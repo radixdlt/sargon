@@ -5,6 +5,8 @@ edition = "2021"
 
 [dependencies]
 chrono = { version = "0.4.31", features = ["serde"] }
+nonempty = { version = "0.8.1", features = ["serde", "serialize"] }
 serde = { version = "1.0.192", features = ["derive"] }
 serde_json = { version = "1.0.108", features = ["preserve_order"] }
 uuid = { version = "1.5.0", features = ["v4", "serde"] }
+radix-engine-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", version = "1.0.1" }
