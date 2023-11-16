@@ -29,6 +29,7 @@ pub struct DeviceInfo {
 }
 
 impl DeviceInfo {
+    /// Instantiates a new `DeviceInfo` with `id`, `date` and `description`.
     pub fn with_values(id: Uuid, date: NaiveDateTime, description: String) -> Self {
         Self {
             id,
@@ -37,6 +38,8 @@ impl DeviceInfo {
         }
     }
 
+    /// Instantiates a new `DeviceInfo` with `description`, and generates a new `id`
+    /// and will use the current `date` for creation date.
     pub fn new(description: &str) -> Self {
         Self::with_values(
             Uuid::new_v4(),
@@ -45,6 +48,8 @@ impl DeviceInfo {
         )
     }
 
+    /// Instantiates a new `DeviceInfo` with "iPhone" as description, and
+    /// generates a new `id` and will use the current `date` for creation date.
     pub fn new_iphone() -> Self {
         Self::new("iPhone")
     }
@@ -53,12 +58,12 @@ impl DeviceInfo {
 #[cfg(test)]
 mod tests {
     use crate::profile::v100::header::device_info::DeviceInfo;
-    use chrono::NaiveDateTime;
+    use chrono::{Datelike, NaiveDateTime};
     use core::fmt::Debug;
     use serde::{de::DeserializeOwned, ser::Serialize};
     use serde_json::json;
-    use std::any::TypeId;
-    use uuid::uuid;
+    use std::{any::TypeId, collections::HashSet};
+    use uuid::{uuid, Uuid};
 
     fn base_assert_equality_after_json_roundtrip<T>(model: &T, json_string: &str, expect_eq: bool)
     where
@@ -117,7 +122,33 @@ mod tests {
     }
 
     #[test]
-    fn test_json() {
+    fn new_iphone() {
+        assert_eq!(DeviceInfo::new_iphone().description, "iPhone");
+    }
+
+    #[test]
+    fn new_nokia() {
+        assert_eq!(DeviceInfo::new("Nokia").description, "Nokia");
+    }
+
+    #[test]
+    fn id_is_unique() {
+        let n = 1000;
+        let ids = (0..n)
+            .map(|_| DeviceInfo::new_iphone())
+            .into_iter()
+            .map(|d| d.id)
+            .collect::<HashSet<Uuid>>();
+        assert_eq!(ids.len(), n);
+    }
+
+    #[test]
+    fn date_is_now() {
+        assert!(DeviceInfo::new_iphone().date.year() >= 2023);
+    }
+
+    #[test]
+    fn json_serialization_roundtripping() {
         let model = DeviceInfo::with_values(
             uuid!("66f07ca2-a9d9-49e5-8152-77aca3d1dd74"),
             NaiveDateTime::parse_from_str("2023-09-11T16:05:56", "%Y-%m-%dT%H:%M:%S").unwrap(),
@@ -147,7 +178,7 @@ mod tests {
     }
 
     #[test]
-    fn test_invalid_json() {
+    fn invalid_json() {
         assert_json_fails::<DeviceInfo>(
             r#"
             {
