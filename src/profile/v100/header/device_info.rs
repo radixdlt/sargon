@@ -1,4 +1,4 @@
-use chrono::NaiveDateTime;
+use chrono::{NaiveDateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -29,12 +29,24 @@ pub struct DeviceInfo {
 }
 
 impl DeviceInfo {
-    pub fn new(id: Uuid, date: NaiveDateTime, description: String) -> Self {
+    pub fn with_values(id: Uuid, date: NaiveDateTime, description: String) -> Self {
         Self {
             id,
             date,
             description,
         }
+    }
+
+    pub fn new(description: &str) -> Self {
+        Self::with_values(
+            Uuid::new_v4(),
+            Utc::now().naive_local(),
+            description.to_string(),
+        )
+    }
+
+    pub fn new_iphone() -> Self {
+        Self::new("iPhone")
     }
 }
 
@@ -44,35 +56,146 @@ mod tests {
     use chrono::NaiveDateTime;
     use core::fmt::Debug;
     use serde::{de::DeserializeOwned, ser::Serialize};
+    use serde_json::json;
+    use std::any::TypeId;
     use uuid::uuid;
 
-    fn assert_json_roundtrip<T>(model: T, json_string: &str)
+    fn base_assert_equality_after_json_roundtrip<T>(model: &T, json_string: &str, expect_eq: bool)
+    where
+        T: Serialize + DeserializeOwned + PartialEq + Debug,
+    {
+        let serialized = serde_json::to_value(&model).unwrap();
+        let json = json_string.parse::<serde_json::Value>().unwrap();
+        let deserialized: T = serde_json::from_value(json.clone()).unwrap();
+        if expect_eq {
+            assert_eq!(&deserialized, model, "Expected `model: T` and `T` deserialized from `json_string`, to be equal, but they were not.");
+            assert_eq!(serialized, json, "Expected `json` (string) and json serialized from `model to be equal`, but they were not.");
+        } else {
+            assert_ne!(&deserialized, model, "Expected difference between `model: T` and `T` deserialized from `json_string`, but they were unexpectedly equal.");
+            assert_ne!(serialized, json, "Expected difference between `json` (string) and json serialized from `model`, but they were unexpectedly equal.");
+        }
+    }
+
+    /// Asserts that (pseudocode) `model.to_json() == json_string` (serialization)
+    /// and also asserts the associative property:
+    /// `Model::from_json(json_string) == model` (deserialization)
+    pub fn assert_eq_after_json_roundtrip<T>(model: &T, json_string: &str)
+    where
+        T: Serialize + DeserializeOwned + PartialEq + Debug,
+    {
+        base_assert_equality_after_json_roundtrip(model, json_string, true)
+    }
+
+    /// Asserts that (pseudocode) `model.to_json() != json_string` (serialization)
+    /// and also asserts the associative property:
+    /// `Model::from_json(json_string) != model` (deserialization)
+    pub fn assert_ne_after_json_roundtrip<T>(model: &T, json_string: &str)
+    where
+        T: Serialize + DeserializeOwned + PartialEq + Debug,
+    {
+        base_assert_equality_after_json_roundtrip(model, json_string, false)
+    }
+
+    /// Asserts that (pseudocode) `Model::from_json(model.to_json()) == model`,
+    /// i.e. that a model after JSON roundtripping remain unchanged.
+    fn assert_json_roundtrip<T>(model: &T)
+    where
+        T: Serialize + DeserializeOwned + PartialEq + Debug,
+    {
+        let serialized = serde_json::to_value(&model).unwrap();
+        let deserialized: T = serde_json::from_value(serialized.clone()).unwrap();
+        assert_eq!(model, &deserialized);
+    }
+
+    fn assert_json_fails<T>(json_string: &str)
     where
         T: Serialize + DeserializeOwned + PartialEq + Debug,
     {
         let json = json_string.parse::<serde_json::Value>().unwrap();
-
-        let deserialized: T = serde_json::from_value(json.clone()).unwrap();
-        let serialized = serde_json::to_value(&model).unwrap();
-        assert_eq!(deserialized, model);
-        assert_eq!(serialized, json);
+        let result = serde_json::from_value::<T>(json);
+        assert!(result.is_err());
     }
 
     #[test]
-    fn test_json_roundtrip() {
-        assert_json_roundtrip(
-            DeviceInfo::new(
-                uuid!("66f07ca2-a9d9-49e5-8152-77aca3d1dd74"),
-                NaiveDateTime::parse_from_str("2023-09-11T16:05:56", "%Y-%m-%dT%H:%M:%S").unwrap(),
-                "iPhone (iPhone)".to_string(),
-            ),
+    fn test_json() {
+        let model = DeviceInfo::with_values(
+            uuid!("66f07ca2-a9d9-49e5-8152-77aca3d1dd74"),
+            NaiveDateTime::parse_from_str("2023-09-11T16:05:56", "%Y-%m-%dT%H:%M:%S").unwrap(),
+            "iPhone".to_string(),
+        );
+        assert_eq_after_json_roundtrip(
+            &model,
             r#"
             {
                 "id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
                 "date": "2023-09-11T16:05:56",
-                "description": "iPhone (iPhone)"
+                "description": "iPhone"
             }
             "#,
-        )
+        );
+        assert_json_roundtrip(&model);
+        assert_ne_after_json_roundtrip(
+            &model,
+            r#"
+            {
+                "id": "00000000-0000-0000-0000-000000000000",
+                "date": "1970-01-01T12:34:56",
+                "description": "Nokia"
+            }
+            "#,
+        );
+    }
+
+    #[test]
+    fn test_invalid_json() {
+        assert_json_fails::<DeviceInfo>(
+            r#"
+            {
+                "id": "invalid-uuid",
+                "date": "1970-01-01T12:34:56",
+                "description": "iPhone"
+            }
+            "#,
+        );
+
+        assert_json_fails::<DeviceInfo>(
+            r#"
+            {
+                "id": "00000000-0000-0000-0000-000000000000",
+                "date": "invalid-date",
+                "description": "iPhone"
+            }
+            "#,
+        );
+
+        assert_json_fails::<DeviceInfo>(
+            r#"
+            {
+                "missing_key": "id",
+                "date": "1970-01-01T12:34:56",
+                "description": "iPhone"
+            }
+            "#,
+        );
+
+        assert_json_fails::<DeviceInfo>(
+            r#"
+            {
+                "id": "00000000-0000-0000-0000-000000000000",
+                "missing_key": "date",
+                "description": "iPhone"
+            }
+            "#,
+        );
+
+        assert_json_fails::<DeviceInfo>(
+            r#"
+            {
+                "id": "00000000-0000-0000-0000-000000000000",
+                "date": "1970-01-01T12:34:56",
+                "missing_key": "description"
+            }
+            "#,
+        );
     }
 }
