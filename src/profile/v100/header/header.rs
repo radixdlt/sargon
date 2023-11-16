@@ -5,7 +5,7 @@ use uuid::Uuid;
 use super::{content_hint::ContentHint, device_info::DeviceInfo};
 
 /// The header of a Profile
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Header {
     /// An immutable and unique identifier of a Profile.
     pub id: Uuid,

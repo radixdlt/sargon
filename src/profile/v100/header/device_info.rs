@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 /// A short summary of a device the Profile is being used
 /// on, typically an iPhone or an Android phone.
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct DeviceInfo {
     /// A best effort stable and unique identifier of this
     /// device.
@@ -40,7 +40,7 @@ impl DeviceInfo {
 
     /// Instantiates a new `DeviceInfo` with `description`, and generates a new `id`
     /// and will use the current `date` for creation date.
-    pub fn new(description: &str) -> Self {
+    pub fn with_description(description: &str) -> Self {
         Self::with_values(
             Uuid::new_v4(),
             Utc::now().naive_local(),
@@ -51,7 +51,13 @@ impl DeviceInfo {
     /// Instantiates a new `DeviceInfo` with "iPhone" as description, and
     /// generates a new `id` and will use the current `date` for creation date.
     pub fn new_iphone() -> Self {
-        Self::new("iPhone")
+        Self::with_description("iPhone")
+    }
+
+    /// Instantiates a new `DeviceInfo` with "Unknown device" as description, and
+    /// generates a new `id` and will use the current `date` for creation date.
+    pub fn new() -> Self {
+        Self::with_description("Unknown device")
     }
 }
 
@@ -61,8 +67,7 @@ mod tests {
     use chrono::{Datelike, NaiveDateTime};
     use core::fmt::Debug;
     use serde::{de::DeserializeOwned, ser::Serialize};
-    use serde_json::json;
-    use std::{any::TypeId, collections::HashSet};
+    use std::collections::HashSet;
     use uuid::{uuid, Uuid};
 
     fn base_assert_equality_after_json_roundtrip<T>(model: &T, json_string: &str, expect_eq: bool)
@@ -127,8 +132,13 @@ mod tests {
     }
 
     #[test]
-    fn new_nokia() {
-        assert_eq!(DeviceInfo::new("Nokia").description, "Nokia");
+    fn with_description() {
+        assert_eq!(DeviceInfo::with_description("Nokia").description, "Nokia");
+    }
+
+    #[test]
+    fn new_has_description_unknown_device() {
+        assert_eq!(DeviceInfo::new().description, "Unknown device");
     }
 
     #[test]
