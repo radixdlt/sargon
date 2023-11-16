@@ -1,12 +1,11 @@
+use std::collections::BTreeSet;
+
 use nonempty::NonEmpty;
 use serde::{Deserialize, Serialize};
 
-use super::{
-    account::{Account, IdentifiedArrayOf},
-    network_id::NetworkID,
-};
+use super::{account::Account, network_id::NetworkID};
 
-pub type Accounts = NonEmpty<IdentifiedArrayOf<Account>>;
+pub type Accounts = NonEmpty<BTreeSet<Account>>;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct Network {
