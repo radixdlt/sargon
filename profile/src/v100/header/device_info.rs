@@ -1,8 +1,10 @@
+use std::fmt::Display;
+
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::utils::factory::{id, now};
+use crate::utils::factory::{date, id, now};
 
 /// A short summary of a device the Profile is being used
 /// on, typically an iPhone or an Android phone.
@@ -65,6 +67,18 @@ impl Default for DeviceInfo {
     }
 }
 
+impl Display for DeviceInfo {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{} | created: {} | #{}",
+            self.description,
+            date(&self.date),
+            self.id.to_string(),
+        )
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::collections::HashSet;
@@ -87,6 +101,19 @@ mod tests {
     #[test]
     fn new_has_description_unknown_device() {
         assert_eq!(DeviceInfo::new().description, "Unknown device");
+    }
+
+    #[test]
+    fn display() {
+        let sut = DeviceInfo::with_values(
+            uuid!("12345678-bbbb-cccc-dddd-abcd12345678"),
+            NaiveDateTime::parse_from_str("2023-09-11T16:05:56", "%Y-%m-%dT%H:%M:%S").unwrap(),
+            "Foo".to_string(),
+        );
+        assert_eq!(
+            format!("{sut}"),
+            "Foo | created: 2023-09-11 | #12345678-bbbb-cccc-dddd-abcd12345678",
+        )
     }
 
     #[test]
