@@ -14,7 +14,8 @@ Middleware that can power Radix Wallet clients (iOS/Android).
 - [x] ContentHint
 - [x] DeviceInfo
 - [x] Header
-- [ ] AccountAddress
+- [x] AccountAddress
+- [x] IdentityAddress
 - [ ] Account
 - [ ] Persona
 - [ ] Network

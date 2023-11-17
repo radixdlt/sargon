@@ -2,19 +2,40 @@ use super::{entity_address::EntityAddress, entity_type::EntityType, network_id::
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 
+/// The address of an identity, used by Personas, a bech32 encoding of a public key hash
+/// that starts with the prefix `"identity_"`, dependent on NetworkID, meaning the same
+/// public key used for two IdentityAddresses on two different networks will not have
+/// the same address.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct IdentityAddress {
+    /// Human readable address of an identity, which are used by Personas. Always starts with
+    /// the prefix `"identity_"`, for example:
+    ///
+    /// `identity_rdx12tgzjrz9u0xz4l28vf04hz87eguclmfaq4d2p8f8lv7zg9ssnzku8j`
+    ///
+    /// Addresses are checksummed, as per Bech32. **Only** *Identity* addresses starts with
+    /// the prefix `"identity_"`.
     pub address: String,
+
+    /// The network this identity address is tied to, i.e. which was used when a public key
+    /// hash was used to bech32 encode it. This means that two public key hashes will result
+    /// in two different identity address on two different networks.
     pub network_id: NetworkID,
 }
 
 impl EntityAddress for IdentityAddress {
+    /// Identifies that IdentityAddresses uses the `EntityType::Identity`, which are used
+    /// to validate the HRP (`"identity_"`) and is also used when forming HD derivation
+    /// paths as per CAP26.
     fn entity_type() -> EntityType {
         EntityType::Identity
     }
 
-    fn with_address_and_network_id(address: &str, network_id: NetworkID) -> Self {
-        Self::validate(address);
+    // Underscored to decrease visibility. You SHOULD NOT call this function directly,
+    // instead use `try_from_bech32` which performs proper validation. Impl types SHOULD
+    // `panic` if `address` does not start with `Self::entity_type().hrp()`
+    fn __with_address_and_network_id(address: &str, network_id: NetworkID) -> Self {
+        assert!(address.starts_with(&Self::entity_type().hrp()), "Invalid address, you SHOULD NOT call this function directly, you should use `try_from_bech32` instead.");
         return Self {
             address: address.to_string(),
             network_id,

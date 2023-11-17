@@ -14,10 +14,14 @@ use super::{
 /// to decode a bech32 encoded address string into Self.
 pub trait EntityAddress: Sized {
     fn entity_type() -> EntityType;
-    fn with_address_and_network_id(address: &str, network_id: NetworkID) -> Self;
-    fn validate(address: &str) {
-        assert!(address.starts_with(&Self::entity_type().hrp()))
-    }
+
+    // Underscored to decrease visibility. You SHOULD NOT call this function directly,
+    // instead use `try_from_bech32` which performs proper validation. Impl types SHOULD
+    // `panic` if `address` does not start with `Self::entity_type().hrp()`
+    fn __with_address_and_network_id(address: &str, network_id: NetworkID) -> Self;
+
+    /// Creates a new address from `public_key` and `network_id` by bech32 encoding
+    /// it.
     fn from_public_key(public_key: PublicKey, network_id: NetworkID) -> Self {
         let component = match Self::entity_type() {
             EntityType::Account => virtual_account_address_from_public_key(&public_key),
@@ -30,8 +34,9 @@ pub trait EntityAddress: Sized {
         };
 
         let address = format!("{node}");
-        return Self::with_address_and_network_id(&address, network_id);
+        return Self::__with_address_and_network_id(&address, network_id);
     }
+
     fn try_from_bech32(s: &str) -> Result<Self, Error> {
         let (network_id, entity_type, hrp, _) = decode_address(s)?;
         if entity_type != Self::entity_type() {
@@ -42,6 +47,6 @@ pub trait EntityAddress: Sized {
             return Err(Error::MismatchingHRPWhileDecodingAddress);
         }
 
-        return Ok(Self::with_address_and_network_id(s, network_id));
+        return Ok(Self::__with_address_and_network_id(s, network_id));
     }
 }
