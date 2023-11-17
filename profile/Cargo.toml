@@ -12,5 +12,4 @@ nonempty = { version = "0.8.1", features = ["serde", "serialize"] }
 serde = { version = "1.0.192", features = ["derive"] }
 serde_json = { version = "1.0.108", features = ["preserve_order"] }
 uuid = { version = "1.5.0", features = ["v4", "serde"] }
-wallet_kit_macros = { path = "../wallet_kit_macros" }
 wallet_kit_test_utils = { path = "../wallet_kit_test_utils" }

@@ -2,7 +2,6 @@
 resolver = "1"
 
 members = [
-    "wallet_kit_macros",
     "profile",
     "wallet_kit_test_utils",
 ]

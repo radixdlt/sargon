@@ -79,15 +79,4 @@ mod tests {
             assert_eq!(sut.number_of_networks.get(), z)
         });
     }
-
-    // #[test_each(0..9)]
-    // fn with_counters_x_y_z_macro(i: u32) {
-    //     let x = i + 1;
-    //     let y = i + 2;
-    //     let z = i + 3;
-    //     let sut = ContentHint::with_counters(x, y, z);
-    //     assert_eq!(sut.number_of_accounts_on_all_networks_in_total.get(), x);
-    //     assert_eq!(sut.number_of_personas_on_all_networks_in_total.get(), y);
-    //     assert_eq!(sut.number_of_networks.get(), z)
-    // }
 }
