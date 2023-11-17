@@ -1,4 +1,4 @@
-use std::cell::Cell;
+use std::{cell::Cell, fmt::Display};
 
 use serde::{Deserialize, Serialize};
 
@@ -63,6 +63,18 @@ impl Default for ContentHint {
     }
 }
 
+impl Display for ContentHint {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "#networks: {}, #accounts: {}, #personas: {}",
+            self.get_number_of_networks(),
+            self.get_number_of_accounts_on_all_networks_in_total(),
+            self.get_number_of_personas_on_all_networks_in_total()
+        )
+    }
+}
+
 // Getters
 impl ContentHint {
     pub fn get_number_of_accounts_on_all_networks_in_total(&self) -> u32 {
@@ -114,6 +126,15 @@ mod tests {
     #[test]
     fn eq() {
         assert_eq!(ContentHint::new(), ContentHint::new());
+    }
+
+    #[test]
+    fn display() {
+        let sut = ContentHint::default();
+        assert_eq!(
+            format!("{}", sut),
+            "#networks: 0, #accounts: 0, #personas: 0"
+        )
     }
 
     #[test]
