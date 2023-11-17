@@ -43,6 +43,14 @@ impl EntityAddress for IdentityAddress {
     }
 }
 
+impl TryInto<IdentityAddress> for &str {
+    type Error = crate::error::Error;
+
+    fn try_into(self) -> Result<IdentityAddress, Self::Error> {
+        IdentityAddress::try_from_bech32(self)
+    }
+}
+
 impl Display for IdentityAddress {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.address)
@@ -90,6 +98,33 @@ mod tests {
         )
         .unwrap();
         assert_eq!(sut.network_id, NetworkID::Mainnet);
+    }
+
+    #[test]
+    fn equality() {
+        let i: IdentityAddress =
+            "identity_rdx12gzxlgre0glhh9jxaptm7tdth8j4w4r8ykpg2xjfv45nghzsjzrvmp"
+                .try_into()
+                .unwrap();
+        assert_eq!(
+            i,
+            "identity_rdx12gzxlgre0glhh9jxaptm7tdth8j4w4r8ykpg2xjfv45nghzsjzrvmp"
+                .try_into()
+                .unwrap()
+        )
+    }
+
+    #[test]
+    fn not_equal() {
+        let i: IdentityAddress =
+            "identity_rdx12gzxlgre0glhh9jxaptm7tdth8j4w4r8ykpg2xjfv45nghzsjzrvmp"
+                .try_into()
+                .unwrap();
+        let j: IdentityAddress =
+            "identity_rdx12tgzjrz9u0xz4l28vf04hz87eguclmfaq4d2p8f8lv7zg9ssnzku8j"
+                .try_into()
+                .unwrap();
+        assert_ne!(i, j)
     }
 
     #[test]

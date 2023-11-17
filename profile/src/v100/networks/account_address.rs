@@ -67,6 +67,14 @@ impl EntityAddress for AccountAddress {
     }
 }
 
+impl TryInto<AccountAddress> for &str {
+    type Error = crate::error::Error;
+
+    fn try_into(self) -> Result<AccountAddress, Self::Error> {
+        AccountAddress::try_from_bech32(self)
+    }
+}
+
 impl Display for AccountAddress {
     /// The full bech32 address.
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -105,6 +113,34 @@ mod tests {
             AccountAddress::from_public_key(PublicKey::Ed25519(public_key), NetworkID::Mainnet)
                 .address,
             "account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzdm"
+        )
+    }
+
+    #[test]
+    fn not_equal() {
+        let a: AccountAddress =
+            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                .try_into()
+                .unwrap();
+        let b: AccountAddress =
+            "account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzdm"
+                .try_into()
+                .unwrap();
+        assert_ne!(a, b)
+    }
+
+    #[test]
+    fn equality() {
+        let a: AccountAddress =
+            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                .try_into()
+                .unwrap();
+
+        assert_eq!(
+            a,
+            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                .try_into()
+                .unwrap()
         )
     }
 
