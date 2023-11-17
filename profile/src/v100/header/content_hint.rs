@@ -57,6 +57,11 @@ impl ContentHint {
 #[cfg(test)]
 mod tests {
 
+    use wallet_kit_test_utils::json::{
+        assert_eq_after_json_roundtrip, assert_json_fails, assert_json_roundtrip,
+        assert_ne_after_json_roundtrip,
+    };
+
     use super::ContentHint;
 
     #[test]
@@ -78,5 +83,85 @@ mod tests {
             assert_eq!(sut.number_of_personas_on_all_networks_in_total.get(), y);
             assert_eq!(sut.number_of_networks.get(), z)
         });
+    }
+
+    #[test]
+    fn json_serialization_roundtripping() {
+        let model = ContentHint::with_counters(3, 2, 1);
+        assert_eq_after_json_roundtrip(
+            &model,
+            r#"
+            {
+                "numberOfAccountsOnAllNetworksInTotal": 3,
+                "numberOfPersonasOnAllNetworksInTotal": 2,
+                "numberOfNetworks": 1
+            }
+            "#,
+        );
+        assert_json_roundtrip(&model);
+        assert_ne_after_json_roundtrip(
+            &model,
+            r#"
+            {
+                "numberOfAccountsOnAllNetworksInTotal": 1337,
+                "numberOfPersonasOnAllNetworksInTotal": 237,
+                "numberOfNetworks": 42
+            }
+            "#,
+        );
+    }
+
+    #[test]
+    fn invalid_json() {
+        assert_json_fails::<ContentHint>(
+            r#"
+            {
+                "numberOfAccountsOnAllNetworksInTotal": "oh a string",
+                "numberOfPersonasOnAllNetworksInTotal": 237,
+                "numberOfNetworks": 42
+            }
+            "#,
+        );
+
+        assert_json_fails::<ContentHint>(
+            r#"
+            {
+                "missing_key": "numberOfAccountsOnAllNetworksInTotal",
+                "numberOfPersonasOnAllNetworksInTotal": 237,
+                "numberOfNetworks": 42
+            }
+            "#,
+        );
+
+        assert_json_fails::<ContentHint>(
+            r#"
+            {
+                "numberOfAccountsOnAllNetworksInTotal": 1337,
+                "missing_key": "numberOfPersonasOnAllNetworksInTotal",
+                "numberOfNetworks": 42
+            }
+            "#,
+        );
+
+        assert_json_fails::<ContentHint>(
+            r#"
+            {
+                "numberOfAccountsOnAllNetworksInTotal": 1337,
+                "numberOfPersonasOnAllNetworksInTotal": 237,
+                "missing_key": "numberOfNetworks"
+            }
+            "#,
+        );
+
+        // We are NOT doing snake case
+        assert_json_fails::<ContentHint>(
+            r#"
+            {
+                "number_of_accounts_on_all_networks_in_total": 1337,
+                "number_of_personas_on_all_networks_in_total": 237,
+                "number_of_networks": 42
+            }
+            "#,
+        );
     }
 }
