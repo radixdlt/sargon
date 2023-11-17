@@ -1,6 +1,8 @@
-use chrono::{NaiveDateTime, Utc};
+use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+
+use crate::utils::factory::{id, now};
 
 /// A short summary of a device the Profile is being used
 /// on, typically an iPhone or an Android phone.
@@ -41,11 +43,7 @@ impl DeviceInfo {
     /// Instantiates a new `DeviceInfo` with `description`, and generates a new `id`
     /// and will use the current `date` for creation date.
     pub fn with_description(description: &str) -> Self {
-        Self::with_values(
-            Uuid::new_v4(),
-            Utc::now().naive_local(),
-            description.to_string(),
-        )
+        Self::with_values(id(), now(), description.to_string())
     }
 
     /// Instantiates a new `DeviceInfo` with "iPhone" as description, and
@@ -102,7 +100,7 @@ mod tests {
     }
 
     #[test]
-    fn json_serialization_roundtripping() {
+    fn json_roundtrip() {
         let model = DeviceInfo::with_values(
             uuid!("66f07ca2-a9d9-49e5-8152-77aca3d1dd74"),
             NaiveDateTime::parse_from_str("2023-09-11T16:05:56", "%Y-%m-%dT%H:%M:%S").unwrap(),

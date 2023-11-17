@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 /// SHOULD be kept up to date, might might not be, since they
 /// are stored values which must be kept in sync.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
 pub struct ContentHint {
     /// The total number of accounts on all networks.
     ///
@@ -18,7 +19,6 @@ pub struct ContentHint {
     /// real consequence.
     ///
     /// This counter includes any by user hidden accounts.
-    #[serde(rename = "numberOfAccountsOnAllNetworksInTotal")]
     pub number_of_accounts_on_all_networks_in_total: Cell<u32>,
 
     /// The total number of personas on all networks.
@@ -29,12 +29,10 @@ pub struct ContentHint {
     /// real consequence.
     ///
     /// This counter includes any by user hidden personas.
-    #[serde(rename = "numberOfPersonasOnAllNetworksInTotal")]
     pub number_of_personas_on_all_networks_in_total: Cell<u32>,
 
     /// The total number of networks that the user has used, i.e.
     /// on which she has any accounts or personas.
-    #[serde(rename = "numberOfNetworks")]
     pub number_of_networks: Cell<u32>,
 }
 
@@ -86,7 +84,7 @@ mod tests {
     }
 
     #[test]
-    fn json_serialization_roundtripping() {
+    fn json_roundtrip() {
         let model = ContentHint::with_counters(3, 2, 1);
         assert_eq_after_json_roundtrip(
             &model,

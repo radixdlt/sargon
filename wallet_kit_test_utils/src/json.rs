@@ -1,5 +1,6 @@
 use core::fmt::Debug;
 use serde::{de::DeserializeOwned, ser::Serialize};
+use serde_json::Value;
 
 fn base_assert_equality_after_json_roundtrip<T>(model: &T, json_string: &str, expect_eq: bool)
 where
@@ -48,11 +49,18 @@ where
     assert_eq!(model, &deserialized);
 }
 
+pub fn assert_json_value_fails<T>(json: Value)
+where
+    T: Serialize + DeserializeOwned + PartialEq + Debug,
+{
+    let result = serde_json::from_value::<T>(json);
+    assert!(result.is_err());
+}
+
 pub fn assert_json_fails<T>(json_string: &str)
 where
     T: Serialize + DeserializeOwned + PartialEq + Debug,
 {
     let json = json_string.parse::<serde_json::Value>().unwrap();
-    let result = serde_json::from_value::<T>(json);
-    assert!(result.is_err());
+    assert_json_value_fails::<T>(json)
 }
