@@ -70,6 +70,12 @@ impl Default for Header {
     }
 }
 
+impl Header {
+    pub fn updated(&self) {
+        self.last_modified.set(now());
+    }
+}
+
 #[cfg(test)]
 pub mod tests {
     use crate::v100::header::{content_hint::ContentHint, device_info::DeviceInfo};
@@ -119,5 +125,17 @@ pub mod tests {
             }
             "#,
         );
+    }
+
+    #[test]
+    fn updated() {
+        let sut = Header::default();
+        let d0 = sut.last_modified.get();
+        for _ in 0..10 {
+            // rust is too fast, if we run it once, unit tests fails.
+            sut.updated();
+        }
+        let d1 = sut.last_modified.get();
+        assert!(d1 > d0);
     }
 }
