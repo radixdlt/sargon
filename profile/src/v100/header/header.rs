@@ -1,4 +1,4 @@
-use std::cell::{Cell, RefCell};
+use std::cell::{Cell, Ref, RefCell};
 
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
@@ -29,13 +29,13 @@ pub struct Header {
     pub creating_device: DeviceInfo,
 
     /// The device on which the profile was last used.
-    pub last_used_on_device: RefCell<DeviceInfo>, // `RefCell` needed, because `Cell` requires `Copy` and `DeviceInfo` contains `String` (which does not impl `Copy`). We could potentially use `fstr` from `fixedstr` crate for `description` inside `DeviceInfo`? and thus use `Cell` here?
+    last_used_on_device: RefCell<DeviceInfo>, // `RefCell` needed, because `Cell` requires `Copy` and `DeviceInfo` contains `String` (which does not impl `Copy`). We could potentially use `fstr` from `fixedstr` crate for `description` inside `DeviceInfo`? and thus use `Cell` here?
 
     /// When the Profile was last modified.
     pub last_modified: Cell<NaiveDateTime>,
 
     /// Hint about the contents of the profile, e.g. number of Accounts and Personas.
-    pub content_hint: RefCell<ContentHint>, // `RefCell` needed because `ContentHint` does not impl `Copy`, which it cant because it contains `Cell`s, and `Cell` itself does not impl `Copy`.
+    content_hint: RefCell<ContentHint>, // `RefCell` needed because `ContentHint` does not impl `Copy`, which it cant because it contains `Cell`s, and `Cell` itself does not impl `Copy`.
 }
 
 impl Header {
@@ -70,13 +70,34 @@ impl Default for Header {
     }
 }
 
+// Getters
 impl Header {
+    /// Hint about the contents of the profile, e.g. number of Accounts and Personas.
+    pub fn get_content_hint(&self) -> Ref<ContentHint> {
+        self.content_hint.borrow()
+    }
+
+    pub fn get_last_used_on_device(&self) -> Ref<DeviceInfo> {
+        self.last_used_on_device.borrow()
+    }
+}
+
+// Setters
+impl Header {
+    /// Updates the `last_modified` field.
     pub fn updated(&self) {
         self.last_modified.set(now());
     }
 
-    pub fn update_content_hint(&self, content_hint: ContentHint) {
-        *self.content_hint.borrow_mut() = content_hint;
+    /// Sets the `content_hint` and updates the `last_modified` field.
+    pub fn update_content_hint(&self, new: ContentHint) {
+        *self.content_hint.borrow_mut() = new;
+        self.updated()
+    }
+
+    /// Sets the `last_used_on_device` and updates the `last_modified` field.
+    pub fn update_last_used_on_device(&self, new: DeviceInfo) {
+        *self.last_used_on_device.borrow_mut() = new;
         self.updated()
     }
 }
@@ -148,14 +169,30 @@ pub mod tests {
     fn update_content_hint() {
         let sut = Header::default();
         let d0 = sut.last_modified.get();
-        let content_hint_0 = sut.content_hint.borrow().clone();
+        let content_hint_0 = sut.get_content_hint().clone();
         let end = 10;
         for n in 1..end {
             // rust is too fast, if we run it once, unit tests fails.
             sut.update_content_hint(ContentHint::all(n));
         }
-        let content_hint_n = sut.content_hint.borrow().clone();
+        let content_hint_n = sut.get_content_hint().clone();
         assert_ne!(content_hint_n, content_hint_0);
+        let d1 = sut.last_modified.get();
+        assert!(d1 > d0);
+    }
+
+    #[test]
+    fn update_last_used_on_device() {
+        let sut = Header::default();
+        let d0: NaiveDateTime = sut.last_modified.get();
+        let device_0 = sut.get_last_used_on_device().clone();
+        let end = 10;
+        for n in 1..end {
+            // rust is too fast, if we run it once, unit tests fails.
+            sut.update_last_used_on_device(DeviceInfo::with_description(n.to_string().as_str()));
+        }
+        let device_n = sut.get_last_used_on_device().clone();
+        assert_ne!(device_n, device_0);
         let d1 = sut.last_modified.get();
         assert!(d1 > d0);
     }
