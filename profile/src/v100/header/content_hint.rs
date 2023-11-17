@@ -47,6 +47,7 @@ impl ContentHint {
         }
     }
 
+    /// Instantiates a new `ContentHint` with all counters equal `count`.
     pub(crate) fn all(count: u32) -> Self {
         Self::with_counters(count, count, count)
     }
@@ -58,6 +59,7 @@ impl ContentHint {
 }
 
 impl Default for ContentHint {
+    /// Instantiates a new empty ContentHint with all counters equal `0`.
     fn default() -> Self {
         Self::new()
     }
@@ -77,14 +79,17 @@ impl Display for ContentHint {
 
 // Getters
 impl ContentHint {
+    /// Gets the number of accounts on all networks in total.
     pub fn get_number_of_accounts_on_all_networks_in_total(&self) -> u32 {
         self.number_of_accounts_on_all_networks_in_total.get()
     }
 
+    /// Gets the number of personas on all networks in total.
     pub fn get_number_of_personas_on_all_networks_in_total(&self) -> u32 {
         self.number_of_personas_on_all_networks_in_total.get()
     }
 
+    /// Gets the number of networks.
     pub fn get_number_of_networks(&self) -> u32 {
         self.number_of_networks.get()
     }
@@ -92,14 +97,17 @@ impl ContentHint {
 
 // Setters
 impl ContentHint {
+    /// Sets the `number_of_accounts_on_all_networks_in_total` to `new`.
     pub fn set_number_of_accounts_on_all_networks_in_total(&self, new: u32) {
         self.number_of_accounts_on_all_networks_in_total.set(new)
     }
 
+    /// Sets the `number_of_personas_on_all_networks_in_total` to `new`.
     pub fn set_number_of_personas_on_all_networks_in_total(&self, new: u32) {
         self.number_of_personas_on_all_networks_in_total.set(new)
     }
 
+    /// Sets the `number_of_networks` to `new`.
     pub fn set_number_of_networks(&self, new: u32) {
         self.number_of_networks.set(new)
     }
