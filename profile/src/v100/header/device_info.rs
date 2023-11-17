@@ -59,6 +59,12 @@ impl DeviceInfo {
     }
 }
 
+impl Default for DeviceInfo {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::collections::HashSet;

@@ -18,3 +18,9 @@ impl Networks {
         Self(map)
     }
 }
+
+impl Default for Networks {
+    fn default() -> Self {
+        Self::new()
+    }
+}

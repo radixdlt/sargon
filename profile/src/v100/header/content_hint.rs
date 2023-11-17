@@ -53,6 +53,12 @@ impl ContentHint {
     }
 }
 
+impl Default for ContentHint {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 // Getters
 impl ContentHint {
     pub fn get_number_of_accounts_on_all_networks_in_total(&self) -> u32 {

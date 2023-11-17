@@ -17,3 +17,9 @@ pub enum NetworkID {
     /// https://github.com/radixdlt/radixdlt-scrypto/blob/v1.0.1/radix-engine-common/src/network/mod.rs#L71
     Stokenet = 0x02,
 }
+
+impl Default for NetworkID {
+    fn default() -> Self {
+        Self::Mainnet
+    }
+}

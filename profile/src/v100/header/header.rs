@@ -64,6 +64,12 @@ impl Header {
     }
 }
 
+impl Default for Header {
+    fn default() -> Self {
+        Self::new(DeviceInfo::default())
+    }
+}
+
 #[cfg(test)]
 pub mod tests {
     use crate::v100::header::{content_hint::ContentHint, device_info::DeviceInfo};
