@@ -1,8 +1,21 @@
+use std::fmt::Display;
+
 use serde_repr::{Deserialize_repr, Serialize_repr};
+use strum::FromRepr;
 
 /// The
 #[derive(
-    Serialize_repr, Deserialize_repr, Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord,
+    Serialize_repr,
+    Deserialize_repr,
+    FromRepr,
+    Clone,
+    Copy,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    PartialOrd,
+    Ord,
 )]
 #[repr(u16)] // most likely will will not do more than 65536 iterations.
 pub enum ProfileSnapshotVersion {
@@ -14,6 +27,18 @@ pub enum ProfileSnapshotVersion {
 impl Default for ProfileSnapshotVersion {
     fn default() -> Self {
         Self::V100
+    }
+}
+
+impl ProfileSnapshotVersion {
+    pub fn discriminant(&self) -> u16 {
+        *self as u16
+    }
+}
+
+impl Display for ProfileSnapshotVersion {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "{}", self.discriminant())
     }
 }
 
@@ -32,5 +57,18 @@ mod tests {
         assert_json_value_fails::<ProfileSnapshotVersion>(json!("100"));
         assert_json_value_fails::<ProfileSnapshotVersion>(json!("v100"));
         assert_json_value_fails::<ProfileSnapshotVersion>(json!("V100"));
+    }
+
+    #[test]
+    fn from_repr() {
+        assert_eq!(
+            ProfileSnapshotVersion::V100,
+            ProfileSnapshotVersion::from_repr(100).unwrap()
+        )
+    }
+
+    #[test]
+    fn discriminant() {
+        assert_eq!(ProfileSnapshotVersion::V100.discriminant(), 100)
     }
 }

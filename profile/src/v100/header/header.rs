@@ -1,4 +1,7 @@
-use std::cell::{Cell, RefCell};
+use std::{
+    cell::{Cell, RefCell},
+    fmt::Display,
+};
 
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
@@ -67,6 +70,18 @@ impl Header {
 impl Default for Header {
     fn default() -> Self {
         Self::new(DeviceInfo::default())
+    }
+}
+
+impl Display for Header {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "#{} v={}, content: {}",
+            self.id,
+            self.snapshot_version,
+            self.get_content_hint()
+        )
     }
 }
 

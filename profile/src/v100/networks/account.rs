@@ -1,4 +1,4 @@
-use std::hash::Hash;
+use std::{fmt::Display, hash::Hash};
 
 use serde::{Deserialize, Serialize};
 
@@ -9,4 +9,10 @@ pub struct Account {
     pub network_id: NetworkID,
     pub display_name: String,
     pub address: AccountAddress,
+}
+
+impl Display for Account {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} | {}", self.display_name, self.address)
+    }
 }
