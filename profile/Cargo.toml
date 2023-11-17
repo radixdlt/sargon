@@ -3,9 +3,6 @@ name = "radix_wallet_kit"
 version = "0.1.0"
 edition = "2021"
 
-[lib]
-doctest = false
-
 [dependencies]
 chrono = { version = "0.4.31", features = ["serde"] }
 nonempty = { version = "0.8.1", features = ["serde", "serialize"] }
@@ -18,5 +15,5 @@ uuid = { version = "1.5.0", features = ["v4", "serde"] }
 wallet_kit_test_utils = { path = "../wallet_kit_test_utils" }
 enum-iterator = "1.4.1"
 radix-engine-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "038ddee8b0f57aa90e36375c69946c4eb634efeb", features = ["serde"] }
-# radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", version = "1.0.3" }
-radix-engine-toolkit-core = { git = "https://github.com/radixdlt/radix-engine-toolkit", version = "1.0.3" }
+radix-engine-toolkit-core = { git = "https://github.com/radixdlt/radix-engine-toolkit", version = "1.0.3", default-features = false }
+radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", version = "1.0.3" }

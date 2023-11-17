@@ -5,9 +5,6 @@ pub enum Error {
     #[error("Invalid Account Address '{0}'.")]
     InvalidAccountAddress(String),
 
-    #[error("Invalid Account, Discrepancy between specified NetworkID and ID of AccountAddress.")]
-    InvalidAccountNetworkMismatch,
-
     #[error("Unsupported engine entity type.")]
     UnsupportedEntityType,
 

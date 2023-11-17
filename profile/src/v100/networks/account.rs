@@ -1,10 +1,6 @@
-use std::{fmt::Display, hash::Hash};
-
-use serde::{Deserialize, Serialize};
-
-use crate::error::Error;
-
 use super::{account_address::AccountAddress, network_id::NetworkID};
+use serde::{Deserialize, Serialize};
+use std::{fmt::Display, hash::Hash};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Account {
@@ -14,12 +10,12 @@ pub struct Account {
 }
 
 impl Account {
-    pub fn with_values(
-        network_id: NetworkID,
-        display_name: String,
-        address: AccountAddress,
-    ) -> Result<Self, Error> {
-        Err(Error::InvalidAccountNetworkMismatch)
+    pub fn with_values(display_name: String, address: AccountAddress) -> Self {
+        Self {
+            network_id: address.network_id,
+            address,
+            display_name,
+        }
     }
 }
 

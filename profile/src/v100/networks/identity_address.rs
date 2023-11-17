@@ -1,24 +1,16 @@
 use super::{entity_address::EntityAddress, entity_type::EntityType, network_id::NetworkID};
-use crate::utils::string_utils::suffix_string;
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct AccountAddress {
+pub struct IdentityAddress {
     pub address: String,
     pub network_id: NetworkID,
 }
 
-impl AccountAddress {
-    pub fn short(&self) -> String {
-        let suffix = suffix_string(6, &self.address);
-        format!("{}...{}", &self.address[0..4], suffix)
-    }
-}
-
-impl EntityAddress for AccountAddress {
+impl EntityAddress for IdentityAddress {
     fn entity_type() -> EntityType {
-        EntityType::Account
+        EntityType::Identity
     }
 
     fn with_address_and_network_id(address: &str, network_id: NetworkID) -> Self {
@@ -30,7 +22,7 @@ impl EntityAddress for AccountAddress {
     }
 }
 
-impl Display for AccountAddress {
+impl Display for IdentityAddress {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.address)
     }
@@ -45,14 +37,14 @@ mod tests {
     use crate::{
         error::Error,
         v100::networks::{
-            account_address::AccountAddress, entity_address::EntityAddress, network_id::NetworkID,
+            entity_address::EntityAddress, identity_address::IdentityAddress, network_id::NetworkID,
         },
     };
 
     #[test]
     fn from_bech32() {
-        assert!(AccountAddress::try_from_bech32(
-            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease",
+        assert!(IdentityAddress::try_from_bech32(
+            "identity_rdx12tgzjrz9u0xz4l28vf04hz87eguclmfaq4d2p8f8lv7zg9ssnzku8j",
         )
         .is_ok());
     }
@@ -60,38 +52,29 @@ mod tests {
     #[test]
     fn from_public_key_bytes_and_network_id() {
         let public_key = Ed25519PublicKey::from_str(
-            "3e9b96a2a863f1be4658ea66aa0584d2a8847d4c0f658b20e62e3594d994d73d",
+            "6c28952be5cdade99c7dd5d003b6b692714b6b74c5fdb5fdc9a8e4ee1d297838",
         )
         .unwrap();
         assert_eq!(
-            AccountAddress::from_public_key(PublicKey::Ed25519(public_key), NetworkID::Mainnet)
+            IdentityAddress::from_public_key(PublicKey::Ed25519(public_key), NetworkID::Mainnet)
                 .address,
-            "account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzdm"
+            "identity_rdx12tgzjrz9u0xz4l28vf04hz87eguclmfaq4d2p8f8lv7zg9ssnzku8j"
         )
     }
 
     #[test]
     fn network_id() {
-        let sut = AccountAddress::try_from_bech32(
-            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease",
+        let sut = IdentityAddress::try_from_bech32(
+            "identity_rdx12tgzjrz9u0xz4l28vf04hz87eguclmfaq4d2p8f8lv7zg9ssnzku8j",
         )
         .unwrap();
         assert_eq!(sut.network_id, NetworkID::Mainnet);
     }
 
     #[test]
-    fn short() {
-        let sut: AccountAddress = AccountAddress::try_from_bech32(
-            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease",
-        )
-        .unwrap();
-        assert_eq!(sut.short(), "acco...please");
-    }
-
-    #[test]
     fn invalid() {
         assert_eq!(
-            AccountAddress::try_from_bech32("x"),
+            IdentityAddress::try_from_bech32("x"),
             Err(Error::FailedToDecodeAddressFromBech32)
         )
     }
@@ -99,8 +82,8 @@ mod tests {
     #[test]
     fn invalid_checksum() {
         assert_eq!(
-            AccountAddress::try_from_bech32(
-                "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3apleasx"
+            IdentityAddress::try_from_bech32(
+                "identity_rdx12tgzjrz9u0xz4l28vf04hz87eguclmfaq4d2p8f8lv7zg9ssnzku8x"
             ),
             Err(Error::FailedToDecodeAddressFromBech32)
         )
@@ -109,10 +92,10 @@ mod tests {
     #[test]
     fn invalid_entity_type() {
         assert_eq!(
-            AccountAddress::try_from_bech32(
-                "identity_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+            IdentityAddress::try_from_bech32(
+                "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
             ),
-            Err(Error::FailedToDecodeAddressFromBech32)
+            Err(Error::MismatchingEntityTypeWhileDecodingAddress)
         )
     }
 }

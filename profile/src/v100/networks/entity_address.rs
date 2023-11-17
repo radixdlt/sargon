@@ -1,14 +1,36 @@
+use radix_engine_common::crypto::PublicKey;
+use radix_engine_toolkit::models::scrypto::node_id::SerializableNodeIdInternal;
+use radix_engine_toolkit_core::functions::derive::{
+    virtual_account_address_from_public_key, virtual_identity_address_from_public_key,
+};
+
 use crate::error::Error;
 
 use super::{
     decode_address_helper::decode_address, entity_type::EntityType, network_id::NetworkID,
 };
 
+/// An address of an entity, provides default implementation of `try_from_bech32`
+/// to decode a bech32 encoded address string into Self.
 pub trait EntityAddress: Sized {
     fn entity_type() -> EntityType;
     fn with_address_and_network_id(address: &str, network_id: NetworkID) -> Self;
     fn validate(address: &str) {
         assert!(address.starts_with(&Self::entity_type().hrp()))
+    }
+    fn from_public_key(public_key: PublicKey, network_id: NetworkID) -> Self {
+        let component = match Self::entity_type() {
+            EntityType::Account => virtual_account_address_from_public_key(&public_key),
+            EntityType::Identity => virtual_identity_address_from_public_key(&public_key),
+        };
+
+        let node = SerializableNodeIdInternal {
+            network_id: network_id.discriminant(),
+            node_id: component.into_node_id(),
+        };
+
+        let address = format!("{node}");
+        return Self::with_address_and_network_id(&address, network_id);
     }
     fn try_from_bech32(s: &str) -> Result<Self, Error> {
         let (network_id, entity_type, hrp, _) = decode_address(s)?;
