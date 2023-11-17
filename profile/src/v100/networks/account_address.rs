@@ -1,13 +1,13 @@
 use super::{entity_address::EntityAddress, entity_type::EntityType, network_id::NetworkID};
 use crate::utils::string_utils::suffix_string;
-use serde::{Deserialize, Serialize};
+use serde::{de, Deserializer, Serialize, Serializer};
 use std::fmt::Display;
 
 /// The address of an Account, a bech32 encoding of a public key hash
 /// that starts with the prefix `"account_"`, dependent on NetworkID, meaning the same
 /// public key used for two AccountAddresses on two different networks will not have
 /// the same address.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct AccountAddress {
     /// Human readable address of an account. Always starts with `"account_"``, for example:
     ///
@@ -26,6 +26,22 @@ pub struct AccountAddress {
     /// hash was used to bech32 encode it. This means that two public key hashes will result
     /// in two different account address on two different networks.
     pub network_id: NetworkID,
+}
+
+impl Serialize for AccountAddress {
+    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&self.address)
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for AccountAddress {
+    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<AccountAddress, D::Error> {
+        let s = String::deserialize(d)?;
+        AccountAddress::try_from_bech32(&s).map_err(de::Error::custom)
+    }
 }
 
 impl AccountAddress {
@@ -87,6 +103,9 @@ mod tests {
     use std::str::FromStr;
 
     use radix_engine_common::crypto::{Ed25519PublicKey, PublicKey};
+    use wallet_kit_test_utils::json::{
+        assert_eq_after_json_roundtrip, assert_json_roundtrip, assert_ne_after_json_roundtrip,
+    };
 
     use crate::{
         error::Error,
@@ -188,5 +207,23 @@ mod tests {
             ),
             Err(Error::FailedToDecodeAddressFromBech32)
         )
+    }
+
+    #[test]
+    fn json_roundtrip() {
+        let a: AccountAddress =
+            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                .try_into()
+                .unwrap();
+
+        assert_eq_after_json_roundtrip(
+            &a,
+            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease",
+        );
+        assert_json_roundtrip(&a);
+        assert_ne_after_json_roundtrip(
+            &a,
+            "account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzdm",
+        );
     }
 }

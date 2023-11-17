@@ -1,12 +1,12 @@
 use super::{entity_address::EntityAddress, entity_type::EntityType, network_id::NetworkID};
-use serde::{Deserialize, Serialize};
+use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 use std::fmt::Display;
 
 /// The address of an identity, used by Personas, a bech32 encoding of a public key hash
 /// that starts with the prefix `"identity_"`, dependent on NetworkID, meaning the same
 /// public key used for two IdentityAddresses on two different networks will not have
 /// the same address.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct IdentityAddress {
     /// Human readable address of an identity, which are used by Personas. Always starts with
     /// the prefix `"identity_"`, for example:
@@ -43,6 +43,22 @@ impl EntityAddress for IdentityAddress {
     }
 }
 
+impl Serialize for IdentityAddress {
+    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&self.address)
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for IdentityAddress {
+    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<IdentityAddress, D::Error> {
+        let s = String::deserialize(d)?;
+        IdentityAddress::try_from_bech32(&s).map_err(de::Error::custom)
+    }
+}
+
 impl TryInto<IdentityAddress> for &str {
     type Error = crate::error::Error;
 
@@ -62,6 +78,7 @@ mod tests {
     use std::str::FromStr;
 
     use radix_engine_common::crypto::{Ed25519PublicKey, PublicKey};
+    use wallet_kit_test_utils::json::{assert_eq_after_json_roundtrip, assert_json_roundtrip, assert_ne_after_json_roundtrip};
 
     use crate::{
         error::Error,
@@ -153,5 +170,23 @@ mod tests {
             ),
             Err(Error::MismatchingEntityTypeWhileDecodingAddress)
         )
+    }
+
+    #[test]
+    fn json_roundtrip() {
+        let a: IdentityAddress =
+            "identity_rdx12gzxlgre0glhh9jxaptm7tdth8j4w4r8ykpg2xjfv45nghzsjzrvmp"
+                .try_into()
+                .unwrap();
+
+        assert_eq_after_json_roundtrip(
+            &a,
+            "identity_rdx12gzxlgre0glhh9jxaptm7tdth8j4w4r8ykpg2xjfv45nghzsjzrvmp",
+        );
+        assert_json_roundtrip(&a);
+        assert_ne_after_json_roundtrip(
+            &a,
+            "identity_rdx12tgzjrz9u0xz4l28vf04hz87eguclmfaq4d2p8f8lv7zg9ssnzku8j",
+        );
     }
 }
