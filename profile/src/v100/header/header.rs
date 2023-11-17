@@ -1,4 +1,4 @@
-use std::cell::{Cell, Ref, RefCell};
+use std::cell::{Cell, RefCell};
 
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
@@ -73,12 +73,12 @@ impl Default for Header {
 // Getters
 impl Header {
     /// Hint about the contents of the profile, e.g. number of Accounts and Personas.
-    pub fn get_content_hint(&self) -> Ref<ContentHint> {
-        self.content_hint.borrow()
+    pub fn get_content_hint(&self) -> ContentHint {
+        self.content_hint.borrow().clone()
     }
 
-    pub fn get_last_used_on_device(&self) -> Ref<DeviceInfo> {
-        self.last_used_on_device.borrow()
+    pub fn get_last_used_on_device(&self) -> DeviceInfo {
+        self.last_used_on_device.borrow().clone()
     }
 }
 
@@ -169,13 +169,13 @@ pub mod tests {
     fn update_content_hint() {
         let sut = Header::default();
         let d0 = sut.last_modified.get();
-        let content_hint_0 = sut.get_content_hint().clone();
+        let content_hint_0 = sut.get_content_hint();
         let end = 10;
         for n in 1..end {
             // rust is too fast, if we run it once, unit tests fails.
             sut.update_content_hint(ContentHint::all(n));
         }
-        let content_hint_n = sut.get_content_hint().clone();
+        let content_hint_n = sut.get_content_hint();
         assert_ne!(content_hint_n, content_hint_0);
         let d1 = sut.last_modified.get();
         assert!(d1 > d0);
@@ -185,13 +185,13 @@ pub mod tests {
     fn update_last_used_on_device() {
         let sut = Header::default();
         let d0: NaiveDateTime = sut.last_modified.get();
-        let device_0 = sut.get_last_used_on_device().clone();
+        let device_0 = sut.get_last_used_on_device();
         let end = 10;
         for n in 1..end {
             // rust is too fast, if we run it once, unit tests fails.
             sut.update_last_used_on_device(DeviceInfo::with_description(n.to_string().as_str()));
         }
-        let device_n = sut.get_last_used_on_device().clone();
+        let device_n = sut.get_last_used_on_device();
         assert_ne!(device_n, device_0);
         let d1 = sut.last_modified.get();
         assert!(d1 > d0);
