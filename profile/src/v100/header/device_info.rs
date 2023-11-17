@@ -63,13 +63,12 @@ impl DeviceInfo {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        profile::v100::header::device_info::DeviceInfo,
-        utils::test_utils::json_test_utils::json_test_utils::*,
-    };
-    use chrono::{Datelike, NaiveDateTime};
     use std::collections::HashSet;
+
+    use crate::v100::header::device_info::DeviceInfo;
+    use chrono::{Datelike, NaiveDateTime};
     use uuid::{uuid, Uuid};
+    use wallet_kit_test_utils::json::*;
 
     #[test]
     fn new_iphone() {
