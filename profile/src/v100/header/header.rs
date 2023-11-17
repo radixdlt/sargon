@@ -74,6 +74,11 @@ impl Header {
     pub fn updated(&self) {
         self.last_modified.set(now());
     }
+
+    pub fn update_content_hint(&self, content_hint: ContentHint) {
+        *self.content_hint.borrow_mut() = content_hint;
+        self.updated()
+    }
 }
 
 #[cfg(test)]
@@ -135,6 +140,22 @@ pub mod tests {
             // rust is too fast, if we run it once, unit tests fails.
             sut.updated();
         }
+        let d1 = sut.last_modified.get();
+        assert!(d1 > d0);
+    }
+
+    #[test]
+    fn update_content_hint() {
+        let sut = Header::default();
+        let d0 = sut.last_modified.get();
+        let content_hint_0 = sut.content_hint.borrow().clone();
+        let end = 10;
+        for n in 1..end {
+            // rust is too fast, if we run it once, unit tests fails.
+            sut.update_content_hint(ContentHint::all(n));
+        }
+        let content_hint_n = sut.content_hint.borrow().clone();
+        assert_ne!(content_hint_n, content_hint_0);
         let d1 = sut.last_modified.get();
         assert!(d1 > d0);
     }
