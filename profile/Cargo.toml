@@ -16,3 +16,7 @@ strum = { version = "0.25.0", features = ["derive"] }
 thiserror = "1.0.50"
 uuid = { version = "1.5.0", features = ["v4", "serde"] }
 wallet_kit_test_utils = { path = "../wallet_kit_test_utils" }
+enum-iterator = "1.4.1"
+radix-engine-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "038ddee8b0f57aa90e36375c69946c4eb634efeb", features = ["serde"] }
+# radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", version = "1.0.3" }
+radix-engine-toolkit-core = { git = "https://github.com/radixdlt/radix-engine-toolkit", version = "1.0.3" }
