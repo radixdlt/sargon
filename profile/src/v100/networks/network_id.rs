@@ -2,12 +2,12 @@ use std::fmt::Display;
 
 use enum_iterator::Sequence;
 use radix_engine_common::network::NetworkDefinition;
-use serde::{Deserialize, Serialize};
+use serde_repr::{Deserialize_repr, Serialize_repr};
 use strum::FromRepr;
 
 #[derive(
-    Serialize,
-    Deserialize,
+    Serialize_repr,
+    Deserialize_repr,
     FromRepr,
     Clone,
     Copy,
@@ -75,5 +75,31 @@ impl NetworkID {
             NetworkID::Mainnet => NetworkDefinition::mainnet(),
             NetworkID::Stokenet => NetworkDefinition::stokenet(),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use serde_json::json;
+    use wallet_kit_test_utils::json::{assert_eq_after_json_roundtrip, assert_json_value_fails};
+
+    use super::NetworkID;
+
+    #[test]
+    fn json() {
+        assert_eq_after_json_roundtrip(&NetworkID::Mainnet, "1");
+        assert_json_value_fails::<NetworkID>(json!("1"));
+    }
+
+    #[test]
+    fn from_repr() {
+        assert_eq!(NetworkID::Mainnet, NetworkID::from_repr(0x01).unwrap());
+        assert_eq!(NetworkID::Stokenet, NetworkID::from_repr(0x02).unwrap());
+    }
+
+    #[test]
+    fn discriminant() {
+        assert_eq!(NetworkID::Mainnet.discriminant(), 0x01);
+        assert_eq!(NetworkID::Stokenet.discriminant(), 0x02);
     }
 }
