@@ -14,10 +14,13 @@ use crate::error::Error;
 )]
 #[repr(u32)] // it is u32 since used in Derivation Paths (CAP26) where each component is a u32.
 pub enum EntityType {
+    /// The entity type used by Accounts.
     Account,
+    /// The entity type used by Personas.
     Identity,
 }
 impl EntityType {
+    /// Conversion of the Radix Engines type for EntityType to Self.
     pub fn try_from(value: EngineEntityType) -> Result<Self, Error> {
         match value {
             EngineEntityType::GlobalVirtualEd25519Account => Ok(Self::Account),
@@ -28,6 +31,7 @@ impl EntityType {
         }
     }
 
+    /// Human Readable Part (HRP) used to create account and identity addresses.
     pub fn hrp(&self) -> String {
         match self {
             Self::Account => "account".to_string(),
