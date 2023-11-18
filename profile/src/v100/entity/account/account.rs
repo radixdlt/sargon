@@ -1,6 +1,6 @@
+use hiearchal_deterministic::derivation_path::DerivationPath;
 use radix_engine_common::crypto::PublicKey;
 use serde::{Deserialize, Serialize};
-use slip10::derivation_path::DerivationPath;
 use std::{cell::RefCell, cmp::Ordering, fmt::Display};
 use transaction::signing::ed25519::Ed25519PrivateKey;
 

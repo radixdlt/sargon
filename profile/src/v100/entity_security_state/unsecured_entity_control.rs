@@ -1,5 +1,5 @@
+use hiearchal_deterministic::cap26::HDPathValue;
 use serde::{Deserialize, Serialize};
-use slip10::cap26::HDPathValue;
 
 use crate::v100::factors::hierarchical_deterministic_factor_instance::HierarchicalDeterministicFactorInstance;
 

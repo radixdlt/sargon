@@ -1,5 +1,5 @@
 [package]
-name = "slip10"
+name = "hiearchal_deterministic"
 version = "0.1.0"
 edition = "2021"
 

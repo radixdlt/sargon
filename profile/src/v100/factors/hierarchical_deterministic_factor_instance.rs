@@ -1,6 +1,6 @@
+use hiearchal_deterministic::derivation_path::DerivationPath;
 use radix_engine_common::crypto::PublicKey;
 use serde::{Deserialize, Serialize};
-use slip10::derivation_path::DerivationPath;
 
 use super::factor_source_id_from_hash::FactorSourceIDFromHash;
 
