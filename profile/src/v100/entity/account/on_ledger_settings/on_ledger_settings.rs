@@ -20,6 +20,14 @@ pub struct OnLedgerSettings {
     third_party_deposits: RefCell<ThirdPartyDeposits>,
 }
 
+impl OnLedgerSettings {
+    pub fn new(third_party_deposits: ThirdPartyDeposits) -> Self {
+        Self {
+            third_party_deposits: RefCell::new(third_party_deposits),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::collections::BTreeSet;

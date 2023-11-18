@@ -97,6 +97,10 @@ impl Account {
     pub fn get_appearance_id(&self) -> AppearanceID {
         self.appearance_id.borrow().clone()
     }
+
+    pub fn get_on_legder_settings(&self) -> OnLedgerSettings {
+        self.on_ledger_settings.borrow().clone()
+    }
 }
 
 // Setters
@@ -112,6 +116,10 @@ impl Account {
     pub fn set_appearance_id(&self, new: AppearanceID) {
         *self.appearance_id.borrow_mut() = new;
     }
+
+    pub fn set_on_ledger_settings(&self, new: OnLedgerSettings) {
+        *self.on_ledger_settings.borrow_mut() = new;
+    }
 }
 
 impl Display for Account {
@@ -122,13 +130,26 @@ impl Display for Account {
 
 #[cfg(test)]
 mod tests {
-    use std::cell::RefCell;
+    use std::{cell::RefCell, collections::BTreeSet};
 
     use crate::v100::{
         address::account_address::AccountAddress,
         entity::{
-            account::appearance_id::AppearanceID, display_name::DisplayName,
-            entity_flag::EntityFlag, entity_flags::EntityFlags,
+            account::{
+                appearance_id::AppearanceID,
+                on_ledger_settings::{
+                    on_ledger_settings::OnLedgerSettings,
+                    third_party_deposits::{
+                        asset_exception::AssetException,
+                        deposit_address_exception_rule::DepositAddressExceptionRule,
+                        deposit_rule::DepositRule, depositor_address::DepositorAddress,
+                        third_party_deposits::ThirdPartyDeposits,
+                    },
+                },
+            },
+            display_name::DisplayName,
+            entity_flag::EntityFlag,
+            entity_flags::EntityFlags,
         },
     };
 
@@ -188,6 +209,47 @@ mod tests {
         let new_flags = EntityFlags::with_flag(EntityFlag::DeletedByUser);
         account.set_flags(new_flags.clone());
         assert_eq!(account.get_flags(), new_flags);
+    }
+
+    #[test]
+    fn on_ledger_settings_get_set() {
+        let account = Account {
+            address: "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                .try_into()
+                .unwrap(),
+            ..Default::default()
+        };
+        assert_eq!(
+            account.get_on_legder_settings(),
+            OnLedgerSettings::default()
+        );
+        let excp1 = AssetException::new(
+            "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
+                .try_into()
+                .unwrap(),
+            DepositAddressExceptionRule::Allow,
+        );
+        let excp2 = AssetException::new(
+            "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
+                .try_into()
+                .unwrap(),
+            DepositAddressExceptionRule::Allow,
+        );
+        let new_third_party_dep = ThirdPartyDeposits::with_rule_and_lists(
+            DepositRule::DenyAll,
+            BTreeSet::from_iter([excp1, excp2].into_iter()),
+            BTreeSet::from_iter(
+                [DepositorAddress::ResourceAddress(
+                    "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
+                        .try_into()
+                        .unwrap(),
+                )]
+                .into_iter(),
+            ),
+        );
+        let new_on_ledger_settings = OnLedgerSettings::new(new_third_party_dep);
+        account.set_on_ledger_settings(new_on_ledger_settings.clone());
+        assert_eq!(account.get_on_legder_settings(), new_on_ledger_settings);
     }
 
     #[test]
