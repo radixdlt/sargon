@@ -45,13 +45,15 @@ impl Display for ProfileSnapshotVersion {
 #[cfg(test)]
 mod tests {
     use serde_json::json;
-    use wallet_kit_test_utils::json::{assert_eq_after_json_roundtrip, assert_json_value_fails};
+    use wallet_kit_test_utils::json::{
+        assert_json_value_eq_after_roundtrip, assert_json_value_fails,
+    };
 
     use super::ProfileSnapshotVersion;
 
     #[test]
     fn json() {
-        assert_eq_after_json_roundtrip(&ProfileSnapshotVersion::V100, "100");
+        assert_json_value_eq_after_roundtrip(&ProfileSnapshotVersion::V100, json!(100));
         assert_json_value_fails::<ProfileSnapshotVersion>(json!(99));
         assert_json_value_fails::<ProfileSnapshotVersion>(json!("99"));
         assert_json_value_fails::<ProfileSnapshotVersion>(json!("100"));
@@ -65,6 +67,11 @@ mod tests {
             ProfileSnapshotVersion::V100,
             ProfileSnapshotVersion::from_repr(100).unwrap()
         )
+    }
+
+    #[test]
+    fn from_repr_unknown_version() {
+        assert!(ProfileSnapshotVersion::from_repr(99).is_none())
     }
 
     #[test]

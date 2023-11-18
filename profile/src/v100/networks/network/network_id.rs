@@ -73,8 +73,7 @@ impl Display for NetworkID {
 }
 
 impl NetworkID {
-
-    /// Looks up a `NetworkDefinition` in a lookup table. 
+    /// Looks up a `NetworkDefinition` in a lookup table.
     pub fn network_definition(&self) -> NetworkDefinition {
         match self {
             NetworkID::Mainnet => NetworkDefinition::mainnet(),
@@ -86,13 +85,15 @@ impl NetworkID {
 #[cfg(test)]
 mod tests {
     use serde_json::json;
-    use wallet_kit_test_utils::json::{assert_eq_after_json_roundtrip, assert_json_value_fails};
+    use wallet_kit_test_utils::json::{
+        assert_json_value_eq_after_roundtrip, assert_json_value_fails,
+    };
 
     use super::NetworkID;
 
     #[test]
     fn json() {
-        assert_eq_after_json_roundtrip(&NetworkID::Mainnet, "1");
+        assert_json_value_eq_after_roundtrip(&NetworkID::Mainnet, json!(1));
         assert_json_value_fails::<NetworkID>(json!("1"));
     }
 
