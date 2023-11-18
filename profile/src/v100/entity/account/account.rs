@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::{cell::Cell, fmt::Display};
 
-use crate::v100::networks::network::network_id::NetworkID;
+use crate::v100::{entity::entity_flags::EntityFlags, networks::network::network_id::NetworkID};
 
 use super::{account_address::AccountAddress, appearance_id::AppearanceID};
 
@@ -50,6 +50,8 @@ pub struct Account {
     /// The visual cue user learns to associated this account with, typically
     /// a beautiful colorful gradient.
     pub appearance_id: Cell<AppearanceID>,
+
+    pub flags: EntityFlags,
 }
 
 impl Account {
@@ -64,6 +66,7 @@ impl Account {
             address,
             display_name,
             appearance_id: Cell::new(appearance_id),
+            flags: EntityFlags::default(),
         }
     }
 }
