@@ -35,7 +35,7 @@ pub struct Header {
     last_used_on_device: RefCell<DeviceInfo>, // `RefCell` needed, because `Cell` requires `Copy` and `DeviceInfo` contains `String` (which does not impl `Copy`). We could potentially use `fstr` from `fixedstr` crate for `description` inside `DeviceInfo`? and thus use `Cell` here?
 
     /// When the Profile was last modified.
-    pub last_modified: Cell<NaiveDateTime>,
+    last_modified: Cell<NaiveDateTime>,
 
     /// Hint about the contents of the profile, e.g. number of Accounts and Personas.
     content_hint: RefCell<ContentHint>, // `RefCell` needed because `ContentHint` does not impl `Copy`, which it cant because it contains `Cell`s, and `Cell` itself does not impl `Copy`.
@@ -94,6 +94,10 @@ impl Header {
 
     pub fn get_last_used_on_device(&self) -> DeviceInfo {
         self.last_used_on_device.borrow().clone()
+    }
+
+    pub fn get_last_modified(&self) -> NaiveDateTime {
+        self.last_modified.get().clone()
     }
 }
 

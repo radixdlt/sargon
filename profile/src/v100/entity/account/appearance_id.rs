@@ -4,6 +4,12 @@ use nutype::nutype;
 #[derive(Serialize, Deserialize, Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct AppearanceID(u8);
 
+impl Default for AppearanceID {
+    fn default() -> Self {
+        Self::new(0).expect("AppearanceID of 0 to be valid")
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use serde_json::json;

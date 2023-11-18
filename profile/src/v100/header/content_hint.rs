@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 /// Important to know that this is just a **hint**, the values
 /// SHOULD be kept up to date, might might not be, since they
 /// are stored values which must be kept in sync.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Default, Clone, Debug, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct ContentHint {
     /// The total number of accounts on all networks.
@@ -55,13 +55,6 @@ impl ContentHint {
     /// Instantiates a new empty ContentHint with all counters equal `0`.
     pub fn new() -> Self {
         Self::all(0)
-    }
-}
-
-impl Default for ContentHint {
-    /// Instantiates a new empty ContentHint with all counters equal `0`.
-    fn default() -> Self {
-        Self::new()
     }
 }
 
