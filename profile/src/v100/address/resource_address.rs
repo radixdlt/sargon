@@ -1,12 +1,5 @@
-use radix_engine_common::{
-    address::AddressBech32Decoder, types::ResourceAddress as EngineResourceAddress,
-};
-
-use crate::{
-    utils::string_utils::suffix_string,
-    v100::{
-        entity::abstract_entity_type::AbstractEntityType, networks::network::network_id::NetworkID,
-    },
+use crate::v100::{
+    entity::abstract_entity_type::AbstractEntityType, networks::network::network_id::NetworkID,
 };
 use serde::{de, Deserializer, Serialize, Serializer};
 use std::fmt::Display;

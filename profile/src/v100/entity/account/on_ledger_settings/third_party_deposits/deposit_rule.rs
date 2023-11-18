@@ -1,4 +1,4 @@
-use std::{default, fmt::Display};
+use std::fmt::Display;
 
 use enum_iterator::Sequence;
 use serde::{Deserialize, Serialize};
