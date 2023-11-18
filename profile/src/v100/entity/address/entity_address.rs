@@ -4,11 +4,9 @@ use radix_engine_toolkit_core::functions::derive::{
     virtual_account_address_from_public_key, virtual_identity_address_from_public_key,
 };
 
-use crate::error::Error;
+use crate::{error::Error, v100::{entity::entity_type::EntityType, networks::network::network_id::NetworkID}};
 
-use super::{
-    decode_address_helper::decode_address, entity_type::EntityType, network_id::NetworkID,
-};
+use super::decode_address_helper::decode_address;
 
 /// An address of an entity, provides default implementation of `try_from_bech32`
 /// to decode a bech32 encoded address string into Self.

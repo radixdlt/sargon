@@ -8,6 +8,14 @@ use super::{header::header::Header, networks::networks::Networks};
 /// FactorInstances and wallet App preferences.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct Profile {
+    /// The header of a Profile(Snapshot) contains crucial metadata
+    /// about this Profile, such as which JSON data format it is
+    /// compatible with and which device was used to create it and
+    /// a hint about its contents.
     pub header: Header,
+
+    /// An ordered mapping of NetworkID -> `Profile.Network`, containing
+    /// all the users Accounts, Personas and AuthorizedDapps the user
+    /// has created and interacted with on this network.
     pub networks: Networks,
 }

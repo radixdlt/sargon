@@ -1,9 +1,7 @@
 use radix_engine_common::types::EntityType as EngineEntityType;
 use radix_engine_toolkit_core::functions::address::decode;
 
-use crate::error::Error;
-
-use super::{entity_type::EntityType, network_id::NetworkID};
+use crate::{error::Error, v100::{networks::network::network_id::NetworkID, entity::entity_type::EntityType}};
 
 type EngineDecodeAddressOutput = (u8, EngineEntityType, String, [u8; 30]);
 pub type DecodeAddressOutput = (NetworkID, EntityType, String, [u8; 30]);

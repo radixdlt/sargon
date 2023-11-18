@@ -1,5 +1,10 @@
-use super::{entity_address::EntityAddress, entity_type::EntityType, network_id::NetworkID};
-use crate::utils::string_utils::suffix_string;
+use crate::{
+    utils::string_utils::suffix_string,
+    v100::{
+        entity::{address::entity_address::EntityAddress, entity_type::EntityType},
+        networks::network::network_id::NetworkID,
+    },
+};
 use serde::{de, Deserializer, Serialize, Serializer};
 use std::fmt::Display;
 
@@ -29,6 +34,7 @@ pub struct AccountAddress {
 }
 
 impl Serialize for AccountAddress {
+    /// Serializes this `AccountAddress` into its bech32 address string as JSON.
     fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
     where
         S: Serializer,
@@ -38,6 +44,7 @@ impl Serialize for AccountAddress {
 }
 
 impl<'de> serde::Deserialize<'de> for AccountAddress {
+    /// Tries to deserializes a JSON string as a bech32 address into an `AccountAddress`.
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<AccountAddress, D::Error> {
         let s = String::deserialize(d)?;
         AccountAddress::try_from_bech32(&s).map_err(de::Error::custom)
@@ -86,6 +93,7 @@ impl EntityAddress for AccountAddress {
 impl TryInto<AccountAddress> for &str {
     type Error = crate::error::Error;
 
+    /// Tries to deserializes a bech32 address into an `AccountAddress`.
     fn try_into(self) -> Result<AccountAddress, Self::Error> {
         AccountAddress::try_from_bech32(self)
     }
@@ -107,12 +115,7 @@ mod tests {
         assert_eq_after_json_roundtrip, assert_json_roundtrip, assert_ne_after_json_roundtrip,
     };
 
-    use crate::{
-        error::Error,
-        v100::networks::{
-            account_address::AccountAddress, entity_address::EntityAddress, network_id::NetworkID,
-        },
-    };
+    use crate::{error::Error, v100::{entity::{account::account_address::AccountAddress, address::entity_address::EntityAddress}, networks::network::network_id::NetworkID}};
 
     #[test]
     fn from_bech32() {

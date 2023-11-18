@@ -1,6 +1,10 @@
-use super::{entity_address::EntityAddress, entity_type::EntityType, network_id::NetworkID};
-use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
+use serde::{de, Deserializer, Serialize, Serializer};
 use std::fmt::Display;
+
+use crate::v100::{
+    entity::{address::entity_address::EntityAddress, entity_type::EntityType},
+    networks::network::network_id::NetworkID,
+};
 
 /// The address of an identity, used by Personas, a bech32 encoding of a public key hash
 /// that starts with the prefix `"identity_"`, dependent on NetworkID, meaning the same
@@ -44,6 +48,7 @@ impl EntityAddress for IdentityAddress {
 }
 
 impl Serialize for IdentityAddress {
+    /// Serializes this `IdentityAddress` into its bech32 address string as JSON.
     fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
     where
         S: Serializer,
@@ -53,6 +58,7 @@ impl Serialize for IdentityAddress {
 }
 
 impl<'de> serde::Deserialize<'de> for IdentityAddress {
+    /// Tries to deserializes a JSON string as a bech32 address into an `IdentityAddress`.
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<IdentityAddress, D::Error> {
         let s = String::deserialize(d)?;
         IdentityAddress::try_from_bech32(&s).map_err(de::Error::custom)
@@ -62,12 +68,14 @@ impl<'de> serde::Deserialize<'de> for IdentityAddress {
 impl TryInto<IdentityAddress> for &str {
     type Error = crate::error::Error;
 
+    /// Tries to deserializes a bech32 address into an `IdentityAddress`.
     fn try_into(self) -> Result<IdentityAddress, Self::Error> {
         IdentityAddress::try_from_bech32(self)
     }
 }
 
 impl Display for IdentityAddress {
+    /// The full bech32 address.
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.address)
     }
@@ -78,14 +86,13 @@ mod tests {
     use std::str::FromStr;
 
     use radix_engine_common::crypto::{Ed25519PublicKey, PublicKey};
-    use wallet_kit_test_utils::json::{assert_eq_after_json_roundtrip, assert_json_roundtrip, assert_ne_after_json_roundtrip};
-
-    use crate::{
-        error::Error,
-        v100::networks::{
-            entity_address::EntityAddress, identity_address::IdentityAddress, network_id::NetworkID,
-        },
+    use wallet_kit_test_utils::json::{
+        assert_eq_after_json_roundtrip, assert_json_roundtrip, assert_ne_after_json_roundtrip,
     };
+
+    use crate::error::Error;
+
+    use super::*;
 
     #[test]
     fn from_bech32() {

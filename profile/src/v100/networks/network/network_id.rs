@@ -43,10 +43,12 @@ impl Default for NetworkID {
 }
 
 impl NetworkID {
+    /// The raw representation of this network id, an `u8`.
     pub fn discriminant(&self) -> u8 {
         *self as u8
     }
 
+    /// The name of the network.
     pub fn description(&self) -> String {
         match self {
             Self::Mainnet => "Mainnet".to_string(),
@@ -58,6 +60,7 @@ impl NetworkID {
 impl TryFrom<u8> for NetworkID {
     type Error = crate::error::Error;
 
+    /// Tries to instantiate a NetworkID from its raw representation `u8`.
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         Self::from_repr(value).ok_or(Self::Error::UnknownNetworkID(value))
     }
@@ -70,6 +73,8 @@ impl Display for NetworkID {
 }
 
 impl NetworkID {
+
+    /// Looks up a `NetworkDefinition` in a lookup table. 
     pub fn network_definition(&self) -> NetworkDefinition {
         match self {
             NetworkID::Mainnet => NetworkDefinition::mainnet(),
