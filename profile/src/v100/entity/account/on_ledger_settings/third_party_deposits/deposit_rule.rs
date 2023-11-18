@@ -1,4 +1,4 @@
-use std::fmt::Display;
+use std::{default, fmt::Display};
 
 use enum_iterator::Sequence;
 use serde::{Deserialize, Serialize};
@@ -24,6 +24,12 @@ pub enum DepositRule {
     AcceptAll,
     AcceptKnown,
     DenyAll,
+}
+
+impl Default for DepositRule {
+    fn default() -> Self {
+        Self::AcceptAll
+    }
 }
 
 impl DepositRule {
