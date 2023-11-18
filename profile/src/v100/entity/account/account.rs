@@ -2,11 +2,12 @@ use serde::{Deserialize, Serialize};
 use std::{cell::RefCell, fmt::Display};
 
 use crate::v100::{
+    address::account_address::AccountAddress,
     entity::{display_name::DisplayName, entity_flags::EntityFlags},
     networks::network::network_id::NetworkID,
 };
 
-use super::{account_address::AccountAddress, appearance_id::AppearanceID};
+use super::appearance_id::AppearanceID;
 
 /// A network unique account with a unique public address and a set of cryptographic
 /// factors used to control it.
@@ -117,11 +118,12 @@ impl Display for Account {
 mod tests {
     use std::cell::RefCell;
 
-    use crate::v100::entity::{
-        account::{account_address::AccountAddress, appearance_id::AppearanceID},
-        display_name::DisplayName,
-        entity_flag::EntityFlag,
-        entity_flags::EntityFlags,
+    use crate::v100::{
+        address::account_address::AccountAddress,
+        entity::{
+            account::appearance_id::AppearanceID, display_name::DisplayName,
+            entity_flag::EntityFlag, entity_flags::EntityFlags,
+        },
     };
 
     use super::Account;

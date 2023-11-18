@@ -1,12 +1,13 @@
 use crate::{
     utils::string_utils::suffix_string,
     v100::{
-        entity::{address::entity_address::EntityAddress, entity_type::EntityType},
-        networks::network::network_id::NetworkID,
+        entity::abstract_entity_type::AbstractEntityType, networks::network::network_id::NetworkID,
     },
 };
 use serde::{de, Deserializer, Serialize, Serializer};
 use std::fmt::Display;
+
+use super::entity_address::EntityAddress;
 
 /// The address of an Account, a bech32 encoding of a public key hash
 /// that starts with the prefix `"account_"`, dependent on NetworkID, meaning the same
@@ -74,8 +75,8 @@ impl EntityAddress for AccountAddress {
     /// Identifies that AccountAddress uses the `EntityType::Account`, which are used
     /// to validate the HRP (`"account_"`) and is also used when forming HD derivation
     /// paths as per CAP26.
-    fn entity_type() -> EntityType {
-        EntityType::Account
+    fn entity_type() -> AbstractEntityType {
+        AbstractEntityType::Account
     }
 
     // Underscored to decrease visibility. You SHOULD NOT call this function directly,
@@ -120,9 +121,7 @@ mod tests {
     use crate::{
         error::Error,
         v100::{
-            entity::{
-                account::account_address::AccountAddress, address::entity_address::EntityAddress,
-            },
+            address::{account_address::AccountAddress, entity_address::EntityAddress},
             networks::network::network_id::NetworkID,
         },
     };

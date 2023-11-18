@@ -1,1 +1,1 @@
-pub mod identity_address;
+pub mod persona;

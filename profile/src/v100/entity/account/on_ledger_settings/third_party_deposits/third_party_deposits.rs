@@ -19,3 +19,17 @@ pub struct ThirdPartyDeposits {
     /// Note: There is no `deny` counterpart for this.
     pub depositors_allow_list: BTreeSet<DepositorAddress>,
 }
+
+impl ThirdPartyDeposits {
+    pub fn with_rule_and_lists(
+        deposit_rule: DepositRule,
+        assets_exception_list: BTreeSet<AssetException>,
+        depositors_allow_list: BTreeSet<DepositorAddress>,
+    ) -> Self {
+        Self {
+            deposit_rule,
+            assets_exception_list,
+            depositors_allow_list,
+        }
+    }
+}

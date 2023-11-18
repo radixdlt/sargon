@@ -4,14 +4,19 @@ use radix_engine_toolkit_core::functions::derive::{
     virtual_account_address_from_public_key, virtual_identity_address_from_public_key,
 };
 
-use crate::{error::Error, v100::{entity::entity_type::EntityType, networks::network::network_id::NetworkID}};
+use crate::{
+    error::Error,
+    v100::{
+        entity::abstract_entity_type::AbstractEntityType, networks::network::network_id::NetworkID,
+    },
+};
 
 use super::decode_address_helper::decode_address;
 
 /// An address of an entity, provides default implementation of `try_from_bech32`
 /// to decode a bech32 encoded address string into Self.
 pub trait EntityAddress: Sized {
-    fn entity_type() -> EntityType;
+    fn entity_type() -> AbstractEntityType;
 
     // Underscored to decrease visibility. You SHOULD NOT call this function directly,
     // instead use `try_from_bech32` which performs proper validation. Impl types SHOULD
@@ -22,8 +27,9 @@ pub trait EntityAddress: Sized {
     /// it.
     fn from_public_key(public_key: PublicKey, network_id: NetworkID) -> Self {
         let component = match Self::entity_type() {
-            EntityType::Account => virtual_account_address_from_public_key(&public_key),
-            EntityType::Identity => virtual_identity_address_from_public_key(&public_key),
+            AbstractEntityType::Account => virtual_account_address_from_public_key(&public_key),
+            AbstractEntityType::Identity => virtual_identity_address_from_public_key(&public_key),
+            AbstractEntityType::Resource => panic!("resource"),
         };
 
         let node = SerializableNodeIdInternal {

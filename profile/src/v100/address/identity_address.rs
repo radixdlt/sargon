@@ -1,10 +1,9 @@
 use serde::{de, Deserializer, Serialize, Serializer};
 use std::fmt::Display;
 
-use crate::v100::{
-    entity::{address::entity_address::EntityAddress, entity_type::EntityType},
-    networks::network::network_id::NetworkID,
-};
+use crate::v100::{entity::abstract_entity_type::AbstractEntityType, networks::network::network_id::NetworkID};
+
+use super::entity_address::EntityAddress;
 
 /// The address of an identity, used by Personas, a bech32 encoding of a public key hash
 /// that starts with the prefix `"identity_"`, dependent on NetworkID, meaning the same
@@ -31,8 +30,8 @@ impl EntityAddress for IdentityAddress {
     /// Identifies that IdentityAddresses uses the `EntityType::Identity`, which are used
     /// to validate the HRP (`"identity_"`) and is also used when forming HD derivation
     /// paths as per CAP26.
-    fn entity_type() -> EntityType {
-        EntityType::Identity
+    fn entity_type() -> AbstractEntityType {
+        AbstractEntityType::Identity
     }
 
     // Underscored to decrease visibility. You SHOULD NOT call this function directly,

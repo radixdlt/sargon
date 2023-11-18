@@ -13,13 +13,15 @@ use crate::error::Error;
     Serialize, Deserialize, FromRepr, Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord,
 )]
 #[repr(u32)] // it is u32 since used in Derivation Paths (CAP26) where each component is a u32.
-pub enum EntityType {
+pub enum AbstractEntityType {
     /// The entity type used by Accounts.
     Account,
     /// The entity type used by Personas.
     Identity,
+    /// Resource address
+    Resource,
 }
-impl EntityType {
+impl AbstractEntityType {
     /// Conversion of the Radix Engines type for EntityType to Self.
     pub fn try_from(value: EngineEntityType) -> Result<Self, Error> {
         match value {
@@ -27,6 +29,7 @@ impl EntityType {
             EngineEntityType::GlobalVirtualSecp256k1Account => Ok(Self::Account),
             EngineEntityType::GlobalVirtualEd25519Identity => Ok(Self::Identity),
             EngineEntityType::GlobalVirtualSecp256k1Identity => Ok(Self::Identity),
+            EngineEntityType::GlobalFungibleResourceManager => Ok(Self::Resource),
             _ => Err(Error::UnsupportedEntityType),
         }
     }
@@ -36,11 +39,12 @@ impl EntityType {
         match self {
             Self::Account => "account".to_string(),
             Self::Identity => "identity".to_string(),
+            Self::Resource => "resource".to_string(),
         }
     }
 }
 
-impl Display for EntityType {
+impl Display for AbstractEntityType {
     fn fmt(
         &self,
         f: &mut radix_engine_common::prelude::fmt::Formatter<'_>,
