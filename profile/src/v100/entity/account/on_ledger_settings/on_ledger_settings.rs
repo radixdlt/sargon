@@ -13,7 +13,7 @@ use super::third_party_deposits::third_party_deposits::ThirdPartyDeposits;
 ///
 /// These settings SHOULD be kept in sync between local state
 /// (in Profile) and On-Ledger.
-#[derive(Serialize, Deserialize, Default, Clone, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Default, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 #[serde(rename_all = "camelCase")]
 pub struct OnLedgerSettings {
     /// Controls the ability of third-parties to deposit into this account

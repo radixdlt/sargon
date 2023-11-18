@@ -7,7 +7,9 @@ use crate::v100::{
     networks::network::network_id::NetworkID,
 };
 
-use super::appearance_id::AppearanceID;
+use super::{
+    appearance_id::AppearanceID, on_ledger_settings::on_ledger_settings::OnLedgerSettings,
+};
 
 /// A network unique account with a unique public address and a set of cryptographic
 /// factors used to control it.
@@ -32,10 +34,6 @@ pub struct Account {
     /// The ID of the network this account can be used with.
     pub network_id: NetworkID,
 
-    /// An off-ledger display name or description chosen by the user when she
-    /// created this account.
-    display_name: RefCell<DisplayName>,
-
     /// A globally unique identifier of this account, being a human readable
     /// address of an account. Always starts with `"account_"``, for example:
     ///
@@ -51,6 +49,10 @@ pub struct Account {
     /// accounts depend on the network id.
     pub address: AccountAddress,
 
+    /// An off-ledger display name or description chosen by the user when she
+    /// created this account.
+    display_name: RefCell<DisplayName>,
+
     /// The visual cue user learns to associated this account with, typically
     /// a beautiful colorful gradient.
     appearance_id: RefCell<AppearanceID>,
@@ -59,6 +61,9 @@ pub struct Account {
     /// user state about Accounts or Personas, such as if an entity is
     /// marked as hidden or not.
     flags: RefCell<EntityFlags>,
+
+    /// The on ledger synced settings for this account
+    on_ledger_settings: RefCell<OnLedgerSettings>,
 }
 
 impl Account {
@@ -74,6 +79,7 @@ impl Account {
             display_name: RefCell::new(display_name),
             appearance_id: RefCell::new(appearance_id),
             flags: RefCell::new(EntityFlags::default()),
+            on_ledger_settings: RefCell::new(OnLedgerSettings::default()),
         }
     }
 }

@@ -6,7 +6,7 @@ use super::{
     asset_exception::AssetException, deposit_rule::DepositRule, depositor_address::DepositorAddress,
 };
 
-#[derive(Serialize, Deserialize, Default, Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Serialize, Deserialize, Default, Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 #[serde(rename_all = "camelCase")]
 pub struct ThirdPartyDeposits {
     /// Controls the ability of third-parties to deposit into this account
