@@ -86,8 +86,10 @@ mod tests {
     use std::str::FromStr;
 
     use radix_engine_common::crypto::{Ed25519PublicKey, PublicKey};
+    use serde_json::json;
     use wallet_kit_test_utils::json::{
-        assert_eq_after_json_roundtrip, assert_json_roundtrip, assert_ne_after_json_roundtrip,
+        assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
+        assert_json_value_ne_after_roundtrip,
     };
 
     use crate::error::Error;
@@ -186,14 +188,14 @@ mod tests {
                 .try_into()
                 .unwrap();
 
-        assert_eq_after_json_roundtrip(
+        assert_json_value_eq_after_roundtrip(
             &a,
-            "identity_rdx12gzxlgre0glhh9jxaptm7tdth8j4w4r8ykpg2xjfv45nghzsjzrvmp",
+            json!("identity_rdx12gzxlgre0glhh9jxaptm7tdth8j4w4r8ykpg2xjfv45nghzsjzrvmp"),
         );
         assert_json_roundtrip(&a);
-        assert_ne_after_json_roundtrip(
+        assert_json_value_ne_after_roundtrip(
             &a,
-            "identity_rdx12tgzjrz9u0xz4l28vf04hz87eguclmfaq4d2p8f8lv7zg9ssnzku8j",
+            json!("identity_rdx12tgzjrz9u0xz4l28vf04hz87eguclmfaq4d2p8f8lv7zg9ssnzku8j"),
         );
     }
 }

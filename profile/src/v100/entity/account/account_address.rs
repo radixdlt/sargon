@@ -111,11 +111,21 @@ mod tests {
     use std::str::FromStr;
 
     use radix_engine_common::crypto::{Ed25519PublicKey, PublicKey};
+    use serde_json::json;
     use wallet_kit_test_utils::json::{
-        assert_eq_after_json_roundtrip, assert_json_roundtrip, assert_ne_after_json_roundtrip,
+        assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
+        assert_json_value_ne_after_roundtrip,
     };
 
-    use crate::{error::Error, v100::{entity::{account::account_address::AccountAddress, address::entity_address::EntityAddress}, networks::network::network_id::NetworkID}};
+    use crate::{
+        error::Error,
+        v100::{
+            entity::{
+                account::account_address::AccountAddress, address::entity_address::EntityAddress,
+            },
+            networks::network::network_id::NetworkID,
+        },
+    };
 
     #[test]
     fn from_bech32() {
@@ -219,14 +229,14 @@ mod tests {
                 .try_into()
                 .unwrap();
 
-        assert_eq_after_json_roundtrip(
+        assert_json_value_eq_after_roundtrip(
             &a,
-            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease",
+            json!("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"),
         );
         assert_json_roundtrip(&a);
-        assert_ne_after_json_roundtrip(
+        assert_json_value_ne_after_roundtrip(
             &a,
-            "account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzdm",
+            json!("account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzdm"),
         );
     }
 }

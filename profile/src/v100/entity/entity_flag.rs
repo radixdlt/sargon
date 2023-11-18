@@ -20,7 +20,7 @@ use strum::FromRepr;
     Ord,
     Sequence,
 )]
-#[serde(rename_all = "lowercase")]
+#[serde(rename_all = "camelCase")]
 pub enum EntityFlag {
     /// The entity is marked as deleted by user. Entity should still be kept in Profile
     DeletedByUser,
@@ -38,5 +38,21 @@ impl Display for EntityFlag {
         f: &mut radix_engine_common::prelude::fmt::Formatter<'_>,
     ) -> radix_engine_common::prelude::fmt::Result {
         write!(f, "{}", self)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use serde_json::json;
+    use wallet_kit_test_utils::json::{
+        assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
+    };
+
+    use super::EntityFlag;
+
+    #[test]
+    fn json_roundtrip() {
+        assert_json_value_eq_after_roundtrip(&EntityFlag::DeletedByUser, json!("deletedByUser"));
+        assert_json_roundtrip(&EntityFlag::DeletedByUser);
     }
 }

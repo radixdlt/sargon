@@ -1,15 +1,12 @@
 use core::fmt::Debug;
 use serde::{de::DeserializeOwned, ser::Serialize};
-use serde_json::{json, Value};
+use serde_json::Value;
 
-fn base_assert_equality_after_json_roundtrip<T>(model: &T, json_string: &str, expect_eq: bool)
+fn base_assert_equality_after_json_roundtrip<T>(model: &T, json: Value, expect_eq: bool)
 where
     T: Serialize + DeserializeOwned + PartialEq + Debug,
 {
     let serialized = serde_json::to_value(&model).unwrap();
-    let json = json_string
-        .parse::<serde_json::Value>()
-        .unwrap_or(json!(json_string));
     let deserialized: T = serde_json::from_value(json.clone()).unwrap();
     if expect_eq {
         assert_eq!(&deserialized, model, "Expected `model: T` and `T` deserialized from `json_string`, to be equal, but they were not.");
@@ -27,7 +24,18 @@ pub fn assert_eq_after_json_roundtrip<T>(model: &T, json_string: &str)
 where
     T: Serialize + DeserializeOwned + PartialEq + Debug,
 {
-    base_assert_equality_after_json_roundtrip(model, json_string, true)
+    let json = json_string.parse::<serde_json::Value>().unwrap();
+    base_assert_equality_after_json_roundtrip(model, json, true)
+}
+
+/// Asserts that (pseudocode) `model.to_json() == json` (serialization)
+/// and also asserts the associative property:
+/// `Model::from_json(json) == model` (deserialization)
+pub fn assert_json_value_eq_after_roundtrip<T>(model: &T, json: Value)
+where
+    T: Serialize + DeserializeOwned + PartialEq + Debug,
+{
+    base_assert_equality_after_json_roundtrip(model, json, true)
 }
 
 /// Asserts that (pseudocode) `model.to_json() != json_string` (serialization)
@@ -37,7 +45,18 @@ pub fn assert_ne_after_json_roundtrip<T>(model: &T, json_string: &str)
 where
     T: Serialize + DeserializeOwned + PartialEq + Debug,
 {
-    base_assert_equality_after_json_roundtrip(model, json_string, false)
+    let json = json_string.parse::<serde_json::Value>().unwrap();
+    base_assert_equality_after_json_roundtrip(model, json, false)
+}
+
+/// Asserts that (pseudocode) `model.to_json() != json` (serialization)
+/// and also asserts the associative property:
+/// `Model::from_json(json) != model` (deserialization)
+pub fn assert_json_value_ne_after_roundtrip<T>(model: &T, json: Value)
+where
+    T: Serialize + DeserializeOwned + PartialEq + Debug,
+{
+    base_assert_equality_after_json_roundtrip(model, json, false)
 }
 
 /// Asserts that (pseudocode) `Model::from_json(model.to_json()) == model`,
