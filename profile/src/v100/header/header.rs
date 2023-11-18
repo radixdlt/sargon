@@ -7,7 +7,7 @@ use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::utils::factory::{id, now};
+use wallet_kit_test_utils::utils::factory::{id, now};
 
 use super::{
     content_hint::ContentHint, device_info::DeviceInfo,

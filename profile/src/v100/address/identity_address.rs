@@ -1,7 +1,9 @@
 use serde::{de, Deserializer, Serialize, Serializer};
 use std::fmt::Display;
 
-use crate::v100::{entity::abstract_entity_type::AbstractEntityType, networks::network::network_id::NetworkID};
+use crate::v100::{
+    entity::abstract_entity_type::AbstractEntityType, networks::network::network_id::NetworkID,
+};
 
 use super::entity_address::EntityAddress;
 
@@ -65,7 +67,7 @@ impl<'de> serde::Deserialize<'de> for IdentityAddress {
 }
 
 impl TryInto<IdentityAddress> for &str {
-    type Error = crate::error::Error;
+    type Error = wallet_kit_test_utils::error::Error;
 
     /// Tries to deserializes a bech32 address into an `IdentityAddress`.
     fn try_into(self) -> Result<IdentityAddress, Self::Error> {
@@ -91,7 +93,7 @@ mod tests {
         assert_json_value_ne_after_roundtrip,
     };
 
-    use crate::error::Error;
+    use wallet_kit_test_utils::error::Error;
 
     use super::*;
 

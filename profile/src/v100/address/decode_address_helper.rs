@@ -1,11 +1,9 @@
 use radix_engine_common::types::EntityType as EngineEntityType;
 use radix_engine_toolkit_core::functions::address::decode;
+use wallet_kit_test_utils::error::Error;
 
-use crate::{
-    error::Error,
-    v100::{
-        entity::abstract_entity_type::AbstractEntityType, networks::network::network_id::NetworkID,
-    },
+use crate::v100::{
+    entity::abstract_entity_type::AbstractEntityType, networks::network::network_id::NetworkID,
 };
 
 type EngineDecodeAddressOutput = (u8, EngineEntityType, String, [u8; 30]);

@@ -3,8 +3,7 @@ use std::fmt::Display;
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-
-use crate::utils::factory::{date, id, now};
+use wallet_kit_test_utils::utils::factory::{date, id, now};
 
 /// A short summary of a device the Profile is being used
 /// on, typically an iPhone or an Android phone.
