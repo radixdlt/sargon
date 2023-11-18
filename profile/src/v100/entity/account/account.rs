@@ -1,11 +1,10 @@
-use nutype::nutype;
 use serde::{Deserialize, Serialize};
-use std::{
-    cell::{Cell, RefCell},
-    fmt::Display,
-};
+use std::{cell::RefCell, fmt::Display};
 
-use crate::v100::{entity::entity_flags::EntityFlags, networks::network::network_id::NetworkID};
+use crate::v100::{
+    entity::{display_name::DisplayName, entity_flags::EntityFlags},
+    networks::network::network_id::NetworkID,
+};
 
 use super::{account_address::AccountAddress, appearance_id::AppearanceID};
 
@@ -53,25 +52,12 @@ pub struct Account {
 
     /// The visual cue user learns to associated this account with, typically
     /// a beautiful colorful gradient.
-    appearance_id: Cell<AppearanceID>,
+    appearance_id: RefCell<AppearanceID>,
 
     /// An order set of `EntityFlag`s used to describe certain Off-ledger
     /// user state about Accounts or Personas, such as if an entity is
     /// marked as hidden or not.
     flags: RefCell<EntityFlags>,
-}
-
-#[nutype(
-    sanitize(trim)
-    validate(not_empty, max_len = 20)
-)]
-#[derive(Serialize, Deserialize, Clone, Debug, Display, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct DisplayName(String);
-
-impl Default for DisplayName {
-    fn default() -> Self {
-        Self::new("Unnamed").expect("Default display name")
-    }
 }
 
 impl Account {
@@ -85,7 +71,7 @@ impl Account {
             network_id: address.network_id,
             address,
             display_name: RefCell::new(display_name),
-            appearance_id: Cell::new(appearance_id),
+            appearance_id: RefCell::new(appearance_id),
             flags: RefCell::new(EntityFlags::default()),
         }
     }
@@ -102,7 +88,7 @@ impl Account {
     }
 
     pub fn get_appearance_id(&self) -> AppearanceID {
-        self.appearance_id.get().clone()
+        self.appearance_id.borrow().clone()
     }
 }
 
@@ -116,8 +102,8 @@ impl Account {
         *self.flags.borrow_mut() = new;
     }
 
-    pub fn set_appearance_id(&mut self, new: AppearanceID) {
-        *self.appearance_id.get_mut() = new;
+    pub fn set_appearance_id(&self, new: AppearanceID) {
+        *self.appearance_id.borrow_mut() = new;
     }
 }
 
@@ -129,7 +115,14 @@ impl Display for Account {
 
 #[cfg(test)]
 mod tests {
-    use crate::v100::entity::account::account_address::AccountAddress;
+    use std::cell::RefCell;
+
+    use crate::v100::entity::{
+        account::{account_address::AccountAddress, appearance_id::AppearanceID},
+        display_name::DisplayName,
+        entity_flag::EntityFlag,
+        entity_flags::EntityFlags,
+    };
 
     use super::Account;
 
@@ -144,6 +137,49 @@ mod tests {
             ..Default::default()
         };
         assert_eq!(account.address, address);
+    }
+
+    #[test]
+    fn appearance_id_get_set() {
+        let account = Account {
+            address: "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                .try_into()
+                .unwrap(),
+            ..Default::default()
+        };
+        assert_eq!(account.get_appearance_id(), AppearanceID::default());
+        let new_appearance_id = AppearanceID::new(1).unwrap();
+        account.set_appearance_id(new_appearance_id);
+        assert_eq!(account.get_appearance_id(), new_appearance_id);
+    }
+
+    #[test]
+    fn display_name_get_set() {
+        let account = Account {
+            address: "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                .try_into()
+                .unwrap(),
+            display_name: RefCell::new(DisplayName::new("Test").unwrap()),
+            ..Default::default()
+        };
+        assert_eq!(account.get_display_name(), "Test");
+        let new_display_name = DisplayName::new("New").unwrap();
+        account.set_display_name(new_display_name.clone());
+        assert_eq!(account.get_display_name(), new_display_name.to_string());
+    }
+
+    #[test]
+    fn flags_get_set() {
+        let account = Account {
+            address: "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                .try_into()
+                .unwrap(),
+            ..Default::default()
+        };
+        assert_eq!(account.get_flags(), EntityFlags::default());
+        let new_flags = EntityFlags::with_flag(EntityFlag::DeletedByUser);
+        account.set_flags(new_flags.clone());
+        assert_eq!(account.get_flags(), new_flags);
     }
 
     #[test]
