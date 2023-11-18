@@ -98,7 +98,7 @@ impl Account {
         self.appearance_id.borrow().clone()
     }
 
-    pub fn get_on_legder_settings(&self) -> OnLedgerSettings {
+    pub fn get_on_ledger_settings(&self) -> OnLedgerSettings {
         self.on_ledger_settings.borrow().clone()
     }
 }
@@ -119,6 +119,13 @@ impl Account {
 
     pub fn set_on_ledger_settings(&self, new: OnLedgerSettings) {
         *self.on_ledger_settings.borrow_mut() = new;
+    }
+
+    pub fn update_on_ledger_settings<F>(&self, update: F)
+    where
+        F: Fn(&mut OnLedgerSettings) -> (),
+    {
+        update(&mut self.on_ledger_settings.borrow_mut())
     }
 }
 
@@ -220,7 +227,7 @@ mod tests {
             ..Default::default()
         };
         assert_eq!(
-            account.get_on_legder_settings(),
+            account.get_on_ledger_settings(),
             OnLedgerSettings::default()
         );
         let excp1 = AssetException::new(
@@ -249,7 +256,14 @@ mod tests {
         );
         let new_on_ledger_settings = OnLedgerSettings::new(new_third_party_dep);
         account.set_on_ledger_settings(new_on_ledger_settings.clone());
-        assert_eq!(account.get_on_legder_settings(), new_on_ledger_settings);
+        assert_eq!(account.get_on_ledger_settings(), new_on_ledger_settings);
+
+
+        assert_eq!(account.get_on_ledger_settings().get_third_party_deposits().get_deposit_rule(), DepositRule::DenyAll);
+        account.update_on_ledger_settings(|o| {
+            o.update_third_party_deposits(|t| t.set_deposit_rule(DepositRule::AcceptAll))
+        });
+        assert_eq!(account.get_on_ledger_settings().get_third_party_deposits().get_deposit_rule(), DepositRule::AcceptAll);
     }
 
     #[test]

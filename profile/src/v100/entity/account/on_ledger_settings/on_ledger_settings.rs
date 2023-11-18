@@ -28,6 +28,23 @@ impl OnLedgerSettings {
     }
 }
 
+impl OnLedgerSettings {
+    pub fn get_third_party_deposits(&self) -> ThirdPartyDeposits {
+        self.third_party_deposits.borrow().clone()
+    }
+
+    pub fn set_third_party_deposits(&self, new: ThirdPartyDeposits) {
+        *self.third_party_deposits.borrow_mut() = new;
+    }
+
+    pub fn update_third_party_deposits<F>(&self, update: F)
+    where
+        F: Fn(&mut ThirdPartyDeposits) -> (),
+    {
+        update(&mut self.third_party_deposits.borrow_mut())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::collections::BTreeSet;
