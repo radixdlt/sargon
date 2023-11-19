@@ -45,3 +45,20 @@ impl CAP26EntityKind {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::cap26::cap26_entity_kind::CAP26EntityKind;
+
+    #[test]
+    fn discriminant() {
+        assert_eq!(CAP26EntityKind::Account.discriminant(), 525);
+        assert_eq!(CAP26EntityKind::Identity.discriminant(), 618);
+    }
+
+    #[test]
+    fn format() {
+        assert_eq!(format!("{}", CAP26EntityKind::Account), "Account");
+        assert_eq!(format!("{}", CAP26EntityKind::Identity), "Identity");
+    }
+}

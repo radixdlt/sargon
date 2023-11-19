@@ -35,20 +35,41 @@ pub enum CAP26KeyKind {
 
 impl Display for CAP26KeyKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.description())
+        write!(f, "{:?}", self)
     }
 }
+
 impl CAP26KeyKind {
     /// The raw representation of this key kind, an `HDPathValue`.
     pub fn discriminant(&self) -> HDPathValue {
         *self as HDPathValue
     }
+}
 
-    fn description(&self) -> String {
-        match self {
-            Self::TransactionSigning => "TransactionSigning".to_string(),
-            Self::AuthenticationSigning => "AuthenticationSigning".to_string(),
-            Self::MessageEncryption => "MessageEncryption".to_string(),
-        }
+#[cfg(test)]
+mod tests {
+    use crate::cap26::cap26_key_kind::CAP26KeyKind;
+
+    #[test]
+    fn discriminant() {
+        assert_eq!(CAP26KeyKind::TransactionSigning.discriminant(), 1460);
+        assert_eq!(CAP26KeyKind::AuthenticationSigning.discriminant(), 1678);
+        assert_eq!(CAP26KeyKind::AuthenticationSigning.discriminant(), 1678);
+    }
+
+    #[test]
+    fn format() {
+        assert_eq!(
+            format!("{}", CAP26KeyKind::TransactionSigning),
+            "TransactionSigning"
+        );
+        assert_eq!(
+            format!("{}", CAP26KeyKind::AuthenticationSigning),
+            "AuthenticationSigning"
+        );
+        assert_eq!(
+            format!("{}", CAP26KeyKind::MessageEncryption),
+            "MessageEncryption"
+        );
     }
 }
