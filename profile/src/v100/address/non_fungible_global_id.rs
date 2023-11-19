@@ -102,12 +102,9 @@ impl NonFungibleGlobalId {
 mod tests {
     use radix_engine_common::data::scrypto::model::NonFungibleLocalId;
     use serde_json::json;
-    use wallet_kit_common::{
-        json::{
-            assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
-            assert_json_value_ne_after_roundtrip,
-        },
-        network_id::NetworkID,
+    use wallet_kit_common::json::{
+        assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
+        assert_json_value_ne_after_roundtrip,
     };
 
     use super::NonFungibleGlobalId;
@@ -120,12 +117,39 @@ mod tests {
             NonFungibleLocalId::String(v) => assert_eq!(v.value(), "value"),
             _ => panic!("wrong"),
         }
+
+        assert_eq!(id.to_canonical_string(), str);
+    }
+
+    #[test]
+    fn test_address() {
+        let str = "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<value>";
+        let id: NonFungibleGlobalId = str.try_into().unwrap();
         assert_eq!(
             id.resource_address().address,
             "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha"
         );
-        assert_eq!(id.network_id(), NetworkID::Simulator);
-        assert_eq!(id.to_canonical_string(), str);
+    }
+
+    #[test]
+    fn test_network_id() {
+        let str = "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<value>";
+        let id: NonFungibleGlobalId = str.try_into().unwrap();
+        assert_eq!(id.as_str(), str);
+    }
+
+    #[test]
+    fn test_as_str() {
+        let str = "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<value>";
+        let id: NonFungibleGlobalId = str.try_into().unwrap();
+        assert_eq!(id.as_str(), str);
+    }
+
+    #[test]
+    fn test_format() {
+        let str = "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<value>";
+        let id: NonFungibleGlobalId = str.try_into().unwrap();
+        assert_eq!(format!("{}", id), str);
     }
 
     #[test]

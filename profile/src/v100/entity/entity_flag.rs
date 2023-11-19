@@ -37,7 +37,7 @@ impl Display for EntityFlag {
         &self,
         f: &mut radix_engine_common::prelude::fmt::Formatter<'_>,
     ) -> radix_engine_common::prelude::fmt::Result {
-        write!(f, "{}", self)
+        write!(f, "{:?}", self)
     }
 }
 
@@ -52,5 +52,13 @@ mod tests {
     fn json_roundtrip() {
         assert_json_value_eq_after_roundtrip(&EntityFlag::DeletedByUser, json!("deletedByUser"));
         assert_json_roundtrip(&EntityFlag::DeletedByUser);
+    }
+
+    #[test]
+    fn display() {
+        assert_eq!(format!("{}", EntityFlag::DeletedByUser), "DeletedByUser");
+
+        // `discriminant` uses Display
+        assert_eq!(EntityFlag::DeletedByUser.discriminant(), "DeletedByUser");
     }
 }

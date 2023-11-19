@@ -66,3 +66,6 @@ impl ThirdPartyDeposits {
         *self.depositors_allow_list.borrow_mut() = new
     }
 }
+
+#[cfg(test)]
+mod tests {}
