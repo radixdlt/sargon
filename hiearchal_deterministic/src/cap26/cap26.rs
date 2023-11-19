@@ -13,6 +13,10 @@ use super::{
 };
 
 pub trait CAP26Repr: Sized {
+    fn entity_kind() -> Option<CAP26EntityKind> {
+        Option::None
+    }
+
     fn __with_path_and_components(
         path: HDPath,
         network_id: NetworkID,
@@ -92,6 +96,15 @@ pub trait CAP26Repr: Sized {
             3,
             Box::new(|v| CAP26EntityKind::from_repr(v).ok_or(InvalidEntityKind(v))),
         )?;
+
+        match Self::entity_kind() {
+            Some(expected_entity_kind) => {
+                if entity_kind != expected_entity_kind {
+                    return Err(WrongEntityKind(entity_kind, expected_entity_kind));
+                }
+            }
+            None => {}
+        }
 
         let key_kind = Self::parse_try_map(
             components,

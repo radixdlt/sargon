@@ -2,6 +2,8 @@ use thiserror::Error;
 
 use crate::bip32::hd_path_component::HDPathValue;
 
+use super::cap26_entity_kind::CAP26EntityKind;
+
 #[derive(Debug, Error, PartialEq)]
 pub enum CAP26Error {
     #[error("Invalid BIP32 path '{0}'.")]
@@ -24,6 +26,9 @@ pub enum CAP26Error {
 
     #[error("InvalidEntityKind, got: '{0}', expected any of: [525H, 618H].")]
     InvalidEntityKind(HDPathValue),
+    
+    #[error("Wrong entity kind, got: '{0}', but expected: '{1}'")]
+    WrongEntityKind(CAP26EntityKind, CAP26EntityKind),
 
     #[error("InvalidKeyKind, got: '{0}', expected any of: [1460H, 1678H, 1391H].")]
     InvalidKeyKind(HDPathValue),

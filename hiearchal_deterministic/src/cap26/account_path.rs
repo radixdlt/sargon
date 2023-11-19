@@ -14,6 +14,10 @@ pub struct AccountPath {
     pub index: HDPathValue,
 }
 impl CAP26Repr for AccountPath {
+    fn entity_kind() -> Option<CAP26EntityKind> {
+        Some(CAP26EntityKind::Account)
+    }
+
     fn __with_path_and_components(
         path: HDPath,
         network_id: NetworkID,
@@ -33,7 +37,7 @@ impl CAP26Repr for AccountPath {
 
 impl AccountPath {
     pub fn placeholder() -> Self {
-        Self::from_str("m/44H/1022H/1H/618H/1460H/0H").unwrap()
+        Self::from_str("m/44H/1022H/1H/525H/1460H/0H").unwrap()
     }
 }
 

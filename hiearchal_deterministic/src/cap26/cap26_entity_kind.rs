@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use strum::FromRepr;
 
@@ -21,4 +23,18 @@ pub enum CAP26EntityKind {
 
     /// Used by Persona
     Identity = 618,
+}
+
+impl Display for CAP26EntityKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.description())
+    }
+}
+impl CAP26EntityKind {
+    fn description(&self) -> String {
+        match self {
+            Self::Account => "Account".to_string(),
+            Self::Identity => "Identity".to_string(),
+        }
+    }
 }
