@@ -39,7 +39,11 @@ Recommended to use [`pre-commit` tool](https://pre-commit.com/)
 brew install pre-commit
 ```
 
-This repo contains a [`.pre-commit-config.yaml`](./.pre-commit-config.yaml) which uses the amazing [`typos` tool](https://github.com/crate-ci/typos).
+This repo contains a [`.pre-commit-config.yaml`](./.pre-commit-config.yaml) which uses the amazing [`typos` tool](https://github.com/crate-ci/typos), you **MUST INSTALL** the config, do it by:
+
+```sh
+pre-commit install
+```
 
 ### Code coverage
 
