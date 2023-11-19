@@ -1,10 +1,8 @@
 use std::str::FromStr;
 
-use itertools::*;
+use itertools::Itertools;
 use serde::{de, Deserializer, Serialize, Serializer};
-use serde_repr::{Deserialize_repr, Serialize_repr};
 use slip10::path::BIP32Path;
-use strum::FromRepr;
 
 use super::hd_path_component::HDPathComponent;
 

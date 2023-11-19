@@ -1,6 +1,3 @@
-use std::str::FromStr;
-
-use slip10::BIP32Path;
 use wallet_kit_common::network_id::NetworkID;
 
 use crate::bip32::{

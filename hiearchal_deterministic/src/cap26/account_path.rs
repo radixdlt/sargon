@@ -3,7 +3,10 @@ use wallet_kit_common::network_id::NetworkID;
 
 use crate::bip32::{hd_path::HDPath, hd_path_component::HDPathValue};
 
-use super::{cap26::CAP26Repr, cap26_entity_kind::CAP26EntityKind, cap26_key_kind::CAP26KeyKind};
+use super::{
+    cap26::CAP26Repr, cap26_entity_kind::CAP26EntityKind, cap26_error::CAP26Error,
+    cap26_key_kind::CAP26KeyKind,
+};
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct AccountPath {
@@ -63,12 +66,25 @@ impl<'de> serde::Deserialize<'de> for AccountPath {
     }
 }
 
+impl TryInto<AccountPath> for &str {
+    type Error = CAP26Error;
+
+    fn try_into(self) -> Result<AccountPath, Self::Error> {
+        AccountPath::from_str(self)
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::network_id::NetworkID;
+    use serde_json::json;
+    use wallet_kit_common::{
+        json::{assert_json_value_eq_after_roundtrip, assert_json_value_ne_after_roundtrip},
+        network_id::NetworkID,
+    };
 
     use crate::cap26::{
-        cap26::CAP26Repr, cap26_entity_kind::CAP26EntityKind, cap26_key_kind::CAP26KeyKind,
+        cap26::CAP26Repr, cap26_entity_kind::CAP26EntityKind, cap26_error::CAP26Error,
+        cap26_key_kind::CAP26KeyKind,
     };
 
     use super::AccountPath;
@@ -84,5 +100,91 @@ mod tests {
         assert_eq!(parsed.to_string(), str);
         let built = AccountPath::new(NetworkID::Mainnet, CAP26KeyKind::TransactionSigning, 0);
         assert_eq!(built, parsed)
+    }
+
+    #[test]
+    fn fails_when_entity_type_identity() {
+        assert_eq!(
+            AccountPath::from_str("m/44H/1022H/1H/618H/1460H/0H"),
+            Err(CAP26Error::WrongEntityKind(
+                CAP26EntityKind::Identity,
+                CAP26EntityKind::Account
+            ))
+        )
+    }
+
+    #[test]
+    fn fails_when_entity_type_does_not_exist() {
+        assert_eq!(
+            AccountPath::from_str("m/44H/1022H/1H/99999H/1460H/0H"),
+            Err(CAP26Error::InvalidEntityKind(99999))
+        )
+    }
+
+    #[test]
+    fn fails_when_key_kind_does_not_exist() {
+        assert_eq!(
+            AccountPath::from_str("m/44H/1022H/1H/525H/22222H/0H"),
+            Err(CAP26Error::InvalidKeyKind(22222))
+        )
+    }
+
+    #[test]
+    fn fails_when_network_id_is_out_of_bounds() {
+        assert_eq!(
+            AccountPath::from_str("m/44H/1022H/4444H/525H/1460H/0H"),
+            Err(CAP26Error::InvalidNetworkIDExceedsLimit(4444))
+        )
+    }
+
+    #[test]
+    fn fails_when_not_bip44() {
+        assert_eq!(
+            AccountPath::from_str("m/777H/1022H/1H/525H/1460H/0H"),
+            Err(CAP26Error::BIP44PurposeNotFound(777))
+        )
+    }
+
+    #[test]
+    fn missing_leading_m_is_ok() {
+        assert!(AccountPath::from_str("44H/1022H/1H/525H/1460H/0H").is_ok())
+    }
+
+    #[test]
+    fn fails_when_index_is_too_large() {
+        assert_eq!(
+            AccountPath::from_str("m/44H/1022H/1H/525H/1460H/4294967296H"),
+            Err(CAP26Error::InvalidBIP32Path(
+                "m/44H/1022H/1H/525H/1460H/4294967296H".to_string()
+            ))
+        )
+    }
+
+    #[test]
+    fn inequality_different_index() {
+        let a: AccountPath = "m/44H/1022H/1H/525H/1460H/0H".try_into().unwrap();
+        let b: AccountPath = "m/44H/1022H/1H/525H/1460H/1H".try_into().unwrap();
+        assert!(a != b);
+    }
+    #[test]
+    fn inequality_different_network_id() {
+        let a: AccountPath = "m/44H/1022H/1H/525H/1460H/0H".try_into().unwrap();
+        let b: AccountPath = "m/44H/1022H/2H/525H/1460H/0H".try_into().unwrap();
+        assert!(a != b);
+    }
+
+    #[test]
+    fn inequality_different_key_kind() {
+        let a: AccountPath = "m/44H/1022H/1H/525H/1460H/0H".try_into().unwrap();
+        let b: AccountPath = "m/44H/1022H/1H/525H/1678H/0H".try_into().unwrap();
+        assert!(a != b);
+    }
+
+    #[test]
+    fn json_roundtrip() {
+        let str = "m/44H/1022H/1H/525H/1460H/0H";
+        let parsed: AccountPath = str.try_into().unwrap();
+        assert_json_value_eq_after_roundtrip(&parsed, json!(str));
+        assert_json_value_ne_after_roundtrip(&parsed, json!("m/44H/1022H/1H/525H/1460H/1H"));
     }
 }
