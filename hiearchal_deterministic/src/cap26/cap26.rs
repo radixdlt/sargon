@@ -21,18 +21,30 @@ pub trait CAP26Repr: Sized {
         index: HDPathValue,
     ) -> Self;
 
-    fn do_parse<F>(
+    fn parse_try_map<T, F>(
+        path: &Vec<HDPathComponent>,
+        index: usize,
+        try_map: F,
+    ) -> Result<T, CAP26Error>
+    where
+        F: Fn(HDPathValue) -> Result<T, CAP26Error>,
+    {
+        let got = &path[index];
+        try_map(got.value())
+    }
+
+    fn parse<F>(
         path: &Vec<HDPathComponent>,
         index: usize,
         expected: HDPathComponent,
         err: F,
     ) -> Result<&HDPathComponent, CAP26Error>
     where
-        F: Fn(usize, &HDPathComponent) -> CAP26Error,
+        F: Fn(HDPathValue) -> CAP26Error,
     {
         let got = &path[index];
         if got != &expected {
-            return Err(err(index, got));
+            return Err(err(got.value()));
         }
         Ok(got)
     }
@@ -41,46 +53,60 @@ pub trait CAP26Repr: Sized {
         use CAP26Error::*;
         let path = HDPath::from_str(s).map_err(|_| CAP26Error::InvalidBIP32Path(s.to_string()))?;
         if path.depth() != 6 {
-            return Err(CAP26Error::InvalidDepthOfCAP26Path);
+            return Err(InvalidDepthOfCAP26Path);
         }
         let components = path.components();
 
-        let parse = |index: usize,
-                     expected: HDPathComponent,
-                     err: Box<dyn Fn(HDPathValue) -> CAP26Error>|
-         -> Result<&HDPathComponent, CAP26Error> {
-            Self::do_parse(components, index, expected, |i, v| err(v.value()))
-        };
-
-        // if !path.components().iter().all(|c| c.is_hardened()) {
-        //     return Err(CAP26Error::NotAllComponentsAreHardened);
-        // }
-        // if path[0] != HDPathComponent::bip44_purpose() {
-        //     return Err(CAP26Error::BIP44PurposeNotFoundAtIndex1(path[0].value()));
-        // }
-        _ = parse(
+        if !components.clone().iter().all(|c| c.is_hardened()) {
+            return Err(NotAllComponentsAreHardened);
+        }
+        _ = Self::parse(
+            components,
             0,
             HDPathComponent::bip44_purpose(),
-            Box::new(|v| BIP44PurposeNotFoundAtIndex1(v)),
+            Box::new(|v| BIP44PurposeNotFound(v)),
         )?;
 
-        // if path[1] != HDPathComponent::bip44_cointype() {
-        //     return Err(CAP26Error::CoinTypeNotFoundAtIndex2(path[1].value()));
-        // }
-        // if path[2].value() >= (u8::MAX as u32) {
-        //     return Err(CAP26Error::InvalidNetworkIDExceedsLimit(path[2].value()));
-        // }
-        // let entity_kind_value = path[3].value();
-        // let Some(entity_kind) = CAP26EntityKind::from_repr(entity_kind_value) else {
-        //     return Err(CAP26Error::InvalidEntityKind(path[3].value()));
-        // };
+        _ = Self::parse(
+            components,
+            1,
+            HDPathComponent::bip44_cointype(),
+            Box::new(|v| CoinTypeNotFound(v)),
+        )?;
 
-        // let key_kind_value = path[4].value();
-        // let Some(key_kind) = CAP26KeyKind::from_repr(key_kind_value) else {
-        //     return Err(CAP26Error::InvalidKeyKind(path[4].value()));
-        // };
+        let network_id = Self::parse_try_map(
+            components,
+            2,
+            Box::new(|v| {
+                if v <= u8::MAX as u32 {
+                    let d = v as u8;
+                    NetworkID::from_repr(d).ok_or(UnsupportedNetworkID(d))
+                } else {
+                    Err(InvalidNetworkIDExceedsLimit(v))
+                }
+            }),
+        )?;
 
-        // return Ok(Self(path));
-        todo!()
+        let entity_kind = Self::parse_try_map(
+            components,
+            3,
+            Box::new(|v| CAP26EntityKind::from_repr(v).ok_or(InvalidEntityKind(v))),
+        )?;
+
+        let key_kind = Self::parse_try_map(
+            components,
+            4,
+            Box::new(|v| CAP26KeyKind::from_repr(v).ok_or(InvalidKeyKind(v))),
+        )?;
+
+        let index = Self::parse_try_map(components, 4, Box::new(|v| Ok(v)))?;
+
+        return Ok(Self::__with_path_and_components(
+            path,
+            network_id,
+            entity_kind,
+            key_kind,
+            index,
+        ));
     }
 }

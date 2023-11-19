@@ -1,3 +1,4 @@
+use hiearchal_deterministic::derivation_path::DerivationPath;
 use radix_engine_common::crypto::PublicKey;
 use serde::{Deserialize, Serialize};
 use std::{cell::RefCell, cmp::Ordering, fmt::Display};
@@ -105,12 +106,11 @@ impl HierarchicalDeterministicFactorInstance {
     pub fn placeholder() -> Self {
         let private_key = Ed25519PrivateKey::from_u64(1337).unwrap();
         let public_key = private_key.public_key();
-        // Self::new(
-        //     FactorSourceIDFromHash::placeholder(),
-        //     PublicKey::Ed25519(public_key),
-        //     DerivationPath::placeholder(),
-        // )
-        todo!()
+        Self::new(
+            FactorSourceIDFromHash::placeholder(),
+            PublicKey::Ed25519(public_key),
+            DerivationPath::placeholder(),
+        )
     }
 }
 

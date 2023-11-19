@@ -13,11 +13,11 @@ pub enum CAP26Error {
     #[error("Found non hardened components in path, invalid!")]
     NotAllComponentsAreHardened,
 
-    #[error("Did not find 44H at expected index 1, found value: '{0}'")]
-    BIP44PurposeNotFoundAtIndex1(HDPathValue),
+    #[error("Did not find 44H, found value: '{0}'")]
+    BIP44PurposeNotFound(HDPathValue),
 
-    #[error("Did not find cointype 1022H at expected index 2, found value: '{0}'")]
-    CoinTypeNotFoundAtIndex2(HDPathValue),
+    #[error("Did not find cointype 1022H, found value: '{0}'")]
+    CoinTypeNotFound(HDPathValue),
 
     #[error("Network ID exceeds limit of 255, will never be valid, at index 3, found value: '{0}', known network IDs: [1 (mainnet), 2 (stokenet)]")]
     InvalidNetworkIDExceedsLimit(HDPathValue),
@@ -27,4 +27,7 @@ pub enum CAP26Error {
 
     #[error("InvalidKeyKind, got: '{0}', expected any of: [1460H, 1678H, 1391H].")]
     InvalidKeyKind(HDPathValue),
+
+    #[error("Unsupported NetworkID, got: '{0}', found value: '{0}', known network IDs: [1 (mainnet), 2 (stokenet)]")]
+    UnsupportedNetworkID(u8),
 }

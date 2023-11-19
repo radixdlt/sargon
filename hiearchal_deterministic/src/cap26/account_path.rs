@@ -31,6 +31,12 @@ impl CAP26Repr for AccountPath {
     }
 }
 
+impl AccountPath {
+    pub fn placeholder() -> Self {
+        Self::from_str("m/44H/1022H/1H/618H/1460H/0H").unwrap()
+    }
+}
+
 impl ToString for AccountPath {
     fn to_string(&self) -> String {
         self.path.to_string()

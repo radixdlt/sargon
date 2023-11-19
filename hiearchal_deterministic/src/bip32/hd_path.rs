@@ -77,9 +77,3 @@ impl<'de> serde::Deserialize<'de> for HDPath {
         HDPath::from_str(&s).map_err(de::Error::custom)
     }
 }
-
-impl HDPath {
-    pub fn placeholder() -> Self {
-        Self::from_str("m/44H/1022H/10H/618H/1460H/0H").unwrap()
-    }
-}
