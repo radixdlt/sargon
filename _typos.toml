@@ -1,0 +1,2 @@
+[files]
+extend-exclude = ["tarpaulin-report.html"]

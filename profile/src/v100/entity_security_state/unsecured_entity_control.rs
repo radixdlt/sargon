@@ -14,7 +14,7 @@ pub struct UnsecuredEntityControl {
     pub entity_index: HDPathValue,
 
     // /// The factor instance which was used to create this unsecured entity, which
-    // /// also controls this entity and is used for signign transactions.
+    // /// also controls this entity and is used for signing transactions.
     pub transaction_signing: HierarchicalDeterministicFactorInstance,
 
     /// The factor instance which can be used for ROLA.

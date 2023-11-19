@@ -4,7 +4,7 @@ Middleware that can power Radix Wallet clients (iOS/Android).
 
 ## Status
 
-`[=-------------------------------------------------]`
+`[==------------------------------------------------]`
 
 ### Done
 
@@ -16,6 +16,8 @@ Middleware that can power Radix Wallet clients (iOS/Android).
 - [x] Header
 - [x] AccountAddress
 - [x] IdentityAddress
+- [x] CAP26AccountPath
+- [ ] CAP26IdentityPath
 - [ ] Account
 - [ ] Persona
 - [ ] Network
@@ -24,3 +26,31 @@ Middleware that can power Radix Wallet clients (iOS/Android).
 - [ ] AppPreferences
 - [ ] P2PLinks
 - [ ] Gateways
+
+# Development
+
+## Setup
+
+### Pre-commit
+
+Recommended to use [`pre-commit` tool](https://pre-commit.com/)
+
+```sh
+brew install pre-commit
+```
+
+This repo contains a [`.pre-commit-config.yaml`](./.pre-commit-config.yaml) which uses the amazing [`typos` tool](https://github.com/crate-ci/typos).
+
+### Code coverage
+
+Recommended to use [`tarpaulin` tool](https://github.com/xd009642/tarpaulin) for code coverage:
+
+```sh
+cargo install cargo-tarpaulin
+```
+
+And then run:
+
+```sh
+cargo tarpaulin --out Html
+```
