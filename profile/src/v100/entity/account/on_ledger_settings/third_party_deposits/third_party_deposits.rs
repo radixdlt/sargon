@@ -62,6 +62,21 @@ impl ThirdPartyDeposits {
         *self.assets_exception_list.borrow_mut() = new
     }
 
+    /// Adds an `AssetException` to the `assets_exception_list` (set).
+    ///
+    /// Returns whether the `exception`` was newly inserted. That is:
+    ///
+    /// If the set did not previously contain an equal value, true is returned.
+    /// If the set already contained an equal value, false is returned, and the entry is not updated.
+    pub fn add_asset_exception(&self, exception: AssetException) -> bool {
+        self.assets_exception_list.borrow_mut().insert(exception)
+    }
+
+    // If the set contains an element equal to `exception`, removes it from the set and drops it. Returns whether such an element was present.
+    pub fn remove_asset_exception(&self, exception: &AssetException) -> bool {
+        self.assets_exception_list.borrow_mut().remove(exception)
+    }
+
     pub fn set_depositors_allow_list(&self, new: BTreeSet<DepositorAddress>) {
         *self.depositors_allow_list.borrow_mut() = new
     }
@@ -110,26 +125,65 @@ mod tests {
         assert_eq_after_json_roundtrip(
             &model,
             r#"
-        {
-	"depositRule" : "acceptKnown",
-	"assetsExceptionList" : [
-		{
-			"address" : "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq",
-			"exceptionRule" : "deny"
-		},
-		{
-			"address" : "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd",
-			"exceptionRule" : "allow"
-		}
-	],
-	"depositorsAllowList" : [
-		{
-			"value" : "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>",
-			"discriminator" : "nonFungibleGlobalID"
-		}
-	]
-}
-        "#,
+            {
+            	"depositRule" : "acceptKnown",
+            	"assetsExceptionList" : [
+            		{
+			            "address" : "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq",
+			            "exceptionRule" : "deny"
+            		},
+            		{
+            			"address" : "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd",
+			            "exceptionRule" : "allow"
+            		}
+            	],
+                "depositorsAllowList" : [
+            		{
+            			"value" : "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>",
+            			"discriminator" : "nonFungibleGlobalID"
+            		}
+               	]
+            }
+            "#,
+        );
+    }
+
+    #[test]
+    fn add_exception_rule() {
+        let settings: ThirdPartyDeposits = serde_json::from_str(
+            r#"
+            {
+            	"depositRule" : "acceptKnown",
+            	"assetsExceptionList" : [
+            		{
+            			"address" : "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd",
+			            "exceptionRule" : "allow"
+            		}
+            	],
+                "depositorsAllowList" : [
+            		{
+            			"value" : "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>",
+            			"discriminator" : "nonFungibleGlobalID"
+            		}
+               	]
+            }
+            "#
+            ).unwrap();
+
+        let exception = AssetException::new(
+            "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
+                .try_into()
+                .unwrap(),
+            DepositAddressExceptionRule::Deny,
+        );
+        assert!(settings.add_asset_exception(exception.clone()));
+        assert_eq!(settings.get_assets_exception_list().len(), 2);
+        assert!(settings.remove_asset_exception(&exception));
+        assert_eq!(settings.get_assets_exception_list().len(), 1);
+        settings.set_assets_exception_list(BTreeSet::from_iter([exception.clone()]));
+        assert!(
+            !settings.add_asset_exception(exception.clone()),
+            "Expected `false` since already present."
         );
     }
 }
