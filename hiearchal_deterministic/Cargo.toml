@@ -11,7 +11,8 @@ test = false
 serde = { version = "1.0.192", features = ["derive"] }
 serde_json = { version = "1.0.108", features = ["preserve_order"] }
 slip10 = "0.4.3"
-wallet_kit_test_utils = { path = "../wallet_kit_test_utils" }
+wallet_kit_common = { path = "../wallet_kit_common" }
 thiserror = "1.0.50"
 serde_repr = "0.1.17"
 strum = { version = "0.25.0", features = ["derive"] }
+itertools = { version = "0.12.0" }

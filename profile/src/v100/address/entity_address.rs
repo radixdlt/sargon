@@ -3,11 +3,9 @@ use radix_engine_toolkit::models::scrypto::node_id::SerializableNodeIdInternal;
 use radix_engine_toolkit_core::functions::derive::{
     virtual_account_address_from_public_key, virtual_identity_address_from_public_key,
 };
-use wallet_kit_test_utils::error::Error;
+use wallet_kit_common::{error::Error, network_id::NetworkID};
 
-use crate::v100::{
-    entity::abstract_entity_type::AbstractEntityType, networks::network::network_id::NetworkID,
-};
+use crate::v100::entity::abstract_entity_type::AbstractEntityType;
 
 use super::decode_address_helper::decode_address;
 

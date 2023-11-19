@@ -7,7 +7,7 @@ use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use wallet_kit_test_utils::utils::factory::{id, now};
+use wallet_kit_common::utils::factory::{id, now};
 
 use super::{
     content_hint::ContentHint, device_info::DeviceInfo,
@@ -126,7 +126,7 @@ pub mod tests {
     use crate::v100::header::{content_hint::ContentHint, device_info::DeviceInfo};
     use chrono::NaiveDateTime;
     use uuid::uuid;
-    use wallet_kit_test_utils::json::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
 
     use super::Header;
 

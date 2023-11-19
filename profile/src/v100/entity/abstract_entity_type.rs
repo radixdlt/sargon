@@ -4,7 +4,7 @@ use radix_engine_common::types::EntityType as EngineEntityType;
 use serde::{Deserialize, Serialize};
 use strum::FromRepr;
 
-use wallet_kit_test_utils::error::Error;
+use wallet_kit_common::error::Error;
 
 /// Type of a wallet Radix Entity - Account or Identity (used by Personas).
 ///

@@ -58,7 +58,7 @@ impl NetworkID {
 }
 
 impl TryFrom<u8> for NetworkID {
-    type Error = wallet_kit_test_utils::error::Error;
+    type Error = crate::error::Error;
 
     /// Tries to instantiate a NetworkID from its raw representation `u8`.
     fn try_from(value: u8) -> Result<Self, Self::Error> {
@@ -84,10 +84,8 @@ impl NetworkID {
 
 #[cfg(test)]
 mod tests {
+    use create::json::{assert_json_value_eq_after_roundtrip, assert_json_value_fails};
     use serde_json::json;
-    use wallet_kit_test_utils::json::{
-        assert_json_value_eq_after_roundtrip, assert_json_value_fails,
-    };
 
     use super::NetworkID;
 

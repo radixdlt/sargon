@@ -3,7 +3,7 @@ use std::fmt::Display;
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use wallet_kit_test_utils::utils::factory::{date, id, now};
+use wallet_kit_common::utils::factory::{date, id, now};
 
 /// A short summary of a device the Profile is being used
 /// on, typically an iPhone or an Android phone.
@@ -85,7 +85,7 @@ mod tests {
     use crate::v100::header::device_info::DeviceInfo;
     use chrono::{Datelike, NaiveDateTime};
     use uuid::{uuid, Uuid};
-    use wallet_kit_test_utils::json::*;
+    use wallet_kit_common::json::*;
 
     #[test]
     fn new_iphone() {

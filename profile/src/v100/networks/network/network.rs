@@ -2,10 +2,9 @@ use std::collections::BTreeSet;
 
 use nonempty::NonEmpty;
 use serde::{Deserialize, Serialize};
+use wallet_kit_common::network_id::NetworkID;
 
 use crate::v100::entity::account::account::Account;
-
-use super::network_id::NetworkID;
 
 /// A NonEmpty ordered set of Accounts on a specific network.
 pub type Accounts = NonEmpty<BTreeSet<Account>>;

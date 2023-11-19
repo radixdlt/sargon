@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
 
 use super::network::network::Network;
-use crate::v100::networks::network::network_id::NetworkID;
+use wallet_kit_common::network_id::NetworkID;
 
 /// An ordered mapping of NetworkID -> `Profile.Network`, containing
 /// all the users Accounts, Personas and AuthorizedDapps the user

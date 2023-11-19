@@ -1,4 +1,4 @@
 [workspace]
 resolver = "1"
 
-members = ["profile", "hiearchal_deterministic", "wallet_kit_test_utils"]
+members = ["profile", "hiearchal_deterministic", "wallet_kit_common"]

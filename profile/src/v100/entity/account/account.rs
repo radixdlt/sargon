@@ -1,8 +1,8 @@
-use hiearchal_deterministic::derivation_path::DerivationPath;
 use radix_engine_common::crypto::PublicKey;
 use serde::{Deserialize, Serialize};
 use std::{cell::RefCell, cmp::Ordering, fmt::Display};
 use transaction::signing::ed25519::Ed25519PrivateKey;
+use wallet_kit_common::network_id::NetworkID;
 
 use crate::v100::{
     address::account_address::AccountAddress,
@@ -15,7 +15,6 @@ use crate::v100::{
         factor_source_id_from_hash::FactorSourceIDFromHash,
         hierarchical_deterministic_factor_instance::HierarchicalDeterministicFactorInstance,
     },
-    networks::network::network_id::NetworkID,
 };
 
 use super::{
@@ -106,11 +105,12 @@ impl HierarchicalDeterministicFactorInstance {
     pub fn placeholder() -> Self {
         let private_key = Ed25519PrivateKey::from_u64(1337).unwrap();
         let public_key = private_key.public_key();
-        Self::new(
-            FactorSourceIDFromHash::placeholder(),
-            PublicKey::Ed25519(public_key),
-            DerivationPath::placeholder(),
-        )
+        // Self::new(
+        //     FactorSourceIDFromHash::placeholder(),
+        //     PublicKey::Ed25519(public_key),
+        //     DerivationPath::placeholder(),
+        // )
+        todo!()
     }
 }
 

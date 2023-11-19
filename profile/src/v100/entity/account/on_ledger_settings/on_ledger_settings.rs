@@ -49,7 +49,7 @@ impl OnLedgerSettings {
 mod tests {
     use std::collections::BTreeSet;
 
-    use wallet_kit_test_utils::json::{
+    use wallet_kit_common::json::{
         assert_eq_after_json_roundtrip, assert_json_roundtrip, assert_ne_after_json_roundtrip,
     };
 
