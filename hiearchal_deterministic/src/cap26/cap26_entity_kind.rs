@@ -3,6 +3,8 @@ use std::fmt::Display;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use strum::FromRepr;
 
+use crate::bip32::hd_path_component::HDPathValue;
+
 #[derive(
     Serialize_repr,
     Deserialize_repr,
@@ -31,6 +33,11 @@ impl Display for CAP26EntityKind {
     }
 }
 impl CAP26EntityKind {
+    /// The raw representation of this entity kind, an `HDPathValue`.
+    pub fn discriminant(&self) -> HDPathValue {
+        *self as HDPathValue
+    }
+
     fn description(&self) -> String {
         match self {
             Self::Account => "Account".to_string(),

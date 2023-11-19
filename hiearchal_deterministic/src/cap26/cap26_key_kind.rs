@@ -1,5 +1,9 @@
+use std::fmt::Display;
+
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use strum::FromRepr;
+
+use crate::bip32::hd_path_component::HDPathValue;
 
 #[derive(
     Serialize_repr,
@@ -27,4 +31,24 @@ pub enum CAP26KeyKind {
     /// For a key to be used for encrypting messages.
     /// The value is the ascii sum of `"MESSAGE_ENCRYPTION"`
     MessageEncryption = 1391,
+}
+
+impl Display for CAP26KeyKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.description())
+    }
+}
+impl CAP26KeyKind {
+    /// The raw representation of this key kind, an `HDPathValue`.
+    pub fn discriminant(&self) -> HDPathValue {
+        *self as HDPathValue
+    }
+
+    fn description(&self) -> String {
+        match self {
+            Self::TransactionSigning => "TransactionSigning".to_string(),
+            Self::AuthenticationSigning => "AuthenticationSigning".to_string(),
+            Self::MessageEncryption => "MessageEncryption".to_string(),
+        }
+    }
 }

@@ -36,6 +36,10 @@ impl HDPath {
         return Self(vec);
     }
 
+    pub(crate) fn from_components(components: Vec<HDPathComponent>) -> Self {
+        Self(components)
+    }
+
     pub(crate) fn components(&self) -> &Vec<HDPathComponent> {
         &self.0
     }
@@ -53,10 +57,12 @@ impl HDPath {
 
 impl ToString for HDPath {
     fn to_string(&self) -> String {
-        self.components()
+        let rest = self
+            .components()
             .into_iter()
             .map(|c| c.to_string())
-            .join("/")
+            .join("/");
+        return format!("m/{}", rest);
     }
 }
 

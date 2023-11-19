@@ -16,6 +16,10 @@ pub trait CAP26Repr: Sized {
     fn entity_kind() -> Option<CAP26EntityKind> {
         Option::None
     }
+    fn hd_path(&self) -> &HDPath;
+    fn to_string(&self) -> String {
+        self.hd_path().to_string()
+    }
 
     fn __with_path_and_components(
         path: HDPath,
@@ -112,7 +116,7 @@ pub trait CAP26Repr: Sized {
             Box::new(|v| CAP26KeyKind::from_repr(v).ok_or(InvalidKeyKind(v))),
         )?;
 
-        let index = Self::parse_try_map(components, 4, Box::new(|v| Ok(v)))?;
+        let index = Self::parse_try_map(components, 5, Box::new(|v| Ok(v)))?;
 
         return Ok(Self::__with_path_and_components(
             path,
@@ -121,5 +125,19 @@ pub trait CAP26Repr: Sized {
             key_kind,
             index,
         ));
+    }
+
+    fn new(network_id: NetworkID, key_kind: CAP26KeyKind, index: HDPathValue) -> Self {
+        let entity_kind = Self::entity_kind().expect("GetID cannot be used with this constructor");
+        let c0 = HDPathComponent::bip44_purpose();
+        let c1 = HDPathComponent::bip44_cointype();
+        let c2 = HDPathComponent::harden(network_id.discriminant() as HDPathValue);
+        let c3 = HDPathComponent::harden(entity_kind.discriminant());
+        let c4 = HDPathComponent::harden(key_kind.discriminant());
+        let c5 = HDPathComponent::harden(index);
+        let components = vec![c0, c1, c2, c3, c4, c5];
+        assert!(components.clone().iter().all(|c| c.is_hardened()));
+        let path = HDPath::from_components(components);
+        return Self::__with_path_and_components(path, network_id, entity_kind, key_kind, index);
     }
 }
