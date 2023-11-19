@@ -84,7 +84,7 @@ impl NetworkID {
 
 #[cfg(test)]
 mod tests {
-    use create::json::{assert_json_value_eq_after_roundtrip, assert_json_value_fails};
+    use crate::json::{assert_json_value_eq_after_roundtrip, assert_json_value_fails};
     use serde_json::json;
 
     use super::NetworkID;
