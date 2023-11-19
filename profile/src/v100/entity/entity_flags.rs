@@ -52,10 +52,12 @@ impl EntityFlags {
         self.0.remove(flag)
     }
 
+    ///Returns true if the set contains the `flag` equal to the value.
     pub fn contains(&self, flag: &EntityFlag) -> bool {
         self.0.contains(flag)
     }
 
+    /// Returns the number of flags in the set.
     pub fn len(&self) -> usize {
         self.0.len()
     }
@@ -85,6 +87,18 @@ mod tests {
         assert!(
             EntityFlags::with_flag(EntityFlag::DeletedByUser).contains(&EntityFlag::DeletedByUser)
         );
+    }
+
+    #[test]
+    fn remove_existing_flag() {
+        assert!(EntityFlags::with_flag(EntityFlag::DeletedByUser)
+            .remove_flag(&EntityFlag::DeletedByUser));
+    }
+
+    #[test]
+    fn remove_non_existing_flag() {
+        assert!(!EntityFlags::default().remove_flag(&EntityFlag::DeletedByUser));
+        // does not exist
     }
 
     #[test]

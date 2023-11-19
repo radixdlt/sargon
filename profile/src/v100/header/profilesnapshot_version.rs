@@ -38,7 +38,7 @@ impl ProfileSnapshotVersion {
 
 impl Display for ProfileSnapshotVersion {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "{}", self.discriminant())
+        write!(f, "{}", self.discriminant())
     }
 }
 
@@ -75,5 +75,10 @@ mod tests {
     #[test]
     fn discriminant() {
         assert_eq!(ProfileSnapshotVersion::V100.discriminant(), 100)
+    }
+
+    #[test]
+    fn display() {
+        assert_eq!(format!("{}", ProfileSnapshotVersion::V100), "100")
     }
 }

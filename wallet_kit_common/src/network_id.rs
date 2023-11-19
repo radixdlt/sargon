@@ -123,6 +123,21 @@ mod tests {
     use super::NetworkID;
 
     #[test]
+    fn mainnet_is_default() {
+        assert_eq!(NetworkID::default(), NetworkID::Mainnet);
+    }
+
+    #[test]
+    fn mainnet_logical_name_is_lowercase_mainnet() {
+        assert_eq!(NetworkID::Mainnet.logical_name(), "mainnet");
+    }
+
+    #[test]
+    fn mainnet_fmt() {
+        assert_eq!(format!("{}", NetworkID::Mainnet), "mainnet");
+    }
+
+    #[test]
     fn json() {
         assert_json_value_eq_after_roundtrip(&NetworkID::Mainnet, json!(1));
         assert_json_value_fails::<NetworkID>(json!("1"));

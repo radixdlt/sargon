@@ -34,3 +34,38 @@ impl ToString for HDPathComponent {
         format!("{}{}", self.value(), h_or_empty)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::HDPathComponent;
+
+    #[test]
+    fn harden() {
+        assert!(HDPathComponent::harden(0).is_hardened())
+    }
+
+    #[test]
+    fn hardened_value() {
+        assert_eq!(HDPathComponent::harden(3).value(), 3)
+    }
+
+    #[test]
+    fn non_hardended_value() {
+        assert_eq!(HDPathComponent::from_value(3).value(), 3)
+    }
+
+    #[test]
+    fn non_hardended_value_isnt_hardened() {
+        assert!(!HDPathComponent::from_value(3).is_hardened())
+    }
+
+    #[test]
+    fn hardened_to_string() {
+        assert_eq!(HDPathComponent::harden(5).to_string(), "5H")
+    }
+
+    #[test]
+    fn non_hardened_to_string() {
+        assert_eq!(HDPathComponent::from_value(7).to_string(), "7")
+    }
+}
