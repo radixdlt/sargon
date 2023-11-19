@@ -105,6 +105,18 @@ mod tests {
     }
 
     #[test]
+    fn format() {
+        let a = IdentityAddress::try_from_bech32(
+            "identity_rdx12tgzjrz9u0xz4l28vf04hz87eguclmfaq4d2p8f8lv7zg9ssnzku8j",
+        )
+        .unwrap();
+        assert_eq!(
+            format!("{}", a),
+            "identity_rdx12tgzjrz9u0xz4l28vf04hz87eguclmfaq4d2p8f8lv7zg9ssnzku8j"
+        );
+    }
+
+    #[test]
     fn from_public_key_bytes_and_network_id() {
         let public_key = Ed25519PublicKey::from_str(
             "6c28952be5cdade99c7dd5d003b6b692714b6b74c5fdb5fdc9a8e4ee1d297838",
