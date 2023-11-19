@@ -116,6 +116,9 @@ impl HierarchicalDeterministicFactorInstance {
 
 // Getters
 impl Account {
+    /// Returns this accounts `display_name` as **a clone**.
+    ///
+    /// Use [`self::set_display_name()`] to update it.
     pub fn get_display_name(&self) -> String {
         self.display_name.borrow().clone().to_string()
     }

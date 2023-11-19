@@ -27,6 +27,7 @@ pub enum EntityFlag {
 }
 
 impl EntityFlag {
+    /// Human readable form of the flag
     pub fn discriminant(&self) -> String {
         format!("{}", self)
     }

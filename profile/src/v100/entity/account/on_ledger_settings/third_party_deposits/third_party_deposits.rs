@@ -54,17 +54,25 @@ impl ThirdPartyDeposits {
 
 // Getters
 impl ThirdPartyDeposits {
-    /// Returns the deposit rule.
+    /// Returns the general `deposit_rule` **as a clone**.
+    ///
+    /// Use [`self::set_deposit_rule(new)`] to update it.
     pub fn get_deposit_rule(&self) -> DepositRule {
         self.deposit_rule.get().clone()
     }
 
-    /// Returns the `assets_exception_list` set value.
+    /// Returns the `assets_exception_list` **as a clone**.
+    ///
+    /// Use [`self::set_assets_exception_list()`], [`self::add_asset_exception()`]
+    /// or [`self::remove_asset_exception`] to update it.
     pub fn get_assets_exception_list(&self) -> BTreeSet<AssetException> {
         self.assets_exception_list.borrow().clone()
     }
 
-    /// Returns the `depositors_allow_list` set value.
+    /// Returns the `depositors_allow_list` **as a clone**.
+    ///
+    /// Use [`self::set_depositors_allow_list()`], [`self::allow_depositor()`],
+    /// or [`self::remove_allowed_depositor()`] to update it.
     pub fn get_depositors_allow_list(&self) -> BTreeSet<DepositorAddress> {
         self.depositors_allow_list.borrow().clone()
     }
@@ -108,12 +116,12 @@ impl ThirdPartyDeposits {
     ///
     /// If the set did not previously contain an equal value, true is returned.
     /// If the set already contained an equal value, false is returned, and the entry is not updated.
-    pub fn allow_depositors(&self, depositor: DepositorAddress) -> bool {
+    pub fn allow_depositor(&self, depositor: DepositorAddress) -> bool {
         self.depositors_allow_list.borrow_mut().insert(depositor)
     }
 
     // If the set contains an element equal to `DepositorAddress`, removes it from the set and drops it. Returns whether such an element was present.
-    pub fn remove_allowed_depositer(&self, depositor: &DepositorAddress) -> bool {
+    pub fn remove_allowed_depositor(&self, depositor: &DepositorAddress) -> bool {
         self.depositors_allow_list.borrow_mut().remove(depositor)
     }
 }
@@ -247,13 +255,13 @@ mod tests {
             )
             .unwrap(),
         );
-        assert!(settings.allow_depositors(depositor.clone()));
+        assert!(settings.allow_depositor(depositor.clone()));
         assert_eq!(settings.get_depositors_allow_list().len(), 1);
-        assert!(settings.remove_allowed_depositer(&depositor));
+        assert!(settings.remove_allowed_depositor(&depositor));
         assert_eq!(settings.get_depositors_allow_list().len(), 0);
         settings.set_depositors_allow_list(BTreeSet::from_iter([depositor.clone()]));
         assert!(
-            !settings.allow_depositors(depositor.clone()),
+            !settings.allow_depositor(depositor.clone()),
             "Expected `false` since already present."
         );
     }
