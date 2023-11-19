@@ -26,7 +26,7 @@ pub enum CAP26Error {
 
     #[error("InvalidEntityKind, got: '{0}', expected any of: [525H, 618H].")]
     InvalidEntityKind(HDPathValue),
-    
+
     #[error("Wrong entity kind, got: '{0}', but expected: '{1}'")]
     WrongEntityKind(CAP26EntityKind, CAP26EntityKind),
 

@@ -1,6 +1,6 @@
 use serde::{de, Deserializer, Serialize, Serializer};
-use wallet_kit_common::network_id::NetworkID;
 use std::fmt::Display;
+use wallet_kit_common::network_id::NetworkID;
 
 use crate::v100::entity::abstract_entity_type::AbstractEntityType;
 

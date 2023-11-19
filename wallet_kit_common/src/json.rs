@@ -41,8 +41,7 @@ where
 /// Asserts that (pseudocode) `model.to_json() != json_string` (serialization)
 /// and also asserts the associative property:
 /// `Model::from_json(json_string) != model` (deserialization)
-pub fn 
-assert_ne_after_json_roundtrip<T>(model: &T, json_string: &str)
+pub fn assert_ne_after_json_roundtrip<T>(model: &T, json_string: &str)
 where
     T: Serialize + DeserializeOwned + PartialEq + Debug,
 {

@@ -8,5 +8,5 @@ repos:
     rev: v1.0
     hooks:
       - id: fmt
-        args: ["--verbose", "--edition", "2021", "--"]
+        args: ["--all", "--", "--check"]
       - id: cargo-check

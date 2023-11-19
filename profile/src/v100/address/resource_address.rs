@@ -1,7 +1,7 @@
 use crate::v100::entity::abstract_entity_type::AbstractEntityType;
 use serde::{de, Deserializer, Serialize, Serializer};
-use wallet_kit_common::network_id::NetworkID;
 use std::fmt::Display;
+use wallet_kit_common::network_id::NetworkID;
 
 use super::entity_address::EntityAddress;
 
@@ -67,10 +67,13 @@ impl Display for ResourceAddress {
 #[cfg(test)]
 mod tests {
     use serde_json::json;
-    use wallet_kit_common::{json::{
-        assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
-        assert_json_value_ne_after_roundtrip,
-    }, network_id::NetworkID};
+    use wallet_kit_common::{
+        json::{
+            assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
+            assert_json_value_ne_after_roundtrip,
+        },
+        network_id::NetworkID,
+    };
 
     use super::ResourceAddress;
 
