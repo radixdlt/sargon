@@ -4,3 +4,8 @@ repos:
     hooks:
       - id: typos
         args: []
+  - repo: https://github.com/doublify/pre-commit-rust
+    rev: v1.0
+    hooks:
+      - id: fmt
+      - id: cargo-check
