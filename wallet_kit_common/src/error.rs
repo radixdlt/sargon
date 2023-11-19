@@ -19,4 +19,7 @@ pub enum Error {
 
     #[error("Unknown network ID '{0}'")]
     UnknownNetworkID(u8),
+
+    #[error("Failed to parse InvalidNonFungibleGlobalID from str.")]
+    InvalidNonFungibleGlobalID,
 }

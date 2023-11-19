@@ -38,7 +38,7 @@ impl Display for DepositAddressExceptionRule {
         &self,
         f: &mut radix_engine_common::prelude::fmt::Formatter<'_>,
     ) -> radix_engine_common::prelude::fmt::Result {
-        write!(f, "{}", self)
+        write!(f, "{:?}", self)
     }
 }
 
@@ -53,5 +53,13 @@ mod tests {
     fn json_roundtrip_accept_all() {
         assert_json_value_eq_after_roundtrip(&DepositAddressExceptionRule::Deny, json!("deny"));
         assert_json_roundtrip(&DepositAddressExceptionRule::Deny);
+    }
+
+    #[test]
+    fn display() {
+        assert_eq!(format!("{}", DepositAddressExceptionRule::Deny), "Deny");
+
+        // `discriminant` uses Display
+        assert_eq!(DepositAddressExceptionRule::Allow.discriminant(), "Allow");
     }
 }

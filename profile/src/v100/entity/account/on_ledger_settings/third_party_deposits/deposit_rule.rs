@@ -43,7 +43,7 @@ impl Display for DepositRule {
         &self,
         f: &mut radix_engine_common::prelude::fmt::Formatter<'_>,
     ) -> radix_engine_common::prelude::fmt::Result {
-        write!(f, "{}", self)
+        write!(f, "{:?}", self)
     }
 }
 
@@ -58,5 +58,21 @@ mod tests {
     fn json_roundtrip_accept_all() {
         assert_json_value_eq_after_roundtrip(&DepositRule::AcceptAll, json!("acceptAll"));
         assert_json_roundtrip(&DepositRule::AcceptAll);
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(DepositRule::AcceptAll, DepositRule::DenyAll);
+        assert_ne!(DepositRule::DenyAll, DepositRule::AcceptKnown);
+        assert_ne!(DepositRule::AcceptAll, DepositRule::AcceptKnown);
+    }
+
+    #[test]
+    fn display() {
+        assert_eq!(format!("{}", DepositRule::AcceptAll), "AcceptAll");
+        assert_eq!(format!("{}", DepositRule::AcceptKnown), "AcceptKnown");
+
+        // `discriminant` uses Display
+        assert_eq!(DepositRule::DenyAll.discriminant(), "DenyAll");
     }
 }
