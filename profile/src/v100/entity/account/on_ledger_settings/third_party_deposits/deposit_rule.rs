@@ -21,18 +21,23 @@ use strum::FromRepr;
 )]
 #[serde(rename_all = "camelCase")]
 pub enum DepositRule {
-    AcceptAll,
+    /// The account accepts **all** assets by default, except for exceptions (if any) which might not deposit/be deposited into this account.
     AcceptKnown,
+    /// The account accepts **known** assets by default, except for exceptions (if any) which might not deposit/be deposited into this account. By known we mean assets this account has received in the past.
+    AcceptAll,
+    /// The account denies **all** assets by default, except for exceptions (if any) which might in fact deposit/be deposited into this account.
     DenyAll,
 }
 
 impl Default for DepositRule {
+    /// By default an account accepts all.
     fn default() -> Self {
         Self::AcceptAll
     }
 }
 
 impl DepositRule {
+    /// Human readable representation of the rule.
     pub fn discriminant(&self) -> String {
         format!("{}", self)
     }
