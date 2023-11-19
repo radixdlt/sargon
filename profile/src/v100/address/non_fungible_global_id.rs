@@ -1,16 +1,19 @@
-use chrono::format::format;
 use radix_engine_common::data::scrypto::model::NonFungibleLocalId;
-use radix_engine_toolkit::models::scrypto::non_fungible_global_id::SerializableNonFungibleGlobalId as EngineSerializableNonFungibleGlobalId;
+use radix_engine_toolkit::models::scrypto::non_fungible_global_id::{
+    SerializableNonFungibleGlobalId as EngineSerializableNonFungibleGlobalId,
+    SerializableNonFungibleGlobalIdInternal as EngineSerializableNonFungibleGlobalIdInternal,
+};
 
 use serde::{Deserialize, Serialize};
 use std::{
     cmp::Ordering,
     fmt::Display,
     hash::{Hash, Hasher},
+    str::FromStr,
 };
-use wallet_kit_common::network_id::NetworkID;
+use wallet_kit_common::{error::Error, network_id::NetworkID};
 
-use super::{entity_address::EntityAddress, resource_address::ResourceAddress};
+use super::resource_address::ResourceAddress;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct NonFungibleGlobalId(EngineSerializableNonFungibleGlobalId);
@@ -46,23 +49,36 @@ impl Hash for NonFungibleGlobalId {
 }
 
 impl NonFungibleGlobalId {
+    pub fn try_from_str(s: &str) -> Result<Self, Error> {
+        EngineSerializableNonFungibleGlobalIdInternal::from_str(s)
+            .map(|i| Self(EngineSerializableNonFungibleGlobalId(i)))
+            .map_err(|_| wallet_kit_common::error::Error::InvalidNonFungibleGlobalID)
+    }
+}
+
+impl TryInto<NonFungibleGlobalId> for &str {
+    type Error = wallet_kit_common::error::Error;
+
+    /// Tries to deserializes a bech32 address into an `AccountAddress`.
+    fn try_into(self) -> Result<NonFungibleGlobalId, Self::Error> {
+        NonFungibleGlobalId::try_from_str(self)
+    }
+}
+
+impl NonFungibleGlobalId {
     pub fn network_id(&self) -> NetworkID {
         NetworkID::from_repr(self.0 .0.network_id).expect("Valid NetworkID")
     }
 
     /// Returns the resource address.
     pub fn resource_address(&self) -> ResourceAddress {
-        let address: String = self
+        let parts: Vec<String> = self
             .to_canonical_string()
-            .clone()
             .split(":")
-            .into_iter()
-            .collect::<Vec<&str>>()
-            .first()
-            .unwrap()
-            .to_string();
+            .map(|p| p.to_string())
+            .collect();
         ResourceAddress {
-            address,
+            address: parts[0].to_string(),
             network_id: self.network_id(),
         }
     }
@@ -86,14 +102,20 @@ impl NonFungibleGlobalId {
 mod tests {
     use radix_engine_common::data::scrypto::model::NonFungibleLocalId;
     use serde_json::json;
-    use wallet_kit_common::network_id::NetworkID;
+    use wallet_kit_common::{
+        json::{
+            assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
+            assert_json_value_ne_after_roundtrip,
+        },
+        network_id::NetworkID,
+    };
 
     use super::NonFungibleGlobalId;
 
     #[test]
     fn test_deserialize() {
         let str = "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<value>";
-        let id: NonFungibleGlobalId = serde_json::from_value(json!(str)).unwrap();
+        let id: NonFungibleGlobalId = str.try_into().unwrap();
         match id.local_id() {
             NonFungibleLocalId::String(v) => assert_eq!(v.value(), "value"),
             _ => panic!("wrong"),
@@ -104,5 +126,23 @@ mod tests {
         );
         assert_eq!(id.network_id(), NetworkID::Simulator);
         assert_eq!(id.to_canonical_string(), str);
+    }
+
+    #[test]
+    fn json_roundtrip() {
+        let id: NonFungibleGlobalId =
+            "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<value>"
+                .try_into()
+                .unwrap();
+
+        assert_json_value_eq_after_roundtrip(
+            &id,
+            json!("resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<value>"),
+        );
+        assert_json_roundtrip(&id);
+        assert_json_value_ne_after_roundtrip(
+            &id,
+            json!("resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<WRONG>"),
+        );
     }
 }
