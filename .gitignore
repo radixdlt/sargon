@@ -2,3 +2,4 @@
 /Cargo.lock
 tarpaulin-report.html
 .vscode
+build_rs_cov.profraw

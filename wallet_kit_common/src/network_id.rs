@@ -138,6 +138,12 @@ mod tests {
     fn discriminant() {
         assert_eq!(NetworkID::Mainnet.discriminant(), 0x01);
         assert_eq!(NetworkID::Stokenet.discriminant(), 0x02);
+        assert_eq!(NetworkID::Simulator.discriminant(), 242);
+        assert_eq!(NetworkID::Adapanet.discriminant(), 0x0a);
+        assert_eq!(NetworkID::Nebunet.discriminant(), 0x0b);
+        assert_eq!(NetworkID::Kisharnet.discriminant(), 0x0c);
+        assert_eq!(NetworkID::Ansharnet.discriminant(), 0x0d);
+        assert_eq!(NetworkID::Zabanet.discriminant(), 0x0e);
     }
 
     #[test]
