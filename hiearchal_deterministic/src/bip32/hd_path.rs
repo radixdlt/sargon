@@ -24,10 +24,7 @@ impl HDPath {
         let mut bip32 = path.clone();
         let mut vec: Vec<HDPathComponent> = Vec::new();
         for _ in 0..bip32.depth() {
-            match bip32.pop() {
-                Some(c) => vec.push(HDPathComponent::from_value(c)),
-                None => break,
-            }
+            vec.push(HDPathComponent::from_value(bip32.pop().unwrap()))
         }
         assert!(vec.len() == path.depth() as usize);
         vec.reverse();
