@@ -84,7 +84,7 @@ mod tests {
 
     use crate::v100::header::device_info::DeviceInfo;
     use chrono::{Datelike, NaiveDateTime};
-    use uuid::{uuid, Uuid};
+    use uuid::Uuid;
     use wallet_kit_common::json::*;
 
     #[test]
@@ -136,7 +136,6 @@ mod tests {
     #[test]
     fn json_roundtrip() {
         let model = DeviceInfo::with_values(
-            // for whatever reason `cargo tarpaulin` fails in CI if we use `uuid!` macro... need to investigate.
             Uuid::from_str("66f07ca2-a9d9-49e5-8152-77aca3d1dd74").unwrap(),
             NaiveDateTime::parse_from_str("2023-09-11T16:05:56", "%Y-%m-%dT%H:%M:%S").unwrap(),
             "iPhone".to_string(),
