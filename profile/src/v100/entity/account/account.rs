@@ -184,6 +184,20 @@ impl Display for Account {
     }
 }
 
+impl Account {
+    // CFG test
+    #[cfg(test)]
+    pub fn placeholder() -> Self {
+        Self::with_values(
+            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                .try_into()
+                .unwrap(),
+            DisplayName::default(),
+            AppearanceID::default(),
+        )
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::{cell::RefCell, collections::BTreeSet};
@@ -234,13 +248,7 @@ mod tests {
 
     #[test]
     fn appearance_id_get_set() {
-        let account = Account::with_values(
-            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
-                .try_into()
-                .unwrap(),
-            DisplayName::default(),
-            AppearanceID::default(),
-        );
+        let account = Account::placeholder();
         assert_eq!(account.get_appearance_id(), AppearanceID::default());
         let new_appearance_id = AppearanceID::new(1).unwrap();
         account.set_appearance_id(new_appearance_id);

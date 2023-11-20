@@ -11,6 +11,7 @@ use wallet_kit_common::network_id::NetworkID;
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct Networks(BTreeMap<NetworkID, Network>);
 
+// Constructors
 impl Networks {
     /// Instantiates a new empty networks collection.
     pub fn new() -> Self {
@@ -26,9 +27,32 @@ impl Networks {
     }
 }
 
+// Getters
+impl Networks {
+    /// Returns the number of networks user has accounts on.
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
+}
+
+// Trait: Default
 impl Default for Networks {
     /// Instantiates a new empty networks collection.
     fn default() -> Self {
         Self::new()
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::v100::networks::networks::Networks;
+
+    #[test]
+    fn default_is_empty() {
+        assert_eq!(Networks::default().len(), 0)
+    }
+
+    // fn with_network() {
+    //     Networks::with_network(network)
+    // }
 }
