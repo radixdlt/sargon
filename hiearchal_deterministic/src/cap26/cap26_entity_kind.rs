@@ -48,6 +48,8 @@ impl CAP26EntityKind {
 
 #[cfg(test)]
 mod tests {
+    use std::collections::BTreeSet;
+
     use crate::cap26::cap26_entity_kind::CAP26EntityKind;
 
     #[test]
@@ -60,5 +62,29 @@ mod tests {
     fn format() {
         assert_eq!(format!("{}", CAP26EntityKind::Account), "Account");
         assert_eq!(format!("{}", CAP26EntityKind::Identity), "Identity");
+    }
+
+    #[test]
+    fn equality() {
+        assert_eq!(CAP26EntityKind::Account, CAP26EntityKind::Account);
+        assert_eq!(CAP26EntityKind::Identity, CAP26EntityKind::Identity);
+    }
+    #[test]
+    fn inequality() {
+        assert_ne!(CAP26EntityKind::Account, CAP26EntityKind::Identity);
+    }
+
+    #[test]
+    fn hash() {
+        assert_eq!(
+            BTreeSet::from_iter([CAP26EntityKind::Account, CAP26EntityKind::Account].into_iter())
+                .len(),
+            1
+        );
+    }
+
+    #[test]
+    fn ord() {
+        assert!(CAP26EntityKind::Account < CAP26EntityKind::Identity);
     }
 }
