@@ -123,9 +123,11 @@ impl Header {
 
 #[cfg(test)]
 pub mod tests {
+    use std::str::FromStr;
+
     use crate::v100::header::{content_hint::ContentHint, device_info::DeviceInfo};
     use chrono::NaiveDateTime;
-    use uuid::uuid;
+    use uuid::Uuid;
     use wallet_kit_common::json::assert_eq_after_json_roundtrip;
 
     use super::Header;
@@ -135,12 +137,12 @@ pub mod tests {
         let date =
             NaiveDateTime::parse_from_str("2023-09-11T16:05:56", "%Y-%m-%dT%H:%M:%S").unwrap();
         let device = DeviceInfo::with_values(
-            uuid!("66f07ca2-a9d9-49e5-8152-77aca3d1dd74"),
+            Uuid::from_str("66f07ca2-a9d9-49e5-8152-77aca3d1dd74").unwrap(),
             date.clone(),
             "iPhone".to_string(),
         );
         let model = Header::with_values(
-            uuid!("12345678-bbbb-cccc-dddd-abcd12345678"),
+            Uuid::from_str("12345678-bbbb-cccc-dddd-abcd12345678").unwrap(),
             device,
             ContentHint::new(),
             date,
@@ -175,19 +177,19 @@ pub mod tests {
     #[test]
     fn updated() {
         let sut = Header::default();
-        let d0 = sut.last_modified.get();
+        let d0 = sut.get_last_modified();
         for _ in 0..10 {
             // rust is too fast, if we run it once, unit tests fails.
             sut.updated();
         }
-        let d1 = sut.last_modified.get();
+        let d1 = sut.get_last_modified();
         assert!(d1 > d0);
     }
 
     #[test]
     fn update_content_hint() {
         let sut = Header::default();
-        let d0 = sut.last_modified.get();
+        let d0 = sut.get_last_modified();
         let content_hint_0 = sut.get_content_hint();
         let end = 10;
         for n in 1..end {
@@ -196,14 +198,14 @@ pub mod tests {
         }
         let content_hint_n = sut.get_content_hint();
         assert_ne!(content_hint_n, content_hint_0);
-        let d1 = sut.last_modified.get();
+        let d1 = sut.get_last_modified();
         assert!(d1 > d0);
     }
 
     #[test]
     fn update_last_used_on_device() {
         let sut = Header::default();
-        let d0: NaiveDateTime = sut.last_modified.get();
+        let d0: NaiveDateTime = sut.get_last_modified();
         let device_0 = sut.get_last_used_on_device();
         let end = 10;
         for n in 1..end {
@@ -212,7 +214,30 @@ pub mod tests {
         }
         let device_n = sut.get_last_used_on_device();
         assert_ne!(device_n, device_0);
-        let d1 = sut.last_modified.get();
-        assert!(d1 > d0);
+        assert!(sut.get_last_modified() > d0);
+    }
+
+    #[test]
+    fn last_updated() {
+        let sut = Header::default();
+        assert_eq!(sut.last_modified.get(), sut.get_last_modified());
+    }
+
+    #[test]
+    fn display() {
+        let date =
+            NaiveDateTime::parse_from_str("2023-09-11T16:05:56", "%Y-%m-%dT%H:%M:%S").unwrap();
+        let device = DeviceInfo::with_values(
+            Uuid::from_str("66f07ca2-a9d9-49e5-8152-77aca3d1dd74").unwrap(),
+            date.clone(),
+            "iPhone".to_string(),
+        );
+        let sut = Header::with_values(
+            Uuid::from_str("12345678-bbbb-cccc-dddd-abcd12345678").unwrap(),
+            device,
+            ContentHint::new(),
+            date,
+        );
+        assert_eq!(format!("{sut}"), "#12345678-bbbb-cccc-dddd-abcd12345678 v=100, content: #networks: 0, #accounts: 0, #personas: 0");
     }
 }
