@@ -3,3 +3,4 @@
 tarpaulin-report.html
 .vscode
 build_rs_cov.profraw
+cobertura.xml

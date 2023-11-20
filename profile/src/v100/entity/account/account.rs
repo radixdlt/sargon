@@ -186,7 +186,9 @@ impl Display for Account {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::BTreeSet;
+    use std::{cell::RefCell, collections::BTreeSet};
+
+    use hiearchal_deterministic::bip32::hd_path_component::HDPathValue;
 
     use crate::v100::{
         address::account_address::AccountAddress,
@@ -207,6 +209,11 @@ mod tests {
             entity_flag::EntityFlag,
             entity_flags::EntityFlags,
         },
+        entity_security_state::{
+            entity_security_state::EntitySecurityState,
+            unsecured_entity_control::UnsecuredEntityControl,
+        },
+        factors::hierarchical_deterministic_factor_instance::HierarchicalDeterministicFactorInstance,
     };
 
     use super::Account;
@@ -328,6 +335,33 @@ mod tests {
                 .get_deposit_rule(),
             DepositRule::AcceptAll
         );
+    }
+
+    #[test]
+    fn compare() {
+        let make = |index: HDPathValue| -> Account {
+            let address: AccountAddress =
+                "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                    .try_into()
+                    .unwrap();
+
+            let account = Account {
+                address: address.clone(),
+                network_id: address.network_id,
+                display_name: RefCell::new(DisplayName::new("Test").unwrap()),
+                appearance_id: RefCell::new(AppearanceID::default()),
+                flags: RefCell::new(EntityFlags::default()),
+                on_ledger_settings: RefCell::new(OnLedgerSettings::default()),
+                security_state: EntitySecurityState::Unsecured(UnsecuredEntityControl::new(
+                    index,
+                    HierarchicalDeterministicFactorInstance::placeholder(),
+                )),
+            };
+            account
+        };
+        let a = make(0);
+        let b = make(1);
+        assert!(a < b);
     }
 
     #[test]

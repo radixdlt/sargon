@@ -80,7 +80,7 @@ impl Display for DeviceInfo {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashSet;
+    use std::{collections::HashSet, str::FromStr};
 
     use crate::v100::header::device_info::DeviceInfo;
     use chrono::{Datelike, NaiveDateTime};
@@ -104,14 +104,16 @@ mod tests {
 
     #[test]
     fn display() {
+        let id_str = "12345678-bbbb-cccc-dddd-abcd12345678";
+        let id = Uuid::from_str(id_str).unwrap();
         let sut = DeviceInfo::with_values(
-            uuid!("12345678-bbbb-cccc-dddd-abcd12345678"),
+            id,
             NaiveDateTime::parse_from_str("2023-09-11T16:05:56", "%Y-%m-%dT%H:%M:%S").unwrap(),
             "Foo".to_string(),
         );
         assert_eq!(
             format!("{sut}"),
-            "Foo | created: 2023-09-11 | #12345678-bbbb-cccc-dddd-abcd12345678",
+            format!("Foo | created: 2023-09-11 | #{}", id_str)
         )
     }
 
@@ -134,7 +136,8 @@ mod tests {
     #[test]
     fn json_roundtrip() {
         let model = DeviceInfo::with_values(
-            uuid!("66f07ca2-a9d9-49e5-8152-77aca3d1dd74"),
+            // for whatever reason `cargo tarpaulin` fails in CI if we use `uuid!` macro... need to investigate.
+            Uuid::from_str("66f07ca2-a9d9-49e5-8152-77aca3d1dd74").unwrap(),
             NaiveDateTime::parse_from_str("2023-09-11T16:05:56", "%Y-%m-%dT%H:%M:%S").unwrap(),
             "iPhone".to_string(),
         );
