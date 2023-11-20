@@ -19,6 +19,8 @@ Middleware that can power Radix Wallet clients (iOS/Android).
 - [x] AccountAddress
 - [x] IdentityAddress
 - [x] CAP26AccountPath
+- [x] ThirdPartyDeposits
+- [x] OnLedgerSettings
 - [ ] CAP26IdentityPath
 - [ ] Account
 - [ ] Persona
