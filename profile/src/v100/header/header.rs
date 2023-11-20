@@ -215,4 +215,22 @@ pub mod tests {
         let d1 = sut.last_modified.get();
         assert!(d1 > d0);
     }
+
+    #[test]
+    fn display() {
+        let date =
+            NaiveDateTime::parse_from_str("2023-09-11T16:05:56", "%Y-%m-%dT%H:%M:%S").unwrap();
+        let device = DeviceInfo::with_values(
+            uuid!("66f07ca2-a9d9-49e5-8152-77aca3d1dd74"),
+            date.clone(),
+            "iPhone".to_string(),
+        );
+        let sut = Header::with_values(
+            uuid!("12345678-bbbb-cccc-dddd-abcd12345678"),
+            device,
+            ContentHint::new(),
+            date,
+        );
+        assert_eq!(format!("{sut}"), "#12345678-bbbb-cccc-dddd-abcd12345678 v=100, content: #networks: 0, #accounts: 0, #personas: 0");
+    }
 }
