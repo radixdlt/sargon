@@ -150,14 +150,42 @@ mod tests {
     }
 
     #[test]
-    fn discriminant() {
+    fn discriminant_mainnet() {
         assert_eq!(NetworkID::Mainnet.discriminant(), 0x01);
+    }
+
+    #[test]
+    fn discriminant_stokenet() {
         assert_eq!(NetworkID::Stokenet.discriminant(), 0x02);
+    }
+
+    #[test]
+    fn discriminant_simulator() {
         assert_eq!(NetworkID::Simulator.discriminant(), 242);
+    }
+
+    #[test]
+    fn discriminant_adapanet() {
         assert_eq!(NetworkID::Adapanet.discriminant(), 0x0a);
+    }
+
+    #[test]
+    fn discriminant_nebunet() {
         assert_eq!(NetworkID::Nebunet.discriminant(), 0x0b);
+    }
+
+    #[test]
+    fn discriminant_kisharnet() {
         assert_eq!(NetworkID::Kisharnet.discriminant(), 0x0c);
+    }
+
+    #[test]
+    fn discriminant_ansharnet() {
         assert_eq!(NetworkID::Ansharnet.discriminant(), 0x0d);
+    }
+
+    #[test]
+    fn discriminant_zabanet() {
         assert_eq!(NetworkID::Zabanet.discriminant(), 0x0e);
     }
 
