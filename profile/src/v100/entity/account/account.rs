@@ -184,12 +184,57 @@ impl Display for Account {
     }
 }
 
+// CFG test
+#[cfg(test)]
+#[cfg(not(tarpaulin_include))]
 impl Account {
-    // CFG test
-    #[cfg(test)]
     pub fn placeholder() -> Self {
+        Self::placeholder_mainnet()
+    }
+
+    pub fn placeholder_mainnet() -> Self {
         Self::with_values(
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                .try_into()
+                .unwrap(),
+            DisplayName::default(),
+            AppearanceID::default(),
+        )
+    }
+
+    pub fn placeholder_stokenet() -> Self {
+        Self::with_values(
+            "account_tdx_2_12ygsf87pma439ezvdyervjfq2nhqme6reau6kcxf6jtaysaxl7sqvd"
+                .try_into()
+                .unwrap(),
+            DisplayName::default(),
+            AppearanceID::default(),
+        )
+    }
+
+    pub fn placeholder_nebunet() -> Self {
+        Self::with_values(
+            "account_tdx_b_1p8ahenyznrqy2w0tyg00r82rwuxys6z8kmrhh37c7maqpydx7p"
+                .try_into()
+                .unwrap(),
+            DisplayName::default(),
+            AppearanceID::default(),
+        )
+    }
+
+    pub fn placeholder_kisharnet() -> Self {
+        Self::with_values(
+            "account_tdx_c_1px26p5tyqq65809em2h4yjczxcxj776kaun6sv3dw66sc3wrm6"
+                .try_into()
+                .unwrap(),
+            DisplayName::default(),
+            AppearanceID::default(),
+        )
+    }
+
+    pub fn placeholder_adapanet() -> Self {
+        Self::with_values(
+            "account_tdx_a_1qwv0unmwmxschqj8sntg6n9eejkrr6yr6fa4ekxazdzqhm6wy5"
                 .try_into()
                 .unwrap(),
             DisplayName::default(),
