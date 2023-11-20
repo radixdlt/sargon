@@ -1,4 +1,6 @@
-# Radix Wallet Kit
+# Wallet Kit
+
+[![codecov](https://codecov.io/github/Sajjon/RadixWalletKit/graph/badge.svg?token=EQYDU0XPMX)](https://codecov.io/github/Sajjon/RadixWalletKit)
 
 Middleware that can power Radix Wallet clients (iOS/Android).
 
