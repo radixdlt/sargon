@@ -90,9 +90,21 @@ mod tests {
     use super::AccountPath;
 
     #[test]
+    fn entity_kind() {
+        assert_eq!(AccountPath::entity_kind(), Some(CAP26EntityKind::Account));
+    }
+
+    #[test]
+    fn hd_path() {
+        let str = "m/44H/1022H/1H/525H/1460H/0H";
+        let parsed: AccountPath = str.try_into().unwrap();
+        assert_eq!(parsed.hd_path().depth(), 6);
+    }
+
+    #[test]
     fn string_roundtrip() {
         let str = "m/44H/1022H/1H/525H/1460H/0H";
-        let parsed = AccountPath::from_str(str).unwrap();
+        let parsed: AccountPath = str.try_into().unwrap();
         assert_eq!(parsed.network_id, NetworkID::Mainnet);
         assert_eq!(parsed.entity_kind, CAP26EntityKind::Account);
         assert_eq!(parsed.key_kind, CAP26KeyKind::TransactionSigning);
