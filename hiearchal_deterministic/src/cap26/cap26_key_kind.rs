@@ -34,6 +34,7 @@ pub enum CAP26KeyKind {
 }
 
 impl Display for CAP26KeyKind {
+    #[cfg(not(tarpaulin_include))]
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}", self)
     }
@@ -41,6 +42,7 @@ impl Display for CAP26KeyKind {
 
 impl CAP26KeyKind {
     /// The raw representation of this key kind, an `HDPathValue`.
+    #[cfg(not(tarpaulin_include))]
     pub fn discriminant(&self) -> HDPathValue {
         *self as HDPathValue
     }

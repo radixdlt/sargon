@@ -51,6 +51,7 @@ impl HDPath {
 }
 
 impl ToString for HDPath {
+    #[cfg(not(tarpaulin_include))]
     fn to_string(&self) -> String {
         let rest = self
             .components()
@@ -61,6 +62,7 @@ impl ToString for HDPath {
     }
 }
 
+#[cfg(not(tarpaulin_include))]
 impl Serialize for HDPath {
     /// Serializes this `AccountAddress` into its bech32 address string as JSON.
     fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
@@ -71,6 +73,7 @@ impl Serialize for HDPath {
     }
 }
 
+#[cfg(not(tarpaulin_include))]
 impl<'de> serde::Deserialize<'de> for HDPath {
     /// Tries to deserializes a JSON string as a bech32 address into an `AccountAddress`.
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<HDPath, D::Error> {

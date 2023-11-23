@@ -45,14 +45,27 @@ impl Default for Networks {
 
 #[cfg(test)]
 mod tests {
-    use crate::v100::networks::networks::Networks;
+    use wallet_kit_common::network_id::NetworkID;
+
+    use crate::v100::{
+        entity::account::account::Account,
+        networks::{
+            network::{accounts::Accounts, network::Network},
+            networks::Networks,
+        },
+    };
 
     #[test]
     fn default_is_empty() {
         assert_eq!(Networks::default().len(), 0)
     }
 
-    // fn with_network() {
-    //     Networks::with_network(network)
-    // }
+    #[test]
+    fn with_network() {
+        let network = Network::new(
+            NetworkID::Mainnet,
+            Accounts::with_account(Account::placeholder_mainnet()),
+        );
+        assert_eq!(Networks::with_network(network).len(), 1);
+    }
 }

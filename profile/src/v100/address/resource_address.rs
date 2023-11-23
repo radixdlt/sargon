@@ -75,7 +75,16 @@ mod tests {
         network_id::NetworkID,
     };
 
+    use crate::v100::address::entity_address::EntityAddress;
+
     use super::ResourceAddress;
+
+    #[test]
+    fn display() {
+        let s = "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd";
+        let a = ResourceAddress::try_from_bech32(s).unwrap();
+        assert_eq!(format!("{a}"), s);
+    }
 
     #[test]
     fn json_roundtrip() {
@@ -103,6 +112,7 @@ mod tests {
                 .unwrap();
         assert_eq!(a.network_id, NetworkID::Mainnet);
     }
+
     #[test]
     fn network_id_stokenet() {
         let a: ResourceAddress =
