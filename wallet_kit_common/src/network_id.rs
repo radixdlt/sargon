@@ -98,6 +98,7 @@ impl Display for NetworkID {
 
 impl NetworkID {
     /// Looks up a `NetworkDefinition` in a lookup table.
+    #[cfg(not(tarpaulin_include))]
     pub fn network_definition(&self) -> NetworkDefinition {
         match self {
             NetworkID::Mainnet => NetworkDefinition::mainnet(),

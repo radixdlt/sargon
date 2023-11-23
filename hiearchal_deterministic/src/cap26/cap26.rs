@@ -14,6 +14,8 @@ pub trait CAP26Repr: Sized {
         Option::None
     }
     fn hd_path(&self) -> &HDPath;
+
+    #[cfg(not(tarpaulin_include))]
     fn to_string(&self) -> String {
         self.hd_path().to_string()
     }
@@ -124,6 +126,7 @@ pub trait CAP26Repr: Sized {
         ));
     }
 
+    #[cfg(not(tarpaulin_include))]
     fn new(network_id: NetworkID, key_kind: CAP26KeyKind, index: HDPathValue) -> Self {
         let entity_kind = Self::entity_kind().expect("GetID cannot be used with this constructor");
         let c0 = HDPathComponent::bip44_purpose();
