@@ -1,10 +1,9 @@
 [package]
-name = "radix_wallet_kit"
+name = "profile"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-nonempty = { version = "0.8.1", features = ["serde", "serialize"] }
 serde = { version = "1.0.192", features = ["derive"] }
 serde_json = { version = "1.0.108", features = ["preserve_order"] }
 serde_repr = "0.1.17"
@@ -24,3 +23,4 @@ nutype = { version = "0.3.1", features = ["serde"] }
 transaction = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "038ddee8b0f57aa90e36375c69946c4eb634efeb", features = [
     "serde",
 ] }
+indexmap = { version = "2.1.0", features = ["serde"] }

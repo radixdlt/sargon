@@ -1,4 +1,4 @@
-use hierarchical_deterministic::derivation_path::DerivationPath;
+use hierarchical_deterministic::derivation::derivation_path::DerivationPath;
 use radix_engine_common::crypto::PublicKey;
 use serde::{Deserialize, Serialize};
 use std::{cell::RefCell, cmp::Ordering, fmt::Display};

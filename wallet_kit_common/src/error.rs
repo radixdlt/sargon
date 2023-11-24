@@ -22,4 +22,7 @@ pub enum Error {
 
     #[error("Failed to parse InvalidNonFungibleGlobalID from str.")]
     InvalidNonFungibleGlobalID,
+
+    #[error("Supported SLIP10 curves in FactorSource crypto parameters is either empty or contains more elements than allowed.")]
+    FactorSourceCryptoParametersSupportedCurvesInvalidSize,
 }
