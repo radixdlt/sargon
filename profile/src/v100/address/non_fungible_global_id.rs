@@ -100,6 +100,8 @@ impl NonFungibleGlobalId {
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashSet;
+
     use radix_engine_common::data::scrypto::model::NonFungibleLocalId;
     use serde_json::json;
     use wallet_kit_common::json::{
@@ -168,5 +170,38 @@ mod tests {
             &id,
             json!("resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<WRONG>"),
         );
+    }
+
+    #[test]
+    fn compare() {
+        let a: NonFungibleGlobalId =
+            "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<1>"
+                .try_into()
+                .unwrap();
+        let b: NonFungibleGlobalId =
+            "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<2>"
+                .try_into()
+                .unwrap();
+        assert!(a < b);
+        assert!(b > a);
+    }
+
+    #[test]
+    fn hash() {
+        let a: NonFungibleGlobalId =
+            "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<1>"
+                .try_into()
+                .unwrap();
+        let b: NonFungibleGlobalId =
+            "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<2>"
+                .try_into()
+                .unwrap();
+        let mut set = HashSet::<NonFungibleGlobalId>::new();
+        set.insert(a.clone());
+        assert_eq!(set.len(), 1);
+        set.insert(a);
+        assert_eq!(set.len(), 1);
+        set.insert(b);
+        assert_eq!(set.len(), 2);
     }
 }

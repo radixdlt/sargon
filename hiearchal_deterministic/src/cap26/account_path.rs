@@ -17,14 +17,17 @@ pub struct AccountPath {
     pub index: HDPathValue,
 }
 impl CAP26Repr for AccountPath {
+    #[cfg(not(tarpaulin_include))]
     fn hd_path(&self) -> &HDPath {
         &self.path
     }
 
+    #[cfg(not(tarpaulin_include))]
     fn entity_kind() -> Option<CAP26EntityKind> {
         Some(CAP26EntityKind::Account)
     }
 
+    #[cfg(not(tarpaulin_include))]
     fn __with_path_and_components(
         path: HDPath,
         network_id: NetworkID,
@@ -43,6 +46,7 @@ impl CAP26Repr for AccountPath {
 }
 
 impl AccountPath {
+    #[cfg(not(tarpaulin_include))]
     pub fn placeholder() -> Self {
         Self::from_str("m/44H/1022H/1H/525H/1460H/0H").unwrap()
     }
@@ -50,6 +54,7 @@ impl AccountPath {
 
 impl Serialize for AccountPath {
     /// Serializes this `AccountAddress` into its bech32 address string as JSON.
+    #[cfg(not(tarpaulin_include))]
     fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
     where
         S: Serializer,
@@ -58,9 +63,9 @@ impl Serialize for AccountPath {
     }
 }
 
-#[cfg(not(tarpaulin_include))]
 impl<'de> serde::Deserialize<'de> for AccountPath {
     /// Tries to deserializes a JSON string as a bech32 address into an `AccountAddress`.
+    #[cfg(not(tarpaulin_include))]
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<AccountPath, D::Error> {
         let s = String::deserialize(d)?;
         AccountPath::from_str(&s).map_err(de::Error::custom)
@@ -70,6 +75,7 @@ impl<'de> serde::Deserialize<'de> for AccountPath {
 impl TryInto<AccountPath> for &str {
     type Error = CAP26Error;
 
+    #[cfg(not(tarpaulin_include))]
     fn try_into(self) -> Result<AccountPath, Self::Error> {
         AccountPath::from_str(self)
     }
