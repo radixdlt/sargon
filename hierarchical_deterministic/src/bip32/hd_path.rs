@@ -78,3 +78,21 @@ impl<'de> serde::Deserialize<'de> for HDPath {
         HDPath::from_str(&s).map_err(de::Error::custom)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use serde_json::json;
+    use wallet_kit_common::json::{
+        assert_json_value_eq_after_roundtrip, assert_json_value_ne_after_roundtrip,
+    };
+
+    use super::HDPath;
+
+    #[test]
+    fn json_roundtrip() {
+        let str = "m/44H/1022H";
+        let parsed = HDPath::from_str(str).unwrap();
+        assert_json_value_eq_after_roundtrip(&parsed, json!(str));
+        assert_json_value_ne_after_roundtrip(&parsed, json!("m/44H/33H"));
+    }
+}
