@@ -1,5 +1,3 @@
-use std::fmt::Display;
-
 use radix_engine_common::types::EntityType as EngineEntityType;
 use serde::{Deserialize, Serialize};
 use strum::FromRepr;
@@ -28,7 +26,6 @@ impl AbstractEntityType {
             EngineEntityType::GlobalVirtualEd25519Account => Ok(Self::Account),
             EngineEntityType::GlobalVirtualSecp256k1Account => Ok(Self::Account),
             EngineEntityType::GlobalVirtualEd25519Identity => Ok(Self::Identity),
-            EngineEntityType::GlobalVirtualSecp256k1Identity => Ok(Self::Identity),
             EngineEntityType::GlobalFungibleResourceManager => Ok(Self::Resource),
             _ => Err(Error::UnsupportedEntityType),
         }
@@ -41,14 +38,5 @@ impl AbstractEntityType {
             Self::Identity => "identity".to_string(),
             Self::Resource => "resource".to_string(),
         }
-    }
-}
-
-impl Display for AbstractEntityType {
-    fn fmt(
-        &self,
-        f: &mut radix_engine_common::prelude::fmt::Formatter<'_>,
-    ) -> radix_engine_common::prelude::fmt::Result {
-        write!(f, "{}", self.hrp())
     }
 }

@@ -300,6 +300,15 @@ mod tests {
     }
 
     #[test]
+    fn display() {
+        let account = Account::placeholder();
+        assert_eq!(
+            format!("{account}"),
+            "Unnamed | account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+        );
+    }
+
+    #[test]
     fn display_name_get_set() {
         let account = Account::with_values(
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"

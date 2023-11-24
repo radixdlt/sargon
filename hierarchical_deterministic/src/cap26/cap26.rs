@@ -99,13 +99,10 @@ pub trait CAP26Repr: Sized {
             Box::new(|v| CAP26EntityKind::from_repr(v).ok_or(InvalidEntityKind(v))),
         )?;
 
-        match Self::entity_kind() {
-            Some(expected_entity_kind) => {
-                if entity_kind != expected_entity_kind {
-                    return Err(WrongEntityKind(entity_kind, expected_entity_kind));
-                }
+        if let Some(expected_entity_kind) = Self::entity_kind() {
+            if entity_kind != expected_entity_kind {
+                return Err(WrongEntityKind(entity_kind, expected_entity_kind));
             }
-            None => {}
         }
 
         let key_kind = Self::parse_try_map(

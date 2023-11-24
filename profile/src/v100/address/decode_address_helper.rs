@@ -20,3 +20,20 @@ pub fn decode_address(s: &str) -> Result<DecodeAddressOutput, Error> {
     let network_id = NetworkID::try_from(network_id_raw)?;
     return Ok((network_id, entity_type, hrp, data));
 }
+
+#[cfg(test)]
+mod tests {
+    use wallet_kit_common::error::Error;
+
+    use super::decode_address;
+
+    #[test]
+    fn decode_unsupported_entity() {
+        assert_eq!(
+            decode_address(
+                "consensusmanager_rdx1scxxxxxxxxxxcnsmgrxxxxxxxxx000999665565xxxxxxxxxcnsmgr"
+            ),
+            Err(Error::UnsupportedEntityType)
+        );
+    }
+}

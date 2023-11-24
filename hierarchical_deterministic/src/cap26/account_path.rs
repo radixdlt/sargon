@@ -115,6 +115,30 @@ mod tests {
     }
 
     #[test]
+    fn invalid_depth() {
+        assert_eq!(
+            AccountPath::from_str("m/44H/1022H"),
+            Err(CAP26Error::InvalidDepthOfCAP26Path)
+        )
+    }
+
+    #[test]
+    fn not_all_hardened() {
+        assert_eq!(
+            AccountPath::from_str("m/44H/1022H/1H/525H/1460H/0"), // last not hardened
+            Err(CAP26Error::NotAllComponentsAreHardened)
+        )
+    }
+
+    #[test]
+    fn cointype_not_found() {
+        assert_eq!(
+            AccountPath::from_str("m/44H/33H/1H/525H/1460H/0"), // `33` instead of 1022
+            Err(CAP26Error::NotAllComponentsAreHardened)
+        )
+    }
+
+    #[test]
     fn fails_when_entity_type_identity() {
         assert_eq!(
             AccountPath::from_str("m/44H/1022H/1H/618H/1460H/0H"),
