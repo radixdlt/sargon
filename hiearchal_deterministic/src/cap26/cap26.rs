@@ -10,6 +10,7 @@ use super::{
 };
 
 pub trait CAP26Repr: Sized {
+    #[cfg(not(tarpaulin_include))]
     fn entity_kind() -> Option<CAP26EntityKind> {
         Option::None
     }
@@ -28,6 +29,7 @@ pub trait CAP26Repr: Sized {
         index: HDPathValue,
     ) -> Self;
 
+    #[cfg(not(tarpaulin_include))]
     fn parse_try_map<T, F>(
         path: &Vec<HDPathComponent>,
         index: usize,
@@ -40,6 +42,7 @@ pub trait CAP26Repr: Sized {
         try_map(got.value())
     }
 
+    #[cfg(not(tarpaulin_include))]
     fn parse<F>(
         path: &Vec<HDPathComponent>,
         index: usize,
@@ -56,6 +59,7 @@ pub trait CAP26Repr: Sized {
         Ok(got)
     }
 
+    #[cfg(not(tarpaulin_include))]
     fn from_str(s: &str) -> Result<Self, CAP26Error> {
         use CAP26Error::*;
         let path = HDPath::from_str(s).map_err(|_| CAP26Error::InvalidBIP32Path(s.to_string()))?;
