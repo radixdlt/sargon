@@ -4,13 +4,24 @@ use hierarchical_deterministic::derivation::{
 use serde::{Deserialize, Serialize};
 use wallet_kit_common::error::Error;
 
+/// Cryptographic parameters a certain FactorSource supports, e.g. which Elliptic Curves
+/// it supports.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct FactorSourceCryptoParameters {
-    /// SHOULD be non empty: Either `curve25519`` or `secp256k1`
+    /// Describes with which Elliptic Curves a Factor Source can be used, e.g. a
+    /// "Babylon" `DeviceFactorSource` is not capable of deriving keys on the curve
+    /// `secp256k1` - only Olympia imported FactorSources can do that.
+    ///
+    /// Either `[curve25519]` or `[secp256k1, curve25519]`
+    ///
+    /// Must not be empty.
     supported_curves: Vec<SLIP10Curve>,
 
-    /// either BIP44 or CAP26 (SLIP10), empty if this factor source does not support HD derivation.
+    /// If not empty: Describes which kind of Hierarchical Deterministic (HD) derivations a FactorSource
+    /// is capable of doing - if empty: the FactorSource does not support HD derivation.
+    ///
+    /// Either BIP44 or CAP26 (SLIP10)
     supported_derivation_path_schemes: Vec<DerivationPathScheme>,
 }
 
