@@ -5,7 +5,8 @@ use serde::{Deserialize, Serialize};
 use wallet_kit_common::error::Error;
 
 /// Cryptographic parameters a certain FactorSource supports, e.g. which Elliptic Curves
-/// it supports.
+/// it supports and which Hierarchical Deterministic (HD) derivations schemes it supports,
+/// if any.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct FactorSourceCryptoParameters {
@@ -18,8 +19,9 @@ pub struct FactorSourceCryptoParameters {
     /// Must not be empty.
     supported_curves: Vec<SLIP10Curve>,
 
-    /// If not empty: Describes which kind of Hierarchical Deterministic (HD) derivations a FactorSource
-    /// is capable of doing - if empty: the FactorSource does not support HD derivation.
+    /// If not empty: Describes which kind of Hierarchical Deterministic (HD)
+    /// derivations a FactorSource is capable of doing - if empty: the
+    /// FactorSource does not support HD derivation.
     ///
     /// Either BIP44 or CAP26 (SLIP10)
     supported_derivation_path_schemes: Vec<DerivationPathScheme>,
@@ -63,6 +65,12 @@ impl FactorSourceCryptoParameters {
     }
 }
 
+impl Default for FactorSourceCryptoParameters {
+    fn default() -> Self {
+        Self::babylon()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use hierarchical_deterministic::derivation::{
@@ -80,6 +88,14 @@ mod tests {
                 .first()
                 .unwrap(),
             &SLIP10Curve::Curve25519
+        );
+    }
+
+    #[test]
+    fn default_is_babylon() {
+        assert_eq!(
+            FactorSourceCryptoParameters::babylon(),
+            FactorSourceCryptoParameters::default()
         );
     }
 

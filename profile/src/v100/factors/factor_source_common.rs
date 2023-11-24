@@ -5,6 +5,7 @@ use std::{
 
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
+use wallet_kit_common::utils::factory::now;
 
 use super::{
     factor_source_crypto_parameters::FactorSourceCryptoParameters,
@@ -16,6 +17,7 @@ use super::{
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct FactorSourceCommon {
+    /// Cryptographic parameters a certain FactorSource supports, e.g. Elliptic Curves.
     pub crypto_parameters: FactorSourceCryptoParameters,
 
     /// When this factor source for originally added by the user.
@@ -36,4 +38,78 @@ pub struct FactorSourceCommon {
     /// Has interior mutability (`RefCell`) since a user might wanna flag a FactorSource as
     /// "deleted".
     pub flags: RefCell<BTreeSet<FactorSourceFlag>>,
+}
+
+impl FactorSourceCommon {
+    pub fn with_values<I>(
+        crypto_parameters: FactorSourceCryptoParameters,
+        added_on: NaiveDateTime,
+        last_used_on: NaiveDateTime,
+        flags: I,
+    ) -> Self
+    where
+        I: IntoIterator<Item = FactorSourceFlag>,
+    {
+        Self {
+            crypto_parameters,
+            added_on,
+            last_used_on: Cell::new(last_used_on),
+            flags: RefCell::new(BTreeSet::from_iter(flags.into_iter())),
+        }
+    }
+
+    pub fn new<I>(crypto_parameters: FactorSourceCryptoParameters, flags: I) -> Self
+    where
+        I: IntoIterator<Item = FactorSourceFlag>,
+    {
+        let date: NaiveDateTime = now();
+        Self::with_values(crypto_parameters, date, date, flags)
+    }
+}
+
+impl Default for FactorSourceCommon {
+    fn default() -> Self {
+        Self::new(FactorSourceCryptoParameters::default(), [])
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use chrono::NaiveDateTime;
+    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
+
+    use crate::v100::factors::{
+        factor_source_crypto_parameters::FactorSourceCryptoParameters,
+        factor_source_flag::FactorSourceFlag,
+    };
+
+    use super::FactorSourceCommon;
+
+    #[test]
+    fn json_roundtrip() {
+        let date =
+            NaiveDateTime::parse_from_str("2023-09-11T16:05:56", "%Y-%m-%dT%H:%M:%S").unwrap();
+        let model = FactorSourceCommon::with_values(
+            FactorSourceCryptoParameters::default(),
+            date.clone(),
+            date,
+            [FactorSourceFlag::Main],
+        );
+
+        assert_eq_after_json_roundtrip(
+            &model,
+            r#"
+            {
+                "addedOn": "2023-09-11T16:05:56",
+                "cryptoParameters": {
+                    "supportedCurves": ["curve25519"],
+                    "supportedDerivationPathSchemes": ["cap26"]
+                },
+                "flags": ["main"],
+                "lastUsedOn": "2023-09-11T16:05:56"
+            }
+            "#,
+        );
+    }
 }
