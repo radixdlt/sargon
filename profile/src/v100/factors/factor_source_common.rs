@@ -77,7 +77,7 @@ impl Default for FactorSourceCommon {
 mod tests {
 
     use chrono::NaiveDateTime;
-    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::{json::assert_eq_after_json_roundtrip, utils::factory::now};
 
     use crate::v100::factors::{
         factor_source_crypto_parameters::FactorSourceCryptoParameters,
@@ -85,6 +85,27 @@ mod tests {
     };
 
     use super::FactorSourceCommon;
+
+    #[test]
+    fn default_support_babylon() {
+        assert_eq!(
+            FactorSourceCommon::default().crypto_parameters,
+            FactorSourceCryptoParameters::babylon()
+        )
+    }
+
+    #[test]
+    fn new_uses_now_as_date() {
+        let date0 = now();
+        let model = FactorSourceCommon::new(FactorSourceCryptoParameters::default(), []);
+        let date1 = now();
+        let do_test = |d: NaiveDateTime| {
+            assert!(d > date0);
+            assert!(d < date1);
+        };
+        do_test(model.added_on);
+        do_test(model.last_used_on.get());
+    }
 
     #[test]
     fn json_roundtrip() {
