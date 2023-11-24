@@ -1,4 +1,4 @@
-use hiearchal_deterministic::derivation_path::DerivationPath;
+use hierarchical_deterministic::derivation_path::DerivationPath;
 use radix_engine_common::crypto::PublicKey;
 use serde::{Deserialize, Serialize};
 use std::{cell::RefCell, cmp::Ordering, fmt::Display};
@@ -186,7 +186,6 @@ impl Display for Account {
 
 // CFG test
 #[cfg(test)]
-#[cfg(not(tarpaulin_include))]
 impl Account {
     pub fn placeholder() -> Self {
         Self::placeholder_mainnet()
@@ -247,7 +246,7 @@ impl Account {
 mod tests {
     use std::{cell::RefCell, collections::BTreeSet};
 
-    use hiearchal_deterministic::bip32::hd_path_component::HDPathValue;
+    use hierarchical_deterministic::bip32::hd_path_component::HDPathValue;
 
     use crate::v100::{
         address::account_address::AccountAddress,

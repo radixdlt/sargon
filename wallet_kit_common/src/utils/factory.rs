@@ -11,7 +11,6 @@ fn date_to_string(dt: &NaiveDateTime, fmt: &str) -> String {
     dt.format(fmt).to_string()
 }
 
-#[cfg(not(tarpaulin_include))]
 pub fn iso8601(dt: &NaiveDateTime) -> String {
     date_to_string(dt, "%Y-%m-%d %H:%M:%S")
 }

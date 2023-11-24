@@ -1,11 +1,10 @@
 [package]
-name = "hiearchal_deterministic"
+name = "hierarchical_deterministic"
 version = "0.1.0"
 edition = "2021"
 
 [lib]
 doctest = false
-test = false
 
 [dependencies]
 serde = { version = "1.0.192", features = ["derive"] }

@@ -57,7 +57,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "Discrepancy, found accounts on other network than mainnet\n")]
+    #[should_panic(expected = "Discrepancy, found accounts on other network than mainnet")]
     fn panic_when_network_id_mismatch_between_accounts_and_value() {
         Network::new(
             NetworkID::Mainnet,
