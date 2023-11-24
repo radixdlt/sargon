@@ -1,4 +1,4 @@
-use hiearchal_deterministic::bip32::hd_path_component::HDPathValue;
+use hierarchical_deterministic::bip32::hd_path_component::HDPathValue;
 use serde::{Deserialize, Serialize};
 
 use crate::v100::factors::hierarchical_deterministic_factor_instance::HierarchicalDeterministicFactorInstance;

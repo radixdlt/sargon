@@ -6,7 +6,6 @@ pub type HDPathValue = u32;
 pub struct HDPathComponent(HDPathValue);
 
 impl HDPathComponent {
-    #[cfg(not(tarpaulin_include))]
     pub(crate) fn value(&self) -> HDPathValue {
         if self.is_hardened() {
             self.0 - BIP32_HARDENED
@@ -30,7 +29,6 @@ impl HDPathComponent {
 }
 
 impl ToString for HDPathComponent {
-    #[cfg(not(tarpaulin_include))]
     fn to_string(&self) -> String {
         let h_or_empty = if self.is_hardened() { "H" } else { "" };
         format!("{}{}", self.value(), h_or_empty)

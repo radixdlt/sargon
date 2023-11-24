@@ -10,13 +10,11 @@ use super::{
 };
 
 pub trait CAP26Repr: Sized {
-    #[cfg(not(tarpaulin_include))]
     fn entity_kind() -> Option<CAP26EntityKind> {
         Option::None
     }
     fn hd_path(&self) -> &HDPath;
 
-    #[cfg(not(tarpaulin_include))]
     fn to_string(&self) -> String {
         self.hd_path().to_string()
     }
@@ -29,7 +27,6 @@ pub trait CAP26Repr: Sized {
         index: HDPathValue,
     ) -> Self;
 
-    #[cfg(not(tarpaulin_include))]
     fn parse_try_map<T, F>(
         path: &Vec<HDPathComponent>,
         index: usize,
@@ -42,7 +39,6 @@ pub trait CAP26Repr: Sized {
         try_map(got.value())
     }
 
-    #[cfg(not(tarpaulin_include))]
     fn parse<F>(
         path: &Vec<HDPathComponent>,
         index: usize,
@@ -59,7 +55,6 @@ pub trait CAP26Repr: Sized {
         Ok(got)
     }
 
-    #[cfg(not(tarpaulin_include))]
     fn from_str(s: &str) -> Result<Self, CAP26Error> {
         use CAP26Error::*;
         let path = HDPath::from_str(s).map_err(|_| CAP26Error::InvalidBIP32Path(s.to_string()))?;
@@ -130,7 +125,6 @@ pub trait CAP26Repr: Sized {
         ));
     }
 
-    #[cfg(not(tarpaulin_include))]
     fn new(network_id: NetworkID, key_kind: CAP26KeyKind, index: HDPathValue) -> Self {
         let entity_kind = Self::entity_kind().expect("GetID cannot be used with this constructor");
         let c0 = HDPathComponent::bip44_purpose();

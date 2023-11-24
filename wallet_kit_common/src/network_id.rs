@@ -92,13 +92,13 @@ impl TryFrom<u8> for NetworkID {
 
 impl Display for NetworkID {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "{}", self.logical_name())
+        write!(f, "{}", self.logical_name())
     }
 }
 
 impl NetworkID {
     /// Looks up a `NetworkDefinition` in a lookup table.
-    #[cfg(not(tarpaulin_include))]
+
     pub fn network_definition(&self) -> NetworkDefinition {
         match self {
             NetworkID::Mainnet => NetworkDefinition::mainnet(),
