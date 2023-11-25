@@ -48,6 +48,9 @@ impl CAP26KeyKind {
 
 #[cfg(test)]
 mod tests {
+    use serde_json::json;
+    use wallet_kit_common::json::{assert_json_roundtrip, assert_json_value_eq_after_roundtrip};
+
     use crate::cap26::cap26_key_kind::CAP26KeyKind;
 
     #[test]
@@ -71,5 +74,11 @@ mod tests {
             format!("{}", CAP26KeyKind::MessageEncryption),
             "MessageEncryption"
         );
+    }
+
+    #[test]
+    fn json_roundtrip() {
+        assert_json_value_eq_after_roundtrip(&CAP26KeyKind::TransactionSigning, json!(1460));
+        assert_json_roundtrip(&CAP26KeyKind::TransactionSigning);
     }
 }

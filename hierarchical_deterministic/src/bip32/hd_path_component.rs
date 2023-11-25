@@ -50,12 +50,12 @@ mod tests {
     }
 
     #[test]
-    fn non_hardended_value() {
+    fn non_hardened_value() {
         assert_eq!(HDPathComponent::from_value(3).value(), 3)
     }
 
     #[test]
-    fn non_hardended_value_isnt_hardened() {
+    fn non_hardened_value_is_not_hardened() {
         assert!(!HDPathComponent::from_value(3).is_hardened())
     }
 
