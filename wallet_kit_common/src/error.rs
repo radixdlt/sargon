@@ -25,4 +25,13 @@ pub enum Error {
 
     #[error("Supported SLIP10 curves in FactorSource crypto parameters is either empty or contains more elements than allowed.")]
     FactorSourceCryptoParametersSupportedCurvesInvalidSize,
+
+    #[error("Unknown BIP39 word.")]
+    UnknownBIP39Word,
+
+    #[error("Invalid mnemonic phrase.")]
+    InvalidMnemonicPhrase,
+
+    #[error("Invalid bip39 word count : '{0}'")]
+    InvalidBIP39WordCount(usize),
 }
