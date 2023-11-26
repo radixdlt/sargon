@@ -9,25 +9,9 @@ use super::{
     cap26_entity_kind::CAP26EntityKind, cap26_error::CAP26Error, cap26_key_kind::CAP26KeyKind,
 };
 
-pub trait CAP26Repr: Sized {
-    fn entity_kind() -> Option<CAP26EntityKind> {
-        Option::None
-    }
-    fn hd_path(&self) -> &HDPath;
-
-    fn to_string(&self) -> String {
-        self.hd_path().to_string()
-    }
-
-    fn __with_path_and_components(
-        path: HDPath,
-        network_id: NetworkID,
-        entity_kind: CAP26EntityKind,
-        key_kind: CAP26KeyKind,
-        index: HDPathValue,
-    ) -> Self;
-
-    fn parse_try_map<T, F>(
+pub(crate) enum CAP26 {}
+impl CAP26 {
+    pub(crate) fn parse_try_map<T, F>(
         path: &Vec<HDPathComponent>,
         index: usize,
         try_map: F,
@@ -39,7 +23,7 @@ pub trait CAP26Repr: Sized {
         try_map(got.value())
     }
 
-    fn parse<F>(
+    pub(crate) fn parse<F>(
         path: &Vec<HDPathComponent>,
         index: usize,
         expected: HDPathComponent,
@@ -55,10 +39,10 @@ pub trait CAP26Repr: Sized {
         Ok(got)
     }
 
-    fn from_str(s: &str) -> Result<Self, CAP26Error> {
+    pub(crate) fn try_parse_base(s: &str) -> Result<(HDPath, Vec<HDPathComponent>), CAP26Error> {
         use CAP26Error::*;
         let path = HDPath::from_str(s).map_err(|_| CAP26Error::InvalidBIP32Path(s.to_string()))?;
-        if path.depth() != 6 {
+        if path.depth() < 2 {
             return Err(InvalidDepthOfCAP26Path);
         }
         let components = path.components();
@@ -79,9 +63,40 @@ pub trait CAP26Repr: Sized {
             HDPathComponent::bip44_cointype(),
             Box::new(|v| CoinTypeNotFound(v)),
         )?;
+        return Ok((path.clone(), components.clone()));
+    }
+}
 
-        let network_id = Self::parse_try_map(
-            components,
+pub trait CAP26Base: Sized {
+    fn hd_path(&self) -> &HDPath;
+
+    fn to_string(&self) -> String {
+        self.hd_path().to_string()
+    }
+}
+
+pub trait CAP26Repr: CAP26Base {
+    fn entity_kind() -> Option<CAP26EntityKind> {
+        Option::None
+    }
+
+    fn __with_path_and_components(
+        path: HDPath,
+        network_id: NetworkID,
+        entity_kind: CAP26EntityKind,
+        key_kind: CAP26KeyKind,
+        index: HDPathValue,
+    ) -> Self;
+
+    fn from_str(s: &str) -> Result<Self, CAP26Error> {
+        use CAP26Error::*;
+        let (path, components) = CAP26::try_parse_base(s)?;
+        if path.depth() != 6 {
+            println!("🔮 path.depth(): {}", path.depth());
+            return Err(InvalidDepthOfCAP26Path);
+        }
+        let network_id = CAP26::parse_try_map(
+            &components,
             2,
             Box::new(|v| {
                 if v <= u8::MAX as u32 {
@@ -92,9 +107,8 @@ pub trait CAP26Repr: Sized {
                 }
             }),
         )?;
-
-        let entity_kind = Self::parse_try_map(
-            components,
+        let entity_kind = CAP26::parse_try_map(
+            &components,
             3,
             Box::new(|v| CAP26EntityKind::from_repr(v).ok_or(InvalidEntityKind(v))),
         )?;
@@ -105,13 +119,13 @@ pub trait CAP26Repr: Sized {
             }
         }
 
-        let key_kind = Self::parse_try_map(
-            components,
+        let key_kind = CAP26::parse_try_map(
+            &components,
             4,
             Box::new(|v| CAP26KeyKind::from_repr(v).ok_or(InvalidKeyKind(v))),
         )?;
 
-        let index = Self::parse_try_map(components, 5, Box::new(|v| Ok(v)))?;
+        let index = CAP26::parse_try_map(&components, 5, Box::new(|v| Ok(v)))?;
 
         return Ok(Self::__with_path_and_components(
             path,

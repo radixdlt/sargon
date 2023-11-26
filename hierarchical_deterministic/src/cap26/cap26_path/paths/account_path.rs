@@ -1,11 +1,14 @@
 use serde::{de, Deserializer, Serialize, Serializer};
 use wallet_kit_common::network_id::NetworkID;
 
-use crate::bip32::{hd_path::HDPath, hd_path_component::HDPathValue};
-
-use super::{
-    cap26::CAP26Repr, cap26_entity_kind::CAP26EntityKind, cap26_error::CAP26Error,
-    cap26_key_kind::CAP26KeyKind,
+use crate::{
+    bip32::{hd_path::HDPath, hd_path_component::HDPathValue},
+    cap26::{
+        cap26::{CAP26Base, CAP26Repr},
+        cap26_entity_kind::CAP26EntityKind,
+        cap26_error::CAP26Error,
+        cap26_key_kind::CAP26KeyKind,
+    },
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -16,11 +19,14 @@ pub struct AccountPath {
     pub key_kind: CAP26KeyKind,
     pub index: HDPathValue,
 }
-impl CAP26Repr for AccountPath {
+
+impl CAP26Base for AccountPath {
     fn hd_path(&self) -> &HDPath {
         &self.path
     }
+}
 
+impl CAP26Repr for AccountPath {
     fn entity_kind() -> Option<CAP26EntityKind> {
         Some(CAP26EntityKind::Account)
     }
@@ -83,7 +89,9 @@ mod tests {
     };
 
     use crate::cap26::{
-        cap26::CAP26Repr, cap26_entity_kind::CAP26EntityKind, cap26_error::CAP26Error,
+        cap26::{CAP26Base, CAP26Repr},
+        cap26_entity_kind::CAP26EntityKind,
+        cap26_error::CAP26Error,
         cap26_key_kind::CAP26KeyKind,
     };
 

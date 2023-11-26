@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     bip44::bip44_like_path::BIP44LikePath,
-    cap26::{account_path::AccountPath, cap26_path::CAP26Path},
+    cap26::cap26_path::{cap26_path::CAP26Path, paths::account_path::AccountPath},
 };
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]

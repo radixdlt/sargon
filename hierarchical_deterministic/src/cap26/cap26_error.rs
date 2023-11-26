@@ -35,4 +35,7 @@ pub enum CAP26Error {
 
     #[error("Unsupported NetworkID, got: '{0}', found value: '{0}', known network IDs: [1 (mainnet), 2 (stokenet)]")]
     UnsupportedNetworkID(u8),
+
+    #[error("Invalid GetID path, last component was not 365' but {0}'")]
+    InvalidGetIDPath(HDPathValue),
 }
