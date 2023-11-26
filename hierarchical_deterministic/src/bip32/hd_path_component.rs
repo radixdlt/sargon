@@ -6,12 +6,15 @@ pub type HDPathValue = u32;
 pub struct HDPathComponent(HDPathValue);
 
 impl HDPathComponent {
-    pub(crate) fn value(&self) -> HDPathValue {
+    pub(crate) fn index(&self) -> HDPathValue {
         if self.is_hardened() {
             self.0 - BIP32_HARDENED
         } else {
             self.0
         }
+    }
+    pub fn value(&self) -> HDPathValue {
+        self.0
     }
 
     pub(crate) fn is_hardened(&self) -> bool {
@@ -31,7 +34,7 @@ impl HDPathComponent {
 impl ToString for HDPathComponent {
     fn to_string(&self) -> String {
         let h_or_empty = if self.is_hardened() { "H" } else { "" };
-        format!("{}{}", self.value(), h_or_empty)
+        format!("{}{}", self.index(), h_or_empty)
     }
 }
 
@@ -46,12 +49,12 @@ mod tests {
 
     #[test]
     fn hardened_value() {
-        assert_eq!(HDPathComponent::harden(3).value(), 3)
+        assert_eq!(HDPathComponent::harden(3).index(), 3)
     }
 
     #[test]
     fn non_hardened_value() {
-        assert_eq!(HDPathComponent::from_value(3).value(), 3)
+        assert_eq!(HDPathComponent::from_value(3).index(), 3)
     }
 
     #[test]

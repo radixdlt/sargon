@@ -1,13 +1,25 @@
 use thiserror::Error;
 
-use crate::bip32::hd_path_component::HDPathValue;
-
-use super::cap26_entity_kind::CAP26EntityKind;
+use crate::{bip32::hd_path_component::HDPathValue, cap26::cap26_entity_kind::CAP26EntityKind};
 
 #[derive(Debug, Error, PartialEq)]
-pub enum CAP26Error {
+pub enum HDPathError {
     #[error("Invalid BIP32 path '{0}'.")]
     InvalidBIP32Path(String),
+
+    #[error("Invalid depth of BIP44 Path.")]
+    InvalidDepthOfBIP44Path,
+
+    #[error("Invalid BIP44Like Path, account was not hardened")]
+    InvalidBIP44LikePathAccountWasNotHardened,
+
+    #[error("Invalid BIP44Like Path, change unexpectedly hardened")]
+    InvalidBIP44LikePathChangeWasUnexpectedlyHardened,
+
+    /// Radix Olympia did follow BIP44, we accidentally hardened the last component `"index"`,
+    /// and for backwards compatibility we require it to be hardened in Babylon too.
+    #[error("Invalid BIP44Like Path, index was not hardened")]
+    InvalidBIP44LikePathIndexWasNotHardened,
 
     #[error("Invalid depth of CAP26 Path.")]
     InvalidDepthOfCAP26Path,

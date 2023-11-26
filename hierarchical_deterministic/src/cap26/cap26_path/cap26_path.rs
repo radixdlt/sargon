@@ -24,8 +24,8 @@ impl Derivation for CAP26Path {
     }
     fn scheme(&self) -> DerivationPathScheme {
         match self {
-            CAP26Path::AccountPath(_) => DerivationPathScheme::Cap26,
-            CAP26Path::GetID(_) => DerivationPathScheme::Bip44Olympia,
+            CAP26Path::AccountPath(p) => p.scheme(),
+            CAP26Path::GetID(p) => p.scheme(),
         }
     }
 }

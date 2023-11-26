@@ -5,13 +5,11 @@ use crate::{
         hd_path::HDPath,
         hd_path_component::{HDPathComponent, HDPathValue},
     },
-    cap26::cap26::CAP26,
     derivation::derivation::Derivation,
+    hdpath_error::HDPathError,
 };
 
-use super::{
-    cap26_entity_kind::CAP26EntityKind, cap26_error::CAP26Error, cap26_key_kind::CAP26KeyKind,
-};
+use super::{cap26_entity_kind::CAP26EntityKind, cap26_key_kind::CAP26KeyKind};
 
 pub trait CAP26Repr: Derivation {
     fn entity_kind() -> Option<CAP26EntityKind> {
@@ -26,14 +24,16 @@ pub trait CAP26Repr: Derivation {
         index: HDPathValue,
     ) -> Self;
 
-    fn from_str(s: &str) -> Result<Self, CAP26Error> {
-        use CAP26Error::*;
-        let (path, components) = CAP26::try_parse_base(s)?;
+    fn from_str(s: &str) -> Result<Self, HDPathError> {
+        use HDPathError::*;
+        let (path, components) = HDPath::try_parse_base(s)?;
+        if !components.clone().iter().all(|c| c.is_hardened()) {
+            return Err(NotAllComponentsAreHardened);
+        }
         if path.depth() != 6 {
-            println!("🔮 path.depth(): {}", path.depth());
             return Err(InvalidDepthOfCAP26Path);
         }
-        let network_id = CAP26::parse_try_map(
+        let network_id = HDPath::parse_try_map(
             &components,
             2,
             Box::new(|v| {
@@ -45,7 +45,7 @@ pub trait CAP26Repr: Derivation {
                 }
             }),
         )?;
-        let entity_kind = CAP26::parse_try_map(
+        let entity_kind = HDPath::parse_try_map(
             &components,
             3,
             Box::new(|v| CAP26EntityKind::from_repr(v).ok_or(InvalidEntityKind(v))),
@@ -57,13 +57,13 @@ pub trait CAP26Repr: Derivation {
             }
         }
 
-        let key_kind = CAP26::parse_try_map(
+        let key_kind = HDPath::parse_try_map(
             &components,
             4,
             Box::new(|v| CAP26KeyKind::from_repr(v).ok_or(InvalidKeyKind(v))),
         )?;
 
-        let index = CAP26::parse_try_map(&components, 5, Box::new(|v| Ok(v)))?;
+        let index = HDPath::parse_try_map(&components, 5, Box::new(|v| Ok(v)))?;
 
         return Ok(Self::__with_path_and_components(
             path,

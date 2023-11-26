@@ -2,8 +2,8 @@ use serde::{de, Deserializer, Serialize, Serializer};
 
 use crate::{
     bip32::{hd_path::HDPath, hd_path_component::HDPathValue},
-    cap26::{cap26::CAP26, cap26_error::CAP26Error},
     derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},
+    hdpath_error::HDPathError,
 };
 
 /// Use it with `GetIDPath::default()` to create the path `m/44'/1022'/365'`
@@ -30,13 +30,13 @@ impl Default for GetIDPath {
 impl GetIDPath {
     pub const LAST_COMPONENT_VALUE: HDPathValue = 365;
 
-    pub fn from_str(s: &str) -> Result<Self, CAP26Error> {
-        use CAP26Error::*;
-        let (path, components) = CAP26::try_parse_base(s)?;
+    pub fn from_str(s: &str) -> Result<Self, HDPathError> {
+        use HDPathError::*;
+        let (path, components) = HDPath::try_parse_base(s)?;
         if path.depth() != 3 {
             return Err(InvalidDepthOfCAP26Path);
         }
-        let value = CAP26::parse_try_map(&components, 2, Box::new(|v| Ok(v)))?;
+        let value = HDPath::parse_try_map(&components, 2, Box::new(|v| Ok(v)))?;
         if value != Self::LAST_COMPONENT_VALUE {
             return Err(InvalidGetIDPath(value));
         }
@@ -65,7 +65,7 @@ impl<'de> serde::Deserialize<'de> for GetIDPath {
 }
 
 impl TryInto<GetIDPath> for &str {
-    type Error = CAP26Error;
+    type Error = HDPathError;
 
     fn try_into(self) -> Result<GetIDPath, Self::Error> {
         GetIDPath::from_str(self)
@@ -77,7 +77,7 @@ mod tests {
     use serde_json::json;
     use wallet_kit_common::json::assert_json_value_eq_after_roundtrip;
 
-    use crate::{cap26::cap26_error::CAP26Error, derivation::derivation::Derivation};
+    use crate::{derivation::derivation::Derivation, hdpath_error::HDPathError};
 
     use super::GetIDPath;
 
@@ -97,7 +97,7 @@ mod tests {
     fn invalid() {
         assert_eq!(
             GetIDPath::from_str("m/44H/1022H/1337H"),
-            Err(CAP26Error::InvalidGetIDPath(1337))
+            Err(HDPathError::InvalidGetIDPath(1337))
         );
     }
 

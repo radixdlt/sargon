@@ -1,6 +1,128 @@
-use serde::{Deserialize, Serialize};
+use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 
-use crate::bip32::hd_path::HDPath;
+use crate::{
+    bip32::{
+        hd_path::HDPath,
+        hd_path_component::{HDPathComponent, HDPathValue},
+    },
+    derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},
+    hdpath_error::HDPathError,
+};
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct BIP44LikePath(HDPath);
+
+impl BIP44LikePath {
+    pub fn from_str(s: &str) -> Result<Self, HDPathError> {
+        let (path, components) = HDPath::try_parse_base(s)?;
+        if path.depth() != 5 {
+            return Err(HDPathError::InvalidDepthOfBIP44Path);
+        }
+        let account = &components[2];
+        if !account.is_hardened() {
+            return Err(HDPathError::InvalidBIP44LikePathAccountWasNotHardened);
+        }
+        let change = &components[3];
+        if change.is_hardened() {
+            return Err(HDPathError::InvalidBIP44LikePathChangeWasUnexpectedlyHardened);
+        }
+
+        let index = &components[4];
+        if !index.is_hardened() {
+            return Err(HDPathError::InvalidBIP44LikePathIndexWasNotHardened);
+        }
+        return Ok(Self(path));
+    }
+
+    fn with_account_and_index(account: HDPathValue, index: HDPathValue) -> Self {
+        let c0 = HDPathComponent::bip44_purpose(); // purpose
+        let c1 = HDPathComponent::bip44_cointype(); // cointype
+        let c2 = HDPathComponent::harden(account); // account
+        let c3 = HDPathComponent::from_value(0); // change
+        let c4 = HDPathComponent::harden(index); // index
+        let components = vec![c0, c1, c2, c3, c4];
+        let path = HDPath::from_components(components);
+        return Self(path);
+    }
+
+    pub fn new(index: HDPathValue) -> Self {
+        Self::with_account_and_index(0, index)
+    }
+}
+
+impl Derivation for BIP44LikePath {
+    fn hd_path(&self) -> &HDPath {
+        &self.0
+    }
+
+    fn scheme(&self) -> DerivationPathScheme {
+        DerivationPathScheme::Bip44Olympia
+    }
+}
+
+impl Serialize for BIP44LikePath {
+    /// Serializes this `AccountAddress` into its bech32 address string as JSON.
+    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&self.to_string())
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for BIP44LikePath {
+    /// Tries to deserializes a JSON string as a bech32 address into an `AccountAddress`.
+    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<BIP44LikePath, D::Error> {
+        let s = String::deserialize(d)?;
+        BIP44LikePath::from_str(&s).map_err(de::Error::custom)
+    }
+}
+
+impl TryInto<BIP44LikePath> for &str {
+    type Error = HDPathError;
+
+    fn try_into(self) -> Result<BIP44LikePath, Self::Error> {
+        BIP44LikePath::from_str(self)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use serde_json::json;
+    use wallet_kit_common::json::{
+        assert_json_value_eq_after_roundtrip, assert_json_value_ne_after_roundtrip,
+    };
+
+    use crate::derivation::derivation::Derivation;
+
+    use super::BIP44LikePath;
+
+    #[test]
+    fn string_roundtrip() {
+        let str = "m/44H/1022H/0H/0/0H";
+        let a: BIP44LikePath = str.try_into().unwrap();
+        assert_eq!(a.to_string(), str);
+    }
+
+    #[test]
+    fn inequality_different_accounts() {
+        let a: BIP44LikePath = "m/44H/1022H/0H/0/0H".try_into().unwrap();
+        let b: BIP44LikePath = "m/44H/1022H/1H/0/0H".try_into().unwrap();
+        assert!(a != b);
+    }
+
+    #[test]
+    fn inequality_different_index() {
+        let a: BIP44LikePath = "m/44H/1022H/0H/0/0H".try_into().unwrap();
+        let b: BIP44LikePath = "m/44H/1022H/0H/0/1H".try_into().unwrap();
+        assert!(a != b);
+    }
+
+    #[test]
+    fn json_roundtrip() {
+        let str = "m/44H/1022H/0H/0/0H";
+        let parsed: BIP44LikePath = str.try_into().unwrap();
+        assert_json_value_eq_after_roundtrip(&parsed, json!(str));
+        assert_json_value_ne_after_roundtrip(&parsed, json!("m/44H/1022H/0H/0/1H"));
+    }
+}
