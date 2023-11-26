@@ -4,11 +4,10 @@ use wallet_kit_common::network_id::NetworkID;
 use crate::{
     bip32::{hd_path::HDPath, hd_path_component::HDPathValue},
     cap26::{
-        cap26::{CAP26Base, CAP26Repr},
-        cap26_entity_kind::CAP26EntityKind,
-        cap26_error::CAP26Error,
-        cap26_key_kind::CAP26KeyKind,
+        cap26_entity_kind::CAP26EntityKind, cap26_error::CAP26Error, cap26_key_kind::CAP26KeyKind,
+        cap26_repr::CAP26Repr,
     },
+    derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -18,12 +17,6 @@ pub struct AccountPath {
     pub entity_kind: CAP26EntityKind,
     pub key_kind: CAP26KeyKind,
     pub index: HDPathValue,
-}
-
-impl CAP26Base for AccountPath {
-    fn hd_path(&self) -> &HDPath {
-        &self.path
-    }
 }
 
 impl CAP26Repr for AccountPath {
@@ -80,6 +73,16 @@ impl TryInto<AccountPath> for &str {
     }
 }
 
+impl Derivation for AccountPath {
+    fn hd_path(&self) -> &HDPath {
+        &self.path
+    }
+
+    fn scheme(&self) -> DerivationPathScheme {
+        DerivationPathScheme::Cap26
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use serde_json::json;
@@ -88,11 +91,12 @@ mod tests {
         network_id::NetworkID,
     };
 
-    use crate::cap26::{
-        cap26::{CAP26Base, CAP26Repr},
-        cap26_entity_kind::CAP26EntityKind,
-        cap26_error::CAP26Error,
-        cap26_key_kind::CAP26KeyKind,
+    use crate::{
+        cap26::{
+            cap26_entity_kind::CAP26EntityKind, cap26_error::CAP26Error,
+            cap26_key_kind::CAP26KeyKind, cap26_repr::CAP26Repr,
+        },
+        derivation::derivation::Derivation,
     };
 
     use super::AccountPath;

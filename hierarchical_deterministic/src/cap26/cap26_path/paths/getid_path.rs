@@ -2,10 +2,8 @@ use serde::{de, Deserializer, Serialize, Serializer};
 
 use crate::{
     bip32::{hd_path::HDPath, hd_path_component::HDPathValue},
-    cap26::{
-        cap26::{CAP26Base, CAP26},
-        cap26_error::CAP26Error,
-    },
+    cap26::{cap26::CAP26, cap26_error::CAP26Error},
+    derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},
 };
 
 /// Use it with `GetIDPath::default()` to create the path `m/44'/1022'/365'`
@@ -14,9 +12,12 @@ use crate::{
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct GetIDPath(HDPath);
 
-impl CAP26Base for GetIDPath {
+impl Derivation for GetIDPath {
     fn hd_path(&self) -> &HDPath {
         &self.0
+    }
+    fn scheme(&self) -> DerivationPathScheme {
+        DerivationPathScheme::Cap26
     }
 }
 
@@ -76,7 +77,7 @@ mod tests {
     use serde_json::json;
     use wallet_kit_common::json::assert_json_value_eq_after_roundtrip;
 
-    use crate::cap26::{cap26::CAP26Base, cap26_error::CAP26Error};
+    use crate::{cap26::cap26_error::CAP26Error, derivation::derivation::Derivation};
 
     use super::GetIDPath;
 
