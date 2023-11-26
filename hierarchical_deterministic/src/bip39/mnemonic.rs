@@ -9,6 +9,7 @@ use super::{bip39_word::bip39_word::BIP39Word, bip39_word_count::BIP39WordCount}
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Mnemonic {
+    internal: bip39::Mnemonic,
     pub words: Vec<BIP39Word>,
     pub word_count: BIP39WordCount,
     pub language: Language,
@@ -19,26 +20,32 @@ impl Mnemonic {
         self.words.iter().map(|w| w.word.to_string()).join(" ")
     }
     pub fn from_phrase(phrase: &str) -> Result<Self, Error> {
-        let intermediary =
+        let internal =
             bip39::Mnemonic::from_str(phrase).map_err(|_| Error::InvalidMnemonicPhrase)?;
-        let words = Self::words(&intermediary)?;
-        let word_count = Self::word_count(&intermediary)?;
+
+        let language = internal.language();
+
+        let words = internal
+            .word_iter()
+            .map(|w| BIP39Word::new(w, language))
+            .collect::<Result<Vec<BIP39Word>, Error>>()?;
+
+        let word_count = BIP39WordCount::from_count(internal.word_count())?;
+
         Ok(Self {
+            internal,
             words,
             word_count,
-            language: intermediary.language(),
+            language,
         })
     }
-    fn words(intermediary: &bip39::Mnemonic) -> Result<Vec<BIP39Word>, Error> {
-        intermediary
-            .word_iter()
-            .map(|w| BIP39Word::new(w, intermediary.language()))
-            .collect()
-    }
-    fn word_count(intermediary: &bip39::Mnemonic) -> Result<BIP39WordCount, Error> {
-        BIP39WordCount::from_count(intermediary.word_count())
+
+    pub fn to_seed(&self, passphrase: &str) -> Seed {
+        self.internal.to_seed(passphrase)
     }
 }
+
+pub type Seed = [u8; 64];
 
 impl Serialize for Mnemonic {
     /// Serializes this `AccountAddress` into its bech32 address string as JSON.
