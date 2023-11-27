@@ -5,6 +5,8 @@ use strum::FromRepr;
 
 use crate::bip32::hd_path_component::HDPathValue;
 
+/// Account or Identity (used by Personas) part of a CAP26 derivation
+/// path.
 #[derive(
     Serialize_repr,
     Deserialize_repr,
