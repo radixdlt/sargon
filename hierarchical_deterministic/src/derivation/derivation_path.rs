@@ -8,6 +8,7 @@ use crate::{
 
 use super::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme};
 
+/// A derivation path on either supported schemes, either Babylon (CAP26) or Olympia (BIP44Like).
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 #[serde(rename_all = "camelCase")]
 #[serde(tag = "discriminator", content = "value")]

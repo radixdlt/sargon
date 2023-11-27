@@ -2,6 +2,12 @@ use thiserror::Error;
 
 #[derive(Debug, Error, PartialEq)]
 pub enum Error {
+    #[error("String not hex")]
+    StringNotHex,
+
+    #[error("Invalid byte count, expected 32.")]
+    InvalidByteCountExpected32,
+
     #[error("Invalid Account Address '{0}'.")]
     InvalidAccountAddress(String),
 
