@@ -36,3 +36,51 @@ impl Derivation for DerivationPath {
         }
     }
 }
+
+impl DerivationPath {
+    pub fn placeholder_cap26() -> Self {
+        DerivationPath::CAP26(CAP26Path::placeholder_account())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{
+        bip44::bip44_like_path::BIP44LikePath,
+        cap26::cap26_path::paths::account_path::AccountPath,
+        derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},
+    };
+
+    use super::DerivationPath;
+    #[test]
+    fn cap26_scheme() {
+        assert_eq!(
+            DerivationPath::placeholder_cap26().scheme(),
+            DerivationPathScheme::Cap26
+        );
+    }
+
+    #[test]
+    fn cap26_hdpath() {
+        assert_eq!(
+            DerivationPath::placeholder_cap26().hd_path(),
+            AccountPath::placeholder().hd_path()
+        );
+    }
+
+    #[test]
+    fn bip44like_scheme() {
+        assert_eq!(
+            DerivationPath::BIP44Like(BIP44LikePath::new(0)).scheme(),
+            DerivationPathScheme::Bip44Olympia
+        );
+    }
+
+    #[test]
+    fn bip44like_hdpath() {
+        assert_eq!(
+            DerivationPath::BIP44Like(BIP44LikePath::new(0)).hd_path(),
+            BIP44LikePath::new(0).hd_path()
+        );
+    }
+}

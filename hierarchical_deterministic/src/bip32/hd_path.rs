@@ -79,11 +79,14 @@ impl HDPath {
         Ok(got)
     }
 
-    pub(crate) fn try_parse_base(s: &str) -> Result<(HDPath, Vec<HDPathComponent>), HDPathError> {
+    pub(crate) fn try_parse_base(
+        s: &str,
+        depth_error: HDPathError,
+    ) -> Result<(HDPath, Vec<HDPathComponent>), HDPathError> {
         use HDPathError::*;
         let path = HDPath::from_str(s).map_err(|_| HDPathError::InvalidBIP32Path(s.to_string()))?;
         if path.depth() < 2 {
-            return Err(InvalidDepthOfCAP26Path);
+            return Err(depth_error);
         }
         let components = path.components();
 

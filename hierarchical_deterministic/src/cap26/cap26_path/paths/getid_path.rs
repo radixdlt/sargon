@@ -32,7 +32,7 @@ impl GetIDPath {
 
     pub fn from_str(s: &str) -> Result<Self, HDPathError> {
         use HDPathError::*;
-        let (path, components) = HDPath::try_parse_base(s)?;
+        let (path, components) = HDPath::try_parse_base(s, HDPathError::InvalidDepthOfCAP26Path)?;
         if path.depth() != 3 {
             return Err(InvalidDepthOfCAP26Path);
         }

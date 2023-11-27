@@ -26,7 +26,7 @@ pub trait CAP26Repr: Derivation {
 
     fn from_str(s: &str) -> Result<Self, HDPathError> {
         use HDPathError::*;
-        let (path, components) = HDPath::try_parse_base(s)?;
+        let (path, components) = HDPath::try_parse_base(s, HDPathError::InvalidDepthOfCAP26Path)?;
         if !components.clone().iter().all(|c| c.is_hardened()) {
             return Err(NotAllComponentsAreHardened);
         }

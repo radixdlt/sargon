@@ -29,3 +29,51 @@ impl Derivation for CAP26Path {
         }
     }
 }
+
+impl CAP26Path {
+    pub fn placeholder_account() -> Self {
+        Self::AccountPath(AccountPath::placeholder())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{
+        cap26::cap26_path::paths::{account_path::AccountPath, getid_path::GetIDPath},
+        derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},
+    };
+
+    use super::CAP26Path;
+
+    #[test]
+    fn scheme_account_path() {
+        assert_eq!(
+            CAP26Path::placeholder_account().scheme(),
+            DerivationPathScheme::Cap26
+        );
+    }
+
+    #[test]
+    fn scheme_getid_path() {
+        assert_eq!(
+            CAP26Path::GetID(GetIDPath::default()).scheme(),
+            DerivationPathScheme::Cap26
+        );
+    }
+
+    #[test]
+    fn hdpath_account_path() {
+        assert_eq!(
+            CAP26Path::placeholder_account().hd_path(),
+            AccountPath::placeholder().hd_path()
+        );
+    }
+
+    #[test]
+    fn hdpath_getid_path() {
+        assert_eq!(
+            CAP26Path::GetID(GetIDPath::default()).hd_path(),
+            GetIDPath::default().hd_path()
+        );
+    }
+}

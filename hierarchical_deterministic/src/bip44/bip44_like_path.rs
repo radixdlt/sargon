@@ -14,7 +14,7 @@ pub struct BIP44LikePath(HDPath);
 
 impl BIP44LikePath {
     pub fn from_str(s: &str) -> Result<Self, HDPathError> {
-        let (path, components) = HDPath::try_parse_base(s)?;
+        let (path, components) = HDPath::try_parse_base(s, HDPathError::InvalidDepthOfBIP44Path)?;
         if path.depth() != 5 {
             return Err(HDPathError::InvalidDepthOfBIP44Path);
         }
@@ -93,7 +93,7 @@ mod tests {
         assert_json_value_eq_after_roundtrip, assert_json_value_ne_after_roundtrip,
     };
 
-    use crate::derivation::derivation::Derivation;
+    use crate::{derivation::derivation::Derivation, hdpath_error::HDPathError};
 
     use super::BIP44LikePath;
 
@@ -102,6 +102,46 @@ mod tests {
         let str = "m/44H/1022H/0H/0/0H";
         let a: BIP44LikePath = str.try_into().unwrap();
         assert_eq!(a.to_string(), str);
+    }
+
+    #[test]
+    fn invalid_depth_1() {
+        assert_eq!(
+            BIP44LikePath::from_str("m/44H"),
+            Err(HDPathError::InvalidDepthOfBIP44Path)
+        );
+    }
+
+    #[test]
+    fn invalid_depth() {
+        assert_eq!(
+            BIP44LikePath::from_str("m/44H/1022H/0H"),
+            Err(HDPathError::InvalidDepthOfBIP44Path)
+        );
+    }
+
+    #[test]
+    fn invalid_account_not_hardened() {
+        assert_eq!(
+            BIP44LikePath::from_str("m/44H/1022H/0/1/2H"),
+            Err(HDPathError::InvalidBIP44LikePathAccountWasNotHardened)
+        );
+    }
+
+    #[test]
+    fn invalid_change_was_hardened() {
+        assert_eq!(
+            BIP44LikePath::from_str("m/44H/1022H/0H/0H/2H"),
+            Err(HDPathError::InvalidBIP44LikePathChangeWasUnexpectedlyHardened)
+        );
+    }
+
+    #[test]
+    fn invalid_index_not_hardened() {
+        assert_eq!(
+            BIP44LikePath::from_str("m/44H/1022H/0H/0/0"),
+            Err(HDPathError::InvalidBIP44LikePathIndexWasNotHardened)
+        );
     }
 
     #[test]
@@ -124,5 +164,13 @@ mod tests {
         let parsed: BIP44LikePath = str.try_into().unwrap();
         assert_json_value_eq_after_roundtrip(&parsed, json!(str));
         assert_json_value_ne_after_roundtrip(&parsed, json!("m/44H/1022H/0H/0/1H"));
+    }
+
+    #[test]
+    fn new_with_account() {
+        assert_ne!(
+            BIP44LikePath::with_account_and_index(1, 0),
+            BIP44LikePath::new(0)
+        );
     }
 }
