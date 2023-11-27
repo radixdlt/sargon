@@ -110,6 +110,7 @@ mod tests {
     };
     use radix_engine_common::crypto::PublicKey;
     use transaction::signing::PrivateKey;
+    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
 
     use super::MnemonicWithPassphrase;
 
@@ -183,6 +184,27 @@ mod tests {
         assert_eq!(
             "03e78cdb2e0b7ea6e55e121a58560ccf841a913d3a4a9b8349e0ef00c2102f48d8",
             public_key_hex_from_private(&private_key)
+        );
+    }
+
+    #[test]
+    fn json_roundtrip() {
+        let model = MnemonicWithPassphrase::with_passphrase(
+            Mnemonic::from_phrase(
+     "habit special recipe upon giraffe manual evil badge dwarf welcome inspire shrug post arrive van",
+            )
+            .unwrap(),
+            "25th".to_string(),
+        );
+
+        assert_eq_after_json_roundtrip(
+            &model,
+            r#"
+            {
+                "mnemonic": "habit special recipe upon giraffe manual evil badge dwarf welcome inspire shrug post arrive van",
+                "passphrase": "25th"
+            }
+            "#,
         );
     }
 }
