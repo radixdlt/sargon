@@ -116,6 +116,27 @@ mod tests {
 
     use super::MnemonicWithPassphrase;
 
+    #[test]
+    fn with_passphrase() {
+        let phrase = "equip will roof matter pink blind book anxiety banner elbow sun young";
+        let passphrase = "25th";
+        let mwp = MnemonicWithPassphrase::with_passphrase(
+            Mnemonic::from_phrase(phrase).unwrap(),
+            passphrase.to_string(),
+        );
+        assert_eq!(mwp.mnemonic.phrase(), phrase);
+        assert_eq!(mwp.passphrase, passphrase);
+    }
+
+    #[test]
+    fn new_eq_from_phrase() {
+        let phrase = "equip will roof matter pink blind book anxiety banner elbow sun young";
+        assert_eq!(
+            MnemonicWithPassphrase::new(Mnemonic::from_phrase(phrase).unwrap()),
+            MnemonicWithPassphrase::from_phrase(phrase).unwrap()
+        );
+    }
+
     /// Test vector: https://github.com/radixdlt/babylon-wallet-ios/blob/99161cbbb11a78f36db6991e5d5c5f092678d5fa/RadixWalletTests/CryptographyTests/SLIP10Tests/TestVectors/cap26_curve25519.json#L8
     #[test]
     fn derive_a_curve25519_key_with_cap26() {
