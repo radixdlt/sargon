@@ -1,6 +1,5 @@
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use slip10::*;
 use transaction::signing::{
     ed25519::Ed25519PrivateKey, secp256k1::Secp256k1PrivateKey, PrivateKey,
 };
@@ -11,7 +10,9 @@ use crate::{
     bip39::mnemonic::{Mnemonic, Seed},
 };
 
-use super::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme};
+use super::{
+    derivation::Derivation, derivation_path_scheme::DerivationPathScheme, slip10_curve::SLIP10Curve,
+};
 
 /// A BIP39 Mnemonic and BIP39 passphrase - aka "25th word" tuple,
 /// from which we can derive a HD Root used for derivation.
@@ -53,14 +54,14 @@ impl MnemonicWithPassphrase {
     }
 
     fn derive_ed25519_private_key(seed: &Seed, path: &HDPath) -> Ed25519PrivateKey {
-        let chain = BIP32Path::from(
+        let chain = slip10::BIP32Path::from(
             path.components()
                 .into_iter()
                 .map(|c| c.value())
                 .collect_vec(),
         );
 
-        let bytes = derive_key_from_path(seed, Curve::Ed25519, &chain)
+        let bytes = slip10::derive_key_from_path(seed, slip10::Curve::Ed25519, &chain)
             .map(|e| e.key)
             .expect("Should always be able to derive");
 
@@ -89,10 +90,12 @@ impl MnemonicWithPassphrase {
         let path = derivation.hd_path();
         match derivation.scheme() {
             DerivationPathScheme::Cap26 => {
+                assert_eq!(derivation.scheme().curve(), SLIP10Curve::Curve25519);
                 let key = Self::derive_ed25519_private_key(&seed, path);
                 PrivateKey::Ed25519(key)
             }
             DerivationPathScheme::Bip44Olympia => {
+                assert_eq!(derivation.scheme().curve(), SLIP10Curve::Secp256k1);
                 let key = Self::derive_secp256k1_private_key(&seed, path);
                 PrivateKey::Secp256k1(key)
             }
@@ -107,36 +110,11 @@ mod tests {
         bip39::mnemonic::Mnemonic,
         bip44::bip44_like_path::BIP44LikePath,
         cap26::{cap26_path::paths::account_path::AccountPath, cap26_repr::CAP26Repr},
+        keys::key_extensions::{private_key_hex, public_key_hex_from_private},
     };
-    use radix_engine_common::crypto::PublicKey;
-    use transaction::signing::PrivateKey;
     use wallet_kit_common::json::assert_eq_after_json_roundtrip;
 
     use super::MnemonicWithPassphrase;
-
-    fn private_key_bytes(private_key: &PrivateKey) -> Vec<u8> {
-        match private_key {
-            PrivateKey::Ed25519(key) => key.to_bytes(),
-            PrivateKey::Secp256k1(key) => key.to_bytes(),
-        }
-    }
-    fn public_key_bytes(public_key: &PublicKey) -> Vec<u8> {
-        match public_key {
-            PublicKey::Ed25519(key) => key.to_vec(),
-            PublicKey::Secp256k1(key) => key.to_vec(),
-        }
-    }
-
-    fn private_key_hex(private_key: &PrivateKey) -> String {
-        hex::encode(private_key_bytes(private_key))
-    }
-
-    fn public_key_hex(public_key: &PublicKey) -> String {
-        hex::encode(public_key_bytes(public_key))
-    }
-    fn public_key_hex_from_private(private_key: &PrivateKey) -> String {
-        public_key_hex(&private_key.public_key())
-    }
 
     /// Test vector: https://github.com/radixdlt/babylon-wallet-ios/blob/99161cbbb11a78f36db6991e5d5c5f092678d5fa/RadixWalletTests/CryptographyTests/SLIP10Tests/TestVectors/cap26_curve25519.json#L8
     #[test]
