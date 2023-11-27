@@ -24,8 +24,56 @@ impl Derivation for CAP26Path {
     }
     fn scheme(&self) -> DerivationPathScheme {
         match self {
-            CAP26Path::AccountPath(_) => DerivationPathScheme::Cap26,
-            CAP26Path::GetID(_) => DerivationPathScheme::Bip44Olympia,
+            CAP26Path::AccountPath(p) => p.scheme(),
+            CAP26Path::GetID(p) => p.scheme(),
         }
+    }
+}
+
+impl CAP26Path {
+    pub fn placeholder_account() -> Self {
+        Self::AccountPath(AccountPath::placeholder())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{
+        cap26::cap26_path::paths::{account_path::AccountPath, getid_path::GetIDPath},
+        derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},
+    };
+
+    use super::CAP26Path;
+
+    #[test]
+    fn scheme_account_path() {
+        assert_eq!(
+            CAP26Path::placeholder_account().scheme(),
+            DerivationPathScheme::Cap26
+        );
+    }
+
+    #[test]
+    fn scheme_getid_path() {
+        assert_eq!(
+            CAP26Path::GetID(GetIDPath::default()).scheme(),
+            DerivationPathScheme::Cap26
+        );
+    }
+
+    #[test]
+    fn hdpath_account_path() {
+        assert_eq!(
+            CAP26Path::placeholder_account().hd_path(),
+            AccountPath::placeholder().hd_path()
+        );
+    }
+
+    #[test]
+    fn hdpath_getid_path() {
+        assert_eq!(
+            CAP26Path::GetID(GetIDPath::default()).hd_path(),
+            GetIDPath::default().hd_path()
+        );
     }
 }

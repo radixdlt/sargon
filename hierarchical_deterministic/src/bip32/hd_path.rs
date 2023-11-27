@@ -4,7 +4,9 @@ use itertools::Itertools;
 use serde::{de, Deserializer, Serialize, Serializer};
 use slip10::path::BIP32Path;
 
-use super::hd_path_component::HDPathComponent;
+use crate::hdpath_error::HDPathError;
+
+use super::hd_path_component::{HDPathComponent, HDPathValue};
 
 use thiserror::Error;
 
@@ -47,6 +49,61 @@ impl HDPath {
         BIP32Path::from_str(s)
             .map(|p| Self::from(p))
             .map_err(|_| BIP32Error::InvalidBIP32Path(s.to_string()))
+    }
+
+    pub(crate) fn parse_try_map<T, F>(
+        path: &Vec<HDPathComponent>,
+        index: usize,
+        try_map: F,
+    ) -> Result<T, HDPathError>
+    where
+        F: Fn(HDPathValue) -> Result<T, HDPathError>,
+    {
+        let got = &path[index];
+        try_map(got.index())
+    }
+
+    pub(crate) fn parse<F>(
+        path: &Vec<HDPathComponent>,
+        index: usize,
+        expected: HDPathComponent,
+        err: F,
+    ) -> Result<&HDPathComponent, HDPathError>
+    where
+        F: Fn(HDPathValue) -> HDPathError,
+    {
+        let got = &path[index];
+        if got != &expected {
+            return Err(err(got.index()));
+        }
+        Ok(got)
+    }
+
+    pub(crate) fn try_parse_base(
+        s: &str,
+        depth_error: HDPathError,
+    ) -> Result<(HDPath, Vec<HDPathComponent>), HDPathError> {
+        use HDPathError::*;
+        let path = HDPath::from_str(s).map_err(|_| HDPathError::InvalidBIP32Path(s.to_string()))?;
+        if path.depth() < 2 {
+            return Err(depth_error);
+        }
+        let components = path.components();
+
+        _ = Self::parse(
+            components,
+            0,
+            HDPathComponent::bip44_purpose(),
+            Box::new(|v| BIP44PurposeNotFound(v)),
+        )?;
+
+        _ = Self::parse(
+            components,
+            1,
+            HDPathComponent::bip44_cointype(),
+            Box::new(|v| CoinTypeNotFound(v)),
+        )?;
+        return Ok((path.clone(), components.clone()));
     }
 }
 
