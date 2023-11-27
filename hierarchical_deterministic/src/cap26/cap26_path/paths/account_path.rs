@@ -146,7 +146,7 @@ mod tests {
     fn cointype_not_found() {
         assert_eq!(
             AccountPath::from_str("m/44H/33H/1H/525H/1460H/0"), // `33` instead of 1022
-            Err(HDPathError::NotAllComponentsAreHardened)
+            Err(HDPathError::CoinTypeNotFound(33))
         )
     }
 
@@ -226,13 +226,6 @@ mod tests {
         let a: AccountPath = "m/44H/1022H/1H/525H/1460H/0H".try_into().unwrap();
         let b: AccountPath = "m/44H/1022H/1H/525H/1678H/0H".try_into().unwrap();
         assert!(a != b);
-    }
-
-    #[test]
-    fn slip10_crate_interop() {
-        //    BIP32Path
-        let str = "m/44H/1022H/1H/525H/1460H/0H";
-        let a: AccountPath = str.try_into().unwrap();
     }
 
     #[test]

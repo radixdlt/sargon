@@ -1,5 +1,3 @@
-use slip10::*;
-
 use crate::bip32::hd_path::HDPath;
 
 use super::derivation_path_scheme::DerivationPathScheme;

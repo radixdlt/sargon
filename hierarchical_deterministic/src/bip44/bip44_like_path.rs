@@ -1,4 +1,4 @@
-use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
+use serde::{de, Deserializer, Serialize, Serializer};
 
 use crate::{
     bip32::{
