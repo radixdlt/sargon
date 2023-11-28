@@ -1,4 +1,7 @@
 pub mod bip32;
+pub mod bip39;
 pub mod bip44;
 pub mod cap26;
-pub mod derivation_path;
+pub mod derivation;
+pub mod hdpath_error;
+pub mod keys;

@@ -5,6 +5,8 @@ use strum::FromRepr;
 
 use crate::bip32::hd_path_component::HDPathValue;
 
+/// Account or Identity (used by Personas) part of a CAP26 derivation
+/// path.
 #[derive(
     Serialize_repr,
     Deserialize_repr,
@@ -50,6 +52,9 @@ impl CAP26EntityKind {
 mod tests {
     use std::collections::BTreeSet;
 
+    use serde_json::json;
+    use wallet_kit_common::json::{assert_json_roundtrip, assert_json_value_eq_after_roundtrip};
+
     use crate::cap26::cap26_entity_kind::CAP26EntityKind;
 
     #[test]
@@ -86,5 +91,11 @@ mod tests {
     #[test]
     fn ord() {
         assert!(CAP26EntityKind::Account < CAP26EntityKind::Identity);
+    }
+
+    #[test]
+    fn json_roundtrip() {
+        assert_json_value_eq_after_roundtrip(&CAP26EntityKind::Account, json!(525));
+        assert_json_roundtrip(&CAP26EntityKind::Account);
     }
 }

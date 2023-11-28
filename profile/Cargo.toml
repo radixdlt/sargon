@@ -1,10 +1,9 @@
 [package]
-name = "radix_wallet_kit"
+name = "profile"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-nonempty = { version = "0.8.1", features = ["serde", "serialize"] }
 serde = { version = "1.0.192", features = ["derive"] }
 serde_json = { version = "1.0.108", features = ["preserve_order"] }
 serde_repr = "0.1.17"
@@ -18,9 +17,9 @@ radix-engine-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", re
 thiserror = "1.0.50"
 chrono = { version = "0.4.31", features = ["serde"] }
 uuid = { version = "1.5.0", features = ["v4", "serde"] }
-radix-engine-toolkit-core = { git = "https://github.com/radixdlt/radix-engine-toolkit", version = "1.0.3", default-features = false }
-radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", version = "1.0.3" }
-nutype = { version = "0.3.1", features = ["serde"] }
+radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "927b0c88dcc62325edf7c6279ee3f84f26a6eadc" }
+radix-engine-toolkit-json = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "927b0c88dcc62325edf7c6279ee3f84f26a6eadc" }
+nutype = { version = "0.4.0", features = ["serde"] }
 transaction = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "038ddee8b0f57aa90e36375c69946c4eb634efeb", features = [
     "serde",
 ] }

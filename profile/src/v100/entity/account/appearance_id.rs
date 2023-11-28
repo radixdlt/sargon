@@ -1,7 +1,20 @@
 use nutype::nutype;
 
-#[nutype(validate(max = 11))]
-#[derive(Serialize, Deserialize, Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[nutype(
+    validate(less_or_equal = 11),
+    derive(
+        Serialize,
+        Deserialize,
+        Copy,
+        Clone,
+        Debug,
+        PartialEq,
+        Eq,
+        PartialOrd,
+        Ord,
+        Hash
+    )
+)]
 pub struct AppearanceID(u8);
 
 impl Default for AppearanceID {
@@ -29,7 +42,10 @@ mod tests {
 
     #[test]
     fn err_too_big() {
-        assert_eq!(AppearanceID::new(12), Err(AppearanceIDError::TooBig));
+        assert_eq!(
+            AppearanceID::new(12),
+            Err(AppearanceIDError::LessOrEqualViolated)
+        );
     }
 
     #[test]

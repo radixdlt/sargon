@@ -18,3 +18,4 @@ radix-engine-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", re
     "serde",
 ] }
 enum-iterator = "1.4.1"
+hex = "0.4.3"

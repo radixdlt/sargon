@@ -2,6 +2,12 @@ use thiserror::Error;
 
 #[derive(Debug, Error, PartialEq)]
 pub enum Error {
+    #[error("String not hex")]
+    StringNotHex,
+
+    #[error("Invalid byte count, expected 32.")]
+    InvalidByteCountExpected32,
+
     #[error("Invalid Account Address '{0}'.")]
     InvalidAccountAddress(String),
 
@@ -22,4 +28,16 @@ pub enum Error {
 
     #[error("Failed to parse InvalidNonFungibleGlobalID from str.")]
     InvalidNonFungibleGlobalID,
+
+    #[error("Supported SLIP10 curves in FactorSource crypto parameters is either empty or contains more elements than allowed.")]
+    FactorSourceCryptoParametersSupportedCurvesInvalidSize,
+
+    #[error("Unknown BIP39 word.")]
+    UnknownBIP39Word,
+
+    #[error("Invalid mnemonic phrase.")]
+    InvalidMnemonicPhrase,
+
+    #[error("Invalid bip39 word count : '{0}'")]
+    InvalidBIP39WordCount(usize),
 }

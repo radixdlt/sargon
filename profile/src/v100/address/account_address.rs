@@ -103,6 +103,15 @@ impl Display for AccountAddress {
     }
 }
 
+impl AccountAddress {
+    pub fn placeholder() -> Self {
+        AccountAddress::try_from_bech32(
+            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease",
+        )
+        .unwrap()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::str::FromStr;
@@ -155,15 +164,11 @@ mod tests {
 
     #[test]
     fn not_equal() {
-        let a: AccountAddress =
-            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
-                .try_into()
-                .unwrap();
         let b: AccountAddress =
             "account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzdm"
                 .try_into()
                 .unwrap();
-        assert_ne!(a, b)
+        assert_ne!(AccountAddress::placeholder(), b)
     }
 
     #[test]

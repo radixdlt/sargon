@@ -15,3 +15,14 @@ thiserror = "1.0.50"
 serde_repr = "0.1.17"
 strum = { version = "0.25.0", features = ["derive"] }
 itertools = { version = "0.12.0" }
+bip39 = { version = "2.0.0", features = ["serde"] }
+nutype = { version = "0.4.0", features = ["serde"] }
+memoize = "0.4.1"
+radix-engine-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "038ddee8b0f57aa90e36375c69946c4eb634efeb", features = [
+    "serde",
+] }
+transaction = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "038ddee8b0f57aa90e36375c69946c4eb634efeb", features = [
+    "serde",
+] }
+bip32 = "0.5.1" # slip10 crate does not support `secp256k1`.
+hex = "0.4.3"
