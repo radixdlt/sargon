@@ -73,6 +73,19 @@ impl Default for FactorSourceCommon {
     }
 }
 
+impl FactorSourceCommon {
+    pub fn placeholder() -> Self {
+        let date =
+            NaiveDateTime::parse_from_str("2023-09-11T16:05:56", "%Y-%m-%dT%H:%M:%S").unwrap();
+        FactorSourceCommon::with_values(
+            FactorSourceCryptoParameters::default(),
+            date.clone(),
+            date,
+            [FactorSourceFlag::Main],
+        )
+    }
+}
+
 #[cfg(test)]
 mod tests {
 

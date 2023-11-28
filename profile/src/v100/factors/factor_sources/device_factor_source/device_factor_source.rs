@@ -25,3 +25,13 @@ pub struct DeviceFactorSource {
     /// Properties describing a DeviceFactorSource to help user disambiguate between it and another one.
     pub hint: DeviceFactorSourceHint,
 }
+
+impl DeviceFactorSource {
+    pub fn placeholder() -> Self {
+        Self {
+            id: FactorSourceIDFromHash::placeholder(),
+            common: FactorSourceCommon::placeholder(),
+            hint: DeviceFactorSourceHint::placeholder(),
+        }
+    }
+}

@@ -10,7 +10,7 @@ use super::{
 /// device (phone), where the ID of it is the hash of a special
 /// key derived near the root of it.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-#[serde(rename_all = "lowercase", remote = "Self")]
+#[serde(remote = "Self")]
 pub enum FactorSourceID {
     #[serde(rename = "fromHash")]
     Hash(FactorSourceIDFromHash),

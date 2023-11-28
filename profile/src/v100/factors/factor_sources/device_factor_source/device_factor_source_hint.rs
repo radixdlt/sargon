@@ -44,6 +44,12 @@ impl Default for DeviceFactorSourceHint {
     }
 }
 
+impl DeviceFactorSourceHint {
+    pub fn placeholder() -> Self {
+        Self::iphone_unknown()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use wallet_kit_common::json::assert_eq_after_json_roundtrip;
