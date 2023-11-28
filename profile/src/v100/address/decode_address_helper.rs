@@ -1,5 +1,5 @@
 use radix_engine_common::types::EntityType as EngineEntityType;
-use radix_engine_toolkit_core::functions::address::decode;
+use radix_engine_toolkit::functions::address::decode;
 use wallet_kit_common::{error::Error, network_id::NetworkID};
 
 use crate::v100::entity::abstract_entity_type::AbstractEntityType;

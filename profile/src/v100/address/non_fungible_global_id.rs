@@ -1,9 +1,9 @@
 use radix_engine_common::data::scrypto::model::NonFungibleLocalId;
-use radix_engine_toolkit::models::scrypto::non_fungible_global_id::{
+
+use radix_engine_toolkit_json::models::scrypto::non_fungible_global_id::{
     SerializableNonFungibleGlobalId as EngineSerializableNonFungibleGlobalId,
     SerializableNonFungibleGlobalIdInternal as EngineSerializableNonFungibleGlobalIdInternal,
 };
-
 use serde::{Deserialize, Serialize};
 use std::{
     cmp::Ordering,
