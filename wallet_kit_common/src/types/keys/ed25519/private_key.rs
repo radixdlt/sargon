@@ -49,6 +49,32 @@ impl Ed25519PrivateKey {
     }
 }
 
+impl Ed25519PrivateKey {
+    pub fn placeholder() -> Self {
+        Self::placeholder_alice()
+    }
+
+    /// `833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42`
+    ///
+    /// expected public key:
+    /// `ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf`
+    ///
+    /// https://github.com/dalek-cryptography/ed25519-dalek/blob/main/tests/ed25519.rs#L103
+    pub fn placeholder_alice() -> Self {
+        Self::from_str("833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42").unwrap()
+    }
+
+    /// `1498b5467a63dffa2dc9d9e069caf075d16fc33fdd4c3b01bfadae6433767d93``
+
+    /// expected public key:
+    /// `b7a3c12dc0c8c748ab07525b701122b88bd78f600c76342d27f25e5f92444cde`
+    ///
+    /// https://cryptobook.nakov.com/digital-signatures/eddsa-sign-verify-examples
+    pub fn placeholder_bob() -> Self {
+        Self::from_str("1498b5467a63dffa2dc9d9e069caf075d16fc33fdd4c3b01bfadae6433767d93").unwrap()
+    }
+}
+
 // #[cfg(test)]
 // mod tests {
 //     use super::*;

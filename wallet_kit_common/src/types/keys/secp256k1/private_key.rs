@@ -49,6 +49,34 @@ impl Secp256k1PrivateKey {
     }
 }
 
+impl Secp256k1PrivateKey {
+    pub fn placeholder() -> Self {
+        Self::placeholder_alice()
+    }
+
+    /// `d78b6578b33f3446bdd9d09d057d6598bc915fec4008a54c509dc3b8cdc7dbe5`
+    /// expected public key uncompressed:
+    /// `04517b88916e7f315bb682f9926b14bc67a0e4246f8a419b986269e1a7e61fffa71159e5614fb40739f4d22004380670cbc99ee4a2a73899d084098f3a139130c4`
+    /// expected public key compressed:
+    /// `02517b88916e7f315bb682f9926b14bc67a0e4246f8a419b986269e1a7e61fffa7`
+    ///
+    /// https://github.com/Sajjon/K1/blob/main/Tests/K1Tests/TestVectors/cyon_ecdh_two_variants_with_kdf.json#L10
+    pub fn placeholder_alice() -> Self {
+        Self::from_str("d78b6578b33f3446bdd9d09d057d6598bc915fec4008a54c509dc3b8cdc7dbe5").unwrap()
+    }
+
+    /// `871761c9921a467059e090a0422ae76af87fa8eb905da91c9b554bd6a028c760``
+    /// expected public key uncompressed:
+    /// `043083620d1596d3f8988ff3270e42970dd2a031e2b9b6488052a4170ff999f3e8ab3efd3320b8f893cb421ed7ff0aa9ff43b43cad4e00e194f89845c6ac8233a7`
+    /// expected public key compressed:
+    /// `033083620d1596d3f8988ff3270e42970dd2a031e2b9b6488052a4170ff999f3e8`
+    ///
+    /// https://github.com/Sajjon/K1/blob/main/Tests/K1Tests/TestVectors/cyon_ecdh_two_variants_with_kdf.json#L12
+    pub fn placeholder_bob() -> Self {
+        Self::from_str("871761c9921a467059e090a0422ae76af87fa8eb905da91c9b554bd6a028c760").unwrap()
+    }
+}
+
 // #[cfg(test)]
 // mod tests {
 //     use super::*;

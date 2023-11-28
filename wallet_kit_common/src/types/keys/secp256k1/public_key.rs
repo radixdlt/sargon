@@ -1,7 +1,9 @@
+use crate::{error::Error, types::keys::secp256k1::private_key::Secp256k1PrivateKey};
 use radix_engine_common::crypto::Secp256k1PublicKey as EngineSecp256k1PublicKey;
+use serde::{Deserialize, Serialize};
+use std::fmt::{Debug, Formatter};
 
-use crate::error::Error;
-
+#[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Secp256k1PublicKey(EngineSecp256k1PublicKey);
 
 impl Secp256k1PublicKey {
@@ -31,5 +33,55 @@ impl TryFrom<&[u8]> for Secp256k1PublicKey {
         EngineSecp256k1PublicKey::try_from(slice)
             .map(Secp256k1PublicKey)
             .map_err(|_| Error::InvalidSecp256k1PublicKeyFromBytes)
+    }
+}
+
+impl Debug for Secp256k1PublicKey {
+    // Required method
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Secp256k1PublicKey")
+            .field("compressed_hex", &self.to_hex())
+            .finish()
+    }
+}
+
+impl Secp256k1PublicKey {
+    pub fn placeholder() -> Self {
+        Self::placeholder_alice()
+    }
+
+    pub fn placeholder_alice() -> Self {
+        let private_key = Secp256k1PrivateKey::placeholder_alice();
+        let public_key = private_key.public_key();
+        assert_eq!(
+            public_key.to_hex(),
+            "02517b88916e7f315bb682f9926b14bc67a0e4246f8a419b986269e1a7e61fffa7"
+        );
+        return public_key;
+    }
+
+    pub fn placeholder_bob() -> Self {
+        let private_key = Secp256k1PrivateKey::placeholder_bob();
+        let public_key = private_key.public_key();
+        assert_eq!(
+            public_key.to_hex(),
+            "033083620d1596d3f8988ff3270e42970dd2a031e2b9b6488052a4170ff999f3e8"
+        );
+        return public_key;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Secp256k1PublicKey;
+    use crate::json::assert_json_value_eq_after_roundtrip;
+    use serde_json::json;
+    #[test]
+    fn json() {
+        let model = Secp256k1PublicKey::placeholder_bob();
+        assert_json_value_eq_after_roundtrip(
+            &model,
+            json!("033083620d1596d3f8988ff3270e42970dd2a031e2b9b6488052a4170ff999f3e8"),
+        )
     }
 }
