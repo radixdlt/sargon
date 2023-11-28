@@ -80,6 +80,10 @@ impl<'de> serde::Deserialize<'de> for Hex32Bytes {
 
 #[cfg(test)]
 mod tests {
+    use std::str::FromStr;
+
+    use crate::error::Error;
+
     use super::Hex32Bytes;
 
     #[test]
@@ -98,5 +102,21 @@ mod tests {
     fn from_vec_roundtrip() {
         let vec = Vec::from([0u8; 32]);
         assert_eq!(Hex32Bytes::from_vec(vec.clone()).unwrap().to_vec(), vec);
+    }
+
+    #[test]
+    fn invalid_str() {
+        assert_eq!(
+            Hex32Bytes::from_str("not a hex string this is"),
+            Err(Error::StringNotHex)
+        );
+    }
+
+    #[test]
+    fn invalid_len() {
+        assert_eq!(
+            Hex32Bytes::from_vec(Vec::from([0u8; 5])),
+            Err(Error::InvalidByteCountExpected32)
+        )
     }
 }
