@@ -17,15 +17,7 @@ impl Secp256k1PrivateKey {
     }
 
     pub fn sign(&self, msg_hash: &impl IsHash) -> Secp256k1Signature {
-        // let m = Message::from_slice(msg_hash.as_ref()).expect("Hash is always a valid message");
-        // let signature = SECP256K1.sign_ecdsa_recoverable(&m, &self.0);
-        // let (recovery_id, signature_data) = signature.serialize_compact();
-
-        // let mut buf = [0u8; 65];
-        // buf[0] = recovery_id.to_i32() as u8;
-        // buf[1..].copy_from_slice(&signature_data);
-        // Secp256k1Signature(buf)
-        todo!();
+        self.0.sign(msg_hash)
     }
 
     pub fn to_bytes(&self) -> Vec<u8> {
@@ -46,6 +38,14 @@ impl Secp256k1PrivateKey {
         Hex32Bytes::from_hex(hex)
             .and_then(|b| Self::from_bytes(&b.to_vec()))
             .map_err(|_| Error::InvalidSecp256k1PrivateKeyFromString)
+    }
+}
+
+impl TryInto<Secp256k1PrivateKey> for &str {
+    type Error = crate::error::Error;
+
+    fn try_into(self) -> Result<Secp256k1PrivateKey, Self::Error> {
+        Secp256k1PrivateKey::from_str(self)
     }
 }
 
@@ -77,25 +77,32 @@ impl Secp256k1PrivateKey {
     }
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
-//     use crate::validation::verify_secp256k1;
-//     use radix_engine_interface::crypto::hash;
-//     use sbor::rust::str::FromStr;
+#[cfg(test)]
+mod tests {
 
-//     #[test]
-//     fn sign_and_verify() {
-//         let test_sk = "0000000000000000000000000000000000000000000000000000000000000001";
-//         let test_pk = "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798";
-//         let test_message_hash = hash("Test");
-//         let test_signature = "00eb8dcd5bb841430dd0a6f45565a1b8bdb4a204eb868832cd006f963a89a662813ab844a542fcdbfda4086a83fbbde516214113051b9c8e42a206c98d564d7122";
-//         let sk = Secp256k1PrivateKey::from_bytes(&hex::decode(test_sk).unwrap()).unwrap();
-//         let pk = Secp256k1PublicKey::from_str(test_pk).unwrap();
-//         let sig = Secp256k1Signature::from_str(test_signature).unwrap();
+    use std::str::FromStr;
 
-//         assert_eq!(sk.public_key(), pk);
-//         assert_eq!(sk.sign(&test_message_hash), sig);
-//         assert!(verify_secp256k1(&test_message_hash, &pk, &sig));
-//     }
-// }
+    use transaction::signing::secp256k1::Secp256k1Signature;
+
+    use crate::hash::hash;
+
+    use super::Secp256k1PrivateKey;
+
+    #[test]
+    fn sign_and_verify() {
+        let msg = hash("Test");
+        let sk: Secp256k1PrivateKey =
+            "0000000000000000000000000000000000000000000000000000000000000001"
+                .try_into()
+                .unwrap();
+        let pk = sk.public_key();
+        assert_eq!(
+            pk.to_hex(),
+            "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+        );
+        let sig = Secp256k1Signature::from_str("00eb8dcd5bb841430dd0a6f45565a1b8bdb4a204eb868832cd006f963a89a662813ab844a542fcdbfda4086a83fbbde516214113051b9c8e42a206c98d564d7122").unwrap();
+
+        assert_eq!(sk.sign(&msg), sig);
+        assert!(pk.is_valid(&sig, &msg))
+    }
+}

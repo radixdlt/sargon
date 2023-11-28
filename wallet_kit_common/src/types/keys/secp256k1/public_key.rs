@@ -1,7 +1,10 @@
 use crate::{error::Error, types::keys::secp256k1::private_key::Secp256k1PrivateKey};
-use radix_engine_common::crypto::Secp256k1PublicKey as EngineSecp256k1PublicKey;
+use radix_engine_common::crypto::{
+    Hash, Secp256k1PublicKey as EngineSecp256k1PublicKey, Secp256k1PublicKeyHash,
+};
 use serde::{Deserialize, Serialize};
 use std::fmt::{Debug, Formatter};
+use transaction::{signing::secp256k1::Secp256k1Signature, validation::verify_secp256k1};
 
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Secp256k1PublicKey(EngineSecp256k1PublicKey);
@@ -21,9 +24,14 @@ impl Secp256k1PublicKey {
         hex::encode(self.to_bytes())
     }
 
-    // pub fn to_hash(&self) -> Secp256k1PublicKeyHash {
-    //     Secp256k1PublicKeyHash::new_from_public_key(self)
-    // }
+    /// Verifies an ECDSA signature over Secp256k1.
+    pub fn is_valid(&self, signature: &Secp256k1Signature, for_hash: &Hash) -> bool {
+        verify_secp256k1(for_hash, &self.0, signature)
+    }
+
+    pub fn to_hash(&self) -> Secp256k1PublicKeyHash {
+        Secp256k1PublicKeyHash::new_from_public_key(&self.0)
+    }
 }
 
 impl TryFrom<&[u8]> for Secp256k1PublicKey {
@@ -40,15 +48,15 @@ impl TryInto<Secp256k1PublicKey> for &str {
     type Error = crate::error::Error;
 
     fn try_into(self) -> Result<Secp256k1PublicKey, Self::Error> {
-        hex::decode(self)
-            .map_err(|_| Error::InvalidSecp256k1PublicKeyFromString)
-            .and_then(|b| Secp256k1PublicKey::try_from(b.as_slice()))
+        Secp256k1PublicKey::from_str(self)
     }
 }
 
 impl Secp256k1PublicKey {
-    pub fn from_hex(hex: &str) -> Result<Self, Error> {
-        hex.try_into()
+    pub fn from_str(hex: &str) -> Result<Self, Error> {
+        hex::decode(hex)
+            .map_err(|_| Error::InvalidSecp256k1PublicKeyFromString)
+            .and_then(|b| Secp256k1PublicKey::try_from(b.as_slice()))
     }
 }
 

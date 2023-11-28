@@ -2,12 +2,15 @@ use crate::{
     error::Error,
     types::{hex_32bytes::Hex32Bytes, keys::ed25519::private_key::Ed25519PrivateKey},
 };
-use radix_engine_common::crypto::Ed25519PublicKey as EngineEd25519PublicKey;
+use radix_engine_common::crypto::{
+    Ed25519PublicKey as EngineEd25519PublicKey, Ed25519PublicKeyHash, Hash,
+};
 use serde::{Deserialize, Serialize};
 use std::{
     fmt::{Debug, Formatter},
     str::FromStr,
 };
+use transaction::{signing::ed25519::Ed25519Signature, validation::verify_ed25519};
 
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Ed25519PublicKey(EngineEd25519PublicKey);
@@ -27,9 +30,14 @@ impl Ed25519PublicKey {
         hex::encode(self.to_bytes())
     }
 
-    // pub fn to_hash(&self) -> Ed25519PublicKeyHash {
-    //     Ed25519PublicKeyHash::new_from_public_key(self)
-    // }
+    /// Verifies an EdDSA signature over Curve25519.
+    pub fn is_valid(&self, signature: &Ed25519Signature, for_hash: &Hash) -> bool {
+        verify_ed25519(for_hash, &self.0, signature)
+    }
+
+    pub fn to_hash(&self) -> Ed25519PublicKeyHash {
+        Ed25519PublicKeyHash::new_from_public_key(&self.0)
+    }
 }
 
 impl Debug for Ed25519PublicKey {
@@ -51,19 +59,19 @@ impl TryFrom<&[u8]> for Ed25519PublicKey {
     }
 }
 
-impl TryInto<Ed25519PublicKey> for &str {
-    type Error = crate::error::Error;
-
-    fn try_into(self) -> Result<Ed25519PublicKey, Self::Error> {
-        Hex32Bytes::from_str(self)
+impl Ed25519PublicKey {
+    pub fn from_str(hex: &str) -> Result<Self, Error> {
+        Hex32Bytes::from_str(hex)
             .and_then(|b| Ed25519PublicKey::try_from(b.to_vec().as_slice()))
             .map_err(|_| Error::InvalidEd25519PublicKeyFromString)
     }
 }
 
-impl Ed25519PublicKey {
-    pub fn from_hex(hex: &str) -> Result<Self, Error> {
-        hex.try_into()
+impl TryInto<Ed25519PublicKey> for &str {
+    type Error = crate::error::Error;
+
+    fn try_into(self) -> Result<Ed25519PublicKey, Self::Error> {
+        Ed25519PublicKey::from_str(self)
     }
 }
 

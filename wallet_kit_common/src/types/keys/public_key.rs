@@ -44,10 +44,10 @@ impl<'de> Deserialize<'de> for PublicKey {
         }
         let wrapper = Wrapper::deserialize(deserializer)?;
         match wrapper.curve {
-            SLIP10Curve::Curve25519 => Ed25519PublicKey::from_hex(&wrapper.hex)
+            SLIP10Curve::Curve25519 => Ed25519PublicKey::from_str(&wrapper.hex)
                 .map(|pk| PublicKey::Ed25519(pk))
                 .map_err(de::Error::custom),
-            SLIP10Curve::Secp256k1 => Secp256k1PublicKey::from_hex(&wrapper.hex)
+            SLIP10Curve::Secp256k1 => Secp256k1PublicKey::from_str(&wrapper.hex)
                 .map(|pk| PublicKey::Secp256k1(pk))
                 .map_err(de::Error::custom),
         }
