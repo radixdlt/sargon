@@ -17,8 +17,14 @@ pub enum Error {
     #[error("Failed to create Ed25519 Public key from bytes.")]
     InvalidEd25519PublicKeyFromBytes,
 
+    #[error("Failed to create Ed25519 Public key from String.")]
+    InvalidEd25519PublicKeyFromString,
+
     #[error("Failed to create Secp256k1 Public key from bytes.")]
     InvalidSecp256k1PublicKeyFromBytes,
+
+    #[error("Failed to create Secp256k1 Public key from String.")]
+    InvalidSecp256k1PublicKeyFromString,
 
     #[error("Appearance id not recognized.")]
     InvalidAppearanceID,

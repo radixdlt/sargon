@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
-
-use super::slip10_curve::SLIP10Curve;
+use wallet_kit_common::types::keys::slip10_curve::SLIP10Curve;
 
 /// Which derivation path to used for some particular HD operations
 /// such as signing or public key derivation. Radix Babylon introduces
@@ -38,14 +37,15 @@ impl DerivationPathScheme {
 #[cfg(test)]
 mod tests {
     use serde_json::json;
-    use wallet_kit_common::json::{
-        assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
-        assert_json_value_ne_after_roundtrip,
+    use wallet_kit_common::{
+        json::{
+            assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
+            assert_json_value_ne_after_roundtrip,
+        },
+        types::keys::slip10_curve::SLIP10Curve,
     };
 
-    use crate::derivation::{
-        derivation_path_scheme::DerivationPathScheme, slip10_curve::SLIP10Curve,
-    };
+    use crate::derivation::derivation_path_scheme::DerivationPathScheme;
 
     #[test]
     fn curve_from_scheme() {

@@ -1,7 +1,10 @@
 use crate::{error::Error, types::keys::secp256k1::private_key::Secp256k1PrivateKey};
 use radix_engine_common::crypto::Secp256k1PublicKey as EngineSecp256k1PublicKey;
 use serde::{Deserialize, Serialize};
-use std::fmt::{Debug, Formatter};
+use std::{
+    fmt::{Debug, Formatter},
+    str::FromStr,
+};
 
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Secp256k1PublicKey(EngineSecp256k1PublicKey);
@@ -33,6 +36,22 @@ impl TryFrom<&[u8]> for Secp256k1PublicKey {
         EngineSecp256k1PublicKey::try_from(slice)
             .map(Secp256k1PublicKey)
             .map_err(|_| Error::InvalidSecp256k1PublicKeyFromBytes)
+    }
+}
+
+impl TryInto<Secp256k1PublicKey> for &str {
+    type Error = crate::error::Error;
+
+    fn try_into(self) -> Result<Secp256k1PublicKey, Self::Error> {
+        hex::decode(self)
+            .map_err(|_| Error::InvalidSecp256k1PublicKeyFromString)
+            .and_then(|b| Secp256k1PublicKey::try_from(b.as_slice()))
+    }
+}
+
+impl Secp256k1PublicKey {
+    pub fn from_hex(hex: &str) -> Result<Self, Error> {
+        hex.try_into()
     }
 }
 

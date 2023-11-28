@@ -1,7 +1,13 @@
-use crate::{error::Error, types::keys::ed25519::private_key::Ed25519PrivateKey};
+use crate::{
+    error::Error,
+    types::{hex_32bytes::Hex32Bytes, keys::ed25519::private_key::Ed25519PrivateKey},
+};
 use radix_engine_common::crypto::Ed25519PublicKey as EngineEd25519PublicKey;
 use serde::{Deserialize, Serialize};
-use std::fmt::{Debug, Formatter};
+use std::{
+    fmt::{Debug, Formatter},
+    str::FromStr,
+};
 
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Ed25519PublicKey(EngineEd25519PublicKey);
@@ -38,10 +44,26 @@ impl Debug for Ed25519PublicKey {
 impl TryFrom<&[u8]> for Ed25519PublicKey {
     type Error = crate::error::Error;
 
-    fn try_from(slice: &[u8]) -> Result<Self, Self::Error> {
+    fn try_from(slice: &[u8]) -> Result<Ed25519PublicKey, Self::Error> {
         EngineEd25519PublicKey::try_from(slice)
             .map(Ed25519PublicKey)
             .map_err(|_| Error::InvalidEd25519PublicKeyFromBytes)
+    }
+}
+
+impl TryInto<Ed25519PublicKey> for &str {
+    type Error = crate::error::Error;
+
+    fn try_into(self) -> Result<Ed25519PublicKey, Self::Error> {
+        Hex32Bytes::from_str(self)
+            .and_then(|b| Ed25519PublicKey::try_from(b.to_vec().as_slice()))
+            .map_err(|_| Error::InvalidEd25519PublicKeyFromString)
+    }
+}
+
+impl Ed25519PublicKey {
+    pub fn from_hex(hex: &str) -> Result<Self, Error> {
+        hex.try_into()
     }
 }
 

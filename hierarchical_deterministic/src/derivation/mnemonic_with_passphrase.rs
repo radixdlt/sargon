@@ -4,7 +4,7 @@ use wallet_kit_common::{
     error::Error,
     types::keys::{
         ed25519::private_key::Ed25519PrivateKey, private_key::PrivateKey,
-        secp256k1::private_key::Secp256k1PrivateKey,
+        secp256k1::private_key::Secp256k1PrivateKey, slip10_curve::SLIP10Curve,
     },
 };
 
@@ -13,9 +13,7 @@ use crate::{
     bip39::mnemonic::{Mnemonic, Seed},
 };
 
-use super::{
-    derivation::Derivation, derivation_path_scheme::DerivationPathScheme, slip10_curve::SLIP10Curve,
-};
+use super::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme};
 
 /// A BIP39 Mnemonic and BIP39 passphrase - aka "25th word" tuple,
 /// from which we can derive a HD Root used for derivation.
