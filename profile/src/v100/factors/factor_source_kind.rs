@@ -134,6 +134,11 @@ mod tests {
             FactorSourceKind::OffDeviceMnemonic.discriminant(),
             "offDeviceMnemonic"
         );
+
+        assert_eq!(
+            FactorSourceKind::TrustedContact.discriminant(),
+            "trustedContact"
+        );
     }
 
     #[test]
