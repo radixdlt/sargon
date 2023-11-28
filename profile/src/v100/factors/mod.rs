@@ -3,6 +3,7 @@ pub mod factor_source_common;
 pub mod factor_source_crypto_parameters;
 pub mod factor_source_flag;
 pub mod factor_source_id;
+pub mod factor_source_id_from_address;
 pub mod factor_source_id_from_hash;
 pub mod factor_source_kind;
 pub mod factor_sources;
