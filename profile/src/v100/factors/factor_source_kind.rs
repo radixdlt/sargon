@@ -137,6 +137,14 @@ mod tests {
     }
 
     #[test]
+    fn display() {
+        assert_eq!(
+            format!("{}", FactorSourceKind::Device.discriminant()),
+            "device"
+        );
+    }
+
+    #[test]
     fn json_roundtrip() {
         assert_json_value_eq_after_roundtrip(
             &FactorSourceKind::TrustedContact,

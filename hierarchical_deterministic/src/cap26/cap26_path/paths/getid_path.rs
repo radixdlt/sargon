@@ -94,10 +94,17 @@ mod tests {
         );
     }
     #[test]
-    fn invalid() {
+    fn invalid_value() {
         assert_eq!(
             GetIDPath::from_str("m/44H/1022H/1337H"),
             Err(HDPathError::InvalidGetIDPath(1337))
+        );
+    }
+    #[test]
+    fn invalid_depth() {
+        assert_eq!(
+            GetIDPath::from_str("m/44H/1022H"),
+            Err(HDPathError::InvalidDepthOfCAP26Path)
         );
     }
 
