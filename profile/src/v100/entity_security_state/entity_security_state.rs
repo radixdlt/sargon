@@ -48,9 +48,6 @@ impl EntitySecurityState {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
-
-    use super::EntitySecurityState;
     // #[test]
     // fn json_roundtrip() {
     //     // let model = Account::with_values(

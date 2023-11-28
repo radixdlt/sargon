@@ -1,10 +1,6 @@
-use hierarchical_deterministic::derivation::{
-    derivation::Derivation, derivation_path::DerivationPath,
-};
-use radix_engine_common::crypto::PublicKey;
+use hierarchical_deterministic::derivation::derivation::Derivation;
 use serde::{Deserialize, Serialize};
 use std::{cell::RefCell, cmp::Ordering, fmt::Display};
-use transaction::signing::ed25519::Ed25519PrivateKey;
 use wallet_kit_common::network_id::NetworkID;
 
 use crate::v100::{
@@ -14,10 +10,7 @@ use crate::v100::{
         entity_security_state::EntitySecurityState,
         unsecured_entity_control::UnsecuredEntityControl,
     },
-    factors::{
-        factor_source_id_from_hash::FactorSourceIDFromHash,
-        hierarchical_deterministic_factor_instance::HierarchicalDeterministicFactorInstance,
-    },
+    factors::hierarchical_deterministic_factor_instance::HierarchicalDeterministicFactorInstance,
 };
 
 use super::{
@@ -235,9 +228,8 @@ impl Account {
 
 #[cfg(test)]
 mod tests {
-    use std::{cell::RefCell, collections::BTreeSet};
+    use std::collections::BTreeSet;
 
-    use hierarchical_deterministic::bip32::hd_path_component::HDPathValue;
     use wallet_kit_common::json::assert_eq_after_json_roundtrip;
 
     use crate::v100::{
@@ -259,11 +251,6 @@ mod tests {
             entity_flag::EntityFlag,
             entity_flags::EntityFlags,
         },
-        entity_security_state::{
-            entity_security_state::EntitySecurityState,
-            unsecured_entity_control::UnsecuredEntityControl,
-        },
-        factors::hierarchical_deterministic_factor_instance::HierarchicalDeterministicFactorInstance,
     };
 
     use super::Account;

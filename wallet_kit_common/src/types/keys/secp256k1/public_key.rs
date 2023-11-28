@@ -1,10 +1,7 @@
 use crate::{error::Error, types::keys::secp256k1::private_key::Secp256k1PrivateKey};
 use radix_engine_common::crypto::Secp256k1PublicKey as EngineSecp256k1PublicKey;
 use serde::{Deserialize, Serialize};
-use std::{
-    fmt::{Debug, Formatter},
-    str::FromStr,
-};
+use std::fmt::{Debug, Formatter};
 
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Secp256k1PublicKey(EngineSecp256k1PublicKey);

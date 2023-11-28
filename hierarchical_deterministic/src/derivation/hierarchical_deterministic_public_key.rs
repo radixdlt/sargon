@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use wallet_kit_common::types::keys::public_key::PublicKey;
 
 use crate::derivation::derivation_path::DerivationPath;
@@ -7,10 +8,12 @@ use crate::derivation::derivation_path::DerivationPath;
 /// produces virtual badges (signatures).
 ///
 /// The `.device` `FactorSource` produces `FactorInstance`s with this kind if badge source.
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
 pub struct HierarchicalDeterministicPublicKey {
     /// The expected public key of the private key derived at `derivationPath`
-    pub publicKey: PublicKey,
+    pub public_key: PublicKey,
 
     /// The HD derivation path for the key pair which produces virtual badges (signatures).
-    pub derivationPath: DerivationPath,
+    pub derivation_path: DerivationPath,
 }

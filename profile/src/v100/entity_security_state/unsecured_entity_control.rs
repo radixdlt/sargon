@@ -45,8 +45,6 @@ impl UnsecuredEntityControl {
 mod tests {
     use wallet_kit_common::json::assert_eq_after_json_roundtrip;
 
-    use crate::v100::factors::hierarchical_deterministic_factor_instance::HierarchicalDeterministicFactorInstance;
-
     use super::UnsecuredEntityControl;
     // #[test]
     fn json_roundtrip() {
