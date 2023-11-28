@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use radix_engine_common::crypto::{Hash, IsHash};
 use serde::{de, Deserializer, Serialize, Serializer};
 
 use crate::error::Error;
@@ -10,6 +11,12 @@ pub struct Hex32Bytes([u8; 32]);
 impl ToString for Hex32Bytes {
     fn to_string(&self) -> String {
         hex::encode(self.0)
+    }
+}
+
+impl From<Hash> for Hex32Bytes {
+    fn from(value: Hash) -> Self {
+        Self::from_bytes(&value.into_bytes())
     }
 }
 

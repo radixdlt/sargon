@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use serde::{Deserialize, Serialize};
 
 /// The **kind** (or "type") of FactorSource describes how it is used.
@@ -57,6 +59,25 @@ pub enum FactorSourceKind {
     ///  * Hierarchical deterministic  (**Encrypted** mnemonic)
     #[serde(rename = "securityQuestions")]
     SecurityQuestions,
+}
+
+impl FactorSourceKind {
+    pub fn discriminant(&self) -> String {
+        use FactorSourceKind::*;
+        match self {
+            Device => "device".to_string(),
+            LedgerHQHardwareWallet => "ledgerHQHardwareWallet".to_string(),
+            OffDeviceMnemonic => "offDeviceMnemonic".to_string(),
+            TrustedContact => "trustedContact".to_string(),
+            SecurityQuestions => "securityQuestions".to_string(),
+        }
+    }
+}
+
+impl Display for FactorSourceKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.discriminant())
+    }
 }
 
 #[cfg(test)]
