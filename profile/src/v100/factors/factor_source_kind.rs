@@ -120,6 +120,23 @@ mod tests {
     }
 
     #[test]
+    fn discriminant() {
+        assert_eq!(FactorSourceKind::Device.discriminant(), "device");
+        assert_eq!(
+            FactorSourceKind::SecurityQuestions.discriminant(),
+            "securityQuestions"
+        );
+        assert_eq!(
+            FactorSourceKind::LedgerHQHardwareWallet.discriminant(),
+            "ledgerHQHardwareWallet"
+        );
+        assert_eq!(
+            FactorSourceKind::OffDeviceMnemonic.discriminant(),
+            "offDeviceMnemonic"
+        );
+    }
+
+    #[test]
     fn json_roundtrip() {
         assert_json_value_eq_after_roundtrip(
             &FactorSourceKind::TrustedContact,
