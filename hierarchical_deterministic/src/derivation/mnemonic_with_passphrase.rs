@@ -1,9 +1,12 @@
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use transaction::signing::{
-    ed25519::Ed25519PrivateKey, secp256k1::Secp256k1PrivateKey, PrivateKey,
+use wallet_kit_common::{
+    error::Error,
+    types::keys::{
+        ed25519::private_key::Ed25519PrivateKey, private_key::PrivateKey,
+        secp256k1::private_key::Secp256k1PrivateKey,
+    },
 };
-use wallet_kit_common::error::Error;
 
 use crate::{
     bip32::hd_path::HDPath,
@@ -110,7 +113,6 @@ mod tests {
         bip39::mnemonic::Mnemonic,
         bip44::bip44_like_path::BIP44LikePath,
         cap26::{cap26_path::paths::account_path::AccountPath, cap26_repr::CAP26Repr},
-        keys::key_extensions::{private_key_hex, public_key_hex_from_private},
     };
     use wallet_kit_common::json::assert_eq_after_json_roundtrip;
 
@@ -148,16 +150,16 @@ mod tests {
             "".to_string(),
         );
 
-        let private_key: transaction::prelude::PrivateKey =
+        let private_key =
             mwp.derive_private_key(AccountPath::from_str("m/44H/1022H/12H/525H/1460H/0H").unwrap());
 
         assert_eq!(
             "13e971fb16cb2c816d6b9f12176e9b8ab9af1831d006114d344d119ab2715506",
-            private_key_hex(&private_key)
+            private_key.hex()
         );
         assert_eq!(
             "451152a1cef7be603205086d4ebac0a0b78fda2ff4684b9dea5ca9ef003d4e7d",
-            public_key_hex_from_private(&private_key)
+            private_key.public_key().hex()
         );
     }
 
@@ -172,17 +174,17 @@ mod tests {
             "".to_string(),
         );
 
-        let private_key: transaction::prelude::PrivateKey =
+        let private_key =
             mwp.derive_private_key(BIP44LikePath::from_str("m/44H/1022H/0H/0/5H").unwrap());
 
         assert_eq!(
             "111323d507d9d690836798e3ef2e5292cfd31092b75b9b59fa584ff593a3d7e4",
-            private_key_hex(&private_key)
+            private_key.hex()
         );
 
         assert_eq!(
             "03e78cdb2e0b7ea6e55e121a58560ccf841a913d3a4a9b8349e0ef00c2102f48d8",
-            public_key_hex_from_private(&private_key)
+            private_key.public_key().hex()
         );
     }
 

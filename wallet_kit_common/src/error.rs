@@ -2,6 +2,12 @@ use thiserror::Error;
 
 #[derive(Debug, Error, PartialEq)]
 pub enum Error {
+    #[error("Appearance id not recognized.")]
+    InvalidAppearanceID,
+
+    #[error("String not not a valid display name, did not pass validation.")]
+    InvalidDisplayName,
+
     #[error("String not hex")]
     StringNotHex,
 

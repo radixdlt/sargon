@@ -28,7 +28,6 @@ impl Serialize for FactorSource {
     where
         S: Serializer,
     {
-        // 3 is the number of fields in the struct.
         let mut state = serializer.serialize_struct("FactorSource", 2)?;
         match self {
             FactorSource::Device(device) => {

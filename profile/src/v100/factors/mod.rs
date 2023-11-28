@@ -1,3 +1,4 @@
+pub mod factor_instance;
 pub mod factor_source;
 pub mod factor_source_common;
 pub mod factor_source_crypto_parameters;

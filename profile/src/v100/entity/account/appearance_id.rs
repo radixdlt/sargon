@@ -1,4 +1,5 @@
 use nutype::nutype;
+use wallet_kit_common::error::Error;
 
 #[nutype(
     validate(less_or_equal = 11),
@@ -23,10 +24,21 @@ impl Default for AppearanceID {
     }
 }
 
+impl TryFrom<u8> for AppearanceID {
+    type Error = wallet_kit_common::error::Error;
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        AppearanceID::new(value).map_err(|_| Error::InvalidAppearanceID)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use serde_json::json;
-    use wallet_kit_common::json::{assert_json_value_eq_after_roundtrip, assert_json_value_fails};
+    use wallet_kit_common::{
+        error::Error,
+        json::{assert_json_value_eq_after_roundtrip, assert_json_value_fails},
+    };
 
     use crate::v100::entity::account::appearance_id::{AppearanceID, AppearanceIDError};
 
@@ -46,6 +58,12 @@ mod tests {
             AppearanceID::new(12),
             Err(AppearanceIDError::LessOrEqualViolated)
         );
+    }
+
+    #[test]
+    fn try_from() {
+        assert_eq!(AppearanceID::try_from(250), Err(Error::InvalidAppearanceID));
+        assert_eq!(AppearanceID::try_from(1), Ok(AppearanceID::new(1).unwrap()));
     }
 
     #[test]

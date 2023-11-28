@@ -37,7 +37,6 @@ impl Serialize for FactorSourceID {
     where
         S: Serializer,
     {
-        // 3 is the number of fields in the struct.
         let mut state = serializer.serialize_struct("FactorSourceID", 2)?;
         match self {
             FactorSourceID::Hash(from_hash) => {

@@ -1,7 +1,6 @@
 use hierarchical_deterministic::{
     cap26::cap26_path::paths::getid_path::GetIDPath,
     derivation::mnemonic_with_passphrase::MnemonicWithPassphrase,
-    keys::key_extensions::public_key_bytes,
 };
 use radix_engine_common::crypto::{blake2b_256_hash, Hash};
 use serde::{Deserialize, Serialize};
@@ -32,7 +31,8 @@ impl FactorSourceIDFromHash {
         mnemonic_with_passphrase: MnemonicWithPassphrase,
     ) -> Self {
         let private_key = mnemonic_with_passphrase.derive_private_key(GetIDPath::default());
-        let public_key_bytes = public_key_bytes(&private_key.public_key());
+        // let public_key_bytes = public_key_bytes(&private_key.public_key());
+        let public_key_bytes = private_key.public_key().to_bytes();
         let hash: Hash = blake2b_256_hash(public_key_bytes);
         let body = Hex32Bytes::from(hash);
         Self::new(factor_source_kind, body)
