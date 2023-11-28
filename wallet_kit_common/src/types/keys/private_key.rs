@@ -10,10 +10,16 @@ pub enum PrivateKey {
 
 impl PrivateKey {
     pub fn public_key(&self) -> PublicKey {
-        todo!();
+        match self {
+            PrivateKey::Ed25519(key) => PublicKey::Ed25519(key.public_key()),
+            PrivateKey::Secp256k1(key) => PublicKey::Secp256k1(key.public_key()),
+        }
     }
 
-    pub fn hex(&self) -> String {
-        todo!();
+    pub fn to_hex(&self) -> String {
+        match self {
+            PrivateKey::Ed25519(key) => key.to_hex(),
+            PrivateKey::Secp256k1(key) => key.to_hex(),
+        }
     }
 }

@@ -3,6 +3,8 @@ use transaction::signing::secp256k1::{
     Secp256k1PrivateKey as EngineSecp256k1PrivateKey, Secp256k1Signature,
 };
 
+use crate::{error::Error, types::hex_32bytes::Hex32Bytes};
+
 use super::public_key::Secp256k1PublicKey;
 
 pub struct Secp256k1PrivateKey(EngineSecp256k1PrivateKey);
@@ -11,8 +13,7 @@ impl Secp256k1PrivateKey {
     pub const LENGTH: usize = 32;
 
     pub fn public_key(&self) -> Secp256k1PublicKey {
-        // Secp256k1PublicKey(PublicKey::from_secret_key_global(&self.0).serialize())
-        todo!();
+        Secp256k1PublicKey::from_engine(self.0.public_key())
     }
 
     pub fn sign(&self, msg_hash: &impl IsHash) -> Secp256k1Signature {
@@ -28,25 +29,23 @@ impl Secp256k1PrivateKey {
     }
 
     pub fn to_bytes(&self) -> Vec<u8> {
-        // self.0.secret_bytes().to_vec()
-        todo!();
+        self.0.to_bytes()
     }
 
-    pub fn from_bytes(slice: &[u8]) -> Result<Self, ()> {
-        // if slice.len() != Secp256k1PrivateKey::LENGTH {
-        //     return Err(());
-        // }
-        // Ok(Self(SecretKey::from_slice(slice).map_err(|_| ())?))
-        todo!();
+    pub fn to_hex(&self) -> String {
+        hex::encode(self.to_bytes())
     }
 
-    pub fn from_u64(n: u64) -> Result<Self, ()> {
-        // let mut bytes = [0u8; Secp256k1PrivateKey::LENGTH];
-        // (&mut bytes[Secp256k1PrivateKey::LENGTH - 8..Secp256k1PrivateKey::LENGTH])
-        //     .copy_from_slice(&n.to_be_bytes());
+    pub fn from_bytes(slice: &[u8]) -> Result<Self, Error> {
+        EngineSecp256k1PrivateKey::from_bytes(slice)
+            .map(Secp256k1PrivateKey)
+            .map_err(|_| Error::InvalidSecp256k1PrivateKeyFromBytes)
+    }
 
-        // Ok(Self(SecretKey::from_slice(&bytes).map_err(|_| ())?))
-        todo!();
+    pub fn from_str(hex: &str) -> Result<Self, Error> {
+        Hex32Bytes::from_hex(hex)
+            .and_then(|b| Self::from_bytes(&b.to_vec()))
+            .map_err(|_| Error::InvalidSecp256k1PrivateKeyFromString)
     }
 }
 

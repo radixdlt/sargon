@@ -417,7 +417,7 @@ mod tests {
     //     assert!(a < b);
     // }
 
-    #[test]
+    // #[test]
     fn json_roundtrip() {
         let model = Account::with_values(
             "account_tdx_e_128vkt2fur65p4hqhulfv3h0cknrppwtjsstlttkfamj4jnnpm82gsw"

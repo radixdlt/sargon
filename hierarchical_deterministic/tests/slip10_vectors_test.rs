@@ -18,11 +18,11 @@ fn derive_a_secp256k1_key_with_bip44_olympia() {
 
     assert_eq!(
         "111323d507d9d690836798e3ef2e5292cfd31092b75b9b59fa584ff593a3d7e4",
-        private_key.hex()
+        private_key.to_hex()
     );
 
     assert_eq!(
         "03e78cdb2e0b7ea6e55e121a58560ccf841a913d3a4a9b8349e0ef00c2102f48d8",
-        private_key.public_key().hex()
+        private_key.public_key().to_hex()
     );
 }

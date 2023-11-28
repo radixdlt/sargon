@@ -5,8 +5,11 @@ pub enum PublicKey {
 }
 
 impl PublicKey {
-    pub fn hex(&self) -> String {
-        todo!();
+    pub fn to_hex(&self) -> String {
+        match self {
+            PublicKey::Ed25519(key) => key.to_hex(),
+            PublicKey::Secp256k1(key) => key.to_hex(),
+        }
     }
 
     pub fn to_bytes(&self) -> Vec<u8> {
