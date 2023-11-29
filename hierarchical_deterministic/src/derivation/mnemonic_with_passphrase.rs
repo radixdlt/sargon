@@ -47,6 +47,12 @@ impl MnemonicWithPassphrase {
     }
 }
 
+impl MnemonicWithPassphrase {
+    pub fn placeholder() -> Self {
+        Self::with_passphrase(Mnemonic::placeholder(), "radix".to_string())
+    }
+}
+
 pub type PrivateKeyBytes = [u8; 32];
 
 impl MnemonicWithPassphrase {
@@ -110,9 +116,13 @@ mod tests {
     use crate::{
         bip39::mnemonic::Mnemonic,
         bip44::bip44_like_path::BIP44LikePath,
-        cap26::{cap26_path::paths::account_path::AccountPath, cap26_repr::CAP26Repr},
+        cap26::{
+            cap26_key_kind::CAP26KeyKind, cap26_path::paths::account_path::AccountPath,
+            cap26_repr::CAP26Repr,
+        },
+        derivation::derivation::Derivation,
     };
-    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::{json::assert_eq_after_json_roundtrip, network_id::NetworkID};
 
     use super::MnemonicWithPassphrase;
 
@@ -204,6 +214,24 @@ mod tests {
                 "passphrase": "25th"
             }
             "#,
+        );
+    }
+
+    #[test]
+    fn keys_for_placeholder() {
+        let mwp = MnemonicWithPassphrase::placeholder();
+        let path = AccountPath::new(NetworkID::Mainnet, CAP26KeyKind::TransactionSigning, 0);
+        let private_key = mwp.derive_private_key(path.clone());
+
+        assert_eq!(path.to_string(), "m/44H/1022H/1H/525H/1460H/0H");
+
+        assert_eq!(
+            "cf52dbc7bb2663223e99fb31799281b813b939440a372d0aa92eb5f5b8516003",
+            private_key.to_hex()
+        );
+        assert_eq!(
+            "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b",
+            private_key.public_key().to_hex()
         );
     }
 }

@@ -74,6 +74,12 @@ impl TryInto<Mnemonic> for &str {
     }
 }
 
+impl Mnemonic {
+    pub fn placeholder() -> Self {
+        Self::from_phrase("bright club bacon dinner achieve pull grid save ramp cereal blush woman humble limb repeat video sudden possible story mask neutral prize goose mandate").expect("Valid mnemonic")
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use bip39::Language;
@@ -111,10 +117,7 @@ mod tests {
 
     #[test]
     fn words() {
-        let mnemonic: Mnemonic =
-            "bright club bacon dinner achieve pull grid save ramp cereal blush woman humble limb repeat video sudden possible story mask neutral prize goose mandate"
-                .try_into()
-                .unwrap();
+        let mnemonic = Mnemonic::placeholder();
         assert_eq!(mnemonic.words[0].word, "bright");
         assert_eq!(mnemonic.words[1].word, "club");
         assert_eq!(mnemonic.words[2].word, "bacon");

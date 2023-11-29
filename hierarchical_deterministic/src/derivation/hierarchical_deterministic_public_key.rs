@@ -17,3 +17,12 @@ pub struct HierarchicalDeterministicPublicKey {
     /// The HD derivation path for the key pair which produces virtual badges (signatures).
     pub derivation_path: DerivationPath,
 }
+
+impl HierarchicalDeterministicPublicKey {
+    pub fn new(public_key: PublicKey, derivation_path: DerivationPath) -> Self {
+        Self {
+            public_key,
+            derivation_path,
+        }
+    }
+}

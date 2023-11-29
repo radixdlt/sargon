@@ -9,3 +9,4 @@ pub mod factor_source_id_from_hash;
 pub mod factor_source_kind;
 pub mod factor_sources;
 pub mod hierarchical_deterministic_factor_instance;
+pub mod to_factor_source_id;

@@ -1,9 +1,28 @@
-use hierarchical_deterministic::derivation::derivation_path::DerivationPath;
-use radix_engine_common::crypto::PublicKey;
+use hierarchical_deterministic::{
+    cap26::{
+        cap26_key_kind::CAP26KeyKind,
+        cap26_path::{cap26_path::CAP26Path, paths::account_path::AccountPath},
+        cap26_repr::CAP26Repr,
+    },
+    derivation::{
+        derivation::Derivation, derivation_path::DerivationPath,
+        hierarchical_deterministic_public_key::HierarchicalDeterministicPublicKey,
+        mnemonic_with_passphrase::MnemonicWithPassphrase,
+    },
+};
 use serde::{Deserialize, Serialize};
-use transaction::signing::ed25519::Ed25519PrivateKey;
+use wallet_kit_common::{network_id::NetworkID, types::keys::public_key::PublicKey};
 
-use super::factor_source_id_from_hash::FactorSourceIDFromHash;
+use crate::v100::factors::factor_source_kind::FactorSourceKind;
+
+use super::{
+    factor_instance::{
+        badge_virtual_source::FactorInstanceBadgeVirtualSource, factor_instance::FactorInstance,
+        factor_instance_badge::FactorInstanceBadge,
+    },
+    factor_source_id_from_hash::FactorSourceIDFromHash,
+    to_factor_source_id::ToFactorSourceID,
+};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -26,16 +45,49 @@ impl HierarchicalDeterministicFactorInstance {
             derivation_path,
         }
     }
+
+    pub fn factor_instance(&self) -> FactorInstance {
+        FactorInstance::new(
+            self.factor_source_id.embed(),
+            FactorInstanceBadge::Virtual(
+                FactorInstanceBadgeVirtualSource::HierarchicalDeterministic(
+                    HierarchicalDeterministicPublicKey::new(
+                        self.public_key,
+                        self.derivation_path.clone(),
+                    ),
+                ),
+            ),
+        )
+    }
 }
 
 impl HierarchicalDeterministicFactorInstance {
     pub fn placeholder() -> Self {
-        let private_key = Ed25519PrivateKey::from_u64(1337).unwrap();
+        let mwp = MnemonicWithPassphrase::placeholder();
+        let path = AccountPath::new(NetworkID::Mainnet, CAP26KeyKind::TransactionSigning, 0);
+        let private_key = mwp.derive_private_key(path.clone());
+
+        assert_eq!(path.to_string(), "m/44H/1022H/1H/525H/1460H/0H");
+
+        assert_eq!(
+            "cf52dbc7bb2663223e99fb31799281b813b939440a372d0aa92eb5f5b8516003",
+            private_key.to_hex()
+        );
         let public_key = private_key.public_key();
+        assert_eq!(
+            "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b",
+            public_key.to_hex()
+        );
+        let id =
+            FactorSourceIDFromHash::from_mnemonic_with_passphrase(FactorSourceKind::Device, mwp);
+        assert_eq!(
+            id.to_string(),
+            "device:3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+        );
         Self::new(
-            FactorSourceIDFromHash::placeholder(),
-            PublicKey::Ed25519(public_key),
-            DerivationPath::placeholder(),
+            id,
+            public_key,
+            DerivationPath::CAP26(CAP26Path::AccountPath(path)),
         )
     }
 }
@@ -46,7 +98,7 @@ mod tests {
 
     use super::HierarchicalDeterministicFactorInstance;
 
-    //#[test]
+    // #[test]
     fn json_roundtrip() {
         let model = HierarchicalDeterministicFactorInstance::placeholder();
         assert_eq_after_json_roundtrip(
@@ -58,11 +110,11 @@ mod tests {
 						"hierarchicalDeterministicPublicKey": {
 							"publicKey": {
 								"curve": "curve25519",
-								"compressedData": "3feb8194ead2e526fbcc4c1673a7a8b29d8cee0b32bb9393692f739821dd256b"
+								"compressedData": "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b"
 							},
 							"derivationPath": {
 								"scheme": "cap26",
-								"path": "m/44H/1022H/14H/525H/1460H/0H"
+								"path": "m/44H/1022H/1H/525H/1460H/0H"
 							}
 						},
 						"discriminator": "hierarchicalDeterministicPublicKey"
@@ -72,7 +124,7 @@ mod tests {
 				"factorSourceID": {
 					"fromHash": {
 						"kind": "device",
-						"body": "c9e67a9028fb3150304c77992710c35c8e479d4fa59f7c45a96ce17f6fdf1d2c"
+						"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
 					},
 					"discriminator": "fromHash"
 				}

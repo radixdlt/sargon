@@ -6,13 +6,22 @@ use radix_engine_common::crypto::{blake2b_256_hash, Hash};
 use serde::{Deserialize, Serialize};
 use wallet_kit_common::types::hex_32bytes::Hex32Bytes;
 
-use super::factor_source_kind::FactorSourceKind;
+use super::{
+    factor_source_id::FactorSourceID, factor_source_kind::FactorSourceKind,
+    to_factor_source_id::ToFactorSourceID,
+};
 
 /// FactorSourceID from a hash.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FactorSourceIDFromHash {
     pub kind: FactorSourceKind,
     pub body: Hex32Bytes,
+}
+
+impl ToFactorSourceID for FactorSourceIDFromHash {
+    fn embed(&self) -> FactorSourceID {
+        FactorSourceID::Hash(self.clone())
+    }
 }
 
 impl ToString for FactorSourceIDFromHash {
@@ -59,6 +68,10 @@ mod tests {
     };
     use wallet_kit_common::json::assert_eq_after_json_roundtrip;
 
+    use crate::v100::factors::{
+        factor_source_id::FactorSourceID, to_factor_source_id::ToFactorSourceID,
+    };
+
     use super::FactorSourceIDFromHash;
 
     #[test]
@@ -74,6 +87,12 @@ mod tests {
             }
             "#,
         );
+    }
+
+    #[test]
+    fn embed() {
+        let from_hash = FactorSourceIDFromHash::placeholder();
+        assert_eq!(from_hash.embed(), FactorSourceID::Hash(from_hash));
     }
 
     struct Vector {
