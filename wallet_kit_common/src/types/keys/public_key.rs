@@ -1,5 +1,7 @@
 use serde::{de, ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
 
+use crate::error::Error;
+
 use super::{
     ed25519::public_key::Ed25519PublicKey, secp256k1::public_key::Secp256k1PublicKey,
     slip10_curve::SLIP10Curve,
@@ -9,6 +11,24 @@ use super::{
 pub enum PublicKey {
     Ed25519(Ed25519PublicKey),
     Secp256k1(Secp256k1PublicKey),
+}
+
+impl PublicKey {
+    pub fn secp256k1_from_bytes(slice: &[u8]) -> Result<Self, Error> {
+        Secp256k1PublicKey::try_from(slice).map(Self::Secp256k1)
+    }
+
+    pub fn ed25519_from_bytes(slice: &[u8]) -> Result<Self, Error> {
+        Ed25519PublicKey::try_from(slice).map(Self::Ed25519)
+    }
+
+    pub fn secp256k1_from_str(hex: &str) -> Result<Self, Error> {
+        Secp256k1PublicKey::from_str(hex).map(Self::Secp256k1)
+    }
+
+    pub fn ed25519_from_str(hex: &str) -> Result<Self, Error> {
+        Ed25519PublicKey::from_str(hex).map(Self::Ed25519)
+    }
 }
 
 impl PublicKey {
@@ -142,7 +162,7 @@ mod tests {
     #[test]
     fn equality_secp256k1() {
         assert_eq!(
-            PublicKey::placeholder_secp256k1_alice(),
+            PublicKey::placeholder_secp256k1(),
             PublicKey::placeholder_secp256k1_alice()
         );
     }
@@ -170,7 +190,7 @@ mod tests {
     #[test]
     fn equality_ed25519() {
         assert_eq!(
-            PublicKey::placeholder_ed25519_alice(),
+            PublicKey::placeholder_ed25519(),
             PublicKey::placeholder_ed25519_alice()
         );
     }
@@ -193,5 +213,49 @@ mod tests {
             PublicKey::placeholder_ed25519_alice(),
             PublicKey::placeholder_secp256k1_alice(),
         );
+    }
+
+    #[test]
+    fn secp256k1_bytes_roundtrip() {
+        let bytes: &[u8] = &[
+            0x02, 0x51, 0x7b, 0x88, 0x91, 0x6e, 0x7f, 0x31, 0x5b, 0xb6, 0x82, 0xf9, 0x92, 0x6b,
+            0x14, 0xbc, 0x67, 0xa0, 0xe4, 0x24, 0x6f, 0x8a, 0x41, 0x9b, 0x98, 0x62, 0x69, 0xe1,
+            0xa7, 0xe6, 0x1f, 0xff, 0xa7,
+        ];
+        let key = PublicKey::secp256k1_from_bytes(bytes).unwrap();
+        assert_eq!(
+            key.to_hex(),
+            "02517b88916e7f315bb682f9926b14bc67a0e4246f8a419b986269e1a7e61fffa7"
+        );
+        assert_eq!(key.to_bytes(), bytes);
+    }
+
+    #[test]
+    fn secp256k1_hex_roundtrip() {
+        let hex = "02517b88916e7f315bb682f9926b14bc67a0e4246f8a419b986269e1a7e61fffa7";
+        let key = PublicKey::secp256k1_from_str(hex).unwrap();
+        assert_eq!(key.to_hex(), hex);
+    }
+
+    #[test]
+    fn ed25519_bytes_roundtrip() {
+        let bytes: &[u8] = &[
+            0xec, 0x17, 0x2b, 0x93, 0xad, 0x5e, 0x56, 0x3b, 0xf4, 0x93, 0x2c, 0x70, 0xe1, 0x24,
+            0x50, 0x34, 0xc3, 0x54, 0x67, 0xef, 0x2e, 0xfd, 0x4d, 0x64, 0xeb, 0xf8, 0x19, 0x68,
+            0x34, 0x67, 0xe2, 0xbf,
+        ];
+        let key = PublicKey::ed25519_from_bytes(bytes).unwrap();
+        assert_eq!(
+            key.to_hex(),
+            "ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf"
+        );
+        assert_eq!(key.to_bytes(), bytes);
+    }
+
+    #[test]
+    fn ed25519_hex_roundtrip() {
+        let hex = "ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf";
+        let key = PublicKey::ed25519_from_str(hex).unwrap();
+        assert_eq!(key.to_hex(), hex);
     }
 }
