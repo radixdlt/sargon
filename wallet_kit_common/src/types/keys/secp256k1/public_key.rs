@@ -139,6 +139,14 @@ mod tests {
     }
 
     #[test]
+    fn invalid_bytes() {
+        assert_eq!(
+            Secp256k1PublicKey::try_from(&[0u8] as &[u8]),
+            Err(Error::InvalidSecp256k1PublicKeyFromBytes)
+        );
+    }
+
+    #[test]
     fn invalid_key_not_on_curve() {
         assert_eq!(
             Secp256k1PublicKey::from_str(

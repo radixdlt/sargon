@@ -137,6 +137,14 @@ mod tests {
     }
 
     #[test]
+    fn invalid_bytes() {
+        assert_eq!(
+            Ed25519PublicKey::try_from(&[0u8] as &[u8]),
+            Err(Error::InvalidEd25519PublicKeyFromBytes)
+        );
+    }
+
+    #[test]
     fn invalid_hex_str() {
         assert_eq!(
             Ed25519PublicKey::from_str("not a valid hex string"),
