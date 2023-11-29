@@ -26,6 +26,12 @@ pub enum Error {
     #[error("Failed to create Secp256k1 Public key from String.")]
     InvalidSecp256k1PublicKeyFromString,
 
+    #[error("Failed to create Secp256k1 Public key, invalid point, not on curve.")]
+    InvalidSecp256k1PublicKeyPointNotOnCurve,
+
+    #[error("Failed to create Ed25519 Public key, invalid point, not on curve.")]
+    InvalidEd25519PublicKeyPointNotOnCurve,
+
     #[error("Appearance id not recognized.")]
     InvalidAppearanceID,
 

@@ -14,6 +14,7 @@ impl Secp256k1PrivateKey {
 
     pub fn public_key(&self) -> Secp256k1PublicKey {
         Secp256k1PublicKey::from_engine(self.0.public_key())
+            .expect("Public Key from EC scalar multiplication should always be valid.")
     }
 
     pub fn sign(&self, msg_hash: &impl IsHash) -> Secp256k1Signature {

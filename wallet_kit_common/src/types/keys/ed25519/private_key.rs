@@ -14,6 +14,7 @@ impl Ed25519PrivateKey {
 
     pub fn public_key(&self) -> Ed25519PublicKey {
         Ed25519PublicKey::from_engine(self.0.public_key())
+            .expect("Public Key from EC scalar multiplication should always be valid.")
     }
 
     pub fn sign(&self, msg_hash: &impl IsHash) -> Ed25519Signature {
