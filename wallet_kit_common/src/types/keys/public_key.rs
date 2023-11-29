@@ -34,6 +34,32 @@ impl PublicKey {
     }
 }
 
+impl PublicKey {
+    pub fn placeholder_secp256k1() -> Self {
+        Self::placeholder_secp256k1_alice()
+    }
+
+    pub fn placeholder_secp256k1_alice() -> Self {
+        Self::Secp256k1(Secp256k1PublicKey::placeholder_alice())
+    }
+
+    pub fn placeholder_secp256k1_bob() -> Self {
+        Self::Secp256k1(Secp256k1PublicKey::placeholder_bob())
+    }
+
+    pub fn placeholder_ed25519() -> Self {
+        Self::placeholder_ed25519_alice()
+    }
+
+    pub fn placeholder_ed25519_alice() -> Self {
+        Self::Ed25519(Ed25519PublicKey::placeholder_alice())
+    }
+
+    pub fn placeholder_ed25519_bob() -> Self {
+        Self::Ed25519(Ed25519PublicKey::placeholder_bob())
+    }
+}
+
 impl<'de> Deserialize<'de> for PublicKey {
     fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
         #[derive(Deserialize, Serialize)]
@@ -69,24 +95,22 @@ impl Serialize for PublicKey {
 #[cfg(test)]
 mod tests {
 
+    use std::collections::BTreeSet;
+
     use crate::json::assert_eq_after_json_roundtrip;
 
     use super::PublicKey;
 
     #[test]
     fn json_roundtrip_ed25519() {
-        let model = PublicKey::Ed25519(
-            "3feb8194ead2e526fbcc4c1673a7a8b29d8cee0b32bb9393692f739821dd256b"
-                .try_into()
-                .unwrap(),
-        );
+        let model = PublicKey::placeholder_ed25519_alice();
 
         assert_eq_after_json_roundtrip(
             &model,
             r#"
 			{
 				"curve": "curve25519",
-				"compressedData": "3feb8194ead2e526fbcc4c1673a7a8b29d8cee0b32bb9393692f739821dd256b"
+				"compressedData": "ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf"
 			}
             "#,
         );
@@ -94,11 +118,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_secp256k1() {
-        let model = PublicKey::Secp256k1(
-            "02517b88916e7f315bb682f9926b14bc67a0e4246f8a419b986269e1a7e61fffa7"
-                .try_into()
-                .unwrap(),
-        );
+        let model = PublicKey::placeholder_secp256k1_alice();
 
         assert_eq_after_json_roundtrip(
             &model,
@@ -108,6 +128,70 @@ mod tests {
 				"compressedData": "02517b88916e7f315bb682f9926b14bc67a0e4246f8a419b986269e1a7e61fffa7"
 			}
             "#,
+        );
+    }
+
+    #[test]
+    fn inequality_secp256k1() {
+        assert_ne!(
+            PublicKey::placeholder_secp256k1_alice(),
+            PublicKey::placeholder_secp256k1_bob(),
+        );
+    }
+
+    #[test]
+    fn equality_secp256k1() {
+        assert_eq!(
+            PublicKey::placeholder_secp256k1_alice(),
+            PublicKey::placeholder_secp256k1_alice()
+        );
+    }
+
+    #[test]
+    fn hash_secp256k1() {
+        assert_eq!(
+            BTreeSet::from_iter([
+                PublicKey::placeholder_secp256k1_alice(),
+                PublicKey::placeholder_secp256k1_alice()
+            ])
+            .len(),
+            1
+        );
+    }
+
+    #[test]
+    fn inequality_ed25519() {
+        assert_ne!(
+            PublicKey::placeholder_ed25519_alice(),
+            PublicKey::placeholder_ed25519_bob(),
+        );
+    }
+
+    #[test]
+    fn equality_ed25519() {
+        assert_eq!(
+            PublicKey::placeholder_ed25519_alice(),
+            PublicKey::placeholder_ed25519_alice()
+        );
+    }
+
+    #[test]
+    fn hash_ed25519() {
+        assert_eq!(
+            BTreeSet::from_iter([
+                PublicKey::placeholder_ed25519_alice(),
+                PublicKey::placeholder_ed25519_alice()
+            ])
+            .len(),
+            1
+        );
+    }
+
+    #[test]
+    fn inequality_different_curves() {
+        assert_ne!(
+            PublicKey::placeholder_ed25519_alice(),
+            PublicKey::placeholder_secp256k1_alice(),
         );
     }
 }
