@@ -169,4 +169,27 @@ mod tests {
             Err(Error::InvalidEd25519PrivateKeyFromBytes)
         );
     }
+
+    #[test]
+    fn equality() {
+        assert_eq!(
+            Ed25519PrivateKey::from_str(
+                "0000000000000000000000000000000000000000000000000000000000000001"
+            )
+            .unwrap(),
+            Ed25519PrivateKey::from_str(
+                "0000000000000000000000000000000000000000000000000000000000000001"
+            )
+            .unwrap()
+        );
+    }
+
+    #[test]
+    fn debug() {
+        let hex = "0000000000000000000000000000000000000000000000000000000000000001";
+        assert_eq!(
+            format!("{:?}", Ed25519PrivateKey::from_str(hex).unwrap()),
+            hex
+        );
+    }
 }

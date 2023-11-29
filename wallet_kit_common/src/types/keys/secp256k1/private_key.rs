@@ -188,4 +188,27 @@ mod tests {
             Err(Error::InvalidSecp256k1PrivateKeyFromBytes)
         );
     }
+
+    #[test]
+    fn equality() {
+        assert_eq!(
+            Secp256k1PrivateKey::from_str(
+                "0000000000000000000000000000000000000000000000000000000000000001"
+            )
+            .unwrap(),
+            Secp256k1PrivateKey::from_str(
+                "0000000000000000000000000000000000000000000000000000000000000001"
+            )
+            .unwrap()
+        );
+    }
+
+    #[test]
+    fn debug() {
+        let hex = "0000000000000000000000000000000000000000000000000000000000000001";
+        assert_eq!(
+            format!("{:?}", Secp256k1PrivateKey::from_str(hex).unwrap()),
+            hex
+        );
+    }
 }
