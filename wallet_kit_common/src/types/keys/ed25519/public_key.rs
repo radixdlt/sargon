@@ -10,6 +10,7 @@ use std::{
 };
 use transaction::{signing::ed25519::Ed25519Signature, validation::verify_ed25519};
 
+/// An Ed25519 public key used to verify cryptographic signatures.
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Ed25519PublicKey(EngineEd25519PublicKey);
 
