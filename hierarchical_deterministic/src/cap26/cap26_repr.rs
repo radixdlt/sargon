@@ -9,10 +9,7 @@ use crate::{
     hdpath_error::HDPathError,
 };
 
-use super::{
-    cap26_entity_kind::CAP26EntityKind, cap26_key_kind::CAP26KeyKind,
-    cap26_path::cap26_path::CAP26Path,
-};
+use super::{cap26_entity_kind::CAP26EntityKind, cap26_key_kind::CAP26KeyKind};
 
 pub trait CAP26Repr: Derivation {
     fn entity_kind() -> Option<CAP26EntityKind> {

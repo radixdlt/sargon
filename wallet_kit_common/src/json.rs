@@ -1,5 +1,8 @@
 use core::fmt::Debug;
-use serde::{de::DeserializeOwned, ser::Serialize};
+use serde::{
+    de::{self, DeserializeOwned},
+    ser::Serialize,
+};
 use serde_json::Value;
 
 fn base_assert_equality_after_json_roundtrip<T>(model: &T, json: Value, expect_eq: bool)
@@ -9,9 +12,11 @@ where
     let serialized = serde_json::to_value(&model).unwrap();
     let deserialized: T = serde_json::from_value(json.clone()).unwrap();
     if expect_eq {
+        assert_eq!(model, &deserialized);
         assert_eq!(&deserialized, model, "Expected `model: T` and `T` deserialized from `json_string`, to be equal, but they were not.");
         assert_eq!(serialized, json, "Expected `json` (string) and json serialized from `model to be equal`, but they were not.");
     } else {
+        assert_ne!(model, &deserialized);
         assert_ne!(&deserialized, model, "Expected difference between `model: T` and `T` deserialized from `json_string`, but they were unexpectedly equal.");
         assert_ne!(serialized, json, "Expected difference between `json` (string) and json serialized from `model`, but they were unexpectedly equal.");
     }

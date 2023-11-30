@@ -53,11 +53,9 @@ impl FactorSourceIDFromHash {
 }
 
 impl FactorSourceIDFromHash {
+    /// This is using the MnemonicWithPass
     pub fn placeholder() -> Self {
-        Self {
-            kind: FactorSourceKind::Device,
-            body: Hex32Bytes::placeholder(),
-        }
+        Self::new_for_device(MnemonicWithPassphrase::placeholder())
     }
 }
 
@@ -75,7 +73,7 @@ mod tests {
     use super::FactorSourceIDFromHash;
 
     #[test]
-    fn json_roundtrip() {
+    fn json_roundtrip_placeholder() {
         let model = FactorSourceIDFromHash::placeholder();
 
         assert_eq_after_json_roundtrip(
@@ -83,7 +81,22 @@ mod tests {
             r#"
             {
                 "kind": "device",
-                "body": "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
+                "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+            }
+            "#,
+        );
+    }
+
+    #[test]
+    fn json_from_placeholder_mnemonic() {
+        let mwp = MnemonicWithPassphrase::placeholder();
+        let model = FactorSourceIDFromHash::new_for_device(mwp);
+        assert_eq_after_json_roundtrip(
+            &model,
+            r#"
+            {
+                "kind": "device",
+                "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
             }
             "#,
         );

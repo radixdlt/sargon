@@ -1,15 +1,15 @@
-use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
-
 use super::{
     factor_source_id_from_address::FactorSourceIDFromAddress,
     factor_source_id_from_hash::FactorSourceIDFromHash,
 };
+use enum_as_inner::EnumAsInner;
+use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
 
 /// A unique and stable identifier of a FactorSource, e.g. a
 /// DeviceFactorSource being a mnemonic securely stored in a
 /// device (phone), where the ID of it is the hash of a special
 /// key derived near the root of it.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Serialize, Deserialize, EnumAsInner, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 #[serde(remote = "Self")]
 pub enum FactorSourceID {
     #[serde(rename = "fromHash")]
@@ -54,27 +54,30 @@ impl Serialize for FactorSourceID {
     }
 }
 
+impl FactorSourceID {
+    pub fn placeholder() -> Self {
+        FactorSourceID::Hash(FactorSourceIDFromHash::placeholder())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use wallet_kit_common::json::assert_eq_after_json_roundtrip;
 
-    use crate::v100::factors::{
-        factor_source_id_from_address::FactorSourceIDFromAddress,
-        factor_source_id_from_hash::FactorSourceIDFromHash,
-    };
+    use crate::v100::factors::factor_source_id_from_address::FactorSourceIDFromAddress;
 
     use super::FactorSourceID;
 
     #[test]
     fn json_roundtrip_from_hash() {
-        let model = FactorSourceID::Hash(FactorSourceIDFromHash::placeholder());
+        let model = FactorSourceID::placeholder();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
             {
                 "fromHash": {
                     "kind": "device",
-                    "body": "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
+                    "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
                 },
                 "discriminator" : "fromHash"
             }

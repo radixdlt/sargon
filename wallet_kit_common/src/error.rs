@@ -76,4 +76,10 @@ pub enum Error {
 
     #[error("Invalid bip39 word count : '{0}'")]
     InvalidBIP39WordCount(usize),
+
+    #[error("Failed to convert FactorInstance into HierarchicalDeterministicFactorInstance, badge is not virtual HD.")]
+    BadgeIsNotVirtualHierarchicalDeterministic,
+
+    #[error("Failed to create FactorSourceIDFromHash from FactorSourceID")]
+    FactorSourceIDNotFromHash,
 }

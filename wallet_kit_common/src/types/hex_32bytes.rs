@@ -1,16 +1,24 @@
-use std::str::FromStr;
+use std::{
+    fmt::{Debug, Display, Formatter},
+    str::FromStr,
+};
 
 use radix_engine_common::crypto::{Hash, IsHash};
 use serde::{de, Deserializer, Serialize, Serializer};
 
 use crate::error::Error;
 
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Hex32Bytes([u8; 32]);
 
-impl ToString for Hex32Bytes {
-    fn to_string(&self) -> String {
-        hex::encode(self.0)
+impl Display for Hex32Bytes {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", hex::encode(self.0))
+    }
+}
+impl Debug for Hex32Bytes {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&hex::encode(self.0))
     }
 }
 

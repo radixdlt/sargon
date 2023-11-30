@@ -10,7 +10,7 @@ use hierarchical_deterministic::{
         mnemonic_with_passphrase::MnemonicWithPassphrase,
     },
 };
-use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
+use serde::{de, Deserializer, Serialize, Serializer};
 use wallet_kit_common::{error::Error, network_id::NetworkID, types::keys::public_key::PublicKey};
 
 use crate::v100::factors::factor_source_kind::FactorSourceKind;
@@ -20,6 +20,7 @@ use super::{
         badge_virtual_source::FactorInstanceBadgeVirtualSource, factor_instance::FactorInstance,
         factor_instance_badge::FactorInstanceBadge,
     },
+    factor_source_id::FactorSourceID,
     factor_source_id_from_hash::FactorSourceIDFromHash,
     to_factor_source_id::ToFactorSourceID,
 };
@@ -44,26 +45,35 @@ impl HierarchicalDeterministicFactorInstance {
         }
     }
 
-    pub fn try_from_factor_instance(factor_instance: FactorInstance) -> Result<Self, Error> {
-        // match factor_instance.badge {
-        //     //             pub enum FactorInstanceBadge {
-        //     //     Virtual(FactorInstanceBadgeVirtualSource),
-        //     // }
-        //     FactorInstanceBadge::Virtual(v) => match v {
-        //         FactorInstanceBadgeVirtualSource::HierarchicalDeterministic(hd) => {
+    pub fn try_from(
+        factor_source_id: FactorSourceID,
+        public_key: PublicKey,
+        derivation_path: DerivationPath,
+    ) -> Result<Self, Error> {
+        let factor_source_id = factor_source_id
+            .as_hash()
+            .ok_or(Error::FactorSourceIDNotFromHash)?;
+        Ok(Self::new(
+            factor_source_id.clone(),
+            public_key,
+            derivation_path,
+        ))
+    }
 
-        //         }
-        //     },
-        // }
-        todo!()
-        // guard case let .virtual(.hierarchicalDeterministic(badge)) = factorInstance.badge else {
-        // 	throw BadgeIsNotVirtualHierarchicalDeterministic()
-        // }
-        // try self.init(
-        // 	factorSourceID: factorInstance.factorSourceID,
-        // 	publicKey: badge.publicKey,
-        // 	derivationPath: badge.derivationPath
-        // )
+    pub fn try_from_factor_instance(factor_instance: FactorInstance) -> Result<Self, Error> {
+        let virtual_source = factor_instance
+            .badge
+            .as_virtual()
+            .ok_or(Error::BadgeIsNotVirtualHierarchicalDeterministic)?;
+        let badge = virtual_source
+            .as_hierarchical_deterministic()
+            .ok_or(Error::BadgeIsNotVirtualHierarchicalDeterministic)?;
+
+        Self::try_from(
+            factor_instance.factor_source_id,
+            badge.public_key,
+            badge.derivation_path.clone(),
+        )
     }
 
     pub fn factor_instance(&self) -> FactorInstance {
@@ -138,7 +148,7 @@ mod tests {
 
     use super::HierarchicalDeterministicFactorInstance;
 
-    // #[test]
+    #[test]
     fn json_roundtrip() {
         let model = HierarchicalDeterministicFactorInstance::placeholder();
         assert_eq_after_json_roundtrip(

@@ -14,6 +14,7 @@ pub struct UnsecuredEntityControl {
     pub transaction_signing: HierarchicalDeterministicFactorInstance,
 
     /// The factor instance which can be used for ROLA.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub authentication_signing: Option<HierarchicalDeterministicFactorInstance>,
 }
 
@@ -46,7 +47,8 @@ mod tests {
     use wallet_kit_common::json::assert_eq_after_json_roundtrip;
 
     use super::UnsecuredEntityControl;
-    // #[test]
+
+    #[test]
     fn json_roundtrip() {
         let model = UnsecuredEntityControl::placeholder();
         assert_eq_after_json_roundtrip(
@@ -59,11 +61,11 @@ mod tests {
 							"hierarchicalDeterministicPublicKey": {
 								"publicKey": {
 									"curve": "curve25519",
-									"compressedData": "3feb8194ead2e526fbcc4c1673a7a8b29d8cee0b32bb9393692f739821dd256b"
+									"compressedData": "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b"
 								},
 								"derivationPath": {
 									"scheme": "cap26",
-									"path": "m/44H/1022H/14H/525H/1460H/0H"
+									"path": "m/44H/1022H/1H/525H/1460H/0H"
 								}
 							},
 							"discriminator": "hierarchicalDeterministicPublicKey"
@@ -73,7 +75,7 @@ mod tests {
 					"factorSourceID": {
 						"fromHash": {
 							"kind": "device",
-							"body": "c9e67a9028fb3150304c77992710c35c8e479d4fa59f7c45a96ce17f6fdf1d2c"
+							"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
 						},
 						"discriminator": "fromHash"
 					}

@@ -1,11 +1,9 @@
-use bip39::Mnemonic;
 use serde::{Deserialize, Serialize};
 use wallet_kit_common::{network_id::NetworkID, types::keys::public_key::PublicKey};
 
 use crate::{
     cap26::{
-        cap26_key_kind::CAP26KeyKind,
-        cap26_path::{cap26_path::CAP26Path, paths::account_path::AccountPath},
+        cap26_key_kind::CAP26KeyKind, cap26_path::paths::account_path::AccountPath,
         cap26_repr::CAP26Repr,
     },
     derivation::{derivation::Derivation, derivation_path::DerivationPath},

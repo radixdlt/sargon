@@ -31,9 +31,8 @@ impl Serialize for EntitySecurityState {
         let mut state = serializer.serialize_struct("EntitySecurityState", 2)?;
         match self {
             EntitySecurityState::Unsecured(control) => {
-                let discriminant = "unsecuredEntityControl";
-                state.serialize_field("discriminator", discriminant)?;
-                state.serialize_field(discriminant, control)?;
+                state.serialize_field("discriminator", "unsecured")?;
+                state.serialize_field("unsecuredEntityControl", control)?;
             }
         }
         state.end()
@@ -48,49 +47,47 @@ impl EntitySecurityState {
 
 #[cfg(test)]
 mod tests {
-    // #[test]
-    // fn json_roundtrip() {
-    //     // let model = Account::with_values(
-    //     //     "account_tdx_e_128vkt2fur65p4hqhulfv3h0cknrppwtjsstlttkfamj4jnnpm82gsw"
-    //     //         .try_into()
-    //     //         .unwrap(),
-    //     //     "Zaba 0".try_into().unwrap(),
-    //     //     0.try_into().unwrap(),
-    //     // );
-    //     assert_eq_after_json_roundtrip(
-    //         &model,
-    //         r#"
-    //         {
-    // 			"unsecuredEntityControl": {
-    // 				"transactionSigning": {
-    // 					"badge": {
-    // 						"virtualSource": {
-    // 							"hierarchicalDeterministicPublicKey": {
-    // 								"publicKey": {
-    // 									"curve": "curve25519",
-    // 									"compressedData": "3feb8194ead2e526fbcc4c1673a7a8b29d8cee0b32bb9393692f739821dd256b"
-    // 								},
-    // 								"derivationPath": {
-    // 									"scheme": "cap26",
-    // 									"path": "m/44H/1022H/14H/525H/1460H/0H"
-    // 								}
-    // 							},
-    // 							"discriminator": "hierarchicalDeterministicPublicKey"
-    // 						},
-    // 						"discriminator": "virtualSource"
-    // 					},
-    // 					"factorSourceID": {
-    // 						"fromHash": {
-    // 							"kind": "device",
-    // 							"body": "c9e67a9028fb3150304c77992710c35c8e479d4fa59f7c45a96ce17f6fdf1d2c"
-    // 						},
-    // 						"discriminator": "fromHash"
-    // 					}
-    // 				}
-    // 			},
-    // 			"discriminator": "unsecured"
-    // 		}
-    //         "#,
-    //     );
-    // }
+    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
+
+    use super::EntitySecurityState;
+
+    #[test]
+    fn json_roundtrip() {
+        let model = EntitySecurityState::placeholder();
+        assert_eq_after_json_roundtrip(
+            &model,
+            r#"
+			{
+				"unsecuredEntityControl": {
+					"transactionSigning": {
+						"badge": {
+							"virtualSource": {
+								"hierarchicalDeterministicPublicKey": {
+									"publicKey": {
+										"curve": "curve25519",
+										"compressedData": "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b"
+									},
+									"derivationPath": {
+										"scheme": "cap26",
+										"path": "m/44H/1022H/1H/525H/1460H/0H"
+									}
+								},
+								"discriminator": "hierarchicalDeterministicPublicKey"
+							},
+							"discriminator": "virtualSource"
+						},
+						"factorSourceID": {
+							"fromHash": {
+								"kind": "device",
+								"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+							},
+							"discriminator": "fromHash"
+						}
+					}
+				},
+				"discriminator": "unsecured"
+			}
+            "#,
+        );
+    }
 }

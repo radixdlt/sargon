@@ -38,6 +38,7 @@ use super::{
 #[serde(rename_all = "camelCase")]
 pub struct Account {
     /// The ID of the network this account can be used with.
+    #[serde(rename = "networkID")]
     pub network_id: NetworkID,
 
     /// A globally unique identifier of this account, being a human readable
@@ -64,6 +65,7 @@ pub struct Account {
 
     /// The visual cue user learns to associated this account with, typically
     /// a beautiful colorful gradient.
+    #[serde(rename = "appearanceID")]
     appearance_id: RefCell<AppearanceID>,
 
     /// An order set of `EntityFlag`s used to describe certain Off-ledger
@@ -425,11 +427,11 @@ mod tests {
 									"hierarchicalDeterministicPublicKey": {
 										"publicKey": {
 											"curve": "curve25519",
-											"compressedData": "3feb8194ead2e526fbcc4c1673a7a8b29d8cee0b32bb9393692f739821dd256b"
+											"compressedData": "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b"
 										},
 										"derivationPath": {
 											"scheme": "cap26",
-											"path": "m/44H/1022H/14H/525H/1460H/0H"
+											"path": "m/44H/1022H/1H/525H/1460H/0H"
 										}
 									},
 									"discriminator": "hierarchicalDeterministicPublicKey"
@@ -439,7 +441,7 @@ mod tests {
 							"factorSourceID": {
 								"fromHash": {
 									"kind": "device",
-									"body": "c9e67a9028fb3150304c77992710c35c8e479d4fa59f7c45a96ce17f6fdf1d2c"
+									"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
 								},
 								"discriminator": "fromHash"
 							}

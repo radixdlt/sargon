@@ -58,7 +58,7 @@ mod tests {
                 "device": {
                     "id": {
                         "kind": "device",
-                        "body": "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
+                        "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
                     },
                     "common": {
                         "flags": ["main"],
