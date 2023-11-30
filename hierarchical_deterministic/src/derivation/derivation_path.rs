@@ -170,7 +170,7 @@ mod tests {
     }
 
     #[test]
-    fn json() {
+    fn json_cap26_account() {
         let path = AccountPath::new(NetworkID::Mainnet, CAP26KeyKind::TransactionSigning, 0);
         let model: DerivationPath = path.into();
         assert_eq_after_json_roundtrip(
@@ -179,6 +179,36 @@ mod tests {
         {
 			"scheme": "cap26",
 			"path": "m/44H/1022H/1H/525H/1460H/0H"
+		}
+        "#,
+        );
+    }
+
+    #[test]
+    fn json_cap26_getid() {
+        let path = GetIDPath::default();
+        let model: DerivationPath = path.into();
+        assert_eq_after_json_roundtrip(
+            &model,
+            r#"
+        {
+			"scheme": "cap26",
+			"path": "m/44H/1022H/365H"
+		}
+        "#,
+        );
+    }
+
+    #[test]
+    fn json_bip44like_account() {
+        let path = BIP44LikePath::placeholder();
+        let model: DerivationPath = path.into();
+        assert_eq_after_json_roundtrip(
+            &model,
+            r#"
+        {
+			"scheme": "bip44Olympia",
+			"path": "m/44H/1022H/0H/0/0H"
 		}
         "#,
         );

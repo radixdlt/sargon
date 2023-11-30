@@ -6,14 +6,15 @@ use wallet_kit_common::types::keys::slip10_curve::SLIP10Curve;
 /// a new scheme call Cap26 but we also need to support BIP44-like used
 /// by Olympia.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-#[serde(rename_all = "lowercase")]
 pub enum DerivationPathScheme {
     /// A BIP32 based derivation path scheme, using SLIP10.
+    #[serde(rename = "cap26")]
     Cap26,
 
     /// A BIP32 based similar to BIP44, but not strict BIP44 since the
     /// last path component is hardened (a mistake made during Olympia),
     /// used to support legacy accounts imported from Olympia wallet.
+    #[serde(rename = "bip44Olympia")]
     Bip44Olympia,
 }
 
