@@ -379,34 +379,7 @@ mod tests {
         );
     }
 
-    // #[test]
-    // fn compare() {
-    //     let make = |index: HDPathValue| -> Account {
-    //         let address: AccountAddress =
-    //             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
-    //                 .try_into()
-    //                 .unwrap();
-
-    //         let account = Account {
-    //             address: address.clone(),
-    //             network_id: address.network_id,
-    //             display_name: RefCell::new(DisplayName::new("Test").unwrap()),
-    //             appearance_id: RefCell::new(AppearanceID::default()),
-    //             flags: RefCell::new(EntityFlags::default()),
-    //             on_ledger_settings: RefCell::new(OnLedgerSettings::default()),
-    //             security_state: EntitySecurityState::Unsecured(UnsecuredEntityControl::new(
-    //                 index,
-    //                 HierarchicalDeterministicFactorInstance::placeholder(),
-    //             )),
-    //         };
-    //         account
-    //     };
-    //     let a = make(0);
-    //     let b = make(1);
-    //     assert!(a < b);
-    // }
-
-    // #[test]
+    #[test]
     fn json_roundtrip() {
         let model = Account::with_values(
             "account_tdx_e_128vkt2fur65p4hqhulfv3h0cknrppwtjsstlttkfamj4jnnpm82gsw"
@@ -415,6 +388,10 @@ mod tests {
             "Zaba 0".try_into().unwrap(),
             0.try_into().unwrap(),
         );
+        model
+            .flags
+            .borrow_mut()
+            .insert_flag(EntityFlag::DeletedByUser);
         assert_eq_after_json_roundtrip(
             &model,
             r#"

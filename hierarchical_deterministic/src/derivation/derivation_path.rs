@@ -1,5 +1,6 @@
 use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
 
+use super::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme};
 use crate::{
     bip32::hd_path::HDPath,
     bip44::bip44_like_path::BIP44LikePath,
@@ -8,14 +9,19 @@ use crate::{
         paths::{account_path::AccountPath, getid_path::GetIDPath},
     },
 };
-
-use super::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme};
+use std::fmt::{Debug, Formatter};
 
 /// A derivation path on either supported schemes, either Babylon (CAP26) or Olympia (BIP44Like).
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum DerivationPath {
     CAP26(CAP26Path),
     BIP44Like(BIP44LikePath),
+}
+
+impl Debug for DerivationPath {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.to_string())
+    }
 }
 
 impl<'de> serde::Deserialize<'de> for DerivationPath {
