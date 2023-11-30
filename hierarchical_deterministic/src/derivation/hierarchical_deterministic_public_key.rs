@@ -1,7 +1,17 @@
+use bip39::Mnemonic;
 use serde::{Deserialize, Serialize};
-use wallet_kit_common::types::keys::public_key::PublicKey;
+use wallet_kit_common::{network_id::NetworkID, types::keys::public_key::PublicKey};
 
-use crate::derivation::derivation_path::DerivationPath;
+use crate::{
+    cap26::{
+        cap26_key_kind::CAP26KeyKind,
+        cap26_path::{cap26_path::CAP26Path, paths::account_path::AccountPath},
+        cap26_repr::CAP26Repr,
+    },
+    derivation::{derivation::Derivation, derivation_path::DerivationPath},
+};
+
+use super::mnemonic_with_passphrase::MnemonicWithPassphrase;
 
 /// The **source** of a virtual hierarchical deterministic badge, contains a
 /// derivation path and public key, from which a private key is derived which
@@ -24,5 +34,53 @@ impl HierarchicalDeterministicPublicKey {
             public_key,
             derivation_path,
         }
+    }
+}
+
+impl HierarchicalDeterministicPublicKey {
+    pub fn placeholder() -> Self {
+        let mwp = MnemonicWithPassphrase::placeholder();
+        let path = AccountPath::new(NetworkID::Mainnet, CAP26KeyKind::TransactionSigning, 0);
+        let private_key = mwp.derive_private_key(path.clone());
+
+        assert_eq!(path.to_string(), "m/44H/1022H/1H/525H/1460H/0H");
+
+        assert_eq!(
+            "cf52dbc7bb2663223e99fb31799281b813b939440a372d0aa92eb5f5b8516003",
+            private_key.to_hex()
+        );
+        let public_key = private_key.public_key();
+        assert_eq!(
+            "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b",
+            public_key.to_hex()
+        );
+        Self::new(public_key, path.into())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
+
+    use super::HierarchicalDeterministicPublicKey;
+
+    #[test]
+    fn json() {
+        let model = HierarchicalDeterministicPublicKey::placeholder();
+        assert_eq_after_json_roundtrip(
+            &model,
+            r#"
+			{
+				"publicKey": {
+					"curve": "curve25519",
+					"compressedData": "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b"
+				},
+				"derivationPath": {
+					"scheme": "cap26",
+					"path": "m/44H/1022H/1H/525H/1460H/0H"
+				}
+			}
+       "#,
+        );
     }
 }

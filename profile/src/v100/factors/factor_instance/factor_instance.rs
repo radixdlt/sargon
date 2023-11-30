@@ -1,12 +1,10 @@
-use hierarchical_deterministic::derivation::hierarchical_deterministic_public_key::HierarchicalDeterministicPublicKey;
-
-use crate::v100::factors::{
-    factor_source_id::FactorSourceID,
-    hierarchical_deterministic_factor_instance::HierarchicalDeterministicFactorInstance,
-};
+use serde::{Deserialize, Serialize};
 
 use super::factor_instance_badge::FactorInstanceBadge;
+use crate::v100::factors::factor_source_id::FactorSourceID;
 
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
 pub struct FactorInstance {
     /// The ID of the `FactorSource` that was used to produce this
     /// factor instance. We will lookup the `FactorSource` in the

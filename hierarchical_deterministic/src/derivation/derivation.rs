@@ -8,6 +8,7 @@ pub trait Derivation: Sized {
     fn to_string(&self) -> String {
         self.hd_path().to_string()
     }
+
     fn scheme(&self) -> DerivationPathScheme;
 
     fn last_component(&self) -> &HDPathComponent {

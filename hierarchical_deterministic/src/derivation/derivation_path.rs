@@ -1,20 +1,56 @@
-use serde::{Deserialize, Serialize};
+use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
 
 use crate::{
     bip32::hd_path::HDPath,
     bip44::bip44_like_path::BIP44LikePath,
-    cap26::cap26_path::{cap26_path::CAP26Path, paths::account_path::AccountPath},
+    cap26::cap26_path::{
+        cap26_path::CAP26Path,
+        paths::{account_path::AccountPath, getid_path::GetIDPath},
+    },
 };
 
 use super::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme};
 
 /// A derivation path on either supported schemes, either Babylon (CAP26) or Olympia (BIP44Like).
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-#[serde(rename_all = "camelCase")]
-#[serde(tag = "discriminator", content = "value")]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum DerivationPath {
     CAP26(CAP26Path),
     BIP44Like(BIP44LikePath),
+}
+
+impl<'de> serde::Deserialize<'de> for DerivationPath {
+    /// Tries to deserializes a JSON string as a bech32 address into an `AccountAddress`.
+    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<DerivationPath, D::Error> {
+        #[derive(Deserialize)]
+        pub struct Inner {
+            pub scheme: DerivationPathScheme,
+            pub path: serde_json::Value,
+        }
+
+        let inner = Inner::deserialize(d)?;
+
+        let derivation_path = match inner.scheme {
+            DerivationPathScheme::Cap26 => DerivationPath::CAP26(
+                CAP26Path::deserialize(inner.path).map_err(serde::de::Error::custom)?,
+            ),
+            DerivationPathScheme::Bip44Olympia => DerivationPath::BIP44Like(
+                BIP44LikePath::deserialize(inner.path).map_err(serde::de::Error::custom)?,
+            ),
+        };
+        Ok(derivation_path)
+    }
+}
+
+impl Serialize for DerivationPath {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("DerivationPath", 2)?;
+        state.serialize_field("scheme", &self.scheme())?;
+        state.serialize_field("path", &self.hd_path().to_string())?;
+        state.end()
+    }
 }
 
 impl DerivationPath {
@@ -44,11 +80,35 @@ impl DerivationPath {
     }
 }
 
+impl From<AccountPath> for DerivationPath {
+    fn from(value: AccountPath) -> Self {
+        Self::CAP26(value.into())
+    }
+}
+
+impl From<GetIDPath> for DerivationPath {
+    fn from(value: GetIDPath) -> Self {
+        Self::CAP26(value.into())
+    }
+}
+
+impl From<BIP44LikePath> for DerivationPath {
+    fn from(value: BIP44LikePath) -> Self {
+        Self::BIP44Like(value)
+    }
+}
+
 #[cfg(test)]
 mod tests {
+    use wallet_kit_common::{json::assert_eq_after_json_roundtrip, network_id::NetworkID};
+
     use crate::{
         bip44::bip44_like_path::BIP44LikePath,
-        cap26::cap26_path::paths::account_path::AccountPath,
+        cap26::{
+            cap26_key_kind::CAP26KeyKind,
+            cap26_path::paths::{account_path::AccountPath, getid_path::GetIDPath},
+            cap26_repr::CAP26Repr,
+        },
         derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},
     };
 
@@ -82,6 +142,45 @@ mod tests {
         assert_eq!(
             DerivationPath::BIP44Like(BIP44LikePath::new(0)).hd_path(),
             BIP44LikePath::new(0).hd_path()
+        );
+    }
+
+    #[test]
+    fn into_from_account_bip44_path() {
+        assert_eq!(
+            DerivationPath::BIP44Like(BIP44LikePath::placeholder()),
+            BIP44LikePath::placeholder().into()
+        );
+    }
+
+    #[test]
+    fn into_from_account_cap26_path() {
+        assert_eq!(
+            DerivationPath::CAP26(AccountPath::placeholder().into()),
+            AccountPath::placeholder().into()
+        );
+    }
+
+    #[test]
+    fn into_from_getid_path() {
+        assert_eq!(
+            DerivationPath::CAP26(GetIDPath::default().into()),
+            GetIDPath::default().into()
+        );
+    }
+
+    #[test]
+    fn json() {
+        let path = AccountPath::new(NetworkID::Mainnet, CAP26KeyKind::TransactionSigning, 0);
+        let model: DerivationPath = path.into();
+        assert_eq_after_json_roundtrip(
+            &model,
+            r#"
+        {
+			"scheme": "cap26",
+			"path": "m/44H/1022H/1H/525H/1460H/0H"
+		}
+        "#,
         );
     }
 }

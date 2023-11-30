@@ -2,6 +2,7 @@ use serde::{de, Deserializer, Serialize, Serializer};
 
 use crate::{
     bip32::{hd_path::HDPath, hd_path_component::HDPathValue},
+    cap26::cap26_path::cap26_path::CAP26Path,
     derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},
     hdpath_error::HDPathError,
 };
@@ -28,6 +29,10 @@ impl Default for GetIDPath {
 }
 
 impl GetIDPath {
+    pub fn embed(&self) -> CAP26Path {
+        CAP26Path::GetID(self.clone())
+    }
+
     pub const LAST_COMPONENT_VALUE: HDPathValue = 365;
 
     pub fn from_str(s: &str) -> Result<Self, HDPathError> {

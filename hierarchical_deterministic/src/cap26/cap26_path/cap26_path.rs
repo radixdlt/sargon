@@ -1,18 +1,39 @@
-use serde::{Deserialize, Serialize};
+use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 
 use crate::{
     bip32::hd_path::HDPath,
+    cap26::cap26_repr::CAP26Repr,
     derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},
 };
 
 use super::paths::{account_path::AccountPath, getid_path::GetIDPath};
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-#[serde(rename_all = "camelCase")]
-#[serde(tag = "discriminator", content = "value")]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum CAP26Path {
     GetID(GetIDPath),
     AccountPath(AccountPath),
+}
+
+impl Serialize for CAP26Path {
+    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&self.to_string())
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for CAP26Path {
+    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<CAP26Path, D::Error> {
+        let s = String::deserialize(d)?;
+        if let Ok(getid) = GetIDPath::from_str(&s) {
+            return Ok(CAP26Path::GetID(getid));
+        } else {
+            AccountPath::from_str(&s)
+                .map(Self::AccountPath)
+                .map_err(de::Error::custom)
+        }
+    }
 }
 
 impl Derivation for CAP26Path {
@@ -27,6 +48,17 @@ impl Derivation for CAP26Path {
             CAP26Path::AccountPath(p) => p.scheme(),
             CAP26Path::GetID(p) => p.scheme(),
         }
+    }
+}
+
+impl From<AccountPath> for CAP26Path {
+    fn from(value: AccountPath) -> Self {
+        Self::AccountPath(value)
+    }
+}
+impl From<GetIDPath> for CAP26Path {
+    fn from(value: GetIDPath) -> Self {
+        Self::GetID(value)
     }
 }
 
@@ -74,6 +106,22 @@ mod tests {
         assert_eq!(
             CAP26Path::GetID(GetIDPath::default()).hd_path(),
             GetIDPath::default().hd_path()
+        );
+    }
+
+    #[test]
+    fn into_from_account_path() {
+        assert_eq!(
+            CAP26Path::AccountPath(AccountPath::placeholder()),
+            AccountPath::placeholder().into()
+        );
+    }
+
+    #[test]
+    fn into_from_getid_path() {
+        assert_eq!(
+            CAP26Path::GetID(GetIDPath::default()),
+            GetIDPath::default().into()
         );
     }
 }

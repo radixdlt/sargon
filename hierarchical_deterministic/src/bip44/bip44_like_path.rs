@@ -86,6 +86,12 @@ impl TryInto<BIP44LikePath> for &str {
     }
 }
 
+impl BIP44LikePath {
+    pub fn placeholder() -> Self {
+        Self::from_str("m/44H/1022H/0H/0/0H").expect("Valid placeholder")
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use serde_json::json;
@@ -102,6 +108,14 @@ mod tests {
         let str = "m/44H/1022H/0H/0/0H";
         let a: BIP44LikePath = str.try_into().unwrap();
         assert_eq!(a.to_string(), str);
+    }
+
+    #[test]
+    fn placeholder() {
+        assert_eq!(
+            BIP44LikePath::placeholder().to_string(),
+            "m/44H/1022H/0H/0/0H"
+        );
     }
 
     #[test]

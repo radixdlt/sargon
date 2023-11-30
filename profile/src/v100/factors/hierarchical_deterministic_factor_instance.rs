@@ -10,8 +10,8 @@ use hierarchical_deterministic::{
         mnemonic_with_passphrase::MnemonicWithPassphrase,
     },
 };
-use serde::{Deserialize, Serialize};
-use wallet_kit_common::{network_id::NetworkID, types::keys::public_key::PublicKey};
+use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
+use wallet_kit_common::{error::Error, network_id::NetworkID, types::keys::public_key::PublicKey};
 
 use crate::v100::factors::factor_source_kind::FactorSourceKind;
 
@@ -24,10 +24,8 @@ use super::{
     to_factor_source_id::ToFactorSourceID,
 };
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct HierarchicalDeterministicFactorInstance {
-    #[serde(rename = "factorSourceID")]
     pub factor_source_id: FactorSourceIDFromHash,
     pub public_key: PublicKey,
     pub derivation_path: DerivationPath,
@@ -46,6 +44,28 @@ impl HierarchicalDeterministicFactorInstance {
         }
     }
 
+    pub fn try_from_factor_instance(factor_instance: FactorInstance) -> Result<Self, Error> {
+        // match factor_instance.badge {
+        //     //             pub enum FactorInstanceBadge {
+        //     //     Virtual(FactorInstanceBadgeVirtualSource),
+        //     // }
+        //     FactorInstanceBadge::Virtual(v) => match v {
+        //         FactorInstanceBadgeVirtualSource::HierarchicalDeterministic(hd) => {
+
+        //         }
+        //     },
+        // }
+        todo!()
+        // guard case let .virtual(.hierarchicalDeterministic(badge)) = factorInstance.badge else {
+        // 	throw BadgeIsNotVirtualHierarchicalDeterministic()
+        // }
+        // try self.init(
+        // 	factorSourceID: factorInstance.factorSourceID,
+        // 	publicKey: badge.publicKey,
+        // 	derivationPath: badge.derivationPath
+        // )
+    }
+
     pub fn factor_instance(&self) -> FactorInstance {
         FactorInstance::new(
             self.factor_source_id.embed(),
@@ -58,6 +78,26 @@ impl HierarchicalDeterministicFactorInstance {
                 ),
             ),
         )
+    }
+}
+
+impl Serialize for HierarchicalDeterministicFactorInstance {
+    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
+    where
+        S: Serializer,
+    {
+        self.factor_instance().serialize(serializer)
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for HierarchicalDeterministicFactorInstance {
+    fn deserialize<D: Deserializer<'de>>(
+        d: D,
+    ) -> Result<HierarchicalDeterministicFactorInstance, D::Error> {
+        FactorInstance::deserialize(d).and_then(|fi| {
+            HierarchicalDeterministicFactorInstance::try_from_factor_instance(fi)
+                .map_err(de::Error::custom)
+        })
     }
 }
 
