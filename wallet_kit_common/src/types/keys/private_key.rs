@@ -17,7 +17,15 @@ pub enum PrivateKey {
 }
 
 impl From<Ed25519PrivateKey> for PrivateKey {
-    /// Enables `let private_key: PrivateKey = Ed25519PrivateKey::new().into()`
+    /// Enables:
+    ///
+    /// ```
+    /// extern crate wallet_kit_common;
+    /// use wallet_kit_common::types::keys::ed25519::private_key::Ed25519PrivateKey;
+    /// use wallet_kit_common::types::keys::private_key::PrivateKey;
+    ///
+    /// let key: PublicKey = Ed25519PrivateKey::new().public_key().into();
+    /// ```
     fn from(value: Ed25519PrivateKey) -> Self {
         Self::Ed25519(value)
     }
@@ -45,7 +53,15 @@ impl PrivateKey {
         }
     }
 
-    /// Returns the hex representation of the inner public key as a `String`.
+    /// Returns the hex representation of the inner private key's bytes as a `Vec`.
+    pub fn to_bytes(&self) -> Vec<u8> {
+        match self {
+            PrivateKey::Ed25519(key) => key.to_bytes(),
+            PrivateKey::Secp256k1(key) => key.to_bytes(),
+        }
+    }
+
+    /// Returns the hex representation of the inner private key as a `String`.
     pub fn to_hex(&self) -> String {
         match self {
             PrivateKey::Ed25519(key) => key.to_hex(),
@@ -56,6 +72,8 @@ impl PrivateKey {
 
 #[cfg(test)]
 mod tests {
+
+    use std::collections::HashSet;
 
     use crate::{
         secure_random_bytes::generate_32_bytes,
@@ -106,5 +124,18 @@ mod tests {
         let private_key: PrivateKey = Secp256k1PrivateKey::from_vec(bytes.clone()).unwrap().into();
         // test `as`
         assert!(private_key.as_ed25519().is_none());
+    }
+
+    #[test]
+    fn generate_new() {
+        let mut set: HashSet<Vec<u8>> = HashSet::new();
+        let n = 100;
+        for _ in 0..n {
+            let key = PrivateKey::new();
+            let bytes = key.to_bytes();
+            assert_eq!(bytes.len(), 32);
+            set.insert(bytes);
+        }
+        assert_eq!(set.len(), n);
     }
 }

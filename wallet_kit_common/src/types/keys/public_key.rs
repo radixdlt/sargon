@@ -14,40 +14,65 @@ use enum_as_inner::EnumAsInner;
 pub enum PublicKey {
     /// An Ed25519 public key used to verify cryptographic signatures.
     Ed25519(Ed25519PublicKey),
+
+    /// A secp256k1 public key used to verify cryptographic signatures (ECDSA signatures).
     Secp256k1(Secp256k1PublicKey),
 }
 
 impl From<Ed25519PublicKey> for PublicKey {
+    /// Enables:
+    ///
+    /// ```
+    /// extern crate wallet_kit_common;
+    /// use wallet_kit_common::types::keys::ed25519::private_key::Ed25519PrivateKey;
+    /// use wallet_kit_common::types::keys::public_key::PublicKey;
+    ///
+    /// let key: PublicKey = Ed25519PrivateKey::new().public_key().into();
+    /// ```
     fn from(value: Ed25519PublicKey) -> Self {
         Self::Ed25519(value)
     }
 }
 
 impl From<Secp256k1PublicKey> for PublicKey {
+    /// Enables:
+    ///
+    /// ```
+    /// extern crate wallet_kit_common;
+    /// use wallet_kit_common::types::keys::secp256k1::private_key::Secp256k1PrivateKey;
+    /// use wallet_kit_common::types::keys::public_key::PublicKey;
+    ///
+    /// let key: PublicKey = Secp256k1PrivateKey::new().public_key().into();
+    /// ```
     fn from(value: Secp256k1PublicKey) -> Self {
         Self::Secp256k1(value)
     }
 }
 
 impl PublicKey {
+    /// Try to instantiate a `PublicKey` from bytes as a `Secp256k1PublicKey`.
     pub fn secp256k1_from_bytes(slice: &[u8]) -> Result<Self, Error> {
         Secp256k1PublicKey::try_from(slice).map(Self::Secp256k1)
     }
 
+    /// Try to instantiate a `PublicKey` from bytes as a `Ed25519PublicKey`.
     pub fn ed25519_from_bytes(slice: &[u8]) -> Result<Self, Error> {
         Ed25519PublicKey::try_from(slice).map(Self::Ed25519)
     }
 
+    /// Try to instantiate a `PublicKey` from hex string as a `Secp256k1PublicKey`.
     pub fn secp256k1_from_str(hex: &str) -> Result<Self, Error> {
         Secp256k1PublicKey::from_str(hex).map(Self::Secp256k1)
     }
 
+    /// Try to instantiate a `PublicKey` from hex string as a `Ed25519PublicKey`.
     pub fn ed25519_from_str(hex: &str) -> Result<Self, Error> {
         Ed25519PublicKey::from_str(hex).map(Self::Ed25519)
     }
 }
 
 impl PublicKey {
+    /// Returns a `SLIP10Curve`, being the curve of the `PublicKey`.
     pub fn curve(&self) -> SLIP10Curve {
         match self {
             PublicKey::Ed25519(_) => SLIP10Curve::Curve25519,
@@ -55,6 +80,7 @@ impl PublicKey {
         }
     }
 
+    /// Returns a hex encoding of the inner public key.
     pub fn to_hex(&self) -> String {
         match self {
             PublicKey::Ed25519(key) => key.to_hex(),
@@ -62,6 +88,7 @@ impl PublicKey {
         }
     }
 
+    /// Returns a clone of the bytes of the inner public key as a `Vec`.
     pub fn to_bytes(&self) -> Vec<u8> {
         match self {
             PublicKey::Ed25519(key) => key.to_bytes(),
@@ -71,26 +98,32 @@ impl PublicKey {
 }
 
 impl PublicKey {
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder_secp256k1() -> Self {
         Self::placeholder_secp256k1_alice()
     }
 
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder_secp256k1_alice() -> Self {
         Self::Secp256k1(Secp256k1PublicKey::placeholder_alice())
     }
 
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder_secp256k1_bob() -> Self {
         Self::Secp256k1(Secp256k1PublicKey::placeholder_bob())
     }
 
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder_ed25519() -> Self {
         Self::placeholder_ed25519_alice()
     }
 
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder_ed25519_alice() -> Self {
         Self::Ed25519(Ed25519PublicKey::placeholder_alice())
     }
 
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder_ed25519_bob() -> Self {
         Self::Ed25519(Ed25519PublicKey::placeholder_bob())
     }
@@ -133,7 +166,12 @@ mod tests {
 
     use std::collections::BTreeSet;
 
-    use crate::json::assert_eq_after_json_roundtrip;
+    use crate::{
+        json::{assert_eq_after_json_roundtrip, assert_json_fails},
+        types::keys::{
+            ed25519::public_key::Ed25519PublicKey, secp256k1::public_key::Secp256k1PublicKey,
+        },
+    };
 
     use super::PublicKey;
 
@@ -147,6 +185,30 @@ mod tests {
 			{
 				"curve": "curve25519",
 				"compressedData": "ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf"
+			}
+            "#,
+        );
+    }
+
+    #[test]
+    fn json_invalid_curve() {
+        assert_json_fails::<PublicKey>(
+            r#"
+			{
+				"curve": "invalid curve",
+				"compressedData": "ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf"
+			}
+            "#,
+        );
+    }
+
+    #[test]
+    fn json_invalid_public_key_not_on_curve() {
+        assert_json_fails::<PublicKey>(
+            r#"
+			{
+				"curve": "curve25519",
+				"compressedData": "abbaabbaabbaabbaabbaabbaabbaabbaabbaabbaabbaabbaabbaabbaabbaabba"
 			}
             "#,
         );
@@ -273,5 +335,19 @@ mod tests {
         let hex = "ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf";
         let key = PublicKey::ed25519_from_str(hex).unwrap();
         assert_eq!(key.to_hex(), hex);
+    }
+
+    #[test]
+    fn ed25519_into_as_roundtrip() {
+        let ed25519 = Ed25519PublicKey::placeholder();
+        let key: PublicKey = ed25519.clone().into();
+        assert_eq!(key.as_ed25519().unwrap(), &ed25519);
+    }
+
+    #[test]
+    fn secp256k1_into_as_roundtrip() {
+        let secp256k1 = Secp256k1PublicKey::placeholder();
+        let key: PublicKey = secp256k1.clone().into();
+        assert_eq!(key.as_secp256k1().unwrap(), &secp256k1);
     }
 }

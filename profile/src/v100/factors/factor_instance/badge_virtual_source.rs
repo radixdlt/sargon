@@ -1,11 +1,18 @@
-use enum_as_inner::EnumAsInner;
 use hierarchical_deterministic::derivation::hierarchical_deterministic_public_key::HierarchicalDeterministicPublicKey;
 use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
-#[derive(Serialize, Deserialize, EnumAsInner, Clone, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 #[serde(remote = "Self")]
 pub enum FactorInstanceBadgeVirtualSource {
     #[serde(rename = "hierarchicalDeterministicPublicKey")]
     HierarchicalDeterministic(HierarchicalDeterministicPublicKey),
+}
+
+impl FactorInstanceBadgeVirtualSource {
+    pub fn as_hierarchical_deterministic(&self) -> &HierarchicalDeterministicPublicKey {
+        match self {
+            FactorInstanceBadgeVirtualSource::HierarchicalDeterministic(hd) => hd,
+        }
+    }
 }
 
 impl<'de> Deserialize<'de> for FactorInstanceBadgeVirtualSource {

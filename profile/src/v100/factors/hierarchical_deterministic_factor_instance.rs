@@ -64,9 +64,8 @@ impl HierarchicalDeterministicFactorInstance {
             .badge
             .as_virtual()
             .ok_or(Error::BadgeIsNotVirtualHierarchicalDeterministic)?;
-        let badge = virtual_source
-            .as_hierarchical_deterministic()
-            .ok_or(Error::BadgeIsNotVirtualHierarchicalDeterministic)?;
+
+        let badge = virtual_source.as_hierarchical_deterministic();
 
         Self::try_from(
             factor_instance.factor_source_id,

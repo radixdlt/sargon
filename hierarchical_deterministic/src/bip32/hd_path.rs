@@ -140,7 +140,8 @@ impl<'de> serde::Deserialize<'de> for HDPath {
 mod tests {
     use serde_json::json;
     use wallet_kit_common::json::{
-        assert_json_value_eq_after_roundtrip, assert_json_value_ne_after_roundtrip,
+        assert_json_value_eq_after_roundtrip, assert_json_value_fails,
+        assert_json_value_ne_after_roundtrip,
     };
 
     use super::HDPath;
@@ -151,5 +152,6 @@ mod tests {
         let parsed = HDPath::from_str(str).unwrap();
         assert_json_value_eq_after_roundtrip(&parsed, json!(str));
         assert_json_value_ne_after_roundtrip(&parsed, json!("m/44H/33H"));
+        assert_json_value_fails::<HDPath>(json!("super invalid path"));
     }
 }

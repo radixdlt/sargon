@@ -130,11 +130,11 @@ impl Secp256k1PrivateKey {
 #[cfg(test)]
 mod tests {
 
-    use std::str::FromStr;
+    use std::{collections::HashSet, str::FromStr};
 
     use transaction::signing::secp256k1::Secp256k1Signature;
 
-    use crate::{error::Error, hash::hash};
+    use crate::{error::Error, hash::hash, types::hex_32bytes::Hex32Bytes};
 
     use super::Secp256k1PrivateKey;
 
@@ -234,6 +234,43 @@ mod tests {
         assert_eq!(
             format!("{:?}", Secp256k1PrivateKey::from_str(hex).unwrap()),
             hex
+        );
+    }
+
+    #[test]
+    fn from_hex32_bytes() {
+        let str = "0000000000000000000000000000000000000000000000000000000000000001";
+        let hex32 = Hex32Bytes::from_hex(str).unwrap();
+        let key = Secp256k1PrivateKey::from_hex32_bytes(hex32).unwrap();
+        assert_eq!(key.to_hex(), str);
+    }
+
+    #[test]
+    fn try_from_bytes() {
+        let str = "0000000000000000000000000000000000000000000000000000000000000001";
+        let vec = hex::decode(str).unwrap();
+        let key = Secp256k1PrivateKey::try_from(vec.as_slice()).unwrap();
+        assert_eq!(key.to_hex(), str);
+    }
+
+    #[test]
+    fn generate_new() {
+        let mut set: HashSet<Vec<u8>> = HashSet::new();
+        let n = 100;
+        for _ in 0..n {
+            let key = Secp256k1PrivateKey::new();
+            let bytes = key.to_bytes();
+            assert_eq!(bytes.len(), 32);
+            set.insert(bytes);
+        }
+        assert_eq!(set.len(), n);
+    }
+
+    #[test]
+    fn placeholder() {
+        assert_eq!(
+            Secp256k1PrivateKey::placeholder().public_key().to_hex(),
+            "02517b88916e7f315bb682f9926b14bc67a0e4246f8a419b986269e1a7e61fffa7"
         );
     }
 }

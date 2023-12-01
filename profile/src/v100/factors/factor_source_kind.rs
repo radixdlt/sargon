@@ -147,6 +147,25 @@ mod tests {
             format!("{}", FactorSourceKind::Device.discriminant()),
             "device"
         );
+        assert_eq!(
+            format!(
+                "{}",
+                FactorSourceKind::LedgerHQHardwareWallet.discriminant()
+            ),
+            "ledgerHQHardwareWallet"
+        );
+        assert_eq!(
+            format!("{}", FactorSourceKind::SecurityQuestions.discriminant()),
+            "securityQuestions"
+        );
+        assert_eq!(
+            format!("{}", FactorSourceKind::OffDeviceMnemonic.discriminant()),
+            "offDeviceMnemonic"
+        );
+        assert_eq!(
+            format!("{}", FactorSourceKind::TrustedContact.discriminant()),
+            "trustedContact"
+        );
     }
 
     #[test]

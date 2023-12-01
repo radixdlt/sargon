@@ -127,7 +127,7 @@ impl Ed25519PrivateKey {
 
 #[cfg(test)]
 mod tests {
-    use std::str::FromStr;
+    use std::{collections::HashSet, str::FromStr};
 
     use transaction::signing::ed25519::Ed25519Signature;
 
@@ -237,6 +237,43 @@ mod tests {
                 .unwrap()
                 .to_hex(),
             hex
+        );
+    }
+
+    #[test]
+    fn generate_new() {
+        let mut set: HashSet<Vec<u8>> = HashSet::new();
+        let n = 100;
+        for _ in 0..n {
+            let key = Ed25519PrivateKey::new();
+            let bytes = key.to_bytes();
+            assert_eq!(bytes.len(), 32);
+            set.insert(bytes);
+        }
+        assert_eq!(set.len(), n);
+    }
+
+    #[test]
+    fn from_hex32_bytes() {
+        let str = "0000000000000000000000000000000000000000000000000000000000000001";
+        let hex32 = Hex32Bytes::from_hex(str).unwrap();
+        let key = Ed25519PrivateKey::from_hex32_bytes(hex32).unwrap();
+        assert_eq!(key.to_hex(), str);
+    }
+
+    #[test]
+    fn try_from_bytes() {
+        let str = "0000000000000000000000000000000000000000000000000000000000000001";
+        let vec = hex::decode(str).unwrap();
+        let key = Ed25519PrivateKey::try_from(vec.as_slice()).unwrap();
+        assert_eq!(key.to_hex(), str);
+    }
+
+    #[test]
+    fn placeholder() {
+        assert_eq!(
+            Ed25519PrivateKey::placeholder().public_key().to_hex(),
+            "ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf"
         );
     }
 }

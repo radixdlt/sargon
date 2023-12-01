@@ -163,6 +163,13 @@ mod tests {
     }
 
     #[test]
+    fn try_into_from_str() {
+        let str = "b7a3c12dc0c8c748ab07525b701122b88bd78f600c76342d27f25e5f92444cde";
+        let key: Ed25519PublicKey = str.try_into().unwrap();
+        assert_eq!(key.to_hex(), str);
+    }
+
+    #[test]
     fn invalid_key_not_on_curve() {
         assert_eq!(
             Ed25519PublicKey::from_str(

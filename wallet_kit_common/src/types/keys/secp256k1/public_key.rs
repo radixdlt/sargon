@@ -176,6 +176,13 @@ mod tests {
     }
 
     #[test]
+    fn try_into_from_str() {
+        let str = "02517b88916e7f315bb682f9926b14bc67a0e4246f8a419b986269e1a7e61fffa7";
+        let key: Secp256k1PublicKey = str.try_into().unwrap();
+        assert_eq!(key.to_hex(), str);
+    }
+
+    #[test]
     fn inequality() {
         assert_ne!(
             Secp256k1PublicKey::placeholder_alice(),

@@ -112,7 +112,11 @@ mod tests {
     fn new_uses_now_as_date() {
         let date0 = now();
         let model = FactorSourceCommon::new(FactorSourceCryptoParameters::default(), []);
-        let date1 = now();
+        let mut date1 = now();
+        for _ in 0..10 {
+            // rust is too fast... lol.
+            date1 = now();
+        }
         let do_test = |d: NaiveDateTime| {
             assert!(d > date0);
             assert!(d < date1);

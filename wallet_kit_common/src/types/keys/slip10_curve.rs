@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 #[serde(rename_all = "camelCase")]
 pub enum SLIP10Curve {
-    /// Curve25519 or Ed25519
+    /// Curve25519 which we use for Ed25519 for EdDSA signatures.
     Curve25519,
 
     /// The bitcoin curve, used by Radix Olympia and still valid

@@ -124,9 +124,11 @@ impl<'de> serde::Deserialize<'de> for Hex32Bytes {
 
 #[cfg(test)]
 mod tests {
-    use std::str::FromStr;
+    use std::{collections::HashSet, str::FromStr};
 
-    use crate::error::Error;
+    use serde_json::json;
+
+    use crate::{error::Error, json::assert_json_value_eq_after_roundtrip};
 
     use super::Hex32Bytes;
 
@@ -137,10 +139,18 @@ mod tests {
     }
 
     #[test]
-    fn generate_32() {
-        assert_ne!(
-            Hex32Bytes::generate().to_string(),
-            "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
+    fn debug() {
+        let str = "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef";
+        let hex_bytes = Hex32Bytes::placeholder();
+        assert_eq!(format!("{:?}", hex_bytes), str);
+    }
+
+    #[test]
+    fn json_roundtrip() {
+        let model = Hex32Bytes::placeholder();
+        assert_json_value_eq_after_roundtrip(
+            &model,
+            json!("deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"),
         );
     }
 
@@ -170,5 +180,16 @@ mod tests {
             Hex32Bytes::from_vec(Vec::from([0u8; 5])),
             Err(Error::InvalidByteCountExpected32)
         )
+    }
+
+    #[test]
+    fn random() {
+        let mut set: HashSet<Vec<u8>> = HashSet::new();
+        let n = 100;
+        for _ in 0..n {
+            let bytes = Hex32Bytes::new();
+            set.insert(bytes.to_vec());
+        }
+        assert_eq!(set.len(), n);
     }
 }
