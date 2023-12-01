@@ -22,7 +22,6 @@ use super::{
     },
     factor_source_id::FactorSourceID,
     factor_source_id_from_hash::FactorSourceIDFromHash,
-    to_factor_source_id::ToFactorSourceID,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -78,7 +77,7 @@ impl HierarchicalDeterministicFactorInstance {
 
     pub fn factor_instance(&self) -> FactorInstance {
         FactorInstance::new(
-            self.factor_source_id.embed(),
+            self.factor_source_id.clone().into(),
             FactorInstanceBadge::Virtual(
                 FactorInstanceBadgeVirtualSource::HierarchicalDeterministic(
                     HierarchicalDeterministicPublicKey::new(

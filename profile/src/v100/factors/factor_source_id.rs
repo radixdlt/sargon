@@ -12,10 +12,26 @@ use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializ
 #[derive(Serialize, Deserialize, EnumAsInner, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 #[serde(remote = "Self")]
 pub enum FactorSourceID {
+    /// FactorSourceID from the blake2b hash of the special HD public key derived at `CAP26::GetID`,
+    /// for a certain `FactorSourceKind`
     #[serde(rename = "fromHash")]
     Hash(FactorSourceIDFromHash),
+
+    /// FactorSourceID from an AccountAddress, typically used by `trustedContact` FactorSource.
     #[serde(rename = "fromAddress")]
     Address(FactorSourceIDFromAddress),
+}
+
+impl From<FactorSourceIDFromHash> for FactorSourceID {
+    fn from(value: FactorSourceIDFromHash) -> Self {
+        Self::Hash(value)
+    }
+}
+
+impl From<FactorSourceIDFromAddress> for FactorSourceID {
+    fn from(value: FactorSourceIDFromAddress) -> Self {
+        Self::Address(value)
+    }
 }
 
 impl<'de> Deserialize<'de> for FactorSourceID {
@@ -65,7 +81,10 @@ impl FactorSourceID {
 mod tests {
     use wallet_kit_common::json::assert_eq_after_json_roundtrip;
 
-    use crate::v100::factors::factor_source_id_from_address::FactorSourceIDFromAddress;
+    use crate::v100::factors::{
+        factor_source_id_from_address::FactorSourceIDFromAddress,
+        factor_source_id_from_hash::FactorSourceIDFromHash,
+    };
 
     use super::FactorSourceID;
 
@@ -101,5 +120,33 @@ mod tests {
             }
             "#,
         )
+    }
+
+    #[test]
+    fn hash_into_as_roundtrip() {
+        let from_hash = FactorSourceIDFromHash::placeholder();
+        let id: FactorSourceID = from_hash.clone().into(); // test `into()`
+        assert_eq!(id.as_hash().unwrap(), &from_hash);
+    }
+
+    #[test]
+    fn hash_into_as_wrong_fails() {
+        let from_hash = FactorSourceIDFromHash::placeholder();
+        let id: FactorSourceID = from_hash.into(); // test `into()`
+        assert!(id.as_address().is_none());
+    }
+
+    #[test]
+    fn address_into_as_roundtrip() {
+        let from_address = FactorSourceIDFromAddress::placeholder();
+        let id: FactorSourceID = from_address.clone().into(); // test `into()`
+        assert_eq!(id.as_address().unwrap(), &from_address);
+    }
+
+    #[test]
+    fn address_into_as_wrong_fails() {
+        let from_address = FactorSourceIDFromAddress::placeholder();
+        let id: FactorSourceID = from_address.into(); // test `into()`
+        assert!(id.as_hash().is_none());
     }
 }

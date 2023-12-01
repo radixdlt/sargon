@@ -6,22 +6,17 @@ use radix_engine_common::crypto::{blake2b_256_hash, Hash};
 use serde::{Deserialize, Serialize};
 use wallet_kit_common::types::hex_32bytes::Hex32Bytes;
 
-use super::{
-    factor_source_id::FactorSourceID, factor_source_kind::FactorSourceKind,
-    to_factor_source_id::ToFactorSourceID,
-};
+use super::factor_source_kind::FactorSourceKind;
 
-/// FactorSourceID from a hash.
+/// FactorSourceID from the blake2b hash of the special HD public key derived at `CAP26::GetID`,
+/// for a certain `FactorSourceKind`
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FactorSourceIDFromHash {
+    /// The kind of the FactorSource this ID refers to, typically `device` or `ledger`.
     pub kind: FactorSourceKind,
-    pub body: Hex32Bytes,
-}
 
-impl ToFactorSourceID for FactorSourceIDFromHash {
-    fn embed(&self) -> FactorSourceID {
-        FactorSourceID::Hash(self.clone())
-    }
+    /// The blake2b hash of the special HD public key derived at `CAP26::GetID`.
+    pub body: Hex32Bytes,
 }
 
 impl ToString for FactorSourceIDFromHash {
@@ -31,6 +26,7 @@ impl ToString for FactorSourceIDFromHash {
 }
 
 impl FactorSourceIDFromHash {
+    /// Instantiates a new `FactorSourceIDFromHash` from the `kind` and `body`.
     pub fn new(kind: FactorSourceKind, body: Hex32Bytes) -> Self {
         Self { kind, body }
     }
@@ -66,10 +62,6 @@ mod tests {
     };
     use wallet_kit_common::json::assert_eq_after_json_roundtrip;
 
-    use crate::v100::factors::{
-        factor_source_id::FactorSourceID, to_factor_source_id::ToFactorSourceID,
-    };
-
     use super::FactorSourceIDFromHash;
 
     #[test]
@@ -100,12 +92,6 @@ mod tests {
             }
             "#,
         );
-    }
-
-    #[test]
-    fn embed() {
-        let from_hash = FactorSourceIDFromHash::placeholder();
-        assert_eq!(from_hash.embed(), FactorSourceID::Hash(from_hash));
     }
 
     struct Vector {
