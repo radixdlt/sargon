@@ -112,6 +112,7 @@ impl<'de> serde::Deserialize<'de> for HierarchicalDeterministicFactorInstance {
 }
 
 impl HierarchicalDeterministicFactorInstance {
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
         let mwp = MnemonicWithPassphrase::placeholder();
         let path = AccountPath::new(NetworkID::Mainnet, CAP26KeyKind::TransactionSigning, 0);

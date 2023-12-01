@@ -13,6 +13,7 @@ pub enum FactorInstanceBadge {
 }
 
 impl FactorInstanceBadge {
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
         FactorInstanceBadge::Virtual(FactorInstanceBadgeVirtualSource::placeholder())
     }

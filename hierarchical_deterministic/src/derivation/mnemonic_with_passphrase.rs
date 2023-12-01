@@ -48,6 +48,7 @@ impl MnemonicWithPassphrase {
 }
 
 impl MnemonicWithPassphrase {
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
         Self::with_passphrase(Mnemonic::placeholder(), "radix".to_string())
     }

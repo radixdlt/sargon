@@ -27,6 +27,7 @@ pub struct DeviceFactorSource {
 }
 
 impl DeviceFactorSource {
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
         Self {
             id: FactorSourceIDFromHash::placeholder(),

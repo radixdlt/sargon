@@ -75,6 +75,7 @@ impl TryInto<Mnemonic> for &str {
 }
 
 impl Mnemonic {
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
         Self::from_phrase("bright club bacon dinner achieve pull grid save ramp cereal blush woman humble limb repeat video sudden possible story mask neutral prize goose mandate").expect("Valid mnemonic")
     }

@@ -40,6 +40,7 @@ impl Serialize for FactorInstanceBadgeVirtualSource {
 }
 
 impl FactorInstanceBadgeVirtualSource {
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
         Self::HierarchicalDeterministic(HierarchicalDeterministicPublicKey::placeholder())
     }

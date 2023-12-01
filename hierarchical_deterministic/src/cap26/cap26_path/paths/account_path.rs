@@ -42,6 +42,7 @@ impl CAP26Repr for AccountPath {
 }
 
 impl AccountPath {
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
         Self::from_str("m/44H/1022H/1H/525H/1460H/0H").unwrap()
     }

@@ -40,6 +40,7 @@ impl Serialize for EntitySecurityState {
 }
 
 impl EntitySecurityState {
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
         Self::Unsecured(UnsecuredEntityControl::placeholder())
     }

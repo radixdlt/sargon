@@ -87,6 +87,7 @@ impl TryInto<BIP44LikePath> for &str {
 }
 
 impl BIP44LikePath {
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
         Self::from_str("m/44H/1022H/0H/0/0H").expect("Valid placeholder")
     }

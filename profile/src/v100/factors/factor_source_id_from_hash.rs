@@ -53,7 +53,7 @@ impl FactorSourceIDFromHash {
 }
 
 impl FactorSourceIDFromHash {
-    /// This is using the MnemonicWithPass
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
         Self::new_for_device(MnemonicWithPassphrase::placeholder())
     }

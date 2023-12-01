@@ -99,6 +99,7 @@ impl TryFrom<&[u8]> for Secp256k1PrivateKey {
 }
 
 impl Secp256k1PrivateKey {
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
         Self::placeholder_alice()
     }

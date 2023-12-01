@@ -55,6 +55,7 @@ impl Serialize for FactorSourceID {
 }
 
 impl FactorSourceID {
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
         FactorSourceID::Hash(FactorSourceIDFromHash::placeholder())
     }

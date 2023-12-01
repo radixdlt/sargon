@@ -63,6 +63,7 @@ impl Debug for Secp256k1PublicKey {
 }
 
 impl Secp256k1PublicKey {
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
         Self::placeholder_alice()
     }

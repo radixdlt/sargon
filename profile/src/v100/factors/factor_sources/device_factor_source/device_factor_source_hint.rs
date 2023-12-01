@@ -45,6 +45,7 @@ impl Default for DeviceFactorSourceHint {
 }
 
 impl DeviceFactorSourceHint {
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
         Self::iphone_unknown()
     }

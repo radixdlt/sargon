@@ -60,6 +60,7 @@ impl Serialize for DerivationPath {
 }
 
 impl DerivationPath {
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
         Self::CAP26(CAP26Path::AccountPath(AccountPath::placeholder()))
     }

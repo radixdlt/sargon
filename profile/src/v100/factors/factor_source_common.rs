@@ -74,6 +74,7 @@ impl Default for FactorSourceCommon {
 }
 
 impl FactorSourceCommon {
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
         let date =
             NaiveDateTime::parse_from_str("2023-09-11T16:05:56", "%Y-%m-%dT%H:%M:%S").unwrap();

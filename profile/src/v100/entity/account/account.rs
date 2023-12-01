@@ -174,6 +174,7 @@ impl Display for Account {
 // CFG test
 #[cfg(test)]
 impl Account {
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
         Self::placeholder_mainnet()
     }

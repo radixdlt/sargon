@@ -19,6 +19,7 @@ impl FactorSourceIDFromAddress {
 }
 
 impl FactorSourceIDFromAddress {
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
         Self::new(
             FactorSourceKind::TrustedContact,

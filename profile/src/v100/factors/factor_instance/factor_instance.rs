@@ -26,6 +26,7 @@ impl FactorInstance {
         }
     }
 
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
         Self::new(
             FactorSourceID::placeholder(),

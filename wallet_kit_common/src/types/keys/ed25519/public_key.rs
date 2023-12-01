@@ -68,6 +68,7 @@ impl Debug for Ed25519PublicKey {
 }
 
 impl Ed25519PublicKey {
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
         Self::placeholder_alice()
     }

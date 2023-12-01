@@ -62,6 +62,7 @@ impl FromStr for Hex32Bytes {
 
 impl Hex32Bytes {
     /// Just some placeholder Hex32Bytes
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
         Self::from_str("deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef")
             .expect("Deadbeef")
