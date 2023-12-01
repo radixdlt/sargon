@@ -6,11 +6,26 @@ use super::{
     ed25519::public_key::Ed25519PublicKey, secp256k1::public_key::Secp256k1PublicKey,
     slip10_curve::SLIP10Curve,
 };
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
+use enum_as_inner::EnumAsInner;
+#[derive(Clone, Copy, Debug, PartialEq, EnumAsInner, Eq, Hash, PartialOrd, Ord)]
+/// A tagged union of supported public keys on different curves, supported
+/// curves are `secp256k1` and `Curve25519`
 pub enum PublicKey {
+    /// An Ed25519 public key used to verify cryptographic signatures.
     Ed25519(Ed25519PublicKey),
     Secp256k1(Secp256k1PublicKey),
+}
+
+impl From<Ed25519PublicKey> for PublicKey {
+    fn from(value: Ed25519PublicKey) -> Self {
+        Self::Ed25519(value)
+    }
+}
+
+impl From<Secp256k1PublicKey> for PublicKey {
+    fn from(value: Secp256k1PublicKey) -> Self {
+        Self::Secp256k1(value)
+    }
 }
 
 impl PublicKey {

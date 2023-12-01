@@ -73,7 +73,8 @@ pub struct Account {
     /// marked as hidden or not.
     flags: RefCell<EntityFlags>,
 
-    /// The on ledger synced settings for this account
+    /// The on ledger synced settings for this account, contains e.g.
+    /// ThirdPartyDeposit settings, with deposit rules for assets.
     on_ledger_settings: RefCell<OnLedgerSettings>,
 }
 

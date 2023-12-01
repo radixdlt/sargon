@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use std::fmt::{Debug, Formatter};
 use transaction::{signing::secp256k1::Secp256k1Signature, validation::verify_secp256k1};
 
+/// A `secp256k1` public key used to verify cryptographic signatures (ECDSA signatures).
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Secp256k1PublicKey(EngineSecp256k1PublicKey);
 
