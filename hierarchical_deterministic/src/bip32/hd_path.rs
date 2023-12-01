@@ -130,6 +130,7 @@ impl Serialize for HDPath {
 
 impl<'de> serde::Deserialize<'de> for HDPath {
     /// Tries to deserializes a JSON string as a bech32 address into an `AccountAddress`.
+    #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<HDPath, D::Error> {
         let s = String::deserialize(d)?;
         HDPath::from_str(&s).map_err(de::Error::custom)

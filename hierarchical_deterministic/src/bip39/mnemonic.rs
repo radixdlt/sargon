@@ -59,6 +59,7 @@ impl Serialize for Mnemonic {
 
 impl<'de> serde::Deserialize<'de> for Mnemonic {
     /// Tries to deserializes a JSON string as a bech32 address into an `AccountAddress`.
+    #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
         let s = String::deserialize(d)?;
         Mnemonic::from_phrase(&s).map_err(de::Error::custom)

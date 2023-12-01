@@ -70,6 +70,11 @@ impl CAP26Path {
 
 #[cfg(test)]
 mod tests {
+    use serde_json::json;
+    use wallet_kit_common::json::{
+        assert_eq_after_json_roundtrip, assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
+    };
+
     use crate::{
         cap26::cap26_path::paths::{account_path::AccountPath, getid_path::GetIDPath},
         derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},
@@ -123,5 +128,17 @@ mod tests {
             CAP26Path::GetID(GetIDPath::default()),
             GetIDPath::default().into()
         );
+    }
+
+    #[test]
+    fn json_roundtrip_getid() {
+        let model: CAP26Path = GetIDPath::default().into();
+        assert_json_value_eq_after_roundtrip(&model, json!("m/44H/1022H/365H"));
+    }
+
+    #[test]
+    fn json_roundtrip_account() {
+        let model: CAP26Path = AccountPath::placeholder().into();
+        assert_json_value_eq_after_roundtrip(&model, json!("m/44H/1022H/1H/525H/1460H/0H"));
     }
 }

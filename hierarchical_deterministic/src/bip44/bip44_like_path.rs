@@ -72,6 +72,7 @@ impl Serialize for BIP44LikePath {
 
 impl<'de> serde::Deserialize<'de> for BIP44LikePath {
     /// Tries to deserializes a JSON string as a bech32 address into an `AccountAddress`.
+    #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<BIP44LikePath, D::Error> {
         let s = String::deserialize(d)?;
         BIP44LikePath::from_str(&s).map_err(de::Error::custom)

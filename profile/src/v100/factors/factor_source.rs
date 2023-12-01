@@ -10,6 +10,7 @@ pub enum FactorSource {
 }
 
 impl<'de> Deserialize<'de> for FactorSource {
+    #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
         // https://github.com/serde-rs/serde/issues/1343#issuecomment-409698470
         #[derive(Deserialize, Serialize)]
@@ -24,6 +25,7 @@ impl<'de> Deserialize<'de> for FactorSource {
 }
 
 impl Serialize for FactorSource {
+    #[cfg(not(tarpaulin_include))] // false negative
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,

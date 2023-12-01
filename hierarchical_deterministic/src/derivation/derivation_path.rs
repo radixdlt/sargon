@@ -26,6 +26,7 @@ impl Debug for DerivationPath {
 
 impl<'de> serde::Deserialize<'de> for DerivationPath {
     /// Tries to deserializes a JSON string as a bech32 address into an `AccountAddress`.
+    #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<DerivationPath, D::Error> {
         #[derive(Deserialize)]
         pub struct Inner {
@@ -48,6 +49,7 @@ impl<'de> serde::Deserialize<'de> for DerivationPath {
 }
 
 impl Serialize for DerivationPath {
+    #[cfg(not(tarpaulin_include))] // false negative
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,

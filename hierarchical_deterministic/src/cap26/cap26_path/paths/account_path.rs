@@ -60,6 +60,7 @@ impl Serialize for AccountPath {
 
 impl<'de> serde::Deserialize<'de> for AccountPath {
     /// Tries to deserializes a JSON string as a bech32 address into an `AccountAddress`.
+    #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<AccountPath, D::Error> {
         let s = String::deserialize(d)?;
         AccountPath::from_str(&s).map_err(de::Error::custom)
