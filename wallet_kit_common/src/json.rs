@@ -1,8 +1,5 @@
 use core::fmt::Debug;
-use serde::{
-    de::{self, DeserializeOwned},
-    ser::Serialize,
-};
+use serde::{de::DeserializeOwned, ser::Serialize};
 use serde_json::Value;
 
 fn base_assert_equality_after_json_roundtrip<T>(model: &T, json: Value, expect_eq: bool)

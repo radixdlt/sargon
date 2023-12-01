@@ -4,9 +4,9 @@ use super::{
 };
 use enum_as_inner::EnumAsInner;
 
-#[derive(EnumAsInner)]
 /// A tagged union of supported private keys on different curves, supported
 /// curves are `secp256k1` and `Curve25519`
+#[derive(EnumAsInner)]
 pub enum PrivateKey {
     /// An Ed25519 private key used to create cryptographic signatures, using EdDSA scheme.
     Ed25519(Ed25519PrivateKey),

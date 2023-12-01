@@ -1,5 +1,11 @@
 use serde::{Deserialize, Serialize};
 
+/// Elliptic Curves which the SLIP10 derivation algorithm supports.
+///
+/// We use SLIP10 for hierarchical deterministic derivation since we
+/// prefer using Curve25519 - which is incompatible with BIP32 (BIP44).
+///
+/// For for information see [SLIP10 reference](https://github.com/satoshilabs/slips/blob/master/slip-0010.md)
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 #[serde(rename_all = "camelCase")]
 pub enum SLIP10Curve {
