@@ -27,6 +27,7 @@ impl Serialize for ResourceAddress {
 
 impl<'de> serde::Deserialize<'de> for ResourceAddress {
     /// Tries to deserializes a JSON string as a bech32 address into an `AccountAddress`.
+    #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<ResourceAddress, D::Error> {
         let s = String::deserialize(d)?;
         ResourceAddress::try_from_bech32(&s).map_err(de::Error::custom)

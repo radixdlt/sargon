@@ -90,6 +90,7 @@ impl MnemonicWithPassphrase {
             .expect("Valid Secp256k1PrivateKey bytes")
     }
 
+    #[cfg(not(tarpaulin_include))] // false negative
     pub fn derive_private_key<D>(&self, derivation: D) -> PrivateKey
     where
         D: Derivation,

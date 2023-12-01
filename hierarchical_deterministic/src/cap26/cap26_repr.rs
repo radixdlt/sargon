@@ -24,6 +24,7 @@ pub trait CAP26Repr: Derivation {
         index: HDPathValue,
     ) -> Self;
 
+    #[cfg(not(tarpaulin_include))] // false negative, this is in fact heavily tested.
     fn from_str(s: &str) -> Result<Self, HDPathError> {
         use HDPathError::*;
         let (path, components) = HDPath::try_parse_base(s, HDPathError::InvalidDepthOfCAP26Path)?;

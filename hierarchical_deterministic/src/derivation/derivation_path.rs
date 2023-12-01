@@ -109,15 +109,11 @@ impl From<BIP44LikePath> for DerivationPath {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::{json::assert_eq_after_json_roundtrip, network_id::NetworkID};
+    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
 
     use crate::{
         bip44::bip44_like_path::BIP44LikePath,
-        cap26::{
-            cap26_key_kind::CAP26KeyKind,
-            cap26_path::paths::{account_path::AccountPath, getid_path::GetIDPath},
-            cap26_repr::CAP26Repr,
-        },
+        cap26::cap26_path::paths::{account_path::AccountPath, getid_path::GetIDPath},
         derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},
     };
 
@@ -180,8 +176,7 @@ mod tests {
 
     #[test]
     fn json_cap26_account() {
-        let path = AccountPath::new(NetworkID::Mainnet, CAP26KeyKind::TransactionSigning, 0);
-        let model: DerivationPath = path.into();
+        let model = DerivationPath::placeholder();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -191,6 +186,12 @@ mod tests {
 		}
         "#,
         );
+    }
+
+    #[test]
+    fn debug() {
+        let model = DerivationPath::placeholder();
+        assert_eq!(format!("{:?}", model), "m/44H/1022H/1H/525H/1460H/0H")
     }
 
     #[test]

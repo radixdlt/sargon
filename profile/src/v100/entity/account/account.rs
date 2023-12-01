@@ -179,6 +179,12 @@ impl Account {
         Self::placeholder_mainnet()
     }
 
+    // /// A `Mainnet` account, a placeholder used to facilitate unit tests.
+    // pub fn placeholder_alice() -> Self {
+    //     let mwp = MnemonicWithPassphrase::placeholder();
+    //     let bdfs = DeviceFactorSource::placeholder()
+    // }
+
     pub fn placeholder_mainnet() -> Self {
         Self::with_values(
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"

@@ -11,6 +11,7 @@ pub trait Derivation: Sized {
 
     fn scheme(&self) -> DerivationPathScheme;
 
+    #[cfg(not(tarpaulin_include))] // false negative
     fn last_component(&self) -> &HDPathComponent {
         self.hd_path().components().last().unwrap()
     }

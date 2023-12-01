@@ -22,7 +22,7 @@ impl From<Ed25519PrivateKey> for PrivateKey {
     /// ```
     /// extern crate wallet_kit_common;
     /// use wallet_kit_common::types::keys::ed25519::private_key::Ed25519PrivateKey;
-    /// use wallet_kit_common::types::keys::private_key::PrivateKey;
+    /// use wallet_kit_common::types::keys::public_key::PublicKey;
     ///
     /// let key: PublicKey = Ed25519PrivateKey::new().public_key().into();
     /// ```
@@ -32,7 +32,15 @@ impl From<Ed25519PrivateKey> for PrivateKey {
 }
 
 impl From<Secp256k1PrivateKey> for PrivateKey {
-    /// Enables `let private_key: PrivateKey = Secp256k1PrivateKey::new().into()`
+    /// Enables:
+    ///
+    /// ```
+    /// extern crate wallet_kit_common;
+    /// use wallet_kit_common::types::keys::secp256k1::private_key::Secp256k1PrivateKey;
+    /// use wallet_kit_common::types::keys::public_key::PublicKey;
+    ///
+    /// let key: PublicKey = Secp256k1PrivateKey::new().public_key().into();
+    /// ```
     fn from(value: Secp256k1PrivateKey) -> Self {
         Self::Secp256k1(value)
     }

@@ -2,7 +2,6 @@ use serde::{de, Deserializer, Serialize, Serializer};
 
 use crate::{
     bip32::{hd_path::HDPath, hd_path_component::HDPathValue},
-    cap26::cap26_path::cap26_path::CAP26Path,
     derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},
     hdpath_error::HDPathError,
 };
@@ -29,10 +28,6 @@ impl Default for GetIDPath {
 }
 
 impl GetIDPath {
-    pub fn embed(&self) -> CAP26Path {
-        CAP26Path::GetID(self.clone())
-    }
-
     pub const LAST_COMPONENT_VALUE: HDPathValue = 365;
 
     pub fn from_str(s: &str) -> Result<Self, HDPathError> {
@@ -63,6 +58,7 @@ impl Serialize for GetIDPath {
 
 impl<'de> serde::Deserialize<'de> for GetIDPath {
     /// Tries to deserializes a JSON string as a bech32 address into an `AccountAddress`.
+    #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<GetIDPath, D::Error> {
         let s = String::deserialize(d)?;
         GetIDPath::from_str(&s).map_err(de::Error::custom)
@@ -80,7 +76,7 @@ impl TryInto<GetIDPath> for &str {
 #[cfg(test)]
 mod tests {
     use serde_json::json;
-    use wallet_kit_common::json::assert_json_value_eq_after_roundtrip;
+    use wallet_kit_common::json::{assert_json_value_eq_after_roundtrip, assert_json_value_fails};
 
     use crate::{derivation::derivation::Derivation, hdpath_error::HDPathError};
 
@@ -118,5 +114,10 @@ mod tests {
         let str = "m/44H/1022H/365H";
         let parsed: GetIDPath = str.try_into().unwrap();
         assert_json_value_eq_after_roundtrip(&parsed, json!(str));
+    }
+
+    #[test]
+    fn json_roundtrip_invalid() {
+        assert_json_value_fails::<GetIDPath>(json!("m/44H/1022H/99H"));
     }
 }

@@ -36,3 +36,40 @@ impl DeviceFactorSource {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
+
+    use super::DeviceFactorSource;
+
+    #[test]
+    fn json() {
+        let model = DeviceFactorSource::placeholder();
+        assert_eq_after_json_roundtrip(
+            &model,
+            r#"
+            {
+                "common": {
+                    "addedOn": "2023-09-11T16:05:56",
+                    "cryptoParameters": {
+                        "supportedCurves": ["curve25519"],
+                        "supportedDerivationPathSchemes": ["cap26"]
+                    },
+                    "flags": ["main"],
+                    "lastUsedOn": "2023-09-11T16:05:56"
+                },
+                "hint": {
+                    "mnemonicWordCount": 24,
+                    "model": "iPhone",
+                    "name": "Unknown Name"
+                },
+                "id": {
+                    "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240",
+                    "kind": "device"
+                }
+            }
+            "#,
+        );
+    }
+}

@@ -59,6 +59,7 @@ impl Serialize for IdentityAddress {
 
 impl<'de> serde::Deserialize<'de> for IdentityAddress {
     /// Tries to deserializes a JSON string as a bech32 address into an `IdentityAddress`.
+    #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<IdentityAddress, D::Error> {
         let s = String::deserialize(d)?;
         IdentityAddress::try_from_bech32(&s).map_err(de::Error::custom)

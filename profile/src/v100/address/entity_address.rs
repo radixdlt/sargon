@@ -21,6 +21,7 @@ pub trait EntityAddress: Sized {
 
     /// Creates a new address from `public_key` and `network_id` by bech32 encoding
     /// it.
+    #[cfg(not(tarpaulin_include))] // false negative
     fn from_public_key(public_key: PublicKey, network_id: NetworkID) -> Self {
         let component = match Self::entity_type() {
             AbstractEntityType::Account => virtual_account_address_from_public_key(&public_key),
