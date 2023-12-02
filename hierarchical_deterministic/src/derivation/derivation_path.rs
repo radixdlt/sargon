@@ -9,10 +9,11 @@ use crate::{
         paths::{account_path::AccountPath, getid_path::GetIDPath},
     },
 };
+use enum_as_inner::EnumAsInner;
 use std::fmt::{Debug, Formatter};
 
 /// A derivation path on either supported schemes, either Babylon (CAP26) or Olympia (BIP44Like).
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, PartialEq, Eq, EnumAsInner, PartialOrd, Ord)]
 pub enum DerivationPath {
     CAP26(CAP26Path),
     BIP44Like(BIP44LikePath),
@@ -113,7 +114,10 @@ mod tests {
 
     use crate::{
         bip44::bip44_like_path::BIP44LikePath,
-        cap26::cap26_path::paths::{account_path::AccountPath, getid_path::GetIDPath},
+        cap26::cap26_path::{
+            cap26_path::CAP26Path,
+            paths::{account_path::AccountPath, getid_path::GetIDPath},
+        },
         derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},
     };
 
@@ -159,10 +163,25 @@ mod tests {
     }
 
     #[test]
+    fn as_bip44_path() {
+        let path: DerivationPath = BIP44LikePath::placeholder().into();
+        assert_eq!(path.as_bip44_like().unwrap(), &BIP44LikePath::placeholder());
+    }
+
+    #[test]
     fn into_from_account_cap26_path() {
         assert_eq!(
             DerivationPath::CAP26(AccountPath::placeholder().into()),
             AccountPath::placeholder().into()
+        );
+    }
+
+    #[test]
+    fn as_cap26_path() {
+        let path: DerivationPath = AccountPath::placeholder().into();
+        assert_eq!(
+            path.as_cap26().unwrap(),
+            &CAP26Path::AccountPath(AccountPath::placeholder())
         );
     }
 

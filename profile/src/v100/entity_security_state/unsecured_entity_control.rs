@@ -1,4 +1,6 @@
+use hierarchical_deterministic::cap26::cap26_key_kind::CAP26KeyKind;
 use serde::{Deserialize, Serialize};
+use wallet_kit_common::error::Error;
 
 use crate::v100::factors::hierarchical_deterministic_factor_instance::HierarchicalDeterministicFactorInstance;
 
@@ -19,27 +21,39 @@ pub struct UnsecuredEntityControl {
 }
 
 impl UnsecuredEntityControl {
-    pub fn with_authentication_signing(
+    pub fn new(
         transaction_signing: HierarchicalDeterministicFactorInstance,
-        authentication_signing: HierarchicalDeterministicFactorInstance,
-    ) -> Self {
-        Self {
-            transaction_signing,
-            authentication_signing: Some(authentication_signing),
+        authentication_signing: Option<HierarchicalDeterministicFactorInstance>,
+    ) -> Result<Self, Error> {
+        if let Some(auth) = &authentication_signing {
+            if let Some(key_kind) = auth.key_kind() {
+                if key_kind != CAP26KeyKind::AuthenticationSigning {
+                    return Err(Error::WrongKeyKindOfAuthenticationSigningFactorInstance);
+                }
+            }
         }
+        if let Some(key_kind) = transaction_signing.key_kind() {
+            if key_kind != CAP26KeyKind::TransactionSigning {
+                return Err(Error::WrongKeyKindOfTransactionSigningFactorInstance);
+            }
+        }
+        Ok(Self {
+            transaction_signing,
+            authentication_signing,
+        })
     }
-    pub fn new(transaction_signing: HierarchicalDeterministicFactorInstance) -> Self {
-        Self {
-            transaction_signing,
-            authentication_signing: Option::None,
-        }
+    pub fn with_transaction_signing_only(
+        transaction_signing: HierarchicalDeterministicFactorInstance,
+    ) -> Result<Self, Error> {
+        Self::new(transaction_signing, None)
     }
 }
 
 impl UnsecuredEntityControl {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
-        Self::new(HierarchicalDeterministicFactorInstance::placeholder())
+        Self::with_transaction_signing_only(HierarchicalDeterministicFactorInstance::placeholder())
+            .expect("Valid placeholder")
     }
 }
 
@@ -47,7 +61,17 @@ impl UnsecuredEntityControl {
 mod tests {
     use wallet_kit_common::json::assert_eq_after_json_roundtrip;
 
+    use crate::v100::factors::hierarchical_deterministic_factor_instance::HierarchicalDeterministicFactorInstance;
+
     use super::UnsecuredEntityControl;
+
+    #[test]
+    fn with_auth_signing() {
+        let tx_sign = HierarchicalDeterministicFactorInstance::placeholder_transaction_signing();
+        let auth_sign = HierarchicalDeterministicFactorInstance::placeholder_auth_signing();
+        let control = UnsecuredEntityControl::new(tx_sign, Some(auth_sign.clone())).unwrap();
+        assert_eq!(control.authentication_signing, Some(auth_sign));
+    }
 
     #[test]
     fn json_roundtrip() {

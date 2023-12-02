@@ -92,9 +92,7 @@ impl Account {
             appearance_id: RefCell::new(appearance_id),
             flags: RefCell::new(EntityFlags::default()),
             on_ledger_settings: RefCell::new(OnLedgerSettings::default()),
-            security_state: EntitySecurityState::Unsecured(UnsecuredEntityControl::new(
-                HierarchicalDeterministicFactorInstance::placeholder(),
-            )),
+            security_state: EntitySecurityState::placeholder(),
         }
     }
 }

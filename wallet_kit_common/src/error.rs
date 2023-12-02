@@ -82,4 +82,10 @@ pub enum Error {
 
     #[error("Failed to create FactorSourceIDFromHash from FactorSourceID")]
     FactorSourceIDNotFromHash,
+
+    #[error("Failed to create UnsecuredEntityControl, transactionSigning factor instance path has wrong key kind")]
+    WrongKeyKindOfTransactionSigningFactorInstance,
+
+    #[error("Failed to create UnsecuredEntityControl, authenticationSigning factor instance path has wrong key kind")]
+    WrongKeyKindOfAuthenticationSigningFactorInstance,
 }

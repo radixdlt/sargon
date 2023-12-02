@@ -1,4 +1,5 @@
 use hierarchical_deterministic::{
+    bip32::hd_path_component::HDPathValue,
     cap26::{
         cap26_key_kind::CAP26KeyKind,
         cap26_path::{cap26_path::CAP26Path, paths::account_path::AccountPath},
@@ -87,6 +88,16 @@ impl HierarchicalDeterministicFactorInstance {
             ),
         )
     }
+
+    pub fn key_kind(&self) -> Option<CAP26KeyKind> {
+        match &self.derivation_path {
+            DerivationPath::CAP26(cap26) => match cap26 {
+                CAP26Path::GetID(_) => None,
+                CAP26Path::AccountPath(account_path) => Some(account_path.key_kind),
+            },
+            DerivationPath::BIP44Like(_) => None,
+        }
+    }
 }
 
 impl Serialize for HierarchicalDeterministicFactorInstance {
@@ -112,27 +123,57 @@ impl<'de> serde::Deserialize<'de> for HierarchicalDeterministicFactorInstance {
 impl HierarchicalDeterministicFactorInstance {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
-        let mwp = MnemonicWithPassphrase::placeholder();
-        let path = AccountPath::new(NetworkID::Mainnet, CAP26KeyKind::TransactionSigning, 0);
-        let private_key = mwp.derive_private_key(path.clone());
+        Self::placeholder_transaction_signing()
+    }
 
-        assert_eq!(path.to_string(), "m/44H/1022H/1H/525H/1460H/0H");
-
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_transaction_signing() -> Self {
+        let placeholder = Self::placeholder_with_key_kind(CAP26KeyKind::TransactionSigning, 0);
         assert_eq!(
-            "cf52dbc7bb2663223e99fb31799281b813b939440a372d0aa92eb5f5b8516003",
-            private_key.to_hex()
+            placeholder.derivation_path.to_string(),
+            "m/44H/1022H/1H/525H/1460H/0H"
         );
-        let public_key = private_key.public_key();
+
         assert_eq!(
             "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b",
-            public_key.to_hex()
+            placeholder.public_key.to_hex()
         );
-        let id =
-            FactorSourceIDFromHash::from_mnemonic_with_passphrase(FactorSourceKind::Device, mwp);
+
         assert_eq!(
-            id.to_string(),
+            placeholder.factor_source_id.to_string(),
             "device:3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
         );
+        return placeholder;
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_auth_signing() -> Self {
+        let placeholder = Self::placeholder_with_key_kind(CAP26KeyKind::AuthenticationSigning, 0);
+        assert_eq!(
+            placeholder.derivation_path.to_string(),
+            "m/44H/1022H/1H/525H/1678H/0H"
+        );
+
+        assert_eq!(
+            "564d6ca366bb24cbe8b512324c93809a32039d74f133bfa82d1e80d93225989f",
+            placeholder.public_key.to_hex()
+        );
+
+        assert_eq!(
+            placeholder.factor_source_id.to_string(),
+            "device:3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+        );
+        return placeholder;
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    fn placeholder_with_key_kind(key_kind: CAP26KeyKind, index: HDPathValue) -> Self {
+        let mwp = MnemonicWithPassphrase::placeholder();
+        let path = AccountPath::new(NetworkID::Mainnet, key_kind, index);
+        let private_key = mwp.derive_private_key(path.clone());
+        let public_key = private_key.public_key();
+        let id =
+            FactorSourceIDFromHash::from_mnemonic_with_passphrase(FactorSourceKind::Device, mwp);
         Self::new(
             id,
             public_key,
@@ -143,6 +184,7 @@ impl HierarchicalDeterministicFactorInstance {
 
 #[cfg(test)]
 mod tests {
+    use hierarchical_deterministic::derivation::derivation::Derivation;
     use wallet_kit_common::json::assert_eq_after_json_roundtrip;
 
     use super::HierarchicalDeterministicFactorInstance;
@@ -179,6 +221,16 @@ mod tests {
 				}
 			}
             "#,
+        );
+    }
+
+    #[test]
+    fn placeholder_auth() {
+        assert_eq!(
+            HierarchicalDeterministicFactorInstance::placeholder_auth_signing()
+                .derivation_path
+                .to_string(),
+            "m/44H/1022H/1H/525H/1678H/0H"
         );
     }
 }
