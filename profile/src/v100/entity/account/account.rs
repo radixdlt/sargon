@@ -201,15 +201,6 @@ impl Account {
             security_state: EntitySecurityState::placeholder(),
         }
     }
-}
-
-// CFG test
-#[cfg(test)]
-impl Account {
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
-        Self::placeholder_mainnet()
-    }
 
     fn placeholder_at_index_name(index: HDPathValue, name: &str) -> Self {
         let mwp = MnemonicWithPassphrase::placeholder();
@@ -235,6 +226,15 @@ impl Account {
     /// derivation index 1.
     pub fn placeholder_bob() -> Self {
         Self::placeholder_at_index_name(1, "Bob")
+    }
+}
+
+// CFG test
+#[cfg(test)]
+impl Account {
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder() -> Self {
+        Self::placeholder_mainnet()
     }
 
     pub fn placeholder_mainnet() -> Self {
@@ -445,18 +445,8 @@ mod tests {
     }
 
     #[test]
-    fn json_roundtrip() {
-        let model = Account::placeholder_with_values(
-            "account_tdx_e_128vkt2fur65p4hqhulfv3h0cknrppwtjsstlttkfamj4jnnpm82gsw"
-                .try_into()
-                .unwrap(),
-            "Zaba 0".try_into().unwrap(),
-            0.try_into().unwrap(),
-        );
-        model
-            .flags
-            .borrow_mut()
-            .insert_flag(EntityFlag::DeletedByUser);
+    fn json_roundtrip_alice() {
+        let model = Account::placeholder_alice();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -491,10 +481,10 @@ mod tests {
 					},
 					"discriminator": "unsecured"
 				},
-				"networkID": 14,
+				"networkID": 1,
 				"appearanceID": 0,
 				"flags": [],
-				"displayName": "Zaba 0",
+				"displayName": "Alice",
 				"onLedgerSettings": {
 					"thirdPartyDeposits": {
 						"depositRule": "acceptAll",
@@ -502,8 +492,63 @@ mod tests {
 						"depositorsAllowList": []
 					}
 				},
-				"flags": ["deletedByUser"],
-				"address": "account_tdx_e_128vkt2fur65p4hqhulfv3h0cknrppwtjsstlttkfamj4jnnpm82gsw"
+				"flags": [],
+				"address": "account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8"
+			}
+            "#,
+        );
+    }
+
+    #[test]
+    fn json_roundtrip_bob() {
+        let model = Account::placeholder_bob();
+        assert_eq_after_json_roundtrip(
+            &model,
+            r#"
+            {
+				"securityState": {
+					"unsecuredEntityControl": {
+						"transactionSigning": {
+							"badge": {
+								"virtualSource": {
+									"hierarchicalDeterministicPublicKey": {
+										"publicKey": {
+											"curve": "curve25519",
+											"compressedData": "08740a2fd178c40ce71966a6537f780978f7f00548cfb59196344b5d7d67e9cf"
+										},
+										"derivationPath": {
+											"scheme": "cap26",
+											"path": "m/44H/1022H/1H/525H/1460H/1H"
+										}
+									},
+									"discriminator": "hierarchicalDeterministicPublicKey"
+								},
+								"discriminator": "virtualSource"
+							},
+							"factorSourceID": {
+								"fromHash": {
+									"kind": "device",
+									"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+								},
+								"discriminator": "fromHash"
+							}
+						}
+					},
+					"discriminator": "unsecured"
+				},
+				"networkID": 1,
+				"appearanceID": 1,
+				"flags": [],
+				"displayName": "Bob",
+				"onLedgerSettings": {
+					"thirdPartyDeposits": {
+						"depositRule": "acceptAll",
+						"assetsExceptionList": [],
+						"depositorsAllowList": []
+					}
+				},
+				"flags": [],
+				"address": "account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69"
 			}
             "#,
         );
