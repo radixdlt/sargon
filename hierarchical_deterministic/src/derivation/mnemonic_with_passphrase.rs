@@ -1,19 +1,15 @@
 use super::hierarchical_deterministic_private_key::HierarchicalDeterministicPrivateKey;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use wallet_kit_common::{
-    network_id::NetworkID,
-    types::keys::{
-        ed25519::private_key::Ed25519PrivateKey, private_key::PrivateKey,
-        secp256k1::private_key::Secp256k1PrivateKey, slip10_curve::SLIP10Curve,
-    },
+use wallet_kit_common::types::keys::{
+    ed25519::private_key::Ed25519PrivateKey, secp256k1::private_key::Secp256k1PrivateKey,
+    slip10_curve::SLIP10Curve,
 };
 
 use super::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme};
 use crate::{
-    bip32::{hd_path::HDPath, hd_path_component::HDPathValue},
+    bip32::hd_path::HDPath,
     bip39::mnemonic::{Mnemonic, Seed},
-    cap26::{cap26_path::paths::account_path::AccountPath, cap26_repr::CAP26Repr},
 };
 use wallet_kit_common::error::hdpath_error::HDPathError as Error;
 

@@ -1,6 +1,4 @@
-use hierarchical_deterministic::derivation::mnemonic_with_passphrase::{
-    self, MnemonicWithPassphrase,
-};
+use hierarchical_deterministic::derivation::mnemonic_with_passphrase::MnemonicWithPassphrase;
 use serde::{Deserialize, Serialize};
 
 use crate::v100::factors::{
@@ -37,7 +35,7 @@ impl TryFrom<FactorSource> for DeviceFactorSource {
     fn try_from(value: FactorSource) -> Result<Self, Self::Error> {
         value
             .into_device()
-            .map_err(|e| Self::Error::ExpectedDeviceFactorSourceGotSomethingElse)
+            .map_err(|_| Self::Error::ExpectedDeviceFactorSourceGotSomethingElse)
     }
 }
 

@@ -1,6 +1,4 @@
-use hierarchical_deterministic::derivation::hierarchical_deterministic_public_key::{
-    self, HierarchicalDeterministicPublicKey,
-};
+use hierarchical_deterministic::derivation::hierarchical_deterministic_public_key::HierarchicalDeterministicPublicKey;
 use serde::{Deserialize, Serialize};
 
 use super::{
