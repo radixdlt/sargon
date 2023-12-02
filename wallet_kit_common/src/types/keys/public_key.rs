@@ -189,10 +189,6 @@ impl Into<EngineEd25519PublicKey> for Ed25519PublicKey {
     }
 }
 
-// impl Into
-//     Secp256k1(Secp256k1PublicKey),
-//     Ed25519(Ed25519PublicKey),
-
 #[cfg(test)]
 mod tests {
 
@@ -206,6 +202,32 @@ mod tests {
     };
 
     use super::PublicKey;
+
+    use radix_engine_common::crypto::PublicKey as EnginePublicKey;
+
+    #[test]
+    fn engine_roundtrip_secp256k1() {
+        let public_key_secp256k1: PublicKey = Secp256k1PublicKey::placeholder().into();
+        let engine_key_secp256k1: EnginePublicKey = public_key_secp256k1.clone().into();
+        match engine_key_secp256k1 {
+            EnginePublicKey::Secp256k1(k) => {
+                assert_eq!(k.to_vec(), public_key_secp256k1.to_bytes())
+            }
+            EnginePublicKey::Ed25519(_) => panic!("wrong kind"),
+        }
+    }
+
+    #[test]
+    fn engine_roundtrip_ed25519() {
+        let public_key_ed25519: PublicKey = Ed25519PublicKey::placeholder().into();
+        let engine_key_ed25519: EnginePublicKey = public_key_ed25519.clone().into();
+        match engine_key_ed25519 {
+            EnginePublicKey::Ed25519(k) => {
+                assert_eq!(k.to_vec(), public_key_ed25519.to_bytes())
+            }
+            EnginePublicKey::Secp256k1(_) => panic!("wrong kind"),
+        }
+    }
 
     #[test]
     fn json_roundtrip_ed25519() {
