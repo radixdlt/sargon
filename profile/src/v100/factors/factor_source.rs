@@ -1,12 +1,18 @@
 use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
 
 use super::factor_sources::device_factor_source::device_factor_source::DeviceFactorSource;
-
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+use enum_as_inner::EnumAsInner;
+#[derive(Serialize, Deserialize, Clone, EnumAsInner, Debug, PartialEq, Eq)]
 #[serde(remote = "Self")]
 pub enum FactorSource {
     #[serde(rename = "device")]
     Device(DeviceFactorSource),
+}
+
+impl From<DeviceFactorSource> for FactorSource {
+    fn from(value: DeviceFactorSource) -> Self {
+        FactorSource::Device(value)
+    }
 }
 
 impl<'de> Deserialize<'de> for FactorSource {

@@ -1,6 +1,7 @@
 use hierarchical_deterministic::derivation::derivation_path_scheme::DerivationPathScheme;
 use serde::{Deserialize, Serialize};
-use wallet_kit_common::{error::Error, types::keys::slip10_curve::SLIP10Curve};
+use wallet_kit_common::error::common_error::CommonError as Error;
+use wallet_kit_common::types::keys::slip10_curve::SLIP10Curve;
 
 /// Cryptographic parameters a certain FactorSource supports, e.g. which Elliptic Curves
 /// it supports and which Hierarchical Deterministic (HD) derivations schemes it supports,
@@ -73,10 +74,11 @@ impl Default for FactorSourceCryptoParameters {
 mod tests {
     use hierarchical_deterministic::derivation::derivation_path_scheme::DerivationPathScheme;
     use wallet_kit_common::{
-        error::Error, json::assert_eq_after_json_roundtrip, types::keys::slip10_curve::SLIP10Curve,
+        json::assert_eq_after_json_roundtrip, types::keys::slip10_curve::SLIP10Curve,
     };
 
     use super::FactorSourceCryptoParameters;
+    use wallet_kit_common::error::common_error::CommonError as Error;
 
     #[test]
     fn babylon_has_curve25519_as_first_curve() {

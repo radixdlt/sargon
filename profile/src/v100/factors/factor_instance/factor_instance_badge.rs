@@ -1,3 +1,4 @@
+use hierarchical_deterministic::derivation::hierarchical_deterministic_public_key::HierarchicalDeterministicPublicKey;
 use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
 
 use super::badge_virtual_source::FactorInstanceBadgeVirtualSource;
@@ -16,6 +17,18 @@ impl FactorInstanceBadge {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
         FactorInstanceBadge::Virtual(FactorInstanceBadgeVirtualSource::placeholder())
+    }
+}
+
+impl From<FactorInstanceBadgeVirtualSource> for FactorInstanceBadge {
+    fn from(value: FactorInstanceBadgeVirtualSource) -> Self {
+        Self::Virtual(value)
+    }
+}
+
+impl From<HierarchicalDeterministicPublicKey> for FactorInstanceBadge {
+    fn from(value: HierarchicalDeterministicPublicKey) -> Self {
+        Self::Virtual(value.into())
     }
 }
 

@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use strum::FromRepr;
-use wallet_kit_common::error::Error;
+use wallet_kit_common::error::hdpath_error::HDPathError as Error;
 
 /// The number of words in the mnemonic of a DeviceFactorSource, according to the BIP39
 /// standard, a multiple of 3, from 12 to 24 words. All "Babylon" `DeviceFactorSource`s

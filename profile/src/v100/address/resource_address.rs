@@ -52,7 +52,7 @@ impl EntityAddress for ResourceAddress {
 }
 
 impl TryInto<ResourceAddress> for &str {
-    type Error = wallet_kit_common::error::Error;
+    type Error = wallet_kit_common::error::common_error::CommonError;
 
     fn try_into(self) -> Result<ResourceAddress, Self::Error> {
         ResourceAddress::try_from_bech32(self)

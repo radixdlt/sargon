@@ -1,6 +1,11 @@
 use serde::{de, ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
 
-use crate::error::Error;
+use crate::error::key_error::KeyError as Error;
+
+use radix_engine_common::crypto::{
+    Ed25519PublicKey as EngineEd25519PublicKey, PublicKey as EnginePublicKey,
+    Secp256k1PublicKey as EngineSecp256k1PublicKey,
+};
 
 use super::{
     ed25519::public_key::Ed25519PublicKey, secp256k1::public_key::Secp256k1PublicKey,
@@ -162,6 +167,31 @@ impl Serialize for PublicKey {
         state.end()
     }
 }
+
+impl Into<EnginePublicKey> for PublicKey {
+    fn into(self) -> EnginePublicKey {
+        match self {
+            PublicKey::Ed25519(key) => EnginePublicKey::Ed25519(key.into()),
+            PublicKey::Secp256k1(key) => EnginePublicKey::Secp256k1(key.into()),
+        }
+    }
+}
+
+impl Into<EngineSecp256k1PublicKey> for Secp256k1PublicKey {
+    fn into(self) -> EngineSecp256k1PublicKey {
+        EngineSecp256k1PublicKey::try_from(self.to_bytes().as_slice()).unwrap()
+    }
+}
+
+impl Into<EngineEd25519PublicKey> for Ed25519PublicKey {
+    fn into(self) -> EngineEd25519PublicKey {
+        EngineEd25519PublicKey::try_from(self.to_bytes().as_slice()).unwrap()
+    }
+}
+
+// impl Into
+//     Secp256k1(Secp256k1PublicKey),
+//     Ed25519(Ed25519PublicKey),
 
 #[cfg(test)]
 mod tests {

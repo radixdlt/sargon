@@ -1,22 +1,47 @@
 use serde::{de, Deserializer, Serialize, Serializer};
-use wallet_kit_common::network_id::NetworkID;
+use wallet_kit_common::{error::hdpath_error::HDPathError, network_id::NetworkID};
 
 use crate::{
     bip32::{hd_path::HDPath, hd_path_component::HDPathValue},
     cap26::{
-        cap26_entity_kind::CAP26EntityKind, cap26_key_kind::CAP26KeyKind, cap26_repr::CAP26Repr,
+        cap26_entity_kind::CAP26EntityKind, cap26_key_kind::CAP26KeyKind,
+        cap26_path::cap26_path::CAP26Path, cap26_repr::CAP26Repr,
     },
-    derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},
-    hdpath_error::HDPathError,
+    derivation::{
+        derivation::Derivation, derivation_path::DerivationPath,
+        derivation_path_scheme::DerivationPathScheme,
+    },
 };
+
+use super::is_entity_path::IsEntityPath;
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct AccountPath {
     pub path: HDPath,
     pub network_id: NetworkID,
-    pub entity_kind: CAP26EntityKind,
-    pub key_kind: CAP26KeyKind,
-    pub index: HDPathValue,
+    entity_kind: CAP26EntityKind,
+    key_kind: CAP26KeyKind,
+    index: HDPathValue,
+}
+
+impl IsEntityPath for AccountPath {
+    fn network_id(&self) -> NetworkID {
+        self.network_id
+    }
+    fn key_kind(&self) -> CAP26KeyKind {
+        self.key_kind
+    }
+    fn index(&self) -> HDPathValue {
+        self.index
+    }
+}
+
+impl TryFrom<&HDPath> for AccountPath {
+    type Error = HDPathError;
+
+    fn try_from(value: &HDPath) -> Result<Self, Self::Error> {
+        Self::try_from_hdpath(value)
+    }
 }
 
 impl CAP26Repr for AccountPath {
@@ -79,7 +104,9 @@ impl Derivation for AccountPath {
     fn hd_path(&self) -> &HDPath {
         &self.path
     }
-
+    fn derivation_path(&self) -> DerivationPath {
+        DerivationPath::CAP26(CAP26Path::AccountPath(self.clone()))
+    }
     fn scheme(&self) -> DerivationPathScheme {
         DerivationPathScheme::Cap26
     }
@@ -89,6 +116,7 @@ impl Derivation for AccountPath {
 mod tests {
     use serde_json::json;
     use wallet_kit_common::{
+        error::hdpath_error::HDPathError,
         json::{assert_json_value_eq_after_roundtrip, assert_json_value_ne_after_roundtrip},
         network_id::NetworkID,
     };
@@ -98,7 +126,6 @@ mod tests {
             cap26_entity_kind::CAP26EntityKind, cap26_key_kind::CAP26KeyKind, cap26_repr::CAP26Repr,
         },
         derivation::derivation::Derivation,
-        hdpath_error::HDPathError,
     };
 
     use super::AccountPath;
@@ -126,6 +153,14 @@ mod tests {
         assert_eq!(parsed.to_string(), str);
         let built = AccountPath::new(NetworkID::Mainnet, CAP26KeyKind::TransactionSigning, 0);
         assert_eq!(built, parsed)
+    }
+
+    #[test]
+    fn new_tx_sign() {
+        assert_eq!(
+            AccountPath::new_mainnet_transaction_signing(77).to_string(),
+            "m/44H/1022H/1H/525H/1460H/77H"
+        );
     }
 
     #[test]
@@ -157,8 +192,8 @@ mod tests {
         assert_eq!(
             AccountPath::from_str("m/44H/1022H/1H/618H/1460H/0H"),
             Err(HDPathError::WrongEntityKind(
-                CAP26EntityKind::Identity,
-                CAP26EntityKind::Account
+                CAP26EntityKind::Identity.discriminant(),
+                CAP26EntityKind::Account.discriminant()
             ))
         )
     }

@@ -41,6 +41,12 @@ impl Serialize for EntitySecurityState {
     }
 }
 
+impl From<UnsecuredEntityControl> for EntitySecurityState {
+    fn from(value: UnsecuredEntityControl) -> Self {
+        Self::Unsecured(value)
+    }
+}
+
 impl EntitySecurityState {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {

@@ -8,4 +8,6 @@ pub mod factor_source_id_from_address;
 pub mod factor_source_id_from_hash;
 pub mod factor_source_kind;
 pub mod factor_sources;
+pub mod hd_transaction_signing_factor_instance;
 pub mod hierarchical_deterministic_factor_instance;
+pub mod is_factor_source;

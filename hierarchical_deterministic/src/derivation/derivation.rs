@@ -1,8 +1,9 @@
 use crate::bip32::{hd_path::HDPath, hd_path_component::HDPathComponent};
 
-use super::derivation_path_scheme::DerivationPathScheme;
+use super::{derivation_path::DerivationPath, derivation_path_scheme::DerivationPathScheme};
 
 pub trait Derivation: Sized {
+    fn derivation_path(&self) -> DerivationPath;
     fn hd_path(&self) -> &HDPath;
 
     fn to_string(&self) -> String {

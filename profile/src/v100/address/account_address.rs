@@ -89,7 +89,7 @@ impl EntityAddress for AccountAddress {
 }
 
 impl TryInto<AccountAddress> for &str {
-    type Error = wallet_kit_common::error::Error;
+    type Error = wallet_kit_common::error::common_error::CommonError;
 
     /// Tries to deserializes a bech32 address into an `AccountAddress`.
     fn try_into(self) -> Result<AccountAddress, Self::Error> {
@@ -116,12 +116,11 @@ impl AccountAddress {
 
 #[cfg(test)]
 mod tests {
-    use std::str::FromStr;
-
     use radix_engine_common::crypto::{Ed25519PublicKey, PublicKey};
     use serde_json::json;
+    use std::str::FromStr;
+    use wallet_kit_common::error::common_error::CommonError as Error;
     use wallet_kit_common::{
-        error::Error,
         json::{
             assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
             assert_json_value_ne_after_roundtrip,

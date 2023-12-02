@@ -65,6 +65,18 @@ impl FactorSourceCommon {
         let date: NaiveDateTime = now();
         Self::with_values(crypto_parameters, date, date, flags)
     }
+
+    pub fn new_bdfs(is_main: bool) -> Self {
+        Self::new(
+            FactorSourceCryptoParameters::babylon(),
+            if is_main {
+                vec![FactorSourceFlag::Main]
+            } else {
+                Vec::new()
+            }
+            .into_iter(),
+        )
+    }
 }
 
 impl Default for FactorSourceCommon {

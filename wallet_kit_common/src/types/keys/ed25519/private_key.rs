@@ -4,7 +4,7 @@ use transaction::signing::ed25519::{
 };
 
 use super::public_key::Ed25519PublicKey;
-use crate::{error::Error, types::hex_32bytes::Hex32Bytes};
+use crate::{error::key_error::KeyError as Error, types::hex_32bytes::Hex32Bytes};
 use std::fmt::{Debug, Formatter};
 
 /// An Ed25519 private key used to create cryptographic signatures, using
@@ -83,7 +83,7 @@ impl Ed25519PrivateKey {
 }
 
 impl TryFrom<&[u8]> for Ed25519PrivateKey {
-    type Error = crate::error::Error;
+    type Error = crate::error::key_error::KeyError;
 
     fn try_from(slice: &[u8]) -> Result<Ed25519PrivateKey, Self::Error> {
         Ed25519PrivateKey::from_bytes(slice)
@@ -91,7 +91,7 @@ impl TryFrom<&[u8]> for Ed25519PrivateKey {
 }
 
 impl TryInto<Ed25519PrivateKey> for &str {
-    type Error = crate::error::Error;
+    type Error = crate::error::key_error::KeyError;
 
     fn try_into(self) -> Result<Ed25519PrivateKey, Self::Error> {
         Ed25519PrivateKey::from_str(self)
@@ -131,7 +131,7 @@ mod tests {
 
     use transaction::signing::ed25519::Ed25519Signature;
 
-    use crate::{error::Error, hash::hash, types::hex_32bytes::Hex32Bytes};
+    use crate::{error::key_error::KeyError as Error, hash::hash, types::hex_32bytes::Hex32Bytes};
 
     use super::Ed25519PrivateKey;
 

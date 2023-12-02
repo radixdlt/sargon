@@ -1,9 +1,12 @@
 use serde::{de, Deserializer, Serialize, Serializer};
+use wallet_kit_common::error::hdpath_error::HDPathError;
 
 use crate::{
     bip32::{hd_path::HDPath, hd_path_component::HDPathValue},
-    derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},
-    hdpath_error::HDPathError,
+    derivation::{
+        derivation::Derivation, derivation_path::DerivationPath,
+        derivation_path_scheme::DerivationPathScheme,
+    },
 };
 
 /// Use it with `GetIDPath::default()` to create the path `m/44'/1022'/365'`
@@ -13,6 +16,9 @@ use crate::{
 pub struct GetIDPath(HDPath);
 
 impl Derivation for GetIDPath {
+    fn derivation_path(&self) -> DerivationPath {
+        DerivationPath::CAP26(self.clone().into())
+    }
     fn hd_path(&self) -> &HDPath {
         &self.0
     }
@@ -27,12 +33,13 @@ impl Default for GetIDPath {
     }
 }
 
-impl GetIDPath {
-    pub const LAST_COMPONENT_VALUE: HDPathValue = 365;
+impl TryFrom<&HDPath> for GetIDPath {
+    type Error = HDPathError;
 
-    pub fn from_str(s: &str) -> Result<Self, HDPathError> {
+    fn try_from(value: &HDPath) -> Result<Self, Self::Error> {
         use HDPathError::*;
-        let (path, components) = HDPath::try_parse_base(s, HDPathError::InvalidDepthOfCAP26Path)?;
+        let (path, components) =
+            HDPath::try_parse_base_hdpath(value, HDPathError::InvalidDepthOfCAP26Path)?;
         if path.depth() != 3 {
             return Err(InvalidDepthOfCAP26Path);
         }
@@ -43,6 +50,15 @@ impl GetIDPath {
         let hd_path = HDPath::from_components(components);
         assert!(Self(hd_path) == Self::default());
         return Ok(Self::default());
+    }
+}
+
+impl GetIDPath {
+    pub const LAST_COMPONENT_VALUE: HDPathValue = 365;
+
+    pub fn from_str(s: &str) -> Result<Self, HDPathError> {
+        let (path, _) = HDPath::try_parse_base(s, HDPathError::InvalidDepthOfCAP26Path)?;
+        return Self::try_from(&path);
     }
 }
 
@@ -76,9 +92,12 @@ impl TryInto<GetIDPath> for &str {
 #[cfg(test)]
 mod tests {
     use serde_json::json;
-    use wallet_kit_common::json::{assert_json_value_eq_after_roundtrip, assert_json_value_fails};
+    use wallet_kit_common::{
+        error::hdpath_error::HDPathError,
+        json::{assert_json_value_eq_after_roundtrip, assert_json_value_fails},
+    };
 
-    use crate::{derivation::derivation::Derivation, hdpath_error::HDPathError};
+    use crate::derivation::derivation::Derivation;
 
     use super::GetIDPath;
 

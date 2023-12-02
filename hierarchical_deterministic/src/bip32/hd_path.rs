@@ -3,8 +3,7 @@ use std::str::FromStr;
 use itertools::Itertools;
 use serde::{de, Deserializer, Serialize, Serializer};
 use slip10::path::BIP32Path;
-
-use crate::hdpath_error::HDPathError;
+use wallet_kit_common::error::hdpath_error::HDPathError;
 
 use super::hd_path_component::{HDPathComponent, HDPathValue};
 
@@ -79,12 +78,11 @@ impl HDPath {
         Ok(got)
     }
 
-    pub(crate) fn try_parse_base(
-        s: &str,
+    pub(crate) fn try_parse_base_hdpath(
+        path: &HDPath,
         depth_error: HDPathError,
     ) -> Result<(HDPath, Vec<HDPathComponent>), HDPathError> {
         use HDPathError::*;
-        let path = HDPath::from_str(s).map_err(|_| HDPathError::InvalidBIP32Path(s.to_string()))?;
         if path.depth() < 2 {
             return Err(depth_error);
         }
@@ -104,6 +102,14 @@ impl HDPath {
             Box::new(|v| CoinTypeNotFound(v)),
         )?;
         return Ok((path.clone(), components.clone()));
+    }
+
+    pub(crate) fn try_parse_base(
+        s: &str,
+        depth_error: HDPathError,
+    ) -> Result<(HDPath, Vec<HDPathComponent>), HDPathError> {
+        let path = HDPath::from_str(s).map_err(|_| HDPathError::InvalidBIP32Path(s.to_string()))?;
+        return Self::try_parse_base_hdpath(&path, depth_error);
     }
 }
 

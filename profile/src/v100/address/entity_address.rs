@@ -1,11 +1,16 @@
-use radix_engine_common::crypto::PublicKey;
+use hierarchical_deterministic::cap26::cap26_path::paths::is_entity_path::IsEntityPath;
+use radix_engine_common::crypto::PublicKey as EnginePublicKey;
 use radix_engine_toolkit::functions::derive::{
     virtual_account_address_from_public_key, virtual_identity_address_from_public_key,
 };
 use radix_engine_toolkit_json::models::scrypto::node_id::SerializableNodeIdInternal;
-use wallet_kit_common::{error::Error, network_id::NetworkID};
+use wallet_kit_common::network_id::NetworkID;
 
-use crate::v100::entity::abstract_entity_type::AbstractEntityType;
+use crate::v100::{
+    entity::abstract_entity_type::AbstractEntityType,
+    factors::hd_transaction_signing_factor_instance::HDFactorInstanceTransactionSigning,
+};
+use wallet_kit_common::error::common_error::CommonError as Error;
 
 use super::decode_address_helper::decode_address;
 
@@ -22,7 +27,10 @@ pub trait EntityAddress: Sized {
     /// Creates a new address from `public_key` and `network_id` by bech32 encoding
     /// it.
     #[cfg(not(tarpaulin_include))] // false negative
-    fn from_public_key(public_key: PublicKey, network_id: NetworkID) -> Self {
+    fn from_public_key<P>(public_key: P, network_id: NetworkID) -> Self
+    where
+        P: Into<EnginePublicKey> + Clone,
+    {
         let component = match Self::entity_type() {
             AbstractEntityType::Account => virtual_account_address_from_public_key(&public_key),
             AbstractEntityType::Identity => virtual_identity_address_from_public_key(&public_key),
@@ -36,6 +44,17 @@ pub trait EntityAddress: Sized {
 
         let address = format!("{node}");
         return Self::__with_address_and_network_id(&address, network_id);
+    }
+
+    fn from_hd_factor_instance_virtual_entity_creation<E: IsEntityPath>(
+        hd_factor_instance_virtual_entity_creation: HDFactorInstanceTransactionSigning<E>,
+    ) -> Self {
+        Self::from_public_key(
+            hd_factor_instance_virtual_entity_creation
+                .public_key()
+                .public_key,
+            hd_factor_instance_virtual_entity_creation.path.network_id(),
+        )
     }
 
     fn try_from_bech32(s: &str) -> Result<Self, Error> {

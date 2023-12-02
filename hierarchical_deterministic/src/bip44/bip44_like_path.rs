@@ -1,20 +1,26 @@
 use serde::{de, Deserializer, Serialize, Serializer};
+use wallet_kit_common::error::hdpath_error::HDPathError;
 
 use crate::{
     bip32::{
         hd_path::HDPath,
         hd_path_component::{HDPathComponent, HDPathValue},
     },
-    derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},
-    hdpath_error::HDPathError,
+    derivation::{
+        derivation::Derivation, derivation_path::DerivationPath,
+        derivation_path_scheme::DerivationPathScheme,
+    },
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct BIP44LikePath(HDPath);
 
-impl BIP44LikePath {
-    pub fn from_str(s: &str) -> Result<Self, HDPathError> {
-        let (path, components) = HDPath::try_parse_base(s, HDPathError::InvalidDepthOfBIP44Path)?;
+impl TryFrom<&HDPath> for BIP44LikePath {
+    type Error = HDPathError;
+
+    fn try_from(value: &HDPath) -> Result<Self, Self::Error> {
+        let (path, components) =
+            HDPath::try_parse_base_hdpath(value, HDPathError::InvalidDepthOfBIP44Path)?;
         if path.depth() != 5 {
             return Err(HDPathError::InvalidDepthOfBIP44Path);
         }
@@ -32,6 +38,13 @@ impl BIP44LikePath {
             return Err(HDPathError::InvalidBIP44LikePathIndexWasNotHardened);
         }
         return Ok(Self(path));
+    }
+}
+
+impl BIP44LikePath {
+    pub fn from_str(s: &str) -> Result<Self, HDPathError> {
+        let (path, _) = HDPath::try_parse_base(s, HDPathError::InvalidDepthOfBIP44Path)?;
+        return Self::try_from(&path);
     }
 
     fn with_account_and_index(account: HDPathValue, index: HDPathValue) -> Self {
@@ -51,6 +64,9 @@ impl BIP44LikePath {
 }
 
 impl Derivation for BIP44LikePath {
+    fn derivation_path(&self) -> DerivationPath {
+        DerivationPath::BIP44Like(self.clone())
+    }
     fn hd_path(&self) -> &HDPath {
         &self.0
     }
@@ -97,11 +113,12 @@ impl BIP44LikePath {
 #[cfg(test)]
 mod tests {
     use serde_json::json;
-    use wallet_kit_common::json::{
-        assert_json_value_eq_after_roundtrip, assert_json_value_ne_after_roundtrip,
+    use wallet_kit_common::{
+        error::hdpath_error::HDPathError,
+        json::{assert_json_value_eq_after_roundtrip, assert_json_value_ne_after_roundtrip},
     };
 
-    use crate::{derivation::derivation::Derivation, hdpath_error::HDPathError};
+    use crate::derivation::derivation::Derivation;
 
     use super::BIP44LikePath;
 

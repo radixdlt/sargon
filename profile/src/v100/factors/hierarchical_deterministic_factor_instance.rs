@@ -2,7 +2,10 @@ use hierarchical_deterministic::{
     bip32::hd_path_component::HDPathValue,
     cap26::{
         cap26_key_kind::CAP26KeyKind,
-        cap26_path::{cap26_path::CAP26Path, paths::account_path::AccountPath},
+        cap26_path::{
+            cap26_path::CAP26Path,
+            paths::{account_path::AccountPath, is_entity_path::IsEntityPath},
+        },
         cap26_repr::CAP26Repr,
     },
     derivation::{
@@ -12,37 +15,50 @@ use hierarchical_deterministic::{
     },
 };
 use serde::{de, Deserializer, Serialize, Serializer};
-use wallet_kit_common::{error::Error, network_id::NetworkID, types::keys::public_key::PublicKey};
+use wallet_kit_common::{network_id::NetworkID, types::keys::public_key::PublicKey};
 
 use crate::v100::factors::factor_source_kind::FactorSourceKind;
+use wallet_kit_common::error::common_error::CommonError as Error;
 
 use super::{
     factor_instance::{
-        badge_virtual_source::FactorInstanceBadgeVirtualSource, factor_instance::FactorInstance,
-        factor_instance_badge::FactorInstanceBadge,
+        factor_instance::FactorInstance, factor_instance_badge::FactorInstanceBadge,
     },
     factor_source_id::FactorSourceID,
     factor_source_id_from_hash::FactorSourceIDFromHash,
 };
 
+/// A virtual hierarchical deterministic `FactorInstance`
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct HierarchicalDeterministicFactorInstance {
     pub factor_source_id: FactorSourceIDFromHash,
-    pub public_key: PublicKey,
-    pub derivation_path: DerivationPath,
+    pub public_key: HierarchicalDeterministicPublicKey,
 }
 
 impl HierarchicalDeterministicFactorInstance {
+    pub fn derivation_path(&self) -> DerivationPath {
+        self.public_key.derivation_path.clone()
+    }
+
     pub fn new(
         factor_source_id: FactorSourceIDFromHash,
-        public_key: PublicKey,
-        derivation_path: DerivationPath,
+        public_key: HierarchicalDeterministicPublicKey,
     ) -> Self {
         Self {
             factor_source_id,
             public_key,
-            derivation_path,
         }
+    }
+
+    pub fn with_key_and_path(
+        factor_source_id: FactorSourceIDFromHash,
+        public_key: PublicKey,
+        derivation_path: DerivationPath,
+    ) -> Self {
+        Self::new(
+            factor_source_id,
+            HierarchicalDeterministicPublicKey::new(public_key, derivation_path),
+        )
     }
 
     pub fn try_from(
@@ -53,7 +69,7 @@ impl HierarchicalDeterministicFactorInstance {
         let factor_source_id = factor_source_id
             .as_hash()
             .ok_or(Error::FactorSourceIDNotFromHash)?;
-        Ok(Self::new(
+        Ok(Self::with_key_and_path(
             factor_source_id.clone(),
             public_key,
             derivation_path,
@@ -78,22 +94,15 @@ impl HierarchicalDeterministicFactorInstance {
     pub fn factor_instance(&self) -> FactorInstance {
         FactorInstance::new(
             self.factor_source_id.clone().into(),
-            FactorInstanceBadge::Virtual(
-                FactorInstanceBadgeVirtualSource::HierarchicalDeterministic(
-                    HierarchicalDeterministicPublicKey::new(
-                        self.public_key,
-                        self.derivation_path.clone(),
-                    ),
-                ),
-            ),
+            FactorInstanceBadge::Virtual(self.public_key.clone().into()),
         )
     }
 
     pub fn key_kind(&self) -> Option<CAP26KeyKind> {
-        match &self.derivation_path {
+        match &self.derivation_path() {
             DerivationPath::CAP26(cap26) => match cap26 {
                 CAP26Path::GetID(_) => None,
-                CAP26Path::AccountPath(account_path) => Some(account_path.key_kind),
+                CAP26Path::AccountPath(account_path) => Some(account_path.key_kind()),
             },
             DerivationPath::BIP44Like(_) => None,
         }
@@ -130,7 +139,7 @@ impl HierarchicalDeterministicFactorInstance {
     pub fn placeholder_transaction_signing() -> Self {
         let placeholder = Self::placeholder_with_key_kind(CAP26KeyKind::TransactionSigning, 0);
         assert_eq!(
-            placeholder.derivation_path.to_string(),
+            placeholder.derivation_path().to_string(),
             "m/44H/1022H/1H/525H/1460H/0H"
         );
 
@@ -150,7 +159,7 @@ impl HierarchicalDeterministicFactorInstance {
     pub fn placeholder_auth_signing() -> Self {
         let placeholder = Self::placeholder_with_key_kind(CAP26KeyKind::AuthenticationSigning, 0);
         assert_eq!(
-            placeholder.derivation_path.to_string(),
+            placeholder.derivation_path().to_string(),
             "m/44H/1022H/1H/525H/1678H/0H"
         );
 
@@ -174,11 +183,7 @@ impl HierarchicalDeterministicFactorInstance {
         let public_key = private_key.public_key();
         let id =
             FactorSourceIDFromHash::from_mnemonic_with_passphrase(FactorSourceKind::Device, mwp);
-        Self::new(
-            id,
-            public_key,
-            DerivationPath::CAP26(CAP26Path::AccountPath(path)),
-        )
+        Self::new(id.into(), public_key)
     }
 }
 
@@ -228,7 +233,7 @@ mod tests {
     fn placeholder_auth() {
         assert_eq!(
             HierarchicalDeterministicFactorInstance::placeholder_auth_signing()
-                .derivation_path
+                .derivation_path()
                 .to_string(),
             "m/44H/1022H/1H/525H/1678H/0H"
         );

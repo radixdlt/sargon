@@ -87,7 +87,7 @@ impl NetworkID {
 }
 
 impl TryFrom<u8> for NetworkID {
-    type Error = crate::error::Error;
+    type Error = crate::error::common_error::CommonError;
 
     /// Tries to instantiate a NetworkID from its raw representation `u8`.
     fn try_from(value: u8) -> Result<Self, Self::Error> {

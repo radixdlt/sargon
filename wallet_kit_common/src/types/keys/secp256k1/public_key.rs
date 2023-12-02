@@ -1,4 +1,6 @@
-use crate::{error::Error, types::keys::secp256k1::private_key::Secp256k1PrivateKey};
+use crate::{
+    error::key_error::KeyError as Error, types::keys::secp256k1::private_key::Secp256k1PrivateKey,
+};
 use bip32::secp256k1::PublicKey as BIP32Secp256k1PublicKey;
 use radix_engine_common::crypto::{Hash, Secp256k1PublicKey as EngineSecp256k1PublicKey};
 use serde::{Deserialize, Serialize};
@@ -31,7 +33,7 @@ impl Secp256k1PublicKey {
 }
 
 impl TryFrom<&[u8]> for Secp256k1PublicKey {
-    type Error = crate::error::Error;
+    type Error = crate::error::key_error::KeyError;
 
     fn try_from(slice: &[u8]) -> Result<Self, Self::Error> {
         EngineSecp256k1PublicKey::try_from(slice)
@@ -41,7 +43,7 @@ impl TryFrom<&[u8]> for Secp256k1PublicKey {
 }
 
 impl TryInto<Secp256k1PublicKey> for &str {
-    type Error = crate::error::Error;
+    type Error = crate::error::key_error::KeyError;
 
     fn try_into(self) -> Result<Secp256k1PublicKey, Self::Error> {
         Secp256k1PublicKey::from_str(self)
@@ -82,7 +84,7 @@ mod tests {
     use std::collections::BTreeSet;
 
     use super::Secp256k1PublicKey;
-    use crate::{error::Error, json::assert_json_value_eq_after_roundtrip};
+    use crate::{error::key_error::KeyError as Error, json::assert_json_value_eq_after_roundtrip};
     use serde_json::json;
 
     #[test]

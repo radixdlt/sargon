@@ -3,7 +3,7 @@ use std::str::FromStr;
 use bip39::Language;
 use itertools::Itertools;
 use serde::{de, Deserializer, Serialize, Serializer};
-use wallet_kit_common::error::Error;
+use wallet_kit_common::error::hdpath_error::HDPathError as Error;
 
 use super::{bip39_word::bip39_word::BIP39Word, bip39_word_count::BIP39WordCount};
 
@@ -67,7 +67,7 @@ impl<'de> serde::Deserialize<'de> for Mnemonic {
 }
 
 impl TryInto<Mnemonic> for &str {
-    type Error = wallet_kit_common::error::Error;
+    type Error = wallet_kit_common::error::hdpath_error::HDPathError;
 
     /// Tries to deserializes a bech32 address into an `AccountAddress`.
     fn try_into(self) -> Result<Mnemonic, Self::Error> {

@@ -1,17 +1,30 @@
-use serde::{de, Deserializer, Serialize, Serializer};
-
 use crate::{
     bip32::hd_path::HDPath,
     cap26::cap26_repr::CAP26Repr,
+    derivation::derivation_path::DerivationPath,
     derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},
 };
+use enum_as_inner::EnumAsInner;
+use serde::{de, Deserializer, Serialize, Serializer};
+use wallet_kit_common::error::hdpath_error::HDPathError;
 
 use super::paths::{account_path::AccountPath, getid_path::GetIDPath};
 
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Debug, PartialEq, EnumAsInner, Eq, PartialOrd, Ord)]
 pub enum CAP26Path {
     GetID(GetIDPath),
     AccountPath(AccountPath),
+}
+
+impl TryFrom<&HDPath> for CAP26Path {
+    type Error = HDPathError;
+
+    fn try_from(value: &HDPath) -> Result<Self, Self::Error> {
+        if let Ok(get_id) = GetIDPath::try_from(value) {
+            return Ok(get_id.into());
+        }
+        return AccountPath::try_from(value).map(|p| p.into());
+    }
 }
 
 impl Serialize for CAP26Path {
@@ -43,6 +56,11 @@ impl Derivation for CAP26Path {
             CAP26Path::GetID(path) => path.hd_path(),
         }
     }
+
+    fn derivation_path(&self) -> DerivationPath {
+        DerivationPath::CAP26(self.clone())
+    }
+
     fn scheme(&self) -> DerivationPathScheme {
         match self {
             CAP26Path::AccountPath(p) => p.scheme(),

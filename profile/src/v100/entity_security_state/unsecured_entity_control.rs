@@ -1,8 +1,11 @@
 use hierarchical_deterministic::cap26::cap26_key_kind::CAP26KeyKind;
 use serde::{Deserialize, Serialize};
-use wallet_kit_common::error::Error;
 
-use crate::v100::factors::hierarchical_deterministic_factor_instance::HierarchicalDeterministicFactorInstance;
+use crate::v100::factors::{
+    hd_transaction_signing_factor_instance::HDFactorInstanceAccountCreation,
+    hierarchical_deterministic_factor_instance::HierarchicalDeterministicFactorInstance,
+};
+use wallet_kit_common::error::common_error::CommonError as Error;
 
 /// Basic security control of an unsecured entity. When said entity
 /// is "securified" it will no longer be controlled by this `UnsecuredEntityControl`
@@ -21,6 +24,15 @@ pub struct UnsecuredEntityControl {
 }
 
 impl UnsecuredEntityControl {
+    pub fn with_account_creating_factor_instance(
+        account_creating_factor_instance: HDFactorInstanceAccountCreation,
+    ) -> Self {
+        Self {
+            transaction_signing: account_creating_factor_instance.into(),
+            authentication_signing: None,
+        }
+    }
+
     pub fn new(
         transaction_signing: HierarchicalDeterministicFactorInstance,
         authentication_signing: Option<HierarchicalDeterministicFactorInstance>,

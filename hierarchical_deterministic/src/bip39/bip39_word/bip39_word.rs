@@ -2,7 +2,7 @@ use std::cmp::Ordering;
 
 use bip39::Language;
 use memoize::memoize;
-use wallet_kit_common::error::Error;
+use wallet_kit_common::error::hdpath_error::HDPathError as Error;
 
 use super::u11::U11;
 
@@ -53,10 +53,9 @@ fn index_of_word_in_bip39_wordlist_of_language(
 
 #[cfg(test)]
 mod tests {
-    use bip39::Language;
-    use wallet_kit_common::error::Error;
-
     use super::BIP39Word;
+    use bip39::Language;
+    use wallet_kit_common::error::hdpath_error::HDPathError as Error;
 
     #[test]
     fn equality() {

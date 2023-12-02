@@ -29,25 +29,29 @@ impl DeviceFactorSourceHint {
         }
     }
 
-    pub fn iphone_unknown_model_and_name_with_word_count(word_count: BIP39WordCount) -> Self {
-        Self::new("Unknown Name".to_string(), "iPhone".to_string(), word_count)
+    pub fn unknown_model_and_name_with_word_count(word_count: BIP39WordCount, model: &str) -> Self {
+        Self::new("Unknown Name".to_string(), model.to_string(), word_count)
     }
-
-    pub fn iphone_unknown() -> Self {
-        Self::iphone_unknown_model_and_name_with_word_count(BIP39WordCount::TwentyFour)
+    pub fn iphone_unknown_model_and_name_with_word_count(word_count: BIP39WordCount) -> Self {
+        Self::unknown_model_and_name_with_word_count(word_count, "iPhone")
     }
 }
 
 impl Default for DeviceFactorSourceHint {
     fn default() -> Self {
-        Self::iphone_unknown()
+        Self::placeholder_iphone_unknown()
     }
 }
 
 impl DeviceFactorSourceHint {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
-        Self::iphone_unknown()
+        Self::placeholder_iphone_unknown()
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_iphone_unknown() -> Self {
+        Self::iphone_unknown_model_and_name_with_word_count(BIP39WordCount::TwentyFour)
     }
 }
 
@@ -61,7 +65,7 @@ mod tests {
     fn default_is_iphone_unknown() {
         assert_eq!(
             DeviceFactorSourceHint::default(),
-            DeviceFactorSourceHint::iphone_unknown()
+            DeviceFactorSourceHint::placeholder_iphone_unknown()
         );
     }
 

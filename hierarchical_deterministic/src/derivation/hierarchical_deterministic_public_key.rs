@@ -36,6 +36,16 @@ impl HierarchicalDeterministicPublicKey {
 }
 
 impl HierarchicalDeterministicPublicKey {
+    pub fn to_hex(&self) -> String {
+        self.public_key.to_hex()
+    }
+
+    pub fn to_bytes(&self) -> Vec<u8> {
+        self.public_key.to_bytes()
+    }
+}
+
+impl HierarchicalDeterministicPublicKey {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
         let mwp = MnemonicWithPassphrase::placeholder();
@@ -53,7 +63,8 @@ impl HierarchicalDeterministicPublicKey {
             "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b",
             public_key.to_hex()
         );
-        Self::new(public_key, path.into())
+        // Self::new(public_key, path.into())
+        return public_key;
     }
 }
 
@@ -62,6 +73,14 @@ mod tests {
     use wallet_kit_common::json::assert_eq_after_json_roundtrip;
 
     use super::HierarchicalDeterministicPublicKey;
+
+    #[test]
+    fn to_hex() {
+        assert_eq!(
+            HierarchicalDeterministicPublicKey::placeholder().to_hex(),
+            "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b"
+        );
+    }
 
     #[test]
     fn json() {

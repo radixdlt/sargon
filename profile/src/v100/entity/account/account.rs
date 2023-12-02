@@ -1,16 +1,26 @@
-use hierarchical_deterministic::derivation::derivation::Derivation;
+use hierarchical_deterministic::{
+    bip32::hd_path_component::HDPathValue,
+    cap26::cap26_path::paths::is_entity_path::HasEntityPath,
+    derivation::{derivation::Derivation, mnemonic_with_passphrase::MnemonicWithPassphrase},
+};
 use serde::{Deserialize, Serialize};
 use std::{cell::RefCell, cmp::Ordering, fmt::Display};
 use wallet_kit_common::network_id::NetworkID;
 
 use crate::v100::{
-    address::account_address::AccountAddress,
+    address::{account_address::AccountAddress, entity_address::EntityAddress},
     entity::{display_name::DisplayName, entity_flags::EntityFlags},
     entity_security_state::{
         entity_security_state::EntitySecurityState,
         unsecured_entity_control::UnsecuredEntityControl,
     },
-    factors::hierarchical_deterministic_factor_instance::HierarchicalDeterministicFactorInstance,
+    factors::{
+        factor_sources::{
+            device_factor_source::device_factor_source::DeviceFactorSource,
+            private_hierarchical_deterministic_factor_source::PrivateHierarchicalDeterministicFactorSource,
+        },
+        hd_transaction_signing_factor_instance::HDFactorInstanceAccountCreation,
+    },
 };
 
 use super::{
@@ -79,20 +89,25 @@ pub struct Account {
 }
 
 impl Account {
-    /// Instantiates an account with a display name, address and appearance id.
-    pub fn with_values(
-        address: AccountAddress,
+    pub fn new(
+        account_creating_factor_instance: HDFactorInstanceAccountCreation,
         display_name: DisplayName,
         appearance_id: AppearanceID,
     ) -> Self {
+        let address = AccountAddress::from_hd_factor_instance_virtual_entity_creation(
+            account_creating_factor_instance.clone(),
+        );
         Self {
-            network_id: address.network_id,
+            network_id: account_creating_factor_instance.network_id(),
             address,
             display_name: RefCell::new(display_name),
+            security_state: UnsecuredEntityControl::with_account_creating_factor_instance(
+                account_creating_factor_instance,
+            )
+            .into(),
             appearance_id: RefCell::new(appearance_id),
             flags: RefCell::new(EntityFlags::default()),
             on_ledger_settings: RefCell::new(OnLedgerSettings::default()),
-            security_state: EntitySecurityState::placeholder(),
         }
     }
 }
@@ -150,9 +165,9 @@ impl Ord for Account {
         match (&self.security_state, &other.security_state) {
             (EntitySecurityState::Unsecured(l), EntitySecurityState::Unsecured(r)) => l
                 .transaction_signing
-                .derivation_path
+                .derivation_path()
                 .last_component()
-                .cmp(r.transaction_signing.derivation_path.last_component()),
+                .cmp(r.transaction_signing.derivation_path().last_component()),
         }
     }
 }
@@ -169,6 +184,25 @@ impl Display for Account {
     }
 }
 
+impl Account {
+    /// Instantiates an account with a display name, address and appearance id.
+    pub fn placeholder_with_values(
+        address: AccountAddress,
+        display_name: DisplayName,
+        appearance_id: AppearanceID,
+    ) -> Self {
+        Self {
+            network_id: address.network_id,
+            address,
+            display_name: RefCell::new(display_name),
+            appearance_id: RefCell::new(appearance_id),
+            flags: RefCell::new(EntityFlags::default()),
+            on_ledger_settings: RefCell::new(OnLedgerSettings::default()),
+            security_state: EntitySecurityState::placeholder(),
+        }
+    }
+}
+
 // CFG test
 #[cfg(test)]
 impl Account {
@@ -177,14 +211,34 @@ impl Account {
         Self::placeholder_mainnet()
     }
 
-    // /// A `Mainnet` account, a placeholder used to facilitate unit tests.
-    // pub fn placeholder_alice() -> Self {
-    //     let mwp = MnemonicWithPassphrase::placeholder();
-    //     let bdfs = DeviceFactorSource::placeholder()
-    // }
+    fn placeholder_at_index_name(index: HDPathValue, name: &str) -> Self {
+        let mwp = MnemonicWithPassphrase::placeholder();
+        let bdfs = DeviceFactorSource::babylon(true, mwp.clone(), "iPhone");
+        let private_hd_factor_source = PrivateHierarchicalDeterministicFactorSource::new(mwp, bdfs);
+        let account_creating_factor_instance = private_hd_factor_source
+            .derive_account_creation_factor_instance(NetworkID::Mainnet, index);
+
+        Self::new(
+            account_creating_factor_instance,
+            DisplayName::new(name).unwrap(),
+            AppearanceID::try_from(index as u8).unwrap(),
+        )
+    }
+
+    /// A `Mainnet` account named "Alice", a placeholder used to facilitate unit tests, with
+    /// derivation index 0,
+    pub fn placeholder_alice() -> Self {
+        Self::placeholder_at_index_name(0, "Alice")
+    }
+
+    /// A `Mainnet` account named "Bob", a placeholder used to facilitate unit tests, with
+    /// derivation index 1.
+    pub fn placeholder_bob() -> Self {
+        Self::placeholder_at_index_name(1, "Bob")
+    }
 
     pub fn placeholder_mainnet() -> Self {
-        Self::with_values(
+        Self::placeholder_with_values(
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
                 .try_into()
                 .unwrap(),
@@ -194,7 +248,7 @@ impl Account {
     }
 
     pub fn placeholder_stokenet() -> Self {
-        Self::with_values(
+        Self::placeholder_with_values(
             "account_tdx_2_12ygsf87pma439ezvdyervjfq2nhqme6reau6kcxf6jtaysaxl7sqvd"
                 .try_into()
                 .unwrap(),
@@ -204,7 +258,7 @@ impl Account {
     }
 
     pub fn placeholder_nebunet() -> Self {
-        Self::with_values(
+        Self::placeholder_with_values(
             "account_tdx_b_1p8ahenyznrqy2w0tyg00r82rwuxys6z8kmrhh37c7maqpydx7p"
                 .try_into()
                 .unwrap(),
@@ -214,7 +268,7 @@ impl Account {
     }
 
     pub fn placeholder_kisharnet() -> Self {
-        Self::with_values(
+        Self::placeholder_with_values(
             "account_tdx_c_1px26p5tyqq65809em2h4yjczxcxj776kaun6sv3dw66sc3wrm6"
                 .try_into()
                 .unwrap(),
@@ -224,7 +278,7 @@ impl Account {
     }
 
     pub fn placeholder_adapanet() -> Self {
-        Self::with_values(
+        Self::placeholder_with_values(
             "account_tdx_a_1qwv0unmwmxschqj8sntg6n9eejkrr6yr6fa4ekxazdzqhm6wy5"
                 .try_into()
                 .unwrap(),
@@ -269,7 +323,7 @@ mod tests {
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
                 .try_into()
                 .unwrap();
-        let account = Account::with_values(
+        let account = Account::placeholder_with_values(
             address.clone(),
             DisplayName::default(),
             AppearanceID::default(),
@@ -296,8 +350,13 @@ mod tests {
     }
 
     #[test]
+    fn compare() {
+        assert!(Account::placeholder_alice() < Account::placeholder_bob());
+    }
+
+    #[test]
     fn display_name_get_set() {
-        let account = Account::with_values(
+        let account = Account::placeholder_with_values(
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
                 .try_into()
                 .unwrap(),
@@ -312,7 +371,7 @@ mod tests {
 
     #[test]
     fn flags_get_set() {
-        let account = Account::with_values(
+        let account = Account::placeholder_with_values(
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
                 .try_into()
                 .unwrap(),
@@ -327,7 +386,7 @@ mod tests {
 
     #[test]
     fn on_ledger_settings_get_set() {
-        let account = Account::with_values(
+        let account = Account::placeholder_with_values(
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
                 .try_into()
                 .unwrap(),
@@ -387,7 +446,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip() {
-        let model = Account::with_values(
+        let model = Account::placeholder_with_values(
             "account_tdx_e_128vkt2fur65p4hqhulfv3h0cknrppwtjsstlttkfamj4jnnpm82gsw"
                 .try_into()
                 .unwrap(),

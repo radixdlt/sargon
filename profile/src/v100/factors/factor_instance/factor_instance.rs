@@ -1,6 +1,12 @@
+use hierarchical_deterministic::derivation::hierarchical_deterministic_public_key::{
+    self, HierarchicalDeterministicPublicKey,
+};
 use serde::{Deserialize, Serialize};
 
-use super::factor_instance_badge::FactorInstanceBadge;
+use super::{
+    badge_virtual_source::FactorInstanceBadgeVirtualSource,
+    factor_instance_badge::FactorInstanceBadge,
+};
 use crate::v100::factors::factor_source_id::FactorSourceID;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
@@ -24,6 +30,20 @@ impl FactorInstance {
             factor_source_id,
             badge,
         }
+    }
+
+    pub fn with_hierarchical_deterministic_public_key(
+        factor_source_id: FactorSourceID,
+        hierarchical_deterministic_public_key: HierarchicalDeterministicPublicKey,
+    ) -> Self {
+        Self::new(
+            factor_source_id,
+            FactorInstanceBadge::Virtual(
+                FactorInstanceBadgeVirtualSource::HierarchicalDeterministic(
+                    hierarchical_deterministic_public_key,
+                ),
+            ),
+        )
     }
 
     /// A placeholder used to facilitate unit tests.

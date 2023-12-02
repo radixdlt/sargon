@@ -15,6 +15,12 @@ impl FactorInstanceBadgeVirtualSource {
     }
 }
 
+impl From<HierarchicalDeterministicPublicKey> for FactorInstanceBadgeVirtualSource {
+    fn from(value: HierarchicalDeterministicPublicKey) -> Self {
+        Self::HierarchicalDeterministic(value)
+    }
+}
+
 impl<'de> Deserialize<'de> for FactorInstanceBadgeVirtualSource {
     #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {

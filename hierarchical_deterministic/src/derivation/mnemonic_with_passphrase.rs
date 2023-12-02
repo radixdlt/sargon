@@ -1,19 +1,21 @@
+use super::hierarchical_deterministic_private_key::HierarchicalDeterministicPrivateKey;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use wallet_kit_common::{
-    error::Error,
+    network_id::NetworkID,
     types::keys::{
         ed25519::private_key::Ed25519PrivateKey, private_key::PrivateKey,
         secp256k1::private_key::Secp256k1PrivateKey, slip10_curve::SLIP10Curve,
     },
 };
 
-use crate::{
-    bip32::hd_path::HDPath,
-    bip39::mnemonic::{Mnemonic, Seed},
-};
-
 use super::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme};
+use crate::{
+    bip32::{hd_path::HDPath, hd_path_component::HDPathValue},
+    bip39::mnemonic::{Mnemonic, Seed},
+    cap26::{cap26_path::paths::account_path::AccountPath, cap26_repr::CAP26Repr},
+};
+use wallet_kit_common::error::hdpath_error::HDPathError as Error;
 
 /// A BIP39 Mnemonic and BIP39 passphrase - aka "25th word" tuple,
 /// from which we can derive a HD Root used for derivation.
@@ -91,22 +93,22 @@ impl MnemonicWithPassphrase {
     }
 
     #[cfg(not(tarpaulin_include))] // false negative
-    pub fn derive_private_key<D>(&self, derivation: D) -> PrivateKey
+    pub fn derive_private_key<D>(&self, derivation: D) -> HierarchicalDeterministicPrivateKey
     where
         D: Derivation,
     {
         let seed = self.to_seed();
-        let path = derivation.hd_path();
+        let path = derivation.derivation_path();
         match derivation.scheme() {
             DerivationPathScheme::Cap26 => {
                 assert_eq!(derivation.scheme().curve(), SLIP10Curve::Curve25519);
-                let key = Self::derive_ed25519_private_key(&seed, path);
-                PrivateKey::Ed25519(key)
+                let key = Self::derive_ed25519_private_key(&seed, path.hd_path());
+                HierarchicalDeterministicPrivateKey::new(key.into(), path)
             }
             DerivationPathScheme::Bip44Olympia => {
                 assert_eq!(derivation.scheme().curve(), SLIP10Curve::Secp256k1);
-                let key = Self::derive_secp256k1_private_key(&seed, path);
-                PrivateKey::Secp256k1(key)
+                let key = Self::derive_secp256k1_private_key(&seed, path.hd_path());
+                HierarchicalDeterministicPrivateKey::new(key.into(), path)
             }
         }
     }
