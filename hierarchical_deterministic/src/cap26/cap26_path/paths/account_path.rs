@@ -28,9 +28,11 @@ impl IsEntityPath for AccountPath {
     fn network_id(&self) -> NetworkID {
         self.network_id
     }
+
     fn key_kind(&self) -> CAP26KeyKind {
         self.key_kind
     }
+
     fn index(&self) -> HDPathValue {
         self.index
     }
@@ -122,8 +124,10 @@ mod tests {
     };
 
     use crate::{
+        bip32::hd_path::HDPath,
         cap26::{
-            cap26_entity_kind::CAP26EntityKind, cap26_key_kind::CAP26KeyKind, cap26_repr::CAP26Repr,
+            cap26_entity_kind::CAP26EntityKind, cap26_key_kind::CAP26KeyKind,
+            cap26_path::paths::is_entity_path::IsEntityPath, cap26_repr::CAP26Repr,
         },
         derivation::derivation::Derivation,
     };
@@ -271,5 +275,29 @@ mod tests {
         let parsed: AccountPath = str.try_into().unwrap();
         assert_json_value_eq_after_roundtrip(&parsed, json!(str));
         assert_json_value_ne_after_roundtrip(&parsed, json!("m/44H/1022H/1H/525H/1460H/1H"));
+    }
+
+    #[test]
+    fn is_entity_path_index() {
+        let sut = AccountPath::placeholder();
+        assert_eq!(sut.index(), 0);
+        assert_eq!(sut.network_id(), NetworkID::Mainnet);
+        assert_eq!(sut.key_kind(), CAP26KeyKind::TransactionSigning);
+    }
+
+    #[test]
+    fn try_from_hdpath_valid() {
+        let hdpath = HDPath::from_str("m/44H/1022H/1H/525H/1460H/0H").unwrap();
+        let account_path = AccountPath::try_from(&hdpath);
+        assert!(account_path.is_ok());
+    }
+
+    #[test]
+    fn try_from_hdpath_invalid() {
+        let hdpath = HDPath::from_str("m/44H/1022H/1H/618H/1460H/0H").unwrap();
+        assert_eq!(
+            AccountPath::try_from(&hdpath),
+            Err(HDPathError::WrongEntityKind(618, 525))
+        );
     }
 }

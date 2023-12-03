@@ -146,7 +146,9 @@ mod tests {
         bip44::bip44_like_path::BIP44LikePath,
         cap26::cap26_path::{
             cap26_path::CAP26Path,
-            paths::{account_path::AccountPath, getid_path::GetIDPath},
+            paths::{
+                account_path::AccountPath, getid_path::GetIDPath, identity_path::IdentityPath,
+            },
         },
         derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},
     };
@@ -204,6 +206,48 @@ mod tests {
             DerivationPath::CAP26(AccountPath::placeholder().into()),
             AccountPath::placeholder().into()
         );
+    }
+
+    #[test]
+    fn into_from_identity_cap26_path() {
+        assert_eq!(
+            DerivationPath::CAP26(IdentityPath::placeholder().into()),
+            IdentityPath::placeholder().into()
+        );
+    }
+
+    #[test]
+    fn derivation_path_identity() {
+        let derivation_path: DerivationPath = IdentityPath::placeholder().into();
+        assert_eq!(derivation_path, derivation_path.derivation_path());
+    }
+
+    #[test]
+    fn try_from_hdpath_account() {
+        let derivation_path: DerivationPath = AccountPath::placeholder().into();
+        let hd_path = derivation_path.hd_path();
+        assert_eq!(DerivationPath::try_from(hd_path), Ok(derivation_path));
+    }
+
+    #[test]
+    fn try_from_hdpath_identity() {
+        let derivation_path: DerivationPath = IdentityPath::placeholder().into();
+        let hd_path = derivation_path.hd_path();
+        assert_eq!(DerivationPath::try_from(hd_path), Ok(derivation_path));
+    }
+
+    #[test]
+    fn try_from_hdpath_bip44() {
+        let derivation_path: DerivationPath = BIP44LikePath::placeholder().into();
+        let hd_path = derivation_path.hd_path();
+        assert_eq!(DerivationPath::try_from(hd_path), Ok(derivation_path));
+    }
+
+    #[test]
+    fn try_from_hdpath_getid() {
+        let derivation_path: DerivationPath = GetIDPath::default().into();
+        let hd_path = derivation_path.hd_path();
+        assert_eq!(DerivationPath::try_from(hd_path), Ok(derivation_path));
     }
 
     #[test]

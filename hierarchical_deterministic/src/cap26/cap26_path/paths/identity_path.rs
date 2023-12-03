@@ -104,9 +104,11 @@ impl Derivation for IdentityPath {
     fn hd_path(&self) -> &HDPath {
         &self.path
     }
+
     fn derivation_path(&self) -> DerivationPath {
         DerivationPath::CAP26(CAP26Path::IdentityPath(self.clone()))
     }
+
     fn scheme(&self) -> DerivationPathScheme {
         DerivationPathScheme::Cap26
     }
@@ -114,18 +116,18 @@ impl Derivation for IdentityPath {
 
 #[cfg(test)]
 mod tests {
+    use crate::{
+        bip32::hd_path::HDPath,
+        cap26::{
+            cap26_entity_kind::CAP26EntityKind, cap26_key_kind::CAP26KeyKind, cap26_repr::CAP26Repr,
+        },
+        derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},
+    };
     use serde_json::json;
     use wallet_kit_common::{
         error::hdpath_error::HDPathError,
         json::{assert_json_value_eq_after_roundtrip, assert_json_value_ne_after_roundtrip},
         network_id::NetworkID,
-    };
-
-    use crate::{
-        cap26::{
-            cap26_entity_kind::CAP26EntityKind, cap26_key_kind::CAP26KeyKind, cap26_repr::CAP26Repr,
-        },
-        derivation::derivation::Derivation,
     };
 
     use super::IdentityPath;
@@ -271,5 +273,39 @@ mod tests {
         let parsed: IdentityPath = str.try_into().unwrap();
         assert_json_value_eq_after_roundtrip(&parsed, json!(str));
         assert_json_value_ne_after_roundtrip(&parsed, json!("m/44H/1022H/1H/618H/1460H/1H"));
+    }
+
+    #[test]
+    fn identity_path_scheme() {
+        assert_eq!(
+            IdentityPath::placeholder().scheme(),
+            DerivationPathScheme::Cap26
+        );
+    }
+
+    #[test]
+    fn identity_path_derivation_path() {
+        assert_eq!(
+            IdentityPath::placeholder()
+                .derivation_path()
+                .hd_path()
+                .to_string(),
+            "m/44H/1022H/1H/618H/1460H/0H"
+        );
+    }
+
+    #[test]
+    fn try_from_hdpath_valid() {
+        let hdpath = HDPath::from_str("m/44H/1022H/1H/618H/1460H/0H").unwrap();
+        assert!(IdentityPath::try_from(&hdpath).is_ok());
+    }
+
+    #[test]
+    fn try_from_hdpath_invalid() {
+        let hdpath = HDPath::from_str("m/44H/1022H/1H/525H/1460H/0H").unwrap();
+        assert_eq!(
+            IdentityPath::try_from(&hdpath),
+            Err(HDPathError::WrongEntityKind(525, 618))
+        );
     }
 }
