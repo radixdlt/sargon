@@ -119,7 +119,8 @@ mod tests {
     use crate::{
         bip32::hd_path::HDPath,
         cap26::{
-            cap26_entity_kind::CAP26EntityKind, cap26_key_kind::CAP26KeyKind, cap26_repr::CAP26Repr,
+            cap26_entity_kind::CAP26EntityKind, cap26_key_kind::CAP26KeyKind,
+            cap26_path::paths::is_entity_path::IsEntityPath, cap26_repr::CAP26Repr,
         },
         derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},
     };
@@ -307,5 +308,13 @@ mod tests {
             IdentityPath::try_from(&hdpath),
             Err(HDPathError::WrongEntityKind(525, 618))
         );
+    }
+
+    #[test]
+    fn is_entity_path_index() {
+        let sut = IdentityPath::placeholder();
+        assert_eq!(sut.index(), 0);
+        assert_eq!(sut.network_id(), NetworkID::Mainnet);
+        assert_eq!(sut.key_kind(), CAP26KeyKind::TransactionSigning);
     }
 }

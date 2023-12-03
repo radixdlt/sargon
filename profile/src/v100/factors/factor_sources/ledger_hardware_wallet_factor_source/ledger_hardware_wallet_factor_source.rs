@@ -83,6 +83,7 @@ mod tests {
     use crate::v100::factors::{
         factor_source::FactorSource,
         factor_sources::device_factor_source::device_factor_source::DeviceFactorSource,
+        is_factor_source::IsFactorSource,
     };
 
     use super::LedgerHardwareWalletFactorSource;
@@ -133,6 +134,22 @@ mod tests {
         assert_eq!(
             LedgerHardwareWalletFactorSource::try_from(factor_source),
             Err(Error::ExpectedLedgerHardwareWalletFactorSourceGotSomethingElse)
+        );
+    }
+
+    #[test]
+    fn factor_source_id() {
+        assert_eq!(
+            LedgerHardwareWalletFactorSource::placeholder().factor_source_id(),
+            LedgerHardwareWalletFactorSource::placeholder().id.into()
+        );
+    }
+
+    #[test]
+    fn factor_source_kind() {
+        assert_eq!(
+            LedgerHardwareWalletFactorSource::placeholder().factor_source_kind(),
+            LedgerHardwareWalletFactorSource::placeholder().id.kind
         );
     }
 }
