@@ -189,8 +189,19 @@ impl HierarchicalDeterministicFactorInstance {
 
 #[cfg(test)]
 mod tests {
-    use hierarchical_deterministic::derivation::derivation::Derivation;
-    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
+    use hierarchical_deterministic::{
+        bip44::bip44_like_path::BIP44LikePath,
+        cap26::cap26_path::paths::getid_path::GetIDPath,
+        derivation::{
+            derivation::Derivation, derivation_path::DerivationPath,
+            hierarchical_deterministic_public_key::HierarchicalDeterministicPublicKey,
+        },
+    };
+    use wallet_kit_common::{
+        json::assert_eq_after_json_roundtrip, types::keys::public_key::PublicKey,
+    };
+
+    use crate::v100::factors::factor_source_id_from_hash::FactorSourceIDFromHash;
 
     use super::HierarchicalDeterministicFactorInstance;
 
@@ -227,6 +238,32 @@ mod tests {
 			}
             "#,
         );
+    }
+
+    #[test]
+    fn key_kind_bip44_is_none() {
+        let derivation_path: DerivationPath = BIP44LikePath::placeholder().into();
+        let sut = HierarchicalDeterministicFactorInstance::new(
+            FactorSourceIDFromHash::placeholder(),
+            HierarchicalDeterministicPublicKey::new(
+                PublicKey::placeholder_ed25519(),
+                derivation_path,
+            ),
+        );
+        assert_eq!(sut.key_kind(), None);
+    }
+
+    #[test]
+    fn key_kind_cap26_getid_is_none() {
+        let derivation_path: DerivationPath = GetIDPath::default().into();
+        let sut = HierarchicalDeterministicFactorInstance::new(
+            FactorSourceIDFromHash::placeholder(),
+            HierarchicalDeterministicPublicKey::new(
+                PublicKey::placeholder_ed25519(),
+                derivation_path,
+            ),
+        );
+        assert_eq!(sut.key_kind(), None);
     }
 
     #[test]

@@ -146,4 +146,11 @@ mod tests {
         }
         assert_eq!(set.len(), n);
     }
+
+    #[test]
+    fn secp256k1_to_bytes() {
+        let bytes = generate_32_bytes();
+        let key = Secp256k1PrivateKey::from_bytes(&bytes).unwrap();
+        assert_eq!(key.to_bytes(), bytes);
+    }
 }
