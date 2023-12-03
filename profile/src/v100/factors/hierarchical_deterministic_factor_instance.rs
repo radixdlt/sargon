@@ -192,7 +192,10 @@ impl HierarchicalDeterministicFactorInstance {
 mod tests {
     use hierarchical_deterministic::{
         bip44::bip44_like_path::BIP44LikePath,
-        cap26::cap26_path::paths::getid_path::GetIDPath,
+        cap26::{
+            cap26_key_kind::CAP26KeyKind,
+            cap26_path::paths::{getid_path::GetIDPath, identity_path::IdentityPath},
+        },
         derivation::{
             derivation::Derivation, derivation_path::DerivationPath,
             hierarchical_deterministic_public_key::HierarchicalDeterministicPublicKey,
@@ -252,6 +255,19 @@ mod tests {
             ),
         );
         assert_eq!(sut.key_kind(), None);
+    }
+
+    #[test]
+    fn key_kind_identity() {
+        let derivation_path: DerivationPath = IdentityPath::placeholder().into();
+        let sut = HierarchicalDeterministicFactorInstance::new(
+            FactorSourceIDFromHash::placeholder(),
+            HierarchicalDeterministicPublicKey::new(
+                PublicKey::placeholder_ed25519(),
+                derivation_path,
+            ),
+        );
+        assert_eq!(sut.key_kind(), Some(CAP26KeyKind::TransactionSigning));
     }
 
     #[test]

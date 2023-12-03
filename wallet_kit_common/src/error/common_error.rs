@@ -70,4 +70,7 @@ pub enum CommonError {
 
     #[error("Expected DeviceFactorSource")]
     ExpectedDeviceFactorSourceGotSomethingElse,
+
+    #[error("Expected LedgerHardwareWalletFactorSource")]
+    ExpectedLedgerHardwareWalletFactorSourceGotSomethingElse,
 }

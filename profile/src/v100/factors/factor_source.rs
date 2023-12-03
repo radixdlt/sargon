@@ -22,6 +22,12 @@ impl From<DeviceFactorSource> for FactorSource {
     }
 }
 
+impl From<LedgerHardwareWalletFactorSource> for FactorSource {
+    fn from(value: LedgerHardwareWalletFactorSource) -> Self {
+        FactorSource::Ledger(value)
+    }
+}
+
 impl<'de> Deserialize<'de> for FactorSource {
     #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {

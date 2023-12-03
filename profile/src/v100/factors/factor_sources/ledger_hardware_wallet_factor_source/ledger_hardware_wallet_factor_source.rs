@@ -3,7 +3,9 @@ use std::cell::RefCell;
 use serde::{Deserialize, Serialize};
 
 use crate::v100::factors::{
-    factor_source_common::FactorSourceCommon, factor_source_id_from_hash::FactorSourceIDFromHash,
+    factor_source::FactorSource, factor_source_common::FactorSourceCommon,
+    factor_source_id::FactorSourceID, factor_source_id_from_hash::FactorSourceIDFromHash,
+    factor_source_kind::FactorSourceKind, is_factor_source::IsFactorSource,
 };
 
 use super::ledger_hardware_wallet_hint::LedgerHardwareWalletHint;
@@ -52,9 +54,36 @@ impl LedgerHardwareWalletFactorSource {
     }
 }
 
+impl TryFrom<FactorSource> for LedgerHardwareWalletFactorSource {
+    type Error = wallet_kit_common::error::common_error::CommonError;
+
+    fn try_from(value: FactorSource) -> Result<Self, Self::Error> {
+        value
+            .into_ledger()
+            .map_err(|_| Self::Error::ExpectedLedgerHardwareWalletFactorSourceGotSomethingElse)
+    }
+}
+
+impl IsFactorSource for LedgerHardwareWalletFactorSource {
+    fn factor_source_kind(&self) -> FactorSourceKind {
+        self.id.kind
+    }
+
+    fn factor_source_id(&self) -> FactorSourceID {
+        self.clone().id.into()
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::{
+        error::common_error::CommonError as Error, json::assert_eq_after_json_roundtrip,
+    };
+
+    use crate::v100::factors::{
+        factor_source::FactorSource,
+        factor_sources::device_factor_source::device_factor_source::DeviceFactorSource,
+    };
 
     use super::LedgerHardwareWalletFactorSource;
 
@@ -84,6 +113,26 @@ mod tests {
                     "model": "nanoS+"
                 }
             }"#,
+        );
+    }
+
+    #[test]
+    fn from_factor_source() {
+        let sut = LedgerHardwareWalletFactorSource::placeholder();
+        let factor_source: FactorSource = sut.clone().into();
+        assert_eq!(
+            LedgerHardwareWalletFactorSource::try_from(factor_source),
+            Ok(sut)
+        );
+    }
+
+    #[test]
+    fn from_factor_source_invalid_got_device() {
+        let wrong = DeviceFactorSource::placeholder();
+        let factor_source: FactorSource = wrong.clone().into();
+        assert_eq!(
+            LedgerHardwareWalletFactorSource::try_from(factor_source),
+            Err(Error::ExpectedLedgerHardwareWalletFactorSourceGotSomethingElse)
         );
     }
 }

@@ -105,9 +105,9 @@ mod tests {
     use wallet_kit_common::json::assert_eq_after_json_roundtrip;
 
     use crate::v100::factors::{
-        factor_source_id::FactorSourceID, is_factor_source::IsFactorSource,
+        factor_source_id::FactorSourceID, is_factor_source::IsFactorSource, factor_source::FactorSource, factor_sources::ledger_hardware_wallet_factor_source::ledger_hardware_wallet_factor_source::LedgerHardwareWalletFactorSource,
     };
-
+use wallet_kit_common::error::common_error::CommonError as Error;
     use super::DeviceFactorSource;
 
     #[test]
@@ -145,5 +145,22 @@ mod tests {
         let sut = DeviceFactorSource::placeholder();
         let factor_source_id: FactorSourceID = sut.clone().id.into();
         assert_eq!(factor_source_id, sut.factor_source_id());
+    }
+
+    #[test]
+    fn from_factor_source() {
+        let sut = DeviceFactorSource::placeholder();
+        let factor_source: FactorSource = sut.clone().into();
+        assert_eq!(DeviceFactorSource::try_from(factor_source), Ok(sut));
+    }
+
+    #[test]
+    fn from_factor_source_invalid_got_ledger() {
+        let ledger = LedgerHardwareWalletFactorSource::placeholder();
+        let factor_source: FactorSource = ledger.clone().into();
+        assert_eq!(
+            DeviceFactorSource::try_from(factor_source),
+            Err(Error::ExpectedDeviceFactorSourceGotSomethingElse)
+        );
     }
 }
