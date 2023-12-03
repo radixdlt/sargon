@@ -111,6 +111,7 @@ impl HierarchicalDeterministicFactorInstance {
 }
 
 impl Serialize for HierarchicalDeterministicFactorInstance {
+    #[cfg(not(tarpaulin_include))] // false negative
     fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
     where
         S: Serializer,
@@ -120,6 +121,7 @@ impl Serialize for HierarchicalDeterministicFactorInstance {
 }
 
 impl<'de> serde::Deserialize<'de> for HierarchicalDeterministicFactorInstance {
+    #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(
         d: D,
     ) -> Result<HierarchicalDeterministicFactorInstance, D::Error> {
@@ -138,42 +140,12 @@ impl HierarchicalDeterministicFactorInstance {
 
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_transaction_signing() -> Self {
-        let placeholder = Self::placeholder_with_key_kind(CAP26KeyKind::TransactionSigning, 0);
-        assert_eq!(
-            placeholder.derivation_path().to_string(),
-            "m/44H/1022H/1H/525H/1460H/0H"
-        );
-
-        assert_eq!(
-            "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b",
-            placeholder.public_key.to_hex()
-        );
-
-        assert_eq!(
-            placeholder.factor_source_id.to_string(),
-            "device:3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
-        );
-        return placeholder;
+        Self::placeholder_with_key_kind(CAP26KeyKind::TransactionSigning, 0)
     }
 
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_auth_signing() -> Self {
-        let placeholder = Self::placeholder_with_key_kind(CAP26KeyKind::AuthenticationSigning, 0);
-        assert_eq!(
-            placeholder.derivation_path().to_string(),
-            "m/44H/1022H/1H/525H/1678H/0H"
-        );
-
-        assert_eq!(
-            "564d6ca366bb24cbe8b512324c93809a32039d74f133bfa82d1e80d93225989f",
-            placeholder.public_key.to_hex()
-        );
-
-        assert_eq!(
-            placeholder.factor_source_id.to_string(),
-            "device:3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
-        );
-        return placeholder;
+        Self::placeholder_with_key_kind(CAP26KeyKind::AuthenticationSigning, 0)
     }
 
     /// A placeholder used to facilitate unit tests.

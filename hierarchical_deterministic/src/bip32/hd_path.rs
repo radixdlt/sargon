@@ -126,6 +126,7 @@ impl ToString for HDPath {
 
 impl Serialize for HDPath {
     /// Serializes this `HDPath` into its bech32 address string as JSON.
+    #[cfg(not(tarpaulin_include))] // false negative
     fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
     where
         S: Serializer,

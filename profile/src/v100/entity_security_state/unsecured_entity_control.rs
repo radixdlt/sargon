@@ -33,6 +33,7 @@ impl UnsecuredEntityControl {
         }
     }
 
+    #[cfg(not(tarpaulin_include))] // false negative
     pub fn new(
         transaction_signing: HierarchicalDeterministicFactorInstance,
         authentication_signing: Option<HierarchicalDeterministicFactorInstance>,
@@ -54,6 +55,7 @@ impl UnsecuredEntityControl {
             authentication_signing,
         })
     }
+
     pub fn with_transaction_signing_only(
         transaction_signing: HierarchicalDeterministicFactorInstance,
     ) -> Result<Self, Error> {
