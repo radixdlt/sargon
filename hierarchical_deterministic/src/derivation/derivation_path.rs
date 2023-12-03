@@ -86,12 +86,14 @@ impl Derivation for DerivationPath {
     fn derivation_path(&self) -> DerivationPath {
         self.clone()
     }
+
     fn hd_path(&self) -> &HDPath {
         match self {
             DerivationPath::CAP26(path) => path.hd_path(),
             DerivationPath::BIP44Like(path) => path.hd_path(),
         }
     }
+
     fn scheme(&self) -> DerivationPathScheme {
         match self {
             DerivationPath::CAP26(p) => p.scheme(),

@@ -3,6 +3,7 @@ use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializ
 
 use super::badge_virtual_source::FactorInstanceBadgeVirtualSource;
 use enum_as_inner::EnumAsInner;
+
 /// Either a "physical" badge (NFT) or some source for recreation of a producer
 /// of a virtual badge (signature), e.g. a HD derivation path, from which a private key
 /// is derived which produces virtual badges (signatures).
@@ -67,7 +68,10 @@ impl Serialize for FactorInstanceBadge {
 
 #[cfg(test)]
 mod tests {
+    use hierarchical_deterministic::derivation::hierarchical_deterministic_public_key::HierarchicalDeterministicPublicKey;
     use wallet_kit_common::json::assert_eq_after_json_roundtrip;
+
+    use crate::v100::factors::factor_instance::badge_virtual_source::FactorInstanceBadgeVirtualSource;
 
     use super::FactorInstanceBadge;
     #[test]
@@ -94,5 +98,31 @@ mod tests {
 			}
             "#,
         );
+    }
+
+    #[test]
+    fn into_from_hd_pubkey() {
+        let sut: FactorInstanceBadge = HierarchicalDeterministicPublicKey::placeholder().into();
+        assert_eq!(
+            sut,
+            FactorInstanceBadge::Virtual(
+                FactorInstanceBadgeVirtualSource::HierarchicalDeterministic(
+                    HierarchicalDeterministicPublicKey::placeholder()
+                )
+            )
+        )
+    }
+
+    #[test]
+    fn into_from_virtual_source() {
+        let sut: FactorInstanceBadge = FactorInstanceBadgeVirtualSource::placeholder().into();
+        assert_eq!(
+            sut,
+            FactorInstanceBadge::Virtual(
+                FactorInstanceBadgeVirtualSource::HierarchicalDeterministic(
+                    HierarchicalDeterministicPublicKey::placeholder()
+                )
+            )
+        )
     }
 }
