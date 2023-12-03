@@ -102,6 +102,7 @@ impl HierarchicalDeterministicFactorInstance {
         match &self.derivation_path() {
             DerivationPath::CAP26(cap26) => match cap26 {
                 CAP26Path::GetID(_) => None,
+                CAP26Path::IdentityPath(identity_path) => Some(identity_path.key_kind()),
                 CAP26Path::AccountPath(account_path) => Some(account_path.key_kind()),
             },
             DerivationPath::BIP44Like(_) => None,

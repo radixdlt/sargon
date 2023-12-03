@@ -59,6 +59,9 @@ pub enum CommonError {
     #[error("Expected AccountPath but got something else.")]
     ExpectedAccountPathButGotSomethingElse,
 
+    #[error("Wrong entity kind in path of FactorInstance")]
+    WrongEntityKindOfInFactorInstancesPath,
+
     #[error("Wrong key kind of FactorInstance - expected transaction signing")]
     WrongKeyKindOfTransactionSigningFactorInstance,
 

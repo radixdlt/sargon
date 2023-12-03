@@ -8,12 +8,16 @@ use enum_as_inner::EnumAsInner;
 use serde::{de, Deserializer, Serialize, Serializer};
 use wallet_kit_common::error::hdpath_error::HDPathError;
 
-use super::paths::{account_path::AccountPath, getid_path::GetIDPath};
+use super::paths::{account_path::AccountPath, getid_path::GetIDPath, identity_path::IdentityPath};
 
+/// A derivation path design specifically for Radix Babylon wallets used by Accounts and Personas
+/// to be unique per network with separate key spaces for Accounts/Identities (Personas) and key
+/// kind: sign transaction or sign auth.
 #[derive(Clone, Debug, PartialEq, EnumAsInner, Eq, PartialOrd, Ord)]
 pub enum CAP26Path {
     GetID(GetIDPath),
     AccountPath(AccountPath),
+    IdentityPath(IdentityPath),
 }
 
 impl TryFrom<&HDPath> for CAP26Path {
@@ -22,6 +26,9 @@ impl TryFrom<&HDPath> for CAP26Path {
     fn try_from(value: &HDPath) -> Result<Self, Self::Error> {
         if let Ok(get_id) = GetIDPath::try_from(value) {
             return Ok(get_id.into());
+        }
+        if let Ok(identity_path) = IdentityPath::try_from(value) {
+            return Ok(identity_path.into());
         }
         return AccountPath::try_from(value).map(|p| p.into());
     }
@@ -53,6 +60,7 @@ impl Derivation for CAP26Path {
     fn hd_path(&self) -> &HDPath {
         match self {
             CAP26Path::AccountPath(path) => path.hd_path(),
+            CAP26Path::IdentityPath(path) => path.hd_path(),
             CAP26Path::GetID(path) => path.hd_path(),
         }
     }
@@ -64,6 +72,7 @@ impl Derivation for CAP26Path {
     fn scheme(&self) -> DerivationPathScheme {
         match self {
             CAP26Path::AccountPath(p) => p.scheme(),
+            CAP26Path::IdentityPath(p) => p.scheme(),
             CAP26Path::GetID(p) => p.scheme(),
         }
     }
@@ -72,6 +81,11 @@ impl Derivation for CAP26Path {
 impl From<AccountPath> for CAP26Path {
     fn from(value: AccountPath) -> Self {
         Self::AccountPath(value)
+    }
+}
+impl From<IdentityPath> for CAP26Path {
+    fn from(value: IdentityPath) -> Self {
+        Self::IdentityPath(value)
     }
 }
 impl From<GetIDPath> for CAP26Path {

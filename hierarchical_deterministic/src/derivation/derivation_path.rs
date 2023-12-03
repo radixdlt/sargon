@@ -6,7 +6,7 @@ use crate::{
     bip44::bip44_like_path::BIP44LikePath,
     cap26::cap26_path::{
         cap26_path::CAP26Path,
-        paths::{account_path::AccountPath, getid_path::GetIDPath},
+        paths::{account_path::AccountPath, getid_path::GetIDPath, identity_path::IdentityPath},
     },
 };
 use enum_as_inner::EnumAsInner;
@@ -108,6 +108,12 @@ impl DerivationPath {
 
 impl From<AccountPath> for DerivationPath {
     fn from(value: AccountPath) -> Self {
+        Self::CAP26(value.into())
+    }
+}
+
+impl From<IdentityPath> for DerivationPath {
+    fn from(value: IdentityPath) -> Self {
         Self::CAP26(value.into())
     }
 }
