@@ -1,18 +1,17 @@
+use super::hierarchical_deterministic_private_key::HierarchicalDeterministicPrivateKey;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use transaction::signing::{
-    ed25519::Ed25519PrivateKey, secp256k1::Secp256k1PrivateKey, PrivateKey,
+use wallet_kit_common::types::keys::{
+    ed25519::private_key::Ed25519PrivateKey, secp256k1::private_key::Secp256k1PrivateKey,
+    slip10_curve::SLIP10Curve,
 };
-use wallet_kit_common::error::Error;
 
+use super::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme};
 use crate::{
     bip32::hd_path::HDPath,
     bip39::mnemonic::{Mnemonic, Seed},
 };
-
-use super::{
-    derivation::Derivation, derivation_path_scheme::DerivationPathScheme, slip10_curve::SLIP10Curve,
-};
+use wallet_kit_common::error::hdpath_error::HDPathError as Error;
 
 /// A BIP39 Mnemonic and BIP39 passphrase - aka "25th word" tuple,
 /// from which we can derive a HD Root used for derivation.
@@ -43,6 +42,13 @@ impl MnemonicWithPassphrase {
     /// from the specified BIP39 mnemonic phrase.
     pub fn from_phrase(phrase: &str) -> Result<Self, Error> {
         Mnemonic::from_phrase(phrase).map(|m| Self::new(m))
+    }
+}
+
+impl MnemonicWithPassphrase {
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder() -> Self {
+        Self::with_passphrase(Mnemonic::placeholder(), "radix".to_string())
     }
 }
 
@@ -82,22 +88,23 @@ impl MnemonicWithPassphrase {
             .expect("Valid Secp256k1PrivateKey bytes")
     }
 
-    pub fn derive_private_key<D>(&self, derivation: D) -> PrivateKey
+    #[cfg(not(tarpaulin_include))] // false negative
+    pub fn derive_private_key<D>(&self, derivation: D) -> HierarchicalDeterministicPrivateKey
     where
         D: Derivation,
     {
         let seed = self.to_seed();
-        let path = derivation.hd_path();
+        let path = derivation.derivation_path();
         match derivation.scheme() {
             DerivationPathScheme::Cap26 => {
                 assert_eq!(derivation.scheme().curve(), SLIP10Curve::Curve25519);
-                let key = Self::derive_ed25519_private_key(&seed, path);
-                PrivateKey::Ed25519(key)
+                let key = Self::derive_ed25519_private_key(&seed, path.hd_path());
+                HierarchicalDeterministicPrivateKey::new(key.into(), path)
             }
             DerivationPathScheme::Bip44Olympia => {
                 assert_eq!(derivation.scheme().curve(), SLIP10Curve::Secp256k1);
-                let key = Self::derive_secp256k1_private_key(&seed, path);
-                PrivateKey::Secp256k1(key)
+                let key = Self::derive_secp256k1_private_key(&seed, path.hd_path());
+                HierarchicalDeterministicPrivateKey::new(key.into(), path)
             }
         }
     }
@@ -109,10 +116,13 @@ mod tests {
     use crate::{
         bip39::mnemonic::Mnemonic,
         bip44::bip44_like_path::BIP44LikePath,
-        cap26::{cap26_path::paths::account_path::AccountPath, cap26_repr::CAP26Repr},
-        keys::key_extensions::{private_key_hex, public_key_hex_from_private},
+        cap26::{
+            cap26_key_kind::CAP26KeyKind, cap26_path::paths::account_path::AccountPath,
+            cap26_repr::CAP26Repr,
+        },
+        derivation::derivation::Derivation,
     };
-    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::{json::assert_eq_after_json_roundtrip, network_id::NetworkID};
 
     use super::MnemonicWithPassphrase;
 
@@ -148,16 +158,16 @@ mod tests {
             "".to_string(),
         );
 
-        let private_key: transaction::prelude::PrivateKey =
+        let private_key =
             mwp.derive_private_key(AccountPath::from_str("m/44H/1022H/12H/525H/1460H/0H").unwrap());
 
         assert_eq!(
             "13e971fb16cb2c816d6b9f12176e9b8ab9af1831d006114d344d119ab2715506",
-            private_key_hex(&private_key)
+            private_key.to_hex()
         );
         assert_eq!(
             "451152a1cef7be603205086d4ebac0a0b78fda2ff4684b9dea5ca9ef003d4e7d",
-            public_key_hex_from_private(&private_key)
+            private_key.public_key().to_hex()
         );
     }
 
@@ -172,17 +182,17 @@ mod tests {
             "".to_string(),
         );
 
-        let private_key: transaction::prelude::PrivateKey =
+        let private_key =
             mwp.derive_private_key(BIP44LikePath::from_str("m/44H/1022H/0H/0/5H").unwrap());
 
         assert_eq!(
             "111323d507d9d690836798e3ef2e5292cfd31092b75b9b59fa584ff593a3d7e4",
-            private_key_hex(&private_key)
+            private_key.to_hex()
         );
 
         assert_eq!(
             "03e78cdb2e0b7ea6e55e121a58560ccf841a913d3a4a9b8349e0ef00c2102f48d8",
-            public_key_hex_from_private(&private_key)
+            private_key.public_key().to_hex()
         );
     }
 
@@ -204,6 +214,24 @@ mod tests {
                 "passphrase": "25th"
             }
             "#,
+        );
+    }
+
+    #[test]
+    fn keys_for_placeholder() {
+        let mwp = MnemonicWithPassphrase::placeholder();
+        let path = AccountPath::new(NetworkID::Mainnet, CAP26KeyKind::TransactionSigning, 0);
+        let private_key = mwp.derive_private_key(path.clone());
+
+        assert_eq!(path.to_string(), "m/44H/1022H/1H/525H/1460H/0H");
+
+        assert_eq!(
+            "cf52dbc7bb2663223e99fb31799281b813b939440a372d0aa92eb5f5b8516003",
+            private_key.to_hex()
+        );
+        assert_eq!(
+            "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b",
+            private_key.public_key().to_hex()
         );
     }
 }

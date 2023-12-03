@@ -1,4 +1,4 @@
-use wallet_kit_common::network_id::NetworkID;
+use wallet_kit_common::{error::hdpath_error::HDPathError, network_id::NetworkID};
 
 use crate::{
     bip32::{
@@ -6,7 +6,6 @@ use crate::{
         hd_path_component::{HDPathComponent, HDPathValue},
     },
     derivation::derivation::Derivation,
-    hdpath_error::HDPathError,
 };
 
 use super::{cap26_entity_kind::CAP26EntityKind, cap26_key_kind::CAP26KeyKind};
@@ -24,9 +23,11 @@ pub trait CAP26Repr: Derivation {
         index: HDPathValue,
     ) -> Self;
 
-    fn from_str(s: &str) -> Result<Self, HDPathError> {
+    #[cfg(not(tarpaulin_include))] // false negative, this is in fact heavily tested.
+    fn try_from_hdpath(hdpath: &HDPath) -> Result<Self, HDPathError> {
         use HDPathError::*;
-        let (path, components) = HDPath::try_parse_base(s, HDPathError::InvalidDepthOfCAP26Path)?;
+        let (path, components) =
+            HDPath::try_parse_base_hdpath(hdpath, HDPathError::InvalidDepthOfCAP26Path)?;
         if !components.clone().iter().all(|c| c.is_hardened()) {
             return Err(NotAllComponentsAreHardened);
         }
@@ -53,7 +54,10 @@ pub trait CAP26Repr: Derivation {
 
         if let Some(expected_entity_kind) = Self::entity_kind() {
             if entity_kind != expected_entity_kind {
-                return Err(WrongEntityKind(entity_kind, expected_entity_kind));
+                return Err(WrongEntityKind(
+                    entity_kind.discriminant(),
+                    expected_entity_kind.discriminant(),
+                ));
             }
         }
 
@@ -74,6 +78,12 @@ pub trait CAP26Repr: Derivation {
         ));
     }
 
+    #[cfg(not(tarpaulin_include))] // false negative, this is in fact heavily tested.
+    fn from_str(s: &str) -> Result<Self, HDPathError> {
+        let (path, _) = HDPath::try_parse_base(s, HDPathError::InvalidDepthOfCAP26Path)?;
+        Self::try_from_hdpath(&path)
+    }
+
     fn new(network_id: NetworkID, key_kind: CAP26KeyKind, index: HDPathValue) -> Self {
         let entity_kind = Self::entity_kind().expect("GetID cannot be used with this constructor");
         let c0 = HDPathComponent::bip44_purpose();
@@ -86,5 +96,9 @@ pub trait CAP26Repr: Derivation {
         assert!(components.clone().iter().all(|c| c.is_hardened()));
         let path = HDPath::from_components(components);
         return Self::__with_path_and_components(path, network_id, entity_kind, key_kind, index);
+    }
+
+    fn new_mainnet_transaction_signing(index: HDPathValue) -> Self {
+        Self::new(NetworkID::Mainnet, CAP26KeyKind::TransactionSigning, index)
     }
 }

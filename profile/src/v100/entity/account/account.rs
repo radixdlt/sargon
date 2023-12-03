@@ -1,20 +1,25 @@
-use hierarchical_deterministic::derivation::derivation_path::DerivationPath;
-use radix_engine_common::crypto::PublicKey;
+use hierarchical_deterministic::{
+    bip32::hd_path_component::HDPathValue,
+    cap26::cap26_path::paths::is_entity_path::HasEntityPath,
+    derivation::{derivation::Derivation, mnemonic_with_passphrase::MnemonicWithPassphrase},
+};
 use serde::{Deserialize, Serialize};
 use std::{cell::RefCell, cmp::Ordering, fmt::Display};
-use transaction::signing::ed25519::Ed25519PrivateKey;
 use wallet_kit_common::network_id::NetworkID;
 
 use crate::v100::{
-    address::account_address::AccountAddress,
+    address::{account_address::AccountAddress, entity_address::EntityAddress},
     entity::{display_name::DisplayName, entity_flags::EntityFlags},
     entity_security_state::{
         entity_security_state::EntitySecurityState,
         unsecured_entity_control::UnsecuredEntityControl,
     },
     factors::{
-        factor_source_id_from_hash::FactorSourceIDFromHash,
-        hierarchical_deterministic_factor_instance::HierarchicalDeterministicFactorInstance,
+        factor_sources::{
+            device_factor_source::device_factor_source::DeviceFactorSource,
+            private_hierarchical_deterministic_factor_source::PrivateHierarchicalDeterministicFactorSource,
+        },
+        hd_transaction_signing_factor_instance::HDFactorInstanceAccountCreation,
     },
 };
 
@@ -43,6 +48,7 @@ use super::{
 #[serde(rename_all = "camelCase")]
 pub struct Account {
     /// The ID of the network this account can be used with.
+    #[serde(rename = "networkID")]
     pub network_id: NetworkID,
 
     /// A globally unique identifier of this account, being a human readable
@@ -69,6 +75,7 @@ pub struct Account {
 
     /// The visual cue user learns to associated this account with, typically
     /// a beautiful colorful gradient.
+    #[serde(rename = "appearanceID")]
     appearance_id: RefCell<AppearanceID>,
 
     /// An order set of `EntityFlag`s used to describe certain Off-ledger
@@ -76,41 +83,32 @@ pub struct Account {
     /// marked as hidden or not.
     flags: RefCell<EntityFlags>,
 
-    /// The on ledger synced settings for this account
+    /// The on ledger synced settings for this account, contains e.g.
+    /// ThirdPartyDeposit settings, with deposit rules for assets.
     on_ledger_settings: RefCell<OnLedgerSettings>,
 }
 
 impl Account {
-    /// Instantiates an account with a display name, address and appearance id.
-    pub fn with_values(
-        address: AccountAddress,
+    pub fn new(
+        account_creating_factor_instance: HDFactorInstanceAccountCreation,
         display_name: DisplayName,
         appearance_id: AppearanceID,
     ) -> Self {
+        let address = AccountAddress::from_hd_factor_instance_virtual_entity_creation(
+            account_creating_factor_instance.clone(),
+        );
         Self {
-            network_id: address.network_id,
+            network_id: account_creating_factor_instance.network_id(),
             address,
             display_name: RefCell::new(display_name),
+            security_state: UnsecuredEntityControl::with_account_creating_factor_instance(
+                account_creating_factor_instance,
+            )
+            .into(),
             appearance_id: RefCell::new(appearance_id),
             flags: RefCell::new(EntityFlags::default()),
             on_ledger_settings: RefCell::new(OnLedgerSettings::default()),
-            security_state: EntitySecurityState::Unsecured(UnsecuredEntityControl::new(
-                0,
-                HierarchicalDeterministicFactorInstance::placeholder(),
-            )),
         }
-    }
-}
-
-impl HierarchicalDeterministicFactorInstance {
-    pub fn placeholder() -> Self {
-        let private_key = Ed25519PrivateKey::from_u64(1337).unwrap();
-        let public_key = private_key.public_key();
-        Self::new(
-            FactorSourceIDFromHash::placeholder(),
-            PublicKey::Ed25519(public_key),
-            DerivationPath::placeholder(),
-        )
     }
 }
 
@@ -165,9 +163,11 @@ impl Account {
 impl Ord for Account {
     fn cmp(&self, other: &Self) -> Ordering {
         match (&self.security_state, &other.security_state) {
-            (EntitySecurityState::Unsecured(l), EntitySecurityState::Unsecured(r)) => {
-                l.entity_index.cmp(&r.entity_index)
-            }
+            (EntitySecurityState::Unsecured(l), EntitySecurityState::Unsecured(r)) => l
+                .transaction_signing
+                .derivation_path()
+                .last_component()
+                .cmp(r.transaction_signing.derivation_path().last_component()),
         }
     }
 }
@@ -184,15 +184,61 @@ impl Display for Account {
     }
 }
 
+impl Account {
+    /// Instantiates an account with a display name, address and appearance id.
+    pub fn placeholder_with_values(
+        address: AccountAddress,
+        display_name: DisplayName,
+        appearance_id: AppearanceID,
+    ) -> Self {
+        Self {
+            network_id: address.network_id,
+            address,
+            display_name: RefCell::new(display_name),
+            appearance_id: RefCell::new(appearance_id),
+            flags: RefCell::new(EntityFlags::default()),
+            on_ledger_settings: RefCell::new(OnLedgerSettings::default()),
+            security_state: EntitySecurityState::placeholder(),
+        }
+    }
+
+    fn placeholder_at_index_name(index: HDPathValue, name: &str) -> Self {
+        let mwp = MnemonicWithPassphrase::placeholder();
+        let bdfs = DeviceFactorSource::babylon(true, mwp.clone(), "iPhone");
+        let private_hd_factor_source = PrivateHierarchicalDeterministicFactorSource::new(mwp, bdfs);
+        let account_creating_factor_instance = private_hd_factor_source
+            .derive_account_creation_factor_instance(NetworkID::Mainnet, index);
+
+        Self::new(
+            account_creating_factor_instance,
+            DisplayName::new(name).unwrap(),
+            AppearanceID::try_from(index as u8).unwrap(),
+        )
+    }
+
+    /// A `Mainnet` account named "Alice", a placeholder used to facilitate unit tests, with
+    /// derivation index 0,
+    pub fn placeholder_alice() -> Self {
+        Self::placeholder_at_index_name(0, "Alice")
+    }
+
+    /// A `Mainnet` account named "Bob", a placeholder used to facilitate unit tests, with
+    /// derivation index 1.
+    pub fn placeholder_bob() -> Self {
+        Self::placeholder_at_index_name(1, "Bob")
+    }
+}
+
 // CFG test
 #[cfg(test)]
 impl Account {
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
         Self::placeholder_mainnet()
     }
 
     pub fn placeholder_mainnet() -> Self {
-        Self::with_values(
+        Self::placeholder_with_values(
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
                 .try_into()
                 .unwrap(),
@@ -202,7 +248,7 @@ impl Account {
     }
 
     pub fn placeholder_stokenet() -> Self {
-        Self::with_values(
+        Self::placeholder_with_values(
             "account_tdx_2_12ygsf87pma439ezvdyervjfq2nhqme6reau6kcxf6jtaysaxl7sqvd"
                 .try_into()
                 .unwrap(),
@@ -212,7 +258,7 @@ impl Account {
     }
 
     pub fn placeholder_nebunet() -> Self {
-        Self::with_values(
+        Self::placeholder_with_values(
             "account_tdx_b_1p8ahenyznrqy2w0tyg00r82rwuxys6z8kmrhh37c7maqpydx7p"
                 .try_into()
                 .unwrap(),
@@ -222,7 +268,7 @@ impl Account {
     }
 
     pub fn placeholder_kisharnet() -> Self {
-        Self::with_values(
+        Self::placeholder_with_values(
             "account_tdx_c_1px26p5tyqq65809em2h4yjczxcxj776kaun6sv3dw66sc3wrm6"
                 .try_into()
                 .unwrap(),
@@ -232,7 +278,7 @@ impl Account {
     }
 
     pub fn placeholder_adapanet() -> Self {
-        Self::with_values(
+        Self::placeholder_with_values(
             "account_tdx_a_1qwv0unmwmxschqj8sntg6n9eejkrr6yr6fa4ekxazdzqhm6wy5"
                 .try_into()
                 .unwrap(),
@@ -244,9 +290,9 @@ impl Account {
 
 #[cfg(test)]
 mod tests {
-    use std::{cell::RefCell, collections::BTreeSet};
+    use std::collections::BTreeSet;
 
-    use hierarchical_deterministic::bip32::hd_path_component::HDPathValue;
+    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
 
     use crate::v100::{
         address::account_address::AccountAddress,
@@ -267,11 +313,6 @@ mod tests {
             entity_flag::EntityFlag,
             entity_flags::EntityFlags,
         },
-        entity_security_state::{
-            entity_security_state::EntitySecurityState,
-            unsecured_entity_control::UnsecuredEntityControl,
-        },
-        factors::hierarchical_deterministic_factor_instance::HierarchicalDeterministicFactorInstance,
     };
 
     use super::Account;
@@ -282,7 +323,7 @@ mod tests {
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
                 .try_into()
                 .unwrap();
-        let account = Account::with_values(
+        let account = Account::placeholder_with_values(
             address.clone(),
             DisplayName::default(),
             AppearanceID::default(),
@@ -309,8 +350,13 @@ mod tests {
     }
 
     #[test]
+    fn compare() {
+        assert!(Account::placeholder_alice() < Account::placeholder_bob());
+    }
+
+    #[test]
     fn display_name_get_set() {
-        let account = Account::with_values(
+        let account = Account::placeholder_with_values(
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
                 .try_into()
                 .unwrap(),
@@ -325,7 +371,7 @@ mod tests {
 
     #[test]
     fn flags_get_set() {
-        let account = Account::with_values(
+        let account = Account::placeholder_with_values(
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
                 .try_into()
                 .unwrap(),
@@ -340,7 +386,7 @@ mod tests {
 
     #[test]
     fn on_ledger_settings_get_set() {
-        let account = Account::with_values(
+        let account = Account::placeholder_with_values(
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
                 .try_into()
                 .unwrap(),
@@ -399,43 +445,112 @@ mod tests {
     }
 
     #[test]
-    fn compare() {
-        let make = |index: HDPathValue| -> Account {
-            let address: AccountAddress =
-                "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
-                    .try_into()
-                    .unwrap();
-
-            let account = Account {
-                address: address.clone(),
-                network_id: address.network_id,
-                display_name: RefCell::new(DisplayName::new("Test").unwrap()),
-                appearance_id: RefCell::new(AppearanceID::default()),
-                flags: RefCell::new(EntityFlags::default()),
-                on_ledger_settings: RefCell::new(OnLedgerSettings::default()),
-                security_state: EntitySecurityState::Unsecured(UnsecuredEntityControl::new(
-                    index,
-                    HierarchicalDeterministicFactorInstance::placeholder(),
-                )),
-            };
-            account
-        };
-        let a = make(0);
-        let b = make(1);
-        assert!(a < b);
+    fn json_roundtrip_alice() {
+        let model = Account::placeholder_alice();
+        assert_eq_after_json_roundtrip(
+            &model,
+            r#"
+            {
+				"securityState": {
+					"unsecuredEntityControl": {
+						"transactionSigning": {
+							"badge": {
+								"virtualSource": {
+									"hierarchicalDeterministicPublicKey": {
+										"publicKey": {
+											"curve": "curve25519",
+											"compressedData": "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b"
+										},
+										"derivationPath": {
+											"scheme": "cap26",
+											"path": "m/44H/1022H/1H/525H/1460H/0H"
+										}
+									},
+									"discriminator": "hierarchicalDeterministicPublicKey"
+								},
+								"discriminator": "virtualSource"
+							},
+							"factorSourceID": {
+								"fromHash": {
+									"kind": "device",
+									"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+								},
+								"discriminator": "fromHash"
+							}
+						}
+					},
+					"discriminator": "unsecured"
+				},
+				"networkID": 1,
+				"appearanceID": 0,
+				"flags": [],
+				"displayName": "Alice",
+				"onLedgerSettings": {
+					"thirdPartyDeposits": {
+						"depositRule": "acceptAll",
+						"assetsExceptionList": [],
+						"depositorsAllowList": []
+					}
+				},
+				"flags": [],
+				"address": "account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8"
+			}
+            "#,
+        );
     }
 
     #[test]
-    fn json_roundtrip() {
-        // let model = assert_eq_after_json_roundtrip(
-        //     &model,
-        //     r#"
-        //     {
-        //         "id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
-        //         "date": "2023-09-11T16:05:56",
-        //         "description": "iPhone"
-        //     }
-        //     "#,
-        // );
+    fn json_roundtrip_bob() {
+        let model = Account::placeholder_bob();
+        assert_eq_after_json_roundtrip(
+            &model,
+            r#"
+            {
+				"securityState": {
+					"unsecuredEntityControl": {
+						"transactionSigning": {
+							"badge": {
+								"virtualSource": {
+									"hierarchicalDeterministicPublicKey": {
+										"publicKey": {
+											"curve": "curve25519",
+											"compressedData": "08740a2fd178c40ce71966a6537f780978f7f00548cfb59196344b5d7d67e9cf"
+										},
+										"derivationPath": {
+											"scheme": "cap26",
+											"path": "m/44H/1022H/1H/525H/1460H/1H"
+										}
+									},
+									"discriminator": "hierarchicalDeterministicPublicKey"
+								},
+								"discriminator": "virtualSource"
+							},
+							"factorSourceID": {
+								"fromHash": {
+									"kind": "device",
+									"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+								},
+								"discriminator": "fromHash"
+							}
+						}
+					},
+					"discriminator": "unsecured"
+				},
+				"networkID": 1,
+				"appearanceID": 1,
+				"flags": [],
+				"displayName": "Bob",
+				"onLedgerSettings": {
+					"thirdPartyDeposits": {
+						"depositRule": "acceptAll",
+						"assetsExceptionList": [],
+						"depositorsAllowList": []
+					}
+				},
+				"flags": [],
+				"address": "account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69"
+			}
+            "#,
+        );
     }
 }

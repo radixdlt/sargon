@@ -1,15 +1,35 @@
 use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
 
-use super::factor_sources::device_factor_source::device_factor_source::DeviceFactorSource;
+use enum_as_inner::EnumAsInner;
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+use super::factor_sources::{
+    device_factor_source::device_factor_source::DeviceFactorSource,
+    ledger_hardware_wallet_factor_source::ledger_hardware_wallet_factor_source::LedgerHardwareWalletFactorSource,
+};
+#[derive(Serialize, Deserialize, Clone, EnumAsInner, Debug, PartialEq, Eq)]
 #[serde(remote = "Self")]
 pub enum FactorSource {
     #[serde(rename = "device")]
     Device(DeviceFactorSource),
+
+    #[serde(rename = "ledgerHQHardwareWallet")]
+    Ledger(LedgerHardwareWalletFactorSource),
+}
+
+impl From<DeviceFactorSource> for FactorSource {
+    fn from(value: DeviceFactorSource) -> Self {
+        FactorSource::Device(value)
+    }
+}
+
+impl From<LedgerHardwareWalletFactorSource> for FactorSource {
+    fn from(value: LedgerHardwareWalletFactorSource) -> Self {
+        FactorSource::Ledger(value)
+    }
 }
 
 impl<'de> Deserialize<'de> for FactorSource {
+    #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
         // https://github.com/serde-rs/serde/issues/1343#issuecomment-409698470
         #[derive(Deserialize, Serialize)]
@@ -24,17 +44,23 @@ impl<'de> Deserialize<'de> for FactorSource {
 }
 
 impl Serialize for FactorSource {
+    #[cfg(not(tarpaulin_include))] // false negative
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        // 3 is the number of fields in the struct.
         let mut state = serializer.serialize_struct("FactorSource", 2)?;
+        let discriminator_key = "discriminator";
         match self {
             FactorSource::Device(device) => {
                 let discriminant = "device";
-                state.serialize_field("discriminator", discriminant)?;
+                state.serialize_field(discriminator_key, discriminant)?;
                 state.serialize_field(discriminant, device)?;
+            }
+            FactorSource::Ledger(ledger) => {
+                let discriminant = "ledgerHQHardwareWallet";
+                state.serialize_field(discriminator_key, discriminant)?;
+                state.serialize_field(discriminant, ledger)?;
             }
         }
         state.end()
@@ -59,7 +85,7 @@ mod tests {
                 "device": {
                     "id": {
                         "kind": "device",
-                        "body": "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
+                        "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
                     },
                     "common": {
                         "flags": ["main"],

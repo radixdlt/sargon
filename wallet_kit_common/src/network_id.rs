@@ -58,6 +58,11 @@ pub enum NetworkID {
     /// The third release candidate of Babylon (RCnet v3)
     Zabanet = 0x0e,
 
+    /// Enkinet (0x21 / 0d33)
+    ///
+    /// https://github.com/radixdlt/babylon-node/blob/main/common/src/main/java/com/radixdlt/networks/Network.java#L94
+    Enkinet = 0x21,
+
     /// Simulator (0xf2 / 0d242)
     Simulator = 242,
 }
@@ -82,7 +87,7 @@ impl NetworkID {
 }
 
 impl TryFrom<u8> for NetworkID {
-    type Error = crate::error::Error;
+    type Error = crate::error::common_error::CommonError;
 
     /// Tries to instantiate a NetworkID from its raw representation `u8`.
     fn try_from(value: u8) -> Result<Self, Self::Error> {
@@ -108,6 +113,11 @@ impl NetworkID {
             NetworkID::Kisharnet => NetworkDefinition::kisharnet(),
             NetworkID::Ansharnet => NetworkDefinition::ansharnet(),
             NetworkID::Zabanet => NetworkDefinition::zabanet(),
+            NetworkID::Enkinet => NetworkDefinition {
+                id: NetworkID::Enkinet.discriminant(),
+                logical_name: String::from("enkinet"),
+                hrp_suffix: String::from("tdx_21_"),
+            },
             NetworkID::Simulator => NetworkDefinition::simulator(),
         }
     }
@@ -171,6 +181,11 @@ mod tests {
     }
 
     #[test]
+    fn discriminant_enkinet() {
+        assert_eq!(NetworkID::Enkinet.discriminant(), 0x21);
+    }
+
+    #[test]
     fn discriminant_nebunet() {
         assert_eq!(NetworkID::Nebunet.discriminant(), 0x0b);
     }
@@ -204,6 +219,14 @@ mod tests {
         assert_eq!(
             NetworkID::Mainnet.network_definition().id,
             NetworkID::Mainnet.discriminant()
+        )
+    }
+
+    #[test]
+    fn lookup_network_definition_enkinet() {
+        assert_eq!(
+            NetworkID::Enkinet.network_definition().id,
+            NetworkID::Enkinet.discriminant()
         )
     }
 

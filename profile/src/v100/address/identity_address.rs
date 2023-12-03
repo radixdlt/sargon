@@ -59,6 +59,7 @@ impl Serialize for IdentityAddress {
 
 impl<'de> serde::Deserialize<'de> for IdentityAddress {
     /// Tries to deserializes a JSON string as a bech32 address into an `IdentityAddress`.
+    #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<IdentityAddress, D::Error> {
         let s = String::deserialize(d)?;
         IdentityAddress::try_from_bech32(&s).map_err(de::Error::custom)
@@ -66,7 +67,7 @@ impl<'de> serde::Deserialize<'de> for IdentityAddress {
 }
 
 impl TryInto<IdentityAddress> for &str {
-    type Error = wallet_kit_common::error::Error;
+    type Error = wallet_kit_common::error::common_error::CommonError;
 
     /// Tries to deserializes a bech32 address into an `IdentityAddress`.
     fn try_into(self) -> Result<IdentityAddress, Self::Error> {
@@ -85,16 +86,17 @@ impl Display for IdentityAddress {
 mod tests {
     use std::str::FromStr;
 
-    use radix_engine_common::crypto::{Ed25519PublicKey, PublicKey};
+    use radix_engine_common::crypto::{
+        Ed25519PublicKey as EngineEd25519PublicKey, PublicKey as EnginePublicKey,
+    };
     use serde_json::json;
     use wallet_kit_common::json::{
         assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
         assert_json_value_ne_after_roundtrip,
     };
 
-    use wallet_kit_common::error::Error;
-
     use super::*;
+    use wallet_kit_common::error::common_error::CommonError as Error;
 
     #[test]
     fn from_bech32() {
@@ -118,13 +120,16 @@ mod tests {
 
     #[test]
     fn from_public_key_bytes_and_network_id() {
-        let public_key = Ed25519PublicKey::from_str(
+        let public_key = EngineEd25519PublicKey::from_str(
             "6c28952be5cdade99c7dd5d003b6b692714b6b74c5fdb5fdc9a8e4ee1d297838",
         )
         .unwrap();
         assert_eq!(
-            IdentityAddress::from_public_key(PublicKey::Ed25519(public_key), NetworkID::Mainnet)
-                .address,
+            IdentityAddress::from_public_key(
+                EnginePublicKey::Ed25519(public_key),
+                NetworkID::Mainnet
+            )
+            .address,
             "identity_rdx12tgzjrz9u0xz4l28vf04hz87eguclmfaq4d2p8f8lv7zg9ssnzku8j"
         )
     }

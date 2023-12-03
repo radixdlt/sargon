@@ -16,7 +16,7 @@ pub struct ResourceAddress {
 }
 
 impl Serialize for ResourceAddress {
-    /// Serializes this `AccountAddress` into its bech32 address string as JSON.
+    /// Serializes this `ResourceAddress` into its bech32 address string as JSON.
     fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
     where
         S: Serializer,
@@ -26,7 +26,8 @@ impl Serialize for ResourceAddress {
 }
 
 impl<'de> serde::Deserialize<'de> for ResourceAddress {
-    /// Tries to deserializes a JSON string as a bech32 address into an `AccountAddress`.
+    /// Tries to deserializes a JSON string as a bech32 address into an `ResourceAddress`.
+    #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<ResourceAddress, D::Error> {
         let s = String::deserialize(d)?;
         ResourceAddress::try_from_bech32(&s).map_err(de::Error::custom)
@@ -51,7 +52,7 @@ impl EntityAddress for ResourceAddress {
 }
 
 impl TryInto<ResourceAddress> for &str {
-    type Error = wallet_kit_common::error::Error;
+    type Error = wallet_kit_common::error::common_error::CommonError;
 
     fn try_into(self) -> Result<ResourceAddress, Self::Error> {
         ResourceAddress::try_from_bech32(self)

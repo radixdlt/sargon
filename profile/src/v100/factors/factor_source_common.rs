@@ -65,6 +65,18 @@ impl FactorSourceCommon {
         let date: NaiveDateTime = now();
         Self::with_values(crypto_parameters, date, date, flags)
     }
+
+    pub fn new_bdfs(is_main: bool) -> Self {
+        Self::new(
+            FactorSourceCryptoParameters::babylon(),
+            if is_main {
+                vec![FactorSourceFlag::Main]
+            } else {
+                Vec::new()
+            }
+            .into_iter(),
+        )
+    }
 }
 
 impl Default for FactorSourceCommon {
@@ -74,6 +86,7 @@ impl Default for FactorSourceCommon {
 }
 
 impl FactorSourceCommon {
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
         let date =
             NaiveDateTime::parse_from_str("2023-09-11T16:05:56", "%Y-%m-%dT%H:%M:%S").unwrap();
@@ -111,7 +124,11 @@ mod tests {
     fn new_uses_now_as_date() {
         let date0 = now();
         let model = FactorSourceCommon::new(FactorSourceCryptoParameters::default(), []);
-        let date1 = now();
+        let mut date1 = now();
+        for _ in 0..10 {
+            // rust is too fast... lol.
+            date1 = now();
+        }
         let do_test = |d: NaiveDateTime| {
             assert!(d > date0);
             assert!(d < date1);
@@ -145,5 +162,21 @@ mod tests {
             }
             "#,
         );
+    }
+
+    #[test]
+    fn main_flag_present_if_main() {
+        assert!(FactorSourceCommon::new_bdfs(true)
+            .flags
+            .get_mut()
+            .contains(&FactorSourceFlag::Main));
+    }
+
+    #[test]
+    fn main_flag_not_present_if_not_main() {
+        assert!(FactorSourceCommon::new_bdfs(false)
+            .flags
+            .get_mut()
+            .is_empty());
     }
 }

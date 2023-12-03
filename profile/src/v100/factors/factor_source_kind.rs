@@ -75,6 +75,7 @@ impl FactorSourceKind {
 }
 
 impl Display for FactorSourceKind {
+    #[cfg(not(tarpaulin_include))] // false negative
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.discriminant())
     }
@@ -146,6 +147,25 @@ mod tests {
         assert_eq!(
             format!("{}", FactorSourceKind::Device.discriminant()),
             "device"
+        );
+        assert_eq!(
+            format!(
+                "{}",
+                FactorSourceKind::LedgerHQHardwareWallet.discriminant()
+            ),
+            "ledgerHQHardwareWallet"
+        );
+        assert_eq!(
+            format!("{}", FactorSourceKind::SecurityQuestions.discriminant()),
+            "securityQuestions"
+        );
+        assert_eq!(
+            format!("{}", FactorSourceKind::OffDeviceMnemonic.discriminant()),
+            "offDeviceMnemonic"
+        );
+        assert_eq!(
+            format!("{}", FactorSourceKind::TrustedContact.discriminant()),
+            "trustedContact"
         );
     }
 

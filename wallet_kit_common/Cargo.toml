@@ -3,9 +3,6 @@ name = "wallet_kit_common"
 version = "0.1.0"
 edition = "2021"
 
-[lib]
-doctest = false
-
 [dependencies]
 serde = { version = "1.0.192", features = ["derive"] }
 serde_json = { version = "1.0.108", features = ["preserve_order"] }
@@ -19,3 +16,11 @@ radix-engine-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", re
 ] }
 enum-iterator = "1.4.1"
 hex = "0.4.3"
+transaction = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "038ddee8b0f57aa90e36375c69946c4eb634efeb", features = [
+    "serde",
+] }
+bip32 = "0.5.1" # only need Secp256k1, to do validation of PublicKey
+ed25519-dalek = "1.0.1"
+rand = "0.8.5"
+enum-as-inner = "0.6.0"
+pretty_assertions = "1.4.0"

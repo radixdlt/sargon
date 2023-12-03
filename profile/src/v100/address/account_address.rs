@@ -42,6 +42,7 @@ impl Serialize for AccountAddress {
 
 impl<'de> serde::Deserialize<'de> for AccountAddress {
     /// Tries to deserializes a JSON string as a bech32 address into an `AccountAddress`.
+    #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<AccountAddress, D::Error> {
         let s = String::deserialize(d)?;
         AccountAddress::try_from_bech32(&s).map_err(de::Error::custom)
@@ -88,7 +89,7 @@ impl EntityAddress for AccountAddress {
 }
 
 impl TryInto<AccountAddress> for &str {
-    type Error = wallet_kit_common::error::Error;
+    type Error = wallet_kit_common::error::common_error::CommonError;
 
     /// Tries to deserializes a bech32 address into an `AccountAddress`.
     fn try_into(self) -> Result<AccountAddress, Self::Error> {
@@ -104,6 +105,7 @@ impl Display for AccountAddress {
 }
 
 impl AccountAddress {
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
         AccountAddress::try_from_bech32(
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease",
@@ -114,12 +116,11 @@ impl AccountAddress {
 
 #[cfg(test)]
 mod tests {
-    use std::str::FromStr;
-
     use radix_engine_common::crypto::{Ed25519PublicKey, PublicKey};
     use serde_json::json;
+    use std::str::FromStr;
+    use wallet_kit_common::error::common_error::CommonError as Error;
     use wallet_kit_common::{
-        error::Error,
         json::{
             assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
             assert_json_value_ne_after_roundtrip,
@@ -135,6 +136,16 @@ mod tests {
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease",
         )
         .is_ok());
+    }
+
+    #[test]
+    fn from_bech32_invalid_entity_type() {
+        assert_eq!(
+            AccountAddress::try_from_bech32(
+                "identity_tdx_21_12tljxea3s0mse52jmpvsphr0haqs86sung8d3qlhr763nxttj59650",
+            ),
+            Err(Error::MismatchingEntityTypeWhileDecodingAddress)
+        );
     }
 
     #[test]

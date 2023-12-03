@@ -23,3 +23,4 @@ nutype = { version = "0.4.0", features = ["serde"] }
 transaction = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "038ddee8b0f57aa90e36375c69946c4eb634efeb", features = [
     "serde",
 ] }
+enum-as-inner = "0.6.0"

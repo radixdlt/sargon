@@ -3,7 +3,7 @@ use std::str::FromStr;
 use bip39::Language;
 use itertools::Itertools;
 use serde::{de, Deserializer, Serialize, Serializer};
-use wallet_kit_common::error::Error;
+use wallet_kit_common::error::hdpath_error::HDPathError as Error;
 
 use super::{bip39_word::bip39_word::BIP39Word, bip39_word_count::BIP39WordCount};
 
@@ -48,7 +48,7 @@ impl Mnemonic {
 pub type Seed = [u8; 64];
 
 impl Serialize for Mnemonic {
-    /// Serializes this `AccountAddress` into its bech32 address string as JSON.
+    /// Serializes this `Mnemonic` into a phrase, all words separated by a space.
     fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
     where
         S: Serializer,
@@ -58,7 +58,8 @@ impl Serialize for Mnemonic {
 }
 
 impl<'de> serde::Deserialize<'de> for Mnemonic {
-    /// Tries to deserializes a JSON string as a bech32 address into an `AccountAddress`.
+    /// Tries to deserializes a JSON string as a Mnemonic
+    #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
         let s = String::deserialize(d)?;
         Mnemonic::from_phrase(&s).map_err(de::Error::custom)
@@ -66,11 +67,18 @@ impl<'de> serde::Deserialize<'de> for Mnemonic {
 }
 
 impl TryInto<Mnemonic> for &str {
-    type Error = wallet_kit_common::error::Error;
+    type Error = wallet_kit_common::error::hdpath_error::HDPathError;
 
     /// Tries to deserializes a bech32 address into an `AccountAddress`.
     fn try_into(self) -> Result<Mnemonic, Self::Error> {
         Mnemonic::from_phrase(self)
+    }
+}
+
+impl Mnemonic {
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder() -> Self {
+        Self::from_phrase("bright club bacon dinner achieve pull grid save ramp cereal blush woman humble limb repeat video sudden possible story mask neutral prize goose mandate").expect("Valid mnemonic")
     }
 }
 
@@ -111,10 +119,7 @@ mod tests {
 
     #[test]
     fn words() {
-        let mnemonic: Mnemonic =
-            "bright club bacon dinner achieve pull grid save ramp cereal blush woman humble limb repeat video sudden possible story mask neutral prize goose mandate"
-                .try_into()
-                .unwrap();
+        let mnemonic = Mnemonic::placeholder();
         assert_eq!(mnemonic.words[0].word, "bright");
         assert_eq!(mnemonic.words[1].word, "club");
         assert_eq!(mnemonic.words[2].word, "bacon");

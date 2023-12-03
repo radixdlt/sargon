@@ -4,6 +4,7 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
 use strum::FromRepr;
 
 use crate::bip32::hd_path_component::HDPathValue;
+use enum_as_inner::EnumAsInner;
 
 #[derive(
     Serialize_repr,
@@ -13,6 +14,7 @@ use crate::bip32::hd_path_component::HDPathValue;
     Copy,
     Debug,
     PartialEq,
+    EnumAsInner,
     Eq,
     Hash,
     PartialOrd,

@@ -1,20 +1,20 @@
 use serde::{Deserialize, Serialize};
-
-use super::slip10_curve::SLIP10Curve;
+use wallet_kit_common::types::keys::slip10_curve::SLIP10Curve;
 
 /// Which derivation path to used for some particular HD operations
 /// such as signing or public key derivation. Radix Babylon introduces
 /// a new scheme call Cap26 but we also need to support BIP44-like used
 /// by Olympia.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-#[serde(rename_all = "camelCase")]
 pub enum DerivationPathScheme {
     /// A BIP32 based derivation path scheme, using SLIP10.
+    #[serde(rename = "cap26")]
     Cap26,
 
     /// A BIP32 based similar to BIP44, but not strict BIP44 since the
     /// last path component is hardened (a mistake made during Olympia),
     /// used to support legacy accounts imported from Olympia wallet.
+    #[serde(rename = "bip44Olympia")]
     Bip44Olympia,
 }
 
@@ -38,14 +38,15 @@ impl DerivationPathScheme {
 #[cfg(test)]
 mod tests {
     use serde_json::json;
-    use wallet_kit_common::json::{
-        assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
-        assert_json_value_ne_after_roundtrip,
+    use wallet_kit_common::{
+        json::{
+            assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
+            assert_json_value_ne_after_roundtrip,
+        },
+        types::keys::slip10_curve::SLIP10Curve,
     };
 
-    use crate::derivation::{
-        derivation_path_scheme::DerivationPathScheme, slip10_curve::SLIP10Curve,
-    };
+    use crate::derivation::derivation_path_scheme::DerivationPathScheme;
 
     #[test]
     fn curve_from_scheme() {

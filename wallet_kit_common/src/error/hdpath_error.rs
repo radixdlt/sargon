@@ -1,7 +1,5 @@
 use thiserror::Error;
 
-use crate::{bip32::hd_path_component::HDPathValue, cap26::cap26_entity_kind::CAP26EntityKind};
-
 #[derive(Debug, Error, PartialEq)]
 pub enum HDPathError {
     #[error("Invalid BIP32 path '{0}'.")]
@@ -28,26 +26,35 @@ pub enum HDPathError {
     NotAllComponentsAreHardened,
 
     #[error("Did not find 44H, found value: '{0}'")]
-    BIP44PurposeNotFound(HDPathValue),
+    BIP44PurposeNotFound(u32),
 
     #[error("Did not find cointype 1022H, found value: '{0}'")]
-    CoinTypeNotFound(HDPathValue),
+    CoinTypeNotFound(u32),
 
     #[error("Network ID exceeds limit of 255, will never be valid, at index 3, found value: '{0}', known network IDs: [1 (mainnet), 2 (stokenet)]")]
-    InvalidNetworkIDExceedsLimit(HDPathValue),
+    InvalidNetworkIDExceedsLimit(u32),
 
     #[error("InvalidEntityKind, got: '{0}', expected any of: [525H, 618H].")]
-    InvalidEntityKind(HDPathValue),
+    InvalidEntityKind(u32),
 
     #[error("Wrong entity kind, got: '{0}', but expected: '{1}'")]
-    WrongEntityKind(CAP26EntityKind, CAP26EntityKind),
+    WrongEntityKind(u32, u32),
 
     #[error("InvalidKeyKind, got: '{0}', expected any of: [1460H, 1678H, 1391H].")]
-    InvalidKeyKind(HDPathValue),
+    InvalidKeyKind(u32),
 
     #[error("Unsupported NetworkID, got: '{0}', found value: '{0}', known network IDs: [1 (mainnet), 2 (stokenet)]")]
     UnsupportedNetworkID(u8),
 
     #[error("Invalid GetID path, last component was not 365' but {0}'")]
-    InvalidGetIDPath(HDPathValue),
+    InvalidGetIDPath(u32),
+
+    #[error("Unknown BIP39 word.")]
+    UnknownBIP39Word,
+
+    #[error("Invalid mnemonic phrase.")]
+    InvalidMnemonicPhrase,
+
+    #[error("Invalid bip39 word count : '{0}'")]
+    InvalidBIP39WordCount(usize),
 }

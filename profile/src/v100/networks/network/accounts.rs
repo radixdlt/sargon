@@ -86,7 +86,7 @@ mod tests {
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
                 .try_into()
                 .unwrap();
-        let account = Account::with_values(
+        let account = Account::placeholder_with_values(
             address.clone(),
             DisplayName::default(),
             AppearanceID::default(),

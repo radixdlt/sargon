@@ -1,7 +1,6 @@
 use hierarchical_deterministic::{
     cap26::cap26_path::paths::getid_path::GetIDPath,
     derivation::mnemonic_with_passphrase::MnemonicWithPassphrase,
-    keys::key_extensions::public_key_bytes,
 };
 use radix_engine_common::crypto::{blake2b_256_hash, Hash};
 use serde::{Deserialize, Serialize};
@@ -9,10 +8,14 @@ use wallet_kit_common::types::hex_32bytes::Hex32Bytes;
 
 use super::factor_source_kind::FactorSourceKind;
 
-/// FactorSourceID from a hash.
+/// FactorSourceID from the blake2b hash of the special HD public key derived at `CAP26::GetID`,
+/// for a certain `FactorSourceKind`
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FactorSourceIDFromHash {
+    /// The kind of the FactorSource this ID refers to, typically `device` or `ledger`.
     pub kind: FactorSourceKind,
+
+    /// The blake2b hash of the special HD public key derived at `CAP26::GetID`.
     pub body: Hex32Bytes,
 }
 
@@ -23,6 +26,7 @@ impl ToString for FactorSourceIDFromHash {
 }
 
 impl FactorSourceIDFromHash {
+    /// Instantiates a new `FactorSourceIDFromHash` from the `kind` and `body`.
     pub fn new(kind: FactorSourceKind, body: Hex32Bytes) -> Self {
         Self { kind, body }
     }
@@ -32,7 +36,7 @@ impl FactorSourceIDFromHash {
         mnemonic_with_passphrase: MnemonicWithPassphrase,
     ) -> Self {
         let private_key = mnemonic_with_passphrase.derive_private_key(GetIDPath::default());
-        let public_key_bytes = public_key_bytes(&private_key.public_key());
+        let public_key_bytes = private_key.public_key().to_bytes();
         let hash: Hash = blake2b_256_hash(public_key_bytes);
         let body = Hex32Bytes::from(hash);
         Self::new(factor_source_kind, body)
@@ -44,11 +48,23 @@ impl FactorSourceIDFromHash {
 }
 
 impl FactorSourceIDFromHash {
+    /// A placeholder used to facilitate unit tests, just an alias
+    /// for `placeholder_device`
     pub fn placeholder() -> Self {
-        Self {
-            kind: FactorSourceKind::Device,
-            body: Hex32Bytes::placeholder(),
-        }
+        Self::placeholder_device()
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_device() -> Self {
+        Self::new_for_device(MnemonicWithPassphrase::placeholder())
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_ledger() -> Self {
+        Self::from_mnemonic_with_passphrase(
+            FactorSourceKind::LedgerHQHardwareWallet,
+            MnemonicWithPassphrase::placeholder(),
+        )
     }
 }
 
@@ -62,7 +78,7 @@ mod tests {
     use super::FactorSourceIDFromHash;
 
     #[test]
-    fn json_roundtrip() {
+    fn json_roundtrip_placeholder() {
         let model = FactorSourceIDFromHash::placeholder();
 
         assert_eq_after_json_roundtrip(
@@ -70,7 +86,22 @@ mod tests {
             r#"
             {
                 "kind": "device",
-                "body": "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
+                "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+            }
+            "#,
+        );
+    }
+
+    #[test]
+    fn json_from_placeholder_mnemonic() {
+        let mwp = MnemonicWithPassphrase::placeholder();
+        let model = FactorSourceIDFromHash::new_for_device(mwp);
+        assert_eq_after_json_roundtrip(
+            &model,
+            r#"
+            {
+                "kind": "device",
+                "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
             }
             "#,
         );

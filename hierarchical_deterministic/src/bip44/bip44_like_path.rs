@@ -1,20 +1,26 @@
 use serde::{de, Deserializer, Serialize, Serializer};
+use wallet_kit_common::error::hdpath_error::HDPathError;
 
 use crate::{
     bip32::{
         hd_path::HDPath,
         hd_path_component::{HDPathComponent, HDPathValue},
     },
-    derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},
-    hdpath_error::HDPathError,
+    derivation::{
+        derivation::Derivation, derivation_path::DerivationPath,
+        derivation_path_scheme::DerivationPathScheme,
+    },
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct BIP44LikePath(HDPath);
 
-impl BIP44LikePath {
-    pub fn from_str(s: &str) -> Result<Self, HDPathError> {
-        let (path, components) = HDPath::try_parse_base(s, HDPathError::InvalidDepthOfBIP44Path)?;
+impl TryFrom<&HDPath> for BIP44LikePath {
+    type Error = HDPathError;
+
+    fn try_from(value: &HDPath) -> Result<Self, Self::Error> {
+        let (path, components) =
+            HDPath::try_parse_base_hdpath(value, HDPathError::InvalidDepthOfBIP44Path)?;
         if path.depth() != 5 {
             return Err(HDPathError::InvalidDepthOfBIP44Path);
         }
@@ -32,6 +38,13 @@ impl BIP44LikePath {
             return Err(HDPathError::InvalidBIP44LikePathIndexWasNotHardened);
         }
         return Ok(Self(path));
+    }
+}
+
+impl BIP44LikePath {
+    pub fn from_str(s: &str) -> Result<Self, HDPathError> {
+        let (path, _) = HDPath::try_parse_base(s, HDPathError::InvalidDepthOfBIP44Path)?;
+        return Self::try_from(&path);
     }
 
     fn with_account_and_index(account: HDPathValue, index: HDPathValue) -> Self {
@@ -51,6 +64,9 @@ impl BIP44LikePath {
 }
 
 impl Derivation for BIP44LikePath {
+    fn derivation_path(&self) -> DerivationPath {
+        DerivationPath::BIP44Like(self.clone())
+    }
     fn hd_path(&self) -> &HDPath {
         &self.0
     }
@@ -61,7 +77,7 @@ impl Derivation for BIP44LikePath {
 }
 
 impl Serialize for BIP44LikePath {
-    /// Serializes this `AccountAddress` into its bech32 address string as JSON.
+    /// Serializes this `BIP44LikePath` into JSON as a string on: "m/44H/1022H/0H/0/0H" format
     fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
     where
         S: Serializer,
@@ -71,7 +87,8 @@ impl Serialize for BIP44LikePath {
 }
 
 impl<'de> serde::Deserialize<'de> for BIP44LikePath {
-    /// Tries to deserializes a JSON string as a bech32 address into an `AccountAddress`.
+    /// Tries to deserializes a JSON string as a derivation path string into a `BIP44LikePath`
+    #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<BIP44LikePath, D::Error> {
         let s = String::deserialize(d)?;
         BIP44LikePath::from_str(&s).map_err(de::Error::custom)
@@ -86,14 +103,22 @@ impl TryInto<BIP44LikePath> for &str {
     }
 }
 
+impl BIP44LikePath {
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder() -> Self {
+        Self::from_str("m/44H/1022H/0H/0/0H").expect("Valid placeholder")
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use serde_json::json;
-    use wallet_kit_common::json::{
-        assert_json_value_eq_after_roundtrip, assert_json_value_ne_after_roundtrip,
+    use wallet_kit_common::{
+        error::hdpath_error::HDPathError,
+        json::{assert_json_value_eq_after_roundtrip, assert_json_value_ne_after_roundtrip},
     };
 
-    use crate::{derivation::derivation::Derivation, hdpath_error::HDPathError};
+    use crate::derivation::derivation::Derivation;
 
     use super::BIP44LikePath;
 
@@ -102,6 +127,14 @@ mod tests {
         let str = "m/44H/1022H/0H/0/0H";
         let a: BIP44LikePath = str.try_into().unwrap();
         assert_eq!(a.to_string(), str);
+    }
+
+    #[test]
+    fn placeholder() {
+        assert_eq!(
+            BIP44LikePath::placeholder().to_string(),
+            "m/44H/1022H/0H/0/0H"
+        );
     }
 
     #[test]

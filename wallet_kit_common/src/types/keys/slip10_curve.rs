@@ -1,9 +1,15 @@
 use serde::{Deserialize, Serialize};
 
+/// Elliptic Curves which the SLIP10 derivation algorithm supports.
+///
+/// We use SLIP10 for hierarchical deterministic derivation since we
+/// prefer using Curve25519 - which is incompatible with BIP32 (BIP44).
+///
+/// For for information see [SLIP10 reference](https://github.com/satoshilabs/slips/blob/master/slip-0010.md)
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 #[serde(rename_all = "camelCase")]
 pub enum SLIP10Curve {
-    /// Curve25519 or Ed25519
+    /// Curve25519 which we use for Ed25519 for EdDSA signatures.
     Curve25519,
 
     /// The bitcoin curve, used by Radix Olympia and still valid
@@ -14,7 +20,8 @@ pub enum SLIP10Curve {
 #[cfg(test)]
 mod tests {
     use serde_json::json;
-    use wallet_kit_common::json::{
+
+    use crate::json::{
         assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
         assert_json_value_ne_after_roundtrip,
     };

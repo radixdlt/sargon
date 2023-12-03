@@ -3,8 +3,7 @@ use std::str::FromStr;
 use itertools::Itertools;
 use serde::{de, Deserializer, Serialize, Serializer};
 use slip10::path::BIP32Path;
-
-use crate::hdpath_error::HDPathError;
+use wallet_kit_common::error::hdpath_error::HDPathError;
 
 use super::hd_path_component::{HDPathComponent, HDPathValue};
 
@@ -79,12 +78,11 @@ impl HDPath {
         Ok(got)
     }
 
-    pub(crate) fn try_parse_base(
-        s: &str,
+    pub(crate) fn try_parse_base_hdpath(
+        path: &HDPath,
         depth_error: HDPathError,
     ) -> Result<(HDPath, Vec<HDPathComponent>), HDPathError> {
         use HDPathError::*;
-        let path = HDPath::from_str(s).map_err(|_| HDPathError::InvalidBIP32Path(s.to_string()))?;
         if path.depth() < 2 {
             return Err(depth_error);
         }
@@ -105,6 +103,14 @@ impl HDPath {
         )?;
         return Ok((path.clone(), components.clone()));
     }
+
+    pub(crate) fn try_parse_base(
+        s: &str,
+        depth_error: HDPathError,
+    ) -> Result<(HDPath, Vec<HDPathComponent>), HDPathError> {
+        let path = HDPath::from_str(s).map_err(|_| HDPathError::InvalidBIP32Path(s.to_string()))?;
+        return Self::try_parse_base_hdpath(&path, depth_error);
+    }
 }
 
 impl ToString for HDPath {
@@ -119,7 +125,8 @@ impl ToString for HDPath {
 }
 
 impl Serialize for HDPath {
-    /// Serializes this `AccountAddress` into its bech32 address string as JSON.
+    /// Serializes this `HDPath` into its bech32 address string as JSON.
+    #[cfg(not(tarpaulin_include))] // false negative
     fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
     where
         S: Serializer,
@@ -129,7 +136,8 @@ impl Serialize for HDPath {
 }
 
 impl<'de> serde::Deserialize<'de> for HDPath {
-    /// Tries to deserializes a JSON string as a bech32 address into an `AccountAddress`.
+    /// Tries to deserializes a JSON string as a bech32 address into an `HDPath`.
+    #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<HDPath, D::Error> {
         let s = String::deserialize(d)?;
         HDPath::from_str(&s).map_err(de::Error::custom)
@@ -140,7 +148,8 @@ impl<'de> serde::Deserialize<'de> for HDPath {
 mod tests {
     use serde_json::json;
     use wallet_kit_common::json::{
-        assert_json_value_eq_after_roundtrip, assert_json_value_ne_after_roundtrip,
+        assert_json_value_eq_after_roundtrip, assert_json_value_fails,
+        assert_json_value_ne_after_roundtrip,
     };
 
     use super::HDPath;
@@ -151,5 +160,6 @@ mod tests {
         let parsed = HDPath::from_str(str).unwrap();
         assert_json_value_eq_after_roundtrip(&parsed, json!(str));
         assert_json_value_ne_after_roundtrip(&parsed, json!("m/44H/33H"));
+        assert_json_value_fails::<HDPath>(json!("super invalid path"));
     }
 }

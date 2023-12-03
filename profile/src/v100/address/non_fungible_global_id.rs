@@ -11,7 +11,9 @@ use std::{
     hash::{Hash, Hasher},
     str::FromStr,
 };
-use wallet_kit_common::{error::Error, network_id::NetworkID};
+
+use wallet_kit_common::error::common_error::CommonError as Error;
+use wallet_kit_common::network_id::NetworkID;
 
 use super::resource_address::ResourceAddress;
 
@@ -52,12 +54,12 @@ impl NonFungibleGlobalId {
     pub fn try_from_str(s: &str) -> Result<Self, Error> {
         EngineSerializableNonFungibleGlobalIdInternal::from_str(s)
             .map(|i| Self(EngineSerializableNonFungibleGlobalId(i)))
-            .map_err(|_| wallet_kit_common::error::Error::InvalidNonFungibleGlobalID)
+            .map_err(|_| Error::InvalidNonFungibleGlobalID)
     }
 }
 
 impl TryInto<NonFungibleGlobalId> for &str {
-    type Error = wallet_kit_common::error::Error;
+    type Error = wallet_kit_common::error::common_error::CommonError;
 
     /// Tries to deserializes a bech32 address into an `AccountAddress`.
     fn try_into(self) -> Result<NonFungibleGlobalId, Self::Error> {
