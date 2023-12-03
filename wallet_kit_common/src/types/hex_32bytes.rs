@@ -105,7 +105,7 @@ impl Hex32Bytes {
 }
 
 impl Serialize for Hex32Bytes {
-    /// Serializes this `AccountAddress` into its bech32 address string as JSON.
+    /// Serializes this `Hex32Bytes` into a hex string as JSON.
     fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
     where
         S: Serializer,
@@ -115,7 +115,7 @@ impl Serialize for Hex32Bytes {
 }
 
 impl<'de> serde::Deserialize<'de> for Hex32Bytes {
-    /// Tries to deserializes a JSON string as a bech32 address into an `AccountAddress`.
+    /// Tries to deserializes a JSON string as a hex string into an `Hex32Bytes`.
     #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Hex32Bytes, D::Error> {
         let s = String::deserialize(d)?;

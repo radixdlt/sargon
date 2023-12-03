@@ -125,7 +125,7 @@ impl ToString for HDPath {
 }
 
 impl Serialize for HDPath {
-    /// Serializes this `AccountAddress` into its bech32 address string as JSON.
+    /// Serializes this `HDPath` into its bech32 address string as JSON.
     fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
     where
         S: Serializer,
@@ -135,7 +135,7 @@ impl Serialize for HDPath {
 }
 
 impl<'de> serde::Deserialize<'de> for HDPath {
-    /// Tries to deserializes a JSON string as a bech32 address into an `AccountAddress`.
+    /// Tries to deserializes a JSON string as a bech32 address into an `HDPath`.
     #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<HDPath, D::Error> {
         let s = String::deserialize(d)?;

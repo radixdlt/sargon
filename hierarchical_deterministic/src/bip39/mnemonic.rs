@@ -48,7 +48,7 @@ impl Mnemonic {
 pub type Seed = [u8; 64];
 
 impl Serialize for Mnemonic {
-    /// Serializes this `AccountAddress` into its bech32 address string as JSON.
+    /// Serializes this `Mnemonic` into a phrase, all words separated by a space.
     fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
     where
         S: Serializer,
@@ -58,7 +58,7 @@ impl Serialize for Mnemonic {
 }
 
 impl<'de> serde::Deserialize<'de> for Mnemonic {
-    /// Tries to deserializes a JSON string as a bech32 address into an `AccountAddress`.
+    /// Tries to deserializes a JSON string as a Mnemonic
     #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
         let s = String::deserialize(d)?;

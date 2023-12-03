@@ -77,7 +77,7 @@ impl Derivation for BIP44LikePath {
 }
 
 impl Serialize for BIP44LikePath {
-    /// Serializes this `AccountAddress` into its bech32 address string as JSON.
+    /// Serializes this `BIP44LikePath` into JSON as a string on: "m/44H/1022H/0H/0/0H" format
     fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
     where
         S: Serializer,
@@ -87,7 +87,7 @@ impl Serialize for BIP44LikePath {
 }
 
 impl<'de> serde::Deserialize<'de> for BIP44LikePath {
-    /// Tries to deserializes a JSON string as a bech32 address into an `AccountAddress`.
+    /// Tries to deserializes a JSON string as a derivation path string into a `BIP44LikePath`
     #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<BIP44LikePath, D::Error> {
         let s = String::deserialize(d)?;

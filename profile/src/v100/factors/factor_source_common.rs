@@ -163,4 +163,20 @@ mod tests {
             "#,
         );
     }
+
+    #[test]
+    fn main_flag_present_if_main() {
+        assert!(FactorSourceCommon::new_bdfs(true)
+            .flags
+            .get_mut()
+            .contains(&FactorSourceFlag::Main));
+    }
+
+    #[test]
+    fn main_flag_not_present_if_not_main() {
+        assert!(FactorSourceCommon::new_bdfs(false)
+            .flags
+            .get_mut()
+            .is_empty());
+    }
 }
