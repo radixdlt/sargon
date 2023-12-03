@@ -1,3 +1,5 @@
+use std::cell::RefCell;
+
 use hierarchical_deterministic::derivation::mnemonic_with_passphrase::MnemonicWithPassphrase;
 use serde::{Deserialize, Serialize};
 
@@ -23,7 +25,10 @@ pub struct DeviceFactorSource {
 
     /// Common properties shared between FactorSources of different kinds,
     /// describing its state, when added, and supported cryptographic parameters.
-    pub common: FactorSourceCommon,
+    ///
+    /// Has interior mutability since we must be able to update the
+    /// last used date.
+    pub common: RefCell<FactorSourceCommon>,
 
     /// Properties describing a DeviceFactorSource to help user disambiguate between it and another one.
     pub hint: DeviceFactorSourceHint,
@@ -50,12 +55,17 @@ impl IsFactorSource for DeviceFactorSource {
 }
 
 impl DeviceFactorSource {
+    /// Instantiates a new `DeviceFactorSource`
     pub fn new(
         id: FactorSourceIDFromHash,
         common: FactorSourceCommon,
         hint: DeviceFactorSourceHint,
     ) -> Self {
-        Self { id, common, hint }
+        Self {
+            id,
+            common: RefCell::new(common),
+            hint,
+        }
     }
 
     pub fn babylon(
@@ -94,6 +104,10 @@ impl DeviceFactorSource {
 mod tests {
     use wallet_kit_common::json::assert_eq_after_json_roundtrip;
 
+    use crate::v100::factors::{
+        factor_source_id::FactorSourceID, is_factor_source::IsFactorSource,
+    };
+
     use super::DeviceFactorSource;
 
     #[test]
@@ -124,5 +138,12 @@ mod tests {
             }
             "#,
         );
+    }
+
+    #[test]
+    fn factor_source_id() {
+        let sut = DeviceFactorSource::placeholder();
+        let factor_source_id: FactorSourceID = sut.clone().id.into();
+        assert_eq!(factor_source_id, sut.factor_source_id());
     }
 }

@@ -48,9 +48,23 @@ impl FactorSourceIDFromHash {
 }
 
 impl FactorSourceIDFromHash {
-    /// A placeholder used to facilitate unit tests.
+    /// A placeholder used to facilitate unit tests, just an alias
+    /// for `placeholder_device`
     pub fn placeholder() -> Self {
+        Self::placeholder_device()
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_device() -> Self {
         Self::new_for_device(MnemonicWithPassphrase::placeholder())
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_ledger() -> Self {
+        Self::from_mnemonic_with_passphrase(
+            FactorSourceKind::LedgerHQHardwareWallet,
+            MnemonicWithPassphrase::placeholder(),
+        )
     }
 }
 
