@@ -9,7 +9,7 @@ use hierarchical_deterministic::{
         cap26_repr::CAP26Repr,
     },
     derivation::{
-        derivation::Derivation, derivation_path::DerivationPath,
+        derivation_path::DerivationPath,
         hierarchical_deterministic_public_key::HierarchicalDeterministicPublicKey,
         mnemonic_with_passphrase::MnemonicWithPassphrase,
     },

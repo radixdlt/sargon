@@ -6,7 +6,7 @@ Middleware that can power Radix Wallet clients (iOS/Android).
 
 ## Status
 
-`[==------------------------------------------------]`
+`[=====---------------------------------------------]`
 
 ### Done
 
@@ -18,18 +18,20 @@ Middleware that can power Radix Wallet clients (iOS/Android).
 - [x] Header
 - [x] AccountAddress
 - [x] IdentityAddress
-- [x] CAP26AccountPath
+- [x] CAP26 AccountPath
+- [x] CAP26 IdentityPath
+- [x] CAP26 GetID
+- [x] BIP44
 - [x] ThirdPartyDeposits
 - [x] OnLedgerSettings
-- [ ] CAP26IdentityPath
-- [ ] Account
-- [ ] Persona
-- [ ] Network
-- [ ] Networks
-- [ ] Profile
+- [x] Account
+- [x] Network
+- [x] Networks
 - [ ] AppPreferences
 - [ ] P2PLinks
 - [ ] Gateways
+- [ ] Persona
+- [ ] Profile
 
 # Development
 
