@@ -11,7 +11,7 @@ use crate::{error::bytes_error::BytesError as Error, secure_random_bytes::genera
 /// Serializable 32 bytes which **always** serializes as a **hex** string, this is useful
 /// since in Radix Wallet Kit we almost always want to serialize bytes into hex and this
 /// allows us to skip using
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Hex32Bytes([u8; 32]);
 
 impl Hex32Bytes {
@@ -61,7 +61,7 @@ impl FromStr for Hex32Bytes {
 }
 
 impl Hex32Bytes {
-    /// Just some placeholder Hex32Bytes
+    /// `deadbeef...``
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
         Self::from_str("deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef")

@@ -1,5 +1,5 @@
 use super::{
-    display::AppDisplay, gateways::Gateways, p2plinks::P2PLinks, security::Security,
+    display::AppDisplay, gateways::Gateways, p2p_links::p2p_links::P2PLinks, security::Security,
     transaction::Transaction,
 };
 
