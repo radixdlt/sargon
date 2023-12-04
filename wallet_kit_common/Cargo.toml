@@ -14,6 +14,7 @@ strum = { version = "0.25.0", features = ["derive"] }
 radix-engine-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "038ddee8b0f57aa90e36375c69946c4eb634efeb", features = [
     "serde",
 ] }
+radix-engine-toolkit-json = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "927b0c88dcc62325edf7c6279ee3f84f26a6eadc" }
 enum-iterator = "1.4.1"
 hex = "0.4.3"
 transaction = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "038ddee8b0f57aa90e36375c69946c4eb634efeb", features = [
