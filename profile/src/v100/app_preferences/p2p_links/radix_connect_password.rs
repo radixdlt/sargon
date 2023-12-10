@@ -1,5 +1,6 @@
+use radix_engine_common::crypto::Hash;
 use serde::{Deserialize, Serialize};
-use wallet_kit_common::types::hex_32bytes::Hex32Bytes;
+use wallet_kit_common::{hash::hash, types::hex_32bytes::Hex32Bytes};
 
 /// The hash of the connection password is used to connect to the Radix Connect Signaling Server,
 /// over web sockets. The actual `ConnectionPassword` is used to encrypt all messages sent via
@@ -12,8 +13,24 @@ impl RadixConnectPassword {
     pub fn new(hex_32bytes: Hex32Bytes) -> Self {
         Self(hex_32bytes)
     }
+
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
-        Self::new(Hex32Bytes::placeholder())
+        Self::placeholder_deadbeef()
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_deadbeef() -> Self {
+        Self::new(Hex32Bytes::placeholder_deadbeef())
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_fadedeaf() -> Self {
+        Self::new(Hex32Bytes::placeholder_fadedeaf())
+    }
+
+    pub fn hash(&self) -> Hash {
+        hash(self.0.bytes())
     }
 }
 

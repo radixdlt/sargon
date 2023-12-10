@@ -64,8 +64,21 @@ impl Hex32Bytes {
     /// `deadbeef...``
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
+        Self::placeholder_deadbeef()
+    }
+
+    /// `deadbeef...``
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_deadbeef() -> Self {
         Self::from_str("deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef")
-            .expect("Deadbeef")
+            .expect("deadbeef...")
+    }
+
+    /// `fadedeaf...``
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_fadedeaf() -> Self {
+        Self::from_str("fadedeaffadedeaffadedeaffadedeaffadedeaffadedeaffadedeaffadedeaf")
+            .expect("fadedeaf...")
     }
 }
 

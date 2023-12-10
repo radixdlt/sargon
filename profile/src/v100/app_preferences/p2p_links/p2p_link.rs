@@ -1,3 +1,5 @@
+use identified_vec::Identifiable;
+use radix_engine_common::crypto::Hash;
 use serde::{Deserialize, Serialize};
 
 use super::radix_connect_password::RadixConnectPassword;
@@ -5,7 +7,7 @@ use super::radix_connect_password::RadixConnectPassword;
 /// A client the user have connected P2P with, typically a
 /// WebRTC connections with a DApp, but might be Android or iPhone
 /// client as well.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
 #[serde(rename_all = "camelCase")]
 pub struct P2PLink {
     /// The most important property of this struct, the `ConnectionPassword`,
@@ -17,6 +19,14 @@ pub struct P2PLink {
     pub display_name: String,
 }
 
+impl Identifiable for P2PLink {
+    type ID = Hash;
+
+    fn id(&self) -> Self::ID {
+        self.connection_password.hash()
+    }
+}
+
 impl P2PLink {
     pub fn new(password: RadixConnectPassword, name: &str) -> Self {
         Self {
@@ -25,8 +35,24 @@ impl P2PLink {
         }
     }
 
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
-        Self::new(RadixConnectPassword::placeholder(), "Chrome on Macbook")
+        Self::placeholder_chrome()
+    }
+
+    /// `deadbeef`... "Chrome on Macbook"
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_chrome() -> Self {
+        Self::new(
+            RadixConnectPassword::placeholder_deadbeef(),
+            "Chrome on Macbook",
+        )
+    }
+
+    /// `fadedeaf`... "Brave on PC"
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_brave() -> Self {
+        Self::new(RadixConnectPassword::placeholder_fadedeaf(), "Brave on PC")
     }
 }
 
