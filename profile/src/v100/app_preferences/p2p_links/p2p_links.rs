@@ -1,23 +1,7 @@
-use identified_vec::IdentifiedVecOf;
-use serde::{Deserialize, Serialize};
-
 use super::p2p_link::P2PLink;
+use identified_vec::{newtype_identified_vec, IsIdentifiedVecOf};
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
-#[serde(transparent)]
-pub struct P2PLinks(IdentifiedVecOf<P2PLink>);
-
-impl P2PLinks {
-    pub fn new(links: IdentifiedVecOf<P2PLink>) -> Self {
-        P2PLinks(links)
-    }
-}
-
-impl FromIterator<P2PLink> for P2PLinks {
-    fn from_iter<T: IntoIterator<Item = P2PLink>>(iter: T) -> Self {
-        P2PLinks::new(IdentifiedVecOf::<P2PLink>::from_iter(iter))
-    }
-}
+newtype_identified_vec!(of: P2PLink, named: P2PLinks);
 
 impl P2PLinks {
     /// A placeholder used to facilitate unit tests.
@@ -51,4 +35,9 @@ mod tests {
             "#,
         )
     }
+
+    // #[test]
+    // fn duplicates_are_not_allowed() {
+    //     P2PLinks::
+    // }
 }
