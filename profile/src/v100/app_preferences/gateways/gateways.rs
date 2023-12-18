@@ -135,6 +135,19 @@ impl Default for Gateways {
     }
 }
 
+impl Gateways {
+    pub fn placeholder() -> Self {
+        let mut sut = Gateways::new(Gateway::rcnet());
+        sut.append(Gateway::mainnet());
+        sut.append(Gateway::stokenet());
+        sut
+    }
+
+    pub fn placeholder_other() -> Self {
+        Gateways::default()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use identified_vec::ItemsCloned;
@@ -143,6 +156,11 @@ mod tests {
     use crate::v100::app_preferences::gateways::gateway::Gateway;
 
     use super::Gateways;
+
+    #[test]
+    fn inequality() {
+        assert_ne!(Gateways::placeholder(), Gateways::placeholder_other());
+    }
 
     #[test]
     fn change_current_to_existing() {
@@ -174,9 +192,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip() {
-        let mut sut = Gateways::new(Gateway::rcnet());
-        sut.append(Gateway::mainnet());
-        sut.append(Gateway::stokenet());
+        let sut = Gateways::placeholder();
 
         assert_eq_after_json_roundtrip(
             &sut,

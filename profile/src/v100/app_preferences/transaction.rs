@@ -3,6 +3,7 @@ use std::{cell::Cell, ops::Deref};
 use radix_engine_common::math::Decimal;
 use radix_engine_toolkit_json::models::common::SerializableDecimal;
 use serde::{Deserialize, Serialize};
+use transaction::prelude::dec;
 
 /// User Preferences relating to submission of transactions.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
@@ -36,12 +37,29 @@ impl Default for Transaction {
     }
 }
 
+impl Transaction {
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder() -> Self {
+        Self::new(dec!("0.975"))
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_other() -> Self {
+        Self::new(dec!("0.765"))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use transaction::prelude::dec;
     use wallet_kit_common::json::assert_eq_after_json_roundtrip;
 
     use super::Transaction;
+
+    #[test]
+    fn inequality() {
+        assert_ne!(Transaction::placeholder(), Transaction::placeholder_other());
+    }
 
     #[test]
     fn get_decimal() {
@@ -52,7 +70,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip() {
-        let sut = Transaction::new(dec!("0.975"));
+        let sut = Transaction::placeholder();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"

@@ -17,6 +17,14 @@ impl P2PLinks {
     pub fn placeholder() -> Self {
         Self::from_iter([P2PLink::placeholder_brave(), P2PLink::placeholder_chrome()])
     }
+
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_other() -> Self {
+        Self::from_iter([
+            P2PLink::placeholder_arc(),
+            P2PLink::placeholder_duckduckgo(),
+        ])
+    }
 }
 
 #[cfg(test)]
@@ -27,6 +35,11 @@ mod tests {
     use crate::v100::app_preferences::p2p_links::p2p_link::P2PLink;
 
     use super::P2PLinks;
+
+    #[test]
+    fn inequality() {
+        assert_ne!(P2PLinks::placeholder(), P2PLinks::placeholder_other());
+    }
 
     #[test]
     fn json_roundtrip() {

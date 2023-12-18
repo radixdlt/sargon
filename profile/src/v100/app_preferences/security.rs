@@ -57,11 +57,28 @@ impl Default for Security {
     }
 }
 
+impl Security {
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder() -> Self {
+        Self::new(true, true, BTreeSet::new())
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_other() -> Self {
+        Self::new(false, false, BTreeSet::new())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use wallet_kit_common::json::assert_eq_after_json_roundtrip;
 
     use super::Security;
+
+    #[test]
+    fn inequality() {
+        assert_ne!(Security::placeholder(), Security::placeholder_other());
+    }
 
     #[test]
     fn default_developer_mode_is_enabled() {
@@ -82,14 +99,14 @@ mod tests {
 
     #[test]
     fn json_roundtrip() {
-        let sut = Security::default();
+        let sut = Security::placeholder();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"
             {
                 "isCloudProfileSyncEnabled": true,
                 "structureConfigurationReferences": [],
-                "isDeveloperModeEnabled": false
+                "isDeveloperModeEnabled": true
             }
             "#,
         )

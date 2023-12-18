@@ -1,17 +1,18 @@
+use derive_getters::Getters;
 use serde::{Deserialize, Serialize};
 
 /// Settings related to displaying of information to the user inside the app.
 ///
 /// **N.B. neither of these settings are in fact not yet used by clients.**
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Getters)]
 #[serde(rename_all = "camelCase")]
 pub struct AppDisplay {
     /// If we should show the aggregate value of users portfolio in fiat currency
     /// of hide it.
-    pub is_currency_amount_visible: bool,
+    is_currency_amount_visible: bool,
 
     /// Which fiat currency the prices are measured in.
-    pub fiat_currency_price_target: FiatCurrency,
+    fiat_currency_price_target: FiatCurrency,
 }
 
 impl AppDisplay {
@@ -26,6 +27,18 @@ impl AppDisplay {
 impl Default for AppDisplay {
     fn default() -> Self {
         Self::new(true, FiatCurrency::default())
+    }
+}
+
+impl AppDisplay {
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder() -> Self {
+        Self::new(true, FiatCurrency::default())
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_other() -> Self {
+        Self::new(false, FiatCurrency::default())
     }
 }
 
@@ -52,6 +65,11 @@ mod tests {
     use super::FiatCurrency;
 
     #[test]
+    fn inequality() {
+        assert_ne!(AppDisplay::placeholder(), AppDisplay::placeholder_other());
+    }
+
+    #[test]
     fn usd_is_default() {
         assert_eq!(
             AppDisplay::default().fiat_currency_price_target,
@@ -66,7 +84,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip() {
-        let sut = AppDisplay::default();
+        let sut = AppDisplay::placeholder();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"
