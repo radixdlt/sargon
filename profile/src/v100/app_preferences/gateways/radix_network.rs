@@ -1,25 +1,25 @@
+use derive_getters::Getters;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt::Display;
-
-use serde::{Deserialize, Serialize};
 use wallet_kit_common::{
     error::common_error::CommonError,
     network_id::NetworkID::{self, *},
 };
 
 /// A version of the Radix Network, for a NetworkID with an identifier (name) and display description (display name)
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Ord, PartialOrd, Hash, Getters)]
 #[serde(rename_all = "camelCase")]
 pub struct RadixNetwork {
     /// A String identifier (always lowercase) with the name of the Network that MUST match what Gateway returns.
     #[serde(rename = "name")]
-    pub logical_name: String,
+    logical_name: String,
 
     /// The canonical identifier of this network.
-    pub id: NetworkID,
+    id: NetworkID,
 
     /// A name of the network intended for display purposes only.
-    pub display_description: String,
+    display_description: String,
 }
 
 impl Display for RadixNetwork {
@@ -27,8 +27,8 @@ impl Display for RadixNetwork {
         write!(
             f,
             "{} ({})",
-            self.display_description,
-            self.id.discriminant()
+            self.display_description(),
+            self.id().discriminant()
         )
     }
 }
@@ -122,7 +122,7 @@ impl RadixNetwork {
         let map = Self::lookup_map();
 
         map.iter()
-            .find(|p| p.1.logical_name == logical_name)
+            .find(|p| p.1.logical_name() == logical_name)
             .map(|p| p.0)
             .ok_or_else(|| CommonError::UnknownNetworkWithName(logical_name.to_string()))
             .and_then(|id| Self::lookup_by_id(id.clone()))

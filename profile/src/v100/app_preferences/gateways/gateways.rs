@@ -1,10 +1,10 @@
 use std::cell::RefCell;
 
+use super::gateway::Gateway;
+
 use identified_vec::{Identifiable, IdentifiedVecOf, IsIdentifiedVec, IsIdentifiedVecOf};
 use serde::{de, ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
 use wallet_kit_common::error::common_error::CommonError;
-
-use super::gateway::Gateway;
 
 /// The currently used Gateway and a collection of other by user added
 /// or predefined Gateways the user can switch to.
@@ -147,25 +147,25 @@ mod tests {
     #[test]
     fn change_current_to_existing() {
         let mut sut = Gateways::default();
-        assert_eq!(sut.current().network().id, NetworkID::Mainnet);
+        assert_eq!(sut.current().network().id(), &NetworkID::Mainnet);
         assert_eq!(sut.change_current(Gateway::stokenet()), Ok(1));
-        assert_eq!(sut.current().network().id, NetworkID::Stokenet);
+        assert_eq!(sut.current().network().id(), &NetworkID::Stokenet);
     }
 
     #[test]
     fn change_current_to_current() {
         let mut sut = Gateways::default();
-        assert_eq!(sut.current().network().id, NetworkID::Mainnet);
+        assert_eq!(sut.current().network().id(), &NetworkID::Mainnet);
         assert_eq!(sut.change_current(Gateway::mainnet()), Ok(0));
-        assert_eq!(sut.current().network().id, NetworkID::Mainnet);
+        assert_eq!(sut.current().network().id(), &NetworkID::Mainnet);
     }
 
     #[test]
     fn change_current_to_new() {
         let mut sut = Gateways::default();
-        assert_eq!(sut.current().network().id, NetworkID::Mainnet);
+        assert_eq!(sut.current().network().id(), &NetworkID::Mainnet);
         assert_eq!(sut.change_current(Gateway::nebunet()), Ok(1));
-        assert_eq!(sut.current().network().id, NetworkID::Nebunet);
+        assert_eq!(sut.current().network().id(), &NetworkID::Nebunet);
         assert_eq!(
             sut.other().items(),
             [Gateway::stokenet(), Gateway::mainnet()]

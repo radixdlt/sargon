@@ -3,6 +3,12 @@ use identified_vec::{newtype_identified_vec, IsIdentifiedVecOf};
 
 newtype_identified_vec!(of: P2PLink, named: P2PLinks);
 
+impl Default for P2PLinks {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl P2PLinks {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
@@ -27,11 +33,11 @@ mod tests {
             r#"
             [
                 {
-                    "connectionPassword": "fadedeaffadedeaffadedeaffadedeaffadedeaffadedeaffadedeaffadedeaf",
+                    "connectionPassword": "babebabebabebabebabebabebabebabebabebabebabebabebabebabebabebabe",
                     "displayName": "Brave on PC"
                 },
                 {
-                    "connectionPassword": "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+                    "connectionPassword": "cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe",
                     "displayName": "Chrome on Macbook"
                 }
             ]

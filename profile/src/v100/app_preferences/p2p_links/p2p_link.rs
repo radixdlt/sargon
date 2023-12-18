@@ -1,9 +1,6 @@
 use identified_vec::Identifiable;
 use radix_engine_common::crypto::Hash;
 use serde::{Deserialize, Serialize};
-use wallet_kit_common::error::common_error::CommonError;
-
-use crate::v100::entity::display_name::DisplayName;
 
 use super::radix_connect_password::RadixConnectPassword;
 
@@ -16,10 +13,10 @@ pub struct P2PLink {
     /// The most important property of this struct, the `ConnectionPassword`,
     /// is used to be able to re-establish the P2P connection and also acts as the seed
     /// for the `ID`.
-    pub connection_password: RadixConnectPassword,
+    connection_password: RadixConnectPassword,
 
     /// Client name, e.g. "Chrome on Macbook" or "My work Android" or "My wifes iPhone SE".
-    pub display_name: DisplayName,
+    display_name: String,
 }
 
 impl Identifiable for P2PLink {
@@ -31,15 +28,21 @@ impl Identifiable for P2PLink {
 }
 
 impl P2PLink {
-    pub fn new(password: RadixConnectPassword, display_name: DisplayName) -> Self {
-        Self {
-            connection_password: password,
-            display_name,
-        }
+    pub fn connection_password(&self) -> RadixConnectPassword {
+        self.connection_password.clone()
     }
 
-    pub fn try_from(password: RadixConnectPassword, name: &str) -> Result<Self, CommonError> {
-        DisplayName::try_from(name).map(|display_name| Self::new(password, display_name))
+    pub fn display_name(&self) -> String {
+        self.display_name.clone()
+    }
+}
+
+impl P2PLink {
+    pub fn new(password: RadixConnectPassword, display_name: &str) -> Self {
+        Self {
+            connection_password: password,
+            display_name: display_name.to_string(),
+        }
     }
 
     /// A placeholder used to facilitate unit tests.
@@ -50,33 +53,31 @@ impl P2PLink {
     /// `aced`... "Arc on MacStudio"
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_arc() -> Self {
-        Self::try_from(RadixConnectPassword::placeholder_aced(), "Arc on MacStudio").unwrap()
+        Self::new(RadixConnectPassword::placeholder_aced(), "Arc on MacStudio")
     }
 
     /// `babe`... "Brave on PC"
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_brave() -> Self {
-        Self::try_from(RadixConnectPassword::placeholder_babe(), "Brave on PC").unwrap()
+        Self::new(RadixConnectPassword::placeholder_babe(), "Brave on PC")
     }
 
     /// `cafe`... "Chrome on Macbook"
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_chrome() -> Self {
-        Self::try_from(
+        Self::new(
             RadixConnectPassword::placeholder_cafe(),
             "Chrome on Macbook",
         )
-        .unwrap()
     }
 
     /// `dead`... "DuckDuckGo on Mac Pro"
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_duckduckgo() -> Self {
-        Self::try_from(
+        Self::new(
             RadixConnectPassword::placeholder_dead(),
             "DuckDuckGo on Mac Pro",
         )
-        .unwrap()
     }
 }
 
@@ -93,7 +94,7 @@ mod tests {
             &sut,
             r#"
             {
-                "connectionPassword": "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+                "connectionPassword": "cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe",
                 "displayName": "Chrome on Macbook"
             }
             "#,

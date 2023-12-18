@@ -178,7 +178,7 @@ mod tests {
 
     #[test]
     fn debug() {
-        let str = "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef";
+        let str = "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
         let hex_bytes = Hex32Bytes::placeholder();
         assert_eq!(format!("{:?}", hex_bytes), str);
     }
@@ -188,7 +188,7 @@ mod tests {
         let model = Hex32Bytes::placeholder();
         assert_json_value_eq_after_roundtrip(
             &model,
-            json!("deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"),
+            json!("deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"),
         );
     }
 

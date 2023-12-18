@@ -5,13 +5,14 @@ use url::Url;
 use wallet_kit_common::network_id::NetworkID;
 
 use super::radix_network::RadixNetwork;
-
+use derive_getters::Getters;
 /// A gateway to some Radix Network, which is a high level REST API which clients (wallets) can
 /// consume in order to query asset balances and submit transactions.
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Ord, PartialOrd, Hash)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Ord, PartialOrd, Hash, Getters)]
 pub struct Gateway {
     /// The Radix network the API is a Gateway to.
     network: RadixNetwork,
+
     /// The URL to the gateways API endpoint
     url: Url,
 }
@@ -20,29 +21,29 @@ impl Identifiable for Gateway {
     type ID = Url;
 
     fn id(&self) -> Self::ID {
-        self.url.clone()
+        self.url().clone()
     }
 }
 
-impl Gateway {
-    /// The URL to the gateways API endpoint
-    pub fn url(&self) -> Url {
-        self.url.clone()
-    }
+// impl Gateway {
+//     /// The URL to the gateways API endpoint
+//     pub fn url(&self) -> Url {
+//         self.url.clone()
+//     }
 
-    /// The Radix network the API is a Gateway to.
-    pub fn network(&self) -> RadixNetwork {
-        self.network.clone()
-    }
-}
+//     /// The Radix network the API is a Gateway to.
+//     pub fn network(&self) -> RadixNetwork {
+//         self.network.clone()
+//     }
+// }
 
 impl Debug for Gateway {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
             "{}: {}",
-            self.network.display_description,
-            self.url.to_string(),
+            self.network().display_description(),
+            self.url().to_string(),
         )
     }
 }
@@ -184,7 +185,7 @@ mod tests {
     #[test]
     fn debug() {
         assert_eq!(
-            format!("{}", Gateway::mainnet()),
+            format!("{:?}", Gateway::mainnet()),
             "Mainnet: https://mainnet.radixdlt.com/"
         );
     }

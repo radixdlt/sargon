@@ -28,3 +28,4 @@ transaction = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "038
 enum-as-inner = "0.6.0"
 identified_vec = { version = "0.1.8", features = ["serde", "id_prim"] }
 url = { version = "2.5.0", features = ["serde"] }
+derive-getters = "0.3.0"
