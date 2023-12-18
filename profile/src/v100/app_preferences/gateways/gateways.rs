@@ -1,8 +1,6 @@
 use std::cell::RefCell;
 
-use identified_vec::{
-    Identifiable, IdentifiedVec, IdentifiedVecOf, IsIdentifiedVec, IsIdentifiedVecOf,
-};
+use identified_vec::{Identifiable, IdentifiedVecOf, IsIdentifiedVec, IsIdentifiedVecOf};
 use serde::{de, ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
 use wallet_kit_common::error::common_error::CommonError;
 
@@ -105,7 +103,7 @@ impl Gateways {
         if self.current() == to {
             return Ok(0);
         }
-        let old_current = self.current.clone().take();
+        let old_current = self.current();
         let (was_inserted, index) = self.append(old_current);
         if !was_inserted {
             return Err(CommonError::GatewaysDiscrepancyOtherShouldNotContainCurrent);
@@ -123,10 +121,6 @@ impl Gateways {
     ///   the operation added a new element, and `index` is the index of `item` in the resulting
     ///   `identified_vec`.
     pub fn append(&mut self, gateway: Gateway) -> (bool, usize) {
-        if self.current() == gateway {
-            return (false, self.other().len());
-        }
-
         self.other.borrow_mut().append(gateway)
     }
 }
@@ -143,11 +137,40 @@ impl Default for Gateways {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
+    use identified_vec::ItemsCloned;
+    use wallet_kit_common::{json::assert_eq_after_json_roundtrip, network_id::NetworkID};
 
     use crate::v100::app_preferences::gateways::gateway::Gateway;
 
     use super::Gateways;
+
+    #[test]
+    fn change_current_to_existing() {
+        let mut sut = Gateways::default();
+        assert_eq!(sut.current().network().id, NetworkID::Mainnet);
+        assert_eq!(sut.change_current(Gateway::stokenet()), Ok(1));
+        assert_eq!(sut.current().network().id, NetworkID::Stokenet);
+    }
+
+    #[test]
+    fn change_current_to_current() {
+        let mut sut = Gateways::default();
+        assert_eq!(sut.current().network().id, NetworkID::Mainnet);
+        assert_eq!(sut.change_current(Gateway::mainnet()), Ok(0));
+        assert_eq!(sut.current().network().id, NetworkID::Mainnet);
+    }
+
+    #[test]
+    fn change_current_to_new() {
+        let mut sut = Gateways::default();
+        assert_eq!(sut.current().network().id, NetworkID::Mainnet);
+        assert_eq!(sut.change_current(Gateway::nebunet()), Ok(1));
+        assert_eq!(sut.current().network().id, NetworkID::Nebunet);
+        assert_eq!(
+            sut.other().items(),
+            [Gateway::stokenet(), Gateway::mainnet()]
+        );
+    }
 
     #[test]
     fn json_roundtrip() {

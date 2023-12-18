@@ -24,6 +24,18 @@ impl Identifiable for Gateway {
     }
 }
 
+impl Gateway {
+    /// The URL to the gateways API endpoint
+    pub fn url(&self) -> Url {
+        self.url.clone()
+    }
+
+    /// The Radix network the API is a Gateway to.
+    pub fn network(&self) -> RadixNetwork {
+        self.network.clone()
+    }
+}
+
 impl Debug for Gateway {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(
