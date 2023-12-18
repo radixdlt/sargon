@@ -99,6 +99,10 @@ impl CAP26Path {
     pub fn placeholder_account() -> Self {
         Self::AccountPath(AccountPath::placeholder())
     }
+
+    pub fn placeholder_identity() -> Self {
+        Self::IdentityPath(IdentityPath::placeholder())
+    }
 }
 
 #[cfg(test)]
@@ -117,6 +121,14 @@ mod tests {
     fn scheme_account_path() {
         assert_eq!(
             CAP26Path::placeholder_account().scheme(),
+            DerivationPathScheme::Cap26
+        );
+    }
+
+    #[test]
+    fn scheme_identity_path() {
+        assert_eq!(
+            CAP26Path::placeholder_identity().scheme(),
             DerivationPathScheme::Cap26
         );
     }

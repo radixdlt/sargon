@@ -151,8 +151,13 @@ impl Gateways {
 
 #[cfg(test)]
 mod tests {
-    use identified_vec::ItemsCloned;
-    use wallet_kit_common::{json::assert_eq_after_json_roundtrip, network_id::NetworkID};
+    use std::cell::RefCell;
+
+    use identified_vec::{IdentifiedVecOf, IsIdentifiedVecOf, ItemsCloned};
+    use wallet_kit_common::{
+        error::common_error::CommonError, json::assert_eq_after_json_roundtrip,
+        network_id::NetworkID,
+    };
 
     use crate::v100::app_preferences::gateways::gateway::Gateway;
 
@@ -169,6 +174,29 @@ mod tests {
         assert_eq!(sut.current().network().id(), &NetworkID::Mainnet);
         assert_eq!(sut.change_current(Gateway::stokenet()), Ok(1));
         assert_eq!(sut.current().network().id(), &NetworkID::Stokenet);
+    }
+
+    #[test]
+    fn new_throw_gateways_discrepancy_other_should_not_contain_current() {
+        assert_eq!(
+            Gateways::new_with_other(
+                Gateway::mainnet(),
+                IdentifiedVecOf::from_iter([Gateway::mainnet()])
+            ),
+            Err(CommonError::GatewaysDiscrepancyOtherShouldNotContainCurrent)
+        );
+    }
+
+    #[test]
+    fn change_throw_gateways_discrepancy_other_should_not_contain_current() {
+        let mut impossible = Gateways {
+            current: RefCell::new(Gateway::mainnet()),
+            other: RefCell::new(IdentifiedVecOf::from_iter([Gateway::mainnet()])),
+        };
+        assert_eq!(
+            impossible.change_current(Gateway::stokenet()),
+            Err(CommonError::GatewaysDiscrepancyOtherShouldNotContainCurrent)
+        );
     }
 
     #[test]

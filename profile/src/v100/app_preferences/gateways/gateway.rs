@@ -25,18 +25,6 @@ impl Identifiable for Gateway {
     }
 }
 
-// impl Gateway {
-//     /// The URL to the gateways API endpoint
-//     pub fn url(&self) -> Url {
-//         self.url.clone()
-//     }
-
-//     /// The Radix network the API is a Gateway to.
-//     pub fn network(&self) -> RadixNetwork {
-//         self.network.clone()
-//     }
-// }
-
 impl Debug for Gateway {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(
@@ -132,6 +120,7 @@ impl Gateway {
 #[cfg(test)]
 mod tests {
     use identified_vec::Identifiable;
+    use radix_engine_common::prelude::HashSet;
     use wallet_kit_common::json::assert_eq_after_json_roundtrip;
 
     use super::Gateway;
@@ -208,5 +197,34 @@ mod tests {
     #[test]
     fn stokenet_is_wellknown() {
         assert_eq!(Gateway::stokenet().is_wellknown(), true);
+    }
+
+    #[test]
+    fn hash() {
+        assert_eq!(
+            HashSet::from_iter([
+                Gateway::mainnet(),
+                Gateway::stokenet(),
+                Gateway::rcnet(),
+                Gateway::nebunet(),
+                Gateway::kisharnet(),
+                Gateway::ansharnet(),
+                Gateway::hammunet(),
+                Gateway::enkinet(),
+                Gateway::mardunet(),
+                // Twice
+                Gateway::mainnet(),
+                Gateway::stokenet(),
+                Gateway::rcnet(),
+                Gateway::nebunet(),
+                Gateway::kisharnet(),
+                Gateway::ansharnet(),
+                Gateway::hammunet(),
+                Gateway::enkinet(),
+                Gateway::mardunet(),
+            ])
+            .len(),
+            9
+        );
     }
 }

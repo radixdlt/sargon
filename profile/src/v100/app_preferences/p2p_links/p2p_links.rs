@@ -43,6 +43,21 @@ mod tests {
     }
 
     #[test]
+    fn display() {
+        let mut sut = P2PLinks::new();
+        sut.append(P2PLink::placeholder_duckduckgo());
+        assert_eq!(format!("{}", sut), "[P2PLink { connection_password: RadixConnectPassword(deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead), display_name: \"DuckDuckGo on Mac Pro\" }]");
+    }
+
+    #[test]
+    fn into_iter() {
+        let mut sut = P2PLinks::new();
+        sut.append(P2PLink::placeholder_duckduckgo());
+        sut.append(P2PLink::placeholder_chrome());
+        assert!(sut.into_iter().any(|p| p.display_name().contains("Chrome")));
+    }
+
+    #[test]
     fn json_roundtrip() {
         let sut = P2PLinks::placeholder();
         assert_eq_after_json_roundtrip(

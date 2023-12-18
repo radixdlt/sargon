@@ -11,9 +11,7 @@ use crate::{
 use super::{cap26_entity_kind::CAP26EntityKind, cap26_key_kind::CAP26KeyKind};
 
 pub trait CAP26Repr: Derivation {
-    fn entity_kind() -> Option<CAP26EntityKind> {
-        Option::None
-    }
+    fn entity_kind() -> Option<CAP26EntityKind>;
 
     fn __with_path_and_components(
         path: HDPath,
