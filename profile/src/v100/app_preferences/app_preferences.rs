@@ -1,5 +1,7 @@
 use std::cell::RefCell;
 
+use serde::{Deserialize, Serialize};
+
 use super::{
     display::AppDisplay, gateways::gateways::Gateways, p2p_links::p2p_links::P2PLinks,
     security::Security, transaction::Transaction,
@@ -10,7 +12,7 @@ use super::{
 ///
 /// Current and other saved Gateways, security settings, connected P2P clients,
 /// App Display settings and preferences for transaction.
-#[derive(Clone, Debug, PartialEq, Eq, Default)]
+#[derive(Clone, Debug, PartialEq, Eq, Default, Deserialize, Serialize)]
 pub struct AppPreferences {
     /// Default config related to making of transactions
     transaction: RefCell<Transaction>,

@@ -1,7 +1,10 @@
-use super::p2p_link::P2PLink;
-use identified_vec::{newtype_identified_vec, IsIdentifiedVecOf};
+use identified_vec::IsIdentifiedVecOf;
 
-newtype_identified_vec!(of: P2PLink, named: P2PLinks);
+use crate::identified_vec_via::IdentifiedVecVia;
+
+use super::p2p_link::P2PLink;
+
+pub type P2PLinks = IdentifiedVecVia<P2PLink>;
 
 impl Default for P2PLinks {
     fn default() -> Self {

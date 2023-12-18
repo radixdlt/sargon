@@ -7,7 +7,7 @@ use super::radix_connect_password::RadixConnectPassword;
 /// A client the user have connected P2P with, typically a
 /// WebRTC connections with a DApp, but might be Android or iPhone
 /// client as well.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Ord, PartialOrd, Hash)]
 #[serde(rename_all = "camelCase")]
 pub struct P2PLink {
     /// The most important property of this struct, the `ConnectionPassword`,
@@ -17,6 +17,18 @@ pub struct P2PLink {
 
     /// Client name, e.g. "Chrome on Macbook" or "My work Android" or "My wifes iPhone SE".
     display_name: String,
+}
+
+impl std::fmt::Debug for P2PLink {
+    fn fmt(
+        &self,
+        f: &mut radix_engine_common::prelude::fmt::Formatter<'_>,
+    ) -> radix_engine_common::prelude::fmt::Result {
+        f.debug_struct("P2PLink")
+            .field("connection_password", &self.connection_password)
+            .field("display_name", &self.display_name)
+            .finish()
+    }
 }
 
 impl Identifiable for P2PLink {
