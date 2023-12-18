@@ -1,8 +1,8 @@
+use super::radix_connect_password::RadixConnectPassword;
 use identified_vec::Identifiable;
 use radix_engine_common::crypto::Hash;
 use serde::{Deserialize, Serialize};
-
-use super::radix_connect_password::RadixConnectPassword;
+use std::fmt::{Debug, Formatter};
 
 /// A client the user have connected P2P with, typically a
 /// WebRTC connections with a DApp, but might be Android or iPhone
@@ -19,11 +19,8 @@ pub struct P2PLink {
     display_name: String,
 }
 
-impl std::fmt::Debug for P2PLink {
-    fn fmt(
-        &self,
-        f: &mut radix_engine_common::prelude::fmt::Formatter<'_>,
-    ) -> radix_engine_common::prelude::fmt::Result {
+impl Debug for P2PLink {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("P2PLink")
             .field("connection_password", &self.connection_password)
             .field("display_name", &self.display_name)
@@ -114,5 +111,26 @@ mod tests {
             }
             "#,
         )
+    }
+
+    #[test]
+    fn display_name() {
+        assert_eq!(P2PLink::placeholder().display_name(), "Chrome on Macbook");
+    }
+
+    #[test]
+    fn connection_password() {
+        assert_eq!(
+            P2PLink::placeholder()
+                .connection_password()
+                .hash()
+                .to_string(),
+            "98e140d9c01c069aa927797627b1bca4d25971a76549ca59df8ef9d8397afa97"
+        );
+    }
+
+    #[test]
+    fn debug() {
+        assert_eq!(format!("{:?}", P2PLink::placeholder()), "P2PLink { connection_password: RadixConnectPassword(cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe), display_name: \"Chrome on Macbook\" }");
     }
 }

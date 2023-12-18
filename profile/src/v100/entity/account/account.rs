@@ -13,7 +13,7 @@ use hierarchical_deterministic::{
     cap26::cap26_path::paths::is_entity_path::HasEntityPath, derivation::derivation::Derivation,
 };
 use serde::{Deserialize, Serialize};
-use std::{cell::RefCell, cmp::Ordering, fmt::Display};
+use std::{cell::RefCell, cmp::Ordering, fmt::Display, hash::Hasher};
 use wallet_kit_common::network_id::NetworkID;
 
 use crate::v100::{
@@ -25,6 +25,8 @@ use crate::v100::{
     },
     factors::hd_transaction_signing_factor_instance::HDFactorInstanceAccountCreation,
 };
+
+use std::hash::Hash;
 
 use super::{
     appearance_id::AppearanceID, on_ledger_settings::on_ledger_settings::OnLedgerSettings,
@@ -112,6 +114,12 @@ impl Account {
             flags: RefCell::new(EntityFlags::default()),
             on_ledger_settings: RefCell::new(OnLedgerSettings::default()),
         }
+    }
+}
+
+impl Hash for Account {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.address().hash(state);
     }
 }
 
@@ -271,7 +279,7 @@ impl Account {
 
     pub fn placeholder_nebunet() -> Self {
         Self::placeholder_with_values(
-            "account_tdx_b_1p8ahenyznrqy2w0tyg00r82rwuxys6z8kmrhh37c7maqpydx7p"
+            "account_tdx_b_1286wrrqrfcrfhthfrtdywe8alney8zu0ja5xrhcq2475ej08m9raqq"
                 .try_into()
                 .unwrap(),
             DisplayName::default(),
@@ -281,7 +289,7 @@ impl Account {
 
     pub fn placeholder_kisharnet() -> Self {
         Self::placeholder_with_values(
-            "account_tdx_c_1px26p5tyqq65809em2h4yjczxcxj776kaun6sv3dw66sc3wrm6"
+            "account_tdx_c_1286wrrqrfcrfhthfrtdywe8alney8zu0ja5xrhcq2475ej0898vkq9"
                 .try_into()
                 .unwrap(),
             DisplayName::default(),
@@ -291,7 +299,7 @@ impl Account {
 
     pub fn placeholder_adapanet() -> Self {
         Self::placeholder_with_values(
-            "account_tdx_a_1qwv0unmwmxschqj8sntg6n9eejkrr6yr6fa4ekxazdzqhm6wy5"
+            "account_tdx_a_1286wrrqrfcrfhthfrtdywe8alney8zu0ja5xrhcq2475ej08srjqq0"
                 .try_into()
                 .unwrap(),
             DisplayName::default(),
@@ -304,6 +312,7 @@ impl Account {
 mod tests {
     use std::collections::BTreeSet;
 
+    use radix_engine_common::prelude::HashSet;
     use wallet_kit_common::json::assert_eq_after_json_roundtrip;
 
     use crate::v100::{
@@ -560,6 +569,21 @@ mod tests {
 				"address": "account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69"
 			}
             "#,
+        );
+    }
+
+    #[test]
+    fn hash() {
+        assert_eq!(
+            HashSet::from_iter([
+                Account::placeholder(),
+                Account::placeholder_stokenet(),
+                Account::placeholder_nebunet(),
+                Account::placeholder_kisharnet(),
+                Account::placeholder_adapanet(),
+            ])
+            .len(),
+            5
         );
     }
 }

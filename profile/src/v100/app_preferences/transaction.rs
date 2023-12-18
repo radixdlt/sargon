@@ -27,6 +27,10 @@ impl Transaction {
     pub fn default_deposit_guarantee(&self) -> Decimal {
         *self.default_deposit_guarantee.get().clone().deref()
     }
+
+    pub fn set_default_deposit_guarantee(&mut self, new: Decimal) {
+        *self.default_deposit_guarantee.get_mut() = new.into()
+    }
 }
 
 impl Default for Transaction {
@@ -79,5 +83,22 @@ mod tests {
             }
             "#,
         )
+    }
+
+    #[test]
+    fn default_is_1() {
+        assert_eq!(
+            Transaction::default()
+                .default_deposit_guarantee()
+                .to_string(),
+            "1"
+        );
+    }
+
+    #[test]
+    fn set_default_deposit_guarantee() {
+        let mut sut = Transaction::default();
+        sut.set_default_deposit_guarantee(dec!("0.237"));
+        assert_eq!(sut.default_deposit_guarantee().to_string(), "0.237");
     }
 }

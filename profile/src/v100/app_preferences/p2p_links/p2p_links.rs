@@ -58,6 +58,11 @@ mod tests {
     }
 
     #[test]
+    fn default_is_empty() {
+        assert_eq!(P2PLinks::default().len(), 0);
+    }
+
+    #[test]
     fn json_roundtrip() {
         let sut = P2PLinks::placeholder();
         assert_eq_after_json_roundtrip(

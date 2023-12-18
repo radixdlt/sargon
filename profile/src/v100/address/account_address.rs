@@ -184,6 +184,15 @@ mod tests {
     }
 
     #[test]
+    fn nebunet() {
+        let address = AccountAddress::try_from_bech32(
+            "account_tdx_b_1286wrrqrfcrfhthfrtdywe8alney8zu0ja5xrhcq2475ej08m9raqq",
+        )
+        .unwrap();
+        assert_eq!(address.network_id, NetworkID::Nebunet)
+    }
+
+    #[test]
     fn equality() {
         let a: AccountAddress =
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"

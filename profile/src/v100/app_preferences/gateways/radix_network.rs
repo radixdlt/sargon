@@ -162,6 +162,16 @@ mod tests {
     }
 
     #[test]
+    fn placeholder() {
+        assert_eq!(RadixNetwork::placeholder().logical_name(), "mainnet");
+    }
+
+    #[test]
+    fn default_is_mainnet() {
+        assert_eq!(RadixNetwork::placeholder(), RadixNetwork::mainnet());
+    }
+
+    #[test]
     fn json_roundtrip_mainnet() {
         let sut = RadixNetwork::mainnet();
         assert_eq_after_json_roundtrip(
