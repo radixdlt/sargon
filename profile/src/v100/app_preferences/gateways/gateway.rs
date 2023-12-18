@@ -6,11 +6,11 @@ use wallet_kit_common::network_id::NetworkID;
 
 use super::radix_network::RadixNetwork;
 
-/// A client the user have connected P2P with, typically a
-/// WebRTC connections with a DApp, but might be Android or iPhone
-/// client as well.
+/// A gateway to some Radix Network, which is a high level REST API which clients (wallets) can
+/// consume in order to query asset balances and submit transactions.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
 pub struct Gateway {
+    /// The Radix network the API is a Gateway to.
     network: RadixNetwork,
     /// The URL to the gateways API endpoint
     url: Url,
