@@ -88,4 +88,7 @@ pub enum CommonError {
 
     #[error("Invalid URL: '{0}'")]
     InvalidURL(String),
+
+    #[error("Accounts on different networks.")]
+    AccountOnWrongNetwork,
 }

@@ -1,5 +1,7 @@
+use std::cell::RefCell;
+
 use serde::{Deserialize, Serialize};
-use wallet_kit_common::network_id::NetworkID;
+use wallet_kit_common::{error::common_error::CommonError, network_id::NetworkID};
 
 use super::accounts::Accounts;
 
@@ -9,10 +11,10 @@ use super::accounts::Accounts;
 pub struct Network {
     /// The ID of the network that has been used to generate the `accounts` and `personas`
     /// and on which the `authorizedDapps` have been deployed on.
-    pub id: NetworkID,
+    id: NetworkID,
 
-    /// A non empty ordered set of Accounts on this network.
-    pub accounts: Accounts,
+    /// An ordered set of Accounts on this network.
+    accounts: RefCell<Accounts>,
 }
 
 impl Network {
@@ -25,23 +27,76 @@ impl Network {
             accounts
                 .get_all()
                 .into_iter()
-                .all(|a| a.network_id == network_id),
+                .all(|a| a.network_id() == network_id),
             "Discrepancy, found accounts on other network than {network_id}"
         );
         Self {
             id: network_id,
-            accounts,
+            accounts: RefCell::new(accounts),
         }
+    }
+}
+
+impl Network {
+    /// The ID of the network that has been used to generate the `accounts` and `personas`
+    /// and on which the `authorizedDapps` have been deployed on.
+    pub fn id(&self) -> NetworkID {
+        self.id.clone()
+    }
+
+    /// An ordered set of Accounts on this network.
+    pub fn accounts(&self) -> Accounts {
+        self.accounts.borrow().clone()
+    }
+}
+
+impl Network {
+    /// Tries to change the accounts to `new`, will throw an error if any of the accounts in `new`
+    /// is on a different network than `self.id()`.
+    pub fn set_accounts(&mut self, new: Accounts) -> Result<(), CommonError> {
+        if new.get_all().iter().any(|a| a.network_id() != self.id()) {
+            return Err(CommonError::AccountOnWrongNetwork);
+        }
+        *self.accounts.borrow_mut() = new;
+        Ok(())
+    }
+}
+
+// CFG test
+#[cfg(test)]
+impl Network {
+    pub fn placeholder() -> Self {
+        Self::new(NetworkID::Mainnet, Accounts::placeholder())
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::network_id::NetworkID;
+    use wallet_kit_common::{error::common_error::CommonError, network_id::NetworkID};
 
     use crate::v100::{entity::account::account::Account, networks::network::accounts::Accounts};
 
     use super::Network;
+
+    #[test]
+    fn get_id() {
+        assert_eq!(Network::placeholder().id(), NetworkID::Mainnet);
+    }
+
+    #[test]
+    fn get_accounts() {
+        let sut = Network::placeholder();
+        assert_eq!(sut.accounts(), Accounts::placeholder());
+    }
+
+    #[test]
+    fn set_accounts_wrong_network() {
+        let mut sut = Network::placeholder();
+        assert_eq!(
+            sut.set_accounts(Accounts::with_account(Account::placeholder_stokenet())),
+            Err(CommonError::AccountOnWrongNetwork)
+        );
+    }
 
     #[test]
     fn duplicate_accounts_are_filtered_out() {
@@ -52,7 +107,7 @@ mod tests {
                     [Account::placeholder(), Account::placeholder()].into_iter()
                 )
             )
-            .accounts
+            .accounts()
             .len(),
             1
         )

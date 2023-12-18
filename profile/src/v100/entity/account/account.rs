@@ -49,7 +49,7 @@ use super::{
 pub struct Account {
     /// The ID of the network this account can be used with.
     #[serde(rename = "networkID")]
-    pub network_id: NetworkID,
+    network_id: NetworkID,
 
     /// A globally unique identifier of this account, being a human readable
     /// address of an account. Always starts with `"account_"``, for example:
@@ -64,7 +64,7 @@ pub struct Account {
     /// No two addresses will ever be the same even for the same factor source
     /// but on different networks, since the public keys controlling the
     /// accounts depend on the network id.
-    pub address: AccountAddress,
+    address: AccountAddress,
 
     /// An off-ledger display name or description chosen by the user when she
     /// created this account.
@@ -114,22 +114,30 @@ impl Account {
 
 // Getters
 impl Account {
+    pub fn network_id(&self) -> NetworkID {
+        self.network_id.clone()
+    }
+
+    pub fn address(&self) -> AccountAddress {
+        self.address.clone()
+    }
+
     /// Returns this accounts `display_name` as **a clone**.
     ///
     /// Use [`self::set_display_name()`] to update it.
-    pub fn get_display_name(&self) -> String {
+    pub fn display_name(&self) -> String {
         self.display_name.borrow().clone().to_string()
     }
 
-    pub fn get_flags(&self) -> EntityFlags {
+    pub fn flags(&self) -> EntityFlags {
         self.flags.borrow().clone()
     }
 
-    pub fn get_appearance_id(&self) -> AppearanceID {
+    pub fn appearance_id(&self) -> AppearanceID {
         self.appearance_id.borrow().clone()
     }
 
-    pub fn get_on_ledger_settings(&self) -> OnLedgerSettings {
+    pub fn on_ledger_settings(&self) -> OnLedgerSettings {
         self.on_ledger_settings.borrow().clone()
     }
 }
@@ -180,7 +188,7 @@ impl PartialOrd for Account {
 
 impl Display for Account {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} | {}", self.get_display_name(), self.address)
+        write!(f, "{} | {}", self.display_name(), self.address)
     }
 }
 
@@ -334,10 +342,10 @@ mod tests {
     #[test]
     fn appearance_id_get_set() {
         let account = Account::placeholder();
-        assert_eq!(account.get_appearance_id(), AppearanceID::default());
+        assert_eq!(account.appearance_id(), AppearanceID::default());
         let new_appearance_id = AppearanceID::new(1).unwrap();
         account.set_appearance_id(new_appearance_id);
-        assert_eq!(account.get_appearance_id(), new_appearance_id);
+        assert_eq!(account.appearance_id(), new_appearance_id);
     }
 
     #[test]
@@ -363,10 +371,10 @@ mod tests {
             DisplayName::new("Test").unwrap(),
             AppearanceID::default(),
         );
-        assert_eq!(account.get_display_name(), "Test");
+        assert_eq!(account.display_name(), "Test");
         let new_display_name = DisplayName::new("New").unwrap();
         account.set_display_name(new_display_name.clone());
-        assert_eq!(account.get_display_name(), new_display_name.to_string());
+        assert_eq!(account.display_name(), new_display_name.to_string());
     }
 
     #[test]
@@ -378,10 +386,10 @@ mod tests {
             DisplayName::new("Test").unwrap(),
             AppearanceID::default(),
         );
-        assert_eq!(account.get_flags(), EntityFlags::default());
+        assert_eq!(account.flags(), EntityFlags::default());
         let new_flags = EntityFlags::with_flag(EntityFlag::DeletedByUser);
         account.set_flags(new_flags.clone());
-        assert_eq!(account.get_flags(), new_flags);
+        assert_eq!(account.flags(), new_flags);
     }
 
     #[test]
@@ -393,10 +401,7 @@ mod tests {
             DisplayName::new("Test").unwrap(),
             AppearanceID::default(),
         );
-        assert_eq!(
-            account.get_on_ledger_settings(),
-            OnLedgerSettings::default()
-        );
+        assert_eq!(account.on_ledger_settings(), OnLedgerSettings::default());
         let excp1 = AssetException::new(
             "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
                 .try_into()
@@ -423,11 +428,11 @@ mod tests {
         );
         let new_on_ledger_settings = OnLedgerSettings::new(new_third_party_dep);
         account.set_on_ledger_settings(new_on_ledger_settings.clone());
-        assert_eq!(account.get_on_ledger_settings(), new_on_ledger_settings);
+        assert_eq!(account.on_ledger_settings(), new_on_ledger_settings);
 
         assert_eq!(
             account
-                .get_on_ledger_settings()
+                .on_ledger_settings()
                 .get_third_party_deposits()
                 .get_deposit_rule(),
             DepositRule::DenyAll
@@ -437,7 +442,7 @@ mod tests {
         });
         assert_eq!(
             account
-                .get_on_ledger_settings()
+                .on_ledger_settings()
                 .get_third_party_deposits()
                 .get_deposit_rule(),
             DepositRule::AcceptAll

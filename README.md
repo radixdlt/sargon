@@ -27,9 +27,9 @@ Middleware that can power Radix Wallet clients (iOS/Android).
 - [x] Account
 - [x] Network
 - [x] Networks
-- [ ] AppPreferences
-- [ ] P2PLinks
-- [ ] Gateways
+- [x] AppPreferences
+- [x] P2PLinks
+- [x] Gateways
 - [ ] Persona
 - [ ] Profile
 

@@ -22,7 +22,7 @@ impl Networks {
     /// `network`.
     pub fn with_network(network: Network) -> Self {
         let mut map = BTreeMap::new();
-        map.insert(network.id, network);
+        map.insert(network.id(), network);
         Self(map)
     }
 }
