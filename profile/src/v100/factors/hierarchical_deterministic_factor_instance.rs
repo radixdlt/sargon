@@ -132,6 +132,7 @@ impl<'de> serde::Deserialize<'de> for HierarchicalDeterministicFactorInstance {
     }
 }
 
+#[cfg(any(test, feature = "placeholder"))]
 impl HierarchicalDeterministicFactorInstance {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {

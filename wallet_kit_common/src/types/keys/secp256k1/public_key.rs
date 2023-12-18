@@ -64,6 +64,7 @@ impl Debug for Secp256k1PublicKey {
     }
 }
 
+#[cfg(any(test, feature = "placeholder"))]
 impl Secp256k1PublicKey {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {

@@ -94,6 +94,7 @@ impl From<GetIDPath> for CAP26Path {
     }
 }
 
+#[cfg(any(test, feature = "placeholder"))]
 impl CAP26Path {
     pub fn placeholder_account() -> Self {
         Self::AccountPath(AccountPath::placeholder())

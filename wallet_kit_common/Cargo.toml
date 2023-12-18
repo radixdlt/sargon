@@ -3,6 +3,9 @@ name = "wallet_kit_common"
 version = "0.1.0"
 edition = "2021"
 
+[features]
+placeholder = []
+
 [dependencies]
 serde = { version = "1.0.193", features = ["derive"] }
 serde_json = { version = "1.0.108", features = ["preserve_order"] }

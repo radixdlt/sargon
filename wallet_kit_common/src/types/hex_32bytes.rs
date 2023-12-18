@@ -60,6 +60,7 @@ impl FromStr for Hex32Bytes {
     }
 }
 
+#[cfg(any(test, feature = "placeholder"))]
 impl Hex32Bytes {
     /// `deadbeef...``
     /// A placeholder used to facilitate unit tests.

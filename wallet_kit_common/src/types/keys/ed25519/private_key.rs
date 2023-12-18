@@ -98,6 +98,7 @@ impl TryInto<Ed25519PrivateKey> for &str {
     }
 }
 
+#[cfg(any(test, feature = "placeholder"))]
 impl Ed25519PrivateKey {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {

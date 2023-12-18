@@ -75,6 +75,7 @@ impl TryInto<Mnemonic> for &str {
     }
 }
 
+#[cfg(any(test, feature = "placeholder"))]
 impl Mnemonic {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {

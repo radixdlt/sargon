@@ -95,6 +95,7 @@ impl AppPreferences {
     }
 }
 
+#[cfg(any(test, feature = "placeholder"))]
 impl AppPreferences {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {

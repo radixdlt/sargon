@@ -37,6 +37,7 @@ impl Default for Transaction {
     }
 }
 
+#[cfg(any(test, feature = "placeholder"))]
 impl Transaction {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {

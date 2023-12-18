@@ -63,7 +63,7 @@ impl Network {
 }
 
 // CFG test
-#[cfg(test)]
+#[cfg(any(test, feature = "placeholder"))]
 impl Network {
     pub fn placeholder() -> Self {
         Self::new(NetworkID::Mainnet, Accounts::placeholder())

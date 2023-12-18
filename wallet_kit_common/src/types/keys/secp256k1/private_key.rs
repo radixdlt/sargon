@@ -98,6 +98,7 @@ impl TryFrom<&[u8]> for Secp256k1PrivateKey {
     }
 }
 
+#[cfg(any(test, feature = "placeholder"))]
 impl Secp256k1PrivateKey {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {

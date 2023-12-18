@@ -103,6 +103,7 @@ impl RadixNetwork {
     }
 }
 
+#[cfg(any(test, feature = "placeholder"))]
 impl RadixNetwork {
     pub fn placeholder() -> Self {
         Self::mainnet()

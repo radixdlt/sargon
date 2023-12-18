@@ -192,6 +192,7 @@ impl Display for Account {
     }
 }
 
+#[cfg(any(test, feature = "placeholder"))]
 impl Account {
     /// Instantiates an account with a display name, address and appearance id.
     pub fn placeholder_with_values(
@@ -238,7 +239,7 @@ impl Account {
 }
 
 // CFG test
-#[cfg(test)]
+#[cfg(any(test, feature = "placeholder"))]
 impl Account {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {

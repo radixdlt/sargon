@@ -30,6 +30,7 @@ impl Default for AppDisplay {
     }
 }
 
+#[cfg(any(test, feature = "placeholder"))]
 impl AppDisplay {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {

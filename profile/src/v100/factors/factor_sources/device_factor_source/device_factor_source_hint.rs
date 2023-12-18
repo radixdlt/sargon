@@ -37,12 +37,7 @@ impl DeviceFactorSourceHint {
     }
 }
 
-impl Default for DeviceFactorSourceHint {
-    fn default() -> Self {
-        Self::placeholder_iphone_unknown()
-    }
-}
-
+#[cfg(any(test, feature = "placeholder"))]
 impl DeviceFactorSourceHint {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
@@ -62,16 +57,8 @@ mod tests {
     use crate::v100::factors::factor_sources::device_factor_source::device_factor_source_hint::DeviceFactorSourceHint;
 
     #[test]
-    fn default_is_iphone_unknown() {
-        assert_eq!(
-            DeviceFactorSourceHint::default(),
-            DeviceFactorSourceHint::placeholder_iphone_unknown()
-        );
-    }
-
-    #[test]
     fn json() {
-        let model = DeviceFactorSourceHint::default();
+        let model = DeviceFactorSourceHint::placeholder_iphone_unknown();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -87,15 +74,15 @@ mod tests {
     #[test]
     fn equality() {
         assert_eq!(
-            DeviceFactorSourceHint::default(),
-            DeviceFactorSourceHint::default()
+            DeviceFactorSourceHint::placeholder_iphone_unknown(),
+            DeviceFactorSourceHint::placeholder_iphone_unknown()
         );
     }
 
     #[test]
     fn inequality() {
         assert_ne!(
-            DeviceFactorSourceHint::default(),
+            DeviceFactorSourceHint::placeholder_iphone_unknown(),
             DeviceFactorSourceHint::iphone_unknown_model_and_name_with_word_count(
                 hierarchical_deterministic::bip39::bip39_word_count::BIP39WordCount::Eighteen
             )

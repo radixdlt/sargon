@@ -57,6 +57,7 @@ impl Default for Security {
     }
 }
 
+#[cfg(any(test, feature = "placeholder"))]
 impl Security {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {

@@ -50,7 +50,7 @@ impl Accounts {
     }
 }
 
-#[cfg(test)]
+#[cfg(any(test, feature = "placeholder"))]
 impl Accounts {
     pub fn placeholder() -> Self {
         Self::with_account(Account::placeholder_mainnet())

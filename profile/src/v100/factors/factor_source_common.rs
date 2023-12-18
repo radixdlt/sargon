@@ -85,6 +85,7 @@ impl Default for FactorSourceCommon {
     }
 }
 
+#[cfg(any(test, feature = "placeholder"))]
 impl FactorSourceCommon {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {

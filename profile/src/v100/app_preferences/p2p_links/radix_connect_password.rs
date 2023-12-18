@@ -14,6 +14,13 @@ impl RadixConnectPassword {
         Self(hex_32bytes)
     }
 
+    pub fn hash(&self) -> Hash {
+        hash(self.0.bytes())
+    }
+}
+
+#[cfg(any(test, feature = "placeholder"))]
+impl RadixConnectPassword {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
         Self::new(Hex32Bytes::placeholder())
@@ -47,10 +54,6 @@ impl RadixConnectPassword {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_fade() -> Self {
         Self::new(Hex32Bytes::placeholder_fade())
-    }
-
-    pub fn hash(&self) -> Hash {
-        hash(self.0.bytes())
     }
 }
 

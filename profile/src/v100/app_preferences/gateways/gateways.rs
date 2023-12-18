@@ -135,6 +135,7 @@ impl Default for Gateways {
     }
 }
 
+#[cfg(any(test, feature = "placeholder"))]
 impl Gateways {
     pub fn placeholder() -> Self {
         let mut sut = Gateways::new(Gateway::rcnet());

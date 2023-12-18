@@ -66,6 +66,7 @@ impl CAP26Repr for IdentityPath {
     }
 }
 
+#[cfg(any(test, feature = "placeholder"))]
 impl IdentityPath {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {

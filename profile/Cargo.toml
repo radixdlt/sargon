@@ -3,6 +3,9 @@ name = "profile"
 version = "0.1.0"
 edition = "2021"
 
+[features]
+placeholder = []
+
 [dependencies]
 serde = { version = "1.0.193", features = ["derive"] }
 serde_json = { version = "1.0.108", features = ["preserve_order"] }
@@ -26,9 +29,14 @@ transaction = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "038
     "serde",
 ] }
 enum-as-inner = "0.6.0"
-identified_vec = { version = "0.1.8", features = [
-    "serde",
-    "id_prim",
-] }
+identified_vec = { version = "0.1.8", features = ["serde", "id_prim"] }
 url = { version = "2.5.0", features = ["serde"] }
 derive-getters = "0.3.0"
+
+[dev-dependencies]
+wallet_kit_common = { path = "../wallet_kit_common", features = [
+    "placeholder",
+] }
+hierarchical_deterministic = { path = "../hierarchical_deterministic", features = [
+    "placeholder",
+] }

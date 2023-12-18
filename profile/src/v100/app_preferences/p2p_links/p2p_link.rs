@@ -56,7 +56,10 @@ impl P2PLink {
             display_name: display_name.to_string(),
         }
     }
+}
 
+#[cfg(any(test, feature = "placeholder"))]
+impl P2PLink {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
         Self::placeholder_chrome()
