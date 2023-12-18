@@ -1,6 +1,6 @@
 use identified_vec::Identifiable;
 use serde::{Deserialize, Serialize};
-use std::fmt::Display;
+use std::fmt::{Debug, Display, Formatter};
 use url::Url;
 use wallet_kit_common::network_id::NetworkID;
 
@@ -8,7 +8,7 @@ use super::radix_network::RadixNetwork;
 
 /// A gateway to some Radix Network, which is a high level REST API which clients (wallets) can
 /// consume in order to query asset balances and submit transactions.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Ord, PartialOrd, Hash)]
 pub struct Gateway {
     /// The Radix network the API is a Gateway to.
     network: RadixNetwork,
@@ -24,14 +24,20 @@ impl Identifiable for Gateway {
     }
 }
 
-impl Display for Gateway {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl Debug for Gateway {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
             "{}: {}",
             self.network.display_description,
             self.url.to_string(),
         )
+    }
+}
+
+impl Display for Gateway {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.url.to_string(),)
     }
 }
 
@@ -157,6 +163,14 @@ mod tests {
 
     #[test]
     fn display() {
+        assert_eq!(
+            format!("{}", Gateway::mainnet()),
+            "https://mainnet.radixdlt.com/"
+        );
+    }
+
+    #[test]
+    fn debug() {
         assert_eq!(
             format!("{}", Gateway::mainnet()),
             "Mainnet: https://mainnet.radixdlt.com/"

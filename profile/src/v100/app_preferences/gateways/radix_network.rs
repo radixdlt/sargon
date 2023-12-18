@@ -69,17 +69,17 @@ impl RadixNetwork {
 
     /// Was a Release Candidate for Babylon launch.
     pub fn kisharnet() -> Self {
-        Self::declare(Kisharnet, "RCnet")
+        Self::declare(Kisharnet, "RCnet (Test Network)")
     }
 
     /// Was the second Release Candidate for Babylon launch.
     pub fn ansharnet() -> Self {
-        Self::declare(Ansharnet, "RCnet-V2 test network")
+        Self::declare(Ansharnet, "RCnet-V2 (Test Network)")
     }
 
     /// Was the third Release Candidate for Babylon launch.
     pub fn zabanet() -> Self {
-        Self::declare(Zabanet, "RCnet-3 test network")
+        Self::declare(Zabanet, "RCnet-V3 (Test Network)")
     }
 
     /// A testnet.

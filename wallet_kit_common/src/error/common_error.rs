@@ -79,4 +79,13 @@ pub enum CommonError {
 
     #[error("No network found with id: '{0}'")]
     UnknownNetworkForID(u8),
+
+    #[error("Gateway discrepancy, 'other' should not contain 'current'.")]
+    GatewaysDiscrepancyOtherShouldNotContainCurrent,
+
+    #[error("Gateways discrepancy, invalid JSON, current not found amongst saved.")]
+    InvalidGatewaysJSONCurrentNotFoundAmongstSaved,
+
+    #[error("Invalid URL: '{0}'")]
+    InvalidURL(String),
 }
