@@ -63,9 +63,9 @@ impl Display for ContentHint {
         write!(
             f,
             "#networks: {}, #accounts: {}, #personas: {}",
-            self.get_number_of_networks(),
-            self.get_number_of_accounts_on_all_networks_in_total(),
-            self.get_number_of_personas_on_all_networks_in_total()
+            self.number_of_networks(),
+            self.number_of_accounts_on_all_networks_in_total(),
+            self.number_of_personas_on_all_networks_in_total()
         )
     }
 }
@@ -73,17 +73,17 @@ impl Display for ContentHint {
 // Getters
 impl ContentHint {
     /// Gets the number of accounts on all networks in total.
-    pub fn get_number_of_accounts_on_all_networks_in_total(&self) -> u32 {
+    pub fn number_of_accounts_on_all_networks_in_total(&self) -> u32 {
         self.number_of_accounts_on_all_networks_in_total.get()
     }
 
     /// Gets the number of personas on all networks in total.
-    pub fn get_number_of_personas_on_all_networks_in_total(&self) -> u32 {
+    pub fn number_of_personas_on_all_networks_in_total(&self) -> u32 {
         self.number_of_personas_on_all_networks_in_total.get()
     }
 
     /// Gets the number of networks.
-    pub fn get_number_of_networks(&self) -> u32 {
+    pub fn number_of_networks(&self) -> u32 {
         self.number_of_networks.get()
     }
 }
@@ -145,9 +145,9 @@ mod tests {
             let y = i + 2;
             let z = i + 3;
             let sut = ContentHint::with_counters(x, y, z);
-            assert_eq!(sut.get_number_of_accounts_on_all_networks_in_total(), x);
-            assert_eq!(sut.get_number_of_personas_on_all_networks_in_total(), y);
-            assert_eq!(sut.get_number_of_networks(), z)
+            assert_eq!(sut.number_of_accounts_on_all_networks_in_total(), x);
+            assert_eq!(sut.number_of_personas_on_all_networks_in_total(), y);
+            assert_eq!(sut.number_of_networks(), z)
         });
     }
 
@@ -155,12 +155,12 @@ mod tests {
     fn set_number_of_accounts_on_all_networks_in_total() {
         let sut = ContentHint::new();
         (1..100).into_iter().for_each(|i| {
-            assert_eq!(sut.get_number_of_accounts_on_all_networks_in_total(), i - 1);
+            assert_eq!(sut.number_of_accounts_on_all_networks_in_total(), i - 1);
             sut.set_number_of_accounts_on_all_networks_in_total(i);
 
             // assert rest unchanged
-            assert_eq!(sut.get_number_of_networks(), 0);
-            assert_eq!(sut.get_number_of_personas_on_all_networks_in_total(), 0);
+            assert_eq!(sut.number_of_networks(), 0);
+            assert_eq!(sut.number_of_personas_on_all_networks_in_total(), 0);
         });
     }
 
@@ -168,12 +168,12 @@ mod tests {
     fn set_number_of_personas_on_all_networks_in_total() {
         let sut = ContentHint::new();
         (1..100).into_iter().for_each(|i| {
-            assert_eq!(sut.get_number_of_personas_on_all_networks_in_total(), i - 1);
+            assert_eq!(sut.number_of_personas_on_all_networks_in_total(), i - 1);
             sut.set_number_of_personas_on_all_networks_in_total(i);
 
             // assert rest unchanged
-            assert_eq!(sut.get_number_of_networks(), 0);
-            assert_eq!(sut.get_number_of_accounts_on_all_networks_in_total(), 0);
+            assert_eq!(sut.number_of_networks(), 0);
+            assert_eq!(sut.number_of_accounts_on_all_networks_in_total(), 0);
         });
     }
 
@@ -181,12 +181,12 @@ mod tests {
     fn set_number_of_networks() {
         let sut = ContentHint::new();
         (1..100).into_iter().for_each(|i| {
-            assert_eq!(sut.get_number_of_networks(), i - 1);
+            assert_eq!(sut.number_of_networks(), i - 1);
             sut.set_number_of_networks(i);
 
             // assert rest unchanged
-            assert_eq!(sut.get_number_of_accounts_on_all_networks_in_total(), 0);
-            assert_eq!(sut.get_number_of_personas_on_all_networks_in_total(), 0);
+            assert_eq!(sut.number_of_accounts_on_all_networks_in_total(), 0);
+            assert_eq!(sut.number_of_personas_on_all_networks_in_total(), 0);
         });
     }
 

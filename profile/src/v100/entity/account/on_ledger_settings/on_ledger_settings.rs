@@ -31,7 +31,7 @@ impl OnLedgerSettings {
 
 impl OnLedgerSettings {
     /// Returns the `ThirdPartyDeposits` as a reference.
-    pub fn get_third_party_deposits(&self) -> Ref<ThirdPartyDeposits> {
+    pub fn third_party_deposits(&self) -> Ref<ThirdPartyDeposits> {
         self.third_party_deposits.borrow()
     }
 
@@ -69,14 +69,14 @@ mod tests {
     fn get_third_party_deposits_then_mutate() {
         let settings = OnLedgerSettings::default();
         assert_eq!(
-            settings.get_third_party_deposits().get_deposit_rule(),
+            settings.third_party_deposits().deposit_rule(),
             DepositRule::AcceptAll
         );
         settings
-            .get_third_party_deposits()
+            .third_party_deposits()
             .set_deposit_rule(DepositRule::DenyAll);
         assert_eq!(
-            settings.get_third_party_deposits().get_deposit_rule(),
+            settings.third_party_deposits().deposit_rule(),
             DepositRule::DenyAll
         );
     }
@@ -85,12 +85,12 @@ mod tests {
     fn set_third_party_deposits_then_mutate() {
         let settings = OnLedgerSettings::default();
         assert_eq!(
-            settings.get_third_party_deposits().get_deposit_rule(),
+            settings.third_party_deposits().deposit_rule(),
             DepositRule::AcceptAll
         );
         settings.set_third_party_deposits(ThirdPartyDeposits::new(DepositRule::DenyAll));
         assert_eq!(
-            settings.get_third_party_deposits().get_deposit_rule(),
+            settings.third_party_deposits().deposit_rule(),
             DepositRule::DenyAll
         );
     }

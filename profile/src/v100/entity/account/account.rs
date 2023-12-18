@@ -433,8 +433,8 @@ mod tests {
         assert_eq!(
             account
                 .on_ledger_settings()
-                .get_third_party_deposits()
-                .get_deposit_rule(),
+                .third_party_deposits()
+                .deposit_rule(),
             DepositRule::DenyAll
         );
         account.update_on_ledger_settings(|o| {
@@ -443,8 +443,8 @@ mod tests {
         assert_eq!(
             account
                 .on_ledger_settings()
-                .get_third_party_deposits()
-                .get_deposit_rule(),
+                .third_party_deposits()
+                .deposit_rule(),
             DepositRule::AcceptAll
         );
     }
