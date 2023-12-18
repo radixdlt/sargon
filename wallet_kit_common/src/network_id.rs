@@ -63,6 +63,21 @@ pub enum NetworkID {
     /// https://github.com/radixdlt/babylon-node/blob/main/common/src/main/java/com/radixdlt/networks/Network.java#L94
     Enkinet = 0x21,
 
+    /// Hammunet
+    /// https://github.com/radixdlt/babylon-node/blob/main/common/src/main/java/com/radixdlt/networks/Network.java#L95
+    /// Decimal value: 34
+    Hammunet = 0x22,
+
+    /// Nergalnet
+    /// https://github.com/radixdlt/babylon-node/blob/main/common/src/main/java/com/radixdlt/networks/Network.java#L96
+    /// Decimal value: 35
+    Nergalnet = 0x23,
+
+    /// Mardunet
+    /// https://github.com/radixdlt/babylon-node/blob/main/common/src/main/java/com/radixdlt/networks/Network.java#L97
+    /// Decimal value: 36
+    Mardunet = 0x24,
+
     /// Simulator (0xf2 / 0d242)
     Simulator = 242,
 }
@@ -105,18 +120,34 @@ impl NetworkID {
     /// Looks up a `NetworkDefinition` in a lookup table.
 
     pub fn network_definition(&self) -> NetworkDefinition {
+        use NetworkID::*;
         match self {
-            NetworkID::Mainnet => NetworkDefinition::mainnet(),
-            NetworkID::Stokenet => NetworkDefinition::stokenet(),
-            NetworkID::Adapanet => NetworkDefinition::adapanet(),
-            NetworkID::Nebunet => NetworkDefinition::nebunet(),
-            NetworkID::Kisharnet => NetworkDefinition::kisharnet(),
-            NetworkID::Ansharnet => NetworkDefinition::ansharnet(),
-            NetworkID::Zabanet => NetworkDefinition::zabanet(),
-            NetworkID::Enkinet => NetworkDefinition {
-                id: NetworkID::Enkinet.discriminant(),
+            Mainnet => NetworkDefinition::mainnet(),
+            Stokenet => NetworkDefinition::stokenet(),
+            Adapanet => NetworkDefinition::adapanet(),
+            Nebunet => NetworkDefinition::nebunet(),
+            Kisharnet => NetworkDefinition::kisharnet(),
+            Ansharnet => NetworkDefinition::ansharnet(),
+            Zabanet => NetworkDefinition::zabanet(),
+            Enkinet => NetworkDefinition {
+                id: Enkinet.discriminant(),
                 logical_name: String::from("enkinet"),
                 hrp_suffix: String::from("tdx_21_"),
+            },
+            Hammunet => NetworkDefinition {
+                id: Hammunet.discriminant(),
+                logical_name: String::from("hammunet"),
+                hrp_suffix: String::from("tdx_22_"),
+            },
+            Nergalnet => NetworkDefinition {
+                id: Nebunet.discriminant(),
+                logical_name: String::from("nergalnet"),
+                hrp_suffix: String::from("tdx_24_"),
+            },
+            Mardunet => NetworkDefinition {
+                id: Mardunet.discriminant(),
+                logical_name: String::from("mardunet"),
+                hrp_suffix: String::from("tdx_24_"),
             },
             NetworkID::Simulator => NetworkDefinition::simulator(),
         }
@@ -186,6 +217,11 @@ mod tests {
     }
 
     #[test]
+    fn discriminant_hammunet() {
+        assert_eq!(NetworkID::Hammunet.discriminant(), 0x22);
+    }
+
+    #[test]
     fn discriminant_nebunet() {
         assert_eq!(NetworkID::Nebunet.discriminant(), 0x0b);
     }
@@ -232,6 +268,7 @@ mod tests {
 
     #[test]
     fn logical_name() {
-        assert_eq!(NetworkID::Mainnet.logical_name(), "mainnet")
+        assert_eq!(NetworkID::Mainnet.logical_name(), "mainnet");
+        assert_eq!(NetworkID::Stokenet.logical_name(), "stokenet");
     }
 }

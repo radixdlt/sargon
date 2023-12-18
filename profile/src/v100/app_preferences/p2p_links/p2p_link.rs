@@ -1,6 +1,9 @@
 use identified_vec::Identifiable;
 use radix_engine_common::crypto::Hash;
 use serde::{Deserialize, Serialize};
+use wallet_kit_common::error::common_error::CommonError;
+
+use crate::v100::entity::display_name::DisplayName;
 
 use super::radix_connect_password::RadixConnectPassword;
 
@@ -16,7 +19,7 @@ pub struct P2PLink {
     pub connection_password: RadixConnectPassword,
 
     /// Client name, e.g. "Chrome on Macbook" or "My work Android" or "My wifes iPhone SE".
-    pub display_name: String,
+    pub display_name: DisplayName,
 }
 
 impl Identifiable for P2PLink {
@@ -28,11 +31,15 @@ impl Identifiable for P2PLink {
 }
 
 impl P2PLink {
-    pub fn new(password: RadixConnectPassword, name: &str) -> Self {
+    pub fn new(password: RadixConnectPassword, display_name: DisplayName) -> Self {
         Self {
             connection_password: password,
-            display_name: name.to_string(),
+            display_name,
         }
+    }
+
+    pub fn try_from(password: RadixConnectPassword, name: &str) -> Result<Self, CommonError> {
+        DisplayName::try_from(name).map(|display_name| Self::new(password, display_name))
     }
 
     /// A placeholder used to facilitate unit tests.
@@ -43,31 +50,33 @@ impl P2PLink {
     /// `aced`... "Arc on MacStudio"
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_arc() -> Self {
-        Self::new(RadixConnectPassword::placeholder_aced(), "Arc on MacStudio")
+        Self::try_from(RadixConnectPassword::placeholder_aced(), "Arc on MacStudio").unwrap()
     }
 
     /// `babe`... "Brave on PC"
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_brave() -> Self {
-        Self::new(RadixConnectPassword::placeholder_babe(), "Brave on PC")
+        Self::try_from(RadixConnectPassword::placeholder_babe(), "Brave on PC").unwrap()
     }
 
     /// `cafe`... "Chrome on Macbook"
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_chrome() -> Self {
-        Self::new(
+        Self::try_from(
             RadixConnectPassword::placeholder_cafe(),
             "Chrome on Macbook",
         )
+        .unwrap()
     }
 
     /// `dead`... "DuckDuckGo on Mac Pro"
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_duckduckgo() -> Self {
-        Self::new(
+        Self::try_from(
             RadixConnectPassword::placeholder_dead(),
             "DuckDuckGo on Mac Pro",
         )
+        .unwrap()
     }
 }
 

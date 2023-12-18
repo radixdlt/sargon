@@ -1,6 +1,6 @@
 use super::{
-    display::AppDisplay, gateways::Gateways, p2p_links::p2p_links::P2PLinks, security::Security,
-    transaction::Transaction,
+    display::AppDisplay, gateways::gateways::Gateways, p2p_links::p2p_links::P2PLinks,
+    security::Security, transaction::Transaction,
 };
 
 /// Collection of all settings, preferences and configuration related to how the wallet

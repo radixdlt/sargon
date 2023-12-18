@@ -3,6 +3,8 @@ use wallet_kit_common::network_id::NetworkID;
 
 use super::accounts::Accounts;
 
+/// Accounts, Personas, Authorized dapps for some Radix Network that user
+/// has created and interacted with.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct Network {
     /// The ID of the network that has been used to generate the `accounts` and `personas`
