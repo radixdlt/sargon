@@ -73,4 +73,10 @@ pub enum CommonError {
 
     #[error("Expected LedgerHardwareWalletFactorSource")]
     ExpectedLedgerHardwareWalletFactorSourceGotSomethingElse,
+
+    #[error("No network found with name: '{0}'")]
+    UnknownNetworkWithName(String),
+
+    #[error("No network found with id: '{0}'")]
+    UnknownNetworkForID(u8),
 }
