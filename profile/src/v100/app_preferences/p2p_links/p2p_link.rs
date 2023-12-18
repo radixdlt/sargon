@@ -40,19 +40,34 @@ impl P2PLink {
         Self::placeholder_chrome()
     }
 
-    /// `deadbeef`... "Chrome on Macbook"
+    /// `aced`... "Arc on MacStudio"
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_arc() -> Self {
+        Self::new(RadixConnectPassword::placeholder_aced(), "Arc on MacStudio")
+    }
+
+    /// `babe`... "Brave on PC"
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_brave() -> Self {
+        Self::new(RadixConnectPassword::placeholder_babe(), "Brave on PC")
+    }
+
+    /// `cafe`... "Chrome on Macbook"
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_chrome() -> Self {
         Self::new(
-            RadixConnectPassword::placeholder_deadbeef(),
+            RadixConnectPassword::placeholder_cafe(),
             "Chrome on Macbook",
         )
     }
 
-    /// `fadedeaf`... "Brave on PC"
+    /// `dead`... "DuckDuckGo on Mac Pro"
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_brave() -> Self {
-        Self::new(RadixConnectPassword::placeholder_fadedeaf(), "Brave on PC")
+    pub fn placeholder_duckduckgo() -> Self {
+        Self::new(
+            RadixConnectPassword::placeholder_dead(),
+            "DuckDuckGo on Mac Pro",
+        )
     }
 }
 

@@ -16,17 +16,37 @@ impl RadixConnectPassword {
 
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
-        Self::placeholder_deadbeef()
+        Self::new(Hex32Bytes::placeholder())
     }
 
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_deadbeef() -> Self {
-        Self::new(Hex32Bytes::placeholder_deadbeef())
+    pub fn placeholder_aced() -> Self {
+        Self::new(Hex32Bytes::placeholder_aced())
     }
 
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_fadedeaf() -> Self {
-        Self::new(Hex32Bytes::placeholder_fadedeaf())
+    pub fn placeholder_babe() -> Self {
+        Self::new(Hex32Bytes::placeholder_babe())
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_cafe() -> Self {
+        Self::new(Hex32Bytes::placeholder_cafe())
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_dead() -> Self {
+        Self::new(Hex32Bytes::placeholder_dead())
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_ecad() -> Self {
+        Self::new(Hex32Bytes::placeholder_ecad())
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_fade() -> Self {
+        Self::new(Hex32Bytes::placeholder_fade())
     }
 
     pub fn hash(&self) -> Hash {
@@ -36,6 +56,7 @@ impl RadixConnectPassword {
 
 #[cfg(test)]
 mod tests {
+    use radix_engine_common::prelude::HashSet;
     use serde_json::json;
     use wallet_kit_common::json::{
         assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
@@ -56,6 +77,31 @@ mod tests {
         assert_json_value_ne_after_roundtrip(
             &sut,
             json!("fadedeaffadedeaffadedeaffadedeaffadedeaffadedeaffadedeaffadedeaf"),
+        );
+    }
+
+    #[test]
+    fn hash() {
+        assert_eq!(
+            HashSet::from_iter([
+                RadixConnectPassword::placeholder(),
+                RadixConnectPassword::placeholder_dead()
+            ])
+            .len(),
+            1
+        );
+
+        assert_eq!(
+            HashSet::from_iter([
+                RadixConnectPassword::placeholder_aced(),
+                RadixConnectPassword::placeholder_babe(),
+                RadixConnectPassword::placeholder_cafe(),
+                RadixConnectPassword::placeholder_dead(),
+                RadixConnectPassword::placeholder_ecad(),
+                RadixConnectPassword::placeholder_fade(),
+            ])
+            .len(),
+            6
         );
     }
 }

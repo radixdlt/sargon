@@ -64,21 +64,43 @@ impl Hex32Bytes {
     /// `deadbeef...``
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
-        Self::placeholder_deadbeef()
+        Self::placeholder_dead()
     }
 
-    /// `deadbeef...``
+    /// `aced...``
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_deadbeef() -> Self {
-        Self::from_str("deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef")
-            .expect("deadbeef...")
+    pub fn placeholder_aced() -> Self {
+        Self::from_str(&"aced".repeat(16)).expect("aced...")
     }
 
-    /// `fadedeaf...``
+    /// `babe...``
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_fadedeaf() -> Self {
-        Self::from_str("fadedeaffadedeaffadedeaffadedeaffadedeaffadedeaffadedeaffadedeaf")
-            .expect("fadedeaf...")
+    pub fn placeholder_babe() -> Self {
+        Self::from_str(&"babe".repeat(16)).expect("babe...")
+    }
+
+    /// `cafe...``
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_cafe() -> Self {
+        Self::from_str(&"cafe".repeat(16)).expect("cafe...")
+    }
+
+    /// `dead...``
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_dead() -> Self {
+        Self::from_str(&"dead".repeat(16)).expect("dead...")
+    }
+
+    /// `ecad...``
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_ecad() -> Self {
+        Self::from_str(&"ecad".repeat(16)).expect("ecad...")
+    }
+
+    /// `fade...``
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_fade() -> Self {
+        Self::from_str(&"fade".repeat(16)).expect("fade...")
     }
 }
 
