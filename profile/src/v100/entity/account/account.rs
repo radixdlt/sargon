@@ -1,7 +1,16 @@
+#[cfg(any(test, feature = "placeholder"))]
+use crate::v100::factors::factor_sources::{
+    device_factor_source::device_factor_source::DeviceFactorSource,
+    private_hierarchical_deterministic_factor_source::PrivateHierarchicalDeterministicFactorSource,
+};
+#[cfg(any(test, feature = "placeholder"))]
 use hierarchical_deterministic::{
     bip32::hd_path_component::HDPathValue,
-    cap26::cap26_path::paths::is_entity_path::HasEntityPath,
-    derivation::{derivation::Derivation, mnemonic_with_passphrase::MnemonicWithPassphrase},
+    derivation::mnemonic_with_passphrase::MnemonicWithPassphrase,
+};
+
+use hierarchical_deterministic::{
+    cap26::cap26_path::paths::is_entity_path::HasEntityPath, derivation::derivation::Derivation,
 };
 use serde::{Deserialize, Serialize};
 use std::{cell::RefCell, cmp::Ordering, fmt::Display};
@@ -14,13 +23,7 @@ use crate::v100::{
         entity_security_state::EntitySecurityState,
         unsecured_entity_control::UnsecuredEntityControl,
     },
-    factors::{
-        factor_sources::{
-            device_factor_source::device_factor_source::DeviceFactorSource,
-            private_hierarchical_deterministic_factor_source::PrivateHierarchicalDeterministicFactorSource,
-        },
-        hd_transaction_signing_factor_instance::HDFactorInstanceAccountCreation,
-    },
+    factors::hd_transaction_signing_factor_instance::HDFactorInstanceAccountCreation,
 };
 
 use super::{

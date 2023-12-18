@@ -1,23 +1,27 @@
+#[cfg(any(test, feature = "placeholder"))]
+use crate::v100::factors::factor_source_kind::FactorSourceKind;
+#[cfg(any(test, feature = "placeholder"))]
 use hierarchical_deterministic::{
     bip32::hd_path_component::HDPathValue,
+    cap26::{cap26_path::paths::account_path::AccountPath, cap26_repr::CAP26Repr},
+    derivation::mnemonic_with_passphrase::MnemonicWithPassphrase,
+};
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::network_id::NetworkID;
+
+use hierarchical_deterministic::{
     cap26::{
         cap26_key_kind::CAP26KeyKind,
-        cap26_path::{
-            cap26_path::CAP26Path,
-            paths::{account_path::AccountPath, is_entity_path::IsEntityPath},
-        },
-        cap26_repr::CAP26Repr,
+        cap26_path::{cap26_path::CAP26Path, paths::is_entity_path::IsEntityPath},
     },
     derivation::{
         derivation_path::DerivationPath,
         hierarchical_deterministic_public_key::HierarchicalDeterministicPublicKey,
-        mnemonic_with_passphrase::MnemonicWithPassphrase,
     },
 };
 use serde::{de, Deserializer, Serialize, Serializer};
-use wallet_kit_common::{network_id::NetworkID, types::keys::public_key::PublicKey};
+use wallet_kit_common::types::keys::public_key::PublicKey;
 
-use crate::v100::factors::factor_source_kind::FactorSourceKind;
 use wallet_kit_common::error::common_error::CommonError as Error;
 
 use super::{

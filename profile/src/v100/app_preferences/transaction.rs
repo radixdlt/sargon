@@ -3,7 +3,6 @@ use std::{cell::Cell, ops::Deref};
 use radix_engine_common::math::Decimal;
 use radix_engine_toolkit_json::models::common::SerializableDecimal;
 use serde::{Deserialize, Serialize};
-use transaction::prelude::dec;
 
 /// User Preferences relating to submission of transactions.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
@@ -41,12 +40,12 @@ impl Default for Transaction {
 impl Transaction {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
-        Self::new(dec!("0.975"))
+        Self::new(transaction::prelude::dec!("0.975"))
     }
 
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_other() -> Self {
-        Self::new(dec!("0.765"))
+        Self::new(transaction::prelude::dec!("0.765"))
     }
 }
 
