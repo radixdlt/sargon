@@ -83,6 +83,11 @@ mod tests {
     use super::Network;
 
     #[test]
+    fn inequality() {
+        assert_eq!(Network::placeholder(), Network::placeholder_other());
+    }
+
+    #[test]
     fn get_id() {
         assert_eq!(Network::placeholder().id(), NetworkID::Mainnet);
     }
