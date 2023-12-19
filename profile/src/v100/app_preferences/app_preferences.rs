@@ -130,7 +130,7 @@ mod tests {
 
     #[test]
     fn set_display() {
-        let mut sut = AppPreferences::placeholder();
+        let sut = AppPreferences::placeholder();
         sut.set_display(AppDisplay::placeholder_other());
         assert_eq!(sut.display(), AppDisplay::placeholder_other())
     }
@@ -145,7 +145,7 @@ mod tests {
 
     #[test]
     fn set_gateways() {
-        let mut sut = AppPreferences::placeholder();
+        let sut = AppPreferences::placeholder();
         sut.set_gateways(Gateways::placeholder_other());
         assert_eq!(sut.gateways(), Gateways::placeholder_other())
     }
@@ -160,7 +160,7 @@ mod tests {
 
     #[test]
     fn set_p2p_links() {
-        let mut sut = AppPreferences::placeholder();
+        let sut = AppPreferences::placeholder();
         sut.set_p2p_links(P2PLinks::placeholder_other());
         assert_eq!(sut.p2p_links(), P2PLinks::placeholder_other())
     }
@@ -175,7 +175,7 @@ mod tests {
 
     #[test]
     fn set_security() {
-        let mut sut = AppPreferences::placeholder();
+        let sut = AppPreferences::placeholder();
         sut.set_security(Security::placeholder_other());
         assert_eq!(sut.security(), Security::placeholder_other())
     }
@@ -190,7 +190,7 @@ mod tests {
 
     #[test]
     fn set_transaction() {
-        let mut sut = AppPreferences::placeholder();
+        let sut = AppPreferences::placeholder();
         sut.set_transaction(Transaction::placeholder_other());
         assert_eq!(sut.transaction(), Transaction::placeholder_other())
     }

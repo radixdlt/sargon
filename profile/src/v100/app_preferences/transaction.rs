@@ -1,4 +1,4 @@
-use std::{cell::Cell, ops::Deref};
+use std::cell::RefCell;
 
 use radix_engine_common::math::Decimal;
 use radix_engine_toolkit_json::models::common::SerializableDecimal;
@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 pub struct Transaction {
     /// The deposit guarantee that will automatically be added for
     /// all deposits in transactions.
-    default_deposit_guarantee: Cell<SerializableDecimal>,
+    default_deposit_guarantee: RefCell<SerializableDecimal>,
 }
 
 impl Transaction {
@@ -18,18 +18,18 @@ impl Transaction {
     /// specified `default_deposit_guarantee` value.
     pub fn new(default_deposit_guarantee: Decimal) -> Self {
         Self {
-            default_deposit_guarantee: Cell::new(default_deposit_guarantee.into()),
+            default_deposit_guarantee: RefCell::new(default_deposit_guarantee.into()),
         }
     }
 
     /// The deposit guarantee that will automatically be added for
     /// all deposits in transactions.
     pub fn default_deposit_guarantee(&self) -> Decimal {
-        *self.default_deposit_guarantee.get().clone().deref()
+        *self.default_deposit_guarantee.borrow().clone()
     }
 
-    pub fn set_default_deposit_guarantee(&mut self, new: Decimal) {
-        *self.default_deposit_guarantee.get_mut() = new.into()
+    pub fn set_default_deposit_guarantee(&self, new: Decimal) {
+        *self.default_deposit_guarantee.borrow_mut() = new.into()
     }
 }
 
@@ -97,7 +97,7 @@ mod tests {
 
     #[test]
     fn set_default_deposit_guarantee() {
-        let mut sut = Transaction::default();
+        let sut = Transaction::default();
         sut.set_default_deposit_guarantee(dec!("0.237"));
         assert_eq!(sut.default_deposit_guarantee().to_string(), "0.237");
     }

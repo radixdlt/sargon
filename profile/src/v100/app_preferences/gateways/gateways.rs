@@ -99,7 +99,7 @@ impl Gateways {
 impl Gateways {
     /// Changes the current Gateway to `to`, if it is not already the current. If `to` is
     /// not a new Gateway, it will be removed from
-    pub fn change_current(&mut self, to: Gateway) -> Result<usize, CommonError> {
+    pub fn change_current(&self, to: Gateway) -> Result<usize, CommonError> {
         if self.current() == to {
             return Ok(0);
         }
@@ -120,7 +120,7 @@ impl Gateways {
     /// - Returns: A pair `(inserted, index)`, where `inserted` is a Boolean value indicating whether
     ///   the operation added a new element, and `index` is the index of `item` in the resulting
     ///   `identified_vec`.
-    pub fn append(&mut self, gateway: Gateway) -> (bool, usize) {
+    pub fn append(&self, gateway: Gateway) -> (bool, usize) {
         self.other.borrow_mut().append(gateway)
     }
 }
@@ -138,7 +138,7 @@ impl Default for Gateways {
 #[cfg(any(test, feature = "placeholder"))]
 impl Gateways {
     pub fn placeholder() -> Self {
-        let mut sut = Gateways::new(Gateway::rcnet());
+        let sut = Gateways::new(Gateway::rcnet());
         sut.append(Gateway::mainnet());
         sut.append(Gateway::stokenet());
         sut
@@ -170,7 +170,7 @@ mod tests {
 
     #[test]
     fn change_current_to_existing() {
-        let mut sut = Gateways::default();
+        let sut = Gateways::default();
         assert_eq!(sut.current().network().id(), &NetworkID::Mainnet);
         assert_eq!(sut.change_current(Gateway::stokenet()), Ok(1));
         assert_eq!(sut.current().network().id(), &NetworkID::Stokenet);
@@ -189,7 +189,7 @@ mod tests {
 
     #[test]
     fn change_throw_gateways_discrepancy_other_should_not_contain_current() {
-        let mut impossible = Gateways {
+        let impossible = Gateways {
             current: RefCell::new(Gateway::mainnet()),
             other: RefCell::new(IdentifiedVecOf::from_iter([Gateway::mainnet()])),
         };
@@ -201,7 +201,7 @@ mod tests {
 
     #[test]
     fn change_current_to_current() {
-        let mut sut = Gateways::default();
+        let sut = Gateways::default();
         assert_eq!(sut.current().network().id(), &NetworkID::Mainnet);
         assert_eq!(sut.change_current(Gateway::mainnet()), Ok(0));
         assert_eq!(sut.current().network().id(), &NetworkID::Mainnet);
@@ -209,7 +209,7 @@ mod tests {
 
     #[test]
     fn change_current_to_new() {
-        let mut sut = Gateways::default();
+        let sut = Gateways::default();
         assert_eq!(sut.current().network().id(), &NetworkID::Mainnet);
         assert_eq!(sut.change_current(Gateway::nebunet()), Ok(1));
         assert_eq!(sut.current().network().id(), &NetworkID::Nebunet);
