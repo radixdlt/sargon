@@ -175,6 +175,8 @@ impl FactorSourceCommon {
 #[cfg(test)]
 mod tests {
 
+    use std::collections::BTreeSet;
+
     use chrono::NaiveDateTime;
     use wallet_kit_common::{json::assert_eq_after_json_roundtrip, utils::factory::now};
 
@@ -247,5 +249,36 @@ mod tests {
     #[test]
     fn main_flag_not_present_if_not_main() {
         assert!(FactorSourceCommon::new_bdfs(false).flags().is_empty());
+    }
+
+    #[test]
+    fn set_crypto_parameters() {
+        let sut = FactorSourceCommon::placeholder_olympia();
+        assert_eq!(
+            sut.crypto_parameters(),
+            FactorSourceCryptoParameters::olympia()
+        );
+        sut.set_crypto_parameters(FactorSourceCryptoParameters::babylon_olympia_compatible());
+        assert_eq!(
+            sut.crypto_parameters(),
+            FactorSourceCryptoParameters::babylon_olympia_compatible()
+        );
+    }
+
+    #[test]
+    fn set_last_used_on() {
+        let sut = FactorSourceCommon::placeholder_main_babylon();
+        let d = now();
+        assert_ne!(sut.last_used_on(), d);
+        sut.set_last_used_on(d);
+        assert_eq!(sut.last_used_on(), d);
+    }
+
+    #[test]
+    fn set_flags() {
+        let sut = FactorSourceCommon::placeholder_main_babylon();
+        assert_eq!(sut.flags().contains(&FactorSourceFlag::Main), true);
+        sut.set_flags(BTreeSet::new());
+        assert_eq!(sut.flags().contains(&FactorSourceFlag::Main), false);
     }
 }
