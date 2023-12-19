@@ -72,6 +72,7 @@ impl Serialize for FactorSourceID {
     }
 }
 
+#[cfg(any(test, feature = "placeholder"))]
 impl FactorSourceID {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {

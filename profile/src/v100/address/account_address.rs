@@ -104,11 +104,25 @@ impl Display for AccountAddress {
     }
 }
 
+#[cfg(any(test, feature = "placeholder"))]
 impl AccountAddress {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
+        Self::placeholder_alice()
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_alice() -> Self {
         AccountAddress::try_from_bech32(
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease",
+        )
+        .unwrap()
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_bob() -> Self {
+        AccountAddress::try_from_bech32(
+            "account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master",
         )
         .unwrap()
     }
@@ -180,6 +194,15 @@ mod tests {
                 .try_into()
                 .unwrap();
         assert_ne!(AccountAddress::placeholder(), b)
+    }
+
+    #[test]
+    fn nebunet() {
+        let address = AccountAddress::try_from_bech32(
+            "account_tdx_b_1286wrrqrfcrfhthfrtdywe8alney8zu0ja5xrhcq2475ej08m9raqq",
+        )
+        .unwrap();
+        assert_eq!(address.network_id, NetworkID::Nebunet)
     }
 
     #[test]

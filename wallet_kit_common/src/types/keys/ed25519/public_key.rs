@@ -67,6 +67,7 @@ impl Debug for Ed25519PublicKey {
     }
 }
 
+#[cfg(any(test, feature = "placeholder"))]
 impl Ed25519PublicKey {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {

@@ -22,7 +22,7 @@ impl Accounts {
     where
         I: Iterator<Item = Account>,
     {
-        Self::new(accounts.map(|a| (a.address.clone(), a)).collect())
+        Self::new(accounts.map(|a| (a.address(), a)).collect())
     }
 
     /// Instantiates a new collection of accounts from a
@@ -47,6 +47,23 @@ impl Accounts {
     /// Returns references to **all** accounts, including hidden ones.
     pub fn get_all(&self) -> Vec<&Account> {
         self.0.iter().map(|(_, v)| v).collect()
+    }
+}
+
+#[cfg(any(test, feature = "placeholder"))]
+impl Accounts {
+    pub fn placeholder() -> Self {
+        Self::with_accounts(
+            [
+                Account::placeholder_mainnet_alice(),
+                Account::placeholder_mainnet_bob(),
+            ]
+            .into_iter(),
+        )
+    }
+
+    pub fn placeholder_other() -> Self {
+        Self::with_account(Account::placeholder_mainnet())
     }
 }
 

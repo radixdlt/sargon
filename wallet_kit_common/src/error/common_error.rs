@@ -73,4 +73,22 @@ pub enum CommonError {
 
     #[error("Expected LedgerHardwareWalletFactorSource")]
     ExpectedLedgerHardwareWalletFactorSourceGotSomethingElse,
+
+    #[error("No network found with name: '{0}'")]
+    UnknownNetworkWithName(String),
+
+    #[error("No network found with id: '{0}'")]
+    UnknownNetworkForID(u8),
+
+    #[error("Gateway discrepancy, 'other' should not contain 'current'.")]
+    GatewaysDiscrepancyOtherShouldNotContainCurrent,
+
+    #[error("Gateways discrepancy, invalid JSON, current not found amongst saved.")]
+    InvalidGatewaysJSONCurrentNotFoundAmongstSaved,
+
+    #[error("Invalid URL: '{0}'")]
+    InvalidURL(String),
+
+    #[error("Accounts on different networks.")]
+    AccountOnWrongNetwork,
 }

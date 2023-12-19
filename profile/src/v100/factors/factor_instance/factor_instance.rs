@@ -43,7 +43,10 @@ impl FactorInstance {
             ),
         )
     }
+}
 
+#[cfg(any(test, feature = "placeholder"))]
+impl FactorInstance {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
         Self::new(

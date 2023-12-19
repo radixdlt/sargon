@@ -51,6 +51,7 @@ impl From<UnsecuredEntityControl> for EntitySecurityState {
     }
 }
 
+#[cfg(any(test, feature = "placeholder"))]
 impl EntitySecurityState {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {

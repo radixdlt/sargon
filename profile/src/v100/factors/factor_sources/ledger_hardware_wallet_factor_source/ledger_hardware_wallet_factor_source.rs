@@ -44,6 +44,7 @@ impl LedgerHardwareWalletFactorSource {
     }
 }
 
+#[cfg(any(test, feature = "placeholder"))]
 impl LedgerHardwareWalletFactorSource {
     pub fn placeholder() -> Self {
         Self::new(

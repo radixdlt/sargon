@@ -63,6 +63,7 @@ impl UnsecuredEntityControl {
     }
 }
 
+#[cfg(any(test, feature = "placeholder"))]
 impl UnsecuredEntityControl {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {

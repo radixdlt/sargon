@@ -47,6 +47,7 @@ impl FactorSourceIDFromHash {
     }
 }
 
+#[cfg(any(test, feature = "placeholder"))]
 impl FactorSourceIDFromHash {
     /// A placeholder used to facilitate unit tests, just an alias
     /// for `placeholder_device`

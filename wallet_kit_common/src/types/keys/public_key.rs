@@ -102,6 +102,7 @@ impl PublicKey {
     }
 }
 
+#[cfg(any(test, feature = "placeholder"))]
 impl PublicKey {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_secp256k1() -> Self {

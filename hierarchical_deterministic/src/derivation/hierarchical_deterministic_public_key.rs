@@ -45,6 +45,7 @@ impl HierarchicalDeterministicPublicKey {
     }
 }
 
+#[cfg(any(test, feature = "placeholder"))]
 impl HierarchicalDeterministicPublicKey {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {

@@ -14,6 +14,7 @@ pub enum FactorInstanceBadge {
     Virtual(FactorInstanceBadgeVirtualSource),
 }
 
+#[cfg(any(test, feature = "placeholder"))]
 impl FactorInstanceBadge {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {

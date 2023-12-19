@@ -103,6 +103,7 @@ impl TryInto<BIP44LikePath> for &str {
     }
 }
 
+#[cfg(any(test, feature = "placeholder"))]
 impl BIP44LikePath {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {

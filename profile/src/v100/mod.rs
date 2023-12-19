@@ -1,4 +1,5 @@
 pub mod address;
+pub mod app_preferences;
 pub mod entity;
 pub mod entity_security_state;
 pub mod factors;

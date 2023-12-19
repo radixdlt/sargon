@@ -21,6 +21,7 @@ impl FactorSourceIDFromAddress {
     }
 }
 
+#[cfg(any(test, feature = "placeholder"))]
 impl FactorSourceIDFromAddress {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {

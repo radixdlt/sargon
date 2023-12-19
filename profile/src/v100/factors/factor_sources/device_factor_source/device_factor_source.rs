@@ -89,6 +89,7 @@ impl DeviceFactorSource {
     }
 }
 
+#[cfg(any(test, feature = "placeholder"))]
 impl DeviceFactorSource {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {

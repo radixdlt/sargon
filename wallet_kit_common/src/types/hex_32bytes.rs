@@ -11,7 +11,7 @@ use crate::{error::bytes_error::BytesError as Error, secure_random_bytes::genera
 /// Serializable 32 bytes which **always** serializes as a **hex** string, this is useful
 /// since in Radix Wallet Kit we almost always want to serialize bytes into hex and this
 /// allows us to skip using
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Hex32Bytes([u8; 32]);
 
 impl Hex32Bytes {
@@ -60,12 +60,48 @@ impl FromStr for Hex32Bytes {
     }
 }
 
+#[cfg(any(test, feature = "placeholder"))]
 impl Hex32Bytes {
-    /// Just some placeholder Hex32Bytes
+    /// `deadbeef...``
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
-        Self::from_str("deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef")
-            .expect("Deadbeef")
+        Self::placeholder_dead()
+    }
+
+    /// `aced...``
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_aced() -> Self {
+        Self::from_str(&"aced".repeat(16)).expect("aced...")
+    }
+
+    /// `babe...``
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_babe() -> Self {
+        Self::from_str(&"babe".repeat(16)).expect("babe...")
+    }
+
+    /// `cafe...``
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_cafe() -> Self {
+        Self::from_str(&"cafe".repeat(16)).expect("cafe...")
+    }
+
+    /// `dead...``
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_dead() -> Self {
+        Self::from_str(&"dead".repeat(16)).expect("dead...")
+    }
+
+    /// `ecad...``
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_ecad() -> Self {
+        Self::from_str(&"ecad".repeat(16)).expect("ecad...")
+    }
+
+    /// `fade...``
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_fade() -> Self {
+        Self::from_str(&"fade".repeat(16)).expect("fade...")
     }
 }
 
@@ -143,7 +179,7 @@ mod tests {
 
     #[test]
     fn debug() {
-        let str = "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef";
+        let str = "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
         let hex_bytes = Hex32Bytes::placeholder();
         assert_eq!(format!("{:?}", hex_bytes), str);
     }
@@ -153,7 +189,7 @@ mod tests {
         let model = Hex32Bytes::placeholder();
         assert_json_value_eq_after_roundtrip(
             &model,
-            json!("deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"),
+            json!("deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"),
         );
     }
 

@@ -57,7 +57,7 @@ impl ThirdPartyDeposits {
     /// Returns the general `deposit_rule` **as a clone**.
     ///
     /// Use [`self::set_deposit_rule(new)`] to update it.
-    pub fn get_deposit_rule(&self) -> DepositRule {
+    pub fn deposit_rule(&self) -> DepositRule {
         self.deposit_rule.get().clone()
     }
 
@@ -65,7 +65,7 @@ impl ThirdPartyDeposits {
     ///
     /// Use [`self::set_assets_exception_list()`], [`self::add_asset_exception()`]
     /// or [`self::remove_asset_exception`] to update it.
-    pub fn get_assets_exception_list(&self) -> BTreeSet<AssetException> {
+    pub fn assets_exception_list(&self) -> BTreeSet<AssetException> {
         self.assets_exception_list.borrow().clone()
     }
 
@@ -73,7 +73,7 @@ impl ThirdPartyDeposits {
     ///
     /// Use [`self::set_depositors_allow_list()`], [`self::allow_depositor()`],
     /// or [`self::remove_allowed_depositor()`] to update it.
-    pub fn get_depositors_allow_list(&self) -> BTreeSet<DepositorAddress> {
+    pub fn depositors_allow_list(&self) -> BTreeSet<DepositorAddress> {
         self.depositors_allow_list.borrow().clone()
     }
 }
@@ -221,9 +221,9 @@ mod tests {
             DepositAddressExceptionRule::Deny,
         );
         assert!(settings.add_asset_exception(exception.clone()));
-        assert_eq!(settings.get_assets_exception_list().len(), 2);
+        assert_eq!(settings.assets_exception_list().len(), 2);
         assert!(settings.remove_asset_exception(&exception));
-        assert_eq!(settings.get_assets_exception_list().len(), 1);
+        assert_eq!(settings.assets_exception_list().len(), 1);
         settings.set_assets_exception_list(BTreeSet::from_iter([exception.clone()]));
         assert!(
             !settings.add_asset_exception(exception.clone()),
@@ -256,9 +256,9 @@ mod tests {
             .unwrap(),
         );
         assert!(settings.allow_depositor(depositor.clone()));
-        assert_eq!(settings.get_depositors_allow_list().len(), 1);
+        assert_eq!(settings.depositors_allow_list().len(), 1);
         assert!(settings.remove_allowed_depositor(&depositor));
-        assert_eq!(settings.get_depositors_allow_list().len(), 0);
+        assert_eq!(settings.depositors_allow_list().len(), 0);
         settings.set_depositors_allow_list(BTreeSet::from_iter([depositor.clone()]));
         assert!(
             !settings.allow_depositor(depositor.clone()),
@@ -269,7 +269,7 @@ mod tests {
     #[test]
     fn accept_all_is_default() {
         assert_eq!(
-            ThirdPartyDeposits::default().get_deposit_rule(),
+            ThirdPartyDeposits::default().deposit_rule(),
             DepositRule::AcceptAll
         );
     }
@@ -277,22 +277,22 @@ mod tests {
     #[test]
     fn empty_assets_exception_list_is_default() {
         assert!(ThirdPartyDeposits::default()
-            .get_assets_exception_list()
+            .assets_exception_list()
             .is_empty(),);
     }
 
     #[test]
     fn empty_depositors_allow_list_is_default() {
         assert!(ThirdPartyDeposits::default()
-            .get_depositors_allow_list()
+            .depositors_allow_list()
             .is_empty(),);
     }
 
     #[test]
     fn change_rule() {
         let settings = ThirdPartyDeposits::new(DepositRule::AcceptAll);
-        assert_eq!(settings.get_deposit_rule(), DepositRule::AcceptAll);
+        assert_eq!(settings.deposit_rule(), DepositRule::AcceptAll);
         settings.set_deposit_rule(DepositRule::DenyAll);
-        assert_eq!(settings.get_deposit_rule(), DepositRule::DenyAll);
+        assert_eq!(settings.deposit_rule(), DepositRule::DenyAll);
     }
 }

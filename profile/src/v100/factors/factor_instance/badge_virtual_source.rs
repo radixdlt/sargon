@@ -54,6 +54,7 @@ impl Serialize for FactorInstanceBadgeVirtualSource {
     }
 }
 
+#[cfg(any(test, feature = "placeholder"))]
 impl FactorInstanceBadgeVirtualSource {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {

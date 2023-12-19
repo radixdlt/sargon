@@ -75,6 +75,7 @@ impl Serialize for DerivationPath {
     }
 }
 
+#[cfg(any(test, feature = "placeholder"))]
 impl DerivationPath {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
@@ -102,6 +103,7 @@ impl Derivation for DerivationPath {
     }
 }
 
+#[cfg(any(test, feature = "placeholder"))]
 impl DerivationPath {
     pub fn placeholder_cap26() -> Self {
         DerivationPath::CAP26(CAP26Path::placeholder_account())

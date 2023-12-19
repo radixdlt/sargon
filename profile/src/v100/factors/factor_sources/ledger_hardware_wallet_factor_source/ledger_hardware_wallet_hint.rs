@@ -20,6 +20,7 @@ impl LedgerHardwareWalletHint {
     }
 }
 
+#[cfg(any(test, feature = "placeholder"))]
 impl LedgerHardwareWalletHint {
     pub fn placeholder() -> Self {
         Self::new("Orange, scratched", LedgerHardwareWalletModel::NanoSPlus)
