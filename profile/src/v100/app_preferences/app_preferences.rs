@@ -56,23 +56,23 @@ impl AppPreferences {
 }
 
 impl AppPreferences {
-    pub fn set_display(&mut self, new: AppDisplay) {
+    pub fn set_display(&self, new: AppDisplay) {
         *self.display.borrow_mut() = new
     }
 
-    pub fn set_gateways(&mut self, new: Gateways) {
+    pub fn set_gateways(&self, new: Gateways) {
         *self.gateways.borrow_mut() = new
     }
 
-    pub fn set_p2p_links(&mut self, new: P2PLinks) {
+    pub fn set_p2p_links(&self, new: P2PLinks) {
         *self.p2p_links.borrow_mut() = new
     }
 
-    pub fn set_security(&mut self, new: Security) {
+    pub fn set_security(&self, new: Security) {
         *self.security.borrow_mut() = new
     }
 
-    pub fn set_transaction(&mut self, new: Transaction) {
+    pub fn set_transaction(&self, new: Transaction) {
         *self.transaction.borrow_mut() = new
     }
 }
