@@ -168,7 +168,7 @@ mod tests {
 
     #[test]
     fn default_is_mainnet() {
-        assert_eq!(RadixNetwork::placeholder(), RadixNetwork::mainnet());
+        assert_eq!(RadixNetwork::default(), RadixNetwork::mainnet());
     }
 
     #[test]

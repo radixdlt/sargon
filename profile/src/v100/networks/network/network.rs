@@ -68,6 +68,10 @@ impl Network {
     pub fn placeholder() -> Self {
         Self::new(NetworkID::Mainnet, Accounts::placeholder())
     }
+
+    pub fn placeholder_other() -> Self {
+        Self::new(NetworkID::Mainnet, Accounts::placeholder_other())
+    }
 }
 
 #[cfg(test)]
@@ -96,6 +100,14 @@ mod tests {
             sut.set_accounts(Accounts::with_account(Account::placeholder_stokenet())),
             Err(CommonError::AccountOnWrongNetwork)
         );
+    }
+
+    #[test]
+    fn set_accounts_same_network() {
+        assert_ne!(Accounts::placeholder(), Accounts::placeholder_other());
+        let mut sut = Network::new(NetworkID::Mainnet, Accounts::placeholder());
+        assert_eq!(sut.set_accounts(Accounts::placeholder_other()), Ok(()));
+        assert_eq!(sut.accounts(), Accounts::placeholder_other());
     }
 
     #[test]

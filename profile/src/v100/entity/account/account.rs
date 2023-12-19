@@ -258,10 +258,20 @@ impl Account {
     }
 
     pub fn placeholder_mainnet() -> Self {
+        Self::placeholder_mainnet_alice()
+    }
+
+    pub fn placeholder_mainnet_alice() -> Self {
         Self::placeholder_with_values(
-            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
-                .try_into()
-                .unwrap(),
+            AccountAddress::placeholder_alice(),
+            DisplayName::default(),
+            AppearanceID::default(),
+        )
+    }
+
+    pub fn placeholder_mainnet_bob() -> Self {
+        Self::placeholder_with_values(
+            AccountAddress::placeholder_bob(),
             DisplayName::default(),
             AppearanceID::default(),
         )

@@ -108,8 +108,21 @@ impl Display for AccountAddress {
 impl AccountAddress {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
+        Self::placeholder_alice()
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_alice() -> Self {
         AccountAddress::try_from_bech32(
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease",
+        )
+        .unwrap()
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_bob() -> Self {
+        AccountAddress::try_from_bech32(
+            "account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master",
         )
         .unwrap()
     }

@@ -53,6 +53,16 @@ impl Accounts {
 #[cfg(any(test, feature = "placeholder"))]
 impl Accounts {
     pub fn placeholder() -> Self {
+        Self::with_accounts(
+            [
+                Account::placeholder_mainnet_alice(),
+                Account::placeholder_mainnet_bob(),
+            ]
+            .into_iter(),
+        )
+    }
+
+    pub fn placeholder_other() -> Self {
         Self::with_account(Account::placeholder_mainnet())
     }
 }
