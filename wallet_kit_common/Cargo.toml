@@ -28,3 +28,4 @@ ed25519-dalek = "1.0.1"
 rand = "0.8.5"
 enum-as-inner = "0.6.0"
 pretty_assertions = "1.4.0"
+identified_vec = { version = "0.1.8", features = ["serde", "id_prim"] }

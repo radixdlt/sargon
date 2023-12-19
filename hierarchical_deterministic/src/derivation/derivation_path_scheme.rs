@@ -1,3 +1,4 @@
+use identified_vec::Identifiable;
 use serde::{Deserialize, Serialize};
 use wallet_kit_common::types::keys::slip10_curve::SLIP10Curve;
 
@@ -16,6 +17,17 @@ pub enum DerivationPathScheme {
     /// used to support legacy accounts imported from Olympia wallet.
     #[serde(rename = "bip44Olympia")]
     Bip44Olympia,
+}
+
+impl Identifiable for DerivationPathScheme {
+    type ID = String;
+
+    fn id(&self) -> Self::ID {
+        match self {
+            Self::Cap26 => "cap26".to_string(),
+            Self::Bip44Olympia => "bip44Olympia".to_string(),
+        }
+    }
 }
 
 impl DerivationPathScheme {
@@ -37,6 +49,7 @@ impl DerivationPathScheme {
 
 #[cfg(test)]
 mod tests {
+    use identified_vec::Identifiable;
     use serde_json::json;
     use wallet_kit_common::{
         json::{
@@ -58,12 +71,19 @@ mod tests {
     }
 
     #[test]
+    fn id() {
+        assert_eq!(DerivationPathScheme::Bip44Olympia.id(), "bip44Olympia");
+        assert_eq!(DerivationPathScheme::Cap26.id(), "cap26");
+    }
+
+    #[test]
     fn json_roundtrip_bip44() {
         let model = DerivationPathScheme::Bip44Olympia;
         assert_json_value_eq_after_roundtrip(&model, json!("bip44Olympia"));
         assert_json_value_ne_after_roundtrip(&model, json!("cap26"));
         assert_json_roundtrip(&model);
     }
+
     #[test]
     fn json_roundtrip_cap26() {
         let model = DerivationPathScheme::Cap26;

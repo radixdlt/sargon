@@ -21,17 +21,35 @@ use super::device_factor_source_hint::DeviceFactorSourceHint;
 pub struct DeviceFactorSource {
     /// Unique and stable identifier of this factor source, stemming from the
     /// hash of a special child key of the HD root of the mnemonic.
-    pub id: FactorSourceIDFromHash,
+    id: FactorSourceIDFromHash,
 
     /// Common properties shared between FactorSources of different kinds,
     /// describing its state, when added, and supported cryptographic parameters.
     ///
     /// Has interior mutability since we must be able to update the
     /// last used date.
-    pub common: RefCell<FactorSourceCommon>,
+    common: RefCell<FactorSourceCommon>,
 
     /// Properties describing a DeviceFactorSource to help user disambiguate between it and another one.
-    pub hint: DeviceFactorSourceHint,
+    hint: DeviceFactorSourceHint,
+}
+
+impl DeviceFactorSource {
+    pub fn id(&self) -> FactorSourceIDFromHash {
+        self.id.clone()
+    }
+
+    pub fn common(&self) -> FactorSourceCommon {
+        self.common.borrow().clone()
+    }
+
+    pub fn set_common(&self, new: FactorSourceCommon) {
+        *self.common.borrow_mut() = new
+    }
+
+    pub fn hint(&self) -> &DeviceFactorSourceHint {
+        &self.hint
+    }
 }
 
 impl TryFrom<FactorSource> for DeviceFactorSource {
@@ -93,9 +111,23 @@ impl DeviceFactorSource {
 impl DeviceFactorSource {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
+        Self::placeholder_babylon()
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_babylon() -> Self {
         Self::new(
             FactorSourceIDFromHash::placeholder(),
-            FactorSourceCommon::placeholder(),
+            FactorSourceCommon::placeholder_main_babylon(),
+            DeviceFactorSourceHint::placeholder(),
+        )
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_olympia() -> Self {
+        Self::new(
+            FactorSourceIDFromHash::placeholder(),
+            FactorSourceCommon::placeholder_olympia(),
             DeviceFactorSourceHint::placeholder(),
         )
     }
@@ -103,12 +135,15 @@ impl DeviceFactorSource {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
+    use hierarchical_deterministic::bip39::bip39_word_count::BIP39WordCount;
+    use wallet_kit_common::{
+        json::assert_eq_after_json_roundtrip, types::keys::slip10_curve::SLIP10Curve,
+    };
 
     use crate::v100::factors::{
-        factor_source_id::FactorSourceID, is_factor_source::IsFactorSource, factor_source::FactorSource, factor_sources::ledger_hardware_wallet_factor_source::ledger_hardware_wallet_factor_source::LedgerHardwareWalletFactorSource,
+        factor_source_id::FactorSourceID, is_factor_source::IsFactorSource, factor_source::FactorSource, factor_sources::ledger_hardware_wallet_factor_source::ledger_hardware_wallet_factor_source::LedgerHardwareWalletFactorSource, factor_source_crypto_parameters::FactorSourceCryptoParameters,
     };
-use wallet_kit_common::error::common_error::CommonError as Error;
+    use wallet_kit_common::error::common_error::CommonError as Error;
     use super::DeviceFactorSource;
 
     #[test]
@@ -162,6 +197,24 @@ use wallet_kit_common::error::common_error::CommonError as Error;
         assert_eq!(
             DeviceFactorSource::try_from(factor_source),
             Err(Error::ExpectedDeviceFactorSourceGotSomethingElse)
+        );
+    }
+
+    #[test]
+    fn placeholder_olympia_has_crypto_parameters_olympia() {
+        assert_eq!(
+            DeviceFactorSource::placeholder_olympia()
+                .common()
+                .crypto_parameters(),
+            FactorSourceCryptoParameters::olympia()
+        );
+    }
+
+    #[test]
+    fn hint() {
+        assert_eq!(
+            DeviceFactorSource::placeholder().hint().mnemonic_word_count,
+            BIP39WordCount::TwentyFour
         );
     }
 }

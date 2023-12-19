@@ -2,9 +2,14 @@ use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializ
 
 use enum_as_inner::EnumAsInner;
 
-use super::factor_sources::{
-    device_factor_source::device_factor_source::DeviceFactorSource,
-    ledger_hardware_wallet_factor_source::ledger_hardware_wallet_factor_source::LedgerHardwareWalletFactorSource,
+use super::{
+    factor_source_id::FactorSourceID,
+    factor_source_kind::FactorSourceKind,
+    factor_sources::{
+        device_factor_source::device_factor_source::DeviceFactorSource,
+        ledger_hardware_wallet_factor_source::ledger_hardware_wallet_factor_source::LedgerHardwareWalletFactorSource,
+    },
+    is_factor_source::IsFactorSource,
 };
 #[derive(Serialize, Deserialize, Clone, EnumAsInner, Debug, PartialEq, Eq)]
 #[serde(remote = "Self")]
@@ -14,6 +19,22 @@ pub enum FactorSource {
 
     #[serde(rename = "ledgerHQHardwareWallet")]
     Ledger(LedgerHardwareWalletFactorSource),
+}
+
+impl IsFactorSource for FactorSource {
+    fn factor_source_kind(&self) -> FactorSourceKind {
+        match self {
+            FactorSource::Device(fs) => fs.factor_source_kind(),
+            FactorSource::Ledger(fs) => fs.factor_source_kind(),
+        }
+    }
+
+    fn factor_source_id(&self) -> FactorSourceID {
+        match self {
+            FactorSource::Device(fs) => fs.factor_source_id(),
+            FactorSource::Ledger(fs) => fs.factor_source_id(),
+        }
+    }
 }
 
 impl From<DeviceFactorSource> for FactorSource {
@@ -66,13 +87,72 @@ impl Serialize for FactorSource {
         state.end()
     }
 }
+
+#[cfg(any(test, feature = "placeholder"))]
+impl FactorSource {
+    pub fn placeholder_device() -> Self {
+        Self::placeholder_device_babylon()
+    }
+
+    pub fn placeholder_device_babylon() -> Self {
+        Self::Device(DeviceFactorSource::placeholder_babylon())
+    }
+
+    pub fn placeholder_device_olympia() -> Self {
+        Self::Device(DeviceFactorSource::placeholder_olympia())
+    }
+
+    pub fn placeholder_ledger() -> Self {
+        Self::Ledger(LedgerHardwareWalletFactorSource::placeholder())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use wallet_kit_common::json::assert_eq_after_json_roundtrip;
 
-    use crate::v100::factors::factor_sources::device_factor_source::device_factor_source::DeviceFactorSource;
+    use crate::v100::factors::{
+        factor_source_kind::FactorSourceKind,
+        factor_sources::{
+            device_factor_source::device_factor_source::DeviceFactorSource,
+            ledger_hardware_wallet_factor_source::ledger_hardware_wallet_factor_source::LedgerHardwareWalletFactorSource,
+        },
+        is_factor_source::IsFactorSource,
+    };
 
     use super::FactorSource;
+
+    #[test]
+    fn factor_source_id_device() {
+        assert_eq!(
+            FactorSource::placeholder_device().factor_source_id(),
+            DeviceFactorSource::placeholder().factor_source_id()
+        );
+    }
+
+    #[test]
+    fn factor_source_id_ledger() {
+        assert_eq!(
+            FactorSource::placeholder_ledger().factor_source_id(),
+            LedgerHardwareWalletFactorSource::placeholder().factor_source_id()
+        );
+    }
+
+    #[test]
+    fn factor_source_kind_device() {
+        assert_eq!(
+            FactorSource::placeholder_device().factor_source_kind(),
+            FactorSourceKind::Device
+        );
+    }
+
+    #[test]
+    fn factor_source_kind_ledger() {
+        assert_eq!(
+            FactorSource::placeholder_ledger().factor_source_kind(),
+            FactorSourceKind::LedgerHQHardwareWallet
+        );
+    }
 
     #[test]
     fn json_roundtrip_from_device() {

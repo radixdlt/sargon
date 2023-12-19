@@ -1,4 +1,5 @@
 use std::{
+    borrow::BorrowMut,
     cell::{Cell, RefCell},
     collections::BTreeSet,
 };
@@ -18,10 +19,16 @@ use super::{
 #[serde(rename_all = "camelCase")]
 pub struct FactorSourceCommon {
     /// Cryptographic parameters a certain FactorSource supports, e.g. Elliptic Curves.
-    pub crypto_parameters: FactorSourceCryptoParameters,
+    ///
+    /// Has interior mutability since Radix Wallet App version 1.3.0, it is
+    /// possible to add crypto parameters to a FactorSource, e.g. when a user
+    /// with a DeviceFactorSource with babylon crypto parameters, lets call it `B`,
+    /// with mnemonic `M` adds `M` again but as an "Olympia" factor source, then
+    /// the olympia crypto parameters are added to `B`.
+    crypto_parameters: RefCell<FactorSourceCryptoParameters>,
 
     /// When this factor source for originally added by the user.
-    pub added_on: NaiveDateTime,
+    added_on: NaiveDateTime,
 
     /// Date of last usage of this factor source
     ///
@@ -31,13 +38,61 @@ pub struct FactorSourceCommon {
     ///
     /// Has interior mutability (`Cell`) since every time this
     /// factor source is used we should update this date.
-    pub last_used_on: Cell<NaiveDateTime>,
+    last_used_on: RefCell<NaiveDateTime>,
 
     /// Flags which describe a certain state a FactorSource might be in, e.g. `Main` (BDFS).
     ///
     /// Has interior mutability (`RefCell`) since a user might wanna flag a FactorSource as
     /// "deleted".
-    pub flags: RefCell<BTreeSet<FactorSourceFlag>>,
+    flags: RefCell<BTreeSet<FactorSourceFlag>>,
+}
+
+impl FactorSourceCommon {
+    /// Cryptographic parameters a certain FactorSource supports, e.g. Elliptic Curves.
+    pub fn crypto_parameters(&self) -> FactorSourceCryptoParameters {
+        self.crypto_parameters.borrow().clone()
+    }
+
+    /// When this factor source for originally added by the user.
+    pub fn added_on(&self) -> NaiveDateTime {
+        self.added_on.clone()
+    }
+
+    /// Date of last usage of this factor source
+    ///
+    /// This is the only mutable property, it is mutable
+    /// since we will update it every time this FactorSource
+    /// is used.
+    ///
+    pub fn last_used_on(&self) -> NaiveDateTime {
+        self.last_used_on.borrow().clone()
+    }
+
+    /// Flags which describe a certain state a FactorSource might be in, e.g. `Main` (BDFS).
+    pub fn flags(&self) -> BTreeSet<FactorSourceFlag> {
+        self.flags.borrow().clone()
+    }
+}
+
+impl FactorSourceCommon {
+    /// Updates the supported crypto parameters of a FactorSource.
+    ///
+    /// Since Radix Wallet App version 1.3.0, it is
+    /// possible to add crypto parameters to a FactorSource, e.g. when a user
+    /// with a DeviceFactorSource with babylon crypto parameters, lets call it `B`,
+    /// with mnemonic `M` adds `M` again but as an "Olympia" factor source, then
+    /// the olympia crypto parameters are added to `B`.
+    pub fn set_crypto_parameters(&self, new: FactorSourceCryptoParameters) {
+        *self.crypto_parameters.borrow_mut() = new
+    }
+
+    pub fn set_last_used_on(&self, new: NaiveDateTime) {
+        *self.last_used_on.borrow_mut() = new
+    }
+
+    pub fn set_flags(&self, new: BTreeSet<FactorSourceFlag>) {
+        *self.flags.borrow_mut() = new
+    }
 }
 
 impl FactorSourceCommon {
@@ -51,9 +106,9 @@ impl FactorSourceCommon {
         I: IntoIterator<Item = FactorSourceFlag>,
     {
         Self {
-            crypto_parameters,
+            crypto_parameters: RefCell::new(crypto_parameters),
             added_on,
-            last_used_on: Cell::new(last_used_on),
+            last_used_on: RefCell::new(last_used_on),
             flags: RefCell::new(BTreeSet::from_iter(flags.into_iter())),
         }
     }
@@ -89,13 +144,30 @@ impl Default for FactorSourceCommon {
 impl FactorSourceCommon {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
+        Self::placeholder_main_babylon()
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_main_babylon() -> Self {
         let date =
             NaiveDateTime::parse_from_str("2023-09-11T16:05:56", "%Y-%m-%dT%H:%M:%S").unwrap();
         FactorSourceCommon::with_values(
-            FactorSourceCryptoParameters::default(),
+            FactorSourceCryptoParameters::babylon(),
             date.clone(),
             date,
             [FactorSourceFlag::Main],
+        )
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_olympia() -> Self {
+        let date =
+            NaiveDateTime::parse_from_str("2023-09-11T16:05:56", "%Y-%m-%dT%H:%M:%S").unwrap();
+        FactorSourceCommon::with_values(
+            FactorSourceCryptoParameters::olympia(),
+            date.clone(),
+            date,
+            [],
         )
     }
 }
@@ -107,7 +179,7 @@ mod tests {
     use wallet_kit_common::{json::assert_eq_after_json_roundtrip, utils::factory::now};
 
     use crate::v100::factors::{
-        factor_source_crypto_parameters::FactorSourceCryptoParameters,
+        factor_source::FactorSource, factor_source_crypto_parameters::FactorSourceCryptoParameters,
         factor_source_flag::FactorSourceFlag,
     };
 
@@ -116,7 +188,7 @@ mod tests {
     #[test]
     fn default_support_babylon() {
         assert_eq!(
-            FactorSourceCommon::default().crypto_parameters,
+            FactorSourceCommon::default().crypto_parameters(),
             FactorSourceCryptoParameters::babylon()
         )
     }
@@ -134,8 +206,8 @@ mod tests {
             assert!(d > date0);
             assert!(d < date1);
         };
-        do_test(model.added_on);
-        do_test(model.last_used_on.get());
+        do_test(model.added_on());
+        do_test(model.last_used_on());
     }
 
     #[test]
@@ -168,16 +240,12 @@ mod tests {
     #[test]
     fn main_flag_present_if_main() {
         assert!(FactorSourceCommon::new_bdfs(true)
-            .flags
-            .get_mut()
+            .flags()
             .contains(&FactorSourceFlag::Main));
     }
 
     #[test]
     fn main_flag_not_present_if_not_main() {
-        assert!(FactorSourceCommon::new_bdfs(false)
-            .flags
-            .get_mut()
-            .is_empty());
+        assert!(FactorSourceCommon::new_bdfs(false).flags().is_empty());
     }
 }
