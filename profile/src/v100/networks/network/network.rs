@@ -53,7 +53,7 @@ impl Network {
 impl Network {
     /// Tries to change the accounts to `new`, will throw an error if any of the accounts in `new`
     /// is on a different network than `self.id()`.
-    pub fn set_accounts(&mut self, new: Accounts) -> Result<(), CommonError> {
+    pub fn set_accounts(&self, new: Accounts) -> Result<(), CommonError> {
         if new.get_all().iter().any(|a| a.network_id() != self.id()) {
             return Err(CommonError::AccountOnWrongNetwork);
         }
@@ -84,7 +84,7 @@ mod tests {
 
     #[test]
     fn inequality() {
-        assert_eq!(Network::placeholder(), Network::placeholder_other());
+        assert_ne!(Network::placeholder(), Network::placeholder_other());
     }
 
     #[test]
@@ -100,7 +100,7 @@ mod tests {
 
     #[test]
     fn set_accounts_wrong_network() {
-        let mut sut = Network::placeholder();
+        let sut = Network::placeholder();
         assert_eq!(
             sut.set_accounts(Accounts::with_account(Account::placeholder_stokenet())),
             Err(CommonError::AccountOnWrongNetwork)
@@ -110,7 +110,7 @@ mod tests {
     #[test]
     fn set_accounts_same_network() {
         assert_ne!(Accounts::placeholder(), Accounts::placeholder_other());
-        let mut sut = Network::new(NetworkID::Mainnet, Accounts::placeholder());
+        let sut = Network::new(NetworkID::Mainnet, Accounts::placeholder());
         assert_eq!(sut.set_accounts(Accounts::placeholder_other()), Ok(()));
         assert_eq!(sut.accounts(), Accounts::placeholder_other());
     }
