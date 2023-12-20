@@ -103,3 +103,35 @@ impl Profile {
         )
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use identified_vec::IsIdentifiedVecOf;
+
+    use crate::v100::{
+        app_preferences::app_preferences::AppPreferences,
+        factors::{factor_source::FactorSource, factor_sources::factor_sources::FactorSources},
+        header::header::Header,
+        networks::networks::Networks,
+    };
+
+    use super::Profile;
+
+    #[should_panic(expected = "FactorSources empty, which must never happen.")]
+    #[test]
+    fn panic_when_factor_sources_empty_in_profile_constructor() {
+        Profile::with(
+            Header::placeholder(),
+            FactorSources::new(),
+            AppPreferences::placeholder(),
+            Networks::placeholder(),
+        );
+    }
+
+    #[should_panic(expected = "FactorSources empty, which must never happen.")]
+    #[test]
+    fn panic_when_factor_sources_empty_when_update_factor_sources() {
+        let sut = Profile::placeholder();
+        sut.set_factor_sources(FactorSources::new());
+    }
+}

@@ -155,6 +155,24 @@ mod tests {
     }
 
     #[test]
+    fn into_from_device() {
+        let factor_source: FactorSource = DeviceFactorSource::placeholder().into();
+        assert_eq!(
+            factor_source,
+            FactorSource::Device(DeviceFactorSource::placeholder())
+        );
+    }
+
+    #[test]
+    fn into_from_ledger() {
+        let factor_source: FactorSource = LedgerHardwareWalletFactorSource::placeholder().into();
+        assert_eq!(
+            factor_source,
+            FactorSource::Ledger(LedgerHardwareWalletFactorSource::placeholder())
+        );
+    }
+
+    #[test]
     fn json_roundtrip_from_device() {
         let model = FactorSource::Device(DeviceFactorSource::placeholder());
         assert_eq_after_json_roundtrip(
