@@ -11,10 +11,7 @@ use hierarchical_deterministic::{
 use wallet_kit_common::network_id::NetworkID;
 
 use hierarchical_deterministic::{
-    cap26::{
-        cap26_key_kind::CAP26KeyKind,
-        cap26_path::{cap26_path::CAP26Path, paths::is_entity_path::IsEntityPath},
-    },
+    cap26::{cap26_key_kind::CAP26KeyKind, cap26_path::cap26_path::CAP26Path},
     derivation::{
         derivation_path::DerivationPath,
         hierarchical_deterministic_public_key::HierarchicalDeterministicPublicKey,

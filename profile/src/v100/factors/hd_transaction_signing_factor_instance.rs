@@ -99,10 +99,7 @@ mod tests {
     use hierarchical_deterministic::{
         cap26::{
             cap26_key_kind::CAP26KeyKind,
-            cap26_path::paths::{
-                account_path::AccountPath, identity_path::IdentityPath,
-                is_entity_path::IsEntityPath,
-            },
+            cap26_path::paths::{account_path::AccountPath, identity_path::IdentityPath},
             cap26_repr::CAP26Repr,
         },
         derivation::hierarchical_deterministic_public_key::HierarchicalDeterministicPublicKey,
