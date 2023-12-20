@@ -217,4 +217,13 @@ mod tests {
             BIP39WordCount::TwentyFour
         );
     }
+
+    #[test]
+    fn set_common() {
+        let sut = DeviceFactorSource::placeholder_babylon();
+        let common = sut.common();
+        common.set_crypto_parameters(FactorSourceCryptoParameters::babylon_olympia_compatible());
+        sut.set_common(common.clone());
+        assert_eq!(sut.common(), common);
+    }
 }

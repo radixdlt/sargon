@@ -6,32 +6,80 @@ Middleware that can power Radix Wallet clients (iOS/Android).
 
 ## Status
 
-`[=====---------------------------------------------]`
+`[==========================------------------------]`
 
 ### Done
 
+#### Hierarchal Deterministic
+
+- [x] Mnemonic
+- [x] MnemonicWithPassphrase
+- [x] HDPath (BIP32)
+- [x] BIP44 Like
+- [x] CAP26
+  - [x] CAP26 AccountPath
+  - [x] CAP26 IdentityPath
+  - [x] CAP26 GetID
+- [x] DerivationPath
+- [x] HierarchicalDeterministicPrivateKey
+- [x] HierarchicalDeterministicPublicKey
+
 #### Profile Snapshot
 
-- [x] NetworkID
-- [x] ContentHint
-- [x] DeviceInfo
 - [x] Header
-- [x] AccountAddress
-- [x] IdentityAddress
-- [x] CAP26 AccountPath
-- [x] CAP26 IdentityPath
-- [x] CAP26 GetID
-- [x] BIP44
-- [x] ThirdPartyDeposits
-- [x] OnLedgerSettings
+  - [x] ContentHint
+  - [x] DeviceInfo
+- [x] Keys
+  - [x] PrivateKey
+    - [x] PrivateKey (enum)
+    - [x] Ed25519PrivateKey
+    - [x] Secp256k1PrivateKey
+  - [x] PublicKey
+    - [x] PublicKey (enum)
+    - [x] Ed25519PublicKey
+    - [x] Secp256k1PublicKey
+- [x] FactorInstance
+  - [x] HierarchicalDeterministicFactorInstance
+- [x] Addresses
+  - [x] AccountAddress
+  - [x] IdentityAddress
+  - [x] ResourceAddress
+- [x] FactorSource
+  - [x] FactorSource
+  - [x] HierarchicalDeterministicFactorSource
+  - [x] PrivateHierarchicalDeterministicFactorSource
+  - [x] FactorSourceKind
+  - [x] FactorSourceID
+  - [x] DeviceFactorSource
+  - [x] LedgerFactorSource
+- [x] FactorSources
+- [x] Entity
+  - [x] EntityKind
+  - [x] SecurityState
+    - [x] UnsecuredEntityControl
+  - [x] EntityFlags
+  - [x] OnLedgerSettings
+    - [x] ThirdPartyDeposits
 - [x] Account
-- [x] Network
+  - [x] AppearanceID
+  - [x] DisplayName
+- [ ] Network
+  - [x] NetworkID
+  - [x] Accounts
+  - [ ] Personas
+  - [ ] Authorized Dapps
 - [x] Networks
 - [x] AppPreferences
-- [x] P2PLinks
-- [x] Gateways
+  - [x] Display
+  - [x] P2PLinks
+    - [x] P2PLink
+  - [x] Security
+  - [x] Transaction
+  - [x] Gateways
+    - [x] Gateway
+    - [x] RadixNetwork
 - [ ] Persona
-- [ ] Profile
+- [x] Profile
 
 # Development
 

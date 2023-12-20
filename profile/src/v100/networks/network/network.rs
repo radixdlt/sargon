@@ -1,7 +1,11 @@
 use std::cell::RefCell;
 
+use identified_vec::Identifiable;
 use serde::{Deserialize, Serialize};
 use wallet_kit_common::{error::common_error::CommonError, network_id::NetworkID};
+
+#[cfg(any(test, feature = "placeholder"))]
+use crate::v100::entity::account::account::Account;
 
 use super::accounts::Accounts;
 
@@ -15,6 +19,15 @@ pub struct Network {
 
     /// An ordered set of Accounts on this network.
     accounts: RefCell<Accounts>,
+}
+
+impl Identifiable for Network {
+    type ID = NetworkID;
+    /// The ID of the network that has been used to generate the `accounts` and `personas`
+    /// and on which the `authorizedDapps` have been deployed on.
+    fn id(&self) -> NetworkID {
+        self.id.clone()
+    }
 }
 
 impl Network {
@@ -38,12 +51,6 @@ impl Network {
 }
 
 impl Network {
-    /// The ID of the network that has been used to generate the `accounts` and `personas`
-    /// and on which the `authorizedDapps` have been deployed on.
-    pub fn id(&self) -> NetworkID {
-        self.id.clone()
-    }
-
     /// An ordered set of Accounts on this network.
     pub fn accounts(&self) -> Accounts {
         self.accounts.borrow().clone()
@@ -65,17 +72,23 @@ impl Network {
 // CFG test
 #[cfg(any(test, feature = "placeholder"))]
 impl Network {
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
         Self::new(NetworkID::Mainnet, Accounts::placeholder())
     }
 
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder_other() -> Self {
-        Self::new(NetworkID::Mainnet, Accounts::placeholder_other())
+        Self::new(
+            NetworkID::Stokenet,
+            Accounts::with_account(Account::placeholder_stokenet()),
+        )
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use identified_vec::Identifiable;
     use wallet_kit_common::{error::common_error::CommonError, network_id::NetworkID};
 
     use crate::v100::{entity::account::account::Account, networks::network::accounts::Accounts};

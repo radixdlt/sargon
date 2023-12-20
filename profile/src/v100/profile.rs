@@ -54,8 +54,16 @@ impl Profile {
 }
 
 impl Profile {
+    pub fn header(&self) -> Header {
+        self.header.borrow().clone()
+    }
+
     pub fn set_header(&self, new: Header) {
         *self.header.borrow_mut() = new
+    }
+
+    pub fn factor_sources(&self) -> FactorSources {
+        self.factor_sources.borrow().clone()
     }
 
     /// Panics if `new` is empty, since FactorSources MUST not be empty.
@@ -64,11 +72,34 @@ impl Profile {
         *self.factor_sources.borrow_mut() = new
     }
 
+    pub fn app_preferences(&self) -> AppPreferences {
+        self.app_preferences.borrow().clone()
+    }
+
     pub fn set_app_preferences(&self, new: AppPreferences) {
         *self.app_preferences.borrow_mut() = new
     }
 
+    pub fn networks(&self) -> Networks {
+        self.networks.borrow().clone()
+    }
+
     pub fn set_networks(&self, new: Networks) {
         *self.networks.borrow_mut() = new
+    }
+}
+
+#[cfg(any(test, feature = "placeholder"))]
+impl Profile {
+    pub fn placeholder() -> Self {
+        let networks = Networks::placeholder();
+        let header = Header::default();
+        header.update_content_hint(networks.content_hint());
+        Self::with(
+            header,
+            FactorSources::placeholder(),
+            AppPreferences::placeholder(),
+            networks,
+        )
     }
 }

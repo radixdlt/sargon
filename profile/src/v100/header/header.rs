@@ -1,6 +1,7 @@
 use std::{
     cell::{Cell, RefCell},
     fmt::Display,
+    str::FromStr,
 };
 
 use chrono::NaiveDateTime;
@@ -23,16 +24,16 @@ use super::{
 pub struct Header {
     /// A versioning number that is increased when breaking
     /// changes is made to ProfileSnapshot JSON data format.
-    pub snapshot_version: ProfileSnapshotVersion,
+    snapshot_version: ProfileSnapshotVersion,
 
     /// An immutable and unique identifier of a Profile.
-    pub id: Uuid,
+    id: Uuid,
 
     /// The device which was used to create the Profile.
-    pub creating_device: DeviceInfo,
+    creating_device: DeviceInfo,
 
     /// The device on which the profile was last used.
-    last_used_on_device: RefCell<DeviceInfo>, // `RefCell` needed, because `Cell` requires `Copy` and `DeviceInfo` contains `String` (which does not impl `Copy`). We could potentially use `fstr` from `fixedstr` crate for `description` inside `DeviceInfo`? and thus use `Cell` here?
+    last_used_on_device: RefCell<DeviceInfo>,
 
     /// When the Profile was last modified.
     last_modified: Cell<NaiveDateTime>,
@@ -87,15 +88,33 @@ impl Display for Header {
 
 // Getters
 impl Header {
+    /// A versioning number that is increased when breaking
+    /// changes is made to ProfileSnapshot JSON data format.
+    pub fn snapshot_version(&self) -> ProfileSnapshotVersion {
+        self.snapshot_version
+    }
+
+    /// An immutable and unique identifier of a Profile.
+    pub fn id(&self) -> Uuid {
+        self.id
+    }
+
+    /// The device which was used to create the Profile.
+    pub fn creating_device(&self) -> DeviceInfo {
+        self.creating_device.clone()
+    }
+
     /// Hint about the contents of the profile, e.g. number of Accounts and Personas.
     pub fn content_hint(&self) -> ContentHint {
         self.content_hint.borrow().clone()
     }
 
+    /// The device on which the profile was last used.
     pub fn last_used_on_device(&self) -> DeviceInfo {
         self.last_used_on_device.borrow().clone()
     }
 
+    /// When the Profile was last modified.
     pub fn last_modified(&self) -> NaiveDateTime {
         self.last_modified.get().clone()
     }
@@ -121,8 +140,29 @@ impl Header {
     }
 }
 
+#[cfg(any(test, feature = "placeholder"))]
+impl Header {
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder() -> Self {
+        let date =
+            NaiveDateTime::parse_from_str("2023-09-11T16:05:56", "%Y-%m-%dT%H:%M:%S").unwrap();
+        let device = DeviceInfo::with_values(
+            Uuid::from_str("66f07ca2-a9d9-49e5-8152-77aca3d1dd74").unwrap(),
+            date.clone(),
+            "iPhone".to_string(),
+        );
+        Header::with_values(
+            Uuid::from_str("12345678-bbbb-cccc-dddd-abcd12345678").unwrap(),
+            device,
+            ContentHint::new(),
+            date,
+        )
+    }
+}
+
 #[cfg(test)]
 pub mod tests {
+
     use std::str::FromStr;
 
     use crate::v100::header::{content_hint::ContentHint, device_info::DeviceInfo};
@@ -134,21 +174,9 @@ pub mod tests {
 
     #[test]
     fn json_roundtrip() {
-        let date =
-            NaiveDateTime::parse_from_str("2023-09-11T16:05:56", "%Y-%m-%dT%H:%M:%S").unwrap();
-        let device = DeviceInfo::with_values(
-            Uuid::from_str("66f07ca2-a9d9-49e5-8152-77aca3d1dd74").unwrap(),
-            date.clone(),
-            "iPhone".to_string(),
-        );
-        let model = Header::with_values(
-            Uuid::from_str("12345678-bbbb-cccc-dddd-abcd12345678").unwrap(),
-            device,
-            ContentHint::new(),
-            date,
-        );
+        let sut = Header::placeholder();
         assert_eq_after_json_roundtrip(
-            &model,
+            &sut,
             r#"
             {
                 "snapshotVersion": 100,

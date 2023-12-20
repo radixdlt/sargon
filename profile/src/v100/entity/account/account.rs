@@ -257,10 +257,12 @@ impl Account {
         Self::placeholder_mainnet()
     }
 
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder_mainnet() -> Self {
         Self::placeholder_mainnet_alice()
     }
 
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder_mainnet_alice() -> Self {
         Self::placeholder_with_values(
             AccountAddress::placeholder_alice(),
@@ -269,6 +271,7 @@ impl Account {
         )
     }
 
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder_mainnet_bob() -> Self {
         Self::placeholder_with_values(
             AccountAddress::placeholder_bob(),
@@ -277,6 +280,7 @@ impl Account {
         )
     }
 
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder_stokenet() -> Self {
         Self::placeholder_with_values(
             "account_tdx_2_12ygsf87pma439ezvdyervjfq2nhqme6reau6kcxf6jtaysaxl7sqvd"
@@ -287,6 +291,7 @@ impl Account {
         )
     }
 
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder_nebunet() -> Self {
         Self::placeholder_with_values(
             "account_tdx_b_1286wrrqrfcrfhthfrtdywe8alney8zu0ja5xrhcq2475ej08m9raqq"
@@ -297,6 +302,7 @@ impl Account {
         )
     }
 
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder_kisharnet() -> Self {
         Self::placeholder_with_values(
             "account_tdx_c_1286wrrqrfcrfhthfrtdywe8alney8zu0ja5xrhcq2475ej0898vkq9"
@@ -307,6 +313,7 @@ impl Account {
         )
     }
 
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder_adapanet() -> Self {
         Self::placeholder_with_values(
             "account_tdx_a_1286wrrqrfcrfhthfrtdywe8alney8zu0ja5xrhcq2475ej08srjqq0"

@@ -19,7 +19,7 @@ pub struct ContentHint {
     /// real consequence.
     ///
     /// This counter includes any by user hidden accounts.
-    number_of_accounts_on_all_networks_in_total: Cell<u32>,
+    number_of_accounts_on_all_networks_in_total: Cell<usize>,
 
     /// The total number of personas on all networks.
     ///
@@ -29,17 +29,17 @@ pub struct ContentHint {
     /// real consequence.
     ///
     /// This counter includes any by user hidden personas.
-    number_of_personas_on_all_networks_in_total: Cell<u32>,
+    number_of_personas_on_all_networks_in_total: Cell<usize>,
 
     /// The total number of networks that the user has used, i.e.
     /// on which she has any accounts or personas.
-    number_of_networks: Cell<u32>,
+    number_of_networks: Cell<usize>,
 }
 
 // Constructors
 impl ContentHint {
     /// Instantiates a new `ContentHint` with the specified counter values.
-    pub fn with_counters(accounts: u32, personas: u32, networks: u32) -> Self {
+    pub fn with_counters(accounts: usize, personas: usize, networks: usize) -> Self {
         Self {
             number_of_accounts_on_all_networks_in_total: Cell::new(accounts),
             number_of_personas_on_all_networks_in_total: Cell::new(personas),
@@ -48,7 +48,7 @@ impl ContentHint {
     }
 
     /// Instantiates a new `ContentHint` with all counters equal `count`.
-    pub(crate) fn all(count: u32) -> Self {
+    pub(crate) fn all(count: usize) -> Self {
         Self::with_counters(count, count, count)
     }
 
@@ -73,17 +73,17 @@ impl Display for ContentHint {
 // Getters
 impl ContentHint {
     /// Gets the number of accounts on all networks in total.
-    pub fn number_of_accounts_on_all_networks_in_total(&self) -> u32 {
+    pub fn number_of_accounts_on_all_networks_in_total(&self) -> usize {
         self.number_of_accounts_on_all_networks_in_total.get()
     }
 
     /// Gets the number of personas on all networks in total.
-    pub fn number_of_personas_on_all_networks_in_total(&self) -> u32 {
+    pub fn number_of_personas_on_all_networks_in_total(&self) -> usize {
         self.number_of_personas_on_all_networks_in_total.get()
     }
 
     /// Gets the number of networks.
-    pub fn number_of_networks(&self) -> u32 {
+    pub fn number_of_networks(&self) -> usize {
         self.number_of_networks.get()
     }
 }
@@ -91,17 +91,17 @@ impl ContentHint {
 // Setters
 impl ContentHint {
     /// Sets the `number_of_accounts_on_all_networks_in_total` to `new`.
-    pub fn set_number_of_accounts_on_all_networks_in_total(&self, new: u32) {
+    pub fn set_number_of_accounts_on_all_networks_in_total(&self, new: usize) {
         self.number_of_accounts_on_all_networks_in_total.set(new)
     }
 
     /// Sets the `number_of_personas_on_all_networks_in_total` to `new`.
-    pub fn set_number_of_personas_on_all_networks_in_total(&self, new: u32) {
+    pub fn set_number_of_personas_on_all_networks_in_total(&self, new: usize) {
         self.number_of_personas_on_all_networks_in_total.set(new)
     }
 
     /// Sets the `number_of_networks` to `new`.
-    pub fn set_number_of_networks(&self, new: u32) {
+    pub fn set_number_of_networks(&self, new: usize) {
         self.number_of_networks.set(new)
     }
 }

@@ -52,6 +52,7 @@ impl Accounts {
 
 #[cfg(any(test, feature = "placeholder"))]
 impl Accounts {
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
         Self::with_accounts(
             [
@@ -62,6 +63,7 @@ impl Accounts {
         )
     }
 
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder_other() -> Self {
         Self::with_account(Account::placeholder_mainnet())
     }
