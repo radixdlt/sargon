@@ -5,6 +5,7 @@ use std::{
 };
 
 use chrono::NaiveDateTime;
+use iso8601_timestamp::Timestamp;
 use serde::{Deserialize, Serialize};
 use wallet_kit_common::utils::factory::now;
 
@@ -28,7 +29,7 @@ pub struct FactorSourceCommon {
     crypto_parameters: RefCell<FactorSourceCryptoParameters>,
 
     /// When this factor source for originally added by the user.
-    added_on: NaiveDateTime,
+    added_on: Timestamp,
 
     /// Date of last usage of this factor source
     ///
@@ -38,7 +39,7 @@ pub struct FactorSourceCommon {
     ///
     /// Has interior mutability (`Cell`) since every time this
     /// factor source is used we should update this date.
-    last_used_on: RefCell<NaiveDateTime>,
+    last_used_on: RefCell<Timestamp>,
 
     /// Flags which describe a certain state a FactorSource might be in, e.g. `Main` (BDFS).
     ///
@@ -54,7 +55,7 @@ impl FactorSourceCommon {
     }
 
     /// When this factor source for originally added by the user.
-    pub fn added_on(&self) -> NaiveDateTime {
+    pub fn added_on(&self) -> Timestamp {
         self.added_on.clone()
     }
 
@@ -64,7 +65,7 @@ impl FactorSourceCommon {
     /// since we will update it every time this FactorSource
     /// is used.
     ///
-    pub fn last_used_on(&self) -> NaiveDateTime {
+    pub fn last_used_on(&self) -> Timestamp {
         self.last_used_on.borrow().clone()
     }
 
@@ -86,7 +87,7 @@ impl FactorSourceCommon {
         *self.crypto_parameters.borrow_mut() = new
     }
 
-    pub fn set_last_used_on(&self, new: NaiveDateTime) {
+    pub fn set_last_used_on(&self, new: Timestamp) {
         *self.last_used_on.borrow_mut() = new
     }
 
@@ -98,8 +99,8 @@ impl FactorSourceCommon {
 impl FactorSourceCommon {
     pub fn with_values<I>(
         crypto_parameters: FactorSourceCryptoParameters,
-        added_on: NaiveDateTime,
-        last_used_on: NaiveDateTime,
+        added_on: Timestamp,
+        last_used_on: Timestamp,
         flags: I,
     ) -> Self
     where
@@ -117,7 +118,7 @@ impl FactorSourceCommon {
     where
         I: IntoIterator<Item = FactorSourceFlag>,
     {
-        let date: NaiveDateTime = now();
+        let date = Timestamp::now_utc();
         Self::with_values(crypto_parameters, date, date, flags)
     }
 
@@ -149,8 +150,7 @@ impl FactorSourceCommon {
 
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_main_babylon() -> Self {
-        let date =
-            NaiveDateTime::parse_from_str("2023-09-11T16:05:56", "%Y-%m-%dT%H:%M:%S").unwrap();
+        let date = Timestamp::parse("2023-09-11T16:05:56.000Z").unwrap();
         FactorSourceCommon::with_values(
             FactorSourceCryptoParameters::babylon(),
             date.clone(),
@@ -161,8 +161,7 @@ impl FactorSourceCommon {
 
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_olympia() -> Self {
-        let date =
-            NaiveDateTime::parse_from_str("2023-09-11T16:05:56", "%Y-%m-%dT%H:%M:%S").unwrap();
+        let date = Timestamp::parse("2023-09-11T16:05:56.000Z").unwrap();
         FactorSourceCommon::with_values(
             FactorSourceCryptoParameters::olympia(),
             date.clone(),
@@ -178,6 +177,7 @@ mod tests {
     use std::collections::BTreeSet;
 
     use chrono::NaiveDateTime;
+    use iso8601_timestamp::Timestamp;
     use wallet_kit_common::{json::assert_eq_after_json_roundtrip, utils::factory::now};
 
     use crate::v100::factors::{
@@ -197,14 +197,14 @@ mod tests {
 
     #[test]
     fn new_uses_now_as_date() {
-        let date0 = now();
+        let date0 = Timestamp::now_utc();
         let model = FactorSourceCommon::new(FactorSourceCryptoParameters::default(), []);
-        let mut date1 = now();
+        let mut date1 = Timestamp::now_utc();
         for _ in 0..10 {
             // rust is too fast... lol.
-            date1 = now();
+            date1 = Timestamp::now_utc();
         }
-        let do_test = |d: NaiveDateTime| {
+        let do_test = |d: Timestamp| {
             assert!(d > date0);
             assert!(d < date1);
         };
@@ -214,8 +214,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip() {
-        let date =
-            NaiveDateTime::parse_from_str("2023-09-11T16:05:56", "%Y-%m-%dT%H:%M:%S").unwrap();
+        let date = Timestamp::parse("2023-09-11T16:05:56.000Z").unwrap();
         let model = FactorSourceCommon::with_values(
             FactorSourceCryptoParameters::default(),
             date.clone(),
@@ -268,7 +267,7 @@ mod tests {
     #[test]
     fn set_last_used_on() {
         let sut = FactorSourceCommon::placeholder_main_babylon();
-        let d = now();
+        let d = Timestamp::now_utc();
         assert_ne!(sut.last_used_on(), d);
         sut.set_last_used_on(d);
         assert_eq!(sut.last_used_on(), d);

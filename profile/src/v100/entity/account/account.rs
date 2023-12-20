@@ -87,6 +87,7 @@ pub struct Account {
     /// An order set of `EntityFlag`s used to describe certain Off-ledger
     /// user state about Accounts or Personas, such as if an entity is
     /// marked as hidden or not.
+    #[serde(default)]
     flags: RefCell<EntityFlags>,
 
     /// The on ledger synced settings for this account, contains e.g.
@@ -337,7 +338,7 @@ impl Account {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::BTreeSet;
+    use std::{collections::BTreeSet, str::FromStr};
 
     use radix_engine_common::prelude::HashSet;
     use wallet_kit_common::json::assert_eq_after_json_roundtrip;
@@ -707,6 +708,75 @@ mod tests {
 			}
             "#,
         );
+    }
+
+    #[test]
+    fn json_deserialization_works_without_flags_as_version_1_0_0_of_app() {
+        let json = serde_json::Value::from_str(
+            r#"
+            {
+                    "securityState":
+                    {
+                        "unsecuredEntityControl":
+                        {
+                            "transactionSigning":
+                            {
+                                "badge":
+                                {
+                                    "virtualSource":
+                                    {
+                                        "hierarchicalDeterministicPublicKey":
+                                        {
+                                            "publicKey":
+                                            {
+                                                "curve": "secp256k1",
+                                                "compressedData": "02f669a43024d90fde69351ccc53022c2f86708d9b3c42693640733c5778235da5"
+                                            },
+                                            "derivationPath":
+                                            {
+                                                "scheme": "bip44Olympia",
+                                                "path": "m/44H/1022H/0H/0/0H"
+                                            }
+                                        },
+                                        "discriminator": "hierarchicalDeterministicPublicKey"
+                                    },
+                                    "discriminator": "virtualSource"
+                                },
+                                "factorSourceID":
+                                {
+                                    "fromHash":
+                                    {
+                                        "kind": "device",
+                                        "body": "8bfacfe888d4e3819c6e9528a1c8f680a4ba73e466d7af4ee204591093006589"
+                                    },
+                                    "discriminator": "fromHash"
+                                }
+                            },
+                            "entityIndex": 3
+                        },
+                        "discriminator": "unsecured"
+                    },
+                    "networkID": 14,
+                    "appearanceID": 3,
+                    "displayName": "Olympia|Soft|0",
+                    "onLedgerSettings":
+                    {
+                        "thirdPartyDeposits":
+                        {
+                            "depositRule": "acceptAll",
+                            "assetsExceptionList":
+                            [],
+                            "depositorsAllowList":
+                            []
+                        }
+                    },
+                    "address": "account_tdx_e_169s2cfz044euhc4yjg4xe4pg55w97rq2c6jh50zsdcpuz5gk6cag6v"
+                }
+            "#,
+        ).unwrap();
+        let account = serde_json::from_value::<Account>(json).unwrap();
+        assert_eq!(account.display_name(), "Olympia|Soft|0"); // soundness
+        assert_eq!(account.flags().len(), 0); // assert Default value is empty flags.
     }
 
     #[test]

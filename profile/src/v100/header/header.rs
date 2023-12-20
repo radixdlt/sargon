@@ -6,7 +6,7 @@ use std::{
 #[cfg(any(test, feature = "placeholder"))]
 use std::str::FromStr;
 
-use chrono::NaiveDateTime;
+use iso8601_timestamp::Timestamp;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -38,7 +38,7 @@ pub struct Header {
     last_used_on_device: RefCell<DeviceInfo>,
 
     /// When the Profile was last modified.
-    last_modified: Cell<NaiveDateTime>,
+    last_modified: Cell<Timestamp>,
 
     /// Hint about the contents of the profile, e.g. number of Accounts and Personas.
     content_hint: RefCell<ContentHint>, // `RefCell` needed because `ContentHint` does not impl `Copy`, which it cant because it contains `Cell`s, and `Cell` itself does not impl `Copy`.
@@ -51,7 +51,7 @@ impl Header {
         id: Uuid,
         creating_device: DeviceInfo,
         content_hint: ContentHint,
-        last_modified: NaiveDateTime,
+        last_modified: Timestamp,
     ) -> Self {
         Self {
             snapshot_version: ProfileSnapshotVersion::default(),
@@ -66,7 +66,12 @@ impl Header {
     /// Instantiates a new `Header` with creating and last used on `DeviceInfo` with
     /// "Unknown device" as description, and empty content hint
     pub fn new(creating_device: DeviceInfo) -> Self {
-        Self::with_values(id(), creating_device, ContentHint::new(), now())
+        Self::with_values(
+            id(),
+            creating_device,
+            ContentHint::new(),
+            Timestamp::now_utc(),
+        )
     }
 }
 
@@ -117,7 +122,7 @@ impl Header {
     }
 
     /// When the Profile was last modified.
-    pub fn last_modified(&self) -> NaiveDateTime {
+    pub fn last_modified(&self) -> Timestamp {
         self.last_modified.get().clone()
     }
 }
@@ -126,7 +131,7 @@ impl Header {
 impl Header {
     /// Updates the `last_modified` field.
     pub fn updated(&self) {
-        self.last_modified.set(now());
+        self.last_modified.set(Timestamp::now_utc());
     }
 
     /// Sets the content hint WITHOUT updating `last_modified`, you SHOULD not
@@ -152,8 +157,8 @@ impl Header {
 impl Header {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
-        let date =
-            NaiveDateTime::parse_from_str("2023-09-11T16:05:56", "%Y-%m-%dT%H:%M:%S").unwrap();
+        //let date =  NaiveDateTime::parse_from_str("2023-09-11T16:05:56", "%Y-%m-%dT%H:%M:%S").unwrap();
+        let date = Timestamp::parse("2023-09-11T16:05:56Z").unwrap();
         let device = DeviceInfo::with_values(
             Uuid::from_str("66f07ca2-a9d9-49e5-8152-77aca3d1dd74").unwrap(),
             date.clone(),
@@ -178,6 +183,7 @@ pub mod tests {
         profilesnapshot_version::ProfileSnapshotVersion,
     };
     use chrono::NaiveDateTime;
+    use iso8601_timestamp::Timestamp;
     use uuid::Uuid;
     use wallet_kit_common::{json::assert_eq_after_json_roundtrip, utils::factory::id};
 
@@ -244,7 +250,7 @@ pub mod tests {
     #[test]
     fn update_last_used_on_device() {
         let sut = Header::default();
-        let d0: NaiveDateTime = sut.last_modified();
+        let d0 = sut.last_modified();
         let device_0 = sut.last_used_on_device();
         let end = 10;
         for n in 1..end {
@@ -264,8 +270,7 @@ pub mod tests {
 
     #[test]
     fn display() {
-        let date =
-            NaiveDateTime::parse_from_str("2023-09-11T16:05:56", "%Y-%m-%dT%H:%M:%S").unwrap();
+        let date = Timestamp::parse("2023-09-11T16:05:56Z").unwrap();
         let device = DeviceInfo::with_values(
             Uuid::from_str("66f07ca2-a9d9-49e5-8152-77aca3d1dd74").unwrap(),
             date.clone(),
