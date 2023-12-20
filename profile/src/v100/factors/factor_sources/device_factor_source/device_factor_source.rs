@@ -100,7 +100,7 @@ impl DeviceFactorSource {
             id,
             FactorSourceCommon::new_bdfs(is_main),
             DeviceFactorSourceHint::unknown_model_and_name_with_word_count(
-                mnemonic_with_passphrase.mnemonic.word_count,
+                mnemonic_with_passphrase.mnemonic.word_count().clone(),
                 device_model,
             ),
         )

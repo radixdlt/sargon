@@ -1,17 +1,18 @@
 use std::cmp::Ordering;
 
 use bip39::Language;
+use derive_getters::Getters;
 use memoize::memoize;
 use wallet_kit_common::error::hdpath_error::HDPathError as Error;
 
 use super::u11::U11;
 
 /// A word in the BIP39 word list of `language` at known `index` (0-2047).
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Getters)]
 pub struct BIP39Word {
-    pub word: String,
-    pub index: U11,
-    pub language: Language,
+    word: String,
+    index: U11,
+    language: Language,
 }
 
 impl Ord for BIP39Word {
@@ -59,14 +60,22 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(BIP39Word::english("zoo"), BIP39Word::english("zoo"));
+        assert_eq!(
+            BIP39Word::english("zoo").unwrap(),
+            BIP39Word::english("zoo").unwrap()
+        );
+    }
+
+    #[test]
+    fn word() {
+        assert_eq!(BIP39Word::english("zoo").unwrap().word(), "zoo");
     }
 
     #[test]
     fn language_of_zoo_is_english() {
         assert_eq!(
-            BIP39Word::english("zoo").unwrap().language,
-            Language::English
+            BIP39Word::english("zoo").unwrap().language(),
+            &Language::English
         );
     }
 
@@ -77,7 +86,14 @@ mod tests {
 
     #[test]
     fn index_of_zoo_is_2047() {
-        assert_eq!(BIP39Word::english("zoo").unwrap().index.into_inner(), 2047);
+        assert_eq!(
+            BIP39Word::english("zoo")
+                .unwrap()
+                .index()
+                .clone()
+                .into_inner(),
+            2047
+        );
     }
 
     #[test]

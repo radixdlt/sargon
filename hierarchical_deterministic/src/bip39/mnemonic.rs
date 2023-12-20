@@ -1,23 +1,24 @@
 use std::str::FromStr;
 
 use bip39::Language;
+use derive_getters::Getters;
 use itertools::Itertools;
 use serde::{de, Deserializer, Serialize, Serializer};
 use wallet_kit_common::error::hdpath_error::HDPathError as Error;
 
 use super::{bip39_word::bip39_word::BIP39Word, bip39_word_count::BIP39WordCount};
 
-#[derive(Clone, PartialEq, Eq, Debug)]
+#[derive(Clone, PartialEq, Eq, Debug, Getters)]
 pub struct Mnemonic {
     internal: bip39::Mnemonic,
-    pub words: Vec<BIP39Word>,
-    pub word_count: BIP39WordCount,
-    pub language: Language,
+    words: Vec<BIP39Word>,
+    word_count: BIP39WordCount,
+    language: Language,
 }
 
 impl Mnemonic {
     pub fn phrase(&self) -> String {
-        self.words.iter().map(|w| w.word.to_string()).join(" ")
+        self.words.iter().map(|w| w.word().to_string()).join(" ")
     }
     pub fn from_phrase(phrase: &str) -> Result<Self, Error> {
         let internal =
@@ -100,11 +101,11 @@ mod tests {
             "bright club bacon dinner achieve pull grid save ramp cereal blush woman humble limb repeat video sudden possible story mask neutral prize goose mandate"
                 .try_into()
                 .unwrap();
-        assert_eq!(mnemonic.language, Language::English);
+        assert_eq!(mnemonic.language(), &Language::English);
         mnemonic
-            .words
+            .words()
             .into_iter()
-            .for_each(|w| assert_eq!(w.language, Language::English));
+            .for_each(|w| assert_eq!(w.language(), &Language::English));
     }
 
     #[test]
@@ -113,20 +114,20 @@ mod tests {
         assert_eq!(
             Mnemonic::from_phrase("zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong")
                 .unwrap()
-                .word_count,
-            BIP39WordCount::Twelve
+                .word_count(),
+            &BIP39WordCount::Twelve
         );
     }
 
     #[test]
     fn words() {
         let mnemonic = Mnemonic::placeholder();
-        assert_eq!(mnemonic.words[0].word, "bright");
-        assert_eq!(mnemonic.words[1].word, "club");
-        assert_eq!(mnemonic.words[2].word, "bacon");
-        assert_eq!(mnemonic.words[12].word, "humble");
-        assert_eq!(mnemonic.words[22].word, "goose");
-        assert_eq!(mnemonic.words[23].word, "mandate");
+        assert_eq!(mnemonic.words[0].word(), "bright");
+        assert_eq!(mnemonic.words[1].word(), "club");
+        assert_eq!(mnemonic.words[2].word(), "bacon");
+        assert_eq!(mnemonic.words[12].word(), "humble");
+        assert_eq!(mnemonic.words[22].word(), "goose");
+        assert_eq!(mnemonic.words[23].word(), "mandate");
     }
 
     #[test]
@@ -134,18 +135,18 @@ mod tests {
         let zoo: Mnemonic = "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"
             .try_into()
             .unwrap();
-        assert_eq!(zoo.words[0].index.clone().into_inner(), 2047);
-        assert_eq!(zoo.words[1].index.clone().into_inner(), 2047);
-        assert_eq!(zoo.words[10].index.clone().into_inner(), 2047);
-        assert_eq!(zoo.words[11].index.clone().into_inner(), 2037);
+        assert_eq!(zoo.words[0].index().clone().into_inner(), 2047);
+        assert_eq!(zoo.words[1].index().clone().into_inner(), 2047);
+        assert_eq!(zoo.words[10].index().clone().into_inner(), 2047);
+        assert_eq!(zoo.words[11].index().clone().into_inner(), 2037);
 
         let abandon: Mnemonic = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
             .try_into()
             .unwrap();
-        assert_eq!(abandon.words[0].index.clone().into_inner(), 0);
-        assert_eq!(abandon.words[1].index.clone().into_inner(), 0);
-        assert_eq!(abandon.words[10].index.clone().into_inner(), 0);
-        assert_eq!(abandon.words[11].index.clone().into_inner(), 3);
+        assert_eq!(abandon.words[0].index().clone().into_inner(), 0);
+        assert_eq!(abandon.words[1].index().clone().into_inner(), 0);
+        assert_eq!(abandon.words[10].index().clone().into_inner(), 0);
+        assert_eq!(abandon.words[11].index().clone().into_inner(), 3);
     }
 
     #[test]
