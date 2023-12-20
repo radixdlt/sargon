@@ -154,13 +154,13 @@ mod tests {
             r#"
             {
                 "common": {
-                    "addedOn": "2023-09-11T16:05:56",
+                    "addedOn": "2023-09-11T16:05:56.000Z",
                     "cryptoParameters": {
                         "supportedCurves": ["curve25519"],
                         "supportedDerivationPathSchemes": ["cap26"]
                     },
                     "flags": ["main"],
-                    "lastUsedOn": "2023-09-11T16:05:56"
+                    "lastUsedOn": "2023-09-11T16:05:56.000Z"
                 },
                 "hint": {
                     "mnemonicWordCount": 24,

@@ -157,7 +157,7 @@ impl Header {
 impl Header {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
-        //let date =  NaiveDateTime::parse_from_str("2023-09-11T16:05:56", "%Y-%m-%dT%H:%M:%S").unwrap();
+        //let date =  NaiveDateTime::parse_from_str("2023-09-11T16:05:56.000Z", "%Y-%m-%dT%H:%M:%S").unwrap();
         let date = Timestamp::parse("2023-09-11T16:05:56Z").unwrap();
         let device = DeviceInfo::with_values(
             Uuid::from_str("66f07ca2-a9d9-49e5-8152-77aca3d1dd74").unwrap(),
@@ -200,15 +200,15 @@ pub mod tests {
                 "id": "12345678-bbbb-cccc-dddd-abcd12345678",
                 "creatingDevice": {
                     "id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
-                    "date": "2023-09-11T16:05:56",
+                    "date": "2023-09-11T16:05:56.000Z",
                     "description": "iPhone"
                 },
                 "lastUsedOnDevice": {
                     "id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
-                    "date": "2023-09-11T16:05:56",
+                    "date": "2023-09-11T16:05:56.000Z",
                     "description": "iPhone"
                 },
-                "lastModified": "2023-09-11T16:05:56",
+                "lastModified": "2023-09-11T16:05:56.000Z",
                 "contentHint": {
                     "numberOfAccountsOnAllNetworksInTotal": 0,
                     "numberOfPersonasOnAllNetworksInTotal": 0,

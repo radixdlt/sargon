@@ -102,7 +102,7 @@ mod tests {
     fn content_hint() {
         assert_eq!(
             Networks::placeholder().content_hint(),
-            ContentHint::with_counters(2, 0, 1)
+            ContentHint::with_counters(4, 0, 2)
         );
     }
 

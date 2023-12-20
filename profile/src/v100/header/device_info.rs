@@ -74,7 +74,7 @@ impl Display for DeviceInfo {
             f,
             "{} | created: {} | #{}",
             self.description,
-            &self.date.to_string(),
+            &self.date.date().to_string(),
             self.id.to_string(),
         )
     }

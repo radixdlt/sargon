@@ -134,9 +134,10 @@ mod tests {
     #[test]
     fn set_accounts_same_network() {
         assert_ne!(Accounts::placeholder(), Accounts::placeholder_other());
-        let sut = Network::new(NetworkID::Mainnet, Accounts::placeholder());
-        assert_eq!(sut.set_accounts(Accounts::placeholder_other()), Ok(()));
-        assert_eq!(sut.accounts(), Accounts::placeholder_other());
+        let sut = Network::new(NetworkID::Mainnet, Accounts::placeholder_mainnet());
+        let new = Accounts::with_account(Account::placeholder_mainnet_bob());
+        assert_eq!(sut.set_accounts(new.clone()), Ok(()));
+        assert_eq!(sut.accounts(), new);
     }
 
     #[test]

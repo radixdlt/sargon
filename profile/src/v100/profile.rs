@@ -147,15 +147,15 @@ mod tests {
 					"id": "12345678-bbbb-cccc-dddd-abcd12345678",
 					"creatingDevice": {
 						"id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
-						"date": "2023-09-11T16:05:56",
+						"date": "2023-09-11T16:05:56.000Z",
 						"description": "iPhone"
 					},
 					"lastUsedOnDevice": {
 						"id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
-						"date": "2023-09-11T16:05:56",
+						"date": "2023-09-11T16:05:56.000Z",
 						"description": "iPhone"
 					},
-					"lastModified": "2023-09-11T16:05:56",
+					"lastModified": "2023-09-11T16:05:56.000Z",
 					"contentHint": {
 						"numberOfAccountsOnAllNetworksInTotal": 4,
 						"numberOfPersonasOnAllNetworksInTotal": 0,
@@ -172,12 +172,12 @@ mod tests {
 							},
 							"common": {
 								"flags": ["main"],
-								"addedOn": "2023-09-11T16:05:56",
+								"addedOn": "2023-09-11T16:05:56.000Z",
 								"cryptoParameters": {
 									"supportedCurves": ["curve25519"],
 									"supportedDerivationPathSchemes": ["cap26"]
 								},
-								"lastUsedOn": "2023-09-11T16:05:56"
+								"lastUsedOn": "2023-09-11T16:05:56.000Z"
 							},
 							"hint": {
 								"name": "Unknown Name",
@@ -194,13 +194,13 @@ mod tests {
 								"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
 							},
 							"common": {
-								"addedOn": "2023-09-11T16:05:56",
+								"addedOn": "2023-09-11T16:05:56.000Z",
 								"cryptoParameters": {
 									"supportedCurves": ["curve25519"],
 									"supportedDerivationPathSchemes": ["cap26"]
 								},
 								"flags": ["main"],
-								"lastUsedOn": "2023-09-11T16:05:56"
+								"lastUsedOn": "2023-09-11T16:05:56.000Z"
 							},
 							"hint": {
 								"name": "Orange, scratched",
