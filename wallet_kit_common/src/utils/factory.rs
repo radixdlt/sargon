@@ -1,29 +1,27 @@
-use chrono::{NaiveDateTime, Utc};
+use iso8601_timestamp::Timestamp;
 use uuid::Uuid;
 
-pub fn now() -> NaiveDateTime {
-    Utc::now().naive_local()
+pub fn now() -> Timestamp {
+    Timestamp::now_utc()
 }
 pub fn id() -> Uuid {
     Uuid::new_v4()
 }
-fn date_to_string(dt: &NaiveDateTime, fmt: &str) -> String {
-    dt.format(fmt).to_string()
+
+pub fn iso8601(dt: &Timestamp) -> String {
+    let (h, m, s) = dt.as_hms();
+    format!("{} {:02}:{:02}:{:02}", date(dt), h, m, s)
 }
 
-pub fn iso8601(dt: &NaiveDateTime) -> String {
-    date_to_string(dt, "%Y-%m-%d %H:%M:%S")
-}
-
-pub fn date(dt: &NaiveDateTime) -> String {
-    date_to_string(dt, "%Y-%m-%d")
+pub fn date(dt: &Timestamp) -> String {
+    dt.date().to_string()
 }
 
 #[cfg(test)]
 mod tests {
     use std::collections::BTreeSet;
 
-    use chrono::NaiveDateTime;
+    use iso8601_timestamp::Timestamp;
     use uuid::Uuid;
 
     use crate::utils::factory::iso8601;
@@ -49,7 +47,7 @@ mod tests {
 
     #[test]
     fn date_str() {
-        assert_eq!(date(&NaiveDateTime::UNIX_EPOCH), "1970-01-01");
-        assert_eq!(iso8601(&NaiveDateTime::UNIX_EPOCH), "1970-01-01 00:00:00");
+        assert_eq!(date(&Timestamp::UNIX_EPOCH), "1970-01-01");
+        assert_eq!(iso8601(&Timestamp::UNIX_EPOCH), "1970-01-01 00:00:00");
     }
 }

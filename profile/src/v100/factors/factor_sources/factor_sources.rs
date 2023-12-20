@@ -69,15 +69,10 @@ impl FactorSources {
 mod tests {
     use identified_vec::Identifiable;
     use wallet_kit_common::{
-        error::common_error::CommonError,
-        json::{assert_eq_after_json_roundtrip, assert_json_value_eq_after_roundtrip},
+        error::common_error::CommonError, json::assert_eq_after_json_roundtrip,
     };
 
-    use crate::v100::factors::{
-        factor_source::FactorSource,
-        factor_sources::device_factor_source::device_factor_source::DeviceFactorSource,
-        is_factor_source::IsFactorSource,
-    };
+    use crate::v100::factors::{factor_source::FactorSource, is_factor_source::IsFactorSource};
 
     use super::FactorSources;
 

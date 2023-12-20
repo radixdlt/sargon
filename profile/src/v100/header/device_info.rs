@@ -1,11 +1,10 @@
 use std::fmt::Display;
 
-use chrono::NaiveDateTime;
 use derive_getters::Getters;
 use iso8601_timestamp::Timestamp;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use wallet_kit_common::utils::factory::{date, id, now};
+use wallet_kit_common::utils::factory::{id, now};
 
 /// A short summary of a device the Profile is being used
 /// on, typically an iPhone or an Android phone.
@@ -46,7 +45,7 @@ impl DeviceInfo {
     /// Instantiates a new `DeviceInfo` with `description`, and generates a new `id`
     /// and will use the current `date` for creation date.
     pub fn with_description(description: &str) -> Self {
-        Self::with_values(id(), Timestamp::now_utc(), description.to_string())
+        Self::with_values(id(), now(), description.to_string())
     }
 
     /// Instantiates a new `DeviceInfo` with "iPhone" as description, and

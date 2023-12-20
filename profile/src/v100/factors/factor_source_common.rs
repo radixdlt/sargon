@@ -1,10 +1,5 @@
-use std::{
-    borrow::BorrowMut,
-    cell::{Cell, RefCell},
-    collections::BTreeSet,
-};
+use std::{cell::RefCell, collections::BTreeSet};
 
-use chrono::NaiveDateTime;
 use iso8601_timestamp::Timestamp;
 use serde::{Deserialize, Serialize};
 use wallet_kit_common::utils::factory::now;
@@ -118,7 +113,7 @@ impl FactorSourceCommon {
     where
         I: IntoIterator<Item = FactorSourceFlag>,
     {
-        let date = Timestamp::now_utc();
+        let date = now();
         Self::with_values(crypto_parameters, date, date, flags)
     }
 
@@ -176,12 +171,11 @@ mod tests {
 
     use std::collections::BTreeSet;
 
-    use chrono::NaiveDateTime;
     use iso8601_timestamp::Timestamp;
     use wallet_kit_common::{json::assert_eq_after_json_roundtrip, utils::factory::now};
 
     use crate::v100::factors::{
-        factor_source::FactorSource, factor_source_crypto_parameters::FactorSourceCryptoParameters,
+        factor_source_crypto_parameters::FactorSourceCryptoParameters,
         factor_source_flag::FactorSourceFlag,
     };
 
@@ -197,12 +191,12 @@ mod tests {
 
     #[test]
     fn new_uses_now_as_date() {
-        let date0 = Timestamp::now_utc();
+        let date0 = now();
         let model = FactorSourceCommon::new(FactorSourceCryptoParameters::default(), []);
-        let mut date1 = Timestamp::now_utc();
+        let mut date1 = now();
         for _ in 0..10 {
             // rust is too fast... lol.
-            date1 = Timestamp::now_utc();
+            date1 = now();
         }
         let do_test = |d: Timestamp| {
             assert!(d > date0);
@@ -267,7 +261,7 @@ mod tests {
     #[test]
     fn set_last_used_on() {
         let sut = FactorSourceCommon::placeholder_main_babylon();
-        let d = Timestamp::now_utc();
+        let d = now();
         assert_ne!(sut.last_used_on(), d);
         sut.set_last_used_on(d);
         assert_eq!(sut.last_used_on(), d);

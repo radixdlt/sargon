@@ -136,9 +136,7 @@ impl DeviceFactorSource {
 #[cfg(test)]
 mod tests {
     use hierarchical_deterministic::bip39::bip39_word_count::BIP39WordCount;
-    use wallet_kit_common::{
-        json::assert_eq_after_json_roundtrip, types::keys::slip10_curve::SLIP10Curve,
-    };
+    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
 
     use crate::v100::factors::{
         factor_source_id::FactorSourceID, is_factor_source::IsFactorSource, factor_source::FactorSource, factor_sources::ledger_hardware_wallet_factor_source::ledger_hardware_wallet_factor_source::LedgerHardwareWalletFactorSource, factor_source_crypto_parameters::FactorSourceCryptoParameters,

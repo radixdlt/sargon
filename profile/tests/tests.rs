@@ -57,6 +57,4 @@ fn v100_100() {
         profile.header().snapshot_version(),
         ProfileSnapshotVersion::V100
     );
-    let serialized = serde_json::to_value(&profile).unwrap();
-    println!("{}", serialized);
 }

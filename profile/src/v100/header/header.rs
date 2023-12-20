@@ -10,7 +10,7 @@ use iso8601_timestamp::Timestamp;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use wallet_kit_common::utils::factory::id;
+use wallet_kit_common::utils::factory::{id, now};
 
 use super::{
     content_hint::ContentHint, device_info::DeviceInfo,
@@ -66,12 +66,7 @@ impl Header {
     /// Instantiates a new `Header` with creating and last used on `DeviceInfo` with
     /// "Unknown device" as description, and empty content hint
     pub fn new(creating_device: DeviceInfo) -> Self {
-        Self::with_values(
-            id(),
-            creating_device,
-            ContentHint::new(),
-            Timestamp::now_utc(),
-        )
+        Self::with_values(id(), creating_device, ContentHint::new(), now())
     }
 }
 
@@ -131,7 +126,7 @@ impl Header {
 impl Header {
     /// Updates the `last_modified` field.
     pub fn updated(&self) {
-        self.last_modified.set(Timestamp::now_utc());
+        self.last_modified.set(now());
     }
 
     /// Sets the content hint WITHOUT updating `last_modified`, you SHOULD not

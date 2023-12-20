@@ -1,12 +1,8 @@
-use std::{borrow::BorrowMut, cell::Cell, collections::BTreeMap, ops::AddAssign};
-
 use identified_vec::{IdentifiedVecOf, IsIdentifiableVecOfVia, IsIdentifiedVec, IsIdentifiedVecOf};
-use serde::{Deserialize, Serialize};
 
 use crate::{identified_vec_via::IdentifiedVecVia, v100::header::content_hint::ContentHint};
 
 use super::network::network::Network;
-use wallet_kit_common::network_id::NetworkID;
 
 /// An ordered mapping of NetworkID -> `Profile.Network`, containing
 /// all the users Accounts, Personas and AuthorizedDapps the user

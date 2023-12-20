@@ -4,9 +4,6 @@ use identified_vec::Identifiable;
 use serde::{Deserialize, Serialize};
 use wallet_kit_common::{error::common_error::CommonError, network_id::NetworkID};
 
-#[cfg(any(test, feature = "placeholder"))]
-use crate::v100::entity::account::account::Account;
-
 use super::accounts::Accounts;
 
 /// Accounts, Personas, Authorized dapps for some Radix Network that user
