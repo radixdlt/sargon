@@ -114,7 +114,8 @@ mod tests {
                     "name": "Orange, scratched",
                     "model": "nanoS+"
                 }
-            }"#,
+            }
+            "#,
         );
     }
 

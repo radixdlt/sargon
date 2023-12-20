@@ -1,8 +1,10 @@
 use std::{
     cell::{Cell, RefCell},
     fmt::Display,
-    str::FromStr,
 };
+
+#[cfg(any(test, feature = "placeholder"))]
+use std::str::FromStr;
 
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
@@ -127,9 +129,15 @@ impl Header {
         self.last_modified.set(now());
     }
 
+    /// Sets the content hint WITHOUT updating `last_modified`, you SHOULD not
+    /// use this, use `update_content_hint`, this is primarily meant for testing.
+    pub fn set_content_hint(&self, new: ContentHint) {
+        *self.content_hint.borrow_mut() = new;
+    }
+
     /// Sets the `content_hint` and updates the `last_modified` field.
     pub fn update_content_hint(&self, new: ContentHint) {
-        *self.content_hint.borrow_mut() = new;
+        self.set_content_hint(new);
         self.updated()
     }
 
@@ -165,15 +173,18 @@ pub mod tests {
 
     use std::str::FromStr;
 
-    use crate::v100::header::{content_hint::ContentHint, device_info::DeviceInfo};
+    use crate::v100::header::{
+        content_hint::ContentHint, device_info::DeviceInfo,
+        profilesnapshot_version::ProfileSnapshotVersion,
+    };
     use chrono::NaiveDateTime;
     use uuid::Uuid;
-    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::{json::assert_eq_after_json_roundtrip, utils::factory::id};
 
     use super::Header;
 
     #[test]
-    fn json_roundtrip() {
+    fn json_roundtrip_placeholder() {
         let sut = Header::placeholder();
         assert_eq_after_json_roundtrip(
             &sut,
@@ -267,5 +278,35 @@ pub mod tests {
             date,
         );
         assert_eq!(format!("{sut}"), "#12345678-bbbb-cccc-dddd-abcd12345678 v=100, content: #networks: 0, #accounts: 0, #personas: 0");
+    }
+
+    #[test]
+    fn creating_device() {
+        let value = DeviceInfo::new_iphone();
+        let sut = Header {
+            creating_device: value.clone(),
+            ..Default::default()
+        };
+        assert_eq!(sut.creating_device(), value)
+    }
+
+    #[test]
+    fn get_id() {
+        let value = id();
+        let sut = Header {
+            id: value.clone(),
+            ..Default::default()
+        };
+        assert_eq!(sut.id(), value)
+    }
+
+    #[test]
+    fn snapshot_version() {
+        let value = ProfileSnapshotVersion::default();
+        let sut = Header {
+            snapshot_version: value.clone(),
+            ..Default::default()
+        };
+        assert_eq!(sut.snapshot_version(), value)
     }
 }

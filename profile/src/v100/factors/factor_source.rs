@@ -173,8 +173,8 @@ mod tests {
     }
 
     #[test]
-    fn json_roundtrip_from_device() {
-        let model = FactorSource::Device(DeviceFactorSource::placeholder());
+    fn json_roundtrip_device() {
+        let model = FactorSource::placeholder_device();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -198,6 +198,38 @@ mod tests {
                         "name": "Unknown Name",
                         "model": "iPhone",
                         "mnemonicWordCount": 24
+                    }
+                }
+            }
+            "#,
+        )
+    }
+
+    #[test]
+    fn json_roundtrip_ledger() {
+        let model = FactorSource::placeholder_ledger();
+        assert_eq_after_json_roundtrip(
+            &model,
+            r#"
+            {
+                "discriminator": "ledgerHQHardwareWallet",
+                "ledgerHQHardwareWallet": {
+                    "id": {
+                        "kind": "ledgerHQHardwareWallet",
+                        "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+                    },
+                    "common": {
+                        "addedOn": "2023-09-11T16:05:56",
+                        "cryptoParameters": {
+                            "supportedCurves": ["curve25519"],
+                            "supportedDerivationPathSchemes": ["cap26"]
+                        },
+                        "flags": ["main"],
+                        "lastUsedOn": "2023-09-11T16:05:56"
+                    },
+                    "hint": {
+                        "name": "Orange, scratched",
+                        "model": "nanoS+"
                     }
                 }
             }

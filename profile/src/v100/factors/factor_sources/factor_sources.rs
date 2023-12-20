@@ -68,8 +68,16 @@ impl FactorSources {
 #[cfg(test)]
 mod tests {
     use identified_vec::Identifiable;
+    use wallet_kit_common::{
+        error::common_error::CommonError,
+        json::{assert_eq_after_json_roundtrip, assert_json_value_eq_after_roundtrip},
+    };
 
-    use crate::v100::factors::{factor_source::FactorSource, is_factor_source::IsFactorSource};
+    use crate::v100::factors::{
+        factor_source::FactorSource,
+        factor_sources::device_factor_source::device_factor_source::DeviceFactorSource,
+        is_factor_source::IsFactorSource,
+    };
 
     use super::FactorSources;
 
@@ -87,5 +95,75 @@ mod tests {
             FactorSources::placeholder(),
             FactorSources::placeholder_other()
         );
+    }
+
+    #[test]
+    fn err_when_try_from_iter_used_with_empty() {
+        assert_eq!(
+            FactorSources::try_from_iter([]),
+            Err(CommonError::FactorSourcesMustNotBeEmpty)
+        );
+    }
+
+    #[test]
+    fn try_from_iter_ok_when_non_empty() {
+        assert!(FactorSources::try_from_iter([FactorSource::placeholder_device()]).is_ok());
+    }
+
+    #[test]
+    fn json_roundtrip_placeholder() {
+        let sut = FactorSources::placeholder();
+        assert_eq_after_json_roundtrip(
+            &sut,
+            r#"
+            [
+                {
+                    "discriminator": "device",
+                    "device": {
+                        "id": {
+                            "kind": "device",
+                            "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+                        },
+                        "common": {
+                            "flags": ["main"],
+                            "addedOn": "2023-09-11T16:05:56",
+                            "cryptoParameters": {
+                                "supportedCurves": ["curve25519"],
+                                "supportedDerivationPathSchemes": ["cap26"]
+                            },
+                            "lastUsedOn": "2023-09-11T16:05:56"
+                        },
+                        "hint": {
+                            "name": "Unknown Name",
+                            "model": "iPhone",
+                            "mnemonicWordCount": 24
+                        }
+                    }
+                },
+                {
+                    "discriminator": "ledgerHQHardwareWallet",
+                    "ledgerHQHardwareWallet": {
+                        "id": {
+                            "kind": "ledgerHQHardwareWallet",
+                            "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+                        },
+                        "common": {
+                            "addedOn": "2023-09-11T16:05:56",
+                            "cryptoParameters": {
+                                "supportedCurves": ["curve25519"],
+                                "supportedDerivationPathSchemes": ["cap26"]
+                            },
+                            "flags": ["main"],
+                            "lastUsedOn": "2023-09-11T16:05:56"
+                        },
+                        "hint": {
+                            "name": "Orange, scratched",
+                            "model": "nanoS+"
+                        }
+                    }
+                }
+            ]
+            "#,
+        )
     }
 }
