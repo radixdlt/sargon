@@ -188,12 +188,11 @@ mod tests {
     }
 
     #[test]
-    fn not_equal() {
-        let b: AccountAddress =
-            "account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzdm"
-                .try_into()
-                .unwrap();
-        assert_ne!(AccountAddress::placeholder(), b)
+    fn inequality() {
+        assert_ne!(
+            AccountAddress::placeholder_alice(),
+            AccountAddress::placeholder_bob()
+        )
     }
 
     #[test]

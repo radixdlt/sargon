@@ -10,7 +10,7 @@ use iso8601_timestamp::Timestamp;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use wallet_kit_common::utils::factory::{id, now};
+use wallet_kit_common::utils::factory::id;
 
 use super::{
     content_hint::ContentHint, device_info::DeviceInfo,
@@ -167,6 +167,23 @@ impl Header {
         Header::with_values(
             Uuid::from_str("12345678-bbbb-cccc-dddd-abcd12345678").unwrap(),
             device,
+            ContentHint::with_counters(4, 0, 2),
+            date,
+        )
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_other() -> Self {
+        //let date =  NaiveDateTime::parse_from_str("2023-09-11T16:05:56.000Z", "%Y-%m-%dT%H:%M:%S").unwrap();
+        let date = Timestamp::parse("2023-12-20T16:05:56Z").unwrap();
+        let device = DeviceInfo::with_values(
+            Uuid::from_str("aabbccdd-a9d9-49e5-8152-beefbeefbeef").unwrap(),
+            date.clone(),
+            "iPhone".to_string(),
+        );
+        Header::with_values(
+            Uuid::from_str("87654321-bbbb-cccc-dddd-87654321dcba").unwrap(),
+            device,
             ContentHint::new(),
             date,
         )
@@ -182,12 +199,22 @@ pub mod tests {
         content_hint::ContentHint, device_info::DeviceInfo,
         profilesnapshot_version::ProfileSnapshotVersion,
     };
-    use chrono::NaiveDateTime;
     use iso8601_timestamp::Timestamp;
     use uuid::Uuid;
     use wallet_kit_common::{json::assert_eq_after_json_roundtrip, utils::factory::id};
 
     use super::Header;
+
+    #[test]
+    fn inequality() {
+        assert_ne!(Header::placeholder(), Header::placeholder_other());
+    }
+
+    #[test]
+    fn equality() {
+        assert_eq!(Header::placeholder(), Header::placeholder());
+        assert_eq!(Header::placeholder_other(), Header::placeholder_other());
+    }
 
     #[test]
     fn json_roundtrip_placeholder() {
@@ -210,9 +237,9 @@ pub mod tests {
                 },
                 "lastModified": "2023-09-11T16:05:56.000Z",
                 "contentHint": {
-                    "numberOfAccountsOnAllNetworksInTotal": 0,
+                    "numberOfAccountsOnAllNetworksInTotal": 4,
                     "numberOfPersonasOnAllNetworksInTotal": 0,
-                    "numberOfNetworks": 0
+                    "numberOfNetworks": 2
                 }
             }
             "#,

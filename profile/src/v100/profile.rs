@@ -136,6 +136,41 @@ mod tests {
     }
 
     #[test]
+    fn set_header() {
+        let profile = Profile::placeholder();
+        assert_eq!(profile.header(), Header::placeholder());
+        profile.set_header(Header::placeholder_other());
+        assert_eq!(profile.header(), Header::placeholder_other());
+    }
+
+    #[test]
+    fn set_factor_sources() {
+        let profile = Profile::placeholder();
+        assert_eq!(profile.factor_sources(), FactorSources::placeholder());
+        profile.set_factor_sources(FactorSources::placeholder_other());
+        assert_eq!(profile.factor_sources(), FactorSources::placeholder_other());
+    }
+
+    #[test]
+    fn set_app_preferences() {
+        let profile = Profile::placeholder();
+        assert_eq!(profile.app_preferences(), AppPreferences::placeholder());
+        profile.set_app_preferences(AppPreferences::placeholder_other());
+        assert_eq!(
+            profile.app_preferences(),
+            AppPreferences::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn set_networks() {
+        let profile = Profile::placeholder();
+        assert_eq!(profile.networks(), Networks::placeholder());
+        profile.set_networks(Networks::placeholder_other());
+        assert_eq!(profile.networks(), Networks::placeholder_other());
+    }
+
+    #[test]
     fn json_roundtrip() {
         let sut = Profile::placeholder();
         assert_eq_after_json_roundtrip(
