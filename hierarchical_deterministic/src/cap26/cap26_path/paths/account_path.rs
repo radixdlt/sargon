@@ -1,3 +1,4 @@
+use derive_getters::Getters;
 use serde::{de, Deserializer, Serialize, Serializer};
 use wallet_kit_common::{error::hdpath_error::HDPathError, network_id::NetworkID};
 
@@ -15,11 +16,14 @@ use crate::{
 
 use super::is_entity_path::IsEntityPath;
 
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Getters)]
 pub struct AccountPath {
-    pub path: HDPath,
-    pub network_id: NetworkID,
+    path: HDPath,
+    network_id: NetworkID,
+
+    #[getter(skip)] // IsEntityPath trait has `entity_kind()` method
     entity_kind: CAP26EntityKind,
+
     key_kind: CAP26KeyKind,
     index: HDPathValue,
 }
@@ -281,9 +285,9 @@ mod tests {
     #[test]
     fn is_entity_path_index() {
         let sut = AccountPath::placeholder();
-        assert_eq!(sut.index(), 0);
-        assert_eq!(sut.network_id(), NetworkID::Mainnet);
-        assert_eq!(sut.key_kind(), CAP26KeyKind::TransactionSigning);
+        assert_eq!(sut.index(), &0);
+        assert_eq!(sut.network_id(), &NetworkID::Mainnet);
+        assert_eq!(sut.key_kind(), &CAP26KeyKind::TransactionSigning);
     }
 
     #[test]

@@ -1,4 +1,5 @@
 use super::hierarchical_deterministic_private_key::HierarchicalDeterministicPrivateKey;
+use derive_getters::Getters;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use wallet_kit_common::types::keys::{
@@ -15,11 +16,11 @@ use wallet_kit_common::error::hdpath_error::HDPathError as Error;
 
 /// A BIP39 Mnemonic and BIP39 passphrase - aka "25th word" tuple,
 /// from which we can derive a HD Root used for derivation.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Getters)]
 #[serde(rename_all = "camelCase")]
 pub struct MnemonicWithPassphrase {
-    pub mnemonic: Mnemonic,
-    pub passphrase: String,
+    mnemonic: Mnemonic,
+    passphrase: String,
 }
 
 impl MnemonicWithPassphrase {
@@ -135,8 +136,8 @@ mod tests {
             Mnemonic::from_phrase(phrase).unwrap(),
             passphrase.to_string(),
         );
-        assert_eq!(mwp.mnemonic.phrase(), phrase);
-        assert_eq!(mwp.passphrase, passphrase);
+        assert_eq!(mwp.mnemonic().phrase(), phrase);
+        assert_eq!(mwp.passphrase(), passphrase);
     }
 
     #[test]

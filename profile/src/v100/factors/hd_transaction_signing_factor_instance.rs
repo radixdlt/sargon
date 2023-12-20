@@ -43,8 +43,8 @@ impl<E: IsEntityPath + Clone> HDFactorInstanceTransactionSigning<E> {
             }
 
             Ok(Self {
-                factor_source_id: hd_factor_instance.factor_source_id,
-                public_key: hd_factor_instance.public_key.public_key,
+                factor_source_id: hd_factor_instance.factor_source_id().clone(),
+                public_key: hd_factor_instance.public_key().public_key().clone(),
                 path: path.clone(),
             })
         } else {
@@ -135,7 +135,7 @@ mod tests {
                 .unwrap()
                 .path
                 .key_kind(),
-            CAP26KeyKind::TransactionSigning
+            &CAP26KeyKind::TransactionSigning
         );
     }
 
@@ -186,7 +186,7 @@ mod tests {
                 .unwrap()
                 .path
                 .key_kind(),
-            CAP26KeyKind::TransactionSigning
+            &CAP26KeyKind::TransactionSigning
         );
     }
 

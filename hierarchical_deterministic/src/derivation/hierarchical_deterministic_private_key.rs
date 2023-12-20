@@ -1,3 +1,4 @@
+use derive_getters::Getters;
 use wallet_kit_common::types::keys::{
     ed25519::private_key::Ed25519PrivateKey, private_key::PrivateKey,
 };
@@ -11,11 +12,12 @@ use super::{
 
 /// An ephemeral (never persisted) HD PrivateKey which contains
 /// the derivation path used to derive it.
+#[derive(Getters)]
 pub struct HierarchicalDeterministicPrivateKey {
     /// The PrivateKey derived from some HD FactorSource using `derivation_path`.
-    pub private_key: PrivateKey,
+    private_key: PrivateKey,
     /// Derivation path used to derive the `PrivateKey` from some HD FactorSource.
-    pub derivation_path: DerivationPath,
+    derivation_path: DerivationPath,
 }
 
 impl HierarchicalDeterministicPrivateKey {

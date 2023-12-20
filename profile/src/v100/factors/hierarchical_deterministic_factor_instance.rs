@@ -1,5 +1,6 @@
 #[cfg(any(test, feature = "placeholder"))]
 use crate::v100::factors::factor_source_kind::FactorSourceKind;
+use derive_getters::Getters;
 #[cfg(any(test, feature = "placeholder"))]
 use hierarchical_deterministic::{
     bip32::hd_path_component::HDPathValue,
@@ -33,15 +34,15 @@ use super::{
 };
 
 /// A virtual hierarchical deterministic `FactorInstance`
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Getters)]
 pub struct HierarchicalDeterministicFactorInstance {
-    pub factor_source_id: FactorSourceIDFromHash,
-    pub public_key: HierarchicalDeterministicPublicKey,
+    factor_source_id: FactorSourceIDFromHash,
+    public_key: HierarchicalDeterministicPublicKey,
 }
 
 impl HierarchicalDeterministicFactorInstance {
     pub fn derivation_path(&self) -> DerivationPath {
-        self.public_key.derivation_path.clone()
+        self.public_key().derivation_path().clone()
     }
 
     pub fn new(
@@ -90,8 +91,8 @@ impl HierarchicalDeterministicFactorInstance {
 
         Self::try_from(
             factor_instance.factor_source_id,
-            badge.public_key,
-            badge.derivation_path.clone(),
+            badge.public_key().clone(),
+            badge.derivation_path().clone(),
         )
     }
 
@@ -106,8 +107,8 @@ impl HierarchicalDeterministicFactorInstance {
         match &self.derivation_path() {
             DerivationPath::CAP26(cap26) => match cap26 {
                 CAP26Path::GetID(_) => None,
-                CAP26Path::IdentityPath(identity_path) => Some(identity_path.key_kind()),
-                CAP26Path::AccountPath(account_path) => Some(account_path.key_kind()),
+                CAP26Path::IdentityPath(identity_path) => Some(identity_path.key_kind().clone()),
+                CAP26Path::AccountPath(account_path) => Some(account_path.key_kind().clone()),
             },
             DerivationPath::BIP44Like(_) => None,
         }
