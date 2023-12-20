@@ -91,4 +91,7 @@ pub enum CommonError {
 
     #[error("Accounts on different networks.")]
     AccountOnWrongNetwork,
+
+    #[error("FactorSources must not be empty.")]
+    FactorSourcesMustNotBeEmpty,
 }

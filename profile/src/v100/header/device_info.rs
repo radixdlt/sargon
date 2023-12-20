@@ -1,13 +1,14 @@
 use std::fmt::Display;
 
-use chrono::NaiveDateTime;
+use derive_getters::Getters;
+use iso8601_timestamp::Timestamp;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use wallet_kit_common::utils::factory::{date, id, now};
+use wallet_kit_common::utils::factory::{id, now};
 
 /// A short summary of a device the Profile is being used
 /// on, typically an iPhone or an Android phone.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, Getters)]
 pub struct DeviceInfo {
     /// A best effort stable and unique identifier of this
     /// device.
@@ -16,24 +17,24 @@ pub struct DeviceInfo {
     /// query iOS for a unique identifier of the device, thus
     /// the iOS team has made their own impl of a best effort
     /// stable identifier.
-    pub id: Uuid,
+    id: Uuid,
 
     /// The date this description of the device was made, might
     /// be equal to when the app was first ever launched on the
     /// device.
-    pub date: NaiveDateTime,
+    date: Timestamp,
 
     /// A short description of the device, we devices should
     /// read the device model and a given name from the device
     /// if they are able to.
     ///
     /// E.g. "My Red Phone (iPhone SE 2nd Gen)"
-    pub description: String,
+    description: String,
 }
 
 impl DeviceInfo {
     /// Instantiates a new `DeviceInfo` with `id`, `date` and `description`.
-    pub fn with_values(id: Uuid, date: NaiveDateTime, description: String) -> Self {
+    pub fn with_values(id: Uuid, date: Timestamp, description: String) -> Self {
         Self {
             id,
             date,
@@ -72,7 +73,7 @@ impl Display for DeviceInfo {
             f,
             "{} | created: {} | #{}",
             self.description,
-            date(&self.date),
+            &self.date.date().to_string(),
             self.id.to_string(),
         )
     }
@@ -83,7 +84,7 @@ mod tests {
     use std::{collections::HashSet, str::FromStr};
 
     use crate::v100::header::device_info::DeviceInfo;
-    use chrono::{Datelike, NaiveDateTime};
+    use iso8601_timestamp::Timestamp;
     use uuid::Uuid;
     use wallet_kit_common::json::*;
 
@@ -108,7 +109,7 @@ mod tests {
         let id = Uuid::from_str(id_str).unwrap();
         let sut = DeviceInfo::with_values(
             id,
-            NaiveDateTime::parse_from_str("2023-09-11T16:05:56", "%Y-%m-%dT%H:%M:%S").unwrap(),
+            Timestamp::parse("2023-09-11T16:05:56Z").unwrap(),
             "Foo".to_string(),
         );
         assert_eq!(
@@ -134,10 +135,25 @@ mod tests {
     }
 
     #[test]
+    fn can_parse_iso8601_json_without_milliseconds_precision() {
+        let str = r#"
+            {
+                "id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
+                "date": "2023-09-11T16:05:56Z",
+                "description": "iPhone"
+            }
+            "#;
+        let model = serde_json::from_str::<DeviceInfo>(str).unwrap();
+        assert_eq!(model.date().day(), 11);
+        let json = serde_json::to_string(&model).unwrap();
+        assert!(json.contains("56.000Z")); // but when serialized, `.000` is included.
+    }
+
+    #[test]
     fn json_roundtrip() {
         let model = DeviceInfo::with_values(
             Uuid::from_str("66f07ca2-a9d9-49e5-8152-77aca3d1dd74").unwrap(),
-            NaiveDateTime::parse_from_str("2023-09-11T16:05:56", "%Y-%m-%dT%H:%M:%S").unwrap(),
+            Timestamp::parse("2023-09-11T16:05:56.000Z").unwrap(),
             "iPhone".to_string(),
         );
         assert_eq_after_json_roundtrip(
@@ -145,7 +161,7 @@ mod tests {
             r#"
             {
                 "id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
-                "date": "2023-09-11T16:05:56",
+                "date": "2023-09-11T16:05:56.000Z",
                 "description": "iPhone"
             }
             "#,
@@ -156,7 +172,7 @@ mod tests {
             r#"
             {
                 "id": "00000000-0000-0000-0000-000000000000",
-                "date": "1970-01-01T12:34:56",
+                "date": "1970-01-01T12:34:56.000Z",
                 "description": "Nokia"
             }
             "#,
@@ -169,7 +185,7 @@ mod tests {
             r#"
             {
                 "id": "invalid-uuid",
-                "date": "1970-01-01T12:34:56",
+                "date": "1970-01-01T12:34:56.000Z",
                 "description": "iPhone"
             }
             "#,
@@ -189,7 +205,7 @@ mod tests {
             r#"
             {
                 "missing_key": "id",
-                "date": "1970-01-01T12:34:56",
+                "date": "1970-01-01T12:34:56.000Z",
                 "description": "iPhone"
             }
             "#,
@@ -209,7 +225,7 @@ mod tests {
             r#"
             {
                 "id": "00000000-0000-0000-0000-000000000000",
-                "date": "1970-01-01T12:34:56",
+                "date": "1970-01-01T12:34:56.000Z",
                 "missing_key": "description"
             }
             "#,

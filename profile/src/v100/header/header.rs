@@ -3,7 +3,10 @@ use std::{
     fmt::Display,
 };
 
-use chrono::NaiveDateTime;
+#[cfg(any(test, feature = "placeholder"))]
+use std::str::FromStr;
+
+use iso8601_timestamp::Timestamp;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -23,19 +26,19 @@ use super::{
 pub struct Header {
     /// A versioning number that is increased when breaking
     /// changes is made to ProfileSnapshot JSON data format.
-    pub snapshot_version: ProfileSnapshotVersion,
+    snapshot_version: ProfileSnapshotVersion,
 
     /// An immutable and unique identifier of a Profile.
-    pub id: Uuid,
+    id: Uuid,
 
     /// The device which was used to create the Profile.
-    pub creating_device: DeviceInfo,
+    creating_device: DeviceInfo,
 
     /// The device on which the profile was last used.
-    last_used_on_device: RefCell<DeviceInfo>, // `RefCell` needed, because `Cell` requires `Copy` and `DeviceInfo` contains `String` (which does not impl `Copy`). We could potentially use `fstr` from `fixedstr` crate for `description` inside `DeviceInfo`? and thus use `Cell` here?
+    last_used_on_device: RefCell<DeviceInfo>,
 
     /// When the Profile was last modified.
-    last_modified: Cell<NaiveDateTime>,
+    last_modified: Cell<Timestamp>,
 
     /// Hint about the contents of the profile, e.g. number of Accounts and Personas.
     content_hint: RefCell<ContentHint>, // `RefCell` needed because `ContentHint` does not impl `Copy`, which it cant because it contains `Cell`s, and `Cell` itself does not impl `Copy`.
@@ -48,7 +51,7 @@ impl Header {
         id: Uuid,
         creating_device: DeviceInfo,
         content_hint: ContentHint,
-        last_modified: NaiveDateTime,
+        last_modified: Timestamp,
     ) -> Self {
         Self {
             snapshot_version: ProfileSnapshotVersion::default(),
@@ -87,16 +90,34 @@ impl Display for Header {
 
 // Getters
 impl Header {
+    /// A versioning number that is increased when breaking
+    /// changes is made to ProfileSnapshot JSON data format.
+    pub fn snapshot_version(&self) -> ProfileSnapshotVersion {
+        self.snapshot_version
+    }
+
+    /// An immutable and unique identifier of a Profile.
+    pub fn id(&self) -> Uuid {
+        self.id
+    }
+
+    /// The device which was used to create the Profile.
+    pub fn creating_device(&self) -> DeviceInfo {
+        self.creating_device.clone()
+    }
+
     /// Hint about the contents of the profile, e.g. number of Accounts and Personas.
     pub fn content_hint(&self) -> ContentHint {
         self.content_hint.borrow().clone()
     }
 
+    /// The device on which the profile was last used.
     pub fn last_used_on_device(&self) -> DeviceInfo {
         self.last_used_on_device.borrow().clone()
     }
 
-    pub fn last_modified(&self) -> NaiveDateTime {
+    /// When the Profile was last modified.
+    pub fn last_modified(&self) -> Timestamp {
         self.last_modified.get().clone()
     }
 }
@@ -108,9 +129,15 @@ impl Header {
         self.last_modified.set(now());
     }
 
+    /// Sets the content hint WITHOUT updating `last_modified`, you SHOULD not
+    /// use this, use `update_content_hint`, this is primarily meant for testing.
+    pub fn set_content_hint(&self, new: ContentHint) {
+        *self.content_hint.borrow_mut() = new;
+    }
+
     /// Sets the `content_hint` and updates the `last_modified` field.
     pub fn update_content_hint(&self, new: ContentHint) {
-        *self.content_hint.borrow_mut() = new;
+        self.set_content_hint(new);
         self.updated()
     }
 
@@ -121,53 +148,93 @@ impl Header {
     }
 }
 
-#[cfg(test)]
-pub mod tests {
-    use std::str::FromStr;
-
-    use crate::v100::header::{content_hint::ContentHint, device_info::DeviceInfo};
-    use chrono::NaiveDateTime;
-    use uuid::Uuid;
-    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
-
-    use super::Header;
-
-    #[test]
-    fn json_roundtrip() {
-        let date =
-            NaiveDateTime::parse_from_str("2023-09-11T16:05:56", "%Y-%m-%dT%H:%M:%S").unwrap();
+#[cfg(any(test, feature = "placeholder"))]
+impl Header {
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder() -> Self {
+        //let date =  NaiveDateTime::parse_from_str("2023-09-11T16:05:56.000Z", "%Y-%m-%dT%H:%M:%S").unwrap();
+        let date = Timestamp::parse("2023-09-11T16:05:56Z").unwrap();
         let device = DeviceInfo::with_values(
             Uuid::from_str("66f07ca2-a9d9-49e5-8152-77aca3d1dd74").unwrap(),
             date.clone(),
             "iPhone".to_string(),
         );
-        let model = Header::with_values(
+        Header::with_values(
             Uuid::from_str("12345678-bbbb-cccc-dddd-abcd12345678").unwrap(),
+            device,
+            ContentHint::with_counters(4, 0, 2),
+            date,
+        )
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_other() -> Self {
+        //let date =  NaiveDateTime::parse_from_str("2023-09-11T16:05:56.000Z", "%Y-%m-%dT%H:%M:%S").unwrap();
+        let date = Timestamp::parse("2023-12-20T16:05:56Z").unwrap();
+        let device = DeviceInfo::with_values(
+            Uuid::from_str("aabbccdd-a9d9-49e5-8152-beefbeefbeef").unwrap(),
+            date.clone(),
+            "iPhone".to_string(),
+        );
+        Header::with_values(
+            Uuid::from_str("87654321-bbbb-cccc-dddd-87654321dcba").unwrap(),
             device,
             ContentHint::new(),
             date,
-        );
+        )
+    }
+}
+
+#[cfg(test)]
+pub mod tests {
+
+    use std::str::FromStr;
+
+    use crate::v100::header::{
+        content_hint::ContentHint, device_info::DeviceInfo,
+        profilesnapshot_version::ProfileSnapshotVersion,
+    };
+    use iso8601_timestamp::Timestamp;
+    use uuid::Uuid;
+    use wallet_kit_common::{json::assert_eq_after_json_roundtrip, utils::factory::id};
+
+    use super::Header;
+
+    #[test]
+    fn inequality() {
+        assert_ne!(Header::placeholder(), Header::placeholder_other());
+    }
+
+    #[test]
+    fn equality() {
+        assert_eq!(Header::placeholder(), Header::placeholder());
+        assert_eq!(Header::placeholder_other(), Header::placeholder_other());
+    }
+
+    #[test]
+    fn json_roundtrip_placeholder() {
+        let sut = Header::placeholder();
         assert_eq_after_json_roundtrip(
-            &model,
+            &sut,
             r#"
             {
                 "snapshotVersion": 100,
                 "id": "12345678-bbbb-cccc-dddd-abcd12345678",
                 "creatingDevice": {
                     "id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
-                    "date": "2023-09-11T16:05:56",
+                    "date": "2023-09-11T16:05:56.000Z",
                     "description": "iPhone"
                 },
                 "lastUsedOnDevice": {
                     "id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
-                    "date": "2023-09-11T16:05:56",
+                    "date": "2023-09-11T16:05:56.000Z",
                     "description": "iPhone"
                 },
-                "lastModified": "2023-09-11T16:05:56",
+                "lastModified": "2023-09-11T16:05:56.000Z",
                 "contentHint": {
-                    "numberOfAccountsOnAllNetworksInTotal": 0,
+                    "numberOfAccountsOnAllNetworksInTotal": 4,
                     "numberOfPersonasOnAllNetworksInTotal": 0,
-                    "numberOfNetworks": 0
+                    "numberOfNetworks": 2
                 }
             }
             "#,
@@ -205,7 +272,7 @@ pub mod tests {
     #[test]
     fn update_last_used_on_device() {
         let sut = Header::default();
-        let d0: NaiveDateTime = sut.last_modified();
+        let d0 = sut.last_modified();
         let device_0 = sut.last_used_on_device();
         let end = 10;
         for n in 1..end {
@@ -225,8 +292,7 @@ pub mod tests {
 
     #[test]
     fn display() {
-        let date =
-            NaiveDateTime::parse_from_str("2023-09-11T16:05:56", "%Y-%m-%dT%H:%M:%S").unwrap();
+        let date = Timestamp::parse("2023-09-11T16:05:56Z").unwrap();
         let device = DeviceInfo::with_values(
             Uuid::from_str("66f07ca2-a9d9-49e5-8152-77aca3d1dd74").unwrap(),
             date.clone(),
@@ -239,5 +305,35 @@ pub mod tests {
             date,
         );
         assert_eq!(format!("{sut}"), "#12345678-bbbb-cccc-dddd-abcd12345678 v=100, content: #networks: 0, #accounts: 0, #personas: 0");
+    }
+
+    #[test]
+    fn creating_device() {
+        let value = DeviceInfo::new_iphone();
+        let sut = Header {
+            creating_device: value.clone(),
+            ..Default::default()
+        };
+        assert_eq!(sut.creating_device(), value)
+    }
+
+    #[test]
+    fn get_id() {
+        let value = id();
+        let sut = Header {
+            id: value.clone(),
+            ..Default::default()
+        };
+        assert_eq!(sut.id(), value)
+    }
+
+    #[test]
+    fn snapshot_version() {
+        let value = ProfileSnapshotVersion::default();
+        let sut = Header {
+            snapshot_version: value.clone(),
+            ..Default::default()
+        };
+        assert_eq!(sut.snapshot_version(), value)
     }
 }

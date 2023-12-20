@@ -4,7 +4,7 @@ use wallet_kit_common::error::common_error::CommonError as Error;
 
 #[nutype(
     sanitize(trim),
-    validate(not_empty, len_char_max = 20),
+    validate(not_empty, len_char_max = 30),
     derive(
         Serialize,
         Deserialize,
@@ -51,6 +51,11 @@ mod tests {
             DisplayName::try_from("this is a much much too long display name"),
             Err(Error::InvalidDisplayName)
         );
+    }
+
+    #[test]
+    fn max_is_ok() {
+        assert!(DisplayName::try_from("0|RDX|Dev Nano S|Some very lon").is_ok());
     }
 
     #[test]

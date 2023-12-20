@@ -107,6 +107,17 @@ impl AppPreferences {
             Transaction::placeholder(),
         )
     }
+
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_other() -> Self {
+        Self::new(
+            AppDisplay::placeholder_other(),
+            Gateways::placeholder_other(),
+            P2PLinks::placeholder(),
+            Security::placeholder_other(),
+            Transaction::placeholder_other(),
+        )
+    }
 }
 
 #[cfg(test)]

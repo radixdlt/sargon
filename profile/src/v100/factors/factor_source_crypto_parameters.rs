@@ -1,7 +1,12 @@
+use std::cell::RefCell;
+
 use hierarchical_deterministic::derivation::derivation_path_scheme::DerivationPathScheme;
+use identified_vec::{IsIdentifiedVec, IsIdentifiedVecOf, ItemsCloned};
 use serde::{Deserialize, Serialize};
 use wallet_kit_common::error::common_error::CommonError as Error;
 use wallet_kit_common::types::keys::slip10_curve::SLIP10Curve;
+
+use crate::identified_vec_via::IdentifiedVecVia;
 
 /// Cryptographic parameters a certain FactorSource supports, e.g. which Elliptic Curves
 /// it supports and which Hierarchical Deterministic (HD) derivations schemes it supports,
@@ -16,14 +21,24 @@ pub struct FactorSourceCryptoParameters {
     /// Either `[curve25519]` or `[secp256k1, curve25519]`
     ///
     /// Must not be empty.
-    supported_curves: Vec<SLIP10Curve>,
+    supported_curves: RefCell<IdentifiedVecVia<SLIP10Curve>>,
 
     /// If not empty: Describes which kind of Hierarchical Deterministic (HD)
     /// derivations a FactorSource is capable of doing - if empty: the
     /// FactorSource does not support HD derivation.
     ///
     /// Either BIP44 or CAP26 (SLIP10)
-    supported_derivation_path_schemes: Vec<DerivationPathScheme>,
+    supported_derivation_path_schemes: RefCell<IdentifiedVecVia<DerivationPathScheme>>,
+}
+
+impl FactorSourceCryptoParameters {
+    pub fn supported_curves(&self) -> Vec<SLIP10Curve> {
+        self.supported_curves.borrow().items()
+    }
+
+    pub fn supported_derivation_path_schemes(&self) -> Vec<DerivationPathScheme> {
+        self.supported_derivation_path_schemes.borrow().items()
+    }
 }
 
 impl FactorSourceCryptoParameters {
@@ -32,18 +47,15 @@ impl FactorSourceCryptoParameters {
         I: IntoIterator<Item = SLIP10Curve>,
         J: IntoIterator<Item = DerivationPathScheme>,
     {
-        let mut supported_curves: Vec<SLIP10Curve> = curves.into_iter().collect();
-        if supported_curves.is_empty() {
+        let supported_curves = IdentifiedVecVia::from_iter(curves);
+        if supported_curves.len() == 0 {
             return Err(Error::FactorSourceCryptoParametersSupportedCurvesInvalidSize);
         }
-        supported_curves.dedup();
-        let mut supported_derivation_path_schemes: Vec<DerivationPathScheme> =
-            schemes.into_iter().collect();
-        supported_derivation_path_schemes.dedup();
+        let supported_derivation_path_schemes = IdentifiedVecVia::from_iter(schemes);
 
         Ok(Self {
-            supported_curves,
-            supported_derivation_path_schemes,
+            supported_curves: RefCell::new(supported_curves),
+            supported_derivation_path_schemes: RefCell::new(supported_derivation_path_schemes),
         })
     }
 
@@ -52,15 +64,23 @@ impl FactorSourceCryptoParameters {
             .expect("Valid Babylon parameters")
     }
 
-    pub fn olympia_compatible() -> Self {
+    pub fn olympia() -> Self {
         Self::new(
-            [SLIP10Curve::Secp256k1, SLIP10Curve::Curve25519],
+            [SLIP10Curve::Secp256k1],
+            [DerivationPathScheme::Bip44Olympia],
+        )
+        .expect("Valid Olympia parameters")
+    }
+
+    pub fn babylon_olympia_compatible() -> Self {
+        Self::new(
+            [SLIP10Curve::Curve25519, SLIP10Curve::Secp256k1],
             [
-                DerivationPathScheme::Bip44Olympia,
                 DerivationPathScheme::Cap26,
+                DerivationPathScheme::Bip44Olympia,
             ],
         )
-        .expect("Valid Babylon parameters")
+        .expect("Valid Babylon and Olympia parameters")
     }
 }
 
@@ -84,7 +104,7 @@ mod tests {
     fn babylon_has_curve25519_as_first_curve() {
         assert_eq!(
             FactorSourceCryptoParameters::babylon()
-                .supported_curves
+                .supported_curves()
                 .first()
                 .unwrap(),
             &SLIP10Curve::Curve25519
@@ -103,7 +123,7 @@ mod tests {
     fn babylon_has_cap26_as_first_derivation_path_scheme() {
         assert_eq!(
             FactorSourceCryptoParameters::babylon()
-                .supported_derivation_path_schemes
+                .supported_derivation_path_schemes()
                 .first()
                 .unwrap(),
             &DerivationPathScheme::Cap26
@@ -111,52 +131,66 @@ mod tests {
     }
 
     #[test]
-    fn olympia_compat_has_secp256k1_as_first_curve() {
+    fn babylon_olympia_compat_has_curve25519_as_first_curve() {
         assert_eq!(
-            FactorSourceCryptoParameters::olympia_compatible()
-                .supported_curves
+            FactorSourceCryptoParameters::babylon_olympia_compatible()
+                .supported_curves()
                 .first()
                 .unwrap(),
-            &SLIP10Curve::Secp256k1
+            &SLIP10Curve::Curve25519
         );
     }
 
     #[test]
-    fn olympia_compat_has_bip44_as_first_derivation_path_scheme() {
+    fn babylon_olympia_compat_has_cap26_as_first_derivation_path_scheme() {
         assert_eq!(
-            FactorSourceCryptoParameters::olympia_compatible()
-                .supported_derivation_path_schemes
+            FactorSourceCryptoParameters::babylon_olympia_compatible()
+                .supported_derivation_path_schemes()
                 .first()
                 .unwrap(),
-            &DerivationPathScheme::Bip44Olympia
+            &DerivationPathScheme::Cap26
         );
     }
 
     #[test]
     fn babylon_does_not_support_secp256k1() {
         assert!(!FactorSourceCryptoParameters::babylon()
-            .supported_curves
+            .supported_curves()
             .contains(&SLIP10Curve::Secp256k1));
     }
 
     #[test]
     fn babylon_does_not_support_bip44() {
         assert!(!FactorSourceCryptoParameters::babylon()
-            .supported_derivation_path_schemes
+            .supported_derivation_path_schemes()
             .contains(&DerivationPathScheme::Bip44Olympia));
     }
 
     #[test]
-    fn olympia_compat_has_supports_curve25519() {
-        assert!(FactorSourceCryptoParameters::olympia_compatible()
-            .supported_curves
+    fn olympia_does_not_support_curve25519() {
+        assert!(!FactorSourceCryptoParameters::olympia()
+            .supported_curves()
             .contains(&SLIP10Curve::Curve25519));
     }
 
     #[test]
-    fn olympia_compat_supports_cap26() {
-        assert!(FactorSourceCryptoParameters::olympia_compatible()
-            .supported_derivation_path_schemes
+    fn olympia_does_not_support_cap26() {
+        assert!(!FactorSourceCryptoParameters::olympia()
+            .supported_derivation_path_schemes()
+            .contains(&DerivationPathScheme::Cap26));
+    }
+
+    #[test]
+    fn babylon_olympia_compat_has_supports_curve25519() {
+        assert!(FactorSourceCryptoParameters::babylon_olympia_compatible()
+            .supported_curves()
+            .contains(&SLIP10Curve::Curve25519));
+    }
+
+    #[test]
+    fn babylon_olympia_compat_supports_cap26() {
+        assert!(FactorSourceCryptoParameters::babylon_olympia_compatible()
+            .supported_derivation_path_schemes()
             .contains(&DerivationPathScheme::Cap26));
     }
 
@@ -176,7 +210,7 @@ mod tests {
                 []
             )
             .unwrap()
-            .supported_curves
+            .supported_curves()
             .len(),
             1
         );
@@ -190,7 +224,7 @@ mod tests {
                 [DerivationPathScheme::Cap26, DerivationPathScheme::Cap26]
             )
             .unwrap()
-            .supported_derivation_path_schemes
+            .supported_derivation_path_schemes()
             .len(),
             1
         );
@@ -212,13 +246,27 @@ mod tests {
 
     #[test]
     fn json_olympia_compat() {
-        let model = FactorSourceCryptoParameters::olympia_compatible();
+        let model = FactorSourceCryptoParameters::olympia();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
         {
-            "supportedCurves": ["secp256k1", "curve25519"],
-            "supportedDerivationPathSchemes": ["bip44Olympia", "cap26"]
+            "supportedCurves": ["secp256k1"],
+            "supportedDerivationPathSchemes": ["bip44Olympia"]
+        }
+        "#,
+        );
+    }
+
+    #[test]
+    fn json_babylon_olympia_compat() {
+        let model = FactorSourceCryptoParameters::babylon_olympia_compatible();
+        assert_eq_after_json_roundtrip(
+            &model,
+            r#"
+        {
+            "supportedCurves": ["curve25519", "secp256k1"],
+            "supportedDerivationPathSchemes": ["cap26", "bip44Olympia"]
         }
         "#,
         );

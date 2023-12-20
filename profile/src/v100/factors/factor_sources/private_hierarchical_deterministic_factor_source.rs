@@ -28,7 +28,7 @@ impl PrivateHierarchicalDeterministicFactorSource {
         factor_source: DeviceFactorSource,
     ) -> Self {
         assert_eq!(
-            factor_source.id,
+            factor_source.factor_source_id(),
             FactorSourceIDFromHash::from_mnemonic_with_passphrase(
                 factor_source.factor_source_kind(),
                 mnemonic_with_passphrase.clone()
@@ -51,7 +51,7 @@ impl PrivateHierarchicalDeterministicFactorSource {
         let path = AccountPath::new(network_id, CAP26KeyKind::TransactionSigning, index);
         let hd_private_key = self.mnemonic_with_passphrase.derive_private_key(path);
         let hd_factor_instance = HierarchicalDeterministicFactorInstance::new(
-            self.factor_source.id.clone(),
+            self.factor_source.id().clone(),
             hd_private_key.public_key(),
         );
         HDFactorInstanceAccountCreation::new(hd_factor_instance).unwrap()

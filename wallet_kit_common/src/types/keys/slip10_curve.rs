@@ -1,3 +1,4 @@
+use identified_vec::Identifiable;
 use serde::{Deserialize, Serialize};
 
 /// Elliptic Curves which the SLIP10 derivation algorithm supports.
@@ -17,8 +18,20 @@ pub enum SLIP10Curve {
     Secp256k1,
 }
 
+impl Identifiable for SLIP10Curve {
+    type ID = String;
+
+    fn id(&self) -> Self::ID {
+        match self {
+            Self::Curve25519 => "curve25519".to_string(),
+            Self::Secp256k1 => "secp256k1".to_string(),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
+    use identified_vec::Identifiable;
     use serde_json::json;
 
     use crate::json::{
@@ -35,11 +48,18 @@ mod tests {
         assert_json_value_ne_after_roundtrip(&model, json!("curve25519"));
         assert_json_roundtrip(&model);
     }
+
     #[test]
     fn json_roundtrip_curve25519() {
         let model = SLIP10Curve::Curve25519;
         assert_json_value_eq_after_roundtrip(&model, json!("curve25519"));
         assert_json_value_ne_after_roundtrip(&model, json!("secp256k1"));
         assert_json_roundtrip(&model);
+    }
+
+    #[test]
+    fn id() {
+        assert_eq!(SLIP10Curve::Curve25519.id(), "curve25519");
+        assert_eq!(SLIP10Curve::Secp256k1.id(), "secp256k1");
     }
 }

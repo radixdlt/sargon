@@ -102,19 +102,20 @@ mod tests {
                     "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
                 },
                 "common": {
-                    "addedOn": "2023-09-11T16:05:56",
+                    "addedOn": "2023-09-11T16:05:56.000Z",
                     "cryptoParameters": {
                         "supportedCurves": ["curve25519"],
                         "supportedDerivationPathSchemes": ["cap26"]
                     },
                     "flags": ["main"],
-                    "lastUsedOn": "2023-09-11T16:05:56"
+                    "lastUsedOn": "2023-09-11T16:05:56.000Z"
                 },
                 "hint": {
                     "name": "Orange, scratched",
                     "model": "nanoS+"
                 }
-            }"#,
+            }
+            "#,
         );
     }
 

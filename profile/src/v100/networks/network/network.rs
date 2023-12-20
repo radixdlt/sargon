@@ -1,5 +1,6 @@
 use std::cell::RefCell;
 
+use identified_vec::Identifiable;
 use serde::{Deserialize, Serialize};
 use wallet_kit_common::{error::common_error::CommonError, network_id::NetworkID};
 
@@ -11,10 +12,20 @@ use super::accounts::Accounts;
 pub struct Network {
     /// The ID of the network that has been used to generate the `accounts` and `personas`
     /// and on which the `authorizedDapps` have been deployed on.
+    #[serde(rename = "networkID")]
     id: NetworkID,
 
     /// An ordered set of Accounts on this network.
     accounts: RefCell<Accounts>,
+}
+
+impl Identifiable for Network {
+    type ID = NetworkID;
+    /// The ID of the network that has been used to generate the `accounts` and `personas`
+    /// and on which the `authorizedDapps` have been deployed on.
+    fn id(&self) -> NetworkID {
+        self.id.clone()
+    }
 }
 
 impl Network {
@@ -38,12 +49,6 @@ impl Network {
 }
 
 impl Network {
-    /// The ID of the network that has been used to generate the `accounts` and `personas`
-    /// and on which the `authorizedDapps` have been deployed on.
-    pub fn id(&self) -> NetworkID {
-        self.id.clone()
-    }
-
     /// An ordered set of Accounts on this network.
     pub fn accounts(&self) -> Accounts {
         self.accounts.borrow().clone()
@@ -65,18 +70,34 @@ impl Network {
 // CFG test
 #[cfg(any(test, feature = "placeholder"))]
 impl Network {
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder() -> Self {
-        Self::new(NetworkID::Mainnet, Accounts::placeholder())
+        Self::placeholder_mainnet()
     }
 
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_mainnet() -> Self {
+        Self::new(NetworkID::Mainnet, Accounts::placeholder_mainnet())
+    }
+
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder_other() -> Self {
-        Self::new(NetworkID::Mainnet, Accounts::placeholder_other())
+        Self::placeholder_stokenet()
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_stokenet() -> Self {
+        Self::new(NetworkID::Stokenet, Accounts::placeholder_stokenet())
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::{error::common_error::CommonError, network_id::NetworkID};
+    use identified_vec::{Identifiable, IsIdentifiedVec};
+    use wallet_kit_common::{
+        error::common_error::CommonError, json::assert_eq_after_json_roundtrip,
+        network_id::NetworkID,
+    };
 
     use crate::v100::{entity::account::account::Account, networks::network::accounts::Accounts};
 
@@ -110,9 +131,10 @@ mod tests {
     #[test]
     fn set_accounts_same_network() {
         assert_ne!(Accounts::placeholder(), Accounts::placeholder_other());
-        let sut = Network::new(NetworkID::Mainnet, Accounts::placeholder());
-        assert_eq!(sut.set_accounts(Accounts::placeholder_other()), Ok(()));
-        assert_eq!(sut.accounts(), Accounts::placeholder_other());
+        let sut = Network::new(NetworkID::Mainnet, Accounts::placeholder_mainnet());
+        let new = Accounts::with_account(Account::placeholder_mainnet_bob());
+        assert_eq!(sut.set_accounts(new.clone()), Ok(()));
+        assert_eq!(sut.accounts(), new);
     }
 
     #[test]
@@ -142,6 +164,216 @@ mod tests {
                 ]
                 .into_iter(),
             ),
+        );
+    }
+
+    #[test]
+    fn json_roundtrip_placeholder_stokenet() {
+        let sut = Network::placeholder_stokenet();
+        assert_eq_after_json_roundtrip(
+            &sut,
+            r#"
+            {
+				"networkID": 2,
+				"accounts": [
+					{
+						"securityState": {
+							"unsecuredEntityControl": {
+								"transactionSigning": {
+									"badge": {
+										"virtualSource": {
+											"hierarchicalDeterministicPublicKey": {
+												"publicKey": {
+													"curve": "curve25519",
+													"compressedData": "18c7409458a82281711b668f833b0485e8fb58a3ceb8a728882bf6b83d3f06a9"
+												},
+												"derivationPath": {
+													"scheme": "cap26",
+													"path": "m/44H/1022H/2H/525H/1460H/0H"
+												}
+											},
+											"discriminator": "hierarchicalDeterministicPublicKey"
+										},
+										"discriminator": "virtualSource"
+									},
+									"factorSourceID": {
+										"fromHash": {
+											"kind": "device",
+											"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+										},
+										"discriminator": "fromHash"
+									}
+								}
+							},
+							"discriminator": "unsecured"
+						},
+						"networkID": 2,
+						"appearanceID": 0,
+						"flags": [],
+						"displayName": "Carol",
+						"onLedgerSettings": {
+							"thirdPartyDeposits": {
+								"depositRule": "acceptAll",
+								"assetsExceptionList": [],
+								"depositorsAllowList": []
+							}
+						},
+						"flags": [],
+						"address": "account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql"
+					},
+					{
+						"securityState": {
+							"unsecuredEntityControl": {
+								"transactionSigning": {
+									"badge": {
+										"virtualSource": {
+											"hierarchicalDeterministicPublicKey": {
+												"publicKey": {
+													"curve": "curve25519",
+													"compressedData": "26b3fd7f65f01ff8e418a56722fde9cc6fc18dc983e0474e6eb6c1cf3bd44f23"
+												},
+												"derivationPath": {
+													"scheme": "cap26",
+													"path": "m/44H/1022H/2H/525H/1460H/1H"
+												}
+											},
+											"discriminator": "hierarchicalDeterministicPublicKey"
+										},
+										"discriminator": "virtualSource"
+									},
+									"factorSourceID": {
+										"fromHash": {
+											"kind": "device",
+											"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+										},
+										"discriminator": "fromHash"
+									}
+								}
+							},
+							"discriminator": "unsecured"
+						},
+						"networkID": 2,
+						"appearanceID": 1,
+						"flags": [],
+						"displayName": "Diana",
+						"onLedgerSettings": {
+							"thirdPartyDeposits": {
+								"depositRule": "acceptAll",
+								"assetsExceptionList": [],
+								"depositorsAllowList": []
+							}
+						},
+						"flags": [],
+						"address": "account_tdx_2_129663ef7fj8azge3y6sl73lf9vyqt53ewzlf7ul2l76mg5wyqlqlpr"
+					}
+				]
+			}
+            "#,
+        )
+    }
+
+    #[test]
+    fn json_roundtrip_placeholder_mainnet() {
+        let sut = Network::placeholder_mainnet();
+        assert_eq_after_json_roundtrip(
+            &sut,
+            r#"
+            {
+				"networkID": 1,
+				"accounts": [
+					{
+						"securityState": {
+							"unsecuredEntityControl": {
+								"transactionSigning": {
+									"badge": {
+										"virtualSource": {
+											"hierarchicalDeterministicPublicKey": {
+												"publicKey": {
+													"curve": "curve25519",
+													"compressedData": "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b"
+												},
+												"derivationPath": {
+													"scheme": "cap26",
+													"path": "m/44H/1022H/1H/525H/1460H/0H"
+												}
+											},
+											"discriminator": "hierarchicalDeterministicPublicKey"
+										},
+										"discriminator": "virtualSource"
+									},
+									"factorSourceID": {
+										"fromHash": {
+											"kind": "device",
+											"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+										},
+										"discriminator": "fromHash"
+									}
+								}
+							},
+							"discriminator": "unsecured"
+						},
+						"networkID": 1,
+						"appearanceID": 0,
+						"flags": [],
+						"displayName": "Alice",
+						"onLedgerSettings": {
+							"thirdPartyDeposits": {
+								"depositRule": "acceptAll",
+								"assetsExceptionList": [],
+								"depositorsAllowList": []
+							}
+						},
+						"flags": [],
+						"address": "account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8"
+					},
+					{
+						"securityState": {
+							"unsecuredEntityControl": {
+								"transactionSigning": {
+									"badge": {
+										"virtualSource": {
+											"hierarchicalDeterministicPublicKey": {
+												"publicKey": {
+													"curve": "curve25519",
+													"compressedData": "08740a2fd178c40ce71966a6537f780978f7f00548cfb59196344b5d7d67e9cf"
+												},
+												"derivationPath": {
+													"scheme": "cap26",
+													"path": "m/44H/1022H/1H/525H/1460H/1H"
+												}
+											},
+											"discriminator": "hierarchicalDeterministicPublicKey"
+										},
+										"discriminator": "virtualSource"
+									},
+									"factorSourceID": {
+										"fromHash": {
+											"kind": "device",
+											"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+										},
+										"discriminator": "fromHash"
+									}
+								}
+							},
+							"discriminator": "unsecured"
+						},
+						"networkID": 1,
+						"appearanceID": 1,
+						"flags": [],
+						"displayName": "Bob",
+						"onLedgerSettings": {
+							"thirdPartyDeposits": {
+								"depositRule": "acceptAll",
+								"assetsExceptionList": [],
+								"depositorsAllowList": []
+							}
+						},
+						"flags": [],
+						"address": "account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69"
+					}
+				]
+			}
+            "#,
         );
     }
 }

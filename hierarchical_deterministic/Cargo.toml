@@ -24,6 +24,7 @@ radix-engine-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", re
 bip32 = "0.5.1" # slip10 crate does not support `secp256k1`.
 hex = "0.4.3"
 enum-as-inner = "0.6.0"
+identified_vec = { version = "0.1.8", features = ["serde", "id_prim"] }
 
 [dev-dependencies]
 wallet_kit_common = { path = "../wallet_kit_common", features = [

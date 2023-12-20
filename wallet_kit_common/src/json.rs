@@ -10,7 +10,6 @@ where
     let serialized = serde_json::to_value(&model).unwrap();
     let deserialized: T = serde_json::from_value(json.clone()).unwrap();
     if expect_eq {
-        assert_eq!(model, &deserialized);
         assert_eq!(&deserialized, model, "Expected `model: T` and `T` deserialized from `json_string`, to be equal, but they were not.");
         assert_eq!(serialized, json, "Expected `json` (string) and json serialized from `model to be equal`, but they were not.");
     } else {
