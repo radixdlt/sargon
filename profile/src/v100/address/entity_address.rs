@@ -45,6 +45,7 @@ pub trait EntityAddress: Sized {
         return Self::__with_address_and_network_id(&address, network_id);
     }
 
+    #[cfg(not(tarpaulin_include))] // false negative
     fn from_hd_factor_instance_virtual_entity_creation<E: IsEntityPath>(
         hd_factor_instance_virtual_entity_creation: HDFactorInstanceTransactionSigning<E>,
     ) -> Self {
