@@ -14,7 +14,7 @@ serde_with = { version = "3.0.0", features = ["hex"] }
 iso8601-timestamp = { version = "0.2.13", features = ["serde"] }
 serde_repr = "0.1.17"
 strum = { version = "0.25.0", features = ["derive"] }
-hd = { path = "../hd" }
+hd = { path = "../hierarchical_deterministic" }
 wallet_kit_common = { path = "../wallet_kit_common" }
 enum-iterator = "1.4.1"
 radix-engine-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "038ddee8b0f57aa90e36375c69946c4eb634efeb", features = [
@@ -37,4 +37,4 @@ derive-getters = "0.3.0"
 wallet_kit_common = { path = "../wallet_kit_common", features = [
     "placeholder",
 ] }
-hd = { path = "../hd", features = ["placeholder"] }
+hd = { path = "../hierarchical_deterministic", features = ["placeholder"] }
