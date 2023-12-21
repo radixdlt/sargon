@@ -2,13 +2,12 @@
 use crate::v100::factors::factor_source_kind::FactorSourceKind;
 use derive_getters::Getters;
 #[cfg(any(test, feature = "placeholder"))]
-use hd::{HDPathValue, MnemonicWithPassphrase};
+use hd::{AccountPath, CAP26Repr, HDPathValue, MnemonicWithPassphrase};
 #[cfg(any(test, feature = "placeholder"))]
 use wallet_kit_common::NetworkID;
 
 use hd::{
-    AccountPath, CAP26KeyKind, CAP26Path, CAP26Repr, DerivationPath,
-    HierarchicalDeterministicPublicKey, IsEntityPath,
+    CAP26KeyKind, CAP26Path, DerivationPath, HierarchicalDeterministicPublicKey, IsEntityPath,
 };
 use serde::{de, Deserializer, Serialize, Serializer};
 use wallet_kit_common::{CommonError as Error, PublicKey};

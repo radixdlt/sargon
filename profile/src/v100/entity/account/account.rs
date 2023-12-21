@@ -8,14 +8,15 @@ use std::{cell::RefCell, cmp::Ordering, fmt::Display, hash::Hasher};
 use wallet_kit_common::NetworkID;
 
 #[cfg(any(test, feature = "placeholder"))]
+use crate::v100::{DeviceFactorSource, PrivateHierarchicalDeterministicFactorSource};
+#[cfg(any(test, feature = "placeholder"))]
 use wallet_kit_common::HasPlaceholder;
 
 use std::hash::Hash;
 
 use crate::v100::{
-    AccountAddress, DeviceFactorSource, DisplayName, EntityAddress, EntityFlags,
-    EntitySecurityState, HDFactorInstanceAccountCreation,
-    PrivateHierarchicalDeterministicFactorSource, UnsecuredEntityControl,
+    AccountAddress, DisplayName, EntityAddress, EntityFlags, EntitySecurityState,
+    HDFactorInstanceAccountCreation, UnsecuredEntityControl,
 };
 
 use super::{AppearanceID, OnLedgerSettings};
