@@ -136,7 +136,7 @@ mod tests {
     use std::str::FromStr;
     use wallet_kit_common::error::common_error::CommonError as Error;
     use wallet_kit_common::{
-        json::{
+        assert_json::{
             assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
             assert_json_value_ne_after_roundtrip,
         },

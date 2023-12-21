@@ -86,7 +86,7 @@ mod tests {
     use crate::v100::header::device_info::DeviceInfo;
     use iso8601_timestamp::Timestamp;
     use uuid::Uuid;
-    use wallet_kit_common::json::*;
+    use wallet_kit_common::assert_json::*;
 
     #[test]
     fn new_iphone() {

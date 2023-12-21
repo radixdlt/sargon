@@ -94,7 +94,7 @@ impl Default for FactorSourceCryptoParameters {
 mod tests {
     use hd::DerivationPathScheme;
     use wallet_kit_common::{
-        json::assert_eq_after_json_roundtrip, types::keys::slip10_curve::SLIP10Curve,
+        assert_json::assert_eq_after_json_roundtrip, types::keys::slip10_curve::SLIP10Curve,
     };
 
     use super::FactorSourceCryptoParameters;

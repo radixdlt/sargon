@@ -196,7 +196,7 @@ mod tests {
     use std::collections::BTreeSet;
 
     use crate::{
-        json::{assert_eq_after_json_roundtrip, assert_json_fails},
+        assert_json::{assert_eq_after_json_roundtrip, assert_json_fails},
         types::keys::{
             ed25519::public_key::Ed25519PublicKey, secp256k1::public_key::Secp256k1PublicKey,
         },

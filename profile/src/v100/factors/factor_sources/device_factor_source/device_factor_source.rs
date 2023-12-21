@@ -136,7 +136,7 @@ impl DeviceFactorSource {
 #[cfg(test)]
 mod tests {
     use hd::BIP39WordCount;
-    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::assert_json::assert_eq_after_json_roundtrip;
 
     use crate::v100::factors::{
         factor_source_id::FactorSourceID, is_factor_source::IsFactorSource, factor_source::FactorSource, factor_sources::ledger_hardware_wallet_factor_source::ledger_hardware_wallet_factor_source::LedgerHardwareWalletFactorSource, factor_source_crypto_parameters::FactorSourceCryptoParameters,

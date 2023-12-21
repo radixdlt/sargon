@@ -155,7 +155,7 @@ mod tests {
 
     use identified_vec::{IdentifiedVecOf, IsIdentifiedVecOf, ItemsCloned};
     use wallet_kit_common::{
-        error::common_error::CommonError, json::assert_eq_after_json_roundtrip,
+        assert_json::assert_eq_after_json_roundtrip, error::common_error::CommonError,
         network_id::NetworkID,
     };
 

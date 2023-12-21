@@ -158,7 +158,7 @@ impl NetworkID {
 mod tests {
     use std::collections::BTreeSet;
 
-    use crate::json::{assert_json_value_eq_after_roundtrip, assert_json_value_fails};
+    use crate::assert_json::{assert_json_value_eq_after_roundtrip, assert_json_value_fails};
     use enum_iterator::all;
     use serde_json::json;
 

@@ -163,7 +163,7 @@ mod tests {
         HierarchicalDeterministicPublicKey, IdentityPath,
     };
     use wallet_kit_common::{
-        json::assert_eq_after_json_roundtrip, types::keys::public_key::PublicKey,
+        assert_json::assert_eq_after_json_roundtrip, types::keys::public_key::PublicKey,
     };
 
     use crate::v100::factors::factor_source_id_from_hash::FactorSourceIDFromHash;

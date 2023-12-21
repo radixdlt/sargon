@@ -196,7 +196,7 @@ pub mod tests {
     };
     use iso8601_timestamp::Timestamp;
     use uuid::Uuid;
-    use wallet_kit_common::{json::assert_eq_after_json_roundtrip, utils::factory::id};
+    use wallet_kit_common::{assert_json::assert_eq_after_json_roundtrip, utils::factory::id};
 
     use super::Header;
 

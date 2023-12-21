@@ -147,7 +147,7 @@ impl<'de> serde::Deserialize<'de> for HDPath {
 #[cfg(test)]
 mod tests {
     use serde_json::json;
-    use wallet_kit_common::json::{
+    use wallet_kit_common::assert_json::{
         assert_json_value_eq_after_roundtrip, assert_json_value_fails,
         assert_json_value_ne_after_roundtrip,
     };

@@ -104,7 +104,7 @@ impl CAP26Path {
 #[cfg(test)]
 mod tests {
     use serde_json::json;
-    use wallet_kit_common::json::assert_json_value_eq_after_roundtrip;
+    use wallet_kit_common::assert_json::assert_json_value_eq_after_roundtrip;
 
     use crate::{derivation::DerivationPathScheme, AccountPath, Derivation, GetIDPath};
 

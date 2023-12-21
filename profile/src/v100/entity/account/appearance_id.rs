@@ -36,7 +36,9 @@ impl TryFrom<u8> for AppearanceID {
 #[cfg(test)]
 mod tests {
     use serde_json::json;
-    use wallet_kit_common::json::{assert_json_value_eq_after_roundtrip, assert_json_value_fails};
+    use wallet_kit_common::assert_json::{
+        assert_json_value_eq_after_roundtrip, assert_json_value_fails,
+    };
 
     use crate::v100::entity::account::appearance_id::{AppearanceID, AppearanceIDError};
     use wallet_kit_common::error::common_error::CommonError as Error;

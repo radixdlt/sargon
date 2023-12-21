@@ -63,7 +63,7 @@ impl DeviceFactorSourceHint {
 #[cfg(test)]
 mod tests {
     use hd::BIP39WordCount;
-    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::assert_json::assert_eq_after_json_roundtrip;
 
     use crate::v100::factors::factor_sources::device_factor_source::device_factor_source_hint::DeviceFactorSourceHint;
 

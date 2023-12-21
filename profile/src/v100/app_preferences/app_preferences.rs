@@ -122,7 +122,7 @@ impl AppPreferences {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::assert_json::assert_eq_after_json_roundtrip;
 
     use crate::v100::app_preferences::{
         display::AppDisplay, gateways::gateways::Gateways, p2p_links::p2p_links::P2PLinks,

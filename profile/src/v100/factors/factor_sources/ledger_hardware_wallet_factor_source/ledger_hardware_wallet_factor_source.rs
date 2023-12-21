@@ -92,7 +92,7 @@ impl IsFactorSource for LedgerHardwareWalletFactorSource {
 #[cfg(test)]
 mod tests {
     use wallet_kit_common::{
-        error::common_error::CommonError as Error, json::assert_eq_after_json_roundtrip,
+        assert_json::assert_eq_after_json_roundtrip, error::common_error::CommonError as Error,
     };
 
     use crate::v100::factors::{

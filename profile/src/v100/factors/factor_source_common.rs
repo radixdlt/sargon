@@ -172,7 +172,7 @@ mod tests {
     use std::collections::BTreeSet;
 
     use iso8601_timestamp::Timestamp;
-    use wallet_kit_common::{json::assert_eq_after_json_roundtrip, utils::factory::now};
+    use wallet_kit_common::{assert_json::assert_eq_after_json_roundtrip, utils::factory::now};
 
     use crate::v100::factors::{
         factor_source_crypto_parameters::FactorSourceCryptoParameters,

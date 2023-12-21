@@ -95,7 +95,7 @@ impl Network {
 mod tests {
     use identified_vec::{Identifiable, IsIdentifiedVec};
     use wallet_kit_common::{
-        error::common_error::CommonError, json::assert_eq_after_json_roundtrip,
+        assert_json::assert_eq_after_json_roundtrip, error::common_error::CommonError,
         network_id::NetworkID,
     };
 

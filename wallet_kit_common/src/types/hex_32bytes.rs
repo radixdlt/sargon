@@ -166,7 +166,7 @@ mod tests {
     use serde_json::json;
 
     use crate::{
-        error::bytes_error::BytesError as Error, json::assert_json_value_eq_after_roundtrip,
+        assert_json::assert_json_value_eq_after_roundtrip, error::bytes_error::BytesError as Error,
     };
 
     use super::Hex32Bytes;

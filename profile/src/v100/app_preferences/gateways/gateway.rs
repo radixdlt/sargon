@@ -121,7 +121,7 @@ impl Gateway {
 mod tests {
     use identified_vec::Identifiable;
     use radix_engine_common::prelude::HashSet;
-    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::assert_json::assert_eq_after_json_roundtrip;
 
     use super::Gateway;
 

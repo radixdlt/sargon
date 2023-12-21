@@ -87,7 +87,9 @@ impl Ed25519PublicKey {
 mod tests {
     use std::collections::BTreeSet;
 
-    use crate::{error::key_error::KeyError as Error, json::assert_json_value_eq_after_roundtrip};
+    use crate::{
+        assert_json::assert_json_value_eq_after_roundtrip, error::key_error::KeyError as Error,
+    };
     use serde_json::json;
 
     use super::Ed25519PublicKey;

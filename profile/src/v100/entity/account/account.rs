@@ -336,7 +336,7 @@ mod tests {
     use std::{collections::BTreeSet, str::FromStr};
 
     use radix_engine_common::prelude::HashSet;
-    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::assert_json::assert_eq_after_json_roundtrip;
 
     use crate::v100::{
         address::account_address::AccountAddress,

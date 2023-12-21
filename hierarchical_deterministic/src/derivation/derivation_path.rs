@@ -135,7 +135,7 @@ impl From<CAP26Path> for DerivationPath {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::assert_json::assert_eq_after_json_roundtrip;
 
     use crate::{
         derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},

@@ -70,7 +70,7 @@ impl Serialize for FactorInstanceBadge {
 #[cfg(test)]
 mod tests {
     use hd::HierarchicalDeterministicPublicKey;
-    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::assert_json::assert_eq_after_json_roundtrip;
 
     use crate::v100::factors::factor_instance::badge_virtual_source::FactorInstanceBadgeVirtualSource;
 

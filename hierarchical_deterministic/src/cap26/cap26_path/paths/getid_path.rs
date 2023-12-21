@@ -90,8 +90,8 @@ impl TryInto<GetIDPath> for &str {
 mod tests {
     use serde_json::json;
     use wallet_kit_common::{
+        assert_json::{assert_json_value_eq_after_roundtrip, assert_json_value_fails},
         error::hdpath_error::HDPathError,
-        json::{assert_json_value_eq_after_roundtrip, assert_json_value_fails},
     };
 
     use crate::Derivation;

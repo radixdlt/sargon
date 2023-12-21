@@ -64,7 +64,7 @@ impl Networks {
 #[cfg(test)]
 mod tests {
     use identified_vec::IsIdentifiedVec;
-    use wallet_kit_common::{json::assert_eq_after_json_roundtrip, network_id::NetworkID};
+    use wallet_kit_common::{assert_json::assert_eq_after_json_roundtrip, network_id::NetworkID};
 
     use crate::v100::{
         entity::account::account::Account,
