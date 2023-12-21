@@ -1,0 +1,4 @@
+[bindings.kotlin]
+package_name = "com.sajjon.rwk"
+
+namespace = "RadixWalletKit"

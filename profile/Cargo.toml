@@ -2,39 +2,58 @@
 name = "profile"
 version = "0.1.0"
 edition = "2021"
+build = "build.rs"
 
 [features]
 placeholder = []
 
 [dependencies]
-serde = { version = "1.0.193", features = ["derive"] }
-serde_json = { version = "1.0.108", features = ["preserve_order"] }
-serde_with = { version = "3.0.0", features = ["hex"] }
-
-iso8601-timestamp = { version = "0.2.13", features = ["serde"] }
-serde_repr = "0.1.17"
-strum = { version = "0.25.0", features = ["derive"] }
 hd = { path = "../hierarchical_deterministic" }
 wallet_kit_common = { path = "../wallet_kit_common" }
-enum-iterator = "1.4.1"
-radix-engine-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "038ddee8b0f57aa90e36375c69946c4eb634efeb", features = [
-    "serde",
-] }
-thiserror = "1.0.50"
-uuid = { version = "1.5.0", features = ["v4", "serde"] }
-radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "927b0c88dcc62325edf7c6279ee3f84f26a6eadc" }
-radix-engine-toolkit-json = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "927b0c88dcc62325edf7c6279ee3f84f26a6eadc" }
-nutype = { version = "0.4.0", features = ["serde"] }
-transaction = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "038ddee8b0f57aa90e36375c69946c4eb634efeb", features = [
-    "serde",
-] }
-enum-as-inner = "0.6.0"
-identified_vec = { version = "0.1.8", features = ["serde", "id_prim"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+iso8601-timestamp = { workspace = true }
+uuid = { workspace = true }
+serde_repr = { workspace = true }
+strum = { workspace = true }
+radix-engine-common = { workspace = true }
+radix-engine-toolkit-json = { workspace = true }
+radix-engine-toolkit = { workspace = true }
+enum-iterator = { workspace = true }
+hex = { workspace = true }
+transaction = { workspace = true }
+bip32 = { workspace = true }
+ed25519-dalek = { workspace = true }
+rand = { workspace = true }
+enum-as-inner = { workspace = true }
+identified_vec = { workspace = true }
+nutype = { workspace = true }
+derive-getters = { workspace = true }
 url = { version = "2.5.0", features = ["serde"] }
-derive-getters = "0.3.0"
+
+# The UniFFI crate for generating bindings to other languages
+uniffi = { git = "https://github.com/0xOmarA/uniffi-rs", tag = "v0.25.4", features = [
+    "cli",
+] }
+
+[build-dependencies]
+# The UniFFI crate for generating bindings to other languages
+uniffi = { git = "https://github.com/0xOmarA/uniffi-rs", tag = "v0.25.4", features = [
+    "build",
+] }
+
 
 [dev-dependencies]
 wallet_kit_common = { path = "../wallet_kit_common", features = [
     "placeholder",
 ] }
 hd = { path = "../hierarchical_deterministic", features = ["placeholder"] }
+
+# The UniFFI crate for generating bindings to other languages
+uniffi = { git = "https://github.com/0xOmarA/uniffi-rs", tag = "v0.25.4", features = [
+    "bindgen-tests",
+] }
+
+[lib]
+crate-type = ["staticlib", "cdylib", "lib"]

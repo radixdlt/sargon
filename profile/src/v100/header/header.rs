@@ -156,7 +156,7 @@ impl HasPlaceholder for Header {
     fn placeholder() -> Self {
         //let date =  NaiveDateTime::parse_from_str("2023-09-11T16:05:56.000Z", "%Y-%m-%dT%H:%M:%S").unwrap();
         let date = Timestamp::parse("2023-09-11T16:05:56Z").unwrap();
-        let device = DeviceInfo::with_values(
+        let device = DeviceInfo::new(
             Uuid::from_str("66f07ca2-a9d9-49e5-8152-77aca3d1dd74").unwrap(),
             date.clone(),
             "iPhone".to_string(),
@@ -173,7 +173,7 @@ impl HasPlaceholder for Header {
     fn placeholder_other() -> Self {
         //let date =  NaiveDateTime::parse_from_str("2023-09-11T16:05:56.000Z", "%Y-%m-%dT%H:%M:%S").unwrap();
         let date = Timestamp::parse("2023-12-20T16:05:56Z").unwrap();
-        let device = DeviceInfo::with_values(
+        let device = DeviceInfo::new(
             Uuid::from_str("aabbccdd-a9d9-49e5-8152-beefbeefbeef").unwrap(),
             date.clone(),
             "iPhone".to_string(),
@@ -295,7 +295,7 @@ pub mod tests {
     #[test]
     fn display() {
         let date = Timestamp::parse("2023-09-11T16:05:56Z").unwrap();
-        let device = DeviceInfo::with_values(
+        let device = DeviceInfo::new(
             Uuid::from_str("66f07ca2-a9d9-49e5-8152-77aca3d1dd74").unwrap(),
             date.clone(),
             "iPhone".to_string(),

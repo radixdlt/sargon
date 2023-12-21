@@ -8,7 +8,7 @@ use wallet_kit_common::{id, now};
 
 /// A short summary of a device the Profile is being used
 /// on, typically an iPhone or an Android phone.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, Getters)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, Getters, uniffi::Object)]
 pub struct DeviceInfo {
     /// A best effort stable and unique identifier of this
     /// device.
@@ -34,7 +34,8 @@ pub struct DeviceInfo {
 
 impl DeviceInfo {
     /// Instantiates a new `DeviceInfo` with `id`, `date` and `description`.
-    pub fn with_values(id: Uuid, date: Timestamp, description: String) -> Self {
+    #[uniffi::constructor]
+    pub fn new(id: Uuid, date: Timestamp, description: String) -> Self {
         Self {
             id,
             date,
@@ -44,26 +45,29 @@ impl DeviceInfo {
 
     /// Instantiates a new `DeviceInfo` with `description`, and generates a new `id`
     /// and will use the current `date` for creation date.
+    #[uniffi::constructor]
     pub fn with_description(description: &str) -> Self {
-        Self::with_values(id(), now(), description.to_string())
+        Self::new(id(), now(), description.to_string())
     }
 
     /// Instantiates a new `DeviceInfo` with "iPhone" as description, and
     /// generates a new `id` and will use the current `date` for creation date.
+    #[uniffi::constructor]
     pub fn new_iphone() -> Self {
         Self::with_description("iPhone")
     }
 
     /// Instantiates a new `DeviceInfo` with "Unknown device" as description, and
     /// generates a new `id` and will use the current `date` for creation date.
-    pub fn new() -> Self {
+    #[uniffi::constructor]
+    pub fn new_unknown_device() -> Self {
         Self::with_description("Unknown device")
     }
 }
 
 impl Default for DeviceInfo {
     fn default() -> Self {
-        Self::new()
+        Self::new_unknown_device()
     }
 }
 
@@ -100,14 +104,17 @@ mod tests {
 
     #[test]
     fn new_has_description_unknown_device() {
-        assert_eq!(DeviceInfo::new().description, "Unknown device");
+        assert_eq!(
+            DeviceInfo::new_unknown_device().description,
+            "Unknown device"
+        );
     }
 
     #[test]
     fn display() {
         let id_str = "12345678-bbbb-cccc-dddd-abcd12345678";
         let id = Uuid::from_str(id_str).unwrap();
-        let sut = DeviceInfo::with_values(
+        let sut = DeviceInfo::new(
             id,
             Timestamp::parse("2023-09-11T16:05:56Z").unwrap(),
             "Foo".to_string(),
@@ -151,7 +158,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip() {
-        let model = DeviceInfo::with_values(
+        let model = DeviceInfo::new(
             Uuid::from_str("66f07ca2-a9d9-49e5-8152-77aca3d1dd74").unwrap(),
             Timestamp::parse("2023-09-11T16:05:56.000Z").unwrap(),
             "iPhone".to_string(),

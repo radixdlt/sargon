@@ -7,25 +7,30 @@ edition = "2021"
 placeholder = []
 
 [dependencies]
-serde = { version = "1.0.193", features = ["derive"] }
-serde_json = { version = "1.0.108", features = ["preserve_order"] }
-slip10 = "0.4.3"
 wallet_kit_common = { path = "../wallet_kit_common" }
-thiserror = "1.0.50"
-serde_repr = "0.1.17"
-strum = { version = "0.25.0", features = ["derive"] }
-itertools = { version = "0.12.0" }
-bip39 = { version = "2.0.0", features = ["serde"] }
-nutype = { version = "0.4.0", features = ["serde"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+iso8601-timestamp = { workspace = true }
+uuid = { workspace = true }
+serde_repr = { workspace = true }
+strum = { workspace = true }
+radix-engine-common = { workspace = true }
+radix-engine-toolkit-json = { workspace = true }
+enum-iterator = { workspace = true }
+hex = { workspace = true }
+transaction = { workspace = true }
+bip32 = { workspace = true }
+itertools = { workspace = true }
+ed25519-dalek = { workspace = true }
+rand = { workspace = true }
+enum-as-inner = { workspace = true }
+identified_vec = { workspace = true }
+nutype = { workspace = true }
+derive-getters = { workspace = true }
+slip10 = "0.4.3"
 memoize = "0.4.1"
-radix-engine-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "038ddee8b0f57aa90e36375c69946c4eb634efeb", features = [
-    "serde",
-] }
-derive-getters = "0.3.0"
-bip32 = "0.5.1" # slip10 crate does not support `secp256k1`.
-hex = "0.4.3"
-enum-as-inner = "0.6.0"
-identified_vec = { version = "0.1.8", features = ["serde", "id_prim"] }
+bip39 = { version = "2.0.0", features = ["serde"] }
 
 [dev-dependencies]
 wallet_kit_common = { path = "../wallet_kit_common", features = [
