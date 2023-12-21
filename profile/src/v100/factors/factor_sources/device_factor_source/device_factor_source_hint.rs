@@ -1,6 +1,5 @@
 use std::cell::RefCell;
 
-use derive_getters::Getters;
 use hd::BIP39WordCount;
 use serde::{Deserialize, Serialize};
 
@@ -9,7 +8,7 @@ use wallet_kit_common::HasPlaceholder;
 
 /// Properties describing a DeviceFactorSource to help user disambiguate between
 /// it and another one.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Getters)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct DeviceFactorSourceHint {
     /// "iPhone RED"
@@ -24,9 +23,22 @@ pub struct DeviceFactorSourceHint {
 }
 
 impl DeviceFactorSourceHint {
+    pub fn mnemonic_word_count(&self) -> BIP39WordCount {
+        self.mnemonic_word_count.clone()
+    }
+
+    pub fn name(&self) -> String {
+        self.name.borrow().clone()
+    }
+
+    pub fn model(&self) -> String {
+        self.model.borrow().clone()
+    }
+
     pub fn set_name(&self, new: String) {
         *self.name.borrow_mut() = new
     }
+
     pub fn set_model(&self, new: String) {
         *self.model.borrow_mut() = new
     }
@@ -98,6 +110,29 @@ mod tests {
         assert_ne!(
             DeviceFactorSourceHint::placeholder(),
             DeviceFactorSourceHint::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn set_model() {
+        let sut = DeviceFactorSourceHint::placeholder();
+        assert_eq!(sut.model(), "iPhone".to_string());
+        sut.set_model("Android".to_string());
+        assert_eq!(sut.model(), "Android".to_string());
+    }
+
+    #[test]
+    fn set_name() {
+        let sut = DeviceFactorSourceHint::placeholder();
+        sut.set_name("Foo".to_string());
+        assert_eq!(sut.name(), "Foo".to_string());
+    }
+
+    #[test]
+    fn get_word_count() {
+        assert_eq!(
+            DeviceFactorSourceHint::placeholder().mnemonic_word_count(),
+            BIP39WordCount::TwentyFour
         );
     }
 

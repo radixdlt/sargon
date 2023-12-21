@@ -65,9 +65,7 @@ pub trait EntityAddress: Sized {
             return Err(Error::MismatchingEntityTypeWhileDecodingAddress);
         }
 
-        if !hrp.starts_with(&entity_type.hrp()) {
-            return Err(Error::MismatchingHRPWhileDecodingAddress);
-        }
+        assert!(hrp.starts_with(&entity_type.hrp()), "Mismatching HRP while decoding address, this should never happen. Did internal function `decode_address` change? Or did you accidentally change or impl the `hrp` method on EntityType?");
 
         return Ok(Self::__with_address_and_network_id(s, network_id));
     }

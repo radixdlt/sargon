@@ -32,9 +32,11 @@ impl IsEntityPath for IdentityPath {
     fn network_id(&self) -> NetworkID {
         self.network_id
     }
+
     fn key_kind(&self) -> CAP26KeyKind {
         self.key_kind
     }
+
     fn index(&self) -> HDPathValue {
         self.index
     }
@@ -153,6 +155,19 @@ mod tests {
         assert_ne!(
             IdentityPath::placeholder(),
             IdentityPath::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn index() {
+        assert_eq!(IdentityPath::placeholder().index(), &0);
+    }
+
+    #[test]
+    fn network_id() {
+        assert_eq!(
+            IdentityPath::placeholder().network_id(),
+            &NetworkID::Mainnet
         );
     }
 

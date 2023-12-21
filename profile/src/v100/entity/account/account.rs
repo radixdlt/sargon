@@ -352,6 +352,17 @@ mod tests {
     use super::Account;
 
     #[test]
+    fn equality() {
+        assert_eq!(Account::placeholder(), Account::placeholder());
+        assert_eq!(Account::placeholder_other(), Account::placeholder_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(Account::placeholder(), Account::placeholder_other());
+    }
+
+    #[test]
     fn new_with_address_only() {
         let address: AccountAddress =
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"

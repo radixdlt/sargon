@@ -104,7 +104,7 @@ impl IsFactorSource for LedgerHardwareWalletFactorSource {
 mod tests {
     use wallet_kit_common::{assert_eq_after_json_roundtrip, CommonError as Error, HasPlaceholder};
 
-    use crate::v100::{DeviceFactorSource, FactorSource, IsFactorSource};
+    use crate::v100::{DeviceFactorSource, FactorSource, FactorSourceCommon, IsFactorSource};
 
     use super::LedgerHardwareWalletFactorSource;
 
@@ -126,6 +126,14 @@ mod tests {
             LedgerHardwareWalletFactorSource::placeholder(),
             LedgerHardwareWalletFactorSource::placeholder_other()
         );
+    }
+
+    #[test]
+    fn set_common() {
+        let sut = LedgerHardwareWalletFactorSource::placeholder();
+        assert_eq!(sut.common(), FactorSourceCommon::placeholder());
+        sut.set_common(FactorSourceCommon::placeholder_other());
+        assert_eq!(sut.common(), FactorSourceCommon::placeholder_other());
     }
 
     #[test]

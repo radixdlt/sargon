@@ -245,7 +245,7 @@ mod tests {
             DeviceFactorSource::placeholder()
                 .hint()
                 .mnemonic_word_count(),
-            &BIP39WordCount::TwentyFour
+            BIP39WordCount::TwentyFour
         );
     }
 

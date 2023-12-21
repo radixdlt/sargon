@@ -148,6 +148,11 @@ mod tests {
     }
 
     #[test]
+    fn index() {
+        assert_eq!(AccountPath::placeholder().index(), &0);
+    }
+
+    #[test]
     fn entity_kind() {
         assert_eq!(AccountPath::entity_kind(), Some(CAP26EntityKind::Account));
     }
