@@ -3,7 +3,7 @@ use std::str::FromStr;
 use itertools::Itertools;
 use serde::{de, Deserializer, Serialize, Serializer};
 use slip10::path::BIP32Path;
-use wallet_kit_common::error::hdpath_error::HDPathError;
+use wallet_kit_common::HDPathError;
 
 use super::hd_path_component::{HDPathComponent, HDPathValue};
 
@@ -147,7 +147,7 @@ impl<'de> serde::Deserialize<'de> for HDPath {
 #[cfg(test)]
 mod tests {
     use serde_json::json;
-    use wallet_kit_common::assert_json::{
+    use wallet_kit_common::{
         assert_json_value_eq_after_roundtrip, assert_json_value_fails,
         assert_json_value_ne_after_roundtrip,
     };

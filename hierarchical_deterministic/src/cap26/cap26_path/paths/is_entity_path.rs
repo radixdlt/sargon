@@ -1,4 +1,4 @@
-use wallet_kit_common::network_id::NetworkID;
+use wallet_kit_common::NetworkID;
 
 use crate::{
     bip32::HDPathValue,

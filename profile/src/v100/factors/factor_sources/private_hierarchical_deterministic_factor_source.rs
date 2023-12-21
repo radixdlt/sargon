@@ -1,6 +1,6 @@
 use derive_getters::Getters;
 use hd::{AccountPath, CAP26KeyKind, CAP26Repr, HDPathValue, MnemonicWithPassphrase};
-use wallet_kit_common::network_id::NetworkID;
+use wallet_kit_common::NetworkID;
 
 use crate::v100::factors::{
     factor_source_id_from_hash::FactorSourceIDFromHash,

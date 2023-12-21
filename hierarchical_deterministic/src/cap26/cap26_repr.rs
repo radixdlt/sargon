@@ -1,4 +1,4 @@
-use wallet_kit_common::{error::hdpath_error::HDPathError, network_id::NetworkID};
+use wallet_kit_common::{HDPathError, NetworkID};
 
 use crate::{
     bip32::{HDPath, HDPathComponent, HDPathValue},

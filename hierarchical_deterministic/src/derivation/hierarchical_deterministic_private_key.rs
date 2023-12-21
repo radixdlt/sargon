@@ -1,7 +1,5 @@
 use derive_getters::Getters;
-use wallet_kit_common::types::keys::{
-    ed25519::private_key::Ed25519PrivateKey, private_key::PrivateKey,
-};
+use wallet_kit_common::{Ed25519PrivateKey, PrivateKey};
 
 use crate::{AccountPath, CAP26Repr};
 

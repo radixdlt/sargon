@@ -2,7 +2,7 @@ use std::cell::RefCell;
 
 use identified_vec::Identifiable;
 use serde::{Deserialize, Serialize};
-use wallet_kit_common::{error::common_error::CommonError, network_id::NetworkID};
+use wallet_kit_common::{CommonError, NetworkID};
 
 use super::accounts::Accounts;
 
@@ -94,10 +94,7 @@ impl Network {
 #[cfg(test)]
 mod tests {
     use identified_vec::{Identifiable, IsIdentifiedVec};
-    use wallet_kit_common::{
-        assert_json::assert_eq_after_json_roundtrip, error::common_error::CommonError,
-        network_id::NetworkID,
-    };
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, CommonError, NetworkID};
 
     use crate::v100::{entity::account::account::Account, networks::network::accounts::Accounts};
 

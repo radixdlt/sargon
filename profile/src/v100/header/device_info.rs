@@ -4,7 +4,7 @@ use derive_getters::Getters;
 use iso8601_timestamp::Timestamp;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use wallet_kit_common::utils::factory::{id, now};
+use wallet_kit_common::{id, now};
 
 /// A short summary of a device the Profile is being used
 /// on, typically an iPhone or an Android phone.
@@ -86,7 +86,7 @@ mod tests {
     use crate::v100::header::device_info::DeviceInfo;
     use iso8601_timestamp::Timestamp;
     use uuid::Uuid;
-    use wallet_kit_common::assert_json::*;
+    use wallet_kit_common::*;
 
     #[test]
     fn new_iphone() {

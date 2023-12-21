@@ -1,7 +1,7 @@
 use identified_vec::{
     Identifiable, IdentifiedVecOf, IsIdentifiableVecOfVia, IsIdentifiedVec, IsIdentifiedVecOf,
 };
-use wallet_kit_common::error::common_error::CommonError;
+use wallet_kit_common::CommonError;
 
 use crate::{
     identified_vec_via::IdentifiedVecVia,
@@ -68,9 +68,7 @@ impl FactorSources {
 #[cfg(test)]
 mod tests {
     use identified_vec::Identifiable;
-    use wallet_kit_common::{
-        assert_json::assert_eq_after_json_roundtrip, error::common_error::CommonError,
-    };
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, CommonError};
 
     use crate::v100::factors::{factor_source::FactorSource, is_factor_source::IsFactorSource};
 

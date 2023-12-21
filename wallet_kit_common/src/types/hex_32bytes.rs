@@ -6,7 +6,7 @@ use std::{
 use radix_engine_common::crypto::{Hash, IsHash};
 use serde::{de, Deserializer, Serialize, Serializer};
 
-use crate::{error::bytes_error::BytesError as Error, secure_random_bytes::generate_32_bytes};
+use crate::{generate_32_bytes, BytesError as Error};
 
 /// Serializable 32 bytes which **always** serializes as a **hex** string, this is useful
 /// since in Radix Wallet Kit we almost always want to serialize bytes into hex and this
@@ -165,9 +165,7 @@ mod tests {
 
     use serde_json::json;
 
-    use crate::{
-        assert_json::assert_json_value_eq_after_roundtrip, error::bytes_error::BytesError as Error,
-    };
+    use crate::{assert_json_value_eq_after_roundtrip, BytesError as Error};
 
     use super::Hex32Bytes;
 

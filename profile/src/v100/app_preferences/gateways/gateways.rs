@@ -4,7 +4,7 @@ use super::gateway::Gateway;
 
 use identified_vec::{Identifiable, IdentifiedVecOf, IsIdentifiedVec, IsIdentifiedVecOf};
 use serde::{de, ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
-use wallet_kit_common::error::common_error::CommonError;
+use wallet_kit_common::CommonError;
 
 /// The currently used Gateway and a collection of other by user added
 /// or predefined Gateways the user can switch to.
@@ -154,10 +154,7 @@ mod tests {
     use std::cell::RefCell;
 
     use identified_vec::{IdentifiedVecOf, IsIdentifiedVecOf, ItemsCloned};
-    use wallet_kit_common::{
-        assert_json::assert_eq_after_json_roundtrip, error::common_error::CommonError,
-        network_id::NetworkID,
-    };
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, CommonError, NetworkID};
 
     use crate::v100::app_preferences::gateways::gateway::Gateway;
 

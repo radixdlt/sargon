@@ -1,4 +1,4 @@
-use crate::{error::key_error::KeyError as Error, types::hex_32bytes::Hex32Bytes};
+use crate::{Hex32Bytes, KeyError as Error};
 use radix_engine_common::crypto::IsHash;
 use transaction::signing::secp256k1::{
     Secp256k1PrivateKey as EngineSecp256k1PrivateKey, Secp256k1Signature,
@@ -83,7 +83,7 @@ impl Secp256k1PrivateKey {
 }
 
 impl TryInto<Secp256k1PrivateKey> for &str {
-    type Error = crate::error::key_error::KeyError;
+    type Error = crate::KeyError;
 
     fn try_into(self) -> Result<Secp256k1PrivateKey, Self::Error> {
         Secp256k1PrivateKey::from_str(self)
@@ -91,7 +91,7 @@ impl TryInto<Secp256k1PrivateKey> for &str {
 }
 
 impl TryFrom<&[u8]> for Secp256k1PrivateKey {
-    type Error = crate::error::key_error::KeyError;
+    type Error = crate::KeyError;
 
     fn try_from(slice: &[u8]) -> Result<Secp256k1PrivateKey, Self::Error> {
         Secp256k1PrivateKey::from_bytes(slice)
@@ -135,7 +135,7 @@ mod tests {
 
     use transaction::signing::secp256k1::Secp256k1Signature;
 
-    use crate::{error::key_error::KeyError as Error, hash::hash, types::hex_32bytes::Hex32Bytes};
+    use crate::{hash, Hex32Bytes, KeyError as Error};
 
     use super::Secp256k1PrivateKey;
 

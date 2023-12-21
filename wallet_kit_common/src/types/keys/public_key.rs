@@ -1,16 +1,12 @@
 use serde::{de, ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
 
-use crate::error::key_error::KeyError as Error;
+use crate::{Ed25519PublicKey, KeyError as Error, SLIP10Curve, Secp256k1PublicKey};
 
 use radix_engine_common::crypto::{
     Ed25519PublicKey as EngineEd25519PublicKey, PublicKey as EnginePublicKey,
     Secp256k1PublicKey as EngineSecp256k1PublicKey,
 };
 
-use super::{
-    ed25519::public_key::Ed25519PublicKey, secp256k1::public_key::Secp256k1PublicKey,
-    slip10_curve::SLIP10Curve,
-};
 use enum_as_inner::EnumAsInner;
 
 /// A tagged union of supported public keys on different curves, supported
@@ -29,8 +25,8 @@ impl From<Ed25519PublicKey> for PublicKey {
     ///
     /// ```
     /// extern crate wallet_kit_common;
-    /// use wallet_kit_common::types::keys::ed25519::private_key::Ed25519PrivateKey;
-    /// use wallet_kit_common::types::keys::public_key::PublicKey;
+    /// use wallet_kit_common::Ed25519PrivateKey;
+    /// use wallet_kit_common::PublicKey;
     ///
     /// let key: PublicKey = Ed25519PrivateKey::new().public_key().into();
     /// ```
@@ -44,8 +40,8 @@ impl From<Secp256k1PublicKey> for PublicKey {
     ///
     /// ```
     /// extern crate wallet_kit_common;
-    /// use wallet_kit_common::types::keys::secp256k1::private_key::Secp256k1PrivateKey;
-    /// use wallet_kit_common::types::keys::public_key::PublicKey;
+    /// use wallet_kit_common::Secp256k1PrivateKey;
+    /// use wallet_kit_common::PublicKey;
     ///
     /// let key: PublicKey = Secp256k1PrivateKey::new().public_key().into();
     /// ```
@@ -196,10 +192,7 @@ mod tests {
     use std::collections::BTreeSet;
 
     use crate::{
-        assert_json::{assert_eq_after_json_roundtrip, assert_json_fails},
-        types::keys::{
-            ed25519::public_key::Ed25519PublicKey, secp256k1::public_key::Secp256k1PublicKey,
-        },
+        assert_eq_after_json_roundtrip, assert_json_fails, Ed25519PublicKey, Secp256k1PublicKey,
     };
 
     use super::PublicKey;

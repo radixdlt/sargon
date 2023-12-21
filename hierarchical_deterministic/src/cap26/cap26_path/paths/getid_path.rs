@@ -1,5 +1,5 @@
 use serde::{de, Deserializer, Serialize, Serializer};
-use wallet_kit_common::error::hdpath_error::HDPathError;
+use wallet_kit_common::HDPathError;
 
 use crate::{
     bip32::{HDPath, HDPathValue},
@@ -90,8 +90,7 @@ impl TryInto<GetIDPath> for &str {
 mod tests {
     use serde_json::json;
     use wallet_kit_common::{
-        assert_json::{assert_json_value_eq_after_roundtrip, assert_json_value_fails},
-        error::hdpath_error::HDPathError,
+        HDPathError, {assert_json_value_eq_after_roundtrip, assert_json_value_fails},
     };
 
     use crate::Derivation;

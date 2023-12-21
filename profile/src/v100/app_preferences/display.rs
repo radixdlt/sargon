@@ -60,7 +60,7 @@ impl Default for FiatCurrency {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::assert_json::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::assert_eq_after_json_roundtrip;
 
     use super::AppDisplay;
     use super::FiatCurrency;

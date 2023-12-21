@@ -1,8 +1,6 @@
-use super::{
-    ed25519::private_key::Ed25519PrivateKey, public_key::PublicKey,
-    secp256k1::private_key::Secp256k1PrivateKey,
-};
 use enum_as_inner::EnumAsInner;
+
+use crate::{Ed25519PrivateKey, PublicKey, Secp256k1PrivateKey};
 
 /// A tagged union of supported private keys on different curves, supported
 /// curves are `secp256k1` and `Curve25519`
@@ -21,8 +19,8 @@ impl From<Ed25519PrivateKey> for PrivateKey {
     ///
     /// ```
     /// extern crate wallet_kit_common;
-    /// use wallet_kit_common::types::keys::ed25519::private_key::Ed25519PrivateKey;
-    /// use wallet_kit_common::types::keys::public_key::PublicKey;
+    /// use wallet_kit_common::Ed25519PrivateKey;
+    /// use wallet_kit_common::PublicKey;
     ///
     /// let key: PublicKey = Ed25519PrivateKey::new().public_key().into();
     /// ```
@@ -36,8 +34,8 @@ impl From<Secp256k1PrivateKey> for PrivateKey {
     ///
     /// ```
     /// extern crate wallet_kit_common;
-    /// use wallet_kit_common::types::keys::secp256k1::private_key::Secp256k1PrivateKey;
-    /// use wallet_kit_common::types::keys::public_key::PublicKey;
+    /// use wallet_kit_common::Secp256k1PrivateKey;
+    /// use wallet_kit_common::PublicKey;
     ///
     /// let key: PublicKey = Secp256k1PrivateKey::new().public_key().into();
     /// ```
@@ -83,12 +81,7 @@ mod tests {
 
     use std::collections::HashSet;
 
-    use crate::{
-        secure_random_bytes::generate_32_bytes,
-        types::keys::{
-            ed25519::private_key::Ed25519PrivateKey, secp256k1::private_key::Secp256k1PrivateKey,
-        },
-    };
+    use crate::{secure_random_bytes::generate_32_bytes, Ed25519PrivateKey, Secp256k1PrivateKey};
 
     use super::PrivateKey;
 

@@ -1,6 +1,6 @@
 use derive_getters::Getters;
 use serde::{de, Deserializer, Serialize, Serializer};
-use wallet_kit_common::{error::hdpath_error::HDPathError, network_id::NetworkID};
+use wallet_kit_common::{HDPathError, NetworkID};
 
 use crate::{
     bip32::{HDPath, HDPathValue},
@@ -121,9 +121,8 @@ mod tests {
 
     use serde_json::json;
     use wallet_kit_common::{
-        assert_json::{assert_json_value_eq_after_roundtrip, assert_json_value_ne_after_roundtrip},
-        error::hdpath_error::HDPathError,
-        network_id::NetworkID,
+        HDPathError, NetworkID,
+        {assert_json_value_eq_after_roundtrip, assert_json_value_ne_after_roundtrip},
     };
 
     use crate::{

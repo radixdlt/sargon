@@ -10,7 +10,7 @@ use hd::{Derivation, HasEntityPath};
 use identified_vec::Identifiable;
 use serde::{Deserialize, Serialize};
 use std::{cell::RefCell, cmp::Ordering, fmt::Display, hash::Hasher};
-use wallet_kit_common::network_id::NetworkID;
+use wallet_kit_common::NetworkID;
 
 use crate::v100::{
     address::{account_address::AccountAddress, entity_address::EntityAddress},
@@ -336,7 +336,7 @@ mod tests {
     use std::{collections::BTreeSet, str::FromStr};
 
     use radix_engine_common::prelude::HashSet;
-    use wallet_kit_common::assert_json::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::assert_eq_after_json_roundtrip;
 
     use crate::v100::{
         address::account_address::AccountAddress,

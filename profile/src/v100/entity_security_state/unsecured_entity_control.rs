@@ -5,7 +5,7 @@ use crate::v100::factors::{
     hd_transaction_signing_factor_instance::HDFactorInstanceAccountCreation,
     hierarchical_deterministic_factor_instance::HierarchicalDeterministicFactorInstance,
 };
-use wallet_kit_common::error::common_error::CommonError as Error;
+use wallet_kit_common::CommonError as Error;
 
 /// Basic security control of an unsecured entity. When said entity
 /// is "securified" it will no longer be controlled by this `UnsecuredEntityControl`
@@ -76,7 +76,7 @@ impl UnsecuredEntityControl {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::assert_json::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::assert_eq_after_json_roundtrip;
 
     use crate::v100::factors::hierarchical_deterministic_factor_instance::HierarchicalDeterministicFactorInstance;
 

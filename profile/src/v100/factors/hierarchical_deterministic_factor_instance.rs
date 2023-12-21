@@ -4,16 +4,14 @@ use derive_getters::Getters;
 #[cfg(any(test, feature = "placeholder"))]
 use hd::{HDPathValue, MnemonicWithPassphrase};
 #[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::network_id::NetworkID;
+use wallet_kit_common::NetworkID;
 
 use hd::{
     AccountPath, CAP26KeyKind, CAP26Path, CAP26Repr, DerivationPath,
     HierarchicalDeterministicPublicKey,
 };
 use serde::{de, Deserializer, Serialize, Serializer};
-use wallet_kit_common::types::keys::public_key::PublicKey;
-
-use wallet_kit_common::error::common_error::CommonError as Error;
+use wallet_kit_common::{CommonError as Error, PublicKey};
 
 use super::{
     factor_instance::{
@@ -162,9 +160,7 @@ mod tests {
         BIP44LikePath, CAP26KeyKind, Derivation, DerivationPath, GetIDPath,
         HierarchicalDeterministicPublicKey, IdentityPath,
     };
-    use wallet_kit_common::{
-        assert_json::assert_eq_after_json_roundtrip, types::keys::public_key::PublicKey,
-    };
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, PublicKey};
 
     use crate::v100::factors::factor_source_id_from_hash::FactorSourceIDFromHash;
 

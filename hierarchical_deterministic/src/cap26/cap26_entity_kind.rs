@@ -55,9 +55,7 @@ mod tests {
     use std::collections::BTreeSet;
 
     use serde_json::json;
-    use wallet_kit_common::assert_json::{
-        assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
-    };
+    use wallet_kit_common::{assert_json_roundtrip, assert_json_value_eq_after_roundtrip};
 
     use crate::cap26::cap26_entity_kind::CAP26EntityKind;
 

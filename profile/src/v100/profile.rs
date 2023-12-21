@@ -107,7 +107,7 @@ impl Profile {
 #[cfg(test)]
 mod tests {
     use identified_vec::IsIdentifiedVecOf;
-    use wallet_kit_common::assert_json::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::assert_eq_after_json_roundtrip;
 
     use crate::v100::{
         app_preferences::app_preferences::AppPreferences,

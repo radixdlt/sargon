@@ -2,7 +2,7 @@ use crate::v100::entity::abstract_entity_type::AbstractEntityType;
 use derive_getters::Getters;
 use serde::{de, Deserializer, Serialize, Serializer};
 use std::fmt::Display;
-use wallet_kit_common::network_id::NetworkID;
+use wallet_kit_common::NetworkID;
 
 use super::entity_address::EntityAddress;
 
@@ -62,7 +62,7 @@ impl EntityAddress for ResourceAddress {
 }
 
 impl TryInto<ResourceAddress> for &str {
-    type Error = wallet_kit_common::error::common_error::CommonError;
+    type Error = wallet_kit_common::CommonError;
 
     fn try_into(self) -> Result<ResourceAddress, Self::Error> {
         ResourceAddress::try_from_bech32(self)
@@ -79,11 +79,11 @@ impl Display for ResourceAddress {
 mod tests {
     use serde_json::json;
     use wallet_kit_common::{
-        assert_json::{
+        NetworkID,
+        {
             assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
             assert_json_value_ne_after_roundtrip,
         },
-        network_id::NetworkID,
     };
 
     use crate::v100::address::entity_address::EntityAddress;

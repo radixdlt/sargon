@@ -3,8 +3,8 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt::Display;
 use wallet_kit_common::{
-    error::common_error::CommonError,
-    network_id::NetworkID::{self, *},
+    CommonError,
+    NetworkID::{self, *},
 };
 
 /// A version of the Radix Network, for a NetworkID with an identifier (name) and display description (display name)
@@ -149,10 +149,7 @@ impl RadixNetwork {
 #[cfg(test)]
 mod tests {
 
-    use wallet_kit_common::{
-        assert_json::assert_eq_after_json_roundtrip, error::common_error::CommonError,
-        network_id::NetworkID,
-    };
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, CommonError, NetworkID};
 
     use super::RadixNetwork;
 

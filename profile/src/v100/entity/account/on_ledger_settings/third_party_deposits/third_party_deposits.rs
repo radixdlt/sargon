@@ -130,7 +130,7 @@ impl ThirdPartyDeposits {
 mod tests {
     use std::collections::BTreeSet;
 
-    use wallet_kit_common::assert_json::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::assert_eq_after_json_roundtrip;
 
     use crate::v100::{
         address::non_fungible_global_id::NonFungibleGlobalId,

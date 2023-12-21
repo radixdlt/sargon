@@ -29,7 +29,7 @@ impl AssetException {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::assert_json::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::assert_eq_after_json_roundtrip;
 
     use crate::v100::entity::account::on_ledger_settings::third_party_deposits::deposit_address_exception_rule::DepositAddressExceptionRule;
 

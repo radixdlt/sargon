@@ -4,7 +4,7 @@ use bip39::Language;
 use derive_getters::Getters;
 use itertools::Itertools;
 use serde::{de, Deserializer, Serialize, Serializer};
-use wallet_kit_common::error::hdpath_error::HDPathError as Error;
+use wallet_kit_common::HDPathError as Error;
 
 use crate::{BIP39Word, BIP39WordCount};
 
@@ -68,7 +68,7 @@ impl<'de> serde::Deserialize<'de> for Mnemonic {
 }
 
 impl TryInto<Mnemonic> for &str {
-    type Error = wallet_kit_common::error::hdpath_error::HDPathError;
+    type Error = wallet_kit_common::HDPathError;
 
     /// Tries to deserializes a bech32 address into an `AccountAddress`.
     fn try_into(self) -> Result<Mnemonic, Self::Error> {
@@ -88,7 +88,7 @@ impl Mnemonic {
 mod tests {
     use bip39::Language;
     use serde_json::json;
-    use wallet_kit_common::assert_json::{
+    use wallet_kit_common::{
         assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
         assert_json_value_ne_after_roundtrip,
     };

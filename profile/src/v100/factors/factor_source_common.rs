@@ -2,7 +2,7 @@ use std::{cell::RefCell, collections::BTreeSet};
 
 use iso8601_timestamp::Timestamp;
 use serde::{Deserialize, Serialize};
-use wallet_kit_common::utils::factory::now;
+use wallet_kit_common::now;
 
 use super::{
     factor_source_crypto_parameters::FactorSourceCryptoParameters,
@@ -172,7 +172,7 @@ mod tests {
     use std::collections::BTreeSet;
 
     use iso8601_timestamp::Timestamp;
-    use wallet_kit_common::{assert_json::assert_eq_after_json_roundtrip, utils::factory::now};
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, now};
 
     use crate::v100::factors::{
         factor_source_crypto_parameters::FactorSourceCryptoParameters,

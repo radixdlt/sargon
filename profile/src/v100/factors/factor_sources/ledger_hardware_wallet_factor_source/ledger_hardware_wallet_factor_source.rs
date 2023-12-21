@@ -70,7 +70,7 @@ impl LedgerHardwareWalletFactorSource {
 }
 
 impl TryFrom<FactorSource> for LedgerHardwareWalletFactorSource {
-    type Error = wallet_kit_common::error::common_error::CommonError;
+    type Error = wallet_kit_common::CommonError;
 
     fn try_from(value: FactorSource) -> Result<Self, Self::Error> {
         value
@@ -91,9 +91,7 @@ impl IsFactorSource for LedgerHardwareWalletFactorSource {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::{
-        assert_json::assert_eq_after_json_roundtrip, error::common_error::CommonError as Error,
-    };
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, CommonError as Error};
 
     use crate::v100::factors::{
         factor_source::FactorSource,

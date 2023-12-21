@@ -4,7 +4,7 @@ use crate::{
 };
 use enum_as_inner::EnumAsInner;
 use serde::{de, Deserializer, Serialize, Serializer};
-use wallet_kit_common::error::hdpath_error::HDPathError;
+use wallet_kit_common::HDPathError;
 
 /// A derivation path design specifically for Radix Babylon wallets used by Accounts and Personas
 /// to be unique per network with separate key spaces for Accounts/Identities (Personas) and key
@@ -104,7 +104,7 @@ impl CAP26Path {
 #[cfg(test)]
 mod tests {
     use serde_json::json;
-    use wallet_kit_common::assert_json::assert_json_value_eq_after_roundtrip;
+    use wallet_kit_common::assert_json_value_eq_after_roundtrip;
 
     use crate::{derivation::DerivationPathScheme, AccountPath, Derivation, GetIDPath};
 

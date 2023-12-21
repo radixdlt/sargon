@@ -1,6 +1,6 @@
 use radix_engine_common::crypto::Hash;
 use serde::{Deserialize, Serialize};
-use wallet_kit_common::{hash::hash, types::hex_32bytes::Hex32Bytes};
+use wallet_kit_common::{hash, Hex32Bytes};
 
 /// The hash of the connection password is used to connect to the Radix Connect Signaling Server,
 /// over web sockets. The actual `ConnectionPassword` is used to encrypt all messages sent via
@@ -61,7 +61,7 @@ impl RadixConnectPassword {
 mod tests {
     use radix_engine_common::prelude::HashSet;
     use serde_json::json;
-    use wallet_kit_common::assert_json::{
+    use wallet_kit_common::{
         assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
         assert_json_value_ne_after_roundtrip,
     };

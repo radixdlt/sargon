@@ -1,9 +1,8 @@
 use serde::{de, Deserializer, Serialize, Serializer};
-use wallet_kit_common::error::hdpath_error::HDPathError;
+use wallet_kit_common::HDPathError;
 
 use crate::{
-    bip32::{HDPath, HDPathComponent, HDPathValue},
-    Derivation, DerivationPath, DerivationPathScheme,
+    Derivation, DerivationPath, DerivationPathScheme, HDPath, HDPathComponent, HDPathValue,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -109,13 +108,10 @@ impl BIP44LikePath {
 mod tests {
     use serde_json::json;
     use wallet_kit_common::{
-        assert_json::{assert_json_value_eq_after_roundtrip, assert_json_value_ne_after_roundtrip},
-        error::hdpath_error::HDPathError,
+        assert_json_value_eq_after_roundtrip, assert_json_value_ne_after_roundtrip, HDPathError,
     };
 
-    use crate::Derivation;
-
-    use super::BIP44LikePath;
+    use crate::{BIP44LikePath, Derivation};
 
     #[test]
     fn string_roundtrip() {

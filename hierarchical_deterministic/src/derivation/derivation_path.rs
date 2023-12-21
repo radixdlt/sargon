@@ -13,7 +13,7 @@ pub enum DerivationPath {
 }
 
 impl TryFrom<&HDPath> for DerivationPath {
-    type Error = wallet_kit_common::error::common_error::CommonError;
+    type Error = wallet_kit_common::CommonError;
 
     fn try_from(value: &HDPath) -> Result<Self, Self::Error> {
         if let Ok(bip44) = BIP44LikePath::try_from(value) {
@@ -135,7 +135,7 @@ impl From<CAP26Path> for DerivationPath {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::assert_json::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::assert_eq_after_json_roundtrip;
 
     use crate::{
         derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},

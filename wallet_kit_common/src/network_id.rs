@@ -102,7 +102,7 @@ impl NetworkID {
 }
 
 impl TryFrom<u8> for NetworkID {
-    type Error = crate::error::common_error::CommonError;
+    type Error = crate::CommonError;
 
     /// Tries to instantiate a NetworkID from its raw representation `u8`.
     fn try_from(value: u8) -> Result<Self, Self::Error> {
@@ -158,7 +158,7 @@ impl NetworkID {
 mod tests {
     use std::collections::BTreeSet;
 
-    use crate::assert_json::{assert_json_value_eq_after_roundtrip, assert_json_value_fails};
+    use crate::{assert_json_value_eq_after_roundtrip, assert_json_value_fails};
     use enum_iterator::all;
     use serde_json::json;
 

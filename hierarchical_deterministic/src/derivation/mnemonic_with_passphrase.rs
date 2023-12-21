@@ -1,15 +1,12 @@
-use super::hierarchical_deterministic_private_key::HierarchicalDeterministicPrivateKey;
+use crate::{
+    Derivation, DerivationPathScheme, HDPath, HierarchicalDeterministicPrivateKey, Mnemonic, Seed,
+};
 use derive_getters::Getters;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use wallet_kit_common::types::keys::{
-    ed25519::private_key::Ed25519PrivateKey, secp256k1::private_key::Secp256k1PrivateKey,
-    slip10_curve::SLIP10Curve,
-};
+use wallet_kit_common::{Ed25519PrivateKey, SLIP10Curve, Secp256k1PrivateKey};
 
-use crate::{Derivation, DerivationPathScheme, HDPath, Mnemonic, Seed};
-
-use wallet_kit_common::error::hdpath_error::HDPathError as Error;
+use wallet_kit_common::HDPathError as Error;
 
 /// A BIP39 Mnemonic and BIP39 passphrase - aka "25th word" tuple,
 /// from which we can derive a HD Root used for derivation.
@@ -113,7 +110,7 @@ impl MnemonicWithPassphrase {
 mod tests {
 
     use crate::{AccountPath, BIP44LikePath, CAP26KeyKind, CAP26Repr, Derivation, Mnemonic};
-    use wallet_kit_common::{assert_json::assert_eq_after_json_roundtrip, network_id::NetworkID};
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, NetworkID};
 
     use super::MnemonicWithPassphrase;
 

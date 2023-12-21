@@ -2,7 +2,7 @@ use identified_vec::Identifiable;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Debug, Display, Formatter};
 use url::Url;
-use wallet_kit_common::network_id::NetworkID;
+use wallet_kit_common::NetworkID;
 
 use super::radix_network::RadixNetwork;
 use derive_getters::Getters;
@@ -121,7 +121,7 @@ impl Gateway {
 mod tests {
     use identified_vec::Identifiable;
     use radix_engine_common::prelude::HashSet;
-    use wallet_kit_common::assert_json::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::assert_eq_after_json_roundtrip;
 
     use super::Gateway;
 

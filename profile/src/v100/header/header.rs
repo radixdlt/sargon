@@ -10,7 +10,7 @@ use iso8601_timestamp::Timestamp;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use wallet_kit_common::utils::factory::{id, now};
+use wallet_kit_common::{id, now};
 
 use super::{
     content_hint::ContentHint, device_info::DeviceInfo,
@@ -196,7 +196,7 @@ pub mod tests {
     };
     use iso8601_timestamp::Timestamp;
     use uuid::Uuid;
-    use wallet_kit_common::{assert_json::assert_eq_after_json_roundtrip, utils::factory::id};
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, id};
 
     use super::Header;
 

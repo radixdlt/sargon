@@ -1,6 +1,6 @@
 use crate::{
-    error::key_error::KeyError as Error,
-    types::{hex_32bytes::Hex32Bytes, keys::ed25519::private_key::Ed25519PrivateKey},
+    types::{hex_32bytes::Hex32Bytes, keys::Ed25519PrivateKey},
+    KeyError as Error,
 };
 use radix_engine_common::crypto::{Ed25519PublicKey as EngineEd25519PublicKey, Hash};
 use serde::{Deserialize, Serialize};
@@ -36,7 +36,7 @@ impl Ed25519PublicKey {
 }
 
 impl TryFrom<&[u8]> for Ed25519PublicKey {
-    type Error = crate::error::key_error::KeyError;
+    type Error = crate::KeyError;
 
     fn try_from(slice: &[u8]) -> Result<Ed25519PublicKey, Self::Error> {
         EngineEd25519PublicKey::try_from(slice)
@@ -46,7 +46,7 @@ impl TryFrom<&[u8]> for Ed25519PublicKey {
 }
 
 impl TryInto<Ed25519PublicKey> for &str {
-    type Error = crate::error::key_error::KeyError;
+    type Error = crate::KeyError;
 
     fn try_into(self) -> Result<Ed25519PublicKey, Self::Error> {
         Ed25519PublicKey::from_str(self)
@@ -87,9 +87,7 @@ impl Ed25519PublicKey {
 mod tests {
     use std::collections::BTreeSet;
 
-    use crate::{
-        assert_json::assert_json_value_eq_after_roundtrip, error::key_error::KeyError as Error,
-    };
+    use crate::{assert_json_value_eq_after_roundtrip, KeyError as Error};
     use serde_json::json;
 
     use super::Ed25519PublicKey;

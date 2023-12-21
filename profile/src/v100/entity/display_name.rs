@@ -1,6 +1,6 @@
 use nutype::nutype;
 
-use wallet_kit_common::error::common_error::CommonError as Error;
+use wallet_kit_common::CommonError as Error;
 
 #[nutype(
     sanitize(trim),
@@ -27,7 +27,7 @@ impl Default for DisplayName {
 }
 
 impl TryFrom<&str> for DisplayName {
-    type Error = wallet_kit_common::error::common_error::CommonError;
+    type Error = wallet_kit_common::CommonError;
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         DisplayName::new(value.to_string()).map_err(|_| Error::InvalidDisplayName)
@@ -37,13 +37,13 @@ impl TryFrom<&str> for DisplayName {
 #[cfg(test)]
 mod tests {
     use serde_json::json;
-    use wallet_kit_common::assert_json::{
+    use wallet_kit_common::{
         assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
         assert_json_value_ne_after_roundtrip,
     };
 
     use super::DisplayName;
-    use wallet_kit_common::error::common_error::CommonError as Error;
+    use wallet_kit_common::CommonError as Error;
 
     #[test]
     fn invalid() {
