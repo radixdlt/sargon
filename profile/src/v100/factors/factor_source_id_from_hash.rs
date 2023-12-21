@@ -69,7 +69,7 @@ impl FactorSourceIDFromHash {
 
 #[cfg(test)]
 mod tests {
-    use hd::{bip39::mnemonic::Mnemonic, MnemonicWithPassphrase};
+    use hd::{Mnemonic, MnemonicWithPassphrase};
     use wallet_kit_common::json::assert_eq_after_json_roundtrip;
 
     use super::FactorSourceIDFromHash;

@@ -72,7 +72,7 @@ mod tests {
         assert_json_value_ne_after_roundtrip,
     };
 
-    use crate::bip39::bip39_word_count::BIP39WordCount;
+    use crate::BIP39WordCount;
 
     #[test]
     fn default_is_24() {

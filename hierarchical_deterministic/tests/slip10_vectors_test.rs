@@ -1,6 +1,4 @@
-use hd::{
-    bip39::mnemonic::Mnemonic, bip44::bip44_like_path::BIP44LikePath, MnemonicWithPassphrase,
-};
+use hd::{BIP44LikePath, Mnemonic, MnemonicWithPassphrase};
 
 #[test]
 fn derive_a_secp256k1_key_with_bip44_olympia() {

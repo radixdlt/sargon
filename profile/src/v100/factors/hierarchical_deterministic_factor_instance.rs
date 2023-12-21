@@ -2,7 +2,7 @@
 use crate::v100::factors::factor_source_kind::FactorSourceKind;
 use derive_getters::Getters;
 #[cfg(any(test, feature = "placeholder"))]
-use hd::{bip32::HDPathValue, MnemonicWithPassphrase};
+use hd::{HDPathValue, MnemonicWithPassphrase};
 #[cfg(any(test, feature = "placeholder"))]
 use wallet_kit_common::network_id::NetworkID;
 
@@ -159,7 +159,7 @@ impl HierarchicalDeterministicFactorInstance {
 #[cfg(test)]
 mod tests {
     use hd::{
-        bip44::bip44_like_path::BIP44LikePath, CAP26KeyKind, Derivation, DerivationPath, GetIDPath,
+        BIP44LikePath, CAP26KeyKind, Derivation, DerivationPath, GetIDPath,
         HierarchicalDeterministicPublicKey, IdentityPath,
     };
     use wallet_kit_common::{

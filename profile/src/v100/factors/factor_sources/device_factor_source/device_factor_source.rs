@@ -135,7 +135,7 @@ impl DeviceFactorSource {
 
 #[cfg(test)]
 mod tests {
-    use hd::bip39::bip39_word_count::BIP39WordCount;
+    use hd::BIP39WordCount;
     use wallet_kit_common::json::assert_eq_after_json_roundtrip;
 
     use crate::v100::factors::{

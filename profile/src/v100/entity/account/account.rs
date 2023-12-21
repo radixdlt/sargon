@@ -4,7 +4,7 @@ use crate::v100::factors::factor_sources::{
     private_hierarchical_deterministic_factor_source::PrivateHierarchicalDeterministicFactorSource,
 };
 #[cfg(any(test, feature = "placeholder"))]
-use hd::{bip32::HDPathValue, MnemonicWithPassphrase};
+use hd::{HDPathValue, MnemonicWithPassphrase};
 
 use hd::{Derivation, HasEntityPath};
 use identified_vec::Identifiable;

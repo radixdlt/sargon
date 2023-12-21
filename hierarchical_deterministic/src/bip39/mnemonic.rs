@@ -6,7 +6,7 @@ use itertools::Itertools;
 use serde::{de, Deserializer, Serialize, Serializer};
 use wallet_kit_common::error::hdpath_error::HDPathError as Error;
 
-use super::{bip39_word::bip39_word::BIP39Word, bip39_word_count::BIP39WordCount};
+use crate::{BIP39Word, BIP39WordCount};
 
 #[derive(Clone, PartialEq, Eq, Debug, Getters)]
 pub struct Mnemonic {

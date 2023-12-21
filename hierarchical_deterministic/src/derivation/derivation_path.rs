@@ -1,10 +1,7 @@
 use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
 
 use super::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme};
-use crate::{
-    bip32::HDPath, bip44::bip44_like_path::BIP44LikePath, AccountPath, CAP26Path, GetIDPath,
-    IdentityPath,
-};
+use crate::{bip32::HDPath, AccountPath, BIP44LikePath, CAP26Path, GetIDPath, IdentityPath};
 use enum_as_inner::EnumAsInner;
 use std::fmt::{Debug, Formatter};
 
@@ -141,9 +138,8 @@ mod tests {
     use wallet_kit_common::json::assert_eq_after_json_roundtrip;
 
     use crate::{
-        bip44::bip44_like_path::BIP44LikePath,
         derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},
-        AccountPath, CAP26Path, GetIDPath, IdentityPath,
+        AccountPath, BIP44LikePath, CAP26Path, GetIDPath, IdentityPath,
     };
 
     use super::DerivationPath;

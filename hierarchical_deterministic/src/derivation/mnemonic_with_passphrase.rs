@@ -7,11 +7,8 @@ use wallet_kit_common::types::keys::{
     slip10_curve::SLIP10Curve,
 };
 
-use super::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme};
-use crate::{
-    bip32::HDPath,
-    bip39::mnemonic::{Mnemonic, Seed},
-};
+use crate::{Derivation, DerivationPathScheme, HDPath, Mnemonic, Seed};
+
 use wallet_kit_common::error::hdpath_error::HDPathError as Error;
 
 /// A BIP39 Mnemonic and BIP39 passphrase - aka "25th word" tuple,
@@ -115,10 +112,7 @@ impl MnemonicWithPassphrase {
 #[cfg(test)]
 mod tests {
 
-    use crate::{
-        bip39::mnemonic::Mnemonic, bip44::bip44_like_path::BIP44LikePath,
-        derivation::derivation::Derivation, AccountPath, CAP26KeyKind, CAP26Repr,
-    };
+    use crate::{AccountPath, BIP44LikePath, CAP26KeyKind, CAP26Repr, Derivation, Mnemonic};
     use wallet_kit_common::{json::assert_eq_after_json_roundtrip, network_id::NetworkID};
 
     use super::MnemonicWithPassphrase;
