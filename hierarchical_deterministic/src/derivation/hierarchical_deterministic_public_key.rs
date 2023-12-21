@@ -3,11 +3,8 @@ use serde::{Deserialize, Serialize};
 use wallet_kit_common::{network_id::NetworkID, types::keys::public_key::PublicKey};
 
 use crate::{
-    cap26::{
-        cap26_key_kind::CAP26KeyKind, cap26_path::paths::account_path::AccountPath,
-        cap26_repr::CAP26Repr,
-    },
     derivation::{derivation::Derivation, derivation_path::DerivationPath},
+    AccountPath, CAP26KeyKind, CAP26Repr,
 };
 
 use super::mnemonic_with_passphrase::MnemonicWithPassphrase;

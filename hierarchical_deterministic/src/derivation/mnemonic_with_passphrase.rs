@@ -116,13 +116,8 @@ impl MnemonicWithPassphrase {
 mod tests {
 
     use crate::{
-        bip39::mnemonic::Mnemonic,
-        bip44::bip44_like_path::BIP44LikePath,
-        cap26::{
-            cap26_key_kind::CAP26KeyKind, cap26_path::paths::account_path::AccountPath,
-            cap26_repr::CAP26Repr,
-        },
-        derivation::derivation::Derivation,
+        bip39::mnemonic::Mnemonic, bip44::bip44_like_path::BIP44LikePath,
+        derivation::derivation::Derivation, AccountPath, CAP26KeyKind, CAP26Repr,
     };
     use wallet_kit_common::{json::assert_eq_after_json_roundtrip, network_id::NetworkID};
 

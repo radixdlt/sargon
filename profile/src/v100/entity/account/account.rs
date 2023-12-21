@@ -6,9 +6,7 @@ use crate::v100::factors::factor_sources::{
 #[cfg(any(test, feature = "placeholder"))]
 use hd::{bip32::HDPathValue, derivation::mnemonic_with_passphrase::MnemonicWithPassphrase};
 
-use hd::{
-    cap26::cap26_path::paths::is_entity_path::HasEntityPath, derivation::derivation::Derivation,
-};
+use hd::{derivation::derivation::Derivation, HasEntityPath};
 use identified_vec::Identifiable;
 use serde::{Deserialize, Serialize};
 use std::{cell::RefCell, cmp::Ordering, fmt::Display, hash::Hasher};

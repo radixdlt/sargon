@@ -2,12 +2,8 @@ use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializ
 
 use super::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme};
 use crate::{
-    bip32::HDPath,
-    bip44::bip44_like_path::BIP44LikePath,
-    cap26::cap26_path::{
-        cap26_path::CAP26Path,
-        paths::{account_path::AccountPath, getid_path::GetIDPath, identity_path::IdentityPath},
-    },
+    bip32::HDPath, bip44::bip44_like_path::BIP44LikePath, AccountPath, CAP26Path, GetIDPath,
+    IdentityPath,
 };
 use enum_as_inner::EnumAsInner;
 use std::fmt::{Debug, Formatter};
@@ -146,13 +142,8 @@ mod tests {
 
     use crate::{
         bip44::bip44_like_path::BIP44LikePath,
-        cap26::cap26_path::{
-            cap26_path::CAP26Path,
-            paths::{
-                account_path::AccountPath, getid_path::GetIDPath, identity_path::IdentityPath,
-            },
-        },
         derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},
+        AccountPath, CAP26Path, GetIDPath, IdentityPath,
     };
 
     use super::DerivationPath;

@@ -1,8 +1,5 @@
 use derive_getters::Getters;
-use hd::{
-    cap26::cap26_path::paths::getid_path::GetIDPath,
-    derivation::mnemonic_with_passphrase::MnemonicWithPassphrase,
-};
+use hd::{derivation::mnemonic_with_passphrase::MnemonicWithPassphrase, GetIDPath};
 use radix_engine_common::crypto::{blake2b_256_hash, Hash};
 use serde::{Deserialize, Serialize};
 use wallet_kit_common::types::hex_32bytes::Hex32Bytes;

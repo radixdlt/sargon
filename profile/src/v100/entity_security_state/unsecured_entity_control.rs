@@ -1,5 +1,4 @@
 use derive_getters::Getters;
-use hd::cap26::cap26_key_kind::CAP26KeyKind;
 use serde::{Deserialize, Serialize};
 
 use crate::v100::factors::{
@@ -39,6 +38,8 @@ impl UnsecuredEntityControl {
         transaction_signing: HierarchicalDeterministicFactorInstance,
         authentication_signing: Option<HierarchicalDeterministicFactorInstance>,
     ) -> Result<Self, Error> {
+        use hd::CAP26KeyKind;
+
         if let Some(auth) = &authentication_signing {
             if let Some(key_kind) = auth.key_kind() {
                 if key_kind != CAP26KeyKind::AuthenticationSigning {

@@ -3,12 +3,11 @@ use crate::{
     cap26::cap26_repr::CAP26Repr,
     derivation::derivation_path::DerivationPath,
     derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},
+    AccountPath, GetIDPath, IdentityPath,
 };
 use enum_as_inner::EnumAsInner;
 use serde::{de, Deserializer, Serialize, Serializer};
 use wallet_kit_common::error::hdpath_error::HDPathError;
-
-use super::paths::{account_path::AccountPath, getid_path::GetIDPath, identity_path::IdentityPath};
 
 /// A derivation path design specifically for Radix Babylon wallets used by Accounts and Personas
 /// to be unique per network with separate key spaces for Accounts/Identities (Personas) and key
@@ -111,8 +110,8 @@ mod tests {
     use wallet_kit_common::json::assert_json_value_eq_after_roundtrip;
 
     use crate::{
-        cap26::cap26_path::paths::{account_path::AccountPath, getid_path::GetIDPath},
         derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},
+        AccountPath, GetIDPath,
     };
 
     use super::CAP26Path;

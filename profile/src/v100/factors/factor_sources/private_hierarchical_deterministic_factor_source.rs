@@ -1,11 +1,7 @@
 use derive_getters::Getters;
 use hd::{
-    bip32::HDPathValue,
-    cap26::{
-        cap26_key_kind::CAP26KeyKind, cap26_path::paths::account_path::AccountPath,
-        cap26_repr::CAP26Repr,
-    },
-    derivation::mnemonic_with_passphrase::MnemonicWithPassphrase,
+    bip32::HDPathValue, derivation::mnemonic_with_passphrase::MnemonicWithPassphrase, AccountPath,
+    CAP26KeyKind, CAP26Repr,
 };
 use wallet_kit_common::network_id::NetworkID;
 

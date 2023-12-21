@@ -1,4 +1,9 @@
-pub mod account_path;
-pub mod getid_path;
-pub mod identity_path;
-pub mod is_entity_path;
+mod account_path;
+mod getid_path;
+mod identity_path;
+mod is_entity_path;
+
+pub use account_path::*;
+pub use getid_path::*;
+pub use identity_path::*;
+pub use is_entity_path::*;

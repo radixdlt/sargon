@@ -3,7 +3,7 @@ use wallet_kit_common::types::keys::{
     ed25519::private_key::Ed25519PrivateKey, private_key::PrivateKey,
 };
 
-use crate::cap26::{cap26_path::paths::account_path::AccountPath, cap26_repr::CAP26Repr};
+use crate::{AccountPath, CAP26Repr};
 
 use super::{
     derivation_path::DerivationPath,
