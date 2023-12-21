@@ -12,10 +12,9 @@ use uuid::Uuid;
 
 use wallet_kit_common::{id, now};
 
-use super::{
-    content_hint::ContentHint, device_info::DeviceInfo,
-    profilesnapshot_version::ProfileSnapshotVersion,
-};
+use crate::ProfileSnapshotVersion;
+
+use super::{content_hint::ContentHint, device_info::DeviceInfo};
 
 /// The header of a Profile(Snapshot) contains crucial metadata
 /// about this Profile, such as which JSON data format it is
@@ -190,9 +189,9 @@ pub mod tests {
 
     use std::str::FromStr;
 
-    use crate::v100::header::{
-        content_hint::ContentHint, device_info::DeviceInfo,
-        profilesnapshot_version::ProfileSnapshotVersion,
+    use crate::{
+        v100::header::{content_hint::ContentHint, device_info::DeviceInfo},
+        ProfileSnapshotVersion,
     };
     use iso8601_timestamp::Timestamp;
     use uuid::Uuid;
