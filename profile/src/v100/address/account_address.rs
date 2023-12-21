@@ -1,4 +1,5 @@
 use crate::v100::entity::abstract_entity_type::AbstractEntityType;
+use derive_getters::Getters;
 use serde::{de, Deserializer, Serialize, Serializer};
 use std::fmt::Display;
 use wallet_kit_common::{network_id::NetworkID, utils::string_utils::suffix_string};
@@ -9,7 +10,7 @@ use super::entity_address::EntityAddress;
 /// that starts with the prefix `"account_"`, dependent on NetworkID, meaning the same
 /// public key used for two AccountAddresses on two different networks will not have
 /// the same address.
-#[derive(Clone, Debug, Default, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Hash, PartialOrd, Ord, Getters)]
 pub struct AccountAddress {
     /// Human readable address of an account. Always starts with `"account_"``, for example:
     ///
@@ -22,12 +23,12 @@ pub struct AccountAddress {
     ///
     /// Addresses are checksummed, as per Bech32. **Only** *Account* addresses starts with
     /// the prefix `account_`.
-    pub address: String,
+    address: String,
 
     /// The network this account address is tied to, i.e. which was used when a public key
     /// hash was used to bech32 encode it. This means that two public key hashes will result
     /// in two different account address on two different networks.
-    pub network_id: NetworkID,
+    network_id: NetworkID,
 }
 
 impl Serialize for AccountAddress {

@@ -193,10 +193,10 @@ impl Ord for Account {
     fn cmp(&self, other: &Self) -> Ordering {
         match (&self.security_state, &other.security_state) {
             (EntitySecurityState::Unsecured(l), EntitySecurityState::Unsecured(r)) => l
-                .transaction_signing
+                .transaction_signing()
                 .derivation_path()
                 .last_component()
-                .cmp(r.transaction_signing.derivation_path().last_component()),
+                .cmp(r.transaction_signing().derivation_path().last_component()),
         }
     }
 }
@@ -222,7 +222,7 @@ impl Account {
         appearance_id: AppearanceID,
     ) -> Self {
         Self {
-            network_id: address.network_id,
+            network_id: address.network_id().clone(),
             address,
             display_name: RefCell::new(display_name),
             appearance_id: RefCell::new(appearance_id),

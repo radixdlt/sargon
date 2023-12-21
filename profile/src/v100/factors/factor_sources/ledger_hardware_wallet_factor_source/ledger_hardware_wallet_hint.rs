@@ -1,14 +1,15 @@
+use derive_getters::Getters;
 use serde::{Deserialize, Serialize};
 
 use super::ledger_hardware_wallet_model::LedgerHardwareWalletModel;
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Getters)]
 pub struct LedgerHardwareWalletHint {
     /// "Orange, scratched"
-    pub name: String,
+    name: String,
 
     /// E.g. `nanoS+`
-    pub model: LedgerHardwareWalletModel,
+    model: LedgerHardwareWalletModel,
 }
 
 impl LedgerHardwareWalletHint {

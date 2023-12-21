@@ -16,17 +16,31 @@ pub struct LedgerHardwareWalletFactorSource {
     /// Unique and stable identifier of this factor source, stemming from the
     /// hash of a special child key of the HD root of the mnemonic,
     /// that is secured by the Ledger Hardware Wallet device.
-    pub id: FactorSourceIDFromHash,
+    id: FactorSourceIDFromHash,
 
     /// Common properties shared between FactorSources of different kinds,
     /// describing its state, when added, and supported cryptographic parameters.
     ///
     /// Has interior mutability since we must be able to update the
     /// last used date.
-    pub common: RefCell<FactorSourceCommon>,
+    common: RefCell<FactorSourceCommon>,
 
     /// Properties describing a LedgerHardwareWalletFactorSource to help user disambiguate between it and another one.
-    pub hint: LedgerHardwareWalletHint,
+    hint: LedgerHardwareWalletHint,
+}
+
+impl LedgerHardwareWalletFactorSource {
+    pub fn id(&self) -> FactorSourceIDFromHash {
+        self.id.clone()
+    }
+
+    pub fn common(&self) -> FactorSourceCommon {
+        self.common.borrow().clone()
+    }
+
+    pub fn set_common(&self, new: FactorSourceCommon) {
+        *self.common.borrow_mut() = new
+    }
 }
 
 impl LedgerHardwareWalletFactorSource {
@@ -67,7 +81,7 @@ impl TryFrom<FactorSource> for LedgerHardwareWalletFactorSource {
 
 impl IsFactorSource for LedgerHardwareWalletFactorSource {
     fn factor_source_kind(&self) -> FactorSourceKind {
-        self.id.kind
+        self.id().kind().clone()
     }
 
     fn factor_source_id(&self) -> FactorSourceID {
@@ -151,7 +165,7 @@ mod tests {
     fn factor_source_kind() {
         assert_eq!(
             LedgerHardwareWalletFactorSource::placeholder().factor_source_kind(),
-            LedgerHardwareWalletFactorSource::placeholder().id.kind
+            *LedgerHardwareWalletFactorSource::placeholder().id().kind()
         );
     }
 }

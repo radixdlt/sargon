@@ -1,22 +1,32 @@
 use std::cell::RefCell;
 
+use derive_getters::Getters;
 use hierarchical_deterministic::bip39::bip39_word_count::BIP39WordCount;
 use serde::{Deserialize, Serialize};
 
 /// Properties describing a DeviceFactorSource to help user disambiguate between
 /// it and another one.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Getters)]
 #[serde(rename_all = "camelCase")]
 pub struct DeviceFactorSourceHint {
     /// "iPhone RED"
-    pub name: RefCell<String>, // mutable so we can update name
+    name: RefCell<String>, // mutable so we can update name
 
     /// "iPhone SE 2nd gen"
-    pub model: RefCell<String>, // mutable because name gets `async` fetched and updated later.
+    model: RefCell<String>, // mutable because name gets `async` fetched and updated later.
 
     /// The number of words in the mnemonic of a DeviceFactorSource, according to the BIP39
     /// standard, a multiple of 3, from 12 to 24 words.
-    pub mnemonic_word_count: BIP39WordCount,
+    mnemonic_word_count: BIP39WordCount,
+}
+
+impl DeviceFactorSourceHint {
+    pub fn set_name(&self, new: String) {
+        *self.name.borrow_mut() = new
+    }
+    pub fn set_model(&self, new: String) {
+        *self.model.borrow_mut() = new
+    }
 }
 
 impl DeviceFactorSourceHint {

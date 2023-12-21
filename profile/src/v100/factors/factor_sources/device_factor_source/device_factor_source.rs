@@ -64,7 +64,7 @@ impl TryFrom<FactorSource> for DeviceFactorSource {
 
 impl IsFactorSource for DeviceFactorSource {
     fn factor_source_kind(&self) -> FactorSourceKind {
-        self.id.kind
+        self.id().kind().clone()
     }
 
     fn factor_source_id(&self) -> FactorSourceID {
@@ -211,8 +211,10 @@ mod tests {
     #[test]
     fn hint() {
         assert_eq!(
-            DeviceFactorSource::placeholder().hint().mnemonic_word_count,
-            BIP39WordCount::TwentyFour
+            DeviceFactorSource::placeholder()
+                .hint()
+                .mnemonic_word_count(),
+            &BIP39WordCount::TwentyFour
         );
     }
 

@@ -1,4 +1,5 @@
 use crate::v100::entity::abstract_entity_type::AbstractEntityType;
+use derive_getters::Getters;
 use serde::{de, Deserializer, Serialize, Serializer};
 use std::fmt::Display;
 use wallet_kit_common::network_id::NetworkID;
@@ -9,10 +10,19 @@ use super::entity_address::EntityAddress;
 /// that starts with the prefix `"account_"`, dependent on NetworkID, meaning the same
 /// public key used for two AccountAddresses on two different networks will not have
 /// the same address.
-#[derive(Clone, Debug, Default, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Hash, PartialOrd, Ord, Getters)]
 pub struct ResourceAddress {
-    pub address: String,
-    pub network_id: NetworkID,
+    address: String,
+    network_id: NetworkID,
+}
+
+impl ResourceAddress {
+    pub(crate) fn new(address: String, network_id: NetworkID) -> Self {
+        Self {
+            address,
+            network_id,
+        }
+    }
 }
 
 impl Serialize for ResourceAddress {

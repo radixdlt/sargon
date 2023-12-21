@@ -1,3 +1,4 @@
+use derive_getters::Getters;
 use hierarchical_deterministic::cap26::cap26_key_kind::CAP26KeyKind;
 use serde::{Deserialize, Serialize};
 
@@ -11,16 +12,16 @@ use wallet_kit_common::error::common_error::CommonError as Error;
 /// is "securified" it will no longer be controlled by this `UnsecuredEntityControl`
 /// but rather by an `AccessControl`. It is a name space holding the
 /// single factor instance which was used to create
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Getters)]
 #[serde(rename_all = "camelCase")]
 pub struct UnsecuredEntityControl {
     // /// The factor instance which was used to create this unsecured entity, which
     // /// also controls this entity and is used for signing transactions.
-    pub transaction_signing: HierarchicalDeterministicFactorInstance,
+    transaction_signing: HierarchicalDeterministicFactorInstance,
 
     /// The factor instance which can be used for ROLA.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub authentication_signing: Option<HierarchicalDeterministicFactorInstance>,
+    authentication_signing: Option<HierarchicalDeterministicFactorInstance>,
 }
 
 impl UnsecuredEntityControl {

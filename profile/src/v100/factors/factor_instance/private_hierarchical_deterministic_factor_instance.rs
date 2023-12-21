@@ -94,8 +94,8 @@ mod tests {
         let sut = PrivateHierarchicalDeterministicFactorInstance::placeholder();
         let key: FactorInstance = sut.into();
         assert_eq!(
-            key.factor_source_id,
-            PrivateHierarchicalDeterministicFactorInstance::placeholder().factor_source_id
+            key.factor_source_id(),
+            &PrivateHierarchicalDeterministicFactorInstance::placeholder().factor_source_id
         );
     }
 }

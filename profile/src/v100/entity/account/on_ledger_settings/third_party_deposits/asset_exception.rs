@@ -1,3 +1,4 @@
+use derive_getters::Getters;
 use serde::{Deserialize, Serialize};
 
 use crate::v100::address::resource_address::ResourceAddress;
@@ -6,14 +7,14 @@ use super::deposit_address_exception_rule::DepositAddressExceptionRule;
 
 /// The specific Asset exception rule, which overrides the general
 ///  `deposit_rule` of a `ThirdPartyDeposits` settings.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, Getters)]
 #[serde(rename_all = "camelCase")]
 pub struct AssetException {
     /// Address of an asset to either deny or allow, as an exception overriding the `ThirdPartyDeposits`'s general `deposit_rule`.
-    pub address: ResourceAddress,
+    address: ResourceAddress,
 
     /// Either deny or allow the `address`.
-    pub exception_rule: DepositAddressExceptionRule,
+    exception_rule: DepositAddressExceptionRule,
 }
 
 impl AssetException {

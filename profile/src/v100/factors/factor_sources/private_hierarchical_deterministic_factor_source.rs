@@ -1,3 +1,4 @@
+use derive_getters::Getters;
 use hierarchical_deterministic::{
     bip32::hd_path_component::HDPathValue,
     cap26::{
@@ -17,9 +18,10 @@ use crate::v100::factors::{
 
 use super::device_factor_source::device_factor_source::DeviceFactorSource;
 
+#[derive(Getters)]
 pub struct PrivateHierarchicalDeterministicFactorSource {
-    pub mnemonic_with_passphrase: MnemonicWithPassphrase,
-    pub factor_source: DeviceFactorSource,
+    mnemonic_with_passphrase: MnemonicWithPassphrase,
+    factor_source: DeviceFactorSource,
 }
 
 impl PrivateHierarchicalDeterministicFactorSource {

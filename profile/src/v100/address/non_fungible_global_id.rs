@@ -79,10 +79,7 @@ impl NonFungibleGlobalId {
             .split(":")
             .map(|p| p.to_string())
             .collect();
-        ResourceAddress {
-            address: parts[0].to_string(),
-            network_id: self.network_id(),
-        }
+        ResourceAddress::new(parts[0].to_string(), self.network_id())
     }
 
     /// Returns the canonical string representation of a NonFungibleGlobalID: "<resource>:<local>"
@@ -130,7 +127,7 @@ mod tests {
         let str = "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<value>";
         let id: NonFungibleGlobalId = str.try_into().unwrap();
         assert_eq!(
-            id.resource_address().address,
+            id.resource_address().address(),
             "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha"
         );
     }

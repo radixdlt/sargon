@@ -2,6 +2,7 @@ use super::{
     factor_source_id_from_hash::FactorSourceIDFromHash,
     hierarchical_deterministic_factor_instance::HierarchicalDeterministicFactorInstance,
 };
+use derive_getters::Getters;
 use hierarchical_deterministic::{
     cap26::cap26_path::{
         cap26_path::CAP26Path,
@@ -19,11 +20,14 @@ use wallet_kit_common::{
 
 /// A specialized Hierarchical Deterministic FactorInstance used for transaction signing
 /// and creation of virtual Accounts and Identities (Personas).
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Getters)]
 pub struct HDFactorInstanceTransactionSigning<E: IsEntityPath> {
-    pub factor_source_id: FactorSourceIDFromHash,
+    factor_source_id: FactorSourceIDFromHash,
+
+    #[getter(skip)] // We prefer `public_key() -> HierarchicalDeterministicPublicKey`
     public_key: PublicKey,
-    pub path: E,
+
+    path: E,
 }
 impl<E: IsEntityPath + Clone> HDFactorInstanceTransactionSigning<E> {
     pub fn try_from<F>(

@@ -1,3 +1,4 @@
+use derive_getters::Getters;
 use hierarchical_deterministic::{
     cap26::cap26_path::paths::getid_path::GetIDPath,
     derivation::mnemonic_with_passphrase::MnemonicWithPassphrase,
@@ -10,13 +11,13 @@ use super::factor_source_kind::FactorSourceKind;
 
 /// FactorSourceID from the blake2b hash of the special HD public key derived at `CAP26::GetID`,
 /// for a certain `FactorSourceKind`
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Getters)]
 pub struct FactorSourceIDFromHash {
     /// The kind of the FactorSource this ID refers to, typically `device` or `ledger`.
-    pub kind: FactorSourceKind,
+    kind: FactorSourceKind,
 
     /// The blake2b hash of the special HD public key derived at `CAP26::GetID`.
-    pub body: Hex32Bytes,
+    body: Hex32Bytes,
 }
 
 impl ToString for FactorSourceIDFromHash {

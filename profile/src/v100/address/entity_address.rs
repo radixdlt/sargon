@@ -54,7 +54,9 @@ pub trait EntityAddress: Sized {
                 .public_key()
                 .public_key()
                 .clone(),
-            hd_factor_instance_virtual_entity_creation.path.network_id(),
+            hd_factor_instance_virtual_entity_creation
+                .path()
+                .network_id(),
         )
     }
 

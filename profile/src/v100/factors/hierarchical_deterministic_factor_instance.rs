@@ -80,14 +80,14 @@ impl HierarchicalDeterministicFactorInstance {
 
     pub fn try_from_factor_instance(factor_instance: FactorInstance) -> Result<Self, Error> {
         let virtual_source = factor_instance
-            .badge
+            .badge()
             .as_virtual()
             .ok_or(Error::BadgeIsNotVirtualHierarchicalDeterministic)?;
 
         let badge = virtual_source.as_hierarchical_deterministic();
 
         Self::try_from(
-            factor_instance.factor_source_id,
+            factor_instance.factor_source_id().clone(),
             badge.public_key().clone(),
             badge.derivation_path().clone(),
         )
