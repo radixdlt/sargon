@@ -8,6 +8,9 @@ use crate::v100::{
     IsFactorSource,
 };
 
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
 use super::device_factor_source_hint::DeviceFactorSourceHint;
 
 /// A factor source representing the device that the Radix Wallet is running on
@@ -107,12 +110,20 @@ impl DeviceFactorSource {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl DeviceFactorSource {
+impl HasPlaceholder for DeviceFactorSource {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::placeholder_babylon()
     }
 
+    /// A placeholder used to facilitate unit tests.
+    fn placeholder_other() -> Self {
+        Self::placeholder_olympia()
+    }
+}
+
+#[cfg(any(test, feature = "placeholder"))]
+impl DeviceFactorSource {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_babylon() -> Self {
         Self::new(
@@ -135,7 +146,7 @@ impl DeviceFactorSource {
 #[cfg(test)]
 mod tests {
     use hd::BIP39WordCount;
-    use wallet_kit_common::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use super::DeviceFactorSource;
     use crate::v100::{
@@ -143,6 +154,26 @@ mod tests {
         LedgerHardwareWalletFactorSource,
     };
     use wallet_kit_common::CommonError as Error;
+
+    #[test]
+    fn equality() {
+        assert_eq!(
+            DeviceFactorSource::placeholder(),
+            DeviceFactorSource::placeholder()
+        );
+        assert_eq!(
+            DeviceFactorSource::placeholder_other(),
+            DeviceFactorSource::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            DeviceFactorSource::placeholder(),
+            DeviceFactorSource::placeholder_other()
+        );
+    }
 
     #[test]
     fn json() {

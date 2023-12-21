@@ -2,7 +2,8 @@ use std::cell::RefCell;
 
 use serde::{Deserialize, Serialize};
 
-use crate::HasPlaceholder;
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
 
 use super::{AppPreferences, FactorSources, Header, Networks};
 
@@ -117,9 +118,7 @@ impl HasPlaceholder for Profile {
 #[cfg(test)]
 mod tests {
     use identified_vec::IsIdentifiedVecOf;
-    use wallet_kit_common::assert_eq_after_json_roundtrip;
-
-    use crate::HasPlaceholder;
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use super::{AppPreferences, FactorSources, Header, Networks, Profile};
 

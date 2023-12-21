@@ -10,6 +10,9 @@ use crate::v100::factors::{
 
 use super::ledger_hardware_wallet_hint::LedgerHardwareWalletHint;
 
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct LedgerHardwareWalletFactorSource {
@@ -59,12 +62,20 @@ impl LedgerHardwareWalletFactorSource {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl LedgerHardwareWalletFactorSource {
-    pub fn placeholder() -> Self {
+impl HasPlaceholder for LedgerHardwareWalletFactorSource {
+    fn placeholder() -> Self {
         Self::new(
             FactorSourceIDFromHash::placeholder_ledger(),
             FactorSourceCommon::placeholder(),
             LedgerHardwareWalletHint::placeholder(),
+        )
+    }
+
+    fn placeholder_other() -> Self {
+        Self::new(
+            FactorSourceIDFromHash::placeholder_ledger(),
+            FactorSourceCommon::placeholder_other(),
+            LedgerHardwareWalletHint::placeholder_other(),
         )
     }
 }
@@ -91,16 +102,35 @@ impl IsFactorSource for LedgerHardwareWalletFactorSource {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, CommonError as Error};
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, CommonError as Error, HasPlaceholder};
 
     use crate::v100::{DeviceFactorSource, FactorSource, IsFactorSource};
 
     use super::LedgerHardwareWalletFactorSource;
 
     #[test]
+    fn equality() {
+        assert_eq!(
+            LedgerHardwareWalletFactorSource::placeholder(),
+            LedgerHardwareWalletFactorSource::placeholder()
+        );
+        assert_eq!(
+            LedgerHardwareWalletFactorSource::placeholder_other(),
+            LedgerHardwareWalletFactorSource::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            LedgerHardwareWalletFactorSource::placeholder(),
+            LedgerHardwareWalletFactorSource::placeholder_other()
+        );
+    }
+
+    #[test]
     fn json_roundtrip() {
-        let model: LedgerHardwareWalletFactorSource =
-            LedgerHardwareWalletFactorSource::placeholder();
+        let model = LedgerHardwareWalletFactorSource::placeholder();
         assert_eq_after_json_roundtrip(
             &model,
             r#"            

@@ -15,6 +15,9 @@ use wallet_kit_common::{CommonError as Error, PublicKey};
 
 use super::{FactorInstance, FactorInstanceBadge, FactorSourceID, FactorSourceIDFromHash};
 
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
 /// A virtual hierarchical deterministic `FactorInstance`
 #[derive(Clone, Debug, PartialEq, Eq, Getters)]
 pub struct HierarchicalDeterministicFactorInstance {
@@ -120,15 +123,27 @@ impl<'de> serde::Deserialize<'de> for HierarchicalDeterministicFactorInstance {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
+impl HasPlaceholder for HierarchicalDeterministicFactorInstance {
+    /// A placeholder used to facilitate unit tests.
+    fn placeholder() -> Self {
+        Self::placeholder_transaction_signing_0()
+    }
+
+    fn placeholder_other() -> Self {
+        Self::placeholder_transaction_signing_1()
+    }
+}
+
+#[cfg(any(test, feature = "placeholder"))]
 impl HierarchicalDeterministicFactorInstance {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
-        Self::placeholder_transaction_signing()
+    pub fn placeholder_transaction_signing_0() -> Self {
+        Self::placeholder_with_key_kind(CAP26KeyKind::TransactionSigning, 0)
     }
 
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_transaction_signing() -> Self {
-        Self::placeholder_with_key_kind(CAP26KeyKind::TransactionSigning, 0)
+    pub fn placeholder_transaction_signing_1() -> Self {
+        Self::placeholder_with_key_kind(CAP26KeyKind::TransactionSigning, 1)
     }
 
     /// A placeholder used to facilitate unit tests.
@@ -154,11 +169,31 @@ mod tests {
         BIP44LikePath, CAP26KeyKind, Derivation, DerivationPath, GetIDPath,
         HierarchicalDeterministicPublicKey, IdentityPath,
     };
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, PublicKey};
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder, PublicKey};
 
     use crate::v100::factors::factor_source_id_from_hash::FactorSourceIDFromHash;
 
     use super::HierarchicalDeterministicFactorInstance;
+
+    #[test]
+    fn equality() {
+        assert_eq!(
+            HierarchicalDeterministicFactorInstance::placeholder(),
+            HierarchicalDeterministicFactorInstance::placeholder()
+        );
+        assert_eq!(
+            HierarchicalDeterministicFactorInstance::placeholder_other(),
+            HierarchicalDeterministicFactorInstance::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            HierarchicalDeterministicFactorInstance::placeholder(),
+            HierarchicalDeterministicFactorInstance::placeholder_other()
+        );
+    }
 
     #[test]
     fn json_roundtrip() {

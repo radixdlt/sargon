@@ -1,6 +1,9 @@
 use serde::{de, Deserializer, Serialize, Serializer};
 use wallet_kit_common::HDPathError;
 
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
 use crate::{
     Derivation, DerivationPath, DerivationPathScheme, HDPath, HDPathComponent, HDPathValue,
 };
@@ -97,10 +100,15 @@ impl TryInto<BIP44LikePath> for &str {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl BIP44LikePath {
+impl HasPlaceholder for BIP44LikePath {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::from_str("m/44H/1022H/0H/0/0H").expect("Valid placeholder")
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    fn placeholder_other() -> Self {
+        Self::from_str("m/44H/1022H/0H/0/1H").expect("Valid placeholder")
     }
 }
 
@@ -109,9 +117,27 @@ mod tests {
     use serde_json::json;
     use wallet_kit_common::{
         assert_json_value_eq_after_roundtrip, assert_json_value_ne_after_roundtrip, HDPathError,
+        HasPlaceholder,
     };
 
     use crate::{BIP44LikePath, Derivation};
+
+    #[test]
+    fn equality() {
+        assert_eq!(BIP44LikePath::placeholder(), BIP44LikePath::placeholder());
+        assert_eq!(
+            BIP44LikePath::placeholder_other(),
+            BIP44LikePath::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            BIP44LikePath::placeholder(),
+            BIP44LikePath::placeholder_other()
+        );
+    }
 
     #[test]
     fn string_roundtrip() {

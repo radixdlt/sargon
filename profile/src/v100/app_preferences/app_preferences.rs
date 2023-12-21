@@ -4,6 +4,9 @@ use serde::{Deserialize, Serialize};
 
 use super::{AppDisplay, Gateways, P2PLinks, Security, Transaction};
 
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
 /// Collection of all settings, preferences and configuration related to how the wallet
 /// behaves and looks.
 ///
@@ -93,9 +96,9 @@ impl AppPreferences {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl AppPreferences {
+impl HasPlaceholder for AppPreferences {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::new(
             AppDisplay::placeholder(),
             Gateways::placeholder(),
@@ -106,7 +109,7 @@ impl AppPreferences {
     }
 
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_other() -> Self {
+    fn placeholder_other() -> Self {
         Self::new(
             AppDisplay::placeholder_other(),
             Gateways::placeholder_other(),
@@ -119,9 +122,26 @@ impl AppPreferences {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use super::{AppDisplay, AppPreferences, Gateways, P2PLinks, Security, Transaction};
+
+    #[test]
+    fn equality() {
+        assert_eq!(AppPreferences::placeholder(), AppPreferences::placeholder());
+        assert_eq!(
+            AppPreferences::placeholder_other(),
+            AppPreferences::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            AppPreferences::placeholder(),
+            AppPreferences::placeholder_other()
+        );
+    }
 
     #[test]
     fn get_display() {

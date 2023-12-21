@@ -8,6 +8,9 @@ use super::{
 };
 use crate::v100::factors::factor_source_id::FactorSourceID;
 
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Getters)]
 pub struct FactorInstance {
     /// The ID of the `FactorSource` that was used to produce this
@@ -47,21 +50,46 @@ impl FactorInstance {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl FactorInstance {
+impl HasPlaceholder for FactorInstance {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::new(
             FactorSourceID::placeholder(),
             FactorInstanceBadge::placeholder(),
+        )
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    fn placeholder_other() -> Self {
+        Self::new(
+            FactorSourceID::placeholder_other(),
+            FactorInstanceBadge::placeholder_other(),
         )
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use super::FactorInstance;
+
+    #[test]
+    fn equality() {
+        assert_eq!(FactorInstance::placeholder(), FactorInstance::placeholder());
+        assert_eq!(
+            FactorInstance::placeholder_other(),
+            FactorInstance::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            FactorInstance::placeholder(),
+            FactorInstance::placeholder_other()
+        );
+    }
 
     #[test]
     fn json_roundtrip() {

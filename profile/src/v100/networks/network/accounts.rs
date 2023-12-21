@@ -1,9 +1,11 @@
 use crate::{
     identified_vec_via::IdentifiedVecVia,
     v100::{Account, AccountAddress},
-    HasPlaceholder,
 };
 use identified_vec::{IdentifiedVecOf, IsIdentifiableVecOfVia, IsIdentifiedVec, IsIdentifiedVecOf};
+
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
 
 /// An ordered set of Accounts on a specific network, most commonly
 /// the set is non-empty.
@@ -87,12 +89,9 @@ impl Accounts {
 #[cfg(test)]
 mod tests {
     use identified_vec::IsIdentifiedVec;
-    use wallet_kit_common::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
-    use crate::{
-        v100::{Account, AccountAddress, Accounts, AppearanceID, DisplayName},
-        HasPlaceholder,
-    };
+    use crate::v100::{Account, AccountAddress, Accounts, AppearanceID, DisplayName};
 
     #[test]
     fn default_is_empty() {

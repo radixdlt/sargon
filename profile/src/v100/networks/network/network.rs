@@ -4,6 +4,9 @@ use identified_vec::Identifiable;
 use serde::{Deserialize, Serialize};
 use wallet_kit_common::{CommonError, NetworkID};
 
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
 use super::accounts::Accounts;
 
 /// Accounts, Personas, Authorized dapps for some Radix Network that user
@@ -69,20 +72,23 @@ impl Network {
 
 // CFG test
 #[cfg(any(test, feature = "placeholder"))]
-impl Network {
+impl HasPlaceholder for Network {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::placeholder_mainnet()
     }
 
     /// A placeholder used to facilitate unit tests.
+    fn placeholder_other() -> Self {
+        Self::placeholder_stokenet()
+    }
+}
+
+#[cfg(any(test, feature = "placeholder"))]
+impl Network {
+    /// A placeholder used to facilitate unit tests.
     pub fn placeholder_mainnet() -> Self {
         Self::new(NetworkID::Mainnet, Accounts::placeholder_mainnet())
-    }
-
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_other() -> Self {
-        Self::placeholder_stokenet()
     }
 
     /// A placeholder used to facilitate unit tests.
@@ -94,12 +100,11 @@ impl Network {
 #[cfg(test)]
 mod tests {
     use identified_vec::{Identifiable, IsIdentifiedVec};
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, CommonError, NetworkID};
-
-    use crate::{
-        v100::{Account, Accounts},
-        HasPlaceholder,
+    use wallet_kit_common::{
+        assert_eq_after_json_roundtrip, CommonError, HasPlaceholder, NetworkID,
     };
+
+    use crate::v100::{Account, Accounts};
 
     use super::Network;
 

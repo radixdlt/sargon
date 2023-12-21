@@ -4,6 +4,9 @@ use iso8601_timestamp::Timestamp;
 use serde::{Deserialize, Serialize};
 use wallet_kit_common::now;
 
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
 use super::{
     factor_source_crypto_parameters::FactorSourceCryptoParameters,
     factor_source_flag::FactorSourceFlag,
@@ -137,12 +140,19 @@ impl Default for FactorSourceCommon {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl FactorSourceCommon {
+impl HasPlaceholder for FactorSourceCommon {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::placeholder_main_babylon()
     }
 
+    fn placeholder_other() -> Self {
+        Self::placeholder_olympia()
+    }
+}
+
+#[cfg(any(test, feature = "placeholder"))]
+impl FactorSourceCommon {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_main_babylon() -> Self {
         let date = Timestamp::parse("2023-09-11T16:05:56.000Z").unwrap();
@@ -172,7 +182,7 @@ mod tests {
     use std::collections::BTreeSet;
 
     use iso8601_timestamp::Timestamp;
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, now};
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, now, HasPlaceholder};
 
     use crate::v100::factors::{
         factor_source_crypto_parameters::FactorSourceCryptoParameters,
@@ -180,6 +190,26 @@ mod tests {
     };
 
     use super::FactorSourceCommon;
+
+    #[test]
+    fn equality() {
+        assert_eq!(
+            FactorSourceCommon::placeholder(),
+            FactorSourceCommon::placeholder()
+        );
+        assert_eq!(
+            FactorSourceCommon::placeholder_other(),
+            FactorSourceCommon::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            FactorSourceCommon::placeholder(),
+            FactorSourceCommon::placeholder_other()
+        );
+    }
 
     #[test]
     fn default_support_babylon() {

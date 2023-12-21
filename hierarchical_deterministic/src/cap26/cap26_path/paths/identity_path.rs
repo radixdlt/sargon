@@ -2,6 +2,9 @@ use derive_getters::Getters;
 use serde::{de, Deserializer, Serialize, Serializer};
 use wallet_kit_common::{HDPathError, NetworkID};
 
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
 use crate::{
     bip32::{HDPath, HDPathValue},
     cap26::{
@@ -68,10 +71,15 @@ impl CAP26Repr for IdentityPath {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl IdentityPath {
+impl HasPlaceholder for IdentityPath {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::from_str("m/44H/1022H/1H/618H/1460H/0H").unwrap()
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    fn placeholder_other() -> Self {
+        Self::from_str("m/44H/1022H/1H/618H/1460H/1H").unwrap()
     }
 }
 
@@ -121,7 +129,7 @@ mod tests {
 
     use serde_json::json;
     use wallet_kit_common::{
-        HDPathError, NetworkID,
+        HDPathError, HasPlaceholder, NetworkID,
         {assert_json_value_eq_after_roundtrip, assert_json_value_ne_after_roundtrip},
     };
 
@@ -130,6 +138,23 @@ mod tests {
     };
 
     use super::IdentityPath;
+
+    #[test]
+    fn equality() {
+        assert_eq!(IdentityPath::placeholder(), IdentityPath::placeholder());
+        assert_eq!(
+            IdentityPath::placeholder_other(),
+            IdentityPath::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            IdentityPath::placeholder(),
+            IdentityPath::placeholder_other()
+        );
+    }
 
     #[test]
     fn entity_kind() {

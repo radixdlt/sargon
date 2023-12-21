@@ -5,9 +5,12 @@ use crate::v100::factors::factor_source_id::FactorSourceID;
 
 use super::factor_instance::FactorInstance;
 
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
 /// An ephemeral (never persisted) HD FactorInstance which contains
 /// the private key, with the ID of its creating FactorSource.
-#[derive(Getters)]
+#[derive(Debug, PartialEq, Eq, Getters)]
 pub struct PrivateHierarchicalDeterministicFactorInstance {
     /// The HD Private Key.
     private_key: HierarchicalDeterministicPrivateKey,
@@ -45,12 +48,20 @@ impl PrivateHierarchicalDeterministicFactorInstance {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl PrivateHierarchicalDeterministicFactorInstance {
+impl HasPlaceholder for PrivateHierarchicalDeterministicFactorInstance {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::new(
             HierarchicalDeterministicPrivateKey::placeholder(),
             FactorSourceID::placeholder(),
+        )
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    fn placeholder_other() -> Self {
+        Self::new(
+            HierarchicalDeterministicPrivateKey::placeholder_other(),
+            FactorSourceID::placeholder_other(),
         )
     }
 }
@@ -58,10 +69,31 @@ impl PrivateHierarchicalDeterministicFactorInstance {
 #[cfg(test)]
 mod tests {
     use hd::{Derivation, HierarchicalDeterministicPrivateKey};
+    use wallet_kit_common::HasPlaceholder;
 
     use crate::v100::factors::factor_instance::factor_instance::FactorInstance;
 
     use super::PrivateHierarchicalDeterministicFactorInstance;
+
+    #[test]
+    fn equality() {
+        assert_eq!(
+            PrivateHierarchicalDeterministicFactorInstance::placeholder(),
+            PrivateHierarchicalDeterministicFactorInstance::placeholder()
+        );
+        assert_eq!(
+            PrivateHierarchicalDeterministicFactorInstance::placeholder_other(),
+            PrivateHierarchicalDeterministicFactorInstance::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            PrivateHierarchicalDeterministicFactorInstance::placeholder(),
+            PrivateHierarchicalDeterministicFactorInstance::placeholder_other()
+        );
+    }
 
     #[test]
     fn new() {

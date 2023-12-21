@@ -3,6 +3,9 @@ use std::{
     str::FromStr,
 };
 
+#[cfg(any(test, feature = "placeholder"))]
+use crate::HasPlaceholder;
+
 use radix_engine_common::crypto::{Hash, IsHash};
 use serde::{de, Deserializer, Serialize, Serializer};
 
@@ -61,13 +64,21 @@ impl FromStr for Hex32Bytes {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl Hex32Bytes {
+impl HasPlaceholder for Hex32Bytes {
     /// `deadbeef...``
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::placeholder_dead()
     }
 
+    /// A placeholder used to facilitate unit tests.
+    fn placeholder_other() -> Self {
+        Self::placeholder_fade()
+    }
+}
+
+#[cfg(any(test, feature = "placeholder"))]
+impl Hex32Bytes {
     /// `aced...``
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_aced() -> Self {
@@ -165,9 +176,23 @@ mod tests {
 
     use serde_json::json;
 
-    use crate::{assert_json_value_eq_after_roundtrip, BytesError as Error};
+    use crate::{assert_json_value_eq_after_roundtrip, BytesError as Error, HasPlaceholder};
 
     use super::Hex32Bytes;
+
+    #[test]
+    fn equality() {
+        assert_eq!(Hex32Bytes::placeholder(), Hex32Bytes::placeholder());
+        assert_eq!(
+            Hex32Bytes::placeholder_other(),
+            Hex32Bytes::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(Hex32Bytes::placeholder(), Hex32Bytes::placeholder_other());
+    }
 
     #[test]
     fn from_string_roundtrip() {

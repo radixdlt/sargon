@@ -7,6 +7,9 @@ use super::public_key::Ed25519PublicKey;
 use crate::{Hex32Bytes, KeyError as Error};
 use std::fmt::{Debug, Formatter};
 
+#[cfg(any(test, feature = "placeholder"))]
+use crate::HasPlaceholder;
+
 /// An Ed25519 private key used to create cryptographic signatures, using
 /// EdDSA scheme.
 pub struct Ed25519PrivateKey(EngineEd25519PrivateKey);
@@ -32,6 +35,8 @@ impl PartialEq for Ed25519PrivateKey {
         self.to_bytes() == other.to_bytes()
     }
 }
+
+impl Eq for Ed25519PrivateKey {}
 
 impl Debug for Ed25519PrivateKey {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -99,12 +104,20 @@ impl TryInto<Ed25519PrivateKey> for &str {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl Ed25519PrivateKey {
+impl HasPlaceholder for Ed25519PrivateKey {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::placeholder_alice()
     }
 
+    /// A placeholder used to facilitate unit tests.
+    fn placeholder_other() -> Self {
+        Self::placeholder_bob()
+    }
+}
+
+#[cfg(any(test, feature = "placeholder"))]
+impl Ed25519PrivateKey {
     /// `833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42`
     ///
     /// expected public key:
@@ -132,9 +145,29 @@ mod tests {
 
     use transaction::signing::ed25519::Ed25519Signature;
 
-    use crate::{hash, Hex32Bytes, KeyError as Error};
+    use crate::{hash, HasPlaceholder, Hex32Bytes, KeyError as Error};
 
     use super::Ed25519PrivateKey;
+
+    #[test]
+    fn equality() {
+        assert_eq!(
+            Ed25519PrivateKey::placeholder(),
+            Ed25519PrivateKey::placeholder()
+        );
+        assert_eq!(
+            Ed25519PrivateKey::placeholder_other(),
+            Ed25519PrivateKey::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            Ed25519PrivateKey::placeholder(),
+            Ed25519PrivateKey::placeholder_other()
+        );
+    }
 
     #[test]
     fn sign_and_verify() {
@@ -193,20 +226,6 @@ mod tests {
         assert_eq!(
             Ed25519PrivateKey::from_bytes(&[0u8] as &[u8]),
             Err(Error::InvalidEd25519PrivateKeyFromBytes)
-        );
-    }
-
-    #[test]
-    fn equality() {
-        assert_eq!(
-            Ed25519PrivateKey::from_str(
-                "0000000000000000000000000000000000000000000000000000000000000001"
-            )
-            .unwrap(),
-            Ed25519PrivateKey::from_str(
-                "0000000000000000000000000000000000000000000000000000000000000001"
-            )
-            .unwrap()
         );
     }
 

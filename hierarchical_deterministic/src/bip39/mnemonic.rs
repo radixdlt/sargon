@@ -8,6 +8,9 @@ use wallet_kit_common::HDPathError as Error;
 
 use crate::{BIP39Word, BIP39WordCount};
 
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
 #[derive(Clone, PartialEq, Eq, Debug, Getters)]
 pub struct Mnemonic {
     internal: bip39::Mnemonic,
@@ -77,10 +80,15 @@ impl TryInto<Mnemonic> for &str {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl Mnemonic {
+impl HasPlaceholder for Mnemonic {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::from_phrase("bright club bacon dinner achieve pull grid save ramp cereal blush woman humble limb repeat video sudden possible story mask neutral prize goose mandate").expect("Valid mnemonic")
+    }
+
+    fn placeholder_other() -> Self {
+        Self::from_phrase("zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong")
+            .expect("Valid mnemonic")
     }
 }
 
@@ -90,10 +98,21 @@ mod tests {
     use serde_json::json;
     use wallet_kit_common::{
         assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
-        assert_json_value_ne_after_roundtrip,
+        assert_json_value_ne_after_roundtrip, HasPlaceholder,
     };
 
     use crate::bip39::{bip39_word_count::BIP39WordCount, mnemonic::Mnemonic};
+
+    #[test]
+    fn equality() {
+        assert_eq!(Mnemonic::placeholder(), Mnemonic::placeholder());
+        assert_eq!(Mnemonic::placeholder_other(), Mnemonic::placeholder_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(Mnemonic::placeholder(), Mnemonic::placeholder_other());
+    }
 
     #[test]
     fn language() {

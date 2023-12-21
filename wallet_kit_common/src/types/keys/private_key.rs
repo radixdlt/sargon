@@ -4,7 +4,7 @@ use crate::{Ed25519PrivateKey, PublicKey, Secp256k1PrivateKey};
 
 /// A tagged union of supported private keys on different curves, supported
 /// curves are `secp256k1` and `Curve25519`
-#[derive(EnumAsInner)]
+#[derive(Debug, PartialEq, Eq, EnumAsInner)]
 pub enum PrivateKey {
     /// An Ed25519 private key used to create cryptographic signatures, using EdDSA scheme.
     Ed25519(Ed25519PrivateKey),

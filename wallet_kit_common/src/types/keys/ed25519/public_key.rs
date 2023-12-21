@@ -10,6 +10,9 @@ use std::{
 };
 use transaction::{signing::ed25519::Ed25519Signature, validation::verify_ed25519};
 
+#[cfg(any(test, feature = "placeholder"))]
+use crate::HasPlaceholder;
+
 /// An Ed25519 public key used to verify cryptographic signatures (EdDSA signatures).
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Ed25519PublicKey(EngineEd25519PublicKey);
@@ -68,12 +71,19 @@ impl Debug for Ed25519PublicKey {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl Ed25519PublicKey {
+impl HasPlaceholder for Ed25519PublicKey {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::placeholder_alice()
     }
 
+    fn placeholder_other() -> Self {
+        Self::placeholder_bob()
+    }
+}
+
+#[cfg(any(test, feature = "placeholder"))]
+impl Ed25519PublicKey {
     pub fn placeholder_alice() -> Self {
         Ed25519PrivateKey::placeholder_alice().public_key()
     }
@@ -87,10 +97,31 @@ impl Ed25519PublicKey {
 mod tests {
     use std::collections::BTreeSet;
 
-    use crate::{assert_json_value_eq_after_roundtrip, KeyError as Error};
+    use crate::{assert_json_value_eq_after_roundtrip, HasPlaceholder, KeyError as Error};
     use serde_json::json;
 
     use super::Ed25519PublicKey;
+
+    #[test]
+    fn equality() {
+        assert_eq!(
+            Ed25519PublicKey::placeholder(),
+            Ed25519PublicKey::placeholder()
+        );
+        assert_eq!(
+            Ed25519PublicKey::placeholder_other(),
+            Ed25519PublicKey::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            Ed25519PublicKey::placeholder(),
+            Ed25519PublicKey::placeholder_other()
+        );
+    }
+
     #[test]
     fn json() {
         let model = Ed25519PublicKey::placeholder_alice();
@@ -185,22 +216,6 @@ mod tests {
         assert_eq!(
             format!("{:?}", Ed25519PublicKey::placeholder_alice()),
             "ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf"
-        );
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(
-            Ed25519PublicKey::placeholder_alice(),
-            Ed25519PublicKey::placeholder_bob()
-        );
-    }
-
-    #[test]
-    fn equality() {
-        assert_eq!(
-            Ed25519PublicKey::placeholder_alice(),
-            Ed25519PublicKey::placeholder_alice()
         );
     }
 

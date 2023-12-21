@@ -6,6 +6,9 @@ use enum_as_inner::EnumAsInner;
 use serde::{de, Deserializer, Serialize, Serializer};
 use wallet_kit_common::HDPathError;
 
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
 /// A derivation path design specifically for Radix Babylon wallets used by Accounts and Personas
 /// to be unique per network with separate key spaces for Accounts/Identities (Personas) and key
 /// kind: sign transaction or sign auth.
@@ -91,6 +94,16 @@ impl From<GetIDPath> for CAP26Path {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
+impl HasPlaceholder for CAP26Path {
+    fn placeholder() -> Self {
+        Self::placeholder_account()
+    }
+    fn placeholder_other() -> Self {
+        Self::placeholder_identity()
+    }
+}
+
+#[cfg(any(test, feature = "placeholder"))]
 impl CAP26Path {
     pub fn placeholder_account() -> Self {
         Self::AccountPath(AccountPath::placeholder())
@@ -104,11 +117,25 @@ impl CAP26Path {
 #[cfg(test)]
 mod tests {
     use serde_json::json;
-    use wallet_kit_common::assert_json_value_eq_after_roundtrip;
+    use wallet_kit_common::{assert_json_value_eq_after_roundtrip, HasPlaceholder};
 
     use crate::{derivation::DerivationPathScheme, AccountPath, Derivation, GetIDPath};
 
     use super::CAP26Path;
+
+    #[test]
+    fn equality() {
+        assert_eq!(CAP26Path::placeholder(), CAP26Path::placeholder());
+        assert_eq!(
+            CAP26Path::placeholder_other(),
+            CAP26Path::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(CAP26Path::placeholder(), CAP26Path::placeholder_other());
+    }
 
     #[test]
     fn scheme_account_path() {

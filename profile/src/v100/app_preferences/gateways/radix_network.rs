@@ -7,6 +7,9 @@ use wallet_kit_common::{
     NetworkID::{self, *},
 };
 
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
 /// A version of the Radix Network, for a NetworkID with an identifier (name) and display description (display name)
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Ord, PartialOrd, Hash, Getters)]
 #[serde(rename_all = "camelCase")]
@@ -104,9 +107,13 @@ impl RadixNetwork {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl RadixNetwork {
-    pub fn placeholder() -> Self {
+impl HasPlaceholder for RadixNetwork {
+    fn placeholder() -> Self {
         Self::mainnet()
+    }
+
+    fn placeholder_other() -> Self {
+        Self::stokenet()
     }
 }
 
@@ -149,9 +156,28 @@ impl RadixNetwork {
 #[cfg(test)]
 mod tests {
 
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, CommonError, NetworkID};
+    use wallet_kit_common::{
+        assert_eq_after_json_roundtrip, CommonError, HasPlaceholder, NetworkID,
+    };
 
     use super::RadixNetwork;
+
+    #[test]
+    fn equality() {
+        assert_eq!(RadixNetwork::placeholder(), RadixNetwork::placeholder());
+        assert_eq!(
+            RadixNetwork::placeholder_other(),
+            RadixNetwork::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            RadixNetwork::placeholder(),
+            RadixNetwork::placeholder_other()
+        );
+    }
 
     #[test]
     fn display() {

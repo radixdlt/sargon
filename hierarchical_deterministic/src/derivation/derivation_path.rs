@@ -5,6 +5,9 @@ use crate::{bip32::HDPath, AccountPath, BIP44LikePath, CAP26Path, GetIDPath, Ide
 use enum_as_inner::EnumAsInner;
 use std::fmt::{Debug, Formatter};
 
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
 /// A derivation path on either supported schemes, either Babylon (CAP26) or Olympia (BIP44Like).
 #[derive(Clone, PartialEq, Eq, EnumAsInner, PartialOrd, Ord)]
 pub enum DerivationPath {
@@ -69,10 +72,15 @@ impl Serialize for DerivationPath {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl DerivationPath {
+impl HasPlaceholder for DerivationPath {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
-        Self::CAP26(CAP26Path::AccountPath(AccountPath::placeholder()))
+    fn placeholder() -> Self {
+        AccountPath::placeholder().into()
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    fn placeholder_other() -> Self {
+        IdentityPath::placeholder().into()
     }
 }
 
@@ -135,7 +143,7 @@ impl From<CAP26Path> for DerivationPath {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use crate::{
         derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},
@@ -143,6 +151,24 @@ mod tests {
     };
 
     use super::DerivationPath;
+
+    #[test]
+    fn equality() {
+        assert_eq!(DerivationPath::placeholder(), DerivationPath::placeholder());
+        assert_eq!(
+            DerivationPath::placeholder_other(),
+            DerivationPath::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            DerivationPath::placeholder(),
+            DerivationPath::placeholder_other()
+        );
+    }
+
     #[test]
     fn cap26_scheme() {
         assert_eq!(

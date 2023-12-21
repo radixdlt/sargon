@@ -4,6 +4,9 @@ use radix_engine_common::crypto::Hash;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Debug, Formatter};
 
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
 /// A client the user have connected P2P with, typically a
 /// WebRTC connections with a DApp, but might be Android or iPhone
 /// client as well.
@@ -56,12 +59,20 @@ impl P2PLink {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl P2PLink {
+impl HasPlaceholder for P2PLink {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::placeholder_chrome()
     }
 
+    /// A placeholder used to facilitate unit tests.
+    fn placeholder_other() -> Self {
+        Self::placeholder_brave()
+    }
+}
+
+#[cfg(any(test, feature = "placeholder"))]
+impl P2PLink {
     /// `aced`... "Arc on MacStudio"
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_arc() -> Self {
@@ -95,9 +106,20 @@ impl P2PLink {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use super::P2PLink;
+
+    #[test]
+    fn equality() {
+        assert_eq!(P2PLink::placeholder(), P2PLink::placeholder());
+        assert_eq!(P2PLink::placeholder_other(), P2PLink::placeholder_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(P2PLink::placeholder(), P2PLink::placeholder_other());
+    }
 
     #[test]
     fn json_roundtrip() {

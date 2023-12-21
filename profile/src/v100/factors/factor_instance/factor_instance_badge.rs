@@ -4,6 +4,9 @@ use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializ
 use super::badge_virtual_source::FactorInstanceBadgeVirtualSource;
 use enum_as_inner::EnumAsInner;
 
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
 /// Either a "physical" badge (NFT) or some source for recreation of a producer
 /// of a virtual badge (signature), e.g. a HD derivation path, from which a private key
 /// is derived which produces virtual badges (signatures).
@@ -15,10 +18,15 @@ pub enum FactorInstanceBadge {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl FactorInstanceBadge {
+impl HasPlaceholder for FactorInstanceBadge {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         FactorInstanceBadge::Virtual(FactorInstanceBadgeVirtualSource::placeholder())
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    fn placeholder_other() -> Self {
+        FactorInstanceBadge::Virtual(FactorInstanceBadgeVirtualSource::placeholder_other())
     }
 }
 
@@ -70,11 +78,32 @@ impl Serialize for FactorInstanceBadge {
 #[cfg(test)]
 mod tests {
     use hd::HierarchicalDeterministicPublicKey;
-    use wallet_kit_common::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use crate::v100::factors::factor_instance::badge_virtual_source::FactorInstanceBadgeVirtualSource;
 
     use super::FactorInstanceBadge;
+
+    #[test]
+    fn equality() {
+        assert_eq!(
+            FactorInstanceBadge::placeholder(),
+            FactorInstanceBadge::placeholder()
+        );
+        assert_eq!(
+            FactorInstanceBadge::placeholder_other(),
+            FactorInstanceBadge::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            FactorInstanceBadge::placeholder(),
+            FactorInstanceBadge::placeholder_other()
+        );
+    }
+
     #[test]
     fn json_roundtrip() {
         let model = FactorInstanceBadge::placeholder();

@@ -94,7 +94,7 @@ mod tests {
     use hd::{
         AccountPath, CAP26KeyKind, CAP26Repr, HierarchicalDeterministicPublicKey, IdentityPath,
     };
-    use wallet_kit_common::{CommonError as Error, NetworkID, PublicKey};
+    use wallet_kit_common::{CommonError as Error, HasPlaceholder, NetworkID, PublicKey};
 
     use crate::v100::factors::{
         factor_source_id_from_hash::FactorSourceIDFromHash,

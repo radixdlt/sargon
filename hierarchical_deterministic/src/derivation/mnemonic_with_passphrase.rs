@@ -8,6 +8,9 @@ use wallet_kit_common::{Ed25519PrivateKey, SLIP10Curve, Secp256k1PrivateKey};
 
 use wallet_kit_common::HDPathError as Error;
 
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
 /// A BIP39 Mnemonic and BIP39 passphrase - aka "25th word" tuple,
 /// from which we can derive a HD Root used for derivation.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Getters)]
@@ -41,10 +44,14 @@ impl MnemonicWithPassphrase {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl MnemonicWithPassphrase {
+impl HasPlaceholder for MnemonicWithPassphrase {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::with_passphrase(Mnemonic::placeholder(), "radix".to_string())
+    }
+
+    fn placeholder_other() -> Self {
+        Self::new(Mnemonic::placeholder_other())
     }
 }
 
@@ -110,9 +117,29 @@ impl MnemonicWithPassphrase {
 mod tests {
 
     use crate::{AccountPath, BIP44LikePath, CAP26KeyKind, CAP26Repr, Derivation, Mnemonic};
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, NetworkID};
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder, NetworkID};
 
     use super::MnemonicWithPassphrase;
+
+    #[test]
+    fn equality() {
+        assert_eq!(
+            MnemonicWithPassphrase::placeholder(),
+            MnemonicWithPassphrase::placeholder()
+        );
+        assert_eq!(
+            MnemonicWithPassphrase::placeholder_other(),
+            MnemonicWithPassphrase::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            MnemonicWithPassphrase::placeholder(),
+            MnemonicWithPassphrase::placeholder_other()
+        );
+    }
 
     #[test]
     fn with_passphrase() {

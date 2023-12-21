@@ -2,6 +2,9 @@ use derive_getters::Getters;
 use serde::{de, Deserializer, Serialize, Serializer};
 use wallet_kit_common::{HDPathError, NetworkID};
 
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
 use crate::{
     bip32::{HDPath, HDPathValue},
     CAP26EntityKind, CAP26KeyKind, CAP26Path, CAP26Repr, Derivation, DerivationPath,
@@ -67,10 +70,15 @@ impl CAP26Repr for AccountPath {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl AccountPath {
+impl HasPlaceholder for AccountPath {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::from_str("m/44H/1022H/1H/525H/1460H/0H").unwrap()
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    fn placeholder_other() -> Self {
+        Self::from_str("m/44H/1022H/1H/525H/1460H/1H").unwrap()
     }
 }
 
@@ -117,13 +125,27 @@ impl Derivation for AccountPath {
 mod tests {
     use serde_json::json;
     use wallet_kit_common::{
-        HDPathError, NetworkID,
+        HDPathError, HasPlaceholder, NetworkID,
         {assert_json_value_eq_after_roundtrip, assert_json_value_ne_after_roundtrip},
     };
 
     use crate::{bip32::HDPath, CAP26EntityKind, CAP26KeyKind, CAP26Repr, Derivation};
 
     use super::AccountPath;
+
+    #[test]
+    fn equality() {
+        assert_eq!(AccountPath::placeholder(), AccountPath::placeholder());
+        assert_eq!(
+            AccountPath::placeholder_other(),
+            AccountPath::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(AccountPath::placeholder(), AccountPath::placeholder_other());
+    }
 
     #[test]
     fn entity_kind() {

@@ -6,6 +6,9 @@ use wallet_kit_common::Hex32Bytes;
 
 use super::factor_source_kind::FactorSourceKind;
 
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
 /// FactorSourceID from the blake2b hash of the special HD public key derived at `CAP26::GetID`,
 /// for a certain `FactorSourceKind`
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Getters)]
@@ -46,13 +49,20 @@ impl FactorSourceIDFromHash {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl FactorSourceIDFromHash {
+impl HasPlaceholder for FactorSourceIDFromHash {
     /// A placeholder used to facilitate unit tests, just an alias
     /// for `placeholder_device`
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::placeholder_device()
     }
 
+    fn placeholder_other() -> Self {
+        Self::placeholder_ledger()
+    }
+}
+
+#[cfg(any(test, feature = "placeholder"))]
+impl FactorSourceIDFromHash {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_device() -> Self {
         Self::new_for_device(MnemonicWithPassphrase::placeholder())
@@ -70,9 +80,29 @@ impl FactorSourceIDFromHash {
 #[cfg(test)]
 mod tests {
     use hd::{Mnemonic, MnemonicWithPassphrase};
-    use wallet_kit_common::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use super::FactorSourceIDFromHash;
+
+    #[test]
+    fn equality() {
+        assert_eq!(
+            FactorSourceIDFromHash::placeholder(),
+            FactorSourceIDFromHash::placeholder()
+        );
+        assert_eq!(
+            FactorSourceIDFromHash::placeholder_other(),
+            FactorSourceIDFromHash::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            FactorSourceIDFromHash::placeholder(),
+            FactorSourceIDFromHash::placeholder_other()
+        );
+    }
 
     #[test]
     fn json_roundtrip_placeholder() {

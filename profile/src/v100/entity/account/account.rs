@@ -7,15 +7,15 @@ use serde::{Deserialize, Serialize};
 use std::{cell::RefCell, cmp::Ordering, fmt::Display, hash::Hasher};
 use wallet_kit_common::NetworkID;
 
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
 use std::hash::Hash;
 
-use crate::{
-    v100::{
-        AccountAddress, DeviceFactorSource, DisplayName, EntityAddress, EntityFlags,
-        EntitySecurityState, HDFactorInstanceAccountCreation,
-        PrivateHierarchicalDeterministicFactorSource, UnsecuredEntityControl,
-    },
-    HasPlaceholder,
+use crate::v100::{
+    AccountAddress, DeviceFactorSource, DisplayName, EntityAddress, EntityFlags,
+    EntitySecurityState, HDFactorInstanceAccountCreation,
+    PrivateHierarchicalDeterministicFactorSource, UnsecuredEntityControl,
 };
 
 use super::{AppearanceID, OnLedgerSettings};
@@ -341,15 +341,12 @@ mod tests {
     use std::{collections::BTreeSet, str::FromStr};
 
     use radix_engine_common::prelude::HashSet;
-    use wallet_kit_common::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
-    use crate::{
-        v100::{
-            AccountAddress, AppearanceID, AssetException, DepositAddressExceptionRule, DepositRule,
-            DepositorAddress, DisplayName, EntityFlag, EntityFlags, OnLedgerSettings,
-            ThirdPartyDeposits,
-        },
-        HasPlaceholder,
+    use crate::v100::{
+        AccountAddress, AppearanceID, AssetException, DepositAddressExceptionRule, DepositRule,
+        DepositorAddress, DisplayName, EntityFlag, EntityFlags, OnLedgerSettings,
+        ThirdPartyDeposits,
     };
 
     use super::Account;

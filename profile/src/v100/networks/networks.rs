@@ -2,6 +2,9 @@ use identified_vec::{IdentifiedVecOf, IsIdentifiableVecOfVia, IsIdentifiedVec, I
 
 use crate::{identified_vec_via::IdentifiedVecVia, v100::ContentHint};
 
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
 use super::Network;
 
 /// An ordered mapping of NetworkID -> `Profile.Network`, containing
@@ -43,9 +46,9 @@ impl Default for Networks {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl Networks {
+impl HasPlaceholder for Networks {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::with_networks(
             [
                 Network::placeholder_mainnet(),
@@ -56,7 +59,7 @@ impl Networks {
     }
 
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_other() -> Self {
+    fn placeholder_other() -> Self {
         Self::with_network(Network::placeholder_other())
     }
 }
@@ -64,7 +67,7 @@ impl Networks {
 #[cfg(test)]
 mod tests {
     use identified_vec::IsIdentifiedVec;
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, NetworkID};
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder, NetworkID};
 
     use crate::v100::{Account, Accounts, ContentHint, Network, Networks};
 

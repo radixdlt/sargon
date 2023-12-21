@@ -4,6 +4,9 @@ use derive_getters::Getters;
 use hd::BIP39WordCount;
 use serde::{Deserialize, Serialize};
 
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
 /// Properties describing a DeviceFactorSource to help user disambiguate between
 /// it and another one.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Getters)]
@@ -48,12 +51,23 @@ impl DeviceFactorSourceHint {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl DeviceFactorSourceHint {
+impl HasPlaceholder for DeviceFactorSourceHint {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::placeholder_iphone_unknown()
     }
 
+    fn placeholder_other() -> Self {
+        Self::new(
+            "Android".to_string(),
+            "Samsung Galaxy S23 Ultra".to_string(),
+            BIP39WordCount::Twelve,
+        )
+    }
+}
+
+#[cfg(any(test, feature = "placeholder"))]
+impl DeviceFactorSourceHint {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_iphone_unknown() -> Self {
         Self::iphone_unknown_model_and_name_with_word_count(BIP39WordCount::TwentyFour)
@@ -63,9 +77,29 @@ impl DeviceFactorSourceHint {
 #[cfg(test)]
 mod tests {
     use hd::BIP39WordCount;
-    use wallet_kit_common::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use crate::v100::factors::factor_sources::device_factor_source::device_factor_source_hint::DeviceFactorSourceHint;
+
+    #[test]
+    fn equality() {
+        assert_eq!(
+            DeviceFactorSourceHint::placeholder(),
+            DeviceFactorSourceHint::placeholder()
+        );
+        assert_eq!(
+            DeviceFactorSourceHint::placeholder_other(),
+            DeviceFactorSourceHint::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            DeviceFactorSourceHint::placeholder(),
+            DeviceFactorSourceHint::placeholder_other()
+        );
+    }
 
     #[test]
     fn json() {
@@ -80,23 +114,5 @@ mod tests {
         }
         "#,
         )
-    }
-
-    #[test]
-    fn equality() {
-        assert_eq!(
-            DeviceFactorSourceHint::placeholder_iphone_unknown(),
-            DeviceFactorSourceHint::placeholder_iphone_unknown()
-        );
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(
-            DeviceFactorSourceHint::placeholder_iphone_unknown(),
-            DeviceFactorSourceHint::iphone_unknown_model_and_name_with_word_count(
-                BIP39WordCount::Eighteen
-            )
-        );
     }
 }

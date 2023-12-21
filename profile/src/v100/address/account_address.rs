@@ -5,6 +5,9 @@ use wallet_kit_common::{suffix_string, NetworkID};
 
 use crate::v100::AbstractEntityType;
 
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
 use super::entity_address::EntityAddress;
 
 /// The address of an Account, a bech32 encoding of a public key hash
@@ -107,12 +110,19 @@ impl Display for AccountAddress {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl AccountAddress {
+impl HasPlaceholder for AccountAddress {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::placeholder_alice()
     }
 
+    fn placeholder_other() -> Self {
+        Self::placeholder_bob()
+    }
+}
+
+#[cfg(any(test, feature = "placeholder"))]
+impl AccountAddress {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_alice() -> Self {
         AccountAddress::try_from_bech32(
@@ -137,7 +147,7 @@ mod tests {
     use std::str::FromStr;
     use wallet_kit_common::CommonError as Error;
     use wallet_kit_common::{
-        NetworkID,
+        HasPlaceholder, NetworkID,
         {
             assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
             assert_json_value_ne_after_roundtrip,
@@ -145,6 +155,23 @@ mod tests {
     };
 
     use crate::v100::address::{account_address::AccountAddress, entity_address::EntityAddress};
+
+    #[test]
+    fn equality() {
+        assert_eq!(AccountAddress::placeholder(), AccountAddress::placeholder());
+        assert_eq!(
+            AccountAddress::placeholder_other(),
+            AccountAddress::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            AccountAddress::placeholder(),
+            AccountAddress::placeholder_other()
+        );
+    }
 
     #[test]
     fn from_bech32() {
@@ -190,35 +217,12 @@ mod tests {
     }
 
     #[test]
-    fn inequality() {
-        assert_ne!(
-            AccountAddress::placeholder_alice(),
-            AccountAddress::placeholder_bob()
-        )
-    }
-
-    #[test]
     fn nebunet() {
         let address = AccountAddress::try_from_bech32(
             "account_tdx_b_1286wrrqrfcrfhthfrtdywe8alney8zu0ja5xrhcq2475ej08m9raqq",
         )
         .unwrap();
         assert_eq!(address.network_id, NetworkID::Nebunet)
-    }
-
-    #[test]
-    fn equality() {
-        let a: AccountAddress =
-            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
-                .try_into()
-                .unwrap();
-
-        assert_eq!(
-            a,
-            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
-                .try_into()
-                .unwrap()
-        )
     }
 
     #[test]

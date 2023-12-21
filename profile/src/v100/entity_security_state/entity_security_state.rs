@@ -2,6 +2,9 @@ use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializ
 
 use super::unsecured_entity_control::UnsecuredEntityControl;
 
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
 /// Describes the state an entity - Account or Persona - is in in regards to how
 /// the user controls it, i.e. if it is controlled by a single factor (private key)
 ///  or an `AccessController` with a potential Multi-Factor setup.
@@ -52,18 +55,43 @@ impl From<UnsecuredEntityControl> for EntitySecurityState {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl EntitySecurityState {
+impl HasPlaceholder for EntitySecurityState {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::Unsecured(UnsecuredEntityControl::placeholder())
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    fn placeholder_other() -> Self {
+        Self::Unsecured(UnsecuredEntityControl::placeholder_other())
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use super::EntitySecurityState;
+
+    #[test]
+    fn equality() {
+        assert_eq!(
+            EntitySecurityState::placeholder(),
+            EntitySecurityState::placeholder()
+        );
+        assert_eq!(
+            EntitySecurityState::placeholder_other(),
+            EntitySecurityState::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            EntitySecurityState::placeholder(),
+            EntitySecurityState::placeholder_other()
+        );
+    }
 
     #[test]
     fn json_roundtrip() {

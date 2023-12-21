@@ -3,13 +3,15 @@ use identified_vec::{
 };
 use wallet_kit_common::CommonError;
 
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
 use crate::{
     identified_vec_via::IdentifiedVecVia,
     v100::factors::{
         factor_source::FactorSource, factor_source_id::FactorSourceID,
         is_factor_source::IsFactorSource,
     },
-    HasPlaceholder,
 };
 
 impl Identifiable for FactorSource {
@@ -69,12 +71,9 @@ impl HasPlaceholder for FactorSources {
 #[cfg(test)]
 mod tests {
     use identified_vec::Identifiable;
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, CommonError};
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, CommonError, HasPlaceholder};
 
-    use crate::{
-        v100::factors::{factor_source::FactorSource, is_factor_source::IsFactorSource},
-        HasPlaceholder,
-    };
+    use crate::v100::factors::{factor_source::FactorSource, is_factor_source::IsFactorSource};
 
     use super::FactorSources;
 

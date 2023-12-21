@@ -9,6 +9,9 @@ use radix_engine_common::crypto::{
 
 use enum_as_inner::EnumAsInner;
 
+#[cfg(any(test, feature = "placeholder"))]
+use crate::HasPlaceholder;
+
 /// A tagged union of supported public keys on different curves, supported
 /// curves are `secp256k1` and `Curve25519`
 #[derive(Clone, Copy, Debug, PartialEq, EnumAsInner, Eq, Hash, PartialOrd, Ord)]
@@ -95,6 +98,17 @@ impl PublicKey {
             PublicKey::Ed25519(key) => key.to_bytes(),
             PublicKey::Secp256k1(key) => key.to_bytes(),
         }
+    }
+}
+
+#[cfg(any(test, feature = "placeholder"))]
+impl HasPlaceholder for PublicKey {
+    fn placeholder() -> Self {
+        Self::placeholder_ed25519_alice()
+    }
+
+    fn placeholder_other() -> Self {
+        Self::placeholder_secp256k1_bob()
     }
 }
 
@@ -192,12 +206,27 @@ mod tests {
     use std::collections::BTreeSet;
 
     use crate::{
-        assert_eq_after_json_roundtrip, assert_json_fails, Ed25519PublicKey, Secp256k1PublicKey,
+        assert_eq_after_json_roundtrip, assert_json_fails, Ed25519PublicKey, HasPlaceholder,
+        Secp256k1PublicKey,
     };
 
     use super::PublicKey;
 
     use radix_engine_common::crypto::PublicKey as EnginePublicKey;
+
+    #[test]
+    fn equality() {
+        assert_eq!(PublicKey::placeholder(), PublicKey::placeholder());
+        assert_eq!(
+            PublicKey::placeholder_other(),
+            PublicKey::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(PublicKey::placeholder(), PublicKey::placeholder_other());
+    }
 
     #[test]
     fn engine_roundtrip_secp256k1() {
