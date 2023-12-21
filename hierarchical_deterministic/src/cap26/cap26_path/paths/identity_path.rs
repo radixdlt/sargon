@@ -19,12 +19,15 @@ use super::is_entity_path::IsEntityPath;
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Getters)]
 pub struct IdentityPath {
     path: HDPath,
+
+    #[getter(skip)] // IsEntityPath trait has `network_id()` method
     network_id: NetworkID,
 
-    #[getter(skip)] // IsEntityPath trait has `entity_kind()` method
     entity_kind: CAP26EntityKind,
 
+    #[getter(skip)] // IsEntityPath trait has `key_kind()` method
     key_kind: CAP26KeyKind,
+    #[getter(skip)] // IsEntityPath trait has `index()` method
     index: HDPathValue,
 }
 
@@ -137,6 +140,7 @@ mod tests {
 
     use crate::{
         bip32::HDPath, CAP26EntityKind, CAP26KeyKind, CAP26Repr, Derivation, DerivationPathScheme,
+        IsEntityPath,
     };
 
     use super::IdentityPath;
@@ -160,20 +164,20 @@ mod tests {
 
     #[test]
     fn index() {
-        assert_eq!(IdentityPath::placeholder().index(), &0);
+        assert_eq!(IdentityPath::placeholder().index(), 0);
     }
 
     #[test]
     fn network_id() {
-        assert_eq!(
-            IdentityPath::placeholder().network_id(),
-            &NetworkID::Mainnet
-        );
+        assert_eq!(IdentityPath::placeholder().network_id(), NetworkID::Mainnet);
     }
 
     #[test]
     fn entity_kind() {
-        assert_eq!(IdentityPath::entity_kind(), Some(CAP26EntityKind::Identity));
+        assert_eq!(
+            IdentityPath::placeholder().entity_kind(),
+            &CAP26EntityKind::Identity
+        );
     }
 
     #[test]
@@ -351,8 +355,8 @@ mod tests {
     #[test]
     fn is_entity_path_index() {
         let sut = IdentityPath::placeholder();
-        assert_eq!(sut.index(), &0);
-        assert_eq!(sut.network_id(), &NetworkID::Mainnet);
-        assert_eq!(sut.key_kind(), &CAP26KeyKind::TransactionSigning);
+        assert_eq!(sut.index(), 0);
+        assert_eq!(sut.network_id(), NetworkID::Mainnet);
+        assert_eq!(sut.key_kind(), CAP26KeyKind::TransactionSigning);
     }
 }

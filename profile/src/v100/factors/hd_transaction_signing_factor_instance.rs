@@ -93,6 +93,7 @@ impl HDFactorInstanceIdentityCreation {
 mod tests {
     use hd::{
         AccountPath, CAP26KeyKind, CAP26Repr, HierarchicalDeterministicPublicKey, IdentityPath,
+        IsEntityPath,
     };
     use wallet_kit_common::{CommonError as Error, HasPlaceholder, NetworkID, PublicKey};
 
@@ -117,9 +118,9 @@ mod tests {
         assert_eq!(
             HDFactorInstanceAccountCreation::new(hd_fi)
                 .unwrap()
-                .path
+                .path()
                 .key_kind(),
-            &CAP26KeyKind::TransactionSigning
+            CAP26KeyKind::TransactionSigning
         );
     }
 
@@ -168,9 +169,9 @@ mod tests {
         assert_eq!(
             HDFactorInstanceIdentityCreation::new(hd_fi)
                 .unwrap()
-                .path
+                .path()
                 .key_kind(),
-            &CAP26KeyKind::TransactionSigning
+            CAP26KeyKind::TransactionSigning
         );
     }
 

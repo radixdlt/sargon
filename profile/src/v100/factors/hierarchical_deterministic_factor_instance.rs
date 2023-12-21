@@ -8,7 +8,7 @@ use wallet_kit_common::NetworkID;
 
 use hd::{
     AccountPath, CAP26KeyKind, CAP26Path, CAP26Repr, DerivationPath,
-    HierarchicalDeterministicPublicKey,
+    HierarchicalDeterministicPublicKey, IsEntityPath,
 };
 use serde::{de, Deserializer, Serialize, Serializer};
 use wallet_kit_common::{CommonError as Error, PublicKey};

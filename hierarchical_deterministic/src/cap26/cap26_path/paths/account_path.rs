@@ -16,12 +16,16 @@ use super::is_entity_path::IsEntityPath;
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Getters)]
 pub struct AccountPath {
     path: HDPath,
+
+    #[getter(skip)] // IsEntityPath trait has `network_id()` method
     network_id: NetworkID,
 
-    #[getter(skip)] // IsEntityPath trait has `entity_kind()` method
     entity_kind: CAP26EntityKind,
 
+    #[getter(skip)] // IsEntityPath trait has `key_kind()` method
     key_kind: CAP26KeyKind,
+
+    #[getter(skip)] // IsEntityPath trait has `index()` method
     index: HDPathValue,
 }
 
@@ -129,7 +133,9 @@ mod tests {
         {assert_json_value_eq_after_roundtrip, assert_json_value_ne_after_roundtrip},
     };
 
-    use crate::{bip32::HDPath, CAP26EntityKind, CAP26KeyKind, CAP26Repr, Derivation};
+    use crate::{
+        bip32::HDPath, CAP26EntityKind, CAP26KeyKind, CAP26Repr, Derivation, IsEntityPath,
+    };
 
     use super::AccountPath;
 
@@ -149,12 +155,15 @@ mod tests {
 
     #[test]
     fn index() {
-        assert_eq!(AccountPath::placeholder().index(), &0);
+        assert_eq!(AccountPath::placeholder().index(), 0);
     }
 
     #[test]
     fn entity_kind() {
-        assert_eq!(AccountPath::entity_kind(), Some(CAP26EntityKind::Account));
+        assert_eq!(
+            AccountPath::placeholder().entity_kind(),
+            &CAP26EntityKind::Account
+        );
     }
 
     #[test]
@@ -298,9 +307,9 @@ mod tests {
     #[test]
     fn is_entity_path_index() {
         let sut = AccountPath::placeholder();
-        assert_eq!(sut.index(), &0);
-        assert_eq!(sut.network_id(), &NetworkID::Mainnet);
-        assert_eq!(sut.key_kind(), &CAP26KeyKind::TransactionSigning);
+        assert_eq!(sut.index(), 0);
+        assert_eq!(sut.network_id(), NetworkID::Mainnet);
+        assert_eq!(sut.key_kind(), CAP26KeyKind::TransactionSigning);
     }
 
     #[test]
