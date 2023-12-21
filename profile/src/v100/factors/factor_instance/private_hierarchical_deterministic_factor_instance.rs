@@ -1,5 +1,5 @@
 use derive_getters::Getters;
-use hd::derivation::hierarchical_deterministic_private_key::HierarchicalDeterministicPrivateKey;
+use hd::HierarchicalDeterministicPrivateKey;
 
 use crate::v100::factors::factor_source_id::FactorSourceID;
 
@@ -57,10 +57,7 @@ impl PrivateHierarchicalDeterministicFactorInstance {
 
 #[cfg(test)]
 mod tests {
-    use hd::derivation::{
-        derivation::Derivation,
-        hierarchical_deterministic_private_key::HierarchicalDeterministicPrivateKey,
-    };
+    use hd::{Derivation, HierarchicalDeterministicPrivateKey};
 
     use crate::v100::factors::factor_instance::factor_instance::FactorInstance;
 

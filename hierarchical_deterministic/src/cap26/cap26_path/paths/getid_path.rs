@@ -3,10 +3,7 @@ use wallet_kit_common::error::hdpath_error::HDPathError;
 
 use crate::{
     bip32::{HDPath, HDPathValue},
-    derivation::{
-        derivation::Derivation, derivation_path::DerivationPath,
-        derivation_path_scheme::DerivationPathScheme,
-    },
+    Derivation, DerivationPath, DerivationPathScheme,
 };
 
 /// Use it with `GetIDPath::default()` to create the path `m/44'/1022'/365'`
@@ -97,7 +94,7 @@ mod tests {
         json::{assert_json_value_eq_after_roundtrip, assert_json_value_fails},
     };
 
-    use crate::derivation::derivation::Derivation;
+    use crate::Derivation;
 
     use super::GetIDPath;
 

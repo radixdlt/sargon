@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 
-use hd::derivation::mnemonic_with_passphrase::MnemonicWithPassphrase;
+use hd::MnemonicWithPassphrase;
 use serde::{Deserialize, Serialize};
 
 use crate::v100::factors::{

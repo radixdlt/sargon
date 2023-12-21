@@ -2,16 +2,13 @@
 use crate::v100::factors::factor_source_kind::FactorSourceKind;
 use derive_getters::Getters;
 #[cfg(any(test, feature = "placeholder"))]
-use hd::{bip32::HDPathValue, derivation::mnemonic_with_passphrase::MnemonicWithPassphrase};
+use hd::{bip32::HDPathValue, MnemonicWithPassphrase};
 #[cfg(any(test, feature = "placeholder"))]
 use wallet_kit_common::network_id::NetworkID;
 
 use hd::{
-    derivation::{
-        derivation_path::DerivationPath,
-        hierarchical_deterministic_public_key::HierarchicalDeterministicPublicKey,
-    },
-    AccountPath, CAP26KeyKind, CAP26Path, CAP26Repr,
+    AccountPath, CAP26KeyKind, CAP26Path, CAP26Repr, DerivationPath,
+    HierarchicalDeterministicPublicKey,
 };
 use serde::{de, Deserializer, Serialize, Serializer};
 use wallet_kit_common::types::keys::public_key::PublicKey;
@@ -162,12 +159,8 @@ impl HierarchicalDeterministicFactorInstance {
 #[cfg(test)]
 mod tests {
     use hd::{
-        bip44::bip44_like_path::BIP44LikePath,
-        derivation::{
-            derivation::Derivation, derivation_path::DerivationPath,
-            hierarchical_deterministic_public_key::HierarchicalDeterministicPublicKey,
-        },
-        CAP26KeyKind, GetIDPath, IdentityPath,
+        bip44::bip44_like_path::BIP44LikePath, CAP26KeyKind, Derivation, DerivationPath, GetIDPath,
+        HierarchicalDeterministicPublicKey, IdentityPath,
     };
     use wallet_kit_common::{
         json::assert_eq_after_json_roundtrip, types::keys::public_key::PublicKey,

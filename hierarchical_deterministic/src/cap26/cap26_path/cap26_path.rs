@@ -1,9 +1,6 @@
 use crate::{
-    bip32::HDPath,
-    cap26::cap26_repr::CAP26Repr,
-    derivation::derivation_path::DerivationPath,
-    derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},
-    AccountPath, GetIDPath, IdentityPath,
+    bip32::HDPath, cap26::cap26_repr::CAP26Repr, AccountPath, Derivation, DerivationPath,
+    DerivationPathScheme, GetIDPath, IdentityPath,
 };
 use enum_as_inner::EnumAsInner;
 use serde::{de, Deserializer, Serialize, Serializer};
@@ -109,10 +106,7 @@ mod tests {
     use serde_json::json;
     use wallet_kit_common::json::assert_json_value_eq_after_roundtrip;
 
-    use crate::{
-        derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},
-        AccountPath, GetIDPath,
-    };
+    use crate::{derivation::DerivationPathScheme, AccountPath, Derivation, GetIDPath};
 
     use super::CAP26Path;
 

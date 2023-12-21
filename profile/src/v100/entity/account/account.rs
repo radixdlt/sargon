@@ -4,9 +4,9 @@ use crate::v100::factors::factor_sources::{
     private_hierarchical_deterministic_factor_source::PrivateHierarchicalDeterministicFactorSource,
 };
 #[cfg(any(test, feature = "placeholder"))]
-use hd::{bip32::HDPathValue, derivation::mnemonic_with_passphrase::MnemonicWithPassphrase};
+use hd::{bip32::HDPathValue, MnemonicWithPassphrase};
 
-use hd::{derivation::derivation::Derivation, HasEntityPath};
+use hd::{Derivation, HasEntityPath};
 use identified_vec::Identifiable;
 use serde::{Deserialize, Serialize};
 use std::{cell::RefCell, cmp::Ordering, fmt::Display, hash::Hasher};

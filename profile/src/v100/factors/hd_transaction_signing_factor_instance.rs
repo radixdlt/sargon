@@ -4,8 +4,8 @@ use super::{
 };
 use derive_getters::Getters;
 use hd::{
-    derivation::hierarchical_deterministic_public_key::HierarchicalDeterministicPublicKey,
-    AccountPath, CAP26Path, HasEntityPath, IdentityPath, IsEntityPath,
+    AccountPath, CAP26Path, HasEntityPath, HierarchicalDeterministicPublicKey, IdentityPath,
+    IsEntityPath,
 };
 use wallet_kit_common::{
     error::common_error::CommonError as Error, types::keys::public_key::PublicKey,
@@ -94,8 +94,7 @@ impl HDFactorInstanceIdentityCreation {
 #[cfg(test)]
 mod tests {
     use hd::{
-        derivation::hierarchical_deterministic_public_key::HierarchicalDeterministicPublicKey,
-        AccountPath, CAP26KeyKind, CAP26Repr, IdentityPath,
+        AccountPath, CAP26KeyKind, CAP26Repr, HierarchicalDeterministicPublicKey, IdentityPath,
     };
     use wallet_kit_common::{
         error::common_error::CommonError as Error, network_id::NetworkID,

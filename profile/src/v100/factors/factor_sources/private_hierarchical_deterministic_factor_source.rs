@@ -1,8 +1,5 @@
 use derive_getters::Getters;
-use hd::{
-    bip32::HDPathValue, derivation::mnemonic_with_passphrase::MnemonicWithPassphrase, AccountPath,
-    CAP26KeyKind, CAP26Repr,
-};
+use hd::{bip32::HDPathValue, AccountPath, CAP26KeyKind, CAP26Repr, MnemonicWithPassphrase};
 use wallet_kit_common::network_id::NetworkID;
 
 use crate::v100::factors::{

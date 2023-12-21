@@ -1,5 +1,5 @@
 use derive_getters::Getters;
-use hd::{derivation::mnemonic_with_passphrase::MnemonicWithPassphrase, GetIDPath};
+use hd::{GetIDPath, MnemonicWithPassphrase};
 use radix_engine_common::crypto::{blake2b_256_hash, Hash};
 use serde::{Deserialize, Serialize};
 use wallet_kit_common::types::hex_32bytes::Hex32Bytes;
@@ -69,9 +69,7 @@ impl FactorSourceIDFromHash {
 
 #[cfg(test)]
 mod tests {
-    use hd::{
-        bip39::mnemonic::Mnemonic, derivation::mnemonic_with_passphrase::MnemonicWithPassphrase,
-    };
+    use hd::{bip39::mnemonic::Mnemonic, MnemonicWithPassphrase};
     use wallet_kit_common::json::assert_eq_after_json_roundtrip;
 
     use super::FactorSourceIDFromHash;

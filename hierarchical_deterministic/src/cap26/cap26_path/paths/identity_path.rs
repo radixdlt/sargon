@@ -8,10 +8,7 @@ use crate::{
         cap26_entity_kind::CAP26EntityKind, cap26_key_kind::CAP26KeyKind,
         cap26_path::cap26_path::CAP26Path, cap26_repr::CAP26Repr,
     },
-    derivation::{
-        derivation::Derivation, derivation_path::DerivationPath,
-        derivation_path_scheme::DerivationPathScheme,
-    },
+    Derivation, DerivationPath, DerivationPathScheme,
 };
 
 use super::is_entity_path::IsEntityPath;
@@ -121,18 +118,16 @@ impl Derivation for IdentityPath {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        bip32::HDPath,
-        cap26::{
-            cap26_entity_kind::CAP26EntityKind, cap26_key_kind::CAP26KeyKind, cap26_repr::CAP26Repr,
-        },
-        derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},
-    };
+
     use serde_json::json;
     use wallet_kit_common::{
         error::hdpath_error::HDPathError,
         json::{assert_json_value_eq_after_roundtrip, assert_json_value_ne_after_roundtrip},
         network_id::NetworkID,
+    };
+
+    use crate::{
+        bip32::HDPath, CAP26EntityKind, CAP26KeyKind, CAP26Repr, Derivation, DerivationPathScheme,
     };
 
     use super::IdentityPath;

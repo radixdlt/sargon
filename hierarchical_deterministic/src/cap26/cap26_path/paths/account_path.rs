@@ -4,14 +4,8 @@ use wallet_kit_common::{error::hdpath_error::HDPathError, network_id::NetworkID}
 
 use crate::{
     bip32::{HDPath, HDPathValue},
-    cap26::{
-        cap26_entity_kind::CAP26EntityKind, cap26_key_kind::CAP26KeyKind,
-        cap26_path::cap26_path::CAP26Path, cap26_repr::CAP26Repr,
-    },
-    derivation::{
-        derivation::Derivation, derivation_path::DerivationPath,
-        derivation_path_scheme::DerivationPathScheme,
-    },
+    CAP26EntityKind, CAP26KeyKind, CAP26Path, CAP26Repr, Derivation, DerivationPath,
+    DerivationPathScheme,
 };
 
 use super::is_entity_path::IsEntityPath;
@@ -128,13 +122,7 @@ mod tests {
         network_id::NetworkID,
     };
 
-    use crate::{
-        bip32::HDPath,
-        cap26::{
-            cap26_entity_kind::CAP26EntityKind, cap26_key_kind::CAP26KeyKind, cap26_repr::CAP26Repr,
-        },
-        derivation::derivation::Derivation,
-    };
+    use crate::{bip32::HDPath, CAP26EntityKind, CAP26KeyKind, CAP26Repr, Derivation};
 
     use super::AccountPath;
 

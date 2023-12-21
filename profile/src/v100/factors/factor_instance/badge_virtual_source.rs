@@ -1,4 +1,4 @@
-use hd::derivation::hierarchical_deterministic_public_key::HierarchicalDeterministicPublicKey;
+use hd::HierarchicalDeterministicPublicKey;
 use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 #[serde(remote = "Self")]
