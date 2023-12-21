@@ -1,17 +1,21 @@
+use derive_getters::Getters;
 use serde::{Deserialize, Serialize};
 
-use crate::v100::address::account_address::AccountAddress;
+use crate::v100::AccountAddress;
+
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
 
 use super::factor_source_kind::FactorSourceKind;
 
 /// FactorSourceID from an AccountAddress, typically used by `trustedContact` FactorSource.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Getters)]
 pub struct FactorSourceIDFromAddress {
     /// The kind of the FactorSource this ID refers to, typically `trustedContact`.
-    pub kind: FactorSourceKind,
+    kind: FactorSourceKind,
 
     /// An account address which the FactorSource this ID refers uses/needs.
-    pub body: AccountAddress,
+    body: AccountAddress,
 }
 
 impl FactorSourceIDFromAddress {
@@ -22,21 +26,49 @@ impl FactorSourceIDFromAddress {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl FactorSourceIDFromAddress {
+impl HasPlaceholder for FactorSourceIDFromAddress {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::new(
             FactorSourceKind::TrustedContact,
             AccountAddress::placeholder(),
+        )
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    fn placeholder_other() -> Self {
+        Self::new(
+            FactorSourceKind::TrustedContact,
+            AccountAddress::placeholder_other(),
         )
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use super::FactorSourceIDFromAddress;
+
+    #[test]
+    fn equality() {
+        assert_eq!(
+            FactorSourceIDFromAddress::placeholder(),
+            FactorSourceIDFromAddress::placeholder()
+        );
+        assert_eq!(
+            FactorSourceIDFromAddress::placeholder_other(),
+            FactorSourceIDFromAddress::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            FactorSourceIDFromAddress::placeholder(),
+            FactorSourceIDFromAddress::placeholder_other()
+        );
+    }
 
     #[test]
     fn json_roundtrip() {

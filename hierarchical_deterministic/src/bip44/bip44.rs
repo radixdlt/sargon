@@ -1,4 +1,4 @@
-use crate::bip32::hd_path_component::HDPathComponent;
+use crate::bip32::HDPathComponent;
 
 impl HDPathComponent {
     pub fn bip44_purpose() -> Self {

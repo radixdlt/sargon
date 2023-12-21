@@ -4,7 +4,10 @@ use super::gateway::Gateway;
 
 use identified_vec::{Identifiable, IdentifiedVecOf, IsIdentifiedVec, IsIdentifiedVecOf};
 use serde::{de, ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
-use wallet_kit_common::error::common_error::CommonError;
+use wallet_kit_common::CommonError;
+
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
 
 /// The currently used Gateway and a collection of other by user added
 /// or predefined Gateways the user can switch to.
@@ -136,15 +139,15 @@ impl Default for Gateways {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl Gateways {
-    pub fn placeholder() -> Self {
+impl HasPlaceholder for Gateways {
+    fn placeholder() -> Self {
         let sut = Gateways::new(Gateway::rcnet());
         sut.append(Gateway::mainnet());
         sut.append(Gateway::stokenet());
         sut
     }
 
-    pub fn placeholder_other() -> Self {
+    fn placeholder_other() -> Self {
         Gateways::default()
     }
 }
@@ -155,13 +158,18 @@ mod tests {
 
     use identified_vec::{IdentifiedVecOf, IsIdentifiedVecOf, ItemsCloned};
     use wallet_kit_common::{
-        error::common_error::CommonError, json::assert_eq_after_json_roundtrip,
-        network_id::NetworkID,
+        assert_eq_after_json_roundtrip, CommonError, HasPlaceholder, NetworkID,
     };
 
     use crate::v100::app_preferences::gateways::gateway::Gateway;
 
     use super::Gateways;
+
+    #[test]
+    fn equality() {
+        assert_eq!(Gateways::placeholder(), Gateways::placeholder());
+        assert_eq!(Gateways::placeholder_other(), Gateways::placeholder_other());
+    }
 
     #[test]
     fn inequality() {

@@ -1,25 +1,23 @@
-use super::hierarchical_deterministic_private_key::HierarchicalDeterministicPrivateKey;
+use crate::{
+    Derivation, DerivationPathScheme, HDPath, HierarchicalDeterministicPrivateKey, Mnemonic, Seed,
+};
+use derive_getters::Getters;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use wallet_kit_common::types::keys::{
-    ed25519::private_key::Ed25519PrivateKey, secp256k1::private_key::Secp256k1PrivateKey,
-    slip10_curve::SLIP10Curve,
-};
+use wallet_kit_common::{Ed25519PrivateKey, SLIP10Curve, Secp256k1PrivateKey};
 
-use super::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme};
-use crate::{
-    bip32::hd_path::HDPath,
-    bip39::mnemonic::{Mnemonic, Seed},
-};
-use wallet_kit_common::error::hdpath_error::HDPathError as Error;
+use wallet_kit_common::HDPathError as Error;
+
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
 
 /// A BIP39 Mnemonic and BIP39 passphrase - aka "25th word" tuple,
 /// from which we can derive a HD Root used for derivation.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Getters)]
 #[serde(rename_all = "camelCase")]
 pub struct MnemonicWithPassphrase {
-    pub mnemonic: Mnemonic,
-    pub passphrase: String,
+    mnemonic: Mnemonic,
+    passphrase: String,
 }
 
 impl MnemonicWithPassphrase {
@@ -46,10 +44,14 @@ impl MnemonicWithPassphrase {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl MnemonicWithPassphrase {
+impl HasPlaceholder for MnemonicWithPassphrase {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::with_passphrase(Mnemonic::placeholder(), "radix".to_string())
+    }
+
+    fn placeholder_other() -> Self {
+        Self::new(Mnemonic::placeholder_other())
     }
 }
 
@@ -114,18 +116,30 @@ impl MnemonicWithPassphrase {
 #[cfg(test)]
 mod tests {
 
-    use crate::{
-        bip39::mnemonic::Mnemonic,
-        bip44::bip44_like_path::BIP44LikePath,
-        cap26::{
-            cap26_key_kind::CAP26KeyKind, cap26_path::paths::account_path::AccountPath,
-            cap26_repr::CAP26Repr,
-        },
-        derivation::derivation::Derivation,
-    };
-    use wallet_kit_common::{json::assert_eq_after_json_roundtrip, network_id::NetworkID};
+    use crate::{AccountPath, BIP44LikePath, CAP26KeyKind, CAP26Repr, Derivation, Mnemonic};
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder, NetworkID};
 
     use super::MnemonicWithPassphrase;
+
+    #[test]
+    fn equality() {
+        assert_eq!(
+            MnemonicWithPassphrase::placeholder(),
+            MnemonicWithPassphrase::placeholder()
+        );
+        assert_eq!(
+            MnemonicWithPassphrase::placeholder_other(),
+            MnemonicWithPassphrase::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            MnemonicWithPassphrase::placeholder(),
+            MnemonicWithPassphrase::placeholder_other()
+        );
+    }
 
     #[test]
     fn with_passphrase() {
@@ -135,8 +149,8 @@ mod tests {
             Mnemonic::from_phrase(phrase).unwrap(),
             passphrase.to_string(),
         );
-        assert_eq!(mwp.mnemonic.phrase(), phrase);
-        assert_eq!(mwp.passphrase, passphrase);
+        assert_eq!(mwp.mnemonic().phrase(), phrase);
+        assert_eq!(mwp.passphrase(), passphrase);
     }
 
     #[test]

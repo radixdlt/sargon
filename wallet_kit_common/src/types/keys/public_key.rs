@@ -1,17 +1,16 @@
 use serde::{de, ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
 
-use crate::error::key_error::KeyError as Error;
+use crate::{Ed25519PublicKey, KeyError as Error, SLIP10Curve, Secp256k1PublicKey};
 
 use radix_engine_common::crypto::{
     Ed25519PublicKey as EngineEd25519PublicKey, PublicKey as EnginePublicKey,
     Secp256k1PublicKey as EngineSecp256k1PublicKey,
 };
 
-use super::{
-    ed25519::public_key::Ed25519PublicKey, secp256k1::public_key::Secp256k1PublicKey,
-    slip10_curve::SLIP10Curve,
-};
 use enum_as_inner::EnumAsInner;
+
+#[cfg(any(test, feature = "placeholder"))]
+use crate::HasPlaceholder;
 
 /// A tagged union of supported public keys on different curves, supported
 /// curves are `secp256k1` and `Curve25519`
@@ -29,8 +28,8 @@ impl From<Ed25519PublicKey> for PublicKey {
     ///
     /// ```
     /// extern crate wallet_kit_common;
-    /// use wallet_kit_common::types::keys::ed25519::private_key::Ed25519PrivateKey;
-    /// use wallet_kit_common::types::keys::public_key::PublicKey;
+    /// use wallet_kit_common::Ed25519PrivateKey;
+    /// use wallet_kit_common::PublicKey;
     ///
     /// let key: PublicKey = Ed25519PrivateKey::new().public_key().into();
     /// ```
@@ -44,8 +43,8 @@ impl From<Secp256k1PublicKey> for PublicKey {
     ///
     /// ```
     /// extern crate wallet_kit_common;
-    /// use wallet_kit_common::types::keys::secp256k1::private_key::Secp256k1PrivateKey;
-    /// use wallet_kit_common::types::keys::public_key::PublicKey;
+    /// use wallet_kit_common::Secp256k1PrivateKey;
+    /// use wallet_kit_common::PublicKey;
     ///
     /// let key: PublicKey = Secp256k1PrivateKey::new().public_key().into();
     /// ```
@@ -99,6 +98,17 @@ impl PublicKey {
             PublicKey::Ed25519(key) => key.to_bytes(),
             PublicKey::Secp256k1(key) => key.to_bytes(),
         }
+    }
+}
+
+#[cfg(any(test, feature = "placeholder"))]
+impl HasPlaceholder for PublicKey {
+    fn placeholder() -> Self {
+        Self::placeholder_ed25519_alice()
+    }
+
+    fn placeholder_other() -> Self {
+        Self::placeholder_secp256k1_bob()
     }
 }
 
@@ -196,15 +206,27 @@ mod tests {
     use std::collections::BTreeSet;
 
     use crate::{
-        json::{assert_eq_after_json_roundtrip, assert_json_fails},
-        types::keys::{
-            ed25519::public_key::Ed25519PublicKey, secp256k1::public_key::Secp256k1PublicKey,
-        },
+        assert_eq_after_json_roundtrip, assert_json_fails, Ed25519PublicKey, HasPlaceholder,
+        Secp256k1PublicKey,
     };
 
     use super::PublicKey;
 
     use radix_engine_common::crypto::PublicKey as EnginePublicKey;
+
+    #[test]
+    fn equality() {
+        assert_eq!(PublicKey::placeholder(), PublicKey::placeholder());
+        assert_eq!(
+            PublicKey::placeholder_other(),
+            PublicKey::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(PublicKey::placeholder(), PublicKey::placeholder_other());
+    }
 
     #[test]
     fn engine_roundtrip_secp256k1() {

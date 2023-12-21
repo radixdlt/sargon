@@ -1,4 +1,5 @@
-use hierarchical_deterministic::derivation::hierarchical_deterministic_public_key::HierarchicalDeterministicPublicKey;
+use derive_getters::Getters;
+use hd::HierarchicalDeterministicPublicKey;
 use serde::{Deserialize, Serialize};
 
 use super::{
@@ -7,19 +8,22 @@ use super::{
 };
 use crate::v100::factors::factor_source_id::FactorSourceID;
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Getters)]
 pub struct FactorInstance {
     /// The ID of the `FactorSource` that was used to produce this
     /// factor instance. We will lookup the `FactorSource` in the
     /// `Profile` and can present user with instruction to re-access
     /// this factor source in order control the `badge`.
     #[serde(rename = "factorSourceID")]
-    pub factor_source_id: FactorSourceID,
+    factor_source_id: FactorSourceID,
 
     /// Either a "physical" badge (NFT) or some source for recreation of a producer
     /// of a virtual badge (signature), e.g. a HD derivation path, from which a private key
     /// is derived which produces virtual badges (signatures).
-    pub badge: FactorInstanceBadge,
+    badge: FactorInstanceBadge,
 }
 
 impl FactorInstance {
@@ -46,21 +50,46 @@ impl FactorInstance {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl FactorInstance {
+impl HasPlaceholder for FactorInstance {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::new(
             FactorSourceID::placeholder(),
             FactorInstanceBadge::placeholder(),
+        )
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    fn placeholder_other() -> Self {
+        Self::new(
+            FactorSourceID::placeholder_other(),
+            FactorInstanceBadge::placeholder_other(),
         )
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use super::FactorInstance;
+
+    #[test]
+    fn equality() {
+        assert_eq!(FactorInstance::placeholder(), FactorInstance::placeholder());
+        assert_eq!(
+            FactorInstance::placeholder_other(),
+            FactorInstance::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            FactorInstance::placeholder(),
+            FactorInstance::placeholder_other()
+        );
+    }
 
     #[test]
     fn json_roundtrip() {

@@ -3,7 +3,7 @@ use std::fmt::Display;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use strum::FromRepr;
 
-use crate::bip32::hd_path_component::HDPathValue;
+use crate::bip32::HDPathValue;
 use enum_as_inner::EnumAsInner;
 
 #[derive(
@@ -51,7 +51,7 @@ impl CAP26KeyKind {
 #[cfg(test)]
 mod tests {
     use serde_json::json;
-    use wallet_kit_common::json::{assert_json_roundtrip, assert_json_value_eq_after_roundtrip};
+    use wallet_kit_common::{assert_json_roundtrip, assert_json_value_eq_after_roundtrip};
 
     use crate::cap26::cap26_key_kind::CAP26KeyKind;
 

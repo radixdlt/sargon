@@ -1,8 +1,11 @@
 use identified_vec::{IdentifiedVecOf, IsIdentifiableVecOfVia, IsIdentifiedVec, IsIdentifiedVecOf};
 
-use crate::{identified_vec_via::IdentifiedVecVia, v100::header::content_hint::ContentHint};
+use crate::{identified_vec_via::IdentifiedVecVia, v100::ContentHint};
 
-use super::network::network::Network;
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
+use super::Network;
 
 /// An ordered mapping of NetworkID -> `Profile.Network`, containing
 /// all the users Accounts, Personas and AuthorizedDapps the user
@@ -43,9 +46,9 @@ impl Default for Networks {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl Networks {
+impl HasPlaceholder for Networks {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::with_networks(
             [
                 Network::placeholder_mainnet(),
@@ -56,7 +59,7 @@ impl Networks {
     }
 
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_other() -> Self {
+    fn placeholder_other() -> Self {
         Self::with_network(Network::placeholder_other())
     }
 }
@@ -64,16 +67,9 @@ impl Networks {
 #[cfg(test)]
 mod tests {
     use identified_vec::IsIdentifiedVec;
-    use wallet_kit_common::{json::assert_eq_after_json_roundtrip, network_id::NetworkID};
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder, NetworkID};
 
-    use crate::v100::{
-        entity::account::account::Account,
-        header::content_hint::ContentHint,
-        networks::{
-            network::{accounts::Accounts, network::Network},
-            networks::Networks,
-        },
-    };
+    use crate::v100::{Account, Accounts, ContentHint, Network, Networks};
 
     #[test]
     fn default_is_empty() {

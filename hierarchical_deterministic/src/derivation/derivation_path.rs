@@ -1,16 +1,12 @@
 use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
 
 use super::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme};
-use crate::{
-    bip32::hd_path::HDPath,
-    bip44::bip44_like_path::BIP44LikePath,
-    cap26::cap26_path::{
-        cap26_path::CAP26Path,
-        paths::{account_path::AccountPath, getid_path::GetIDPath, identity_path::IdentityPath},
-    },
-};
+use crate::{bip32::HDPath, AccountPath, BIP44LikePath, CAP26Path, GetIDPath, IdentityPath};
 use enum_as_inner::EnumAsInner;
 use std::fmt::{Debug, Formatter};
+
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
 
 /// A derivation path on either supported schemes, either Babylon (CAP26) or Olympia (BIP44Like).
 #[derive(Clone, PartialEq, Eq, EnumAsInner, PartialOrd, Ord)]
@@ -20,7 +16,7 @@ pub enum DerivationPath {
 }
 
 impl TryFrom<&HDPath> for DerivationPath {
-    type Error = wallet_kit_common::error::common_error::CommonError;
+    type Error = wallet_kit_common::CommonError;
 
     fn try_from(value: &HDPath) -> Result<Self, Self::Error> {
         if let Ok(bip44) = BIP44LikePath::try_from(value) {
@@ -76,10 +72,15 @@ impl Serialize for DerivationPath {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl DerivationPath {
+impl HasPlaceholder for DerivationPath {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
-        Self::CAP26(CAP26Path::AccountPath(AccountPath::placeholder()))
+    fn placeholder() -> Self {
+        AccountPath::placeholder().into()
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    fn placeholder_other() -> Self {
+        IdentityPath::placeholder().into()
     }
 }
 
@@ -142,20 +143,32 @@ impl From<CAP26Path> for DerivationPath {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use crate::{
-        bip44::bip44_like_path::BIP44LikePath,
-        cap26::cap26_path::{
-            cap26_path::CAP26Path,
-            paths::{
-                account_path::AccountPath, getid_path::GetIDPath, identity_path::IdentityPath,
-            },
-        },
         derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},
+        AccountPath, BIP44LikePath, CAP26Path, GetIDPath, IdentityPath,
     };
 
     use super::DerivationPath;
+
+    #[test]
+    fn equality() {
+        assert_eq!(DerivationPath::placeholder(), DerivationPath::placeholder());
+        assert_eq!(
+            DerivationPath::placeholder_other(),
+            DerivationPath::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            DerivationPath::placeholder(),
+            DerivationPath::placeholder_other()
+        );
+    }
+
     #[test]
     fn cap26_scheme() {
         assert_eq!(

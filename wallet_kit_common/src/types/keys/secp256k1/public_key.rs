@@ -1,11 +1,12 @@
-use crate::{
-    error::key_error::KeyError as Error, types::keys::secp256k1::private_key::Secp256k1PrivateKey,
-};
+use crate::{KeyError as Error, Secp256k1PrivateKey};
 use bip32::secp256k1::PublicKey as BIP32Secp256k1PublicKey;
 use radix_engine_common::crypto::{Hash, Secp256k1PublicKey as EngineSecp256k1PublicKey};
 use serde::{Deserialize, Serialize};
 use std::fmt::{Debug, Formatter};
 use transaction::{signing::secp256k1::Secp256k1Signature, validation::verify_secp256k1};
+
+#[cfg(any(test, feature = "placeholder"))]
+use crate::HasPlaceholder;
 
 /// A `secp256k1` public key used to verify cryptographic signatures (ECDSA signatures).
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -33,7 +34,7 @@ impl Secp256k1PublicKey {
 }
 
 impl TryFrom<&[u8]> for Secp256k1PublicKey {
-    type Error = crate::error::key_error::KeyError;
+    type Error = crate::KeyError;
 
     fn try_from(slice: &[u8]) -> Result<Self, Self::Error> {
         EngineSecp256k1PublicKey::try_from(slice)
@@ -43,7 +44,7 @@ impl TryFrom<&[u8]> for Secp256k1PublicKey {
 }
 
 impl TryInto<Secp256k1PublicKey> for &str {
-    type Error = crate::error::key_error::KeyError;
+    type Error = crate::KeyError;
 
     fn try_into(self) -> Result<Secp256k1PublicKey, Self::Error> {
         Secp256k1PublicKey::from_str(self)
@@ -65,12 +66,19 @@ impl Debug for Secp256k1PublicKey {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl Secp256k1PublicKey {
+impl HasPlaceholder for Secp256k1PublicKey {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::placeholder_alice()
     }
 
+    fn placeholder_other() -> Self {
+        Self::placeholder_bob()
+    }
+}
+
+#[cfg(any(test, feature = "placeholder"))]
+impl Secp256k1PublicKey {
     pub fn placeholder_alice() -> Self {
         Secp256k1PrivateKey::placeholder_alice().public_key()
     }
@@ -85,8 +93,28 @@ mod tests {
     use std::collections::BTreeSet;
 
     use super::Secp256k1PublicKey;
-    use crate::{error::key_error::KeyError as Error, json::assert_json_value_eq_after_roundtrip};
+    use crate::{assert_json_value_eq_after_roundtrip, HasPlaceholder, KeyError as Error};
     use serde_json::json;
+
+    #[test]
+    fn equality() {
+        assert_eq!(
+            Secp256k1PublicKey::placeholder(),
+            Secp256k1PublicKey::placeholder()
+        );
+        assert_eq!(
+            Secp256k1PublicKey::placeholder_other(),
+            Secp256k1PublicKey::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            Secp256k1PublicKey::placeholder(),
+            Secp256k1PublicKey::placeholder_other()
+        );
+    }
 
     #[test]
     fn from_str() {
@@ -183,22 +211,6 @@ mod tests {
         let str = "02517b88916e7f315bb682f9926b14bc67a0e4246f8a419b986269e1a7e61fffa7";
         let key: Secp256k1PublicKey = str.try_into().unwrap();
         assert_eq!(key.to_hex(), str);
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(
-            Secp256k1PublicKey::placeholder_alice(),
-            Secp256k1PublicKey::placeholder_bob()
-        );
-    }
-
-    #[test]
-    fn equality() {
-        assert_eq!(
-            Secp256k1PublicKey::placeholder_alice(),
-            Secp256k1PublicKey::placeholder_alice()
-        );
     }
 
     #[test]

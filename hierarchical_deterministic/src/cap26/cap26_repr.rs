@@ -1,11 +1,8 @@
-use wallet_kit_common::{error::hdpath_error::HDPathError, network_id::NetworkID};
+use wallet_kit_common::{HDPathError, NetworkID};
 
 use crate::{
-    bip32::{
-        hd_path::HDPath,
-        hd_path_component::{HDPathComponent, HDPathValue},
-    },
-    derivation::derivation::Derivation,
+    bip32::{HDPath, HDPathComponent, HDPathValue},
+    Derivation,
 };
 
 use super::{cap26_entity_kind::CAP26EntityKind, cap26_key_kind::CAP26KeyKind};

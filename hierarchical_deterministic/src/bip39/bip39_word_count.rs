@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use strum::FromRepr;
-use wallet_kit_common::error::hdpath_error::HDPathError as Error;
+use wallet_kit_common::HDPathError as Error;
 
 /// The number of words in the mnemonic of a DeviceFactorSource, according to the BIP39
 /// standard, a multiple of 3, from 12 to 24 words. All "Babylon" `DeviceFactorSource`s
@@ -67,12 +67,12 @@ mod tests {
     use std::collections::BTreeSet;
 
     use serde_json::json;
-    use wallet_kit_common::json::{
+    use wallet_kit_common::{
         assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
         assert_json_value_ne_after_roundtrip,
     };
 
-    use crate::bip39::bip39_word_count::BIP39WordCount;
+    use crate::BIP39WordCount;
 
     #[test]
     fn default_is_24() {

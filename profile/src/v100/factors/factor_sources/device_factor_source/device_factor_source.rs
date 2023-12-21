@@ -1,13 +1,15 @@
 use std::cell::RefCell;
 
-use hierarchical_deterministic::derivation::mnemonic_with_passphrase::MnemonicWithPassphrase;
+use hd::MnemonicWithPassphrase;
 use serde::{Deserialize, Serialize};
 
-use crate::v100::factors::{
-    factor_source::FactorSource, factor_source_common::FactorSourceCommon,
-    factor_source_id::FactorSourceID, factor_source_id_from_hash::FactorSourceIDFromHash,
-    factor_source_kind::FactorSourceKind, is_factor_source::IsFactorSource,
+use crate::v100::{
+    FactorSource, FactorSourceCommon, FactorSourceID, FactorSourceIDFromHash, FactorSourceKind,
+    IsFactorSource,
 };
+
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
 
 use super::device_factor_source_hint::DeviceFactorSourceHint;
 
@@ -53,7 +55,7 @@ impl DeviceFactorSource {
 }
 
 impl TryFrom<FactorSource> for DeviceFactorSource {
-    type Error = wallet_kit_common::error::common_error::CommonError;
+    type Error = wallet_kit_common::CommonError;
 
     fn try_from(value: FactorSource) -> Result<Self, Self::Error> {
         value
@@ -64,7 +66,7 @@ impl TryFrom<FactorSource> for DeviceFactorSource {
 
 impl IsFactorSource for DeviceFactorSource {
     fn factor_source_kind(&self) -> FactorSourceKind {
-        self.id.kind
+        self.id().kind().clone()
     }
 
     fn factor_source_id(&self) -> FactorSourceID {
@@ -100,7 +102,7 @@ impl DeviceFactorSource {
             id,
             FactorSourceCommon::new_bdfs(is_main),
             DeviceFactorSourceHint::unknown_model_and_name_with_word_count(
-                mnemonic_with_passphrase.mnemonic.word_count,
+                mnemonic_with_passphrase.mnemonic().word_count().clone(),
                 device_model,
             ),
         )
@@ -108,12 +110,20 @@ impl DeviceFactorSource {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl DeviceFactorSource {
+impl HasPlaceholder for DeviceFactorSource {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::placeholder_babylon()
     }
 
+    /// A placeholder used to facilitate unit tests.
+    fn placeholder_other() -> Self {
+        Self::placeholder_olympia()
+    }
+}
+
+#[cfg(any(test, feature = "placeholder"))]
+impl DeviceFactorSource {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_babylon() -> Self {
         Self::new(
@@ -135,14 +145,35 @@ impl DeviceFactorSource {
 
 #[cfg(test)]
 mod tests {
-    use hierarchical_deterministic::bip39::bip39_word_count::BIP39WordCount;
-    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
+    use hd::BIP39WordCount;
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
-    use crate::v100::factors::{
-        factor_source_id::FactorSourceID, is_factor_source::IsFactorSource, factor_source::FactorSource, factor_sources::ledger_hardware_wallet_factor_source::ledger_hardware_wallet_factor_source::LedgerHardwareWalletFactorSource, factor_source_crypto_parameters::FactorSourceCryptoParameters,
-    };
-    use wallet_kit_common::error::common_error::CommonError as Error;
     use super::DeviceFactorSource;
+    use crate::v100::{
+        FactorSource, FactorSourceCryptoParameters, FactorSourceID, IsFactorSource,
+        LedgerHardwareWalletFactorSource,
+    };
+    use wallet_kit_common::CommonError as Error;
+
+    #[test]
+    fn equality() {
+        assert_eq!(
+            DeviceFactorSource::placeholder(),
+            DeviceFactorSource::placeholder()
+        );
+        assert_eq!(
+            DeviceFactorSource::placeholder_other(),
+            DeviceFactorSource::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            DeviceFactorSource::placeholder(),
+            DeviceFactorSource::placeholder_other()
+        );
+    }
 
     #[test]
     fn json() {
@@ -211,7 +242,9 @@ mod tests {
     #[test]
     fn hint() {
         assert_eq!(
-            DeviceFactorSource::placeholder().hint().mnemonic_word_count,
+            DeviceFactorSource::placeholder()
+                .hint()
+                .mnemonic_word_count(),
             BIP39WordCount::TwentyFour
         );
     }

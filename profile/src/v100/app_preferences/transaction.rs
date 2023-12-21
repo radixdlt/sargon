@@ -4,6 +4,9 @@ use radix_engine_common::math::Decimal;
 use radix_engine_toolkit_json::models::common::SerializableDecimal;
 use serde::{Deserialize, Serialize};
 
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
 /// User Preferences relating to submission of transactions.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -41,14 +44,14 @@ impl Default for Transaction {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl Transaction {
+impl HasPlaceholder for Transaction {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::new(transaction::prelude::dec!("0.975"))
     }
 
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_other() -> Self {
+    fn placeholder_other() -> Self {
         Self::new(transaction::prelude::dec!("0.765"))
     }
 }
@@ -56,9 +59,18 @@ impl Transaction {
 #[cfg(test)]
 mod tests {
     use transaction::prelude::dec;
-    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use super::Transaction;
+
+    #[test]
+    fn equality() {
+        assert_eq!(Transaction::placeholder(), Transaction::placeholder());
+        assert_eq!(
+            Transaction::placeholder_other(),
+            Transaction::placeholder_other()
+        );
+    }
 
     #[test]
     fn inequality() {

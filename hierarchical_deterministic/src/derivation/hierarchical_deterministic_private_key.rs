@@ -1,8 +1,10 @@
-use wallet_kit_common::types::keys::{
-    ed25519::private_key::Ed25519PrivateKey, private_key::PrivateKey,
-};
+use derive_getters::Getters;
+use wallet_kit_common::{Ed25519PrivateKey, PrivateKey, Secp256k1PrivateKey};
 
-use crate::cap26::{cap26_path::paths::account_path::AccountPath, cap26_repr::CAP26Repr};
+use crate::{AccountPath, BIP44LikePath, CAP26Repr};
+
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
 
 use super::{
     derivation_path::DerivationPath,
@@ -11,11 +13,12 @@ use super::{
 
 /// An ephemeral (never persisted) HD PrivateKey which contains
 /// the derivation path used to derive it.
+#[derive(Debug, PartialEq, Eq, Getters)]
 pub struct HierarchicalDeterministicPrivateKey {
     /// The PrivateKey derived from some HD FactorSource using `derivation_path`.
-    pub private_key: PrivateKey,
+    private_key: PrivateKey,
     /// Derivation path used to derive the `PrivateKey` from some HD FactorSource.
-    pub derivation_path: DerivationPath,
+    derivation_path: DerivationPath,
 }
 
 impl HierarchicalDeterministicPrivateKey {
@@ -45,9 +48,9 @@ impl HierarchicalDeterministicPrivateKey {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl HierarchicalDeterministicPrivateKey {
+impl HasPlaceholder for HierarchicalDeterministicPrivateKey {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::new(
             Ed25519PrivateKey::from_str(
                 "cf52dbc7bb2663223e99fb31799281b813b939440a372d0aa92eb5f5b8516003",
@@ -59,11 +62,46 @@ impl HierarchicalDeterministicPrivateKey {
                 .into(),
         )
     }
+
+    fn placeholder_other() -> Self {
+        Self::new(
+            Secp256k1PrivateKey::from_str(
+                "111323d507d9d690836798e3ef2e5292cfd31092b75b9b59fa584ff593a3d7e4",
+            )
+            .unwrap()
+            .into(),
+            BIP44LikePath::from_str("m/44H/1022H/0H/0/5H")
+                .unwrap()
+                .into(),
+        )
+    }
 }
 
 #[cfg(test)]
 mod tests {
+    use wallet_kit_common::HasPlaceholder;
+
     use super::HierarchicalDeterministicPrivateKey;
+
+    #[test]
+    fn equality() {
+        assert_eq!(
+            HierarchicalDeterministicPrivateKey::placeholder(),
+            HierarchicalDeterministicPrivateKey::placeholder()
+        );
+        assert_eq!(
+            HierarchicalDeterministicPrivateKey::placeholder_other(),
+            HierarchicalDeterministicPrivateKey::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            HierarchicalDeterministicPrivateKey::placeholder(),
+            HierarchicalDeterministicPrivateKey::placeholder_other()
+        );
+    }
 
     #[test]
     fn publickey_of_placeholder() {

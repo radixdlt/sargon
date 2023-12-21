@@ -1,26 +1,33 @@
+use derive_getters::Getters;
 use serde::{de, Deserializer, Serialize, Serializer};
-use wallet_kit_common::{error::hdpath_error::HDPathError, network_id::NetworkID};
+use wallet_kit_common::{HDPathError, NetworkID};
+
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
 
 use crate::{
-    bip32::{hd_path::HDPath, hd_path_component::HDPathValue},
+    bip32::{HDPath, HDPathValue},
     cap26::{
         cap26_entity_kind::CAP26EntityKind, cap26_key_kind::CAP26KeyKind,
         cap26_path::cap26_path::CAP26Path, cap26_repr::CAP26Repr,
     },
-    derivation::{
-        derivation::Derivation, derivation_path::DerivationPath,
-        derivation_path_scheme::DerivationPathScheme,
-    },
+    Derivation, DerivationPath, DerivationPathScheme,
 };
 
 use super::is_entity_path::IsEntityPath;
 
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Getters)]
 pub struct IdentityPath {
-    pub path: HDPath,
-    pub network_id: NetworkID,
+    path: HDPath,
+
+    #[getter(skip)] // IsEntityPath trait has `network_id()` method
+    network_id: NetworkID,
+
     entity_kind: CAP26EntityKind,
+
+    #[getter(skip)] // IsEntityPath trait has `key_kind()` method
     key_kind: CAP26KeyKind,
+    #[getter(skip)] // IsEntityPath trait has `index()` method
     index: HDPathValue,
 }
 
@@ -28,9 +35,11 @@ impl IsEntityPath for IdentityPath {
     fn network_id(&self) -> NetworkID {
         self.network_id
     }
+
     fn key_kind(&self) -> CAP26KeyKind {
         self.key_kind
     }
+
     fn index(&self) -> HDPathValue {
         self.index
     }
@@ -67,10 +76,15 @@ impl CAP26Repr for IdentityPath {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl IdentityPath {
+impl HasPlaceholder for IdentityPath {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::from_str("m/44H/1022H/1H/618H/1460H/0H").unwrap()
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    fn placeholder_other() -> Self {
+        Self::from_str("m/44H/1022H/1H/618H/1460H/1H").unwrap()
     }
 }
 
@@ -117,26 +131,53 @@ impl Derivation for IdentityPath {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        bip32::hd_path::HDPath,
-        cap26::{
-            cap26_entity_kind::CAP26EntityKind, cap26_key_kind::CAP26KeyKind,
-            cap26_path::paths::is_entity_path::IsEntityPath, cap26_repr::CAP26Repr,
-        },
-        derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},
-    };
+
     use serde_json::json;
     use wallet_kit_common::{
-        error::hdpath_error::HDPathError,
-        json::{assert_json_value_eq_after_roundtrip, assert_json_value_ne_after_roundtrip},
-        network_id::NetworkID,
+        HDPathError, HasPlaceholder, NetworkID,
+        {assert_json_value_eq_after_roundtrip, assert_json_value_ne_after_roundtrip},
+    };
+
+    use crate::{
+        bip32::HDPath, CAP26EntityKind, CAP26KeyKind, CAP26Repr, Derivation, DerivationPathScheme,
+        IsEntityPath,
     };
 
     use super::IdentityPath;
 
     #[test]
+    fn equality() {
+        assert_eq!(IdentityPath::placeholder(), IdentityPath::placeholder());
+        assert_eq!(
+            IdentityPath::placeholder_other(),
+            IdentityPath::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            IdentityPath::placeholder(),
+            IdentityPath::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn index() {
+        assert_eq!(IdentityPath::placeholder().index(), 0);
+    }
+
+    #[test]
+    fn network_id() {
+        assert_eq!(IdentityPath::placeholder().network_id(), NetworkID::Mainnet);
+    }
+
+    #[test]
     fn entity_kind() {
-        assert_eq!(IdentityPath::entity_kind(), Some(CAP26EntityKind::Identity));
+        assert_eq!(
+            IdentityPath::placeholder().entity_kind(),
+            &CAP26EntityKind::Identity
+        );
     }
 
     #[test]

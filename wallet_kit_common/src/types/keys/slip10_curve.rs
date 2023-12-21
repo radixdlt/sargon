@@ -34,7 +34,7 @@ mod tests {
     use identified_vec::Identifiable;
     use serde_json::json;
 
-    use crate::json::{
+    use crate::{
         assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
         assert_json_value_ne_after_roundtrip,
     };

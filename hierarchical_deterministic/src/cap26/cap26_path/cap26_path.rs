@@ -1,14 +1,13 @@
 use crate::{
-    bip32::hd_path::HDPath,
-    cap26::cap26_repr::CAP26Repr,
-    derivation::derivation_path::DerivationPath,
-    derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},
+    bip32::HDPath, cap26::cap26_repr::CAP26Repr, AccountPath, Derivation, DerivationPath,
+    DerivationPathScheme, GetIDPath, IdentityPath,
 };
 use enum_as_inner::EnumAsInner;
 use serde::{de, Deserializer, Serialize, Serializer};
-use wallet_kit_common::error::hdpath_error::HDPathError;
+use wallet_kit_common::HDPathError;
 
-use super::paths::{account_path::AccountPath, getid_path::GetIDPath, identity_path::IdentityPath};
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
 
 /// A derivation path design specifically for Radix Babylon wallets used by Accounts and Personas
 /// to be unique per network with separate key spaces for Accounts/Identities (Personas) and key
@@ -95,6 +94,16 @@ impl From<GetIDPath> for CAP26Path {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
+impl HasPlaceholder for CAP26Path {
+    fn placeholder() -> Self {
+        Self::placeholder_account()
+    }
+    fn placeholder_other() -> Self {
+        Self::placeholder_identity()
+    }
+}
+
+#[cfg(any(test, feature = "placeholder"))]
 impl CAP26Path {
     pub fn placeholder_account() -> Self {
         Self::AccountPath(AccountPath::placeholder())
@@ -108,14 +117,25 @@ impl CAP26Path {
 #[cfg(test)]
 mod tests {
     use serde_json::json;
-    use wallet_kit_common::json::assert_json_value_eq_after_roundtrip;
+    use wallet_kit_common::{assert_json_value_eq_after_roundtrip, HasPlaceholder};
 
-    use crate::{
-        cap26::cap26_path::paths::{account_path::AccountPath, getid_path::GetIDPath},
-        derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},
-    };
+    use crate::{derivation::DerivationPathScheme, AccountPath, Derivation, GetIDPath};
 
     use super::CAP26Path;
+
+    #[test]
+    fn equality() {
+        assert_eq!(CAP26Path::placeholder(), CAP26Path::placeholder());
+        assert_eq!(
+            CAP26Path::placeholder_other(),
+            CAP26Path::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(CAP26Path::placeholder(), CAP26Path::placeholder_other());
+    }
 
     #[test]
     fn scheme_account_path() {

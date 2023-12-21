@@ -1,7 +1,10 @@
 use identified_vec::{
     Identifiable, IdentifiedVecOf, IsIdentifiableVecOfVia, IsIdentifiedVec, IsIdentifiedVecOf,
 };
-use wallet_kit_common::error::common_error::CommonError;
+use wallet_kit_common::CommonError;
+
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
 
 use crate::{
     identified_vec_via::IdentifiedVecVia,
@@ -47,8 +50,8 @@ impl FactorSources {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl FactorSources {
-    pub fn placeholder() -> Self {
+impl HasPlaceholder for FactorSources {
+    fn placeholder() -> Self {
         Self::try_from_iter([
             FactorSource::placeholder_device(),
             FactorSource::placeholder_ledger(),
@@ -56,7 +59,7 @@ impl FactorSources {
         .unwrap()
     }
 
-    pub fn placeholder_other() -> Self {
+    fn placeholder_other() -> Self {
         Self::try_from_iter([
             FactorSource::placeholder_device_olympia(),
             FactorSource::placeholder_device_babylon(),
@@ -68,9 +71,7 @@ impl FactorSources {
 #[cfg(test)]
 mod tests {
     use identified_vec::Identifiable;
-    use wallet_kit_common::{
-        error::common_error::CommonError, json::assert_eq_after_json_roundtrip,
-    };
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, CommonError, HasPlaceholder};
 
     use crate::v100::factors::{factor_source::FactorSource, is_factor_source::IsFactorSource};
 

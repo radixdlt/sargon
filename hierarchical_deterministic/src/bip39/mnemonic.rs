@@ -1,23 +1,27 @@
 use std::str::FromStr;
 
 use bip39::Language;
+use derive_getters::Getters;
 use itertools::Itertools;
 use serde::{de, Deserializer, Serialize, Serializer};
-use wallet_kit_common::error::hdpath_error::HDPathError as Error;
+use wallet_kit_common::HDPathError as Error;
 
-use super::{bip39_word::bip39_word::BIP39Word, bip39_word_count::BIP39WordCount};
+use crate::{BIP39Word, BIP39WordCount};
 
-#[derive(Clone, PartialEq, Eq, Debug)]
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
+#[derive(Clone, PartialEq, Eq, Debug, Getters)]
 pub struct Mnemonic {
     internal: bip39::Mnemonic,
-    pub words: Vec<BIP39Word>,
-    pub word_count: BIP39WordCount,
-    pub language: Language,
+    words: Vec<BIP39Word>,
+    word_count: BIP39WordCount,
+    language: Language,
 }
 
 impl Mnemonic {
     pub fn phrase(&self) -> String {
-        self.words.iter().map(|w| w.word.to_string()).join(" ")
+        self.words.iter().map(|w| w.word().to_string()).join(" ")
     }
     pub fn from_phrase(phrase: &str) -> Result<Self, Error> {
         let internal =
@@ -67,7 +71,7 @@ impl<'de> serde::Deserialize<'de> for Mnemonic {
 }
 
 impl TryInto<Mnemonic> for &str {
-    type Error = wallet_kit_common::error::hdpath_error::HDPathError;
+    type Error = wallet_kit_common::HDPathError;
 
     /// Tries to deserializes a bech32 address into an `AccountAddress`.
     fn try_into(self) -> Result<Mnemonic, Self::Error> {
@@ -76,10 +80,15 @@ impl TryInto<Mnemonic> for &str {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl Mnemonic {
+impl HasPlaceholder for Mnemonic {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::from_phrase("bright club bacon dinner achieve pull grid save ramp cereal blush woman humble limb repeat video sudden possible story mask neutral prize goose mandate").expect("Valid mnemonic")
+    }
+
+    fn placeholder_other() -> Self {
+        Self::from_phrase("zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong")
+            .expect("Valid mnemonic")
     }
 }
 
@@ -87,12 +96,23 @@ impl Mnemonic {
 mod tests {
     use bip39::Language;
     use serde_json::json;
-    use wallet_kit_common::json::{
+    use wallet_kit_common::{
         assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
-        assert_json_value_ne_after_roundtrip,
+        assert_json_value_ne_after_roundtrip, HasPlaceholder,
     };
 
     use crate::bip39::{bip39_word_count::BIP39WordCount, mnemonic::Mnemonic};
+
+    #[test]
+    fn equality() {
+        assert_eq!(Mnemonic::placeholder(), Mnemonic::placeholder());
+        assert_eq!(Mnemonic::placeholder_other(), Mnemonic::placeholder_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(Mnemonic::placeholder(), Mnemonic::placeholder_other());
+    }
 
     #[test]
     fn language() {
@@ -100,11 +120,11 @@ mod tests {
             "bright club bacon dinner achieve pull grid save ramp cereal blush woman humble limb repeat video sudden possible story mask neutral prize goose mandate"
                 .try_into()
                 .unwrap();
-        assert_eq!(mnemonic.language, Language::English);
+        assert_eq!(mnemonic.language(), &Language::English);
         mnemonic
-            .words
+            .words()
             .into_iter()
-            .for_each(|w| assert_eq!(w.language, Language::English));
+            .for_each(|w| assert_eq!(w.language(), &Language::English));
     }
 
     #[test]
@@ -113,20 +133,20 @@ mod tests {
         assert_eq!(
             Mnemonic::from_phrase("zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong")
                 .unwrap()
-                .word_count,
-            BIP39WordCount::Twelve
+                .word_count(),
+            &BIP39WordCount::Twelve
         );
     }
 
     #[test]
     fn words() {
         let mnemonic = Mnemonic::placeholder();
-        assert_eq!(mnemonic.words[0].word, "bright");
-        assert_eq!(mnemonic.words[1].word, "club");
-        assert_eq!(mnemonic.words[2].word, "bacon");
-        assert_eq!(mnemonic.words[12].word, "humble");
-        assert_eq!(mnemonic.words[22].word, "goose");
-        assert_eq!(mnemonic.words[23].word, "mandate");
+        assert_eq!(mnemonic.words[0].word(), "bright");
+        assert_eq!(mnemonic.words[1].word(), "club");
+        assert_eq!(mnemonic.words[2].word(), "bacon");
+        assert_eq!(mnemonic.words[12].word(), "humble");
+        assert_eq!(mnemonic.words[22].word(), "goose");
+        assert_eq!(mnemonic.words[23].word(), "mandate");
     }
 
     #[test]
@@ -134,18 +154,18 @@ mod tests {
         let zoo: Mnemonic = "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"
             .try_into()
             .unwrap();
-        assert_eq!(zoo.words[0].index.clone().into_inner(), 2047);
-        assert_eq!(zoo.words[1].index.clone().into_inner(), 2047);
-        assert_eq!(zoo.words[10].index.clone().into_inner(), 2047);
-        assert_eq!(zoo.words[11].index.clone().into_inner(), 2037);
+        assert_eq!(zoo.words[0].index().clone().into_inner(), 2047);
+        assert_eq!(zoo.words[1].index().clone().into_inner(), 2047);
+        assert_eq!(zoo.words[10].index().clone().into_inner(), 2047);
+        assert_eq!(zoo.words[11].index().clone().into_inner(), 2037);
 
         let abandon: Mnemonic = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
             .try_into()
             .unwrap();
-        assert_eq!(abandon.words[0].index.clone().into_inner(), 0);
-        assert_eq!(abandon.words[1].index.clone().into_inner(), 0);
-        assert_eq!(abandon.words[10].index.clone().into_inner(), 0);
-        assert_eq!(abandon.words[11].index.clone().into_inner(), 3);
+        assert_eq!(abandon.words[0].index().clone().into_inner(), 0);
+        assert_eq!(abandon.words[1].index().clone().into_inner(), 0);
+        assert_eq!(abandon.words[10].index().clone().into_inner(), 0);
+        assert_eq!(abandon.words[11].index().clone().into_inner(), 3);
     }
 
     #[test]

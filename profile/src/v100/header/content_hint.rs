@@ -109,7 +109,7 @@ impl ContentHint {
 #[cfg(test)]
 mod tests {
 
-    use wallet_kit_common::json::{
+    use wallet_kit_common::{
         assert_eq_after_json_roundtrip, assert_json_fails, assert_json_roundtrip,
         assert_ne_after_json_roundtrip,
     };

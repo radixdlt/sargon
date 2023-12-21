@@ -5,6 +5,9 @@ use super::{
 use enum_as_inner::EnumAsInner;
 use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
 
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
 /// A unique and stable identifier of a FactorSource, e.g. a
 /// DeviceFactorSource being a mnemonic securely stored in a
 /// device (phone), where the ID of it is the hash of a special
@@ -75,16 +78,21 @@ impl Serialize for FactorSourceID {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl FactorSourceID {
+impl HasPlaceholder for FactorSourceID {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         FactorSourceID::Hash(FactorSourceIDFromHash::placeholder())
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    fn placeholder_other() -> Self {
+        FactorSourceID::Hash(FactorSourceIDFromHash::placeholder_other())
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use crate::v100::factors::{
         factor_source_id_from_address::FactorSourceIDFromAddress,
@@ -92,6 +100,23 @@ mod tests {
     };
 
     use super::FactorSourceID;
+
+    #[test]
+    fn equality() {
+        assert_eq!(FactorSourceID::placeholder(), FactorSourceID::placeholder());
+        assert_eq!(
+            FactorSourceID::placeholder_other(),
+            FactorSourceID::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            FactorSourceID::placeholder(),
+            FactorSourceID::placeholder_other()
+        );
+    }
 
     #[test]
     fn json_roundtrip_from_hash() {

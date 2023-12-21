@@ -1,25 +1,18 @@
-use hierarchical_deterministic::{
-    bip32::hd_path_component::HDPathValue,
-    cap26::{
-        cap26_key_kind::CAP26KeyKind, cap26_path::paths::account_path::AccountPath,
-        cap26_repr::CAP26Repr,
-    },
-    derivation::mnemonic_with_passphrase::MnemonicWithPassphrase,
-};
-use wallet_kit_common::network_id::NetworkID;
+use derive_getters::Getters;
+use hd::{AccountPath, CAP26KeyKind, CAP26Repr, HDPathValue, MnemonicWithPassphrase};
+use wallet_kit_common::NetworkID;
 
-use crate::v100::factors::{
-    factor_source_id_from_hash::FactorSourceIDFromHash,
-    hd_transaction_signing_factor_instance::HDFactorInstanceAccountCreation,
-    hierarchical_deterministic_factor_instance::HierarchicalDeterministicFactorInstance,
-    is_factor_source::IsFactorSource,
+use crate::v100::{
+    FactorSourceIDFromHash, HDFactorInstanceAccountCreation,
+    HierarchicalDeterministicFactorInstance, IsFactorSource,
 };
 
-use super::device_factor_source::device_factor_source::DeviceFactorSource;
+use super::DeviceFactorSource;
 
+#[derive(Getters)]
 pub struct PrivateHierarchicalDeterministicFactorSource {
-    pub mnemonic_with_passphrase: MnemonicWithPassphrase,
-    pub factor_source: DeviceFactorSource,
+    mnemonic_with_passphrase: MnemonicWithPassphrase,
+    factor_source: DeviceFactorSource,
 }
 
 impl PrivateHierarchicalDeterministicFactorSource {

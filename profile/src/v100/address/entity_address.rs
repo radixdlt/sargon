@@ -1,16 +1,15 @@
-use hierarchical_deterministic::cap26::cap26_path::paths::is_entity_path::IsEntityPath;
+use hd::IsEntityPath;
 use radix_engine_common::crypto::PublicKey as EnginePublicKey;
 use radix_engine_toolkit::functions::derive::{
     virtual_account_address_from_public_key, virtual_identity_address_from_public_key,
 };
 use radix_engine_toolkit_json::models::scrypto::node_id::SerializableNodeIdInternal;
-use wallet_kit_common::network_id::NetworkID;
+use wallet_kit_common::NetworkID;
 
-use crate::v100::{
-    entity::abstract_entity_type::AbstractEntityType,
-    factors::hd_transaction_signing_factor_instance::HDFactorInstanceTransactionSigning,
-};
-use wallet_kit_common::error::common_error::CommonError as Error;
+use wallet_kit_common::CommonError as Error;
+
+use crate::v100::AbstractEntityType;
+use crate::v100::HDFactorInstanceTransactionSigning;
 
 use super::decode_address_helper::decode_address;
 
@@ -46,14 +45,18 @@ pub trait EntityAddress: Sized {
         return Self::__with_address_and_network_id(&address, network_id);
     }
 
+    #[cfg(not(tarpaulin_include))] // false negative
     fn from_hd_factor_instance_virtual_entity_creation<E: IsEntityPath>(
         hd_factor_instance_virtual_entity_creation: HDFactorInstanceTransactionSigning<E>,
     ) -> Self {
         Self::from_public_key(
             hd_factor_instance_virtual_entity_creation
                 .public_key()
-                .public_key,
-            hd_factor_instance_virtual_entity_creation.path.network_id(),
+                .public_key()
+                .clone(),
+            hd_factor_instance_virtual_entity_creation
+                .path()
+                .network_id(),
         )
     }
 
@@ -63,9 +66,7 @@ pub trait EntityAddress: Sized {
             return Err(Error::MismatchingEntityTypeWhileDecodingAddress);
         }
 
-        if !hrp.starts_with(&entity_type.hrp()) {
-            return Err(Error::MismatchingHRPWhileDecodingAddress);
-        }
+        assert!(hrp.starts_with(&entity_type.hrp()), "Mismatching HRP while decoding address, this should never happen. Did internal function `decode_address` change? Or did you accidentally change or impl the `hrp` method on EntityType?");
 
         return Ok(Self::__with_address_and_network_id(s, network_id));
     }

@@ -2,11 +2,10 @@ use std::cell::RefCell;
 
 use serde::{Deserialize, Serialize};
 
-use super::{
-    app_preferences::app_preferences::AppPreferences,
-    factors::factor_sources::factor_sources::FactorSources, header::header::Header,
-    networks::networks::Networks,
-};
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
+use super::{AppPreferences, FactorSources, Header, Networks};
 
 /// Representation of the Radix Wallet, contains a list of
 /// users Accounts, Personas, Authorized Dapps per network
@@ -90,8 +89,8 @@ impl Profile {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl Profile {
-    pub fn placeholder() -> Self {
+impl HasPlaceholder for Profile {
+    fn placeholder() -> Self {
         let networks = Networks::placeholder();
         let header = Header::placeholder();
         header.set_content_hint(networks.content_hint());
@@ -102,20 +101,37 @@ impl Profile {
             networks,
         )
     }
+
+    fn placeholder_other() -> Self {
+        let networks = Networks::placeholder_other();
+        let header = Header::placeholder_other();
+        header.set_content_hint(networks.content_hint());
+        Self::with(
+            header,
+            FactorSources::placeholder_other(),
+            AppPreferences::placeholder_other(),
+            networks,
+        )
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use identified_vec::IsIdentifiedVecOf;
-    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
-    use crate::v100::{
-        app_preferences::app_preferences::AppPreferences,
-        factors::factor_sources::factor_sources::FactorSources, header::header::Header,
-        networks::networks::Networks,
-    };
+    use super::{AppPreferences, FactorSources, Header, Networks, Profile};
 
-    use super::Profile;
+    #[test]
+    fn inequality() {
+        assert_ne!(Profile::placeholder(), Profile::placeholder_other());
+    }
+
+    #[test]
+    fn equality() {
+        assert_eq!(Profile::placeholder(), Profile::placeholder());
+        assert_eq!(Profile::placeholder_other(), Profile::placeholder_other());
+    }
 
     #[should_panic(expected = "FactorSources empty, which must never happen.")]
     #[test]

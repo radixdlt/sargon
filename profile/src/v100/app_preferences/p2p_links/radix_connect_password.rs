@@ -1,6 +1,9 @@
 use radix_engine_common::crypto::Hash;
 use serde::{Deserialize, Serialize};
-use wallet_kit_common::{hash::hash, types::hex_32bytes::Hex32Bytes};
+use wallet_kit_common::{hash, Hex32Bytes};
+
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
 
 /// The hash of the connection password is used to connect to the Radix Connect Signaling Server,
 /// over web sockets. The actual `ConnectionPassword` is used to encrypt all messages sent via
@@ -20,12 +23,19 @@ impl RadixConnectPassword {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl RadixConnectPassword {
+impl HasPlaceholder for RadixConnectPassword {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::new(Hex32Bytes::placeholder())
     }
 
+    fn placeholder_other() -> Self {
+        Self::new(Hex32Bytes::placeholder_other())
+    }
+}
+
+#[cfg(any(test, feature = "placeholder"))]
+impl RadixConnectPassword {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_aced() -> Self {
         Self::new(Hex32Bytes::placeholder_aced())
@@ -61,12 +71,32 @@ impl RadixConnectPassword {
 mod tests {
     use radix_engine_common::prelude::HashSet;
     use serde_json::json;
-    use wallet_kit_common::json::{
+    use wallet_kit_common::{
         assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
-        assert_json_value_ne_after_roundtrip,
+        assert_json_value_ne_after_roundtrip, HasPlaceholder,
     };
 
     use super::RadixConnectPassword;
+
+    #[test]
+    fn equality() {
+        assert_eq!(
+            RadixConnectPassword::placeholder(),
+            RadixConnectPassword::placeholder()
+        );
+        assert_eq!(
+            RadixConnectPassword::placeholder_other(),
+            RadixConnectPassword::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            RadixConnectPassword::placeholder(),
+            RadixConnectPassword::placeholder_other()
+        );
+    }
 
     #[test]
     fn json_roundtrip() {

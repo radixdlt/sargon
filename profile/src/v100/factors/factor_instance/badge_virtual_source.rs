@@ -1,4 +1,8 @@
-use hierarchical_deterministic::derivation::hierarchical_deterministic_public_key::HierarchicalDeterministicPublicKey;
+use hd::HierarchicalDeterministicPublicKey;
+
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
 use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 #[serde(remote = "Self")]
@@ -55,18 +59,44 @@ impl Serialize for FactorInstanceBadgeVirtualSource {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl FactorInstanceBadgeVirtualSource {
+impl HasPlaceholder for FactorInstanceBadgeVirtualSource {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::HierarchicalDeterministic(HierarchicalDeterministicPublicKey::placeholder())
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    fn placeholder_other() -> Self {
+        Self::HierarchicalDeterministic(HierarchicalDeterministicPublicKey::placeholder_other())
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use super::FactorInstanceBadgeVirtualSource;
+
+    #[test]
+    fn equality() {
+        assert_eq!(
+            FactorInstanceBadgeVirtualSource::placeholder(),
+            FactorInstanceBadgeVirtualSource::placeholder()
+        );
+        assert_eq!(
+            FactorInstanceBadgeVirtualSource::placeholder_other(),
+            FactorInstanceBadgeVirtualSource::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            FactorInstanceBadgeVirtualSource::placeholder(),
+            FactorInstanceBadgeVirtualSource::placeholder_other()
+        );
+    }
+
     #[test]
     fn json_roundtrip() {
         let model = FactorInstanceBadgeVirtualSource::placeholder();

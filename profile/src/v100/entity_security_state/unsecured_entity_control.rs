@@ -1,26 +1,26 @@
-use hierarchical_deterministic::cap26::cap26_key_kind::CAP26KeyKind;
+use derive_getters::Getters;
 use serde::{Deserialize, Serialize};
 
-use crate::v100::factors::{
-    hd_transaction_signing_factor_instance::HDFactorInstanceAccountCreation,
-    hierarchical_deterministic_factor_instance::HierarchicalDeterministicFactorInstance,
-};
-use wallet_kit_common::error::common_error::CommonError as Error;
+use crate::v100::{HDFactorInstanceAccountCreation, HierarchicalDeterministicFactorInstance};
+use wallet_kit_common::CommonError as Error;
+
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
 
 /// Basic security control of an unsecured entity. When said entity
 /// is "securified" it will no longer be controlled by this `UnsecuredEntityControl`
 /// but rather by an `AccessControl`. It is a name space holding the
 /// single factor instance which was used to create
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Getters)]
 #[serde(rename_all = "camelCase")]
 pub struct UnsecuredEntityControl {
     // /// The factor instance which was used to create this unsecured entity, which
     // /// also controls this entity and is used for signing transactions.
-    pub transaction_signing: HierarchicalDeterministicFactorInstance,
+    transaction_signing: HierarchicalDeterministicFactorInstance,
 
     /// The factor instance which can be used for ROLA.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub authentication_signing: Option<HierarchicalDeterministicFactorInstance>,
+    authentication_signing: Option<HierarchicalDeterministicFactorInstance>,
 }
 
 impl UnsecuredEntityControl {
@@ -38,6 +38,8 @@ impl UnsecuredEntityControl {
         transaction_signing: HierarchicalDeterministicFactorInstance,
         authentication_signing: Option<HierarchicalDeterministicFactorInstance>,
     ) -> Result<Self, Error> {
+        use hd::CAP26KeyKind;
+
         if let Some(auth) = &authentication_signing {
             if let Some(key_kind) = auth.key_kind() {
                 if key_kind != CAP26KeyKind::AuthenticationSigning {
@@ -64,25 +66,52 @@ impl UnsecuredEntityControl {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl UnsecuredEntityControl {
+impl HasPlaceholder for UnsecuredEntityControl {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::with_transaction_signing_only(HierarchicalDeterministicFactorInstance::placeholder())
             .expect("Valid placeholder")
+    }
+
+    fn placeholder_other() -> Self {
+        Self::with_transaction_signing_only(
+            HierarchicalDeterministicFactorInstance::placeholder_other(),
+        )
+        .expect("Valid placeholder")
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
-    use crate::v100::factors::hierarchical_deterministic_factor_instance::HierarchicalDeterministicFactorInstance;
+    use crate::v100::HierarchicalDeterministicFactorInstance;
 
     use super::UnsecuredEntityControl;
 
     #[test]
+    fn equality() {
+        assert_eq!(
+            UnsecuredEntityControl::placeholder(),
+            UnsecuredEntityControl::placeholder()
+        );
+        assert_eq!(
+            UnsecuredEntityControl::placeholder_other(),
+            UnsecuredEntityControl::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            UnsecuredEntityControl::placeholder(),
+            UnsecuredEntityControl::placeholder_other()
+        );
+    }
+
+    #[test]
     fn with_auth_signing() {
-        let tx_sign = HierarchicalDeterministicFactorInstance::placeholder_transaction_signing();
+        let tx_sign = HierarchicalDeterministicFactorInstance::placeholder();
         let auth_sign = HierarchicalDeterministicFactorInstance::placeholder_auth_signing();
         let control = UnsecuredEntityControl::new(tx_sign, Some(auth_sign.clone())).unwrap();
         assert_eq!(control.authentication_signing, Some(auth_sign));

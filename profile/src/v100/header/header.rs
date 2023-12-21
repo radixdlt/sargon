@@ -6,16 +6,18 @@ use std::{
 #[cfg(any(test, feature = "placeholder"))]
 use std::str::FromStr;
 
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
 use iso8601_timestamp::Timestamp;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use wallet_kit_common::utils::factory::{id, now};
+use wallet_kit_common::{id, now};
 
-use super::{
-    content_hint::ContentHint, device_info::DeviceInfo,
-    profilesnapshot_version::ProfileSnapshotVersion,
-};
+use crate::ProfileSnapshotVersion;
+
+use super::{content_hint::ContentHint, device_info::DeviceInfo};
 
 /// The header of a Profile(Snapshot) contains crucial metadata
 /// about this Profile, such as which JSON data format it is
@@ -149,9 +151,9 @@ impl Header {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl Header {
+impl HasPlaceholder for Header {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         //let date =  NaiveDateTime::parse_from_str("2023-09-11T16:05:56.000Z", "%Y-%m-%dT%H:%M:%S").unwrap();
         let date = Timestamp::parse("2023-09-11T16:05:56Z").unwrap();
         let device = DeviceInfo::with_values(
@@ -168,7 +170,7 @@ impl Header {
     }
 
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_other() -> Self {
+    fn placeholder_other() -> Self {
         //let date =  NaiveDateTime::parse_from_str("2023-09-11T16:05:56.000Z", "%Y-%m-%dT%H:%M:%S").unwrap();
         let date = Timestamp::parse("2023-12-20T16:05:56Z").unwrap();
         let device = DeviceInfo::with_values(
@@ -190,25 +192,25 @@ pub mod tests {
 
     use std::str::FromStr;
 
-    use crate::v100::header::{
-        content_hint::ContentHint, device_info::DeviceInfo,
-        profilesnapshot_version::ProfileSnapshotVersion,
+    use crate::{
+        v100::header::{content_hint::ContentHint, device_info::DeviceInfo},
+        ProfileSnapshotVersion,
     };
     use iso8601_timestamp::Timestamp;
     use uuid::Uuid;
-    use wallet_kit_common::{json::assert_eq_after_json_roundtrip, utils::factory::id};
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, id, HasPlaceholder};
 
     use super::Header;
-
-    #[test]
-    fn inequality() {
-        assert_ne!(Header::placeholder(), Header::placeholder_other());
-    }
 
     #[test]
     fn equality() {
         assert_eq!(Header::placeholder(), Header::placeholder());
         assert_eq!(Header::placeholder_other(), Header::placeholder_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(Header::placeholder(), Header::placeholder_other());
     }
 
     #[test]

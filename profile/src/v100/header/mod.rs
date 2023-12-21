@@ -1,4 +1,7 @@
-pub mod content_hint;
-pub mod device_info;
-pub mod header;
-pub mod profilesnapshot_version;
+mod content_hint;
+mod device_info;
+mod header;
+
+pub use content_hint::*;
+pub use device_info::*;
+pub use header::*;

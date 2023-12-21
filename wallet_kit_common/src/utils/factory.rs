@@ -24,7 +24,7 @@ mod tests {
     use iso8601_timestamp::Timestamp;
     use uuid::Uuid;
 
-    use crate::utils::factory::iso8601;
+    use crate::iso8601;
 
     use super::{date, id, now};
 

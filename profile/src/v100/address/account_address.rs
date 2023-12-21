@@ -1,7 +1,12 @@
-use crate::v100::entity::abstract_entity_type::AbstractEntityType;
+use derive_getters::Getters;
 use serde::{de, Deserializer, Serialize, Serializer};
 use std::fmt::Display;
-use wallet_kit_common::{network_id::NetworkID, utils::string_utils::suffix_string};
+use wallet_kit_common::{suffix_string, NetworkID};
+
+use crate::v100::AbstractEntityType;
+
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
 
 use super::entity_address::EntityAddress;
 
@@ -9,7 +14,7 @@ use super::entity_address::EntityAddress;
 /// that starts with the prefix `"account_"`, dependent on NetworkID, meaning the same
 /// public key used for two AccountAddresses on two different networks will not have
 /// the same address.
-#[derive(Clone, Debug, Default, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Hash, PartialOrd, Ord, Getters)]
 pub struct AccountAddress {
     /// Human readable address of an account. Always starts with `"account_"``, for example:
     ///
@@ -22,12 +27,12 @@ pub struct AccountAddress {
     ///
     /// Addresses are checksummed, as per Bech32. **Only** *Account* addresses starts with
     /// the prefix `account_`.
-    pub address: String,
+    address: String,
 
     /// The network this account address is tied to, i.e. which was used when a public key
     /// hash was used to bech32 encode it. This means that two public key hashes will result
     /// in two different account address on two different networks.
-    pub network_id: NetworkID,
+    network_id: NetworkID,
 }
 
 impl Serialize for AccountAddress {
@@ -89,7 +94,7 @@ impl EntityAddress for AccountAddress {
 }
 
 impl TryInto<AccountAddress> for &str {
-    type Error = wallet_kit_common::error::common_error::CommonError;
+    type Error = wallet_kit_common::CommonError;
 
     /// Tries to deserializes a bech32 address into an `AccountAddress`.
     fn try_into(self) -> Result<AccountAddress, Self::Error> {
@@ -105,12 +110,19 @@ impl Display for AccountAddress {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl AccountAddress {
+impl HasPlaceholder for AccountAddress {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::placeholder_alice()
     }
 
+    fn placeholder_other() -> Self {
+        Self::placeholder_bob()
+    }
+}
+
+#[cfg(any(test, feature = "placeholder"))]
+impl AccountAddress {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_alice() -> Self {
         AccountAddress::try_from_bech32(
@@ -133,16 +145,33 @@ mod tests {
     use radix_engine_common::crypto::{Ed25519PublicKey, PublicKey};
     use serde_json::json;
     use std::str::FromStr;
-    use wallet_kit_common::error::common_error::CommonError as Error;
+    use wallet_kit_common::CommonError as Error;
     use wallet_kit_common::{
-        json::{
+        HasPlaceholder, NetworkID,
+        {
             assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
             assert_json_value_ne_after_roundtrip,
         },
-        network_id::NetworkID,
     };
 
     use crate::v100::address::{account_address::AccountAddress, entity_address::EntityAddress};
+
+    #[test]
+    fn equality() {
+        assert_eq!(AccountAddress::placeholder(), AccountAddress::placeholder());
+        assert_eq!(
+            AccountAddress::placeholder_other(),
+            AccountAddress::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            AccountAddress::placeholder(),
+            AccountAddress::placeholder_other()
+        );
+    }
 
     #[test]
     fn from_bech32() {
@@ -188,35 +217,12 @@ mod tests {
     }
 
     #[test]
-    fn inequality() {
-        assert_ne!(
-            AccountAddress::placeholder_alice(),
-            AccountAddress::placeholder_bob()
-        )
-    }
-
-    #[test]
     fn nebunet() {
         let address = AccountAddress::try_from_bech32(
             "account_tdx_b_1286wrrqrfcrfhthfrtdywe8alney8zu0ja5xrhcq2475ej08m9raqq",
         )
         .unwrap();
         assert_eq!(address.network_id, NetworkID::Nebunet)
-    }
-
-    #[test]
-    fn equality() {
-        let a: AccountAddress =
-            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
-                .try_into()
-                .unwrap();
-
-        assert_eq!(
-            a,
-            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
-                .try_into()
-                .unwrap()
-        )
     }
 
     #[test]

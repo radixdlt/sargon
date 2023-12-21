@@ -1,3 +1,7 @@
-pub mod gateway;
-pub mod gateways;
-pub mod radix_network;
+mod gateway;
+mod gateways;
+mod radix_network;
+
+pub use gateway::*;
+pub use gateways::*;
+pub use radix_network::*;

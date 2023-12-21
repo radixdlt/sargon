@@ -12,8 +12,8 @@ use std::{
     str::FromStr,
 };
 
-use wallet_kit_common::error::common_error::CommonError as Error;
-use wallet_kit_common::network_id::NetworkID;
+use wallet_kit_common::CommonError as Error;
+use wallet_kit_common::NetworkID;
 
 use super::resource_address::ResourceAddress;
 
@@ -59,7 +59,7 @@ impl NonFungibleGlobalId {
 }
 
 impl TryInto<NonFungibleGlobalId> for &str {
-    type Error = wallet_kit_common::error::common_error::CommonError;
+    type Error = wallet_kit_common::CommonError;
 
     /// Tries to deserializes a bech32 address into an `AccountAddress`.
     fn try_into(self) -> Result<NonFungibleGlobalId, Self::Error> {
@@ -79,10 +79,7 @@ impl NonFungibleGlobalId {
             .split(":")
             .map(|p| p.to_string())
             .collect();
-        ResourceAddress {
-            address: parts[0].to_string(),
-            network_id: self.network_id(),
-        }
+        ResourceAddress::new(parts[0].to_string(), self.network_id())
     }
 
     /// Returns the canonical string representation of a NonFungibleGlobalID: "<resource>:<local>"
@@ -106,7 +103,7 @@ mod tests {
 
     use radix_engine_common::data::scrypto::model::NonFungibleLocalId;
     use serde_json::json;
-    use wallet_kit_common::json::{
+    use wallet_kit_common::{
         assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
         assert_json_value_ne_after_roundtrip,
     };
@@ -130,7 +127,7 @@ mod tests {
         let str = "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<value>";
         let id: NonFungibleGlobalId = str.try_into().unwrap();
         assert_eq!(
-            id.resource_address().address,
+            id.resource_address().address(),
             "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha"
         );
     }

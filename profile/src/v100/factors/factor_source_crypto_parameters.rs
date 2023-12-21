@@ -1,10 +1,10 @@
 use std::cell::RefCell;
 
-use hierarchical_deterministic::derivation::derivation_path_scheme::DerivationPathScheme;
+use hd::DerivationPathScheme;
 use identified_vec::{IsIdentifiedVec, IsIdentifiedVecOf, ItemsCloned};
 use serde::{Deserialize, Serialize};
-use wallet_kit_common::error::common_error::CommonError as Error;
-use wallet_kit_common::types::keys::slip10_curve::SLIP10Curve;
+use wallet_kit_common::CommonError as Error;
+use wallet_kit_common::SLIP10Curve;
 
 use crate::identified_vec_via::IdentifiedVecVia;
 
@@ -92,13 +92,11 @@ impl Default for FactorSourceCryptoParameters {
 
 #[cfg(test)]
 mod tests {
-    use hierarchical_deterministic::derivation::derivation_path_scheme::DerivationPathScheme;
-    use wallet_kit_common::{
-        json::assert_eq_after_json_roundtrip, types::keys::slip10_curve::SLIP10Curve,
-    };
+    use hd::DerivationPathScheme;
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, SLIP10Curve};
 
     use super::FactorSourceCryptoParameters;
-    use wallet_kit_common::error::common_error::CommonError as Error;
+    use wallet_kit_common::CommonError as Error;
 
     #[test]
     fn babylon_has_curve25519_as_first_curve() {

@@ -1,8 +1,11 @@
 use crate::{
     identified_vec_via::IdentifiedVecVia,
-    v100::{address::account_address::AccountAddress, entity::account::account::Account},
+    v100::{Account, AccountAddress},
 };
 use identified_vec::{IdentifiedVecOf, IsIdentifiableVecOfVia, IsIdentifiedVec, IsIdentifiedVecOf};
+
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
 
 /// An ordered set of Accounts on a specific network, most commonly
 /// the set is non-empty.
@@ -47,12 +50,19 @@ impl Accounts {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl Accounts {
+impl HasPlaceholder for Accounts {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::placeholder_mainnet()
     }
 
+    /// A placeholder used to facilitate unit tests.
+    fn placeholder_other() -> Self {
+        Self::placeholder_stokenet()
+    }
+}
+#[cfg(any(test, feature = "placeholder"))]
+impl Accounts {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_mainnet() -> Self {
         Self::with_accounts(
@@ -62,11 +72,6 @@ impl Accounts {
             ]
             .into_iter(),
         )
-    }
-
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_other() -> Self {
-        Self::placeholder_stokenet()
     }
 
     /// A placeholder used to facilitate unit tests.
@@ -84,16 +89,9 @@ impl Accounts {
 #[cfg(test)]
 mod tests {
     use identified_vec::IsIdentifiedVec;
-    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
-    use crate::v100::{
-        address::account_address::AccountAddress,
-        entity::{
-            account::{account::Account, appearance_id::AppearanceID},
-            display_name::DisplayName,
-        },
-        networks::network::accounts::Accounts,
-    };
+    use crate::v100::{Account, AccountAddress, Accounts, AppearanceID, DisplayName};
 
     #[test]
     fn default_is_empty() {

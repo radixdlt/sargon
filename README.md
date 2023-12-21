@@ -4,13 +4,32 @@
 
 Middleware that can power Radix Wallet clients (iOS/Android).
 
-## Status
+# Status
 
-`[==========================------------------------]`
+## LOGIC
 
-### Done
+`[===-----------------------------------------------]`
 
-#### Hierarchal Deterministic
+### Hierarchal Deterministic
+
+- [x] BIP39
+- [x] Derivation
+  - [x] Hierarchal Deterministic `secp256k1`
+  - [x] Hierarchal Deterministic `Ed25519`
+- [x] Signing
+  - [x] Hierarchal Deterministic ECDSA (`secp256k1`)
+  - [x] Hierarchal Deterministic EdDSA (`Ed25519`)
+- [x] CAP26
+  - [x] CAP26 AccountPath
+  - [x] CAP26 IdentityPath
+  - [x] CAP26 GetID
+
+## MODELS
+
+`[================================================--]`
+All models have JSON support and `Placeholder` with which "recursively" I've crafted two valid example Profiles.
+
+### Hierarchal Deterministic
 
 - [x] Mnemonic
 - [x] MnemonicWithPassphrase
@@ -24,7 +43,7 @@ Middleware that can power Radix Wallet clients (iOS/Android).
 - [x] HierarchicalDeterministicPrivateKey
 - [x] HierarchicalDeterministicPublicKey
 
-#### Profile Snapshot
+### Profile Snapshot
 
 - [x] Header
   - [x] ContentHint

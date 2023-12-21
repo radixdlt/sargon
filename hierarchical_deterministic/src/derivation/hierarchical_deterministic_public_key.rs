@@ -1,29 +1,30 @@
+use derive_getters::Getters;
 use serde::{Deserialize, Serialize};
-use wallet_kit_common::{network_id::NetworkID, types::keys::public_key::PublicKey};
+use wallet_kit_common::{NetworkID, PublicKey};
 
 use crate::{
-    cap26::{
-        cap26_key_kind::CAP26KeyKind, cap26_path::paths::account_path::AccountPath,
-        cap26_repr::CAP26Repr,
-    },
     derivation::{derivation::Derivation, derivation_path::DerivationPath},
+    AccountPath, BIP44LikePath, CAP26KeyKind, CAP26Repr, Mnemonic,
 };
 
 use super::mnemonic_with_passphrase::MnemonicWithPassphrase;
+
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
 
 /// The **source** of a virtual hierarchical deterministic badge, contains a
 /// derivation path and public key, from which a private key is derived which
 /// produces virtual badges (signatures).
 ///
 /// The `.device` `FactorSource` produces `FactorInstance`s with this kind if badge source.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Getters)]
 #[serde(rename_all = "camelCase")]
 pub struct HierarchicalDeterministicPublicKey {
     /// The expected public key of the private key derived at `derivationPath`
-    pub public_key: PublicKey,
+    public_key: PublicKey,
 
     /// The HD derivation path for the key pair which produces virtual badges (signatures).
-    pub derivation_path: DerivationPath,
+    derivation_path: DerivationPath,
 }
 
 impl HierarchicalDeterministicPublicKey {
@@ -46,9 +47,9 @@ impl HierarchicalDeterministicPublicKey {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl HierarchicalDeterministicPublicKey {
+impl HasPlaceholder for HierarchicalDeterministicPublicKey {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         let mwp = MnemonicWithPassphrase::placeholder();
         let path = AccountPath::new(NetworkID::Mainnet, CAP26KeyKind::TransactionSigning, 0);
         let private_key = mwp.derive_private_key(path.clone());
@@ -64,14 +65,39 @@ impl HierarchicalDeterministicPublicKey {
             "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b",
             public_key.to_hex()
         );
-        // Self::new(public_key, path.into())
-        return public_key;
+
+        public_key
+    }
+
+    fn placeholder_other() -> Self {
+        let mwp = MnemonicWithPassphrase::with_passphrase(
+            Mnemonic::from_phrase(
+     "habit special recipe upon giraffe manual evil badge dwarf welcome inspire shrug post arrive van",
+            )
+            .unwrap(),
+            "".to_string(),
+        );
+
+        let private_key =
+            mwp.derive_private_key(BIP44LikePath::from_str("m/44H/1022H/0H/0/5H").unwrap());
+
+        assert_eq!(
+            "111323d507d9d690836798e3ef2e5292cfd31092b75b9b59fa584ff593a3d7e4",
+            private_key.to_hex()
+        );
+        let public_key = private_key.public_key();
+        assert_eq!(
+            "03e78cdb2e0b7ea6e55e121a58560ccf841a913d3a4a9b8349e0ef00c2102f48d8",
+            public_key.to_hex()
+        );
+
+        public_key
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use super::HierarchicalDeterministicPublicKey;
 

@@ -1,7 +1,4 @@
-use hierarchical_deterministic::{
-    bip39::mnemonic::Mnemonic, bip44::bip44_like_path::BIP44LikePath,
-    derivation::mnemonic_with_passphrase::MnemonicWithPassphrase,
-};
+use hd::{BIP44LikePath, Mnemonic, MnemonicWithPassphrase};
 
 #[test]
 fn derive_a_secp256k1_key_with_bip44_olympia() {

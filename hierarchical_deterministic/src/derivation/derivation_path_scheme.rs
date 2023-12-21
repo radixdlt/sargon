@@ -1,6 +1,6 @@
 use identified_vec::Identifiable;
 use serde::{Deserialize, Serialize};
-use wallet_kit_common::types::keys::slip10_curve::SLIP10Curve;
+use wallet_kit_common::SLIP10Curve;
 
 /// Which derivation path to used for some particular HD operations
 /// such as signing or public key derivation. Radix Babylon introduces
@@ -52,11 +52,11 @@ mod tests {
     use identified_vec::Identifiable;
     use serde_json::json;
     use wallet_kit_common::{
-        json::{
+        SLIP10Curve,
+        {
             assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
             assert_json_value_ne_after_roundtrip,
         },
-        types::keys::slip10_curve::SLIP10Curve,
     };
 
     use crate::derivation::derivation_path_scheme::DerivationPathScheme;

@@ -5,6 +5,9 @@ use std::{
 
 use serde::{Deserialize, Serialize};
 
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
 // FIXME: MFA this is in fact not used, so ok to be a `bool` for now. The AppPreferences Security type has
 // a field `structure_configuration_references` but no client can populate it yet, so the list will always
 // be empty, thus save to used a serializable trivial type such as `bool` as a placeholder for now.
@@ -58,23 +61,29 @@ impl Default for Security {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl Security {
+impl HasPlaceholder for Security {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::new(true, true, BTreeSet::new())
     }
 
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_other() -> Self {
+    fn placeholder_other() -> Self {
         Self::new(false, false, BTreeSet::new())
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use super::Security;
+
+    #[test]
+    fn equality() {
+        assert_eq!(Security::placeholder(), Security::placeholder());
+        assert_eq!(Security::placeholder_other(), Security::placeholder_other());
+    }
 
     #[test]
     fn inequality() {

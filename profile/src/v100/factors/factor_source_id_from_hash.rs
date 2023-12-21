@@ -1,22 +1,23 @@
-use hierarchical_deterministic::{
-    cap26::cap26_path::paths::getid_path::GetIDPath,
-    derivation::mnemonic_with_passphrase::MnemonicWithPassphrase,
-};
+use derive_getters::Getters;
+use hd::{GetIDPath, MnemonicWithPassphrase};
 use radix_engine_common::crypto::{blake2b_256_hash, Hash};
 use serde::{Deserialize, Serialize};
-use wallet_kit_common::types::hex_32bytes::Hex32Bytes;
+use wallet_kit_common::Hex32Bytes;
 
 use super::factor_source_kind::FactorSourceKind;
 
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
 /// FactorSourceID from the blake2b hash of the special HD public key derived at `CAP26::GetID`,
 /// for a certain `FactorSourceKind`
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Getters)]
 pub struct FactorSourceIDFromHash {
     /// The kind of the FactorSource this ID refers to, typically `device` or `ledger`.
-    pub kind: FactorSourceKind,
+    kind: FactorSourceKind,
 
     /// The blake2b hash of the special HD public key derived at `CAP26::GetID`.
-    pub body: Hex32Bytes,
+    body: Hex32Bytes,
 }
 
 impl ToString for FactorSourceIDFromHash {
@@ -48,13 +49,20 @@ impl FactorSourceIDFromHash {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl FactorSourceIDFromHash {
+impl HasPlaceholder for FactorSourceIDFromHash {
     /// A placeholder used to facilitate unit tests, just an alias
     /// for `placeholder_device`
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::placeholder_device()
     }
 
+    fn placeholder_other() -> Self {
+        Self::placeholder_ledger()
+    }
+}
+
+#[cfg(any(test, feature = "placeholder"))]
+impl FactorSourceIDFromHash {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_device() -> Self {
         Self::new_for_device(MnemonicWithPassphrase::placeholder())
@@ -71,12 +79,30 @@ impl FactorSourceIDFromHash {
 
 #[cfg(test)]
 mod tests {
-    use hierarchical_deterministic::{
-        bip39::mnemonic::Mnemonic, derivation::mnemonic_with_passphrase::MnemonicWithPassphrase,
-    };
-    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
+    use hd::{Mnemonic, MnemonicWithPassphrase};
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use super::FactorSourceIDFromHash;
+
+    #[test]
+    fn equality() {
+        assert_eq!(
+            FactorSourceIDFromHash::placeholder(),
+            FactorSourceIDFromHash::placeholder()
+        );
+        assert_eq!(
+            FactorSourceIDFromHash::placeholder_other(),
+            FactorSourceIDFromHash::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            FactorSourceIDFromHash::placeholder(),
+            FactorSourceIDFromHash::placeholder_other()
+        );
+    }
 
     #[test]
     fn json_roundtrip_placeholder() {

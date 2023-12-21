@@ -1,6 +1,9 @@
 use derive_getters::Getters;
 use serde::{Deserialize, Serialize};
 
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
 /// Settings related to displaying of information to the user inside the app.
 ///
 /// **N.B. neither of these settings are in fact not yet used by clients.**
@@ -31,14 +34,14 @@ impl Default for AppDisplay {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl AppDisplay {
+impl HasPlaceholder for AppDisplay {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::new(true, FiatCurrency::default())
     }
 
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_other() -> Self {
+    fn placeholder_other() -> Self {
         Self::new(false, FiatCurrency::default())
     }
 }
@@ -60,10 +63,20 @@ impl Default for FiatCurrency {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::HasPlaceholder;
 
     use super::AppDisplay;
     use super::FiatCurrency;
+
+    #[test]
+    fn equality() {
+        assert_eq!(AppDisplay::placeholder(), AppDisplay::placeholder());
+        assert_eq!(
+            AppDisplay::placeholder_other(),
+            AppDisplay::placeholder_other()
+        );
+    }
 
     #[test]
     fn inequality() {

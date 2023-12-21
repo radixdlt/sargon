@@ -1,12 +1,9 @@
 use serde::{de, Deserializer, Serialize, Serializer};
-use wallet_kit_common::error::hdpath_error::HDPathError;
+use wallet_kit_common::HDPathError;
 
 use crate::{
-    bip32::{hd_path::HDPath, hd_path_component::HDPathValue},
-    derivation::{
-        derivation::Derivation, derivation_path::DerivationPath,
-        derivation_path_scheme::DerivationPathScheme,
-    },
+    bip32::{HDPath, HDPathValue},
+    Derivation, DerivationPath, DerivationPathScheme,
 };
 
 /// Use it with `GetIDPath::default()` to create the path `m/44'/1022'/365'`
@@ -93,11 +90,10 @@ impl TryInto<GetIDPath> for &str {
 mod tests {
     use serde_json::json;
     use wallet_kit_common::{
-        error::hdpath_error::HDPathError,
-        json::{assert_json_value_eq_after_roundtrip, assert_json_value_fails},
+        HDPathError, {assert_json_value_eq_after_roundtrip, assert_json_value_fails},
     };
 
-    use crate::derivation::derivation::Derivation;
+    use crate::Derivation;
 
     use super::GetIDPath;
 

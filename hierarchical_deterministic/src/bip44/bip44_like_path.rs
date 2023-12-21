@@ -1,15 +1,11 @@
 use serde::{de, Deserializer, Serialize, Serializer};
-use wallet_kit_common::error::hdpath_error::HDPathError;
+use wallet_kit_common::HDPathError;
+
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
 
 use crate::{
-    bip32::{
-        hd_path::HDPath,
-        hd_path_component::{HDPathComponent, HDPathValue},
-    },
-    derivation::{
-        derivation::Derivation, derivation_path::DerivationPath,
-        derivation_path_scheme::DerivationPathScheme,
-    },
+    Derivation, DerivationPath, DerivationPathScheme, HDPath, HDPathComponent, HDPathValue,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -104,10 +100,15 @@ impl TryInto<BIP44LikePath> for &str {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl BIP44LikePath {
+impl HasPlaceholder for BIP44LikePath {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::from_str("m/44H/1022H/0H/0/0H").expect("Valid placeholder")
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    fn placeholder_other() -> Self {
+        Self::from_str("m/44H/1022H/0H/0/1H").expect("Valid placeholder")
     }
 }
 
@@ -115,13 +116,28 @@ impl BIP44LikePath {
 mod tests {
     use serde_json::json;
     use wallet_kit_common::{
-        error::hdpath_error::HDPathError,
-        json::{assert_json_value_eq_after_roundtrip, assert_json_value_ne_after_roundtrip},
+        assert_json_value_eq_after_roundtrip, assert_json_value_ne_after_roundtrip, HDPathError,
+        HasPlaceholder,
     };
 
-    use crate::derivation::derivation::Derivation;
+    use crate::{BIP44LikePath, Derivation};
 
-    use super::BIP44LikePath;
+    #[test]
+    fn equality() {
+        assert_eq!(BIP44LikePath::placeholder(), BIP44LikePath::placeholder());
+        assert_eq!(
+            BIP44LikePath::placeholder_other(),
+            BIP44LikePath::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            BIP44LikePath::placeholder(),
+            BIP44LikePath::placeholder_other()
+        );
+    }
 
     #[test]
     fn string_roundtrip() {

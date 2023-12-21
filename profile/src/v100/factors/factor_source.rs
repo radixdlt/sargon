@@ -2,14 +2,12 @@ use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializ
 
 use enum_as_inner::EnumAsInner;
 
+#[cfg(any(test, feature = "placeholder"))]
+use wallet_kit_common::HasPlaceholder;
+
 use super::{
-    factor_source_id::FactorSourceID,
-    factor_source_kind::FactorSourceKind,
-    factor_sources::{
-        device_factor_source::device_factor_source::DeviceFactorSource,
-        ledger_hardware_wallet_factor_source::ledger_hardware_wallet_factor_source::LedgerHardwareWalletFactorSource,
-    },
-    is_factor_source::IsFactorSource,
+    DeviceFactorSource, FactorSourceID, FactorSourceKind, IsFactorSource,
+    LedgerHardwareWalletFactorSource,
 };
 #[derive(Serialize, Deserialize, Clone, EnumAsInner, Debug, PartialEq, Eq)]
 #[serde(remote = "Self")]
@@ -89,6 +87,17 @@ impl Serialize for FactorSource {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
+impl HasPlaceholder for FactorSource {
+    fn placeholder() -> Self {
+        Self::placeholder_device()
+    }
+
+    fn placeholder_other() -> Self {
+        Self::placeholder_ledger()
+    }
+}
+
+#[cfg(any(test, feature = "placeholder"))]
 impl FactorSource {
     pub fn placeholder_device() -> Self {
         Self::placeholder_device_babylon()
@@ -109,18 +118,30 @@ impl FactorSource {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
-    use crate::v100::factors::{
-        factor_source_kind::FactorSourceKind,
-        factor_sources::{
-            device_factor_source::device_factor_source::DeviceFactorSource,
-            ledger_hardware_wallet_factor_source::ledger_hardware_wallet_factor_source::LedgerHardwareWalletFactorSource,
-        },
-        is_factor_source::IsFactorSource,
+    use crate::v100::{
+        DeviceFactorSource, FactorSourceKind, IsFactorSource, LedgerHardwareWalletFactorSource,
     };
 
     use super::FactorSource;
+
+    #[test]
+    fn equality() {
+        assert_eq!(FactorSource::placeholder(), FactorSource::placeholder());
+        assert_eq!(
+            FactorSource::placeholder_other(),
+            FactorSource::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            FactorSource::placeholder(),
+            FactorSource::placeholder_other()
+        );
+    }
 
     #[test]
     fn factor_source_id_device() {

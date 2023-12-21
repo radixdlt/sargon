@@ -1,5 +1,11 @@
-pub mod ed25519;
-pub mod private_key;
-pub mod public_key;
-pub mod secp256k1;
-pub mod slip10_curve;
+mod ed25519;
+mod private_key;
+mod public_key;
+mod secp256k1;
+mod slip10_curve;
+
+pub use ed25519::*;
+pub use private_key::*;
+pub use public_key::*;
+pub use secp256k1::*;
+pub use slip10_curve::*;

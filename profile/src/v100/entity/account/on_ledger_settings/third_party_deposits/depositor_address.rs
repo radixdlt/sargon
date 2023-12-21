@@ -1,8 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::v100::address::{
-    non_fungible_global_id::NonFungibleGlobalId, resource_address::ResourceAddress,
-};
+use crate::v100::{NonFungibleGlobalId, ResourceAddress};
 
 /// The addresses that can be added as exception to the `DepositRule`
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -15,7 +13,7 @@ pub enum DepositorAddress {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::json::assert_eq_after_json_roundtrip;
+    use wallet_kit_common::assert_eq_after_json_roundtrip;
 
     use super::DepositorAddress;
 

@@ -1,8 +1,11 @@
-use crate::{error::key_error::KeyError as Error, types::hex_32bytes::Hex32Bytes};
+use crate::{Hex32Bytes, KeyError as Error};
 use radix_engine_common::crypto::IsHash;
 use transaction::signing::secp256k1::{
     Secp256k1PrivateKey as EngineSecp256k1PrivateKey, Secp256k1Signature,
 };
+
+#[cfg(any(test, feature = "placeholder"))]
+use crate::HasPlaceholder;
 
 use super::public_key::Secp256k1PublicKey;
 use std::fmt::{Debug, Formatter};
@@ -32,6 +35,8 @@ impl PartialEq for Secp256k1PrivateKey {
         self.to_bytes() == other.to_bytes()
     }
 }
+
+impl Eq for Secp256k1PrivateKey {}
 
 impl Debug for Secp256k1PrivateKey {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -83,7 +88,7 @@ impl Secp256k1PrivateKey {
 }
 
 impl TryInto<Secp256k1PrivateKey> for &str {
-    type Error = crate::error::key_error::KeyError;
+    type Error = crate::KeyError;
 
     fn try_into(self) -> Result<Secp256k1PrivateKey, Self::Error> {
         Secp256k1PrivateKey::from_str(self)
@@ -91,7 +96,7 @@ impl TryInto<Secp256k1PrivateKey> for &str {
 }
 
 impl TryFrom<&[u8]> for Secp256k1PrivateKey {
-    type Error = crate::error::key_error::KeyError;
+    type Error = crate::KeyError;
 
     fn try_from(slice: &[u8]) -> Result<Secp256k1PrivateKey, Self::Error> {
         Secp256k1PrivateKey::from_bytes(slice)
@@ -99,12 +104,19 @@ impl TryFrom<&[u8]> for Secp256k1PrivateKey {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
-impl Secp256k1PrivateKey {
+impl HasPlaceholder for Secp256k1PrivateKey {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
+    fn placeholder() -> Self {
         Self::placeholder_alice()
     }
 
+    fn placeholder_other() -> Self {
+        Self::placeholder_bob()
+    }
+}
+
+#[cfg(any(test, feature = "placeholder"))]
+impl Secp256k1PrivateKey {
     /// `d78b6578b33f3446bdd9d09d057d6598bc915fec4008a54c509dc3b8cdc7dbe5`
     /// expected public key uncompressed:
     /// `04517b88916e7f315bb682f9926b14bc67a0e4246f8a419b986269e1a7e61fffa71159e5614fb40739f4d22004380670cbc99ee4a2a73899d084098f3a139130c4`
@@ -135,9 +147,29 @@ mod tests {
 
     use transaction::signing::secp256k1::Secp256k1Signature;
 
-    use crate::{error::key_error::KeyError as Error, hash::hash, types::hex_32bytes::Hex32Bytes};
+    use crate::{hash, HasPlaceholder, Hex32Bytes, KeyError as Error};
 
     use super::Secp256k1PrivateKey;
+
+    #[test]
+    fn equality() {
+        assert_eq!(
+            Secp256k1PrivateKey::placeholder(),
+            Secp256k1PrivateKey::placeholder()
+        );
+        assert_eq!(
+            Secp256k1PrivateKey::placeholder_other(),
+            Secp256k1PrivateKey::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            Secp256k1PrivateKey::placeholder(),
+            Secp256k1PrivateKey::placeholder_other()
+        );
+    }
 
     #[test]
     fn sign_and_verify() {
@@ -212,20 +244,6 @@ mod tests {
         assert_eq!(
             Secp256k1PrivateKey::from_bytes(&[0u8; 32]),
             Err(Error::InvalidSecp256k1PrivateKeyFromBytes)
-        );
-    }
-
-    #[test]
-    fn equality() {
-        assert_eq!(
-            Secp256k1PrivateKey::from_str(
-                "0000000000000000000000000000000000000000000000000000000000000001"
-            )
-            .unwrap(),
-            Secp256k1PrivateKey::from_str(
-                "0000000000000000000000000000000000000000000000000000000000000001"
-            )
-            .unwrap()
         );
     }
 
