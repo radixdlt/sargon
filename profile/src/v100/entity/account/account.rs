@@ -13,13 +13,13 @@ use std::{cell::RefCell, cmp::Ordering, fmt::Display, hash::Hasher};
 use wallet_kit_common::NetworkID;
 
 use crate::v100::{
-    address::{account_address::AccountAddress, entity_address::EntityAddress},
     entity::{display_name::DisplayName, entity_flags::EntityFlags},
     entity_security_state::{
         entity_security_state::EntitySecurityState,
         unsecured_entity_control::UnsecuredEntityControl,
     },
     factors::hd_transaction_signing_factor_instance::HDFactorInstanceAccountCreation,
+    AccountAddress, EntityAddress,
 };
 
 use std::hash::Hash;
@@ -339,7 +339,6 @@ mod tests {
     use wallet_kit_common::assert_eq_after_json_roundtrip;
 
     use crate::v100::{
-        address::account_address::AccountAddress,
         entity::{
             account::{
                 appearance_id::AppearanceID,
@@ -357,6 +356,7 @@ mod tests {
             entity_flag::EntityFlag,
             entity_flags::EntityFlags,
         },
+        AccountAddress,
     };
 
     use super::Account;

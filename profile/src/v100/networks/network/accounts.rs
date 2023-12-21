@@ -1,6 +1,6 @@
 use crate::{
     identified_vec_via::IdentifiedVecVia,
-    v100::{address::account_address::AccountAddress, entity::account::account::Account},
+    v100::{entity::account::account::Account, AccountAddress},
 };
 use identified_vec::{IdentifiedVecOf, IsIdentifiableVecOfVia, IsIdentifiedVec, IsIdentifiedVecOf};
 
@@ -87,12 +87,12 @@ mod tests {
     use wallet_kit_common::assert_eq_after_json_roundtrip;
 
     use crate::v100::{
-        address::account_address::AccountAddress,
         entity::{
             account::{account::Account, appearance_id::AppearanceID},
             display_name::DisplayName,
         },
         networks::network::accounts::Accounts,
+        AccountAddress,
     };
 
     #[test]

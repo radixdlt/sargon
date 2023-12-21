@@ -1,7 +1,7 @@
 use derive_getters::Getters;
 use serde::{Deserialize, Serialize};
 
-use crate::v100::address::account_address::AccountAddress;
+use crate::v100::AccountAddress;
 
 use super::factor_source_kind::FactorSourceKind;
 

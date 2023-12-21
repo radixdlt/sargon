@@ -1,7 +1,7 @@
 use derive_getters::Getters;
 use serde::{Deserialize, Serialize};
 
-use crate::v100::address::resource_address::ResourceAddress;
+use crate::v100::ResourceAddress;
 
 use super::deposit_address_exception_rule::DepositAddressExceptionRule;
 
