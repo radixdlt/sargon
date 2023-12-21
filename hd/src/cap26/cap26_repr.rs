@@ -1,10 +1,7 @@
 use wallet_kit_common::{error::hdpath_error::HDPathError, network_id::NetworkID};
 
 use crate::{
-    bip32::{
-        hd_path::HDPath,
-        hd_path_component::{HDPathComponent, HDPathValue},
-    },
+    bip32::{HDPath, HDPathComponent, HDPathValue},
     derivation::derivation::Derivation,
 };
 

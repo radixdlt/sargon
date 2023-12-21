@@ -1,6 +1,6 @@
 use derive_getters::Getters;
-use hierarchical_deterministic::{
-    bip32::hd_path_component::HDPathValue,
+use hd::{
+    bip32::HDPathValue,
     cap26::{
         cap26_key_kind::CAP26KeyKind, cap26_path::paths::account_path::AccountPath,
         cap26_repr::CAP26Repr,

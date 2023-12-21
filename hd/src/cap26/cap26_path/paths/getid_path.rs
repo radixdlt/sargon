@@ -2,7 +2,7 @@ use serde::{de, Deserializer, Serialize, Serializer};
 use wallet_kit_common::error::hdpath_error::HDPathError;
 
 use crate::{
-    bip32::{hd_path::HDPath, hd_path_component::HDPathValue},
+    bip32::{HDPath, HDPathValue},
     derivation::{
         derivation::Derivation, derivation_path::DerivationPath,
         derivation_path_scheme::DerivationPathScheme,

@@ -9,7 +9,7 @@ use wallet_kit_common::types::keys::{
 
 use super::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme};
 use crate::{
-    bip32::hd_path::HDPath,
+    bip32::HDPath,
     bip39::mnemonic::{Mnemonic, Seed},
 };
 use wallet_kit_common::error::hdpath_error::HDPathError as Error;

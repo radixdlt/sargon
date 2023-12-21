@@ -1,5 +1,5 @@
 use derive_getters::Getters;
-use hierarchical_deterministic::derivation::hierarchical_deterministic_public_key::HierarchicalDeterministicPublicKey;
+use hd::derivation::hierarchical_deterministic_public_key::HierarchicalDeterministicPublicKey;
 use serde::{Deserialize, Serialize};
 
 use super::{

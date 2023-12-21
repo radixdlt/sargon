@@ -1,5 +1,5 @@
 use derive_getters::Getters;
-use hierarchical_deterministic::cap26::cap26_key_kind::CAP26KeyKind;
+use hd::cap26::cap26_key_kind::CAP26KeyKind;
 use serde::{Deserialize, Serialize};
 
 use crate::v100::factors::{

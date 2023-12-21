@@ -1,4 +1,4 @@
-use hierarchical_deterministic::{
+use hd::{
     bip39::mnemonic::Mnemonic, bip44::bip44_like_path::BIP44LikePath,
     derivation::mnemonic_with_passphrase::MnemonicWithPassphrase,
 };

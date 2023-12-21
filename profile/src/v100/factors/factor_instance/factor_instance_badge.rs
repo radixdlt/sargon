@@ -1,4 +1,4 @@
-use hierarchical_deterministic::derivation::hierarchical_deterministic_public_key::HierarchicalDeterministicPublicKey;
+use hd::derivation::hierarchical_deterministic_public_key::HierarchicalDeterministicPublicKey;
 use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
 
 use super::badge_virtual_source::FactorInstanceBadgeVirtualSource;
@@ -69,7 +69,7 @@ impl Serialize for FactorInstanceBadge {
 
 #[cfg(test)]
 mod tests {
-    use hierarchical_deterministic::derivation::hierarchical_deterministic_public_key::HierarchicalDeterministicPublicKey;
+    use hd::derivation::hierarchical_deterministic_public_key::HierarchicalDeterministicPublicKey;
     use wallet_kit_common::json::assert_eq_after_json_roundtrip;
 
     use crate::v100::factors::factor_instance::badge_virtual_source::FactorInstanceBadgeVirtualSource;

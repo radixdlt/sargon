@@ -1,5 +1,5 @@
 [package]
-name = "hierarchical_deterministic"
+name = "hd"
 version = "0.1.0"
 edition = "2021"
 

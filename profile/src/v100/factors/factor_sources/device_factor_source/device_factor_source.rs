@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 
-use hierarchical_deterministic::derivation::mnemonic_with_passphrase::MnemonicWithPassphrase;
+use hd::derivation::mnemonic_with_passphrase::MnemonicWithPassphrase;
 use serde::{Deserialize, Serialize};
 
 use crate::v100::factors::{
@@ -135,7 +135,7 @@ impl DeviceFactorSource {
 
 #[cfg(test)]
 mod tests {
-    use hierarchical_deterministic::bip39::bip39_word_count::BIP39WordCount;
+    use hd::bip39::bip39_word_count::BIP39WordCount;
     use wallet_kit_common::json::assert_eq_after_json_roundtrip;
 
     use crate::v100::factors::{

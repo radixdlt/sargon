@@ -1,4 +1,4 @@
-use hierarchical_deterministic::cap26::cap26_path::paths::is_entity_path::IsEntityPath;
+use hd::cap26::cap26_path::paths::is_entity_path::IsEntityPath;
 use radix_engine_common::crypto::PublicKey as EnginePublicKey;
 use radix_engine_toolkit::functions::derive::{
     virtual_account_address_from_public_key, virtual_identity_address_from_public_key,

@@ -1,4 +1,4 @@
-use crate::bip32::{hd_path::HDPath, hd_path_component::HDPathComponent};
+use crate::bip32::{HDPath, HDPathComponent};
 
 use super::{derivation_path::DerivationPath, derivation_path_scheme::DerivationPathScheme};
 

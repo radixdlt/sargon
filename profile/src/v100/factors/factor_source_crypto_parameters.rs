@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 
-use hierarchical_deterministic::derivation::derivation_path_scheme::DerivationPathScheme;
+use hd::derivation::derivation_path_scheme::DerivationPathScheme;
 use identified_vec::{IsIdentifiedVec, IsIdentifiedVecOf, ItemsCloned};
 use serde::{Deserialize, Serialize};
 use wallet_kit_common::error::common_error::CommonError as Error;
@@ -92,7 +92,7 @@ impl Default for FactorSourceCryptoParameters {
 
 #[cfg(test)]
 mod tests {
-    use hierarchical_deterministic::derivation::derivation_path_scheme::DerivationPathScheme;
+    use hd::derivation::derivation_path_scheme::DerivationPathScheme;
     use wallet_kit_common::{
         json::assert_eq_after_json_roundtrip, types::keys::slip10_curve::SLIP10Curve,
     };

@@ -1,5 +1,5 @@
 use derive_getters::Getters;
-use hierarchical_deterministic::{
+use hd::{
     cap26::cap26_path::paths::getid_path::GetIDPath,
     derivation::mnemonic_with_passphrase::MnemonicWithPassphrase,
 };
@@ -72,7 +72,7 @@ impl FactorSourceIDFromHash {
 
 #[cfg(test)]
 mod tests {
-    use hierarchical_deterministic::{
+    use hd::{
         bip39::mnemonic::Mnemonic, derivation::mnemonic_with_passphrase::MnemonicWithPassphrase,
     };
     use wallet_kit_common::json::assert_eq_after_json_roundtrip;

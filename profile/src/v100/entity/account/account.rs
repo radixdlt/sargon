@@ -4,12 +4,9 @@ use crate::v100::factors::factor_sources::{
     private_hierarchical_deterministic_factor_source::PrivateHierarchicalDeterministicFactorSource,
 };
 #[cfg(any(test, feature = "placeholder"))]
-use hierarchical_deterministic::{
-    bip32::hd_path_component::HDPathValue,
-    derivation::mnemonic_with_passphrase::MnemonicWithPassphrase,
-};
+use hd::{bip32::HDPathValue, derivation::mnemonic_with_passphrase::MnemonicWithPassphrase};
 
-use hierarchical_deterministic::{
+use hd::{
     cap26::cap26_path::paths::is_entity_path::HasEntityPath, derivation::derivation::Derivation,
 };
 use identified_vec::Identifiable;

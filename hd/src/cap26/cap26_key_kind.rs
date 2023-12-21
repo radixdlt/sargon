@@ -3,7 +3,7 @@ use std::fmt::Display;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use strum::FromRepr;
 
-use crate::bip32::hd_path_component::HDPathValue;
+use crate::bip32::HDPathValue;
 use enum_as_inner::EnumAsInner;
 
 #[derive(

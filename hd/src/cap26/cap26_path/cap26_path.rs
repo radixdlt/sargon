@@ -1,5 +1,5 @@
 use crate::{
-    bip32::hd_path::HDPath,
+    bip32::HDPath,
     cap26::cap26_repr::CAP26Repr,
     derivation::derivation_path::DerivationPath,
     derivation::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme},

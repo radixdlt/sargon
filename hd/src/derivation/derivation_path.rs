@@ -2,7 +2,7 @@ use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializ
 
 use super::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme};
 use crate::{
-    bip32::hd_path::HDPath,
+    bip32::HDPath,
     bip44::bip44_like_path::BIP44LikePath,
     cap26::cap26_path::{
         cap26_path::CAP26Path,

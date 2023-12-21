@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 
 use derive_getters::Getters;
-use hierarchical_deterministic::bip39::bip39_word_count::BIP39WordCount;
+use hd::bip39::bip39_word_count::BIP39WordCount;
 use serde::{Deserialize, Serialize};
 
 /// Properties describing a DeviceFactorSource to help user disambiguate between
@@ -62,6 +62,7 @@ impl DeviceFactorSourceHint {
 
 #[cfg(test)]
 mod tests {
+    use hd::bip39::bip39_word_count::BIP39WordCount;
     use wallet_kit_common::json::assert_eq_after_json_roundtrip;
 
     use crate::v100::factors::factor_sources::device_factor_source::device_factor_source_hint::DeviceFactorSourceHint;
@@ -94,7 +95,7 @@ mod tests {
         assert_ne!(
             DeviceFactorSourceHint::placeholder_iphone_unknown(),
             DeviceFactorSourceHint::iphone_unknown_model_and_name_with_word_count(
-                hierarchical_deterministic::bip39::bip39_word_count::BIP39WordCount::Eighteen
+                BIP39WordCount::Eighteen
             )
         );
     }

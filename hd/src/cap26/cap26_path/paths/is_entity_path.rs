@@ -1,7 +1,7 @@
 use wallet_kit_common::network_id::NetworkID;
 
 use crate::{
-    bip32::hd_path_component::HDPathValue,
+    bip32::HDPathValue,
     cap26::{cap26_key_kind::CAP26KeyKind, cap26_repr::CAP26Repr},
 };
 

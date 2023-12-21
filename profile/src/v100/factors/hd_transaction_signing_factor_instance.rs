@@ -3,7 +3,7 @@ use super::{
     hierarchical_deterministic_factor_instance::HierarchicalDeterministicFactorInstance,
 };
 use derive_getters::Getters;
-use hierarchical_deterministic::{
+use hd::{
     cap26::cap26_path::{
         cap26_path::CAP26Path,
         paths::{
@@ -100,7 +100,7 @@ impl HDFactorInstanceIdentityCreation {
 
 #[cfg(test)]
 mod tests {
-    use hierarchical_deterministic::{
+    use hd::{
         cap26::{
             cap26_key_kind::CAP26KeyKind,
             cap26_path::paths::{account_path::AccountPath, identity_path::IdentityPath},
