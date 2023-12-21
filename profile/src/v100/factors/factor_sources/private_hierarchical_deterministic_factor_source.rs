@@ -2,14 +2,12 @@ use derive_getters::Getters;
 use hd::{AccountPath, CAP26KeyKind, CAP26Repr, HDPathValue, MnemonicWithPassphrase};
 use wallet_kit_common::NetworkID;
 
-use crate::v100::factors::{
-    factor_source_id_from_hash::FactorSourceIDFromHash,
-    hd_transaction_signing_factor_instance::HDFactorInstanceAccountCreation,
-    hierarchical_deterministic_factor_instance::HierarchicalDeterministicFactorInstance,
-    is_factor_source::IsFactorSource,
+use crate::v100::{
+    FactorSourceIDFromHash, HDFactorInstanceAccountCreation,
+    HierarchicalDeterministicFactorInstance, IsFactorSource,
 };
 
-use super::device_factor_source::device_factor_source::DeviceFactorSource;
+use super::DeviceFactorSource;
 
 #[derive(Getters)]
 pub struct PrivateHierarchicalDeterministicFactorSource {

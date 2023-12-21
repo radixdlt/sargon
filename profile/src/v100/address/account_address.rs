@@ -1,8 +1,9 @@
-use crate::v100::entity::abstract_entity_type::AbstractEntityType;
 use derive_getters::Getters;
 use serde::{de, Deserializer, Serialize, Serializer};
 use std::fmt::Display;
 use wallet_kit_common::{suffix_string, NetworkID};
+
+use crate::v100::AbstractEntityType;
 
 use super::entity_address::EntityAddress;
 

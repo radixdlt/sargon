@@ -1,4 +1,4 @@
-use crate::v100::entity::abstract_entity_type::AbstractEntityType;
+use crate::v100::AbstractEntityType;
 use derive_getters::Getters;
 use serde::{de, Deserializer, Serialize, Serializer};
 use std::fmt::Display;

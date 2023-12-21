@@ -1,10 +1,7 @@
 use derive_getters::Getters;
 use serde::{Deserialize, Serialize};
 
-use crate::v100::factors::{
-    hd_transaction_signing_factor_instance::HDFactorInstanceAccountCreation,
-    hierarchical_deterministic_factor_instance::HierarchicalDeterministicFactorInstance,
-};
+use crate::v100::{HDFactorInstanceAccountCreation, HierarchicalDeterministicFactorInstance};
 use wallet_kit_common::CommonError as Error;
 
 /// Basic security control of an unsecured entity. When said entity
@@ -78,7 +75,7 @@ impl UnsecuredEntityControl {
 mod tests {
     use wallet_kit_common::assert_eq_after_json_roundtrip;
 
-    use crate::v100::factors::hierarchical_deterministic_factor_instance::HierarchicalDeterministicFactorInstance;
+    use crate::v100::HierarchicalDeterministicFactorInstance;
 
     use super::UnsecuredEntityControl;
 

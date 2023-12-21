@@ -3,13 +3,8 @@ use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializ
 use enum_as_inner::EnumAsInner;
 
 use super::{
-    factor_source_id::FactorSourceID,
-    factor_source_kind::FactorSourceKind,
-    factor_sources::{
-        device_factor_source::device_factor_source::DeviceFactorSource,
-        ledger_hardware_wallet_factor_source::ledger_hardware_wallet_factor_source::LedgerHardwareWalletFactorSource,
-    },
-    is_factor_source::IsFactorSource,
+    DeviceFactorSource, FactorSourceID, FactorSourceKind, IsFactorSource,
+    LedgerHardwareWalletFactorSource,
 };
 #[derive(Serialize, Deserialize, Clone, EnumAsInner, Debug, PartialEq, Eq)]
 #[serde(remote = "Self")]
@@ -111,13 +106,8 @@ impl FactorSource {
 mod tests {
     use wallet_kit_common::assert_eq_after_json_roundtrip;
 
-    use crate::v100::factors::{
-        factor_source_kind::FactorSourceKind,
-        factor_sources::{
-            device_factor_source::device_factor_source::DeviceFactorSource,
-            ledger_hardware_wallet_factor_source::ledger_hardware_wallet_factor_source::LedgerHardwareWalletFactorSource,
-        },
-        is_factor_source::IsFactorSource,
+    use crate::v100::{
+        DeviceFactorSource, FactorSourceKind, IsFactorSource, LedgerHardwareWalletFactorSource,
     };
 
     use super::FactorSource;

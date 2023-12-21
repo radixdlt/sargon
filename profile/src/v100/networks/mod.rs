@@ -1,2 +1,5 @@
-pub mod network;
-pub mod networks;
+mod network;
+mod networks;
+
+pub use network::*;
+pub use networks::*;

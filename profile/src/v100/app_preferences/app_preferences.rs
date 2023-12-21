@@ -2,10 +2,7 @@ use std::cell::RefCell;
 
 use serde::{Deserialize, Serialize};
 
-use super::{
-    display::AppDisplay, gateways::gateways::Gateways, p2p_links::p2p_links::P2PLinks,
-    security::Security, transaction::Transaction,
-};
+use super::{AppDisplay, Gateways, P2PLinks, Security, Transaction};
 
 /// Collection of all settings, preferences and configuration related to how the wallet
 /// behaves and looks.
@@ -124,12 +121,7 @@ impl AppPreferences {
 mod tests {
     use wallet_kit_common::assert_eq_after_json_roundtrip;
 
-    use crate::v100::app_preferences::{
-        display::AppDisplay, gateways::gateways::Gateways, p2p_links::p2p_links::P2PLinks,
-        security::Security, transaction::Transaction,
-    };
-
-    use super::AppPreferences;
+    use super::{AppDisplay, AppPreferences, Gateways, P2PLinks, Security, Transaction};
 
     #[test]
     fn get_display() {

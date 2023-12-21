@@ -1,4 +1,4 @@
-use profile::{v100::profile::Profile, ProfileSnapshotVersion};
+use profile::{v100::Profile, ProfileSnapshotVersion};
 use std::{
     env,
     ffi::{OsStr, OsString},

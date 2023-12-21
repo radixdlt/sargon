@@ -13,13 +13,7 @@ use hd::{
 use serde::{de, Deserializer, Serialize, Serializer};
 use wallet_kit_common::{CommonError as Error, PublicKey};
 
-use super::{
-    factor_instance::{
-        factor_instance::FactorInstance, factor_instance_badge::FactorInstanceBadge,
-    },
-    factor_source_id::FactorSourceID,
-    factor_source_id_from_hash::FactorSourceIDFromHash,
-};
+use super::{FactorInstance, FactorInstanceBadge, FactorSourceID, FactorSourceIDFromHash};
 
 /// A virtual hierarchical deterministic `FactorInstance`
 #[derive(Clone, Debug, PartialEq, Eq, Getters)]

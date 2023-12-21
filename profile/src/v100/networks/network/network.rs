@@ -96,7 +96,10 @@ mod tests {
     use identified_vec::{Identifiable, IsIdentifiedVec};
     use wallet_kit_common::{assert_eq_after_json_roundtrip, CommonError, NetworkID};
 
-    use crate::v100::{entity::account::account::Account, networks::network::accounts::Accounts};
+    use crate::{
+        v100::{Account, Accounts},
+        HasPlaceholder,
+    };
 
     use super::Network;
 

@@ -1,9 +1,4 @@
 #[cfg(any(test, feature = "placeholder"))]
-use crate::v100::factors::factor_sources::{
-    device_factor_source::device_factor_source::DeviceFactorSource,
-    private_hierarchical_deterministic_factor_source::PrivateHierarchicalDeterministicFactorSource,
-};
-#[cfg(any(test, feature = "placeholder"))]
 use hd::{HDPathValue, MnemonicWithPassphrase};
 
 use hd::{Derivation, HasEntityPath};
@@ -12,21 +7,18 @@ use serde::{Deserialize, Serialize};
 use std::{cell::RefCell, cmp::Ordering, fmt::Display, hash::Hasher};
 use wallet_kit_common::NetworkID;
 
-use crate::v100::{
-    entity::{display_name::DisplayName, entity_flags::EntityFlags},
-    entity_security_state::{
-        entity_security_state::EntitySecurityState,
-        unsecured_entity_control::UnsecuredEntityControl,
-    },
-    factors::hd_transaction_signing_factor_instance::HDFactorInstanceAccountCreation,
-    AccountAddress, EntityAddress,
-};
-
 use std::hash::Hash;
 
-use super::{
-    appearance_id::AppearanceID, on_ledger_settings::on_ledger_settings::OnLedgerSettings,
+use crate::{
+    v100::{
+        AccountAddress, DeviceFactorSource, DisplayName, EntityAddress, EntityFlags,
+        EntitySecurityState, HDFactorInstanceAccountCreation,
+        PrivateHierarchicalDeterministicFactorSource, UnsecuredEntityControl,
+    },
+    HasPlaceholder,
 };
+
+use super::{AppearanceID, OnLedgerSettings};
 
 /// A network unique account with a unique public address and a set of cryptographic
 /// factors used to control it.
@@ -209,6 +201,19 @@ impl Display for Account {
 }
 
 #[cfg(any(test, feature = "placeholder"))]
+impl HasPlaceholder for Account {
+    /// A placeholder used to facilitate unit tests.
+    fn placeholder() -> Self {
+        Self::placeholder_mainnet()
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    fn placeholder_other() -> Self {
+        Self::placeholder_mainnet_other()
+    }
+}
+
+#[cfg(any(test, feature = "placeholder"))]
 impl Account {
     /// Instantiates an account with a display name, address and appearance id.
     pub fn placeholder_with_values(
@@ -274,13 +279,13 @@ impl Account {
     }
 
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder() -> Self {
-        Self::placeholder_mainnet()
+    pub fn placeholder_mainnet() -> Self {
+        Self::placeholder_mainnet_alice()
     }
 
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_mainnet() -> Self {
-        Self::placeholder_mainnet_alice()
+    pub fn placeholder_mainnet_other() -> Self {
+        Self::placeholder_mainnet_bob()
     }
 
     /// A placeholder used to facilitate unit tests.
@@ -338,25 +343,13 @@ mod tests {
     use radix_engine_common::prelude::HashSet;
     use wallet_kit_common::assert_eq_after_json_roundtrip;
 
-    use crate::v100::{
-        entity::{
-            account::{
-                appearance_id::AppearanceID,
-                on_ledger_settings::{
-                    on_ledger_settings::OnLedgerSettings,
-                    third_party_deposits::{
-                        asset_exception::AssetException,
-                        deposit_address_exception_rule::DepositAddressExceptionRule,
-                        deposit_rule::DepositRule, depositor_address::DepositorAddress,
-                        third_party_deposits::ThirdPartyDeposits,
-                    },
-                },
-            },
-            display_name::DisplayName,
-            entity_flag::EntityFlag,
-            entity_flags::EntityFlags,
+    use crate::{
+        v100::{
+            AccountAddress, AppearanceID, AssetException, DepositAddressExceptionRule, DepositRule,
+            DepositorAddress, DisplayName, EntityFlag, EntityFlags, OnLedgerSettings,
+            ThirdPartyDeposits,
         },
-        AccountAddress,
+        HasPlaceholder,
     };
 
     use super::Account;

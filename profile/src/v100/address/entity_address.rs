@@ -6,11 +6,10 @@ use radix_engine_toolkit::functions::derive::{
 use radix_engine_toolkit_json::models::scrypto::node_id::SerializableNodeIdInternal;
 use wallet_kit_common::NetworkID;
 
-use crate::v100::{
-    entity::abstract_entity_type::AbstractEntityType,
-    factors::hd_transaction_signing_factor_instance::HDFactorInstanceTransactionSigning,
-};
 use wallet_kit_common::CommonError as Error;
+
+use crate::v100::AbstractEntityType;
+use crate::v100::HDFactorInstanceTransactionSigning;
 
 use super::decode_address_helper::decode_address;
 

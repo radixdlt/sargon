@@ -1,10 +1,17 @@
 mod address;
-pub mod app_preferences;
-pub mod entity;
-pub mod entity_security_state;
-pub mod factors;
-pub mod header;
-pub mod networks;
-pub mod profile;
+mod app_preferences;
+mod entity;
+mod entity_security_state;
+mod factors;
+mod header;
+mod networks;
+mod profile;
 
 pub use address::*;
+pub use app_preferences::*;
+pub use entity::*;
+pub use entity_security_state::*;
+pub use factors::*;
+pub use header::*;
+pub use networks::*;
+pub use profile::*;

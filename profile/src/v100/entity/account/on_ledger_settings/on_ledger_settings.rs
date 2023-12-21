@@ -2,7 +2,7 @@ use std::cell::{Ref, RefCell};
 
 use serde::{Deserialize, Serialize};
 
-use super::third_party_deposits::third_party_deposits::ThirdPartyDeposits;
+use super::ThirdPartyDeposits;
 
 /// Account settings that user has set on the account component
 /// On-Ledger, that is set via a transaction mutating the state
@@ -57,10 +57,9 @@ mod tests {
         assert_eq_after_json_roundtrip, assert_json_roundtrip, assert_ne_after_json_roundtrip,
     };
 
-    use crate::v100::entity::account::on_ledger_settings::third_party_deposits::{
-        asset_exception::AssetException,
-        deposit_address_exception_rule::DepositAddressExceptionRule, deposit_rule::DepositRule,
-        depositor_address::DepositorAddress, third_party_deposits::ThirdPartyDeposits,
+    use crate::v100::{
+        AssetException, DepositAddressExceptionRule, DepositRule, DepositorAddress,
+        ThirdPartyDeposits,
     };
 
     use super::OnLedgerSettings;

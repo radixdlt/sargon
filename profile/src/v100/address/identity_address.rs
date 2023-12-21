@@ -3,7 +3,7 @@ use serde::{de, Deserializer, Serialize, Serializer};
 use std::fmt::Display;
 use wallet_kit_common::NetworkID;
 
-use crate::v100::entity::abstract_entity_type::AbstractEntityType;
+use crate::v100::AbstractEntityType;
 
 use super::entity_address::EntityAddress;
 

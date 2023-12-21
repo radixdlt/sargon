@@ -3,10 +3,9 @@ use std::cell::RefCell;
 use hd::MnemonicWithPassphrase;
 use serde::{Deserialize, Serialize};
 
-use crate::v100::factors::{
-    factor_source::FactorSource, factor_source_common::FactorSourceCommon,
-    factor_source_id::FactorSourceID, factor_source_id_from_hash::FactorSourceIDFromHash,
-    factor_source_kind::FactorSourceKind, is_factor_source::IsFactorSource,
+use crate::v100::{
+    FactorSource, FactorSourceCommon, FactorSourceID, FactorSourceIDFromHash, FactorSourceKind,
+    IsFactorSource,
 };
 
 use super::device_factor_source_hint::DeviceFactorSourceHint;
@@ -138,11 +137,12 @@ mod tests {
     use hd::BIP39WordCount;
     use wallet_kit_common::assert_eq_after_json_roundtrip;
 
-    use crate::v100::factors::{
-        factor_source_id::FactorSourceID, is_factor_source::IsFactorSource, factor_source::FactorSource, factor_sources::ledger_hardware_wallet_factor_source::ledger_hardware_wallet_factor_source::LedgerHardwareWalletFactorSource, factor_source_crypto_parameters::FactorSourceCryptoParameters,
+    use super::DeviceFactorSource;
+    use crate::v100::{
+        FactorSource, FactorSourceCryptoParameters, FactorSourceID, IsFactorSource,
+        LedgerHardwareWalletFactorSource,
     };
     use wallet_kit_common::CommonError as Error;
-    use super::DeviceFactorSource;
 
     #[test]
     fn json() {

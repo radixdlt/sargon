@@ -2,8 +2,9 @@ use radix_engine_common::types::EntityType as EngineEntityType;
 use radix_engine_toolkit::functions::address::decode;
 use wallet_kit_common::NetworkID;
 
-use crate::v100::entity::abstract_entity_type::AbstractEntityType;
 use wallet_kit_common::CommonError as Error;
+
+use crate::v100::AbstractEntityType;
 
 type EngineDecodeAddressOutput = (u8, EngineEntityType, String, [u8; 30]);
 pub type DecodeAddressOutput = (NetworkID, AbstractEntityType, String, [u8; 30]);

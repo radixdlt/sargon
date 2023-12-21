@@ -1,8 +1,8 @@
 use identified_vec::{IdentifiedVecOf, IsIdentifiableVecOfVia, IsIdentifiedVec, IsIdentifiedVecOf};
 
-use crate::{identified_vec_via::IdentifiedVecVia, v100::header::content_hint::ContentHint};
+use crate::{identified_vec_via::IdentifiedVecVia, v100::ContentHint};
 
-use super::network::network::Network;
+use super::Network;
 
 /// An ordered mapping of NetworkID -> `Profile.Network`, containing
 /// all the users Accounts, Personas and AuthorizedDapps the user
@@ -66,14 +66,7 @@ mod tests {
     use identified_vec::IsIdentifiedVec;
     use wallet_kit_common::{assert_eq_after_json_roundtrip, NetworkID};
 
-    use crate::v100::{
-        entity::account::account::Account,
-        header::content_hint::ContentHint,
-        networks::{
-            network::{accounts::Accounts, network::Network},
-            networks::Networks,
-        },
-    };
+    use crate::v100::{Account, Accounts, ContentHint, Network, Networks};
 
     #[test]
     fn default_is_empty() {
