@@ -1,11 +1,19 @@
-use std::cell::RefCell;
+use std::{
+    cell::RefCell,
+    fmt::{Debug, Display},
+};
 
+use identified_vec::IsIdentifiedVec;
 use serde::{Deserialize, Serialize};
 
 #[cfg(any(test, feature = "placeholder"))]
 use wallet_kit_common::HasPlaceholder;
+use wallet_kit_common::{CommonError, NetworkID};
 
-use super::{AppPreferences, FactorSources, Header, Networks};
+use super::{
+    Account, AccountAddress, AppPreferences, FactorSource, FactorSourceID, FactorSources, Header,
+    IsFactorSource, Networks,
+};
 
 /// Representation of the Radix Wallet, contains a list of
 /// users Accounts, Personas, Authorized Dapps per network
@@ -88,6 +96,40 @@ impl Profile {
     }
 }
 
+impl Profile {
+    /// Returns `false` if no account with `address` was found, otherwise if found,
+    /// the account gets updated by `mutate` closure and this function returns
+    /// `true`.
+    pub fn update_account<F>(&mut self, address: &AccountAddress, mutate: F) -> bool
+    where
+        F: FnMut(&Account) -> (),
+    {
+        self.networks.borrow_mut().update_account(address, mutate)
+    }
+
+    pub fn update_factor_source<S, M>(
+        &mut self,
+        factor_source_id: &FactorSourceID,
+        mut mutate: M,
+    ) -> Result<bool, CommonError>
+    where
+        S: IsFactorSource,
+        M: FnMut(S) -> Result<S, CommonError>,
+    {
+        self.factor_sources
+            .borrow_mut()
+            .try_update_with(factor_source_id, |f| {
+                S::try_from(f.clone())
+                    .map_err(|_| CommonError::CastFactorSourceWrongKind)
+                    .and_then(|element| {
+                        mutate(element)
+                            .map(|modified| modified.into())
+                            .map_err(|_| CommonError::UpdateFactorSourceMutateFailed)
+                    })
+            })
+    }
+}
+
 #[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for Profile {
     fn placeholder() -> Self {
@@ -117,8 +159,16 @@ impl HasPlaceholder for Profile {
 
 #[cfg(test)]
 mod tests {
-    use identified_vec::IsIdentifiedVecOf;
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use identified_vec::{IsIdentifiedVec, IsIdentifiedVecOf};
+    use radix_engine_toolkit_json::models::common;
+    use wallet_kit_common::{
+        assert_eq_after_json_roundtrip, CommonError, HasPlaceholder, NetworkID, SLIP10Curve,
+    };
+
+    use crate::v100::{
+        DeviceFactorSource, DisplayName, FactorSource, FactorSourceID,
+        LedgerHardwareWalletFactorSource,
+    };
 
     use super::{AppPreferences, FactorSources, Header, Networks, Profile};
 
@@ -131,6 +181,127 @@ mod tests {
     fn equality() {
         assert_eq!(Profile::placeholder(), Profile::placeholder());
         assert_eq!(Profile::placeholder_other(), Profile::placeholder_other());
+    }
+
+    #[test]
+    fn add_supported_curve_to_factor_source() {
+        let mut sut = Profile::placeholder();
+        let id: &FactorSourceID = &DeviceFactorSource::placeholder().id().into();
+
+        assert!(sut
+            .factor_sources()
+            .contains_id(&DeviceFactorSource::placeholder().id().into()));
+
+        assert_eq!(
+            sut.factor_sources()
+                .get(id)
+                .unwrap()
+                .as_device()
+                .unwrap()
+                .common()
+                .crypto_parameters()
+                .supported_curves(),
+            [SLIP10Curve::Curve25519]
+        );
+
+        assert_eq!(
+            sut.update_factor_source(id, |dfs: DeviceFactorSource| {
+                let common = dfs.common();
+                let cp = common.crypto_parameters();
+                cp.add_supported_curve(SLIP10Curve::Secp256k1);
+                common.set_crypto_parameters(cp);
+                dfs.set_common(common);
+                Ok(dfs)
+            }),
+            Ok(true)
+        );
+
+        assert_eq!(
+            sut.factor_sources()
+                .get(id)
+                .unwrap()
+                .as_device()
+                .unwrap()
+                .common()
+                .crypto_parameters()
+                .supported_curves(),
+            [SLIP10Curve::Curve25519, SLIP10Curve::Secp256k1]
+        );
+    }
+
+    #[test]
+    fn add_supported_curve_to_factor_source_failure_cast_wrong_factor_source_kind() {
+        let mut sut = Profile::placeholder();
+        let id: &FactorSourceID = &DeviceFactorSource::placeholder().id().into();
+
+        assert!(sut
+            .factor_sources()
+            .contains_id(&DeviceFactorSource::placeholder().id().into()));
+
+        assert_eq!(
+            sut.factor_sources()
+                .get(id)
+                .unwrap()
+                .as_device()
+                .unwrap()
+                .common()
+                .crypto_parameters()
+                .supported_curves(),
+            [SLIP10Curve::Curve25519]
+        );
+
+        assert_eq!(
+            sut.update_factor_source(id, |lfs: LedgerHardwareWalletFactorSource| {
+                let common = lfs.common();
+                let cp = common.crypto_parameters();
+                cp.add_supported_curve(SLIP10Curve::Secp256k1);
+                common.set_crypto_parameters(cp);
+                lfs.set_common(common);
+                Ok(lfs)
+            }),
+            Err(CommonError::CastFactorSourceWrongKind)
+        );
+
+        // Remains unchanged
+        assert_eq!(
+            sut.factor_sources()
+                .get(id)
+                .unwrap()
+                .as_device()
+                .unwrap()
+                .common()
+                .crypto_parameters()
+                .supported_curves(),
+            [SLIP10Curve::Curve25519]
+        );
+    }
+
+    #[test]
+    fn update_name_of_accounts() {
+        let mut sut = Profile::placeholder();
+        let account = sut
+            .networks()
+            .get(&NetworkID::Mainnet)
+            .unwrap()
+            .accounts()
+            .get_at_index(0)
+            .unwrap()
+            .clone();
+
+        assert_eq!(account.display_name(), "Alice");
+        assert!(sut.update_account(&account.address(), |a| a
+            .set_display_name(DisplayName::new("Satoshi").unwrap())));
+
+        assert_eq!(
+            sut.networks()
+                .get(&NetworkID::Mainnet)
+                .unwrap()
+                .accounts()
+                .get_at_index(0)
+                .unwrap()
+                .display_name(),
+            "Satoshi"
+        );
     }
 
     #[should_panic(expected = "FactorSources empty, which must never happen.")]

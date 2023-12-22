@@ -94,4 +94,10 @@ pub enum CommonError {
 
     #[error("FactorSources must not be empty.")]
     FactorSourcesMustNotBeEmpty,
+
+    #[error("Failed to update FactorSource, error while mutating.")]
+    UpdateFactorSourceMutateFailed,
+
+    #[error("Failed to cast factor source, wrong kind.")]
+    CastFactorSourceWrongKind,
 }

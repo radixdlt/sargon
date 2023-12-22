@@ -26,7 +26,7 @@ rand = "0.8.5"
 itertools = { version = "0.12.0" }
 enum-as-inner = "0.6.0"
 derive-getters = "0.3.0"
-identified_vec = { version = "0.1.8", features = ["serde", "id_prim"] }
+identified_vec = { version = "0.1.11", features = ["serde", "id_prim"] }
 nutype = { version = "0.4.0", features = ["serde"] }
 
 [profile.release]

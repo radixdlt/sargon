@@ -39,6 +39,33 @@ impl FactorSourceCryptoParameters {
     pub fn supported_derivation_path_schemes(&self) -> Vec<DerivationPathScheme> {
         self.supported_derivation_path_schemes.borrow().items()
     }
+
+    /// Append a SLIP10Curve to the end of `supported_curves`, if it doesn't already contain it.
+    ///
+    /// - Parameter curve: The curve to add to the `supported_curves`.
+    /// - Returns: A pair `(inserted, index)`, where `inserted` is a Boolean value indicating whether
+    ///   the operation added a new curve, and `index` is the index of `item` in the resulting
+    ///   `identified_vec`.
+    /// - Complexity: The operation is expected to perform O(1)
+    pub fn add_supported_curve(&self, curve: SLIP10Curve) -> (bool, usize) {
+        self.supported_curves.borrow_mut().append(curve)
+    }
+
+    /// Append a DerivationPathScheme to the end of `supported_derivation_path_schemes`, if it doesn't already contain it.
+    ///
+    /// - Parameter scheme: The DerivationPathScheme to add to the `supported_derivation_path_schemes`.
+    /// - Returns: A pair `(inserted, index)`, where `inserted` is a Boolean value indicating whether
+    ///   the operation added a new scheme, and `index` is the index of `item` in the resulting
+    ///   `identified_vec`.
+    /// - Complexity: The operation is expected to perform O(1)
+    pub fn add_supported_derivation_path_schemes(
+        &self,
+        scheme: DerivationPathScheme,
+    ) -> (bool, usize) {
+        self.supported_derivation_path_schemes
+            .borrow_mut()
+            .append(scheme)
+    }
 }
 
 impl FactorSourceCryptoParameters {
@@ -107,6 +134,56 @@ mod tests {
                 .unwrap(),
             &SLIP10Curve::Curve25519
         );
+    }
+
+    #[test]
+    fn add_curve() {
+        let sut = FactorSourceCryptoParameters::babylon();
+        assert_eq!(
+            sut.supported_curves().contains(&SLIP10Curve::Secp256k1),
+            false
+        );
+        assert_eq!(sut.add_supported_curve(SLIP10Curve::Secp256k1), (true, 1));
+        assert_eq!(
+            sut.supported_curves().contains(&SLIP10Curve::Secp256k1),
+            true
+        );
+    }
+
+    #[test]
+    fn add_existing_curve_is_noop() {
+        assert_eq!(
+            FactorSourceCryptoParameters::babylon().add_supported_curve(SLIP10Curve::Curve25519),
+            (false, 0)
+        )
+    }
+
+    #[test]
+    fn add_scheme() {
+        let sut = FactorSourceCryptoParameters::babylon();
+        assert_eq!(
+            sut.supported_derivation_path_schemes()
+                .contains(&DerivationPathScheme::Bip44Olympia),
+            false
+        );
+        assert_eq!(
+            sut.add_supported_derivation_path_schemes(DerivationPathScheme::Bip44Olympia),
+            (true, 1)
+        );
+        assert_eq!(
+            sut.supported_derivation_path_schemes()
+                .contains(&DerivationPathScheme::Bip44Olympia),
+            true
+        );
+    }
+
+    #[test]
+    fn add_existing_scheme_is_noop() {
+        assert_eq!(
+            FactorSourceCryptoParameters::babylon()
+                .add_supported_derivation_path_schemes(DerivationPathScheme::Cap26),
+            (false, 0)
+        )
     }
 
     #[test]

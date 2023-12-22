@@ -4,6 +4,7 @@ use crate::{
 };
 use identified_vec::{IdentifiedVecOf, IsIdentifiableVecOfVia, IsIdentifiedVec, IsIdentifiedVecOf};
 
+use wallet_kit_common::CommonError;
 #[cfg(any(test, feature = "placeholder"))]
 use wallet_kit_common::HasPlaceholder;
 
@@ -25,6 +26,18 @@ impl Accounts {
     /// single account.
     pub fn with_account(account: Account) -> Self {
         Self::with_accounts([account].into_iter())
+    }
+}
+
+impl Accounts {
+    /// Returns `false` if no account with `address` was found, otherwise if found,
+    /// the account gets updated by `mutate` closure and this function returns
+    /// `true`.
+    pub fn update_account<F>(&mut self, address: &AccountAddress, mut mutate: F) -> bool
+    where
+        F: FnMut(&Account) -> (),
+    {
+        self.update_with(address, |a| mutate(a))
     }
 }
 

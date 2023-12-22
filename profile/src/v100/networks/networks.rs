@@ -1,6 +1,12 @@
-use identified_vec::{IdentifiedVecOf, IsIdentifiableVecOfVia, IsIdentifiedVec, IsIdentifiedVecOf};
+use std::{borrow::BorrowMut, cell::RefCell, rc::Rc, sync::Mutex};
 
-use crate::{identified_vec_via::IdentifiedVecVia, v100::ContentHint};
+use identified_vec::{IdentifiedVecOf, IsIdentifiableVecOfVia, IsIdentifiedVec, IsIdentifiedVecOf};
+use wallet_kit_common::NetworkID;
+
+use crate::{
+    identified_vec_via::IdentifiedVecVia,
+    v100::{Account, AccountAddress, ContentHint},
+};
 
 #[cfg(any(test, feature = "placeholder"))]
 use wallet_kit_common::HasPlaceholder;
@@ -27,6 +33,45 @@ impl Networks {
     /// `network`.
     pub fn with_network(network: Network) -> Self {
         Self::with_networks([network].into_iter())
+    }
+}
+
+impl Networks {
+    // pub fn update_mut<F, R>(&mut self, mutate: F) -> R
+    // where
+    //     F: Fn(&mut Self) -> R,
+    // {
+    //     mutate(self)
+    // }
+
+    // pub fn update<F, R>(&self, mutate: F) -> R
+    // where
+    //     F: Fn(&Self) -> R,
+    // {
+    //     mutate(self)
+    // }
+
+    /// Returns `false` if no account with `address` was found, otherwise if found,
+    /// the account gets updated by `mutate` closure and this function returns
+    /// `true`.
+    pub fn update_account<F>(&mut self, address: &AccountAddress, mut mutate: F) -> bool
+    where
+        F: FnMut(&Account) -> (),
+    {
+        let mut updated_account = false;
+        let updated_network = self.update_with(&address.network_id(), |n| {
+            updated_account = n.update_account(address, |a| mutate(a))
+        });
+        if !updated_account {
+            return false;
+        }
+
+        assert!(
+            updated_network,
+            "Strange! Update an account, which was not on this network?"
+        );
+
+        return updated_account && updated_network;
     }
 }
 
@@ -66,10 +111,10 @@ impl HasPlaceholder for Networks {
 
 #[cfg(test)]
 mod tests {
-    use identified_vec::IsIdentifiedVec;
+    use identified_vec::{Identifiable, IsIdentifiedVec};
     use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder, NetworkID};
 
-    use crate::v100::{Account, Accounts, ContentHint, Network, Networks};
+    use crate::v100::{Account, Accounts, ContentHint, DisplayName, Network, Networks};
 
     #[test]
     fn default_is_empty() {
@@ -79,6 +124,63 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(Networks::placeholder(), Networks::placeholder_other());
+    }
+
+    #[test]
+    fn update_account() {
+        let mut sut = Networks::placeholder();
+        let id = &NetworkID::Mainnet;
+        let account_address = Account::placeholder().address();
+        assert_eq!(
+            sut.get(id)
+                .unwrap()
+                .accounts()
+                .get(&account_address)
+                .unwrap()
+                .display_name(),
+            "Alice"
+        );
+        assert!(sut.update_account(&account_address, |a| _ =
+            a.set_display_name(DisplayName::new("Stella").unwrap())));
+        assert_eq!(
+            sut.get(id)
+                .unwrap()
+                .accounts()
+                .get(&account_address)
+                .unwrap()
+                .display_name(),
+            "Stella"
+        );
+    }
+
+    #[test]
+    fn update_account_unknown_network() {
+        let mut sut = Networks::placeholder();
+        let id = &NetworkID::Mainnet;
+        let account_address = Account::placeholder_nebunet().address();
+        assert_eq!(sut.get(id).unwrap().accounts().get(&account_address), None);
+        assert_eq!(
+            sut.update_account(&account_address, |a| _ =
+                a.set_display_name(DisplayName::new("Will fail").unwrap())),
+            false
+        );
+        // Assert unchanged
+        assert_eq!(sut, Networks::placeholder());
+    }
+
+    #[test]
+    fn update_account_unknown_account() {
+        let mut sut = Networks::placeholder();
+        let id = &NetworkID::Mainnet;
+        let account_address = Account::placeholder_mainnet_carol().address();
+        assert_eq!(sut.get(id).unwrap().accounts().get(&account_address), None);
+        assert_eq!(
+            sut.update_account(&account_address, |a| _ =
+                a.set_display_name(DisplayName::new("Will fail").unwrap())),
+            false
+        );
+        // Assert unchanged
+        assert_eq!(sut, Networks::placeholder());
     }
 
     #[test]

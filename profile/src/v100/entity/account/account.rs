@@ -177,6 +177,15 @@ impl Account {
     }
 }
 
+impl Account {
+    pub fn update<F, R>(&self, mutate: F) -> R
+    where
+        F: Fn(&Self) -> R,
+    {
+        mutate(self)
+    }
+}
+
 impl Ord for Account {
     fn cmp(&self, other: &Self) -> Ordering {
         match (&self.security_state, &other.security_state) {
@@ -265,6 +274,12 @@ impl Account {
     /// derivation index 1.
     pub fn placeholder_mainnet_bob() -> Self {
         Self::placeholder_at_index_name(1, "Bob")
+    }
+
+    /// A `Mainnet` account named "Carol", a placeholder used to facilitate unit tests, with
+    /// derivation index 2.
+    pub fn placeholder_mainnet_carol() -> Self {
+        Self::placeholder_at_index_name(2, "Carol")
     }
 
     /// A `Mainnet` account named "Alice", a placeholder used to facilitate unit tests, with
@@ -413,6 +428,14 @@ mod tests {
         let new_display_name = DisplayName::new("New").unwrap();
         account.set_display_name(new_display_name.clone());
         assert_eq!(account.display_name(), new_display_name.to_string());
+    }
+
+    #[test]
+    fn update() {
+        let account = Account::placeholder();
+        assert_eq!(account.display_name(), "Alice");
+        account.update(|a| a.set_display_name(DisplayName::new("Satoshi").unwrap()));
+        assert_eq!(account.display_name(), "Satoshi");
     }
 
     #[test]

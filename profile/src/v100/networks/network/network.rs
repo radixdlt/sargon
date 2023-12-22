@@ -7,6 +7,8 @@ use wallet_kit_common::{CommonError, NetworkID};
 #[cfg(any(test, feature = "placeholder"))]
 use wallet_kit_common::HasPlaceholder;
 
+use crate::v100::{Account, AccountAddress};
+
 use super::accounts::Accounts;
 
 /// Accounts, Personas, Authorized dapps for some Radix Network that user
@@ -67,6 +69,18 @@ impl Network {
         }
         *self.accounts.borrow_mut() = new;
         Ok(())
+    }
+}
+
+impl Network {
+    /// Returns `false` if no account with `address` was found, otherwise if found,
+    /// the account gets updated by `mutate` closure and this function returns
+    /// `true`.
+    pub fn update_account<F>(&mut self, address: &AccountAddress, mutate: F) -> bool
+    where
+        F: FnMut(&Account) -> (),
+    {
+        self.accounts.borrow_mut().update_account(address, mutate)
     }
 }
 
