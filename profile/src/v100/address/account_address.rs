@@ -1,9 +1,9 @@
-use derive_getters::Getters;
 use serde::{de, Deserializer, Serialize, Serializer};
 use std::fmt::Display;
-use wallet_kit_common::{suffix_string, NetworkID};
 
-use crate::v100::AbstractEntityType;
+use wallet_kit_common::suffix_string;
+
+use crate::{v100::AbstractEntityType, NetworkID};
 
 #[cfg(any(test, feature = "placeholder"))]
 use wallet_kit_common::HasPlaceholder;
@@ -14,7 +14,18 @@ use super::entity_address::EntityAddress;
 /// that starts with the prefix `"account_"`, dependent on NetworkID, meaning the same
 /// public key used for two AccountAddresses on two different networks will not have
 /// the same address.
-#[derive(Clone, Debug, Default, PartialEq, Eq, Hash, PartialOrd, Ord, Getters)]
+#[derive(
+    Clone,
+    Debug,
+    Default,
+    PartialEq,
+    Eq,
+    Hash,
+    PartialOrd,
+    Ord,
+    schemars::JsonSchema,
+    uniffi::Object,
+)]
 pub struct AccountAddress {
     /// Human readable address of an account. Always starts with `"account_"``, for example:
     ///
@@ -35,6 +46,48 @@ pub struct AccountAddress {
     network_id: NetworkID,
 }
 
+#[uniffi::export]
+impl AccountAddress {
+    /// Human readable address of an account. Always starts with `"account_"``, for example:
+    ///
+    /// `account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease`
+    ///
+    /// Most commonly the user will see this address in its abbreviated
+    /// form which is:
+    ///
+    /// `acco...please`
+    ///
+    /// Addresses are checksummed, as per Bech32. **Only** *Account* addresses starts with
+    /// the prefix `account_`.
+    pub fn address(&self) -> String {
+        self.address.clone()
+    }
+
+    /// The network this account address is tied to, i.e. which was used when a public key
+    /// hash was used to bech32 encode it. This means that two public key hashes will result
+    /// in two different account address on two different networks.
+    pub fn network_id(&self) -> NetworkID {
+        self.network_id.clone()
+    }
+
+    /// Formats the AccountAddress to its abbreviated form which is what the user
+    /// is most used to, since it is what we most commonly display in the Radix
+    /// ecosystem.
+    ///
+    /// The abbreviated form returns:
+    ///
+    /// `acco...please`
+    ///
+    /// For the account address:
+    ///
+    /// `account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease`
+    ///
+    pub fn short(&self) -> String {
+        let suffix = suffix_string(6, &self.address);
+        format!("{}...{}", &self.address[0..4], suffix)
+    }
+}
+
 impl Serialize for AccountAddress {
     /// Serializes this `AccountAddress` into its bech32 address string as JSON.
     fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
@@ -51,25 +104,6 @@ impl<'de> serde::Deserialize<'de> for AccountAddress {
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<AccountAddress, D::Error> {
         let s = String::deserialize(d)?;
         AccountAddress::try_from_bech32(&s).map_err(de::Error::custom)
-    }
-}
-
-impl AccountAddress {
-    /// Formats the AccountAddress to its abbreviated form which is what the user
-    /// is most used to, since it is what we most commonly display in the Radix
-    /// ecosystem.
-    ///
-    /// The abbreviated form returns:
-    ///
-    /// `acco...please`
-    ///
-    /// For the account address:
-    ///
-    /// `account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease`
-    ///
-    pub fn short(&self) -> String {
-        let suffix = suffix_string(6, &self.address);
-        format!("{}...{}", &self.address[0..4], suffix)
     }
 }
 
@@ -147,7 +181,7 @@ mod tests {
     use std::str::FromStr;
     use wallet_kit_common::CommonError as Error;
     use wallet_kit_common::{
-        HasPlaceholder, NetworkID,
+        HasPlaceholder,
         {
             assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
             assert_json_value_ne_after_roundtrip,
@@ -155,6 +189,7 @@ mod tests {
     };
 
     use crate::v100::address::{account_address::AccountAddress, entity_address::EntityAddress};
+    use crate::NetworkID;
 
     #[test]
     fn equality() {
@@ -211,7 +246,7 @@ mod tests {
         .unwrap();
         assert_eq!(
             AccountAddress::from_public_key(PublicKey::Ed25519(public_key), NetworkID::Mainnet)
-                .address,
+                .address(),
             "account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzdm"
         )
     }

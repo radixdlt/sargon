@@ -1,6 +1,6 @@
 use derive_getters::Getters;
 use serde::{de, Deserializer, Serialize, Serializer};
-use wallet_kit_common::{HDPathError, NetworkID};
+use wallet_kit_common::HDPathError;
 
 #[cfg(any(test, feature = "placeholder"))]
 use wallet_kit_common::HasPlaceholder;
@@ -11,7 +11,7 @@ use crate::{
         cap26_entity_kind::CAP26EntityKind, cap26_key_kind::CAP26KeyKind,
         cap26_path::cap26_path::CAP26Path, cap26_repr::CAP26Repr,
     },
-    Derivation, DerivationPath, DerivationPathScheme,
+    Derivation, DerivationPath, DerivationPathScheme, SimpleNetworkID,
 };
 
 use super::is_entity_path::IsEntityPath;
@@ -21,7 +21,7 @@ pub struct IdentityPath {
     path: HDPath,
 
     #[getter(skip)] // IsEntityPath trait has `network_id()` method
-    network_id: NetworkID,
+    network_id: SimpleNetworkID,
 
     entity_kind: CAP26EntityKind,
 
@@ -32,7 +32,7 @@ pub struct IdentityPath {
 }
 
 impl IsEntityPath for IdentityPath {
-    fn network_id(&self) -> NetworkID {
+    fn network_id(&self) -> SimpleNetworkID {
         self.network_id
     }
 
@@ -60,7 +60,7 @@ impl CAP26Repr for IdentityPath {
 
     fn __with_path_and_components(
         path: HDPath,
-        network_id: NetworkID,
+        network_id: SimpleNetworkID,
         entity_kind: CAP26EntityKind,
         key_kind: CAP26KeyKind,
         index: HDPathValue,
@@ -134,13 +134,13 @@ mod tests {
 
     use serde_json::json;
     use wallet_kit_common::{
-        HDPathError, HasPlaceholder, NetworkID,
+        HDPathError, HasPlaceholder,
         {assert_json_value_eq_after_roundtrip, assert_json_value_ne_after_roundtrip},
     };
 
     use crate::{
         bip32::HDPath, CAP26EntityKind, CAP26KeyKind, CAP26Repr, Derivation, DerivationPathScheme,
-        IsEntityPath,
+        IsEntityPath, SimpleNetworkID,
     };
 
     use super::IdentityPath;
@@ -169,7 +169,10 @@ mod tests {
 
     #[test]
     fn network_id() {
-        assert_eq!(IdentityPath::placeholder().network_id(), NetworkID::Mainnet);
+        assert_eq!(
+            IdentityPath::placeholder().network_id(),
+            SimpleNetworkID::Mainnet
+        );
     }
 
     #[test]
@@ -191,12 +194,16 @@ mod tests {
     fn string_roundtrip() {
         let str = "m/44H/1022H/1H/618H/1460H/0H";
         let parsed: IdentityPath = str.try_into().unwrap();
-        assert_eq!(parsed.network_id, NetworkID::Mainnet);
+        assert_eq!(parsed.network_id, SimpleNetworkID::Mainnet);
         assert_eq!(parsed.entity_kind, CAP26EntityKind::Identity);
         assert_eq!(parsed.key_kind, CAP26KeyKind::TransactionSigning);
         assert_eq!(parsed.index, 0);
         assert_eq!(parsed.to_string(), str);
-        let built = IdentityPath::new(NetworkID::Mainnet, CAP26KeyKind::TransactionSigning, 0);
+        let built = IdentityPath::new(
+            SimpleNetworkID::Mainnet,
+            CAP26KeyKind::TransactionSigning,
+            0,
+        );
         assert_eq!(built, parsed)
     }
 
@@ -356,7 +363,7 @@ mod tests {
     fn is_entity_path_index() {
         let sut = IdentityPath::placeholder();
         assert_eq!(sut.index(), 0);
-        assert_eq!(sut.network_id(), NetworkID::Mainnet);
+        assert_eq!(sut.network_id(), SimpleNetworkID::Mainnet);
         assert_eq!(sut.key_kind(), CAP26KeyKind::TransactionSigning);
     }
 }

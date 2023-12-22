@@ -4,6 +4,7 @@ use enum_iterator::Sequence;
 use radix_engine_common::network::NetworkDefinition;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use strum::FromRepr;
+use wallet_kit_common::CommonError;
 
 #[derive(
     Serialize_repr,
@@ -18,6 +19,8 @@ use strum::FromRepr;
     PartialOrd,
     Ord,
     Sequence,
+    schemars::JsonSchema,
+    uniffi::Enum,
 )]
 #[repr(u8)]
 pub enum NetworkID {
@@ -102,7 +105,7 @@ impl NetworkID {
 }
 
 impl TryFrom<u8> for NetworkID {
-    type Error = crate::CommonError;
+    type Error = CommonError;
 
     /// Tries to instantiate a NetworkID from its raw representation `u8`.
     fn try_from(value: u8) -> Result<Self, Self::Error> {
@@ -158,9 +161,9 @@ impl NetworkID {
 mod tests {
     use std::collections::BTreeSet;
 
-    use crate::{assert_json_value_eq_after_roundtrip, assert_json_value_fails};
     use enum_iterator::all;
     use serde_json::json;
+    use wallet_kit_common::{assert_json_value_eq_after_roundtrip, assert_json_value_fails};
 
     use super::NetworkID;
 

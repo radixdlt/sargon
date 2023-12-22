@@ -1,6 +1,6 @@
 use derive_getters::Getters;
 use serde::{Deserialize, Serialize};
-use wallet_kit_common::{NetworkID, PublicKey};
+use wallet_kit_common::PublicKey;
 
 use crate::{
     derivation::{derivation::Derivation, derivation_path::DerivationPath},
@@ -9,6 +9,8 @@ use crate::{
 
 use super::mnemonic_with_passphrase::MnemonicWithPassphrase;
 
+#[cfg(any(test, feature = "placeholder"))]
+use crate::SimpleNetworkID;
 #[cfg(any(test, feature = "placeholder"))]
 use wallet_kit_common::HasPlaceholder;
 
@@ -51,7 +53,11 @@ impl HasPlaceholder for HierarchicalDeterministicPublicKey {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
         let mwp = MnemonicWithPassphrase::placeholder();
-        let path = AccountPath::new(NetworkID::Mainnet, CAP26KeyKind::TransactionSigning, 0);
+        let path = AccountPath::new(
+            SimpleNetworkID::Mainnet,
+            CAP26KeyKind::TransactionSigning,
+            0,
+        );
         let private_key = mwp.derive_private_key(path.clone());
 
         assert_eq!(path.to_string(), "m/44H/1022H/1H/525H/1460H/0H");

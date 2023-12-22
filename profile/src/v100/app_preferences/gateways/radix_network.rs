@@ -2,13 +2,12 @@ use derive_getters::Getters;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt::Display;
-use wallet_kit_common::{
-    CommonError,
-    NetworkID::{self, *},
-};
+use wallet_kit_common::CommonError;
 
 #[cfg(any(test, feature = "placeholder"))]
 use wallet_kit_common::HasPlaceholder;
+
+use crate::NetworkID::{self, *};
 
 /// A version of the Radix Network, for a NetworkID with an identifier (name) and display description (display name)
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Ord, PartialOrd, Hash, Getters)]
@@ -156,9 +155,9 @@ impl RadixNetwork {
 #[cfg(test)]
 mod tests {
 
-    use wallet_kit_common::{
-        assert_eq_after_json_roundtrip, CommonError, HasPlaceholder, NetworkID,
-    };
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, CommonError, HasPlaceholder};
+
+    use crate::NetworkID;
 
     use super::RadixNetwork;
 

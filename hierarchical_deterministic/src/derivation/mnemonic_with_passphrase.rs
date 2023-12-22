@@ -116,8 +116,10 @@ impl MnemonicWithPassphrase {
 #[cfg(test)]
 mod tests {
 
-    use crate::{AccountPath, BIP44LikePath, CAP26KeyKind, CAP26Repr, Derivation, Mnemonic};
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder, NetworkID};
+    use crate::{
+        AccountPath, BIP44LikePath, CAP26KeyKind, CAP26Repr, Derivation, Mnemonic, SimpleNetworkID,
+    };
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use super::MnemonicWithPassphrase;
 
@@ -235,7 +237,11 @@ mod tests {
     #[test]
     fn keys_for_placeholder() {
         let mwp = MnemonicWithPassphrase::placeholder();
-        let path = AccountPath::new(NetworkID::Mainnet, CAP26KeyKind::TransactionSigning, 0);
+        let path = AccountPath::new(
+            SimpleNetworkID::Mainnet,
+            CAP26KeyKind::TransactionSigning,
+            0,
+        );
         let private_key = mwp.derive_private_key(path.clone());
 
         assert_eq!(path.to_string(), "m/44H/1022H/1H/525H/1460H/0H");

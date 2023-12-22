@@ -13,7 +13,8 @@ use std::{
 };
 
 use wallet_kit_common::CommonError as Error;
-use wallet_kit_common::NetworkID;
+
+use crate::NetworkID;
 
 use super::resource_address::ResourceAddress;
 

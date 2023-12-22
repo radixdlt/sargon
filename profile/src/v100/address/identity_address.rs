@@ -1,9 +1,8 @@
 use derive_getters::Getters;
 use serde::{de, Deserializer, Serialize, Serializer};
 use std::fmt::Display;
-use wallet_kit_common::NetworkID;
 
-use crate::v100::AbstractEntityType;
+use crate::{v100::AbstractEntityType, NetworkID};
 
 use super::entity_address::EntityAddress;
 

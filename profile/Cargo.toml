@@ -4,6 +4,9 @@ version = "0.1.0"
 edition = "2021"
 build = "build.rs"
 
+[package.metadata.uniffi.testing]
+external-crates = ["wallet_kit_common"]
+
 [features]
 placeholder = []
 
@@ -31,29 +34,18 @@ identified_vec = { workspace = true }
 nutype = { workspace = true }
 derive-getters = { workspace = true }
 url = { version = "2.5.0", features = ["serde"] }
-
-# The UniFFI crate for generating bindings to other languages
-uniffi = { git = "https://github.com/0xOmarA/uniffi-rs", tag = "v0.25.4", features = [
-    "cli",
-] }
+schemars = { workspace = true }
+uniffi = { workspace = true, features = ["cli"] }
 
 [build-dependencies]
-# The UniFFI crate for generating bindings to other languages
-uniffi = { git = "https://github.com/0xOmarA/uniffi-rs", tag = "v0.25.4", features = [
-    "build",
-] }
-
+uniffi = { workspace = true, features = ["build"] }
 
 [dev-dependencies]
 wallet_kit_common = { path = "../wallet_kit_common", features = [
     "placeholder",
 ] }
 hd = { path = "../hierarchical_deterministic", features = ["placeholder"] }
-
-# The UniFFI crate for generating bindings to other languages
-uniffi = { git = "https://github.com/0xOmarA/uniffi-rs", tag = "v0.25.4", features = [
-    "bindgen-tests",
-] }
+uniffi = { workspace = true, features = ["bindgen-tests"] }
 
 [lib]
 crate-type = ["staticlib", "cdylib", "lib"]

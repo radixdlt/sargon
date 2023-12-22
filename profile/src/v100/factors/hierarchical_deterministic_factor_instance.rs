@@ -1,11 +1,10 @@
 #[cfg(any(test, feature = "placeholder"))]
 use crate::v100::factors::factor_source_kind::FactorSourceKind;
+#[cfg(any(test, feature = "placeholder"))]
+use crate::NetworkID;
 use derive_getters::Getters;
 #[cfg(any(test, feature = "placeholder"))]
 use hd::{AccountPath, CAP26Repr, HDPathValue, MnemonicWithPassphrase};
-#[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::NetworkID;
-
 use hd::{
     CAP26KeyKind, CAP26Path, DerivationPath, HierarchicalDeterministicPublicKey, IsEntityPath,
 };
@@ -153,7 +152,7 @@ impl HierarchicalDeterministicFactorInstance {
     /// A placeholder used to facilitate unit tests.
     fn placeholder_with_key_kind(key_kind: CAP26KeyKind, index: HDPathValue) -> Self {
         let mwp = MnemonicWithPassphrase::placeholder();
-        let path = AccountPath::new(NetworkID::Mainnet, key_kind, index);
+        let path = AccountPath::new(NetworkID::Mainnet.into(), key_kind, index);
         let private_key = mwp.derive_private_key(path.clone());
         let public_key = private_key.public_key();
         let id =

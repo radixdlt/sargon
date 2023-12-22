@@ -1,8 +1,8 @@
-use wallet_kit_common::{HDPathError, NetworkID};
+use wallet_kit_common::HDPathError;
 
 use crate::{
     bip32::{HDPath, HDPathComponent, HDPathValue},
-    Derivation,
+    Derivation, SimpleNetworkID,
 };
 
 use super::{cap26_entity_kind::CAP26EntityKind, cap26_key_kind::CAP26KeyKind};
@@ -12,7 +12,7 @@ pub trait CAP26Repr: Derivation {
 
     fn __with_path_and_components(
         path: HDPath,
-        network_id: NetworkID,
+        network_id: SimpleNetworkID,
         entity_kind: CAP26EntityKind,
         key_kind: CAP26KeyKind,
         index: HDPathValue,
@@ -35,7 +35,7 @@ pub trait CAP26Repr: Derivation {
             Box::new(|v| {
                 if v <= u8::MAX as u32 {
                     let d = v as u8;
-                    NetworkID::from_repr(d).ok_or(UnsupportedNetworkID(d))
+                    SimpleNetworkID::from_repr(d).ok_or(UnsupportedNetworkID(d))
                 } else {
                     Err(InvalidNetworkIDExceedsLimit(v))
                 }
@@ -79,7 +79,7 @@ pub trait CAP26Repr: Derivation {
         Self::try_from_hdpath(&path)
     }
 
-    fn new(network_id: NetworkID, key_kind: CAP26KeyKind, index: HDPathValue) -> Self {
+    fn new(network_id: SimpleNetworkID, key_kind: CAP26KeyKind, index: HDPathValue) -> Self {
         let entity_kind = Self::entity_kind().expect("GetID cannot be used with this constructor");
         let c0 = HDPathComponent::bip44_purpose();
         let c1 = HDPathComponent::bip44_cointype();
@@ -94,6 +94,10 @@ pub trait CAP26Repr: Derivation {
     }
 
     fn new_mainnet_transaction_signing(index: HDPathValue) -> Self {
-        Self::new(NetworkID::Mainnet, CAP26KeyKind::TransactionSigning, index)
+        Self::new(
+            SimpleNetworkID::Mainnet,
+            CAP26KeyKind::TransactionSigning,
+            index,
+        )
     }
 }

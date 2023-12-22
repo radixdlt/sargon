@@ -2,12 +2,15 @@ use std::cell::RefCell;
 
 use identified_vec::Identifiable;
 use serde::{Deserialize, Serialize};
-use wallet_kit_common::{CommonError, NetworkID};
+use wallet_kit_common::CommonError;
 
 #[cfg(any(test, feature = "placeholder"))]
 use wallet_kit_common::HasPlaceholder;
 
-use crate::v100::{Account, AccountAddress};
+use crate::{
+    v100::{Account, AccountAddress},
+    NetworkID,
+};
 
 use super::accounts::Accounts;
 
@@ -114,11 +117,12 @@ impl Network {
 #[cfg(test)]
 mod tests {
     use identified_vec::{Identifiable, IsIdentifiedVec};
-    use wallet_kit_common::{
-        assert_eq_after_json_roundtrip, CommonError, HasPlaceholder, NetworkID,
-    };
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, CommonError, HasPlaceholder};
 
-    use crate::v100::{Account, Accounts};
+    use crate::{
+        v100::{Account, Accounts},
+        NetworkID,
+    };
 
     use super::Network;
 

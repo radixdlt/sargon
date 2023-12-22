@@ -6,9 +6,9 @@ use std::{
 use identified_vec::IsIdentifiedVec;
 use serde::{Deserialize, Serialize};
 
+use wallet_kit_common::CommonError;
 #[cfg(any(test, feature = "placeholder"))]
 use wallet_kit_common::HasPlaceholder;
-use wallet_kit_common::{CommonError, NetworkID};
 
 use super::{
     Account, AccountAddress, AppPreferences, FactorSource, FactorSourceID, FactorSources, Header,
@@ -162,12 +162,15 @@ mod tests {
     use identified_vec::{IsIdentifiedVec, IsIdentifiedVecOf};
     use radix_engine_toolkit_json::models::common;
     use wallet_kit_common::{
-        assert_eq_after_json_roundtrip, CommonError, HasPlaceholder, NetworkID, SLIP10Curve,
+        assert_eq_after_json_roundtrip, CommonError, HasPlaceholder, SLIP10Curve,
     };
 
-    use crate::v100::{
-        DeviceFactorSource, DisplayName, FactorSource, FactorSourceID,
-        LedgerHardwareWalletFactorSource,
+    use crate::{
+        v100::{
+            DeviceFactorSource, DisplayName, FactorSource, FactorSourceID,
+            LedgerHardwareWalletFactorSource,
+        },
+        NetworkID,
     };
 
     use super::{AppPreferences, FactorSources, Header, Networks, Profile};

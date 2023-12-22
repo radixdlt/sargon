@@ -2,7 +2,8 @@ use identified_vec::Identifiable;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Debug, Display, Formatter};
 use url::Url;
-use wallet_kit_common::NetworkID;
+
+use crate::NetworkID;
 
 use super::radix_network::RadixNetwork;
 use derive_getters::Getters;

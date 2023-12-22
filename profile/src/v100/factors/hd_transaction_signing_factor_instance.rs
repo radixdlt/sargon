@@ -95,14 +95,17 @@ mod tests {
         AccountPath, CAP26KeyKind, CAP26Repr, HierarchicalDeterministicPublicKey, IdentityPath,
         IsEntityPath,
     };
-    use wallet_kit_common::{CommonError as Error, HasPlaceholder, NetworkID, PublicKey};
+    use wallet_kit_common::{CommonError as Error, HasPlaceholder, PublicKey};
 
-    use crate::v100::factors::{
-        factor_source_id_from_hash::FactorSourceIDFromHash,
-        hd_transaction_signing_factor_instance::{
-            HDFactorInstanceAccountCreation, HDFactorInstanceIdentityCreation,
+    use crate::{
+        v100::factors::{
+            factor_source_id_from_hash::FactorSourceIDFromHash,
+            hd_transaction_signing_factor_instance::{
+                HDFactorInstanceAccountCreation, HDFactorInstanceIdentityCreation,
+            },
+            hierarchical_deterministic_factor_instance::HierarchicalDeterministicFactorInstance,
         },
-        hierarchical_deterministic_factor_instance::HierarchicalDeterministicFactorInstance,
+        NetworkID,
     };
 
     #[test]
@@ -144,7 +147,12 @@ mod tests {
     fn account_creation_wrong_key_kind() {
         let hd_key = HierarchicalDeterministicPublicKey::new(
             PublicKey::placeholder_ed25519(),
-            AccountPath::new(NetworkID::Mainnet, CAP26KeyKind::AuthenticationSigning, 0).into(),
+            AccountPath::new(
+                NetworkID::Mainnet.into(),
+                CAP26KeyKind::AuthenticationSigning,
+                0,
+            )
+            .into(),
         );
         let hd_fi = HierarchicalDeterministicFactorInstance::new(
             FactorSourceIDFromHash::placeholder(),
@@ -195,7 +203,12 @@ mod tests {
     fn identity_creation_wrong_key_kind() {
         let hd_key = HierarchicalDeterministicPublicKey::new(
             PublicKey::placeholder_ed25519(),
-            IdentityPath::new(NetworkID::Mainnet, CAP26KeyKind::AuthenticationSigning, 0).into(),
+            IdentityPath::new(
+                NetworkID::Mainnet.into(),
+                CAP26KeyKind::AuthenticationSigning,
+                0,
+            )
+            .into(),
         );
         let hd_fi = HierarchicalDeterministicFactorInstance::new(
             FactorSourceIDFromHash::placeholder(),

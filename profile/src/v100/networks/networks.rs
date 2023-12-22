@@ -1,7 +1,6 @@
 use std::{borrow::BorrowMut, cell::RefCell, rc::Rc, sync::Mutex};
 
 use identified_vec::{IdentifiedVecOf, IsIdentifiableVecOfVia, IsIdentifiedVec, IsIdentifiedVecOf};
-use wallet_kit_common::NetworkID;
 
 use crate::{
     identified_vec_via::IdentifiedVecVia,
@@ -112,9 +111,12 @@ impl HasPlaceholder for Networks {
 #[cfg(test)]
 mod tests {
     use identified_vec::{Identifiable, IsIdentifiedVec};
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder, NetworkID};
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
-    use crate::v100::{Account, Accounts, ContentHint, DisplayName, Network, Networks};
+    use crate::{
+        v100::{Account, Accounts, ContentHint, DisplayName, Network, Networks},
+        NetworkID,
+    };
 
     #[test]
     fn default_is_empty() {

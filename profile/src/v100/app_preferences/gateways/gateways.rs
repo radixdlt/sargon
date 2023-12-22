@@ -157,11 +157,9 @@ mod tests {
     use std::cell::RefCell;
 
     use identified_vec::{IdentifiedVecOf, IsIdentifiedVecOf, ItemsCloned};
-    use wallet_kit_common::{
-        assert_eq_after_json_roundtrip, CommonError, HasPlaceholder, NetworkID,
-    };
+    use wallet_kit_common::{assert_eq_after_json_roundtrip, CommonError, HasPlaceholder};
 
-    use crate::v100::app_preferences::gateways::gateway::Gateway;
+    use crate::{v100::app_preferences::gateways::gateway::Gateway, NetworkID};
 
     use super::Gateways;
 

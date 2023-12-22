@@ -5,7 +5,6 @@ use hd::{Derivation, HasEntityPath};
 use identified_vec::Identifiable;
 use serde::{Deserialize, Serialize};
 use std::{cell::RefCell, cmp::Ordering, fmt::Display, hash::Hasher};
-use wallet_kit_common::NetworkID;
 
 #[cfg(any(test, feature = "placeholder"))]
 use crate::v100::{DeviceFactorSource, PrivateHierarchicalDeterministicFactorSource};
@@ -14,9 +13,12 @@ use wallet_kit_common::HasPlaceholder;
 
 use std::hash::Hash;
 
-use crate::v100::{
-    AccountAddress, DisplayName, EntityAddress, EntityFlags, EntitySecurityState,
-    HDFactorInstanceAccountCreation, UnsecuredEntityControl,
+use crate::{
+    v100::{
+        AccountAddress, DisplayName, EntityAddress, EntityFlags, EntitySecurityState,
+        HDFactorInstanceAccountCreation, UnsecuredEntityControl,
+    },
+    NetworkID,
 };
 
 use super::{AppearanceID, OnLedgerSettings};
@@ -93,7 +95,7 @@ impl Account {
             account_creating_factor_instance.clone(),
         );
         Self {
-            network_id: account_creating_factor_instance.network_id(),
+            network_id: account_creating_factor_instance.network_id().into(),
             address,
             display_name: RefCell::new(display_name),
             security_state: UnsecuredEntityControl::with_account_creating_factor_instance(
