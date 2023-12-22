@@ -2,16 +2,19 @@ use std::cell::RefCell;
 
 use serde::{Deserialize, Serialize};
 
-use crate::v100::factors::{
-    factor_source::FactorSource, factor_source_common::FactorSourceCommon,
-    factor_source_id::FactorSourceID, factor_source_id_from_hash::FactorSourceIDFromHash,
-    factor_source_kind::FactorSourceKind, is_factor_source::IsFactorSource,
+use crate::{
+    v100::factors::{
+        factor_source::FactorSource, factor_source_common::FactorSourceCommon,
+        factor_source_id::FactorSourceID, factor_source_id_from_hash::FactorSourceIDFromHash,
+        factor_source_kind::FactorSourceKind, is_factor_source::IsFactorSource,
+    },
+    CommonError,
 };
 
 use super::ledger_hardware_wallet_hint::LedgerHardwareWalletHint;
 
 #[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -81,7 +84,7 @@ impl HasPlaceholder for LedgerHardwareWalletFactorSource {
 }
 
 impl TryFrom<FactorSource> for LedgerHardwareWalletFactorSource {
-    type Error = wallet_kit_common::CommonError;
+    type Error = CommonError;
 
     fn try_from(value: FactorSource) -> Result<Self, Self::Error> {
         value
@@ -102,7 +105,7 @@ impl IsFactorSource for LedgerHardwareWalletFactorSource {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, CommonError as Error, HasPlaceholder};
+    use crate::{assert_eq_after_json_roundtrip, CommonError as Error, HasPlaceholder};
 
     use crate::v100::{DeviceFactorSource, FactorSource, FactorSourceCommon, IsFactorSource};
 

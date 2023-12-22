@@ -2,7 +2,7 @@ use derive_getters::Getters;
 use serde::{Deserialize, Serialize};
 
 #[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 /// Settings related to displaying of information to the user inside the app.
 ///
@@ -63,8 +63,8 @@ impl Default for FiatCurrency {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::assert_eq_after_json_roundtrip;
-    use wallet_kit_common::HasPlaceholder;
+    use crate::assert_eq_after_json_roundtrip;
+    use crate::HasPlaceholder;
 
     use super::AppDisplay;
     use super::FiatCurrency;

@@ -1,12 +1,12 @@
 use serde::{de, Deserializer, Serialize, Serializer};
 use std::fmt::Display;
 
-use wallet_kit_common::suffix_string;
+use crate::{suffix_string, PublicKey};
 
 use crate::{v100::AbstractEntityType, NetworkID};
 
 #[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 use super::entity_address::EntityAddress;
 
@@ -44,6 +44,14 @@ pub struct AccountAddress {
     /// hash was used to bech32 encode it. This means that two public key hashes will result
     /// in two different account address on two different networks.
     network_id: NetworkID,
+}
+
+// #[uniffi::export]
+impl AccountAddress {
+    #[uniffi::constructor]
+    pub fn new(public_key: PublicKey, network_id: NetworkID) -> Self {
+        <Self as EntityAddress>::from_public_key(public_key, network_id)
+    }
 }
 
 #[uniffi::export]
@@ -128,7 +136,7 @@ impl EntityAddress for AccountAddress {
 }
 
 impl TryInto<AccountAddress> for &str {
-    type Error = wallet_kit_common::CommonError;
+    type Error = crate::CommonError;
 
     /// Tries to deserializes a bech32 address into an `AccountAddress`.
     fn try_into(self) -> Result<AccountAddress, Self::Error> {
@@ -176,17 +184,17 @@ impl AccountAddress {
 
 #[cfg(test)]
 mod tests {
-    use radix_engine_common::crypto::{Ed25519PublicKey, PublicKey};
-    use serde_json::json;
-    use std::str::FromStr;
-    use wallet_kit_common::CommonError as Error;
-    use wallet_kit_common::{
+
+    use crate::PublicKey;
+    use crate::{CommonError as Error, Ed25519PublicKey};
+    use crate::{
         HasPlaceholder,
         {
             assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
             assert_json_value_ne_after_roundtrip,
         },
     };
+    use serde_json::json;
 
     use crate::v100::address::{account_address::AccountAddress, entity_address::EntityAddress};
     use crate::NetworkID;
@@ -244,9 +252,23 @@ mod tests {
             "3e9b96a2a863f1be4658ea66aa0584d2a8847d4c0f658b20e62e3594d994d73d",
         )
         .unwrap();
+
         assert_eq!(
             AccountAddress::from_public_key(PublicKey::Ed25519(public_key), NetworkID::Mainnet)
                 .address(),
+            "account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzdm"
+        )
+    }
+
+    #[test]
+    fn new() {
+        let public_key = Ed25519PublicKey::from_str(
+            "3e9b96a2a863f1be4658ea66aa0584d2a8847d4c0f658b20e62e3594d994d73d",
+        )
+        .unwrap();
+
+        assert_eq!(
+            AccountAddress::new(PublicKey::Ed25519(public_key), NetworkID::Mainnet).address(),
             "account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzdm"
         )
     }

@@ -5,7 +5,7 @@ use radix_engine_toolkit_json::models::common::SerializableDecimal;
 use serde::{Deserialize, Serialize};
 
 #[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 /// User Preferences relating to submission of transactions.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
@@ -58,8 +58,8 @@ impl HasPlaceholder for Transaction {
 
 #[cfg(test)]
 mod tests {
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
     use transaction::prelude::dec;
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use super::Transaction;
 

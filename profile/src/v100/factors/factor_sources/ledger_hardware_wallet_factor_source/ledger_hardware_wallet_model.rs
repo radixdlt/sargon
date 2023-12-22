@@ -16,8 +16,8 @@ pub enum LedgerHardwareWalletModel {
 mod tests {
     use std::collections::BTreeSet;
 
+    use crate::assert_json_value_eq_after_roundtrip;
     use serde_json::json;
-    use wallet_kit_common::assert_json_value_eq_after_roundtrip;
 
     use crate::v100::factors::factor_sources::ledger_hardware_wallet_factor_source::ledger_hardware_wallet_model::LedgerHardwareWalletModel;
 

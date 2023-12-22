@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 
-use hd::MnemonicWithPassphrase;
+use crate::{CommonError, MnemonicWithPassphrase};
 use serde::{Deserialize, Serialize};
 
 use crate::v100::{
@@ -9,7 +9,7 @@ use crate::v100::{
 };
 
 #[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 use super::device_factor_source_hint::DeviceFactorSourceHint;
 
@@ -55,7 +55,7 @@ impl DeviceFactorSource {
 }
 
 impl TryFrom<FactorSource> for DeviceFactorSource {
-    type Error = wallet_kit_common::CommonError;
+    type Error = CommonError;
 
     fn try_from(value: FactorSource) -> Result<Self, Self::Error> {
         value
@@ -145,15 +145,15 @@ impl DeviceFactorSource {
 
 #[cfg(test)]
 mod tests {
-    use hd::BIP39WordCount;
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use crate::BIP39WordCount;
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use super::DeviceFactorSource;
     use crate::v100::{
         FactorSource, FactorSourceCryptoParameters, FactorSourceID, IsFactorSource,
         LedgerHardwareWalletFactorSource,
     };
-    use wallet_kit_common::CommonError as Error;
+    use crate::CommonError as Error;
 
     #[test]
     fn equality() {

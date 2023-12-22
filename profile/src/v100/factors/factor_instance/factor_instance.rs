@@ -1,5 +1,5 @@
+use crate::HierarchicalDeterministicPublicKey;
 use derive_getters::Getters;
-use hd::HierarchicalDeterministicPublicKey;
 use serde::{Deserialize, Serialize};
 
 use super::{
@@ -9,7 +9,7 @@ use super::{
 use crate::v100::factors::factor_source_id::FactorSourceID;
 
 #[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Getters)]
 pub struct FactorInstance {
@@ -70,7 +70,7 @@ impl HasPlaceholder for FactorInstance {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use super::FactorInstance;
 

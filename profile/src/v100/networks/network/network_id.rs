@@ -1,10 +1,10 @@
 use std::fmt::Display;
 
+use crate::CommonError;
 use enum_iterator::Sequence;
 use radix_engine_common::network::NetworkDefinition;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use strum::FromRepr;
-use wallet_kit_common::CommonError;
 
 #[derive(
     Serialize_repr,
@@ -161,9 +161,9 @@ impl NetworkID {
 mod tests {
     use std::collections::BTreeSet;
 
+    use crate::{assert_json_value_eq_after_roundtrip, assert_json_value_fails};
     use enum_iterator::all;
     use serde_json::json;
-    use wallet_kit_common::{assert_json_value_eq_after_roundtrip, assert_json_value_fails};
 
     use super::NetworkID;
 

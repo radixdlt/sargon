@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use std::fmt::{Debug, Formatter};
 
 #[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 /// A client the user have connected P2P with, typically a
 /// WebRTC connections with a DApp, but might be Android or iPhone
@@ -106,7 +106,7 @@ impl P2PLink {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use super::P2PLink;
 

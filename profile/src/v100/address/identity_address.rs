@@ -2,7 +2,7 @@ use derive_getters::Getters;
 use serde::{de, Deserializer, Serialize, Serializer};
 use std::fmt::Display;
 
-use crate::{v100::AbstractEntityType, NetworkID};
+use crate::{v100::AbstractEntityType, CommonError, NetworkID};
 
 use super::entity_address::EntityAddress;
 
@@ -67,7 +67,7 @@ impl<'de> serde::Deserialize<'de> for IdentityAddress {
 }
 
 impl TryInto<IdentityAddress> for &str {
-    type Error = wallet_kit_common::CommonError;
+    type Error = CommonError;
 
     /// Tries to deserializes a bech32 address into an `IdentityAddress`.
     fn try_into(self) -> Result<IdentityAddress, Self::Error> {
@@ -86,17 +86,17 @@ impl Display for IdentityAddress {
 mod tests {
     use std::str::FromStr;
 
+    use crate::{
+        assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
+        assert_json_value_ne_after_roundtrip,
+    };
     use radix_engine_common::crypto::{
         Ed25519PublicKey as EngineEd25519PublicKey, PublicKey as EnginePublicKey,
     };
     use serde_json::json;
-    use wallet_kit_common::{
-        assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
-        assert_json_value_ne_after_roundtrip,
-    };
 
     use super::*;
-    use wallet_kit_common::CommonError as Error;
+    use crate::CommonError as Error;
 
     #[test]
     fn from_bech32() {

@@ -130,7 +130,7 @@ impl ThirdPartyDeposits {
 mod tests {
     use std::collections::BTreeSet;
 
-    use wallet_kit_common::assert_eq_after_json_roundtrip;
+    use crate::assert_eq_after_json_roundtrip;
 
     use crate::v100::{
         entity::account::on_ledger_settings::third_party_deposits::{

@@ -13,7 +13,7 @@ pub enum DepositorAddress {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::assert_eq_after_json_roundtrip;
+    use crate::assert_eq_after_json_roundtrip;
 
     use super::DepositorAddress;
 

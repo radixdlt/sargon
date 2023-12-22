@@ -1,10 +1,10 @@
 use std::cell::RefCell;
 
-use hd::BIP39WordCount;
+use crate::BIP39WordCount;
 use serde::{Deserialize, Serialize};
 
 #[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 /// Properties describing a DeviceFactorSource to help user disambiguate between
 /// it and another one.
@@ -88,8 +88,8 @@ impl DeviceFactorSourceHint {
 
 #[cfg(test)]
 mod tests {
-    use hd::BIP39WordCount;
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use crate::BIP39WordCount;
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use crate::v100::factors::factor_sources::device_factor_source::device_factor_source_hint::DeviceFactorSourceHint;
 

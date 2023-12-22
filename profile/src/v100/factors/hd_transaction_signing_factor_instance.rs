@@ -2,12 +2,12 @@ use super::{
     factor_source_id_from_hash::FactorSourceIDFromHash,
     hierarchical_deterministic_factor_instance::HierarchicalDeterministicFactorInstance,
 };
-use derive_getters::Getters;
-use hd::{
+use crate::{
     AccountPath, CAP26Path, HasEntityPath, HierarchicalDeterministicPublicKey, IdentityPath,
     IsEntityPath,
 };
-use wallet_kit_common::{CommonError as Error, PublicKey};
+use crate::{CommonError as Error, PublicKey};
+use derive_getters::Getters;
 
 /// A specialized Hierarchical Deterministic FactorInstance used for transaction signing
 /// and creation of virtual Accounts and Identities (Personas).
@@ -91,11 +91,11 @@ impl HDFactorInstanceIdentityCreation {
 
 #[cfg(test)]
 mod tests {
-    use hd::{
+    use crate::{
         AccountPath, CAP26KeyKind, CAP26Repr, HierarchicalDeterministicPublicKey, IdentityPath,
         IsEntityPath,
     };
-    use wallet_kit_common::{CommonError as Error, HasPlaceholder, PublicKey};
+    use crate::{CommonError as Error, HasPlaceholder, PublicKey};
 
     use crate::{
         v100::factors::{

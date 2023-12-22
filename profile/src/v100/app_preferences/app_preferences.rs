@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use super::{AppDisplay, Gateways, P2PLinks, Security, Transaction};
 
 #[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 /// Collection of all settings, preferences and configuration related to how the wallet
 /// behaves and looks.
@@ -122,7 +122,7 @@ impl HasPlaceholder for AppPreferences {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use super::{AppDisplay, AppPreferences, Gateways, P2PLinks, Security, Transaction};
 

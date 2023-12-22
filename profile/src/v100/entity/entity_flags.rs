@@ -65,11 +65,11 @@ impl EntityFlags {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
-    use wallet_kit_common::{
+    use crate::{
         assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
         assert_json_value_ne_after_roundtrip,
     };
+    use serde_json::json;
 
     use crate::v100::entity::{entity_flag::EntityFlag, entity_flags::EntityFlags};
 

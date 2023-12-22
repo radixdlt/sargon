@@ -1,12 +1,12 @@
+use crate::HierarchicalDeterministicPrivateKey;
 use derive_getters::Getters;
-use hd::HierarchicalDeterministicPrivateKey;
 
 use crate::v100::factors::factor_source_id::FactorSourceID;
 
 use super::factor_instance::FactorInstance;
 
 #[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 /// An ephemeral (never persisted) HD FactorInstance which contains
 /// the private key, with the ID of its creating FactorSource.
@@ -68,8 +68,8 @@ impl HasPlaceholder for PrivateHierarchicalDeterministicFactorInstance {
 
 #[cfg(test)]
 mod tests {
-    use hd::{Derivation, HierarchicalDeterministicPrivateKey};
-    use wallet_kit_common::HasPlaceholder;
+    use crate::HasPlaceholder;
+    use crate::{Derivation, HierarchicalDeterministicPrivateKey};
 
     use crate::v100::factors::factor_instance::factor_instance::FactorInstance;
 

@@ -1,7 +1,7 @@
-use hd::HierarchicalDeterministicPublicKey;
+use crate::HierarchicalDeterministicPublicKey;
 
 #[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
@@ -73,7 +73,7 @@ impl HasPlaceholder for FactorInstanceBadgeVirtualSource {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use super::FactorInstanceBadgeVirtualSource;
 

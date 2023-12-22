@@ -1,13 +1,13 @@
+use crate::Hex32Bytes;
+use crate::{GetIDPath, MnemonicWithPassphrase};
 use derive_getters::Getters;
-use hd::{GetIDPath, MnemonicWithPassphrase};
 use radix_engine_common::crypto::{blake2b_256_hash, Hash};
 use serde::{Deserialize, Serialize};
-use wallet_kit_common::Hex32Bytes;
 
 use super::factor_source_kind::FactorSourceKind;
 
 #[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 /// FactorSourceID from the blake2b hash of the special HD public key derived at `CAP26::GetID`,
 /// for a certain `FactorSourceKind`
@@ -79,8 +79,8 @@ impl FactorSourceIDFromHash {
 
 #[cfg(test)]
 mod tests {
-    use hd::{Mnemonic, MnemonicWithPassphrase};
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use crate::{Mnemonic, MnemonicWithPassphrase};
 
     use super::FactorSourceIDFromHash;
 

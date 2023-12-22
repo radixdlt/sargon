@@ -85,8 +85,8 @@ impl Display for FactorSourceKind {
 mod tests {
     use std::collections::BTreeSet;
 
+    use crate::{assert_json_roundtrip, assert_json_value_eq_after_roundtrip};
     use serde_json::json;
-    use wallet_kit_common::{assert_json_roundtrip, assert_json_value_eq_after_roundtrip};
 
     use crate::v100::factors::factor_source_kind::FactorSourceKind;
 

@@ -1,10 +1,10 @@
 use std::fmt::Display;
 
+use crate::{id, now};
 use derive_getters::Getters;
 use iso8601_timestamp::Timestamp;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use wallet_kit_common::{id, now};
 
 /// A short summary of a device the Profile is being used
 /// on, typically an iPhone or an Android phone.
@@ -88,9 +88,9 @@ mod tests {
     use std::{collections::HashSet, str::FromStr};
 
     use crate::v100::header::device_info::DeviceInfo;
+    use crate::*;
     use iso8601_timestamp::Timestamp;
     use uuid::Uuid;
-    use wallet_kit_common::*;
 
     #[test]
     fn new_iphone() {

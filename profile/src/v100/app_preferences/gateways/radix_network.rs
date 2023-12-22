@@ -1,11 +1,11 @@
+use crate::CommonError;
 use derive_getters::Getters;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt::Display;
-use wallet_kit_common::CommonError;
 
 #[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 use crate::NetworkID::{self, *};
 
@@ -155,7 +155,7 @@ impl RadixNetwork {
 #[cfg(test)]
 mod tests {
 
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, CommonError, HasPlaceholder};
+    use crate::{assert_eq_after_json_roundtrip, CommonError, HasPlaceholder};
 
     use crate::NetworkID;
 

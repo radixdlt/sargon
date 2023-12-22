@@ -1,7 +1,7 @@
 #[cfg(any(test, feature = "placeholder"))]
-use hd::{HDPathValue, MnemonicWithPassphrase};
+use crate::{HDPathValue, MnemonicWithPassphrase};
 
-use hd::{Derivation, HasEntityPath};
+use crate::{Derivation, HasEntityPath};
 use identified_vec::Identifiable;
 use serde::{Deserialize, Serialize};
 use std::{cell::RefCell, cmp::Ordering, fmt::Display, hash::Hasher};
@@ -9,7 +9,7 @@ use std::{cell::RefCell, cmp::Ordering, fmt::Display, hash::Hasher};
 #[cfg(any(test, feature = "placeholder"))]
 use crate::v100::{DeviceFactorSource, PrivateHierarchicalDeterministicFactorSource};
 #[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 use std::hash::Hash;
 
@@ -358,8 +358,8 @@ impl Account {
 mod tests {
     use std::{collections::BTreeSet, str::FromStr};
 
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
     use radix_engine_common::prelude::HashSet;
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use crate::v100::{
         AccountAddress, AppearanceID, AssetException, DepositAddressExceptionRule, DepositRule,

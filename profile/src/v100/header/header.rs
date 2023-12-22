@@ -7,13 +7,13 @@ use std::{
 use std::str::FromStr;
 
 #[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 use iso8601_timestamp::Timestamp;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use wallet_kit_common::{id, now};
+use crate::{id, now};
 
 use crate::ProfileSnapshotVersion;
 
@@ -192,13 +192,13 @@ pub mod tests {
 
     use std::str::FromStr;
 
+    use crate::{assert_eq_after_json_roundtrip, id, HasPlaceholder};
     use crate::{
         v100::header::{content_hint::ContentHint, device_info::DeviceInfo},
         ProfileSnapshotVersion,
     };
     use iso8601_timestamp::Timestamp;
     use uuid::Uuid;
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, id, HasPlaceholder};
 
     use super::Header;
 

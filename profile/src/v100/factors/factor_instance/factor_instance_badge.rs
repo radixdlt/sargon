@@ -1,11 +1,11 @@
-use hd::HierarchicalDeterministicPublicKey;
+use crate::HierarchicalDeterministicPublicKey;
 use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
 
 use super::badge_virtual_source::FactorInstanceBadgeVirtualSource;
 use enum_as_inner::EnumAsInner;
 
 #[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 /// Either a "physical" badge (NFT) or some source for recreation of a producer
 /// of a virtual badge (signature), e.g. a HD derivation path, from which a private key
@@ -77,8 +77,8 @@ impl Serialize for FactorInstanceBadge {
 
 #[cfg(test)]
 mod tests {
-    use hd::HierarchicalDeterministicPublicKey;
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use crate::HierarchicalDeterministicPublicKey;
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use crate::v100::factors::factor_instance::badge_virtual_source::FactorInstanceBadgeVirtualSource;
 

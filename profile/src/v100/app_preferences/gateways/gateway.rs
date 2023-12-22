@@ -120,9 +120,9 @@ impl Gateway {
 
 #[cfg(test)]
 mod tests {
+    use crate::assert_eq_after_json_roundtrip;
     use identified_vec::Identifiable;
     use radix_engine_common::prelude::HashSet;
-    use wallet_kit_common::assert_eq_after_json_roundtrip;
 
     use super::Gateway;
 

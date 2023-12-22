@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["profile", "hierarchical_deterministic", "wallet_kit_common"]
+members = ["profile"]
 
 [workspace.dependencies]
 serde = { version = "1.0.193", features = ["derive"] }

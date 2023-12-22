@@ -1,5 +1,5 @@
+use crate::{AccountPath, CAP26KeyKind, CAP26Repr, HDPathValue, MnemonicWithPassphrase};
 use derive_getters::Getters;
-use hd::{AccountPath, CAP26KeyKind, CAP26Repr, HDPathValue, MnemonicWithPassphrase};
 
 use crate::{
     v100::{
@@ -43,7 +43,7 @@ impl PrivateHierarchicalDeterministicFactorSource {
         network_id: NetworkID,
         index: HDPathValue,
     ) -> HDFactorInstanceAccountCreation {
-        let path = AccountPath::new(network_id.into(), CAP26KeyKind::TransactionSigning, index);
+        let path = AccountPath::new(network_id, CAP26KeyKind::TransactionSigning, index);
         let hd_private_key = self.mnemonic_with_passphrase.derive_private_key(path);
         let hd_factor_instance = HierarchicalDeterministicFactorInstance::new(
             self.factor_source.id().clone(),

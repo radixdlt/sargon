@@ -1,11 +1,11 @@
 use std::{cell::RefCell, collections::BTreeSet};
 
+use crate::now;
 use iso8601_timestamp::Timestamp;
 use serde::{Deserialize, Serialize};
-use wallet_kit_common::now;
 
 #[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 use super::{
     factor_source_crypto_parameters::FactorSourceCryptoParameters,
@@ -181,8 +181,8 @@ mod tests {
 
     use std::collections::BTreeSet;
 
+    use crate::{assert_eq_after_json_roundtrip, now, HasPlaceholder};
     use iso8601_timestamp::Timestamp;
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, now, HasPlaceholder};
 
     use crate::v100::factors::{
         factor_source_crypto_parameters::FactorSourceCryptoParameters,

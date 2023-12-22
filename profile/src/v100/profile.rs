@@ -6,9 +6,9 @@ use std::{
 use identified_vec::IsIdentifiedVec;
 use serde::{Deserialize, Serialize};
 
-use wallet_kit_common::CommonError;
+use crate::CommonError;
 #[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 use super::{
     Account, AccountAddress, AppPreferences, FactorSource, FactorSourceID, FactorSources, Header,
@@ -159,11 +159,9 @@ impl HasPlaceholder for Profile {
 
 #[cfg(test)]
 mod tests {
+    use crate::{assert_eq_after_json_roundtrip, CommonError, HasPlaceholder, SLIP10Curve};
     use identified_vec::{IsIdentifiedVec, IsIdentifiedVecOf};
     use radix_engine_toolkit_json::models::common;
-    use wallet_kit_common::{
-        assert_eq_after_json_roundtrip, CommonError, HasPlaceholder, SLIP10Curve,
-    };
 
     use crate::{
         v100::{

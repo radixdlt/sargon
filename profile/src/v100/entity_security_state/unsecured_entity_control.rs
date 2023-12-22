@@ -2,10 +2,10 @@ use derive_getters::Getters;
 use serde::{Deserialize, Serialize};
 
 use crate::v100::{HDFactorInstanceAccountCreation, HierarchicalDeterministicFactorInstance};
-use wallet_kit_common::CommonError as Error;
+use crate::CommonError as Error;
 
 #[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 /// Basic security control of an unsecured entity. When said entity
 /// is "securified" it will no longer be controlled by this `UnsecuredEntityControl`
@@ -38,7 +38,7 @@ impl UnsecuredEntityControl {
         transaction_signing: HierarchicalDeterministicFactorInstance,
         authentication_signing: Option<HierarchicalDeterministicFactorInstance>,
     ) -> Result<Self, Error> {
-        use hd::CAP26KeyKind;
+        use crate::CAP26KeyKind;
 
         if let Some(auth) = &authentication_signing {
             if let Some(key_kind) = auth.key_kind() {
@@ -83,7 +83,7 @@ impl HasPlaceholder for UnsecuredEntityControl {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use crate::v100::HierarchicalDeterministicFactorInstance;
 

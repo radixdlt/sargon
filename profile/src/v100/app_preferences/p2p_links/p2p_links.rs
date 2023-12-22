@@ -5,7 +5,7 @@ use crate::identified_vec_via::IdentifiedVecVia;
 use super::p2p_link::P2PLink;
 
 #[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 pub type P2PLinks = IdentifiedVecVia<P2PLink>;
 
@@ -33,8 +33,8 @@ impl HasPlaceholder for P2PLinks {
 
 #[cfg(test)]
 mod tests {
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
     use identified_vec::{IsIdentifiedVec, IsIdentifiedVecOf};
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use crate::v100::app_preferences::p2p_links::p2p_link::P2PLink;
 

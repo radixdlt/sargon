@@ -12,7 +12,7 @@ use std::{
     str::FromStr,
 };
 
-use wallet_kit_common::CommonError as Error;
+use crate::CommonError as Error;
 
 use crate::NetworkID;
 
@@ -60,7 +60,7 @@ impl NonFungibleGlobalId {
 }
 
 impl TryInto<NonFungibleGlobalId> for &str {
-    type Error = wallet_kit_common::CommonError;
+    type Error = crate::CommonError;
 
     /// Tries to deserializes a bech32 address into an `AccountAddress`.
     fn try_into(self) -> Result<NonFungibleGlobalId, Self::Error> {
@@ -102,12 +102,12 @@ impl NonFungibleGlobalId {
 mod tests {
     use std::collections::HashSet;
 
-    use radix_engine_common::data::scrypto::model::NonFungibleLocalId;
-    use serde_json::json;
-    use wallet_kit_common::{
+    use crate::{
         assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
         assert_json_value_ne_after_roundtrip,
     };
+    use radix_engine_common::data::scrypto::model::NonFungibleLocalId;
+    use serde_json::json;
 
     use super::NonFungibleGlobalId;
 

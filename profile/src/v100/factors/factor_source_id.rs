@@ -6,7 +6,7 @@ use enum_as_inner::EnumAsInner;
 use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
 
 #[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 /// A unique and stable identifier of a FactorSource, e.g. a
 /// DeviceFactorSource being a mnemonic securely stored in a
@@ -92,7 +92,7 @@ impl HasPlaceholder for FactorSourceID {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use crate::v100::factors::{
         factor_source_id_from_address::FactorSourceIDFromAddress,

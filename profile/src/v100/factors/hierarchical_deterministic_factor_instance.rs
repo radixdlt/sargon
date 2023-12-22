@@ -2,19 +2,19 @@
 use crate::v100::factors::factor_source_kind::FactorSourceKind;
 #[cfg(any(test, feature = "placeholder"))]
 use crate::NetworkID;
-use derive_getters::Getters;
 #[cfg(any(test, feature = "placeholder"))]
-use hd::{AccountPath, CAP26Repr, HDPathValue, MnemonicWithPassphrase};
-use hd::{
+use crate::{AccountPath, CAP26Repr, HDPathValue, MnemonicWithPassphrase};
+use crate::{
     CAP26KeyKind, CAP26Path, DerivationPath, HierarchicalDeterministicPublicKey, IsEntityPath,
 };
+use crate::{CommonError as Error, PublicKey};
+use derive_getters::Getters;
 use serde::{de, Deserializer, Serialize, Serializer};
-use wallet_kit_common::{CommonError as Error, PublicKey};
 
 use super::{FactorInstance, FactorInstanceBadge, FactorSourceID, FactorSourceIDFromHash};
 
 #[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 /// A virtual hierarchical deterministic `FactorInstance`
 #[derive(Clone, Debug, PartialEq, Eq, Getters)]
@@ -163,11 +163,11 @@ impl HierarchicalDeterministicFactorInstance {
 
 #[cfg(test)]
 mod tests {
-    use hd::{
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder, PublicKey};
+    use crate::{
         BIP44LikePath, CAP26KeyKind, Derivation, DerivationPath, GetIDPath,
         HierarchicalDeterministicPublicKey, IdentityPath,
     };
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder, PublicKey};
 
     use crate::v100::factors::factor_source_id_from_hash::FactorSourceIDFromHash;
 

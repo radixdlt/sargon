@@ -2,12 +2,12 @@ use std::cell::RefCell;
 
 use super::gateway::Gateway;
 
+use crate::CommonError;
 use identified_vec::{Identifiable, IdentifiedVecOf, IsIdentifiedVec, IsIdentifiedVecOf};
 use serde::{de, ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
-use wallet_kit_common::CommonError;
 
 #[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 /// The currently used Gateway and a collection of other by user added
 /// or predefined Gateways the user can switch to.
@@ -156,8 +156,8 @@ impl HasPlaceholder for Gateways {
 mod tests {
     use std::cell::RefCell;
 
+    use crate::{assert_eq_after_json_roundtrip, CommonError, HasPlaceholder};
     use identified_vec::{IdentifiedVecOf, IsIdentifiedVecOf, ItemsCloned};
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, CommonError, HasPlaceholder};
 
     use crate::{v100::app_preferences::gateways::gateway::Gateway, NetworkID};
 

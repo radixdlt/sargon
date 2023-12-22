@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use crate::v100::AccountAddress;
 
 #[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 use super::factor_source_kind::FactorSourceKind;
 
@@ -46,7 +46,7 @@ impl HasPlaceholder for FactorSourceIDFromAddress {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use super::FactorSourceIDFromAddress;
 

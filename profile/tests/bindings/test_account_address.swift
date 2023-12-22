@@ -1,3 +1,8 @@
 import profileFFI
 
-struct AccountAddress { }
+func playground() throws {
+    // let publicKey
+    // let address = AccountAddress(new: )
+}
+
+try! playground()

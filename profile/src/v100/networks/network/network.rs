@@ -1,11 +1,11 @@
 use std::cell::RefCell;
 
+use crate::CommonError;
 use identified_vec::Identifiable;
 use serde::{Deserialize, Serialize};
-use wallet_kit_common::CommonError;
 
 #[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 use crate::{
     v100::{Account, AccountAddress},
@@ -116,8 +116,8 @@ impl Network {
 
 #[cfg(test)]
 mod tests {
+    use crate::{assert_eq_after_json_roundtrip, CommonError, HasPlaceholder};
     use identified_vec::{Identifiable, IsIdentifiedVec};
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, CommonError, HasPlaceholder};
 
     use crate::{
         v100::{Account, Accounts},

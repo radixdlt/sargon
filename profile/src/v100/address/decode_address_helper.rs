@@ -1,7 +1,7 @@
 use radix_engine_common::types::EntityType as EngineEntityType;
 use radix_engine_toolkit::functions::address::decode;
 
-use wallet_kit_common::CommonError as Error;
+use crate::CommonError as Error;
 
 use crate::{v100::AbstractEntityType, NetworkID};
 
@@ -26,7 +26,7 @@ pub fn decode_address(s: &str) -> Result<DecodeAddressOutput, Error> {
 mod tests {
 
     use super::decode_address;
-    use wallet_kit_common::CommonError as Error;
+    use crate::CommonError as Error;
 
     #[test]
     fn decode_unsupported_entity() {

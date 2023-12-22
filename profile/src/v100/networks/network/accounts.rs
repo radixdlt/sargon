@@ -4,9 +4,9 @@ use crate::{
 };
 use identified_vec::{IdentifiedVecOf, IsIdentifiableVecOfVia, IsIdentifiedVec, IsIdentifiedVecOf};
 
-use wallet_kit_common::CommonError;
+use crate::CommonError;
 #[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 /// An ordered set of Accounts on a specific network, most commonly
 /// the set is non-empty.
@@ -101,8 +101,8 @@ impl Accounts {
 
 #[cfg(test)]
 mod tests {
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
     use identified_vec::IsIdentifiedVec;
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use crate::v100::{Account, AccountAddress, Accounts, AppearanceID, DisplayName};
 

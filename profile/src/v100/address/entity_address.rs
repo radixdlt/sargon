@@ -1,55 +1,17 @@
-use hd::IsEntityPath;
+use crate::IsEntityPath;
 use radix_engine_common::crypto::PublicKey as EnginePublicKey;
 use radix_engine_toolkit::functions::derive::{
     virtual_account_address_from_public_key, virtual_identity_address_from_public_key,
 };
 use radix_engine_toolkit_json::models::scrypto::node_id::SerializableNodeIdInternal;
 
-use wallet_kit_common::CommonError as Error;
+use crate::CommonError as Error;
 
 use crate::v100::AbstractEntityType;
 use crate::v100::HDFactorInstanceTransactionSigning;
 use crate::NetworkID;
 
 use super::decode_address_helper::decode_address;
-
-impl From<hd::SimpleNetworkID> for NetworkID {
-    fn from(value: hd::SimpleNetworkID) -> Self {
-        match value {
-            hd::SimpleNetworkID::Mainnet => NetworkID::Mainnet,
-            hd::SimpleNetworkID::Stokenet => NetworkID::Stokenet,
-            hd::SimpleNetworkID::Adapanet => NetworkID::Adapanet,
-            hd::SimpleNetworkID::Kisharnet => NetworkID::Kisharnet,
-            hd::SimpleNetworkID::Nebunet => NetworkID::Nebunet,
-            hd::SimpleNetworkID::Ansharnet => NetworkID::Ansharnet,
-            hd::SimpleNetworkID::Zabanet => NetworkID::Zabanet,
-            hd::SimpleNetworkID::Enkinet => NetworkID::Enkinet,
-            hd::SimpleNetworkID::Hammunet => NetworkID::Hammunet,
-            hd::SimpleNetworkID::Nergalnet => NetworkID::Nergalnet,
-            hd::SimpleNetworkID::Mardunet => NetworkID::Mardunet,
-            hd::SimpleNetworkID::Simulator => NetworkID::Simulator,
-        }
-    }
-}
-
-impl From<NetworkID> for hd::SimpleNetworkID {
-    fn from(value: NetworkID) -> Self {
-        match value {
-            NetworkID::Mainnet => hd::SimpleNetworkID::Mainnet,
-            NetworkID::Stokenet => hd::SimpleNetworkID::Stokenet,
-            NetworkID::Adapanet => hd::SimpleNetworkID::Adapanet,
-            NetworkID::Kisharnet => hd::SimpleNetworkID::Kisharnet,
-            NetworkID::Nebunet => hd::SimpleNetworkID::Nebunet,
-            NetworkID::Ansharnet => hd::SimpleNetworkID::Ansharnet,
-            NetworkID::Zabanet => hd::SimpleNetworkID::Zabanet,
-            NetworkID::Enkinet => hd::SimpleNetworkID::Enkinet,
-            NetworkID::Hammunet => hd::SimpleNetworkID::Hammunet,
-            NetworkID::Nergalnet => hd::SimpleNetworkID::Nergalnet,
-            NetworkID::Mardunet => hd::SimpleNetworkID::Mardunet,
-            NetworkID::Simulator => hd::SimpleNetworkID::Simulator,
-        }
-    }
-}
 
 /// An address of an entity, provides default implementation of `try_from_bech32`
 /// to decode a bech32 encoded address string into Self.
@@ -87,10 +49,9 @@ pub trait EntityAddress: Sized {
     fn from_hd_factor_instance_virtual_entity_creation<E: IsEntityPath>(
         hd_factor_instance_virtual_entity_creation: HDFactorInstanceTransactionSigning<E>,
     ) -> Self {
-        let simple_network_id = hd_factor_instance_virtual_entity_creation
+        let network_id = hd_factor_instance_virtual_entity_creation
             .path()
             .network_id();
-        let network_id: NetworkID = simple_network_id.into();
 
         Self::from_public_key(
             hd_factor_instance_virtual_entity_creation

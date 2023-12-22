@@ -6,7 +6,7 @@ use std::{
 use serde::{Deserialize, Serialize};
 
 #[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 // FIXME: MFA this is in fact not used, so ok to be a `bool` for now. The AppPreferences Security type has
 // a field `structure_configuration_references` but no client can populate it yet, so the list will always
@@ -75,7 +75,7 @@ impl HasPlaceholder for Security {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use super::Security;
 

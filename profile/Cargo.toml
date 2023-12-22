@@ -4,15 +4,10 @@ version = "0.1.0"
 edition = "2021"
 build = "build.rs"
 
-[package.metadata.uniffi.testing]
-external-crates = ["wallet_kit_common"]
-
 [features]
 placeholder = []
 
 [dependencies]
-hd = { path = "../hierarchical_deterministic" }
-wallet_kit_common = { path = "../wallet_kit_common" }
 serde = { workspace = true }
 serde_json = { workspace = true }
 thiserror = { workspace = true }
@@ -33,18 +28,20 @@ enum-as-inner = { workspace = true }
 identified_vec = { workspace = true }
 nutype = { workspace = true }
 derive-getters = { workspace = true }
-url = { version = "2.5.0", features = ["serde"] }
 schemars = { workspace = true }
 uniffi = { workspace = true, features = ["cli"] }
+url = { version = "2.5.0", features = ["serde"] }
+pretty_assertions = "1.4.0"
+slip10 = "0.4.3"
+memoize = "0.4.1"
+itertools = { version = "0.12.0" }
+bip39 = { version = "2.0.0", features = ["serde"] }
+
 
 [build-dependencies]
 uniffi = { workspace = true, features = ["build"] }
 
 [dev-dependencies]
-wallet_kit_common = { path = "../wallet_kit_common", features = [
-    "placeholder",
-] }
-hd = { path = "../hierarchical_deterministic", features = ["placeholder"] }
 uniffi = { workspace = true, features = ["bindgen-tests"] }
 
 [lib]

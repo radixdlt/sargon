@@ -3,7 +3,7 @@ use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializ
 use super::unsecured_entity_control::UnsecuredEntityControl;
 
 #[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 /// Describes the state an entity - Account or Persona - is in in regards to how
 /// the user controls it, i.e. if it is controlled by a single factor (private key)
@@ -69,7 +69,7 @@ impl HasPlaceholder for EntitySecurityState {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use super::EntitySecurityState;
 
