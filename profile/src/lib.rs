@@ -5,6 +5,9 @@ mod v100;
 mod wallet_kit_common;
 
 pub mod prelude {
+
+    pub(crate) use thiserror::Error as ThisError;
+
     pub use crate::hierarchical_deterministic::*;
     pub use crate::identified_vec_via::*;
     pub use crate::profilesnapshot_version::*;
@@ -14,4 +17,4 @@ pub mod prelude {
 
 pub use prelude::*;
 
-uniffi::include_scaffolding!("profile");
+uniffi::include_scaffolding!("profileFFI");

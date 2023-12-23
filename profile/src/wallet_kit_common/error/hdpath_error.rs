@@ -1,6 +1,7 @@
 use thiserror::Error;
 
-#[derive(Debug, Error, PartialEq)]
+#[derive(Clone, Debug, Error, PartialEq, uniffi::Error)]
+#[uniffi(flat_error)]
 pub enum HDPathError {
     #[error("Invalid BIP32 path '{0}'.")]
     InvalidBIP32Path(String),

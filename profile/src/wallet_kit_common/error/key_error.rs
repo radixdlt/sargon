@@ -1,6 +1,7 @@
-use thiserror::Error;
+use crate::prelude::*;
 
-#[derive(Debug, Error, PartialEq)]
+#[derive(Clone, Debug, ThisError, PartialEq, uniffi::Error)]
+#[uniffi(flat_error)]
 pub enum KeyError {
     #[error("Failed to create Ed25519 Private key from bytes.")]
     InvalidEd25519PrivateKeyFromBytes,

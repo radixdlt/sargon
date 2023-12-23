@@ -2,7 +2,10 @@ use thiserror::Error;
 
 use super::{bytes_error::BytesError, hdpath_error::HDPathError, key_error::KeyError};
 
-#[derive(Debug, Error, PartialEq)]
+pub type Result<T> = std::result::Result<T, CommonError>;
+
+#[derive(Clone, Debug, Error, PartialEq, uniffi::Error)]
+#[uniffi(flat_error)]
 pub enum CommonError {
     ///
     /// NESTED

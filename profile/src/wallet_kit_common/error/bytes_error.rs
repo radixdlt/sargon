@@ -1,6 +1,7 @@
 use thiserror::Error;
 
-#[derive(Debug, Error, PartialEq)]
+#[derive(Clone, Debug, Error, PartialEq, uniffi::Error)]
+#[uniffi(flat_error)]
 pub enum BytesError {
     #[error("String not hex")]
     StringNotHex,

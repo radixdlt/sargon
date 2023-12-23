@@ -2,8 +2,11 @@ use crate::{Ed25519PrivateKey, Hex32Bytes, KeyError as Error};
 use radix_engine_common::crypto::{Ed25519PublicKey as EngineEd25519PublicKey, Hash};
 use serde::{Deserialize, Serialize};
 use std::{
+    borrow::Borrow,
     fmt::{Debug, Formatter},
+    ops::Deref,
     str::FromStr,
+    sync::Arc,
 };
 use transaction::{signing::ed25519::Ed25519Signature, validation::verify_ed25519};
 
@@ -11,22 +14,39 @@ use transaction::{signing::ed25519::Ed25519Signature, validation::verify_ed25519
 use crate::HasPlaceholder;
 
 /// An Ed25519 public key used to verify cryptographic signatures (EdDSA signatures).
-#[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(
+    Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Object,
+)]
 pub struct Ed25519PublicKey(EngineEd25519PublicKey);
 
-impl Ed25519PublicKey {
-    pub(crate) fn from_engine(engine: EngineEd25519PublicKey) -> Result<Self, Error> {
-        ed25519_dalek::PublicKey::from_bytes(engine.to_vec().as_slice())
-            .map(|_| Self(engine))
-            .map_err(|_| Error::InvalidEd25519PublicKeyPointNotOnCurve)
+impl From<EngineEd25519PublicKey> for Ed25519PublicKey {
+    fn from(value: EngineEd25519PublicKey) -> Self {
+        Self::from_engine(value).expect("EngineEd25519PublicKey should have been valid.")
     }
+}
 
+impl From<Ed25519PublicKey> for EngineEd25519PublicKey {
+    fn from(value: Ed25519PublicKey) -> Self {
+        value.0
+    }
+}
+
+#[uniffi::export]
+impl Ed25519PublicKey {
     pub fn to_bytes(&self) -> Vec<u8> {
         self.0.to_vec()
     }
 
     pub fn to_hex(&self) -> String {
         hex::encode(self.to_bytes())
+    }
+}
+
+impl Ed25519PublicKey {
+    pub(crate) fn from_engine(engine: EngineEd25519PublicKey) -> Result<Self, Error> {
+        ed25519_dalek::PublicKey::from_bytes(engine.to_vec().as_slice())
+            .map(|_| Self(engine))
+            .map_err(|_| Error::InvalidEd25519PublicKeyPointNotOnCurve)
     }
 
     /// Verifies an EdDSA signature over Curve25519.
@@ -53,11 +73,20 @@ impl TryInto<Ed25519PublicKey> for &str {
     }
 }
 
+#[uniffi::export]
 impl Ed25519PublicKey {
-    pub fn from_str(hex: &str) -> Result<Self, Error> {
-        Hex32Bytes::from_str(hex)
+    #[uniffi::constructor]
+    pub fn from_hex(hex: String) -> Result<Arc<Self>, crate::KeyError> {
+        Hex32Bytes::from_str(hex.as_str())
             .map_err(|_| Error::InvalidEd25519PublicKeyFromString)
             .and_then(|b| Ed25519PublicKey::try_from(b.to_vec().as_slice()))
+            .map(|k| Arc::new(k))
+    }
+}
+
+impl Ed25519PublicKey {
+    pub fn from_str(hex: &str) -> Result<Self, crate::KeyError> {
+        Self::from_hex(hex.to_string()).map(|arc| arc.0.into())
     }
 }
 
