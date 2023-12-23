@@ -17,4 +17,4 @@ pub mod prelude {
 
 pub use prelude::*;
 
-uniffi::include_scaffolding!("profileFFI");
+uniffi::include_scaffolding!("radix_wallet_kit");

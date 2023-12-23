@@ -1,4 +1,4 @@
-import profileFFI
+import radix_wallet_kit
 
 func playground() throws {
     let hex = "ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf"
