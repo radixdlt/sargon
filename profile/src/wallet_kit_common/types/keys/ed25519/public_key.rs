@@ -55,13 +55,22 @@ impl Ed25519PublicKey {
     }
 }
 
+#[uniffi::export]
+impl Ed25519PublicKey {
+    #[uniffi::constructor]
+    fn from_bytes(bytes: Vec<u8>) -> Result<Arc<Self>, crate::KeyError> {
+        EngineEd25519PublicKey::try_from(bytes.as_slice())
+            .map_err(|_| Error::InvalidEd25519PublicKeyFromBytes)
+            .and_then(|pk| Self::from_engine(pk))
+            .map(|k| Arc::new(k))
+    }
+}
+
 impl TryFrom<&[u8]> for Ed25519PublicKey {
     type Error = crate::KeyError;
 
-    fn try_from(slice: &[u8]) -> Result<Ed25519PublicKey, Self::Error> {
-        EngineEd25519PublicKey::try_from(slice)
-            .map_err(|_| Error::InvalidEd25519PublicKeyFromBytes)
-            .and_then(|pk| Self::from_engine(pk))
+    fn try_from(slice: &[u8]) -> Result<Self, Self::Error> {
+        Self::from_bytes(slice.to_vec()).map(|k| k.0.into())
     }
 }
 

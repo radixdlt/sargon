@@ -188,18 +188,6 @@ impl Into<EnginePublicKey> for PublicKey {
     }
 }
 
-impl Into<EngineSecp256k1PublicKey> for Secp256k1PublicKey {
-    fn into(self) -> EngineSecp256k1PublicKey {
-        EngineSecp256k1PublicKey::try_from(self.to_bytes().as_slice()).unwrap()
-    }
-}
-
-// impl Into<EngineEd25519PublicKey> for Ed25519PublicKey {
-//     fn into(self) -> EngineEd25519PublicKey {
-//         EngineEd25519PublicKey::try_from(self.to_bytes().as_slice()).unwrap()
-//     }
-// }
-
 #[cfg(test)]
 mod tests {
 
