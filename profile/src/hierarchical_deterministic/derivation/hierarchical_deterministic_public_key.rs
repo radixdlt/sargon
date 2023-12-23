@@ -2,8 +2,11 @@ use crate::PublicKey;
 use derive_getters::Getters;
 use serde::{Deserialize, Serialize};
 
+use crate::DerivationPath;
+
+#[cfg(any(test, feature = "placeholder"))]
 use crate::{
-    AccountPath, BIP44LikePath, CAP26KeyKind, CAP26Repr, Derivation, DerivationPath, Mnemonic,
+    AccountPath, BIP44LikePath, CAP26KeyKind, CAP26Repr, Derivation, Mnemonic,
     MnemonicWithPassphrase,
 };
 

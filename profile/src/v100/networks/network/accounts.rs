@@ -4,7 +4,6 @@ use crate::{
 };
 use identified_vec::{IdentifiedVecOf, IsIdentifiableVecOfVia, IsIdentifiedVec, IsIdentifiedVecOf};
 
-use crate::CommonError;
 #[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 

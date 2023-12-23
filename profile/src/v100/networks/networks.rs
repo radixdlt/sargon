@@ -1,5 +1,3 @@
-use std::{borrow::BorrowMut, cell::RefCell, rc::Rc, sync::Mutex};
-
 use identified_vec::{IdentifiedVecOf, IsIdentifiableVecOfVia, IsIdentifiedVec, IsIdentifiedVecOf};
 
 use crate::{
@@ -111,7 +109,7 @@ impl HasPlaceholder for Networks {
 #[cfg(test)]
 mod tests {
     use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
-    use identified_vec::{Identifiable, IsIdentifiedVec};
+    use identified_vec::IsIdentifiedVec;
 
     use crate::{
         v100::{Account, Accounts, ContentHint, DisplayName, Network, Networks},

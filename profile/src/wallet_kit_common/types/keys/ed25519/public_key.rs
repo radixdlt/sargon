@@ -1,10 +1,8 @@
-use crate::{Ed25519PrivateKey, Hex32Bytes, KeyError as Error};
+use crate::{Hex32Bytes, KeyError as Error};
 use radix_engine_common::crypto::{Ed25519PublicKey as EngineEd25519PublicKey, Hash};
 use serde::{Deserialize, Serialize};
 use std::{
-    borrow::Borrow,
     fmt::{Debug, Formatter},
-    ops::Deref,
     str::FromStr,
     sync::Arc,
 };
@@ -12,6 +10,9 @@ use transaction::{signing::ed25519::Ed25519Signature, validation::verify_ed25519
 
 #[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
+
+#[cfg(any(test, feature = "placeholder"))]
+use crate::Ed25519PrivateKey;
 
 /// An Ed25519 public key used to verify cryptographic signatures (EdDSA signatures).
 #[derive(

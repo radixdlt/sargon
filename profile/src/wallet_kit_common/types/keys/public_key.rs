@@ -2,10 +2,7 @@ use serde::{de, ser::SerializeStruct, Deserialize, Deserializer, Serialize, Seri
 
 use crate::{Ed25519PublicKey, KeyError as Error, SLIP10Curve, Secp256k1PublicKey};
 
-use radix_engine_common::crypto::{
-    Ed25519PublicKey as EngineEd25519PublicKey, PublicKey as EnginePublicKey,
-    Secp256k1PublicKey as EngineSecp256k1PublicKey,
-};
+use radix_engine_common::crypto::PublicKey as EnginePublicKey;
 
 use enum_as_inner::EnumAsInner;
 

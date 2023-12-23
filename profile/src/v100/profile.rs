@@ -1,7 +1,4 @@
-use std::{
-    cell::RefCell,
-    fmt::{Debug, Display},
-};
+use std::{cell::RefCell, fmt::Debug};
 
 use identified_vec::IsIdentifiedVec;
 use serde::{Deserialize, Serialize};
@@ -11,8 +8,8 @@ use crate::CommonError;
 use crate::HasPlaceholder;
 
 use super::{
-    Account, AccountAddress, AppPreferences, FactorSource, FactorSourceID, FactorSources, Header,
-    IsFactorSource, Networks,
+    Account, AccountAddress, AppPreferences, FactorSourceID, FactorSources, Header, IsFactorSource,
+    Networks,
 };
 
 /// Representation of the Radix Wallet, contains a list of
@@ -161,13 +158,9 @@ impl HasPlaceholder for Profile {
 mod tests {
     use crate::{assert_eq_after_json_roundtrip, CommonError, HasPlaceholder, SLIP10Curve};
     use identified_vec::{IsIdentifiedVec, IsIdentifiedVecOf};
-    use radix_engine_toolkit_json::models::common;
 
     use crate::{
-        v100::{
-            DeviceFactorSource, DisplayName, FactorSource, FactorSourceID,
-            LedgerHardwareWalletFactorSource,
-        },
+        v100::{DeviceFactorSource, DisplayName, FactorSourceID, LedgerHardwareWalletFactorSource},
         NetworkID,
     };
 

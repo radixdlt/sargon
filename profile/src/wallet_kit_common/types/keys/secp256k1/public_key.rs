@@ -1,4 +1,4 @@
-use crate::{KeyError as Error, Secp256k1PrivateKey};
+use crate::KeyError as Error;
 use bip32::secp256k1::PublicKey as BIP32Secp256k1PublicKey;
 use radix_engine_common::crypto::{Hash, Secp256k1PublicKey as EngineSecp256k1PublicKey};
 use serde::{Deserialize, Serialize};
@@ -10,6 +10,9 @@ use transaction::{signing::secp256k1::Secp256k1Signature, validation::verify_sec
 
 #[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
+
+#[cfg(any(test, feature = "placeholder"))]
+use crate::Secp256k1PrivateKey;
 
 /// A `secp256k1` public key used to verify cryptographic signatures (ECDSA signatures).
 #[derive(

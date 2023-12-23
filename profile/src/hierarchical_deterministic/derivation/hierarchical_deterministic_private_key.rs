@@ -1,6 +1,9 @@
-use crate::{Ed25519PrivateKey, PrivateKey, Secp256k1PrivateKey};
+use crate::PrivateKey;
+#[cfg(any(test, feature = "placeholder"))]
+use crate::{Ed25519PrivateKey, Secp256k1PrivateKey};
 use derive_getters::Getters;
 
+#[cfg(any(test, feature = "placeholder"))]
 use crate::{AccountPath, BIP44LikePath, CAP26Repr};
 
 #[cfg(any(test, feature = "placeholder"))]
