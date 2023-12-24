@@ -254,7 +254,7 @@ mod tests {
         .unwrap();
 
         assert_eq!(
-            AccountAddress::from_public_key(PublicKey::Ed25519(public_key), NetworkID::Mainnet)
+            AccountAddress::from_public_key::<PublicKey>(public_key.into(), NetworkID::Mainnet)
                 .address(),
             "account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzdm"
         )
@@ -268,7 +268,7 @@ mod tests {
         .unwrap();
 
         assert_eq!(
-            AccountAddress::new(PublicKey::Ed25519(public_key), NetworkID::Mainnet).address(),
+            AccountAddress::new(public_key.into(), NetworkID::Mainnet).address(),
             "account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzdm"
         )
     }

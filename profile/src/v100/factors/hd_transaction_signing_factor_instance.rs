@@ -15,7 +15,8 @@ use derive_getters::Getters;
 pub struct HDFactorInstanceTransactionSigning<E: IsEntityPath> {
     factor_source_id: FactorSourceIDFromHash,
 
-    #[getter(skip)] // We prefer `public_key() -> HierarchicalDeterministicPublicKey`
+    #[getter(skip)]
+    // We prefer to let the method `public_key()` return a `HierarchicalDeterministicPublicKey` instead of a `PublicKey` since it contains derivation path
     public_key: PublicKey,
 
     path: E,
@@ -56,7 +57,10 @@ impl<E: IsEntityPath + Clone> HasEntityPath<E> for HDFactorInstanceTransactionSi
 
 impl<E: IsEntityPath> HDFactorInstanceTransactionSigning<E> {
     pub fn public_key(&self) -> HierarchicalDeterministicPublicKey {
-        HierarchicalDeterministicPublicKey::new(self.public_key, self.path.derivation_path())
+        HierarchicalDeterministicPublicKey::new(
+            self.public_key.clone(),
+            self.path.derivation_path(),
+        )
     }
 }
 

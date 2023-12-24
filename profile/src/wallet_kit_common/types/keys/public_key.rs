@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use serde::{de, ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
 
 use crate::{Ed25519PublicKey, KeyError as Error, SLIP10Curve, Secp256k1PublicKey};
@@ -11,13 +13,13 @@ use crate::HasPlaceholder;
 
 /// A tagged union of supported public keys on different curves, supported
 /// curves are `secp256k1` and `Curve25519`
-#[derive(Clone, Copy, Debug, PartialEq, EnumAsInner, Eq, Hash, PartialOrd, Ord)]
+#[derive(Clone, Debug, PartialEq, EnumAsInner, Eq, Hash, PartialOrd, Ord, uniffi::Enum)]
 pub enum PublicKey {
     /// An Ed25519 public key used to verify cryptographic signatures.
-    Ed25519(Ed25519PublicKey),
+    Ed25519 { key: Arc<Ed25519PublicKey> },
 
     /// A secp256k1 public key used to verify cryptographic signatures (ECDSA signatures).
-    Secp256k1(Secp256k1PublicKey),
+    Secp256k1 { key: Arc<Secp256k1PublicKey> },
 }
 
 impl From<Ed25519PublicKey> for PublicKey {
@@ -31,7 +33,9 @@ impl From<Ed25519PublicKey> for PublicKey {
     /// let key: PublicKey = Ed25519PrivateKey::new().public_key().into();
     /// ```
     fn from(value: Ed25519PublicKey) -> Self {
-        Self::Ed25519(value)
+        Self::Ed25519 {
+            key: Arc::new(value),
+        }
     }
 }
 
@@ -46,29 +50,31 @@ impl From<Secp256k1PublicKey> for PublicKey {
     /// let key: PublicKey = Secp256k1PrivateKey::new().public_key().into();
     /// ```
     fn from(value: Secp256k1PublicKey) -> Self {
-        Self::Secp256k1(value)
+        Self::Secp256k1 {
+            key: Arc::new(value),
+        }
     }
 }
 
 impl PublicKey {
     /// Try to instantiate a `PublicKey` from bytes as a `Secp256k1PublicKey`.
     pub fn secp256k1_from_bytes(slice: &[u8]) -> Result<Self, Error> {
-        Secp256k1PublicKey::try_from(slice).map(Self::Secp256k1)
+        Secp256k1PublicKey::try_from(slice).map(|k| k.into())
     }
 
     /// Try to instantiate a `PublicKey` from bytes as a `Ed25519PublicKey`.
     pub fn ed25519_from_bytes(slice: &[u8]) -> Result<Self, Error> {
-        Ed25519PublicKey::try_from(slice).map(Self::Ed25519)
+        Ed25519PublicKey::try_from(slice).map(|k| k.into())
     }
 
     /// Try to instantiate a `PublicKey` from hex string as a `Secp256k1PublicKey`.
     pub fn secp256k1_from_str(hex: &str) -> Result<Self, Error> {
-        Secp256k1PublicKey::from_str(hex).map(Self::Secp256k1)
+        Secp256k1PublicKey::from_str(hex).map(|k| k.into())
     }
 
     /// Try to instantiate a `PublicKey` from hex string as a `Ed25519PublicKey`.
     pub fn ed25519_from_str(hex: &str) -> Result<Self, Error> {
-        Ed25519PublicKey::from_str(hex).map(Self::Ed25519)
+        Ed25519PublicKey::from_str(hex).map(|k| k.into())
     }
 }
 
@@ -76,24 +82,24 @@ impl PublicKey {
     /// Returns a `SLIP10Curve`, being the curve of the `PublicKey`.
     pub fn curve(&self) -> SLIP10Curve {
         match self {
-            PublicKey::Ed25519(_) => SLIP10Curve::Curve25519,
-            PublicKey::Secp256k1(_) => SLIP10Curve::Secp256k1,
+            PublicKey::Ed25519 { key: _ } => SLIP10Curve::Curve25519,
+            PublicKey::Secp256k1 { key: _ } => SLIP10Curve::Secp256k1,
         }
     }
 
     /// Returns a hex encoding of the inner public key.
     pub fn to_hex(&self) -> String {
         match self {
-            PublicKey::Ed25519(key) => key.to_hex(),
-            PublicKey::Secp256k1(key) => key.to_hex(),
+            PublicKey::Ed25519 { key } => key.to_hex(),
+            PublicKey::Secp256k1 { key } => key.to_hex(),
         }
     }
 
     /// Returns a clone of the bytes of the inner public key as a `Vec`.
     pub fn to_bytes(&self) -> Vec<u8> {
         match self {
-            PublicKey::Ed25519(key) => key.to_bytes(),
-            PublicKey::Secp256k1(key) => key.to_bytes(),
+            PublicKey::Ed25519 { key } => key.to_bytes(),
+            PublicKey::Secp256k1 { key } => key.to_bytes(),
         }
     }
 }
@@ -118,12 +124,16 @@ impl PublicKey {
 
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_secp256k1_alice() -> Self {
-        Self::Secp256k1(Secp256k1PublicKey::placeholder_alice())
+        Self::Secp256k1 {
+            key: Secp256k1PublicKey::placeholder_alice().into(),
+        }
     }
 
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_secp256k1_bob() -> Self {
-        Self::Secp256k1(Secp256k1PublicKey::placeholder_bob())
+        Self::Secp256k1 {
+            key: Secp256k1PublicKey::placeholder_bob().into(),
+        }
     }
 
     /// A placeholder used to facilitate unit tests.
@@ -133,12 +143,16 @@ impl PublicKey {
 
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_ed25519_alice() -> Self {
-        Self::Ed25519(Ed25519PublicKey::placeholder_alice())
+        Self::Ed25519 {
+            key: Ed25519PublicKey::placeholder_alice().into(),
+        }
     }
 
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_ed25519_bob() -> Self {
-        Self::Ed25519(Ed25519PublicKey::placeholder_bob())
+        Self::Ed25519 {
+            key: Ed25519PublicKey::placeholder_bob().into(),
+        }
     }
 }
 
@@ -154,10 +168,10 @@ impl<'de> Deserialize<'de> for PublicKey {
         let wrapper = Wrapper::deserialize(deserializer)?;
         match wrapper.curve {
             SLIP10Curve::Curve25519 => Ed25519PublicKey::from_str(&wrapper.hex)
-                .map(|pk| PublicKey::Ed25519(pk))
+                .map(|pk| PublicKey::Ed25519 { key: pk.into() })
                 .map_err(de::Error::custom),
             SLIP10Curve::Secp256k1 => Secp256k1PublicKey::from_str(&wrapper.hex)
-                .map(|pk| PublicKey::Secp256k1(pk))
+                .map(|pk| PublicKey::Secp256k1 { key: pk.into() })
                 .map_err(de::Error::custom),
         }
     }
@@ -176,11 +190,11 @@ impl Serialize for PublicKey {
     }
 }
 
-impl Into<EnginePublicKey> for PublicKey {
-    fn into(self) -> EnginePublicKey {
-        match self {
-            PublicKey::Ed25519(key) => EnginePublicKey::Ed25519(key.into()),
-            PublicKey::Secp256k1(key) => EnginePublicKey::Secp256k1(key.into()),
+impl From<PublicKey> for EnginePublicKey {
+    fn from(value: PublicKey) -> Self {
+        match value {
+            PublicKey::Ed25519 { key } => key.0.into(),
+            PublicKey::Secp256k1 { key } => key.0.into(),
         }
     }
 }
@@ -403,13 +417,13 @@ mod tests {
     fn ed25519_into_as_roundtrip() {
         let ed25519 = Ed25519PublicKey::placeholder();
         let key: PublicKey = ed25519.clone().into();
-        assert_eq!(key.as_ed25519().unwrap(), &ed25519);
+        assert_eq!(key.as_ed25519().unwrap(), &ed25519.into());
     }
 
     #[test]
     fn secp256k1_into_as_roundtrip() {
         let secp256k1 = Secp256k1PublicKey::placeholder();
         let key: PublicKey = secp256k1.clone().into();
-        assert_eq!(key.as_secp256k1().unwrap(), &secp256k1);
+        assert_eq!(key.as_secp256k1().unwrap(), &secp256k1.into());
     }
 }

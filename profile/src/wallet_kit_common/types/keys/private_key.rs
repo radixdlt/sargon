@@ -54,8 +54,12 @@ impl PrivateKey {
     /// in the `PublicKey` tagged union.
     pub fn public_key(&self) -> PublicKey {
         match self {
-            PrivateKey::Ed25519(key) => PublicKey::Ed25519(key.public_key()),
-            PrivateKey::Secp256k1(key) => PublicKey::Secp256k1(key.public_key()),
+            PrivateKey::Ed25519(key) => PublicKey::Ed25519 {
+                key: key.public_key().into(),
+            },
+            PrivateKey::Secp256k1(key) => PublicKey::Secp256k1 {
+                key: key.public_key().into(),
+            },
         }
     }
 

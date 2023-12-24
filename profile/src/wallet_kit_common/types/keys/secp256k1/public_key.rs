@@ -18,7 +18,7 @@ use crate::Secp256k1PrivateKey;
 #[derive(
     Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Object,
 )]
-pub struct Secp256k1PublicKey(EngineSecp256k1PublicKey);
+pub struct Secp256k1PublicKey(pub(crate) EngineSecp256k1PublicKey);
 
 impl From<EngineSecp256k1PublicKey> for Secp256k1PublicKey {
     fn from(value: EngineSecp256k1PublicKey) -> Self {

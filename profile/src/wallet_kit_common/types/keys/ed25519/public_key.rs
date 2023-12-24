@@ -18,7 +18,7 @@ use crate::Ed25519PrivateKey;
 #[derive(
     Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Object,
 )]
-pub struct Ed25519PublicKey(EngineEd25519PublicKey);
+pub struct Ed25519PublicKey(pub(crate) EngineEd25519PublicKey);
 
 impl From<EngineEd25519PublicKey> for Ed25519PublicKey {
     fn from(value: EngineEd25519PublicKey) -> Self {
