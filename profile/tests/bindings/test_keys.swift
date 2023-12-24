@@ -122,8 +122,8 @@ func testKeys() throws {
     try testKeysSecp256k1()
 }
 
-func playground() throws {
+func test() throws {
     try testKeys()
 }
 
-try! playground()
+try! test()

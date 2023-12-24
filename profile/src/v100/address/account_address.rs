@@ -1,5 +1,6 @@
 use serde::{de, Deserializer, Serialize, Serializer};
 use std::fmt::Display;
+use std::sync::Arc;
 
 use crate::{suffix_string, PublicKey};
 
@@ -46,11 +47,11 @@ pub struct AccountAddress {
     network_id: NetworkID,
 }
 
-// #[uniffi::export]
+#[uniffi::export]
 impl AccountAddress {
     #[uniffi::constructor]
-    pub fn new(public_key: PublicKey, network_id: NetworkID) -> Self {
-        <Self as EntityAddress>::from_public_key(public_key, network_id)
+    pub fn new(public_key: PublicKey, network_id: NetworkID) -> Arc<Self> {
+        <Self as EntityAddress>::from_public_key(public_key, network_id).into()
     }
 }
 
