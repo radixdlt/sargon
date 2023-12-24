@@ -145,6 +145,14 @@ impl TryInto<AccountAddress> for &str {
     }
 }
 
+#[uniffi::export]
+impl AccountAddress {
+    #[uniffi::constructor]
+    pub fn from_bech32(string: String) -> Result<Arc<Self>, crate::CommonError> {
+        Self::try_from_bech32(string.as_str()).map(|a| a.into())
+    }
+}
+
 impl Display for AccountAddress {
     /// The full bech32 address.
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -218,7 +226,7 @@ mod tests {
     }
 
     #[test]
-    fn from_bech32() {
+    fn try_from_bech32() {
         assert!(AccountAddress::try_from_bech32(
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease",
         )
@@ -243,6 +251,18 @@ mod tests {
         .unwrap();
         assert_eq!(
             format!("{}", a),
+            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+        );
+    }
+
+    #[test]
+    fn from_bech32() {
+        let a = AccountAddress::from_bech32(
+            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease".to_string(),
+        )
+        .unwrap();
+        assert_eq!(
+            a.address(),
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
         );
     }
