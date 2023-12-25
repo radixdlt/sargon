@@ -10,6 +10,7 @@ use std::{
     fmt::Display,
     hash::{Hash, Hasher},
     str::FromStr,
+    sync::Arc,
 };
 
 use crate::CommonError as Error;
@@ -18,12 +19,18 @@ use crate::NetworkID;
 
 use super::resource_address::ResourceAddress;
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, uniffi::Object)]
 pub struct NonFungibleGlobalId(EngineSerializableNonFungibleGlobalId);
 
+#[uniffi::export]
 impl NonFungibleGlobalId {
     pub fn as_str(&self) -> String {
         format!("{}", self)
+    }
+
+    #[uniffi::constructor]
+    pub fn from_str(string: String) -> Result<Arc<Self>, Error> {
+        Self::try_from_str(string.as_str()).map(|id| id.into())
     }
 }
 
@@ -62,25 +69,26 @@ impl NonFungibleGlobalId {
 impl TryInto<NonFungibleGlobalId> for &str {
     type Error = crate::CommonError;
 
-    /// Tries to deserializes a bech32 address into an `AccountAddress`.
+    /// Tries to deserializes a bech32 address into an `NonFungibleGlobalId`.
     fn try_into(self) -> Result<NonFungibleGlobalId, Self::Error> {
         NonFungibleGlobalId::try_from_str(self)
     }
 }
 
+#[uniffi::export]
 impl NonFungibleGlobalId {
     pub fn network_id(&self) -> NetworkID {
         NetworkID::from_repr(self.0 .0.network_id).expect("Valid NetworkID")
     }
 
     /// Returns the resource address.
-    pub fn resource_address(&self) -> ResourceAddress {
+    pub fn resource_address(&self) -> Arc<ResourceAddress> {
         let parts: Vec<String> = self
             .to_canonical_string()
             .split(":")
             .map(|p| p.to_string())
             .collect();
-        ResourceAddress::new(parts[0].to_string(), self.network_id())
+        ResourceAddress::new(parts[0].to_string(), self.network_id()).into()
     }
 
     /// Returns the canonical string representation of a NonFungibleGlobalID: "<resource>:<local>"

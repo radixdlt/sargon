@@ -1,7 +1,6 @@
 use crate::{v100::AbstractEntityType, CommonError, NetworkID};
-use derive_getters::Getters;
 use serde::{de, Deserializer, Serialize, Serializer};
-use std::fmt::Display;
+use std::{fmt::Display, sync::Arc};
 
 use super::entity_address::EntityAddress;
 
@@ -9,10 +8,26 @@ use super::entity_address::EntityAddress;
 /// that starts with the prefix `"account_"`, dependent on NetworkID, meaning the same
 /// public key used for two AccountAddresses on two different networks will not have
 /// the same address.
-#[derive(Clone, Debug, Default, PartialEq, Eq, Hash, PartialOrd, Ord, Getters)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Object)]
 pub struct ResourceAddress {
     address: String,
     network_id: NetworkID,
+}
+
+#[uniffi::export]
+impl ResourceAddress {
+    pub fn address(&self) -> String {
+        self.address.clone()
+    }
+
+    pub fn network_id(&self) -> NetworkID {
+        self.network_id.clone()
+    }
+
+    #[uniffi::constructor]
+    fn from_bech32(string: String) -> Result<Arc<ResourceAddress>, crate::CommonError> {
+        ResourceAddress::try_from_bech32(&string).map(|a| a.into())
+    }
 }
 
 impl ResourceAddress {
@@ -112,12 +127,16 @@ mod tests {
     }
 
     #[test]
-    fn network_id_mainnet() {
-        let a: ResourceAddress =
+    fn getters() {
+        let a = ResourceAddress::from_bech32(
+            "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd".to_string(),
+        )
+        .unwrap();
+        assert_eq!(a.network_id(), NetworkID::Mainnet);
+        assert_eq!(
+            a.address(),
             "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
-                .try_into()
-                .unwrap();
-        assert_eq!(a.network_id, NetworkID::Mainnet);
+        );
     }
 
     #[test]
@@ -126,6 +145,6 @@ mod tests {
             "resource_tdx_2_1tkckx9fynl9f7756z8wxphq7wce6vk874nuq4f2nnxgh3nzrwhjdlp"
                 .try_into()
                 .unwrap();
-        assert_eq!(a.network_id, NetworkID::Stokenet);
+        assert_eq!(a.network_id(), NetworkID::Stokenet);
     }
 }
