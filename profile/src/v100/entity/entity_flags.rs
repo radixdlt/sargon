@@ -84,9 +84,8 @@ mod tests {
 
     #[test]
     fn new_with_f_contains_f() {
-        assert!(
-            EntityFlags::with_flag(EntityFlag::DeletedByUser).contains(&EntityFlag::DeletedByUser)
-        );
+        assert!(EntityFlags::with_flag(EntityFlag::DeletedByUser)
+            .contains(&EntityFlag::DeletedByUser));
     }
 
     #[test]

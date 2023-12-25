@@ -1,5 +1,5 @@
-use radix_engine_common::data::scrypto::model::NonFungibleLocalId;
-
+use crate::{CommonError as Error, NonFungibleLocalId};
+use radix_engine_common::data::scrypto::model::NonFungibleLocalId as NativeNonFungibleLocalId;
 use radix_engine_toolkit_json::models::scrypto::non_fungible_global_id::{
     SerializableNonFungibleGlobalId as EngineSerializableNonFungibleGlobalId,
     SerializableNonFungibleGlobalIdInternal as EngineSerializableNonFungibleGlobalIdInternal,
@@ -12,8 +12,6 @@ use std::{
     str::FromStr,
     sync::Arc,
 };
-
-use crate::CommonError as Error;
 
 use crate::NetworkID;
 
@@ -75,6 +73,16 @@ impl TryInto<NonFungibleGlobalId> for &str {
     }
 }
 
+impl NonFungibleGlobalId {
+    /// Returns the non-fungible id.
+    pub fn local_id(&self) -> Arc<NonFungibleLocalId> {
+        let native_id: NativeNonFungibleLocalId =
+            self.0 .0.non_fungible_global_id.local_id().clone();
+        let id: crate::NonFungibleLocalId = native_id.into();
+        Arc::new(id)
+    }
+}
+
 #[uniffi::export]
 impl NonFungibleGlobalId {
     pub fn network_id(&self) -> NetworkID {
@@ -99,11 +107,6 @@ impl NonFungibleGlobalId {
     pub fn to_canonical_string(&self) -> String {
         format!("{}", self.0 .0)
     }
-
-    /// Returns the non-fungible id.
-    pub fn local_id(&self) -> &NonFungibleLocalId {
-        self.0 .0.non_fungible_global_id.local_id()
-    }
 }
 
 #[cfg(test)]
@@ -112,9 +115,8 @@ mod tests {
 
     use crate::{
         assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
-        assert_json_value_ne_after_roundtrip,
+        assert_json_value_ne_after_roundtrip, NonFungibleLocalId,
     };
-    use radix_engine_common::data::scrypto::model::NonFungibleLocalId;
     use serde_json::json;
 
     use super::NonFungibleGlobalId;
@@ -123,8 +125,8 @@ mod tests {
     fn test_deserialize() {
         let str = "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<value>";
         let id: NonFungibleGlobalId = str.try_into().unwrap();
-        match id.local_id() {
-            NonFungibleLocalId::String(v) => assert_eq!(v.value(), "value"),
+        match id.local_id().as_ref() {
+            NonFungibleLocalId::Str { value } => assert_eq!(value, "value"),
             _ => panic!("wrong"),
         }
 

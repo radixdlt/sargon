@@ -273,14 +273,14 @@ mod tests {
     #[test]
     fn update_name_of_accounts() {
         let mut sut = Profile::placeholder();
-        let account = sut
-            .networks()
-            .get(&NetworkID::Mainnet)
-            .unwrap()
-            .accounts()
-            .get_at_index(0)
-            .unwrap()
-            .clone();
+        let account =
+            sut.networks()
+                .get(&NetworkID::Mainnet)
+                .unwrap()
+                .accounts()
+                .get_at_index(0)
+                .unwrap()
+                .clone();
 
         assert_eq!(account.display_name(), "Alice");
         assert!(sut.update_account(&account.address(), |a| a

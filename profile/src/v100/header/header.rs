@@ -300,12 +300,13 @@ pub mod tests {
             date.clone(),
             "iPhone".to_string(),
         );
-        let sut = Header::with_values(
-            Uuid::from_str("12345678-bbbb-cccc-dddd-abcd12345678").unwrap(),
-            device,
-            ContentHint::new(),
-            date,
-        );
+        let sut =
+            Header::with_values(
+                Uuid::from_str("12345678-bbbb-cccc-dddd-abcd12345678").unwrap(),
+                device,
+                ContentHint::new(),
+                date,
+            );
         assert_eq!(format!("{sut}"), "#12345678-bbbb-cccc-dddd-abcd12345678 v=100, content: #networks: 0, #accounts: 0, #personas: 0");
     }
 

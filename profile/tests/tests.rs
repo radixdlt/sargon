@@ -44,9 +44,9 @@ where
             serde_json::Value::from_str(j.as_str())
                 .map_err(|_| TestingError::FailedDoesNotContainValidJSON(j))
         })
-        .and_then(|v| {
-            serde_json::from_value::<T>(v).map_err(|e| TestingError::FailedToDeserialize(e))
-        })
+        .and_then(
+            |v| serde_json::from_value::<T>(v).map_err(|e| TestingError::FailedToDeserialize(e))
+        )
 }
 
 #[test]

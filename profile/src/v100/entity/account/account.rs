@@ -500,9 +500,9 @@ mod tests {
                 .deposit_rule(),
             DepositRule::DenyAll
         );
-        account.update_on_ledger_settings(|o| {
-            o.update_third_party_deposits(|t| t.set_deposit_rule(DepositRule::AcceptAll))
-        });
+        account.update_on_ledger_settings(
+            |o| o.update_third_party_deposits(|t| t.set_deposit_rule(DepositRule::AcceptAll))
+        );
         assert_eq!(
             account
                 .on_ledger_settings()

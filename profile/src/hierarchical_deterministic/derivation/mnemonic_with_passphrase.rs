@@ -167,13 +167,14 @@ mod tests {
     /// Test vector: https://github.com/radixdlt/babylon-wallet-ios/blob/99161cbbb11a78f36db6991e5d5c5f092678d5fa/RadixWalletTests/CryptographyTests/SLIP10Tests/TestVectors/cap26_curve25519.json#L8
     #[test]
     fn derive_a_curve25519_key_with_cap26() {
-        let mwp = MnemonicWithPassphrase::with_passphrase(
-            Mnemonic::from_phrase(
-                "equip will roof matter pink blind book anxiety banner elbow sun young",
-            )
-            .unwrap(),
-            "".to_string(),
-        );
+        let mwp =
+            MnemonicWithPassphrase::with_passphrase(
+                Mnemonic::from_phrase(
+                    "equip will roof matter pink blind book anxiety banner elbow sun young",
+                )
+                .unwrap(),
+                "".to_string(),
+            );
 
         let private_key =
             mwp.derive_private_key(AccountPath::from_str("m/44H/1022H/12H/525H/1460H/0H").unwrap());

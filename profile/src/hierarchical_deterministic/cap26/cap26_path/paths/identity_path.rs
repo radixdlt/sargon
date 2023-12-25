@@ -280,9 +280,7 @@ mod tests {
     fn fails_when_index_is_too_large() {
         assert_eq!(
             IdentityPath::from_str("m/44H/1022H/1H/618H/1460H/4294967296H"),
-            Err(HDPathError::InvalidBIP32Path(
-                "m/44H/1022H/1H/618H/1460H/4294967296H".to_string()
-            ))
+            Err(HDPathError::InvalidBIP32Path("m/44H/1022H/1H/618H/1460H/4294967296H".to_string()))
         )
     }
 

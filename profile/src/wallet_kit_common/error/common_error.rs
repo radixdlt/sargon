@@ -103,4 +103,17 @@ pub enum CommonError {
 
     #[error("Failed to cast factor source, wrong kind.")]
     CastFactorSourceWrongKind,
+
+    #[error("Length check failed.")]
+    InvalidLength {
+        expected: usize,
+        actual: usize,
+        data: Vec<u8>,
+    },
+
+    #[error("Invalid NonFungibleLocalID::String")]
+    InvalidNonFungibleLocalIDString,
+
+    #[error("Invalid NonFungibleLocalID::Bytes")]
+    InvalidNonFungibleLocalIDBytes,
 }

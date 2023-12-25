@@ -239,12 +239,13 @@ mod tests {
     #[test]
     fn json_roundtrip() {
         let date = Timestamp::parse("2023-09-11T16:05:56.000Z").unwrap();
-        let model = FactorSourceCommon::with_values(
-            FactorSourceCryptoParameters::default(),
-            date.clone(),
-            date,
-            [FactorSourceFlag::Main],
-        );
+        let model =
+            FactorSourceCommon::with_values(
+                FactorSourceCryptoParameters::default(),
+                date.clone(),
+                date,
+                [FactorSourceFlag::Main],
+            );
 
         assert_eq_after_json_roundtrip(
             &model,
