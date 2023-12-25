@@ -7,7 +7,8 @@ func testAddress() throws {
     assert(address0.address() == bech32)
     let address1 = try AccountAddress.fromBech32(string: bech32)
     assert(address1.address() == bech32)
-
+    assert(address1.short() == "acco...m2kzdm")
+    assert(address1.networkId() == .mainnet)
 }
 
 func test() throws {
