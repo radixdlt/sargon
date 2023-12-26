@@ -1,5 +1,4 @@
 use crate::CommonError;
-use derive_getters::Getters;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt::Display;
@@ -10,7 +9,9 @@ use crate::HasPlaceholder;
 use crate::NetworkID::{self, *};
 
 /// A version of the Radix Network, for a NetworkID with an identifier (name) and display description (display name)
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Ord, PartialOrd, Hash, Getters)]
+#[derive(
+    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Ord, PartialOrd, Hash, uniffi::Object,
+)]
 #[serde(rename_all = "camelCase")]
 pub struct RadixNetwork {
     /// A String identifier (always lowercase) with the name of the Network that MUST match what Gateway returns.
@@ -22,6 +23,21 @@ pub struct RadixNetwork {
 
     /// A name of the network intended for display purposes only.
     display_description: String,
+}
+
+#[uniffi::export]
+impl RadixNetwork {
+    pub fn logical_name(&self) -> String {
+        self.logical_name.clone()
+    }
+
+    pub fn id(&self) -> NetworkID {
+        self.id.clone()
+    }
+
+    pub fn display_description(&self) -> String {
+        self.display_description.clone()
+    }
 }
 
 impl Display for RadixNetwork {

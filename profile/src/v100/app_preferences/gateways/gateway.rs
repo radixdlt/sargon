@@ -1,21 +1,46 @@
 use identified_vec::Identifiable;
 use serde::{Deserialize, Serialize};
-use std::fmt::{Debug, Display, Formatter};
+use std::{
+    fmt::{Debug, Display, Formatter},
+    ops::Deref,
+    sync::Arc,
+};
 use url::Url;
 
-use crate::NetworkID;
+use crate::{CommonError, NetworkID};
 
 use super::radix_network::RadixNetwork;
-use derive_getters::Getters;
+
 /// A gateway to some Radix Network, which is a high level REST API which clients (wallets) can
 /// consume in order to query asset balances and submit transactions.
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Ord, PartialOrd, Hash, Getters)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Ord, PartialOrd, Hash, uniffi::Object)]
 pub struct Gateway {
     /// The Radix network the API is a Gateway to.
     network: RadixNetwork,
 
     /// The URL to the gateways API endpoint
     url: Url,
+}
+
+#[uniffi::export]
+impl Gateway {
+    pub fn get_network(&self) -> Arc<RadixNetwork> {
+        self.network().into()
+    }
+
+    pub fn get_url(&self) -> String {
+        self.url().as_str().to_string()
+    }
+}
+
+impl Gateway {
+    pub fn network(&self) -> RadixNetwork {
+        self.network.clone()
+    }
+
+    pub fn url(&self) -> Url {
+        self.url.clone()
+    }
 }
 
 impl Identifiable for Gateway {
@@ -49,13 +74,33 @@ impl Default for Gateway {
     }
 }
 
+#[uniffi::export]
+impl Gateway {
+    #[uniffi::constructor]
+    pub fn new(url: String, id: NetworkID) -> Result<Arc<Self>, crate::CommonError> {
+        let url = Url::try_from(url.as_str()).map_err(|_| CommonError::InvalidURL(url))?;
+        let network = RadixNetwork::lookup_by_id(id)?;
+        Ok(Self { url, network }.into())
+    }
+}
+
 impl Gateway {
     fn declare(url: &str, id: NetworkID) -> Self {
-        Self {
-            url: Url::try_from(url).expect("Valid URL"),
-            network: RadixNetwork::lookup_by_id(id).expect("Network for ID"),
-        }
+        Self::new(url.to_string(), id)
+            .expect("Valid")
+            .deref()
+            .clone()
     }
+}
+
+#[uniffi::export]
+pub fn gateway_mainnet() -> Arc<Gateway> {
+    Gateway::mainnet().into()
+}
+
+#[uniffi::export]
+pub fn gateway_stokenet() -> Arc<Gateway> {
+    Gateway::stokenet().into()
 }
 
 impl Gateway {
