@@ -62,6 +62,7 @@ pub trait EntityAddress: Sized {
         )
     }
 
+    #[cfg(not(tarpaulin_include))] // false negative
     fn try_from_bech32(s: &str) -> Result<Self, Error> {
         let (network_id, entity_type, hrp, _) = decode_address(s)?;
         if entity_type != Self::entity_type() {

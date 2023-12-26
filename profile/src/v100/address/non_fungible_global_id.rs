@@ -215,3 +215,21 @@ mod tests {
         assert_eq!(set.len(), 2);
     }
 }
+
+#[cfg(test)]
+mod test_uniffi_api {
+    use super::NonFungibleGlobalId;
+
+    use std::ops::Deref;
+
+    #[test]
+    fn from_str() {
+        let str = "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<1>";
+        assert_eq!(
+            NonFungibleGlobalId::from_str(str.to_string())
+                .unwrap()
+                .deref(),
+            &NonFungibleGlobalId::try_from_str(str).unwrap()
+        );
+    }
+}

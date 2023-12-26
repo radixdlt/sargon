@@ -26,12 +26,6 @@ impl From<EngineEd25519PublicKey> for Ed25519PublicKey {
     }
 }
 
-impl From<Ed25519PublicKey> for EngineEd25519PublicKey {
-    fn from(value: Ed25519PublicKey) -> Self {
-        value.0
-    }
-}
-
 #[uniffi::export]
 impl Ed25519PublicKey {
     pub fn to_bytes(&self) -> Vec<u8> {

@@ -22,6 +22,7 @@ pub struct HDFactorInstanceTransactionSigning<E: IsEntityPath> {
     path: E,
 }
 impl<E: IsEntityPath + Clone> HDFactorInstanceTransactionSigning<E> {
+    #[cfg(not(tarpaulin_include))] // false negative
     pub fn try_from<F>(
         hd_factor_instance: HierarchicalDeterministicFactorInstance,
         extract: F,

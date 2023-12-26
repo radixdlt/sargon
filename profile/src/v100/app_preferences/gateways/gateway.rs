@@ -274,3 +274,34 @@ mod tests {
         );
     }
 }
+
+#[cfg(test)]
+mod tests_uniffi_api {
+    use std::ops::Deref;
+
+    use crate::{gateway_mainnet, gateway_stokenet};
+
+    use super::Gateway;
+
+    #[test]
+    fn test_gateway_mainnet() {
+        assert_eq!(gateway_mainnet().deref(), &Gateway::mainnet());
+    }
+
+    #[test]
+    fn test_gateway_stokenet() {
+        assert_eq!(gateway_stokenet().deref(), &Gateway::stokenet());
+    }
+
+    #[test]
+    fn get_network() {
+        let sut = Gateway::mainnet();
+        assert_eq!(sut.get_network().deref(), &sut.network());
+    }
+
+    #[test]
+    fn get_url() {
+        let sut = Gateway::mainnet();
+        assert_eq!(sut.get_url(), sut.url().to_string());
+    }
+}

@@ -26,12 +26,6 @@ impl From<EngineSecp256k1PublicKey> for Secp256k1PublicKey {
     }
 }
 
-impl From<Secp256k1PublicKey> for EngineSecp256k1PublicKey {
-    fn from(value: Secp256k1PublicKey) -> Self {
-        value.0
-    }
-}
-
 #[uniffi::export]
 impl Secp256k1PublicKey {
     pub fn to_bytes(&self) -> Vec<u8> {

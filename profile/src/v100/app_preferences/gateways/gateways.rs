@@ -1,8 +1,4 @@
-use std::{
-    cell::RefCell,
-    ops::Deref,
-    sync::{Arc, Mutex, RwLock},
-};
+use std::sync::{Arc, Mutex};
 
 use super::gateway::Gateway;
 
@@ -56,9 +52,11 @@ impl Gateways {
     pub fn get_current(&self) -> Arc<Gateway> {
         self.current().into()
     }
+
     pub fn get_other(&self) -> Vec<Arc<Gateway>> {
         self.other().into_iter().map(|g| g.into()).collect()
     }
+
     pub fn get_all(&self) -> Vec<Arc<Gateway>> {
         self.all().into_iter().map(|g| g.into()).collect()
     }
@@ -97,6 +95,7 @@ impl Gateways {
 }
 
 impl Serialize for Gateways {
+    #[cfg(not(tarpaulin_include))] // false negative
     fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
     where
         S: Serializer,
@@ -231,10 +230,9 @@ impl HasPlaceholder for Gateways {
 
 #[cfg(test)]
 mod tests {
-    use std::{cell::RefCell, sync::Mutex};
+    use std::sync::Mutex;
 
     use crate::{assert_eq_after_json_roundtrip, CommonError, HasPlaceholder};
-    use identified_vec::{IdentifiedVecOf, IsIdentifiedVecOf, ItemsCloned};
 
     use crate::{v100::app_preferences::gateways::gateway::Gateway, NetworkID};
 
@@ -337,5 +335,57 @@ mod tests {
             }
             "#,
         )
+    }
+}
+
+#[cfg(test)]
+mod test_uniffi_api {
+    use std::ops::Deref;
+
+    use itertools::Itertools;
+
+    use crate::{gateway_mainnet, Gateway, HasPlaceholder};
+
+    use super::Gateways;
+
+    #[test]
+    fn with_current() {
+        assert_eq!(
+            Gateways::with_current(gateway_mainnet()).deref().clone(),
+            Gateways::new(Gateway::mainnet())
+        );
+    }
+
+    #[test]
+    fn get_all() {
+        let sut = Gateways::placeholder();
+        assert_eq!(
+            sut.get_all()
+                .into_iter()
+                .map(|x| x.deref().clone())
+                .collect_vec(),
+            sut.all()
+        );
+    }
+
+    #[test]
+    fn get_current() {
+        let sut = Gateways::placeholder();
+        assert_eq!(&sut.current(), sut.get_current().deref());
+    }
+
+    #[test]
+    fn get_other() {
+        let sut = Gateways::placeholder();
+        sut.append(Gateway::ansharnet());
+        sut.append(Gateway::kisharnet());
+        sut.append(Gateway::mardunet());
+        assert_eq!(
+            sut.get_other()
+                .into_iter()
+                .map(|x| x.deref().clone())
+                .collect_vec(),
+            sut.other()
+        );
     }
 }
