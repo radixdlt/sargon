@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
 
 use enum_as_inner::EnumAsInner;
@@ -9,41 +11,46 @@ use super::{
     DeviceFactorSource, FactorSourceID, FactorSourceKind, IsFactorSource,
     LedgerHardwareWalletFactorSource,
 };
-#[derive(Serialize, Deserialize, Clone, EnumAsInner, Debug, PartialEq, Eq)]
-#[serde(remote = "Self")]
+#[derive(Clone, EnumAsInner, Debug, PartialEq, Eq, uniffi::Enum)]
 pub enum FactorSource {
-    #[serde(rename = "device")]
-    Device(DeviceFactorSource),
+    Device {
+        factor: Arc<DeviceFactorSource>,
+    },
 
-    #[serde(rename = "ledgerHQHardwareWallet")]
-    Ledger(LedgerHardwareWalletFactorSource),
+    Ledger {
+        factor: Arc<LedgerHardwareWalletFactorSource>,
+    },
 }
 
 impl IsFactorSource for FactorSource {
     fn factor_source_kind(&self) -> FactorSourceKind {
         match self {
-            FactorSource::Device(fs) => fs.factor_source_kind(),
-            FactorSource::Ledger(fs) => fs.factor_source_kind(),
+            FactorSource::Device { factor } => factor.factor_source_kind(),
+            FactorSource::Ledger { factor } => factor.factor_source_kind(),
         }
     }
 
     fn factor_source_id(&self) -> FactorSourceID {
         match self {
-            FactorSource::Device(fs) => fs.factor_source_id(),
-            FactorSource::Ledger(fs) => fs.factor_source_id(),
+            FactorSource::Device { factor } => factor.factor_source_id(),
+            FactorSource::Ledger { factor } => factor.factor_source_id(),
         }
     }
 }
 
 impl From<DeviceFactorSource> for FactorSource {
     fn from(value: DeviceFactorSource) -> Self {
-        FactorSource::Device(value)
+        FactorSource::Device {
+            factor: value.into(),
+        }
     }
 }
 
 impl From<LedgerHardwareWalletFactorSource> for FactorSource {
     fn from(value: LedgerHardwareWalletFactorSource) -> Self {
-        FactorSource::Ledger(value)
+        FactorSource::Ledger {
+            factor: value.into(),
+        }
     }
 }
 
@@ -68,18 +75,20 @@ impl Serialize for FactorSource {
     where
         S: Serializer,
     {
+        use std::ops::Deref;
+
         let mut state = serializer.serialize_struct("FactorSource", 2)?;
         let discriminator_key = "discriminator";
         match self {
-            FactorSource::Device(device) => {
+            FactorSource::Device { factor: device } => {
                 let discriminant = "device";
                 state.serialize_field(discriminator_key, discriminant)?;
-                state.serialize_field(discriminant, device)?;
+                state.serialize_field(discriminant, device.deref())?;
             }
-            FactorSource::Ledger(ledger) => {
+            FactorSource::Ledger { factor: ledger } => {
                 let discriminant = "ledgerHQHardwareWallet";
                 state.serialize_field(discriminator_key, discriminant)?;
-                state.serialize_field(discriminant, ledger)?;
+                state.serialize_field(discriminant, ledger.deref())?;
             }
         }
         state.end()
@@ -104,15 +113,21 @@ impl FactorSource {
     }
 
     pub fn placeholder_device_babylon() -> Self {
-        Self::Device(DeviceFactorSource::placeholder_babylon())
+        Self::Device {
+            factor: DeviceFactorSource::placeholder_babylon().into(),
+        }
     }
 
     pub fn placeholder_device_olympia() -> Self {
-        Self::Device(DeviceFactorSource::placeholder_olympia())
+        Self::Device {
+            factor: DeviceFactorSource::placeholder_olympia().into(),
+        }
     }
 
     pub fn placeholder_ledger() -> Self {
-        Self::Ledger(LedgerHardwareWalletFactorSource::placeholder())
+        Self::Ledger {
+            factor: LedgerHardwareWalletFactorSource::placeholder().into(),
+        }
     }
 }
 
@@ -180,7 +195,9 @@ mod tests {
         let factor_source: FactorSource = DeviceFactorSource::placeholder().into();
         assert_eq!(
             factor_source,
-            FactorSource::Device(DeviceFactorSource::placeholder())
+            FactorSource::Device {
+                factor: DeviceFactorSource::placeholder().into()
+            }
         );
     }
 
@@ -189,7 +206,9 @@ mod tests {
         let factor_source: FactorSource = LedgerHardwareWalletFactorSource::placeholder().into();
         assert_eq!(
             factor_source,
-            FactorSource::Ledger(LedgerHardwareWalletFactorSource::placeholder())
+            FactorSource::Ledger {
+                factor: LedgerHardwareWalletFactorSource::placeholder().into()
+            }
         );
     }
 

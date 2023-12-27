@@ -1,11 +1,16 @@
-use std::{cell::RefCell, fmt::Debug};
+use std::{
+    cell::RefCell,
+    fmt::Debug,
+    sync::{Arc, Mutex},
+};
 
 use identified_vec::IsIdentifiedVec;
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
-use crate::CommonError;
 #[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
+use crate::{CommonError, Network};
 
 use super::{
     Account, AccountAddress, AppPreferences, FactorSourceID, FactorSources, Header, IsFactorSource,
@@ -16,27 +21,27 @@ use super::{
 /// users Accounts, Personas, Authorized Dapps per network
 /// the user has used. It also contains all FactorSources,
 /// FactorInstances and wallet App preferences.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, uniffi::Object)]
 #[serde(rename_all = "camelCase")]
 pub struct Profile {
     /// The header of a Profile(Snapshot) contains crucial metadata
     /// about this Profile, such as which JSON data format it is
     /// compatible with and which device was used to create it and
     /// a hint about its contents.
-    header: RefCell<Header>,
+    header: Mutex<Header>,
 
     /// All sources of factors, used for authorization such as spending funds, contains no
     /// secrets.
-    factor_sources: RefCell<FactorSources>,
+    factor_sources: Mutex<FactorSources>,
 
     /// Settings for this profile in the app, contains default security configs
     /// as well as display settings.
-    app_preferences: RefCell<AppPreferences>,
+    app_preferences: Mutex<AppPreferences>,
 
     /// An ordered mapping of NetworkID -> `Profile.Network`, containing
     /// all the users Accounts, Personas and AuthorizedDapps the user
     /// has created and interacted with on this network.
-    networks: RefCell<Networks>,
+    networks: Mutex<Networks>,
 }
 
 impl Profile {
@@ -49,47 +54,77 @@ impl Profile {
     ) -> Self {
         factor_sources.assert_not_empty();
         Self {
-            header: RefCell::new(header),
-            factor_sources: RefCell::new(factor_sources),
-            app_preferences: RefCell::new(app_preferences),
-            networks: RefCell::new(networks),
+            header: Mutex::new(header),
+            factor_sources: Mutex::new(factor_sources),
+            app_preferences: Mutex::new(app_preferences),
+            networks: Mutex::new(networks),
         }
     }
 }
 
 impl Profile {
-    pub fn header(&self) -> Header {
-        self.header.borrow().clone()
-    }
-
-    pub fn set_header(&self, new: Header) {
-        *self.header.borrow_mut() = new
+    pub fn header(&self) -> Arc<Header> {
+        self.header
+            .lock()
+            .expect("`self.header` to not be locked.")
+            .clone()
     }
 
     pub fn factor_sources(&self) -> FactorSources {
-        self.factor_sources.borrow().clone()
+        self.factor_sources
+            .lock()
+            .expect("`self.factor_sources` to not be locked.")
+            .clone()
+    }
+
+    pub fn app_preferences(&self) -> AppPreferences {
+        self.app_preferences
+            .lock()
+            .expect("`self.app_preferences` to not be locked.")
+            .clone()
+    }
+
+    pub fn networks(&self) -> Networks {
+        self.networks
+            .lock()
+            .expect("`self.networks` to not be locked.")
+            .clone()
+    }
+}
+
+#[uniffi::export]
+impl Profile {
+    pub fn get_networks(&self) -> Vec<Arc<Network>> {
+        self.networks().into_iter().map(|n| n.into()).collect_vec()
+    }
+}
+
+impl Profile {
+    pub fn set_header(&self, new: Header) {
+        *self.header.lock().expect("`self.header` to not be locked.") = new
     }
 
     /// Panics if `new` is empty, since FactorSources MUST not be empty.
     pub fn set_factor_sources(&self, new: FactorSources) {
         new.assert_not_empty();
-        *self.factor_sources.borrow_mut() = new
-    }
-
-    pub fn app_preferences(&self) -> AppPreferences {
-        self.app_preferences.borrow().clone()
+        *self
+            .factor_sources
+            .lock()
+            .expect("`self.factor_sources` to not be locked.") = new
     }
 
     pub fn set_app_preferences(&self, new: AppPreferences) {
-        *self.app_preferences.borrow_mut() = new
-    }
-
-    pub fn networks(&self) -> Networks {
-        self.networks.borrow().clone()
+        *self
+            .app_preferences
+            .lock()
+            .expect("`self.app_preferences` to not be locked.") = new
     }
 
     pub fn set_networks(&self, new: Networks) {
-        *self.networks.borrow_mut() = new
+        *self
+            .networks
+            .lock()
+            .expect("`self.networks` to not be locked.") = new
     }
 }
 
@@ -101,7 +136,10 @@ impl Profile {
     where
         F: FnMut(&Account) -> (),
     {
-        self.networks.borrow_mut().update_account(address, mutate)
+        self.networks
+            .lock()
+            .expect("`self.networks` to not be locked.")
+            .update_account(address, mutate)
     }
 
     pub fn update_factor_source<S, M>(
@@ -114,7 +152,8 @@ impl Profile {
         M: FnMut(S) -> Result<S, CommonError>,
     {
         self.factor_sources
-            .borrow_mut()
+            .lock()
+            .expect("`self.factor_sources` to not be locked.")
             .try_update_with(factor_source_id, |f| {
                 S::try_from(f.clone())
                     .map_err(|_| CommonError::CastFactorSourceWrongKind)

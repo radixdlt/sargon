@@ -4,6 +4,7 @@ use crate::{HDPathValue, MnemonicWithPassphrase};
 use crate::{Derivation, HasEntityPath};
 use identified_vec::Identifiable;
 use serde::{Deserialize, Serialize};
+use std::sync::Mutex;
 use std::{cell::RefCell, cmp::Ordering, fmt::Display, hash::Hasher};
 
 #[cfg(any(test, feature = "placeholder"))]
@@ -40,7 +41,7 @@ use super::{AppearanceID, OnLedgerSettings};
 /// An account can be either controlled by a "Babylon" DeviceFactorSource or a
 /// Legacy one imported from Olympia, or a Ledger hardware wallet, which too might
 /// have been imported from Olympia.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, uniffi::Object)]
 #[serde(rename_all = "camelCase")]
 pub struct Account {
     /// The ID of the network this account can be used with.
@@ -64,7 +65,7 @@ pub struct Account {
 
     /// An off-ledger display name or description chosen by the user when she
     /// created this account.
-    display_name: RefCell<DisplayName>,
+    display_name: Mutex<DisplayName>,
 
     /// Security state of this account, either "securified" or not.
     security_state: EntitySecurityState,
@@ -72,17 +73,17 @@ pub struct Account {
     /// The visual cue user learns to associated this account with, typically
     /// a beautiful colorful gradient.
     #[serde(rename = "appearanceID")]
-    appearance_id: RefCell<AppearanceID>,
+    appearance_id: Mutex<AppearanceID>,
 
     /// An order set of `EntityFlag`s used to describe certain Off-ledger
     /// user state about Accounts or Personas, such as if an entity is
     /// marked as hidden or not.
     #[serde(default)]
-    flags: RefCell<EntityFlags>,
+    flags: Mutex<EntityFlags>,
 
     /// The on ledger synced settings for this account, contains e.g.
     /// ThirdPartyDeposit settings, with deposit rules for assets.
-    on_ledger_settings: RefCell<OnLedgerSettings>,
+    on_ledger_settings: Mutex<OnLedgerSettings>,
 }
 
 impl Account {

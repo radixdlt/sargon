@@ -1,4 +1,5 @@
-use derive_getters::Getters;
+use std::sync::Arc;
+
 use serde::{Deserialize, Serialize};
 
 #[cfg(any(test, feature = "placeholder"))]
@@ -7,7 +8,7 @@ use crate::HasPlaceholder;
 /// Settings related to displaying of information to the user inside the app.
 ///
 /// **N.B. neither of these settings are in fact not yet used by clients.**
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Getters)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, uniffi::Object)]
 #[serde(rename_all = "camelCase")]
 pub struct AppDisplay {
     /// If we should show the aggregate value of users portfolio in fiat currency
@@ -18,18 +19,34 @@ pub struct AppDisplay {
     fiat_currency_price_target: FiatCurrency,
 }
 
+#[uniffi::export]
 impl AppDisplay {
-    pub fn new(is_currency_amount_visible: bool, fiat_currency: FiatCurrency) -> Self {
-        Self {
+    #[uniffi::constructor]
+    pub fn new(is_currency_amount_visible: bool, fiat_currency: FiatCurrency) -> Arc<Self> {
+        Arc::new(Self {
             is_currency_amount_visible,
             fiat_currency_price_target: fiat_currency,
-        }
+        })
+    }
+
+    /// If we should show the aggregate value of users portfolio in fiat currency
+    /// of hide it.
+    pub fn is_currency_amount_visible(&self) -> bool {
+        self.is_currency_amount_visible
+    }
+
+    /// Which fiat currency the prices are measured in.
+    pub fn fiat_currency_price_target(&self) -> FiatCurrency {
+        self.fiat_currency_price_target
     }
 }
 
 impl Default for AppDisplay {
     fn default() -> Self {
-        Self::new(true, FiatCurrency::default())
+        Self {
+            is_currency_amount_visible: true,
+            fiat_currency_price_target: FiatCurrency::default(),
+        }
     }
 }
 
@@ -37,17 +54,25 @@ impl Default for AppDisplay {
 impl HasPlaceholder for AppDisplay {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
-        Self::new(true, FiatCurrency::default())
+        Self {
+            is_currency_amount_visible: true,
+            fiat_currency_price_target: FiatCurrency::default(),
+        }
     }
 
     /// A placeholder used to facilitate unit tests.
     fn placeholder_other() -> Self {
-        Self::new(false, FiatCurrency::default())
+        Self {
+            is_currency_amount_visible: false,
+            fiat_currency_price_target: FiatCurrency::default(),
+        }
     }
 }
 
 /// Fiat currency to measure and display the value of some XRD or other Radix assets value/worth in.
-#[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(
+    Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Enum,
+)]
 pub enum FiatCurrency {
     /// American dollars.
     #[serde(rename = "usd")]
@@ -86,14 +111,14 @@ mod tests {
     #[test]
     fn usd_is_default() {
         assert_eq!(
-            AppDisplay::default().fiat_currency_price_target,
+            AppDisplay::default().fiat_currency_price_target(),
             FiatCurrency::USD
         );
     }
 
     #[test]
     fn fiat_worth_is_visible_by_default() {
-        assert_eq!(AppDisplay::default().is_currency_amount_visible, true);
+        assert_eq!(AppDisplay::default().is_currency_amount_visible(), true);
     }
 
     #[test]

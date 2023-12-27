@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::Hex32Bytes;
 use crate::{GetIDPath, MnemonicWithPassphrase};
 use derive_getters::Getters;
@@ -11,13 +13,36 @@ use crate::HasPlaceholder;
 
 /// FactorSourceID from the blake2b hash of the special HD public key derived at `CAP26::GetID`,
 /// for a certain `FactorSourceKind`
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Getters)]
+#[derive(
+    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, uniffi::Object,
+)]
 pub struct FactorSourceIDFromHash {
     /// The kind of the FactorSource this ID refers to, typically `device` or `ledger`.
     kind: FactorSourceKind,
 
     /// The blake2b hash of the special HD public key derived at `CAP26::GetID`.
     body: Hex32Bytes,
+}
+
+#[uniffi::export]
+impl FactorSourceIDFromHash {
+    pub fn get_kind(&self) -> FactorSourceKind {
+        self.kind()
+    }
+
+    pub fn get_body(&self) -> Arc<Hex32Bytes> {
+        self.body().into()
+    }
+}
+
+impl FactorSourceIDFromHash {
+    pub fn kind(&self) -> FactorSourceKind {
+        self.kind.clone()
+    }
+
+    pub fn body(&self) -> Hex32Bytes {
+        self.body.clone()
+    }
 }
 
 impl ToString for FactorSourceIDFromHash {

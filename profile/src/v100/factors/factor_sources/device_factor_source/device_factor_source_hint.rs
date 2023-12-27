@@ -1,4 +1,4 @@
-use std::cell::RefCell;
+use std::{cell::RefCell, ops::Mul, sync::Mutex};
 
 use crate::BIP39WordCount;
 use serde::{Deserialize, Serialize};
@@ -8,33 +8,36 @@ use crate::HasPlaceholder;
 
 /// Properties describing a DeviceFactorSource to help user disambiguate between
 /// it and another one.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, uniffi::Object)]
 #[serde(rename_all = "camelCase")]
 pub struct DeviceFactorSourceHint {
     /// "iPhone RED"
-    name: RefCell<String>, // mutable so we can update name
+    name: Mutex<String>, // mutable so we can update name
 
     /// "iPhone SE 2nd gen"
-    model: RefCell<String>, // mutable because name gets `async` fetched and updated later.
+    model: Mutex<String>, // mutable because name gets `async` fetched and updated later.
 
     /// The number of words in the mnemonic of a DeviceFactorSource, according to the BIP39
     /// standard, a multiple of 3, from 12 to 24 words.
     mnemonic_word_count: BIP39WordCount,
 }
 
+#[uniffi::export]
 impl DeviceFactorSourceHint {
     pub fn mnemonic_word_count(&self) -> BIP39WordCount {
         self.mnemonic_word_count.clone()
     }
 
     pub fn name(&self) -> String {
-        self.name.borrow().clone()
+        self.name.lock().expect(msg).clone()
     }
 
     pub fn model(&self) -> String {
         self.model.borrow().clone()
     }
+}
 
+impl DeviceFactorSourceHint {
     pub fn set_name(&self, new: String) {
         *self.name.borrow_mut() = new
     }

@@ -1,6 +1,9 @@
 use std::{
+    alloc::System,
     cell::{Cell, RefCell},
     fmt::Display,
+    sync::{Arc, Mutex},
+    time::SystemTime,
 };
 
 #[cfg(any(test, feature = "placeholder"))]
@@ -9,7 +12,7 @@ use std::str::FromStr;
 #[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
-use iso8601_timestamp::Timestamp;
+use iso8601_timestamp::{time::Time, Timestamp};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -23,7 +26,7 @@ use super::{content_hint::ContentHint, device_info::DeviceInfo};
 /// about this Profile, such as which JSON data format it is
 /// compatible with and which device was used to create it and
 /// a hint about its contents.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, uniffi::Object)]
 #[serde(rename_all = "camelCase")]
 pub struct Header {
     /// A versioning number that is increased when breaking
@@ -37,13 +40,38 @@ pub struct Header {
     creating_device: DeviceInfo,
 
     /// The device on which the profile was last used.
-    last_used_on_device: RefCell<DeviceInfo>,
+    last_used_on_device: Mutex<DeviceInfo>,
 
     /// When the Profile was last modified.
-    last_modified: Cell<Timestamp>,
+    last_modified: Mutex<Timestamp>,
 
     /// Hint about the contents of the profile, e.g. number of Accounts and Personas.
-    content_hint: RefCell<ContentHint>, // `RefCell` needed because `ContentHint` does not impl `Copy`, which it cant because it contains `Cell`s, and `Cell` itself does not impl `Copy`.
+    content_hint: Mutex<ContentHint>, // `RefCell` needed because `ContentHint` does not impl `Copy`, which it cant because it contains `Cell`s, and `Cell` itself does not impl `Copy`.
+}
+
+impl Eq for Header {}
+impl PartialEq for Header {
+    fn eq(&self, other: &Self) -> bool {
+        self.snapshot_version == other.snapshot_version
+            && self.id() == other.id()
+            && self.creating_device() == other.creating_device()
+            && self.last_used_on_device() == other.last_used_on_device()
+            && self.last_modified() == other.last_modified()
+            && self.content_hint() == other.content_hint()
+    }
+}
+
+impl Clone for Header {
+    fn clone(&self) -> Self {
+        Self {
+            snapshot_version: ProfileSnapshotVersion::default(),
+            id: self.id.clone(),
+            creating_device: self.creating_device(),
+            last_used_on_device: Mutex::new(self.creating_device()),
+            last_modified: Mutex::new(self.last_modified()),
+            content_hint: Mutex::new(self.content_hint()),
+        }
+    }
 }
 
 impl Header {
@@ -59,9 +87,9 @@ impl Header {
             snapshot_version: ProfileSnapshotVersion::default(),
             id,
             creating_device: creating_device.clone(),
-            last_used_on_device: RefCell::new(creating_device),
-            last_modified: Cell::new(last_modified),
-            content_hint: RefCell::new(content_hint),
+            last_used_on_device: Mutex::new(creating_device),
+            last_modified: Mutex::new(last_modified),
+            content_hint: Mutex::new(content_hint),
         }
     }
 
@@ -90,7 +118,45 @@ impl Display for Header {
     }
 }
 
-// Getters
+#[uniffi::export]
+impl Header {
+    /// A versioning number that is increased when breaking
+    /// changes is made to ProfileSnapshot JSON data format.
+    pub fn get_snapshot_version(&self) -> ProfileSnapshotVersion {
+        self.snapshot_version().into()
+    }
+
+    /// An immutable and unique identifier of a Profile.
+    pub fn get_id(&self) -> String {
+        self.id()
+    }
+
+    /// The device which was used to create the Profile.
+    pub fn get_creating_device(&self) -> Arc<DeviceInfo> {
+        self.creating_device().into()
+    }
+
+    /// Hint about the contents of the profile, e.g. number of Accounts and Personas.
+    pub fn get_content_hint(&self) -> Arc<ContentHint> {
+        self.content_hint().into()
+    }
+
+    /// The device on which the profile was last used.
+    pub fn get_last_used_on_device(&self) -> Arc<DeviceInfo> {
+        self.last_used_on_device().into()
+    }
+
+    /// When the Profile was last modified.
+    pub fn get_last_modified(&self) -> SystemTime {
+        to_system_time(self.last_modified())
+    }
+}
+
+pub fn to_system_time(timestamp: Timestamp) -> SystemTime {
+    let str = timestamp.to_string();
+    time_util::parse_system_time_from_date_str(str.as_str()).expect("Valid date")
+}
+
 impl Header {
     /// A versioning number that is increased when breaking
     /// changes is made to ProfileSnapshot JSON data format.
@@ -99,8 +165,8 @@ impl Header {
     }
 
     /// An immutable and unique identifier of a Profile.
-    pub fn id(&self) -> Uuid {
-        self.id
+    pub fn id(&self) -> String {
+        self.id.to_string()
     }
 
     /// The device which was used to create the Profile.
@@ -110,17 +176,26 @@ impl Header {
 
     /// Hint about the contents of the profile, e.g. number of Accounts and Personas.
     pub fn content_hint(&self) -> ContentHint {
-        self.content_hint.borrow().clone()
+        self.content_hint
+            .lock()
+            .expect("`self.content_hint` to not have been locked.")
+            .clone()
     }
 
     /// The device on which the profile was last used.
     pub fn last_used_on_device(&self) -> DeviceInfo {
-        self.last_used_on_device.borrow().clone()
+        self.last_used_on_device
+            .lock()
+            .expect("`self.last_used_on_device` to not have been locked.")
+            .clone()
     }
 
     /// When the Profile was last modified.
     pub fn last_modified(&self) -> Timestamp {
-        self.last_modified.get().clone()
+        self.last_modified
+            .lock()
+            .expect("`self.last_modified` to not have been locked.")
+            .clone()
     }
 }
 
@@ -128,13 +203,19 @@ impl Header {
 impl Header {
     /// Updates the `last_modified` field.
     pub fn updated(&self) {
-        self.last_modified.set(now());
+        *self
+            .last_modified
+            .lock()
+            .expect("`self.last_modified` to not have been locked.") = now();
     }
 
     /// Sets the content hint WITHOUT updating `last_modified`, you SHOULD not
     /// use this, use `update_content_hint`, this is primarily meant for testing.
     pub fn set_content_hint(&self, new: ContentHint) {
-        *self.content_hint.borrow_mut() = new;
+        *self
+            .content_hint
+            .lock()
+            .expect("`self.content_hint` to not have been locked.") = new;
     }
 
     /// Sets the `content_hint` and updates the `last_modified` field.
@@ -145,7 +226,10 @@ impl Header {
 
     /// Sets the `last_used_on_device` and updates the `last_modified` field.
     pub fn update_last_used_on_device(&self, new: DeviceInfo) {
-        *self.last_used_on_device.borrow_mut() = new;
+        *self
+            .last_used_on_device
+            .lock()
+            .expect("`self.last_used_on_device` to not have been locked.") = new;
         self.updated()
     }
 }
@@ -288,8 +372,9 @@ pub mod tests {
 
     #[test]
     fn last_updated() {
-        let sut = Header::default();
-        assert_eq!(sut.last_modified.get(), sut.last_modified());
+        let a = Header::default();
+        let b = Header::default();
+        assert_ne!(a.last_modified(), b.last_modified());
     }
 
     #[test]
@@ -327,7 +412,7 @@ pub mod tests {
             id: value.clone(),
             ..Default::default()
         };
-        assert_eq!(sut.id(), value)
+        assert_eq!(sut.id(), value.to_string())
     }
 
     #[test]

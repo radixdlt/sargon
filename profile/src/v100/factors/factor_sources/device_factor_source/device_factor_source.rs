@@ -1,4 +1,8 @@
-use std::cell::RefCell;
+use std::{
+    cell::RefCell,
+    ops::Deref,
+    sync::{Arc, Mutex},
+};
 
 use crate::{CommonError, MnemonicWithPassphrase};
 use serde::{Deserialize, Serialize};
@@ -18,7 +22,7 @@ use super::device_factor_source_hint::DeviceFactorSourceHint;
 /// all new Accounts and Personas an users authenticate signing by authorizing
 /// the client (Wallet App) to access a mnemonic stored in secure storage on
 /// the device.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, uniffi::Object)]
 #[serde(rename_all = "camelCase")]
 pub struct DeviceFactorSource {
     /// Unique and stable identifier of this factor source, stemming from the
@@ -30,10 +34,47 @@ pub struct DeviceFactorSource {
     ///
     /// Has interior mutability since we must be able to update the
     /// last used date.
-    common: RefCell<FactorSourceCommon>,
+    common: Mutex<FactorSourceCommon>,
 
     /// Properties describing a DeviceFactorSource to help user disambiguate between it and another one.
     hint: DeviceFactorSourceHint,
+}
+
+impl Eq for DeviceFactorSource {}
+impl PartialEq for DeviceFactorSource {
+    fn eq(&self, other: &Self) -> bool {
+        self.id() == other.id() && self.common() == other.common() && self.hint() == other.hint()
+    }
+}
+
+impl Clone for DeviceFactorSource {
+    fn clone(&self) -> Self {
+        Self::new(self.id(), self.common(), self.hint())
+    }
+}
+
+impl DeviceFactorSource {
+    pub fn set_common(&self, new: FactorSourceCommon) {
+        *self
+            .common
+            .lock()
+            .expect("`self.common` to not have been locked.") = new
+    }
+}
+
+#[uniffi::export]
+impl DeviceFactorSource {
+    pub fn get_id(&self) -> Arc<FactorSourceIDFromHash> {
+        self.id().into()
+    }
+
+    pub fn get_common(&self) -> Arc<FactorSourceCommon> {
+        self.common().into()
+    }
+
+    pub fn get_hint(&self) -> Arc<DeviceFactorSourceHint> {
+        self.hint().into()
+    }
 }
 
 impl DeviceFactorSource {
@@ -42,15 +83,14 @@ impl DeviceFactorSource {
     }
 
     pub fn common(&self) -> FactorSourceCommon {
-        self.common.borrow().clone()
+        self.common
+            .lock()
+            .expect("`self.common` to not have been locked.")
+            .clone()
     }
 
-    pub fn set_common(&self, new: FactorSourceCommon) {
-        *self.common.borrow_mut() = new
-    }
-
-    pub fn hint(&self) -> &DeviceFactorSourceHint {
-        &self.hint
+    pub fn hint(&self) -> DeviceFactorSourceHint {
+        self.hint.clone()
     }
 }
 
@@ -61,6 +101,7 @@ impl TryFrom<FactorSource> for DeviceFactorSource {
         value
             .into_device()
             .map_err(|_| Self::Error::ExpectedDeviceFactorSourceGotSomethingElse)
+            .map(|x| x.deref().clone())
     }
 }
 
@@ -83,7 +124,7 @@ impl DeviceFactorSource {
     ) -> Self {
         Self {
             id,
-            common: RefCell::new(common),
+            common: Mutex::new(common),
             hint,
         }
     }

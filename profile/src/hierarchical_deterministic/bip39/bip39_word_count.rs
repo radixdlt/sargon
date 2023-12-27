@@ -19,6 +19,7 @@ use strum::FromRepr;
     Hash,
     PartialOrd,
     Ord,
+    uniffi::Enum,
 )]
 #[repr(u8)]
 pub enum BIP39WordCount {

@@ -1,7 +1,11 @@
-use std::cell::RefCell;
+use std::{
+    cell::RefCell,
+    sync::{Arc, Mutex},
+};
 
 use crate::CommonError;
 use identified_vec::Identifiable;
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
 #[cfg(any(test, feature = "placeholder"))]
@@ -16,7 +20,7 @@ use super::accounts::Accounts;
 
 /// Accounts, Personas, Authorized dapps for some Radix Network that user
 /// has created and interacted with.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, uniffi::Object)]
 pub struct Network {
     /// The ID of the network that has been used to generate the `accounts` and `personas`
     /// and on which the `authorizedDapps` have been deployed on.
@@ -24,7 +28,23 @@ pub struct Network {
     id: NetworkID,
 
     /// An ordered set of Accounts on this network.
-    accounts: RefCell<Accounts>,
+    accounts: Mutex<Accounts>,
+}
+
+impl Clone for Network {
+    fn clone(&self) -> Self {
+        Self {
+            id: self.id.clone(),
+            accounts: Mutex::new(self.accounts()),
+        }
+    }
+}
+
+impl Eq for Network {}
+impl PartialEq for Network {
+    fn eq(&self, other: &Self) -> bool {
+        self.id() == other.id() && self.accounts() == other.accounts()
+    }
 }
 
 impl Identifiable for Network {
@@ -51,15 +71,25 @@ impl Network {
         );
         Self {
             id: network_id,
-            accounts: RefCell::new(accounts),
+            accounts: Mutex::new(accounts),
         }
+    }
+}
+
+#[uniffi::export]
+impl Network {
+    pub fn get_accounts(&self) -> Vec<Arc<Account>> {
+        self.accounts().into_iter().map(|a| a.into()).collect_vec()
     }
 }
 
 impl Network {
     /// An ordered set of Accounts on this network.
     pub fn accounts(&self) -> Accounts {
-        self.accounts.borrow().clone()
+        self.accounts
+            .lock()
+            .expect("`self.accounts` to not have been locked.")
+            .clone()
     }
 }
 
@@ -70,7 +100,10 @@ impl Network {
         if new.get_all().iter().any(|a| a.network_id() != self.id()) {
             return Err(CommonError::AccountOnWrongNetwork);
         }
-        *self.accounts.borrow_mut() = new;
+        *self
+            .accounts
+            .lock()
+            .expect("`self.accounts` to not have been locked.") = new;
         Ok(())
     }
 }
@@ -83,7 +116,10 @@ impl Network {
     where
         F: FnMut(&Account) -> (),
     {
-        self.accounts.borrow_mut().update_account(address, mutate)
+        self.accounts
+            .lock()
+            .expect("`self.accounts` to not have been locked.")
+            .update_account(address, mutate)
     }
 }
 

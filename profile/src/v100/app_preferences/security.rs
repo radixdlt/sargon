@@ -1,7 +1,4 @@
-use std::{
-    cell::{Cell, RefCell},
-    collections::BTreeSet,
-};
+use std::{collections::BTreeSet, sync::Mutex};
 
 use serde::{Deserialize, Serialize};
 
@@ -16,12 +13,31 @@ pub type SecurityStructureConfigurationReference = bool;
 /// Controls e.g. if Profile Snapshot gets synced to iCloud or not, and whether
 /// developer mode is enabled or not. In future (MFA) we will also save a list of
 /// MFA security structure configurations.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, uniffi::Object)]
 #[serde(rename_all = "camelCase")]
 pub struct Security {
-    is_cloud_profile_sync_enabled: Cell<bool>,
-    is_developer_mode_enabled: Cell<bool>,
-    structure_configuration_references: RefCell<BTreeSet<SecurityStructureConfigurationReference>>,
+    is_cloud_profile_sync_enabled: Mutex<bool>,
+    is_developer_mode_enabled: Mutex<bool>,
+    structure_configuration_references: Mutex<BTreeSet<SecurityStructureConfigurationReference>>,
+}
+
+impl Clone for Security {
+    fn clone(&self) -> Self {
+        Self::new(
+            self.is_cloud_profile_sync_enabled().clone(),
+            self.is_developer_mode_enabled().clone(),
+            self.structure_configuration_references().clone(),
+        )
+    }
+}
+impl Eq for Security {}
+impl PartialEq for Security {
+    fn eq(&self, other: &Self) -> bool {
+        self.is_cloud_profile_sync_enabled() == other.is_cloud_profile_sync_enabled()
+            && self.is_developer_mode_enabled() == other.is_developer_mode_enabled()
+            && self.structure_configuration_references()
+                == other.structure_configuration_references()
+    }
 }
 
 impl Security {
@@ -32,24 +48,33 @@ impl Security {
         structure_configuration_references: BTreeSet<SecurityStructureConfigurationReference>,
     ) -> Self {
         Self {
-            is_cloud_profile_sync_enabled: Cell::new(is_cloud_profile_sync_enabled),
-            is_developer_mode_enabled: Cell::new(is_developer_mode_enabled),
-            structure_configuration_references: RefCell::new(structure_configuration_references),
+            is_cloud_profile_sync_enabled: Mutex::new(is_cloud_profile_sync_enabled),
+            is_developer_mode_enabled: Mutex::new(is_developer_mode_enabled),
+            structure_configuration_references: Mutex::new(structure_configuration_references),
         }
     }
 
     pub fn is_cloud_profile_sync_enabled(&self) -> bool {
-        self.is_cloud_profile_sync_enabled.get()
+        self.is_cloud_profile_sync_enabled
+            .lock()
+            .expect("`self.is_cloud_profile_sync_enabled` to not have been locked")
+            .clone()
     }
 
     pub fn is_developer_mode_enabled(&self) -> bool {
-        self.is_developer_mode_enabled.get()
+        self.is_developer_mode_enabled
+            .lock()
+            .expect("`self.is_developer_mode_enabled` to not have been locked")
+            .clone()
     }
 
     pub fn structure_configuration_references(
         &self,
     ) -> BTreeSet<SecurityStructureConfigurationReference> {
-        self.structure_configuration_references.borrow().clone()
+        self.structure_configuration_references
+            .lock()
+            .expect("`self.structure_configuration_references to not have been locked`")
+            .clone()
     }
 }
 

@@ -6,13 +6,34 @@ use super::ledger_hardware_wallet_model::LedgerHardwareWalletModel;
 #[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Getters)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, uniffi::Object)]
 pub struct LedgerHardwareWalletHint {
     /// "Orange, scratched"
     name: String,
 
     /// E.g. `nanoS+`
     model: LedgerHardwareWalletModel,
+}
+
+#[uniffi::export]
+impl LedgerHardwareWalletHint {
+    pub fn get_name(&self) -> String {
+        self.name()
+    }
+
+    pub fn get_model(&self) -> LedgerHardwareWalletModel {
+        self.model()
+    }
+}
+
+impl LedgerHardwareWalletHint {
+    pub fn name(&self) -> String {
+        self.name.clone()
+    }
+
+    pub fn model(&self) -> LedgerHardwareWalletModel {
+        self.model.clone()
+    }
 }
 
 impl LedgerHardwareWalletHint {

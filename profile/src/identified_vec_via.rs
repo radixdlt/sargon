@@ -5,7 +5,9 @@ use identified_vec::{
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::fmt::{Debug, Display, Formatter};
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct IdentifiedVecVia<Element: Identifiable + Debug + Clone>(IdentifiedVecOf<Element>);
+pub struct IdentifiedVecVia<Element: Identifiable + Debug + Clone>(
+    pub(crate) IdentifiedVecOf<Element>,
+);
 
 impl<Element: Identifiable + Debug + Clone> ViaMarker for IdentifiedVecVia<Element> {}
 impl<Element: Identifiable + Debug + Clone> IsIdentifiableVecOfVia<Element>

@@ -1,17 +1,12 @@
-use std::cell::RefCell;
-
 use crate::CommonError as Error;
 use crate::DerivationPathScheme;
 use crate::SLIP10Curve;
-use identified_vec::{IsIdentifiedVec, IsIdentifiedVecOf, ItemsCloned};
 use serde::{Deserialize, Serialize};
-
-use crate::identified_vec_via::IdentifiedVecVia;
 
 /// Cryptographic parameters a certain FactorSource supports, e.g. which Elliptic Curves
 /// it supports and which Hierarchical Deterministic (HD) derivations schemes it supports,
 /// if any.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, uniffi::Object)]
 #[serde(rename_all = "camelCase")]
 pub struct FactorSourceCryptoParameters {
     /// Describes with which Elliptic Curves a Factor Source can be used, e.g. a
@@ -21,50 +16,23 @@ pub struct FactorSourceCryptoParameters {
     /// Either `[curve25519]` or `[secp256k1, curve25519]`
     ///
     /// Must not be empty.
-    supported_curves: RefCell<IdentifiedVecVia<SLIP10Curve>>,
+    supported_curves: Vec<SLIP10Curve>,
 
     /// If not empty: Describes which kind of Hierarchical Deterministic (HD)
     /// derivations a FactorSource is capable of doing - if empty: the
     /// FactorSource does not support HD derivation.
     ///
     /// Either BIP44 or CAP26 (SLIP10)
-    supported_derivation_path_schemes: RefCell<IdentifiedVecVia<DerivationPathScheme>>,
+    supported_derivation_path_schemes: Vec<DerivationPathScheme>,
 }
 
 impl FactorSourceCryptoParameters {
     pub fn supported_curves(&self) -> Vec<SLIP10Curve> {
-        self.supported_curves.borrow().items()
+        self.supported_curves.clone()
     }
 
     pub fn supported_derivation_path_schemes(&self) -> Vec<DerivationPathScheme> {
-        self.supported_derivation_path_schemes.borrow().items()
-    }
-
-    /// Append a SLIP10Curve to the end of `supported_curves`, if it doesn't already contain it.
-    ///
-    /// - Parameter curve: The curve to add to the `supported_curves`.
-    /// - Returns: A pair `(inserted, index)`, where `inserted` is a Boolean value indicating whether
-    ///   the operation added a new curve, and `index` is the index of `item` in the resulting
-    ///   `identified_vec`.
-    /// - Complexity: The operation is expected to perform O(1)
-    pub fn add_supported_curve(&self, curve: SLIP10Curve) -> (bool, usize) {
-        self.supported_curves.borrow_mut().append(curve)
-    }
-
-    /// Append a DerivationPathScheme to the end of `supported_derivation_path_schemes`, if it doesn't already contain it.
-    ///
-    /// - Parameter scheme: The DerivationPathScheme to add to the `supported_derivation_path_schemes`.
-    /// - Returns: A pair `(inserted, index)`, where `inserted` is a Boolean value indicating whether
-    ///   the operation added a new scheme, and `index` is the index of `item` in the resulting
-    ///   `identified_vec`.
-    /// - Complexity: The operation is expected to perform O(1)
-    pub fn add_supported_derivation_path_schemes(
-        &self,
-        scheme: DerivationPathScheme,
-    ) -> (bool, usize) {
-        self.supported_derivation_path_schemes
-            .borrow_mut()
-            .append(scheme)
+        self.supported_derivation_path_schemes.clone()
     }
 }
 
@@ -74,15 +42,16 @@ impl FactorSourceCryptoParameters {
         I: IntoIterator<Item = SLIP10Curve>,
         J: IntoIterator<Item = DerivationPathScheme>,
     {
-        let supported_curves = IdentifiedVecVia::from_iter(curves);
+        let mut supported_curves = Vec::from_iter(curves);
         if supported_curves.len() == 0 {
             return Err(Error::FactorSourceCryptoParametersSupportedCurvesInvalidSize);
         }
-        let supported_derivation_path_schemes = IdentifiedVecVia::from_iter(schemes);
+        supported_curves.dedup();
+        let supported_derivation_path_schemes = Vec::from_iter(schemes);
 
         Ok(Self {
-            supported_curves: RefCell::new(supported_curves),
-            supported_derivation_path_schemes: RefCell::new(supported_derivation_path_schemes),
+            supported_curves,
+            supported_derivation_path_schemes,
         })
     }
 
@@ -134,56 +103,6 @@ mod tests {
                 .unwrap(),
             &SLIP10Curve::Curve25519
         );
-    }
-
-    #[test]
-    fn add_curve() {
-        let sut = FactorSourceCryptoParameters::babylon();
-        assert_eq!(
-            sut.supported_curves().contains(&SLIP10Curve::Secp256k1),
-            false
-        );
-        assert_eq!(sut.add_supported_curve(SLIP10Curve::Secp256k1), (true, 1));
-        assert_eq!(
-            sut.supported_curves().contains(&SLIP10Curve::Secp256k1),
-            true
-        );
-    }
-
-    #[test]
-    fn add_existing_curve_is_noop() {
-        assert_eq!(
-            FactorSourceCryptoParameters::babylon().add_supported_curve(SLIP10Curve::Curve25519),
-            (false, 0)
-        )
-    }
-
-    #[test]
-    fn add_scheme() {
-        let sut = FactorSourceCryptoParameters::babylon();
-        assert_eq!(
-            sut.supported_derivation_path_schemes()
-                .contains(&DerivationPathScheme::Bip44Olympia),
-            false
-        );
-        assert_eq!(
-            sut.add_supported_derivation_path_schemes(DerivationPathScheme::Bip44Olympia),
-            (true, 1)
-        );
-        assert_eq!(
-            sut.supported_derivation_path_schemes()
-                .contains(&DerivationPathScheme::Bip44Olympia),
-            true
-        );
-    }
-
-    #[test]
-    fn add_existing_scheme_is_noop() {
-        assert_eq!(
-            FactorSourceCryptoParameters::babylon()
-                .add_supported_derivation_path_schemes(DerivationPathScheme::Cap26),
-            (false, 0)
-        )
     }
 
     #[test]

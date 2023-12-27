@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 /// Important to know that this is just a **hint**, the values
 /// SHOULD be kept up to date, might might not be, since they
 /// are stored values which must be kept in sync.
-#[derive(Serialize, Deserialize, Default, Clone, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Default, Clone, Debug, PartialEq, Eq, uniffi::Object)]
 #[serde(rename_all = "camelCase")]
 pub struct ContentHint {
     /// The total number of accounts on all networks.
@@ -19,7 +19,7 @@ pub struct ContentHint {
     /// real consequence.
     ///
     /// This counter includes any by user hidden accounts.
-    number_of_accounts_on_all_networks_in_total: Cell<usize>,
+    number_of_accounts_on_all_networks_in_total: usize,
 
     /// The total number of personas on all networks.
     ///
@@ -29,11 +29,11 @@ pub struct ContentHint {
     /// real consequence.
     ///
     /// This counter includes any by user hidden personas.
-    number_of_personas_on_all_networks_in_total: Cell<usize>,
+    number_of_personas_on_all_networks_in_total: usize,
 
     /// The total number of networks that the user has used, i.e.
     /// on which she has any accounts or personas.
-    number_of_networks: Cell<usize>,
+    number_of_networks: usize,
 }
 
 // Constructors
@@ -41,9 +41,9 @@ impl ContentHint {
     /// Instantiates a new `ContentHint` with the specified counter values.
     pub fn with_counters(accounts: usize, personas: usize, networks: usize) -> Self {
         Self {
-            number_of_accounts_on_all_networks_in_total: Cell::new(accounts),
-            number_of_personas_on_all_networks_in_total: Cell::new(personas),
-            number_of_networks: Cell::new(networks),
+            number_of_accounts_on_all_networks_in_total: accounts,
+            number_of_personas_on_all_networks_in_total: personas,
+            number_of_networks: networks,
         }
     }
 
@@ -74,35 +74,17 @@ impl Display for ContentHint {
 impl ContentHint {
     /// Gets the number of accounts on all networks in total.
     pub fn number_of_accounts_on_all_networks_in_total(&self) -> usize {
-        self.number_of_accounts_on_all_networks_in_total.get()
+        self.number_of_accounts_on_all_networks_in_total
     }
 
     /// Gets the number of personas on all networks in total.
     pub fn number_of_personas_on_all_networks_in_total(&self) -> usize {
-        self.number_of_personas_on_all_networks_in_total.get()
+        self.number_of_personas_on_all_networks_in_total
     }
 
     /// Gets the number of networks.
     pub fn number_of_networks(&self) -> usize {
-        self.number_of_networks.get()
-    }
-}
-
-// Setters
-impl ContentHint {
-    /// Sets the `number_of_accounts_on_all_networks_in_total` to `new`.
-    pub fn set_number_of_accounts_on_all_networks_in_total(&self, new: usize) {
-        self.number_of_accounts_on_all_networks_in_total.set(new)
-    }
-
-    /// Sets the `number_of_personas_on_all_networks_in_total` to `new`.
-    pub fn set_number_of_personas_on_all_networks_in_total(&self, new: usize) {
-        self.number_of_personas_on_all_networks_in_total.set(new)
-    }
-
-    /// Sets the `number_of_networks` to `new`.
-    pub fn set_number_of_networks(&self, new: usize) {
-        self.number_of_networks.set(new)
+        self.number_of_networks
     }
 }
 
@@ -119,9 +101,9 @@ mod tests {
     #[test]
     fn new_counters_all_start_at_zero() {
         let sut = ContentHint::new();
-        assert_eq!(sut.number_of_accounts_on_all_networks_in_total.get(), 0);
-        assert_eq!(sut.number_of_personas_on_all_networks_in_total.get(), 0);
-        assert_eq!(sut.number_of_networks.get(), 0);
+        assert_eq!(sut.number_of_accounts_on_all_networks_in_total(), 0);
+        assert_eq!(sut.number_of_personas_on_all_networks_in_total(), 0);
+        assert_eq!(sut.number_of_networks(), 0);
     }
 
     #[test]
@@ -148,45 +130,6 @@ mod tests {
             assert_eq!(sut.number_of_accounts_on_all_networks_in_total(), x);
             assert_eq!(sut.number_of_personas_on_all_networks_in_total(), y);
             assert_eq!(sut.number_of_networks(), z)
-        });
-    }
-
-    #[test]
-    fn set_number_of_accounts_on_all_networks_in_total() {
-        let sut = ContentHint::new();
-        (1..100).into_iter().for_each(|i| {
-            assert_eq!(sut.number_of_accounts_on_all_networks_in_total(), i - 1);
-            sut.set_number_of_accounts_on_all_networks_in_total(i);
-
-            // assert rest unchanged
-            assert_eq!(sut.number_of_networks(), 0);
-            assert_eq!(sut.number_of_personas_on_all_networks_in_total(), 0);
-        });
-    }
-
-    #[test]
-    fn set_number_of_personas_on_all_networks_in_total() {
-        let sut = ContentHint::new();
-        (1..100).into_iter().for_each(|i| {
-            assert_eq!(sut.number_of_personas_on_all_networks_in_total(), i - 1);
-            sut.set_number_of_personas_on_all_networks_in_total(i);
-
-            // assert rest unchanged
-            assert_eq!(sut.number_of_networks(), 0);
-            assert_eq!(sut.number_of_accounts_on_all_networks_in_total(), 0);
-        });
-    }
-
-    #[test]
-    fn set_number_of_networks() {
-        let sut = ContentHint::new();
-        (1..100).into_iter().for_each(|i| {
-            assert_eq!(sut.number_of_networks(), i - 1);
-            sut.set_number_of_networks(i);
-
-            // assert rest unchanged
-            assert_eq!(sut.number_of_accounts_on_all_networks_in_total(), 0);
-            assert_eq!(sut.number_of_personas_on_all_networks_in_total(), 0);
         });
     }
 

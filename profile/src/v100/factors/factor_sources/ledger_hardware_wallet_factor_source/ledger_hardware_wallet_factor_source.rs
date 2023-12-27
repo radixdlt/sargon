@@ -1,4 +1,8 @@
-use std::cell::RefCell;
+use std::{
+    cell::RefCell,
+    ops::Deref,
+    sync::{Arc, Mutex},
+};
 
 use serde::{Deserialize, Serialize};
 
@@ -16,7 +20,7 @@ use super::ledger_hardware_wallet_hint::LedgerHardwareWalletHint;
 #[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, uniffi::Object)]
 #[serde(rename_all = "camelCase")]
 pub struct LedgerHardwareWalletFactorSource {
     /// Unique and stable identifier of this factor source, stemming from the
@@ -29,10 +33,42 @@ pub struct LedgerHardwareWalletFactorSource {
     ///
     /// Has interior mutability since we must be able to update the
     /// last used date.
-    common: RefCell<FactorSourceCommon>,
+    common: Mutex<FactorSourceCommon>,
 
     /// Properties describing a LedgerHardwareWalletFactorSource to help user disambiguate between it and another one.
     hint: LedgerHardwareWalletHint,
+}
+
+impl Eq for LedgerHardwareWalletFactorSource {}
+impl PartialEq for LedgerHardwareWalletFactorSource {
+    fn eq(&self, other: &Self) -> bool {
+        self.id() == other.id() && self.common() == other.common() && self.hint() == other.hint()
+    }
+}
+
+impl Clone for LedgerHardwareWalletFactorSource {
+    fn clone(&self) -> Self {
+        Self {
+            id: self.id.clone(),
+            common: Mutex::new(self.common()),
+            hint: self.hint.clone(),
+        }
+    }
+}
+
+#[uniffi::export]
+impl LedgerHardwareWalletFactorSource {
+    pub fn get_id(&self) -> Arc<FactorSourceIDFromHash> {
+        self.id().into()
+    }
+
+    pub fn get_common(&self) -> Arc<FactorSourceCommon> {
+        self.common().into()
+    }
+
+    pub fn get_hint(&self) -> Arc<LedgerHardwareWalletHint> {
+        self.hint().into()
+    }
 }
 
 impl LedgerHardwareWalletFactorSource {
@@ -41,11 +77,23 @@ impl LedgerHardwareWalletFactorSource {
     }
 
     pub fn common(&self) -> FactorSourceCommon {
-        self.common.borrow().clone()
+        self.common
+            .lock()
+            .expect("`self.common` to not have been locked.")
+            .clone()
     }
 
+    pub fn hint(&self) -> LedgerHardwareWalletHint {
+        self.hint.clone()
+    }
+}
+
+impl LedgerHardwareWalletFactorSource {
     pub fn set_common(&self, new: FactorSourceCommon) {
-        *self.common.borrow_mut() = new
+        *self
+            .common
+            .lock()
+            .expect("`self.common` to not have been locked.") = new
     }
 }
 
@@ -58,7 +106,7 @@ impl LedgerHardwareWalletFactorSource {
     ) -> Self {
         Self {
             id,
-            common: RefCell::new(common),
+            common: Mutex::new(common),
             hint,
         }
     }
@@ -87,9 +135,12 @@ impl TryFrom<FactorSource> for LedgerHardwareWalletFactorSource {
     type Error = CommonError;
 
     fn try_from(value: FactorSource) -> Result<Self, Self::Error> {
-        value
-            .into_ledger()
-            .map_err(|_| Self::Error::ExpectedLedgerHardwareWalletFactorSourceGotSomethingElse)
+        match value {
+            FactorSource::Ledger { factor } => Ok(*factor),
+            FactorSource::Device { factor } => {
+                Err(Self::Error::ExpectedLedgerHardwareWalletFactorSourceGotSomethingElse)
+            }
+        }
     }
 }
 
@@ -200,7 +251,7 @@ mod tests {
     fn factor_source_kind() {
         assert_eq!(
             LedgerHardwareWalletFactorSource::placeholder().factor_source_kind(),
-            *LedgerHardwareWalletFactorSource::placeholder().id().kind()
+            LedgerHardwareWalletFactorSource::placeholder().id().kind()
         );
     }
 }

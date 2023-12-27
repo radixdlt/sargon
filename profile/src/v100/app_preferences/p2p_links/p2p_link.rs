@@ -2,7 +2,11 @@ use super::radix_connect_password::RadixConnectPassword;
 use identified_vec::Identifiable;
 use radix_engine_common::crypto::Hash;
 use serde::{Deserialize, Serialize};
-use std::fmt::{Debug, Formatter};
+use std::{
+    fmt::{Debug, Formatter},
+    ops::Deref,
+    sync::Arc,
+};
 
 #[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
@@ -10,7 +14,7 @@ use crate::HasPlaceholder;
 /// A client the user have connected P2P with, typically a
 /// WebRTC connections with a DApp, but might be Android or iPhone
 /// client as well.
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Ord, PartialOrd, Hash)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Ord, PartialOrd, Hash, uniffi::Object)]
 #[serde(rename_all = "camelCase")]
 pub struct P2PLink {
     /// The most important property of this struct, the `ConnectionPassword`,
@@ -39,9 +43,18 @@ impl Identifiable for P2PLink {
     }
 }
 
+#[uniffi::export]
 impl P2PLink {
-    pub fn connection_password(&self) -> RadixConnectPassword {
-        self.connection_password.clone()
+    #[uniffi::constructor]
+    pub fn new(password: Arc<RadixConnectPassword>, display_name: String) -> Arc<Self> {
+        Arc::new(Self {
+            connection_password: password.deref().clone(),
+            display_name,
+        })
+    }
+
+    pub fn get_connection_password(&self) -> Arc<RadixConnectPassword> {
+        self.connection_password().into()
     }
 
     pub fn display_name(&self) -> String {
@@ -50,11 +63,8 @@ impl P2PLink {
 }
 
 impl P2PLink {
-    pub fn new(password: RadixConnectPassword, display_name: &str) -> Self {
-        Self {
-            connection_password: password,
-            display_name: display_name.to_string(),
-        }
+    pub fn connection_password(&self) -> RadixConnectPassword {
+        self.connection_password.clone()
     }
 }
 
@@ -73,22 +83,28 @@ impl HasPlaceholder for P2PLink {
 
 #[cfg(any(test, feature = "placeholder"))]
 impl P2PLink {
+    fn declare(password: RadixConnectPassword, display: &str) -> Self {
+        Self::new(password.into(), display.to_string())
+            .deref()
+            .clone()
+    }
+
     /// `aced`... "Arc on MacStudio"
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_arc() -> Self {
-        Self::new(RadixConnectPassword::placeholder_aced(), "Arc on MacStudio")
+        Self::declare(RadixConnectPassword::placeholder_aced(), "Arc on MacStudio")
     }
 
     /// `babe`... "Brave on PC"
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_brave() -> Self {
-        Self::new(RadixConnectPassword::placeholder_babe(), "Brave on PC")
+        Self::declare(RadixConnectPassword::placeholder_babe(), "Brave on PC")
     }
 
     /// `cafe`... "Chrome on Macbook"
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_chrome() -> Self {
-        Self::new(
+        Self::declare(
             RadixConnectPassword::placeholder_cafe(),
             "Chrome on Macbook",
         )
@@ -97,7 +113,7 @@ impl P2PLink {
     /// `dead`... "DuckDuckGo on Mac Pro"
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_duckduckgo() -> Self {
-        Self::new(
+        Self::declare(
             RadixConnectPassword::placeholder_dead(),
             "DuckDuckGo on Mac Pro",
         )

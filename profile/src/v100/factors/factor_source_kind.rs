@@ -3,7 +3,9 @@ use std::fmt::Display;
 use serde::{Deserialize, Serialize};
 
 /// The **kind** (or "type") of FactorSource describes how it is used.
-#[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(
+    Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Enum,
+)]
 pub enum FactorSourceKind {
     /// A user owned unencrypted mnemonic (and optional BIP39 passphrase) stored on device,
     /// thus directly usable. This kind is used as the standard factor source for all new

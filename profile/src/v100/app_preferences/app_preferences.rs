@@ -1,4 +1,4 @@
-use std::cell::RefCell;
+use std::sync::Mutex;
 
 use serde::{Deserialize, Serialize};
 
@@ -12,68 +12,121 @@ use crate::HasPlaceholder;
 ///
 /// Current and other saved Gateways, security settings, connected P2P clients,
 /// App Display settings and preferences for transaction.
-#[derive(Clone, Debug, PartialEq, Eq, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, uniffi::Object)]
 #[serde(rename_all = "camelCase")]
 pub struct AppPreferences {
     /// Display settings in the wallet app, such as appearances, currency etc.
-    display: RefCell<AppDisplay>,
+    display: Mutex<AppDisplay>,
 
     /// The gateway of the active network and collection of other saved gateways.
-    gateways: RefCell<Gateways>,
+    gateways: Mutex<Gateways>,
 
     /// Collection of clients user have connected P2P with, typically these
     /// are WebRTC connections with DApps, but might be Android or iPhone
     /// clients as well.
-    p2p_links: RefCell<P2PLinks>,
+    p2p_links: Mutex<P2PLinks>,
 
     /// Controls e.g. if Profile Snapshot gets synced to iCloud/Google backup or not.
-    security: RefCell<Security>,
+    security: Mutex<Security>,
 
     /// Default config related to making of transactions
-    transaction: RefCell<Transaction>,
+    transaction: Mutex<Transaction>,
+}
+
+impl Eq for AppPreferences {}
+impl PartialEq for AppPreferences {
+    fn eq(&self, other: &Self) -> bool {
+        self.display() == other.display()
+            && self.gateways() == other.gateways()
+            && self.p2p_links() == other.p2p_links()
+            && self.security() == other.security()
+            && self.transaction() == other.transaction()
+    }
+}
+
+impl Clone for AppPreferences {
+    fn clone(&self) -> Self {
+        Self::new(
+            self.display(),
+            self.gateways(),
+            self.p2p_links(),
+            self.security(),
+            self.transaction(),
+        )
+    }
 }
 
 impl AppPreferences {
     pub fn display(&self) -> AppDisplay {
-        self.display.borrow().clone()
+        self.display
+            .lock()
+            .expect("`self.display` to not have been locked.")
+            .clone()
     }
 
     pub fn gateways(&self) -> Gateways {
-        self.gateways.borrow().clone()
+        self.gateways
+            .lock()
+            .expect("`self.gateways` to not have been locked.")
+            .clone()
     }
 
     pub fn p2p_links(&self) -> P2PLinks {
-        self.p2p_links.borrow().clone()
+        self.p2p_links
+            .lock()
+            .expect("`self.p2p_links` to not have been locked.")
+            .clone()
     }
 
     pub fn security(&self) -> Security {
-        self.security.borrow().clone()
+        self.security
+            .lock()
+            .expect("`self.security` to not have been locked.")
+            .clone()
     }
 
     pub fn transaction(&self) -> Transaction {
-        self.transaction.borrow().clone()
+        self.transaction
+            .lock()
+            .expect("`self.transaction` to not have been locked.")
+            .clone()
     }
 }
 
 impl AppPreferences {
     pub fn set_display(&self, new: AppDisplay) {
-        *self.display.borrow_mut() = new
+        *self
+            .display
+            .lock()
+            .expect("`self.display` to not have been locked.") = new
     }
 
     pub fn set_gateways(&self, new: Gateways) {
-        *self.gateways.borrow_mut() = new
+        *self
+            .gateways
+            .lock()
+            .expect("`self.gateways` to not have been locked.") = new
     }
 
     pub fn set_p2p_links(&self, new: P2PLinks) {
-        *self.p2p_links.borrow_mut() = new
+        *self
+            .p2p_links
+            .lock()
+            .expect("`self.p2p_links` to not have been locked.") = new
     }
 
     pub fn set_security(&self, new: Security) {
-        *self.security.borrow_mut() = new
+        *self
+            .security
+            .lock()
+            .expect("`self.security` to not have been locked.") = new
     }
 
     pub fn set_transaction(&self, new: Transaction) {
-        *self.transaction.borrow_mut() = new
+        *self
+            .transaction
+            .lock()
+            .expect("`self.transaction` to not have been locked.") = new
     }
 }
 
@@ -86,11 +139,11 @@ impl AppPreferences {
         transaction: Transaction,
     ) -> Self {
         Self {
-            display: RefCell::new(display),
-            gateways: RefCell::new(gateways),
-            p2p_links: RefCell::new(p2p_links),
-            security: RefCell::new(security),
-            transaction: RefCell::new(transaction),
+            display: Mutex::new(display),
+            gateways: Mutex::new(gateways),
+            p2p_links: Mutex::new(p2p_links),
+            security: Mutex::new(security),
+            transaction: Mutex::new(transaction),
         }
     }
 }
