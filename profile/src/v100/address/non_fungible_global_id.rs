@@ -17,7 +17,7 @@ use crate::NetworkID;
 
 use super::resource_address::ResourceAddress;
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, uniffi::Object)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct NonFungibleGlobalId(EngineSerializableNonFungibleGlobalId);
 
 #[uniffi::export]

@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 /// Cryptographic parameters a certain FactorSource supports, e.g. which Elliptic Curves
 /// it supports and which Hierarchical Deterministic (HD) derivations schemes it supports,
 /// if any.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, uniffi::Object)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct FactorSourceCryptoParameters {
     /// Describes with which Elliptic Curves a Factor Source can be used, e.g. a

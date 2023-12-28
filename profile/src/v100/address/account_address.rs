@@ -15,18 +15,7 @@ use super::entity_address::EntityAddress;
 /// that starts with the prefix `"account_"`, dependent on NetworkID, meaning the same
 /// public key used for two AccountAddresses on two different networks will not have
 /// the same address.
-#[derive(
-    Clone,
-    Debug,
-    Default,
-    PartialEq,
-    Eq,
-    Hash,
-    PartialOrd,
-    Ord,
-    schemars::JsonSchema,
-    uniffi::Object,
-)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, uniffi::Record)]
 pub struct AccountAddress {
     /// Human readable address of an account. Always starts with `"account_"``, for example:
     ///
@@ -47,38 +36,14 @@ pub struct AccountAddress {
     network_id: NetworkID,
 }
 
-#[uniffi::export]
 impl AccountAddress {
-    #[uniffi::constructor]
-    pub fn new(public_key: PublicKey, network_id: NetworkID) -> Arc<Self> {
+    pub fn new(public_key: PublicKey, network_id: NetworkID) -> Self {
         <Self as EntityAddress>::from_public_key(public_key, network_id).into()
     }
 }
 
 #[uniffi::export]
 impl AccountAddress {
-    /// Human readable address of an account. Always starts with `"account_"``, for example:
-    ///
-    /// `account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease`
-    ///
-    /// Most commonly the user will see this address in its abbreviated
-    /// form which is:
-    ///
-    /// `acco...please`
-    ///
-    /// Addresses are checksummed, as per Bech32. **Only** *Account* addresses starts with
-    /// the prefix `account_`.
-    pub fn address(&self) -> String {
-        self.address.clone()
-    }
-
-    /// The network this account address is tied to, i.e. which was used when a public key
-    /// hash was used to bech32 encode it. This means that two public key hashes will result
-    /// in two different account address on two different networks.
-    pub fn network_id(&self) -> NetworkID {
-        self.network_id.clone()
-    }
-
     /// Formats the AccountAddress to its abbreviated form which is what the user
     /// is most used to, since it is what we most commonly display in the Radix
     /// ecosystem.
@@ -148,7 +113,7 @@ impl TryInto<AccountAddress> for &str {
 #[uniffi::export]
 impl AccountAddress {
     #[uniffi::constructor]
-    pub fn from_bech32(string: String) -> Result<Arc<Self>, crate::CommonError> {
+    pub fn from_bech32(string: String) -> Result<Self, crate::CommonError> {
         Self::try_from_bech32(string.as_str()).map(|a| a.into())
     }
 }

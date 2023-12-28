@@ -8,7 +8,7 @@ use super::entity_address::EntityAddress;
 /// that starts with the prefix `"account_"`, dependent on NetworkID, meaning the same
 /// public key used for two AccountAddresses on two different networks will not have
 /// the same address.
-#[derive(Clone, Debug, Default, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Object)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record)]
 pub struct ResourceAddress {
     address: String,
     network_id: NetworkID,
@@ -16,16 +16,8 @@ pub struct ResourceAddress {
 
 #[uniffi::export]
 impl ResourceAddress {
-    pub fn address(&self) -> String {
-        self.address.clone()
-    }
-
-    pub fn network_id(&self) -> NetworkID {
-        self.network_id.clone()
-    }
-
     #[uniffi::constructor]
-    fn from_bech32(string: String) -> Result<Arc<ResourceAddress>, crate::CommonError> {
+    fn from_bech32(string: String) -> Result<ResourceAddress, crate::CommonError> {
         ResourceAddress::try_from_bech32(&string).map(|a| a.into())
     }
 }

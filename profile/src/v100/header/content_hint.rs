@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 /// Important to know that this is just a **hint**, the values
 /// SHOULD be kept up to date, might might not be, since they
 /// are stored values which must be kept in sync.
-#[derive(Serialize, Deserialize, Default, Clone, Debug, PartialEq, Eq, uniffi::Object)]
+#[derive(Serialize, Deserialize, Default, Clone, Debug, PartialEq, Eq, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct ContentHint {
     /// The total number of accounts on all networks.

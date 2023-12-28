@@ -1,8 +1,3 @@
-use std::{
-    cell::RefCell,
-    sync::{Arc, Mutex},
-};
-
 use crate::CommonError;
 use identified_vec::Identifiable;
 use itertools::Itertools;
@@ -20,7 +15,7 @@ use super::accounts::Accounts;
 
 /// Accounts, Personas, Authorized dapps for some Radix Network that user
 /// has created and interacted with.
-#[derive(Serialize, Deserialize, Debug, uniffi::Object)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct Network {
     /// The ID of the network that has been used to generate the `accounts` and `personas`
     /// and on which the `authorizedDapps` have been deployed on.
@@ -28,23 +23,7 @@ pub struct Network {
     id: NetworkID,
 
     /// An ordered set of Accounts on this network.
-    accounts: Mutex<Accounts>,
-}
-
-impl Clone for Network {
-    fn clone(&self) -> Self {
-        Self {
-            id: self.id.clone(),
-            accounts: Mutex::new(self.accounts()),
-        }
-    }
-}
-
-impl Eq for Network {}
-impl PartialEq for Network {
-    fn eq(&self, other: &Self) -> bool {
-        self.id() == other.id() && self.accounts() == other.accounts()
-    }
+    accounts: Accounts,
 }
 
 impl Identifiable for Network {
@@ -71,7 +50,7 @@ impl Network {
         );
         Self {
             id: network_id,
-            accounts: Mutex::new(accounts),
+            accounts,
         }
     }
 }

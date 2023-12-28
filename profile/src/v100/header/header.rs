@@ -1,10 +1,4 @@
-use std::{
-    alloc::System,
-    cell::{Cell, RefCell},
-    fmt::Display,
-    sync::{Arc, Mutex},
-    time::SystemTime,
-};
+use std::{alloc::System, fmt::Display, time::SystemTime};
 
 #[cfg(any(test, feature = "placeholder"))]
 use std::str::FromStr;
@@ -26,7 +20,7 @@ use super::{content_hint::ContentHint, device_info::DeviceInfo};
 /// about this Profile, such as which JSON data format it is
 /// compatible with and which device was used to create it and
 /// a hint about its contents.
-#[derive(Serialize, Deserialize, Debug, uniffi::Object)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct Header {
     /// A versioning number that is increased when breaking
@@ -40,38 +34,13 @@ pub struct Header {
     creating_device: DeviceInfo,
 
     /// The device on which the profile was last used.
-    last_used_on_device: Mutex<DeviceInfo>,
+    last_used_on_device: DeviceInfo,
 
     /// When the Profile was last modified.
-    last_modified: Mutex<Timestamp>,
+    last_modified: Timestamp,
 
     /// Hint about the contents of the profile, e.g. number of Accounts and Personas.
-    content_hint: Mutex<ContentHint>, // `RefCell` needed because `ContentHint` does not impl `Copy`, which it cant because it contains `Cell`s, and `Cell` itself does not impl `Copy`.
-}
-
-impl Eq for Header {}
-impl PartialEq for Header {
-    fn eq(&self, other: &Self) -> bool {
-        self.snapshot_version == other.snapshot_version
-            && self.id() == other.id()
-            && self.creating_device() == other.creating_device()
-            && self.last_used_on_device() == other.last_used_on_device()
-            && self.last_modified() == other.last_modified()
-            && self.content_hint() == other.content_hint()
-    }
-}
-
-impl Clone for Header {
-    fn clone(&self) -> Self {
-        Self {
-            snapshot_version: ProfileSnapshotVersion::default(),
-            id: self.id.clone(),
-            creating_device: self.creating_device(),
-            last_used_on_device: Mutex::new(self.creating_device()),
-            last_modified: Mutex::new(self.last_modified()),
-            content_hint: Mutex::new(self.content_hint()),
-        }
-    }
+    content_hint: ContentHint,
 }
 
 impl Header {
@@ -87,9 +56,9 @@ impl Header {
             snapshot_version: ProfileSnapshotVersion::default(),
             id,
             creating_device: creating_device.clone(),
-            last_used_on_device: Mutex::new(creating_device),
-            last_modified: Mutex::new(last_modified),
-            content_hint: Mutex::new(content_hint),
+            last_used_on_device: creating_device,
+            last_modified,
+            content_hint,
         }
     }
 

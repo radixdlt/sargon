@@ -16,7 +16,7 @@ use crate::Ed25519PrivateKey;
 
 /// An Ed25519 public key used to verify cryptographic signatures (EdDSA signatures).
 #[derive(
-    Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Object,
+    Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record,
 )]
 pub struct Ed25519PublicKey(pub(crate) EngineEd25519PublicKey);
 

@@ -14,7 +14,7 @@ use crate::HasPlaceholder;
 /// A client the user have connected P2P with, typically a
 /// WebRTC connections with a DApp, but might be Android or iPhone
 /// client as well.
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Ord, PartialOrd, Hash, uniffi::Object)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Ord, PartialOrd, Hash, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct P2PLink {
     /// The most important property of this struct, the `ConnectionPassword`,

@@ -4,8 +4,7 @@ use crate::{HDPathValue, MnemonicWithPassphrase};
 use crate::{Derivation, HasEntityPath};
 use identified_vec::Identifiable;
 use serde::{Deserialize, Serialize};
-use std::sync::Mutex;
-use std::{cell::RefCell, cmp::Ordering, fmt::Display, hash::Hasher};
+use std::{cmp::Ordering, fmt::Display, hash::Hasher};
 
 #[cfg(any(test, feature = "placeholder"))]
 use crate::v100::{DeviceFactorSource, PrivateHierarchicalDeterministicFactorSource};
@@ -41,7 +40,7 @@ use super::{AppearanceID, OnLedgerSettings};
 /// An account can be either controlled by a "Babylon" DeviceFactorSource or a
 /// Legacy one imported from Olympia, or a Ledger hardware wallet, which too might
 /// have been imported from Olympia.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, uniffi::Object)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct Account {
     /// The ID of the network this account can be used with.
@@ -65,7 +64,7 @@ pub struct Account {
 
     /// An off-ledger display name or description chosen by the user when she
     /// created this account.
-    display_name: Mutex<DisplayName>,
+    display_name: DisplayName,
 
     /// Security state of this account, either "securified" or not.
     security_state: EntitySecurityState,
@@ -73,17 +72,17 @@ pub struct Account {
     /// The visual cue user learns to associated this account with, typically
     /// a beautiful colorful gradient.
     #[serde(rename = "appearanceID")]
-    appearance_id: Mutex<AppearanceID>,
+    appearance_id: AppearanceID,
 
     /// An order set of `EntityFlag`s used to describe certain Off-ledger
     /// user state about Accounts or Personas, such as if an entity is
     /// marked as hidden or not.
     #[serde(default)]
-    flags: Mutex<EntityFlags>,
+    flags: EntityFlags,
 
     /// The on ledger synced settings for this account, contains e.g.
     /// ThirdPartyDeposit settings, with deposit rules for assets.
-    on_ledger_settings: Mutex<OnLedgerSettings>,
+    on_ledger_settings: OnLedgerSettings,
 }
 
 impl Account {
@@ -98,14 +97,14 @@ impl Account {
         Self {
             network_id: account_creating_factor_instance.network_id().into(),
             address,
-            display_name: RefCell::new(display_name),
+            display_name,
             security_state: UnsecuredEntityControl::with_account_creating_factor_instance(
                 account_creating_factor_instance,
             )
             .into(),
-            appearance_id: RefCell::new(appearance_id),
-            flags: RefCell::new(EntityFlags::default()),
-            on_ledger_settings: RefCell::new(OnLedgerSettings::default()),
+            appearance_id,
+            flags: EntityFlags::default(),
+            on_ledger_settings: OnLedgerSettings::default(),
         }
     }
 }
@@ -237,10 +236,10 @@ impl Account {
         Self {
             network_id: address.network_id().clone(),
             address,
-            display_name: RefCell::new(display_name),
-            appearance_id: RefCell::new(appearance_id),
-            flags: RefCell::new(EntityFlags::default()),
-            on_ledger_settings: RefCell::new(OnLedgerSettings::default()),
+            display_name,
+            appearance_id,
+            flags: EntityFlags::default(),
+            on_ledger_settings: OnLedgerSettings::default(),
             security_state: EntitySecurityState::placeholder(),
         }
     }

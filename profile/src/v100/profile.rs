@@ -1,8 +1,4 @@
-use std::{
-    cell::RefCell,
-    fmt::Debug,
-    sync::{Arc, Mutex},
-};
+use std::fmt::Debug;
 
 use identified_vec::IsIdentifiedVec;
 use itertools::Itertools;
@@ -21,27 +17,27 @@ use super::{
 /// users Accounts, Personas, Authorized Dapps per network
 /// the user has used. It also contains all FactorSources,
 /// FactorInstances and wallet App preferences.
-#[derive(Serialize, Deserialize, Debug, uniffi::Object)]
+#[derive(Serialize, Deserialize, Debug, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct Profile {
     /// The header of a Profile(Snapshot) contains crucial metadata
     /// about this Profile, such as which JSON data format it is
     /// compatible with and which device was used to create it and
     /// a hint about its contents.
-    header: Mutex<Header>,
+    header: Header,
 
     /// All sources of factors, used for authorization such as spending funds, contains no
     /// secrets.
-    factor_sources: Mutex<FactorSources>,
+    factor_sources: FactorSources,
 
     /// Settings for this profile in the app, contains default security configs
     /// as well as display settings.
-    app_preferences: Mutex<AppPreferences>,
+    app_preferences: AppPreferences,
 
     /// An ordered mapping of NetworkID -> `Profile.Network`, containing
     /// all the users Accounts, Personas and AuthorizedDapps the user
     /// has created and interacted with on this network.
-    networks: Mutex<Networks>,
+    networks: Networks,
 }
 
 impl Profile {
@@ -54,77 +50,11 @@ impl Profile {
     ) -> Self {
         factor_sources.assert_not_empty();
         Self {
-            header: Mutex::new(header),
-            factor_sources: Mutex::new(factor_sources),
-            app_preferences: Mutex::new(app_preferences),
-            networks: Mutex::new(networks),
+            header,
+            factor_sources,
+            app_preferences,
+            networks,
         }
-    }
-}
-
-impl Profile {
-    pub fn header(&self) -> Arc<Header> {
-        self.header
-            .lock()
-            .expect("`self.header` to not be locked.")
-            .clone()
-    }
-
-    pub fn factor_sources(&self) -> FactorSources {
-        self.factor_sources
-            .lock()
-            .expect("`self.factor_sources` to not be locked.")
-            .clone()
-    }
-
-    pub fn app_preferences(&self) -> AppPreferences {
-        self.app_preferences
-            .lock()
-            .expect("`self.app_preferences` to not be locked.")
-            .clone()
-    }
-
-    pub fn networks(&self) -> Networks {
-        self.networks
-            .lock()
-            .expect("`self.networks` to not be locked.")
-            .clone()
-    }
-}
-
-#[uniffi::export]
-impl Profile {
-    pub fn get_networks(&self) -> Vec<Arc<Network>> {
-        self.networks().into_iter().map(|n| n.into()).collect_vec()
-    }
-}
-
-impl Profile {
-    pub fn set_header(&self, new: Header) {
-        *self.header.lock().expect("`self.header` to not be locked.") = new
-    }
-
-    /// Panics if `new` is empty, since FactorSources MUST not be empty.
-    pub fn set_factor_sources(&self, new: FactorSources) {
-        new.assert_not_empty();
-        *self
-            .factor_sources
-            .lock()
-            .expect("`self.factor_sources` to not be locked.") = new
-    }
-
-    pub fn set_app_preferences(&self, new: AppPreferences) {
-        *self
-            .app_preferences
-            .lock()
-            .expect("`self.app_preferences` to not be locked.") = new
-    }
-
-    pub fn set_networks(&self, new: Networks) {
-        *self
-            .networks
-            .lock()
-            .expect("`self.networks` to not be locked.") = new
     }
 }
 

@@ -1,5 +1,3 @@
-use std::sync::Mutex;
-
 use serde::{Deserialize, Serialize};
 
 use super::{AppDisplay, Gateways, P2PLinks, Security, Transaction};
@@ -12,25 +10,25 @@ use crate::HasPlaceholder;
 ///
 /// Current and other saved Gateways, security settings, connected P2P clients,
 /// App Display settings and preferences for transaction.
-#[derive(Debug, Default, Deserialize, Serialize, uniffi::Object)]
+#[derive(Debug, Default, Deserialize, Serialize, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct AppPreferences {
     /// Display settings in the wallet app, such as appearances, currency etc.
-    display: Mutex<AppDisplay>,
+    display: AppDisplay,
 
     /// The gateway of the active network and collection of other saved gateways.
-    gateways: Mutex<Gateways>,
+    gateways: Gateways,
 
     /// Collection of clients user have connected P2P with, typically these
     /// are WebRTC connections with DApps, but might be Android or iPhone
     /// clients as well.
-    p2p_links: Mutex<P2PLinks>,
+    p2p_links: P2PLinks,
 
     /// Controls e.g. if Profile Snapshot gets synced to iCloud/Google backup or not.
-    security: Mutex<Security>,
+    security: Security,
 
     /// Default config related to making of transactions
-    transaction: Mutex<Transaction>,
+    transaction: Transaction,
 }
 
 impl Eq for AppPreferences {}
@@ -139,11 +137,11 @@ impl AppPreferences {
         transaction: Transaction,
     ) -> Self {
         Self {
-            display: Mutex::new(display),
-            gateways: Mutex::new(gateways),
-            p2p_links: Mutex::new(p2p_links),
-            security: Mutex::new(security),
-            transaction: Mutex::new(transaction),
+            display,
+            gateways,
+            p2p_links,
+            security,
+            transaction,
         }
     }
 }

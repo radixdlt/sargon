@@ -13,7 +13,7 @@ use super::radix_network::RadixNetwork;
 
 /// A gateway to some Radix Network, which is a high level REST API which clients (wallets) can
 /// consume in order to query asset balances and submit transactions.
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Ord, PartialOrd, Hash, uniffi::Object)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Ord, PartialOrd, Hash, uniffi::Record)]
 pub struct Gateway {
     /// The Radix network the API is a Gateway to.
     network: RadixNetwork,

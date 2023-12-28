@@ -1,4 +1,4 @@
-use std::{collections::BTreeSet, sync::Mutex};
+use std::collections::BTreeSet;
 
 use serde::{Deserialize, Serialize};
 
@@ -13,12 +13,12 @@ pub type SecurityStructureConfigurationReference = bool;
 /// Controls e.g. if Profile Snapshot gets synced to iCloud or not, and whether
 /// developer mode is enabled or not. In future (MFA) we will also save a list of
 /// MFA security structure configurations.
-#[derive(Serialize, Deserialize, Debug, uniffi::Object)]
+#[derive(Serialize, Deserialize, Debug, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct Security {
-    is_cloud_profile_sync_enabled: Mutex<bool>,
-    is_developer_mode_enabled: Mutex<bool>,
-    structure_configuration_references: Mutex<BTreeSet<SecurityStructureConfigurationReference>>,
+    is_cloud_profile_sync_enabled: bool,
+    is_developer_mode_enabled: bool,
+    structure_configuration_references: BTreeSet<SecurityStructureConfigurationReference>,
 }
 
 impl Clone for Security {
@@ -48,9 +48,9 @@ impl Security {
         structure_configuration_references: BTreeSet<SecurityStructureConfigurationReference>,
     ) -> Self {
         Self {
-            is_cloud_profile_sync_enabled: Mutex::new(is_cloud_profile_sync_enabled),
-            is_developer_mode_enabled: Mutex::new(is_developer_mode_enabled),
-            structure_configuration_references: Mutex::new(structure_configuration_references),
+            is_cloud_profile_sync_enabled,
+            is_developer_mode_enabled,
+            structure_configuration_references,
         }
     }
 

@@ -1,5 +1,3 @@
-use std::sync::Mutex;
-
 use radix_engine_common::math::Decimal;
 use radix_engine_toolkit_json::models::common::SerializableDecimal;
 use serde::{Deserialize, Serialize};
@@ -8,12 +6,12 @@ use serde::{Deserialize, Serialize};
 use crate::HasPlaceholder;
 
 /// User Preferences relating to submission of transactions.
-#[derive(Serialize, Deserialize, Debug, uniffi::Object)]
+#[derive(Serialize, Deserialize, Debug, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct Transaction {
     /// The deposit guarantee that will automatically be added for
     /// all deposits in transactions.
-    default_deposit_guarantee: Mutex<SerializableDecimal>,
+    default_deposit_guarantee: SerializableDecimal,
 }
 
 impl Eq for Transaction {}
@@ -33,7 +31,7 @@ impl Transaction {
     /// specified `default_deposit_guarantee` value.
     pub fn new(default_deposit_guarantee: Decimal) -> Self {
         Self {
-            default_deposit_guarantee: Mutex::new(default_deposit_guarantee.into()),
+            default_deposit_guarantee,
         }
     }
 

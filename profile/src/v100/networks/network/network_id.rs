@@ -19,7 +19,6 @@ use strum::FromRepr;
     PartialOrd,
     Ord,
     Sequence,
-    schemars::JsonSchema,
     uniffi::Enum,
 )]
 #[repr(u8)]

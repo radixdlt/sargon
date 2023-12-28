@@ -8,7 +8,7 @@ use crate::HasPlaceholder;
 /// Settings related to displaying of information to the user inside the app.
 ///
 /// **N.B. neither of these settings are in fact not yet used by clients.**
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, uniffi::Object)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct AppDisplay {
     /// If we should show the aggregate value of users portfolio in fiat currency

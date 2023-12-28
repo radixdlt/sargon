@@ -8,7 +8,7 @@ use uuid::Uuid;
 
 /// A short summary of a device the Profile is being used
 /// on, typically an iPhone or an Android phone.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, Getters, uniffi::Object)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, Getters, uniffi::Record)]
 pub struct DeviceInfo {
     /// A best effort stable and unique identifier of this
     /// device.

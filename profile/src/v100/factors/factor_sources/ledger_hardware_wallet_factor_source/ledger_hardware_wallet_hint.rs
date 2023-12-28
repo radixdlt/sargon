@@ -6,7 +6,7 @@ use super::ledger_hardware_wallet_model::LedgerHardwareWalletModel;
 #[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, uniffi::Object)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct LedgerHardwareWalletHint {
     /// "Orange, scratched"
     name: String,

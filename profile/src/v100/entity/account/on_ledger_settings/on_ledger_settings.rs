@@ -1,5 +1,3 @@
-use std::cell::{Ref, RefCell};
-
 use serde::{Deserialize, Serialize};
 
 use super::ThirdPartyDeposits;
@@ -13,39 +11,21 @@ use super::ThirdPartyDeposits;
 ///
 /// These settings SHOULD be kept in sync between local state
 /// (in Profile) and On-Ledger.
-#[derive(Serialize, Deserialize, Default, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(
+    Serialize, Deserialize, Default, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, uniffi::Record,
+)]
 #[serde(rename_all = "camelCase")]
 pub struct OnLedgerSettings {
     /// Controls the ability of third-parties to deposit into this account
-    third_party_deposits: RefCell<ThirdPartyDeposits>,
+    third_party_deposits: ThirdPartyDeposits,
 }
 
 impl OnLedgerSettings {
     /// Instantiates a new `OnLedgerSettings` with the specified `ThirdPartyDeposits``
     pub fn new(third_party_deposits: ThirdPartyDeposits) -> Self {
         Self {
-            third_party_deposits: RefCell::new(third_party_deposits),
+            third_party_deposits,
         }
-    }
-}
-
-impl OnLedgerSettings {
-    /// Returns the `ThirdPartyDeposits` as a reference.
-    pub fn third_party_deposits(&self) -> Ref<ThirdPartyDeposits> {
-        self.third_party_deposits.borrow()
-    }
-
-    /// Replaces the `ThirdPartyDeposits` with the `new` value.
-    pub fn set_third_party_deposits(&self, new: ThirdPartyDeposits) {
-        *self.third_party_deposits.borrow_mut() = new;
-    }
-
-    /// Updates the `ThirdPartyDeposits` by calling the `update` closure.
-    pub fn update_third_party_deposits<F>(&self, update: F)
-    where
-        F: Fn(&mut ThirdPartyDeposits) -> (),
-    {
-        update(&mut self.third_party_deposits.borrow_mut())
     }
 }
 

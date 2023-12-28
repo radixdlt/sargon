@@ -1,7 +1,4 @@
-use std::{
-    cell::{Cell, RefCell},
-    collections::BTreeSet,
-};
+use std::collections::BTreeSet;
 
 use serde::{Deserialize, Serialize};
 
@@ -11,18 +8,20 @@ use super::{
 
 /// Controls the ability of third-parties to deposit into a certain account, this is
 /// useful for users who wish to not be able to receive airdrops.
-#[derive(Serialize, Deserialize, Default, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(
+    Serialize, Deserialize, Default, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, uniffi::Record,
+)]
 #[serde(rename_all = "camelCase")]
 pub struct ThirdPartyDeposits {
     /// Controls the ability of third-parties to deposit into this account
-    deposit_rule: Cell<DepositRule>,
+    deposit_rule: DepositRule,
 
     /// Denies or allows third-party deposits of specific assets by ignoring the `depositMode`
-    assets_exception_list: RefCell<BTreeSet<AssetException>>,
+    assets_exception_list: BTreeSet<AssetException>,
 
     /// Allows certain third-party depositors to deposit assets freely.
     /// Note: There is no `deny` counterpart for this.
-    depositors_allow_list: RefCell<BTreeSet<DepositorAddress>>,
+    depositors_allow_list: BTreeSet<DepositorAddress>,
 }
 
 impl ThirdPartyDeposits {
@@ -31,9 +30,9 @@ impl ThirdPartyDeposits {
     /// `depositors_allow` lists.
     pub fn new(deposit_rule: DepositRule) -> Self {
         Self {
-            deposit_rule: Cell::new(deposit_rule),
-            assets_exception_list: RefCell::new(BTreeSet::new()),
-            depositors_allow_list: RefCell::new(BTreeSet::new()),
+            deposit_rule,
+            assets_exception_list: BTreeSet::new(),
+            depositors_allow_list: BTreeSet::new(),
         }
     }
 
@@ -45,9 +44,9 @@ impl ThirdPartyDeposits {
         depositors_allow_list: BTreeSet<DepositorAddress>,
     ) -> Self {
         Self {
-            deposit_rule: Cell::new(deposit_rule),
-            assets_exception_list: RefCell::new(assets_exception_list),
-            depositors_allow_list: RefCell::new(depositors_allow_list),
+            deposit_rule,
+            assets_exception_list,
+            depositors_allow_list,
         }
     }
 }

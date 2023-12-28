@@ -1,5 +1,3 @@
-use std::sync::{Arc, Mutex};
-
 use super::gateway::Gateway;
 
 use crate::CommonError;
@@ -13,16 +11,16 @@ use crate::HasPlaceholder;
 
 /// The currently used Gateway and a collection of other by user added
 /// or predefined Gateways the user can switch to.
-#[derive(Debug, uniffi::Object)]
+#[derive(Debug, uniffi::Record)]
 pub struct Gateways {
     /// The currently used Gateway, when a user query's asset balances of
     /// accounts or submits transactions, this Gateway will be used.
-    current: Mutex<Gateway>,
+    current: Gateway,
 
     /// Other by user added or predefined Gateways the user can switch to.
     /// It might be Gateways with different URLs on the SAME network, or
     /// other networks, the identifier of a Gateway is the URL.
-    other: Mutex<Vec<Gateway>>,
+    other: Vec<Gateway>,
 }
 
 impl Eq for Gateways {}
@@ -138,8 +136,8 @@ impl<'de> Deserialize<'de> for Gateways {
 impl Gateways {
     pub fn new(current: Gateway) -> Self {
         Self {
-            current: Mutex::new(current),
-            other: Mutex::new(Vec::new()),
+            current,
+            other: Vec::new(),
         }
     }
 
@@ -147,10 +145,7 @@ impl Gateways {
         if other.contains(&current) {
             return Err(CommonError::GatewaysDiscrepancyOtherShouldNotContainCurrent);
         }
-        Ok(Self {
-            current: Mutex::new(current),
-            other: Mutex::new(other),
-        })
+        Ok(Self { current, other })
     }
 }
 
@@ -230,8 +225,6 @@ impl HasPlaceholder for Gateways {
 
 #[cfg(test)]
 mod tests {
-    use std::sync::Mutex;
-
     use crate::{assert_eq_after_json_roundtrip, CommonError, HasPlaceholder};
 
     use crate::{v100::app_preferences::gateways::gateway::Gateway, NetworkID};
@@ -268,8 +261,8 @@ mod tests {
     #[test]
     fn change_throw_gateways_discrepancy_other_should_not_contain_current() {
         let impossible = Gateways {
-            current: Mutex::new(Gateway::mainnet()),
-            other: Mutex::new([Gateway::mainnet()].to_vec()),
+            current: Gateway::mainnet(),
+            other: [Gateway::mainnet()].to_vec(),
         };
         assert_eq!(
             impossible.change_current(Gateway::stokenet()),

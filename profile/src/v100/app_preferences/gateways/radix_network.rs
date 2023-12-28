@@ -10,7 +10,7 @@ use crate::NetworkID::{self, *};
 
 /// A version of the Radix Network, for a NetworkID with an identifier (name) and display description (display name)
 #[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Ord, PartialOrd, Hash, uniffi::Object,
+    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Ord, PartialOrd, Hash, uniffi::Record,
 )]
 #[serde(rename_all = "camelCase")]
 pub struct RadixNetwork {
