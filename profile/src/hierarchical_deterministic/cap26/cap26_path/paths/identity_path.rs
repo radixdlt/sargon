@@ -1,5 +1,6 @@
+use std::sync::Arc;
+
 use crate::HDPathError;
-use derive_getters::Getters;
 use serde::{de, Deserializer, Serialize, Serializer};
 
 #[cfg(any(test, feature = "placeholder"))]
@@ -12,18 +13,15 @@ use crate::{
 
 use super::is_entity_path::IsEntityPath;
 
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Getters)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, uniffi::Record)]
 pub struct IdentityPath {
-    path: HDPath,
+    path: Arc<HDPath>,
 
-    #[getter(skip)] // IsEntityPath trait has `network_id()` method
     network_id: NetworkID,
 
     entity_kind: CAP26EntityKind,
 
-    #[getter(skip)] // IsEntityPath trait has `key_kind()` method
     key_kind: CAP26KeyKind,
-    #[getter(skip)] // IsEntityPath trait has `index()` method
     index: HDPathValue,
 }
 

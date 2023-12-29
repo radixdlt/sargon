@@ -21,6 +21,7 @@ use enum_as_inner::EnumAsInner;
     Hash,
     PartialOrd,
     Ord,
+    uniffi::Enum,
 )]
 #[repr(u32)]
 pub enum CAP26EntityKind {

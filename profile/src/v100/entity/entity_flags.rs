@@ -7,8 +7,8 @@ use super::entity_flag::EntityFlag;
 /// An order set of `EntityFlag`s used to describe certain Off-ledger
 /// user state about Accounts or Personas, such as if an entity is
 /// marked as hidden or not.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct EntityFlags(BTreeSet<EntityFlag>);
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, uniffi::Object)]
+pub struct EntityFlags(Vec<EntityFlag>); // FIXME: Change to Set
 
 impl EntityFlags {
     /// Instantiates an empty collection of entity flags.
@@ -43,7 +43,11 @@ impl EntityFlags {
     /// If the set did not previously contain an equal flag, true is returned.
     /// If the set already contained an equal flag, false is returned, and the entry is not updated.
     pub fn insert_flag(&mut self, flag: EntityFlag) -> bool {
-        self.0.insert(flag)
+        // self.0.insert(flag) // FIXME: NOW!
+        let contained = self.0.contains(&flag);
+        self.0.append(flag);
+        self.0.dedup();
+        !contained
     }
 
     /// If the set contains a flag equal to `flag`, removes it from the set and drops it.

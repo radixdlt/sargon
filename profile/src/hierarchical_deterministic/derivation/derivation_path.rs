@@ -3,16 +3,16 @@ use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializ
 use super::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme};
 use crate::{AccountPath, BIP44LikePath, CAP26Path, CommonError, GetIDPath, HDPath, IdentityPath};
 use enum_as_inner::EnumAsInner;
-use std::fmt::{Debug, Formatter};
+use std::{fmt::{Debug, Formatter}, sync::Arc};
 
 #[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 /// A derivation path on either supported schemes, either Babylon (CAP26) or Olympia (BIP44Like).
-#[derive(Clone, PartialEq, Eq, EnumAsInner, PartialOrd, Ord)]
+#[derive(Clone, PartialEq, Eq, EnumAsInner, PartialOrd, Ord, uniffi::Enum)]
 pub enum DerivationPath {
-    CAP26(CAP26Path),
-    BIP44Like(BIP44LikePath),
+    CAP26 { value: CAP26Path },
+    BIP44Like { value: Arc<BIP44LikePath> },
 }
 
 impl TryFrom<&HDPath> for DerivationPath {

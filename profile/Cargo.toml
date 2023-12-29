@@ -29,8 +29,12 @@ identified_vec = { workspace = true }
 nutype = { workspace = true }
 derive-getters = { workspace = true }
 schemars = { workspace = true }
+uniffi_core = { workspace = true }
 uniffi = { workspace = true, features = ["cli"] }
-url = { version = "2.5.0", features = ["serde"] }
+url = { git = "https://github.com/sajjon/rust-url", branch = "uniffi", features = [
+    "serde",
+    "uniffi",
+] }
 pretty_assertions = "1.4.0"
 slip10 = "0.4.3"
 memoize = "0.4.1"

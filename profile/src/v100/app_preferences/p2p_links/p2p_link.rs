@@ -20,7 +20,7 @@ pub struct P2PLink {
     /// The most important property of this struct, the `ConnectionPassword`,
     /// is used to be able to re-establish the P2P connection and also acts as the seed
     /// for the `ID`.
-    connection_password: RadixConnectPassword,
+    connection_password: Arc<RadixConnectPassword>,
 
     /// Client name, e.g. "Chrome on Macbook" or "My work Android" or "My wifes iPhone SE".
     display_name: String,
@@ -40,25 +40,6 @@ impl Identifiable for P2PLink {
 
     fn id(&self) -> Self::ID {
         self.connection_password.hash()
-    }
-}
-
-#[uniffi::export]
-impl P2PLink {
-    #[uniffi::constructor]
-    pub fn new(password: Arc<RadixConnectPassword>, display_name: String) -> Arc<Self> {
-        Arc::new(Self {
-            connection_password: password.deref().clone(),
-            display_name,
-        })
-    }
-
-    pub fn get_connection_password(&self) -> Arc<RadixConnectPassword> {
-        self.connection_password().into()
-    }
-
-    pub fn display_name(&self) -> String {
-        self.display_name.clone()
     }
 }
 

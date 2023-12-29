@@ -55,13 +55,6 @@ impl Network {
     }
 }
 
-#[uniffi::export]
-impl Network {
-    pub fn get_accounts(&self) -> Vec<Arc<Account>> {
-        self.accounts().into_iter().map(|a| a.into()).collect_vec()
-    }
-}
-
 impl Network {
     /// An ordered set of Accounts on this network.
     pub fn accounts(&self) -> Accounts {

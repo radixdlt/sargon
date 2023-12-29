@@ -1,14 +1,18 @@
+use std::sync::Arc;
+
 use serde::{Deserialize, Serialize};
 
 use crate::v100::{NonFungibleGlobalId, ResourceAddress};
 
 /// The addresses that can be added as exception to the `DepositRule`
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(
+    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Enum,
+)]
 #[serde(rename_all = "camelCase")]
 #[serde(tag = "discriminator", content = "value")]
 pub enum DepositorAddress {
-    ResourceAddress(ResourceAddress),
-    NonFungibleGlobalID(NonFungibleGlobalId),
+    ResourceAddress { value: ResourceAddress },
+    NonFungibleGlobalID { value: Arc<NonFungibleGlobalId> },
 }
 
 #[cfg(test)]

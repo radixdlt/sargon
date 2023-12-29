@@ -17,8 +17,8 @@ use crate::NetworkID;
 
 use super::resource_address::ResourceAddress;
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, uniffi::Record)]
-pub struct NonFungibleGlobalId(EngineSerializableNonFungibleGlobalId);
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, uniffi::Object)]
+pub struct NonFungibleGlobalId(pub(crate) EngineSerializableNonFungibleGlobalId);
 
 #[uniffi::export]
 impl NonFungibleGlobalId {
@@ -90,7 +90,7 @@ impl NonFungibleGlobalId {
     }
 
     /// Returns the resource address.
-    pub fn resource_address(&self) -> Arc<ResourceAddress> {
+    pub fn resource_address(&self) -> ResourceAddress {
         let parts: Vec<String> = self
             .to_canonical_string()
             .split(":")

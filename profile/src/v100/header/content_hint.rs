@@ -19,7 +19,7 @@ pub struct ContentHint {
     /// real consequence.
     ///
     /// This counter includes any by user hidden accounts.
-    number_of_accounts_on_all_networks_in_total: usize,
+    number_of_accounts_on_all_networks_in_total: u16,
 
     /// The total number of personas on all networks.
     ///
@@ -29,11 +29,11 @@ pub struct ContentHint {
     /// real consequence.
     ///
     /// This counter includes any by user hidden personas.
-    number_of_personas_on_all_networks_in_total: usize,
+    number_of_personas_on_all_networks_in_total: u16,
 
     /// The total number of networks that the user has used, i.e.
     /// on which she has any accounts or personas.
-    number_of_networks: usize,
+    number_of_networks: u16,
 }
 
 // Constructors

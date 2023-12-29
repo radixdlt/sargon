@@ -2,7 +2,6 @@ use std::sync::Arc;
 
 use crate::Hex32Bytes;
 use crate::{GetIDPath, MnemonicWithPassphrase};
-use derive_getters::Getters;
 use radix_engine_common::crypto::{blake2b_256_hash, Hash};
 use serde::{Deserialize, Serialize};
 
@@ -21,18 +20,7 @@ pub struct FactorSourceIDFromHash {
     kind: FactorSourceKind,
 
     /// The blake2b hash of the special HD public key derived at `CAP26::GetID`.
-    body: Hex32Bytes,
-}
-
-#[uniffi::export]
-impl FactorSourceIDFromHash {
-    pub fn get_kind(&self) -> FactorSourceKind {
-        self.kind()
-    }
-
-    pub fn get_body(&self) -> Arc<Hex32Bytes> {
-        self.body().into()
-    }
+    body: Arc<Hex32Bytes>,
 }
 
 impl FactorSourceIDFromHash {

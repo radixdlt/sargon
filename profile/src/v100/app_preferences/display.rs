@@ -13,32 +13,10 @@ use crate::HasPlaceholder;
 pub struct AppDisplay {
     /// If we should show the aggregate value of users portfolio in fiat currency
     /// of hide it.
-    is_currency_amount_visible: bool,
+    pub is_currency_amount_visible: bool,
 
     /// Which fiat currency the prices are measured in.
-    fiat_currency_price_target: FiatCurrency,
-}
-
-#[uniffi::export]
-impl AppDisplay {
-    #[uniffi::constructor]
-    pub fn new(is_currency_amount_visible: bool, fiat_currency: FiatCurrency) -> Arc<Self> {
-        Arc::new(Self {
-            is_currency_amount_visible,
-            fiat_currency_price_target: fiat_currency,
-        })
-    }
-
-    /// If we should show the aggregate value of users portfolio in fiat currency
-    /// of hide it.
-    pub fn is_currency_amount_visible(&self) -> bool {
-        self.is_currency_amount_visible
-    }
-
-    /// Which fiat currency the prices are measured in.
-    pub fn fiat_currency_price_target(&self) -> FiatCurrency {
-        self.fiat_currency_price_target
-    }
+    pub fiat_currency_price_target: FiatCurrency,
 }
 
 impl Default for AppDisplay {

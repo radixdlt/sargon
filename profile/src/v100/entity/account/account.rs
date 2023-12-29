@@ -4,6 +4,7 @@ use crate::{HDPathValue, MnemonicWithPassphrase};
 use crate::{Derivation, HasEntityPath};
 use identified_vec::Identifiable;
 use serde::{Deserialize, Serialize};
+use std::sync::Arc;
 use std::{cmp::Ordering, fmt::Display, hash::Hasher};
 
 #[cfg(any(test, feature = "placeholder"))]
@@ -64,7 +65,7 @@ pub struct Account {
 
     /// An off-ledger display name or description chosen by the user when she
     /// created this account.
-    display_name: DisplayName,
+    display_name: String, // change to DisplayName once it support uniffi
 
     /// Security state of this account, either "securified" or not.
     security_state: EntitySecurityState,
@@ -72,13 +73,13 @@ pub struct Account {
     /// The visual cue user learns to associated this account with, typically
     /// a beautiful colorful gradient.
     #[serde(rename = "appearanceID")]
-    appearance_id: AppearanceID,
+    appearance_id: u8, // FIXME: NOW!
 
     /// An order set of `EntityFlag`s used to describe certain Off-ledger
     /// user state about Accounts or Personas, such as if an entity is
     /// marked as hidden or not.
     #[serde(default)]
-    flags: EntityFlags,
+    flags: Arc<EntityFlags>,
 
     /// The on ledger synced settings for this account, contains e.g.
     /// ThirdPartyDeposit settings, with deposit rules for assets.

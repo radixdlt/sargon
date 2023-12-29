@@ -15,7 +15,7 @@ use crate::CommonError as Error;
         Eq,
         PartialOrd,
         Ord,
-        Hash
+        Hash,
     )
 )]
 pub struct DisplayName(String);

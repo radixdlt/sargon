@@ -8,7 +8,7 @@ use crate::{
     Derivation, DerivationPath, DerivationPathScheme, HDPath, HDPathComponent, HDPathValue,
 };
 
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, uniffi::Object)]
 pub struct BIP44LikePath(HDPath);
 
 impl TryFrom<&HDPath> for BIP44LikePath {

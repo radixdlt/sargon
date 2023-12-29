@@ -14,11 +14,11 @@ use super::{
 #[derive(Clone, EnumAsInner, Debug, PartialEq, Eq, uniffi::Enum)]
 pub enum FactorSource {
     Device {
-        factor: Arc<DeviceFactorSource>,
+        factor: DeviceFactorSource,
     },
 
     Ledger {
-        factor: Arc<LedgerHardwareWalletFactorSource>,
+        factor: LedgerHardwareWalletFactorSource,
     },
 }
 

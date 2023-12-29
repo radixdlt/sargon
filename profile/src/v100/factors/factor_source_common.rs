@@ -28,17 +28,17 @@ pub struct FactorSourceCommon {
     crypto_parameters: FactorSourceCryptoParameters,
 
     /// When this factor source for originally added by the user.
-    added_on: Timestamp,
+    // added_on: Timestamp, // FIXME: NOW!
 
     /// Date of last usage of this factor source
     ///
     /// This is the only mutable property, it is mutable
     /// since we will update it every time this FactorSource
     /// is used.
-    last_used_on: Timestamp,
+    // last_used_on: Timestamp,  // FIXME: NOW!
 
     /// Flags which describe a certain state a FactorSource might be in, e.g. `Main` (BDFS).
-    flags: BTreeSet<FactorSourceFlag>,
+    flags: Vec<FactorSourceFlag>, // FIXME: Change to Set
 }
 
 impl FactorSourceCommon {
@@ -53,9 +53,9 @@ impl FactorSourceCommon {
     {
         Self {
             crypto_parameters,
-            added_on,
-            last_used_on,
-            flags: BTreeSet::from_iter(flags.into_iter()),
+            // added_on,
+            // last_used_on,
+            flags: Vec::from_iter(flags.into_iter()),
         }
     }
 

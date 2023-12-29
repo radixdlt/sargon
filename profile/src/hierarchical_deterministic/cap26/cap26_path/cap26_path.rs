@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::HDPathError;
 use crate::{
     AccountPath, CAP26Repr, Derivation, DerivationPath, DerivationPathScheme, GetIDPath, HDPath,
@@ -12,11 +14,11 @@ use crate::HasPlaceholder;
 /// A derivation path design specifically for Radix Babylon wallets used by Accounts and Personas
 /// to be unique per network with separate key spaces for Accounts/Identities (Personas) and key
 /// kind: sign transaction or sign auth.
-#[derive(Clone, Debug, PartialEq, EnumAsInner, Eq, PartialOrd, Ord)]
+#[derive(Clone, Debug, PartialEq, EnumAsInner, Eq, PartialOrd, Ord, uniffi::Enum)]
 pub enum CAP26Path {
-    GetID(GetIDPath),
-    AccountPath(AccountPath),
-    IdentityPath(IdentityPath),
+    GetID { value: Arc<GetIDPath> },
+    AccountPath { value: AccountPath },
+    IdentityPat { value: IdentityPath },
 }
 
 impl TryFrom<&HDPath> for CAP26Path {

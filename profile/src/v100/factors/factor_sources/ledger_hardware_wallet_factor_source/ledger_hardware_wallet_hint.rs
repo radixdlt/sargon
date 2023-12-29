@@ -15,17 +15,6 @@ pub struct LedgerHardwareWalletHint {
     model: LedgerHardwareWalletModel,
 }
 
-#[uniffi::export]
-impl LedgerHardwareWalletHint {
-    pub fn get_name(&self) -> String {
-        self.name()
-    }
-
-    pub fn get_model(&self) -> LedgerHardwareWalletModel {
-        self.model()
-    }
-}
-
 impl LedgerHardwareWalletHint {
     pub fn name(&self) -> String {
         self.name.clone()

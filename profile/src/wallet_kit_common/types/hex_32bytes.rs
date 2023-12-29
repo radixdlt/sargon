@@ -14,7 +14,7 @@ use crate::{generate_32_bytes, BytesError as Error};
 /// Serializable 32 bytes which **always** serializes as a **hex** string, this is useful
 /// since in Radix Wallet Kit we almost always want to serialize bytes into hex and this
 /// allows us to skip using
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, uniffi::Object)]
 pub struct Hex32Bytes(pub(crate) [u8; 32]);
 
 impl Hex32Bytes {

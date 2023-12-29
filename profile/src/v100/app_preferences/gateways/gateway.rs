@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::{
     fmt::{Debug, Display, Formatter},
     ops::Deref,
+    str::FromStr,
     sync::Arc,
 };
 use url::Url;
@@ -19,18 +20,7 @@ pub struct Gateway {
     network: RadixNetwork,
 
     /// The URL to the gateways API endpoint
-    url: Url,
-}
-
-#[uniffi::export]
-impl Gateway {
-    pub fn get_network(&self) -> Arc<RadixNetwork> {
-        self.network().into()
-    }
-
-    pub fn get_url(&self) -> String {
-        self.url().as_str().to_string()
-    }
+    url: String, // FIXME: change to `Url` once https://github.com/servo/rust-url/pull/891 gets merged
 }
 
 impl Gateway {
@@ -39,7 +29,8 @@ impl Gateway {
     }
 
     pub fn url(&self) -> Url {
-        self.url.clone()
+        // FIXME:
+        Url::from_str(&self.url).unwrap()
     }
 }
 
@@ -74,9 +65,9 @@ impl Default for Gateway {
     }
 }
 
-#[uniffi::export]
+// #[uniffi::export]
 impl Gateway {
-    #[uniffi::constructor]
+    // #[uniffi::constructor]
     pub fn new(url: String, id: NetworkID) -> Result<Arc<Self>, crate::CommonError> {
         let url = Url::try_from(url.as_str()).map_err(|_| CommonError::InvalidURL(url))?;
         let network = RadixNetwork::lookup_by_id(id)?;
@@ -94,12 +85,12 @@ impl Gateway {
 }
 
 #[uniffi::export]
-pub fn gateway_mainnet() -> Arc<Gateway> {
+pub fn gateway_mainnet() -> Gateway {
     Gateway::mainnet().into()
 }
 
 #[uniffi::export]
-pub fn gateway_stokenet() -> Arc<Gateway> {
+pub fn gateway_stokenet() -> Gateway {
     Gateway::stokenet().into()
 }
 

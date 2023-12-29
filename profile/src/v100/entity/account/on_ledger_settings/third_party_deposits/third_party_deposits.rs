@@ -17,11 +17,11 @@ pub struct ThirdPartyDeposits {
     deposit_rule: DepositRule,
 
     /// Denies or allows third-party deposits of specific assets by ignoring the `depositMode`
-    assets_exception_list: BTreeSet<AssetException>,
+    assets_exception_list: Vec<AssetException>, // FIXME: change to Set once UniFFI support Sets
 
     /// Allows certain third-party depositors to deposit assets freely.
     /// Note: There is no `deny` counterpart for this.
-    depositors_allow_list: BTreeSet<DepositorAddress>,
+    depositors_allow_list: Vec<DepositorAddress>, // FIXME: change to Set once UniFFI support Sets
 }
 
 impl ThirdPartyDeposits {
@@ -31,8 +31,8 @@ impl ThirdPartyDeposits {
     pub fn new(deposit_rule: DepositRule) -> Self {
         Self {
             deposit_rule,
-            assets_exception_list: BTreeSet::new(),
-            depositors_allow_list: BTreeSet::new(),
+            assets_exception_list: Vec::new(),
+            depositors_allow_list: Vec::new(),
         }
     }
 
@@ -40,8 +40,8 @@ impl ThirdPartyDeposits {
     /// rule and lists.
     pub fn with_rule_and_lists(
         deposit_rule: DepositRule,
-        assets_exception_list: BTreeSet<AssetException>,
-        depositors_allow_list: BTreeSet<DepositorAddress>,
+        assets_exception_list: Vec<AssetException>,
+        depositors_allow_list: Vec<DepositorAddress>,
     ) -> Self {
         Self {
             deposit_rule,
@@ -51,44 +51,8 @@ impl ThirdPartyDeposits {
     }
 }
 
-// Getters
-impl ThirdPartyDeposits {
-    /// Returns the general `deposit_rule` **as a clone**.
-    ///
-    /// Use [`self::set_deposit_rule(new)`] to update it.
-    pub fn deposit_rule(&self) -> DepositRule {
-        self.deposit_rule.get().clone()
-    }
-
-    /// Returns the `assets_exception_list` **as a clone**.
-    ///
-    /// Use [`self::set_assets_exception_list()`], [`self::add_asset_exception()`]
-    /// or [`self::remove_asset_exception`] to update it.
-    pub fn assets_exception_list(&self) -> BTreeSet<AssetException> {
-        self.assets_exception_list.borrow().clone()
-    }
-
-    /// Returns the `depositors_allow_list` **as a clone**.
-    ///
-    /// Use [`self::set_depositors_allow_list()`], [`self::allow_depositor()`],
-    /// or [`self::remove_allowed_depositor()`] to update it.
-    pub fn depositors_allow_list(&self) -> BTreeSet<DepositorAddress> {
-        self.depositors_allow_list.borrow().clone()
-    }
-}
-
 // Setters
 impl ThirdPartyDeposits {
-    /// Updates the `deposit_rule` to `new`.
-    pub fn set_deposit_rule(&self, new: DepositRule) {
-        self.deposit_rule.set(new);
-    }
-
-    /// Replaces the `assets_exception_list` with the `new` set.
-    pub fn set_assets_exception_list(&self, new: BTreeSet<AssetException>) {
-        *self.assets_exception_list.borrow_mut() = new
-    }
-
     /// Adds an `AssetException` to the `assets_exception_list` (set).
     ///
     /// Returns whether the `exception`` was newly inserted. That is:
@@ -102,11 +66,6 @@ impl ThirdPartyDeposits {
     // If the set contains an element equal to `exception`, removes it from the set and drops it. Returns whether such an element was present.
     pub fn remove_asset_exception(&self, exception: &AssetException) -> bool {
         self.assets_exception_list.borrow_mut().remove(exception)
-    }
-
-    /// Replaces the `depositors_allow_list` with the `new` set.
-    pub fn set_depositors_allow_list(&self, new: BTreeSet<DepositorAddress>) {
-        *self.depositors_allow_list.borrow_mut() = new
     }
 
     /// Adds a `DepositorAddress` to the `depositors_allow_list` (set).

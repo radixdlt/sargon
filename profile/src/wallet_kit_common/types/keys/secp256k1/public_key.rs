@@ -16,7 +16,7 @@ use crate::Secp256k1PrivateKey;
 
 /// A `secp256k1` public key used to verify cryptographic signatures (ECDSA signatures).
 #[derive(
-    Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record,
+    Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Object,
 )]
 pub struct Secp256k1PublicKey(pub(crate) EngineSecp256k1PublicKey);
 

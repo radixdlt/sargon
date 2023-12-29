@@ -1,7 +1,9 @@
-use radix_engine_common::math::Decimal;
+use std::sync::Arc;
+
 use radix_engine_toolkit_json::models::common::SerializableDecimal;
 use serde::{Deserialize, Serialize};
 
+use crate::Decimal;
 #[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
@@ -11,7 +13,7 @@ use crate::HasPlaceholder;
 pub struct Transaction {
     /// The deposit guarantee that will automatically be added for
     /// all deposits in transactions.
-    default_deposit_guarantee: SerializableDecimal,
+    default_deposit_guarantee: Arc<Decimal>,
 }
 
 impl Eq for Transaction {}
@@ -31,7 +33,7 @@ impl Transaction {
     /// specified `default_deposit_guarantee` value.
     pub fn new(default_deposit_guarantee: Decimal) -> Self {
         Self {
-            default_deposit_guarantee,
+            default_deposit_guarantee: Arc::new(default_deposit_guarantee),
         }
     }
 

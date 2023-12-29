@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 /// such as signing or public key derivation. Radix Babylon introduces
 /// a new scheme call Cap26 but we also need to support BIP44-like used
 /// by Olympia.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, uniffi::Enum)]
 pub enum DerivationPathScheme {
     /// A BIP32 based derivation path scheme, using SLIP10.
     #[serde(rename = "cap26")]

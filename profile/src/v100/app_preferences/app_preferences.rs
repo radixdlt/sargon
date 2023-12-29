@@ -22,7 +22,7 @@ pub struct AppPreferences {
     /// Collection of clients user have connected P2P with, typically these
     /// are WebRTC connections with DApps, but might be Android or iPhone
     /// clients as well.
-    p2p_links: P2PLinks,
+    // p2p_links: P2PLinks, // FIXME: NOW!
 
     /// Controls e.g. if Profile Snapshot gets synced to iCloud/Google backup or not.
     security: Security,
@@ -36,7 +36,7 @@ impl PartialEq for AppPreferences {
     fn eq(&self, other: &Self) -> bool {
         self.display() == other.display()
             && self.gateways() == other.gateways()
-            && self.p2p_links() == other.p2p_links()
+            // && self.p2p_links() == other.p2p_links()
             && self.security() == other.security()
             && self.transaction() == other.transaction()
     }
@@ -139,7 +139,7 @@ impl AppPreferences {
         Self {
             display,
             gateways,
-            p2p_links,
+            // p2p_links,
             security,
             transaction,
         }

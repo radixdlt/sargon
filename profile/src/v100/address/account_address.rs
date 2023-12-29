@@ -1,6 +1,5 @@
 use serde::{de, Deserializer, Serialize, Serializer};
 use std::fmt::Display;
-use std::sync::Arc;
 
 use crate::{suffix_string, PublicKey};
 
@@ -15,7 +14,7 @@ use super::entity_address::EntityAddress;
 /// that starts with the prefix `"account_"`, dependent on NetworkID, meaning the same
 /// public key used for two AccountAddresses on two different networks will not have
 /// the same address.
-#[derive(Clone, Debug, Default, PartialEq, Eq, uniffi::Record)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct AccountAddress {
     /// Human readable address of an account. Always starts with `"account_"``, for example:
     ///
@@ -42,7 +41,7 @@ impl AccountAddress {
     }
 }
 
-#[uniffi::export]
+// #[uniffi::export]
 impl AccountAddress {
     /// Formats the AccountAddress to its abbreviated form which is what the user
     /// is most used to, since it is what we most commonly display in the Radix

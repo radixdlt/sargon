@@ -18,6 +18,7 @@ use strum::FromRepr;
     PartialOrd,
     Ord,
     Sequence,
+    uniffi::Enum,
 )]
 #[serde(rename_all = "camelCase")]
 pub enum DepositRule {

@@ -25,21 +25,6 @@ pub struct RadixNetwork {
     display_description: String,
 }
 
-#[uniffi::export]
-impl RadixNetwork {
-    pub fn logical_name(&self) -> String {
-        self.logical_name.clone()
-    }
-
-    pub fn id(&self) -> NetworkID {
-        self.id.clone()
-    }
-
-    pub fn display_description(&self) -> String {
-        self.display_description.clone()
-    }
-}
-
 impl Display for RadixNetwork {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(

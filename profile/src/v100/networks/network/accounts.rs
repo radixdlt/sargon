@@ -1,6 +1,7 @@
 use crate::{
     identified_vec_via::IdentifiedVecVia,
     v100::{Account, AccountAddress},
+    UniffiCustomTypeConverter,
 };
 use identified_vec::{IdentifiedVecOf, IsIdentifiableVecOfVia, IsIdentifiedVec, IsIdentifiedVecOf};
 
@@ -9,7 +10,40 @@ use crate::HasPlaceholder;
 
 /// An ordered set of Accounts on a specific network, most commonly
 /// the set is non-empty.
-pub type Accounts = IdentifiedVecVia<Account>;
+// pub type Accounts = IdentifiedVecVia<Account>;
+
+#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+pub struct Accounts {
+    vec: Vec<Accounts>,
+}
+
+// // Use `Uuid` as a custom type, with `String` as the Builtin
+// uniffi::custom_type!(Accounts, Vec<Account>);
+
+// impl UniffiCustomTypeConverter for Accounts {
+//     type Builtin = Vec<Account>;
+
+//     fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
+//         Ok(val)
+//     }
+
+//     fn from_custom(obj: Self) -> Self::Builtin {
+//         obj.val
+//     }
+// }
+
+// // Use `url::Url` as a custom type, with `String` as the Builtin
+// impl UniffiCustomTypeConverter for Url {
+//     type Builtin = String;
+
+//     fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
+//         Ok(Url::parse(&val)?)
+//     }
+
+//     fn from_custom(obj: Self) -> Self::Builtin {
+//         obj.into()
+//     }
+// }
 
 impl Accounts {
     /// Instantiates a new collection of accounts from

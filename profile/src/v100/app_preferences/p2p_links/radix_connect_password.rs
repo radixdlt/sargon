@@ -9,10 +9,10 @@ use crate::HasPlaceholder;
 /// over web sockets. The actual `ConnectionPassword` is used to encrypt all messages sent via
 /// the Signaling Server.
 #[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, uniffi::Record,
+    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, uniffi::Object,
 )]
 #[serde(transparent)]
-pub struct RadixConnectPassword(Hex32Bytes);
+pub struct RadixConnectPassword(pub(crate) Hex32Bytes);
 
 impl RadixConnectPassword {
     pub fn new(hex_32bytes: Hex32Bytes) -> Self {

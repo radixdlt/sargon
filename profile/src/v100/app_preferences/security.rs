@@ -18,7 +18,7 @@ pub type SecurityStructureConfigurationReference = bool;
 pub struct Security {
     is_cloud_profile_sync_enabled: bool,
     is_developer_mode_enabled: bool,
-    structure_configuration_references: BTreeSet<SecurityStructureConfigurationReference>,
+    structure_configuration_references: Vec<SecurityStructureConfigurationReference>, // FIXME: Change to Set once UniFFI supports sets
 }
 
 impl Clone for Security {

@@ -1,1 +1,32 @@
+[bindings.swift]
+generate_immutable_records = true
+
+[bindings.swift.custom_types.Uuid]
+# Name of the type in the Swift code
+type_name = "UUID"
+# Modules that need to be imported
+imports = ["Foundation"]
+# Functions to convert between strings and URLs
+into_custom = "UUID(uuidString: {})!"
+from_custom = "{}.uuidString"
+
+
+[bindings.kotlin.custom_types.Uuid]
+# Name of the type in the Kotlin code
+type_name = "UUID"
+# Classes that need to be imported
+imports = ["java.util.UUID"]
+# Functions to convert between strings and URLs
+into_custom = "UUID.fromString({})"
+from_custom = "{}.toString()"
+
+[bindings.python.custom_types.Uuid]
+type_name = "UUID"
+# modules to import
+imports = ["uuid"]
+# Functions to convert between strings and the ParsedUrl class
+into_custom = "uuid.UUID({})"
+from_custom = "str({})"
+
+
 namespace = "radix_wallet_kit"

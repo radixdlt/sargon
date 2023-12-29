@@ -6,8 +6,8 @@ use crate::{Derivation, DerivationPath, DerivationPathScheme, HDPath, HDPathValu
 /// Use it with `GetIDPath::default()` to create the path `m/44'/1022'/365'`
 /// which is used by all hierarchal deterministic factor sources to derive
 /// the special root key which we hash to form the `FactorSourceIDFromHash`
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct GetIDPath(HDPath);
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, uniffi::Object)]
+pub struct GetIDPath(pub(crate) HDPath);
 
 impl Derivation for GetIDPath {
     fn derivation_path(&self) -> DerivationPath {

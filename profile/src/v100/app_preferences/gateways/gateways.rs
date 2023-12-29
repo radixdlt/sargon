@@ -45,21 +45,6 @@ impl Gateways {
     }
 }
 
-#[uniffi::export]
-impl Gateways {
-    pub fn get_current(&self) -> Arc<Gateway> {
-        self.current().into()
-    }
-
-    pub fn get_other(&self) -> Vec<Arc<Gateway>> {
-        self.other().into_iter().map(|g| g.into()).collect()
-    }
-
-    pub fn get_all(&self) -> Vec<Arc<Gateway>> {
-        self.all().into_iter().map(|g| g.into()).collect()
-    }
-}
-
 impl Gateways {
     pub fn len(&self) -> usize {
         self.other
@@ -152,8 +137,8 @@ impl Gateways {
 #[uniffi::export]
 impl Gateways {
     #[uniffi::constructor]
-    pub fn with_current(current: Arc<Gateway>) -> Arc<Self> {
-        Self::new(current.as_ref().clone()).into()
+    pub fn with_current(current: Gateway) -> Self {
+        Self::new(current.as_ref().clone())
     }
 }
 
