@@ -18,7 +18,7 @@ use crate::HasPlaceholder;
 pub enum CAP26Path {
     GetID { value: Arc<GetIDPath> },
     AccountPath { value: AccountPath },
-    IdentityPat { value: IdentityPath },
+    IdentityPath { value: IdentityPath },
 }
 
 impl TryFrom<&HDPath> for CAP26Path {
@@ -48,10 +48,12 @@ impl<'de> serde::Deserialize<'de> for CAP26Path {
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<CAP26Path, D::Error> {
         let s = String::deserialize(d)?;
         if let Ok(getid) = GetIDPath::from_str(&s) {
-            return Ok(CAP26Path::GetID(getid));
+            return Ok(CAP26Path::GetID {
+                value: getid.into(),
+            });
         } else {
             AccountPath::from_str(&s)
-                .map(Self::AccountPath)
+                .map(|value| Self::AccountPath { value })
                 .map_err(de::Error::custom)
         }
     }
@@ -60,38 +62,42 @@ impl<'de> serde::Deserialize<'de> for CAP26Path {
 impl Derivation for CAP26Path {
     fn hd_path(&self) -> &HDPath {
         match self {
-            CAP26Path::AccountPath(path) => path.hd_path(),
-            CAP26Path::IdentityPath(path) => path.hd_path(),
-            CAP26Path::GetID(path) => path.hd_path(),
+            CAP26Path::AccountPath { value } => value.hd_path(),
+            CAP26Path::IdentityPath { value } => value.hd_path(),
+            CAP26Path::GetID { value } => value.hd_path(),
         }
     }
 
     fn derivation_path(&self) -> DerivationPath {
-        DerivationPath::CAP26(self.clone())
+        DerivationPath::CAP26 {
+            value: self.clone(),
+        }
     }
 
     fn scheme(&self) -> DerivationPathScheme {
         match self {
-            CAP26Path::AccountPath(p) => p.scheme(),
-            CAP26Path::IdentityPath(p) => p.scheme(),
-            CAP26Path::GetID(p) => p.scheme(),
+            CAP26Path::AccountPath { value } => value.scheme(),
+            CAP26Path::IdentityPath { value } => value.scheme(),
+            CAP26Path::GetID { value } => value.scheme(),
         }
     }
 }
 
 impl From<AccountPath> for CAP26Path {
     fn from(value: AccountPath) -> Self {
-        Self::AccountPath(value)
+        Self::AccountPath { value }
     }
 }
 impl From<IdentityPath> for CAP26Path {
     fn from(value: IdentityPath) -> Self {
-        Self::IdentityPath(value)
+        Self::IdentityPath { value }
     }
 }
 impl From<GetIDPath> for CAP26Path {
     fn from(value: GetIDPath) -> Self {
-        Self::GetID(value)
+        Self::GetID {
+            value: value.into(),
+        }
     }
 }
 
@@ -108,11 +114,15 @@ impl HasPlaceholder for CAP26Path {
 #[cfg(any(test, feature = "placeholder"))]
 impl CAP26Path {
     pub fn placeholder_account() -> Self {
-        Self::AccountPath(AccountPath::placeholder())
+        Self::AccountPath {
+            value: AccountPath::placeholder(),
+        }
     }
 
     pub fn placeholder_identity() -> Self {
-        Self::IdentityPath(IdentityPath::placeholder())
+        Self::IdentityPath {
+            value: IdentityPath::placeholder(),
+        }
     }
 }
 
@@ -158,7 +168,10 @@ mod tests {
     #[test]
     fn scheme_getid_path() {
         assert_eq!(
-            CAP26Path::GetID(GetIDPath::default()).scheme(),
+            CAP26Path::GetID {
+                value: GetIDPath::default().into()
+            }
+            .scheme(),
             DerivationPathScheme::Cap26
         );
     }
@@ -174,7 +187,10 @@ mod tests {
     #[test]
     fn hdpath_getid_path() {
         assert_eq!(
-            CAP26Path::GetID(GetIDPath::default()).hd_path(),
+            CAP26Path::GetID {
+                value: GetIDPath::default().into()
+            }
+            .hd_path(),
             GetIDPath::default().hd_path()
         );
     }
@@ -182,7 +198,9 @@ mod tests {
     #[test]
     fn into_from_account_path() {
         assert_eq!(
-            CAP26Path::AccountPath(AccountPath::placeholder()),
+            CAP26Path::AccountPath {
+                value: AccountPath::placeholder()
+            },
             AccountPath::placeholder().into()
         );
     }
@@ -190,7 +208,9 @@ mod tests {
     #[test]
     fn into_from_getid_path() {
         assert_eq!(
-            CAP26Path::GetID(GetIDPath::default()),
+            CAP26Path::GetID {
+                value: GetIDPath::default().into()
+            },
             GetIDPath::default().into()
         );
     }

@@ -10,7 +10,7 @@ iso8601-timestamp = { git = "https://github.com/Lantern-chat/iso8601-timestamp",
     "serde",
     "std",
 ] }
-uuid = { version = "1.5.0", features = ["v4", "serde"] }
+uuid = { version = "1.6.1", features = ["v4", "serde"] }
 serde_repr = "0.1.17"
 strum = { version = "0.25.0", features = ["derive"] }
 radix-engine-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "038ddee8b0f57aa90e36375c69946c4eb634efeb", features = [
@@ -20,7 +20,6 @@ radix-engine-interface = { git = "https://github.com/radixdlt/radixdlt-scrypto",
     "std",
 ] }
 radix-engine-toolkit-json = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "e848b6abb9c5e72c695819e4d61a2d0c25f695f5" }
-radix-engine-toolkit-uniffi = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "e848b6abb9c5e72c695819e4d61a2d0c25f695f5" }
 radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "e848b6abb9c5e72c695819e4d61a2d0c25f695f5" }
 enum-iterator = "1.4.1"
 hex = "0.4.3"
@@ -36,11 +35,9 @@ derive-getters = "0.3.0"
 identified_vec = { version = "0.1.11", features = ["serde", "id_prim"] }
 nutype = { version = "0.4.0", features = ["serde"] }
 schemars = { version = "0.8.12", features = ["preserve_order"] }
-# The UniFFI crate for generating bindings to other languages
-uniffi = { git = "https://github.com/0xOmarA/uniffi-rs", tag = "v0.25.4", features = [
+uniffi = { git = "https://github.com/mozilla/uniffi-rs", rev = "fb8dd5c0f9406ea558d0d9d86804f4688ae95e44", features = [
     "cli",
 ] }
-uniffi_core = { git = "https://github.com/0xOmarA/uniffi-rs", tag = "v0.25.4", default-features = false }
 
 
 [profile.release]

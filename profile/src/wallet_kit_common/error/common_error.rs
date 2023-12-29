@@ -116,4 +116,7 @@ pub enum CommonError {
 
     #[error("Invalid NonFungibleLocalID::Bytes")]
     InvalidNonFungibleLocalIDBytes,
+
+    #[error("Invalid Decimal")]
+    DecimalError,
 }

@@ -15,7 +15,7 @@ impl Decimal {
         value
             .parse()
             .map(|value| Arc::new(Self(value)))
-            .map_err(Into::into)
+            .map_err(|e| CommonError::DecimalError)
     }
 
     #[uniffi::constructor]

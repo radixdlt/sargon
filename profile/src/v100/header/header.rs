@@ -37,7 +37,7 @@ pub struct Header {
     last_used_on_device: DeviceInfo,
 
     /// When the Profile was last modified.
-    last_modified: Timestamp,
+    last_modified: SystemTime, // FIXME: Now use Timestamp
 
     /// Hint about the contents of the profile, e.g. number of Accounts and Personas.
     content_hint: ContentHint,
@@ -57,7 +57,7 @@ impl Header {
             id,
             creating_device: creating_device.clone(),
             last_used_on_device: creating_device,
-            last_modified,
+            last_modified: last_modified.into(),
             content_hint,
         }
     }
@@ -87,43 +87,10 @@ impl Display for Header {
     }
 }
 
-#[uniffi::export]
-impl Header {
-    /// A versioning number that is increased when breaking
-    /// changes is made to ProfileSnapshot JSON data format.
-    pub fn get_snapshot_version(&self) -> ProfileSnapshotVersion {
-        self.snapshot_version().into()
-    }
-
-    /// An immutable and unique identifier of a Profile.
-    pub fn get_id(&self) -> String {
-        self.id()
-    }
-
-    /// The device which was used to create the Profile.
-    pub fn get_creating_device(&self) -> Arc<DeviceInfo> {
-        self.creating_device().into()
-    }
-
-    /// Hint about the contents of the profile, e.g. number of Accounts and Personas.
-    pub fn get_content_hint(&self) -> Arc<ContentHint> {
-        self.content_hint().into()
-    }
-
-    /// The device on which the profile was last used.
-    pub fn get_last_used_on_device(&self) -> Arc<DeviceInfo> {
-        self.last_used_on_device().into()
-    }
-
-    /// When the Profile was last modified.
-    pub fn get_last_modified(&self) -> SystemTime {
-        to_system_time(self.last_modified())
-    }
-}
-
 pub fn to_system_time(timestamp: Timestamp) -> SystemTime {
-    let str = timestamp.to_string();
-    time_util::parse_system_time_from_date_str(str.as_str()).expect("Valid date")
+    // let str = timestamp.to_string();
+    // time_util::parse_system_time_from_date_str(str.as_str()).expect("Valid date")
+    timestamp.into()
 }
 
 impl Header {

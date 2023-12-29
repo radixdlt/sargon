@@ -11,7 +11,9 @@ pub struct GetIDPath(pub(crate) HDPath);
 
 impl Derivation for GetIDPath {
     fn derivation_path(&self) -> DerivationPath {
-        DerivationPath::CAP26(self.clone().into())
+        DerivationPath::CAP26 {
+            value: self.clone().into(),
+        }
     }
     fn hd_path(&self) -> &HDPath {
         &self.0

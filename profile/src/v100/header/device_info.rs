@@ -1,10 +1,20 @@
-use std::fmt::Display;
+use std::{fmt::Display, time::SystemTime};
 
-use crate::{id, now};
+use crate::{id, now, UniffiCustomTypeConverter};
 use derive_getters::Getters;
 use iso8601_timestamp::Timestamp;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+
+impl UniffiCustomTypeConverter for Uuid {
+    type Builtin = String;
+    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
+        Uuid::from_str(val.as_str()).map_err(|e| e.into())
+    }
+    fn from_custom(obj: Self) -> Self::Builtin {
+        obj.to_string()
+    }
+}
 
 /// A short summary of a device the Profile is being used
 /// on, typically an iPhone or an Android phone.
@@ -17,12 +27,12 @@ pub struct DeviceInfo {
     /// query iOS for a unique identifier of the device, thus
     /// the iOS team has made their own impl of a best effort
     /// stable identifier.
-    id: Uuid,
+    id: String, // FIXME: NOW use Uuid
 
     /// The date this description of the device was made, might
     /// be equal to when the app was first ever launched on the
     /// device.
-    date: Timestamp,
+    date: SystemTime, // FIXME: NOW use Timestamp
 
     /// A short description of the device, we devices should
     /// read the device model and a given name from the device

@@ -15,6 +15,7 @@ pub mod prelude {
     pub use crate::wallet_kit_common::*;
 }
 
+pub use uuid::Uuid;
 pub use prelude::*;
 
 uniffi::include_scaffolding!("radix_wallet_kit");

@@ -3,7 +3,10 @@ use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializ
 use super::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme};
 use crate::{AccountPath, BIP44LikePath, CAP26Path, CommonError, GetIDPath, HDPath, IdentityPath};
 use enum_as_inner::EnumAsInner;
-use std::{fmt::{Debug, Formatter}, sync::Arc};
+use std::{
+    fmt::{Debug, Formatter},
+    sync::Arc,
+};
 
 #[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
@@ -12,7 +15,7 @@ use crate::HasPlaceholder;
 #[derive(Clone, PartialEq, Eq, EnumAsInner, PartialOrd, Ord, uniffi::Enum)]
 pub enum DerivationPath {
     CAP26 { value: CAP26Path },
-    BIP44Like { value: Arc<BIP44LikePath> },
+    BIP44Like { value: BIP44LikePath },
 }
 
 impl TryFrom<&HDPath> for DerivationPath {
@@ -47,12 +50,12 @@ impl<'de> serde::Deserialize<'de> for DerivationPath {
         let inner = Inner::deserialize(d)?;
 
         let derivation_path = match inner.scheme {
-            DerivationPathScheme::Cap26 => DerivationPath::CAP26(
-                CAP26Path::deserialize(inner.path).map_err(serde::de::Error::custom)?,
-            ),
-            DerivationPathScheme::Bip44Olympia => DerivationPath::BIP44Like(
-                BIP44LikePath::deserialize(inner.path).map_err(serde::de::Error::custom)?,
-            ),
+            DerivationPathScheme::Cap26 => DerivationPath::CAP26 {
+                value: CAP26Path::deserialize(inner.path).map_err(serde::de::Error::custom)?,
+            },
+            DerivationPathScheme::Bip44Olympia => DerivationPath::BIP44Like {
+                value: BIP44LikePath::deserialize(inner.path).map_err(serde::de::Error::custom)?,
+            },
         };
         Ok(derivation_path)
     }
@@ -91,15 +94,15 @@ impl Derivation for DerivationPath {
 
     fn hd_path(&self) -> &HDPath {
         match self {
-            DerivationPath::CAP26(path) => path.hd_path(),
-            DerivationPath::BIP44Like(path) => path.hd_path(),
+            DerivationPath::CAP26 { value } => value.hd_path(),
+            DerivationPath::BIP44Like { value } => value.hd_path(),
         }
     }
 
     fn scheme(&self) -> DerivationPathScheme {
         match self {
-            DerivationPath::CAP26(p) => p.scheme(),
-            DerivationPath::BIP44Like(p) => p.scheme(),
+            DerivationPath::CAP26 { value } => value.scheme(),
+            DerivationPath::BIP44Like { value } => value.scheme(),
         }
     }
 }
@@ -107,37 +110,45 @@ impl Derivation for DerivationPath {
 #[cfg(any(test, feature = "placeholder"))]
 impl DerivationPath {
     pub fn placeholder_cap26() -> Self {
-        DerivationPath::CAP26(CAP26Path::placeholder_account())
+        DerivationPath::CAP26 {
+            value: CAP26Path::placeholder_account(),
+        }
     }
 }
 
 impl From<AccountPath> for DerivationPath {
     fn from(value: AccountPath) -> Self {
-        Self::CAP26(value.into())
+        Self::CAP26 {
+            value: value.into(),
+        }
     }
 }
 
 impl From<IdentityPath> for DerivationPath {
     fn from(value: IdentityPath) -> Self {
-        Self::CAP26(value.into())
+        Self::CAP26 {
+            value: value.into(),
+        }
     }
 }
 
 impl From<GetIDPath> for DerivationPath {
     fn from(value: GetIDPath) -> Self {
-        Self::CAP26(value.into())
+        Self::CAP26 {
+            value: value.into(),
+        }
     }
 }
 
 impl From<BIP44LikePath> for DerivationPath {
     fn from(value: BIP44LikePath) -> Self {
-        Self::BIP44Like(value)
+        Self::BIP44Like { value }
     }
 }
 
 impl From<CAP26Path> for DerivationPath {
     fn from(value: CAP26Path) -> Self {
-        Self::CAP26(value)
+        Self::CAP26 { value }
     }
 }
 
@@ -187,7 +198,10 @@ mod tests {
     #[test]
     fn bip44like_scheme() {
         assert_eq!(
-            DerivationPath::BIP44Like(BIP44LikePath::new(0)).scheme(),
+            DerivationPath::BIP44Like {
+                value: BIP44LikePath::new(0)
+            }
+            .scheme(),
             DerivationPathScheme::Bip44Olympia
         );
     }
@@ -195,7 +209,10 @@ mod tests {
     #[test]
     fn bip44like_hdpath() {
         assert_eq!(
-            DerivationPath::BIP44Like(BIP44LikePath::new(0)).hd_path(),
+            DerivationPath::BIP44Like {
+                value: BIP44LikePath::new(0)
+            }
+            .hd_path(),
             BIP44LikePath::new(0).hd_path()
         );
     }
@@ -203,7 +220,9 @@ mod tests {
     #[test]
     fn into_from_account_bip44_path() {
         assert_eq!(
-            DerivationPath::BIP44Like(BIP44LikePath::placeholder()),
+            DerivationPath::BIP44Like {
+                value: BIP44LikePath::placeholder()
+            },
             BIP44LikePath::placeholder().into()
         );
     }
@@ -217,7 +236,9 @@ mod tests {
     #[test]
     fn into_from_account_cap26_path() {
         assert_eq!(
-            DerivationPath::CAP26(AccountPath::placeholder().into()),
+            DerivationPath::CAP26 {
+                value: AccountPath::placeholder().into()
+            },
             AccountPath::placeholder().into()
         );
     }
@@ -225,7 +246,9 @@ mod tests {
     #[test]
     fn into_from_identity_cap26_path() {
         assert_eq!(
-            DerivationPath::CAP26(IdentityPath::placeholder().into()),
+            DerivationPath::CAP26 {
+                value: IdentityPath::placeholder().into()
+            },
             IdentityPath::placeholder().into()
         );
     }
@@ -266,8 +289,10 @@ mod tests {
 
     #[test]
     fn from_cap26() {
-        let derivation_path: DerivationPath =
-            CAP26Path::AccountPath(AccountPath::placeholder()).into();
+        let derivation_path: DerivationPath = CAP26Path::AccountPath {
+            value: AccountPath::placeholder(),
+        }
+        .into();
         assert_eq!(
             derivation_path.derivation_path(),
             AccountPath::placeholder().derivation_path()
@@ -279,14 +304,18 @@ mod tests {
         let path: DerivationPath = AccountPath::placeholder().into();
         assert_eq!(
             path.as_cap26().unwrap(),
-            &CAP26Path::AccountPath(AccountPath::placeholder())
+            &CAP26Path::AccountPath {
+                value: AccountPath::placeholder()
+            }
         );
     }
 
     #[test]
     fn into_from_getid_path() {
         assert_eq!(
-            DerivationPath::CAP26(GetIDPath::default().into()),
+            DerivationPath::CAP26 {
+                value: GetIDPath::default().into()
+            },
             GetIDPath::default().into()
         );
     }

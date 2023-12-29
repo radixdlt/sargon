@@ -62,7 +62,7 @@ impl CAP26Repr for AccountPath {
         index: HDPathValue,
     ) -> Self {
         Self {
-            path,
+            path: path.into(),
             network_id,
             entity_kind,
             key_kind,
@@ -116,7 +116,11 @@ impl Derivation for AccountPath {
         &self.path
     }
     fn derivation_path(&self) -> DerivationPath {
-        DerivationPath::CAP26(CAP26Path::AccountPath(self.clone()))
+        DerivationPath::CAP26 {
+            value: CAP26Path::AccountPath {
+                value: self.clone(),
+            },
+        }
     }
     fn scheme(&self) -> DerivationPathScheme {
         DerivationPathScheme::Cap26
@@ -159,8 +163,8 @@ mod tests {
     #[test]
     fn entity_kind() {
         assert_eq!(
-            AccountPath::placeholder().entity_kind(),
-            &CAP26EntityKind::Account
+            AccountPath::placeholder().entity_kind,
+            CAP26EntityKind::Account
         );
     }
 

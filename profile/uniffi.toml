@@ -27,6 +27,3 @@ imports = ["uuid"]
 # Functions to convert between strings and the ParsedUrl class
 into_custom = "uuid.UUID({})"
 from_custom = "str({})"
-
-
-namespace = "radix_wallet_kit"

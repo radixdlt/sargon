@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::HDPathError;
 use serde::{de, Deserializer, Serialize, Serializer};
 
@@ -8,8 +10,18 @@ use crate::{
     Derivation, DerivationPath, DerivationPathScheme, HDPath, HDPathComponent, HDPathValue,
 };
 
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, uniffi::Object)]
-pub struct BIP44LikePath(HDPath);
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, uniffi::Record)]
+pub struct BIP44LikePath {
+    path: Arc<HDPath>,
+}
+
+impl BIP44LikePath {
+    pub fn from(path: HDPath) -> Self {
+        Self {
+            path: Arc::new(path),
+        }
+    }
+}
 
 impl TryFrom<&HDPath> for BIP44LikePath {
     type Error = HDPathError;
@@ -33,7 +45,7 @@ impl TryFrom<&HDPath> for BIP44LikePath {
         if !index.is_hardened() {
             return Err(HDPathError::InvalidBIP44LikePathIndexWasNotHardened);
         }
-        return Ok(Self(path));
+        return Ok(Self::from(path));
     }
 }
 
@@ -51,7 +63,7 @@ impl BIP44LikePath {
         let c4 = HDPathComponent::harden(index); // index
         let components = vec![c0, c1, c2, c3, c4];
         let path = HDPath::from_components(components);
-        return Self(path);
+        return Self::from(path);
     }
 
     pub fn new(index: HDPathValue) -> Self {
@@ -61,10 +73,12 @@ impl BIP44LikePath {
 
 impl Derivation for BIP44LikePath {
     fn derivation_path(&self) -> DerivationPath {
-        DerivationPath::BIP44Like(self.clone())
+        DerivationPath::BIP44Like {
+            value: self.clone(),
+        }
     }
     fn hd_path(&self) -> &HDPath {
-        &self.0
+        &self.path
     }
 
     fn scheme(&self) -> DerivationPathScheme {
