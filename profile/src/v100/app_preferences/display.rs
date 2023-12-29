@@ -8,7 +8,7 @@ use crate::HasPlaceholder;
 /// Settings related to displaying of information to the user inside the app.
 ///
 /// **N.B. neither of these settings are in fact not yet used by clients.**
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, uniffi::Record)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct AppDisplay {
     /// If we should show the aggregate value of users portfolio in fiat currency
@@ -89,14 +89,14 @@ mod tests {
     #[test]
     fn usd_is_default() {
         assert_eq!(
-            AppDisplay::default().fiat_currency_price_target(),
+            AppDisplay::default().fiat_currency_price_target,
             FiatCurrency::USD
         );
     }
 
     #[test]
     fn fiat_worth_is_visible_by_default() {
-        assert_eq!(AppDisplay::default().is_currency_amount_visible(), true);
+        assert_eq!(AppDisplay::default().is_currency_amount_visible, true);
     }
 
     #[test]

@@ -1,4 +1,3 @@
-use derive_getters::Getters;
 use serde::{Deserialize, Serialize};
 
 use crate::v100::AccountAddress;
@@ -9,13 +8,13 @@ use crate::HasPlaceholder;
 use super::factor_source_kind::FactorSourceKind;
 
 /// FactorSourceID from an AccountAddress, typically used by `trustedContact` FactorSource.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Getters)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct FactorSourceIDFromAddress {
     /// The kind of the FactorSource this ID refers to, typically `trustedContact`.
-    kind: FactorSourceKind,
+    pub kind: FactorSourceKind,
 
     /// An account address which the FactorSource this ID refers uses/needs.
-    body: AccountAddress,
+    pub body: AccountAddress,
 }
 
 impl FactorSourceIDFromAddress {

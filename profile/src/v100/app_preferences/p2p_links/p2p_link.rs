@@ -20,10 +20,19 @@ pub struct P2PLink {
     /// The most important property of this struct, the `ConnectionPassword`,
     /// is used to be able to re-establish the P2P connection and also acts as the seed
     /// for the `ID`.
-    connection_password: Arc<RadixConnectPassword>,
+    connection_password: RadixConnectPassword,
 
     /// Client name, e.g. "Chrome on Macbook" or "My work Android" or "My wifes iPhone SE".
     display_name: String,
+}
+
+impl P2PLink {
+    pub fn new(connection_password: RadixConnectPassword, display_name: String) -> Self {
+        Self {
+            connection_password,
+            display_name,
+        }
+    }
 }
 
 impl Debug for P2PLink {
@@ -65,9 +74,7 @@ impl HasPlaceholder for P2PLink {
 #[cfg(any(test, feature = "placeholder"))]
 impl P2PLink {
     fn declare(password: RadixConnectPassword, display: &str) -> Self {
-        Self::new(password.into(), display.to_string())
-            .deref()
-            .clone()
+        Self::new(password, display.to_string())
     }
 
     /// `aced`... "Arc on MacStudio"
@@ -134,7 +141,7 @@ mod tests {
 
     #[test]
     fn display_name() {
-        assert_eq!(P2PLink::placeholder().display_name(), "Chrome on Macbook");
+        assert_eq!(P2PLink::placeholder().display_name, "Chrome on Macbook");
     }
 
     #[test]

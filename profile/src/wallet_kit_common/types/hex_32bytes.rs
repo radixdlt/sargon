@@ -30,6 +30,16 @@ impl Hex32Bytes {
     }
 }
 
+impl Hex32Bytes {
+    pub fn to_hex(&self) -> String {
+        hex::encode(self.bytes())
+    }
+
+    pub fn to_string(&self) -> String {
+        self.to_hex()
+    }
+}
+
 impl Display for Hex32Bytes {
     /// Formats the `Hex32Bytes` as a hex string.
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -205,6 +215,13 @@ mod tests {
         let str = "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
         let hex_bytes = Hex32Bytes::placeholder();
         assert_eq!(format!("{:?}", hex_bytes), str);
+    }
+
+    #[test]
+    fn to_hex() {
+        let str = "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
+        let hex_bytes = Hex32Bytes::placeholder();
+        assert_eq!(hex_bytes.to_string(), str);
     }
 
     #[test]

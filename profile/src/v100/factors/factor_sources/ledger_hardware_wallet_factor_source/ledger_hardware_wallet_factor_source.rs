@@ -70,7 +70,7 @@ impl TryFrom<FactorSource> for LedgerHardwareWalletFactorSource {
 
     fn try_from(value: FactorSource) -> Result<Self, Self::Error> {
         match value {
-            FactorSource::Ledger { factor } => Ok(*factor),
+            FactorSource::Ledger { factor } => Ok(factor),
             FactorSource::Device { factor } => {
                 Err(Self::Error::ExpectedLedgerHardwareWalletFactorSourceGotSomethingElse)
             }
@@ -80,7 +80,7 @@ impl TryFrom<FactorSource> for LedgerHardwareWalletFactorSource {
 
 impl IsFactorSource for LedgerHardwareWalletFactorSource {
     fn factor_source_kind(&self) -> FactorSourceKind {
-        self.id().kind().clone()
+        self.id.kind.clone()
     }
 
     fn factor_source_id(&self) -> FactorSourceID {
@@ -116,13 +116,13 @@ mod tests {
         );
     }
 
-    #[test]
-    fn set_common() {
-        let sut = LedgerHardwareWalletFactorSource::placeholder();
-        assert_eq!(sut.common(), FactorSourceCommon::placeholder());
-        sut.set_common(FactorSourceCommon::placeholder_other());
-        assert_eq!(sut.common(), FactorSourceCommon::placeholder_other());
-    }
+    // #[test]
+    // fn set_common() {
+    //     let sut = LedgerHardwareWalletFactorSource::placeholder();
+    //     assert_eq!(sut.common(), FactorSourceCommon::placeholder());
+    //     sut.set_common(FactorSourceCommon::placeholder_other());
+    //     assert_eq!(sut.common(), FactorSourceCommon::placeholder_other());
+    // }
 
     #[test]
     fn json_roundtrip() {
@@ -185,7 +185,7 @@ mod tests {
     fn factor_source_kind() {
         assert_eq!(
             LedgerHardwareWalletFactorSource::placeholder().factor_source_kind(),
-            LedgerHardwareWalletFactorSource::placeholder().id().kind()
+            LedgerHardwareWalletFactorSource::placeholder().id.kind
         );
     }
 }

@@ -1,12 +1,48 @@
-use std::sync::Arc;
-
-use radix_engine_common::math::Decimal as NativeDecimal;
+use std::{ops::Deref, sync::Arc};
 
 use crate::CommonError;
+use radix_engine_common::math::Decimal as NativeDecimal;
+use radix_engine_toolkit_json::models::common::SerializableDecimal;
+use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
+use std::fmt::Display;
 
 // FIXME: Use RET's type!
-#[derive(Clone, Debug, uniffi::Object, Default)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Object, Default)]
 pub struct Decimal(pub(crate) NativeDecimal);
+
+impl Serialize for Decimal {
+    /// Serializes this `HDPath` into its bech32 address string as JSON.
+    #[cfg(not(tarpaulin_include))] // false negative
+    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
+    where
+        S: Serializer,
+    {
+        let dec: SerializableDecimal = self.0.into();
+        SerializableDecimal::serialize(&dec, serializer)
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for Decimal {
+    /// Tries to deserializes a JSON string as a bech32 address into an `HDPath`.
+    #[cfg(not(tarpaulin_include))] // false negative
+    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Decimal, D::Error> {
+        let s = SerializableDecimal::deserialize(d)?;
+        let native: NativeDecimal = *s.deref();
+        Ok(Self(native))
+    }
+}
+
+impl Decimal {
+    pub fn try_from_str(s: &str) -> Result<Self, CommonError> {
+        Self::new(s.to_string()).map(|a| a.deref().clone())
+    }
+}
+
+impl Display for Decimal {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
 
 #[uniffi::export]
 impl Decimal {

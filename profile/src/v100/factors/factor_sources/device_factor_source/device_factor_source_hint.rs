@@ -6,18 +6,18 @@ use crate::HasPlaceholder;
 
 /// Properties describing a DeviceFactorSource to help user disambiguate between
 /// it and another one.
-#[derive(Serialize, Deserialize, Debug, uniffi::Record)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct DeviceFactorSourceHint {
     /// "iPhone RED"
-    name: String,
+    pub name: String,
 
     /// "iPhone SE 2nd gen"
-    model: String,
+    pub model: String,
 
     /// The number of words in the mnemonic of a DeviceFactorSource, according to the BIP39
     /// standard, a multiple of 3, from 12 to 24 words.
-    mnemonic_word_count: BIP39WordCount,
+    pub mnemonic_word_count: BIP39WordCount,
 }
 
 impl DeviceFactorSourceHint {
@@ -91,23 +91,23 @@ mod tests {
 
     #[test]
     fn set_model() {
-        let sut = DeviceFactorSourceHint::placeholder();
-        assert_eq!(sut.model(), "iPhone".to_string());
-        sut.set_model("Android".to_string());
-        assert_eq!(sut.model(), "Android".to_string());
+        let mut sut = DeviceFactorSourceHint::placeholder();
+        assert_eq!(sut.model, "iPhone".to_string());
+        sut.model = "Android".to_string();
+        assert_eq!(sut.model, "Android".to_string());
     }
 
     #[test]
     fn set_name() {
-        let sut = DeviceFactorSourceHint::placeholder();
+        let mut sut = DeviceFactorSourceHint::placeholder();
         sut.name = "Foo".to_string();
-        assert_eq!(sut.name(), "Foo".to_string());
+        assert_eq!(sut.name, "Foo".to_string());
     }
 
     #[test]
     fn get_word_count() {
         assert_eq!(
-            DeviceFactorSourceHint::placeholder().mnemonic_word_count(),
+            DeviceFactorSourceHint::placeholder().mnemonic_word_count,
             BIP39WordCount::TwentyFour
         );
     }

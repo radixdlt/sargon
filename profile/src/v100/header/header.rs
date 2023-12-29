@@ -80,9 +80,7 @@ impl Display for Header {
         write!(
             f,
             "#{} v={}, content: {}",
-            self.id,
-            self.snapshot_version,
-            self.content_hint()
+            self.id, self.snapshot_version, self.content_hint
         )
     }
 }
@@ -91,83 +89,6 @@ pub fn to_system_time(timestamp: Timestamp) -> SystemTime {
     // let str = timestamp.to_string();
     // time_util::parse_system_time_from_date_str(str.as_str()).expect("Valid date")
     timestamp.into()
-}
-
-impl Header {
-    /// A versioning number that is increased when breaking
-    /// changes is made to ProfileSnapshot JSON data format.
-    pub fn snapshot_version(&self) -> ProfileSnapshotVersion {
-        self.snapshot_version
-    }
-
-    /// An immutable and unique identifier of a Profile.
-    pub fn id(&self) -> String {
-        self.id.to_string()
-    }
-
-    /// The device which was used to create the Profile.
-    pub fn creating_device(&self) -> DeviceInfo {
-        self.creating_device.clone()
-    }
-
-    /// Hint about the contents of the profile, e.g. number of Accounts and Personas.
-    pub fn content_hint(&self) -> ContentHint {
-        self.content_hint
-            .lock()
-            .expect("`self.content_hint` to not have been locked.")
-            .clone()
-    }
-
-    /// The device on which the profile was last used.
-    pub fn last_used_on_device(&self) -> DeviceInfo {
-        self.last_used_on_device
-            .lock()
-            .expect("`self.last_used_on_device` to not have been locked.")
-            .clone()
-    }
-
-    /// When the Profile was last modified.
-    pub fn last_modified(&self) -> Timestamp {
-        self.last_modified
-            .lock()
-            .expect("`self.last_modified` to not have been locked.")
-            .clone()
-    }
-}
-
-// Setters
-impl Header {
-    /// Updates the `last_modified` field.
-    pub fn updated(&self) {
-        *self
-            .last_modified
-            .lock()
-            .expect("`self.last_modified` to not have been locked.") = now();
-    }
-
-    /// Sets the content hint WITHOUT updating `last_modified`, you SHOULD not
-    /// use this, use `update_content_hint`, this is primarily meant for testing.
-    pub fn set_content_hint(&self, new: ContentHint) {
-        *self
-            .content_hint
-            .lock()
-            .expect("`self.content_hint` to not have been locked.") = new;
-    }
-
-    /// Sets the `content_hint` and updates the `last_modified` field.
-    pub fn update_content_hint(&self, new: ContentHint) {
-        self.set_content_hint(new);
-        self.updated()
-    }
-
-    /// Sets the `last_used_on_device` and updates the `last_modified` field.
-    pub fn update_last_used_on_device(&self, new: DeviceInfo) {
-        *self
-            .last_used_on_device
-            .lock()
-            .expect("`self.last_used_on_device` to not have been locked.") = new;
-        self.updated()
-    }
 }
 
 #[cfg(any(test, feature = "placeholder"))]
@@ -263,54 +184,54 @@ pub mod tests {
         );
     }
 
-    #[test]
-    fn updated() {
-        let sut = Header::default();
-        let d0 = sut.last_modified();
-        for _ in 0..10 {
-            // rust is too fast, if we run it once, unit tests fails.
-            sut.updated();
-        }
-        let d1 = sut.last_modified();
-        assert!(d1 > d0);
-    }
+    // #[test]
+    // fn updated() {
+    //     let sut = Header::default();
+    //     let d0 = sut.last_modified;
+    //     for _ in 0..10 {
+    //         // rust is too fast, if we run it once, unit tests fails.
+    //         sut.last;
+    //     }
+    //     let d1 = sut.last_modified;
+    //     assert!(d1 > d0);
+    // }
 
-    #[test]
-    fn update_content_hint() {
-        let sut = Header::default();
-        let d0 = sut.last_modified();
-        let content_hint_0 = sut.content_hint();
-        let end = 10;
-        for n in 1..end {
-            // rust is too fast, if we run it once, unit tests fails.
-            sut.update_content_hint(ContentHint::all(n));
-        }
-        let content_hint_n = sut.content_hint();
-        assert_ne!(content_hint_n, content_hint_0);
-        let d1 = sut.last_modified();
-        assert!(d1 > d0);
-    }
+    // #[test]
+    // fn update_content_hint() {
+    //     let sut = Header::default();
+    //     let d0 = sut.last_modified;
+    //     let content_hint_0 = sut.content_hint;
+    //     let end = 10;
+    //     for n in 1..end {
+    //         // rust is too fast, if we run it once, unit tests fails.
+    //         sut.update_content_hint(ContentHint::all(n));
+    //     }
+    //     let content_hint_n = sut.content_hint();
+    //     assert_ne!(content_hint_n, content_hint_0);
+    //     let d1 = sut.last_modified();
+    //     assert!(d1 > d0);
+    // }
 
-    #[test]
-    fn update_last_used_on_device() {
-        let sut = Header::default();
-        let d0 = sut.last_modified();
-        let device_0 = sut.last_used_on_device();
-        let end = 10;
-        for n in 1..end {
-            // rust is too fast, if we run it once, unit tests fails.
-            sut.update_last_used_on_device(DeviceInfo::with_description(n.to_string().as_str()));
-        }
-        let device_n = sut.last_used_on_device();
-        assert_ne!(device_n, device_0);
-        assert!(sut.last_modified() > d0);
-    }
+    // #[test]
+    // fn update_last_used_on_device() {
+    //     let sut = Header::default();
+    //     let d0 = sut.last_modified;
+    //     let device_0 = sut.last_used_on_device;
+    //     let end = 10;
+    //     for n in 1..end {
+    //         // rust is too fast, if we run it once, unit tests fails.
+    //         sut.update_last_used_on_device(DeviceInfo::with_description(n.to_string().as_str()));
+    //     }
+    //     let device_n = sut.last_used_on_device();
+    //     assert_ne!(device_n, device_0);
+    //     assert!(sut.last_modified() > d0);
+    // }
 
     #[test]
     fn last_updated() {
         let a = Header::default();
         let b = Header::default();
-        assert_ne!(a.last_modified(), b.last_modified());
+        assert_ne!(a.last_modified, b.last_modified);
     }
 
     #[test]
@@ -338,7 +259,7 @@ pub mod tests {
             creating_device: value.clone(),
             ..Default::default()
         };
-        assert_eq!(sut.creating_device(), value)
+        assert_eq!(sut.creating_device, value)
     }
 
     #[test]
@@ -348,7 +269,7 @@ pub mod tests {
             id: value.clone(),
             ..Default::default()
         };
-        assert_eq!(sut.id(), value.to_string())
+        assert_eq!(sut.id, value)
     }
 
     #[test]
@@ -358,6 +279,6 @@ pub mod tests {
             snapshot_version: value.clone(),
             ..Default::default()
         };
-        assert_eq!(sut.snapshot_version(), value)
+        assert_eq!(sut.snapshot_version, value)
     }
 }

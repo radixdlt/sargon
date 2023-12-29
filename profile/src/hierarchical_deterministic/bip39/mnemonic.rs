@@ -1,8 +1,6 @@
 use std::str::FromStr;
 
-use crate::HDPathError as Error;
-use bip39::Language;
-use derive_getters::Getters;
+use crate::{BIP39Language, HDPathError as Error};
 use itertools::Itertools;
 use serde::{de, Deserializer, Serialize, Serializer};
 
@@ -11,17 +9,19 @@ use crate::{BIP39Word, BIP39WordCount};
 #[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
-#[derive(Clone, PartialEq, Eq, Debug, Getters)]
+#[derive(Clone, PartialEq, Eq, Debug, Hash, uniffi::Record)]
 pub struct Mnemonic {
-    internal: bip39::Mnemonic,
-    words: Vec<BIP39Word>,
-    word_count: BIP39WordCount,
-    language: Language,
+    pub words: Vec<BIP39Word>,
+    pub word_count: BIP39WordCount,
+    pub language: BIP39Language,
 }
 
 impl Mnemonic {
+    fn internal(&self) -> bip39::Mnemonic {
+        bip39::Mnemonic::from_str(&self.phrase()).unwrap()
+    }
     pub fn phrase(&self) -> String {
-        self.words.iter().map(|w| w.word().to_string()).join(" ")
+        self.words.iter().map(|w| w.word.to_string()).join(" ")
     }
     pub fn from_phrase(phrase: &str) -> Result<Self, Error> {
         let internal =
@@ -31,21 +31,20 @@ impl Mnemonic {
 
         let words = internal
             .word_iter()
-            .map(|w| BIP39Word::new(w, language))
+            .map(|w| BIP39Word::new(w, language.into()))
             .collect::<Result<Vec<BIP39Word>, Error>>()?;
 
         let word_count = BIP39WordCount::from_count(internal.word_count())?;
 
         Ok(Self {
-            internal,
             words,
             word_count,
-            language,
+            language: language.into(),
         })
     }
 
     pub fn to_seed(&self, passphrase: &str) -> Seed {
-        self.internal.to_seed(passphrase)
+        self.internal().to_seed(passphrase)
     }
 }
 
@@ -96,7 +95,7 @@ impl HasPlaceholder for Mnemonic {
 mod tests {
     use crate::{
         assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
-        assert_json_value_ne_after_roundtrip, HasPlaceholder,
+        assert_json_value_ne_after_roundtrip, BIP39Language, HasPlaceholder,
     };
     use bip39::Language;
     use serde_json::json;
@@ -120,11 +119,11 @@ mod tests {
             "bright club bacon dinner achieve pull grid save ramp cereal blush woman humble limb repeat video sudden possible story mask neutral prize goose mandate"
                 .try_into()
                 .unwrap();
-        assert_eq!(mnemonic.language(), &Language::English);
+        assert_eq!(mnemonic.language, BIP39Language::English);
         mnemonic
-            .words()
+            .words
             .into_iter()
-            .for_each(|w| assert_eq!(w.language(), &Language::English));
+            .for_each(|w| assert_eq!(w.language, BIP39Language::English));
     }
 
     #[test]
@@ -133,20 +132,20 @@ mod tests {
         assert_eq!(
             Mnemonic::from_phrase("zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong")
                 .unwrap()
-                .word_count(),
-            &BIP39WordCount::Twelve
+                .word_count,
+            BIP39WordCount::Twelve
         );
     }
 
     #[test]
     fn words() {
         let mnemonic = Mnemonic::placeholder();
-        assert_eq!(mnemonic.words[0].word(), "bright");
-        assert_eq!(mnemonic.words[1].word(), "club");
-        assert_eq!(mnemonic.words[2].word(), "bacon");
-        assert_eq!(mnemonic.words[12].word(), "humble");
-        assert_eq!(mnemonic.words[22].word(), "goose");
-        assert_eq!(mnemonic.words[23].word(), "mandate");
+        assert_eq!(mnemonic.words[0].word, "bright");
+        assert_eq!(mnemonic.words[1].word, "club");
+        assert_eq!(mnemonic.words[2].word, "bacon");
+        assert_eq!(mnemonic.words[12].word, "humble");
+        assert_eq!(mnemonic.words[22].word, "goose");
+        assert_eq!(mnemonic.words[23].word, "mandate");
     }
 
     #[test]
@@ -154,18 +153,18 @@ mod tests {
         let zoo: Mnemonic = "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"
             .try_into()
             .unwrap();
-        assert_eq!(zoo.words[0].index().clone().into_inner(), 2047);
-        assert_eq!(zoo.words[1].index().clone().into_inner(), 2047);
-        assert_eq!(zoo.words[10].index().clone().into_inner(), 2047);
-        assert_eq!(zoo.words[11].index().clone().into_inner(), 2037);
+        assert_eq!(zoo.words[0].index.clone().into_inner(), 2047);
+        assert_eq!(zoo.words[1].index.clone().into_inner(), 2047);
+        assert_eq!(zoo.words[10].index.clone().into_inner(), 2047);
+        assert_eq!(zoo.words[11].index.clone().into_inner(), 2037);
 
         let abandon: Mnemonic = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
             .try_into()
             .unwrap();
-        assert_eq!(abandon.words[0].index().clone().into_inner(), 0);
-        assert_eq!(abandon.words[1].index().clone().into_inner(), 0);
-        assert_eq!(abandon.words[10].index().clone().into_inner(), 0);
-        assert_eq!(abandon.words[11].index().clone().into_inner(), 3);
+        assert_eq!(abandon.words[0].index.clone().into_inner(), 0);
+        assert_eq!(abandon.words[1].index.clone().into_inner(), 0);
+        assert_eq!(abandon.words[10].index.clone().into_inner(), 0);
+        assert_eq!(abandon.words[11].index.clone().into_inner(), 3);
     }
 
     #[test]

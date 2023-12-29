@@ -13,11 +13,11 @@ use crate::HasPlaceholder;
 
 /// A BIP39 Mnemonic and BIP39 passphrase - aka "25th word" tuple,
 /// from which we can derive a HD Root used for derivation.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Getters)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct MnemonicWithPassphrase {
-    mnemonic: Mnemonic,
-    passphrase: String,
+    pub mnemonic: Mnemonic,
+    pub passphrase: String,
 }
 
 impl MnemonicWithPassphrase {
@@ -151,8 +151,8 @@ mod tests {
             Mnemonic::from_phrase(phrase).unwrap(),
             passphrase.to_string(),
         );
-        assert_eq!(mwp.mnemonic().phrase(), phrase);
-        assert_eq!(mwp.passphrase(), passphrase);
+        assert_eq!(mwp.mnemonic.phrase(), phrase);
+        assert_eq!(mwp.passphrase, passphrase);
     }
 
     #[test]

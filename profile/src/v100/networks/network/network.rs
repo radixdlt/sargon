@@ -20,10 +20,10 @@ pub struct Network {
     /// The ID of the network that has been used to generate the `accounts` and `personas`
     /// and on which the `authorizedDapps` have been deployed on.
     #[serde(rename = "networkID")]
-    id: NetworkID,
+    pub id: NetworkID,
 
     /// An ordered set of Accounts on this network.
-    accounts: Accounts,
+    pub accounts: Accounts,
 }
 
 impl Identifiable for Network {
@@ -56,31 +56,6 @@ impl Network {
 }
 
 impl Network {
-    /// An ordered set of Accounts on this network.
-    pub fn accounts(&self) -> Accounts {
-        self.accounts
-            .lock()
-            .expect("`self.accounts` to not have been locked.")
-            .clone()
-    }
-}
-
-impl Network {
-    /// Tries to change the accounts to `new`, will throw an error if any of the accounts in `new`
-    /// is on a different network than `self.id()`.
-    pub fn set_accounts(&self, new: Accounts) -> Result<(), CommonError> {
-        if new.get_all().iter().any(|a| a.network_id() != self.id()) {
-            return Err(CommonError::AccountOnWrongNetwork);
-        }
-        *self
-            .accounts
-            .lock()
-            .expect("`self.accounts` to not have been locked.") = new;
-        Ok(())
-    }
-}
-
-impl Network {
     /// Returns `false` if no account with `address` was found, otherwise if found,
     /// the account gets updated by `mutate` closure and this function returns
     /// `true`.
@@ -88,10 +63,7 @@ impl Network {
     where
         F: FnMut(&Account) -> (),
     {
-        self.accounts
-            .lock()
-            .expect("`self.accounts` to not have been locked.")
-            .update_account(address, mutate)
+        todo!()
     }
 }
 
@@ -147,26 +119,17 @@ mod tests {
     #[test]
     fn get_accounts() {
         let sut = Network::placeholder();
-        assert_eq!(sut.accounts(), Accounts::placeholder());
+        assert_eq!(sut.accounts, Accounts::placeholder());
     }
 
-    #[test]
-    fn set_accounts_wrong_network() {
-        let sut = Network::placeholder();
-        assert_eq!(
-            sut.set_accounts(Accounts::with_account(Account::placeholder_stokenet())),
-            Err(CommonError::AccountOnWrongNetwork)
-        );
-    }
-
-    #[test]
-    fn set_accounts_same_network() {
-        assert_ne!(Accounts::placeholder(), Accounts::placeholder_other());
-        let sut = Network::new(NetworkID::Mainnet, Accounts::placeholder_mainnet());
-        let new = Accounts::with_account(Account::placeholder_mainnet_bob());
-        assert_eq!(sut.set_accounts(new.clone()), Ok(()));
-        assert_eq!(sut.accounts(), new);
-    }
+    // #[test]
+    // fn set_accounts_wrong_network() {
+    //     let sut = Network::placeholder();
+    //     assert_eq!(
+    //         sut.set_accounts(Accounts::with_account(Account::placeholder_stokenet())),
+    //         Err(CommonError::AccountOnWrongNetwork)
+    //     );
+    // }
 
     #[test]
     fn duplicate_accounts_are_filtered_out() {
@@ -177,7 +140,7 @@ mod tests {
                     [Account::placeholder(), Account::placeholder()].into_iter()
                 )
             )
-            .accounts()
+            .accounts
             .len(),
             1
         )

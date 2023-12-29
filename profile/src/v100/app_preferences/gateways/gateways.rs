@@ -11,33 +11,21 @@ use crate::HasPlaceholder;
 
 /// The currently used Gateway and a collection of other by user added
 /// or predefined Gateways the user can switch to.
-#[derive(Debug, uniffi::Record)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct Gateways {
     /// The currently used Gateway, when a user query's asset balances of
     /// accounts or submits transactions, this Gateway will be used.
-    current: Gateway,
+    pub current: Gateway,
 
     /// Other by user added or predefined Gateways the user can switch to.
     /// It might be Gateways with different URLs on the SAME network, or
     /// other networks, the identifier of a Gateway is the URL.
-    other: Vec<Gateway>,
-}
-
-impl Eq for Gateways {}
-impl PartialEq for Gateways {
-    fn eq(&self, other: &Self) -> bool {
-        self.all() == other.all()
-    }
-}
-impl Clone for Gateways {
-    fn clone(&self) -> Self {
-        Self::new_with_other(self.current(), self.other()).expect("self to have been valid")
-    }
+    pub other: Vec<Gateway>,
 }
 
 impl Gateways {
     fn other_identified(&self) -> IdentifiedVecOf<Gateway> {
-        let other_vec = self.other();
+        let other_vec = self.other;
         let expected_len = other_vec.len();
         let identified = IdentifiedVecOf::from_iter(other_vec);
         assert_eq!(identified.len(), expected_len);
@@ -47,33 +35,13 @@ impl Gateways {
 
 impl Gateways {
     pub fn len(&self) -> usize {
-        self.other
-            .lock()
-            .expect("`self.other` to not have been locked.")
-            .len()
-            + 1
+        self.other.len() + 1
     }
-
     pub fn all(&self) -> Vec<Gateway> {
         let mut all = Vec::new();
-        all.push(self.current());
-        all.append(&mut self.other());
-        assert_eq!(all.len(), self.len());
+        all.push(self.current);
+        all.append(&mut self.other);
         all
-    }
-
-    pub fn current(&self) -> Gateway {
-        self.current
-            .lock()
-            .expect("`self.current` to not have been locked")
-            .clone()
-    }
-
-    pub fn other(&self) -> Vec<Gateway> {
-        self.other
-            .lock()
-            .expect("`self.other` to not have been locked")
-            .clone()
     }
 }
 
@@ -84,7 +52,7 @@ impl Serialize for Gateways {
         S: Serializer,
     {
         let mut state = serializer.serialize_struct("Gateways", 2)?;
-        state.serialize_field("current", self.current().id().as_str())?;
+        state.serialize_field("current", self.current.url.as_str())?;
         state.serialize_field("saved", &self.all())?;
         state.end()
     }
@@ -138,7 +106,7 @@ impl Gateways {
 impl Gateways {
     #[uniffi::constructor]
     pub fn with_current(current: Gateway) -> Self {
-        Self::new(current.as_ref().clone())
+        Self::new(current)
     }
 }
 
@@ -147,27 +115,28 @@ impl Gateways {
     /// not a new Gateway, it will be removed from. Returns `Ok(false)` if `to` was already
     /// the `current`, returns `Ok(true)` if `to` was not already `current`.
     pub fn change_current(&self, to: Gateway) -> Result<bool, CommonError> {
-        if self.current() == to {
-            return Ok(false);
-        }
-        let old_current = self.current();
-        let was_inserted = self.append(old_current);
-        if !was_inserted {
-            return Err(CommonError::GatewaysDiscrepancyOtherShouldNotContainCurrent);
-        }
-        let other_identified = self.other_identified();
-        if let Some(idx) = other_identified.index_of_id(&to.id()) {
-            self.other
-                .lock()
-                .expect("`self.other` to not have been locked.")
-                .remove(idx);
-        }
+        // if self.current == to {
+        //     return Ok(false);
+        // }
+        // let old_current = self.current;
+        // let was_inserted = self.append(old_current);
+        // if !was_inserted {
+        //     return Err(CommonError::GatewaysDiscrepancyOtherShouldNotContainCurrent);
+        // }
+        // let other_identified = self.other_identified();
+        // if let Some(idx) = other_identified.index_of_id(&to.id()) {
+        //     self.other
+        //         .lock()
+        //         .expect("`self.other` to not have been locked.")
+        //         .remove(idx);
+        // }
 
-        *self
-            .current
-            .lock()
-            .expect("`self.current` to not have been locked.") = to;
-        Ok(true)
+        // *self
+        //     .current
+        //     .lock()
+        //     .expect("`self.current` to not have been locked.") = to;
+        // Ok(true)
+        todo!()
     }
 
     /// Appends `gateway` to the `other` list, without changing the `current` Gateway.
@@ -176,14 +145,15 @@ impl Gateways {
     ///
     /// - Returns: `true` if it was added, `false` if it was already present (noop)
     pub fn append(&self, gateway: Gateway) -> bool {
-        if self.other_identified().contains_id(&gateway.id()) {
-            return false;
-        }
-        self.other
-            .lock()
-            .expect("`self.other` to not have been locked.")
-            .push(gateway);
-        return true;
+        // if self.other_identified().contains_id(&gateway.id()) {
+        //     return false;
+        // }
+        // self.other
+        //     .lock()
+        //     .expect("`self.other` to not have been locked.")
+        //     .push(gateway);
+        // return true;
+        todo!()
     }
 }
 
@@ -230,9 +200,9 @@ mod tests {
     #[test]
     fn change_current_to_existing() {
         let sut = Gateways::default();
-        assert_eq!(sut.current().network().id(), NetworkID::Mainnet);
+        assert_eq!(sut.current.network.id, NetworkID::Mainnet);
         assert_eq!(sut.change_current(Gateway::stokenet()), Ok(true));
-        assert_eq!(sut.current().network().id(), NetworkID::Stokenet);
+        assert_eq!(sut.current.network.id, NetworkID::Stokenet);
     }
 
     #[test]
@@ -258,18 +228,18 @@ mod tests {
     #[test]
     fn change_current_to_current() {
         let sut = Gateways::default();
-        assert_eq!(sut.current().network().id(), NetworkID::Mainnet);
+        assert_eq!(sut.current.network.id, NetworkID::Mainnet);
         assert_eq!(sut.change_current(Gateway::mainnet()), Ok(false));
-        assert_eq!(sut.current().network().id(), NetworkID::Mainnet);
+        assert_eq!(sut.current.network.id, NetworkID::Mainnet);
     }
 
     #[test]
     fn change_current_to_new() {
         let sut = Gateways::default();
-        assert_eq!(sut.current().network().id(), NetworkID::Mainnet);
+        assert_eq!(sut.current.network.id, NetworkID::Mainnet);
         assert_eq!(sut.change_current(Gateway::nebunet()), Ok(true));
-        assert_eq!(sut.current().network().id(), NetworkID::Nebunet);
-        assert_eq!(sut.other(), [Gateway::stokenet(), Gateway::mainnet()]);
+        assert_eq!(sut.current.network.id, NetworkID::Nebunet);
+        assert_eq!(sut.other, [Gateway::stokenet(), Gateway::mainnet()]);
     }
 
     #[test]
@@ -313,57 +283,5 @@ mod tests {
             }
             "#,
         )
-    }
-}
-
-#[cfg(test)]
-mod test_uniffi_api {
-    use std::ops::Deref;
-
-    use itertools::Itertools;
-
-    use crate::{gateway_mainnet, Gateway, HasPlaceholder};
-
-    use super::Gateways;
-
-    #[test]
-    fn with_current() {
-        assert_eq!(
-            Gateways::with_current(gateway_mainnet()).deref().clone(),
-            Gateways::new(Gateway::mainnet())
-        );
-    }
-
-    #[test]
-    fn get_all() {
-        let sut = Gateways::placeholder();
-        assert_eq!(
-            sut.get_all()
-                .into_iter()
-                .map(|x| x.deref().clone())
-                .collect_vec(),
-            sut.all()
-        );
-    }
-
-    #[test]
-    fn get_current() {
-        let sut = Gateways::placeholder();
-        assert_eq!(&sut.current(), sut.get_current().deref());
-    }
-
-    #[test]
-    fn get_other() {
-        let sut = Gateways::placeholder();
-        sut.append(Gateway::ansharnet());
-        sut.append(Gateway::kisharnet());
-        sut.append(Gateway::mardunet());
-        assert_eq!(
-            sut.get_other()
-                .into_iter()
-                .map(|x| x.deref().clone())
-                .collect_vec(),
-            sut.other()
-        );
     }
 }

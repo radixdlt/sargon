@@ -15,7 +15,21 @@ pub mod prelude {
     pub use crate::wallet_kit_common::*;
 }
 
-pub use uuid::Uuid;
 pub use prelude::*;
+pub use url::Url;
+pub use uuid::Uuid;
+
+// Use `url::Url` as a custom type, with `String` as the Builtin
+impl UniffiCustomTypeConverter for Url {
+    type Builtin = String;
+
+    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
+        Ok(Url::parse(&val)?)
+    }
+
+    fn from_custom(obj: Self) -> Self::Builtin {
+        obj.into()
+    }
+}
 
 uniffi::include_scaffolding!("radix_wallet_kit");

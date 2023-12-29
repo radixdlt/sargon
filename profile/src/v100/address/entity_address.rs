@@ -56,7 +56,7 @@ pub trait EntityAddress: Sized {
         Self::from_public_key(
             hd_factor_instance_virtual_entity_creation
                 .public_key()
-                .public_key()
+                .public_key
                 .clone(),
             network_id,
         )

@@ -17,20 +17,10 @@ use crate::HasPlaceholder;
 )]
 pub struct FactorSourceIDFromHash {
     /// The kind of the FactorSource this ID refers to, typically `device` or `ledger`.
-    kind: FactorSourceKind,
+    pub kind: FactorSourceKind,
 
     /// The blake2b hash of the special HD public key derived at `CAP26::GetID`.
-    body: Arc<Hex32Bytes>,
-}
-
-impl FactorSourceIDFromHash {
-    pub fn kind(&self) -> FactorSourceKind {
-        self.kind.clone()
-    }
-
-    pub fn body(&self) -> Hex32Bytes {
-        self.body.clone()
-    }
+    pub body: Arc<Hex32Bytes>,
 }
 
 impl ToString for FactorSourceIDFromHash {
@@ -42,7 +32,10 @@ impl ToString for FactorSourceIDFromHash {
 impl FactorSourceIDFromHash {
     /// Instantiates a new `FactorSourceIDFromHash` from the `kind` and `body`.
     pub fn new(kind: FactorSourceKind, body: Hex32Bytes) -> Self {
-        Self { kind, body }
+        Self {
+            kind,
+            body: body.into(),
+        }
     }
 
     pub fn from_mnemonic_with_passphrase(

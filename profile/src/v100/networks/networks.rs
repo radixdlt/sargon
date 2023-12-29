@@ -1,4 +1,5 @@
 use identified_vec::{IdentifiedVecOf, IsIdentifiableVecOfVia, IsIdentifiedVec, IsIdentifiedVecOf};
+use serde::{Deserialize, Serialize};
 
 use crate::{
     identified_vec_via::IdentifiedVecVia,
@@ -9,11 +10,13 @@ use crate::{
 use crate::HasPlaceholder;
 
 use super::Network;
+use identified_vec::Identifiable;
 
 /// An ordered mapping of NetworkID -> `Profile.Network`, containing
 /// all the users Accounts, Personas and AuthorizedDapps the user
 /// has created and interacted with on this network.
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, uniffi::Record)]
+#[serde(transparent)]
 pub struct Networks {
     // FIXME: Now
     vec: Vec<Network>,
@@ -24,11 +27,20 @@ impl Networks {
     }
     pub fn from_iter<I>(iter: I) -> Self
     where
-        I: Iterator<Item = Network>,
+        I: IntoIterator<Item = Network>,
     {
         Self {
             vec: Vec::from_iter(iter),
         }
+    }
+    pub fn append(&mut self, network: Network) {
+        if self.vec.iter().any(|x| x.id() == network.id()) {
+            return;
+        }
+        self.vec.push(network);
+    }
+    pub fn len(&self) -> usize {
+        self.vec.len()
     }
 }
 

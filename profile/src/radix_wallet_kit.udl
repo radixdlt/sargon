@@ -1,4 +1,7 @@
 [Custom]
 typedef string Uuid;
 
+[Custom]
+typedef string Url;
+
 namespace radix_wallet_kit {};

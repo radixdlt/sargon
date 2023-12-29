@@ -10,8 +10,8 @@ use super::entity_address::EntityAddress;
 /// the same address.
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record)]
 pub struct ResourceAddress {
-    address: String,
-    network_id: NetworkID,
+    pub address: String,
+    pub network_id: NetworkID,
 }
 
 #[uniffi::export]
@@ -124,9 +124,9 @@ mod tests {
             "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd".to_string(),
         )
         .unwrap();
-        assert_eq!(a.network_id(), NetworkID::Mainnet);
+        assert_eq!(a.network_id, NetworkID::Mainnet);
         assert_eq!(
-            a.address(),
+            a.address,
             "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
         );
     }
@@ -137,6 +137,6 @@ mod tests {
             "resource_tdx_2_1tkckx9fynl9f7756z8wxphq7wce6vk874nuq4f2nnxgh3nzrwhjdlp"
                 .try_into()
                 .unwrap();
-        assert_eq!(a.network_id(), NetworkID::Stokenet);
+        assert_eq!(a.network_id, NetworkID::Stokenet);
     }
 }

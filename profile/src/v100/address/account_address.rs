@@ -226,7 +226,7 @@ mod tests {
         )
         .unwrap();
         assert_eq!(
-            a.address(),
+            a.address,
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
         );
     }
@@ -240,7 +240,7 @@ mod tests {
 
         assert_eq!(
             AccountAddress::from_public_key::<PublicKey>(public_key.into(), NetworkID::Mainnet)
-                .address(),
+                .address,
             "account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzdm"
         )
     }
@@ -253,7 +253,7 @@ mod tests {
         .unwrap();
 
         assert_eq!(
-            AccountAddress::new(public_key.into(), NetworkID::Mainnet).address(),
+            AccountAddress::new(public_key.into(), NetworkID::Mainnet).address,
             "account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzdm"
         )
     }

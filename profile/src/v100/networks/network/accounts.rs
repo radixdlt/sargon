@@ -3,7 +3,10 @@ use crate::{
     v100::{Account, AccountAddress},
     UniffiCustomTypeConverter,
 };
-use identified_vec::{IdentifiedVecOf, IsIdentifiableVecOfVia, IsIdentifiedVec, IsIdentifiedVecOf};
+use identified_vec::{
+    Identifiable, IdentifiedVecOf, IsIdentifiableVecOfVia, IsIdentifiedVec, IsIdentifiedVecOf,
+};
+use serde::{Deserialize, Serialize};
 
 #[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
@@ -12,47 +15,43 @@ use crate::HasPlaceholder;
 /// the set is non-empty.
 // pub type Accounts = IdentifiedVecVia<Account>;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+#[serde(transparent)]
 pub struct Accounts {
-    vec: Vec<Accounts>,
+    vec: Vec<Account>,
 }
 
-// // Use `Uuid` as a custom type, with `String` as the Builtin
-// uniffi::custom_type!(Accounts, Vec<Account>);
-
-// impl UniffiCustomTypeConverter for Accounts {
-//     type Builtin = Vec<Account>;
-
-//     fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
-//         Ok(val)
-//     }
-
-//     fn from_custom(obj: Self) -> Self::Builtin {
-//         obj.val
-//     }
-// }
-
-// // Use `url::Url` as a custom type, with `String` as the Builtin
-// impl UniffiCustomTypeConverter for Url {
-//     type Builtin = String;
-
-//     fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
-//         Ok(Url::parse(&val)?)
-//     }
-
-//     fn from_custom(obj: Self) -> Self::Builtin {
-//         obj.into()
-//     }
-// }
+impl Accounts {
+    pub fn new() -> Self {
+        Self { vec: Vec::new() }
+    }
+    pub fn from_iter<I>(iter: I) -> Self
+    where
+        I: IntoIterator<Item = Account>,
+    {
+        Self {
+            vec: Vec::from_iter(iter),
+        }
+    }
+    pub fn append(&mut self, account: Account) {
+        if self.vec.iter().any(|x| x.id() == account.id()) {
+            return;
+        }
+        self.vec.push(account);
+    }
+    pub fn len(&self) -> usize {
+        self.vec.len()
+    }
+}
 
 impl Accounts {
     /// Instantiates a new collection of accounts from
     /// and iterator of accounts.
     pub fn with_accounts<I>(accounts: I) -> Self
     where
-        I: Iterator<Item = Account>,
+        I: IntoIterator<Item = Account>,
     {
-        Self::from_identified_vec_of(IdentifiedVecOf::from_iter(accounts))
+        Self::from_iter(accounts)
     }
 
     /// Instantiates a new collection of accounts from a
@@ -70,7 +69,8 @@ impl Accounts {
     where
         F: FnMut(&Account) -> (),
     {
-        self.update_with(address, |a| mutate(a))
+        // self.update_with(address, |a| mutate(a))
+        todo!()
     }
 }
 
@@ -86,12 +86,14 @@ impl Default for Accounts {
 impl Accounts {
     /// Returns a reference to the account identified by `address`, if it exists.
     pub fn get_account_by_address(&self, address: &AccountAddress) -> Option<&Account> {
-        self.get(address)
+        // self.get(address)
+        todo!()
     }
 
     /// Returns references to **all** accounts, including hidden ones.
     pub fn get_all(&self) -> Vec<&Account> {
-        self.elements()
+        todo!()
+        // self.elements()
     }
 }
 

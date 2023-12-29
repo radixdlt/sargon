@@ -1,5 +1,6 @@
 use std::collections::BTreeSet;
 
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
 #[cfg(any(test, feature = "placeholder"))]
@@ -13,31 +14,12 @@ pub type SecurityStructureConfigurationReference = bool;
 /// Controls e.g. if Profile Snapshot gets synced to iCloud or not, and whether
 /// developer mode is enabled or not. In future (MFA) we will also save a list of
 /// MFA security structure configurations.
-#[derive(Serialize, Deserialize, Debug, uniffi::Record)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Hash, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct Security {
-    is_cloud_profile_sync_enabled: bool,
-    is_developer_mode_enabled: bool,
-    structure_configuration_references: Vec<SecurityStructureConfigurationReference>, // FIXME: Change to Set once UniFFI supports sets
-}
-
-impl Clone for Security {
-    fn clone(&self) -> Self {
-        Self::new(
-            self.is_cloud_profile_sync_enabled().clone(),
-            self.is_developer_mode_enabled().clone(),
-            self.structure_configuration_references().clone(),
-        )
-    }
-}
-impl Eq for Security {}
-impl PartialEq for Security {
-    fn eq(&self, other: &Self) -> bool {
-        self.is_cloud_profile_sync_enabled() == other.is_cloud_profile_sync_enabled()
-            && self.is_developer_mode_enabled() == other.is_developer_mode_enabled()
-            && self.structure_configuration_references()
-                == other.structure_configuration_references()
-    }
+    pub is_cloud_profile_sync_enabled: bool,
+    pub is_developer_mode_enabled: bool,
+    pub structure_configuration_references: Vec<SecurityStructureConfigurationReference>, // FIXME: Change to Set once UniFFI supports sets
 }
 
 impl Security {
@@ -50,31 +32,10 @@ impl Security {
         Self {
             is_cloud_profile_sync_enabled,
             is_developer_mode_enabled,
-            structure_configuration_references,
+            structure_configuration_references: structure_configuration_references
+                .into_iter()
+                .collect_vec(),
         }
-    }
-
-    pub fn is_cloud_profile_sync_enabled(&self) -> bool {
-        self.is_cloud_profile_sync_enabled
-            .lock()
-            .expect("`self.is_cloud_profile_sync_enabled` to not have been locked")
-            .clone()
-    }
-
-    pub fn is_developer_mode_enabled(&self) -> bool {
-        self.is_developer_mode_enabled
-            .lock()
-            .expect("`self.is_developer_mode_enabled` to not have been locked")
-            .clone()
-    }
-
-    pub fn structure_configuration_references(
-        &self,
-    ) -> BTreeSet<SecurityStructureConfigurationReference> {
-        self.structure_configuration_references
-            .lock()
-            .expect("`self.structure_configuration_references to not have been locked`")
-            .clone()
     }
 }
 
@@ -117,18 +78,18 @@ mod tests {
 
     #[test]
     fn default_developer_mode_is_enabled() {
-        assert!(Security::default().is_cloud_profile_sync_enabled());
+        assert!(Security::default().is_cloud_profile_sync_enabled);
     }
 
     #[test]
     fn default_is_developer_mode_disabled() {
-        assert_eq!(Security::default().is_developer_mode_enabled(), false);
+        assert_eq!(Security::default().is_developer_mode_enabled, false);
     }
 
     #[test]
     fn default_structure_configuration_references_is_empty() {
         assert!(Security::default()
-            .structure_configuration_references()
+            .structure_configuration_references
             .is_empty());
     }
 

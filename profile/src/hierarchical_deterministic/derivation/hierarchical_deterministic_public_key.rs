@@ -24,10 +24,10 @@ use crate::NetworkID;
 #[serde(rename_all = "camelCase")]
 pub struct HierarchicalDeterministicPublicKey {
     /// The expected public key of the private key derived at `derivationPath`
-    public_key: PublicKey,
+    pub public_key: PublicKey,
 
     /// The HD derivation path for the key pair which produces virtual badges (signatures).
-    derivation_path: DerivationPath,
+    pub derivation_path: DerivationPath,
 }
 
 impl HierarchicalDeterministicPublicKey {

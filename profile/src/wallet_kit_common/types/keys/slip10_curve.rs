@@ -7,7 +7,9 @@ use serde::{Deserialize, Serialize};
 /// prefer using Curve25519 - which is incompatible with BIP32 (BIP44).
 ///
 /// For for information see [SLIP10 reference](https://github.com/satoshilabs/slips/blob/master/slip-0010.md)
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, uniffi::Enum)]
+#[derive(
+    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Enum,
+)]
 #[serde(rename_all = "camelCase")]
 pub enum SLIP10Curve {
     /// Curve25519 which we use for Ed25519 for EdDSA signatures.

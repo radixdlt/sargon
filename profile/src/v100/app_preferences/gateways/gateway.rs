@@ -3,7 +3,6 @@ use serde::{Deserialize, Serialize};
 use std::{
     fmt::{Debug, Display, Formatter},
     ops::Deref,
-    str::FromStr,
     sync::Arc,
 };
 use url::Url;
@@ -17,28 +16,17 @@ use super::radix_network::RadixNetwork;
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Ord, PartialOrd, Hash, uniffi::Record)]
 pub struct Gateway {
     /// The Radix network the API is a Gateway to.
-    network: RadixNetwork,
+    pub network: RadixNetwork,
 
     /// The URL to the gateways API endpoint
-    url: String, // FIXME: change to `Url` once https://github.com/servo/rust-url/pull/891 gets merged
-}
-
-impl Gateway {
-    pub fn network(&self) -> RadixNetwork {
-        self.network.clone()
-    }
-
-    pub fn url(&self) -> Url {
-        // FIXME:
-        Url::from_str(&self.url).unwrap()
-    }
+    pub url: Url,
 }
 
 impl Identifiable for Gateway {
     type ID = Url;
 
     fn id(&self) -> Self::ID {
-        self.url().clone()
+        self.url.clone()
     }
 }
 
@@ -47,8 +35,8 @@ impl Debug for Gateway {
         write!(
             f,
             "{}: {}",
-            self.network().display_description(),
-            self.url().to_string(),
+            self.network.display_description,
+            self.url.to_string(),
         )
     }
 }
@@ -268,7 +256,6 @@ mod tests {
 
 #[cfg(test)]
 mod tests_uniffi_api {
-    use std::ops::Deref;
 
     use crate::{gateway_mainnet, gateway_stokenet};
 
@@ -276,23 +263,11 @@ mod tests_uniffi_api {
 
     #[test]
     fn test_gateway_mainnet() {
-        assert_eq!(gateway_mainnet().deref(), &Gateway::mainnet());
+        assert_eq!(gateway_mainnet(), Gateway::mainnet());
     }
 
     #[test]
     fn test_gateway_stokenet() {
-        assert_eq!(gateway_stokenet().deref(), &Gateway::stokenet());
-    }
-
-    #[test]
-    fn get_network() {
-        let sut = Gateway::mainnet();
-        assert_eq!(sut.get_network().deref(), &sut.network());
-    }
-
-    #[test]
-    fn get_url() {
-        let sut = Gateway::mainnet();
-        assert_eq!(sut.get_url(), sut.url().to_string());
+        assert_eq!(gateway_stokenet(), Gateway::stokenet());
     }
 }

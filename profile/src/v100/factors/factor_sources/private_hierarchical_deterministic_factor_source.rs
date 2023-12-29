@@ -11,10 +11,10 @@ use crate::{
 
 use super::DeviceFactorSource;
 
-#[derive(Getters)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct PrivateHierarchicalDeterministicFactorSource {
-    mnemonic_with_passphrase: MnemonicWithPassphrase,
-    factor_source: DeviceFactorSource,
+    pub mnemonic_with_passphrase: MnemonicWithPassphrase,
+    pub factor_source: DeviceFactorSource,
 }
 
 impl PrivateHierarchicalDeterministicFactorSource {
@@ -46,7 +46,7 @@ impl PrivateHierarchicalDeterministicFactorSource {
         let path = AccountPath::new(network_id, CAP26KeyKind::TransactionSigning, index);
         let hd_private_key = self.mnemonic_with_passphrase.derive_private_key(path);
         let hd_factor_instance = HierarchicalDeterministicFactorInstance::new(
-            self.factor_source.id().clone(),
+            self.factor_source.id.clone(),
             hd_private_key.public_key(),
         );
         HDFactorInstanceAccountCreation::new(hd_factor_instance).unwrap()

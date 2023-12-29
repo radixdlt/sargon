@@ -138,7 +138,7 @@ mod tests {
         let str = "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<value>";
         let id: NonFungibleGlobalId = str.try_into().unwrap();
         assert_eq!(
-            id.resource_address().address(),
+            id.resource_address().address,
             "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha"
         );
     }

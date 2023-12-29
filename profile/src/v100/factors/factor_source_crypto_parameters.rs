@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 /// Cryptographic parameters a certain FactorSource supports, e.g. which Elliptic Curves
 /// it supports and which Hierarchical Deterministic (HD) derivations schemes it supports,
 /// if any.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, uniffi::Record)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct FactorSourceCryptoParameters {
     /// Describes with which Elliptic Curves a Factor Source can be used, e.g. a
@@ -16,14 +16,14 @@ pub struct FactorSourceCryptoParameters {
     /// Either `[curve25519]` or `[secp256k1, curve25519]`
     ///
     /// Must not be empty.
-    supported_curves: Vec<SLIP10Curve>,
+    pub supported_curves: Vec<SLIP10Curve>,
 
     /// If not empty: Describes which kind of Hierarchical Deterministic (HD)
     /// derivations a FactorSource is capable of doing - if empty: the
     /// FactorSource does not support HD derivation.
     ///
     /// Either BIP44 or CAP26 (SLIP10)
-    supported_derivation_path_schemes: Vec<DerivationPathScheme>,
+    pub supported_derivation_path_schemes: Vec<DerivationPathScheme>,
 }
 
 impl FactorSourceCryptoParameters {

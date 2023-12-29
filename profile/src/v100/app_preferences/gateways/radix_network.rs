@@ -16,13 +16,13 @@ use crate::NetworkID::{self, *};
 pub struct RadixNetwork {
     /// A String identifier (always lowercase) with the name of the Network that MUST match what Gateway returns.
     #[serde(rename = "name")]
-    logical_name: String,
+    pub logical_name: String,
 
     /// The canonical identifier of this network.
-    id: NetworkID,
+    pub id: NetworkID,
 
     /// A name of the network intended for display purposes only.
-    display_description: String,
+    pub display_description: String,
 }
 
 impl Display for RadixNetwork {
@@ -30,8 +30,8 @@ impl Display for RadixNetwork {
         write!(
             f,
             "{} ({})",
-            self.display_description(),
-            self.id().discriminant()
+            self.display_description,
+            self.id.discriminant()
         )
     }
 }
@@ -130,7 +130,7 @@ impl RadixNetwork {
         let map = Self::lookup_map();
 
         map.iter()
-            .find(|p| p.1.logical_name() == logical_name)
+            .find(|p| p.1.logical_name == logical_name)
             .map(|p| p.0)
             .ok_or_else(|| CommonError::UnknownNetworkWithName(logical_name.to_string()))
             .and_then(|id| Self::lookup_by_id(id.clone()))
@@ -186,7 +186,7 @@ mod tests {
 
     #[test]
     fn placeholder() {
-        assert_eq!(RadixNetwork::placeholder().logical_name(), "mainnet");
+        assert_eq!(RadixNetwork::placeholder().logical_name, "mainnet");
     }
 
     #[test]

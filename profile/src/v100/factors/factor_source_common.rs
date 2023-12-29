@@ -25,20 +25,20 @@ pub struct FactorSourceCommon {
     /// with a DeviceFactorSource with babylon crypto parameters, lets call it `B`,
     /// with mnemonic `M` adds `M` again but as an "Olympia" factor source, then
     /// the olympia crypto parameters are added to `B`.
-    crypto_parameters: FactorSourceCryptoParameters,
+    pub crypto_parameters: FactorSourceCryptoParameters,
 
     /// When this factor source for originally added by the user.
-    // added_on: Timestamp, // FIXME: NOW!
+    pub added_on: SystemTime, // FIXME: NOW!
 
     /// Date of last usage of this factor source
     ///
     /// This is the only mutable property, it is mutable
     /// since we will update it every time this FactorSource
     /// is used.
-    // last_used_on: Timestamp,  // FIXME: NOW!
+    pub last_used_on: SystemTime, // FIXME: NOW!
 
     /// Flags which describe a certain state a FactorSource might be in, e.g. `Main` (BDFS).
-    flags: Vec<FactorSourceFlag>, // FIXME: Change to Set
+    pub flags: Vec<FactorSourceFlag>, // FIXME: Change to Set
 }
 
 impl FactorSourceCommon {
@@ -53,8 +53,8 @@ impl FactorSourceCommon {
     {
         Self {
             crypto_parameters,
-            // added_on,
-            // last_used_on,
+            added_on: added_on.into(),
+            last_used_on: last_used_on.into(),
             flags: Vec::from_iter(flags.into_iter()),
         }
     }
@@ -161,27 +161,27 @@ mod tests {
     #[test]
     fn default_support_babylon() {
         assert_eq!(
-            FactorSourceCommon::default().crypto_parameters(),
+            FactorSourceCommon::default().crypto_parameters,
             FactorSourceCryptoParameters::babylon()
         )
     }
 
-    #[test]
-    fn new_uses_now_as_date() {
-        let date0 = now();
-        let model = FactorSourceCommon::new(FactorSourceCryptoParameters::default(), []);
-        let mut date1 = now();
-        for _ in 0..10 {
-            // rust is too fast... lol.
-            date1 = now();
-        }
-        let do_test = |d: Timestamp| {
-            assert!(d > date0);
-            assert!(d < date1);
-        };
-        do_test(model.added_on());
-        do_test(model.last_used_on());
-    }
+    // #[test]
+    // fn new_uses_now_as_date() {
+    //     let date0 = now();
+    //     let model = FactorSourceCommon::new(FactorSourceCryptoParameters::default(), []);
+    //     let mut date1 = now();
+    //     for _ in 0..10 {
+    //         // rust is too fast... lol.
+    //         date1 = now();
+    //     }
+    //     let do_test = |d: Timestamp| {
+    //         assert!(d > date0);
+    //         assert!(d < date1);
+    //     };
+    //     do_test(model.added_on);
+    //     do_test(model.last_used_on);
+    // }
 
     #[test]
     fn json_roundtrip() {
@@ -213,43 +213,12 @@ mod tests {
     #[test]
     fn main_flag_present_if_main() {
         assert!(FactorSourceCommon::new_bdfs(true)
-            .flags()
+            .flags
             .contains(&FactorSourceFlag::Main));
     }
 
     #[test]
     fn main_flag_not_present_if_not_main() {
-        assert!(FactorSourceCommon::new_bdfs(false).flags().is_empty());
-    }
-
-    #[test]
-    fn set_crypto_parameters() {
-        let sut = FactorSourceCommon::placeholder_olympia();
-        assert_eq!(
-            sut.crypto_parameters(),
-            FactorSourceCryptoParameters::olympia()
-        );
-        sut.set_crypto_parameters(FactorSourceCryptoParameters::babylon_olympia_compatible());
-        assert_eq!(
-            sut.crypto_parameters(),
-            FactorSourceCryptoParameters::babylon_olympia_compatible()
-        );
-    }
-
-    #[test]
-    fn set_last_used_on() {
-        let sut = FactorSourceCommon::placeholder_main_babylon();
-        let d = now();
-        assert_ne!(sut.last_used_on(), d);
-        sut.set_last_used_on(d);
-        assert_eq!(sut.last_used_on(), d);
-    }
-
-    #[test]
-    fn set_flags() {
-        let sut = FactorSourceCommon::placeholder_main_babylon();
-        assert_eq!(sut.flags().contains(&FactorSourceFlag::Main), true);
-        sut.set_flags(BTreeSet::new());
-        assert_eq!(sut.flags().contains(&FactorSourceFlag::Main), false);
+        assert!(FactorSourceCommon::new_bdfs(false).flags.is_empty());
     }
 }

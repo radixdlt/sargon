@@ -39,9 +39,9 @@ impl Serialize for EntitySecurityState {
     {
         let mut state = serializer.serialize_struct("EntitySecurityState", 2)?;
         match self {
-            EntitySecurityState::Unsecured(control) => {
+            EntitySecurityState::Unsecured { value } => {
                 state.serialize_field("discriminator", "unsecured")?;
-                state.serialize_field("unsecuredEntityControl", control)?;
+                state.serialize_field("unsecuredEntityControl", value)?;
             }
         }
         state.end()
@@ -50,7 +50,7 @@ impl Serialize for EntitySecurityState {
 
 impl From<UnsecuredEntityControl> for EntitySecurityState {
     fn from(value: UnsecuredEntityControl) -> Self {
-        Self::Unsecured(value)
+        Self::Unsecured { value }
     }
 }
 
@@ -58,12 +58,16 @@ impl From<UnsecuredEntityControl> for EntitySecurityState {
 impl HasPlaceholder for EntitySecurityState {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
-        Self::Unsecured(UnsecuredEntityControl::placeholder())
+        Self::Unsecured {
+            value: UnsecuredEntityControl::placeholder(),
+        }
     }
 
     /// A placeholder used to facilitate unit tests.
     fn placeholder_other() -> Self {
-        Self::Unsecured(UnsecuredEntityControl::placeholder_other())
+        Self::Unsecured {
+            value: UnsecuredEntityControl::placeholder_other(),
+        }
     }
 }
 

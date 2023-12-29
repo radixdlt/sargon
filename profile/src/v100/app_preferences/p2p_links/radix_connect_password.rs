@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::{hash, Hex32Bytes};
 use radix_engine_common::crypto::Hash;
 use serde::{Deserialize, Serialize};
@@ -9,18 +11,22 @@ use crate::HasPlaceholder;
 /// over web sockets. The actual `ConnectionPassword` is used to encrypt all messages sent via
 /// the Signaling Server.
 #[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, uniffi::Object,
+    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, uniffi::Record,
 )]
 #[serde(transparent)]
-pub struct RadixConnectPassword(pub(crate) Hex32Bytes);
+pub struct RadixConnectPassword {
+    bytes: Arc<Hex32Bytes>,
+}
 
 impl RadixConnectPassword {
     pub fn new(hex_32bytes: Hex32Bytes) -> Self {
-        Self(hex_32bytes)
+        Self {
+            bytes: hex_32bytes.into(),
+        }
     }
 
     pub fn hash(&self) -> Hash {
-        hash(self.0.bytes())
+        hash(self.bytes.bytes())
     }
 }
 

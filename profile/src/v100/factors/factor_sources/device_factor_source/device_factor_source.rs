@@ -21,17 +21,17 @@ use super::device_factor_source_hint::DeviceFactorSourceHint;
 pub struct DeviceFactorSource {
     /// Unique and stable identifier of this factor source, stemming from the
     /// hash of a special child key of the HD root of the mnemonic.
-    id: FactorSourceIDFromHash,
+    pub id: FactorSourceIDFromHash,
 
     /// Common properties shared between FactorSources of different kinds,
     /// describing its state, when added, and supported cryptographic parameters.
     ///
     /// Has interior mutability since we must be able to update the
     /// last used date.
-    common: FactorSourceCommon,
+    pub common: FactorSourceCommon,
 
     /// Properties describing a DeviceFactorSource to help user disambiguate between it and another one.
-    hint: DeviceFactorSourceHint,
+    pub hint: DeviceFactorSourceHint,
 }
 
 impl TryFrom<FactorSource> for DeviceFactorSource {
@@ -41,13 +41,12 @@ impl TryFrom<FactorSource> for DeviceFactorSource {
         value
             .into_device()
             .map_err(|_| Self::Error::ExpectedDeviceFactorSourceGotSomethingElse)
-            .map(|x| x.deref().clone())
     }
 }
 
 impl IsFactorSource for DeviceFactorSource {
     fn factor_source_kind(&self) -> FactorSourceKind {
-        self.id().kind().clone()
+        self.id.kind.clone()
     }
 
     fn factor_source_id(&self) -> FactorSourceID {
@@ -79,7 +78,7 @@ impl DeviceFactorSource {
             id,
             FactorSourceCommon::new_bdfs(is_main),
             DeviceFactorSourceHint::unknown_model_and_name_with_word_count(
-                mnemonic_with_passphrase.mnemonic().word_count().clone(),
+                mnemonic_with_passphrase.mnemonic.word_count.clone(),
                 device_model,
             ),
         )
@@ -210,8 +209,8 @@ mod tests {
     fn placeholder_olympia_has_crypto_parameters_olympia() {
         assert_eq!(
             DeviceFactorSource::placeholder_olympia()
-                .common()
-                .crypto_parameters(),
+                .common
+                .crypto_parameters,
             FactorSourceCryptoParameters::olympia()
         );
     }
@@ -219,19 +218,8 @@ mod tests {
     #[test]
     fn hint() {
         assert_eq!(
-            DeviceFactorSource::placeholder()
-                .hint()
-                .mnemonic_word_count(),
+            DeviceFactorSource::placeholder().hint.mnemonic_word_count,
             BIP39WordCount::TwentyFour
         );
-    }
-
-    #[test]
-    fn set_common() {
-        let sut = DeviceFactorSource::placeholder_babylon();
-        let common = sut.common();
-        common.set_crypto_parameters(FactorSourceCryptoParameters::babylon_olympia_compatible());
-        sut.set_common(common.clone());
-        assert_eq!(sut.common(), common);
     }
 }
