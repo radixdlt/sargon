@@ -45,7 +45,7 @@ impl Network {
             accounts
                 .get_all()
                 .into_iter()
-                .all(|a| a.network_id() == network_id),
+                .all(|a| a.network_id == network_id),
             "Discrepancy, found accounts on other network than {network_id}"
         );
         Self {

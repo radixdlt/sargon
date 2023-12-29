@@ -25,22 +25,22 @@ use super::{content_hint::ContentHint, device_info::DeviceInfo};
 pub struct Header {
     /// A versioning number that is increased when breaking
     /// changes is made to ProfileSnapshot JSON data format.
-    snapshot_version: ProfileSnapshotVersion,
+    pub snapshot_version: ProfileSnapshotVersion,
 
     /// An immutable and unique identifier of a Profile.
-    id: Uuid,
+    pub id: Uuid,
 
     /// The device which was used to create the Profile.
-    creating_device: DeviceInfo,
+    pub creating_device: DeviceInfo,
 
     /// The device on which the profile was last used.
-    last_used_on_device: DeviceInfo,
+    pub last_used_on_device: DeviceInfo,
 
     /// When the Profile was last modified.
-    last_modified: SystemTime, // FIXME: Now use Timestamp
+    pub last_modified: SystemTime, // FIXME: Now use Timestamp
 
     /// Hint about the contents of the profile, e.g. number of Accounts and Personas.
-    content_hint: ContentHint,
+    pub content_hint: ContentHint,
 }
 
 impl Header {

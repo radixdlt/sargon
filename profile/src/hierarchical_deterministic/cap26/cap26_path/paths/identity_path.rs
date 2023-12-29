@@ -13,16 +13,17 @@ use crate::{
 
 use super::is_entity_path::IsEntityPath;
 
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record)]
 pub struct IdentityPath {
-    path: Arc<HDPath>,
+    pub path: Arc<HDPath>,
 
-    network_id: NetworkID,
+    pub network_id: NetworkID,
 
-    entity_kind: CAP26EntityKind,
+    pub entity_kind: CAP26EntityKind,
 
-    key_kind: CAP26KeyKind,
-    index: HDPathValue,
+    pub key_kind: CAP26KeyKind,
+
+    pub index: HDPathValue,
 }
 
 impl IsEntityPath for IdentityPath {

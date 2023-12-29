@@ -7,19 +7,21 @@ use super::entity_flag::EntityFlag;
 /// An order set of `EntityFlag`s used to describe certain Off-ledger
 /// user state about Accounts or Personas, such as if an entity is
 /// marked as hidden or not.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, uniffi::Object)]
+#[derive(
+    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, uniffi::Object,
+)]
 pub struct EntityFlags(Vec<EntityFlag>); // FIXME: Change to Set
 
 impl EntityFlags {
     /// Instantiates an empty collection of entity flags.
     pub fn new() -> Self {
-        Self(BTreeSet::new())
+        Self(Vec::new())
     }
 
     /// Instantiates a flag collection with the provided Vec<Flag>,
     /// removing any duplicates from `flags` if any.
     pub fn with_flags(flags: Vec<EntityFlag>) -> Self {
-        Self(BTreeSet::from_iter(flags))
+        Self(flags)
     }
 
     /// Instantiates a flag collection with the provided single flag
@@ -43,17 +45,20 @@ impl EntityFlags {
     /// If the set did not previously contain an equal flag, true is returned.
     /// If the set already contained an equal flag, false is returned, and the entry is not updated.
     pub fn insert_flag(&mut self, flag: EntityFlag) -> bool {
-        // self.0.insert(flag) // FIXME: NOW!
-        let contained = self.0.contains(&flag);
-        self.0.append(flag);
-        self.0.dedup();
-        !contained
+        // // self.0.insert(flag) // FIXME: NOW!
+        // let contained = self.0.contains(&flag);
+        // self.0.append(flag);
+        // self.0.dedup();
+        // !contained
+
+        todo!()
     }
 
     /// If the set contains a flag equal to `flag`, removes it from the set and drops it.
     /// Returns whether such a flag was present.
     pub fn remove_flag(&mut self, flag: &EntityFlag) -> bool {
-        self.0.remove(flag)
+        // self.0.remove(flag)
+        todo!()
     }
 
     ///Returns true if the set contains the `flag` equal to the value.

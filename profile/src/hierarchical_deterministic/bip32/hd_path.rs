@@ -15,7 +15,7 @@ pub enum BIP32Error {
     InvalidBIP32Path(String),
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, uniffi::Object)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Object)]
 pub struct HDPath(pub(crate) Vec<HDPathComponent>);
 
 impl HDPath {

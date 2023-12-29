@@ -10,9 +10,9 @@ use crate::{
     Derivation, DerivationPath, DerivationPathScheme, HDPath, HDPathComponent, HDPathValue,
 };
 
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record)]
 pub struct BIP44LikePath {
-    path: Arc<HDPath>,
+    pub path: Arc<HDPath>,
 }
 
 impl BIP44LikePath {

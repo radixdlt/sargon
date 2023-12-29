@@ -27,12 +27,12 @@ pub struct AccountAddress {
     ///
     /// Addresses are checksummed, as per Bech32. **Only** *Account* addresses starts with
     /// the prefix `account_`.
-    address: String,
+    pub address: String,
 
     /// The network this account address is tied to, i.e. which was used when a public key
     /// hash was used to bech32 encode it. This means that two public key hashes will result
     /// in two different account address on two different networks.
-    network_id: NetworkID,
+    pub network_id: NetworkID,
 }
 
 impl AccountAddress {

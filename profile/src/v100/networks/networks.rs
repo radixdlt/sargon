@@ -15,11 +15,11 @@ use identified_vec::Identifiable;
 /// An ordered mapping of NetworkID -> `Profile.Network`, containing
 /// all the users Accounts, Personas and AuthorizedDapps the user
 /// has created and interacted with on this network.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, uniffi::Record)]
+#[derive(Serialize, Deserialize, Clone, Hash, Debug, PartialEq, Eq, uniffi::Record)]
 #[serde(transparent)]
 pub struct Networks {
     // FIXME: Now
-    vec: Vec<Network>,
+    pub vec: Vec<Network>,
 }
 impl Networks {
     pub fn new() -> Self {

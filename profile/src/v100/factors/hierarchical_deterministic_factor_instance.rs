@@ -17,7 +17,7 @@ use super::{FactorInstance, FactorInstanceBadge, FactorSourceID, FactorSourceIDF
 use crate::HasPlaceholder;
 
 /// A virtual hierarchical deterministic `FactorInstance`
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct HierarchicalDeterministicFactorInstance {
     pub factor_source_id: FactorSourceIDFromHash,
     pub public_key: HierarchicalDeterministicPublicKey,

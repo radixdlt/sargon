@@ -11,7 +11,7 @@ use super::{
     DeviceFactorSource, FactorSourceID, FactorSourceKind, IsFactorSource,
     LedgerHardwareWalletFactorSource,
 };
-#[derive(Clone, EnumAsInner, Debug, PartialEq, Eq, uniffi::Enum)]
+#[derive(Clone, EnumAsInner, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
 pub enum FactorSource {
     Device {
         factor: DeviceFactorSource,

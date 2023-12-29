@@ -14,7 +14,7 @@ use crate::HasPlaceholder;
 /// A derivation path design specifically for Radix Babylon wallets used by Accounts and Personas
 /// to be unique per network with separate key spaces for Accounts/Identities (Personas) and key
 /// kind: sign transaction or sign auth.
-#[derive(Clone, Debug, PartialEq, EnumAsInner, Eq, PartialOrd, Ord, uniffi::Enum)]
+#[derive(Clone, Debug, PartialEq, EnumAsInner, Eq, Hash, PartialOrd, Ord, uniffi::Enum)]
 pub enum CAP26Path {
     GetID { value: Arc<GetIDPath> },
     AccountPath { value: AccountPath },
