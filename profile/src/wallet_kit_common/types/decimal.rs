@@ -1,4 +1,4 @@
-use std::{ops::Deref, sync::Arc};
+use std::{ops::Deref, str::FromStr};
 
 use crate::CommonError;
 use radix_engine_common::math::Decimal as NativeDecimal;
@@ -7,8 +7,21 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::fmt::Display;
 
 // FIXME: Use RET's type!
-#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Object, Default)]
-pub struct Decimal(pub(crate) NativeDecimal);
+#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record, Default)]
+pub struct Decimal {
+    base10_string: String,
+}
+
+impl Decimal {
+    fn native(&self) -> NativeDecimal {
+        NativeDecimal::from_str(&self.base10_string).unwrap()
+    }
+    fn from_native(decimal: NativeDecimal) -> Self {
+        Self {
+            base10_string: decimal.to_string(),
+        }
+    }
+}
 
 impl Serialize for Decimal {
     /// Serializes this `HDPath` into its bech32 address string as JSON.
@@ -17,7 +30,7 @@ impl Serialize for Decimal {
     where
         S: Serializer,
     {
-        let dec: SerializableDecimal = self.0.into();
+        let dec: SerializableDecimal = self.native().into();
         SerializableDecimal::serialize(&dec, serializer)
     }
 }
@@ -28,192 +41,176 @@ impl<'de> Deserialize<'de> for Decimal {
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Decimal, D::Error> {
         let s = SerializableDecimal::deserialize(d)?;
         let native: NativeDecimal = *s.deref();
-        Ok(Self(native))
+        Ok(Self::from_native(native))
     }
 }
 
 impl Decimal {
     pub fn try_from_str(s: &str) -> Result<Self, CommonError> {
-        Self::new(s.to_string()).map(|a| a.deref().clone())
+        Self::new(s.to_string())
     }
 }
 
 impl Display for Decimal {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
+        write!(f, "{}", self.native())
     }
 }
 
-#[uniffi::export]
 impl Decimal {
-    #[uniffi::constructor]
-    pub fn new(value: String) -> Result<Arc<Self>, CommonError> {
+    pub fn new(value: String) -> Result<Self, CommonError> {
         value
-            .parse()
-            .map(|value| Arc::new(Self(value)))
+            .parse::<NativeDecimal>()
+            .map(|native| Self::from_native(native))
             .map_err(|_| CommonError::DecimalError)
     }
 
-    #[uniffi::constructor]
-    pub fn max() -> Arc<Self> {
-        Arc::new(Self(NativeDecimal::MAX))
+    pub fn max() -> Self {
+        Self::from_native(NativeDecimal::MAX)
+    }
+
+    pub fn min() -> Self {
+        Self::from_native(NativeDecimal::MIN)
     }
 
     #[uniffi::constructor]
-    pub fn min() -> Arc<Self> {
-        Arc::new(Self(NativeDecimal::MIN))
+    pub fn zero() -> Self {
+        Self::from_native(NativeDecimal::zero())
     }
 
     #[uniffi::constructor]
-    pub fn zero() -> Arc<Self> {
-        Arc::new(Self(NativeDecimal::zero()))
+    pub fn one() -> Self {
+        Self::from_native(NativeDecimal::one())
     }
 
-    #[uniffi::constructor]
-    pub fn one() -> Arc<Self> {
-        Arc::new(Self(NativeDecimal::one()))
-    }
-
-    pub fn add(&self, other: Arc<Self>) -> Result<Arc<Self>, CommonError> {
+    pub fn add(&self, other: Self) -> Result<Self, CommonError> {
         use radix_engine_common::math::CheckedAdd;
-        self.0
-            .checked_add(other.0)
+        self.native()
+            .checked_add(other.native())
             .ok_or(CommonError::DecimalError)
-            .map(Self)
-            .map(Arc::new)
+            .map(Self::from_native)
     }
 
-    pub fn sub(&self, other: Arc<Self>) -> Result<Arc<Self>, CommonError> {
+    pub fn sub(&self, other: Self) -> Result<Self, CommonError> {
         use radix_engine_common::math::CheckedSub;
-        self.0
-            .checked_sub(other.0)
+        self.native()
+            .checked_sub(other.native())
             .ok_or(CommonError::DecimalError)
-            .map(Self)
-            .map(Arc::new)
+            .map(Self::from_native)
     }
 
-    pub fn mul(&self, other: Arc<Self>) -> Result<Arc<Self>, CommonError> {
+    pub fn mul(&self, other: Self) -> Result<Self, CommonError> {
         use radix_engine_common::math::CheckedMul;
-        self.0
-            .checked_mul(other.0)
+        self.native()
+            .checked_mul(other.native())
             .ok_or(CommonError::DecimalError)
-            .map(Self)
-            .map(Arc::new)
+            .map(Self::from_native)
     }
 
-    pub fn div(&self, other: Arc<Self>) -> Result<Arc<Self>, CommonError> {
+    pub fn div(&self, other: Self) -> Result<Self, CommonError> {
         use radix_engine_common::math::CheckedDiv;
-        self.0
-            .checked_div(other.0)
+        self.native()
+            .checked_div(other.native())
             .ok_or(CommonError::DecimalError)
-            .map(Self)
-            .map(Arc::new)
+            .map(Self::from_native)
     }
 
     pub fn as_str(&self) -> String {
-        self.0.to_string()
+        self.native().to_string()
     }
 
     pub fn is_zero(&self) -> bool {
-        self.0.is_zero()
+        self.native().is_zero()
     }
 
     pub fn is_positive(&self) -> bool {
-        self.0.is_positive()
+        self.native().is_positive()
     }
 
     pub fn is_negative(&self) -> bool {
-        self.0.is_negative()
+        self.native().is_negative()
     }
 
-    pub fn abs(&self) -> Result<Arc<Self>, CommonError> {
-        self.0
+    pub fn abs(&self) -> Result<Self, CommonError> {
+        self.native()
             .checked_abs()
             .ok_or(CommonError::DecimalError)
-            .map(Self)
-            .map(Arc::new)
+            .map(Self::from_native)
     }
 
-    pub fn floor(&self) -> Result<Arc<Self>, CommonError> {
-        self.0
+    pub fn floor(&self) -> Result<Self, CommonError> {
+        self.native()
             .checked_floor()
             .ok_or(CommonError::DecimalError)
-            .map(Self)
-            .map(Arc::new)
+            .map(Self::from_native)
     }
 
-    pub fn ceiling(&self) -> Result<Arc<Self>, CommonError> {
-        self.0
+    pub fn ceiling(&self) -> Result<Self, CommonError> {
+        self.native()
             .checked_ceiling()
             .ok_or(CommonError::DecimalError)
-            .map(Self)
-            .map(Arc::new)
+            .map(Self::from_native)
     }
 
     pub fn round(
         &self,
         decimal_places: i32,
         rounding_mode: RoundingMode,
-    ) -> Result<Arc<Self>, CommonError> {
-        self.0
+    ) -> Result<Self, CommonError> {
+        self.native()
             .checked_round(decimal_places, rounding_mode.into())
             .ok_or(CommonError::DecimalError)
-            .map(Self)
-            .map(Arc::new)
+            .map(Self::from_native)
     }
 
-    pub fn powi(&self, exp: i64) -> Result<Arc<Self>, CommonError> {
-        self.0
+    pub fn powi(&self, exp: i64) -> Result<Self, CommonError> {
+        self.native()
             .checked_powi(exp)
-            .map(Self)
-            .map(Arc::new)
+            .map(Self::from_native)
             .ok_or(CommonError::DecimalError)
     }
 
-    pub fn sqrt(&self) -> Option<Arc<Self>> {
-        self.0.checked_sqrt().map(|value| Arc::new(Self(value)))
+    pub fn sqrt(&self) -> Option<Self> {
+        self.native().checked_sqrt().map(Self::from_native)
     }
 
-    pub fn cbrt(&self) -> Result<Arc<Self>, CommonError> {
-        self.0
+    pub fn cbrt(&self) -> Result<Self, CommonError> {
+        self.native()
             .checked_cbrt()
-            .map(Self)
-            .map(Arc::new)
+            .map(Self::from_native)
             .ok_or(CommonError::DecimalError)
     }
 
-    pub fn nth_root(&self, n: u32) -> Option<Arc<Self>> {
-        self.0
-            .checked_nth_root(n)
-            .map(|value| Arc::new(Self(value)))
+    pub fn nth_root(&self, n: u32) -> Option<Self> {
+        self.native().checked_nth_root(n).map(Self::from_native)
     }
 
-    pub fn equal(&self, other: Arc<Self>) -> bool {
-        self.0.eq(&other.0)
+    pub fn equal(&self, other: Self) -> bool {
+        self.native().eq(&other.native())
     }
 
-    pub fn not_equal(&self, other: Arc<Self>) -> bool {
-        self.0.ne(&other.0)
+    pub fn not_equal(&self, other: Self) -> bool {
+        self.native().ne(&other.native())
     }
 
-    pub fn greater_than(&self, other: Arc<Self>) -> bool {
-        self.0.gt(&other.0)
+    pub fn greater_than(&self, other: Self) -> bool {
+        self.native().gt(&other.native())
     }
 
-    pub fn greater_than_or_equal(&self, other: Arc<Self>) -> bool {
-        self.0.ge(&other.0)
+    pub fn greater_than_or_equal(&self, other: Self) -> bool {
+        self.native().ge(&other.native())
     }
 
-    pub fn less_than(&self, other: Arc<Self>) -> bool {
-        self.0.lt(&other.0)
+    pub fn less_than(&self, other: Self) -> bool {
+        self.native().lt(&other.native())
     }
 
-    pub fn less_than_or_equal(&self, other: Arc<Self>) -> bool {
-        self.0.le(&other.0)
+    pub fn less_than_or_equal(&self, other: Self) -> bool {
+        self.native().le(&other.native())
     }
 
     pub fn mantissa(&self) -> String {
-        self.0 .0.to_string()
+        self.native().0.to_string()
     }
 }
 
@@ -249,5 +246,22 @@ impl From<RoundingMode> for radix_engine_common::math::RoundingMode {
                 radix_engine_common::math::RoundingMode::ToNearestMidpointToEven
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Decimal;
+
+    #[test]
+    fn add() {
+        let a =
+            Decimal::try_from_str("3138550867693340381917894711603833208051.177722232017256447")
+                .unwrap();
+        let b =
+            Decimal::try_from_str("3036550867693340381917894711603833208050.177722232017256447")
+                .unwrap();
+        let c = Decimal::try_from_str("102000000000000000000000000000000000001");
+        assert_eq!(a.sub(b), c);
     }
 }

@@ -12,7 +12,7 @@ use crate::HasPlaceholder;
 pub struct Transaction {
     /// The deposit guarantee that will automatically be added for
     /// all deposits in transactions.
-    pub default_deposit_guarantee: Arc<Decimal>,
+    pub default_deposit_guarantee: Decimal,
 }
 
 impl Transaction {
@@ -20,7 +20,7 @@ impl Transaction {
     /// specified `default_deposit_guarantee` value.
     pub fn new(default_deposit_guarantee: Decimal) -> Self {
         Self {
-            default_deposit_guarantee: Arc::new(default_deposit_guarantee),
+            default_deposit_guarantee,
         }
     }
 }
@@ -71,7 +71,7 @@ mod tests {
     #[test]
     fn get_decimal() {
         let value = Decimal::new("0.975".to_string()).unwrap();
-        let sut = Transaction::new(value.deref().clone());
+        let sut = Transaction::new(value.clone());
         assert_eq!(sut.default_deposit_guarantee, value)
     }
 
