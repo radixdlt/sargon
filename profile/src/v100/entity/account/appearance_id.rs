@@ -11,7 +11,7 @@ pub struct AppearanceID {
 
 impl AppearanceID {
     pub fn new(value: u8) -> Result<Self, CommonError> {
-        if value >= 11 {
+        if value > 11 {
             return Err(CommonError::InvalidAppearanceID);
         }
         Ok(Self { value })

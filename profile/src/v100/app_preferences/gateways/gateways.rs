@@ -23,6 +23,11 @@ pub struct Gateways {
     pub other: Vec<Gateway>,
 }
 
+#[uniffi::export]
+pub fn new_gateways(current: Gateway) -> Gateways {
+    Gateways::new(current)
+}
+
 impl Gateways {
     fn other_identified(&self) -> IdentifiedVecOf<Gateway> {
         let other_vec = self.other.clone();
@@ -99,14 +104,6 @@ impl Gateways {
             return Err(CommonError::GatewaysDiscrepancyOtherShouldNotContainCurrent);
         }
         Ok(Self { current, other })
-    }
-}
-
-#[uniffi::export]
-impl Gateways {
-    #[uniffi::constructor]
-    pub fn with_current(current: Gateway) -> Self {
-        Self::new(current)
     }
 }
 

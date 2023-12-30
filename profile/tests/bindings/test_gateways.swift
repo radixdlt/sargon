@@ -2,8 +2,8 @@ import radix_wallet_kit
 
 func test() throws {
 	let mainnet = gatewayMainnet()
-	let gateways = Gateways.withCurrent(current: mainnet)
-	assert(gateways.getCurrent().getNetwork().id() == .mainnet)
+	let gateways = newGateways(current: mainnet)
+	assert(gateways.current.network.id == .mainnet)
 }
 
 try! test()

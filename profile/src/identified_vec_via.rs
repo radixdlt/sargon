@@ -11,37 +11,6 @@ pub struct IdentifiedVecVia<Element: Identifiable + Debug + Clone> {
     id_vec: IdentifiedVecOf<Element>,
 }
 
-// // https://github.com/mozilla/uniffi-rs/issues/1606#issuecomment-1598914207
-// // https://github.com/MathieuTricoire/convex-rs-ffi/blob/2a25bc9d593ade508c1c16a0ab6174fd6c980d53/convex-ffi/src/lib.rs#L81-L112
-// unsafe impl<UT, Element: Identifiable + Debug + Clone> uniffi::FfiConverter<UT>
-//     for IdentifiedVecVia<Element>
-// {
-//     uniffi::ffi_converter_rust_buffer_lift_and_lower!(Element);
-
-//     fn write(obj: Self, buf: &mut Vec<u8>) {
-//         let len = i32::try_from(obj.len()).unwrap();
-//         buf.put_i32(len);
-//         for element in obj.0.items() {
-//             <Element as uniffi::FfiConverter<UT>>::write(element, buf);
-//         }
-//     }
-
-//     fn try_read(buf: &mut &[u8]) -> uniffi::Result<Self> {
-//         uniffi::check_remaining(buf, 4)?;
-//         let len = usize::try_from(buf.get_i32())?;
-//         let mut identified_vec_via = IdentifiedVecVia::<Element>::new();
-//         for _ in 0..len {
-//             let element = <Element as uniffi::FfiConverter<UT>>::try_read(buf)?;
-//             identified_vec_via.append(element)
-//         }
-//         Ok(identified_vec_via)
-//     }
-
-//     const TYPE_ID_META: uniffi::MetadataBuffer =
-//         uniffi::MetadataBuffer::from_code(uniffi::metadata::codes::TYPE_HASH_MAP)
-//             .concat(<Element as uniffi::FfiConverter<UT>>::TYPE_ID_META);
-// }
-
 impl<Element: Identifiable + Debug + Clone> ViaMarker for IdentifiedVecVia<Element> {}
 impl<Element: Identifiable + Debug + Clone> IsIdentifiableVecOfVia<Element>
     for IdentifiedVecVia<Element>

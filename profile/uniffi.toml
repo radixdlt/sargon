@@ -62,7 +62,7 @@ type_name = "Date"
 # Modules that need to be imported
 imports = ["Foundation"]
 # Functions to convert between strings and URLs
-into_custom = "{let df = DateFormatter();df.dateFormat = \"yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ\";return df.date(from: {})}()"
+into_custom = "{let df = DateFormatter();df.dateFormat = \"yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ\";return df.date(from: {})!}()"
 from_custom = "{let df = DateFormatter();df.dateFormat = \"yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ\";return df.string(from: {})}()"
 
 [bindings.kotlin.custom_types.Timestamp]

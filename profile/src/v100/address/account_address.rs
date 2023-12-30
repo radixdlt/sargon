@@ -1,7 +1,7 @@
 use serde::{de, Deserializer, Serialize, Serializer};
 use std::fmt::Display;
 
-use crate::{suffix_string, PublicKey};
+use crate::{suffix_string, CommonError, PublicKey};
 
 use crate::{v100::AbstractEntityType, NetworkID};
 
@@ -35,14 +35,38 @@ pub struct AccountAddress {
     pub network_id: NetworkID,
 }
 
+/// Formats the AccountAddress to its abbreviated form which is what the user
+/// is most used to, since it is what we most commonly display in the Radix
+/// ecosystem.
+///
+/// The abbreviated form returns:
+///
+/// `acco...please`
+///
+/// For the account address:
+///
+/// `account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease`
+///
+#[uniffi::export]
+pub fn account_address_to_short(address: &AccountAddress) -> String {
+    address.short()
+}
+
+#[uniffi::export]
+pub fn new_account_address(bech32: String) -> Result<AccountAddress, CommonError> {
+    AccountAddress::try_from_bech32(bech32.as_str())
+}
+
+#[uniffi::export]
+pub fn new_account_address_from(public_key: PublicKey, network_id: NetworkID) -> AccountAddress {
+    AccountAddress::new(public_key, network_id)
+}
+
 impl AccountAddress {
     pub fn new(public_key: PublicKey, network_id: NetworkID) -> Self {
         <Self as EntityAddress>::from_public_key(public_key, network_id).into()
     }
-}
 
-// #[uniffi::export]
-impl AccountAddress {
     /// Formats the AccountAddress to its abbreviated form which is what the user
     /// is most used to, since it is what we most commonly display in the Radix
     /// ecosystem.
@@ -106,14 +130,6 @@ impl TryInto<AccountAddress> for &str {
     /// Tries to deserializes a bech32 address into an `AccountAddress`.
     fn try_into(self) -> Result<AccountAddress, Self::Error> {
         AccountAddress::try_from_bech32(self)
-    }
-}
-
-#[uniffi::export]
-impl AccountAddress {
-    #[uniffi::constructor]
-    pub fn from_bech32(string: String) -> Result<Self, crate::CommonError> {
-        Self::try_from_bech32(string.as_str()).map(|a| a.into())
     }
 }
 
@@ -215,18 +231,6 @@ mod tests {
         .unwrap();
         assert_eq!(
             format!("{}", a),
-            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
-        );
-    }
-
-    #[test]
-    fn from_bech32() {
-        let a = AccountAddress::from_bech32(
-            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease".to_string(),
-        )
-        .unwrap();
-        assert_eq!(
-            a.address,
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
         );
     }

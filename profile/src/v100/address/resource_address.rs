@@ -15,11 +15,8 @@ pub struct ResourceAddress {
 }
 
 #[uniffi::export]
-impl ResourceAddress {
-    #[uniffi::constructor]
-    fn from_bech32(string: String) -> Result<ResourceAddress, crate::CommonError> {
-        ResourceAddress::try_from_bech32(&string).map(|a| a.into())
-    }
+pub fn new_resource_address(bech32: String) -> Result<ResourceAddress, CommonError> {
+    ResourceAddress::try_from_bech32(bech32.as_str())
 }
 
 impl ResourceAddress {
@@ -115,19 +112,6 @@ mod tests {
         assert_json_value_ne_after_roundtrip(
             &a,
             json!("resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"),
-        );
-    }
-
-    #[test]
-    fn getters() {
-        let a = ResourceAddress::from_bech32(
-            "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd".to_string(),
-        )
-        .unwrap();
-        assert_eq!(a.network_id, NetworkID::Mainnet);
-        assert_eq!(
-            a.address,
-            "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
         );
     }
 
