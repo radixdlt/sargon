@@ -1,9 +1,7 @@
 use std::{fmt::Display, time::SystemTime};
 
-#[cfg(any(test, feature = "placeholder"))]
 use std::str::FromStr;
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 use iso8601_timestamp::Timestamp;
@@ -41,6 +39,15 @@ pub struct Header {
 
     /// Hint about the contents of the profile, e.g. number of Accounts and Personas.
     pub content_hint: ContentHint,
+}
+
+#[uniffi::export]
+pub fn new_header_placeholder() -> Header {
+    Header::placeholder()
+}
+#[uniffi::export]
+pub fn new_header_placeholder_other() -> Header {
+    Header::placeholder_other()
 }
 
 impl Header {
@@ -91,7 +98,6 @@ pub fn to_system_time(timestamp: Timestamp) -> SystemTime {
     timestamp.into()
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for Header {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {

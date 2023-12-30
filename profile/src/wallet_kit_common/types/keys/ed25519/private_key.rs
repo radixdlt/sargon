@@ -7,7 +7,6 @@ use super::public_key::Ed25519PublicKey;
 use crate::{Hex32Bytes, KeyError as Error};
 use std::fmt::{Debug, Formatter};
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 /// An Ed25519 private key used to create cryptographic signatures, using
@@ -103,7 +102,6 @@ impl TryInto<Ed25519PrivateKey> for &str {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for Ed25519PrivateKey {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
@@ -116,7 +114,6 @@ impl HasPlaceholder for Ed25519PrivateKey {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl Ed25519PrivateKey {
     /// `833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42`
     ///

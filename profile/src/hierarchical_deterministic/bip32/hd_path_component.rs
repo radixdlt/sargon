@@ -2,32 +2,33 @@ const BIP32_HARDENED: u32 = 2147483648;
 
 pub type HDPathValue = u32;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct HDPathComponent(HDPathValue);
+#[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record)]
+pub struct HDPathComponent {
+    pub value: HDPathValue,
+}
 
 impl HDPathComponent {
     pub(crate) fn index(&self) -> HDPathValue {
         if self.is_hardened() {
-            self.0 - BIP32_HARDENED
+            self.value - BIP32_HARDENED
         } else {
-            self.0
+            self.value
         }
-    }
-    pub fn value(&self) -> HDPathValue {
-        self.0
     }
 
     pub(crate) fn is_hardened(&self) -> bool {
-        self.0 >= BIP32_HARDENED
+        self.value >= BIP32_HARDENED
     }
 
     pub(crate) fn from_value(value: HDPathValue) -> Self {
-        Self(value)
+        Self { value }
     }
 
     pub(crate) fn harden(value: HDPathValue) -> Self {
         assert!(value < BIP32_HARDENED);
-        Self(value + BIP32_HARDENED)
+        Self {
+            value: value + BIP32_HARDENED,
+        }
     }
 }
 

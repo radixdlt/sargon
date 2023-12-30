@@ -1,10 +1,7 @@
-use std::sync::Arc;
-
 use crate::{hash, Hex32Bytes};
 use radix_engine_common::crypto::Hash;
 use serde::{Deserialize, Serialize};
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 /// The hash of the connection password is used to connect to the Radix Connect Signaling Server,
@@ -15,7 +12,7 @@ use crate::HasPlaceholder;
 )]
 #[serde(transparent)]
 pub struct RadixConnectPassword {
-    bytes: Arc<Hex32Bytes>,
+    bytes: Hex32Bytes,
 }
 
 impl RadixConnectPassword {
@@ -30,7 +27,6 @@ impl RadixConnectPassword {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for RadixConnectPassword {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
@@ -42,7 +38,6 @@ impl HasPlaceholder for RadixConnectPassword {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl RadixConnectPassword {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_aced() -> Self {

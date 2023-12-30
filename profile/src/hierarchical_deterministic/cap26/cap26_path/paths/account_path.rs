@@ -1,9 +1,6 @@
-use std::sync::Arc;
-
 use crate::HDPathError;
 use serde::{de, Deserializer, Serialize, Serializer};
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 use crate::{
@@ -15,7 +12,7 @@ use super::is_entity_path::IsEntityPath;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record)]
 pub struct AccountPath {
-    pub path: Arc<HDPath>,
+    pub path: HDPath,
 
     pub network_id: NetworkID,
 
@@ -70,7 +67,6 @@ impl CAP26Repr for AccountPath {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for AccountPath {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {

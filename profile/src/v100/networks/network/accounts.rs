@@ -2,7 +2,6 @@ use crate::v100::{Account, AccountAddress};
 use identified_vec::Identifiable;
 use serde::{Deserialize, Serialize};
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 // pub type Accounts = IdentifiedVecVia<Account>;
@@ -91,7 +90,6 @@ impl Accounts {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for Accounts {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
@@ -103,7 +101,7 @@ impl HasPlaceholder for Accounts {
         Self::placeholder_stokenet()
     }
 }
-#[cfg(any(test, feature = "placeholder"))]
+
 impl Accounts {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_mainnet() -> Self {

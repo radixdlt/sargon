@@ -2,7 +2,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::v100::AccountAddress;
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 use super::factor_source_kind::FactorSourceKind;
@@ -24,7 +23,6 @@ impl FactorSourceIDFromAddress {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for FactorSourceIDFromAddress {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {

@@ -12,7 +12,7 @@ use crate::v100::{NonFungibleGlobalId, ResourceAddress};
 #[serde(tag = "discriminator", content = "value")]
 pub enum DepositorAddress {
     ResourceAddress { value: ResourceAddress },
-    NonFungibleGlobalID { value: Arc<NonFungibleGlobalId> },
+    NonFungibleGlobalID { value: NonFungibleGlobalId },
 }
 
 #[cfg(test)]

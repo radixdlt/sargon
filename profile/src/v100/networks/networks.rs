@@ -2,7 +2,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::v100::{Account, AccountAddress, ContentHint};
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 use super::Network;
@@ -120,7 +119,6 @@ impl Default for Networks {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for Networks {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {

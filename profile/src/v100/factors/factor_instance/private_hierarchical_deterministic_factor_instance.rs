@@ -4,7 +4,6 @@ use crate::v100::factors::factor_source_id::FactorSourceID;
 
 use super::factor_instance::FactorInstance;
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 /// An ephemeral (never persisted) HD FactorInstance which contains
@@ -47,7 +46,6 @@ impl PrivateHierarchicalDeterministicFactorInstance {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for PrivateHierarchicalDeterministicFactorInstance {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {

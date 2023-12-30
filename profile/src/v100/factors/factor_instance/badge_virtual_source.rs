@@ -1,6 +1,5 @@
 use crate::HierarchicalDeterministicPublicKey;
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
@@ -61,7 +60,6 @@ impl Serialize for FactorInstanceBadgeVirtualSource {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for FactorInstanceBadgeVirtualSource {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {

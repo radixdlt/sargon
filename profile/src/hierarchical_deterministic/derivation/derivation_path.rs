@@ -3,11 +3,8 @@ use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializ
 use super::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme};
 use crate::{AccountPath, BIP44LikePath, CAP26Path, CommonError, GetIDPath, HDPath, IdentityPath};
 use enum_as_inner::EnumAsInner;
-use std::{
-    fmt::{Debug, Formatter},
-};
+use std::fmt::{Debug, Formatter};
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 /// A derivation path on either supported schemes, either Babylon (CAP26) or Olympia (BIP44Like).
@@ -73,7 +70,6 @@ impl Serialize for DerivationPath {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for DerivationPath {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
@@ -106,7 +102,6 @@ impl Derivation for DerivationPath {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl DerivationPath {
     pub fn placeholder_cap26() -> Self {
         DerivationPath::CAP26 {

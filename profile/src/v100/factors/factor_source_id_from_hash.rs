@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use crate::Hex32Bytes;
 use crate::{GetIDPath, MnemonicWithPassphrase};
 use radix_engine_common::crypto::{blake2b_256_hash, Hash};
@@ -7,7 +5,6 @@ use serde::{Deserialize, Serialize};
 
 use super::factor_source_kind::FactorSourceKind;
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 /// FactorSourceID from the blake2b hash of the special HD public key derived at `CAP26::GetID`,
@@ -20,7 +17,7 @@ pub struct FactorSourceIDFromHash {
     pub kind: FactorSourceKind,
 
     /// The blake2b hash of the special HD public key derived at `CAP26::GetID`.
-    pub body: Arc<Hex32Bytes>,
+    pub body: Hex32Bytes,
 }
 
 impl ToString for FactorSourceIDFromHash {
@@ -54,7 +51,6 @@ impl FactorSourceIDFromHash {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for FactorSourceIDFromHash {
     /// A placeholder used to facilitate unit tests, just an alias
     /// for `placeholder_device`
@@ -67,7 +63,6 @@ impl HasPlaceholder for FactorSourceIDFromHash {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl FactorSourceIDFromHash {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_device() -> Self {

@@ -2,13 +2,13 @@ use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializ
 
 use enum_as_inner::EnumAsInner;
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 use super::{
     DeviceFactorSource, FactorSourceID, FactorSourceKind, IsFactorSource,
     LedgerHardwareWalletFactorSource,
 };
+
 #[derive(Clone, EnumAsInner, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
 pub enum FactorSource {
     Device {
@@ -91,7 +91,6 @@ impl Serialize for FactorSource {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for FactorSource {
     fn placeholder() -> Self {
         Self::placeholder_device()
@@ -102,7 +101,6 @@ impl HasPlaceholder for FactorSource {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl FactorSource {
     pub fn placeholder_device() -> Self {
         Self::placeholder_device_babylon()

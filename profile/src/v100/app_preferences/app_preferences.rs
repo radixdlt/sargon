@@ -2,7 +2,6 @@ use serde::{Deserialize, Serialize};
 
 use super::{AppDisplay, Gateways, P2PLinks, Security, Transaction};
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 /// Collection of all settings, preferences and configuration related to how the wallet
@@ -22,13 +21,22 @@ pub struct AppPreferences {
     /// Collection of clients user have connected P2P with, typically these
     /// are WebRTC connections with DApps, but might be Android or iPhone
     /// clients as well.
-    p2p_links: P2PLinks, // FIXME: NOW!
+    pub p2p_links: P2PLinks, // FIXME: NOW!
 
     /// Controls e.g. if Profile Snapshot gets synced to iCloud/Google backup or not.
     pub security: Security,
 
     /// Default config related to making of transactions
     pub transaction: Transaction,
+}
+
+#[uniffi::export]
+pub fn new_app_preferences_placeholder() -> AppPreferences {
+    AppPreferences::placeholder()
+}
+#[uniffi::export]
+pub fn new_app_preferences_placeholder_other() -> AppPreferences {
+    AppPreferences::placeholder_other()
 }
 
 impl AppPreferences {
@@ -49,7 +57,6 @@ impl AppPreferences {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for AppPreferences {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {

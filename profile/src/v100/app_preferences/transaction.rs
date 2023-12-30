@@ -3,7 +3,7 @@ use std::sync::Arc;
 use serde::{Deserialize, Serialize};
 
 use crate::Decimal;
-#[cfg(any(test, feature = "placeholder"))]
+
 use crate::HasPlaceholder;
 
 /// User Preferences relating to submission of transactions.
@@ -34,7 +34,6 @@ impl Default for Transaction {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for Transaction {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {

@@ -1,4 +1,4 @@
-use std::{cmp::Ordering, ops::Deref, sync::Arc};
+use std::cmp::Ordering;
 
 use crate::HDPathError as Error;
 use memoize::memoize;
@@ -41,7 +41,7 @@ impl From<BIP39Language> for bip39::Language {
 #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct BIP39Word {
     pub word: String,
-    pub index: Arc<U11>,
+    pub index: U11,
     pub language: BIP39Language,
 }
 
@@ -79,7 +79,7 @@ fn index_of_word_in_bip39_wordlist_of_language(
 ) -> Option<U11> {
     language
         .find_word(word)
-        .map(|i| U11::new(i).expect("Less than 2048").deref().clone())
+        .map(|i| U11::new(i).expect("Less than 2048"))
 }
 
 #[cfg(test)]
@@ -115,14 +115,7 @@ mod tests {
 
     #[test]
     fn index_of_zoo_is_2047() {
-        assert_eq!(
-            BIP39Word::english("zoo")
-                .unwrap()
-                .index
-                .clone()
-                .into_inner(),
-            2047
-        );
+        assert_eq!(BIP39Word::english("zoo").unwrap().index.clone().inner, 2047);
     }
 
     #[test]

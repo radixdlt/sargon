@@ -5,7 +5,6 @@ use super::{
 use enum_as_inner::EnumAsInner;
 use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 /// A unique and stable identifier of a FactorSource, e.g. a
@@ -75,7 +74,6 @@ impl Serialize for FactorSourceID {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for FactorSourceID {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {

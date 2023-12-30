@@ -1,7 +1,6 @@
 use identified_vec::Identifiable;
 use serde::{Deserialize, Serialize};
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 use crate::v100::factors::{
@@ -24,6 +23,16 @@ pub struct FactorSources {
     // FIXME: Now
     pub vec: Vec<FactorSource>,
 }
+
+#[uniffi::export]
+pub fn new_factor_sources_placeholder() -> FactorSources {
+    FactorSources::placeholder()
+}
+#[uniffi::export]
+pub fn new_factor_sources_placeholder_other() -> FactorSources {
+    FactorSources::placeholder_other()
+}
+
 impl FactorSources {
     pub fn new() -> Self {
         Self { vec: Vec::new() }
@@ -70,7 +79,6 @@ impl FactorSources {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for FactorSources {
     fn placeholder() -> Self {
         Self::from_iter([

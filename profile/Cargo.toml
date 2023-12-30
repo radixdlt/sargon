@@ -18,6 +18,7 @@ strum = { workspace = true }
 radix-engine-common = { workspace = true }
 radix-engine-toolkit-json = { workspace = true }
 radix-engine-toolkit = { workspace = true }
+radix-engine-interface = { workspace = true }
 enum-iterator = { workspace = true }
 hex = { workspace = true }
 transaction = { workspace = true }
@@ -38,7 +39,6 @@ memoize = "0.4.1"
 itertools = { version = "0.12.0" }
 bip39 = { version = "2.0.0", features = ["serde"] }
 time-util = { version = "0.3.4", features = ["chrono"] }
-
 
 [build-dependencies]
 uniffi = { workspace = true, features = ["build"] }

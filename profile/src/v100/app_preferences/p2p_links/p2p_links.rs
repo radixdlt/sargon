@@ -4,7 +4,6 @@ use serde::{Deserialize, Serialize};
 
 use super::p2p_link::P2PLink;
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 // pub type P2PLinks = IdentifiedVecVia<P2PLink>;
@@ -48,7 +47,6 @@ impl Default for P2PLinks {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for P2PLinks {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {

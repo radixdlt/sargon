@@ -3,7 +3,7 @@ use std::fmt::Debug;
 use serde::{Deserialize, Serialize};
 
 use crate::CommonError;
-#[cfg(any(test, feature = "placeholder"))]
+
 use crate::HasPlaceholder;
 
 use super::{
@@ -36,6 +36,16 @@ pub struct Profile {
     /// all the users Accounts, Personas and AuthorizedDapps the user
     /// has created and interacted with on this network.
     pub networks: Networks,
+}
+
+#[uniffi::export]
+pub fn new_profile_placeholder() -> Profile {
+    Profile::placeholder()
+}
+
+#[uniffi::export]
+pub fn new_profile_placeholder_other() -> Profile {
+    Profile::placeholder_other()
 }
 
 impl Profile {
@@ -89,7 +99,6 @@ impl Profile {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for Profile {
     fn placeholder() -> Self {
         let networks = Networks::placeholder();

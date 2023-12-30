@@ -1,8 +1,7 @@
-#[cfg(any(test, feature = "placeholder"))]
 use crate::v100::factors::factor_source_kind::FactorSourceKind;
-#[cfg(any(test, feature = "placeholder"))]
+
 use crate::NetworkID;
-#[cfg(any(test, feature = "placeholder"))]
+
 use crate::{AccountPath, CAP26Repr, HDPathValue, MnemonicWithPassphrase};
 use crate::{
     CAP26KeyKind, CAP26Path, DerivationPath, HierarchicalDeterministicPublicKey, IsEntityPath,
@@ -12,7 +11,6 @@ use serde::{de, Deserializer, Serialize, Serializer};
 
 use super::{FactorInstance, FactorInstanceBadge, FactorSourceID, FactorSourceIDFromHash};
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 /// A virtual hierarchical deterministic `FactorInstance`
@@ -121,7 +119,6 @@ impl<'de> serde::Deserialize<'de> for HierarchicalDeterministicFactorInstance {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for HierarchicalDeterministicFactorInstance {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
@@ -133,7 +130,6 @@ impl HasPlaceholder for HierarchicalDeterministicFactorInstance {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HierarchicalDeterministicFactorInstance {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_transaction_signing_0() -> Self {

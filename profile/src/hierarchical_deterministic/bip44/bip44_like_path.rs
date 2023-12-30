@@ -1,9 +1,6 @@
-use std::sync::Arc;
-
 use crate::HDPathError;
 use serde::{de, Deserializer, Serialize, Serializer};
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 use crate::{
@@ -12,14 +9,12 @@ use crate::{
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record)]
 pub struct BIP44LikePath {
-    pub path: Arc<HDPath>,
+    pub path: HDPath,
 }
 
 impl BIP44LikePath {
     pub fn from(path: HDPath) -> Self {
-        Self {
-            path: Arc::new(path),
-        }
+        Self { path }
     }
 }
 
@@ -113,7 +108,6 @@ impl TryInto<BIP44LikePath> for &str {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for BIP44LikePath {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {

@@ -1,7 +1,6 @@
 use identified_vec::Identifiable;
 use serde::{Deserialize, Serialize};
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 use crate::{
@@ -66,7 +65,7 @@ impl Network {
 }
 
 // CFG test
-#[cfg(any(test, feature = "placeholder"))]
+
 impl HasPlaceholder for Network {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
@@ -79,7 +78,6 @@ impl HasPlaceholder for Network {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl Network {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_mainnet() -> Self {

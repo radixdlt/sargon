@@ -3,15 +3,13 @@ use serde::{Deserialize, Serialize};
 
 use crate::DerivationPath;
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::{
     AccountPath, BIP44LikePath, CAP26KeyKind, CAP26Repr, Derivation, Mnemonic,
     MnemonicWithPassphrase,
 };
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
-#[cfg(any(test, feature = "placeholder"))]
+
 use crate::NetworkID;
 
 /// The **source** of a virtual hierarchical deterministic badge, contains a
@@ -48,7 +46,6 @@ impl HierarchicalDeterministicPublicKey {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for HierarchicalDeterministicPublicKey {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {

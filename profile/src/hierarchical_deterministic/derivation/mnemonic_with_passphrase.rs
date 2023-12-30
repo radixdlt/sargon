@@ -7,7 +7,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::HDPathError as Error;
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 /// A BIP39 Mnemonic and BIP39 passphrase - aka "25th word" tuple,
@@ -42,7 +41,6 @@ impl MnemonicWithPassphrase {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for MnemonicWithPassphrase {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
@@ -63,9 +61,9 @@ impl MnemonicWithPassphrase {
 
     fn derive_ed25519_private_key(seed: &Seed, path: &HDPath) -> Ed25519PrivateKey {
         let chain = slip10::BIP32Path::from(
-            path.components()
-                .into_iter()
-                .map(|c| c.value())
+            path.components
+                .iter()
+                .map(|c| c.value.clone())
                 .collect_vec(),
         );
 

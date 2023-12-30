@@ -3,7 +3,6 @@ use serde::{Deserialize, Serialize};
 use crate::v100::{HDFactorInstanceAccountCreation, HierarchicalDeterministicFactorInstance};
 use crate::CommonError as Error;
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 /// Basic security control of an unsecured entity. When said entity
@@ -64,7 +63,6 @@ impl UnsecuredEntityControl {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for UnsecuredEntityControl {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {

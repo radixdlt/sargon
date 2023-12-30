@@ -8,10 +8,8 @@ use std::{
 };
 use transaction::{signing::ed25519::Ed25519Signature, validation::verify_ed25519};
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::Ed25519PrivateKey;
 
 /// An Ed25519 public key used to verify cryptographic signatures (EdDSA signatures).
@@ -100,7 +98,6 @@ impl Debug for Ed25519PublicKey {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for Ed25519PublicKey {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
@@ -112,7 +109,6 @@ impl HasPlaceholder for Ed25519PublicKey {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl Ed25519PublicKey {
     pub fn placeholder_alice() -> Self {
         Ed25519PrivateKey::placeholder_alice().public_key()

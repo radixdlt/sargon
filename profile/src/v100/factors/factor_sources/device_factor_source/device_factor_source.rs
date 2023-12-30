@@ -6,7 +6,6 @@ use crate::v100::{
     IsFactorSource,
 };
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 use super::device_factor_source_hint::DeviceFactorSourceHint;
@@ -85,7 +84,6 @@ impl DeviceFactorSource {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for DeviceFactorSource {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
@@ -98,7 +96,6 @@ impl HasPlaceholder for DeviceFactorSource {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl DeviceFactorSource {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_babylon() -> Self {

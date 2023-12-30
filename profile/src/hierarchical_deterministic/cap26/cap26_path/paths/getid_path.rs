@@ -6,8 +6,10 @@ use crate::{Derivation, DerivationPath, DerivationPathScheme, HDPath, HDPathValu
 /// Use it with `GetIDPath::default()` to create the path `m/44'/1022'/365'`
 /// which is used by all hierarchal deterministic factor sources to derive
 /// the special root key which we hash to form the `FactorSourceIDFromHash`
-#[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Object)]
-pub struct GetIDPath(pub(crate) HDPath);
+#[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record)]
+pub struct GetIDPath {
+    pub path: HDPath,
+}
 
 impl Derivation for GetIDPath {
     fn derivation_path(&self) -> DerivationPath {
@@ -16,7 +18,7 @@ impl Derivation for GetIDPath {
         }
     }
     fn hd_path(&self) -> &HDPath {
-        &self.0
+        &self.path
     }
     fn scheme(&self) -> DerivationPathScheme {
         DerivationPathScheme::Cap26
@@ -25,7 +27,9 @@ impl Derivation for GetIDPath {
 
 impl Default for GetIDPath {
     fn default() -> Self {
-        Self(HDPath::from_str("m/44H/1022H/365H").expect("Valid path"))
+        Self {
+            path: HDPath::from_str("m/44H/1022H/365H").expect("Valid path"),
+        }
     }
 }
 
@@ -44,7 +48,7 @@ impl TryFrom<&HDPath> for GetIDPath {
             return Err(InvalidGetIDPath(value));
         }
         let hd_path = HDPath::from_components(components);
-        assert!(Self(hd_path) == Self::default());
+        assert_eq!(Self { path: hd_path }, Self::default());
         return Ok(Self::default());
     }
 }

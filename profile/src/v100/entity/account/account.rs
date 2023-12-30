@@ -1,4 +1,3 @@
-#[cfg(any(test, feature = "placeholder"))]
 use crate::{HDPathValue, MnemonicWithPassphrase};
 
 use crate::{Derivation, HasEntityPath};
@@ -6,9 +5,8 @@ use identified_vec::Identifiable;
 use serde::{Deserialize, Serialize};
 use std::{cmp::Ordering, fmt::Display};
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::v100::{DeviceFactorSource, PrivateHierarchicalDeterministicFactorSource};
-#[cfg(any(test, feature = "placeholder"))]
+
 use crate::HasPlaceholder;
 
 use std::hash::Hash;
@@ -153,7 +151,6 @@ impl Display for Account {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for Account {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
@@ -166,7 +163,6 @@ impl HasPlaceholder for Account {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl Account {
     /// Instantiates an account with a display name, address and appearance id.
     pub fn placeholder_with_values(

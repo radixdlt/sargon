@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 /// Settings related to displaying of information to the user inside the app.
@@ -26,7 +25,6 @@ impl Default for AppDisplay {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for AppDisplay {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {

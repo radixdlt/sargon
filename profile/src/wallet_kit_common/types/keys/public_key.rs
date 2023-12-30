@@ -8,7 +8,6 @@ use radix_engine_common::crypto::PublicKey as EnginePublicKey;
 
 use enum_as_inner::EnumAsInner;
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 /// A tagged union of supported public keys on different curves, supported
@@ -104,7 +103,6 @@ impl PublicKey {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for PublicKey {
     fn placeholder() -> Self {
         Self::placeholder_ed25519_alice()
@@ -115,7 +113,6 @@ impl HasPlaceholder for PublicKey {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl PublicKey {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_secp256k1() -> Self {

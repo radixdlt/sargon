@@ -4,7 +4,6 @@ use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializ
 use super::badge_virtual_source::FactorInstanceBadgeVirtualSource;
 use enum_as_inner::EnumAsInner;
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 /// Either a "physical" badge (NFT) or some source for recreation of a producer
@@ -19,7 +18,6 @@ pub enum FactorInstanceBadge {
     },
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for FactorInstanceBadge {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {

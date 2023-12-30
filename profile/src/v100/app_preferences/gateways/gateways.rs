@@ -6,7 +6,6 @@ use identified_vec::{
 };
 use serde::{de, ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 /// The currently used Gateway and a collection of other by user added
@@ -26,6 +25,15 @@ pub struct Gateways {
 #[uniffi::export]
 pub fn new_gateways(current: Gateway) -> Gateways {
     Gateways::new(current)
+}
+
+#[uniffi::export]
+pub fn new_gateways_placeholder() -> Gateways {
+    Gateways::placeholder()
+}
+#[uniffi::export]
+pub fn new_gateways_placeholder_other() -> Gateways {
+    Gateways::placeholder_other()
 }
 
 impl Gateways {
@@ -141,16 +149,12 @@ impl Gateways {
     /// If `other` was new then `(true, index_of_new)` is returned.
     ///
     /// - Returns: `true` if it was added, `false` if it was already present (noop)
-    pub fn append(&self, _gateway: Gateway) -> bool {
-        // if self.other_identified().contains_id(&gateway.id()) {
-        //     return false;
-        // }
-        // self.other
-        //     .lock()
-        //     .expect("`self.other` to not have been locked.")
-        //     .push(gateway);
-        // return true;
-        todo!()
+    pub fn append(&mut self, gateway: Gateway) -> bool {
+        if self.other.contains(&gateway) {
+            return false;
+        }
+        self.other.push(gateway);
+        return true;
     }
 }
 
@@ -161,10 +165,9 @@ impl Default for Gateways {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for Gateways {
     fn placeholder() -> Self {
-        let sut = Gateways::new(Gateway::rcnet());
+        let mut sut = Gateways::new(Gateway::rcnet());
         sut.append(Gateway::mainnet());
         sut.append(Gateway::stokenet());
         sut

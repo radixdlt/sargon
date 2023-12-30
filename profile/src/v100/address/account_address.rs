@@ -5,7 +5,6 @@ use crate::{suffix_string, CommonError, PublicKey};
 
 use crate::{v100::AbstractEntityType, NetworkID};
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 use super::entity_address::EntityAddress;
@@ -140,7 +139,6 @@ impl Display for AccountAddress {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for AccountAddress {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
@@ -152,7 +150,6 @@ impl HasPlaceholder for AccountAddress {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl AccountAddress {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_alice() -> Self {

@@ -15,8 +15,10 @@ pub enum BIP32Error {
     InvalidBIP32Path(String),
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Object)]
-pub struct HDPath(pub(crate) Vec<HDPathComponent>);
+#[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record)]
+pub struct HDPath {
+    pub components: Vec<HDPathComponent>,
+}
 
 impl HDPath {
     /// Upgrades a BIP32Path (extern crate, which is a bit limiting),
@@ -29,19 +31,15 @@ impl HDPath {
         }
         assert!(vec.len() == path.depth() as usize);
         vec.reverse();
-        return Self(vec);
+        return Self::from_components(vec);
     }
 
     pub(crate) fn from_components(components: Vec<HDPathComponent>) -> Self {
-        Self(components)
-    }
-
-    pub(crate) fn components(&self) -> &Vec<HDPathComponent> {
-        &self.0
+        Self { components }
     }
 
     pub(crate) fn depth(&self) -> usize {
-        self.0.len()
+        self.components.len()
     }
 
     pub fn from_str(s: &str) -> Result<Self, BIP32Error> {
@@ -86,7 +84,7 @@ impl HDPath {
         if path.depth() < 2 {
             return Err(depth_error);
         }
-        let components = path.components();
+        let components = &path.components;
 
         _ = Self::parse(
             components,
@@ -116,9 +114,9 @@ impl HDPath {
 impl ToString for HDPath {
     fn to_string(&self) -> String {
         let rest = self
-            .components()
-            .into_iter()
-            .map(|c| c.to_string())
+            .components
+            .iter()
+            .map(|c| c.clone().to_string())
             .join("/");
         return format!("m/{}", rest);
     }

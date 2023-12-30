@@ -11,7 +11,6 @@ use crate::{
 
 use super::ledger_hardware_wallet_hint::LedgerHardwareWalletHint;
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug, uniffi::Record)]
@@ -44,7 +43,6 @@ impl LedgerHardwareWalletFactorSource {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for LedgerHardwareWalletFactorSource {
     fn placeholder() -> Self {
         Self::new(

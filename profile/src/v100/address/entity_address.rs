@@ -1,5 +1,6 @@
 use crate::IsEntityPath;
 use radix_engine_common::crypto::PublicKey as EnginePublicKey;
+use radix_engine_common::types::NodeId;
 use radix_engine_toolkit::functions::derive::{
     virtual_account_address_from_public_key, virtual_identity_address_from_public_key,
 };
@@ -23,6 +24,15 @@ pub trait EntityAddress: Sized {
     // `panic` if `address` does not start with `Self::entity_type().hrp()`
     fn __with_address_and_network_id(address: &str, network_id: NetworkID) -> Self;
 
+    fn address_from_node_id(node_id: NodeId, network_id_value: u8) -> String {
+        let node = SerializableNodeIdInternal {
+            network_id: network_id_value,
+            node_id,
+        };
+
+        format!("{node}")
+    }
+
     /// Creates a new address from `public_key` and `network_id` by bech32 encoding
     /// it.
     #[cfg(not(tarpaulin_include))] // false negative
@@ -36,12 +46,8 @@ pub trait EntityAddress: Sized {
             AbstractEntityType::Resource => panic!("resource"),
         };
 
-        let node = SerializableNodeIdInternal {
-            network_id: network_id.discriminant(),
-            node_id: component.into_node_id(),
-        };
-
-        let address = format!("{node}");
+        let address =
+            Self::address_from_node_id(component.into_node_id(), network_id.discriminant());
         return Self::__with_address_and_network_id(&address, network_id);
     }
 

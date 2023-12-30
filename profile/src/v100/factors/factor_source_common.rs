@@ -3,9 +3,8 @@ use std::time::SystemTime;
 use iso8601_timestamp::Timestamp;
 use serde::{Deserialize, Serialize};
 
-#[cfg(any(test, feature = "placeholder"))]
-use crate::HasPlaceholder;
 use crate::now;
+use crate::HasPlaceholder;
 
 use super::{
     factor_source_crypto_parameters::FactorSourceCryptoParameters,
@@ -85,7 +84,6 @@ impl Default for FactorSourceCommon {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for FactorSourceCommon {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
@@ -97,7 +95,6 @@ impl HasPlaceholder for FactorSourceCommon {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl FactorSourceCommon {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_main_babylon() -> Self {

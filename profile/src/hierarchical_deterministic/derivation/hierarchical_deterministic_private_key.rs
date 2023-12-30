@@ -1,11 +1,9 @@
 use crate::PrivateKey;
-#[cfg(any(test, feature = "placeholder"))]
+
 use crate::{Ed25519PrivateKey, Secp256k1PrivateKey};
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::{AccountPath, BIP44LikePath, CAP26Repr};
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 use super::{
@@ -50,7 +48,6 @@ impl HierarchicalDeterministicPrivateKey {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for HierarchicalDeterministicPrivateKey {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {

@@ -1,9 +1,9 @@
 import radix_wallet_kit
 
-public typealias SUT = Gateways
+public typealias SUT = AppPreferences
 extension SUT {
-	public static let placeholder: Self = newGatewaysPlaceholder()
-	public static let placeholderOther: Self = newGatewaysPlaceholderOther()
+	public static let placeholder: Self = newAppPreferencesPlaceholder()
+	public static let placeholderOther: Self = newAppPreferencesPlaceholderOther()
 }
 
 func test_equatable() throws {
@@ -24,19 +24,9 @@ func test_hashable() throws {
 	assert(Set([a, b, b, a]).count == 2)
 }
 
-func test_new() throws {
-	let mainnet = gatewayMainnet()
-	assert(mainnet == gatewayMainnet())
-	let gateways = newGateways(current: mainnet)
-	assert(gateways.current.network.id == .mainnet)
-}
-
-
 func test() throws {
 	try test_equatable()
 	try test_hashable()
-	try test_new()
 }
-
 
 try! test()

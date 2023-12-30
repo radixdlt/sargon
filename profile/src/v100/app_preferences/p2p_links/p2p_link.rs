@@ -4,7 +4,6 @@ use radix_engine_common::crypto::Hash;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Debug, Formatter};
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 /// A client the user have connected P2P with, typically a
@@ -54,7 +53,6 @@ impl P2PLink {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for P2PLink {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
@@ -67,7 +65,6 @@ impl HasPlaceholder for P2PLink {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl P2PLink {
     fn declare(password: RadixConnectPassword, display: &str) -> Self {
         Self::new(password, display.to_string())

@@ -8,10 +8,8 @@ use std::{
 };
 use transaction::{signing::secp256k1::Secp256k1Signature, validation::verify_secp256k1};
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::Secp256k1PrivateKey;
 
 /// A `secp256k1` public key used to verify cryptographic signatures (ECDSA signatures).
@@ -100,7 +98,6 @@ impl Debug for Secp256k1PublicKey {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for Secp256k1PublicKey {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
@@ -112,7 +109,6 @@ impl HasPlaceholder for Secp256k1PublicKey {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl Secp256k1PublicKey {
     pub fn placeholder_alice() -> Self {
         Secp256k1PrivateKey::placeholder_alice().public_key()

@@ -1,7 +1,6 @@
 use crate::BIP39WordCount;
 use serde::{Deserialize, Serialize};
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 /// Properties describing a DeviceFactorSource to help user disambiguate between
@@ -38,7 +37,6 @@ impl DeviceFactorSourceHint {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for DeviceFactorSourceHint {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
@@ -54,7 +52,6 @@ impl HasPlaceholder for DeviceFactorSourceHint {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl DeviceFactorSourceHint {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_iphone_unknown() -> Self {

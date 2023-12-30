@@ -4,7 +4,6 @@ use transaction::signing::secp256k1::{
     Secp256k1PrivateKey as EngineSecp256k1PrivateKey, Secp256k1Signature,
 };
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 use super::public_key::Secp256k1PublicKey;
@@ -103,7 +102,6 @@ impl TryFrom<&[u8]> for Secp256k1PrivateKey {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for Secp256k1PrivateKey {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
@@ -115,7 +113,6 @@ impl HasPlaceholder for Secp256k1PrivateKey {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl Secp256k1PrivateKey {
     /// `d78b6578b33f3446bdd9d09d057d6598bc915fec4008a54c509dc3b8cdc7dbe5`
     /// expected public key uncompressed:

@@ -1,31 +1,27 @@
-use std::sync::Arc;
-
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 
 use crate::CommonError;
 
 #[derive(
-    Serialize, Deserialize, Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, uniffi::Object,
+    Serialize, Deserialize, Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, uniffi::Record,
 )]
-pub struct U11(u16);
+pub struct U11 {
+    pub inner: u16,
+}
 
 impl U11 {
-    pub fn new(inner: u16) -> Result<Arc<Self>, CommonError> {
+    pub fn new(inner: u16) -> Result<Self, CommonError> {
         if inner >= 2048 {
             return Err(CommonError::InvalidBIP39Index);
         }
-        Ok(Self(inner).into())
-    }
-
-    pub fn into_inner(&self) -> u16 {
-        self.0
+        Ok(Self { inner })
     }
 }
 
 impl Display for U11 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self.into_inner())
+        write!(f, "{:?}", &self.inner)
     }
 }
 
@@ -46,7 +42,7 @@ mod tests {
 
     #[test]
     fn inner() {
-        assert_eq!(U11::new(1024).unwrap().into_inner(), 1024);
+        assert_eq!(U11::new(1024).unwrap().inner, 1024);
     }
 
     #[test]

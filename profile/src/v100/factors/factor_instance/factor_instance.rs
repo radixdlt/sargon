@@ -7,7 +7,6 @@ use super::{
 };
 use crate::v100::factors::factor_source_id::FactorSourceID;
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
@@ -48,7 +47,6 @@ impl FactorInstance {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for FactorInstance {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {

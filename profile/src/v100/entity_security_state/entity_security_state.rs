@@ -2,7 +2,6 @@ use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializ
 
 use super::unsecured_entity_control::UnsecuredEntityControl;
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 /// Describes the state an entity - Account or Persona - is in in regards to how
@@ -54,7 +53,6 @@ impl From<UnsecuredEntityControl> for EntitySecurityState {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for EntitySecurityState {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {

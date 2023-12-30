@@ -3,7 +3,6 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt::Display;
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 use crate::NetworkID::{self, *};
@@ -106,7 +105,6 @@ impl RadixNetwork {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for RadixNetwork {
     fn placeholder() -> Self {
         Self::mainnet()

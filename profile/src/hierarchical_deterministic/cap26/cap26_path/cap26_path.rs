@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use crate::HDPathError;
 use crate::{
     AccountPath, CAP26Repr, Derivation, DerivationPath, DerivationPathScheme, GetIDPath, HDPath,
@@ -8,7 +6,6 @@ use crate::{
 use enum_as_inner::EnumAsInner;
 use serde::{de, Deserializer, Serialize, Serializer};
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 /// A derivation path design specifically for Radix Babylon wallets used by Accounts and Personas
@@ -16,7 +13,7 @@ use crate::HasPlaceholder;
 /// kind: sign transaction or sign auth.
 #[derive(Clone, Debug, PartialEq, EnumAsInner, Eq, Hash, PartialOrd, Ord, uniffi::Enum)]
 pub enum CAP26Path {
-    GetID { value: Arc<GetIDPath> },
+    GetID { value: GetIDPath },
     AccountPath { value: AccountPath },
     IdentityPath { value: IdentityPath },
 }
@@ -101,7 +98,6 @@ impl From<GetIDPath> for CAP26Path {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for CAP26Path {
     fn placeholder() -> Self {
         Self::placeholder_account()
@@ -111,7 +107,6 @@ impl HasPlaceholder for CAP26Path {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl CAP26Path {
     pub fn placeholder_account() -> Self {
         Self::AccountPath {

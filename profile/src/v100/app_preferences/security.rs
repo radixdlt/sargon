@@ -3,7 +3,6 @@ use std::collections::BTreeSet;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
 // FIXME: MFA this is in fact not used, so ok to be a `bool` for now. The AppPreferences Security type has
@@ -46,7 +45,6 @@ impl Default for Security {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for Security {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
