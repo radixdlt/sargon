@@ -1,6 +1,5 @@
 use std::sync::Arc;
 
-use radix_engine_toolkit_json::models::common::SerializableDecimal;
 use serde::{Deserialize, Serialize};
 
 use crate::Decimal;
@@ -93,9 +92,7 @@ mod tests {
     #[test]
     fn default_is_1() {
         assert_eq!(
-            Transaction::default()
-                .default_deposit_guarantee
-                .to_string(),
+            Transaction::default().default_deposit_guarantee.to_string(),
             "1"
         );
     }

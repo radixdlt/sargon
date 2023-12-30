@@ -1,5 +1,3 @@
-use std::collections::BTreeSet;
-
 use serde::{Deserialize, Serialize};
 
 use super::entity_flag::EntityFlag;
@@ -7,21 +5,39 @@ use super::entity_flag::EntityFlag;
 /// An order set of `EntityFlag`s used to describe certain Off-ledger
 /// user state about Accounts or Personas, such as if an entity is
 /// marked as hidden or not.
-#[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, uniffi::Object,
-)]
-pub struct EntityFlags(Vec<EntityFlag>); // FIXME: Change to Set
-
+#[derive(Serialize, Deserialize, Clone, Debug, Hash, PartialEq, Eq, uniffi::Record)]
+#[serde(transparent)]
+pub struct EntityFlags {
+    // FIXME: Now
+    pub vec: Vec<EntityFlag>,
+}
 impl EntityFlags {
-    /// Instantiates an empty collection of entity flags.
     pub fn new() -> Self {
-        Self(Vec::new())
+        Self { vec: Vec::new() }
     }
 
+    pub fn from_iter<I>(iter: I) -> Self
+    where
+        I: IntoIterator<Item = EntityFlag>,
+    {
+        Self {
+            vec: Vec::from_iter(iter),
+        }
+    }
+
+    pub fn append(&mut self, flag: EntityFlag) {
+        if self.vec.contains(&flag) {
+            return;
+        }
+        self.vec.push(flag);
+    }
+}
+
+impl EntityFlags {
     /// Instantiates a flag collection with the provided Vec<Flag>,
     /// removing any duplicates from `flags` if any.
     pub fn with_flags(flags: Vec<EntityFlag>) -> Self {
-        Self(flags)
+        Self { vec: flags }
     }
 
     /// Instantiates a flag collection with the provided single flag
@@ -44,7 +60,7 @@ impl EntityFlags {
     ///
     /// If the set did not previously contain an equal flag, true is returned.
     /// If the set already contained an equal flag, false is returned, and the entry is not updated.
-    pub fn insert_flag(&mut self, flag: EntityFlag) -> bool {
+    pub fn insert_flag(&mut self, _flag: EntityFlag) -> bool {
         // // self.0.insert(flag) // FIXME: NOW!
         // let contained = self.0.contains(&flag);
         // self.0.append(flag);
@@ -56,19 +72,19 @@ impl EntityFlags {
 
     /// If the set contains a flag equal to `flag`, removes it from the set and drops it.
     /// Returns whether such a flag was present.
-    pub fn remove_flag(&mut self, flag: &EntityFlag) -> bool {
+    pub fn remove_flag(&mut self, _flag: &EntityFlag) -> bool {
         // self.0.remove(flag)
         todo!()
     }
 
     ///Returns true if the set contains the `flag` equal to the value.
     pub fn contains(&self, flag: &EntityFlag) -> bool {
-        self.0.contains(flag)
+        self.vec.contains(flag)
     }
 
     /// Returns the number of flags in the set.
     pub fn len(&self) -> usize {
-        self.0.len()
+        self.vec.len()
     }
 }
 

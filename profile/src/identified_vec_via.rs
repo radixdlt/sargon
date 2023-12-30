@@ -1,10 +1,10 @@
 use identified_vec::{
     identified_vec_into_iterator::IdentifiedVecIntoIterator, Identifiable, IdentifiedVecOf,
-    IsIdentifiableVecOfVia, IsIdentifiedVec, ViaMarker,
+    IsIdentifiableVecOfVia, ViaMarker,
 };
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::fmt::{Debug, Display, Formatter};
-use uniffi::deps::bytes::BufMut;
+// use uniffi::deps::bytes::BufMut;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IdentifiedVecVia<Element: Identifiable + Debug + Clone> {

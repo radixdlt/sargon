@@ -1,6 +1,4 @@
-use identified_vec::{Identifiable, IsIdentifiedVecOf};
-
-use crate::identified_vec_via::IdentifiedVecVia;
+use identified_vec::Identifiable;
 
 use serde::{Deserialize, Serialize};
 
@@ -17,10 +15,12 @@ pub struct P2PLinks {
     // FIXME: Now
     vec: Vec<P2PLink>,
 }
+
 impl P2PLinks {
     pub fn new() -> Self {
         Self { vec: Vec::new() }
     }
+
     pub fn from_iter<I>(iter: I) -> Self
     where
         I: IntoIterator<Item = P2PLink>,
@@ -29,12 +29,14 @@ impl P2PLinks {
             vec: Vec::from_iter(iter.into_iter()),
         }
     }
+
     pub fn append(&mut self, link: P2PLink) {
         if self.vec.iter().any(|x| x.id() == link.id()) {
             return;
         }
         self.vec.push(link);
     }
+
     pub fn len(&self) -> usize {
         self.vec.len()
     }
@@ -65,9 +67,6 @@ impl HasPlaceholder for P2PLinks {
 #[cfg(test)]
 mod tests {
     use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
-    use identified_vec::{IsIdentifiedVec, IsIdentifiedVecOf};
-
-    use crate::v100::app_preferences::p2p_links::p2p_link::P2PLink;
 
     use super::P2PLinks;
 

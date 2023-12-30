@@ -1,12 +1,11 @@
-use std::{collections::BTreeSet, sync::Arc, time::SystemTime};
+use std::time::SystemTime;
 
-use crate::{now, to_system_time};
 use iso8601_timestamp::Timestamp;
-use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
 #[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
+use crate::now;
 
 use super::{
     factor_source_crypto_parameters::FactorSourceCryptoParameters,
@@ -126,9 +125,7 @@ impl FactorSourceCommon {
 #[cfg(test)]
 mod tests {
 
-    use std::collections::BTreeSet;
-
-    use crate::{assert_eq_after_json_roundtrip, now, HasPlaceholder};
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
     use iso8601_timestamp::Timestamp;
 
     use crate::v100::factors::{

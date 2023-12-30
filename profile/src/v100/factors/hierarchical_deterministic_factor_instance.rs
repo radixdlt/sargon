@@ -90,11 +90,11 @@ impl HierarchicalDeterministicFactorInstance {
     pub fn key_kind(&self) -> Option<CAP26KeyKind> {
         match &self.derivation_path() {
             DerivationPath::CAP26 { value } => match value {
-                CAP26Path::GetID { value } => None,
+                CAP26Path::GetID { value: _ } => None,
                 CAP26Path::IdentityPath { value } => Some(value.key_kind().clone()),
                 CAP26Path::AccountPath { value } => Some(value.key_kind().clone()),
             },
-            DerivationPath::BIP44Like { value } => None,
+            DerivationPath::BIP44Like { value: _ } => None,
         }
     }
 }

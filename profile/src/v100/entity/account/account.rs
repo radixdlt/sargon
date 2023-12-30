@@ -4,8 +4,7 @@ use crate::{HDPathValue, MnemonicWithPassphrase};
 use crate::{Derivation, HasEntityPath};
 use identified_vec::Identifiable;
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
-use std::{cmp::Ordering, fmt::Display, hash::Hasher};
+use std::{cmp::Ordering, fmt::Display};
 
 #[cfg(any(test, feature = "placeholder"))]
 use crate::v100::{DeviceFactorSource, PrivateHierarchicalDeterministicFactorSource};
@@ -79,7 +78,7 @@ pub struct Account {
     /// user state about Accounts or Personas, such as if an entity is
     /// marked as hidden or not.
     #[serde(default)]
-    pub flags: Arc<EntityFlags>,
+    pub flags: EntityFlags,
 
     /// The on ledger synced settings for this account, contains e.g.
     /// ThirdPartyDeposit settings, with deposit rules for assets.
@@ -298,16 +297,12 @@ impl Account {
 
 #[cfg(test)]
 mod tests {
-    use std::{collections::BTreeSet, str::FromStr};
+    use std::str::FromStr;
 
     use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
     use radix_engine_common::prelude::HashSet;
 
-    use crate::v100::{
-        AccountAddress, AppearanceID, AssetException, DepositAddressExceptionRule, DepositRule,
-        DepositorAddress, DisplayName, EntityFlag, EntityFlags, OnLedgerSettings,
-        ThirdPartyDeposits,
-    };
+    use crate::v100::{AccountAddress, AppearanceID, DisplayName};
 
     use super::Account;
 

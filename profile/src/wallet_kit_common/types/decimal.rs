@@ -3,7 +3,7 @@ use std::{ops::Deref, sync::Arc};
 use crate::CommonError;
 use radix_engine_common::math::Decimal as NativeDecimal;
 use radix_engine_toolkit_json::models::common::SerializableDecimal;
-use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::fmt::Display;
 
 // FIXME: Use RET's type!
@@ -22,7 +22,7 @@ impl Serialize for Decimal {
     }
 }
 
-impl<'de> serde::Deserialize<'de> for Decimal {
+impl<'de> Deserialize<'de> for Decimal {
     /// Tries to deserializes a JSON string as a bech32 address into an `HDPath`.
     #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Decimal, D::Error> {
@@ -51,7 +51,7 @@ impl Decimal {
         value
             .parse()
             .map(|value| Arc::new(Self(value)))
-            .map_err(|e| CommonError::DecimalError)
+            .map_err(|_| CommonError::DecimalError)
     }
 
     #[uniffi::constructor]

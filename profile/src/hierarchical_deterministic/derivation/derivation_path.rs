@@ -5,7 +5,6 @@ use crate::{AccountPath, BIP44LikePath, CAP26Path, CommonError, GetIDPath, HDPat
 use enum_as_inner::EnumAsInner;
 use std::{
     fmt::{Debug, Formatter},
-    sync::Arc,
 };
 
 #[cfg(any(test, feature = "placeholder"))]

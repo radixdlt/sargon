@@ -1,12 +1,10 @@
 use std::fmt::Debug;
 
-use identified_vec::IsIdentifiedVec;
-use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
+use crate::CommonError;
 #[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
-use crate::{CommonError, Network};
 
 use super::{
     Account, AccountAddress, AppPreferences, FactorSourceID, FactorSources, Header, IsFactorSource,
@@ -71,8 +69,8 @@ impl Profile {
 
     pub fn update_factor_source<S, M>(
         &mut self,
-        factor_source_id: &FactorSourceID,
-        mut mutate: M,
+        _factor_source_id: &FactorSourceID,
+        mut _mutate: M,
     ) -> Result<bool, CommonError>
     where
         S: IsFactorSource,
@@ -120,15 +118,10 @@ impl HasPlaceholder for Profile {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, CommonError, HasPlaceholder, SLIP10Curve};
-    use identified_vec::{IsIdentifiedVec, IsIdentifiedVecOf};
-
     use crate::{
-        v100::{DeviceFactorSource, DisplayName, FactorSourceID, LedgerHardwareWalletFactorSource},
-        NetworkID,
+        assert_eq_after_json_roundtrip, AppPreferences, FactorSources, HasPlaceholder, Header,
+        Networks, Profile,
     };
-
-    use super::{AppPreferences, FactorSources, Header, Networks, Profile};
 
     #[test]
     fn inequality() {

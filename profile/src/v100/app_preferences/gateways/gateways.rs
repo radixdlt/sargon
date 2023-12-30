@@ -114,7 +114,7 @@ impl Gateways {
     /// Changes the current Gateway to `to`, if it is not already the current. If `to` is
     /// not a new Gateway, it will be removed from. Returns `Ok(false)` if `to` was already
     /// the `current`, returns `Ok(true)` if `to` was not already `current`.
-    pub fn change_current(&self, to: Gateway) -> Result<bool, CommonError> {
+    pub fn change_current(&self, _to: Gateway) -> Result<bool, CommonError> {
         // if self.current == to {
         //     return Ok(false);
         // }
@@ -123,7 +123,7 @@ impl Gateways {
         // if !was_inserted {
         //     return Err(CommonError::GatewaysDiscrepancyOtherShouldNotContainCurrent);
         // }
-        // let other_identified = self.other_identified();
+        let _ = self.other_identified();
         // if let Some(idx) = other_identified.index_of_id(&to.id()) {
         //     self.other
         //         .lock()
@@ -144,7 +144,7 @@ impl Gateways {
     /// If `other` was new then `(true, index_of_new)` is returned.
     ///
     /// - Returns: `true` if it was added, `false` if it was already present (noop)
-    pub fn append(&self, gateway: Gateway) -> bool {
+    pub fn append(&self, _gateway: Gateway) -> bool {
         // if self.other_identified().contains_id(&gateway.id()) {
         //     return false;
         // }

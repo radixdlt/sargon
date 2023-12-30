@@ -1,5 +1,3 @@
-use std::ops::Deref;
-
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -71,7 +69,7 @@ impl TryFrom<FactorSource> for LedgerHardwareWalletFactorSource {
     fn try_from(value: FactorSource) -> Result<Self, Self::Error> {
         match value {
             FactorSource::Ledger { factor } => Ok(factor),
-            FactorSource::Device { factor } => {
+            FactorSource::Device { factor: _ } => {
                 Err(Self::Error::ExpectedLedgerHardwareWalletFactorSourceGotSomethingElse)
             }
         }
@@ -92,7 +90,7 @@ impl IsFactorSource for LedgerHardwareWalletFactorSource {
 mod tests {
     use crate::{assert_eq_after_json_roundtrip, CommonError as Error, HasPlaceholder};
 
-    use crate::v100::{DeviceFactorSource, FactorSource, FactorSourceCommon, IsFactorSource};
+    use crate::v100::{DeviceFactorSource, FactorSource, IsFactorSource};
 
     use super::LedgerHardwareWalletFactorSource;
 

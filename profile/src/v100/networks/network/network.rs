@@ -1,6 +1,4 @@
-use crate::CommonError;
 use identified_vec::Identifiable;
-use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
 #[cfg(any(test, feature = "placeholder"))]
@@ -59,7 +57,7 @@ impl Network {
     /// Returns `false` if no account with `address` was found, otherwise if found,
     /// the account gets updated by `mutate` closure and this function returns
     /// `true`.
-    pub fn update_account<F>(&mut self, address: &AccountAddress, mutate: F) -> bool
+    pub fn update_account<F>(&mut self, _address: &AccountAddress, _mutate: F) -> bool
     where
         F: FnMut(&Account) -> (),
     {
@@ -96,8 +94,8 @@ impl Network {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, CommonError, HasPlaceholder};
-    use identified_vec::{Identifiable, IsIdentifiedVec};
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use identified_vec::Identifiable;
 
     use crate::{
         v100::{Account, Accounts},

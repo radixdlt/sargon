@@ -1,18 +1,11 @@
-use crate::CommonError;
-use identified_vec::{
-    Identifiable, IdentifiedVecOf, IsIdentifiableVecOfVia, IsIdentifiedVec, IsIdentifiedVecOf,
-};
+use identified_vec::Identifiable;
 use serde::{Deserialize, Serialize};
 
 #[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
-use crate::{
-    identified_vec_via::IdentifiedVecVia,
-    v100::factors::{
-        factor_source::FactorSource, factor_source_id::FactorSourceID,
-        is_factor_source::IsFactorSource,
-    },
+use crate::v100::factors::{
+    factor_source::FactorSource, factor_source_id::FactorSourceID, is_factor_source::IsFactorSource,
 };
 
 impl Identifiable for FactorSource {
@@ -96,7 +89,7 @@ impl HasPlaceholder for FactorSources {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, CommonError, HasPlaceholder};
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
     use identified_vec::Identifiable;
 
     use crate::v100::factors::{factor_source::FactorSource, is_factor_source::IsFactorSource};

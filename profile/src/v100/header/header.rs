@@ -1,4 +1,4 @@
-use std::{alloc::System, fmt::Display, time::SystemTime};
+use std::{fmt::Display, time::SystemTime};
 
 #[cfg(any(test, feature = "placeholder"))]
 use std::str::FromStr;
@@ -6,7 +6,7 @@ use std::str::FromStr;
 #[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
-use iso8601_timestamp::{time::Time, Timestamp};
+use iso8601_timestamp::Timestamp;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 

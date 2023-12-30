@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
 
 use enum_as_inner::EnumAsInner;
@@ -75,8 +73,6 @@ impl Serialize for FactorSource {
     where
         S: Serializer,
     {
-        use std::ops::Deref;
-
         let mut state = serializer.serialize_struct("FactorSource", 2)?;
         let discriminator_key = "discriminator";
         match self {

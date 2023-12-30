@@ -1,19 +1,9 @@
 use std::{fmt::Display, time::SystemTime};
 
-use crate::{id, now, UniffiCustomTypeConverter};
+use crate::{id, now};
 use iso8601_timestamp::Timestamp;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-
-impl UniffiCustomTypeConverter for Uuid {
-    type Builtin = String;
-    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
-        Uuid::try_parse(val.as_str()).map_err(|e| e.into())
-    }
-    fn from_custom(obj: Self) -> Self::Builtin {
-        obj.to_string()
-    }
-}
 
 /// A short summary of a device the Profile is being used
 /// on, typically an iPhone or an Android phone.

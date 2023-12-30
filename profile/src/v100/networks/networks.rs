@@ -1,10 +1,6 @@
-use identified_vec::{IdentifiedVecOf, IsIdentifiableVecOfVia, IsIdentifiedVec, IsIdentifiedVecOf};
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    identified_vec_via::IdentifiedVecVia,
-    v100::{Account, AccountAddress, ContentHint},
-};
+use crate::v100::{Account, AccountAddress, ContentHint};
 
 #[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
@@ -83,7 +79,7 @@ impl Networks {
     /// Returns `false` if no account with `address` was found, otherwise if found,
     /// the account gets updated by `mutate` closure and this function returns
     /// `true`.
-    pub fn update_account<F>(&mut self, address: &AccountAddress, mut mutate: F) -> bool
+    pub fn update_account<F>(&mut self, _address: &AccountAddress, mut _mutate: F) -> bool
     where
         F: FnMut(&Account) -> (),
     {
@@ -145,13 +141,8 @@ impl HasPlaceholder for Networks {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
-    use identified_vec::IsIdentifiedVec;
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder, Networks};
 
-    use crate::{
-        v100::{Account, Accounts, ContentHint, DisplayName, Network, Networks},
-        NetworkID,
-    };
     /*
 
         #[test]

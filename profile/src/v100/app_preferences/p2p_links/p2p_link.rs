@@ -2,11 +2,7 @@ use super::radix_connect_password::RadixConnectPassword;
 use identified_vec::Identifiable;
 use radix_engine_common::crypto::Hash;
 use serde::{Deserialize, Serialize};
-use std::{
-    fmt::{Debug, Formatter},
-    ops::Deref,
-    sync::Arc,
-};
+use std::fmt::{Debug, Formatter};
 
 #[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
@@ -20,10 +16,10 @@ pub struct P2PLink {
     /// The most important property of this struct, the `ConnectionPassword`,
     /// is used to be able to re-establish the P2P connection and also acts as the seed
     /// for the `ID`.
-    connection_password: RadixConnectPassword,
+    pub connection_password: RadixConnectPassword,
 
     /// Client name, e.g. "Chrome on Macbook" or "My work Android" or "My wifes iPhone SE".
-    display_name: String,
+    pub display_name: String,
 }
 
 impl P2PLink {

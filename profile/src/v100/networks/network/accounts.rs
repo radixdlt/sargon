@@ -1,20 +1,14 @@
-use crate::{
-    identified_vec_via::IdentifiedVecVia,
-    v100::{Account, AccountAddress},
-    UniffiCustomTypeConverter,
-};
-use identified_vec::{
-    Identifiable, IdentifiedVecOf, IsIdentifiableVecOfVia, IsIdentifiedVec, IsIdentifiedVecOf,
-};
+use crate::v100::{Account, AccountAddress};
+use identified_vec::Identifiable;
 use serde::{Deserialize, Serialize};
 
 #[cfg(any(test, feature = "placeholder"))]
 use crate::HasPlaceholder;
 
-/// An ordered set of Accounts on a specific network, most commonly
-/// the set is non-empty.
 // pub type Accounts = IdentifiedVecVia<Account>;
 
+/// An ordered set of Accounts on a specific network, most commonly
+/// the set is non-empty.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 #[serde(transparent)]
 pub struct Accounts {
@@ -65,7 +59,7 @@ impl Accounts {
     /// Returns `false` if no account with `address` was found, otherwise if found,
     /// the account gets updated by `mutate` closure and this function returns
     /// `true`.
-    pub fn update_account<F>(&mut self, address: &AccountAddress, mut mutate: F) -> bool
+    pub fn update_account<F>(&mut self, _address: &AccountAddress, mut _mutate: F) -> bool
     where
         F: FnMut(&Account) -> (),
     {
@@ -85,7 +79,7 @@ impl Default for Accounts {
 // Getters
 impl Accounts {
     /// Returns a reference to the account identified by `address`, if it exists.
-    pub fn get_account_by_address(&self, address: &AccountAddress) -> Option<&Account> {
+    pub fn get_account_by_address(&self, _address: &AccountAddress) -> Option<&Account> {
         // self.get(address)
         todo!()
     }
@@ -137,7 +131,6 @@ impl Accounts {
 #[cfg(test)]
 mod tests {
     use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
-    use identified_vec::IsIdentifiedVec;
 
     use crate::v100::{Account, AccountAddress, Accounts, AppearanceID, DisplayName};
 

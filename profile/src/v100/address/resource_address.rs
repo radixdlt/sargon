@@ -1,6 +1,6 @@
 use crate::{v100::AbstractEntityType, CommonError, NetworkID};
 use serde::{de, Deserializer, Serialize, Serializer};
-use std::{fmt::Display, sync::Arc};
+use std::fmt::Display;
 
 use super::entity_address::EntityAddress;
 

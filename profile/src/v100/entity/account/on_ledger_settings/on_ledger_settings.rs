@@ -41,7 +41,6 @@ impl OnLedgerSettings {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::BTreeSet;
 
     use crate::{
         assert_eq_after_json_roundtrip, assert_json_roundtrip, assert_ne_after_json_roundtrip,
