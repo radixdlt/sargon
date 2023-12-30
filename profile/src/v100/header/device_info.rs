@@ -1,4 +1,4 @@
-use std::{fmt::Display, time::SystemTime};
+use std::fmt::Display;
 
 use crate::{id, now};
 use iso8601_timestamp::Timestamp;
@@ -21,7 +21,7 @@ pub struct DeviceInfo {
     /// The date this description of the device was made, might
     /// be equal to when the app was first ever launched on the
     /// device.
-    pub date: SystemTime, // FIXME: NOW use Timestamp
+    pub date: Timestamp,
 
     /// A short description of the device, we devices should
     /// read the device model and a given name from the device
@@ -33,32 +33,28 @@ pub struct DeviceInfo {
 
 impl DeviceInfo {
     /// Instantiates a new `DeviceInfo` with `id`, `date` and `description`.
-    #[uniffi::constructor]
     pub fn new(id: Uuid, date: Timestamp, description: String) -> Self {
         Self {
             id,
-            date: date.into(),
+            date,
             description,
         }
     }
 
     /// Instantiates a new `DeviceInfo` with `description`, and generates a new `id`
     /// and will use the current `date` for creation date.
-    #[uniffi::constructor]
     pub fn with_description(description: &str) -> Self {
         Self::new(id(), now(), description.to_string())
     }
 
     /// Instantiates a new `DeviceInfo` with "iPhone" as description, and
     /// generates a new `id` and will use the current `date` for creation date.
-    #[uniffi::constructor]
     pub fn new_iphone() -> Self {
         Self::with_description("iPhone")
     }
 
     /// Instantiates a new `DeviceInfo` with "Unknown device" as description, and
     /// generates a new `id` and will use the current `date` for creation date.
-    #[uniffi::constructor]
     pub fn new_unknown_device() -> Self {
         Self::with_description("Unknown device")
     }

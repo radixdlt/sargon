@@ -56,12 +56,22 @@ imports = ["urllib.parse"]
 into_custom = "urllib.parse.urlparse({})"
 from_custom = "urllib.parse.urlunparse({})"
 
-
 [bindings.swift.custom_types.Timestamp]
 # Name of the type in the Swift code
 type_name = "Date"
 # Modules that need to be imported
 imports = ["Foundation"]
 # Functions to convert between strings and URLs
-into_custom = "Date(string: {})!"
-from_custom = "String(describing: {})"
+into_custom = "{let df = DateFormatter();df.dateFormat = \"yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ\";return df.date(from: {})}()"
+from_custom = "{let df = DateFormatter();df.dateFormat = \"yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ\";return df.string(from: {})}()"
+
+[bindings.kotlin.custom_types.Timestamp]
+type_name = "OffsetDateTime"
+imports = ["java.time"]
+into_custom = "OffsetDateTime.parse({}, DateTimeFormatter.ISO_DATE_TIME)"
+from_custom = "{}.format(DateTimeFormatter.ISO_DATE_TIME)"
+
+[bindings.python.custom_types.Timestamp]
+imports = ["datetime"]
+into_custom = "{}.isoformat()"
+from_custom = "datetime.fromisoformat({})"

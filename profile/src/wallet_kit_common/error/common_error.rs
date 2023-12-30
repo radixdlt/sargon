@@ -125,4 +125,7 @@ pub enum CommonError {
 
     #[error("Invalid DisplayName too long.")]
     InvalidDisplayNameTooLong,
+
+    #[error("Invalid ISO8601 Time string.")]
+    InvalidISO8601String,
 }

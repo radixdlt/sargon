@@ -15,6 +15,7 @@ pub mod prelude {
     pub use crate::wallet_kit_common::*;
 }
 
+use iso8601_timestamp::Timestamp;
 pub use prelude::*;
 pub use url::Url;
 pub use uuid::Uuid;
@@ -29,6 +30,30 @@ impl UniffiCustomTypeConverter for Url {
 
     fn from_custom(obj: Self) -> Self::Builtin {
         obj.into()
+    }
+}
+
+impl UniffiCustomTypeConverter for Timestamp {
+    type Builtin = String;
+
+    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
+        Timestamp::parse(val.as_str())
+            .ok_or_else(|| CommonError::InvalidISO8601String)
+            .map_err(|e| e.into())
+    }
+
+    fn from_custom(obj: Self) -> Self::Builtin {
+        obj.to_string()
+    }
+}
+
+impl UniffiCustomTypeConverter for Uuid {
+    type Builtin = String;
+    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
+        Uuid::try_parse(val.as_str()).map_err(|e| e.into())
+    }
+    fn from_custom(obj: Self) -> Self::Builtin {
+        obj.to_string()
     }
 }
 
