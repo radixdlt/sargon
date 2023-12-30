@@ -37,7 +37,7 @@ pub struct Header {
     pub last_used_on_device: DeviceInfo,
 
     /// When the Profile was last modified.
-    pub last_modified: SystemTime, // FIXME: Now use Timestamp
+    pub last_modified: Timestamp,
 
     /// Hint about the contents of the profile, e.g. number of Accounts and Personas.
     pub content_hint: ContentHint,

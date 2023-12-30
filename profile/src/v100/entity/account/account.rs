@@ -72,7 +72,7 @@ pub struct Account {
     /// The visual cue user learns to associated this account with, typically
     /// a beautiful colorful gradient.
     #[serde(rename = "appearanceID")]
-    pub appearance_id: u8, // FIXME: NOW!
+    pub appearance_id: AppearanceID,
 
     /// An order set of `EntityFlag`s used to describe certain Off-ledger
     /// user state about Accounts or Personas, such as if an entity is
@@ -102,7 +102,7 @@ impl Account {
                 account_creating_factor_instance,
             )
             .into(),
-            appearance_id: appearance_id.into_inner(),
+            appearance_id,
             flags: EntityFlags::default().into(),
             on_ledger_settings: OnLedgerSettings::default(),
         }
@@ -178,7 +178,7 @@ impl Account {
             network_id: address.network_id.clone(),
             address,
             display_name,
-            appearance_id: appearance_id.into_inner(),
+            appearance_id,
             flags: EntityFlags::default().into(),
             on_ledger_settings: OnLedgerSettings::default(),
             security_state: EntitySecurityState::placeholder(),
