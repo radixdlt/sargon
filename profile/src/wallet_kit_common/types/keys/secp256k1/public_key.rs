@@ -38,7 +38,7 @@ impl Secp256k1PublicKey {
 
     pub(crate) fn from_engine(engine: EngineSecp256k1PublicKey) -> Result<Self, Error> {
         BIP32Secp256k1PublicKey::from_sec1_bytes(engine.to_vec().as_slice())
-            .map(|pk| Self {
+            .map(|_| Self {
                 bytes: engine.to_vec(),
             })
             .map_err(|_| Error::InvalidSecp256k1PublicKeyPointNotOnCurve)

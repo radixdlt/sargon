@@ -19,15 +19,6 @@ pub fn new_resource_address(bech32: String) -> Result<ResourceAddress, CommonErr
     ResourceAddress::try_from_bech32(bech32.as_str())
 }
 
-impl ResourceAddress {
-    pub(crate) fn new(address: String, network_id: NetworkID) -> Self {
-        Self {
-            address,
-            network_id,
-        }
-    }
-}
-
 impl Serialize for ResourceAddress {
     /// Serializes this `ResourceAddress` into its bech32 address string as JSON.
     fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>

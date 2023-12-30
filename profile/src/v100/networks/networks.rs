@@ -102,12 +102,8 @@ impl Networks {
 
 impl Networks {
     pub fn content_hint(&self) -> ContentHint {
-        // let number_of_accounts = self
-        //     .vec
-        //     .iter()
-        //     .fold(0, |acc, x| acc + x.accounts().vec.len());
-        // ContentHint::with_counters(number_of_accounts, 0, self.vec.len())
-        todo!()
+        let number_of_accounts = self.vec.iter().fold(0, |acc, x| acc + x.accounts.len());
+        ContentHint::with_counters(number_of_accounts, 0, self.vec.len())
     }
 }
 

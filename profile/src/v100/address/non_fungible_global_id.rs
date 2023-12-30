@@ -1,19 +1,15 @@
 use crate::{CommonError as Error, EntityAddress, NonFungibleLocalId};
-use radix_engine_common::{
-    address::AddressBech32Decoder,
-    data::scrypto::model::NonFungibleLocalId as NativeNonFungibleLocalId,
-};
+use radix_engine_common::address::AddressBech32Decoder;
 use radix_engine_toolkit_json::models::scrypto::non_fungible_global_id::{
     SerializableNonFungibleGlobalId as EngineSerializableNonFungibleGlobalId,
     SerializableNonFungibleGlobalIdInternal as EngineSerializableNonFungibleGlobalIdInternal,
 };
-use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
+use serde::{de, Deserializer, Serialize, Serializer};
 use std::{
     cmp::Ordering,
     fmt::Display,
     hash::{Hash, Hasher},
     str::FromStr,
-    sync::Arc,
 };
 use transaction::prelude::NonFungibleGlobalId as EngineNonFungibleGlobalId;
 

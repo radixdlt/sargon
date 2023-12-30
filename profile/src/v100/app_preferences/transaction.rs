@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use serde::{Deserialize, Serialize};
 
 use crate::Decimal;
@@ -48,8 +46,6 @@ impl HasPlaceholder for Transaction {
 
 #[cfg(test)]
 mod tests {
-    use std::ops::Deref;
-
     use crate::{assert_eq_after_json_roundtrip, Decimal, HasPlaceholder};
 
     use super::Transaction;

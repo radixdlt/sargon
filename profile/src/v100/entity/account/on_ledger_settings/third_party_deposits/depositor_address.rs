@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use serde::{Deserialize, Serialize};
 
 use crate::v100::{NonFungibleGlobalId, ResourceAddress};

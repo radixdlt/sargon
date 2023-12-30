@@ -84,9 +84,8 @@ impl Accounts {
     }
 
     /// Returns references to **all** accounts, including hidden ones.
-    pub fn get_all(&self) -> Vec<&Account> {
-        todo!()
-        // self.elements()
+    pub fn get_all(&self) -> Vec<Account> {
+        self.vec.clone()
     }
 }
 

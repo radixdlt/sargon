@@ -17,6 +17,11 @@ pub struct Ed25519PublicKey {
     bytes: Vec<u8>, // FIXME: change to either EngineEd25519PublicKey or ed25519_dalek::PublicKey once we have proper UniFFI lift/lower/UniffiCustomTypeConverter
 }
 
+#[uniffi::export]
+pub fn new_ed25519_public_key(hex: String) -> Result<Ed25519PublicKey, crate::KeyError> {
+    Ed25519PublicKey::from_hex(hex)
+}
+
 impl From<EngineEd25519PublicKey> for Ed25519PublicKey {
     fn from(value: EngineEd25519PublicKey) -> Self {
         Self::from_engine(value).expect("EngineEd25519PublicKey should have been valid.")
