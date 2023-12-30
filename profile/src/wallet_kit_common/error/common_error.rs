@@ -119,4 +119,7 @@ pub enum CommonError {
 
     #[error("Invalid Decimal")]
     DecimalError,
+
+    #[error("Invalid BIP39 Index")]
+    InvalidBIP39Index,
 }

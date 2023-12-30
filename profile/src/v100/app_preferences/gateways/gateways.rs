@@ -25,7 +25,7 @@ pub struct Gateways {
 
 impl Gateways {
     fn other_identified(&self) -> IdentifiedVecOf<Gateway> {
-        let other_vec = self.other;
+        let other_vec = self.other.clone();
         let expected_len = other_vec.len();
         let identified = IdentifiedVecOf::from_iter(other_vec);
         assert_eq!(identified.len(), expected_len);
@@ -39,8 +39,8 @@ impl Gateways {
     }
     pub fn all(&self) -> Vec<Gateway> {
         let mut all = Vec::new();
-        all.push(self.current);
-        all.append(&mut self.other);
+        all.push(self.current.clone());
+        all.append(&mut self.other.clone());
         all
     }
 }

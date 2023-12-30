@@ -1,18 +1,48 @@
-use nutype::nutype;
+use std::sync::Arc;
 
-#[nutype(
-    validate(less = 2048),
-    derive(PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Display, Clone)
+use nutype::nutype;
+use serde::{Deserialize, Serialize};
+use std::fmt::Display;
+
+use crate::CommonError;
+
+// #[nutype(
+//     validate(less = 2048),
+//     derive(PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Display, Clone)
+// )]
+
+#[derive(
+    Serialize, Deserialize, Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, uniffi::Object,
 )]
 pub struct U11(u16);
 
+impl U11 {
+    pub fn new(inner: u16) -> Result<Arc<Self>, CommonError> {
+        if inner >= 2048 {
+            return Err(CommonError::InvalidBIP39Index);
+        }
+        Ok(Self(inner).into())
+    }
+
+    pub fn into_inner(&self) -> u16 {
+        self.0
+    }
+}
+
+impl Display for U11 {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self.into_inner())
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{U11Error, U11};
+    use super::U11;
+    use crate::CommonError;
 
     #[test]
     fn invalid_2048() {
-        assert_eq!(U11::new(2048), Err(U11Error::LessViolated));
+        assert_eq!(U11::new(2048), Err(CommonError::InvalidBIP39Index));
     }
 
     #[test]

@@ -54,7 +54,7 @@ fn v100_100() {
     let profile = vector::<Profile>("only_plaintext_profile_snapshot_version_100")
         .expect("V100 Profile to deserialize");
     assert_eq!(
-        profile.header().snapshot_version(),
+        profile.header.snapshot_version,
         ProfileSnapshotVersion::V100
     );
 }

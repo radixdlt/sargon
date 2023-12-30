@@ -1,4 +1,4 @@
-use std::cmp::Ordering;
+use std::{cmp::Ordering, ops::Deref, sync::Arc};
 
 use crate::HDPathError as Error;
 use derive_getters::Getters;
@@ -42,7 +42,7 @@ impl From<BIP39Language> for bip39::Language {
 #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct BIP39Word {
     pub word: String,
-    pub index: U11,
+    pub index: Arc<U11>,
     pub language: BIP39Language,
 }
 
@@ -64,7 +64,7 @@ impl BIP39Word {
             .ok_or(Error::UnknownBIP39Word)?;
         Ok(Self {
             word: word.to_string(),
-            index,
+            index: index.into(),
             language,
         })
     }
@@ -80,7 +80,7 @@ fn index_of_word_in_bip39_wordlist_of_language(
 ) -> Option<U11> {
     language
         .find_word(word)
-        .map(|i| U11::new(i).expect("Less than 2048"))
+        .map(|i| U11::new(i).expect("Less than 2048").deref().clone())
 }
 
 #[cfg(test)]
