@@ -15,10 +15,10 @@ use crate::HasPlaceholder;
 #[derive(Clone, Debug, PartialEq, EnumAsInner, Eq, Hash, PartialOrd, Ord, uniffi::Enum)]
 pub enum PublicKey {
     /// An Ed25519 public key used to verify cryptographic signatures.
-    Ed25519 { key: Arc<Ed25519PublicKey> },
+    Ed25519 { key: Ed25519PublicKey },
 
     /// A secp256k1 public key used to verify cryptographic signatures (ECDSA signatures).
-    Secp256k1 { key: Arc<Secp256k1PublicKey> },
+    Secp256k1 { key: Secp256k1PublicKey },
 }
 
 impl From<Ed25519PublicKey> for PublicKey {
@@ -32,9 +32,7 @@ impl From<Ed25519PublicKey> for PublicKey {
     /// let key: PublicKey = Ed25519PrivateKey::new().public_key().into();
     /// ```
     fn from(value: Ed25519PublicKey) -> Self {
-        Self::Ed25519 {
-            key: Arc::new(value),
-        }
+        Self::Ed25519 { key: value }
     }
 }
 
@@ -49,9 +47,7 @@ impl From<Secp256k1PublicKey> for PublicKey {
     /// let key: PublicKey = Secp256k1PrivateKey::new().public_key().into();
     /// ```
     fn from(value: Secp256k1PublicKey) -> Self {
-        Self::Secp256k1 {
-            key: Arc::new(value),
-        }
+        Self::Secp256k1 { key: value }
     }
 }
 
@@ -190,8 +186,8 @@ impl Serialize for PublicKey {
 impl From<PublicKey> for EnginePublicKey {
     fn from(value: PublicKey) -> Self {
         match value {
-            PublicKey::Ed25519 { key } => key.0.into(),
-            PublicKey::Secp256k1 { key } => key.0.into(),
+            PublicKey::Ed25519 { key } => key.to_engine().into(),
+            PublicKey::Secp256k1 { key } => key.to_engine().into(),
         }
     }
 }

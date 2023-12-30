@@ -4,7 +4,6 @@ use serde::{Deserialize, Serialize};
 use std::{
     fmt::{Debug, Formatter},
     str::FromStr,
-    sync::Arc,
 };
 use transaction::{signing::ed25519::Ed25519Signature, validation::verify_ed25519};
 
@@ -13,10 +12,10 @@ use crate::HasPlaceholder;
 use crate::Ed25519PrivateKey;
 
 /// An Ed25519 public key used to verify cryptographic signatures (EdDSA signatures).
-#[derive(
-    Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Object,
-)]
-pub struct Ed25519PublicKey(pub(crate) EngineEd25519PublicKey);
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record)]
+pub struct Ed25519PublicKey {
+    bytes: Vec<u8>, // FIXME: change to either EngineEd25519PublicKey or ed25519_dalek::PublicKey once we have proper UniFFI lift/lower/UniffiCustomTypeConverter
+}
 
 impl From<EngineEd25519PublicKey> for Ed25519PublicKey {
     fn from(value: EngineEd25519PublicKey) -> Self {
@@ -24,10 +23,9 @@ impl From<EngineEd25519PublicKey> for Ed25519PublicKey {
     }
 }
 
-#[uniffi::export]
 impl Ed25519PublicKey {
     pub fn to_bytes(&self) -> Vec<u8> {
-        self.0.to_vec()
+        self.bytes.clone()
     }
 
     pub fn to_hex(&self) -> String {
@@ -36,26 +34,29 @@ impl Ed25519PublicKey {
 }
 
 impl Ed25519PublicKey {
+    pub(crate) fn to_engine(&self) -> EngineEd25519PublicKey {
+        EngineEd25519PublicKey::try_from(self.to_bytes().as_slice()).unwrap()
+    }
+
     pub(crate) fn from_engine(engine: EngineEd25519PublicKey) -> Result<Self, Error> {
         ed25519_dalek::PublicKey::from_bytes(engine.to_vec().as_slice())
-            .map(|_| Self(engine))
+            .map(|_| Self {
+                bytes: engine.to_vec(),
+            }) // FIXME: Delete this once we can represent the key as a `uniffi::Record` without letting the field be bytes...(keep it as `EngineEd25519PublicKey`)
             .map_err(|_| Error::InvalidEd25519PublicKeyPointNotOnCurve)
     }
 
     /// Verifies an EdDSA signature over Curve25519.
     pub fn is_valid(&self, signature: &Ed25519Signature, for_hash: &Hash) -> bool {
-        verify_ed25519(for_hash, &self.0, signature)
+        verify_ed25519(for_hash, &self.to_engine(), signature)
     }
 }
 
-#[uniffi::export]
 impl Ed25519PublicKey {
-    #[uniffi::constructor]
-    fn from_bytes(bytes: Vec<u8>) -> Result<Arc<Self>, crate::KeyError> {
+    fn from_bytes(bytes: Vec<u8>) -> Result<Self, crate::KeyError> {
         EngineEd25519PublicKey::try_from(bytes.as_slice())
             .map_err(|_| Error::InvalidEd25519PublicKeyFromBytes)
             .and_then(|pk| Self::from_engine(pk))
-            .map(|k| Arc::new(k))
     }
 }
 
@@ -63,7 +64,7 @@ impl TryFrom<&[u8]> for Ed25519PublicKey {
     type Error = crate::KeyError;
 
     fn try_from(slice: &[u8]) -> Result<Self, Self::Error> {
-        Self::from_bytes(slice.to_vec()).map(|k| k.0.into())
+        Self::from_bytes(slice.to_vec())
     }
 }
 
@@ -75,20 +76,17 @@ impl TryInto<Ed25519PublicKey> for &str {
     }
 }
 
-#[uniffi::export]
 impl Ed25519PublicKey {
-    #[uniffi::constructor]
-    pub fn from_hex(hex: String) -> Result<Arc<Self>, crate::KeyError> {
+    pub fn from_hex(hex: String) -> Result<Self, crate::KeyError> {
         Hex32Bytes::from_str(hex.as_str())
             .map_err(|_| Error::InvalidEd25519PublicKeyFromString)
             .and_then(|b| Ed25519PublicKey::try_from(b.to_vec().as_slice()))
-            .map(|k| Arc::new(k))
     }
 }
 
 impl Ed25519PublicKey {
     pub fn from_str(hex: &str) -> Result<Self, crate::KeyError> {
-        Self::from_hex(hex.to_string()).map(|arc| arc.0.into())
+        Self::from_hex(hex.to_string())
     }
 }
 

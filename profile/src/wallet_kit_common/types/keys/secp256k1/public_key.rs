@@ -2,10 +2,7 @@ use crate::KeyError as Error;
 use bip32::secp256k1::PublicKey as BIP32Secp256k1PublicKey;
 use radix_engine_common::crypto::{Hash, Secp256k1PublicKey as EngineSecp256k1PublicKey};
 use serde::{Deserialize, Serialize};
-use std::{
-    fmt::{Debug, Formatter},
-    sync::Arc,
-};
+use std::fmt::{Debug, Formatter};
 use transaction::{signing::secp256k1::Secp256k1Signature, validation::verify_secp256k1};
 
 use crate::HasPlaceholder;
@@ -13,10 +10,10 @@ use crate::HasPlaceholder;
 use crate::Secp256k1PrivateKey;
 
 /// A `secp256k1` public key used to verify cryptographic signatures (ECDSA signatures).
-#[derive(
-    Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Object,
-)]
-pub struct Secp256k1PublicKey(pub(crate) EngineSecp256k1PublicKey);
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record)]
+pub struct Secp256k1PublicKey {
+    bytes: Vec<u8>, // FIXME: change to either EngineSecp256k1PublicKey or bip32::secp256k1::PublicKey once we have proper UniFFI lift/lower/UniffiCustomTypeConverter
+}
 
 impl From<EngineSecp256k1PublicKey> for Secp256k1PublicKey {
     fn from(value: EngineSecp256k1PublicKey) -> Self {
@@ -24,10 +21,9 @@ impl From<EngineSecp256k1PublicKey> for Secp256k1PublicKey {
     }
 }
 
-#[uniffi::export]
 impl Secp256k1PublicKey {
     pub fn to_bytes(&self) -> Vec<u8> {
-        self.0.to_vec()
+        self.bytes.clone()
     }
 
     pub fn to_hex(&self) -> String {
@@ -36,26 +32,29 @@ impl Secp256k1PublicKey {
 }
 
 impl Secp256k1PublicKey {
+    pub(crate) fn to_engine(&self) -> EngineSecp256k1PublicKey {
+        EngineSecp256k1PublicKey::try_from(self.to_bytes().as_slice()).unwrap()
+    }
+
     pub(crate) fn from_engine(engine: EngineSecp256k1PublicKey) -> Result<Self, Error> {
         BIP32Secp256k1PublicKey::from_sec1_bytes(engine.to_vec().as_slice())
-            .map(|_| Self(engine))
+            .map(|pk| Self {
+                bytes: engine.to_vec(),
+            })
             .map_err(|_| Error::InvalidSecp256k1PublicKeyPointNotOnCurve)
     }
 
     /// Verifies an ECDSA signature over Secp256k1.
     pub fn is_valid(&self, signature: &Secp256k1Signature, for_hash: &Hash) -> bool {
-        verify_secp256k1(for_hash, &self.0, signature)
+        verify_secp256k1(for_hash, &self.to_engine(), signature)
     }
 }
 
-#[uniffi::export]
 impl Secp256k1PublicKey {
-    #[uniffi::constructor]
-    fn from_bytes(bytes: Vec<u8>) -> Result<Arc<Self>, crate::KeyError> {
+    fn from_bytes(bytes: Vec<u8>) -> Result<Self, crate::KeyError> {
         EngineSecp256k1PublicKey::try_from(bytes.as_slice())
             .map_err(|_| Error::InvalidSecp256k1PublicKeyFromBytes)
             .and_then(|pk| Self::from_engine(pk))
-            .map(|k| Arc::new(k))
     }
 }
 
@@ -63,7 +62,7 @@ impl TryFrom<&[u8]> for Secp256k1PublicKey {
     type Error = crate::KeyError;
 
     fn try_from(slice: &[u8]) -> Result<Self, Self::Error> {
-        Self::from_bytes(slice.to_vec()).map(|k| k.0.into())
+        Self::from_bytes(slice.to_vec())
     }
 }
 
@@ -75,20 +74,17 @@ impl TryInto<Secp256k1PublicKey> for &str {
     }
 }
 
-#[uniffi::export]
 impl Secp256k1PublicKey {
-    #[uniffi::constructor]
-    pub fn from_hex(hex: String) -> Result<Arc<Self>, Error> {
+    pub fn from_hex(hex: String) -> Result<Self, Error> {
         hex::decode(hex)
             .map_err(|_| Error::InvalidSecp256k1PublicKeyFromString)
             .and_then(|b| Secp256k1PublicKey::try_from(b.as_slice()))
-            .map(|k| Arc::new(k))
     }
 }
 
 impl Secp256k1PublicKey {
     pub fn from_str(hex: &str) -> Result<Self, Error> {
-        Self::from_hex(hex.to_string()).map(|arc| arc.0.into())
+        Self::from_hex(hex.to_string())
     }
 }
 
