@@ -1,7 +1,6 @@
 use std::{cmp::Ordering, ops::Deref, sync::Arc};
 
 use crate::HDPathError as Error;
-use derive_getters::Getters;
 use memoize::memoize;
 
 use super::u11::U11;

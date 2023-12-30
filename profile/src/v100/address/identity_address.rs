@@ -1,4 +1,3 @@
-use derive_getters::Getters;
 use serde::{de, Deserializer, Serialize, Serializer};
 use std::fmt::Display;
 
@@ -10,7 +9,7 @@ use super::entity_address::EntityAddress;
 /// that starts with the prefix `"identity_"`, dependent on NetworkID, meaning the same
 /// public key used for two IdentityAddresses on two different networks will not have
 /// the same address.
-#[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, Getters)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record)]
 pub struct IdentityAddress {
     /// Human readable address of an identity, which are used by Personas. Always starts with
     /// the prefix `"identity_"`, for example:
@@ -19,12 +18,12 @@ pub struct IdentityAddress {
     ///
     /// Addresses are checksummed, as per Bech32. **Only** *Identity* addresses starts with
     /// the prefix `"identity_"`.
-    address: String,
+    pub address: String,
 
     /// The network this identity address is tied to, i.e. which was used when a public key
     /// hash was used to bech32 encode it. This means that two public key hashes will result
     /// in two different identity address on two different networks.
-    network_id: NetworkID,
+    pub network_id: NetworkID,
 }
 
 impl EntityAddress for IdentityAddress {

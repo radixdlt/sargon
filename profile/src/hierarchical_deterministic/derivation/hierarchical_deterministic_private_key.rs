@@ -1,7 +1,6 @@
 use crate::PrivateKey;
 #[cfg(any(test, feature = "placeholder"))]
 use crate::{Ed25519PrivateKey, Secp256k1PrivateKey};
-use derive_getters::Getters;
 
 #[cfg(any(test, feature = "placeholder"))]
 use crate::{AccountPath, BIP44LikePath, CAP26Repr};
@@ -16,12 +15,13 @@ use super::{
 
 /// An ephemeral (never persisted) HD PrivateKey which contains
 /// the derivation path used to derive it.
-#[derive(Debug, PartialEq, Eq, Getters)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct HierarchicalDeterministicPrivateKey {
     /// The PrivateKey derived from some HD FactorSource using `derivation_path`.
-    private_key: PrivateKey,
+    pub private_key: PrivateKey,
+
     /// Derivation path used to derive the `PrivateKey` from some HD FactorSource.
-    derivation_path: DerivationPath,
+    pub derivation_path: DerivationPath,
 }
 
 impl HierarchicalDeterministicPrivateKey {

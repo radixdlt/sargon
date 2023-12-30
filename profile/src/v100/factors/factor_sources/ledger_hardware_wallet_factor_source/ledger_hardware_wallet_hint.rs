@@ -1,4 +1,3 @@
-use derive_getters::Getters;
 use serde::{Deserialize, Serialize};
 
 use super::ledger_hardware_wallet_model::LedgerHardwareWalletModel;

@@ -1,4 +1,3 @@
-use derive_getters::Getters;
 use serde::{Deserialize, Serialize};
 
 use crate::v100::{HDFactorInstanceAccountCreation, HierarchicalDeterministicFactorInstance};

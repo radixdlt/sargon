@@ -1,28 +1,48 @@
-use nutype::nutype;
+use serde::{Deserialize, Serialize};
 
-use crate::CommonError as Error;
+use crate::CommonError;
+use std::fmt::Display;
 
-#[nutype(
-    sanitize(trim),
-    validate(not_empty, len_char_max = 30),
-    derive(
-        Serialize,
-        Deserialize,
-        Clone,
-        Debug,
-        Display,
-        PartialEq,
-        Eq,
-        PartialOrd,
-        Ord,
-        Hash,
-    )
+// #[nutype(
+//     sanitize(trim),
+//     validate(not_empty, len_char_max = 30),
+
+// )]
+
+#[derive(
+    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, uniffi::Record,
 )]
-pub struct DisplayName(String);
+pub struct DisplayName {
+    pub value: String,
+}
+
+impl DisplayName {
+    pub fn max_len() -> usize {
+        30
+    }
+
+    pub fn new(value: String) -> Result<Self, CommonError> {
+        let value = value.trim().to_string();
+        if value.is_empty() {
+            return Err(CommonError::InvalidDisplayNameEmpty);
+        }
+        if value.len() >= Self::max_len() {
+            return Err(CommonError::InvalidDisplayNameTooLong);
+        }
+
+        Ok(Self { value })
+    }
+}
+
+impl Display for DisplayName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self.value)
+    }
+}
 
 impl Default for DisplayName {
     fn default() -> Self {
-        Self::new("Unnamed").expect("Default display name")
+        Self::new("Unnamed".to_string()).expect("Default display name")
     }
 }
 
@@ -30,7 +50,7 @@ impl TryFrom<&str> for DisplayName {
     type Error = crate::CommonError;
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
-        DisplayName::new(value.to_string()).map_err(|_| Error::InvalidDisplayName)
+        DisplayName::new(value.to_string())
     }
 }
 
@@ -49,7 +69,7 @@ mod tests {
     fn invalid() {
         assert_eq!(
             DisplayName::try_from("this is a much much too long display name"),
-            Err(Error::InvalidDisplayName)
+            Err(Error::InvalidDisplayNameTooLong)
         );
     }
 
@@ -62,14 +82,14 @@ mod tests {
     fn valid_try_from() {
         assert_eq!(
             DisplayName::try_from("Main"),
-            Ok(DisplayName::new("Main").unwrap())
+            Ok(DisplayName::new("Main".to_string()).unwrap())
         );
     }
 
     #[test]
     fn inner() {
         assert_eq!(
-            DisplayName::new("Main account").unwrap().into_inner(),
+            DisplayName::new("Main account".to_string()).unwrap().value,
             "Main account"
         );
     }

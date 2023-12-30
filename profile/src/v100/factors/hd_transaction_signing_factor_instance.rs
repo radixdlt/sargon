@@ -7,19 +7,17 @@ use crate::{
     IsEntityPath,
 };
 use crate::{CommonError as Error, PublicKey};
-use derive_getters::Getters;
 
 /// A specialized Hierarchical Deterministic FactorInstance used for transaction signing
 /// and creation of virtual Accounts and Identities (Personas).
-#[derive(Clone, Debug, PartialEq, Eq, Getters)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct HDFactorInstanceTransactionSigning<E: IsEntityPath> {
-    factor_source_id: FactorSourceIDFromHash,
+    pub factor_source_id: FactorSourceIDFromHash,
 
-    #[getter(skip)]
     // We prefer to let the method `public_key()` return a `HierarchicalDeterministicPublicKey` instead of a `PublicKey` since it contains derivation path
-    public_key: PublicKey,
+    pub public_key: PublicKey,
 
-    path: E,
+    pub path: E,
 }
 impl<E: IsEntityPath + Clone> HDFactorInstanceTransactionSigning<E> {
     #[cfg(not(tarpaulin_include))] // false negative
@@ -127,7 +125,7 @@ mod tests {
         assert_eq!(
             HDFactorInstanceAccountCreation::new(hd_fi)
                 .unwrap()
-                .path()
+                .path
                 .key_kind(),
             CAP26KeyKind::TransactionSigning
         );
@@ -186,7 +184,7 @@ mod tests {
         assert_eq!(
             HDFactorInstanceIdentityCreation::new(hd_fi)
                 .unwrap()
-                .path()
+                .path
                 .key_kind(),
             CAP26KeyKind::TransactionSigning
         );

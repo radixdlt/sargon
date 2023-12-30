@@ -8,7 +8,6 @@ use crate::{
     CAP26KeyKind, CAP26Path, DerivationPath, HierarchicalDeterministicPublicKey, IsEntityPath,
 };
 use crate::{CommonError as Error, PublicKey};
-use derive_getters::Getters;
 use serde::{de, Deserializer, Serialize, Serializer};
 
 use super::{FactorInstance, FactorInstanceBadge, FactorSourceID, FactorSourceIDFromHash};
@@ -66,14 +65,14 @@ impl HierarchicalDeterministicFactorInstance {
 
     pub fn try_from_factor_instance(factor_instance: FactorInstance) -> Result<Self, Error> {
         let virtual_source = factor_instance
-            .badge()
+            .badge
             .as_virtual()
             .ok_or(Error::BadgeIsNotVirtualHierarchicalDeterministic)?;
 
         let badge = virtual_source.as_hierarchical_deterministic();
 
         Self::try_from(
-            factor_instance.factor_source_id().clone(),
+            factor_instance.factor_source_id.clone(),
             badge.public_key.clone(),
             badge.derivation_path.clone(),
         )
@@ -82,7 +81,9 @@ impl HierarchicalDeterministicFactorInstance {
     pub fn factor_instance(&self) -> FactorInstance {
         FactorInstance::new(
             self.factor_source_id.clone().into(),
-            FactorInstanceBadge::Virtual(self.public_key.clone().into()),
+            FactorInstanceBadge::Virtual {
+                value: self.public_key.clone().into(),
+            },
         )
     }
 

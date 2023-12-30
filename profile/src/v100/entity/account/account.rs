@@ -65,7 +65,7 @@ pub struct Account {
 
     /// An off-ledger display name or description chosen by the user when she
     /// created this account.
-    pub display_name: String, // change to DisplayName once it support uniffi
+    pub display_name: DisplayName,
 
     /// Security state of this account, either "securified" or not.
     pub security_state: EntitySecurityState,
@@ -98,7 +98,7 @@ impl Account {
         Self {
             network_id: account_creating_factor_instance.network_id().into(),
             address,
-            display_name: display_name.into_inner(),
+            display_name,
             security_state: UnsecuredEntityControl::with_account_creating_factor_instance(
                 account_creating_factor_instance,
             )
@@ -178,7 +178,7 @@ impl Account {
         Self {
             network_id: address.network_id.clone(),
             address,
-            display_name: display_name.into_inner(),
+            display_name,
             appearance_id: appearance_id.into_inner(),
             flags: EntityFlags::default().into(),
             on_ledger_settings: OnLedgerSettings::default(),
@@ -203,7 +203,7 @@ impl Account {
 
         Self::new(
             account_creating_factor_instance,
-            DisplayName::new(name).unwrap(),
+            DisplayName::new(name.to_string()).unwrap(),
             AppearanceID::try_from(index as u8).unwrap(),
         )
     }
@@ -730,7 +730,7 @@ mod tests {
             "#,
         ).unwrap();
         let account = serde_json::from_value::<Account>(json).unwrap();
-        assert_eq!(account.display_name, "Olympia|Soft|0"); // soundness
+        assert_eq!(account.display_name.value, "Olympia|Soft|0".to_string()); // soundness
         assert_eq!(account.flags.len(), 0); // assert Default value is empty flags.
     }
 

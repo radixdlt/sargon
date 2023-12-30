@@ -1,15 +1,9 @@
 use std::sync::Arc;
 
-use nutype::nutype;
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 
 use crate::CommonError;
-
-// #[nutype(
-//     validate(less = 2048),
-//     derive(PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Display, Clone)
-// )]
 
 #[derive(
     Serialize, Deserialize, Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, uniffi::Object,

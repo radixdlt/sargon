@@ -4,24 +4,27 @@ use crate::HierarchicalDeterministicPublicKey;
 use crate::HasPlaceholder;
 
 use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
 #[serde(remote = "Self")]
 pub enum FactorInstanceBadgeVirtualSource {
     #[serde(rename = "hierarchicalDeterministicPublicKey")]
-    HierarchicalDeterministic(HierarchicalDeterministicPublicKey),
+    HierarchicalDeterministic {
+        value: HierarchicalDeterministicPublicKey,
+    },
 }
 
 impl FactorInstanceBadgeVirtualSource {
     pub fn as_hierarchical_deterministic(&self) -> &HierarchicalDeterministicPublicKey {
         match self {
-            FactorInstanceBadgeVirtualSource::HierarchicalDeterministic(hd) => hd,
+            FactorInstanceBadgeVirtualSource::HierarchicalDeterministic { value } => value,
         }
     }
 }
 
 impl From<HierarchicalDeterministicPublicKey> for FactorInstanceBadgeVirtualSource {
     fn from(value: HierarchicalDeterministicPublicKey) -> Self {
-        Self::HierarchicalDeterministic(value)
+        Self::HierarchicalDeterministic { value }
     }
 }
 
@@ -48,10 +51,10 @@ impl Serialize for FactorInstanceBadgeVirtualSource {
     {
         let mut state = serializer.serialize_struct("FactorInstanceBadgeVirtualSource", 2)?;
         match self {
-            FactorInstanceBadgeVirtualSource::HierarchicalDeterministic(hd) => {
+            FactorInstanceBadgeVirtualSource::HierarchicalDeterministic { value } => {
                 let discriminant = "hierarchicalDeterministicPublicKey";
                 state.serialize_field("discriminator", discriminant)?;
-                state.serialize_field(discriminant, hd)?;
+                state.serialize_field(discriminant, value)?;
             }
         }
         state.end()
@@ -62,12 +65,16 @@ impl Serialize for FactorInstanceBadgeVirtualSource {
 impl HasPlaceholder for FactorInstanceBadgeVirtualSource {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
-        Self::HierarchicalDeterministic(HierarchicalDeterministicPublicKey::placeholder())
+        Self::HierarchicalDeterministic {
+            value: HierarchicalDeterministicPublicKey::placeholder(),
+        }
     }
 
     /// A placeholder used to facilitate unit tests.
     fn placeholder_other() -> Self {
-        Self::HierarchicalDeterministic(HierarchicalDeterministicPublicKey::placeholder_other())
+        Self::HierarchicalDeterministic {
+            value: HierarchicalDeterministicPublicKey::placeholder_other(),
+        }
     }
 }
 

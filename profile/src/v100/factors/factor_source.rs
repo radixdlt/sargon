@@ -83,12 +83,12 @@ impl Serialize for FactorSource {
             FactorSource::Device { factor: device } => {
                 let discriminant = "device";
                 state.serialize_field(discriminator_key, discriminant)?;
-                state.serialize_field(discriminant, device.deref())?;
+                state.serialize_field(discriminant, device)?;
             }
             FactorSource::Ledger { factor: ledger } => {
                 let discriminant = "ledgerHQHardwareWallet";
                 state.serialize_field(discriminator_key, discriminant)?;
-                state.serialize_field(discriminant, ledger.deref())?;
+                state.serialize_field(discriminant, ledger)?;
             }
         }
         state.end()

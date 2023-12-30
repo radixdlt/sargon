@@ -26,9 +26,6 @@ pub enum CommonError {
     #[error("Appearance id not recognized.")]
     InvalidAppearanceID,
 
-    #[error("String not not a valid display name, did not pass validation.")]
-    InvalidDisplayName,
-
     #[error("Invalid Account Address '{0}'.")]
     InvalidAccountAddress(String),
 
@@ -122,4 +119,10 @@ pub enum CommonError {
 
     #[error("Invalid BIP39 Index")]
     InvalidBIP39Index,
+
+    #[error("Invalid DisplayName cannot be empty.")]
+    InvalidDisplayNameEmpty,
+
+    #[error("Invalid DisplayName too long.")]
+    InvalidDisplayNameTooLong,
 }

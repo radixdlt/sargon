@@ -10,35 +10,43 @@ use crate::HasPlaceholder;
 /// Either a "physical" badge (NFT) or some source for recreation of a producer
 /// of a virtual badge (signature), e.g. a HD derivation path, from which a private key
 /// is derived which produces virtual badges (signatures).
-#[derive(Serialize, Deserialize, EnumAsInner, Clone, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, EnumAsInner, Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
 #[serde(remote = "Self")]
 pub enum FactorInstanceBadge {
     #[serde(rename = "virtualSource")]
-    Virtual(FactorInstanceBadgeVirtualSource),
+    Virtual {
+        value: FactorInstanceBadgeVirtualSource,
+    },
 }
 
 #[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for FactorInstanceBadge {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
-        FactorInstanceBadge::Virtual(FactorInstanceBadgeVirtualSource::placeholder())
+        FactorInstanceBadge::Virtual {
+            value: FactorInstanceBadgeVirtualSource::placeholder(),
+        }
     }
 
     /// A placeholder used to facilitate unit tests.
     fn placeholder_other() -> Self {
-        FactorInstanceBadge::Virtual(FactorInstanceBadgeVirtualSource::placeholder_other())
+        FactorInstanceBadge::Virtual {
+            value: FactorInstanceBadgeVirtualSource::placeholder_other(),
+        }
     }
 }
 
 impl From<FactorInstanceBadgeVirtualSource> for FactorInstanceBadge {
     fn from(value: FactorInstanceBadgeVirtualSource) -> Self {
-        Self::Virtual(value)
+        Self::Virtual { value }
     }
 }
 
 impl From<HierarchicalDeterministicPublicKey> for FactorInstanceBadge {
     fn from(value: HierarchicalDeterministicPublicKey) -> Self {
-        Self::Virtual(value.into())
+        Self::Virtual {
+            value: value.into(),
+        }
     }
 }
 
@@ -65,10 +73,10 @@ impl Serialize for FactorInstanceBadge {
     {
         let mut state = serializer.serialize_struct("FactorInstanceBadge", 2)?;
         match self {
-            FactorInstanceBadge::Virtual(virtual_source) => {
+            FactorInstanceBadge::Virtual { value } => {
                 let discriminant = "virtualSource";
                 state.serialize_field("discriminator", discriminant)?;
-                state.serialize_field(discriminant, virtual_source)?;
+                state.serialize_field(discriminant, value)?;
             }
         }
         state.end()
@@ -135,11 +143,11 @@ mod tests {
         let sut: FactorInstanceBadge = HierarchicalDeterministicPublicKey::placeholder().into();
         assert_eq!(
             sut,
-            FactorInstanceBadge::Virtual(
-                FactorInstanceBadgeVirtualSource::HierarchicalDeterministic(
-                    HierarchicalDeterministicPublicKey::placeholder()
-                )
-            )
+            FactorInstanceBadge::Virtual {
+                value: FactorInstanceBadgeVirtualSource::HierarchicalDeterministic {
+                    value: HierarchicalDeterministicPublicKey::placeholder()
+                }
+            }
         )
     }
 
@@ -148,11 +156,11 @@ mod tests {
         let sut: FactorInstanceBadge = FactorInstanceBadgeVirtualSource::placeholder().into();
         assert_eq!(
             sut,
-            FactorInstanceBadge::Virtual(
-                FactorInstanceBadgeVirtualSource::HierarchicalDeterministic(
-                    HierarchicalDeterministicPublicKey::placeholder()
-                )
-            )
+            FactorInstanceBadge::Virtual {
+                value: FactorInstanceBadgeVirtualSource::HierarchicalDeterministic {
+                    value: HierarchicalDeterministicPublicKey::placeholder()
+                }
+            }
         )
     }
 }

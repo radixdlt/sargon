@@ -1,7 +1,6 @@
 use std::sync::Arc;
 
 use crate::HDPathError;
-use derive_getters::Getters;
 use serde::{de, Deserializer, Serialize, Serializer};
 
 #[cfg(any(test, feature = "placeholder"))]

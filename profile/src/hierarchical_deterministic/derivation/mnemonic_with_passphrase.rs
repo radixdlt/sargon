@@ -2,7 +2,6 @@ use crate::{
     Derivation, DerivationPathScheme, HDPath, HierarchicalDeterministicPrivateKey, Mnemonic, Seed,
 };
 use crate::{Ed25519PrivateKey, SLIP10Curve, Secp256k1PrivateKey};
-use derive_getters::Getters;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 

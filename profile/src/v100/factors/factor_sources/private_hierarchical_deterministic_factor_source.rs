@@ -1,5 +1,4 @@
 use crate::{AccountPath, CAP26KeyKind, CAP26Repr, HDPathValue, MnemonicWithPassphrase};
-use derive_getters::Getters;
 
 use crate::{
     v100::{

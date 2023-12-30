@@ -1,4 +1,3 @@
-use derive_getters::Getters;
 use identified_vec::Identifiable;
 use serde::{Deserialize, Serialize};
 

@@ -1,5 +1,4 @@
 use crate::PublicKey;
-use derive_getters::Getters;
 use serde::{Deserialize, Serialize};
 
 use crate::DerivationPath;
