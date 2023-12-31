@@ -82,7 +82,7 @@ impl Secp256k1PrivateKey {
     pub fn from_str(hex: &str) -> Result<Self, Error> {
         Hex32Bytes::from_hex(hex)
             .map_err(|_| Error::InvalidSecp256k1PrivateKeyFromString)
-            .and_then(|b| Self::from_bytes(&b.to_vec()))
+            .and_then(Self::from_hex32_bytes)
     }
 }
 

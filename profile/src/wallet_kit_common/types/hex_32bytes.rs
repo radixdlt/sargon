@@ -148,10 +148,10 @@ impl Hex32Bytes {
     /// Tries to turn the `Vec` into a `Hex32Bytes`. Will fail
     /// if `bytes` does not have length 32.
     pub fn from_vec(bytes: Vec<u8>) -> Result<Self, Error> {
-        bytes
-            .try_into()
-            .map(|bytes| Self { bytes })
-            .map_err(|_| Error::InvalidByteCountExpected32)
+        if bytes.len() != 32 {
+            return Err(Error::InvalidByteCountExpected32);
+        }
+        Ok(Self { bytes })
     }
 
     /// Tries to decode the string `s` into a `Hex32Bytes`. Will fail
