@@ -30,6 +30,10 @@ impl<Element: Identifiable + Debug + Clone> IdentifiedVecVia<Element> {
     pub fn len(&self) -> usize {
         self.id_vec.len()
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
 }
 impl<Element: Identifiable + Debug + Clone> ViaMarker for IdentifiedVecVia<Element> {}
 impl<Element: Identifiable + Debug + Clone> IsIdentifiableVecOfVia<Element>

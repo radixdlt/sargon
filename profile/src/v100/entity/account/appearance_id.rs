@@ -1,12 +1,27 @@
 use crate::CommonError;
-use serde::{Deserialize, Serialize};
+use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 use std::fmt::Display;
 
-#[derive(
-    Serialize, Deserialize, Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, uniffi::Record,
-)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, uniffi::Record)]
 pub struct AppearanceID {
     pub value: u8,
+}
+
+impl Serialize for AppearanceID {
+    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_u8(self.value)
+    }
+}
+
+impl<'de> Deserialize<'de> for AppearanceID {
+    #[cfg(not(tarpaulin_include))] // false negative
+    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<AppearanceID, D::Error> {
+        let value = u8::deserialize(d)?;
+        AppearanceID::new(value).map_err(de::Error::custom)
+    }
 }
 
 impl AppearanceID {

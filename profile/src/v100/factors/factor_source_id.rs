@@ -12,16 +12,20 @@ use crate::HasPlaceholder;
 /// device (phone), where the ID of it is the hash of a special
 /// key derived near the root of it.
 #[derive(Serialize, Deserialize, EnumAsInner, Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
-#[serde(remote = "Self")]
+#[serde(untagged, remote = "Self")]
 pub enum FactorSourceID {
     /// FactorSourceID from the blake2b hash of the special HD public key derived at `CAP26::GetID`,
     /// for a certain `FactorSourceKind`
-    #[serde(rename = "fromHash")]
-    Hash { value: FactorSourceIDFromHash },
+    Hash {
+        #[serde(rename = "fromHash")]
+        value: FactorSourceIDFromHash,
+    },
 
     /// FactorSourceID from an AccountAddress, typically used by `trustedContact` FactorSource.
-    #[serde(rename = "fromAddress")]
-    Address { value: FactorSourceIDFromAddress },
+    Address {
+        #[serde(rename = "fromAddress")]
+        value: FactorSourceIDFromAddress,
+    },
 }
 
 impl From<FactorSourceIDFromHash> for FactorSourceID {
@@ -45,9 +49,9 @@ impl<'de> Deserialize<'de> for FactorSourceID {
             #[serde(rename = "discriminator")]
             _ignore: String,
             #[serde(flatten, with = "FactorSourceID")]
-            inner: FactorSourceID,
+            value: FactorSourceID,
         }
-        Wrapper::deserialize(deserializer).map(|w| w.inner)
+        Wrapper::deserialize(deserializer).map(|w| w.value)
     }
 }
 

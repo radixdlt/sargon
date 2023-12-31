@@ -10,10 +10,10 @@ use crate::HasPlaceholder;
 /// of a virtual badge (signature), e.g. a HD derivation path, from which a private key
 /// is derived which produces virtual badges (signatures).
 #[derive(Serialize, Deserialize, EnumAsInner, Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
-#[serde(remote = "Self")]
+#[serde(untagged, remote = "Self")]
 pub enum FactorInstanceBadge {
-    #[serde(rename = "virtualSource")]
     Virtual {
+        #[serde(rename = "virtualSource")]
         value: FactorInstanceBadgeVirtualSource,
     },
 }
@@ -57,9 +57,9 @@ impl<'de> Deserialize<'de> for FactorInstanceBadge {
             #[serde(rename = "discriminator")]
             _ignore: String,
             #[serde(flatten, with = "FactorInstanceBadge")]
-            inner: FactorInstanceBadge,
+            value: FactorInstanceBadge,
         }
-        Wrapper::deserialize(deserializer).map(|w| w.inner)
+        Wrapper::deserialize(deserializer).map(|w| w.value)
     }
 }
 

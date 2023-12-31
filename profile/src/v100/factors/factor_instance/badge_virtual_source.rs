@@ -5,10 +5,10 @@ use crate::HasPlaceholder;
 use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
-#[serde(remote = "Self")]
+#[serde(untagged, remote = "Self")]
 pub enum FactorInstanceBadgeVirtualSource {
-    #[serde(rename = "hierarchicalDeterministicPublicKey")]
     HierarchicalDeterministic {
+        #[serde(rename = "hierarchicalDeterministicPublicKey")]
         value: HierarchicalDeterministicPublicKey,
     },
 }
@@ -36,9 +36,9 @@ impl<'de> Deserialize<'de> for FactorInstanceBadgeVirtualSource {
             #[serde(rename = "discriminator")]
             _ignore: String,
             #[serde(flatten, with = "FactorInstanceBadgeVirtualSource")]
-            inner: FactorInstanceBadgeVirtualSource,
+            value: FactorInstanceBadgeVirtualSource,
         }
-        Wrapper::deserialize(deserializer).map(|w| w.inner)
+        Wrapper::deserialize(deserializer).map(|w| w.value)
     }
 }
 

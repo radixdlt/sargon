@@ -230,6 +230,19 @@ mod tests {
     }
 
     #[test]
+    fn json_roundtrip_str() {
+        let id = NonFungibleGlobalId::try_from_str(
+            "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>",
+        )
+        .unwrap();
+
+        assert_json_value_eq_after_roundtrip(
+            &id,
+            json!("resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>"),
+        );
+    }
+
+    #[test]
     fn compare() {
         let a: NonFungibleGlobalId =
             "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd:#3333#"

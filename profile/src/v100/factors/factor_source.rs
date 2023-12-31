@@ -9,13 +9,16 @@ use super::{
     LedgerHardwareWalletFactorSource,
 };
 
-#[derive(Clone, EnumAsInner, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(Serialize, Deserialize, Clone, EnumAsInner, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
+#[serde(untagged, remote = "Self")]
 pub enum FactorSource {
     Device {
+        #[serde(rename = "device")]
         factor: DeviceFactorSource,
     },
 
     Ledger {
+        #[serde(rename = "ledgerHQHardwareWallet")]
         factor: LedgerHardwareWalletFactorSource,
     },
 }
@@ -58,12 +61,12 @@ impl<'de> Deserialize<'de> for FactorSource {
         // https://github.com/serde-rs/serde/issues/1343#issuecomment-409698470
         #[derive(Deserialize, Serialize)]
         struct Wrapper {
-            #[serde(rename = "discriminator")]
-            _ignore: String,
+            // #[serde(rename = "discriminator")]
+            discriminator: String,
             #[serde(flatten, with = "FactorSource")]
-            inner: FactorSource,
+            factor: FactorSource,
         }
-        Wrapper::deserialize(deserializer).map(|w| w.inner)
+        Wrapper::deserialize(deserializer).map(|w| w.factor)
     }
 }
 

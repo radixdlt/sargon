@@ -1,13 +1,25 @@
+use identified_vec::Identifiable;
 use iso8601_timestamp::Timestamp;
 use serde::{Deserialize, Serialize};
 
 use crate::now;
 use crate::HasPlaceholder;
+use crate::IdentifiedVecVia;
 
 use super::{
     factor_source_crypto_parameters::FactorSourceCryptoParameters,
     factor_source_flag::FactorSourceFlag,
 };
+
+/// Flags which describe a certain state a FactorSource might be in, e.g. `Main` (BDFS).
+pub type FactorSourceFlags = IdentifiedVecVia<FactorSourceFlag>;
+impl Identifiable for FactorSourceFlag {
+    type ID = Self;
+
+    fn id(&self) -> Self::ID {
+        self.clone()
+    }
+}
 
 /// Common properties shared between FactorSources of different kinds, describing
 /// its state, when added, and supported cryptographic parameters.
@@ -34,7 +46,7 @@ pub struct FactorSourceCommon {
     pub last_used_on: Timestamp,
 
     /// Flags which describe a certain state a FactorSource might be in, e.g. `Main` (BDFS).
-    pub flags: Vec<FactorSourceFlag>, // FIXME: Change to Set
+    pub flags: FactorSourceFlags,
 }
 
 impl FactorSourceCommon {
@@ -51,7 +63,7 @@ impl FactorSourceCommon {
             crypto_parameters,
             added_on: added_on.into(),
             last_used_on: last_used_on.into(),
-            flags: Vec::from_iter(flags.into_iter()),
+            flags: FactorSourceFlags::from_iter(flags),
         }
     }
 
@@ -121,6 +133,7 @@ impl FactorSourceCommon {
 mod tests {
 
     use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use identified_vec::IsIdentifiedVec;
     use iso8601_timestamp::Timestamp;
 
     use crate::v100::factors::{

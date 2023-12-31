@@ -1,46 +1,14 @@
-use serde::{Deserialize, Serialize};
-
 use crate::v100::{Account, AccountAddress, ContentHint};
 
-use crate::HasPlaceholder;
+use crate::{HasPlaceholder, IdentifiedVecVia};
 
 use super::Network;
-use identified_vec::Identifiable;
+use identified_vec::IsIdentifiedVec;
 
 /// An ordered mapping of NetworkID -> `Profile.Network`, containing
 /// all the users Accounts, Personas and AuthorizedDapps the user
 /// has created and interacted with on this network.
-#[derive(Serialize, Deserialize, Clone, Hash, Debug, PartialEq, Eq, uniffi::Record)]
-#[serde(transparent)]
-pub struct Networks {
-    // FIXME: Now
-    pub list: Vec<Network>,
-}
-
-impl Networks {
-    pub fn new() -> Self {
-        Self { list: Vec::new() }
-    }
-    pub fn from_iter<I>(iter: I) -> Self
-    where
-        I: IntoIterator<Item = Network>,
-    {
-        Self {
-            list: Vec::from_iter(iter),
-        }
-    }
-    pub fn append(&mut self, network: Network) {
-        if self.list.iter().any(|x| x.id() == network.id()) {
-            return;
-        }
-        self.list.push(network);
-    }
-    pub fn len(&self) -> usize {
-        self.list.len()
-    }
-}
-
-// pub type Networks = IdentifiedVecVia<Network>;
+pub type Networks = IdentifiedVecVia<Network>;
 
 // Constructors
 impl Networks {
@@ -62,36 +30,28 @@ impl Networks {
 }
 
 impl Networks {
-    // pub fn update_mut<F, R>(&mut self, mutate: F) -> R
-    // where
-    //     F: Fn(&mut Self) -> R,
-    // {
-    //     mutate(self)
-    // }
-
-    // pub fn update<F, R>(&self, mutate: F) -> R
-    // where
-    //     F: Fn(&Self) -> R,
-    // {
-    //     mutate(self)
-    // }
+    pub fn get_account(&self, address: &AccountAddress) -> Option<Account> {
+        self.get(&address.network_id)
+            .and_then(|n| n.accounts.get_account_by_address(address))
+            .cloned()
+    }
 
     /// Returns a clone of the updated account if found, else None.
-    pub fn update_account<F>(&mut self, address: &AccountAddress, mutate: F) -> Option<Account>
+    pub fn update_account<F>(&mut self, address: &AccountAddress, mut mutate: F) -> Option<Account>
     where
         F: FnMut(&mut Account) -> (),
     {
-        self.list
-            .iter_mut()
-            .find(|n| n.id() == address.network_id)
-            .map(|n| n.update_account(address, mutate))?
+        self.update_with(&address.network_id, |n| {
+            _ = n.update_account(address, |a| mutate(a))
+        });
+        self.get_account(address)
     }
 }
 
 impl Networks {
     pub fn content_hint(&self) -> ContentHint {
-        let number_of_accounts = self.list.iter().fold(0, |acc, x| acc + x.accounts.len());
-        ContentHint::with_counters(number_of_accounts, 0, self.list.len())
+        let number_of_accounts = self.iter().fold(0, |acc, x| acc + x.accounts.len());
+        ContentHint::with_counters(number_of_accounts, 0, self.len())
     }
 }
 
@@ -123,94 +83,96 @@ impl HasPlaceholder for Networks {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder, Networks};
+    use crate::{
+        assert_eq_after_json_roundtrip, Account, DisplayName, HasPlaceholder, NetworkID, Networks,
+    };
 
+    #[test]
+    fn default_is_empty() {
+        assert_eq!(Networks::default().len(), 0)
+    }
     /*
+    #[test]
+    fn inequality() {
+        assert_ne!(Networks::placeholder(), Networks::placeholder_other());
+    }
 
-        #[test]
-        fn default_is_empty() {
-            assert_eq!(Networks::default().len(), 0)
-        }
+    #[test]
+    fn update_account() {
+        let mut sut = Networks::placeholder();
+        let id = &NetworkID::Mainnet;
+        let account_address = Account::placeholder().address();
+        assert_eq!(
+            sut.get(id)
+                .unwrap()
+                .accounts()
+                .get(&account_address)
+                .unwrap()
+                .display_name(),
+            "Alice"
+        );
+        assert!(sut.update_account(&account_address, |a| _ =
+            a.set_display_name(DisplayName::new("Stella").unwrap())));
+        assert_eq!(
+            sut.get(id)
+                .unwrap()
+                .accounts()
+                .get(&account_address)
+                .unwrap()
+                .display_name(),
+            "Stella"
+        );
+    }
 
-        #[test]
-        fn inequality() {
-            assert_ne!(Networks::placeholder(), Networks::placeholder_other());
-        }
+    #[test]
+    fn update_account_unknown_network() {
+        let mut sut = Networks::placeholder();
+        let id = &NetworkID::Mainnet;
+        let account_address = Account::placeholder_nebunet().address();
+        assert_eq!(sut.get(id).unwrap().accounts().get(&account_address), None);
+        assert_eq!(
+            sut.update_account(&account_address, |a| _ =
+                a.set_display_name(DisplayName::new("Will fail").unwrap())),
+            false
+        );
+        // Assert unchanged
+        assert_eq!(sut, Networks::placeholder());
+    }
 
-        #[test]
-        fn update_account() {
-            let mut sut = Networks::placeholder();
-            let id = &NetworkID::Mainnet;
-            let account_address = Account::placeholder().address();
-            assert_eq!(
-                sut.get(id)
-                    .unwrap()
-                    .accounts()
-                    .get(&account_address)
-                    .unwrap()
-                    .display_name(),
-                "Alice"
-            );
-            assert!(sut.update_account(&account_address, |a| _ =
-                a.set_display_name(DisplayName::new("Stella").unwrap())));
-            assert_eq!(
-                sut.get(id)
-                    .unwrap()
-                    .accounts()
-                    .get(&account_address)
-                    .unwrap()
-                    .display_name(),
-                "Stella"
-            );
-        }
+    #[test]
+    fn update_account_unknown_account() {
+        let mut sut = Networks::placeholder();
+        let id = &NetworkID::Mainnet;
+        let account_address = Account::placeholder_mainnet_carol().address();
+        assert_eq!(sut.get(id).unwrap().accounts().get(&account_address), None);
+        assert_eq!(
+            sut.update_account(&account_address, |a| _ =
+                a.set_display_name(DisplayName::new("Will fail").unwrap())),
+            false
+        );
+        // Assert unchanged
+        assert_eq!(sut, Networks::placeholder());
+    }
 
-        #[test]
-        fn update_account_unknown_network() {
-            let mut sut = Networks::placeholder();
-            let id = &NetworkID::Mainnet;
-            let account_address = Account::placeholder_nebunet().address();
-            assert_eq!(sut.get(id).unwrap().accounts().get(&account_address), None);
-            assert_eq!(
-                sut.update_account(&account_address, |a| _ =
-                    a.set_display_name(DisplayName::new("Will fail").unwrap())),
-                false
-            );
-            // Assert unchanged
-            assert_eq!(sut, Networks::placeholder());
-        }
+    #[test]
+    fn with_network() {
+        let network = Network::new(
+            NetworkID::Mainnet,
+            Accounts::with_account(Account::placeholder_mainnet()),
+        );
+        assert_eq!(Networks::with_network(network).len(), 1);
+    }
 
-        #[test]
-        fn update_account_unknown_account() {
-            let mut sut = Networks::placeholder();
-            let id = &NetworkID::Mainnet;
-            let account_address = Account::placeholder_mainnet_carol().address();
-            assert_eq!(sut.get(id).unwrap().accounts().get(&account_address), None);
-            assert_eq!(
-                sut.update_account(&account_address, |a| _ =
-                    a.set_display_name(DisplayName::new("Will fail").unwrap())),
-                false
-            );
-            // Assert unchanged
-            assert_eq!(sut, Networks::placeholder());
-        }
+    #[test]
+    fn content_hint() {
+        assert_eq!(
+            Networks::placeholder().content_hint(),
+            ContentHint::with_counters(4, 0, 2)
+        );
+    }
 
-        #[test]
-        fn with_network() {
-            let network = Network::new(
-                NetworkID::Mainnet,
-                Accounts::with_account(Account::placeholder_mainnet()),
-            );
-            assert_eq!(Networks::with_network(network).len(), 1);
-        }
-
-        #[test]
-        fn content_hint() {
-            assert_eq!(
-                Networks::placeholder().content_hint(),
-                ContentHint::with_counters(4, 0, 2)
-            );
-        }
     */
+
     #[test]
     fn json_roundtrip() {
         let sut = Networks::placeholder();

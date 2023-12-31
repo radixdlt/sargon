@@ -7,7 +7,7 @@ use crate::v100::{NonFungibleGlobalId, ResourceAddress};
     Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Enum,
 )]
 #[serde(rename_all = "camelCase")]
-#[serde(tag = "discriminator", content = "value")]
+#[serde(tag = "discriminator")]
 pub enum DepositorAddress {
     ResourceAddress { value: ResourceAddress },
     NonFungibleGlobalID { value: NonFungibleGlobalId },

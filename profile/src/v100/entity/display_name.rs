@@ -1,13 +1,28 @@
-use serde::{Deserialize, Serialize};
+use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 
 use crate::CommonError;
 use std::fmt::Display;
 
-#[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, uniffi::Record,
-)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, uniffi::Record)]
 pub struct DisplayName {
     pub value: String,
+}
+
+impl Serialize for DisplayName {
+    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&self.value)
+    }
+}
+
+impl<'de> Deserialize<'de> for DisplayName {
+    #[cfg(not(tarpaulin_include))] // false negative
+    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<DisplayName, D::Error> {
+        let s = String::deserialize(d)?;
+        DisplayName::new(s.to_string()).map_err(de::Error::custom)
+    }
 }
 
 impl DisplayName {
@@ -51,7 +66,7 @@ impl TryFrom<&str> for DisplayName {
 #[cfg(test)]
 mod tests {
     use crate::{
-        assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
+        assert_json_roundtrip, assert_json_value_eq_after_roundtrip, assert_json_value_fails,
         assert_json_value_ne_after_roundtrip,
     };
     use serde_json::json;
@@ -95,5 +110,7 @@ mod tests {
         assert_json_value_eq_after_roundtrip(&a, json!("Cool persona"));
         assert_json_roundtrip(&a);
         assert_json_value_ne_after_roundtrip(&a, json!("Main account"));
+
+        assert_json_value_fails::<DisplayName>(json!("this is a much much too long display name"));
     }
 }

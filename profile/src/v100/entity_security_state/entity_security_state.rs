@@ -8,11 +8,13 @@ use crate::HasPlaceholder;
 /// the user controls it, i.e. if it is controlled by a single factor (private key)
 ///  or an `AccessController` with a potential Multi-Factor setup.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
-#[serde(remote = "Self")]
+#[serde(untagged, remote = "Self")]
 pub enum EntitySecurityState {
     /// The account is controlled by a single factor (private key)
-    #[serde(rename = "unsecuredEntityControl")]
-    Unsecured { value: UnsecuredEntityControl },
+    Unsecured {
+        #[serde(rename = "unsecuredEntityControl")]
+        value: UnsecuredEntityControl,
+    },
 }
 
 impl<'de> Deserialize<'de> for EntitySecurityState {
@@ -24,9 +26,9 @@ impl<'de> Deserialize<'de> for EntitySecurityState {
             #[serde(rename = "discriminator")]
             _ignore: String,
             #[serde(flatten, with = "EntitySecurityState")]
-            inner: EntitySecurityState,
+            value: EntitySecurityState,
         }
-        Wrapper::deserialize(deserializer).map(|w| w.inner)
+        Wrapper::deserialize(deserializer).map(|w| w.value)
     }
 }
 
