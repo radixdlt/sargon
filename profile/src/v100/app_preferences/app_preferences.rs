@@ -21,7 +21,7 @@ pub struct AppPreferences {
     /// Collection of clients user have connected P2P with, typically these
     /// are WebRTC connections with DApps, but might be Android or iPhone
     /// clients as well.
-    pub p2p_links: P2PLinks, // FIXME: NOW!
+    pub p2p_links: P2PLinks,
 
     /// Controls e.g. if Profile Snapshot gets synced to iCloud/Google backup or not.
     pub security: Security,

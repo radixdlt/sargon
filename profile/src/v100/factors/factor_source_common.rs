@@ -1,5 +1,3 @@
-use std::time::SystemTime;
-
 use iso8601_timestamp::Timestamp;
 use serde::{Deserialize, Serialize};
 
@@ -26,14 +24,14 @@ pub struct FactorSourceCommon {
     pub crypto_parameters: FactorSourceCryptoParameters,
 
     /// When this factor source for originally added by the user.
-    pub added_on: SystemTime, // FIXME: NOW!
+    pub added_on: Timestamp,
 
     /// Date of last usage of this factor source
     ///
     /// This is the only mutable property, it is mutable
     /// since we will update it every time this FactorSource
     /// is used.
-    pub last_used_on: SystemTime, // FIXME: NOW!
+    pub last_used_on: Timestamp,
 
     /// Flags which describe a certain state a FactorSource might be in, e.g. `Main` (BDFS).
     pub flags: Vec<FactorSourceFlag>, // FIXME: Change to Set

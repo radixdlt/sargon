@@ -14,28 +14,29 @@ use identified_vec::Identifiable;
 #[serde(transparent)]
 pub struct Networks {
     // FIXME: Now
-    pub vec: Vec<Network>,
+    pub list: Vec<Network>,
 }
+
 impl Networks {
     pub fn new() -> Self {
-        Self { vec: Vec::new() }
+        Self { list: Vec::new() }
     }
     pub fn from_iter<I>(iter: I) -> Self
     where
         I: IntoIterator<Item = Network>,
     {
         Self {
-            vec: Vec::from_iter(iter),
+            list: Vec::from_iter(iter),
         }
     }
     pub fn append(&mut self, network: Network) {
-        if self.vec.iter().any(|x| x.id() == network.id()) {
+        if self.list.iter().any(|x| x.id() == network.id()) {
             return;
         }
-        self.vec.push(network);
+        self.list.push(network);
     }
     pub fn len(&self) -> usize {
-        self.vec.len()
+        self.list.len()
     }
 }
 
@@ -75,35 +76,22 @@ impl Networks {
     //     mutate(self)
     // }
 
-    /// Returns `false` if no account with `address` was found, otherwise if found,
-    /// the account gets updated by `mutate` closure and this function returns
-    /// `true`.
-    pub fn update_account<F>(&mut self, _address: &AccountAddress, mut _mutate: F) -> bool
+    /// Returns a clone of the updated account if found, else None.
+    pub fn update_account<F>(&mut self, address: &AccountAddress, mut mutate: F) -> Option<Account>
     where
-        F: FnMut(&Account) -> (),
+        F: FnMut(&mut Account) -> (),
     {
-        // let mut updated_account = false;
-        // let updated_network = self.update_with(&address.network_id(), |n| {
-        //     updated_account = n.update_account(address, |a| mutate(a))
-        // });
-        // if !updated_account {
-        //     return false;
-        // }
-
-        // assert!(
-        //     updated_network,
-        //     "Strange! Update an account, which was not on this network?"
-        // );
-
-        // return updated_account && updated_network;
-        todo!()
+        self.list
+            .iter_mut()
+            .find(|n| n.id() == address.network_id)
+            .map(|n| n.update_account(address, mutate))?
     }
 }
 
 impl Networks {
     pub fn content_hint(&self) -> ContentHint {
-        let number_of_accounts = self.vec.iter().fold(0, |acc, x| acc + x.accounts.len());
-        ContentHint::with_counters(number_of_accounts, 0, self.vec.len())
+        let number_of_accounts = self.list.iter().fold(0, |acc, x| acc + x.accounts.len());
+        ContentHint::with_counters(number_of_accounts, 0, self.list.len())
     }
 }
 

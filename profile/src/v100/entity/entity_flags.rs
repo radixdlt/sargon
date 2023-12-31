@@ -9,11 +9,11 @@ use super::entity_flag::EntityFlag;
 #[serde(transparent)]
 pub struct EntityFlags {
     // FIXME: Now
-    pub vec: Vec<EntityFlag>,
+    pub list: Vec<EntityFlag>,
 }
 impl EntityFlags {
     pub fn new() -> Self {
-        Self { vec: Vec::new() }
+        Self { list: Vec::new() }
     }
 
     pub fn from_iter<I>(iter: I) -> Self
@@ -21,15 +21,15 @@ impl EntityFlags {
         I: IntoIterator<Item = EntityFlag>,
     {
         Self {
-            vec: Vec::from_iter(iter),
+            list: Vec::from_iter(iter),
         }
     }
 
     pub fn append(&mut self, flag: EntityFlag) {
-        if self.vec.contains(&flag) {
+        if self.list.contains(&flag) {
             return;
         }
-        self.vec.push(flag);
+        self.list.push(flag);
     }
 }
 
@@ -37,7 +37,7 @@ impl EntityFlags {
     /// Instantiates a flag collection with the provided Vec<Flag>,
     /// removing any duplicates from `flags` if any.
     pub fn with_flags(flags: Vec<EntityFlag>) -> Self {
-        Self { vec: flags }
+        Self { list: flags }
     }
 
     /// Instantiates a flag collection with the provided single flag
@@ -79,12 +79,12 @@ impl EntityFlags {
 
     ///Returns true if the set contains the `flag` equal to the value.
     pub fn contains(&self, flag: &EntityFlag) -> bool {
-        self.vec.contains(flag)
+        self.list.contains(flag)
     }
 
     /// Returns the number of flags in the set.
     pub fn len(&self) -> usize {
-        self.vec.len()
+        self.list.len()
     }
 }
 

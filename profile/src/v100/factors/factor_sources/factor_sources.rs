@@ -21,7 +21,7 @@ impl Identifiable for FactorSource {
 #[serde(transparent)]
 pub struct FactorSources {
     // FIXME: Now
-    pub vec: Vec<FactorSource>,
+    pub list: Vec<FactorSource>,
 }
 
 #[uniffi::export]
@@ -35,24 +35,24 @@ pub fn new_factor_sources_placeholder_other() -> FactorSources {
 
 impl FactorSources {
     pub fn new() -> Self {
-        Self { vec: Vec::new() }
+        Self { list: Vec::new() }
     }
     pub fn from_iter<I>(iter: I) -> Self
     where
         I: IntoIterator<Item = FactorSource>,
     {
         Self {
-            vec: Vec::from_iter(iter),
+            list: Vec::from_iter(iter),
         }
     }
     pub fn append(&mut self, factor_source: FactorSource) {
-        if self.vec.iter().any(|x| x.id() == factor_source.id()) {
+        if self.list.iter().any(|x| x.id() == factor_source.id()) {
             return;
         }
-        self.vec.push(factor_source);
+        self.list.push(factor_source);
     }
     pub fn len(&self) -> usize {
-        self.vec.len()
+        self.list.len()
     }
 }
 

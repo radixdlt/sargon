@@ -12,12 +12,12 @@ use crate::HasPlaceholder;
 #[serde(transparent)]
 pub struct P2PLinks {
     // FIXME: Now
-    vec: Vec<P2PLink>,
+    list: Vec<P2PLink>,
 }
 
 impl P2PLinks {
     pub fn new() -> Self {
-        Self { vec: Vec::new() }
+        Self { list: Vec::new() }
     }
 
     pub fn from_iter<I>(iter: I) -> Self
@@ -25,19 +25,19 @@ impl P2PLinks {
         I: IntoIterator<Item = P2PLink>,
     {
         Self {
-            vec: Vec::from_iter(iter.into_iter()),
+            list: Vec::from_iter(iter.into_iter()),
         }
     }
 
     pub fn append(&mut self, link: P2PLink) {
-        if self.vec.iter().any(|x| x.id() == link.id()) {
+        if self.list.iter().any(|x| x.id() == link.id()) {
             return;
         }
-        self.vec.push(link);
+        self.list.push(link);
     }
 
     pub fn len(&self) -> usize {
-        self.vec.len()
+        self.list.len()
     }
 }
 

@@ -116,6 +116,10 @@ impl Identifiable for Account {
 }
 
 impl Account {
+    pub fn set_display_name(&mut self, new: DisplayName) {
+        self.display_name = new
+    }
+
     pub fn update<F, R>(&self, mutate: F) -> R
     where
         F: Fn(&Self) -> R,

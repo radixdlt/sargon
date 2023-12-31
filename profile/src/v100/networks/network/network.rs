@@ -53,18 +53,14 @@ impl Network {
 }
 
 impl Network {
-    /// Returns `false` if no account with `address` was found, otherwise if found,
-    /// the account gets updated by `mutate` closure and this function returns
-    /// `true`.
-    pub fn update_account<F>(&mut self, _address: &AccountAddress, _mutate: F) -> bool
+    /// Returns a clone of the updated account if found, else None.
+    pub fn update_account<F>(&mut self, address: &AccountAddress, mut mutate: F) -> Option<Account>
     where
-        F: FnMut(&Account) -> (),
+        F: FnMut(&mut Account) -> (),
     {
-        todo!()
+        self.accounts.update_account(address, mutate)
     }
 }
-
-// CFG test
 
 impl HasPlaceholder for Network {
     /// A placeholder used to facilitate unit tests.

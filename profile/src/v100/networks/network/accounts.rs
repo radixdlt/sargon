@@ -11,29 +11,29 @@ use crate::HasPlaceholder;
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 #[serde(transparent)]
 pub struct Accounts {
-    vec: Vec<Account>,
+    pub list: Vec<Account>,
 }
 
 impl Accounts {
     pub fn new() -> Self {
-        Self { vec: Vec::new() }
+        Self { list: Vec::new() }
     }
     pub fn from_iter<I>(iter: I) -> Self
     where
         I: IntoIterator<Item = Account>,
     {
         Self {
-            vec: Vec::from_iter(iter),
+            list: Vec::from_iter(iter),
         }
     }
     pub fn append(&mut self, account: Account) {
-        if self.vec.iter().any(|x| x.id() == account.id()) {
+        if self.list.iter().any(|x| x.id() == account.id()) {
             return;
         }
-        self.vec.push(account);
+        self.list.push(account);
     }
     pub fn len(&self) -> usize {
-        self.vec.len()
+        self.list.len()
     }
 }
 
@@ -55,15 +55,15 @@ impl Accounts {
 }
 
 impl Accounts {
-    /// Returns `false` if no account with `address` was found, otherwise if found,
-    /// the account gets updated by `mutate` closure and this function returns
-    /// `true`.
-    pub fn update_account<F>(&mut self, _address: &AccountAddress, mut _mutate: F) -> bool
+    /// Returns a clone of the updated account if found, else None.
+    pub fn update_account<F>(&mut self, address: &AccountAddress, mut mutate: F) -> Option<Account>
     where
-        F: FnMut(&Account) -> (),
+        F: FnMut(&mut Account) -> (),
     {
-        // self.update_with(address, |a| mutate(a))
-        todo!()
+        self.list.iter_mut().find(|a| &a.id() == address).map(|a| {
+            mutate(a);
+            return a.clone();
+        })
     }
 }
 
@@ -85,7 +85,7 @@ impl Accounts {
 
     /// Returns references to **all** accounts, including hidden ones.
     pub fn get_all(&self) -> Vec<Account> {
-        self.vec.clone()
+        self.list.clone()
     }
 }
 

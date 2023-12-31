@@ -3,12 +3,6 @@ use serde::{Deserialize, Serialize};
 use crate::CommonError;
 use std::fmt::Display;
 
-// #[nutype(
-//     sanitize(trim),
-//     validate(not_empty, len_char_max = 30),
-
-// )]
-
 #[derive(
     Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, uniffi::Record,
 )]
