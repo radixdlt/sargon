@@ -28,7 +28,7 @@ pub enum FactorSourceKind {
     /// * Off device
     /// * Hardware (requires Browser Connector Extension to communicate with wallet)
     /// * Hierarchical deterministic
-    /// * Entity creating (accounts only) // FIXME: MFA remove
+    /// * Entity creating (accounts only)
     #[serde(rename = "ledgerHQHardwareWallet")]
     LedgerHQHardwareWallet,
 
