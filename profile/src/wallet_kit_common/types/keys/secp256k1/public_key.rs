@@ -2,7 +2,9 @@ use crate::KeyError as Error;
 use bip32::secp256k1::PublicKey as BIP32Secp256k1PublicKey;
 use radix_engine_common::crypto::{Hash, Secp256k1PublicKey as EngineSecp256k1PublicKey};
 use serde::{Deserialize, Serialize};
+use serde_with::{hex::Hex, serde_as};
 use std::fmt::{Debug, Formatter};
+use std::str::FromStr;
 use transaction::{signing::secp256k1::Secp256k1Signature, validation::verify_secp256k1};
 
 use crate::HasPlaceholder;
@@ -10,8 +12,11 @@ use crate::HasPlaceholder;
 use crate::Secp256k1PrivateKey;
 
 /// A `secp256k1` public key used to verify cryptographic signatures (ECDSA signatures).
+#[serde_as]
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record)]
+#[serde(transparent)]
 pub struct Secp256k1PublicKey {
+    #[serde_as(as = "Hex")]
     bytes: Vec<u8>, // FIXME: change to either EngineSecp256k1PublicKey or bip32::secp256k1::PublicKey once we have proper UniFFI lift/lower/UniffiCustomTypeConverter
 }
 
@@ -97,6 +102,14 @@ impl TryInto<Secp256k1PublicKey> for &str {
 
     fn try_into(self) -> Result<Secp256k1PublicKey, Self::Error> {
         Secp256k1PublicKey::from_str(self)
+    }
+}
+
+impl FromStr for Secp256k1PublicKey {
+    type Err = crate::KeyError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Self::from_hex(s.to_string())
     }
 }
 

@@ -1,6 +1,7 @@
 use crate::{Hex32Bytes, KeyError as Error};
 use radix_engine_common::crypto::{Ed25519PublicKey as EngineEd25519PublicKey, Hash};
 use serde::{Deserialize, Serialize};
+use serde_with::{hex::Hex, serde_as};
 use std::{
     fmt::{Debug, Formatter},
     str::FromStr,
@@ -12,8 +13,11 @@ use crate::HasPlaceholder;
 use crate::Ed25519PrivateKey;
 
 /// An Ed25519 public key used to verify cryptographic signatures (EdDSA signatures).
+#[serde_as]
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record)]
+#[serde(transparent)]
 pub struct Ed25519PublicKey {
+    #[serde_as(as = "Hex")]
     bytes: Vec<u8>, // FIXME: change to either EngineEd25519PublicKey or ed25519_dalek::PublicKey once we have proper UniFFI lift/lower/UniffiCustomTypeConverter
 }
 
@@ -128,6 +132,14 @@ impl HasPlaceholder for Ed25519PublicKey {
 
     fn placeholder_other() -> Self {
         Self::placeholder_bob()
+    }
+}
+
+impl FromStr for Ed25519PublicKey {
+    type Err = crate::KeyError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Self::from_hex(s.to_string())
     }
 }
 

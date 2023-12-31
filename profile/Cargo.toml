@@ -10,6 +10,7 @@ placeholder = []
 [dependencies]
 serde = { workspace = true, features = ["rc"] }
 serde_json = { workspace = true }
+serde_with = { workspace = true }
 thiserror = { workspace = true }
 iso8601-timestamp = { workspace = true }
 uuid = { workspace = true }
