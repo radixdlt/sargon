@@ -13,10 +13,10 @@ use super::deposit_address_exception_rule::DepositAddressExceptionRule;
 #[serde(rename_all = "camelCase")]
 pub struct AssetException {
     /// Address of an asset to either deny or allow, as an exception overriding the `ThirdPartyDeposits`'s general `deposit_rule`.
-    address: ResourceAddress,
+    pub address: ResourceAddress,
 
     /// Either deny or allow the `address`.
-    exception_rule: DepositAddressExceptionRule,
+    pub exception_rule: DepositAddressExceptionRule,
 }
 
 impl Identifiable for AssetException {

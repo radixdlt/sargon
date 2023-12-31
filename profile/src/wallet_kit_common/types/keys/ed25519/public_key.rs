@@ -18,8 +18,27 @@ pub struct Ed25519PublicKey {
 }
 
 #[uniffi::export]
-pub fn new_ed25519_public_key(hex: String) -> Result<Ed25519PublicKey, crate::KeyError> {
+pub fn new_ed25519_public_key_from_hex(hex: String) -> Result<Ed25519PublicKey, crate::KeyError> {
     Ed25519PublicKey::from_hex(hex)
+}
+
+#[uniffi::export]
+pub fn new_ed25519_public_key_from_bytes(
+    bytes: Vec<u8>,
+) -> Result<Ed25519PublicKey, crate::KeyError> {
+    Ed25519PublicKey::from_bytes(bytes)
+}
+
+/// Encodes the `Ed25519PublicKey` to a hexadecimal string, lowercased, without any `0x` prefix, e.g.
+/// `"b7a3c12dc0c8c748ab07525b701122b88bd78f600c76342d27f25e5f92444cde"`
+#[uniffi::export]
+pub fn ed25519_public_key_to_hex(public_key: &Ed25519PublicKey) -> String {
+    public_key.to_hex()
+}
+
+#[uniffi::export]
+pub fn ed25519_public_key_to_bytes(public_key: &Ed25519PublicKey) -> Vec<u8> {
+    public_key.to_bytes()
 }
 
 impl From<EngineEd25519PublicKey> for Ed25519PublicKey {

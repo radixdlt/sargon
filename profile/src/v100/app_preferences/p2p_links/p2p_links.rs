@@ -1,45 +1,11 @@
-use identified_vec::Identifiable;
-
-use serde::{Deserialize, Serialize};
-
 use super::p2p_link::P2PLink;
 
-use crate::HasPlaceholder;
+use crate::{HasPlaceholder, IdentifiedVecVia};
 
-// pub type P2PLinks = IdentifiedVecVia<P2PLink>;
-
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
-#[serde(transparent)]
-pub struct P2PLinks {
-    // FIXME: Now
-    list: Vec<P2PLink>,
-}
-
-impl P2PLinks {
-    pub fn new() -> Self {
-        Self { list: Vec::new() }
-    }
-
-    pub fn from_iter<I>(iter: I) -> Self
-    where
-        I: IntoIterator<Item = P2PLink>,
-    {
-        Self {
-            list: Vec::from_iter(iter.into_iter()),
-        }
-    }
-
-    pub fn append(&mut self, link: P2PLink) {
-        if self.list.iter().any(|x| x.id() == link.id()) {
-            return;
-        }
-        self.list.push(link);
-    }
-
-    pub fn len(&self) -> usize {
-        self.list.len()
-    }
-}
+/// Collection of clients user have connected P2P with, typically these
+/// are WebRTC connections with DApps, but might be Android or iPhone
+/// clients as well.
+pub type P2PLinks = IdentifiedVecVia<P2PLink>;
 
 impl Default for P2PLinks {
     fn default() -> Self {

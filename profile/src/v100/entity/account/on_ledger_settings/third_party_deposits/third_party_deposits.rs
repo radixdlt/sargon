@@ -1,4 +1,7 @@
+use identified_vec::Identifiable;
 use serde::{Deserialize, Serialize};
+
+use crate::IdentifiedVecVia;
 
 use super::{
     asset_exception::AssetException, deposit_rule::DepositRule, depositor_address::DepositorAddress,
@@ -6,30 +9,32 @@ use super::{
 
 /// Controls the ability of third-parties to deposit into a certain account, this is
 /// useful for users who wish to not be able to receive airdrops.
-#[derive(
-    Serialize,
-    Deserialize,
-    Default,
-    Clone,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash,
-    PartialOrd,
-    Ord,
-    uniffi::Record,
-)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct ThirdPartyDeposits {
     /// Controls the ability of third-parties to deposit into this account
     pub deposit_rule: DepositRule,
 
     /// Denies or allows third-party deposits of specific assets by ignoring the `depositMode`
-    pub assets_exception_list: Vec<AssetException>, // FIXME: change to Set once UniFFI support Sets
+    pub assets_exception_list: IdentifiedVecVia<AssetException>,
 
     /// Allows certain third-party depositors to deposit assets freely.
     /// Note: There is no `deny` counterpart for this.
-    pub depositors_allow_list: Vec<DepositorAddress>, // FIXME: change to Set once UniFFI support Sets
+    pub depositors_allow_list: IdentifiedVecVia<DepositorAddress>,
+}
+
+impl Default for ThirdPartyDeposits {
+    fn default() -> Self {
+        Self::new(Default::default())
+    }
+}
+
+impl Identifiable for DepositorAddress {
+    type ID = Self;
+
+    fn id(&self) -> Self::ID {
+        self.clone()
+    }
 }
 
 impl ThirdPartyDeposits {
@@ -39,22 +44,26 @@ impl ThirdPartyDeposits {
     pub fn new(deposit_rule: DepositRule) -> Self {
         Self {
             deposit_rule,
-            assets_exception_list: Vec::new(),
-            depositors_allow_list: Vec::new(),
+            assets_exception_list: IdentifiedVecVia::new(),
+            depositors_allow_list: IdentifiedVecVia::new(),
         }
     }
 
     /// Instantiates a new `ThirdPartyDeposits` with the provided
     /// rule and lists.
-    pub fn with_rule_and_lists(
+    pub fn with_rule_and_lists<I, J>(
         deposit_rule: DepositRule,
-        assets_exception_list: Vec<AssetException>,
-        depositors_allow_list: Vec<DepositorAddress>,
-    ) -> Self {
+        assets_exception_list: I,
+        depositors_allow_list: J,
+    ) -> Self
+    where
+        I: IntoIterator<Item = AssetException>,
+        J: IntoIterator<Item = DepositorAddress>,
+    {
         Self {
             deposit_rule,
-            assets_exception_list,
-            depositors_allow_list,
+            assets_exception_list: IdentifiedVecVia::from_iter(assets_exception_list),
+            depositors_allow_list: IdentifiedVecVia::from_iter(depositors_allow_list),
         }
     }
 }

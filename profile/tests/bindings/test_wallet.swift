@@ -7,7 +7,7 @@ func test() throws {
 		assert(profile.networks.list.count > 1)
 		let mainnet = profile.networks.list[0]
 		assert(mainnet.id == .mainnet)
-		let mainnetAccounts = mainnet.accounts.list
+		let mainnetAccounts = mainnet.accounts
 		assert(mainnetAccounts.count > 1)
 		let account = mainnetAccounts[0]
 		assert(account.displayName.value == "Alice")
@@ -30,7 +30,7 @@ func test() throws {
 	do {
 		let profile = try wallet.profileSnapshot()
 		let mainnet = profile.networks.list[0]
-		let mainnetAccounts = mainnet.accounts.list
+		let mainnetAccounts = mainnet.accounts
 		let account = mainnetAccounts[0]
 		assert(account.displayName.value == "Satoshi")
 	} catch {

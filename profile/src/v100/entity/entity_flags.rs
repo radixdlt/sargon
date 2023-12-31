@@ -1,43 +1,30 @@
-use serde::{Deserialize, Serialize};
+use identified_vec::{Identifiable, IsIdentifiedVec};
+
+use crate::IdentifiedVecVia;
 
 use super::entity_flag::EntityFlag;
 
 /// An order set of `EntityFlag`s used to describe certain Off-ledger
 /// user state about Accounts or Personas, such as if an entity is
 /// marked as hidden or not.
-#[derive(Serialize, Deserialize, Clone, Debug, Hash, PartialEq, Eq, uniffi::Record)]
-#[serde(transparent)]
-pub struct EntityFlags {
-    // FIXME: Now
-    pub list: Vec<EntityFlag>,
-}
-impl EntityFlags {
-    pub fn new() -> Self {
-        Self { list: Vec::new() }
-    }
+pub type EntityFlags = IdentifiedVecVia<EntityFlag>;
 
-    pub fn from_iter<I>(iter: I) -> Self
-    where
-        I: IntoIterator<Item = EntityFlag>,
-    {
-        Self {
-            list: Vec::from_iter(iter),
-        }
-    }
+impl Identifiable for EntityFlag {
+    type ID = Self;
 
-    pub fn append(&mut self, flag: EntityFlag) {
-        if self.list.contains(&flag) {
-            return;
-        }
-        self.list.push(flag);
+    fn id(&self) -> Self::ID {
+        self.clone()
     }
 }
 
 impl EntityFlags {
     /// Instantiates a flag collection with the provided Vec<Flag>,
     /// removing any duplicates from `flags` if any.
-    pub fn with_flags(flags: Vec<EntityFlag>) -> Self {
-        Self { list: flags }
+    pub fn with_flags<I>(flags: I) -> Self
+    where
+        I: IntoIterator<Item = EntityFlag>,
+    {
+        Self::from_iter(flags)
     }
 
     /// Instantiates a flag collection with the provided single flag
@@ -60,31 +47,12 @@ impl EntityFlags {
     ///
     /// If the set did not previously contain an equal flag, true is returned.
     /// If the set already contained an equal flag, false is returned, and the entry is not updated.
-    pub fn insert_flag(&mut self, _flag: EntityFlag) -> bool {
-        // // self.0.insert(flag) // FIXME: NOW!
-        // let contained = self.0.contains(&flag);
-        // self.0.append(flag);
-        // self.0.dedup();
-        // !contained
-
-        todo!()
+    pub fn insert_flag(&mut self, flag: EntityFlag) -> bool {
+        self.append(flag).0
     }
 
-    /// If the set contains a flag equal to `flag`, removes it from the set and drops it.
-    /// Returns whether such a flag was present.
-    pub fn remove_flag(&mut self, _flag: &EntityFlag) -> bool {
-        // self.0.remove(flag)
-        todo!()
-    }
-
-    ///Returns true if the set contains the `flag` equal to the value.
-    pub fn contains(&self, flag: &EntityFlag) -> bool {
-        self.list.contains(flag)
-    }
-
-    /// Returns the number of flags in the set.
-    pub fn len(&self) -> usize {
-        self.list.len()
+    pub fn remove_flag(&mut self, flag: &EntityFlag) -> Option<EntityFlag> {
+        self.remove(flag)
     }
 }
 
@@ -94,6 +62,7 @@ mod tests {
         assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
         assert_json_value_ne_after_roundtrip,
     };
+    use identified_vec::IsIdentifiedVec;
     use serde_json::json;
 
     use crate::v100::entity::{entity_flag::EntityFlag, entity_flags::EntityFlags};
@@ -116,12 +85,15 @@ mod tests {
     #[test]
     fn remove_existing_flag() {
         assert!(EntityFlags::with_flag(EntityFlag::DeletedByUser)
-            .remove_flag(&EntityFlag::DeletedByUser));
+            .remove_flag(&EntityFlag::DeletedByUser)
+            .is_some());
     }
 
     #[test]
     fn remove_non_existing_flag() {
-        assert!(!EntityFlags::default().remove_flag(&EntityFlag::DeletedByUser));
+        assert!(!EntityFlags::default()
+            .remove_flag(&EntityFlag::DeletedByUser)
+            .is_none());
         // does not exist
     }
 

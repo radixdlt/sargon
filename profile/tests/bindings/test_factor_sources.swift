@@ -1,6 +1,6 @@
 import radix_wallet_kit
 
-public typealias SUT = FactorSources
+public typealias SUT = [FactorSource]
 extension SUT {
 	public static let placeholder: Self = newFactorSourcesPlaceholder()
 	public static let placeholderOther: Self = newFactorSourcesPlaceholderOther()

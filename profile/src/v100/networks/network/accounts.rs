@@ -1,41 +1,43 @@
-use crate::v100::{Account, AccountAddress};
-use identified_vec::Identifiable;
-use serde::{Deserialize, Serialize};
+use crate::{
+    v100::{Account, AccountAddress},
+    IdentifiedVecVia,
+};
+use identified_vec::IsIdentifiedVec;
 
 use crate::HasPlaceholder;
 
-// pub type Accounts = IdentifiedVecVia<Account>;
+pub type Accounts = IdentifiedVecVia<Account>;
 
 /// An ordered set of Accounts on a specific network, most commonly
 /// the set is non-empty.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
-#[serde(transparent)]
-pub struct Accounts {
-    pub list: Vec<Account>,
-}
+// #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+// #[serde(transparent)]
+// pub struct Accounts {
+//     pub list: Vec<Account>,
+// }
 
-impl Accounts {
-    pub fn new() -> Self {
-        Self { list: Vec::new() }
-    }
-    pub fn from_iter<I>(iter: I) -> Self
-    where
-        I: IntoIterator<Item = Account>,
-    {
-        Self {
-            list: Vec::from_iter(iter),
-        }
-    }
-    pub fn append(&mut self, account: Account) {
-        if self.list.iter().any(|x| x.id() == account.id()) {
-            return;
-        }
-        self.list.push(account);
-    }
-    pub fn len(&self) -> usize {
-        self.list.len()
-    }
-}
+// impl Accounts {
+//     pub fn new() -> Self {
+//         Self { list: Vec::new() }
+//     }
+//     pub fn from_iter<I>(iter: I) -> Self
+//     where
+//         I: IntoIterator<Item = Account>,
+//     {
+//         Self {
+//             list: Vec::from_iter(iter),
+//         }
+//     }
+//     pub fn append(&mut self, account: Account) {
+//         if self.list.iter().any(|x| x.id() == account.id()) {
+//             return;
+//         }
+//         self.list.push(account);
+//     }
+//     pub fn len(&self) -> usize {
+//         self.list.len()
+//     }
+// }
 
 impl Accounts {
     /// Instantiates a new collection of accounts from
@@ -54,19 +56,6 @@ impl Accounts {
     }
 }
 
-impl Accounts {
-    /// Returns a clone of the updated account if found, else None.
-    pub fn update_account<F>(&mut self, address: &AccountAddress, mut mutate: F) -> Option<Account>
-    where
-        F: FnMut(&mut Account) -> (),
-    {
-        self.list.iter_mut().find(|a| &a.id() == address).map(|a| {
-            mutate(a);
-            return a.clone();
-        })
-    }
-}
-
 // Trait: Default
 impl Default for Accounts {
     /// Instantiates a new empty networks collection.
@@ -75,17 +64,15 @@ impl Default for Accounts {
     }
 }
 
-// Getters
 impl Accounts {
     /// Returns a reference to the account identified by `address`, if it exists.
-    pub fn get_account_by_address(&self, _address: &AccountAddress) -> Option<&Account> {
-        // self.get(address)
-        todo!()
+    pub fn get_account_by_address(&self, address: &AccountAddress) -> Option<&Account> {
+        self.get(address)
     }
 
     /// Returns references to **all** accounts, including hidden ones.
-    pub fn get_all(&self) -> Vec<Account> {
-        self.list.clone()
+    pub fn get_all(&self) -> Vec<&Account> {
+        self.elements()
     }
 }
 

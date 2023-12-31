@@ -34,6 +34,16 @@ pub struct AccountAddress {
     pub network_id: NetworkID,
 }
 
+#[uniffi::export]
+pub fn new_account_address(bech32: String) -> Result<AccountAddress, CommonError> {
+    AccountAddress::try_from_bech32(bech32.as_str())
+}
+
+#[uniffi::export]
+pub fn new_account_address_from(public_key: PublicKey, network_id: NetworkID) -> AccountAddress {
+    AccountAddress::new(public_key, network_id)
+}
+
 /// Formats the AccountAddress to its abbreviated form which is what the user
 /// is most used to, since it is what we most commonly display in the Radix
 /// ecosystem.
@@ -49,16 +59,6 @@ pub struct AccountAddress {
 #[uniffi::export]
 pub fn account_address_to_short(address: &AccountAddress) -> String {
     address.short()
-}
-
-#[uniffi::export]
-pub fn new_account_address(bech32: String) -> Result<AccountAddress, CommonError> {
-    AccountAddress::try_from_bech32(bech32.as_str())
-}
-
-#[uniffi::export]
-pub fn new_account_address_from(public_key: PublicKey, network_id: NetworkID) -> AccountAddress {
-    AccountAddress::new(public_key, network_id)
 }
 
 impl AccountAddress {

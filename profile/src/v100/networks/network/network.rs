@@ -1,4 +1,4 @@
-use identified_vec::Identifiable;
+use identified_vec::{Identifiable, IsIdentifiedVec};
 use serde::{Deserialize, Serialize};
 
 use crate::HasPlaceholder;
@@ -54,11 +54,15 @@ impl Network {
 
 impl Network {
     /// Returns a clone of the updated account if found, else None.
-    pub fn update_account<F>(&mut self, address: &AccountAddress, mut mutate: F) -> Option<Account>
+    pub fn update_account<F>(&mut self, address: &AccountAddress, mutate: F) -> Option<Account>
     where
         F: FnMut(&mut Account) -> (),
     {
-        self.accounts.update_account(address, mutate)
+        if self.accounts.update_with(address, mutate) {
+            self.accounts.get(address).cloned()
+        } else {
+            None
+        }
     }
 }
 
