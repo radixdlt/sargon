@@ -1,4 +1,4 @@
-use std::{fmt::Display, time::SystemTime};
+use std::fmt::Display;
 
 use std::str::FromStr;
 
@@ -90,12 +90,6 @@ impl Display for Header {
             self.id, self.snapshot_version, self.content_hint
         )
     }
-}
-
-pub fn to_system_time(timestamp: Timestamp) -> SystemTime {
-    // let str = timestamp.to_string();
-    // time_util::parse_system_time_from_date_str(str.as_str()).expect("Valid date")
-    timestamp.into()
 }
 
 impl HasPlaceholder for Header {
