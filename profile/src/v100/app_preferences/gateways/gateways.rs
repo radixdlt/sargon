@@ -119,29 +119,22 @@ impl Gateways {
     /// Changes the current Gateway to `to`, if it is not already the current. If `to` is
     /// not a new Gateway, it will be removed from. Returns `Ok(false)` if `to` was already
     /// the `current`, returns `Ok(true)` if `to` was not already `current`.
-    pub fn change_current(&self, _to: Gateway) -> Result<bool, CommonError> {
-        // if self.current == to {
-        //     return Ok(false);
-        // }
-        // let old_current = self.current;
-        // let was_inserted = self.append(old_current);
-        // if !was_inserted {
-        //     return Err(CommonError::GatewaysDiscrepancyOtherShouldNotContainCurrent);
-        // }
-        let _ = self.other_identified();
-        // if let Some(idx) = other_identified.index_of_id(&to.id()) {
-        //     self.other
-        //         .lock()
-        //         .expect("`self.other` to not have been locked.")
-        //         .remove(idx);
-        // }
+    pub fn change_current(&mut self, to: Gateway) -> Result<bool, CommonError> {
+        if self.current == to {
+            return Ok(false);
+        }
+        let old_current = &self.current;
+        let was_inserted = self.append(old_current.clone());
+        if !was_inserted {
+            return Err(CommonError::GatewaysDiscrepancyOtherShouldNotContainCurrent);
+        }
+        let other_identified = self.other_identified();
+        if let Some(idx) = other_identified.index_of_id(&to.id()) {
+            self.other.remove(idx);
+        }
 
-        // *self
-        //     .current
-        //     .lock()
-        //     .expect("`self.current` to not have been locked.") = to;
-        // Ok(true)
-        todo!()
+        self.current = to;
+        Ok(true)
     }
 
     /// Appends `gateway` to the `other` list, without changing the `current` Gateway.
@@ -199,7 +192,7 @@ mod tests {
 
     #[test]
     fn change_current_to_existing() {
-        let sut = Gateways::default();
+        let mut sut = Gateways::default();
         assert_eq!(sut.current.network.id, NetworkID::Mainnet);
         assert_eq!(sut.change_current(Gateway::stokenet()), Ok(true));
         assert_eq!(sut.current.network.id, NetworkID::Stokenet);
@@ -215,7 +208,7 @@ mod tests {
 
     #[test]
     fn change_throw_gateways_discrepancy_other_should_not_contain_current() {
-        let impossible = Gateways {
+        let mut impossible = Gateways {
             current: Gateway::mainnet(),
             other: [Gateway::mainnet()].to_vec(),
         };
@@ -227,7 +220,7 @@ mod tests {
 
     #[test]
     fn change_current_to_current() {
-        let sut = Gateways::default();
+        let mut sut = Gateways::default();
         assert_eq!(sut.current.network.id, NetworkID::Mainnet);
         assert_eq!(sut.change_current(Gateway::mainnet()), Ok(false));
         assert_eq!(sut.current.network.id, NetworkID::Mainnet);
@@ -235,7 +228,7 @@ mod tests {
 
     #[test]
     fn change_current_to_new() {
-        let sut = Gateways::default();
+        let mut sut = Gateways::default();
         assert_eq!(sut.current.network.id, NetworkID::Mainnet);
         assert_eq!(sut.change_current(Gateway::nebunet()), Ok(true));
         assert_eq!(sut.current.network.id, NetworkID::Nebunet);
