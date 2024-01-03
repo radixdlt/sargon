@@ -3,7 +3,10 @@ use identified_vec::{
     IsIdentifiableVecOfVia, IsIdentifiedVec, IsIdentifiedVecOf, ViaMarker,
 };
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use std::fmt::{Debug, Display, Formatter};
+use std::{
+    fmt::{Debug, Display, Formatter},
+    ops::Index,
+};
 use uniffi::{
     check_remaining,
     deps::bytes::{Buf, BufMut},
@@ -34,8 +37,22 @@ impl<Element: Identifiable + Debug + Clone> IdentifiedVecVia<Element> {
     pub fn is_empty(&self) -> bool {
         self.len() == 0
     }
+
+    pub fn first(&self) -> Option<Element> {
+        self.get_at_index(0).cloned()
+    }
 }
+
+impl<Element: Identifiable + Debug + Clone> Index<usize> for IdentifiedVecVia<Element> {
+    type Output = Element;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        self.get_at_index(index).expect("Element at index: {index}")
+    }
+}
+
 impl<Element: Identifiable + Debug + Clone> ViaMarker for IdentifiedVecVia<Element> {}
+
 impl<Element: Identifiable + Debug + Clone> IsIdentifiableVecOfVia<Element>
     for IdentifiedVecVia<Element>
 {
