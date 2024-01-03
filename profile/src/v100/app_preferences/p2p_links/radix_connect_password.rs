@@ -1,3 +1,5 @@
+use std::fmt::{Debug, Formatter};
+
 use crate::{hash, Hex32Bytes};
 use radix_engine_common::crypto::Hash;
 use serde::{Deserialize, Serialize};
@@ -7,12 +9,16 @@ use crate::HasPlaceholder;
 /// The hash of the connection password is used to connect to the Radix Connect Signaling Server,
 /// over web sockets. The actual `ConnectionPassword` is used to encrypt all messages sent via
 /// the Signaling Server.
-#[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, uniffi::Record,
-)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, uniffi::Record)]
 #[serde(transparent)]
 pub struct RadixConnectPassword {
     bytes: Hex32Bytes,
+}
+
+impl Debug for RadixConnectPassword {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.bytes.to_hex(),)
+    }
 }
 
 impl RadixConnectPassword {
@@ -98,6 +104,14 @@ mod tests {
         assert_ne!(
             RadixConnectPassword::placeholder(),
             RadixConnectPassword::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn debug() {
+        assert_eq!(
+            format!("{:?}", RadixConnectPassword::placeholder()),
+            "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"
         );
     }
 

@@ -91,9 +91,10 @@ mod tests {
 
     #[test]
     fn remove_non_existing_flag() {
-        assert!(!EntityFlags::default()
-            .remove_flag(&EntityFlag::DeletedByUser)
-            .is_none());
+        assert_eq!(
+            EntityFlags::default().remove_flag(&EntityFlag::DeletedByUser),
+            None
+        );
         // does not exist
     }
 

@@ -234,10 +234,8 @@ mod tests {
         assert_eq!(settings.depositors_allow_list.len(), 1);
         assert!(settings.remove_allowed_depositor(&depositor));
         assert_eq!(settings.depositors_allow_list.len(), 0);
-        assert_eq!(
-            settings.depositors_allow_list,
-            IdentifiedVecVia::from_iter([depositor.clone()]),
-        );
+
+        settings.depositors_allow_list = IdentifiedVecVia::from_iter([depositor.clone()]);
         assert!(
             !settings.allow_depositor(depositor.clone()),
             "Expected `false` since already present."

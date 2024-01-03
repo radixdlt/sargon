@@ -32,10 +32,11 @@ impl P2PLink {
 
 impl Debug for P2PLink {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("P2PLink")
-            .field("connection_password", &self.connection_password)
-            .field("display_name", &self.display_name)
-            .finish()
+        write!(
+            f,
+            "P2PLink {{ display_name: '{}', connection_password: '{:?}' }}",
+            self.display_name, self.connection_password,
+        )
     }
 }
 
@@ -150,6 +151,6 @@ mod tests {
 
     #[test]
     fn debug() {
-        assert_eq!(format!("{:?}", P2PLink::placeholder()), "P2PLink { connection_password: RadixConnectPassword(cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe), display_name: \"Chrome on Macbook\" }");
+        assert_eq!(format!("{:?}", P2PLink::placeholder()), "P2PLink { display_name: 'Chrome on Macbook', connection_password: 'cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe' }");
     }
 }

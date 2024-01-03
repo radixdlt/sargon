@@ -35,7 +35,7 @@ impl DisplayName {
         if value.is_empty() {
             return Err(CommonError::InvalidDisplayNameEmpty);
         }
-        if value.len() >= Self::max_len() {
+        if value.len() > Self::max_len() {
             return Err(CommonError::InvalidDisplayNameTooLong);
         }
 
@@ -45,7 +45,7 @@ impl DisplayName {
 
 impl Display for DisplayName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self.value)
+        write!(f, "{}", self.value)
     }
 }
 
