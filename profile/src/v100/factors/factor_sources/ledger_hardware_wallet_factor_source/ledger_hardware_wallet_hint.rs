@@ -7,10 +7,10 @@ use crate::HasPlaceholder;
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct LedgerHardwareWalletHint {
     /// "Orange, scratched"
-    name: String,
+    pub name: String,
 
     /// E.g. `nanoS+`
-    model: LedgerHardwareWalletModel,
+    pub model: LedgerHardwareWalletModel,
 }
 
 impl LedgerHardwareWalletHint {

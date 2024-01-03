@@ -21,7 +21,7 @@ impl<'de> Deserialize<'de> for DisplayName {
     #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<DisplayName, D::Error> {
         let s = String::deserialize(d)?;
-        DisplayName::new(s.to_string()).map_err(de::Error::custom)
+        DisplayName::new(s.as_str()).map_err(de::Error::custom)
     }
 }
 
@@ -30,7 +30,7 @@ impl DisplayName {
         30
     }
 
-    pub fn new(value: String) -> Result<Self, CommonError> {
+    pub fn new(value: &str) -> Result<Self, CommonError> {
         let value = value.trim().to_string();
         if value.is_empty() {
             return Err(CommonError::InvalidDisplayNameEmpty);
@@ -51,7 +51,7 @@ impl Display for DisplayName {
 
 impl Default for DisplayName {
     fn default() -> Self {
-        Self::new("Unnamed".to_string()).expect("Default display name")
+        Self::new("Unnamed").expect("Default display name")
     }
 }
 
@@ -59,7 +59,7 @@ impl TryFrom<&str> for DisplayName {
     type Error = crate::CommonError;
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
-        DisplayName::new(value.to_string())
+        DisplayName::new(value)
     }
 }
 
@@ -91,14 +91,14 @@ mod tests {
     fn valid_try_from() {
         assert_eq!(
             DisplayName::try_from("Main"),
-            Ok(DisplayName::new("Main".to_string()).unwrap())
+            Ok(DisplayName::new("Main").unwrap())
         );
     }
 
     #[test]
     fn inner() {
         assert_eq!(
-            DisplayName::new("Main account".to_string()).unwrap().value,
+            DisplayName::new("Main account").unwrap().value,
             "Main account"
         );
     }

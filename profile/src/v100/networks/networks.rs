@@ -117,7 +117,7 @@ mod tests {
         );
 
         sut.update_account(&account_address, |a| {
-            a.set_display_name(DisplayName::new("Stella".to_string()).unwrap())
+            a.display_name = DisplayName::new("Stella").unwrap()
         });
 
         assert_eq!(
@@ -141,7 +141,7 @@ mod tests {
 
         assert!(sut
             .update_account(&account_address, |a| {
-                a.set_display_name(DisplayName::new("will fail".to_string()).unwrap())
+                a.display_name = DisplayName::new("will fail").unwrap()
             })
             .is_none());
 
@@ -158,7 +158,7 @@ mod tests {
 
         assert!(sut
             .update_account(&account_address, |a| {
-                a.set_display_name(DisplayName::new("will fail".to_string()).unwrap())
+                a.display_name = DisplayName::new("will fail").unwrap()
             })
             .is_none());
 

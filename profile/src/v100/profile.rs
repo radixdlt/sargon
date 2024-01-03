@@ -1,5 +1,6 @@
 use std::fmt::Debug;
 
+use identified_vec::IsIdentifiedVec;
 use serde::{Deserialize, Serialize};
 
 use crate::CommonError;
@@ -77,23 +78,22 @@ impl Profile {
 
     pub fn update_factor_source<S, M>(
         &mut self,
-        _factor_source_id: &FactorSourceID,
-        mut _mutate: M,
+        factor_source_id: &FactorSourceID,
+        mut mutate: M,
     ) -> Result<bool, CommonError>
     where
         S: IsFactorSource,
         M: FnMut(S) -> Result<S, CommonError>,
     {
-        // self.factor_sources.try_update_with(factor_source_id, |f| {
-        //     S::try_from(f.clone())
-        //         .map_err(|_| CommonError::CastFactorSourceWrongKind)
-        //         .and_then(|element| {
-        //             mutate(element)
-        //                 .map(|modified| modified.into())
-        //                 .map_err(|_| CommonError::UpdateFactorSourceMutateFailed)
-        //         })
-        // })
-        todo!()
+        self.factor_sources.try_update_with(factor_source_id, |f| {
+            S::try_from(f.clone())
+                .map_err(|_| CommonError::CastFactorSourceWrongKind)
+                .and_then(|element| {
+                    mutate(element)
+                        .map(|modified| modified.into())
+                        .map_err(|_| CommonError::UpdateFactorSourceMutateFailed)
+                })
+        })
     }
 }
 
@@ -125,9 +125,12 @@ impl HasPlaceholder for Profile {
 
 #[cfg(test)]
 mod tests {
+    use identified_vec::{IsIdentifiedVec, ItemsCloned};
+
     use crate::{
-        assert_eq_after_json_roundtrip, AppPreferences, FactorSources, HasPlaceholder, Header,
-        Networks, Profile,
+        assert_eq_after_json_roundtrip, AppPreferences, CommonError, DeviceFactorSource,
+        DisplayName, FactorSourceCryptoParameters, FactorSourceID, FactorSources, HasPlaceholder,
+        Header, LedgerHardwareWalletFactorSource, NetworkID, Networks, Profile, SLIP10Curve,
     };
 
     #[test]
@@ -141,126 +144,127 @@ mod tests {
         assert_eq!(Profile::placeholder_other(), Profile::placeholder_other());
     }
 
-    // #[test]
-    // fn add_supported_curve_to_factor_source() {
-    //     let mut sut = Profile::placeholder();
-    //     let id: &FactorSourceID = &DeviceFactorSource::placeholder().id().into();
+    #[test]
+    fn change_supported_curve_of_factor_source() {
+        let mut sut = Profile::placeholder();
+        let id: &FactorSourceID = &DeviceFactorSource::placeholder().id.into();
 
-    //     assert!(sut
-    //         .factor_sources
-    //         .contains_id(&DeviceFactorSource::placeholder().id().into()));
+        assert!(sut
+            .factor_sources
+            .contains_id(&DeviceFactorSource::placeholder().id.into()));
 
-    //     assert_eq!(
-    //         sut.factor_sources
-    //             .get(id)
-    //             .unwrap()
-    //             .as_device()
-    //             .unwrap()
-    //             .common()
-    //             .crypto_parameters()
-    //             .supported_curves(),
-    //         [SLIP10Curve::Curve25519]
-    //     );
+        assert_eq!(
+            sut.factor_sources
+                .get(id)
+                .unwrap()
+                .as_device()
+                .unwrap()
+                .common
+                .crypto_parameters
+                .supported_curves
+                .items(),
+            [SLIP10Curve::Curve25519]
+        );
 
-    //     assert_eq!(
-    //         sut.update_factor_source(id, |dfs: DeviceFactorSource| {
-    //             let common = dfs.common();
-    //             let cp = common.crypto_parameters();
-    //             cp.add_supported_curve(SLIP10Curve::Secp256k1);
-    //             common.set_crypto_parameters(cp);
-    //             dfs.set_common(common);
-    //             Ok(dfs)
-    //         }),
-    //         Ok(true)
-    //     );
+        assert_eq!(
+            sut.update_factor_source(id, |mut dfs: DeviceFactorSource| {
+                dfs.common.crypto_parameters =
+                    FactorSourceCryptoParameters::babylon_olympia_compatible();
+                Ok(dfs)
+            }),
+            Ok(true)
+        );
 
-    //     assert_eq!(
-    //         sut.factor_sources
-    //             .get(id)
-    //             .unwrap()
-    //             .as_device()
-    //             .unwrap()
-    //             .common()
-    //             .crypto_parameters()
-    //             .supported_curves(),
-    //         [SLIP10Curve::Curve25519, SLIP10Curve::Secp256k1]
-    //     );
-    // }
+        assert_eq!(
+            sut.factor_sources
+                .get(id)
+                .unwrap()
+                .as_device()
+                .unwrap()
+                .common
+                .crypto_parameters
+                .supported_curves
+                .items(),
+            [SLIP10Curve::Curve25519, SLIP10Curve::Secp256k1]
+        );
+    }
 
-    // #[test]
-    // fn add_supported_curve_to_factor_source_failure_cast_wrong_factor_source_kind() {
-    //     let mut sut = Profile::placeholder();
-    //     let id: &FactorSourceID = &DeviceFactorSource::placeholder().id().into();
+    #[test]
+    fn add_supported_curve_to_factor_source_failure_cast_wrong_factor_source_kind() {
+        let mut sut = Profile::placeholder();
+        let id: &FactorSourceID = &DeviceFactorSource::placeholder().id.into();
 
-    //     assert!(sut
-    //         .factor_sources
-    //         .contains_id(&DeviceFactorSource::placeholder().id().into()));
+        assert!(sut
+            .factor_sources
+            .contains_id(&DeviceFactorSource::placeholder().id.into()));
 
-    //     assert_eq!(
-    //         sut.factor_sources
-    //             .get(id)
-    //             .unwrap()
-    //             .as_device()
-    //             .unwrap()
-    //             .common()
-    //             .crypto_parameters()
-    //             .supported_curves(),
-    //         [SLIP10Curve::Curve25519]
-    //     );
+        assert_eq!(
+            sut.factor_sources
+                .get(id)
+                .unwrap()
+                .as_device()
+                .unwrap()
+                .common
+                .crypto_parameters
+                .supported_curves
+                .items(),
+            [SLIP10Curve::Curve25519]
+        );
 
-    //     assert_eq!(
-    //         sut.update_factor_source(id, |lfs: LedgerHardwareWalletFactorSource| {
-    //             let common = lfs.common();
-    //             let cp = common.crypto_parameters();
-    //             cp.add_supported_curve(SLIP10Curve::Secp256k1);
-    //             common.set_crypto_parameters(cp);
-    //             lfs.set_common(common);
-    //             Ok(lfs)
-    //         }),
-    //         Err(CommonError::CastFactorSourceWrongKind)
-    //     );
+        assert_eq!(
+            sut.update_factor_source(id, |mut lfs: LedgerHardwareWalletFactorSource| {
+                lfs.common.crypto_parameters =
+                    FactorSourceCryptoParameters::babylon_olympia_compatible();
+                Ok(lfs)
+            }),
+            Err(CommonError::CastFactorSourceWrongKind)
+        );
 
-    //     // Remains unchanged
-    //     assert_eq!(
-    //         sut.factor_sources
-    //             .get(id)
-    //             .unwrap()
-    //             .as_device()
-    //             .unwrap()
-    //             .common()
-    //             .crypto_parameters()
-    //             .supported_curves(),
-    //         [SLIP10Curve::Curve25519]
-    //     );
-    // }
+        // Remains unchanged
+        assert_eq!(
+            sut.factor_sources
+                .get(id)
+                .unwrap()
+                .as_device()
+                .unwrap()
+                .common
+                .crypto_parameters
+                .supported_curves
+                .items(),
+            [SLIP10Curve::Curve25519]
+        );
+    }
 
-    // #[test]
-    // fn update_name_of_accounts() {
-    //     let mut sut = Profile::placeholder();
-    //     let account =
-    //         sut.networks
-    //             .get(&NetworkID::Mainnet)
-    //             .unwrap()
-    //             .accounts()
-    //             .get_at_index(0)
-    //             .unwrap()
-    //             .clone();
+    #[test]
+    fn update_name_of_accounts() {
+        let mut sut = Profile::placeholder();
+        let account = sut
+            .networks
+            .get(&NetworkID::Mainnet)
+            .unwrap()
+            .accounts
+            .get_at_index(0)
+            .unwrap()
+            .clone();
 
-    //     assert_eq!(account.display_name(), "Alice");
-    //     assert!(sut.update_account(&account.address(), |a| a
-    //         .set_display_name(DisplayName::new("Satoshi").unwrap())));
+        assert_eq!(account.display_name.value, "Alice");
+        assert!(sut
+            .update_account(&account.address, |a| a.display_name =
+                DisplayName::new("Satoshi").unwrap())
+            .is_some());
 
-    //     assert_eq!(
-    //         sut.networks
-    //             .get(&NetworkID::Mainnet)
-    //             .unwrap()
-    //             .accounts()
-    //             .get_at_index(0)
-    //             .unwrap()
-    //             .display_name(),
-    //         "Satoshi"
-    //     );
-    // }
+        assert_eq!(
+            sut.networks
+                .get(&NetworkID::Mainnet)
+                .unwrap()
+                .accounts
+                .get_at_index(0)
+                .unwrap()
+                .display_name
+                .value,
+            "Satoshi"
+        );
+    }
 
     #[should_panic(expected = "FactorSources empty, which must never happen.")]
     #[test]

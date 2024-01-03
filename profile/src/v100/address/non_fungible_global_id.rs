@@ -19,8 +19,8 @@ use super::resource_address::ResourceAddress;
 
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct NonFungibleGlobalId {
-    resource_address: ResourceAddress,
-    non_fungible_local_id: NonFungibleLocalId,
+    pub resource_address: ResourceAddress,
+    pub non_fungible_local_id: NonFungibleLocalId,
 }
 
 impl From<ResourceAddress> for radix_engine_common::types::ResourceAddress {

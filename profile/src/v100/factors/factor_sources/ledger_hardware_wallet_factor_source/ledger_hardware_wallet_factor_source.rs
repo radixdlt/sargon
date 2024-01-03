@@ -19,17 +19,17 @@ pub struct LedgerHardwareWalletFactorSource {
     /// Unique and stable identifier of this factor source, stemming from the
     /// hash of a special child key of the HD root of the mnemonic,
     /// that is secured by the Ledger Hardware Wallet device.
-    id: FactorSourceIDFromHash,
+    pub id: FactorSourceIDFromHash,
 
     /// Common properties shared between FactorSources of different kinds,
     /// describing its state, when added, and supported cryptographic parameters.
     ///
     /// Has interior mutability since we must be able to update the
     /// last used date.
-    common: FactorSourceCommon,
+    pub common: FactorSourceCommon,
 
     /// Properties describing a LedgerHardwareWalletFactorSource to help user disambiguate between it and another one.
-    hint: LedgerHardwareWalletHint,
+    pub hint: LedgerHardwareWalletHint,
 }
 
 impl LedgerHardwareWalletFactorSource {

@@ -116,13 +116,9 @@ impl Identifiable for Account {
 }
 
 impl Account {
-    pub fn set_display_name(&mut self, new: DisplayName) {
-        self.display_name = new
-    }
-
-    pub fn update<F, R>(&self, mutate: F) -> R
+    pub fn update<F, R>(&mut self, mutate: F) -> R
     where
-        F: Fn(&Self) -> R,
+        F: Fn(&mut Self) -> R,
     {
         mutate(self)
     }
@@ -202,7 +198,7 @@ impl Account {
 
         Self::new(
             account_creating_factor_instance,
-            DisplayName::new(name.to_string()).unwrap(),
+            DisplayName::new(name).unwrap(),
             AppearanceID::try_from(index as u8).unwrap(),
         )
     }
@@ -299,7 +295,11 @@ impl Account {
 mod tests {
     use std::str::FromStr;
 
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use crate::{
+        assert_eq_after_json_roundtrip, AssetException, DepositAddressExceptionRule, DepositRule,
+        DepositorAddress, EntityFlag, EntityFlags, HasPlaceholder, OnLedgerSettings,
+        ThirdPartyDeposits,
+    };
     use radix_engine_common::prelude::HashSet;
 
     use crate::v100::{AccountAddress, AppearanceID, DisplayName};
@@ -345,100 +345,90 @@ mod tests {
         assert!(Account::placeholder_alice() < Account::placeholder_bob());
     }
 
-    // #[test]
-    // fn display_name_get_set() {
-    //     let account = Account::placeholder_with_values(
-    //         "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
-    //             .try_into()
-    //             .unwrap(),
-    //         DisplayName::new("Test").unwrap(),
-    //         AppearanceID::default(),
-    //     );
-    //     assert_eq!(account.display_name, "Test");
-    //     let new_display_name = DisplayName::new("New").unwrap();
-    //     account.set_display_name(new_display_name.clone());
-    //     assert_eq!(account.display_name, new_display_name.to_string());
-    // }
+    #[test]
+    fn display_name_get_set() {
+        let mut account = Account::placeholder_with_values(
+            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                .try_into()
+                .unwrap(),
+            DisplayName::new("Test").unwrap(),
+            AppearanceID::default(),
+        );
+        assert_eq!(account.display_name.value, "Test");
+        let new_display_name = DisplayName::new("New").unwrap();
+        account.display_name = new_display_name.clone();
+        assert_eq!(account.display_name, new_display_name);
+    }
 
-    // #[test]
-    // fn update() {
-    //     let account = Account::placeholder();
-    //     assert_eq!(account.display_name, "Alice");
-    //     account.update(|a| a.set_display_name(DisplayName::new("Satoshi").unwrap()));
-    //     assert_eq!(account.display_name, "Satoshi");
-    // }
+    #[test]
+    fn update() {
+        let mut account = Account::placeholder();
+        assert_eq!(account.display_name.value, "Alice");
+        account.update(|a| a.display_name = DisplayName::new("Satoshi").unwrap());
+        assert_eq!(account.display_name.value, "Satoshi");
+    }
 
-    // #[test]
-    // fn flags_get_set() {
-    //     let account = Account::placeholder_with_values(
-    //         "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
-    //             .try_into()
-    //             .unwrap(),
-    //         DisplayName::new("Test").unwrap(),
-    //         AppearanceID::default(),
-    //     );
-    //     assert_eq!(account.flags, EntityFlags::default());
-    //     let new_flags = EntityFlags::with_flag(EntityFlag::DeletedByUser);
-    //     account.set_flags(new_flags.clone());
-    //     assert_eq!(account.flags, new_flags);
-    // }
+    #[test]
+    fn flags_get_set() {
+        let mut account = Account::placeholder_with_values(
+            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                .try_into()
+                .unwrap(),
+            DisplayName::new("Test").unwrap(),
+            AppearanceID::default(),
+        );
+        assert_eq!(account.flags, EntityFlags::default());
+        let new_flags = EntityFlags::with_flag(EntityFlag::DeletedByUser);
+        account.flags = new_flags.clone();
+        assert_eq!(account.flags, new_flags);
+    }
 
-    // #[test]
-    // fn on_ledger_settings_get_set() {
-    //     let account = Account::placeholder_with_values(
-    //         "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
-    //             .try_into()
-    //             .unwrap(),
-    //         DisplayName::new("Test").unwrap(),
-    //         AppearanceID::default(),
-    //     );
-    //     assert_eq!(account.on_ledger_settings, OnLedgerSettings::default());
-    //     let excp1 = AssetException::new(
-    //         "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
-    //             .try_into()
-    //             .unwrap(),
-    //         DepositAddressExceptionRule::Allow,
-    //     );
-    //     let excp2 = AssetException::new(
-    //         "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
-    //             .try_into()
-    //             .unwrap(),
-    //         DepositAddressExceptionRule::Allow,
-    //     );
-    //     let new_third_party_dep = ThirdPartyDeposits::with_rule_and_lists(
-    //         DepositRule::DenyAll,
-    //         BTreeSet::from_iter([excp1, excp2].into_iter()),
-    //         BTreeSet::from_iter(
-    //             [DepositorAddress::ResourceAddress(
-    //                 "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
-    //                     .try_into()
-    //                     .unwrap(),
-    //             )]
-    //             .into_iter(),
-    //         ),
-    //     );
-    //     let new_on_ledger_settings = OnLedgerSettings::new(new_third_party_dep);
-    //     account.set_on_ledger_settings(new_on_ledger_settings.clone());
-    //     assert_eq!(account.on_ledger_settings, new_on_ledger_settings);
+    #[test]
+    fn on_ledger_settings_get_set() {
+        let mut account = Account::placeholder_with_values(
+            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                .try_into()
+                .unwrap(),
+            DisplayName::new("Test").unwrap(),
+            AppearanceID::default(),
+        );
+        assert_eq!(account.on_ledger_settings, OnLedgerSettings::default());
+        let excp1 = AssetException::new(
+            "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
+                .try_into()
+                .unwrap(),
+            DepositAddressExceptionRule::Allow,
+        );
+        let excp2 = AssetException::new(
+            "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
+                .try_into()
+                .unwrap(),
+            DepositAddressExceptionRule::Allow,
+        );
+        let new_third_party_dep = ThirdPartyDeposits::with_rule_and_lists(
+            DepositRule::DenyAll,
+            [excp1, excp2],
+            [DepositorAddress::ResourceAddress {
+                value: "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
+                    .try_into()
+                    .unwrap(),
+            }],
+        );
+        let new_on_ledger_settings = OnLedgerSettings::new(new_third_party_dep);
+        account.on_ledger_settings = new_on_ledger_settings.clone();
+        assert_eq!(account.on_ledger_settings, new_on_ledger_settings);
 
-    //     assert_eq!(
-    //         account
-    //             .on_ledger_settings
-    //             .third_party_deposits()
-    //             .deposit_rule(),
-    //         DepositRule::DenyAll
-    //     );
-    //     account.update_on_ledger_settings(
-    //         |o| o.update_third_party_deposits(|t| t.set_deposit_rule(DepositRule::AcceptAll))
-    //     );
-    //     assert_eq!(
-    //         account
-    //             .on_ledger_settings
-    //             .third_party_deposits()
-    //             .deposit_rule(),
-    //         DepositRule::AcceptAll
-    //     );
-    // }
+        assert_eq!(
+            account.on_ledger_settings.third_party_deposits.deposit_rule,
+            DepositRule::DenyAll
+        );
+
+        account.on_ledger_settings.third_party_deposits.deposit_rule = DepositRule::AcceptAll;
+        assert_eq!(
+            account.on_ledger_settings.third_party_deposits.deposit_rule,
+            DepositRule::AcceptAll
+        );
+    }
 
     #[test]
     fn json_roundtrip_mainnet_alice() {

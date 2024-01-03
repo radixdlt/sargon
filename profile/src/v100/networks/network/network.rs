@@ -118,15 +118,6 @@ mod tests {
         assert_eq!(sut.accounts, Accounts::placeholder());
     }
 
-    // #[test]
-    // fn set_accounts_wrong_network() {
-    //     let sut = Network::placeholder();
-    //     assert_eq!(
-    //         sut.set_accounts(Accounts::with_account(Account::placeholder_stokenet())),
-    //         Err(CommonError::AccountOnWrongNetwork)
-    //     );
-    // }
-
     #[test]
     fn duplicate_accounts_are_filtered_out() {
         assert_eq!(

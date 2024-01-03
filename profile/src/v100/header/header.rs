@@ -184,49 +184,6 @@ pub mod tests {
         );
     }
 
-    // #[test]
-    // fn updated() {
-    //     let sut = Header::default();
-    //     let d0 = sut.last_modified;
-    //     for _ in 0..10 {
-    //         // rust is too fast, if we run it once, unit tests fails.
-    //         sut.last;
-    //     }
-    //     let d1 = sut.last_modified;
-    //     assert!(d1 > d0);
-    // }
-
-    // #[test]
-    // fn update_content_hint() {
-    //     let sut = Header::default();
-    //     let d0 = sut.last_modified;
-    //     let content_hint_0 = sut.content_hint;
-    //     let end = 10;
-    //     for n in 1..end {
-    //         // rust is too fast, if we run it once, unit tests fails.
-    //         sut.update_content_hint(ContentHint::all(n));
-    //     }
-    //     let content_hint_n = sut.content_hint();
-    //     assert_ne!(content_hint_n, content_hint_0);
-    //     let d1 = sut.last_modified();
-    //     assert!(d1 > d0);
-    // }
-
-    // #[test]
-    // fn update_last_used_on_device() {
-    //     let sut = Header::default();
-    //     let d0 = sut.last_modified;
-    //     let device_0 = sut.last_used_on_device;
-    //     let end = 10;
-    //     for n in 1..end {
-    //         // rust is too fast, if we run it once, unit tests fails.
-    //         sut.update_last_used_on_device(DeviceInfo::with_description(n.to_string().as_str()));
-    //     }
-    //     let device_n = sut.last_used_on_device();
-    //     assert_ne!(device_n, device_0);
-    //     assert!(sut.last_modified() > d0);
-    // }
-
     #[test]
     fn last_updated() {
         let a = Header::default();

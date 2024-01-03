@@ -6,38 +6,9 @@ use identified_vec::IsIdentifiedVec;
 
 use crate::HasPlaceholder;
 
-pub type Accounts = IdentifiedVecVia<Account>;
-
 /// An ordered set of Accounts on a specific network, most commonly
 /// the set is non-empty.
-// #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
-// #[serde(transparent)]
-// pub struct Accounts {
-//     pub list: Vec<Account>,
-// }
-
-// impl Accounts {
-//     pub fn new() -> Self {
-//         Self { list: Vec::new() }
-//     }
-//     pub fn from_iter<I>(iter: I) -> Self
-//     where
-//         I: IntoIterator<Item = Account>,
-//     {
-//         Self {
-//             list: Vec::from_iter(iter),
-//         }
-//     }
-//     pub fn append(&mut self, account: Account) {
-//         if self.list.iter().any(|x| x.id() == account.id()) {
-//             return;
-//         }
-//         self.list.push(account);
-//     }
-//     pub fn len(&self) -> usize {
-//         self.list.len()
-//     }
-// }
+pub type Accounts = IdentifiedVecVia<Account>;
 
 impl Accounts {
     /// Instantiates a new collection of accounts from

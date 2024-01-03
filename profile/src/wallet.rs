@@ -27,18 +27,14 @@ impl Wallet {
         address: AccountAddress,
         to: String,
     ) -> Result<Account, CommonError> {
-        DisplayName::new(to)
+        DisplayName::new(to.as_str())
             .and_then(|new_name| {
                 self.write(
-                    |mut p| p.update_account(&address, |a| a.set_display_name(new_name.to_owned()))
+                    |mut p| p.update_account(&address, |a| a.display_name = new_name.to_owned())
                 )
             })
             .and_then(|r| r.ok_or_else(|| CommonError::AccountOnWrongNetwork))
     }
-
-    // pub fn new_account(name: String, network_id: NetworkID) -> Result<Account, CommonError> {
-
-    // }
 }
 
 impl Wallet {

@@ -12,7 +12,7 @@ use crate::HasPlaceholder;
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, uniffi::Record)]
 #[serde(transparent)]
 pub struct RadixConnectPassword {
-    bytes: Hex32Bytes,
+    pub bytes: Hex32Bytes,
 }
 
 impl Debug for RadixConnectPassword {
