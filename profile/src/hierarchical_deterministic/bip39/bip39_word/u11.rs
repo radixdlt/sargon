@@ -41,6 +41,11 @@ mod tests {
     }
 
     #[test]
+    fn display() {
+        assert_eq!(format!("{}", U11::new(2047).unwrap()), "2047")
+    }
+
+    #[test]
     fn inner() {
         assert_eq!(U11::new(1024).unwrap().inner, 1024);
     }

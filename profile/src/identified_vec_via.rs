@@ -109,6 +109,7 @@ where
     }
 }
 
+#[cfg(not(tarpaulin_include))] // Tested in binding tests (e.g. test*.swift files)
 unsafe impl<UT, T: Identifiable + Debug + Clone + Lower<UT>> Lower<UT> for IdentifiedVecVia<T> {
     type FfiType = RustBuffer;
 
@@ -128,6 +129,7 @@ unsafe impl<UT, T: Identifiable + Debug + Clone + Lower<UT>> Lower<UT> for Ident
         MetadataBuffer::from_code(metadata::codes::TYPE_VEC).concat(T::TYPE_ID_META);
 }
 
+#[cfg(not(tarpaulin_include))] // Tested in binding tests (e.g. test*.swift files)
 unsafe impl<UT, T: Identifiable + Debug + Clone + Lower<UT>> LowerReturn<UT>
     for IdentifiedVecVia<T>
 {
@@ -140,6 +142,7 @@ unsafe impl<UT, T: Identifiable + Debug + Clone + Lower<UT>> LowerReturn<UT>
     const TYPE_ID_META: MetadataBuffer = <Self as Lower<UT>>::TYPE_ID_META;
 }
 
+#[cfg(not(tarpaulin_include))] // Tested in binding tests (e.g. test*.swift files)
 unsafe impl<UT, T: Identifiable + Debug + Clone + Lift<UT>> Lift<UT> for IdentifiedVecVia<T> {
     type FfiType = RustBuffer;
 
@@ -159,4 +162,44 @@ unsafe impl<UT, T: Identifiable + Debug + Clone + Lift<UT>> Lift<UT> for Identif
 
     const TYPE_ID_META: MetadataBuffer =
         MetadataBuffer::from_code(metadata::codes::TYPE_VEC).concat(T::TYPE_ID_META);
+}
+
+#[cfg(test)]
+mod tests {
+    use itertools::Itertools;
+
+    use super::IdentifiedVecVia;
+    type SUT = IdentifiedVecVia<i32>;
+
+    #[test]
+    fn first() {
+        let sut = SUT::from_iter([1337, 42, 237]);
+        assert_eq!(sut.first(), Some(1337));
+    }
+
+    #[test]
+    fn is_empty() {
+        let sut = SUT::from_iter([1337, 42, 237]);
+        assert_eq!(sut.is_empty(), false);
+        assert_eq!(SUT::new().is_empty(), true);
+    }
+
+    #[test]
+    fn len() {
+        let sut = SUT::from_iter([1337, 42, 237]);
+        assert_eq!(sut.len(), 3);
+        assert_eq!(SUT::new().len(), 0);
+    }
+
+    #[test]
+    fn into_iter() {
+        let sut = SUT::from_iter([1337, 42, 237]);
+        assert_eq!(sut.into_iter().collect_vec(), [1337, 42, 237]);
+    }
+
+    #[test]
+    fn display() {
+        let sut = SUT::from_iter([1337, 42, 237]);
+        assert_eq!(format!("{}", sut), "[1337, 42, 237]");
+    }
 }

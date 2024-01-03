@@ -23,6 +23,7 @@ pub use url::Url;
 pub use uuid::Uuid;
 
 // Use `url::Url` as a custom type, with `String` as the Builtin
+#[cfg(not(tarpaulin_include))] // Tested in binding tests (e.g. test*.swift files)
 impl UniffiCustomTypeConverter for Url {
     type Builtin = String;
 
@@ -35,6 +36,7 @@ impl UniffiCustomTypeConverter for Url {
     }
 }
 
+#[cfg(not(tarpaulin_include))] // Tested in binding tests (e.g. test*.swift files)
 impl UniffiCustomTypeConverter for Timestamp {
     type Builtin = String;
 
@@ -49,6 +51,7 @@ impl UniffiCustomTypeConverter for Timestamp {
     }
 }
 
+#[cfg(not(tarpaulin_include))] // Tested in binding tests (e.g. test*.swift files)
 impl UniffiCustomTypeConverter for Uuid {
     type Builtin = String;
     fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
