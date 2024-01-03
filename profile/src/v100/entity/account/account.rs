@@ -115,15 +115,6 @@ impl Identifiable for Account {
     }
 }
 
-impl Account {
-    pub fn update<F, R>(&mut self, mutate: F) -> R
-    where
-        F: Fn(&mut Self) -> R,
-    {
-        mutate(self)
-    }
-}
-
 impl Ord for Account {
     fn cmp(&self, other: &Self) -> Ordering {
         match (&self.security_state, &other.security_state) {
@@ -364,7 +355,7 @@ mod tests {
     fn update() {
         let mut account = Account::placeholder();
         assert_eq!(account.display_name.value, "Alice");
-        account.update(|a| a.display_name = DisplayName::new("Satoshi").unwrap());
+        account.display_name = DisplayName::new("Satoshi").unwrap();
         assert_eq!(account.display_name.value, "Satoshi");
     }
 
