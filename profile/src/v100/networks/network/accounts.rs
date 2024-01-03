@@ -95,6 +95,17 @@ mod tests {
     }
 
     #[test]
+    fn inequality() {
+        assert_ne!(Accounts::placeholder(), Accounts::placeholder_other());
+    }
+
+    #[test]
+    fn equality() {
+        assert_eq!(Accounts::placeholder(), Accounts::placeholder());
+        assert_eq!(Accounts::placeholder_other(), Accounts::placeholder_other());
+    }
+
+    #[test]
     fn duplicates_are_prevented() {
         assert_eq!(
             Accounts::with_accounts([Account::placeholder(), Account::placeholder()].into_iter())

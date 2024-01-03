@@ -96,6 +96,22 @@ mod tests {
     }
 
     #[test]
+    fn empty_is_invalid() {
+        assert_eq!(
+            DisplayName::try_from(""),
+            Err(Error::InvalidDisplayNameEmpty)
+        );
+    }
+
+    #[test]
+    fn spaces_trimmed_into_empty_is_invalid() {
+        assert_eq!(
+            DisplayName::try_from("   "),
+            Err(Error::InvalidDisplayNameEmpty)
+        );
+    }
+
+    #[test]
     fn inner() {
         assert_eq!(
             DisplayName::new("Main account").unwrap().value,

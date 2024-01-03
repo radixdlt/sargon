@@ -219,6 +219,13 @@ mod tests {
     }
 
     #[test]
+    fn display() {
+        let str = "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
+        let hex_bytes = Hex32Bytes::placeholder();
+        assert_eq!(format!("{}", hex_bytes), str);
+    }
+
+    #[test]
     fn to_hex() {
         let str = "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
         let hex_bytes = Hex32Bytes::placeholder();

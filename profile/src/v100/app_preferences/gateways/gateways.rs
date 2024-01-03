@@ -278,3 +278,30 @@ mod tests {
         )
     }
 }
+
+#[cfg(test)]
+mod uniffi_tests {
+    use crate::{
+        new_gateways, new_gateways_placeholder, new_gateways_placeholder_other, Gateway,
+        HasPlaceholder,
+    };
+
+    use super::Gateways;
+
+    #[test]
+    fn equality_placeholders() {
+        assert_eq!(Gateways::placeholder(), new_gateways_placeholder());
+        assert_eq!(
+            Gateways::placeholder_other(),
+            new_gateways_placeholder_other()
+        );
+    }
+
+    #[test]
+    fn new_with_current() {
+        assert_eq!(
+            new_gateways(Gateway::mardunet()).all(),
+            [Gateway::mardunet()]
+        );
+    }
+}

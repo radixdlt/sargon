@@ -601,3 +601,19 @@ mod tests {
         );
     }
 }
+
+#[cfg(test)]
+mod uniffi_tests {
+    use crate::{new_profile_placeholder, new_profile_placeholder_other, HasPlaceholder};
+
+    use super::Profile;
+
+    #[test]
+    fn equality_placeholders() {
+        assert_eq!(Profile::placeholder(), new_profile_placeholder());
+        assert_eq!(
+            Profile::placeholder_other(),
+            new_profile_placeholder_other()
+        );
+    }
+}

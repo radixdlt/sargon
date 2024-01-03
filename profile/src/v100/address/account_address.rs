@@ -171,6 +171,8 @@ impl AccountAddress {
 #[cfg(test)]
 mod tests {
 
+    use std::str::FromStr;
+
     use crate::PublicKey;
     use crate::{CommonError as Error, Ed25519PublicKey};
     use crate::{
@@ -330,5 +332,47 @@ mod tests {
             &a,
             json!("account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzdm"),
         );
+    }
+}
+
+#[cfg(test)]
+mod uniffi_tests {
+    use std::str::FromStr;
+
+    use crate::{
+        account_address_to_short, new_account_address, new_account_address_from, Ed25519PublicKey,
+        EntityAddress, NetworkID, PublicKey,
+    };
+
+    use super::AccountAddress;
+
+    #[test]
+    fn short() {
+        let sut: AccountAddress = AccountAddress::try_from_bech32(
+            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease",
+        )
+        .unwrap();
+        assert_eq!(account_address_to_short(&sut), "acco...please");
+    }
+
+    #[test]
+    fn new() {
+        let public_key: PublicKey = Ed25519PublicKey::from_str(
+            "3e9b96a2a863f1be4658ea66aa0584d2a8847d4c0f658b20e62e3594d994d73d",
+        )
+        .unwrap()
+        .into();
+
+        let bech32 = "account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzdm";
+        assert_eq!(
+            AccountAddress::new(public_key.clone(), NetworkID::Mainnet),
+            new_account_address_from(public_key, NetworkID::Mainnet)
+        );
+        let from_bech32 = new_account_address(bech32.to_string()).unwrap();
+        assert_eq!(
+            AccountAddress::try_from_bech32(bech32).unwrap(),
+            from_bech32.clone()
+        );
+        assert_eq!(from_bech32.address, bech32)
     }
 }

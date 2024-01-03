@@ -239,3 +239,16 @@ pub mod tests {
         assert_eq!(sut.snapshot_version, value)
     }
 }
+
+#[cfg(test)]
+mod uniffi_tests {
+    use crate::{new_header_placeholder, new_header_placeholder_other, HasPlaceholder};
+
+    use super::Header;
+
+    #[test]
+    fn equality_placeholders() {
+        assert_eq!(Header::placeholder(), new_header_placeholder());
+        assert_eq!(Header::placeholder_other(), new_header_placeholder_other());
+    }
+}

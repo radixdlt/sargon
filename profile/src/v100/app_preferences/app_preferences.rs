@@ -34,6 +34,7 @@ pub struct AppPreferences {
 pub fn new_app_preferences_placeholder() -> AppPreferences {
     AppPreferences::placeholder()
 }
+
 #[uniffi::export]
 pub fn new_app_preferences_placeholder_other() -> AppPreferences {
     AppPreferences::placeholder_other()
@@ -205,5 +206,26 @@ mod tests {
             }
             "#,
         )
+    }
+}
+
+#[cfg(test)]
+mod uniffi_tests {
+    use crate::{
+        new_app_preferences_placeholder, new_app_preferences_placeholder_other, HasPlaceholder,
+    };
+
+    use super::AppPreferences;
+
+    #[test]
+    fn equality_placeholders() {
+        assert_eq!(
+            AppPreferences::placeholder(),
+            new_app_preferences_placeholder()
+        );
+        assert_eq!(
+            AppPreferences::placeholder_other(),
+            new_app_preferences_placeholder_other()
+        );
     }
 }

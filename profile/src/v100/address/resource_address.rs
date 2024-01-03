@@ -115,3 +115,19 @@ mod tests {
         assert_eq!(a.network_id, NetworkID::Stokenet);
     }
 }
+
+#[cfg(test)]
+mod uniffi_tests {
+    use crate::{new_resource_address, EntityAddress};
+
+    use super::ResourceAddress;
+
+    #[test]
+    fn new() {
+        let s = "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd";
+        let a = ResourceAddress::try_from_bech32(s).unwrap();
+        let b = new_resource_address(s.to_string()).unwrap();
+        assert_eq!(b.address, s);
+        assert_eq!(a, b);
+    }
+}

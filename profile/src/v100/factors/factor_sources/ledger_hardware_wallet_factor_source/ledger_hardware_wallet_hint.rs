@@ -14,16 +14,6 @@ pub struct LedgerHardwareWalletHint {
 }
 
 impl LedgerHardwareWalletHint {
-    pub fn name(&self) -> String {
-        self.name.clone()
-    }
-
-    pub fn model(&self) -> LedgerHardwareWalletModel {
-        self.model.clone()
-    }
-}
-
-impl LedgerHardwareWalletHint {
     pub fn new(name: &str, model: LedgerHardwareWalletModel) -> Self {
         Self {
             name: name.to_string(),

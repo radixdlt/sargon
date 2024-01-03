@@ -79,18 +79,16 @@ mod tests {
         );
     }
 
-    // #[test]
-    // fn err_when_try_from_iter_used_with_empty() {
-    //     assert_eq!(
-    //         FactorSources::try_from_iter([]),
-    //         Err(CommonError::FactorSourcesMustNotBeEmpty)
-    //     );
-    // }
-
-    // #[test]
-    // fn try_from_iter_ok_when_non_empty() {
-    //     assert!(FactorSources::try_from_iter([FactorSource::placeholder_device()]).is_ok());
-    // }
+    #[test]
+    fn duplicates_are_prevented() {
+        assert_eq!(
+            FactorSources::from_iter(
+                [FactorSource::placeholder(), FactorSource::placeholder()].into_iter()
+            )
+            .len(),
+            1
+        )
+    }
 
     #[test]
     fn json_roundtrip_placeholder() {
@@ -147,5 +145,26 @@ mod tests {
             ]
             "#,
         )
+    }
+}
+
+#[cfg(test)]
+mod uniffi_tests {
+    use crate::{
+        new_factor_sources_placeholder, new_factor_sources_placeholder_other, HasPlaceholder,
+    };
+
+    use super::FactorSources;
+
+    #[test]
+    fn equality_placeholders() {
+        assert_eq!(
+            FactorSources::placeholder(),
+            new_factor_sources_placeholder()
+        );
+        assert_eq!(
+            FactorSources::placeholder_other(),
+            new_factor_sources_placeholder_other()
+        );
     }
 }

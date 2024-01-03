@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use serde::{de, ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
 
 use crate::{Ed25519PublicKey, KeyError as Error, SLIP10Curve, Secp256k1PublicKey};

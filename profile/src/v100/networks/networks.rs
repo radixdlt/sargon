@@ -83,7 +83,7 @@ impl HasPlaceholder for Networks {
 
 #[cfg(test)]
 mod tests {
-    use identified_vec::IsIdentifiedVec;
+    use identified_vec::{IsIdentifiedVec, ItemsCloned};
 
     use crate::{
         assert_eq_after_json_roundtrip, Account, Accounts, ContentHint, DisplayName,
@@ -98,6 +98,48 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(Networks::placeholder(), Networks::placeholder_other());
+    }
+
+    #[test]
+    fn equality() {
+        assert_eq!(Networks::placeholder(), Networks::placeholder());
+        assert_eq!(Networks::placeholder_other(), Networks::placeholder_other());
+    }
+
+    #[test]
+    fn duplicates_are_prevented() {
+        assert_eq!(
+            Networks::from_iter([Network::placeholder(), Network::placeholder()].into_iter()).len(),
+            1
+        )
+    }
+
+    #[test]
+    fn duplicates_are_prevented_and_first_added_is_retained() {
+        let mut sut =
+            Networks::from_iter([Network::new(
+                NetworkID::Mainnet,
+                Accounts::from_iter([
+                    Account::placeholder_mainnet_alice(),
+                    Account::placeholder_mainnet_bob(),
+                ]),
+            )]);
+        assert_eq!(
+            sut.append(Network::new(
+                NetworkID::Mainnet,
+                Accounts::from_iter([Account::placeholder_mainnet_carol()]),
+            ))
+            .0,
+            false
+        );
+
+        assert_eq!(
+            sut.get(&NetworkID::Mainnet).unwrap().accounts.items(),
+            [
+                Account::placeholder_mainnet_alice(),
+                Account::placeholder_mainnet_bob()
+            ]
+        );
     }
 
     #[test]

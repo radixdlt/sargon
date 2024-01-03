@@ -33,6 +33,16 @@ pub fn new_ed25519_public_key_from_bytes(
     Ed25519PublicKey::from_bytes(bytes)
 }
 
+#[uniffi::export]
+pub fn new_ed25519_public_key_placeholder() -> Ed25519PublicKey {
+    Ed25519PublicKey::placeholder()
+}
+
+#[uniffi::export]
+pub fn new_ed25519_public_key_placeholder_other() -> Ed25519PublicKey {
+    Ed25519PublicKey::placeholder_other()
+}
+
 /// Encodes the `Ed25519PublicKey` to a hexadecimal string, lowercased, without any `0x` prefix, e.g.
 /// `"b7a3c12dc0c8c748ab07525b701122b88bd78f600c76342d27f25e5f92444cde"`
 #[uniffi::export]
@@ -112,12 +122,6 @@ impl Ed25519PublicKey {
     }
 }
 
-impl Ed25519PublicKey {
-    pub fn from_str(hex: &str) -> Result<Self, crate::KeyError> {
-        Self::from_hex(hex.to_string())
-    }
-}
-
 impl Debug for Ed25519PublicKey {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.write_str(&self.to_hex())
@@ -155,9 +159,10 @@ impl Ed25519PublicKey {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::BTreeSet;
+    use std::{collections::BTreeSet, str::FromStr};
 
     use crate::{assert_json_value_eq_after_roundtrip, HasPlaceholder, KeyError as Error};
+    use radix_engine_common::crypto::Ed25519PublicKey as EngineEd25519PublicKey;
     use serde_json::json;
 
     use super::Ed25519PublicKey;
@@ -197,6 +202,22 @@ mod tests {
             "ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf"
         )
         .is_ok());
+    }
+
+    #[test]
+    fn from_engine() {
+        let from_engine: Ed25519PublicKey = EngineEd25519PublicKey::from_str(
+            "ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf",
+        )
+        .unwrap()
+        .into();
+        assert_eq!(
+            from_engine,
+            Ed25519PublicKey::from_str(
+                "ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf"
+            )
+            .unwrap()
+        );
     }
 
     #[test]
@@ -290,5 +311,51 @@ mod tests {
             .len(),
             1
         );
+    }
+}
+
+#[cfg(test)]
+mod uniffi_tests {
+    use crate::{
+        ed25519_public_key_to_bytes, ed25519_public_key_to_hex, new_ed25519_public_key_from_bytes,
+        new_ed25519_public_key_from_hex, new_ed25519_public_key_placeholder,
+        new_ed25519_public_key_placeholder_other, HasPlaceholder,
+    };
+
+    use super::Ed25519PublicKey;
+
+    #[test]
+    fn equality_placeholders() {
+        assert_eq!(
+            Ed25519PublicKey::placeholder(),
+            new_ed25519_public_key_placeholder()
+        );
+        assert_eq!(
+            Ed25519PublicKey::placeholder_other(),
+            new_ed25519_public_key_placeholder_other()
+        );
+    }
+
+    #[test]
+    fn new_from_bytes() {
+        let bytes = hex::decode("b7a3c12dc0c8c748ab07525b701122b88bd78f600c76342d27f25e5f92444cde")
+            .unwrap();
+        let from_bytes = new_ed25519_public_key_from_bytes(bytes.clone()).unwrap();
+        assert_eq!(
+            from_bytes,
+            Ed25519PublicKey::from_bytes(bytes.clone()).unwrap()
+        );
+        assert_eq!(ed25519_public_key_to_bytes(&from_bytes), bytes);
+    }
+
+    #[test]
+    fn new_from_hex() {
+        let hex = "b7a3c12dc0c8c748ab07525b701122b88bd78f600c76342d27f25e5f92444cde";
+        let from_hex = new_ed25519_public_key_from_hex(hex.to_string()).unwrap();
+        assert_eq!(
+            from_hex,
+            Ed25519PublicKey::from_hex(hex.to_string()).unwrap()
+        );
+        assert_eq!(ed25519_public_key_to_hex(&from_hex), hex)
     }
 }

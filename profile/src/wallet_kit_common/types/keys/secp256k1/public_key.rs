@@ -46,6 +46,16 @@ pub fn secp256k1_public_key_to_bytes(public_key: &Secp256k1PublicKey) -> Vec<u8>
     public_key.to_bytes()
 }
 
+#[uniffi::export]
+pub fn new_secp256k1_public_key_placeholder() -> Secp256k1PublicKey {
+    Secp256k1PublicKey::placeholder()
+}
+
+#[uniffi::export]
+pub fn new_secp256k1_public_key_placeholder_other() -> Secp256k1PublicKey {
+    Secp256k1PublicKey::placeholder_other()
+}
+
 impl From<EngineSecp256k1PublicKey> for Secp256k1PublicKey {
     fn from(value: EngineSecp256k1PublicKey) -> Self {
         Self::from_engine(value).expect("EngineEd25519PublicKey should have been valid.")
@@ -121,12 +131,6 @@ impl Secp256k1PublicKey {
     }
 }
 
-impl Secp256k1PublicKey {
-    pub fn from_str(hex: &str) -> Result<Self, Error> {
-        Self::from_hex(hex.to_string())
-    }
-}
-
 impl Debug for Secp256k1PublicKey {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.write_str(&self.to_hex())
@@ -156,7 +160,7 @@ impl Secp256k1PublicKey {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::BTreeSet;
+    use std::{collections::BTreeSet, str::FromStr};
 
     use super::Secp256k1PublicKey;
     use crate::{assert_json_value_eq_after_roundtrip, HasPlaceholder, KeyError as Error};
@@ -290,5 +294,52 @@ mod tests {
             .len(),
             1
         );
+    }
+}
+
+#[cfg(test)]
+mod uniffi_tests {
+    use crate::{
+        new_secp256k1_public_key_from_bytes, new_secp256k1_public_key_from_hex,
+        new_secp256k1_public_key_placeholder, new_secp256k1_public_key_placeholder_other,
+        secp256k1_public_key_to_bytes, secp256k1_public_key_to_hex, HasPlaceholder,
+    };
+
+    use super::Secp256k1PublicKey;
+
+    #[test]
+    fn equality_placeholders() {
+        assert_eq!(
+            Secp256k1PublicKey::placeholder(),
+            new_secp256k1_public_key_placeholder()
+        );
+        assert_eq!(
+            Secp256k1PublicKey::placeholder_other(),
+            new_secp256k1_public_key_placeholder_other()
+        );
+    }
+
+    #[test]
+    fn new_from_bytes() {
+        let bytes =
+            hex::decode("033083620d1596d3f8988ff3270e42970dd2a031e2b9b6488052a4170ff999f3e8")
+                .unwrap();
+        let from_bytes = new_secp256k1_public_key_from_bytes(bytes.clone()).unwrap();
+        assert_eq!(
+            from_bytes,
+            Secp256k1PublicKey::from_bytes(bytes.clone()).unwrap()
+        );
+        assert_eq!(secp256k1_public_key_to_bytes(&from_bytes), bytes);
+    }
+
+    #[test]
+    fn new_from_hex() {
+        let hex = "033083620d1596d3f8988ff3270e42970dd2a031e2b9b6488052a4170ff999f3e8";
+        let from_hex = new_secp256k1_public_key_from_hex(hex.to_string()).unwrap();
+        assert_eq!(
+            from_hex,
+            Secp256k1PublicKey::from_hex(hex.to_string()).unwrap()
+        );
+        assert_eq!(secp256k1_public_key_to_hex(&from_hex), hex)
     }
 }

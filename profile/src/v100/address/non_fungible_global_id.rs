@@ -53,15 +53,6 @@ impl<'de> serde::Deserialize<'de> for NonFungibleGlobalId {
 }
 
 impl NonFungibleGlobalId {
-    pub fn new(
-        resource_address: ResourceAddress,
-        non_fungible_local_id: NonFungibleLocalId,
-    ) -> Self {
-        Self {
-            resource_address,
-            non_fungible_local_id,
-        }
-    }
     fn from_internal_engine(internal: EngineSerializableNonFungibleGlobalIdInternal) -> Self {
         let (engine_resource_address, engine_local_id) =
             internal.non_fungible_global_id.into_parts();

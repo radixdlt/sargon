@@ -72,6 +72,11 @@ mod tests {
     }
 
     #[test]
+    fn display() {
+        assert_eq!(format!("{}", AppearanceID::new(11).unwrap()), "11");
+    }
+
+    #[test]
     fn err_too_big() {
         assert_eq!(AppearanceID::new(12), Err(CommonError::InvalidAppearanceID));
     }
