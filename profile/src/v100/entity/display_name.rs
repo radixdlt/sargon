@@ -8,6 +8,11 @@ pub struct DisplayName {
     pub value: String,
 }
 
+#[uniffi::export]
+pub fn new_display_name(name: String) -> Result<DisplayName, CommonError> {
+    DisplayName::new(name.as_str())
+}
+
 impl Serialize for DisplayName {
     fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
     where
@@ -128,5 +133,18 @@ mod tests {
         assert_json_value_ne_after_roundtrip(&a, json!("Main account"));
 
         assert_json_value_fails::<DisplayName>(json!("this is a much much too long display name"));
+    }
+}
+
+#[cfg(test)]
+mod uniffi_tests {
+    use crate::{new_display_name, DisplayName};
+
+    #[test]
+    fn new() {
+        assert_eq!(
+            new_display_name("Main".to_string()).unwrap(),
+            DisplayName::new("Main").unwrap(),
+        );
     }
 }

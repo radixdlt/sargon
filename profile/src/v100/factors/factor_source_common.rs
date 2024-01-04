@@ -1,4 +1,5 @@
 use identified_vec::Identifiable;
+use identified_vec::IsIdentifiedVec;
 use iso8601_timestamp::Timestamp;
 use serde::{Deserialize, Serialize};
 
@@ -85,6 +86,15 @@ impl FactorSourceCommon {
             }
             .into_iter(),
         )
+    }
+
+    pub fn supports_babylon(&self) -> bool {
+        self.crypto_parameters.supports_babylon()
+    }
+
+    /// Checks if its Main Babylon Device Factor Source (BDFS).
+    pub fn is_main_bdfs(&self) -> bool {
+        self.supports_babylon() && self.flags.contains(&FactorSourceFlag::Main)
     }
 }
 

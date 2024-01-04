@@ -1,4 +1,6 @@
-use crate::{AccountPath, CAP26KeyKind, CAP26Repr, HDPathValue, MnemonicWithPassphrase};
+use crate::{
+    AccountPath, CAP26KeyKind, CAP26Repr, HDPathValue, MnemonicWithPassphrase, WalletClientModel,
+};
 
 use crate::{
     v100::{
@@ -34,6 +36,16 @@ impl PrivateHierarchicalDeterministicFactorSource {
             factor_source,
         }
     }
+
+    pub fn generate_new(wallet_client_model: WalletClientModel) -> Self {
+        let mnemonic_with_passphrase = MnemonicWithPassphrase::generate_new();
+        let bdfs = DeviceFactorSource::babylon(
+            true,
+            mnemonic_with_passphrase.clone(),
+            wallet_client_model,
+        );
+        Self::new(mnemonic_with_passphrase, bdfs)
+    }
 }
 
 impl PrivateHierarchicalDeterministicFactorSource {
@@ -49,5 +61,29 @@ impl PrivateHierarchicalDeterministicFactorSource {
             hd_private_key.public_key(),
         );
         HDFactorInstanceAccountCreation::new(hd_factor_instance).unwrap()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use radix_engine_interface::sbor::rust::collections::HashSet;
+
+    use crate::WalletClientModel;
+
+    use super::PrivateHierarchicalDeterministicFactorSource;
+
+    #[test]
+    fn hash() {
+        let n = 100;
+        let set =
+            (0..n)
+                .into_iter()
+                .map(|_| {
+                    PrivateHierarchicalDeterministicFactorSource::generate_new(
+                        WalletClientModel::Unknown,
+                    )
+                })
+                .collect::<HashSet<_>>();
+        assert_eq!(set.len(), n);
     }
 }

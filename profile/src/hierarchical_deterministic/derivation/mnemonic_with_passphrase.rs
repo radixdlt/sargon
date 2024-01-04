@@ -34,6 +34,10 @@ impl MnemonicWithPassphrase {
         }
     }
 
+    pub fn generate_new() -> Self {
+        Self::new(Mnemonic::generate_new())
+    }
+
     /// Instantiates a new `MnemonicWithPassphrase` with empty passphrase (no passphrase),
     /// from the specified BIP39 mnemonic phrase.
     pub fn from_phrase(phrase: &str) -> Result<Self, Error> {

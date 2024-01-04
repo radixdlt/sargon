@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use crate::{BIP39Language, HDPathError as Error};
+use crate::{BIP39Language, HDPathError as Error, Hex32Bytes};
 use itertools::Itertools;
 use serde::{de, Deserializer, Serialize, Serializer};
 
@@ -16,6 +16,35 @@ pub struct Mnemonic {
 }
 
 impl Mnemonic {
+    fn from_internal(internal: bip39::Mnemonic) -> Self {
+        let language = internal.language();
+
+        let words = internal
+            .word_iter()
+            .map(|w| BIP39Word::new(w, language.into()))
+            .collect::<Result<Vec<BIP39Word>, Error>>()
+            .expect("Crate bip39 generated words unknown to us.");
+
+        let word_count = BIP39WordCount::from_count(internal.word_count())
+            .expect("Crate bip39 generated a BIP39 standard incompatible word count.");
+
+        Self {
+            words,
+            word_count,
+            language: language.into(),
+        }
+    }
+    pub fn from_entropy(entropy: [u8; 32]) -> Self {
+        let internal = bip39::Mnemonic::from_entropy(entropy.as_slice()).unwrap();
+        Self::from_internal(internal)
+    }
+    pub fn from_hex32(bytes: Hex32Bytes) -> Self {
+        Self::from_entropy(bytes.bytes())
+    }
+
+    pub fn generate_new() -> Self {
+        Self::from_hex32(Hex32Bytes::generate())
+    }
     fn internal(&self) -> bip39::Mnemonic {
         bip39::Mnemonic::from_str(&self.phrase()).unwrap()
     }
@@ -23,23 +52,9 @@ impl Mnemonic {
         self.words.iter().map(|w| w.word.to_string()).join(" ")
     }
     pub fn from_phrase(phrase: &str) -> Result<Self, Error> {
-        let internal =
-            bip39::Mnemonic::from_str(phrase).map_err(|_| Error::InvalidMnemonicPhrase)?;
-
-        let language = internal.language();
-
-        let words = internal
-            .word_iter()
-            .map(|w| BIP39Word::new(w, language.into()))
-            .collect::<Result<Vec<BIP39Word>, Error>>()?;
-
-        let word_count = BIP39WordCount::from_count(internal.word_count())?;
-
-        Ok(Self {
-            words,
-            word_count,
-            language: language.into(),
-        })
+        bip39::Mnemonic::from_str(phrase)
+            .map_err(|_| Error::InvalidMnemonicPhrase)
+            .map(Self::from_internal)
     }
 
     pub fn to_seed(&self, passphrase: &str) -> Seed {

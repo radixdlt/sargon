@@ -1,7 +1,7 @@
 use crate::BIP39WordCount;
-use serde::{Deserialize, Serialize};
-
 use crate::HasPlaceholder;
+use serde::{Deserialize, Serialize};
+use std::fmt::Display;
 
 /// Properties describing a DeviceFactorSource to help user disambiguate between
 /// it and another one.
@@ -19,6 +19,28 @@ pub struct DeviceFactorSourceHint {
     pub mnemonic_word_count: BIP39WordCount,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, uniffi::Enum)]
+pub enum WalletClientModel {
+    Iphone,
+    Android,
+    Unknown,
+}
+impl WalletClientModel {
+    pub fn name(&self) -> String {
+        match self {
+            Self::Iphone => "iPhone",
+            Self::Android => "Android",
+            Self::Unknown => "Unknown",
+        }
+        .to_string()
+    }
+}
+impl Display for WalletClientModel {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:}", &self.name())
+    }
+}
+
 impl DeviceFactorSourceHint {
     /// Instantiates a new DeviceFactorSourceHint from the specified name, model and word count.
     pub fn new(name: String, model: String, word_count: BIP39WordCount) -> Self {
@@ -29,11 +51,19 @@ impl DeviceFactorSourceHint {
         }
     }
 
-    pub fn unknown_model_and_name_with_word_count(word_count: BIP39WordCount, model: &str) -> Self {
-        Self::new("Unknown Name".to_string(), model.to_string(), word_count)
+    pub fn unknown_model_of_client(
+        word_count: BIP39WordCount,
+        wallet_client_model: WalletClientModel,
+    ) -> Self {
+        Self::new(
+            "Unknown Name".to_string(),
+            wallet_client_model.to_string(),
+            word_count,
+        )
     }
-    pub fn iphone_unknown_model_and_name_with_word_count(word_count: BIP39WordCount) -> Self {
-        Self::unknown_model_and_name_with_word_count(word_count, "iPhone")
+
+    pub fn iphone_unknown_model_with_word_count(word_count: BIP39WordCount) -> Self {
+        Self::unknown_model_of_client(word_count, WalletClientModel::Iphone)
     }
 }
 
@@ -55,7 +85,7 @@ impl HasPlaceholder for DeviceFactorSourceHint {
 impl DeviceFactorSourceHint {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_iphone_unknown() -> Self {
-        Self::iphone_unknown_model_and_name_with_word_count(BIP39WordCount::TwentyFour)
+        Self::iphone_unknown_model_with_word_count(BIP39WordCount::TwentyFour)
     }
 }
 

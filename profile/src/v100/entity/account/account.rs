@@ -1,4 +1,4 @@
-use crate::{HDPathValue, MnemonicWithPassphrase};
+use crate::{HDPathValue, MnemonicWithPassphrase, WalletClientModel};
 
 use crate::{Derivation, HasEntityPath};
 use identified_vec::Identifiable;
@@ -182,7 +182,7 @@ impl Account {
         name: &str,
     ) -> Self {
         let mwp = MnemonicWithPassphrase::placeholder();
-        let bdfs = DeviceFactorSource::babylon(true, mwp.clone(), "iPhone");
+        let bdfs = DeviceFactorSource::babylon(true, mwp.clone(), WalletClientModel::Iphone);
         let private_hd_factor_source = PrivateHierarchicalDeterministicFactorSource::new(mwp, bdfs);
         let account_creating_factor_instance =
             private_hd_factor_source.derive_account_creation_factor_instance(network_id, index);

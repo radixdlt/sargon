@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use crate::CommonError;
 
 use crate::HasPlaceholder;
+use crate::PrivateHierarchicalDeterministicFactorSource;
 
 use super::{
     Account, AccountAddress, AppPreferences, FactorSourceID, FactorSources, Header, IsFactorSource,
@@ -50,6 +51,18 @@ pub fn new_profile_placeholder_other() -> Profile {
 }
 
 impl Profile {
+    /// Creates a new Profile from the `PrivateHierarchicalDeterministicFactorSource`, without any
+    /// networks (thus no accounts), with creating device info as "unknown".
+    pub fn new(private_device_factor_source: PrivateHierarchicalDeterministicFactorSource) -> Self {
+        let bdfs = private_device_factor_source.factor_source;
+        Self::with(
+            Header::default(),
+            FactorSources::with_bdfs(bdfs),
+            AppPreferences::default(),
+            Networks::new(),
+        )
+    }
+
     /// Panics if `factor_sources` is empty, since FactorSources MUST not be empty.
     pub fn with(
         header: Header,

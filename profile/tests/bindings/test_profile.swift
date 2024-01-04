@@ -1,8 +1,8 @@
 import radix_wallet_kit
 
 extension Profile {
-	public static let placeholder = newProfilePlaceholder()
-	public static let placeholderOther = newProfilePlaceholderOther()
+	fileprivate static let placeholder = newProfilePlaceholder()
+	fileprivate static let placeholderOther = newProfilePlaceholderOther()
 }
 
 func test_equatable() throws {

@@ -1,4 +1,4 @@
-use crate::{CommonError, MnemonicWithPassphrase};
+use crate::{CommonError, MnemonicWithPassphrase, WalletClientModel};
 use serde::{Deserialize, Serialize};
 
 use crate::v100::{
@@ -66,7 +66,7 @@ impl DeviceFactorSource {
     pub fn babylon(
         is_main: bool,
         mnemonic_with_passphrase: MnemonicWithPassphrase,
-        device_model: &str,
+        wallet_client_model: WalletClientModel,
     ) -> Self {
         let id = FactorSourceIDFromHash::from_mnemonic_with_passphrase(
             FactorSourceKind::Device,
@@ -76,11 +76,16 @@ impl DeviceFactorSource {
         Self::new(
             id,
             FactorSourceCommon::new_bdfs(is_main),
-            DeviceFactorSourceHint::unknown_model_and_name_with_word_count(
+            DeviceFactorSourceHint::unknown_model_of_client(
                 mnemonic_with_passphrase.mnemonic.word_count.clone(),
-                device_model,
+                wallet_client_model,
             ),
         )
+    }
+
+    /// Checks if its Main Babylon Device Factor Source (BDFS).
+    pub fn is_main_bdfs(&self) -> bool {
+        self.common.is_main_bdfs()
     }
 }
 

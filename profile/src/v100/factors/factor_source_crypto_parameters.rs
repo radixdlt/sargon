@@ -2,6 +2,7 @@ use crate::CommonError as Error;
 use crate::DerivationPathScheme;
 use crate::IdentifiedVecVia;
 use crate::SLIP10Curve;
+use identified_vec::IsIdentifiedVec;
 use serde::{Deserialize, Serialize};
 
 /// Cryptographic parameters a certain FactorSource supports, e.g. which Elliptic Curves
@@ -67,6 +68,13 @@ impl FactorSourceCryptoParameters {
             ],
         )
         .expect("Valid Babylon and Olympia parameters")
+    }
+
+    pub fn supports_babylon(&self) -> bool {
+        self.supported_curves.contains(&SLIP10Curve::Curve25519)
+            && self
+                .supported_derivation_path_schemes
+                .contains(&DerivationPathScheme::Cap26)
     }
 }
 

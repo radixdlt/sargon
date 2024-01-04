@@ -129,8 +129,6 @@ pub enum CommonError {
     #[error("Invalid ISO8601 Time string.")]
     InvalidISO8601String,
 
-    #[error("Failed To Read Profile, unable to acquire lock.")]
-    FailedToReadProfileUnableToAcquireLock,
-    #[error("Failed To Modify Profile, unable to acquire lock.")]
-    FailedToModifyProfileUnableToAcquireLock,
+    #[error("Unknown account.")]
+    UnknownAccount,
 }

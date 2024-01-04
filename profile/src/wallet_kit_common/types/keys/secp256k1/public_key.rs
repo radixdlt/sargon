@@ -166,6 +166,8 @@ mod tests {
     use crate::{assert_json_value_eq_after_roundtrip, HasPlaceholder, KeyError as Error};
     use serde_json::json;
 
+    use radix_engine_common::crypto::Secp256k1PublicKey as EngineSecp256k1PublicKey;
+
     #[test]
     fn equality() {
         assert_eq!(
@@ -215,6 +217,22 @@ mod tests {
         assert_eq!(
             Secp256k1PublicKey::placeholder_alice().to_hex(),
             "02517b88916e7f315bb682f9926b14bc67a0e4246f8a419b986269e1a7e61fffa7"
+        );
+    }
+
+    #[test]
+    fn from_engine() {
+        let from_engine: Secp256k1PublicKey = EngineSecp256k1PublicKey::from_str(
+            "033083620d1596d3f8988ff3270e42970dd2a031e2b9b6488052a4170ff999f3e8",
+        )
+        .unwrap()
+        .into();
+        assert_eq!(
+            from_engine,
+            Secp256k1PublicKey::from_str(
+                "033083620d1596d3f8988ff3270e42970dd2a031e2b9b6488052a4170ff999f3e8"
+            )
+            .unwrap()
         );
     }
 

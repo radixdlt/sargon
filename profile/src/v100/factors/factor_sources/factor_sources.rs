@@ -1,6 +1,6 @@
 use identified_vec::Identifiable;
 
-use crate::{HasPlaceholder, IdentifiedVecVia};
+use crate::{DeviceFactorSource, HasPlaceholder, IdentifiedVecVia};
 
 use crate::v100::factors::{
     factor_source::FactorSource, factor_source_id::FactorSourceID, is_factor_source::IsFactorSource,
@@ -28,6 +28,13 @@ pub fn new_factor_sources_placeholder_other() -> FactorSources {
 }
 
 impl FactorSources {
+    /// Panics if `device_factor_source` is not using Babylon crypto parameters
+    /// AND marked "main".
+    pub fn with_bdfs(device_factor_source: DeviceFactorSource) -> Self {
+        assert!(device_factor_source.is_main_bdfs());
+        Self::from_iter([device_factor_source.into()])
+    }
+
     /// Panics if this `FactorSources` is empty.
     pub fn assert_not_empty(&self) {
         assert_ne!(
