@@ -1,3 +1,3 @@
 [all]
 excluded_files = ["profile/tests/test_generated_bindings.rs"]
-test_timeout = 600
+implicit-test-threads = false
