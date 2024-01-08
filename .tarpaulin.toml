@@ -7,5 +7,5 @@ verbose = true
 all-features = true
 workspace = true
 timeout = "1800s"
-out = ["xml"]
+out = ["Xml"]
 force-clean = false
