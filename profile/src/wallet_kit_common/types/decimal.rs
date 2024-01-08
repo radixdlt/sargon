@@ -25,10 +25,9 @@ impl PartialOrd for Decimal {
             return Some(Ordering::Equal);
         } else if lhs.le(rhs) {
             return Some(Ordering::Less);
-        } else if lhs.gt(rhs) {
-            return Some(Ordering::Greater);
         } else {
-            return None;
+            assert!(lhs.gt(rhs), "!(LHS == RHS || LHS < RHS), thus we expected LHS > RHS, but it was not. Most likely the implementation of RET's Decimal has changed, maybe to involve NaN?");
+            return Some(Ordering::Greater);
         }
     }
 }
