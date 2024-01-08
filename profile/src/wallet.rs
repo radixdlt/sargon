@@ -84,4 +84,28 @@ mod tests {
             .is_ok());
         wallet.read(|p| assert_eq!(p.networks[0].accounts[0].display_name.value, "Stella"));
     }
+
+    #[test]
+    fn mutref() {
+        struct Account {
+            name: String,
+        }
+        struct Network {
+            accounts: Vec<Account>,
+        }
+        struct Profile {
+            networks: Vec<Network>,
+        }
+        let mut profile =
+            Profile {
+                networks: vec![Network {
+                    accounts: vec![Account {
+                        name: "Redrum_237".to_string(),
+                    }],
+                }],
+            };
+        let account = &mut profile.networks[0].accounts[0];
+        account.name = "Sajjon".to_string();
+        assert_eq!(profile.networks[0].accounts[0].name, "Sajjon");
+    }
 }
