@@ -1,18 +1,37 @@
-#[cfg(not(tarpaulin_include))] // WILL MIGRATE SOON
 use std::{ops::Deref, str::FromStr};
 
 use crate::CommonError;
 use radix_engine_common::math::Decimal as NativeDecimal;
 use radix_engine_toolkit_json::models::common::SerializableDecimal;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use std::fmt::Display;
+use std::{cmp::Ordering, fmt::Display};
 
 // FIXME: Use RET's type!
-#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record, Default)]
+#[derive(Clone, Debug, Eq, Ord, Hash, uniffi::Record, Default)]
 pub struct Decimal {
     base10_string: String,
 }
 
+impl PartialEq for Decimal {
+    fn eq(&self, other: &Self) -> bool {
+        self.native().eq(&other.native())
+    }
+}
+impl PartialOrd for Decimal {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        let lhs = &self.native();
+        let rhs = &other.native();
+        if lhs.eq(rhs) {
+            return Some(Ordering::Equal);
+        } else if lhs.le(rhs) {
+            return Some(Ordering::Less);
+        } else if lhs.gt(rhs) {
+            return Some(Ordering::Greater);
+        } else {
+            return None;
+        }
+    }
+}
 impl Decimal {
     fn native(&self) -> NativeDecimal {
         NativeDecimal::from_str(&self.base10_string).unwrap()
@@ -65,56 +84,12 @@ impl Decimal {
             .map_err(|_| CommonError::DecimalError)
     }
 
-    pub fn max() -> Self {
-        Self::from_native(NativeDecimal::MAX)
-    }
-
-    pub fn min() -> Self {
-        Self::from_native(NativeDecimal::MIN)
-    }
-
     pub fn zero() -> Self {
         Self::from_native(NativeDecimal::zero())
     }
 
     pub fn one() -> Self {
         Self::from_native(NativeDecimal::one())
-    }
-
-    pub fn add(&self, other: Self) -> Result<Self, CommonError> {
-        use radix_engine_common::math::CheckedAdd;
-        self.native()
-            .checked_add(other.native())
-            .ok_or(CommonError::DecimalError)
-            .map(Self::from_native)
-    }
-
-    pub fn sub(&self, other: Self) -> Result<Self, CommonError> {
-        use radix_engine_common::math::CheckedSub;
-        self.native()
-            .checked_sub(other.native())
-            .ok_or(CommonError::DecimalError)
-            .map(Self::from_native)
-    }
-
-    pub fn mul(&self, other: Self) -> Result<Self, CommonError> {
-        use radix_engine_common::math::CheckedMul;
-        self.native()
-            .checked_mul(other.native())
-            .ok_or(CommonError::DecimalError)
-            .map(Self::from_native)
-    }
-
-    pub fn div(&self, other: Self) -> Result<Self, CommonError> {
-        use radix_engine_common::math::CheckedDiv;
-        self.native()
-            .checked_div(other.native())
-            .ok_or(CommonError::DecimalError)
-            .map(Self::from_native)
-    }
-
-    pub fn as_str(&self) -> String {
-        self.native().to_string()
     }
 
     pub fn is_zero(&self) -> bool {
@@ -128,138 +103,171 @@ impl Decimal {
     pub fn is_negative(&self) -> bool {
         self.native().is_negative()
     }
+}
 
-    pub fn abs(&self) -> Result<Self, CommonError> {
-        self.native()
-            .checked_abs()
-            .ok_or(CommonError::DecimalError)
-            .map(Self::from_native)
-    }
+impl TryInto<Decimal> for &str {
+    type Error = crate::CommonError;
 
-    pub fn floor(&self) -> Result<Self, CommonError> {
-        self.native()
-            .checked_floor()
-            .ok_or(CommonError::DecimalError)
-            .map(Self::from_native)
-    }
-
-    pub fn ceiling(&self) -> Result<Self, CommonError> {
-        self.native()
-            .checked_ceiling()
-            .ok_or(CommonError::DecimalError)
-            .map(Self::from_native)
-    }
-
-    pub fn round(
-        &self,
-        decimal_places: i32,
-        rounding_mode: RoundingMode,
-    ) -> Result<Self, CommonError> {
-        self.native()
-            .checked_round(decimal_places, rounding_mode.into())
-            .ok_or(CommonError::DecimalError)
-            .map(Self::from_native)
-    }
-
-    pub fn powi(&self, exp: i64) -> Result<Self, CommonError> {
-        self.native()
-            .checked_powi(exp)
-            .map(Self::from_native)
-            .ok_or(CommonError::DecimalError)
-    }
-
-    pub fn sqrt(&self) -> Option<Self> {
-        self.native().checked_sqrt().map(Self::from_native)
-    }
-
-    pub fn cbrt(&self) -> Result<Self, CommonError> {
-        self.native()
-            .checked_cbrt()
-            .map(Self::from_native)
-            .ok_or(CommonError::DecimalError)
-    }
-
-    pub fn nth_root(&self, n: u32) -> Option<Self> {
-        self.native().checked_nth_root(n).map(Self::from_native)
-    }
-
-    pub fn equal(&self, other: Self) -> bool {
-        self.native().eq(&other.native())
-    }
-
-    pub fn not_equal(&self, other: Self) -> bool {
-        self.native().ne(&other.native())
-    }
-
-    pub fn greater_than(&self, other: Self) -> bool {
-        self.native().gt(&other.native())
-    }
-
-    pub fn greater_than_or_equal(&self, other: Self) -> bool {
-        self.native().ge(&other.native())
-    }
-
-    pub fn less_than(&self, other: Self) -> bool {
-        self.native().lt(&other.native())
-    }
-
-    pub fn less_than_or_equal(&self, other: Self) -> bool {
-        self.native().le(&other.native())
-    }
-
-    pub fn mantissa(&self) -> String {
-        self.native().0.to_string()
+    fn try_into(self) -> Result<Decimal, Self::Error> {
+        Decimal::try_from_str(self)
     }
 }
 
-#[derive(Clone, Debug, uniffi::Enum)]
-pub enum RoundingMode {
-    ToPositiveInfinity,
-    ToNegativeInfinity,
-    ToZero,
-    AwayFromZero,
-    ToNearestMidpointTowardZero,
-    ToNearestMidpointAwayFromZero,
-    ToNearestMidpointToEven,
-}
+impl TryFrom<&[u8]> for Decimal {
+    type Error = crate::CommonError;
 
-impl From<RoundingMode> for radix_engine_common::math::RoundingMode {
-    fn from(value: RoundingMode) -> Self {
-        match value {
-            RoundingMode::ToPositiveInfinity => {
-                radix_engine_common::math::RoundingMode::ToPositiveInfinity
-            }
-            RoundingMode::ToNegativeInfinity => {
-                radix_engine_common::math::RoundingMode::ToNegativeInfinity
-            }
-            RoundingMode::ToZero => radix_engine_common::math::RoundingMode::ToZero,
-            RoundingMode::AwayFromZero => radix_engine_common::math::RoundingMode::AwayFromZero,
-            RoundingMode::ToNearestMidpointTowardZero => {
-                radix_engine_common::math::RoundingMode::ToNearestMidpointTowardZero
-            }
-            RoundingMode::ToNearestMidpointAwayFromZero => {
-                radix_engine_common::math::RoundingMode::ToNearestMidpointAwayFromZero
-            }
-            RoundingMode::ToNearestMidpointToEven => {
-                radix_engine_common::math::RoundingMode::ToNearestMidpointToEven
-            }
-        }
+    fn try_from(slice: &[u8]) -> Result<Self, Self::Error> {
+        NativeDecimal::try_from(slice)
+            .map(Self::from_native)
+            .map_err(|_| CommonError::DecimalError)
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashSet;
+
+    use serde_json::json;
+
+    use crate::{
+        assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
+        assert_json_value_ne_after_roundtrip, generate_32_bytes, generate_bytes, CommonError,
+    };
+
     use super::Decimal;
 
     #[test]
-    fn add() {
+    fn eq() {
+        assert_eq!(Decimal::zero(), Decimal::zero());
+        assert_eq!(Decimal::one(), Decimal::one());
+        assert_eq!(Decimal::zero(), Decimal::try_from_str("0").unwrap());
+        assert_eq!(Decimal::one(), Decimal::try_from_str("1").unwrap());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(Decimal::one(), Decimal::zero());
+    }
+
+    #[test]
+    fn is_zero() {
+        assert_eq!(Decimal::zero().is_zero(), true);
+        assert_eq!(Decimal::one().is_zero(), false);
+    }
+
+    #[test]
+    fn is_positive() {
+        assert_eq!(Decimal::zero().is_positive(), false);
+        assert_eq!(Decimal::one().is_positive(), true);
+    }
+
+    #[test]
+    fn is_negative() {
+        assert_eq!(Decimal::try_from_str("-1").unwrap().is_negative(), true);
+        assert_eq!(Decimal::zero().is_negative(), false);
+        assert_eq!(Decimal::one().is_negative(), false);
+    }
+
+    #[test]
+    fn not_less() {
+        assert_eq!(Decimal::zero() < Decimal::zero(), false);
+        assert_eq!(Decimal::one() < Decimal::one(), false);
+        assert_eq!(Decimal::one() < Decimal::zero(), false);
+    }
+
+    #[test]
+    fn less() {
+        assert_eq!(Decimal::zero() < Decimal::one(), true);
+    }
+
+    #[test]
+    fn leq() {
+        assert_eq!(Decimal::zero() <= Decimal::zero(), true);
+        assert_eq!(Decimal::one() <= Decimal::one(), true);
+
+        assert_eq!(Decimal::one() <= Decimal::zero(), false);
+    }
+
+    #[test]
+    fn not_greater_than() {
+        assert_eq!(Decimal::zero() > Decimal::zero(), false);
+        assert_eq!(Decimal::one() > Decimal::one(), false);
+        assert_eq!(Decimal::zero() > Decimal::one(), false);
+    }
+
+    #[test]
+    fn geq() {
+        assert_eq!(Decimal::zero() >= Decimal::zero(), true);
+        assert_eq!(Decimal::one() >= Decimal::one(), true);
+
+        assert_eq!(Decimal::zero() >= Decimal::one(), false);
+    }
+
+    #[test]
+    fn greater() {
+        assert_eq!(Decimal::one() > Decimal::zero(), true);
+    }
+
+    #[test]
+    fn from_str() {
         let a =
             Decimal::try_from_str("3138550867693340381917894711603833208051.177722232017256447")
                 .unwrap();
         let b =
             Decimal::try_from_str("3036550867693340381917894711603833208050.177722232017256447")
                 .unwrap();
-        let c = Decimal::try_from_str("102000000000000000000000000000000000001");
-        assert_eq!(a.sub(b), c);
+        assert_eq!(a > b, true);
+    }
+
+    #[test]
+    fn try_from_invalid_str() {
+        assert_eq!(
+            Decimal::try_from_str("apabanan"),
+            Err(CommonError::DecimalError)
+        );
+    }
+
+    #[test]
+    fn try_from_invalid_bytes() {
+        assert_eq!(
+            Decimal::try_from(generate_32_bytes().as_slice()),
+            Err(CommonError::DecimalError)
+        );
+    }
+
+    #[test]
+    fn try_from_valid_bytes() {
+        assert!(Decimal::try_from(generate_bytes::<24>().as_slice()).is_ok());
+    }
+
+    #[test]
+    fn display() {
+        let s = "3138550867693340381917894711603833208051.177722232017256447";
+        let a: Decimal = s.try_into().unwrap();
+        assert_eq!(format!("{}", a), s);
+    }
+
+    #[test]
+    fn json_roundtrip() {
+        let a: Decimal = "3138550867693340381917894711603833208051.177722232017256447"
+            .try_into()
+            .unwrap();
+
+        assert_json_value_eq_after_roundtrip(
+            &a,
+            json!("3138550867693340381917894711603833208051.177722232017256447"),
+        );
+        assert_json_roundtrip(&a);
+        assert_json_value_ne_after_roundtrip(&a, json!("3.1415"));
+    }
+
+    #[test]
+    fn hash() {
+        let n = 100;
+        let set = (0..n)
+            .into_iter()
+            .map(|_| Decimal::try_from(generate_bytes::<24>().as_slice()).unwrap())
+            .collect::<HashSet<_>>();
+        assert_eq!(set.len(), n);
     }
 }
