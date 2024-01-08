@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::HasPlaceholder;
+use crate::{FiatCurrency, HasPlaceholder};
 
 /// Settings related to displaying of information to the user inside the app.
 ///
@@ -43,30 +43,9 @@ impl HasPlaceholder for AppDisplay {
     }
 }
 
-/// Fiat currency to measure and display the value of some XRD or other Radix assets value/worth in.
-#[derive(
-    Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Enum,
-)]
-pub enum FiatCurrency {
-    /// American dollars.
-    #[serde(rename = "usd")]
-    USD,
-}
-
-impl Default for FiatCurrency {
-    /// American dollars.
-    fn default() -> Self {
-        Self::USD
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use crate::assert_eq_after_json_roundtrip;
-    use crate::HasPlaceholder;
-
-    use super::AppDisplay;
-    use super::FiatCurrency;
+    use crate::{assert_eq_after_json_roundtrip, AppDisplay, HasPlaceholder};
 
     #[test]
     fn equality() {
@@ -80,14 +59,6 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(AppDisplay::placeholder(), AppDisplay::placeholder_other());
-    }
-
-    #[test]
-    fn usd_is_default() {
-        assert_eq!(
-            AppDisplay::default().fiat_currency_price_target,
-            FiatCurrency::USD
-        );
     }
 
     #[test]

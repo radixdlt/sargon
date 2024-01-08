@@ -53,9 +53,7 @@ impl Default for Gateway {
     }
 }
 
-// #[uniffi::export]
 impl Gateway {
-    // #[uniffi::constructor]
     pub fn new(url: String, id: NetworkID) -> Result<Arc<Self>, crate::CommonError> {
         let url = Url::try_from(url.as_str()).map_err(|_| CommonError::InvalidURL(url))?;
         let network = RadixNetwork::lookup_by_id(id)?;

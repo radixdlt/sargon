@@ -13,10 +13,7 @@ use crate::{CommonError as Error, PublicKey};
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct HDFactorInstanceTransactionSigning<E: IsEntityPath> {
     pub factor_source_id: FactorSourceIDFromHash,
-
-    // We prefer to let the method `public_key()` return a `HierarchicalDeterministicPublicKey` instead of a `PublicKey` since it contains derivation path
     pub public_key: PublicKey,
-
     pub path: E,
 }
 impl<E: IsEntityPath + Clone> HDFactorInstanceTransactionSigning<E> {

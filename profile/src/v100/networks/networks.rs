@@ -16,9 +16,8 @@ impl Networks {
     /// and iterator.
     pub fn with_networks<I>(networks: I) -> Self
     where
-        I: Iterator<Item = Network>,
+        I: IntoIterator<Item = Network>,
     {
-        // Self::from_identified_vec_of(IdentifiedVecOf::from_iter(networks))
         Self::from_iter(networks)
     }
 

@@ -30,7 +30,9 @@ impl HasPlaceholder for P2PLinks {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use identified_vec::IsIdentifiedVec;
+
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder, P2PLink};
 
     use super::P2PLinks;
 
@@ -84,23 +86,23 @@ mod tests {
         )
     }
 
-    // #[test]
-    // fn duplicates_are_not_allowed() {
-    //     let mut sut =
-    //         P2PLinks::from_iter([P2PLink::placeholder_brave(), P2PLink::placeholder_chrome()]);
-    //     let (inserted, _) = sut.append(P2PLink::placeholder_brave());
-    //     assert_eq!(inserted, false);
-    // }
+    #[test]
+    fn duplicates_are_not_allowed() {
+        let mut sut =
+            P2PLinks::from_iter([P2PLink::placeholder_brave(), P2PLink::placeholder_chrome()]);
+        let (inserted, _) = sut.append(P2PLink::placeholder_brave());
+        assert_eq!(inserted, false);
+    }
 
-    // #[test]
-    // fn order_is_maintained() {
-    //     let a = P2PLink::placeholder_arc();
-    //     let b = P2PLink::placeholder_brave();
-    //     let c = P2PLink::placeholder_chrome();
-    //     let d = P2PLink::placeholder_duckduckgo();
-    //     let mut sut = P2PLinks::from_iter([&a, &b, &c].into_iter().cloned());
-    //     assert_eq!(sut.elements(), [&a, &b, &c]);
-    //     sut.insert(d.clone(), 1);
-    //     assert_eq!(sut.elements(), [&a, &d, &b, &c]);
-    // }
+    #[test]
+    fn order_is_maintained() {
+        let a = P2PLink::placeholder_arc();
+        let b = P2PLink::placeholder_brave();
+        let c = P2PLink::placeholder_chrome();
+        let d = P2PLink::placeholder_duckduckgo();
+        let mut sut = P2PLinks::from_iter([&a, &b, &c].into_iter().cloned());
+        assert_eq!(sut.elements(), [&a, &b, &c]);
+        sut.insert(d.clone(), 1);
+        assert_eq!(sut.elements(), [&a, &d, &b, &c]);
+    }
 }

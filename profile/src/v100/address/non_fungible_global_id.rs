@@ -72,10 +72,6 @@ impl NonFungibleGlobalId {
         }
     }
 
-    // fn from_engine(engine: EngineSerializableNonFungibleGlobalId) -> Self {
-    //     Self::from_internal_engine(engine.0)
-    // }
-
     fn engine_global_id(&self) -> EngineNonFungibleGlobalId {
         EngineNonFungibleGlobalId::new(
             self.resource_address.clone().into(),

@@ -1,8 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use super::{AppDisplay, Gateways, P2PLinks, Security, Transaction};
-
-use crate::HasPlaceholder;
+use crate::{AppDisplay, Gateways, HasPlaceholder, P2PLinks, Security, Transaction};
 
 /// Collection of all settings, preferences and configuration related to how the wallet
 /// behaves and looks.

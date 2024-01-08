@@ -114,6 +114,15 @@ mod tests {
                 .unwrap();
         assert_eq!(a.network_id, NetworkID::Stokenet);
     }
+
+    #[test]
+    fn network_id_mainnet() {
+        let a: ResourceAddress =
+            "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
+                .try_into()
+                .unwrap();
+        assert_eq!(a.network_id, NetworkID::Mainnet);
+    }
 }
 
 #[cfg(test)]

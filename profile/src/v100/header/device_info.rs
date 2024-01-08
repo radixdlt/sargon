@@ -133,25 +133,25 @@ mod tests {
         assert_eq!(ids.len(), n);
     }
 
-    // #[test]
-    // fn date_is_now() {
-    //     assert!(DeviceInfo::new_iphone().date.year() >= 2023);
-    // }
+    #[test]
+    fn date_is_now() {
+        assert!(DeviceInfo::new_iphone().date.year() >= 2023);
+    }
 
-    // #[test]
-    // fn can_parse_iso8601_json_without_milliseconds_precision() {
-    //     let str = r#"
-    //         {
-    //             "id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
-    //             "date": "2023-09-11T16:05:56Z",
-    //             "description": "iPhone"
-    //         }
-    //         "#;
-    //     let model = serde_json::from_str::<DeviceInfo>(str).unwrap();
-    //     assert_eq!(model.date().day(), 11);
-    //     let json = serde_json::to_string(&model).unwrap();
-    //     assert!(json.contains("56.000Z")); // but when serialized, `.000` is included.
-    // }
+    #[test]
+    fn can_parse_iso8601_json_without_milliseconds_precision() {
+        let str = r#"
+            {
+                "id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
+                "date": "2023-09-11T16:05:56Z",
+                "description": "iPhone"
+            }
+            "#;
+        let model = serde_json::from_str::<DeviceInfo>(str).unwrap();
+        assert_eq!(model.date.day(), 11);
+        let json = serde_json::to_string(&model).unwrap();
+        assert!(json.contains("56.000Z"));
+    }
 
     #[test]
     fn json_roundtrip() {

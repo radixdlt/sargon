@@ -112,14 +112,6 @@ mod tests {
         );
     }
 
-    // #[test]
-    // fn set_common() {
-    //     let sut = LedgerHardwareWalletFactorSource::placeholder();
-    //     assert_eq!(sut.common(), FactorSourceCommon::placeholder());
-    //     sut.set_common(FactorSourceCommon::placeholder_other());
-    //     assert_eq!(sut.common(), FactorSourceCommon::placeholder_other());
-    // }
-
     #[test]
     fn json_roundtrip() {
         let model = LedgerHardwareWalletFactorSource::placeholder();
