@@ -66,8 +66,8 @@ impl TryFrom<FactorSource> for LedgerHardwareWalletFactorSource {
 
     fn try_from(value: FactorSource) -> Result<Self, Self::Error> {
         match value {
-            FactorSource::Ledger { factor } => Ok(factor),
-            FactorSource::Device { factor: _ } => {
+            FactorSource::Ledger { value: factor } => Ok(factor),
+            FactorSource::Device { value: _ } => {
                 Err(Self::Error::ExpectedLedgerHardwareWalletFactorSourceGotSomethingElse)
             }
         }

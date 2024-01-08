@@ -112,7 +112,7 @@ func testKeysCurve25519() throws {
 		fromHex: newEd25519PublicKeyFromHex,
 		hex: hex
 	)
-	let publicKey = PublicKey.ed25519(key: key)
+	let publicKey = PublicKey.ed25519(value: key)
 	switch publicKey {
 	case let .ed25519(ed25519Key): assert(ed25519Key.toHex() == hex)
 	case .secp256k1: assertionFailure("Expected Ed25519 key")
@@ -127,7 +127,7 @@ func testKeysSecp256k1() throws {
 		fromHex: newSecp256k1PublicKeyFromHex,
 		hex: hex
 	)
-	let publicKey = PublicKey.secp256k1(key: key)
+	let publicKey = PublicKey.secp256k1(value: key)
 	switch publicKey {
 	case let .secp256k1(secp256k1Key): assert(secp256k1Key.toHex() == hex)
 	case .ed25519: assertionFailure("Expected secp256k1 key")

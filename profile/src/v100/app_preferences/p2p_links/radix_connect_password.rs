@@ -12,24 +12,24 @@ use crate::HasPlaceholder;
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, uniffi::Record)]
 #[serde(transparent)]
 pub struct RadixConnectPassword {
-    pub bytes: Hex32Bytes,
+    pub value: Hex32Bytes,
 }
 
 impl Debug for RadixConnectPassword {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.bytes.to_hex(),)
+        write!(f, "{}", self.value.to_hex(),)
     }
 }
 
 impl RadixConnectPassword {
     pub fn new(hex_32bytes: Hex32Bytes) -> Self {
         Self {
-            bytes: hex_32bytes.into(),
+            value: hex_32bytes.into(),
         }
     }
 
     pub fn hash(&self) -> Hash {
-        hash(self.bytes.bytes())
+        hash(self.value.bytes())
     }
 }
 

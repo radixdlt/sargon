@@ -55,10 +55,10 @@ impl PrivateKey {
     pub fn public_key(&self) -> PublicKey {
         match self {
             PrivateKey::Ed25519(key) => PublicKey::Ed25519 {
-                key: key.public_key().into(),
+                value: key.public_key().into(),
             },
             PrivateKey::Secp256k1(key) => PublicKey::Secp256k1 {
-                key: key.public_key().into(),
+                value: key.public_key().into(),
             },
         }
     }

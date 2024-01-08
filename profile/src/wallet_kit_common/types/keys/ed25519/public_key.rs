@@ -18,7 +18,7 @@ use crate::Ed25519PrivateKey;
 #[serde(transparent)]
 pub struct Ed25519PublicKey {
     #[serde_as(as = "Hex")]
-    bytes: Vec<u8>, // FIXME: change to either EngineEd25519PublicKey or ed25519_dalek::PublicKey once we have proper UniFFI lift/lower/UniffiCustomTypeConverter
+    value: Vec<u8>, // FIXME: change to either `radix_engine_common::crypto::Ed25519PublicKey` or `ed25519_dalek::PublicKey` once we have proper UniFFI lift/lower/UniffiCustomTypeConverter
 }
 
 #[uniffi::export]
@@ -63,7 +63,7 @@ impl From<EngineEd25519PublicKey> for Ed25519PublicKey {
 
 impl Ed25519PublicKey {
     pub fn to_bytes(&self) -> Vec<u8> {
-        self.bytes.clone()
+        self.value.clone()
     }
 
     pub fn to_hex(&self) -> String {
@@ -79,7 +79,7 @@ impl Ed25519PublicKey {
     pub(crate) fn from_engine(engine: EngineEd25519PublicKey) -> Result<Self, Error> {
         ed25519_dalek::PublicKey::from_bytes(engine.to_vec().as_slice())
             .map(|_| Self {
-                bytes: engine.to_vec(),
+                value: engine.to_vec(),
             }) // FIXME: Delete this once we can represent the key as a `uniffi::Record` without letting the field be bytes...(keep it as `EngineEd25519PublicKey`)
             .map_err(|_| Error::InvalidEd25519PublicKeyPointNotOnCurve)
     }

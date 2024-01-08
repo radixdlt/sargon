@@ -5,7 +5,7 @@ func testAddress() throws {
 	let key = try newEd25519PublicKeyFromHex(
 		hex: "3e9b96a2a863f1be4658ea66aa0584d2a8847d4c0f658b20e62e3594d994d73d")
 	let address0 = newAccountAddressFrom(
-		publicKey: PublicKey.ed25519(key: key), networkId: .mainnet)
+		publicKey: PublicKey.ed25519(value: key), networkId: .mainnet)
 	assert(address0.address == bech32)
 	let address1 = try newAccountAddress(bech32: bech32)
 	assert(address1.address == bech32)

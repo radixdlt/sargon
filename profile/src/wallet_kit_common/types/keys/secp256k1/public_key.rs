@@ -17,7 +17,7 @@ use crate::Secp256k1PrivateKey;
 #[serde(transparent)]
 pub struct Secp256k1PublicKey {
     #[serde_as(as = "Hex")]
-    bytes: Vec<u8>, // FIXME: change to either EngineSecp256k1PublicKey or bip32::secp256k1::PublicKey once we have proper UniFFI lift/lower/UniffiCustomTypeConverter
+    value: Vec<u8>, // FIXME: change to either `radix_engine_common::crypto::Secp256k1PublicKey` or `bip32::secp256k1::PublicKey` once we have proper UniFFI lift/lower/UniffiCustomTypeConverter
 }
 
 #[uniffi::export]
@@ -64,7 +64,7 @@ impl From<EngineSecp256k1PublicKey> for Secp256k1PublicKey {
 
 impl Secp256k1PublicKey {
     pub fn to_bytes(&self) -> Vec<u8> {
-        self.bytes.clone()
+        self.value.clone()
     }
 
     pub fn to_hex(&self) -> String {
@@ -80,7 +80,7 @@ impl Secp256k1PublicKey {
     pub(crate) fn from_engine(engine: EngineSecp256k1PublicKey) -> Result<Self, Error> {
         BIP32Secp256k1PublicKey::from_sec1_bytes(engine.to_vec().as_slice())
             .map(|_| Self {
-                bytes: engine.to_vec(),
+                value: engine.to_vec(),
             })
             .map_err(|_| Error::InvalidSecp256k1PublicKeyPointNotOnCurve)
     }

@@ -14,27 +14,27 @@ use super::{
 pub enum FactorSource {
     Device {
         #[serde(rename = "device")]
-        factor: DeviceFactorSource,
+        value: DeviceFactorSource,
     },
 
     Ledger {
         #[serde(rename = "ledgerHQHardwareWallet")]
-        factor: LedgerHardwareWalletFactorSource,
+        value: LedgerHardwareWalletFactorSource,
     },
 }
 
 impl IsFactorSource for FactorSource {
     fn factor_source_kind(&self) -> FactorSourceKind {
         match self {
-            FactorSource::Device { factor } => factor.factor_source_kind(),
-            FactorSource::Ledger { factor } => factor.factor_source_kind(),
+            FactorSource::Device { value } => value.factor_source_kind(),
+            FactorSource::Ledger { value } => value.factor_source_kind(),
         }
     }
 
     fn factor_source_id(&self) -> FactorSourceID {
         match self {
-            FactorSource::Device { factor } => factor.factor_source_id(),
-            FactorSource::Ledger { factor } => factor.factor_source_id(),
+            FactorSource::Device { value } => value.factor_source_id(),
+            FactorSource::Ledger { value } => value.factor_source_id(),
         }
     }
 }
@@ -42,7 +42,7 @@ impl IsFactorSource for FactorSource {
 impl From<DeviceFactorSource> for FactorSource {
     fn from(value: DeviceFactorSource) -> Self {
         FactorSource::Device {
-            factor: value.into(),
+            value: value.into(),
         }
     }
 }
@@ -50,7 +50,7 @@ impl From<DeviceFactorSource> for FactorSource {
 impl From<LedgerHardwareWalletFactorSource> for FactorSource {
     fn from(value: LedgerHardwareWalletFactorSource) -> Self {
         FactorSource::Ledger {
-            factor: value.into(),
+            value: value.into(),
         }
     }
 }
@@ -78,12 +78,12 @@ impl Serialize for FactorSource {
         let mut state = serializer.serialize_struct("FactorSource", 2)?;
         let discriminator_key = "discriminator";
         match self {
-            FactorSource::Device { factor: device } => {
+            FactorSource::Device { value: device } => {
                 let discriminant = "device";
                 state.serialize_field(discriminator_key, discriminant)?;
                 state.serialize_field(discriminant, device)?;
             }
-            FactorSource::Ledger { factor: ledger } => {
+            FactorSource::Ledger { value: ledger } => {
                 let discriminant = "ledgerHQHardwareWallet";
                 state.serialize_field(discriminator_key, discriminant)?;
                 state.serialize_field(discriminant, ledger)?;
@@ -110,19 +110,19 @@ impl FactorSource {
 
     pub fn placeholder_device_babylon() -> Self {
         Self::Device {
-            factor: DeviceFactorSource::placeholder_babylon().into(),
+            value: DeviceFactorSource::placeholder_babylon().into(),
         }
     }
 
     pub fn placeholder_device_olympia() -> Self {
         Self::Device {
-            factor: DeviceFactorSource::placeholder_olympia().into(),
+            value: DeviceFactorSource::placeholder_olympia().into(),
         }
     }
 
     pub fn placeholder_ledger() -> Self {
         Self::Ledger {
-            factor: LedgerHardwareWalletFactorSource::placeholder().into(),
+            value: LedgerHardwareWalletFactorSource::placeholder().into(),
         }
     }
 }
@@ -192,7 +192,7 @@ mod tests {
         assert_eq!(
             factor_source,
             FactorSource::Device {
-                factor: DeviceFactorSource::placeholder().into()
+                value: DeviceFactorSource::placeholder().into()
             }
         );
     }
@@ -203,7 +203,7 @@ mod tests {
         assert_eq!(
             factor_source,
             FactorSource::Ledger {
-                factor: LedgerHardwareWalletFactorSource::placeholder().into()
+                value: LedgerHardwareWalletFactorSource::placeholder().into()
             }
         );
     }
