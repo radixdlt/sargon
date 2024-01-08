@@ -1,3 +1,4 @@
+#[cfg(not(tarpaulin_include))] // WILL MIGRATE SOON
 use std::{ops::Deref, str::FromStr};
 
 use crate::CommonError;
@@ -25,7 +26,6 @@ impl Decimal {
 
 impl Serialize for Decimal {
     /// Serializes this `HDPath` into its bech32 address string as JSON.
-    #[cfg(not(tarpaulin_include))] // false negative
     fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
     where
         S: Serializer,
@@ -73,12 +73,10 @@ impl Decimal {
         Self::from_native(NativeDecimal::MIN)
     }
 
-    #[uniffi::constructor]
     pub fn zero() -> Self {
         Self::from_native(NativeDecimal::zero())
     }
 
-    #[uniffi::constructor]
     pub fn one() -> Self {
         Self::from_native(NativeDecimal::one())
     }

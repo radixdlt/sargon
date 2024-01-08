@@ -108,6 +108,7 @@ mod tests {
             FactorSourceCryptoParameters::babylon(),
             FactorSourceCryptoParameters::default()
         );
+        assert!(FactorSourceCryptoParameters::babylon().supports_babylon());
     }
 
     #[test]

@@ -88,6 +88,10 @@ impl FactorSourceCommon {
         )
     }
 
+    pub fn new_main_bdfs() -> Self {
+        Self::new_bdfs(true)
+    }
+
     pub fn supports_babylon(&self) -> bool {
         self.crypto_parameters.supports_babylon()
     }
@@ -142,7 +146,7 @@ impl FactorSourceCommon {
 #[cfg(test)]
 mod tests {
 
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use crate::{assert_eq_after_json_roundtrip, now, HasPlaceholder};
     use identified_vec::IsIdentifiedVec;
     use iso8601_timestamp::Timestamp;
 
@@ -178,25 +182,31 @@ mod tests {
         assert_eq!(
             FactorSourceCommon::default().crypto_parameters,
             FactorSourceCryptoParameters::babylon()
-        )
+        );
+        assert!(FactorSourceCommon::default().supports_babylon());
     }
 
-    // #[test]
-    // fn new_uses_now_as_date() {
-    //     let date0 = now();
-    //     let model = FactorSourceCommon::new(FactorSourceCryptoParameters::default(), []);
-    //     let mut date1 = now();
-    //     for _ in 0..10 {
-    //         // rust is too fast... lol.
-    //         date1 = now();
-    //     }
-    //     let do_test = |d: Timestamp| {
-    //         assert!(d > date0);
-    //         assert!(d < date1);
-    //     };
-    //     do_test(model.added_on);
-    //     do_test(model.last_used_on);
-    // }
+    #[test]
+    fn new_main_bdfs() {
+        assert!(FactorSourceCommon::new_main_bdfs().is_main_bdfs());
+    }
+
+    #[test]
+    fn new_uses_now_as_date() {
+        let date0 = now();
+        let model = FactorSourceCommon::new(FactorSourceCryptoParameters::default(), []);
+        let mut date1 = now();
+        for _ in 0..10 {
+            // rust is too fast... lol.
+            date1 = now();
+        }
+        let do_test = |d: Timestamp| {
+            assert!(d > date0);
+            assert!(d < date1);
+        };
+        do_test(model.added_on);
+        do_test(model.last_used_on);
+    }
 
     #[test]
     fn json_roundtrip() {

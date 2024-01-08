@@ -138,12 +138,15 @@ impl HasPlaceholder for Profile {
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashSet;
+
     use identified_vec::{IsIdentifiedVec, ItemsCloned};
 
     use crate::{
         assert_eq_after_json_roundtrip, AppPreferences, CommonError, DeviceFactorSource,
         DisplayName, FactorSourceCryptoParameters, FactorSourceID, FactorSources, HasPlaceholder,
-        Header, LedgerHardwareWalletFactorSource, NetworkID, Networks, Profile, SLIP10Curve,
+        Header, LedgerHardwareWalletFactorSource, NetworkID, Networks,
+        PrivateHierarchicalDeterministicFactorSource, Profile, SLIP10Curve, WalletClientModel,
     };
 
     #[test]
@@ -288,6 +291,20 @@ mod tests {
             AppPreferences::placeholder(),
             Networks::placeholder(),
         );
+    }
+
+    #[test]
+    fn hash() {
+        let n = 100;
+        let set = (0..n)
+            .into_iter()
+            .map(|_| {
+                Profile::new(PrivateHierarchicalDeterministicFactorSource::generate_new(
+                    WalletClientModel::Unknown,
+                ))
+            })
+            .collect::<HashSet<_>>();
+        assert_eq!(set.len(), n);
     }
 
     #[test]

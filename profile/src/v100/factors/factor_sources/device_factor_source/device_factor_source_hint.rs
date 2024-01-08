@@ -1,7 +1,5 @@
-use crate::BIP39WordCount;
-use crate::HasPlaceholder;
+use crate::{BIP39WordCount, HasPlaceholder, WalletClientModel};
 use serde::{Deserialize, Serialize};
-use std::fmt::Display;
 
 /// Properties describing a DeviceFactorSource to help user disambiguate between
 /// it and another one.
@@ -17,28 +15,6 @@ pub struct DeviceFactorSourceHint {
     /// The number of words in the mnemonic of a DeviceFactorSource, according to the BIP39
     /// standard, a multiple of 3, from 12 to 24 words.
     pub mnemonic_word_count: BIP39WordCount,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, uniffi::Enum)]
-pub enum WalletClientModel {
-    Iphone,
-    Android,
-    Unknown,
-}
-impl WalletClientModel {
-    pub fn name(&self) -> String {
-        match self {
-            Self::Iphone => "iPhone",
-            Self::Android => "Android",
-            Self::Unknown => "Unknown",
-        }
-        .to_string()
-    }
-}
-impl Display for WalletClientModel {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:}", &self.name())
-    }
 }
 
 impl DeviceFactorSourceHint {

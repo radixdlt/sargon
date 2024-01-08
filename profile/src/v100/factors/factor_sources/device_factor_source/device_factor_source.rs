@@ -123,8 +123,8 @@ impl DeviceFactorSource {
 
 #[cfg(test)]
 mod tests {
-    use crate::BIP39WordCount;
     use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use crate::{BIP39WordCount, MnemonicWithPassphrase, WalletClientModel};
 
     use super::DeviceFactorSource;
     use crate::v100::{
@@ -151,6 +151,16 @@ mod tests {
             DeviceFactorSource::placeholder(),
             DeviceFactorSource::placeholder_other()
         );
+    }
+
+    #[test]
+    fn main_babylon() {
+        assert!(DeviceFactorSource::babylon(
+            true,
+            MnemonicWithPassphrase::placeholder(),
+            WalletClientModel::placeholder()
+        )
+        .is_main_bdfs());
     }
 
     #[test]
