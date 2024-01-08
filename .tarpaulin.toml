@@ -1,0 +1,2 @@
+[all]
+excluded_files = ["profile/tests/test_generated_bindings.rs"]
