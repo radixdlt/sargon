@@ -55,7 +55,7 @@ impl Wallet {
 
 #[cfg(test)]
 mod tests {
-    use crate::{DisplayName, HasPlaceholder, Profile};
+    use crate::{AccountAddress, CommonError, DisplayName, HasPlaceholder, Profile};
 
     use super::Wallet;
 
@@ -83,6 +83,14 @@ mod tests {
             .change_name_of_account(account.address, DisplayName::new("Stella").unwrap())
             .is_ok());
         wallet.read(|p| assert_eq!(p.networks[0].accounts[0].display_name.value, "Stella"));
+
+        assert_eq!(
+            wallet.change_name_of_account(
+                AccountAddress::placeholder_other(),
+                DisplayName::new("not used").unwrap()
+            ),
+            Err(CommonError::UnknownAccount)
+        );
     }
 
     #[test]

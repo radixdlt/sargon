@@ -108,8 +108,7 @@ impl HasPlaceholder for Mnemonic {
 mod tests {
     use crate::{
         assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
-        assert_json_value_ne_after_roundtrip, BIP39Language, CommonError, HDPathError,
-        HasPlaceholder,
+        assert_json_value_ne_after_roundtrip, BIP39Language, HDPathError, HasPlaceholder,
     };
 
     use serde_json::json;
