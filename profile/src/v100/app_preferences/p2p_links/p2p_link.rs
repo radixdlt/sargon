@@ -4,30 +4,39 @@ use radix_engine_common::crypto::Hash;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Debug, Formatter};
 
-#[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 /// A client the user have connected P2P with, typically a
 /// WebRTC connections with a DApp, but might be Android or iPhone
 /// client as well.
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Ord, PartialOrd, Hash)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Ord, PartialOrd, Hash, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct P2PLink {
     /// The most important property of this struct, the `ConnectionPassword`,
     /// is used to be able to re-establish the P2P connection and also acts as the seed
     /// for the `ID`.
-    connection_password: RadixConnectPassword,
+    pub connection_password: RadixConnectPassword,
 
     /// Client name, e.g. "Chrome on Macbook" or "My work Android" or "My wifes iPhone SE".
-    display_name: String,
+    pub display_name: String,
+}
+
+impl P2PLink {
+    pub fn new(connection_password: RadixConnectPassword, display_name: String) -> Self {
+        Self {
+            connection_password,
+            display_name,
+        }
+    }
 }
 
 impl Debug for P2PLink {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("P2PLink")
-            .field("connection_password", &self.connection_password)
-            .field("display_name", &self.display_name)
-            .finish()
+        write!(
+            f,
+            "P2PLink {{ display_name: '{}', connection_password: '{:?}' }}",
+            self.display_name, self.connection_password,
+        )
     }
 }
 
@@ -43,22 +52,8 @@ impl P2PLink {
     pub fn connection_password(&self) -> RadixConnectPassword {
         self.connection_password.clone()
     }
-
-    pub fn display_name(&self) -> String {
-        self.display_name.clone()
-    }
 }
 
-impl P2PLink {
-    pub fn new(password: RadixConnectPassword, display_name: &str) -> Self {
-        Self {
-            connection_password: password,
-            display_name: display_name.to_string(),
-        }
-    }
-}
-
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for P2PLink {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
@@ -71,24 +66,27 @@ impl HasPlaceholder for P2PLink {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl P2PLink {
+    fn declare(password: RadixConnectPassword, display: &str) -> Self {
+        Self::new(password, display.to_string())
+    }
+
     /// `aced`... "Arc on MacStudio"
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_arc() -> Self {
-        Self::new(RadixConnectPassword::placeholder_aced(), "Arc on MacStudio")
+        Self::declare(RadixConnectPassword::placeholder_aced(), "Arc on MacStudio")
     }
 
     /// `babe`... "Brave on PC"
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_brave() -> Self {
-        Self::new(RadixConnectPassword::placeholder_babe(), "Brave on PC")
+        Self::declare(RadixConnectPassword::placeholder_babe(), "Brave on PC")
     }
 
     /// `cafe`... "Chrome on Macbook"
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_chrome() -> Self {
-        Self::new(
+        Self::declare(
             RadixConnectPassword::placeholder_cafe(),
             "Chrome on Macbook",
         )
@@ -97,7 +95,7 @@ impl P2PLink {
     /// `dead`... "DuckDuckGo on Mac Pro"
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_duckduckgo() -> Self {
-        Self::new(
+        Self::declare(
             RadixConnectPassword::placeholder_dead(),
             "DuckDuckGo on Mac Pro",
         )
@@ -106,7 +104,7 @@ impl P2PLink {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use super::P2PLink;
 
@@ -137,7 +135,7 @@ mod tests {
 
     #[test]
     fn display_name() {
-        assert_eq!(P2PLink::placeholder().display_name(), "Chrome on Macbook");
+        assert_eq!(P2PLink::placeholder().display_name, "Chrome on Macbook");
     }
 
     #[test]
@@ -153,6 +151,6 @@ mod tests {
 
     #[test]
     fn debug() {
-        assert_eq!(format!("{:?}", P2PLink::placeholder()), "P2PLink { connection_password: RadixConnectPassword(cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe), display_name: \"Chrome on Macbook\" }");
+        assert_eq!(format!("{:?}", P2PLink::placeholder()), "P2PLink { display_name: 'Chrome on Macbook', connection_password: 'cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe' }");
     }
 }

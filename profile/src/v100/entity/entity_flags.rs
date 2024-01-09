@@ -1,25 +1,30 @@
-use std::collections::BTreeSet;
+use identified_vec::{Identifiable, IsIdentifiedVec};
 
-use serde::{Deserialize, Serialize};
+use crate::IdentifiedVecVia;
 
 use super::entity_flag::EntityFlag;
 
 /// An order set of `EntityFlag`s used to describe certain Off-ledger
 /// user state about Accounts or Personas, such as if an entity is
 /// marked as hidden or not.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct EntityFlags(BTreeSet<EntityFlag>);
+pub type EntityFlags = IdentifiedVecVia<EntityFlag>;
+
+impl Identifiable for EntityFlag {
+    type ID = Self;
+
+    fn id(&self) -> Self::ID {
+        self.clone()
+    }
+}
 
 impl EntityFlags {
-    /// Instantiates an empty collection of entity flags.
-    pub fn new() -> Self {
-        Self(BTreeSet::new())
-    }
-
     /// Instantiates a flag collection with the provided Vec<Flag>,
     /// removing any duplicates from `flags` if any.
-    pub fn with_flags(flags: Vec<EntityFlag>) -> Self {
-        Self(BTreeSet::from_iter(flags))
+    pub fn with_flags<I>(flags: I) -> Self
+    where
+        I: IntoIterator<Item = EntityFlag>,
+    {
+        Self::from_iter(flags)
     }
 
     /// Instantiates a flag collection with the provided single flag
@@ -43,33 +48,22 @@ impl EntityFlags {
     /// If the set did not previously contain an equal flag, true is returned.
     /// If the set already contained an equal flag, false is returned, and the entry is not updated.
     pub fn insert_flag(&mut self, flag: EntityFlag) -> bool {
-        self.0.insert(flag)
+        self.append(flag).0
     }
 
-    /// If the set contains a flag equal to `flag`, removes it from the set and drops it.
-    /// Returns whether such a flag was present.
-    pub fn remove_flag(&mut self, flag: &EntityFlag) -> bool {
-        self.0.remove(flag)
-    }
-
-    ///Returns true if the set contains the `flag` equal to the value.
-    pub fn contains(&self, flag: &EntityFlag) -> bool {
-        self.0.contains(flag)
-    }
-
-    /// Returns the number of flags in the set.
-    pub fn len(&self) -> usize {
-        self.0.len()
+    pub fn remove_flag(&mut self, flag: &EntityFlag) -> Option<EntityFlag> {
+        self.remove(flag)
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
-    use wallet_kit_common::{
+    use crate::{
         assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
         assert_json_value_ne_after_roundtrip,
     };
+    use identified_vec::IsIdentifiedVec;
+    use serde_json::json;
 
     use crate::v100::entity::{entity_flag::EntityFlag, entity_flags::EntityFlags};
 
@@ -84,20 +78,23 @@ mod tests {
 
     #[test]
     fn new_with_f_contains_f() {
-        assert!(
-            EntityFlags::with_flag(EntityFlag::DeletedByUser).contains(&EntityFlag::DeletedByUser)
-        );
+        assert!(EntityFlags::with_flag(EntityFlag::DeletedByUser)
+            .contains(&EntityFlag::DeletedByUser));
     }
 
     #[test]
     fn remove_existing_flag() {
         assert!(EntityFlags::with_flag(EntityFlag::DeletedByUser)
-            .remove_flag(&EntityFlag::DeletedByUser));
+            .remove_flag(&EntityFlag::DeletedByUser)
+            .is_some());
     }
 
     #[test]
     fn remove_non_existing_flag() {
-        assert!(!EntityFlags::default().remove_flag(&EntityFlag::DeletedByUser));
+        assert_eq!(
+            EntityFlags::default().remove_flag(&EntityFlag::DeletedByUser),
+            None
+        );
         // does not exist
     }
 

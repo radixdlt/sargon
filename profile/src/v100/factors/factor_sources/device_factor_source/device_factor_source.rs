@@ -1,6 +1,4 @@
-use std::cell::RefCell;
-
-use hd::MnemonicWithPassphrase;
+use crate::{CommonError, MnemonicWithPassphrase, WalletClientModel};
 use serde::{Deserialize, Serialize};
 
 use crate::v100::{
@@ -8,8 +6,7 @@ use crate::v100::{
     IsFactorSource,
 };
 
-#[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 use super::device_factor_source_hint::DeviceFactorSourceHint;
 
@@ -18,44 +15,26 @@ use super::device_factor_source_hint::DeviceFactorSourceHint;
 /// all new Accounts and Personas an users authenticate signing by authorizing
 /// the client (Wallet App) to access a mnemonic stored in secure storage on
 /// the device.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct DeviceFactorSource {
     /// Unique and stable identifier of this factor source, stemming from the
     /// hash of a special child key of the HD root of the mnemonic.
-    id: FactorSourceIDFromHash,
+    pub id: FactorSourceIDFromHash,
 
     /// Common properties shared between FactorSources of different kinds,
     /// describing its state, when added, and supported cryptographic parameters.
     ///
     /// Has interior mutability since we must be able to update the
     /// last used date.
-    common: RefCell<FactorSourceCommon>,
+    pub common: FactorSourceCommon,
 
     /// Properties describing a DeviceFactorSource to help user disambiguate between it and another one.
-    hint: DeviceFactorSourceHint,
-}
-
-impl DeviceFactorSource {
-    pub fn id(&self) -> FactorSourceIDFromHash {
-        self.id.clone()
-    }
-
-    pub fn common(&self) -> FactorSourceCommon {
-        self.common.borrow().clone()
-    }
-
-    pub fn set_common(&self, new: FactorSourceCommon) {
-        *self.common.borrow_mut() = new
-    }
-
-    pub fn hint(&self) -> &DeviceFactorSourceHint {
-        &self.hint
-    }
+    pub hint: DeviceFactorSourceHint,
 }
 
 impl TryFrom<FactorSource> for DeviceFactorSource {
-    type Error = wallet_kit_common::CommonError;
+    type Error = CommonError;
 
     fn try_from(value: FactorSource) -> Result<Self, Self::Error> {
         value
@@ -66,7 +45,7 @@ impl TryFrom<FactorSource> for DeviceFactorSource {
 
 impl IsFactorSource for DeviceFactorSource {
     fn factor_source_kind(&self) -> FactorSourceKind {
-        self.id().kind().clone()
+        self.id.kind.clone()
     }
 
     fn factor_source_id(&self) -> FactorSourceID {
@@ -81,17 +60,13 @@ impl DeviceFactorSource {
         common: FactorSourceCommon,
         hint: DeviceFactorSourceHint,
     ) -> Self {
-        Self {
-            id,
-            common: RefCell::new(common),
-            hint,
-        }
+        Self { id, common, hint }
     }
 
     pub fn babylon(
         is_main: bool,
         mnemonic_with_passphrase: MnemonicWithPassphrase,
-        device_model: &str,
+        wallet_client_model: WalletClientModel,
     ) -> Self {
         let id = FactorSourceIDFromHash::from_mnemonic_with_passphrase(
             FactorSourceKind::Device,
@@ -101,15 +76,19 @@ impl DeviceFactorSource {
         Self::new(
             id,
             FactorSourceCommon::new_bdfs(is_main),
-            DeviceFactorSourceHint::unknown_model_and_name_with_word_count(
-                mnemonic_with_passphrase.mnemonic().word_count().clone(),
-                device_model,
+            DeviceFactorSourceHint::unknown_model_of_client(
+                mnemonic_with_passphrase.mnemonic.word_count.clone(),
+                wallet_client_model,
             ),
         )
     }
+
+    /// Checks if its Main Babylon Device Factor Source (BDFS).
+    pub fn is_main_bdfs(&self) -> bool {
+        self.common.is_main_bdfs()
+    }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for DeviceFactorSource {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
@@ -122,7 +101,6 @@ impl HasPlaceholder for DeviceFactorSource {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl DeviceFactorSource {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_babylon() -> Self {
@@ -145,15 +123,15 @@ impl DeviceFactorSource {
 
 #[cfg(test)]
 mod tests {
-    use hd::BIP39WordCount;
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use crate::{BIP39WordCount, MnemonicWithPassphrase, WalletClientModel};
 
     use super::DeviceFactorSource;
     use crate::v100::{
         FactorSource, FactorSourceCryptoParameters, FactorSourceID, IsFactorSource,
         LedgerHardwareWalletFactorSource,
     };
-    use wallet_kit_common::CommonError as Error;
+    use crate::CommonError as Error;
 
     #[test]
     fn equality() {
@@ -173,6 +151,16 @@ mod tests {
             DeviceFactorSource::placeholder(),
             DeviceFactorSource::placeholder_other()
         );
+    }
+
+    #[test]
+    fn main_babylon() {
+        assert!(DeviceFactorSource::babylon(
+            true,
+            MnemonicWithPassphrase::placeholder(),
+            WalletClientModel::placeholder()
+        )
+        .is_main_bdfs());
     }
 
     #[test]
@@ -233,8 +221,8 @@ mod tests {
     fn placeholder_olympia_has_crypto_parameters_olympia() {
         assert_eq!(
             DeviceFactorSource::placeholder_olympia()
-                .common()
-                .crypto_parameters(),
+                .common
+                .crypto_parameters,
             FactorSourceCryptoParameters::olympia()
         );
     }
@@ -242,19 +230,8 @@ mod tests {
     #[test]
     fn hint() {
         assert_eq!(
-            DeviceFactorSource::placeholder()
-                .hint()
-                .mnemonic_word_count(),
+            DeviceFactorSource::placeholder().hint.mnemonic_word_count,
             BIP39WordCount::TwentyFour
         );
-    }
-
-    #[test]
-    fn set_common() {
-        let sut = DeviceFactorSource::placeholder_babylon();
-        let common = sut.common();
-        common.set_crypto_parameters(FactorSourceCryptoParameters::babylon_olympia_compatible());
-        sut.set_common(common.clone());
-        assert_eq!(sut.common(), common);
     }
 }

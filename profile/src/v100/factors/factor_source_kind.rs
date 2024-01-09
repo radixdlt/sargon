@@ -3,7 +3,9 @@ use std::fmt::Display;
 use serde::{Deserialize, Serialize};
 
 /// The **kind** (or "type") of FactorSource describes how it is used.
-#[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(
+    Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Enum,
+)]
 pub enum FactorSourceKind {
     /// A user owned unencrypted mnemonic (and optional BIP39 passphrase) stored on device,
     /// thus directly usable. This kind is used as the standard factor source for all new
@@ -26,7 +28,7 @@ pub enum FactorSourceKind {
     /// * Off device
     /// * Hardware (requires Browser Connector Extension to communicate with wallet)
     /// * Hierarchical deterministic
-    /// * Entity creating (accounts only) // FIXME: MFA remove
+    /// * Entity creating (accounts only)
     #[serde(rename = "ledgerHQHardwareWallet")]
     LedgerHQHardwareWallet,
 
@@ -85,8 +87,8 @@ impl Display for FactorSourceKind {
 mod tests {
     use std::collections::BTreeSet;
 
+    use crate::{assert_json_roundtrip, assert_json_value_eq_after_roundtrip};
     use serde_json::json;
-    use wallet_kit_common::{assert_json_roundtrip, assert_json_value_eq_after_roundtrip};
 
     use crate::v100::factors::factor_source_kind::FactorSourceKind;
 

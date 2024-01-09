@@ -1,27 +1,29 @@
-use hd::HierarchicalDeterministicPublicKey;
+use crate::HierarchicalDeterministicPublicKey;
 
-#[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
-#[serde(remote = "Self")]
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
+#[serde(untagged, remote = "Self")]
 pub enum FactorInstanceBadgeVirtualSource {
-    #[serde(rename = "hierarchicalDeterministicPublicKey")]
-    HierarchicalDeterministic(HierarchicalDeterministicPublicKey),
+    HierarchicalDeterministic {
+        #[serde(rename = "hierarchicalDeterministicPublicKey")]
+        value: HierarchicalDeterministicPublicKey,
+    },
 }
 
 impl FactorInstanceBadgeVirtualSource {
     pub fn as_hierarchical_deterministic(&self) -> &HierarchicalDeterministicPublicKey {
         match self {
-            FactorInstanceBadgeVirtualSource::HierarchicalDeterministic(hd) => hd,
+            FactorInstanceBadgeVirtualSource::HierarchicalDeterministic { value } => value,
         }
     }
 }
 
 impl From<HierarchicalDeterministicPublicKey> for FactorInstanceBadgeVirtualSource {
     fn from(value: HierarchicalDeterministicPublicKey) -> Self {
-        Self::HierarchicalDeterministic(value)
+        Self::HierarchicalDeterministic { value }
     }
 }
 
@@ -34,9 +36,9 @@ impl<'de> Deserialize<'de> for FactorInstanceBadgeVirtualSource {
             #[serde(rename = "discriminator")]
             _ignore: String,
             #[serde(flatten, with = "FactorInstanceBadgeVirtualSource")]
-            inner: FactorInstanceBadgeVirtualSource,
+            value: FactorInstanceBadgeVirtualSource,
         }
-        Wrapper::deserialize(deserializer).map(|w| w.inner)
+        Wrapper::deserialize(deserializer).map(|w| w.value)
     }
 }
 
@@ -48,32 +50,35 @@ impl Serialize for FactorInstanceBadgeVirtualSource {
     {
         let mut state = serializer.serialize_struct("FactorInstanceBadgeVirtualSource", 2)?;
         match self {
-            FactorInstanceBadgeVirtualSource::HierarchicalDeterministic(hd) => {
+            FactorInstanceBadgeVirtualSource::HierarchicalDeterministic { value } => {
                 let discriminant = "hierarchicalDeterministicPublicKey";
                 state.serialize_field("discriminator", discriminant)?;
-                state.serialize_field(discriminant, hd)?;
+                state.serialize_field(discriminant, value)?;
             }
         }
         state.end()
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for FactorInstanceBadgeVirtualSource {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
-        Self::HierarchicalDeterministic(HierarchicalDeterministicPublicKey::placeholder())
+        Self::HierarchicalDeterministic {
+            value: HierarchicalDeterministicPublicKey::placeholder(),
+        }
     }
 
     /// A placeholder used to facilitate unit tests.
     fn placeholder_other() -> Self {
-        Self::HierarchicalDeterministic(HierarchicalDeterministicPublicKey::placeholder_other())
+        Self::HierarchicalDeterministic {
+            value: HierarchicalDeterministicPublicKey::placeholder_other(),
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use super::FactorInstanceBadgeVirtualSource;
 

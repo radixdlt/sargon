@@ -1,12 +1,11 @@
-use derive_getters::Getters;
 use serde::{de, Deserializer, Serialize, Serializer};
 use std::fmt::Display;
-use wallet_kit_common::{suffix_string, NetworkID};
 
-use crate::v100::AbstractEntityType;
+use crate::{suffix_string, CommonError, PublicKey};
 
-#[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::{v100::AbstractEntityType, NetworkID};
+
+use crate::HasPlaceholder;
 
 use super::entity_address::EntityAddress;
 
@@ -14,7 +13,7 @@ use super::entity_address::EntityAddress;
 /// that starts with the prefix `"account_"`, dependent on NetworkID, meaning the same
 /// public key used for two AccountAddresses on two different networks will not have
 /// the same address.
-#[derive(Clone, Debug, Default, PartialEq, Eq, Hash, PartialOrd, Ord, Getters)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct AccountAddress {
     /// Human readable address of an account. Always starts with `"account_"``, for example:
     ///
@@ -27,12 +26,62 @@ pub struct AccountAddress {
     ///
     /// Addresses are checksummed, as per Bech32. **Only** *Account* addresses starts with
     /// the prefix `account_`.
-    address: String,
+    pub address: String,
 
     /// The network this account address is tied to, i.e. which was used when a public key
     /// hash was used to bech32 encode it. This means that two public key hashes will result
     /// in two different account address on two different networks.
-    network_id: NetworkID,
+    pub network_id: NetworkID,
+}
+
+#[uniffi::export]
+pub fn new_account_address(bech32: String) -> Result<AccountAddress, CommonError> {
+    AccountAddress::try_from_bech32(bech32.as_str())
+}
+
+#[uniffi::export]
+pub fn new_account_address_from(public_key: PublicKey, network_id: NetworkID) -> AccountAddress {
+    AccountAddress::new(public_key, network_id)
+}
+
+/// Formats the AccountAddress to its abbreviated form which is what the user
+/// is most used to, since it is what we most commonly display in the Radix
+/// ecosystem.
+///
+/// The abbreviated form returns:
+///
+/// `acco...please`
+///
+/// For the account address:
+///
+/// `account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease`
+///
+#[uniffi::export]
+pub fn account_address_to_short(address: &AccountAddress) -> String {
+    address.short()
+}
+
+impl AccountAddress {
+    pub fn new(public_key: PublicKey, network_id: NetworkID) -> Self {
+        <Self as EntityAddress>::from_public_key(public_key, network_id).into()
+    }
+
+    /// Formats the AccountAddress to its abbreviated form which is what the user
+    /// is most used to, since it is what we most commonly display in the Radix
+    /// ecosystem.
+    ///
+    /// The abbreviated form returns:
+    ///
+    /// `acco...please`
+    ///
+    /// For the account address:
+    ///
+    /// `account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease`
+    ///
+    pub fn short(&self) -> String {
+        let suffix = suffix_string(6, &self.address);
+        format!("{}...{}", &self.address[0..4], suffix)
+    }
 }
 
 impl Serialize for AccountAddress {
@@ -51,25 +100,6 @@ impl<'de> serde::Deserialize<'de> for AccountAddress {
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<AccountAddress, D::Error> {
         let s = String::deserialize(d)?;
         AccountAddress::try_from_bech32(&s).map_err(de::Error::custom)
-    }
-}
-
-impl AccountAddress {
-    /// Formats the AccountAddress to its abbreviated form which is what the user
-    /// is most used to, since it is what we most commonly display in the Radix
-    /// ecosystem.
-    ///
-    /// The abbreviated form returns:
-    ///
-    /// `acco...please`
-    ///
-    /// For the account address:
-    ///
-    /// `account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease`
-    ///
-    pub fn short(&self) -> String {
-        let suffix = suffix_string(6, &self.address);
-        format!("{}...{}", &self.address[0..4], suffix)
     }
 }
 
@@ -94,7 +124,7 @@ impl EntityAddress for AccountAddress {
 }
 
 impl TryInto<AccountAddress> for &str {
-    type Error = wallet_kit_common::CommonError;
+    type Error = crate::CommonError;
 
     /// Tries to deserializes a bech32 address into an `AccountAddress`.
     fn try_into(self) -> Result<AccountAddress, Self::Error> {
@@ -109,7 +139,6 @@ impl Display for AccountAddress {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for AccountAddress {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
@@ -121,7 +150,6 @@ impl HasPlaceholder for AccountAddress {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl AccountAddress {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_alice() -> Self {
@@ -142,19 +170,22 @@ impl AccountAddress {
 
 #[cfg(test)]
 mod tests {
-    use radix_engine_common::crypto::{Ed25519PublicKey, PublicKey};
-    use serde_json::json;
+
     use std::str::FromStr;
-    use wallet_kit_common::CommonError as Error;
-    use wallet_kit_common::{
-        HasPlaceholder, NetworkID,
+
+    use crate::PublicKey;
+    use crate::{CommonError as Error, Ed25519PublicKey};
+    use crate::{
+        HasPlaceholder,
         {
             assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
             assert_json_value_ne_after_roundtrip,
         },
     };
+    use serde_json::json;
 
     use crate::v100::address::{account_address::AccountAddress, entity_address::EntityAddress};
+    use crate::NetworkID;
 
     #[test]
     fn equality() {
@@ -174,7 +205,7 @@ mod tests {
     }
 
     #[test]
-    fn from_bech32() {
+    fn try_from_bech32() {
         assert!(AccountAddress::try_from_bech32(
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease",
         )
@@ -209,9 +240,23 @@ mod tests {
             "3e9b96a2a863f1be4658ea66aa0584d2a8847d4c0f658b20e62e3594d994d73d",
         )
         .unwrap();
+
         assert_eq!(
-            AccountAddress::from_public_key(PublicKey::Ed25519(public_key), NetworkID::Mainnet)
+            AccountAddress::from_public_key::<PublicKey>(public_key.into(), NetworkID::Mainnet)
                 .address,
+            "account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzdm"
+        )
+    }
+
+    #[test]
+    fn new() {
+        let public_key = Ed25519PublicKey::from_str(
+            "3e9b96a2a863f1be4658ea66aa0584d2a8847d4c0f658b20e62e3594d994d73d",
+        )
+        .unwrap();
+
+        assert_eq!(
+            AccountAddress::new(public_key.into(), NetworkID::Mainnet).address,
             "account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzdm"
         )
     }
@@ -287,5 +332,47 @@ mod tests {
             &a,
             json!("account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzdm"),
         );
+    }
+}
+
+#[cfg(test)]
+mod uniffi_tests {
+    use std::str::FromStr;
+
+    use crate::{
+        account_address_to_short, new_account_address, new_account_address_from, Ed25519PublicKey,
+        EntityAddress, NetworkID, PublicKey,
+    };
+
+    use super::AccountAddress;
+
+    #[test]
+    fn short() {
+        let sut: AccountAddress = AccountAddress::try_from_bech32(
+            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease",
+        )
+        .unwrap();
+        assert_eq!(account_address_to_short(&sut), "acco...please");
+    }
+
+    #[test]
+    fn new() {
+        let public_key: PublicKey = Ed25519PublicKey::from_str(
+            "3e9b96a2a863f1be4658ea66aa0584d2a8847d4c0f658b20e62e3594d994d73d",
+        )
+        .unwrap()
+        .into();
+
+        let bech32 = "account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzdm";
+        assert_eq!(
+            AccountAddress::new(public_key.clone(), NetworkID::Mainnet),
+            new_account_address_from(public_key, NetworkID::Mainnet)
+        );
+        let from_bech32 = new_account_address(bech32.to_string()).unwrap();
+        assert_eq!(
+            AccountAddress::try_from_bech32(bech32).unwrap(),
+            from_bech32.clone()
+        );
+        assert_eq!(from_bech32.address, bech32)
     }
 }

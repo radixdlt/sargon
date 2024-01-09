@@ -27,7 +27,10 @@ Middleware that can power Radix Wallet clients (iOS/Android).
 ## MODELS
 
 `[================================================--]`
+
 All models have JSON support and `Placeholder` with which "recursively" I've crafted two valid example Profiles.
+
+All models have Swift/Kotlin bindings using [UniFFI](https://github.com/mozilla/uniffi-rs) generating immutable values types that are `Equatable` and `Hashable`!
 
 ### Hierarchal Deterministic
 
@@ -130,4 +133,16 @@ And then run:
 
 ```sh
 cargo tarpaulin --out Html
+```
+
+### nextest
+[Nextest](https://nexte.st/index.html) is a nice test runner for Rust!
+
+```sh
+cargo install cargo-nextest
+```
+
+## Test
+```sh
+cargo nextest run --package profile --test uniffi && cargo nextest run
 ```

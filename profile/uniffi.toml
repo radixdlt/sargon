@@ -1,0 +1,77 @@
+[bindings.swift]
+generate_immutable_records = true
+
+[bindings.swift.custom_types.Uuid]
+# Name of the type in the Swift code
+type_name = "UUID"
+# Modules that need to be imported
+imports = ["Foundation"]
+# Functions to convert between strings and URLs
+into_custom = "UUID(uuidString: {})!"
+from_custom = "{}.uuidString"
+
+[bindings.kotlin.custom_types.Uuid]
+# Name of the type in the Kotlin code
+type_name = "UUID"
+# Classes that need to be imported
+imports = ["java.util.UUID"]
+# Functions to convert between strings and URLs
+into_custom = "UUID.fromString({})"
+from_custom = "{}.toString()"
+
+[bindings.python.custom_types.Uuid]
+type_name = "UUID"
+# modules to import
+imports = ["uuid"]
+# Functions to convert between strings and the ParsedUrl class
+into_custom = "uuid.UUID({})"
+from_custom = "str({})"
+
+
+[bindings.swift.custom_types.Url]
+# Name of the type in the Swift code
+type_name = "URL"
+# Modules that need to be imported
+imports = ["Foundation"]
+# Functions to convert between strings and URLs
+into_custom = "URL(string: {})!"
+from_custom = "String(describing: {})"
+
+[bindings.kotlin.custom_types.Url]
+# Name of the type in the Kotlin code
+type_name = "URL"
+# Classes that need to be imported
+imports = ["java.net.URI", "java.net.URL"]
+# Functions to convert between strings and URLs
+into_custom = "URI({}).toURL()"
+from_custom = "{}.toString()"
+
+[bindings.python.custom_types.Url]
+# We're going to be the urllib.parse.ParseResult class, which is the closest
+# thing Python has to a Url class.  No need to specify `type_name` though,
+# since Python is loosely typed.
+# modules to import
+imports = ["urllib.parse"]
+# Functions to convert between strings and the ParsedUrl class
+into_custom = "urllib.parse.urlparse({})"
+from_custom = "urllib.parse.urlunparse({})"
+
+[bindings.swift.custom_types.Timestamp]
+# Name of the type in the Swift code
+type_name = "Date"
+# Modules that need to be imported
+imports = ["Foundation"]
+# Functions to convert between strings and URLs
+into_custom = "{let df = DateFormatter();df.dateFormat = \"yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ\";return df.date(from: {})!}()"
+from_custom = "{let df = DateFormatter();df.dateFormat = \"yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ\";return df.string(from: {})}()"
+
+[bindings.kotlin.custom_types.Timestamp]
+type_name = "OffsetDateTime"
+imports = ["java.time"]
+into_custom = "OffsetDateTime.parse({}, DateTimeFormatter.ISO_DATE_TIME)"
+from_custom = "{}.format(DateTimeFormatter.ISO_DATE_TIME)"
+
+[bindings.python.custom_types.Timestamp]
+imports = ["datetime"]
+into_custom = "{}.isoformat()"
+from_custom = "datetime.fromisoformat({})"

@@ -1,21 +1,20 @@
-use derive_getters::Getters;
-use hd::HierarchicalDeterministicPrivateKey;
+use crate::HierarchicalDeterministicPrivateKey;
 
 use crate::v100::factors::factor_source_id::FactorSourceID;
 
 use super::factor_instance::FactorInstance;
 
-#[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 /// An ephemeral (never persisted) HD FactorInstance which contains
 /// the private key, with the ID of its creating FactorSource.
-#[derive(Debug, PartialEq, Eq, Getters)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct PrivateHierarchicalDeterministicFactorInstance {
     /// The HD Private Key.
-    private_key: HierarchicalDeterministicPrivateKey,
+    pub private_key: HierarchicalDeterministicPrivateKey,
+
     /// The ID of the FactorSource creating the `PrivateKey`.
-    factor_source_id: FactorSourceID,
+    pub factor_source_id: FactorSourceID,
 }
 
 impl From<PrivateHierarchicalDeterministicFactorInstance> for HierarchicalDeterministicPrivateKey {
@@ -47,7 +46,6 @@ impl PrivateHierarchicalDeterministicFactorInstance {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for PrivateHierarchicalDeterministicFactorInstance {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
@@ -68,8 +66,8 @@ impl HasPlaceholder for PrivateHierarchicalDeterministicFactorInstance {
 
 #[cfg(test)]
 mod tests {
-    use hd::{Derivation, HierarchicalDeterministicPrivateKey};
-    use wallet_kit_common::HasPlaceholder;
+    use crate::HasPlaceholder;
+    use crate::{Derivation, HierarchicalDeterministicPrivateKey};
 
     use crate::v100::factors::factor_instance::factor_instance::FactorInstance;
 
@@ -99,11 +97,11 @@ mod tests {
     fn new() {
         let sut = PrivateHierarchicalDeterministicFactorInstance::placeholder();
         assert_eq!(
-            sut.private_key().derivation_path().to_string(),
+            sut.private_key.derivation_path.to_string(),
             "m/44H/1022H/1H/525H/1460H/0H"
         );
         assert_eq!(
-            sut.private_key().private_key().to_hex(),
+            sut.private_key.private_key.to_hex(),
             "cf52dbc7bb2663223e99fb31799281b813b939440a372d0aa92eb5f5b8516003"
         );
     }
@@ -123,8 +121,8 @@ mod tests {
         let sut = PrivateHierarchicalDeterministicFactorInstance::placeholder();
         let key: FactorInstance = sut.into();
         assert_eq!(
-            key.factor_source_id(),
-            &PrivateHierarchicalDeterministicFactorInstance::placeholder().factor_source_id
+            key.factor_source_id,
+            PrivateHierarchicalDeterministicFactorInstance::placeholder().factor_source_id
         );
     }
 }

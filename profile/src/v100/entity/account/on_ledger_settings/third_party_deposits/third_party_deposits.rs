@@ -1,9 +1,7 @@
-use std::{
-    cell::{Cell, RefCell},
-    collections::BTreeSet,
-};
-
+use identified_vec::{Identifiable, IsIdentifiedVec};
 use serde::{Deserialize, Serialize};
+
+use crate::IdentifiedVecVia;
 
 use super::{
     asset_exception::AssetException, deposit_rule::DepositRule, depositor_address::DepositorAddress,
@@ -11,18 +9,32 @@ use super::{
 
 /// Controls the ability of third-parties to deposit into a certain account, this is
 /// useful for users who wish to not be able to receive airdrops.
-#[derive(Serialize, Deserialize, Default, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct ThirdPartyDeposits {
     /// Controls the ability of third-parties to deposit into this account
-    deposit_rule: Cell<DepositRule>,
+    pub deposit_rule: DepositRule,
 
     /// Denies or allows third-party deposits of specific assets by ignoring the `depositMode`
-    assets_exception_list: RefCell<BTreeSet<AssetException>>,
+    pub assets_exception_list: IdentifiedVecVia<AssetException>,
 
     /// Allows certain third-party depositors to deposit assets freely.
     /// Note: There is no `deny` counterpart for this.
-    depositors_allow_list: RefCell<BTreeSet<DepositorAddress>>,
+    pub depositors_allow_list: IdentifiedVecVia<DepositorAddress>,
+}
+
+impl Default for ThirdPartyDeposits {
+    fn default() -> Self {
+        Self::new(Default::default())
+    }
+}
+
+impl Identifiable for DepositorAddress {
+    type ID = Self;
+
+    fn id(&self) -> Self::ID {
+        self.clone()
+    }
 }
 
 impl ThirdPartyDeposits {
@@ -31,63 +43,28 @@ impl ThirdPartyDeposits {
     /// `depositors_allow` lists.
     pub fn new(deposit_rule: DepositRule) -> Self {
         Self {
-            deposit_rule: Cell::new(deposit_rule),
-            assets_exception_list: RefCell::new(BTreeSet::new()),
-            depositors_allow_list: RefCell::new(BTreeSet::new()),
+            deposit_rule,
+            assets_exception_list: IdentifiedVecVia::new(),
+            depositors_allow_list: IdentifiedVecVia::new(),
         }
     }
 
     /// Instantiates a new `ThirdPartyDeposits` with the provided
     /// rule and lists.
-    pub fn with_rule_and_lists(
+    pub fn with_rule_and_lists<I, J>(
         deposit_rule: DepositRule,
-        assets_exception_list: BTreeSet<AssetException>,
-        depositors_allow_list: BTreeSet<DepositorAddress>,
-    ) -> Self {
+        assets_exception_list: I,
+        depositors_allow_list: J,
+    ) -> Self
+    where
+        I: IntoIterator<Item = AssetException>,
+        J: IntoIterator<Item = DepositorAddress>,
+    {
         Self {
-            deposit_rule: Cell::new(deposit_rule),
-            assets_exception_list: RefCell::new(assets_exception_list),
-            depositors_allow_list: RefCell::new(depositors_allow_list),
+            deposit_rule,
+            assets_exception_list: IdentifiedVecVia::from_iter(assets_exception_list),
+            depositors_allow_list: IdentifiedVecVia::from_iter(depositors_allow_list),
         }
-    }
-}
-
-// Getters
-impl ThirdPartyDeposits {
-    /// Returns the general `deposit_rule` **as a clone**.
-    ///
-    /// Use [`self::set_deposit_rule(new)`] to update it.
-    pub fn deposit_rule(&self) -> DepositRule {
-        self.deposit_rule.get().clone()
-    }
-
-    /// Returns the `assets_exception_list` **as a clone**.
-    ///
-    /// Use [`self::set_assets_exception_list()`], [`self::add_asset_exception()`]
-    /// or [`self::remove_asset_exception`] to update it.
-    pub fn assets_exception_list(&self) -> BTreeSet<AssetException> {
-        self.assets_exception_list.borrow().clone()
-    }
-
-    /// Returns the `depositors_allow_list` **as a clone**.
-    ///
-    /// Use [`self::set_depositors_allow_list()`], [`self::allow_depositor()`],
-    /// or [`self::remove_allowed_depositor()`] to update it.
-    pub fn depositors_allow_list(&self) -> BTreeSet<DepositorAddress> {
-        self.depositors_allow_list.borrow().clone()
-    }
-}
-
-// Setters
-impl ThirdPartyDeposits {
-    /// Updates the `deposit_rule` to `new`.
-    pub fn set_deposit_rule(&self, new: DepositRule) {
-        self.deposit_rule.set(new);
-    }
-
-    /// Replaces the `assets_exception_list` with the `new` set.
-    pub fn set_assets_exception_list(&self, new: BTreeSet<AssetException>) {
-        *self.assets_exception_list.borrow_mut() = new
     }
 
     /// Adds an `AssetException` to the `assets_exception_list` (set).
@@ -96,18 +73,13 @@ impl ThirdPartyDeposits {
     ///
     /// If the set did not previously contain an equal value, true is returned.
     /// If the set already contained an equal value, false is returned, and the entry is not updated.
-    pub fn add_asset_exception(&self, exception: AssetException) -> bool {
-        self.assets_exception_list.borrow_mut().insert(exception)
+    pub fn add_asset_exception(&mut self, exception: AssetException) -> bool {
+        self.assets_exception_list.append(exception).0
     }
 
     // If the set contains an element equal to `exception`, removes it from the set and drops it. Returns whether such an element was present.
-    pub fn remove_asset_exception(&self, exception: &AssetException) -> bool {
-        self.assets_exception_list.borrow_mut().remove(exception)
-    }
-
-    /// Replaces the `depositors_allow_list` with the `new` set.
-    pub fn set_depositors_allow_list(&self, new: BTreeSet<DepositorAddress>) {
-        *self.depositors_allow_list.borrow_mut() = new
+    pub fn remove_asset_exception(&mut self, exception: &AssetException) -> bool {
+        self.assets_exception_list.remove(exception).is_some()
     }
 
     /// Adds a `DepositorAddress` to the `depositors_allow_list` (set).
@@ -116,13 +88,13 @@ impl ThirdPartyDeposits {
     ///
     /// If the set did not previously contain an equal value, true is returned.
     /// If the set already contained an equal value, false is returned, and the entry is not updated.
-    pub fn allow_depositor(&self, depositor: DepositorAddress) -> bool {
-        self.depositors_allow_list.borrow_mut().insert(depositor)
+    pub fn allow_depositor(&mut self, depositor: DepositorAddress) -> bool {
+        self.depositors_allow_list.append(depositor).0
     }
 
     // If the set contains an element equal to `DepositorAddress`, removes it from the set and drops it. Returns whether such an element was present.
-    pub fn remove_allowed_depositor(&self, depositor: &DepositorAddress) -> bool {
-        self.depositors_allow_list.borrow_mut().remove(depositor)
+    pub fn remove_allowed_depositor(&mut self, depositor: &DepositorAddress) -> bool {
+        self.depositors_allow_list.remove(depositor).is_some()
     }
 }
 
@@ -130,7 +102,7 @@ impl ThirdPartyDeposits {
 mod tests {
     use std::collections::BTreeSet;
 
-    use wallet_kit_common::assert_eq_after_json_roundtrip;
+    use crate::{assert_eq_after_json_roundtrip, IdentifiedVecVia};
 
     use crate::v100::{
         entity::account::on_ledger_settings::third_party_deposits::{
@@ -161,7 +133,7 @@ mod tests {
             DepositRule::AcceptKnown,
             BTreeSet::from_iter([excp1, excp2].into_iter()),
             BTreeSet::from_iter(
-                [DepositorAddress::NonFungibleGlobalID(NonFungibleGlobalId::try_from_str("resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>").unwrap())]
+                [DepositorAddress::NonFungibleGlobalID { value: NonFungibleGlobalId::try_from_str("resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>").unwrap()}]
                 .into_iter(),
             ),
         );
@@ -194,7 +166,7 @@ mod tests {
 
     #[test]
     fn change_asset_exception_list() {
-        let settings: ThirdPartyDeposits = serde_json::from_str(
+        let mut settings: ThirdPartyDeposits = serde_json::from_str(
             r#"
             {
             	"depositRule" : "acceptKnown",
@@ -221,10 +193,12 @@ mod tests {
             DepositAddressExceptionRule::Deny,
         );
         assert!(settings.add_asset_exception(exception.clone()));
-        assert_eq!(settings.assets_exception_list().len(), 2);
+        assert_eq!(settings.assets_exception_list.len(), 2);
         assert!(settings.remove_asset_exception(&exception));
-        assert_eq!(settings.assets_exception_list().len(), 1);
-        settings.set_assets_exception_list(BTreeSet::from_iter([exception.clone()]));
+        assert_eq!(settings.assets_exception_list.len(), 1);
+        // settings.set_assets_exception_list(BTreeSet::from_iter([exception.clone()]));
+        settings.assets_exception_list = IdentifiedVecVia::from_iter([exception.clone()]);
+
         assert!(
             !settings.add_asset_exception(exception.clone()),
             "Expected `false` since already present."
@@ -233,7 +207,7 @@ mod tests {
 
     #[test]
     fn change_allowed_depositor() {
-        let settings: ThirdPartyDeposits = serde_json::from_str(
+        let mut settings: ThirdPartyDeposits = serde_json::from_str(
             r#"
             {
             	"depositRule" : "acceptKnown",
@@ -249,17 +223,19 @@ mod tests {
         )
         .unwrap();
 
-        let depositor = DepositorAddress::NonFungibleGlobalID(
-            NonFungibleGlobalId::try_from_str(
-                "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>",
-            )
-            .unwrap(),
-        );
+        let depositor =
+            DepositorAddress::NonFungibleGlobalID {
+                value: NonFungibleGlobalId::try_from_str(
+                    "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>",
+                )
+                .unwrap(),
+            };
         assert!(settings.allow_depositor(depositor.clone()));
-        assert_eq!(settings.depositors_allow_list().len(), 1);
+        assert_eq!(settings.depositors_allow_list.len(), 1);
         assert!(settings.remove_allowed_depositor(&depositor));
-        assert_eq!(settings.depositors_allow_list().len(), 0);
-        settings.set_depositors_allow_list(BTreeSet::from_iter([depositor.clone()]));
+        assert_eq!(settings.depositors_allow_list.len(), 0);
+
+        settings.depositors_allow_list = IdentifiedVecVia::from_iter([depositor.clone()]);
         assert!(
             !settings.allow_depositor(depositor.clone()),
             "Expected `false` since already present."
@@ -269,7 +245,7 @@ mod tests {
     #[test]
     fn accept_all_is_default() {
         assert_eq!(
-            ThirdPartyDeposits::default().deposit_rule(),
+            ThirdPartyDeposits::default().deposit_rule,
             DepositRule::AcceptAll
         );
     }
@@ -277,22 +253,22 @@ mod tests {
     #[test]
     fn empty_assets_exception_list_is_default() {
         assert!(ThirdPartyDeposits::default()
-            .assets_exception_list()
+            .assets_exception_list
             .is_empty(),);
     }
 
     #[test]
     fn empty_depositors_allow_list_is_default() {
         assert!(ThirdPartyDeposits::default()
-            .depositors_allow_list()
+            .depositors_allow_list
             .is_empty(),);
     }
 
     #[test]
     fn change_rule() {
-        let settings = ThirdPartyDeposits::new(DepositRule::AcceptAll);
-        assert_eq!(settings.deposit_rule(), DepositRule::AcceptAll);
-        settings.set_deposit_rule(DepositRule::DenyAll);
-        assert_eq!(settings.deposit_rule(), DepositRule::DenyAll);
+        let mut settings = ThirdPartyDeposits::new(DepositRule::AcceptAll);
+        assert_eq!(settings.deposit_rule, DepositRule::AcceptAll);
+        settings.deposit_rule = DepositRule::DenyAll;
+        assert_eq!(settings.deposit_rule, DepositRule::DenyAll);
     }
 }

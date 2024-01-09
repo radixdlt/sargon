@@ -1,23 +1,23 @@
-use derive_getters::Getters;
-use hd::{GetIDPath, MnemonicWithPassphrase};
+use crate::Hex32Bytes;
+use crate::{GetIDPath, MnemonicWithPassphrase};
 use radix_engine_common::crypto::{blake2b_256_hash, Hash};
 use serde::{Deserialize, Serialize};
-use wallet_kit_common::Hex32Bytes;
 
 use super::factor_source_kind::FactorSourceKind;
 
-#[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 /// FactorSourceID from the blake2b hash of the special HD public key derived at `CAP26::GetID`,
 /// for a certain `FactorSourceKind`
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Getters)]
+#[derive(
+    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, uniffi::Record,
+)]
 pub struct FactorSourceIDFromHash {
     /// The kind of the FactorSource this ID refers to, typically `device` or `ledger`.
-    kind: FactorSourceKind,
+    pub kind: FactorSourceKind,
 
     /// The blake2b hash of the special HD public key derived at `CAP26::GetID`.
-    body: Hex32Bytes,
+    pub body: Hex32Bytes,
 }
 
 impl ToString for FactorSourceIDFromHash {
@@ -29,7 +29,10 @@ impl ToString for FactorSourceIDFromHash {
 impl FactorSourceIDFromHash {
     /// Instantiates a new `FactorSourceIDFromHash` from the `kind` and `body`.
     pub fn new(kind: FactorSourceKind, body: Hex32Bytes) -> Self {
-        Self { kind, body }
+        Self {
+            kind,
+            body: body.into(),
+        }
     }
 
     pub fn from_mnemonic_with_passphrase(
@@ -48,7 +51,6 @@ impl FactorSourceIDFromHash {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for FactorSourceIDFromHash {
     /// A placeholder used to facilitate unit tests, just an alias
     /// for `placeholder_device`
@@ -61,7 +63,6 @@ impl HasPlaceholder for FactorSourceIDFromHash {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl FactorSourceIDFromHash {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_device() -> Self {
@@ -75,12 +76,20 @@ impl FactorSourceIDFromHash {
             MnemonicWithPassphrase::placeholder(),
         )
     }
+
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_ledger_other() -> Self {
+        Self::from_mnemonic_with_passphrase(
+            FactorSourceKind::LedgerHQHardwareWallet,
+            MnemonicWithPassphrase::placeholder_other(),
+        )
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use hd::{Mnemonic, MnemonicWithPassphrase};
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use crate::{Mnemonic, MnemonicWithPassphrase};
 
     use super::FactorSourceIDFromHash;
 

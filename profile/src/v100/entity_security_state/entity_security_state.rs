@@ -2,18 +2,19 @@ use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializ
 
 use super::unsecured_entity_control::UnsecuredEntityControl;
 
-#[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 /// Describes the state an entity - Account or Persona - is in in regards to how
 /// the user controls it, i.e. if it is controlled by a single factor (private key)
 ///  or an `AccessController` with a potential Multi-Factor setup.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
-#[serde(remote = "Self")]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
+#[serde(untagged, remote = "Self")]
 pub enum EntitySecurityState {
     /// The account is controlled by a single factor (private key)
-    #[serde(rename = "unsecuredEntityControl")]
-    Unsecured(UnsecuredEntityControl),
+    Unsecured {
+        #[serde(rename = "unsecuredEntityControl")]
+        value: UnsecuredEntityControl,
+    },
 }
 
 impl<'de> Deserialize<'de> for EntitySecurityState {
@@ -25,9 +26,9 @@ impl<'de> Deserialize<'de> for EntitySecurityState {
             #[serde(rename = "discriminator")]
             _ignore: String,
             #[serde(flatten, with = "EntitySecurityState")]
-            inner: EntitySecurityState,
+            value: EntitySecurityState,
         }
-        Wrapper::deserialize(deserializer).map(|w| w.inner)
+        Wrapper::deserialize(deserializer).map(|w| w.value)
     }
 }
 
@@ -39,9 +40,9 @@ impl Serialize for EntitySecurityState {
     {
         let mut state = serializer.serialize_struct("EntitySecurityState", 2)?;
         match self {
-            EntitySecurityState::Unsecured(control) => {
+            EntitySecurityState::Unsecured { value } => {
                 state.serialize_field("discriminator", "unsecured")?;
-                state.serialize_field("unsecuredEntityControl", control)?;
+                state.serialize_field("unsecuredEntityControl", value)?;
             }
         }
         state.end()
@@ -50,26 +51,29 @@ impl Serialize for EntitySecurityState {
 
 impl From<UnsecuredEntityControl> for EntitySecurityState {
     fn from(value: UnsecuredEntityControl) -> Self {
-        Self::Unsecured(value)
+        Self::Unsecured { value }
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for EntitySecurityState {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
-        Self::Unsecured(UnsecuredEntityControl::placeholder())
+        Self::Unsecured {
+            value: UnsecuredEntityControl::placeholder(),
+        }
     }
 
     /// A placeholder used to facilitate unit tests.
     fn placeholder_other() -> Self {
-        Self::Unsecured(UnsecuredEntityControl::placeholder_other())
+        Self::Unsecured {
+            value: UnsecuredEntityControl::placeholder_other(),
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use super::EntitySecurityState;
 

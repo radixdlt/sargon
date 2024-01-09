@@ -2,7 +2,9 @@ use serde::{Deserialize, Serialize};
 
 /// Flags which describe a certain state a FactorSource might be in, primarily used
 /// by DeviceFactorSource's to mark which "Babylon" FactorSource is the **main** one.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(
+    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Enum,
+)]
 #[serde(rename_all = "camelCase")]
 pub enum FactorSourceFlag {
     /// Used to mark a "babylon" `.device` FactorSource as "main". All new accounts
@@ -21,11 +23,11 @@ pub enum FactorSourceFlag {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
-    use wallet_kit_common::{
+    use crate::{
         assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
         assert_json_value_ne_after_roundtrip,
     };
+    use serde_json::json;
 
     use super::FactorSourceFlag;
 

@@ -1,23 +1,43 @@
-use nutype::nutype;
+use crate::CommonError;
+use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
+use std::fmt::Display;
 
-use wallet_kit_common::CommonError as Error;
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, uniffi::Record)]
+pub struct AppearanceID {
+    pub value: u8,
+}
 
-#[nutype(
-    validate(less_or_equal = 11),
-    derive(
-        Serialize,
-        Deserialize,
-        Copy,
-        Clone,
-        Debug,
-        PartialEq,
-        Eq,
-        PartialOrd,
-        Ord,
-        Hash
-    )
-)]
-pub struct AppearanceID(u8);
+impl Serialize for AppearanceID {
+    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_u8(self.value)
+    }
+}
+
+impl<'de> Deserialize<'de> for AppearanceID {
+    #[cfg(not(tarpaulin_include))] // false negative
+    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<AppearanceID, D::Error> {
+        let value = u8::deserialize(d)?;
+        AppearanceID::new(value).map_err(de::Error::custom)
+    }
+}
+
+impl AppearanceID {
+    pub fn new(value: u8) -> Result<Self, CommonError> {
+        if value > 11 {
+            return Err(CommonError::InvalidAppearanceID);
+        }
+        Ok(Self { value })
+    }
+}
+
+impl Display for AppearanceID {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self.value)
+    }
+}
 
 impl Default for AppearanceID {
     fn default() -> Self {
@@ -26,20 +46,20 @@ impl Default for AppearanceID {
 }
 
 impl TryFrom<u8> for AppearanceID {
-    type Error = wallet_kit_common::CommonError;
+    type Error = crate::CommonError;
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
-        AppearanceID::new(value).map_err(|_| Error::InvalidAppearanceID)
+        AppearanceID::new(value)
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
-    use wallet_kit_common::{assert_json_value_eq_after_roundtrip, assert_json_value_fails};
 
-    use crate::v100::entity::account::appearance_id::{AppearanceID, AppearanceIDError};
-    use wallet_kit_common::CommonError as Error;
+    use crate::{
+        assert_json_value_eq_after_roundtrip, assert_json_value_fails, AppearanceID, CommonError,
+    };
+    use serde_json::json;
 
     #[test]
     fn lowest() {
@@ -52,17 +72,22 @@ mod tests {
     }
 
     #[test]
+    fn display() {
+        assert_eq!(format!("{}", AppearanceID::new(11).unwrap()), "11");
+    }
+
+    #[test]
     fn err_too_big() {
-        assert_eq!(
-            AppearanceID::new(12),
-            Err(AppearanceIDError::LessOrEqualViolated)
-        );
+        assert_eq!(AppearanceID::new(12), Err(CommonError::InvalidAppearanceID));
     }
 
     #[test]
     fn try_from() {
-        assert_eq!(AppearanceID::try_from(250), Err(Error::InvalidAppearanceID));
-        assert_eq!(AppearanceID::try_from(1), Ok(AppearanceID::new(1).unwrap()));
+        assert_eq!(
+            AppearanceID::try_from(250),
+            Err(CommonError::InvalidAppearanceID)
+        );
+        assert_eq!(AppearanceID::try_from(1), AppearanceID::new(1));
     }
 
     #[test]

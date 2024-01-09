@@ -5,37 +5,38 @@ use super::{
 use enum_as_inner::EnumAsInner;
 use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
 
-#[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 /// A unique and stable identifier of a FactorSource, e.g. a
 /// DeviceFactorSource being a mnemonic securely stored in a
 /// device (phone), where the ID of it is the hash of a special
 /// key derived near the root of it.
-#[derive(
-    Serialize, Deserialize, EnumAsInner, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash,
-)]
-#[serde(remote = "Self")]
+#[derive(Serialize, Deserialize, EnumAsInner, Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
+#[serde(untagged, remote = "Self")]
 pub enum FactorSourceID {
     /// FactorSourceID from the blake2b hash of the special HD public key derived at `CAP26::GetID`,
     /// for a certain `FactorSourceKind`
-    #[serde(rename = "fromHash")]
-    Hash(FactorSourceIDFromHash),
+    Hash {
+        #[serde(rename = "fromHash")]
+        value: FactorSourceIDFromHash,
+    },
 
     /// FactorSourceID from an AccountAddress, typically used by `trustedContact` FactorSource.
-    #[serde(rename = "fromAddress")]
-    Address(FactorSourceIDFromAddress),
+    Address {
+        #[serde(rename = "fromAddress")]
+        value: FactorSourceIDFromAddress,
+    },
 }
 
 impl From<FactorSourceIDFromHash> for FactorSourceID {
     fn from(value: FactorSourceIDFromHash) -> Self {
-        Self::Hash(value)
+        Self::Hash { value }
     }
 }
 
 impl From<FactorSourceIDFromAddress> for FactorSourceID {
     fn from(value: FactorSourceIDFromAddress) -> Self {
-        Self::Address(value)
+        Self::Address { value }
     }
 }
 
@@ -48,9 +49,9 @@ impl<'de> Deserialize<'de> for FactorSourceID {
             #[serde(rename = "discriminator")]
             _ignore: String,
             #[serde(flatten, with = "FactorSourceID")]
-            inner: FactorSourceID,
+            value: FactorSourceID,
         }
-        Wrapper::deserialize(deserializer).map(|w| w.inner)
+        Wrapper::deserialize(deserializer).map(|w| w.value)
     }
 }
 
@@ -62,37 +63,40 @@ impl Serialize for FactorSourceID {
     {
         let mut state = serializer.serialize_struct("FactorSourceID", 2)?;
         match self {
-            FactorSourceID::Hash(from_hash) => {
+            FactorSourceID::Hash { value } => {
                 let discriminant = "fromHash";
                 state.serialize_field("discriminator", discriminant)?;
-                state.serialize_field(discriminant, from_hash)?;
+                state.serialize_field(discriminant, value)?;
             }
-            FactorSourceID::Address(from_address) => {
+            FactorSourceID::Address { value } => {
                 let discriminant = "fromAddress";
                 state.serialize_field("discriminator", discriminant)?;
-                state.serialize_field(discriminant, from_address)?;
+                state.serialize_field(discriminant, value)?;
             }
         }
         state.end()
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for FactorSourceID {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
-        FactorSourceID::Hash(FactorSourceIDFromHash::placeholder())
+        FactorSourceID::Hash {
+            value: FactorSourceIDFromHash::placeholder(),
+        }
     }
 
     /// A placeholder used to facilitate unit tests.
     fn placeholder_other() -> Self {
-        FactorSourceID::Hash(FactorSourceIDFromHash::placeholder_other())
+        FactorSourceID::Hash {
+            value: FactorSourceIDFromHash::placeholder_other(),
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use crate::v100::factors::{
         factor_source_id_from_address::FactorSourceIDFromAddress,
@@ -137,7 +141,9 @@ mod tests {
 
     #[test]
     fn json_roundtrip_from_address() {
-        let model = FactorSourceID::Address(FactorSourceIDFromAddress::placeholder());
+        let model = FactorSourceID::Address {
+            value: FactorSourceIDFromAddress::placeholder(),
+        };
         assert_eq_after_json_roundtrip(
             &model,
             r#"

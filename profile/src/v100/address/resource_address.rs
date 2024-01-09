@@ -1,8 +1,6 @@
-use crate::v100::AbstractEntityType;
-use derive_getters::Getters;
+use crate::{v100::AbstractEntityType, CommonError, NetworkID};
 use serde::{de, Deserializer, Serialize, Serializer};
 use std::fmt::Display;
-use wallet_kit_common::NetworkID;
 
 use super::entity_address::EntityAddress;
 
@@ -10,19 +8,15 @@ use super::entity_address::EntityAddress;
 /// that starts with the prefix `"account_"`, dependent on NetworkID, meaning the same
 /// public key used for two AccountAddresses on two different networks will not have
 /// the same address.
-#[derive(Clone, Debug, Default, PartialEq, Eq, Hash, PartialOrd, Ord, Getters)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record)]
 pub struct ResourceAddress {
-    address: String,
-    network_id: NetworkID,
+    pub address: String,
+    pub network_id: NetworkID,
 }
 
-impl ResourceAddress {
-    pub(crate) fn new(address: String, network_id: NetworkID) -> Self {
-        Self {
-            address,
-            network_id,
-        }
-    }
+#[uniffi::export]
+pub fn new_resource_address(bech32: String) -> Result<ResourceAddress, CommonError> {
+    ResourceAddress::try_from_bech32(bech32.as_str())
 }
 
 impl Serialize for ResourceAddress {
@@ -62,7 +56,7 @@ impl EntityAddress for ResourceAddress {
 }
 
 impl TryInto<ResourceAddress> for &str {
-    type Error = wallet_kit_common::CommonError;
+    type Error = CommonError;
 
     fn try_into(self) -> Result<ResourceAddress, Self::Error> {
         ResourceAddress::try_from_bech32(self)
@@ -77,16 +71,13 @@ impl Display for ResourceAddress {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
-    use wallet_kit_common::{
-        NetworkID,
-        {
-            assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
-            assert_json_value_ne_after_roundtrip,
-        },
+    use crate::{
+        assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
+        assert_json_value_ne_after_roundtrip,
     };
+    use serde_json::json;
 
-    use crate::v100::address::entity_address::EntityAddress;
+    use crate::{v100::address::entity_address::EntityAddress, NetworkID};
 
     use super::ResourceAddress;
 
@@ -116,6 +107,15 @@ mod tests {
     }
 
     #[test]
+    fn network_id_stokenet() {
+        let a: ResourceAddress =
+            "resource_tdx_2_1tkckx9fynl9f7756z8wxphq7wce6vk874nuq4f2nnxgh3nzrwhjdlp"
+                .try_into()
+                .unwrap();
+        assert_eq!(a.network_id, NetworkID::Stokenet);
+    }
+
+    #[test]
     fn network_id_mainnet() {
         let a: ResourceAddress =
             "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
@@ -123,13 +123,20 @@ mod tests {
                 .unwrap();
         assert_eq!(a.network_id, NetworkID::Mainnet);
     }
+}
+
+#[cfg(test)]
+mod uniffi_tests {
+    use crate::{new_resource_address, EntityAddress};
+
+    use super::ResourceAddress;
 
     #[test]
-    fn network_id_stokenet() {
-        let a: ResourceAddress =
-            "resource_tdx_2_1tkckx9fynl9f7756z8wxphq7wce6vk874nuq4f2nnxgh3nzrwhjdlp"
-                .try_into()
-                .unwrap();
-        assert_eq!(a.network_id, NetworkID::Stokenet);
+    fn new() {
+        let s = "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd";
+        let a = ResourceAddress::try_from_bech32(s).unwrap();
+        let b = new_resource_address(s.to_string()).unwrap();
+        assert_eq!(b.address, s);
+        assert_eq!(a, b);
     }
 }

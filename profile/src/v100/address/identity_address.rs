@@ -1,9 +1,7 @@
-use derive_getters::Getters;
 use serde::{de, Deserializer, Serialize, Serializer};
 use std::fmt::Display;
-use wallet_kit_common::NetworkID;
 
-use crate::v100::AbstractEntityType;
+use crate::{v100::AbstractEntityType, CommonError, NetworkID};
 
 use super::entity_address::EntityAddress;
 
@@ -11,7 +9,7 @@ use super::entity_address::EntityAddress;
 /// that starts with the prefix `"identity_"`, dependent on NetworkID, meaning the same
 /// public key used for two IdentityAddresses on two different networks will not have
 /// the same address.
-#[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, Getters)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record)]
 pub struct IdentityAddress {
     /// Human readable address of an identity, which are used by Personas. Always starts with
     /// the prefix `"identity_"`, for example:
@@ -20,12 +18,12 @@ pub struct IdentityAddress {
     ///
     /// Addresses are checksummed, as per Bech32. **Only** *Identity* addresses starts with
     /// the prefix `"identity_"`.
-    address: String,
+    pub address: String,
 
     /// The network this identity address is tied to, i.e. which was used when a public key
     /// hash was used to bech32 encode it. This means that two public key hashes will result
     /// in two different identity address on two different networks.
-    network_id: NetworkID,
+    pub network_id: NetworkID,
 }
 
 impl EntityAddress for IdentityAddress {
@@ -68,7 +66,7 @@ impl<'de> serde::Deserialize<'de> for IdentityAddress {
 }
 
 impl TryInto<IdentityAddress> for &str {
-    type Error = wallet_kit_common::CommonError;
+    type Error = CommonError;
 
     /// Tries to deserializes a bech32 address into an `IdentityAddress`.
     fn try_into(self) -> Result<IdentityAddress, Self::Error> {
@@ -87,17 +85,17 @@ impl Display for IdentityAddress {
 mod tests {
     use std::str::FromStr;
 
+    use crate::{
+        assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
+        assert_json_value_ne_after_roundtrip,
+    };
     use radix_engine_common::crypto::{
         Ed25519PublicKey as EngineEd25519PublicKey, PublicKey as EnginePublicKey,
     };
     use serde_json::json;
-    use wallet_kit_common::{
-        assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
-        assert_json_value_ne_after_roundtrip,
-    };
 
     use super::*;
-    use wallet_kit_common::CommonError as Error;
+    use crate::CommonError as Error;
 
     #[test]
     fn from_bech32() {

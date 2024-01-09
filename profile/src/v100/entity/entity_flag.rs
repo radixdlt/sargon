@@ -19,6 +19,7 @@ use strum::FromRepr;
     PartialOrd,
     Ord,
     Sequence,
+    uniffi::Enum,
 )]
 #[serde(rename_all = "camelCase")]
 pub enum EntityFlag {
@@ -44,8 +45,8 @@ impl Display for EntityFlag {
 
 #[cfg(test)]
 mod tests {
+    use crate::{assert_json_roundtrip, assert_json_value_eq_after_roundtrip};
     use serde_json::json;
-    use wallet_kit_common::{assert_json_roundtrip, assert_json_value_eq_after_roundtrip};
 
     use super::EntityFlag;
 

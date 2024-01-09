@@ -1,11 +1,10 @@
 use crate::{
-    identified_vec_via::IdentifiedVecVia,
     v100::{Account, AccountAddress},
+    IdentifiedVecVia,
 };
-use identified_vec::{IdentifiedVecOf, IsIdentifiableVecOfVia, IsIdentifiedVec, IsIdentifiedVecOf};
+use identified_vec::IsIdentifiedVec;
 
-#[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 /// An ordered set of Accounts on a specific network, most commonly
 /// the set is non-empty.
@@ -16,9 +15,9 @@ impl Accounts {
     /// and iterator of accounts.
     pub fn with_accounts<I>(accounts: I) -> Self
     where
-        I: Iterator<Item = Account>,
+        I: IntoIterator<Item = Account>,
     {
-        Self::from_identified_vec_of(IdentifiedVecOf::from_iter(accounts))
+        Self::from_iter(accounts)
     }
 
     /// Instantiates a new collection of accounts from a
@@ -36,7 +35,6 @@ impl Default for Accounts {
     }
 }
 
-// Getters
 impl Accounts {
     /// Returns a reference to the account identified by `address`, if it exists.
     pub fn get_account_by_address(&self, address: &AccountAddress) -> Option<&Account> {
@@ -49,7 +47,6 @@ impl Accounts {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for Accounts {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
@@ -61,7 +58,7 @@ impl HasPlaceholder for Accounts {
         Self::placeholder_stokenet()
     }
 }
-#[cfg(any(test, feature = "placeholder"))]
+
 impl Accounts {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_mainnet() -> Self {
@@ -88,14 +85,24 @@ impl Accounts {
 
 #[cfg(test)]
 mod tests {
-    use identified_vec::IsIdentifiedVec;
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use crate::v100::{Account, AccountAddress, Accounts, AppearanceID, DisplayName};
 
     #[test]
     fn default_is_empty() {
         assert_eq!(Accounts::default().len(), 0);
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(Accounts::placeholder(), Accounts::placeholder_other());
+    }
+
+    #[test]
+    fn equality() {
+        assert_eq!(Accounts::placeholder(), Accounts::placeholder());
+        assert_eq!(Accounts::placeholder_other(), Accounts::placeholder_other());
     }
 
     #[test]

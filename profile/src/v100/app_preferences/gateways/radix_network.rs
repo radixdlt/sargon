@@ -1,28 +1,27 @@
-use derive_getters::Getters;
+use crate::CommonError;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt::Display;
-use wallet_kit_common::{
-    CommonError,
-    NetworkID::{self, *},
-};
 
-#[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
+
+use crate::NetworkID::{self, *};
 
 /// A version of the Radix Network, for a NetworkID with an identifier (name) and display description (display name)
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Ord, PartialOrd, Hash, Getters)]
+#[derive(
+    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Ord, PartialOrd, Hash, uniffi::Record,
+)]
 #[serde(rename_all = "camelCase")]
 pub struct RadixNetwork {
     /// A String identifier (always lowercase) with the name of the Network that MUST match what Gateway returns.
     #[serde(rename = "name")]
-    logical_name: String,
+    pub logical_name: String,
 
     /// The canonical identifier of this network.
-    id: NetworkID,
+    pub id: NetworkID,
 
     /// A name of the network intended for display purposes only.
-    display_description: String,
+    pub display_description: String,
 }
 
 impl Display for RadixNetwork {
@@ -30,8 +29,8 @@ impl Display for RadixNetwork {
         write!(
             f,
             "{} ({})",
-            self.display_description(),
-            self.id().discriminant()
+            self.display_description,
+            self.id.discriminant()
         )
     }
 }
@@ -106,7 +105,6 @@ impl RadixNetwork {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for RadixNetwork {
     fn placeholder() -> Self {
         Self::mainnet()
@@ -130,7 +128,7 @@ impl RadixNetwork {
         let map = Self::lookup_map();
 
         map.iter()
-            .find(|p| p.1.logical_name() == logical_name)
+            .find(|p| p.1.logical_name == logical_name)
             .map(|p| p.0)
             .ok_or_else(|| CommonError::UnknownNetworkWithName(logical_name.to_string()))
             .and_then(|id| Self::lookup_by_id(id.clone()))
@@ -156,9 +154,9 @@ impl RadixNetwork {
 #[cfg(test)]
 mod tests {
 
-    use wallet_kit_common::{
-        assert_eq_after_json_roundtrip, CommonError, HasPlaceholder, NetworkID,
-    };
+    use crate::{assert_eq_after_json_roundtrip, CommonError, HasPlaceholder};
+
+    use crate::NetworkID;
 
     use super::RadixNetwork;
 
@@ -186,7 +184,7 @@ mod tests {
 
     #[test]
     fn placeholder() {
-        assert_eq!(RadixNetwork::placeholder().logical_name(), "mainnet");
+        assert_eq!(RadixNetwork::placeholder().logical_name, "mainnet");
     }
 
     #[test]
@@ -236,9 +234,7 @@ mod tests {
     fn lookup_by_id_error() {
         assert_eq!(
             RadixNetwork::lookup_by_id(NetworkID::Simulator),
-            Err(CommonError::UnknownNetworkForID(
-                NetworkID::Simulator.discriminant()
-            ))
+            Err(CommonError::UnknownNetworkForID(NetworkID::Simulator.discriminant()))
         );
     }
 

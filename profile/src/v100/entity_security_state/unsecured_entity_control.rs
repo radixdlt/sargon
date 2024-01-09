@@ -1,26 +1,24 @@
-use derive_getters::Getters;
 use serde::{Deserialize, Serialize};
 
 use crate::v100::{HDFactorInstanceAccountCreation, HierarchicalDeterministicFactorInstance};
-use wallet_kit_common::CommonError as Error;
+use crate::CommonError as Error;
 
-#[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 /// Basic security control of an unsecured entity. When said entity
 /// is "securified" it will no longer be controlled by this `UnsecuredEntityControl`
 /// but rather by an `AccessControl`. It is a name space holding the
 /// single factor instance which was used to create
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Getters)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct UnsecuredEntityControl {
     // /// The factor instance which was used to create this unsecured entity, which
     // /// also controls this entity and is used for signing transactions.
-    transaction_signing: HierarchicalDeterministicFactorInstance,
+    pub transaction_signing: HierarchicalDeterministicFactorInstance,
 
     /// The factor instance which can be used for ROLA.
     #[serde(skip_serializing_if = "Option::is_none")]
-    authentication_signing: Option<HierarchicalDeterministicFactorInstance>,
+    pub authentication_signing: Option<HierarchicalDeterministicFactorInstance>,
 }
 
 impl UnsecuredEntityControl {
@@ -38,7 +36,7 @@ impl UnsecuredEntityControl {
         transaction_signing: HierarchicalDeterministicFactorInstance,
         authentication_signing: Option<HierarchicalDeterministicFactorInstance>,
     ) -> Result<Self, Error> {
-        use hd::CAP26KeyKind;
+        use crate::CAP26KeyKind;
 
         if let Some(auth) = &authentication_signing {
             if let Some(key_kind) = auth.key_kind() {
@@ -65,7 +63,6 @@ impl UnsecuredEntityControl {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for UnsecuredEntityControl {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
@@ -83,7 +80,7 @@ impl HasPlaceholder for UnsecuredEntityControl {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use crate::v100::HierarchicalDeterministicFactorInstance;
 

@@ -1,22 +1,22 @@
-#[cfg(any(test, feature = "placeholder"))]
-use hd::{HDPathValue, MnemonicWithPassphrase};
+use crate::{HDPathValue, MnemonicWithPassphrase, WalletClientModel};
 
-use hd::{Derivation, HasEntityPath};
+use crate::{Derivation, HasEntityPath};
 use identified_vec::Identifiable;
 use serde::{Deserialize, Serialize};
-use std::{cell::RefCell, cmp::Ordering, fmt::Display, hash::Hasher};
-use wallet_kit_common::NetworkID;
+use std::{cmp::Ordering, fmt::Display};
 
-#[cfg(any(test, feature = "placeholder"))]
 use crate::v100::{DeviceFactorSource, PrivateHierarchicalDeterministicFactorSource};
-#[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+
+use crate::HasPlaceholder;
 
 use std::hash::Hash;
 
-use crate::v100::{
-    AccountAddress, DisplayName, EntityAddress, EntityFlags, EntitySecurityState,
-    HDFactorInstanceAccountCreation, UnsecuredEntityControl,
+use crate::{
+    v100::{
+        AccountAddress, DisplayName, EntityAddress, EntityFlags, EntitySecurityState,
+        HDFactorInstanceAccountCreation, UnsecuredEntityControl,
+    },
+    NetworkID,
 };
 
 use super::{AppearanceID, OnLedgerSettings};
@@ -38,12 +38,12 @@ use super::{AppearanceID, OnLedgerSettings};
 /// An account can be either controlled by a "Babylon" DeviceFactorSource or a
 /// Legacy one imported from Olympia, or a Ledger hardware wallet, which too might
 /// have been imported from Olympia.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Hash, Eq, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct Account {
     /// The ID of the network this account can be used with.
     #[serde(rename = "networkID")]
-    network_id: NetworkID,
+    pub network_id: NetworkID,
 
     /// A globally unique identifier of this account, being a human readable
     /// address of an account. Always starts with `"account_"``, for example:
@@ -58,29 +58,29 @@ pub struct Account {
     /// No two addresses will ever be the same even for the same factor source
     /// but on different networks, since the public keys controlling the
     /// accounts depend on the network id.
-    address: AccountAddress,
+    pub address: AccountAddress,
 
     /// An off-ledger display name or description chosen by the user when she
     /// created this account.
-    display_name: RefCell<DisplayName>,
+    pub display_name: DisplayName,
 
     /// Security state of this account, either "securified" or not.
-    security_state: EntitySecurityState,
+    pub security_state: EntitySecurityState,
 
     /// The visual cue user learns to associated this account with, typically
     /// a beautiful colorful gradient.
     #[serde(rename = "appearanceID")]
-    appearance_id: RefCell<AppearanceID>,
+    pub appearance_id: AppearanceID,
 
     /// An order set of `EntityFlag`s used to describe certain Off-ledger
     /// user state about Accounts or Personas, such as if an entity is
     /// marked as hidden or not.
     #[serde(default)]
-    flags: RefCell<EntityFlags>,
+    pub flags: EntityFlags,
 
     /// The on ledger synced settings for this account, contains e.g.
     /// ThirdPartyDeposit settings, with deposit rules for assets.
-    on_ledger_settings: RefCell<OnLedgerSettings>,
+    pub on_ledger_settings: OnLedgerSettings,
 }
 
 impl Account {
@@ -93,16 +93,16 @@ impl Account {
             account_creating_factor_instance.clone(),
         );
         Self {
-            network_id: account_creating_factor_instance.network_id(),
+            network_id: account_creating_factor_instance.network_id().into(),
             address,
-            display_name: RefCell::new(display_name),
+            display_name,
             security_state: UnsecuredEntityControl::with_account_creating_factor_instance(
                 account_creating_factor_instance,
             )
             .into(),
-            appearance_id: RefCell::new(appearance_id),
-            flags: RefCell::new(EntityFlags::default()),
-            on_ledger_settings: RefCell::new(OnLedgerSettings::default()),
+            appearance_id,
+            flags: EntityFlags::default().into(),
+            on_ledger_settings: OnLedgerSettings::default(),
         }
     }
 }
@@ -115,76 +115,17 @@ impl Identifiable for Account {
     }
 }
 
-impl Hash for Account {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.address().hash(state);
-    }
-}
-
-// Getters
-impl Account {
-    pub fn network_id(&self) -> NetworkID {
-        self.network_id.clone()
-    }
-
-    pub fn address(&self) -> AccountAddress {
-        self.address.clone()
-    }
-
-    /// Returns this accounts `display_name` as **a clone**.
-    ///
-    /// Use [`self::set_display_name()`] to update it.
-    pub fn display_name(&self) -> String {
-        self.display_name.borrow().clone().to_string()
-    }
-
-    pub fn flags(&self) -> EntityFlags {
-        self.flags.borrow().clone()
-    }
-
-    pub fn appearance_id(&self) -> AppearanceID {
-        self.appearance_id.borrow().clone()
-    }
-
-    pub fn on_ledger_settings(&self) -> OnLedgerSettings {
-        self.on_ledger_settings.borrow().clone()
-    }
-}
-
-// Setters
-impl Account {
-    pub fn set_display_name(&self, new: DisplayName) {
-        *self.display_name.borrow_mut() = new;
-    }
-
-    pub fn set_flags(&self, new: EntityFlags) {
-        *self.flags.borrow_mut() = new;
-    }
-
-    pub fn set_appearance_id(&self, new: AppearanceID) {
-        *self.appearance_id.borrow_mut() = new;
-    }
-
-    pub fn set_on_ledger_settings(&self, new: OnLedgerSettings) {
-        *self.on_ledger_settings.borrow_mut() = new;
-    }
-
-    pub fn update_on_ledger_settings<F>(&self, update: F)
-    where
-        F: Fn(&mut OnLedgerSettings) -> (),
-    {
-        update(&mut self.on_ledger_settings.borrow_mut())
-    }
-}
-
 impl Ord for Account {
     fn cmp(&self, other: &Self) -> Ordering {
         match (&self.security_state, &other.security_state) {
-            (EntitySecurityState::Unsecured(l), EntitySecurityState::Unsecured(r)) => l
-                .transaction_signing()
+            (
+                EntitySecurityState::Unsecured { value: l },
+                EntitySecurityState::Unsecured { value: r },
+            ) => l
+                .transaction_signing
                 .derivation_path()
                 .last_component()
-                .cmp(r.transaction_signing().derivation_path().last_component()),
+                .cmp(r.transaction_signing.derivation_path().last_component()),
         }
     }
 }
@@ -197,11 +138,10 @@ impl PartialOrd for Account {
 
 impl Display for Account {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} | {}", self.display_name(), self.address)
+        write!(f, "{} | {}", self.display_name, self.address)
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for Account {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
@@ -214,7 +154,6 @@ impl HasPlaceholder for Account {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl Account {
     /// Instantiates an account with a display name, address and appearance id.
     pub fn placeholder_with_values(
@@ -223,12 +162,12 @@ impl Account {
         appearance_id: AppearanceID,
     ) -> Self {
         Self {
-            network_id: address.network_id().clone(),
+            network_id: address.network_id.clone(),
             address,
-            display_name: RefCell::new(display_name),
-            appearance_id: RefCell::new(appearance_id),
-            flags: RefCell::new(EntityFlags::default()),
-            on_ledger_settings: RefCell::new(OnLedgerSettings::default()),
+            display_name,
+            appearance_id,
+            flags: EntityFlags::default().into(),
+            on_ledger_settings: OnLedgerSettings::default(),
             security_state: EntitySecurityState::placeholder(),
         }
     }
@@ -243,7 +182,7 @@ impl Account {
         name: &str,
     ) -> Self {
         let mwp = MnemonicWithPassphrase::placeholder();
-        let bdfs = DeviceFactorSource::babylon(true, mwp.clone(), "iPhone");
+        let bdfs = DeviceFactorSource::babylon(true, mwp.clone(), WalletClientModel::Iphone);
         let private_hd_factor_source = PrivateHierarchicalDeterministicFactorSource::new(mwp, bdfs);
         let account_creating_factor_instance =
             private_hd_factor_source.derive_account_creation_factor_instance(network_id, index);
@@ -265,6 +204,12 @@ impl Account {
     /// derivation index 1.
     pub fn placeholder_mainnet_bob() -> Self {
         Self::placeholder_at_index_name(1, "Bob")
+    }
+
+    /// A `Mainnet` account named "Carol", a placeholder used to facilitate unit tests, with
+    /// derivation index 2.
+    pub fn placeholder_mainnet_carol() -> Self {
+        Self::placeholder_at_index_name(2, "Carol")
     }
 
     /// A `Mainnet` account named "Alice", a placeholder used to facilitate unit tests, with
@@ -339,16 +284,16 @@ impl Account {
 
 #[cfg(test)]
 mod tests {
-    use std::{collections::BTreeSet, str::FromStr};
+    use std::str::FromStr;
 
-    use radix_engine_common::prelude::HashSet;
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
-
-    use crate::v100::{
-        AccountAddress, AppearanceID, AssetException, DepositAddressExceptionRule, DepositRule,
-        DepositorAddress, DisplayName, EntityFlag, EntityFlags, OnLedgerSettings,
+    use crate::{
+        assert_eq_after_json_roundtrip, AssetException, DepositAddressExceptionRule, DepositRule,
+        DepositorAddress, EntityFlag, EntityFlags, HasPlaceholder, OnLedgerSettings,
         ThirdPartyDeposits,
     };
+    use radix_engine_common::prelude::HashSet;
+
+    use crate::v100::{AccountAddress, AppearanceID, DisplayName};
 
     use super::Account;
 
@@ -378,15 +323,6 @@ mod tests {
     }
 
     #[test]
-    fn appearance_id_get_set() {
-        let account = Account::placeholder();
-        assert_eq!(account.appearance_id(), AppearanceID::default());
-        let new_appearance_id = AppearanceID::new(1).unwrap();
-        account.set_appearance_id(new_appearance_id);
-        assert_eq!(account.appearance_id(), new_appearance_id);
-    }
-
-    #[test]
     fn display() {
         let account = Account::placeholder();
         assert_eq!(
@@ -402,44 +338,52 @@ mod tests {
 
     #[test]
     fn display_name_get_set() {
-        let account = Account::placeholder_with_values(
+        let mut account = Account::placeholder_with_values(
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
                 .try_into()
                 .unwrap(),
             DisplayName::new("Test").unwrap(),
             AppearanceID::default(),
         );
-        assert_eq!(account.display_name(), "Test");
+        assert_eq!(account.display_name.value, "Test");
         let new_display_name = DisplayName::new("New").unwrap();
-        account.set_display_name(new_display_name.clone());
-        assert_eq!(account.display_name(), new_display_name.to_string());
+        account.display_name = new_display_name.clone();
+        assert_eq!(account.display_name, new_display_name);
+    }
+
+    #[test]
+    fn update() {
+        let mut account = Account::placeholder();
+        assert_eq!(account.display_name.value, "Alice");
+        account.display_name = DisplayName::new("Satoshi").unwrap();
+        assert_eq!(account.display_name.value, "Satoshi");
     }
 
     #[test]
     fn flags_get_set() {
-        let account = Account::placeholder_with_values(
+        let mut account = Account::placeholder_with_values(
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
                 .try_into()
                 .unwrap(),
             DisplayName::new("Test").unwrap(),
             AppearanceID::default(),
         );
-        assert_eq!(account.flags(), EntityFlags::default());
+        assert_eq!(account.flags, EntityFlags::default());
         let new_flags = EntityFlags::with_flag(EntityFlag::DeletedByUser);
-        account.set_flags(new_flags.clone());
-        assert_eq!(account.flags(), new_flags);
+        account.flags = new_flags.clone();
+        assert_eq!(account.flags, new_flags);
     }
 
     #[test]
     fn on_ledger_settings_get_set() {
-        let account = Account::placeholder_with_values(
+        let mut account = Account::placeholder_with_values(
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
                 .try_into()
                 .unwrap(),
             DisplayName::new("Test").unwrap(),
             AppearanceID::default(),
         );
-        assert_eq!(account.on_ledger_settings(), OnLedgerSettings::default());
+        assert_eq!(account.on_ledger_settings, OnLedgerSettings::default());
         let excp1 = AssetException::new(
             "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
                 .try_into()
@@ -454,35 +398,25 @@ mod tests {
         );
         let new_third_party_dep = ThirdPartyDeposits::with_rule_and_lists(
             DepositRule::DenyAll,
-            BTreeSet::from_iter([excp1, excp2].into_iter()),
-            BTreeSet::from_iter(
-                [DepositorAddress::ResourceAddress(
-                    "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
-                        .try_into()
-                        .unwrap(),
-                )]
-                .into_iter(),
-            ),
+            [excp1, excp2],
+            [DepositorAddress::ResourceAddress {
+                value: "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
+                    .try_into()
+                    .unwrap(),
+            }],
         );
         let new_on_ledger_settings = OnLedgerSettings::new(new_third_party_dep);
-        account.set_on_ledger_settings(new_on_ledger_settings.clone());
-        assert_eq!(account.on_ledger_settings(), new_on_ledger_settings);
+        account.on_ledger_settings = new_on_ledger_settings.clone();
+        assert_eq!(account.on_ledger_settings, new_on_ledger_settings);
 
         assert_eq!(
-            account
-                .on_ledger_settings()
-                .third_party_deposits()
-                .deposit_rule(),
+            account.on_ledger_settings.third_party_deposits.deposit_rule,
             DepositRule::DenyAll
         );
-        account.update_on_ledger_settings(|o| {
-            o.update_third_party_deposits(|t| t.set_deposit_rule(DepositRule::AcceptAll))
-        });
+
+        account.on_ledger_settings.third_party_deposits.deposit_rule = DepositRule::AcceptAll;
         assert_eq!(
-            account
-                .on_ledger_settings()
-                .third_party_deposits()
-                .deposit_rule(),
+            account.on_ledger_settings.third_party_deposits.deposit_rule,
             DepositRule::AcceptAll
         );
     }
@@ -772,8 +706,8 @@ mod tests {
             "#,
         ).unwrap();
         let account = serde_json::from_value::<Account>(json).unwrap();
-        assert_eq!(account.display_name(), "Olympia|Soft|0"); // soundness
-        assert_eq!(account.flags().len(), 0); // assert Default value is empty flags.
+        assert_eq!(account.display_name.value, "Olympia|Soft|0".to_string()); // soundness
+        assert_eq!(account.flags.len(), 0); // assert Default value is empty flags.
     }
 
     #[test]

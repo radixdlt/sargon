@@ -1,32 +1,28 @@
-#[cfg(any(test, feature = "placeholder"))]
 use crate::v100::factors::factor_source_kind::FactorSourceKind;
-use derive_getters::Getters;
-#[cfg(any(test, feature = "placeholder"))]
-use hd::{AccountPath, CAP26Repr, HDPathValue, MnemonicWithPassphrase};
-#[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::NetworkID;
 
-use hd::{
+use crate::NetworkID;
+
+use crate::{AccountPath, CAP26Repr, HDPathValue, MnemonicWithPassphrase};
+use crate::{
     CAP26KeyKind, CAP26Path, DerivationPath, HierarchicalDeterministicPublicKey, IsEntityPath,
 };
+use crate::{CommonError as Error, PublicKey};
 use serde::{de, Deserializer, Serialize, Serializer};
-use wallet_kit_common::{CommonError as Error, PublicKey};
 
 use super::{FactorInstance, FactorInstanceBadge, FactorSourceID, FactorSourceIDFromHash};
 
-#[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 /// A virtual hierarchical deterministic `FactorInstance`
-#[derive(Clone, Debug, PartialEq, Eq, Getters)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct HierarchicalDeterministicFactorInstance {
-    factor_source_id: FactorSourceIDFromHash,
-    public_key: HierarchicalDeterministicPublicKey,
+    pub factor_source_id: FactorSourceIDFromHash,
+    pub public_key: HierarchicalDeterministicPublicKey,
 }
 
 impl HierarchicalDeterministicFactorInstance {
     pub fn derivation_path(&self) -> DerivationPath {
-        self.public_key().derivation_path().clone()
+        self.public_key.derivation_path.clone()
     }
 
     pub fn new(
@@ -67,34 +63,36 @@ impl HierarchicalDeterministicFactorInstance {
 
     pub fn try_from_factor_instance(factor_instance: FactorInstance) -> Result<Self, Error> {
         let virtual_source = factor_instance
-            .badge()
+            .badge
             .as_virtual()
             .ok_or(Error::BadgeIsNotVirtualHierarchicalDeterministic)?;
 
         let badge = virtual_source.as_hierarchical_deterministic();
 
         Self::try_from(
-            factor_instance.factor_source_id().clone(),
-            badge.public_key().clone(),
-            badge.derivation_path().clone(),
+            factor_instance.factor_source_id.clone(),
+            badge.public_key.clone(),
+            badge.derivation_path.clone(),
         )
     }
 
     pub fn factor_instance(&self) -> FactorInstance {
         FactorInstance::new(
             self.factor_source_id.clone().into(),
-            FactorInstanceBadge::Virtual(self.public_key.clone().into()),
+            FactorInstanceBadge::Virtual {
+                value: self.public_key.clone().into(),
+            },
         )
     }
 
     pub fn key_kind(&self) -> Option<CAP26KeyKind> {
         match &self.derivation_path() {
-            DerivationPath::CAP26(cap26) => match cap26 {
-                CAP26Path::GetID(_) => None,
-                CAP26Path::IdentityPath(identity_path) => Some(identity_path.key_kind().clone()),
-                CAP26Path::AccountPath(account_path) => Some(account_path.key_kind().clone()),
+            DerivationPath::CAP26 { value } => match value {
+                CAP26Path::GetID { value: _ } => None,
+                CAP26Path::IdentityPath { value } => Some(value.key_kind().clone()),
+                CAP26Path::AccountPath { value } => Some(value.key_kind().clone()),
             },
-            DerivationPath::BIP44Like(_) => None,
+            DerivationPath::BIP44Like { value: _ } => None,
         }
     }
 }
@@ -121,7 +119,6 @@ impl<'de> serde::Deserialize<'de> for HierarchicalDeterministicFactorInstance {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for HierarchicalDeterministicFactorInstance {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
@@ -133,7 +130,6 @@ impl HasPlaceholder for HierarchicalDeterministicFactorInstance {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HierarchicalDeterministicFactorInstance {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_transaction_signing_0() -> Self {
@@ -153,7 +149,7 @@ impl HierarchicalDeterministicFactorInstance {
     /// A placeholder used to facilitate unit tests.
     fn placeholder_with_key_kind(key_kind: CAP26KeyKind, index: HDPathValue) -> Self {
         let mwp = MnemonicWithPassphrase::placeholder();
-        let path = AccountPath::new(NetworkID::Mainnet, key_kind, index);
+        let path = AccountPath::new(NetworkID::Mainnet.into(), key_kind, index);
         let private_key = mwp.derive_private_key(path.clone());
         let public_key = private_key.public_key();
         let id =
@@ -164,11 +160,11 @@ impl HierarchicalDeterministicFactorInstance {
 
 #[cfg(test)]
 mod tests {
-    use hd::{
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder, PublicKey};
+    use crate::{
         BIP44LikePath, CAP26KeyKind, Derivation, DerivationPath, GetIDPath,
         HierarchicalDeterministicPublicKey, IdentityPath,
     };
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder, PublicKey};
 
     use crate::v100::factors::factor_source_id_from_hash::FactorSourceIDFromHash;
 

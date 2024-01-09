@@ -1,49 +1,35 @@
-use std::cell::RefCell;
-
 use serde::{Deserialize, Serialize};
 
-use crate::v100::factors::{
-    factor_source::FactorSource, factor_source_common::FactorSourceCommon,
-    factor_source_id::FactorSourceID, factor_source_id_from_hash::FactorSourceIDFromHash,
-    factor_source_kind::FactorSourceKind, is_factor_source::IsFactorSource,
+use crate::{
+    v100::factors::{
+        factor_source::FactorSource, factor_source_common::FactorSourceCommon,
+        factor_source_id::FactorSourceID, factor_source_id_from_hash::FactorSourceIDFromHash,
+        factor_source_kind::FactorSourceKind, is_factor_source::IsFactorSource,
+    },
+    CommonError,
 };
 
 use super::ledger_hardware_wallet_hint::LedgerHardwareWalletHint;
 
-#[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct LedgerHardwareWalletFactorSource {
     /// Unique and stable identifier of this factor source, stemming from the
     /// hash of a special child key of the HD root of the mnemonic,
     /// that is secured by the Ledger Hardware Wallet device.
-    id: FactorSourceIDFromHash,
+    pub id: FactorSourceIDFromHash,
 
     /// Common properties shared between FactorSources of different kinds,
     /// describing its state, when added, and supported cryptographic parameters.
     ///
     /// Has interior mutability since we must be able to update the
     /// last used date.
-    common: RefCell<FactorSourceCommon>,
+    pub common: FactorSourceCommon,
 
     /// Properties describing a LedgerHardwareWalletFactorSource to help user disambiguate between it and another one.
-    hint: LedgerHardwareWalletHint,
-}
-
-impl LedgerHardwareWalletFactorSource {
-    pub fn id(&self) -> FactorSourceIDFromHash {
-        self.id.clone()
-    }
-
-    pub fn common(&self) -> FactorSourceCommon {
-        self.common.borrow().clone()
-    }
-
-    pub fn set_common(&self, new: FactorSourceCommon) {
-        *self.common.borrow_mut() = new
-    }
+    pub hint: LedgerHardwareWalletHint,
 }
 
 impl LedgerHardwareWalletFactorSource {
@@ -53,15 +39,10 @@ impl LedgerHardwareWalletFactorSource {
         common: FactorSourceCommon,
         hint: LedgerHardwareWalletHint,
     ) -> Self {
-        Self {
-            id,
-            common: RefCell::new(common),
-            hint,
-        }
+        Self { id, common, hint }
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for LedgerHardwareWalletFactorSource {
     fn placeholder() -> Self {
         Self::new(
@@ -73,7 +54,7 @@ impl HasPlaceholder for LedgerHardwareWalletFactorSource {
 
     fn placeholder_other() -> Self {
         Self::new(
-            FactorSourceIDFromHash::placeholder_ledger(),
+            FactorSourceIDFromHash::placeholder_ledger_other(),
             FactorSourceCommon::placeholder_other(),
             LedgerHardwareWalletHint::placeholder_other(),
         )
@@ -81,18 +62,21 @@ impl HasPlaceholder for LedgerHardwareWalletFactorSource {
 }
 
 impl TryFrom<FactorSource> for LedgerHardwareWalletFactorSource {
-    type Error = wallet_kit_common::CommonError;
+    type Error = CommonError;
 
     fn try_from(value: FactorSource) -> Result<Self, Self::Error> {
-        value
-            .into_ledger()
-            .map_err(|_| Self::Error::ExpectedLedgerHardwareWalletFactorSourceGotSomethingElse)
+        match value {
+            FactorSource::Ledger { value: factor } => Ok(factor),
+            FactorSource::Device { value: _ } => {
+                Err(Self::Error::ExpectedLedgerHardwareWalletFactorSourceGotSomethingElse)
+            }
+        }
     }
 }
 
 impl IsFactorSource for LedgerHardwareWalletFactorSource {
     fn factor_source_kind(&self) -> FactorSourceKind {
-        self.id().kind().clone()
+        self.id.kind.clone()
     }
 
     fn factor_source_id(&self) -> FactorSourceID {
@@ -102,9 +86,9 @@ impl IsFactorSource for LedgerHardwareWalletFactorSource {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, CommonError as Error, HasPlaceholder};
+    use crate::{assert_eq_after_json_roundtrip, CommonError as Error, HasPlaceholder};
 
-    use crate::v100::{DeviceFactorSource, FactorSource, FactorSourceCommon, IsFactorSource};
+    use crate::v100::{DeviceFactorSource, FactorSource, IsFactorSource};
 
     use super::LedgerHardwareWalletFactorSource;
 
@@ -126,14 +110,6 @@ mod tests {
             LedgerHardwareWalletFactorSource::placeholder(),
             LedgerHardwareWalletFactorSource::placeholder_other()
         );
-    }
-
-    #[test]
-    fn set_common() {
-        let sut = LedgerHardwareWalletFactorSource::placeholder();
-        assert_eq!(sut.common(), FactorSourceCommon::placeholder());
-        sut.set_common(FactorSourceCommon::placeholder_other());
-        assert_eq!(sut.common(), FactorSourceCommon::placeholder_other());
     }
 
     #[test]
@@ -197,7 +173,7 @@ mod tests {
     fn factor_source_kind() {
         assert_eq!(
             LedgerHardwareWalletFactorSource::placeholder().factor_source_kind(),
-            *LedgerHardwareWalletFactorSource::placeholder().id().kind()
+            LedgerHardwareWalletFactorSource::placeholder().id.kind
         );
     }
 }

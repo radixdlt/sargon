@@ -1,0 +1,10 @@
+[Custom]
+typedef string Uuid;
+
+[Custom]
+typedef string Url;
+
+[Custom]
+typedef string Timestamp;
+
+namespace radix_wallet_kit {};

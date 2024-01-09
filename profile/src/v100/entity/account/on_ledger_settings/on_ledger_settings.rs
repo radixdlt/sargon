@@ -1,5 +1,3 @@
-use std::cell::{Ref, RefCell};
-
 use serde::{Deserialize, Serialize};
 
 use super::ThirdPartyDeposits;
@@ -13,47 +11,26 @@ use super::ThirdPartyDeposits;
 ///
 /// These settings SHOULD be kept in sync between local state
 /// (in Profile) and On-Ledger.
-#[derive(Serialize, Deserialize, Default, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Serialize, Deserialize, Default, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct OnLedgerSettings {
     /// Controls the ability of third-parties to deposit into this account
-    third_party_deposits: RefCell<ThirdPartyDeposits>,
+    pub third_party_deposits: ThirdPartyDeposits,
 }
 
 impl OnLedgerSettings {
     /// Instantiates a new `OnLedgerSettings` with the specified `ThirdPartyDeposits``
     pub fn new(third_party_deposits: ThirdPartyDeposits) -> Self {
         Self {
-            third_party_deposits: RefCell::new(third_party_deposits),
+            third_party_deposits,
         }
-    }
-}
-
-impl OnLedgerSettings {
-    /// Returns the `ThirdPartyDeposits` as a reference.
-    pub fn third_party_deposits(&self) -> Ref<ThirdPartyDeposits> {
-        self.third_party_deposits.borrow()
-    }
-
-    /// Replaces the `ThirdPartyDeposits` with the `new` value.
-    pub fn set_third_party_deposits(&self, new: ThirdPartyDeposits) {
-        *self.third_party_deposits.borrow_mut() = new;
-    }
-
-    /// Updates the `ThirdPartyDeposits` by calling the `update` closure.
-    pub fn update_third_party_deposits<F>(&self, update: F)
-    where
-        F: Fn(&mut ThirdPartyDeposits) -> (),
-    {
-        update(&mut self.third_party_deposits.borrow_mut())
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use std::collections::BTreeSet;
 
-    use wallet_kit_common::{
+    use crate::{
         assert_eq_after_json_roundtrip, assert_json_roundtrip, assert_ne_after_json_roundtrip,
     };
 
@@ -66,30 +43,14 @@ mod tests {
 
     #[test]
     fn get_third_party_deposits_then_mutate() {
-        let settings = OnLedgerSettings::default();
+        let mut settings = OnLedgerSettings::default();
         assert_eq!(
-            settings.third_party_deposits().deposit_rule(),
+            settings.third_party_deposits.deposit_rule,
             DepositRule::AcceptAll
         );
-        settings
-            .third_party_deposits()
-            .set_deposit_rule(DepositRule::DenyAll);
+        settings.third_party_deposits.deposit_rule = DepositRule::DenyAll;
         assert_eq!(
-            settings.third_party_deposits().deposit_rule(),
-            DepositRule::DenyAll
-        );
-    }
-
-    #[test]
-    fn set_third_party_deposits_then_mutate() {
-        let settings = OnLedgerSettings::default();
-        assert_eq!(
-            settings.third_party_deposits().deposit_rule(),
-            DepositRule::AcceptAll
-        );
-        settings.set_third_party_deposits(ThirdPartyDeposits::new(DepositRule::DenyAll));
-        assert_eq!(
-            settings.third_party_deposits().deposit_rule(),
+            settings.third_party_deposits.deposit_rule,
             DepositRule::DenyAll
         );
     }
@@ -140,13 +101,13 @@ mod tests {
         );
         let model = ThirdPartyDeposits::with_rule_and_lists(
             DepositRule::DenyAll,
-            BTreeSet::from_iter([excp1, excp2].into_iter()),
-            BTreeSet::from_iter(
-                [DepositorAddress::ResourceAddress(
-                    "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
+            Vec::from_iter([excp1, excp2].into_iter()),
+            Vec::from_iter(
+                [DepositorAddress::ResourceAddress {
+                    value: "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
                         .try_into()
                         .unwrap(),
-                )]
+                }]
                 .into_iter(),
             ),
         );

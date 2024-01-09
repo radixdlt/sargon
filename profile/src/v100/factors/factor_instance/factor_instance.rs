@@ -1,5 +1,4 @@
-use derive_getters::Getters;
-use hd::HierarchicalDeterministicPublicKey;
+use crate::HierarchicalDeterministicPublicKey;
 use serde::{Deserialize, Serialize};
 
 use super::{
@@ -8,22 +7,21 @@ use super::{
 };
 use crate::v100::factors::factor_source_id::FactorSourceID;
 
-#[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Getters)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct FactorInstance {
     /// The ID of the `FactorSource` that was used to produce this
     /// factor instance. We will lookup the `FactorSource` in the
     /// `Profile` and can present user with instruction to re-access
     /// this factor source in order control the `badge`.
     #[serde(rename = "factorSourceID")]
-    factor_source_id: FactorSourceID,
+    pub factor_source_id: FactorSourceID,
 
     /// Either a "physical" badge (NFT) or some source for recreation of a producer
     /// of a virtual badge (signature), e.g. a HD derivation path, from which a private key
     /// is derived which produces virtual badges (signatures).
-    badge: FactorInstanceBadge,
+    pub badge: FactorInstanceBadge,
 }
 
 impl FactorInstance {
@@ -40,16 +38,15 @@ impl FactorInstance {
     ) -> Self {
         Self::new(
             factor_source_id,
-            FactorInstanceBadge::Virtual(
-                FactorInstanceBadgeVirtualSource::HierarchicalDeterministic(
-                    hierarchical_deterministic_public_key,
-                ),
-            ),
+            FactorInstanceBadge::Virtual {
+                value: FactorInstanceBadgeVirtualSource::HierarchicalDeterministic {
+                    value: hierarchical_deterministic_public_key,
+                },
+            },
         )
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for FactorInstance {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
@@ -70,7 +67,7 @@ impl HasPlaceholder for FactorInstance {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use super::FactorInstance;
 

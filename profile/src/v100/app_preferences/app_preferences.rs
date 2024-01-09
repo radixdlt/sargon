@@ -1,80 +1,41 @@
-use std::cell::RefCell;
-
 use serde::{Deserialize, Serialize};
 
-use super::{AppDisplay, Gateways, P2PLinks, Security, Transaction};
-
-#[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::{AppDisplay, Gateways, HasPlaceholder, P2PLinks, Security, Transaction};
 
 /// Collection of all settings, preferences and configuration related to how the wallet
 /// behaves and looks.
 ///
 /// Current and other saved Gateways, security settings, connected P2P clients,
 /// App Display settings and preferences for transaction.
-#[derive(Clone, Debug, PartialEq, Eq, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, PartialEq, Eq, Clone, Hash, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct AppPreferences {
     /// Display settings in the wallet app, such as appearances, currency etc.
-    display: RefCell<AppDisplay>,
+    pub display: AppDisplay,
 
     /// The gateway of the active network and collection of other saved gateways.
-    gateways: RefCell<Gateways>,
+    pub gateways: Gateways,
 
     /// Collection of clients user have connected P2P with, typically these
     /// are WebRTC connections with DApps, but might be Android or iPhone
     /// clients as well.
-    p2p_links: RefCell<P2PLinks>,
+    pub p2p_links: P2PLinks,
 
     /// Controls e.g. if Profile Snapshot gets synced to iCloud/Google backup or not.
-    security: RefCell<Security>,
+    pub security: Security,
 
     /// Default config related to making of transactions
-    transaction: RefCell<Transaction>,
+    pub transaction: Transaction,
 }
 
-impl AppPreferences {
-    pub fn display(&self) -> AppDisplay {
-        self.display.borrow().clone()
-    }
-
-    pub fn gateways(&self) -> Gateways {
-        self.gateways.borrow().clone()
-    }
-
-    pub fn p2p_links(&self) -> P2PLinks {
-        self.p2p_links.borrow().clone()
-    }
-
-    pub fn security(&self) -> Security {
-        self.security.borrow().clone()
-    }
-
-    pub fn transaction(&self) -> Transaction {
-        self.transaction.borrow().clone()
-    }
+#[uniffi::export]
+pub fn new_app_preferences_placeholder() -> AppPreferences {
+    AppPreferences::placeholder()
 }
 
-impl AppPreferences {
-    pub fn set_display(&self, new: AppDisplay) {
-        *self.display.borrow_mut() = new
-    }
-
-    pub fn set_gateways(&self, new: Gateways) {
-        *self.gateways.borrow_mut() = new
-    }
-
-    pub fn set_p2p_links(&self, new: P2PLinks) {
-        *self.p2p_links.borrow_mut() = new
-    }
-
-    pub fn set_security(&self, new: Security) {
-        *self.security.borrow_mut() = new
-    }
-
-    pub fn set_transaction(&self, new: Transaction) {
-        *self.transaction.borrow_mut() = new
-    }
+#[uniffi::export]
+pub fn new_app_preferences_placeholder_other() -> AppPreferences {
+    AppPreferences::placeholder_other()
 }
 
 impl AppPreferences {
@@ -86,16 +47,15 @@ impl AppPreferences {
         transaction: Transaction,
     ) -> Self {
         Self {
-            display: RefCell::new(display),
-            gateways: RefCell::new(gateways),
-            p2p_links: RefCell::new(p2p_links),
-            security: RefCell::new(security),
-            transaction: RefCell::new(transaction),
+            display,
+            gateways,
+            p2p_links,
+            security,
+            transaction,
         }
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for AppPreferences {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
@@ -122,7 +82,7 @@ impl HasPlaceholder for AppPreferences {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use super::{AppDisplay, AppPreferences, Gateways, P2PLinks, Security, Transaction};
 
@@ -146,76 +106,41 @@ mod tests {
     #[test]
     fn get_display() {
         assert_eq!(
-            AppPreferences::placeholder().display(),
+            AppPreferences::placeholder().display,
             AppDisplay::placeholder()
         )
     }
 
     #[test]
-    fn set_display() {
-        let sut = AppPreferences::placeholder();
-        sut.set_display(AppDisplay::placeholder_other());
-        assert_eq!(sut.display(), AppDisplay::placeholder_other())
-    }
-
-    #[test]
     fn get_gateways() {
         assert_eq!(
-            AppPreferences::placeholder().gateways(),
+            AppPreferences::placeholder().gateways,
             Gateways::placeholder()
         )
     }
 
     #[test]
-    fn set_gateways() {
-        let sut = AppPreferences::placeholder();
-        sut.set_gateways(Gateways::placeholder_other());
-        assert_eq!(sut.gateways(), Gateways::placeholder_other())
-    }
-
-    #[test]
     fn get_p2p_links() {
         assert_eq!(
-            AppPreferences::placeholder().p2p_links(),
+            AppPreferences::placeholder().p2p_links,
             P2PLinks::placeholder()
         )
     }
 
     #[test]
-    fn set_p2p_links() {
-        let sut = AppPreferences::placeholder();
-        sut.set_p2p_links(P2PLinks::placeholder_other());
-        assert_eq!(sut.p2p_links(), P2PLinks::placeholder_other())
-    }
-
-    #[test]
     fn get_security() {
         assert_eq!(
-            AppPreferences::placeholder().security(),
+            AppPreferences::placeholder().security,
             Security::placeholder()
         )
     }
 
     #[test]
-    fn set_security() {
-        let sut = AppPreferences::placeholder();
-        sut.set_security(Security::placeholder_other());
-        assert_eq!(sut.security(), Security::placeholder_other())
-    }
-
-    #[test]
     fn get_transaction() {
         assert_eq!(
-            AppPreferences::placeholder().transaction(),
+            AppPreferences::placeholder().transaction,
             Transaction::placeholder()
         )
-    }
-
-    #[test]
-    fn set_transaction() {
-        let sut = AppPreferences::placeholder();
-        sut.set_transaction(Transaction::placeholder_other());
-        assert_eq!(sut.transaction(), Transaction::placeholder_other())
     }
 
     #[test]
@@ -279,5 +204,26 @@ mod tests {
             }
             "#,
         )
+    }
+}
+
+#[cfg(test)]
+mod uniffi_tests {
+    use crate::{
+        new_app_preferences_placeholder, new_app_preferences_placeholder_other, HasPlaceholder,
+    };
+
+    use super::AppPreferences;
+
+    #[test]
+    fn equality_placeholders() {
+        assert_eq!(
+            AppPreferences::placeholder(),
+            new_app_preferences_placeholder()
+        );
+        assert_eq!(
+            AppPreferences::placeholder_other(),
+            new_app_preferences_placeholder_other()
+        );
     }
 }

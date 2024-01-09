@@ -1,25 +1,26 @@
-use std::cell::RefCell;
-
-use identified_vec::Identifiable;
+use identified_vec::{Identifiable, IsIdentifiedVec};
 use serde::{Deserialize, Serialize};
-use wallet_kit_common::{CommonError, NetworkID};
 
-#[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
+
+use crate::{
+    v100::{Account, AccountAddress},
+    NetworkID,
+};
 
 use super::accounts::Accounts;
 
 /// Accounts, Personas, Authorized dapps for some Radix Network that user
 /// has created and interacted with.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct Network {
     /// The ID of the network that has been used to generate the `accounts` and `personas`
     /// and on which the `authorizedDapps` have been deployed on.
     #[serde(rename = "networkID")]
-    id: NetworkID,
+    pub id: NetworkID,
 
     /// An ordered set of Accounts on this network.
-    accounts: RefCell<Accounts>,
+    pub accounts: Accounts,
 }
 
 impl Identifiable for Network {
@@ -41,37 +42,30 @@ impl Network {
             accounts
                 .get_all()
                 .into_iter()
-                .all(|a| a.network_id() == network_id),
+                .all(|a| a.network_id == network_id),
             "Discrepancy, found accounts on other network than {network_id}"
         );
         Self {
             id: network_id,
-            accounts: RefCell::new(accounts),
+            accounts,
         }
     }
 }
 
 impl Network {
-    /// An ordered set of Accounts on this network.
-    pub fn accounts(&self) -> Accounts {
-        self.accounts.borrow().clone()
-    }
-}
-
-impl Network {
-    /// Tries to change the accounts to `new`, will throw an error if any of the accounts in `new`
-    /// is on a different network than `self.id()`.
-    pub fn set_accounts(&self, new: Accounts) -> Result<(), CommonError> {
-        if new.get_all().iter().any(|a| a.network_id() != self.id()) {
-            return Err(CommonError::AccountOnWrongNetwork);
+    /// Returns a clone of the updated account if found, else None.
+    pub fn update_account<F>(&mut self, address: &AccountAddress, mutate: F) -> Option<Account>
+    where
+        F: FnMut(&mut Account) -> (),
+    {
+        if self.accounts.update_with(address, mutate) {
+            self.accounts.get(address).cloned()
+        } else {
+            None
         }
-        *self.accounts.borrow_mut() = new;
-        Ok(())
     }
 }
 
-// CFG test
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for Network {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
@@ -84,7 +78,6 @@ impl HasPlaceholder for Network {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl Network {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_mainnet() -> Self {
@@ -99,12 +92,13 @@ impl Network {
 
 #[cfg(test)]
 mod tests {
-    use identified_vec::{Identifiable, IsIdentifiedVec};
-    use wallet_kit_common::{
-        assert_eq_after_json_roundtrip, CommonError, HasPlaceholder, NetworkID,
-    };
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use identified_vec::Identifiable;
 
-    use crate::v100::{Account, Accounts};
+    use crate::{
+        v100::{Account, Accounts},
+        NetworkID,
+    };
 
     use super::Network;
 
@@ -121,25 +115,7 @@ mod tests {
     #[test]
     fn get_accounts() {
         let sut = Network::placeholder();
-        assert_eq!(sut.accounts(), Accounts::placeholder());
-    }
-
-    #[test]
-    fn set_accounts_wrong_network() {
-        let sut = Network::placeholder();
-        assert_eq!(
-            sut.set_accounts(Accounts::with_account(Account::placeholder_stokenet())),
-            Err(CommonError::AccountOnWrongNetwork)
-        );
-    }
-
-    #[test]
-    fn set_accounts_same_network() {
-        assert_ne!(Accounts::placeholder(), Accounts::placeholder_other());
-        let sut = Network::new(NetworkID::Mainnet, Accounts::placeholder_mainnet());
-        let new = Accounts::with_account(Account::placeholder_mainnet_bob());
-        assert_eq!(sut.set_accounts(new.clone()), Ok(()));
-        assert_eq!(sut.accounts(), new);
+        assert_eq!(sut.accounts, Accounts::placeholder());
     }
 
     #[test]
@@ -151,7 +127,7 @@ mod tests {
                     [Account::placeholder(), Account::placeholder()].into_iter()
                 )
             )
-            .accounts()
+            .accounts
             .len(),
             1
         )

@@ -1,18 +1,16 @@
-use derive_getters::Getters;
 use serde::{Deserialize, Serialize};
 
 use super::ledger_hardware_wallet_model::LedgerHardwareWalletModel;
 
-#[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Getters)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct LedgerHardwareWalletHint {
     /// "Orange, scratched"
-    name: String,
+    pub name: String,
 
     /// E.g. `nanoS+`
-    model: LedgerHardwareWalletModel,
+    pub model: LedgerHardwareWalletModel,
 }
 
 impl LedgerHardwareWalletHint {
@@ -24,7 +22,6 @@ impl LedgerHardwareWalletHint {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for LedgerHardwareWalletHint {
     fn placeholder() -> Self {
         Self::new("Orange, scratched", LedgerHardwareWalletModel::NanoSPlus)
@@ -37,7 +34,7 @@ impl HasPlaceholder for LedgerHardwareWalletHint {
 
 #[cfg(test)]
 mod tests {
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
     use super::LedgerHardwareWalletHint;
 

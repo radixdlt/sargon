@@ -1,28 +1,38 @@
+use std::fmt::{Debug, Formatter};
+
+use crate::{hash, Hex32Bytes};
 use radix_engine_common::crypto::Hash;
 use serde::{Deserialize, Serialize};
-use wallet_kit_common::{hash, Hex32Bytes};
 
-#[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::HasPlaceholder;
 
 /// The hash of the connection password is used to connect to the Radix Connect Signaling Server,
 /// over web sockets. The actual `ConnectionPassword` is used to encrypt all messages sent via
 /// the Signaling Server.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, uniffi::Record)]
 #[serde(transparent)]
-pub struct RadixConnectPassword(Hex32Bytes);
+pub struct RadixConnectPassword {
+    pub value: Hex32Bytes,
+}
 
-impl RadixConnectPassword {
-    pub fn new(hex_32bytes: Hex32Bytes) -> Self {
-        Self(hex_32bytes)
-    }
-
-    pub fn hash(&self) -> Hash {
-        hash(self.0.bytes())
+impl Debug for RadixConnectPassword {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.value.to_hex(),)
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
+impl RadixConnectPassword {
+    pub fn new(hex_32bytes: Hex32Bytes) -> Self {
+        Self {
+            value: hex_32bytes.into(),
+        }
+    }
+
+    pub fn hash(&self) -> Hash {
+        hash(self.value.bytes())
+    }
+}
+
 impl HasPlaceholder for RadixConnectPassword {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
@@ -34,7 +44,6 @@ impl HasPlaceholder for RadixConnectPassword {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl RadixConnectPassword {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_aced() -> Self {
@@ -69,12 +78,12 @@ impl RadixConnectPassword {
 
 #[cfg(test)]
 mod tests {
-    use radix_engine_common::prelude::HashSet;
-    use serde_json::json;
-    use wallet_kit_common::{
+    use crate::{
         assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
         assert_json_value_ne_after_roundtrip, HasPlaceholder,
     };
+    use radix_engine_common::prelude::HashSet;
+    use serde_json::json;
 
     use super::RadixConnectPassword;
 
@@ -95,6 +104,14 @@ mod tests {
         assert_ne!(
             RadixConnectPassword::placeholder(),
             RadixConnectPassword::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn debug() {
+        assert_eq!(
+            format!("{:?}", RadixConnectPassword::placeholder()),
+            "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"
         );
     }
 

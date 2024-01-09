@@ -16,6 +16,7 @@ use strum::FromRepr;
     Hash,
     PartialOrd,
     Ord,
+    uniffi::Enum,
 )]
 #[repr(u16)] // most likely will will not do more than 65536 iterations.
 pub enum ProfileSnapshotVersion {
@@ -44,8 +45,8 @@ impl Display for ProfileSnapshotVersion {
 
 #[cfg(test)]
 mod tests {
+    use crate::{assert_json_value_eq_after_roundtrip, assert_json_value_fails};
     use serde_json::json;
-    use wallet_kit_common::{assert_json_value_eq_after_roundtrip, assert_json_value_fails};
 
     use super::ProfileSnapshotVersion;
 

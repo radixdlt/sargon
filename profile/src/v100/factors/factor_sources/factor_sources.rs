@@ -1,17 +1,9 @@
-use identified_vec::{
-    Identifiable, IdentifiedVecOf, IsIdentifiableVecOfVia, IsIdentifiedVec, IsIdentifiedVecOf,
-};
-use wallet_kit_common::CommonError;
+use identified_vec::Identifiable;
 
-#[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::{DeviceFactorSource, HasPlaceholder, IdentifiedVecVia};
 
-use crate::{
-    identified_vec_via::IdentifiedVecVia,
-    v100::factors::{
-        factor_source::FactorSource, factor_source_id::FactorSourceID,
-        is_factor_source::IsFactorSource,
-    },
+use crate::v100::factors::{
+    factor_source::FactorSource, factor_source_id::FactorSourceID, is_factor_source::IsFactorSource,
 };
 
 impl Identifiable for FactorSource {
@@ -26,17 +18,21 @@ impl Identifiable for FactorSource {
 /// MUST never be empty.
 pub type FactorSources = IdentifiedVecVia<FactorSource>;
 
-impl FactorSources {
-    pub fn try_from_iter<I>(into_iter: I) -> Result<Self, CommonError>
-    where
-        I: IntoIterator<Item = FactorSource>,
-    {
-        let vec = IdentifiedVecOf::from_iter(into_iter);
-        if vec.len() == 0 {
-            return Err(CommonError::FactorSourcesMustNotBeEmpty);
-        }
+#[uniffi::export]
+pub fn new_factor_sources_placeholder() -> FactorSources {
+    FactorSources::placeholder()
+}
+#[uniffi::export]
+pub fn new_factor_sources_placeholder_other() -> FactorSources {
+    FactorSources::placeholder_other()
+}
 
-        Ok(Self::from_identified_vec_of(vec))
+impl FactorSources {
+    /// Panics if `device_factor_source` is not using Babylon crypto parameters
+    /// AND marked "main".
+    pub fn with_bdfs(device_factor_source: DeviceFactorSource) -> Self {
+        assert!(device_factor_source.is_main_bdfs());
+        Self::from_iter([device_factor_source.into()])
     }
 
     /// Panics if this `FactorSources` is empty.
@@ -49,29 +45,26 @@ impl FactorSources {
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for FactorSources {
     fn placeholder() -> Self {
-        Self::try_from_iter([
+        Self::from_iter([
             FactorSource::placeholder_device(),
             FactorSource::placeholder_ledger(),
         ])
-        .unwrap()
     }
 
     fn placeholder_other() -> Self {
-        Self::try_from_iter([
+        Self::from_iter([
             FactorSource::placeholder_device_olympia(),
             FactorSource::placeholder_device_babylon(),
         ])
-        .unwrap()
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
     use identified_vec::Identifiable;
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, CommonError, HasPlaceholder};
 
     use crate::v100::factors::{factor_source::FactorSource, is_factor_source::IsFactorSource};
 
@@ -94,16 +87,14 @@ mod tests {
     }
 
     #[test]
-    fn err_when_try_from_iter_used_with_empty() {
+    fn duplicates_are_prevented() {
         assert_eq!(
-            FactorSources::try_from_iter([]),
-            Err(CommonError::FactorSourcesMustNotBeEmpty)
-        );
-    }
-
-    #[test]
-    fn try_from_iter_ok_when_non_empty() {
-        assert!(FactorSources::try_from_iter([FactorSource::placeholder_device()]).is_ok());
+            FactorSources::from_iter(
+                [FactorSource::placeholder(), FactorSource::placeholder()].into_iter()
+            )
+            .len(),
+            1
+        )
     }
 
     #[test]
@@ -161,5 +152,26 @@ mod tests {
             ]
             "#,
         )
+    }
+}
+
+#[cfg(test)]
+mod uniffi_tests {
+    use crate::{
+        new_factor_sources_placeholder, new_factor_sources_placeholder_other, HasPlaceholder,
+    };
+
+    use super::FactorSources;
+
+    #[test]
+    fn equality_placeholders() {
+        assert_eq!(
+            FactorSources::placeholder(),
+            new_factor_sources_placeholder()
+        );
+        assert_eq!(
+            FactorSources::placeholder_other(),
+            new_factor_sources_placeholder_other()
+        );
     }
 }

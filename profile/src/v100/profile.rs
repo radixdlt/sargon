@@ -1,40 +1,68 @@
-use std::cell::RefCell;
+use std::fmt::Debug;
 
+use identified_vec::IsIdentifiedVec;
 use serde::{Deserialize, Serialize};
 
-#[cfg(any(test, feature = "placeholder"))]
-use wallet_kit_common::HasPlaceholder;
+use crate::CommonError;
 
-use super::{AppPreferences, FactorSources, Header, Networks};
+use crate::HasPlaceholder;
+use crate::PrivateHierarchicalDeterministicFactorSource;
+
+use super::{
+    Account, AccountAddress, AppPreferences, FactorSourceID, FactorSources, Header, IsFactorSource,
+    Networks,
+};
 
 /// Representation of the Radix Wallet, contains a list of
 /// users Accounts, Personas, Authorized Dapps per network
 /// the user has used. It also contains all FactorSources,
 /// FactorInstances and wallet App preferences.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct Profile {
     /// The header of a Profile(Snapshot) contains crucial metadata
     /// about this Profile, such as which JSON data format it is
     /// compatible with and which device was used to create it and
     /// a hint about its contents.
-    header: RefCell<Header>,
+    pub header: Header,
 
     /// All sources of factors, used for authorization such as spending funds, contains no
     /// secrets.
-    factor_sources: RefCell<FactorSources>,
+    pub factor_sources: FactorSources,
 
     /// Settings for this profile in the app, contains default security configs
     /// as well as display settings.
-    app_preferences: RefCell<AppPreferences>,
+    pub app_preferences: AppPreferences,
 
     /// An ordered mapping of NetworkID -> `Profile.Network`, containing
     /// all the users Accounts, Personas and AuthorizedDapps the user
     /// has created and interacted with on this network.
-    networks: RefCell<Networks>,
+    pub networks: Networks,
+}
+
+#[uniffi::export]
+pub fn new_profile_placeholder() -> Profile {
+    Profile::placeholder()
+}
+
+#[uniffi::export]
+pub fn new_profile_placeholder_other() -> Profile {
+    Profile::placeholder_other()
 }
 
 impl Profile {
+    /// Creates a new Profile from the `PrivateHierarchicalDeterministicFactorSource`, without any
+    /// networks (thus no accounts), with creating device info as "unknown".
+    pub fn new(private_device_factor_source: PrivateHierarchicalDeterministicFactorSource) -> Self {
+        let bdfs = private_device_factor_source.factor_source;
+        Self::with(
+            Header::default(),
+            FactorSources::with_bdfs(bdfs),
+            AppPreferences::default(),
+            Networks::new(),
+        )
+    }
+
     /// Panics if `factor_sources` is empty, since FactorSources MUST not be empty.
     pub fn with(
         header: Header,
@@ -44,56 +72,45 @@ impl Profile {
     ) -> Self {
         factor_sources.assert_not_empty();
         Self {
-            header: RefCell::new(header),
-            factor_sources: RefCell::new(factor_sources),
-            app_preferences: RefCell::new(app_preferences),
-            networks: RefCell::new(networks),
+            header,
+            factor_sources,
+            app_preferences,
+            networks,
         }
     }
 }
 
 impl Profile {
-    pub fn header(&self) -> Header {
-        self.header.borrow().clone()
+    /// Returns a clone of the updated account if found, else None.
+    pub fn update_account<F>(&mut self, address: &AccountAddress, mutate: F) -> Option<Account>
+    where
+        F: FnMut(&mut Account) -> (),
+    {
+        self.networks.update_account(address, mutate)
     }
 
-    pub fn set_header(&self, new: Header) {
-        *self.header.borrow_mut() = new
-    }
-
-    pub fn factor_sources(&self) -> FactorSources {
-        self.factor_sources.borrow().clone()
-    }
-
-    /// Panics if `new` is empty, since FactorSources MUST not be empty.
-    pub fn set_factor_sources(&self, new: FactorSources) {
-        new.assert_not_empty();
-        *self.factor_sources.borrow_mut() = new
-    }
-
-    pub fn app_preferences(&self) -> AppPreferences {
-        self.app_preferences.borrow().clone()
-    }
-
-    pub fn set_app_preferences(&self, new: AppPreferences) {
-        *self.app_preferences.borrow_mut() = new
-    }
-
-    pub fn networks(&self) -> Networks {
-        self.networks.borrow().clone()
-    }
-
-    pub fn set_networks(&self, new: Networks) {
-        *self.networks.borrow_mut() = new
+    pub fn update_factor_source<S, M>(
+        &mut self,
+        factor_source_id: &FactorSourceID,
+        mut mutate: M,
+    ) -> Result<bool, CommonError>
+    where
+        S: IsFactorSource,
+        M: FnMut(S) -> Result<S, CommonError>,
+    {
+        self.factor_sources.try_update_with(factor_source_id, |f| {
+            S::try_from(f.clone())
+                .map_err(|_| CommonError::CastFactorSourceWrongKind)
+                .and_then(|element| mutate(element).map(|modified| modified.into()))
+        })
     }
 }
 
-#[cfg(any(test, feature = "placeholder"))]
 impl HasPlaceholder for Profile {
     fn placeholder() -> Self {
         let networks = Networks::placeholder();
-        let header = Header::placeholder();
-        header.set_content_hint(networks.content_hint());
+        let mut header = Header::placeholder();
+        header.content_hint = networks.content_hint();
         Self::with(
             header,
             FactorSources::placeholder(),
@@ -104,8 +121,8 @@ impl HasPlaceholder for Profile {
 
     fn placeholder_other() -> Self {
         let networks = Networks::placeholder_other();
-        let header = Header::placeholder_other();
-        header.set_content_hint(networks.content_hint());
+        let mut header = Header::placeholder_other();
+        header.content_hint = networks.content_hint();
         Self::with(
             header,
             FactorSources::placeholder_other(),
@@ -117,10 +134,16 @@ impl HasPlaceholder for Profile {
 
 #[cfg(test)]
 mod tests {
-    use identified_vec::IsIdentifiedVecOf;
-    use wallet_kit_common::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use std::collections::HashSet;
 
-    use super::{AppPreferences, FactorSources, Header, Networks, Profile};
+    use identified_vec::{IsIdentifiedVec, ItemsCloned};
+
+    use crate::{
+        assert_eq_after_json_roundtrip, AppPreferences, CommonError, DeviceFactorSource,
+        DisplayName, FactorSourceCryptoParameters, FactorSourceID, FactorSources, HasPlaceholder,
+        Header, LedgerHardwareWalletFactorSource, NetworkID, Networks,
+        PrivateHierarchicalDeterministicFactorSource, Profile, SLIP10Curve, WalletClientModel,
+    };
 
     #[test]
     fn inequality() {
@@ -131,6 +154,150 @@ mod tests {
     fn equality() {
         assert_eq!(Profile::placeholder(), Profile::placeholder());
         assert_eq!(Profile::placeholder_other(), Profile::placeholder_other());
+    }
+
+    #[test]
+    fn update_factor_source_not_update_when_factor_source_not_found() {
+        let mut sut = Profile::placeholder();
+        let wrong_id: &FactorSourceID = &LedgerHardwareWalletFactorSource::placeholder_other()
+            .id
+            .into();
+
+        assert_eq!(
+            sut.update_factor_source(wrong_id, |lfs: LedgerHardwareWalletFactorSource| {
+                Ok(lfs)
+            }),
+            Ok(false)
+        );
+    }
+
+    #[test]
+    fn change_supported_curve_of_factor_source() {
+        let mut sut = Profile::placeholder();
+        let id: &FactorSourceID = &DeviceFactorSource::placeholder().id.into();
+        assert!(sut
+            .factor_sources
+            .contains_id(&DeviceFactorSource::placeholder().id.into()));
+
+        assert_eq!(
+            sut.factor_sources
+                .get(id)
+                .unwrap()
+                .as_device()
+                .unwrap()
+                .common
+                .crypto_parameters
+                .supported_curves
+                .items(),
+            [SLIP10Curve::Curve25519]
+        );
+
+        assert_eq!(
+            sut.update_factor_source(id, |mut dfs: DeviceFactorSource| {
+                dfs.common.crypto_parameters =
+                    FactorSourceCryptoParameters::babylon_olympia_compatible();
+                Ok(dfs)
+            }),
+            Ok(true)
+        );
+
+        // test failure
+        assert_eq!(
+            sut.update_factor_source(id, |_: DeviceFactorSource| {
+                Err(CommonError::UpdateFactorSourceMutateFailed)
+            }),
+            Err(CommonError::UpdateFactorSourceMutateFailed)
+        );
+
+        assert_eq!(
+            sut.factor_sources
+                .get(id)
+                .unwrap()
+                .as_device()
+                .unwrap()
+                .common
+                .crypto_parameters
+                .supported_curves
+                .items(),
+            [SLIP10Curve::Curve25519, SLIP10Curve::Secp256k1]
+        );
+    }
+
+    #[test]
+    fn add_supported_curve_to_factor_source_failure_cast_wrong_factor_source_kind() {
+        let mut sut = Profile::placeholder();
+        let id: &FactorSourceID = &DeviceFactorSource::placeholder().id.into();
+
+        assert!(sut
+            .factor_sources
+            .contains_id(&DeviceFactorSource::placeholder().id.into()));
+
+        assert_eq!(
+            sut.factor_sources
+                .get(id)
+                .unwrap()
+                .as_device()
+                .unwrap()
+                .common
+                .crypto_parameters
+                .supported_curves
+                .items(),
+            [SLIP10Curve::Curve25519]
+        );
+
+        assert_eq!(
+            sut.update_factor_source(id, |mut lfs: LedgerHardwareWalletFactorSource| {
+                lfs.common.crypto_parameters =
+                    FactorSourceCryptoParameters::babylon_olympia_compatible();
+                Ok(lfs)
+            }),
+            Err(CommonError::CastFactorSourceWrongKind)
+        );
+
+        // Remains unchanged
+        assert_eq!(
+            sut.factor_sources
+                .get(id)
+                .unwrap()
+                .as_device()
+                .unwrap()
+                .common
+                .crypto_parameters
+                .supported_curves
+                .items(),
+            [SLIP10Curve::Curve25519]
+        );
+    }
+
+    #[test]
+    fn update_name_of_accounts() {
+        let mut sut = Profile::placeholder();
+        let account = sut
+            .networks
+            .get(&NetworkID::Mainnet)
+            .unwrap()
+            .accounts
+            .get_at_index(0)
+            .unwrap()
+            .clone();
+
+        assert_eq!(account.display_name.value, "Alice");
+        assert!(sut
+            .update_account(&account.address, |a| a.display_name =
+                DisplayName::new("Satoshi").unwrap())
+            .is_some());
+
+        assert_eq!(
+            sut.networks
+                .get(&NetworkID::Mainnet)
+                .unwrap()
+                .accounts
+                .get_at_index(0)
+                .unwrap()
+                .display_name
+                .value,
+            "Satoshi"
+        );
     }
 
     #[should_panic(expected = "FactorSources empty, which must never happen.")]
@@ -144,46 +311,18 @@ mod tests {
         );
     }
 
-    #[should_panic(expected = "FactorSources empty, which must never happen.")]
     #[test]
-    fn panic_when_factor_sources_empty_when_update_factor_sources() {
-        let sut = Profile::placeholder();
-        sut.set_factor_sources(FactorSources::new());
-    }
-
-    #[test]
-    fn set_header() {
-        let profile = Profile::placeholder();
-        assert_eq!(profile.header(), Header::placeholder());
-        profile.set_header(Header::placeholder_other());
-        assert_eq!(profile.header(), Header::placeholder_other());
-    }
-
-    #[test]
-    fn set_factor_sources() {
-        let profile = Profile::placeholder();
-        assert_eq!(profile.factor_sources(), FactorSources::placeholder());
-        profile.set_factor_sources(FactorSources::placeholder_other());
-        assert_eq!(profile.factor_sources(), FactorSources::placeholder_other());
-    }
-
-    #[test]
-    fn set_app_preferences() {
-        let profile = Profile::placeholder();
-        assert_eq!(profile.app_preferences(), AppPreferences::placeholder());
-        profile.set_app_preferences(AppPreferences::placeholder_other());
-        assert_eq!(
-            profile.app_preferences(),
-            AppPreferences::placeholder_other()
-        );
-    }
-
-    #[test]
-    fn set_networks() {
-        let profile = Profile::placeholder();
-        assert_eq!(profile.networks(), Networks::placeholder());
-        profile.set_networks(Networks::placeholder_other());
-        assert_eq!(profile.networks(), Networks::placeholder_other());
+    fn hash() {
+        let n = 100;
+        let set = (0..n)
+            .into_iter()
+            .map(|_| {
+                Profile::new(PrivateHierarchicalDeterministicFactorSource::generate_new(
+                    WalletClientModel::Unknown,
+                ))
+            })
+            .collect::<HashSet<_>>();
+        assert_eq!(set.len(), n);
     }
 
     #[test]
@@ -507,6 +646,22 @@ mod tests {
 				]
 			}
             "#,
+        );
+    }
+}
+
+#[cfg(test)]
+mod uniffi_tests {
+    use crate::{new_profile_placeholder, new_profile_placeholder_other, HasPlaceholder};
+
+    use super::Profile;
+
+    #[test]
+    fn equality_placeholders() {
+        assert_eq!(Profile::placeholder(), new_profile_placeholder());
+        assert_eq!(
+            Profile::placeholder_other(),
+            new_profile_placeholder_other()
         );
     }
 }
