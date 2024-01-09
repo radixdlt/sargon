@@ -1,0 +1,67 @@
+use identified_vec::{IsIdentifiedVec, ItemsCloned};
+use itertools::Itertools;
+
+use crate::{
+    AccountPath, CAP26KeyKind, CAP26Repr, DerivationPath, DeviceFactorSource, EntityKind,
+    EntitySecurityState, HDPathValue, NetworkID, Profile,
+};
+
+impl Profile {
+    pub fn bdfs(&self) -> DeviceFactorSource {
+        let device_factor_source = self
+            .factor_sources
+            .clone()
+            .into_iter()
+            .map(|f| f.as_device().cloned())
+            .filter_map(std::convert::identity)
+            .collect_vec();
+
+        let explicit_main =
+            device_factor_source
+                .clone()
+                .into_iter()
+                .filter(|x| x.is_main_bdfs())
+                .collect_vec()
+                .first()
+                .cloned();
+
+        let implicit_main = device_factor_source
+            .into_iter()
+            .filter(|x| x.common.supports_babylon())
+            .collect_vec()
+            .first()
+            .expect("A Profile should always contain Babylon DeviceFactorSource")
+            .clone();
+
+        return explicit_main.unwrap_or(implicit_main).clone();
+    }
+
+    pub fn next_derivation_index_for_entity(
+        &self,
+        kind: EntityKind,
+        network_id: NetworkID,
+    ) -> HDPathValue {
+        match kind {
+            EntityKind::Persona => panic!("Personas are not supported yet"),
+            EntityKind::Accounts => {}
+        };
+        let index = self
+            .networks
+            .get(&network_id)
+            .map(|n| {
+                n.accounts
+                    .items()
+                    .into_iter()
+                    .filter(|a| match &a.security_state {
+                        EntitySecurityState::Unsecured { value } => {
+                            value.transaction_signing.factor_source_id == self.bdfs().id
+                        }
+                    })
+                    .collect_vec()
+                    .len()
+            })
+            .unwrap_or(0);
+
+        return index as HDPathValue;
+    }
+}

@@ -15,6 +15,12 @@ pub struct Mnemonic {
     pub language: BIP39Language,
 }
 
+/// Returns the words of a mnemonic as a String joined by spaces, e.g. "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"
+#[uniffi::export]
+pub fn mnemonic_phrase(from: &Mnemonic) -> String {
+    from.phrase()
+}
+
 impl Mnemonic {
     fn from_internal(internal: bip39::Mnemonic) -> Self {
         let language = internal.language();

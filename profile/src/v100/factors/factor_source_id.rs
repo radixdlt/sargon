@@ -28,15 +28,15 @@ pub enum FactorSourceID {
     },
 }
 
-impl From<FactorSourceIDFromHash> for FactorSourceID {
-    fn from(value: FactorSourceIDFromHash) -> Self {
-        Self::Hash { value }
+impl Into<FactorSourceID> for FactorSourceIDFromHash {
+    fn into(self) -> FactorSourceID {
+        FactorSourceID::Hash { value: self }
     }
 }
 
-impl From<FactorSourceIDFromAddress> for FactorSourceID {
-    fn from(value: FactorSourceIDFromAddress) -> Self {
-        Self::Address { value }
+impl Into<FactorSourceID> for FactorSourceIDFromAddress {
+    fn into(self) -> FactorSourceID {
+        FactorSourceID::Address { value: self }
     }
 }
 

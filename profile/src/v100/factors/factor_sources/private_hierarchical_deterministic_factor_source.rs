@@ -1,5 +1,6 @@
 use crate::{
-    AccountPath, CAP26KeyKind, CAP26Repr, HDPathValue, MnemonicWithPassphrase, WalletClientModel,
+    AccountPath, CAP26KeyKind, CAP26Repr, CommonError, HDPathValue, Hex32Bytes, Mnemonic,
+    MnemonicWithPassphrase, WalletClientModel,
 };
 
 use crate::{
@@ -16,6 +17,18 @@ use super::DeviceFactorSource;
 pub struct PrivateHierarchicalDeterministicFactorSource {
     pub mnemonic_with_passphrase: MnemonicWithPassphrase,
     pub factor_source: DeviceFactorSource,
+}
+
+#[uniffi::export]
+pub fn new_private_hd_factor_source(
+    entropy: Vec<u8>,
+    wallet_client_model: WalletClientModel,
+) -> Result<PrivateHierarchicalDeterministicFactorSource, CommonError> {
+    Hex32Bytes::from_vec(entropy)
+        .map(|e| {
+            PrivateHierarchicalDeterministicFactorSource::new_with_entropy(e, wallet_client_model)
+        })
+        .map_err(|e| CommonError::Bytes(e))
 }
 
 impl PrivateHierarchicalDeterministicFactorSource {
@@ -37,14 +50,23 @@ impl PrivateHierarchicalDeterministicFactorSource {
         }
     }
 
-    pub fn generate_new(wallet_client_model: WalletClientModel) -> Self {
-        let mnemonic_with_passphrase = MnemonicWithPassphrase::generate_new();
+    fn new_with_mnemonic(mnemonic: Mnemonic, wallet_client_model: WalletClientModel) -> Self {
+        let mnemonic_with_passphrase = MnemonicWithPassphrase::new(mnemonic);
         let bdfs = DeviceFactorSource::babylon(
             true,
             mnemonic_with_passphrase.clone(),
             wallet_client_model,
         );
         Self::new(mnemonic_with_passphrase, bdfs)
+    }
+
+    pub fn new_with_entropy(entropy: Hex32Bytes, wallet_client_model: WalletClientModel) -> Self {
+        let mnemonic = Mnemonic::from_hex32(entropy);
+        Self::new_with_mnemonic(mnemonic, wallet_client_model)
+    }
+
+    pub fn generate_new(wallet_client_model: WalletClientModel) -> Self {
+        Self::new_with_entropy(Hex32Bytes::generate(), wallet_client_model)
     }
 }
 

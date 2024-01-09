@@ -1,5 +1,6 @@
 mod hierarchical_deterministic;
 mod identified_vec_via;
+mod logic;
 mod profilesnapshot_version;
 mod v100;
 mod wallet;
@@ -11,6 +12,7 @@ pub mod prelude {
 
     pub use crate::hierarchical_deterministic::*;
     pub use crate::identified_vec_via::*;
+    pub use crate::logic::*;
     pub use crate::profilesnapshot_version::*;
     pub use crate::v100::*;
     pub use crate::wallet::*;

@@ -1,3 +1,4 @@
+use enum_as_inner::EnumAsInner;
 use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
 
 use super::unsecured_entity_control::UnsecuredEntityControl;
@@ -7,7 +8,7 @@ use crate::HasPlaceholder;
 /// Describes the state an entity - Account or Persona - is in in regards to how
 /// the user controls it, i.e. if it is controlled by a single factor (private key)
 ///  or an `AccessController` with a potential Multi-Factor setup.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, EnumAsInner, uniffi::Enum)]
 #[serde(untagged, remote = "Self")]
 pub enum EntitySecurityState {
     /// The account is controlled by a single factor (private key)

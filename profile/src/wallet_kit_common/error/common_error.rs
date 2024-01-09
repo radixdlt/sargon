@@ -131,4 +131,10 @@ pub enum CommonError {
 
     #[error("Unknown account.")]
     UnknownAccount,
+
+    #[error("Failed to read from secure storage (Keychain).")]
+    SecureStorageReadError,
+
+    #[error("Failed to write to secure storage (Keychain).")]
+    SecureStorageWriteError,
 }

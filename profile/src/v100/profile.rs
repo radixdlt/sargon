@@ -3,14 +3,10 @@ use std::fmt::Debug;
 use identified_vec::IsIdentifiedVec;
 use serde::{Deserialize, Serialize};
 
-use crate::CommonError;
-
-use crate::HasPlaceholder;
-use crate::PrivateHierarchicalDeterministicFactorSource;
-
-use super::{
-    Account, AccountAddress, AppPreferences, FactorSourceID, FactorSources, Header, IsFactorSource,
-    Networks,
+use crate::{
+    Account, AccountAddress, AppPreferences, CommonError, DeviceInfo, FactorSourceID,
+    FactorSources, HasPlaceholder, Header, IsFactorSource, Networks,
+    PrivateHierarchicalDeterministicFactorSource,
 };
 
 /// Representation of the Radix Wallet, contains a list of
@@ -41,6 +37,14 @@ pub struct Profile {
 }
 
 #[uniffi::export]
+pub fn new_profile(
+    private_hd_factor_source: PrivateHierarchicalDeterministicFactorSource,
+    creating_device_name: String,
+) -> Profile {
+    Profile::new(private_hd_factor_source, creating_device_name.as_str())
+}
+
+#[uniffi::export]
 pub fn new_profile_placeholder() -> Profile {
     Profile::placeholder()
 }
@@ -53,10 +57,17 @@ pub fn new_profile_placeholder_other() -> Profile {
 impl Profile {
     /// Creates a new Profile from the `PrivateHierarchicalDeterministicFactorSource`, without any
     /// networks (thus no accounts), with creating device info as "unknown".
-    pub fn new(private_device_factor_source: PrivateHierarchicalDeterministicFactorSource) -> Self {
+    pub fn new(
+        private_device_factor_source: PrivateHierarchicalDeterministicFactorSource,
+        creating_device_name: &str,
+    ) -> Self {
         let bdfs = private_device_factor_source.factor_source;
+        let creating_device = DeviceInfo::with_description(
+            format!("{} - {}", creating_device_name, bdfs.hint.model).as_str(),
+        );
+        let header = Header::new(creating_device);
         Self::with(
-            Header::default(),
+            header,
             FactorSources::with_bdfs(bdfs),
             AppPreferences::default(),
             Networks::new(),
@@ -317,9 +328,12 @@ mod tests {
         let set = (0..n)
             .into_iter()
             .map(|_| {
-                Profile::new(PrivateHierarchicalDeterministicFactorSource::generate_new(
-                    WalletClientModel::Unknown,
-                ))
+                Profile::new(
+                    PrivateHierarchicalDeterministicFactorSource::generate_new(
+                        WalletClientModel::Unknown,
+                    ),
+                    "Foo",
+                )
             })
             .collect::<HashSet<_>>();
         assert_eq!(set.len(), n);
