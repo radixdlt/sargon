@@ -166,6 +166,7 @@ unsafe impl<UT, T: Identifiable + Debug + Clone + Lift<UT>> Lift<UT> for Identif
 
 #[cfg(test)]
 mod tests {
+    use identified_vec::{IsIdentifiableVecOfVia, IsIdentifiedVec};
     use itertools::Itertools;
 
     use super::IdentifiedVecVia;
@@ -201,5 +202,27 @@ mod tests {
     fn display() {
         let sut = SUT::from_iter([1337, 42, 237]);
         assert_eq!(format!("{}", sut), "[1337, 42, 237]");
+    }
+
+    #[test]
+    fn via() {
+        let sut = SUT::from_iter([1337, 42, 237]);
+        assert_eq!(sut.via().clone().into_iter().collect_vec(), [1337, 42, 237]);
+    }
+
+    #[test]
+    fn via_mut_read() {
+        let mut sut = SUT::from_iter([1337, 42, 237]);
+        assert_eq!(
+            sut.via_mut().clone().into_iter().collect_vec(),
+            [1337, 42, 237]
+        );
+    }
+
+    #[test]
+    fn via_mut_write() {
+        let mut sut = SUT::from_iter([1337, 42]);
+        sut.via_mut().append(237);
+        assert_eq!(sut.into_iter().collect_vec(), [1337, 42, 237]);
     }
 }
