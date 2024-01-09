@@ -56,10 +56,12 @@ impl<Element: Identifiable + Debug + Clone> ViaMarker for IdentifiedVecVia<Eleme
 impl<Element: Identifiable + Debug + Clone> IsIdentifiableVecOfVia<Element>
     for IdentifiedVecVia<Element>
 {
+    #[cfg(not(tarpaulin_include))] // false negative
     fn via_mut(&mut self) -> &mut IdentifiedVecOf<Element> {
         &mut self.id_vec
     }
 
+    #[cfg(not(tarpaulin_include))] // false negative
     fn via(&self) -> &IdentifiedVecOf<Element> {
         &self.id_vec
     }
