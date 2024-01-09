@@ -76,6 +76,14 @@ impl FactorSourceIDFromHash {
             MnemonicWithPassphrase::placeholder(),
         )
     }
+
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_ledger_other() -> Self {
+        Self::from_mnemonic_with_passphrase(
+            FactorSourceKind::LedgerHQHardwareWallet,
+            MnemonicWithPassphrase::placeholder_other(),
+        )
+    }
 }
 
 #[cfg(test)]

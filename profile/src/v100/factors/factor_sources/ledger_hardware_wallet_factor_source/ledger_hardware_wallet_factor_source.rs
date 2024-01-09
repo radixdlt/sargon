@@ -54,7 +54,7 @@ impl HasPlaceholder for LedgerHardwareWalletFactorSource {
 
     fn placeholder_other() -> Self {
         Self::new(
-            FactorSourceIDFromHash::placeholder_ledger(),
+            FactorSourceIDFromHash::placeholder_ledger_other(),
             FactorSourceCommon::placeholder_other(),
             LedgerHardwareWalletHint::placeholder_other(),
         )

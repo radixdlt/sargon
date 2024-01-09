@@ -108,7 +108,8 @@ impl HasPlaceholder for Mnemonic {
 mod tests {
     use crate::{
         assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
-        assert_json_value_ne_after_roundtrip, BIP39Language, HasPlaceholder,
+        assert_json_value_ne_after_roundtrip, BIP39Language, CommonError, HDPathError,
+        HasPlaceholder,
     };
 
     use serde_json::json;
@@ -185,6 +186,14 @@ mod tests {
         let phrase = "bright club bacon dinner achieve pull grid save ramp cereal blush woman humble limb repeat video sudden possible story mask neutral prize goose mandate";
         let mnemonic = Mnemonic::from_phrase(phrase).unwrap();
         assert_eq!(mnemonic.phrase(), phrase);
+    }
+
+    #[test]
+    fn from_phrase_invalid() {
+        assert_eq!(
+            Mnemonic::from_phrase("zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo abandon"),
+            Err(HDPathError::InvalidMnemonicPhrase)
+        );
     }
 
     #[test]

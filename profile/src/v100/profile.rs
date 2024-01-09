@@ -101,11 +101,7 @@ impl Profile {
         self.factor_sources.try_update_with(factor_source_id, |f| {
             S::try_from(f.clone())
                 .map_err(|_| CommonError::CastFactorSourceWrongKind)
-                .and_then(|element| {
-                    mutate(element)
-                        .map(|modified| modified.into())
-                        .map_err(|_| CommonError::UpdateFactorSourceMutateFailed)
-                })
+                .and_then(|element| mutate(element).map(|modified| modified.into()))
         })
     }
 }
@@ -161,10 +157,24 @@ mod tests {
     }
 
     #[test]
+    fn update_factor_source_not_update_when_factor_source_not_found() {
+        let mut sut = Profile::placeholder();
+        let wrong_id: &FactorSourceID = &LedgerHardwareWalletFactorSource::placeholder_other()
+            .id
+            .into();
+
+        assert_eq!(
+            sut.update_factor_source(wrong_id, |lfs: LedgerHardwareWalletFactorSource| {
+                Ok(lfs)
+            }),
+            Ok(false)
+        );
+    }
+
+    #[test]
     fn change_supported_curve_of_factor_source() {
         let mut sut = Profile::placeholder();
         let id: &FactorSourceID = &DeviceFactorSource::placeholder().id.into();
-
         assert!(sut
             .factor_sources
             .contains_id(&DeviceFactorSource::placeholder().id.into()));
@@ -189,6 +199,14 @@ mod tests {
                 Ok(dfs)
             }),
             Ok(true)
+        );
+
+        // test failure
+        assert_eq!(
+            sut.update_factor_source(id, |_: DeviceFactorSource| {
+                Err(CommonError::UpdateFactorSourceMutateFailed)
+            }),
+            Err(CommonError::UpdateFactorSourceMutateFailed)
         );
 
         assert_eq!(
