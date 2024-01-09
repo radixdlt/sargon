@@ -4,9 +4,6 @@ version = "0.1.0"
 edition = "2021"
 build = "build.rs"
 
-[features]
-placeholder = []
-
 [dependencies]
 serde = { workspace = true, features = ["rc"] }
 serde_json = { workspace = true }
@@ -46,6 +43,13 @@ uniffi = { workspace = true, features = ["build"] }
 
 [dev-dependencies]
 uniffi = { workspace = true, features = ["bindgen-tests"] }
+
+[[test]]
+name = "vectors"
+
+[[test]]
+name = "uniffi"
+test = false
 
 [lib]
 crate-type = ["staticlib", "cdylib", "lib"]

@@ -134,3 +134,15 @@ And then run:
 ```sh
 cargo tarpaulin --out Html
 ```
+
+### nextest
+[Nextest](https://nexte.st/index.html) is a nice test runner for Rust!
+
+```sh
+cargo install cargo-nextest
+```
+
+## Test
+```sh
+cargo nextest run --package profile --test uniffi && cargo nextest run
+```

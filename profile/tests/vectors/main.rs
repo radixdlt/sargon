@@ -35,7 +35,7 @@ fn vector<'a, T>(name: impl AsRef<OsStr>) -> Result<T, TestingError>
 where
     T: for<'de> serde::Deserialize<'de>,
 {
-    let base = append_to_path(crate_dir(), "/tests/vectors/");
+    let base = append_to_path(crate_dir(), "/tests/vectors/fixtures/");
     let base_file_path = append_to_path(base, name);
     let path = append_to_path(base_file_path, ".json");
     fs::read_to_string(path.clone())

@@ -3,7 +3,7 @@ exclude-files = [
     "profile/bindings/*",
     "profile/tests/test_generated_bindings.rs",
 ]
-verbose = true
+verbose = false
 all-features = true
 workspace = true
 timeout = "1800s"
