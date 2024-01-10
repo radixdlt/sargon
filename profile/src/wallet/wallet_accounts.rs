@@ -1,8 +1,28 @@
+use identified_vec::IsIdentifiedVec;
+
 use crate::{
-    Account, AccountAddress, AppearanceID, CommonError, DisplayName, EntityKind, Mnemonic,
-    MnemonicWithPassphrase, NetworkID, PrivateHierarchicalDeterministicFactorSource,
-    SecureStorageKey, Wallet,
+    Account, AccountAddress, AppearanceID, CommonError, DeviceFactorSource, DisplayName,
+    EntityKind, FactorSourceIDFromHash, Mnemonic, MnemonicWithPassphrase, NetworkID,
+    PrivateHierarchicalDeterministicFactorSource, SecureStorageKey, Wallet,
 };
+
+impl Wallet {
+    pub fn load_private_device_factor_source(
+        &self,
+        device_factor_source: DeviceFactorSource,
+    ) -> Result<PrivateHierarchicalDeterministicFactorSource, CommonError> {
+        self.wallet_client_storage
+            .load_mnemonic_with_passphrase(&device_factor_source.id)
+            .map(|mwp| PrivateHierarchicalDeterministicFactorSource::new(mwp, device_factor_source))
+    }
+    pub fn load_private_device_factor_source_by_id(
+        &self,
+        id: &FactorSourceIDFromHash,
+    ) -> Result<PrivateHierarchicalDeterministicFactorSource, CommonError> {
+        let device_factor_source = self.profile().device_factor_source_by_id(id)?;
+        self.load_private_device_factor_source(device_factor_source)
+    }
+}
 
 //========
 // SET - Account
@@ -19,18 +39,9 @@ impl Wallet {
         let profile = &self.profile();
         let bdfs = profile.bdfs();
         let index = profile.next_derivation_index_for_entity(EntityKind::Accounts, network_id);
-        self.read_secure_storage
-            .get(SecureStorageKey::DeviceFactorSourceMnemonic {
-                factor_source_id: bdfs.clone().id,
-            })
-            .and_then(|o| o.ok_or(CommonError::SecureStorageReadError))
-            .and_then(|p| Mnemonic::from_phrase(p.as_str()).map_err(|e| CommonError::HDPath(e)))
-            .map(|m| {
-                PrivateHierarchicalDeterministicFactorSource::new(
-                    MnemonicWithPassphrase::new(m.clone()),
-                    bdfs.clone(),
-                )
-            })
+        let number_of_accounts_on_network = profile.networks.get(&network_id).map(|n| n.accounts.len()).unwrap_or(0);
+        let appearance_id = AppearanceID::from_number_of_accounts_on_network(number_of_accounts_on_network);
+        self.load_private_device_factor_source(bdfs)
             .map(|p| p.derive_account_creation_factor_instance(network_id, index))
             .map(|fi| Account::new(fi, name, AppearanceID::new(0).unwrap()))
     }
@@ -49,14 +60,14 @@ impl Wallet {
 #[cfg(test)]
 mod tests {
     use crate::{
-        AccountAddress, CommonError, DisplayName, HasPlaceholder, NotYetSetSecureStorage, Profile,
+        AccountAddress, CommonError, DisplayName, HasPlaceholder, MockSecureStorage, Profile,
         Wallet,
     };
 
     #[test]
     fn change_display_name_of_accounts() {
         let profile = Profile::placeholder();
-        let wallet = Wallet::new(profile.clone(), NotYetSetSecureStorage::new());
+        let wallet = Wallet::new(profile.clone(), MockSecureStorage::new());
         let account = wallet.read(|p| p.networks[0].accounts[0].clone());
         assert_eq!(account.display_name.value, "Alice");
         assert!(wallet

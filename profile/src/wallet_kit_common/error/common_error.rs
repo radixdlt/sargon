@@ -135,6 +135,9 @@ pub enum CommonError {
     #[error("Failed to read from secure storage (Keychain).")]
     SecureStorageReadError,
 
+    #[error("Failed to load DeviceFactorSource from secure storage")]
+    UnableToLoadDeviceFactorSourceFromSecureStorage,
+
     #[error("Failed to write to secure storage (Keychain).")]
     SecureStorageWriteError,
 
@@ -149,4 +152,7 @@ pub enum CommonError {
 
     #[error("Failed to load Profile Headers list")]
     FailedToLoadProfileHeadersList,
+
+    #[error("FactorSource with ID not found in Profile")]
+    ProfileDoesNotContainFactorSourceWithID,
 }

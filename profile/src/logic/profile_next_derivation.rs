@@ -2,11 +2,31 @@ use identified_vec::{IsIdentifiedVec, ItemsCloned};
 use itertools::Itertools;
 
 use crate::{
-    AccountPath, CAP26KeyKind, CAP26Repr, DerivationPath, DeviceFactorSource, EntityKind,
-    EntitySecurityState, HDPathValue, NetworkID, Profile,
+    AccountPath, CAP26KeyKind, CAP26Repr, CommonError, DerivationPath, DeviceFactorSource,
+    EntityKind, EntitySecurityState, FactorSource, FactorSourceID, HDPathValue, IsFactorSource,
+    NetworkID, Profile, FactorSourceIDFromHash,
 };
 
 impl Profile {
+    
+    pub fn factor_source_by_id<F>(&self, id: &FactorSourceID) -> Result<F, CommonError>
+    where
+    F: IsFactorSource,
+    {
+        self.factor_sources
+        .get(id)
+        .ok_or(CommonError::ProfileDoesNotContainFactorSourceWithID)
+        .and_then(|f| {
+            f.clone()
+            .try_into()
+            .map_err(|_| CommonError::CastFactorSourceWrongKind)
+        })
+    }
+    
+    pub fn device_factor_source_by_id(&self, id: &FactorSourceIDFromHash) -> Result<DeviceFactorSource, CommonError> {
+        self.factor_source_by_id(&id.clone().into())
+    }
+
     pub fn bdfs(&self) -> DeviceFactorSource {
         let device_factor_source = self
             .factor_sources

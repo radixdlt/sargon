@@ -7,6 +7,7 @@ pub struct AppearanceID {
     pub value: u8,
 }
 
+
 impl Serialize for AppearanceID {
     fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
     where
@@ -30,6 +31,10 @@ impl AppearanceID {
             return Err(CommonError::InvalidAppearanceID);
         }
         Ok(Self { value })
+    }
+
+    pub fn from_number_of_accounts_on_network(n: usize) -> Self {
+        Self::new(n)
     }
 }
 

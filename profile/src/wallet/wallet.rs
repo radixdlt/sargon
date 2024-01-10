@@ -1,9 +1,11 @@
 use std::sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard};
 
 use identified_vec::{Identifiable, IsIdentifiedVec};
-use uuid::Uuid;
 
-use crate::{CommonError, FactorSourceIDFromHash, Header, IdentifiedVecVia, Profile, ProfileID};
+use crate::{
+    CommonError, FactorSourceIDFromHash, Header, IdentifiedVecVia, Profile, ProfileID,
+    SecureStorage, SecureStorageKey, WalletClientStorage,
+};
 
 pub type HeadersList = IdentifiedVecVia<Header>;
 impl Identifiable for Header {
@@ -11,144 +13,6 @@ impl Identifiable for Header {
 
     fn id(&self) -> Self::ID {
         self.id.clone()
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Enum)]
-pub enum SecureStorageKey {
-    SnapshotHeadersList,
-    DeviceFactorSourceMnemonic {
-        factor_source_id: FactorSourceIDFromHash,
-    },
-    ProfileSnapshot {
-        profile_id: ProfileID,
-    },
-}
-impl SecureStorageKey {
-    pub fn identifier(&self) -> String {
-        format!(
-            "secure_storage_key_{}",
-            match self {
-                SecureStorageKey::SnapshotHeadersList => "headers".to_string(),
-                SecureStorageKey::DeviceFactorSourceMnemonic { factor_source_id } =>
-                    format!("device_factor_source_{}", factor_source_id.to_string()),
-                SecureStorageKey::ProfileSnapshot { profile_id } =>
-                    format!("profile_snapshot_{}", profile_id),
-            }
-        )
-    }
-}
-
-#[uniffi::export]
-pub fn secure_storage_key_identifier(key: &SecureStorageKey) -> String {
-    key.identifier()
-}
-
-pub type Data = Vec<u8>;
-
-#[uniffi::export]
-pub trait SecureStorage: Send + Sync + std::fmt::Debug {
-    fn load_data(&self, key: SecureStorageKey) -> Result<Option<Data>, CommonError>;
-    fn save_data(&self, key: SecureStorageKey, data: Data) -> Result<(), CommonError>;
-}
-
-#[derive(Debug)]
-pub struct NotYetSetSecureStorage {}
-impl NotYetSetSecureStorage {
-    pub fn new() -> Arc<Self> {
-        Arc::new(NotYetSetSecureStorage {})
-    }
-}
-impl SecureStorage for NotYetSetSecureStorage {
-    fn load_data(&self, key: SecureStorageKey) -> Result<Option<Data>, CommonError> {
-        panic!("You have not installed any secure storage yet.")
-    }
-
-    fn save_data(&self, key: SecureStorageKey, value: Data) -> Result<(), CommonError> {
-        panic!("You have not installed any secure storage yet.")
-    }
-}
-
-#[derive(Debug)]
-pub struct WalletClientStorage {
-    interface: Arc<dyn SecureStorage>,
-}
-impl WalletClientStorage {
-    pub(crate) fn new(interface: Arc<dyn SecureStorage>) -> Self {
-        Self { interface }
-    }
-}
-impl WalletClientStorage {
-    pub fn load<'de, T>(&self, key: SecureStorageKey) -> Result<Option<T>, CommonError>
-    where
-        T: serde::Deserialize<'de>,
-    {
-        self.interface.load_data(key).and_then(|o| match o {
-            None => Ok(None),
-            Some(j) => {
-                serde_json::from_slice(&j).map_err(|e| CommonError::FailedToDeserializeToJSON)
-            }
-        })
-    }
-
-    /// Like `load` but returns `Result<T>` instead of `Result<Option<T>>` and throws the provided error if
-    /// the value was `None`.
-    pub fn load_or<'de, T>(&self, key: SecureStorageKey, err: CommonError) -> Result<T, CommonError>
-    where
-        T: serde::Deserialize<'de>,
-    {
-        self.load(key).and_then(|o| o.ok_or(err))
-    }
-
-    /// Like `load` but returns `T` instead of `Result<Option<T>>` and defaults to `default`, if `load` returned `Ok(None)` or `Err`.
-    pub fn load_unwrap_or<'de, T>(&self, key: SecureStorageKey, default: T) -> T
-    where
-        T: serde::Deserialize<'de>,
-    {
-        self.load(key)
-            .map(|o| o.unwrap_or(default))
-            .unwrap_or(default)
-    }
-
-    pub fn load_headers_list_or_empty(&self) -> HeadersList {
-        self.load_unwrap_or(SecureStorageKey::SnapshotHeadersList, HeadersList::new())
-    }
-}
-
-/// Panics and logs with error the `reason` (with file/line context.)
-pub fn log_panic(prefix: &str, provided_reason: impl AsRef<str>) {
-    let msg = format!(
-        "{}: '{}' ({}:{}:{})",
-        prefix,
-        provided_reason.as_ref(),
-        file!(),
-        line!(),
-        column!()
-    );
-    log::error!("{}", msg);
-    panic!("{}", msg);
-}
-pub fn incorrect_impl(reason: impl AsRef<str>) {
-  log_panic("Incorrect implementation", reason)
-}
-pub fn fatal_error(reason: impl AsRef<str>) {
-  log_panic("Fatal error", reason)
-}
-
-impl WalletClientStorage {
-    pub(crate) fn assert_not_contains_profile_with_id(&self, profile_id: ProfileID) {
-        if self.load_headers_list_or_empty().contains_id(&profile_id) {
-            fatal_error(format!("Profile with id {profile_id}"))
-        }
-    }
-
-    pub fn save<T>(&self, key: SecureStorageKey, value: &T) -> Result<(), CommonError>
-    where
-        T: serde::Serialize,
-    {
-        serde_json::to_vec(value)
-            .map_err(|e| CommonError::FailedToSerializeToJSON)
-            .and_then(|j| self.interface.save_data(key, j))
     }
 }
 
@@ -266,21 +130,19 @@ impl Wallet {
 
 #[cfg(test)]
 mod tests {
-    use crate::{HasPlaceholder, Profile};
-
-    use super::{NotYetSetSecureStorage, Wallet};
+    use crate::{HasPlaceholder, MockSecureStorage, Profile, Wallet};
 
     #[test]
     fn read_header() {
         let profile = Profile::placeholder();
-        let wallet = Wallet::new(profile.clone(), NotYetSetSecureStorage::new());
+        let wallet = Wallet::new(profile.clone(), MockSecureStorage::new());
         wallet.read(|p| assert_eq!(p.header, profile.header))
     }
 
     #[test]
     fn take_snapshot() {
         let profile = Profile::placeholder();
-        let wallet = Wallet::new(profile.clone(), NotYetSetSecureStorage::new());
+        let wallet = Wallet::new(profile.clone(), MockSecureStorage::new());
         assert_eq!(wallet.profile(), profile)
     }
 }
