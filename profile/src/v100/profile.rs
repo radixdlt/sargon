@@ -2,11 +2,12 @@ use std::fmt::Debug;
 
 use identified_vec::IsIdentifiedVec;
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 use crate::{
     Account, AccountAddress, AppPreferences, CommonError, DeviceInfo, FactorSourceID,
     FactorSources, HasPlaceholder, Header, IsFactorSource, Networks,
-    PrivateHierarchicalDeterministicFactorSource,
+    PrivateHierarchicalDeterministicFactorSource, ProfileID,
 };
 
 /// Representation of the Radix Wallet, contains a list of
@@ -92,6 +93,11 @@ impl Profile {
 }
 
 impl Profile {
+    /// Returns the unique ID of this Profile (just an alias for `header.id`).
+    pub fn id(&self) -> ProfileID {
+        self.header.id
+    }
+
     /// Returns a clone of the updated account if found, else None.
     pub fn update_account<F>(&mut self, address: &AccountAddress, mutate: F) -> Option<Account>
     where

@@ -1,5 +1,5 @@
-import radix_wallet_kit
 import Foundation
+import radix_wallet_kit
 
 extension Profile {
 	fileprivate static let placeholder = newProfilePlaceholder()
@@ -16,19 +16,23 @@ extension Data {
 	}
 }
 
+extension SecureStorageKey {
+	var identifier: String {
+		secureStorageKeyIdentifier(key: self)
+	}
+}
 
 public final class EphemeralKeychain: SecureStorage {
-	private var store: Dictionary<String, String>
+	private var store: [String: String]
 	private init() {
 		store = [:]
 	}
 	public static let shared = EphemeralKeychain()
 	public func get(key: SecureStorageKey) throws -> String? {
-		let key_ = 
-		store[key]
+		store[key.identifier]
 	}
 	public func put(key: SecureStorageKey, value: String) throws {
-		store[key] = value
+		store[key.identifier] = value
 	}
 }
 
@@ -38,13 +42,13 @@ func test() throws {
 	let secureStorage = EphemeralKeychain.shared
 
 	let privateHDFactorSource = try newPrivateHdFactorSource(
-		entropy: Data.random(byteCount: 32), 
+		entropy: Data.random(byteCount: 32),
 		walletClientModel: .iphone
 	)
 	let mnemonic = mnemonicPhrase(from: privateHDFactorSource.mnemonicWithPassphrase.mnemonic)
 	try secureStorage.put(key: .keyMnemonic, value: mnemonic)
 	let profile = newProfile(
-		privateHdFactorSource: privateHDFactorSource, 
+		privateHdFactorSource: privateHDFactorSource,
 		creatingDeviceName: "IntegrationTest"
 	)
 	let wallet = Wallet(
@@ -52,12 +56,11 @@ func test() throws {
 		secureStorage: secureStorage
 	)
 	wallet.createNew
-	try secureStorage.put(key: .keyProfile, value: wallet.jsonSnapshot())
 
 	do {
 		let profile = wallet.profile()
 		assert(profile.networks.count > 1)
-/*
+		/*
 		let mainnet = profile.networks[0]
 		assert(mainnet.id == .mainnet)
 		let mainnetAccounts = mainnet.accounts
@@ -84,7 +87,7 @@ func test() throws {
 		print("Failed to do stuff ❌ error: \(error)")
 		return
 	}
-/*
+	/*
 	do {
 		let profile = wallet.profile()
 		let mainnet = profile.networks[0]

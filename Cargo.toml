@@ -3,6 +3,9 @@ resolver = "2"
 members = ["profile"]
 
 [workspace.dependencies]
+log = "0.4.20"
+env_logger = "0.10.1"
+derive_more = "0.99.17"
 serde = { version = "1.0.193", features = ["derive"] }
 serde_json = { version = "1.0.108", features = ["preserve_order"] }
 serde_with = { version = "3.4.0" }

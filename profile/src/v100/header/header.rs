@@ -2,17 +2,26 @@ use std::fmt::Display;
 
 use std::str::FromStr;
 
-use crate::HasPlaceholder;
-
+use crate::{
+    now, profile_id, CommonError, ContentHint, DeviceInfo, HasPlaceholder, ProfileSnapshotVersion,
+};
+use derive_more::Display;
 use iso8601_timestamp::Timestamp;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::{id, now};
-
-use crate::ProfileSnapshotVersion;
-
-use super::{content_hint::ContentHint, device_info::DeviceInfo};
+/// A stable and globally unique identifier of a Profile.
+#[derive(Serialize, Deserialize, Debug, Display, Clone, PartialEq, Eq, Hash)]
+#[serde(transparent)]
+pub struct ProfileID(pub(crate) Uuid);
+uniffi::custom_newtype!(ProfileID, Uuid);
+impl ProfileID {
+    pub fn from_str(s: &str) -> Result<Self, CommonError> {
+        Uuid::from_str(s)
+            .map(ProfileID)
+            .map_err(|_| CommonError::InvalidProfileID)
+    }
+}
 
 /// The header of a Profile(Snapshot) contains crucial metadata
 /// about this Profile, such as which JSON data format it is
@@ -26,7 +35,7 @@ pub struct Header {
     pub snapshot_version: ProfileSnapshotVersion,
 
     /// An immutable and unique identifier of a Profile.
-    pub id: Uuid,
+    pub id: ProfileID,
 
     /// The device which was used to create the Profile.
     pub creating_device: DeviceInfo,
@@ -54,7 +63,7 @@ impl Header {
     /// Instantiates a new `Header` using the default snapshot version and
     /// the specified values, most prominently a creating device (`DeviceInfo`).
     pub fn with_values(
-        id: Uuid,
+        id: ProfileID,
         creating_device: DeviceInfo,
         content_hint: ContentHint,
         last_modified: Timestamp,
@@ -72,7 +81,7 @@ impl Header {
     /// Instantiates a new `Header` with creating and last used on `DeviceInfo` with
     /// "Unknown device" as description, and empty content hint
     pub fn new(creating_device: DeviceInfo) -> Self {
-        Self::with_values(id(), creating_device, ContentHint::new(), now())
+        Self::with_values(profile_id(), creating_device, ContentHint::new(), now())
     }
 }
 
@@ -103,7 +112,7 @@ impl HasPlaceholder for Header {
             "iPhone".to_string(),
         );
         Header::with_values(
-            Uuid::from_str("12345678-bbbb-cccc-dddd-abcd12345678").unwrap(),
+            ProfileID::from_str("12345678-bbbb-cccc-dddd-abcd12345678").unwrap(),
             device,
             ContentHint::with_counters(4, 0, 2),
             date,
@@ -120,7 +129,7 @@ impl HasPlaceholder for Header {
             "iPhone".to_string(),
         );
         Header::with_values(
-            Uuid::from_str("87654321-bbbb-cccc-dddd-87654321dcba").unwrap(),
+            ProfileID::from_str("87654321-bbbb-cccc-dddd-87654321dcba").unwrap(),
             device,
             ContentHint::new(),
             date,
@@ -133,7 +142,7 @@ pub mod tests {
 
     use std::str::FromStr;
 
-    use crate::{assert_eq_after_json_roundtrip, id, HasPlaceholder};
+    use crate::{assert_eq_after_json_roundtrip, profile_id, HasPlaceholder, ProfileID};
     use crate::{
         v100::header::{content_hint::ContentHint, device_info::DeviceInfo},
         ProfileSnapshotVersion,
@@ -201,7 +210,7 @@ pub mod tests {
         );
         let sut =
             Header::with_values(
-                Uuid::from_str("12345678-bbbb-cccc-dddd-abcd12345678").unwrap(),
+                ProfileID::from_str("12345678-bbbb-cccc-dddd-abcd12345678").unwrap(),
                 device,
                 ContentHint::new(),
                 date,
@@ -221,7 +230,7 @@ pub mod tests {
 
     #[test]
     fn get_id() {
-        let value = id();
+        let value = profile_id();
         let sut = Header {
             id: value.clone(),
             ..Default::default()

@@ -1,11 +1,16 @@
 use iso8601_timestamp::Timestamp;
 use uuid::Uuid;
 
+use crate::ProfileID;
+
 pub fn now() -> Timestamp {
     Timestamp::now_utc()
 }
 pub fn id() -> Uuid {
     Uuid::new_v4()
+}
+pub fn profile_id() -> ProfileID {
+    ProfileID(id())
 }
 
 pub fn iso8601(dt: &Timestamp) -> String {

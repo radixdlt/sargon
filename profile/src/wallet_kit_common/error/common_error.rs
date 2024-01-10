@@ -137,4 +137,16 @@ pub enum CommonError {
 
     #[error("Failed to write to secure storage (Keychain).")]
     SecureStorageWriteError,
+
+    #[error("Failed Serialize value to JSON.")]
+    FailedToSerializeToJSON,
+
+    #[error("Failed deserialize JSON to value.")]
+    FailedToDeserializeToJSON,
+
+    #[error("Invalid ProfileID (UUID)")]
+    InvalidProfileID,
+
+    #[error("Failed to load Profile Headers list")]
+    FailedToLoadProfileHeadersList,
 }
