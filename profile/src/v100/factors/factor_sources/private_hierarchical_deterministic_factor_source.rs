@@ -1,17 +1,4 @@
-use crate::{
-    AccountPath, CAP26KeyKind, CAP26Repr, CommonError, HDPathValue, Hex32Bytes, Mnemonic,
-    MnemonicWithPassphrase, WalletClientModel,
-};
-
-use crate::{
-    v100::{
-        FactorSourceIDFromHash, HDFactorInstanceAccountCreation,
-        HierarchicalDeterministicFactorInstance, IsFactorSource,
-    },
-    NetworkID,
-};
-
-use super::DeviceFactorSource;
+use crate::prelude::*;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct PrivateHierarchicalDeterministicFactorSource {
@@ -23,12 +10,10 @@ pub struct PrivateHierarchicalDeterministicFactorSource {
 pub fn new_private_hd_factor_source(
     entropy: Vec<u8>,
     wallet_client_model: WalletClientModel,
-) -> Result<PrivateHierarchicalDeterministicFactorSource, CommonError> {
-    Hex32Bytes::from_vec(entropy)
-        .map(|e| {
-            PrivateHierarchicalDeterministicFactorSource::new_with_entropy(e, wallet_client_model)
-        })
-        .map_err(|e| CommonError::Bytes(e))
+) -> Result<PrivateHierarchicalDeterministicFactorSource> {
+    Hex32Bytes::from_vec(entropy).map(
+        |e| PrivateHierarchicalDeterministicFactorSource::new_with_entropy(e, wallet_client_model)
+    )
 }
 
 impl PrivateHierarchicalDeterministicFactorSource {

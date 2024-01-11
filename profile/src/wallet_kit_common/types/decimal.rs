@@ -1,10 +1,6 @@
-use std::{ops::Deref, str::FromStr};
-
-use crate::CommonError;
+use crate::prelude::*;
 use radix_engine_common::math::Decimal as NativeDecimal;
 use radix_engine_toolkit_json::models::common::SerializableDecimal;
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use std::{cmp::Ordering, fmt::Display};
 
 // FIXME: Use RET's type!
 #[derive(Clone, Debug, Eq, Ord, Hash, uniffi::Record, Default)]
@@ -64,19 +60,19 @@ impl<'de> Deserialize<'de> for Decimal {
 }
 
 impl Decimal {
-    pub fn try_from_str(s: &str) -> Result<Self, CommonError> {
+    pub fn try_from_str(s: &str) -> Result<Self> {
         Self::new(s.to_string())
     }
 }
 
-impl Display for Decimal {
+impl std::fmt::Display for Decimal {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.native())
     }
 }
 
 impl Decimal {
-    pub fn new(value: String) -> Result<Self, CommonError> {
+    pub fn new(value: String) -> Result<Self> {
         value
             .parse::<NativeDecimal>()
             .map(|native| Self::from_native(native))
@@ -115,7 +111,7 @@ impl TryInto<Decimal> for &str {
 impl TryFrom<&[u8]> for Decimal {
     type Error = crate::CommonError;
 
-    fn try_from(slice: &[u8]) -> Result<Self, Self::Error> {
+    fn try_from(slice: &[u8]) -> Result<Self> {
         NativeDecimal::try_from(slice)
             .map(Self::from_native)
             .map_err(|_| CommonError::DecimalError)

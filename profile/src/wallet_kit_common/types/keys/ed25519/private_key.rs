@@ -1,16 +1,14 @@
+use crate::prelude::*;
+
 use radix_engine_common::crypto::IsHash;
 use transaction::signing::ed25519::{
     Ed25519PrivateKey as EngineEd25519PrivateKey, Ed25519Signature,
 };
 
-use super::public_key::Ed25519PublicKey;
-use crate::{Hex32Bytes, KeyError as Error};
-use std::fmt::{Debug, Formatter};
-
-use crate::HasPlaceholder;
-
 /// An Ed25519 private key used to create cryptographic signatures, using
 /// EdDSA scheme.
+#[derive(derive_more::Debug)]
+#[debug("{}", "self.to_hex()")]
 pub struct Ed25519PrivateKey(EngineEd25519PrivateKey);
 
 impl Ed25519PrivateKey {
@@ -37,12 +35,6 @@ impl PartialEq for Ed25519PrivateKey {
 
 impl Eq for Ed25519PrivateKey {}
 
-impl Debug for Ed25519PrivateKey {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str(&self.to_hex())
-    }
-}
-
 impl Ed25519PrivateKey {
     pub fn from_engine(engine: EngineEd25519PrivateKey) -> Self {
         Self(engine)
@@ -62,32 +54,32 @@ impl Ed25519PrivateKey {
     }
 
     pub fn to_hex(&self) -> String {
-        hex::encode(self.to_bytes())
+        hex_encode(self.to_bytes())
     }
 
-    pub fn from_bytes(slice: &[u8]) -> Result<Self, Error> {
+    pub fn from_bytes(slice: &[u8]) -> Result<Self> {
         EngineEd25519PrivateKey::from_bytes(slice)
-            .map_err(|_| Error::InvalidEd25519PrivateKeyFromBytes)
+            .map_err(|_| CommonError::InvalidEd25519PrivateKeyFromBytes(slice.to_owned()))
             .map(Self::from_engine)
     }
 
-    pub fn from_str(hex: &str) -> Result<Self, Error> {
+    pub fn from_str(hex: &str) -> Result<Self> {
         Hex32Bytes::from_hex(hex)
-            .map_err(|_| Error::InvalidEd25519PrivateKeyFromString)
+            .map_err(|_| CommonError::InvalidEd25519PrivateKeyFromString(hex.to_owned()))
             .and_then(|b| Self::from_bytes(&b.to_vec()))
     }
 
-    pub fn from_vec(bytes: Vec<u8>) -> Result<Self, Error> {
+    pub fn from_vec(bytes: Vec<u8>) -> Result<Self> {
         Self::from_bytes(bytes.as_slice())
     }
 
-    pub fn from_hex32_bytes(bytes: Hex32Bytes) -> Result<Self, Error> {
+    pub fn from_hex32_bytes(bytes: Hex32Bytes) -> Result<Self> {
         Self::from_vec(bytes.to_vec())
     }
 }
 
 impl TryFrom<&[u8]> for Ed25519PrivateKey {
-    type Error = crate::KeyError;
+    type Error = crate::CommonError;
 
     fn try_from(slice: &[u8]) -> Result<Ed25519PrivateKey, Self::Error> {
         Ed25519PrivateKey::from_bytes(slice)
@@ -95,7 +87,7 @@ impl TryFrom<&[u8]> for Ed25519PrivateKey {
 }
 
 impl TryInto<Ed25519PrivateKey> for &str {
-    type Error = crate::KeyError;
+    type Error = crate::CommonError;
 
     fn try_into(self) -> Result<Ed25519PrivateKey, Self::Error> {
         Ed25519PrivateKey::from_str(self)
@@ -138,13 +130,9 @@ impl Ed25519PrivateKey {
 
 #[cfg(test)]
 mod tests {
-    use std::{collections::HashSet, str::FromStr};
+    use crate::prelude::*;
 
     use transaction::signing::ed25519::Ed25519Signature;
-
-    use crate::{hash, HasPlaceholder, Hex32Bytes, KeyError as Error};
-
-    use super::Ed25519PrivateKey;
 
     #[test]
     fn equality() {
@@ -186,8 +174,8 @@ mod tests {
 
     #[test]
     fn bytes_roundtrip() {
-        let bytes = hex::decode("0000000000000000000000000000000000000000000000000000000000000001")
-            .unwrap();
+        let bytes =
+            hex_decode("0000000000000000000000000000000000000000000000000000000000000001").unwrap();
         assert_eq!(
             Ed25519PrivateKey::from_bytes(bytes.as_slice())
                 .unwrap()
@@ -206,7 +194,7 @@ mod tests {
     fn invalid_hex() {
         assert_eq!(
             Ed25519PrivateKey::from_str("not hex"),
-            Err(Error::InvalidEd25519PrivateKeyFromString)
+            Err(CommonError::InvalidEd25519PrivateKeyFromString)
         );
     }
 
@@ -214,7 +202,7 @@ mod tests {
     fn invalid_hex_too_short() {
         assert_eq!(
             Ed25519PrivateKey::from_str("dead"),
-            Err(Error::InvalidEd25519PrivateKeyFromString)
+            Err(CommonError::InvalidEd25519PrivateKeyFromString)
         );
     }
 
@@ -222,7 +210,7 @@ mod tests {
     fn invalid_bytes() {
         assert_eq!(
             Ed25519PrivateKey::from_bytes(&[0u8] as &[u8]),
-            Err(Error::InvalidEd25519PrivateKeyFromBytes)
+            Err(CommonError::InvalidEd25519PrivateKeyFromBytes)
         );
     }
 
@@ -239,7 +227,7 @@ mod tests {
     fn from_vec() {
         let hex = "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef";
         assert_eq!(
-            Ed25519PrivateKey::from_vec(Vec::from(hex::decode(hex).unwrap()))
+            Ed25519PrivateKey::from_vec(Vec::from(hex_decode(hex).unwrap()))
                 .unwrap()
                 .to_hex(),
             hex
@@ -281,7 +269,7 @@ mod tests {
     #[test]
     fn try_from_bytes() {
         let str = "0000000000000000000000000000000000000000000000000000000000000001";
-        let vec = hex::decode(str).unwrap();
+        let vec = hex_decode(str).unwrap();
         let key = Ed25519PrivateKey::try_from(vec.as_slice()).unwrap();
         assert_eq!(key.to_hex(), str);
     }

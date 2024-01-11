@@ -1,10 +1,5 @@
-use crate::{
-    v100::{Account, AccountAddress},
-    IdentifiedVecVia,
-};
+use crate::prelude::*;
 use identified_vec::IsIdentifiedVec;
-
-use crate::HasPlaceholder;
 
 /// An ordered set of Accounts on a specific network, most commonly
 /// the set is non-empty.
@@ -85,10 +80,7 @@ impl Accounts {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
-
-    use crate::v100::{Account, AccountAddress, Accounts, AppearanceID, DisplayName};
-
+    use crate::prelude::*;
     #[test]
     fn default_is_empty() {
         assert_eq!(Accounts::default().len(), 0);

@@ -1,11 +1,4 @@
-use super::{
-    factor_source_id_from_address::FactorSourceIDFromAddress,
-    factor_source_id_from_hash::FactorSourceIDFromHash,
-};
-use enum_as_inner::EnumAsInner;
-use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
-
-use crate::HasPlaceholder;
+use crate::prelude::*;
 
 /// A unique and stable identifier of a FactorSource, e.g. a
 /// DeviceFactorSource being a mnemonic securely stored in a

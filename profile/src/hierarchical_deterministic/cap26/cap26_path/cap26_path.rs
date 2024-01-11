@@ -1,12 +1,4 @@
-use crate::HDPathError;
-use crate::{
-    AccountPath, CAP26Repr, Derivation, DerivationPath, DerivationPathScheme, GetIDPath, HDPath,
-    IdentityPath,
-};
-use enum_as_inner::EnumAsInner;
-use serde::{de, Deserializer, Serialize, Serializer};
-
-use crate::HasPlaceholder;
+use crate::prelude::*;
 
 /// A derivation path design specifically for Radix Babylon wallets used by Accounts and Personas
 /// to be unique per network with separate key spaces for Accounts/Identities (Personas) and key
@@ -19,9 +11,9 @@ pub enum CAP26Path {
 }
 
 impl TryFrom<&HDPath> for CAP26Path {
-    type Error = HDPathError;
+    type Error = CommonError;
 
-    fn try_from(value: &HDPath) -> Result<Self, Self::Error> {
+    fn try_from(value: &HDPath) -> Result<Self> {
         if let Ok(get_id) = GetIDPath::try_from(value) {
             return Ok(get_id.into());
         }

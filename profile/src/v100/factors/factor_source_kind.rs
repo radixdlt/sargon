@@ -1,6 +1,4 @@
-use std::fmt::Display;
-
-use serde::{Deserialize, Serialize};
+use crate::prelude::*;
 
 /// The **kind** (or "type") of FactorSource describes how it is used.
 #[derive(
@@ -76,7 +74,7 @@ impl FactorSourceKind {
     }
 }
 
-impl Display for FactorSourceKind {
+impl std::fmt::Display for FactorSourceKind {
     #[cfg(not(tarpaulin_include))] // false negative
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.discriminant())

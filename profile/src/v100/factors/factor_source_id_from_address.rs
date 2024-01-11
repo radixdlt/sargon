@@ -1,10 +1,4 @@
-use serde::{Deserialize, Serialize};
-
-use crate::v100::AccountAddress;
-
-use crate::HasPlaceholder;
-
-use super::factor_source_kind::FactorSourceKind;
+use crate::prelude::*;
 
 /// FactorSourceID from an AccountAddress, typically used by `trustedContact` FactorSource.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]

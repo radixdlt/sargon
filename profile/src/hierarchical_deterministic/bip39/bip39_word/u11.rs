@@ -1,27 +1,29 @@
-use serde::{Deserialize, Serialize};
-use std::fmt::Display;
-
-use crate::CommonError;
+use crate::prelude::*;
 
 #[derive(
-    Serialize, Deserialize, Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, uniffi::Record,
+    Serialize,
+    Deserialize,
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    derive_more::Display,
+    Ord,
+    Hash,
+    uniffi::Record,
 )]
+#[display("{inner}")]
 pub struct U11 {
     pub inner: u16,
 }
 
 impl U11 {
-    pub fn new(inner: u16) -> Result<Self, CommonError> {
+    pub fn new(inner: u16) -> Result<Self> {
         if inner >= 2048 {
-            return Err(CommonError::InvalidBIP39Index);
+            return Err(CommonError::InvalidBIP39Index(inner));
         }
         Ok(Self { inner })
-    }
-}
-
-impl Display for U11 {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", &self.inner)
     }
 }
 
@@ -32,7 +34,7 @@ mod tests {
 
     #[test]
     fn invalid_2048() {
-        assert_eq!(U11::new(2048), Err(CommonError::InvalidBIP39Index));
+        assert_eq!(U11::new(2048), Err(CommonError::InvalidBIP39Index(2048)));
     }
 
     #[test]

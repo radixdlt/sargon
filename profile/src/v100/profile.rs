@@ -1,15 +1,4 @@
-use std::fmt::Debug;
-
-use identified_vec::IsIdentifiedVec;
-use serde::{Deserialize, Serialize};
-use uuid::Uuid;
-
-use crate::{
-    Account, AccountAddress, AppPreferences, CommonError, DeviceInfo, FactorSourceID,
-    FactorSources, HasPlaceholder, Header, IsFactorSource, Networks,
-    PrivateHierarchicalDeterministicFactorSource, ProfileID,
-};
-
+use crate::prelude::*;
 /// Representation of the Radix Wallet, contains a list of
 /// users Accounts, Personas, Authorized Dapps per network
 /// the user has used. It also contains all FactorSources,
@@ -110,10 +99,10 @@ impl Profile {
         &mut self,
         factor_source_id: &FactorSourceID,
         mut mutate: M,
-    ) -> Result<bool, CommonError>
+    ) -> Result<bool>
     where
         S: IsFactorSource,
-        M: FnMut(S) -> Result<S, CommonError>,
+        M: FnMut(S) -> Result<S>,
     {
         self.factor_sources.try_update_with(factor_source_id, |f| {
             S::try_from(f.clone())
@@ -151,16 +140,9 @@ impl HasPlaceholder for Profile {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashSet;
+    use crate::prelude::*;
 
     use identified_vec::{IsIdentifiedVec, ItemsCloned};
-
-    use crate::{
-        assert_eq_after_json_roundtrip, AppPreferences, CommonError, DeviceFactorSource,
-        DisplayName, FactorSourceCryptoParameters, FactorSourceID, FactorSources, HasPlaceholder,
-        Header, LedgerHardwareWalletFactorSource, NetworkID, Networks,
-        PrivateHierarchicalDeterministicFactorSource, Profile, SLIP10Curve, WalletClientModel,
-    };
 
     #[test]
     fn inequality() {

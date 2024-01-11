@@ -1,10 +1,4 @@
-use super::gateway::Gateway;
-
-use crate::{CommonError, IdentifiedVecVia};
-use identified_vec::{Identifiable, IdentifiedVecOf, IsIdentifiedVec, ItemsCloned};
-use serde::{de, ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
-
-use crate::HasPlaceholder;
+use crate::prelude::*;
 
 /// The currently used Gateway and a collection of other by user added
 /// or predefined Gateways the user can switch to.
@@ -63,8 +57,6 @@ impl Serialize for Gateways {
 impl<'de> Deserialize<'de> for Gateways {
     #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Gateways, D::Error> {
-        use url::Url;
-
         #[derive(Deserialize, Serialize)]
         struct Wrapper {
             #[serde(rename = "current")]
@@ -96,7 +88,7 @@ impl Gateways {
         }
     }
 
-    pub fn new_with_other<I>(current: Gateway, other: I) -> Result<Self, CommonError>
+    pub fn new_with_other<I>(current: Gateway, other: I) -> Result<Self>
     where
         I: IntoIterator<Item = Gateway>,
     {
@@ -112,7 +104,7 @@ impl Gateways {
     /// Changes the current Gateway to `to`, if it is not already the current. If `to` is
     /// not a new Gateway, it will be removed from. Returns `Ok(false)` if `to` was already
     /// the `current`, returns `Ok(true)` if `to` was not already `current`.
-    pub fn change_current(&mut self, to: Gateway) -> Result<bool, CommonError> {
+    pub fn change_current(&mut self, to: Gateway) -> Result<bool> {
         if self.current == to {
             return Ok(false);
         }

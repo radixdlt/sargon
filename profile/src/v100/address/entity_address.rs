@@ -1,18 +1,10 @@
-use crate::IsEntityPath;
+use crate::prelude::*;
 use radix_engine_common::crypto::PublicKey as EnginePublicKey;
 use radix_engine_common::types::NodeId;
 use radix_engine_toolkit::functions::derive::{
     virtual_account_address_from_public_key, virtual_identity_address_from_public_key,
 };
 use radix_engine_toolkit_json::models::scrypto::node_id::SerializableNodeIdInternal;
-
-use crate::CommonError as Error;
-
-use crate::v100::AbstractEntityType;
-use crate::v100::HDFactorInstanceTransactionSigning;
-use crate::NetworkID;
-
-use super::decode_address_helper::decode_address;
 
 /// An address of an entity, provides default implementation of `try_from_bech32`
 /// to decode a bech32 encoded address string into Self.
@@ -67,10 +59,10 @@ pub trait EntityAddress: Sized {
     }
 
     #[cfg(not(tarpaulin_include))] // false negative
-    fn try_from_bech32(s: &str) -> Result<Self, Error> {
+    fn try_from_bech32(s: &str) -> Result<Self> {
         let (network_id, entity_type, hrp, _) = decode_address(s)?;
         if entity_type != Self::entity_type() {
-            return Err(Error::MismatchingEntityTypeWhileDecodingAddress);
+            return Err(CommonError::MismatchingEntityTypeWhileDecodingAddress);
         }
 
         assert!(hrp.starts_with(&entity_type.hrp()), "Mismatching HRP while decoding address, this should never happen. Did internal function `decode_address` change? Or did you accidentally change or impl the `hrp` method on EntityType?");

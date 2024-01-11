@@ -1,11 +1,5 @@
-use crate::Hex32Bytes;
-use crate::{GetIDPath, MnemonicWithPassphrase};
+use crate::prelude::*;
 use radix_engine_common::crypto::{blake2b_256_hash, Hash};
-use serde::{Deserialize, Serialize};
-
-use super::factor_source_kind::FactorSourceKind;
-
-use crate::HasPlaceholder;
 
 /// FactorSourceID from the blake2b hash of the special HD public key derived at `CAP26::GetID`,
 /// for a certain `FactorSourceKind`

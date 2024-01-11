@@ -1,11 +1,4 @@
-use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
-
-use super::{derivation::Derivation, derivation_path_scheme::DerivationPathScheme};
-use crate::{AccountPath, BIP44LikePath, CAP26Path, CommonError, GetIDPath, HDPath, IdentityPath};
-use enum_as_inner::EnumAsInner;
-use std::fmt::{Debug, Formatter};
-
-use crate::HasPlaceholder;
+use crate::prelude::*;
 
 /// A derivation path on either supported schemes, either Babylon (CAP26) or Olympia (BIP44Like).
 #[derive(Clone, PartialEq, Eq, Hash, EnumAsInner, PartialOrd, Ord, uniffi::Enum)]
@@ -17,7 +10,7 @@ pub enum DerivationPath {
 impl TryFrom<&HDPath> for DerivationPath {
     type Error = CommonError;
 
-    fn try_from(value: &HDPath) -> Result<Self, Self::Error> {
+    fn try_from(value: &HDPath) -> Result<Self> {
         if let Ok(bip44) = BIP44LikePath::try_from(value) {
             return Ok(bip44.into());
         };
@@ -27,8 +20,8 @@ impl TryFrom<&HDPath> for DerivationPath {
     }
 }
 
-impl Debug for DerivationPath {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+impl std::fmt::Debug for DerivationPath {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str(&self.to_string())
     }
 }

@@ -1,29 +1,27 @@
-use identified_vec::{IsIdentifiedVec, ItemsCloned};
-use itertools::Itertools;
-
-use crate::{
-    AccountPath, CAP26KeyKind, CAP26Repr, CommonError, DerivationPath, DeviceFactorSource,
-    EntityKind, EntitySecurityState, FactorSource, FactorSourceID, HDPathValue, IsFactorSource,
-    NetworkID, Profile, FactorSourceIDFromHash,
-};
+use crate::prelude::*;
 
 impl Profile {
-    
-    pub fn factor_source_by_id<F>(&self, id: &FactorSourceID) -> Result<F, CommonError>
+    pub fn factor_source_by_id<F>(&self, id: &FactorSourceID) -> Result<F>
     where
-    F: IsFactorSource,
+        F: IsFactorSource,
     {
         self.factor_sources
-        .get(id)
-        .ok_or(CommonError::ProfileDoesNotContainFactorSourceWithID)
-        .and_then(|f| {
-            f.clone()
-            .try_into()
-            .map_err(|_| CommonError::CastFactorSourceWrongKind)
-        })
+            .get(id)
+            .ok_or(CommonError::ProfileDoesNotContainFactorSourceWithID)
+            .and_then(|f| {
+                f.clone()
+                    .try_into()
+                    .map_err(|_| CommonError::CastFactorSourceWrongKind {
+                        expected: F::factor_source_kind(),
+                        found: f.factor_source_kind(),
+                    })
+            })
     }
-    
-    pub fn device_factor_source_by_id(&self, id: &FactorSourceIDFromHash) -> Result<DeviceFactorSource, CommonError> {
+
+    pub fn device_factor_source_by_id(
+        &self,
+        id: &FactorSourceIDFromHash,
+    ) -> Result<DeviceFactorSource> {
         self.factor_source_by_id(&id.clone().into())
     }
 

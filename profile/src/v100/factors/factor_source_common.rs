@@ -1,16 +1,5 @@
-use identified_vec::Identifiable;
-use identified_vec::IsIdentifiedVec;
-use iso8601_timestamp::Timestamp;
-use serde::{Deserialize, Serialize};
-
-use crate::now;
-use crate::HasPlaceholder;
-use crate::IdentifiedVecVia;
-
-use super::{
-    factor_source_crypto_parameters::FactorSourceCryptoParameters,
-    factor_source_flag::FactorSourceFlag,
-};
+use crate::prelude::*;
+use identified_vec::{Identifiable, IsIdentifiedVec};
 
 /// Flags which describe a certain state a FactorSource might be in, e.g. `Main` (BDFS).
 pub type FactorSourceFlags = IdentifiedVecVia<FactorSourceFlag>;

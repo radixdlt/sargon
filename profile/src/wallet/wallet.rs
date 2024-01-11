@@ -1,11 +1,6 @@
+use crate::prelude::*;
+use identified_vec::Identifiable;
 use std::sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard};
-
-use identified_vec::{Identifiable, IsIdentifiedVec};
-
-use crate::{
-    CommonError, FactorSourceIDFromHash, Header, IdentifiedVecVia, Profile, ProfileID,
-    SecureStorage, SecureStorageKey, WalletClientStorage,
-};
 
 pub type HeadersList = IdentifiedVecVia<Header>;
 impl Identifiable for Header {
@@ -56,9 +51,7 @@ impl Wallet {
     }
 
     #[uniffi::constructor]
-    pub fn with_existing_profile(
-        secure_storage: Arc<dyn SecureStorage>,
-    ) -> Result<Self, CommonError> {
+    pub fn with_existing_profile(secure_storage: Arc<dyn SecureStorage>) -> Result<Self> {
         // wallet.init();
         // secure_storage.get(SecureStorageKey::)
         todo!()
@@ -69,7 +62,7 @@ impl Wallet {
 // Wallet + SecureStorage
 //========
 impl Wallet {
-    pub(crate) fn save_profile(&self, profile: &Profile) -> Result<(), CommonError> {
+    pub(crate) fn save_profile(&self, profile: &Profile) -> Result<()> {
         self.wallet_client_storage.save(
             SecureStorageKey::ProfileSnapshot {
                 profile_id: profile.header.id,

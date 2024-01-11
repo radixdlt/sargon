@@ -1,13 +1,4 @@
-use crate::{
-    Derivation, DerivationPathScheme, HDPath, HierarchicalDeterministicPrivateKey, Mnemonic, Seed,
-};
-use crate::{Ed25519PrivateKey, SLIP10Curve, Secp256k1PrivateKey};
-use itertools::Itertools;
-use serde::{Deserialize, Serialize};
-
-use crate::HDPathError as Error;
-
-use crate::HasPlaceholder;
+use crate::prelude::*;
 
 /// A BIP39 Mnemonic and BIP39 passphrase - aka "25th word" tuple,
 /// from which we can derive a HD Root used for derivation.
@@ -40,7 +31,7 @@ impl MnemonicWithPassphrase {
 
     /// Instantiates a new `MnemonicWithPassphrase` with empty passphrase (no passphrase),
     /// from the specified BIP39 mnemonic phrase.
-    pub fn from_phrase(phrase: &str) -> Result<Self, Error> {
+    pub fn from_phrase(phrase: &str) -> Result<Self> {
         Mnemonic::from_phrase(phrase).map(|m| Self::new(m))
     }
 }

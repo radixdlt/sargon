@@ -1,16 +1,4 @@
-use crate::PublicKey;
-use serde::{Deserialize, Serialize};
-
-use crate::DerivationPath;
-
-use crate::{
-    AccountPath, BIP44LikePath, CAP26KeyKind, CAP26Repr, Derivation, Mnemonic,
-    MnemonicWithPassphrase,
-};
-
-use crate::HasPlaceholder;
-
-use crate::NetworkID;
+use crate::prelude::*;
 
 /// The **source** of a virtual hierarchical deterministic badge, contains a
 /// derivation path and public key, from which a private key is derived which

@@ -1,5 +1,4 @@
-use crate::{BIP39WordCount, HasPlaceholder, WalletClientModel};
-use serde::{Deserialize, Serialize};
+use crate::prelude::*;
 
 /// Properties describing a DeviceFactorSource to help user disambiguate between
 /// it and another one.

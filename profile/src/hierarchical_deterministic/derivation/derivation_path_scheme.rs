@@ -1,6 +1,4 @@
-use crate::SLIP10Curve;
-use identified_vec::Identifiable;
-use serde::{Deserialize, Serialize};
+use crate::prelude::*;
 
 /// Which derivation path to used for some particular HD operations
 /// such as signing or public key derivation. Radix Babylon introduces
@@ -51,12 +49,7 @@ impl DerivationPathScheme {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
-        assert_json_value_ne_after_roundtrip, DerivationPathScheme, SLIP10Curve,
-    };
-    use identified_vec::Identifiable;
-    use serde_json::json;
+    use crate::prelude::*;
 
     #[test]
     fn curve_from_scheme() {

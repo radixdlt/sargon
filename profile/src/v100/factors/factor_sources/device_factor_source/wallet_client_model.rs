@@ -1,27 +1,10 @@
-use std::fmt::Display;
+use crate::prelude::*;
 
-use crate::HasPlaceholder;
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, derive_more::Display, uniffi::Enum)]
 pub enum WalletClientModel {
     Iphone,
     Android,
     Unknown,
-}
-impl WalletClientModel {
-    pub fn name(&self) -> String {
-        match self {
-            Self::Iphone => "iPhone",
-            Self::Android => "Android",
-            Self::Unknown => "Unknown",
-        }
-        .to_string()
-    }
-}
-impl Display for WalletClientModel {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:}", &self.name())
-    }
 }
 
 impl HasPlaceholder for WalletClientModel {
@@ -61,7 +44,7 @@ mod tests {
 
     #[test]
     fn name() {
-        assert_eq!(WalletClientModel::Iphone.name(), "iPhone");
+        assert_eq!(WalletClientModel::Iphone.name(), "Ihhone");
         assert_eq!(WalletClientModel::Android.name(), "Android");
         assert_eq!(WalletClientModel::Unknown.name(), "Unknown");
     }

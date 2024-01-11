@@ -1,8 +1,4 @@
-use std::fmt::Display;
-
-use crate::HDPathError as Error;
-use serde_repr::{Deserialize_repr, Serialize_repr};
-use strum::FromRepr;
+use crate::prelude::*;
 
 /// The number of words in the mnemonic of a DeviceFactorSource, according to the BIP39
 /// standard, a multiple of 3, from 12 to 24 words. All "Babylon" `DeviceFactorSource`s
@@ -39,20 +35,21 @@ pub enum BIP39WordCount {
     Twelve = 12,
 }
 
-impl Display for BIP39WordCount {
+impl std::fmt::Display for BIP39WordCount {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{} words", self.discriminant())
     }
 }
+
 impl BIP39WordCount {
     /// The raw representation of the word count as a number.
     pub fn discriminant(&self) -> u8 {
         *self as u8
     }
 
-    pub fn from_count(count: usize) -> Result<Self, Error> {
-        let repr = u8::try_from(count).map_err(|_| Error::InvalidBIP39WordCount(count))?;
-        let self_ = Self::from_repr(repr).ok_or(Error::InvalidBIP39WordCount(count))?;
+    pub fn from_count(count: usize) -> Result<Self> {
+        let repr = u8::try_from(count).map_err(|_| CommonError::InvalidBIP39WordCount(count))?;
+        let self_ = Self::from_repr(repr).ok_or(CommonError::InvalidBIP39WordCount(count))?;
         Ok(self_)
     }
 }

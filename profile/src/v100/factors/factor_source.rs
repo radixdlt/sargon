@@ -1,13 +1,4 @@
-use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
-
-use enum_as_inner::EnumAsInner;
-
-use crate::HasPlaceholder;
-
-use super::{
-    DeviceFactorSource, FactorSourceID, FactorSourceKind, IsFactorSource,
-    LedgerHardwareWalletFactorSource,
-};
+use crate::prelude::*;
 
 #[derive(Serialize, Deserialize, Clone, EnumAsInner, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
 #[serde(untagged, remote = "Self")]

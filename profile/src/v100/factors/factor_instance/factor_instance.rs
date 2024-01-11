@@ -1,13 +1,4 @@
-use crate::HierarchicalDeterministicPublicKey;
-use serde::{Deserialize, Serialize};
-
-use super::{
-    badge_virtual_source::FactorInstanceBadgeVirtualSource,
-    factor_instance_badge::FactorInstanceBadge,
-};
-use crate::v100::factors::factor_source_id::FactorSourceID;
-
-use crate::HasPlaceholder;
+use crate::prelude::*;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct FactorInstance {

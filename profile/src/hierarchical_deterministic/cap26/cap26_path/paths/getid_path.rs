@@ -1,7 +1,4 @@
-use crate::HDPathError;
-use serde::{de, Deserializer, Serialize, Serializer};
-
-use crate::{Derivation, DerivationPath, DerivationPathScheme, HDPath, HDPathValue};
+use crate::prelude::*;
 
 /// Use it with `GetIDPath::default()` to create the path `m/44'/1022'/365'`
 /// which is used by all hierarchal deterministic factor sources to derive
@@ -34,18 +31,24 @@ impl Default for GetIDPath {
 }
 
 impl TryFrom<&HDPath> for GetIDPath {
-    type Error = HDPathError;
+    type Error = CommonError;
 
-    fn try_from(value: &HDPath) -> Result<Self, Self::Error> {
-        use HDPathError::*;
+    fn try_from(value: &HDPath) -> Result<Self> {
+        let expected_depth = 3;
         let (path, components) =
-            HDPath::try_parse_base_hdpath(value, HDPathError::InvalidDepthOfCAP26Path)?;
-        if path.depth() != 3 {
-            return Err(InvalidDepthOfCAP26Path);
+            HDPath::try_parse_base_hdpath(value, |v| CommonError::InvalidDepthOfCAP26Path {
+                expected: v.expected,
+                found: v.found,
+            })?;
+        if path.depth() != expected_depth {
+            return Err(CommonError::InvalidDepthOfCAP26Path {
+                expected: expected_depth,
+                found: path.depth(),
+            });
         }
         let value = HDPath::parse_try_map(&components, 2, Box::new(|v| Ok(v)))?;
         if value != Self::LAST_COMPONENT_VALUE {
-            return Err(InvalidGetIDPath(value));
+            return Err(CommonError::InvalidGetIDPath(value));
         }
         let hd_path = HDPath::from_components(components);
         assert_eq!(Self { path: hd_path }, Self::default());
@@ -56,8 +59,11 @@ impl TryFrom<&HDPath> for GetIDPath {
 impl GetIDPath {
     pub const LAST_COMPONENT_VALUE: HDPathValue = 365;
 
-    pub fn from_str(s: &str) -> Result<Self, HDPathError> {
-        let (path, _) = HDPath::try_parse_base(s, HDPathError::InvalidDepthOfCAP26Path)?;
+    pub fn from_str(s: &str) -> Result<Self> {
+        let (path, _) = HDPath::try_parse_base(s, |v| CommonError::InvalidDepthOfCAP26Path {
+            expected: v.expected,
+            found: v.found,
+        })?;
         return Self::try_from(&path);
     }
 }
@@ -82,7 +88,7 @@ impl<'de> serde::Deserialize<'de> for GetIDPath {
 }
 
 impl TryInto<GetIDPath> for &str {
-    type Error = HDPathError;
+    type Error = CommonError;
 
     fn try_into(self) -> Result<GetIDPath, Self::Error> {
         GetIDPath::from_str(self)
@@ -92,7 +98,7 @@ impl TryInto<GetIDPath> for &str {
 #[cfg(test)]
 mod tests {
     use crate::{
-        HDPathError, {assert_json_value_eq_after_roundtrip, assert_json_value_fails},
+        CommonError, {assert_json_value_eq_after_roundtrip, assert_json_value_fails},
     };
     use serde_json::json;
 
@@ -116,14 +122,17 @@ mod tests {
     fn invalid_value() {
         assert_eq!(
             GetIDPath::from_str("m/44H/1022H/1337H"),
-            Err(HDPathError::InvalidGetIDPath(1337))
+            Err(CommonError::InvalidGetIDPath(1337))
         );
     }
     #[test]
     fn invalid_depth() {
         assert_eq!(
             GetIDPath::from_str("m/44H/1022H"),
-            Err(HDPathError::InvalidDepthOfCAP26Path)
+            Err(CommonError::InvalidDepthOfCAP26Path {
+                expected: 6,
+                found: 2
+            })
         );
     }
 

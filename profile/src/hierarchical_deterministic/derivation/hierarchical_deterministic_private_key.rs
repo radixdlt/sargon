@@ -1,15 +1,4 @@
-use crate::PrivateKey;
-
-use crate::{Ed25519PrivateKey, Secp256k1PrivateKey};
-
-use crate::{AccountPath, BIP44LikePath, CAP26Repr};
-
-use crate::HasPlaceholder;
-
-use super::{
-    derivation_path::DerivationPath,
-    hierarchical_deterministic_public_key::HierarchicalDeterministicPublicKey,
-};
+use crate::prelude::*;
 
 /// An ephemeral (never persisted) HD PrivateKey which contains
 /// the derivation path used to derive it.

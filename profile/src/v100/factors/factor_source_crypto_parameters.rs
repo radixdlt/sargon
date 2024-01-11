@@ -1,9 +1,5 @@
-use crate::CommonError as Error;
-use crate::DerivationPathScheme;
-use crate::IdentifiedVecVia;
-use crate::SLIP10Curve;
+use crate::prelude::*;
 use identified_vec::IsIdentifiedVec;
-use serde::{Deserialize, Serialize};
 
 /// Cryptographic parameters a certain FactorSource supports, e.g. which Elliptic Curves
 /// it supports and which Hierarchical Deterministic (HD) derivations schemes it supports,
@@ -30,14 +26,14 @@ pub struct FactorSourceCryptoParameters {
 
 impl FactorSourceCryptoParameters {
     #[cfg(not(tarpaulin_include))] // false negative
-    pub fn new<I, J>(curves: I, schemes: J) -> Result<Self, Error>
+    pub fn new<I, J>(curves: I, schemes: J) -> Result<Self>
     where
         I: IntoIterator<Item = SLIP10Curve>,
         J: IntoIterator<Item = DerivationPathScheme>,
     {
         let supported_curves = IdentifiedVecVia::from_iter(curves);
         if supported_curves.len() == 0 {
-            return Err(Error::FactorSourceCryptoParametersSupportedCurvesInvalidSize);
+            return Err(CommonError::FactorSourceCryptoParametersSupportedCurvesInvalidSize);
         }
         let supported_derivation_path_schemes = IdentifiedVecVia::from_iter(schemes);
 

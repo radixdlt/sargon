@@ -1,21 +1,11 @@
-use crate::{CommonError as Error, EntityAddress, NonFungibleLocalId};
+use crate::prelude::*;
 use radix_engine_common::address::AddressBech32Decoder;
 use radix_engine_toolkit_json::models::scrypto::non_fungible_global_id::{
     SerializableNonFungibleGlobalId as EngineSerializableNonFungibleGlobalId,
     SerializableNonFungibleGlobalIdInternal as EngineSerializableNonFungibleGlobalIdInternal,
 };
-use serde::{de, Deserializer, Serialize, Serializer};
-use std::{
-    cmp::Ordering,
-    fmt::Display,
-    hash::{Hash, Hasher},
-    str::FromStr,
-};
+
 use transaction::prelude::NonFungibleGlobalId as EngineNonFungibleGlobalId;
-
-use crate::NetworkID;
-
-use super::resource_address::ResourceAddress;
 
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct NonFungibleGlobalId {
@@ -91,7 +81,7 @@ impl NonFungibleGlobalId {
     }
 }
 
-impl Display for NonFungibleGlobalId {
+impl std::fmt::Display for NonFungibleGlobalId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.engine().0)
     }
@@ -109,17 +99,17 @@ impl PartialOrd for NonFungibleGlobalId {
     }
 }
 
-impl Hash for NonFungibleGlobalId {
-    fn hash<H: Hasher>(&self, state: &mut H) {
+impl std::hash::Hash for NonFungibleGlobalId {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.to_canonical_string().hash(state);
     }
 }
 
 impl NonFungibleGlobalId {
-    pub fn try_from_str(s: &str) -> Result<Self, Error> {
+    pub fn try_from_str(s: &str) -> Result<Self> {
         EngineSerializableNonFungibleGlobalIdInternal::from_str(s)
             .map(|i| Self::from_internal_engine(i))
-            .map_err(|_| Error::InvalidNonFungibleGlobalID)
+            .map_err(|_| CommonError::InvalidNonFungibleGlobalID)
     }
 }
 

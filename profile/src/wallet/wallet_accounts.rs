@@ -1,16 +1,12 @@
 use identified_vec::IsIdentifiedVec;
 
-use crate::{
-    Account, AccountAddress, AppearanceID, CommonError, DeviceFactorSource, DisplayName,
-    EntityKind, FactorSourceIDFromHash, Mnemonic, MnemonicWithPassphrase, NetworkID,
-    PrivateHierarchicalDeterministicFactorSource, SecureStorageKey, Wallet,
-};
+use crate::prelude::*;
 
 impl Wallet {
     pub fn load_private_device_factor_source(
         &self,
         device_factor_source: DeviceFactorSource,
-    ) -> Result<PrivateHierarchicalDeterministicFactorSource, CommonError> {
+    ) -> Result<PrivateHierarchicalDeterministicFactorSource> {
         self.wallet_client_storage
             .load_mnemonic_with_passphrase(&device_factor_source.id)
             .map(|mwp| PrivateHierarchicalDeterministicFactorSource::new(mwp, device_factor_source))
@@ -18,7 +14,7 @@ impl Wallet {
     pub fn load_private_device_factor_source_by_id(
         &self,
         id: &FactorSourceIDFromHash,
-    ) -> Result<PrivateHierarchicalDeterministicFactorSource, CommonError> {
+    ) -> Result<PrivateHierarchicalDeterministicFactorSource> {
         let device_factor_source = self.profile().device_factor_source_by_id(id)?;
         self.load_private_device_factor_source(device_factor_source)
     }
@@ -31,16 +27,17 @@ impl Wallet {
 impl Wallet {
     /// Creates a new non securified account using the `main` "Babylon" `DeviceFactorSource` and the "next" index for this FactorSource
     /// as derivation path.
-    pub fn create_new_account(
-        &self,
-        network_id: NetworkID,
-        name: DisplayName,
-    ) -> Result<Account, CommonError> {
+    pub fn create_new_account(&self, network_id: NetworkID, name: DisplayName) -> Result<Account> {
         let profile = &self.profile();
         let bdfs = profile.bdfs();
         let index = profile.next_derivation_index_for_entity(EntityKind::Accounts, network_id);
-        let number_of_accounts_on_network = profile.networks.get(&network_id).map(|n| n.accounts.len()).unwrap_or(0);
-        let appearance_id = AppearanceID::from_number_of_accounts_on_network(number_of_accounts_on_network);
+        let number_of_accounts_on_network = profile
+            .networks
+            .get(&network_id)
+            .map(|n| n.accounts.len())
+            .unwrap_or(0);
+        let appearance_id =
+            AppearanceID::from_number_of_accounts_on_network(number_of_accounts_on_network);
         self.load_private_device_factor_source(bdfs)
             .map(|p| p.derive_account_creation_factor_instance(network_id, index))
             .map(|fi| Account::new(fi, name, AppearanceID::new(0).unwrap()))
@@ -51,7 +48,7 @@ impl Wallet {
         &self,
         address: AccountAddress,
         to: DisplayName,
-    ) -> Result<Account, CommonError> {
+    ) -> Result<Account> {
         self.write(|mut p| p.update_account(&address, |a| a.display_name = to.to_owned()))
             .ok_or_else(|| CommonError::UnknownAccount)
     }

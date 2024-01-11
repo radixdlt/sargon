@@ -1,16 +1,14 @@
-use crate::{Hex32Bytes, KeyError as Error};
+use crate::prelude::*;
+
 use radix_engine_common::crypto::IsHash;
 use transaction::signing::secp256k1::{
     Secp256k1PrivateKey as EngineSecp256k1PrivateKey, Secp256k1Signature,
 };
 
-use crate::HasPlaceholder;
-
-use super::public_key::Secp256k1PublicKey;
-use std::fmt::{Debug, Formatter};
-
 /// A secp256k1 private key used to create cryptographic signatures, more specifically
 /// ECDSA signatures, that offer recovery of the public key.
+#[derive(derive_more::Debug)]
+#[debug("{}", "self.to_hex()")]
 pub struct Secp256k1PrivateKey(EngineSecp256k1PrivateKey);
 
 impl Secp256k1PrivateKey {
@@ -37,12 +35,6 @@ impl PartialEq for Secp256k1PrivateKey {
 
 impl Eq for Secp256k1PrivateKey {}
 
-impl Debug for Secp256k1PrivateKey {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str(&self.to_hex())
-    }
-}
-
 impl Secp256k1PrivateKey {
     pub fn from_engine(engine: EngineSecp256k1PrivateKey) -> Self {
         Self(engine)
@@ -62,32 +54,32 @@ impl Secp256k1PrivateKey {
     }
 
     pub fn to_hex(&self) -> String {
-        hex::encode(self.to_bytes())
+        hex_encode(self.to_bytes())
     }
 
-    pub fn from_bytes(slice: &[u8]) -> Result<Self, Error> {
+    pub fn from_bytes(slice: &[u8]) -> Result<Self> {
         EngineSecp256k1PrivateKey::from_bytes(slice)
-            .map_err(|_| Error::InvalidSecp256k1PrivateKeyFromBytes)
+            .map_err(|_| CommonError::InvalidSecp256k1PrivateKeyFromBytes(slice.to_owned()))
             .map(Self::from_engine)
     }
 
-    pub fn from_vec(bytes: Vec<u8>) -> Result<Self, Error> {
+    pub fn from_vec(bytes: Vec<u8>) -> Result<Self> {
         Self::from_bytes(bytes.as_slice())
     }
 
-    pub fn from_hex32_bytes(bytes: Hex32Bytes) -> Result<Self, Error> {
+    pub fn from_hex32_bytes(bytes: Hex32Bytes) -> Result<Self> {
         Self::from_vec(bytes.to_vec())
     }
 
-    pub fn from_str(hex: &str) -> Result<Self, Error> {
+    pub fn from_str(hex: &str) -> Result<Self> {
         Hex32Bytes::from_hex(hex)
-            .map_err(|_| Error::InvalidSecp256k1PrivateKeyFromString)
+            .map_err(|_| CommonError::InvalidSecp256k1PrivateKeyFromString(hex.to_owned()))
             .and_then(Self::from_hex32_bytes)
     }
 }
 
 impl TryInto<Secp256k1PrivateKey> for &str {
-    type Error = crate::KeyError;
+    type Error = crate::CommonError;
 
     fn try_into(self) -> Result<Secp256k1PrivateKey, Self::Error> {
         Secp256k1PrivateKey::from_str(self)
@@ -95,7 +87,7 @@ impl TryInto<Secp256k1PrivateKey> for &str {
 }
 
 impl TryFrom<&[u8]> for Secp256k1PrivateKey {
-    type Error = crate::KeyError;
+    type Error = crate::CommonError;
 
     fn try_from(slice: &[u8]) -> Result<Secp256k1PrivateKey, Self::Error> {
         Secp256k1PrivateKey::from_bytes(slice)
@@ -140,13 +132,8 @@ impl Secp256k1PrivateKey {
 #[cfg(test)]
 mod tests {
 
-    use std::{collections::HashSet, str::FromStr};
-
+    use crate::prelude::*;
     use transaction::signing::secp256k1::Secp256k1Signature;
-
-    use crate::{hash, HasPlaceholder, Hex32Bytes, KeyError as Error};
-
-    use super::Secp256k1PrivateKey;
 
     #[test]
     fn equality() {
@@ -188,8 +175,8 @@ mod tests {
 
     #[test]
     fn bytes_roundtrip() {
-        let bytes = hex::decode("0000000000000000000000000000000000000000000000000000000000000001")
-            .unwrap();
+        let bytes =
+            hex_decode("0000000000000000000000000000000000000000000000000000000000000001").unwrap();
         assert_eq!(
             Secp256k1PrivateKey::from_bytes(bytes.as_slice())
                 .unwrap()
@@ -208,7 +195,7 @@ mod tests {
     fn invalid_hex() {
         assert_eq!(
             Secp256k1PrivateKey::from_str("not hex"),
-            Err(Error::InvalidSecp256k1PrivateKeyFromString)
+            Err(CommonError::InvalidSecp256k1PrivateKeyFromString)
         );
     }
 
@@ -216,7 +203,7 @@ mod tests {
     fn invalid_hex_too_short() {
         assert_eq!(
             Secp256k1PrivateKey::from_str("dead"),
-            Err(Error::InvalidSecp256k1PrivateKeyFromString)
+            Err(CommonError::InvalidSecp256k1PrivateKeyFromString)
         );
     }
 
@@ -224,7 +211,7 @@ mod tests {
     fn invalid_bytes() {
         assert_eq!(
             Secp256k1PrivateKey::from_bytes(&[0u8] as &[u8]),
-            Err(Error::InvalidSecp256k1PrivateKeyFromBytes)
+            Err(CommonError::InvalidSecp256k1PrivateKeyFromBytes)
         );
     }
 
@@ -232,7 +219,7 @@ mod tests {
     fn invalid_too_large() {
         assert_eq!(
             Secp256k1PrivateKey::from_bytes(&[0xFFu8; 32]),
-            Err(Error::InvalidSecp256k1PrivateKeyFromBytes)
+            Err(CommonError::InvalidSecp256k1PrivateKeyFromBytes)
         );
     }
 
@@ -240,7 +227,7 @@ mod tests {
     fn invalid_zero() {
         assert_eq!(
             Secp256k1PrivateKey::from_bytes(&[0u8; 32]),
-            Err(Error::InvalidSecp256k1PrivateKeyFromBytes)
+            Err(CommonError::InvalidSecp256k1PrivateKeyFromBytes)
         );
     }
 
@@ -264,7 +251,7 @@ mod tests {
     #[test]
     fn try_from_bytes() {
         let str = "0000000000000000000000000000000000000000000000000000000000000001";
-        let vec = hex::decode(str).unwrap();
+        let vec = hex_decode(str).unwrap();
         let key = Secp256k1PrivateKey::try_from(vec.as_slice()).unwrap();
         assert_eq!(key.to_hex(), str);
     }

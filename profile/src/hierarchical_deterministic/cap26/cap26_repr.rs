@@ -1,8 +1,4 @@
-use crate::HDPathError;
-
-use crate::{
-    CAP26EntityKind, CAP26KeyKind, Derivation, HDPath, HDPathComponent, HDPathValue, NetworkID,
-};
+use crate::prelude::*;
 
 pub trait CAP26Repr: Derivation {
     fn entity_kind() -> Option<CAP26EntityKind>;
@@ -16,48 +12,53 @@ pub trait CAP26Repr: Derivation {
     ) -> Self;
 
     #[cfg(not(tarpaulin_include))] // false negative, this is in fact heavily tested.
-    fn try_from_hdpath(hdpath: &HDPath) -> Result<Self, HDPathError> {
-        use HDPathError::*;
+    fn try_from_hdpath(hdpath: &HDPath) -> Result<Self> {
+        let expected_depth = 6;
         let (path, components) =
-            HDPath::try_parse_base_hdpath(hdpath, HDPathError::InvalidDepthOfCAP26Path)?;
+            HDPath::try_parse_base_hdpath(hdpath, |v| CommonError::InvalidDepthOfCAP26Path {
+                expected: v.expected,
+                found: v.found,
+            })?;
         if !components.clone().iter().all(|c| c.is_hardened()) {
-            return Err(NotAllComponentsAreHardened);
+            return Err(CommonError::NotAllComponentsAreHardened);
         }
         if path.depth() != 6 {
-            return Err(InvalidDepthOfCAP26Path);
+            return Err(CommonError::InvalidDepthOfCAP26Path {
+                expected: expected_depth,
+                found: path.depth(),
+            });
         }
-        let network_id =
-            HDPath::parse_try_map(
-                &components,
-                2,
-                Box::new(|v| {
-                    if v <= u8::MAX as u32 {
-                        let d = v as u8;
-                        NetworkID::from_repr(d).ok_or(UnsupportedNetworkID(d))
-                    } else {
-                        Err(InvalidNetworkIDExceedsLimit(v))
-                    }
-                }),
-            )?;
+        let network_id = HDPath::parse_try_map(
+            &components,
+            2,
+            Box::new(|v| {
+                if v <= u8::MAX as u32 {
+                    let d = v as u8;
+                    NetworkID::from_repr(d).ok_or(CommonError::UnsupportedNetworkID(d))
+                } else {
+                    Err(CommonError::InvalidNetworkIDExceedsLimit(v))
+                }
+            }),
+        )?;
         let entity_kind = HDPath::parse_try_map(
             &components,
             3,
-            Box::new(|v| CAP26EntityKind::from_repr(v).ok_or(InvalidEntityKind(v))),
+            Box::new(|v| CAP26EntityKind::from_repr(v).ok_or(CommonError::InvalidEntityKind(v))),
         )?;
 
         if let Some(expected_entity_kind) = Self::entity_kind() {
             if entity_kind != expected_entity_kind {
-                return Err(WrongEntityKind(
-                    entity_kind.discriminant(),
-                    expected_entity_kind.discriminant(),
-                ));
+                return Err(CommonError::WrongEntityKind {
+                    expected: expected_entity_kind.discriminant(),
+                    found: entity_kind.discriminant(),
+                });
             }
         }
 
         let key_kind = HDPath::parse_try_map(
             &components,
             4,
-            Box::new(|v| CAP26KeyKind::from_repr(v).ok_or(InvalidKeyKind(v))),
+            Box::new(|v| CAP26KeyKind::from_repr(v).ok_or(CommonError::InvalidKeyKind(v))),
         )?;
 
         let index = HDPath::parse_try_map(&components, 5, Box::new(|v| Ok(v)))?;
@@ -66,8 +67,11 @@ pub trait CAP26Repr: Derivation {
     }
 
     #[cfg(not(tarpaulin_include))] // false negative, this is in fact heavily tested.
-    fn from_str(s: &str) -> Result<Self, HDPathError> {
-        let (path, _) = HDPath::try_parse_base(s, HDPathError::InvalidDepthOfCAP26Path)?;
+    fn from_str(s: &str) -> Result<Self> {
+        let (path, _) = HDPath::try_parse_base(s, |v| CommonError::InvalidDepthOfCAP26Path {
+            expected: v.expected,
+            found: v.found,
+        })?;
         Self::try_from_hdpath(&path)
     }
 

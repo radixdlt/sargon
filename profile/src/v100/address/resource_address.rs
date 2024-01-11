@@ -1,41 +1,36 @@
-use crate::{v100::AbstractEntityType, CommonError, NetworkID};
-use serde::{de, Deserializer, Serialize, Serializer};
-use std::fmt::Display;
-
-use super::entity_address::EntityAddress;
+use crate::prelude::*;
 
 /// The address of an Account, a bech32 encoding of a public key hash
 /// that starts with the prefix `"account_"`, dependent on NetworkID, meaning the same
 /// public key used for two AccountAddresses on two different networks will not have
 /// the same address.
-#[derive(Clone, Debug, Default, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record)]
+#[serde_as]
+#[derive(
+    Clone,
+    Debug,
+    Default,
+    PartialEq,
+    Eq,
+    Serialize,
+    Deserialize,
+    Hash,
+    derive_more::Display,
+    PartialOrd,
+    Ord,
+    uniffi::Record,
+)]
+#[display("{address}")]
 pub struct ResourceAddress {
+    #[serde_as(as = "DisplayFromStr")]
     pub address: String,
+
+    #[serde(skip_serializing)]
     pub network_id: NetworkID,
 }
 
 #[uniffi::export]
-pub fn new_resource_address(bech32: String) -> Result<ResourceAddress, CommonError> {
+pub fn new_resource_address(bech32: String) -> Result<ResourceAddress> {
     ResourceAddress::try_from_bech32(bech32.as_str())
-}
-
-impl Serialize for ResourceAddress {
-    /// Serializes this `ResourceAddress` into its bech32 address string as JSON.
-    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_str(&self.address)
-    }
-}
-
-impl<'de> serde::Deserialize<'de> for ResourceAddress {
-    /// Tries to deserializes a JSON string as a bech32 address into an `ResourceAddress`.
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<ResourceAddress, D::Error> {
-        let s = String::deserialize(d)?;
-        ResourceAddress::try_from_bech32(&s).map_err(de::Error::custom)
-    }
 }
 
 impl EntityAddress for ResourceAddress {
@@ -55,17 +50,11 @@ impl EntityAddress for ResourceAddress {
     }
 }
 
-impl TryInto<ResourceAddress> for &str {
+impl TryFrom<&str> for ResourceAddress {
     type Error = CommonError;
 
-    fn try_into(self) -> Result<ResourceAddress, Self::Error> {
-        ResourceAddress::try_from_bech32(self)
-    }
-}
-
-impl Display for ResourceAddress {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.address)
+    fn try_from(value: &str) -> Result<Self> {
+        ResourceAddress::try_from_bech32(value)
     }
 }
 

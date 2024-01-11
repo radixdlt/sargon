@@ -1,14 +1,4 @@
-use crate::HDPathError;
-use serde::{de, Deserializer, Serialize, Serializer};
-
-use crate::HasPlaceholder;
-
-use crate::{
-    CAP26EntityKind, CAP26KeyKind, CAP26Path, CAP26Repr, Derivation, DerivationPath,
-    DerivationPathScheme, HDPath, HDPathValue, NetworkID,
-};
-
-use super::is_entity_path::IsEntityPath;
+use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record)]
 pub struct AccountPath {
@@ -38,9 +28,9 @@ impl IsEntityPath for AccountPath {
 }
 
 impl TryFrom<&HDPath> for AccountPath {
-    type Error = HDPathError;
+    type Error = CommonError;
 
-    fn try_from(value: &HDPath) -> Result<Self, Self::Error> {
+    fn try_from(value: &HDPath) -> Result<Self> {
         Self::try_from_hdpath(value)
     }
 }
@@ -99,7 +89,7 @@ impl<'de> serde::Deserialize<'de> for AccountPath {
 }
 
 impl TryInto<AccountPath> for &str {
-    type Error = HDPathError;
+    type Error = CommonError;
 
     fn try_into(self) -> Result<AccountPath, Self::Error> {
         AccountPath::from_str(self)
@@ -124,17 +114,8 @@ impl Derivation for AccountPath {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        HDPathError, HasPlaceholder,
-        {assert_json_value_eq_after_roundtrip, assert_json_value_ne_after_roundtrip},
-    };
+    use crate::prelude::*;
     use serde_json::json;
-
-    use crate::{
-        CAP26EntityKind, CAP26KeyKind, CAP26Repr, Derivation, HDPath, IsEntityPath, NetworkID,
-    };
-
-    use super::AccountPath;
 
     #[test]
     fn equality() {
@@ -195,7 +176,10 @@ mod tests {
     fn invalid_depth() {
         assert_eq!(
             AccountPath::from_str("m/44H/1022H"),
-            Err(HDPathError::InvalidDepthOfCAP26Path)
+            Err(CommonError::InvalidDepthOfBIP44Path {
+                expected: 6,
+                found: 1
+            })
         )
     }
 
@@ -203,7 +187,7 @@ mod tests {
     fn not_all_hardened() {
         assert_eq!(
             AccountPath::from_str("m/44H/1022H/1H/525H/1460H/0"), // last not hardened
-            Err(HDPathError::NotAllComponentsAreHardened)
+            Err(CommonError::NotAllComponentsAreHardened)
         )
     }
 
@@ -211,7 +195,7 @@ mod tests {
     fn cointype_not_found() {
         assert_eq!(
             AccountPath::from_str("m/44H/33H/1H/525H/1460H/0"), // `33` instead of 1022
-            Err(HDPathError::CoinTypeNotFound(33))
+            Err(CommonError::CoinTypeNotFound(33))
         )
     }
 
@@ -219,10 +203,10 @@ mod tests {
     fn fails_when_entity_type_identity() {
         assert_eq!(
             AccountPath::from_str("m/44H/1022H/1H/618H/1460H/0H"),
-            Err(HDPathError::WrongEntityKind(
-                CAP26EntityKind::Identity.discriminant(),
-                CAP26EntityKind::Account.discriminant()
-            ))
+            Err(CommonError::WrongEntityKind {
+                expected: CAP26EntityKind::Account.discriminant(),
+                found: CAP26EntityKind::Identity.discriminant()
+            })
         )
     }
 
@@ -230,7 +214,7 @@ mod tests {
     fn fails_when_entity_type_does_not_exist() {
         assert_eq!(
             AccountPath::from_str("m/44H/1022H/1H/99999H/1460H/0H"),
-            Err(HDPathError::InvalidEntityKind(99999))
+            Err(CommonError::InvalidEntityKind(99999))
         )
     }
 
@@ -238,7 +222,7 @@ mod tests {
     fn fails_when_key_kind_does_not_exist() {
         assert_eq!(
             AccountPath::from_str("m/44H/1022H/1H/525H/22222H/0H"),
-            Err(HDPathError::InvalidKeyKind(22222))
+            Err(CommonError::InvalidKeyKind(22222))
         )
     }
 
@@ -246,7 +230,7 @@ mod tests {
     fn fails_when_network_id_is_out_of_bounds() {
         assert_eq!(
             AccountPath::from_str("m/44H/1022H/4444H/525H/1460H/0H"),
-            Err(HDPathError::InvalidNetworkIDExceedsLimit(4444))
+            Err(CommonError::InvalidNetworkIDExceedsLimit(4444))
         )
     }
 
@@ -254,7 +238,7 @@ mod tests {
     fn fails_when_not_bip44() {
         assert_eq!(
             AccountPath::from_str("m/777H/1022H/1H/525H/1460H/0H"),
-            Err(HDPathError::BIP44PurposeNotFound(777))
+            Err(CommonError::BIP44PurposeNotFound(777))
         )
     }
 
@@ -267,7 +251,7 @@ mod tests {
     fn fails_when_index_is_too_large() {
         assert_eq!(
             AccountPath::from_str("m/44H/1022H/1H/525H/1460H/4294967296H"),
-            Err(HDPathError::InvalidBIP32Path("m/44H/1022H/1H/525H/1460H/4294967296H".to_string()))
+            Err(CommonError::InvalidBIP32Path("m/44H/1022H/1H/525H/1460H/4294967296H".to_string()))
         )
     }
 
@@ -319,7 +303,10 @@ mod tests {
         let hdpath = HDPath::from_str("m/44H/1022H/1H/618H/1460H/0H").unwrap();
         assert_eq!(
             AccountPath::try_from(&hdpath),
-            Err(HDPathError::WrongEntityKind(618, 525))
+            Err(CommonError::WrongEntityKind {
+                expected: 525,
+                found: 618
+            })
         );
     }
 }

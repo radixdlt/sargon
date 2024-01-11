@@ -1,35 +1,36 @@
-use crate::{Hex32Bytes, KeyError as Error};
+use crate::prelude::*;
+
 use radix_engine_common::crypto::{Ed25519PublicKey as EngineEd25519PublicKey, Hash};
-use serde::{Deserialize, Serialize};
-use serde_with::{hex::Hex, serde_as};
-use std::{
-    fmt::{Debug, Formatter},
-    str::FromStr,
-};
 use transaction::{signing::ed25519::Ed25519Signature, validation::verify_ed25519};
-
-use crate::HasPlaceholder;
-
-use crate::Ed25519PrivateKey;
 
 /// An Ed25519 public key used to verify cryptographic signatures (EdDSA signatures).
 #[serde_as]
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record)]
+#[derive(
+    Serialize,
+    Deserialize,
+    Clone,
+    PartialEq,
+    Eq,
+    Hash,
+    PartialOrd,
+    Ord,
+    derive_more::Debug,
+    uniffi::Record,
+)]
 #[serde(transparent)]
+#[debug("{}", "self.to_hex()")]
 pub struct Ed25519PublicKey {
-    #[serde_as(as = "Hex")]
+    #[serde_as(as = "serde_with::hex::Hex")]
     value: Vec<u8>, // FIXME: change to either `radix_engine_common::crypto::Ed25519PublicKey` or `ed25519_dalek::PublicKey` once we have proper UniFFI lift/lower/UniffiCustomTypeConverter
 }
 
 #[uniffi::export]
-pub fn new_ed25519_public_key_from_hex(hex: String) -> Result<Ed25519PublicKey, crate::KeyError> {
+pub fn new_ed25519_public_key_from_hex(hex: String) -> Result<Ed25519PublicKey> {
     Ed25519PublicKey::from_hex(hex)
 }
 
 #[uniffi::export]
-pub fn new_ed25519_public_key_from_bytes(
-    bytes: Vec<u8>,
-) -> Result<Ed25519PublicKey, crate::KeyError> {
+pub fn new_ed25519_public_key_from_bytes(bytes: Vec<u8>) -> Result<Ed25519PublicKey> {
     Ed25519PublicKey::from_bytes(bytes)
 }
 
@@ -67,7 +68,7 @@ impl Ed25519PublicKey {
     }
 
     pub fn to_hex(&self) -> String {
-        hex::encode(self.to_bytes())
+        hex_encode(self.to_bytes())
     }
 }
 
@@ -76,12 +77,12 @@ impl Ed25519PublicKey {
         EngineEd25519PublicKey::try_from(self.to_bytes().as_slice()).unwrap()
     }
 
-    pub(crate) fn from_engine(engine: EngineEd25519PublicKey) -> Result<Self, Error> {
+    pub(crate) fn from_engine(engine: EngineEd25519PublicKey) -> Result<Self> {
         ed25519_dalek::PublicKey::from_bytes(engine.to_vec().as_slice())
             .map(|_| Self {
                 value: engine.to_vec(),
             }) // FIXME: Delete this once we can represent the key as a `uniffi::Record` without letting the field be bytes...(keep it as `EngineEd25519PublicKey`)
-            .map_err(|_| Error::InvalidEd25519PublicKeyPointNotOnCurve)
+            .map_err(|_| CommonError::InvalidEd25519PublicKeyPointNotOnCurve)
     }
 
     /// Verifies an EdDSA signature over Curve25519.
@@ -91,23 +92,23 @@ impl Ed25519PublicKey {
 }
 
 impl Ed25519PublicKey {
-    fn from_bytes(bytes: Vec<u8>) -> Result<Self, crate::KeyError> {
+    fn from_bytes(bytes: Vec<u8>) -> Result<Self> {
         EngineEd25519PublicKey::try_from(bytes.as_slice())
-            .map_err(|_| Error::InvalidEd25519PublicKeyFromBytes)
+            .map_err(|_| CommonError::InvalidEd25519PublicKeyFromBytes(bytes))
             .and_then(|pk| Self::from_engine(pk))
     }
 }
 
 impl TryFrom<&[u8]> for Ed25519PublicKey {
-    type Error = crate::KeyError;
+    type Error = crate::CommonError;
 
-    fn try_from(slice: &[u8]) -> Result<Self, Self::Error> {
+    fn try_from(slice: &[u8]) -> Result<Self> {
         Self::from_bytes(slice.to_vec())
     }
 }
 
 impl TryInto<Ed25519PublicKey> for &str {
-    type Error = crate::KeyError;
+    type Error = crate::CommonError;
 
     fn try_into(self) -> Result<Ed25519PublicKey, Self::Error> {
         Ed25519PublicKey::from_str(self)
@@ -115,16 +116,10 @@ impl TryInto<Ed25519PublicKey> for &str {
 }
 
 impl Ed25519PublicKey {
-    pub fn from_hex(hex: String) -> Result<Self, crate::KeyError> {
+    pub fn from_hex(hex: String) -> Result<Self> {
         Hex32Bytes::from_str(hex.as_str())
-            .map_err(|_| Error::InvalidEd25519PublicKeyFromString)
+            .map_err(|_| CommonError::InvalidEd25519PublicKeyFromString(hex))
             .and_then(|b| Ed25519PublicKey::try_from(b.to_vec().as_slice()))
-    }
-}
-
-impl Debug for Ed25519PublicKey {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str(&self.to_hex())
     }
 }
 
@@ -140,9 +135,9 @@ impl HasPlaceholder for Ed25519PublicKey {
 }
 
 impl FromStr for Ed25519PublicKey {
-    type Err = crate::KeyError;
+    type Err = crate::CommonError;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
+    fn from_str(s: &str) -> Result<Self> {
         Self::from_hex(s.to_string())
     }
 }
@@ -159,13 +154,9 @@ impl Ed25519PublicKey {
 
 #[cfg(test)]
 mod tests {
-    use std::{collections::BTreeSet, str::FromStr};
-
-    use crate::{assert_json_value_eq_after_roundtrip, HasPlaceholder, KeyError as Error};
+    use crate::prelude::*;
     use radix_engine_common::crypto::Ed25519PublicKey as EngineEd25519PublicKey;
     use serde_json::json;
-
-    use super::Ed25519PublicKey;
 
     #[test]
     fn equality() {
@@ -256,7 +247,7 @@ mod tests {
     fn invalid_bytes() {
         assert_eq!(
             Ed25519PublicKey::try_from(&[0u8] as &[u8]),
-            Err(Error::InvalidEd25519PublicKeyFromBytes)
+            Err(CommonError::InvalidEd25519PublicKeyFromBytes)
         );
     }
 
@@ -264,7 +255,7 @@ mod tests {
     fn invalid_hex_str() {
         assert_eq!(
             Ed25519PublicKey::from_str("not a valid hex string"),
-            Err(Error::InvalidEd25519PublicKeyFromString)
+            Err(CommonError::InvalidEd25519PublicKeyFromString)
         );
     }
 
@@ -272,7 +263,7 @@ mod tests {
     fn invalid_str_too_short() {
         assert_eq!(
             Ed25519PublicKey::from_str("dead"),
-            Err(Error::InvalidEd25519PublicKeyFromString)
+            Err(CommonError::InvalidEd25519PublicKeyFromString)
         );
     }
 
@@ -289,7 +280,7 @@ mod tests {
             Ed25519PublicKey::from_str(
                 "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
             ),
-            Err(Error::InvalidEd25519PublicKeyPointNotOnCurve)
+            Err(CommonError::InvalidEd25519PublicKeyPointNotOnCurve)
         );
     }
 

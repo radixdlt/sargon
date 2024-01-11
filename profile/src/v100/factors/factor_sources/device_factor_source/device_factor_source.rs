@@ -1,14 +1,4 @@
-use crate::{CommonError, MnemonicWithPassphrase, WalletClientModel};
-use serde::{Deserialize, Serialize};
-
-use crate::v100::{
-    FactorSource, FactorSourceCommon, FactorSourceID, FactorSourceIDFromHash, FactorSourceKind,
-    IsFactorSource,
-};
-
-use crate::HasPlaceholder;
-
-use super::device_factor_source_hint::DeviceFactorSourceHint;
+use crate::prelude::*;
 
 /// A factor source representing the device that the Radix Wallet is running on
 /// typically an iPhone or Android device. This is the initial factor source of
@@ -36,14 +26,18 @@ pub struct DeviceFactorSource {
 impl TryFrom<FactorSource> for DeviceFactorSource {
     type Error = CommonError;
 
-    fn try_from(value: FactorSource) -> Result<Self, Self::Error> {
+    fn try_from(value: FactorSource) -> Result<Self> {
         value
             .into_device()
             .map_err(|_| Self::Error::ExpectedDeviceFactorSourceGotSomethingElse)
     }
 }
-
 impl IsFactorSource for DeviceFactorSource {
+    fn factor_source_kind() -> FactorSourceKind {
+        FactorSourceKind::Device
+    }
+}
+impl BaseIsFactorSource for DeviceFactorSource {
     fn factor_source_kind(&self) -> FactorSourceKind {
         self.id.kind.clone()
     }

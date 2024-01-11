@@ -1,11 +1,7 @@
+use crate::prelude::*;
 use std::sync::Arc;
 
 use identified_vec::IsIdentifiedVec;
-
-use crate::{
-    fatal_error, CommonError, FactorSourceIDFromHash, HeadersList, MnemonicWithPassphrase,
-    PrivateHierarchicalDeterministicFactorSource, ProfileID, SecureStorage, SecureStorageKey,
-};
 
 #[derive(Debug)]
 pub struct WalletClientStorage {
@@ -17,7 +13,7 @@ impl WalletClientStorage {
     }
 }
 impl WalletClientStorage {
-    pub fn load<'de, T>(&self, key: SecureStorageKey) -> Result<Option<T>, CommonError>
+    pub fn load<'de, T>(&self, key: SecureStorageKey) -> Result<Option<T>>
     where
         T: serde::Deserialize<'de>,
     {
@@ -31,7 +27,7 @@ impl WalletClientStorage {
 
     /// Like `load` but returns `Result<T>` instead of `Result<Option<T>>` and throws the provided error if
     /// the value was `None`.
-    pub fn load_or<'de, T>(&self, key: SecureStorageKey, err: CommonError) -> Result<T, CommonError>
+    pub fn load_or<'de, T>(&self, key: SecureStorageKey, err: CommonError) -> Result<T>
     where
         T: serde::Deserialize<'de>,
     {
@@ -55,7 +51,7 @@ impl WalletClientStorage {
     pub fn load_mnemonic_with_passphrase(
         &self,
         id: &FactorSourceIDFromHash,
-    ) -> Result<MnemonicWithPassphrase, CommonError> {
+    ) -> Result<MnemonicWithPassphrase> {
         self.load_or(
             SecureStorageKey::DeviceFactorSourceMnemonic {
                 factor_source_id: id.clone(),
@@ -70,7 +66,7 @@ impl WalletClientStorage {
         }
     }
 
-    pub fn save<T>(&self, key: SecureStorageKey, value: &T) -> Result<(), CommonError>
+    pub fn save<T>(&self, key: SecureStorageKey, value: &T) -> Result<()>
     where
         T: serde::Serialize,
     {
@@ -82,7 +78,7 @@ impl WalletClientStorage {
     pub fn load_private_device_factor_source(
         &self,
         id: FactorSourceIDFromHash,
-    ) -> Result<MnemonicWithPassphrase, CommonError> {
+    ) -> Result<MnemonicWithPassphrase> {
         self.load_or(
             SecureStorageKey::DeviceFactorSourceMnemonic {
                 factor_source_id: id,

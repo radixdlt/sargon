@@ -1,34 +1,14 @@
-use std::fmt::Display;
-
-use std::str::FromStr;
-
-use crate::{
-    now, profile_id, CommonError, ContentHint, DeviceInfo, HasPlaceholder, ProfileSnapshotVersion,
-};
-use derive_more::Display;
-use iso8601_timestamp::Timestamp;
-use serde::{Deserialize, Serialize};
-use uuid::Uuid;
-
-/// A stable and globally unique identifier of a Profile.
-#[derive(Serialize, Deserialize, Debug, Display, Clone, PartialEq, Eq, Hash)]
-#[serde(transparent)]
-pub struct ProfileID(pub(crate) Uuid);
-uniffi::custom_newtype!(ProfileID, Uuid);
-impl ProfileID {
-    pub fn from_str(s: &str) -> Result<Self, CommonError> {
-        Uuid::from_str(s)
-            .map(ProfileID)
-            .map_err(|_| CommonError::InvalidProfileID)
-    }
-}
+use crate::prelude::*;
 
 /// The header of a Profile(Snapshot) contains crucial metadata
 /// about this Profile, such as which JSON data format it is
 /// compatible with and which device was used to create it and
 /// a hint about its contents.
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(
+    Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, derive_more::Display, uniffi::Record,
+)]
 #[serde(rename_all = "camelCase")]
+#[display("#{} v={}, content: {}", id, snapshot_version, content_hint)]
 pub struct Header {
     /// A versioning number that is increased when breaking
     /// changes is made to ProfileSnapshot JSON data format.
@@ -88,16 +68,6 @@ impl Header {
 impl Default for Header {
     fn default() -> Self {
         Self::new(DeviceInfo::default())
-    }
-}
-
-impl Display for Header {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "#{} v={}, content: {}",
-            self.id, self.snapshot_version, self.content_hint
-        )
     }
 }
 

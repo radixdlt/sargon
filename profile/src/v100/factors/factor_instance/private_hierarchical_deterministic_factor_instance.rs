@@ -1,10 +1,4 @@
-use crate::HierarchicalDeterministicPrivateKey;
-
-use crate::v100::factors::factor_source_id::FactorSourceID;
-
-use super::factor_instance::FactorInstance;
-
-use crate::HasPlaceholder;
+use crate::prelude::*;
 
 /// An ephemeral (never persisted) HD FactorInstance which contains
 /// the private key, with the ID of its creating FactorSource.

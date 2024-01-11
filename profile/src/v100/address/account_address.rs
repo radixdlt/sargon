@@ -1,19 +1,23 @@
-use serde::{de, Deserializer, Serialize, Serializer};
-use std::fmt::Display;
-
-use crate::{suffix_string, CommonError, PublicKey};
-
-use crate::{v100::AbstractEntityType, NetworkID};
-
-use crate::HasPlaceholder;
-
-use super::entity_address::EntityAddress;
+use crate::prelude::*;
 
 /// The address of an Account, a bech32 encoding of a public key hash
 /// that starts with the prefix `"account_"`, dependent on NetworkID, meaning the same
 /// public key used for two AccountAddresses on two different networks will not have
 /// the same address.
-#[derive(Clone, Debug, Default, PartialEq, Eq, Hash, uniffi::Record)]
+#[serde_as]
+#[derive(
+    Clone,
+    Debug,
+    Default,
+    Serialize,
+    Deserialize,
+    PartialEq,
+    derive_more::Display,
+    Eq,
+    Hash,
+    uniffi::Record,
+)]
+#[display("{address}")]
 pub struct AccountAddress {
     /// Human readable address of an account. Always starts with `"account_"``, for example:
     ///
@@ -26,16 +30,18 @@ pub struct AccountAddress {
     ///
     /// Addresses are checksummed, as per Bech32. **Only** *Account* addresses starts with
     /// the prefix `account_`.
+    #[serde_as(as = "DisplayFromStr")]
     pub address: String,
 
     /// The network this account address is tied to, i.e. which was used when a public key
     /// hash was used to bech32 encode it. This means that two public key hashes will result
     /// in two different account address on two different networks.
+    #[serde(skip_serializing)]
     pub network_id: NetworkID,
 }
 
 #[uniffi::export]
-pub fn new_account_address(bech32: String) -> Result<AccountAddress, CommonError> {
+pub fn new_account_address(bech32: String) -> Result<AccountAddress> {
     AccountAddress::try_from_bech32(bech32.as_str())
 }
 
@@ -84,25 +90,6 @@ impl AccountAddress {
     }
 }
 
-impl Serialize for AccountAddress {
-    /// Serializes this `AccountAddress` into its bech32 address string as JSON.
-    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_str(&self.address)
-    }
-}
-
-impl<'de> serde::Deserialize<'de> for AccountAddress {
-    /// Tries to deserializes a JSON string as a bech32 address into an `AccountAddress`.
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<AccountAddress, D::Error> {
-        let s = String::deserialize(d)?;
-        AccountAddress::try_from_bech32(&s).map_err(de::Error::custom)
-    }
-}
-
 impl EntityAddress for AccountAddress {
     /// Identifies that AccountAddress uses the `EntityType::Account`, which are used
     /// to validate the HRP (`"account_"`) and is also used when forming HD derivation
@@ -127,15 +114,8 @@ impl TryInto<AccountAddress> for &str {
     type Error = crate::CommonError;
 
     /// Tries to deserializes a bech32 address into an `AccountAddress`.
-    fn try_into(self) -> Result<AccountAddress, Self::Error> {
+    fn try_into(self) -> Result<AccountAddress> {
         AccountAddress::try_from_bech32(self)
-    }
-}
-
-impl Display for AccountAddress {
-    /// The full bech32 address.
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.address)
     }
 }
 

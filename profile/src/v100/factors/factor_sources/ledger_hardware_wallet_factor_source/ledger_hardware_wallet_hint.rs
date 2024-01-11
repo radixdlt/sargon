@@ -1,8 +1,4 @@
-use serde::{Deserialize, Serialize};
-
-use super::ledger_hardware_wallet_model::LedgerHardwareWalletModel;
-
-use crate::HasPlaceholder;
+use crate::prelude::*;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct LedgerHardwareWalletHint {
@@ -34,9 +30,7 @@ impl HasPlaceholder for LedgerHardwareWalletHint {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
-
-    use super::LedgerHardwareWalletHint;
+    use crate::prelude::*;
 
     #[test]
     fn equality() {

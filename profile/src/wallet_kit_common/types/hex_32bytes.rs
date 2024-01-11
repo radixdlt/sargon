@@ -1,19 +1,22 @@
-use std::{
-    fmt::{Debug, Display, Formatter},
-    str::FromStr,
-};
-
-use crate::HasPlaceholder;
-
+use crate::prelude::*;
 use radix_engine_common::crypto::{Hash, IsHash};
-use serde::{de, Deserializer, Serialize, Serializer};
-
-use crate::{generate_32_bytes, BytesError as Error};
 
 /// Serializable 32 bytes which **always** serializes as a **hex** string, this is useful
 /// since in Radix Wallet Kit we almost always want to serialize bytes into hex and this
 /// allows us to skip using
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, uniffi::Record)]
+#[derive(
+    Clone,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    derive_more::Display,
+    derive_more::Debug,
+    uniffi::Record,
+)]
+#[display("{}", self.to_hex())]
+#[debug("{}", self.to_hex())]
 pub struct Hex32Bytes {
     bytes: Vec<u8>, // FIXME: We REALLY want `[u8; 32]` - but that does not work in UniFFI land with `uniffi::Record` - so we should write an UniffiCustomTypeConverter for this (yet another one...)
 }
@@ -33,24 +36,11 @@ impl Hex32Bytes {
 
 impl Hex32Bytes {
     pub fn to_hex(&self) -> String {
-        hex::encode(self.bytes())
+        hex_encode(self.bytes())
     }
 
     pub fn to_string(&self) -> String {
         self.to_hex()
-    }
-}
-
-impl Display for Hex32Bytes {
-    /// Formats the `Hex32Bytes` as a hex string.
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", hex::encode(&self.bytes))
-    }
-}
-impl Debug for Hex32Bytes {
-    /// Formats the `Hex32Bytes` as a hex string.
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str(&hex::encode(&self.bytes))
     }
 }
 
@@ -62,14 +52,14 @@ impl From<Hash> for Hex32Bytes {
 }
 
 impl FromStr for Hex32Bytes {
-    type Err = Error;
+    type Err = CommonError;
 
     /// Tries to decode the string `s` into a `Hex32Bytes`. Will fail
     /// if the string is not valid hex or if the decoded bytes does
     /// not have length 32.
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        hex::decode(s)
-            .map_err(|_| Error::StringNotHex)
+        hex_decode(s)
+            .map_err(|_| CommonError::StringNotHex(s.to_owned()))
             .and_then(|v| Self::from_vec(v))
     }
 }
@@ -147,9 +137,9 @@ impl Hex32Bytes {
 
     /// Tries to turn the `Vec` into a `Hex32Bytes`. Will fail
     /// if `bytes` does not have length 32.
-    pub fn from_vec(bytes: Vec<u8>) -> Result<Self, Error> {
+    pub fn from_vec(bytes: Vec<u8>) -> Result<Self> {
         if bytes.len() != 32 {
-            return Err(Error::InvalidByteCountExpected32);
+            return Err(CommonError::InvalidByteCountExpected32);
         }
         Ok(Self { bytes })
     }
@@ -157,7 +147,7 @@ impl Hex32Bytes {
     /// Tries to decode the string `s` into a `Hex32Bytes`. Will fail
     /// if the string is not valid hex or if the decoded bytes does
     /// not have length 32.
-    pub fn from_hex(s: &str) -> Result<Self, Error> {
+    pub fn from_hex(s: &str) -> Result<Self> {
         Self::from_str(s)
     }
 }
@@ -183,13 +173,9 @@ impl<'de> serde::Deserialize<'de> for Hex32Bytes {
 
 #[cfg(test)]
 mod tests {
-    use std::{collections::HashSet, str::FromStr};
 
+    use crate::prelude::*;
     use serde_json::json;
-
-    use crate::{assert_json_value_eq_after_roundtrip, BytesError as Error, HasPlaceholder};
-
-    use super::Hex32Bytes;
 
     #[test]
     fn equality() {
@@ -255,9 +241,10 @@ mod tests {
 
     #[test]
     fn invalid_str() {
+        let s = "invalid str";
         assert_eq!(
-            Hex32Bytes::from_str("not a hex string this is"),
-            Err(Error::StringNotHex)
+            Hex32Bytes::from_str(s),
+            Err(CommonError::StringNotHex(s.to_owned()))
         );
     }
 
@@ -265,7 +252,7 @@ mod tests {
     fn invalid_len() {
         assert_eq!(
             Hex32Bytes::from_vec(Vec::from([0u8; 5])),
-            Err(Error::InvalidByteCountExpected32)
+            Err(CommonError::InvalidByteCountExpected32)
         )
     }
 

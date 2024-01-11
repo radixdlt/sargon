@@ -1,12 +1,4 @@
-use std::str::FromStr;
-
-use crate::{BIP39Language, HDPathError as Error, Hex32Bytes};
-use itertools::Itertools;
-use serde::{de, Deserializer, Serialize, Serializer};
-
-use crate::{BIP39Word, BIP39WordCount};
-
-use crate::HasPlaceholder;
+use crate::prelude::*;
 
 #[derive(Clone, PartialEq, Eq, Debug, Hash, uniffi::Record)]
 pub struct Mnemonic {
@@ -28,7 +20,7 @@ impl Mnemonic {
         let words = internal
             .word_iter()
             .map(|w| BIP39Word::new(w, language.into()))
-            .collect::<Result<Vec<BIP39Word>, Error>>()
+            .collect::<Result<Vec<BIP39Word>, CommonError>>()
             .expect("Crate bip39 generated words unknown to us.");
 
         let word_count = BIP39WordCount::from_count(internal.word_count())
@@ -57,9 +49,9 @@ impl Mnemonic {
     pub fn phrase(&self) -> String {
         self.words.iter().map(|w| w.word.to_string()).join(" ")
     }
-    pub fn from_phrase(phrase: &str) -> Result<Self, Error> {
+    pub fn from_phrase(phrase: &str) -> Result<Self> {
         bip39::Mnemonic::from_str(phrase)
-            .map_err(|_| Error::InvalidMnemonicPhrase)
+            .map_err(|_| CommonError::InvalidMnemonicPhrase)
             .map(Self::from_internal)
     }
 
@@ -90,7 +82,7 @@ impl<'de> serde::Deserialize<'de> for Mnemonic {
 }
 
 impl TryInto<Mnemonic> for &str {
-    type Error = crate::HDPathError;
+    type Error = crate::CommonError;
 
     /// Tries to deserializes a bech32 address into an `AccountAddress`.
     fn try_into(self) -> Result<Mnemonic, Self::Error> {
@@ -112,14 +104,8 @@ impl HasPlaceholder for Mnemonic {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
-        assert_json_value_ne_after_roundtrip, BIP39Language, HDPathError, HasPlaceholder,
-    };
-
+    use crate::prelude::*;
     use serde_json::json;
-
-    use crate::{BIP39WordCount, Mnemonic};
 
     #[test]
     fn equality() {
@@ -197,7 +183,7 @@ mod tests {
     fn from_phrase_invalid() {
         assert_eq!(
             Mnemonic::from_phrase("zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo abandon"),
-            Err(HDPathError::InvalidMnemonicPhrase)
+            Err(CommonError::InvalidMnemonicPhrase)
         );
     }
 

@@ -1,15 +1,9 @@
-use identified_vec::Identifiable;
-use serde::{Deserialize, Serialize};
+use crate::prelude::*;
 use std::{
     fmt::{Debug, Display, Formatter},
     ops::Deref,
     sync::Arc,
 };
-use url::Url;
-
-use crate::{CommonError, NetworkID};
-
-use super::radix_network::RadixNetwork;
 
 /// A gateway to some Radix Network, which is a high level REST API which clients (wallets) can
 /// consume in order to query asset balances and submit transactions.

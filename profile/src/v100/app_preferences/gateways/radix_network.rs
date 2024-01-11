@@ -1,17 +1,23 @@
-use crate::CommonError;
-use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-use std::fmt::Display;
-
-use crate::HasPlaceholder;
+use crate::prelude::*;
 
 use crate::NetworkID::{self, *};
 
 /// A version of the Radix Network, for a NetworkID with an identifier (name) and display description (display name)
 #[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Ord, PartialOrd, Hash, uniffi::Record,
+    Serialize,
+    Deserialize,
+    Clone,
+    Debug,
+    PartialEq,
+    Eq,
+    Ord,
+    PartialOrd,
+    Hash,
+    derive_more::Display,
+    uniffi::Record,
 )]
 #[serde(rename_all = "camelCase")]
+#[display("{} ({})", self.display_description, self.id.discriminant())]
 pub struct RadixNetwork {
     /// A String identifier (always lowercase) with the name of the Network that MUST match what Gateway returns.
     #[serde(rename = "name")]
@@ -22,17 +28,6 @@ pub struct RadixNetwork {
 
     /// A name of the network intended for display purposes only.
     pub display_description: String,
-}
-
-impl Display for RadixNetwork {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{} ({})",
-            self.display_description,
-            self.id.discriminant()
-        )
-    }
 }
 
 impl Default for RadixNetwork {
@@ -116,7 +111,7 @@ impl HasPlaceholder for RadixNetwork {
 }
 
 impl RadixNetwork {
-    pub fn lookup_by_id(id: NetworkID) -> Result<Self, CommonError> {
+    pub fn lookup_by_id(id: NetworkID) -> Result<Self> {
         let map = Self::lookup_map();
         let Some(network) = map.get(&id) else {
             return Err(CommonError::UnknownNetworkForID(id.discriminant()));
@@ -124,7 +119,7 @@ impl RadixNetwork {
         Ok(network.clone())
     }
 
-    pub fn lookup_by_name(logical_name: &str) -> Result<Self, CommonError> {
+    pub fn lookup_by_name(logical_name: &str) -> Result<Self> {
         let map = Self::lookup_map();
 
         map.iter()

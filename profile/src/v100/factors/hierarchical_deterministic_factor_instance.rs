@@ -1,18 +1,4 @@
-use crate::v100::factors::factor_source_kind::FactorSourceKind;
-
-use crate::NetworkID;
-
-use crate::{AccountPath, CAP26Repr, HDPathValue, MnemonicWithPassphrase};
-use crate::{
-    CAP26KeyKind, CAP26Path, DerivationPath, HierarchicalDeterministicPublicKey, IsEntityPath,
-};
-use crate::{CommonError as Error, PublicKey};
-use serde::{de, Deserializer, Serialize, Serializer};
-
-use super::{FactorInstance, FactorInstanceBadge, FactorSourceID, FactorSourceIDFromHash};
-
-use crate::HasPlaceholder;
-
+use crate::prelude::*;
 /// A virtual hierarchical deterministic `FactorInstance`
 #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct HierarchicalDeterministicFactorInstance {
@@ -50,10 +36,10 @@ impl HierarchicalDeterministicFactorInstance {
         factor_source_id: FactorSourceID,
         public_key: PublicKey,
         derivation_path: DerivationPath,
-    ) -> Result<Self, Error> {
+    ) -> Result<Self> {
         let factor_source_id = factor_source_id
             .as_hash()
-            .ok_or(Error::FactorSourceIDNotFromHash)?;
+            .ok_or(CommonError::FactorSourceIDNotFromHash)?;
         Ok(Self::with_key_and_path(
             factor_source_id.clone(),
             public_key,
@@ -61,11 +47,11 @@ impl HierarchicalDeterministicFactorInstance {
         ))
     }
 
-    pub fn try_from_factor_instance(factor_instance: FactorInstance) -> Result<Self, Error> {
+    pub fn try_from_factor_instance(factor_instance: FactorInstance) -> Result<Self> {
         let virtual_source = factor_instance
             .badge
             .as_virtual()
-            .ok_or(Error::BadgeIsNotVirtualHierarchicalDeterministic)?;
+            .ok_or(CommonError::BadgeIsNotVirtualHierarchicalDeterministic)?;
 
         let badge = virtual_source.as_hierarchical_deterministic();
 

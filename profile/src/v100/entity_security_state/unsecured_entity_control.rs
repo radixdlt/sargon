@@ -1,9 +1,4 @@
-use serde::{Deserialize, Serialize};
-
-use crate::v100::{HDFactorInstanceAccountCreation, HierarchicalDeterministicFactorInstance};
-use crate::CommonError as Error;
-
-use crate::HasPlaceholder;
+use crate::prelude::*;
 
 /// Basic security control of an unsecured entity. When said entity
 /// is "securified" it will no longer be controlled by this `UnsecuredEntityControl`
@@ -35,19 +30,17 @@ impl UnsecuredEntityControl {
     pub fn new(
         transaction_signing: HierarchicalDeterministicFactorInstance,
         authentication_signing: Option<HierarchicalDeterministicFactorInstance>,
-    ) -> Result<Self, Error> {
-        use crate::CAP26KeyKind;
-
+    ) -> Result<Self> {
         if let Some(auth) = &authentication_signing {
             if let Some(key_kind) = auth.key_kind() {
                 if key_kind != CAP26KeyKind::AuthenticationSigning {
-                    return Err(Error::WrongKeyKindOfAuthenticationSigningFactorInstance);
+                    return Err(CommonError::WrongKeyKindOfAuthenticationSigningFactorInstance);
                 }
             }
         }
         if let Some(key_kind) = transaction_signing.key_kind() {
             if key_kind != CAP26KeyKind::TransactionSigning {
-                return Err(Error::WrongKeyKindOfTransactionSigningFactorInstance);
+                return Err(CommonError::WrongKeyKindOfTransactionSigningFactorInstance);
             }
         }
         Ok(Self {
@@ -58,7 +51,7 @@ impl UnsecuredEntityControl {
 
     pub fn with_transaction_signing_only(
         transaction_signing: HierarchicalDeterministicFactorInstance,
-    ) -> Result<Self, Error> {
+    ) -> Result<Self> {
         Self::new(transaction_signing, None)
     }
 }

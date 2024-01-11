@@ -1,14 +1,6 @@
-use std::str::FromStr;
-
-use serde::{de, ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
-
-use crate::{Ed25519PublicKey, KeyError as Error, SLIP10Curve, Secp256k1PublicKey};
+use crate::prelude::*;
 
 use radix_engine_common::crypto::PublicKey as EnginePublicKey;
-
-use enum_as_inner::EnumAsInner;
-
-use crate::HasPlaceholder;
 
 /// A tagged union of supported public keys on different curves, supported
 /// curves are `secp256k1` and `Curve25519`
@@ -53,22 +45,22 @@ impl From<Secp256k1PublicKey> for PublicKey {
 
 impl PublicKey {
     /// Try to instantiate a `PublicKey` from bytes as a `Secp256k1PublicKey`.
-    pub fn secp256k1_from_bytes(slice: &[u8]) -> Result<Self, Error> {
+    pub fn secp256k1_from_bytes(slice: &[u8]) -> Result<Self> {
         Secp256k1PublicKey::try_from(slice).map(|k| k.into())
     }
 
     /// Try to instantiate a `PublicKey` from bytes as a `Ed25519PublicKey`.
-    pub fn ed25519_from_bytes(slice: &[u8]) -> Result<Self, Error> {
+    pub fn ed25519_from_bytes(slice: &[u8]) -> Result<Self> {
         Ed25519PublicKey::try_from(slice).map(|k| k.into())
     }
 
     /// Try to instantiate a `PublicKey` from hex string as a `Secp256k1PublicKey`.
-    pub fn secp256k1_from_str(hex: &str) -> Result<Self, Error> {
+    pub fn secp256k1_from_str(hex: &str) -> Result<Self> {
         Secp256k1PublicKey::from_str(hex).map(|k| k.into())
     }
 
     /// Try to instantiate a `PublicKey` from hex string as a `Ed25519PublicKey`.
-    pub fn ed25519_from_str(hex: &str) -> Result<Self, Error> {
+    pub fn ed25519_from_str(hex: &str) -> Result<Self> {
         Ed25519PublicKey::from_str(hex).map(|k| k.into())
     }
 }

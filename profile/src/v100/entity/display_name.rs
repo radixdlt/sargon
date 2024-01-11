@@ -1,33 +1,29 @@
-use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
+use crate::prelude::*;
 
-use crate::CommonError;
-use std::fmt::Display;
-
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, uniffi::Record)]
+#[serde_as]
+#[derive(
+    Serialize,
+    Deserialize,
+    Clone,
+    Debug,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    derive_more::Display,
+    uniffi::Record,
+)]
+#[serde(transparent)]
+#[display("{value}")]
 pub struct DisplayName {
+    #[serde_as(as = "serde_with::DisplayFromStr")]
     pub value: String,
 }
 
 #[uniffi::export]
-pub fn new_display_name(name: String) -> Result<DisplayName, CommonError> {
+pub fn new_display_name(name: String) -> Result<DisplayName> {
     DisplayName::new(name.as_str())
-}
-
-impl Serialize for DisplayName {
-    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_str(&self.value)
-    }
-}
-
-impl<'de> Deserialize<'de> for DisplayName {
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<DisplayName, D::Error> {
-        let s = String::deserialize(d)?;
-        DisplayName::new(s.as_str()).map_err(de::Error::custom)
-    }
 }
 
 impl DisplayName {
@@ -35,7 +31,7 @@ impl DisplayName {
         30
     }
 
-    pub fn new(value: &str) -> Result<Self, CommonError> {
+    pub fn new(value: &str) -> Result<Self> {
         let value = value.trim().to_string();
         if value.is_empty() {
             return Err(CommonError::InvalidDisplayNameEmpty);
@@ -48,12 +44,6 @@ impl DisplayName {
     }
 }
 
-impl Display for DisplayName {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.value)
-    }
-}
-
 impl Default for DisplayName {
     fn default() -> Self {
         Self::new("Unnamed").expect("Default display name")
@@ -63,7 +53,7 @@ impl Default for DisplayName {
 impl TryFrom<&str> for DisplayName {
     type Error = crate::CommonError;
 
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
+    fn try_from(value: &str) -> Result<Self> {
         DisplayName::new(value)
     }
 }

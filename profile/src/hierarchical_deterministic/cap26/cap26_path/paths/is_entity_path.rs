@@ -1,4 +1,4 @@
-use crate::{CAP26KeyKind, CAP26Repr, HDPathValue, NetworkID};
+use crate::prelude::*;
 
 pub trait IsEntityPath: CAP26Repr {
     fn network_id(&self) -> NetworkID;

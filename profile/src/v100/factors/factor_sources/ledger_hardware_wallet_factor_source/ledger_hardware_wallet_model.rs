@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+use crate::prelude::*;
 
 /// The model of a Ledger HQ hardware wallet NanoS, e.g.
 /// *Ledger Nano S+*.
@@ -16,12 +16,8 @@ pub enum LedgerHardwareWalletModel {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::BTreeSet;
-
-    use crate::assert_json_value_eq_after_roundtrip;
+    use crate::prelude::*;
     use serde_json::json;
-
-    use crate::v100::factors::factor_sources::ledger_hardware_wallet_factor_source::ledger_hardware_wallet_model::LedgerHardwareWalletModel;
 
     #[test]
     fn equality() {

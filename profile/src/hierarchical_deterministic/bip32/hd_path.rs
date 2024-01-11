@@ -1,23 +1,52 @@
-use std::str::FromStr;
+use crate::prelude::*;
 
-use crate::HDPathError;
-use itertools::Itertools;
-use serde::{de, Deserializer, Serialize, Serializer};
 use slip10::path::BIP32Path;
 
-use super::hd_path_component::{HDPathComponent, HDPathValue};
-
-use thiserror::Error;
-
-#[derive(Debug, Error, PartialEq)]
-pub enum BIP32Error {
-    #[error("Invalid BIP32 path '{0}'.")]
-    InvalidBIP32Path(String),
+#[derive(Debug)]
+pub struct InvalidValue<T: std::fmt::Debug> {
+    pub expected: T,
+    pub found: T,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record)]
 pub struct HDPath {
     pub components: Vec<HDPathComponent>,
+}
+
+impl std::fmt::Display for HDPath {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.to_bip32_string())
+    }
+}
+
+impl Serialize for HDPath {
+    /// Serializes this `HDPath` into its bech32 address string as JSON.
+    #[cfg(not(tarpaulin_include))] // false negative
+    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&self.to_string())
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for HDPath {
+    /// Tries to deserializes a JSON string as a bech32 address into an `HDPath`.
+    #[cfg(not(tarpaulin_include))] // false negative
+    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<HDPath, D::Error> {
+        let s = String::deserialize(d)?;
+        HDPath::from_str(&s).map_err(de::Error::custom)
+    }
+}
+
+impl std::str::FromStr for HDPath {
+    type Err = crate::CommonError;
+
+    fn from_str(s: &str) -> Result<Self> {
+        BIP32Path::from_str(s)
+            .map(|p| Self::from(p))
+            .map_err(|_| CommonError::InvalidBIP32Path(s.to_string()))
+    }
 }
 
 impl HDPath {
@@ -42,19 +71,13 @@ impl HDPath {
         self.components.len()
     }
 
-    pub fn from_str(s: &str) -> Result<Self, BIP32Error> {
-        BIP32Path::from_str(s)
-            .map(|p| Self::from(p))
-            .map_err(|_| BIP32Error::InvalidBIP32Path(s.to_string()))
-    }
-
     pub(crate) fn parse_try_map<T, F>(
         path: &Vec<HDPathComponent>,
         index: usize,
         try_map: F,
-    ) -> Result<T, HDPathError>
+    ) -> Result<T>
     where
-        F: Fn(HDPathValue) -> Result<T, HDPathError>,
+        F: Fn(HDPathValue) -> Result<T>,
     {
         let got = &path[index];
         try_map(got.index())
@@ -65,9 +88,9 @@ impl HDPath {
         index: usize,
         expected: HDPathComponent,
         err: F,
-    ) -> Result<&HDPathComponent, HDPathError>
+    ) -> Result<&HDPathComponent>
     where
-        F: Fn(HDPathValue) -> HDPathError,
+        F: Fn(HDPathValue) -> CommonError,
     {
         let got = &path[index];
         if got != &expected {
@@ -76,13 +99,19 @@ impl HDPath {
         Ok(got)
     }
 
-    pub(crate) fn try_parse_base_hdpath(
+    pub(crate) fn try_parse_base_hdpath<F>(
         path: &HDPath,
-        depth_error: HDPathError,
-    ) -> Result<(HDPath, Vec<HDPathComponent>), HDPathError> {
-        use HDPathError::*;
-        if path.depth() < 2 {
-            return Err(depth_error);
+        depth_error: F,
+    ) -> Result<(HDPath, Vec<HDPathComponent>)>
+    where
+        F: FnOnce(InvalidValue<usize>) -> CommonError,
+    {
+        let expected_depth = 2;
+        if path.depth() < expected_depth {
+            return Err(depth_error(InvalidValue {
+                expected: expected_depth,
+                found: path.depth(),
+            }));
         }
         let components = &path.components;
 
@@ -90,29 +119,32 @@ impl HDPath {
             components,
             0,
             HDPathComponent::bip44_purpose(),
-            Box::new(|v| BIP44PurposeNotFound(v)),
+            Box::new(|v| CommonError::BIP44PurposeNotFound(v)),
         )?;
 
         _ = Self::parse(
             components,
             1,
             HDPathComponent::bip44_cointype(),
-            Box::new(|v| CoinTypeNotFound(v)),
+            Box::new(|v| CommonError::CoinTypeNotFound(v)),
         )?;
         return Ok((path.clone(), components.clone()));
     }
 
-    pub(crate) fn try_parse_base(
+    pub(crate) fn try_parse_base<F>(
         s: &str,
-        depth_error: HDPathError,
-    ) -> Result<(HDPath, Vec<HDPathComponent>), HDPathError> {
-        let path = HDPath::from_str(s).map_err(|_| HDPathError::InvalidBIP32Path(s.to_string()))?;
+        depth_error: F,
+    ) -> Result<(HDPath, Vec<HDPathComponent>)>
+    where
+        F: FnOnce(InvalidValue<usize>) -> CommonError,
+    {
+        let path = HDPath::from_str(s).map_err(|_| CommonError::InvalidBIP32Path(s.to_string()))?;
         return Self::try_parse_base_hdpath(&path, depth_error);
     }
 }
 
-impl ToString for HDPath {
-    fn to_string(&self) -> String {
+impl HDPath {
+    fn to_bip32_string(&self) -> String {
         let rest = self
             .components
             .iter()
@@ -122,35 +154,11 @@ impl ToString for HDPath {
     }
 }
 
-impl Serialize for HDPath {
-    /// Serializes this `HDPath` into its bech32 address string as JSON.
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_str(&self.to_string())
-    }
-}
-
-impl<'de> serde::Deserialize<'de> for HDPath {
-    /// Tries to deserializes a JSON string as a bech32 address into an `HDPath`.
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<HDPath, D::Error> {
-        let s = String::deserialize(d)?;
-        HDPath::from_str(&s).map_err(de::Error::custom)
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use crate::{
-        assert_json_value_eq_after_roundtrip, assert_json_value_fails,
-        assert_json_value_ne_after_roundtrip,
-    };
-    use serde_json::json;
 
-    use super::HDPath;
+    use crate::prelude::*;
+    use serde_json::json;
 
     #[test]
     fn json_roundtrip() {

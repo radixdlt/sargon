@@ -1,11 +1,4 @@
-use crate::HDPathError;
-use serde::{de, Deserializer, Serialize, Serializer};
-
-use crate::HasPlaceholder;
-
-use crate::{
-    Derivation, DerivationPath, DerivationPathScheme, HDPath, HDPathComponent, HDPathValue,
-};
+use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record)]
 pub struct BIP44LikePath {
@@ -16,37 +9,54 @@ impl BIP44LikePath {
     pub fn from(path: HDPath) -> Self {
         Self { path }
     }
+    pub const PATH_DEPTH: usize = 5;
+
+    fn assert_depth_of(path: &HDPath) -> Result<(), CommonError> {
+        let found = path.depth();
+        if found != Self::PATH_DEPTH {
+            return Err(CommonError::InvalidDepthOfBIP44Path {
+                expected: Self::PATH_DEPTH,
+                found,
+            });
+        }
+        Ok(())
+    }
 }
 
 impl TryFrom<&HDPath> for BIP44LikePath {
-    type Error = HDPathError;
+    type Error = CommonError;
 
-    fn try_from(value: &HDPath) -> Result<Self, Self::Error> {
+    fn try_from(value: &HDPath) -> Result<Self> {
         let (path, components) =
-            HDPath::try_parse_base_hdpath(value, HDPathError::InvalidDepthOfBIP44Path)?;
-        if path.depth() != 5 {
-            return Err(HDPathError::InvalidDepthOfBIP44Path);
-        }
+            HDPath::try_parse_base_hdpath(value, |v| CommonError::InvalidDepthOfBIP44Path {
+                expected: v.expected,
+                found: v.found,
+            })?;
+
+        BIP44LikePath::assert_depth_of(value)?;
         let account = &components[2];
         if !account.is_hardened() {
-            return Err(HDPathError::InvalidBIP44LikePathAccountWasNotHardened);
+            return Err(CommonError::InvalidBIP44LikePathAccountWasNotHardened);
         }
         let change = &components[3];
         if change.is_hardened() {
-            return Err(HDPathError::InvalidBIP44LikePathChangeWasUnexpectedlyHardened);
+            return Err(CommonError::InvalidBIP44LikePathChangeWasUnexpectedlyHardened);
         }
 
         let index = &components[4];
         if !index.is_hardened() {
-            return Err(HDPathError::InvalidBIP44LikePathIndexWasNotHardened);
+            return Err(CommonError::InvalidBIP44LikePathIndexWasNotHardened);
         }
         return Ok(Self::from(path));
     }
 }
 
 impl BIP44LikePath {
-    pub fn from_str(s: &str) -> Result<Self, HDPathError> {
-        let (path, _) = HDPath::try_parse_base(s, HDPathError::InvalidDepthOfBIP44Path)?;
+    pub fn from_str(s: &str) -> Result<Self> {
+        let (path, _) = HDPath::try_parse_base(s, |v| CommonError::InvalidDepthOfBIP44Path {
+            expected: v.expected,
+            found: v.found,
+        })?;
         return Self::try_from(&path);
     }
 
@@ -101,7 +111,7 @@ impl<'de> serde::Deserialize<'de> for BIP44LikePath {
 }
 
 impl TryInto<BIP44LikePath> for &str {
-    type Error = HDPathError;
+    type Error = CommonError;
 
     fn try_into(self) -> Result<BIP44LikePath, Self::Error> {
         BIP44LikePath::from_str(self)
@@ -123,7 +133,7 @@ impl HasPlaceholder for BIP44LikePath {
 #[cfg(test)]
 mod tests {
     use crate::{
-        assert_json_value_eq_after_roundtrip, assert_json_value_ne_after_roundtrip, HDPathError,
+        assert_json_value_eq_after_roundtrip, assert_json_value_ne_after_roundtrip, CommonError,
         HasPlaceholder,
     };
     use serde_json::json;
@@ -166,15 +176,21 @@ mod tests {
     fn invalid_depth_1() {
         assert_eq!(
             BIP44LikePath::from_str("m/44H"),
-            Err(HDPathError::InvalidDepthOfBIP44Path)
+            Err(CommonError::InvalidDepthOfBIP44Path {
+                expected: BIP44LikePath::PATH_DEPTH,
+                found: 1
+            })
         );
     }
 
     #[test]
-    fn invalid_depth() {
+    fn invalid_depth_3() {
         assert_eq!(
             BIP44LikePath::from_str("m/44H/1022H/0H"),
-            Err(HDPathError::InvalidDepthOfBIP44Path)
+            Err(CommonError::InvalidDepthOfBIP44Path {
+                expected: BIP44LikePath::PATH_DEPTH,
+                found: 3
+            })
         );
     }
 
@@ -182,7 +198,7 @@ mod tests {
     fn invalid_account_not_hardened() {
         assert_eq!(
             BIP44LikePath::from_str("m/44H/1022H/0/1/2H"),
-            Err(HDPathError::InvalidBIP44LikePathAccountWasNotHardened)
+            Err(CommonError::InvalidBIP44LikePathAccountWasNotHardened)
         );
     }
 
@@ -190,7 +206,7 @@ mod tests {
     fn invalid_change_was_hardened() {
         assert_eq!(
             BIP44LikePath::from_str("m/44H/1022H/0H/0H/2H"),
-            Err(HDPathError::InvalidBIP44LikePathChangeWasUnexpectedlyHardened)
+            Err(CommonError::InvalidBIP44LikePathChangeWasUnexpectedlyHardened)
         );
     }
 
@@ -198,7 +214,7 @@ mod tests {
     fn invalid_index_not_hardened() {
         assert_eq!(
             BIP44LikePath::from_str("m/44H/1022H/0H/0/0"),
-            Err(HDPathError::InvalidBIP44LikePathIndexWasNotHardened)
+            Err(CommonError::InvalidBIP44LikePathIndexWasNotHardened)
         );
     }
 
