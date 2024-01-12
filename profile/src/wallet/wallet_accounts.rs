@@ -38,7 +38,7 @@ impl Wallet {
             AppearanceID::from_number_of_accounts_on_network(number_of_accounts_on_network);
         self.load_private_device_factor_source(bdfs)
             .map(|p| p.derive_account_creation_factor_instance(network_id, index))
-            .map(|fi| Account::new(fi, name, AppearanceID::new(0).unwrap()))
+            .map(|fi| Account::new(fi, name, appearance_id))
     }
 
     /// Updates the display name of account with the provided address, throws an error if the account is unknown to the wallet.

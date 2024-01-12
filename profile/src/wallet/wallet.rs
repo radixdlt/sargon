@@ -21,10 +21,6 @@ impl Wallet {
     fn init_logging(&self) {
         env_logger::init();
     }
-    /// Initializes the wallet, setting up e.g. logging
-    fn init(&self) {
-        self.init_logging()
-    }
 }
 
 //========
@@ -37,47 +33,60 @@ impl Wallet {
     pub fn new(profile: Profile, secure_storage: Arc<dyn SecureStorage>) -> Self {
         // Init WalletClient's storage
         let wallet_client_storage = WalletClientStorage::new(secure_storage);
+
         // profile.id() MUST be new, clients should not call `Wallet::new` with an existing Profile, they MUST
         // use `Wallet::with_existing_profile` for existing profiles (they should check first..)
         wallet_client_storage.assert_not_contains_profile_with_id(profile.id());
+
+        // Init wallet
         let wallet = Self {
             profile: RwLock::new(profile.clone()),
             wallet_client_storage,
         };
-        wallet.save_profile_or_log(&profile);
-        wallet.init();
+
+        // Save new profile (also sets activeProfileID)
+        wallet.save_new_profile_or_panic(&profile);
+
+        // Init logging
+        wallet.init_logging();
         wallet
     }
 
     #[uniffi::constructor]
     pub fn with_existing_profile(secure_storage: Arc<dyn SecureStorage>) -> Result<Self> {
-        // wallet.init();
-        // secure_storage.get(SecureStorageKey::)
-        todo!()
-    }
-}
+        // Init WalletClient's storage
+        let wallet_client_storage = WalletClientStorage::new(secure_storage);
 
-//========
-// Wallet + SecureStorage
-//========
-impl Wallet {
-    pub(crate) fn save_profile(&self, profile: &Profile) -> Result<()> {
-        self.wallet_client_storage.save(
-            SecureStorageKey::ProfileSnapshot {
-                profile_id: profile.header.id.clone(),
-            },
-            profile,
-        )
-    }
-    pub(crate) fn save_profile_or_log(&self, profile: &Profile) {
-        match self.save_profile(profile) {
-            Ok(_) => log::info!("Successfully saved profile with ID: {}", profile.id()),
-            Err(e) => log::error!(
-                "Failed to save profile with ID: {}, error: {}",
-                profile.id(),
-                e
-            ),
-        }
+        // Load active profile ID
+        let active_profile_id: ProfileID = wallet_client_storage.load_or(
+            SecureStorageKey::ActiveProfileID,
+            CommonError::NoActiveProfileIDSet,
+        )?;
+
+        // Form storage key
+        let profile_key = SecureStorageKey::ProfileSnapshot {
+            profile_id: active_profile_id.clone(),
+        };
+
+        // Load Profile from storage with key
+        let profile: Profile = wallet_client_storage.load_or(
+            profile_key,
+            CommonError::ProfileSnapshotNotFound(active_profile_id),
+        )?;
+
+        // Create wallet
+        let wallet = Self {
+            profile: RwLock::new(profile),
+            wallet_client_storage,
+        };
+
+        // Set active profile ID
+        wallet.save_active_profile_id(&profile_id())?;
+
+        // Init logging
+        wallet.init_logging();
+
+        Ok(wallet)
     }
 }
 

@@ -39,11 +39,12 @@ mod tests {
     fn inequality() {
         assert_ne!(P2PLinks::placeholder(), P2PLinks::placeholder_other());
     }
+
     #[test]
     fn display() {
         let mut sut = P2PLinks::new();
         sut.append(P2PLink::placeholder_duckduckgo());
-        assert_eq!(format!("{}", sut), "[P2PLink { connection_password: RadixConnectPassword(deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead), display_name: \"DuckDuckGo on Mac Pro\" }]");
+        assert_eq!(format!("{}", sut), "[P2PLink { display_name: 'DuckDuckGo on Mac Pro', connection_password: 'deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead' }]");
     }
 
     #[test]

@@ -3,6 +3,7 @@ use crate::prelude::*;
 #[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Enum)]
 pub enum SecureStorageKey {
     SnapshotHeadersList,
+    ActiveProfileID,
     DeviceFactorSourceMnemonic {
         factor_source_id: FactorSourceIDFromHash,
     },
@@ -15,6 +16,7 @@ impl SecureStorageKey {
         format!(
             "secure_storage_key_{}",
             match self {
+                SecureStorageKey::ActiveProfileID => "activeProfileID".to_string(),
                 SecureStorageKey::SnapshotHeadersList => "headers".to_string(),
                 SecureStorageKey::DeviceFactorSourceMnemonic { factor_source_id } =>
                     format!("device_factor_source_{}", factor_source_id.to_string()),

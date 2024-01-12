@@ -76,8 +76,18 @@ pub fn assert_json_value_fails<T>(json: Value)
 where
     T: Serialize + DeserializeOwned + PartialEq + Debug,
 {
-    let result = serde_json::from_value::<T>(json);
-    assert!(result.is_err());
+    let result = serde_json::from_value::<T>(json.clone());
+    match result {
+        Ok(t) => {
+            let failure = format!(
+                "Expected JSON serialization to fail, but it did not, deserialized into: {:?},\n\nFrom JSON: {}",
+                t,
+                serde_json::to_string(&json).unwrap()
+            );
+            assert!(false, "{failure}");
+        }
+        Err(_) => {} // Good, we expected a failure
+    }
 }
 
 pub fn assert_json_fails<T>(json_string: &str)

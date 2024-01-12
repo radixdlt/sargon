@@ -4,15 +4,12 @@ use crate::prelude::*;
 /// that starts with the prefix `"account_"`, dependent on NetworkID, meaning the same
 /// public key used for two AccountAddresses on two different networks will not have
 /// the same address.
-#[serde_as]
 #[derive(
     Clone,
     Debug,
     Default,
     PartialEq,
     Eq,
-    Serialize,
-    Deserialize,
     Hash,
     derive_more::Display,
     PartialOrd,
@@ -21,11 +18,27 @@ use crate::prelude::*;
 )]
 #[display("{address}")]
 pub struct ResourceAddress {
-    #[serde_as(as = "DisplayFromStr")]
     pub address: String,
-
-    #[serde(skip_serializing)]
     pub network_id: NetworkID,
+}
+
+impl Serialize for ResourceAddress {
+    /// Serializes this `ResourceAddress` into its bech32 address string as JSON.
+    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&self.address)
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for ResourceAddress {
+    /// Tries to deserializes a JSON string as a bech32 address into an `ResourceAddress`.
+    #[cfg(not(tarpaulin_include))] // false negative
+    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<ResourceAddress, D::Error> {
+        let s = String::deserialize(d)?;
+        ResourceAddress::try_from_bech32(&s).map_err(de::Error::custom)
+    }
 }
 
 #[uniffi::export]

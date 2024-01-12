@@ -1,24 +1,28 @@
 use crate::prelude::*;
 
-#[serde_as]
 #[derive(
-    Serialize,
-    Deserialize,
-    Clone,
-    Debug,
-    PartialEq,
-    Eq,
-    PartialOrd,
-    Ord,
-    Hash,
-    derive_more::Display,
-    uniffi::Record,
+    Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, derive_more::Display, uniffi::Record,
 )]
-#[serde(transparent)]
 #[display("{value}")]
 pub struct DisplayName {
-    #[serde_as(as = "serde_with::DisplayFromStr")]
     pub value: String,
+}
+
+impl Serialize for DisplayName {
+    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&self.value)
+    }
+}
+
+impl<'de> Deserialize<'de> for DisplayName {
+    #[cfg(not(tarpaulin_include))] // false negative
+    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<DisplayName, D::Error> {
+        let s = String::deserialize(d)?;
+        DisplayName::new(s.as_str()).map_err(de::Error::custom)
+    }
 }
 
 #[uniffi::export]

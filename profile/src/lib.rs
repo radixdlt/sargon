@@ -1,3 +1,5 @@
+#![allow(unused_imports)]
+
 mod hierarchical_deterministic;
 mod identified_vec_via;
 mod logic;

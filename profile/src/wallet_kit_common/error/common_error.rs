@@ -241,4 +241,10 @@ pub enum CommonError {
 
     #[error("FactorSource with ID not found in Profile: {0:?}")]
     ProfileDoesNotContainFactorSourceWithID(FactorSourceID) = 10073,
+
+    #[error("No active ProfileID found in secure storage.")]
+    NoActiveProfileIDSet = 10074,
+
+    #[error("No Profile snapshot found for ProfileID {0}")]
+    ProfileSnapshotNotFound(ProfileID) = 10075,
 }
