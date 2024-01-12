@@ -33,7 +33,7 @@ impl TryFrom<FactorSource> for DeviceFactorSource {
     }
 }
 impl IsFactorSource for DeviceFactorSource {
-    fn factor_source_kind() -> FactorSourceKind {
+    fn kind() -> FactorSourceKind {
         FactorSourceKind::Device
     }
 }

@@ -195,7 +195,7 @@ mod tests {
     fn invalid_hex() {
         assert_eq!(
             Secp256k1PrivateKey::from_str("not hex"),
-            Err(CommonError::InvalidSecp256k1PrivateKeyFromString)
+            Err(CommonError::InvalidSecp256k1PrivateKeyFromString("not hex".to_owned()))
         );
     }
 
@@ -203,7 +203,7 @@ mod tests {
     fn invalid_hex_too_short() {
         assert_eq!(
             Secp256k1PrivateKey::from_str("dead"),
-            Err(CommonError::InvalidSecp256k1PrivateKeyFromString)
+            Err(CommonError::InvalidSecp256k1PrivateKeyFromString("dead".to_owned()))
         );
     }
 
@@ -211,23 +211,25 @@ mod tests {
     fn invalid_bytes() {
         assert_eq!(
             Secp256k1PrivateKey::from_bytes(&[0u8] as &[u8]),
-            Err(CommonError::InvalidSecp256k1PrivateKeyFromBytes)
+            Err(CommonError::InvalidSecp256k1PrivateKeyFromBytes(vec![0]))
         );
     }
 
     #[test]
     fn invalid_too_large() {
+        let bytes = [0xFFu8; 32];
         assert_eq!(
-            Secp256k1PrivateKey::from_bytes(&[0xFFu8; 32]),
-            Err(CommonError::InvalidSecp256k1PrivateKeyFromBytes)
+            Secp256k1PrivateKey::from_bytes(&bytes),
+            Err(CommonError::InvalidSecp256k1PrivateKeyFromBytes(bytes.to_vec()))
         );
     }
 
     #[test]
     fn invalid_zero() {
+        let bytes = [0u8; 32];
         assert_eq!(
-            Secp256k1PrivateKey::from_bytes(&[0u8; 32]),
-            Err(CommonError::InvalidSecp256k1PrivateKeyFromBytes)
+            Secp256k1PrivateKey::from_bytes(&bytes),
+            Err(CommonError::InvalidSecp256k1PrivateKeyFromBytes(bytes.to_vec()))
         );
     }
 

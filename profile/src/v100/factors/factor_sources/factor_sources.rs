@@ -56,12 +56,7 @@ impl HasPlaceholder for FactorSources {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
-    use identified_vec::Identifiable;
-
-    use crate::v100::factors::{factor_source::FactorSource, is_factor_source::IsFactorSource};
-
-    use super::FactorSources;
+    use crate::prelude::*;
 
     #[test]
     fn identifiable_id_uses_factor_source_id() {

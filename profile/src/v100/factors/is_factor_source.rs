@@ -6,5 +6,5 @@ pub trait BaseIsFactorSource: Into<FactorSource> + TryFrom<FactorSource> {
 }
 
 pub trait IsFactorSource: BaseIsFactorSource {
-    fn factor_source_kind() -> FactorSourceKind;
+    fn kind() -> FactorSourceKind;
 }

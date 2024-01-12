@@ -194,7 +194,7 @@ mod tests {
     fn invalid_hex() {
         assert_eq!(
             Ed25519PrivateKey::from_str("not hex"),
-            Err(CommonError::InvalidEd25519PrivateKeyFromString)
+            Err(CommonError::InvalidEd25519PrivateKeyFromString("not hex".to_owned()))
         );
     }
 
@@ -202,7 +202,7 @@ mod tests {
     fn invalid_hex_too_short() {
         assert_eq!(
             Ed25519PrivateKey::from_str("dead"),
-            Err(CommonError::InvalidEd25519PrivateKeyFromString)
+            Err(CommonError::InvalidEd25519PrivateKeyFromString("dead".to_owned()))
         );
     }
 
@@ -210,7 +210,7 @@ mod tests {
     fn invalid_bytes() {
         assert_eq!(
             Ed25519PrivateKey::from_bytes(&[0u8] as &[u8]),
-            Err(CommonError::InvalidEd25519PrivateKeyFromBytes)
+            Err(CommonError::InvalidEd25519PrivateKeyFromBytes(vec![0]))
         );
     }
 

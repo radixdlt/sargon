@@ -247,7 +247,7 @@ mod tests {
     fn invalid_bytes() {
         assert_eq!(
             Ed25519PublicKey::try_from(&[0u8] as &[u8]),
-            Err(CommonError::InvalidEd25519PublicKeyFromBytes)
+            Err(CommonError::InvalidEd25519PublicKeyFromBytes(vec![0]))
         );
     }
 
@@ -255,7 +255,7 @@ mod tests {
     fn invalid_hex_str() {
         assert_eq!(
             Ed25519PublicKey::from_str("not a valid hex string"),
-            Err(CommonError::InvalidEd25519PublicKeyFromString)
+            Err(CommonError::InvalidEd25519PublicKeyFromString("not a valid hex string".to_owned()))
         );
     }
 
@@ -263,7 +263,7 @@ mod tests {
     fn invalid_str_too_short() {
         assert_eq!(
             Ed25519PublicKey::from_str("dead"),
-            Err(CommonError::InvalidEd25519PublicKeyFromString)
+            Err(CommonError::InvalidEd25519PublicKeyFromString("dead".to_owned()))
         );
     }
 

@@ -83,12 +83,7 @@ impl std::fmt::Display for FactorSourceKind {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::BTreeSet;
-
-    use crate::{assert_json_roundtrip, assert_json_value_eq_after_roundtrip};
-    use serde_json::json;
-
-    use crate::v100::factors::factor_source_kind::FactorSourceKind;
+    use crate::prelude::*;
 
     #[test]
     fn equality() {

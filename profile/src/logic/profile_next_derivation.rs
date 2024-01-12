@@ -12,7 +12,7 @@ impl Profile {
                 f.clone()
                     .try_into()
                     .map_err(|_| CommonError::CastFactorSourceWrongKind {
-                        expected: <F as IsFactorSource>::factor_source_kind(),
+                        expected: <F as IsFactorSource>::kind(),
                         found: f.factor_source_kind(),
                     })
             })

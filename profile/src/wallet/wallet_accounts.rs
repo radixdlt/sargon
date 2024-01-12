@@ -1,5 +1,3 @@
-use identified_vec::IsIdentifiedVec;
-
 use crate::prelude::*;
 
 impl Wallet {

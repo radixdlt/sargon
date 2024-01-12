@@ -139,7 +139,7 @@ impl Hex32Bytes {
     /// if `bytes` does not have length 32.
     pub fn from_vec(bytes: Vec<u8>) -> Result<Self> {
         if bytes.len() != 32 {
-            return Err(CommonError::InvalidByteCountExpected32);
+            return Err(CommonError::InvalidByteCountExpected32(bytes.len()));
         }
         Ok(Self { bytes })
     }
@@ -252,7 +252,7 @@ mod tests {
     fn invalid_len() {
         assert_eq!(
             Hex32Bytes::from_vec(Vec::from([0u8; 5])),
-            Err(CommonError::InvalidByteCountExpected32)
+            Err(CommonError::InvalidByteCountExpected32(5))
         )
     }
 

@@ -53,6 +53,8 @@ impl<'de> Deserialize<'de> for Decimal {
     /// Tries to deserializes a JSON string as a bech32 address into an `HDPath`.
     #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Decimal, D::Error> {
+        use std::ops::Deref;
+
         let s = SerializableDecimal::deserialize(d)?;
         let native: NativeDecimal = *s.deref();
         Ok(Self::from_native(native))

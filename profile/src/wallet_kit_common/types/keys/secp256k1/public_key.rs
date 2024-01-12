@@ -126,7 +126,7 @@ impl FromStr for Secp256k1PublicKey {
 
 impl Secp256k1PublicKey {
     pub fn from_hex(hex: String) -> Result<Self> {
-        hex_decode(hex)
+        hex_decode(hex.clone())
             .map_err(|_| CommonError::InvalidSecp256k1PublicKeyFromString(hex))
             .and_then(|b| Secp256k1PublicKey::try_from(b.as_slice()))
     }
@@ -239,8 +239,8 @@ mod tests {
     #[test]
     fn invalid_hex_str() {
         assert_eq!(
-            Secp256k1PublicKey::from_str("not a valid hex string"),
-            Err(CommonError::InvalidSecp256k1PublicKeyFromString)
+            Secp256k1PublicKey::from_str("hi"),
+            Err(CommonError::InvalidSecp256k1PublicKeyFromString("hi".to_owned()))
         );
     }
 
@@ -248,15 +248,16 @@ mod tests {
     fn invalid_str_too_short() {
         assert_eq!(
             Secp256k1PublicKey::from_str("dead"),
-            Err(CommonError::InvalidSecp256k1PublicKeyFromBytes)
+            Err(CommonError::InvalidSecp256k1PublicKeyFromBytes(vec![0xde, 0xad]))
         );
     }
 
     #[test]
     fn invalid_bytes() {
+        let bytes: &[u8] = &[0u8];
         assert_eq!(
-            Secp256k1PublicKey::try_from(&[0u8] as &[u8]),
-            Err(CommonError::InvalidSecp256k1PublicKeyFromBytes)
+            Secp256k1PublicKey::try_from(bytes),
+            Err(CommonError::InvalidSecp256k1PublicKeyFromBytes(bytes.to_vec()))
         );
     }
 

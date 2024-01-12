@@ -1,6 +1,5 @@
 use crate::prelude::*;
-use identified_vec::Identifiable;
-use std::sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard};
+use std::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 
 pub type HeadersList = IdentifiedVecVia<Header>;
 impl Identifiable for Header {
@@ -42,7 +41,7 @@ impl Wallet {
         // use `Wallet::with_existing_profile` for existing profiles (they should check first..)
         wallet_client_storage.assert_not_contains_profile_with_id(profile.id());
         let wallet = Self {
-            profile: RwLock::new(profile),
+            profile: RwLock::new(profile.clone()),
             wallet_client_storage,
         };
         wallet.save_profile_or_log(&profile);
@@ -65,7 +64,7 @@ impl Wallet {
     pub(crate) fn save_profile(&self, profile: &Profile) -> Result<()> {
         self.wallet_client_storage.save(
             SecureStorageKey::ProfileSnapshot {
-                profile_id: profile.header.id,
+                profile_id: profile.header.id.clone(),
             },
             profile,
         )

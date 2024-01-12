@@ -32,6 +32,7 @@ pub mod prelude {
     pub(crate) use serde_with::*;
     pub(crate) use std::cmp::Ordering;
     pub(crate) use std::str::FromStr;
+    pub(crate) use std::sync::Arc;
     pub(crate) use strum::FromRepr;
     pub(crate) use url::Url;
     pub(crate) use uuid::Uuid;

@@ -84,7 +84,7 @@ impl Profile {
 impl Profile {
     /// Returns the unique ID of this Profile (just an alias for `header.id`).
     pub fn id(&self) -> ProfileID {
-        self.header.id
+        self.header.id.clone()
     }
 
     /// Returns a clone of the updated account if found, else None.
@@ -106,7 +106,10 @@ impl Profile {
     {
         self.factor_sources.try_update_with(factor_source_id, |f| {
             S::try_from(f.clone())
-                .map_err(|_| CommonError::CastFactorSourceWrongKind)
+                .map_err(|_| CommonError::CastFactorSourceWrongKind {
+                    expected: S::kind(),
+                    found: f.factor_source_kind(),
+                })
                 .and_then(|element| mutate(element).map(|modified| modified.into()))
         })
     }
@@ -141,8 +144,6 @@ impl HasPlaceholder for Profile {
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
-
-    use identified_vec::{IsIdentifiedVec, ItemsCloned};
 
     #[test]
     fn inequality() {
@@ -250,7 +251,10 @@ mod tests {
                     FactorSourceCryptoParameters::babylon_olympia_compatible();
                 Ok(lfs)
             }),
-            Err(CommonError::CastFactorSourceWrongKind)
+            Err(CommonError::CastFactorSourceWrongKind {
+                expected: FactorSourceKind::LedgerHQHardwareWallet,
+                found: FactorSourceKind::Device
+            })
         );
 
         // Remains unchanged

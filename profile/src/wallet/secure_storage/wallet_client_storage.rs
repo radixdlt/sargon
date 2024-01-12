@@ -1,7 +1,4 @@
 use crate::prelude::*;
-use std::sync::Arc;
-
-use identified_vec::IsIdentifiedVec;
 
 #[derive(Debug)]
 pub struct WalletClientStorage {
@@ -17,12 +14,13 @@ impl WalletClientStorage {
     where
         T: serde::Deserialize<'de>,
     {
-        self.interface.load_data(key).and_then(|o| match o {
-            None => Ok(None),
-            Some(j) => {
-                serde_json::from_slice(&j).map_err(|e| CommonError::FailedToDeserializeToJSON)
-            }
-        })
+        // self.interface.load_data(key).and_then(|o| match o {
+        //     None => Ok(None),
+        //     Some(j) => {
+        //         serde_json::from_slice(j).map_err(|e| CommonError::FailedToDeserializeToJSON)
+        //     }
+        // })
+        todo!()
     }
 
     /// Like `load` but returns `Result<T>` instead of `Result<Option<T>>` and throws the provided error if
@@ -37,10 +35,10 @@ impl WalletClientStorage {
     /// Like `load` but returns `T` instead of `Result<Option<T>>` and defaults to `default`, if `load` returned `Ok(None)` or `Err`.
     pub fn load_unwrap_or<'de, T>(&self, key: SecureStorageKey, default: T) -> T
     where
-        T: serde::Deserialize<'de>,
+        T: serde::Deserialize<'de> + Clone,
     {
         self.load(key)
-            .map(|o| o.unwrap_or(default))
+            .map(|o| o.unwrap_or(default.clone()))
             .unwrap_or(default)
     }
 

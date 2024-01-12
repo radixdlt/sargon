@@ -61,7 +61,7 @@ impl TryFrom<FactorSource> for LedgerHardwareWalletFactorSource {
     }
 }
 impl IsFactorSource for LedgerHardwareWalletFactorSource {
-    fn factor_source_kind() -> FactorSourceKind {
+    fn kind() -> FactorSourceKind {
         FactorSourceKind::LedgerHQHardwareWallet
     }
 }

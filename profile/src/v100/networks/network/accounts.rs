@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use identified_vec::IsIdentifiedVec;
 
 /// An ordered set of Accounts on a specific network, most commonly
 /// the set is non-empty.

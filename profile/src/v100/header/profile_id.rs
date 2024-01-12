@@ -9,6 +9,6 @@ impl ProfileID {
     pub fn from_str(s: &str) -> Result<Self> {
         Uuid::from_str(s)
             .map(ProfileID)
-            .map_err(|_| CommonError::InvalidProfileID)
+            .map_err(|_| CommonError::InvalidProfileID(s.to_owned()))
     }
 }
