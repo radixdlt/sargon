@@ -10,32 +10,30 @@ impl WalletClientStorage {
     }
 }
 impl WalletClientStorage {
-    pub fn load<'de, T>(&self, key: SecureStorageKey) -> Result<Option<T>>
+    pub fn load<T>(&self, key: SecureStorageKey) -> Result<Option<T>>
     where
-        T: serde::Deserialize<'de>,
+        T: for<'a> serde::Deserialize<'a>,
     {
-        // self.interface.load_data(key).and_then(|o| match o {
-        //     None => Ok(None),
-        //     Some(j) => {
-        //         serde_json::from_slice(j).map_err(|e| CommonError::FailedToDeserializeToJSON)
-        //     }
-        // })
-        todo!()
+        self.interface.load_data(key).and_then(|o| match o {
+            None => Ok(None),
+            Some(j) => serde_json::from_slice(j.as_slice())
+                .map_err(|_| CommonError::FailedToDeserializeToJSON),
+        })
     }
 
     /// Like `load` but returns `Result<T>` instead of `Result<Option<T>>` and throws the provided error if
     /// the value was `None`.
-    pub fn load_or<'de, T>(&self, key: SecureStorageKey, err: CommonError) -> Result<T>
+    pub fn load_or<T>(&self, key: SecureStorageKey, err: CommonError) -> Result<T>
     where
-        T: serde::Deserialize<'de>,
+        T: for<'a> serde::Deserialize<'a>,
     {
         self.load(key).and_then(|o| o.ok_or(err))
     }
 
     /// Like `load` but returns `T` instead of `Result<Option<T>>` and defaults to `default`, if `load` returned `Ok(None)` or `Err`.
-    pub fn load_unwrap_or<'de, T>(&self, key: SecureStorageKey, default: T) -> T
+    pub fn load_unwrap_or<T>(&self, key: SecureStorageKey, default: T) -> T
     where
-        T: serde::Deserialize<'de> + Clone,
+        T: for<'a> serde::Deserialize<'a> + Clone,
     {
         self.load(key)
             .map(|o| o.unwrap_or(default.clone()))
@@ -69,7 +67,7 @@ impl WalletClientStorage {
         T: serde::Serialize,
     {
         serde_json::to_vec(value)
-            .map_err(|e| CommonError::FailedToSerializeToJSON)
+            .map_err(|_| CommonError::FailedToSerializeToJSON)
             .and_then(|j| self.interface.save_data(key, j))
     }
 
