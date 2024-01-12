@@ -126,7 +126,7 @@ mod tests {
         assert_eq!(
             GetIDPath::from_str("m/44H/1022H"),
             Err(CommonError::InvalidDepthOfCAP26Path {
-                expected: 6,
+                expected: 3,
                 found: 2
             })
         );

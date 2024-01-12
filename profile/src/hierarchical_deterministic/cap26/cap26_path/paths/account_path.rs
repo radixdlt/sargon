@@ -175,9 +175,9 @@ mod tests {
     fn invalid_depth() {
         assert_eq!(
             AccountPath::from_str("m/44H/1022H"),
-            Err(CommonError::InvalidDepthOfBIP44Path {
+            Err(CommonError::InvalidDepthOfCAP26Path {
                 expected: 6,
-                found: 1
+                found: 2
             })
         )
     }
