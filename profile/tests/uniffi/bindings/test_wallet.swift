@@ -77,22 +77,25 @@ func test() throws {
 
 	// MARK: ==================================
 	print("🔮 Creating first testnet account")
+	let testnetAccountName = "Hello Radix Account!"
 	let test0 = try wallet.createAndSaveNewAccount(
 		networkId: .stokenet,
 		name: DisplayName(
-			validating: "Stoke 0"
+			validating: testnetAccountName
 		)
 	)
 	assert(wallet.profile().networks.count == 2)
 	assert(wallet.profile().networks[1].accounts == [test0])
 	assert(
 		wallet.profile().networks[1].accounts[0].displayName.value
-			== "Stoke 0"
+			== testnetAccountName
 	)
 	assert(
 		wallet.profile().networks[1].accounts[0].networkId
 			== .stokenet
 	)
+	assert(keychain.contains(value: testnetAccountName))
+
 	print("✨ Successfully created first testnet account ✅")
 
 }
