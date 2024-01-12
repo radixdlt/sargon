@@ -1,14 +1,15 @@
 #![cfg(test)]
 use crate::prelude::*;
 
+/// Used for testing - a type which does NOT save anything.
 #[derive(Debug)]
-pub struct MockSecureStorage {}
-impl MockSecureStorage {
+pub struct EphemeralSecureStorage {}
+impl EphemeralSecureStorage {
     pub fn new() -> Arc<Self> {
-        Arc::new(MockSecureStorage {})
+        Arc::new(EphemeralSecureStorage {})
     }
 }
-impl SecureStorage for MockSecureStorage {
+impl SecureStorage for EphemeralSecureStorage {
     fn load_data(&self, _key: SecureStorageKey) -> Result<Option<Vec<u8>>> {
         Ok(None)
     }

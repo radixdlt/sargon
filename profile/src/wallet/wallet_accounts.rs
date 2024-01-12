@@ -54,15 +54,12 @@ impl Wallet {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        AccountAddress, CommonError, DisplayName, HasPlaceholder, MockSecureStorage, Profile,
-        Wallet,
-    };
+    use crate::prelude::*;
 
     #[test]
     fn change_display_name_of_accounts() {
         let profile = Profile::placeholder();
-        let wallet = Wallet::new(profile.clone(), MockSecureStorage::new());
+        let wallet = Wallet::ephemeral(profile.clone());
         let account = wallet.read(|p| p.networks[0].accounts[0].clone());
         assert_eq!(account.display_name.value, "Alice");
         assert!(wallet

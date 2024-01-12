@@ -56,12 +56,6 @@ impl WalletClientStorage {
         )
     }
 
-    pub(crate) fn assert_not_contains_profile_with_id(&self, profile_id: ProfileID) {
-        if self.load_headers_list_or_empty().contains_id(&profile_id) {
-            fatal_error(format!("Profile with id {profile_id}"))
-        }
-    }
-
     pub fn save<T>(&self, key: SecureStorageKey, value: &T) -> Result<()>
     where
         T: serde::Serialize,

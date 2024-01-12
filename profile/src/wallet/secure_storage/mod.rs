@@ -7,7 +7,7 @@ pub use secure_storage_key::*;
 pub use wallet_client_storage::*;
 
 #[cfg(test)]
-mod mock_secure_storage;
+mod ephemeral_secure_storage;
 
 #[cfg(test)]
-pub use mock_secure_storage::*;
+pub use ephemeral_secure_storage::*;

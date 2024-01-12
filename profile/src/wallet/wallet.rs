@@ -19,7 +19,9 @@ pub struct Wallet {
 impl Wallet {
     /// Initializes logging
     fn init_logging(&self) {
-        env_logger::init();
+        // env_logger::init();
+        // Hmm ^^ not needed? already initialized?
+        // env_logger::init should not be called after logger initialized: SetLoggerError(())
     }
 }
 
@@ -28,15 +30,41 @@ impl Wallet {
 //========
 #[uniffi::export]
 impl Wallet {
-    /// Creates wallet with an entirely new Profile, this function panics if the profile already exists.
+    /// Creates a new Mnemonic from `entropy` (without BIP39 passphrase) and creates a new Profile,
+    /// saving both the Mnemonic and Profile into secure storage and returns a new Wallet.
     #[uniffi::constructor]
-    pub fn new(profile: Profile, secure_storage: Arc<dyn SecureStorage>) -> Self {
+    pub fn by_creating_new_profile_and_secrets_with_entropy(
+        entropy: Vec<u8>,
+        wallet_client_model: WalletClientModel,
+        wallet_client_name: String,
+        secure_storage: Arc<dyn SecureStorage>,
+    ) -> Result<Self> {
+        let entropy_32bytes = Hex32Bytes::from_vec(entropy)?;
+        let private_hd_factor_source =
+            PrivateHierarchicalDeterministicFactorSource::new_with_entropy(
+                entropy_32bytes,
+                wallet_client_model,
+            );
+
+        let profile = Profile::new(
+            private_hd_factor_source.clone(),
+            wallet_client_name.as_str(),
+        );
+        let wallet = Self::by_importing_profile(profile, secure_storage);
+        wallet.wallet_client_storage.save(
+            SecureStorageKey::DeviceFactorSourceMnemonic {
+                factor_source_id: private_hd_factor_source.factor_source.id.clone(),
+            },
+            &private_hd_factor_source.mnemonic_with_passphrase,
+        )?;
+        Ok(wallet)
+    }
+
+    /// Creates wallet by *importing* a Profile.
+    #[uniffi::constructor]
+    pub fn by_importing_profile(profile: Profile, secure_storage: Arc<dyn SecureStorage>) -> Self {
         // Init WalletClient's storage
         let wallet_client_storage = WalletClientStorage::new(secure_storage);
-
-        // profile.id() MUST be new, clients should not call `Wallet::new` with an existing Profile, they MUST
-        // use `Wallet::with_existing_profile` for existing profiles (they should check first..)
-        wallet_client_storage.assert_not_contains_profile_with_id(profile.id());
 
         // Init wallet
         let wallet = Self {
@@ -53,7 +81,7 @@ impl Wallet {
     }
 
     #[uniffi::constructor]
-    pub fn with_existing_profile(secure_storage: Arc<dyn SecureStorage>) -> Result<Self> {
+    pub fn by_loading_profile(secure_storage: Arc<dyn SecureStorage>) -> Result<Self> {
         // Init WalletClient's storage
         let wallet_client_storage = WalletClientStorage::new(secure_storage);
 
@@ -63,15 +91,32 @@ impl Wallet {
             CommonError::NoActiveProfileIDSet,
         )?;
 
+        Self::new_load_profile_with_id(active_profile_id, wallet_client_storage)
+    }
+
+    #[uniffi::constructor]
+    pub fn by_loading_profile_with_id(
+        profile_id: ProfileID,
+        secure_storage: Arc<dyn SecureStorage>,
+    ) -> Result<Self> {
+        Self::new_load_profile_with_id(profile_id, WalletClientStorage::new(secure_storage))
+    }
+}
+
+impl Wallet {
+    fn new_load_profile_with_id(
+        profile_id: ProfileID,
+        wallet_client_storage: WalletClientStorage,
+    ) -> Result<Self> {
         // Form storage key
         let profile_key = SecureStorageKey::ProfileSnapshot {
-            profile_id: active_profile_id.clone(),
+            profile_id: profile_id.clone(),
         };
 
         // Load Profile from storage with key
         let profile: Profile = wallet_client_storage.load_or(
             profile_key,
-            CommonError::ProfileSnapshotNotFound(active_profile_id),
+            CommonError::ProfileSnapshotNotFound(profile_id.clone()),
         )?;
 
         // Create wallet
@@ -81,12 +126,29 @@ impl Wallet {
         };
 
         // Set active profile ID
-        wallet.save_active_profile_id(&profile_id())?;
+        wallet.save_active_profile_id(&profile_id)?;
 
         // Init logging
         wallet.init_logging();
 
         Ok(wallet)
+    }
+}
+
+#[cfg(test)]
+impl Wallet {
+    pub(crate) fn ephemeral(profile: Profile) -> Self {
+        Self::by_importing_profile(profile, EphemeralSecureStorage::new())
+    }
+}
+#[cfg(test)]
+impl HasPlaceholder for Wallet {
+    fn placeholder() -> Self {
+        Self::ephemeral(Profile::placeholder())
+    }
+
+    fn placeholder_other() -> Self {
+        Self::ephemeral(Profile::placeholder_other())
     }
 }
 
@@ -135,14 +197,14 @@ mod tests {
     #[test]
     fn read_header() {
         let profile = Profile::placeholder();
-        let wallet = Wallet::new(profile.clone(), MockSecureStorage::new());
+        let wallet = Wallet::ephemeral(profile.clone());
         wallet.read(|p| assert_eq!(p.header, profile.header))
     }
 
     #[test]
     fn take_snapshot() {
         let profile = Profile::placeholder();
-        let wallet = Wallet::new(profile.clone(), MockSecureStorage::new());
+        let wallet = Wallet::ephemeral(profile.clone());
         assert_eq!(wallet.profile(), profile)
     }
 }

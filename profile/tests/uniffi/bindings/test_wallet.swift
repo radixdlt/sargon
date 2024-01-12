@@ -28,10 +28,10 @@ public final class EphemeralKeychain: SecureStorage {
 		store = [:]
 	}
 	public static let shared = EphemeralKeychain()
-	public func get(key: SecureStorageKey) throws -> String? {
+	public func loadData(key: SecureStorageKey) throws -> Data? {
 		store[key.identifier]
 	}
-	public func put(key: SecureStorageKey, value: String) throws {
+	public func saveData(key: SecureStorageKey, value: Data) throws {
 		store[key.identifier] = value
 	}
 }
@@ -45,8 +45,6 @@ func test() throws {
 		entropy: Data.random(byteCount: 32),
 		walletClientModel: .iphone
 	)
-	let mnemonic = mnemonicPhrase(from: privateHDFactorSource.mnemonicWithPassphrase.mnemonic)
-	try secureStorage.put(key: .keyMnemonic, value: mnemonic)
 	let profile = newProfile(
 		privateHdFactorSource: privateHDFactorSource,
 		creatingDeviceName: "IntegrationTest"
