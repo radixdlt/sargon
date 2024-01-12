@@ -2,6 +2,7 @@ use crate::prelude::*;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, derive_more::Display, uniffi::Enum)]
 pub enum WalletClientModel {
+    #[display("iPhone")]
     Iphone,
     Android,
     Unknown,
@@ -42,7 +43,7 @@ mod tests {
 
     #[test]
     fn name() {
-        assert_eq!(format!("{}", WalletClientModel::Iphone), "Iphone");
+        assert_eq!(format!("{}", WalletClientModel::Iphone), "iPhone");
         assert_eq!(format!("{}", WalletClientModel::Android), "Android");
         assert_eq!(format!("{}", WalletClientModel::Unknown), "Unknown");
     }
