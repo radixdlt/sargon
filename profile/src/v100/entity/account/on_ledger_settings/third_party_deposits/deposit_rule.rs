@@ -1,8 +1,4 @@
-use std::fmt::Display;
-
-use enum_iterator::Sequence;
-use serde::{Deserialize, Serialize};
-use strum::FromRepr;
+use crate::prelude::*;
 
 /// The general deposit rule to apply
 #[derive(
@@ -17,7 +13,7 @@ use strum::FromRepr;
     Hash,
     PartialOrd,
     Ord,
-    Sequence,
+    enum_iterator::Sequence,
     uniffi::Enum,
 )]
 #[serde(rename_all = "camelCase")]
@@ -44,7 +40,7 @@ impl DepositRule {
     }
 }
 
-impl Display for DepositRule {
+impl std::fmt::Display for DepositRule {
     fn fmt(
         &self,
         f: &mut radix_engine_common::prelude::fmt::Formatter<'_>,
@@ -55,10 +51,7 @@ impl Display for DepositRule {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_json_roundtrip, assert_json_value_eq_after_roundtrip};
-    use serde_json::json;
-
-    use super::DepositRule;
+    use crate::prelude::*;
 
     #[test]
     fn json_roundtrip_accept_all() {

@@ -68,9 +68,8 @@ impl HasPlaceholder for HierarchicalDeterministicPrivateKey {
 
 #[cfg(test)]
 mod tests {
-    use crate::HasPlaceholder;
 
-    use super::HierarchicalDeterministicPrivateKey;
+    use crate::prelude::*;
 
     #[test]
     fn equality() {

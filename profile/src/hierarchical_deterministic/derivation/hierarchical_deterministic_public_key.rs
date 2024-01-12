@@ -84,9 +84,8 @@ impl HasPlaceholder for HierarchicalDeterministicPublicKey {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
-    use super::HierarchicalDeterministicPublicKey;
+    use crate::prelude::*;
 
     #[test]
     fn to_hex() {

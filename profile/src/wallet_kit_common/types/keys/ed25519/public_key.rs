@@ -156,7 +156,6 @@ impl Ed25519PublicKey {
 mod tests {
     use crate::prelude::*;
     use radix_engine_common::crypto::Ed25519PublicKey as EngineEd25519PublicKey;
-    use serde_json::json;
 
     #[test]
     fn equality() {

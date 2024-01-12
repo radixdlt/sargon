@@ -83,22 +83,7 @@ impl HDFactorInstanceIdentityCreation {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        AccountPath, CAP26KeyKind, CAP26Repr, HierarchicalDeterministicPublicKey, IdentityPath,
-        IsEntityPath,
-    };
-    use crate::{CommonError as Error, HasPlaceholder, PublicKey};
-
-    use crate::{
-        v100::factors::{
-            factor_source_id_from_hash::FactorSourceIDFromHash,
-            hd_transaction_signing_factor_instance::{
-                HDFactorInstanceAccountCreation, HDFactorInstanceIdentityCreation,
-            },
-            hierarchical_deterministic_factor_instance::HierarchicalDeterministicFactorInstance,
-        },
-        NetworkID,
-    };
+    use crate::prelude::*;
 
     #[test]
     fn account_creation_valid() {
@@ -133,7 +118,7 @@ mod tests {
             );
         assert_eq!(
             HDFactorInstanceAccountCreation::new(hd_fi),
-            Err(Error::WrongEntityKindOfInFactorInstancesPath)
+            Err(CommonError::WrongEntityKindOfInFactorInstancesPath)
         );
     }
 
@@ -155,7 +140,7 @@ mod tests {
             );
         assert_eq!(
             HDFactorInstanceAccountCreation::new(hd_fi),
-            Err(Error::WrongKeyKindOfTransactionSigningFactorInstance)
+            Err(CommonError::WrongKeyKindOfTransactionSigningFactorInstance)
         );
     }
 
@@ -192,7 +177,7 @@ mod tests {
             );
         assert_eq!(
             HDFactorInstanceIdentityCreation::new(hd_fi),
-            Err(Error::WrongEntityKindOfInFactorInstancesPath)
+            Err(CommonError::WrongEntityKindOfInFactorInstancesPath)
         );
     }
 
@@ -214,7 +199,7 @@ mod tests {
             );
         assert_eq!(
             HDFactorInstanceIdentityCreation::new(hd_fi),
-            Err(Error::WrongKeyKindOfTransactionSigningFactorInstance)
+            Err(CommonError::WrongKeyKindOfTransactionSigningFactorInstance)
         );
     }
 }

@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use enum_iterator::Sequence;
 use radix_engine_common::network::NetworkDefinition;
 
 #[derive(
@@ -14,7 +13,7 @@ use radix_engine_common::network::NetworkDefinition;
     Hash,
     PartialOrd,
     Ord,
-    Sequence,
+    enum_iterator::Sequence,
     uniffi::Enum,
 )]
 #[repr(u8)]
@@ -156,7 +155,6 @@ impl NetworkID {
 mod tests {
     use crate::prelude::*;
     use enum_iterator::all;
-    use serde_json::json;
 
     #[test]
     fn mainnet_is_default() {

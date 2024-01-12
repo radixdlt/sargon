@@ -115,12 +115,8 @@ impl CAP26Path {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_json_value_eq_after_roundtrip, HasPlaceholder};
-    use serde_json::json;
 
-    use crate::{AccountPath, Derivation, DerivationPathScheme, GetIDPath};
-
-    use super::CAP26Path;
+    use crate::prelude::*;
 
     #[test]
     fn equality() {

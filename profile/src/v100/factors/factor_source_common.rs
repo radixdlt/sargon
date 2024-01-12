@@ -134,17 +134,7 @@ impl FactorSourceCommon {
 #[cfg(test)]
 mod tests {
 
-    use crate::{assert_eq_after_json_roundtrip, now, HasPlaceholder};
-    use identified_vec::IsIdentifiedVec;
-    use iso8601_timestamp::Timestamp;
-
-    use crate::v100::factors::{
-        factor_source_crypto_parameters::FactorSourceCryptoParameters,
-        factor_source_flag::FactorSourceFlag,
-    };
-
-    use super::FactorSourceCommon;
-
+    use crate::prelude::*;
     #[test]
     fn equality() {
         assert_eq!(

@@ -187,14 +187,7 @@ impl From<PublicKey> for EnginePublicKey {
 #[cfg(test)]
 mod tests {
 
-    use std::collections::BTreeSet;
-
-    use crate::{
-        assert_eq_after_json_roundtrip, assert_json_fails, Ed25519PublicKey, HasPlaceholder,
-        Secp256k1PublicKey,
-    };
-
-    use super::PublicKey;
+    use crate::prelude::*;
 
     use radix_engine_common::crypto::PublicKey as EnginePublicKey;
 

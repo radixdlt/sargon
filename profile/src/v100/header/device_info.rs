@@ -1,10 +1,4 @@
-use std::fmt::Display;
-
-use crate::{id, now};
-use iso8601_timestamp::Timestamp;
-use serde::{Deserialize, Serialize};
-use uuid::Uuid;
-
+use crate::prelude::*;
 /// A short summary of a device the Profile is being used
 /// on, typically an iPhone or an Android phone.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
@@ -66,7 +60,7 @@ impl Default for DeviceInfo {
     }
 }
 
-impl Display for DeviceInfo {
+impl std::fmt::Display for DeviceInfo {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let date: Timestamp = self.date.into();
         let date_str = date.date().to_string();
@@ -82,12 +76,7 @@ impl Display for DeviceInfo {
 
 #[cfg(test)]
 mod tests {
-    use std::{collections::HashSet, str::FromStr};
-
-    use crate::v100::header::device_info::DeviceInfo;
-    use crate::*;
-    use iso8601_timestamp::Timestamp;
-    use uuid::Uuid;
+    use crate::prelude::*;
 
     #[test]
     fn new_iphone() {

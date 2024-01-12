@@ -1,11 +1,4 @@
-use identified_vec::{Identifiable, IsIdentifiedVec};
-use serde::{Deserialize, Serialize};
-
-use crate::IdentifiedVecVia;
-
-use super::{
-    asset_exception::AssetException, deposit_rule::DepositRule, depositor_address::DepositorAddress,
-};
+use crate::prelude::*;
 
 /// Controls the ability of third-parties to deposit into a certain account, this is
 /// useful for users who wish to not be able to receive airdrops.
@@ -100,20 +93,7 @@ impl ThirdPartyDeposits {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::BTreeSet;
-
-    use crate::{assert_eq_after_json_roundtrip, IdentifiedVecVia};
-
-    use crate::v100::{
-        entity::account::on_ledger_settings::third_party_deposits::{
-            asset_exception::AssetException,
-            deposit_address_exception_rule::DepositAddressExceptionRule, deposit_rule::DepositRule,
-            depositor_address::DepositorAddress,
-        },
-        NonFungibleGlobalId,
-    };
-
-    use super::ThirdPartyDeposits;
+    use crate::prelude::*;
 
     #[test]
     fn json_roundtrip() {

@@ -1,7 +1,4 @@
-use enum_as_inner::EnumAsInner;
-
-use crate::{Ed25519PrivateKey, PublicKey, Secp256k1PrivateKey};
-
+use crate::prelude::*;
 /// A tagged union of supported private keys on different curves, supported
 /// curves are `secp256k1` and `Curve25519`
 #[derive(Debug, PartialEq, Eq, EnumAsInner)]
@@ -83,11 +80,7 @@ impl PrivateKey {
 #[cfg(test)]
 mod tests {
 
-    use std::collections::HashSet;
-
-    use crate::{generate_32_bytes, Ed25519PrivateKey, Secp256k1PrivateKey};
-
-    use super::PrivateKey;
+    use crate::prelude::*;
 
     #[test]
     fn private_key_ed25519_into_as_roundtrip() {

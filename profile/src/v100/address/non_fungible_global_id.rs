@@ -1,4 +1,5 @@
 use crate::prelude::*;
+
 use radix_engine_common::address::AddressBech32Decoder;
 use radix_engine_toolkit_json::models::scrypto::non_fungible_global_id::{
     SerializableNonFungibleGlobalId as EngineSerializableNonFungibleGlobalId,
@@ -135,15 +136,7 @@ impl NonFungibleGlobalId {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashSet;
-
-    use crate::{
-        assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
-        assert_json_value_ne_after_roundtrip, NonFungibleLocalId,
-    };
-    use serde_json::json;
-
-    use super::NonFungibleGlobalId;
+    use crate::prelude::*;
 
     #[test]
     fn test_deserialize() {

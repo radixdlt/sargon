@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+use crate::prelude::*;
 
 /// Fiat currency to measure and display the value of some XRD or other Radix assets value/worth in.
 #[derive(
@@ -19,9 +19,7 @@ impl Default for FiatCurrency {
 
 #[cfg(test)]
 mod tests {
-    use crate::AppDisplay;
-
-    use super::FiatCurrency;
+    use crate::prelude::*;
 
     #[test]
     fn usd_is_default() {

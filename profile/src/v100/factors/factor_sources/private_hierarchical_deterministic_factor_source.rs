@@ -73,11 +73,7 @@ impl PrivateHierarchicalDeterministicFactorSource {
 
 #[cfg(test)]
 mod tests {
-    use radix_engine_interface::sbor::rust::collections::HashSet;
-
-    use crate::WalletClientModel;
-
-    use super::PrivateHierarchicalDeterministicFactorSource;
+    use crate::prelude::*;
 
     #[test]
     fn hash() {

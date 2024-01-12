@@ -1,7 +1,4 @@
-use iso8601_timestamp::Timestamp;
-use uuid::Uuid;
-
-use crate::ProfileID;
+use crate::prelude::*;
 
 pub fn now() -> Timestamp {
     Timestamp::now_utc()
@@ -24,14 +21,7 @@ pub fn date(dt: &Timestamp) -> String {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::BTreeSet;
-
-    use iso8601_timestamp::Timestamp;
-    use uuid::Uuid;
-
-    use crate::iso8601;
-
-    use super::{date, id, now};
+    use crate::prelude::*;
 
     #[test]
     fn date_now() {

@@ -1,6 +1,4 @@
-use serde::{Deserialize, Serialize};
-
-use crate::{AppDisplay, Gateways, HasPlaceholder, P2PLinks, Security, Transaction};
+use crate::prelude::*;
 
 /// Collection of all settings, preferences and configuration related to how the wallet
 /// behaves and looks.
@@ -82,9 +80,7 @@ impl HasPlaceholder for AppPreferences {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
-
-    use super::{AppDisplay, AppPreferences, Gateways, P2PLinks, Security, Transaction};
+    use crate::prelude::*;
 
     #[test]
     fn equality() {

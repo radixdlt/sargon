@@ -1,6 +1,4 @@
-use serde::{Deserialize, Serialize};
-
-use crate::{HasPlaceholder, IdentifiedVecVia};
+use crate::prelude::*;
 
 // FIXME: MFA this is in fact not used, so ok to be a `bool` for now. The AppPreferences Security type has
 // a field `structure_configuration_references` but no client can populate it yet, so the list will always
@@ -57,9 +55,7 @@ impl HasPlaceholder for Security {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
-
-    use super::Security;
+    use crate::prelude::*;
 
     #[test]
     fn equality() {

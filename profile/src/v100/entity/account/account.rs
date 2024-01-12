@@ -1,25 +1,4 @@
-use crate::{HDPathValue, MnemonicWithPassphrase, WalletClientModel};
-
-use crate::{Derivation, HasEntityPath};
-use identified_vec::Identifiable;
-use serde::{Deserialize, Serialize};
-use std::{cmp::Ordering, fmt::Display};
-
-use crate::v100::{DeviceFactorSource, PrivateHierarchicalDeterministicFactorSource};
-
-use crate::HasPlaceholder;
-
-use std::hash::Hash;
-
-use crate::{
-    v100::{
-        AccountAddress, DisplayName, EntityAddress, EntityFlags, EntitySecurityState,
-        HDFactorInstanceAccountCreation, UnsecuredEntityControl,
-    },
-    NetworkID,
-};
-
-use super::{AppearanceID, OnLedgerSettings};
+use crate::prelude::*;
 
 /// A network unique account with a unique public address and a set of cryptographic
 /// factors used to control it.
@@ -136,7 +115,7 @@ impl PartialOrd for Account {
     }
 }
 
-impl Display for Account {
+impl std::fmt::Display for Account {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{} | {}", self.display_name, self.address)
     }

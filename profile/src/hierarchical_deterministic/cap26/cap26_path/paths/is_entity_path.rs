@@ -1,11 +1,12 @@
 use crate::prelude::*;
 
-pub trait IsEntityPath: CAP26Repr {
+// TODO: Merge trait IsEntityPath into trait EntityCAP26Path ?
+pub trait IsEntityPath: EntityCAP26Path {
     fn network_id(&self) -> NetworkID;
     fn key_kind(&self) -> CAP26KeyKind;
     fn index(&self) -> HDPathValue;
 }
-
+// TODO: Remove - not used???
 pub trait HasEntityPath<Path: IsEntityPath> {
     fn path(&self) -> Path;
 

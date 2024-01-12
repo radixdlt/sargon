@@ -60,13 +60,7 @@ impl HasPlaceholder for PrivateHierarchicalDeterministicFactorInstance {
 
 #[cfg(test)]
 mod tests {
-    use crate::HasPlaceholder;
-    use crate::{Derivation, HierarchicalDeterministicPrivateKey};
-
-    use crate::v100::factors::factor_instance::factor_instance::FactorInstance;
-
-    use super::PrivateHierarchicalDeterministicFactorInstance;
-
+    use crate::prelude::*;
     #[test]
     fn equality() {
         assert_eq!(

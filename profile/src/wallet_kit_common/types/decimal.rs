@@ -122,16 +122,7 @@ impl TryFrom<&[u8]> for Decimal {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashSet;
-
-    use serde_json::json;
-
-    use crate::{
-        assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
-        assert_json_value_ne_after_roundtrip, generate_32_bytes, generate_bytes, CommonError,
-    };
-
-    use super::Decimal;
+    use crate::prelude::*;
 
     #[test]
     fn eq() {

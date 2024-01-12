@@ -1,4 +1,5 @@
 use crate::prelude::*;
+
 use radix_engine_common::data::scrypto::model::NonFungibleLocalId as NativeNonFungibleLocalId;
 
 #[derive(Clone, Debug, uniffi::Enum, Hash, PartialEq, Eq)]
@@ -71,15 +72,13 @@ impl std::str::FromStr for NonFungibleLocalId {
 
 #[cfg(test)]
 mod tests {
-    use crate::{CommonError, Hex32Bytes};
+    use crate::prelude::*;
 
-    use super::NonFungibleLocalId;
     use radix_engine_common::data::scrypto::model::{
         BytesNonFungibleLocalId, IntegerNonFungibleLocalId,
         NonFungibleLocalId as NativeNonFungibleLocalId, RUIDNonFungibleLocalId,
         StringNonFungibleLocalId,
     };
-    use std::str::FromStr;
 
     #[test]
     fn from_str_ok() {

@@ -60,11 +60,7 @@ impl From<AppearanceID> for u8 {
 #[cfg(test)]
 mod tests {
 
-    use crate::{
-        assert_json_value_eq_after_roundtrip, assert_json_value_fails, AppearanceID, CommonError,
-    };
-    use serde_json::json;
-
+    use crate::prelude::*;
     #[test]
     fn lowest() {
         assert!(AppearanceID::new(0).is_ok());

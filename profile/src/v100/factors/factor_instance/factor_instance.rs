@@ -58,9 +58,7 @@ impl HasPlaceholder for FactorInstance {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
-
-    use super::FactorInstance;
+    use crate::prelude::*;
 
     #[test]
     fn equality() {

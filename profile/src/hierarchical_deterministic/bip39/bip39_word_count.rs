@@ -62,15 +62,8 @@ impl Default for BIP39WordCount {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::BTreeSet;
 
-    use crate::{
-        assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
-        assert_json_value_ne_after_roundtrip,
-    };
-    use serde_json::json;
-
-    use crate::BIP39WordCount;
+    use crate::prelude::*;
 
     #[test]
     fn default_is_24() {

@@ -1,4 +1,5 @@
 use crate::prelude::*;
+
 impl Identifiable for FactorSource {
     type ID = FactorSourceID;
 

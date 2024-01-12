@@ -1,14 +1,4 @@
-use identified_vec::{Identifiable, IsIdentifiedVec};
-use serde::{Deserialize, Serialize};
-
-use crate::HasPlaceholder;
-
-use crate::{
-    v100::{Account, AccountAddress},
-    NetworkID,
-};
-
-use super::accounts::Accounts;
+use crate::prelude::*;
 
 /// Accounts, Personas, Authorized dapps for some Radix Network that user
 /// has created and interacted with.
@@ -92,15 +82,7 @@ impl Network {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
-    use identified_vec::Identifiable;
-
-    use crate::{
-        v100::{Account, Accounts},
-        NetworkID,
-    };
-
-    use super::Network;
+    use crate::prelude::*;
 
     #[test]
     fn inequality() {

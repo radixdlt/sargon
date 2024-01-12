@@ -1,6 +1,4 @@
-use serde::{Deserialize, Serialize};
-
-use crate::v100::{NonFungibleGlobalId, ResourceAddress};
+use crate::prelude::*;
 
 /// The addresses that can be added as exception to the `DepositRule`
 #[derive(
@@ -15,10 +13,7 @@ pub enum DepositorAddress {
 
 #[cfg(test)]
 mod tests {
-    use crate::assert_eq_after_json_roundtrip;
-
-    use super::DepositorAddress;
-
+    use crate::prelude::*;
     #[test]
     fn json_decode_deny_all_with_exceptions() {
         let model =

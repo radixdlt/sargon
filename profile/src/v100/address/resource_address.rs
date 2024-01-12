@@ -60,15 +60,7 @@ impl TryFrom<&str> for ResourceAddress {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
-        assert_json_value_ne_after_roundtrip,
-    };
-    use serde_json::json;
-
-    use crate::{v100::address::entity_address::EntityAddress, NetworkID};
-
-    use super::ResourceAddress;
+    use crate::prelude::*;
 
     #[test]
     fn display() {

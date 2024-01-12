@@ -146,16 +146,7 @@ impl HierarchicalDeterministicFactorInstance {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder, PublicKey};
-    use crate::{
-        BIP44LikePath, CAP26KeyKind, Derivation, DerivationPath, GetIDPath,
-        HierarchicalDeterministicPublicKey, IdentityPath,
-    };
-
-    use crate::v100::factors::factor_source_id_from_hash::FactorSourceIDFromHash;
-
-    use super::HierarchicalDeterministicFactorInstance;
-
+    use crate::prelude::*;
     #[test]
     fn equality() {
         assert_eq!(

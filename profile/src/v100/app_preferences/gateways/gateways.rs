@@ -154,14 +154,7 @@ impl HasPlaceholder for Gateways {
 
 #[cfg(test)]
 mod tests {
-    use identified_vec::ItemsCloned;
-
-    use crate::{assert_eq_after_json_roundtrip, CommonError, HasPlaceholder, IdentifiedVecVia};
-
-    use crate::{v100::app_preferences::gateways::gateway::Gateway, NetworkID};
-
-    use super::Gateways;
-
+    use crate::prelude::*;
     #[test]
     fn equality() {
         assert_eq!(Gateways::placeholder(), Gateways::placeholder());

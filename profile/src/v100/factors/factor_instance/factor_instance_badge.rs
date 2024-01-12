@@ -77,12 +77,7 @@ impl Serialize for FactorInstanceBadge {
 
 #[cfg(test)]
 mod tests {
-    use crate::HierarchicalDeterministicPublicKey;
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
-
-    use crate::v100::factors::factor_instance::badge_virtual_source::FactorInstanceBadgeVirtualSource;
-
-    use super::FactorInstanceBadge;
+    use crate::prelude::*;
 
     #[test]
     fn equality() {

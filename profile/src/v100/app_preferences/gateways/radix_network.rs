@@ -149,11 +149,7 @@ impl RadixNetwork {
 #[cfg(test)]
 mod tests {
 
-    use crate::{assert_eq_after_json_roundtrip, CommonError, HasPlaceholder};
-
-    use crate::NetworkID;
-
-    use super::RadixNetwork;
+    use crate::prelude::*;
 
     #[test]
     fn equality() {

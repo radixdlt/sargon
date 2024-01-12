@@ -1,6 +1,4 @@
-use super::p2p_link::P2PLink;
-
-use crate::{HasPlaceholder, IdentifiedVecVia};
+use crate::prelude::*;
 
 /// Collection of clients user have connected P2P with, typically these
 /// are WebRTC connections with DApps, but might be Android or iPhone
@@ -30,12 +28,7 @@ impl HasPlaceholder for P2PLinks {
 
 #[cfg(test)]
 mod tests {
-    use identified_vec::IsIdentifiedVec;
-
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder, P2PLink};
-
-    use super::P2PLinks;
-
+    use crate::prelude::*;
     #[test]
     fn equality() {
         assert_eq!(P2PLinks::placeholder(), P2PLinks::placeholder());
@@ -46,20 +39,20 @@ mod tests {
     fn inequality() {
         assert_ne!(P2PLinks::placeholder(), P2PLinks::placeholder_other());
     }
-    // #[test]
-    // fn display() {
-    //     let mut sut = P2PLinks::new();
-    //     sut.append(P2PLink::placeholder_duckduckgo());
-    //     assert_eq!(format!("{}", sut), "[P2PLink { connection_password: RadixConnectPassword(deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead), display_name: \"DuckDuckGo on Mac Pro\" }]");
-    // }
+    #[test]
+    fn display() {
+        let mut sut = P2PLinks::new();
+        sut.append(P2PLink::placeholder_duckduckgo());
+        assert_eq!(format!("{}", sut), "[P2PLink { connection_password: RadixConnectPassword(deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead), display_name: \"DuckDuckGo on Mac Pro\" }]");
+    }
 
-    // #[test]
-    // fn into_iter() {
-    //     let mut sut = P2PLinks::new();
-    //     sut.append(P2PLink::placeholder_duckduckgo());
-    //     sut.append(P2PLink::placeholder_chrome());
-    //     assert!(sut.into_iter().any(|p| p.display_name().contains("Chrome")));
-    // }
+    #[test]
+    fn into_iter() {
+        let mut sut = P2PLinks::new();
+        sut.append(P2PLink::placeholder_duckduckgo());
+        sut.append(P2PLink::placeholder_chrome());
+        assert!(sut.into_iter().any(|p| p.display_name.contains("Chrome")));
+    }
 
     #[test]
     fn default_is_empty() {

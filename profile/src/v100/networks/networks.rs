@@ -1,9 +1,4 @@
-use crate::v100::{Account, AccountAddress, ContentHint};
-
-use crate::{HasPlaceholder, IdentifiedVecVia};
-
-use super::Network;
-use identified_vec::IsIdentifiedVec;
+use crate::prelude::*;
 
 /// An ordered mapping of NetworkID -> `Profile.Network`, containing
 /// all the users Accounts, Personas and AuthorizedDapps the user
@@ -82,12 +77,7 @@ impl HasPlaceholder for Networks {
 
 #[cfg(test)]
 mod tests {
-    use identified_vec::{IsIdentifiedVec, ItemsCloned};
-
-    use crate::{
-        assert_eq_after_json_roundtrip, Account, Accounts, ContentHint, DisplayName,
-        HasPlaceholder, Network, NetworkID, Networks,
-    };
+    use crate::prelude::*;
 
     #[test]
     fn default_is_empty() {

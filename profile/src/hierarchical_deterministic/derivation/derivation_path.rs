@@ -142,12 +142,7 @@ impl From<CAP26Path> for DerivationPath {
 #[cfg(test)]
 mod tests {
 
-    use crate::{
-        assert_eq_after_json_roundtrip, AccountPath, BIP44LikePath, CAP26Path, Derivation,
-        DerivationPathScheme, GetIDPath, HasPlaceholder, IdentityPath,
-    };
-
-    use super::DerivationPath;
+    use crate::prelude::*;
 
     #[test]
     fn equality() {

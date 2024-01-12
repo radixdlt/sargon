@@ -1,9 +1,5 @@
 use crate::prelude::*;
-use std::{
-    fmt::{Debug, Display, Formatter},
-    ops::Deref,
-    sync::Arc,
-};
+use std::ops::Deref;
 
 /// A gateway to some Radix Network, which is a high level REST API which clients (wallets) can
 /// consume in order to query asset balances and submit transactions.
@@ -24,8 +20,8 @@ impl Identifiable for Gateway {
     }
 }
 
-impl Debug for Gateway {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+impl std::fmt::Debug for Gateway {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
             "{}: {}",
@@ -35,8 +31,8 @@ impl Debug for Gateway {
     }
 }
 
-impl Display for Gateway {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+impl std::fmt::Display for Gateway {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.url.to_string(),)
     }
 }
@@ -136,11 +132,7 @@ impl Gateway {
 
 #[cfg(test)]
 mod tests {
-    use crate::assert_eq_after_json_roundtrip;
-    use identified_vec::Identifiable;
-    use radix_engine_common::prelude::HashSet;
-
-    use super::Gateway;
+    use crate::prelude::*;
 
     #[test]
     fn json_roundtrip_mainnet() {
@@ -219,7 +211,7 @@ mod tests {
     #[test]
     fn hash() {
         assert_eq!(
-            HashSet::from_iter([
+            HashSet::<Gateway>::from_iter([
                 Gateway::mainnet(),
                 Gateway::stokenet(),
                 Gateway::rcnet(),

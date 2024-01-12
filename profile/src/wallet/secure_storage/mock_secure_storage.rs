@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use crate::prelude::*;
 
 #[derive(Debug)]
@@ -10,11 +8,11 @@ impl MockSecureStorage {
     }
 }
 impl SecureStorage for MockSecureStorage {
-    fn load_data(&self, key: SecureStorageKey) -> Result<Option<Vec<u8>>> {
+    fn load_data(&self, _key: SecureStorageKey) -> Result<Option<Vec<u8>>> {
         panic!("You have not installed any secure storage yet.")
     }
 
-    fn save_data(&self, key: SecureStorageKey, value: Vec<u8>) -> Result<()> {
+    fn save_data(&self, _key: SecureStorageKey, _value: Vec<u8>) -> Result<()> {
         panic!("You have not installed any secure storage yet.")
     }
 }

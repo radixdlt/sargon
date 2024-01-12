@@ -1,7 +1,4 @@
-use std::fmt::Display;
-
-use serde::{Deserialize, Serialize};
-
+use crate::prelude::*;
 /// A hint describing the contents of a Profile, acting as a
 /// summary of a Profile used by a ProfileSnapshot Header.
 ///
@@ -58,7 +55,7 @@ impl ContentHint {
     }
 }
 
-impl Display for ContentHint {
+impl std::fmt::Display for ContentHint {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
@@ -73,12 +70,7 @@ impl Display for ContentHint {
 #[cfg(test)]
 mod tests {
 
-    use crate::{
-        assert_eq_after_json_roundtrip, assert_json_fails, assert_json_roundtrip,
-        assert_ne_after_json_roundtrip,
-    };
-
-    use super::ContentHint;
+    use crate::prelude::*;
 
     #[test]
     fn new_counters_all_start_at_zero() {

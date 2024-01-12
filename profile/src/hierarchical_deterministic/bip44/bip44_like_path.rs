@@ -27,11 +27,12 @@ impl TryFrom<&HDPath> for BIP44LikePath {
     type Error = CommonError;
 
     fn try_from(value: &HDPath) -> Result<Self> {
-        let (path, components) =
-            HDPath::try_parse_base_hdpath(value, |v| CommonError::InvalidDepthOfBIP44Path {
-                expected: v.expected,
+        let (path, components) = HDPath::try_parse_base_hdpath(value, |v| {
+            CommonError::InvalidDepthOfBIP44Path {
+                expected: Self::PATH_DEPTH,
                 found: v.found,
-            })?;
+            }
+        })?;
 
         BIP44LikePath::assert_depth_of(value)?;
         let account = &components[2];
@@ -54,7 +55,7 @@ impl TryFrom<&HDPath> for BIP44LikePath {
 impl BIP44LikePath {
     pub fn from_str(s: &str) -> Result<Self> {
         let (path, _) = HDPath::try_parse_base(s, |v| CommonError::InvalidDepthOfBIP44Path {
-            expected: v.expected,
+            expected: Self::PATH_DEPTH,
             found: v.found,
         })?;
         return Self::try_from(&path);
@@ -132,13 +133,8 @@ impl HasPlaceholder for BIP44LikePath {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        assert_json_value_eq_after_roundtrip, assert_json_value_ne_after_roundtrip, CommonError,
-        HasPlaceholder,
-    };
-    use serde_json::json;
 
-    use crate::{BIP44LikePath, Derivation};
+    use crate::prelude::*;
 
     #[test]
     fn equality() {

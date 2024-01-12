@@ -1,10 +1,5 @@
-use std::fmt::{Debug, Formatter};
-
-use crate::{hash, Hex32Bytes};
+use crate::prelude::*;
 use radix_engine_common::crypto::Hash;
-use serde::{Deserialize, Serialize};
-
-use crate::HasPlaceholder;
 
 /// The hash of the connection password is used to connect to the Radix Connect Signaling Server,
 /// over web sockets. The actual `ConnectionPassword` is used to encrypt all messages sent via
@@ -15,8 +10,8 @@ pub struct RadixConnectPassword {
     pub value: Hex32Bytes,
 }
 
-impl Debug for RadixConnectPassword {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+impl std::fmt::Debug for RadixConnectPassword {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.value.to_hex(),)
     }
 }
@@ -78,14 +73,7 @@ impl RadixConnectPassword {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
-        assert_json_value_ne_after_roundtrip, HasPlaceholder,
-    };
-    use radix_engine_common::prelude::HashSet;
-    use serde_json::json;
-
-    use super::RadixConnectPassword;
+    use crate::prelude::*;
 
     #[test]
     fn equality() {
@@ -133,7 +121,7 @@ mod tests {
     #[test]
     fn hash() {
         assert_eq!(
-            HashSet::from_iter([
+            HashSet::<RadixConnectPassword>::from_iter([
                 RadixConnectPassword::placeholder(),
                 RadixConnectPassword::placeholder_dead()
             ])
@@ -142,7 +130,7 @@ mod tests {
         );
 
         assert_eq!(
-            HashSet::from_iter([
+            HashSet::<RadixConnectPassword>::from_iter([
                 RadixConnectPassword::placeholder_aced(),
                 RadixConnectPassword::placeholder_babe(),
                 RadixConnectPassword::placeholder_cafe(),

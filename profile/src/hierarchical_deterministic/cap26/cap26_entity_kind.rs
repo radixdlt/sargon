@@ -1,10 +1,4 @@
-use std::fmt::Display;
-
-use serde_repr::{Deserialize_repr, Serialize_repr};
-use strum::FromRepr;
-
-use crate::HDPathValue;
-use enum_as_inner::EnumAsInner;
+use crate::prelude::*;
 
 /// Account or Identity (used by Personas) part of a CAP26 derivation
 /// path.
@@ -32,7 +26,7 @@ pub enum CAP26EntityKind {
     Identity = 618,
 }
 
-impl Display for CAP26EntityKind {
+impl std::fmt::Display for CAP26EntityKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.description())
     }
@@ -53,10 +47,8 @@ impl CAP26EntityKind {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::BTreeSet;
 
-    use crate::{assert_json_roundtrip, assert_json_value_eq_after_roundtrip, CAP26EntityKind};
-    use serde_json::json;
+    use crate::prelude::*;
 
     #[test]
     fn discriminant() {

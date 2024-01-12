@@ -1,7 +1,8 @@
 use crate::prelude::*;
 
-pub trait CAP26Repr: Derivation {
-    fn entity_kind() -> Option<CAP26EntityKind>;
+const ENTITY_PATH_DEPTH: usize = 6;
+pub trait EntityCAP26Path: Derivation {
+    fn entity_kind() -> CAP26EntityKind;
 
     fn __with_path_and_components(
         path: HDPath,
@@ -13,18 +14,18 @@ pub trait CAP26Repr: Derivation {
 
     #[cfg(not(tarpaulin_include))] // false negative, this is in fact heavily tested.
     fn try_from_hdpath(hdpath: &HDPath) -> Result<Self> {
-        let expected_depth = 6;
-        let (path, components) =
-            HDPath::try_parse_base_hdpath(hdpath, |v| CommonError::InvalidDepthOfCAP26Path {
-                expected: v.expected,
+        let (path, components) = HDPath::try_parse_base_hdpath(hdpath, |v| {
+            CommonError::InvalidDepthOfCAP26Path {
+                expected: ENTITY_PATH_DEPTH,
                 found: v.found,
-            })?;
+            }
+        })?;
         if !components.clone().iter().all(|c| c.is_hardened()) {
             return Err(CommonError::NotAllComponentsAreHardened);
         }
-        if path.depth() != 6 {
+        if path.depth() != ENTITY_PATH_DEPTH {
             return Err(CommonError::InvalidDepthOfCAP26Path {
-                expected: expected_depth,
+                expected: ENTITY_PATH_DEPTH,
                 found: path.depth(),
             });
         }
@@ -46,13 +47,11 @@ pub trait CAP26Repr: Derivation {
             Box::new(|v| CAP26EntityKind::from_repr(v).ok_or(CommonError::InvalidEntityKind(v))),
         )?;
 
-        if let Some(expected_entity_kind) = Self::entity_kind() {
-            if entity_kind != expected_entity_kind {
-                return Err(CommonError::WrongEntityKind {
-                    expected: expected_entity_kind.discriminant(),
-                    found: entity_kind.discriminant(),
-                });
-            }
+        if entity_kind != Self::entity_kind() {
+            return Err(CommonError::WrongEntityKind {
+                expected: Self::entity_kind(),
+                found: entity_kind,
+            });
         }
 
         let key_kind = HDPath::parse_try_map(
@@ -69,14 +68,14 @@ pub trait CAP26Repr: Derivation {
     #[cfg(not(tarpaulin_include))] // false negative, this is in fact heavily tested.
     fn from_str(s: &str) -> Result<Self> {
         let (path, _) = HDPath::try_parse_base(s, |v| CommonError::InvalidDepthOfCAP26Path {
-            expected: v.expected,
+            expected: ENTITY_PATH_DEPTH,
             found: v.found,
         })?;
         Self::try_from_hdpath(&path)
     }
 
     fn new(network_id: NetworkID, key_kind: CAP26KeyKind, index: HDPathValue) -> Self {
-        let entity_kind = Self::entity_kind().expect("GetID cannot be used with this constructor");
+        let entity_kind = Self::entity_kind();
         let c0 = HDPathComponent::bip44_purpose();
         let c1 = HDPathComponent::bip44_cointype();
         let c2 = HDPathComponent::harden(network_id.discriminant() as HDPathValue);

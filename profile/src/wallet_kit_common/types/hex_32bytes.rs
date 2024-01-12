@@ -175,7 +175,6 @@ impl<'de> serde::Deserialize<'de> for Hex32Bytes {
 mod tests {
 
     use crate::prelude::*;
-    use serde_json::json;
 
     #[test]
     fn equality() {

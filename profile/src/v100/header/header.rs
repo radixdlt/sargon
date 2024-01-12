@@ -109,18 +109,7 @@ impl HasPlaceholder for Header {
 
 #[cfg(test)]
 pub mod tests {
-
-    use std::str::FromStr;
-
-    use crate::{assert_eq_after_json_roundtrip, profile_id, HasPlaceholder, ProfileID};
-    use crate::{
-        v100::header::{content_hint::ContentHint, device_info::DeviceInfo},
-        ProfileSnapshotVersion,
-    };
-    use iso8601_timestamp::Timestamp;
-    use uuid::Uuid;
-
-    use super::Header;
+    use crate::prelude::*;
 
     #[test]
     fn equality() {

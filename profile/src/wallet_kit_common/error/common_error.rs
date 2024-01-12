@@ -80,7 +80,10 @@ pub enum CommonError {
     InvalidEntityKind(u32) = 10023,
 
     #[error("Wrong entity kind, (expected {expected}, found {found})")]
-    WrongEntityKind { expected: u32, found: u32 } = 10024,
+    WrongEntityKind {
+        expected: CAP26EntityKind,
+        found: CAP26EntityKind,
+    } = 10024,
 
     #[error("InvalidKeyKind, got: '{0}', expected any of: [1460H, 1678H, 1391H].")]
     InvalidKeyKind(u32) = 10025,

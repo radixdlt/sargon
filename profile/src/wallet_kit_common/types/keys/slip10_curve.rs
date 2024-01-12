@@ -1,5 +1,4 @@
-use identified_vec::Identifiable;
-use serde::{Deserialize, Serialize};
+use crate::prelude::*;
 
 /// Elliptic Curves which the SLIP10 derivation algorithm supports.
 ///
@@ -33,15 +32,7 @@ impl Identifiable for SLIP10Curve {
 
 #[cfg(test)]
 mod tests {
-    use identified_vec::Identifiable;
-    use serde_json::json;
-
-    use crate::{
-        assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
-        assert_json_value_ne_after_roundtrip,
-    };
-
-    use super::SLIP10Curve;
+    use crate::prelude::*;
 
     #[test]
     fn json_roundtrip_secp256k1() {

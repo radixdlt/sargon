@@ -1,9 +1,4 @@
-use serde::{de, Deserializer, Serialize, Serializer};
-use std::fmt::Display;
-
-use crate::{v100::AbstractEntityType, CommonError, NetworkID};
-
-use super::entity_address::EntityAddress;
+use crate::prelude::*;
 
 /// The address of an identity, used by Personas, a bech32 encoding of a public key hash
 /// that starts with the prefix `"identity_"`, dependent on NetworkID, meaning the same
@@ -74,7 +69,7 @@ impl TryInto<IdentityAddress> for &str {
     }
 }
 
-impl Display for IdentityAddress {
+impl std::fmt::Display for IdentityAddress {
     /// The full bech32 address.
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.address)
@@ -83,19 +78,10 @@ impl Display for IdentityAddress {
 
 #[cfg(test)]
 mod tests {
-    use std::str::FromStr;
-
-    use crate::{
-        assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
-        assert_json_value_ne_after_roundtrip,
-    };
+    use crate::prelude::*;
     use radix_engine_common::crypto::{
         Ed25519PublicKey as EngineEd25519PublicKey, PublicKey as EnginePublicKey,
     };
-    use serde_json::json;
-
-    use super::*;
-    use crate::CommonError as Error;
 
     #[test]
     fn from_bech32() {
@@ -173,7 +159,7 @@ mod tests {
     fn invalid() {
         assert_eq!(
             IdentityAddress::try_from_bech32("x"),
-            Err(Error::FailedToDecodeAddressFromBech32("x".to_owned()))
+            Err(CommonError::FailedToDecodeAddressFromBech32("x".to_owned()))
         )
     }
 
@@ -182,7 +168,7 @@ mod tests {
         let s = "identity_rdx12tgzjrz9u0xz4l28vf04hz87eguclmfaq4d2p8f8lv7zg9ssnzku8x";
         assert_eq!(
             IdentityAddress::try_from_bech32(s),
-            Err(Error::FailedToDecodeAddressFromBech32(s.to_owned()))
+            Err(CommonError::FailedToDecodeAddressFromBech32(s.to_owned()))
         )
     }
 
@@ -192,7 +178,7 @@ mod tests {
             IdentityAddress::try_from_bech32(
                 "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
             ),
-            Err(Error::MismatchingEntityTypeWhileDecodingAddress)
+            Err(CommonError::MismatchingEntityTypeWhileDecodingAddress)
         )
     }
 

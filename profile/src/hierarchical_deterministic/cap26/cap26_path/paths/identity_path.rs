@@ -35,9 +35,9 @@ impl TryFrom<&HDPath> for IdentityPath {
     }
 }
 
-impl CAP26Repr for IdentityPath {
-    fn entity_kind() -> Option<CAP26EntityKind> {
-        Some(CAP26EntityKind::Identity)
+impl EntityCAP26Path for IdentityPath {
+    fn entity_kind() -> CAP26EntityKind {
+        CAP26EntityKind::Identity
     }
 
     fn __with_path_and_components(
@@ -118,7 +118,6 @@ impl Derivation for IdentityPath {
 mod tests {
 
     use crate::prelude::*;
-    use serde_json::json;
 
     #[test]
     fn equality() {
@@ -215,8 +214,8 @@ mod tests {
         assert_eq!(
             IdentityPath::from_str("m/44H/1022H/1H/525H/1460H/0H"),
             Err(CommonError::WrongEntityKind {
-                expected: CAP26EntityKind::Identity.discriminant(),
-                found: CAP26EntityKind::Account.discriminant()
+                expected: CAP26EntityKind::Identity,
+                found: CAP26EntityKind::Account,
             })
         )
     }
@@ -325,8 +324,8 @@ mod tests {
         assert_eq!(
             IdentityPath::try_from(&hdpath),
             Err(CommonError::WrongEntityKind {
-                expected: 618,
-                found: 525
+                expected: CAP26EntityKind::Identity,
+                found: CAP26EntityKind::Account
             })
         );
     }

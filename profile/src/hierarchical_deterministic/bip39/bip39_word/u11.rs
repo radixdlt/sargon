@@ -29,8 +29,8 @@ impl U11 {
 
 #[cfg(test)]
 mod tests {
-    use super::U11;
-    use crate::CommonError;
+
+    use crate::prelude::*;
 
     #[test]
     fn invalid_2048() {

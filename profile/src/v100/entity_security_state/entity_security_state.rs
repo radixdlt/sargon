@@ -1,9 +1,4 @@
-use enum_as_inner::EnumAsInner;
-use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
-
-use super::unsecured_entity_control::UnsecuredEntityControl;
-
-use crate::HasPlaceholder;
+use crate::prelude::*;
 
 /// Describes the state an entity - Account or Persona - is in in regards to how
 /// the user controls it, i.e. if it is controlled by a single factor (private key)
@@ -74,9 +69,7 @@ impl HasPlaceholder for EntitySecurityState {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
-
-    use super::EntitySecurityState;
+    use crate::prelude::*;
 
     #[test]
     fn equality() {

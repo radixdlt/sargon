@@ -1,6 +1,4 @@
-use serde::{Deserialize, Serialize};
-
-use crate::{FiatCurrency, HasPlaceholder};
+use crate::prelude::*;
 
 /// Settings related to displaying of information to the user inside the app.
 ///
@@ -45,8 +43,7 @@ impl HasPlaceholder for AppDisplay {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, AppDisplay, HasPlaceholder};
-
+    use crate::prelude::*;
     #[test]
     fn equality() {
         assert_eq!(AppDisplay::placeholder(), AppDisplay::placeholder());

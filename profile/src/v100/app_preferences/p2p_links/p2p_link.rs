@@ -1,10 +1,6 @@
-use super::radix_connect_password::RadixConnectPassword;
-use identified_vec::Identifiable;
-use radix_engine_common::crypto::Hash;
-use serde::{Deserialize, Serialize};
-use std::fmt::{Debug, Formatter};
+use crate::prelude::*;
 
-use crate::HasPlaceholder;
+use radix_engine_common::crypto::Hash;
 
 /// A client the user have connected P2P with, typically a
 /// WebRTC connections with a DApp, but might be Android or iPhone
@@ -30,8 +26,8 @@ impl P2PLink {
     }
 }
 
-impl Debug for P2PLink {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+impl std::fmt::Debug for P2PLink {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
             "P2PLink {{ display_name: '{}', connection_password: '{:?}' }}",
@@ -104,9 +100,7 @@ impl P2PLink {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
-
-    use super::P2PLink;
+    use crate::prelude::*;
 
     #[test]
     fn equality() {

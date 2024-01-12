@@ -35,11 +35,12 @@ impl TryFrom<&HDPath> for GetIDPath {
 
     fn try_from(value: &HDPath) -> Result<Self> {
         let expected_depth = 3;
-        let (path, components) =
-            HDPath::try_parse_base_hdpath(value, |v| CommonError::InvalidDepthOfCAP26Path {
-                expected: v.expected,
+        let (path, components) = HDPath::try_parse_base_hdpath(value, |v| {
+            CommonError::InvalidDepthOfCAP26Path {
+                expected: Self::PATH_DEPTH,
                 found: v.found,
-            })?;
+            }
+        })?;
         if path.depth() != expected_depth {
             return Err(CommonError::InvalidDepthOfCAP26Path {
                 expected: expected_depth,
@@ -57,11 +58,12 @@ impl TryFrom<&HDPath> for GetIDPath {
 }
 
 impl GetIDPath {
+    pub const PATH_DEPTH: usize = 3;
     pub const LAST_COMPONENT_VALUE: HDPathValue = 365;
 
     pub fn from_str(s: &str) -> Result<Self> {
         let (path, _) = HDPath::try_parse_base(s, |v| CommonError::InvalidDepthOfCAP26Path {
-            expected: v.expected,
+            expected: Self::PATH_DEPTH,
             found: v.found,
         })?;
         return Self::try_from(&path);
@@ -97,14 +99,8 @@ impl TryInto<GetIDPath> for &str {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        CommonError, {assert_json_value_eq_after_roundtrip, assert_json_value_fails},
-    };
-    use serde_json::json;
 
-    use crate::Derivation;
-
-    use super::GetIDPath;
+    use crate::prelude::*;
 
     #[test]
     fn to_string() {

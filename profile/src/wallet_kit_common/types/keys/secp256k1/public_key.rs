@@ -156,7 +156,6 @@ impl Secp256k1PublicKey {
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
-    use serde_json::json;
 
     use radix_engine_common::crypto::Secp256k1PublicKey as EngineSecp256k1PublicKey;
 

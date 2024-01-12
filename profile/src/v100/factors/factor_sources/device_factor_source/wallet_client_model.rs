@@ -19,9 +19,7 @@ impl HasPlaceholder for WalletClientModel {
 
 #[cfg(test)]
 mod tests {
-    use crate::HasPlaceholder;
-
-    use super::WalletClientModel;
+    use crate::prelude::*;
     #[test]
     fn equality() {
         assert_eq!(

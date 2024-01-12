@@ -122,8 +122,7 @@ impl Wallet {
 
 #[cfg(test)]
 mod tests {
-    use crate::{HasPlaceholder, MockSecureStorage, Profile, Wallet};
-
+    use crate::prelude::*;
     #[test]
     fn read_header() {
         let profile = Profile::placeholder();

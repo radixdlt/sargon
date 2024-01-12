@@ -82,10 +82,7 @@ impl FactorSourceIDFromHash {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
-    use crate::{Mnemonic, MnemonicWithPassphrase};
-
-    use super::FactorSourceIDFromHash;
+    use crate::prelude::*;
 
     #[test]
     fn equality() {

@@ -8,6 +8,11 @@ pub struct InvalidValue<T: std::fmt::Debug> {
     pub found: T,
 }
 
+#[derive(Debug)]
+pub struct InvalidValueFound<T: std::fmt::Debug> {
+    pub found: T,
+}
+
 #[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record)]
 pub struct HDPath {
     pub components: Vec<HDPathComponent>,
@@ -104,12 +109,11 @@ impl HDPath {
         depth_error: F,
     ) -> Result<(HDPath, Vec<HDPathComponent>)>
     where
-        F: FnOnce(InvalidValue<usize>) -> CommonError,
+        F: FnOnce(InvalidValueFound<usize>) -> CommonError,
     {
         let expected_depth = 2;
         if path.depth() < expected_depth {
-            return Err(depth_error(InvalidValue {
-                expected: expected_depth,
+            return Err(depth_error(InvalidValueFound {
                 found: path.depth(),
             }));
         }
@@ -136,7 +140,7 @@ impl HDPath {
         depth_error: F,
     ) -> Result<(HDPath, Vec<HDPathComponent>)>
     where
-        F: FnOnce(InvalidValue<usize>) -> CommonError,
+        F: FnOnce(InvalidValueFound<usize>) -> CommonError,
     {
         let path = HDPath::from_str(s).map_err(|_| CommonError::InvalidBIP32Path(s.to_string()))?;
         return Self::try_parse_base_hdpath(&path, depth_error);
@@ -158,7 +162,6 @@ impl HDPath {
 mod tests {
 
     use crate::prelude::*;
-    use serde_json::json;
 
     #[test]
     fn json_roundtrip() {

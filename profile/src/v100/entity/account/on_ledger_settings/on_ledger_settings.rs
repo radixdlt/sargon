@@ -1,6 +1,4 @@
-use serde::{Deserialize, Serialize};
-
-use super::ThirdPartyDeposits;
+use crate::prelude::*;
 
 /// Account settings that user has set on the account component
 /// On-Ledger, that is set via a transaction mutating the state
@@ -29,17 +27,7 @@ impl OnLedgerSettings {
 
 #[cfg(test)]
 mod tests {
-
-    use crate::{
-        assert_eq_after_json_roundtrip, assert_json_roundtrip, assert_ne_after_json_roundtrip,
-    };
-
-    use crate::v100::{
-        AssetException, DepositAddressExceptionRule, DepositRule, DepositorAddress,
-        ThirdPartyDeposits,
-    };
-
-    use super::OnLedgerSettings;
+    use crate::prelude::*;
 
     #[test]
     fn get_third_party_deposits_then_mutate() {

@@ -104,8 +104,8 @@ impl HasPlaceholder for Mnemonic {
 
 #[cfg(test)]
 mod tests {
+
     use crate::prelude::*;
-    use serde_json::json;
 
     #[test]
     fn equality() {

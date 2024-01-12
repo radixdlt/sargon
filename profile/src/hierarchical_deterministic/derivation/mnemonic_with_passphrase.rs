@@ -108,12 +108,7 @@ impl MnemonicWithPassphrase {
 #[cfg(test)]
 mod tests {
 
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
-    use crate::{
-        AccountPath, BIP44LikePath, CAP26KeyKind, CAP26Repr, Derivation, Mnemonic, NetworkID,
-    };
-
-    use super::MnemonicWithPassphrase;
+    use crate::prelude::*;
 
     #[test]
     fn equality() {

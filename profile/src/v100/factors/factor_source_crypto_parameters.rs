@@ -82,14 +82,7 @@ impl Default for FactorSourceCryptoParameters {
 
 #[cfg(test)]
 mod tests {
-    use identified_vec::IsIdentifiedVec;
-
-    use crate::DerivationPathScheme;
-    use crate::{assert_eq_after_json_roundtrip, SLIP10Curve};
-
-    use super::FactorSourceCryptoParameters;
-    use crate::CommonError as Error;
-
+    use crate::prelude::*;
     #[test]
     fn babylon_has_curve25519_as_first_curve() {
         assert_eq!(
@@ -186,7 +179,7 @@ mod tests {
     fn curves_must_not_be_empty() {
         assert_eq!(
             FactorSourceCryptoParameters::new([], []),
-            Err(Error::FactorSourceCryptoParametersSupportedCurvesInvalidSize)
+            Err(CommonError::FactorSourceCryptoParametersSupportedCurvesInvalidSize)
         );
     }
 

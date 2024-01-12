@@ -1,8 +1,4 @@
-use serde::{Deserialize, Serialize};
-
-use crate::Decimal;
-
-use crate::HasPlaceholder;
+use crate::prelude::*;
 
 /// User Preferences relating to submission of transactions.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Hash, uniffi::Record)]
@@ -46,10 +42,7 @@ impl HasPlaceholder for Transaction {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, Decimal, HasPlaceholder};
-
-    use super::Transaction;
-
+    use crate::prelude::*;
     #[test]
     fn equality() {
         assert_eq!(Transaction::placeholder(), Transaction::placeholder());

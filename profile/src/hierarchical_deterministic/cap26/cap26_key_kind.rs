@@ -1,10 +1,4 @@
-use std::fmt::Display;
-
-use serde_repr::{Deserialize_repr, Serialize_repr};
-use strum::FromRepr;
-
-use crate::HDPathValue;
-use enum_as_inner::EnumAsInner;
+use crate::prelude::*;
 
 #[derive(
     Serialize_repr,
@@ -36,7 +30,7 @@ pub enum CAP26KeyKind {
     MessageEncryption = 1391,
 }
 
-impl Display for CAP26KeyKind {
+impl std::fmt::Display for CAP26KeyKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}", self)
     }
@@ -51,8 +45,8 @@ impl CAP26KeyKind {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_json_roundtrip, assert_json_value_eq_after_roundtrip, CAP26KeyKind};
-    use serde_json::json;
+
+    use crate::prelude::*;
 
     #[test]
     fn discriminant() {
