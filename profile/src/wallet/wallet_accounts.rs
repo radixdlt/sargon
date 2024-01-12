@@ -23,7 +23,7 @@ impl Wallet {
 //========
 #[uniffi::export]
 impl Wallet {
-    /// Creates a new non securified account using the `main` "Babylon" `DeviceFactorSource` and the "next" index for this FactorSource
+    /// Creates a new non securified account **WITHOUT** saving it, using the `main` "Babylon" `DeviceFactorSource` and the "next" index for this FactorSource
     /// as derivation path.
     pub fn create_new_account(&self, network_id: NetworkID, name: DisplayName) -> Result<Account> {
         let profile = &self.profile();
@@ -34,11 +34,54 @@ impl Wallet {
             .get(&network_id)
             .map(|n| n.accounts.len())
             .unwrap_or(0);
+
         let appearance_id =
             AppearanceID::from_number_of_accounts_on_network(number_of_accounts_on_network);
-        self.load_private_device_factor_source(bdfs)
-            .map(|p| p.derive_account_creation_factor_instance(network_id, index))
-            .map(|fi| Account::new(fi, name, appearance_id))
+
+        let factor_instance = self
+            .load_private_device_factor_source(bdfs)
+            .map(|p| p.derive_account_creation_factor_instance(network_id, index))?;
+
+        let account = Account::new(factor_instance, name, appearance_id);
+
+        Ok(account)
+    }
+
+    /// Returns `Ok(())` if the `account` was new and successfully saved. If saving failed or if the account was already present in Profile, an
+    /// error is thrown (strict).
+    pub fn save_new_account(&self, account: Account) -> Result<()> {
+        // TODO: clean this up, BAD code. messy, mostly because of (my) bad IdentifiedVec API.
+        let network_id = account.network_id.clone();
+        let err_exists = CommonError::AccountAlreadyPresent(account.id().clone());
+        self.try_write(|mut p| {
+            let networks = &mut p.networks;
+            if networks.contains_id(&network_id) {
+                networks
+                    .try_update_with(&network_id, |network| {
+                        if network.accounts.append(account.clone()).0 {
+                            Ok(network.clone())
+                        } else {
+                            return Err(err_exists.clone());
+                        }
+                    })
+                    .and_then(|r| if r { Ok(()) } else { Err(err_exists.clone()) })
+            } else {
+                let network = Network::new(network_id, Accounts::from_iter([account.to_owned()]));
+                networks.append(network);
+                Ok(())
+            }
+        })
+    }
+
+    /// Create a new Account and saves it into the active Profile.
+    pub fn create_and_save_new_account(
+        &self,
+        network_id: NetworkID,
+        name: DisplayName,
+    ) -> Result<Account> {
+        let account = self.create_new_account(network_id, name)?;
+        self.save_new_account(account.clone())?;
+        Ok(account)
     }
 
     /// Updates the display name of account with the provided address, throws an error if the account is unknown to the wallet.

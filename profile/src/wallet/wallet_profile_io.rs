@@ -26,6 +26,11 @@ impl Wallet {
             ),
         }
     }
+
+    pub(crate) fn save_existing_profile(&self) -> Result<()> {
+        self.save_profile(&self.profile())
+    }
+
     pub(crate) fn save_profile_or_panic(&self, profile: &Profile) -> bool {
         match self.save_profile(profile) {
             Ok(_) => {

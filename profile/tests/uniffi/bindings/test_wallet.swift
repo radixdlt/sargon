@@ -1,8 +1,113 @@
 import Foundation
 import radix_wallet_kit
 
+func test() throws {
+	print("🚀 Test Wallet in Swift start")
+	defer { print("✅ Test Wallet in Swift completed ") }
+
+	let keychain = EphemeralKeychain.shared
+	assert(keychain.isEmpty)
+
+	// MARK: ==================================
+	print("🔮 GENERATING NEW WALLET")
+	// or: `Wallet.generateNew()`
+	let wallet = try Wallet.with(
+		entropy: Data(repeating: 0xff, count: 32)
+	)
+
+	assert(
+		keychain.contains(
+			value:
+				"zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo vote"
+		))
+	print("✨ SUCCESSFULLY GENERATED NEW WALLET ✅")
+	// MARK: ==================================
+	print("🔮 Creating first account on mainnet")
+	let initialNameOfFirstAccount = "Alice"
+	// Not created any account yet...
+	assert(!keychain.contains(value: initialNameOfFirstAccount))
+	assert(wallet.profile().networks.count == 0)
+	var main0 = try wallet.createAndSaveNewAccount(
+		networkId: .mainnet,
+		name: DisplayName(
+			validating: initialNameOfFirstAccount
+		)
+	)
+	assert(main0.networkId == .mainnet)
+	assert(wallet.profile().networks.count == 1)
+	assert(wallet.profile().networks[0].accounts.count == 1)
+	assert(
+		wallet.profile().networks[0].accounts[0].displayName.value
+			== initialNameOfFirstAccount
+	)
+	assert(keychain.contains(value: initialNameOfFirstAccount))
+	print("✨ Successfully created first account ✅")
+	// MARK: ==================================
+	print("🔮 Renaming account")
+	let updatedNameOfFirstAccount = "Satoshi"
+	main0 = try wallet.changeNameOfAccount(
+		address: main0.address,
+		to: DisplayName(
+			validating: updatedNameOfFirstAccount
+		))
+	assert(
+		wallet.profile().networks[0].accounts[0].displayName.value
+			== updatedNameOfFirstAccount
+	)
+	assert(
+		keychain.contains(
+			value: updatedNameOfFirstAccount
+		))
+	print("✨ Successfully renamed first account ✅")
+	// MARK: ==================================
+	print("🔮 Creating second mainnet account")
+	let main1 = try wallet.createAndSaveNewAccount(
+		networkId: .mainnet,
+		name: DisplayName(
+			validating: "Bob"
+		)
+	)
+	assert(main0.address != main1.address)
+	assert(
+		main0.networkId == main1.networkId
+	)
+	assert(wallet.profile().networks.count == 1)
+	assert(wallet.profile().networks[0].accounts == [main0, main1])
+	print("✨ Successfully created second mainnet account ✅")
+
+	// MARK: ==================================
+	print("🔮 Creating first testnet account")
+	let test0 = try wallet.createAndSaveNewAccount(
+		networkId: .stokenet,
+		name: DisplayName(
+			validating: "Stoke 0"
+		)
+	)
+	assert(wallet.profile().networks.count == 2)
+	assert(wallet.profile().networks[1].accounts == [test0])
+	assert(
+		wallet.profile().networks[1].accounts[0].displayName.value
+			== "Stoke 0"
+	)
+	assert(
+		wallet.profile().networks[1].accounts[0].networkId
+			== .stokenet
+	)
+	print("✨ Successfully created first testnet account ✅")
+
+}
+
+try! test()
+
+// MARK: Helpers
+
 extension Profile {
 	fileprivate static let placeholder = newProfilePlaceholder()
+}
+extension DisplayName {
+	init(validating value: String) throws {
+		self = try newDisplayName(name: value)
+	}
 }
 extension Data {
 	public static func random(byteCount: Int) throws -> Self {
@@ -16,6 +121,30 @@ extension Data {
 	}
 }
 
+extension Wallet {
+	public static let defaultIphoneName: String = "iPhone"
+
+	public static func generateNew(
+		iPhoneName: String = Wallet.defaultIphoneName
+	) throws -> Wallet {
+		try Wallet.with(
+			entropy: .random(byteCount: 32), iPhoneName: iPhoneName
+		)
+	}
+
+	public static func with(
+		entropy: Data,
+		iPhoneName: String = Wallet.defaultIphoneName
+	) throws -> Wallet {
+		try Wallet.byCreatingNewProfileAndSecretsWithEntropy(
+			entropy: entropy,
+			walletClientModel: .iphone,
+			walletClientName: iPhoneName,
+			secureStorage: EphemeralKeychain.shared
+		)
+	}
+}
+
 extension SecureStorageKey {
 	var identifier: String {
 		secureStorageKeyIdentifier(key: self)
@@ -23,7 +152,7 @@ extension SecureStorageKey {
 }
 
 public final class EphemeralKeychain: SecureStorage {
-	private var store: [String: String]
+	private var store: [String: Data]
 	private init() {
 		store = [:]
 	}
@@ -31,69 +160,17 @@ public final class EphemeralKeychain: SecureStorage {
 	public func loadData(key: SecureStorageKey) throws -> Data? {
 		store[key.identifier]
 	}
-	public func saveData(key: SecureStorageKey, value: Data) throws {
-		store[key.identifier] = value
+	public func saveData(key: SecureStorageKey, data: Data) throws {
+		store[key.identifier] = data
+	}
+	public var isEmpty: Bool {
+		store.isEmpty
+	}
+	public func contains(value: String) -> Bool {
+		store
+			.values
+			.map({ String(data: $0, encoding: .utf8)! })
+			.contains(where: { $0.contains(value) })
+
 	}
 }
-
-func test() throws {
-	print("🚀 Test Wallet in Swift start")
-	defer { print("✅ Test Wallet in Swift completed ") }
-	let secureStorage = EphemeralKeychain.shared
-
-	let privateHDFactorSource = try newPrivateHdFactorSource(
-		entropy: Data.random(byteCount: 32),
-		walletClientModel: .iphone
-	)
-	let profile = newProfile(
-		privateHdFactorSource: privateHDFactorSource,
-		creatingDeviceName: "IntegrationTest"
-	)
-	let wallet = Wallet(
-		profile: profile,
-		secureStorage: secureStorage
-	)
-	wallet.createNew
-
-	do {
-		let profile = wallet.profile()
-		assert(profile.networks.count > 1)
-		/*
-		let mainnet = profile.networks[0]
-		assert(mainnet.id == .mainnet)
-		let mainnetAccounts = mainnet.accounts
-		assert(mainnetAccounts.count > 1)
-		let account = mainnetAccounts[0]
-		assert(account.displayName.value == "Alice")
-		let address = account.address
-		assert(
-			address.address
-				== "account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8"
-		)
-		let newName = try newDisplayName(name: "Satoshi")
-
-		let renamed = try wallet.changeNameOfAccount(
-			address: address, to: newName
-		)
-		assert(
-			renamed
-				.displayName.value == "Satoshi")
-
-		assert(account.displayName.value == "Alice")  // all types are VALUE types, so the prev `let` variable should NOT have been changed (which would be the case if we used classes...)
-*/
-	} catch {
-		print("Failed to do stuff ❌ error: \(error)")
-		return
-	}
-	/*
-	do {
-		let profile = wallet.profile()
-		let mainnet = profile.networks[0]
-		let mainnetAccounts = mainnet.accounts
-		let account = mainnetAccounts[0]
-		assert(account.displayName.value == "Satoshi")
-	}
-*/
-}
-
-try! test()

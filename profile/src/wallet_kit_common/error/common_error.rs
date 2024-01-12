@@ -247,4 +247,10 @@ pub enum CommonError {
 
     #[error("No Profile snapshot found for ProfileID {0}")]
     ProfileSnapshotNotFound(ProfileID) = 10075,
+
+    #[error("Account Already Present {0}")]
+    AccountAlreadyPresent(AccountAddress) = 10076,
+
+    #[error("Unable to acquire write lock for Profile inside Wallet")]
+    UnableToAcquireWriteLockForProfile = 10077,
 }

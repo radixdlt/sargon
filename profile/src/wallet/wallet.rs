@@ -184,10 +184,30 @@ impl Wallet {
     where
         F: Fn(RwLockWriteGuard<'_, Profile>) -> R,
     {
-        self.profile
+        let value = self.profile
             .try_write()
             .map(mutate)
-            .expect("Implementing Wallet clients should not read and write Profile from Wallet from multiple threads.")
+            .expect("Implementing Wallet clients should not read and write Profile from Wallet from multiple threads.");
+
+        self.save_existing_profile()
+            .expect("Failed to save Profile to secure storage.");
+
+        value
+    }
+
+    pub(crate) fn try_write<F, R>(&self, mutate: F) -> Result<R>
+    where
+        F: Fn(RwLockWriteGuard<'_, Profile>) -> Result<R>,
+    {
+        let res = self
+            .profile
+            .try_write()
+            .map_err(|_| CommonError::UnableToAcquireWriteLockForProfile)
+            .and_then(mutate)?;
+
+        self.save_existing_profile()?;
+
+        Ok(res)
     }
 }
 
