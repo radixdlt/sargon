@@ -117,15 +117,7 @@ impl DeviceFactorSource {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
-    use crate::{BIP39WordCount, MnemonicWithPassphrase, WalletClientModel};
-
-    use super::DeviceFactorSource;
-    use crate::v100::{
-        FactorSource, FactorSourceCryptoParameters, FactorSourceID, IsFactorSource,
-        LedgerHardwareWalletFactorSource,
-    };
-    use crate::CommonError as Error;
+    use crate::prelude::*;
 
     #[test]
     fn equality() {
@@ -207,7 +199,7 @@ mod tests {
         let factor_source: FactorSource = ledger.clone().into();
         assert_eq!(
             DeviceFactorSource::try_from(factor_source),
-            Err(Error::ExpectedDeviceFactorSourceGotSomethingElse)
+            Err(CommonError::ExpectedDeviceFactorSourceGotSomethingElse)
         );
     }
 

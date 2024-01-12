@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use identified_vec::{Identifiable, IsIdentifiedVec};
 
 /// Flags which describe a certain state a FactorSource might be in, e.g. `Main` (BDFS).
 pub type FactorSourceFlags = IdentifiedVecVia<FactorSourceFlag>;

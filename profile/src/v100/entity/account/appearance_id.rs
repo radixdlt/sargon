@@ -26,7 +26,7 @@ impl AppearanceID {
     pub const MAX: u8 = 11;
     pub fn new(value: u8) -> Result<Self> {
         if value > Self::MAX {
-            return Err(CommonError::InvalidAppearanceID);
+            return Err(CommonError::InvalidAppearanceID(value));
         }
         Ok(Self { value })
     }
@@ -49,6 +49,11 @@ impl TryFrom<u8> for AppearanceID {
 
     fn try_from(value: u8) -> Result<Self> {
         AppearanceID::new(value)
+    }
+}
+impl From<AppearanceID> for u8 {
+    fn from(value: AppearanceID) -> Self {
+        value.value
     }
 }
 
@@ -77,14 +82,17 @@ mod tests {
 
     #[test]
     fn err_too_big() {
-        assert_eq!(AppearanceID::new(12), Err(CommonError::InvalidAppearanceID));
+        assert_eq!(
+            AppearanceID::new(12),
+            Err(CommonError::InvalidAppearanceID(12))
+        );
     }
 
     #[test]
     fn try_from() {
         assert_eq!(
             AppearanceID::try_from(250),
-            Err(CommonError::InvalidAppearanceID)
+            Err(CommonError::InvalidAppearanceID(250))
         );
         assert_eq!(AppearanceID::try_from(1), AppearanceID::new(1));
     }

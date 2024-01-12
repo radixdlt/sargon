@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use identified_vec::IsIdentifiedVec;
 
 /// Cryptographic parameters a certain FactorSource supports, e.g. which Elliptic Curves
 /// it supports and which Hierarchical Deterministic (HD) derivations schemes it supports,

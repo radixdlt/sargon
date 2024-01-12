@@ -1,3 +1,4 @@
+use crate::prelude::*;
 use radix_engine_common::data::scrypto::model::NonFungibleLocalId as NativeNonFungibleLocalId;
 
 #[derive(Clone, Debug, uniffi::Enum, Hash, PartialEq, Eq)]
@@ -49,9 +50,9 @@ impl TryFrom<NonFungibleLocalId> for NativeNonFungibleLocalId {
                 value
                     .try_into()
                     .map(Self::ruid)
-                    .map_err(|value| Self::Error::InvalidLength {
+                    .map_err(|value| CommonError::InvalidLength {
                         expected: 32,
-                        actual: value.len(),
+                        found: value.len(),
                         data: value,
                     })
             }
@@ -161,7 +162,7 @@ mod tests {
             NativeNonFungibleLocalId::try_from(invalid),
             Err(CommonError::InvalidLength {
                 expected: 32,
-                actual: 0,
+                found: 0,
                 data: Vec::new()
             })
         );

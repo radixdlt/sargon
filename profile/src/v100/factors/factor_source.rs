@@ -14,7 +14,7 @@ pub enum FactorSource {
     },
 }
 
-impl IsFactorSource for FactorSource {
+impl BaseIsFactorSource for FactorSource {
     fn factor_source_kind(&self) -> FactorSourceKind {
         match self {
             FactorSource::Device { value } => value.factor_source_kind(),
@@ -120,13 +120,7 @@ impl FactorSource {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
-
-    use crate::v100::{
-        DeviceFactorSource, FactorSourceKind, IsFactorSource, LedgerHardwareWalletFactorSource,
-    };
-
-    use super::FactorSource;
+    use crate::prelude::*;
 
     #[test]
     fn equality() {

@@ -1,11 +1,4 @@
-use identified_vec::Identifiable;
-
-use crate::{DeviceFactorSource, HasPlaceholder, IdentifiedVecVia};
-
-use crate::v100::factors::{
-    factor_source::FactorSource, factor_source_id::FactorSourceID, is_factor_source::IsFactorSource,
-};
-
+use crate::prelude::*;
 impl Identifiable for FactorSource {
     type ID = FactorSourceID;
 

@@ -7,12 +7,12 @@ impl Profile {
     {
         self.factor_sources
             .get(id)
-            .ok_or(CommonError::ProfileDoesNotContainFactorSourceWithID)
+            .ok_or(CommonError::ProfileDoesNotContainFactorSourceWithID(id.clone()))
             .and_then(|f| {
                 f.clone()
                     .try_into()
                     .map_err(|_| CommonError::CastFactorSourceWrongKind {
-                        expected: F::factor_source_kind(),
+                        expected: <F as IsFactorSource>::factor_source_kind(),
                         found: f.factor_source_kind(),
                     })
             })

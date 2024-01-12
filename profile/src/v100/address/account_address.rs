@@ -151,21 +151,7 @@ impl AccountAddress {
 #[cfg(test)]
 mod tests {
 
-    use std::str::FromStr;
-
-    use crate::PublicKey;
-    use crate::{CommonError as Error, Ed25519PublicKey};
-    use crate::{
-        HasPlaceholder,
-        {
-            assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
-            assert_json_value_ne_after_roundtrip,
-        },
-    };
-    use serde_json::json;
-
-    use crate::v100::address::{account_address::AccountAddress, entity_address::EntityAddress};
-    use crate::NetworkID;
+    use crate::prelude::*;
 
     #[test]
     fn equality() {
@@ -198,7 +184,7 @@ mod tests {
             AccountAddress::try_from_bech32(
                 "identity_tdx_21_12tljxea3s0mse52jmpvsphr0haqs86sung8d3qlhr763nxttj59650",
             ),
-            Err(Error::MismatchingEntityTypeWhileDecodingAddress)
+            Err(CommonError::MismatchingEntityTypeWhileDecodingAddress)
         );
     }
 
@@ -272,27 +258,25 @@ mod tests {
     fn invalid() {
         assert_eq!(
             AccountAddress::try_from_bech32("x"),
-            Err(Error::FailedToDecodeAddressFromBech32)
+            Err(CommonError::FailedToDecodeAddressFromBech32("x".to_owned()))
         )
     }
 
     #[test]
     fn invalid_checksum() {
+        let s = "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3apleasx";
         assert_eq!(
-            AccountAddress::try_from_bech32(
-                "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3apleasx"
-            ),
-            Err(Error::FailedToDecodeAddressFromBech32)
+            AccountAddress::try_from_bech32(s),
+            Err(CommonError::FailedToDecodeAddressFromBech32(s.to_owned()))
         )
     }
 
     #[test]
     fn invalid_entity_type() {
+        let s = "identity_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease";
         assert_eq!(
-            AccountAddress::try_from_bech32(
-                "identity_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
-            ),
-            Err(Error::FailedToDecodeAddressFromBech32)
+            AccountAddress::try_from_bech32(s),
+            Err(CommonError::FailedToDecodeAddressFromBech32(s.to_owned()))
         )
     }
 

@@ -27,17 +27,18 @@ pub fn new_display_name(name: String) -> Result<DisplayName> {
 }
 
 impl DisplayName {
-    pub fn max_len() -> usize {
-        30
-    }
+    pub const MAX_LEN: usize = 30;
 
     pub fn new(value: &str) -> Result<Self> {
         let value = value.trim().to_string();
         if value.is_empty() {
             return Err(CommonError::InvalidDisplayNameEmpty);
         }
-        if value.len() > Self::max_len() {
-            return Err(CommonError::InvalidDisplayNameTooLong);
+        if value.len() > Self::MAX_LEN {
+            return Err(CommonError::InvalidDisplayNameTooLong {
+                expected: Self::MAX_LEN,
+                found: value.len(),
+            });
         }
 
         Ok(Self { value })
@@ -60,20 +61,16 @@ impl TryFrom<&str> for DisplayName {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        assert_json_roundtrip, assert_json_value_eq_after_roundtrip, assert_json_value_fails,
-        assert_json_value_ne_after_roundtrip,
-    };
-    use serde_json::json;
-
-    use super::DisplayName;
-    use crate::CommonError as Error;
-
+    use crate::prelude::*;
     #[test]
     fn invalid() {
+        let s = "this is a much much too long display name";
         assert_eq!(
-            DisplayName::try_from("this is a much much too long display name"),
-            Err(Error::InvalidDisplayNameTooLong)
+            DisplayName::try_from(s),
+            Err(CommonError::InvalidDisplayNameTooLong {
+                expected: DisplayName::MAX_LEN,
+                found: s.len()
+            })
         );
     }
 
@@ -94,7 +91,7 @@ mod tests {
     fn empty_is_invalid() {
         assert_eq!(
             DisplayName::try_from(""),
-            Err(Error::InvalidDisplayNameEmpty)
+            Err(CommonError::InvalidDisplayNameEmpty)
         );
     }
 
@@ -102,7 +99,7 @@ mod tests {
     fn spaces_trimmed_into_empty_is_invalid() {
         assert_eq!(
             DisplayName::try_from("   "),
-            Err(Error::InvalidDisplayNameEmpty)
+            Err(CommonError::InvalidDisplayNameEmpty)
         );
     }
 

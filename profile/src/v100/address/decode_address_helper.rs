@@ -10,7 +10,7 @@ pub type DecodeAddressOutput = (NetworkID, AbstractEntityType, String, [u8; 30])
 
 fn engine_decode_address(s: &str) -> Result<EngineDecodeAddressOutput, Error> {
     let Some(tuple) = decode(&s) else {
-        return Err(Error::FailedToDecodeAddressFromBech32);
+        return Err(Error::FailedToDecodeAddressFromBech32(s.to_owned()));
     };
     Ok(tuple)
 }

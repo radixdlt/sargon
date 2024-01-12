@@ -60,12 +60,12 @@ impl TryFrom<FactorSource> for LedgerHardwareWalletFactorSource {
         }
     }
 }
-impl IsFactorSource for DeviceFactorSource {
+impl IsFactorSource for LedgerHardwareWalletFactorSource {
     fn factor_source_kind() -> FactorSourceKind {
         FactorSourceKind::LedgerHQHardwareWallet
     }
 }
-impl BaseIsFactorSourcefor LedgerHardwareWalletFactorSource {
+impl BaseIsFactorSource for LedgerHardwareWalletFactorSource {
     fn factor_source_kind(&self) -> FactorSourceKind {
         self.id.kind.clone()
     }

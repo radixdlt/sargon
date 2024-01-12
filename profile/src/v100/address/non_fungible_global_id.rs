@@ -109,7 +109,7 @@ impl NonFungibleGlobalId {
     pub fn try_from_str(s: &str) -> Result<Self> {
         EngineSerializableNonFungibleGlobalIdInternal::from_str(s)
             .map(|i| Self::from_internal_engine(i))
-            .map_err(|_| CommonError::InvalidNonFungibleGlobalID)
+            .map_err(|_| CommonError::InvalidNonFungibleGlobalID(s.to_owned()))
     }
 }
 

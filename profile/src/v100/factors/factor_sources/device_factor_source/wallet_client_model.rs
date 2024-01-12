@@ -44,8 +44,8 @@ mod tests {
 
     #[test]
     fn name() {
-        assert_eq!(WalletClientModel::Iphone.name(), "Ihhone");
-        assert_eq!(WalletClientModel::Android.name(), "Android");
-        assert_eq!(WalletClientModel::Unknown.name(), "Unknown");
+        assert_eq!(format!("{}", WalletClientModel::Iphone), "Iphone");
+        assert_eq!(format!("{}", WalletClientModel::Android), "Android");
+        assert_eq!(format!("{}", WalletClientModel::Unknown), "Unknown");
     }
 }
