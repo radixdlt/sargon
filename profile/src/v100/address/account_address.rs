@@ -4,19 +4,7 @@ use crate::prelude::*;
 /// that starts with the prefix `"account_"`, dependent on NetworkID, meaning the same
 /// public key used for two AccountAddresses on two different networks will not have
 /// the same address.
-#[serde_as]
-#[derive(
-    Clone,
-    Debug,
-    Default,
-    Serialize,
-    Deserialize,
-    PartialEq,
-    derive_more::Display,
-    Eq,
-    Hash,
-    uniffi::Record,
-)]
+#[derive(Clone, Debug, Default, PartialEq, derive_more::Display, Eq, Hash, uniffi::Record)]
 #[display("{address}")]
 pub struct AccountAddress {
     /// Human readable address of an account. Always starts with `"account_"``, for example:
@@ -30,14 +18,31 @@ pub struct AccountAddress {
     ///
     /// Addresses are checksummed, as per Bech32. **Only** *Account* addresses starts with
     /// the prefix `account_`.
-    #[serde_as(as = "DisplayFromStr")]
     pub address: String,
 
     /// The network this account address is tied to, i.e. which was used when a public key
     /// hash was used to bech32 encode it. This means that two public key hashes will result
     /// in two different account address on two different networks.
-    #[serde(skip_serializing)]
     pub network_id: NetworkID,
+}
+
+impl Serialize for AccountAddress {
+    /// Serializes this `AccountAddress` into its bech32 address string as JSON.
+    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&self.address)
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for AccountAddress {
+    /// Tries to deserializes a JSON string as a bech32 address into an `AccountAddress`.
+    #[cfg(not(tarpaulin_include))] // false negative
+    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<AccountAddress, D::Error> {
+        let s = String::deserialize(d)?;
+        AccountAddress::try_from_bech32(&s).map_err(de::Error::custom)
+    }
 }
 
 #[uniffi::export]
