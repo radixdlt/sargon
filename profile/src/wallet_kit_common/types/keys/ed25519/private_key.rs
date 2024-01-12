@@ -8,7 +8,7 @@ use transaction::signing::ed25519::{
 /// An Ed25519 private key used to create cryptographic signatures, using
 /// EdDSA scheme.
 #[derive(derive_more::Debug)]
-#[debug("{}", "self.to_hex()")]
+#[debug("{}", self.to_hex())]
 pub struct Ed25519PrivateKey(EngineEd25519PrivateKey);
 
 impl Ed25519PrivateKey {

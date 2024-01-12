@@ -8,7 +8,7 @@ use transaction::signing::secp256k1::{
 /// A secp256k1 private key used to create cryptographic signatures, more specifically
 /// ECDSA signatures, that offer recovery of the public key.
 #[derive(derive_more::Debug)]
-#[debug("{}", "self.to_hex()")]
+#[debug("{}", self.to_hex())]
 pub struct Secp256k1PrivateKey(EngineSecp256k1PrivateKey);
 
 impl Secp256k1PrivateKey {

@@ -1,3 +1,4 @@
+#![cfg(test)]
 use crate::prelude::*;
 
 #[derive(Debug)]
@@ -9,10 +10,10 @@ impl MockSecureStorage {
 }
 impl SecureStorage for MockSecureStorage {
     fn load_data(&self, _key: SecureStorageKey) -> Result<Option<Vec<u8>>> {
-        panic!("You have not installed any secure storage yet.")
+        Ok(None)
     }
 
     fn save_data(&self, _key: SecureStorageKey, _value: Vec<u8>) -> Result<()> {
-        panic!("You have not installed any secure storage yet.")
+        Ok(())
     }
 }

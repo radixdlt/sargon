@@ -18,7 +18,7 @@ use transaction::{signing::ed25519::Ed25519Signature, validation::verify_ed25519
     uniffi::Record,
 )]
 #[serde(transparent)]
-#[debug("{}", "self.to_hex()")]
+#[debug("{}", self.to_hex())]
 pub struct Ed25519PublicKey {
     #[serde_as(as = "serde_with::hex::Hex")]
     value: Vec<u8>, // FIXME: change to either `radix_engine_common::crypto::Ed25519PublicKey` or `ed25519_dalek::PublicKey` once we have proper UniFFI lift/lower/UniffiCustomTypeConverter

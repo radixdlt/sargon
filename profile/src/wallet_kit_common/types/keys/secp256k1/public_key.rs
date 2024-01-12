@@ -19,7 +19,7 @@ use transaction::{signing::secp256k1::Secp256k1Signature, validation::verify_sec
     uniffi::Record,
 )]
 #[serde(transparent)]
-#[debug("{}", "self.to_hex()")]
+#[debug("{}", self.to_hex())]
 pub struct Secp256k1PublicKey {
     #[serde_as(as = "serde_with::hex::Hex")]
     value: Vec<u8>, // FIXME: change to either `radix_engine_common::crypto::Secp256k1PublicKey` or `bip32::secp256k1::PublicKey` once we have proper UniFFI lift/lower/UniffiCustomTypeConverter
