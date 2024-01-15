@@ -3,34 +3,24 @@ use crate::prelude::*;
 use slip10::path::BIP32Path;
 
 #[derive(
-    Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, derive_more::Display, uniffi::Record,
+    Clone,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    PartialOrd,
+    Ord,
+    SerializeDisplay,
+    DeserializeFromStr,
+    derive_more::Display,
+    uniffi::Record,
 )]
 #[display("{}", self.to_bip32_string())]
 pub struct HDPath {
     pub components: Vec<HDPathComponent>,
 }
 
-impl Serialize for HDPath {
-    /// Serializes this `HDPath` into its bech32 address string as JSON.
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_str(&self.to_string())
-    }
-}
-
-impl<'de> serde::Deserialize<'de> for HDPath {
-    /// Tries to deserializes a JSON string as a bech32 address into an `HDPath`.
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<HDPath, D::Error> {
-        let s = String::deserialize(d)?;
-        HDPath::from_str(&s).map_err(de::Error::custom)
-    }
-}
-
-impl std::str::FromStr for HDPath {
+impl FromStr for HDPath {
     type Err = crate::CommonError;
 
     fn from_str(s: &str) -> Result<Self> {
@@ -147,19 +137,36 @@ mod tests {
 
     use crate::prelude::*;
 
-    #[test]
-    fn json_roundtrip() {
-        let str = "m/44H/1022H";
-        let parsed = HDPath::from_str(str).unwrap();
-        assert_json_value_eq_after_roundtrip(&parsed, json!(str));
-        assert_json_value_ne_after_roundtrip(&parsed, json!("m/44H/33H"));
-        assert_json_value_fails::<HDPath>(json!("super invalid path"));
+    impl HDPath {
+        fn harden<I>(iter: I) -> Self
+        where
+            I: IntoIterator<Item = HDPathValue>,
+        {
+            HDPath {
+                components: iter.into_iter().map(HDPathComponent::harden).collect_vec(),
+            }
+        }
     }
 
     #[test]
     fn display() {
-        let s = "m/44H/1022H";
-        let path = HDPath::from_str(s).unwrap();
-        assert_eq!(format!("{}", path), s);
+        let path = HDPath::harden([44, 1022]);
+        assert_eq!(format!("{}", path), "m/44H/1022H");
+    }
+
+    #[test]
+    fn from_str() {
+        assert_eq!(
+            HDPath::from_str("m/44H/1022H").unwrap(),
+            HDPath::harden([44, 1022])
+        );
+    }
+
+    #[test]
+    fn json_roundtrip() {
+        let sut = HDPath::harden([44, 1022]);
+        assert_json_value_eq_after_roundtrip(&sut, json!("m/44H/1022H"));
+        assert_json_value_ne_after_roundtrip(&sut, json!("m/44H/33H"));
+        assert_json_value_fails::<HDPath>(json!("super invalid path"));
     }
 }
