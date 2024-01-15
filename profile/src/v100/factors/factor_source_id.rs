@@ -4,19 +4,32 @@ use crate::prelude::*;
 /// DeviceFactorSource being a mnemonic securely stored in a
 /// device (phone), where the ID of it is the hash of a special
 /// key derived near the root of it.
-#[derive(Serialize, Deserialize, EnumAsInner, Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(
+    Serialize,
+    Deserialize,
+    EnumAsInner,
+    Clone,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    derive_more::Display,
+    uniffi::Enum,
+)]
 #[serde(untagged, remote = "Self")]
 pub enum FactorSourceID {
     /// FactorSourceID from the blake2b hash of the special HD public key derived at `CAP26::GetID`,
     /// for a certain `FactorSourceKind`
     Hash {
         #[serde(rename = "fromHash")]
+        #[display("{}", value)]
         value: FactorSourceIDFromHash,
     },
 
     /// FactorSourceID from an AccountAddress, typically used by `trustedContact` FactorSource.
     Address {
         #[serde(rename = "fromAddress")]
+        #[display("{}", value)]
         value: FactorSourceIDFromAddress,
     },
 }

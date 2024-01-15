@@ -1,7 +1,19 @@
 use crate::prelude::*;
 
 /// FactorSourceID from an AccountAddress, typically used by `trustedContact` FactorSource.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(
+    Serialize,
+    Deserialize,
+    Clone,
+    PartialEq,
+    Eq,
+    Hash,
+    derive_more::Display,
+    derive_more::Debug,
+    uniffi::Record,
+)]
+#[display("{}:{}", self.kind.discriminant(), self.body.to_string())]
+#[debug("{}:{}", self.kind.discriminant(), self.body.to_string())]
 pub struct FactorSourceIDFromAddress {
     /// The kind of the FactorSource this ID refers to, typically `trustedContact`.
     pub kind: FactorSourceKind,

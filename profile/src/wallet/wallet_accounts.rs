@@ -1,20 +1,113 @@
+use log::LevelFilter;
+
 use crate::prelude::*;
 
+trait SafeToLog {
+    fn non_sensitive(&self) -> impl std::fmt::Debug;
+}
+impl SafeToLog for PrivateHierarchicalDeterministicFactorSource {
+    fn non_sensitive(&self) -> impl std::fmt::Debug {
+        format!(
+            "{} {}",
+            self.factor_source.hint.mnemonic_word_count, self.factor_source.id
+        )
+    }
+}
+
+trait LoggedResult<T: SafeToLog>: Sized {
+    fn log_lvl_formatted<F>(self, level: log::Level, format: F) -> Self
+    where
+        F: FnOnce(&T) -> String;
+
+    fn log_lvl(self, level: log::Level, prefix: impl AsRef<str>) -> Self {
+        self.log_lvl_formatted(level, |f| {
+            format!("{} - {:?}", prefix.as_ref(), f.non_sensitive())
+        })
+    }
+    fn log_info(self, prefix: impl AsRef<str>) -> Self {
+        self.log_lvl(log::Level::Info, prefix)
+    }
+}
+impl<T: SafeToLog> LoggedResult<T> for Result<T> {
+    fn log_lvl_formatted<F>(self, level: log::Level, format: F) -> Self
+    where
+        F: FnOnce(&T) -> String,
+    {
+        self.inspect(|x| log::log!(level, "{}", format(&x)))
+    }
+}
+
 impl Wallet {
+    /// Saves a device factor source to Profile and SecureStorage, this method MUST NOT
+    /// return Ok() if any of the writes failed, i.e. if Ok is returned, then mnemonic
+    /// will be present in SecureStorage and the DeviceFactorSource present in Profile.
+    ///
+    /// Throws if it is already present in Profile. It is Wallet Client
+    /// dependent if it throws if already present in SecureStorage.
+    ///
+    /// Takes ownership of `PrivateHierarchicalDeterministicFactorSource`
+    pub fn save_private_device_factor_source(
+        &self,
+        private_device_factor_source: PrivateHierarchicalDeterministicFactorSource,
+    ) -> Result<()> {
+        let id = private_device_factor_source.factor_source.id.clone();
+
+        info!(
+            "Save Private DeviceFactorSource to SecureStorage, factor source id: {}",
+            &id
+        );
+
+        self.wallet_client_storage.save_mnemonic_with_passphrase(
+            &private_device_factor_source.mnemonic_with_passphrase,
+            &id,
+        )?;
+
+        self.save_factor_source(private_device_factor_source.factor_source.into())
+            .map_err(|e| {
+                error!(
+                    "Failed to Private DeviceFactorSource to SecureStorage, factor source id: {}",
+                    id
+                );
+                _ = self.wallet_client_storage.delete_mnemonic(&id);
+                e
+            })
+    }
+
+    pub fn save_factor_source(&self, factor_source: FactorSource) -> Result<()> {
+        self.try_write(|mut p| {
+            if p.factor_sources.append(factor_source.to_owned()).0 {
+                Err(CommonError::Unknown)
+            } else {
+                Ok(())
+            }
+        })
+        .map_err(
+            |_| CommonError::UnableToSaveFactorSourceToProfile(factor_source.factor_source_id())
+        )
+    }
+
     pub fn load_private_device_factor_source(
         &self,
-        device_factor_source: DeviceFactorSource,
+        device_factor_source: &DeviceFactorSource,
     ) -> Result<PrivateHierarchicalDeterministicFactorSource> {
+        info!(
+            "Load Private DeviceFactorSource from SecureStorage, factor source id: {}",
+            &device_factor_source.id
+        );
         self.wallet_client_storage
             .load_mnemonic_with_passphrase(&device_factor_source.id)
-            .map(|mwp| PrivateHierarchicalDeterministicFactorSource::new(mwp, device_factor_source))
+            .map(|mwp| {
+                PrivateHierarchicalDeterministicFactorSource::new(mwp, device_factor_source.clone())
+            })
+            .log_info("Successfully loaded Private DeviceFactorSource from SecureStorage")
     }
+
     pub fn load_private_device_factor_source_by_id(
         &self,
         id: &FactorSourceIDFromHash,
     ) -> Result<PrivateHierarchicalDeterministicFactorSource> {
         let device_factor_source = self.profile().device_factor_source_by_id(id)?;
-        self.load_private_device_factor_source(device_factor_source)
+        self.load_private_device_factor_source(&device_factor_source)
     }
 }
 
@@ -39,7 +132,7 @@ impl Wallet {
             AppearanceID::from_number_of_accounts_on_network(number_of_accounts_on_network);
 
         let factor_instance = self
-            .load_private_device_factor_source(bdfs)
+            .load_private_device_factor_source(&bdfs)
             .map(|p| p.derive_account_creation_factor_instance(network_id, index))?;
 
         let account = Account::new(factor_instance, name, appearance_id);
@@ -97,12 +190,13 @@ impl Wallet {
 
 #[cfg(test)]
 mod tests {
+
     use crate::prelude::*;
 
     #[test]
     fn change_display_name_of_accounts() {
         let profile = Profile::placeholder();
-        let wallet = Wallet::ephemeral(profile.clone());
+        let (wallet, _) = Wallet::ephemeral(profile.clone());
         let account = wallet.read(|p| p.networks[0].accounts[0].clone());
         assert_eq!(account.display_name.value, "Alice");
         assert!(wallet
@@ -116,6 +210,26 @@ mod tests {
                 DisplayName::new("not used").unwrap()
             ),
             Err(CommonError::UnknownAccount)
+        );
+    }
+
+    #[test]
+    fn load_private_device_factor_source() {
+        let private = PrivateHierarchicalDeterministicFactorSource::placeholder();
+        let dfs = private.factor_source;
+        let profile = Profile::placeholder();
+        let (wallet, storage) = Wallet::ephemeral(profile.clone());
+        let data = serde_json::to_vec(&private.mnemonic_with_passphrase).unwrap();
+        let key = SecureStorageKey::DeviceFactorSourceMnemonic {
+            factor_source_id: dfs.id.clone(),
+        };
+        storage.save_data(key.clone(), data.clone()).unwrap();
+        assert_eq!(
+            wallet
+                .load_private_device_factor_source(&dfs)
+                .unwrap()
+                .mnemonic_with_passphrase,
+            MnemonicWithPassphrase::placeholder()
         );
     }
 }

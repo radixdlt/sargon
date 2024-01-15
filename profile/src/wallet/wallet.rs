@@ -94,6 +94,7 @@ impl Wallet {
         let private_hd_factor_source =
             PrivateHierarchicalDeterministicFactorSource::new_with_entropy(
                 entropy_32bytes,
+                BIP39Passphrase::default(),
                 wallet_client_model,
             );
 
@@ -160,18 +161,22 @@ impl Wallet {
 
 #[cfg(test)]
 impl Wallet {
-    pub(crate) fn ephemeral(profile: Profile) -> Self {
-        Self::by_importing_profile(profile, EphemeralSecureStorage::new())
+    pub(crate) fn ephemeral(profile: Profile) -> (Self, Arc<EphemeralSecureStorage>) {
+        let storage = EphemeralSecureStorage::new();
+        (
+            Self::by_importing_profile(profile, storage.clone()),
+            storage,
+        )
     }
 }
 #[cfg(test)]
 impl HasPlaceholder for Wallet {
     fn placeholder() -> Self {
-        Self::ephemeral(Profile::placeholder())
+        Self::ephemeral(Profile::placeholder()).0
     }
 
     fn placeholder_other() -> Self {
-        Self::ephemeral(Profile::placeholder_other())
+        Self::ephemeral(Profile::placeholder_other()).0
     }
 }
 
@@ -239,15 +244,13 @@ mod tests {
     use crate::prelude::*;
     #[test]
     fn read_header() {
-        let profile = Profile::placeholder();
-        let wallet = Wallet::ephemeral(profile.clone());
-        wallet.read(|p| assert_eq!(p.header, profile.header))
+        let wallet = Wallet::placeholder();
+        wallet.read(|p| assert_eq!(p.header, Profile::placeholder().header))
     }
 
     #[test]
     fn take_snapshot() {
-        let profile = Profile::placeholder();
-        let wallet = Wallet::ephemeral(profile.clone());
-        assert_eq!(wallet.profile(), profile)
+        let wallet = Wallet::placeholder();
+        assert_eq!(wallet.profile(), Profile::placeholder())
     }
 }

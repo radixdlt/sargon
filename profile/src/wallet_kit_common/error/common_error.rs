@@ -8,6 +8,9 @@ pub type Result<T, E = CommonError> = std::result::Result<T, E>;
 #[derive(Clone, Debug, ThisError, PartialEq, uniffi::Error)]
 #[uniffi(flat_error)]
 pub enum CommonError {
+    #[error("Unknown Error")]
+    Unknown = 10000,
+
     #[error("Failed to create Ed25519 Private key from bytes {0:?}")]
     InvalidEd25519PrivateKeyFromBytes(Vec<u8>) = 10001,
 
@@ -230,8 +233,11 @@ pub enum CommonError {
     #[error("Failed Serialize value to JSON.")]
     FailedToSerializeToJSON = 10069,
 
-    #[error("Failed deserialize JSON to value.")]
-    FailedToDeserializeToJSON = 10070,
+    #[error("Failed deserialize JSON with #{json_byte_count} bytes to value of type {type_name}")]
+    FailedToDeserializeJSONToValue {
+        json_byte_count: usize,
+        type_name: String,
+    } = 10070,
 
     #[error("Failed To create ProfileID (UUID) from string: {0}")]
     InvalidProfileID(String) = 10071,
@@ -253,4 +259,10 @@ pub enum CommonError {
 
     #[error("Unable to acquire write lock for Profile inside Wallet")]
     UnableToAcquireWriteLockForProfile = 10077,
+
+    #[error("Failed save Mnemonic to secure storage with FactorSourceID: {0}")]
+    UnableToSaveMnemonicToSecureStorage(FactorSourceIDFromHash) = 10078,
+
+    #[error("Failed save Mnemonic to secure storage, FactorSourceID: {0}")]
+    UnableToSaveFactorSourceToProfile(FactorSourceID) = 10079,
 }

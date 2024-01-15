@@ -16,8 +16,12 @@ impl WalletClientStorage {
     {
         self.interface.load_data(key).and_then(|o| match o {
             None => Ok(None),
-            Some(j) => serde_json::from_slice(j.as_slice())
-                .map_err(|_| CommonError::FailedToDeserializeToJSON),
+            Some(j) => serde_json::from_slice(j.as_slice()).map_err(|_| {
+                CommonError::FailedToDeserializeJSONToValue {
+                    json_byte_count: j.len(),
+                    type_name: std::any::type_name::<T>().to_string(),
+                }
+            }),
         })
     }
 
@@ -56,6 +60,27 @@ impl WalletClientStorage {
         )
     }
 
+    pub fn save_mnemonic_with_passphrase(
+        &self,
+        mnemonic_with_passphrase: &MnemonicWithPassphrase,
+        id: &FactorSourceIDFromHash,
+    ) -> Result<()> {
+        self.save(
+            SecureStorageKey::DeviceFactorSourceMnemonic {
+                factor_source_id: id.clone(),
+            },
+            mnemonic_with_passphrase,
+        )
+        .map_err(|_| CommonError::UnableToSaveMnemonicToSecureStorage(id.clone()))
+    }
+
+    pub fn delete_mnemonic(&self, id: &FactorSourceIDFromHash) -> Result<()> {
+        self.interface
+            .delete_data_for_key(SecureStorageKey::DeviceFactorSourceMnemonic {
+                factor_source_id: id.clone(),
+            })
+    }
+
     pub fn save<T>(&self, key: SecureStorageKey, value: &T) -> Result<()>
     where
         T: serde::Serialize,
@@ -63,17 +88,5 @@ impl WalletClientStorage {
         serde_json::to_vec(value)
             .map_err(|_| CommonError::FailedToSerializeToJSON)
             .and_then(|j| self.interface.save_data(key, j))
-    }
-
-    pub fn load_private_device_factor_source(
-        &self,
-        id: FactorSourceIDFromHash,
-    ) -> Result<MnemonicWithPassphrase> {
-        self.load_or(
-            SecureStorageKey::DeviceFactorSourceMnemonic {
-                factor_source_id: id,
-            },
-            CommonError::UnableToLoadDeviceFactorSourceFromSecureStorage,
-        )
     }
 }

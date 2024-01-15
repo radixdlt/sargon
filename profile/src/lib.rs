@@ -26,6 +26,7 @@ pub mod prelude {
     pub(crate) use ::hex::encode as hex_encode;
     pub(crate) use iso8601_timestamp::Timestamp;
     pub(crate) use itertools::Itertools;
+    pub(crate) use log::{debug, error, info, trace, warn};
     pub(crate) use serde::{
         de, ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer,
     };

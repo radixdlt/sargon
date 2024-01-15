@@ -11,9 +11,13 @@ pub fn new_private_hd_factor_source(
     entropy: Vec<u8>,
     wallet_client_model: WalletClientModel,
 ) -> Result<PrivateHierarchicalDeterministicFactorSource> {
-    Hex32Bytes::from_vec(entropy).map(
-        |e| PrivateHierarchicalDeterministicFactorSource::new_with_entropy(e, wallet_client_model)
-    )
+    Hex32Bytes::from_vec(entropy).map(|e| {
+        PrivateHierarchicalDeterministicFactorSource::new_with_entropy(
+            e,
+            BIP39Passphrase::default(),
+            wallet_client_model,
+        )
+    })
 }
 
 impl PrivateHierarchicalDeterministicFactorSource {
@@ -35,8 +39,10 @@ impl PrivateHierarchicalDeterministicFactorSource {
         }
     }
 
-    fn new_with_mnemonic(mnemonic: Mnemonic, wallet_client_model: WalletClientModel) -> Self {
-        let mnemonic_with_passphrase = MnemonicWithPassphrase::new(mnemonic);
+    fn new_with_mnemonic_with_passphrase(
+        mnemonic_with_passphrase: MnemonicWithPassphrase,
+        wallet_client_model: WalletClientModel,
+    ) -> Self {
         let bdfs = DeviceFactorSource::babylon(
             true,
             mnemonic_with_passphrase.clone(),
@@ -45,13 +51,23 @@ impl PrivateHierarchicalDeterministicFactorSource {
         Self::new(mnemonic_with_passphrase, bdfs)
     }
 
-    pub fn new_with_entropy(entropy: Hex32Bytes, wallet_client_model: WalletClientModel) -> Self {
+    pub fn new_with_entropy(
+        entropy: Hex32Bytes,
+        passphrase: BIP39Passphrase,
+        wallet_client_model: WalletClientModel,
+    ) -> Self {
         let mnemonic = Mnemonic::from_hex32(entropy);
-        Self::new_with_mnemonic(mnemonic, wallet_client_model)
+        let mnemonic_with_passphrase =
+            MnemonicWithPassphrase::with_passphrase(mnemonic, passphrase);
+        Self::new_with_mnemonic_with_passphrase(mnemonic_with_passphrase, wallet_client_model)
     }
 
     pub fn generate_new(wallet_client_model: WalletClientModel) -> Self {
-        Self::new_with_entropy(Hex32Bytes::generate(), wallet_client_model)
+        Self::new_with_entropy(
+            Hex32Bytes::generate(),
+            BIP39Passphrase::default(),
+            wallet_client_model,
+        )
     }
 }
 
@@ -68,6 +84,22 @@ impl PrivateHierarchicalDeterministicFactorSource {
             hd_private_key.public_key(),
         );
         HDFactorInstanceAccountCreation::new(hd_factor_instance).unwrap()
+    }
+}
+
+impl HasPlaceholder for PrivateHierarchicalDeterministicFactorSource {
+    fn placeholder() -> Self {
+        Self::new_with_mnemonic_with_passphrase(
+            MnemonicWithPassphrase::placeholder(),
+            WalletClientModel::Iphone,
+        )
+    }
+
+    fn placeholder_other() -> Self {
+        Self::new_with_mnemonic_with_passphrase(
+            MnemonicWithPassphrase::placeholder_other(),
+            WalletClientModel::Android,
+        )
     }
 }
 

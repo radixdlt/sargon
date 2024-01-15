@@ -6,11 +6,11 @@ use crate::prelude::*;
 #[serde(rename_all = "camelCase")]
 pub struct MnemonicWithPassphrase {
     pub mnemonic: Mnemonic,
-    pub passphrase: String,
+    pub passphrase: BIP39Passphrase,
 }
 
 impl MnemonicWithPassphrase {
-    pub fn with_passphrase(mnemonic: Mnemonic, passphrase: String) -> Self {
+    pub fn with_passphrase(mnemonic: Mnemonic, passphrase: BIP39Passphrase) -> Self {
         Self {
             mnemonic,
             passphrase,
@@ -21,7 +21,7 @@ impl MnemonicWithPassphrase {
     pub fn new(mnemonic: Mnemonic) -> Self {
         Self {
             mnemonic,
-            passphrase: "".to_string(),
+            passphrase: BIP39Passphrase::default(),
         }
     }
 
@@ -39,7 +39,7 @@ impl MnemonicWithPassphrase {
 impl HasPlaceholder for MnemonicWithPassphrase {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
-        Self::with_passphrase(Mnemonic::placeholder(), "radix".to_string())
+        Self::with_passphrase(Mnemonic::placeholder(), BIP39Passphrase::placeholder())
     }
 
     fn placeholder_other() -> Self {
@@ -51,7 +51,7 @@ pub type PrivateKeyBytes = [u8; 32];
 
 impl MnemonicWithPassphrase {
     pub fn to_seed(&self) -> Seed {
-        self.mnemonic.to_seed(&self.passphrase)
+        self.mnemonic.to_seed(&self.passphrase.0)
     }
 
     fn derive_ed25519_private_key(seed: &Seed, path: &HDPath) -> Ed25519PrivateKey {
@@ -136,10 +136,10 @@ mod tests {
         let passphrase = "25th";
         let mwp = MnemonicWithPassphrase::with_passphrase(
             Mnemonic::from_phrase(phrase).unwrap(),
-            passphrase.to_string(),
+            BIP39Passphrase::new(passphrase),
         );
         assert_eq!(mwp.mnemonic.phrase(), phrase);
-        assert_eq!(mwp.passphrase, passphrase);
+        assert_eq!(mwp.passphrase.0, passphrase);
     }
 
     #[test]
@@ -154,14 +154,13 @@ mod tests {
     /// Test vector: https://github.com/radixdlt/babylon-wallet-ios/blob/99161cbbb11a78f36db6991e5d5c5f092678d5fa/RadixWalletTests/CryptographyTests/SLIP10Tests/TestVectors/cap26_curve25519.json#L8
     #[test]
     fn derive_a_curve25519_key_with_cap26() {
-        let mwp =
-            MnemonicWithPassphrase::with_passphrase(
-                Mnemonic::from_phrase(
-                    "equip will roof matter pink blind book anxiety banner elbow sun young",
-                )
-                .unwrap(),
-                "".to_string(),
-            );
+        let mwp = MnemonicWithPassphrase::with_passphrase(
+            Mnemonic::from_phrase(
+                "equip will roof matter pink blind book anxiety banner elbow sun young",
+            )
+            .unwrap(),
+            BIP39Passphrase::default(),
+        );
 
         let private_key =
             mwp.derive_private_key(AccountPath::from_str("m/44H/1022H/12H/525H/1460H/0H").unwrap());
@@ -184,7 +183,7 @@ mod tests {
      "habit special recipe upon giraffe manual evil badge dwarf welcome inspire shrug post arrive van",
             )
             .unwrap(),
-            "".to_string(),
+            BIP39Passphrase::default(),
         );
 
         let private_key =
@@ -208,7 +207,7 @@ mod tests {
      "habit special recipe upon giraffe manual evil badge dwarf welcome inspire shrug post arrive van",
             )
             .unwrap(),
-            "25th".to_string(),
+            "25th".into(),
         );
 
         assert_eq_after_json_roundtrip(

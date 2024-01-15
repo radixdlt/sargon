@@ -155,18 +155,27 @@ extension SecureStorageKey {
 	}
 }
 
-public final class EphemeralKeychain: SecureStorage {
+public final class EphemeralKeychain {
 	private var store: [String: Data]
 	private init() {
 		store = [:]
 	}
-	public static let shared = EphemeralKeychain()
+}
+extension EphemeralKeychain: SecureStorage {
 	public func loadData(key: SecureStorageKey) throws -> Data? {
 		store[key.identifier]
 	}
 	public func saveData(key: SecureStorageKey, data: Data) throws {
 		store[key.identifier] = data
 	}
+	public func deleteDataForKey(key: SecureStorageKey) throws {
+		store.removeValue(forKey: key.identifier)
+	}
+
+}
+extension EphemeralKeychain {
+	public static let shared = EphemeralKeychain()
+
 	public var isEmpty: Bool {
 		store.isEmpty
 	}

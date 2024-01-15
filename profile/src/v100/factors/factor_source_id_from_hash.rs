@@ -4,20 +4,26 @@ use radix_engine_common::crypto::{blake2b_256_hash, Hash};
 /// FactorSourceID from the blake2b hash of the special HD public key derived at `CAP26::GetID`,
 /// for a certain `FactorSourceKind`
 #[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, uniffi::Record,
+    Serialize,
+    Deserialize,
+    Clone,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    derive_more::Display,
+    derive_more::Debug,
+    uniffi::Record,
 )]
+#[display("{}:{}", self.kind.discriminant(), self.body.to_string())]
+#[debug("{}:{}", self.kind.discriminant(), self.body.to_string())]
 pub struct FactorSourceIDFromHash {
     /// The kind of the FactorSource this ID refers to, typically `device` or `ledger`.
     pub kind: FactorSourceKind,
 
     /// The blake2b hash of the special HD public key derived at `CAP26::GetID`.
     pub body: Hex32Bytes,
-}
-
-impl ToString for FactorSourceIDFromHash {
-    fn to_string(&self) -> String {
-        format!("{}:{}", self.kind.discriminant(), self.body.to_string())
-    }
 }
 
 impl FactorSourceIDFromHash {
@@ -105,6 +111,22 @@ mod tests {
     }
 
     #[test]
+    fn display() {
+        assert_eq!(
+            format!("{}", FactorSourceIDFromHash::placeholder()),
+            "device:3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+        );
+    }
+
+    #[test]
+    fn debug() {
+        assert_eq!(
+            format!("{:?}", FactorSourceIDFromHash::placeholder()),
+            "device:3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+        );
+    }
+
+    #[test]
     fn json_roundtrip_placeholder() {
         let model = FactorSourceIDFromHash::placeholder();
 
@@ -158,7 +180,7 @@ mod tests {
     fn test_vector(vector: Vector) {
         let mwp = MnemonicWithPassphrase::with_passphrase(
             Mnemonic::from_phrase(&vector.phrase).unwrap(),
-            vector.pass,
+            BIP39Passphrase::new(vector.pass),
         );
         let id = FactorSourceIDFromHash::new_for_device(mwp);
         assert_eq!(id.to_string(), vector.expected_id);

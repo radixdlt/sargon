@@ -62,7 +62,7 @@ impl HasPlaceholder for HierarchicalDeterministicPublicKey {
      "habit special recipe upon giraffe manual evil badge dwarf welcome inspire shrug post arrive van",
             )
             .unwrap(),
-            "".to_string(),
+            "".into(),
         );
 
         let private_key =
