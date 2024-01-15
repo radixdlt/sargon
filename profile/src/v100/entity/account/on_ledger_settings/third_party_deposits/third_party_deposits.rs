@@ -99,13 +99,13 @@ mod tests {
     fn json_roundtrip() {
         let excp1 = AssetException::new(
             "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
-                .try_into()
+                .parse()
                 .unwrap(),
             DepositAddressExceptionRule::Deny,
         );
         let excp2 = AssetException::new(
             "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
-                .try_into()
+                .parse()
                 .unwrap(),
             DepositAddressExceptionRule::Allow,
         );
@@ -113,7 +113,7 @@ mod tests {
             DepositRule::AcceptKnown,
             BTreeSet::from_iter([excp1, excp2].into_iter()),
             BTreeSet::from_iter(
-                [DepositorAddress::NonFungibleGlobalID { value: NonFungibleGlobalId::try_from_str("resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>").unwrap()}]
+                [DepositorAddress::NonFungibleGlobalID { value: "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>".parse().unwrap()}]
                 .into_iter(),
             ),
         );
@@ -168,7 +168,7 @@ mod tests {
 
         let exception = AssetException::new(
             "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
-                .try_into()
+                .parse()
                 .unwrap(),
             DepositAddressExceptionRule::Deny,
         );
@@ -203,13 +203,11 @@ mod tests {
         )
         .unwrap();
 
-        let depositor =
-            DepositorAddress::NonFungibleGlobalID {
-                value: NonFungibleGlobalId::try_from_str(
-                    "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>",
-                )
+        let depositor = DepositorAddress::NonFungibleGlobalID {
+            value: "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>"
+                .parse()
                 .unwrap(),
-            };
+        };
         assert!(settings.allow_depositor(depositor.clone()));
         assert_eq!(settings.depositors_allow_list.len(), 1);
         assert!(settings.remove_allowed_depositor(&depositor));

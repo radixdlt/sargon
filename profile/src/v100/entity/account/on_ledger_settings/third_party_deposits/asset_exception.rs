@@ -40,7 +40,7 @@ mod tests {
     fn json_decode_deny_all_with_exceptions() {
         let model = AssetException::new(
             "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
-                .try_into()
+                .parse()
                 .unwrap(),
             DepositAddressExceptionRule::Allow,
         );
@@ -59,13 +59,13 @@ mod tests {
     fn inequality_allow_ne_deny() {
         let a = AssetException::new(
             "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
-                .try_into()
+                .parse()
                 .unwrap(),
             DepositAddressExceptionRule::Allow,
         );
         let b = AssetException::new(
             "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
-                .try_into()
+                .parse()
                 .unwrap(),
             DepositAddressExceptionRule::Deny,
         );
@@ -76,13 +76,13 @@ mod tests {
     fn inequality_allow_different_addresses() {
         let a = AssetException::new(
             "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
-                .try_into()
+                .parse()
                 .unwrap(),
             DepositAddressExceptionRule::Allow,
         );
         let b = AssetException::new(
             "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
-                .try_into()
+                .parse()
                 .unwrap(),
             DepositAddressExceptionRule::Allow,
         );
@@ -93,13 +93,13 @@ mod tests {
     fn equality() {
         let a = AssetException::new(
             "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
-                .try_into()
+                .parse()
                 .unwrap(),
             DepositAddressExceptionRule::Allow,
         );
         let b = AssetException::new(
             "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
-                .try_into()
+                .parse()
                 .unwrap(),
             DepositAddressExceptionRule::Allow,
         );

@@ -331,13 +331,13 @@ mod tests {
         assert_eq!(account.on_ledger_settings, OnLedgerSettings::default());
         let excp1 = AssetException::new(
             "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
-                .try_into()
+                .parse()
                 .unwrap(),
             DepositAddressExceptionRule::Allow,
         );
         let excp2 = AssetException::new(
             "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
-                .try_into()
+                .parse()
                 .unwrap(),
             DepositAddressExceptionRule::Allow,
         );
@@ -346,7 +346,7 @@ mod tests {
             [excp1, excp2],
             [DepositorAddress::ResourceAddress {
                 value: "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
-                    .try_into()
+                    .parse()
                     .unwrap(),
             }],
         );

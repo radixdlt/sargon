@@ -11,34 +11,17 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Hash,
-    derive_more::Display,
     PartialOrd,
     Ord,
+    SerializeDisplay,
+    DeserializeFromStr,
+    derive_more::Display,
     uniffi::Record,
 )]
 #[display("{address}")]
 pub struct ResourceAddress {
     pub address: String,
     pub network_id: NetworkID,
-}
-
-impl Serialize for ResourceAddress {
-    /// Serializes this `ResourceAddress` into its bech32 address string as JSON.
-    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_str(&self.address)
-    }
-}
-
-impl<'de> serde::Deserialize<'de> for ResourceAddress {
-    /// Tries to deserializes a JSON string as a bech32 address into an `ResourceAddress`.
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<ResourceAddress, D::Error> {
-        let s = String::deserialize(d)?;
-        ResourceAddress::try_from_bech32(&s).map_err(de::Error::custom)
-    }
 }
 
 #[uniffi::export]
@@ -63,11 +46,11 @@ impl EntityAddress for ResourceAddress {
     }
 }
 
-impl TryFrom<&str> for ResourceAddress {
-    type Error = CommonError;
+impl FromStr for ResourceAddress {
+    type Err = CommonError;
 
-    fn try_from(value: &str) -> Result<Self> {
-        ResourceAddress::try_from_bech32(value)
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        ResourceAddress::try_from_bech32(s)
     }
 }
 
@@ -86,7 +69,7 @@ mod tests {
     fn json_roundtrip() {
         let a: ResourceAddress =
             "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
-                .try_into()
+                .parse()
                 .unwrap();
 
         assert_json_value_eq_after_roundtrip(
@@ -101,10 +84,21 @@ mod tests {
     }
 
     #[test]
+    fn json_roundtrip_fails_for_invalid() {
+        assert_json_value_fails::<ResourceAddress>(
+            json!("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxxx")
+        );
+        assert_json_value_fails::<ResourceAddress>(
+            json!("account_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+        );
+        assert_json_value_fails::<ResourceAddress>(json!("super invalid"));
+    }
+
+    #[test]
     fn network_id_stokenet() {
         let a: ResourceAddress =
             "resource_tdx_2_1tkckx9fynl9f7756z8wxphq7wce6vk874nuq4f2nnxgh3nzrwhjdlp"
-                .try_into()
+                .parse()
                 .unwrap();
         assert_eq!(a.network_id, NetworkID::Stokenet);
     }
@@ -113,7 +107,7 @@ mod tests {
     fn network_id_mainnet() {
         let a: ResourceAddress =
             "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
-                .try_into()
+                .parse()
                 .unwrap();
         assert_eq!(a.network_id, NetworkID::Mainnet);
     }
