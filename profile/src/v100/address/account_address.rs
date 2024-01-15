@@ -4,7 +4,18 @@ use crate::prelude::*;
 /// that starts with the prefix `"account_"`, dependent on NetworkID, meaning the same
 /// public key used for two AccountAddresses on two different networks will not have
 /// the same address.
-#[derive(Clone, Debug, Default, PartialEq, derive_more::Display, Eq, Hash, uniffi::Record)]
+#[derive(
+    Clone,
+    Debug,
+    Default,
+    PartialEq,
+    Eq,
+    Hash,
+    SerializeDisplay,
+    DeserializeFromStr,
+    derive_more::Display,
+    uniffi::Record,
+)]
 #[display("{address}")]
 pub struct AccountAddress {
     /// Human readable address of an account. Always starts with `"account_"``, for example:
@@ -24,25 +35,6 @@ pub struct AccountAddress {
     /// hash was used to bech32 encode it. This means that two public key hashes will result
     /// in two different account address on two different networks.
     pub network_id: NetworkID,
-}
-
-impl Serialize for AccountAddress {
-    /// Serializes this `AccountAddress` into its bech32 address string as JSON.
-    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_str(&self.address)
-    }
-}
-
-impl<'de> serde::Deserialize<'de> for AccountAddress {
-    /// Tries to deserializes a JSON string as a bech32 address into an `AccountAddress`.
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<AccountAddress, D::Error> {
-        let s = String::deserialize(d)?;
-        AccountAddress::try_from_bech32(&s).map_err(de::Error::custom)
-    }
 }
 
 #[uniffi::export]
@@ -95,6 +87,14 @@ impl AccountAddress {
     }
 }
 
+impl FromStr for AccountAddress {
+    type Err = CommonError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        AccountAddress::try_from_bech32(s)
+    }
+}
+
 impl EntityAddress for AccountAddress {
     /// Identifies that AccountAddress uses the `EntityType::Account`, which are used
     /// to validate the HRP (`"account_"`) and is also used when forming HD derivation
@@ -112,15 +112,6 @@ impl EntityAddress for AccountAddress {
             address: address.to_string(),
             network_id,
         };
-    }
-}
-
-impl TryInto<AccountAddress> for &str {
-    type Error = crate::CommonError;
-
-    /// Tries to deserializes a bech32 address into an `AccountAddress`.
-    fn try_into(self) -> Result<AccountAddress> {
-        AccountAddress::try_from_bech32(self)
     }
 }
 
@@ -289,7 +280,7 @@ mod tests {
     fn json_roundtrip() {
         let a: AccountAddress =
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
-                .try_into()
+                .parse()
                 .unwrap();
 
         assert_json_value_eq_after_roundtrip(
@@ -301,6 +292,17 @@ mod tests {
             &a,
             json!("account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzdm"),
         );
+    }
+
+    #[test]
+    fn json_roundtrip_fails_for_invalid() {
+        assert_json_value_fails::<AccountAddress>(
+            json!("identity_rdx12gzxlgre0glhh9jxaptm7tdth8j4w4r8ykpg2xjfv45nghzsjzrvmp")
+        );
+        assert_json_value_fails::<AccountAddress>(
+            json!("account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzzz")
+        );
+        assert_json_value_fails::<AccountAddress>(json!("super invalid"));
     }
 }
 

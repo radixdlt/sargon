@@ -170,7 +170,7 @@ mod tests {
     }
 
     #[test]
-    fn test_format() {
+    fn display() {
         let str = "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd:#2244#";
         let id: NonFungibleGlobalId = str.try_into().unwrap();
         assert_eq!(format!("{}", id), str);

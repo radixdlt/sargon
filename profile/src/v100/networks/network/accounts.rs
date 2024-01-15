@@ -112,10 +112,7 @@ mod tests {
 
     #[test]
     fn get_by_address() {
-        let address: AccountAddress =
-            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
-                .try_into()
-                .unwrap();
+        let address = AccountAddress::placeholder();
         let account = Account::placeholder_with_values(
             address.clone(),
             DisplayName::default(),

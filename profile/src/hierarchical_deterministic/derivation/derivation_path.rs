@@ -63,7 +63,7 @@ impl Serialize for DerivationPath {
     {
         let mut state = serializer.serialize_struct("DerivationPath", 2)?;
         state.serialize_field("scheme", &self.scheme())?;
-        state.serialize_field("path", &self.hd_path().to_string())?;
+        state.serialize_field("path", &self.hd_path())?;
         state.end()
     }
 }

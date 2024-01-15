@@ -97,6 +97,12 @@ impl Identifiable for Account {
     }
 }
 
+impl PartialOrd for Account {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
 impl Ord for Account {
     fn cmp(&self, other: &Self) -> Ordering {
         match (&self.security_state, &other.security_state) {
@@ -109,12 +115,6 @@ impl Ord for Account {
                 .last_component()
                 .cmp(r.transaction_signing.derivation_path().last_component()),
         }
-    }
-}
-
-impl PartialOrd for Account {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
     }
 }
 
@@ -228,7 +228,7 @@ impl Account {
     pub fn placeholder_nebunet() -> Self {
         Self::placeholder_with_values(
             "account_tdx_b_1286wrrqrfcrfhthfrtdywe8alney8zu0ja5xrhcq2475ej08m9raqq"
-                .try_into()
+                .parse()
                 .unwrap(),
             DisplayName::default(),
             AppearanceID::default(),
@@ -239,7 +239,7 @@ impl Account {
     pub fn placeholder_kisharnet() -> Self {
         Self::placeholder_with_values(
             "account_tdx_c_1286wrrqrfcrfhthfrtdywe8alney8zu0ja5xrhcq2475ej0898vkq9"
-                .try_into()
+                .parse()
                 .unwrap(),
             DisplayName::default(),
             AppearanceID::default(),
@@ -250,7 +250,7 @@ impl Account {
     pub fn placeholder_adapanet() -> Self {
         Self::placeholder_with_values(
             "account_tdx_a_1286wrrqrfcrfhthfrtdywe8alney8zu0ja5xrhcq2475ej08srjqq0"
-                .try_into()
+                .parse()
                 .unwrap(),
             DisplayName::default(),
             AppearanceID::default(),
@@ -288,7 +288,7 @@ mod tests {
     fn new_with_address_only() {
         let address: AccountAddress =
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
-                .try_into()
+                .parse()
                 .unwrap();
         let account = Account::placeholder_with_values(
             address.clone(),
@@ -313,21 +313,6 @@ mod tests {
     }
 
     #[test]
-    fn display_name_get_set() {
-        let mut account = Account::placeholder_with_values(
-            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
-                .try_into()
-                .unwrap(),
-            DisplayName::new("Test").unwrap(),
-            AppearanceID::default(),
-        );
-        assert_eq!(account.display_name.value, "Test");
-        let new_display_name = DisplayName::new("New").unwrap();
-        account.display_name = new_display_name.clone();
-        assert_eq!(account.display_name, new_display_name);
-    }
-
-    #[test]
     fn update() {
         let mut account = Account::placeholder();
         assert_eq!(account.display_name.value, "Alice");
@@ -336,29 +321,13 @@ mod tests {
     }
 
     #[test]
-    fn flags_get_set() {
-        let mut account = Account::placeholder_with_values(
-            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
-                .try_into()
-                .unwrap(),
-            DisplayName::new("Test").unwrap(),
-            AppearanceID::default(),
-        );
-        assert_eq!(account.flags, EntityFlags::default());
-        let new_flags = EntityFlags::with_flag(EntityFlag::DeletedByUser);
-        account.flags = new_flags.clone();
-        assert_eq!(account.flags, new_flags);
-    }
-
-    #[test]
     fn on_ledger_settings_get_set() {
-        let mut account = Account::placeholder_with_values(
-            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
-                .try_into()
-                .unwrap(),
-            DisplayName::new("Test").unwrap(),
-            AppearanceID::default(),
-        );
+        let mut account =
+            Account::placeholder_with_values(
+                AccountAddress::placeholder_alice(),
+                DisplayName::new("Test").unwrap(),
+                AppearanceID::default(),
+            );
         assert_eq!(account.on_ledger_settings, OnLedgerSettings::default());
         let excp1 = AssetException::new(
             "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
