@@ -11,6 +11,8 @@ use radix_engine_common::crypto::{Hash, IsHash};
     PartialOrd,
     Ord,
     Hash,
+    SerializeDisplay,
+    DeserializeFromStr,
     derive_more::Display,
     derive_more::Debug,
     uniffi::Record,
@@ -152,25 +154,6 @@ impl Hex32Bytes {
     }
 }
 
-impl Serialize for Hex32Bytes {
-    /// Serializes this `Hex32Bytes` into a hex string as JSON.
-    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_str(&self.to_string())
-    }
-}
-
-impl<'de> serde::Deserialize<'de> for Hex32Bytes {
-    /// Tries to deserializes a JSON string as a hex string into an `Hex32Bytes`.
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Hex32Bytes, D::Error> {
-        let s = String::deserialize(d)?;
-        Hex32Bytes::from_hex(&s).map_err(de::Error::custom)
-    }
-}
-
 #[cfg(test)]
 mod tests {
 
@@ -224,6 +207,13 @@ mod tests {
             &model,
             json!("deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"),
         );
+    }
+
+    #[test]
+    fn json_roundtrip_fails_for_invalid() {
+        assert_json_value_fails::<Hex32Bytes>(json!("not even hex"));
+        assert_json_value_fails::<Hex32Bytes>(json!("deadbeef"));
+        assert_json_value_fails::<Hex32Bytes>(json!("deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"));
     }
 
     #[test]
