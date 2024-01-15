@@ -1,28 +1,21 @@
 use crate::prelude::*;
 
 #[derive(
-    Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, derive_more::Display, uniffi::Record,
+    Clone,
+    Debug,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    SerializeDisplay,
+    DeserializeFromStr,
+    derive_more::Display,
+    uniffi::Record,
 )]
 #[display("{value}")]
 pub struct DisplayName {
     pub value: String,
-}
-
-impl Serialize for DisplayName {
-    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_str(&self.value)
-    }
-}
-
-impl<'de> Deserialize<'de> for DisplayName {
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<DisplayName, D::Error> {
-        let s = String::deserialize(d)?;
-        DisplayName::new(s.as_str()).map_err(de::Error::custom)
-    }
 }
 
 #[uniffi::export]
@@ -55,11 +48,11 @@ impl Default for DisplayName {
     }
 }
 
-impl TryFrom<&str> for DisplayName {
-    type Error = crate::CommonError;
+impl FromStr for DisplayName {
+    type Err = CommonError;
 
-    fn try_from(value: &str) -> Result<Self> {
-        DisplayName::new(value)
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        DisplayName::new(s)
     }
 }
 
@@ -70,7 +63,7 @@ mod tests {
     fn invalid() {
         let s = "this is a much much too long display name";
         assert_eq!(
-            DisplayName::try_from(s),
+            DisplayName::new(s),
             Err(CommonError::InvalidDisplayNameTooLong {
                 expected: DisplayName::MAX_LEN,
                 found: s.len()
@@ -80,13 +73,13 @@ mod tests {
 
     #[test]
     fn max_is_ok() {
-        assert!(DisplayName::try_from("0|RDX|Dev Nano S|Some very lon").is_ok());
+        assert!(DisplayName::new("0|RDX|Dev Nano S|Some very lon").is_ok());
     }
 
     #[test]
     fn valid_try_from() {
         assert_eq!(
-            DisplayName::try_from("Main"),
+            DisplayName::new("Main"),
             Ok(DisplayName::new("Main").unwrap())
         );
     }
@@ -94,7 +87,7 @@ mod tests {
     #[test]
     fn empty_is_invalid() {
         assert_eq!(
-            DisplayName::try_from(""),
+            DisplayName::new(""),
             Err(CommonError::InvalidDisplayNameEmpty)
         );
     }
@@ -102,7 +95,7 @@ mod tests {
     #[test]
     fn spaces_trimmed_into_empty_is_invalid() {
         assert_eq!(
-            DisplayName::try_from("   "),
+            DisplayName::new("   "),
             Err(CommonError::InvalidDisplayNameEmpty)
         );
     }
@@ -117,13 +110,18 @@ mod tests {
 
     #[test]
     fn json_roundtrip() {
-        let a: DisplayName = "Cool persona".try_into().unwrap();
+        let a: DisplayName = "Cool persona".parse().unwrap();
 
         assert_json_value_eq_after_roundtrip(&a, json!("Cool persona"));
         assert_json_roundtrip(&a);
         assert_json_value_ne_after_roundtrip(&a, json!("Main account"));
+    }
 
+    #[test]
+    fn json_fails_for_invalid() {
         assert_json_value_fails::<DisplayName>(json!("this is a much much too long display name"));
+        assert_json_value_fails::<DisplayName>(json!(""));
+        assert_json_value_fails::<DisplayName>(json!("   "));
     }
 }
 
