@@ -5,8 +5,20 @@ use crate::prelude::*;
 /// Important to know that this is just a **hint**, the values
 /// SHOULD be kept up to date, might might not be, since they
 /// are stored values which must be kept in sync.
-#[derive(Serialize, Deserialize, Default, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(
+    Serialize,
+    Deserialize,
+    Default,
+    Clone,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    derive_more::Display,
+    uniffi::Record,
+)]
 #[serde(rename_all = "camelCase")]
+#[display("#networks: {number_of_networks}, #accounts: {number_of_accounts_on_all_networks_in_total}, #personas: {number_of_personas_on_all_networks_in_total}")]
 pub struct ContentHint {
     /// The total number of accounts on all networks.
     ///
@@ -52,18 +64,6 @@ impl ContentHint {
     /// Instantiates a new empty ContentHint with all counters equal `0`.
     pub fn new() -> Self {
         Self::all(0)
-    }
-}
-
-impl std::fmt::Display for ContentHint {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "#networks: {}, #accounts: {}, #personas: {}",
-            self.number_of_networks,
-            self.number_of_accounts_on_all_networks_in_total,
-            self.number_of_personas_on_all_networks_in_total
-        )
     }
 }
 
