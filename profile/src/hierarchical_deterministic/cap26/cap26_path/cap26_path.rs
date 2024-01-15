@@ -3,10 +3,26 @@ use crate::prelude::*;
 /// A derivation path design specifically for Radix Babylon wallets used by Accounts and Personas
 /// to be unique per network with separate key spaces for Accounts/Identities (Personas) and key
 /// kind: sign transaction or sign auth.
-#[derive(Clone, Debug, PartialEq, EnumAsInner, Eq, Hash, PartialOrd, Ord, uniffi::Enum)]
+#[derive(
+    Clone,
+    Debug,
+    PartialEq,
+    EnumAsInner,
+    Eq,
+    Hash,
+    PartialOrd,
+    Ord,
+    SerializeDisplay,
+    DeserializeFromStr,
+    derive_more::Display,
+    uniffi::Enum,
+)]
 pub enum CAP26Path {
+    #[display("{value}")]
     GetID { value: GetIDPath },
+    #[display("{value}")]
     AccountPath { value: AccountPath },
+    #[display("{value}")]
     IdentityPath { value: IdentityPath },
 }
 
@@ -24,26 +40,16 @@ impl TryFrom<&HDPath> for CAP26Path {
     }
 }
 
-impl Serialize for CAP26Path {
-    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_str(&self.to_string())
-    }
-}
+impl FromStr for CAP26Path {
+    type Err = CommonError;
 
-impl<'de> serde::Deserialize<'de> for CAP26Path {
-    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<CAP26Path, D::Error> {
-        let s = String::deserialize(d)?;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
         if let Ok(getid) = GetIDPath::from_str(&s) {
-            return Ok(CAP26Path::GetID {
+            Ok(CAP26Path::GetID {
                 value: getid.into(),
-            });
+            })
         } else {
-            AccountPath::from_str(&s)
-                .map(|value| Self::AccountPath { value })
-                .map_err(de::Error::custom)
+            AccountPath::from_str(&s).map(|value| Self::AccountPath { value })
         }
     }
 }
@@ -77,11 +83,13 @@ impl From<AccountPath> for CAP26Path {
         Self::AccountPath { value }
     }
 }
+
 impl From<IdentityPath> for CAP26Path {
     fn from(value: IdentityPath) -> Self {
         Self::IdentityPath { value }
     }
 }
+
 impl From<GetIDPath> for CAP26Path {
     fn from(value: GetIDPath) -> Self {
         Self::GetID {
@@ -94,6 +102,7 @@ impl HasPlaceholder for CAP26Path {
     fn placeholder() -> Self {
         Self::placeholder_account()
     }
+
     fn placeholder_other() -> Self {
         Self::placeholder_identity()
     }

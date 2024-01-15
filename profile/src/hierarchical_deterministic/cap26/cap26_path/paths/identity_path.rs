@@ -1,6 +1,19 @@
 use crate::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record)]
+#[derive(
+    Clone,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    PartialOrd,
+    Ord,
+    SerializeDisplay,
+    DeserializeFromStr,
+    derive_more::Display,
+    uniffi::Record,
+)]
+#[display("{}", self.bip32_string())]
 pub struct IdentityPath {
     pub path: HDPath,
 
@@ -69,33 +82,12 @@ impl HasPlaceholder for IdentityPath {
     }
 }
 
-impl Serialize for IdentityPath {
-    /// Serializes this `IdentityPath` into its bech32 address string as JSON.
-    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_str(&self.to_string())
+impl FromStr for IdentityPath {
+    type Err = CommonError;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Self::from_bip32str(s)
     }
 }
-
-impl<'de> serde::Deserialize<'de> for IdentityPath {
-    /// Tries to deserializes a JSON string as a bech32 address into an `IdentityPath`.
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<IdentityPath, D::Error> {
-        let s = String::deserialize(d)?;
-        IdentityPath::from_str(&s).map_err(de::Error::custom)
-    }
-}
-
-impl TryInto<IdentityPath> for &str {
-    type Error = CommonError;
-
-    fn try_into(self) -> Result<IdentityPath, Self::Error> {
-        IdentityPath::from_str(self)
-    }
-}
-
 impl Derivation for IdentityPath {
     fn hd_path(&self) -> &HDPath {
         &self.path
@@ -157,14 +149,14 @@ mod tests {
     #[test]
     fn hd_path() {
         let str = "m/44H/1022H/1H/618H/1460H/0H";
-        let parsed: IdentityPath = str.try_into().unwrap();
+        let parsed: IdentityPath = str.parse().unwrap();
         assert_eq!(parsed.hd_path().depth(), 6);
     }
 
     #[test]
     fn string_roundtrip() {
         let str = "m/44H/1022H/1H/618H/1460H/0H";
-        let parsed: IdentityPath = str.try_into().unwrap();
+        let parsed: IdentityPath = str.parse().unwrap();
         assert_eq!(parsed.network_id, NetworkID::Mainnet);
         assert_eq!(parsed.entity_kind, CAP26EntityKind::Identity);
         assert_eq!(parsed.key_kind, CAP26KeyKind::TransactionSigning);
@@ -267,28 +259,28 @@ mod tests {
 
     #[test]
     fn inequality_different_index() {
-        let a: IdentityPath = "m/44H/1022H/1H/618H/1460H/0H".try_into().unwrap();
-        let b: IdentityPath = "m/44H/1022H/1H/618H/1460H/1H".try_into().unwrap();
+        let a: IdentityPath = "m/44H/1022H/1H/618H/1460H/0H".parse().unwrap();
+        let b: IdentityPath = "m/44H/1022H/1H/618H/1460H/1H".parse().unwrap();
         assert!(a != b);
     }
     #[test]
     fn inequality_different_network_id() {
-        let a: IdentityPath = "m/44H/1022H/1H/618H/1460H/0H".try_into().unwrap();
-        let b: IdentityPath = "m/44H/1022H/2H/618H/1460H/0H".try_into().unwrap();
+        let a: IdentityPath = "m/44H/1022H/1H/618H/1460H/0H".parse().unwrap();
+        let b: IdentityPath = "m/44H/1022H/2H/618H/1460H/0H".parse().unwrap();
         assert!(a != b);
     }
 
     #[test]
     fn inequality_different_key_kind() {
-        let a: IdentityPath = "m/44H/1022H/1H/618H/1460H/0H".try_into().unwrap();
-        let b: IdentityPath = "m/44H/1022H/1H/618H/1678H/0H".try_into().unwrap();
+        let a: IdentityPath = "m/44H/1022H/1H/618H/1460H/0H".parse().unwrap();
+        let b: IdentityPath = "m/44H/1022H/1H/618H/1678H/0H".parse().unwrap();
         assert!(a != b);
     }
 
     #[test]
     fn json_roundtrip() {
         let str = "m/44H/1022H/1H/618H/1460H/0H";
-        let parsed: IdentityPath = str.try_into().unwrap();
+        let parsed: IdentityPath = str.parse().unwrap();
         assert_json_value_eq_after_roundtrip(&parsed, json!(str));
         assert_json_value_ne_after_roundtrip(&parsed, json!("m/44H/1022H/1H/618H/1460H/1H"));
     }

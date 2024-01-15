@@ -76,7 +76,7 @@ pub type Seed = [u8; 64];
 impl FromStr for Mnemonic {
     type Err = CommonError;
 
-    fn from_str(s: &str) -> Result<Self> {
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
         Mnemonic::from_phrase(s)
     }
 }

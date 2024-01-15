@@ -3,7 +3,7 @@ pub trait Derivation: Sized {
     fn derivation_path(&self) -> DerivationPath;
     fn hd_path(&self) -> &HDPath;
 
-    fn to_string(&self) -> String {
+    fn bip32_string(&self) -> String {
         self.hd_path().to_string()
     }
 

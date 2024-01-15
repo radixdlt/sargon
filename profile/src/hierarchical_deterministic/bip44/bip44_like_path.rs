@@ -1,6 +1,19 @@
 use crate::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record)]
+#[derive(
+    Clone,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    PartialOrd,
+    Ord,
+    SerializeDisplay,
+    DeserializeFromStr,
+    derive_more::Display,
+    uniffi::Record,
+)]
+#[display("{}", self.bip32_string())]
 pub struct BIP44LikePath {
     pub path: HDPath,
 }
@@ -52,14 +65,6 @@ impl TryFrom<&HDPath> for BIP44LikePath {
 }
 
 impl BIP44LikePath {
-    pub fn from_str(s: &str) -> Result<Self> {
-        let (path, _) = HDPath::try_parse_base(s, |v| CommonError::InvalidDepthOfBIP44Path {
-            expected: Self::PATH_DEPTH,
-            found: v,
-        })?;
-        return Self::try_from(&path);
-    }
-
     fn with_account_and_index(account: HDPathValue, index: HDPathValue) -> Self {
         let c0 = HDPathComponent::bip44_purpose(); // purpose
         let c1 = HDPathComponent::bip44_cointype(); // cointype
@@ -91,30 +96,15 @@ impl Derivation for BIP44LikePath {
     }
 }
 
-impl Serialize for BIP44LikePath {
-    /// Serializes this `BIP44LikePath` into JSON as a string on: "m/44H/1022H/0H/0/0H" format
-    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_str(&self.to_string())
-    }
-}
+impl FromStr for BIP44LikePath {
+    type Err = CommonError;
 
-impl<'de> serde::Deserialize<'de> for BIP44LikePath {
-    /// Tries to deserializes a JSON string as a derivation path string into a `BIP44LikePath`
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<BIP44LikePath, D::Error> {
-        let s = String::deserialize(d)?;
-        BIP44LikePath::from_str(&s).map_err(de::Error::custom)
-    }
-}
-
-impl TryInto<BIP44LikePath> for &str {
-    type Error = CommonError;
-
-    fn try_into(self) -> Result<BIP44LikePath, Self::Error> {
-        BIP44LikePath::from_str(self)
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let (path, _) = HDPath::try_parse_base(s, |v| CommonError::InvalidDepthOfBIP44Path {
+            expected: Self::PATH_DEPTH,
+            found: v,
+        })?;
+        return Self::try_from(&path);
     }
 }
 
@@ -155,7 +145,7 @@ mod tests {
     #[test]
     fn string_roundtrip() {
         let str = "m/44H/1022H/0H/0/0H";
-        let a: BIP44LikePath = str.try_into().unwrap();
+        let a: BIP44LikePath = str.parse().unwrap();
         assert_eq!(a.to_string(), str);
     }
 
@@ -215,22 +205,22 @@ mod tests {
 
     #[test]
     fn inequality_different_accounts() {
-        let a: BIP44LikePath = "m/44H/1022H/0H/0/0H".try_into().unwrap();
-        let b: BIP44LikePath = "m/44H/1022H/1H/0/0H".try_into().unwrap();
+        let a: BIP44LikePath = "m/44H/1022H/0H/0/0H".parse().unwrap();
+        let b: BIP44LikePath = "m/44H/1022H/1H/0/0H".parse().unwrap();
         assert!(a != b);
     }
 
     #[test]
     fn inequality_different_index() {
-        let a: BIP44LikePath = "m/44H/1022H/0H/0/0H".try_into().unwrap();
-        let b: BIP44LikePath = "m/44H/1022H/0H/0/1H".try_into().unwrap();
+        let a: BIP44LikePath = "m/44H/1022H/0H/0/0H".parse().unwrap();
+        let b: BIP44LikePath = "m/44H/1022H/0H/0/1H".parse().unwrap();
         assert!(a != b);
     }
 
     #[test]
     fn json_roundtrip() {
         let str = "m/44H/1022H/0H/0/0H";
-        let parsed: BIP44LikePath = str.try_into().unwrap();
+        let parsed: BIP44LikePath = str.parse().unwrap();
         assert_json_value_eq_after_roundtrip(&parsed, json!(str));
         assert_json_value_ne_after_roundtrip(&parsed, json!("m/44H/1022H/0H/0/1H"));
     }

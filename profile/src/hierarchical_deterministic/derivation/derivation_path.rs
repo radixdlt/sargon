@@ -22,7 +22,12 @@ impl TryFrom<&HDPath> for DerivationPath {
 
 impl std::fmt::Debug for DerivationPath {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(&self.to_string())
+        f.write_str(&self.bip32_string())
+    }
+}
+impl std::fmt::Display for DerivationPath {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.bip32_string())
     }
 }
 

@@ -23,7 +23,7 @@ pub struct HDPath {
 impl FromStr for HDPath {
     type Err = crate::CommonError;
 
-    fn from_str(s: &str) -> Result<Self> {
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
         BIP32Path::from_str(s)
             .map(|p| Self::from(p))
             .map_err(|_| CommonError::InvalidBIP32Path(s.to_string()))

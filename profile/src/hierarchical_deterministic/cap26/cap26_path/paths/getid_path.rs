@@ -3,7 +3,20 @@ use crate::prelude::*;
 /// Use it with `GetIDPath::default()` to create the path `m/44'/1022'/365'`
 /// which is used by all hierarchal deterministic factor sources to derive
 /// the special root key which we hash to form the `FactorSourceIDFromHash`
-#[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record)]
+#[derive(
+    Clone,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    PartialOrd,
+    Ord,
+    SerializeDisplay,
+    DeserializeFromStr,
+    derive_more::Display,
+    uniffi::Record,
+)]
+#[display("{}", self.bip32_string())]
 pub struct GetIDPath {
     pub path: HDPath,
 }
@@ -59,40 +72,16 @@ impl TryFrom<&HDPath> for GetIDPath {
 impl GetIDPath {
     pub const PATH_DEPTH: usize = 3;
     pub const LAST_COMPONENT_VALUE: HDPathValue = 365;
+}
 
-    pub fn from_str(s: &str) -> Result<Self> {
+impl FromStr for GetIDPath {
+    type Err = CommonError;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
         let (path, _) = HDPath::try_parse_base(s, |v| CommonError::InvalidDepthOfCAP26Path {
             expected: Self::PATH_DEPTH,
             found: v,
         })?;
         return Self::try_from(&path);
-    }
-}
-
-impl Serialize for GetIDPath {
-    /// Serializes this `GetIDPath` into JSON as a derivation path string on format `m/1022H/365H`
-    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_str(&self.to_string())
-    }
-}
-
-impl<'de> serde::Deserialize<'de> for GetIDPath {
-    /// Tries to deserializes a JSON string as derivation path string into a `GetIDPath`
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<GetIDPath, D::Error> {
-        let s = String::deserialize(d)?;
-        GetIDPath::from_str(&s).map_err(de::Error::custom)
-    }
-}
-
-impl TryInto<GetIDPath> for &str {
-    type Error = CommonError;
-
-    fn try_into(self) -> Result<GetIDPath, Self::Error> {
-        GetIDPath::from_str(self)
     }
 }
 
@@ -102,7 +91,7 @@ mod tests {
     use crate::prelude::*;
 
     #[test]
-    fn to_string() {
+    fn display() {
         assert_eq!(GetIDPath::default().to_string(), "m/44H/1022H/365H");
     }
 
@@ -110,7 +99,7 @@ mod tests {
     fn from_str() {
         assert_eq!(
             GetIDPath::default(),
-            GetIDPath::from_str("m/44H/1022H/365H").unwrap()
+            "m/44H/1022H/365H".parse::<GetIDPath>().unwrap()
         );
     }
     #[test]
@@ -134,7 +123,7 @@ mod tests {
     #[test]
     fn json_roundtrip() {
         let str = "m/44H/1022H/365H";
-        let parsed: GetIDPath = str.try_into().unwrap();
+        let parsed: GetIDPath = str.parse().unwrap();
         assert_json_value_eq_after_roundtrip(&parsed, json!(str));
     }
 

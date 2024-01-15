@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 const ENTITY_PATH_DEPTH: usize = 6;
-pub trait EntityCAP26Path: Derivation {
+pub trait EntityCAP26Path: Derivation + FromStr {
     fn entity_kind() -> CAP26EntityKind;
 
     fn __with_path_and_components(
@@ -64,8 +64,7 @@ pub trait EntityCAP26Path: Derivation {
         return Ok(Self::__with_path_and_components(path, network_id, entity_kind, key_kind, index));
     }
 
-    #[cfg(not(tarpaulin_include))] // false negative, this is in fact heavily tested.
-    fn from_str(s: &str) -> Result<Self> {
+    fn from_bip32str(s: &str) -> Result<Self> {
         let (path, _) = HDPath::try_parse_base(s, |v| CommonError::InvalidDepthOfCAP26Path {
             expected: ENTITY_PATH_DEPTH,
             found: v,

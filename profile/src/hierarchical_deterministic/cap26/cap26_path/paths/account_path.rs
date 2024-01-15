@@ -1,6 +1,19 @@
 use crate::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record)]
+#[derive(
+    Clone,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    PartialOrd,
+    Ord,
+    SerializeDisplay,
+    DeserializeFromStr,
+    derive_more::Display,
+    uniffi::Record,
+)]
+#[display("{}", self.bip32_string())]
 pub struct AccountPath {
     pub path: HDPath,
 
@@ -69,30 +82,10 @@ impl HasPlaceholder for AccountPath {
     }
 }
 
-impl Serialize for AccountPath {
-    /// Serializes this `AccountPath` into JSON as a string on: "m/44H/1022H/1H/525H/1460H/0H" format
-    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_str(&self.to_string())
-    }
-}
-
-impl<'de> serde::Deserialize<'de> for AccountPath {
-    /// Tries to deserializes a JSON string as a derivation path string into a `AccountPath`
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<AccountPath, D::Error> {
-        let s = String::deserialize(d)?;
-        AccountPath::from_str(&s).map_err(de::Error::custom)
-    }
-}
-
-impl TryInto<AccountPath> for &str {
-    type Error = CommonError;
-
-    fn try_into(self) -> Result<AccountPath, Self::Error> {
-        AccountPath::from_str(self)
+impl FromStr for AccountPath {
+    type Err = CommonError;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Self::from_bip32str(s)
     }
 }
 
@@ -146,14 +139,14 @@ mod tests {
     #[test]
     fn hd_path() {
         let str = "m/44H/1022H/1H/525H/1460H/0H";
-        let parsed: AccountPath = str.try_into().unwrap();
+        let parsed: AccountPath = str.parse().unwrap();
         assert_eq!(parsed.hd_path().depth(), 6);
     }
 
     #[test]
     fn string_roundtrip() {
         let str = "m/44H/1022H/1H/525H/1460H/0H";
-        let parsed: AccountPath = str.try_into().unwrap();
+        let parsed: AccountPath = str.parse().unwrap();
         assert_eq!(parsed.network_id, NetworkID::Mainnet);
         assert_eq!(parsed.entity_kind, CAP26EntityKind::Account);
         assert_eq!(parsed.key_kind, CAP26KeyKind::TransactionSigning);
@@ -256,28 +249,28 @@ mod tests {
 
     #[test]
     fn inequality_different_index() {
-        let a: AccountPath = "m/44H/1022H/1H/525H/1460H/0H".try_into().unwrap();
-        let b: AccountPath = "m/44H/1022H/1H/525H/1460H/1H".try_into().unwrap();
+        let a: AccountPath = "m/44H/1022H/1H/525H/1460H/0H".parse().unwrap();
+        let b: AccountPath = "m/44H/1022H/1H/525H/1460H/1H".parse().unwrap();
         assert!(a != b);
     }
     #[test]
     fn inequality_different_network_id() {
-        let a: AccountPath = "m/44H/1022H/1H/525H/1460H/0H".try_into().unwrap();
-        let b: AccountPath = "m/44H/1022H/2H/525H/1460H/0H".try_into().unwrap();
+        let a: AccountPath = "m/44H/1022H/1H/525H/1460H/0H".parse().unwrap();
+        let b: AccountPath = "m/44H/1022H/2H/525H/1460H/0H".parse().unwrap();
         assert!(a != b);
     }
 
     #[test]
     fn inequality_different_key_kind() {
-        let a: AccountPath = "m/44H/1022H/1H/525H/1460H/0H".try_into().unwrap();
-        let b: AccountPath = "m/44H/1022H/1H/525H/1678H/0H".try_into().unwrap();
+        let a: AccountPath = "m/44H/1022H/1H/525H/1460H/0H".parse().unwrap();
+        let b: AccountPath = "m/44H/1022H/1H/525H/1678H/0H".parse().unwrap();
         assert!(a != b);
     }
 
     #[test]
     fn json_roundtrip() {
         let str = "m/44H/1022H/1H/525H/1460H/0H";
-        let parsed: AccountPath = str.try_into().unwrap();
+        let parsed: AccountPath = str.parse().unwrap();
         assert_json_value_eq_after_roundtrip(&parsed, json!(str));
         assert_json_value_ne_after_roundtrip(&parsed, json!("m/44H/1022H/1H/525H/1460H/1H"));
     }

@@ -5,8 +5,10 @@ use crate::prelude::*;
 #[serde(transparent)]
 pub struct ProfileID(pub(crate) Uuid);
 uniffi::custom_newtype!(ProfileID, Uuid);
-impl ProfileID {
-    pub fn from_str(s: &str) -> Result<Self> {
+
+impl FromStr for ProfileID {
+    type Err = CommonError;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
         Uuid::from_str(s)
             .map(ProfileID)
             .map_err(|_| CommonError::InvalidProfileID(s.to_owned()))

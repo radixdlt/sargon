@@ -57,7 +57,7 @@ impl EntityAddress for IdentityAddress {
 impl FromStr for IdentityAddress {
     type Err = CommonError;
 
-    fn from_str(s: &str) -> Result<Self> {
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
         IdentityAddress::try_from_bech32(s)
     }
 }

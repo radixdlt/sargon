@@ -137,7 +137,7 @@ impl HasPlaceholder for Ed25519PublicKey {
 impl FromStr for Ed25519PublicKey {
     type Err = crate::CommonError;
 
-    fn from_str(s: &str) -> Result<Self> {
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
         Self::from_hex(s.to_string())
     }
 }

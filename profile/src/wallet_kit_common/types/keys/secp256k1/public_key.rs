@@ -119,7 +119,7 @@ impl TryInto<Secp256k1PublicKey> for &str {
 impl FromStr for Secp256k1PublicKey {
     type Err = crate::CommonError;
 
-    fn from_str(s: &str) -> Result<Self> {
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
         Self::from_hex(s.to_string())
     }
 }
