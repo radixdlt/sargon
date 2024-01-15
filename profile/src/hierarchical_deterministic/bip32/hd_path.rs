@@ -2,15 +2,12 @@ use crate::prelude::*;
 
 use slip10::path::BIP32Path;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record)]
+#[derive(
+    Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, derive_more::Display, uniffi::Record,
+)]
+#[display("{}", self.to_bip32_string())]
 pub struct HDPath {
     pub components: Vec<HDPathComponent>,
-}
-
-impl std::fmt::Display for HDPath {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.to_bip32_string())
-    }
 }
 
 impl Serialize for HDPath {
