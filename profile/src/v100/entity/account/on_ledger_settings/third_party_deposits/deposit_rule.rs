@@ -41,10 +41,7 @@ impl DepositRule {
 }
 
 impl std::fmt::Display for DepositRule {
-    fn fmt(
-        &self,
-        f: &mut radix_engine_common::prelude::fmt::Formatter<'_>,
-    ) -> radix_engine_common::prelude::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}", self)
     }
 }

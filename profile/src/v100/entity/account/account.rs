@@ -17,7 +17,10 @@ use crate::prelude::*;
 /// An account can be either controlled by a "Babylon" DeviceFactorSource or a
 /// Legacy one imported from Olympia, or a Ledger hardware wallet, which too might
 /// have been imported from Olympia.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Hash, Eq, uniffi::Record)]
+#[derive(
+    Serialize, Deserialize, Clone, Debug, PartialEq, Hash, Eq, derive_more::Display, uniffi::Record,
+)]
+#[display("{display_name} | {address}")]
 #[serde(rename_all = "camelCase")]
 pub struct Account {
     /// The ID of the network this account can be used with.
@@ -112,12 +115,6 @@ impl Ord for Account {
 impl PartialOrd for Account {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
-    }
-}
-
-impl std::fmt::Display for Account {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} | {}", self.display_name, self.address)
     }
 }
 

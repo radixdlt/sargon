@@ -3,7 +3,21 @@ use std::ops::Deref;
 
 /// A gateway to some Radix Network, which is a high level REST API which clients (wallets) can
 /// consume in order to query asset balances and submit transactions.
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Ord, PartialOrd, Hash, uniffi::Record)]
+#[derive(
+    Serialize,
+    Deserialize,
+    Clone,
+    PartialEq,
+    Eq,
+    Ord,
+    PartialOrd,
+    Hash,
+    derive_more::Display,
+    derive_more::Debug,
+    uniffi::Record,
+)]
+#[display("{}", self.url.to_string())]
+#[debug("{}: {}", self.network.display_description, self.url.to_string())]
 pub struct Gateway {
     /// The Radix network the API is a Gateway to.
     pub network: RadixNetwork,
@@ -17,23 +31,6 @@ impl Identifiable for Gateway {
 
     fn id(&self) -> Self::ID {
         self.url.clone()
-    }
-}
-
-impl std::fmt::Debug for Gateway {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}: {}",
-            self.network.display_description,
-            self.url.to_string(),
-        )
-    }
-}
-
-impl std::fmt::Display for Gateway {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.url.to_string(),)
     }
 }
 
@@ -253,5 +250,21 @@ mod tests_uniffi_api {
     #[test]
     fn test_gateway_stokenet() {
         assert_eq!(gateway_stokenet(), Gateway::stokenet());
+    }
+
+    #[test]
+    fn display() {
+        assert_eq!(
+            format!("{}", Gateway::mainnet()),
+            "https://mainnet.radixdlt.com/"
+        );
+    }
+
+    #[test]
+    fn debug() {
+        assert_eq!(
+            format!("{:?}", Gateway::mainnet()),
+            "Mainnet: https://mainnet.radixdlt.com/"
+        );
     }
 }

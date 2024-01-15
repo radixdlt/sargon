@@ -31,10 +31,7 @@ impl DepositAddressExceptionRule {
 }
 
 impl std::fmt::Display for DepositAddressExceptionRule {
-    fn fmt(
-        &self,
-        f: &mut radix_engine_common::prelude::fmt::Formatter<'_>,
-    ) -> radix_engine_common::prelude::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}", self)
     }
 }

@@ -8,7 +8,8 @@ use radix_engine_toolkit_json::models::scrypto::non_fungible_global_id::{
 
 use transaction::prelude::NonFungibleGlobalId as EngineNonFungibleGlobalId;
 
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq, derive_more::Display, uniffi::Record)]
+#[display("{}", self.engine().0)]
 pub struct NonFungibleGlobalId {
     pub resource_address: ResourceAddress,
     pub non_fungible_local_id: NonFungibleLocalId,
@@ -79,12 +80,6 @@ impl NonFungibleGlobalId {
             self.engine_global_id().into(),
             self.network_id().discriminant(),
         )
-    }
-}
-
-impl std::fmt::Display for NonFungibleGlobalId {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.engine().0)
     }
 }
 

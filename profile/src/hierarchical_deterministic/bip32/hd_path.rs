@@ -163,10 +163,16 @@ mod tests {
     }
 
     #[test]
-    fn json_roundtrip() {
+    fn json_roundtrip_success() {
         let sut = HDPath::harden([44, 1022]);
         assert_json_value_eq_after_roundtrip(&sut, json!("m/44H/1022H"));
         assert_json_value_ne_after_roundtrip(&sut, json!("m/44H/33H"));
+    }
+
+    #[test]
+    fn json_roundtrip_fails_for_invalid() {
+        assert_json_value_fails::<HDPath>(json!("x/44H"));
+        assert_json_value_fails::<HDPath>(json!("m/44X"));
         assert_json_value_fails::<HDPath>(json!("super invalid path"));
     }
 }

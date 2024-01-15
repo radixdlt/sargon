@@ -4,7 +4,20 @@ use crate::prelude::*;
 /// that starts with the prefix `"identity_"`, dependent on NetworkID, meaning the same
 /// public key used for two IdentityAddresses on two different networks will not have
 /// the same address.
-#[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record)]
+#[derive(
+    Clone,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    PartialOrd,
+    Ord,
+    SerializeDisplay,
+    DeserializeFromStr,
+    derive_more::Display,
+    uniffi::Record,
+)]
+#[display("{address}")]
 pub struct IdentityAddress {
     /// Human readable address of an identity, which are used by Personas. Always starts with
     /// the prefix `"identity_"`, for example:
@@ -41,38 +54,11 @@ impl EntityAddress for IdentityAddress {
     }
 }
 
-impl Serialize for IdentityAddress {
-    /// Serializes this `IdentityAddress` into its bech32 address string as JSON.
-    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_str(&self.address)
-    }
-}
+impl FromStr for IdentityAddress {
+    type Err = CommonError;
 
-impl<'de> serde::Deserialize<'de> for IdentityAddress {
-    /// Tries to deserializes a JSON string as a bech32 address into an `IdentityAddress`.
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<IdentityAddress, D::Error> {
-        let s = String::deserialize(d)?;
-        IdentityAddress::try_from_bech32(&s).map_err(de::Error::custom)
-    }
-}
-
-impl TryInto<IdentityAddress> for &str {
-    type Error = CommonError;
-
-    /// Tries to deserializes a bech32 address into an `IdentityAddress`.
-    fn try_into(self) -> Result<IdentityAddress, Self::Error> {
-        IdentityAddress::try_from_bech32(self)
-    }
-}
-
-impl std::fmt::Display for IdentityAddress {
-    /// The full bech32 address.
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.address)
+    fn from_str(s: &str) -> Result<Self> {
+        IdentityAddress::try_from_bech32(s)
     }
 }
 
@@ -92,7 +78,16 @@ mod tests {
     }
 
     #[test]
-    fn format() {
+    fn from_str() {
+        assert!(
+            "identity_rdx12tgzjrz9u0xz4l28vf04hz87eguclmfaq4d2p8f8lv7zg9ssnzku8j"
+                .parse::<IdentityAddress>()
+                .is_ok()
+        );
+    }
+
+    #[test]
+    fn display() {
         let a = IdentityAddress::try_from_bech32(
             "identity_rdx12tgzjrz9u0xz4l28vf04hz87eguclmfaq4d2p8f8lv7zg9ssnzku8j",
         )
@@ -132,12 +127,12 @@ mod tests {
     fn equality() {
         let i: IdentityAddress =
             "identity_rdx12gzxlgre0glhh9jxaptm7tdth8j4w4r8ykpg2xjfv45nghzsjzrvmp"
-                .try_into()
+                .parse()
                 .unwrap();
         assert_eq!(
             i,
             "identity_rdx12gzxlgre0glhh9jxaptm7tdth8j4w4r8ykpg2xjfv45nghzsjzrvmp"
-                .try_into()
+                .parse()
                 .unwrap()
         )
     }
@@ -146,11 +141,11 @@ mod tests {
     fn not_equal() {
         let i: IdentityAddress =
             "identity_rdx12gzxlgre0glhh9jxaptm7tdth8j4w4r8ykpg2xjfv45nghzsjzrvmp"
-                .try_into()
+                .parse()
                 .unwrap();
         let j: IdentityAddress =
             "identity_rdx12tgzjrz9u0xz4l28vf04hz87eguclmfaq4d2p8f8lv7zg9ssnzku8j"
-                .try_into()
+                .parse()
                 .unwrap();
         assert_ne!(i, j)
     }
@@ -183,10 +178,10 @@ mod tests {
     }
 
     #[test]
-    fn json_roundtrip() {
+    fn json_roundtrip_success() {
         let a: IdentityAddress =
             "identity_rdx12gzxlgre0glhh9jxaptm7tdth8j4w4r8ykpg2xjfv45nghzsjzrvmp"
-                .try_into()
+                .parse()
                 .unwrap();
 
         assert_json_value_eq_after_roundtrip(
@@ -198,5 +193,16 @@ mod tests {
             &a,
             json!("identity_rdx12tgzjrz9u0xz4l28vf04hz87eguclmfaq4d2p8f8lv7zg9ssnzku8j"),
         );
+    }
+
+    #[test]
+    fn json_roundtrip_fails_for_invalid() {
+        assert_json_value_fails::<IdentityAddress>(
+            json!("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+        );
+        assert_json_value_fails::<IdentityAddress>(
+            json!("identity_rdx12tgzjrz9u0xz4l28vf04hz87eguclmfaq4d2p8f8lv7zg9ssnzkuxx")
+        );
+        assert_json_value_fails::<IdentityAddress>(json!("super invalid"));
     }
 }

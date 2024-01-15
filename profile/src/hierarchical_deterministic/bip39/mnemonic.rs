@@ -1,6 +1,17 @@
 use crate::prelude::*;
 
-#[derive(Clone, PartialEq, Eq, Debug, Hash, uniffi::Record)]
+#[derive(
+    Clone,
+    PartialEq,
+    Eq,
+    Debug,
+    Hash,
+    SerializeDisplay,
+    DeserializeFromStr,
+    derive_more::Display,
+    uniffi::Record,
+)]
+#[display("{}", self.phrase())]
 pub struct Mnemonic {
     pub words: Vec<BIP39Word>,
     pub word_count: BIP39WordCount,
@@ -62,31 +73,11 @@ impl Mnemonic {
 
 pub type Seed = [u8; 64];
 
-impl Serialize for Mnemonic {
-    /// Serializes this `Mnemonic` into a phrase, all words separated by a space.
-    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_str(&self.phrase())
-    }
-}
+impl FromStr for Mnemonic {
+    type Err = CommonError;
 
-impl<'de> serde::Deserialize<'de> for Mnemonic {
-    /// Tries to deserializes a JSON string as a Mnemonic
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-        let s = String::deserialize(d)?;
-        Mnemonic::from_phrase(&s).map_err(de::Error::custom)
-    }
-}
-
-impl TryInto<Mnemonic> for &str {
-    type Error = crate::CommonError;
-
-    /// Tries to deserializes a bech32 address into an `AccountAddress`.
-    fn try_into(self) -> Result<Mnemonic, Self::Error> {
-        Mnemonic::from_phrase(self)
+    fn from_str(s: &str) -> Result<Self> {
+        Mnemonic::from_phrase(s)
     }
 }
 
@@ -122,7 +113,7 @@ mod tests {
     fn language() {
         let mnemonic: Mnemonic =
             "bright club bacon dinner achieve pull grid save ramp cereal blush woman humble limb repeat video sudden possible story mask neutral prize goose mandate"
-                .try_into()
+                .parse()
                 .unwrap();
         assert_eq!(mnemonic.language, BIP39Language::English);
         mnemonic
@@ -156,7 +147,7 @@ mod tests {
     #[test]
     fn words_index() {
         let zoo: Mnemonic = "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"
-            .try_into()
+            .parse()
             .unwrap();
         assert_eq!(zoo.words[0].index.clone().inner, 2047);
         assert_eq!(zoo.words[1].index.clone().inner, 2047);
@@ -164,7 +155,7 @@ mod tests {
         assert_eq!(zoo.words[11].index.clone().inner, 2037);
 
         let abandon: Mnemonic = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
-            .try_into()
+            .parse()
             .unwrap();
         assert_eq!(abandon.words[0].index.clone().inner, 0);
         assert_eq!(abandon.words[1].index.clone().inner, 0);
@@ -188,9 +179,9 @@ mod tests {
     }
 
     #[test]
-    fn json_roundtrip() {
+    fn json_roundtrip_success() {
         let a: Mnemonic = "bright club bacon dinner achieve pull grid save ramp cereal blush woman humble limb repeat video sudden possible story mask neutral prize goose mandate"
-            .try_into()
+            .parse()
             .unwrap();
 
         assert_json_value_eq_after_roundtrip(
@@ -202,5 +193,16 @@ mod tests {
             &a,
             json!("zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"),
         );
+    }
+
+    #[test]
+    fn json_fails() {
+        assert_json_value_fails::<Mnemonic>(json!("invalid"));
+        assert_json_value_fails::<Mnemonic>(
+            json!("zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo abandon")
+        ); // not checksummed
+        assert_json_value_fails::<Mnemonic>(
+            json!("hej jag zoo zoo zoo zoo zoo zoo zoo zoo zoo abandon")
+        ); // invalid words
     }
 }
