@@ -35,12 +35,11 @@ impl TryFrom<&HDPath> for GetIDPath {
 
     fn try_from(value: &HDPath) -> Result<Self> {
         let expected_depth = 3;
-        let (path, components) = HDPath::try_parse_base_hdpath(value, |v| {
-            CommonError::InvalidDepthOfCAP26Path {
+        let (path, components) =
+            HDPath::try_parse_base_hdpath(value, |v| CommonError::InvalidDepthOfCAP26Path {
                 expected: Self::PATH_DEPTH,
-                found: v.found,
-            }
-        })?;
+                found: v,
+            })?;
         if path.depth() != expected_depth {
             return Err(CommonError::InvalidDepthOfCAP26Path {
                 expected: expected_depth,
@@ -64,7 +63,7 @@ impl GetIDPath {
     pub fn from_str(s: &str) -> Result<Self> {
         let (path, _) = HDPath::try_parse_base(s, |v| CommonError::InvalidDepthOfCAP26Path {
             expected: Self::PATH_DEPTH,
-            found: v.found,
+            found: v,
         })?;
         return Self::try_from(&path);
     }

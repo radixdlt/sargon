@@ -27,12 +27,11 @@ impl TryFrom<&HDPath> for BIP44LikePath {
     type Error = CommonError;
 
     fn try_from(value: &HDPath) -> Result<Self> {
-        let (path, components) = HDPath::try_parse_base_hdpath(value, |v| {
-            CommonError::InvalidDepthOfBIP44Path {
+        let (path, components) =
+            HDPath::try_parse_base_hdpath(value, |v| CommonError::InvalidDepthOfBIP44Path {
                 expected: Self::PATH_DEPTH,
-                found: v.found,
-            }
-        })?;
+                found: v,
+            })?;
 
         BIP44LikePath::assert_depth_of(value)?;
         let account = &components[2];
@@ -56,7 +55,7 @@ impl BIP44LikePath {
     pub fn from_str(s: &str) -> Result<Self> {
         let (path, _) = HDPath::try_parse_base(s, |v| CommonError::InvalidDepthOfBIP44Path {
             expected: Self::PATH_DEPTH,
-            found: v.found,
+            found: v,
         })?;
         return Self::try_from(&path);
     }

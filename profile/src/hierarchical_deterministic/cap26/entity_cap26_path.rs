@@ -14,12 +14,11 @@ pub trait EntityCAP26Path: Derivation {
 
     #[cfg(not(tarpaulin_include))] // false negative, this is in fact heavily tested.
     fn try_from_hdpath(hdpath: &HDPath) -> Result<Self> {
-        let (path, components) = HDPath::try_parse_base_hdpath(hdpath, |v| {
-            CommonError::InvalidDepthOfCAP26Path {
+        let (path, components) =
+            HDPath::try_parse_base_hdpath(hdpath, |v| CommonError::InvalidDepthOfCAP26Path {
                 expected: ENTITY_PATH_DEPTH,
-                found: v.found,
-            }
-        })?;
+                found: v,
+            })?;
         if !components.clone().iter().all(|c| c.is_hardened()) {
             return Err(CommonError::NotAllComponentsAreHardened);
         }
@@ -69,7 +68,7 @@ pub trait EntityCAP26Path: Derivation {
     fn from_str(s: &str) -> Result<Self> {
         let (path, _) = HDPath::try_parse_base(s, |v| CommonError::InvalidDepthOfCAP26Path {
             expected: ENTITY_PATH_DEPTH,
-            found: v.found,
+            found: v,
         })?;
         Self::try_from_hdpath(&path)
     }

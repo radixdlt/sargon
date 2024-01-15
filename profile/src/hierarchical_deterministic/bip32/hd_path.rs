@@ -2,17 +2,6 @@ use crate::prelude::*;
 
 use slip10::path::BIP32Path;
 
-#[derive(Debug)]
-pub struct InvalidValue<T: std::fmt::Debug> {
-    pub expected: T,
-    pub found: T,
-}
-
-#[derive(Debug)]
-pub struct InvalidValueFound<T: std::fmt::Debug> {
-    pub found: T,
-}
-
 #[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record)]
 pub struct HDPath {
     pub components: Vec<HDPathComponent>,
@@ -109,13 +98,11 @@ impl HDPath {
         depth_error: F,
     ) -> Result<(HDPath, Vec<HDPathComponent>)>
     where
-        F: FnOnce(InvalidValueFound<usize>) -> CommonError,
+        F: FnOnce(usize) -> CommonError,
     {
         let expected_depth = 2;
         if path.depth() < expected_depth {
-            return Err(depth_error(InvalidValueFound {
-                found: path.depth(),
-            }));
+            return Err(depth_error(path.depth()));
         }
         let components = &path.components;
 
@@ -140,7 +127,7 @@ impl HDPath {
         depth_error: F,
     ) -> Result<(HDPath, Vec<HDPathComponent>)>
     where
-        F: FnOnce(InvalidValueFound<usize>) -> CommonError,
+        F: FnOnce(usize) -> CommonError,
     {
         let path = HDPath::from_str(s).map_err(|_| CommonError::InvalidBIP32Path(s.to_string()))?;
         return Self::try_parse_base_hdpath(&path, depth_error);
@@ -170,5 +157,12 @@ mod tests {
         assert_json_value_eq_after_roundtrip(&parsed, json!(str));
         assert_json_value_ne_after_roundtrip(&parsed, json!("m/44H/33H"));
         assert_json_value_fails::<HDPath>(json!("super invalid path"));
+    }
+
+    #[test]
+    fn display() {
+        let s = "m/44H/1022H";
+        let path = HDPath::from_str(s).unwrap();
+        assert_eq!(format!("{}", path), s);
     }
 }
