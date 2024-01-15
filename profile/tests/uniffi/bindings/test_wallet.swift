@@ -139,6 +139,7 @@ extension Wallet {
 		entropy: Data,
 		iPhoneName: String = Wallet.defaultIphoneName
 	) throws -> Wallet {
+		// Rust: `by_creating_new_profile_and_secrets_with_entropy`
 		try Wallet.byCreatingNewProfileAndSecretsWithEntropy(
 			entropy: entropy,
 			walletClientModel: .iphone,

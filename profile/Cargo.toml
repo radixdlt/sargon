@@ -27,7 +27,7 @@ enum-as-inner = { workspace = true }
 identified_vec = { workspace = true }
 schemars = { workspace = true }
 log = { workspace = true }
-env_logger = { workspace = true }
+pretty_env_logger = { workspace = true }
 uniffi = { workspace = true, features = ["cli"] }
 url = { git = "https://github.com/sajjon/rust-url", branch = "uniffi", features = [
     "serde",

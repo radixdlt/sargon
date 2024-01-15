@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use std::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
+use std::sync::{Once, RwLock, RwLockReadGuard, RwLockWriteGuard};
 
 pub type HeadersList = IdentifiedVecVia<Header>;
 impl Identifiable for Header {
@@ -18,51 +18,17 @@ pub struct Wallet {
 
 impl Wallet {
     /// Initializes logging
-    fn init_logging(&self) {
-        // env_logger::init();
-        // Hmm ^^ not needed? already initialized?
-        // env_logger::init should not be called after logger initialized: SetLoggerError(())
-    }
-}
-
-//========
-// CONSTRUCTOR
-//========
-#[uniffi::export]
-impl Wallet {
-    /// Creates a new Mnemonic from `entropy` (without BIP39 passphrase) and creates a new Profile,
-    /// saving both the Mnemonic and Profile into secure storage and returns a new Wallet.
-    #[uniffi::constructor]
-    pub fn by_creating_new_profile_and_secrets_with_entropy(
-        entropy: Vec<u8>,
-        wallet_client_model: WalletClientModel,
-        wallet_client_name: String,
-        secure_storage: Arc<dyn SecureStorage>,
-    ) -> Result<Self> {
-        let entropy_32bytes = Hex32Bytes::from_vec(entropy)?;
-        let private_hd_factor_source =
-            PrivateHierarchicalDeterministicFactorSource::new_with_entropy(
-                entropy_32bytes,
-                wallet_client_model,
-            );
-
-        let profile = Profile::new(
-            private_hd_factor_source.clone(),
-            wallet_client_name.as_str(),
-        );
-        let wallet = Self::by_importing_profile(profile, secure_storage);
-        wallet.wallet_client_storage.save(
-            SecureStorageKey::DeviceFactorSourceMnemonic {
-                factor_source_id: private_hd_factor_source.factor_source.id.clone(),
-            },
-            &private_hd_factor_source.mnemonic_with_passphrase,
-        )?;
-        Ok(wallet)
+    fn init_logging() {
+        static ONCE: Once = Once::new();
+        ONCE.call_once(|| {
+            pretty_env_logger::formatted_builder()
+                .filter_level(log::LevelFilter::Info)
+                .try_init()
+                .expect("Should be able to setup a logger.");
+        });
     }
 
-    /// Creates wallet by *importing* a Profile.
-    #[uniffi::constructor]
-    pub fn by_importing_profile(profile: Profile, secure_storage: Arc<dyn SecureStorage>) -> Self {
+    fn with_imported_profile(profile: Profile, secure_storage: Arc<dyn SecureStorage>) -> Self {
         // Init WalletClient's storage
         let wallet_client_storage = WalletClientStorage::new(secure_storage);
 
@@ -75,35 +41,9 @@ impl Wallet {
         // Save new profile (also sets activeProfileID)
         wallet.save_new_profile_or_panic(&profile);
 
-        // Init logging
-        wallet.init_logging();
         wallet
     }
 
-    #[uniffi::constructor]
-    pub fn by_loading_profile(secure_storage: Arc<dyn SecureStorage>) -> Result<Self> {
-        // Init WalletClient's storage
-        let wallet_client_storage = WalletClientStorage::new(secure_storage);
-
-        // Load active profile ID
-        let active_profile_id: ProfileID = wallet_client_storage.load_or(
-            SecureStorageKey::ActiveProfileID,
-            CommonError::NoActiveProfileIDSet,
-        )?;
-
-        Self::new_load_profile_with_id(active_profile_id, wallet_client_storage)
-    }
-
-    #[uniffi::constructor]
-    pub fn by_loading_profile_with_id(
-        profile_id: ProfileID,
-        secure_storage: Arc<dyn SecureStorage>,
-    ) -> Result<Self> {
-        Self::new_load_profile_with_id(profile_id, WalletClientStorage::new(secure_storage))
-    }
-}
-
-impl Wallet {
     fn new_load_profile_with_id(
         profile_id: ProfileID,
         wallet_client_storage: WalletClientStorage,
@@ -128,10 +68,93 @@ impl Wallet {
         // Set active profile ID
         wallet.save_active_profile_id(&profile_id)?;
 
-        // Init logging
-        wallet.init_logging();
-
         Ok(wallet)
+    }
+}
+
+//========
+// CONSTRUCTOR
+//========
+#[uniffi::export]
+impl Wallet {
+    /// Creates a new Mnemonic from `entropy` (without BIP39 passphrase) and creates a new Profile,
+    /// saving both the Mnemonic and Profile into secure storage and returns a new Wallet.
+    #[uniffi::constructor]
+    pub fn by_creating_new_profile_and_secrets_with_entropy(
+        entropy: Vec<u8>,
+        wallet_client_model: WalletClientModel,
+        wallet_client_name: String,
+        secure_storage: Arc<dyn SecureStorage>,
+    ) -> Result<Self> {
+        Wallet::init_logging();
+
+        log::info!("Instantiating Wallet by creating a new Profile from entropy (provided), for client: {}", wallet_client_model);
+
+        let entropy_32bytes = Hex32Bytes::from_vec(entropy)?;
+        let private_hd_factor_source =
+            PrivateHierarchicalDeterministicFactorSource::new_with_entropy(
+                entropy_32bytes,
+                wallet_client_model,
+            );
+
+        let profile = Profile::new(
+            private_hd_factor_source.clone(),
+            wallet_client_name.as_str(),
+        );
+        let wallet = Self::with_imported_profile(profile, secure_storage);
+        wallet.wallet_client_storage.save(
+            SecureStorageKey::DeviceFactorSourceMnemonic {
+                factor_source_id: private_hd_factor_source.factor_source.id.clone(),
+            },
+            &private_hd_factor_source.mnemonic_with_passphrase,
+        )?;
+        Ok(wallet)
+    }
+
+    /// Creates wallet by *importing* a Profile.
+    #[uniffi::constructor]
+    pub fn by_importing_profile(profile: Profile, secure_storage: Arc<dyn SecureStorage>) -> Self {
+        Wallet::init_logging();
+
+        log::info!(
+            "Instantiating Wallet by importing a Profile with ID: {}",
+            profile.id()
+        );
+
+        Self::with_imported_profile(profile, secure_storage)
+    }
+
+    #[uniffi::constructor]
+    pub fn by_loading_profile(secure_storage: Arc<dyn SecureStorage>) -> Result<Self> {
+        Wallet::init_logging();
+
+        log::info!("Instantiating Wallet by loading the active Profile from storage");
+
+        // Init WalletClient's storage
+        let wallet_client_storage = WalletClientStorage::new(secure_storage);
+
+        // Load active profile ID
+        let active_profile_id: ProfileID = wallet_client_storage.load_or(
+            SecureStorageKey::ActiveProfileID,
+            CommonError::NoActiveProfileIDSet,
+        )?;
+
+        Self::new_load_profile_with_id(active_profile_id, wallet_client_storage)
+    }
+
+    #[uniffi::constructor]
+    pub fn by_loading_profile_with_id(
+        profile_id: ProfileID,
+        secure_storage: Arc<dyn SecureStorage>,
+    ) -> Result<Self> {
+        Wallet::init_logging();
+
+        log::info!(
+            "Instantiating Wallet by loading the Profile with ID {} from storage",
+            profile_id
+        );
+
+        Self::new_load_profile_with_id(profile_id, WalletClientStorage::new(secure_storage))
     }
 }
 
