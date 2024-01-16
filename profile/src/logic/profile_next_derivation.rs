@@ -83,3 +83,30 @@ impl Profile {
         return index as HDPathValue;
     }
 }
+
+#[cfg(test)]
+mod tests {
+
+    use crate::prelude::*;
+
+    #[test]
+    fn factor_source_by_id_success_device() {
+        let profile = Profile::placeholder();
+        let dfs = DeviceFactorSource::placeholder_babylon();
+        assert_eq!(
+            profile.factor_source_by_id::<DeviceFactorSource>(&dfs.factor_source_id()),
+            Ok(dfs)
+        );
+    }
+
+    #[test]
+    fn factor_source_by_id_success_ledger() {
+        let profile = Profile::placeholder();
+        let lfs = LedgerHardwareWalletFactorSource::placeholder();
+        assert_eq!(
+            profile
+                .factor_source_by_id::<LedgerHardwareWalletFactorSource>(&lfs.factor_source_id()),
+            Ok(lfs)
+        );
+    }
+}
