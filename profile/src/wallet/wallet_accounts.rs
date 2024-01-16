@@ -1,52 +1,21 @@
-use log::LevelFilter;
-
 use crate::prelude::*;
 
-trait SafeToLog {
-    fn non_sensitive(&self) -> impl std::fmt::Debug;
-}
-impl SafeToLog for PrivateHierarchicalDeterministicFactorSource {
-    fn non_sensitive(&self) -> impl std::fmt::Debug {
-        format!(
-            "{} {}",
-            self.factor_source.hint.mnemonic_word_count, self.factor_source.id
-        )
-    }
-}
-
-trait LoggedResult<T: SafeToLog>: Sized {
-    fn log_lvl_formatted<F>(self, level: log::Level, format: F) -> Self
-    where
-        F: FnOnce(&T) -> String;
-
-    fn log_lvl(self, level: log::Level, prefix: impl AsRef<str>) -> Self {
-        self.log_lvl_formatted(level, |f| {
-            format!("{} - {:?}", prefix.as_ref(), f.non_sensitive())
-        })
-    }
-    fn log_info(self, prefix: impl AsRef<str>) -> Self {
-        self.log_lvl(log::Level::Info, prefix)
-    }
-}
-impl<T: SafeToLog> LoggedResult<T> for Result<T> {
-    fn log_lvl_formatted<F>(self, level: log::Level, format: F) -> Self
-    where
-        F: FnOnce(&T) -> String,
-    {
-        self.inspect(|x| log::log!(level, "{}", format(&x)))
-    }
-}
-
 impl Wallet {
-    /// Saves a device factor source to Profile and SecureStorage, this method MUST NOT
-    /// return Ok() if any of the writes failed, i.e. if Ok is returned, then mnemonic
-    /// will be present in SecureStorage and the DeviceFactorSource present in Profile.
+    /// Adds a device factor source to Profile and SecureStorage, this method will only
+    /// return `Ok` if both the mnemonic was successfully saved to SecureStorage and the
+    /// DeviceFactorSource present in Profile and Profile also successfully updated in
+    /// SecureStorage.
     ///
-    /// Throws if it is already present in Profile. It is Wallet Client
+    /// Returns `Err` if it is already present in Profile. It is Wallet Client
     /// dependent if it throws if already present in SecureStorage.
     ///
+    /// If saving of `MnemonicWithPassphrase` to SecureStorage succeeds, but adding
+    /// `DeviceFactorSource` to Profile/saving of Profile to SecureStorage fails, then
+    /// this method will try to remove the newly saved `MnemonicWithPassphrase` from
+    /// `SecureStorage`.
+    ///
     /// Takes ownership of `PrivateHierarchicalDeterministicFactorSource`
-    pub fn save_private_device_factor_source(
+    pub fn add_private_device_factor_source(
         &self,
         private_device_factor_source: PrivateHierarchicalDeterministicFactorSource,
     ) -> Result<()> {
@@ -62,7 +31,7 @@ impl Wallet {
             &id,
         )?;
 
-        self.save_factor_source(private_device_factor_source.factor_source.into())
+        self.add_factor_source(private_device_factor_source.factor_source.into())
             .map_err(|e| {
                 error!(
                     "Failed to Private DeviceFactorSource to SecureStorage, factor source id: {}",
@@ -73,7 +42,15 @@ impl Wallet {
             })
     }
 
-    pub fn save_factor_source(&self, factor_source: FactorSource) -> Result<()> {
+    /// Adds `factor_source` to Profile and takes a snapshot of Profile and
+    /// updates it in SecureStorage.
+    ///
+    /// Returns `Err` if `factor_source` is already present in factor source,
+    /// or if saving to SecureStorage fails.
+    ///
+    /// If only saving to SecureStorage fails, the Profile still remains
+    /// edited.
+    pub fn add_factor_source(&self, factor_source: FactorSource) -> Result<()> {
         self.try_write(|mut p| {
             if p.factor_sources.append(factor_source.to_owned()).0 {
                 Err(CommonError::Unknown)
@@ -86,6 +63,15 @@ impl Wallet {
         )
     }
 
+    /// Loads a `MnemonicWithPassphrase` with the `id` of `device_factor_source`,
+    /// from SecureStorage, and returns a `PrivateHierarchicalDeterministicFactorSource`
+    /// built from both.
+    ///
+    /// Useful for when you will want to sign transactions or derive public keys for
+    /// creation of new entities.
+    ///
+    /// Returns `Err` if loading or decoding of `MnemonicWithPassphrase` from
+    /// SecureStorage fails.
     pub fn load_private_device_factor_source(
         &self,
         device_factor_source: &DeviceFactorSource,
@@ -102,6 +88,15 @@ impl Wallet {
             .log_info("Successfully loaded Private DeviceFactorSource from SecureStorage")
     }
 
+    /// Loads a `MnemonicWithPassphrase` with the `id` of `device_factor_source`,
+    /// from SecureStorage, and returns a `PrivateHierarchicalDeterministicFactorSource`
+    /// built from both.
+    ///
+    /// Useful for when you will want to sign transactions or derive public keys for
+    /// creation of new entities.
+    ///
+    /// Returns `Err` if loading or decoding of `MnemonicWithPassphrase` from
+    /// SecureStorage fails.
     pub fn load_private_device_factor_source_by_id(
         &self,
         id: &FactorSourceIDFromHash,
@@ -116,8 +111,10 @@ impl Wallet {
 //========
 #[uniffi::export]
 impl Wallet {
-    /// Creates a new non securified account **WITHOUT** saving it, using the `main` "Babylon" `DeviceFactorSource` and the "next" index for this FactorSource
-    /// as derivation path.
+    /// Creates a new non securified account **WITHOUT** add it to Profile, using the *main* "Babylon"
+    /// `DeviceFactorSource` and the "next" index for this FactorSource as derivation path.
+    ///
+    /// If you want to add it to Profile, call `wallet.add_account(account)`
     pub fn create_new_account(&self, network_id: NetworkID, name: DisplayName) -> Result<Account> {
         let profile = &self.profile();
         let bdfs = profile.bdfs();
@@ -140,9 +137,9 @@ impl Wallet {
         Ok(account)
     }
 
-    /// Returns `Ok(())` if the `account` was new and successfully saved. If saving failed or if the account was already present in Profile, an
-    /// error is thrown (strict).
-    pub fn save_new_account(&self, account: Account) -> Result<()> {
+    /// Returns `Ok(())` if the `account` was new and successfully added. If saving failed or if the account was already present in Profile, an
+    /// error is returned.
+    pub fn add_account(&self, account: Account) -> Result<()> {
         // TODO: clean this up, BAD code. messy, mostly because of (my) bad IdentifiedVec API.
         let network_id = account.network_id.clone();
         let err_exists = CommonError::AccountAlreadyPresent(account.id().clone());
@@ -166,14 +163,14 @@ impl Wallet {
         })
     }
 
-    /// Create a new Account and saves it into the active Profile.
-    pub fn create_and_save_new_account(
+    /// Create a new Account and adds it to the active Profile.
+    pub fn create_new_account_and_add_it_to_profile(
         &self,
         network_id: NetworkID,
         name: DisplayName,
     ) -> Result<Account> {
         let account = self.create_new_account(network_id, name)?;
-        self.save_new_account(account.clone())?;
+        self.add_account(account.clone())?;
         Ok(account)
     }
 

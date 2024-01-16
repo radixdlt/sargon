@@ -248,7 +248,7 @@ pub enum CommonError {
     #[error("FactorSource with ID not found in Profile: {0:?}")]
     ProfileDoesNotContainFactorSourceWithID(FactorSourceID) = 10073,
 
-    #[error("No active ProfileID found in secure storage.")]
+    #[error("No active ProfileID found in SecureStorage.")]
     NoActiveProfileIDSet = 10074,
 
     #[error("No Profile snapshot found for ProfileID {0}")]
@@ -260,9 +260,12 @@ pub enum CommonError {
     #[error("Unable to acquire write lock for Profile inside Wallet")]
     UnableToAcquireWriteLockForProfile = 10077,
 
-    #[error("Failed save Mnemonic to secure storage with FactorSourceID: {0}")]
+    #[error("Failed save Mnemonic to SecureStorage with FactorSourceID: {0}")]
     UnableToSaveMnemonicToSecureStorage(FactorSourceIDFromHash) = 10078,
 
-    #[error("Failed save Mnemonic to secure storage, FactorSourceID: {0}")]
-    UnableToSaveFactorSourceToProfile(FactorSourceID) = 10079,
+    #[error("Failed load Mnemonic from SecureStorage with FactorSourceID: {0}")]
+    UnableToLoadMnemonicFromSecureStorage(FactorSourceIDFromHash) = 10079,
+
+    #[error("Failed save FactorSource to SecureStorage, FactorSourceID: {0}")]
+    UnableToSaveFactorSourceToProfile(FactorSourceID) = 10080,
 }

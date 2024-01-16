@@ -1,15 +1,51 @@
 use crate::prelude::*;
 
+/// An abstraction of an implementing WalletClients's secure storage, used by `Wallet` to
+/// save and load models, most prominently `Profile` and `MnemonicWithPassphrase`.
+///
+/// It uses the lower level CRUD trait `SecureStorage` which works on bytes (Vec<u8>),
+/// by instead working with JSON.
+///
+/// The typical usage is that `Wallet` uses this to build even higher level API's that work
+/// with application level types such as `PrivateHierarchicalDeterministicFactorSource`, which
+/// apart from `MnemonicWithPassphrase` read from SecureStorage using this `WalletClientStorage`,
+/// also has to load the DeviceFactorSource from Profile, given a FactorSourceID only.
 #[derive(Debug)]
 pub struct WalletClientStorage {
+    /// Low level CRUD traits injected from implementing Wallet Client, that works on bytes.
     interface: Arc<dyn SecureStorage>,
 }
+
 impl WalletClientStorage {
+    /// Creates a new WalletClientStorage using an implementation of
+    /// `SecureStorage`.
     pub(crate) fn new(interface: Arc<dyn SecureStorage>) -> Self {
         Self { interface }
     }
 }
+
+//======
+// Save T
+//======
 impl WalletClientStorage {
+    pub fn save<T>(&self, key: SecureStorageKey, value: &T) -> Result<()>
+    where
+        T: serde::Serialize,
+    {
+        serde_json::to_vec(value)
+            .map_err(|_| CommonError::FailedToSerializeToJSON)
+            .and_then(|j| self.interface.save_data(key, j))
+    }
+}
+
+//======
+// Load T
+//======
+impl WalletClientStorage {
+    /// Loads bytes from SecureStorage and deserializes them into `T`.
+    ///
+    /// Returns `Ok(None)` if no bytes were found, returns Err if failed
+    /// to load bytes or failed to deserialize the JSON into a `T`.
     pub fn load<T>(&self, key: SecureStorageKey) -> Result<Option<T>>
     where
         T: for<'a> serde::Deserialize<'a>,
@@ -25,8 +61,10 @@ impl WalletClientStorage {
         })
     }
 
-    /// Like `load` but returns `Result<T>` instead of `Result<Option<T>>` and throws the provided error if
-    /// the value was `None`.
+    /// Loads bytes from SecureStorage and deserializes them into `T`.
+    ///
+    /// Returns Err if failed to load bytes or failed to deserialize the JSON into a `T`,
+    /// unlike `load` this method returns an error if `None` bytes were found.
     pub fn load_or<T>(&self, key: SecureStorageKey, err: CommonError) -> Result<T>
     where
         T: for<'a> serde::Deserialize<'a>,
@@ -34,7 +72,10 @@ impl WalletClientStorage {
         self.load(key).and_then(|o| o.ok_or(err))
     }
 
-    /// Like `load` but returns `T` instead of `Result<Option<T>>` and defaults to `default`, if `load` returned `Ok(None)` or `Err`.
+    /// Loads bytes from SecureStorage and deserializes them into `T`.
+    ///
+    /// Returns Err if failed to load bytes or failed to deserialize the JSON into a `T`,
+    /// unlike `load` this method returns `default` if `None` bytes were found.
     pub fn load_unwrap_or<T>(&self, key: SecureStorageKey, default: T) -> T
     where
         T: for<'a> serde::Deserialize<'a> + Clone,
@@ -43,23 +84,13 @@ impl WalletClientStorage {
             .map(|o| o.unwrap_or(default.clone()))
             .unwrap_or(default)
     }
+}
 
-    pub fn load_headers_list_or_empty(&self) -> HeadersList {
-        self.load_unwrap_or(SecureStorageKey::SnapshotHeadersList, HeadersList::new())
-    }
-
-    pub fn load_mnemonic_with_passphrase(
-        &self,
-        id: &FactorSourceIDFromHash,
-    ) -> Result<MnemonicWithPassphrase> {
-        self.load_or(
-            SecureStorageKey::DeviceFactorSourceMnemonic {
-                factor_source_id: id.clone(),
-            },
-            CommonError::UnableToLoadDeviceFactorSourceFromSecureStorage,
-        )
-    }
-
+//======
+// Mnemonic CR(U)D
+//======
+impl WalletClientStorage {
+    /// Saves a MnemonicWithPassphrase under a given `FactorSourceIDFromHash`
     pub fn save_mnemonic_with_passphrase(
         &self,
         mnemonic_with_passphrase: &MnemonicWithPassphrase,
@@ -74,19 +105,24 @@ impl WalletClientStorage {
         .map_err(|_| CommonError::UnableToSaveMnemonicToSecureStorage(id.clone()))
     }
 
+    /// Loads a MnemonicWithPassphrase with a `FactorSourceIDFromHash`
+    pub fn load_mnemonic_with_passphrase(
+        &self,
+        id: &FactorSourceIDFromHash,
+    ) -> Result<MnemonicWithPassphrase> {
+        self.load_or(
+            SecureStorageKey::DeviceFactorSourceMnemonic {
+                factor_source_id: id.clone(),
+            },
+            CommonError::UnableToLoadMnemonicFromSecureStorage(id.clone()),
+        )
+    }
+
+    /// Deletes a MnemonicWithPassphrase with a `FactorSourceIDFromHash`
     pub fn delete_mnemonic(&self, id: &FactorSourceIDFromHash) -> Result<()> {
         self.interface
             .delete_data_for_key(SecureStorageKey::DeviceFactorSourceMnemonic {
                 factor_source_id: id.clone(),
             })
-    }
-
-    pub fn save<T>(&self, key: SecureStorageKey, value: &T) -> Result<()>
-    where
-        T: serde::Serialize,
-    {
-        serde_json::to_vec(value)
-            .map_err(|_| CommonError::FailedToSerializeToJSON)
-            .and_then(|j| self.interface.save_data(key, j))
     }
 }

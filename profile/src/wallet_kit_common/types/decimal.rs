@@ -39,7 +39,6 @@ impl Decimal {
 }
 
 impl Serialize for Decimal {
-    /// Serializes this `HDPath` into its bech32 address string as JSON.
     fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
     where
         S: Serializer,
@@ -50,7 +49,6 @@ impl Serialize for Decimal {
 }
 
 impl<'de> Deserialize<'de> for Decimal {
-    /// Tries to deserializes a JSON string as a bech32 address into an `HDPath`.
     #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Decimal, D::Error> {
         use std::ops::Deref;

@@ -103,6 +103,16 @@ impl HasPlaceholder for PrivateHierarchicalDeterministicFactorSource {
     }
 }
 
+impl SafeToLog for PrivateHierarchicalDeterministicFactorSource {
+    /// Logs the word count and FactorSourceID o
+    fn non_sensitive(&self) -> impl std::fmt::Debug {
+        format!(
+            "{} {}",
+            self.factor_source.hint.mnemonic_word_count, self.factor_source.id
+        )
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
