@@ -63,14 +63,7 @@ pub enum FactorSourceKind {
 
 impl FactorSourceKind {
     pub fn discriminant(&self) -> String {
-        use FactorSourceKind::*;
-        match self {
-            Device => "device".to_string(),
-            LedgerHQHardwareWallet => "ledgerHQHardwareWallet".to_string(),
-            OffDeviceMnemonic => "offDeviceMnemonic".to_string(),
-            TrustedContact => "trustedContact".to_string(),
-            SecurityQuestions => "securityQuestions".to_string(),
-        }
+        serde_json::to_string(self).expect("Should always be able to JSON encode FactorSourceKind.")
     }
 }
 

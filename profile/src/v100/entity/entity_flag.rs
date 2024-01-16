@@ -15,25 +15,13 @@ use crate::prelude::*;
     PartialOrd,
     Ord,
     enum_iterator::Sequence,
+    derive_more::Display,
     uniffi::Enum,
 )]
 #[serde(rename_all = "camelCase")]
 pub enum EntityFlag {
     /// The entity is marked as deleted by user. Entity should still be kept in Profile
     DeletedByUser,
-}
-
-impl EntityFlag {
-    /// Human readable form of the flag
-    pub fn discriminant(&self) -> String {
-        format!("{}", self)
-    }
-}
-
-impl std::fmt::Display for EntityFlag {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self)
-    }
 }
 
 #[cfg(test)]
@@ -49,8 +37,10 @@ mod tests {
     #[test]
     fn display() {
         assert_eq!(format!("{}", EntityFlag::DeletedByUser), "DeletedByUser");
+    }
 
-        // `discriminant` uses Display
-        assert_eq!(EntityFlag::DeletedByUser.discriminant(), "DeletedByUser");
+    #[test]
+    fn debug() {
+        assert_eq!(format!("{:?}", EntityFlag::DeletedByUser), "DeletedByUser");
     }
 }

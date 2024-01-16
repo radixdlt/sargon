@@ -115,7 +115,6 @@ impl std::fmt::Display for NetworkID {
 
 impl NetworkID {
     /// Looks up a `NetworkDefinition` in a lookup table.
-
     pub fn network_definition(&self) -> NetworkDefinition {
         use NetworkID::*;
         match self {

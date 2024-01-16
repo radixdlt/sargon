@@ -5,8 +5,24 @@ use radix_engine_common::crypto::Hash;
 /// A client the user have connected P2P with, typically a
 /// WebRTC connections with a DApp, but might be Android or iPhone
 /// client as well.
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Ord, PartialOrd, Hash, uniffi::Record)]
+#[derive(
+    Serialize,
+    Deserialize,
+    Clone,
+    PartialEq,
+    Eq,
+    Ord,
+    PartialOrd,
+    Hash,
+    derive_more::Debug,
+    derive_more::Display,
+    uniffi::Record,
+)]
 #[serde(rename_all = "camelCase")]
+#[debug(
+    "P2PLink {{ display_name: '{display_name}', connection_password: '{connection_password}' }}"
+)]
+#[display("{}", self.to_obfuscated_string())]
 pub struct P2PLink {
     /// The most important property of this struct, the `ConnectionPassword`,
     /// is used to be able to re-establish the P2P connection and also acts as the seed
@@ -15,6 +31,12 @@ pub struct P2PLink {
 
     /// Client name, e.g. "Chrome on Macbook" or "My work Android" or "My wifes iPhone SE".
     pub display_name: String,
+}
+
+impl SafeToLog for P2PLink {
+    fn non_sensitive(&self) -> impl std::fmt::Debug {
+        self.to_obfuscated_string()
+    }
 }
 
 impl P2PLink {
@@ -26,12 +48,11 @@ impl P2PLink {
     }
 }
 
-impl std::fmt::Debug for P2PLink {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "P2PLink {{ display_name: '{}', connection_password: '{:?}' }}",
-            self.display_name, self.connection_password,
+impl P2PLink {
+    pub fn to_obfuscated_string(&self) -> String {
+        format!(
+            "P2PLink( name: '{}', password: <OMITTED>)",
+            self.display_name
         )
     }
 }
@@ -146,5 +167,22 @@ mod tests {
     #[test]
     fn debug() {
         assert_eq!(format!("{:?}", P2PLink::placeholder()), "P2PLink { display_name: 'Chrome on Macbook', connection_password: 'cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe' }");
+    }
+
+    #[test]
+    fn display() {
+        assert_eq!(
+            format!("{}", P2PLink::placeholder()),
+            "P2PLink( name: 'Chrome on Macbook', password: <OMITTED>)"
+        );
+    }
+
+    #[test]
+    fn safe_to_log() {
+        let sut = P2PLink::placeholder();
+        assert_eq!(
+            format!("{:?}", sut.to_string()),
+            format!("{:?}", sut.non_sensitive())
+        );
     }
 }

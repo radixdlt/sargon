@@ -14,6 +14,7 @@ use crate::prelude::*;
     PartialOrd,
     Ord,
     enum_iterator::Sequence,
+    derive_more::Display,
     uniffi::Enum,
 )]
 #[serde(rename_all = "camelCase")]
@@ -22,18 +23,6 @@ pub enum DepositAddressExceptionRule {
     Allow,
     /// A resource can never be deposited in to the account by third-parties
     Deny,
-}
-
-impl DepositAddressExceptionRule {
-    pub fn discriminant(&self) -> String {
-        format!("{}", self)
-    }
-}
-
-impl std::fmt::Display for DepositAddressExceptionRule {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self)
-    }
 }
 
 #[cfg(test)]
@@ -49,8 +38,12 @@ mod tests {
     #[test]
     fn display() {
         assert_eq!(format!("{}", DepositAddressExceptionRule::Deny), "Deny");
+        assert_eq!(format!("{}", DepositAddressExceptionRule::Allow), "Allow");
+    }
 
-        // `discriminant` uses Display
-        assert_eq!(DepositAddressExceptionRule::Allow.discriminant(), "Allow");
+    #[test]
+    fn debug() {
+        assert_eq!(format!("{:?}", DepositAddressExceptionRule::Deny), "Deny");
+        assert_eq!(format!("{:?}", DepositAddressExceptionRule::Allow), "Allow");
     }
 }

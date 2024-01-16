@@ -14,6 +14,7 @@ use crate::prelude::*;
     PartialOrd,
     Ord,
     enum_iterator::Sequence,
+    derive_more::Display,
     uniffi::Enum,
 )]
 #[serde(rename_all = "camelCase")]
@@ -30,19 +31,6 @@ impl Default for DepositRule {
     /// By default an account accepts all.
     fn default() -> Self {
         Self::AcceptAll
-    }
-}
-
-impl DepositRule {
-    /// Human readable representation of the rule.
-    pub fn discriminant(&self) -> String {
-        format!("{}", self)
-    }
-}
-
-impl std::fmt::Display for DepositRule {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self)
     }
 }
 
@@ -67,8 +55,13 @@ mod tests {
     fn display() {
         assert_eq!(format!("{}", DepositRule::AcceptAll), "AcceptAll");
         assert_eq!(format!("{}", DepositRule::AcceptKnown), "AcceptKnown");
+        assert_eq!(format!("{}", DepositRule::DenyAll), "DenyAll");
+    }
 
-        // `discriminant` uses Display
-        assert_eq!(DepositRule::DenyAll.discriminant(), "DenyAll");
+    #[test]
+    fn debug() {
+        assert_eq!(format!("{:?}", DepositRule::AcceptAll), "AcceptAll");
+        assert_eq!(format!("{:?}", DepositRule::AcceptKnown), "AcceptKnown");
+        assert_eq!(format!("{:?}", DepositRule::DenyAll), "DenyAll");
     }
 }
