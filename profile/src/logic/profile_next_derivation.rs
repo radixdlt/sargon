@@ -134,4 +134,24 @@ mod tests {
             Err(CommonError::ProfileDoesNotContainFactorSourceWithID(lfs.factor_source_id()))
         );
     }
+
+    #[test]
+    fn device_factor_source_by_id_success_device() {
+        let profile = Profile::placeholder();
+        let dfs = DeviceFactorSource::placeholder_babylon();
+        assert_eq!(profile.device_factor_source_by_id(&dfs.id), Ok(dfs));
+    }
+
+    #[test]
+    fn device_factor_source_by_id_fail_unknown_id() {
+        let profile = Profile::placeholder();
+
+        let id =
+            FactorSourceIDFromHash::new_for_device(MnemonicWithPassphrase::placeholder_other());
+
+        assert_eq!(
+            profile.device_factor_source_by_id(&id),
+            Err(CommonError::ProfileDoesNotContainFactorSourceWithID(id.into()))
+        );
+    }
 }
