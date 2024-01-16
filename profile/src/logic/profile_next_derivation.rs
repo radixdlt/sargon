@@ -54,10 +54,11 @@ impl Profile {
         return explicit_main.unwrap_or(implicit_main).clone();
     }
 
-    pub fn next_derivation_index_for_entity(
+    fn next_derivation_index_for_entity_for_factor_source(
         &self,
         kind: EntityKind,
         network_id: NetworkID,
+        factor_source_id: FactorSourceIDFromHash,
     ) -> HDPathValue {
         match kind {
             EntityKind::Persona => panic!("Personas are not supported yet"),
@@ -72,7 +73,7 @@ impl Profile {
                     .into_iter()
                     .filter(|a| match &a.security_state {
                         EntitySecurityState::Unsecured { value } => {
-                            value.transaction_signing.factor_source_id == self.bdfs().id
+                            value.transaction_signing.factor_source_id == factor_source_id
                         }
                     })
                     .collect_vec()
@@ -80,7 +81,15 @@ impl Profile {
             })
             .unwrap_or(0);
 
-        return index as HDPathValue;
+        index as u32
+    }
+
+    pub fn next_derivation_index_for_entity(
+        &self,
+        kind: EntityKind,
+        network_id: NetworkID,
+    ) -> HDPathValue {
+        self.next_derivation_index_for_entity_for_factor_source(kind, network_id, self.bdfs().id)
     }
 }
 
@@ -153,5 +162,113 @@ mod tests {
             profile.device_factor_source_by_id(&id),
             Err(CommonError::ProfileDoesNotContainFactorSourceWithID(id.into()))
         );
+    }
+
+    #[test]
+    fn bdfs_success_without_explicit_main_flag() {
+        let profile = Profile::placeholder_no_factor_source_explicitly_marked_as_main();
+        assert_eq!(profile.bdfs().id, DeviceFactorSource::placeholder().id);
+    }
+
+    #[test]
+    fn bdfs_success_with_explicit_main_flag() {
+        let profile = Profile::placeholder();
+        assert_eq!(profile.bdfs().id, DeviceFactorSource::placeholder().id);
+    }
+
+    #[test]
+    #[should_panic(expected = "A Profile should always contain Babylon DeviceFactorSource")]
+    fn bdfs_fail_for_invalid_profile_without_device_factor_source() {
+        let profile = Profile::placeholder_no_device_factor_source();
+        _ = profile.bdfs();
+    }
+
+    #[test]
+    #[should_panic(expected = "A Profile should always contain Babylon DeviceFactorSource")]
+    fn bdfs_fail_for_invalid_profile_without_babylon_device_factor_source() {
+        let profile = Profile::placeholder_no_babylon_device_factor_source();
+        _ = profile.bdfs();
+    }
+
+    #[test]
+    fn next_derivation_index_for_entity_account_bdfs_mainnet() {
+        let profile = Profile::placeholder();
+        assert_eq!(
+            profile.next_derivation_index_for_entity(EntityKind::Accounts, NetworkID::Mainnet),
+            2
+        );
+    }
+
+    #[test]
+    fn next_derivation_index_for_entity_account_bdfs_stokenet() {
+        let profile = Profile::placeholder();
+        assert_eq!(
+            profile.next_derivation_index_for_entity(EntityKind::Accounts, NetworkID::Stokenet),
+            2
+        );
+    }
+
+    #[test]
+    fn next_derivation_index_for_entity_account_olympia_dfs_mainnet() {
+        let profile = Profile::placeholder();
+        assert_eq!(
+            profile.next_derivation_index_for_entity_for_factor_source(
+                EntityKind::Accounts,
+                NetworkID::Mainnet,
+                DeviceFactorSource::placeholder_olympia().id
+            ),
+            0
+        );
+    }
+}
+
+impl Profile {
+    pub fn placeholder_no_device_factor_source() -> Self {
+        let networks = Networks::placeholder();
+        let mut header = Header::placeholder();
+        header.content_hint = networks.content_hint();
+        Self::with(
+            header,
+            FactorSources::from_iter([FactorSource::placeholder_ledger()]),
+            AppPreferences::placeholder(),
+            networks,
+        )
+    }
+
+    pub fn placeholder_no_babylon_device_factor_source() -> Self {
+        let networks = Networks::placeholder();
+        let mut header = Header::placeholder();
+        header.content_hint = networks.content_hint();
+        Self::with(
+            header,
+            FactorSources::from_iter([DeviceFactorSource::placeholder_olympia().into()]),
+            AppPreferences::placeholder(),
+            networks,
+        )
+    }
+
+    pub fn placeholder_no_factor_source_explicitly_marked_as_main() -> Self {
+        let mut profile = Profile::placeholder();
+
+        let main_factors = profile
+            .factor_sources
+            .iter()
+            .filter_map(|f| f.as_device().cloned())
+            .filter(|df| df.common.flags.contains(&FactorSourceFlag::Main))
+            .map(|f| f.factor_source_id())
+            .collect_vec();
+
+        main_factors.iter().for_each(|id| {
+            _ = profile.factor_sources.update_with(id, |f| {
+                _ = f
+                    .as_device_mut()
+                    .unwrap()
+                    .common
+                    .flags
+                    .remove(&FactorSourceFlag::Main)
+            })
+        });
+
+        profile
     }
 }

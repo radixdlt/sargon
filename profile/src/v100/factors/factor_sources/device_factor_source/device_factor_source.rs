@@ -108,7 +108,7 @@ impl DeviceFactorSource {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_olympia() -> Self {
         Self::new(
-            FactorSourceIDFromHash::placeholder(),
+            FactorSourceIDFromHash::placeholder_other(),
             FactorSourceCommon::placeholder_olympia(),
             DeviceFactorSourceHint::placeholder(),
         )
