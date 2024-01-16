@@ -13,6 +13,7 @@ use crate::prelude::*;
     Hash,
     PartialOrd,
     Ord,
+    derive_more::Display,
     uniffi::Enum,
 )]
 #[repr(u32)]
@@ -28,12 +29,6 @@ pub enum CAP26KeyKind {
     /// For a key to be used for encrypting messages.
     /// The value is the ascii sum of `"MESSAGE_ENCRYPTION"`
     MessageEncryption = 1391,
-}
-
-impl std::fmt::Display for CAP26KeyKind {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self)
-    }
 }
 
 impl CAP26KeyKind {
@@ -56,7 +51,7 @@ mod tests {
     }
 
     #[test]
-    fn format() {
+    fn display() {
         assert_eq!(
             format!("{}", CAP26KeyKind::TransactionSigning),
             "TransactionSigning"
@@ -67,6 +62,22 @@ mod tests {
         );
         assert_eq!(
             format!("{}", CAP26KeyKind::MessageEncryption),
+            "MessageEncryption"
+        );
+    }
+
+    #[test]
+    fn debug() {
+        assert_eq!(
+            format!("{:?}", CAP26KeyKind::TransactionSigning),
+            "TransactionSigning"
+        );
+        assert_eq!(
+            format!("{:?}", CAP26KeyKind::AuthenticationSigning),
+            "AuthenticationSigning"
+        );
+        assert_eq!(
+            format!("{:?}", CAP26KeyKind::MessageEncryption),
             "MessageEncryption"
         );
     }

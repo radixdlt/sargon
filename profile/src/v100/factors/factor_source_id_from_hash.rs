@@ -16,8 +16,8 @@ use radix_engine_common::crypto::{blake2b_256_hash, Hash};
     derive_more::Debug,
     uniffi::Record,
 )]
-#[display("{}:{}", self.kind.discriminant(), self.body.to_string())]
-#[debug("{}:{}", self.kind.discriminant(), self.body.to_string())]
+#[display("{}", self.to_canonical_string())]
+#[debug("{}", self.to_canonical_string())]
 pub struct FactorSourceIDFromHash {
     /// The kind of the FactorSource this ID refers to, typically `device` or `ledger`.
     pub kind: FactorSourceKind,
@@ -48,6 +48,12 @@ impl FactorSourceIDFromHash {
 
     pub fn new_for_device(mnemonic_with_passphrase: MnemonicWithPassphrase) -> Self {
         Self::from_mnemonic_with_passphrase(FactorSourceKind::Device, mnemonic_with_passphrase)
+    }
+}
+
+impl FactorSourceIDFromHash {
+    pub fn to_canonical_string(&self) -> String {
+        format!("{}:{}", self.kind.discriminant(), self.body.to_string())
     }
 }
 

@@ -1,9 +1,22 @@
 use crate::prelude::*;
 
 /// A derivation path on either supported schemes, either Babylon (CAP26) or Olympia (BIP44Like).
-#[derive(Clone, PartialEq, Eq, Hash, EnumAsInner, PartialOrd, Ord, uniffi::Enum)]
+#[derive(
+    Clone,
+    PartialEq,
+    Eq,
+    Hash,
+    EnumAsInner,
+    PartialOrd,
+    Ord,
+    derive_more::Display,
+    derive_more::Debug,
+    uniffi::Enum,
+)]
 pub enum DerivationPath {
+    #[debug("{}", self.bip32_string())]
     CAP26 { value: CAP26Path },
+    #[debug("{}", self.bip32_string())]
     BIP44Like { value: BIP44LikePath },
 }
 
@@ -17,17 +30,6 @@ impl TryFrom<&HDPath> for DerivationPath {
         return CAP26Path::try_from(value)
             .map(|p| p.derivation_path())
             .map_err(|e| e.into());
-    }
-}
-
-impl std::fmt::Debug for DerivationPath {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(&self.bip32_string())
-    }
-}
-impl std::fmt::Display for DerivationPath {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(&self.bip32_string())
     }
 }
 
@@ -319,6 +321,12 @@ mod tests {
 		}
         "#,
         );
+    }
+
+    #[test]
+    fn display() {
+        let model = DerivationPath::placeholder();
+        assert_eq!(format!("{}", model), "m/44H/1022H/1H/525H/1460H/0H")
     }
 
     #[test]
