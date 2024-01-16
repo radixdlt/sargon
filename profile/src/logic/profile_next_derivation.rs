@@ -109,4 +109,29 @@ mod tests {
             Ok(lfs)
         );
     }
+
+    #[test]
+    fn factor_source_by_id_fail_wrong_kind() {
+        let profile = Profile::placeholder();
+        let dfs = DeviceFactorSource::placeholder_babylon();
+        assert_eq!(
+            profile
+                .factor_source_by_id::<LedgerHardwareWalletFactorSource>(&dfs.factor_source_id()),
+            Err(CommonError::CastFactorSourceWrongKind {
+                expected: FactorSourceKind::LedgerHQHardwareWallet,
+                found: FactorSourceKind::Device,
+            })
+        );
+    }
+
+    #[test]
+    fn factor_source_by_id_fail_unknown_id() {
+        let profile = Profile::placeholder();
+        let lfs = LedgerHardwareWalletFactorSource::placeholder_other();
+        assert_eq!(
+            profile
+                .factor_source_by_id::<LedgerHardwareWalletFactorSource>(&lfs.factor_source_id()),
+            Err(CommonError::ProfileDoesNotContainFactorSourceWithID(lfs.factor_source_id()))
+        );
+    }
 }
