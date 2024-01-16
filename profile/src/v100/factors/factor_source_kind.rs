@@ -63,7 +63,12 @@ pub enum FactorSourceKind {
 
 impl FactorSourceKind {
     pub fn discriminant(&self) -> String {
-        serde_json::to_string(self).expect("Should always be able to JSON encode FactorSourceKind.")
+        // We do `to_value.as_str` instead of `to_string(_pretty)` to avoid unwanted quotation marks around the string.
+        serde_json::to_value(self)
+            .expect("Should always be able to JSON encode FactorSourceKind.")
+            .as_str()
+            .expect("Representation should always be string")
+            .to_owned()
     }
 }
 
