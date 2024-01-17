@@ -44,13 +44,15 @@ impl Identifiable for P2PLink {
     type ID = Hash;
 
     fn id(&self) -> Self::ID {
-        self.connection_password.hash()
+        self.connection_password
+            .hash()
     }
 }
 
 impl P2PLink {
     pub fn connection_password(&self) -> RadixConnectPassword {
-        self.connection_password.clone()
+        self.connection_password
+            .clone()
     }
 }
 

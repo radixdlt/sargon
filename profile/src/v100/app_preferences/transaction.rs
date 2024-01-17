@@ -87,7 +87,9 @@ mod tests {
     #[test]
     fn default_is_1() {
         assert_eq!(
-            Transaction::default().default_deposit_guarantee.to_string(),
+            Transaction::default()
+                .default_deposit_guarantee
+                .to_string(),
             "1"
         );
     }
@@ -96,6 +98,10 @@ mod tests {
     fn set_default_deposit_guarantee() {
         let mut sut = Transaction::default();
         sut.default_deposit_guarantee = Decimal::new("0.237".to_string()).unwrap();
-        assert_eq!(sut.default_deposit_guarantee.to_string(), "0.237");
+        assert_eq!(
+            sut.default_deposit_guarantee
+                .to_string(),
+            "0.237"
+        );
     }
 }

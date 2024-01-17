@@ -93,12 +93,16 @@ impl FactorSourceCommon {
     }
 
     pub fn supports_babylon(&self) -> bool {
-        self.crypto_parameters.supports_babylon()
+        self.crypto_parameters
+            .supports_babylon()
     }
 
     /// Checks if its Main Babylon Device Factor Source (BDFS).
     pub fn is_main_bdfs(&self) -> bool {
-        self.supports_babylon() && self.flags.contains(&FactorSourceFlag::Main)
+        self.supports_babylon()
+            && self
+                .flags
+                .contains(&FactorSourceFlag::Main)
     }
 }
 
@@ -211,13 +215,12 @@ mod tests {
     #[test]
     fn json_roundtrip() {
         let date = Timestamp::parse("2023-09-11T16:05:56.000Z").unwrap();
-        let model =
-            FactorSourceCommon::with_values(
-                FactorSourceCryptoParameters::default(),
-                date.clone(),
-                date,
-                [FactorSourceFlag::Main],
-            );
+        let model = FactorSourceCommon::with_values(
+            FactorSourceCryptoParameters::default(),
+            date.clone(),
+            date,
+            [FactorSourceFlag::Main],
+        );
 
         assert_eq_after_json_roundtrip(
             &model,
@@ -244,6 +247,8 @@ mod tests {
 
     #[test]
     fn main_flag_not_present_if_not_main() {
-        assert!(FactorSourceCommon::new_bdfs(false).flags.is_empty());
+        assert!(FactorSourceCommon::new_bdfs(false)
+            .flags
+            .is_empty());
     }
 }

@@ -26,7 +26,11 @@ pub struct NonFungibleGlobalId {
 impl From<ResourceAddress> for radix_engine_common::types::ResourceAddress {
     fn from(value: ResourceAddress) -> Self {
         radix_engine_common::types::ResourceAddress::try_from_bech32(
-            &AddressBech32Decoder::new(&value.network_id.network_definition()),
+            &AddressBech32Decoder::new(
+                &value
+                    .network_id
+                    .network_definition(),
+            ),
             value.address.clone().as_str(),
         )
         .unwrap()
@@ -38,7 +42,10 @@ impl Serialize for NonFungibleGlobalId {
     where
         S: Serializer,
     {
-        serializer.serialize_str(self.to_canonical_string().as_str())
+        serializer.serialize_str(
+            self.to_canonical_string()
+                .as_str(),
+        )
     }
 }
 
@@ -54,8 +61,9 @@ impl<'de> serde::Deserialize<'de> for NonFungibleGlobalId {
 
 impl NonFungibleGlobalId {
     fn from_internal_engine(internal: EngineSerializableNonFungibleGlobalIdInternal) -> Self {
-        let (engine_resource_address, engine_local_id) =
-            internal.non_fungible_global_id.into_parts();
+        let (engine_resource_address, engine_local_id) = internal
+            .non_fungible_global_id
+            .into_parts();
 
         let resource_address_bech32 = ResourceAddress::address_from_node_id(
             engine_resource_address.into_node_id(),
@@ -74,19 +82,27 @@ impl NonFungibleGlobalId {
 
     fn engine_global_id(&self) -> EngineNonFungibleGlobalId {
         EngineNonFungibleGlobalId::new(
-            self.resource_address.clone().into(),
-            self.non_fungible_local_id.clone().try_into().unwrap(),
+            self.resource_address
+                .clone()
+                .into(),
+            self.non_fungible_local_id
+                .clone()
+                .try_into()
+                .unwrap(),
         )
     }
 
     fn network_id(&self) -> NetworkID {
-        self.resource_address.network_id.clone()
+        self.resource_address
+            .network_id
+            .clone()
     }
 
     fn engine(&self) -> EngineSerializableNonFungibleGlobalId {
         EngineSerializableNonFungibleGlobalId::new(
             self.engine_global_id().into(),
-            self.network_id().discriminant(),
+            self.network_id()
+                .discriminant(),
         )
     }
 }
@@ -99,7 +115,8 @@ impl Display for NonFungibleGlobalId {
 
 impl Ord for NonFungibleGlobalId {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.to_string().cmp(&other.to_string())
+        self.to_string()
+            .cmp(&other.to_string())
     }
 }
 
@@ -111,7 +128,8 @@ impl PartialOrd for NonFungibleGlobalId {
 
 impl Hash for NonFungibleGlobalId {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        self.to_canonical_string().hash(state);
+        self.to_canonical_string()
+            .hash(state);
     }
 }
 
@@ -159,7 +177,10 @@ mod tests {
     fn test_deserialize() {
         let str = "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd:#2244#";
         let id: NonFungibleGlobalId = str.try_into().unwrap();
-        match id.clone().non_fungible_local_id {
+        match id
+            .clone()
+            .non_fungible_local_id
+        {
             NonFungibleLocalId::Integer { value } => assert_eq!(value, 2244),
             _ => panic!("wrong"),
         }

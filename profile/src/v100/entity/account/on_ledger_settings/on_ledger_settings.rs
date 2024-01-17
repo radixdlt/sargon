@@ -45,12 +45,18 @@ mod tests {
     fn get_third_party_deposits_then_mutate() {
         let mut settings = OnLedgerSettings::default();
         assert_eq!(
-            settings.third_party_deposits.deposit_rule,
+            settings
+                .third_party_deposits
+                .deposit_rule,
             DepositRule::AcceptAll
         );
-        settings.third_party_deposits.deposit_rule = DepositRule::DenyAll;
+        settings
+            .third_party_deposits
+            .deposit_rule = DepositRule::DenyAll;
         assert_eq!(
-            settings.third_party_deposits.deposit_rule,
+            settings
+                .third_party_deposits
+                .deposit_rule,
             DepositRule::DenyAll
         );
     }

@@ -86,7 +86,8 @@ impl Profile {
     where
         F: FnMut(&mut Account) -> (),
     {
-        self.networks.update_account(address, mutate)
+        self.networks
+            .update_account(address, mutate)
     }
 
     pub fn update_factor_source<S, M>(
@@ -98,11 +99,12 @@ impl Profile {
         S: IsFactorSource,
         M: FnMut(S) -> Result<S, CommonError>,
     {
-        self.factor_sources.try_update_with(factor_source_id, |f| {
-            S::try_from(f.clone())
-                .map_err(|_| CommonError::CastFactorSourceWrongKind)
-                .and_then(|element| mutate(element).map(|modified| modified.into()))
-        })
+        self.factor_sources
+            .try_update_with(factor_source_id, |f| {
+                S::try_from(f.clone())
+                    .map_err(|_| CommonError::CastFactorSourceWrongKind)
+                    .and_then(|element| mutate(element).map(|modified| modified.into()))
+            })
     }
 }
 
@@ -174,10 +176,16 @@ mod tests {
     #[test]
     fn change_supported_curve_of_factor_source() {
         let mut sut = Profile::placeholder();
-        let id: &FactorSourceID = &DeviceFactorSource::placeholder().id.into();
+        let id: &FactorSourceID = &DeviceFactorSource::placeholder()
+            .id
+            .into();
         assert!(sut
             .factor_sources
-            .contains_id(&DeviceFactorSource::placeholder().id.into()));
+            .contains_id(
+                &DeviceFactorSource::placeholder()
+                    .id
+                    .into()
+            ));
 
         assert_eq!(
             sut.factor_sources
@@ -226,11 +234,17 @@ mod tests {
     #[test]
     fn add_supported_curve_to_factor_source_failure_cast_wrong_factor_source_kind() {
         let mut sut = Profile::placeholder();
-        let id: &FactorSourceID = &DeviceFactorSource::placeholder().id.into();
+        let id: &FactorSourceID = &DeviceFactorSource::placeholder()
+            .id
+            .into();
 
         assert!(sut
             .factor_sources
-            .contains_id(&DeviceFactorSource::placeholder().id.into()));
+            .contains_id(
+                &DeviceFactorSource::placeholder()
+                    .id
+                    .into()
+            ));
 
         assert_eq!(
             sut.factor_sources

@@ -45,16 +45,14 @@ impl TryFrom<NonFungibleLocalId> for NativeNonFungibleLocalId {
             NonFungibleLocalId::Bytes { value } => {
                 Self::bytes(value).map_err(|_| Self::Error::InvalidNonFungibleLocalIDBytes)
             }
-            NonFungibleLocalId::Ruid { value } => {
-                value
-                    .try_into()
-                    .map(Self::ruid)
-                    .map_err(|value| Self::Error::InvalidLength {
-                        expected: 32,
-                        actual: value.len(),
-                        data: value,
-                    })
-            }
+            NonFungibleLocalId::Ruid { value } => value
+                .try_into()
+                .map(Self::ruid)
+                .map_err(|value| Self::Error::InvalidLength {
+                    expected: 32,
+                    actual: value.len(),
+                    data: value,
+                }),
             NonFungibleLocalId::Integer { value } => Ok(Self::integer(value)),
         }
     }
@@ -97,7 +95,9 @@ mod tests {
 
     #[test]
     fn from_native_ruid() {
-        let bytes = Hex32Bytes::placeholder_dead().bytes().to_owned();
+        let bytes = Hex32Bytes::placeholder_dead()
+            .bytes()
+            .to_owned();
         let non_native = NonFungibleLocalId::Ruid {
             value: bytes.clone().to_vec(),
         };
@@ -105,7 +105,12 @@ mod tests {
         assert_eq!(non_native.clone(), native.clone().into());
         assert_eq!(non_native.clone().try_into(), Ok(native.clone()));
         assert_eq!(
-            NonFungibleLocalId::from_str(non_native.clone().to_string().as_str()),
+            NonFungibleLocalId::from_str(
+                non_native
+                    .clone()
+                    .to_string()
+                    .as_str()
+            ),
             Ok(non_native)
         );
     }
@@ -122,7 +127,12 @@ mod tests {
         assert_eq!(non_native.clone(), native.clone().into());
         assert_eq!(non_native.clone().try_into(), Ok(native.clone()));
         assert_eq!(
-            NonFungibleLocalId::from_str(non_native.clone().to_string().as_str()),
+            NonFungibleLocalId::from_str(
+                non_native
+                    .clone()
+                    .to_string()
+                    .as_str()
+            ),
             Ok(non_native)
         );
     }
@@ -137,7 +147,12 @@ mod tests {
         assert_eq!(non_native.clone(), native.clone().into());
         assert_eq!(non_native.clone().try_into(), Ok(native.clone()));
         assert_eq!(
-            NonFungibleLocalId::from_str(non_native.clone().to_string().as_str()),
+            NonFungibleLocalId::from_str(
+                non_native
+                    .clone()
+                    .to_string()
+                    .as_str()
+            ),
             Ok(non_native)
         );
     }
@@ -149,7 +164,12 @@ mod tests {
         assert_eq!(non_native.clone(), native.clone().into());
         assert_eq!(non_native.clone().try_into(), Ok(native.clone()));
         assert_eq!(
-            NonFungibleLocalId::from_str(non_native.clone().to_string().as_str()),
+            NonFungibleLocalId::from_str(
+                non_native
+                    .clone()
+                    .to_string()
+                    .as_str()
+            ),
             Ok(non_native)
         );
     }

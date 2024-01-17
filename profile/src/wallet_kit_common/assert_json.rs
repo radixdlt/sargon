@@ -26,7 +26,9 @@ pub fn assert_eq_after_json_roundtrip<T>(model: &T, json_string: &str)
 where
     T: Serialize + DeserializeOwned + PartialEq + Debug,
 {
-    let json = json_string.parse::<serde_json::Value>().unwrap();
+    let json = json_string
+        .parse::<serde_json::Value>()
+        .unwrap();
     base_assert_equality_after_json_roundtrip(model, json, true)
 }
 
@@ -47,7 +49,9 @@ pub fn assert_ne_after_json_roundtrip<T>(model: &T, json_string: &str)
 where
     T: Serialize + DeserializeOwned + PartialEq + Debug,
 {
-    let json = json_string.parse::<serde_json::Value>().unwrap();
+    let json = json_string
+        .parse::<serde_json::Value>()
+        .unwrap();
     base_assert_equality_after_json_roundtrip(model, json, false)
 }
 
@@ -84,6 +88,8 @@ pub fn assert_json_fails<T>(json_string: &str)
 where
     T: Serialize + DeserializeOwned + PartialEq + Debug,
 {
-    let json = json_string.parse::<serde_json::Value>().unwrap();
+    let json = json_string
+        .parse::<serde_json::Value>()
+        .unwrap();
     assert_json_value_fails::<T>(json)
 }

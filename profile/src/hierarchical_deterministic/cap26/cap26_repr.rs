@@ -26,19 +26,18 @@ pub trait CAP26Repr: Derivation {
         if path.depth() != 6 {
             return Err(InvalidDepthOfCAP26Path);
         }
-        let network_id =
-            HDPath::parse_try_map(
-                &components,
-                2,
-                Box::new(|v| {
-                    if v <= u8::MAX as u32 {
-                        let d = v as u8;
-                        NetworkID::from_repr(d).ok_or(UnsupportedNetworkID(d))
-                    } else {
-                        Err(InvalidNetworkIDExceedsLimit(v))
-                    }
-                }),
-            )?;
+        let network_id = HDPath::parse_try_map(
+            &components,
+            2,
+            Box::new(|v| {
+                if v <= u8::MAX as u32 {
+                    let d = v as u8;
+                    NetworkID::from_repr(d).ok_or(UnsupportedNetworkID(d))
+                } else {
+                    Err(InvalidNetworkIDExceedsLimit(v))
+                }
+            }),
+        )?;
         let entity_kind = HDPath::parse_try_map(
             &components,
             3,
@@ -62,7 +61,13 @@ pub trait CAP26Repr: Derivation {
 
         let index = HDPath::parse_try_map(&components, 5, Box::new(|v| Ok(v)))?;
 
-        return Ok(Self::__with_path_and_components(path, network_id, entity_kind, key_kind, index));
+        return Ok(Self::__with_path_and_components(
+            path,
+            network_id,
+            entity_kind,
+            key_kind,
+            index,
+        ));
     }
 
     #[cfg(not(tarpaulin_include))] // false negative, this is in fact heavily tested.

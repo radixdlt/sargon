@@ -72,7 +72,8 @@ impl FactorSourceCryptoParameters {
     }
 
     pub fn supports_babylon(&self) -> bool {
-        self.supported_curves.contains(&SLIP10Curve::Curve25519)
+        self.supported_curves
+            .contains(&SLIP10Curve::Curve25519)
             && self
                 .supported_derivation_path_schemes
                 .contains(&DerivationPathScheme::Cap26)

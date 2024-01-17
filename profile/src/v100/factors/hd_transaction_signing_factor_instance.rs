@@ -3,45 +3,55 @@ use super::{
     hierarchical_deterministic_factor_instance::HierarchicalDeterministicFactorInstance,
 };
 use crate::{
-    AccountPath, CAP26Path, HasEntityPath, HierarchicalDeterministicPublicKey, IdentityPath,
-    IsEntityPath,
+    AccountPath, CAP26Path, HDPathError, HasEntityPath, HierarchicalDeterministicPublicKey,
+    IdentityPath, IsEntityPath,
 };
 use crate::{CommonError as Error, PublicKey};
 
 /// A specialized Hierarchical Deterministic FactorInstance used for transaction signing
 /// and creation of virtual Accounts and Identities (Personas).
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub struct HDFactorInstanceTransactionSigning<E: IsEntityPath> {
+pub struct HDFactorInstanceTransactionSigning<E: IsEntityPath + Clone> {
     pub factor_source_id: FactorSourceIDFromHash,
     pub public_key: PublicKey,
     pub path: E,
 }
-impl<E: IsEntityPath + Clone> HDFactorInstanceTransactionSigning<E> {
-    #[cfg(not(tarpaulin_include))] // false negative
-    pub fn try_from<F>(
-        hd_factor_instance: HierarchicalDeterministicFactorInstance,
-        extract: F,
-    ) -> Result<Self, Error>
-    where
-        F: Fn(&CAP26Path) -> Option<&E>,
-    {
-        if let Some(path) = hd_factor_instance
+
+// impl<T: IsEntityPath + Clone> TryFrom<HierarchicalDeterministicFactorInstance>
+//     for HDFactorInstanceTransactionSigning<T>
+// {
+//     type Error = crate::CommonError;
+impl<T: IsEntityPath + Clone> HDFactorInstanceTransactionSigning<T> {
+    fn try_from_factor_instance(
+        value: HierarchicalDeterministicFactorInstance,
+    ) -> Result<Self, crate::CommonError> {
+        value
             .derivation_path()
             .as_cap26()
-            .and_then(|p| extract(p))
-        {
-            if !path.key_kind().is_transaction_signing() {
-                return Err(Error::WrongKeyKindOfTransactionSigningFactorInstance);
-            }
-
-            Ok(Self {
-                factor_source_id: hd_factor_instance.factor_source_id.clone(),
-                public_key: hd_factor_instance.public_key.public_key.clone(),
-                path: path.clone(),
+            .ok_or(Error::WrongEntityKindOfInFactorInstancesPath)
+            .map(|p| p.clone())
+            .and_then(|p| {
+                p.try_into()
+                    .map_err(|_| Error::WrongEntityKindOfInFactorInstancesPath)
             })
-        } else {
-            return Err(Error::WrongEntityKindOfInFactorInstancesPath);
-        }
+            .and_then(|p: T| {
+                if !p
+                    .key_kind()
+                    .is_transaction_signing()
+                {
+                    Err(Error::WrongKeyKindOfTransactionSigningFactorInstance)
+                } else {
+                    Ok(p)
+                }
+            })
+            .map(|p| Self {
+                factor_source_id: value.factor_source_id.clone(),
+                public_key: value
+                    .public_key
+                    .public_key
+                    .clone(),
+                path: p.clone(),
+            })
     }
 }
 
@@ -51,7 +61,7 @@ impl<E: IsEntityPath + Clone> HasEntityPath<E> for HDFactorInstanceTransactionSi
     }
 }
 
-impl<E: IsEntityPath> HDFactorInstanceTransactionSigning<E> {
+impl<E: IsEntityPath + Clone> HDFactorInstanceTransactionSigning<E> {
     pub fn public_key(&self) -> HierarchicalDeterministicPublicKey {
         HierarchicalDeterministicPublicKey::new(
             self.public_key.clone(),
@@ -66,9 +76,13 @@ pub type HDFactorInstanceAccountCreation = HDFactorInstanceTransactionSigning<Ac
 /// Just an alias for when `HDFactorInstanceTransactionSigning` is used to create a new Account.
 pub type HDFactorInstanceIdentityCreation = HDFactorInstanceTransactionSigning<IdentityPath>;
 
-impl HDFactorInstanceAccountCreation {
+impl<T> HDFactorInstanceTransactionSigning<T>
+where
+    T: IsEntityPath + Clone,
+{
     pub fn new(hd_factor_instance: HierarchicalDeterministicFactorInstance) -> Result<Self, Error> {
-        Self::try_from(hd_factor_instance, |p| p.as_account_path())
+        // hd_factor_instance.try_into()
+        Self::try_from_factor_instance(hd_factor_instance)
     }
 }
 
@@ -80,12 +94,6 @@ impl<E: IsEntityPath + Clone> From<HDFactorInstanceTransactionSigning<E>>
             value.clone().factor_source_id,
             value.public_key(),
         )
-    }
-}
-
-impl HDFactorInstanceIdentityCreation {
-    pub fn new(hd_factor_instance: HierarchicalDeterministicFactorInstance) -> Result<Self, Error> {
-        Self::try_from(hd_factor_instance, |p| p.as_identity_path())
     }
 }
 
@@ -114,11 +122,10 @@ mod tests {
             PublicKey::placeholder_ed25519(),
             AccountPath::placeholder().into(),
         );
-        let hd_fi =
-            HierarchicalDeterministicFactorInstance::new(
-                FactorSourceIDFromHash::placeholder(),
-                hd_key,
-            );
+        let hd_fi = HierarchicalDeterministicFactorInstance::new(
+            FactorSourceIDFromHash::placeholder(),
+            hd_key,
+        );
         assert_eq!(
             HDFactorInstanceAccountCreation::new(hd_fi)
                 .unwrap()
@@ -134,11 +141,10 @@ mod tests {
             PublicKey::placeholder_ed25519(),
             IdentityPath::placeholder().into(),
         );
-        let hd_fi =
-            HierarchicalDeterministicFactorInstance::new(
-                FactorSourceIDFromHash::placeholder(),
-                hd_key,
-            );
+        let hd_fi = HierarchicalDeterministicFactorInstance::new(
+            FactorSourceIDFromHash::placeholder(),
+            hd_key,
+        );
         assert_eq!(
             HDFactorInstanceAccountCreation::new(hd_fi),
             Err(Error::WrongEntityKindOfInFactorInstancesPath)
@@ -156,11 +162,10 @@ mod tests {
             )
             .into(),
         );
-        let hd_fi =
-            HierarchicalDeterministicFactorInstance::new(
-                FactorSourceIDFromHash::placeholder(),
-                hd_key,
-            );
+        let hd_fi = HierarchicalDeterministicFactorInstance::new(
+            FactorSourceIDFromHash::placeholder(),
+            hd_key,
+        );
         assert_eq!(
             HDFactorInstanceAccountCreation::new(hd_fi),
             Err(Error::WrongKeyKindOfTransactionSigningFactorInstance)
@@ -173,11 +178,10 @@ mod tests {
             PublicKey::placeholder_ed25519(),
             IdentityPath::placeholder().into(),
         );
-        let hd_fi =
-            HierarchicalDeterministicFactorInstance::new(
-                FactorSourceIDFromHash::placeholder(),
-                hd_key,
-            );
+        let hd_fi = HierarchicalDeterministicFactorInstance::new(
+            FactorSourceIDFromHash::placeholder(),
+            hd_key,
+        );
         assert_eq!(
             HDFactorInstanceIdentityCreation::new(hd_fi)
                 .unwrap()
@@ -193,11 +197,10 @@ mod tests {
             PublicKey::placeholder_ed25519(),
             AccountPath::placeholder().into(),
         );
-        let hd_fi =
-            HierarchicalDeterministicFactorInstance::new(
-                FactorSourceIDFromHash::placeholder(),
-                hd_key,
-            );
+        let hd_fi = HierarchicalDeterministicFactorInstance::new(
+            FactorSourceIDFromHash::placeholder(),
+            hd_key,
+        );
         assert_eq!(
             HDFactorInstanceIdentityCreation::new(hd_fi),
             Err(Error::WrongEntityKindOfInFactorInstancesPath)
@@ -215,11 +218,10 @@ mod tests {
             )
             .into(),
         );
-        let hd_fi =
-            HierarchicalDeterministicFactorInstance::new(
-                FactorSourceIDFromHash::placeholder(),
-                hd_key,
-            );
+        let hd_fi = HierarchicalDeterministicFactorInstance::new(
+            FactorSourceIDFromHash::placeholder(),
+            hd_key,
+        );
         assert_eq!(
             HDFactorInstanceIdentityCreation::new(hd_fi),
             Err(Error::WrongKeyKindOfTransactionSigningFactorInstance)

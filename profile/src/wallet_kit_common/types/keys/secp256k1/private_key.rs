@@ -201,7 +201,12 @@ mod tests {
     #[test]
     fn hex_roundtrip() {
         let hex = "0000000000000000000000000000000000000000000000000000000000000001";
-        assert_eq!(Secp256k1PrivateKey::from_str(hex).unwrap().to_hex(), hex);
+        assert_eq!(
+            Secp256k1PrivateKey::from_str(hex)
+                .unwrap()
+                .to_hex(),
+            hex
+        );
     }
 
     #[test]
@@ -285,7 +290,9 @@ mod tests {
     #[test]
     fn placeholder() {
         assert_eq!(
-            Secp256k1PrivateKey::placeholder().public_key().to_hex(),
+            Secp256k1PrivateKey::placeholder()
+                .public_key()
+                .to_hex(),
             "02517b88916e7f315bb682f9926b14bc67a0e4246f8a419b986269e1a7e61fffa7"
         );
     }
