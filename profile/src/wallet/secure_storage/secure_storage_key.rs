@@ -31,3 +31,50 @@ impl SecureStorageKey {
 pub fn secure_storage_key_identifier(key: &SecureStorageKey) -> String {
     key.identifier()
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::prelude::*;
+
+    #[test]
+    fn identifier() {
+        assert_eq!(
+            SecureStorageKey::ActiveProfileID.identifier(),
+            "secure_storage_key_activeProfileID"
+        );
+        assert_eq!(
+            SecureStorageKey::SnapshotHeadersList.identifier(),
+            "secure_storage_key_headers"
+        );
+        assert_eq!(
+            SecureStorageKey::DeviceFactorSourceMnemonic {
+                factor_source_id: FactorSourceIDFromHash::placeholder()
+            }
+            .identifier(),
+            "secure_storage_key_device_factor_source_device:3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+        );
+        assert_eq!(
+            SecureStorageKey::ProfileSnapshot {
+                profile_id: ProfileID::placeholder()
+            }
+            .identifier(),
+            "secure_storage_key_profile_snapshot_ffffffff-ffff-ffff-ffff-ffffffffffff"
+        );
+    }
+}
+
+#[cfg(test)]
+mod uniffi_tests {
+    use crate::prelude::*;
+
+    #[test]
+    fn identifier() {
+        let key = SecureStorageKey::ProfileSnapshot {
+            profile_id: ProfileID::placeholder(),
+        };
+        assert_eq!(
+            key.clone().identifier(),
+            secure_storage_key_identifier(&key)
+        );
+    }
+}
