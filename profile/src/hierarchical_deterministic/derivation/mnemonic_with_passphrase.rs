@@ -2,11 +2,34 @@ use crate::prelude::*;
 
 /// A BIP39 Mnemonic and BIP39 passphrase - aka "25th word" tuple,
 /// from which we can derive a HD Root used for derivation.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(
+    Serialize,
+    Deserialize,
+    Clone,
+    PartialEq,
+    Eq,
+    Hash,
+    derive_more::Debug,
+    derive_more::Display,
+    uniffi::Record,
+)]
 #[serde(rename_all = "camelCase")]
+#[display("<OBFUSCATED>")]
+#[debug("{:?}", self.non_sensitive())]
 pub struct MnemonicWithPassphrase {
     pub mnemonic: Mnemonic,
     pub passphrase: BIP39Passphrase,
+}
+
+impl SafeToLog for MnemonicWithPassphrase {
+    /// Logs the word count and FactorSourceID o
+    fn non_sensitive(&self) -> impl std::fmt::Debug {
+        format!(
+            "{:?} + {:?}",
+            self.mnemonic.non_sensitive(),
+            self.passphrase.non_sensitive()
+        )
+    }
 }
 
 impl MnemonicWithPassphrase {
@@ -127,6 +150,13 @@ mod tests {
         assert_ne!(
             MnemonicWithPassphrase::placeholder(),
             MnemonicWithPassphrase::placeholder_other()
+        );
+    }
+    #[test]
+    fn display() {
+        assert_eq!(
+            format!("{}", MnemonicWithPassphrase::placeholder()),
+            "<NOT EMPTY>"
         );
     }
 

@@ -4,18 +4,31 @@ use crate::prelude::*;
     Clone,
     PartialEq,
     Eq,
-    Debug,
     Hash,
     SerializeDisplay,
     DeserializeFromStr,
     derive_more::Display,
+    derive_more::Debug,
     uniffi::Record,
 )]
-#[display("{}", self.phrase())]
+#[display("OBFUSCATED")]
+#[debug("{:?}", self.non_sensitive())]
 pub struct Mnemonic {
     pub words: Vec<BIP39Word>,
     pub word_count: BIP39WordCount,
     pub language: BIP39Language,
+}
+
+impl SafeToLog for Mnemonic {
+    /// Logs the word count and FactorSourceID o
+    fn non_sensitive(&self) -> impl std::fmt::Debug {
+        format!(
+            "{} ({}...{})",
+            self.word_count,
+            self.words.first().unwrap().word,
+            self.words.last().unwrap().word
+        )
+    }
 }
 
 /// Returns the words of a mnemonic as a String joined by spaces, e.g. "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"
@@ -25,6 +38,10 @@ pub fn mnemonic_phrase(from: &Mnemonic) -> String {
 }
 
 impl Mnemonic {
+    pub fn to_obfuscated_string(&self) -> String {
+        format!("Mnemonic in {} obfuscated.", self.language)
+    }
+
     fn from_internal(internal: bip39::Mnemonic) -> Self {
         let language = internal.language();
 
@@ -107,6 +124,18 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(Mnemonic::placeholder(), Mnemonic::placeholder_other());
+    }
+
+    #[test]
+    fn debug() {
+        let mnemonic = Mnemonic::placeholder();
+        assert_eq!(format!("{:?}", mnemonic), "24 words (bright...mandate)")
+    }
+
+    #[test]
+    fn display() {
+        let mnemonic = Mnemonic::placeholder();
+        assert_eq!(format!("{}", mnemonic), "Mnemonic in English obfuscated.")
     }
 
     #[test]

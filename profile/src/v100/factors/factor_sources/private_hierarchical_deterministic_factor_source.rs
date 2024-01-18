@@ -104,7 +104,7 @@ impl HasPlaceholder for PrivateHierarchicalDeterministicFactorSource {
 }
 
 impl SafeToLog for PrivateHierarchicalDeterministicFactorSource {
-    /// Logs the word count and FactorSourceID o
+    /// Logs the word count and FactorSourceID.
     fn non_sensitive(&self) -> impl std::fmt::Debug {
         format!(
             "{} {}",

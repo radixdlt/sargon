@@ -23,7 +23,7 @@ impl Wallet {
         static ONCE: Once = Once::new();
         ONCE.call_once(|| {
             pretty_env_logger::formatted_builder()
-                .filter_level(log::LevelFilter::Info)
+                .filter_level(log::LevelFilter::Trace)
                 .try_init()
                 .expect("Should be able to setup a logger.");
         });

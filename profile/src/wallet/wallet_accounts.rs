@@ -338,4 +338,28 @@ mod tests {
             }
         );
     }
+
+    #[test]
+    fn add_factor_source_fails_when_already_exists() {
+        let profile = Profile::placeholder();
+        let other = PrivateHierarchicalDeterministicFactorSource::placeholder();
+        let (wallet, _) = Wallet::ephemeral(profile.clone());
+        assert_eq!(
+            wallet.add_factor_source(other.factor_source.clone().into()),
+            Err(CommonError::UnableToSaveFactorSourceToProfile(
+                other.factor_source.factor_source_id()
+            ))
+        )
+    }
+
+    #[test]
+    fn load_private_device_factor_source_by_id() {
+        let profile = Profile::placeholder();
+        let private = PrivateHierarchicalDeterministicFactorSource::placeholder();
+        let (wallet, _) = Wallet::ephemeral(profile.clone());
+        assert_eq!(
+            wallet.load_private_device_factor_source_by_id(&private.factor_source.id.clone()),
+            Ok(private.clone())
+        );
+    }
 }

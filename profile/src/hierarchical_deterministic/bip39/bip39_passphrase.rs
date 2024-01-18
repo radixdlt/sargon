@@ -4,9 +4,24 @@ use crate::prelude::*;
 
 /// A BIP39 passphrase, which required but when not used by user, the Default value will be use (empty string),
 /// as per BIP39 standard.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(
+    Serialize, Deserialize, Clone, PartialEq, Eq, derive_more::Display, derive_more::Debug, Hash,
+)]
 #[serde(transparent)]
+#[display("<OBFUSCATED>")]
+#[debug("{:?}", self.non_sensitive())]
 pub struct BIP39Passphrase(pub String);
+
+impl SafeToLog for BIP39Passphrase {
+    /// Logs the word count and FactorSourceID o
+    fn non_sensitive(&self) -> impl std::fmt::Debug {
+        if self.0.is_empty() {
+            "<EMPTY>"
+        } else {
+            "<NOT EMPTY>"
+        }
+    }
+}
 
 impl BIP39Passphrase {
     pub fn new(s: impl AsRef<str>) -> Self {
@@ -53,5 +68,23 @@ mod tests {
         assert_json_value_eq_after_roundtrip(&sut, json!("25th word"));
         assert_json_roundtrip(&sut);
         assert_json_value_ne_after_roundtrip(&sut, json!("foobar"));
+    }
+
+    #[test]
+    fn display() {
+        assert_eq!(
+            format!("{}", BIP39Passphrase::new("so secret")),
+            "<NOT EMPTY>"
+        );
+        assert_eq!(format!("{}", BIP39Passphrase::default()), "<EMPTY>");
+    }
+
+    #[test]
+    fn debug() {
+        assert_eq!(
+            format!("{:?}", BIP39Passphrase::new("so secret")),
+            "<OBFUSCATED>"
+        );
+        assert_eq!(format!("{:?}", BIP39Passphrase::default()), "<OBFUSCATED>");
     }
 }
