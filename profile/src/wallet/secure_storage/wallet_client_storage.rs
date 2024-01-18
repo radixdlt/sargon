@@ -128,11 +128,22 @@ impl WalletClientStorage {
 }
 
 #[cfg(test)]
+impl WalletClientStorage {
+    pub(crate) fn ephemeral() -> (WalletClientStorage, Arc<EphemeralSecureStorage>) {
+        let storage = EphemeralSecureStorage::new();
+        (WalletClientStorage::new(storage.clone()), storage)
+    }
+}
+
+#[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use ::hex::FromHex;
+
+    use crate::{prelude::*, wallet::secure_storage::ephemeral_secure_storage};
+    use std::sync::RwLock;
 
     fn make_sut() -> WalletClientStorage {
-        WalletClientStorage::new(EphemeralSecureStorage::new())
+        WalletClientStorage::ephemeral().0
     }
 
     #[test]
@@ -174,5 +185,58 @@ mod tests {
             sut.load::<Profile>(SecureStorageKey::ActiveProfileID),
             Ok(Some(Profile::placeholder()))
         );
+    }
+
+    #[test]
+    fn load_unwrap_or_some_default_not_used() {
+        let sut = make_sut();
+
+        assert!(sut
+            .save(SecureStorageKey::ActiveProfileID, &Profile::placeholder())
+            .is_ok());
+        assert_eq!(
+            sut.load_unwrap_or::<Profile>(
+                SecureStorageKey::ActiveProfileID,
+                Profile::placeholder_other()
+            ),
+            Profile::placeholder()
+        );
+    }
+
+    #[test]
+    fn load_unwrap_or_none_default_is_used() {
+        let sut = make_sut();
+
+        assert_eq!(
+            sut.load_unwrap_or::<Profile>(
+                SecureStorageKey::ActiveProfileID,
+                Profile::placeholder_other()
+            ),
+            Profile::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn save_mnemonic_with_passphrase() {
+        let private = PrivateHierarchicalDeterministicFactorSource::placeholder_other();
+        let factor_source_id = private.factor_source.id.clone();
+        let (sut, storage) = WalletClientStorage::ephemeral();
+        let key = SecureStorageKey::DeviceFactorSourceMnemonic {
+            factor_source_id: factor_source_id.clone(),
+        };
+        assert_eq!(storage.load_data(key.clone()), Ok(None)); // not yet saved
+        assert!(sut
+            .save_mnemonic_with_passphrase(
+                &private.mnemonic_with_passphrase,
+                &factor_source_id.clone()
+            )
+            .is_ok());
+
+        // Assert indeed was saved.
+        assert!(storage
+            .load_data(key)
+            .map(|b| String::from_utf8(b.unwrap()).unwrap())
+            .unwrap()
+            .contains("zoo"));
     }
 }
