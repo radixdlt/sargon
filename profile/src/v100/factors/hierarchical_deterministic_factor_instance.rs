@@ -22,9 +22,7 @@ pub struct HierarchicalDeterministicFactorInstance {
 
 impl HierarchicalDeterministicFactorInstance {
     pub fn derivation_path(&self) -> DerivationPath {
-        self.public_key
-            .derivation_path
-            .clone()
+        self.public_key.derivation_path.clone()
     }
 
     pub fn new(
@@ -72,9 +70,7 @@ impl HierarchicalDeterministicFactorInstance {
         let badge = virtual_source.as_hierarchical_deterministic();
 
         Self::try_from(
-            factor_instance
-                .factor_source_id
-                .clone(),
+            factor_instance.factor_source_id.clone(),
             badge.public_key.clone(),
             badge.derivation_path.clone(),
         )
@@ -82,9 +78,7 @@ impl HierarchicalDeterministicFactorInstance {
 
     pub fn factor_instance(&self) -> FactorInstance {
         FactorInstance::new(
-            self.factor_source_id
-                .clone()
-                .into(),
+            self.factor_source_id.clone().into(),
             FactorInstanceBadge::Virtual {
                 value: self.public_key.clone().into(),
             },
@@ -109,8 +103,7 @@ impl Serialize for HierarchicalDeterministicFactorInstance {
     where
         S: Serializer,
     {
-        self.factor_instance()
-            .serialize(serializer)
+        self.factor_instance().serialize(serializer)
     }
 }
 

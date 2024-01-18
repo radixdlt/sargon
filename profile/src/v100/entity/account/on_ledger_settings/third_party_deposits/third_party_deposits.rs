@@ -74,16 +74,12 @@ impl ThirdPartyDeposits {
     /// If the set did not previously contain an equal value, true is returned.
     /// If the set already contained an equal value, false is returned, and the entry is not updated.
     pub fn add_asset_exception(&mut self, exception: AssetException) -> bool {
-        self.assets_exception_list
-            .append(exception)
-            .0
+        self.assets_exception_list.append(exception).0
     }
 
     // If the set contains an element equal to `exception`, removes it from the set and drops it. Returns whether such an element was present.
     pub fn remove_asset_exception(&mut self, exception: &AssetException) -> bool {
-        self.assets_exception_list
-            .remove(exception)
-            .is_some()
+        self.assets_exception_list.remove(exception).is_some()
     }
 
     /// Adds a `DepositorAddress` to the `depositors_allow_list` (set).
@@ -93,16 +89,12 @@ impl ThirdPartyDeposits {
     /// If the set did not previously contain an equal value, true is returned.
     /// If the set already contained an equal value, false is returned, and the entry is not updated.
     pub fn allow_depositor(&mut self, depositor: DepositorAddress) -> bool {
-        self.depositors_allow_list
-            .append(depositor)
-            .0
+        self.depositors_allow_list.append(depositor).0
     }
 
     // If the set contains an element equal to `DepositorAddress`, removes it from the set and drops it. Returns whether such an element was present.
     pub fn remove_allowed_depositor(&mut self, depositor: &DepositorAddress) -> bool {
-        self.depositors_allow_list
-            .remove(depositor)
-            .is_some()
+        self.depositors_allow_list.remove(depositor).is_some()
     }
 }
 
@@ -201,19 +193,9 @@ mod tests {
             DepositAddressExceptionRule::Deny,
         );
         assert!(settings.add_asset_exception(exception.clone()));
-        assert_eq!(
-            settings
-                .assets_exception_list
-                .len(),
-            2
-        );
+        assert_eq!(settings.assets_exception_list.len(), 2);
         assert!(settings.remove_asset_exception(&exception));
-        assert_eq!(
-            settings
-                .assets_exception_list
-                .len(),
-            1
-        );
+        assert_eq!(settings.assets_exception_list.len(), 1);
         // settings.set_assets_exception_list(BTreeSet::from_iter([exception.clone()]));
         settings.assets_exception_list = IdentifiedVecVia::from_iter([exception.clone()]);
 
@@ -241,26 +223,17 @@ mod tests {
         )
         .unwrap();
 
-        let depositor = DepositorAddress::NonFungibleGlobalID {
-            value: NonFungibleGlobalId::try_from_str(
-                "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>",
-            )
-            .unwrap(),
-        };
+        let depositor =
+            DepositorAddress::NonFungibleGlobalID {
+                value: NonFungibleGlobalId::try_from_str(
+                    "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>",
+                )
+                .unwrap(),
+            };
         assert!(settings.allow_depositor(depositor.clone()));
-        assert_eq!(
-            settings
-                .depositors_allow_list
-                .len(),
-            1
-        );
+        assert_eq!(settings.depositors_allow_list.len(), 1);
         assert!(settings.remove_allowed_depositor(&depositor));
-        assert_eq!(
-            settings
-                .depositors_allow_list
-                .len(),
-            0
-        );
+        assert_eq!(settings.depositors_allow_list.len(), 0);
 
         settings.depositors_allow_list = IdentifiedVecVia::from_iter([depositor.clone()]);
         assert!(

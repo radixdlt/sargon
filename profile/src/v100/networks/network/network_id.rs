@@ -99,8 +99,7 @@ impl NetworkID {
     /// Name, most not be changed, i.e. cannot capitalized, is used
     /// by app to validate against Gateway
     pub fn logical_name(&self) -> String {
-        self.network_definition()
-            .logical_name
+        self.network_definition().logical_name
     }
 }
 
@@ -248,11 +247,7 @@ mod tests {
     fn no_mixup() {
         let ids = all::<NetworkID>().collect::<Vec<NetworkID>>();
         assert_eq!(
-            BTreeSet::from_iter(
-                ids.iter()
-                    .map(|id| id.logical_name())
-            )
-            .len(),
+            BTreeSet::from_iter(ids.iter().map(|id| id.logical_name())).len(),
             ids.len()
         );
     }
@@ -260,9 +255,7 @@ mod tests {
     #[test]
     fn lookup_network_definition() {
         assert_eq!(
-            NetworkID::Mainnet
-                .network_definition()
-                .id,
+            NetworkID::Mainnet.network_definition().id,
             NetworkID::Mainnet.discriminant()
         )
     }
@@ -270,9 +263,7 @@ mod tests {
     #[test]
     fn lookup_network_definition_enkinet() {
         assert_eq!(
-            NetworkID::Enkinet
-                .network_definition()
-                .id,
+            NetworkID::Enkinet.network_definition().id,
             NetworkID::Enkinet.discriminant()
         )
     }

@@ -81,14 +81,15 @@ mod tests {
     #[test]
     fn hash() {
         let n = 100;
-        let set = (0..n)
-            .into_iter()
-            .map(|_| {
-                PrivateHierarchicalDeterministicFactorSource::generate_new(
-                    WalletClientModel::Unknown,
-                )
-            })
-            .collect::<HashSet<_>>();
+        let set =
+            (0..n)
+                .into_iter()
+                .map(|_| {
+                    PrivateHierarchicalDeterministicFactorSource::generate_new(
+                        WalletClientModel::Unknown,
+                    )
+                })
+                .collect::<HashSet<_>>();
         assert_eq!(set.len(), n);
     }
 }

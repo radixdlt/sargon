@@ -31,10 +31,7 @@ impl Networks {
 impl Networks {
     pub fn get_account(&self, address: &AccountAddress) -> Option<Account> {
         self.get(&address.network_id)
-            .and_then(|n| {
-                n.accounts
-                    .get_account_by_address(address)
-            })
+            .and_then(|n| n.accounts.get_account_by_address(address))
             .cloned()
     }
 
@@ -52,9 +49,7 @@ impl Networks {
 
 impl Networks {
     pub fn content_hint(&self) -> ContentHint {
-        let number_of_accounts = self
-            .iter()
-            .fold(0, |acc, x| acc + x.accounts.len());
+        let number_of_accounts = self.iter().fold(0, |acc, x| acc + x.accounts.len());
         ContentHint::with_counters(number_of_accounts, 0, self.len())
     }
 }
@@ -120,13 +115,14 @@ mod tests {
 
     #[test]
     fn duplicates_are_prevented_and_first_added_is_retained() {
-        let mut sut = Networks::from_iter([Network::new(
-            NetworkID::Mainnet,
-            Accounts::from_iter([
-                Account::placeholder_mainnet_alice(),
-                Account::placeholder_mainnet_bob(),
-            ]),
-        )]);
+        let mut sut =
+            Networks::from_iter([Network::new(
+                NetworkID::Mainnet,
+                Accounts::from_iter([
+                    Account::placeholder_mainnet_alice(),
+                    Account::placeholder_mainnet_bob(),
+                ]),
+            )]);
         assert_eq!(
             sut.append(Network::new(
                 NetworkID::Mainnet,
@@ -137,10 +133,7 @@ mod tests {
         );
 
         assert_eq!(
-            sut.get(&NetworkID::Mainnet)
-                .unwrap()
-                .accounts
-                .items(),
+            sut.get(&NetworkID::Mainnet).unwrap().accounts.items(),
             [
                 Account::placeholder_mainnet_alice(),
                 Account::placeholder_mainnet_bob()
@@ -185,13 +178,7 @@ mod tests {
         let mut sut = Networks::placeholder();
         let id = &NetworkID::Mainnet;
         let account_address = Account::placeholder_nebunet().address;
-        assert_eq!(
-            sut.get(id)
-                .unwrap()
-                .accounts
-                .get(&account_address),
-            None
-        );
+        assert_eq!(sut.get(id).unwrap().accounts.get(&account_address), None);
 
         assert!(sut
             .update_account(&account_address, |a| {
@@ -208,13 +195,7 @@ mod tests {
         let mut sut = Networks::placeholder();
         let id = &NetworkID::Mainnet;
         let account_address = Account::placeholder_mainnet_carol().address;
-        assert_eq!(
-            sut.get(id)
-                .unwrap()
-                .accounts
-                .get(&account_address),
-            None
-        );
+        assert_eq!(sut.get(id).unwrap().accounts.get(&account_address), None);
 
         assert!(sut
             .update_account(&account_address, |a| {

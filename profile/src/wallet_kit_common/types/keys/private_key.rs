@@ -93,14 +93,10 @@ mod tests {
     fn private_key_ed25519_into_as_roundtrip() {
         let bytes = generate_32_bytes();
         // test `into``
-        let private_key: PrivateKey = Ed25519PrivateKey::from_vec(bytes.clone())
-            .unwrap()
-            .into();
+        let private_key: PrivateKey = Ed25519PrivateKey::from_vec(bytes.clone()).unwrap().into();
         // test `as`
         assert_eq!(
-            private_key
-                .as_ed25519()
-                .unwrap(),
+            private_key.as_ed25519().unwrap(),
             &Ed25519PrivateKey::from_vec(bytes).unwrap()
         );
     }
@@ -109,27 +105,19 @@ mod tests {
     fn private_key_ed25519_into_as_wrong_fails() {
         let bytes = generate_32_bytes();
         // test `into``
-        let private_key: PrivateKey = Ed25519PrivateKey::from_vec(bytes.clone())
-            .unwrap()
-            .into();
+        let private_key: PrivateKey = Ed25519PrivateKey::from_vec(bytes.clone()).unwrap().into();
         // test `as`
-        assert!(private_key
-            .as_secp256k1()
-            .is_none());
+        assert!(private_key.as_secp256k1().is_none());
     }
 
     #[test]
     fn private_key_secp256k1_into_as_roundtrip() {
         let bytes = generate_32_bytes();
         // test `into``
-        let private_key: PrivateKey = Secp256k1PrivateKey::from_vec(bytes.clone())
-            .unwrap()
-            .into();
+        let private_key: PrivateKey = Secp256k1PrivateKey::from_vec(bytes.clone()).unwrap().into();
         // test `as`
         assert_eq!(
-            private_key
-                .as_secp256k1()
-                .unwrap(),
+            private_key.as_secp256k1().unwrap(),
             &Secp256k1PrivateKey::from_vec(bytes).unwrap()
         );
     }
@@ -138,13 +126,9 @@ mod tests {
     fn private_key_secp256k1_into_as_wrong_fails() {
         let bytes = generate_32_bytes();
         // test `into``
-        let private_key: PrivateKey = Secp256k1PrivateKey::from_vec(bytes.clone())
-            .unwrap()
-            .into();
+        let private_key: PrivateKey = Secp256k1PrivateKey::from_vec(bytes.clone()).unwrap().into();
         // test `as`
-        assert!(private_key
-            .as_ed25519()
-            .is_none());
+        assert!(private_key.as_ed25519().is_none());
     }
 
     #[test]

@@ -165,9 +165,7 @@ mod tests {
     fn factor_source_id() {
         assert_eq!(
             LedgerHardwareWalletFactorSource::placeholder().factor_source_id(),
-            LedgerHardwareWalletFactorSource::placeholder()
-                .id
-                .into()
+            LedgerHardwareWalletFactorSource::placeholder().id.into()
         );
     }
 
@@ -175,9 +173,7 @@ mod tests {
     fn factor_source_kind() {
         assert_eq!(
             LedgerHardwareWalletFactorSource::placeholder().factor_source_kind(),
-            LedgerHardwareWalletFactorSource::placeholder()
-                .id
-                .kind
+            LedgerHardwareWalletFactorSource::placeholder().id.kind
         );
     }
 }

@@ -14,8 +14,7 @@ pub struct Decimal {
 
 impl PartialEq for Decimal {
     fn eq(&self, other: &Self) -> bool {
-        self.native()
-            .eq(&other.native())
+        self.native().eq(&other.native())
     }
 }
 impl PartialOrd for Decimal {
@@ -163,12 +162,7 @@ mod tests {
 
     #[test]
     fn is_negative() {
-        assert_eq!(
-            Decimal::try_from_str("-1")
-                .unwrap()
-                .is_negative(),
-            true
-        );
+        assert_eq!(Decimal::try_from_str("-1").unwrap().is_negative(), true);
         assert_eq!(Decimal::zero().is_negative(), false);
         assert_eq!(Decimal::one().is_negative(), false);
     }

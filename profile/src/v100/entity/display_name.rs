@@ -119,18 +119,14 @@ mod tests {
     #[test]
     fn inner() {
         assert_eq!(
-            DisplayName::new("Main account")
-                .unwrap()
-                .value,
+            DisplayName::new("Main account").unwrap().value,
             "Main account"
         );
     }
 
     #[test]
     fn json_roundtrip() {
-        let a: DisplayName = "Cool persona"
-            .try_into()
-            .unwrap();
+        let a: DisplayName = "Cool persona".try_into().unwrap();
 
         assert_json_value_eq_after_roundtrip(&a, json!("Cool persona"));
         assert_json_roundtrip(&a);

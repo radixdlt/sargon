@@ -77,10 +77,7 @@ impl DeviceFactorSource {
             id,
             FactorSourceCommon::new_bdfs(is_main),
             DeviceFactorSourceHint::unknown_model_of_client(
-                mnemonic_with_passphrase
-                    .mnemonic
-                    .word_count
-                    .clone(),
+                mnemonic_with_passphrase.mnemonic.word_count.clone(),
                 wallet_client_model,
             ),
         )
@@ -233,9 +230,7 @@ mod tests {
     #[test]
     fn hint() {
         assert_eq!(
-            DeviceFactorSource::placeholder()
-                .hint
-                .mnemonic_word_count,
+            DeviceFactorSource::placeholder().hint.mnemonic_word_count,
             BIP39WordCount::TwentyFour
         );
     }

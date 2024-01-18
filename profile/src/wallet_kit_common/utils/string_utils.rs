@@ -1,11 +1,7 @@
 /// Returns the last `n` chars of the &str `s`. If `s` is shorter than `n`
 /// we panic.
 pub fn suffix_str(n: usize, s: &str) -> String {
-    let split_pos = s
-        .char_indices()
-        .nth_back(n - 1)
-        .unwrap()
-        .0;
+    let split_pos = s.char_indices().nth_back(n - 1).unwrap().0;
     s[split_pos..].to_string()
 }
 

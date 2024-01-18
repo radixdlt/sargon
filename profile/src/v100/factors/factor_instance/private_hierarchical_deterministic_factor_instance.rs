@@ -97,15 +97,11 @@ mod tests {
     fn new() {
         let sut = PrivateHierarchicalDeterministicFactorInstance::placeholder();
         assert_eq!(
-            sut.private_key
-                .derivation_path
-                .to_string(),
+            sut.private_key.derivation_path.to_string(),
             "m/44H/1022H/1H/525H/1460H/0H"
         );
         assert_eq!(
-            sut.private_key
-                .private_key
-                .to_hex(),
+            sut.private_key.private_key.to_hex(),
             "cf52dbc7bb2663223e99fb31799281b813b939440a372d0aa92eb5f5b8516003"
         );
     }

@@ -44,9 +44,7 @@ impl Default for RadixNetwork {
 impl RadixNetwork {
     fn declare(id: NetworkID, display: &str) -> Self {
         Self {
-            logical_name: id
-                .network_definition()
-                .logical_name,
+            logical_name: id.network_definition().logical_name,
             id,
             display_description: display.to_string(),
         }
@@ -236,9 +234,7 @@ mod tests {
     fn lookup_by_id_error() {
         assert_eq!(
             RadixNetwork::lookup_by_id(NetworkID::Simulator),
-            Err(CommonError::UnknownNetworkForID(
-                NetworkID::Simulator.discriminant()
-            ))
+            Err(CommonError::UnknownNetworkForID(NetworkID::Simulator.discriminant()))
         );
     }
 

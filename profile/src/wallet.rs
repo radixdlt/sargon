@@ -82,14 +82,7 @@ mod tests {
         assert!(wallet
             .change_name_of_account(account.address, DisplayName::new("Stella").unwrap())
             .is_ok());
-        wallet.read(|p| {
-            assert_eq!(
-                p.networks[0].accounts[0]
-                    .display_name
-                    .value,
-                "Stella"
-            )
-        });
+        wallet.read(|p| assert_eq!(p.networks[0].accounts[0].display_name.value, "Stella"));
 
         assert_eq!(
             wallet.change_name_of_account(
@@ -111,13 +104,14 @@ mod tests {
         struct Profile {
             networks: Vec<Network>,
         }
-        let mut profile = Profile {
-            networks: vec![Network {
-                accounts: vec![Account {
-                    name: "Redrum_237".to_string(),
+        let mut profile =
+            Profile {
+                networks: vec![Network {
+                    accounts: vec![Account {
+                        name: "Redrum_237".to_string(),
+                    }],
                 }],
-            }],
-        };
+            };
         let account = &mut profile.networks[0].accounts[0];
         account.name = "Sajjon".to_string();
         assert_eq!(profile.networks[0].accounts[0].name, "Sajjon");

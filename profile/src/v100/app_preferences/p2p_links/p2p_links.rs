@@ -100,11 +100,7 @@ mod tests {
         let b = P2PLink::placeholder_brave();
         let c = P2PLink::placeholder_chrome();
         let d = P2PLink::placeholder_duckduckgo();
-        let mut sut = P2PLinks::from_iter(
-            [&a, &b, &c]
-                .into_iter()
-                .cloned(),
-        );
+        let mut sut = P2PLinks::from_iter([&a, &b, &c].into_iter().cloned());
         assert_eq!(sut.elements(), [&a, &b, &c]);
         sut.insert(d.clone(), 1);
         assert_eq!(sut.elements(), [&a, &d, &b, &c]);

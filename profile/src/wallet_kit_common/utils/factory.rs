@@ -41,10 +41,7 @@ mod tests {
     #[test]
     fn id_unique() {
         let n = 100;
-        let set = (0..n)
-            .into_iter()
-            .map(|_| id())
-            .collect::<BTreeSet<Uuid>>();
+        let set = (0..n).into_iter().map(|_| id()).collect::<BTreeSet<Uuid>>();
         assert_eq!(set.len(), n);
     }
 

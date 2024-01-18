@@ -58,13 +58,8 @@ impl Network {
     where
         F: FnMut(&mut Account) -> (),
     {
-        if self
-            .accounts
-            .update_with(address, mutate)
-        {
-            self.accounts
-                .get(address)
-                .cloned()
+        if self.accounts.update_with(address, mutate) {
+            self.accounts.get(address).cloned()
         } else {
             None
         }

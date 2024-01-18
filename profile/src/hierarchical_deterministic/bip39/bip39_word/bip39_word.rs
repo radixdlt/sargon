@@ -65,20 +65,13 @@ mod tests {
 
     #[test]
     fn word() {
-        assert_eq!(
-            BIP39Word::english("zoo")
-                .unwrap()
-                .word,
-            "zoo"
-        );
+        assert_eq!(BIP39Word::english("zoo").unwrap().word, "zoo");
     }
 
     #[test]
     fn language_of_zoo_is_english() {
         assert_eq!(
-            BIP39Word::english("zoo")
-                .unwrap()
-                .language,
+            BIP39Word::english("zoo").unwrap().language,
             BIP39Language::English
         );
     }
@@ -90,14 +83,7 @@ mod tests {
 
     #[test]
     fn index_of_zoo_is_2047() {
-        assert_eq!(
-            BIP39Word::english("zoo")
-                .unwrap()
-                .index
-                .clone()
-                .inner,
-            2047
-        );
+        assert_eq!(BIP39Word::english("zoo").unwrap().index.clone().inner, 2047);
     }
 
     #[test]

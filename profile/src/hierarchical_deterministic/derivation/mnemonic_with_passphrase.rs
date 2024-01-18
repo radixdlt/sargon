@@ -60,8 +60,7 @@ pub type PrivateKeyBytes = [u8; 32];
 
 impl MnemonicWithPassphrase {
     pub fn to_seed(&self) -> Seed {
-        self.mnemonic
-            .to_seed(&self.passphrase)
+        self.mnemonic.to_seed(&self.passphrase)
     }
 
     fn derive_ed25519_private_key(seed: &Seed, path: &HDPath) -> Ed25519PrivateKey {
@@ -88,10 +87,7 @@ impl MnemonicWithPassphrase {
         let child_xprv = bip32::XPrv::derive_from_path(&seed, &chain)
             .expect("To always be able to derive a child key using a valid BIP32 path");
 
-        let private_key_bytes: PrivateKeyBytes = child_xprv
-            .private_key()
-            .to_bytes()
-            .into();
+        let private_key_bytes: PrivateKeyBytes = child_xprv.private_key().to_bytes().into();
         Secp256k1PrivateKey::from_bytes(&private_key_bytes)
             .expect("Valid Secp256k1PrivateKey bytes")
     }
@@ -172,13 +168,14 @@ mod tests {
     /// Test vector: https://github.com/radixdlt/babylon-wallet-ios/blob/99161cbbb11a78f36db6991e5d5c5f092678d5fa/RadixWalletTests/CryptographyTests/SLIP10Tests/TestVectors/cap26_curve25519.json#L8
     #[test]
     fn derive_a_curve25519_key_with_cap26() {
-        let mwp = MnemonicWithPassphrase::with_passphrase(
-            Mnemonic::from_phrase(
-                "equip will roof matter pink blind book anxiety banner elbow sun young",
-            )
-            .unwrap(),
-            "".to_string(),
-        );
+        let mwp =
+            MnemonicWithPassphrase::with_passphrase(
+                Mnemonic::from_phrase(
+                    "equip will roof matter pink blind book anxiety banner elbow sun young",
+                )
+                .unwrap(),
+                "".to_string(),
+            );
 
         let private_key =
             mwp.derive_private_key(AccountPath::from_str("m/44H/1022H/12H/525H/1460H/0H").unwrap());
@@ -189,9 +186,7 @@ mod tests {
         );
         assert_eq!(
             "451152a1cef7be603205086d4ebac0a0b78fda2ff4684b9dea5ca9ef003d4e7d",
-            private_key
-                .public_key()
-                .to_hex()
+            private_key.public_key().to_hex()
         );
     }
 
@@ -216,9 +211,7 @@ mod tests {
 
         assert_eq!(
             "03e78cdb2e0b7ea6e55e121a58560ccf841a913d3a4a9b8349e0ef00c2102f48d8",
-            private_key
-                .public_key()
-                .to_hex()
+            private_key.public_key().to_hex()
         );
     }
 
@@ -257,9 +250,7 @@ mod tests {
         );
         assert_eq!(
             "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b",
-            private_key
-                .public_key()
-                .to_hex()
+            private_key.public_key().to_hex()
         );
     }
 }

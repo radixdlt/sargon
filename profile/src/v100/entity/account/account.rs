@@ -93,7 +93,9 @@ impl Account {
             account_creating_factor_instance.clone(),
         );
         Self {
-            network_id: account_creating_factor_instance.network_id().into(),
+            network_id: account_creating_factor_instance
+                .network_id()
+                .into(),
             address,
             display_name,
             security_state: UnsecuredEntityControl::with_entity_creating_factor_instance(
@@ -125,11 +127,7 @@ impl Ord for Account {
                 .transaction_signing
                 .derivation_path()
                 .last_component()
-                .cmp(
-                    r.transaction_signing
-                        .derivation_path()
-                        .last_component(),
-                ),
+                .cmp(r.transaction_signing.derivation_path().last_component()),
         }
     }
 }
@@ -414,22 +412,13 @@ mod tests {
         assert_eq!(account.on_ledger_settings, new_on_ledger_settings);
 
         assert_eq!(
-            account
-                .on_ledger_settings
-                .third_party_deposits
-                .deposit_rule,
+            account.on_ledger_settings.third_party_deposits.deposit_rule,
             DepositRule::DenyAll
         );
 
-        account
-            .on_ledger_settings
-            .third_party_deposits
-            .deposit_rule = DepositRule::AcceptAll;
+        account.on_ledger_settings.third_party_deposits.deposit_rule = DepositRule::AcceptAll;
         assert_eq!(
-            account
-                .on_ledger_settings
-                .third_party_deposits
-                .deposit_rule,
+            account.on_ledger_settings.third_party_deposits.deposit_rule,
             DepositRule::AcceptAll
         );
     }

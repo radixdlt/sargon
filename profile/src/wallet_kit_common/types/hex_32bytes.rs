@@ -133,11 +133,7 @@ impl Hex32Bytes {
 
     /// Returns a references to the inner array slice.
     pub fn bytes(&self) -> [u8; 32] {
-        self.bytes
-            .clone()
-            .as_slice()
-            .try_into()
-            .expect("32 bytes")
+        self.bytes.clone().as_slice().try_into().expect("32 bytes")
     }
 }
 
@@ -212,12 +208,7 @@ mod tests {
     #[test]
     fn from_string_roundtrip() {
         let str = "0000000000000000000000000000000000000000000000000000000000000000";
-        assert_eq!(
-            Hex32Bytes::from_hex(str)
-                .unwrap()
-                .to_string(),
-            str
-        );
+        assert_eq!(Hex32Bytes::from_hex(str).unwrap().to_string(), str);
     }
 
     #[test]
@@ -259,12 +250,7 @@ mod tests {
     #[test]
     fn from_vec_roundtrip() {
         let vec = Vec::from([0u8; 32]);
-        assert_eq!(
-            Hex32Bytes::from_vec(vec.clone())
-                .unwrap()
-                .to_vec(),
-            vec
-        );
+        assert_eq!(Hex32Bytes::from_vec(vec.clone()).unwrap().to_vec(), vec);
     }
 
     #[test]

@@ -35,8 +35,7 @@ impl Debug for Gateway {
         write!(
             f,
             "{}: {}",
-            self.network
-                .display_description,
+            self.network.display_description,
             self.url.to_string(),
         )
     }

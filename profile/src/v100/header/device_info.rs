@@ -135,12 +135,7 @@ mod tests {
 
     #[test]
     fn date_is_now() {
-        assert!(
-            DeviceInfo::new_iphone()
-                .date
-                .year()
-                >= 2023
-        );
+        assert!(DeviceInfo::new_iphone().date.year() >= 2023);
     }
 
     #[test]

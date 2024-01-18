@@ -104,17 +104,15 @@ mod tests {
 
     #[test]
     fn with_counters_constructor() {
-        (0..100)
-            .into_iter()
-            .for_each(|i| {
-                let x = i + 1;
-                let y = i + 2;
-                let z = i + 3;
-                let sut = ContentHint::with_counters(x, y, z);
-                assert_eq!(sut.number_of_accounts_on_all_networks_in_total as usize, x);
-                assert_eq!(sut.number_of_personas_on_all_networks_in_total as usize, y);
-                assert_eq!(sut.number_of_networks as usize, z)
-            });
+        (0..100).into_iter().for_each(|i| {
+            let x = i + 1;
+            let y = i + 2;
+            let z = i + 3;
+            let sut = ContentHint::with_counters(x, y, z);
+            assert_eq!(sut.number_of_accounts_on_all_networks_in_total as usize, x);
+            assert_eq!(sut.number_of_personas_on_all_networks_in_total as usize, y);
+            assert_eq!(sut.number_of_networks as usize, z)
+        });
     }
 
     #[test]

@@ -121,8 +121,7 @@ impl Gateways {
         if !was_inserted {
             return Err(CommonError::GatewaysDiscrepancyOtherShouldNotContainCurrent);
         }
-        self.other
-            .remove_by_id(&to.id());
+        self.other.remove_by_id(&to.id());
         self.current = to;
         Ok(true)
     }
