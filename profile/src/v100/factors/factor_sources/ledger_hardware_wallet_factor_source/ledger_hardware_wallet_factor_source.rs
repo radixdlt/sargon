@@ -1,7 +1,10 @@
 use crate::prelude::*;
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug, uniffi::Record)]
+#[derive(
+    Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug, derive_more::Display, uniffi::Record,
+)]
 #[serde(rename_all = "camelCase")]
+#[display("{hint} : {id}")]
 pub struct LedgerHardwareWalletFactorSource {
     /// Unique and stable identifier of this factor source, stemming from the
     /// hash of a special child key of the HD root of the mnemonic,

@@ -5,8 +5,11 @@ use crate::prelude::*;
 /// all new Accounts and Personas an users authenticate signing by authorizing
 /// the client (Wallet App) to access a mnemonic stored in secure storage on
 /// the device.
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(
+    Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, derive_more::Display, uniffi::Record,
+)]
 #[serde(rename_all = "camelCase")]
+#[display("{hint} {id}")]
 pub struct DeviceFactorSource {
     /// Unique and stable identifier of this factor source, stemming from the
     /// hash of a special child key of the HD root of the mnemonic.

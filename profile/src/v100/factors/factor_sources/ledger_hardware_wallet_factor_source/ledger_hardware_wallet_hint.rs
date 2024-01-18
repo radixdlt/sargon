@@ -1,6 +1,9 @@
 use crate::prelude::*;
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(
+    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, derive_more::Display, uniffi::Record,
+)]
+#[display("{name} {model}")]
 pub struct LedgerHardwareWalletHint {
     /// "Orange, scratched"
     pub name: String,

@@ -2,8 +2,11 @@ use crate::prelude::*;
 
 /// Properties describing a DeviceFactorSource to help user disambiguate between
 /// it and another one.
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(
+    Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, derive_more::Display, uniffi::Record,
+)]
 #[serde(rename_all = "camelCase")]
+#[display("{name} {model}")]
 pub struct DeviceFactorSourceHint {
     /// "iPhone RED"
     pub name: String,

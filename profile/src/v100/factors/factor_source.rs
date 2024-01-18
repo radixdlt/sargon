@@ -1,15 +1,28 @@
 use crate::prelude::*;
 
-#[derive(Serialize, Deserialize, Clone, EnumAsInner, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(
+    Serialize,
+    Deserialize,
+    Clone,
+    EnumAsInner,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    derive_more::Display,
+    uniffi::Enum,
+)]
 #[serde(untagged, remote = "Self")]
 pub enum FactorSource {
     Device {
         #[serde(rename = "device")]
+        #[display("DeviceFS({value})")]
         value: DeviceFactorSource,
     },
 
     Ledger {
         #[serde(rename = "ledgerHQHardwareWallet")]
+        #[display("LedgerHWFS({value})")]
         value: LedgerHardwareWalletFactorSource,
     },
 }

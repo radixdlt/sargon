@@ -12,7 +12,8 @@ impl Identifiable for Header {
 
 #[derive(Debug, uniffi::Object)]
 pub struct Wallet {
-    profile: RwLock<Profile>,
+    // This is pub(crate) for testing purposes only, i.e. causing the RwLock to be poisoned.
+    pub(crate) profile: RwLock<Profile>,
     pub(crate) wallet_client_storage: WalletClientStorage,
 }
 

@@ -34,7 +34,7 @@ impl Wallet {
         self.add_factor_source(private_device_factor_source.factor_source.into())
             .map_err(|e| {
                 error!(
-                    "Failed to Private DeviceFactorSource to SecureStorage, factor source id: {}",
+                    "Failed to add Private DeviceFactorSource to SecureStorage, factor source id: {}",
                     id
                 );
                 _ = self.wallet_client_storage.delete_mnemonic(&id);
@@ -52,10 +52,20 @@ impl Wallet {
     /// edited.
     pub fn add_factor_source(&self, factor_source: FactorSource) -> Result<()> {
         self.try_write(|mut p| {
+            trace!(
+                "About to add FactorSource: {}, to list of factor sources: {}",
+                &factor_source,
+                &p.factor_sources
+            );
             if p.factor_sources.append(factor_source.to_owned()).0 {
-                Err(CommonError::Unknown)
-            } else {
+                debug!("Added FactorSource: {}", &factor_source);
                 Ok(())
+            } else {
+                error!(
+                    "FactorSource not added, already present: {}",
+                    &factor_source
+                );
+                Err(CommonError::Unknown)
             }
         })
         .map_err(
@@ -188,6 +198,14 @@ impl Wallet {
 #[cfg(test)]
 mod tests {
 
+    use std::{
+        borrow::{Borrow, BorrowMut},
+        ops::Deref,
+        sync::atomic::AtomicBool,
+    };
+
+    use __private__::{Mutex, RwLock};
+
     use crate::prelude::*;
 
     #[test]
@@ -227,6 +245,97 @@ mod tests {
                 .unwrap()
                 .mnemonic_with_passphrase,
             MnemonicWithPassphrase::placeholder()
+        );
+    }
+
+    #[test]
+    pub fn add_private_device_factor_source_successful() {
+        let profile = Profile::placeholder();
+        let new =
+            PrivateHierarchicalDeterministicFactorSource::generate_new(WalletClientModel::Unknown);
+        let (wallet, storage) = Wallet::ephemeral(profile.clone());
+        assert_eq!(
+            profile
+                .factor_sources
+                .contains_id(&new.clone().factor_source.factor_source_id()),
+            false
+        );
+        assert!(wallet.add_private_device_factor_source(new.clone()).is_ok());
+        assert!(storage.storage.read().unwrap().contains_key(
+            &SecureStorageKey::DeviceFactorSourceMnemonic {
+                factor_source_id: new.clone().factor_source.id,
+            },
+        ));
+        assert_eq!(
+            wallet
+                .profile()
+                .factor_sources
+                .contains_id(&new.clone().factor_source.factor_source_id()),
+            true
+        );
+    }
+
+    #[test]
+    pub fn add_private_device_factor_source_ok_storage_when_save_to_profile_fails_then_deleted_from_storage(
+    ) {
+        let profile = Profile::placeholder();
+        let new =
+            PrivateHierarchicalDeterministicFactorSource::generate_new(WalletClientModel::Unknown);
+
+        assert_eq!(
+            profile
+                .factor_sources
+                .contains_id(&new.clone().factor_source.factor_source_id()),
+            false
+        );
+        let delete_data_was_called = Arc::new(RwLock::new(Option::<SecureStorageKey>::None));
+        #[derive(Debug)]
+        struct TestStorage {
+            delete_data_was_called: Arc<RwLock<Option<SecureStorageKey>>>,
+        }
+        impl SecureStorage for TestStorage {
+            fn load_data(&self, _key: SecureStorageKey) -> Result<Option<Vec<u8>>> {
+                todo!()
+            }
+
+            fn save_data(&self, _key: SecureStorageKey, _data: Vec<u8>) -> Result<()> {
+                Ok(()) // mnemonic gets saved
+            }
+
+            fn delete_data_for_key(&self, key: SecureStorageKey) -> Result<()> {
+                let mut delete_data_was_called = self.delete_data_was_called.write().unwrap();
+                *delete_data_was_called = Some(key);
+                Ok(())
+            }
+        }
+        let storage = Arc::new(TestStorage {
+            delete_data_was_called: delete_data_was_called.clone(),
+        });
+        let wallet = Wallet::by_importing_profile(profile, storage.clone());
+
+        // Acquire write lock, in order to make `wallet.add_private_device_factor_source` fail (because cant have multiple writers).
+        let lock = wallet.profile.write().unwrap();
+
+        assert_eq!(
+            wallet.add_private_device_factor_source(new.clone()),
+            Err(CommonError::UnableToSaveFactorSourceToProfile(
+                new.factor_source.factor_source_id()
+            ))
+        );
+        drop(lock);
+
+        assert_eq!(
+            wallet
+                .profile()
+                .factor_sources
+                .contains_id(&new.clone().factor_source.factor_source_id()),
+            false // should not have been saved.
+        );
+        assert_eq!(
+            delete_data_was_called.read().unwrap().clone().unwrap(),
+            SecureStorageKey::DeviceFactorSourceMnemonic {
+                factor_source_id: new.clone().factor_source.id
+            }
         );
     }
 }
