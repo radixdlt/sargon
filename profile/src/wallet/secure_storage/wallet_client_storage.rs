@@ -143,6 +143,7 @@ mod tests {
             Ok(None)
         );
     }
+
     #[test]
     fn load_fail_to_deserialize_json() {
         let sut = make_sut();
@@ -159,6 +160,19 @@ mod tests {
                 json_byte_count: 1,
                 type_name: "profile::v100::profile::Profile".to_string()
             })
+        );
+    }
+
+    #[test]
+    fn load_successful() {
+        let sut = make_sut();
+
+        assert!(sut
+            .save(SecureStorageKey::ActiveProfileID, &Profile::placeholder())
+            .is_ok());
+        assert_eq!(
+            sut.load::<Profile>(SecureStorageKey::ActiveProfileID),
+            Ok(Some(Profile::placeholder()))
         );
     }
 }
