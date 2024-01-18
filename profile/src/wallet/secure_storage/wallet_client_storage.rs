@@ -133,6 +133,28 @@ impl WalletClientStorage {
         let storage = EphemeralSecureStorage::new();
         (WalletClientStorage::new(storage.clone()), storage)
     }
+
+    pub(crate) fn always_fail() -> Self {
+        WalletClientStorage::new(Arc::new(AlwaysFailStorage {}))
+    }
+}
+#[cfg(test)]
+#[derive(Debug)]
+struct AlwaysFailStorage {}
+
+#[cfg(test)]
+impl SecureStorage for AlwaysFailStorage {
+    fn load_data(&self, _key: SecureStorageKey) -> Result<Option<Vec<u8>>> {
+        todo!()
+    }
+
+    fn save_data(&self, _key: SecureStorageKey, _data: Vec<u8>) -> Result<()> {
+        Err(CommonError::Unknown)
+    }
+
+    fn delete_data_for_key(&self, _key: SecureStorageKey) -> Result<()> {
+        todo!()
+    }
 }
 
 #[cfg(test)]
@@ -238,5 +260,15 @@ mod tests {
             .map(|b| String::from_utf8(b.unwrap()).unwrap())
             .unwrap()
             .contains("zoo"));
+    }
+
+    #[test]
+    fn save_mnemonic_with_passphrase_failure() {
+        let sut = WalletClientStorage::always_fail();
+        let id = FactorSourceIDFromHash::placeholder();
+        assert_eq!(
+            sut.save_mnemonic_with_passphrase(&MnemonicWithPassphrase::placeholder(), &id),
+            Err(CommonError::UnableToSaveMnemonicToSecureStorage(id.clone()))
+        );
     }
 }
