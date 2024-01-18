@@ -17,10 +17,6 @@ pub struct HDFactorInstanceTransactionSigning<E: IsEntityPath + Clone> {
     pub path: E,
 }
 
-// impl<T: IsEntityPath + Clone> TryFrom<HierarchicalDeterministicFactorInstance>
-//     for HDFactorInstanceTransactionSigning<T>
-// {
-//     type Error = crate::CommonError;
 impl<T: IsEntityPath + Clone> HDFactorInstanceTransactionSigning<T> {
     fn try_from_factor_instance(
         value: HierarchicalDeterministicFactorInstance,
@@ -81,7 +77,6 @@ where
     T: IsEntityPath + Clone,
 {
     pub fn new(hd_factor_instance: HierarchicalDeterministicFactorInstance) -> Result<Self, Error> {
-        // hd_factor_instance.try_into()
         Self::try_from_factor_instance(hd_factor_instance)
     }
 }
