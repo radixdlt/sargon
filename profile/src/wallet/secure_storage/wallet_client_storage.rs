@@ -271,4 +271,23 @@ mod tests {
             Err(CommonError::UnableToSaveMnemonicToSecureStorage(id.clone()))
         );
     }
+
+    #[test]
+    fn delete_mnemonic() {
+        // ARRANGE
+        let private = PrivateHierarchicalDeterministicFactorSource::placeholder_other();
+        let factor_source_id = private.factor_source.id.clone();
+        let (sut, storage) = WalletClientStorage::ephemeral();
+        let key = SecureStorageKey::DeviceFactorSourceMnemonic {
+            factor_source_id: factor_source_id.clone(),
+        };
+        assert!(storage.save_data(key.clone(), vec![0xde, 0xad]).is_ok());
+        assert_eq!(storage.load_data(key.clone()), Ok(Some(vec![0xde, 0xad]))); // assert save worked
+
+        // ACT
+        assert!(sut.delete_mnemonic(&factor_source_id).is_ok());
+
+        // ASSERT
+        assert_eq!(storage.load_data(key), Ok(None));
+    }
 }
