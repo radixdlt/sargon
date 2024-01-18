@@ -126,3 +126,39 @@ impl WalletClientStorage {
             })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::prelude::*;
+
+    fn make_sut() -> WalletClientStorage {
+        WalletClientStorage::new(EphemeralSecureStorage::new())
+    }
+
+    #[test]
+    fn load_ok_when_none() {
+        let sut = make_sut();
+        assert_eq!(
+            sut.load::<Profile>(SecureStorageKey::ActiveProfileID),
+            Ok(None)
+        );
+    }
+    #[test]
+    fn load_fail_to_deserialize_json() {
+        let sut = make_sut();
+
+        assert!(sut
+            .save(
+                SecureStorageKey::ActiveProfileID,
+                &0u8, // obviously a u8 is not a Profile
+            )
+            .is_ok());
+        assert_eq!(
+            sut.load::<Profile>(SecureStorageKey::ActiveProfileID),
+            Err(CommonError::FailedToDeserializeJSONToValue {
+                json_byte_count: 1,
+                type_name: "profile::v100::profile::Profile".to_string()
+            })
+        );
+    }
+}
