@@ -371,7 +371,7 @@ mod tests {
     }
 
     #[test]
-    fn create_new_account_success() {
+    fn create_new_account_not_first_success() {
         let (wallet, storage) = Wallet::ephemeral(Profile::placeholder());
         assert_eq!(wallet.profile().networks[0].accounts.len(), 2);
 
@@ -396,5 +396,33 @@ mod tests {
 
         // Account SHOULD NOT yet have been saved into Profile, so number of accounts should still be 2
         assert_eq!(wallet.profile().networks[0].accounts.len(), 2);
+    }
+
+    #[test]
+    fn create_new_account_first_success() {
+        let private = PrivateHierarchicalDeterministicFactorSource::placeholder();
+        let (wallet, storage) = Wallet::ephemeral(Profile::new(private.clone(), "Test"));
+        assert_eq!(wallet.profile().networks.len(), 0); // no accounts yet, no networks even
+
+        let data = serde_json::to_vec(&private.mnemonic_with_passphrase).unwrap();
+        let key = SecureStorageKey::DeviceFactorSourceMnemonic {
+            factor_source_id: private.clone().factor_source.id.clone(),
+        };
+        assert!(storage.save_data(key.clone(), data).is_ok());
+
+        let account = wallet
+            .create_new_account(NetworkID::Mainnet, DisplayName::new("Zero").unwrap())
+            .unwrap();
+
+        assert_eq!(account.display_name.value, "Zero");
+        assert_eq!(account.network_id, NetworkID::Mainnet);
+        assert_eq!(
+            account.address.address,
+            "account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8"
+        );
+        assert_eq!(account.appearance_id, AppearanceID::new(0).unwrap());
+
+        // Account SHOULD NOT yet have been saved into Profile, so number of accounts should still be 2
+        assert_eq!(wallet.profile().networks.len(), 0);
     }
 }
