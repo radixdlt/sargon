@@ -356,7 +356,14 @@ mod tests {
     fn load_private_device_factor_source_by_id() {
         let profile = Profile::placeholder();
         let private = PrivateHierarchicalDeterministicFactorSource::placeholder();
-        let (wallet, _) = Wallet::ephemeral(profile.clone());
+        let (wallet, storage) = Wallet::ephemeral(profile.clone());
+
+        let data = serde_json::to_vec(&private.mnemonic_with_passphrase).unwrap();
+        let key = SecureStorageKey::DeviceFactorSourceMnemonic {
+            factor_source_id: private.clone().factor_source.id.clone(),
+        };
+        assert!(storage.save_data(key.clone(), data.clone()).is_ok());
+
         assert_eq!(
             wallet.load_private_device_factor_source_by_id(&private.factor_source.id.clone()),
             Ok(private.clone())

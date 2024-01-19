@@ -9,17 +9,23 @@ use crate::prelude::*;
 )]
 #[serde(transparent)]
 #[display("<OBFUSCATED>")]
-#[debug("{:?}", self.non_sensitive())]
+#[debug("{:?}", self.partially_obfuscated_string())]
 pub struct BIP39Passphrase(pub String);
 
-impl SafeToLog for BIP39Passphrase {
-    /// Logs the word count and FactorSourceID o
-    fn non_sensitive(&self) -> impl std::fmt::Debug {
+impl BIP39Passphrase {
+    pub fn partially_obfuscated_string(&self) -> String {
         if self.0.is_empty() {
             "<EMPTY>"
         } else {
             "<NOT EMPTY>"
         }
+        .to_string()
+    }
+}
+impl SafeToLog for BIP39Passphrase {
+    /// Logs the word count and FactorSourceID o
+    fn non_sensitive(&self) -> impl std::fmt::Debug {
+        self.partially_obfuscated_string()
     }
 }
 
@@ -71,20 +77,23 @@ mod tests {
     }
 
     #[test]
-    fn display() {
-        assert_eq!(
-            format!("{}", BIP39Passphrase::new("so secret")),
-            "<NOT EMPTY>"
-        );
-        assert_eq!(format!("{}", BIP39Passphrase::default()), "<EMPTY>");
-    }
-
-    #[test]
     fn debug() {
         assert_eq!(
             format!("{:?}", BIP39Passphrase::new("so secret")),
+            format!("{:?}", "<NOT EMPTY>")
+        );
+        assert_eq!(
+            format!("{:?}", BIP39Passphrase::default()),
+            format!("{:?}", "<EMPTY>")
+        );
+    }
+
+    #[test]
+    fn display() {
+        assert_eq!(
+            format!("{}", BIP39Passphrase::new("so secret")),
             "<OBFUSCATED>"
         );
-        assert_eq!(format!("{:?}", BIP39Passphrase::default()), "<OBFUSCATED>");
+        assert_eq!(format!("{}", BIP39Passphrase::default()), "<OBFUSCATED>");
     }
 }

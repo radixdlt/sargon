@@ -5,29 +5,41 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Hash,
-    SerializeDisplay,
     DeserializeFromStr,
     derive_more::Display,
     derive_more::Debug,
     uniffi::Record,
 )]
-#[display("OBFUSCATED")]
-#[debug("{:?}", self.non_sensitive())]
+#[display("{}", self.to_obfuscated_string())]
+#[debug("{:?}", self.partially_obfuscated_string())]
 pub struct Mnemonic {
     pub words: Vec<BIP39Word>,
     pub word_count: BIP39WordCount,
     pub language: BIP39Language,
 }
 
-impl SafeToLog for Mnemonic {
-    /// Logs the word count and FactorSourceID o
-    fn non_sensitive(&self) -> impl std::fmt::Debug {
+impl Serialize for Mnemonic {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.phrase().serialize(serializer)
+    }
+}
+impl Mnemonic {
+    pub fn partially_obfuscated_string(&self) -> String {
         format!(
             "{} ({}...{})",
             self.word_count,
             self.words.first().unwrap().word,
             self.words.last().unwrap().word
         )
+    }
+}
+impl SafeToLog for Mnemonic {
+    /// Logs the word count and FactorSourceID o
+    fn non_sensitive(&self) -> impl std::fmt::Debug {
+        self.partially_obfuscated_string()
     }
 }
 
@@ -129,7 +141,10 @@ mod tests {
     #[test]
     fn debug() {
         let mnemonic = Mnemonic::placeholder();
-        assert_eq!(format!("{:?}", mnemonic), "24 words (bright...mandate)")
+        assert_eq!(
+            format!("{:?}", mnemonic),
+            format!("{:?}", "24 words (bright...mandate)")
+        );
     }
 
     #[test]

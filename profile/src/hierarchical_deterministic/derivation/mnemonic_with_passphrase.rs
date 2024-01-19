@@ -15,20 +15,25 @@ use crate::prelude::*;
 )]
 #[serde(rename_all = "camelCase")]
 #[display("<OBFUSCATED>")]
-#[debug("{:?}", self.non_sensitive())]
+#[debug("{:?}", self.partially_obfuscated_string())]
 pub struct MnemonicWithPassphrase {
     pub mnemonic: Mnemonic,
     pub passphrase: BIP39Passphrase,
 }
 
+impl MnemonicWithPassphrase {
+    pub fn partially_obfuscated_string(&self) -> String {
+        format!(
+            "{} + {}",
+            self.mnemonic.partially_obfuscated_string(),
+            self.passphrase.partially_obfuscated_string()
+        )
+    }
+}
 impl SafeToLog for MnemonicWithPassphrase {
     /// Logs the word count and FactorSourceID o
     fn non_sensitive(&self) -> impl std::fmt::Debug {
-        format!(
-            "{:?} + {:?}",
-            self.mnemonic.non_sensitive(),
-            self.passphrase.non_sensitive()
-        )
+        self.partially_obfuscated_string()
     }
 }
 
@@ -152,11 +157,24 @@ mod tests {
             MnemonicWithPassphrase::placeholder_other()
         );
     }
+
     #[test]
     fn display() {
         assert_eq!(
             format!("{}", MnemonicWithPassphrase::placeholder()),
-            "<NOT EMPTY>"
+            "<OBFUSCATED>"
+        );
+    }
+
+    #[test]
+    fn debug() {
+        assert_eq!(
+            format!("{:?}", MnemonicWithPassphrase::placeholder()),
+            format!("{:?}", "24 words (bright...mandate) + <NOT EMPTY>")
+        );
+        assert_eq!(
+            format!("{:?}", MnemonicWithPassphrase::placeholder_other()),
+            format!("{:?}", "12 words (zoo...wrong) + <EMPTY>")
         );
     }
 

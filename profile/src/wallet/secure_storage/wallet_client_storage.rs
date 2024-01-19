@@ -53,9 +53,15 @@ impl WalletClientStorage {
         self.interface.load_data(key).and_then(|o| match o {
             None => Ok(None),
             Some(j) => serde_json::from_slice(j.as_slice()).map_err(|_| {
+                let type_name = std::any::type_name::<T>().to_string();
+                error!(
+                    "Failed to deserialize json to type: {}\nJSON (utf8):\n{:?}",
+                    &type_name,
+                    String::from_utf8(j.clone())
+                );
                 CommonError::FailedToDeserializeJSONToValue {
                     json_byte_count: j.len(),
-                    type_name: std::any::type_name::<T>().to_string(),
+                    type_name,
                 }
             }),
         })
