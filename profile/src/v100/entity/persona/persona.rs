@@ -60,22 +60,6 @@ impl Persona {
         }
     }
 
-    /// Instantiates an persona with a display name, address and appearance id.
-    pub fn placeholder_with_values(address: IdentityAddress, display_name: DisplayName) -> Self {
-        Self {
-            network_id: address.network_id.clone(),
-            address,
-            display_name,
-            flags: EntityFlags::default().into(),
-            security_state: EntitySecurityState::placeholder(),
-            persona_data: PersonaData::default(),
-        }
-    }
-
-    fn placeholder_at_index_name(index: HDPathValue, name: &str) -> Self {
-        Self::placeholder_at_index_name_network(NetworkID::Mainnet, index, name)
-    }
-
     fn placeholder_at_index_name_network(
         network_id: NetworkID,
         index: HDPathValue,
@@ -94,58 +78,16 @@ impl Persona {
         )
     }
 
-    /// A `Mainnet` persona named "Alice", a placeholder used to facilitate unit tests, with
-    /// derivation index 0,
-    pub fn placeholder_mainnet_alice() -> Self {
-        Self::placeholder_at_index_name(0, "Alice")
+    fn placeholder_at_index_name(index: HDPathValue, name: &str) -> Self {
+        Self::placeholder_at_index_name_network(NetworkID::Mainnet, index, name)
     }
 
-    /// A `Mainnet` persona named "Bob", a placeholder used to facilitate unit tests, with
-    /// derivation index 1.
-    pub fn placeholder_mainnet_bob() -> Self {
-        Self::placeholder_at_index_name(1, "Bob")
+    pub fn placeholder_satoshi() -> Self {
+        Self::placeholder_at_index_name(0, "Satoshi")
     }
 
-    /// A `Mainnet` persona named "Carol", a placeholder used to facilitate unit tests, with
-    /// derivation index 2.
-    pub fn placeholder_mainnet_carol() -> Self {
-        Self::placeholder_at_index_name(2, "Carol")
-    }
-
-    /// A `Mainnet` persona named "Alice", a placeholder used to facilitate unit tests, with
-    /// derivation index 0,
-    pub fn placeholder_alice() -> Self {
-        Self::placeholder_mainnet_alice()
-    }
-
-    /// A `Mainnet` persona named "Bob", a placeholder used to facilitate unit tests, with
-    /// derivation index 1.
-    pub fn placeholder_bob() -> Self {
-        Self::placeholder_mainnet_bob()
-    }
-
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_mainnet() -> Self {
-        Self::placeholder_mainnet_alice()
-    }
-
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_stokenet_carol() -> Self {
-        Self::placeholder_at_index_name_network(NetworkID::Stokenet, 0, "Carol")
-    }
-
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_stokenet() -> Self {
-        Self::placeholder_stokenet_carol()
-    }
-
-    /// A `Mainnet` persona named "Batman", a placeholder used to facilitate unit tests,
-    pub fn placeholder_persona_batman() -> Self {
-        let identity_address: IdentityAddress =
-            "identity_rdx12gzxlgre0glhh9jxaptm7tdth8j4w4r8ykpg2xjfv45nghzsjzrvmp"
-                .try_into()
-                .unwrap();
-        Self::placeholder_with_values(identity_address, DisplayName::new("Batman").unwrap())
+       pub fn placeholder_batman() -> Self {
+        Self::placeholder_at_index_name(1, "Batman")
     }
 }
 
@@ -192,11 +134,11 @@ impl Identifiable for Persona {
 /// Placeholder conformance to facilitate unit-tests
 impl HasPlaceholder for Persona {
     fn placeholder() -> Self {
-        Self::placeholder_alice()
+        Self::placeholder_satoshi()
     }
 
     fn placeholder_other() -> Self {
-        Self::placeholder_bob()
+        Self::placeholder_batman()
     }
 }
 
@@ -226,51 +168,48 @@ mod tests {
 
     #[test]
     fn compare() {
-        assert!(Persona::placeholder_alice() < Persona::placeholder_bob());
+        assert!(Persona::placeholder_batman() > Persona::placeholder_satoshi());
     }
 
     #[test]
     fn new_with_identity_and_name() {
         let identity_address: IdentityAddress =
-            "identity_rdx12gzxlgre0glhh9jxaptm7tdth8j4w4r8ykpg2xjfv45nghzsjzrvmp"
+            "identity_rdx12gcd4r799jpvztlffgw483pqcen98pjnay988n8rmscdswd872xy62"
                 .try_into()
                 .unwrap();
-        let persona = Persona::placeholder_with_values(
-            identity_address.clone(),
-            DisplayName::new("Batman").unwrap(),
-        );
+        let persona = Persona::placeholder_batman();
         assert_eq!(persona.address, identity_address);
     }
 
     #[test]
     fn display() {
-        let account = Persona::placeholder_persona_batman();
+        let account = Persona::placeholder_batman();
         assert_eq!(
             format!("{account}"),
-            "Batman | identity_rdx12gzxlgre0glhh9jxaptm7tdth8j4w4r8ykpg2xjfv45nghzsjzrvmp"
+            "Batman | identity_rdx12gcd4r799jpvztlffgw483pqcen98pjnay988n8rmscdswd872xy62"
         );
     }
 
     #[test]
     fn display_name_get_set() {
-        let mut persona = Persona::placeholder_persona_batman();
+        let mut persona = Persona::placeholder_batman();
         assert_eq!(persona.display_name.value, "Batman");
-        let new_display_name = DisplayName::new("Superman").unwrap();
+        let new_display_name = DisplayName::new("Satoshi").unwrap();
         persona.display_name = new_display_name.clone();
         assert_eq!(persona.display_name, new_display_name);
     }
 
     #[test]
     fn update() {
-        let mut persona = Persona::placeholder_persona_batman();
-        assert_eq!(persona.display_name.value, "Batman");
-        persona.display_name = DisplayName::new("Satoshi").unwrap();
+        let mut persona = Persona::placeholder_satoshi();
         assert_eq!(persona.display_name.value, "Satoshi");
+        persona.display_name = DisplayName::new("Batman").unwrap();
+        assert_eq!(persona.display_name.value, "Batman");
     }
 
     #[test]
     fn flags_get_set() {
-        let mut persona = Persona::placeholder_persona_batman();
+        let mut persona = Persona::placeholder_batman();
         assert_eq!(persona.flags, EntityFlags::default());
         let new_flags = EntityFlags::with_flag(EntityFlag::DeletedByUser);
         persona.flags = new_flags.clone();
@@ -278,40 +217,22 @@ mod tests {
     }
 
     #[test]
-    fn json_serialize() {
-        let model = Persona::placeholder_alice();
-        let jsonstr = serde_json::to_string(&model).unwrap();
-        println!("{}", jsonstr);
-    }
-
-    #[test]
     fn placerholder_display_name() {
         let placeholder = Persona::placeholder();
-        assert_eq!(placeholder.display_name, DisplayName::new("Alice").unwrap());
+        assert_eq!(placeholder.display_name, DisplayName::new("Satoshi").unwrap());
     }
 
     #[test]
-    fn placeholder_other_display_name() {
-        let placeholder_other = Persona::placeholder_other();
-        assert_eq!(
-            placeholder_other.display_name,
-            DisplayName::new("Bob").unwrap()
-        );
-    }
-
-    #[test]
-    fn placeholder_alice_security_state() {
-        let persona = Persona::placeholder_alice();
-        let jsonstr = serde_json::to_string(&persona.security_state).unwrap();
-        println!("{:#?}", jsonstr);
-        // assert_eq!(persona.security_state, EntitySecurityState::Unsecured {  });
+    fn placerholder_other_display_name() {
+        let placeholder = Persona::placeholder_other();
+        assert_eq!(placeholder.display_name, DisplayName::new("Batman").unwrap());
     }
 
     #[test]
     fn identifiable() {
-        let persona = Persona::placeholder_persona_batman();
+        let persona = Persona::placeholder_batman();
         let identity_address: IdentityAddress =
-            "identity_rdx12gzxlgre0glhh9jxaptm7tdth8j4w4r8ykpg2xjfv45nghzsjzrvmp"
+            "identity_rdx12gcd4r799jpvztlffgw483pqcen98pjnay988n8rmscdswd872xy62"
                 .try_into()
                 .unwrap();
         assert_eq!(persona.id(), identity_address);
@@ -319,13 +240,13 @@ mod tests {
 
     #[test]
     fn json_roundtrip_batman() {
-        let model = Persona::placeholder_persona_batman();
+        let model = Persona::placeholder_batman();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
             {
                 "networkID": 1,
-                "address": "identity_rdx12gzxlgre0glhh9jxaptm7tdth8j4w4r8ykpg2xjfv45nghzsjzrvmp",
+                "address": "identity_rdx12gcd4r799jpvztlffgw483pqcen98pjnay988n8rmscdswd872xy62",
                 "displayName": "Batman",
                 "securityState": {
                   "discriminator": "unsecured",
@@ -345,11 +266,11 @@ mod tests {
                           "hierarchicalDeterministicPublicKey": {
                             "publicKey": {
                               "curve": "curve25519",
-                              "compressedData": "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b"
+                              "compressedData": "1fe80badc0520334ee339e4010491d417ca3aed0c9621698b10655529f0ee506"
                             },
                             "derivationPath": {
                               "scheme": "cap26",
-                              "path": "m/44H/1022H/1H/525H/1460H/0H"
+                              "path": "m/44H/1022H/1H/618H/1460H/1H"
                             }
                           }
                         }
@@ -365,8 +286,54 @@ mod tests {
     }
 
     #[test]
+    fn json_roundtrip_satoshi() {
+        let model = Persona::placeholder_satoshi();
+        assert_eq_after_json_roundtrip(&model, 
+            r#"
+            {
+                "networkID": 1,
+                "address": "identity_rdx122kttqch0eehzj6f9nkkxcw7msfeg9udurq5u0ysa0e92c59w0mg6x",
+                "displayName": "Satoshi",
+                "securityState": {
+                  "discriminator": "unsecured",
+                  "unsecuredEntityControl": {
+                    "transactionSigning": {
+                      "factorSourceID": {
+                        "discriminator": "fromHash",
+                        "fromHash": {
+                          "kind": "device",
+                          "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+                        }
+                      },
+                      "badge": {
+                        "discriminator": "virtualSource",
+                        "virtualSource": {
+                          "discriminator": "hierarchicalDeterministicPublicKey",
+                          "hierarchicalDeterministicPublicKey": {
+                            "publicKey": {
+                              "curve": "curve25519",
+                              "compressedData": "983ab1d3a77dd6b30bb8a5d59d490a0380cc0aa9ab464983d3fc581fcf64543f"
+                            },
+                            "derivationPath": {
+                              "scheme": "cap26",
+                              "path": "m/44H/1022H/1H/618H/1460H/0H"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "flags": [],
+                "personaData": {}
+              }
+        "#
+    );
+    }
+
+    #[test]
     fn json_deserialization_works_without_flags_as_version_1_0_0_of_app() {
-        let json = serde_json::Value::from_str(
+        let json = serde_json::from_str(
             r#"
             {
                 "networkID": 1,
@@ -415,29 +382,22 @@ mod tests {
 
     #[test]
     fn placeholder_mainnet() {
-        let persona = Persona::placeholder_mainnet();
-        assert_eq!(persona.display_name.value, "Alice".to_string());
+        let persona = Persona::placeholder_batman();
+        assert_eq!(persona.display_name.value, "Batman".to_string());
         assert_eq!(persona.network_id, NetworkID::Mainnet);
     }
 
     #[test]
     fn placeholder_stokenet() {
-        let persona = Persona::placeholder_stokenet();
-        assert_eq!(persona.display_name.value, "Carol".to_string());
+        let persona = Persona::placeholder_at_index_name_network(NetworkID::Stokenet, 1, "Batman");
+        assert_eq!(persona.display_name.value, "Batman".to_string());
         assert_eq!(persona.network_id, NetworkID::Stokenet);
     }
 
     #[test]
-    fn placeholder_stokenet_carol() {
-        let persona = Persona::placeholder_stokenet_carol();
-        assert_eq!(persona.display_name.value, "Carol".to_string());
+    fn placeholder_stokenet_satoshi() {
+        let persona = Persona::placeholder_at_index_name_network(NetworkID::Stokenet, 0, "Satoshi");
+        assert_eq!(persona.display_name.value, "Satoshi".to_string());
         assert_eq!(persona.network_id, NetworkID::Stokenet);
-    }
-
-    #[test]
-    fn placeholder_mainnet_carol() {
-        let persona = Persona::placeholder_mainnet_carol();
-        assert_eq!(persona.display_name.value, "Carol".to_string());
-        assert_eq!(persona.network_id, NetworkID::Mainnet);
     }
 }

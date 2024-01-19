@@ -43,16 +43,7 @@ impl Serialize for CAP26Path {
 
 impl<'de> serde::Deserialize<'de> for CAP26Path {
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<CAP26Path, D::Error> {
-        let s = String::deserialize(d)?;
-        if let Ok(getid) = GetIDPath::from_str(&s) {
-            return Ok(CAP26Path::GetID {
-                value: getid.into(),
-            });
-        } else {
-            AccountPath::from_str(&s)
-                .map(|value| Self::AccountPath { value })
-                .map_err(de::Error::custom)
-        }
+        HDPath::deserialize(d).and_then(|p| Self::try_from(&p).map_err(de::Error::custom))
     }
 }
 
