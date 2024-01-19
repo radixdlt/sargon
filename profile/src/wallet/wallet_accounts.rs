@@ -369,4 +369,32 @@ mod tests {
             .unwrap();
         assert_eq!(loaded, private);
     }
+
+    #[test]
+    fn create_new_account_success() {
+        let (wallet, storage) = Wallet::ephemeral(Profile::placeholder());
+        assert_eq!(wallet.profile().networks[0].accounts.len(), 2);
+
+        let private = PrivateHierarchicalDeterministicFactorSource::placeholder();
+        let data = serde_json::to_vec(&private.mnemonic_with_passphrase).unwrap();
+        let key = SecureStorageKey::DeviceFactorSourceMnemonic {
+            factor_source_id: private.clone().factor_source.id.clone(),
+        };
+        assert!(storage.save_data(key.clone(), data).is_ok());
+
+        let account = wallet
+            .create_new_account(NetworkID::Mainnet, DisplayName::new("Alice").unwrap())
+            .unwrap();
+
+        assert_eq!(account.display_name.value, "Alice");
+        assert_eq!(account.network_id, NetworkID::Mainnet);
+        assert_eq!(
+            account.address.address,
+            "account_rdx12xvg2sssh0rpca6e8xyqv5vf4nqu928083yzf0fdrnvjdz2pvc000x" // pretty cool address! Random!
+        );
+        assert_eq!(account.appearance_id, AppearanceID::new(2).unwrap());
+
+        // Account SHOULD NOT yet have been saved into Profile, so number of accounts should still be 2
+        assert_eq!(wallet.profile().networks[0].accounts.len(), 2);
+    }
 }
