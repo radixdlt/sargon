@@ -204,9 +204,9 @@ mod tests {
         sync::atomic::AtomicBool,
     };
 
-    use __private__::{Mutex, RwLock};
-
     use crate::prelude::*;
+    pub use pretty_assertions::{assert_eq, assert_ne};
+    use std::sync::RwLock;
 
     #[test]
     fn change_display_name_of_accounts() {
@@ -362,11 +362,11 @@ mod tests {
         let key = SecureStorageKey::DeviceFactorSourceMnemonic {
             factor_source_id: private.clone().factor_source.id.clone(),
         };
-        assert!(storage.save_data(key.clone(), data.clone()).is_ok());
+        assert!(storage.save_data(key.clone(), data).is_ok());
 
-        assert_eq!(
-            wallet.load_private_device_factor_source_by_id(&private.factor_source.id.clone()),
-            Ok(private.clone())
-        );
+        let loaded = wallet
+            .load_private_device_factor_source_by_id(&private.factor_source.id.clone())
+            .unwrap();
+        assert_eq!(loaded, private);
     }
 }

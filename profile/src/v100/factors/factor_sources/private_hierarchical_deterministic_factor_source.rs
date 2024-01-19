@@ -89,16 +89,21 @@ impl PrivateHierarchicalDeterministicFactorSource {
 
 impl HasPlaceholder for PrivateHierarchicalDeterministicFactorSource {
     fn placeholder() -> Self {
-        Self::new_with_mnemonic_with_passphrase(
+        Self::new(
             MnemonicWithPassphrase::placeholder(),
-            WalletClientModel::Iphone,
+            DeviceFactorSource::placeholder_babylon(),
         )
     }
 
     fn placeholder_other() -> Self {
-        Self::new_with_mnemonic_with_passphrase(
-            MnemonicWithPassphrase::placeholder_other(),
-            WalletClientModel::Android,
+        let mwp = MnemonicWithPassphrase::placeholder_other();
+        Self::new(
+            mwp.clone(),
+            DeviceFactorSource::new(
+                FactorSourceIDFromHash::new_for_device(mwp),
+                FactorSourceCommon::placeholder_olympia(),
+                DeviceFactorSourceHint::placeholder_other(),
+            ),
         )
     }
 }
