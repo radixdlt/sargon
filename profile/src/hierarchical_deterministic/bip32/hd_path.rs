@@ -4,7 +4,6 @@ use slip10::path::BIP32Path;
 
 #[derive(
     Clone,
-    Debug,
     PartialEq,
     Eq,
     Hash,
@@ -13,9 +12,11 @@ use slip10::path::BIP32Path;
     SerializeDisplay,
     DeserializeFromStr,
     derive_more::Display,
+    derive_more::Debug,
     uniffi::Record,
 )]
 #[display("{}", self.to_bip32_string())]
+#[debug("{}", self.to_bip32_string())]
 pub struct HDPath {
     pub components: Vec<HDPathComponent>,
 }
@@ -116,8 +117,9 @@ impl HDPath {
     where
         F: FnOnce(usize) -> CommonError,
     {
-        let path = HDPath::from_str(s).map_err(|_| CommonError::InvalidBIP32Path(s.to_string()))?;
-        return Self::try_parse_base_hdpath(&path, depth_error);
+        HDPath::from_str(s)
+            .map_err(|_| CommonError::InvalidBIP32Path(s.to_string()))
+            .and_then(|p| Self::try_parse_base_hdpath(&p, depth_error))
     }
 }
 
@@ -155,11 +157,30 @@ mod tests {
     }
 
     #[test]
+    fn debug() {
+        let path = HDPath::harden([44, 1022]);
+        assert_eq!(format!("{:?}", path), "m/44H/1022H");
+    }
+
+    #[test]
     fn from_str() {
         assert_eq!(
             HDPath::from_str("m/44H/1022H").unwrap(),
             HDPath::harden([44, 1022])
         );
+    }
+
+    #[test]
+    fn ord() {
+        assert!(HDPath::harden([44, 2]) > HDPath::harden([44, 1]));
+    }
+
+    #[test]
+    fn uniffi_record() {
+        #[derive(uniffi::Record)]
+        struct Holder {
+            inner: HDPath,
+        }
     }
 
     #[test]

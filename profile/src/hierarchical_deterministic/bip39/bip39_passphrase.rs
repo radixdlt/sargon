@@ -96,4 +96,16 @@ mod tests {
         );
         assert_eq!(format!("{}", BIP39Passphrase::default()), "<OBFUSCATED>");
     }
+
+    #[test]
+    fn non_sensitive() {
+        assert_eq!(
+            format!("{:?}", BIP39Passphrase::new("so secret").non_sensitive()),
+            format!("{:?}", "<NOT EMPTY>")
+        );
+        assert_eq!(
+            format!("{:?}", BIP39Passphrase::default().non_sensitive()),
+            format!("{:?}", "<EMPTY>")
+        );
+    }
 }
