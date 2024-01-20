@@ -20,7 +20,9 @@ pub mod prelude {
 
     pub(crate) use std::collections::{BTreeSet, HashMap, HashSet};
 
-    pub(crate) use ::identified_vec::*;
+    pub(crate) use ::identified_vec::{
+        Identifiable, IdentifiedVec, IdentifiedVecOf, IsIdentifiedVec, ItemsCloned,
+    };
 
     pub(crate) use ::hex::decode as hex_decode;
     pub(crate) use ::hex::encode as hex_encode;

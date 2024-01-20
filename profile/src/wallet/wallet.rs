@@ -2,13 +2,6 @@ use crate::prelude::*;
 use std::sync::{Once, RwLock, RwLockReadGuard, RwLockWriteGuard};
 
 pub type HeadersList = IdentifiedVecVia<Header>;
-impl Identifiable for Header {
-    type ID = ProfileID;
-
-    fn id(&self) -> Self::ID {
-        self.id.clone()
-    }
-}
 
 #[derive(Debug, uniffi::Object)]
 pub struct Wallet {
@@ -242,6 +235,8 @@ impl Wallet {
 
 #[cfg(test)]
 mod tests {
+    use radix_engine_toolkit_json::models::transaction::header;
+
     use crate::prelude::*;
     #[test]
     fn read_header() {
@@ -253,5 +248,98 @@ mod tests {
     fn take_snapshot() {
         let wallet = Wallet::placeholder();
         assert_eq!(wallet.profile(), Profile::placeholder())
+    }
+}
+
+#[cfg(test)]
+mod uniffi_tests {
+    use crate::prelude::*;
+
+    #[test]
+    fn by_loading_profile_with_id() {
+        let profile = Profile::placeholder();
+        let secure_storage = EphemeralSecureStorage::new();
+        let data = serde_json::to_vec(&profile).unwrap();
+        assert!(secure_storage
+            .save_data(
+                SecureStorageKey::ProfileSnapshot {
+                    profile_id: profile.id(),
+                },
+                data,
+            )
+            .is_ok());
+        assert_eq!(
+            secure_storage.load_data(SecureStorageKey::ActiveProfileID),
+            Ok(None)
+        ); // we dont have any ActiveID yet.
+        let wallet =
+            Wallet::by_loading_profile_with_id(profile.id(), secure_storage.clone()).unwrap();
+        assert_eq!(wallet.profile(), profile);
+
+        // Assert an ActiveProfileID has been saved.
+        assert_eq!(
+            secure_storage.load_data(SecureStorageKey::ActiveProfileID),
+            Ok(Some(serde_json::to_vec(&profile.id()).unwrap()))
+        );
+    }
+
+    #[test]
+    fn by_loading_profile() {
+        let profile = Profile::placeholder();
+        let secure_storage = EphemeralSecureStorage::new();
+        let active_profile_id_data = serde_json::to_vec(&profile.id()).unwrap();
+        assert!(secure_storage
+            .save_data(SecureStorageKey::ActiveProfileID, active_profile_id_data)
+            .is_ok());
+        let data = serde_json::to_vec(&profile).unwrap();
+        assert!(secure_storage
+            .save_data(
+                SecureStorageKey::ProfileSnapshot {
+                    profile_id: profile.id(),
+                },
+                data,
+            )
+            .is_ok());
+        let wallet = Wallet::by_loading_profile(secure_storage).unwrap();
+        assert_eq!(wallet.profile(), profile);
+    }
+
+    #[test]
+    fn snapshot_json() {
+        let profile = Profile::placeholder();
+        let secure_storage = EphemeralSecureStorage::new();
+        let wallet = Wallet::by_importing_profile(profile.clone(), secure_storage);
+        let expected_json = serde_json::to_string(&profile).unwrap();
+        assert_eq!(wallet.json_snapshot(), expected_json);
+    }
+
+    #[test]
+    fn by_creating_new_profile_and_secrets_with_entropy() {
+        let secure_storage = EphemeralSecureStorage::new();
+        let wallet =
+            Wallet::by_creating_new_profile_and_secrets_with_entropy(
+                Vec::from_iter([0xff; 32]),
+                WalletClientModel::Unknown,
+                "Test".to_string(),
+                secure_storage.clone(),
+            )
+            .unwrap();
+        let mnemonic_json = secure_storage
+            .load_data(SecureStorageKey::DeviceFactorSourceMnemonic {
+                factor_source_id: wallet.profile().bdfs().id,
+            })
+            .unwrap()
+            .unwrap();
+        let mwp = serde_json::from_slice::<MnemonicWithPassphrase>(&mnemonic_json).unwrap();
+        assert_eq!(mwp.mnemonic.phrase(), "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo vote");
+
+        let active_id_data =
+            secure_storage
+                .load_data(SecureStorageKey::ActiveProfileID)
+                .unwrap()
+                .unwrap();
+
+        let active_id = serde_json::from_slice::<ProfileID>(&active_id_data).unwrap();
+        assert_eq!(active_id, wallet.profile().id());
     }
 }

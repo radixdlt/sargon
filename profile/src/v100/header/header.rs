@@ -65,6 +65,14 @@ impl Header {
     }
 }
 
+impl Identifiable for Header {
+    type ID = ProfileID;
+
+    fn id(&self) -> Self::ID {
+        self.id.clone()
+    }
+}
+
 impl Default for Header {
     fn default() -> Self {
         Self::new(DeviceInfo::default())
@@ -218,5 +226,12 @@ mod uniffi_tests {
     fn equality_placeholders() {
         assert_eq!(Header::placeholder(), new_header_placeholder());
         assert_eq!(Header::placeholder_other(), new_header_placeholder_other());
+    }
+
+    #[test]
+    fn header_identifiable() {
+        use identified_vec::Identifiable;
+        let sut = Header::placeholder();
+        assert_eq!(&sut.id(), &sut.id);
     }
 }
