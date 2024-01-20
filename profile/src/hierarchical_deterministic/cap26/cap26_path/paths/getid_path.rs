@@ -46,6 +46,7 @@ impl Default for GetIDPath {
 impl TryFrom<&HDPath> for GetIDPath {
     type Error = CommonError;
 
+    #[cfg(not(tarpaulin_include))] // false negative
     fn try_from(value: &HDPath) -> Result<Self> {
         let expected_depth = 3;
         let (path, components) =
@@ -76,6 +77,8 @@ impl GetIDPath {
 
 impl FromStr for GetIDPath {
     type Err = CommonError;
+
+    #[cfg(not(tarpaulin_include))] // false negative
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let (path, _) = HDPath::try_parse_base(s, |v| CommonError::InvalidDepthOfCAP26Path {
             expected: Self::PATH_DEPTH,

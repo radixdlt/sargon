@@ -46,6 +46,7 @@ impl WalletClientStorage {
     ///
     /// Returns `Ok(None)` if no bytes were found, returns Err if failed
     /// to load bytes or failed to deserialize the JSON into a `T`.
+    #[cfg(not(tarpaulin_include))] // false negative
     pub fn load<T>(&self, key: SecureStorageKey) -> Result<Option<T>>
     where
         T: for<'a> serde::Deserialize<'a>,
@@ -55,7 +56,7 @@ impl WalletClientStorage {
             Some(j) => serde_json::from_slice(j.as_slice()).map_err(|_| {
                 let type_name = std::any::type_name::<T>().to_string();
                 error!(
-                    "Failed to deserialize json to type: {}\nJSON (utf8):\n{:?}",
+                    "Deserialize json to type: {}\nJSON (utf8):\n{:?}",
                     &type_name,
                     String::from_utf8(j.clone())
                 );
