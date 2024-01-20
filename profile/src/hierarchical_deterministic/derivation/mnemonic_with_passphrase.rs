@@ -179,6 +179,24 @@ mod tests {
     }
 
     #[test]
+    fn non_sensitive() {
+        assert_eq!(
+            format!(
+                "{:?}",
+                MnemonicWithPassphrase::placeholder().non_sensitive()
+            ),
+            format!("{:?}", "24 words (bright...mandate) + <NOT EMPTY>")
+        );
+        assert_eq!(
+            format!(
+                "{:?}",
+                MnemonicWithPassphrase::placeholder_other().non_sensitive()
+            ),
+            format!("{:?}", "12 words (zoo...wrong) + <EMPTY>")
+        );
+    }
+
+    #[test]
     fn with_passphrase() {
         let phrase = "equip will roof matter pink blind book anxiety banner elbow sun young";
         let passphrase = "25th";
@@ -285,5 +303,15 @@ mod tests {
             "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b",
             private_key.public_key().to_hex()
         );
+    }
+
+    #[test]
+    fn hash() {
+        let n = 100;
+        let set = (0..n)
+            .into_iter()
+            .map(|_| MnemonicWithPassphrase::generate_new())
+            .collect::<HashSet<_>>();
+        assert_eq!(set.len(), n);
     }
 }

@@ -6,7 +6,7 @@ members = ["profile"]
 log = "0.4.20"
 pretty_env_logger = "0.5.0"
 derive_more = { version = "1.0.0-beta.6", features = ["debug", "display"] }
-serde = { version = "1.0.193", features = ["derive"] }
+serde = { version = "1.0.193", features = ["derive", "rc", "std"] }
 serde_json = { version = "1.0.108", features = ["preserve_order"] }
 serde_with = { version = "3.4.0" }
 thiserror = "1.0.50"

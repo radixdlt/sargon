@@ -5,7 +5,7 @@ edition = "2021"
 build = "build.rs"
 
 [dependencies]
-serde = { workspace = true, features = ["rc"] }
+serde = { workspace = true }
 serde_json = { workspace = true }
 serde_with = { workspace = true }
 thiserror = { workspace = true }
@@ -47,6 +47,7 @@ uniffi = { workspace = true, features = ["build"] }
 
 [dev-dependencies]
 uniffi = { workspace = true, features = ["bindgen-tests"] }
+serde = { workspace = true }
 
 [[test]]
 name = "vectors"

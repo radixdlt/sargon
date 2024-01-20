@@ -168,7 +168,7 @@ mod tests {
     use ::hex::FromHex;
 
     use crate::{prelude::*, wallet::secure_storage::ephemeral_secure_storage};
-    use std::sync::RwLock;
+    use std::{fmt::Write, sync::RwLock};
 
     fn make_sut() -> WalletClientStorage {
         WalletClientStorage::ephemeral().0
@@ -295,5 +295,25 @@ mod tests {
 
         // ASSERT
         assert_eq!(storage.load_data(key), Ok(None));
+    }
+
+    #[test]
+    fn save_fail_to_serialize() {
+        use serde::Serialize;
+        struct AlwaysFailSerialize {}
+        impl Serialize for AlwaysFailSerialize {
+            fn serialize<S>(&self, _serializer: S) -> core::result::Result<S::Ok, S::Error>
+            where
+                S: Serializer,
+            {
+                Err(CommonError::Unknown).map_err(serde::ser::Error::custom)
+            }
+        }
+
+        let (sut, _) = WalletClientStorage::ephemeral();
+        assert_eq!(
+            sut.save(SecureStorageKey::ActiveProfileID, &AlwaysFailSerialize {}),
+            Err(CommonError::FailedToSerializeToJSON)
+        );
     }
 }
