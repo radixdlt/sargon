@@ -22,6 +22,7 @@ pub struct MnemonicWithPassphrase {
 }
 
 impl MnemonicWithPassphrase {
+    #[cfg(not(tarpaulin_include))] // false negative
     pub fn partially_obfuscated_string(&self) -> String {
         format!(
             "{} + {}",

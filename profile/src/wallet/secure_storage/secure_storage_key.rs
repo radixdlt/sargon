@@ -12,6 +12,7 @@ pub enum SecureStorageKey {
     },
 }
 impl SecureStorageKey {
+    #[cfg(not(tarpaulin_include))] // false negative
     pub fn identifier(&self) -> String {
         format!(
             "secure_storage_key_{}",

@@ -217,6 +217,7 @@ impl Wallet {
         value
     }
 
+    #[cfg(not(tarpaulin_include))] // false negative
     pub(crate) fn try_write<F, R>(&self, mutate: F) -> Result<R>
     where
         F: Fn(RwLockWriteGuard<'_, Profile>) -> Result<R>,
