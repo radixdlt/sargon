@@ -55,8 +55,13 @@ impl HDPath {
         return Self::from_components(vec);
     }
 
-    pub(crate) fn from_components(components: Vec<HDPathComponent>) -> Self {
-        Self { components }
+    pub(crate) fn from_components<I>(components: I) -> Self
+    where
+        I: IntoIterator<Item = HDPathComponent>,
+    {
+        Self {
+            components: components.into_iter().collect_vec(),
+        }
     }
 
     pub(crate) fn depth(&self) -> usize {

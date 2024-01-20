@@ -64,6 +64,7 @@ pub trait EntityCAP26Path: Derivation + FromStr {
         return Ok(Self::__with_path_and_components(path, network_id, entity_kind, key_kind, index));
     }
 
+    #[cfg(not(tarpaulin_include))] // false negative
     fn from_bip32str(s: &str) -> Result<Self> {
         let (path, _) = HDPath::try_parse_base(s, |v| CommonError::InvalidDepthOfCAP26Path {
             expected: ENTITY_PATH_DEPTH,

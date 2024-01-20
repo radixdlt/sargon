@@ -110,9 +110,22 @@ mod tests {
         );
     }
     #[test]
-    fn invalid_depth() {
+    fn invalid_depth_from_str() {
         assert_eq!(
             GetIDPath::from_str("m/44H/1022H"),
+            Err(CommonError::InvalidDepthOfCAP26Path {
+                expected: 3,
+                found: 2
+            })
+        );
+    }
+
+    #[test]
+    fn invalid_depth_from_value() {
+        assert_eq!(
+            GetIDPath::try_from(&HDPath::from_components(
+                [HDPathComponent::harden(44), HDPathComponent::harden(1022)]
+            )),
             Err(CommonError::InvalidDepthOfCAP26Path {
                 expected: 3,
                 found: 2
