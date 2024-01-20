@@ -410,14 +410,16 @@ mod tests {
         assert_after(account, wallet.profile());
     }
 
-    #[test]
-    fn create_new_account_first_success() {
+    fn test_create_new_account_first_success<F>(also_save: bool, assert_last: F)
+    where
+        F: Fn(Account, Profile) -> (),
+    {
         test_new_account(
             Profile::new(
                 PrivateHierarchicalDeterministicFactorSource::placeholder(),
                 "Test",
             ),
-            false,
+            also_save,
             |p| {
                 assert_eq!(p.networks.len(), 0); // no accounts yet, no networks even
             },
@@ -428,17 +430,32 @@ mod tests {
                 );
                 assert_eq!(a.appearance_id, AppearanceID::new(0).unwrap()); // using `0` since first.
 
-                // Account SHOULD NOT yet have been saved into Profile, so number of accounts should still be 2
-                assert_eq!(q.networks.len(), 0);
+                assert_last(a, q);
             },
         );
     }
 
     #[test]
-    fn create_new_account_not_first_success() {
+    fn create_new_account_first_success() {
+        test_create_new_account_first_success(false, |_, q| {
+            // Account SHOULD NOT yet have been saved into Profile, so number of accounts should still be 2
+            assert_eq!(q.networks.len(), 0);
+        });
+
+        test_create_new_account_first_success(true, |a, q| {
+            // Account SHOULD NOT yet have been saved into Profile, so number of accounts should still be 2
+            assert_eq!(q.networks.len(), 1);
+            assert_eq!(q.networks[0].accounts[0], a);
+        })
+    }
+
+    fn test_create_new_account_not_first_success<F>(also_save: bool, assert_last: F)
+    where
+        F: Fn(Account, Profile) -> (),
+    {
         test_new_account(
             Profile::placeholder(),
-            false,
+            also_save,
             |p| {
                 assert_eq!(p.networks[0].accounts.len(), 2);
             },
@@ -449,9 +466,21 @@ mod tests {
                 );
                 assert_eq!(a.appearance_id, AppearanceID::new(2).unwrap());
 
-                // Account SHOULD NOT yet have been saved into Profile, so number of accounts should still be 2
-                assert_eq!(q.networks[0].accounts.len(), 2);
+                assert_last(a, q);
             },
         );
+    }
+
+    #[test]
+    fn create_new_account_not_first_success() {
+        test_create_new_account_not_first_success(false, |_, q| {
+            // Account SHOULD NOT yet have been saved into Profile, so number of accounts should still be 2
+            assert_eq!(q.networks[0].accounts.len(), 2);
+        });
+
+        test_create_new_account_not_first_success(true, |a, q| {
+            assert_eq!(q.networks[0].accounts.len(), 3);
+            assert_eq!(q.networks[0].accounts[2], a);
+        })
     }
 }
