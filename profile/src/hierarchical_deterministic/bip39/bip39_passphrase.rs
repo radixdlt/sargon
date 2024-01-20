@@ -1,5 +1,3 @@
-use std::convert::Infallible;
-
 use crate::prelude::*;
 
 /// A BIP39 passphrase, which required but when not used by user, the Default value will be use (empty string),
