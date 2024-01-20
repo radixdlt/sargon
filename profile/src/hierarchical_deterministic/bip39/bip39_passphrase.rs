@@ -68,6 +68,26 @@ mod tests {
     use crate::prelude::*;
 
     #[test]
+    fn equality() {
+        assert_eq!(
+            BIP39Passphrase::placeholder(),
+            BIP39Passphrase::placeholder()
+        );
+        assert_eq!(
+            BIP39Passphrase::placeholder_other(),
+            BIP39Passphrase::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            BIP39Passphrase::placeholder(),
+            BIP39Passphrase::placeholder_other()
+        );
+    }
+
+    #[test]
     fn json_roundtrip() {
         let sut: BIP39Passphrase = "25th word".into();
 
@@ -107,5 +127,13 @@ mod tests {
             format!("{:?}", BIP39Passphrase::default().non_sensitive()),
             format!("{:?}", "<EMPTY>")
         );
+    }
+
+    #[test]
+    fn uniffi_record() {
+        #[derive(uniffi::Record)]
+        struct UniffiRecordAssertCompilesBIP39Passphrase {
+            inner: BIP39Passphrase,
+        }
     }
 }

@@ -31,6 +31,16 @@ impl FromStr for HDPath {
     }
 }
 
+impl HasPlaceholder for HDPath {
+    fn placeholder() -> Self {
+        Self::from_str("m/44H/1022H/1H/525H/1460H/1H").unwrap()
+    }
+
+    fn placeholder_other() -> Self {
+        Self::from_str("m/44H/1022H/0H/0/0H").unwrap()
+    }
+}
+
 impl HDPath {
     /// Upgrades a BIP32Path (extern crate, which is a bit limiting),
     /// to our type HDPath, which has a better API.
@@ -151,6 +161,17 @@ mod tests {
     }
 
     #[test]
+    fn equality() {
+        assert_eq!(HDPath::placeholder(), HDPath::placeholder());
+        assert_eq!(HDPath::placeholder_other(), HDPath::placeholder_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(HDPath::placeholder(), HDPath::placeholder_other());
+    }
+
+    #[test]
     fn display() {
         let path = HDPath::harden([44, 1022]);
         assert_eq!(format!("{}", path), "m/44H/1022H");
@@ -178,7 +199,7 @@ mod tests {
     #[test]
     fn uniffi_record() {
         #[derive(uniffi::Record)]
-        struct Holder {
+        struct UniffiRecordAssertCompilesHDPath {
             inner: HDPath,
         }
     }
