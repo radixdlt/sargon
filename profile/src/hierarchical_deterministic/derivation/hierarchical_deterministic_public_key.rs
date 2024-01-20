@@ -1,4 +1,4 @@
-use crate::PublicKey;
+use crate::{PublicKey, IdentityPath};
 use serde::{Deserialize, Serialize};
 
 use crate::DerivationPath;

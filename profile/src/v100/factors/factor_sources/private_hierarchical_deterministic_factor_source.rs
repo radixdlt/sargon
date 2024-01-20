@@ -1,5 +1,6 @@
 use crate::{
-    AccountPath, CAP26KeyKind, CAP26Repr, HDPathValue, MnemonicWithPassphrase, WalletClientModel,
+    AccountPath, CAP26KeyKind, CAP26Repr, HDFactorInstanceTransactionSigning, HDPathValue,
+    IsEntityPath, MnemonicWithPassphrase, WalletClientModel,
 };
 
 use crate::{
@@ -49,18 +50,23 @@ impl PrivateHierarchicalDeterministicFactorSource {
 }
 
 impl PrivateHierarchicalDeterministicFactorSource {
-    pub fn derive_account_creation_factor_instance(
+    pub fn derive_entity_creation_factor_instance<T>(
         &self,
         network_id: NetworkID,
         index: HDPathValue,
-    ) -> HDFactorInstanceAccountCreation {
-        let path = AccountPath::new(network_id, CAP26KeyKind::TransactionSigning, index);
-        let hd_private_key = self.mnemonic_with_passphrase.derive_private_key(path);
+    ) -> HDFactorInstanceTransactionSigning<T>
+    where
+        T: IsEntityPath + Clone,
+    {
+        let path = T::new(network_id, CAP26KeyKind::TransactionSigning, index);
+        let hd_private_key = self
+            .mnemonic_with_passphrase
+            .derive_private_key(path);
         let hd_factor_instance = HierarchicalDeterministicFactorInstance::new(
             self.factor_source.id.clone(),
             hd_private_key.public_key(),
         );
-        HDFactorInstanceAccountCreation::new(hd_factor_instance).unwrap()
+        HDFactorInstanceTransactionSigning::new(hd_factor_instance).unwrap()
     }
 }
 

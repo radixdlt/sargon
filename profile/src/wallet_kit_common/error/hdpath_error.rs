@@ -50,6 +50,12 @@ pub enum HDPathError {
     #[error("Invalid GetID path, last component was not 365' but {0}'")]
     InvalidGetIDPath(u32),
 
+    #[error("Expected identity path got something else")]
+    ExpectedIdentityPathGotSomethingElse,
+
+    #[error("Expected account path got something else")]
+    ExpectedAccountPathGotSomethingElse,
+
     #[error("Unknown BIP39 word.")]
     UnknownBIP39Word,
 

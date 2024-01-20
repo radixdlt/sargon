@@ -93,10 +93,12 @@ impl Account {
             account_creating_factor_instance.clone(),
         );
         Self {
-            network_id: account_creating_factor_instance.network_id().into(),
+            network_id: account_creating_factor_instance
+                .network_id()
+                .into(),
             address,
             display_name,
-            security_state: UnsecuredEntityControl::with_account_creating_factor_instance(
+            security_state: UnsecuredEntityControl::with_entity_creating_factor_instance(
                 account_creating_factor_instance,
             )
             .into(),
@@ -185,7 +187,7 @@ impl Account {
         let bdfs = DeviceFactorSource::babylon(true, mwp.clone(), WalletClientModel::Iphone);
         let private_hd_factor_source = PrivateHierarchicalDeterministicFactorSource::new(mwp, bdfs);
         let account_creating_factor_instance =
-            private_hd_factor_source.derive_account_creation_factor_instance(network_id, index);
+            private_hd_factor_source.derive_entity_creation_factor_instance(network_id, index);
 
         Self::new(
             account_creating_factor_instance,

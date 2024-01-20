@@ -52,10 +52,12 @@ pub trait EntityAddress: Sized {
     }
 
     #[cfg(not(tarpaulin_include))] // false negative
-    fn from_hd_factor_instance_virtual_entity_creation<E: IsEntityPath>(
+    fn from_hd_factor_instance_virtual_entity_creation<E: IsEntityPath + Clone>(
         hd_factor_instance_virtual_entity_creation: HDFactorInstanceTransactionSigning<E>,
     ) -> Self {
-        let network_id = hd_factor_instance_virtual_entity_creation.path.network_id();
+        let network_id = hd_factor_instance_virtual_entity_creation
+            .path
+            .network_id();
 
         Self::from_public_key(
             hd_factor_instance_virtual_entity_creation

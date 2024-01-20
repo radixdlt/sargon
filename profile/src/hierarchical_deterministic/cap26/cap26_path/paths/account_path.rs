@@ -1,4 +1,4 @@
-use crate::HDPathError;
+use crate::{CommonError, HDPathError};
 use serde::{de, Deserializer, Serialize, Serializer};
 
 use crate::HasPlaceholder;
@@ -34,6 +34,17 @@ impl IsEntityPath for AccountPath {
 
     fn index(&self) -> HDPathValue {
         self.index
+    }
+}
+
+impl TryFrom<CAP26Path> for AccountPath {
+    type Error = HDPathError;
+
+    fn try_from(value: CAP26Path) -> Result<Self, Self::Error> {
+        value
+            .as_account_path()
+            .ok_or(HDPathError::ExpectedAccountPathGotSomethingElse)
+            .cloned()
     }
 }
 

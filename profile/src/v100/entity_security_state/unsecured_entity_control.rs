@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::v100::{HDFactorInstanceAccountCreation, HierarchicalDeterministicFactorInstance};
-use crate::CommonError as Error;
+use crate::{CommonError as Error, HDFactorInstanceTransactionSigning, IsEntityPath};
 
 use crate::HasPlaceholder;
 
@@ -22,11 +22,14 @@ pub struct UnsecuredEntityControl {
 }
 
 impl UnsecuredEntityControl {
-    pub fn with_account_creating_factor_instance(
-        account_creating_factor_instance: HDFactorInstanceAccountCreation,
-    ) -> Self {
+    pub fn with_entity_creating_factor_instance<T>(
+        entity_creating_factor_instance: HDFactorInstanceTransactionSigning<T>,
+    ) -> Self
+    where
+        T: IsEntityPath + Clone,
+    {
         Self {
-            transaction_signing: account_creating_factor_instance.into(),
+            transaction_signing: entity_creating_factor_instance.into(),
             authentication_signing: None,
         }
     }

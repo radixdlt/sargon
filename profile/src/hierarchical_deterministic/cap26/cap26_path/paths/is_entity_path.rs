@@ -1,6 +1,6 @@
-use crate::{CAP26KeyKind, CAP26Repr, HDPathValue, NetworkID};
+use crate::{CAP26KeyKind, CAP26Path, CAP26Repr, HDPathError, HDPathValue, NetworkID};
 
-pub trait IsEntityPath: CAP26Repr {
+pub trait IsEntityPath: CAP26Repr + Into<CAP26Path> + TryFrom<CAP26Path> {
     fn network_id(&self) -> NetworkID;
     fn key_kind(&self) -> CAP26KeyKind;
     fn index(&self) -> HDPathValue;
