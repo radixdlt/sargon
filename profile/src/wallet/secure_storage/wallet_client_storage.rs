@@ -146,7 +146,7 @@ impl WalletClientStorage {
 }
 #[cfg(test)]
 #[derive(Debug)]
-struct AlwaysFailStorage {}
+pub(crate) struct AlwaysFailStorage {}
 
 #[cfg(test)]
 impl SecureStorage for AlwaysFailStorage {

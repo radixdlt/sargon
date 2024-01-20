@@ -19,11 +19,10 @@ impl Wallet {
     pub(crate) fn save_active_profile_id_or_panic(&self, profile_id: &ProfileID) {
         match self.save_active_profile_id(profile_id) {
             Ok(_) => log::info!("Successfully saved active ProfileID: {}", profile_id),
-            Err(e) => log::error!(
+            Err(e) => fatal_error(format!(
                 "Failed to save active ProfileID: {}, error: {}",
-                profile_id,
-                e
-            ),
+                profile_id, e
+            )),
         }
     }
 
@@ -51,5 +50,39 @@ impl Wallet {
         if self.save_profile_or_panic(profile) {
             self.save_active_profile_id_or_panic(&profile.id());
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::prelude::*;
+
+    #[should_panic(
+        expected = "Fatal error: 'Failed to save active ProfileID: 12345678-bbbb-cccc-dddd-abcd12345678, error: Unknown Error'"
+    )]
+    #[test]
+    fn save_active_profile_id_or_panic_fail() {
+        #[derive(Debug)]
+        struct FailSaveActiveProfileIDStorage {}
+
+        impl SecureStorage for FailSaveActiveProfileIDStorage {
+            fn load_data(&self, _key: SecureStorageKey) -> Result<Option<Vec<u8>>> {
+                todo!()
+            }
+
+            fn save_data(&self, key: SecureStorageKey, _data: Vec<u8>) -> Result<()> {
+                match key {
+                    SecureStorageKey::ActiveProfileID => Err(CommonError::Unknown),
+                    _ => Ok(()),
+                }
+            }
+
+            fn delete_data_for_key(&self, _key: SecureStorageKey) -> Result<()> {
+                todo!()
+            }
+        }
+        let storage = Arc::new(FailSaveActiveProfileIDStorage {});
+
+        _ = Wallet::by_importing_profile(Profile::placeholder(), storage);
     }
 }
