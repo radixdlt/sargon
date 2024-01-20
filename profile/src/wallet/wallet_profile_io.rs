@@ -37,11 +37,11 @@ impl Wallet {
                 true
             }
             Err(e) => {
-                log::error!(
+                fatal_error(format!(
                     "Failed to save profile with ID: {}, error: {}",
                     profile.id(),
                     e
-                );
+                ));
                 false
             }
         }
@@ -82,6 +82,37 @@ mod tests {
             }
         }
         let storage = Arc::new(FailSaveActiveProfileIDStorage {});
+
+        _ = Wallet::by_importing_profile(Profile::placeholder(), storage);
+    }
+
+    #[should_panic(
+        expected = "Fatal error: 'Failed to save profile with ID: 12345678-bbbb-cccc-dddd-abcd12345678, error: Unknown Error'"
+    )]
+    #[test]
+    fn save_profile_or_panic_fail() {
+        #[derive(Debug)]
+        struct FailSaveProfileStorage {}
+
+        impl SecureStorage for FailSaveProfileStorage {
+            fn load_data(&self, _key: SecureStorageKey) -> Result<Option<Vec<u8>>> {
+                todo!()
+            }
+
+            fn save_data(&self, key: SecureStorageKey, _data: Vec<u8>) -> Result<()> {
+                match key {
+                    SecureStorageKey::ProfileSnapshot { profile_id: _ } => {
+                        Err(CommonError::Unknown)
+                    }
+                    _ => Ok(()),
+                }
+            }
+
+            fn delete_data_for_key(&self, _key: SecureStorageKey) -> Result<()> {
+                todo!()
+            }
+        }
+        let storage = Arc::new(FailSaveProfileStorage {});
 
         _ = Wallet::by_importing_profile(Profile::placeholder(), storage);
     }

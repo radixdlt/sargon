@@ -154,6 +154,15 @@ mod tests {
     }
 
     #[test]
+    fn non_sensitive() {
+        let mnemonic = Mnemonic::placeholder();
+        assert_eq!(
+            format!("{:?}", mnemonic.non_sensitive()),
+            format!("{:?}", "24 words (bright...mandate)")
+        );
+    }
+
+    #[test]
     fn language() {
         let mnemonic: Mnemonic =
             "bright club bacon dinner achieve pull grid save ramp cereal blush woman humble limb repeat video sudden possible story mask neutral prize goose mandate"
@@ -248,5 +257,17 @@ mod tests {
         assert_json_value_fails::<Mnemonic>(
             json!("hej jag zoo zoo zoo zoo zoo zoo zoo zoo zoo abandon")
         ); // invalid words
+    }
+}
+
+#[cfg(test)]
+mod uniffi_tests {
+    use crate::prelude::*;
+
+    #[test]
+    fn name() {
+        let str = "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong";
+        let sut: Mnemonic = str.parse().unwrap();
+        assert_eq!(mnemonic_phrase(&sut), str);
     }
 }
