@@ -140,7 +140,7 @@ impl Wallet {
 
         let factor_instance = self
             .load_private_device_factor_source(&bdfs)
-            .map(|p| p.derive_account_creation_factor_instance(network_id, index))?;
+            .map(|p| p.derive_entity_creation_factor_instance(network_id, index))?;
 
         let account = Account::new(factor_instance, name, appearance_id);
 
@@ -174,7 +174,7 @@ impl Wallet {
     }
 
     /// Create a new Account and adds it to the active Profile.
-    pub fn create_new_account_and_add_it_to_profile(
+    pub fn create_and_save_new_account(
         &self,
         network_id: NetworkID,
         name: DisplayName,
@@ -398,7 +398,7 @@ mod tests {
         let account_name = DisplayName::new("Test").unwrap();
         let network_id = NetworkID::Mainnet;
         let account = if also_save {
-            wallet.create_new_account_and_add_it_to_profile(network_id, account_name.clone())
+            wallet.create_and_save_new_account(network_id, account_name.clone())
         } else {
             wallet.create_new_account(network_id, account_name.clone())
         }

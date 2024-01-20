@@ -40,6 +40,17 @@ impl IsEntityPath for AccountPath {
     }
 }
 
+impl TryFrom<CAP26Path> for AccountPath {
+    type Error = CommonError;
+
+    fn try_from(value: CAP26Path) -> Result<Self, Self::Error> {
+        value
+            .as_account_path()
+            .ok_or(CommonError::ExpectedAccountPathButGotSomethingElse)
+            .cloned()
+    }
+}
+
 impl TryFrom<&HDPath> for AccountPath {
     type Error = CommonError;
 

@@ -42,15 +42,8 @@ impl TryFrom<&HDPath> for CAP26Path {
 
 impl FromStr for CAP26Path {
     type Err = CommonError;
-
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if let Ok(getid) = GetIDPath::from_str(&s) {
-            Ok(CAP26Path::GetID {
-                value: getid.into(),
-            })
-        } else {
-            AccountPath::from_str(&s).map(|value| Self::AccountPath { value })
-        }
+        s.parse::<HDPath>().and_then(|p| Self::try_from(&p))
     }
 }
 

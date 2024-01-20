@@ -1,1 +1,2 @@
-pub mod persona;
+mod persona;
+pub use persona::*;

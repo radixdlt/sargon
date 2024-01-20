@@ -131,7 +131,7 @@ mod tests {
                     SecureStorageKey::ProfileSnapshot { profile_id: _ } => {
                         serde_json::to_vec(&Profile::placeholder())
                             .map(Some)
-                            .map_err(|e| CommonError::Unknown)
+                            .map_err(|_| CommonError::Unknown)
                     }
                     _ => todo!(),
                 }

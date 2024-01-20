@@ -268,4 +268,7 @@ pub enum CommonError {
 
     #[error("Failed save FactorSource to SecureStorage, FactorSourceID: {0}")]
     UnableToSaveFactorSourceToProfile(FactorSourceID) = 10080,
+
+    #[error("Expected IdentityPath but got something else.")]
+    ExpectedIdentityPathButGotSomethingElse = 10081,
 }
