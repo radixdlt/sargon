@@ -60,7 +60,7 @@ impl Wallet {
         };
 
         // Set active profile ID
-        wallet.save_active_profile_id(&profile_id)?;
+        wallet.save_active_profile_id_or_panic(&profile_id);
 
         Ok(wallet)
     }

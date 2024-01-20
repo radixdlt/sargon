@@ -116,4 +116,40 @@ mod tests {
 
         _ = Wallet::by_importing_profile(Profile::placeholder(), storage);
     }
+
+    #[should_panic(
+        expected = "Fatal error: 'Failed to save active ProfileID: ffffffff-ffff-ffff-ffff-ffffffffffff, error: Unknown Error'"
+    )]
+    #[test]
+    fn new_load_profile_with_id_fail() {
+        #[derive(Debug)]
+        struct FailSaveActiveProfileIDStorage {}
+
+        impl SecureStorage for FailSaveActiveProfileIDStorage {
+            fn load_data(&self, key: SecureStorageKey) -> Result<Option<Vec<u8>>> {
+                match key {
+                    SecureStorageKey::ProfileSnapshot { profile_id: _ } => {
+                        serde_json::to_vec(&Profile::placeholder())
+                            .map(Some)
+                            .map_err(|e| CommonError::Unknown)
+                    }
+                    _ => todo!(),
+                }
+            }
+
+            fn save_data(&self, key: SecureStorageKey, _data: Vec<u8>) -> Result<()> {
+                match key {
+                    SecureStorageKey::ActiveProfileID => Err(CommonError::Unknown),
+                    _ => Ok(()),
+                }
+            }
+
+            fn delete_data_for_key(&self, _key: SecureStorageKey) -> Result<()> {
+                todo!()
+            }
+        }
+        let storage = Arc::new(FailSaveActiveProfileIDStorage {});
+
+        _ = Wallet::by_loading_profile_with_id(ProfileID::placeholder(), storage).unwrap();
+    }
 }
