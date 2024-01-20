@@ -137,3 +137,16 @@ mod tests {
         assert_eq!(set.len(), n);
     }
 }
+
+#[cfg(test)]
+mod uniffi_tests {
+    use crate::prelude::*;
+
+    #[test]
+    fn new_uses_empty_bip39_passphrase() {
+        let private =
+            new_private_hd_factor_source(Vec::from_iter([0xff; 32]), WalletClientModel::Unknown)
+                .unwrap();
+        assert_eq!(private.mnemonic_with_passphrase.passphrase.0, "");
+    }
+}

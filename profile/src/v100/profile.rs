@@ -658,7 +658,10 @@ mod tests {
 
 #[cfg(test)]
 mod uniffi_tests {
-    use crate::{new_profile_placeholder, new_profile_placeholder_other, HasPlaceholder};
+    use crate::{
+        new_profile_placeholder, new_profile_placeholder_other, BaseIsFactorSource, HasPlaceholder,
+        PrivateHierarchicalDeterministicFactorSource,
+    };
 
     use super::Profile;
 
@@ -668,6 +671,16 @@ mod uniffi_tests {
         assert_eq!(
             Profile::placeholder_other(),
             new_profile_placeholder_other()
+        );
+    }
+
+    #[test]
+    fn new_private_hd() {
+        let private = PrivateHierarchicalDeterministicFactorSource::placeholder();
+        let lhs = super::new_profile(private.clone(), "iPhone".to_string());
+        assert_eq!(
+            lhs.bdfs().factor_source_id(),
+            private.factor_source.factor_source_id()
         );
     }
 }

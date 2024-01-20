@@ -197,6 +197,11 @@ mod tests {
     }
 
     #[test]
+    fn static_kind() {
+        assert_eq!(DeviceFactorSource::kind(), FactorSourceKind::Device);
+    }
+
+    #[test]
     fn from_factor_source_invalid_got_ledger() {
         let ledger = LedgerHardwareWalletFactorSource::placeholder();
         let factor_source: FactorSource = ledger.clone().into();
