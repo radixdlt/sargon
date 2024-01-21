@@ -96,6 +96,7 @@ impl HDPath {
         Ok(got)
     }
 
+    #[cfg(not(tarpaulin_include))] // false negative
     pub(crate) fn try_parse_base_hdpath<F>(
         path: &HDPath,
         depth_error: F,
