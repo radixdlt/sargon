@@ -31,6 +31,7 @@ pub enum TestingError {
 }
 
 /// `name` is file name without extension, assuming it is json file
+#[cfg(not(tarpaulin_include))]
 fn vector<'a, T>(name: impl AsRef<OsStr>) -> Result<T, TestingError>
 where
     T: for<'de> serde::Deserialize<'de>,

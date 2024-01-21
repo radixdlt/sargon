@@ -88,6 +88,7 @@ pub trait EntityCAP26Path: Derivation + FromStr {
         Self::try_from_hdpath(&path)
     }
 
+    #[cfg(not(tarpaulin_include))] // false negative
     fn new(
         network_id: NetworkID,
         key_kind: CAP26KeyKind,
