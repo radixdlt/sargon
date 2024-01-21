@@ -40,11 +40,12 @@ impl TryFrom<&HDPath> for BIP44LikePath {
     type Error = CommonError;
 
     fn try_from(value: &HDPath) -> Result<Self> {
-        let (path, components) =
-            HDPath::try_parse_base_hdpath(value, |v| CommonError::InvalidDepthOfBIP44Path {
+        let (path, components) = HDPath::try_parse_base_hdpath(value, |v| {
+            CommonError::InvalidDepthOfBIP44Path {
                 expected: Self::PATH_DEPTH,
                 found: v,
-            })?;
+            }
+        })?;
 
         BIP44LikePath::assert_depth_of(value)?;
         let account = &components[2];
@@ -53,7 +54,9 @@ impl TryFrom<&HDPath> for BIP44LikePath {
         }
         let change = &components[3];
         if change.is_hardened() {
-            return Err(CommonError::InvalidBIP44LikePathChangeWasUnexpectedlyHardened);
+            return Err(
+                CommonError::InvalidBIP44LikePathChangeWasUnexpectedlyHardened,
+            );
         }
 
         let index = &components[4];
@@ -65,7 +68,10 @@ impl TryFrom<&HDPath> for BIP44LikePath {
 }
 
 impl BIP44LikePath {
-    fn with_account_and_index(account: HDPathValue, index: HDPathValue) -> Self {
+    fn with_account_and_index(
+        account: HDPathValue,
+        index: HDPathValue,
+    ) -> Self {
         let c0 = HDPathComponent::bip44_purpose(); // purpose
         let c1 = HDPathComponent::bip44_cointype(); // cointype
         let c2 = HDPathComponent::harden(account); // account
@@ -100,9 +106,11 @@ impl FromStr for BIP44LikePath {
     type Err = CommonError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (path, _) = HDPath::try_parse_base(s, |v| CommonError::InvalidDepthOfBIP44Path {
-            expected: Self::PATH_DEPTH,
-            found: v,
+        let (path, _) = HDPath::try_parse_base(s, |v| {
+            CommonError::InvalidDepthOfBIP44Path {
+                expected: Self::PATH_DEPTH,
+                found: v,
+            }
         })?;
         return Self::try_from(&path);
     }
@@ -222,7 +230,10 @@ mod tests {
         let str = "m/44H/1022H/0H/0/0H";
         let parsed: BIP44LikePath = str.parse().unwrap();
         assert_json_value_eq_after_roundtrip(&parsed, json!(str));
-        assert_json_value_ne_after_roundtrip(&parsed, json!("m/44H/1022H/0H/0/1H"));
+        assert_json_value_ne_after_roundtrip(
+            &parsed,
+            json!("m/44H/1022H/0H/0/1H"),
+        );
     }
 
     #[test]

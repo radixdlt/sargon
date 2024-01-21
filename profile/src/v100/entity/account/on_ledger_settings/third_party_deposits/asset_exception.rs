@@ -3,7 +3,16 @@ use crate::prelude::*;
 /// The specific Asset exception rule, which overrides the general
 ///  `deposit_rule` of a `ThirdPartyDeposits` settings.
 #[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record,
+    Serialize,
+    Deserialize,
+    Clone,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    PartialOrd,
+    Ord,
+    uniffi::Record,
 )]
 #[serde(rename_all = "camelCase")]
 pub struct AssetException {
@@ -24,7 +33,10 @@ impl Identifiable for AssetException {
 
 impl AssetException {
     /// Instantiates a new `AssetException` with the specified `ResourceAddress` and rule.
-    pub fn new(address: ResourceAddress, exception_rule: DepositAddressExceptionRule) -> Self {
+    pub fn new(
+        address: ResourceAddress,
+        exception_rule: DepositAddressExceptionRule,
+    ) -> Self {
         Self {
             address,
             exception_rule,

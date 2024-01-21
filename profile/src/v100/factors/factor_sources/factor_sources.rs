@@ -79,7 +79,8 @@ mod tests {
     fn duplicates_are_prevented() {
         assert_eq!(
             FactorSources::from_iter(
-                [FactorSource::placeholder(), FactorSource::placeholder()].into_iter()
+                [FactorSource::placeholder(), FactorSource::placeholder()]
+                    .into_iter()
             )
             .len(),
             1
@@ -147,7 +148,8 @@ mod tests {
 #[cfg(test)]
 mod uniffi_tests {
     use crate::{
-        new_factor_sources_placeholder, new_factor_sources_placeholder_other, HasPlaceholder,
+        new_factor_sources_placeholder, new_factor_sources_placeholder_other,
+        HasPlaceholder,
     };
 
     use super::FactorSources;

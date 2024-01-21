@@ -61,7 +61,9 @@ impl From<LedgerHardwareWalletFactorSource> for FactorSource {
 
 impl<'de> Deserialize<'de> for FactorSource {
     #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D: Deserializer<'de>>(
+        deserializer: D,
+    ) -> Result<Self, D::Error> {
         // https://github.com/serde-rs/serde/issues/1343#issuecomment-409698470
         #[derive(Deserialize, Serialize)]
         struct Wrapper {
@@ -186,7 +188,8 @@ mod tests {
 
     #[test]
     fn into_from_device() {
-        let factor_source: FactorSource = DeviceFactorSource::placeholder().into();
+        let factor_source: FactorSource =
+            DeviceFactorSource::placeholder().into();
         assert_eq!(
             factor_source,
             FactorSource::Device {
@@ -197,7 +200,8 @@ mod tests {
 
     #[test]
     fn into_from_ledger() {
-        let factor_source: FactorSource = LedgerHardwareWalletFactorSource::placeholder().into();
+        let factor_source: FactorSource =
+            LedgerHardwareWalletFactorSource::placeholder().into();
         assert_eq!(
             factor_source,
             FactorSource::Ledger {

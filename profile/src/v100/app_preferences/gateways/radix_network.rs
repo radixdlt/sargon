@@ -125,7 +125,9 @@ impl RadixNetwork {
         map.iter()
             .find(|p| p.1.logical_name == logical_name)
             .map(|p| p.0)
-            .ok_or_else(|| CommonError::UnknownNetworkWithName(logical_name.to_string()))
+            .ok_or_else(|| {
+                CommonError::UnknownNetworkWithName(logical_name.to_string())
+            })
             .and_then(|id| Self::lookup_by_id(id.clone()))
     }
 
@@ -225,7 +227,9 @@ mod tests {
     fn lookup_by_id_error() {
         assert_eq!(
             RadixNetwork::lookup_by_id(NetworkID::Simulator),
-            Err(CommonError::UnknownNetworkForID(NetworkID::Simulator.discriminant()))
+            Err(CommonError::UnknownNetworkForID(
+                NetworkID::Simulator.discriminant()
+            ))
         );
     }
 

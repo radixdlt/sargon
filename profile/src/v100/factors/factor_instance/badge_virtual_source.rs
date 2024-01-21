@@ -1,6 +1,8 @@
 use crate::prelude::*;
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(
+    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum,
+)]
 #[serde(untagged, remote = "Self")]
 pub enum FactorInstanceBadgeVirtualSource {
     HierarchicalDeterministic {
@@ -10,14 +12,20 @@ pub enum FactorInstanceBadgeVirtualSource {
 }
 
 impl FactorInstanceBadgeVirtualSource {
-    pub fn as_hierarchical_deterministic(&self) -> &HierarchicalDeterministicPublicKey {
+    pub fn as_hierarchical_deterministic(
+        &self,
+    ) -> &HierarchicalDeterministicPublicKey {
         match self {
-            FactorInstanceBadgeVirtualSource::HierarchicalDeterministic { value } => value,
+            FactorInstanceBadgeVirtualSource::HierarchicalDeterministic {
+                value,
+            } => value,
         }
     }
 }
 
-impl From<HierarchicalDeterministicPublicKey> for FactorInstanceBadgeVirtualSource {
+impl From<HierarchicalDeterministicPublicKey>
+    for FactorInstanceBadgeVirtualSource
+{
     fn from(value: HierarchicalDeterministicPublicKey) -> Self {
         Self::HierarchicalDeterministic { value }
     }
@@ -25,7 +33,9 @@ impl From<HierarchicalDeterministicPublicKey> for FactorInstanceBadgeVirtualSour
 
 impl<'de> Deserialize<'de> for FactorInstanceBadgeVirtualSource {
     #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D: Deserializer<'de>>(
+        deserializer: D,
+    ) -> Result<Self, D::Error> {
         // https://github.com/serde-rs/serde/issues/1343#issuecomment-409698470
         #[derive(Deserialize, Serialize)]
         struct Wrapper {
@@ -44,9 +54,12 @@ impl Serialize for FactorInstanceBadgeVirtualSource {
     where
         S: Serializer,
     {
-        let mut state = serializer.serialize_struct("FactorInstanceBadgeVirtualSource", 2)?;
+        let mut state = serializer
+            .serialize_struct("FactorInstanceBadgeVirtualSource", 2)?;
         match self {
-            FactorInstanceBadgeVirtualSource::HierarchicalDeterministic { value } => {
+            FactorInstanceBadgeVirtualSource::HierarchicalDeterministic {
+                value,
+            } => {
                 let discriminant = "hierarchicalDeterministicPublicKey";
                 state.serialize_field("discriminator", discriminant)?;
                 state.serialize_field(discriminant, value)?;

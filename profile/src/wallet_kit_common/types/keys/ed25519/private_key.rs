@@ -17,7 +17,8 @@ impl Ed25519PrivateKey {
     /// used by wallets, which tend to rather use a Mnemonic and
     /// derive hierarchical deterministic keys.
     pub fn generate() -> Self {
-        Self::from_hex32_bytes(Hex32Bytes::generate()).expect("Should be able to generate 32 bytes")
+        Self::from_hex32_bytes(Hex32Bytes::generate())
+            .expect("Should be able to generate 32 bytes")
     }
 
     /// Just an alias for `Self::generate()`, generating a new
@@ -41,8 +42,9 @@ impl Ed25519PrivateKey {
     }
 
     pub fn public_key(&self) -> Ed25519PublicKey {
-        Ed25519PublicKey::from_engine(self.0.public_key())
-            .expect("Public Key from EC scalar multiplication should always be valid.")
+        Ed25519PublicKey::from_engine(self.0.public_key()).expect(
+            "Public Key from EC scalar multiplication should always be valid.",
+        )
     }
 
     pub fn sign(&self, msg_hash: &impl IsHash) -> Ed25519Signature {
@@ -59,13 +61,17 @@ impl Ed25519PrivateKey {
 
     pub fn from_bytes(slice: &[u8]) -> Result<Self> {
         EngineEd25519PrivateKey::from_bytes(slice)
-            .map_err(|_| CommonError::InvalidEd25519PrivateKeyFromBytes(slice.to_owned()))
+            .map_err(|_| {
+                CommonError::InvalidEd25519PrivateKeyFromBytes(slice.to_owned())
+            })
             .map(Self::from_engine)
     }
 
     pub fn from_str(hex: &str) -> Result<Self> {
         Hex32Bytes::from_hex(hex)
-            .map_err(|_| CommonError::InvalidEd25519PrivateKeyFromString(hex.to_owned()))
+            .map_err(|_| {
+                CommonError::InvalidEd25519PrivateKeyFromString(hex.to_owned())
+            })
             .and_then(|b| Self::from_bytes(&b.to_vec()))
     }
 
@@ -114,7 +120,10 @@ impl Ed25519PrivateKey {
     ///
     /// https://github.com/dalek-cryptography/ed25519-dalek/blob/main/tests/ed25519.rs#L103
     pub fn placeholder_alice() -> Self {
-        Self::from_str("833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42").unwrap()
+        Self::from_str(
+            "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42",
+        )
+        .unwrap()
     }
 
     /// `1498b5467a63dffa2dc9d9e069caf075d16fc33fdd4c3b01bfadae6433767d93``
@@ -124,7 +133,10 @@ impl Ed25519PrivateKey {
     ///
     /// https://cryptobook.nakov.com/digital-signatures/eddsa-sign-verify-examples
     pub fn placeholder_bob() -> Self {
-        Self::from_str("1498b5467a63dffa2dc9d9e069caf075d16fc33fdd4c3b01bfadae6433767d93").unwrap()
+        Self::from_str(
+            "1498b5467a63dffa2dc9d9e069caf075d16fc33fdd4c3b01bfadae6433767d93",
+        )
+        .unwrap()
     }
 }
 
@@ -174,8 +186,10 @@ mod tests {
 
     #[test]
     fn bytes_roundtrip() {
-        let bytes =
-            hex_decode("0000000000000000000000000000000000000000000000000000000000000001").unwrap();
+        let bytes = hex_decode(
+            "0000000000000000000000000000000000000000000000000000000000000001",
+        )
+        .unwrap();
         assert_eq!(
             Ed25519PrivateKey::from_bytes(bytes.as_slice())
                 .unwrap()
@@ -186,7 +200,8 @@ mod tests {
 
     #[test]
     fn hex_roundtrip() {
-        let hex = "0000000000000000000000000000000000000000000000000000000000000001";
+        let hex =
+            "0000000000000000000000000000000000000000000000000000000000000001";
         assert_eq!(Ed25519PrivateKey::from_str(hex).unwrap().to_hex(), hex);
     }
 
@@ -194,7 +209,9 @@ mod tests {
     fn invalid_hex() {
         assert_eq!(
             Ed25519PrivateKey::from_str("not hex"),
-            Err(CommonError::InvalidEd25519PrivateKeyFromString("not hex".to_owned()))
+            Err(CommonError::InvalidEd25519PrivateKeyFromString(
+                "not hex".to_owned()
+            ))
         );
     }
 
@@ -202,7 +219,9 @@ mod tests {
     fn invalid_hex_too_short() {
         assert_eq!(
             Ed25519PrivateKey::from_str("dead"),
-            Err(CommonError::InvalidEd25519PrivateKeyFromString("dead".to_owned()))
+            Err(CommonError::InvalidEd25519PrivateKeyFromString(
+                "dead".to_owned()
+            ))
         );
     }
 
@@ -216,7 +235,8 @@ mod tests {
 
     #[test]
     fn debug() {
-        let hex = "0000000000000000000000000000000000000000000000000000000000000001";
+        let hex =
+            "0000000000000000000000000000000000000000000000000000000000000001";
         assert_eq!(
             format!("{:?}", Ed25519PrivateKey::from_str(hex).unwrap()),
             hex
@@ -225,7 +245,8 @@ mod tests {
 
     #[test]
     fn from_vec() {
-        let hex = "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef";
+        let hex =
+            "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef";
         assert_eq!(
             Ed25519PrivateKey::from_vec(Vec::from(hex_decode(hex).unwrap()))
                 .unwrap()
@@ -236,11 +257,14 @@ mod tests {
 
     #[test]
     fn from_hex32() {
-        let hex = "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef";
+        let hex =
+            "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef";
         assert_eq!(
-            Ed25519PrivateKey::from_hex32_bytes(Hex32Bytes::from_hex(hex).unwrap())
-                .unwrap()
-                .to_hex(),
+            Ed25519PrivateKey::from_hex32_bytes(
+                Hex32Bytes::from_hex(hex).unwrap()
+            )
+            .unwrap()
+            .to_hex(),
             hex
         );
     }
@@ -260,7 +284,8 @@ mod tests {
 
     #[test]
     fn from_hex32_bytes() {
-        let str = "0000000000000000000000000000000000000000000000000000000000000001";
+        let str =
+            "0000000000000000000000000000000000000000000000000000000000000001";
         let hex32 = Hex32Bytes::from_hex(str).unwrap();
         let key = Ed25519PrivateKey::from_hex32_bytes(hex32).unwrap();
         assert_eq!(key.to_hex(), str);
@@ -268,7 +293,8 @@ mod tests {
 
     #[test]
     fn try_from_bytes() {
-        let str = "0000000000000000000000000000000000000000000000000000000000000001";
+        let str =
+            "0000000000000000000000000000000000000000000000000000000000000001";
         let vec = hex_decode(str).unwrap();
         let key = Ed25519PrivateKey::try_from(vec.as_slice()).unwrap();
         assert_eq!(key.to_hex(), str);

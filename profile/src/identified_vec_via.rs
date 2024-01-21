@@ -1,6 +1,7 @@
 use identified_vec::{
-    identified_vec_into_iterator::IdentifiedVecIntoIterator, Identifiable, IdentifiedVecOf,
-    IsIdentifiableVecOfVia, IsIdentifiedVec, IsIdentifiedVecOf, ViaMarker,
+    identified_vec_into_iterator::IdentifiedVecIntoIterator, Identifiable,
+    IdentifiedVecOf, IsIdentifiableVecOfVia, IsIdentifiedVec,
+    IsIdentifiedVecOf, ViaMarker,
 };
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::{
@@ -27,7 +28,9 @@ impl<Element: Identifiable + Debug + Clone> IdentifiedVecVia<Element> {
     where
         I: IntoIterator<Item = Element>,
     {
-        Self::from_identified_vec_of(IdentifiedVecOf::from_iter(unique_elements))
+        Self::from_identified_vec_of(IdentifiedVecOf::from_iter(
+            unique_elements,
+        ))
     }
 
     pub fn len(&self) -> usize {
@@ -43,7 +46,9 @@ impl<Element: Identifiable + Debug + Clone> IdentifiedVecVia<Element> {
     }
 }
 
-impl<Element: Identifiable + Debug + Clone> Index<usize> for IdentifiedVecVia<Element> {
+impl<Element: Identifiable + Debug + Clone> Index<usize>
+    for IdentifiedVecVia<Element>
+{
     type Output = Element;
 
     fn index(&self, index: usize) -> &Self::Output {
@@ -51,7 +56,10 @@ impl<Element: Identifiable + Debug + Clone> Index<usize> for IdentifiedVecVia<El
     }
 }
 
-impl<Element: Identifiable + Debug + Clone> ViaMarker for IdentifiedVecVia<Element> {}
+impl<Element: Identifiable + Debug + Clone> ViaMarker
+    for IdentifiedVecVia<Element>
+{
+}
 
 impl<Element: Identifiable + Debug + Clone> IsIdentifiableVecOfVia<Element>
     for IdentifiedVecVia<Element>
@@ -66,33 +74,44 @@ impl<Element: Identifiable + Debug + Clone> IsIdentifiableVecOfVia<Element>
         &self.id_vec
     }
 
-    fn from_identified_vec_of(identified_vec_of: IdentifiedVecOf<Element>) -> Self {
+    fn from_identified_vec_of(
+        identified_vec_of: IdentifiedVecOf<Element>,
+    ) -> Self {
         Self {
             id_vec: identified_vec_of,
         }
     }
 }
 
-impl<Element: Identifiable + Debug + Clone> Display for IdentifiedVecVia<Element> {
+impl<Element: Identifiable + Debug + Clone> Display
+    for IdentifiedVecVia<Element>
+{
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(&self.id_vec, f)
     }
 }
 
-impl<Element: Identifiable + Debug + Clone> IntoIterator for IdentifiedVecVia<Element> {
+impl<Element: Identifiable + Debug + Clone> IntoIterator
+    for IdentifiedVecVia<Element>
+{
     type Item = Element;
-    type IntoIter = IdentifiedVecIntoIterator<<Element as Identifiable>::ID, Element>;
+    type IntoIter =
+        IdentifiedVecIntoIterator<<Element as Identifiable>::ID, Element>;
 
     fn into_iter(self) -> Self::IntoIter {
         Self::IntoIter::new(self.id_vec)
     }
 }
 
-impl<Element: Identifiable + Debug + Clone> Serialize for IdentifiedVecVia<Element>
+impl<Element: Identifiable + Debug + Clone> Serialize
+    for IdentifiedVecVia<Element>
 where
     Element: Serialize + Identifiable + Debug + Clone,
 {
-    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
+    fn serialize<S>(
+        &self,
+        serializer: S,
+    ) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
     where
         S: Serializer,
     {
@@ -100,19 +119,24 @@ where
     }
 }
 
-impl<'de, Element: Identifiable + Debug + Clone> Deserialize<'de> for IdentifiedVecVia<Element>
+impl<'de, Element: Identifiable + Debug + Clone> Deserialize<'de>
+    for IdentifiedVecVia<Element>
 where
     Element: Deserialize<'de> + Identifiable + Debug + Clone,
 {
     #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D: Deserializer<'de>>(
+        deserializer: D,
+    ) -> Result<Self, D::Error> {
         let id_vec_of = IdentifiedVecOf::<Element>::deserialize(deserializer)?;
         return Ok(Self::from_identified_vec_of(id_vec_of));
     }
 }
 
 #[cfg(not(tarpaulin_include))] // Tested in binding tests (e.g. test*.swift files)
-unsafe impl<UT, T: Identifiable + Debug + Clone + Lower<UT>> Lower<UT> for IdentifiedVecVia<T> {
+unsafe impl<UT, T: Identifiable + Debug + Clone + Lower<UT>> Lower<UT>
+    for IdentifiedVecVia<T>
+{
     type FfiType = RustBuffer;
 
     fn write(obj: IdentifiedVecVia<T>, buf: &mut Vec<u8>) {
@@ -128,7 +152,8 @@ unsafe impl<UT, T: Identifiable + Debug + Clone + Lower<UT>> Lower<UT> for Ident
     }
 
     const TYPE_ID_META: MetadataBuffer =
-        MetadataBuffer::from_code(metadata::codes::TYPE_VEC).concat(T::TYPE_ID_META);
+        MetadataBuffer::from_code(metadata::codes::TYPE_VEC)
+            .concat(T::TYPE_ID_META);
 }
 
 #[cfg(not(tarpaulin_include))] // Tested in binding tests (e.g. test*.swift files)
@@ -145,7 +170,9 @@ unsafe impl<UT, T: Identifiable + Debug + Clone + Lower<UT>> LowerReturn<UT>
 }
 
 #[cfg(not(tarpaulin_include))] // Tested in binding tests (e.g. test*.swift files)
-unsafe impl<UT, T: Identifiable + Debug + Clone + Lift<UT>> Lift<UT> for IdentifiedVecVia<T> {
+unsafe impl<UT, T: Identifiable + Debug + Clone + Lift<UT>> Lift<UT>
+    for IdentifiedVecVia<T>
+{
     type FfiType = RustBuffer;
 
     fn try_read(buf: &mut &[u8]) -> uniffi::Result<IdentifiedVecVia<T>> {
@@ -163,7 +190,8 @@ unsafe impl<UT, T: Identifiable + Debug + Clone + Lift<UT>> Lift<UT> for Identif
     }
 
     const TYPE_ID_META: MetadataBuffer =
-        MetadataBuffer::from_code(metadata::codes::TYPE_VEC).concat(T::TYPE_ID_META);
+        MetadataBuffer::from_code(metadata::codes::TYPE_VEC)
+            .concat(T::TYPE_ID_META);
 }
 
 #[cfg(test)]
@@ -209,7 +237,10 @@ mod tests {
     #[test]
     fn via() {
         let sut = SUT::from_iter([1337, 42, 237]);
-        assert_eq!(sut.via().clone().into_iter().collect_vec(), [1337, 42, 237]);
+        assert_eq!(
+            sut.via().clone().into_iter().collect_vec(),
+            [1337, 42, 237]
+        );
     }
 
     #[test]

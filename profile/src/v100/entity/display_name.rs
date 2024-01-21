@@ -119,7 +119,9 @@ mod tests {
 
     #[test]
     fn json_fails_for_invalid() {
-        assert_json_value_fails::<DisplayName>(json!("this is a much much too long display name"));
+        assert_json_value_fails::<DisplayName>(json!(
+            "this is a much much too long display name"
+        ));
         assert_json_value_fails::<DisplayName>(json!(""));
         assert_json_value_fails::<DisplayName>(json!("   "));
     }

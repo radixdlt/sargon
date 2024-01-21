@@ -5,7 +5,17 @@ use radix_engine_common::types::EntityType as EngineEntityType;
 ///
 /// CAP26 uses this type to create separate key spaces for Accounts and Identities
 #[derive(
-    Serialize, Deserialize, FromRepr, Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord,
+    Serialize,
+    Deserialize,
+    FromRepr,
+    Clone,
+    Copy,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    PartialOrd,
+    Ord,
 )]
 #[repr(u32)] // it is u32 since used in Derivation Paths (CAP26) where each component is a u32.
 pub enum AbstractEntityType {
@@ -21,9 +31,15 @@ impl AbstractEntityType {
     pub fn try_from(value: EngineEntityType) -> Result<Self> {
         match value {
             EngineEntityType::GlobalVirtualEd25519Account => Ok(Self::Account),
-            EngineEntityType::GlobalVirtualSecp256k1Account => Ok(Self::Account),
-            EngineEntityType::GlobalVirtualEd25519Identity => Ok(Self::Identity),
-            EngineEntityType::GlobalFungibleResourceManager => Ok(Self::Resource),
+            EngineEntityType::GlobalVirtualSecp256k1Account => {
+                Ok(Self::Account)
+            }
+            EngineEntityType::GlobalVirtualEd25519Identity => {
+                Ok(Self::Identity)
+            }
+            EngineEntityType::GlobalFungibleResourceManager => {
+                Ok(Self::Resource)
+            }
             _ => Err(CommonError::UnsupportedEntityType),
         }
     }

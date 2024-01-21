@@ -59,7 +59,10 @@ impl PrivateHierarchicalDeterministicFactorSource {
         let mnemonic = Mnemonic::from_hex32(entropy);
         let mnemonic_with_passphrase =
             MnemonicWithPassphrase::with_passphrase(mnemonic, passphrase);
-        Self::new_with_mnemonic_with_passphrase(mnemonic_with_passphrase, wallet_client_model)
+        Self::new_with_mnemonic_with_passphrase(
+            mnemonic_with_passphrase,
+            wallet_client_model,
+        )
     }
 
     pub fn generate_new(wallet_client_model: WalletClientModel) -> Self {
@@ -81,7 +84,8 @@ impl PrivateHierarchicalDeterministicFactorSource {
         T: IsEntityPath + Clone,
     {
         let path = T::new(network_id, CAP26KeyKind::TransactionSigning, index);
-        let hd_private_key = self.mnemonic_with_passphrase.derive_private_key(path);
+        let hd_private_key =
+            self.mnemonic_with_passphrase.derive_private_key(path);
         let hd_factor_instance = HierarchicalDeterministicFactorInstance::new(
             self.factor_source.id.clone(),
             hd_private_key.public_key(),
@@ -128,15 +132,14 @@ mod tests {
     #[test]
     fn hash() {
         let n = 100;
-        let set =
-            (0..n)
-                .into_iter()
-                .map(|_| {
-                    PrivateHierarchicalDeterministicFactorSource::generate_new(
-                        WalletClientModel::Unknown,
-                    )
-                })
-                .collect::<HashSet<_>>();
+        let set = (0..n)
+            .into_iter()
+            .map(|_| {
+                PrivateHierarchicalDeterministicFactorSource::generate_new(
+                    WalletClientModel::Unknown,
+                )
+            })
+            .collect::<HashSet<_>>();
         assert_eq!(set.len(), n);
     }
 }
@@ -147,9 +150,11 @@ mod uniffi_tests {
 
     #[test]
     fn new_uses_empty_bip39_passphrase() {
-        let private =
-            new_private_hd_factor_source(Vec::from_iter([0xff; 32]), WalletClientModel::Unknown)
-                .unwrap();
+        let private = new_private_hd_factor_source(
+            Vec::from_iter([0xff; 32]),
+            WalletClientModel::Unknown,
+        )
+        .unwrap();
         assert_eq!(private.mnemonic_with_passphrase.passphrase.0, "");
     }
 }

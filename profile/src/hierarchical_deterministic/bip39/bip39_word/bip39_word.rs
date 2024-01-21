@@ -24,8 +24,9 @@ impl PartialOrd for BIP39Word {
 
 impl BIP39Word {
     pub fn new(word: &'static str, language: BIP39Language) -> Result<Self> {
-        let index = index_of_word_in_bip39_wordlist_of_language(&word, language.into())
-            .ok_or(CommonError::UnknownBIP39Word)?;
+        let index =
+            index_of_word_in_bip39_wordlist_of_language(&word, language.into())
+                .ok_or(CommonError::UnknownBIP39Word)?;
         Ok(Self {
             word: word.to_string(),
             index: index.into(),
@@ -82,12 +83,21 @@ mod tests {
 
     #[test]
     fn index_of_zoo_is_2047() {
-        assert_eq!(BIP39Word::english("zoo").unwrap().index.clone().inner, 2047);
+        assert_eq!(
+            BIP39Word::english("zoo").unwrap().index.clone().inner,
+            2047
+        );
     }
 
     #[test]
     fn ord() {
-        assert!(BIP39Word::english("abandon").unwrap() < BIP39Word::english("ability").unwrap());
-        assert!(BIP39Word::english("zoo").unwrap() > BIP39Word::english("zone").unwrap());
+        assert!(
+            BIP39Word::english("abandon").unwrap()
+                < BIP39Word::english("ability").unwrap()
+        );
+        assert!(
+            BIP39Word::english("zoo").unwrap()
+                > BIP39Word::english("zone").unwrap()
+        );
     }
 }

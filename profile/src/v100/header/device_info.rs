@@ -3,7 +3,15 @@ use crate::prelude::*;
 /// A short summary of a device the Profile is being used
 /// on, typically an iPhone or an Android phone.
 #[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, derive_more::Display, uniffi::Record,
+    Serialize,
+    Deserialize,
+    Clone,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    derive_more::Display,
+    uniffi::Record,
 )]
 #[display("{} | created: {} | #{}", description, self.date.date(), id.to_string())]
 pub struct DeviceInfo {

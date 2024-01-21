@@ -2,7 +2,16 @@ use crate::prelude::*;
 
 /// The addresses that can be added as exception to the `DepositRule`
 #[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Enum,
+    Serialize,
+    Deserialize,
+    Clone,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    PartialOrd,
+    Ord,
+    uniffi::Enum,
 )]
 #[serde(rename_all = "camelCase")]
 #[serde(tag = "discriminator")]

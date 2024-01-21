@@ -65,16 +65,24 @@ mod tests {
 
     #[test]
     fn ord() {
-        assert!(LedgerHardwareWalletModel::NanoS < LedgerHardwareWalletModel::NanoX);
+        assert!(
+            LedgerHardwareWalletModel::NanoS < LedgerHardwareWalletModel::NanoX
+        );
     }
 
     #[test]
     fn json_roundtrip() {
-        assert_json_value_eq_after_roundtrip(&LedgerHardwareWalletModel::NanoS, json!("nanoS"));
+        assert_json_value_eq_after_roundtrip(
+            &LedgerHardwareWalletModel::NanoS,
+            json!("nanoS"),
+        );
         assert_json_value_eq_after_roundtrip(
             &LedgerHardwareWalletModel::NanoSPlus,
             json!("nanoS+"),
         );
-        assert_json_value_eq_after_roundtrip(&LedgerHardwareWalletModel::NanoX, json!("nanoX"));
+        assert_json_value_eq_after_roundtrip(
+            &LedgerHardwareWalletModel::NanoX,
+            json!("nanoX"),
+        );
     }
 }

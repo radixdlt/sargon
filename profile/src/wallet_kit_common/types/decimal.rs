@@ -39,7 +39,10 @@ impl Decimal {
 }
 
 impl Serialize for Decimal {
-    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
+    fn serialize<S>(
+        &self,
+        serializer: S,
+    ) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
     where
         S: Serializer,
     {
@@ -196,12 +199,14 @@ mod tests {
 
     #[test]
     fn from_str() {
-        let a =
-            Decimal::try_from_str("3138550867693340381917894711603833208051.177722232017256447")
-                .unwrap();
-        let b =
-            Decimal::try_from_str("3036550867693340381917894711603833208050.177722232017256447")
-                .unwrap();
+        let a = Decimal::try_from_str(
+            "3138550867693340381917894711603833208051.177722232017256447",
+        )
+        .unwrap();
+        let b = Decimal::try_from_str(
+            "3036550867693340381917894711603833208050.177722232017256447",
+        )
+        .unwrap();
         assert_eq!(a > b, true);
     }
 
@@ -235,13 +240,16 @@ mod tests {
 
     #[test]
     fn json_roundtrip() {
-        let a: Decimal = "3138550867693340381917894711603833208051.177722232017256447"
-            .try_into()
-            .unwrap();
+        let a: Decimal =
+            "3138550867693340381917894711603833208051.177722232017256447"
+                .try_into()
+                .unwrap();
 
         assert_json_value_eq_after_roundtrip(
             &a,
-            json!("3138550867693340381917894711603833208051.177722232017256447"),
+            json!(
+                "3138550867693340381917894711603833208051.177722232017256447"
+            ),
         );
         assert_json_roundtrip(&a);
         assert_json_value_ne_after_roundtrip(&a, json!("3.1415"));
@@ -252,7 +260,9 @@ mod tests {
         let n = 100;
         let set = (0..n)
             .into_iter()
-            .map(|_| Decimal::try_from(generate_bytes::<24>().as_slice()).unwrap())
+            .map(|_| {
+                Decimal::try_from(generate_bytes::<24>().as_slice()).unwrap()
+            })
             .collect::<HashSet<_>>();
         assert_eq!(set.len(), n);
     }

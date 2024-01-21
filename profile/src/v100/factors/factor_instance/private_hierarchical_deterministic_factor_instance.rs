@@ -11,7 +11,9 @@ pub struct PrivateHierarchicalDeterministicFactorInstance {
     pub factor_source_id: FactorSourceID,
 }
 
-impl From<PrivateHierarchicalDeterministicFactorInstance> for HierarchicalDeterministicPrivateKey {
+impl From<PrivateHierarchicalDeterministicFactorInstance>
+    for HierarchicalDeterministicPrivateKey
+{
     fn from(value: PrivateHierarchicalDeterministicFactorInstance) -> Self {
         value.private_key
     }
@@ -110,7 +112,8 @@ mod tests {
         let key: FactorInstance = sut.into();
         assert_eq!(
             key.factor_source_id,
-            PrivateHierarchicalDeterministicFactorInstance::placeholder().factor_source_id
+            PrivateHierarchicalDeterministicFactorInstance::placeholder()
+                .factor_source_id
         );
     }
 }

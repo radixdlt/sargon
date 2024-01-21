@@ -64,7 +64,9 @@ impl Mnemonic {
             .expect("Crate bip39 generated words unknown to us.");
 
         let word_count = BIP39WordCount::from_count(internal.word_count())
-            .expect("Crate bip39 generated a BIP39 standard incompatible word count.");
+            .expect(
+            "Crate bip39 generated a BIP39 standard incompatible word count.",
+        );
 
         Self {
             words,
@@ -73,7 +75,8 @@ impl Mnemonic {
         }
     }
     pub fn from_entropy(entropy: [u8; 32]) -> Self {
-        let internal = bip39::Mnemonic::from_entropy(entropy.as_slice()).unwrap();
+        let internal =
+            bip39::Mnemonic::from_entropy(entropy.as_slice()).unwrap();
         Self::from_internal(internal)
     }
     pub fn from_hex32(bytes: Hex32Bytes) -> Self {
@@ -130,7 +133,10 @@ mod tests {
     #[test]
     fn equality() {
         assert_eq!(Mnemonic::placeholder(), Mnemonic::placeholder());
-        assert_eq!(Mnemonic::placeholder_other(), Mnemonic::placeholder_other());
+        assert_eq!(
+            Mnemonic::placeholder_other(),
+            Mnemonic::placeholder_other()
+        );
     }
 
     #[test]
@@ -179,9 +185,11 @@ mod tests {
     fn word_count() {
         assert_eq!( Mnemonic::from_phrase("bright club bacon dinner achieve pull grid save ramp cereal blush woman humble limb repeat video sudden possible story mask neutral prize goose mandate").unwrap().word_count, BIP39WordCount::TwentyFour);
         assert_eq!(
-            Mnemonic::from_phrase("zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong")
-                .unwrap()
-                .word_count,
+            Mnemonic::from_phrase(
+                "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"
+            )
+            .unwrap()
+            .word_count,
             BIP39WordCount::Twelve
         );
     }
@@ -226,7 +234,9 @@ mod tests {
     #[test]
     fn from_phrase_invalid() {
         assert_eq!(
-            Mnemonic::from_phrase("zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo abandon"),
+            Mnemonic::from_phrase(
+                "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo abandon"
+            ),
             Err(CommonError::InvalidMnemonicPhrase)
         );
     }
@@ -251,12 +261,12 @@ mod tests {
     #[test]
     fn json_fails() {
         assert_json_value_fails::<Mnemonic>(json!("invalid"));
-        assert_json_value_fails::<Mnemonic>(
-            json!("zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo abandon")
-        ); // not checksummed
-        assert_json_value_fails::<Mnemonic>(
-            json!("hej jag zoo zoo zoo zoo zoo zoo zoo zoo zoo abandon")
-        ); // invalid words
+        assert_json_value_fails::<Mnemonic>(json!(
+            "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo abandon"
+        )); // not checksummed
+        assert_json_value_fails::<Mnemonic>(json!(
+            "hej jag zoo zoo zoo zoo zoo zoo zoo zoo zoo abandon"
+        )); // invalid words
     }
 }
 

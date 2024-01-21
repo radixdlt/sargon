@@ -14,7 +14,10 @@ impl Default for P2PLinks {
 impl HasPlaceholder for P2PLinks {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
-        Self::from_iter([P2PLink::placeholder_brave(), P2PLink::placeholder_chrome()])
+        Self::from_iter([
+            P2PLink::placeholder_brave(),
+            P2PLink::placeholder_chrome(),
+        ])
     }
 
     /// A placeholder used to facilitate unit tests.
@@ -32,7 +35,10 @@ mod tests {
     #[test]
     fn equality() {
         assert_eq!(P2PLinks::placeholder(), P2PLinks::placeholder());
-        assert_eq!(P2PLinks::placeholder_other(), P2PLinks::placeholder_other());
+        assert_eq!(
+            P2PLinks::placeholder_other(),
+            P2PLinks::placeholder_other()
+        );
     }
 
     #[test]
@@ -82,8 +88,10 @@ mod tests {
 
     #[test]
     fn duplicates_are_not_allowed() {
-        let mut sut =
-            P2PLinks::from_iter([P2PLink::placeholder_brave(), P2PLink::placeholder_chrome()]);
+        let mut sut = P2PLinks::from_iter([
+            P2PLink::placeholder_brave(),
+            P2PLink::placeholder_chrome(),
+        ]);
         let (inserted, _) = sut.append(P2PLink::placeholder_brave());
         assert_eq!(inserted, false);
     }

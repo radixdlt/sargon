@@ -209,6 +209,9 @@ mod tests {
     #[test]
     fn json_roundtrip_account() {
         let model: CAP26Path = AccountPath::placeholder().into();
-        assert_json_value_eq_after_roundtrip(&model, json!("m/44H/1022H/1H/525H/1460H/0H"));
+        assert_json_value_eq_after_roundtrip(
+            &model,
+            json!("m/44H/1022H/1H/525H/1460H/0H"),
+        );
     }
 }

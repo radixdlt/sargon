@@ -2,7 +2,9 @@ use crate::prelude::*;
 
 /// Accounts, Personas, Authorized dapps for some Radix Network that user
 /// has created and interacted with.
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(
+    Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, uniffi::Record,
+)]
 pub struct Network {
     /// The ID of the network that has been used to generate the `accounts` and `personas`
     /// and on which the `authorizedDapps` have been deployed on.
@@ -44,7 +46,11 @@ impl Network {
 
 impl Network {
     /// Returns a clone of the updated account if found, else None.
-    pub fn update_account<F>(&mut self, address: &AccountAddress, mutate: F) -> Option<Account>
+    pub fn update_account<F>(
+        &mut self,
+        address: &AccountAddress,
+        mutate: F,
+    ) -> Option<Account>
     where
         F: FnMut(&mut Account) -> (),
     {
@@ -106,7 +112,8 @@ mod tests {
             Network::new(
                 NetworkID::Mainnet,
                 Accounts::with_accounts(
-                    [Account::placeholder(), Account::placeholder()].into_iter()
+                    [Account::placeholder(), Account::placeholder()]
+                        .into_iter()
                 )
             )
             .accounts
@@ -116,7 +123,9 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "Discrepancy, found accounts on other network than mainnet")]
+    #[should_panic(
+        expected = "Discrepancy, found accounts on other network than mainnet"
+    )]
     fn panic_when_network_id_mismatch_between_accounts_and_value() {
         Network::new(
             NetworkID::Mainnet,

@@ -4,7 +4,9 @@ use crate::prelude::*;
 /// is "securified" it will no longer be controlled by this `UnsecuredEntityControl`
 /// but rather by an `AccessControl`. It is a name space holding the
 /// single factor instance which was used to create
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(
+    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
+)]
 #[serde(rename_all = "camelCase")]
 pub struct UnsecuredEntityControl {
     // /// The factor instance which was used to create this unsecured entity, which
@@ -43,7 +45,9 @@ impl UnsecuredEntityControl {
         }
         if let Some(key_kind) = transaction_signing.key_kind() {
             if key_kind != CAP26KeyKind::TransactionSigning {
-                return Err(CommonError::WrongKeyKindOfTransactionSigningFactorInstance);
+                return Err(
+                    CommonError::WrongKeyKindOfTransactionSigningFactorInstance,
+                );
             }
         }
         Ok(Self {
@@ -62,8 +66,10 @@ impl UnsecuredEntityControl {
 impl HasPlaceholder for UnsecuredEntityControl {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
-        Self::with_transaction_signing_only(HierarchicalDeterministicFactorInstance::placeholder())
-            .expect("Valid placeholder")
+        Self::with_transaction_signing_only(
+            HierarchicalDeterministicFactorInstance::placeholder(),
+        )
+        .expect("Valid placeholder")
     }
 
     fn placeholder_other() -> Self {
@@ -101,8 +107,11 @@ mod tests {
     #[test]
     fn with_auth_signing() {
         let tx_sign = HierarchicalDeterministicFactorInstance::placeholder();
-        let auth_sign = HierarchicalDeterministicFactorInstance::placeholder_auth_signing();
-        let control = UnsecuredEntityControl::new(tx_sign, Some(auth_sign.clone())).unwrap();
+        let auth_sign =
+            HierarchicalDeterministicFactorInstance::placeholder_auth_signing();
+        let control =
+            UnsecuredEntityControl::new(tx_sign, Some(auth_sign.clone()))
+                .unwrap();
         assert_eq!(control.authentication_signing, Some(auth_sign));
     }
 

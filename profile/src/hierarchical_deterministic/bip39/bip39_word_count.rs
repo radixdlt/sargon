@@ -48,8 +48,10 @@ impl BIP39WordCount {
     }
 
     pub fn from_count(count: usize) -> Result<Self> {
-        let repr = u8::try_from(count).map_err(|_| CommonError::InvalidBIP39WordCount(count))?;
-        let self_ = Self::from_repr(repr).ok_or(CommonError::InvalidBIP39WordCount(count))?;
+        let repr = u8::try_from(count)
+            .map_err(|_| CommonError::InvalidBIP39WordCount(count))?;
+        let self_ = Self::from_repr(repr)
+            .ok_or(CommonError::InvalidBIP39WordCount(count))?;
         Ok(self_)
     }
 }
@@ -99,7 +101,8 @@ mod tests {
     fn hash() {
         assert_eq!(
             BTreeSet::from_iter(
-                [BIP39WordCount::TwentyFour, BIP39WordCount::TwentyFour].into_iter()
+                [BIP39WordCount::TwentyFour, BIP39WordCount::TwentyFour]
+                    .into_iter()
             )
             .len(),
             1
@@ -113,8 +116,14 @@ mod tests {
 
     #[test]
     fn json_roundtrip() {
-        assert_json_value_eq_after_roundtrip(&BIP39WordCount::TwentyFour, json!(24));
-        assert_json_value_ne_after_roundtrip(&BIP39WordCount::TwentyFour, json!(12));
+        assert_json_value_eq_after_roundtrip(
+            &BIP39WordCount::TwentyFour,
+            json!(24),
+        );
+        assert_json_value_ne_after_roundtrip(
+            &BIP39WordCount::TwentyFour,
+            json!(12),
+        );
         assert_json_roundtrip(&BIP39WordCount::TwentyFour);
     }
 }

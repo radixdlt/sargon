@@ -31,7 +31,10 @@ impl Default for Accounts {
 
 impl Accounts {
     /// Returns a reference to the account identified by `address`, if it exists.
-    pub fn get_account_by_address(&self, address: &AccountAddress) -> Option<&Account> {
+    pub fn get_account_by_address(
+        &self,
+        address: &AccountAddress,
+    ) -> Option<&Account> {
         self.get(address)
     }
 
@@ -93,14 +96,19 @@ mod tests {
     #[test]
     fn equality() {
         assert_eq!(Accounts::placeholder(), Accounts::placeholder());
-        assert_eq!(Accounts::placeholder_other(), Accounts::placeholder_other());
+        assert_eq!(
+            Accounts::placeholder_other(),
+            Accounts::placeholder_other()
+        );
     }
 
     #[test]
     fn duplicates_are_prevented() {
         assert_eq!(
-            Accounts::with_accounts([Account::placeholder(), Account::placeholder()].into_iter())
-                .len(),
+            Accounts::with_accounts(
+                [Account::placeholder(), Account::placeholder()].into_iter()
+            )
+            .len(),
             1
         )
     }

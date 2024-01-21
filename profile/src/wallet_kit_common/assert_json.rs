@@ -4,8 +4,11 @@ use serde::{de::DeserializeOwned, ser::Serialize};
 use serde_json::Value;
 
 #[cfg(not(tarpaulin_include))]
-fn base_assert_equality_after_json_roundtrip<T>(model: &T, json: Value, expect_eq: bool)
-where
+fn base_assert_equality_after_json_roundtrip<T>(
+    model: &T,
+    json: Value,
+    expect_eq: bool,
+) where
     T: Serialize + DeserializeOwned + PartialEq + Debug,
 {
     let serialized = serde_json::to_value(&model).unwrap();

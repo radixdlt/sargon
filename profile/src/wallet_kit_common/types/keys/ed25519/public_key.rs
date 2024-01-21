@@ -1,7 +1,11 @@
 use crate::prelude::*;
 
-use radix_engine_common::crypto::{Ed25519PublicKey as EngineEd25519PublicKey, Hash};
-use transaction::{signing::ed25519::Ed25519Signature, validation::verify_ed25519};
+use radix_engine_common::crypto::{
+    Ed25519PublicKey as EngineEd25519PublicKey, Hash,
+};
+use transaction::{
+    signing::ed25519::Ed25519Signature, validation::verify_ed25519,
+};
 
 /// An Ed25519 public key used to verify cryptographic signatures (EdDSA signatures).
 #[serde_as]
@@ -25,12 +29,16 @@ pub struct Ed25519PublicKey {
 }
 
 #[uniffi::export]
-pub fn new_ed25519_public_key_from_hex(hex: String) -> Result<Ed25519PublicKey> {
+pub fn new_ed25519_public_key_from_hex(
+    hex: String,
+) -> Result<Ed25519PublicKey> {
     Ed25519PublicKey::from_hex(hex)
 }
 
 #[uniffi::export]
-pub fn new_ed25519_public_key_from_bytes(bytes: Vec<u8>) -> Result<Ed25519PublicKey> {
+pub fn new_ed25519_public_key_from_bytes(
+    bytes: Vec<u8>,
+) -> Result<Ed25519PublicKey> {
     Ed25519PublicKey::from_bytes(bytes)
 }
 
@@ -58,7 +66,8 @@ pub fn ed25519_public_key_to_bytes(public_key: &Ed25519PublicKey) -> Vec<u8> {
 
 impl From<EngineEd25519PublicKey> for Ed25519PublicKey {
     fn from(value: EngineEd25519PublicKey) -> Self {
-        Self::from_engine(value).expect("EngineEd25519PublicKey should have been valid.")
+        Self::from_engine(value)
+            .expect("EngineEd25519PublicKey should have been valid.")
     }
 }
 
@@ -86,7 +95,11 @@ impl Ed25519PublicKey {
     }
 
     /// Verifies an EdDSA signature over Curve25519.
-    pub fn is_valid(&self, signature: &Ed25519Signature, for_hash: &Hash) -> bool {
+    pub fn is_valid(
+        &self,
+        signature: &Ed25519Signature,
+        for_hash: &Hash,
+    ) -> bool {
         verify_ed25519(for_hash, &self.to_engine(), signature)
     }
 }
@@ -212,12 +225,11 @@ mod tests {
 
     #[test]
     fn bytes_roundtrip() {
-        let bytes: &[u8] =
-            &[
-                0xec, 0x17, 0x2b, 0x93, 0xad, 0x5e, 0x56, 0x3b, 0xf4, 0x93, 0x2c, 0x70, 0xe1, 0x24,
-                0x50, 0x34, 0xc3, 0x54, 0x67, 0xef, 0x2e, 0xfd, 0x4d, 0x64, 0xeb, 0xf8, 0x19, 0x68,
-                0x34, 0x67, 0xe2, 0xbf,
-            ];
+        let bytes: &[u8] = &[
+            0xec, 0x17, 0x2b, 0x93, 0xad, 0x5e, 0x56, 0x3b, 0xf4, 0x93, 0x2c,
+            0x70, 0xe1, 0x24, 0x50, 0x34, 0xc3, 0x54, 0x67, 0xef, 0x2e, 0xfd,
+            0x4d, 0x64, 0xeb, 0xf8, 0x19, 0x68, 0x34, 0x67, 0xe2, 0xbf,
+        ];
         let key = Ed25519PublicKey::try_from(bytes).unwrap();
         assert_eq!(
             key.to_hex(),
@@ -254,7 +266,9 @@ mod tests {
     fn invalid_hex_str() {
         assert_eq!(
             Ed25519PublicKey::from_str("not a valid hex string"),
-            Err(CommonError::InvalidEd25519PublicKeyFromString("not a valid hex string".to_owned()))
+            Err(CommonError::InvalidEd25519PublicKeyFromString(
+                "not a valid hex string".to_owned()
+            ))
         );
     }
 
@@ -262,13 +276,16 @@ mod tests {
     fn invalid_str_too_short() {
         assert_eq!(
             Ed25519PublicKey::from_str("dead"),
-            Err(CommonError::InvalidEd25519PublicKeyFromString("dead".to_owned()))
+            Err(CommonError::InvalidEd25519PublicKeyFromString(
+                "dead".to_owned()
+            ))
         );
     }
 
     #[test]
     fn try_into_from_str() {
-        let str = "b7a3c12dc0c8c748ab07525b701122b88bd78f600c76342d27f25e5f92444cde";
+        let str =
+            "b7a3c12dc0c8c748ab07525b701122b88bd78f600c76342d27f25e5f92444cde";
         let key: Ed25519PublicKey = str.try_into().unwrap();
         assert_eq!(key.to_hex(), str);
     }
@@ -307,8 +324,9 @@ mod tests {
 #[cfg(test)]
 mod uniffi_tests {
     use crate::{
-        ed25519_public_key_to_bytes, ed25519_public_key_to_hex, new_ed25519_public_key_from_bytes,
-        new_ed25519_public_key_from_hex, new_ed25519_public_key_placeholder,
+        ed25519_public_key_to_bytes, ed25519_public_key_to_hex,
+        new_ed25519_public_key_from_bytes, new_ed25519_public_key_from_hex,
+        new_ed25519_public_key_placeholder,
         new_ed25519_public_key_placeholder_other, HasPlaceholder,
     };
 
@@ -328,9 +346,12 @@ mod uniffi_tests {
 
     #[test]
     fn new_from_bytes() {
-        let bytes = hex::decode("b7a3c12dc0c8c748ab07525b701122b88bd78f600c76342d27f25e5f92444cde")
-            .unwrap();
-        let from_bytes = new_ed25519_public_key_from_bytes(bytes.clone()).unwrap();
+        let bytes = hex::decode(
+            "b7a3c12dc0c8c748ab07525b701122b88bd78f600c76342d27f25e5f92444cde",
+        )
+        .unwrap();
+        let from_bytes =
+            new_ed25519_public_key_from_bytes(bytes.clone()).unwrap();
         assert_eq!(
             from_bytes,
             Ed25519PublicKey::from_bytes(bytes.clone()).unwrap()
@@ -340,8 +361,10 @@ mod uniffi_tests {
 
     #[test]
     fn new_from_hex() {
-        let hex = "b7a3c12dc0c8c748ab07525b701122b88bd78f600c76342d27f25e5f92444cde";
-        let from_hex = new_ed25519_public_key_from_hex(hex.to_string()).unwrap();
+        let hex =
+            "b7a3c12dc0c8c748ab07525b701122b88bd78f600c76342d27f25e5f92444cde";
+        let from_hex =
+            new_ed25519_public_key_from_hex(hex.to_string()).unwrap();
         assert_eq!(
             from_hex,
             Ed25519PublicKey::from_hex(hex.to_string()).unwrap()

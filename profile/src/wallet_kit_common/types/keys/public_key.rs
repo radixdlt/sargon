@@ -4,7 +4,17 @@ use radix_engine_common::crypto::PublicKey as EnginePublicKey;
 
 /// A tagged union of supported public keys on different curves, supported
 /// curves are `secp256k1` and `Curve25519`
-#[derive(Clone, Debug, PartialEq, EnumAsInner, Eq, Hash, PartialOrd, Ord, uniffi::Enum)]
+#[derive(
+    Clone,
+    Debug,
+    PartialEq,
+    EnumAsInner,
+    Eq,
+    Hash,
+    PartialOrd,
+    Ord,
+    uniffi::Enum,
+)]
 pub enum PublicKey {
     /// An Ed25519 public key used to verify cryptographic signatures.
     Ed25519 { value: Ed25519PublicKey },
@@ -143,7 +153,9 @@ impl PublicKey {
 
 impl<'de> Deserialize<'de> for PublicKey {
     #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D: Deserializer<'de>>(
+        deserializer: D,
+    ) -> Result<Self, D::Error> {
         #[derive(Deserialize, Serialize)]
         struct Wrapper {
             #[serde(rename = "compressedData")]
@@ -155,9 +167,11 @@ impl<'de> Deserialize<'de> for PublicKey {
             SLIP10Curve::Curve25519 => Ed25519PublicKey::from_str(&wrapper.hex)
                 .map(|pk| PublicKey::Ed25519 { value: pk.into() })
                 .map_err(de::Error::custom),
-            SLIP10Curve::Secp256k1 => Secp256k1PublicKey::from_str(&wrapper.hex)
-                .map(|pk| PublicKey::Secp256k1 { value: pk.into() })
-                .map_err(de::Error::custom),
+            SLIP10Curve::Secp256k1 => {
+                Secp256k1PublicKey::from_str(&wrapper.hex)
+                    .map(|pk| PublicKey::Secp256k1 { value: pk.into() })
+                    .map_err(de::Error::custom)
+            }
         }
     }
 }
@@ -207,8 +221,10 @@ mod tests {
 
     #[test]
     fn engine_roundtrip_secp256k1() {
-        let public_key_secp256k1: PublicKey = Secp256k1PublicKey::placeholder().into();
-        let engine_key_secp256k1: EnginePublicKey = public_key_secp256k1.clone().into();
+        let public_key_secp256k1: PublicKey =
+            Secp256k1PublicKey::placeholder().into();
+        let engine_key_secp256k1: EnginePublicKey =
+            public_key_secp256k1.clone().into();
         match engine_key_secp256k1 {
             EnginePublicKey::Secp256k1(k) => {
                 assert_eq!(k.to_vec(), public_key_secp256k1.to_bytes())
@@ -219,8 +235,10 @@ mod tests {
 
     #[test]
     fn engine_roundtrip_ed25519() {
-        let public_key_ed25519: PublicKey = Ed25519PublicKey::placeholder().into();
-        let engine_key_ed25519: EnginePublicKey = public_key_ed25519.clone().into();
+        let public_key_ed25519: PublicKey =
+            Ed25519PublicKey::placeholder().into();
+        let engine_key_ed25519: EnginePublicKey =
+            public_key_ed25519.clone().into();
         match engine_key_ed25519 {
             EnginePublicKey::Ed25519(k) => {
                 assert_eq!(k.to_vec(), public_key_ed25519.to_bytes())
@@ -349,12 +367,11 @@ mod tests {
 
     #[test]
     fn secp256k1_bytes_roundtrip() {
-        let bytes: &[u8] =
-            &[
-                0x02, 0x51, 0x7b, 0x88, 0x91, 0x6e, 0x7f, 0x31, 0x5b, 0xb6, 0x82, 0xf9, 0x92, 0x6b,
-                0x14, 0xbc, 0x67, 0xa0, 0xe4, 0x24, 0x6f, 0x8a, 0x41, 0x9b, 0x98, 0x62, 0x69, 0xe1,
-                0xa7, 0xe6, 0x1f, 0xff, 0xa7,
-            ];
+        let bytes: &[u8] = &[
+            0x02, 0x51, 0x7b, 0x88, 0x91, 0x6e, 0x7f, 0x31, 0x5b, 0xb6, 0x82,
+            0xf9, 0x92, 0x6b, 0x14, 0xbc, 0x67, 0xa0, 0xe4, 0x24, 0x6f, 0x8a,
+            0x41, 0x9b, 0x98, 0x62, 0x69, 0xe1, 0xa7, 0xe6, 0x1f, 0xff, 0xa7,
+        ];
         let key = PublicKey::secp256k1_from_bytes(bytes).unwrap();
         assert_eq!(
             key.to_hex(),
@@ -372,12 +389,11 @@ mod tests {
 
     #[test]
     fn ed25519_bytes_roundtrip() {
-        let bytes: &[u8] =
-            &[
-                0xec, 0x17, 0x2b, 0x93, 0xad, 0x5e, 0x56, 0x3b, 0xf4, 0x93, 0x2c, 0x70, 0xe1, 0x24,
-                0x50, 0x34, 0xc3, 0x54, 0x67, 0xef, 0x2e, 0xfd, 0x4d, 0x64, 0xeb, 0xf8, 0x19, 0x68,
-                0x34, 0x67, 0xe2, 0xbf,
-            ];
+        let bytes: &[u8] = &[
+            0xec, 0x17, 0x2b, 0x93, 0xad, 0x5e, 0x56, 0x3b, 0xf4, 0x93, 0x2c,
+            0x70, 0xe1, 0x24, 0x50, 0x34, 0xc3, 0x54, 0x67, 0xef, 0x2e, 0xfd,
+            0x4d, 0x64, 0xeb, 0xf8, 0x19, 0x68, 0x34, 0x67, 0xe2, 0xbf,
+        ];
         let key = PublicKey::ed25519_from_bytes(bytes).unwrap();
         assert_eq!(
             key.to_hex(),
@@ -388,7 +404,8 @@ mod tests {
 
     #[test]
     fn ed25519_hex_roundtrip() {
-        let hex = "ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf";
+        let hex =
+            "ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf";
         let key = PublicKey::ed25519_from_str(hex).unwrap();
         assert_eq!(key.to_hex(), hex);
     }

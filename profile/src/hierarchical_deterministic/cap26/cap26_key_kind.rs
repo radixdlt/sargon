@@ -84,7 +84,10 @@ mod tests {
 
     #[test]
     fn json_roundtrip() {
-        assert_json_value_eq_after_roundtrip(&CAP26KeyKind::TransactionSigning, json!(1460));
+        assert_json_value_eq_after_roundtrip(
+            &CAP26KeyKind::TransactionSigning,
+            json!(1460),
+        );
         assert_json_roundtrip(&CAP26KeyKind::TransactionSigning);
     }
 }

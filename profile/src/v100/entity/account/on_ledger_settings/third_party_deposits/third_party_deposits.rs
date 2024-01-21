@@ -2,7 +2,9 @@ use crate::prelude::*;
 
 /// Controls the ability of third-parties to deposit into a certain account, this is
 /// useful for users who wish to not be able to receive airdrops.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(
+    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
+)]
 #[serde(rename_all = "camelCase")]
 pub struct ThirdPartyDeposits {
     /// Controls the ability of third-parties to deposit into this account
@@ -55,8 +57,12 @@ impl ThirdPartyDeposits {
     {
         Self {
             deposit_rule,
-            assets_exception_list: IdentifiedVecVia::from_iter(assets_exception_list),
-            depositors_allow_list: IdentifiedVecVia::from_iter(depositors_allow_list),
+            assets_exception_list: IdentifiedVecVia::from_iter(
+                assets_exception_list,
+            ),
+            depositors_allow_list: IdentifiedVecVia::from_iter(
+                depositors_allow_list,
+            ),
         }
     }
 
@@ -71,7 +77,10 @@ impl ThirdPartyDeposits {
     }
 
     // If the set contains an element equal to `exception`, removes it from the set and drops it. Returns whether such an element was present.
-    pub fn remove_asset_exception(&mut self, exception: &AssetException) -> bool {
+    pub fn remove_asset_exception(
+        &mut self,
+        exception: &AssetException,
+    ) -> bool {
         self.assets_exception_list.remove(exception).is_some()
     }
 
@@ -86,7 +95,10 @@ impl ThirdPartyDeposits {
     }
 
     // If the set contains an element equal to `DepositorAddress`, removes it from the set and drops it. Returns whether such an element was present.
-    pub fn remove_allowed_depositor(&mut self, depositor: &DepositorAddress) -> bool {
+    pub fn remove_allowed_depositor(
+        &mut self,
+        depositor: &DepositorAddress,
+    ) -> bool {
         self.depositors_allow_list.remove(depositor).is_some()
     }
 }
@@ -177,7 +189,8 @@ mod tests {
         assert!(settings.remove_asset_exception(&exception));
         assert_eq!(settings.assets_exception_list.len(), 1);
         // settings.set_assets_exception_list(BTreeSet::from_iter([exception.clone()]));
-        settings.assets_exception_list = IdentifiedVecVia::from_iter([exception.clone()]);
+        settings.assets_exception_list =
+            IdentifiedVecVia::from_iter([exception.clone()]);
 
         assert!(
             !settings.add_asset_exception(exception.clone()),
@@ -213,7 +226,8 @@ mod tests {
         assert!(settings.remove_allowed_depositor(&depositor));
         assert_eq!(settings.depositors_allow_list.len(), 0);
 
-        settings.depositors_allow_list = IdentifiedVecVia::from_iter([depositor.clone()]);
+        settings.depositors_allow_list =
+            IdentifiedVecVia::from_iter([depositor.clone()]);
         assert!(
             !settings.allow_depositor(depositor.clone()),
             "Expected `false` since already present."

@@ -160,7 +160,10 @@ mod tests {
             I: IntoIterator<Item = HDPathValue>,
         {
             HDPath {
-                components: iter.into_iter().map(HDPathComponent::harden).collect_vec(),
+                components: iter
+                    .into_iter()
+                    .map(HDPathComponent::harden)
+                    .collect_vec(),
             }
         }
     }

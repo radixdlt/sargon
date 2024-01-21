@@ -41,8 +41,12 @@ impl Default for Gateway {
 }
 
 impl Gateway {
-    pub fn new(url: String, id: NetworkID) -> Result<Arc<Self>, crate::CommonError> {
-        let url = Url::try_from(url.as_str()).map_err(|_| CommonError::InvalidURL(url))?;
+    pub fn new(
+        url: String,
+        id: NetworkID,
+    ) -> Result<Arc<Self>, crate::CommonError> {
+        let url = Url::try_from(url.as_str())
+            .map_err(|_| CommonError::InvalidURL(url))?;
         let network = RadixNetwork::lookup_by_id(id)?;
         Ok(Self { url, network }.into())
     }
@@ -106,7 +110,10 @@ impl Gateway {
     }
 
     pub fn enkinet() -> Self {
-        Self::declare("https://enkinet-gateway.radixdlt.com/", NetworkID::Enkinet)
+        Self::declare(
+            "https://enkinet-gateway.radixdlt.com/",
+            NetworkID::Enkinet,
+        )
     }
 
     pub fn mardunet() -> Self {

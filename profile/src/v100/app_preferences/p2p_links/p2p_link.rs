@@ -40,7 +40,10 @@ impl SafeToLog for P2PLink {
 }
 
 impl P2PLink {
-    pub fn new(connection_password: RadixConnectPassword, display_name: String) -> Self {
+    pub fn new(
+        connection_password: RadixConnectPassword,
+        display_name: String,
+    ) -> Self {
         Self {
             connection_password,
             display_name,
@@ -91,7 +94,10 @@ impl P2PLink {
     /// `aced`... "Arc on MacStudio"
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_arc() -> Self {
-        Self::declare(RadixConnectPassword::placeholder_aced(), "Arc on MacStudio")
+        Self::declare(
+            RadixConnectPassword::placeholder_aced(),
+            "Arc on MacStudio",
+        )
     }
 
     /// `babe`... "Brave on PC"

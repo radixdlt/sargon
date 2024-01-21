@@ -5,7 +5,17 @@ use crate::prelude::*;
 ///
 /// Current and other saved Gateways, security settings, connected P2P clients,
 /// App Display settings and preferences for transaction.
-#[derive(Debug, Default, Deserialize, Serialize, PartialEq, Eq, Clone, Hash, uniffi::Record)]
+#[derive(
+    Debug,
+    Default,
+    Deserialize,
+    Serialize,
+    PartialEq,
+    Eq,
+    Clone,
+    Hash,
+    uniffi::Record,
+)]
 #[serde(rename_all = "camelCase")]
 pub struct AppPreferences {
     /// Display settings in the wallet app, such as appearances, currency etc.
@@ -84,7 +94,10 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(AppPreferences::placeholder(), AppPreferences::placeholder());
+        assert_eq!(
+            AppPreferences::placeholder(),
+            AppPreferences::placeholder()
+        );
         assert_eq!(
             AppPreferences::placeholder_other(),
             AppPreferences::placeholder_other()
@@ -206,7 +219,8 @@ mod tests {
 #[cfg(test)]
 mod uniffi_tests {
     use crate::{
-        new_app_preferences_placeholder, new_app_preferences_placeholder_other, HasPlaceholder,
+        new_app_preferences_placeholder, new_app_preferences_placeholder_other,
+        HasPlaceholder,
     };
 
     use super::AppPreferences;

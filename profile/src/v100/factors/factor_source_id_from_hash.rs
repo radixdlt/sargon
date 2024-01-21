@@ -39,15 +39,21 @@ impl FactorSourceIDFromHash {
         factor_source_kind: FactorSourceKind,
         mnemonic_with_passphrase: MnemonicWithPassphrase,
     ) -> Self {
-        let private_key = mnemonic_with_passphrase.derive_private_key(GetIDPath::default());
+        let private_key =
+            mnemonic_with_passphrase.derive_private_key(GetIDPath::default());
         let public_key_bytes = private_key.public_key().to_bytes();
         let hash: Hash = blake2b_256_hash(public_key_bytes);
         let body = Hex32Bytes::from(hash);
         Self::new(factor_source_kind, body)
     }
 
-    pub fn new_for_device(mnemonic_with_passphrase: MnemonicWithPassphrase) -> Self {
-        Self::from_mnemonic_with_passphrase(FactorSourceKind::Device, mnemonic_with_passphrase)
+    pub fn new_for_device(
+        mnemonic_with_passphrase: MnemonicWithPassphrase,
+    ) -> Self {
+        Self::from_mnemonic_with_passphrase(
+            FactorSourceKind::Device,
+            mnemonic_with_passphrase,
+        )
     }
 }
 

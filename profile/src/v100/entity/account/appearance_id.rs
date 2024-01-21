@@ -95,7 +95,10 @@ mod tests {
 
     #[test]
     fn json() {
-        assert_json_value_eq_after_roundtrip(&AppearanceID::new(3).unwrap(), json!(3));
+        assert_json_value_eq_after_roundtrip(
+            &AppearanceID::new(3).unwrap(),
+            json!(3),
+        );
         assert_json_value_fails::<AppearanceID>(json!("3"));
         assert_json_value_fails::<AppearanceID>(json!(99));
     }

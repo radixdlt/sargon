@@ -22,7 +22,10 @@ impl Wallet {
         });
     }
 
-    fn with_imported_profile(profile: Profile, secure_storage: Arc<dyn SecureStorage>) -> Self {
+    fn with_imported_profile(
+        profile: Profile,
+        secure_storage: Arc<dyn SecureStorage>,
+    ) -> Self {
         // Init WalletClient's storage
         let wallet_client_storage = WalletClientStorage::new(secure_storage);
 
@@ -99,7 +102,10 @@ impl Wallet {
         let wallet = Self::with_imported_profile(profile, secure_storage);
         wallet.wallet_client_storage.save(
             SecureStorageKey::DeviceFactorSourceMnemonic {
-                factor_source_id: private_hd_factor_source.factor_source.id.clone(),
+                factor_source_id: private_hd_factor_source
+                    .factor_source
+                    .id
+                    .clone(),
             },
             &private_hd_factor_source.mnemonic_with_passphrase,
         )?;
@@ -108,7 +114,10 @@ impl Wallet {
 
     /// Creates wallet by *importing* a Profile.
     #[uniffi::constructor]
-    pub fn by_importing_profile(profile: Profile, secure_storage: Arc<dyn SecureStorage>) -> Self {
+    pub fn by_importing_profile(
+        profile: Profile,
+        secure_storage: Arc<dyn SecureStorage>,
+    ) -> Self {
         Wallet::init_logging();
 
         log::info!(
@@ -120,10 +129,14 @@ impl Wallet {
     }
 
     #[uniffi::constructor]
-    pub fn by_loading_profile(secure_storage: Arc<dyn SecureStorage>) -> Result<Self> {
+    pub fn by_loading_profile(
+        secure_storage: Arc<dyn SecureStorage>,
+    ) -> Result<Self> {
         Wallet::init_logging();
 
-        log::info!("Instantiating Wallet by loading the active Profile from storage");
+        log::info!(
+            "Instantiating Wallet by loading the active Profile from storage"
+        );
 
         // Init WalletClient's storage
         let wallet_client_storage = WalletClientStorage::new(secure_storage);
@@ -149,13 +162,18 @@ impl Wallet {
             profile_id
         );
 
-        Self::new_load_profile_with_id(profile_id, WalletClientStorage::new(secure_storage))
+        Self::new_load_profile_with_id(
+            profile_id,
+            WalletClientStorage::new(secure_storage),
+        )
     }
 }
 
 #[cfg(test)]
 impl Wallet {
-    pub(crate) fn ephemeral(profile: Profile) -> (Self, Arc<EphemeralSecureStorage>) {
+    pub(crate) fn ephemeral(
+        profile: Profile,
+    ) -> (Self, Arc<EphemeralSecureStorage>) {
         let storage = EphemeralSecureStorage::new();
         (
             Self::by_importing_profile(profile, storage.clone()),
@@ -273,8 +291,11 @@ mod uniffi_tests {
             secure_storage.load_data(SecureStorageKey::ActiveProfileID),
             Ok(None)
         ); // we dont have any ActiveID yet.
-        let wallet =
-            Wallet::by_loading_profile_with_id(profile.id(), secure_storage.clone()).unwrap();
+        let wallet = Wallet::by_loading_profile_with_id(
+            profile.id(),
+            secure_storage.clone(),
+        )
+        .unwrap();
         assert_eq!(wallet.profile(), profile);
 
         // Assert an ActiveProfileID has been saved.
@@ -290,7 +311,10 @@ mod uniffi_tests {
         let secure_storage = EphemeralSecureStorage::new();
         let active_profile_id_data = serde_json::to_vec(&profile.id()).unwrap();
         assert!(secure_storage
-            .save_data(SecureStorageKey::ActiveProfileID, active_profile_id_data)
+            .save_data(
+                SecureStorageKey::ActiveProfileID,
+                active_profile_id_data
+            )
             .is_ok());
         let data = serde_json::to_vec(&profile).unwrap();
         assert!(secure_storage
@@ -309,7 +333,8 @@ mod uniffi_tests {
     fn snapshot_json() {
         let profile = Profile::placeholder();
         let secure_storage = EphemeralSecureStorage::new();
-        let wallet = Wallet::by_importing_profile(profile.clone(), secure_storage);
+        let wallet =
+            Wallet::by_importing_profile(profile.clone(), secure_storage);
         let expected_json = serde_json::to_string(&profile).unwrap();
         assert_eq!(wallet.json_snapshot(), expected_json);
     }
@@ -317,30 +342,31 @@ mod uniffi_tests {
     #[test]
     fn by_creating_new_profile_and_secrets_with_entropy() {
         let secure_storage = EphemeralSecureStorage::new();
-        let wallet =
-            Wallet::by_creating_new_profile_and_secrets_with_entropy(
-                Vec::from_iter([0xff; 32]),
-                WalletClientModel::Unknown,
-                "Test".to_string(),
-                secure_storage.clone(),
-            )
-            .unwrap();
+        let wallet = Wallet::by_creating_new_profile_and_secrets_with_entropy(
+            Vec::from_iter([0xff; 32]),
+            WalletClientModel::Unknown,
+            "Test".to_string(),
+            secure_storage.clone(),
+        )
+        .unwrap();
         let mnemonic_json = secure_storage
             .load_data(SecureStorageKey::DeviceFactorSourceMnemonic {
                 factor_source_id: wallet.profile().bdfs().id,
             })
             .unwrap()
             .unwrap();
-        let mwp = serde_json::from_slice::<MnemonicWithPassphrase>(&mnemonic_json).unwrap();
+        let mwp =
+            serde_json::from_slice::<MnemonicWithPassphrase>(&mnemonic_json)
+                .unwrap();
         assert_eq!(mwp.mnemonic.phrase(), "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo vote");
 
-        let active_id_data =
-            secure_storage
-                .load_data(SecureStorageKey::ActiveProfileID)
-                .unwrap()
-                .unwrap();
+        let active_id_data = secure_storage
+            .load_data(SecureStorageKey::ActiveProfileID)
+            .unwrap()
+            .unwrap();
 
-        let active_id = serde_json::from_slice::<ProfileID>(&active_id_data).unwrap();
+        let active_id =
+            serde_json::from_slice::<ProfileID>(&active_id_data).unwrap();
         assert_eq!(active_id, wallet.profile().id());
     }
 }

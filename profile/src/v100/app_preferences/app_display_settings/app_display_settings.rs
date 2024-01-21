@@ -3,7 +3,9 @@ use crate::prelude::*;
 /// Settings related to displaying of information to the user inside the app.
 ///
 /// **N.B. neither of these settings are in fact not yet used by clients.**
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(
+    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
+)]
 #[serde(rename_all = "camelCase")]
 pub struct AppDisplay {
     /// If we should show the aggregate value of users portfolio in fiat currency

@@ -48,7 +48,11 @@ pub struct ContentHint {
 // Constructors
 impl ContentHint {
     /// Instantiates a new `ContentHint` with the specified counter values.
-    pub fn with_counters(accounts: usize, personas: usize, networks: usize) -> Self {
+    pub fn with_counters(
+        accounts: usize,
+        personas: usize,
+        networks: usize,
+    ) -> Self {
         Self {
             number_of_accounts_on_all_networks_in_total: accounts as u16,
             number_of_personas_on_all_networks_in_total: personas as u16,
@@ -101,8 +105,14 @@ mod tests {
             let y = i + 2;
             let z = i + 3;
             let sut = ContentHint::with_counters(x, y, z);
-            assert_eq!(sut.number_of_accounts_on_all_networks_in_total as usize, x);
-            assert_eq!(sut.number_of_personas_on_all_networks_in_total as usize, y);
+            assert_eq!(
+                sut.number_of_accounts_on_all_networks_in_total as usize,
+                x
+            );
+            assert_eq!(
+                sut.number_of_personas_on_all_networks_in_total as usize,
+                y
+            );
             assert_eq!(sut.number_of_networks as usize, z)
         });
     }

@@ -5,7 +5,16 @@ use crate::prelude::*;
 /// a new scheme call Cap26 but we also need to support BIP44-like used
 /// by Olympia.
 #[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Enum,
+    Serialize,
+    Deserialize,
+    Clone,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    PartialOrd,
+    Ord,
+    uniffi::Enum,
 )]
 pub enum DerivationPathScheme {
     /// A BIP32 based derivation path scheme, using SLIP10.
@@ -53,7 +62,10 @@ mod tests {
 
     #[test]
     fn curve_from_scheme() {
-        assert_eq!(DerivationPathScheme::Cap26.curve(), SLIP10Curve::Curve25519);
+        assert_eq!(
+            DerivationPathScheme::Cap26.curve(),
+            SLIP10Curve::Curve25519
+        );
         assert_eq!(
             DerivationPathScheme::Bip44Olympia.curve(),
             SLIP10Curve::Secp256k1

@@ -12,13 +12,22 @@ impl Wallet {
             profile,
         )
     }
-    pub(crate) fn save_active_profile_id(&self, profile_id: &ProfileID) -> Result<()> {
+    pub(crate) fn save_active_profile_id(
+        &self,
+        profile_id: &ProfileID,
+    ) -> Result<()> {
         self.wallet_client_storage
             .save(SecureStorageKey::ActiveProfileID, profile_id)
     }
-    pub(crate) fn save_active_profile_id_or_panic(&self, profile_id: &ProfileID) {
+    pub(crate) fn save_active_profile_id_or_panic(
+        &self,
+        profile_id: &ProfileID,
+    ) {
         match self.save_active_profile_id(profile_id) {
-            Ok(_) => log::info!("Successfully saved active ProfileID: {}", profile_id),
+            Ok(_) => log::info!(
+                "Successfully saved active ProfileID: {}",
+                profile_id
+            ),
             Err(e) => fatal_error(format!(
                 "Failed to save active ProfileID: {}, error: {}",
                 profile_id, e
@@ -33,7 +42,10 @@ impl Wallet {
     pub(crate) fn save_profile_or_panic(&self, profile: &Profile) -> bool {
         match self.save_profile(profile) {
             Ok(_) => {
-                log::info!("Successfully saved profile with ID: {}", profile.id());
+                log::info!(
+                    "Successfully saved profile with ID: {}",
+                    profile.id()
+                );
                 true
             }
             Err(e) => {
@@ -66,18 +78,30 @@ mod tests {
         struct FailSaveActiveProfileIDStorage {}
 
         impl SecureStorage for FailSaveActiveProfileIDStorage {
-            fn load_data(&self, _key: SecureStorageKey) -> Result<Option<Vec<u8>>> {
+            fn load_data(
+                &self,
+                _key: SecureStorageKey,
+            ) -> Result<Option<Vec<u8>>> {
                 todo!()
             }
 
-            fn save_data(&self, key: SecureStorageKey, _data: Vec<u8>) -> Result<()> {
+            fn save_data(
+                &self,
+                key: SecureStorageKey,
+                _data: Vec<u8>,
+            ) -> Result<()> {
                 match key {
-                    SecureStorageKey::ActiveProfileID => Err(CommonError::Unknown),
+                    SecureStorageKey::ActiveProfileID => {
+                        Err(CommonError::Unknown)
+                    }
                     _ => Ok(()),
                 }
             }
 
-            fn delete_data_for_key(&self, _key: SecureStorageKey) -> Result<()> {
+            fn delete_data_for_key(
+                &self,
+                _key: SecureStorageKey,
+            ) -> Result<()> {
                 todo!()
             }
         }
@@ -95,11 +119,18 @@ mod tests {
         struct FailSaveProfileStorage {}
 
         impl SecureStorage for FailSaveProfileStorage {
-            fn load_data(&self, _key: SecureStorageKey) -> Result<Option<Vec<u8>>> {
+            fn load_data(
+                &self,
+                _key: SecureStorageKey,
+            ) -> Result<Option<Vec<u8>>> {
                 todo!()
             }
 
-            fn save_data(&self, key: SecureStorageKey, _data: Vec<u8>) -> Result<()> {
+            fn save_data(
+                &self,
+                key: SecureStorageKey,
+                _data: Vec<u8>,
+            ) -> Result<()> {
                 match key {
                     SecureStorageKey::ProfileSnapshot { profile_id: _ } => {
                         Err(CommonError::Unknown)
@@ -108,7 +139,10 @@ mod tests {
                 }
             }
 
-            fn delete_data_for_key(&self, _key: SecureStorageKey) -> Result<()> {
+            fn delete_data_for_key(
+                &self,
+                _key: SecureStorageKey,
+            ) -> Result<()> {
                 todo!()
             }
         }
@@ -126,7 +160,10 @@ mod tests {
         struct FailSaveActiveProfileIDStorage {}
 
         impl SecureStorage for FailSaveActiveProfileIDStorage {
-            fn load_data(&self, key: SecureStorageKey) -> Result<Option<Vec<u8>>> {
+            fn load_data(
+                &self,
+                key: SecureStorageKey,
+            ) -> Result<Option<Vec<u8>>> {
                 match key {
                     SecureStorageKey::ProfileSnapshot { profile_id: _ } => {
                         serde_json::to_vec(&Profile::placeholder())
@@ -137,19 +174,32 @@ mod tests {
                 }
             }
 
-            fn save_data(&self, key: SecureStorageKey, _data: Vec<u8>) -> Result<()> {
+            fn save_data(
+                &self,
+                key: SecureStorageKey,
+                _data: Vec<u8>,
+            ) -> Result<()> {
                 match key {
-                    SecureStorageKey::ActiveProfileID => Err(CommonError::Unknown),
+                    SecureStorageKey::ActiveProfileID => {
+                        Err(CommonError::Unknown)
+                    }
                     _ => Ok(()),
                 }
             }
 
-            fn delete_data_for_key(&self, _key: SecureStorageKey) -> Result<()> {
+            fn delete_data_for_key(
+                &self,
+                _key: SecureStorageKey,
+            ) -> Result<()> {
                 todo!()
             }
         }
         let storage = Arc::new(FailSaveActiveProfileIDStorage {});
 
-        _ = Wallet::by_loading_profile_with_id(ProfileID::placeholder(), storage).unwrap();
+        _ = Wallet::by_loading_profile_with_id(
+            ProfileID::placeholder(),
+            storage,
+        )
+        .unwrap();
     }
 }

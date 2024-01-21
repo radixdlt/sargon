@@ -5,7 +5,15 @@ use crate::prelude::*;
 /// compatible with and which device was used to create it and
 /// a hint about its contents.
 #[derive(
-    Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, derive_more::Display, uniffi::Record,
+    Serialize,
+    Deserialize,
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    Hash,
+    derive_more::Display,
+    uniffi::Record,
 )]
 #[serde(rename_all = "camelCase")]
 #[display("#{} v={}, content: {}", id, snapshot_version, content_hint)]
@@ -61,7 +69,12 @@ impl Header {
     /// Instantiates a new `Header` with creating and last used on `DeviceInfo` with
     /// "Unknown device" as description, and empty content hint
     pub fn new(creating_device: DeviceInfo) -> Self {
-        Self::with_values(profile_id(), creating_device, ContentHint::new(), now())
+        Self::with_values(
+            profile_id(),
+            creating_device,
+            ContentHint::new(),
+            now(),
+        )
     }
 }
 
@@ -90,7 +103,8 @@ impl HasPlaceholder for Header {
             "iPhone".to_string(),
         );
         Header::with_values(
-            ProfileID::from_str("12345678-bbbb-cccc-dddd-abcd12345678").unwrap(),
+            ProfileID::from_str("12345678-bbbb-cccc-dddd-abcd12345678")
+                .unwrap(),
             device,
             ContentHint::with_counters(4, 0, 2),
             date,
@@ -107,7 +121,8 @@ impl HasPlaceholder for Header {
             "iPhone".to_string(),
         );
         Header::with_values(
-            ProfileID::from_str("87654321-bbbb-cccc-dddd-87654321dcba").unwrap(),
+            ProfileID::from_str("87654321-bbbb-cccc-dddd-87654321dcba")
+                .unwrap(),
             device,
             ContentHint::new(),
             date,
@@ -175,13 +190,13 @@ pub mod tests {
             date.clone(),
             "iPhone".to_string(),
         );
-        let sut =
-            Header::with_values(
-                ProfileID::from_str("12345678-bbbb-cccc-dddd-abcd12345678").unwrap(),
-                device,
-                ContentHint::new(),
-                date,
-            );
+        let sut = Header::with_values(
+            ProfileID::from_str("12345678-bbbb-cccc-dddd-abcd12345678")
+                .unwrap(),
+            device,
+            ContentHint::new(),
+            date,
+        );
         assert_eq!(format!("{sut}"), "#12345678-bbbb-cccc-dddd-abcd12345678 v=100, content: #networks: 0, #accounts: 0, #personas: 0");
     }
 
@@ -218,7 +233,9 @@ pub mod tests {
 
 #[cfg(test)]
 mod uniffi_tests {
-    use crate::{new_header_placeholder, new_header_placeholder_other, HasPlaceholder};
+    use crate::{
+        new_header_placeholder, new_header_placeholder_other, HasPlaceholder,
+    };
 
     use super::Header;
 

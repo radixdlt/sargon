@@ -6,7 +6,15 @@ use crate::prelude::*;
 /// the client (Wallet App) to access a mnemonic stored in secure storage on
 /// the device.
 #[derive(
-    Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, derive_more::Display, uniffi::Record,
+    Serialize,
+    Deserialize,
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    Hash,
+    derive_more::Display,
+    uniffi::Record,
 )]
 #[serde(rename_all = "camelCase")]
 #[display("{hint} {id}")]
@@ -30,9 +38,9 @@ impl TryFrom<FactorSource> for DeviceFactorSource {
     type Error = CommonError;
 
     fn try_from(value: FactorSource) -> Result<Self> {
-        value
-            .into_device()
-            .map_err(|_| Self::Error::ExpectedDeviceFactorSourceGotSomethingElse)
+        value.into_device().map_err(|_| {
+            Self::Error::ExpectedDeviceFactorSourceGotSomethingElse
+        })
     }
 }
 impl IsFactorSource for DeviceFactorSource {

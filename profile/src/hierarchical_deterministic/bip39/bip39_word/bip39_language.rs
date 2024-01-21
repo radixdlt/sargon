@@ -3,7 +3,16 @@
 /// The English language is always available, other languages are enabled using
 /// the compilation features.
 #[derive(
-    Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, derive_more::Display, uniffi::Enum,
+    Clone,
+    Copy,
+    Debug,
+    Hash,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    derive_more::Display,
+    uniffi::Enum,
 )]
 pub enum BIP39Language {
     /// The English language.

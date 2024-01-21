@@ -2,7 +2,17 @@ use crate::prelude::*;
 
 /// Fiat currency to measure and display the value of some XRD or other Radix assets value/worth in.
 #[derive(
-    Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Enum,
+    Serialize,
+    Deserialize,
+    Clone,
+    Copy,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    PartialOrd,
+    Ord,
+    uniffi::Enum,
 )]
 pub enum FiatCurrency {
     /// American dollars.

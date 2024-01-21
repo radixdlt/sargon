@@ -28,7 +28,10 @@ impl HierarchicalDeterministicFactorInstance {
     ) -> Self {
         Self::new(
             factor_source_id,
-            HierarchicalDeterministicPublicKey::new(public_key, derivation_path),
+            HierarchicalDeterministicPublicKey::new(
+                public_key,
+                derivation_path,
+            ),
         )
     }
 
@@ -47,7 +50,9 @@ impl HierarchicalDeterministicFactorInstance {
         ))
     }
 
-    pub fn try_from_factor_instance(factor_instance: FactorInstance) -> Result<Self> {
+    pub fn try_from_factor_instance(
+        factor_instance: FactorInstance,
+    ) -> Result<Self> {
         let virtual_source = factor_instance
             .badge
             .as_virtual()
@@ -75,8 +80,12 @@ impl HierarchicalDeterministicFactorInstance {
         match &self.derivation_path() {
             DerivationPath::CAP26 { value } => match value {
                 CAP26Path::GetID { value: _ } => None,
-                CAP26Path::IdentityPath { value } => Some(value.key_kind().clone()),
-                CAP26Path::AccountPath { value } => Some(value.key_kind().clone()),
+                CAP26Path::IdentityPath { value } => {
+                    Some(value.key_kind().clone())
+                }
+                CAP26Path::AccountPath { value } => {
+                    Some(value.key_kind().clone())
+                }
             },
             DerivationPath::BIP44Like { value: _ } => None,
         }
@@ -85,7 +94,10 @@ impl HierarchicalDeterministicFactorInstance {
 
 impl Serialize for HierarchicalDeterministicFactorInstance {
     #[cfg(not(tarpaulin_include))] // false negative
-    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
+    fn serialize<S>(
+        &self,
+        serializer: S,
+    ) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
     where
         S: Serializer,
     {
@@ -99,8 +111,10 @@ impl<'de> serde::Deserialize<'de> for HierarchicalDeterministicFactorInstance {
         d: D,
     ) -> Result<HierarchicalDeterministicFactorInstance, D::Error> {
         FactorInstance::deserialize(d).and_then(|fi| {
-            HierarchicalDeterministicFactorInstance::try_from_factor_instance(fi)
-                .map_err(de::Error::custom)
+            HierarchicalDeterministicFactorInstance::try_from_factor_instance(
+                fi,
+            )
+            .map_err(de::Error::custom)
         })
     }
 }
@@ -133,13 +147,18 @@ impl HierarchicalDeterministicFactorInstance {
     }
 
     /// A placeholder used to facilitate unit tests.
-    fn placeholder_with_key_kind(key_kind: CAP26KeyKind, index: HDPathValue) -> Self {
+    fn placeholder_with_key_kind(
+        key_kind: CAP26KeyKind,
+        index: HDPathValue,
+    ) -> Self {
         let mwp = MnemonicWithPassphrase::placeholder();
         let path = AccountPath::new(NetworkID::Mainnet.into(), key_kind, index);
         let private_key = mwp.derive_private_key(path.clone());
         let public_key = private_key.public_key();
-        let id =
-            FactorSourceIDFromHash::from_mnemonic_with_passphrase(FactorSourceKind::Device, mwp);
+        let id = FactorSourceIDFromHash::from_mnemonic_with_passphrase(
+            FactorSourceKind::Device,
+            mwp,
+        );
         Self::new(id.into(), public_key)
     }
 }
@@ -204,7 +223,8 @@ mod tests {
 
     #[test]
     fn key_kind_bip44_is_none() {
-        let derivation_path: DerivationPath = BIP44LikePath::placeholder().into();
+        let derivation_path: DerivationPath =
+            BIP44LikePath::placeholder().into();
         let sut = HierarchicalDeterministicFactorInstance::new(
             FactorSourceIDFromHash::placeholder(),
             HierarchicalDeterministicPublicKey::new(
@@ -217,7 +237,8 @@ mod tests {
 
     #[test]
     fn key_kind_identity() {
-        let derivation_path: DerivationPath = IdentityPath::placeholder().into();
+        let derivation_path: DerivationPath =
+            IdentityPath::placeholder().into();
         let sut = HierarchicalDeterministicFactorInstance::new(
             FactorSourceIDFromHash::placeholder(),
             HierarchicalDeterministicPublicKey::new(

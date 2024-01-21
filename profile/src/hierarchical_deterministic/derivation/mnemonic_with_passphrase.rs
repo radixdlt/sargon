@@ -39,7 +39,10 @@ impl SafeToLog for MnemonicWithPassphrase {
 }
 
 impl MnemonicWithPassphrase {
-    pub fn with_passphrase(mnemonic: Mnemonic, passphrase: BIP39Passphrase) -> Self {
+    pub fn with_passphrase(
+        mnemonic: Mnemonic,
+        passphrase: BIP39Passphrase,
+    ) -> Self {
         Self {
             mnemonic,
             passphrase,
@@ -68,7 +71,10 @@ impl MnemonicWithPassphrase {
 impl HasPlaceholder for MnemonicWithPassphrase {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
-        Self::with_passphrase(Mnemonic::placeholder(), BIP39Passphrase::placeholder())
+        Self::with_passphrase(
+            Mnemonic::placeholder(),
+            BIP39Passphrase::placeholder(),
+        )
     }
 
     fn placeholder_other() -> Self {
@@ -83,7 +89,10 @@ impl MnemonicWithPassphrase {
         self.mnemonic.to_seed(&self.passphrase.0)
     }
 
-    fn derive_ed25519_private_key(seed: &Seed, path: &HDPath) -> Ed25519PrivateKey {
+    fn derive_ed25519_private_key(
+        seed: &Seed,
+        path: &HDPath,
+    ) -> Ed25519PrivateKey {
         let chain = slip10::BIP32Path::from(
             path.components
                 .iter()
@@ -91,29 +100,39 @@ impl MnemonicWithPassphrase {
                 .collect_vec(),
         );
 
-        let bytes = slip10::derive_key_from_path(seed, slip10::Curve::Ed25519, &chain)
-            .map(|e| e.key)
-            .expect("Should always be able to derive");
+        let bytes =
+            slip10::derive_key_from_path(seed, slip10::Curve::Ed25519, &chain)
+                .map(|e| e.key)
+                .expect("Should always be able to derive");
 
-        Ed25519PrivateKey::from_bytes(&bytes).expect("Valid Ed25519PrivateKey bytes")
+        Ed25519PrivateKey::from_bytes(&bytes)
+            .expect("Valid Ed25519PrivateKey bytes")
     }
 
-    fn derive_secp256k1_private_key(seed: &Seed, path: &HDPath) -> Secp256k1PrivateKey {
+    fn derive_secp256k1_private_key(
+        seed: &Seed,
+        path: &HDPath,
+    ) -> Secp256k1PrivateKey {
         let chain: bip32::DerivationPath = path
             .to_string()
             .replace("H", "'")
             .parse()
             .expect("All HDPaths are valid bip32 paths");
-        let child_xprv = bip32::XPrv::derive_from_path(&seed, &chain)
-            .expect("To always be able to derive a child key using a valid BIP32 path");
+        let child_xprv = bip32::XPrv::derive_from_path(&seed, &chain).expect(
+            "To always be able to derive a child key using a valid BIP32 path",
+        );
 
-        let private_key_bytes: PrivateKeyBytes = child_xprv.private_key().to_bytes().into();
+        let private_key_bytes: PrivateKeyBytes =
+            child_xprv.private_key().to_bytes().into();
         Secp256k1PrivateKey::from_bytes(&private_key_bytes)
             .expect("Valid Secp256k1PrivateKey bytes")
     }
 
     #[cfg(not(tarpaulin_include))] // false negative
-    pub fn derive_private_key<D>(&self, derivation: D) -> HierarchicalDeterministicPrivateKey
+    pub fn derive_private_key<D>(
+        &self,
+        derivation: D,
+    ) -> HierarchicalDeterministicPrivateKey
     where
         D: Derivation,
     {
@@ -121,13 +140,18 @@ impl MnemonicWithPassphrase {
         let path = derivation.derivation_path();
         match derivation.scheme() {
             DerivationPathScheme::Cap26 => {
-                assert_eq!(derivation.scheme().curve(), SLIP10Curve::Curve25519);
-                let key = Self::derive_ed25519_private_key(&seed, path.hd_path());
+                assert_eq!(
+                    derivation.scheme().curve(),
+                    SLIP10Curve::Curve25519
+                );
+                let key =
+                    Self::derive_ed25519_private_key(&seed, path.hd_path());
                 HierarchicalDeterministicPrivateKey::new(key.into(), path)
             }
             DerivationPathScheme::Bip44Olympia => {
                 assert_eq!(derivation.scheme().curve(), SLIP10Curve::Secp256k1);
-                let key = Self::derive_secp256k1_private_key(&seed, path.hd_path());
+                let key =
+                    Self::derive_secp256k1_private_key(&seed, path.hd_path());
                 HierarchicalDeterministicPrivateKey::new(key.into(), path)
             }
         }
@@ -229,8 +253,9 @@ mod tests {
             BIP39Passphrase::default(),
         );
 
-        let private_key =
-            mwp.derive_private_key(AccountPath::from_str("m/44H/1022H/12H/525H/1460H/0H").unwrap());
+        let private_key = mwp.derive_private_key(
+            AccountPath::from_str("m/44H/1022H/12H/525H/1460H/0H").unwrap(),
+        );
 
         assert_eq!(
             "13e971fb16cb2c816d6b9f12176e9b8ab9af1831d006114d344d119ab2715506",
@@ -253,8 +278,9 @@ mod tests {
             BIP39Passphrase::default(),
         );
 
-        let private_key =
-            mwp.derive_private_key(BIP44LikePath::from_str("m/44H/1022H/0H/0/5H").unwrap());
+        let private_key = mwp.derive_private_key(
+            BIP44LikePath::from_str("m/44H/1022H/0H/0/5H").unwrap(),
+        );
 
         assert_eq!(
             "111323d507d9d690836798e3ef2e5292cfd31092b75b9b59fa584ff593a3d7e4",
@@ -291,7 +317,11 @@ mod tests {
     #[test]
     fn keys_for_placeholder() {
         let mwp = MnemonicWithPassphrase::placeholder();
-        let path = AccountPath::new(NetworkID::Mainnet, CAP26KeyKind::TransactionSigning, 0);
+        let path = AccountPath::new(
+            NetworkID::Mainnet,
+            CAP26KeyKind::TransactionSigning,
+            0,
+        );
         let private_key = mwp.derive_private_key(path.clone());
 
         assert_eq!(path.to_string(), "m/44H/1022H/1H/525H/1460H/0H");

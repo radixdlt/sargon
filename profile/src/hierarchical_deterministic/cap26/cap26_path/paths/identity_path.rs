@@ -146,7 +146,10 @@ mod tests {
 
     #[test]
     fn network_id() {
-        assert_eq!(IdentityPath::placeholder().network_id(), NetworkID::Mainnet);
+        assert_eq!(
+            IdentityPath::placeholder().network_id(),
+            NetworkID::Mainnet
+        );
     }
 
     #[test]
@@ -173,7 +176,11 @@ mod tests {
         assert_eq!(parsed.key_kind, CAP26KeyKind::TransactionSigning);
         assert_eq!(parsed.index, 0);
         assert_eq!(parsed.to_string(), str);
-        let built = IdentityPath::new(NetworkID::Mainnet, CAP26KeyKind::TransactionSigning, 0);
+        let built = IdentityPath::new(
+            NetworkID::Mainnet,
+            CAP26KeyKind::TransactionSigning,
+            0,
+        );
         assert_eq!(built, parsed)
     }
 
@@ -264,7 +271,9 @@ mod tests {
     fn fails_when_index_is_too_large() {
         assert_eq!(
             IdentityPath::from_str("m/44H/1022H/1H/618H/1460H/4294967296H"),
-            Err(CommonError::InvalidBIP32Path("m/44H/1022H/1H/618H/1460H/4294967296H".to_string()))
+            Err(CommonError::InvalidBIP32Path(
+                "m/44H/1022H/1H/618H/1460H/4294967296H".to_string()
+            ))
         )
     }
 
@@ -293,7 +302,10 @@ mod tests {
         let str = "m/44H/1022H/1H/618H/1460H/0H";
         let parsed: IdentityPath = str.parse().unwrap();
         assert_json_value_eq_after_roundtrip(&parsed, json!(str));
-        assert_json_value_ne_after_roundtrip(&parsed, json!("m/44H/1022H/1H/618H/1460H/1H"));
+        assert_json_value_ne_after_roundtrip(
+            &parsed,
+            json!("m/44H/1022H/1H/618H/1460H/1H"),
+        );
     }
 
     #[test]

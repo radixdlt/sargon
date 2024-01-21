@@ -2,7 +2,17 @@ use crate::prelude::*;
 
 /// The **kind** (or "type") of FactorSource describes how it is used.
 #[derive(
-    Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Enum,
+    Serialize,
+    Deserialize,
+    Clone,
+    Copy,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    PartialOrd,
+    Ord,
+    uniffi::Enum,
 )]
 pub enum FactorSourceKind {
     /// A user owned unencrypted mnemonic (and optional BIP39 passphrase) stored on device,
@@ -102,8 +112,11 @@ mod tests {
     #[test]
     fn hash() {
         assert_eq!(
-            BTreeSet::from_iter([FactorSourceKind::Device, FactorSourceKind::Device].into_iter())
-                .len(),
+            BTreeSet::from_iter(
+                [FactorSourceKind::Device, FactorSourceKind::Device]
+                    .into_iter()
+            )
+            .len(),
             1
         );
     }
@@ -168,7 +181,10 @@ mod tests {
             &FactorSourceKind::TrustedContact,
             json!("trustedContact"),
         );
-        assert_json_value_eq_after_roundtrip(&FactorSourceKind::Device, json!("device"));
+        assert_json_value_eq_after_roundtrip(
+            &FactorSourceKind::Device,
+            json!("device"),
+        );
         assert_json_value_eq_after_roundtrip(
             &FactorSourceKind::SecurityQuestions,
             json!("securityQuestions"),

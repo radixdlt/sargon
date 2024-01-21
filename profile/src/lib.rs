@@ -21,7 +21,8 @@ pub mod prelude {
     pub(crate) use std::collections::{BTreeSet, HashMap, HashSet};
 
     pub(crate) use ::identified_vec::{
-        Identifiable, IdentifiedVec, IdentifiedVecOf, IsIdentifiedVec, ItemsCloned,
+        Identifiable, IdentifiedVec, IdentifiedVecOf, IsIdentifiedVec,
+        ItemsCloned,
     };
 
     pub(crate) use ::hex::decode as hex_decode;
@@ -30,7 +31,8 @@ pub mod prelude {
     pub(crate) use itertools::Itertools;
     pub(crate) use log::{debug, error, info, trace, warn};
     pub(crate) use serde::{
-        de, ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer,
+        de, ser::SerializeStruct, Deserialize, Deserializer, Serialize,
+        Serializer,
     };
     pub(crate) use serde_json::json;
     pub(crate) use serde_repr::{Deserialize_repr, Serialize_repr};

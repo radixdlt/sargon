@@ -1,7 +1,15 @@
 use crate::prelude::*;
 
 #[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, derive_more::Display, uniffi::Record,
+    Serialize,
+    Deserialize,
+    Clone,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    derive_more::Display,
+    uniffi::Record,
 )]
 #[display("{name} {model}")]
 pub struct LedgerHardwareWalletHint {

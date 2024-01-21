@@ -36,7 +36,9 @@ impl TryFrom<&HDPath> for DerivationPath {
 impl<'de> serde::Deserialize<'de> for DerivationPath {
     /// Tries to deserializes a JSON string as a bech32 address into an `AccountAddress`.
     #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<DerivationPath, D::Error> {
+    fn deserialize<D: Deserializer<'de>>(
+        d: D,
+    ) -> Result<DerivationPath, D::Error> {
         #[derive(Deserialize)]
         pub struct Inner {
             pub scheme: DerivationPathScheme,
@@ -47,10 +49,12 @@ impl<'de> serde::Deserialize<'de> for DerivationPath {
 
         let derivation_path = match inner.scheme {
             DerivationPathScheme::Cap26 => DerivationPath::CAP26 {
-                value: CAP26Path::deserialize(inner.path).map_err(serde::de::Error::custom)?,
+                value: CAP26Path::deserialize(inner.path)
+                    .map_err(serde::de::Error::custom)?,
             },
             DerivationPathScheme::Bip44Olympia => DerivationPath::BIP44Like {
-                value: BIP44LikePath::deserialize(inner.path).map_err(serde::de::Error::custom)?,
+                value: BIP44LikePath::deserialize(inner.path)
+                    .map_err(serde::de::Error::custom)?,
             },
         };
         Ok(derivation_path)
@@ -153,7 +157,10 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(DerivationPath::placeholder(), DerivationPath::placeholder());
+        assert_eq!(
+            DerivationPath::placeholder(),
+            DerivationPath::placeholder()
+        );
         assert_eq!(
             DerivationPath::placeholder_other(),
             DerivationPath::placeholder_other()
@@ -219,7 +226,10 @@ mod tests {
     #[test]
     fn as_bip44_path() {
         let path: DerivationPath = BIP44LikePath::placeholder().into();
-        assert_eq!(path.as_bip44_like().unwrap(), &BIP44LikePath::placeholder());
+        assert_eq!(
+            path.as_bip44_like().unwrap(),
+            &BIP44LikePath::placeholder()
+        );
     }
 
     #[test]
@@ -244,7 +254,8 @@ mod tests {
 
     #[test]
     fn derivation_path_identity() {
-        let derivation_path: DerivationPath = IdentityPath::placeholder().into();
+        let derivation_path: DerivationPath =
+            IdentityPath::placeholder().into();
         assert_eq!(derivation_path, derivation_path.derivation_path());
     }
 
@@ -257,14 +268,16 @@ mod tests {
 
     #[test]
     fn try_from_hdpath_identity() {
-        let derivation_path: DerivationPath = IdentityPath::placeholder().into();
+        let derivation_path: DerivationPath =
+            IdentityPath::placeholder().into();
         let hd_path = derivation_path.hd_path();
         assert_eq!(DerivationPath::try_from(hd_path), Ok(derivation_path));
     }
 
     #[test]
     fn try_from_hdpath_bip44() {
-        let derivation_path: DerivationPath = BIP44LikePath::placeholder().into();
+        let derivation_path: DerivationPath =
+            BIP44LikePath::placeholder().into();
         let hd_path = derivation_path.hd_path();
         assert_eq!(DerivationPath::try_from(hd_path), Ok(derivation_path));
     }

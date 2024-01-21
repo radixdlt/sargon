@@ -37,7 +37,10 @@ impl EntityAddress for ResourceAddress {
     // Underscored to decrease visibility. You SHOULD NOT call this function directly,
     // instead use `try_from_bech32` which performs proper validation. Impl types SHOULD
     // `panic` if `address` does not start with `Self::entity_type().hrp()`
-    fn __with_address_and_network_id(address: &str, network_id: NetworkID) -> Self {
+    fn __with_address_and_network_id(
+        address: &str,
+        network_id: NetworkID,
+    ) -> Self {
         assert!(address.starts_with(&Self::entity_type().hrp()), "Invalid address, you SHOULD NOT call this function directly, you should use `try_from_bech32` instead.");
         return Self {
             address: address.to_string(),

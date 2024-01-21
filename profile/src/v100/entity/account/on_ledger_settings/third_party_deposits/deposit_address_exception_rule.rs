@@ -31,7 +31,10 @@ mod tests {
 
     #[test]
     fn json_roundtrip_accept_all() {
-        assert_json_value_eq_after_roundtrip(&DepositAddressExceptionRule::Deny, json!("deny"));
+        assert_json_value_eq_after_roundtrip(
+            &DepositAddressExceptionRule::Deny,
+            json!("deny"),
+        );
         assert_json_roundtrip(&DepositAddressExceptionRule::Deny);
     }
 
@@ -44,6 +47,9 @@ mod tests {
     #[test]
     fn debug() {
         assert_eq!(format!("{:?}", DepositAddressExceptionRule::Deny), "Deny");
-        assert_eq!(format!("{:?}", DepositAddressExceptionRule::Allow), "Allow");
+        assert_eq!(
+            format!("{:?}", DepositAddressExceptionRule::Allow),
+            "Allow"
+        );
     }
 }

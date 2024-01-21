@@ -43,7 +43,10 @@ impl Gateways {
 
 impl Serialize for Gateways {
     #[cfg(not(tarpaulin_include))] // false negative
-    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
+    fn serialize<S>(
+        &self,
+        serializer: S,
+    ) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
     where
         S: Serializer,
     {
@@ -56,7 +59,9 @@ impl Serialize for Gateways {
 
 impl<'de> Deserialize<'de> for Gateways {
     #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Gateways, D::Error> {
+    fn deserialize<D: Deserializer<'de>>(
+        deserializer: D,
+    ) -> Result<Gateways, D::Error> {
         #[derive(Deserialize, Serialize)]
         struct Wrapper {
             #[serde(rename = "current")]
@@ -69,14 +74,17 @@ impl<'de> Deserialize<'de> for Gateways {
             .iter()
             .find(|g| g.id() == wrapped.url)
             .map(|g| g.clone())
-            .ok_or_else(|| CommonError::InvalidGatewaysJSONCurrentNotFoundAmongstSaved)
+            .ok_or_else(|| {
+                CommonError::InvalidGatewaysJSONCurrentNotFoundAmongstSaved
+            })
             .map_err(de::Error::custom)?;
 
         let mut other = wrapped.saved.clone();
 
         other.remove(&current);
 
-        Gateways::new_with_other(current, other.items()).map_err(de::Error::custom)
+        Gateways::new_with_other(current, other.items())
+            .map_err(de::Error::custom)
     }
 }
 
@@ -94,7 +102,9 @@ impl Gateways {
     {
         let other = IdentifiedVecVia::from_iter(other);
         if other.contains(&current) {
-            return Err(CommonError::GatewaysDiscrepancyOtherShouldNotContainCurrent);
+            return Err(
+                CommonError::GatewaysDiscrepancyOtherShouldNotContainCurrent,
+            );
         }
         Ok(Self { current, other })
     }
@@ -111,7 +121,9 @@ impl Gateways {
         let old_current = &self.current;
         let was_inserted = self.append(old_current.clone());
         if !was_inserted {
-            return Err(CommonError::GatewaysDiscrepancyOtherShouldNotContainCurrent);
+            return Err(
+                CommonError::GatewaysDiscrepancyOtherShouldNotContainCurrent,
+            );
         }
         self.other.remove_by_id(&to.id());
         self.current = to;
@@ -158,7 +170,10 @@ mod tests {
     #[test]
     fn equality() {
         assert_eq!(Gateways::placeholder(), Gateways::placeholder());
-        assert_eq!(Gateways::placeholder_other(), Gateways::placeholder_other());
+        assert_eq!(
+            Gateways::placeholder_other(),
+            Gateways::placeholder_other()
+        );
     }
 
     #[test]
@@ -177,7 +192,10 @@ mod tests {
     #[test]
     fn new_throw_gateways_discrepancy_other_should_not_contain_current() {
         assert_eq!(
-            Gateways::new_with_other(Gateway::mainnet(), vec![Gateway::mainnet()]),
+            Gateways::new_with_other(
+                Gateway::mainnet(),
+                vec![Gateway::mainnet()]
+            ),
             Err(CommonError::GatewaysDiscrepancyOtherShouldNotContainCurrent)
         );
     }
@@ -221,7 +239,10 @@ mod tests {
         assert_eq!(sut.current.network.id, NetworkID::Mainnet);
         assert_eq!(sut.change_current(Gateway::nebunet()), Ok(true));
         assert_eq!(sut.current.network.id, NetworkID::Nebunet);
-        assert_eq!(sut.other.items(), [Gateway::stokenet(), Gateway::mainnet()]);
+        assert_eq!(
+            sut.other.items(),
+            [Gateway::stokenet(), Gateway::mainnet()]
+        );
     }
 
     #[test]
@@ -271,8 +292,8 @@ mod tests {
 #[cfg(test)]
 mod uniffi_tests {
     use crate::{
-        new_gateways, new_gateways_placeholder, new_gateways_placeholder_other, Gateway,
-        HasPlaceholder,
+        new_gateways, new_gateways_placeholder, new_gateways_placeholder_other,
+        Gateway, HasPlaceholder,
     };
 
     use super::Gateways;

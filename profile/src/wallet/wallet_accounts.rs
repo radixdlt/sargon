@@ -68,9 +68,11 @@ impl Wallet {
                 Err(CommonError::Unknown)
             }
         })
-        .map_err(
-            |_| CommonError::UnableToSaveFactorSourceToProfile(factor_source.factor_source_id())
-        )
+        .map_err(|_| {
+            CommonError::UnableToSaveFactorSourceToProfile(
+                factor_source.factor_source_id(),
+            )
+        })
     }
 
     /// Loads a `MnemonicWithPassphrase` with the `id` of `device_factor_source`,
@@ -111,7 +113,8 @@ impl Wallet {
         &self,
         id: &FactorSourceIDFromHash,
     ) -> Result<PrivateHierarchicalDeterministicFactorSource> {
-        let device_factor_source = self.profile().device_factor_source_by_id(id)?;
+        let device_factor_source =
+            self.profile().device_factor_source_by_id(id)?;
         self.load_private_device_factor_source(&device_factor_source)
     }
 }
@@ -125,22 +128,29 @@ impl Wallet {
     /// `DeviceFactorSource` and the "next" index for this FactorSource as derivation path.
     ///
     /// If you want to add it to Profile, call `wallet.add_account(account)`
-    pub fn create_new_account(&self, network_id: NetworkID, name: DisplayName) -> Result<Account> {
+    pub fn create_new_account(
+        &self,
+        network_id: NetworkID,
+        name: DisplayName,
+    ) -> Result<Account> {
         let profile = &self.profile();
         let bdfs = profile.bdfs();
-        let index = profile.next_derivation_index_for_entity(EntityKind::Accounts, network_id);
+        let index = profile
+            .next_derivation_index_for_entity(EntityKind::Accounts, network_id);
         let number_of_accounts_on_network = profile
             .networks
             .get(&network_id)
             .map(|n| n.accounts.len())
             .unwrap_or(0);
 
-        let appearance_id =
-            AppearanceID::from_number_of_accounts_on_network(number_of_accounts_on_network);
+        let appearance_id = AppearanceID::from_number_of_accounts_on_network(
+            number_of_accounts_on_network,
+        );
 
-        let factor_instance = self
-            .load_private_device_factor_source(&bdfs)
-            .map(|p| p.derive_entity_creation_factor_instance(network_id, index))?;
+        let factor_instance =
+            self.load_private_device_factor_source(&bdfs).map(|p| {
+                p.derive_entity_creation_factor_instance(network_id, index)
+            })?;
 
         let account = Account::new(factor_instance, name, appearance_id);
 
@@ -152,7 +162,8 @@ impl Wallet {
     pub fn add_account(&self, account: Account) -> Result<()> {
         // TODO: clean this up, BAD code. messy, mostly because of (my) bad IdentifiedVec API.
         let network_id = account.network_id.clone();
-        let err_exists = CommonError::AccountAlreadyPresent(account.id().clone());
+        let err_exists =
+            CommonError::AccountAlreadyPresent(account.id().clone());
         self.try_write(|mut p| {
             let networks = &mut p.networks;
             if networks.contains_id(&network_id) {
@@ -164,9 +175,14 @@ impl Wallet {
                             return Err(err_exists.clone());
                         }
                     })
-                    .and_then(|r| if r { Ok(()) } else { Err(err_exists.clone()) })
+                    .and_then(
+                        |r| if r { Ok(()) } else { Err(err_exists.clone()) },
+                    )
             } else {
-                let network = Network::new(network_id, Accounts::from_iter([account.to_owned()]));
+                let network = Network::new(
+                    network_id,
+                    Accounts::from_iter([account.to_owned()]),
+                );
                 networks.append(network);
                 Ok(())
             }
@@ -190,8 +206,10 @@ impl Wallet {
         address: AccountAddress,
         to: DisplayName,
     ) -> Result<Account> {
-        self.write(|mut p| p.update_account(&address, |a| a.display_name = to.to_owned()))
-            .ok_or_else(|| CommonError::UnknownAccount)
+        self.write(|mut p| {
+            p.update_account(&address, |a| a.display_name = to.to_owned())
+        })
+        .ok_or_else(|| CommonError::UnknownAccount)
     }
 }
 
@@ -215,9 +233,14 @@ mod tests {
         let account = wallet.read(|p| p.networks[0].accounts[0].clone());
         assert_eq!(account.display_name.value, "Alice");
         assert!(wallet
-            .change_name_of_account(account.address, DisplayName::new("Stella").unwrap())
+            .change_name_of_account(
+                account.address,
+                DisplayName::new("Stella").unwrap()
+            )
             .is_ok());
-        wallet.read(|p| assert_eq!(p.networks[0].accounts[0].display_name.value, "Stella"));
+        wallet.read(|p| {
+            assert_eq!(p.networks[0].accounts[0].display_name.value, "Stella")
+        });
 
         assert_eq!(
             wallet.change_name_of_account(
@@ -230,11 +253,13 @@ mod tests {
 
     #[test]
     fn load_private_device_factor_source() {
-        let private = PrivateHierarchicalDeterministicFactorSource::placeholder();
+        let private =
+            PrivateHierarchicalDeterministicFactorSource::placeholder();
         let dfs = private.factor_source;
         let profile = Profile::placeholder();
         let (wallet, storage) = Wallet::ephemeral(profile.clone());
-        let data = serde_json::to_vec(&private.mnemonic_with_passphrase).unwrap();
+        let data =
+            serde_json::to_vec(&private.mnemonic_with_passphrase).unwrap();
         let key = SecureStorageKey::DeviceFactorSourceMnemonic {
             factor_source_id: dfs.id.clone(),
         };
@@ -251,8 +276,9 @@ mod tests {
     #[test]
     pub fn add_private_device_factor_source_successful() {
         let profile = Profile::placeholder();
-        let new =
-            PrivateHierarchicalDeterministicFactorSource::generate_new(WalletClientModel::Unknown);
+        let new = PrivateHierarchicalDeterministicFactorSource::generate_new(
+            WalletClientModel::Unknown,
+        );
         let (wallet, storage) = Wallet::ephemeral(profile.clone());
         assert_eq!(
             profile
@@ -279,8 +305,9 @@ mod tests {
     pub fn add_private_device_factor_source_ok_storage_when_save_to_profile_fails_then_deleted_from_storage(
     ) {
         let profile = Profile::placeholder();
-        let new =
-            PrivateHierarchicalDeterministicFactorSource::generate_new(WalletClientModel::Unknown);
+        let new = PrivateHierarchicalDeterministicFactorSource::generate_new(
+            WalletClientModel::Unknown,
+        );
 
         assert_eq!(
             profile
@@ -288,22 +315,31 @@ mod tests {
                 .contains_id(&new.clone().factor_source.factor_source_id()),
             false
         );
-        let delete_data_was_called = Arc::new(RwLock::new(Option::<SecureStorageKey>::None));
+        let delete_data_was_called =
+            Arc::new(RwLock::new(Option::<SecureStorageKey>::None));
         #[derive(Debug)]
         struct TestStorage {
             delete_data_was_called: Arc<RwLock<Option<SecureStorageKey>>>,
         }
         impl SecureStorage for TestStorage {
-            fn load_data(&self, _key: SecureStorageKey) -> Result<Option<Vec<u8>>> {
+            fn load_data(
+                &self,
+                _key: SecureStorageKey,
+            ) -> Result<Option<Vec<u8>>> {
                 todo!()
             }
 
-            fn save_data(&self, _key: SecureStorageKey, _data: Vec<u8>) -> Result<()> {
+            fn save_data(
+                &self,
+                _key: SecureStorageKey,
+                _data: Vec<u8>,
+            ) -> Result<()> {
                 Ok(()) // mnemonic gets saved
             }
 
             fn delete_data_for_key(&self, key: SecureStorageKey) -> Result<()> {
-                let mut delete_data_was_called = self.delete_data_was_called.write().unwrap();
+                let mut delete_data_was_called =
+                    self.delete_data_was_called.write().unwrap();
                 *delete_data_was_called = Some(key);
                 Ok(())
             }
@@ -355,17 +391,21 @@ mod tests {
     #[test]
     fn load_private_device_factor_source_by_id() {
         let profile = Profile::placeholder();
-        let private = PrivateHierarchicalDeterministicFactorSource::placeholder();
+        let private =
+            PrivateHierarchicalDeterministicFactorSource::placeholder();
         let (wallet, storage) = Wallet::ephemeral(profile.clone());
 
-        let data = serde_json::to_vec(&private.mnemonic_with_passphrase).unwrap();
+        let data =
+            serde_json::to_vec(&private.mnemonic_with_passphrase).unwrap();
         let key = SecureStorageKey::DeviceFactorSourceMnemonic {
             factor_source_id: private.clone().factor_source.id.clone(),
         };
         assert!(storage.save_data(key.clone(), data).is_ok());
 
         let loaded = wallet
-            .load_private_device_factor_source_by_id(&private.factor_source.id.clone())
+            .load_private_device_factor_source_by_id(
+                &private.factor_source.id.clone(),
+            )
             .unwrap();
         assert_eq!(loaded, private);
     }
@@ -380,7 +420,8 @@ mod tests {
         F: Fn(Profile) -> (),
         G: Fn(Account, Profile) -> (),
     {
-        let private = PrivateHierarchicalDeterministicFactorSource::placeholder();
+        let private =
+            PrivateHierarchicalDeterministicFactorSource::placeholder();
         assert_eq!(
             init_profile.bdfs().factor_source_id(),
             private.clone().factor_source.factor_source_id()
@@ -389,7 +430,8 @@ mod tests {
         let (wallet, storage) = Wallet::ephemeral(init_profile);
         assert_before(wallet.profile());
 
-        let data = serde_json::to_vec(&private.mnemonic_with_passphrase).unwrap();
+        let data =
+            serde_json::to_vec(&private.mnemonic_with_passphrase).unwrap();
         let key = SecureStorageKey::DeviceFactorSourceMnemonic {
             factor_source_id: private.clone().factor_source.id.clone(),
         };
@@ -449,8 +491,10 @@ mod tests {
         })
     }
 
-    fn test_create_new_account_not_first_success<F>(also_save: bool, assert_last: F)
-    where
+    fn test_create_new_account_not_first_success<F>(
+        also_save: bool,
+        assert_last: F,
+    ) where
         F: Fn(Account, Profile) -> (),
     {
         test_new_account(

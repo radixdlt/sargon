@@ -49,11 +49,12 @@ impl TryFrom<&HDPath> for GetIDPath {
     #[cfg(not(tarpaulin_include))] // false negative
     fn try_from(value: &HDPath) -> Result<Self> {
         let expected_depth = 3;
-        let (path, components) =
-            HDPath::try_parse_base_hdpath(value, |v| CommonError::InvalidDepthOfCAP26Path {
+        let (path, components) = HDPath::try_parse_base_hdpath(value, |v| {
+            CommonError::InvalidDepthOfCAP26Path {
                 expected: Self::PATH_DEPTH,
                 found: v,
-            })?;
+            }
+        })?;
         if path.depth() != expected_depth {
             return Err(CommonError::InvalidDepthOfCAP26Path {
                 expected: expected_depth,
@@ -80,9 +81,11 @@ impl FromStr for GetIDPath {
 
     #[cfg(not(tarpaulin_include))] // false negative
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (path, _) = HDPath::try_parse_base(s, |v| CommonError::InvalidDepthOfCAP26Path {
-            expected: Self::PATH_DEPTH,
-            found: v,
+        let (path, _) = HDPath::try_parse_base(s, |v| {
+            CommonError::InvalidDepthOfCAP26Path {
+                expected: Self::PATH_DEPTH,
+                found: v,
+            }
         })?;
         return Self::try_from(&path);
     }
@@ -126,9 +129,10 @@ mod tests {
     #[test]
     fn invalid_depth_from_value() {
         assert_eq!(
-            GetIDPath::try_from(&HDPath::from_components(
-                [HDPathComponent::harden(44), HDPathComponent::harden(1022)]
-            )),
+            GetIDPath::try_from(&HDPath::from_components([
+                HDPathComponent::harden(44),
+                HDPathComponent::harden(1022)
+            ])),
             Err(CommonError::InvalidDepthOfCAP26Path {
                 expected: 3,
                 found: 2

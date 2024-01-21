@@ -35,10 +35,14 @@ pub enum CommonError {
     #[error("Failed to create Secp256k1 Public key from String {0}.")]
     InvalidSecp256k1PublicKeyFromString(String) = 10008,
 
-    #[error("Failed to create Secp256k1 Public key, invalid point, not on curve.")]
+    #[error(
+        "Failed to create Secp256k1 Public key, invalid point, not on curve."
+    )]
     InvalidSecp256k1PublicKeyPointNotOnCurve = 10009,
 
-    #[error("Failed to create Ed25519 Public key, invalid point, not on curve.")]
+    #[error(
+        "Failed to create Ed25519 Public key, invalid point, not on curve."
+    )]
     InvalidEd25519PublicKeyPointNotOnCurve = 10010,
 
     #[error("String not hex {0}")]
@@ -56,7 +60,9 @@ pub enum CommonError {
     #[error("Invalid BIP44Like Path, account was not hardened")]
     InvalidBIP44LikePathAccountWasNotHardened = 10015,
 
-    #[error("Invalid BIP44Like Path, 'change' component was unexpectedly hardened")]
+    #[error(
+        "Invalid BIP44Like Path, 'change' component was unexpectedly hardened"
+    )]
     InvalidBIP44LikePathChangeWasUnexpectedlyHardened = 10016,
 
     /// Radix Olympia did follow BIP44, we accidentally hardened the last component `"index"`,
@@ -64,7 +70,9 @@ pub enum CommonError {
     #[error("Invalid BIP44Like Path, 'index' component was not hardened")]
     InvalidBIP44LikePathIndexWasNotHardened = 10017,
 
-    #[error("Invalid depth of CAP26 Path, (expected {expected}, found {found})")]
+    #[error(
+        "Invalid depth of CAP26 Path, (expected {expected}, found {found})"
+    )]
     InvalidDepthOfCAP26Path { expected: usize, found: usize } = 10018,
 
     #[error("Found non hardened components in path, invalid!")]
@@ -88,7 +96,9 @@ pub enum CommonError {
         found: CAP26EntityKind,
     } = 10024,
 
-    #[error("InvalidKeyKind, got: '{0}', expected any of: [1460H, 1678H, 1391H].")]
+    #[error(
+        "InvalidKeyKind, got: '{0}', expected any of: [1460H, 1678H, 1391H]."
+    )]
     InvalidKeyKind(u32) = 10025,
 
     #[error("Unsupported NetworkID, got: '{0}', found value: '{0}', known network IDs: [1 (mainnet), 2 (stokenet)]")]
@@ -148,7 +158,9 @@ pub enum CommonError {
     #[error("Wrong key kind of FactorInstance - expected transaction signing")]
     WrongKeyKindOfTransactionSigningFactorInstance = 10044,
 
-    #[error("Wrong key kind of FactorInstance - expected authentication signing")]
+    #[error(
+        "Wrong key kind of FactorInstance - expected authentication signing"
+    )]
     WrongKeyKindOfAuthenticationSigningFactorInstance = 10045,
 
     #[error("Expected DeviceFactorSource")]
@@ -166,13 +178,17 @@ pub enum CommonError {
     #[error("Gateway discrepancy, 'other' should not contain 'current'.")]
     GatewaysDiscrepancyOtherShouldNotContainCurrent = 10050,
 
-    #[error("Gateways discrepancy, invalid JSON, current not found amongst saved.")]
+    #[error(
+        "Gateways discrepancy, invalid JSON, current not found amongst saved."
+    )]
     InvalidGatewaysJSONCurrentNotFoundAmongstSaved = 10051,
 
     #[error("Invalid URL: '{0}'")]
     InvalidURL(String) = 10052,
 
-    #[error("Accounts on different networks, expected: {expected}, found: {found}")]
+    #[error(
+        "Accounts on different networks, expected: {expected}, found: {found}"
+    )]
     AccountOnWrongNetwork {
         expected: NetworkID,
         found: NetworkID,
@@ -263,7 +279,9 @@ pub enum CommonError {
     #[error("Failed save Mnemonic to SecureStorage with FactorSourceID: {0}")]
     UnableToSaveMnemonicToSecureStorage(FactorSourceIDFromHash) = 10078,
 
-    #[error("Failed load Mnemonic from SecureStorage with FactorSourceID: {0}")]
+    #[error(
+        "Failed load Mnemonic from SecureStorage with FactorSourceID: {0}"
+    )]
     UnableToLoadMnemonicFromSecureStorage(FactorSourceIDFromHash) = 10079,
 
     #[error("Failed save FactorSource to SecureStorage, FactorSourceID: {0}")]

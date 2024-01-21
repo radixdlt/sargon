@@ -3,7 +3,9 @@ use crate::prelude::*;
 /// Cryptographic parameters a certain FactorSource supports, e.g. which Elliptic Curves
 /// it supports and which Hierarchical Deterministic (HD) derivations schemes it supports,
 /// if any.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(
+    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
+)]
 #[serde(rename_all = "camelCase")]
 pub struct FactorSourceCryptoParameters {
     /// Describes with which Elliptic Curves a Factor Source can be used, e.g. a
@@ -20,7 +22,8 @@ pub struct FactorSourceCryptoParameters {
     /// FactorSource does not support HD derivation.
     ///
     /// Either BIP44 or CAP26 (SLIP10)
-    pub supported_derivation_path_schemes: IdentifiedVecVia<DerivationPathScheme>,
+    pub supported_derivation_path_schemes:
+        IdentifiedVecVia<DerivationPathScheme>,
 }
 
 impl FactorSourceCryptoParameters {
@@ -34,7 +37,8 @@ impl FactorSourceCryptoParameters {
         if supported_curves.len() == 0 {
             return Err(CommonError::FactorSourceCryptoParametersSupportedCurvesInvalidSize);
         }
-        let supported_derivation_path_schemes = IdentifiedVecVia::from_iter(schemes);
+        let supported_derivation_path_schemes =
+            IdentifiedVecVia::from_iter(schemes);
 
         Ok(Self {
             supported_curves,

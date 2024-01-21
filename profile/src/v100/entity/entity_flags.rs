@@ -89,8 +89,11 @@ mod tests {
     #[test]
     fn new_with_duplicates_of_f_contains_only_f() {
         assert_eq!(
-            EntityFlags::with_flags(vec![EntityFlag::DeletedByUser, EntityFlag::DeletedByUser])
-                .len(),
+            EntityFlags::with_flags(vec![
+                EntityFlag::DeletedByUser,
+                EntityFlag::DeletedByUser
+            ])
+            .len(),
             1
         );
     }
@@ -106,10 +109,16 @@ mod tests {
     fn json_roundtrip_non_empty() {
         let model = EntityFlags::with_flag(EntityFlag::DeletedByUser);
 
-        assert_json_value_eq_after_roundtrip(&model, json!(vec!["deletedByUser"]));
+        assert_json_value_eq_after_roundtrip(
+            &model,
+            json!(vec!["deletedByUser"]),
+        );
 
         assert_json_roundtrip(&model);
-        assert_json_value_ne_after_roundtrip(&model, json!(Vec::<String>::new()));
+        assert_json_value_ne_after_roundtrip(
+            &model,
+            json!(Vec::<String>::new()),
+        );
     }
 
     #[test]
@@ -120,6 +129,9 @@ mod tests {
         assert_json_value_eq_after_roundtrip(&model, json);
         assert_json_roundtrip(&model);
 
-        assert_json_value_ne_after_roundtrip(&model, json!(vec!["deletedByUser"]));
+        assert_json_value_ne_after_roundtrip(
+            &model,
+            json!(vec!["deletedByUser"]),
+        );
     }
 }

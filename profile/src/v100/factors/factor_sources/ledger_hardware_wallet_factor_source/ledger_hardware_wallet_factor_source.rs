@@ -1,7 +1,15 @@
 use crate::prelude::*;
 
 #[derive(
-    Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug, derive_more::Display, uniffi::Record,
+    Serialize,
+    Deserialize,
+    Clone,
+    PartialEq,
+    Eq,
+    Hash,
+    Debug,
+    derive_more::Display,
+    uniffi::Record,
 )]
 #[serde(rename_all = "camelCase")]
 #[display("{hint} : {id}")]
@@ -162,7 +170,8 @@ mod tests {
     #[test]
     fn factor_source_kind() {
         assert_eq!(
-            LedgerHardwareWalletFactorSource::placeholder().factor_source_kind(),
+            LedgerHardwareWalletFactorSource::placeholder()
+                .factor_source_kind(),
             LedgerHardwareWalletFactorSource::placeholder().id.kind
         );
     }

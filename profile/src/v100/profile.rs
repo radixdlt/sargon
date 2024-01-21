@@ -3,7 +3,9 @@ use crate::prelude::*;
 /// users Accounts, Personas, Authorized Dapps per network
 /// the user has used. It also contains all FactorSources,
 /// FactorInstances and wallet App preferences.
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(
+    Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, uniffi::Record,
+)]
 #[serde(rename_all = "camelCase")]
 pub struct Profile {
     /// The header of a Profile(Snapshot) contains crucial metadata
@@ -88,7 +90,11 @@ impl Profile {
     }
 
     /// Returns a clone of the updated account if found, else None.
-    pub fn update_account<F>(&mut self, address: &AccountAddress, mutate: F) -> Option<Account>
+    pub fn update_account<F>(
+        &mut self,
+        address: &AccountAddress,
+        mutate: F,
+    ) -> Option<Account>
     where
         F: FnMut(&mut Account) -> (),
     {
@@ -110,7 +116,9 @@ impl Profile {
                     expected: S::kind(),
                     found: f.factor_source_kind(),
                 })
-                .and_then(|element| mutate(element).map(|modified| modified.into()))
+                .and_then(|element| {
+                    mutate(element).map(|modified| modified.into())
+                })
         })
     }
 }
@@ -159,14 +167,16 @@ mod tests {
     #[test]
     fn update_factor_source_not_update_when_factor_source_not_found() {
         let mut sut = Profile::placeholder();
-        let wrong_id: &FactorSourceID = &LedgerHardwareWalletFactorSource::placeholder_other()
-            .id
-            .into();
+        let wrong_id: &FactorSourceID =
+            &LedgerHardwareWalletFactorSource::placeholder_other()
+                .id
+                .into();
 
         assert_eq!(
-            sut.update_factor_source(wrong_id, |lfs: LedgerHardwareWalletFactorSource| {
-                Ok(lfs)
-            }),
+            sut.update_factor_source(
+                wrong_id,
+                |lfs: LedgerHardwareWalletFactorSource| { Ok(lfs) }
+            ),
             Ok(false)
         );
     }
@@ -224,7 +234,8 @@ mod tests {
     }
 
     #[test]
-    fn add_supported_curve_to_factor_source_failure_cast_wrong_factor_source_kind() {
+    fn add_supported_curve_to_factor_source_failure_cast_wrong_factor_source_kind(
+    ) {
         let mut sut = Profile::placeholder();
         let id: &FactorSourceID = &DeviceFactorSource::placeholder().id.into();
 
@@ -246,11 +257,14 @@ mod tests {
         );
 
         assert_eq!(
-            sut.update_factor_source(id, |mut lfs: LedgerHardwareWalletFactorSource| {
-                lfs.common.crypto_parameters =
+            sut.update_factor_source(
+                id,
+                |mut lfs: LedgerHardwareWalletFactorSource| {
+                    lfs.common.crypto_parameters =
                     FactorSourceCryptoParameters::babylon_olympia_compatible();
-                Ok(lfs)
-            }),
+                    Ok(lfs)
+                }
+            ),
             Err(CommonError::CastFactorSourceWrongKind {
                 expected: FactorSourceKind::LedgerHQHardwareWallet,
                 found: FactorSourceKind::Device
@@ -659,7 +673,8 @@ mod tests {
 #[cfg(test)]
 mod uniffi_tests {
     use crate::{
-        new_profile_placeholder, new_profile_placeholder_other, BaseIsFactorSource, HasPlaceholder,
+        new_profile_placeholder, new_profile_placeholder_other,
+        BaseIsFactorSource, HasPlaceholder,
         PrivateHierarchicalDeterministicFactorSource,
     };
 
@@ -676,7 +691,8 @@ mod uniffi_tests {
 
     #[test]
     fn new_private_hd() {
-        let private = PrivateHierarchicalDeterministicFactorSource::placeholder();
+        let private =
+            PrivateHierarchicalDeterministicFactorSource::placeholder();
         let lhs = super::new_profile(private.clone(), "iPhone".to_string());
         assert_eq!(
             lhs.bdfs().factor_source_id(),

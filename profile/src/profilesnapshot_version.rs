@@ -45,14 +45,19 @@ impl Display for ProfileSnapshotVersion {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_json_value_eq_after_roundtrip, assert_json_value_fails};
+    use crate::{
+        assert_json_value_eq_after_roundtrip, assert_json_value_fails,
+    };
     use serde_json::json;
 
     use super::ProfileSnapshotVersion;
 
     #[test]
     fn json() {
-        assert_json_value_eq_after_roundtrip(&ProfileSnapshotVersion::V100, json!(100));
+        assert_json_value_eq_after_roundtrip(
+            &ProfileSnapshotVersion::V100,
+            json!(100),
+        );
         assert_json_value_fails::<ProfileSnapshotVersion>(json!(99));
         assert_json_value_fails::<ProfileSnapshotVersion>(json!("99"));
         assert_json_value_fails::<ProfileSnapshotVersion>(json!("100"));

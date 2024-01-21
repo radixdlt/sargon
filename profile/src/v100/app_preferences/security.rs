@@ -8,7 +8,9 @@ pub type SecurityStructureConfigurationReference = bool;
 /// Controls e.g. if Profile Snapshot gets synced to iCloud or not, and whether
 /// developer mode is enabled or not. In future (MFA) we will also save a list of
 /// MFA security structure configurations.
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Hash, uniffi::Record)]
+#[derive(
+    Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Hash, uniffi::Record,
+)]
 #[serde(rename_all = "camelCase")]
 pub struct Security {
     pub is_cloud_profile_sync_enabled: bool,
@@ -60,7 +62,10 @@ mod tests {
     #[test]
     fn equality() {
         assert_eq!(Security::placeholder(), Security::placeholder());
-        assert_eq!(Security::placeholder_other(), Security::placeholder_other());
+        assert_eq!(
+            Security::placeholder_other(),
+            Security::placeholder_other()
+        );
     }
 
     #[test]

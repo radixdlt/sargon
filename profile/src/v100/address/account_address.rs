@@ -43,7 +43,10 @@ pub fn new_account_address(bech32: String) -> Result<AccountAddress> {
 }
 
 #[uniffi::export]
-pub fn new_account_address_from(public_key: PublicKey, network_id: NetworkID) -> AccountAddress {
+pub fn new_account_address_from(
+    public_key: PublicKey,
+    network_id: NetworkID,
+) -> AccountAddress {
     AccountAddress::new(public_key, network_id)
 }
 
@@ -106,7 +109,10 @@ impl EntityAddress for AccountAddress {
     // Underscored to decrease visibility. You SHOULD NOT call this function directly,
     // instead use `try_from_bech32` which performs proper validation. Impl types SHOULD
     // `panic` if `address` does not start with `Self::entity_type().hrp()`
-    fn __with_address_and_network_id(address: &str, network_id: NetworkID) -> Self {
+    fn __with_address_and_network_id(
+        address: &str,
+        network_id: NetworkID,
+    ) -> Self {
         assert!(address.starts_with(&Self::entity_type().hrp()), "Invalid address, you SHOULD NOT call this function directly, you should use `try_from_bech32` instead.");
         return Self {
             address: address.to_string(),
@@ -151,7 +157,10 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(AccountAddress::placeholder(), AccountAddress::placeholder());
+        assert_eq!(
+            AccountAddress::placeholder(),
+            AccountAddress::placeholder()
+        );
         assert_eq!(
             AccountAddress::placeholder_other(),
             AccountAddress::placeholder_other()
@@ -311,8 +320,9 @@ mod uniffi_tests {
     use std::str::FromStr;
 
     use crate::{
-        account_address_to_short, new_account_address, new_account_address_from, Ed25519PublicKey,
-        EntityAddress, NetworkID, PublicKey,
+        account_address_to_short, new_account_address,
+        new_account_address_from, Ed25519PublicKey, EntityAddress, NetworkID,
+        PublicKey,
     };
 
     use super::AccountAddress;

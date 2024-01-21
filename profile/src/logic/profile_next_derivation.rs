@@ -8,14 +8,16 @@ impl Profile {
     {
         self.factor_sources
             .get(id)
-            .ok_or(CommonError::ProfileDoesNotContainFactorSourceWithID(id.clone()))
+            .ok_or(CommonError::ProfileDoesNotContainFactorSourceWithID(
+                id.clone(),
+            ))
             .and_then(|f| {
-                f.clone()
-                    .try_into()
-                    .map_err(|_| CommonError::CastFactorSourceWrongKind {
+                f.clone().try_into().map_err(|_| {
+                    CommonError::CastFactorSourceWrongKind {
                         expected: <F as IsFactorSource>::kind(),
                         found: f.factor_source_kind(),
-                    })
+                    }
+                })
             })
     }
 
@@ -35,21 +37,22 @@ impl Profile {
             .filter_map(std::convert::identity)
             .collect_vec();
 
-        let explicit_main =
-            device_factor_source
-                .clone()
-                .into_iter()
-                .filter(|x| x.is_main_bdfs())
-                .collect_vec()
-                .first()
-                .cloned();
+        let explicit_main = device_factor_source
+            .clone()
+            .into_iter()
+            .filter(|x| x.is_main_bdfs())
+            .collect_vec()
+            .first()
+            .cloned();
 
         let implicit_main = device_factor_source
             .into_iter()
             .filter(|x| x.common.supports_babylon())
             .collect_vec()
             .first()
-            .expect("A Profile should always contain Babylon DeviceFactorSource")
+            .expect(
+                "A Profile should always contain Babylon DeviceFactorSource",
+            )
             .clone();
 
         return explicit_main.unwrap_or(implicit_main).clone();
@@ -74,7 +77,8 @@ impl Profile {
                     .into_iter()
                     .filter(|a| match &a.security_state {
                         EntitySecurityState::Unsecured { value } => {
-                            value.transaction_signing.factor_source_id == factor_source_id
+                            value.transaction_signing.factor_source_id
+                                == factor_source_id
                         }
                     })
                     .collect_vec()
@@ -90,7 +94,11 @@ impl Profile {
         kind: EntityKind,
         network_id: NetworkID,
     ) -> HDPathValue {
-        self.next_derivation_index_for_entity_for_factor_source(kind, network_id, self.bdfs().id)
+        self.next_derivation_index_for_entity_for_factor_source(
+            kind,
+            network_id,
+            self.bdfs().id,
+        )
     }
 }
 
@@ -104,7 +112,9 @@ mod tests {
         let profile = Profile::placeholder();
         let dfs = DeviceFactorSource::placeholder_babylon();
         assert_eq!(
-            profile.factor_source_by_id::<DeviceFactorSource>(&dfs.factor_source_id()),
+            profile.factor_source_by_id::<DeviceFactorSource>(
+                &dfs.factor_source_id()
+            ),
             Ok(dfs)
         );
     }
@@ -114,8 +124,9 @@ mod tests {
         let profile = Profile::placeholder();
         let lfs = LedgerHardwareWalletFactorSource::placeholder();
         assert_eq!(
-            profile
-                .factor_source_by_id::<LedgerHardwareWalletFactorSource>(&lfs.factor_source_id()),
+            profile.factor_source_by_id::<LedgerHardwareWalletFactorSource>(
+                &lfs.factor_source_id()
+            ),
             Ok(lfs)
         );
     }
@@ -125,8 +136,9 @@ mod tests {
         let profile = Profile::placeholder();
         let dfs = DeviceFactorSource::placeholder_babylon();
         assert_eq!(
-            profile
-                .factor_source_by_id::<LedgerHardwareWalletFactorSource>(&dfs.factor_source_id()),
+            profile.factor_source_by_id::<LedgerHardwareWalletFactorSource>(
+                &dfs.factor_source_id()
+            ),
             Err(CommonError::CastFactorSourceWrongKind {
                 expected: FactorSourceKind::LedgerHQHardwareWallet,
                 found: FactorSourceKind::Device,
@@ -139,9 +151,12 @@ mod tests {
         let profile = Profile::placeholder();
         let lfs = LedgerHardwareWalletFactorSource::placeholder_other();
         assert_eq!(
-            profile
-                .factor_source_by_id::<LedgerHardwareWalletFactorSource>(&lfs.factor_source_id()),
-            Err(CommonError::ProfileDoesNotContainFactorSourceWithID(lfs.factor_source_id()))
+            profile.factor_source_by_id::<LedgerHardwareWalletFactorSource>(
+                &lfs.factor_source_id()
+            ),
+            Err(CommonError::ProfileDoesNotContainFactorSourceWithID(
+                lfs.factor_source_id()
+            ))
         );
     }
 
@@ -156,18 +171,22 @@ mod tests {
     fn device_factor_source_by_id_fail_unknown_id() {
         let profile = Profile::placeholder();
 
-        let id =
-            FactorSourceIDFromHash::new_for_device(MnemonicWithPassphrase::placeholder_other());
+        let id = FactorSourceIDFromHash::new_for_device(
+            MnemonicWithPassphrase::placeholder_other(),
+        );
 
         assert_eq!(
             profile.device_factor_source_by_id(&id),
-            Err(CommonError::ProfileDoesNotContainFactorSourceWithID(id.into()))
+            Err(CommonError::ProfileDoesNotContainFactorSourceWithID(
+                id.into()
+            ))
         );
     }
 
     #[test]
     fn bdfs_success_without_explicit_main_flag() {
-        let profile = Profile::placeholder_no_factor_source_explicitly_marked_as_main();
+        let profile =
+            Profile::placeholder_no_factor_source_explicitly_marked_as_main();
         assert_eq!(profile.bdfs().id, DeviceFactorSource::placeholder().id);
     }
 
@@ -178,14 +197,18 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "A Profile should always contain Babylon DeviceFactorSource")]
+    #[should_panic(
+        expected = "A Profile should always contain Babylon DeviceFactorSource"
+    )]
     fn bdfs_fail_for_invalid_profile_without_device_factor_source() {
         let profile = Profile::placeholder_no_device_factor_source();
         _ = profile.bdfs();
     }
 
     #[test]
-    #[should_panic(expected = "A Profile should always contain Babylon DeviceFactorSource")]
+    #[should_panic(
+        expected = "A Profile should always contain Babylon DeviceFactorSource"
+    )]
     fn bdfs_fail_for_invalid_profile_without_babylon_device_factor_source() {
         let profile = Profile::placeholder_no_babylon_device_factor_source();
         _ = profile.bdfs();
@@ -195,7 +218,10 @@ mod tests {
     fn next_derivation_index_for_entity_account_bdfs_mainnet() {
         let profile = Profile::placeholder();
         assert_eq!(
-            profile.next_derivation_index_for_entity(EntityKind::Accounts, NetworkID::Mainnet),
+            profile.next_derivation_index_for_entity(
+                EntityKind::Accounts,
+                NetworkID::Mainnet
+            ),
             2
         );
     }
@@ -204,7 +230,10 @@ mod tests {
     fn next_derivation_index_for_entity_account_bdfs_stokenet() {
         let profile = Profile::placeholder();
         assert_eq!(
-            profile.next_derivation_index_for_entity(EntityKind::Accounts, NetworkID::Stokenet),
+            profile.next_derivation_index_for_entity(
+                EntityKind::Accounts,
+                NetworkID::Stokenet
+            ),
             2
         );
     }
@@ -242,7 +271,9 @@ impl Profile {
         header.content_hint = networks.content_hint();
         Self::with(
             header,
-            FactorSources::from_iter([DeviceFactorSource::placeholder_olympia().into()]),
+            FactorSources::from_iter([
+                DeviceFactorSource::placeholder_olympia().into(),
+            ]),
             AppPreferences::placeholder(),
             networks,
         )

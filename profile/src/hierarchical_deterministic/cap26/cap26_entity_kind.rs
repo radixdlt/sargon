@@ -72,8 +72,11 @@ mod tests {
     #[test]
     fn hash() {
         assert_eq!(
-            BTreeSet::from_iter([CAP26EntityKind::Account, CAP26EntityKind::Account].into_iter())
-                .len(),
+            BTreeSet::from_iter(
+                [CAP26EntityKind::Account, CAP26EntityKind::Account]
+                    .into_iter()
+            )
+            .len(),
             1
         );
     }
@@ -85,7 +88,10 @@ mod tests {
 
     #[test]
     fn json_roundtrip() {
-        assert_json_value_eq_after_roundtrip(&CAP26EntityKind::Account, json!(525));
+        assert_json_value_eq_after_roundtrip(
+            &CAP26EntityKind::Account,
+            json!(525),
+        );
         assert_json_roundtrip(&CAP26EntityKind::Account);
     }
 }

@@ -3,7 +3,14 @@ use crate::prelude::*;
 /// A BIP39 passphrase, which required but when not used by user, the Default value will be use (empty string),
 /// as per BIP39 standard.
 #[derive(
-    Serialize, Deserialize, Clone, PartialEq, Eq, derive_more::Display, derive_more::Debug, Hash,
+    Serialize,
+    Deserialize,
+    Clone,
+    PartialEq,
+    Eq,
+    derive_more::Display,
+    derive_more::Debug,
+    Hash,
 )]
 #[serde(transparent)]
 #[display("<OBFUSCATED>")]

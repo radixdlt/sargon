@@ -48,7 +48,9 @@ impl Into<FactorSourceID> for FactorSourceIDFromAddress {
 
 impl<'de> Deserialize<'de> for FactorSourceID {
     #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D: Deserializer<'de>>(
+        deserializer: D,
+    ) -> Result<Self, D::Error> {
         // https://github.com/serde-rs/serde/issues/1343#issuecomment-409698470
         #[derive(Deserialize, Serialize)]
         struct Wrapper {
@@ -106,7 +108,10 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(FactorSourceID::placeholder(), FactorSourceID::placeholder());
+        assert_eq!(
+            FactorSourceID::placeholder(),
+            FactorSourceID::placeholder()
+        );
         assert_eq!(
             FactorSourceID::placeholder_other(),
             FactorSourceID::placeholder_other()

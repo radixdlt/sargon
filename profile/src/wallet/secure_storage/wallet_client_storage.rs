@@ -72,7 +72,11 @@ impl WalletClientStorage {
     ///
     /// Returns Err if failed to load bytes or failed to deserialize the JSON into a `T`,
     /// unlike `load` this method returns an error if `None` bytes were found.
-    pub fn load_or<T>(&self, key: SecureStorageKey, err: CommonError) -> Result<T>
+    pub fn load_or<T>(
+        &self,
+        key: SecureStorageKey,
+        err: CommonError,
+    ) -> Result<T>
     where
         T: for<'a> serde::Deserialize<'a>,
     {
@@ -109,7 +113,9 @@ impl WalletClientStorage {
             },
             mnemonic_with_passphrase,
         )
-        .map_err(|_| CommonError::UnableToSaveMnemonicToSecureStorage(id.clone()))
+        .map_err(|_| {
+            CommonError::UnableToSaveMnemonicToSecureStorage(id.clone())
+        })
     }
 
     /// Loads a MnemonicWithPassphrase with a `FactorSourceIDFromHash`
@@ -127,16 +133,18 @@ impl WalletClientStorage {
 
     /// Deletes a MnemonicWithPassphrase with a `FactorSourceIDFromHash`
     pub fn delete_mnemonic(&self, id: &FactorSourceIDFromHash) -> Result<()> {
-        self.interface
-            .delete_data_for_key(SecureStorageKey::DeviceFactorSourceMnemonic {
+        self.interface.delete_data_for_key(
+            SecureStorageKey::DeviceFactorSourceMnemonic {
                 factor_source_id: id.clone(),
-            })
+            },
+        )
     }
 }
 
 #[cfg(test)]
 impl WalletClientStorage {
-    pub(crate) fn ephemeral() -> (WalletClientStorage, Arc<EphemeralSecureStorage>) {
+    pub(crate) fn ephemeral(
+    ) -> (WalletClientStorage, Arc<EphemeralSecureStorage>) {
         let storage = EphemeralSecureStorage::new();
         (WalletClientStorage::new(storage.clone()), storage)
     }
@@ -247,7 +255,8 @@ mod tests {
 
     #[test]
     fn save_mnemonic_with_passphrase() {
-        let private = PrivateHierarchicalDeterministicFactorSource::placeholder_other();
+        let private =
+            PrivateHierarchicalDeterministicFactorSource::placeholder_other();
         let factor_source_id = private.factor_source.id.clone();
         let (sut, storage) = WalletClientStorage::ephemeral();
         let key = SecureStorageKey::DeviceFactorSourceMnemonic {
@@ -274,7 +283,10 @@ mod tests {
         let sut = WalletClientStorage::always_fail();
         let id = FactorSourceIDFromHash::placeholder();
         assert_eq!(
-            sut.save_mnemonic_with_passphrase(&MnemonicWithPassphrase::placeholder(), &id),
+            sut.save_mnemonic_with_passphrase(
+                &MnemonicWithPassphrase::placeholder(),
+                &id
+            ),
             Err(CommonError::UnableToSaveMnemonicToSecureStorage(id.clone()))
         );
     }
@@ -282,7 +294,8 @@ mod tests {
     #[test]
     fn delete_mnemonic() {
         // ARRANGE
-        let private = PrivateHierarchicalDeterministicFactorSource::placeholder_other();
+        let private =
+            PrivateHierarchicalDeterministicFactorSource::placeholder_other();
         let factor_source_id = private.factor_source.id.clone();
         let (sut, storage) = WalletClientStorage::ephemeral();
         let key = SecureStorageKey::DeviceFactorSourceMnemonic {
@@ -303,7 +316,10 @@ mod tests {
         use serde::Serialize;
         struct AlwaysFailSerialize {}
         impl Serialize for AlwaysFailSerialize {
-            fn serialize<S>(&self, _serializer: S) -> core::result::Result<S::Ok, S::Error>
+            fn serialize<S>(
+                &self,
+                _serializer: S,
+            ) -> core::result::Result<S::Ok, S::Error>
             where
                 S: Serializer,
             {
@@ -313,7 +329,10 @@ mod tests {
 
         let (sut, _) = WalletClientStorage::ephemeral();
         assert_eq!(
-            sut.save(SecureStorageKey::ActiveProfileID, &AlwaysFailSerialize {}),
+            sut.save(
+                SecureStorageKey::ActiveProfileID,
+                &AlwaysFailSerialize {}
+            ),
             Err(CommonError::FailedToSerializeToJSON)
         );
     }

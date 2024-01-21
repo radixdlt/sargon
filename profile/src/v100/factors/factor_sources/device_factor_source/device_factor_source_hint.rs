@@ -3,7 +3,15 @@ use crate::prelude::*;
 /// Properties describing a DeviceFactorSource to help user disambiguate between
 /// it and another one.
 #[derive(
-    Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, derive_more::Display, uniffi::Record,
+    Serialize,
+    Deserialize,
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    Hash,
+    derive_more::Display,
+    uniffi::Record,
 )]
 #[serde(rename_all = "camelCase")]
 #[display("{name} {model}")]
@@ -21,7 +29,11 @@ pub struct DeviceFactorSourceHint {
 
 impl DeviceFactorSourceHint {
     /// Instantiates a new DeviceFactorSourceHint from the specified name, model and word count.
-    pub fn new(name: String, model: String, word_count: BIP39WordCount) -> Self {
+    pub fn new(
+        name: String,
+        model: String,
+        word_count: BIP39WordCount,
+    ) -> Self {
         Self {
             name,
             model,
@@ -40,7 +52,9 @@ impl DeviceFactorSourceHint {
         )
     }
 
-    pub fn iphone_unknown_model_with_word_count(word_count: BIP39WordCount) -> Self {
+    pub fn iphone_unknown_model_with_word_count(
+        word_count: BIP39WordCount,
+    ) -> Self {
         Self::unknown_model_of_client(word_count, WalletClientModel::Iphone)
     }
 }

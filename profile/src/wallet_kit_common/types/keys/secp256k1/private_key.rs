@@ -17,7 +17,8 @@ impl Secp256k1PrivateKey {
     /// used by wallets, which tend to rather use a Mnemonic and
     /// derive hierarchical deterministic keys.
     pub fn generate() -> Self {
-        Self::from_hex32_bytes(Hex32Bytes::generate()).expect("Should be able to generate 32 bytes")
+        Self::from_hex32_bytes(Hex32Bytes::generate())
+            .expect("Should be able to generate 32 bytes")
     }
 
     /// Just an alias for `Self::generate()`, generating a new
@@ -41,8 +42,9 @@ impl Secp256k1PrivateKey {
     }
 
     pub fn public_key(&self) -> Secp256k1PublicKey {
-        Secp256k1PublicKey::from_engine(self.0.public_key())
-            .expect("Public Key from EC scalar multiplication should always be valid.")
+        Secp256k1PublicKey::from_engine(self.0.public_key()).expect(
+            "Public Key from EC scalar multiplication should always be valid.",
+        )
     }
 
     pub fn sign(&self, msg_hash: &impl IsHash) -> Secp256k1Signature {
@@ -59,7 +61,11 @@ impl Secp256k1PrivateKey {
 
     pub fn from_bytes(slice: &[u8]) -> Result<Self> {
         EngineSecp256k1PrivateKey::from_bytes(slice)
-            .map_err(|_| CommonError::InvalidSecp256k1PrivateKeyFromBytes(slice.to_owned()))
+            .map_err(|_| {
+                CommonError::InvalidSecp256k1PrivateKeyFromBytes(
+                    slice.to_owned(),
+                )
+            })
             .map(Self::from_engine)
     }
 
@@ -73,7 +79,11 @@ impl Secp256k1PrivateKey {
 
     pub fn from_str(hex: &str) -> Result<Self> {
         Hex32Bytes::from_hex(hex)
-            .map_err(|_| CommonError::InvalidSecp256k1PrivateKeyFromString(hex.to_owned()))
+            .map_err(|_| {
+                CommonError::InvalidSecp256k1PrivateKeyFromString(
+                    hex.to_owned(),
+                )
+            })
             .and_then(Self::from_hex32_bytes)
     }
 }
@@ -114,7 +124,10 @@ impl Secp256k1PrivateKey {
     ///
     /// https://github.com/Sajjon/K1/blob/main/Tests/K1Tests/TestVectors/cyon_ecdh_two_variants_with_kdf.json#L10
     pub fn placeholder_alice() -> Self {
-        Self::from_str("d78b6578b33f3446bdd9d09d057d6598bc915fec4008a54c509dc3b8cdc7dbe5").unwrap()
+        Self::from_str(
+            "d78b6578b33f3446bdd9d09d057d6598bc915fec4008a54c509dc3b8cdc7dbe5",
+        )
+        .unwrap()
     }
 
     /// `871761c9921a467059e090a0422ae76af87fa8eb905da91c9b554bd6a028c760``
@@ -125,7 +138,10 @@ impl Secp256k1PrivateKey {
     ///
     /// https://github.com/Sajjon/K1/blob/main/Tests/K1Tests/TestVectors/cyon_ecdh_two_variants_with_kdf.json#L12
     pub fn placeholder_bob() -> Self {
-        Self::from_str("871761c9921a467059e090a0422ae76af87fa8eb905da91c9b554bd6a028c760").unwrap()
+        Self::from_str(
+            "871761c9921a467059e090a0422ae76af87fa8eb905da91c9b554bd6a028c760",
+        )
+        .unwrap()
     }
 }
 
@@ -175,8 +191,10 @@ mod tests {
 
     #[test]
     fn bytes_roundtrip() {
-        let bytes =
-            hex_decode("0000000000000000000000000000000000000000000000000000000000000001").unwrap();
+        let bytes = hex_decode(
+            "0000000000000000000000000000000000000000000000000000000000000001",
+        )
+        .unwrap();
         assert_eq!(
             Secp256k1PrivateKey::from_bytes(bytes.as_slice())
                 .unwrap()
@@ -187,7 +205,8 @@ mod tests {
 
     #[test]
     fn hex_roundtrip() {
-        let hex = "0000000000000000000000000000000000000000000000000000000000000001";
+        let hex =
+            "0000000000000000000000000000000000000000000000000000000000000001";
         assert_eq!(Secp256k1PrivateKey::from_str(hex).unwrap().to_hex(), hex);
     }
 
@@ -195,7 +214,9 @@ mod tests {
     fn invalid_hex() {
         assert_eq!(
             Secp256k1PrivateKey::from_str("not hex"),
-            Err(CommonError::InvalidSecp256k1PrivateKeyFromString("not hex".to_owned()))
+            Err(CommonError::InvalidSecp256k1PrivateKeyFromString(
+                "not hex".to_owned()
+            ))
         );
     }
 
@@ -203,7 +224,9 @@ mod tests {
     fn invalid_hex_too_short() {
         assert_eq!(
             Secp256k1PrivateKey::from_str("dead"),
-            Err(CommonError::InvalidSecp256k1PrivateKeyFromString("dead".to_owned()))
+            Err(CommonError::InvalidSecp256k1PrivateKeyFromString(
+                "dead".to_owned()
+            ))
         );
     }
 
@@ -220,7 +243,9 @@ mod tests {
         let bytes = [0xFFu8; 32];
         assert_eq!(
             Secp256k1PrivateKey::from_bytes(&bytes),
-            Err(CommonError::InvalidSecp256k1PrivateKeyFromBytes(bytes.to_vec()))
+            Err(CommonError::InvalidSecp256k1PrivateKeyFromBytes(
+                bytes.to_vec()
+            ))
         );
     }
 
@@ -229,13 +254,16 @@ mod tests {
         let bytes = [0u8; 32];
         assert_eq!(
             Secp256k1PrivateKey::from_bytes(&bytes),
-            Err(CommonError::InvalidSecp256k1PrivateKeyFromBytes(bytes.to_vec()))
+            Err(CommonError::InvalidSecp256k1PrivateKeyFromBytes(
+                bytes.to_vec()
+            ))
         );
     }
 
     #[test]
     fn debug() {
-        let hex = "0000000000000000000000000000000000000000000000000000000000000001";
+        let hex =
+            "0000000000000000000000000000000000000000000000000000000000000001";
         assert_eq!(
             format!("{:?}", Secp256k1PrivateKey::from_str(hex).unwrap()),
             hex
@@ -244,7 +272,8 @@ mod tests {
 
     #[test]
     fn from_hex32_bytes() {
-        let str = "0000000000000000000000000000000000000000000000000000000000000001";
+        let str =
+            "0000000000000000000000000000000000000000000000000000000000000001";
         let hex32 = Hex32Bytes::from_hex(str).unwrap();
         let key = Secp256k1PrivateKey::from_hex32_bytes(hex32).unwrap();
         assert_eq!(key.to_hex(), str);
@@ -252,7 +281,8 @@ mod tests {
 
     #[test]
     fn try_from_bytes() {
-        let str = "0000000000000000000000000000000000000000000000000000000000000001";
+        let str =
+            "0000000000000000000000000000000000000000000000000000000000000001";
         let vec = hex_decode(str).unwrap();
         let key = Secp256k1PrivateKey::try_from(vec.as_slice()).unwrap();
         assert_eq!(key.to_hex(), str);

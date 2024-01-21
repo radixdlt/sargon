@@ -40,7 +40,10 @@ mod tests {
 
     #[test]
     fn json_roundtrip_accept_all() {
-        assert_json_value_eq_after_roundtrip(&DepositRule::AcceptAll, json!("acceptAll"));
+        assert_json_value_eq_after_roundtrip(
+            &DepositRule::AcceptAll,
+            json!("acceptAll"),
+        );
         assert_json_roundtrip(&DepositRule::AcceptAll);
     }
 

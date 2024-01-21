@@ -1,6 +1,8 @@
 use crate::prelude::*;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, derive_more::Display, uniffi::Enum)]
+#[derive(
+    Debug, Clone, PartialEq, Eq, Hash, derive_more::Display, uniffi::Enum,
+)]
 pub enum WalletClientModel {
     #[display("iPhone")]
     Iphone,

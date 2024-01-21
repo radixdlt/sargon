@@ -18,7 +18,15 @@ use crate::prelude::*;
 /// Legacy one imported from Olympia, or a Ledger hardware wallet, which too might
 /// have been imported from Olympia.
 #[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Hash, Eq, derive_more::Display, uniffi::Record,
+    Serialize,
+    Deserialize,
+    Clone,
+    Debug,
+    PartialEq,
+    Hash,
+    Eq,
+    derive_more::Display,
+    uniffi::Record,
 )]
 #[display("{display_name} | {address}")]
 #[serde(rename_all = "camelCase")]
@@ -71,17 +79,19 @@ impl Account {
         display_name: DisplayName,
         appearance_id: AppearanceID,
     ) -> Self {
-        let address = AccountAddress::from_hd_factor_instance_virtual_entity_creation(
-            account_creating_factor_instance.clone(),
-        );
+        let address =
+            AccountAddress::from_hd_factor_instance_virtual_entity_creation(
+                account_creating_factor_instance.clone(),
+            );
         Self {
             network_id: account_creating_factor_instance.network_id().into(),
             address,
             display_name,
-            security_state: UnsecuredEntityControl::with_entity_creating_factor_instance(
-                account_creating_factor_instance,
-            )
-            .into(),
+            security_state:
+                UnsecuredEntityControl::with_entity_creating_factor_instance(
+                    account_creating_factor_instance,
+                )
+                .into(),
             appearance_id,
             flags: EntityFlags::default().into(),
             on_ledger_settings: OnLedgerSettings::default(),
@@ -158,10 +168,15 @@ impl Account {
         name: &str,
     ) -> Self {
         let mwp = MnemonicWithPassphrase::placeholder();
-        let bdfs = DeviceFactorSource::babylon(true, mwp.clone(), WalletClientModel::Iphone);
-        let private_hd_factor_source = PrivateHierarchicalDeterministicFactorSource::new(mwp, bdfs);
-        let account_creating_factor_instance =
-            private_hd_factor_source.derive_entity_creation_factor_instance(network_id, index);
+        let bdfs = DeviceFactorSource::babylon(
+            true,
+            mwp.clone(),
+            WalletClientModel::Iphone,
+        );
+        let private_hd_factor_source =
+            PrivateHierarchicalDeterministicFactorSource::new(mwp, bdfs);
+        let account_creating_factor_instance = private_hd_factor_source
+            .derive_entity_creation_factor_instance(network_id, index);
 
         Self::new(
             account_creating_factor_instance,
@@ -263,9 +278,9 @@ mod tests {
     use std::str::FromStr;
 
     use crate::{
-        assert_eq_after_json_roundtrip, AssetException, DepositAddressExceptionRule, DepositRule,
-        DepositorAddress, EntityFlag, EntityFlags, HasPlaceholder, OnLedgerSettings,
-        ThirdPartyDeposits,
+        assert_eq_after_json_roundtrip, AssetException,
+        DepositAddressExceptionRule, DepositRule, DepositorAddress, EntityFlag,
+        EntityFlags, HasPlaceholder, OnLedgerSettings, ThirdPartyDeposits,
     };
     use radix_engine_common::prelude::HashSet;
 
@@ -322,12 +337,11 @@ mod tests {
 
     #[test]
     fn on_ledger_settings_get_set() {
-        let mut account =
-            Account::placeholder_with_values(
-                AccountAddress::placeholder_alice(),
-                DisplayName::new("Test").unwrap(),
-                AppearanceID::default(),
-            );
+        let mut account = Account::placeholder_with_values(
+            AccountAddress::placeholder_alice(),
+            DisplayName::new("Test").unwrap(),
+            AppearanceID::default(),
+        );
         assert_eq!(account.on_ledger_settings, OnLedgerSettings::default());
         let excp1 = AssetException::new(
             "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
@@ -359,7 +373,8 @@ mod tests {
             DepositRule::DenyAll
         );
 
-        account.on_ledger_settings.third_party_deposits.deposit_rule = DepositRule::AcceptAll;
+        account.on_ledger_settings.third_party_deposits.deposit_rule =
+            DepositRule::AcceptAll;
         assert_eq!(
             account.on_ledger_settings.third_party_deposits.deposit_rule,
             DepositRule::AcceptAll

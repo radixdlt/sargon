@@ -14,7 +14,10 @@ pub struct HierarchicalDeterministicPrivateKey {
 impl HierarchicalDeterministicPrivateKey {
     /// Instantiates a new `HierarchicalDeterministicPrivateKey` from a PrivateKey and
     /// the derivation path used to derive it.
-    pub fn new(private_key: PrivateKey, derivation_path: DerivationPath) -> Self {
+    pub fn new(
+        private_key: PrivateKey,
+        derivation_path: DerivationPath,
+    ) -> Self {
         Self {
             private_key,
             derivation_path,
