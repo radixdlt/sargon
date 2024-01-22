@@ -5,6 +5,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::prelude::*;
 
+use super::persona_data::{IdentifiedEntry, PersonaData};
+
 #[derive(
     Serialize, Deserialize, Clone, Debug, PartialEq, Hash, Eq, uniffi::Record,
 )]
@@ -42,7 +44,6 @@ impl Persona {
     pub fn new(
         persona_creating_factor_instance: HDFactorInstanceIdentityCreation,
         display_name: DisplayName,
-        persona_data: PersonaData,
     ) -> Self {
         let address =
             IdentityAddress::from_hd_factor_instance_virtual_entity_creation(
@@ -58,7 +59,7 @@ impl Persona {
                 )
                 .into(),
             flags: EntityFlags::default(),
-            persona_data,
+            persona_data: PersonaData::new(IdentifiedEntry::default()),
         }
     }
 
@@ -81,7 +82,6 @@ impl Persona {
         Self::new(
             persona_creating_factor_instance,
             DisplayName::new(name).unwrap(),
-            PersonaData::default(),
         )
     }
 
@@ -145,25 +145,14 @@ impl HasPlaceholder for Persona {
     }
 }
 
-/// Empty struct to act as placeholder for PersonaData, `todo`
-#[derive(
-    Serialize,
-    Deserialize,
-    Clone,
-    Debug,
-    PartialEq,
-    Hash,
-    Eq,
-    Default,
-    uniffi::Record,
-)]
-pub struct PersonaData {}
-
 #[cfg(test)]
 mod tests {
     use crate::{
         prelude::*,
-        v100::entity::persona::{Persona, PersonaData},
+        v100::entity::persona::{
+            persona_data::{self, PersonaData},
+            Persona,
+        },
     };
     use identified_vec::Identifiable;
     use std::str::FromStr;
@@ -298,7 +287,17 @@ mod tests {
                   }
                 },
                 "flags": [],
-                "personaData": {}
+                "personaData": {
+                  "name": {
+                    "id": "00000000-0000-0000-0000-000000000000",
+                    "value": {
+                      "variant": "Western",
+                      "family_name": "",
+                      "given_name": "",
+                      "nickname": ""
+                    }
+                  }
+                }
               }
             "#,
         );
@@ -311,42 +310,52 @@ mod tests {
             &model,
             r#"
             {
-                "networkID": 1,
-                "address": "identity_rdx122kttqch0eehzj6f9nkkxcw7msfeg9udurq5u0ysa0e92c59w0mg6x",
-                "displayName": "Satoshi",
-                "securityState": {
-                  "discriminator": "unsecured",
-                  "unsecuredEntityControl": {
-                    "transactionSigning": {
-                      "factorSourceID": {
-                        "discriminator": "fromHash",
-                        "fromHash": {
-                          "kind": "device",
-                          "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
-                        }
-                      },
-                      "badge": {
-                        "discriminator": "virtualSource",
-                        "virtualSource": {
-                          "discriminator": "hierarchicalDeterministicPublicKey",
-                          "hierarchicalDeterministicPublicKey": {
-                            "publicKey": {
-                              "curve": "curve25519",
-                              "compressedData": "983ab1d3a77dd6b30bb8a5d59d490a0380cc0aa9ab464983d3fc581fcf64543f"
-                            },
-                            "derivationPath": {
-                              "scheme": "cap26",
-                              "path": "m/44H/1022H/1H/618H/1460H/0H"
-                            }
+              "networkID": 1,
+              "address": "identity_rdx122kttqch0eehzj6f9nkkxcw7msfeg9udurq5u0ysa0e92c59w0mg6x",
+              "displayName": "Satoshi",
+              "securityState": {
+                "discriminator": "unsecured",
+                "unsecuredEntityControl": {
+                  "transactionSigning": {
+                    "factorSourceID": {
+                      "discriminator": "fromHash",
+                      "fromHash": {
+                        "kind": "device",
+                        "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+                      }
+                    },
+                    "badge": {
+                      "discriminator": "virtualSource",
+                      "virtualSource": {
+                        "discriminator": "hierarchicalDeterministicPublicKey",
+                        "hierarchicalDeterministicPublicKey": {
+                          "publicKey": {
+                            "curve": "curve25519",
+                            "compressedData": "983ab1d3a77dd6b30bb8a5d59d490a0380cc0aa9ab464983d3fc581fcf64543f"
+                          },
+                          "derivationPath": {
+                            "scheme": "cap26",
+                            "path": "m/44H/1022H/1H/618H/1460H/0H"
                           }
                         }
                       }
                     }
                   }
-                },
-                "flags": [],
-                "personaData": {}
+                }
+              },
+              "flags": [],
+              "personaData": {
+                "name": {
+                  "id": "00000000-0000-0000-0000-000000000000",
+                  "value": {
+                    "variant": "Western",
+                    "family_name": "",
+                    "given_name": "",
+                    "nickname": ""
+                  }
+                }
               }
+            }
         "#,
         );
     }
@@ -356,48 +365,58 @@ mod tests {
         let json = serde_json::from_str(
             r#"
             {
-                "networkID": 1,
-                "address": "identity_rdx12gzxlgre0glhh9jxaptm7tdth8j4w4r8ykpg2xjfv45nghzsjzrvmp",
-                "displayName": "Batman",
-                "securityState": {
-                  "discriminator": "unsecured",
-                  "unsecuredEntityControl": {
-                    "transactionSigning": {
-                      "factorSourceID": {
-                        "discriminator": "fromHash",
-                        "fromHash": {
-                          "kind": "device",
-                          "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
-                        }
-                      },
-                      "badge": {
-                        "discriminator": "virtualSource",
-                        "virtualSource": {
-                          "discriminator": "hierarchicalDeterministicPublicKey",
-                          "hierarchicalDeterministicPublicKey": {
-                            "publicKey": {
-                              "curve": "curve25519",
-                              "compressedData": "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b"
-                            },
-                            "derivationPath": {
-                              "scheme": "cap26",
-                              "path": "m/44H/1022H/1H/525H/1460H/0H"
-                            }
+              "networkID": 1,
+              "address": "identity_rdx122kttqch0eehzj6f9nkkxcw7msfeg9udurq5u0ysa0e92c59w0mg6x",
+              "displayName": "Satoshi",
+              "securityState": {
+                "discriminator": "unsecured",
+                "unsecuredEntityControl": {
+                  "transactionSigning": {
+                    "factorSourceID": {
+                      "discriminator": "fromHash",
+                      "fromHash": {
+                        "kind": "device",
+                        "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+                      }
+                    },
+                    "badge": {
+                      "discriminator": "virtualSource",
+                      "virtualSource": {
+                        "discriminator": "hierarchicalDeterministicPublicKey",
+                        "hierarchicalDeterministicPublicKey": {
+                          "publicKey": {
+                            "curve": "curve25519",
+                            "compressedData": "983ab1d3a77dd6b30bb8a5d59d490a0380cc0aa9ab464983d3fc581fcf64543f"
+                          },
+                          "derivationPath": {
+                            "scheme": "cap26",
+                            "path": "m/44H/1022H/1H/618H/1460H/0H"
                           }
                         }
                       }
                     }
                   }
-                },
-                "flags": [],
-                "personaData": {}
+                }
+              },
+              "flags": [],
+              "personaData": {
+                "name": {
+                  "id": "00000000-0000-0000-0000-000000000000",
+                  "value": {
+                    "variant": "Western",
+                    "family_name": "",
+                    "given_name": "",
+                    "nickname": ""
+                  }
+                }
               }
+            }
             "#,
         ).unwrap();
         let persona = serde_json::from_value::<Persona>(json).unwrap();
-        assert_eq!(persona.display_name.value, "Batman".to_string()); // soundness
+        assert_eq!(persona.display_name.value, "Satoshi".to_string()); // soundness
         assert_eq!(persona.flags.len(), 0); // assert Default value is empty flags.
-        assert_eq!(persona.persona_data, PersonaData {}); // assert Default value is empty flags.
+        assert_eq!(persona.persona_data, PersonaData::new(Default::default()));
     }
 
     #[test]
