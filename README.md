@@ -8,7 +8,7 @@ Middleware that can power Radix Wallet clients (iOS/Android).
 
 ## LOGIC
 
-`[===-----------------------------------------------]`
+`[======--------------------------------------------]`
 
 ### Hierarchal Deterministic
 
@@ -24,9 +24,27 @@ Middleware that can power Radix Wallet clients (iOS/Android).
   - [x] CAP26 IdentityPath
   - [x] CAP26 GetID
 
+### Profile Management
+
+- [x] Create new Profile
+- [x] Load active Profile
+- [x] Import Profile
+
+### Account Management
+
+- [x] Create new account
+- [x] Update account
+
+### FactorSource Management
+
+- [x] Create DeviceFactorSource
+- [x] Save DeviceFactorSource
+- [x] Create LedgerFactorSource
+- [ ] Save LedgerFactorSource (trivially done)
+
 ## MODELS
 
-`[================================================--]`
+`[=================================================-]`
 
 All models have JSON support and `Placeholder` with which "recursively" I've crafted two valid example Profiles.
 
@@ -85,11 +103,6 @@ All models have Swift/Kotlin bindings using [UniFFI](https://github.com/mozilla/
 - [x] Account
   - [x] AppearanceID
   - [x] DisplayName
-- [ ] Network
-  - [x] NetworkID
-  - [x] Accounts
-  - [ ] Personas
-  - [ ] Authorized Dapps
 - [x] Networks
 - [x] AppPreferences
   - [x] Display
@@ -101,6 +114,19 @@ All models have Swift/Kotlin bindings using [UniFFI](https://github.com/mozilla/
     - [x] Gateway
     - [x] RadixNetwork
 - [ ] Persona
+  - [x] Persona (without `PersonaData`)
+  - [ ] PersonaData
+    - [ ] Name
+    - [ ] Email
+    - [ ] Phone
+- [ ] Authorized Dapp
+  - [ ] Shared Accounts
+  - [ ] Shared Personas
+- [ ] Network
+  - [x] NetworkID
+  - [x] Accounts
+  - [x] Personas
+  - [ ] Authorized Dapps
 - [x] Profile
 
 # Development
@@ -136,6 +162,7 @@ cargo tarpaulin --out Html
 ```
 
 ### nextest
+
 [Nextest](https://nexte.st/index.html) is a nice test runner for Rust!
 
 ```sh
@@ -143,6 +170,7 @@ cargo install cargo-nextest
 ```
 
 ## Test
+
 ```sh
 cargo nextest run --package profile --test uniffi && cargo nextest run
 ```
