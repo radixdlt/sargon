@@ -33,6 +33,10 @@ impl Gateways {
         self.other.len() + 1
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
     pub fn all(&self) -> Vec<Gateway> {
         let mut all = Vec::new();
         all.push(self.current.clone());

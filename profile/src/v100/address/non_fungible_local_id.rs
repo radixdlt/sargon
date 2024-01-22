@@ -18,7 +18,7 @@ impl NonFungibleLocalId {
 
 impl std::fmt::Display for NonFungibleLocalId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.native().to_string())
+        write!(f, "{}", self.native())
     }
 }
 
