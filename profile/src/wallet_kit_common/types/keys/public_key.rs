@@ -30,7 +30,7 @@ impl From<Ed25519PublicKey> for PublicKey {
     /// extern crate profile;
     /// use profile::prelude::*;
     ///
-    /// let key: PublicKey = Ed25519PrivateKey::new().public_key().into();
+    /// let key: PublicKey = Ed25519PrivateKey::generate().public_key().into();
     /// ```
     fn from(value: Ed25519PublicKey) -> Self {
         Self::Ed25519 { value }
@@ -44,7 +44,7 @@ impl From<Secp256k1PublicKey> for PublicKey {
     /// extern crate profile;
     /// use profile::prelude::*;
     ///
-    /// let key: PublicKey = Secp256k1PrivateKey::new().public_key().into();
+    /// let key: PublicKey = Secp256k1PrivateKey::generate().public_key().into();
     /// ```
     fn from(value: Secp256k1PublicKey) -> Self {
         Self::Secp256k1 { value }
