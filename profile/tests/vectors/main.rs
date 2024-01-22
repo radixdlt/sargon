@@ -1,4 +1,5 @@
-use profile::{Profile, ProfileSnapshotVersion};
+use profile::prelude::*;
+use serde::Deserialize;
 use std::{
     env,
     ffi::{OsStr, OsString},
@@ -34,7 +35,7 @@ pub enum TestingError {
 #[cfg(not(tarpaulin_include))]
 fn vector<'a, T>(name: impl AsRef<OsStr>) -> Result<T, TestingError>
 where
-    T: for<'de> serde::Deserialize<'de>,
+    T: for<'de> Deserialize<'de>,
 {
     let base = append_to_path(crate_dir(), "/tests/vectors/fixtures/");
     let base_file_path = append_to_path(base, name);
@@ -60,4 +61,92 @@ fn v100_100() {
         profile.header.snapshot_version,
         ProfileSnapshotVersion::V100
     );
+}
+
+#[derive(Deserialize, Debug)]
+struct CAP26Vector {
+    path: HDPath,
+
+    #[serde(rename = "publicKey")]
+    public_key_hex: String,
+
+    #[serde(rename = "entityKind")]
+    entity_kind: CAP26EntityKind,
+
+    #[serde(rename = "privateKey")]
+    private_key_hex: String,
+
+    #[serde(rename = "entityIndex")]
+    entity_index: HDPathValue,
+
+    #[serde(rename = "keyKind")]
+    key_kind: CAP26KeyKind,
+}
+
+#[derive(Deserialize, Debug)]
+struct CAP26Group {
+    mnemonic: Mnemonic,
+    tests: Vec<CAP26Vector>,
+}
+impl CAP26Group {
+    fn test<S, P>(&self) -> ()
+    where
+        P: IsPublicKey<S::Signature>
+            + FromStr<Err = CommonError>
+            + std::fmt::Debug
+            + PartialEq,
+        S: IsPrivateKey<P> + FromStr<Err = CommonError> + std::fmt::Debug,
+    {
+        let seed = self.mnemonic.to_seed("");
+        self.tests
+            .iter()
+            .map(|v| {
+                let private_key = v.private_key::<S, P>()?;
+                let derived: profile::PrivateKey = match S::curve() {
+                    profile::SLIP10Curve::Curve25519 => {
+                        MnemonicWithPassphrase::derive_ed25519_private_key(
+                            &seed, &v.path,
+                        )
+                        .into()
+                    }
+                    profile::SLIP10Curve::Secp256k1 => {
+                        MnemonicWithPassphrase::derive_secp256k1_private_key(
+                            &seed, &v.path,
+                        )
+                        .into()
+                    }
+                };
+                assert_eq!(derived.to_hex(), format!("{:?}", private_key));
+                Ok::<(), CommonError>(())
+            })
+            .collect::<Result<Vec<()>, CommonError>>()
+            .expect("All test vectors to pass");
+    }
+}
+
+impl CAP26Vector {
+    fn private_key<S, P>(&self) -> Result<S, CommonError>
+    where
+        P: IsPublicKey<S::Signature>
+            + FromStr<Err = CommonError>
+            + std::fmt::Debug
+            + PartialEq,
+        S: IsPrivateKey<P> + FromStr<Err = CommonError>,
+    {
+        let s: S = self.private_key_hex.parse()?;
+        let p: P = self.public_key_hex.parse()?;
+        assert_eq!(s.public_key(), p);
+        Ok(s)
+    }
+}
+
+#[test]
+fn cap26() {
+    let secp256k1 = vector::<CAP26Group>("cap26_secp256k1")
+        .expect("CAP26 Secp256k1 vectors");
+    let curve25519 = vector::<CAP26Group>("cap26_curve25519")
+        .expect("CAP26 Curve25519 vectors");
+
+    secp256k1.test::<Secp256k1PrivateKey, Secp256k1PublicKey>();
+    curve25519.test::<Ed25519PrivateKey, Ed25519PublicKey>();
 }

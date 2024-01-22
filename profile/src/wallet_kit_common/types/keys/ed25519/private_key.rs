@@ -36,19 +36,27 @@ impl PartialEq for Ed25519PrivateKey {
 
 impl Eq for Ed25519PrivateKey {}
 
-impl Ed25519PrivateKey {
-    pub fn from_engine(engine: EngineEd25519PrivateKey) -> Self {
-        Self(engine)
+impl IsPrivateKey<Ed25519PublicKey> for Ed25519PrivateKey {
+    fn curve() -> SLIP10Curve {
+        SLIP10Curve::Curve25519
     }
 
-    pub fn public_key(&self) -> Ed25519PublicKey {
+    type Signature = Ed25519Signature;
+
+    fn public_key(&self) -> Ed25519PublicKey {
         Ed25519PublicKey::from_engine(self.0.public_key()).expect(
             "Public Key from EC scalar multiplication should always be valid.",
         )
     }
 
-    pub fn sign(&self, msg_hash: &impl IsHash) -> Ed25519Signature {
+    fn sign(&self, msg_hash: &impl IsHash) -> Ed25519Signature {
         self.0.sign(msg_hash)
+    }
+}
+
+impl Ed25519PrivateKey {
+    pub fn from_engine(engine: EngineEd25519PrivateKey) -> Self {
+        Self(engine)
     }
 
     pub fn to_bytes(&self) -> Vec<u8> {
@@ -65,14 +73,6 @@ impl Ed25519PrivateKey {
                 CommonError::InvalidEd25519PrivateKeyFromBytes(slice.to_owned())
             })
             .map(Self::from_engine)
-    }
-
-    pub fn from_str(hex: &str) -> Result<Self> {
-        Hex32Bytes::from_hex(hex)
-            .map_err(|_| {
-                CommonError::InvalidEd25519PrivateKeyFromString(hex.to_owned())
-            })
-            .and_then(|b| Self::from_bytes(&b.to_vec()))
     }
 
     pub fn from_vec(bytes: Vec<u8>) -> Result<Self> {
@@ -92,11 +92,15 @@ impl TryFrom<&[u8]> for Ed25519PrivateKey {
     }
 }
 
-impl TryInto<Ed25519PrivateKey> for &str {
-    type Error = crate::CommonError;
+impl FromStr for Ed25519PrivateKey {
+    type Err = CommonError;
 
-    fn try_into(self) -> Result<Ed25519PrivateKey, Self::Error> {
-        Ed25519PrivateKey::from_str(self)
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Hex32Bytes::from_hex(s)
+            .map_err(|_| {
+                CommonError::InvalidEd25519PrivateKeyFromString(s.to_owned())
+            })
+            .and_then(|b| Self::from_bytes(&b.to_vec()))
     }
 }
 
@@ -167,11 +171,16 @@ mod tests {
     }
 
     #[test]
+    fn curve() {
+        assert_eq!(Ed25519PrivateKey::curve(), SLIP10Curve::Curve25519);
+    }
+
+    #[test]
     fn sign_and_verify() {
         let msg = hash("Test");
         let sk: Ed25519PrivateKey =
             "0000000000000000000000000000000000000000000000000000000000000001"
-                .try_into()
+                .parse()
                 .unwrap();
         let pk = sk.public_key();
         assert_eq!(

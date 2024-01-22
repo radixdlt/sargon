@@ -89,7 +89,7 @@ impl MnemonicWithPassphrase {
         self.mnemonic.to_seed(&self.passphrase.0)
     }
 
-    fn derive_ed25519_private_key(
+    pub fn derive_ed25519_private_key(
         seed: &Seed,
         path: &HDPath,
     ) -> Ed25519PrivateKey {
@@ -109,7 +109,7 @@ impl MnemonicWithPassphrase {
             .expect("Valid Ed25519PrivateKey bytes")
     }
 
-    fn derive_secp256k1_private_key(
+    pub fn derive_secp256k1_private_key(
         seed: &Seed,
         path: &HDPath,
     ) -> Secp256k1PrivateKey {

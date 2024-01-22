@@ -28,8 +28,7 @@ impl From<Ed25519PublicKey> for PublicKey {
     ///
     /// ```
     /// extern crate profile;
-    /// use profile::Ed25519PrivateKey;
-    /// use profile::PublicKey;
+    /// use profile::prelude::*;
     ///
     /// let key: PublicKey = Ed25519PrivateKey::new().public_key().into();
     /// ```
@@ -43,8 +42,7 @@ impl From<Secp256k1PublicKey> for PublicKey {
     ///
     /// ```
     /// extern crate profile;
-    /// use profile::Secp256k1PrivateKey;
-    /// use profile::PublicKey;
+    /// use profile::prelude::*;
     ///
     /// let key: PublicKey = Secp256k1PrivateKey::new().public_key().into();
     /// ```

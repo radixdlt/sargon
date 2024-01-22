@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 use bip32::secp256k1::PublicKey as BIP32Secp256k1PublicKey;
 use radix_engine_common::crypto::{
-    Hash, Secp256k1PublicKey as EngineSecp256k1PublicKey,
+    Hash, IsHash, Secp256k1PublicKey as EngineSecp256k1PublicKey,
 };
 use transaction::{
     signing::secp256k1::Secp256k1Signature, validation::verify_secp256k1,
@@ -74,6 +74,17 @@ impl From<EngineSecp256k1PublicKey> for Secp256k1PublicKey {
     }
 }
 
+impl IsPublicKey<Secp256k1Signature> for Secp256k1PublicKey {
+    /// Verifies an ECDSA signature over Secp256k1.
+    fn is_valid(
+        &self,
+        signature: &Secp256k1Signature,
+        for_hash: &impl IsHash,
+    ) -> bool {
+        verify_secp256k1(for_hash.as_hash(), &self.to_engine(), signature)
+    }
+}
+
 impl Secp256k1PublicKey {
     pub fn to_bytes(&self) -> Vec<u8> {
         self.value.clone()
@@ -97,15 +108,6 @@ impl Secp256k1PublicKey {
                 value: engine.to_vec(),
             })
             .map_err(|_| CommonError::InvalidSecp256k1PublicKeyPointNotOnCurve)
-    }
-
-    /// Verifies an ECDSA signature over Secp256k1.
-    pub fn is_valid(
-        &self,
-        signature: &Secp256k1Signature,
-        for_hash: &Hash,
-    ) -> bool {
-        verify_secp256k1(for_hash, &self.to_engine(), signature)
     }
 }
 

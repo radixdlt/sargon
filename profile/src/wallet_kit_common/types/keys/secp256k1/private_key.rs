@@ -41,16 +41,6 @@ impl Secp256k1PrivateKey {
         Self(engine)
     }
 
-    pub fn public_key(&self) -> Secp256k1PublicKey {
-        Secp256k1PublicKey::from_engine(self.0.public_key()).expect(
-            "Public Key from EC scalar multiplication should always be valid.",
-        )
-    }
-
-    pub fn sign(&self, msg_hash: &impl IsHash) -> Secp256k1Signature {
-        self.0.sign(msg_hash)
-    }
-
     pub fn to_bytes(&self) -> Vec<u8> {
         self.0.to_bytes()
     }
@@ -76,23 +66,17 @@ impl Secp256k1PrivateKey {
     pub fn from_hex32_bytes(bytes: Hex32Bytes) -> Result<Self> {
         Self::from_vec(bytes.to_vec())
     }
-
-    pub fn from_str(hex: &str) -> Result<Self> {
-        Hex32Bytes::from_hex(hex)
-            .map_err(|_| {
-                CommonError::InvalidSecp256k1PrivateKeyFromString(
-                    hex.to_owned(),
-                )
-            })
-            .and_then(Self::from_hex32_bytes)
-    }
 }
 
-impl TryInto<Secp256k1PrivateKey> for &str {
-    type Error = crate::CommonError;
+impl FromStr for Secp256k1PrivateKey {
+    type Err = CommonError;
 
-    fn try_into(self) -> Result<Secp256k1PrivateKey, Self::Error> {
-        Secp256k1PrivateKey::from_str(self)
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Hex32Bytes::from_hex(s)
+            .map_err(|_| {
+                CommonError::InvalidSecp256k1PrivateKeyFromString(s.to_owned())
+            })
+            .and_then(Self::from_hex32_bytes)
     }
 }
 
@@ -101,6 +85,24 @@ impl TryFrom<&[u8]> for Secp256k1PrivateKey {
 
     fn try_from(slice: &[u8]) -> Result<Secp256k1PrivateKey, Self::Error> {
         Secp256k1PrivateKey::from_bytes(slice)
+    }
+}
+
+impl IsPrivateKey<Secp256k1PublicKey> for Secp256k1PrivateKey {
+    fn curve() -> SLIP10Curve {
+        SLIP10Curve::Secp256k1
+    }
+
+    type Signature = Secp256k1Signature;
+
+    fn public_key(&self) -> Secp256k1PublicKey {
+        Secp256k1PublicKey::from_engine(self.0.public_key()).expect(
+            "Public Key from EC scalar multiplication should always be valid.",
+        )
+    }
+
+    fn sign(&self, msg_hash: &impl IsHash) -> Secp256k1Signature {
+        self.0.sign(msg_hash)
     }
 }
 
@@ -172,11 +174,16 @@ mod tests {
     }
 
     #[test]
+    fn curve() {
+        assert_eq!(Secp256k1PrivateKey::curve(), SLIP10Curve::Secp256k1);
+    }
+
+    #[test]
     fn sign_and_verify() {
         let msg = hash("Test");
         let sk: Secp256k1PrivateKey =
             "0000000000000000000000000000000000000000000000000000000000000001"
-                .try_into()
+                .parse()
                 .unwrap();
         let pk = sk.public_key();
         assert_eq!(
