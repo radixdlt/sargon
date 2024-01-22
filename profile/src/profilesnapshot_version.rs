@@ -3,7 +3,7 @@ use std::fmt::Display;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use strum::FromRepr;
 
-/// The
+/// The version of the Profile Snapshot data format (JSON).
 #[derive(
     Serialize_repr,
     Deserialize_repr,
@@ -18,7 +18,7 @@ use strum::FromRepr;
     Ord,
     uniffi::Enum,
 )]
-#[repr(u16)] // most likely will will not do more than 65536 iterations.
+#[repr(u16)] // most likely we will not do more than 65536 iterations.
 pub enum ProfileSnapshotVersion {
     /// The version we went live with on Babylon mainnet 2023-09-28,
     /// shipped with iOS 1.0.0 (7) and Android v 1.0.0.
@@ -45,14 +45,19 @@ impl Display for ProfileSnapshotVersion {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_json_value_eq_after_roundtrip, assert_json_value_fails};
+    use crate::{
+        assert_json_value_eq_after_roundtrip, assert_json_value_fails,
+    };
     use serde_json::json;
 
     use super::ProfileSnapshotVersion;
 
     #[test]
     fn json() {
-        assert_json_value_eq_after_roundtrip(&ProfileSnapshotVersion::V100, json!(100));
+        assert_json_value_eq_after_roundtrip(
+            &ProfileSnapshotVersion::V100,
+            json!(100),
+        );
         assert_json_value_fails::<ProfileSnapshotVersion>(json!(99));
         assert_json_value_fails::<ProfileSnapshotVersion>(json!("99"));
         assert_json_value_fails::<ProfileSnapshotVersion>(json!("100"));

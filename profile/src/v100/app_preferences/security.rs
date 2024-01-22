@@ -1,6 +1,4 @@
-use serde::{Deserialize, Serialize};
-
-use crate::{HasPlaceholder, IdentifiedVecVia};
+use crate::prelude::*;
 
 // FIXME: MFA this is in fact not used, so ok to be a `bool` for now. The AppPreferences Security type has
 // a field `structure_configuration_references` but no client can populate it yet, so the list will always
@@ -10,7 +8,9 @@ pub type SecurityStructureConfigurationReference = bool;
 /// Controls e.g. if Profile Snapshot gets synced to iCloud or not, and whether
 /// developer mode is enabled or not. In future (MFA) we will also save a list of
 /// MFA security structure configurations.
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Hash, uniffi::Record)]
+#[derive(
+    Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Hash, uniffi::Record,
+)]
 #[serde(rename_all = "camelCase")]
 pub struct Security {
     pub is_cloud_profile_sync_enabled: bool,
@@ -57,14 +57,15 @@ impl HasPlaceholder for Security {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
-
-    use super::Security;
+    use crate::prelude::*;
 
     #[test]
     fn equality() {
         assert_eq!(Security::placeholder(), Security::placeholder());
-        assert_eq!(Security::placeholder_other(), Security::placeholder_other());
+        assert_eq!(
+            Security::placeholder_other(),
+            Security::placeholder_other()
+        );
     }
 
     #[test]

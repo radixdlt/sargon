@@ -1,20 +1,18 @@
-use serde::{Deserialize, Serialize};
+use crate::prelude::*;
 
-use crate::{
-    v100::factors::{
-        factor_source::FactorSource, factor_source_common::FactorSourceCommon,
-        factor_source_id::FactorSourceID, factor_source_id_from_hash::FactorSourceIDFromHash,
-        factor_source_kind::FactorSourceKind, is_factor_source::IsFactorSource,
-    },
-    CommonError,
-};
-
-use super::ledger_hardware_wallet_hint::LedgerHardwareWalletHint;
-
-use crate::HasPlaceholder;
-
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug, uniffi::Record)]
+#[derive(
+    Serialize,
+    Deserialize,
+    Clone,
+    PartialEq,
+    Eq,
+    Hash,
+    Debug,
+    derive_more::Display,
+    uniffi::Record,
+)]
 #[serde(rename_all = "camelCase")]
+#[display("{hint} : {id}")]
 pub struct LedgerHardwareWalletFactorSource {
     /// Unique and stable identifier of this factor source, stemming from the
     /// hash of a special child key of the HD root of the mnemonic,
@@ -64,7 +62,7 @@ impl HasPlaceholder for LedgerHardwareWalletFactorSource {
 impl TryFrom<FactorSource> for LedgerHardwareWalletFactorSource {
     type Error = CommonError;
 
-    fn try_from(value: FactorSource) -> Result<Self, Self::Error> {
+    fn try_from(value: FactorSource) -> Result<Self> {
         match value {
             FactorSource::Ledger { value: factor } => Ok(factor),
             FactorSource::Device { value: _ } => {
@@ -73,8 +71,12 @@ impl TryFrom<FactorSource> for LedgerHardwareWalletFactorSource {
         }
     }
 }
-
 impl IsFactorSource for LedgerHardwareWalletFactorSource {
+    fn kind() -> FactorSourceKind {
+        FactorSourceKind::LedgerHQHardwareWallet
+    }
+}
+impl BaseIsFactorSource for LedgerHardwareWalletFactorSource {
     fn factor_source_kind(&self) -> FactorSourceKind {
         self.id.kind.clone()
     }
@@ -86,11 +88,7 @@ impl IsFactorSource for LedgerHardwareWalletFactorSource {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, CommonError as Error, HasPlaceholder};
-
-    use crate::v100::{DeviceFactorSource, FactorSource, IsFactorSource};
-
-    use super::LedgerHardwareWalletFactorSource;
+    use crate::prelude::*;
 
     #[test]
     fn equality() {
@@ -157,7 +155,7 @@ mod tests {
         let factor_source: FactorSource = wrong.clone().into();
         assert_eq!(
             LedgerHardwareWalletFactorSource::try_from(factor_source),
-            Err(Error::ExpectedLedgerHardwareWalletFactorSourceGotSomethingElse)
+            Err(CommonError::ExpectedLedgerHardwareWalletFactorSourceGotSomethingElse)
         );
     }
 
@@ -172,7 +170,8 @@ mod tests {
     #[test]
     fn factor_source_kind() {
         assert_eq!(
-            LedgerHardwareWalletFactorSource::placeholder().factor_source_kind(),
+            LedgerHardwareWalletFactorSource::placeholder()
+                .factor_source_kind(),
             LedgerHardwareWalletFactorSource::placeholder().id.kind
         );
     }

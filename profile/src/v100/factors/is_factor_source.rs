@@ -1,9 +1,12 @@
-use super::{
-    factor_source::FactorSource, factor_source_id::FactorSourceID,
-    factor_source_kind::FactorSourceKind,
-};
+use crate::prelude::*;
 
-pub trait IsFactorSource: Into<FactorSource> + TryFrom<FactorSource> {
+pub trait BaseIsFactorSource:
+    Into<FactorSource> + TryFrom<FactorSource>
+{
     fn factor_source_kind(&self) -> FactorSourceKind;
     fn factor_source_id(&self) -> FactorSourceID;
+}
+
+pub trait IsFactorSource: BaseIsFactorSource {
+    fn kind() -> FactorSourceKind;
 }

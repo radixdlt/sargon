@@ -1,48 +1,56 @@
-use super::{
-    factor_source_id_from_address::FactorSourceIDFromAddress,
-    factor_source_id_from_hash::FactorSourceIDFromHash,
-};
-use enum_as_inner::EnumAsInner;
-use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
-
-use crate::HasPlaceholder;
+use crate::prelude::*;
 
 /// A unique and stable identifier of a FactorSource, e.g. a
 /// DeviceFactorSource being a mnemonic securely stored in a
 /// device (phone), where the ID of it is the hash of a special
 /// key derived near the root of it.
-#[derive(Serialize, Deserialize, EnumAsInner, Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(
+    Serialize,
+    Deserialize,
+    EnumAsInner,
+    Clone,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    derive_more::Display,
+    uniffi::Enum,
+)]
 #[serde(untagged, remote = "Self")]
 pub enum FactorSourceID {
     /// FactorSourceID from the blake2b hash of the special HD public key derived at `CAP26::GetID`,
     /// for a certain `FactorSourceKind`
     Hash {
         #[serde(rename = "fromHash")]
+        #[display("{}", value)]
         value: FactorSourceIDFromHash,
     },
 
     /// FactorSourceID from an AccountAddress, typically used by `trustedContact` FactorSource.
     Address {
         #[serde(rename = "fromAddress")]
+        #[display("{}", value)]
         value: FactorSourceIDFromAddress,
     },
 }
 
-impl From<FactorSourceIDFromHash> for FactorSourceID {
-    fn from(value: FactorSourceIDFromHash) -> Self {
-        Self::Hash { value }
+impl Into<FactorSourceID> for FactorSourceIDFromHash {
+    fn into(self) -> FactorSourceID {
+        FactorSourceID::Hash { value: self }
     }
 }
 
-impl From<FactorSourceIDFromAddress> for FactorSourceID {
-    fn from(value: FactorSourceIDFromAddress) -> Self {
-        Self::Address { value }
+impl Into<FactorSourceID> for FactorSourceIDFromAddress {
+    fn into(self) -> FactorSourceID {
+        FactorSourceID::Address { value: self }
     }
 }
 
 impl<'de> Deserialize<'de> for FactorSourceID {
     #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D: Deserializer<'de>>(
+        deserializer: D,
+    ) -> Result<Self, D::Error> {
         // https://github.com/serde-rs/serde/issues/1343#issuecomment-409698470
         #[derive(Deserialize, Serialize)]
         struct Wrapper {
@@ -96,18 +104,14 @@ impl HasPlaceholder for FactorSourceID {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
-
-    use crate::v100::factors::{
-        factor_source_id_from_address::FactorSourceIDFromAddress,
-        factor_source_id_from_hash::FactorSourceIDFromHash,
-    };
-
-    use super::FactorSourceID;
+    use crate::prelude::*;
 
     #[test]
     fn equality() {
-        assert_eq!(FactorSourceID::placeholder(), FactorSourceID::placeholder());
+        assert_eq!(
+            FactorSourceID::placeholder(),
+            FactorSourceID::placeholder()
+        );
         assert_eq!(
             FactorSourceID::placeholder_other(),
             FactorSourceID::placeholder_other()

@@ -1,23 +1,24 @@
-use crate::{CommonError as Error, EntityAddress, NonFungibleLocalId};
+use crate::prelude::*;
+
 use radix_engine_common::address::AddressBech32Decoder;
 use radix_engine_toolkit_json::models::scrypto::non_fungible_global_id::{
     SerializableNonFungibleGlobalId as EngineSerializableNonFungibleGlobalId,
     SerializableNonFungibleGlobalIdInternal as EngineSerializableNonFungibleGlobalIdInternal,
 };
-use serde::{de, Deserializer, Serialize, Serializer};
-use std::{
-    cmp::Ordering,
-    fmt::Display,
-    hash::{Hash, Hasher},
-    str::FromStr,
-};
+
 use transaction::prelude::NonFungibleGlobalId as EngineNonFungibleGlobalId;
 
-use crate::NetworkID;
-
-use super::resource_address::ResourceAddress;
-
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+#[derive(
+    Clone,
+    Debug,
+    PartialEq,
+    Eq,
+    SerializeDisplay,
+    DeserializeFromStr,
+    derive_more::Display,
+    uniffi::Record,
+)]
+#[display("{}", self.to_canonical_string())]
 pub struct NonFungibleGlobalId {
     pub resource_address: ResourceAddress,
     pub non_fungible_local_id: NonFungibleLocalId,
@@ -33,27 +34,10 @@ impl From<ResourceAddress> for radix_engine_common::types::ResourceAddress {
     }
 }
 
-impl Serialize for NonFungibleGlobalId {
-    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_str(self.to_canonical_string().as_str())
-    }
-}
-
-impl<'de> serde::Deserialize<'de> for NonFungibleGlobalId {
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<NonFungibleGlobalId, D::Error> {
-        let s = String::deserialize(deserializer)?;
-        EngineSerializableNonFungibleGlobalIdInternal::from_str(s.as_str())
-            .map(|internal| Self::from_internal_engine(internal))
-            .map_err(de::Error::custom)
-    }
-}
-
 impl NonFungibleGlobalId {
-    fn from_internal_engine(internal: EngineSerializableNonFungibleGlobalIdInternal) -> Self {
+    fn from_internal_engine(
+        internal: EngineSerializableNonFungibleGlobalIdInternal,
+    ) -> Self {
         let (engine_resource_address, engine_local_id) =
             internal.non_fungible_global_id.into_parts();
 
@@ -91,12 +75,6 @@ impl NonFungibleGlobalId {
     }
 }
 
-impl Display for NonFungibleGlobalId {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.engine().0)
-    }
-}
-
 impl Ord for NonFungibleGlobalId {
     fn cmp(&self, other: &Self) -> Ordering {
         self.to_string().cmp(&other.to_string())
@@ -109,26 +87,19 @@ impl PartialOrd for NonFungibleGlobalId {
     }
 }
 
-impl Hash for NonFungibleGlobalId {
-    fn hash<H: Hasher>(&self, state: &mut H) {
+impl std::hash::Hash for NonFungibleGlobalId {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.to_canonical_string().hash(state);
     }
 }
 
-impl NonFungibleGlobalId {
-    pub fn try_from_str(s: &str) -> Result<Self, Error> {
+impl FromStr for NonFungibleGlobalId {
+    type Err = CommonError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
         EngineSerializableNonFungibleGlobalIdInternal::from_str(s)
             .map(|i| Self::from_internal_engine(i))
-            .map_err(|_| Error::InvalidNonFungibleGlobalID)
-    }
-}
-
-impl TryInto<NonFungibleGlobalId> for &str {
-    type Error = crate::CommonError;
-
-    /// Tries to deserializes a bech32 address into an `NonFungibleGlobalId`.
-    fn try_into(self) -> Result<NonFungibleGlobalId, Self::Error> {
-        NonFungibleGlobalId::try_from_str(self)
+            .map_err(|_| CommonError::InvalidNonFungibleGlobalID(s.to_owned()))
     }
 }
 
@@ -145,20 +116,12 @@ impl NonFungibleGlobalId {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashSet;
-
-    use crate::{
-        assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
-        assert_json_value_ne_after_roundtrip, NonFungibleLocalId,
-    };
-    use serde_json::json;
-
-    use super::NonFungibleGlobalId;
+    use crate::prelude::*;
 
     #[test]
     fn test_deserialize() {
         let str = "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd:#2244#";
-        let id: NonFungibleGlobalId = str.try_into().unwrap();
+        let id: NonFungibleGlobalId = str.parse().unwrap();
         match id.clone().non_fungible_local_id {
             NonFungibleLocalId::Integer { value } => assert_eq!(value, 2244),
             _ => panic!("wrong"),
@@ -170,7 +133,7 @@ mod tests {
     #[test]
     fn test_address() {
         let str = "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd:#2244#";
-        let id: NonFungibleGlobalId = str.try_into().unwrap();
+        let id: NonFungibleGlobalId = str.parse().unwrap();
         assert_eq!(
             id.resource_address.address,
             "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd"
@@ -180,21 +143,21 @@ mod tests {
     #[test]
     fn test_network_id() {
         let str = "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd:#2244#";
-        let id: NonFungibleGlobalId = str.try_into().unwrap();
+        let id: NonFungibleGlobalId = str.parse().unwrap();
         assert_eq!(id.to_string(), str);
     }
 
     #[test]
     fn test_as_str() {
         let str = "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd:#2244#";
-        let id: NonFungibleGlobalId = str.try_into().unwrap();
+        let id: NonFungibleGlobalId = str.parse().unwrap();
         assert_eq!(id.to_string(), str);
     }
 
     #[test]
-    fn test_format() {
+    fn display() {
         let str = "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd:#2244#";
-        let id: NonFungibleGlobalId = str.try_into().unwrap();
+        let id: NonFungibleGlobalId = str.parse().unwrap();
         assert_eq!(format!("{}", id), str);
     }
 
@@ -202,7 +165,7 @@ mod tests {
     fn json_roundtrip() {
         let id: NonFungibleGlobalId =
             "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd:#2244#"
-                .try_into()
+                .parse()
                 .unwrap();
 
         assert_json_value_eq_after_roundtrip(
@@ -218,26 +181,37 @@ mod tests {
 
     #[test]
     fn json_roundtrip_str() {
-        let id = NonFungibleGlobalId::try_from_str(
-            "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>",
-        )
-        .unwrap();
+        let sut: NonFungibleGlobalId =
+            "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>"
+                .parse()
+                .unwrap();
 
         assert_json_value_eq_after_roundtrip(
-            &id,
+            &sut,
             json!("resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>"),
         );
+    }
+
+    #[test]
+    fn json_roundtrip_fails_for_invalid() {
+        assert_json_value_fails::<NonFungibleGlobalId>(
+            json!("resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha : foobar")
+        );
+        assert_json_value_fails::<NonFungibleGlobalId>(
+            json!("account_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>")
+        );
+        assert_json_value_fails::<NonFungibleGlobalId>(json!("super invalid"));
     }
 
     #[test]
     fn compare() {
         let a: NonFungibleGlobalId =
             "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd:#3333#"
-                .try_into()
+                .parse()
                 .unwrap();
         let b: NonFungibleGlobalId =
             "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd:#8888#"
-                .try_into()
+                .parse()
                 .unwrap();
         assert!(a < b);
         assert!(b > a);
@@ -247,11 +221,11 @@ mod tests {
     fn hash() {
         let a: NonFungibleGlobalId =
             "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd:#1#"
-                .try_into()
+                .parse()
                 .unwrap();
         let b: NonFungibleGlobalId =
             "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd:#2#"
-                .try_into()
+                .parse()
                 .unwrap();
         let mut set = HashSet::<NonFungibleGlobalId>::new();
         set.insert(a.clone());

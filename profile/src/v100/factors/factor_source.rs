@@ -1,29 +1,33 @@
-use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
+use crate::prelude::*;
 
-use enum_as_inner::EnumAsInner;
-
-use crate::HasPlaceholder;
-
-use super::{
-    DeviceFactorSource, FactorSourceID, FactorSourceKind, IsFactorSource,
-    LedgerHardwareWalletFactorSource,
-};
-
-#[derive(Serialize, Deserialize, Clone, EnumAsInner, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(
+    Serialize,
+    Deserialize,
+    Clone,
+    EnumAsInner,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    derive_more::Display,
+    uniffi::Enum,
+)]
 #[serde(untagged, remote = "Self")]
 pub enum FactorSource {
     Device {
         #[serde(rename = "device")]
+        #[display("DeviceFS({value})")]
         value: DeviceFactorSource,
     },
 
     Ledger {
         #[serde(rename = "ledgerHQHardwareWallet")]
+        #[display("LedgerHWFS({value})")]
         value: LedgerHardwareWalletFactorSource,
     },
 }
 
-impl IsFactorSource for FactorSource {
+impl BaseIsFactorSource for FactorSource {
     fn factor_source_kind(&self) -> FactorSourceKind {
         match self {
             FactorSource::Device { value } => value.factor_source_kind(),
@@ -57,7 +61,9 @@ impl From<LedgerHardwareWalletFactorSource> for FactorSource {
 
 impl<'de> Deserialize<'de> for FactorSource {
     #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D: Deserializer<'de>>(
+        deserializer: D,
+    ) -> Result<Self, D::Error> {
         // https://github.com/serde-rs/serde/issues/1343#issuecomment-409698470
         #[derive(Deserialize, Serialize)]
         struct Wrapper {
@@ -129,13 +135,7 @@ impl FactorSource {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
-
-    use crate::v100::{
-        DeviceFactorSource, FactorSourceKind, IsFactorSource, LedgerHardwareWalletFactorSource,
-    };
-
-    use super::FactorSource;
+    use crate::prelude::*;
 
     #[test]
     fn equality() {
@@ -188,7 +188,8 @@ mod tests {
 
     #[test]
     fn into_from_device() {
-        let factor_source: FactorSource = DeviceFactorSource::placeholder().into();
+        let factor_source: FactorSource =
+            DeviceFactorSource::placeholder().into();
         assert_eq!(
             factor_source,
             FactorSource::Device {
@@ -199,7 +200,8 @@ mod tests {
 
     #[test]
     fn into_from_ledger() {
-        let factor_source: FactorSource = LedgerHardwareWalletFactorSource::placeholder().into();
+        let factor_source: FactorSource =
+            LedgerHardwareWalletFactorSource::placeholder().into();
         assert_eq!(
             factor_source,
             FactorSource::Ledger {

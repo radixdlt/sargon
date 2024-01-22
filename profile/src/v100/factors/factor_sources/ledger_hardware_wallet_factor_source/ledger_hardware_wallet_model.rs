@@ -1,9 +1,20 @@
-use serde::{Deserialize, Serialize};
+use crate::prelude::*;
 
 /// The model of a Ledger HQ hardware wallet NanoS, e.g.
 /// *Ledger Nano S+*.
 #[derive(
-    Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Enum,
+    Serialize,
+    Deserialize,
+    Clone,
+    Copy,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    PartialOrd,
+    Ord,
+    derive_more::Display,
+    uniffi::Enum,
 )]
 #[serde(rename_all = "camelCase")]
 pub enum LedgerHardwareWalletModel {
@@ -16,12 +27,7 @@ pub enum LedgerHardwareWalletModel {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::BTreeSet;
-
-    use crate::assert_json_value_eq_after_roundtrip;
-    use serde_json::json;
-
-    use crate::v100::factors::factor_sources::ledger_hardware_wallet_factor_source::ledger_hardware_wallet_model::LedgerHardwareWalletModel;
+    use crate::prelude::*;
 
     #[test]
     fn equality() {
@@ -59,16 +65,24 @@ mod tests {
 
     #[test]
     fn ord() {
-        assert!(LedgerHardwareWalletModel::NanoS < LedgerHardwareWalletModel::NanoX);
+        assert!(
+            LedgerHardwareWalletModel::NanoS < LedgerHardwareWalletModel::NanoX
+        );
     }
 
     #[test]
     fn json_roundtrip() {
-        assert_json_value_eq_after_roundtrip(&LedgerHardwareWalletModel::NanoS, json!("nanoS"));
+        assert_json_value_eq_after_roundtrip(
+            &LedgerHardwareWalletModel::NanoS,
+            json!("nanoS"),
+        );
         assert_json_value_eq_after_roundtrip(
             &LedgerHardwareWalletModel::NanoSPlus,
             json!("nanoS+"),
         );
-        assert_json_value_eq_after_roundtrip(&LedgerHardwareWalletModel::NanoX, json!("nanoX"));
+        assert_json_value_eq_after_roundtrip(
+            &LedgerHardwareWalletModel::NanoX,
+            json!("nanoX"),
+        );
     }
 }

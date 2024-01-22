@@ -1,36 +1,45 @@
-use crate::KeyError as Error;
+use crate::prelude::*;
+
 use bip32::secp256k1::PublicKey as BIP32Secp256k1PublicKey;
-use radix_engine_common::crypto::{Hash, Secp256k1PublicKey as EngineSecp256k1PublicKey};
-use serde::{Deserialize, Serialize};
-use serde_with::{hex::Hex, serde_as};
-use std::fmt::{Debug, Formatter};
-use std::str::FromStr;
-use transaction::{signing::secp256k1::Secp256k1Signature, validation::verify_secp256k1};
-
-use crate::HasPlaceholder;
-
-use crate::Secp256k1PrivateKey;
+use radix_engine_common::crypto::{
+    Hash, IsHash, Secp256k1PublicKey as EngineSecp256k1PublicKey,
+};
+use transaction::{
+    signing::secp256k1::Secp256k1Signature, validation::verify_secp256k1,
+};
 
 /// A `secp256k1` public key used to verify cryptographic signatures (ECDSA signatures).
 #[serde_as]
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record)]
+#[derive(
+    Serialize,
+    Deserialize,
+    Clone,
+    PartialEq,
+    Eq,
+    Hash,
+    PartialOrd,
+    Ord,
+    derive_more::Debug,
+    uniffi::Record,
+)]
 #[serde(transparent)]
+#[debug("{}", self.to_hex())]
 pub struct Secp256k1PublicKey {
-    #[serde_as(as = "Hex")]
+    #[serde_as(as = "serde_with::hex::Hex")]
     value: Vec<u8>, // FIXME: change to either `radix_engine_common::crypto::Secp256k1PublicKey` or `bip32::secp256k1::PublicKey` once we have proper UniFFI lift/lower/UniffiCustomTypeConverter
 }
 
 #[uniffi::export]
 pub fn new_secp256k1_public_key_from_hex(
     hex: String,
-) -> Result<Secp256k1PublicKey, crate::KeyError> {
+) -> Result<Secp256k1PublicKey> {
     Secp256k1PublicKey::from_hex(hex)
 }
 
 #[uniffi::export]
 pub fn new_secp256k1_public_key_from_bytes(
     bytes: Vec<u8>,
-) -> Result<Secp256k1PublicKey, crate::KeyError> {
+) -> Result<Secp256k1PublicKey> {
     Secp256k1PublicKey::from_bytes(bytes)
 }
 
@@ -42,7 +51,9 @@ pub fn secp256k1_public_key_to_hex(public_key: &Secp256k1PublicKey) -> String {
 }
 
 #[uniffi::export]
-pub fn secp256k1_public_key_to_bytes(public_key: &Secp256k1PublicKey) -> Vec<u8> {
+pub fn secp256k1_public_key_to_bytes(
+    public_key: &Secp256k1PublicKey,
+) -> Vec<u8> {
     public_key.to_bytes()
 }
 
@@ -58,7 +69,19 @@ pub fn new_secp256k1_public_key_placeholder_other() -> Secp256k1PublicKey {
 
 impl From<EngineSecp256k1PublicKey> for Secp256k1PublicKey {
     fn from(value: EngineSecp256k1PublicKey) -> Self {
-        Self::from_engine(value).expect("EngineEd25519PublicKey should have been valid.")
+        Self::from_engine(value)
+            .expect("EngineEd25519PublicKey should have been valid.")
+    }
+}
+
+impl IsPublicKey<Secp256k1Signature> for Secp256k1PublicKey {
+    /// Verifies an ECDSA signature over Secp256k1.
+    fn is_valid(
+        &self,
+        signature: &Secp256k1Signature,
+        for_hash: &impl IsHash,
+    ) -> bool {
+        verify_secp256k1(for_hash.as_hash(), &self.to_engine(), signature)
     }
 }
 
@@ -68,7 +91,7 @@ impl Secp256k1PublicKey {
     }
 
     pub fn to_hex(&self) -> String {
-        hex::encode(self.to_bytes())
+        hex_encode(self.to_bytes())
     }
 }
 
@@ -77,46 +100,43 @@ impl Secp256k1PublicKey {
         EngineSecp256k1PublicKey::try_from(self.to_bytes().as_slice()).unwrap()
     }
 
-    pub(crate) fn from_engine(engine: EngineSecp256k1PublicKey) -> Result<Self, Error> {
+    pub(crate) fn from_engine(
+        engine: EngineSecp256k1PublicKey,
+    ) -> Result<Self> {
         BIP32Secp256k1PublicKey::from_sec1_bytes(engine.to_vec().as_slice())
             .map(|_| Self {
                 value: engine.to_vec(),
             })
-            .map_err(|_| Error::InvalidSecp256k1PublicKeyPointNotOnCurve)
-    }
-
-    /// Verifies an ECDSA signature over Secp256k1.
-    pub fn is_valid(&self, signature: &Secp256k1Signature, for_hash: &Hash) -> bool {
-        verify_secp256k1(for_hash, &self.to_engine(), signature)
+            .map_err(|_| CommonError::InvalidSecp256k1PublicKeyPointNotOnCurve)
     }
 }
 
 impl Secp256k1PublicKey {
-    fn from_bytes(bytes: Vec<u8>) -> Result<Self, crate::KeyError> {
+    fn from_bytes(bytes: Vec<u8>) -> Result<Self> {
         EngineSecp256k1PublicKey::try_from(bytes.as_slice())
-            .map_err(|_| Error::InvalidSecp256k1PublicKeyFromBytes)
+            .map_err(|_| CommonError::InvalidSecp256k1PublicKeyFromBytes(bytes))
             .and_then(|pk| Self::from_engine(pk))
     }
 }
 
 impl TryFrom<&[u8]> for Secp256k1PublicKey {
-    type Error = crate::KeyError;
+    type Error = crate::CommonError;
 
-    fn try_from(slice: &[u8]) -> Result<Self, Self::Error> {
+    fn try_from(slice: &[u8]) -> Result<Self> {
         Self::from_bytes(slice.to_vec())
     }
 }
 
 impl TryInto<Secp256k1PublicKey> for &str {
-    type Error = crate::KeyError;
+    type Error = crate::CommonError;
 
-    fn try_into(self) -> Result<Secp256k1PublicKey, Self::Error> {
+    fn try_into(self) -> Result<Secp256k1PublicKey> {
         Secp256k1PublicKey::from_str(self)
     }
 }
 
 impl FromStr for Secp256k1PublicKey {
-    type Err = crate::KeyError;
+    type Err = crate::CommonError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Self::from_hex(s.to_string())
@@ -124,16 +144,10 @@ impl FromStr for Secp256k1PublicKey {
 }
 
 impl Secp256k1PublicKey {
-    pub fn from_hex(hex: String) -> Result<Self, Error> {
-        hex::decode(hex)
-            .map_err(|_| Error::InvalidSecp256k1PublicKeyFromString)
+    pub fn from_hex(hex: String) -> Result<Self> {
+        hex_decode(hex.clone())
+            .map_err(|_| CommonError::InvalidSecp256k1PublicKeyFromString(hex))
             .and_then(|b| Secp256k1PublicKey::try_from(b.as_slice()))
-    }
-}
-
-impl Debug for Secp256k1PublicKey {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str(&self.to_hex())
     }
 }
 
@@ -160,11 +174,7 @@ impl Secp256k1PublicKey {
 
 #[cfg(test)]
 mod tests {
-    use std::{collections::BTreeSet, str::FromStr};
-
-    use super::Secp256k1PublicKey;
-    use crate::{assert_json_value_eq_after_roundtrip, HasPlaceholder, KeyError as Error};
-    use serde_json::json;
+    use crate::prelude::*;
 
     use radix_engine_common::crypto::Secp256k1PublicKey as EngineSecp256k1PublicKey;
 
@@ -198,12 +208,11 @@ mod tests {
 
     #[test]
     fn bytes_roundtrip() {
-        let bytes: &[u8] =
-            &[
-                0x02, 0x51, 0x7b, 0x88, 0x91, 0x6e, 0x7f, 0x31, 0x5b, 0xb6, 0x82, 0xf9, 0x92, 0x6b,
-                0x14, 0xbc, 0x67, 0xa0, 0xe4, 0x24, 0x6f, 0x8a, 0x41, 0x9b, 0x98, 0x62, 0x69, 0xe1,
-                0xa7, 0xe6, 0x1f, 0xff, 0xa7,
-            ];
+        let bytes: &[u8] = &[
+            0x02, 0x51, 0x7b, 0x88, 0x91, 0x6e, 0x7f, 0x31, 0x5b, 0xb6, 0x82,
+            0xf9, 0x92, 0x6b, 0x14, 0xbc, 0x67, 0xa0, 0xe4, 0x24, 0x6f, 0x8a,
+            0x41, 0x9b, 0x98, 0x62, 0x69, 0xe1, 0xa7, 0xe6, 0x1f, 0xff, 0xa7,
+        ];
         let key = Secp256k1PublicKey::try_from(bytes).unwrap();
         assert_eq!(
             key.to_hex(),
@@ -247,8 +256,10 @@ mod tests {
     #[test]
     fn invalid_hex_str() {
         assert_eq!(
-            Secp256k1PublicKey::from_str("not a valid hex string"),
-            Err(Error::InvalidSecp256k1PublicKeyFromString)
+            Secp256k1PublicKey::from_str("hi"),
+            Err(CommonError::InvalidSecp256k1PublicKeyFromString(
+                "hi".to_owned()
+            ))
         );
     }
 
@@ -256,15 +267,20 @@ mod tests {
     fn invalid_str_too_short() {
         assert_eq!(
             Secp256k1PublicKey::from_str("dead"),
-            Err(Error::InvalidSecp256k1PublicKeyFromBytes)
+            Err(CommonError::InvalidSecp256k1PublicKeyFromBytes(vec![
+                0xde, 0xad
+            ]))
         );
     }
 
     #[test]
     fn invalid_bytes() {
+        let bytes: &[u8] = &[0u8];
         assert_eq!(
-            Secp256k1PublicKey::try_from(&[0u8] as &[u8]),
-            Err(Error::InvalidSecp256k1PublicKeyFromBytes)
+            Secp256k1PublicKey::try_from(bytes),
+            Err(CommonError::InvalidSecp256k1PublicKeyFromBytes(
+                bytes.to_vec()
+            ))
         );
     }
 
@@ -274,7 +290,7 @@ mod tests {
             Secp256k1PublicKey::from_str(
                 "99deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
             ),
-            Err(Error::InvalidSecp256k1PublicKeyPointNotOnCurve)
+            Err(CommonError::InvalidSecp256k1PublicKeyPointNotOnCurve)
         );
     }
 
@@ -319,8 +335,10 @@ mod tests {
 mod uniffi_tests {
     use crate::{
         new_secp256k1_public_key_from_bytes, new_secp256k1_public_key_from_hex,
-        new_secp256k1_public_key_placeholder, new_secp256k1_public_key_placeholder_other,
-        secp256k1_public_key_to_bytes, secp256k1_public_key_to_hex, HasPlaceholder,
+        new_secp256k1_public_key_placeholder,
+        new_secp256k1_public_key_placeholder_other,
+        secp256k1_public_key_to_bytes, secp256k1_public_key_to_hex,
+        HasPlaceholder,
     };
 
     use super::Secp256k1PublicKey;
@@ -342,7 +360,8 @@ mod uniffi_tests {
         let bytes =
             hex::decode("033083620d1596d3f8988ff3270e42970dd2a031e2b9b6488052a4170ff999f3e8")
                 .unwrap();
-        let from_bytes = new_secp256k1_public_key_from_bytes(bytes.clone()).unwrap();
+        let from_bytes =
+            new_secp256k1_public_key_from_bytes(bytes.clone()).unwrap();
         assert_eq!(
             from_bytes,
             Secp256k1PublicKey::from_bytes(bytes.clone()).unwrap()
@@ -353,7 +372,8 @@ mod uniffi_tests {
     #[test]
     fn new_from_hex() {
         let hex = "033083620d1596d3f8988ff3270e42970dd2a031e2b9b6488052a4170ff999f3e8";
-        let from_hex = new_secp256k1_public_key_from_hex(hex.to_string()).unwrap();
+        let from_hex =
+            new_secp256k1_public_key_from_hex(hex.to_string()).unwrap();
         assert_eq!(
             from_hex,
             Secp256k1PublicKey::from_hex(hex.to_string()).unwrap()

@@ -1,15 +1,24 @@
-use std::fmt::Display;
-
-use serde::{Deserialize, Serialize};
-
+use crate::prelude::*;
 /// A hint describing the contents of a Profile, acting as a
 /// summary of a Profile used by a ProfileSnapshot Header.
 ///
 /// Important to know that this is just a **hint**, the values
 /// SHOULD be kept up to date, might might not be, since they
 /// are stored values which must be kept in sync.
-#[derive(Serialize, Deserialize, Default, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(
+    Serialize,
+    Deserialize,
+    Default,
+    Clone,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    derive_more::Display,
+    uniffi::Record,
+)]
 #[serde(rename_all = "camelCase")]
+#[display("#networks: {number_of_networks}, #accounts: {number_of_accounts_on_all_networks_in_total}, #personas: {number_of_personas_on_all_networks_in_total}")]
 pub struct ContentHint {
     /// The total number of accounts on all networks.
     ///
@@ -39,7 +48,11 @@ pub struct ContentHint {
 // Constructors
 impl ContentHint {
     /// Instantiates a new `ContentHint` with the specified counter values.
-    pub fn with_counters(accounts: usize, personas: usize, networks: usize) -> Self {
+    pub fn with_counters(
+        accounts: usize,
+        personas: usize,
+        networks: usize,
+    ) -> Self {
         Self {
             number_of_accounts_on_all_networks_in_total: accounts as u16,
             number_of_personas_on_all_networks_in_total: personas as u16,
@@ -58,27 +71,10 @@ impl ContentHint {
     }
 }
 
-impl Display for ContentHint {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "#networks: {}, #accounts: {}, #personas: {}",
-            self.number_of_networks,
-            self.number_of_accounts_on_all_networks_in_total,
-            self.number_of_personas_on_all_networks_in_total
-        )
-    }
-}
-
 #[cfg(test)]
 mod tests {
 
-    use crate::{
-        assert_eq_after_json_roundtrip, assert_json_fails, assert_json_roundtrip,
-        assert_ne_after_json_roundtrip,
-    };
-
-    use super::ContentHint;
+    use crate::prelude::*;
 
     #[test]
     fn new_counters_all_start_at_zero() {
@@ -109,8 +105,14 @@ mod tests {
             let y = i + 2;
             let z = i + 3;
             let sut = ContentHint::with_counters(x, y, z);
-            assert_eq!(sut.number_of_accounts_on_all_networks_in_total as usize, x);
-            assert_eq!(sut.number_of_personas_on_all_networks_in_total as usize, y);
+            assert_eq!(
+                sut.number_of_accounts_on_all_networks_in_total as usize,
+                x
+            );
+            assert_eq!(
+                sut.number_of_personas_on_all_networks_in_total as usize,
+                y
+            );
             assert_eq!(sut.number_of_networks as usize, z)
         });
     }

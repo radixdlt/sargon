@@ -1,10 +1,4 @@
-use identified_vec::Identifiable;
-
-use crate::{DeviceFactorSource, HasPlaceholder, IdentifiedVecVia};
-
-use crate::v100::factors::{
-    factor_source::FactorSource, factor_source_id::FactorSourceID, is_factor_source::IsFactorSource,
-};
+use crate::prelude::*;
 
 impl Identifiable for FactorSource {
     type ID = FactorSourceID;
@@ -63,12 +57,7 @@ impl HasPlaceholder for FactorSources {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
-    use identified_vec::Identifiable;
-
-    use crate::v100::factors::{factor_source::FactorSource, is_factor_source::IsFactorSource};
-
-    use super::FactorSources;
+    use crate::prelude::*;
 
     #[test]
     fn identifiable_id_uses_factor_source_id() {
@@ -90,7 +79,8 @@ mod tests {
     fn duplicates_are_prevented() {
         assert_eq!(
             FactorSources::from_iter(
-                [FactorSource::placeholder(), FactorSource::placeholder()].into_iter()
+                [FactorSource::placeholder(), FactorSource::placeholder()]
+                    .into_iter()
             )
             .len(),
             1
@@ -158,7 +148,8 @@ mod tests {
 #[cfg(test)]
 mod uniffi_tests {
     use crate::{
-        new_factor_sources_placeholder, new_factor_sources_placeholder_other, HasPlaceholder,
+        new_factor_sources_placeholder, new_factor_sources_placeholder_other,
+        HasPlaceholder,
     };
 
     use super::FactorSources;

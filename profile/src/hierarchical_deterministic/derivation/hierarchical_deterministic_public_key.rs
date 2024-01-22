@@ -1,23 +1,13 @@
-use crate::{PublicKey, IdentityPath};
-use serde::{Deserialize, Serialize};
-
-use crate::DerivationPath;
-
-use crate::{
-    AccountPath, BIP44LikePath, CAP26KeyKind, CAP26Repr, Derivation, Mnemonic,
-    MnemonicWithPassphrase,
-};
-
-use crate::HasPlaceholder;
-
-use crate::NetworkID;
+use crate::prelude::*;
 
 /// The **source** of a virtual hierarchical deterministic badge, contains a
 /// derivation path and public key, from which a private key is derived which
 /// produces virtual badges (signatures).
 ///
 /// The `.device` `FactorSource` produces `FactorInstance`s with this kind if badge source.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(
+    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
+)]
 #[serde(rename_all = "camelCase")]
 pub struct HierarchicalDeterministicPublicKey {
     /// The expected public key of the private key derived at `derivationPath`
@@ -50,7 +40,11 @@ impl HasPlaceholder for HierarchicalDeterministicPublicKey {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
         let mwp = MnemonicWithPassphrase::placeholder();
-        let path = AccountPath::new(NetworkID::Mainnet, CAP26KeyKind::TransactionSigning, 0);
+        let path = AccountPath::new(
+            NetworkID::Mainnet,
+            CAP26KeyKind::TransactionSigning,
+            0,
+        );
         let private_key = mwp.derive_private_key(path.clone());
 
         assert_eq!(path.to_string(), "m/44H/1022H/1H/525H/1460H/0H");
@@ -74,11 +68,12 @@ impl HasPlaceholder for HierarchicalDeterministicPublicKey {
      "habit special recipe upon giraffe manual evil badge dwarf welcome inspire shrug post arrive van",
             )
             .unwrap(),
-            "".to_string(),
+            "".into(),
         );
 
-        let private_key =
-            mwp.derive_private_key(BIP44LikePath::from_str("m/44H/1022H/0H/0/5H").unwrap());
+        let private_key = mwp.derive_private_key(
+            BIP44LikePath::from_str("m/44H/1022H/0H/0/5H").unwrap(),
+        );
 
         assert_eq!(
             "111323d507d9d690836798e3ef2e5292cfd31092b75b9b59fa584ff593a3d7e4",
@@ -96,9 +91,8 @@ impl HasPlaceholder for HierarchicalDeterministicPublicKey {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
 
-    use super::HierarchicalDeterministicPublicKey;
+    use crate::prelude::*;
 
     #[test]
     fn to_hex() {

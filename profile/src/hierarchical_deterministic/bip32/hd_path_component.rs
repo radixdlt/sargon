@@ -2,7 +2,9 @@ const BIP32_HARDENED: u32 = 2147483648;
 
 pub type HDPathValue = u32;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record)]
+#[derive(
+    Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record,
+)]
 pub struct HDPathComponent {
     pub value: HDPathValue,
 }

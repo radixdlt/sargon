@@ -1,10 +1,4 @@
-use crate::HierarchicalDeterministicPrivateKey;
-
-use crate::v100::factors::factor_source_id::FactorSourceID;
-
-use super::factor_instance::FactorInstance;
-
-use crate::HasPlaceholder;
+use crate::prelude::*;
 
 /// An ephemeral (never persisted) HD FactorInstance which contains
 /// the private key, with the ID of its creating FactorSource.
@@ -17,7 +11,9 @@ pub struct PrivateHierarchicalDeterministicFactorInstance {
     pub factor_source_id: FactorSourceID,
 }
 
-impl From<PrivateHierarchicalDeterministicFactorInstance> for HierarchicalDeterministicPrivateKey {
+impl From<PrivateHierarchicalDeterministicFactorInstance>
+    for HierarchicalDeterministicPrivateKey
+{
     fn from(value: PrivateHierarchicalDeterministicFactorInstance) -> Self {
         value.private_key
     }
@@ -66,13 +62,7 @@ impl HasPlaceholder for PrivateHierarchicalDeterministicFactorInstance {
 
 #[cfg(test)]
 mod tests {
-    use crate::HasPlaceholder;
-    use crate::{Derivation, HierarchicalDeterministicPrivateKey};
-
-    use crate::v100::factors::factor_instance::factor_instance::FactorInstance;
-
-    use super::PrivateHierarchicalDeterministicFactorInstance;
-
+    use crate::prelude::*;
     #[test]
     fn equality() {
         assert_eq!(
@@ -122,7 +112,8 @@ mod tests {
         let key: FactorInstance = sut.into();
         assert_eq!(
             key.factor_source_id,
-            PrivateHierarchicalDeterministicFactorInstance::placeholder().factor_source_id
+            PrivateHierarchicalDeterministicFactorInstance::placeholder()
+                .factor_source_id
         );
     }
 }

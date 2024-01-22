@@ -1,16 +1,28 @@
-use super::radix_connect_password::RadixConnectPassword;
-use identified_vec::Identifiable;
-use radix_engine_common::crypto::Hash;
-use serde::{Deserialize, Serialize};
-use std::fmt::{Debug, Formatter};
+use crate::prelude::*;
 
-use crate::HasPlaceholder;
+use radix_engine_common::crypto::Hash;
 
 /// A client the user have connected P2P with, typically a
 /// WebRTC connections with a DApp, but might be Android or iPhone
 /// client as well.
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Ord, PartialOrd, Hash, uniffi::Record)]
+#[derive(
+    Serialize,
+    Deserialize,
+    Clone,
+    PartialEq,
+    Eq,
+    Ord,
+    PartialOrd,
+    Hash,
+    derive_more::Debug,
+    derive_more::Display,
+    uniffi::Record,
+)]
 #[serde(rename_all = "camelCase")]
+#[debug(
+    "P2PLink {{ display_name: '{display_name}', connection_password: '{connection_password}' }}"
+)]
+#[display("{}", self.to_obfuscated_string())]
 pub struct P2PLink {
     /// The most important property of this struct, the `ConnectionPassword`,
     /// is used to be able to re-establish the P2P connection and also acts as the seed
@@ -21,8 +33,17 @@ pub struct P2PLink {
     pub display_name: String,
 }
 
+impl SafeToLog for P2PLink {
+    fn non_sensitive(&self) -> impl std::fmt::Debug {
+        self.to_obfuscated_string()
+    }
+}
+
 impl P2PLink {
-    pub fn new(connection_password: RadixConnectPassword, display_name: String) -> Self {
+    pub fn new(
+        connection_password: RadixConnectPassword,
+        display_name: String,
+    ) -> Self {
         Self {
             connection_password,
             display_name,
@@ -30,12 +51,11 @@ impl P2PLink {
     }
 }
 
-impl Debug for P2PLink {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "P2PLink {{ display_name: '{}', connection_password: '{:?}' }}",
-            self.display_name, self.connection_password,
+impl P2PLink {
+    pub fn to_obfuscated_string(&self) -> String {
+        format!(
+            "P2PLink( name: '{}', password: <OMITTED>)",
+            self.display_name
         )
     }
 }
@@ -74,7 +94,10 @@ impl P2PLink {
     /// `aced`... "Arc on MacStudio"
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_arc() -> Self {
-        Self::declare(RadixConnectPassword::placeholder_aced(), "Arc on MacStudio")
+        Self::declare(
+            RadixConnectPassword::placeholder_aced(),
+            "Arc on MacStudio",
+        )
     }
 
     /// `babe`... "Brave on PC"
@@ -104,9 +127,7 @@ impl P2PLink {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
-
-    use super::P2PLink;
+    use crate::prelude::*;
 
     #[test]
     fn equality() {
@@ -152,5 +173,22 @@ mod tests {
     #[test]
     fn debug() {
         assert_eq!(format!("{:?}", P2PLink::placeholder()), "P2PLink { display_name: 'Chrome on Macbook', connection_password: 'cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe' }");
+    }
+
+    #[test]
+    fn display() {
+        assert_eq!(
+            format!("{}", P2PLink::placeholder()),
+            "P2PLink( name: 'Chrome on Macbook', password: <OMITTED>)"
+        );
+    }
+
+    #[test]
+    fn safe_to_log() {
+        let sut = P2PLink::placeholder();
+        assert_eq!(
+            format!("{:?}", sut.to_string()),
+            format!("{:?}", sut.non_sensitive())
+        );
     }
 }

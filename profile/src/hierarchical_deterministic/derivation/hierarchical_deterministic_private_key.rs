@@ -1,15 +1,4 @@
-use crate::PrivateKey;
-
-use crate::{Ed25519PrivateKey, Secp256k1PrivateKey};
-
-use crate::{AccountPath, BIP44LikePath, CAP26Repr};
-
-use crate::HasPlaceholder;
-
-use super::{
-    derivation_path::DerivationPath,
-    hierarchical_deterministic_public_key::HierarchicalDeterministicPublicKey,
-};
+use crate::prelude::*;
 
 /// An ephemeral (never persisted) HD PrivateKey which contains
 /// the derivation path used to derive it.
@@ -25,7 +14,10 @@ pub struct HierarchicalDeterministicPrivateKey {
 impl HierarchicalDeterministicPrivateKey {
     /// Instantiates a new `HierarchicalDeterministicPrivateKey` from a PrivateKey and
     /// the derivation path used to derive it.
-    pub fn new(private_key: PrivateKey, derivation_path: DerivationPath) -> Self {
+    pub fn new(
+        private_key: PrivateKey,
+        derivation_path: DerivationPath,
+    ) -> Self {
         Self {
             private_key,
             derivation_path,
@@ -79,9 +71,8 @@ impl HasPlaceholder for HierarchicalDeterministicPrivateKey {
 
 #[cfg(test)]
 mod tests {
-    use crate::HasPlaceholder;
 
-    use super::HierarchicalDeterministicPrivateKey;
+    use crate::prelude::*;
 
     #[test]
     fn equality() {

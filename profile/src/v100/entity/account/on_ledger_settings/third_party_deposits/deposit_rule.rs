@@ -1,8 +1,4 @@
-use std::fmt::Display;
-
-use enum_iterator::Sequence;
-use serde::{Deserialize, Serialize};
-use strum::FromRepr;
+use crate::prelude::*;
 
 /// The general deposit rule to apply
 #[derive(
@@ -17,7 +13,8 @@ use strum::FromRepr;
     Hash,
     PartialOrd,
     Ord,
-    Sequence,
+    enum_iterator::Sequence,
+    derive_more::Display,
     uniffi::Enum,
 )]
 #[serde(rename_all = "camelCase")]
@@ -37,32 +34,16 @@ impl Default for DepositRule {
     }
 }
 
-impl DepositRule {
-    /// Human readable representation of the rule.
-    pub fn discriminant(&self) -> String {
-        format!("{}", self)
-    }
-}
-
-impl Display for DepositRule {
-    fn fmt(
-        &self,
-        f: &mut radix_engine_common::prelude::fmt::Formatter<'_>,
-    ) -> radix_engine_common::prelude::fmt::Result {
-        write!(f, "{:?}", self)
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use crate::{assert_json_roundtrip, assert_json_value_eq_after_roundtrip};
-    use serde_json::json;
-
-    use super::DepositRule;
+    use crate::prelude::*;
 
     #[test]
     fn json_roundtrip_accept_all() {
-        assert_json_value_eq_after_roundtrip(&DepositRule::AcceptAll, json!("acceptAll"));
+        assert_json_value_eq_after_roundtrip(
+            &DepositRule::AcceptAll,
+            json!("acceptAll"),
+        );
         assert_json_roundtrip(&DepositRule::AcceptAll);
     }
 
@@ -77,8 +58,13 @@ mod tests {
     fn display() {
         assert_eq!(format!("{}", DepositRule::AcceptAll), "AcceptAll");
         assert_eq!(format!("{}", DepositRule::AcceptKnown), "AcceptKnown");
+        assert_eq!(format!("{}", DepositRule::DenyAll), "DenyAll");
+    }
 
-        // `discriminant` uses Display
-        assert_eq!(DepositRule::DenyAll.discriminant(), "DenyAll");
+    #[test]
+    fn debug() {
+        assert_eq!(format!("{:?}", DepositRule::AcceptAll), "AcceptAll");
+        assert_eq!(format!("{:?}", DepositRule::AcceptKnown), "AcceptKnown");
+        assert_eq!(format!("{:?}", DepositRule::DenyAll), "DenyAll");
     }
 }

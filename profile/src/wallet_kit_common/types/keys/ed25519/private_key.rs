@@ -1,16 +1,14 @@
+use crate::prelude::*;
+
 use radix_engine_common::crypto::IsHash;
 use transaction::signing::ed25519::{
     Ed25519PrivateKey as EngineEd25519PrivateKey, Ed25519Signature,
 };
 
-use super::public_key::Ed25519PublicKey;
-use crate::{Hex32Bytes, KeyError as Error};
-use std::fmt::{Debug, Formatter};
-
-use crate::HasPlaceholder;
-
 /// An Ed25519 private key used to create cryptographic signatures, using
 /// EdDSA scheme.
+#[derive(derive_more::Debug)]
+#[debug("{}", self.to_hex())]
 pub struct Ed25519PrivateKey(EngineEd25519PrivateKey);
 
 impl Ed25519PrivateKey {
@@ -19,7 +17,8 @@ impl Ed25519PrivateKey {
     /// used by wallets, which tend to rather use a Mnemonic and
     /// derive hierarchical deterministic keys.
     pub fn generate() -> Self {
-        Self::from_hex32_bytes(Hex32Bytes::generate()).expect("Should be able to generate 32 bytes")
+        Self::from_hex32_bytes(Hex32Bytes::generate())
+            .expect("Should be able to generate 32 bytes")
     }
 
     /// Just an alias for `Self::generate()`, generating a new
@@ -37,9 +36,21 @@ impl PartialEq for Ed25519PrivateKey {
 
 impl Eq for Ed25519PrivateKey {}
 
-impl Debug for Ed25519PrivateKey {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str(&self.to_hex())
+impl IsPrivateKey<Ed25519PublicKey> for Ed25519PrivateKey {
+    fn curve() -> SLIP10Curve {
+        SLIP10Curve::Curve25519
+    }
+
+    type Signature = Ed25519Signature;
+
+    fn public_key(&self) -> Ed25519PublicKey {
+        Ed25519PublicKey::from_engine(self.0.public_key()).expect(
+            "Public Key from EC scalar multiplication should always be valid.",
+        )
+    }
+
+    fn sign(&self, msg_hash: &impl IsHash) -> Ed25519Signature {
+        self.0.sign(msg_hash)
     }
 }
 
@@ -48,57 +59,48 @@ impl Ed25519PrivateKey {
         Self(engine)
     }
 
-    pub fn public_key(&self) -> Ed25519PublicKey {
-        Ed25519PublicKey::from_engine(self.0.public_key())
-            .expect("Public Key from EC scalar multiplication should always be valid.")
-    }
-
-    pub fn sign(&self, msg_hash: &impl IsHash) -> Ed25519Signature {
-        self.0.sign(msg_hash)
-    }
-
     pub fn to_bytes(&self) -> Vec<u8> {
         self.0.to_bytes().to_vec()
     }
 
     pub fn to_hex(&self) -> String {
-        hex::encode(self.to_bytes())
+        hex_encode(self.to_bytes())
     }
 
-    pub fn from_bytes(slice: &[u8]) -> Result<Self, Error> {
+    pub fn from_bytes(slice: &[u8]) -> Result<Self> {
         EngineEd25519PrivateKey::from_bytes(slice)
-            .map_err(|_| Error::InvalidEd25519PrivateKeyFromBytes)
+            .map_err(|_| {
+                CommonError::InvalidEd25519PrivateKeyFromBytes(slice.to_owned())
+            })
             .map(Self::from_engine)
     }
 
-    pub fn from_str(hex: &str) -> Result<Self, Error> {
-        Hex32Bytes::from_hex(hex)
-            .map_err(|_| Error::InvalidEd25519PrivateKeyFromString)
-            .and_then(|b| Self::from_bytes(&b.to_vec()))
-    }
-
-    pub fn from_vec(bytes: Vec<u8>) -> Result<Self, Error> {
+    pub fn from_vec(bytes: Vec<u8>) -> Result<Self> {
         Self::from_bytes(bytes.as_slice())
     }
 
-    pub fn from_hex32_bytes(bytes: Hex32Bytes) -> Result<Self, Error> {
+    pub fn from_hex32_bytes(bytes: Hex32Bytes) -> Result<Self> {
         Self::from_vec(bytes.to_vec())
     }
 }
 
 impl TryFrom<&[u8]> for Ed25519PrivateKey {
-    type Error = crate::KeyError;
+    type Error = crate::CommonError;
 
     fn try_from(slice: &[u8]) -> Result<Ed25519PrivateKey, Self::Error> {
         Ed25519PrivateKey::from_bytes(slice)
     }
 }
 
-impl TryInto<Ed25519PrivateKey> for &str {
-    type Error = crate::KeyError;
+impl FromStr for Ed25519PrivateKey {
+    type Err = CommonError;
 
-    fn try_into(self) -> Result<Ed25519PrivateKey, Self::Error> {
-        Ed25519PrivateKey::from_str(self)
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Hex32Bytes::from_hex(s)
+            .map_err(|_| {
+                CommonError::InvalidEd25519PrivateKeyFromString(s.to_owned())
+            })
+            .and_then(|b| Self::from_bytes(&b.to_vec()))
     }
 }
 
@@ -122,7 +124,10 @@ impl Ed25519PrivateKey {
     ///
     /// https://github.com/dalek-cryptography/ed25519-dalek/blob/main/tests/ed25519.rs#L103
     pub fn placeholder_alice() -> Self {
-        Self::from_str("833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42").unwrap()
+        Self::from_str(
+            "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42",
+        )
+        .unwrap()
     }
 
     /// `1498b5467a63dffa2dc9d9e069caf075d16fc33fdd4c3b01bfadae6433767d93``
@@ -132,19 +137,18 @@ impl Ed25519PrivateKey {
     ///
     /// https://cryptobook.nakov.com/digital-signatures/eddsa-sign-verify-examples
     pub fn placeholder_bob() -> Self {
-        Self::from_str("1498b5467a63dffa2dc9d9e069caf075d16fc33fdd4c3b01bfadae6433767d93").unwrap()
+        Self::from_str(
+            "1498b5467a63dffa2dc9d9e069caf075d16fc33fdd4c3b01bfadae6433767d93",
+        )
+        .unwrap()
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use std::{collections::HashSet, str::FromStr};
+    use crate::prelude::*;
 
     use transaction::signing::ed25519::Ed25519Signature;
-
-    use crate::{hash, HasPlaceholder, Hex32Bytes, KeyError as Error};
-
-    use super::Ed25519PrivateKey;
 
     #[test]
     fn equality() {
@@ -167,11 +171,16 @@ mod tests {
     }
 
     #[test]
+    fn curve() {
+        assert_eq!(Ed25519PrivateKey::curve(), SLIP10Curve::Curve25519);
+    }
+
+    #[test]
     fn sign_and_verify() {
         let msg = hash("Test");
         let sk: Ed25519PrivateKey =
             "0000000000000000000000000000000000000000000000000000000000000001"
-                .try_into()
+                .parse()
                 .unwrap();
         let pk = sk.public_key();
         assert_eq!(
@@ -186,8 +195,10 @@ mod tests {
 
     #[test]
     fn bytes_roundtrip() {
-        let bytes = hex::decode("0000000000000000000000000000000000000000000000000000000000000001")
-            .unwrap();
+        let bytes = hex_decode(
+            "0000000000000000000000000000000000000000000000000000000000000001",
+        )
+        .unwrap();
         assert_eq!(
             Ed25519PrivateKey::from_bytes(bytes.as_slice())
                 .unwrap()
@@ -198,7 +209,8 @@ mod tests {
 
     #[test]
     fn hex_roundtrip() {
-        let hex = "0000000000000000000000000000000000000000000000000000000000000001";
+        let hex =
+            "0000000000000000000000000000000000000000000000000000000000000001";
         assert_eq!(Ed25519PrivateKey::from_str(hex).unwrap().to_hex(), hex);
     }
 
@@ -206,7 +218,9 @@ mod tests {
     fn invalid_hex() {
         assert_eq!(
             Ed25519PrivateKey::from_str("not hex"),
-            Err(Error::InvalidEd25519PrivateKeyFromString)
+            Err(CommonError::InvalidEd25519PrivateKeyFromString(
+                "not hex".to_owned()
+            ))
         );
     }
 
@@ -214,7 +228,9 @@ mod tests {
     fn invalid_hex_too_short() {
         assert_eq!(
             Ed25519PrivateKey::from_str("dead"),
-            Err(Error::InvalidEd25519PrivateKeyFromString)
+            Err(CommonError::InvalidEd25519PrivateKeyFromString(
+                "dead".to_owned()
+            ))
         );
     }
 
@@ -222,13 +238,14 @@ mod tests {
     fn invalid_bytes() {
         assert_eq!(
             Ed25519PrivateKey::from_bytes(&[0u8] as &[u8]),
-            Err(Error::InvalidEd25519PrivateKeyFromBytes)
+            Err(CommonError::InvalidEd25519PrivateKeyFromBytes(vec![0]))
         );
     }
 
     #[test]
     fn debug() {
-        let hex = "0000000000000000000000000000000000000000000000000000000000000001";
+        let hex =
+            "0000000000000000000000000000000000000000000000000000000000000001";
         assert_eq!(
             format!("{:?}", Ed25519PrivateKey::from_str(hex).unwrap()),
             hex
@@ -237,9 +254,10 @@ mod tests {
 
     #[test]
     fn from_vec() {
-        let hex = "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef";
+        let hex =
+            "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef";
         assert_eq!(
-            Ed25519PrivateKey::from_vec(Vec::from(hex::decode(hex).unwrap()))
+            Ed25519PrivateKey::from_vec(Vec::from(hex_decode(hex).unwrap()))
                 .unwrap()
                 .to_hex(),
             hex
@@ -248,11 +266,14 @@ mod tests {
 
     #[test]
     fn from_hex32() {
-        let hex = "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef";
+        let hex =
+            "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef";
         assert_eq!(
-            Ed25519PrivateKey::from_hex32_bytes(Hex32Bytes::from_hex(hex).unwrap())
-                .unwrap()
-                .to_hex(),
+            Ed25519PrivateKey::from_hex32_bytes(
+                Hex32Bytes::from_hex(hex).unwrap()
+            )
+            .unwrap()
+            .to_hex(),
             hex
         );
     }
@@ -272,7 +293,8 @@ mod tests {
 
     #[test]
     fn from_hex32_bytes() {
-        let str = "0000000000000000000000000000000000000000000000000000000000000001";
+        let str =
+            "0000000000000000000000000000000000000000000000000000000000000001";
         let hex32 = Hex32Bytes::from_hex(str).unwrap();
         let key = Ed25519PrivateKey::from_hex32_bytes(hex32).unwrap();
         assert_eq!(key.to_hex(), str);
@@ -280,8 +302,9 @@ mod tests {
 
     #[test]
     fn try_from_bytes() {
-        let str = "0000000000000000000000000000000000000000000000000000000000000001";
-        let vec = hex::decode(str).unwrap();
+        let str =
+            "0000000000000000000000000000000000000000000000000000000000000001";
+        let vec = hex_decode(str).unwrap();
         let key = Ed25519PrivateKey::try_from(vec.as_slice()).unwrap();
         assert_eq!(key.to_hex(), str);
     }

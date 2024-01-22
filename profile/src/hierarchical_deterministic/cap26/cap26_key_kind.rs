@@ -1,10 +1,4 @@
-use std::fmt::Display;
-
-use serde_repr::{Deserialize_repr, Serialize_repr};
-use strum::FromRepr;
-
-use crate::HDPathValue;
-use enum_as_inner::EnumAsInner;
+use crate::prelude::*;
 
 #[derive(
     Serialize_repr,
@@ -19,6 +13,7 @@ use enum_as_inner::EnumAsInner;
     Hash,
     PartialOrd,
     Ord,
+    derive_more::Display,
     uniffi::Enum,
 )]
 #[repr(u32)]
@@ -36,12 +31,6 @@ pub enum CAP26KeyKind {
     MessageEncryption = 1391,
 }
 
-impl Display for CAP26KeyKind {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self)
-    }
-}
-
 impl CAP26KeyKind {
     /// The raw representation of this key kind, an `HDPathValue`.
     pub fn discriminant(&self) -> HDPathValue {
@@ -51,8 +40,8 @@ impl CAP26KeyKind {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_json_roundtrip, assert_json_value_eq_after_roundtrip, CAP26KeyKind};
-    use serde_json::json;
+
+    use crate::prelude::*;
 
     #[test]
     fn discriminant() {
@@ -62,7 +51,7 @@ mod tests {
     }
 
     #[test]
-    fn format() {
+    fn display() {
         assert_eq!(
             format!("{}", CAP26KeyKind::TransactionSigning),
             "TransactionSigning"
@@ -78,8 +67,27 @@ mod tests {
     }
 
     #[test]
+    fn debug() {
+        assert_eq!(
+            format!("{:?}", CAP26KeyKind::TransactionSigning),
+            "TransactionSigning"
+        );
+        assert_eq!(
+            format!("{:?}", CAP26KeyKind::AuthenticationSigning),
+            "AuthenticationSigning"
+        );
+        assert_eq!(
+            format!("{:?}", CAP26KeyKind::MessageEncryption),
+            "MessageEncryption"
+        );
+    }
+
+    #[test]
     fn json_roundtrip() {
-        assert_json_value_eq_after_roundtrip(&CAP26KeyKind::TransactionSigning, json!(1460));
+        assert_json_value_eq_after_roundtrip(
+            &CAP26KeyKind::TransactionSigning,
+            json!(1460),
+        );
         assert_json_roundtrip(&CAP26KeyKind::TransactionSigning);
     }
 }

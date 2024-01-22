@@ -1,8 +1,18 @@
-use serde::{Deserialize, Serialize};
+use crate::prelude::*;
 
 /// Fiat currency to measure and display the value of some XRD or other Radix assets value/worth in.
 #[derive(
-    Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Enum,
+    Serialize,
+    Deserialize,
+    Clone,
+    Copy,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    PartialOrd,
+    Ord,
+    uniffi::Enum,
 )]
 pub enum FiatCurrency {
     /// American dollars.
@@ -19,9 +29,7 @@ impl Default for FiatCurrency {
 
 #[cfg(test)]
 mod tests {
-    use crate::AppDisplay;
-
-    use super::FiatCurrency;
+    use crate::prelude::*;
 
     #[test]
     fn usd_is_default() {

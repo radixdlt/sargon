@@ -1,9 +1,18 @@
-use serde::{Deserialize, Serialize};
+use crate::prelude::*;
 
 /// Flags which describe a certain state a FactorSource might be in, primarily used
 /// by DeviceFactorSource's to mark which "Babylon" FactorSource is the **main** one.
 #[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Enum,
+    Serialize,
+    Deserialize,
+    Clone,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    PartialOrd,
+    Ord,
+    uniffi::Enum,
 )]
 #[serde(rename_all = "camelCase")]
 pub enum FactorSourceFlag {
@@ -23,13 +32,7 @@ pub enum FactorSourceFlag {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
-        assert_json_value_ne_after_roundtrip,
-    };
-    use serde_json::json;
-
-    use super::FactorSourceFlag;
+    use crate::prelude::*;
 
     #[test]
     fn json_roundtrip_main() {

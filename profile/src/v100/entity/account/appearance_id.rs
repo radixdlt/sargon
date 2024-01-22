@@ -1,41 +1,40 @@
-use crate::CommonError;
-use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
-use std::fmt::Display;
+use crate::prelude::*;
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, uniffi::Record)]
+#[derive(
+    Copy,
+    Clone,
+    Debug,
+    Serialize,
+    Deserialize,
+    PartialEq,
+    Eq,
+    derive_more::Display,
+    PartialOrd,
+    Ord,
+    Hash,
+    uniffi::Record,
+)]
+#[serde(try_from = "u8")]
+#[serde(into = "u8")]
+#[display("{value}")]
 pub struct AppearanceID {
     pub value: u8,
 }
 
-impl Serialize for AppearanceID {
-    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_u8(self.value)
-    }
-}
-
-impl<'de> Deserialize<'de> for AppearanceID {
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<AppearanceID, D::Error> {
-        let value = u8::deserialize(d)?;
-        AppearanceID::new(value).map_err(de::Error::custom)
-    }
-}
-
 impl AppearanceID {
-    pub fn new(value: u8) -> Result<Self, CommonError> {
-        if value > 11 {
-            return Err(CommonError::InvalidAppearanceID);
+    /// The number of different appearances
+    pub const MAX: u8 = 11;
+    pub fn new(value: u8) -> Result<Self> {
+        if value > Self::MAX {
+            return Err(CommonError::InvalidAppearanceID(value));
         }
         Ok(Self { value })
     }
-}
 
-impl Display for AppearanceID {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self.value)
+    pub fn from_number_of_accounts_on_network(n: usize) -> Self {
+        Self {
+            value: (n % (Self::MAX as usize)) as u8,
+        }
     }
 }
 
@@ -48,19 +47,20 @@ impl Default for AppearanceID {
 impl TryFrom<u8> for AppearanceID {
     type Error = crate::CommonError;
 
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
+    fn try_from(value: u8) -> Result<Self> {
         AppearanceID::new(value)
+    }
+}
+impl From<AppearanceID> for u8 {
+    fn from(value: AppearanceID) -> Self {
+        value.value
     }
 }
 
 #[cfg(test)]
 mod tests {
 
-    use crate::{
-        assert_json_value_eq_after_roundtrip, assert_json_value_fails, AppearanceID, CommonError,
-    };
-    use serde_json::json;
-
+    use crate::prelude::*;
     #[test]
     fn lowest() {
         assert!(AppearanceID::new(0).is_ok());
@@ -78,21 +78,27 @@ mod tests {
 
     #[test]
     fn err_too_big() {
-        assert_eq!(AppearanceID::new(12), Err(CommonError::InvalidAppearanceID));
+        assert_eq!(
+            AppearanceID::new(12),
+            Err(CommonError::InvalidAppearanceID(12))
+        );
     }
 
     #[test]
     fn try_from() {
         assert_eq!(
             AppearanceID::try_from(250),
-            Err(CommonError::InvalidAppearanceID)
+            Err(CommonError::InvalidAppearanceID(250))
         );
         assert_eq!(AppearanceID::try_from(1), AppearanceID::new(1));
     }
 
     #[test]
     fn json() {
-        assert_json_value_eq_after_roundtrip(&AppearanceID::new(3).unwrap(), json!(3));
+        assert_json_value_eq_after_roundtrip(
+            &AppearanceID::new(3).unwrap(),
+            json!(3),
+        );
         assert_json_value_fails::<AppearanceID>(json!("3"));
         assert_json_value_fails::<AppearanceID>(json!(99));
     }

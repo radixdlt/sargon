@@ -2,7 +2,18 @@
 ///
 /// The English language is always available, other languages are enabled using
 /// the compilation features.
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, uniffi::Enum)]
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Hash,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    derive_more::Display,
+    uniffi::Enum,
+)]
 pub enum BIP39Language {
     /// The English language.
     English,
@@ -47,5 +58,10 @@ mod tests {
             bip39::Language::from(BIP39Language::English),
             bip39::Language::English
         );
+    }
+
+    #[test]
+    fn display() {
+        assert_eq!(format!("{}", BIP39Language::English), "English");
     }
 }

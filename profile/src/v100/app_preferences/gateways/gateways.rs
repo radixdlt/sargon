@@ -1,10 +1,4 @@
-use super::gateway::Gateway;
-
-use crate::{CommonError, IdentifiedVecVia};
-use identified_vec::{Identifiable, IdentifiedVecOf, IsIdentifiedVec, ItemsCloned};
-use serde::{de, ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
-
-use crate::HasPlaceholder;
+use crate::prelude::*;
 
 /// The currently used Gateway and a collection of other by user added
 /// or predefined Gateways the user can switch to.
@@ -49,7 +43,10 @@ impl Gateways {
 
 impl Serialize for Gateways {
     #[cfg(not(tarpaulin_include))] // false negative
-    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
+    fn serialize<S>(
+        &self,
+        serializer: S,
+    ) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
     where
         S: Serializer,
     {
@@ -62,9 +59,9 @@ impl Serialize for Gateways {
 
 impl<'de> Deserialize<'de> for Gateways {
     #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Gateways, D::Error> {
-        use url::Url;
-
+    fn deserialize<D: Deserializer<'de>>(
+        deserializer: D,
+    ) -> Result<Gateways, D::Error> {
         #[derive(Deserialize, Serialize)]
         struct Wrapper {
             #[serde(rename = "current")]
@@ -77,14 +74,17 @@ impl<'de> Deserialize<'de> for Gateways {
             .iter()
             .find(|g| g.id() == wrapped.url)
             .map(|g| g.clone())
-            .ok_or_else(|| CommonError::InvalidGatewaysJSONCurrentNotFoundAmongstSaved)
+            .ok_or_else(|| {
+                CommonError::InvalidGatewaysJSONCurrentNotFoundAmongstSaved
+            })
             .map_err(de::Error::custom)?;
 
         let mut other = wrapped.saved.clone();
 
         other.remove(&current);
 
-        Gateways::new_with_other(current, other.items()).map_err(de::Error::custom)
+        Gateways::new_with_other(current, other.items())
+            .map_err(de::Error::custom)
     }
 }
 
@@ -96,13 +96,15 @@ impl Gateways {
         }
     }
 
-    pub fn new_with_other<I>(current: Gateway, other: I) -> Result<Self, CommonError>
+    pub fn new_with_other<I>(current: Gateway, other: I) -> Result<Self>
     where
         I: IntoIterator<Item = Gateway>,
     {
         let other = IdentifiedVecVia::from_iter(other);
         if other.contains(&current) {
-            return Err(CommonError::GatewaysDiscrepancyOtherShouldNotContainCurrent);
+            return Err(
+                CommonError::GatewaysDiscrepancyOtherShouldNotContainCurrent,
+            );
         }
         Ok(Self { current, other })
     }
@@ -112,14 +114,16 @@ impl Gateways {
     /// Changes the current Gateway to `to`, if it is not already the current. If `to` is
     /// not a new Gateway, it will be removed from. Returns `Ok(false)` if `to` was already
     /// the `current`, returns `Ok(true)` if `to` was not already `current`.
-    pub fn change_current(&mut self, to: Gateway) -> Result<bool, CommonError> {
+    pub fn change_current(&mut self, to: Gateway) -> Result<bool> {
         if self.current == to {
             return Ok(false);
         }
         let old_current = &self.current;
         let was_inserted = self.append(old_current.clone());
         if !was_inserted {
-            return Err(CommonError::GatewaysDiscrepancyOtherShouldNotContainCurrent);
+            return Err(
+                CommonError::GatewaysDiscrepancyOtherShouldNotContainCurrent,
+            );
         }
         self.other.remove_by_id(&to.id());
         self.current = to;
@@ -162,18 +166,14 @@ impl HasPlaceholder for Gateways {
 
 #[cfg(test)]
 mod tests {
-    use identified_vec::ItemsCloned;
-
-    use crate::{assert_eq_after_json_roundtrip, CommonError, HasPlaceholder, IdentifiedVecVia};
-
-    use crate::{v100::app_preferences::gateways::gateway::Gateway, NetworkID};
-
-    use super::Gateways;
-
+    use crate::prelude::*;
     #[test]
     fn equality() {
         assert_eq!(Gateways::placeholder(), Gateways::placeholder());
-        assert_eq!(Gateways::placeholder_other(), Gateways::placeholder_other());
+        assert_eq!(
+            Gateways::placeholder_other(),
+            Gateways::placeholder_other()
+        );
     }
 
     #[test]
@@ -192,7 +192,10 @@ mod tests {
     #[test]
     fn new_throw_gateways_discrepancy_other_should_not_contain_current() {
         assert_eq!(
-            Gateways::new_with_other(Gateway::mainnet(), vec![Gateway::mainnet()]),
+            Gateways::new_with_other(
+                Gateway::mainnet(),
+                vec![Gateway::mainnet()]
+            ),
             Err(CommonError::GatewaysDiscrepancyOtherShouldNotContainCurrent)
         );
     }
@@ -236,7 +239,10 @@ mod tests {
         assert_eq!(sut.current.network.id, NetworkID::Mainnet);
         assert_eq!(sut.change_current(Gateway::nebunet()), Ok(true));
         assert_eq!(sut.current.network.id, NetworkID::Nebunet);
-        assert_eq!(sut.other.items(), [Gateway::stokenet(), Gateway::mainnet()]);
+        assert_eq!(
+            sut.other.items(),
+            [Gateway::stokenet(), Gateway::mainnet()]
+        );
     }
 
     #[test]
@@ -286,8 +292,8 @@ mod tests {
 #[cfg(test)]
 mod uniffi_tests {
     use crate::{
-        new_gateways, new_gateways_placeholder, new_gateways_placeholder_other, Gateway,
-        HasPlaceholder,
+        new_gateways, new_gateways_placeholder, new_gateways_placeholder_other,
+        Gateway, HasPlaceholder,
     };
 
     use super::Gateways;

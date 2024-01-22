@@ -1,7 +1,4 @@
-use enum_as_inner::EnumAsInner;
-
-use crate::{Ed25519PrivateKey, PublicKey, Secp256k1PrivateKey};
-
+use crate::prelude::*;
 /// A tagged union of supported private keys on different curves, supported
 /// curves are `secp256k1` and `Curve25519`
 #[derive(Debug, PartialEq, Eq, EnumAsInner)]
@@ -19,8 +16,7 @@ impl From<Ed25519PrivateKey> for PrivateKey {
     ///
     /// ```
     /// extern crate profile;
-    /// use profile::Ed25519PrivateKey;
-    /// use profile::PublicKey;
+    /// use profile::prelude::*;
     ///
     /// let key: PublicKey = Ed25519PrivateKey::new().public_key().into();
     /// ```
@@ -34,8 +30,7 @@ impl From<Secp256k1PrivateKey> for PrivateKey {
     ///
     /// ```
     /// extern crate profile;
-    /// use profile::Secp256k1PrivateKey;
-    /// use profile::PublicKey;
+    /// use profile::prelude::*;
     ///
     /// let key: PublicKey = Secp256k1PrivateKey::new().public_key().into();
     /// ```
@@ -83,17 +78,14 @@ impl PrivateKey {
 #[cfg(test)]
 mod tests {
 
-    use std::collections::HashSet;
-
-    use crate::{generate_32_bytes, Ed25519PrivateKey, Secp256k1PrivateKey};
-
-    use super::PrivateKey;
+    use crate::prelude::*;
 
     #[test]
     fn private_key_ed25519_into_as_roundtrip() {
         let bytes = generate_32_bytes();
         // test `into``
-        let private_key: PrivateKey = Ed25519PrivateKey::from_vec(bytes.clone()).unwrap().into();
+        let private_key: PrivateKey =
+            Ed25519PrivateKey::from_vec(bytes.clone()).unwrap().into();
         // test `as`
         assert_eq!(
             private_key.as_ed25519().unwrap(),
@@ -105,7 +97,8 @@ mod tests {
     fn private_key_ed25519_into_as_wrong_fails() {
         let bytes = generate_32_bytes();
         // test `into``
-        let private_key: PrivateKey = Ed25519PrivateKey::from_vec(bytes.clone()).unwrap().into();
+        let private_key: PrivateKey =
+            Ed25519PrivateKey::from_vec(bytes.clone()).unwrap().into();
         // test `as`
         assert!(private_key.as_secp256k1().is_none());
     }
@@ -114,7 +107,8 @@ mod tests {
     fn private_key_secp256k1_into_as_roundtrip() {
         let bytes = generate_32_bytes();
         // test `into``
-        let private_key: PrivateKey = Secp256k1PrivateKey::from_vec(bytes.clone()).unwrap().into();
+        let private_key: PrivateKey =
+            Secp256k1PrivateKey::from_vec(bytes.clone()).unwrap().into();
         // test `as`
         assert_eq!(
             private_key.as_secp256k1().unwrap(),
@@ -126,7 +120,8 @@ mod tests {
     fn private_key_secp256k1_into_as_wrong_fails() {
         let bytes = generate_32_bytes();
         // test `into``
-        let private_key: PrivateKey = Secp256k1PrivateKey::from_vec(bytes.clone()).unwrap().into();
+        let private_key: PrivateKey =
+            Secp256k1PrivateKey::from_vec(bytes.clone()).unwrap().into();
         // test `as`
         assert!(private_key.as_ed25519().is_none());
     }

@@ -1,8 +1,4 @@
-use std::fmt::Display;
-
-use enum_iterator::Sequence;
-use serde::{Deserialize, Serialize};
-use strum::FromRepr;
+use crate::prelude::*;
 
 /// The exception kind for deposit address
 #[derive(
@@ -17,7 +13,8 @@ use strum::FromRepr;
     Hash,
     PartialOrd,
     Ord,
-    Sequence,
+    enum_iterator::Sequence,
+    derive_more::Display,
     uniffi::Enum,
 )]
 #[serde(rename_all = "camelCase")]
@@ -28,39 +25,31 @@ pub enum DepositAddressExceptionRule {
     Deny,
 }
 
-impl DepositAddressExceptionRule {
-    pub fn discriminant(&self) -> String {
-        format!("{}", self)
-    }
-}
-
-impl Display for DepositAddressExceptionRule {
-    fn fmt(
-        &self,
-        f: &mut radix_engine_common::prelude::fmt::Formatter<'_>,
-    ) -> radix_engine_common::prelude::fmt::Result {
-        write!(f, "{:?}", self)
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use crate::{assert_json_roundtrip, assert_json_value_eq_after_roundtrip};
-    use serde_json::json;
-
-    use super::DepositAddressExceptionRule;
+    use crate::prelude::*;
 
     #[test]
     fn json_roundtrip_accept_all() {
-        assert_json_value_eq_after_roundtrip(&DepositAddressExceptionRule::Deny, json!("deny"));
+        assert_json_value_eq_after_roundtrip(
+            &DepositAddressExceptionRule::Deny,
+            json!("deny"),
+        );
         assert_json_roundtrip(&DepositAddressExceptionRule::Deny);
     }
 
     #[test]
     fn display() {
         assert_eq!(format!("{}", DepositAddressExceptionRule::Deny), "Deny");
+        assert_eq!(format!("{}", DepositAddressExceptionRule::Allow), "Allow");
+    }
 
-        // `discriminant` uses Display
-        assert_eq!(DepositAddressExceptionRule::Allow.discriminant(), "Allow");
+    #[test]
+    fn debug() {
+        assert_eq!(format!("{:?}", DepositAddressExceptionRule::Deny), "Deny");
+        assert_eq!(
+            format!("{:?}", DepositAddressExceptionRule::Allow),
+            "Allow"
+        );
     }
 }

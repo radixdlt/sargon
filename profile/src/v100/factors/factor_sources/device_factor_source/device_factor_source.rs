@@ -1,22 +1,23 @@
-use crate::{CommonError, MnemonicWithPassphrase, WalletClientModel};
-use serde::{Deserialize, Serialize};
-
-use crate::v100::{
-    FactorSource, FactorSourceCommon, FactorSourceID, FactorSourceIDFromHash, FactorSourceKind,
-    IsFactorSource,
-};
-
-use crate::HasPlaceholder;
-
-use super::device_factor_source_hint::DeviceFactorSourceHint;
+use crate::prelude::*;
 
 /// A factor source representing the device that the Radix Wallet is running on
 /// typically an iPhone or Android device. This is the initial factor source of
 /// all new Accounts and Personas an users authenticate signing by authorizing
 /// the client (Wallet App) to access a mnemonic stored in secure storage on
 /// the device.
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(
+    Serialize,
+    Deserialize,
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    Hash,
+    derive_more::Display,
+    uniffi::Record,
+)]
 #[serde(rename_all = "camelCase")]
+#[display("{hint} {id}")]
 pub struct DeviceFactorSource {
     /// Unique and stable identifier of this factor source, stemming from the
     /// hash of a special child key of the HD root of the mnemonic.
@@ -36,14 +37,18 @@ pub struct DeviceFactorSource {
 impl TryFrom<FactorSource> for DeviceFactorSource {
     type Error = CommonError;
 
-    fn try_from(value: FactorSource) -> Result<Self, Self::Error> {
-        value
-            .into_device()
-            .map_err(|_| Self::Error::ExpectedDeviceFactorSourceGotSomethingElse)
+    fn try_from(value: FactorSource) -> Result<Self> {
+        value.into_device().map_err(|_| {
+            Self::Error::ExpectedDeviceFactorSourceGotSomethingElse
+        })
     }
 }
-
 impl IsFactorSource for DeviceFactorSource {
+    fn kind() -> FactorSourceKind {
+        FactorSourceKind::Device
+    }
+}
+impl BaseIsFactorSource for DeviceFactorSource {
     fn factor_source_kind(&self) -> FactorSourceKind {
         self.id.kind.clone()
     }
@@ -114,7 +119,7 @@ impl DeviceFactorSource {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_olympia() -> Self {
         Self::new(
-            FactorSourceIDFromHash::placeholder(),
+            FactorSourceIDFromHash::placeholder_other(),
             FactorSourceCommon::placeholder_olympia(),
             DeviceFactorSourceHint::placeholder(),
         )
@@ -123,15 +128,7 @@ impl DeviceFactorSource {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
-    use crate::{BIP39WordCount, MnemonicWithPassphrase, WalletClientModel};
-
-    use super::DeviceFactorSource;
-    use crate::v100::{
-        FactorSource, FactorSourceCryptoParameters, FactorSourceID, IsFactorSource,
-        LedgerHardwareWalletFactorSource,
-    };
-    use crate::CommonError as Error;
+    use crate::prelude::*;
 
     #[test]
     fn equality() {
@@ -208,12 +205,17 @@ mod tests {
     }
 
     #[test]
+    fn static_kind() {
+        assert_eq!(DeviceFactorSource::kind(), FactorSourceKind::Device);
+    }
+
+    #[test]
     fn from_factor_source_invalid_got_ledger() {
         let ledger = LedgerHardwareWalletFactorSource::placeholder();
         let factor_source: FactorSource = ledger.clone().into();
         assert_eq!(
             DeviceFactorSource::try_from(factor_source),
-            Err(Error::ExpectedDeviceFactorSourceGotSomethingElse)
+            Err(CommonError::ExpectedDeviceFactorSourceGotSomethingElse)
         );
     }
 

@@ -1,15 +1,10 @@
-use identified_vec::{Identifiable, IsIdentifiedVec};
-use serde::{Deserialize, Serialize};
-
-use crate::IdentifiedVecVia;
-
-use super::{
-    asset_exception::AssetException, deposit_rule::DepositRule, depositor_address::DepositorAddress,
-};
+use crate::prelude::*;
 
 /// Controls the ability of third-parties to deposit into a certain account, this is
 /// useful for users who wish to not be able to receive airdrops.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(
+    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
+)]
 #[serde(rename_all = "camelCase")]
 pub struct ThirdPartyDeposits {
     /// Controls the ability of third-parties to deposit into this account
@@ -62,8 +57,12 @@ impl ThirdPartyDeposits {
     {
         Self {
             deposit_rule,
-            assets_exception_list: IdentifiedVecVia::from_iter(assets_exception_list),
-            depositors_allow_list: IdentifiedVecVia::from_iter(depositors_allow_list),
+            assets_exception_list: IdentifiedVecVia::from_iter(
+                assets_exception_list,
+            ),
+            depositors_allow_list: IdentifiedVecVia::from_iter(
+                depositors_allow_list,
+            ),
         }
     }
 
@@ -78,7 +77,10 @@ impl ThirdPartyDeposits {
     }
 
     // If the set contains an element equal to `exception`, removes it from the set and drops it. Returns whether such an element was present.
-    pub fn remove_asset_exception(&mut self, exception: &AssetException) -> bool {
+    pub fn remove_asset_exception(
+        &mut self,
+        exception: &AssetException,
+    ) -> bool {
         self.assets_exception_list.remove(exception).is_some()
     }
 
@@ -93,39 +95,29 @@ impl ThirdPartyDeposits {
     }
 
     // If the set contains an element equal to `DepositorAddress`, removes it from the set and drops it. Returns whether such an element was present.
-    pub fn remove_allowed_depositor(&mut self, depositor: &DepositorAddress) -> bool {
+    pub fn remove_allowed_depositor(
+        &mut self,
+        depositor: &DepositorAddress,
+    ) -> bool {
         self.depositors_allow_list.remove(depositor).is_some()
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use std::collections::BTreeSet;
-
-    use crate::{assert_eq_after_json_roundtrip, IdentifiedVecVia};
-
-    use crate::v100::{
-        entity::account::on_ledger_settings::third_party_deposits::{
-            asset_exception::AssetException,
-            deposit_address_exception_rule::DepositAddressExceptionRule, deposit_rule::DepositRule,
-            depositor_address::DepositorAddress,
-        },
-        NonFungibleGlobalId,
-    };
-
-    use super::ThirdPartyDeposits;
+    use crate::prelude::*;
 
     #[test]
     fn json_roundtrip() {
         let excp1 = AssetException::new(
             "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
-                .try_into()
+                .parse()
                 .unwrap(),
             DepositAddressExceptionRule::Deny,
         );
         let excp2 = AssetException::new(
             "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
-                .try_into()
+                .parse()
                 .unwrap(),
             DepositAddressExceptionRule::Allow,
         );
@@ -133,7 +125,7 @@ mod tests {
             DepositRule::AcceptKnown,
             BTreeSet::from_iter([excp1, excp2].into_iter()),
             BTreeSet::from_iter(
-                [DepositorAddress::NonFungibleGlobalID { value: NonFungibleGlobalId::try_from_str("resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>").unwrap()}]
+                [DepositorAddress::NonFungibleGlobalID { value: "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>".parse().unwrap()}]
                 .into_iter(),
             ),
         );
@@ -188,7 +180,7 @@ mod tests {
 
         let exception = AssetException::new(
             "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
-                .try_into()
+                .parse()
                 .unwrap(),
             DepositAddressExceptionRule::Deny,
         );
@@ -197,7 +189,8 @@ mod tests {
         assert!(settings.remove_asset_exception(&exception));
         assert_eq!(settings.assets_exception_list.len(), 1);
         // settings.set_assets_exception_list(BTreeSet::from_iter([exception.clone()]));
-        settings.assets_exception_list = IdentifiedVecVia::from_iter([exception.clone()]);
+        settings.assets_exception_list =
+            IdentifiedVecVia::from_iter([exception.clone()]);
 
         assert!(
             !settings.add_asset_exception(exception.clone()),
@@ -223,19 +216,18 @@ mod tests {
         )
         .unwrap();
 
-        let depositor =
-            DepositorAddress::NonFungibleGlobalID {
-                value: NonFungibleGlobalId::try_from_str(
-                    "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>",
-                )
+        let depositor = DepositorAddress::NonFungibleGlobalID {
+            value: "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>"
+                .parse()
                 .unwrap(),
-            };
+        };
         assert!(settings.allow_depositor(depositor.clone()));
         assert_eq!(settings.depositors_allow_list.len(), 1);
         assert!(settings.remove_allowed_depositor(&depositor));
         assert_eq!(settings.depositors_allow_list.len(), 0);
 
-        settings.depositors_allow_list = IdentifiedVecVia::from_iter([depositor.clone()]);
+        settings.depositors_allow_list =
+            IdentifiedVecVia::from_iter([depositor.clone()]);
         assert!(
             !settings.allow_depositor(depositor.clone()),
             "Expected `false` since already present."

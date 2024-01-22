@@ -1,13 +1,19 @@
-use crate::HDPathError;
-use serde::{de, Deserializer, Serialize, Serializer};
+use crate::prelude::*;
 
-use crate::HasPlaceholder;
-
-use crate::{
-    Derivation, DerivationPath, DerivationPathScheme, HDPath, HDPathComponent, HDPathValue,
-};
-
-#[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record)]
+#[derive(
+    Clone,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    PartialOrd,
+    Ord,
+    SerializeDisplay,
+    DeserializeFromStr,
+    derive_more::Display,
+    uniffi::Record,
+)]
+#[display("{}", self.bip32_string())]
 pub struct BIP44LikePath {
     pub path: HDPath,
 }
@@ -16,41 +22,56 @@ impl BIP44LikePath {
     pub fn from(path: HDPath) -> Self {
         Self { path }
     }
+    pub const PATH_DEPTH: usize = 5;
+
+    fn assert_depth_of(path: &HDPath) -> Result<(), CommonError> {
+        let found = path.depth();
+        if found != Self::PATH_DEPTH {
+            return Err(CommonError::InvalidDepthOfBIP44Path {
+                expected: Self::PATH_DEPTH,
+                found,
+            });
+        }
+        Ok(())
+    }
 }
 
 impl TryFrom<&HDPath> for BIP44LikePath {
-    type Error = HDPathError;
+    type Error = CommonError;
 
-    fn try_from(value: &HDPath) -> Result<Self, Self::Error> {
-        let (path, components) =
-            HDPath::try_parse_base_hdpath(value, HDPathError::InvalidDepthOfBIP44Path)?;
-        if path.depth() != 5 {
-            return Err(HDPathError::InvalidDepthOfBIP44Path);
-        }
+    fn try_from(value: &HDPath) -> Result<Self> {
+        let (path, components) = HDPath::try_parse_base_hdpath(value, |v| {
+            CommonError::InvalidDepthOfBIP44Path {
+                expected: Self::PATH_DEPTH,
+                found: v,
+            }
+        })?;
+
+        BIP44LikePath::assert_depth_of(value)?;
         let account = &components[2];
         if !account.is_hardened() {
-            return Err(HDPathError::InvalidBIP44LikePathAccountWasNotHardened);
+            return Err(CommonError::InvalidBIP44LikePathAccountWasNotHardened);
         }
         let change = &components[3];
         if change.is_hardened() {
-            return Err(HDPathError::InvalidBIP44LikePathChangeWasUnexpectedlyHardened);
+            return Err(
+                CommonError::InvalidBIP44LikePathChangeWasUnexpectedlyHardened,
+            );
         }
 
         let index = &components[4];
         if !index.is_hardened() {
-            return Err(HDPathError::InvalidBIP44LikePathIndexWasNotHardened);
+            return Err(CommonError::InvalidBIP44LikePathIndexWasNotHardened);
         }
         return Ok(Self::from(path));
     }
 }
 
 impl BIP44LikePath {
-    pub fn from_str(s: &str) -> Result<Self, HDPathError> {
-        let (path, _) = HDPath::try_parse_base(s, HDPathError::InvalidDepthOfBIP44Path)?;
-        return Self::try_from(&path);
-    }
-
-    fn with_account_and_index(account: HDPathValue, index: HDPathValue) -> Self {
+    fn with_account_and_index(
+        account: HDPathValue,
+        index: HDPathValue,
+    ) -> Self {
         let c0 = HDPathComponent::bip44_purpose(); // purpose
         let c1 = HDPathComponent::bip44_cointype(); // cointype
         let c2 = HDPathComponent::harden(account); // account
@@ -81,30 +102,17 @@ impl Derivation for BIP44LikePath {
     }
 }
 
-impl Serialize for BIP44LikePath {
-    /// Serializes this `BIP44LikePath` into JSON as a string on: "m/44H/1022H/0H/0/0H" format
-    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_str(&self.to_string())
-    }
-}
+impl FromStr for BIP44LikePath {
+    type Err = CommonError;
 
-impl<'de> serde::Deserialize<'de> for BIP44LikePath {
-    /// Tries to deserializes a JSON string as a derivation path string into a `BIP44LikePath`
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<BIP44LikePath, D::Error> {
-        let s = String::deserialize(d)?;
-        BIP44LikePath::from_str(&s).map_err(de::Error::custom)
-    }
-}
-
-impl TryInto<BIP44LikePath> for &str {
-    type Error = HDPathError;
-
-    fn try_into(self) -> Result<BIP44LikePath, Self::Error> {
-        BIP44LikePath::from_str(self)
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let (path, _) = HDPath::try_parse_base(s, |v| {
+            CommonError::InvalidDepthOfBIP44Path {
+                expected: Self::PATH_DEPTH,
+                found: v,
+            }
+        })?;
+        return Self::try_from(&path);
     }
 }
 
@@ -122,13 +130,8 @@ impl HasPlaceholder for BIP44LikePath {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        assert_json_value_eq_after_roundtrip, assert_json_value_ne_after_roundtrip, HDPathError,
-        HasPlaceholder,
-    };
-    use serde_json::json;
 
-    use crate::{BIP44LikePath, Derivation};
+    use crate::prelude::*;
 
     #[test]
     fn equality() {
@@ -150,7 +153,7 @@ mod tests {
     #[test]
     fn string_roundtrip() {
         let str = "m/44H/1022H/0H/0/0H";
-        let a: BIP44LikePath = str.try_into().unwrap();
+        let a: BIP44LikePath = str.parse().unwrap();
         assert_eq!(a.to_string(), str);
     }
 
@@ -166,15 +169,21 @@ mod tests {
     fn invalid_depth_1() {
         assert_eq!(
             BIP44LikePath::from_str("m/44H"),
-            Err(HDPathError::InvalidDepthOfBIP44Path)
+            Err(CommonError::InvalidDepthOfBIP44Path {
+                expected: BIP44LikePath::PATH_DEPTH,
+                found: 1
+            })
         );
     }
 
     #[test]
-    fn invalid_depth() {
+    fn invalid_depth_3() {
         assert_eq!(
             BIP44LikePath::from_str("m/44H/1022H/0H"),
-            Err(HDPathError::InvalidDepthOfBIP44Path)
+            Err(CommonError::InvalidDepthOfBIP44Path {
+                expected: BIP44LikePath::PATH_DEPTH,
+                found: 3
+            })
         );
     }
 
@@ -182,7 +191,7 @@ mod tests {
     fn invalid_account_not_hardened() {
         assert_eq!(
             BIP44LikePath::from_str("m/44H/1022H/0/1/2H"),
-            Err(HDPathError::InvalidBIP44LikePathAccountWasNotHardened)
+            Err(CommonError::InvalidBIP44LikePathAccountWasNotHardened)
         );
     }
 
@@ -190,7 +199,7 @@ mod tests {
     fn invalid_change_was_hardened() {
         assert_eq!(
             BIP44LikePath::from_str("m/44H/1022H/0H/0H/2H"),
-            Err(HDPathError::InvalidBIP44LikePathChangeWasUnexpectedlyHardened)
+            Err(CommonError::InvalidBIP44LikePathChangeWasUnexpectedlyHardened)
         );
     }
 
@@ -198,30 +207,33 @@ mod tests {
     fn invalid_index_not_hardened() {
         assert_eq!(
             BIP44LikePath::from_str("m/44H/1022H/0H/0/0"),
-            Err(HDPathError::InvalidBIP44LikePathIndexWasNotHardened)
+            Err(CommonError::InvalidBIP44LikePathIndexWasNotHardened)
         );
     }
 
     #[test]
     fn inequality_different_accounts() {
-        let a: BIP44LikePath = "m/44H/1022H/0H/0/0H".try_into().unwrap();
-        let b: BIP44LikePath = "m/44H/1022H/1H/0/0H".try_into().unwrap();
+        let a: BIP44LikePath = "m/44H/1022H/0H/0/0H".parse().unwrap();
+        let b: BIP44LikePath = "m/44H/1022H/1H/0/0H".parse().unwrap();
         assert!(a != b);
     }
 
     #[test]
     fn inequality_different_index() {
-        let a: BIP44LikePath = "m/44H/1022H/0H/0/0H".try_into().unwrap();
-        let b: BIP44LikePath = "m/44H/1022H/0H/0/1H".try_into().unwrap();
+        let a: BIP44LikePath = "m/44H/1022H/0H/0/0H".parse().unwrap();
+        let b: BIP44LikePath = "m/44H/1022H/0H/0/1H".parse().unwrap();
         assert!(a != b);
     }
 
     #[test]
     fn json_roundtrip() {
         let str = "m/44H/1022H/0H/0/0H";
-        let parsed: BIP44LikePath = str.try_into().unwrap();
+        let parsed: BIP44LikePath = str.parse().unwrap();
         assert_json_value_eq_after_roundtrip(&parsed, json!(str));
-        assert_json_value_ne_after_roundtrip(&parsed, json!("m/44H/1022H/0H/0/1H"));
+        assert_json_value_ne_after_roundtrip(
+            &parsed,
+            json!("m/44H/1022H/0H/0/1H"),
+        );
     }
 
     #[test]

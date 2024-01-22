@@ -1,56 +1,44 @@
-use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
+use crate::prelude::*;
 
-use crate::CommonError;
-use std::fmt::Display;
-
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, uniffi::Record)]
+#[derive(
+    Clone,
+    Debug,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    SerializeDisplay,
+    DeserializeFromStr,
+    derive_more::Display,
+    uniffi::Record,
+)]
+#[display("{value}")]
 pub struct DisplayName {
     pub value: String,
 }
 
 #[uniffi::export]
-pub fn new_display_name(name: String) -> Result<DisplayName, CommonError> {
+pub fn new_display_name(name: String) -> Result<DisplayName> {
     DisplayName::new(name.as_str())
 }
 
-impl Serialize for DisplayName {
-    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_str(&self.value)
-    }
-}
-
-impl<'de> Deserialize<'de> for DisplayName {
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<DisplayName, D::Error> {
-        let s = String::deserialize(d)?;
-        DisplayName::new(s.as_str()).map_err(de::Error::custom)
-    }
-}
-
 impl DisplayName {
-    pub fn max_len() -> usize {
-        30
-    }
+    pub const MAX_LEN: usize = 30;
 
-    pub fn new(value: &str) -> Result<Self, CommonError> {
+    pub fn new(value: &str) -> Result<Self> {
         let value = value.trim().to_string();
         if value.is_empty() {
             return Err(CommonError::InvalidDisplayNameEmpty);
         }
-        if value.len() > Self::max_len() {
-            return Err(CommonError::InvalidDisplayNameTooLong);
+        if value.len() > Self::MAX_LEN {
+            return Err(CommonError::InvalidDisplayNameTooLong {
+                expected: Self::MAX_LEN,
+                found: value.len(),
+            });
         }
 
         Ok(Self { value })
-    }
-}
-
-impl Display for DisplayName {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.value)
     }
 }
 
@@ -60,42 +48,38 @@ impl Default for DisplayName {
     }
 }
 
-impl TryFrom<&str> for DisplayName {
-    type Error = crate::CommonError;
+impl FromStr for DisplayName {
+    type Err = CommonError;
 
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        DisplayName::new(value)
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        DisplayName::new(s)
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        assert_json_roundtrip, assert_json_value_eq_after_roundtrip, assert_json_value_fails,
-        assert_json_value_ne_after_roundtrip,
-    };
-    use serde_json::json;
-
-    use super::DisplayName;
-    use crate::CommonError as Error;
-
+    use crate::prelude::*;
     #[test]
     fn invalid() {
+        let s = "this is a much much too long display name";
         assert_eq!(
-            DisplayName::try_from("this is a much much too long display name"),
-            Err(Error::InvalidDisplayNameTooLong)
+            DisplayName::new(s),
+            Err(CommonError::InvalidDisplayNameTooLong {
+                expected: DisplayName::MAX_LEN,
+                found: s.len()
+            })
         );
     }
 
     #[test]
     fn max_is_ok() {
-        assert!(DisplayName::try_from("0|RDX|Dev Nano S|Some very lon").is_ok());
+        assert!(DisplayName::new("0|RDX|Dev Nano S|Some very lon").is_ok());
     }
 
     #[test]
     fn valid_try_from() {
         assert_eq!(
-            DisplayName::try_from("Main"),
+            DisplayName::new("Main"),
             Ok(DisplayName::new("Main").unwrap())
         );
     }
@@ -103,16 +87,16 @@ mod tests {
     #[test]
     fn empty_is_invalid() {
         assert_eq!(
-            DisplayName::try_from(""),
-            Err(Error::InvalidDisplayNameEmpty)
+            DisplayName::new(""),
+            Err(CommonError::InvalidDisplayNameEmpty)
         );
     }
 
     #[test]
     fn spaces_trimmed_into_empty_is_invalid() {
         assert_eq!(
-            DisplayName::try_from("   "),
-            Err(Error::InvalidDisplayNameEmpty)
+            DisplayName::new("   "),
+            Err(CommonError::InvalidDisplayNameEmpty)
         );
     }
 
@@ -126,13 +110,20 @@ mod tests {
 
     #[test]
     fn json_roundtrip() {
-        let a: DisplayName = "Cool persona".try_into().unwrap();
+        let a: DisplayName = "Cool persona".parse().unwrap();
 
         assert_json_value_eq_after_roundtrip(&a, json!("Cool persona"));
         assert_json_roundtrip(&a);
         assert_json_value_ne_after_roundtrip(&a, json!("Main account"));
+    }
 
-        assert_json_value_fails::<DisplayName>(json!("this is a much much too long display name"));
+    #[test]
+    fn json_fails_for_invalid() {
+        assert_json_value_fails::<DisplayName>(json!(
+            "this is a much much too long display name"
+        ));
+        assert_json_value_fails::<DisplayName>(json!(""));
+        assert_json_value_fails::<DisplayName>(json!("   "));
     }
 }
 

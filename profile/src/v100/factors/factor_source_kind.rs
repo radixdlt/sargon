@@ -1,10 +1,18 @@
-use std::fmt::Display;
-
-use serde::{Deserialize, Serialize};
+use crate::prelude::*;
 
 /// The **kind** (or "type") of FactorSource describes how it is used.
 #[derive(
-    Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Enum,
+    Serialize,
+    Deserialize,
+    Clone,
+    Copy,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    PartialOrd,
+    Ord,
+    uniffi::Enum,
 )]
 pub enum FactorSourceKind {
     /// A user owned unencrypted mnemonic (and optional BIP39 passphrase) stored on device,
@@ -65,18 +73,16 @@ pub enum FactorSourceKind {
 
 impl FactorSourceKind {
     pub fn discriminant(&self) -> String {
-        use FactorSourceKind::*;
-        match self {
-            Device => "device".to_string(),
-            LedgerHQHardwareWallet => "ledgerHQHardwareWallet".to_string(),
-            OffDeviceMnemonic => "offDeviceMnemonic".to_string(),
-            TrustedContact => "trustedContact".to_string(),
-            SecurityQuestions => "securityQuestions".to_string(),
-        }
+        // We do `to_value.as_str` instead of `to_string(_pretty)` to avoid unwanted quotation marks around the string.
+        serde_json::to_value(self)
+            .expect("Should always be able to JSON encode FactorSourceKind.")
+            .as_str()
+            .expect("Representation should always be string")
+            .to_owned()
     }
 }
 
-impl Display for FactorSourceKind {
+impl std::fmt::Display for FactorSourceKind {
     #[cfg(not(tarpaulin_include))] // false negative
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.discriminant())
@@ -85,12 +91,7 @@ impl Display for FactorSourceKind {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::BTreeSet;
-
-    use crate::{assert_json_roundtrip, assert_json_value_eq_after_roundtrip};
-    use serde_json::json;
-
-    use crate::v100::factors::factor_source_kind::FactorSourceKind;
+    use crate::prelude::*;
 
     #[test]
     fn equality() {
@@ -111,8 +112,11 @@ mod tests {
     #[test]
     fn hash() {
         assert_eq!(
-            BTreeSet::from_iter([FactorSourceKind::Device, FactorSourceKind::Device].into_iter())
-                .len(),
+            BTreeSet::from_iter(
+                [FactorSourceKind::Device, FactorSourceKind::Device]
+                    .into_iter()
+            )
+            .len(),
             1
         );
     }
@@ -177,7 +181,10 @@ mod tests {
             &FactorSourceKind::TrustedContact,
             json!("trustedContact"),
         );
-        assert_json_value_eq_after_roundtrip(&FactorSourceKind::Device, json!("device"));
+        assert_json_value_eq_after_roundtrip(
+            &FactorSourceKind::Device,
+            json!("device"),
+        );
         assert_json_value_eq_after_roundtrip(
             &FactorSourceKind::SecurityQuestions,
             json!("securityQuestions"),

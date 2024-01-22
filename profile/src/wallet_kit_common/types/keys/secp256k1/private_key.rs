@@ -1,16 +1,14 @@
-use crate::{Hex32Bytes, KeyError as Error};
+use crate::prelude::*;
+
 use radix_engine_common::crypto::IsHash;
 use transaction::signing::secp256k1::{
     Secp256k1PrivateKey as EngineSecp256k1PrivateKey, Secp256k1Signature,
 };
 
-use crate::HasPlaceholder;
-
-use super::public_key::Secp256k1PublicKey;
-use std::fmt::{Debug, Formatter};
-
 /// A secp256k1 private key used to create cryptographic signatures, more specifically
 /// ECDSA signatures, that offer recovery of the public key.
+#[derive(derive_more::Debug)]
+#[debug("{}", self.to_hex())]
 pub struct Secp256k1PrivateKey(EngineSecp256k1PrivateKey);
 
 impl Secp256k1PrivateKey {
@@ -19,7 +17,8 @@ impl Secp256k1PrivateKey {
     /// used by wallets, which tend to rather use a Mnemonic and
     /// derive hierarchical deterministic keys.
     pub fn generate() -> Self {
-        Self::from_hex32_bytes(Hex32Bytes::generate()).expect("Should be able to generate 32 bytes")
+        Self::from_hex32_bytes(Hex32Bytes::generate())
+            .expect("Should be able to generate 32 bytes")
     }
 
     /// Just an alias for `Self::generate()`, generating a new
@@ -37,24 +36,9 @@ impl PartialEq for Secp256k1PrivateKey {
 
 impl Eq for Secp256k1PrivateKey {}
 
-impl Debug for Secp256k1PrivateKey {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str(&self.to_hex())
-    }
-}
-
 impl Secp256k1PrivateKey {
     pub fn from_engine(engine: EngineSecp256k1PrivateKey) -> Self {
         Self(engine)
-    }
-
-    pub fn public_key(&self) -> Secp256k1PublicKey {
-        Secp256k1PublicKey::from_engine(self.0.public_key())
-            .expect("Public Key from EC scalar multiplication should always be valid.")
-    }
-
-    pub fn sign(&self, msg_hash: &impl IsHash) -> Secp256k1Signature {
-        self.0.sign(msg_hash)
     }
 
     pub fn to_bytes(&self) -> Vec<u8> {
@@ -62,43 +46,63 @@ impl Secp256k1PrivateKey {
     }
 
     pub fn to_hex(&self) -> String {
-        hex::encode(self.to_bytes())
+        hex_encode(self.to_bytes())
     }
 
-    pub fn from_bytes(slice: &[u8]) -> Result<Self, Error> {
+    pub fn from_bytes(slice: &[u8]) -> Result<Self> {
         EngineSecp256k1PrivateKey::from_bytes(slice)
-            .map_err(|_| Error::InvalidSecp256k1PrivateKeyFromBytes)
+            .map_err(|_| {
+                CommonError::InvalidSecp256k1PrivateKeyFromBytes(
+                    slice.to_owned(),
+                )
+            })
             .map(Self::from_engine)
     }
 
-    pub fn from_vec(bytes: Vec<u8>) -> Result<Self, Error> {
+    pub fn from_vec(bytes: Vec<u8>) -> Result<Self> {
         Self::from_bytes(bytes.as_slice())
     }
 
-    pub fn from_hex32_bytes(bytes: Hex32Bytes) -> Result<Self, Error> {
+    pub fn from_hex32_bytes(bytes: Hex32Bytes) -> Result<Self> {
         Self::from_vec(bytes.to_vec())
     }
+}
 
-    pub fn from_str(hex: &str) -> Result<Self, Error> {
-        Hex32Bytes::from_hex(hex)
-            .map_err(|_| Error::InvalidSecp256k1PrivateKeyFromString)
+impl FromStr for Secp256k1PrivateKey {
+    type Err = CommonError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Hex32Bytes::from_hex(s)
+            .map_err(|_| {
+                CommonError::InvalidSecp256k1PrivateKeyFromString(s.to_owned())
+            })
             .and_then(Self::from_hex32_bytes)
     }
 }
 
-impl TryInto<Secp256k1PrivateKey> for &str {
-    type Error = crate::KeyError;
-
-    fn try_into(self) -> Result<Secp256k1PrivateKey, Self::Error> {
-        Secp256k1PrivateKey::from_str(self)
-    }
-}
-
 impl TryFrom<&[u8]> for Secp256k1PrivateKey {
-    type Error = crate::KeyError;
+    type Error = crate::CommonError;
 
     fn try_from(slice: &[u8]) -> Result<Secp256k1PrivateKey, Self::Error> {
         Secp256k1PrivateKey::from_bytes(slice)
+    }
+}
+
+impl IsPrivateKey<Secp256k1PublicKey> for Secp256k1PrivateKey {
+    fn curve() -> SLIP10Curve {
+        SLIP10Curve::Secp256k1
+    }
+
+    type Signature = Secp256k1Signature;
+
+    fn public_key(&self) -> Secp256k1PublicKey {
+        Secp256k1PublicKey::from_engine(self.0.public_key()).expect(
+            "Public Key from EC scalar multiplication should always be valid.",
+        )
+    }
+
+    fn sign(&self, msg_hash: &impl IsHash) -> Secp256k1Signature {
+        self.0.sign(msg_hash)
     }
 }
 
@@ -122,7 +126,10 @@ impl Secp256k1PrivateKey {
     ///
     /// https://github.com/Sajjon/K1/blob/main/Tests/K1Tests/TestVectors/cyon_ecdh_two_variants_with_kdf.json#L10
     pub fn placeholder_alice() -> Self {
-        Self::from_str("d78b6578b33f3446bdd9d09d057d6598bc915fec4008a54c509dc3b8cdc7dbe5").unwrap()
+        Self::from_str(
+            "d78b6578b33f3446bdd9d09d057d6598bc915fec4008a54c509dc3b8cdc7dbe5",
+        )
+        .unwrap()
     }
 
     /// `871761c9921a467059e090a0422ae76af87fa8eb905da91c9b554bd6a028c760``
@@ -133,20 +140,18 @@ impl Secp256k1PrivateKey {
     ///
     /// https://github.com/Sajjon/K1/blob/main/Tests/K1Tests/TestVectors/cyon_ecdh_two_variants_with_kdf.json#L12
     pub fn placeholder_bob() -> Self {
-        Self::from_str("871761c9921a467059e090a0422ae76af87fa8eb905da91c9b554bd6a028c760").unwrap()
+        Self::from_str(
+            "871761c9921a467059e090a0422ae76af87fa8eb905da91c9b554bd6a028c760",
+        )
+        .unwrap()
     }
 }
 
 #[cfg(test)]
 mod tests {
 
-    use std::{collections::HashSet, str::FromStr};
-
+    use crate::prelude::*;
     use transaction::signing::secp256k1::Secp256k1Signature;
-
-    use crate::{hash, HasPlaceholder, Hex32Bytes, KeyError as Error};
-
-    use super::Secp256k1PrivateKey;
 
     #[test]
     fn equality() {
@@ -169,11 +174,16 @@ mod tests {
     }
 
     #[test]
+    fn curve() {
+        assert_eq!(Secp256k1PrivateKey::curve(), SLIP10Curve::Secp256k1);
+    }
+
+    #[test]
     fn sign_and_verify() {
         let msg = hash("Test");
         let sk: Secp256k1PrivateKey =
             "0000000000000000000000000000000000000000000000000000000000000001"
-                .try_into()
+                .parse()
                 .unwrap();
         let pk = sk.public_key();
         assert_eq!(
@@ -188,8 +198,10 @@ mod tests {
 
     #[test]
     fn bytes_roundtrip() {
-        let bytes = hex::decode("0000000000000000000000000000000000000000000000000000000000000001")
-            .unwrap();
+        let bytes = hex_decode(
+            "0000000000000000000000000000000000000000000000000000000000000001",
+        )
+        .unwrap();
         assert_eq!(
             Secp256k1PrivateKey::from_bytes(bytes.as_slice())
                 .unwrap()
@@ -200,7 +212,8 @@ mod tests {
 
     #[test]
     fn hex_roundtrip() {
-        let hex = "0000000000000000000000000000000000000000000000000000000000000001";
+        let hex =
+            "0000000000000000000000000000000000000000000000000000000000000001";
         assert_eq!(Secp256k1PrivateKey::from_str(hex).unwrap().to_hex(), hex);
     }
 
@@ -208,7 +221,9 @@ mod tests {
     fn invalid_hex() {
         assert_eq!(
             Secp256k1PrivateKey::from_str("not hex"),
-            Err(Error::InvalidSecp256k1PrivateKeyFromString)
+            Err(CommonError::InvalidSecp256k1PrivateKeyFromString(
+                "not hex".to_owned()
+            ))
         );
     }
 
@@ -216,7 +231,9 @@ mod tests {
     fn invalid_hex_too_short() {
         assert_eq!(
             Secp256k1PrivateKey::from_str("dead"),
-            Err(Error::InvalidSecp256k1PrivateKeyFromString)
+            Err(CommonError::InvalidSecp256k1PrivateKeyFromString(
+                "dead".to_owned()
+            ))
         );
     }
 
@@ -224,29 +241,36 @@ mod tests {
     fn invalid_bytes() {
         assert_eq!(
             Secp256k1PrivateKey::from_bytes(&[0u8] as &[u8]),
-            Err(Error::InvalidSecp256k1PrivateKeyFromBytes)
+            Err(CommonError::InvalidSecp256k1PrivateKeyFromBytes(vec![0]))
         );
     }
 
     #[test]
     fn invalid_too_large() {
+        let bytes = [0xFFu8; 32];
         assert_eq!(
-            Secp256k1PrivateKey::from_bytes(&[0xFFu8; 32]),
-            Err(Error::InvalidSecp256k1PrivateKeyFromBytes)
+            Secp256k1PrivateKey::from_bytes(&bytes),
+            Err(CommonError::InvalidSecp256k1PrivateKeyFromBytes(
+                bytes.to_vec()
+            ))
         );
     }
 
     #[test]
     fn invalid_zero() {
+        let bytes = [0u8; 32];
         assert_eq!(
-            Secp256k1PrivateKey::from_bytes(&[0u8; 32]),
-            Err(Error::InvalidSecp256k1PrivateKeyFromBytes)
+            Secp256k1PrivateKey::from_bytes(&bytes),
+            Err(CommonError::InvalidSecp256k1PrivateKeyFromBytes(
+                bytes.to_vec()
+            ))
         );
     }
 
     #[test]
     fn debug() {
-        let hex = "0000000000000000000000000000000000000000000000000000000000000001";
+        let hex =
+            "0000000000000000000000000000000000000000000000000000000000000001";
         assert_eq!(
             format!("{:?}", Secp256k1PrivateKey::from_str(hex).unwrap()),
             hex
@@ -255,7 +279,8 @@ mod tests {
 
     #[test]
     fn from_hex32_bytes() {
-        let str = "0000000000000000000000000000000000000000000000000000000000000001";
+        let str =
+            "0000000000000000000000000000000000000000000000000000000000000001";
         let hex32 = Hex32Bytes::from_hex(str).unwrap();
         let key = Secp256k1PrivateKey::from_hex32_bytes(hex32).unwrap();
         assert_eq!(key.to_hex(), str);
@@ -263,8 +288,9 @@ mod tests {
 
     #[test]
     fn try_from_bytes() {
-        let str = "0000000000000000000000000000000000000000000000000000000000000001";
-        let vec = hex::decode(str).unwrap();
+        let str =
+            "0000000000000000000000000000000000000000000000000000000000000001";
+        let vec = hex_decode(str).unwrap();
         let key = Secp256k1PrivateKey::try_from(vec.as_slice()).unwrap();
         assert_eq!(key.to_hex(), str);
     }

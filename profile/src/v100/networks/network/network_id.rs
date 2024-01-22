@@ -1,10 +1,5 @@
-use std::fmt::Display;
-
-use crate::CommonError;
-use enum_iterator::Sequence;
+use crate::prelude::*;
 use radix_engine_common::network::NetworkDefinition;
-use serde_repr::{Deserialize_repr, Serialize_repr};
-use strum::FromRepr;
 
 #[derive(
     Serialize_repr,
@@ -18,7 +13,7 @@ use strum::FromRepr;
     Hash,
     PartialOrd,
     Ord,
-    Sequence,
+    enum_iterator::Sequence,
     uniffi::Enum,
 )]
 #[repr(u8)]
@@ -107,12 +102,12 @@ impl TryFrom<u8> for NetworkID {
     type Error = CommonError;
 
     /// Tries to instantiate a NetworkID from its raw representation `u8`.
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
+    fn try_from(value: u8) -> Result<Self> {
         Self::from_repr(value).ok_or(Self::Error::UnknownNetworkID(value))
     }
 }
 
-impl Display for NetworkID {
+impl std::fmt::Display for NetworkID {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.logical_name())
     }
@@ -120,7 +115,6 @@ impl Display for NetworkID {
 
 impl NetworkID {
     /// Looks up a `NetworkDefinition` in a lookup table.
-
     pub fn network_definition(&self) -> NetworkDefinition {
         use NetworkID::*;
         match self {
@@ -158,13 +152,8 @@ impl NetworkID {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::BTreeSet;
-
-    use crate::{assert_json_value_eq_after_roundtrip, assert_json_value_fails};
+    use crate::prelude::*;
     use enum_iterator::all;
-    use serde_json::json;
-
-    use super::NetworkID;
 
     #[test]
     fn mainnet_is_default() {

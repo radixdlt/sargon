@@ -1,15 +1,19 @@
-use crate::HierarchicalDeterministicPublicKey;
-use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
-
-use super::badge_virtual_source::FactorInstanceBadgeVirtualSource;
-use enum_as_inner::EnumAsInner;
-
-use crate::HasPlaceholder;
+use crate::prelude::*;
 
 /// Either a "physical" badge (NFT) or some source for recreation of a producer
 /// of a virtual badge (signature), e.g. a HD derivation path, from which a private key
 /// is derived which produces virtual badges (signatures).
-#[derive(Serialize, Deserialize, EnumAsInner, Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(
+    Serialize,
+    Deserialize,
+    EnumAsInner,
+    Clone,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    uniffi::Enum,
+)]
 #[serde(untagged, remote = "Self")]
 pub enum FactorInstanceBadge {
     Virtual {
@@ -50,7 +54,9 @@ impl From<HierarchicalDeterministicPublicKey> for FactorInstanceBadge {
 
 impl<'de> Deserialize<'de> for FactorInstanceBadge {
     #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D: Deserializer<'de>>(
+        deserializer: D,
+    ) -> Result<Self, D::Error> {
         // https://github.com/serde-rs/serde/issues/1343#issuecomment-409698470
         #[derive(Deserialize, Serialize)]
         struct Wrapper {
@@ -69,7 +75,8 @@ impl Serialize for FactorInstanceBadge {
     where
         S: Serializer,
     {
-        let mut state = serializer.serialize_struct("FactorInstanceBadge", 2)?;
+        let mut state =
+            serializer.serialize_struct("FactorInstanceBadge", 2)?;
         match self {
             FactorInstanceBadge::Virtual { value } => {
                 let discriminant = "virtualSource";
@@ -83,12 +90,7 @@ impl Serialize for FactorInstanceBadge {
 
 #[cfg(test)]
 mod tests {
-    use crate::HierarchicalDeterministicPublicKey;
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
-
-    use crate::v100::factors::factor_instance::badge_virtual_source::FactorInstanceBadgeVirtualSource;
-
-    use super::FactorInstanceBadge;
+    use crate::prelude::*;
 
     #[test]
     fn equality() {
@@ -138,7 +140,8 @@ mod tests {
 
     #[test]
     fn into_from_hd_pubkey() {
-        let sut: FactorInstanceBadge = HierarchicalDeterministicPublicKey::placeholder().into();
+        let sut: FactorInstanceBadge =
+            HierarchicalDeterministicPublicKey::placeholder().into();
         assert_eq!(
             sut,
             FactorInstanceBadge::Virtual {
@@ -151,7 +154,8 @@ mod tests {
 
     #[test]
     fn into_from_virtual_source() {
-        let sut: FactorInstanceBadge = FactorInstanceBadgeVirtualSource::placeholder().into();
+        let sut: FactorInstanceBadge =
+            FactorInstanceBadgeVirtualSource::placeholder().into();
         assert_eq!(
             sut,
             FactorInstanceBadge::Virtual {

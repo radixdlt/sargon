@@ -1,9 +1,4 @@
-use crate::v100::{Account, AccountAddress, ContentHint};
-
-use crate::{HasPlaceholder, IdentifiedVecVia};
-
-use super::Network;
-use identified_vec::IsIdentifiedVec;
+use crate::prelude::*;
 
 /// An ordered mapping of NetworkID -> `Profile.Network`, containing
 /// all the users Accounts, Personas and AuthorizedDapps the user
@@ -36,7 +31,11 @@ impl Networks {
     }
 
     /// Returns a clone of the updated account if found, else None.
-    pub fn update_account<F>(&mut self, address: &AccountAddress, mut mutate: F) -> Option<Account>
+    pub fn update_account<F>(
+        &mut self,
+        address: &AccountAddress,
+        mut mutate: F,
+    ) -> Option<Account>
     where
         F: FnMut(&mut Account) -> (),
     {
@@ -49,7 +48,8 @@ impl Networks {
 
 impl Networks {
     pub fn content_hint(&self) -> ContentHint {
-        let number_of_accounts = self.iter().fold(0, |acc, x| acc + x.accounts.len());
+        let number_of_accounts =
+            self.iter().fold(0, |acc, x| acc + x.accounts.len());
         ContentHint::with_counters(number_of_accounts, 0, self.len())
     }
 }
@@ -82,12 +82,7 @@ impl HasPlaceholder for Networks {
 
 #[cfg(test)]
 mod tests {
-    use identified_vec::{IsIdentifiedVec, ItemsCloned};
-
-    use crate::{
-        assert_eq_after_json_roundtrip, Account, Accounts, ContentHint, DisplayName,
-        HasPlaceholder, Network, NetworkID, Networks,
-    };
+    use crate::prelude::*;
 
     #[test]
     fn default_is_empty() {
@@ -102,27 +97,32 @@ mod tests {
     #[test]
     fn equality() {
         assert_eq!(Networks::placeholder(), Networks::placeholder());
-        assert_eq!(Networks::placeholder_other(), Networks::placeholder_other());
+        assert_eq!(
+            Networks::placeholder_other(),
+            Networks::placeholder_other()
+        );
     }
 
     #[test]
     fn duplicates_are_prevented() {
         assert_eq!(
-            Networks::from_iter([Network::placeholder(), Network::placeholder()].into_iter()).len(),
+            Networks::from_iter(
+                [Network::placeholder(), Network::placeholder()].into_iter()
+            )
+            .len(),
             1
         )
     }
 
     #[test]
     fn duplicates_are_prevented_and_first_added_is_retained() {
-        let mut sut =
-            Networks::from_iter([Network::new(
-                NetworkID::Mainnet,
-                Accounts::from_iter([
-                    Account::placeholder_mainnet_alice(),
-                    Account::placeholder_mainnet_bob(),
-                ]),
-            )]);
+        let mut sut = Networks::from_iter([Network::new(
+            NetworkID::Mainnet,
+            Accounts::from_iter([
+                Account::placeholder_mainnet_alice(),
+                Account::placeholder_mainnet_bob(),
+            ]),
+        )]);
         assert_eq!(
             sut.append(Network::new(
                 NetworkID::Mainnet,

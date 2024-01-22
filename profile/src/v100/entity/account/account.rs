@@ -1,25 +1,4 @@
-use crate::{HDPathValue, MnemonicWithPassphrase, WalletClientModel};
-
-use crate::{Derivation, HasEntityPath};
-use identified_vec::Identifiable;
-use serde::{Deserialize, Serialize};
-use std::{cmp::Ordering, fmt::Display};
-
-use crate::v100::{DeviceFactorSource, PrivateHierarchicalDeterministicFactorSource};
-
-use crate::HasPlaceholder;
-
-use std::hash::Hash;
-
-use crate::{
-    v100::{
-        AccountAddress, DisplayName, EntityAddress, EntityFlags, EntitySecurityState,
-        HDFactorInstanceAccountCreation, UnsecuredEntityControl,
-    },
-    NetworkID,
-};
-
-use super::{AppearanceID, OnLedgerSettings};
+use crate::prelude::*;
 
 /// A network unique account with a unique public address and a set of cryptographic
 /// factors used to control it.
@@ -38,7 +17,18 @@ use super::{AppearanceID, OnLedgerSettings};
 /// An account can be either controlled by a "Babylon" DeviceFactorSource or a
 /// Legacy one imported from Olympia, or a Ledger hardware wallet, which too might
 /// have been imported from Olympia.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Hash, Eq, uniffi::Record)]
+#[derive(
+    Serialize,
+    Deserialize,
+    Clone,
+    Debug,
+    PartialEq,
+    Hash,
+    Eq,
+    derive_more::Display,
+    uniffi::Record,
+)]
+#[display("{display_name} | {address}")]
 #[serde(rename_all = "camelCase")]
 pub struct Account {
     /// The ID of the network this account can be used with.
@@ -89,19 +79,19 @@ impl Account {
         display_name: DisplayName,
         appearance_id: AppearanceID,
     ) -> Self {
-        let address = AccountAddress::from_hd_factor_instance_virtual_entity_creation(
-            account_creating_factor_instance.clone(),
-        );
+        let address =
+            AccountAddress::from_hd_factor_instance_virtual_entity_creation(
+                account_creating_factor_instance.clone(),
+            );
         Self {
-            network_id: account_creating_factor_instance
-                .network_id()
-                .into(),
+            network_id: account_creating_factor_instance.network_id().into(),
             address,
             display_name,
-            security_state: UnsecuredEntityControl::with_entity_creating_factor_instance(
-                account_creating_factor_instance,
-            )
-            .into(),
+            security_state:
+                UnsecuredEntityControl::with_entity_creating_factor_instance(
+                    account_creating_factor_instance,
+                )
+                .into(),
             appearance_id,
             flags: EntityFlags::default().into(),
             on_ledger_settings: OnLedgerSettings::default(),
@@ -117,6 +107,12 @@ impl Identifiable for Account {
     }
 }
 
+impl PartialOrd for Account {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
 impl Ord for Account {
     fn cmp(&self, other: &Self) -> Ordering {
         match (&self.security_state, &other.security_state) {
@@ -129,18 +125,6 @@ impl Ord for Account {
                 .last_component()
                 .cmp(r.transaction_signing.derivation_path().last_component()),
         }
-    }
-}
-
-impl PartialOrd for Account {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl Display for Account {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} | {}", self.display_name, self.address)
     }
 }
 
@@ -184,10 +168,15 @@ impl Account {
         name: &str,
     ) -> Self {
         let mwp = MnemonicWithPassphrase::placeholder();
-        let bdfs = DeviceFactorSource::babylon(true, mwp.clone(), WalletClientModel::Iphone);
-        let private_hd_factor_source = PrivateHierarchicalDeterministicFactorSource::new(mwp, bdfs);
-        let account_creating_factor_instance =
-            private_hd_factor_source.derive_entity_creation_factor_instance(network_id, index);
+        let bdfs = DeviceFactorSource::babylon(
+            true,
+            mwp.clone(),
+            WalletClientModel::Iphone,
+        );
+        let private_hd_factor_source =
+            PrivateHierarchicalDeterministicFactorSource::new(mwp, bdfs);
+        let account_creating_factor_instance = private_hd_factor_source
+            .derive_entity_creation_factor_instance(network_id, index);
 
         Self::new(
             account_creating_factor_instance,
@@ -254,7 +243,7 @@ impl Account {
     pub fn placeholder_nebunet() -> Self {
         Self::placeholder_with_values(
             "account_tdx_b_1286wrrqrfcrfhthfrtdywe8alney8zu0ja5xrhcq2475ej08m9raqq"
-                .try_into()
+                .parse()
                 .unwrap(),
             DisplayName::default(),
             AppearanceID::default(),
@@ -265,7 +254,7 @@ impl Account {
     pub fn placeholder_kisharnet() -> Self {
         Self::placeholder_with_values(
             "account_tdx_c_1286wrrqrfcrfhthfrtdywe8alney8zu0ja5xrhcq2475ej0898vkq9"
-                .try_into()
+                .parse()
                 .unwrap(),
             DisplayName::default(),
             AppearanceID::default(),
@@ -276,7 +265,7 @@ impl Account {
     pub fn placeholder_adapanet() -> Self {
         Self::placeholder_with_values(
             "account_tdx_a_1286wrrqrfcrfhthfrtdywe8alney8zu0ja5xrhcq2475ej08srjqq0"
-                .try_into()
+                .parse()
                 .unwrap(),
             DisplayName::default(),
             AppearanceID::default(),
@@ -289,9 +278,9 @@ mod tests {
     use std::str::FromStr;
 
     use crate::{
-        assert_eq_after_json_roundtrip, AssetException, DepositAddressExceptionRule, DepositRule,
-        DepositorAddress, EntityFlag, EntityFlags, HasPlaceholder, OnLedgerSettings,
-        ThirdPartyDeposits,
+        assert_eq_after_json_roundtrip, AssetException,
+        DepositAddressExceptionRule, DepositRule, DepositorAddress, EntityFlag,
+        EntityFlags, HasPlaceholder, OnLedgerSettings, ThirdPartyDeposits,
     };
     use radix_engine_common::prelude::HashSet;
 
@@ -314,7 +303,7 @@ mod tests {
     fn new_with_address_only() {
         let address: AccountAddress =
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
-                .try_into()
+                .parse()
                 .unwrap();
         let account = Account::placeholder_with_values(
             address.clone(),
@@ -339,21 +328,6 @@ mod tests {
     }
 
     #[test]
-    fn display_name_get_set() {
-        let mut account = Account::placeholder_with_values(
-            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
-                .try_into()
-                .unwrap(),
-            DisplayName::new("Test").unwrap(),
-            AppearanceID::default(),
-        );
-        assert_eq!(account.display_name.value, "Test");
-        let new_display_name = DisplayName::new("New").unwrap();
-        account.display_name = new_display_name.clone();
-        assert_eq!(account.display_name, new_display_name);
-    }
-
-    #[test]
     fn update() {
         let mut account = Account::placeholder();
         assert_eq!(account.display_name.value, "Alice");
@@ -362,39 +336,22 @@ mod tests {
     }
 
     #[test]
-    fn flags_get_set() {
-        let mut account = Account::placeholder_with_values(
-            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
-                .try_into()
-                .unwrap(),
-            DisplayName::new("Test").unwrap(),
-            AppearanceID::default(),
-        );
-        assert_eq!(account.flags, EntityFlags::default());
-        let new_flags = EntityFlags::with_flag(EntityFlag::DeletedByUser);
-        account.flags = new_flags.clone();
-        assert_eq!(account.flags, new_flags);
-    }
-
-    #[test]
     fn on_ledger_settings_get_set() {
         let mut account = Account::placeholder_with_values(
-            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
-                .try_into()
-                .unwrap(),
+            AccountAddress::placeholder_alice(),
             DisplayName::new("Test").unwrap(),
             AppearanceID::default(),
         );
         assert_eq!(account.on_ledger_settings, OnLedgerSettings::default());
         let excp1 = AssetException::new(
             "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
-                .try_into()
+                .parse()
                 .unwrap(),
             DepositAddressExceptionRule::Allow,
         );
         let excp2 = AssetException::new(
             "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
-                .try_into()
+                .parse()
                 .unwrap(),
             DepositAddressExceptionRule::Allow,
         );
@@ -403,7 +360,7 @@ mod tests {
             [excp1, excp2],
             [DepositorAddress::ResourceAddress {
                 value: "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
-                    .try_into()
+                    .parse()
                     .unwrap(),
             }],
         );
@@ -416,7 +373,8 @@ mod tests {
             DepositRule::DenyAll
         );
 
-        account.on_ledger_settings.third_party_deposits.deposit_rule = DepositRule::AcceptAll;
+        account.on_ledger_settings.third_party_deposits.deposit_rule =
+            DepositRule::AcceptAll;
         assert_eq!(
             account.on_ledger_settings.third_party_deposits.deposit_rule,
             DepositRule::AcceptAll

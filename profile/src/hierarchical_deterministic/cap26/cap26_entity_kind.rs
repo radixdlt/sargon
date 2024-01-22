@@ -1,10 +1,4 @@
-use std::fmt::Display;
-
-use serde_repr::{Deserialize_repr, Serialize_repr};
-use strum::FromRepr;
-
-use crate::HDPathValue;
-use enum_as_inner::EnumAsInner;
+use crate::prelude::*;
 
 /// Account or Identity (used by Personas) part of a CAP26 derivation
 /// path.
@@ -14,49 +8,38 @@ use enum_as_inner::EnumAsInner;
     FromRepr,
     Clone,
     Copy,
-    Debug,
     EnumAsInner,
     PartialEq,
     Eq,
     Hash,
     PartialOrd,
     Ord,
+    derive_more::Display,
+    derive_more::Debug,
     uniffi::Enum,
 )]
 #[repr(u32)]
 pub enum CAP26EntityKind {
-    /// An account entity type
+    /// An Account entity type
+    #[display("Account")]
     Account = 525,
 
-    /// Used by Persona
+    /// An Identity entity type (used by Personas)
+    #[display("Identity")]
     Identity = 618,
 }
 
-impl Display for CAP26EntityKind {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.description())
-    }
-}
 impl CAP26EntityKind {
     /// The raw representation of this entity kind, an `HDPathValue`.
     pub fn discriminant(&self) -> HDPathValue {
         *self as HDPathValue
     }
-
-    fn description(&self) -> String {
-        match self {
-            Self::Account => "Account".to_string(),
-            Self::Identity => "Identity".to_string(),
-        }
-    }
 }
 
 #[cfg(test)]
 mod tests {
-    use std::collections::BTreeSet;
 
-    use crate::{assert_json_roundtrip, assert_json_value_eq_after_roundtrip, CAP26EntityKind};
-    use serde_json::json;
+    use crate::prelude::*;
 
     #[test]
     fn discriminant() {
@@ -65,9 +48,15 @@ mod tests {
     }
 
     #[test]
-    fn format() {
+    fn display() {
         assert_eq!(format!("{}", CAP26EntityKind::Account), "Account");
         assert_eq!(format!("{}", CAP26EntityKind::Identity), "Identity");
+    }
+
+    #[test]
+    fn debug() {
+        assert_eq!(format!("{:?}", CAP26EntityKind::Account), "Account");
+        assert_eq!(format!("{:?}", CAP26EntityKind::Identity), "Identity");
     }
 
     #[test]
@@ -83,8 +72,11 @@ mod tests {
     #[test]
     fn hash() {
         assert_eq!(
-            BTreeSet::from_iter([CAP26EntityKind::Account, CAP26EntityKind::Account].into_iter())
-                .len(),
+            BTreeSet::from_iter(
+                [CAP26EntityKind::Account, CAP26EntityKind::Account]
+                    .into_iter()
+            )
+            .len(),
             1
         );
     }
@@ -96,7 +88,10 @@ mod tests {
 
     #[test]
     fn json_roundtrip() {
-        assert_json_value_eq_after_roundtrip(&CAP26EntityKind::Account, json!(525));
+        assert_json_value_eq_after_roundtrip(
+            &CAP26EntityKind::Account,
+            json!(525),
+        );
         assert_json_roundtrip(&CAP26EntityKind::Account);
     }
 }

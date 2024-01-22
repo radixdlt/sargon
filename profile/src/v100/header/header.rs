@@ -1,32 +1,29 @@
-use std::fmt::Display;
-
-use std::str::FromStr;
-
-use crate::HasPlaceholder;
-
-use iso8601_timestamp::Timestamp;
-use serde::{Deserialize, Serialize};
-use uuid::Uuid;
-
-use crate::{id, now};
-
-use crate::ProfileSnapshotVersion;
-
-use super::{content_hint::ContentHint, device_info::DeviceInfo};
+use crate::prelude::*;
 
 /// The header of a Profile(Snapshot) contains crucial metadata
 /// about this Profile, such as which JSON data format it is
 /// compatible with and which device was used to create it and
 /// a hint about its contents.
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(
+    Serialize,
+    Deserialize,
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    Hash,
+    derive_more::Display,
+    uniffi::Record,
+)]
 #[serde(rename_all = "camelCase")]
+#[display("#{} v={}, content: {}", id, snapshot_version, content_hint)]
 pub struct Header {
     /// A versioning number that is increased when breaking
     /// changes is made to ProfileSnapshot JSON data format.
     pub snapshot_version: ProfileSnapshotVersion,
 
     /// An immutable and unique identifier of a Profile.
-    pub id: Uuid,
+    pub id: ProfileID,
 
     /// The device which was used to create the Profile.
     pub creating_device: DeviceInfo,
@@ -54,7 +51,7 @@ impl Header {
     /// Instantiates a new `Header` using the default snapshot version and
     /// the specified values, most prominently a creating device (`DeviceInfo`).
     pub fn with_values(
-        id: Uuid,
+        id: ProfileID,
         creating_device: DeviceInfo,
         content_hint: ContentHint,
         last_modified: Timestamp,
@@ -72,23 +69,26 @@ impl Header {
     /// Instantiates a new `Header` with creating and last used on `DeviceInfo` with
     /// "Unknown device" as description, and empty content hint
     pub fn new(creating_device: DeviceInfo) -> Self {
-        Self::with_values(id(), creating_device, ContentHint::new(), now())
+        Self::with_values(
+            profile_id(),
+            creating_device,
+            ContentHint::new(),
+            now(),
+        )
+    }
+}
+
+impl Identifiable for Header {
+    type ID = ProfileID;
+
+    fn id(&self) -> Self::ID {
+        self.id.clone()
     }
 }
 
 impl Default for Header {
     fn default() -> Self {
         Self::new(DeviceInfo::default())
-    }
-}
-
-impl Display for Header {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "#{} v={}, content: {}",
-            self.id, self.snapshot_version, self.content_hint
-        )
     }
 }
 
@@ -103,7 +103,8 @@ impl HasPlaceholder for Header {
             "iPhone".to_string(),
         );
         Header::with_values(
-            Uuid::from_str("12345678-bbbb-cccc-dddd-abcd12345678").unwrap(),
+            ProfileID::from_str("12345678-bbbb-cccc-dddd-abcd12345678")
+                .unwrap(),
             device,
             ContentHint::with_counters(4, 0, 2),
             date,
@@ -120,7 +121,8 @@ impl HasPlaceholder for Header {
             "iPhone".to_string(),
         );
         Header::with_values(
-            Uuid::from_str("87654321-bbbb-cccc-dddd-87654321dcba").unwrap(),
+            ProfileID::from_str("87654321-bbbb-cccc-dddd-87654321dcba")
+                .unwrap(),
             device,
             ContentHint::new(),
             date,
@@ -130,18 +132,7 @@ impl HasPlaceholder for Header {
 
 #[cfg(test)]
 pub mod tests {
-
-    use std::str::FromStr;
-
-    use crate::{assert_eq_after_json_roundtrip, id, HasPlaceholder};
-    use crate::{
-        v100::header::{content_hint::ContentHint, device_info::DeviceInfo},
-        ProfileSnapshotVersion,
-    };
-    use iso8601_timestamp::Timestamp;
-    use uuid::Uuid;
-
-    use super::Header;
+    use crate::prelude::*;
 
     #[test]
     fn equality() {
@@ -199,13 +190,13 @@ pub mod tests {
             date.clone(),
             "iPhone".to_string(),
         );
-        let sut =
-            Header::with_values(
-                Uuid::from_str("12345678-bbbb-cccc-dddd-abcd12345678").unwrap(),
-                device,
-                ContentHint::new(),
-                date,
-            );
+        let sut = Header::with_values(
+            ProfileID::from_str("12345678-bbbb-cccc-dddd-abcd12345678")
+                .unwrap(),
+            device,
+            ContentHint::new(),
+            date,
+        );
         assert_eq!(format!("{sut}"), "#12345678-bbbb-cccc-dddd-abcd12345678 v=100, content: #networks: 0, #accounts: 0, #personas: 0");
     }
 
@@ -221,7 +212,7 @@ pub mod tests {
 
     #[test]
     fn get_id() {
-        let value = id();
+        let value = profile_id();
         let sut = Header {
             id: value.clone(),
             ..Default::default()
@@ -242,7 +233,9 @@ pub mod tests {
 
 #[cfg(test)]
 mod uniffi_tests {
-    use crate::{new_header_placeholder, new_header_placeholder_other, HasPlaceholder};
+    use crate::{
+        new_header_placeholder, new_header_placeholder_other, HasPlaceholder,
+    };
 
     use super::Header;
 
@@ -250,5 +243,12 @@ mod uniffi_tests {
     fn equality_placeholders() {
         assert_eq!(Header::placeholder(), new_header_placeholder());
         assert_eq!(Header::placeholder_other(), new_header_placeholder_other());
+    }
+
+    #[test]
+    fn header_identifiable() {
+        use identified_vec::Identifiable;
+        let sut = Header::placeholder();
+        assert_eq!(&sut.id(), &sut.id);
     }
 }

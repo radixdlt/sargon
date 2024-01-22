@@ -1,23 +1,11 @@
-use std::fmt::Debug;
-
-use identified_vec::IsIdentifiedVec;
-use serde::{Deserialize, Serialize};
-
-use crate::CommonError;
-
-use crate::HasPlaceholder;
-use crate::PrivateHierarchicalDeterministicFactorSource;
-
-use super::{
-    Account, AccountAddress, AppPreferences, FactorSourceID, FactorSources, Header, IsFactorSource,
-    Networks,
-};
-
+use crate::prelude::*;
 /// Representation of the Radix Wallet, contains a list of
 /// users Accounts, Personas, Authorized Dapps per network
 /// the user has used. It also contains all FactorSources,
 /// FactorInstances and wallet App preferences.
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(
+    Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, uniffi::Record,
+)]
 #[serde(rename_all = "camelCase")]
 pub struct Profile {
     /// The header of a Profile(Snapshot) contains crucial metadata
@@ -41,6 +29,14 @@ pub struct Profile {
 }
 
 #[uniffi::export]
+pub fn new_profile(
+    private_hd_factor_source: PrivateHierarchicalDeterministicFactorSource,
+    creating_device_name: String,
+) -> Profile {
+    Profile::new(private_hd_factor_source, creating_device_name.as_str())
+}
+
+#[uniffi::export]
 pub fn new_profile_placeholder() -> Profile {
     Profile::placeholder()
 }
@@ -53,10 +49,17 @@ pub fn new_profile_placeholder_other() -> Profile {
 impl Profile {
     /// Creates a new Profile from the `PrivateHierarchicalDeterministicFactorSource`, without any
     /// networks (thus no accounts), with creating device info as "unknown".
-    pub fn new(private_device_factor_source: PrivateHierarchicalDeterministicFactorSource) -> Self {
+    pub fn new(
+        private_device_factor_source: PrivateHierarchicalDeterministicFactorSource,
+        creating_device_name: &str,
+    ) -> Self {
         let bdfs = private_device_factor_source.factor_source;
+        let creating_device = DeviceInfo::with_description(
+            format!("{} - {}", creating_device_name, bdfs.hint.model).as_str(),
+        );
+        let header = Header::new(creating_device);
         Self::with(
-            Header::default(),
+            header,
             FactorSources::with_bdfs(bdfs),
             AppPreferences::default(),
             Networks::new(),
@@ -81,8 +84,17 @@ impl Profile {
 }
 
 impl Profile {
+    /// Returns the unique ID of this Profile (just an alias for `header.id`).
+    pub fn id(&self) -> ProfileID {
+        self.header.id.clone()
+    }
+
     /// Returns a clone of the updated account if found, else None.
-    pub fn update_account<F>(&mut self, address: &AccountAddress, mutate: F) -> Option<Account>
+    pub fn update_account<F>(
+        &mut self,
+        address: &AccountAddress,
+        mutate: F,
+    ) -> Option<Account>
     where
         F: FnMut(&mut Account) -> (),
     {
@@ -93,15 +105,20 @@ impl Profile {
         &mut self,
         factor_source_id: &FactorSourceID,
         mut mutate: M,
-    ) -> Result<bool, CommonError>
+    ) -> Result<bool>
     where
         S: IsFactorSource,
-        M: FnMut(S) -> Result<S, CommonError>,
+        M: FnMut(S) -> Result<S>,
     {
         self.factor_sources.try_update_with(factor_source_id, |f| {
             S::try_from(f.clone())
-                .map_err(|_| CommonError::CastFactorSourceWrongKind)
-                .and_then(|element| mutate(element).map(|modified| modified.into()))
+                .map_err(|_| CommonError::CastFactorSourceWrongKind {
+                    expected: S::kind(),
+                    found: f.factor_source_kind(),
+                })
+                .and_then(|element| {
+                    mutate(element).map(|modified| modified.into())
+                })
         })
     }
 }
@@ -134,16 +151,7 @@ impl HasPlaceholder for Profile {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashSet;
-
-    use identified_vec::{IsIdentifiedVec, ItemsCloned};
-
-    use crate::{
-        assert_eq_after_json_roundtrip, AppPreferences, CommonError, DeviceFactorSource,
-        DisplayName, FactorSourceCryptoParameters, FactorSourceID, FactorSources, HasPlaceholder,
-        Header, LedgerHardwareWalletFactorSource, NetworkID, Networks,
-        PrivateHierarchicalDeterministicFactorSource, Profile, SLIP10Curve, WalletClientModel,
-    };
+    use crate::prelude::*;
 
     #[test]
     fn inequality() {
@@ -159,14 +167,16 @@ mod tests {
     #[test]
     fn update_factor_source_not_update_when_factor_source_not_found() {
         let mut sut = Profile::placeholder();
-        let wrong_id: &FactorSourceID = &LedgerHardwareWalletFactorSource::placeholder_other()
-            .id
-            .into();
+        let wrong_id: &FactorSourceID =
+            &LedgerHardwareWalletFactorSource::placeholder_other()
+                .id
+                .into();
 
         assert_eq!(
-            sut.update_factor_source(wrong_id, |lfs: LedgerHardwareWalletFactorSource| {
-                Ok(lfs)
-            }),
+            sut.update_factor_source(
+                wrong_id,
+                |lfs: LedgerHardwareWalletFactorSource| { Ok(lfs) }
+            ),
             Ok(false)
         );
     }
@@ -224,7 +234,8 @@ mod tests {
     }
 
     #[test]
-    fn add_supported_curve_to_factor_source_failure_cast_wrong_factor_source_kind() {
+    fn add_supported_curve_to_factor_source_failure_cast_wrong_factor_source_kind(
+    ) {
         let mut sut = Profile::placeholder();
         let id: &FactorSourceID = &DeviceFactorSource::placeholder().id.into();
 
@@ -246,12 +257,18 @@ mod tests {
         );
 
         assert_eq!(
-            sut.update_factor_source(id, |mut lfs: LedgerHardwareWalletFactorSource| {
-                lfs.common.crypto_parameters =
+            sut.update_factor_source(
+                id,
+                |mut lfs: LedgerHardwareWalletFactorSource| {
+                    lfs.common.crypto_parameters =
                     FactorSourceCryptoParameters::babylon_olympia_compatible();
-                Ok(lfs)
-            }),
-            Err(CommonError::CastFactorSourceWrongKind)
+                    Ok(lfs)
+                }
+            ),
+            Err(CommonError::CastFactorSourceWrongKind {
+                expected: FactorSourceKind::LedgerHQHardwareWallet,
+                found: FactorSourceKind::Device
+            })
         );
 
         // Remains unchanged
@@ -317,9 +334,12 @@ mod tests {
         let set = (0..n)
             .into_iter()
             .map(|_| {
-                Profile::new(PrivateHierarchicalDeterministicFactorSource::generate_new(
-                    WalletClientModel::Unknown,
-                ))
+                Profile::new(
+                    PrivateHierarchicalDeterministicFactorSource::generate_new(
+                        WalletClientModel::Unknown,
+                    ),
+                    "Foo",
+                )
             })
             .collect::<HashSet<_>>();
         assert_eq!(set.len(), n);
@@ -652,7 +672,11 @@ mod tests {
 
 #[cfg(test)]
 mod uniffi_tests {
-    use crate::{new_profile_placeholder, new_profile_placeholder_other, HasPlaceholder};
+    use crate::{
+        new_profile_placeholder, new_profile_placeholder_other,
+        BaseIsFactorSource, HasPlaceholder,
+        PrivateHierarchicalDeterministicFactorSource,
+    };
 
     use super::Profile;
 
@@ -662,6 +686,17 @@ mod uniffi_tests {
         assert_eq!(
             Profile::placeholder_other(),
             new_profile_placeholder_other()
+        );
+    }
+
+    #[test]
+    fn new_private_hd() {
+        let private =
+            PrivateHierarchicalDeterministicFactorSource::placeholder();
+        let lhs = super::new_profile(private.clone(), "iPhone".to_string());
+        assert_eq!(
+            lhs.bdfs().factor_source_id(),
+            private.factor_source.factor_source_id()
         );
     }
 }

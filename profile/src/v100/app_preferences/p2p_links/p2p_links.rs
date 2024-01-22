@@ -1,6 +1,4 @@
-use super::p2p_link::P2PLink;
-
-use crate::{HasPlaceholder, IdentifiedVecVia};
+use crate::prelude::*;
 
 /// Collection of clients user have connected P2P with, typically these
 /// are WebRTC connections with DApps, but might be Android or iPhone
@@ -16,7 +14,10 @@ impl Default for P2PLinks {
 impl HasPlaceholder for P2PLinks {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
-        Self::from_iter([P2PLink::placeholder_brave(), P2PLink::placeholder_chrome()])
+        Self::from_iter([
+            P2PLink::placeholder_brave(),
+            P2PLink::placeholder_chrome(),
+        ])
     }
 
     /// A placeholder used to facilitate unit tests.
@@ -30,36 +31,35 @@ impl HasPlaceholder for P2PLinks {
 
 #[cfg(test)]
 mod tests {
-    use identified_vec::IsIdentifiedVec;
-
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder, P2PLink};
-
-    use super::P2PLinks;
-
+    use crate::prelude::*;
     #[test]
     fn equality() {
         assert_eq!(P2PLinks::placeholder(), P2PLinks::placeholder());
-        assert_eq!(P2PLinks::placeholder_other(), P2PLinks::placeholder_other());
+        assert_eq!(
+            P2PLinks::placeholder_other(),
+            P2PLinks::placeholder_other()
+        );
     }
 
     #[test]
     fn inequality() {
         assert_ne!(P2PLinks::placeholder(), P2PLinks::placeholder_other());
     }
-    // #[test]
-    // fn display() {
-    //     let mut sut = P2PLinks::new();
-    //     sut.append(P2PLink::placeholder_duckduckgo());
-    //     assert_eq!(format!("{}", sut), "[P2PLink { connection_password: RadixConnectPassword(deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead), display_name: \"DuckDuckGo on Mac Pro\" }]");
-    // }
 
-    // #[test]
-    // fn into_iter() {
-    //     let mut sut = P2PLinks::new();
-    //     sut.append(P2PLink::placeholder_duckduckgo());
-    //     sut.append(P2PLink::placeholder_chrome());
-    //     assert!(sut.into_iter().any(|p| p.display_name().contains("Chrome")));
-    // }
+    #[test]
+    fn display() {
+        let mut sut = P2PLinks::new();
+        sut.append(P2PLink::placeholder_duckduckgo());
+        assert_eq!(format!("{}", sut), "[P2PLink { display_name: 'DuckDuckGo on Mac Pro', connection_password: 'deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead' }]");
+    }
+
+    #[test]
+    fn into_iter() {
+        let mut sut = P2PLinks::new();
+        sut.append(P2PLink::placeholder_duckduckgo());
+        sut.append(P2PLink::placeholder_chrome());
+        assert!(sut.into_iter().any(|p| p.display_name.contains("Chrome")));
+    }
 
     #[test]
     fn default_is_empty() {
@@ -88,8 +88,10 @@ mod tests {
 
     #[test]
     fn duplicates_are_not_allowed() {
-        let mut sut =
-            P2PLinks::from_iter([P2PLink::placeholder_brave(), P2PLink::placeholder_chrome()]);
+        let mut sut = P2PLinks::from_iter([
+            P2PLink::placeholder_brave(),
+            P2PLink::placeholder_chrome(),
+        ]);
         let (inserted, _) = sut.append(P2PLink::placeholder_brave());
         assert_eq!(inserted, false);
     }

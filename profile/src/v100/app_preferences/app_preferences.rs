@@ -1,13 +1,21 @@
-use serde::{Deserialize, Serialize};
-
-use crate::{AppDisplay, Gateways, HasPlaceholder, P2PLinks, Security, Transaction};
+use crate::prelude::*;
 
 /// Collection of all settings, preferences and configuration related to how the wallet
 /// behaves and looks.
 ///
 /// Current and other saved Gateways, security settings, connected P2P clients,
 /// App Display settings and preferences for transaction.
-#[derive(Debug, Default, Deserialize, Serialize, PartialEq, Eq, Clone, Hash, uniffi::Record)]
+#[derive(
+    Debug,
+    Default,
+    Deserialize,
+    Serialize,
+    PartialEq,
+    Eq,
+    Clone,
+    Hash,
+    uniffi::Record,
+)]
 #[serde(rename_all = "camelCase")]
 pub struct AppPreferences {
     /// Display settings in the wallet app, such as appearances, currency etc.
@@ -82,13 +90,14 @@ impl HasPlaceholder for AppPreferences {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
-
-    use super::{AppDisplay, AppPreferences, Gateways, P2PLinks, Security, Transaction};
+    use crate::prelude::*;
 
     #[test]
     fn equality() {
-        assert_eq!(AppPreferences::placeholder(), AppPreferences::placeholder());
+        assert_eq!(
+            AppPreferences::placeholder(),
+            AppPreferences::placeholder()
+        );
         assert_eq!(
             AppPreferences::placeholder_other(),
             AppPreferences::placeholder_other()
@@ -210,7 +219,8 @@ mod tests {
 #[cfg(test)]
 mod uniffi_tests {
     use crate::{
-        new_app_preferences_placeholder, new_app_preferences_placeholder_other, HasPlaceholder,
+        new_app_preferences_placeholder, new_app_preferences_placeholder_other,
+        HasPlaceholder,
     };
 
     use super::AppPreferences;

@@ -1,10 +1,6 @@
-use std::{ops::Deref, str::FromStr};
-
-use crate::CommonError;
+use crate::prelude::*;
 use radix_engine_common::math::Decimal as NativeDecimal;
 use radix_engine_toolkit_json::models::common::SerializableDecimal;
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use std::{cmp::Ordering, fmt::Display};
 
 // FIXME: Use RET's type!
 #[derive(Clone, Debug, Eq, Ord, Hash, uniffi::Record, Default)]
@@ -43,8 +39,10 @@ impl Decimal {
 }
 
 impl Serialize for Decimal {
-    /// Serializes this `HDPath` into its bech32 address string as JSON.
-    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
+    fn serialize<S>(
+        &self,
+        serializer: S,
+    ) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
     where
         S: Serializer,
     {
@@ -54,9 +52,10 @@ impl Serialize for Decimal {
 }
 
 impl<'de> Deserialize<'de> for Decimal {
-    /// Tries to deserializes a JSON string as a bech32 address into an `HDPath`.
     #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Decimal, D::Error> {
+        use std::ops::Deref;
+
         let s = SerializableDecimal::deserialize(d)?;
         let native: NativeDecimal = *s.deref();
         Ok(Self::from_native(native))
@@ -64,19 +63,19 @@ impl<'de> Deserialize<'de> for Decimal {
 }
 
 impl Decimal {
-    pub fn try_from_str(s: &str) -> Result<Self, CommonError> {
+    pub fn try_from_str(s: &str) -> Result<Self> {
         Self::new(s.to_string())
     }
 }
 
-impl Display for Decimal {
+impl std::fmt::Display for Decimal {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.native())
     }
 }
 
 impl Decimal {
-    pub fn new(value: String) -> Result<Self, CommonError> {
+    pub fn new(value: String) -> Result<Self> {
         value
             .parse::<NativeDecimal>()
             .map(|native| Self::from_native(native))
@@ -115,7 +114,7 @@ impl TryInto<Decimal> for &str {
 impl TryFrom<&[u8]> for Decimal {
     type Error = crate::CommonError;
 
-    fn try_from(slice: &[u8]) -> Result<Self, Self::Error> {
+    fn try_from(slice: &[u8]) -> Result<Self> {
         NativeDecimal::try_from(slice)
             .map(Self::from_native)
             .map_err(|_| CommonError::DecimalError)
@@ -124,16 +123,7 @@ impl TryFrom<&[u8]> for Decimal {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashSet;
-
-    use serde_json::json;
-
-    use crate::{
-        assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
-        assert_json_value_ne_after_roundtrip, generate_32_bytes, generate_bytes, CommonError,
-    };
-
-    use super::Decimal;
+    use crate::prelude::*;
 
     #[test]
     fn eq() {
@@ -209,12 +199,14 @@ mod tests {
 
     #[test]
     fn from_str() {
-        let a =
-            Decimal::try_from_str("3138550867693340381917894711603833208051.177722232017256447")
-                .unwrap();
-        let b =
-            Decimal::try_from_str("3036550867693340381917894711603833208050.177722232017256447")
-                .unwrap();
+        let a = Decimal::try_from_str(
+            "3138550867693340381917894711603833208051.177722232017256447",
+        )
+        .unwrap();
+        let b = Decimal::try_from_str(
+            "3036550867693340381917894711603833208050.177722232017256447",
+        )
+        .unwrap();
         assert_eq!(a > b, true);
     }
 
@@ -248,13 +240,16 @@ mod tests {
 
     #[test]
     fn json_roundtrip() {
-        let a: Decimal = "3138550867693340381917894711603833208051.177722232017256447"
-            .try_into()
-            .unwrap();
+        let a: Decimal =
+            "3138550867693340381917894711603833208051.177722232017256447"
+                .try_into()
+                .unwrap();
 
         assert_json_value_eq_after_roundtrip(
             &a,
-            json!("3138550867693340381917894711603833208051.177722232017256447"),
+            json!(
+                "3138550867693340381917894711603833208051.177722232017256447"
+            ),
         );
         assert_json_roundtrip(&a);
         assert_json_value_ne_after_roundtrip(&a, json!("3.1415"));
@@ -265,7 +260,9 @@ mod tests {
         let n = 100;
         let set = (0..n)
             .into_iter()
-            .map(|_| Decimal::try_from(generate_bytes::<24>().as_slice()).unwrap())
+            .map(|_| {
+                Decimal::try_from(generate_bytes::<24>().as_slice()).unwrap()
+            })
             .collect::<HashSet<_>>();
         assert_eq!(set.len(), n);
     }

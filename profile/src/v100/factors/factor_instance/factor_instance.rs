@@ -1,15 +1,8 @@
-use crate::HierarchicalDeterministicPublicKey;
-use serde::{Deserialize, Serialize};
+use crate::prelude::*;
 
-use super::{
-    badge_virtual_source::FactorInstanceBadgeVirtualSource,
-    factor_instance_badge::FactorInstanceBadge,
-};
-use crate::v100::factors::factor_source_id::FactorSourceID;
-
-use crate::HasPlaceholder;
-
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(
+    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
+)]
 pub struct FactorInstance {
     /// The ID of the `FactorSource` that was used to produce this
     /// factor instance. We will lookup the `FactorSource` in the
@@ -25,7 +18,10 @@ pub struct FactorInstance {
 }
 
 impl FactorInstance {
-    pub fn new(factor_source_id: FactorSourceID, badge: FactorInstanceBadge) -> Self {
+    pub fn new(
+        factor_source_id: FactorSourceID,
+        badge: FactorInstanceBadge,
+    ) -> Self {
         Self {
             factor_source_id,
             badge,
@@ -67,13 +63,14 @@ impl HasPlaceholder for FactorInstance {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
-
-    use super::FactorInstance;
+    use crate::prelude::*;
 
     #[test]
     fn equality() {
-        assert_eq!(FactorInstance::placeholder(), FactorInstance::placeholder());
+        assert_eq!(
+            FactorInstance::placeholder(),
+            FactorInstance::placeholder()
+        );
         assert_eq!(
             FactorInstance::placeholder_other(),
             FactorInstance::placeholder_other()

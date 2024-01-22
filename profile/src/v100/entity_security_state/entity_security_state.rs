@@ -1,13 +1,19 @@
-use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
-
-use super::unsecured_entity_control::UnsecuredEntityControl;
-
-use crate::HasPlaceholder;
+use crate::prelude::*;
 
 /// Describes the state an entity - Account or Persona - is in, in regards to how
 /// the user controls it, i.e. if it is controlled by a single factor (private key)
 ///  or an `AccessController` with a potential Multi-Factor setup.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(
+    Serialize,
+    Deserialize,
+    Clone,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    EnumAsInner,
+    uniffi::Enum,
+)]
 #[serde(untagged, remote = "Self")]
 pub enum EntitySecurityState {
     /// The account is controlled by a single factor (private key)
@@ -19,7 +25,9 @@ pub enum EntitySecurityState {
 
 impl<'de> Deserialize<'de> for EntitySecurityState {
     #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D: Deserializer<'de>>(
+        deserializer: D,
+    ) -> Result<Self, D::Error> {
         // https://github.com/serde-rs/serde/issues/1343#issuecomment-409698470
         #[derive(Deserialize, Serialize)]
         struct Wrapper {
@@ -38,7 +46,8 @@ impl Serialize for EntitySecurityState {
     where
         S: Serializer,
     {
-        let mut state = serializer.serialize_struct("EntitySecurityState", 2)?;
+        let mut state =
+            serializer.serialize_struct("EntitySecurityState", 2)?;
         match self {
             EntitySecurityState::Unsecured { value } => {
                 state.serialize_field("discriminator", "unsecured")?;
@@ -73,9 +82,7 @@ impl HasPlaceholder for EntitySecurityState {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
-
-    use super::EntitySecurityState;
+    use crate::prelude::*;
 
     #[test]
     fn equality() {

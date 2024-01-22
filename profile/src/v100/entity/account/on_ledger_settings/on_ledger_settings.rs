@@ -1,6 +1,4 @@
-use serde::{Deserialize, Serialize};
-
-use super::ThirdPartyDeposits;
+use crate::prelude::*;
 
 /// Account settings that user has set on the account component
 /// On-Ledger, that is set via a transaction mutating the state
@@ -11,7 +9,17 @@ use super::ThirdPartyDeposits;
 ///
 /// These settings SHOULD be kept in sync between local state
 /// (in Profile) and On-Ledger.
-#[derive(Serialize, Deserialize, Default, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(
+    Serialize,
+    Deserialize,
+    Default,
+    Clone,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    uniffi::Record,
+)]
 #[serde(rename_all = "camelCase")]
 pub struct OnLedgerSettings {
     /// Controls the ability of third-parties to deposit into this account
@@ -29,17 +37,7 @@ impl OnLedgerSettings {
 
 #[cfg(test)]
 mod tests {
-
-    use crate::{
-        assert_eq_after_json_roundtrip, assert_json_roundtrip, assert_ne_after_json_roundtrip,
-    };
-
-    use crate::v100::{
-        AssetException, DepositAddressExceptionRule, DepositRule, DepositorAddress,
-        ThirdPartyDeposits,
-    };
-
-    use super::OnLedgerSettings;
+    use crate::prelude::*;
 
     #[test]
     fn get_third_party_deposits_then_mutate() {
@@ -89,13 +87,13 @@ mod tests {
     fn json_decode_deny_all_with_exceptions() {
         let excp1 = AssetException::new(
             "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
-                .try_into()
+                .parse()
                 .unwrap(),
             DepositAddressExceptionRule::Allow,
         );
         let excp2 = AssetException::new(
             "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
-                .try_into()
+                .parse()
                 .unwrap(),
             DepositAddressExceptionRule::Allow,
         );
@@ -105,7 +103,7 @@ mod tests {
             Vec::from_iter(
                 [DepositorAddress::ResourceAddress {
                     value: "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
-                        .try_into()
+                        .parse()
                         .unwrap(),
                 }]
                 .into_iter(),

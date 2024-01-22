@@ -1,11 +1,11 @@
-use serde::{Deserialize, Serialize};
-
-use crate::{FiatCurrency, HasPlaceholder};
+use crate::prelude::*;
 
 /// Settings related to displaying of information to the user inside the app.
 ///
 /// **N.B. neither of these settings are in fact not yet used by clients.**
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(
+    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
+)]
 #[serde(rename_all = "camelCase")]
 pub struct AppDisplay {
     /// If we should show the aggregate value of users portfolio in fiat currency
@@ -45,8 +45,7 @@ impl HasPlaceholder for AppDisplay {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, AppDisplay, HasPlaceholder};
-
+    use crate::prelude::*;
     #[test]
     fn equality() {
         assert_eq!(AppDisplay::placeholder(), AppDisplay::placeholder());

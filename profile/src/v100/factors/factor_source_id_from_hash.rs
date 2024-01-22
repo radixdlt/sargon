@@ -1,29 +1,29 @@
-use crate::Hex32Bytes;
-use crate::{GetIDPath, MnemonicWithPassphrase};
+use crate::prelude::*;
 use radix_engine_common::crypto::{blake2b_256_hash, Hash};
-use serde::{Deserialize, Serialize};
-
-use super::factor_source_kind::FactorSourceKind;
-
-use crate::HasPlaceholder;
 
 /// FactorSourceID from the blake2b hash of the special HD public key derived at `CAP26::GetID`,
 /// for a certain `FactorSourceKind`
 #[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, uniffi::Record,
+    Serialize,
+    Deserialize,
+    Clone,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    derive_more::Display,
+    derive_more::Debug,
+    uniffi::Record,
 )]
+#[display("{}", self.to_canonical_string())]
+#[debug("{}", self.to_canonical_string())]
 pub struct FactorSourceIDFromHash {
     /// The kind of the FactorSource this ID refers to, typically `device` or `ledger`.
     pub kind: FactorSourceKind,
 
     /// The blake2b hash of the special HD public key derived at `CAP26::GetID`.
     pub body: Hex32Bytes,
-}
-
-impl ToString for FactorSourceIDFromHash {
-    fn to_string(&self) -> String {
-        format!("{}:{}", self.kind.discriminant(), self.body.to_string())
-    }
 }
 
 impl FactorSourceIDFromHash {
@@ -39,15 +39,27 @@ impl FactorSourceIDFromHash {
         factor_source_kind: FactorSourceKind,
         mnemonic_with_passphrase: MnemonicWithPassphrase,
     ) -> Self {
-        let private_key = mnemonic_with_passphrase.derive_private_key(GetIDPath::default());
+        let private_key =
+            mnemonic_with_passphrase.derive_private_key(GetIDPath::default());
         let public_key_bytes = private_key.public_key().to_bytes();
         let hash: Hash = blake2b_256_hash(public_key_bytes);
         let body = Hex32Bytes::from(hash);
         Self::new(factor_source_kind, body)
     }
 
-    pub fn new_for_device(mnemonic_with_passphrase: MnemonicWithPassphrase) -> Self {
-        Self::from_mnemonic_with_passphrase(FactorSourceKind::Device, mnemonic_with_passphrase)
+    pub fn new_for_device(
+        mnemonic_with_passphrase: MnemonicWithPassphrase,
+    ) -> Self {
+        Self::from_mnemonic_with_passphrase(
+            FactorSourceKind::Device,
+            mnemonic_with_passphrase,
+        )
+    }
+}
+
+impl FactorSourceIDFromHash {
+    pub fn to_canonical_string(&self) -> String {
+        format!("{}:{}", self.kind.discriminant(), self.body.to_string())
     }
 }
 
@@ -88,10 +100,7 @@ impl FactorSourceIDFromHash {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
-    use crate::{Mnemonic, MnemonicWithPassphrase};
-
-    use super::FactorSourceIDFromHash;
+    use crate::prelude::*;
 
     #[test]
     fn equality() {
@@ -110,6 +119,22 @@ mod tests {
         assert_ne!(
             FactorSourceIDFromHash::placeholder(),
             FactorSourceIDFromHash::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn display() {
+        assert_eq!(
+            format!("{}", FactorSourceIDFromHash::placeholder()),
+            "device:3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+        );
+    }
+
+    #[test]
+    fn debug() {
+        assert_eq!(
+            format!("{:?}", FactorSourceIDFromHash::placeholder()),
+            "device:3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
         );
     }
 
@@ -167,7 +192,7 @@ mod tests {
     fn test_vector(vector: Vector) {
         let mwp = MnemonicWithPassphrase::with_passphrase(
             Mnemonic::from_phrase(&vector.phrase).unwrap(),
-            vector.pass,
+            BIP39Passphrase::new(vector.pass),
         );
         let id = FactorSourceIDFromHash::new_for_device(mwp);
         assert_eq!(id.to_string(), vector.expected_id);

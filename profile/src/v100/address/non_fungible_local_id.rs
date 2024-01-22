@@ -1,3 +1,5 @@
+use crate::prelude::*;
+
 use radix_engine_common::data::scrypto::model::NonFungibleLocalId as NativeNonFungibleLocalId;
 
 #[derive(Clone, Debug, uniffi::Enum, Hash, PartialEq, Eq)]
@@ -39,22 +41,18 @@ impl TryFrom<NonFungibleLocalId> for NativeNonFungibleLocalId {
 
     fn try_from(value: NonFungibleLocalId) -> Result<Self, crate::CommonError> {
         match value {
-            NonFungibleLocalId::Str { value } => {
-                Self::string(value).map_err(|_| Self::Error::InvalidNonFungibleLocalIDString)
-            }
-            NonFungibleLocalId::Bytes { value } => {
-                Self::bytes(value).map_err(|_| Self::Error::InvalidNonFungibleLocalIDBytes)
-            }
-            NonFungibleLocalId::Ruid { value } => {
-                value
-                    .try_into()
-                    .map(Self::ruid)
-                    .map_err(|value| Self::Error::InvalidLength {
-                        expected: 32,
-                        actual: value.len(),
-                        data: value,
-                    })
-            }
+            NonFungibleLocalId::Str { value } => Self::string(value)
+                .map_err(|_| Self::Error::InvalidNonFungibleLocalIDString),
+            NonFungibleLocalId::Bytes { value } => Self::bytes(value)
+                .map_err(|_| Self::Error::InvalidNonFungibleLocalIDBytes),
+            NonFungibleLocalId::Ruid { value } => value
+                .try_into()
+                .map(Self::ruid)
+                .map_err(|value| CommonError::InvalidLength {
+                    expected: 32,
+                    found: value.len(),
+                    data: value,
+                }),
             NonFungibleLocalId::Integer { value } => Ok(Self::integer(value)),
         }
     }
@@ -70,15 +68,13 @@ impl std::str::FromStr for NonFungibleLocalId {
 
 #[cfg(test)]
 mod tests {
-    use crate::{CommonError, Hex32Bytes};
+    use crate::prelude::*;
 
-    use super::NonFungibleLocalId;
     use radix_engine_common::data::scrypto::model::{
         BytesNonFungibleLocalId, IntegerNonFungibleLocalId,
         NonFungibleLocalId as NativeNonFungibleLocalId, RUIDNonFungibleLocalId,
         StringNonFungibleLocalId,
     };
-    use std::str::FromStr;
 
     #[test]
     fn from_str_ok() {
@@ -101,11 +97,15 @@ mod tests {
         let non_native = NonFungibleLocalId::Ruid {
             value: bytes.clone().to_vec(),
         };
-        let native = NativeNonFungibleLocalId::RUID(RUIDNonFungibleLocalId::new(bytes.clone()));
+        let native = NativeNonFungibleLocalId::RUID(
+            RUIDNonFungibleLocalId::new(bytes.clone()),
+        );
         assert_eq!(non_native.clone(), native.clone().into());
         assert_eq!(non_native.clone().try_into(), Ok(native.clone()));
         assert_eq!(
-            NonFungibleLocalId::from_str(non_native.clone().to_string().as_str()),
+            NonFungibleLocalId::from_str(
+                non_native.clone().to_string().as_str()
+            ),
             Ok(non_native)
         );
     }
@@ -122,7 +122,9 @@ mod tests {
         assert_eq!(non_native.clone(), native.clone().into());
         assert_eq!(non_native.clone().try_into(), Ok(native.clone()));
         assert_eq!(
-            NonFungibleLocalId::from_str(non_native.clone().to_string().as_str()),
+            NonFungibleLocalId::from_str(
+                non_native.clone().to_string().as_str()
+            ),
             Ok(non_native)
         );
     }
@@ -132,12 +134,15 @@ mod tests {
         let non_native = NonFungibleLocalId::Str {
             value: "test".to_string(),
         };
-        let native =
-            NativeNonFungibleLocalId::String(StringNonFungibleLocalId::new("test").unwrap());
+        let native = NativeNonFungibleLocalId::String(
+            StringNonFungibleLocalId::new("test").unwrap(),
+        );
         assert_eq!(non_native.clone(), native.clone().into());
         assert_eq!(non_native.clone().try_into(), Ok(native.clone()));
         assert_eq!(
-            NonFungibleLocalId::from_str(non_native.clone().to_string().as_str()),
+            NonFungibleLocalId::from_str(
+                non_native.clone().to_string().as_str()
+            ),
             Ok(non_native)
         );
     }
@@ -145,11 +150,15 @@ mod tests {
     #[test]
     fn from_native_integer() {
         let non_native = NonFungibleLocalId::Integer { value: 1234 };
-        let native = NativeNonFungibleLocalId::Integer(IntegerNonFungibleLocalId::new(1234));
+        let native = NativeNonFungibleLocalId::Integer(
+            IntegerNonFungibleLocalId::new(1234),
+        );
         assert_eq!(non_native.clone(), native.clone().into());
         assert_eq!(non_native.clone().try_into(), Ok(native.clone()));
         assert_eq!(
-            NonFungibleLocalId::from_str(non_native.clone().to_string().as_str()),
+            NonFungibleLocalId::from_str(
+                non_native.clone().to_string().as_str()
+            ),
             Ok(non_native)
         );
     }
@@ -161,7 +170,7 @@ mod tests {
             NativeNonFungibleLocalId::try_from(invalid),
             Err(CommonError::InvalidLength {
                 expected: 32,
-                actual: 0,
+                found: 0,
                 data: Vec::new()
             })
         );

@@ -1,19 +1,22 @@
-use serde::{de, Deserializer, Serialize, Serializer};
-use std::fmt::Display;
-
-use crate::{suffix_string, CommonError, PublicKey};
-
-use crate::{v100::AbstractEntityType, NetworkID};
-
-use crate::HasPlaceholder;
-
-use super::entity_address::EntityAddress;
+use crate::prelude::*;
 
 /// The address of an Account, a bech32 encoding of a public key hash
 /// that starts with the prefix `"account_"`, dependent on NetworkID, meaning the same
 /// public key used for two AccountAddresses on two different networks will not have
 /// the same address.
-#[derive(Clone, Debug, Default, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(
+    Clone,
+    Debug,
+    Default,
+    PartialEq,
+    Eq,
+    Hash,
+    SerializeDisplay,
+    DeserializeFromStr,
+    derive_more::Display,
+    uniffi::Record,
+)]
+#[display("{address}")]
 pub struct AccountAddress {
     /// Human readable address of an account. Always starts with `"account_"``, for example:
     ///
@@ -35,12 +38,15 @@ pub struct AccountAddress {
 }
 
 #[uniffi::export]
-pub fn new_account_address(bech32: String) -> Result<AccountAddress, CommonError> {
+pub fn new_account_address(bech32: String) -> Result<AccountAddress> {
     AccountAddress::try_from_bech32(bech32.as_str())
 }
 
 #[uniffi::export]
-pub fn new_account_address_from(public_key: PublicKey, network_id: NetworkID) -> AccountAddress {
+pub fn new_account_address_from(
+    public_key: PublicKey,
+    network_id: NetworkID,
+) -> AccountAddress {
     AccountAddress::new(public_key, network_id)
 }
 
@@ -84,22 +90,11 @@ impl AccountAddress {
     }
 }
 
-impl Serialize for AccountAddress {
-    /// Serializes this `AccountAddress` into its bech32 address string as JSON.
-    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_str(&self.address)
-    }
-}
+impl FromStr for AccountAddress {
+    type Err = CommonError;
 
-impl<'de> serde::Deserialize<'de> for AccountAddress {
-    /// Tries to deserializes a JSON string as a bech32 address into an `AccountAddress`.
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<AccountAddress, D::Error> {
-        let s = String::deserialize(d)?;
-        AccountAddress::try_from_bech32(&s).map_err(de::Error::custom)
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        AccountAddress::try_from_bech32(s)
     }
 }
 
@@ -114,28 +109,15 @@ impl EntityAddress for AccountAddress {
     // Underscored to decrease visibility. You SHOULD NOT call this function directly,
     // instead use `try_from_bech32` which performs proper validation. Impl types SHOULD
     // `panic` if `address` does not start with `Self::entity_type().hrp()`
-    fn __with_address_and_network_id(address: &str, network_id: NetworkID) -> Self {
+    fn __with_address_and_network_id(
+        address: &str,
+        network_id: NetworkID,
+    ) -> Self {
         assert!(address.starts_with(&Self::entity_type().hrp()), "Invalid address, you SHOULD NOT call this function directly, you should use `try_from_bech32` instead.");
         return Self {
             address: address.to_string(),
             network_id,
         };
-    }
-}
-
-impl TryInto<AccountAddress> for &str {
-    type Error = crate::CommonError;
-
-    /// Tries to deserializes a bech32 address into an `AccountAddress`.
-    fn try_into(self) -> Result<AccountAddress, Self::Error> {
-        AccountAddress::try_from_bech32(self)
-    }
-}
-
-impl Display for AccountAddress {
-    /// The full bech32 address.
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.address)
     }
 }
 
@@ -171,25 +153,14 @@ impl AccountAddress {
 #[cfg(test)]
 mod tests {
 
-    use std::str::FromStr;
-
-    use crate::PublicKey;
-    use crate::{CommonError as Error, Ed25519PublicKey};
-    use crate::{
-        HasPlaceholder,
-        {
-            assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
-            assert_json_value_ne_after_roundtrip,
-        },
-    };
-    use serde_json::json;
-
-    use crate::v100::address::{account_address::AccountAddress, entity_address::EntityAddress};
-    use crate::NetworkID;
+    use crate::prelude::*;
 
     #[test]
     fn equality() {
-        assert_eq!(AccountAddress::placeholder(), AccountAddress::placeholder());
+        assert_eq!(
+            AccountAddress::placeholder(),
+            AccountAddress::placeholder()
+        );
         assert_eq!(
             AccountAddress::placeholder_other(),
             AccountAddress::placeholder_other()
@@ -218,7 +189,7 @@ mod tests {
             AccountAddress::try_from_bech32(
                 "identity_tdx_21_12tljxea3s0mse52jmpvsphr0haqs86sung8d3qlhr763nxttj59650",
             ),
-            Err(Error::MismatchingEntityTypeWhileDecodingAddress)
+            Err(CommonError::MismatchingEntityTypeWhileDecodingAddress)
         );
     }
 
@@ -292,27 +263,25 @@ mod tests {
     fn invalid() {
         assert_eq!(
             AccountAddress::try_from_bech32("x"),
-            Err(Error::FailedToDecodeAddressFromBech32)
+            Err(CommonError::FailedToDecodeAddressFromBech32("x".to_owned()))
         )
     }
 
     #[test]
     fn invalid_checksum() {
+        let s = "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3apleasx";
         assert_eq!(
-            AccountAddress::try_from_bech32(
-                "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3apleasx"
-            ),
-            Err(Error::FailedToDecodeAddressFromBech32)
+            AccountAddress::try_from_bech32(s),
+            Err(CommonError::FailedToDecodeAddressFromBech32(s.to_owned()))
         )
     }
 
     #[test]
     fn invalid_entity_type() {
+        let s = "identity_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease";
         assert_eq!(
-            AccountAddress::try_from_bech32(
-                "identity_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
-            ),
-            Err(Error::FailedToDecodeAddressFromBech32)
+            AccountAddress::try_from_bech32(s),
+            Err(CommonError::FailedToDecodeAddressFromBech32(s.to_owned()))
         )
     }
 
@@ -320,7 +289,7 @@ mod tests {
     fn json_roundtrip() {
         let a: AccountAddress =
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
-                .try_into()
+                .parse()
                 .unwrap();
 
         assert_json_value_eq_after_roundtrip(
@@ -333,6 +302,17 @@ mod tests {
             json!("account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzdm"),
         );
     }
+
+    #[test]
+    fn json_roundtrip_fails_for_invalid() {
+        assert_json_value_fails::<AccountAddress>(
+            json!("identity_rdx12gzxlgre0glhh9jxaptm7tdth8j4w4r8ykpg2xjfv45nghzsjzrvmp")
+        );
+        assert_json_value_fails::<AccountAddress>(
+            json!("account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzzz")
+        );
+        assert_json_value_fails::<AccountAddress>(json!("super invalid"));
+    }
 }
 
 #[cfg(test)]
@@ -340,8 +320,9 @@ mod uniffi_tests {
     use std::str::FromStr;
 
     use crate::{
-        account_address_to_short, new_account_address, new_account_address_from, Ed25519PublicKey,
-        EntityAddress, NetworkID, PublicKey,
+        account_address_to_short, new_account_address,
+        new_account_address_from, Ed25519PublicKey, EntityAddress, NetworkID,
+        PublicKey,
     };
 
     use super::AccountAddress;

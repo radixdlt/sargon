@@ -1,13 +1,20 @@
-use crate::SLIP10Curve;
-use identified_vec::Identifiable;
-use serde::{Deserialize, Serialize};
+use crate::prelude::*;
 
 /// Which derivation path to used for some particular HD operations
 /// such as signing or public key derivation. Radix Babylon introduces
 /// a new scheme call Cap26 but we also need to support BIP44-like used
 /// by Olympia.
 #[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Enum,
+    Serialize,
+    Deserialize,
+    Clone,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    PartialOrd,
+    Ord,
+    uniffi::Enum,
 )]
 pub enum DerivationPathScheme {
     /// A BIP32 based derivation path scheme, using SLIP10.
@@ -51,16 +58,14 @@ impl DerivationPathScheme {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        assert_json_roundtrip, assert_json_value_eq_after_roundtrip,
-        assert_json_value_ne_after_roundtrip, DerivationPathScheme, SLIP10Curve,
-    };
-    use identified_vec::Identifiable;
-    use serde_json::json;
+    use crate::prelude::*;
 
     #[test]
     fn curve_from_scheme() {
-        assert_eq!(DerivationPathScheme::Cap26.curve(), SLIP10Curve::Curve25519);
+        assert_eq!(
+            DerivationPathScheme::Cap26.curve(),
+            SLIP10Curve::Curve25519
+        );
         assert_eq!(
             DerivationPathScheme::Bip44Olympia.curve(),
             SLIP10Curve::Secp256k1

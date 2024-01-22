@@ -1,14 +1,11 @@
-use crate::CommonError as Error;
-use crate::DerivationPathScheme;
-use crate::IdentifiedVecVia;
-use crate::SLIP10Curve;
-use identified_vec::IsIdentifiedVec;
-use serde::{Deserialize, Serialize};
+use crate::prelude::*;
 
 /// Cryptographic parameters a certain FactorSource supports, e.g. which Elliptic Curves
 /// it supports and which Hierarchical Deterministic (HD) derivations schemes it supports,
 /// if any.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(
+    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
+)]
 #[serde(rename_all = "camelCase")]
 pub struct FactorSourceCryptoParameters {
     /// Describes with which Elliptic Curves a Factor Source can be used, e.g. a
@@ -25,21 +22,23 @@ pub struct FactorSourceCryptoParameters {
     /// FactorSource does not support HD derivation.
     ///
     /// Either BIP44 or CAP26 (SLIP10)
-    pub supported_derivation_path_schemes: IdentifiedVecVia<DerivationPathScheme>,
+    pub supported_derivation_path_schemes:
+        IdentifiedVecVia<DerivationPathScheme>,
 }
 
 impl FactorSourceCryptoParameters {
     #[cfg(not(tarpaulin_include))] // false negative
-    pub fn new<I, J>(curves: I, schemes: J) -> Result<Self, Error>
+    pub fn new<I, J>(curves: I, schemes: J) -> Result<Self>
     where
         I: IntoIterator<Item = SLIP10Curve>,
         J: IntoIterator<Item = DerivationPathScheme>,
     {
         let supported_curves = IdentifiedVecVia::from_iter(curves);
         if supported_curves.len() == 0 {
-            return Err(Error::FactorSourceCryptoParametersSupportedCurvesInvalidSize);
+            return Err(CommonError::FactorSourceCryptoParametersSupportedCurvesInvalidSize);
         }
-        let supported_derivation_path_schemes = IdentifiedVecVia::from_iter(schemes);
+        let supported_derivation_path_schemes =
+            IdentifiedVecVia::from_iter(schemes);
 
         Ok(Self {
             supported_curves,
@@ -87,14 +86,7 @@ impl Default for FactorSourceCryptoParameters {
 
 #[cfg(test)]
 mod tests {
-    use identified_vec::IsIdentifiedVec;
-
-    use crate::DerivationPathScheme;
-    use crate::{assert_eq_after_json_roundtrip, SLIP10Curve};
-
-    use super::FactorSourceCryptoParameters;
-    use crate::CommonError as Error;
-
+    use crate::prelude::*;
     #[test]
     fn babylon_has_curve25519_as_first_curve() {
         assert_eq!(
@@ -191,7 +183,7 @@ mod tests {
     fn curves_must_not_be_empty() {
         assert_eq!(
             FactorSourceCryptoParameters::new([], []),
-            Err(Error::FactorSourceCryptoParametersSupportedCurvesInvalidSize)
+            Err(CommonError::FactorSourceCryptoParametersSupportedCurvesInvalidSize)
         );
     }
 

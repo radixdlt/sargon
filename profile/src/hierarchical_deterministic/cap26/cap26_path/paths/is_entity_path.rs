@@ -1,11 +1,14 @@
-use crate::{CAP26KeyKind, CAP26Path, CAP26Repr, HDPathError, HDPathValue, NetworkID};
+use crate::prelude::*;
 
-pub trait IsEntityPath: CAP26Repr + Into<CAP26Path> + TryFrom<CAP26Path> {
+// TODO: Merge trait IsEntityPath into trait EntityCAP26Path ?
+pub trait IsEntityPath:
+    EntityCAP26Path + Into<CAP26Path> + TryFrom<CAP26Path>
+{
     fn network_id(&self) -> NetworkID;
     fn key_kind(&self) -> CAP26KeyKind;
     fn index(&self) -> HDPathValue;
 }
-
+// TODO: Remove - not used???
 pub trait HasEntityPath<Path: IsEntityPath> {
     fn path(&self) -> Path;
 

@@ -1,2 +1,2 @@
 [files]
-extend-exclude = ["tarpaulin-report.html"]
+extend-exclude = ["tarpaulin-report.html", "profile/tests/vectors/fixtures/*.json"]

@@ -1,23 +1,44 @@
-use std::str::FromStr;
+use crate::prelude::*;
 
-use crate::HDPathError;
-use itertools::Itertools;
-use serde::{de, Deserializer, Serialize, Serializer};
 use slip10::path::BIP32Path;
 
-use super::hd_path_component::{HDPathComponent, HDPathValue};
-
-use thiserror::Error;
-
-#[derive(Debug, Error, PartialEq)]
-pub enum BIP32Error {
-    #[error("Invalid BIP32 path '{0}'.")]
-    InvalidBIP32Path(String),
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record)]
+#[derive(
+    Clone,
+    PartialEq,
+    Eq,
+    Hash,
+    PartialOrd,
+    Ord,
+    SerializeDisplay,
+    DeserializeFromStr,
+    derive_more::Display,
+    derive_more::Debug,
+    uniffi::Record,
+)]
+#[display("{}", self.to_bip32_string())]
+#[debug("{}", self.to_bip32_string())]
 pub struct HDPath {
     pub components: Vec<HDPathComponent>,
+}
+
+impl FromStr for HDPath {
+    type Err = crate::CommonError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        BIP32Path::from_str(s)
+            .map(|p| Self::from(p))
+            .map_err(|_| CommonError::InvalidBIP32Path(s.to_string()))
+    }
+}
+
+impl HasPlaceholder for HDPath {
+    fn placeholder() -> Self {
+        Self::from_str("m/44H/1022H/1H/525H/1460H/1H").unwrap()
+    }
+
+    fn placeholder_other() -> Self {
+        Self::from_str("m/44H/1022H/0H/0/0H").unwrap()
+    }
 }
 
 impl HDPath {
@@ -34,27 +55,26 @@ impl HDPath {
         return Self::from_components(vec);
     }
 
-    pub(crate) fn from_components(components: Vec<HDPathComponent>) -> Self {
-        Self { components }
+    pub(crate) fn from_components<I>(components: I) -> Self
+    where
+        I: IntoIterator<Item = HDPathComponent>,
+    {
+        Self {
+            components: components.into_iter().collect_vec(),
+        }
     }
 
     pub(crate) fn depth(&self) -> usize {
         self.components.len()
     }
 
-    pub fn from_str(s: &str) -> Result<Self, BIP32Error> {
-        BIP32Path::from_str(s)
-            .map(|p| Self::from(p))
-            .map_err(|_| BIP32Error::InvalidBIP32Path(s.to_string()))
-    }
-
     pub(crate) fn parse_try_map<T, F>(
         path: &Vec<HDPathComponent>,
         index: usize,
         try_map: F,
-    ) -> Result<T, HDPathError>
+    ) -> Result<T>
     where
-        F: Fn(HDPathValue) -> Result<T, HDPathError>,
+        F: Fn(HDPathValue) -> Result<T>,
     {
         let got = &path[index];
         try_map(got.index())
@@ -65,9 +85,9 @@ impl HDPath {
         index: usize,
         expected: HDPathComponent,
         err: F,
-    ) -> Result<&HDPathComponent, HDPathError>
+    ) -> Result<&HDPathComponent>
     where
-        F: Fn(HDPathValue) -> HDPathError,
+        F: Fn(HDPathValue) -> CommonError,
     {
         let got = &path[index];
         if got != &expected {
@@ -76,13 +96,17 @@ impl HDPath {
         Ok(got)
     }
 
-    pub(crate) fn try_parse_base_hdpath(
+    #[cfg(not(tarpaulin_include))] // false negative
+    pub(crate) fn try_parse_base_hdpath<F>(
         path: &HDPath,
-        depth_error: HDPathError,
-    ) -> Result<(HDPath, Vec<HDPathComponent>), HDPathError> {
-        use HDPathError::*;
-        if path.depth() < 2 {
-            return Err(depth_error);
+        depth_error: F,
+    ) -> Result<(HDPath, Vec<HDPathComponent>)>
+    where
+        F: FnOnce(usize) -> CommonError,
+    {
+        let expected_depth = 2;
+        if path.depth() < expected_depth {
+            return Err(depth_error(path.depth()));
         }
         let components = &path.components;
 
@@ -90,29 +114,33 @@ impl HDPath {
             components,
             0,
             HDPathComponent::bip44_purpose(),
-            Box::new(|v| BIP44PurposeNotFound(v)),
+            Box::new(|v| CommonError::BIP44PurposeNotFound(v)),
         )?;
 
         _ = Self::parse(
             components,
             1,
             HDPathComponent::bip44_cointype(),
-            Box::new(|v| CoinTypeNotFound(v)),
+            Box::new(|v| CommonError::CoinTypeNotFound(v)),
         )?;
         return Ok((path.clone(), components.clone()));
     }
 
-    pub(crate) fn try_parse_base(
+    pub(crate) fn try_parse_base<F>(
         s: &str,
-        depth_error: HDPathError,
-    ) -> Result<(HDPath, Vec<HDPathComponent>), HDPathError> {
-        let path = HDPath::from_str(s).map_err(|_| HDPathError::InvalidBIP32Path(s.to_string()))?;
-        return Self::try_parse_base_hdpath(&path, depth_error);
+        depth_error: F,
+    ) -> Result<(HDPath, Vec<HDPathComponent>)>
+    where
+        F: FnOnce(usize) -> CommonError,
+    {
+        HDPath::from_str(s)
+            .map_err(|_| CommonError::InvalidBIP32Path(s.to_string()))
+            .and_then(|p| Self::try_parse_base_hdpath(&p, depth_error))
     }
 }
 
-impl ToString for HDPath {
-    fn to_string(&self) -> String {
+impl HDPath {
+    fn to_bip32_string(&self) -> String {
         let rest = self
             .components
             .iter()
@@ -122,42 +150,80 @@ impl ToString for HDPath {
     }
 }
 
-impl Serialize for HDPath {
-    /// Serializes this `HDPath` into its bech32 address string as JSON.
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_str(&self.to_string())
-    }
-}
-
-impl<'de> serde::Deserialize<'de> for HDPath {
-    /// Tries to deserializes a JSON string as a bech32 address into an `HDPath`.
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<HDPath, D::Error> {
-        let s = String::deserialize(d)?;
-        HDPath::from_str(&s).map_err(de::Error::custom)
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use crate::{
-        assert_json_value_eq_after_roundtrip, assert_json_value_fails,
-        assert_json_value_ne_after_roundtrip,
-    };
-    use serde_json::json;
 
-    use super::HDPath;
+    use crate::prelude::*;
+
+    impl HDPath {
+        fn harden<I>(iter: I) -> Self
+        where
+            I: IntoIterator<Item = HDPathValue>,
+        {
+            HDPath {
+                components: iter
+                    .into_iter()
+                    .map(HDPathComponent::harden)
+                    .collect_vec(),
+            }
+        }
+    }
 
     #[test]
-    fn json_roundtrip() {
-        let str = "m/44H/1022H";
-        let parsed = HDPath::from_str(str).unwrap();
-        assert_json_value_eq_after_roundtrip(&parsed, json!(str));
-        assert_json_value_ne_after_roundtrip(&parsed, json!("m/44H/33H"));
+    fn equality() {
+        assert_eq!(HDPath::placeholder(), HDPath::placeholder());
+        assert_eq!(HDPath::placeholder_other(), HDPath::placeholder_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(HDPath::placeholder(), HDPath::placeholder_other());
+    }
+
+    #[test]
+    fn display() {
+        let path = HDPath::harden([44, 1022]);
+        assert_eq!(format!("{}", path), "m/44H/1022H");
+    }
+
+    #[test]
+    fn debug() {
+        let path = HDPath::harden([44, 1022]);
+        assert_eq!(format!("{:?}", path), "m/44H/1022H");
+    }
+
+    #[test]
+    fn from_str() {
+        assert_eq!(
+            HDPath::from_str("m/44H/1022H").unwrap(),
+            HDPath::harden([44, 1022])
+        );
+    }
+
+    #[test]
+    fn ord() {
+        assert!(HDPath::harden([44, 2]) > HDPath::harden([44, 1]));
+    }
+
+    #[test]
+    fn uniffi_record() {
+        #[derive(uniffi::Record)]
+        struct UniffiRecordAssertCompilesHDPath {
+            inner: HDPath,
+        }
+    }
+
+    #[test]
+    fn json_roundtrip_success() {
+        let sut = HDPath::harden([44, 1022]);
+        assert_json_value_eq_after_roundtrip(&sut, json!("m/44H/1022H"));
+        assert_json_value_ne_after_roundtrip(&sut, json!("m/44H/33H"));
+    }
+
+    #[test]
+    fn json_roundtrip_fails_for_invalid() {
+        assert_json_value_fails::<HDPath>(json!("x/44H"));
+        assert_json_value_fails::<HDPath>(json!("m/44X"));
         assert_json_value_fails::<HDPath>(json!("super invalid path"));
     }
 }

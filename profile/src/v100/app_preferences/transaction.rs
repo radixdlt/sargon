@@ -1,11 +1,9 @@
-use serde::{Deserialize, Serialize};
-
-use crate::Decimal;
-
-use crate::HasPlaceholder;
+use crate::prelude::*;
 
 /// User Preferences relating to submission of transactions.
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Hash, uniffi::Record)]
+#[derive(
+    Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Hash, uniffi::Record,
+)]
 #[serde(rename_all = "camelCase")]
 pub struct Transaction {
     /// The deposit guarantee that will automatically be added for
@@ -46,10 +44,7 @@ impl HasPlaceholder for Transaction {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, Decimal, HasPlaceholder};
-
-    use super::Transaction;
-
+    use crate::prelude::*;
     #[test]
     fn equality() {
         assert_eq!(Transaction::placeholder(), Transaction::placeholder());
@@ -61,7 +56,10 @@ mod tests {
 
     #[test]
     fn inequality() {
-        assert_ne!(Transaction::placeholder(), Transaction::placeholder_other());
+        assert_ne!(
+            Transaction::placeholder(),
+            Transaction::placeholder_other()
+        );
     }
 
     #[test]
@@ -95,7 +93,8 @@ mod tests {
     #[test]
     fn set_default_deposit_guarantee() {
         let mut sut = Transaction::default();
-        sut.default_deposit_guarantee = Decimal::new("0.237".to_string()).unwrap();
+        sut.default_deposit_guarantee =
+            Decimal::new("0.237".to_string()).unwrap();
         assert_eq!(sut.default_deposit_guarantee.to_string(), "0.237");
     }
 }

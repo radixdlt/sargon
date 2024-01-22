@@ -1,9 +1,6 @@
-use std::cmp::Ordering;
+use crate::prelude::*;
 
-use crate::{BIP39Language, HDPathError as Error};
 use memoize::memoize;
-
-use super::u11::U11;
 
 /// A word in the BIP39 word list of `language` at known `index` (0-2047).
 #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
@@ -26,16 +23,17 @@ impl PartialOrd for BIP39Word {
 }
 
 impl BIP39Word {
-    pub fn new(word: &'static str, language: BIP39Language) -> Result<Self, Error> {
-        let index = index_of_word_in_bip39_wordlist_of_language(&word, language.into())
-            .ok_or(Error::UnknownBIP39Word)?;
+    pub fn new(word: &'static str, language: BIP39Language) -> Result<Self> {
+        let index =
+            index_of_word_in_bip39_wordlist_of_language(&word, language.into())
+                .ok_or(CommonError::UnknownBIP39Word)?;
         Ok(Self {
             word: word.to_string(),
             index: index.into(),
             language,
         })
     }
-    pub fn english(word: &'static str) -> Result<Self, Error> {
+    pub fn english(word: &'static str) -> Result<Self> {
         Self::new(word, BIP39Language::English)
     }
 }
@@ -52,8 +50,7 @@ fn index_of_word_in_bip39_wordlist_of_language(
 
 #[cfg(test)]
 mod tests {
-    use super::BIP39Word;
-    use crate::{BIP39Language, HDPathError as Error};
+    use crate::prelude::*;
 
     #[test]
     fn equality() {
@@ -78,17 +75,29 @@ mod tests {
 
     #[test]
     fn invalid_word() {
-        assert_eq!(BIP39Word::english("foobar"), Err(Error::UnknownBIP39Word));
+        assert_eq!(
+            BIP39Word::english("foobar"),
+            Err(CommonError::UnknownBIP39Word)
+        );
     }
 
     #[test]
     fn index_of_zoo_is_2047() {
-        assert_eq!(BIP39Word::english("zoo").unwrap().index.clone().inner, 2047);
+        assert_eq!(
+            BIP39Word::english("zoo").unwrap().index.clone().inner,
+            2047
+        );
     }
 
     #[test]
     fn ord() {
-        assert!(BIP39Word::english("abandon").unwrap() < BIP39Word::english("ability").unwrap());
-        assert!(BIP39Word::english("zoo").unwrap() > BIP39Word::english("zone").unwrap());
+        assert!(
+            BIP39Word::english("abandon").unwrap()
+                < BIP39Word::english("ability").unwrap()
+        );
+        assert!(
+            BIP39Word::english("zoo").unwrap()
+                > BIP39Word::english("zone").unwrap()
+        );
     }
 }

@@ -1,19 +1,23 @@
-use identified_vec::Identifiable;
-use serde::{Deserialize, Serialize};
-use std::{
-    fmt::{Debug, Display, Formatter},
-    ops::Deref,
-    sync::Arc,
-};
-use url::Url;
-
-use crate::{CommonError, NetworkID};
-
-use super::radix_network::RadixNetwork;
+use crate::prelude::*;
+use std::ops::Deref;
 
 /// A gateway to some Radix Network, which is a high level REST API which clients (wallets) can
 /// consume in order to query asset balances and submit transactions.
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Ord, PartialOrd, Hash, uniffi::Record)]
+#[derive(
+    Serialize,
+    Deserialize,
+    Clone,
+    PartialEq,
+    Eq,
+    Ord,
+    PartialOrd,
+    Hash,
+    derive_more::Display,
+    derive_more::Debug,
+    uniffi::Record,
+)]
+#[display("{}", self.url.to_string())]
+#[debug("{}: {}", self.network.display_description, self.url.to_string())]
 pub struct Gateway {
     /// The Radix network the API is a Gateway to.
     pub network: RadixNetwork,
@@ -30,23 +34,6 @@ impl Identifiable for Gateway {
     }
 }
 
-impl Debug for Gateway {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}: {}",
-            self.network.display_description,
-            self.url.to_string(),
-        )
-    }
-}
-
-impl Display for Gateway {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.url.to_string(),)
-    }
-}
-
 impl Default for Gateway {
     fn default() -> Self {
         Self::mainnet()
@@ -54,8 +41,12 @@ impl Default for Gateway {
 }
 
 impl Gateway {
-    pub fn new(url: String, id: NetworkID) -> Result<Arc<Self>, crate::CommonError> {
-        let url = Url::try_from(url.as_str()).map_err(|_| CommonError::InvalidURL(url))?;
+    pub fn new(
+        url: String,
+        id: NetworkID,
+    ) -> Result<Arc<Self>, crate::CommonError> {
+        let url = Url::try_from(url.as_str())
+            .map_err(|_| CommonError::InvalidURL(url))?;
         let network = RadixNetwork::lookup_by_id(id)?;
         Ok(Self { url, network }.into())
     }
@@ -119,7 +110,10 @@ impl Gateway {
     }
 
     pub fn enkinet() -> Self {
-        Self::declare("https://enkinet-gateway.radixdlt.com/", NetworkID::Enkinet)
+        Self::declare(
+            "https://enkinet-gateway.radixdlt.com/",
+            NetworkID::Enkinet,
+        )
     }
 
     pub fn mardunet() -> Self {
@@ -142,11 +136,7 @@ impl Gateway {
 
 #[cfg(test)]
 mod tests {
-    use crate::assert_eq_after_json_roundtrip;
-    use identified_vec::Identifiable;
-    use radix_engine_common::prelude::HashSet;
-
-    use super::Gateway;
+    use crate::prelude::*;
 
     #[test]
     fn json_roundtrip_mainnet() {
@@ -225,7 +215,7 @@ mod tests {
     #[test]
     fn hash() {
         assert_eq!(
-            HashSet::from_iter([
+            HashSet::<Gateway>::from_iter([
                 Gateway::mainnet(),
                 Gateway::stokenet(),
                 Gateway::rcnet(),
@@ -267,5 +257,21 @@ mod tests_uniffi_api {
     #[test]
     fn test_gateway_stokenet() {
         assert_eq!(gateway_stokenet(), Gateway::stokenet());
+    }
+
+    #[test]
+    fn display() {
+        assert_eq!(
+            format!("{}", Gateway::mainnet()),
+            "https://mainnet.radixdlt.com/"
+        );
+    }
+
+    #[test]
+    fn debug() {
+        assert_eq!(
+            format!("{:?}", Gateway::mainnet()),
+            "Mainnet: https://mainnet.radixdlt.com/"
+        );
     }
 }

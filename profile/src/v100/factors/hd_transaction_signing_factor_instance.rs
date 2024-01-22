@@ -1,12 +1,4 @@
-use super::{
-    factor_source_id_from_hash::FactorSourceIDFromHash,
-    hierarchical_deterministic_factor_instance::HierarchicalDeterministicFactorInstance,
-};
-use crate::{
-    AccountPath, CAP26Path, HDPathError, HasEntityPath, HierarchicalDeterministicPublicKey,
-    IdentityPath, IsEntityPath,
-};
-use crate::{CommonError as Error, PublicKey};
+use crate::prelude::*;
 
 /// A specialized Hierarchical Deterministic FactorInstance used for transaction signing
 /// and creation of virtual Accounts and Identities (Personas).
@@ -20,38 +12,34 @@ pub struct HDFactorInstanceTransactionSigning<E: IsEntityPath + Clone> {
 impl<T: IsEntityPath + Clone> HDFactorInstanceTransactionSigning<T> {
     fn try_from_factor_instance(
         value: HierarchicalDeterministicFactorInstance,
-    ) -> Result<Self, crate::CommonError> {
+    ) -> Result<Self> {
         value
             .derivation_path()
             .as_cap26()
-            .ok_or(Error::WrongEntityKindOfInFactorInstancesPath)
+            .ok_or(CommonError::WrongEntityKindOfInFactorInstancesPath)
             .map(|p| p.clone())
             .and_then(|p| {
                 p.try_into()
-                    .map_err(|_| Error::WrongEntityKindOfInFactorInstancesPath)
+                    .map_err(|_| CommonError::WrongEntityKindOfInFactorInstancesPath)
             })
             .and_then(|p: T| {
-                if !p
-                    .key_kind()
-                    .is_transaction_signing()
-                {
-                    Err(Error::WrongKeyKindOfTransactionSigningFactorInstance)
+                if !p.key_kind().is_transaction_signing() {
+                    Err(CommonError::WrongKeyKindOfTransactionSigningFactorInstance)
                 } else {
                     Ok(p)
                 }
             })
             .map(|p| Self {
                 factor_source_id: value.factor_source_id.clone(),
-                public_key: value
-                    .public_key
-                    .public_key
-                    .clone(),
+                public_key: value.public_key.public_key.clone(),
                 path: p.clone(),
             })
     }
 }
 
-impl<E: IsEntityPath + Clone> HasEntityPath<E> for HDFactorInstanceTransactionSigning<E> {
+impl<E: IsEntityPath + Clone> HasEntityPath<E>
+    for HDFactorInstanceTransactionSigning<E>
+{
     fn path(&self) -> E {
         self.path.clone()
     }
@@ -67,16 +55,20 @@ impl<E: IsEntityPath + Clone> HDFactorInstanceTransactionSigning<E> {
 }
 
 /// Just an alias for when `HDFactorInstanceTransactionSigning` is used to create a new Account.
-pub type HDFactorInstanceAccountCreation = HDFactorInstanceTransactionSigning<AccountPath>;
+pub type HDFactorInstanceAccountCreation =
+    HDFactorInstanceTransactionSigning<AccountPath>;
 
 /// Just an alias for when `HDFactorInstanceTransactionSigning` is used to create a new Account.
-pub type HDFactorInstanceIdentityCreation = HDFactorInstanceTransactionSigning<IdentityPath>;
+pub type HDFactorInstanceIdentityCreation =
+    HDFactorInstanceTransactionSigning<IdentityPath>;
 
 impl<T> HDFactorInstanceTransactionSigning<T>
 where
     T: IsEntityPath + Clone,
 {
-    pub fn new(hd_factor_instance: HierarchicalDeterministicFactorInstance) -> Result<Self, Error> {
+    pub fn new(
+        hd_factor_instance: HierarchicalDeterministicFactorInstance,
+    ) -> Result<Self> {
         Self::try_from_factor_instance(hd_factor_instance)
     }
 }
@@ -94,22 +86,7 @@ impl<E: IsEntityPath + Clone> From<HDFactorInstanceTransactionSigning<E>>
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        AccountPath, CAP26KeyKind, CAP26Repr, HierarchicalDeterministicPublicKey, IdentityPath,
-        IsEntityPath,
-    };
-    use crate::{CommonError as Error, HasPlaceholder, PublicKey};
-
-    use crate::{
-        v100::factors::{
-            factor_source_id_from_hash::FactorSourceIDFromHash,
-            hd_transaction_signing_factor_instance::{
-                HDFactorInstanceAccountCreation, HDFactorInstanceIdentityCreation,
-            },
-            hierarchical_deterministic_factor_instance::HierarchicalDeterministicFactorInstance,
-        },
-        NetworkID,
-    };
+    use crate::prelude::*;
 
     #[test]
     fn account_creation_valid() {
@@ -117,11 +94,10 @@ mod tests {
             PublicKey::placeholder_ed25519(),
             AccountPath::placeholder().into(),
         );
-        let hd_fi =
-            HierarchicalDeterministicFactorInstance::new(
-                FactorSourceIDFromHash::placeholder(),
-                hd_key,
-            );
+        let hd_fi = HierarchicalDeterministicFactorInstance::new(
+            FactorSourceIDFromHash::placeholder(),
+            hd_key,
+        );
         assert_eq!(
             HDFactorInstanceAccountCreation::new(hd_fi)
                 .unwrap()
@@ -137,14 +113,13 @@ mod tests {
             PublicKey::placeholder_ed25519(),
             IdentityPath::placeholder().into(),
         );
-        let hd_fi =
-            HierarchicalDeterministicFactorInstance::new(
-                FactorSourceIDFromHash::placeholder(),
-                hd_key,
-            );
+        let hd_fi = HierarchicalDeterministicFactorInstance::new(
+            FactorSourceIDFromHash::placeholder(),
+            hd_key,
+        );
         assert_eq!(
             HDFactorInstanceAccountCreation::new(hd_fi),
-            Err(Error::WrongEntityKindOfInFactorInstancesPath)
+            Err(CommonError::WrongEntityKindOfInFactorInstancesPath)
         );
     }
 
@@ -159,14 +134,13 @@ mod tests {
             )
             .into(),
         );
-        let hd_fi =
-            HierarchicalDeterministicFactorInstance::new(
-                FactorSourceIDFromHash::placeholder(),
-                hd_key,
-            );
+        let hd_fi = HierarchicalDeterministicFactorInstance::new(
+            FactorSourceIDFromHash::placeholder(),
+            hd_key,
+        );
         assert_eq!(
             HDFactorInstanceAccountCreation::new(hd_fi),
-            Err(Error::WrongKeyKindOfTransactionSigningFactorInstance)
+            Err(CommonError::WrongKeyKindOfTransactionSigningFactorInstance)
         );
     }
 
@@ -176,11 +150,10 @@ mod tests {
             PublicKey::placeholder_ed25519(),
             IdentityPath::placeholder().into(),
         );
-        let hd_fi =
-            HierarchicalDeterministicFactorInstance::new(
-                FactorSourceIDFromHash::placeholder(),
-                hd_key,
-            );
+        let hd_fi = HierarchicalDeterministicFactorInstance::new(
+            FactorSourceIDFromHash::placeholder(),
+            hd_key,
+        );
         assert_eq!(
             HDFactorInstanceIdentityCreation::new(hd_fi)
                 .unwrap()
@@ -196,14 +169,13 @@ mod tests {
             PublicKey::placeholder_ed25519(),
             AccountPath::placeholder().into(),
         );
-        let hd_fi =
-            HierarchicalDeterministicFactorInstance::new(
-                FactorSourceIDFromHash::placeholder(),
-                hd_key,
-            );
+        let hd_fi = HierarchicalDeterministicFactorInstance::new(
+            FactorSourceIDFromHash::placeholder(),
+            hd_key,
+        );
         assert_eq!(
             HDFactorInstanceIdentityCreation::new(hd_fi),
-            Err(Error::WrongEntityKindOfInFactorInstancesPath)
+            Err(CommonError::WrongEntityKindOfInFactorInstancesPath)
         );
     }
 
@@ -218,14 +190,13 @@ mod tests {
             )
             .into(),
         );
-        let hd_fi =
-            HierarchicalDeterministicFactorInstance::new(
-                FactorSourceIDFromHash::placeholder(),
-                hd_key,
-            );
+        let hd_fi = HierarchicalDeterministicFactorInstance::new(
+            FactorSourceIDFromHash::placeholder(),
+            hd_key,
+        );
         assert_eq!(
             HDFactorInstanceIdentityCreation::new(hd_fi),
-            Err(Error::WrongKeyKindOfTransactionSigningFactorInstance)
+            Err(CommonError::WrongKeyKindOfTransactionSigningFactorInstance)
         );
     }
 }

@@ -5,7 +5,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::prelude::*;
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Hash, Eq, uniffi::Record)]
+#[derive(
+    Serialize, Deserialize, Clone, Debug, PartialEq, Hash, Eq, uniffi::Record,
+)]
 #[serde(rename_all = "camelCase")]
 pub struct Persona {
     /// The ID of the network this account can be used with.
@@ -42,19 +44,19 @@ impl Persona {
         display_name: DisplayName,
         persona_data: PersonaData,
     ) -> Self {
-        let address = IdentityAddress::from_hd_factor_instance_virtual_entity_creation(
-            persona_creating_factor_instance.clone(),
-        );
+        let address =
+            IdentityAddress::from_hd_factor_instance_virtual_entity_creation(
+                persona_creating_factor_instance.clone(),
+            );
         Self {
-            network_id: persona_creating_factor_instance
-                .network_id()
-                .into(),
+            network_id: persona_creating_factor_instance.network_id().into(),
             address,
             display_name,
-            security_state: UnsecuredEntityControl::with_entity_creating_factor_instance(
-                persona_creating_factor_instance,
-            )
-            .into(),
+            security_state:
+                UnsecuredEntityControl::with_entity_creating_factor_instance(
+                    persona_creating_factor_instance,
+                )
+                .into(),
             flags: EntityFlags::default().into(),
             persona_data,
         }
@@ -66,8 +68,13 @@ impl Persona {
         name: &str,
     ) -> Self {
         let mwp = MnemonicWithPassphrase::placeholder();
-        let bdfs = DeviceFactorSource::babylon(true, mwp.clone(), WalletClientModel::Iphone);
-        let private_hd_factor_source = PrivateHierarchicalDeterministicFactorSource::new(mwp, bdfs);
+        let bdfs = DeviceFactorSource::babylon(
+            true,
+            mwp.clone(),
+            WalletClientModel::Iphone,
+        );
+        let private_hd_factor_source =
+            PrivateHierarchicalDeterministicFactorSource::new(mwp, bdfs);
         let persona_creating_factor_instance: HDFactorInstanceTransactionSigning<IdentityPath> =
             private_hd_factor_source.derive_entity_creation_factor_instance(network_id, index);
 
@@ -86,7 +93,7 @@ impl Persona {
         Self::placeholder_at_index_name(0, "Satoshi")
     }
 
-       pub fn placeholder_batman() -> Self {
+    pub fn placeholder_batman() -> Self {
         Self::placeholder_at_index_name(1, "Batman")
     }
 }
@@ -107,11 +114,7 @@ impl Ord for Persona {
                 .transaction_signing
                 .derivation_path()
                 .last_component()
-                .cmp(
-                    r.transaction_signing
-                        .derivation_path()
-                        .last_component(),
-                ),
+                .cmp(r.transaction_signing.derivation_path().last_component()),
         }
     }
 }
@@ -143,7 +146,17 @@ impl HasPlaceholder for Persona {
 }
 
 /// Empty struct to act as placeholder for PersonaData, `todo`
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Hash, Eq, Default, uniffi::Record)]
+#[derive(
+    Serialize,
+    Deserialize,
+    Clone,
+    Debug,
+    PartialEq,
+    Hash,
+    Eq,
+    Default,
+    uniffi::Record,
+)]
 pub struct PersonaData {}
 
 #[cfg(test)]
@@ -175,7 +188,7 @@ mod tests {
     fn new_with_identity_and_name() {
         let identity_address: IdentityAddress =
             "identity_rdx12gcd4r799jpvztlffgw483pqcen98pjnay988n8rmscdswd872xy62"
-                .try_into()
+                .parse()
                 .unwrap();
         let persona = Persona::placeholder_batman();
         assert_eq!(persona.address, identity_address);
@@ -219,13 +232,19 @@ mod tests {
     #[test]
     fn placerholder_display_name() {
         let placeholder = Persona::placeholder();
-        assert_eq!(placeholder.display_name, DisplayName::new("Satoshi").unwrap());
+        assert_eq!(
+            placeholder.display_name,
+            DisplayName::new("Satoshi").unwrap()
+        );
     }
 
     #[test]
     fn placerholder_other_display_name() {
         let placeholder = Persona::placeholder_other();
-        assert_eq!(placeholder.display_name, DisplayName::new("Batman").unwrap());
+        assert_eq!(
+            placeholder.display_name,
+            DisplayName::new("Batman").unwrap()
+        );
     }
 
     #[test]
@@ -233,7 +252,7 @@ mod tests {
         let persona = Persona::placeholder_batman();
         let identity_address: IdentityAddress =
             "identity_rdx12gcd4r799jpvztlffgw483pqcen98pjnay988n8rmscdswd872xy62"
-                .try_into()
+                .parse()
                 .unwrap();
         assert_eq!(persona.id(), identity_address);
     }
@@ -288,7 +307,8 @@ mod tests {
     #[test]
     fn json_roundtrip_satoshi() {
         let model = Persona::placeholder_satoshi();
-        assert_eq_after_json_roundtrip(&model, 
+        assert_eq_after_json_roundtrip(
+            &model,
             r#"
             {
                 "networkID": 1,
@@ -327,8 +347,8 @@ mod tests {
                 "flags": [],
                 "personaData": {}
               }
-        "#
-    );
+        "#,
+        );
     }
 
     #[test]
@@ -389,14 +409,22 @@ mod tests {
 
     #[test]
     fn placeholder_stokenet() {
-        let persona = Persona::placeholder_at_index_name_network(NetworkID::Stokenet, 1, "Batman");
+        let persona = Persona::placeholder_at_index_name_network(
+            NetworkID::Stokenet,
+            1,
+            "Batman",
+        );
         assert_eq!(persona.display_name.value, "Batman".to_string());
         assert_eq!(persona.network_id, NetworkID::Stokenet);
     }
 
     #[test]
     fn placeholder_stokenet_satoshi() {
-        let persona = Persona::placeholder_at_index_name_network(NetworkID::Stokenet, 0, "Satoshi");
+        let persona = Persona::placeholder_at_index_name_network(
+            NetworkID::Stokenet,
+            0,
+            "Satoshi",
+        );
         assert_eq!(persona.display_name.value, "Satoshi".to_string());
         assert_eq!(persona.network_id, NetworkID::Stokenet);
     }

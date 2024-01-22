@@ -1,16 +1,4 @@
-use identified_vec::Identifiable;
-use identified_vec::IsIdentifiedVec;
-use iso8601_timestamp::Timestamp;
-use serde::{Deserialize, Serialize};
-
-use crate::now;
-use crate::HasPlaceholder;
-use crate::IdentifiedVecVia;
-
-use super::{
-    factor_source_crypto_parameters::FactorSourceCryptoParameters,
-    factor_source_flag::FactorSourceFlag,
-};
+use crate::prelude::*;
 
 /// Flags which describe a certain state a FactorSource might be in, e.g. `Main` (BDFS).
 pub type FactorSourceFlags = IdentifiedVecVia<FactorSourceFlag>;
@@ -24,7 +12,9 @@ impl Identifiable for FactorSourceFlag {
 
 /// Common properties shared between FactorSources of different kinds, describing
 /// its state, when added, and supported cryptographic parameters.
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(
+    Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, uniffi::Record,
+)]
 #[serde(rename_all = "camelCase")]
 pub struct FactorSourceCommon {
     /// Cryptographic parameters a certain FactorSource supports, e.g. Elliptic Curves.
@@ -68,7 +58,10 @@ impl FactorSourceCommon {
         }
     }
 
-    pub fn new<I>(crypto_parameters: FactorSourceCryptoParameters, flags: I) -> Self
+    pub fn new<I>(
+        crypto_parameters: FactorSourceCryptoParameters,
+        flags: I,
+    ) -> Self
     where
         I: IntoIterator<Item = FactorSourceFlag>,
     {
@@ -146,17 +139,7 @@ impl FactorSourceCommon {
 #[cfg(test)]
 mod tests {
 
-    use crate::{assert_eq_after_json_roundtrip, now, HasPlaceholder};
-    use identified_vec::IsIdentifiedVec;
-    use iso8601_timestamp::Timestamp;
-
-    use crate::v100::factors::{
-        factor_source_crypto_parameters::FactorSourceCryptoParameters,
-        factor_source_flag::FactorSourceFlag,
-    };
-
-    use super::FactorSourceCommon;
-
+    use crate::prelude::*;
     #[test]
     fn equality() {
         assert_eq!(
@@ -194,7 +177,10 @@ mod tests {
     #[test]
     fn new_uses_now_as_date() {
         let date0 = now();
-        let model = FactorSourceCommon::new(FactorSourceCryptoParameters::default(), []);
+        let model = FactorSourceCommon::new(
+            FactorSourceCryptoParameters::default(),
+            [],
+        );
         let mut date1 = now();
         for _ in 0..10 {
             // rust is too fast... lol.
@@ -211,13 +197,12 @@ mod tests {
     #[test]
     fn json_roundtrip() {
         let date = Timestamp::parse("2023-09-11T16:05:56.000Z").unwrap();
-        let model =
-            FactorSourceCommon::with_values(
-                FactorSourceCryptoParameters::default(),
-                date.clone(),
-                date,
-                [FactorSourceFlag::Main],
-            );
+        let model = FactorSourceCommon::with_values(
+            FactorSourceCryptoParameters::default(),
+            date.clone(),
+            date,
+            [FactorSourceFlag::Main],
+        );
 
         assert_eq_after_json_roundtrip(
             &model,

@@ -1,5 +1,8 @@
+#![allow(unused_imports)]
+
 mod hierarchical_deterministic;
 mod identified_vec_via;
+mod logic;
 mod profilesnapshot_version;
 mod v100;
 mod wallet;
@@ -7,20 +10,44 @@ mod wallet_kit_common;
 
 pub mod prelude {
 
-    pub(crate) use thiserror::Error as ThisError;
-
     pub use crate::hierarchical_deterministic::*;
     pub use crate::identified_vec_via::*;
+    pub use crate::logic::*;
     pub use crate::profilesnapshot_version::*;
     pub use crate::v100::*;
     pub use crate::wallet::*;
     pub use crate::wallet_kit_common::*;
+
+    pub(crate) use std::collections::{BTreeSet, HashMap, HashSet};
+
+    pub(crate) use ::identified_vec::{
+        Identifiable, IdentifiedVec, IdentifiedVecOf, IsIdentifiedVec,
+        ItemsCloned,
+    };
+
+    pub(crate) use ::hex::decode as hex_decode;
+    pub(crate) use ::hex::encode as hex_encode;
+    pub(crate) use iso8601_timestamp::Timestamp;
+    pub(crate) use itertools::Itertools;
+    pub(crate) use log::{debug, error, info, trace, warn};
+    pub(crate) use serde::{
+        de, ser::SerializeStruct, Deserialize, Deserializer, Serialize,
+        Serializer,
+    };
+    pub(crate) use serde_json::json;
+    pub(crate) use serde_repr::{Deserialize_repr, Serialize_repr};
+    pub(crate) use serde_with::*;
+    pub(crate) use std::cmp::Ordering;
+    pub(crate) use std::str::FromStr;
+    pub(crate) use std::sync::Arc;
+    pub(crate) use strum::FromRepr;
+    pub(crate) use url::Url;
+    pub(crate) use uuid::Uuid;
+
+    pub(crate) use enum_as_inner::EnumAsInner;
 }
 
-use iso8601_timestamp::Timestamp;
 pub use prelude::*;
-pub use url::Url;
-pub use uuid::Uuid;
 
 // Use `url::Url` as a custom type, with `String` as the Builtin
 #[cfg(not(tarpaulin_include))] // Tested in binding tests (e.g. test*.swift files)
@@ -42,7 +69,7 @@ impl UniffiCustomTypeConverter for Timestamp {
 
     fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
         Timestamp::parse(val.as_str())
-            .ok_or_else(|| CommonError::InvalidISO8601String)
+            .ok_or_else(|| CommonError::InvalidISO8601String(val))
             .map_err(|e| e.into())
     }
 

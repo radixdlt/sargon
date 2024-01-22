@@ -1,16 +1,19 @@
-use crate::{CommonError, HDPathError};
-use serde::{de, Deserializer, Serialize, Serializer};
+use crate::prelude::*;
 
-use crate::HasPlaceholder;
-
-use crate::{
-    CAP26EntityKind, CAP26KeyKind, CAP26Path, CAP26Repr, Derivation, DerivationPath,
-    DerivationPathScheme, HDPath, HDPathValue, NetworkID,
-};
-
-use super::is_entity_path::IsEntityPath;
-
-#[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, uniffi::Record)]
+#[derive(
+    Clone,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    PartialOrd,
+    Ord,
+    SerializeDisplay,
+    DeserializeFromStr,
+    derive_more::Display,
+    uniffi::Record,
+)]
+#[display("{}", self.bip32_string())]
 pub struct AccountPath {
     pub path: HDPath,
 
@@ -38,27 +41,27 @@ impl IsEntityPath for AccountPath {
 }
 
 impl TryFrom<CAP26Path> for AccountPath {
-    type Error = HDPathError;
+    type Error = CommonError;
 
     fn try_from(value: CAP26Path) -> Result<Self, Self::Error> {
         value
             .as_account_path()
-            .ok_or(HDPathError::ExpectedAccountPathGotSomethingElse)
+            .ok_or(CommonError::ExpectedAccountPathButGotSomethingElse)
             .cloned()
     }
 }
 
 impl TryFrom<&HDPath> for AccountPath {
-    type Error = HDPathError;
+    type Error = CommonError;
 
-    fn try_from(value: &HDPath) -> Result<Self, Self::Error> {
+    fn try_from(value: &HDPath) -> Result<Self> {
         Self::try_from_hdpath(value)
     }
 }
 
-impl CAP26Repr for AccountPath {
-    fn entity_kind() -> Option<CAP26EntityKind> {
-        Some(CAP26EntityKind::Account)
+impl EntityCAP26Path for AccountPath {
+    fn entity_kind() -> CAP26EntityKind {
+        CAP26EntityKind::Account
     }
 
     fn __with_path_and_components(
@@ -90,30 +93,10 @@ impl HasPlaceholder for AccountPath {
     }
 }
 
-impl Serialize for AccountPath {
-    /// Serializes this `AccountPath` into JSON as a string on: "m/44H/1022H/1H/525H/1460H/0H" format
-    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_str(&self.to_string())
-    }
-}
-
-impl<'de> serde::Deserialize<'de> for AccountPath {
-    /// Tries to deserializes a JSON string as a derivation path string into a `AccountPath`
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<AccountPath, D::Error> {
-        let s = String::deserialize(d)?;
-        AccountPath::from_str(&s).map_err(de::Error::custom)
-    }
-}
-
-impl TryInto<AccountPath> for &str {
-    type Error = HDPathError;
-
-    fn try_into(self) -> Result<AccountPath, Self::Error> {
-        AccountPath::from_str(self)
+impl FromStr for AccountPath {
+    type Err = CommonError;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Self::from_bip32str(s)
     }
 }
 
@@ -135,17 +118,7 @@ impl Derivation for AccountPath {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        HDPathError, HasPlaceholder,
-        {assert_json_value_eq_after_roundtrip, assert_json_value_ne_after_roundtrip},
-    };
-    use serde_json::json;
-
-    use crate::{
-        CAP26EntityKind, CAP26KeyKind, CAP26Repr, Derivation, HDPath, IsEntityPath, NetworkID,
-    };
-
-    use super::AccountPath;
+    use crate::prelude::*;
 
     #[test]
     fn equality() {
@@ -158,7 +131,10 @@ mod tests {
 
     #[test]
     fn inequality() {
-        assert_ne!(AccountPath::placeholder(), AccountPath::placeholder_other());
+        assert_ne!(
+            AccountPath::placeholder(),
+            AccountPath::placeholder_other()
+        );
     }
 
     #[test]
@@ -177,20 +153,24 @@ mod tests {
     #[test]
     fn hd_path() {
         let str = "m/44H/1022H/1H/525H/1460H/0H";
-        let parsed: AccountPath = str.try_into().unwrap();
+        let parsed: AccountPath = str.parse().unwrap();
         assert_eq!(parsed.hd_path().depth(), 6);
     }
 
     #[test]
     fn string_roundtrip() {
         let str = "m/44H/1022H/1H/525H/1460H/0H";
-        let parsed: AccountPath = str.try_into().unwrap();
+        let parsed: AccountPath = str.parse().unwrap();
         assert_eq!(parsed.network_id, NetworkID::Mainnet);
         assert_eq!(parsed.entity_kind, CAP26EntityKind::Account);
         assert_eq!(parsed.key_kind, CAP26KeyKind::TransactionSigning);
         assert_eq!(parsed.index, 0);
         assert_eq!(parsed.to_string(), str);
-        let built = AccountPath::new(NetworkID::Mainnet, CAP26KeyKind::TransactionSigning, 0);
+        let built = AccountPath::new(
+            NetworkID::Mainnet,
+            CAP26KeyKind::TransactionSigning,
+            0,
+        );
         assert_eq!(built, parsed)
     }
 
@@ -206,7 +186,10 @@ mod tests {
     fn invalid_depth() {
         assert_eq!(
             AccountPath::from_str("m/44H/1022H"),
-            Err(HDPathError::InvalidDepthOfCAP26Path)
+            Err(CommonError::InvalidDepthOfCAP26Path {
+                expected: 6,
+                found: 2
+            })
         )
     }
 
@@ -214,7 +197,7 @@ mod tests {
     fn not_all_hardened() {
         assert_eq!(
             AccountPath::from_str("m/44H/1022H/1H/525H/1460H/0"), // last not hardened
-            Err(HDPathError::NotAllComponentsAreHardened)
+            Err(CommonError::NotAllComponentsAreHardened)
         )
     }
 
@@ -222,7 +205,7 @@ mod tests {
     fn cointype_not_found() {
         assert_eq!(
             AccountPath::from_str("m/44H/33H/1H/525H/1460H/0"), // `33` instead of 1022
-            Err(HDPathError::CoinTypeNotFound(33))
+            Err(CommonError::CoinTypeNotFound(33))
         )
     }
 
@@ -230,10 +213,10 @@ mod tests {
     fn fails_when_entity_type_identity() {
         assert_eq!(
             AccountPath::from_str("m/44H/1022H/1H/618H/1460H/0H"),
-            Err(HDPathError::WrongEntityKind(
-                CAP26EntityKind::Identity.discriminant(),
-                CAP26EntityKind::Account.discriminant()
-            ))
+            Err(CommonError::WrongEntityKind {
+                expected: CAP26EntityKind::Account,
+                found: CAP26EntityKind::Identity
+            })
         )
     }
 
@@ -241,7 +224,7 @@ mod tests {
     fn fails_when_entity_type_does_not_exist() {
         assert_eq!(
             AccountPath::from_str("m/44H/1022H/1H/99999H/1460H/0H"),
-            Err(HDPathError::InvalidEntityKind(99999))
+            Err(CommonError::InvalidEntityKind(99999))
         )
     }
 
@@ -249,7 +232,7 @@ mod tests {
     fn fails_when_key_kind_does_not_exist() {
         assert_eq!(
             AccountPath::from_str("m/44H/1022H/1H/525H/22222H/0H"),
-            Err(HDPathError::InvalidKeyKind(22222))
+            Err(CommonError::InvalidKeyKind(22222))
         )
     }
 
@@ -257,7 +240,7 @@ mod tests {
     fn fails_when_network_id_is_out_of_bounds() {
         assert_eq!(
             AccountPath::from_str("m/44H/1022H/4444H/525H/1460H/0H"),
-            Err(HDPathError::InvalidNetworkIDExceedsLimit(4444))
+            Err(CommonError::InvalidNetworkIDExceedsLimit(4444))
         )
     }
 
@@ -265,7 +248,7 @@ mod tests {
     fn fails_when_not_bip44() {
         assert_eq!(
             AccountPath::from_str("m/777H/1022H/1H/525H/1460H/0H"),
-            Err(HDPathError::BIP44PurposeNotFound(777))
+            Err(CommonError::BIP44PurposeNotFound(777))
         )
     }
 
@@ -278,36 +261,41 @@ mod tests {
     fn fails_when_index_is_too_large() {
         assert_eq!(
             AccountPath::from_str("m/44H/1022H/1H/525H/1460H/4294967296H"),
-            Err(HDPathError::InvalidBIP32Path("m/44H/1022H/1H/525H/1460H/4294967296H".to_string()))
+            Err(CommonError::InvalidBIP32Path(
+                "m/44H/1022H/1H/525H/1460H/4294967296H".to_string()
+            ))
         )
     }
 
     #[test]
     fn inequality_different_index() {
-        let a: AccountPath = "m/44H/1022H/1H/525H/1460H/0H".try_into().unwrap();
-        let b: AccountPath = "m/44H/1022H/1H/525H/1460H/1H".try_into().unwrap();
+        let a: AccountPath = "m/44H/1022H/1H/525H/1460H/0H".parse().unwrap();
+        let b: AccountPath = "m/44H/1022H/1H/525H/1460H/1H".parse().unwrap();
         assert!(a != b);
     }
     #[test]
     fn inequality_different_network_id() {
-        let a: AccountPath = "m/44H/1022H/1H/525H/1460H/0H".try_into().unwrap();
-        let b: AccountPath = "m/44H/1022H/2H/525H/1460H/0H".try_into().unwrap();
+        let a: AccountPath = "m/44H/1022H/1H/525H/1460H/0H".parse().unwrap();
+        let b: AccountPath = "m/44H/1022H/2H/525H/1460H/0H".parse().unwrap();
         assert!(a != b);
     }
 
     #[test]
     fn inequality_different_key_kind() {
-        let a: AccountPath = "m/44H/1022H/1H/525H/1460H/0H".try_into().unwrap();
-        let b: AccountPath = "m/44H/1022H/1H/525H/1678H/0H".try_into().unwrap();
+        let a: AccountPath = "m/44H/1022H/1H/525H/1460H/0H".parse().unwrap();
+        let b: AccountPath = "m/44H/1022H/1H/525H/1678H/0H".parse().unwrap();
         assert!(a != b);
     }
 
     #[test]
     fn json_roundtrip() {
         let str = "m/44H/1022H/1H/525H/1460H/0H";
-        let parsed: AccountPath = str.try_into().unwrap();
+        let parsed: AccountPath = str.parse().unwrap();
         assert_json_value_eq_after_roundtrip(&parsed, json!(str));
-        assert_json_value_ne_after_roundtrip(&parsed, json!("m/44H/1022H/1H/525H/1460H/1H"));
+        assert_json_value_ne_after_roundtrip(
+            &parsed,
+            json!("m/44H/1022H/1H/525H/1460H/1H"),
+        );
     }
 
     #[test]
@@ -330,7 +318,10 @@ mod tests {
         let hdpath = HDPath::from_str("m/44H/1022H/1H/618H/1460H/0H").unwrap();
         assert_eq!(
             AccountPath::try_from(&hdpath),
-            Err(HDPathError::WrongEntityKind(618, 525))
+            Err(CommonError::WrongEntityKind {
+                expected: CAP26EntityKind::Account,
+                found: CAP26EntityKind::Identity
+            })
         );
     }
 }

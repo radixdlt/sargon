@@ -1,10 +1,4 @@
-use crate::{
-    v100::{Account, AccountAddress},
-    IdentifiedVecVia,
-};
-use identified_vec::IsIdentifiedVec;
-
-use crate::HasPlaceholder;
+use crate::prelude::*;
 
 /// An ordered set of Accounts on a specific network, most commonly
 /// the set is non-empty.
@@ -37,7 +31,10 @@ impl Default for Accounts {
 
 impl Accounts {
     /// Returns a reference to the account identified by `address`, if it exists.
-    pub fn get_account_by_address(&self, address: &AccountAddress) -> Option<&Account> {
+    pub fn get_account_by_address(
+        &self,
+        address: &AccountAddress,
+    ) -> Option<&Account> {
         self.get(address)
     }
 
@@ -85,10 +82,7 @@ impl Accounts {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
-
-    use crate::v100::{Account, AccountAddress, Accounts, AppearanceID, DisplayName};
-
+    use crate::prelude::*;
     #[test]
     fn default_is_empty() {
         assert_eq!(Accounts::default().len(), 0);
@@ -102,14 +96,19 @@ mod tests {
     #[test]
     fn equality() {
         assert_eq!(Accounts::placeholder(), Accounts::placeholder());
-        assert_eq!(Accounts::placeholder_other(), Accounts::placeholder_other());
+        assert_eq!(
+            Accounts::placeholder_other(),
+            Accounts::placeholder_other()
+        );
     }
 
     #[test]
     fn duplicates_are_prevented() {
         assert_eq!(
-            Accounts::with_accounts([Account::placeholder(), Account::placeholder()].into_iter())
-                .len(),
+            Accounts::with_accounts(
+                [Account::placeholder(), Account::placeholder()].into_iter()
+            )
+            .len(),
             1
         )
     }
@@ -121,10 +120,7 @@ mod tests {
 
     #[test]
     fn get_by_address() {
-        let address: AccountAddress =
-            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
-                .try_into()
-                .unwrap();
+        let address = AccountAddress::placeholder();
         let account = Account::placeholder_with_values(
             address.clone(),
             DisplayName::default(),

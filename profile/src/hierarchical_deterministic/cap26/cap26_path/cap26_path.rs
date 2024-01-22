@@ -1,27 +1,35 @@
-use crate::HDPathError;
-use crate::{
-    AccountPath, CAP26Repr, Derivation, DerivationPath, DerivationPathScheme, GetIDPath, HDPath,
-    IdentityPath,
-};
-use enum_as_inner::EnumAsInner;
-use serde::{de, Deserializer, Serialize, Serializer};
-
-use crate::HasPlaceholder;
+use crate::prelude::*;
 
 /// A derivation path design specifically for Radix Babylon wallets used by Accounts and Personas
 /// to be unique per network with separate key spaces for Accounts/Identities (Personas) and key
 /// kind: sign transaction or sign auth.
-#[derive(Clone, Debug, PartialEq, EnumAsInner, Eq, Hash, PartialOrd, Ord, uniffi::Enum)]
+#[derive(
+    Clone,
+    Debug,
+    PartialEq,
+    EnumAsInner,
+    Eq,
+    Hash,
+    PartialOrd,
+    Ord,
+    SerializeDisplay,
+    DeserializeFromStr,
+    derive_more::Display,
+    uniffi::Enum,
+)]
 pub enum CAP26Path {
+    #[display("{value}")]
     GetID { value: GetIDPath },
+    #[display("{value}")]
     AccountPath { value: AccountPath },
+    #[display("{value}")]
     IdentityPath { value: IdentityPath },
 }
 
 impl TryFrom<&HDPath> for CAP26Path {
-    type Error = HDPathError;
+    type Error = CommonError;
 
-    fn try_from(value: &HDPath) -> Result<Self, Self::Error> {
+    fn try_from(value: &HDPath) -> Result<Self> {
         if let Ok(get_id) = GetIDPath::try_from(value) {
             return Ok(get_id.into());
         }
@@ -32,18 +40,10 @@ impl TryFrom<&HDPath> for CAP26Path {
     }
 }
 
-impl Serialize for CAP26Path {
-    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_str(&self.to_string())
-    }
-}
-
-impl<'de> serde::Deserialize<'de> for CAP26Path {
-    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<CAP26Path, D::Error> {
-        HDPath::deserialize(d).and_then(|p| Self::try_from(&p).map_err(de::Error::custom))
+impl FromStr for CAP26Path {
+    type Err = CommonError;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        s.parse::<HDPath>().and_then(|p| Self::try_from(&p))
     }
 }
 
@@ -76,11 +76,13 @@ impl From<AccountPath> for CAP26Path {
         Self::AccountPath { value }
     }
 }
+
 impl From<IdentityPath> for CAP26Path {
     fn from(value: IdentityPath) -> Self {
         Self::IdentityPath { value }
     }
 }
+
 impl From<GetIDPath> for CAP26Path {
     fn from(value: GetIDPath) -> Self {
         Self::GetID {
@@ -93,6 +95,7 @@ impl HasPlaceholder for CAP26Path {
     fn placeholder() -> Self {
         Self::placeholder_account()
     }
+
     fn placeholder_other() -> Self {
         Self::placeholder_identity()
     }
@@ -114,12 +117,8 @@ impl CAP26Path {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assert_json_value_eq_after_roundtrip, HasPlaceholder};
-    use serde_json::json;
 
-    use crate::{AccountPath, Derivation, DerivationPathScheme, GetIDPath};
-
-    use super::CAP26Path;
+    use crate::prelude::*;
 
     #[test]
     fn equality() {
@@ -210,6 +209,9 @@ mod tests {
     #[test]
     fn json_roundtrip_account() {
         let model: CAP26Path = AccountPath::placeholder().into();
-        assert_json_value_eq_after_roundtrip(&model, json!("m/44H/1022H/1H/525H/1460H/0H"));
+        assert_json_value_eq_after_roundtrip(
+            &model,
+            json!("m/44H/1022H/1H/525H/1460H/0H"),
+        );
     }
 }
