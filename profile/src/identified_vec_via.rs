@@ -19,18 +19,17 @@ pub struct IdentifiedVecVia<Element: Identifiable + Debug + Clone> {
     id_vec: IdentifiedVecOf<Element>,
 }
 
+impl<Element: Identifiable + Debug + Clone> std::iter::FromIterator<Element>
+    for IdentifiedVecVia<Element>
+{
+    fn from_iter<T: IntoIterator<Item = Element>>(iter: T) -> Self {
+        Self::from_identified_vec_of(IdentifiedVecOf::from_iter(iter))
+    }
+}
+
 impl<Element: Identifiable + Debug + Clone> IdentifiedVecVia<Element> {
     pub fn new() -> Self {
         Self::from_identified_vec_of(IdentifiedVecOf::new())
-    }
-
-    pub fn from_iter<I>(unique_elements: I) -> Self
-    where
-        I: IntoIterator<Item = Element>,
-    {
-        Self::from_identified_vec_of(IdentifiedVecOf::from_iter(
-            unique_elements,
-        ))
     }
 
     pub fn len(&self) -> usize {
@@ -182,7 +181,7 @@ unsafe impl<UT, T: Identifiable + Debug + Clone + Lift<UT>> Lift<UT>
         for _ in 0..len {
             vec.push(<T as Lift<UT>>::try_read(buf)?)
         }
-        Ok(IdentifiedVecVia::from_iter(vec))
+        Ok(<IdentifiedVecVia<_> as FromIterator<T>>::from_iter(vec))
     }
 
     fn try_lift(buf: RustBuffer) -> uniffi::Result<IdentifiedVecVia<T>> {
@@ -200,6 +199,8 @@ mod tests {
     use itertools::Itertools;
 
     use super::IdentifiedVecVia;
+
+    #[allow(clippy::upper_case_acronyms)]
     type SUT = IdentifiedVecVia<i32>;
 
     #[test]

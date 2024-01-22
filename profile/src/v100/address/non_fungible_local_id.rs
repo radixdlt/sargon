@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 use radix_engine_common::data::scrypto::model::NonFungibleLocalId as NativeNonFungibleLocalId;
 
-#[derive(Clone, Debug, uniffi::Enum, Hash, PartialEq, Eq)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq, uniffi::Enum)]
 pub enum NonFungibleLocalId {
     Integer { value: u64 },
     Str { value: String },
@@ -11,9 +11,14 @@ pub enum NonFungibleLocalId {
 }
 
 impl NonFungibleLocalId {
-    pub fn to_string(&self) -> String {
-        let native = NativeNonFungibleLocalId::try_from(self.clone()).unwrap();
-        native.to_string()
+    fn native(&self) -> NativeNonFungibleLocalId {
+        NativeNonFungibleLocalId::try_from(self.clone()).unwrap()
+    }
+}
+
+impl std::fmt::Display for NonFungibleLocalId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.native().to_string())
     }
 }
 

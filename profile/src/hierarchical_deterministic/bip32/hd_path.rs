@@ -69,7 +69,7 @@ impl HDPath {
     }
 
     pub(crate) fn parse_try_map<T, F>(
-        path: &Vec<HDPathComponent>,
+        path: &[HDPathComponent],
         index: usize,
         try_map: F,
     ) -> Result<T>
@@ -81,7 +81,7 @@ impl HDPath {
     }
 
     pub(crate) fn parse<F>(
-        path: &Vec<HDPathComponent>,
+        path: &[HDPathComponent],
         index: usize,
         expected: HDPathComponent,
         err: F,
