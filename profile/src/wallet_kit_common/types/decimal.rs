@@ -3,7 +3,7 @@ use radix_engine_common::math::Decimal as NativeDecimal;
 use radix_engine_toolkit_json::models::common::SerializableDecimal;
 
 // FIXME: Use RET's type!
-#[derive(Clone, Debug, Eq, Ord, Hash, uniffi::Record, Default)]
+#[derive(Clone, Debug, Eq, uniffi::Record, Default)]
 pub struct Decimal {
     base10_string: String,
 }
@@ -13,17 +13,27 @@ impl PartialEq for Decimal {
         self.native().eq(&other.native())
     }
 }
+impl std::hash::Hash for Decimal {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.native().hash(state);
+    }
+}
 impl PartialOrd for Decimal {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+impl Ord for Decimal {
+    fn cmp(&self, other: &Self) -> Ordering {
         let lhs = &self.native();
         let rhs = &other.native();
         if lhs.eq(rhs) {
-            Some(Ordering::Equal)
+            Ordering::Equal
         } else if lhs.le(rhs) {
-            return Some(Ordering::Less);
+            return Ordering::Less;
         } else {
             assert!(lhs.gt(rhs), "!(LHS == RHS || LHS < RHS), thus we expected LHS > RHS, but it was not. Most likely the implementation of RET's Decimal has changed, maybe to involve NaN?");
-            return Some(Ordering::Greater);
+            return Ordering::Greater;
         }
     }
 }
