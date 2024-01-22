@@ -227,3 +227,119 @@ mod bip44_tests {
         fixture.test();
     }
 }
+
+#[cfg(test)]
+mod slip10_tests {
+    use super::*;
+
+    #[allow(dead_code)]
+    #[derive(Deserialize, Clone)]
+    struct KeyVector {
+        curve: String,
+
+        #[serde(rename = "chainCode")]
+        chain_code: String,
+
+        #[serde(rename = "privateKey")]
+        private_key: String,
+
+        #[serde(rename = "publicKey")]
+        public_key: String,
+
+        fingerprint: String,
+        xpub: String,
+        xprv: String,
+    }
+    impl KeyVector {
+        fn test(&self, seed: &[u8; 64], path: &HDPath) {
+            let maybe_derived: Option<profile::PrivateKey> =
+                match self.curve.as_str() {
+                    "ed25519" => Some(
+                        MnemonicWithPassphrase::derive_ed25519_private_key(
+                            seed, path,
+                        )
+                        .into(),
+                    ),
+                    "secp256k1" => Some(
+                        MnemonicWithPassphrase::derive_secp256k1_private_key(
+                            seed, path,
+                        )
+                        .into(),
+                    ),
+                    _ => {
+                        assert_eq!(self.curve, "nist256p1");
+                        /* P256 not yet supported */
+                        None
+                    }
+                };
+            let Some(derived) = maybe_derived else { return };
+            assert_eq!(derived.to_hex(), self.private_key);
+            assert!(self.public_key.ends_with(&derived.public_key().to_hex()));
+        }
+    }
+
+    #[derive(Deserialize, Clone)]
+    struct TestCase {
+        path: HDPath,
+
+        #[serde(rename = "childKeys")]
+        child_keys: Vec<KeyVector>,
+    }
+    impl TestCase {
+        fn test(&self, seed: &[u8; 64]) {
+            self.child_keys
+                .iter()
+                .for_each(|k| k.test(seed, &self.path));
+        }
+    }
+
+    #[allow(dead_code)]
+    #[derive(Deserialize, Clone)]
+    struct Group {
+        seed: String,
+
+        #[serde(rename = "mnemonicPhrase")]
+        mnemonic: Mnemonic,
+
+        entropy: String,
+
+        passphrase: BIP39Passphrase,
+
+        #[serde(rename = "masterKeys")]
+        master_keys: Vec<KeyVector>,
+
+        #[serde(rename = "testCases")]
+        test_cases: Vec<TestCase>,
+    }
+    impl Group {
+        fn test(&self) {
+            let seed = self.mnemonic.to_seed(&self.passphrase.0);
+            let entropy = ::hex::decode(&self.entropy).unwrap();
+            assert_eq!(self.mnemonic, Mnemonic::from_entropy(&entropy));
+            assert_eq!(::hex::encode(seed), self.seed);
+            self.test_cases.iter().for_each(|c| c.test(&seed));
+        }
+    }
+
+    #[derive(Deserialize, Clone)]
+    struct Fixture {
+        #[serde(rename = "testGroups")]
+        test_groups: Vec<Group>,
+    }
+    impl Fixture {
+        fn test(&self) {
+            self.test_groups.iter().for_each(|g| g.test())
+        }
+    }
+
+    #[test]
+    fn test_vectors() {
+        let ten =
+            fixture::<Fixture>("slip10_tests_#10").expect("SLIP10 #10 fixture");
+        let thousand = fixture::<Fixture>("slip10_tests_#1000")
+            .expect("SLIP10 #1000 fixture");
+
+        ten.test();
+        thousand.test();
+    }
+}
