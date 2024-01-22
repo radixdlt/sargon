@@ -23,5 +23,5 @@ repos:
         name: test
         language: system
         types: [file, rust]
-        entry: cargo nextest run --package profile --test uniffi && cargo nextest run
+        entry: cargo test && cargo test --package profile --test uniffi
         pass_filenames: false
