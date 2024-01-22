@@ -226,15 +226,13 @@ mod tests {
 
     #[test]
     fn len() {
-        assert_eq!(
-            Gateways::new_with_other(
-                Gateway::mainnet(),                         // 1
-                [Gateway::stokenet(), Gateway::mardunet()]  // + 2
-            )
-            .unwrap()
-            .len(),
-            1 + 2
-        );
+        let sut = Gateways::new_with_other(
+            Gateway::mainnet(),                         // 1
+            [Gateway::stokenet(), Gateway::mardunet()], // + 2
+        )
+        .unwrap();
+        assert_eq!(sut.clone().len(), 1 + 2);
+        assert_eq!(sut.is_empty(), false);
     }
 
     #[test]
