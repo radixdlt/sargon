@@ -72,7 +72,7 @@ impl EntityCAP26Path for IdentityPath {
         index: HDPathValue,
     ) -> Self {
         Self {
-            path: path.into(),
+            path,
             network_id,
             entity_kind,
             key_kind,

@@ -52,8 +52,8 @@ impl FactorSourceCommon {
     {
         Self {
             crypto_parameters,
-            added_on: added_on.into(),
-            last_used_on: last_used_on.into(),
+            added_on,
+            last_used_on,
             flags: FactorSourceFlags::from_iter(flags),
         }
     }
@@ -76,8 +76,7 @@ impl FactorSourceCommon {
                 vec![FactorSourceFlag::Main]
             } else {
                 Vec::new()
-            }
-            .into_iter(),
+            },
         )
     }
 
@@ -118,7 +117,7 @@ impl FactorSourceCommon {
         let date = Timestamp::parse("2023-09-11T16:05:56.000Z").unwrap();
         FactorSourceCommon::with_values(
             FactorSourceCryptoParameters::babylon(),
-            date.clone(),
+            date,
             date,
             [FactorSourceFlag::Main],
         )
@@ -129,7 +128,7 @@ impl FactorSourceCommon {
         let date = Timestamp::parse("2023-09-11T16:05:56.000Z").unwrap();
         FactorSourceCommon::with_values(
             FactorSourceCryptoParameters::olympia(),
-            date.clone(),
+            date,
             date,
             [],
         )
@@ -199,7 +198,7 @@ mod tests {
         let date = Timestamp::parse("2023-09-11T16:05:56.000Z").unwrap();
         let model = FactorSourceCommon::with_values(
             FactorSourceCryptoParameters::default(),
-            date.clone(),
+            date,
             date,
             [FactorSourceFlag::Main],
         );

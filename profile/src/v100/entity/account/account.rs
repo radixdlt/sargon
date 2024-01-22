@@ -84,7 +84,7 @@ impl Account {
                 account_creating_factor_instance.clone(),
             );
         Self {
-            network_id: account_creating_factor_instance.network_id().into(),
+            network_id: account_creating_factor_instance.network_id(),
             address,
             display_name,
             security_state:
@@ -93,7 +93,7 @@ impl Account {
                 )
                 .into(),
             appearance_id,
-            flags: EntityFlags::default().into(),
+            flags: EntityFlags::default(),
             on_ledger_settings: OnLedgerSettings::default(),
         }
     }
@@ -148,11 +148,11 @@ impl Account {
         appearance_id: AppearanceID,
     ) -> Self {
         Self {
-            network_id: address.network_id.clone(),
+            network_id: address.network_id,
             address,
             display_name,
             appearance_id,
-            flags: EntityFlags::default().into(),
+            flags: EntityFlags::default(),
             on_ledger_settings: OnLedgerSettings::default(),
             security_state: EntitySecurityState::placeholder(),
         }

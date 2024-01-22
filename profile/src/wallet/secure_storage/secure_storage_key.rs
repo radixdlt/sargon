@@ -22,10 +22,7 @@ impl SecureStorageKey {
                 SecureStorageKey::SnapshotHeadersList => "headers".to_string(),
                 SecureStorageKey::DeviceFactorSourceMnemonic {
                     factor_source_id,
-                } => format!(
-                    "device_factor_source_{}",
-                    factor_source_id.to_string()
-                ),
+                } => format!("device_factor_source_{}", factor_source_id),
                 SecureStorageKey::ProfileSnapshot { profile_id } =>
                     format!("profile_snapshot_{}", profile_id),
             }

@@ -50,10 +50,10 @@ impl EntityAddress for IdentityAddress {
         network_id: NetworkID,
     ) -> Self {
         assert!(address.starts_with(&Self::entity_type().hrp()), "Invalid address, you SHOULD NOT call this function directly, you should use `try_from_bech32` instead.");
-        return Self {
+        Self {
             address: address.to_string(),
             network_id,
-        };
+        }
     }
 }
 

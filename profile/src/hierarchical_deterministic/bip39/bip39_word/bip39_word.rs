@@ -25,11 +25,11 @@ impl PartialOrd for BIP39Word {
 impl BIP39Word {
     pub fn new(word: &'static str, language: BIP39Language) -> Result<Self> {
         let index =
-            index_of_word_in_bip39_wordlist_of_language(&word, language.into())
+            index_of_word_in_bip39_wordlist_of_language(word, language.into())
                 .ok_or(CommonError::UnknownBIP39Word)?;
         Ok(Self {
             word: word.to_string(),
-            index: index.into(),
+            index,
             language,
         })
     }

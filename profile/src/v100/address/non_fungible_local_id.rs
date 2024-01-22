@@ -97,9 +97,8 @@ mod tests {
         let non_native = NonFungibleLocalId::Ruid {
             value: bytes.clone().to_vec(),
         };
-        let native = NativeNonFungibleLocalId::RUID(
-            RUIDNonFungibleLocalId::new(bytes.clone()),
-        );
+        let native =
+            NativeNonFungibleLocalId::RUID(RUIDNonFungibleLocalId::new(bytes));
         assert_eq!(non_native.clone(), native.clone().into());
         assert_eq!(non_native.clone().try_into(), Ok(native.clone()));
         assert_eq!(

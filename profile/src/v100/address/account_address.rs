@@ -69,7 +69,7 @@ pub fn account_address_to_short(address: &AccountAddress) -> String {
 
 impl AccountAddress {
     pub fn new(public_key: PublicKey, network_id: NetworkID) -> Self {
-        <Self as EntityAddress>::from_public_key(public_key, network_id).into()
+        <Self as EntityAddress>::from_public_key(public_key, network_id)
     }
 
     /// Formats the AccountAddress to its abbreviated form which is what the user
@@ -114,10 +114,10 @@ impl EntityAddress for AccountAddress {
         network_id: NetworkID,
     ) -> Self {
         assert!(address.starts_with(&Self::entity_type().hrp()), "Invalid address, you SHOULD NOT call this function directly, you should use `try_from_bech32` instead.");
-        return Self {
+        Self {
             address: address.to_string(),
             network_id,
-        };
+        }
     }
 }
 

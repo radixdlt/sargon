@@ -62,7 +62,7 @@ mod tests {
 
     #[test]
     fn fiat_worth_is_visible_by_default() {
-        assert_eq!(AppDisplay::default().is_currency_amount_visible, true);
+        assert!(AppDisplay::default().is_currency_amount_visible);
     }
 
     #[test]

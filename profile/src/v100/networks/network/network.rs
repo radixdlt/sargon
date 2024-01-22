@@ -20,7 +20,7 @@ impl Identifiable for Network {
     /// The ID of the network that has been used to generate the `accounts` and `personas`
     /// and on which the `authorizedDapps` have been deployed on.
     fn id(&self) -> NetworkID {
-        self.id.clone()
+        self.id
     }
 }
 
@@ -52,7 +52,7 @@ impl Network {
         mutate: F,
     ) -> Option<Account>
     where
-        F: FnMut(&mut Account) -> (),
+        F: FnMut(&mut Account),
     {
         if self.accounts.update_with(address, mutate) {
             self.accounts.get(address).cloned()
@@ -129,13 +129,10 @@ mod tests {
     fn panic_when_network_id_mismatch_between_accounts_and_value() {
         Network::new(
             NetworkID::Mainnet,
-            Accounts::with_accounts(
-                [
-                    Account::placeholder_mainnet(),
-                    Account::placeholder_stokenet(),
-                ]
-                .into_iter(),
-            ),
+            Accounts::with_accounts([
+                Account::placeholder_mainnet(),
+                Account::placeholder_stokenet(),
+            ]),
         );
     }
 

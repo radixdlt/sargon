@@ -31,7 +31,7 @@ impl FactorSourceIDFromAddress {
 
 impl FactorSourceIDFromAddress {
     pub fn to_canonical_string(&self) -> String {
-        format!("{}:{}", self.kind.discriminant(), self.body.to_string())
+        format!("{}:{}", self.kind.discriminant(), self.body)
     }
 }
 

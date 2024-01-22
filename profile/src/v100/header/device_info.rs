@@ -114,7 +114,6 @@ mod tests {
         let n = 1000;
         let ids = (0..n)
             .map(|_| DeviceInfo::new_iphone())
-            .into_iter()
             .map(|d| d.id)
             .collect::<HashSet<Uuid>>();
         assert_eq!(ids.len(), n);

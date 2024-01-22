@@ -129,7 +129,7 @@ where
         deserializer: D,
     ) -> Result<Self, D::Error> {
         let id_vec_of = IdentifiedVecOf::<Element>::deserialize(deserializer)?;
-        return Ok(Self::from_identified_vec_of(id_vec_of));
+        Ok(Self::from_identified_vec_of(id_vec_of))
     }
 }
 
@@ -182,7 +182,7 @@ unsafe impl<UT, T: Identifiable + Debug + Clone + Lift<UT>> Lift<UT>
         for _ in 0..len {
             vec.push(<T as Lift<UT>>::try_read(buf)?)
         }
-        Ok(IdentifiedVecVia::from_iter(vec.into_iter()))
+        Ok(IdentifiedVecVia::from_iter(vec))
     }
 
     fn try_lift(buf: RustBuffer) -> uniffi::Result<IdentifiedVecVia<T>> {
@@ -211,8 +211,8 @@ mod tests {
     #[test]
     fn is_empty() {
         let sut = SUT::from_iter([1337, 42, 237]);
-        assert_eq!(sut.is_empty(), false);
-        assert_eq!(SUT::new().is_empty(), true);
+        assert!(!sut.is_empty());
+        assert!(SUT::new().is_empty());
     }
 
     #[test]

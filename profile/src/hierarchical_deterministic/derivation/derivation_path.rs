@@ -27,9 +27,7 @@ impl TryFrom<&HDPath> for DerivationPath {
         if let Ok(bip44) = BIP44LikePath::try_from(value) {
             return Ok(bip44.into());
         };
-        return CAP26Path::try_from(value)
-            .map(|p| p.derivation_path())
-            .map_err(|e| e.into());
+        CAP26Path::try_from(value).map(|p| p.derivation_path())
     }
 }
 

@@ -80,12 +80,8 @@ impl HierarchicalDeterministicFactorInstance {
         match &self.derivation_path() {
             DerivationPath::CAP26 { value } => match value {
                 CAP26Path::GetID { value: _ } => None,
-                CAP26Path::IdentityPath { value } => {
-                    Some(value.key_kind().clone())
-                }
-                CAP26Path::AccountPath { value } => {
-                    Some(value.key_kind().clone())
-                }
+                CAP26Path::IdentityPath { value } => Some(value.key_kind()),
+                CAP26Path::AccountPath { value } => Some(value.key_kind()),
             },
             DerivationPath::BIP44Like { value: _ } => None,
         }
@@ -152,14 +148,14 @@ impl HierarchicalDeterministicFactorInstance {
         index: HDPathValue,
     ) -> Self {
         let mwp = MnemonicWithPassphrase::placeholder();
-        let path = AccountPath::new(NetworkID::Mainnet.into(), key_kind, index);
+        let path = AccountPath::new(NetworkID::Mainnet, key_kind, index);
         let private_key = mwp.derive_private_key(path.clone());
         let public_key = private_key.public_key();
         let id = FactorSourceIDFromHash::from_mnemonic_with_passphrase(
             FactorSourceKind::Device,
             mwp,
         );
-        Self::new(id.into(), public_key)
+        Self::new(id, public_key)
     }
 }
 

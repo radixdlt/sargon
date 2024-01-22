@@ -25,9 +25,7 @@ pub struct RadixConnectPassword {
 
 impl RadixConnectPassword {
     pub fn new(hex_32bytes: Hex32Bytes) -> Self {
-        Self {
-            value: hex_32bytes.into(),
-        }
+        Self { value: hex_32bytes }
     }
 
     pub fn hash(&self) -> Hash {

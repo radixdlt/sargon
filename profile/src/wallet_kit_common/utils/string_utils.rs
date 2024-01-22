@@ -8,7 +8,7 @@ pub fn suffix_str(n: usize, s: &str) -> String {
 /// Returns the last `n` chars of the &String `s`. If `s` is shorter than `n`
 /// we panic.
 pub fn suffix_string(n: usize, s: &String) -> String {
-    suffix_str(n, &s)
+    suffix_str(n, s)
 }
 
 #[cfg(test)]

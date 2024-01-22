@@ -118,14 +118,14 @@ impl PublicKey {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_secp256k1_alice() -> Self {
         Self::Secp256k1 {
-            value: Secp256k1PublicKey::placeholder_alice().into(),
+            value: Secp256k1PublicKey::placeholder_alice(),
         }
     }
 
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_secp256k1_bob() -> Self {
         Self::Secp256k1 {
-            value: Secp256k1PublicKey::placeholder_bob().into(),
+            value: Secp256k1PublicKey::placeholder_bob(),
         }
     }
 
@@ -137,14 +137,14 @@ impl PublicKey {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_ed25519_alice() -> Self {
         Self::Ed25519 {
-            value: Ed25519PublicKey::placeholder_alice().into(),
+            value: Ed25519PublicKey::placeholder_alice(),
         }
     }
 
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_ed25519_bob() -> Self {
         Self::Ed25519 {
-            value: Ed25519PublicKey::placeholder_bob().into(),
+            value: Ed25519PublicKey::placeholder_bob(),
         }
     }
 }
@@ -163,11 +163,11 @@ impl<'de> Deserialize<'de> for PublicKey {
         let wrapper = Wrapper::deserialize(deserializer)?;
         match wrapper.curve {
             SLIP10Curve::Curve25519 => Ed25519PublicKey::from_str(&wrapper.hex)
-                .map(|pk| PublicKey::Ed25519 { value: pk.into() })
+                .map(|pk| PublicKey::Ed25519 { value: pk })
                 .map_err(de::Error::custom),
             SLIP10Curve::Secp256k1 => {
                 Secp256k1PublicKey::from_str(&wrapper.hex)
-                    .map(|pk| PublicKey::Secp256k1 { value: pk.into() })
+                    .map(|pk| PublicKey::Secp256k1 { value: pk })
                     .map_err(de::Error::custom)
             }
         }
@@ -412,13 +412,13 @@ mod tests {
     fn ed25519_into_as_roundtrip() {
         let ed25519 = Ed25519PublicKey::placeholder();
         let key: PublicKey = ed25519.clone().into();
-        assert_eq!(key.as_ed25519().unwrap(), &ed25519.into());
+        assert_eq!(key.as_ed25519().unwrap(), &ed25519);
     }
 
     #[test]
     fn secp256k1_into_as_roundtrip() {
         let secp256k1 = Secp256k1PublicKey::placeholder();
         let key: PublicKey = secp256k1.clone().into();
-        assert_eq!(key.as_secp256k1().unwrap(), &secp256k1.into());
+        assert_eq!(key.as_secp256k1().unwrap(), &secp256k1);
     }
 }

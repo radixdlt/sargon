@@ -49,7 +49,7 @@ impl Persona {
                 persona_creating_factor_instance.clone(),
             );
         Self {
-            network_id: persona_creating_factor_instance.network_id().into(),
+            network_id: persona_creating_factor_instance.network_id(),
             address,
             display_name,
             security_state:
@@ -57,7 +57,7 @@ impl Persona {
                     persona_creating_factor_instance,
                 )
                 .into(),
-            flags: EntityFlags::default().into(),
+            flags: EntityFlags::default(),
             persona_data,
         }
     }

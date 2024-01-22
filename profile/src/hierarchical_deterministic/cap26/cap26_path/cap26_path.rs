@@ -36,7 +36,7 @@ impl TryFrom<&HDPath> for CAP26Path {
         if let Ok(identity_path) = IdentityPath::try_from(value) {
             return Ok(identity_path.into());
         }
-        return AccountPath::try_from(value).map(|p| p.into());
+        AccountPath::try_from(value).map(|p| p.into())
     }
 }
 
@@ -85,9 +85,7 @@ impl From<IdentityPath> for CAP26Path {
 
 impl From<GetIDPath> for CAP26Path {
     fn from(value: GetIDPath) -> Self {
-        Self::GetID {
-            value: value.into(),
-        }
+        Self::GetID { value }
     }
 }
 
@@ -154,7 +152,7 @@ mod tests {
     fn scheme_getid_path() {
         assert_eq!(
             CAP26Path::GetID {
-                value: GetIDPath::default().into()
+                value: GetIDPath::default()
             }
             .scheme(),
             DerivationPathScheme::Cap26
@@ -173,7 +171,7 @@ mod tests {
     fn hdpath_getid_path() {
         assert_eq!(
             CAP26Path::GetID {
-                value: GetIDPath::default().into()
+                value: GetIDPath::default()
             }
             .hd_path(),
             GetIDPath::default().hd_path()
@@ -194,7 +192,7 @@ mod tests {
     fn into_from_getid_path() {
         assert_eq!(
             CAP26Path::GetID {
-                value: GetIDPath::default().into()
+                value: GetIDPath::default()
             },
             GetIDPath::default().into()
         );

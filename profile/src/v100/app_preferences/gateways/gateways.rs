@@ -73,8 +73,8 @@ impl<'de> Deserialize<'de> for Gateways {
             .saved
             .iter()
             .find(|g| g.id() == wrapped.url)
-            .map(|g| g.clone())
-            .ok_or_else(|| {
+            .cloned()
+            .ok_or({
                 CommonError::InvalidGatewaysJSONCurrentNotFoundAmongstSaved
             })
             .map_err(de::Error::custom)?;
@@ -140,7 +140,7 @@ impl Gateways {
             return false;
         }
         self.other.append(gateway);
-        return true;
+        true
     }
 }
 

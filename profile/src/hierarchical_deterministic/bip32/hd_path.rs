@@ -26,7 +26,7 @@ impl FromStr for HDPath {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         BIP32Path::from_str(s)
-            .map(|p| Self::from(p))
+            .map(Self::from)
             .map_err(|_| CommonError::InvalidBIP32Path(s.to_string()))
     }
 }
@@ -52,7 +52,7 @@ impl HDPath {
         }
         assert!(vec.len() == path.depth() as usize);
         vec.reverse();
-        return Self::from_components(vec);
+        Self::from_components(vec)
     }
 
     pub(crate) fn from_components<I>(components: I) -> Self
@@ -114,16 +114,16 @@ impl HDPath {
             components,
             0,
             HDPathComponent::bip44_purpose(),
-            Box::new(|v| CommonError::BIP44PurposeNotFound(v)),
+            Box::new(CommonError::BIP44PurposeNotFound),
         )?;
 
         _ = Self::parse(
             components,
             1,
             HDPathComponent::bip44_cointype(),
-            Box::new(|v| CommonError::CoinTypeNotFound(v)),
+            Box::new(CommonError::CoinTypeNotFound),
         )?;
-        return Ok((path.clone(), components.clone()));
+        Ok((path.clone(), components.clone()))
     }
 
     pub(crate) fn try_parse_base<F>(
@@ -146,7 +146,7 @@ impl HDPath {
             .iter()
             .map(|c| c.clone().to_string())
             .join("/");
-        return format!("m/{}", rest);
+        format!("m/{}", rest)
     }
 }
 

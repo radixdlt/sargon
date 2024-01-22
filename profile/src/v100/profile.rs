@@ -96,7 +96,7 @@ impl Profile {
         mutate: F,
     ) -> Option<Account>
     where
-        F: FnMut(&mut Account) -> (),
+        F: FnMut(&mut Account),
     {
         self.networks.update_account(address, mutate)
     }
@@ -332,7 +332,6 @@ mod tests {
     fn hash() {
         let n = 100;
         let set = (0..n)
-            .into_iter()
             .map(|_| {
                 Profile::new(
                     PrivateHierarchicalDeterministicFactorSource::generate_new(

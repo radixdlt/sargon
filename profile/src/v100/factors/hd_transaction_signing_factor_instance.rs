@@ -128,7 +128,7 @@ mod tests {
         let hd_key = HierarchicalDeterministicPublicKey::new(
             PublicKey::placeholder_ed25519(),
             AccountPath::new(
-                NetworkID::Mainnet.into(),
+                NetworkID::Mainnet,
                 CAP26KeyKind::AuthenticationSigning,
                 0,
             )
@@ -184,7 +184,7 @@ mod tests {
         let hd_key = HierarchicalDeterministicPublicKey::new(
             PublicKey::placeholder_ed25519(),
             IdentityPath::new(
-                NetworkID::Mainnet.into(),
+                NetworkID::Mainnet,
                 CAP26KeyKind::AuthenticationSigning,
                 0,
             )

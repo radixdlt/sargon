@@ -39,6 +39,12 @@ impl From<Secp256k1PrivateKey> for PrivateKey {
     }
 }
 
+impl Default for PrivateKey {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl PrivateKey {
     /// Generates a new `PrivateKey` over Curve25519.
     pub fn new() -> Self {
@@ -50,10 +56,10 @@ impl PrivateKey {
     pub fn public_key(&self) -> PublicKey {
         match self {
             PrivateKey::Ed25519(key) => PublicKey::Ed25519 {
-                value: key.public_key().into(),
+                value: key.public_key(),
             },
             PrivateKey::Secp256k1(key) => PublicKey::Secp256k1 {
-                value: key.public_key().into(),
+                value: key.public_key(),
             },
         }
     }

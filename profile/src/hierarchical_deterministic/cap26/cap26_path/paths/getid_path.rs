@@ -61,13 +61,13 @@ impl TryFrom<&HDPath> for GetIDPath {
                 found: path.depth(),
             });
         }
-        let value = HDPath::parse_try_map(&components, 2, Box::new(|v| Ok(v)))?;
+        let value = HDPath::parse_try_map(&components, 2, Box::new(Ok))?;
         if value != Self::LAST_COMPONENT_VALUE {
             return Err(CommonError::InvalidGetIDPath(value));
         }
         let hd_path = HDPath::from_components(components);
         assert_eq!(Self { path: hd_path }, Self::default());
-        return Ok(Self::default());
+        Ok(Self::default())
     }
 }
 
@@ -87,7 +87,7 @@ impl FromStr for GetIDPath {
                 found: v,
             }
         })?;
-        return Self::try_from(&path);
+        Self::try_from(&path)
     }
 }
 

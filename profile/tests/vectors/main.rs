@@ -10,7 +10,7 @@ use std::{
 use thiserror::Error;
 
 fn crate_dir() -> PathBuf {
-    env::var("CARGO_MANIFEST_DIR").unwrap().try_into().unwrap()
+    env::var("CARGO_MANIFEST_DIR").unwrap().into()
 }
 
 fn append_to_path(p: impl Into<OsString>, s: impl AsRef<OsStr>) -> PathBuf {
@@ -48,7 +48,7 @@ where
         })
         .and_then(|v| {
             serde_json::from_value::<T>(v)
-                .map_err(|e| TestingError::FailedToDeserialize(e))
+                .map_err(TestingError::FailedToDeserialize)
         })
 }
 
@@ -99,7 +99,7 @@ mod cap26_tests {
         tests: Vec<CAP26Vector>,
     }
     impl CAP26Group {
-        fn test<S, P>(&self) -> ()
+        fn test<S, P>(&self)
         where
             P: IsPublicKey<S::Signature>
                 + FromStr<Err = CommonError>
@@ -186,8 +186,7 @@ mod bip44_tests {
                     let derived_private_key: Secp256k1PrivateKey =
                         MnemonicWithPassphrase::derive_secp256k1_private_key(
                             &seed, &v.path,
-                        )
-                        .into();
+                        );
                     assert_eq!(derived_private_key, expected_private_key);
                     assert_eq!(
                         &derived_private_key.public_key(),

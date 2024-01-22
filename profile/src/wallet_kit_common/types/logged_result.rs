@@ -20,7 +20,7 @@ impl<T: SafeToLog> LoggedResult<T> for Result<T> {
     where
         F: FnOnce(&T) -> String,
     {
-        self.inspect(|x| log::log!(level, "{}", format(&x)))
+        self.inspect(|x| log::log!(level, "{}", format(x)))
             .inspect_err(|e| log::error!("Err: {}", e))
     }
 }
