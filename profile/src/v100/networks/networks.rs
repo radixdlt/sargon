@@ -19,7 +19,7 @@ impl Networks {
     /// Instantiates a new network collection with the provided
     /// `network`.
     pub fn with_network(network: Network) -> Self {
-        Self::with_networks([network].into_iter())
+        Self::with_networks([network])
     }
 }
 
@@ -37,7 +37,7 @@ impl Networks {
         mut mutate: F,
     ) -> Option<Account>
     where
-        F: FnMut(&mut Account) -> (),
+        F: FnMut(&mut Account),
     {
         self.update_with(&address.network_id, |n| {
             _ = n.update_account(address, |a| mutate(a))
@@ -65,13 +65,10 @@ impl Default for Networks {
 impl HasPlaceholder for Networks {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
-        Self::with_networks(
-            [
-                Network::placeholder_mainnet(),
-                Network::placeholder_stokenet(),
-            ]
-            .into_iter(),
-        )
+        Self::with_networks([
+            Network::placeholder_mainnet(),
+            Network::placeholder_stokenet(),
+        ])
     }
 
     /// A placeholder used to facilitate unit tests.
@@ -123,13 +120,12 @@ mod tests {
                 Account::placeholder_mainnet_bob(),
             ]),
         )]);
-        assert_eq!(
-            sut.append(Network::new(
+        assert!(
+            !sut.append(Network::new(
                 NetworkID::Mainnet,
                 Accounts::from_iter([Account::placeholder_mainnet_carol()]),
             ))
-            .0,
-            false
+            .0
         );
 
         assert_eq!(

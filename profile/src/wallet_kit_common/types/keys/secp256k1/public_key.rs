@@ -115,7 +115,7 @@ impl Secp256k1PublicKey {
     fn from_bytes(bytes: Vec<u8>) -> Result<Self> {
         EngineSecp256k1PublicKey::try_from(bytes.as_slice())
             .map_err(|_| CommonError::InvalidSecp256k1PublicKeyFromBytes(bytes))
-            .and_then(|pk| Self::from_engine(pk))
+            .and_then(Self::from_engine)
     }
 }
 

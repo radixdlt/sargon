@@ -80,7 +80,7 @@ mod tests {
 
     #[test]
     fn default_is_developer_mode_disabled() {
-        assert_eq!(Security::default().is_developer_mode_enabled, false);
+        assert!(!Security::default().is_developer_mode_enabled);
     }
 
     #[test]

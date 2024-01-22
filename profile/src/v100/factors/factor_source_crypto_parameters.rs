@@ -34,7 +34,7 @@ impl FactorSourceCryptoParameters {
         J: IntoIterator<Item = DerivationPathScheme>,
     {
         let supported_curves = IdentifiedVecVia::from_iter(curves);
-        if supported_curves.len() == 0 {
+        if supported_curves.is_empty() {
             return Err(CommonError::FactorSourceCryptoParametersSupportedCurvesInvalidSize);
         }
         let supported_derivation_path_schemes =

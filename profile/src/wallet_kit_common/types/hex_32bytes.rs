@@ -30,20 +30,11 @@ impl Hex32Bytes {
         Hex32Bytes::from_vec(generate_32_bytes())
             .expect("Should be able to generate 32 bytes.")
     }
-
-    /// Just an alias for `Self::generate()`
-    pub fn new() -> Self {
-        Self::generate()
-    }
 }
 
 impl Hex32Bytes {
     pub fn to_hex(&self) -> String {
         hex_encode(self.bytes())
-    }
-
-    pub fn to_string(&self) -> String {
-        self.to_hex()
     }
 }
 
@@ -63,7 +54,7 @@ impl FromStr for Hex32Bytes {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         hex_decode(s)
             .map_err(|_| CommonError::StringNotHex(s.to_owned()))
-            .and_then(|v| Self::from_vec(v))
+            .and_then(Self::from_vec)
     }
 }
 
@@ -121,7 +112,7 @@ impl Hex32Bytes {
 impl Hex32Bytes {
     /// Returns a clone of the inner bytes as a `Vec`.
     pub fn to_vec(&self) -> Vec<u8> {
-        Vec::from(self.bytes().clone())
+        Vec::from(self.bytes())
     }
 
     /// Returns a references to the inner array slice.
@@ -255,7 +246,7 @@ mod tests {
         let mut set: HashSet<Vec<u8>> = HashSet::new();
         let n = 100;
         for _ in 0..n {
-            let bytes = Hex32Bytes::new();
+            let bytes = Hex32Bytes::generate();
             set.insert(bytes.to_vec());
         }
         assert_eq!(set.len(), n);

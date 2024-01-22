@@ -64,7 +64,7 @@ impl MnemonicWithPassphrase {
     /// Instantiates a new `MnemonicWithPassphrase` with empty passphrase (no passphrase),
     /// from the specified BIP39 mnemonic phrase.
     pub fn from_phrase(phrase: &str) -> Result<Self> {
-        Mnemonic::from_phrase(phrase).map(|m| Self::new(m))
+        Mnemonic::from_phrase(phrase).map(Self::new)
     }
 }
 
@@ -94,10 +94,7 @@ impl MnemonicWithPassphrase {
         path: &HDPath,
     ) -> Ed25519PrivateKey {
         let chain = slip10::BIP32Path::from(
-            path.components
-                .iter()
-                .map(|c| c.value.clone())
-                .collect_vec(),
+            path.components.iter().map(|c| c.value).collect_vec(),
         );
 
         let bytes =
@@ -115,10 +112,10 @@ impl MnemonicWithPassphrase {
     ) -> Secp256k1PrivateKey {
         let chain: bip32::DerivationPath = path
             .to_string()
-            .replace("H", "'")
+            .replace('H', "'")
             .parse()
             .expect("All HDPaths are valid bip32 paths");
-        let child_xprv = bip32::XPrv::derive_from_path(&seed, &chain).expect(
+        let child_xprv = bip32::XPrv::derive_from_path(seed, &chain).expect(
             "To always be able to derive a child key using a valid BIP32 path",
         );
 
@@ -340,7 +337,6 @@ mod tests {
     fn hash() {
         let n = 100;
         let set = (0..n)
-            .into_iter()
             .map(|_| MnemonicWithPassphrase::generate_new())
             .collect::<HashSet<_>>();
         assert_eq!(set.len(), n);

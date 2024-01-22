@@ -123,10 +123,9 @@ mod tests {
         );
         let model = ThirdPartyDeposits::with_rule_and_lists(
             DepositRule::AcceptKnown,
-            BTreeSet::from_iter([excp1, excp2].into_iter()),
+            BTreeSet::from_iter([excp1, excp2]),
             BTreeSet::from_iter(
-                [DepositorAddress::NonFungibleGlobalID { value: "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>".parse().unwrap()}]
-                .into_iter(),
+                [DepositorAddress::NonFungibleGlobalID { value: "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>".parse().unwrap()}],
             ),
         );
 

@@ -3,9 +3,32 @@ repos:
     rev: v1.17.2
     hooks:
       - id: typos
-  - repo: https://github.com/doublify/pre-commit-rust
-    rev: v1.0
+  - repo: local
     hooks:
       - id: fmt
-        args: ["--all", "--", "--check"]
-      - id: cargo-check
+        name: fmt
+        language: system
+        types: [file, rust]
+        entry: cargo fmt -- --check
+        pass_filenames: false
+
+      - id: clippy
+        name: clippy
+        language: system
+        types: [file, rust]
+        entry: cargo clippy --all -- -D warnings # Use -D warnings option to ensure the job fails when encountering warnings
+        pass_filenames: false
+
+      - id: unit tests
+        name: unit tests
+        language: system
+        types: [file, rust]
+        entry: cargo test --lib
+        pass_filenames: false
+
+      - id: doc tests
+        name: doc tests
+        language: system
+        types: [file, rust]
+        entry: cargo test --doc
+        pass_filenames: false

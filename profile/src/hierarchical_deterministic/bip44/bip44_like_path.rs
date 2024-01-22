@@ -63,7 +63,7 @@ impl TryFrom<&HDPath> for BIP44LikePath {
         if !index.is_hardened() {
             return Err(CommonError::InvalidBIP44LikePathIndexWasNotHardened);
         }
-        return Ok(Self::from(path));
+        Ok(Self::from(path))
     }
 }
 
@@ -79,7 +79,7 @@ impl BIP44LikePath {
         let c4 = HDPathComponent::harden(index); // index
         let components = vec![c0, c1, c2, c3, c4];
         let path = HDPath::from_components(components);
-        return Self::from(path);
+        Self::from(path)
     }
 
     pub fn new(index: HDPathValue) -> Self {
@@ -112,7 +112,7 @@ impl FromStr for BIP44LikePath {
                 found: v,
             }
         })?;
-        return Self::try_from(&path);
+        Self::try_from(&path)
     }
 }
 

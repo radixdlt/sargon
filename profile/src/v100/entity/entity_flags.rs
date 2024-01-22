@@ -9,7 +9,7 @@ impl Identifiable for EntityFlag {
     type ID = Self;
 
     fn id(&self) -> Self::ID {
-        self.clone()
+        *self
     }
 }
 

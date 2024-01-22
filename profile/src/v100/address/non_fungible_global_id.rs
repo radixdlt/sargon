@@ -64,12 +64,12 @@ impl NonFungibleGlobalId {
     }
 
     fn network_id(&self) -> NetworkID {
-        self.resource_address.network_id.clone()
+        self.resource_address.network_id
     }
 
     fn engine(&self) -> EngineSerializableNonFungibleGlobalId {
         EngineSerializableNonFungibleGlobalId::new(
-            self.engine_global_id().into(),
+            self.engine_global_id(),
             self.network_id().discriminant(),
         )
     }
@@ -98,7 +98,7 @@ impl FromStr for NonFungibleGlobalId {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         EngineSerializableNonFungibleGlobalIdInternal::from_str(s)
-            .map(|i| Self::from_internal_engine(i))
+            .map(Self::from_internal_engine)
             .map_err(|_| CommonError::InvalidNonFungibleGlobalID(s.to_owned()))
     }
 }

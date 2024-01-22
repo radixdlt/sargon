@@ -63,12 +63,12 @@ impl Gateway {
 
 #[uniffi::export]
 pub fn gateway_mainnet() -> Gateway {
-    Gateway::mainnet().into()
+    Gateway::mainnet()
 }
 
 #[uniffi::export]
 pub fn gateway_stokenet() -> Gateway {
-    Gateway::stokenet().into()
+    Gateway::stokenet()
 }
 
 impl Gateway {
@@ -130,7 +130,7 @@ impl Gateway {
     }
 
     pub fn is_wellknown(&self) -> bool {
-        Self::wellknown().contains(&self)
+        Self::wellknown().contains(self)
     }
 }
 
@@ -204,12 +204,12 @@ mod tests {
 
     #[test]
     fn mainnet_is_wellknown() {
-        assert_eq!(Gateway::mainnet().is_wellknown(), true);
+        assert!(Gateway::mainnet().is_wellknown());
     }
 
     #[test]
     fn stokenet_is_wellknown() {
-        assert_eq!(Gateway::stokenet().is_wellknown(), true);
+        assert!(Gateway::stokenet().is_wellknown());
     }
 
     #[test]

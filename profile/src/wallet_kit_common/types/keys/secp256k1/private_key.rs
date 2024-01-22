@@ -20,12 +20,6 @@ impl Secp256k1PrivateKey {
         Self::from_hex32_bytes(Hex32Bytes::generate())
             .expect("Should be able to generate 32 bytes")
     }
-
-    /// Just an alias for `Self::generate()`, generating a new
-    /// key from random bytes.
-    pub fn new() -> Self {
-        Self::generate()
-    }
 }
 
 impl PartialEq for Secp256k1PrivateKey {
@@ -300,7 +294,7 @@ mod tests {
         let mut set: HashSet<Vec<u8>> = HashSet::new();
         let n = 100;
         for _ in 0..n {
-            let key = Secp256k1PrivateKey::new();
+            let key = Secp256k1PrivateKey::generate();
             let bytes = key.to_bytes();
             assert_eq!(bytes.len(), 32);
             set.insert(bytes);

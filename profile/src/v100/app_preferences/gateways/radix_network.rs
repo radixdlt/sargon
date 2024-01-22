@@ -128,7 +128,7 @@ impl RadixNetwork {
             .ok_or_else(|| {
                 CommonError::UnknownNetworkWithName(logical_name.to_string())
             })
-            .and_then(|id| Self::lookup_by_id(id.clone()))
+            .and_then(|id| Self::lookup_by_id(*id))
     }
 
     fn lookup_map() -> HashMap<NetworkID, Self> {

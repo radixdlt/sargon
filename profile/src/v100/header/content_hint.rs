@@ -100,7 +100,7 @@ mod tests {
 
     #[test]
     fn with_counters_constructor() {
-        (0..100).into_iter().for_each(|i| {
+        (0..100).for_each(|i| {
             let x = i + 1;
             let y = i + 2;
             let z = i + 3;

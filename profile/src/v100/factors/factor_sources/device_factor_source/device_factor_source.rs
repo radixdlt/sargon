@@ -50,7 +50,7 @@ impl IsFactorSource for DeviceFactorSource {
 }
 impl BaseIsFactorSource for DeviceFactorSource {
     fn factor_source_kind(&self) -> FactorSourceKind {
-        self.id.kind.clone()
+        self.id.kind
     }
 
     fn factor_source_id(&self) -> FactorSourceID {
@@ -82,7 +82,7 @@ impl DeviceFactorSource {
             id,
             FactorSourceCommon::new_bdfs(is_main),
             DeviceFactorSourceHint::unknown_model_of_client(
-                mnemonic_with_passphrase.mnemonic.word_count.clone(),
+                mnemonic_with_passphrase.mnemonic.word_count,
                 wallet_client_model,
             ),
         )

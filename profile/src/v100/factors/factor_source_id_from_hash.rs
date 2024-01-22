@@ -29,10 +29,7 @@ pub struct FactorSourceIDFromHash {
 impl FactorSourceIDFromHash {
     /// Instantiates a new `FactorSourceIDFromHash` from the `kind` and `body`.
     pub fn new(kind: FactorSourceKind, body: Hex32Bytes) -> Self {
-        Self {
-            kind,
-            body: body.into(),
-        }
+        Self { kind, body }
     }
 
     pub fn from_mnemonic_with_passphrase(
@@ -59,7 +56,7 @@ impl FactorSourceIDFromHash {
 
 impl FactorSourceIDFromHash {
     pub fn to_canonical_string(&self) -> String {
-        format!("{}:{}", self.kind.discriminant(), self.body.to_string())
+        format!("{}:{}", self.kind.discriminant(), self.body)
     }
 }
 
@@ -229,6 +226,6 @@ mod tests {
                 "device:883882e1d9d47b98090163bb4b369ae00349507693d856b1854de103dfe52793"
             ),
         ];
-        vectors.into_iter().for_each(|v| test_vector(v));
+        vectors.into_iter().for_each(test_vector);
     }
 }

@@ -110,7 +110,7 @@ impl Ed25519PublicKey {
     fn from_bytes(bytes: Vec<u8>) -> Result<Self> {
         EngineEd25519PublicKey::try_from(bytes.as_slice())
             .map_err(|_| CommonError::InvalidEd25519PublicKeyFromBytes(bytes))
-            .and_then(|pk| Self::from_engine(pk))
+            .and_then(Self::from_engine)
     }
 }
 

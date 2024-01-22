@@ -21,7 +21,7 @@ impl SecureStorage for EphemeralSecureStorage {
         self.storage
             .try_read()
             .map_err(|_| CommonError::SecureStorageReadError)
-            .and_then(|s| Ok(s.get(&key).cloned()))
+            .map(|s| s.get(&key).cloned())
     }
 
     fn save_data(&self, key: SecureStorageKey, value: Vec<u8>) -> Result<()> {

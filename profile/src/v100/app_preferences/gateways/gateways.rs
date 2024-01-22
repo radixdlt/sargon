@@ -14,15 +14,19 @@ pub struct Gateways {
     pub other: IdentifiedVecVia<Gateway>,
 }
 
+/// Constructs `Gateways` with `current` set as active Gateway.
 #[uniffi::export]
 pub fn new_gateways(current: Gateway) -> Gateways {
     Gateways::new(current)
 }
 
+/// A placeholder value useful for tests and previews.
 #[uniffi::export]
 pub fn new_gateways_placeholder() -> Gateways {
     Gateways::placeholder()
 }
+
+/// A placeholder value useful for tests and previews.
 #[uniffi::export]
 pub fn new_gateways_placeholder_other() -> Gateways {
     Gateways::placeholder_other()
@@ -31,6 +35,10 @@ pub fn new_gateways_placeholder_other() -> Gateways {
 impl Gateways {
     pub fn len(&self) -> usize {
         self.other.len() + 1
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 
     pub fn all(&self) -> Vec<Gateway> {
@@ -73,8 +81,8 @@ impl<'de> Deserialize<'de> for Gateways {
             .saved
             .iter()
             .find(|g| g.id() == wrapped.url)
-            .map(|g| g.clone())
-            .ok_or_else(|| {
+            .cloned()
+            .ok_or({
                 CommonError::InvalidGatewaysJSONCurrentNotFoundAmongstSaved
             })
             .map_err(de::Error::custom)?;
@@ -140,14 +148,14 @@ impl Gateways {
             return false;
         }
         self.other.append(gateway);
-        return true;
+        true
     }
 }
 
 impl Default for Gateways {
     fn default() -> Self {
         Self::new_with_other(Gateway::mainnet(), vec![Gateway::stokenet()])
-            .expect("Stokenet and Mainnet should have different IDs.")
+            .expect("Stokenet and Mainnet should have different NetworkIDs.")
     }
 }
 
@@ -222,15 +230,13 @@ mod tests {
 
     #[test]
     fn len() {
-        assert_eq!(
-            Gateways::new_with_other(
-                Gateway::mainnet(),                         // 1
-                [Gateway::stokenet(), Gateway::mardunet()]  // + 2
-            )
-            .unwrap()
-            .len(),
-            1 + 2
-        );
+        let sut = Gateways::new_with_other(
+            Gateway::mainnet(),                         // 1
+            [Gateway::stokenet(), Gateway::mardunet()], // + 2
+        )
+        .unwrap();
+        assert_eq!(sut.clone().len(), 1 + 2);
+        assert_eq!(sut.is_empty(), false);
     }
 
     #[test]

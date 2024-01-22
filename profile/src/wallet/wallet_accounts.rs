@@ -161,7 +161,7 @@ impl Wallet {
     /// error is returned.
     pub fn add_account(&self, account: Account) -> Result<()> {
         // TODO: clean this up, BAD code. messy, mostly because of (my) bad IdentifiedVec API.
-        let network_id = account.network_id.clone();
+        let network_id = account.network_id;
         let err_exists =
             CommonError::AccountAlreadyPresent(account.id().clone());
         self.try_write(|mut p| {
@@ -172,7 +172,7 @@ impl Wallet {
                         if network.accounts.append(account.clone()).0 {
                             Ok(network.clone())
                         } else {
-                            return Err(err_exists.clone());
+                            Err(err_exists.clone())
                         }
                     })
                     .and_then(
@@ -209,7 +209,7 @@ impl Wallet {
         self.write(|mut p| {
             p.update_account(&address, |a| a.display_name = to.to_owned())
         })
-        .ok_or_else(|| CommonError::UnknownAccount)
+        .ok_or(CommonError::UnknownAccount)
     }
 }
 
@@ -417,8 +417,8 @@ mod tests {
         assert_before: F,
         assert_after: G,
     ) where
-        F: Fn(Profile) -> (),
-        G: Fn(Account, Profile) -> (),
+        F: Fn(Profile),
+        G: Fn(Account, Profile),
     {
         let private =
             PrivateHierarchicalDeterministicFactorSource::placeholder();
@@ -454,7 +454,7 @@ mod tests {
 
     fn test_create_new_account_first_success<F>(also_save: bool, assert_last: F)
     where
-        F: Fn(Account, Profile) -> (),
+        F: Fn(Account, Profile),
     {
         test_new_account(
             Profile::new(
@@ -495,7 +495,7 @@ mod tests {
         also_save: bool,
         assert_last: F,
     ) where
-        F: Fn(Account, Profile) -> (),
+        F: Fn(Account, Profile),
     {
         test_new_account(
             Profile::placeholder(),

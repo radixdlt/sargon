@@ -17,7 +17,7 @@ impl Accounts {
     /// Instantiates a new collection of accounts from a
     /// single account.
     pub fn with_account(account: Account) -> Self {
-        Self::with_accounts([account].into_iter())
+        Self::with_accounts([account])
     }
 }
 
@@ -59,24 +59,18 @@ impl HasPlaceholder for Accounts {
 impl Accounts {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_mainnet() -> Self {
-        Self::with_accounts(
-            [
-                Account::placeholder_mainnet_alice(),
-                Account::placeholder_mainnet_bob(),
-            ]
-            .into_iter(),
-        )
+        Self::with_accounts([
+            Account::placeholder_mainnet_alice(),
+            Account::placeholder_mainnet_bob(),
+        ])
     }
 
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_stokenet() -> Self {
-        Self::with_accounts(
-            [
-                Account::placeholder_stokenet_carol(),
-                Account::placeholder_stokenet_diana(),
-            ]
-            .into_iter(),
-        )
+        Self::with_accounts([
+            Account::placeholder_stokenet_carol(),
+            Account::placeholder_stokenet_diana(),
+        ])
     }
 }
 

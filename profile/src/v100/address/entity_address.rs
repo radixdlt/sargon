@@ -50,7 +50,7 @@ pub trait EntityAddress: Sized {
             component.into_node_id(),
             network_id.discriminant(),
         );
-        return Self::__with_address_and_network_id(&address, network_id);
+        Self::__with_address_and_network_id(&address, network_id)
     }
 
     #[cfg(not(tarpaulin_include))] // false negative
@@ -80,6 +80,6 @@ pub trait EntityAddress: Sized {
 
         assert!(hrp.starts_with(&entity_type.hrp()), "Mismatching HRP while decoding address, this should never happen. Did internal function `decode_address` change? Or did you accidentally change or impl the `hrp` method on EntityType?");
 
-        return Ok(Self::__with_address_and_network_id(s, network_id));
+        Ok(Self::__with_address_and_network_id(s, network_id))
     }
 }

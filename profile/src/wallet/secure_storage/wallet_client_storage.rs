@@ -323,7 +323,7 @@ mod tests {
             where
                 S: Serializer,
             {
-                Err(CommonError::Unknown).map_err(serde::ser::Error::custom)
+                Err(serde::ser::Error::custom(CommonError::Unknown))
             }
         }
 

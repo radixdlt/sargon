@@ -66,15 +66,15 @@ pub trait EntityCAP26Path: Derivation + FromStr {
             }),
         )?;
 
-        let index = HDPath::parse_try_map(&components, 5, Box::new(|v| Ok(v)))?;
+        let index = HDPath::parse_try_map(&components, 5, Box::new(Ok))?;
 
-        return Ok(Self::__with_path_and_components(
+        Ok(Self::__with_path_and_components(
             path,
             network_id,
             entity_kind,
             key_kind,
             index,
-        ));
+        ))
     }
 
     #[cfg(not(tarpaulin_include))] // false negative
@@ -105,13 +105,13 @@ pub trait EntityCAP26Path: Derivation + FromStr {
         let components = vec![c0, c1, c2, c3, c4, c5];
         assert!(components.clone().iter().all(|c| c.is_hardened()));
         let path = HDPath::from_components(components);
-        return Self::__with_path_and_components(
+        Self::__with_path_and_components(
             path,
             network_id,
             entity_kind,
             key_kind,
             index,
-        );
+        )
     }
 
     fn new_mainnet_transaction_signing(index: HDPathValue) -> Self {

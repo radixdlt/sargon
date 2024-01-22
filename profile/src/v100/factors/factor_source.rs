@@ -45,17 +45,13 @@ impl BaseIsFactorSource for FactorSource {
 
 impl From<DeviceFactorSource> for FactorSource {
     fn from(value: DeviceFactorSource) -> Self {
-        FactorSource::Device {
-            value: value.into(),
-        }
+        FactorSource::Device { value }
     }
 }
 
 impl From<LedgerHardwareWalletFactorSource> for FactorSource {
     fn from(value: LedgerHardwareWalletFactorSource) -> Self {
-        FactorSource::Ledger {
-            value: value.into(),
-        }
+        FactorSource::Ledger { value }
     }
 }
 
@@ -116,19 +112,19 @@ impl FactorSource {
 
     pub fn placeholder_device_babylon() -> Self {
         Self::Device {
-            value: DeviceFactorSource::placeholder_babylon().into(),
+            value: DeviceFactorSource::placeholder_babylon(),
         }
     }
 
     pub fn placeholder_device_olympia() -> Self {
         Self::Device {
-            value: DeviceFactorSource::placeholder_olympia().into(),
+            value: DeviceFactorSource::placeholder_olympia(),
         }
     }
 
     pub fn placeholder_ledger() -> Self {
         Self::Ledger {
-            value: LedgerHardwareWalletFactorSource::placeholder().into(),
+            value: LedgerHardwareWalletFactorSource::placeholder(),
         }
     }
 }
@@ -193,7 +189,7 @@ mod tests {
         assert_eq!(
             factor_source,
             FactorSource::Device {
-                value: DeviceFactorSource::placeholder().into()
+                value: DeviceFactorSource::placeholder()
             }
         );
     }
@@ -205,7 +201,7 @@ mod tests {
         assert_eq!(
             factor_source,
             FactorSource::Ledger {
-                value: LedgerHardwareWalletFactorSource::placeholder().into()
+                value: LedgerHardwareWalletFactorSource::placeholder()
             }
         );
     }

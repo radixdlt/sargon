@@ -93,7 +93,7 @@ mod tests {
             P2PLink::placeholder_chrome(),
         ]);
         let (inserted, _) = sut.append(P2PLink::placeholder_brave());
-        assert_eq!(inserted, false);
+        assert!(!inserted);
     }
 
     #[test]

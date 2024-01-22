@@ -18,7 +18,7 @@ impl From<Ed25519PrivateKey> for PrivateKey {
     /// extern crate profile;
     /// use profile::prelude::*;
     ///
-    /// let key: PublicKey = Ed25519PrivateKey::new().public_key().into();
+    /// let key: PublicKey = Ed25519PrivateKey::generate().public_key().into();
     /// ```
     fn from(value: Ed25519PrivateKey) -> Self {
         Self::Ed25519(value)
@@ -32,7 +32,7 @@ impl From<Secp256k1PrivateKey> for PrivateKey {
     /// extern crate profile;
     /// use profile::prelude::*;
     ///
-    /// let key: PublicKey = Secp256k1PrivateKey::new().public_key().into();
+    /// let key: PublicKey = Secp256k1PrivateKey::generate().public_key().into();
     /// ```
     fn from(value: Secp256k1PrivateKey) -> Self {
         Self::Secp256k1(value)
@@ -40,20 +40,15 @@ impl From<Secp256k1PrivateKey> for PrivateKey {
 }
 
 impl PrivateKey {
-    /// Generates a new `PrivateKey` over Curve25519.
-    pub fn new() -> Self {
-        Ed25519PrivateKey::generate().into()
-    }
-
     /// Calculates the public key of the inner `PrivateKey` and wraps it
     /// in the `PublicKey` tagged union.
     pub fn public_key(&self) -> PublicKey {
         match self {
             PrivateKey::Ed25519(key) => PublicKey::Ed25519 {
-                value: key.public_key().into(),
+                value: key.public_key(),
             },
             PrivateKey::Secp256k1(key) => PublicKey::Secp256k1 {
-                value: key.public_key().into(),
+                value: key.public_key(),
             },
         }
     }
@@ -131,7 +126,7 @@ mod tests {
         let mut set: HashSet<Vec<u8>> = HashSet::new();
         let n = 100;
         for _ in 0..n {
-            let key = PrivateKey::new();
+            let key: PrivateKey = Ed25519PrivateKey::generate().into();
             let bytes = key.to_bytes();
             assert_eq!(bytes.len(), 32);
             set.insert(bytes);

@@ -69,7 +69,7 @@ impl UniffiCustomTypeConverter for Timestamp {
 
     fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
         Timestamp::parse(val.as_str())
-            .ok_or_else(|| CommonError::InvalidISO8601String(val))
+            .ok_or(CommonError::InvalidISO8601String(val))
             .map_err(|e| e.into())
     }
 

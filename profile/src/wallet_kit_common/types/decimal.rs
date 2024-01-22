@@ -3,7 +3,7 @@ use radix_engine_common::math::Decimal as NativeDecimal;
 use radix_engine_toolkit_json::models::common::SerializableDecimal;
 
 // FIXME: Use RET's type!
-#[derive(Clone, Debug, Eq, Ord, Hash, uniffi::Record, Default)]
+#[derive(Clone, Debug, Eq, uniffi::Record, Default)]
 pub struct Decimal {
     base10_string: String,
 }
@@ -13,17 +13,27 @@ impl PartialEq for Decimal {
         self.native().eq(&other.native())
     }
 }
+impl std::hash::Hash for Decimal {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.native().hash(state);
+    }
+}
 impl PartialOrd for Decimal {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+impl Ord for Decimal {
+    fn cmp(&self, other: &Self) -> Ordering {
         let lhs = &self.native();
         let rhs = &other.native();
         if lhs.eq(rhs) {
-            return Some(Ordering::Equal);
+            Ordering::Equal
         } else if lhs.le(rhs) {
-            return Some(Ordering::Less);
+            return Ordering::Less;
         } else {
             assert!(lhs.gt(rhs), "!(LHS == RHS || LHS < RHS), thus we expected LHS > RHS, but it was not. Most likely the implementation of RET's Decimal has changed, maybe to involve NaN?");
-            return Some(Ordering::Greater);
+            return Ordering::Greater;
         }
     }
 }
@@ -78,7 +88,7 @@ impl Decimal {
     pub fn new(value: String) -> Result<Self> {
         value
             .parse::<NativeDecimal>()
-            .map(|native| Self::from_native(native))
+            .map(Self::from_native)
             .map_err(|_| CommonError::DecimalError)
     }
 
@@ -140,61 +150,61 @@ mod tests {
 
     #[test]
     fn is_zero() {
-        assert_eq!(Decimal::zero().is_zero(), true);
-        assert_eq!(Decimal::one().is_zero(), false);
+        assert!(Decimal::zero().is_zero());
+        assert!(!Decimal::one().is_zero());
     }
 
     #[test]
     fn is_positive() {
-        assert_eq!(Decimal::zero().is_positive(), false);
-        assert_eq!(Decimal::one().is_positive(), true);
+        assert!(!Decimal::zero().is_positive());
+        assert!(Decimal::one().is_positive());
     }
 
     #[test]
     fn is_negative() {
-        assert_eq!(Decimal::try_from_str("-1").unwrap().is_negative(), true);
-        assert_eq!(Decimal::zero().is_negative(), false);
-        assert_eq!(Decimal::one().is_negative(), false);
+        assert!(Decimal::try_from_str("-1").unwrap().is_negative());
+        assert!(!Decimal::zero().is_negative());
+        assert!(!Decimal::one().is_negative());
     }
 
     #[test]
     fn not_less() {
-        assert_eq!(Decimal::zero() < Decimal::zero(), false);
-        assert_eq!(Decimal::one() < Decimal::one(), false);
-        assert_eq!(Decimal::one() < Decimal::zero(), false);
+        assert!(Decimal::zero() >= Decimal::zero());
+        assert!(Decimal::one() >= Decimal::one());
+        assert!(Decimal::one() >= Decimal::zero());
     }
 
     #[test]
     fn less() {
-        assert_eq!(Decimal::zero() < Decimal::one(), true);
+        assert!(Decimal::zero() < Decimal::one());
     }
 
     #[test]
     fn leq() {
-        assert_eq!(Decimal::zero() <= Decimal::zero(), true);
-        assert_eq!(Decimal::one() <= Decimal::one(), true);
+        assert!(Decimal::zero() <= Decimal::zero());
+        assert!(Decimal::one() <= Decimal::one());
 
-        assert_eq!(Decimal::one() <= Decimal::zero(), false);
+        assert!(Decimal::one() > Decimal::zero());
     }
 
     #[test]
     fn not_greater_than() {
-        assert_eq!(Decimal::zero() > Decimal::zero(), false);
-        assert_eq!(Decimal::one() > Decimal::one(), false);
-        assert_eq!(Decimal::zero() > Decimal::one(), false);
+        assert!(Decimal::zero() <= Decimal::zero());
+        assert!(Decimal::one() <= Decimal::one());
+        assert!(Decimal::zero() <= Decimal::one());
     }
 
     #[test]
     fn geq() {
-        assert_eq!(Decimal::zero() >= Decimal::zero(), true);
-        assert_eq!(Decimal::one() >= Decimal::one(), true);
+        assert!(Decimal::zero() >= Decimal::zero());
+        assert!(Decimal::one() >= Decimal::one());
 
-        assert_eq!(Decimal::zero() >= Decimal::one(), false);
+        assert!(Decimal::zero() < Decimal::one());
     }
 
     #[test]
     fn greater() {
-        assert_eq!(Decimal::one() > Decimal::zero(), true);
+        assert!(Decimal::one() > Decimal::zero());
     }
 
     #[test]
@@ -207,7 +217,7 @@ mod tests {
             "3036550867693340381917894711603833208050.177722232017256447",
         )
         .unwrap();
-        assert_eq!(a > b, true);
+        assert!(a > b);
     }
 
     #[test]
@@ -259,7 +269,6 @@ mod tests {
     fn hash() {
         let n = 100;
         let set = (0..n)
-            .into_iter()
             .map(|_| {
                 Decimal::try_from(generate_bytes::<24>().as_slice()).unwrap()
             })

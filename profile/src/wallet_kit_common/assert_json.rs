@@ -11,7 +11,7 @@ fn base_assert_equality_after_json_roundtrip<T>(
 ) where
     T: Serialize + DeserializeOwned + PartialEq + Debug,
 {
-    let serialized = serde_json::to_value(&model).unwrap();
+    let serialized = serde_json::to_value(model).unwrap();
     let deserialized: T = serde_json::from_value(json.clone()).unwrap();
     if expect_eq {
         assert_eq!(&deserialized, model, "Expected `model: T` and `T` deserialized from `json_string`, to be equal, but they were not.");
@@ -76,7 +76,7 @@ pub fn assert_json_roundtrip<T>(model: &T)
 where
     T: Serialize + DeserializeOwned + PartialEq + Debug,
 {
-    let serialized = serde_json::to_value(&model).unwrap();
+    let serialized = serde_json::to_value(model).unwrap();
     let deserialized: T = serde_json::from_value(serialized.clone()).unwrap();
     assert_eq!(model, &deserialized);
 }
@@ -87,17 +87,15 @@ where
     T: Serialize + DeserializeOwned + PartialEq + Debug,
 {
     let result = serde_json::from_value::<T>(json.clone());
-    match result {
-        Ok(t) => {
-            let failure = format!(
-                "Expected JSON serialization to fail, but it did not, deserialized into: {:?},\n\nFrom JSON: {}",
-                t,
-                serde_json::to_string(&json).unwrap()
-            );
-            assert!(false, "{failure}");
-        }
-        Err(_) => {} // Good, we expected a failure
+
+    if let Ok(t) = result {
+        panic!(
+            "Expected JSON serialization to fail, but it did not, deserialized into: {:?},\n\nFrom JSON: {}",
+            t,
+            serde_json::to_string(&json).unwrap()
+        );
     }
+    // all good, expected fail.
 }
 
 #[cfg(not(tarpaulin_include))]

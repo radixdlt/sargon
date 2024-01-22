@@ -61,7 +61,7 @@ impl Header {
             id,
             creating_device: creating_device.clone(),
             last_used_on_device: creating_device,
-            last_modified: last_modified.into(),
+            last_modified,
             content_hint,
         }
     }
@@ -99,7 +99,7 @@ impl HasPlaceholder for Header {
         let date = Timestamp::parse("2023-09-11T16:05:56Z").unwrap();
         let device = DeviceInfo::new(
             Uuid::from_str("66f07ca2-a9d9-49e5-8152-77aca3d1dd74").unwrap(),
-            date.clone(),
+            date,
             "iPhone".to_string(),
         );
         Header::with_values(
@@ -117,7 +117,7 @@ impl HasPlaceholder for Header {
         let date = Timestamp::parse("2023-12-20T16:05:56Z").unwrap();
         let device = DeviceInfo::new(
             Uuid::from_str("aabbccdd-a9d9-49e5-8152-beefbeefbeef").unwrap(),
-            date.clone(),
+            date,
             "iPhone".to_string(),
         );
         Header::with_values(
@@ -187,7 +187,7 @@ pub mod tests {
         let date = Timestamp::parse("2023-09-11T16:05:56Z").unwrap();
         let device = DeviceInfo::new(
             Uuid::from_str("66f07ca2-a9d9-49e5-8152-77aca3d1dd74").unwrap(),
-            date.clone(),
+            date,
             "iPhone".to_string(),
         );
         let sut = Header::with_values(
@@ -224,7 +224,7 @@ pub mod tests {
     fn snapshot_version() {
         let value = ProfileSnapshotVersion::default();
         let sut = Header {
-            snapshot_version: value.clone(),
+            snapshot_version: value,
             ..Default::default()
         };
         assert_eq!(sut.snapshot_version, value)
