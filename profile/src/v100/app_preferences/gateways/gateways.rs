@@ -14,15 +14,19 @@ pub struct Gateways {
     pub other: IdentifiedVecVia<Gateway>,
 }
 
+/// Constructs `Gateways` with `current` set as active Gateway.
 #[uniffi::export]
 pub fn new_gateways(current: Gateway) -> Gateways {
     Gateways::new(current)
 }
 
+/// A placeholder value useful for tests and previews.
 #[uniffi::export]
 pub fn new_gateways_placeholder() -> Gateways {
     Gateways::placeholder()
 }
+
+/// A placeholder value useful for tests and previews.
 #[uniffi::export]
 pub fn new_gateways_placeholder_other() -> Gateways {
     Gateways::placeholder_other()
@@ -151,7 +155,7 @@ impl Gateways {
 impl Default for Gateways {
     fn default() -> Self {
         Self::new_with_other(Gateway::mainnet(), vec![Gateway::stokenet()])
-            .expect("Stokenet and Mainnet should have different IDs.")
+            .expect("Stokenet and Mainnet should have different NetworkIDs.")
     }
 }
 
