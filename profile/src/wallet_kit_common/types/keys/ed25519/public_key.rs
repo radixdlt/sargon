@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 use radix_engine_common::crypto::{
-    Ed25519PublicKey as EngineEd25519PublicKey, Hash,
+    Ed25519PublicKey as EngineEd25519PublicKey, IsHash,
 };
 use transaction::{
     signing::ed25519::Ed25519Signature, validation::verify_ed25519,
@@ -71,6 +71,17 @@ impl From<EngineEd25519PublicKey> for Ed25519PublicKey {
     }
 }
 
+impl IsPublicKey<Ed25519Signature> for Ed25519PublicKey {
+    /// Verifies an EdDSA signature over Curve25519.
+    fn is_valid(
+        &self,
+        signature: &Ed25519Signature,
+        for_hash: &impl IsHash,
+    ) -> bool {
+        verify_ed25519(for_hash.as_hash(), &self.to_engine(), signature)
+    }
+}
+
 impl Ed25519PublicKey {
     pub fn to_bytes(&self) -> Vec<u8> {
         self.value.clone()
@@ -92,15 +103,6 @@ impl Ed25519PublicKey {
                 value: engine.to_vec(),
             }) // FIXME: Delete this once we can represent the key as a `uniffi::Record` without letting the field be bytes...(keep it as `EngineEd25519PublicKey`)
             .map_err(|_| CommonError::InvalidEd25519PublicKeyPointNotOnCurve)
-    }
-
-    /// Verifies an EdDSA signature over Curve25519.
-    pub fn is_valid(
-        &self,
-        signature: &Ed25519Signature,
-        for_hash: &Hash,
-    ) -> bool {
-        verify_ed25519(for_hash, &self.to_engine(), signature)
     }
 }
 

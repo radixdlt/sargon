@@ -74,13 +74,12 @@ impl Mnemonic {
             language: language.into(),
         }
     }
-    pub fn from_entropy(entropy: [u8; 32]) -> Self {
-        let internal =
-            bip39::Mnemonic::from_entropy(entropy.as_slice()).unwrap();
+    pub fn from_entropy(entropy: &[u8]) -> Self {
+        let internal = bip39::Mnemonic::from_entropy(entropy).unwrap();
         Self::from_internal(internal)
     }
     pub fn from_hex32(bytes: Hex32Bytes) -> Self {
-        Self::from_entropy(bytes.bytes())
+        Self::from_entropy(&bytes.bytes())
     }
 
     pub fn generate_new() -> Self {
