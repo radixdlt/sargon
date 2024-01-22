@@ -85,7 +85,7 @@ impl AccountAddress {
     /// `account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease`
     ///
     pub fn short(&self) -> String {
-        let suffix = suffix_string(6, &self.address);
+        let suffix = suffix_str(6, &self.address);
         format!("{}...{}", &self.address[0..4], suffix)
     }
 }

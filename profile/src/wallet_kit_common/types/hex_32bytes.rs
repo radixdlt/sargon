@@ -47,10 +47,6 @@ impl Hex32Bytes {
     pub fn to_hex(&self) -> String {
         hex_encode(self.bytes())
     }
-
-    pub fn to_string(&self) -> String {
-        self.to_hex()
-    }
 }
 
 impl From<Hash> for Hex32Bytes {
