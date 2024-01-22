@@ -16,9 +16,6 @@ mod tests {
 
     #[test]
     fn string_suffix() {
-        assert_eq!(
-            suffix_str(7, &"By the rivers of Babylon".to_string()),
-            "Babylon"
-        )
+        assert_eq!(suffix_str(7, "By the rivers of Babylon"), "Babylon")
     }
 }
