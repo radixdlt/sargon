@@ -200,6 +200,14 @@ impl Wallet {
         Ok(account)
     }
 
+    /// Updates `account` as a whole, if it exists, else an error is thrown.
+    pub fn update_account(&self, to: Account) -> Result<Account> {
+        self.write(|mut p| {
+            p.update_account(&to.address, |a| *a = to.to_owned())
+        })
+        .ok_or(CommonError::UnknownAccount)
+    }
+
     /// Updates the display name of account with the provided address, throws an error if the account is unknown to the wallet.
     pub fn change_name_of_account(
         &self,
@@ -249,6 +257,29 @@ mod tests {
             ),
             Err(CommonError::UnknownAccount)
         );
+    }
+
+    #[test]
+    fn update_account() {
+        let profile = Profile::placeholder();
+        let (wallet, _) = Wallet::ephemeral(profile.clone());
+        let mut account = wallet.read(|p| p.networks[0].accounts[0].clone());
+        assert_eq!(account.display_name.value, "Alice");
+        account.display_name = DisplayName::new("Stella").unwrap();
+        account.appearance_id = AppearanceID::new(7).unwrap();
+
+        // Assert that `Account` returned by method `update_account` is the updated one.
+        assert_eq!(
+            wallet.update_account(account).unwrap().display_name.value,
+            "Stella"
+        );
+
+        // Assert account has been updated in `wallet.profile`
+        wallet.read(|p| {
+            let account = &p.networks[0].accounts[0];
+            assert_eq!(account.display_name.value, "Stella");
+            assert_eq!(account.appearance_id.value, 7);
+        });
     }
 
     #[test]

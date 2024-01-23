@@ -1,5 +1,8 @@
 use crate::prelude::*;
 
+// Generate the FfiConverter needed by UniFFI for newtype `BIP39Passphrase`.
+uniffi::custom_newtype!(BIP39Passphrase, String);
+
 /// A BIP39 passphrase, which required but when not used by user, the Default value will be use (empty string),
 /// as per BIP39 standard.
 #[derive(
@@ -65,8 +68,6 @@ impl Default for BIP39Passphrase {
         Self("".to_string())
     }
 }
-
-uniffi::custom_newtype!(BIP39Passphrase, String);
 
 #[cfg(test)]
 mod tests {
