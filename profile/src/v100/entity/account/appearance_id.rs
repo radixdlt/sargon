@@ -21,6 +21,21 @@ pub struct AppearanceID {
     pub value: u8,
 }
 
+#[uniffi::export]
+pub fn new_appearance_id(validating: u8) -> Result<AppearanceID> {
+    AppearanceID::new(validating)
+}
+
+#[uniffi::export]
+pub fn new_appearance_id_placeholder() -> AppearanceID {
+    AppearanceID::placeholder()
+}
+
+#[uniffi::export]
+pub fn new_appearance_id_placeholder_other() -> AppearanceID {
+    AppearanceID::placeholder_other()
+}
+
 impl AppearanceID {
     /// The number of different appearances
     pub const MAX: u8 = 11;
@@ -35,6 +50,56 @@ impl AppearanceID {
         Self {
             value: (n % (Self::MAX as usize)) as u8,
         }
+    }
+
+    // Probably want this as a macro... but it is just not worth it, why I boilerplate it.
+    fn declare(value: u8) -> Self {
+        Self::new(value).expect("Should have declared valid value.")
+    }
+    pub fn gradient0() -> Self {
+        Self::declare(0)
+    }
+    pub fn gradient1() -> Self {
+        Self::declare(1)
+    }
+    pub fn gradient2() -> Self {
+        Self::declare(2)
+    }
+    pub fn gradient3() -> Self {
+        Self::declare(3)
+    }
+    pub fn gradient4() -> Self {
+        Self::declare(4)
+    }
+    pub fn gradient5() -> Self {
+        Self::declare(5)
+    }
+    pub fn gradient6() -> Self {
+        Self::declare(6)
+    }
+    pub fn gradient7() -> Self {
+        Self::declare(7)
+    }
+    pub fn gradient8() -> Self {
+        Self::declare(8)
+    }
+    pub fn gradient9() -> Self {
+        Self::declare(9)
+    }
+    pub fn gradient10() -> Self {
+        Self::declare(10)
+    }
+    pub fn gradient11() -> Self {
+        Self::declare(11)
+    }
+}
+
+impl HasPlaceholder for AppearanceID {
+    fn placeholder() -> Self {
+        Self::gradient0()
+    }
+    fn placeholder_other() -> Self {
+        Self::gradient11()
     }
 }
 
@@ -61,6 +126,24 @@ impl From<AppearanceID> for u8 {
 mod tests {
 
     use crate::prelude::*;
+
+    #[test]
+    fn equality() {
+        assert_eq!(AppearanceID::placeholder(), AppearanceID::placeholder());
+        assert_eq!(
+            AppearanceID::placeholder_other(),
+            AppearanceID::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            AppearanceID::placeholder(),
+            AppearanceID::placeholder_other()
+        );
+    }
+
     #[test]
     fn lowest() {
         assert!(AppearanceID::new(0).is_ok());
@@ -101,5 +184,45 @@ mod tests {
         );
         assert_json_value_fails::<AppearanceID>(json!("3"));
         assert_json_value_fails::<AppearanceID>(json!(99));
+    }
+
+    #[test]
+    fn presets() {
+        let set = [
+            AppearanceID::gradient0(),
+            AppearanceID::gradient1(),
+            AppearanceID::gradient2(),
+            AppearanceID::gradient3(),
+            AppearanceID::gradient4(),
+            AppearanceID::gradient5(),
+            AppearanceID::gradient6(),
+            AppearanceID::gradient7(),
+            AppearanceID::gradient8(),
+            AppearanceID::gradient9(),
+            AppearanceID::gradient10(),
+            AppearanceID::gradient11(),
+        ]
+        .into_iter()
+        .map(|a| a.value)
+        .collect::<HashSet<_>>();
+        assert_eq!(set.len(), (AppearanceID::MAX as usize) + 1);
+    }
+}
+
+#[cfg(test)]
+mod uniffi_tests {
+    use crate::prelude::*;
+
+    #[test]
+    fn new() {
+        assert_eq!(new_appearance_id(5).unwrap(), AppearanceID::gradient5());
+    }
+
+    #[test]
+    fn placeholders() {
+        assert_ne!(
+            new_appearance_id_placeholder(),
+            new_appearance_id_placeholder_other()
+        );
     }
 }

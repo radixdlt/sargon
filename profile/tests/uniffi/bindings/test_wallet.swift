@@ -43,8 +43,30 @@ func test() throws {
 	assert(keychain.contains(value: initialNameOfFirstAccount))
 	print("✨ Successfully created first account ✅")
 	// MARK: ==================================
-	print("🔮 Renaming account")
-	let updatedNameOfFirstAccount = "Satoshi"
+	print("🔮 Update account using `update_account`")
+	var updatedNameOfFirstAccount = "Stella"
+	main0.displayName = try DisplayName(validating: updatedNameOfFirstAccount)
+	main0.appearanceId = .placeholderOther
+	let main0Updated = try wallet.updateAccount(to: main0)
+	assert(main0Updated == main0)
+	assert(
+		wallet.profile().networks[0].accounts[0].displayName.value
+			== updatedNameOfFirstAccount
+	)
+	assert(
+		wallet.profile().networks[0].accounts[0].appearanceId
+			== .placeholderOther
+	)
+
+	assert(
+		keychain.contains(
+			value: updatedNameOfFirstAccount
+		))
+	print("✨ Successfully updated first account using `update_account` ✅")
+
+	// MARK: ==================================
+	print("🔮 Renaming account using changeNameOfAccount")
+	updatedNameOfFirstAccount = "Satoshi"
 	main0 = try wallet.changeNameOfAccount(
 		address: main0.address,
 		to: DisplayName(
@@ -58,7 +80,7 @@ func test() throws {
 		keychain.contains(
 			value: updatedNameOfFirstAccount
 		))
-	print("✨ Successfully renamed first account ✅")
+	print("✨ Successfully renamed first account using changeNameOfAccount ✅")
 	// MARK: ==================================
 	print("🔮 Creating second mainnet account")
 	let main1 = try wallet.createAndSaveNewAccount(
@@ -111,6 +133,11 @@ extension DisplayName {
 	init(validating value: String) throws {
 		self = try newDisplayName(name: value)
 	}
+}
+typealias AppearanceID = AppearanceId
+extension AppearanceID {
+	static let placeholder: Self = newAppearanceIdPlaceholder()
+	static let placeholderOther: Self = newAppearanceIdPlaceholderOther()
 }
 extension Data {
 	public static func random(byteCount: Int) throws -> Self {
