@@ -1,12 +1,4 @@
-use std::str::FromStr;
-
-use derive_more::Display;
-use serde::{Deserialize, Serialize};
-use uuid::Uuid;
-
-use crate::HasPlaceholder;
-
-use super::{Name, Variant};
+use crate::prelude::*;
 
 type PersonaDataEntryID = Uuid;
 
@@ -19,11 +11,10 @@ type PersonaDataEntryID = Uuid;
     PartialEq,
     Hash,
     Eq,
-    Display,
+    derive_more::Display,
     uniffi::Record,
 )]
-#[display("{} \n id: {}", value, id)]
-#[derive(Default)]
+#[display("{} - {}", value, id)]
 pub struct IdentifiedEntry {
     id: PersonaDataEntryID,
     value: Name,
@@ -104,16 +95,6 @@ mod tests {
             "00000000-0000-0000-0000-000000000002"
         );
         assert_eq!(placeholder.value.to_string(), "Jun-fan Bruce Lee");
-    }
-
-    #[test]
-    fn default() {
-        let default = IdentifiedEntry::default();
-        assert_eq!(
-            default.id.to_string(),
-            "00000000-0000-0000-0000-000000000000"
-        );
-        assert_eq!(default.value.to_string(), "  ")
     }
 
     #[test]

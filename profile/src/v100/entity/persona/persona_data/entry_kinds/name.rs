@@ -1,7 +1,5 @@
-use serde::{Deserialize, Serialize};
-use std::{cmp::Ordering, fmt::Display};
-
 use crate::prelude::*;
+use derive_more::Display;
 
 #[derive(
     Serialize,
@@ -11,9 +9,11 @@ use crate::prelude::*;
     PartialEq,
     Hash,
     Eq,
+    Display,
     uniffi::Record,
-    Default,
 )]
+#[display("{}", self.full())]
+#[serde(rename_all = "camelCase")]
 pub struct Name {
     variant: Variant,
     family_name: String,
@@ -24,29 +24,34 @@ pub struct Name {
 impl Name {
     pub fn new(
         variant: Variant,
-        family_name: &str,
-        given_name: &str,
-        nickname: &str,
-    ) -> Self {
-        Self {
-            variant,
-            family_name: family_name.to_string(),
-            given_name: given_name.to_string(),
-            nickname: nickname.to_string(),
+        family_name: impl AsRef<str>,
+        given_name: impl AsRef<str>,
+        nickname: impl AsRef<str>,
+    ) -> Result<Self> {
+        let family_name = family_name.as_ref().trim().to_string();
+        let given_name = given_name.as_ref().trim().to_string();
+        let nickname = nickname.as_ref().trim().to_string();
+        if family_name.is_empty()
+            || given_name.is_empty()
+            || nickname.is_empty()
+        {
+            return Err(CommonError::InvalidDisplayNameEmpty);
         }
+        Ok(Self {
+            variant,
+            family_name: family_name,
+            given_name: given_name,
+            nickname: nickname,
+        })
     }
-}
 
-impl Display for Name {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn full(&self) -> String {
         match self.variant {
-            Variant::Western => write!(
-                f,
+            Variant::Western => format!(
                 "{} {} {}",
                 self.given_name, self.nickname, self.family_name
             ),
-            Variant::Eastern => write!(
-                f,
+            Variant::Eastern => format!(
                 "{} {} {}",
                 self.family_name, self.nickname, self.given_name
             ),
@@ -57,10 +62,12 @@ impl Display for Name {
 impl HasPlaceholder for Name {
     fn placeholder() -> Self {
         Name::new(Variant::Western, "Wayne", "Bruce", "Batman")
+            .expect("Failed to construct placeholder")
     }
 
     fn placeholder_other() -> Self {
         Name::new(Variant::Eastern, "Jun-fan", "Lee", "Bruce")
+            .expect("Failed to construct placeholder")
     }
 }
 
@@ -80,12 +87,24 @@ impl Default for Variant {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::{assert_eq_after_json_roundtrip, HasPlaceholder};
+    use crate::prelude::*;
 
     #[test]
     fn new_name() {
         let name = Name::new(Variant::Western, "Wayne", "Bruce", "Batman");
+        assert_eq!(name.family_name, "Wayne");
+        assert_eq!(name.given_name, "Bruce");
+        assert_eq!(name.nickname, "Batman");
+    }
+
+    #[test]
+    fn new_as_ref() {
+        let name = Name::new(
+            Variant::Western,
+            String::from_str("Wayne").unwrap(),
+            String::from_str("Bruce").unwrap(),
+            String::from_str("Batman").unwrap(),
+        );
         assert_eq!(name.family_name, "Wayne");
         assert_eq!(name.given_name, "Bruce");
         assert_eq!(name.nickname, "Batman");

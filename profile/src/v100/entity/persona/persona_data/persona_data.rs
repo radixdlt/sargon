@@ -1,6 +1,4 @@
-use super::IdentifiedEntry;
-use derive_more::Display;
-use serde::{Deserialize, Serialize};
+use crate::prelude::*;
 
 #[derive(
     Serialize,
@@ -10,11 +8,11 @@ use serde::{Deserialize, Serialize};
     PartialEq,
     Hash,
     Eq,
-    Display,
+    derive_more::Display,
     uniffi::Record,
 )]
 #[display("{}", name)]
-#[derive(Default)]
+#[serde(rename_all = "camelCase")]
 pub struct PersonaData {
     pub name: IdentifiedEntry,
 }
@@ -25,13 +23,23 @@ impl PersonaData {
     }
 }
 
+impl HasPlaceholder for PersonaData {
+    fn placeholder() -> Self {
+        Self::new(IdentifiedEntry::placeholder())
+    }
+
+    fn placeholder_other() -> Self {
+        Self::new(IdentifiedEntry::placeholder_other())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    #[test]
-    fn new_persona_data() {
-        let persona_data = PersonaData::new(IdentifiedEntry::default());
-        assert_eq!(persona_data.name, IdentifiedEntry::default());
-    }
+    // #[test]
+    // fn new_persona_data() {
+    //     let persona_data = PersonaData::new(IdentifiedEntry::default());
+    //     assert_eq!(persona_data.name, IdentifiedEntry::default());
+    // }
 }
