@@ -1,5 +1,8 @@
 [bindings.swift]
-generate_immutable_records = true
+# Actually `generate_immutable_records` is `false` by default, but wanted a natural place to document it, our 
+# clients must be able to pass an updated value, e.g. `update_account(updated_account)` and before have
+# mutated the stored properties on account.
+generate_immutable_records = false
 
 [bindings.swift.custom_types.Uuid]
 # Name of the type in the Swift code
