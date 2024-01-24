@@ -33,7 +33,7 @@ pub struct AppPreferences {
     pub security: Security,
 
     /// Default config related to making of transactions
-    pub transaction: Transaction,
+    pub transaction: TransactionPreferences,
 }
 
 #[uniffi::export]
@@ -52,7 +52,7 @@ impl AppPreferences {
         gateways: Gateways,
         p2p_links: P2PLinks,
         security: Security,
-        transaction: Transaction,
+        transaction: TransactionPreferences,
     ) -> Self {
         Self {
             display,
@@ -72,7 +72,7 @@ impl HasPlaceholder for AppPreferences {
             Gateways::placeholder(),
             P2PLinks::placeholder(),
             Security::placeholder(),
-            Transaction::placeholder(),
+            TransactionPreferences::placeholder(),
         )
     }
 
@@ -83,7 +83,7 @@ impl HasPlaceholder for AppPreferences {
             Gateways::placeholder_other(),
             P2PLinks::placeholder(),
             Security::placeholder_other(),
-            Transaction::placeholder_other(),
+            TransactionPreferences::placeholder_other(),
         )
     }
 }
@@ -148,7 +148,7 @@ mod tests {
     fn get_transaction() {
         assert_eq!(
             AppPreferences::placeholder().transaction,
-            Transaction::placeholder()
+            TransactionPreferences::placeholder()
         )
     }
 
