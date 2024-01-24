@@ -141,11 +141,7 @@ impl HDPath {
 
 impl HDPath {
     fn to_bip32_string(&self) -> String {
-        let rest = self
-            .components
-            .iter()
-            .map(|c| c.clone().to_string())
-            .join("/");
+        let rest = self.components.iter().map(|c| c.to_string()).join("/");
         format!("m/{}", rest)
     }
 }
