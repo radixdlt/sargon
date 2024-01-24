@@ -36,13 +36,21 @@ impl UnsecuredEntityControl {
         transaction_signing: HierarchicalDeterministicFactorInstance,
         authentication_signing: Option<HierarchicalDeterministicFactorInstance>,
     ) -> Result<Self> {
-        if let Some(auth) = &authentication_signing {
-            if let Some(key_kind) = auth.key_kind() {
-                if key_kind != CAP26KeyKind::AuthenticationSigning {
-                    return Err(CommonError::WrongKeyKindOfAuthenticationSigningFactorInstance);
-                }
-            }
+        let is_invalid_auth_signing_key = authentication_signing
+            .as_ref()
+            .and_then(|auth| {
+                auth.key_kind().map(|key_kind| {
+                    key_kind != CAP26KeyKind::AuthenticationSigning
+                })
+            })
+            .unwrap_or(false);
+
+        if is_invalid_auth_signing_key {
+            return Err(
+                CommonError::WrongKeyKindOfAuthenticationSigningFactorInstance,
+            );
         }
+
         if let Some(key_kind) = transaction_signing.key_kind() {
             if key_kind != CAP26KeyKind::TransactionSigning {
                 return Err(
