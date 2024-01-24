@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-use slip10::path::BIP32Path;
-
 #[derive(
     Clone,
     PartialEq,
@@ -25,8 +23,8 @@ impl FromStr for HDPath {
     type Err = crate::CommonError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        BIP32Path::from_str(s)
-            .map(Self::from)
+        slip10::path::BIP32Path::from_str(s)
+            .map(|p| p.into())
             .map_err(|_| CommonError::InvalidBIP32Path(s.to_string()))
     }
 }
@@ -41,20 +39,28 @@ impl HasPlaceholder for HDPath {
     }
 }
 
-impl HDPath {
-    /// Upgrades a BIP32Path (extern crate, which is a bit limiting),
+impl From<slip10::path::BIP32Path> for HDPath {
+    /// Upgrades a slip10::path::BIP32Path (extern crate, which is a bit limiting),
     /// to our type HDPath, which has a better API.
-    pub(crate) fn from(path: BIP32Path) -> Self {
-        let mut bip32 = path.clone();
+    fn from(value: slip10::path::BIP32Path) -> Self {
+        let expected_depth = value.depth() as usize;
+        let mut bip32 = value;
         let mut vec: Vec<HDPathComponent> = Vec::new();
-        for _ in 0..bip32.depth() {
-            vec.push(HDPathComponent::from_value(bip32.pop().unwrap()))
+        for _ in 0..expected_depth {
+            vec.push(
+                bip32
+                    .pop()
+                    .expect("Should already have asserted length of BIP32 path")
+                    .into(),
+            )
         }
-        assert!(vec.len() == path.depth() as usize);
+        assert!(vec.len() == expected_depth);
         vec.reverse();
         Self::from_components(vec)
     }
+}
 
+impl HDPath {
     pub(crate) fn from_components<I>(components: I) -> Self
     where
         I: IntoIterator<Item = HDPathComponent>,
