@@ -79,12 +79,6 @@ pub enum Variant {
     Eastern,
 }
 
-impl Default for Variant {
-    fn default() -> Self {
-        Self::Western
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
