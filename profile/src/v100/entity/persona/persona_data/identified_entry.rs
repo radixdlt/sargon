@@ -16,8 +16,8 @@ type PersonaDataEntryID = Uuid;
 )]
 #[display("{} - {}", value, id)]
 pub struct IdentifiedEntry {
-    id: PersonaDataEntryID,
-    value: Name,
+    pub id: PersonaDataEntryID,
+    pub value: Name,
 }
 
 impl IdentifiedEntry {
@@ -51,29 +51,24 @@ mod tests {
 
     #[test]
     fn new() {
-        let identified_entry = IdentifiedEntry::new(
-            Uuid::nil(),
-            Name::new(Variant::Western, "Wayne", "Bruce", "Batman"),
-        );
+        let name = Name::new(Variant::Western, "Wayne", "Bruce", "Batman")
+            .expect("Name counstruction should not fail");
+        let identified_entry = IdentifiedEntry::new(Uuid::nil(), name.clone());
         assert_eq!(
             identified_entry.id,
             Uuid::from_str("00000000-0000-0000-0000-000000000000").unwrap()
         );
-        assert_eq!(
-            identified_entry.value,
-            Name::new(Variant::Western, "Wayne", "Bruce", "Batman")
-        )
+        assert_eq!(identified_entry.value, name)
     }
 
     #[test]
     fn display() {
-        let identified_entry = IdentifiedEntry::new(
-            Uuid::nil(),
-            Name::new(Variant::Western, "Wayne", "Bruce", "Batman"),
-        );
+        let name = Name::new(Variant::Western, "Wayne", "Bruce", "Batman")
+            .expect("Name counstruction should not fail");
+        let identified_entry = IdentifiedEntry::new(Uuid::nil(), name);
         assert_eq!(
             format!("{identified_entry}"),
-            "Bruce Batman Wayne \n id: 00000000-0000-0000-0000-000000000000"
+            "Bruce Batman Wayne - 00000000-0000-0000-0000-000000000000"
         );
     }
 
@@ -102,16 +97,17 @@ mod tests {
         let model = IdentifiedEntry::placeholder();
         assert_eq_after_json_roundtrip(
             &model,
-            r#"{
-            "id": "00000000-0000-0000-0000-000000000001",
-            "value": {
-              "variant": "Western",
-              "family_name": "Wayne",
-              "given_name": "Bruce",
-              "nickname": "Batman"
-            }
-          }
-        "#,
+            r#"
+            {
+                "id": "00000000-0000-0000-0000-000000000001",
+                "value": {
+                    "variant": "Western",
+                    "familyName": "Wayne",
+                    "givenName": "Bruce",
+                    "nickname": "Batman"
+                }
+             }
+            "#,
         )
     }
 
@@ -120,16 +116,17 @@ mod tests {
         let model = IdentifiedEntry::placeholder_other();
         assert_eq_after_json_roundtrip(
             &model,
-            r#"{
-            "id": "00000000-0000-0000-0000-000000000002",
-            "value": {
-              "variant": "Eastern",
-              "family_name": "Jun-fan",
-              "given_name": "Lee",
-              "nickname": "Bruce"
+            r#"
+            {
+                "id": "00000000-0000-0000-0000-000000000002",
+                "value": {
+                    "variant": "Eastern",
+                    "familyName": "Jun-fan",
+                    "givenName": "Lee",
+                    "nickname": "Bruce"
+                }
             }
-          }
-        "#,
+            "#,
         )
     }
 }

@@ -39,9 +39,9 @@ impl Name {
         }
         Ok(Self {
             variant,
-            family_name: family_name,
-            given_name: given_name,
-            nickname: nickname,
+            family_name,
+            given_name,
+            nickname,
         })
     }
 
@@ -91,7 +91,8 @@ mod tests {
 
     #[test]
     fn new_name() {
-        let name = Name::new(Variant::Western, "Wayne", "Bruce", "Batman");
+        let name = Name::new(Variant::Western, "Wayne", "Bruce", "Batman")
+            .expect("Name construction should not fail");
         assert_eq!(name.family_name, "Wayne");
         assert_eq!(name.given_name, "Bruce");
         assert_eq!(name.nickname, "Batman");
@@ -101,10 +102,11 @@ mod tests {
     fn new_as_ref() {
         let name = Name::new(
             Variant::Western,
-            String::from_str("Wayne").unwrap(),
-            String::from_str("Bruce").unwrap(),
-            String::from_str("Batman").unwrap(),
-        );
+            "Wayne".to_string(),
+            "Bruce".to_string(),
+            "Batman".to_string(),
+        )
+        .expect("Name construction should not fail");
         assert_eq!(name.family_name, "Wayne");
         assert_eq!(name.given_name, "Bruce");
         assert_eq!(name.nickname, "Batman");
@@ -132,7 +134,8 @@ mod tests {
         assert_eq!(name.family_name, "Wayne");
         assert_eq!(name.given_name, "Bruce");
         assert_eq!(name.nickname, "Batman");
-        let new_name = Name::new(Variant::Western, "Kent", "Clark", "Superman");
+        let new_name = Name::new(Variant::Western, "Kent", "Clark", "Superman")
+            .expect("Name construction should not fail");
         name = new_name.clone();
         assert_eq!(name, new_name);
     }
@@ -141,9 +144,28 @@ mod tests {
     fn update() {
         let mut name = Name::placeholder();
         assert_eq!(name.family_name, "Wayne");
-        let new_name = Name::new(Variant::Western, "Kent", "Clark", "Superman");
+        let new_name = Name::new(Variant::Western, "Kent", "Clark", "Superman")
+            .expect("Name construction should not fail");
         name.family_name = new_name.family_name;
         assert_eq!(name.family_name, "Kent");
+    }
+
+    #[test]
+    fn empty_family_name() {
+        let name = Name::new(Variant::Western, "", "Clark", "Superman");
+        assert_eq!(name, Err(CommonError::InvalidDisplayNameEmpty));
+    }
+
+    #[test]
+    fn empty_given_name() {
+        let name = Name::new(Variant::Western, "Kent", "", "Superman");
+        assert_eq!(name, Err(CommonError::InvalidDisplayNameEmpty));
+    }
+
+    #[test]
+    fn empty_nickname() {
+        let name = Name::new(Variant::Western, "Kent", "Clark", "");
+        assert_eq!(name, Err(CommonError::InvalidDisplayNameEmpty));
     }
 
     #[test]
@@ -163,13 +185,14 @@ mod tests {
         let model = Name::placeholder();
         assert_eq_after_json_roundtrip(
             &model,
-            r#"{
-                                "variant": "Western",
-                                "family_name": "Wayne",
-                                "given_name": "Bruce",
-                                "nickname": "Batman"
-                            }
-                            "#,
+            r#"
+            {
+                "variant": "Western",
+                "familyName": "Wayne",
+                "givenName": "Bruce",
+                "nickname": "Batman"
+            }
+            "#,
         )
     }
 
@@ -178,13 +201,14 @@ mod tests {
         let model = Name::placeholder_other();
         assert_eq_after_json_roundtrip(
             &model,
-            r#"{
-                                "variant": "Eastern",
-                                "family_name": "Jun-fan",
-                                "given_name": "Lee",
-                                "nickname": "Bruce"
-                            }
-                            "#,
+            r#"
+            {
+                "variant": "Eastern",
+                "familyName": "Jun-fan",
+                "givenName": "Lee",
+                "nickname": "Bruce"
+            }
+            "#,
         )
     }
 }

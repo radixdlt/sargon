@@ -55,7 +55,8 @@ impl Persona {
         let persona_data = persona_data.map_or(
             PersonaData::new(IdentifiedEntry::new(
                 Uuid::nil(),
-                Name::new(Variant::Western, "Wayne", "Bruce", "Batman"),
+                Name::new(Variant::Western, "Wayne", "Bruce", "Batman")
+                    .expect("Name counstruction should not fail"),
             )),
             |p| p,
         );
@@ -76,7 +77,8 @@ impl Persona {
     fn placeholder_at_index_name_network(
         network_id: NetworkID,
         index: HDPathValue,
-        name: &str,
+        display_name: &str,
+        name: Name,
     ) -> Self {
         let mwp = MnemonicWithPassphrase::placeholder();
         let bdfs = DeviceFactorSource::babylon(
@@ -91,29 +93,41 @@ impl Persona {
 
         Self::new(
             persona_creating_factor_instance,
-            DisplayName::new(name).unwrap(),
-            None,
+            DisplayName::new(display_name).unwrap(),
+            Some(PersonaData::new(IdentifiedEntry::new(Uuid::nil(), name))),
         )
     }
 
-    fn placeholder_at_index_name(index: HDPathValue, name: &str) -> Self {
-        Self::placeholder_at_index_name_network(NetworkID::Mainnet, index, name)
+    fn placeholder_at_index_name(
+        index: HDPathValue,
+        display_name: &str,
+        name: Name,
+    ) -> Self {
+        Self::placeholder_at_index_name_network(
+            NetworkID::Mainnet,
+            index,
+            display_name,
+            name,
+        )
     }
 
     pub fn placeholder_satoshi() -> Self {
-        Self::placeholder_at_index_name(0, "Satoshi")
+        let name =
+            Name::new(Variant::Eastern, "Nakamoto", "Satoshi", "Satoshi")
+                .expect(
+                "Failure to construct placeholder Name should not be possible",
+            );
+        Self::placeholder_at_index_name(0, "Satoshi", name)
     }
 
     pub fn placeholder_batman() -> Self {
-        Self::placeholder_at_index_name(1, "Batman")
+        let name = Name::new(Variant::Western, "Wayne", "Bruce", "Batman")
+            .expect(
+                "Failure to construct placeholder Name should not be possible",
+            );
+        Self::placeholder_at_index_name(1, "Batman", name)
     }
 }
-
-// impl Display for Persona {
-//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-//         write!(f, "{} | {}", self.display_name, self.address)
-//     }
-// }
 
 impl Ord for Persona {
     fn cmp(&self, other: &Self) -> Ordering {
@@ -159,8 +173,6 @@ impl HasPlaceholder for Persona {
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
-    // use identified_vec::Identifiable;
-    // use std::str::FromStr;
 
     #[test]
     fn equality() {
@@ -297,14 +309,14 @@ mod tests {
                     "id": "00000000-0000-0000-0000-000000000000",
                     "value": {
                       "variant": "Western",
-                      "family_name": "",
-                      "given_name": "",
-                      "nickname": ""
+                      "familyName": "Wayne",
+                      "givenName": "Bruce",
+                      "nickname": "Batman"
                     }
                   }
                 }
               }
-            "#,
+              "#,
         );
     }
 
@@ -353,15 +365,15 @@ mod tests {
                 "name": {
                   "id": "00000000-0000-0000-0000-000000000000",
                   "value": {
-                    "variant": "Western",
-                    "family_name": "",
-                    "given_name": "",
-                    "nickname": ""
+                    "variant": "Eastern",
+                    "familyName": "Nakamoto",
+                    "givenName": "Satoshi",
+                    "nickname": "Satoshi"
                   }
                 }
               }
             }
-        "#,
+            "#,
         );
     }
 
@@ -408,10 +420,10 @@ mod tests {
                 "name": {
                   "id": "00000000-0000-0000-0000-000000000000",
                   "value": {
-                    "variant": "Western",
-                    "familyName": "",
-                    "givenName": "",
-                    "nickname": ""
+                    "variant": "Eastern",
+                    "familyName": "Nakamoto",
+                    "givenName": "Satoshi",
+                    "nickname": "Satoshi"
                   }
                 }
               }
@@ -433,23 +445,32 @@ mod tests {
 
     #[test]
     fn placeholder_stokenet() {
+        let name = Name::new(Variant::Western, "Wayne", "Bruce", "Batman")
+            .expect("Name counstruction should not fail");
         let persona = Persona::placeholder_at_index_name_network(
             NetworkID::Stokenet,
             1,
             "Batman",
+            name.clone(),
         );
         assert_eq!(persona.display_name.value, "Batman".to_string());
         assert_eq!(persona.network_id, NetworkID::Stokenet);
+        assert_eq!(persona.persona_data.name.value, name);
     }
 
     #[test]
     fn placeholder_stokenet_satoshi() {
+        let name =
+            Name::new(Variant::Western, "Nakamoto", "Satoshi", "Satoshi")
+                .expect("Name counstruction should not fail");
         let persona = Persona::placeholder_at_index_name_network(
             NetworkID::Stokenet,
             0,
             "Satoshi",
+            name.clone(),
         );
         assert_eq!(persona.display_name.value, "Satoshi".to_string());
         assert_eq!(persona.network_id, NetworkID::Stokenet);
+        assert_eq!(persona.persona_data.name.value, name);
     }
 }
