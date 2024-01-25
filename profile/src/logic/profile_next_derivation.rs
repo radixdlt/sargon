@@ -103,7 +103,7 @@ impl Profile {
 
 impl Profile {
     pub fn placeholder_no_device_factor_source() -> Self {
-        let networks = Networks::placeholder();
+        let networks = ProfileNetworks::placeholder();
         let mut header = Header::placeholder();
         header.content_hint = networks.content_hint();
         Self::with(
@@ -115,7 +115,7 @@ impl Profile {
     }
 
     pub fn placeholder_no_babylon_device_factor_source() -> Self {
-        let networks = Networks::placeholder();
+        let networks = ProfileNetworks::placeholder();
         let mut header = Header::placeholder();
         header.content_hint = networks.content_hint();
         Self::with(

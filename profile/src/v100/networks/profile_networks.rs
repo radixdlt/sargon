@@ -3,10 +3,10 @@ use crate::prelude::*;
 /// An ordered mapping of NetworkID -> `Profile.Network`, containing
 /// all the users Accounts, Personas and AuthorizedDapps the user
 /// has created and interacted with on this network.
-pub type Networks = IdentifiedVecVia<ProfileNetwork>;
+pub type ProfileNetworks = IdentifiedVecVia<ProfileNetwork>;
 
 // Constructors
-impl Networks {
+impl ProfileNetworks {
     /// Instantiates a new collection of networks from
     /// and iterator.
     pub fn with_networks<I>(networks: I) -> Self
@@ -23,7 +23,7 @@ impl Networks {
     }
 }
 
-impl Networks {
+impl ProfileNetworks {
     pub fn get_account(&self, address: &AccountAddress) -> Option<Account> {
         self.get(&address.network_id)
             .and_then(|n| n.accounts.get_account_by_address(address))
@@ -46,7 +46,7 @@ impl Networks {
     }
 }
 
-impl Networks {
+impl ProfileNetworks {
     pub fn content_hint(&self) -> ContentHint {
         let number_of_accounts =
             self.iter().fold(0, |acc, x| acc + x.accounts.len());
@@ -54,15 +54,14 @@ impl Networks {
     }
 }
 
-// Trait: Default
-impl Default for Networks {
+impl Default for ProfileNetworks {
     /// Instantiates a new empty networks collection.
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl HasPlaceholder for Networks {
+impl HasPlaceholder for ProfileNetworks {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
         Self::with_networks([
@@ -83,27 +82,33 @@ mod tests {
 
     #[test]
     fn default_is_empty() {
-        assert_eq!(Networks::default().len(), 0)
+        assert_eq!(ProfileNetworks::default().len(), 0)
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(Networks::placeholder(), Networks::placeholder_other());
+        assert_ne!(
+            ProfileNetworks::placeholder(),
+            ProfileNetworks::placeholder_other()
+        );
     }
 
     #[test]
     fn equality() {
-        assert_eq!(Networks::placeholder(), Networks::placeholder());
         assert_eq!(
-            Networks::placeholder_other(),
-            Networks::placeholder_other()
+            ProfileNetworks::placeholder(),
+            ProfileNetworks::placeholder()
+        );
+        assert_eq!(
+            ProfileNetworks::placeholder_other(),
+            ProfileNetworks::placeholder_other()
         );
     }
 
     #[test]
     fn duplicates_are_prevented() {
         assert_eq!(
-            Networks::from_iter(
+            ProfileNetworks::from_iter(
                 [ProfileNetwork::placeholder(), ProfileNetwork::placeholder()]
                     .into_iter()
             )
@@ -114,7 +119,7 @@ mod tests {
 
     #[test]
     fn duplicates_are_prevented_and_first_added_is_retained() {
-        let mut sut = Networks::from_iter([ProfileNetwork::new(
+        let mut sut = ProfileNetworks::from_iter([ProfileNetwork::new(
             NetworkID::Mainnet,
             Accounts::from_iter([
                 Account::placeholder_mainnet_alice(),
@@ -140,7 +145,7 @@ mod tests {
 
     #[test]
     fn update_account() {
-        let mut sut = Networks::placeholder();
+        let mut sut = ProfileNetworks::placeholder();
         let id = &NetworkID::Mainnet;
         let account_address = Account::placeholder().address;
         assert_eq!(
@@ -172,7 +177,7 @@ mod tests {
 
     #[test]
     fn update_account_unknown_network() {
-        let mut sut = Networks::placeholder();
+        let mut sut = ProfileNetworks::placeholder();
         let id = &NetworkID::Mainnet;
         let account_address = Account::placeholder_nebunet().address;
         assert_eq!(sut.get(id).unwrap().accounts.get(&account_address), None);
@@ -184,12 +189,12 @@ mod tests {
             .is_none());
 
         // Assert unchanged
-        assert_eq!(sut, Networks::placeholder());
+        assert_eq!(sut, ProfileNetworks::placeholder());
     }
 
     #[test]
     fn update_account_unknown_account() {
-        let mut sut = Networks::placeholder();
+        let mut sut = ProfileNetworks::placeholder();
         let id = &NetworkID::Mainnet;
         let account_address = Account::placeholder_mainnet_carol().address;
         assert_eq!(sut.get(id).unwrap().accounts.get(&account_address), None);
@@ -201,7 +206,7 @@ mod tests {
             .is_none());
 
         // Assert unchanged
-        assert_eq!(sut, Networks::placeholder());
+        assert_eq!(sut, ProfileNetworks::placeholder());
     }
 
     #[test]
@@ -210,20 +215,20 @@ mod tests {
             NetworkID::Mainnet,
             Accounts::with_account(Account::placeholder_mainnet()),
         );
-        assert_eq!(Networks::with_network(network).len(), 1);
+        assert_eq!(ProfileNetworks::with_network(network).len(), 1);
     }
 
     #[test]
     fn content_hint() {
         assert_eq!(
-            Networks::placeholder().content_hint(),
+            ProfileNetworks::placeholder().content_hint(),
             ContentHint::with_counters(4, 0, 2)
         );
     }
 
     #[test]
     fn json_roundtrip() {
-        let sut = Networks::placeholder();
+        let sut = ProfileNetworks::placeholder();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"
