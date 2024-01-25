@@ -34,10 +34,12 @@ uniffi::custom_type!(EngineSecp256k1PublicKey, Vec<u8>);
 impl UniffiCustomTypeConverter for EngineSecp256k1PublicKey {
     type Builtin = Vec<u8>;
 
+    #[cfg(not(tarpaulin_include))] // false negative | tested in bindgen tests
     fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
         Self::try_from(val.as_slice()).map_err(|e| e.into())
     }
 
+    #[cfg(not(tarpaulin_include))] // false negative | tested in bindgen tests
     fn from_custom(obj: Self) -> Self::Builtin {
         obj.to_vec()
     }
