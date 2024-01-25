@@ -16,13 +16,11 @@ extension RadixConnectPassword {
     init(bytes: Hex32Bytes) {
         self = newRadixConnectPassword(bytes: bytes)
     }
-    init() throws {
-        try self.init(bytes: Hex32Bytes(bytes: Data.random(byteCount: 32)))
-    }
 }
 
 func test() throws {
-    let bytes = try Data.random(byteCount: 32)
+    let data = try Data.random(byteCount: 32)
+    let bytes = try newHex32BytesFrom(bytes: data)
     let password = RadixConnectPassword(bytes: bytes)
     assert(password.value == bytes)
 }

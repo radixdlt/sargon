@@ -38,7 +38,7 @@ impl IsPrivateKey<Ed25519PublicKey> for Ed25519PrivateKey {
     type Signature = Ed25519Signature;
 
     fn public_key(&self) -> Ed25519PublicKey {
-        Ed25519PublicKey::from_engine(self.0.public_key()).expect(
+        self.0.public_key().try_into().expect(
             "Public Key from EC scalar multiplication should always be valid.",
         )
     }

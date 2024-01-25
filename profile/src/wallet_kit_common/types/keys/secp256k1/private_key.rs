@@ -90,7 +90,7 @@ impl IsPrivateKey<Secp256k1PublicKey> for Secp256k1PrivateKey {
     type Signature = Secp256k1Signature;
 
     fn public_key(&self) -> Secp256k1PublicKey {
-        Secp256k1PublicKey::from_engine(self.0.public_key()).expect(
+        Secp256k1PublicKey::try_from(self.0.public_key()).expect(
             "Public Key from EC scalar multiplication should always be valid.",
         )
     }

@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{prelude::*, UniffiCustomTypeConverter};
 
 use bip32::secp256k1::PublicKey as BIP32Secp256k1PublicKey;
 use radix_engine_common::crypto::{
@@ -11,36 +11,50 @@ use transaction::{
 /// A `secp256k1` public key used to verify cryptographic signatures (ECDSA signatures).
 #[serde_as]
 #[derive(
-    Serialize,
-    Deserialize,
     Clone,
     PartialEq,
     Eq,
     Hash,
     PartialOrd,
     Ord,
+    SerializeDisplay, // yes we could have #[serde(transparent)] since `EngineEd25519PublicKey` is Serialize, but we wanna be in control.
+    DeserializeFromStr, // yes we could have #[serde(transparent)] since `EngineEd25519PublicKey` is Deserialize, but we wanna be in control.
+    derive_more::Display,
     derive_more::Debug,
     uniffi::Record,
 )]
-#[serde(transparent)]
+#[display("{}", self.to_hex())]
 #[debug("{}", self.to_hex())]
 pub struct Secp256k1PublicKey {
-    #[serde_as(as = "serde_with::hex::Hex")]
-    value: Vec<u8>, // FIXME: change to either `radix_engine_common::crypto::Secp256k1PublicKey` or `bip32::secp256k1::PublicKey` once we have proper UniFFI lift/lower/UniffiCustomTypeConverter
+    inner: EngineSecp256k1PublicKey,
+}
+
+uniffi::custom_type!(EngineSecp256k1PublicKey, Vec<u8>);
+
+impl UniffiCustomTypeConverter for EngineSecp256k1PublicKey {
+    type Builtin = Vec<u8>;
+
+    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
+        Self::try_from(val.as_slice()).map_err(|e| e.into())
+    }
+
+    fn from_custom(obj: Self) -> Self::Builtin {
+        obj.to_vec()
+    }
 }
 
 #[uniffi::export]
 pub fn new_secp256k1_public_key_from_hex(
     hex: String,
 ) -> Result<Secp256k1PublicKey> {
-    Secp256k1PublicKey::from_hex(hex)
+    hex.parse()
 }
 
 #[uniffi::export]
 pub fn new_secp256k1_public_key_from_bytes(
     bytes: Vec<u8>,
 ) -> Result<Secp256k1PublicKey> {
-    Secp256k1PublicKey::from_bytes(bytes)
+    bytes.try_into()
 }
 
 /// Encodes the compressed form (33 bytes) of a `Secp256k1PublicKey` to a hexadecimal string, lowercased, without any `0x` prefix, e.g.
@@ -67,13 +81,6 @@ pub fn new_secp256k1_public_key_placeholder_other() -> Secp256k1PublicKey {
     Secp256k1PublicKey::placeholder_other()
 }
 
-impl From<EngineSecp256k1PublicKey> for Secp256k1PublicKey {
-    fn from(value: EngineSecp256k1PublicKey) -> Self {
-        Self::from_engine(value)
-            .expect("EngineEd25519PublicKey should have been valid.")
-    }
-}
-
 impl IsPublicKey<Secp256k1Signature> for Secp256k1PublicKey {
     /// Verifies an ECDSA signature over Secp256k1.
     fn is_valid(
@@ -86,8 +93,12 @@ impl IsPublicKey<Secp256k1Signature> for Secp256k1PublicKey {
 }
 
 impl Secp256k1PublicKey {
+    pub(crate) fn to_engine(&self) -> EngineSecp256k1PublicKey {
+        self.inner
+    }
+
     pub fn to_bytes(&self) -> Vec<u8> {
-        self.value.clone()
+        self.to_engine().to_vec()
     }
 
     pub fn to_hex(&self) -> String {
@@ -95,27 +106,21 @@ impl Secp256k1PublicKey {
     }
 }
 
-impl Secp256k1PublicKey {
-    pub(crate) fn to_engine(&self) -> EngineSecp256k1PublicKey {
-        EngineSecp256k1PublicKey::try_from(self.to_bytes().as_slice()).unwrap()
-    }
+impl TryFrom<EngineSecp256k1PublicKey> for Secp256k1PublicKey {
+    type Error = CommonError;
 
-    pub(crate) fn from_engine(
-        engine: EngineSecp256k1PublicKey,
-    ) -> Result<Self> {
-        BIP32Secp256k1PublicKey::from_sec1_bytes(engine.to_vec().as_slice())
-            .map(|_| Self {
-                value: engine.to_vec(),
-            })
+    fn try_from(value: EngineSecp256k1PublicKey) -> Result<Self, Self::Error> {
+        BIP32Secp256k1PublicKey::from_sec1_bytes(value.to_vec().as_slice())
             .map_err(|_| CommonError::InvalidSecp256k1PublicKeyPointNotOnCurve)
+            .map(|_| Self { inner: value })
     }
 }
 
-impl Secp256k1PublicKey {
-    fn from_bytes(bytes: Vec<u8>) -> Result<Self> {
-        EngineSecp256k1PublicKey::try_from(bytes.as_slice())
-            .map_err(|_| CommonError::InvalidSecp256k1PublicKeyFromBytes(bytes))
-            .and_then(Self::from_engine)
+impl TryFrom<Vec<u8>> for Secp256k1PublicKey {
+    type Error = CommonError;
+
+    fn try_from(value: Vec<u8>) -> Result<Self, Self::Error> {
+        value.as_slice().try_into()
     }
 }
 
@@ -123,23 +128,11 @@ impl TryFrom<&[u8]> for Secp256k1PublicKey {
     type Error = crate::CommonError;
 
     fn try_from(slice: &[u8]) -> Result<Self> {
-        Self::from_bytes(slice.to_vec())
-    }
-}
-
-impl TryInto<Secp256k1PublicKey> for &str {
-    type Error = crate::CommonError;
-
-    fn try_into(self) -> Result<Secp256k1PublicKey> {
-        Secp256k1PublicKey::from_str(self)
-    }
-}
-
-impl FromStr for Secp256k1PublicKey {
-    type Err = crate::CommonError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Self::from_hex(s.to_string())
+        EngineSecp256k1PublicKey::try_from(slice)
+            .map_err(|_| {
+                CommonError::InvalidSecp256k1PublicKeyFromBytes(slice.to_vec())
+            })
+            .and_then(|k| k.try_into())
     }
 }
 
@@ -169,6 +162,14 @@ impl Secp256k1PublicKey {
 
     pub fn placeholder_bob() -> Self {
         Secp256k1PrivateKey::placeholder_bob().public_key()
+    }
+}
+
+impl FromStr for Secp256k1PublicKey {
+    type Err = crate::CommonError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Self::from_hex(s.to_string())
     }
 }
 
@@ -235,7 +236,9 @@ mod tests {
             "033083620d1596d3f8988ff3270e42970dd2a031e2b9b6488052a4170ff999f3e8",
         )
         .unwrap()
-        .into();
+        .try_into()
+        .unwrap();
+
         assert_eq!(
             from_engine,
             Secp256k1PublicKey::from_str(
@@ -314,7 +317,7 @@ mod tests {
     #[test]
     fn try_into_from_str() {
         let str = "02517b88916e7f315bb682f9926b14bc67a0e4246f8a419b986269e1a7e61fffa7";
-        let key: Secp256k1PublicKey = str.try_into().unwrap();
+        let key: Secp256k1PublicKey = str.parse().unwrap();
         assert_eq!(key.to_hex(), str);
     }
 
@@ -364,7 +367,7 @@ mod uniffi_tests {
             new_secp256k1_public_key_from_bytes(bytes.clone()).unwrap();
         assert_eq!(
             from_bytes,
-            Secp256k1PublicKey::from_bytes(bytes.clone()).unwrap()
+            Secp256k1PublicKey::try_from(bytes.clone()).unwrap()
         );
         assert_eq!(secp256k1_public_key_to_bytes(&from_bytes), bytes);
     }
