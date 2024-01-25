@@ -205,12 +205,12 @@ impl Wallet {
 
     /// Clone the profile and return it.
     pub fn profile(&self) -> Profile {
-        self.read(|p| p.clone())
+        self.access_profile_with(|p| p.clone())
     }
 }
 
 impl Wallet {
-    pub(crate) fn read<T: Clone, F>(&self, access: F) -> T
+    pub(crate) fn access_profile_with<T: Clone, F>(&self, access: F) -> T
     where
         F: Fn(RwLockReadGuard<'_, Profile>) -> T,
     {
@@ -220,7 +220,7 @@ impl Wallet {
             .expect("Implementing Wallet clients should not read and write Profile from Wallet from multiple threads.")
     }
 
-    pub(crate) fn write<F, R>(&self, mutate: F) -> R
+    pub(crate) fn update_profile_with<F, R>(&self, mutate: F) -> R
     where
         F: Fn(RwLockWriteGuard<'_, Profile>) -> R,
     {
@@ -236,7 +236,7 @@ impl Wallet {
     }
 
     #[cfg(not(tarpaulin_include))] // false negative
-    pub(crate) fn try_write<F, R>(&self, mutate: F) -> Result<R>
+    pub(crate) fn try_update_profile_with<F, R>(&self, mutate: F) -> Result<R>
     where
         F: Fn(RwLockWriteGuard<'_, Profile>) -> Result<R>,
     {
@@ -260,7 +260,9 @@ mod tests {
     #[test]
     fn read_header() {
         let wallet = Wallet::placeholder();
-        wallet.read(|p| assert_eq!(p.header, Profile::placeholder().header))
+        wallet.access_profile_with(|p| {
+            assert_eq!(p.header, Profile::placeholder().header)
+        })
     }
 
     #[test]
