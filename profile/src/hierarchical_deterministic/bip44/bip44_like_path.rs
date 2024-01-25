@@ -75,7 +75,7 @@ impl BIP44LikePath {
         let c0 = HDPathComponent::bip44_purpose(); // purpose
         let c1 = HDPathComponent::bip44_cointype(); // cointype
         let c2 = HDPathComponent::harden(account); // account
-        let c3 = HDPathComponent::from_value(0); // change
+        let c3 = HDPathComponent::non_hardened(0); // change
         let c4 = HDPathComponent::harden(index); // index
         let components = vec![c0, c1, c2, c3, c4];
         let path = HDPath::from_components(components);

@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{prelude::*, UniffiCustomTypeConverter};
 
 use radix_engine_common::crypto::{
     Ed25519PublicKey as EngineEd25519PublicKey, IsHash,
@@ -10,36 +10,51 @@ use transaction::{
 /// An Ed25519 public key used to verify cryptographic signatures (EdDSA signatures).
 #[serde_as]
 #[derive(
-    Serialize,
-    Deserialize,
     Clone,
     PartialEq,
     Eq,
     Hash,
     PartialOrd,
     Ord,
+    SerializeDisplay, // yes we could have #[serde(transparent)] since `EngineEd25519PublicKey` is Serialize, but we wanna be in control.
+    DeserializeFromStr, // yes we could have #[serde(transparent)] since `EngineEd25519PublicKey` is Deserialize, but we wanna be in control.
+    derive_more::Display,
     derive_more::Debug,
     uniffi::Record,
 )]
-#[serde(transparent)]
+#[display("{}", self.to_hex())]
 #[debug("{}", self.to_hex())]
 pub struct Ed25519PublicKey {
-    #[serde_as(as = "serde_with::hex::Hex")]
-    value: Vec<u8>, // FIXME: change to either `radix_engine_common::crypto::Ed25519PublicKey` or `ed25519_dalek::PublicKey` once we have proper UniFFI lift/lower/UniffiCustomTypeConverter
+    inner: EngineEd25519PublicKey,
+}
+
+uniffi::custom_type!(EngineEd25519PublicKey, Vec<u8>);
+impl UniffiCustomTypeConverter for EngineEd25519PublicKey {
+    type Builtin = Vec<u8>;
+
+    #[cfg(not(tarpaulin_include))] // false negative | tested in bindgen tests
+    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
+        Self::try_from(val.as_slice()).map_err(|e| e.into())
+    }
+
+    #[cfg(not(tarpaulin_include))] // false negative | tested in bindgen tests
+    fn from_custom(obj: Self) -> Self::Builtin {
+        obj.to_vec()
+    }
 }
 
 #[uniffi::export]
 pub fn new_ed25519_public_key_from_hex(
     hex: String,
 ) -> Result<Ed25519PublicKey> {
-    Ed25519PublicKey::from_hex(hex)
+    hex.parse()
 }
 
 #[uniffi::export]
 pub fn new_ed25519_public_key_from_bytes(
     bytes: Vec<u8>,
 ) -> Result<Ed25519PublicKey> {
-    Ed25519PublicKey::from_bytes(bytes)
+    bytes.try_into()
 }
 
 #[uniffi::export]
@@ -64,13 +79,6 @@ pub fn ed25519_public_key_to_bytes(public_key: &Ed25519PublicKey) -> Vec<u8> {
     public_key.to_bytes()
 }
 
-impl From<EngineEd25519PublicKey> for Ed25519PublicKey {
-    fn from(value: EngineEd25519PublicKey) -> Self {
-        Self::from_engine(value)
-            .expect("EngineEd25519PublicKey should have been valid.")
-    }
-}
-
 impl IsPublicKey<Ed25519Signature> for Ed25519PublicKey {
     /// Verifies an EdDSA signature over Curve25519.
     fn is_valid(
@@ -83,8 +91,12 @@ impl IsPublicKey<Ed25519Signature> for Ed25519PublicKey {
 }
 
 impl Ed25519PublicKey {
+    pub(crate) fn to_engine(&self) -> EngineEd25519PublicKey {
+        self.inner
+    }
+
     pub fn to_bytes(&self) -> Vec<u8> {
-        self.value.clone()
+        self.to_engine().to_vec()
     }
 
     pub fn to_hex(&self) -> String {
@@ -92,25 +104,21 @@ impl Ed25519PublicKey {
     }
 }
 
-impl Ed25519PublicKey {
-    pub(crate) fn to_engine(&self) -> EngineEd25519PublicKey {
-        EngineEd25519PublicKey::try_from(self.to_bytes().as_slice()).unwrap()
-    }
+impl TryFrom<EngineEd25519PublicKey> for Ed25519PublicKey {
+    type Error = CommonError;
 
-    pub(crate) fn from_engine(engine: EngineEd25519PublicKey) -> Result<Self> {
-        ed25519_dalek::PublicKey::from_bytes(engine.to_vec().as_slice())
-            .map(|_| Self {
-                value: engine.to_vec(),
-            }) // FIXME: Delete this once we can represent the key as a `uniffi::Record` without letting the field be bytes...(keep it as `EngineEd25519PublicKey`)
+    fn try_from(value: EngineEd25519PublicKey) -> Result<Self, Self::Error> {
+        ed25519_dalek::PublicKey::from_bytes(value.to_vec().as_slice())
             .map_err(|_| CommonError::InvalidEd25519PublicKeyPointNotOnCurve)
+            .map(|_| Self { inner: value })
     }
 }
 
-impl Ed25519PublicKey {
-    fn from_bytes(bytes: Vec<u8>) -> Result<Self> {
-        EngineEd25519PublicKey::try_from(bytes.as_slice())
-            .map_err(|_| CommonError::InvalidEd25519PublicKeyFromBytes(bytes))
-            .and_then(Self::from_engine)
+impl TryFrom<Vec<u8>> for Ed25519PublicKey {
+    type Error = CommonError;
+
+    fn try_from(value: Vec<u8>) -> Result<Self, Self::Error> {
+        value.as_slice().try_into()
     }
 }
 
@@ -118,23 +126,20 @@ impl TryFrom<&[u8]> for Ed25519PublicKey {
     type Error = crate::CommonError;
 
     fn try_from(slice: &[u8]) -> Result<Self> {
-        Self::from_bytes(slice.to_vec())
-    }
-}
-
-impl TryInto<Ed25519PublicKey> for &str {
-    type Error = crate::CommonError;
-
-    fn try_into(self) -> Result<Ed25519PublicKey, Self::Error> {
-        Ed25519PublicKey::from_str(self)
+        EngineEd25519PublicKey::try_from(slice)
+            .map_err(|_| {
+                CommonError::InvalidEd25519PublicKeyFromBytes(slice.to_vec())
+            })
+            .and_then(|k| k.try_into())
     }
 }
 
 impl Ed25519PublicKey {
     pub fn from_hex(hex: String) -> Result<Self> {
+        // We want to ALWAYS go via `try_from(slice: &[u8])` since validates the EC point (`EngineEd25519PublicKey` doesn't!)
         Hex32Bytes::from_str(hex.as_str())
             .map_err(|_| CommonError::InvalidEd25519PublicKeyFromString(hex))
-            .and_then(|b| Ed25519PublicKey::try_from(b.to_vec().as_slice()))
+            .and_then(|b| b.to_vec().try_into())
     }
 }
 
@@ -215,7 +220,8 @@ mod tests {
             "ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf",
         )
         .unwrap()
-        .into();
+        .try_into()
+        .unwrap();
         assert_eq!(
             from_engine,
             Ed25519PublicKey::from_str(
@@ -288,7 +294,7 @@ mod tests {
     fn try_into_from_str() {
         let str =
             "b7a3c12dc0c8c748ab07525b701122b88bd78f600c76342d27f25e5f92444cde";
-        let key: Ed25519PublicKey = str.try_into().unwrap();
+        let key: Ed25519PublicKey = str.parse().unwrap();
         assert_eq!(key.to_hex(), str);
     }
 
@@ -356,7 +362,7 @@ mod uniffi_tests {
             new_ed25519_public_key_from_bytes(bytes.clone()).unwrap();
         assert_eq!(
             from_bytes,
-            Ed25519PublicKey::from_bytes(bytes.clone()).unwrap()
+            Ed25519PublicKey::try_from(bytes.clone()).unwrap()
         );
         assert_eq!(ed25519_public_key_to_bytes(&from_bytes), bytes);
     }

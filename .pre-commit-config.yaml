@@ -32,3 +32,17 @@ repos:
         types: [file, rust]
         entry: cargo test --doc
         pass_filenames: false
+
+      - id: vectors integration tests
+        name: vectors integration tests
+        language: system
+        types: [file, rust]
+        entry: cargo test --package profile --test vectors
+        pass_filenames: false
+
+      - id: uniffi bindgen tests
+        name: uniffi bindgen tests
+        language: system
+        types: [file, rust]
+        entry: cargo test --package profile --test uniffi
+        pass_filenames: false

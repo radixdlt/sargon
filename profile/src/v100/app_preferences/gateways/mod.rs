@@ -1,7 +1,7 @@
 mod gateway;
 mod gateways;
-mod radix_network;
+mod network_definition;
 
 pub use gateway::*;
 pub use gateways::*;
-pub use radix_network::*;
+pub use network_definition::*;

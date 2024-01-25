@@ -5,7 +5,7 @@ use crate::prelude::*;
 #[derive(
     Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, uniffi::Record,
 )]
-pub struct Network {
+pub struct ProfileNetwork {
     /// The ID of the network that has been used to generate the `accounts` and `personas`
     /// and on which the `authorizedDapps` have been deployed on.
     #[serde(rename = "networkID")]
@@ -15,7 +15,7 @@ pub struct Network {
     pub accounts: Accounts,
 }
 
-impl Identifiable for Network {
+impl Identifiable for ProfileNetwork {
     type ID = NetworkID;
     /// The ID of the network that has been used to generate the `accounts` and `personas`
     /// and on which the `authorizedDapps` have been deployed on.
@@ -24,7 +24,7 @@ impl Identifiable for Network {
     }
 }
 
-impl Network {
+impl ProfileNetwork {
     /// Instantiates a new `Network` from `network_id` and `accounts`.
     ///
     /// Panics if not any account in `accounts` is on another
@@ -44,7 +44,7 @@ impl Network {
     }
 }
 
-impl Network {
+impl ProfileNetwork {
     /// Returns a clone of the updated account if found, else None.
     pub fn update_account<F>(
         &mut self,
@@ -62,7 +62,7 @@ impl Network {
     }
 }
 
-impl HasPlaceholder for Network {
+impl HasPlaceholder for ProfileNetwork {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
         Self::placeholder_mainnet()
@@ -74,7 +74,7 @@ impl HasPlaceholder for Network {
     }
 }
 
-impl Network {
+impl ProfileNetwork {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_mainnet() -> Self {
         Self::new(NetworkID::Mainnet, Accounts::placeholder_mainnet())
@@ -92,24 +92,27 @@ mod tests {
 
     #[test]
     fn inequality() {
-        assert_ne!(Network::placeholder(), Network::placeholder_other());
+        assert_ne!(
+            ProfileNetwork::placeholder(),
+            ProfileNetwork::placeholder_other()
+        );
     }
 
     #[test]
     fn get_id() {
-        assert_eq!(Network::placeholder().id(), NetworkID::Mainnet);
+        assert_eq!(ProfileNetwork::placeholder().id(), NetworkID::Mainnet);
     }
 
     #[test]
     fn get_accounts() {
-        let sut = Network::placeholder();
+        let sut = ProfileNetwork::placeholder();
         assert_eq!(sut.accounts, Accounts::placeholder());
     }
 
     #[test]
     fn duplicate_accounts_are_filtered_out() {
         assert_eq!(
-            Network::new(
+            ProfileNetwork::new(
                 NetworkID::Mainnet,
                 Accounts::with_accounts(
                     [Account::placeholder(), Account::placeholder()]
@@ -127,7 +130,7 @@ mod tests {
         expected = "Discrepancy, found accounts on other network than mainnet"
     )]
     fn panic_when_network_id_mismatch_between_accounts_and_value() {
-        Network::new(
+        ProfileNetwork::new(
             NetworkID::Mainnet,
             Accounts::with_accounts([
                 Account::placeholder_mainnet(),
@@ -138,7 +141,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_placeholder_stokenet() {
-        let sut = Network::placeholder_stokenet();
+        let sut = ProfileNetwork::placeholder_stokenet();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"
@@ -243,7 +246,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_placeholder_mainnet() {
-        let sut = Network::placeholder_mainnet();
+        let sut = ProfileNetwork::placeholder_mainnet();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"

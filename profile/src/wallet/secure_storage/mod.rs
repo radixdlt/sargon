@@ -11,3 +11,9 @@ mod ephemeral_secure_storage;
 
 #[cfg(test)]
 pub use ephemeral_secure_storage::*;
+
+#[cfg(test)]
+mod always_fail_storage;
+
+#[cfg(test)]
+pub use always_fail_storage::*;

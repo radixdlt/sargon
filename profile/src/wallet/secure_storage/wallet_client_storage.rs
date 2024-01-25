@@ -153,24 +153,6 @@ impl WalletClientStorage {
         WalletClientStorage::new(Arc::new(AlwaysFailStorage {}))
     }
 }
-#[cfg(test)]
-#[derive(Debug)]
-pub(crate) struct AlwaysFailStorage {}
-
-#[cfg(test)]
-impl SecureStorage for AlwaysFailStorage {
-    fn load_data(&self, _key: SecureStorageKey) -> Result<Option<Vec<u8>>> {
-        todo!()
-    }
-
-    fn save_data(&self, _key: SecureStorageKey, _data: Vec<u8>) -> Result<()> {
-        Err(CommonError::Unknown)
-    }
-
-    fn delete_data_for_key(&self, _key: SecureStorageKey) -> Result<()> {
-        todo!()
-    }
-}
 
 #[cfg(test)]
 mod tests {

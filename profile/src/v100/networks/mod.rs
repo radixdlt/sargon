@@ -1,5 +1,5 @@
 mod network;
-mod networks;
+mod profile_networks;
 
 pub use network::*;
-pub use networks::*;
+pub use profile_networks::*;

@@ -25,7 +25,7 @@ pub struct Profile {
     /// An ordered mapping of NetworkID -> `Profile.Network`, containing
     /// all the users Accounts, Personas and AuthorizedDapps the user
     /// has created and interacted with on this network.
-    pub networks: Networks,
+    pub networks: ProfileNetworks,
 }
 
 #[uniffi::export]
@@ -62,7 +62,7 @@ impl Profile {
             header,
             FactorSources::with_bdfs(bdfs),
             AppPreferences::default(),
-            Networks::new(),
+            ProfileNetworks::new(),
         )
     }
 
@@ -71,7 +71,7 @@ impl Profile {
         header: Header,
         factor_sources: FactorSources,
         app_preferences: AppPreferences,
-        networks: Networks,
+        networks: ProfileNetworks,
     ) -> Self {
         factor_sources.assert_not_empty();
         Self {
@@ -125,7 +125,7 @@ impl Profile {
 
 impl HasPlaceholder for Profile {
     fn placeholder() -> Self {
-        let networks = Networks::placeholder();
+        let networks = ProfileNetworks::placeholder();
         let mut header = Header::placeholder();
         header.content_hint = networks.content_hint();
         Self::with(
@@ -137,7 +137,7 @@ impl HasPlaceholder for Profile {
     }
 
     fn placeholder_other() -> Self {
-        let networks = Networks::placeholder_other();
+        let networks = ProfileNetworks::placeholder_other();
         let mut header = Header::placeholder_other();
         header.content_hint = networks.content_hint();
         Self::with(
@@ -324,7 +324,7 @@ mod tests {
             Header::placeholder(),
             FactorSources::new(),
             AppPreferences::placeholder(),
-            Networks::placeholder(),
+            ProfileNetworks::placeholder(),
         );
     }
 

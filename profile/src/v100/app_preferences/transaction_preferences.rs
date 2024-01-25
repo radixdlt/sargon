@@ -5,13 +5,13 @@ use crate::prelude::*;
     Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Hash, uniffi::Record,
 )]
 #[serde(rename_all = "camelCase")]
-pub struct Transaction {
+pub struct TransactionPreferences {
     /// The deposit guarantee that will automatically be added for
     /// all deposits in transactions.
     pub default_deposit_guarantee: Decimal,
 }
 
-impl Transaction {
+impl TransactionPreferences {
     /// Instantiates a new Transaction user preference with the
     /// specified `default_deposit_guarantee` value.
     pub fn new(default_deposit_guarantee: Decimal) -> Self {
@@ -21,7 +21,7 @@ impl Transaction {
     }
 }
 
-impl Default for Transaction {
+impl Default for TransactionPreferences {
     /// By default `1.0` is used.
     fn default() -> Self {
         Self {
@@ -30,7 +30,7 @@ impl Default for Transaction {
     }
 }
 
-impl HasPlaceholder for Transaction {
+impl HasPlaceholder for TransactionPreferences {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
         Self::new(Decimal::try_from_str("0.975").unwrap())
@@ -47,31 +47,34 @@ mod tests {
     use crate::prelude::*;
     #[test]
     fn equality() {
-        assert_eq!(Transaction::placeholder(), Transaction::placeholder());
         assert_eq!(
-            Transaction::placeholder_other(),
-            Transaction::placeholder_other()
+            TransactionPreferences::placeholder(),
+            TransactionPreferences::placeholder()
+        );
+        assert_eq!(
+            TransactionPreferences::placeholder_other(),
+            TransactionPreferences::placeholder_other()
         );
     }
 
     #[test]
     fn inequality() {
         assert_ne!(
-            Transaction::placeholder(),
-            Transaction::placeholder_other()
+            TransactionPreferences::placeholder(),
+            TransactionPreferences::placeholder_other()
         );
     }
 
     #[test]
     fn get_decimal() {
         let value = Decimal::new("0.975".to_string()).unwrap();
-        let sut = Transaction::new(value.clone());
+        let sut = TransactionPreferences::new(value.clone());
         assert_eq!(sut.default_deposit_guarantee, value)
     }
 
     #[test]
     fn json_roundtrip() {
-        let sut = Transaction::placeholder();
+        let sut = TransactionPreferences::placeholder();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"
@@ -85,7 +88,9 @@ mod tests {
     #[test]
     fn default_is_1() {
         assert_eq!(
-            Transaction::default().default_deposit_guarantee.to_string(),
+            TransactionPreferences::default()
+                .default_deposit_guarantee
+                .to_string(),
             "1"
         );
     }

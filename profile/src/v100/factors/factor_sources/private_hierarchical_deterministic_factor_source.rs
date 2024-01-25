@@ -11,7 +11,7 @@ pub fn new_private_hd_factor_source(
     entropy: Vec<u8>,
     wallet_client_model: WalletClientModel,
 ) -> Result<PrivateHierarchicalDeterministicFactorSource> {
-    Hex32Bytes::from_vec(entropy).map(|e| {
+    entropy.try_into().map(|e| {
         PrivateHierarchicalDeterministicFactorSource::new_with_entropy(
             e,
             BIP39Passphrase::default(),

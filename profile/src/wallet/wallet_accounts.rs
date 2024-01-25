@@ -51,7 +51,7 @@ impl Wallet {
     /// If only saving to SecureStorage fails, the Profile still remains
     /// edited.
     pub fn add_factor_source(&self, factor_source: FactorSource) -> Result<()> {
-        self.try_write(|mut p| {
+        self.try_update_profile_with(|mut p| {
             trace!(
                 "About to add FactorSource: {}, to list of factor sources: {}",
                 &factor_source,
@@ -164,7 +164,7 @@ impl Wallet {
         let network_id = account.network_id;
         let err_exists =
             CommonError::AccountAlreadyPresent(account.id().clone());
-        self.try_write(|mut p| {
+        self.try_update_profile_with(|mut p| {
             let networks = &mut p.networks;
             if networks.contains_id(&network_id) {
                 networks
@@ -179,7 +179,7 @@ impl Wallet {
                         |r| if r { Ok(()) } else { Err(err_exists.clone()) },
                     )
             } else {
-                let network = Network::new(
+                let network = ProfileNetwork::new(
                     network_id,
                     Accounts::from_iter([account.to_owned()]),
                 );
@@ -202,7 +202,7 @@ impl Wallet {
 
     /// Updates `account` as a whole, if it exists, else an error is thrown.
     pub fn update_account(&self, to: Account) -> Result<Account> {
-        self.write(|mut p| {
+        self.update_profile_with(|mut p| {
             p.update_account(&to.address, |a| *a = to.to_owned())
         })
         .ok_or(CommonError::UnknownAccount)
@@ -214,7 +214,7 @@ impl Wallet {
         address: AccountAddress,
         to: DisplayName,
     ) -> Result<Account> {
-        self.write(|mut p| {
+        self.update_profile_with(|mut p| {
             p.update_account(&address, |a| a.display_name = to.to_owned())
         })
         .ok_or(CommonError::UnknownAccount)
@@ -238,7 +238,8 @@ mod tests {
     fn change_display_name_of_accounts() {
         let profile = Profile::placeholder();
         let (wallet, _) = Wallet::ephemeral(profile.clone());
-        let account = wallet.read(|p| p.networks[0].accounts[0].clone());
+        let account =
+            wallet.access_profile_with(|p| p.networks[0].accounts[0].clone());
         assert_eq!(account.display_name.value, "Alice");
         assert!(wallet
             .change_name_of_account(
@@ -246,7 +247,7 @@ mod tests {
                 DisplayName::new("Stella").unwrap()
             )
             .is_ok());
-        wallet.read(|p| {
+        wallet.access_profile_with(|p| {
             assert_eq!(p.networks[0].accounts[0].display_name.value, "Stella")
         });
 
@@ -263,7 +264,8 @@ mod tests {
     fn update_account() {
         let profile = Profile::placeholder();
         let (wallet, _) = Wallet::ephemeral(profile.clone());
-        let mut account = wallet.read(|p| p.networks[0].accounts[0].clone());
+        let mut account =
+            wallet.access_profile_with(|p| p.networks[0].accounts[0].clone());
         assert_eq!(account.display_name.value, "Alice");
         account.display_name = DisplayName::new("Stella").unwrap();
         account.appearance_id = AppearanceID::new(7).unwrap();
@@ -275,7 +277,7 @@ mod tests {
         );
 
         // Assert account has been updated in `wallet.profile`
-        wallet.read(|p| {
+        wallet.access_profile_with(|p| {
             let account = &p.networks[0].accounts[0];
             assert_eq!(account.display_name.value, "Stella");
             assert_eq!(account.appearance_id.value, 7);
