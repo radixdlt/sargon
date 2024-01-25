@@ -18,7 +18,7 @@ use crate::NetworkID::{self, *};
 )]
 #[serde(rename_all = "camelCase")]
 #[display("{} ({})", self.display_description, self.id.discriminant())]
-pub struct RadixNetwork {
+pub struct NetworkDefinition {
     /// A String identifier (always lowercase) with the name of the Network that MUST match what Gateway returns.
     #[serde(rename = "name")]
     pub logical_name: String,
@@ -30,23 +30,23 @@ pub struct RadixNetwork {
     pub display_description: String,
 }
 
-impl Default for RadixNetwork {
+impl Default for NetworkDefinition {
     fn default() -> Self {
         Self::mainnet()
     }
 }
 
-impl RadixNetwork {
+impl NetworkDefinition {
     fn declare(id: NetworkID, display: &str) -> Self {
         Self {
-            logical_name: id.network_definition().logical_name,
+            logical_name: id.logical_name(),
             id,
             display_description: display.to_string(),
         }
     }
 }
 
-impl RadixNetwork {
+impl NetworkDefinition {
     /// The Radix mainnet, the "real" Network on which all launched Dapps and
     /// assets with any real value resides.
     pub fn mainnet() -> Self {
@@ -100,7 +100,7 @@ impl RadixNetwork {
     }
 }
 
-impl HasPlaceholder for RadixNetwork {
+impl HasPlaceholder for NetworkDefinition {
     fn placeholder() -> Self {
         Self::mainnet()
     }
@@ -110,7 +110,7 @@ impl HasPlaceholder for RadixNetwork {
     }
 }
 
-impl RadixNetwork {
+impl NetworkDefinition {
     pub fn lookup_by_id(id: NetworkID) -> Result<Self> {
         let map = Self::lookup_map();
         let Some(network) = map.get(&id) else {
@@ -155,39 +155,42 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(RadixNetwork::placeholder(), RadixNetwork::placeholder());
         assert_eq!(
-            RadixNetwork::placeholder_other(),
-            RadixNetwork::placeholder_other()
+            NetworkDefinition::placeholder(),
+            NetworkDefinition::placeholder()
+        );
+        assert_eq!(
+            NetworkDefinition::placeholder_other(),
+            NetworkDefinition::placeholder_other()
         );
     }
 
     #[test]
     fn inequality() {
         assert_ne!(
-            RadixNetwork::placeholder(),
-            RadixNetwork::placeholder_other()
+            NetworkDefinition::placeholder(),
+            NetworkDefinition::placeholder_other()
         );
     }
 
     #[test]
     fn display() {
-        assert_eq!(format!("{}", RadixNetwork::mainnet()), "Mainnet (1)");
+        assert_eq!(format!("{}", NetworkDefinition::mainnet()), "Mainnet (1)");
     }
 
     #[test]
     fn placeholder() {
-        assert_eq!(RadixNetwork::placeholder().logical_name, "mainnet");
+        assert_eq!(NetworkDefinition::placeholder().logical_name, "mainnet");
     }
 
     #[test]
     fn default_is_mainnet() {
-        assert_eq!(RadixNetwork::default(), RadixNetwork::mainnet());
+        assert_eq!(NetworkDefinition::default(), NetworkDefinition::mainnet());
     }
 
     #[test]
     fn json_roundtrip_mainnet() {
-        let sut = RadixNetwork::mainnet();
+        let sut = NetworkDefinition::mainnet();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"
@@ -202,7 +205,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_stokenet() {
-        let sut = RadixNetwork::stokenet();
+        let sut = NetworkDefinition::stokenet();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"
@@ -218,7 +221,7 @@ mod tests {
     #[test]
     fn lookup_by_name_error() {
         assert_eq!(
-            RadixNetwork::lookup_by_name("x"),
+            NetworkDefinition::lookup_by_name("x"),
             Err(CommonError::UnknownNetworkWithName("x".to_string()))
         );
     }
@@ -226,7 +229,7 @@ mod tests {
     #[test]
     fn lookup_by_id_error() {
         assert_eq!(
-            RadixNetwork::lookup_by_id(NetworkID::Simulator),
+            NetworkDefinition::lookup_by_id(NetworkID::Simulator),
             Err(CommonError::UnknownNetworkForID(
                 NetworkID::Simulator.discriminant()
             ))
@@ -236,96 +239,96 @@ mod tests {
     #[test]
     fn lookup_by_id_mainnet() {
         assert_eq!(
-            RadixNetwork::lookup_by_id(NetworkID::Mainnet),
-            Ok(RadixNetwork::mainnet())
+            NetworkDefinition::lookup_by_id(NetworkID::Mainnet),
+            Ok(NetworkDefinition::mainnet())
         );
     }
 
     #[test]
     fn lookup_by_id_stokenet() {
         assert_eq!(
-            RadixNetwork::lookup_by_id(NetworkID::Stokenet),
-            Ok(RadixNetwork::stokenet())
+            NetworkDefinition::lookup_by_id(NetworkID::Stokenet),
+            Ok(NetworkDefinition::stokenet())
         );
     }
 
     #[test]
     fn lookup_by_name_mainnet() {
         assert_eq!(
-            RadixNetwork::lookup_by_name("mainnet"),
-            Ok(RadixNetwork::mainnet())
+            NetworkDefinition::lookup_by_name("mainnet"),
+            Ok(NetworkDefinition::mainnet())
         );
     }
 
     #[test]
     fn lookup_by_name_stokenet() {
         assert_eq!(
-            RadixNetwork::lookup_by_name("stokenet"),
-            Ok(RadixNetwork::stokenet())
+            NetworkDefinition::lookup_by_name("stokenet"),
+            Ok(NetworkDefinition::stokenet())
         );
     }
 
     #[test]
     fn lookup_by_id_nergalnet() {
         assert_eq!(
-            RadixNetwork::lookup_by_id(NetworkID::Nergalnet),
-            Ok(RadixNetwork::nergalnet())
+            NetworkDefinition::lookup_by_id(NetworkID::Nergalnet),
+            Ok(NetworkDefinition::nergalnet())
         );
     }
 
     #[test]
     fn lookup_by_id_mardunet() {
         assert_eq!(
-            RadixNetwork::lookup_by_id(NetworkID::Mardunet),
-            Ok(RadixNetwork::mardunet())
+            NetworkDefinition::lookup_by_id(NetworkID::Mardunet),
+            Ok(NetworkDefinition::mardunet())
         );
     }
 
     #[test]
     fn lookup_by_id_enkinet() {
         assert_eq!(
-            RadixNetwork::lookup_by_id(NetworkID::Enkinet),
-            Ok(RadixNetwork::enkinet())
+            NetworkDefinition::lookup_by_id(NetworkID::Enkinet),
+            Ok(NetworkDefinition::enkinet())
         );
     }
 
     #[test]
     fn lookup_by_id_hammunet() {
         assert_eq!(
-            RadixNetwork::lookup_by_id(NetworkID::Hammunet),
-            Ok(RadixNetwork::hammunet())
+            NetworkDefinition::lookup_by_id(NetworkID::Hammunet),
+            Ok(NetworkDefinition::hammunet())
         );
     }
 
     #[test]
     fn lookup_by_id_zabanet() {
         assert_eq!(
-            RadixNetwork::lookup_by_id(NetworkID::Zabanet),
-            Ok(RadixNetwork::zabanet())
+            NetworkDefinition::lookup_by_id(NetworkID::Zabanet),
+            Ok(NetworkDefinition::zabanet())
         );
     }
 
     #[test]
     fn lookup_by_id_ansharnet() {
         assert_eq!(
-            RadixNetwork::lookup_by_id(NetworkID::Ansharnet),
-            Ok(RadixNetwork::ansharnet())
+            NetworkDefinition::lookup_by_id(NetworkID::Ansharnet),
+            Ok(NetworkDefinition::ansharnet())
         );
     }
 
     #[test]
     fn lookup_by_id_kisharnet() {
         assert_eq!(
-            RadixNetwork::lookup_by_id(NetworkID::Kisharnet),
-            Ok(RadixNetwork::kisharnet())
+            NetworkDefinition::lookup_by_id(NetworkID::Kisharnet),
+            Ok(NetworkDefinition::kisharnet())
         );
     }
 
     #[test]
     fn lookup_by_id_nebunet() {
         assert_eq!(
-            RadixNetwork::lookup_by_id(NetworkID::Nebunet),
-            Ok(RadixNetwork::nebunet())
+            NetworkDefinition::lookup_by_id(NetworkID::Nebunet),
+            Ok(NetworkDefinition::nebunet())
         );
     }
 }

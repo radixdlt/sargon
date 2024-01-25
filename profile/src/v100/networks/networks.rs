@@ -3,7 +3,7 @@ use crate::prelude::*;
 /// An ordered mapping of NetworkID -> `Profile.Network`, containing
 /// all the users Accounts, Personas and AuthorizedDapps the user
 /// has created and interacted with on this network.
-pub type Networks = IdentifiedVecVia<Network>;
+pub type Networks = IdentifiedVecVia<ProfileNetwork>;
 
 // Constructors
 impl Networks {
@@ -11,14 +11,14 @@ impl Networks {
     /// and iterator.
     pub fn with_networks<I>(networks: I) -> Self
     where
-        I: IntoIterator<Item = Network>,
+        I: IntoIterator<Item = ProfileNetwork>,
     {
         Self::from_iter(networks)
     }
 
     /// Instantiates a new network collection with the provided
     /// `network`.
-    pub fn with_network(network: Network) -> Self {
+    pub fn with_network(network: ProfileNetwork) -> Self {
         Self::with_networks([network])
     }
 }
@@ -66,14 +66,14 @@ impl HasPlaceholder for Networks {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
         Self::with_networks([
-            Network::placeholder_mainnet(),
-            Network::placeholder_stokenet(),
+            ProfileNetwork::placeholder_mainnet(),
+            ProfileNetwork::placeholder_stokenet(),
         ])
     }
 
     /// A placeholder used to facilitate unit tests.
     fn placeholder_other() -> Self {
-        Self::with_network(Network::placeholder_other())
+        Self::with_network(ProfileNetwork::placeholder_other())
     }
 }
 
@@ -104,7 +104,8 @@ mod tests {
     fn duplicates_are_prevented() {
         assert_eq!(
             Networks::from_iter(
-                [Network::placeholder(), Network::placeholder()].into_iter()
+                [ProfileNetwork::placeholder(), ProfileNetwork::placeholder()]
+                    .into_iter()
             )
             .len(),
             1
@@ -113,7 +114,7 @@ mod tests {
 
     #[test]
     fn duplicates_are_prevented_and_first_added_is_retained() {
-        let mut sut = Networks::from_iter([Network::new(
+        let mut sut = Networks::from_iter([ProfileNetwork::new(
             NetworkID::Mainnet,
             Accounts::from_iter([
                 Account::placeholder_mainnet_alice(),
@@ -121,7 +122,7 @@ mod tests {
             ]),
         )]);
         assert!(
-            !sut.append(Network::new(
+            !sut.append(ProfileNetwork::new(
                 NetworkID::Mainnet,
                 Accounts::from_iter([Account::placeholder_mainnet_carol()]),
             ))
@@ -205,7 +206,7 @@ mod tests {
 
     #[test]
     fn with_network() {
-        let network = Network::new(
+        let network = ProfileNetwork::new(
             NetworkID::Mainnet,
             Accounts::with_account(Account::placeholder_mainnet()),
         );

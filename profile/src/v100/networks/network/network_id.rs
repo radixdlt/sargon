@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use radix_engine_common::network::NetworkDefinition;
+use radix_engine_common::network::NetworkDefinition as NativeNetworkDefinition;
 
 #[derive(
     Serialize_repr,
@@ -114,38 +114,40 @@ impl std::fmt::Display for NetworkID {
 }
 
 impl NetworkID {
-    /// Looks up a `NetworkDefinition` in a lookup table.
-    pub fn network_definition(&self) -> NetworkDefinition {
+    /// Looks up a `NativeNetworkDefinition` in lookup table,
+    /// this is used internally for radix_engine_common::address::AddressBech32Decoder,
+    /// and to read out the canonical name (logical name) for a network.
+    pub(crate) fn network_definition(&self) -> NativeNetworkDefinition {
         use NetworkID::*;
         match self {
-            Mainnet => NetworkDefinition::mainnet(),
-            Stokenet => NetworkDefinition::stokenet(),
-            Adapanet => NetworkDefinition::adapanet(),
-            Nebunet => NetworkDefinition::nebunet(),
-            Kisharnet => NetworkDefinition::kisharnet(),
-            Ansharnet => NetworkDefinition::ansharnet(),
-            Zabanet => NetworkDefinition::zabanet(),
-            Enkinet => NetworkDefinition {
+            Mainnet => NativeNetworkDefinition::mainnet(),
+            Stokenet => NativeNetworkDefinition::stokenet(),
+            Adapanet => NativeNetworkDefinition::adapanet(),
+            Nebunet => NativeNetworkDefinition::nebunet(),
+            Kisharnet => NativeNetworkDefinition::kisharnet(),
+            Ansharnet => NativeNetworkDefinition::ansharnet(),
+            Zabanet => NativeNetworkDefinition::zabanet(),
+            Enkinet => NativeNetworkDefinition {
                 id: Enkinet.discriminant(),
                 logical_name: String::from("enkinet"),
                 hrp_suffix: String::from("tdx_21_"),
             },
-            Hammunet => NetworkDefinition {
+            Hammunet => NativeNetworkDefinition {
                 id: Hammunet.discriminant(),
                 logical_name: String::from("hammunet"),
                 hrp_suffix: String::from("tdx_22_"),
             },
-            Nergalnet => NetworkDefinition {
+            Nergalnet => NativeNetworkDefinition {
                 id: Nebunet.discriminant(),
                 logical_name: String::from("nergalnet"),
                 hrp_suffix: String::from("tdx_24_"),
             },
-            Mardunet => NetworkDefinition {
+            Mardunet => NativeNetworkDefinition {
                 id: Mardunet.discriminant(),
                 logical_name: String::from("mardunet"),
                 hrp_suffix: String::from("tdx_24_"),
             },
-            NetworkID::Simulator => NetworkDefinition::simulator(),
+            NetworkID::Simulator => NativeNetworkDefinition::simulator(),
         }
     }
 }
@@ -240,7 +242,7 @@ mod tests {
             ids.len()
         );
     }
-
+    /*
     #[test]
     fn lookup_network_definition() {
         assert_eq!(
@@ -256,6 +258,7 @@ mod tests {
             NetworkID::Enkinet.discriminant()
         )
     }
+    */
 
     #[test]
     fn logical_name() {

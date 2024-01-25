@@ -20,7 +20,7 @@ use std::ops::Deref;
 #[debug("{}: {}", self.network.display_description, self.url.to_string())]
 pub struct Gateway {
     /// The Radix network the API is a Gateway to.
-    pub network: RadixNetwork,
+    pub network: NetworkDefinition,
 
     /// The URL to the gateways API endpoint
     pub url: Url,
@@ -47,7 +47,7 @@ impl Gateway {
     ) -> Result<Arc<Self>, crate::CommonError> {
         let url = Url::try_from(url.as_str())
             .map_err(|_| CommonError::InvalidURL(url))?;
-        let network = RadixNetwork::lookup_by_id(id)?;
+        let network = NetworkDefinition::lookup_by_id(id)?;
         Ok(Self { url, network }.into())
     }
 }

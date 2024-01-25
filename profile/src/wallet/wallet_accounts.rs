@@ -179,7 +179,7 @@ impl Wallet {
                         |r| if r { Ok(()) } else { Err(err_exists.clone()) },
                     )
             } else {
-                let network = Network::new(
+                let network = ProfileNetwork::new(
                     network_id,
                     Accounts::from_iter([account.to_owned()]),
                 );
