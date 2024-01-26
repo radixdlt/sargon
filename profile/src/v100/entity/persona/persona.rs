@@ -1,13 +1,17 @@
-use std::{cmp::Ordering, fmt::Display};
-
-use identified_vec::Identifiable;
-use serde::{Deserialize, Serialize};
-
 use crate::prelude::*;
 
 #[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Hash, Eq, uniffi::Record,
+    Serialize,
+    Deserialize,
+    Clone,
+    Debug,
+    PartialEq,
+    Hash,
+    Eq,
+    derive_more::Display,
+    uniffi::Record,
 )]
+#[display("{} | {}", display_name, address)]
 #[serde(rename_all = "camelCase")]
 pub struct Persona {
     /// The ID of the network this account can be used with.
@@ -42,12 +46,20 @@ impl Persona {
     pub fn new(
         persona_creating_factor_instance: HDFactorInstanceIdentityCreation,
         display_name: DisplayName,
-        persona_data: PersonaData,
+        persona_data: Option<PersonaData>,
     ) -> Self {
         let address =
             IdentityAddress::from_hd_factor_instance_virtual_entity_creation(
                 persona_creating_factor_instance.clone(),
             );
+        let persona_data = persona_data.map_or(
+            PersonaData::new(IdentifiedEntry::new(
+                Uuid::nil(),
+                Name::new(Variant::Western, "Wayne", "Bruce", "Batman")
+                    .expect("Name counstruction should not fail"),
+            )),
+            |p| p,
+        );
         Self {
             network_id: persona_creating_factor_instance.network_id(),
             address,
@@ -65,7 +77,8 @@ impl Persona {
     fn placeholder_at_index_name_network(
         network_id: NetworkID,
         index: HDPathValue,
-        name: &str,
+        display_name: &str,
+        name: Name,
     ) -> Self {
         let mwp = MnemonicWithPassphrase::placeholder();
         let bdfs = DeviceFactorSource::babylon(
@@ -80,27 +93,39 @@ impl Persona {
 
         Self::new(
             persona_creating_factor_instance,
-            DisplayName::new(name).unwrap(),
-            PersonaData::default(),
+            DisplayName::new(display_name).unwrap(),
+            Some(PersonaData::new(IdentifiedEntry::new(Uuid::nil(), name))),
         )
     }
 
-    fn placeholder_at_index_name(index: HDPathValue, name: &str) -> Self {
-        Self::placeholder_at_index_name_network(NetworkID::Mainnet, index, name)
+    fn placeholder_at_index_name(
+        index: HDPathValue,
+        display_name: &str,
+        name: Name,
+    ) -> Self {
+        Self::placeholder_at_index_name_network(
+            NetworkID::Mainnet,
+            index,
+            display_name,
+            name,
+        )
     }
 
     pub fn placeholder_satoshi() -> Self {
-        Self::placeholder_at_index_name(0, "Satoshi")
+        let name =
+            Name::new(Variant::Eastern, "Nakamoto", "Satoshi", "Satoshi")
+                .expect(
+                "Failure to construct placeholder Name should not be possible",
+            );
+        Self::placeholder_at_index_name(0, "Satoshi", name)
     }
 
     pub fn placeholder_batman() -> Self {
-        Self::placeholder_at_index_name(1, "Batman")
-    }
-}
-
-impl Display for Persona {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} | {}", self.display_name, self.address)
+        let name = Name::new(Variant::Western, "Wayne", "Bruce", "Batman")
+            .expect(
+                "Failure to construct placeholder Name should not be possible",
+            );
+        Self::placeholder_at_index_name(1, "Batman", name)
     }
 }
 
@@ -145,28 +170,9 @@ impl HasPlaceholder for Persona {
     }
 }
 
-/// Empty struct to act as placeholder for PersonaData, `todo`
-#[derive(
-    Serialize,
-    Deserialize,
-    Clone,
-    Debug,
-    PartialEq,
-    Hash,
-    Eq,
-    Default,
-    uniffi::Record,
-)]
-pub struct PersonaData {}
-
 #[cfg(test)]
 mod tests {
-    use crate::{
-        prelude::*,
-        v100::entity::persona::{Persona, PersonaData},
-    };
-    use identified_vec::Identifiable;
-    use std::str::FromStr;
+    use crate::prelude::*;
 
     #[test]
     fn equality() {
@@ -298,9 +304,19 @@ mod tests {
                   }
                 },
                 "flags": [],
-                "personaData": {}
+                "personaData": {
+                  "name": {
+                    "id": "00000000-0000-0000-0000-000000000000",
+                    "value": {
+                      "variant": "Western",
+                      "familyName": "Wayne",
+                      "givenName": "Bruce",
+                      "nickname": "Batman"
+                    }
+                  }
+                }
               }
-            "#,
+              "#,
         );
     }
 
@@ -311,43 +327,53 @@ mod tests {
             &model,
             r#"
             {
-                "networkID": 1,
-                "address": "identity_rdx122kttqch0eehzj6f9nkkxcw7msfeg9udurq5u0ysa0e92c59w0mg6x",
-                "displayName": "Satoshi",
-                "securityState": {
-                  "discriminator": "unsecured",
-                  "unsecuredEntityControl": {
-                    "transactionSigning": {
-                      "factorSourceID": {
-                        "discriminator": "fromHash",
-                        "fromHash": {
-                          "kind": "device",
-                          "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
-                        }
-                      },
-                      "badge": {
-                        "discriminator": "virtualSource",
-                        "virtualSource": {
-                          "discriminator": "hierarchicalDeterministicPublicKey",
-                          "hierarchicalDeterministicPublicKey": {
-                            "publicKey": {
-                              "curve": "curve25519",
-                              "compressedData": "983ab1d3a77dd6b30bb8a5d59d490a0380cc0aa9ab464983d3fc581fcf64543f"
-                            },
-                            "derivationPath": {
-                              "scheme": "cap26",
-                              "path": "m/44H/1022H/1H/618H/1460H/0H"
-                            }
+              "networkID": 1,
+              "address": "identity_rdx122kttqch0eehzj6f9nkkxcw7msfeg9udurq5u0ysa0e92c59w0mg6x",
+              "displayName": "Satoshi",
+              "securityState": {
+                "discriminator": "unsecured",
+                "unsecuredEntityControl": {
+                  "transactionSigning": {
+                    "factorSourceID": {
+                      "discriminator": "fromHash",
+                      "fromHash": {
+                        "kind": "device",
+                        "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+                      }
+                    },
+                    "badge": {
+                      "discriminator": "virtualSource",
+                      "virtualSource": {
+                        "discriminator": "hierarchicalDeterministicPublicKey",
+                        "hierarchicalDeterministicPublicKey": {
+                          "publicKey": {
+                            "curve": "curve25519",
+                            "compressedData": "983ab1d3a77dd6b30bb8a5d59d490a0380cc0aa9ab464983d3fc581fcf64543f"
+                          },
+                          "derivationPath": {
+                            "scheme": "cap26",
+                            "path": "m/44H/1022H/1H/618H/1460H/0H"
                           }
                         }
                       }
                     }
                   }
-                },
-                "flags": [],
-                "personaData": {}
+                }
+              },
+              "flags": [],
+              "personaData": {
+                "name": {
+                  "id": "00000000-0000-0000-0000-000000000000",
+                  "value": {
+                    "variant": "Eastern",
+                    "familyName": "Nakamoto",
+                    "givenName": "Satoshi",
+                    "nickname": "Satoshi"
+                  }
+                }
               }
-        "#,
+            }
+            "#,
         );
     }
 
@@ -356,48 +382,58 @@ mod tests {
         let json = serde_json::from_str(
             r#"
             {
-                "networkID": 1,
-                "address": "identity_rdx12gzxlgre0glhh9jxaptm7tdth8j4w4r8ykpg2xjfv45nghzsjzrvmp",
-                "displayName": "Batman",
-                "securityState": {
-                  "discriminator": "unsecured",
-                  "unsecuredEntityControl": {
-                    "transactionSigning": {
-                      "factorSourceID": {
-                        "discriminator": "fromHash",
-                        "fromHash": {
-                          "kind": "device",
-                          "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
-                        }
-                      },
-                      "badge": {
-                        "discriminator": "virtualSource",
-                        "virtualSource": {
-                          "discriminator": "hierarchicalDeterministicPublicKey",
-                          "hierarchicalDeterministicPublicKey": {
-                            "publicKey": {
-                              "curve": "curve25519",
-                              "compressedData": "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b"
-                            },
-                            "derivationPath": {
-                              "scheme": "cap26",
-                              "path": "m/44H/1022H/1H/525H/1460H/0H"
-                            }
+              "networkID": 1,
+              "address": "identity_rdx122kttqch0eehzj6f9nkkxcw7msfeg9udurq5u0ysa0e92c59w0mg6x",
+              "displayName": "Satoshi",
+              "securityState": {
+                "discriminator": "unsecured",
+                "unsecuredEntityControl": {
+                  "transactionSigning": {
+                    "factorSourceID": {
+                      "discriminator": "fromHash",
+                      "fromHash": {
+                        "kind": "device",
+                        "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+                      }
+                    },
+                    "badge": {
+                      "discriminator": "virtualSource",
+                      "virtualSource": {
+                        "discriminator": "hierarchicalDeterministicPublicKey",
+                        "hierarchicalDeterministicPublicKey": {
+                          "publicKey": {
+                            "curve": "curve25519",
+                            "compressedData": "983ab1d3a77dd6b30bb8a5d59d490a0380cc0aa9ab464983d3fc581fcf64543f"
+                          },
+                          "derivationPath": {
+                            "scheme": "cap26",
+                            "path": "m/44H/1022H/1H/618H/1460H/0H"
                           }
                         }
                       }
                     }
                   }
-                },
-                "flags": [],
-                "personaData": {}
+                }
+              },
+              "flags": [],
+              "personaData": {
+                "name": {
+                  "id": "00000000-0000-0000-0000-000000000000",
+                  "value": {
+                    "variant": "Eastern",
+                    "familyName": "Nakamoto",
+                    "givenName": "Satoshi",
+                    "nickname": "Satoshi"
+                  }
+                }
               }
+            }
             "#,
         ).unwrap();
         let persona = serde_json::from_value::<Persona>(json).unwrap();
-        assert_eq!(persona.display_name.value, "Batman".to_string()); // soundness
+        assert_eq!(persona.display_name.value, "Satoshi".to_string()); // soundness
         assert_eq!(persona.flags.len(), 0); // assert Default value is empty flags.
-        assert_eq!(persona.persona_data, PersonaData {}); // assert Default value is empty flags.
+                                            // assert_eq!(persona.persona_data, PersonaData::new());
     }
 
     #[test]
@@ -409,23 +445,32 @@ mod tests {
 
     #[test]
     fn placeholder_stokenet() {
+        let name = Name::new(Variant::Western, "Wayne", "Bruce", "Batman")
+            .expect("Name counstruction should not fail");
         let persona = Persona::placeholder_at_index_name_network(
             NetworkID::Stokenet,
             1,
             "Batman",
+            name.clone(),
         );
         assert_eq!(persona.display_name.value, "Batman".to_string());
         assert_eq!(persona.network_id, NetworkID::Stokenet);
+        assert_eq!(persona.persona_data.name.value, name);
     }
 
     #[test]
     fn placeholder_stokenet_satoshi() {
+        let name =
+            Name::new(Variant::Western, "Nakamoto", "Satoshi", "Satoshi")
+                .expect("Name counstruction should not fail");
         let persona = Persona::placeholder_at_index_name_network(
             NetworkID::Stokenet,
             0,
             "Satoshi",
+            name.clone(),
         );
         assert_eq!(persona.display_name.value, "Satoshi".to_string());
         assert_eq!(persona.network_id, NetworkID::Stokenet);
+        assert_eq!(persona.persona_data.name.value, name);
     }
 }
