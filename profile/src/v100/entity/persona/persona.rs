@@ -42,7 +42,7 @@ pub struct Persona {
 }
 
 impl Persona {
-    /// Creates a new [`Persona`].
+    /// Creates a new `Persona`, if `persona_data` is `None`, an empty object will be created.
     pub fn new(
         persona_creating_factor_instance: HDFactorInstanceIdentityCreation,
         display_name: DisplayName,
@@ -52,14 +52,6 @@ impl Persona {
             IdentityAddress::from_hd_factor_instance_virtual_entity_creation(
                 persona_creating_factor_instance.clone(),
             );
-        let persona_data = persona_data.map_or(
-            PersonaData::new(IdentifiedEntry::new(
-                Uuid::nil(),
-                Name::new(Variant::Western, "Wayne", "Bruce", "Batman")
-                    .expect("Name counstruction should not fail"),
-            )),
-            |p| p,
-        );
         Self {
             network_id: persona_creating_factor_instance.network_id(),
             address,
@@ -70,10 +62,12 @@ impl Persona {
                 )
                 .into(),
             flags: EntityFlags::default(),
-            persona_data,
+            persona_data: persona_data.unwrap_or_default(),
         }
     }
+}
 
+impl Persona {
     fn placeholder_at_index_name_network(
         network_id: NetworkID,
         index: HDPathValue,
@@ -94,7 +88,10 @@ impl Persona {
         Self::new(
             persona_creating_factor_instance,
             DisplayName::new(display_name).unwrap(),
-            Some(PersonaData::new(IdentifiedEntry::new(Uuid::nil(), name))),
+            Some(PersonaData::new(Some(PersonaDataIdentifiedName::with_id(
+                Uuid::nil(),
+                name,
+            )))),
         )
     }
 
@@ -455,7 +452,7 @@ mod tests {
         );
         assert_eq!(persona.display_name.value, "Batman".to_string());
         assert_eq!(persona.network_id, NetworkID::Stokenet);
-        assert_eq!(persona.persona_data.name.value, name);
+        assert_eq!(persona.persona_data.name.unwrap().value, name);
     }
 
     #[test]
@@ -471,6 +468,6 @@ mod tests {
         );
         assert_eq!(persona.display_name.value, "Satoshi".to_string());
         assert_eq!(persona.network_id, NetworkID::Stokenet);
-        assert_eq!(persona.persona_data.name.value, name);
+        assert_eq!(persona.persona_data.name.unwrap().value, name);
     }
 }
