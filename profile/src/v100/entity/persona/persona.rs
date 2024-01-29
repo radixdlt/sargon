@@ -73,6 +73,7 @@ impl Persona {
         index: HDPathValue,
         display_name: &str,
         name: Name,
+        phone_numbers: CollectionOfPhoneNumbers,
     ) -> Self {
         let mwp = MnemonicWithPassphrase::placeholder();
         let bdfs = DeviceFactorSource::babylon(
@@ -88,10 +89,10 @@ impl Persona {
         Self::new(
             persona_creating_factor_instance,
             DisplayName::new(display_name).unwrap(),
-            Some(PersonaData::new(Some(PersonaDataIdentifiedName::with_id(
-                Uuid::nil(),
-                name,
-            )))),
+            Some(PersonaData::new(
+                Some(PersonaDataIdentifiedName::with_id(Uuid::nil(), name)),
+                phone_numbers,
+            )),
         )
     }
 
@@ -99,12 +100,14 @@ impl Persona {
         index: HDPathValue,
         display_name: &str,
         name: Name,
+        phone_numbers: CollectionOfPhoneNumbers,
     ) -> Self {
         Self::placeholder_at_index_name_network(
             NetworkID::Mainnet,
             index,
             display_name,
             name,
+            phone_numbers,
         )
     }
 
@@ -114,7 +117,12 @@ impl Persona {
                 .expect(
                 "Failure to construct placeholder Name should not be possible",
             );
-        Self::placeholder_at_index_name(0, "Satoshi", name)
+        Self::placeholder_at_index_name(
+            0,
+            "Satoshi",
+            name,
+            CollectionOfPhoneNumbers::placeholder(),
+        )
     }
 
     pub fn placeholder_batman() -> Self {
@@ -122,7 +130,12 @@ impl Persona {
             .expect(
                 "Failure to construct placeholder Name should not be possible",
             );
-        Self::placeholder_at_index_name(1, "Batman", name)
+        Self::placeholder_at_index_name(
+            1,
+            "Batman",
+            name,
+            CollectionOfPhoneNumbers::default(),
+        )
     }
 }
 
@@ -266,54 +279,55 @@ mod tests {
         assert_eq_after_json_roundtrip(
             &model,
             r#"
-            {
-                "networkID": 1,
-                "address": "identity_rdx12gcd4r799jpvztlffgw483pqcen98pjnay988n8rmscdswd872xy62",
-                "displayName": "Batman",
-                "securityState": {
-                  "discriminator": "unsecured",
-                  "unsecuredEntityControl": {
-                    "transactionSigning": {
-                      "factorSourceID": {
-                        "discriminator": "fromHash",
-                        "fromHash": {
-                          "kind": "device",
-                          "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
-                        }
-                      },
-                      "badge": {
-                        "discriminator": "virtualSource",
-                        "virtualSource": {
-                          "discriminator": "hierarchicalDeterministicPublicKey",
-                          "hierarchicalDeterministicPublicKey": {
-                            "publicKey": {
-                              "curve": "curve25519",
-                              "compressedData": "1fe80badc0520334ee339e4010491d417ca3aed0c9621698b10655529f0ee506"
-                            },
-                            "derivationPath": {
-                              "scheme": "cap26",
-                              "path": "m/44H/1022H/1H/618H/1460H/1H"
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                },
-                "flags": [],
-                "personaData": {
-                  "name": {
-                    "id": "00000000-0000-0000-0000-000000000000",
-                    "value": {
-                      "variant": "Western",
-                      "familyName": "Wayne",
-                      "givenName": "Bruce",
-                      "nickname": "Batman"
-                    }
-                  }
-                }
-              }
-              "#,
+			{
+				"networkID": 1,
+				"address": "identity_rdx12gcd4r799jpvztlffgw483pqcen98pjnay988n8rmscdswd872xy62",
+				"displayName": "Batman",
+				"securityState": {
+					"discriminator": "unsecured",
+					"unsecuredEntityControl": {
+						"transactionSigning": {
+							"factorSourceID": {
+								"discriminator": "fromHash",
+								"fromHash": {
+									"kind": "device",
+									"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+								}
+							},
+							"badge": {
+								"discriminator": "virtualSource",
+								"virtualSource": {
+									"discriminator": "hierarchicalDeterministicPublicKey",
+									"hierarchicalDeterministicPublicKey": {
+										"publicKey": {
+											"curve": "curve25519",
+											"compressedData": "1fe80badc0520334ee339e4010491d417ca3aed0c9621698b10655529f0ee506"
+										},
+										"derivationPath": {
+											"scheme": "cap26",
+											"path": "m/44H/1022H/1H/618H/1460H/1H"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"flags": [],
+				"personaData": {
+					"name": {
+						"id": "00000000-0000-0000-0000-000000000000",
+						"value": {
+							"variant": "Western",
+							"familyName": "Wayne",
+							"givenName": "Bruce",
+							"nickname": "Batman"
+						}
+					},
+                    "phoneNumbers": []
+				}
+			}
+			"#,
         );
     }
 
@@ -324,52 +338,62 @@ mod tests {
             &model,
             r#"
             {
-              "networkID": 1,
-              "address": "identity_rdx122kttqch0eehzj6f9nkkxcw7msfeg9udurq5u0ysa0e92c59w0mg6x",
-              "displayName": "Satoshi",
-              "securityState": {
-                "discriminator": "unsecured",
-                "unsecuredEntityControl": {
-                  "transactionSigning": {
-                    "factorSourceID": {
-                      "discriminator": "fromHash",
-                      "fromHash": {
-                        "kind": "device",
-                        "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
-                      }
-                    },
-                    "badge": {
-                      "discriminator": "virtualSource",
-                      "virtualSource": {
-                        "discriminator": "hierarchicalDeterministicPublicKey",
-                        "hierarchicalDeterministicPublicKey": {
-                          "publicKey": {
-                            "curve": "curve25519",
-                            "compressedData": "983ab1d3a77dd6b30bb8a5d59d490a0380cc0aa9ab464983d3fc581fcf64543f"
-                          },
-                          "derivationPath": {
-                            "scheme": "cap26",
-                            "path": "m/44H/1022H/1H/618H/1460H/0H"
-                          }
+				"networkID": 1,
+				"address": "identity_rdx122kttqch0eehzj6f9nkkxcw7msfeg9udurq5u0ysa0e92c59w0mg6x",
+				"displayName": "Satoshi",
+				"securityState": {
+					"discriminator": "unsecured",
+					"unsecuredEntityControl": {
+						"transactionSigning": {
+							"factorSourceID": {
+								"discriminator": "fromHash",
+								"fromHash": {
+									"kind": "device",
+									"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+								}
+							},
+							"badge": {
+								"discriminator": "virtualSource",
+								"virtualSource": {
+									"discriminator": "hierarchicalDeterministicPublicKey",
+									"hierarchicalDeterministicPublicKey": {
+										"publicKey": {
+											"curve": "curve25519",
+											"compressedData": "983ab1d3a77dd6b30bb8a5d59d490a0380cc0aa9ab464983d3fc581fcf64543f"
+										},
+										"derivationPath": {
+											"scheme": "cap26",
+											"path": "m/44H/1022H/1H/618H/1460H/0H"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"flags": [],
+				"personaData": {
+					"name": {
+						"id": "00000000-0000-0000-0000-000000000000",
+						"value": {
+							"variant": "Eastern",
+							"familyName": "Nakamoto",
+							"givenName": "Satoshi",
+							"nickname": "Satoshi"
+						}
+					},
+                    "phoneNumbers": [
+                        {
+                            "id": "00000000-0000-0000-0000-000000000001",
+                            "value": "+46123456789"
+                        },
+                        {
+                            "id": "00000000-0000-0000-0000-000000000002",
+                            "value": "+44987654321"
                         }
-                      }
-                    }
-                  }
-                }
-              },
-              "flags": [],
-              "personaData": {
-                "name": {
-                  "id": "00000000-0000-0000-0000-000000000000",
-                  "value": {
-                    "variant": "Eastern",
-                    "familyName": "Nakamoto",
-                    "givenName": "Satoshi",
-                    "nickname": "Satoshi"
-                  }
-                }
-              }
-            }
+                    ]
+				}
+			}
             "#,
         );
     }
@@ -379,52 +403,61 @@ mod tests {
         let json = serde_json::from_str(
             r#"
             {
-              "networkID": 1,
-              "address": "identity_rdx122kttqch0eehzj6f9nkkxcw7msfeg9udurq5u0ysa0e92c59w0mg6x",
-              "displayName": "Satoshi",
-              "securityState": {
-                "discriminator": "unsecured",
-                "unsecuredEntityControl": {
-                  "transactionSigning": {
-                    "factorSourceID": {
-                      "discriminator": "fromHash",
-                      "fromHash": {
-                        "kind": "device",
-                        "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
-                      }
-                    },
-                    "badge": {
-                      "discriminator": "virtualSource",
-                      "virtualSource": {
-                        "discriminator": "hierarchicalDeterministicPublicKey",
-                        "hierarchicalDeterministicPublicKey": {
-                          "publicKey": {
-                            "curve": "curve25519",
-                            "compressedData": "983ab1d3a77dd6b30bb8a5d59d490a0380cc0aa9ab464983d3fc581fcf64543f"
-                          },
-                          "derivationPath": {
-                            "scheme": "cap26",
-                            "path": "m/44H/1022H/1H/618H/1460H/0H"
-                          }
+				"networkID": 1,
+				"address": "identity_rdx122kttqch0eehzj6f9nkkxcw7msfeg9udurq5u0ysa0e92c59w0mg6x",
+				"displayName": "Satoshi",
+				"securityState": {
+					"discriminator": "unsecured",
+					"unsecuredEntityControl": {
+						"transactionSigning": {
+							"factorSourceID": {
+								"discriminator": "fromHash",
+								"fromHash": {
+									"kind": "device",
+									"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+								}
+							},
+							"badge": {
+								"discriminator": "virtualSource",
+								"virtualSource": {
+									"discriminator": "hierarchicalDeterministicPublicKey",
+									"hierarchicalDeterministicPublicKey": {
+										"publicKey": {
+											"curve": "curve25519",
+											"compressedData": "983ab1d3a77dd6b30bb8a5d59d490a0380cc0aa9ab464983d3fc581fcf64543f"
+										},
+										"derivationPath": {
+											"scheme": "cap26",
+											"path": "m/44H/1022H/1H/618H/1460H/0H"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"personaData": {
+					"name": {
+						"id": "00000000-0000-0000-0000-000000000000",
+						"value": {
+							"variant": "Eastern",
+							"familyName": "Nakamoto",
+							"givenName": "Satoshi",
+							"nickname": "Satoshi"
+						}
+					},
+                    "phoneNumbers": [
+                        {
+                            "id": "00000000-0000-0000-0000-000000000001",
+                            "value": "+46123456789"
+                        },
+                        {
+                            "id": "00000000-0000-0000-0000-000000000002",
+                            "value": "+44987654321"
                         }
-                      }
-                    }
-                  }
-                }
-              },
-              "flags": [],
-              "personaData": {
-                "name": {
-                  "id": "00000000-0000-0000-0000-000000000000",
-                  "value": {
-                    "variant": "Eastern",
-                    "familyName": "Nakamoto",
-                    "givenName": "Satoshi",
-                    "nickname": "Satoshi"
-                  }
-                }
-              }
-            }
+                    ]
+				}
+			}
             "#,
         ).unwrap();
         let persona = serde_json::from_value::<Persona>(json).unwrap();
@@ -449,6 +482,7 @@ mod tests {
             1,
             "Batman",
             name.clone(),
+            CollectionOfPhoneNumbers::placeholder(),
         );
         assert_eq!(persona.display_name.value, "Batman".to_string());
         assert_eq!(persona.network_id, NetworkID::Stokenet);
@@ -465,6 +499,7 @@ mod tests {
             0,
             "Satoshi",
             name.clone(),
+            CollectionOfPhoneNumbers::placeholder(),
         );
         assert_eq!(persona.display_name.value, "Satoshi".to_string());
         assert_eq!(persona.network_id, NetworkID::Stokenet);

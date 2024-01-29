@@ -21,10 +21,13 @@ pub struct PersonaData {
 }
 
 impl PersonaData {
-    pub fn new(name: Option<PersonaDataIdentifiedName>) -> Self {
+    pub fn new(
+        name: Option<PersonaDataIdentifiedName>,
+        phone_numbers: CollectionOfPhoneNumbers,
+    ) -> Self {
         Self {
             name,
-            phone_numbers: CollectionOfPhoneNumbers::default(),
+            phone_numbers,
         }
     }
 }
@@ -42,11 +45,17 @@ impl PersonaData {
 
 impl HasPlaceholder for PersonaData {
     fn placeholder() -> Self {
-        Self::new(Some(PersonaDataIdentifiedName::placeholder()))
+        Self::new(
+            Some(PersonaDataIdentifiedName::placeholder()),
+            CollectionOfPhoneNumbers::placeholder(),
+        )
     }
 
     fn placeholder_other() -> Self {
-        Self::new(Some(PersonaDataIdentifiedName::placeholder_other()))
+        Self::new(
+            Some(PersonaDataIdentifiedName::placeholder_other()),
+            CollectionOfPhoneNumbers::placeholder_other(),
+        )
     }
 }
 
@@ -76,9 +85,13 @@ mod tests {
         let name =
             Name::new(Variant::Western, "Skywalker", "Anakin", "Darth Vader")
                 .expect("Name counstruction should not fail");
-        let persona_data = PersonaData::new(Some(
-            PersonaDataIdentifiedName::with_id(Uuid::nil(), name.clone()),
-        ));
+        let persona_data = PersonaData {
+            name: Some(PersonaDataIdentifiedName::with_id(
+                Uuid::nil(),
+                name.clone(),
+            )),
+            ..Default::default()
+        };
         assert_eq!(
             persona_data.name,
             Some(PersonaDataIdentifiedName::with_id(
@@ -100,6 +113,37 @@ mod tests {
         assert_eq!(
             PersonaData::placeholder_other().name,
             Some(PersonaDataIdentifiedName::placeholder_other())
+        );
+    }
+
+    #[test]
+    fn json_roundtrip_placeholder() {
+        let model = PersonaData::placeholder();
+        assert_eq_after_json_roundtrip(
+            &model,
+            r#"
+            {
+                "name": {
+                    "id": "00000000-0000-0000-0000-000000000001",
+                    "value": {
+                        "variant": "Western",
+                        "familyName": "Wayne",
+                        "givenName": "Bruce",
+                        "nickname": "Batman"
+                    }
+                },
+                "phoneNumbers": [
+                    {
+                        "id": "00000000-0000-0000-0000-000000000001",
+                        "value": "+46123456789"
+                    },
+                    {
+                        "id": "00000000-0000-0000-0000-000000000002",
+                        "value": "+44987654321"
+                    }
+                ]
+            }
+            "#,
         );
     }
 }

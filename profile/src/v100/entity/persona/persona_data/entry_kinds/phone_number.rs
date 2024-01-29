@@ -13,7 +13,7 @@ use crate::prelude::*;
 )]
 #[display("{number}")]
 #[debug("{number}")]
-#[serde(rename_all = "camelCase")]
+#[serde(transparent)]
 pub struct PhoneNumber {
     number: String,
 }
@@ -32,7 +32,7 @@ impl PhoneNumber {
         if number.is_empty() {
             return Err(CommonError::PersonaDataInvalidPhoneNumberEmpty);
         }
-        return Ok(Self { number });
+        Ok(Self { number })
     }
 }
 
@@ -42,6 +42,33 @@ impl HasPlaceholder for PhoneNumber {
     }
 
     fn placeholder_other() -> Self {
-        PhoneNumber::new("+449876554321").expect("Valid placeholder.")
+        PhoneNumber::new("+44987654321").expect("Valid placeholder.")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::prelude::*;
+
+    #[test]
+    fn invalid_empty() {
+        assert_eq!(
+            PhoneNumber::new(""),
+            Err(CommonError::PersonaDataInvalidPhoneNumberEmpty)
+        );
+    }
+
+    #[test]
+    fn json_roundtrip_placeholder() {
+        let model = PhoneNumber::placeholder();
+        assert_json_value_eq_after_roundtrip(&model, json!("+46123456789"));
+    }
+
+    #[test]
+    fn id_is_number() {
+        assert_eq!(
+            PhoneNumber::placeholder().id(),
+            PhoneNumber::placeholder().number
+        );
     }
 }

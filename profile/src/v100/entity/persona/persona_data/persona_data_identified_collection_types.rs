@@ -15,6 +15,7 @@ macro_rules! declare_collection_of_identified_entry {
         )]
         #[debug("{collection}")]
         #[display("{collection}")]
+        #[serde(transparent)]
         pub struct $struct_name {
             pub collection: IdentifiedVecVia<$id_ent_type>,
         }
@@ -42,7 +43,10 @@ macro_rules! declare_collection_of_identified_entry {
 
         impl HasPlaceholder for $struct_name {
             fn placeholder() -> Self {
-                $struct_name::new(<$id_ent_type>::placeholder())
+                $struct_name::values([
+                    <$id_ent_type>::placeholder(),
+                    <$id_ent_type>::placeholder_other(),
+                ])
             }
 
             fn placeholder_other() -> Self {
@@ -52,7 +56,10 @@ macro_rules! declare_collection_of_identified_entry {
     };
 }
 
-declare_collection_of_identified_entry!(PhoneNumber, CollectionOfPhoneNumbers);
+declare_collection_of_identified_entry!(
+    PersonaDataIdentifiedPhoneNumber,
+    CollectionOfPhoneNumbers
+);
 
 #[cfg(test)]
 mod collection_of_phone_numbers_tests {
@@ -60,7 +67,7 @@ mod collection_of_phone_numbers_tests {
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = CollectionOfPhoneNumbers;
-    type V = PhoneNumber;
+    type V = PersonaDataIdentifiedPhoneNumber;
 
     #[test]
     fn new() {
@@ -69,51 +76,46 @@ mod collection_of_phone_numbers_tests {
         assert_eq!(sut.collection.items(), vec![value]);
     }
 
-    //     #[test]
-    //     fn display() {
-    //         let value = V::placeholder();
-    //         let sut = SUT::with_id(Uuid::nil(), value.clone());
-    //         assert_eq!(
-    //             format!("{}", sut),
-    //             format!("{} - 00000000-0000-0000-0000-000000000000", value)
-    //         );
-    //     }
+    #[test]
+    fn display() {
+        let value = V::placeholder();
+        let sut = SUT::new(value.clone());
+        assert_eq!(format!("{}", sut), format!("[{}]", value));
+    }
 
-    //     #[test]
-    //     fn json_roundtrip_placeholder() {
-    //         let model = SUT::placeholder();
-    //         assert_eq_after_json_roundtrip(
-    //             &model,
-    //             r#"
-    //         {
-    //             "id": "00000000-0000-0000-0000-000000000001",
-    //             "value": {
-    //                 "variant": "Western",
-    //                 "familyName": "Wayne",
-    //                 "givenName": "Bruce",
-    //                 "nickname": "Batman"
-    //             }
-    //          }
-    //         "#,
-    //         )
-    //     }
+    #[test]
+    fn json_roundtrip_placeholder() {
+        let model = SUT::placeholder();
+        assert_eq_after_json_roundtrip(
+            &model,
+            r#"
+            [
+                {
+                    "id": "00000000-0000-0000-0000-000000000001",
+                    "value": "+46123456789"
+                },
+                {
+                    "id": "00000000-0000-0000-0000-000000000002",
+                    "value": "+44987654321"
+                }
+            ]
+            "#,
+        )
+    }
 
-    //     #[test]
-    //     fn json_roundtrip_placeholder_other() {
-    //         let model = SUT::placeholder_other();
-    //         assert_eq_after_json_roundtrip(
-    //             &model,
-    //             r#"
-    //         {
-    //             "id": "00000000-0000-0000-0000-000000000002",
-    //             "value": {
-    //                 "variant": "Eastern",
-    //                 "familyName": "Jun-fan",
-    //                 "givenName": "Lee",
-    //                 "nickname": "Bruce"
-    //             }
-    //         }
-    //         "#,
-    //         )
-    //     }
+    #[test]
+    fn json_roundtrip_placeholder_other() {
+        let model = SUT::placeholder_other();
+        assert_eq_after_json_roundtrip(
+            &model,
+            r#"
+            [
+                {
+                    "id": "00000000-0000-0000-0000-000000000002",
+                    "value": "+44987654321"
+                }
+            ]
+            "#,
+        )
+    }
 }

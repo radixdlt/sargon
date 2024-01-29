@@ -22,6 +22,14 @@ macro_rules! declare_identified_entry {
             pub value: $value_type,
         }
 
+        impl Identifiable for $struct_name {
+            type ID = PersonaDataEntryID;
+
+            fn id(&self) -> Self::ID {
+                self.id.clone()
+            }
+        }
+
         impl $struct_name {
             pub(crate) fn with_id(
                 id: PersonaDataEntryID,
@@ -74,6 +82,34 @@ mod identified_name_tests {
     type V = Name;
 
     #[test]
+    fn equality() {
+        assert_eq!(SUT::placeholder(), SUT::placeholder());
+        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+    }
+
+    #[test]
+    fn deref() {
+        assert_eq!(*SUT::placeholder(), V::placeholder());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+        assert_ne!(SUT::new(V::placeholder()), SUT::new(V::placeholder()));
+    }
+
+    #[test]
+    fn hash() {
+        let n = 100;
+        let set = (0..n)
+            .map(|_| {
+                SUT::new(V::placeholder()) // generates a new ID
+            })
+            .collect::<HashSet<_>>();
+        assert_eq!(set.len(), n);
+    }
+
+    #[test]
     fn new() {
         let value = V::placeholder_other();
         let sut = SUT::with_id(Uuid::nil(), value.clone());
@@ -90,7 +126,7 @@ mod identified_name_tests {
         let sut = SUT::with_id(Uuid::nil(), value.clone());
         assert_eq!(
             format!("{}", sut),
-            format!("{} - 00000000-0000-0000-0000-000000000000", value)
+            "Bruce Batman Wayne - 00000000-0000-0000-0000-000000000000"
         );
     }
 
@@ -100,15 +136,15 @@ mod identified_name_tests {
         assert_eq_after_json_roundtrip(
             &model,
             r#"
-        {
-            "id": "00000000-0000-0000-0000-000000000001",
-            "value": {
-                "variant": "Western",
-                "familyName": "Wayne",
-                "givenName": "Bruce",
-                "nickname": "Batman"
+            {
+                "id": "00000000-0000-0000-0000-000000000001",
+                "value": {
+                    "variant": "Western",
+                    "familyName": "Wayne",
+                    "givenName": "Bruce",
+                    "nickname": "Batman"
+                }
             }
-         }
         "#,
         )
     }
@@ -119,16 +155,104 @@ mod identified_name_tests {
         assert_eq_after_json_roundtrip(
             &model,
             r#"
-        {
-            "id": "00000000-0000-0000-0000-000000000002",
-            "value": {
-                "variant": "Eastern",
-                "familyName": "Jun-fan",
-                "givenName": "Lee",
-                "nickname": "Bruce"
+            {
+                "id": "00000000-0000-0000-0000-000000000002",
+                "value": {
+                    "variant": "Eastern",
+                    "familyName": "Jun-fan",
+                    "givenName": "Lee",
+                    "nickname": "Bruce"
+                }
             }
-        }
-        "#,
+            "#,
+        )
+    }
+}
+
+// Uh copy paste of tests :/ since sharing tests with `macro_rules` does not really work
+
+#[cfg(test)]
+mod identified_number_tests {
+    use crate::prelude::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = PersonaDataIdentifiedPhoneNumber;
+    type V = PhoneNumber;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::placeholder(), SUT::placeholder());
+        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+    }
+
+    #[test]
+    fn deref() {
+        assert_eq!(*SUT::placeholder(), V::placeholder());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+        assert_ne!(SUT::new(V::placeholder()), SUT::new(V::placeholder()));
+    }
+
+    #[test]
+    fn hash() {
+        let n = 100;
+        let set = (0..n)
+            .map(|_| {
+                SUT::new(V::placeholder()) // generates a new ID
+            })
+            .collect::<HashSet<_>>();
+        assert_eq!(set.len(), n);
+    }
+
+    #[test]
+    fn new() {
+        let value = V::placeholder_other();
+        let sut = SUT::with_id(Uuid::nil(), value.clone());
+        assert_eq!(
+            sut.id,
+            Uuid::from_str("00000000-0000-0000-0000-000000000000").unwrap()
+        );
+        assert_eq!(sut.value, value)
+    }
+
+    #[test]
+    fn display() {
+        let value = V::placeholder();
+        let sut = SUT::with_id(Uuid::nil(), value.clone());
+        assert_eq!(
+            format!("{}", sut),
+            "+46123456789 - 00000000-0000-0000-0000-000000000000"
+        );
+    }
+
+    #[test]
+    fn json_roundtrip_placeholder() {
+        let model = SUT::placeholder();
+        assert_eq_after_json_roundtrip(
+            &model,
+            r#"
+            {
+                "id": "00000000-0000-0000-0000-000000000001",
+                "value": "+46123456789"
+            }
+            "#,
+        )
+    }
+
+    #[test]
+    fn json_roundtrip_placeholder_other() {
+        let model = SUT::placeholder_other();
+        assert_eq_after_json_roundtrip(
+            &model,
+            r#"
+            {
+                "id": "00000000-0000-0000-0000-000000000002",
+                "value": "+44987654321"
+            }
+            "#,
         )
     }
 }
