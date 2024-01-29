@@ -17,11 +17,15 @@ use crate::prelude::*;
 #[serde(rename_all = "camelCase")]
 pub struct PersonaData {
     pub name: Option<PersonaDataIdentifiedName>,
+    pub phone_numbers: CollectionOfPhoneNumbers,
 }
 
 impl PersonaData {
     pub fn new(name: Option<PersonaDataIdentifiedName>) -> Self {
-        Self { name }
+        Self {
+            name,
+            phone_numbers: CollectionOfPhoneNumbers::default(),
+        }
     }
 }
 

@@ -289,4 +289,7 @@ pub enum CommonError {
 
     #[error("Expected IdentityPath but got something else.")]
     ExpectedIdentityPathButGotSomethingElse = 10081,
+
+    #[error("Invalid PersonaData - phone number empty")]
+    PersonaDataInvalidPhoneNumberEmpty = 10082,
 }

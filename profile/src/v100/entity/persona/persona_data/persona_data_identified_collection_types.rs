@@ -1,0 +1,119 @@
+use crate::prelude::*;
+
+macro_rules! declare_collection_of_identified_entry {
+    ($id_ent_type:ty,$struct_name:ident) => {
+        #[derive(
+            Serialize,
+            Deserialize,
+            Clone,
+            PartialEq,
+            Hash,
+            Eq,
+            derive_more::Display,
+            derive_more::Debug,
+            uniffi::Record,
+        )]
+        #[debug("{collection}")]
+        #[display("{collection}")]
+        pub struct $struct_name {
+            pub collection: IdentifiedVecVia<$id_ent_type>,
+        }
+
+        impl Default for $struct_name {
+            fn default() -> Self {
+                Self::values([])
+            }
+        }
+
+        impl $struct_name {
+            pub fn values<I>(values: I) -> Self
+            where
+                I: IntoIterator<Item = $id_ent_type>,
+            {
+                Self {
+                    collection: IdentifiedVecVia::from_iter(values),
+                }
+            }
+
+            pub fn new(value: $id_ent_type) -> Self {
+                Self::values([value])
+            }
+        }
+
+        impl HasPlaceholder for $struct_name {
+            fn placeholder() -> Self {
+                $struct_name::new(<$id_ent_type>::placeholder())
+            }
+
+            fn placeholder_other() -> Self {
+                $struct_name::new(<$id_ent_type>::placeholder_other())
+            }
+        }
+    };
+}
+
+declare_collection_of_identified_entry!(PhoneNumber, CollectionOfPhoneNumbers);
+
+#[cfg(test)]
+mod collection_of_phone_numbers_tests {
+    use crate::prelude::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = CollectionOfPhoneNumbers;
+    type V = PhoneNumber;
+
+    #[test]
+    fn new() {
+        let value = V::placeholder_other();
+        let sut = SUT::new(value.clone());
+        assert_eq!(sut.collection.items(), vec![value]);
+    }
+
+    //     #[test]
+    //     fn display() {
+    //         let value = V::placeholder();
+    //         let sut = SUT::with_id(Uuid::nil(), value.clone());
+    //         assert_eq!(
+    //             format!("{}", sut),
+    //             format!("{} - 00000000-0000-0000-0000-000000000000", value)
+    //         );
+    //     }
+
+    //     #[test]
+    //     fn json_roundtrip_placeholder() {
+    //         let model = SUT::placeholder();
+    //         assert_eq_after_json_roundtrip(
+    //             &model,
+    //             r#"
+    //         {
+    //             "id": "00000000-0000-0000-0000-000000000001",
+    //             "value": {
+    //                 "variant": "Western",
+    //                 "familyName": "Wayne",
+    //                 "givenName": "Bruce",
+    //                 "nickname": "Batman"
+    //             }
+    //          }
+    //         "#,
+    //         )
+    //     }
+
+    //     #[test]
+    //     fn json_roundtrip_placeholder_other() {
+    //         let model = SUT::placeholder_other();
+    //         assert_eq_after_json_roundtrip(
+    //             &model,
+    //             r#"
+    //         {
+    //             "id": "00000000-0000-0000-0000-000000000002",
+    //             "value": {
+    //                 "variant": "Eastern",
+    //                 "familyName": "Jun-fan",
+    //                 "givenName": "Lee",
+    //                 "nickname": "Bruce"
+    //             }
+    //         }
+    //         "#,
+    //         )
+    //     }
+}

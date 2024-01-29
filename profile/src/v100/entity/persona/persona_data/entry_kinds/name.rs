@@ -1,18 +1,18 @@
 use crate::prelude::*;
-use derive_more::Display;
 
 #[derive(
     Serialize,
     Deserialize,
     Clone,
-    Debug,
     PartialEq,
     Hash,
     Eq,
-    Display,
+    derive_more::Display,
+    derive_more::Debug,
     uniffi::Record,
 )]
 #[display("{}", self.full())]
+#[debug("{}", self.full())]
 #[serde(rename_all = "camelCase")]
 pub struct Name {
     variant: Variant,

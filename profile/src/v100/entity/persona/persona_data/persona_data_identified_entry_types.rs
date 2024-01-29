@@ -63,92 +63,72 @@ macro_rules! declare_identified_entry {
 }
 
 declare_identified_entry!(Name, PersonaDataIdentifiedName);
+declare_identified_entry!(PhoneNumber, PersonaDataIdentifiedPhoneNumber);
 
 #[cfg(test)]
-mod identified_name_testes {
+mod identified_name_tests {
     use crate::prelude::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = PersonaDataIdentifiedName;
+    type V = Name;
 
     #[test]
     fn new() {
-        let name = Name::new(Variant::Western, "Wayne", "Bruce", "Batman")
-            .expect("Name counstruction should not fail");
-        let identified_entry = SUT::with_id(Uuid::nil(), name.clone());
+        let value = V::placeholder_other();
+        let sut = SUT::with_id(Uuid::nil(), value.clone());
         assert_eq!(
-            identified_entry.id,
+            sut.id,
             Uuid::from_str("00000000-0000-0000-0000-000000000000").unwrap()
         );
-        assert_eq!(identified_entry.value, name)
+        assert_eq!(sut.value, value)
     }
 
     #[test]
     fn display() {
-        let name = Name::new(Variant::Western, "Wayne", "Bruce", "Batman")
-            .expect("Name counstruction should not fail");
-        let identified_entry = SUT::with_id(Uuid::nil(), name);
+        let value = V::placeholder();
+        let sut = SUT::with_id(Uuid::nil(), value.clone());
         assert_eq!(
-            format!("{identified_entry}"),
-            "Bruce Batman Wayne - 00000000-0000-0000-0000-000000000000"
+            format!("{}", sut),
+            format!("{} - 00000000-0000-0000-0000-000000000000", value)
         );
     }
 
     #[test]
-    fn placeholder() {
-        let placeholder = SUT::placeholder();
-        assert_eq!(
-            placeholder.id.to_string(),
-            "00000000-0000-0000-0000-000000000001"
-        );
-        assert_eq!(placeholder.value.to_string(), "Bruce Batman Wayne");
-    }
-
-    #[test]
-    fn placeholder_other() {
-        let placeholder = SUT::placeholder_other();
-        assert_eq!(
-            placeholder.id.to_string(),
-            "00000000-0000-0000-0000-000000000002"
-        );
-        assert_eq!(placeholder.value.to_string(), "Jun-fan Bruce Lee");
-    }
-
-    #[test]
-    fn json_roundtrip_batman() {
+    fn json_roundtrip_placeholder() {
         let model = SUT::placeholder();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
-            {
-                "id": "00000000-0000-0000-0000-000000000001",
-                "value": {
-                    "variant": "Western",
-                    "familyName": "Wayne",
-                    "givenName": "Bruce",
-                    "nickname": "Batman"
-                }
-             }
-            "#,
+        {
+            "id": "00000000-0000-0000-0000-000000000001",
+            "value": {
+                "variant": "Western",
+                "familyName": "Wayne",
+                "givenName": "Bruce",
+                "nickname": "Batman"
+            }
+         }
+        "#,
         )
     }
 
     #[test]
-    fn json_roundtrip_bruce_lee() {
+    fn json_roundtrip_placeholder_other() {
         let model = SUT::placeholder_other();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
-            {
-                "id": "00000000-0000-0000-0000-000000000002",
-                "value": {
-                    "variant": "Eastern",
-                    "familyName": "Jun-fan",
-                    "givenName": "Lee",
-                    "nickname": "Bruce"
-                }
+        {
+            "id": "00000000-0000-0000-0000-000000000002",
+            "value": {
+                "variant": "Eastern",
+                "familyName": "Jun-fan",
+                "givenName": "Lee",
+                "nickname": "Bruce"
             }
-            "#,
+        }
+        "#,
         )
     }
 }
