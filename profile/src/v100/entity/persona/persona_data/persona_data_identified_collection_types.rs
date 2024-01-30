@@ -115,6 +115,20 @@ mod collection_of_phone_numbers_tests {
     }
 
     #[test]
+    fn equality() {
+        assert_eq!(SUT::placeholder(), SUT::placeholder());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+        assert_ne!(
+            SUT::new(V::new(V::placeholder().value)),
+            SUT::new(V::new(V::placeholder().value))
+        ); // generates new ID, thus not equal
+    }
+
+    #[test]
     fn new_with_value() {
         let value = PhoneNumber::placeholder();
         let sut = SUT::single_value(value.clone());
@@ -229,6 +243,20 @@ mod collection_of_email_addresses_tests {
         let value = EmailAddress::placeholder();
         let sut = SUT::single_value(value.clone());
         assert_eq!(sut.collection.items().first().unwrap().value, value);
+    }
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::placeholder(), SUT::placeholder());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+        assert_ne!(
+            SUT::new(V::new(V::placeholder().value)),
+            SUT::new(V::new(V::placeholder().value))
+        ); // generates new ID, thus not equal
     }
 
     #[test]

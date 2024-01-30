@@ -102,11 +102,6 @@ mod identified_name_tests {
     }
 
     #[test]
-    fn deref() {
-        assert_eq!(*SUT::placeholder(), V::placeholder());
-    }
-
-    #[test]
     fn inequality() {
         assert_ne!(SUT::placeholder(), SUT::placeholder_other());
         assert_ne!(SUT::new(V::placeholder()), SUT::new(V::placeholder()));
@@ -121,6 +116,11 @@ mod identified_name_tests {
             })
             .collect::<HashSet<_>>();
         assert_eq!(set.len(), n);
+    }
+
+    #[test]
+    fn deref() {
+        assert_eq!(*SUT::placeholder(), V::placeholder());
     }
 
     #[test]

@@ -97,6 +97,29 @@ mod tests {
     }
 
     #[test]
+    fn invalid_local_id_string() {
+        assert_eq!(
+            NonFungibleLocalId::Str {
+                value: "".to_string()
+            }
+            .try_into(),
+            Err::<NativeNonFungibleLocalId, _>(
+                CommonError::InvalidNonFungibleLocalIDString
+            )
+        );
+    }
+
+    #[test]
+    fn invalid_local_id_bytes() {
+        assert_eq!(
+            NonFungibleLocalId::Bytes { value: Vec::new() }.try_into(),
+            Err::<NativeNonFungibleLocalId, _>(
+                CommonError::InvalidNonFungibleLocalIDBytes
+            )
+        );
+    }
+
+    #[test]
     fn from_native_ruid() {
         let bytes = Hex32Bytes::placeholder_dead().bytes().to_owned();
         let non_native = NonFungibleLocalId::Ruid {
