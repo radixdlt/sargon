@@ -97,7 +97,7 @@ impl ProfileNetwork {
         Self::new(
             NetworkID::Stokenet,
             Accounts::placeholder_stokenet(),
-            Personas::default(),
+            Personas::placeholder_stokenet(),
         )
     }
 }
@@ -155,113 +155,6 @@ mod tests {
             ]),
             Personas::default(),
         );
-    }
-
-    #[test]
-    fn json_roundtrip_placeholder_stokenet() {
-        let sut = ProfileNetwork::placeholder_stokenet();
-        assert_eq_after_json_roundtrip(
-            &sut,
-            r#"
-            {
-				"networkID": 2,
-				"accounts": [
-					{
-						"securityState": {
-							"unsecuredEntityControl": {
-								"transactionSigning": {
-									"badge": {
-										"virtualSource": {
-											"hierarchicalDeterministicPublicKey": {
-												"publicKey": {
-													"curve": "curve25519",
-													"compressedData": "18c7409458a82281711b668f833b0485e8fb58a3ceb8a728882bf6b83d3f06a9"
-												},
-												"derivationPath": {
-													"scheme": "cap26",
-													"path": "m/44H/1022H/2H/525H/1460H/0H"
-												}
-											},
-											"discriminator": "hierarchicalDeterministicPublicKey"
-										},
-										"discriminator": "virtualSource"
-									},
-									"factorSourceID": {
-										"fromHash": {
-											"kind": "device",
-											"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
-										},
-										"discriminator": "fromHash"
-									}
-								}
-							},
-							"discriminator": "unsecured"
-						},
-						"networkID": 2,
-						"appearanceID": 0,
-						"flags": [],
-						"displayName": "Carol",
-						"onLedgerSettings": {
-							"thirdPartyDeposits": {
-								"depositRule": "acceptAll",
-								"assetsExceptionList": [],
-								"depositorsAllowList": []
-							}
-						},
-						"flags": [],
-						"address": "account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql"
-					},
-					{
-						"securityState": {
-							"unsecuredEntityControl": {
-								"transactionSigning": {
-									"badge": {
-										"virtualSource": {
-											"hierarchicalDeterministicPublicKey": {
-												"publicKey": {
-													"curve": "curve25519",
-													"compressedData": "26b3fd7f65f01ff8e418a56722fde9cc6fc18dc983e0474e6eb6c1cf3bd44f23"
-												},
-												"derivationPath": {
-													"scheme": "cap26",
-													"path": "m/44H/1022H/2H/525H/1460H/1H"
-												}
-											},
-											"discriminator": "hierarchicalDeterministicPublicKey"
-										},
-										"discriminator": "virtualSource"
-									},
-									"factorSourceID": {
-										"fromHash": {
-											"kind": "device",
-											"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
-										},
-										"discriminator": "fromHash"
-									}
-								}
-							},
-							"discriminator": "unsecured"
-						},
-						"networkID": 2,
-						"appearanceID": 1,
-						"flags": [],
-						"displayName": "Diana",
-						"onLedgerSettings": {
-							"thirdPartyDeposits": {
-								"depositRule": "acceptAll",
-								"assetsExceptionList": [],
-								"depositorsAllowList": []
-							}
-						},
-						"flags": [],
-						"address": "account_tdx_2_129663ef7fj8azge3y6sl73lf9vyqt53ewzlf7ul2l76mg5wyqlqlpr"
-					}
-				],
-				"personas": [
-				]
-			}
-            "#,
-        )
     }
 
     #[test]
@@ -492,9 +385,233 @@ mod tests {
 						}
 					}
 				]
-	
 			}
             "#,
         );
+    }
+
+    #[test]
+    fn json_roundtrip_placeholder_stokenet() {
+        let sut = ProfileNetwork::placeholder_stokenet();
+        assert_eq_after_json_roundtrip(
+            &sut,
+            r#"
+            {
+				"networkID": 2,
+				"accounts": [
+					{
+						"securityState": {
+							"unsecuredEntityControl": {
+								"transactionSigning": {
+									"badge": {
+										"virtualSource": {
+											"hierarchicalDeterministicPublicKey": {
+												"publicKey": {
+													"curve": "curve25519",
+													"compressedData": "18c7409458a82281711b668f833b0485e8fb58a3ceb8a728882bf6b83d3f06a9"
+												},
+												"derivationPath": {
+													"scheme": "cap26",
+													"path": "m/44H/1022H/2H/525H/1460H/0H"
+												}
+											},
+											"discriminator": "hierarchicalDeterministicPublicKey"
+										},
+										"discriminator": "virtualSource"
+									},
+									"factorSourceID": {
+										"fromHash": {
+											"kind": "device",
+											"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+										},
+										"discriminator": "fromHash"
+									}
+								}
+							},
+							"discriminator": "unsecured"
+						},
+						"networkID": 2,
+						"appearanceID": 0,
+						"flags": [],
+						"displayName": "Carol",
+						"onLedgerSettings": {
+							"thirdPartyDeposits": {
+								"depositRule": "acceptAll",
+								"assetsExceptionList": [],
+								"depositorsAllowList": []
+							}
+						},
+						"flags": [],
+						"address": "account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql"
+					},
+					{
+						"securityState": {
+							"unsecuredEntityControl": {
+								"transactionSigning": {
+									"badge": {
+										"virtualSource": {
+											"hierarchicalDeterministicPublicKey": {
+												"publicKey": {
+													"curve": "curve25519",
+													"compressedData": "26b3fd7f65f01ff8e418a56722fde9cc6fc18dc983e0474e6eb6c1cf3bd44f23"
+												},
+												"derivationPath": {
+													"scheme": "cap26",
+													"path": "m/44H/1022H/2H/525H/1460H/1H"
+												}
+											},
+											"discriminator": "hierarchicalDeterministicPublicKey"
+										},
+										"discriminator": "virtualSource"
+									},
+									"factorSourceID": {
+										"fromHash": {
+											"kind": "device",
+											"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+										},
+										"discriminator": "fromHash"
+									}
+								}
+							},
+							"discriminator": "unsecured"
+						},
+						"networkID": 2,
+						"appearanceID": 1,
+						"flags": [],
+						"displayName": "Diana",
+						"onLedgerSettings": {
+							"thirdPartyDeposits": {
+								"depositRule": "acceptAll",
+								"assetsExceptionList": [],
+								"depositorsAllowList": []
+							}
+						},
+						"flags": [],
+						"address": "account_tdx_2_129663ef7fj8azge3y6sl73lf9vyqt53ewzlf7ul2l76mg5wyqlqlpr"
+					}
+				],
+				"personas": [
+					{
+						"networkID": 2,
+						"address": "identity_tdx_2_12fk6qyu2860xyx2jk7j6ex464ccrnxrve4kpaa8qyxx99y5627ahhc",
+						"displayName": "Skywalker",
+						"securityState": {
+							"discriminator": "unsecured",
+							"unsecuredEntityControl": {
+								"transactionSigning": {
+									"factorSourceID": {
+										"discriminator": "fromHash",
+										"fromHash": {
+											"kind": "device",
+											"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+										}
+									},
+									"badge": {
+										"discriminator": "virtualSource",
+										"virtualSource": {
+											"discriminator": "hierarchicalDeterministicPublicKey",
+											"hierarchicalDeterministicPublicKey": {
+												"publicKey": {
+													"curve": "curve25519",
+													"compressedData": "3c4d6f1267485854313c1ed81aea193b8f750cd081e3aa4dea29b93c34ca2261"
+												},
+												"derivationPath": {
+													"scheme": "cap26",
+													"path": "m/44H/1022H/2H/618H/1460H/0H"
+												}
+											}
+										}
+									}
+								}
+							}
+						},
+						"flags": [],
+						"personaData": {
+							"name": {
+								"id": "00000000-0000-0000-0000-000000000000",
+								"value": {
+									"variant": "Eastern",
+									"familyName": "Skywalker",
+									"givenName": "Leia",
+									"nickname": "Princess Leia"
+								}
+							},
+							"phoneNumbers": [
+								{
+									"id": "00000000-0000-0000-0000-000000000001",
+									"value": "+42 3 456 789"
+								}
+							],
+							"emailAddresses": [
+								{
+									"id": "00000000-0000-0000-0000-000000000002",
+									"value": "leia@sky.walker"
+								}
+							]
+						}
+					},
+					{
+						"networkID": 2,
+						"address": "identity_tdx_2_12gr0d9da3jvye7mdrreljyqs35esjyjsl9r8t5v96hq6fq367cln08",
+						"displayName": "Granger",
+						"securityState": {
+							"discriminator": "unsecured",
+							"unsecuredEntityControl": {
+								"transactionSigning": {
+									"factorSourceID": {
+										"discriminator": "fromHash",
+										"fromHash": {
+											"kind": "device",
+											"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+										}
+									},
+									"badge": {
+										"discriminator": "virtualSource",
+										"virtualSource": {
+											"discriminator": "hierarchicalDeterministicPublicKey",
+											"hierarchicalDeterministicPublicKey": {
+												"publicKey": {
+													"curve": "curve25519",
+													"compressedData": "b6885032393165d56cce19850c2a3dbb80733d21c78c7314223e9c3a75f64c8d"
+												},
+												"derivationPath": {
+													"scheme": "cap26",
+													"path": "m/44H/1022H/2H/618H/1460H/1H"
+												}
+											}
+										}
+									}
+								}
+							}
+						},
+						"flags": [],
+						"personaData": {
+							"name": {
+								"id": "00000000-0000-0000-0000-000000000000",
+								"value": {
+									"variant": "Western",
+									"familyName": "Granger",
+									"givenName": "Hermione",
+									"nickname": "Hermy"
+								}
+							},
+							"phoneNumbers": [
+								{
+									"id": "00000000-0000-0000-0000-000000000001",
+									"value": "+44 123 456 77"
+								}
+							],
+							"emailAddresses": [
+								{
+									"id": "00000000-0000-0000-0000-000000000002",
+									"value": "granger.h@hogwarts.uk.co"
+								}
+							]
+						}
+					}
+				]
+			}
+            "#,
+        )
     }
 }
