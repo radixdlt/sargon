@@ -113,6 +113,11 @@ mod tests {
     }
 
     #[test]
+    fn get_all() {
+        assert_eq!(Personas::placeholder().get_all().len(), 2);
+    }
+
+    #[test]
     fn get_by_address() {
         let persona = Persona::placeholder();
         let address = persona.address.clone();

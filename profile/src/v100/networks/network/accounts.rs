@@ -113,6 +113,11 @@ mod tests {
     }
 
     #[test]
+    fn get_all() {
+        assert_eq!(Accounts::placeholder().get_all().len(), 2);
+    }
+
+    #[test]
     fn get_by_address() {
         let address = AccountAddress::placeholder();
         let account = Account::placeholder_with_values(

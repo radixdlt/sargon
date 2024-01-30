@@ -122,12 +122,44 @@ mod collection_of_phone_numbers_tests {
     }
 
     #[test]
+    fn new_with_values() {
+        let value0 = PhoneNumber::placeholder();
+        let value1 = PhoneNumber::placeholder_other();
+        let sut = SUT::values([value0.clone(), value1.clone()]);
+        assert_eq!(
+            sut.collection.into_iter().map(|e| e.value).collect_vec(),
+            vec![value0, value1]
+        );
+    }
+
+    #[test]
+    fn hash() {
+        assert_eq!(
+            HashSet::<SUT>::from([SUT::placeholder(), SUT::placeholder()])
+                .len(),
+            1
+        );
+    }
+
+    #[test]
     fn display() {
         assert_eq!(
             format!("{}", SUT::placeholder()),
             "[+46123456789, +44987654321]"
         );
         assert_eq!(format!("{}", SUT::placeholder_other()), "[+44987654321]");
+    }
+
+    #[test]
+    fn debug() {
+        assert_eq!(
+            format!("{:?}", SUT::placeholder()),
+            "[+46123456789 - 00000000-0000-0000-0000-000000000001, +44987654321 - 00000000-0000-0000-0000-000000000002]"
+        );
+        assert_eq!(
+            format!("{:?}", SUT::placeholder_other()),
+            "[+44987654321 - 00000000-0000-0000-0000-000000000002]"
+        );
     }
 
     #[test]
@@ -200,10 +232,36 @@ mod collection_of_email_addresses_tests {
     }
 
     #[test]
+    fn hash() {
+        assert_eq!(
+            HashSet::<SUT>::from([SUT::placeholder(), SUT::placeholder()])
+                .len(),
+            1
+        );
+    }
+
+    #[test]
     fn display() {
-        let value = V::placeholder();
-        let sut = SUT::new(value.clone());
-        assert_eq!(format!("{}", sut), format!("[{}]", value));
+        assert_eq!(
+            format!("{}", SUT::placeholder()),
+            "[alan@turing.hero, satoshi@nakamoto.btc]"
+        );
+        assert_eq!(
+            format!("{}", SUT::placeholder_other()),
+            "[satoshi@nakamoto.btc]"
+        );
+    }
+
+    #[test]
+    fn debug() {
+        assert_eq!(
+            format!("{:?}", SUT::placeholder()),
+            "[alan@turing.hero - 00000000-0000-0000-0000-000000000001, satoshi@nakamoto.btc - 00000000-0000-0000-0000-000000000002]"
+        );
+        assert_eq!(
+            format!("{:?}", SUT::placeholder_other()),
+            "[satoshi@nakamoto.btc - 00000000-0000-0000-0000-000000000002]"
+        );
     }
 
     #[test]
@@ -211,6 +269,17 @@ mod collection_of_email_addresses_tests {
         assert_eq!(
             *SUT::placeholder().items(),
             vec![V::placeholder(), V::placeholder_other()]
+        );
+    }
+
+    #[test]
+    fn new_with_values() {
+        let value0 = EmailAddress::placeholder();
+        let value1 = EmailAddress::placeholder_other();
+        let sut = SUT::values([value0.clone(), value1.clone()]);
+        assert_eq!(
+            sut.collection.into_iter().map(|e| e.value).collect_vec(),
+            vec![value0, value1]
         );
     }
 
