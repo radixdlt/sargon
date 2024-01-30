@@ -15,10 +15,10 @@ use crate::prelude::*;
 #[debug("{}", self.full())]
 #[serde(rename_all = "camelCase")]
 pub struct Name {
-    variant: Variant,
-    family_name: String,
-    given_name: String,
-    nickname: String,
+    pub variant: Variant,
+    pub family_name: String,
+    pub given_name: String,
+    pub nickname: String,
 }
 
 impl Name {

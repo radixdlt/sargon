@@ -292,4 +292,7 @@ pub enum CommonError {
 
     #[error("Invalid PersonaData - phone number empty")]
     PersonaDataInvalidPhoneNumberEmpty = 10082,
+
+    #[error("Invalid PersonaData - email address empty")]
+    PersonaDataInvalidEmailAddressEmpty = 10083,
 }

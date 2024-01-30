@@ -61,6 +61,11 @@ declare_collection_of_identified_entry!(
     CollectionOfPhoneNumbers
 );
 
+declare_collection_of_identified_entry!(
+    PersonaDataIdentifiedEmailAddress,
+    CollectionOfEmailAddresses
+);
+
 #[cfg(test)]
 mod collection_of_phone_numbers_tests {
     use crate::prelude::*;
@@ -113,6 +118,67 @@ mod collection_of_phone_numbers_tests {
                 {
                     "id": "00000000-0000-0000-0000-000000000002",
                     "value": "+44987654321"
+                }
+            ]
+            "#,
+        )
+    }
+}
+
+// Uh copy paste of tests :/ since sharing tests with `macro_rules` does not really work
+
+#[cfg(test)]
+mod collection_of_email_addresses_tests {
+    use crate::prelude::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = CollectionOfEmailAddresses;
+    type V = PersonaDataIdentifiedEmailAddress;
+
+    #[test]
+    fn new() {
+        let value = V::placeholder_other();
+        let sut = SUT::new(value.clone());
+        assert_eq!(sut.collection.items(), vec![value]);
+    }
+
+    #[test]
+    fn display() {
+        let value = V::placeholder();
+        let sut = SUT::new(value.clone());
+        assert_eq!(format!("{}", sut), format!("[{}]", value));
+    }
+
+    #[test]
+    fn json_roundtrip_placeholder() {
+        let model = SUT::placeholder();
+        assert_eq_after_json_roundtrip(
+            &model,
+            r#"
+            [
+                {
+                    "id": "00000000-0000-0000-0000-000000000001",
+                    "value": "alan@turing.hero"
+                },
+                {
+                    "id": "00000000-0000-0000-0000-000000000002",
+                    "value": "satoshi@nakamoto.btc"
+                }
+            ]
+            "#,
+        )
+    }
+
+    #[test]
+    fn json_roundtrip_placeholder_other() {
+        let model = SUT::placeholder_other();
+        assert_eq_after_json_roundtrip(
+            &model,
+            r#"
+            [
+                {
+                    "id": "00000000-0000-0000-0000-000000000002",
+                    "value": "satoshi@nakamoto.btc"
                 }
             ]
             "#,
