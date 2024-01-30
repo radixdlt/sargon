@@ -17,7 +17,7 @@ use crate::prelude::*;
 pub struct Name {
     pub variant: Variant,
     pub family_name: String,
-    pub given_name: String,
+    pub given_names: String,
     pub nickname: String,
 }
 
@@ -25,14 +25,14 @@ impl Name {
     pub fn new(
         variant: Variant,
         family_name: impl AsRef<str>,
-        given_name: impl AsRef<str>,
+        given_names: impl AsRef<str>,
         nickname: impl AsRef<str>,
     ) -> Result<Self> {
         let family_name = family_name.as_ref().trim().to_string();
-        let given_name = given_name.as_ref().trim().to_string();
+        let given_names = given_names.as_ref().trim().to_string();
         let nickname = nickname.as_ref().trim().to_string();
         if family_name.is_empty()
-            || given_name.is_empty()
+            || given_names.is_empty()
             || nickname.is_empty()
         {
             return Err(CommonError::InvalidDisplayNameEmpty);
@@ -40,7 +40,7 @@ impl Name {
         Ok(Self {
             variant,
             family_name,
-            given_name,
+            given_names,
             nickname,
         })
     }
@@ -49,11 +49,11 @@ impl Name {
         match self.variant {
             Variant::Western => format!(
                 "{} {} {}",
-                self.given_name, self.nickname, self.family_name
+                self.given_names, self.nickname, self.family_name
             ),
             Variant::Eastern => format!(
                 "{} {} {}",
-                self.family_name, self.nickname, self.given_name
+                self.family_name, self.nickname, self.given_names
             ),
         }
     }
@@ -74,6 +74,7 @@ impl HasPlaceholder for Name {
 #[derive(
     Serialize, Deserialize, Clone, Debug, PartialEq, Hash, Eq, uniffi::Enum,
 )]
+#[serde(rename_all = "lowercase")]
 pub enum Variant {
     Western,
     Eastern,
@@ -88,7 +89,7 @@ mod tests {
         let name = Name::new(Variant::Western, "Wayne", "Bruce", "Batman")
             .expect("Name construction should not fail");
         assert_eq!(name.family_name, "Wayne");
-        assert_eq!(name.given_name, "Bruce");
+        assert_eq!(name.given_names, "Bruce");
         assert_eq!(name.nickname, "Batman");
     }
 
@@ -102,7 +103,7 @@ mod tests {
         )
         .expect("Name construction should not fail");
         assert_eq!(name.family_name, "Wayne");
-        assert_eq!(name.given_name, "Bruce");
+        assert_eq!(name.given_names, "Bruce");
         assert_eq!(name.nickname, "Batman");
     }
 
@@ -110,7 +111,7 @@ mod tests {
     fn placeholder() {
         let placeholder = Name::placeholder();
         assert_eq!(placeholder.family_name, "Wayne");
-        assert_eq!(placeholder.given_name, "Bruce");
+        assert_eq!(placeholder.given_names, "Bruce");
         assert_eq!(placeholder.nickname, "Batman");
     }
 
@@ -118,7 +119,7 @@ mod tests {
     fn placeholder_other() {
         let placeholder = Name::placeholder_other();
         assert_eq!(placeholder.family_name, "Jun-fan");
-        assert_eq!(placeholder.given_name, "Lee");
+        assert_eq!(placeholder.given_names, "Lee");
         assert_eq!(placeholder.nickname, "Bruce");
     }
 
@@ -126,7 +127,7 @@ mod tests {
     fn name_get_set() {
         let mut name = Name::placeholder();
         assert_eq!(name.family_name, "Wayne");
-        assert_eq!(name.given_name, "Bruce");
+        assert_eq!(name.given_names, "Bruce");
         assert_eq!(name.nickname, "Batman");
         let new_name = Name::new(Variant::Western, "Kent", "Clark", "Superman")
             .expect("Name construction should not fail");
@@ -181,9 +182,9 @@ mod tests {
             &model,
             r#"
             {
-                "variant": "Western",
+                "variant": "western",
                 "familyName": "Wayne",
-                "givenName": "Bruce",
+                "givenNames": "Bruce",
                 "nickname": "Batman"
             }
             "#,
@@ -197,9 +198,9 @@ mod tests {
             &model,
             r#"
             {
-                "variant": "Eastern",
+                "variant": "eastern",
                 "familyName": "Jun-fan",
-                "givenName": "Lee",
+                "givenNames": "Lee",
                 "nickname": "Bruce"
             }
             "#,

@@ -606,9 +606,9 @@ mod tests {
 									"name": {
 										"id": "00000000-0000-0000-0000-000000000000",
 										"value": {
-											"variant": "Eastern",
+											"variant": "eastern",
 											"familyName": "Nakamoto",
-											"givenName": "Satoshi",
+											"givenNames": "Satoshi",
 											"nickname": "Satoshi"
 										}
 									},
@@ -673,9 +673,9 @@ mod tests {
 									"name": {
 										"id": "00000000-0000-0000-0000-000000000000",
 										"value": {
-											"variant": "Western",
+											"variant": "western",
 											"familyName": "Wayne",
-											"givenName": "Bruce",
+											"givenNames": "Bruce",
 											"nickname": "Batman"
 										}
 									},
@@ -829,9 +829,9 @@ mod tests {
 									"name": {
 										"id": "00000000-0000-0000-0000-000000000000",
 										"value": {
-											"variant": "Eastern",
+											"variant": "eastern",
 											"familyName": "Skywalker",
-											"givenName": "Leia",
+											"givenNames": "Leia",
 											"nickname": "Princess Leia"
 										}
 									},
@@ -888,9 +888,9 @@ mod tests {
 									"name": {
 										"id": "00000000-0000-0000-0000-000000000000",
 										"value": {
-											"variant": "Western",
+											"variant": "western",
 											"familyName": "Granger",
-											"givenName": "Hermione",
+											"givenNames": "Hermione",
 											"nickname": "Hermy"
 										}
 									},

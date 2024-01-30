@@ -98,8 +98,7 @@ impl Persona {
 
         let ctr = Arc::<Mutex<u64>>::new(Mutex::new(1));
         let next = || {
-            let v: u64 = ctr.lock().unwrap().borrow().clone();
-            let n = Uuid::from_u64_pair(0, v);
+            let n = Uuid::from_u64_pair(0, *ctr.lock().unwrap().borrow());
             ctr.lock().unwrap().borrow_mut().add_assign(1);
             n
         };
@@ -423,9 +422,9 @@ mod tests {
 					"name": {
 						"id": "00000000-0000-0000-0000-000000000000",
 						"value": {
-							"variant": "Eastern",
+							"variant": "eastern",
 							"familyName": "Nakamoto",
-							"givenName": "Satoshi",
+							"givenNames": "Satoshi",
 							"nickname": "Satoshi"
 						}
 					},
@@ -500,9 +499,9 @@ mod tests {
 					"name": {
 						"id": "00000000-0000-0000-0000-000000000000",
 						"value": {
-							"variant": "Western",
+							"variant": "western",
 							"familyName": "Wayne",
-							"givenName": "Bruce",
+							"givenNames": "Bruce",
 							"nickname": "Batman"
 						}
 					},
@@ -569,9 +568,9 @@ mod tests {
 					"name": {
 						"id": "00000000-0000-0000-0000-000000000000",
 						"value": {
-							"variant": "Eastern",
+							"variant": "eastern",
 							"familyName": "Skywalker",
-							"givenName": "Leia",
+							"givenNames": "Leia",
 							"nickname": "Princess Leia"
 						}
 					},
@@ -638,9 +637,9 @@ mod tests {
 					"name": {
 						"id": "00000000-0000-0000-0000-000000000000",
 						"value": {
-							"variant": "Western",
+							"variant": "western",
 							"familyName": "Granger",
-							"givenName": "Hermione",
+							"givenNames": "Hermione",
 							"nickname": "Hermy"
 						}
 					},

@@ -180,9 +180,9 @@ mod tests {
                 "name": {
                     "id": "00000000-0000-0000-0000-000000000001",
                     "value": {
-                        "variant": "Western",
+                        "variant": "western",
                         "familyName": "Wayne",
-                        "givenName": "Bruce",
+                        "givenNames": "Bruce",
                         "nickname": "Batman"
                     }
                 },

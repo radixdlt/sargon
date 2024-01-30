@@ -156,9 +156,9 @@ mod identified_name_tests {
             {
                 "id": "00000000-0000-0000-0000-000000000001",
                 "value": {
-                    "variant": "Western",
+                    "variant": "western",
                     "familyName": "Wayne",
-                    "givenName": "Bruce",
+                    "givenNames": "Bruce",
                     "nickname": "Batman"
                 }
             }
@@ -175,9 +175,9 @@ mod identified_name_tests {
             {
                 "id": "00000000-0000-0000-0000-000000000002",
                 "value": {
-                    "variant": "Eastern",
+                    "variant": "eastern",
                     "familyName": "Jun-fan",
-                    "givenName": "Lee",
+                    "givenNames": "Lee",
                     "nickname": "Bruce"
                 }
             }
