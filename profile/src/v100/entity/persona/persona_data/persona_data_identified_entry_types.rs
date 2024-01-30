@@ -122,13 +122,16 @@ mod identified_name_tests {
     }
 
     #[test]
-    fn display() {
-        let value = V::placeholder();
-        let sut = SUT::with_id(Uuid::nil(), value.clone());
+    fn debug() {
         assert_eq!(
-            format!("{}", sut),
-            "Bruce Batman Wayne - 00000000-0000-0000-0000-000000000000"
+            format!("{:?}", SUT::placeholder()),
+            "Bruce Batman Wayne - 00000000-0000-0000-0000-000000000001"
         );
+    }
+
+    #[test]
+    fn display() {
+        assert_eq!(format!("{}", SUT::placeholder()), "Bruce Batman Wayne");
     }
 
     #[test]
@@ -220,13 +223,16 @@ mod identified_number_tests {
     }
 
     #[test]
-    fn display() {
-        let value = V::placeholder();
-        let sut = SUT::with_id(Uuid::nil(), value.clone());
+    fn debug() {
         assert_eq!(
-            format!("{}", sut),
-            "+46123456789 - 00000000-0000-0000-0000-000000000000"
+            format!("{:?}", SUT::placeholder()),
+            "+46123456789 - 00000000-0000-0000-0000-000000000001"
         );
+    }
+
+    #[test]
+    fn display() {
+        assert_eq!(format!("{}", SUT::placeholder()), "+46123456789");
     }
 
     #[test]
@@ -306,13 +312,16 @@ mod identified_email_tests {
     }
 
     #[test]
-    fn display() {
-        let value = V::placeholder();
-        let sut = SUT::with_id(Uuid::nil(), value.clone());
+    fn debug() {
         assert_eq!(
-            format!("{}", sut),
-            "alan@turing.hero - 00000000-0000-0000-0000-000000000000"
+            format!("{:?}", SUT::placeholder()),
+            "alan@turing.hero - 00000000-0000-0000-0000-000000000001"
         );
+    }
+
+    #[test]
+    fn display() {
+        assert_eq!(format!("{}", SUT::placeholder()), "alan@turing.hero");
     }
 
     #[test]

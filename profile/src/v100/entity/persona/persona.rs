@@ -330,7 +330,8 @@ mod tests {
 							"nickname": "Batman"
 						}
 					},
-                    "phoneNumbers": []
+                    "phoneNumbers": [],
+                    "emailAddresses": []
 				}
 			}
 			"#,
@@ -397,6 +398,16 @@ mod tests {
                             "id": "00000000-0000-0000-0000-000000000002",
                             "value": "+44987654321"
                         }
+                    ],
+                    "emailAddresses": [
+                        {
+                            "id": "00000000-0000-0000-0000-000000000001",
+                            "value": "alan@turing.hero"
+                        },
+                        {
+                            "id": "00000000-0000-0000-0000-000000000002",
+                            "value": "satoshi@nakamoto.btc"
+                        }
                     ]
 				}
 			}
@@ -411,7 +422,7 @@ mod tests {
             {
 				"networkID": 1,
 				"address": "identity_rdx122kttqch0eehzj6f9nkkxcw7msfeg9udurq5u0ysa0e92c59w0mg6x",
-				"displayName": "Satoshi",
+				"displayName": "No Flags",
 				"securityState": {
 					"discriminator": "unsecured",
 					"unsecuredEntityControl": {
@@ -443,33 +454,14 @@ mod tests {
 					}
 				},
 				"personaData": {
-					"name": {
-						"id": "00000000-0000-0000-0000-000000000000",
-						"value": {
-							"variant": "Eastern",
-							"familyName": "Nakamoto",
-							"givenName": "Satoshi",
-							"nickname": "Satoshi"
-						}
-					},
-                    "phoneNumbers": [
-                        {
-                            "id": "00000000-0000-0000-0000-000000000001",
-                            "value": "+46123456789"
-                        },
-                        {
-                            "id": "00000000-0000-0000-0000-000000000002",
-                            "value": "+44987654321"
-                        }
-                    ]
+                    "phoneNumbers": [],
+                    "emailAddresses": []
 				}
 			}
             "#,
         ).unwrap();
         let persona = serde_json::from_value::<Persona>(json).unwrap();
-        assert_eq!(persona.display_name.value, "Satoshi".to_string()); // soundness
         assert_eq!(persona.flags.len(), 0); // assert Default value is empty flags.
-                                            // assert_eq!(persona.persona_data, PersonaData::new());
     }
 
     #[test]

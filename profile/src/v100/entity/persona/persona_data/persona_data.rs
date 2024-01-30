@@ -213,6 +213,11 @@ mod tests {
 
     #[test]
     fn display() {
-        assert_eq!(format!("{}", PersonaData::placeholder()), "apa");
+        assert_eq!(format!("{}", PersonaData::placeholder()), "name: Bruce Batman Wayne\nphone: +46123456789\nphone: +44987654321\nemail: alan@turing.hero\nemail: satoshi@nakamoto.btc");
+    }
+
+    #[test]
+    fn debug() {
+        assert_eq!(format!("{:?}", PersonaData::placeholder()), "name: Bruce Batman Wayne\nphone: +46123456789 - 00000000-0000-0000-0000-000000000001\nphone: +44987654321 - 00000000-0000-0000-0000-000000000002\nemail: alan@turing.hero - 00000000-0000-0000-0000-000000000001\nemail: satoshi@nakamoto.btc - 00000000-0000-0000-0000-000000000002");
     }
 }

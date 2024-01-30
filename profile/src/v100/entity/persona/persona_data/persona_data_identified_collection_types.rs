@@ -14,7 +14,7 @@ macro_rules! declare_collection_of_identified_entry {
             uniffi::Record,
         )]
         #[debug("{collection}")]
-        #[display("{collection}")]
+        #[display("{}", self.display_string())]
         #[serde(transparent)]
         pub struct $struct_name {
             pub collection: IdentifiedVecVia<$id_ent_type>,
@@ -46,6 +46,14 @@ macro_rules! declare_collection_of_identified_entry {
 
             pub fn new(value: $id_ent_type) -> Self {
                 Self::values([value])
+            }
+        }
+
+        impl $struct_name {
+            fn display_string(&self) -> String {
+                let items =
+                    self.items().into_iter().map(|v| v.to_string()).join(", ");
+                format!("[{}]", items)
             }
         }
 
@@ -91,9 +99,11 @@ mod collection_of_phone_numbers_tests {
 
     #[test]
     fn display() {
-        let value = V::placeholder();
-        let sut = SUT::new(value.clone());
-        assert_eq!(format!("{}", sut), format!("[{}]", value));
+        assert_eq!(
+            format!("{}", SUT::placeholder()),
+            "[+46123456789, +44987654321]"
+        );
+        assert_eq!(format!("{}", SUT::placeholder_other()), "[+44987654321]");
     }
 
     #[test]
