@@ -108,6 +108,21 @@ mod collection_of_phone_numbers_tests {
     type V = PersonaDataIdentifiedPhoneNumber;
 
     #[test]
+    fn uniffi_compile_time() {
+        #[derive(uniffi::Record)]
+        struct Foo {
+            phone_numbers: CollectionOfPhoneNumbers,
+        }
+        assert_eq!(
+            Foo {
+                phone_numbers: CollectionOfPhoneNumbers::placeholder()
+            }
+            .phone_numbers,
+            CollectionOfPhoneNumbers::placeholder()
+        );
+    }
+
+    #[test]
     fn new() {
         let value = V::placeholder_other();
         let sut = SUT::new(value.clone());

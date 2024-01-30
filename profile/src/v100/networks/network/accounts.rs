@@ -77,6 +77,7 @@ impl Accounts {
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
+
     #[test]
     fn default_is_empty() {
         assert_eq!(Accounts::default().len(), 0);
