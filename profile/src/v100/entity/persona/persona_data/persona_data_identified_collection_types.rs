@@ -22,7 +22,7 @@ macro_rules! declare_collection_of_identified_entry {
 
         impl Default for $struct_name {
             fn default() -> Self {
-                Self::values([])
+                Self::entries([])
             }
         }
 
@@ -35,7 +35,7 @@ macro_rules! declare_collection_of_identified_entry {
         }
 
         impl $struct_name {
-            pub fn values<I>(values: I) -> Self
+            pub fn entries<I>(values: I) -> Self
             where
                 I: IntoIterator<Item = $id_ent_type>,
             {
@@ -45,7 +45,24 @@ macro_rules! declare_collection_of_identified_entry {
             }
 
             pub fn new(value: $id_ent_type) -> Self {
-                Self::values([value])
+                Self::entries([value])
+            }
+
+            /// Creates a new CollectionOf PersonaDataEntries using just the *value*, which will be given a
+            /// generated ID and put in a `$id_ent_type`
+            pub fn single_value(
+                value: <$id_ent_type as PersonaDataEntryValue>::Value,
+            ) -> Self {
+                Self::new(value.into())
+            }
+
+            pub fn values<I>(values: I) -> Self
+            where
+                I: IntoIterator<
+                    Item = <$id_ent_type as PersonaDataEntryValue>::Value,
+                >,
+            {
+                Self::entries(values.into_iter().map(|v| v.into()))
             }
         }
 
@@ -59,7 +76,7 @@ macro_rules! declare_collection_of_identified_entry {
 
         impl HasPlaceholder for $struct_name {
             fn placeholder() -> Self {
-                $struct_name::values([
+                $struct_name::entries([
                     <$id_ent_type>::placeholder(),
                     <$id_ent_type>::placeholder_other(),
                 ])
@@ -95,6 +112,13 @@ mod collection_of_phone_numbers_tests {
         let value = V::placeholder_other();
         let sut = SUT::new(value.clone());
         assert_eq!(sut.collection.items(), vec![value]);
+    }
+
+    #[test]
+    fn new_with_value() {
+        let value = PhoneNumber::placeholder();
+        let sut = SUT::single_value(value.clone());
+        assert_eq!(sut.collection.items().first().unwrap().value, value);
     }
 
     #[test]
@@ -166,6 +190,13 @@ mod collection_of_email_addresses_tests {
         let value = V::placeholder_other();
         let sut = SUT::new(value.clone());
         assert_eq!(sut.collection.items(), vec![value]);
+    }
+
+    #[test]
+    fn new_with_value() {
+        let value = EmailAddress::placeholder();
+        let sut = SUT::single_value(value.clone());
+        assert_eq!(sut.collection.items().first().unwrap().value, value);
     }
 
     #[test]

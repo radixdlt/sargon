@@ -182,6 +182,7 @@ impl Wallet {
                 let network = ProfileNetwork::new(
                     network_id,
                     Accounts::from_iter([account.to_owned()]),
+                    Personas::default(),
                 );
                 networks.append(network);
                 Ok(())

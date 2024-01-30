@@ -26,6 +26,14 @@ impl Identifiable for PhoneNumber {
     }
 }
 
+impl FromStr for PhoneNumber {
+    type Err = CommonError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Self::new(s)
+    }
+}
+
 impl PhoneNumber {
     pub fn new(number: impl AsRef<str>) -> Result<Self> {
         let number = number.as_ref().to_owned();
@@ -103,5 +111,11 @@ mod tests {
             PhoneNumber::new("+46123456789").unwrap(),
             PhoneNumber::placeholder()
         );
+    }
+
+    #[test]
+    fn new_with_fromstr() {
+        let phone: PhoneNumber = "+46123456789".parse().unwrap();
+        assert_eq!(phone, PhoneNumber::placeholder());
     }
 }

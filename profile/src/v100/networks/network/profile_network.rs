@@ -13,6 +13,9 @@ pub struct ProfileNetwork {
 
     /// An ordered set of Accounts on this network.
     pub accounts: Accounts,
+
+    /// An ordered set of Personas on this network.
+    pub personas: Personas,
 }
 
 impl Identifiable for ProfileNetwork {
@@ -29,7 +32,11 @@ impl ProfileNetwork {
     ///
     /// Panics if not any account in `accounts` is on another
     /// network than `network_id`
-    pub fn new(network_id: NetworkID, accounts: Accounts) -> Self {
+    pub fn new(
+        network_id: NetworkID,
+        accounts: Accounts,
+        personas: Personas,
+    ) -> Self {
         assert!(
             accounts
                 .get_all()
@@ -40,6 +47,7 @@ impl ProfileNetwork {
         Self {
             id: network_id,
             accounts,
+            personas,
         }
     }
 }
@@ -77,12 +85,20 @@ impl HasPlaceholder for ProfileNetwork {
 impl ProfileNetwork {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_mainnet() -> Self {
-        Self::new(NetworkID::Mainnet, Accounts::placeholder_mainnet())
+        Self::new(
+            NetworkID::Mainnet,
+            Accounts::placeholder_mainnet(),
+            Personas::placeholder_mainnet(),
+        )
     }
 
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_stokenet() -> Self {
-        Self::new(NetworkID::Stokenet, Accounts::placeholder_stokenet())
+        Self::new(
+            NetworkID::Stokenet,
+            Accounts::placeholder_stokenet(),
+            Personas::default(),
+        )
     }
 }
 
@@ -117,7 +133,8 @@ mod tests {
                 Accounts::with_accounts(
                     [Account::placeholder(), Account::placeholder()]
                         .into_iter()
-                )
+                ),
+                Personas::default()
             )
             .accounts
             .len(),
@@ -136,6 +153,7 @@ mod tests {
                 Account::placeholder_mainnet(),
                 Account::placeholder_stokenet(),
             ]),
+            Personas::default(),
         );
     }
 
@@ -238,6 +256,8 @@ mod tests {
 						"flags": [],
 						"address": "account_tdx_2_129663ef7fj8azge3y6sl73lf9vyqt53ewzlf7ul2l76mg5wyqlqlpr"
 					}
+				],
+				"personas": [
 				]
 			}
             "#,
@@ -343,7 +363,136 @@ mod tests {
 						"flags": [],
 						"address": "account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69"
 					}
+				],
+				"personas": [
+					{
+						"networkID": 1,
+						"address": "identity_rdx122kttqch0eehzj6f9nkkxcw7msfeg9udurq5u0ysa0e92c59w0mg6x",
+						"displayName": "Satoshi",
+						"securityState": {
+							"discriminator": "unsecured",
+							"unsecuredEntityControl": {
+								"transactionSigning": {
+									"factorSourceID": {
+										"discriminator": "fromHash",
+										"fromHash": {
+											"kind": "device",
+											"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+										}
+									},
+									"badge": {
+										"discriminator": "virtualSource",
+										"virtualSource": {
+											"discriminator": "hierarchicalDeterministicPublicKey",
+											"hierarchicalDeterministicPublicKey": {
+												"publicKey": {
+													"curve": "curve25519",
+													"compressedData": "983ab1d3a77dd6b30bb8a5d59d490a0380cc0aa9ab464983d3fc581fcf64543f"
+												},
+												"derivationPath": {
+													"scheme": "cap26",
+													"path": "m/44H/1022H/1H/618H/1460H/0H"
+												}
+											}
+										}
+									}
+								}
+							}
+						},
+						"flags": [],
+						"personaData": {
+							"name": {
+								"id": "00000000-0000-0000-0000-000000000000",
+								"value": {
+									"variant": "Eastern",
+									"familyName": "Nakamoto",
+									"givenName": "Satoshi",
+									"nickname": "Satoshi"
+								}
+							},
+							"phoneNumbers": [
+								{
+									"id": "00000000-0000-0000-0000-000000000001",
+									"value": "+46123456789"
+								},
+								{
+									"id": "00000000-0000-0000-0000-000000000002",
+									"value": "+44987654321"
+								}
+							],
+							"emailAddresses": [
+								{
+									"id": "00000000-0000-0000-0000-000000000003",
+									"value": "sat@os.hi"
+								},
+								{
+									"id": "00000000-0000-0000-0000-000000000004",
+									"value": "satoshi@nakamoto.btc"
+								}
+							]
+						}
+					},
+					{
+						"networkID": 1,
+						"address": "identity_rdx12gcd4r799jpvztlffgw483pqcen98pjnay988n8rmscdswd872xy62",
+						"displayName": "Batman",
+						"securityState": {
+							"discriminator": "unsecured",
+							"unsecuredEntityControl": {
+								"transactionSigning": {
+									"factorSourceID": {
+										"discriminator": "fromHash",
+										"fromHash": {
+											"kind": "device",
+											"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+										}
+									},
+									"badge": {
+										"discriminator": "virtualSource",
+										"virtualSource": {
+											"discriminator": "hierarchicalDeterministicPublicKey",
+											"hierarchicalDeterministicPublicKey": {
+												"publicKey": {
+													"curve": "curve25519",
+													"compressedData": "1fe80badc0520334ee339e4010491d417ca3aed0c9621698b10655529f0ee506"
+												},
+												"derivationPath": {
+													"scheme": "cap26",
+													"path": "m/44H/1022H/1H/618H/1460H/1H"
+												}
+											}
+										}
+									}
+								}
+							}
+						},
+						"flags": [],
+						"personaData": {
+							"name": {
+								"id": "00000000-0000-0000-0000-000000000000",
+								"value": {
+									"variant": "Western",
+									"familyName": "Wayne",
+									"givenName": "Bruce",
+									"nickname": "Batman"
+								}
+							},
+							"phoneNumbers": [
+								{
+									"id": "00000000-0000-0000-0000-000000000001",
+									"value": "+1 13 371 337"
+								}
+							],
+							"emailAddresses": [
+								{
+									"id": "00000000-0000-0000-0000-000000000002",
+									"value": "bat@m.an"
+								}
+							]
+						}
+					}
 				]
+	
 			}
             "#,
         );

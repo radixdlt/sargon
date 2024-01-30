@@ -26,6 +26,14 @@ impl Identifiable for EmailAddress {
     }
 }
 
+impl FromStr for EmailAddress {
+    type Err = CommonError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Self::new(s)
+    }
+}
+
 impl EmailAddress {
     pub fn new(email: impl AsRef<str>) -> Result<Self> {
         let email = email.as_ref().to_owned();
@@ -103,5 +111,11 @@ mod tests {
             EmailAddress::new("alan@turing.hero").unwrap(),
             EmailAddress::placeholder()
         );
+    }
+
+    #[test]
+    fn new_with_fromstr() {
+        let email: EmailAddress = "alan@turing.hero".parse().unwrap();
+        assert_eq!(email, EmailAddress::placeholder());
     }
 }

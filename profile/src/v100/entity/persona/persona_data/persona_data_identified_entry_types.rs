@@ -2,6 +2,10 @@ use crate::prelude::*;
 
 pub type PersonaDataEntryID = Uuid;
 
+pub trait PersonaDataEntryValue: From<Self::Value> {
+    type Value;
+}
+
 macro_rules! declare_identified_entry {
     ($value_type:ty,$struct_name:ident) => {
         #[derive(
@@ -20,6 +24,15 @@ macro_rules! declare_identified_entry {
         pub struct $struct_name {
             pub id: PersonaDataEntryID,
             pub value: $value_type,
+        }
+
+        impl From<$value_type> for $struct_name {
+            fn from(value: $value_type) -> Self {
+                Self::new(value)
+            }
+        }
+        impl PersonaDataEntryValue for $struct_name {
+            type Value = $value_type;
         }
 
         impl Identifiable for $struct_name {
