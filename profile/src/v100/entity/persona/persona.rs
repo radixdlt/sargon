@@ -74,6 +74,7 @@ impl Persona {
 }
 
 impl Persona {
+    #[cfg(not(tarpaulin_include))] // false negative
     fn placeholder_at_index_name_network<P, E>(
         network_id: NetworkID,
         index: HDPathValue,
@@ -129,6 +130,7 @@ impl Persona {
         )
     }
 
+    #[cfg(not(tarpaulin_include))] // false negative
     fn placeholder_at_index_name<P, E>(
         index: HDPathValue,
         display_name: &str,
