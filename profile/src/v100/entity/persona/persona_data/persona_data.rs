@@ -12,34 +12,86 @@ use crate::prelude::*;
     derive_more::Debug,
     uniffi::Record,
 )]
-#[display("{}", self.existing_values())]
-#[debug("{}", self.existing_values())]
+#[display("{}", self.string_representation(false))]
+#[debug("{}", self.string_representation(true))]
 #[serde(rename_all = "camelCase")]
 pub struct PersonaData {
     pub name: Option<PersonaDataIdentifiedName>,
     pub phone_numbers: CollectionOfPhoneNumbers,
+    pub email_addresses: CollectionOfEmailAddresses,
 }
 
 impl PersonaData {
     pub fn new(
         name: Option<PersonaDataIdentifiedName>,
         phone_numbers: CollectionOfPhoneNumbers,
+        email_addresses: CollectionOfEmailAddresses,
     ) -> Self {
         Self {
             name,
             phone_numbers,
+            email_addresses,
         }
     }
 }
 
+trait DebugString {
+    fn dbg_string(&self) -> String;
+}
+impl<U> DebugString for U
+where
+    U: std::fmt::Debug,
+{
+    fn dbg_string(&self) -> String {
+        format!("{:?}", self)
+    }
+}
+
 impl PersonaData {
-    pub fn existing_values(&self) -> String {
+    pub fn string_representation(&self, include_id: bool) -> String {
         let name = self
             .name
             .as_deref()
-            .map(|v| format!("name: {}\n", v.clone()));
+            .map(|v| {
+                if include_id {
+                    v.dbg_string()
+                } else {
+                    v.to_string()
+                }
+            })
+            .map(|v| format!("name: {v}"));
 
-        [name].into_iter().map(|v| v.unwrap_or_default()).join("")
+        let phones = self
+            .phone_numbers
+            .iter()
+            .cloned()
+            .map(|v| {
+                if include_id {
+                    v.dbg_string()
+                } else {
+                    v.to_string()
+                }
+            })
+            .map(|v| format!("phone: {v}"))
+            .join("\n");
+
+        let emails = self
+            .email_addresses
+            .iter()
+            .cloned()
+            .map(|v| {
+                if include_id {
+                    v.dbg_string()
+                } else {
+                    v.to_string()
+                }
+            })
+            .map(|v| format!("email: {v}"))
+            .join("\n");
+
+        [name.unwrap_or_default(), phones, emails]
+            .into_iter()
+            .join("\n")
     }
 }
 
@@ -48,6 +100,7 @@ impl HasPlaceholder for PersonaData {
         Self::new(
             Some(PersonaDataIdentifiedName::placeholder()),
             CollectionOfPhoneNumbers::placeholder(),
+            CollectionOfEmailAddresses::placeholder(),
         )
     }
 
@@ -55,6 +108,7 @@ impl HasPlaceholder for PersonaData {
         Self::new(
             Some(PersonaDataIdentifiedName::placeholder_other()),
             CollectionOfPhoneNumbers::placeholder_other(),
+            CollectionOfEmailAddresses::placeholder(),
         )
     }
 }
@@ -84,7 +138,7 @@ mod tests {
     fn new_persona_data() {
         let name =
             Name::new(Variant::Western, "Skywalker", "Anakin", "Darth Vader")
-                .expect("Name counstruction should not fail");
+                .unwrap();
         let persona_data = PersonaData {
             name: Some(PersonaDataIdentifiedName::with_id(
                 Uuid::nil(),
@@ -141,9 +195,24 @@ mod tests {
                         "id": "00000000-0000-0000-0000-000000000002",
                         "value": "+44987654321"
                     }
+                ],
+                "emailAddresses": [
+                    {
+                        "id": "00000000-0000-0000-0000-000000000001",
+                        "value": "alan@turing.hero"
+                    },
+                    {
+                        "id": "00000000-0000-0000-0000-000000000002",
+                        "value": "satoshi@nakamoto.btc"
+                    }
                 ]
             }
             "#,
         );
+    }
+
+    #[test]
+    fn display() {
+        assert_eq!(format!("{}", PersonaData::placeholder()), "apa");
     }
 }

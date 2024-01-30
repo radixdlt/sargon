@@ -74,6 +74,7 @@ impl Persona {
         display_name: &str,
         name: Name,
         phone_numbers: CollectionOfPhoneNumbers,
+        email_addresses: CollectionOfEmailAddresses,
     ) -> Self {
         let mwp = MnemonicWithPassphrase::placeholder();
         let bdfs = DeviceFactorSource::babylon(
@@ -92,6 +93,7 @@ impl Persona {
             Some(PersonaData::new(
                 Some(PersonaDataIdentifiedName::with_id(Uuid::nil(), name)),
                 phone_numbers,
+                email_addresses,
             )),
         )
     }
@@ -101,6 +103,7 @@ impl Persona {
         display_name: &str,
         name: Name,
         phone_numbers: CollectionOfPhoneNumbers,
+        email_addresses: CollectionOfEmailAddresses,
     ) -> Self {
         Self::placeholder_at_index_name_network(
             NetworkID::Mainnet,
@@ -108,6 +111,7 @@ impl Persona {
             display_name,
             name,
             phone_numbers,
+            email_addresses,
         )
     }
 
@@ -122,6 +126,7 @@ impl Persona {
             "Satoshi",
             name,
             CollectionOfPhoneNumbers::placeholder(),
+            CollectionOfEmailAddresses::placeholder(),
         )
     }
 
@@ -135,6 +140,7 @@ impl Persona {
             "Batman",
             name,
             CollectionOfPhoneNumbers::default(),
+            CollectionOfEmailAddresses::default(),
         )
     }
 }
@@ -246,7 +252,7 @@ mod tests {
     }
 
     #[test]
-    fn placerholder_display_name() {
+    fn placeholder_display_name() {
         let placeholder = Persona::placeholder();
         assert_eq!(
             placeholder.display_name,
@@ -255,7 +261,7 @@ mod tests {
     }
 
     #[test]
-    fn placerholder_other_display_name() {
+    fn placeholder_other_display_name() {
         let placeholder = Persona::placeholder_other();
         assert_eq!(
             placeholder.display_name,
@@ -475,34 +481,31 @@ mod tests {
 
     #[test]
     fn placeholder_stokenet() {
-        let name = Name::new(Variant::Western, "Wayne", "Bruce", "Batman")
-            .expect("Name counstruction should not fail");
         let persona = Persona::placeholder_at_index_name_network(
             NetworkID::Stokenet,
             1,
             "Batman",
-            name.clone(),
+            Name::placeholder(),
             CollectionOfPhoneNumbers::placeholder(),
+            CollectionOfEmailAddresses::placeholder(),
         );
         assert_eq!(persona.display_name.value, "Batman".to_string());
         assert_eq!(persona.network_id, NetworkID::Stokenet);
-        assert_eq!(persona.persona_data.name.unwrap().value, name);
+        assert_eq!(persona.address.address, "identity_tdx_2_12gr0d9da3jvye7mdrreljyqs35esjyjsl9r8t5v96hq6fq367cln08");
     }
 
     #[test]
     fn placeholder_stokenet_satoshi() {
-        let name =
-            Name::new(Variant::Western, "Nakamoto", "Satoshi", "Satoshi")
-                .expect("Name counstruction should not fail");
         let persona = Persona::placeholder_at_index_name_network(
             NetworkID::Stokenet,
             0,
             "Satoshi",
-            name.clone(),
+            Name::placeholder(),
             CollectionOfPhoneNumbers::placeholder(),
+            CollectionOfEmailAddresses::placeholder(),
         );
         assert_eq!(persona.display_name.value, "Satoshi".to_string());
         assert_eq!(persona.network_id, NetworkID::Stokenet);
-        assert_eq!(persona.persona_data.name.unwrap().value, name);
+        assert_eq!(persona.address.address, "identity_tdx_2_12fk6qyu2860xyx2jk7j6ex464ccrnxrve4kpaa8qyxx99y5627ahhc");
     }
 }

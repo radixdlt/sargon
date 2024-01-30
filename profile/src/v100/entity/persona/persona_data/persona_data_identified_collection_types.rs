@@ -26,6 +26,14 @@ macro_rules! declare_collection_of_identified_entry {
             }
         }
 
+        impl std::ops::Deref for $struct_name {
+            type Target = IdentifiedVecVia<$id_ent_type>;
+
+            fn deref(&self) -> &Self::Target {
+                &self.collection
+            }
+        }
+
         impl $struct_name {
             pub fn values<I>(values: I) -> Self
             where
@@ -89,6 +97,14 @@ mod collection_of_phone_numbers_tests {
     }
 
     #[test]
+    fn deref() {
+        assert_eq!(
+            *SUT::placeholder().items(),
+            vec![V::placeholder(), V::placeholder_other()]
+        );
+    }
+
+    #[test]
     fn json_roundtrip_placeholder() {
         let model = SUT::placeholder();
         assert_eq_after_json_roundtrip(
@@ -147,6 +163,14 @@ mod collection_of_email_addresses_tests {
         let value = V::placeholder();
         let sut = SUT::new(value.clone());
         assert_eq!(format!("{}", sut), format!("[{}]", value));
+    }
+
+    #[test]
+    fn deref() {
+        assert_eq!(
+            *SUT::placeholder().items(),
+            vec![V::placeholder(), V::placeholder_other()]
+        );
     }
 
     #[test]

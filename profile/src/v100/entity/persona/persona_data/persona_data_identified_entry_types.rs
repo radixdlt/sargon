@@ -16,7 +16,7 @@ macro_rules! declare_identified_entry {
             uniffi::Record,
         )]
         #[debug("{} - {}", value, id)]
-        #[display("{} - {}", value, id)]
+        #[display("{value}")]
         pub struct $struct_name {
             pub id: PersonaDataEntryID,
             pub value: $value_type,
