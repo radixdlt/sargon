@@ -3,9 +3,11 @@ use crate::prelude::*;
 pub fn now() -> Timestamp {
     Timestamp::now_utc()
 }
+
 pub fn id() -> Uuid {
     Uuid::new_v4()
 }
+
 pub fn profile_id() -> ProfileID {
     ProfileID(id())
 }
