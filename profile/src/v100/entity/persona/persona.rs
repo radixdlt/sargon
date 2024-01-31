@@ -1,3 +1,4 @@
+use __private__::PhantomData;
 use rand::distributions::uniform::SampleBorrow;
 
 use crate::prelude::*;
@@ -95,6 +96,30 @@ impl Persona {
     }
 }
 
+pub struct IDGenerator<T: From<Uuid>> {
+    ctr: Arc<Mutex<u64>>,
+    phantom: PhantomData<T>,
+}
+impl<T: From<Uuid>> IDGenerator<T> {
+    pub fn starting_at(ctr: u64) -> Self {
+        Self {
+            ctr: Arc::new(Mutex::new(ctr)),
+            phantom: PhantomData,
+        }
+    }
+
+    #[allow(clippy::new_without_default)]
+    pub fn new() -> Self {
+        Self::starting_at(0)
+    }
+
+    pub fn next(&self) -> T {
+        let n = Uuid::from_u64_pair(0, *self.ctr.lock().unwrap().borrow());
+        self.ctr.lock().unwrap().borrow_mut().add_assign(1);
+        n.into()
+    }
+}
+
 impl Persona {
     #[cfg(not(tarpaulin_include))] // false negative
     fn placeholder_at_index_name_network<P, E>(
@@ -120,25 +145,23 @@ impl Persona {
         let private_hd_factor_source =
             PrivateHierarchicalDeterministicFactorSource::new(mwp, bdfs);
 
-        let ctr = Arc::<Mutex<u64>>::new(Mutex::new(1));
-        let next = || {
-            let n = Uuid::from_u64_pair(0, *ctr.lock().unwrap().borrow());
-            ctr.lock().unwrap().borrow_mut().add_assign(1);
-            n.into()
-        };
-
+        let id = IDGenerator::<PersonaDataEntryID>::starting_at(1);
         let phone_numbers = CollectionOfPhoneNumbers::entries(
             phone_numbers
                 .into_iter()
                 .map(|s| s.parse::<PersonaDataEntryPhoneNumber>().unwrap())
-                .map(|v| PersonaDataIdentifiedPhoneNumber::with_id(next(), v)),
+                .map(|v| {
+                    PersonaDataIdentifiedPhoneNumber::with_id(id.next(), v)
+                }),
         );
 
         let email_addresses = CollectionOfEmailAddresses::entries(
             email_addresses
                 .into_iter()
                 .map(|s| s.parse::<PersonaDataEntryEmailAddress>().unwrap())
-                .map(|v| PersonaDataIdentifiedEmailAddress::with_id(next(), v)),
+                .map(|v| {
+                    PersonaDataIdentifiedEmailAddress::with_id(id.next(), v)
+                }),
         );
 
         let mut persona = Self::new(

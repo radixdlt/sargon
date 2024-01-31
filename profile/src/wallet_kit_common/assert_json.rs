@@ -36,6 +36,19 @@ where
     base_assert_equality_after_json_roundtrip(model, json, true)
 }
 
+#[cfg(not(tarpaulin_include))]
+pub fn print_json<T>(model: &T)
+where
+    T: Serialize,
+{
+    println!(
+        "{}",
+        serde_json::to_string_pretty(model).expect(
+            "Should be able to JSON serialize passed in serializable model."
+        )
+    );
+}
+
 /// Asserts that (pseudocode) `model.to_json() == json` (serialization)
 /// and also asserts the associative property:
 /// `Model::from_json(json) == model` (deserialization)

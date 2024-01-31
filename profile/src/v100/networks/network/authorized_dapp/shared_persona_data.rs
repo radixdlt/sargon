@@ -17,10 +17,121 @@ pub struct SharedPersonaData {
     /// IDs of a `PersonaDataEntryPhoneNumber`s the user has shared with some dApp on some network
     /// can be `None`, or can be `Some(<EMPTY>)`.
     pub phone_numbers: Option<SharedCollection>,
+}
 
-    
+impl SharedPersonaData {
+    pub fn new(
+        name: impl Into<Option<PersonaDataEntryID>>,
+        email_addresses: impl Into<Option<SharedCollection>>,
+        phone_numbers: impl Into<Option<SharedCollection>>,
+    ) -> Self {
+        Self {
+            name: name.into(),
+            email_addresses: email_addresses.into(),
+            phone_numbers: phone_numbers.into(),
+        }
+    }
 }
 
 impl HasPlaceholder for SharedPersonaData {
+    fn placeholder() -> Self {
+        let id = IDGenerator::<PersonaDataEntryID>::starting_at(0);
+        Self::new(
+            id.next(),
+            SharedCollection::new(
+                RequestedQuantity::exactly(2),
+                IdentifiedVecVia::from_iter([id.next(), id.next()]),
+            ),
+            SharedCollection::new(
+                RequestedQuantity::at_least(1),
+                IdentifiedVecVia::from_iter([id.next(), id.next()]),
+            ),
+        )
+    }
 
+    fn placeholder_other() -> Self {
+        let id = IDGenerator::<PersonaDataEntryID>::starting_at(0xf0);
+        Self::new(
+            id.next(),
+            SharedCollection::new(
+                RequestedQuantity::exactly(2),
+                IdentifiedVecVia::from_iter([id.next(), id.next()]),
+            ),
+            SharedCollection::new(
+                RequestedQuantity::at_least(1),
+                IdentifiedVecVia::from_iter([id.next(), id.next()]),
+            ),
+        )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::prelude::*;
+
+    #[test]
+    fn json_roundtrip_placeholder() {
+        let model = SharedPersonaData::placeholder();
+        assert_eq_after_json_roundtrip(
+            &model,
+            r#"
+            {
+				"name": "00000000-0000-0000-0000-000000000000",
+				"emailAddresses": {
+					"request": {
+						"quantifier": "exactly",
+						"quantity": 2
+					},
+					"ids": [
+						"00000000-0000-0000-0000-000000000001",
+						"00000000-0000-0000-0000-000000000002"
+					]
+				},
+				"phoneNumbers": {
+					"request": {
+						"quantifier": "atLeast",
+						"quantity": 1
+					},
+					"ids": [
+						"00000000-0000-0000-0000-000000000003",
+						"00000000-0000-0000-0000-000000000004"
+					]
+				}
+			}
+            "#,
+        );
+    }
+
+    #[test]
+    fn json_roundtrip_placeholder_other() {
+        let model = SharedPersonaData::placeholder_other();
+        assert_eq_after_json_roundtrip(
+            &model,
+            r#"
+            {
+				"name": "00000000-0000-0000-0000-0000000000f0",
+				"emailAddresses": {
+					"request": {
+						"quantifier": "exactly",
+						"quantity": 2
+					},
+					"ids": [
+						"00000000-0000-0000-0000-0000000000f1",
+						"00000000-0000-0000-0000-0000000000f2"
+					]
+				},
+				"phoneNumbers": {
+					"request": {
+						"quantifier": "atLeast",
+						"quantity": 1
+					},
+					"ids": [
+						"00000000-0000-0000-0000-0000000000f3",
+						"00000000-0000-0000-0000-0000000000f4"
+					]
+				}
+			}
+            "#,
+        );
+    }
 }

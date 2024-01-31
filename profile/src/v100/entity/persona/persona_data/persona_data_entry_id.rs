@@ -61,16 +61,34 @@ impl From<Uuid> for PersonaDataEntryID {
     }
 }
 
+impl PersonaDataEntryID {
+    fn from_u64(value: u64) -> Self {
+        Uuid::from_u64_pair(0, value).into()
+    }
+
+    pub fn placeholder_one() -> Self {
+        Self::from_u64(1)
+    }
+
+    pub fn placeholder_two() -> Self {
+        Self::from_u64(2)
+    }
+
+    pub fn placeholder_three() -> Self {
+        Self::from_u64(3)
+    }
+
+    pub fn placeholder_four() -> Self {
+        Self::from_u64(4)
+    }
+}
+
 impl HasPlaceholder for PersonaDataEntryID {
     fn placeholder() -> Self {
-        Uuid::from_str("00000000-0000-0000-0000-000000000001")
-            .expect("Should have a valid placeholder")
-            .into()
+        Self::placeholder_one()
     }
 
     fn placeholder_other() -> Self {
-        Uuid::from_str("00000000-0000-0000-0000-000000000002")
-            .expect("Should have a valid placeholder")
-            .into()
+        Self::placeholder_two()
     }
 }

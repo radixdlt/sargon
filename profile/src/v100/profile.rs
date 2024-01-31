@@ -471,7 +471,7 @@ mod tests {
 						"defaultDepositGuarantee": "0.975"
 					}
 				},
-				"networks": [	
+				"networks": 				[
 					{
 						"networkID": 1,
 						"accounts": [
@@ -692,7 +692,7 @@ mod tests {
 								}
 							}
 						],
-						"authorizedDapps": [
+						"authorizedDapps":	[
 							{
 								"networkID": 1,
 								"dAppDefinitionAddress": "account_rdx12x0xfz2yumu2qsh6yt0v8xjfc7et04vpsz775kc3yd3xvle4w5d5k5",
@@ -710,6 +710,29 @@ mod tests {
 												"account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease",
 												"account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master"
 											]
+										},
+										"sharedPersonaData": {
+											"name": "00000000-0000-0000-0000-000000000000",
+											"emailAddresses": {
+												"request": {
+													"quantifier": "exactly",
+													"quantity": 2
+												},
+												"ids": [
+													"00000000-0000-0000-0000-000000000001",
+													"00000000-0000-0000-0000-000000000002"
+												]
+											},
+											"phoneNumbers": {
+												"request": {
+													"quantifier": "atLeast",
+													"quantity": 1
+												},
+												"ids": [
+													"00000000-0000-0000-0000-000000000003",
+													"00000000-0000-0000-0000-000000000004"
+												]
+											}
 										}
 									},
 									{
@@ -723,6 +746,29 @@ mod tests {
 											"ids": [
 												"account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master"
 											]
+										},
+										"sharedPersonaData": {
+											"name": "00000000-0000-0000-0000-0000000000f0",
+											"emailAddresses": {
+												"request": {
+													"quantifier": "exactly",
+													"quantity": 2
+												},
+												"ids": [
+													"00000000-0000-0000-0000-0000000000f1",
+													"00000000-0000-0000-0000-0000000000f2"
+												]
+											},
+											"phoneNumbers": {
+												"request": {
+													"quantifier": "atLeast",
+													"quantity": 1
+												},
+												"ids": [
+													"00000000-0000-0000-0000-0000000000f3",
+													"00000000-0000-0000-0000-0000000000f4"
+												]
+											}
 										}
 									}
 								]
@@ -743,13 +789,36 @@ mod tests {
 											"ids": [
 												"account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master"
 											]
+										},
+										"sharedPersonaData": {
+											"name": "00000000-0000-0000-0000-0000000000f0",
+											"emailAddresses": {
+												"request": {
+													"quantifier": "exactly",
+													"quantity": 2
+												},
+												"ids": [
+													"00000000-0000-0000-0000-0000000000f1",
+													"00000000-0000-0000-0000-0000000000f2"
+												]
+											},
+											"phoneNumbers": {
+												"request": {
+													"quantifier": "atLeast",
+													"quantity": 1
+												},
+												"ids": [
+													"00000000-0000-0000-0000-0000000000f3",
+													"00000000-0000-0000-0000-0000000000f4"
+												]
+											}
 										}
 									}
 								]
 							}
 						]
 					},
-									{
+					{
 						"networkID": 2,
 						"accounts": [
 							{
@@ -961,8 +1030,8 @@ mod tests {
 								}
 							}
 						],
-						"authorizedDapps": [
-							{
+						"authorizedDapps": 	[
+								{
 								"networkID": 2,
 								"dAppDefinitionAddress": "account_tdx_2_128evrrwfp8gj9240qq0m06ukhwaj2cmejluxxreanzjwq62vmlf8r4",
 								"displayName": "Dev Console",
@@ -979,6 +1048,29 @@ mod tests {
 												"account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql",
 												"account_tdx_2_129663ef7fj8azge3y6sl73lf9vyqt53ewzlf7ul2l76mg5wyqlqlpr"
 											]
+										},
+										"sharedPersonaData": {
+											"name": "00000000-0000-0000-0000-000000000000",
+											"emailAddresses": {
+												"request": {
+													"quantifier": "exactly",
+													"quantity": 2
+												},
+												"ids": [
+													"00000000-0000-0000-0000-000000000001",
+													"00000000-0000-0000-0000-000000000002"
+												]
+											},
+											"phoneNumbers": {
+												"request": {
+													"quantifier": "atLeast",
+													"quantity": 1
+												},
+												"ids": [
+													"00000000-0000-0000-0000-000000000003",
+													"00000000-0000-0000-0000-000000000004"
+												]
+											}
 										}
 									},
 									{
@@ -992,6 +1084,29 @@ mod tests {
 											"ids": [
 												"account_tdx_2_129663ef7fj8azge3y6sl73lf9vyqt53ewzlf7ul2l76mg5wyqlqlpr"
 											]
+										},
+										"sharedPersonaData": {
+											"name": "00000000-0000-0000-0000-0000000000f0",
+											"emailAddresses": {
+												"request": {
+													"quantifier": "exactly",
+													"quantity": 2
+												},
+												"ids": [
+													"00000000-0000-0000-0000-0000000000f1",
+													"00000000-0000-0000-0000-0000000000f2"
+												]
+											},
+											"phoneNumbers": {
+												"request": {
+													"quantifier": "atLeast",
+													"quantity": 1
+												},
+												"ids": [
+													"00000000-0000-0000-0000-0000000000f3",
+													"00000000-0000-0000-0000-0000000000f4"
+												]
+											}
 										}
 									}
 								]
@@ -1012,6 +1127,29 @@ mod tests {
 											"ids": [
 												"account_tdx_2_129663ef7fj8azge3y6sl73lf9vyqt53ewzlf7ul2l76mg5wyqlqlpr"
 											]
+										},
+										"sharedPersonaData": {
+											"name": "00000000-0000-0000-0000-0000000000f0",
+											"emailAddresses": {
+												"request": {
+													"quantifier": "exactly",
+													"quantity": 2
+												},
+												"ids": [
+													"00000000-0000-0000-0000-0000000000f1",
+													"00000000-0000-0000-0000-0000000000f2"
+												]
+											},
+											"phoneNumbers": {
+												"request": {
+													"quantifier": "atLeast",
+													"quantity": 1
+												},
+												"ids": [
+													"00000000-0000-0000-0000-0000000000f3",
+													"00000000-0000-0000-0000-0000000000f4"
+												]
+											}
 										}
 									}
 								]

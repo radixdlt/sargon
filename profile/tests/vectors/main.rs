@@ -66,7 +66,9 @@ where
 #[cfg(test)]
 mod profile_snapshot_tests {
     use super::*;
-  
+    use profile::assert_json_value_eq_after_roundtrip;
+    use profile::prelude::*;
+
     #[test]
     fn v100_100() {
         let (profile, json) = fixture_and_json::<Profile>(

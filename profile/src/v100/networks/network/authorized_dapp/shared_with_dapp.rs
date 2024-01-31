@@ -23,30 +23,12 @@ macro_rules! declare_shared_with_dapp {
         impl $struct_name {
             pub fn new(
                 request: RequestedQuantity,
-                ids: IdentifiedVecVia<$id_ent_type>,
+                ids: impl Into<IdentifiedVecVia<$id_ent_type>>,
             ) -> Self {
-                Self { request, ids }
-            }
-        }
-
-        impl HasPlaceholder for $struct_name {
-            fn placeholder() -> Self {
-                $struct_name::new(
-                    RequestedQuantity::exactly(2),
-                    IdentifiedVecVia::from_iter([
-                        <$id_ent_type>::placeholder(),
-                        <$id_ent_type>::placeholder_other(),
-                    ]),
-                )
-            }
-
-            fn placeholder_other() -> Self {
-                $struct_name::new(
-                    RequestedQuantity::at_least(1),
-                    IdentifiedVecVia::from_iter([
-                        <$id_ent_type>::placeholder_other(),
-                    ]),
-                )
+                Self {
+                    request,
+                    ids: ids.into(),
+                }
             }
         }
     };
@@ -56,16 +38,32 @@ declare_shared_with_dapp!(AccountAddress, SharedAccounts);
 
 declare_shared_with_dapp!(PersonaDataEntryID, SharedCollection);
 
+impl HasPlaceholder for SharedAccounts {
+    fn placeholder() -> Self {
+        Self::placeholder_mainnet()
+    }
+
+    fn placeholder_other() -> Self {
+        Self::placeholder_mainnet_other()
+    }
+}
 impl SharedAccounts {
     pub fn placeholder_mainnet() -> Self {
-        let value = Self::placeholder();
-        assert!(&value.ids.iter().all(|a| a.network_id == NetworkID::Mainnet));
-        value
+        Self::new(
+            RequestedQuantity::exactly(2),
+            IdentifiedVecVia::from_iter([
+                AccountAddress::placeholder_mainnet(),
+                AccountAddress::placeholder_mainnet_other(),
+            ]),
+        )
     }
     pub fn placeholder_mainnet_other() -> Self {
-        let value = Self::placeholder_other();
-        assert!(&value.ids.iter().all(|a| a.network_id == NetworkID::Mainnet));
-        value
+        Self::new(
+            RequestedQuantity::at_least(1),
+            IdentifiedVecVia::from_iter([
+                AccountAddress::placeholder_mainnet_other(),
+            ]),
+        )
     }
     pub fn placeholder_stokenet() -> Self {
         Self::new(
