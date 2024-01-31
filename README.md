@@ -42,6 +42,11 @@ Middleware that can power Radix Wallet clients (iOS/Android).
 - [x] Create LedgerFactorSource
 - [ ] Save LedgerFactorSource (trivially done)
 
+### Dapp Interaction
+
+- [ ] Map `AuthorizedPersonaSimple` -> `AuthorizedPersonaDetailed`
+- [ ] Update `AuthorizedPersonaSimple` based on a Dapp request
+
 ## MODELS
 
 `[=================================================-]`

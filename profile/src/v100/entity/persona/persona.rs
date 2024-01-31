@@ -124,7 +124,7 @@ impl Persona {
         let next = || {
             let n = Uuid::from_u64_pair(0, *ctr.lock().unwrap().borrow());
             ctr.lock().unwrap().borrow_mut().add_assign(1);
-            n
+            n.into()
         };
 
         let phone_numbers = CollectionOfPhoneNumbers::entries(
@@ -146,7 +146,10 @@ impl Persona {
                 .derive_entity_creation_factor_instance(network_id, index),
             DisplayName::new(display_name).unwrap(),
             Some(PersonaData::new(
-                Some(PersonaDataIdentifiedName::with_id(Uuid::nil(), name)),
+                Some(PersonaDataIdentifiedName::with_id(
+                    PersonaDataEntryID::nil(),
+                    name,
+                )),
                 phone_numbers,
                 email_addresses,
             )),

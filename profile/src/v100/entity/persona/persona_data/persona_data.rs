@@ -184,7 +184,7 @@ mod tests {
         .unwrap();
         let persona_data = PersonaData {
             name: Some(PersonaDataIdentifiedName::with_id(
-                Uuid::nil(),
+                PersonaDataEntryID::nil(),
                 name.clone(),
             )),
             ..Default::default()
@@ -192,7 +192,7 @@ mod tests {
         assert_eq!(
             persona_data.name,
             Some(PersonaDataIdentifiedName::with_id(
-                Uuid::from_str("00000000-0000-0000-0000-000000000000").unwrap(),
+                "00000000-0000-0000-0000-000000000000".parse().unwrap(),
                 name
             ))
         );

@@ -39,7 +39,6 @@ uniffi = { git = "https://github.com/mozilla/uniffi-rs", rev = "fb8dd5c0f9406ea5
     "cli",
 ] }
 
-
 [profile.release]
 incremental = false
 panic = 'unwind'

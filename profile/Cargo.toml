@@ -41,7 +41,6 @@ bip39 = { version = "2.0.0", features = ["serde"] }
 time-util = { version = "0.3.4", features = ["chrono"] }
 derive_more = { workspace = true }
 
-
 [build-dependencies]
 uniffi = { workspace = true, features = ["build"] }
 
