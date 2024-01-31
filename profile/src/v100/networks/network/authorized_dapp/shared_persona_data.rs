@@ -17,4 +17,10 @@ pub struct SharedPersonaData {
     /// IDs of a `PersonaDataEntryPhoneNumber`s the user has shared with some dApp on some network
     /// can be `None`, or can be `Some(<EMPTY>)`.
     pub phone_numbers: Option<SharedCollection>,
+
+    
+}
+
+impl HasPlaceholder for SharedPersonaData {
+
 }

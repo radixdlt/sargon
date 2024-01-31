@@ -33,37 +33,47 @@ pub enum TestingError {
 
 /// `name` is file name without extension, assuming it is json file
 #[cfg(not(tarpaulin_include))]
-fn fixture<'a, T>(name: impl AsRef<OsStr>) -> Result<T, TestingError>
+fn fixture_and_json<'a, T>(
+    name: impl AsRef<OsStr>,
+) -> Result<(T, serde_json::Value), TestingError>
 where
     T: for<'de> Deserialize<'de>,
 {
     let base = append_to_path(crate_dir(), "/tests/vectors/fixtures/");
     let base_file_path = append_to_path(base, name);
     let path = append_to_path(base_file_path, ".json");
-    fs::read_to_string(path.clone())
+    let json = fs::read_to_string(path.clone())
         .map_err(|_| TestingError::FailedToOpenFile(path))
         .and_then(|j| {
             serde_json::Value::from_str(j.as_str())
                 .map_err(|_| TestingError::FailedDoesNotContainValidJSON(j))
-        })
-        .and_then(|v| {
-            serde_json::from_value::<T>(v)
-                .map_err(TestingError::FailedToDeserialize)
-        })
+        })?;
+
+    serde_json::from_value::<T>(json.clone())
+        .map_err(TestingError::FailedToDeserialize)
+        .map(|v| (v, json))
+}
+
+/// `name` is file name without extension, assuming it is json file
+#[cfg(not(tarpaulin_include))]
+fn fixture<'a, T>(name: impl AsRef<OsStr>) -> Result<T, TestingError>
+where
+    T: for<'de> Deserialize<'de>,
+{
+    fixture_and_json(name).map(|t| t.0)
 }
 
 #[cfg(test)]
 mod profile_snapshot_tests {
     use super::*;
+  
     #[test]
     fn v100_100() {
-        let profile =
-            fixture::<Profile>("only_plaintext_profile_snapshot_version_100")
-                .expect("V100 Profile to deserialize");
-        assert_eq!(
-            profile.header.snapshot_version,
-            ProfileSnapshotVersion::V100
-        );
+        let (profile, json) = fixture_and_json::<Profile>(
+            "only_plaintext_profile_snapshot_version_100",
+        )
+        .expect("V100 Profile to deserialize");
+        assert_json_value_eq_after_roundtrip(&profile, json)
     }
 }
 

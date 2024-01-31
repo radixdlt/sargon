@@ -23,6 +23,9 @@ pub struct AuthorizedPersonaSimple {
 
     /// List of "ongoing accountAddresses" that user given the dApp access to.
     pub shared_accounts: Option<SharedAccounts>,
+
+    /// ID to PersonaData entires to user has shared with a Dapp.
+    pub shared_persona_data: SharedPersonaData,
 }
 
 impl AuthorizedPersonaSimple {
@@ -30,11 +33,13 @@ impl AuthorizedPersonaSimple {
         identity_address: IdentityAddress,
         last_login: Timestamp,
         shared_accounts: Option<SharedAccounts>,
+        shared_persona_data: SharedPersonaData,
     ) -> Self {
         Self {
             identity_address,
             last_login,
             shared_accounts,
+            shared_persona_data,
         }
     }
 }

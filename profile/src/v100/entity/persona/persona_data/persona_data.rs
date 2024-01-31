@@ -53,6 +53,40 @@ pub struct PersonaData {
     /// `(Uuid, PersonaDataIdentifiedEmailAddress)`, each element is identifiable by its ID. Can be empty, can
     /// contain elements with the same value, but under different IDs.
     pub email_addresses: CollectionOfEmailAddresses,
+
+    /// Includes "postalAddresses: []" JSON when `PersonaData` is serialized, which is required to be
+    /// compatible with wallets, but the clients to not yet use Postal Addresses, so we defer creation
+    /// of it.
+    #[serde(default)]
+    postal_addresses: NothingList,
+
+    /// Includes "creditCards: []" JSON when `PersonaData` is serialized, which is required to be
+    /// compatible with wallets, but the clients to not yet use Credit Cards, so we defer creation
+    /// of it.
+    #[serde(default)]
+    credit_cards: NothingList,
+
+    /// Includes "urls: []" JSON when `PersonaData` is serialized, which is required to be
+    /// compatible with wallets, but the clients to not yet use URLs, so we defer creation
+    /// of it.
+    #[serde(default)]
+    urls: NothingList,
+}
+
+#[derive(
+    Serialize,
+    Deserialize,
+    Debug,
+    Clone,
+    Default,
+    PartialEq,
+    Hash,
+    Eq,
+    uniffi::Record,
+)]
+#[serde(transparent)]
+pub struct NothingList {
+    empty: Vec<bool>,
 }
 
 impl PersonaData {
@@ -65,6 +99,9 @@ impl PersonaData {
             name,
             phone_numbers,
             email_addresses,
+            postal_addresses: NothingList::default(),
+            credit_cards: NothingList::default(),
+            urls: NothingList::default(),
         }
     }
 }
