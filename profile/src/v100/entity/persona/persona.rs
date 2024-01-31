@@ -6,6 +6,25 @@ use std::ops::AddAssign;
 use std::sync::atomic::AtomicU64;
 use std::sync::Mutex;
 
+/// A Persona is an identity a user choses to login to a dApp with, using
+/// RadixConnect - Radix decentralized login solution. A persona is very
+/// similar to [`Account`]s, in the sense that they are On-Network/On-Ledger
+/// components, with a unique network dependent address ([`IdentityAddress`])
+/// and with a security state (see [`EntitySecurityState`]) knowing which
+/// factor instances that control this component, but with one important
+/// difference: a Persona cannot hold funds. It is impossible to transfer
+/// any asset to a Persona. The On-Network component representation of
+/// the Persona is called `Identity`. The concept "Persona" is a Radix
+/// Wallet (Profile) *application* of an Identity.
+///
+/// Personas have data (see [`PersonaData`]), which is personal information
+/// a user has associated with a this Persona, of different kinds, such as name,
+/// email address(es) or phone number(s). The `PersonaData` is **never** uploaded
+/// to the Radix Network, i.e. it is a pure Radix Wallet (Profile) construct,
+/// On-Network Identities does not know of PersonaData, and never will (well
+/// technically, nothing stops a user from building their own wallet and uploading
+/// personal information to the metadata of the Identity component... but `Sargon`
+/// never will, nor will the Radix Wallet.).
 #[derive(
     Serialize,
     Deserialize,
@@ -44,6 +63,9 @@ pub struct Persona {
     #[serde(default)]
     pub flags: EntityFlags,
 
+    /// Personal information a user has associated with a certain Persona, of different kinds, such as name,
+    /// email address(es) or phone number(s). This information is only ever stored in Profile and is never
+    /// uploaded to the Radix Network.
     pub persona_data: PersonaData,
 }
 
@@ -79,7 +101,7 @@ impl Persona {
         network_id: NetworkID,
         index: HDPathValue,
         display_name: &str,
-        name: Name,
+        name: PersonaDataEntryName,
         phone_numbers: P,
         email_addresses: E,
     ) -> Self
@@ -107,14 +129,14 @@ impl Persona {
         let phone_numbers = CollectionOfPhoneNumbers::entries(
             phone_numbers
                 .into_iter()
-                .map(|s| s.parse::<PhoneNumber>().unwrap())
+                .map(|s| s.parse::<PersonaDataEntryPhoneNumber>().unwrap())
                 .map(|v| PersonaDataIdentifiedPhoneNumber::with_id(next(), v)),
         );
 
         let email_addresses = CollectionOfEmailAddresses::entries(
             email_addresses
                 .into_iter()
-                .map(|s| s.parse::<EmailAddress>().unwrap())
+                .map(|s| s.parse::<PersonaDataEntryEmailAddress>().unwrap())
                 .map(|v| PersonaDataIdentifiedEmailAddress::with_id(next(), v)),
         );
 
@@ -134,7 +156,7 @@ impl Persona {
     fn placeholder_at_index_name<P, E>(
         index: HDPathValue,
         display_name: &str,
-        name: Name,
+        name: PersonaDataEntryName,
         phone_numbers: P,
         email_addresses: E,
     ) -> Self
@@ -161,11 +183,13 @@ impl Persona {
     }
 
     pub fn placeholder_mainnet_satoshi() -> Self {
-        let name =
-            Name::new(Variant::Eastern, "Nakamoto", "Satoshi", "Satoshi")
-                .expect(
-                "Failure to construct placeholder Name should not be possible",
-            );
+        let name = PersonaDataEntryName::new(
+            Variant::Eastern,
+            "Nakamoto",
+            "Satoshi",
+            "Satoshi",
+        )
+        .expect("Failure to construct placeholder Name should not be possible");
         Self::placeholder_at_index_name(
             0,
             "Satoshi",
@@ -182,10 +206,13 @@ impl Persona {
     }
 
     pub fn placeholder_mainnet_batman() -> Self {
-        let name = Name::new(Variant::Western, "Wayne", "Bruce", "Batman")
-            .expect(
-                "Failure to construct placeholder Name should not be possible",
-            );
+        let name = PersonaDataEntryName::new(
+            Variant::Western,
+            "Wayne",
+            "Bruce",
+            "Batman",
+        )
+        .expect("Failure to construct placeholder Name should not be possible");
         Self::placeholder_at_index_name(
             1,
             "Batman",
@@ -202,11 +229,13 @@ impl Persona {
     }
 
     pub fn placeholder_stokenet_leia_skywalker() -> Self {
-        let name =
-            Name::new(Variant::Eastern, "Skywalker", "Leia", "Princess Leia")
-                .expect(
-                "Failure to construct placeholder Name should not be possible",
-            );
+        let name = PersonaDataEntryName::new(
+            Variant::Eastern,
+            "Skywalker",
+            "Leia",
+            "Princess Leia",
+        )
+        .expect("Failure to construct placeholder Name should not be possible");
         Self::placeholder_at_index_name_network(
             NetworkID::Stokenet,
             0,
@@ -224,10 +253,13 @@ impl Persona {
     }
 
     pub fn placeholder_stokenet_hermione() -> Self {
-        let name = Name::new(Variant::Western, "Granger", "Hermione", "Hermy")
-            .expect(
-                "Failure to construct placeholder Name should not be possible",
-            );
+        let name = PersonaDataEntryName::new(
+            Variant::Western,
+            "Granger",
+            "Hermione",
+            "Hermy",
+        )
+        .expect("Failure to construct placeholder Name should not be possible");
         Self::placeholder_at_index_name_network(
             NetworkID::Stokenet,
             1,

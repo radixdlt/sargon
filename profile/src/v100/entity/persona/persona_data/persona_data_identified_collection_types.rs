@@ -130,15 +130,15 @@ mod collection_of_phone_numbers_tests {
 
     #[test]
     fn new_with_value() {
-        let value = PhoneNumber::placeholder();
+        let value = PersonaDataEntryPhoneNumber::placeholder();
         let sut = SUT::single_value(value.clone());
         assert_eq!(sut.collection.items().first().unwrap().value, value);
     }
 
     #[test]
     fn new_with_values() {
-        let value0 = PhoneNumber::placeholder();
-        let value1 = PhoneNumber::placeholder_other();
+        let value0 = PersonaDataEntryPhoneNumber::placeholder();
+        let value1 = PersonaDataEntryPhoneNumber::placeholder_other();
         let sut = SUT::values([value0.clone(), value1.clone()]);
         assert_eq!(
             sut.collection.into_iter().map(|e| e.value).collect_vec(),
@@ -240,7 +240,7 @@ mod collection_of_email_addresses_tests {
 
     #[test]
     fn new_with_value() {
-        let value = EmailAddress::placeholder();
+        let value = PersonaDataEntryEmailAddress::placeholder();
         let sut = SUT::single_value(value.clone());
         assert_eq!(sut.collection.items().first().unwrap().value, value);
     }
@@ -302,8 +302,8 @@ mod collection_of_email_addresses_tests {
 
     #[test]
     fn new_with_values() {
-        let value0 = EmailAddress::placeholder();
-        let value1 = EmailAddress::placeholder_other();
+        let value0 = PersonaDataEntryEmailAddress::placeholder();
+        let value1 = PersonaDataEntryEmailAddress::placeholder_other();
         let sut = SUT::values([value0.clone(), value1.clone()]);
         assert_eq!(
             sut.collection.into_iter().map(|e| e.value).collect_vec(),

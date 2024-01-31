@@ -1,5 +1,14 @@
 use crate::prelude::*;
 
+/// A persons name they have chosen to associated with a Persona, e.g. "Bruce 'Batman' Wayne" using Western name variant,
+/// or `"Jun-fan 'Bruce' Lee"` using Eastern name variant (family name comes before given name(s)).
+///
+/// Nickname is optional in the sense that it can be left blank. Family name and given names are never empty.
+///
+/// If a name has multiple given names, they all go into the `given_names` String, e.g. Pippi Longstocking's real name -
+/// her Swedish name - is in full: "Pippilotta Viktualia Rullgardina Krusmynta Efraimsdotter Långstrump", where her
+/// given names: "Pippilotta Viktualia Rullgardina Krusmynta Efraimsdotter" are put in the `given_names` field, and
+/// "Långstrump" (Longstocking) is her family name.
 #[derive(
     Serialize,
     Deserialize,
@@ -14,14 +23,14 @@ use crate::prelude::*;
 #[display("{}", self.full())]
 #[debug("{}", self.full())]
 #[serde(rename_all = "camelCase")]
-pub struct Name {
+pub struct PersonaDataEntryName {
     pub variant: Variant,
     pub family_name: String,
     pub given_names: String,
     pub nickname: String,
 }
 
-impl Name {
+impl PersonaDataEntryName {
     pub fn new(
         variant: Variant,
         family_name: impl AsRef<str>,
@@ -59,14 +68,14 @@ impl Name {
     }
 }
 
-impl HasPlaceholder for Name {
+impl HasPlaceholder for PersonaDataEntryName {
     fn placeholder() -> Self {
-        Name::new(Variant::Western, "Wayne", "Bruce", "Batman")
+        PersonaDataEntryName::new(Variant::Western, "Wayne", "Bruce", "Batman")
             .expect("Should have a valid Name placeholder")
     }
 
     fn placeholder_other() -> Self {
-        Name::new(Variant::Eastern, "Jun-fan", "Lee", "Bruce")
+        PersonaDataEntryName::new(Variant::Eastern, "Jun-fan", "Lee", "Bruce")
             .expect("Should have a valid Name placeholder")
     }
 }
@@ -86,9 +95,13 @@ mod tests {
 
     #[test]
     fn new_name() {
-        let name =
-            Name::new(Variant::Western, "\n Wayne\n ", "  Bruce  ", "Batman ")
-                .unwrap(); // testing trim
+        let name = PersonaDataEntryName::new(
+            Variant::Western,
+            "\n Wayne\n ",
+            "  Bruce  ",
+            "Batman ",
+        )
+        .unwrap(); // testing trim
         assert_eq!(name.family_name, "Wayne");
         assert_eq!(name.given_names, "Bruce");
         assert_eq!(name.nickname, "Batman");
@@ -96,7 +109,7 @@ mod tests {
 
     #[test]
     fn new_from_string_multiple_given_names() {
-        let name = Name::new(
+        let name = PersonaDataEntryName::new(
             Variant::Western,
             "Långstrump".to_string(),
             "Pippilotta Viktualia Rullgardina Krusmynta Efraimsdotter"
@@ -112,7 +125,7 @@ mod tests {
 
     #[test]
     fn placeholder() {
-        let placeholder = Name::placeholder();
+        let placeholder = PersonaDataEntryName::placeholder();
         assert_eq!(placeholder.family_name, "Wayne");
         assert_eq!(placeholder.given_names, "Bruce");
         assert_eq!(placeholder.nickname, "Batman");
@@ -120,7 +133,7 @@ mod tests {
 
     #[test]
     fn placeholder_other() {
-        let placeholder = Name::placeholder_other();
+        let placeholder = PersonaDataEntryName::placeholder_other();
         assert_eq!(placeholder.family_name, "Jun-fan");
         assert_eq!(placeholder.given_names, "Lee");
         assert_eq!(placeholder.nickname, "Bruce");
@@ -129,7 +142,12 @@ mod tests {
     #[test]
     fn empty_family_name_is_err() {
         assert_eq!(
-            Name::new(Variant::Western, "", "Clark", "Superman"),
+            PersonaDataEntryName::new(
+                Variant::Western,
+                "",
+                "Clark",
+                "Superman"
+            ),
             Err(CommonError::PersonaDataInvalidNameFamilyNameEmpty)
         );
     }
@@ -137,7 +155,12 @@ mod tests {
     #[test]
     fn spaces_trimmed_empty_family_name_is_err() {
         assert_eq!(
-            Name::new(Variant::Western, "  ", "Clark", "Superman"),
+            PersonaDataEntryName::new(
+                Variant::Western,
+                "  ",
+                "Clark",
+                "Superman"
+            ),
             Err(CommonError::PersonaDataInvalidNameFamilyNameEmpty)
         );
     }
@@ -145,7 +168,7 @@ mod tests {
     #[test]
     fn empty_given_names_is_err() {
         assert_eq!(
-            Name::new(Variant::Western, "Kent", "", "Superman"),
+            PersonaDataEntryName::new(Variant::Western, "Kent", "", "Superman"),
             Err(CommonError::PersonaDataInvalidNameGivenNamesEmpty)
         );
     }
@@ -153,7 +176,12 @@ mod tests {
     #[test]
     fn spaces_trimmed_empty_given_names_is_err() {
         assert_eq!(
-            Name::new(Variant::Western, "Kent", " ", "Superman"),
+            PersonaDataEntryName::new(
+                Variant::Western,
+                "Kent",
+                " ",
+                "Superman"
+            ),
             Err(CommonError::PersonaDataInvalidNameGivenNamesEmpty)
         );
     }
@@ -161,7 +189,7 @@ mod tests {
     #[test]
     fn empty_nickname_is_ok() {
         assert_eq!(
-            Name::new(Variant::Western, "Kent", "Clark", "")
+            PersonaDataEntryName::new(Variant::Western, "Kent", "Clark", "")
                 .unwrap()
                 .nickname,
             ""
@@ -170,19 +198,19 @@ mod tests {
 
     #[test]
     fn display_western() {
-        let placeholder = Name::placeholder();
+        let placeholder = PersonaDataEntryName::placeholder();
         assert_eq!(format!("{placeholder}"), "Bruce Batman Wayne")
     }
 
     #[test]
     fn display_eastern() {
-        let placeholder = Name::placeholder_other();
+        let placeholder = PersonaDataEntryName::placeholder_other();
         assert_eq!(format!("{placeholder}"), "Jun-fan Bruce Lee")
     }
 
     #[test]
     fn json_roundtrip_placeholder() {
-        let model = Name::placeholder();
+        let model = PersonaDataEntryName::placeholder();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -198,7 +226,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_placeholder_other() {
-        let model = Name::placeholder_other();
+        let model = PersonaDataEntryName::placeholder_other();
         assert_eq_after_json_roundtrip(
             &model,
             r#"

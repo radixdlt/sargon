@@ -1,5 +1,10 @@
 use crate::prelude::*;
 
+/// A persons email address they have chosen to associated with a Persona, e.g.
+/// `satoshi@btc.org`.
+///
+/// Current implementation does not validate the email address other than it
+/// cannot be empty (in the future we might add some simple validation).
 #[derive(
     Serialize,
     Deserialize,
@@ -14,11 +19,11 @@ use crate::prelude::*;
 #[display("{email}")]
 #[debug("{email}")]
 #[serde(transparent)]
-pub struct EmailAddress {
+pub struct PersonaDataEntryEmailAddress {
     pub email: String,
 }
 
-impl Identifiable for EmailAddress {
+impl Identifiable for PersonaDataEntryEmailAddress {
     type ID = String;
 
     fn id(&self) -> Self::ID {
@@ -26,7 +31,7 @@ impl Identifiable for EmailAddress {
     }
 }
 
-impl FromStr for EmailAddress {
+impl FromStr for PersonaDataEntryEmailAddress {
     type Err = CommonError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -34,7 +39,7 @@ impl FromStr for EmailAddress {
     }
 }
 
-impl EmailAddress {
+impl PersonaDataEntryEmailAddress {
     pub fn new(email: impl AsRef<str>) -> Result<Self> {
         let email = email.as_ref().to_owned();
         if email.is_empty() {
@@ -44,7 +49,7 @@ impl EmailAddress {
     }
 }
 
-impl HasPlaceholder for EmailAddress {
+impl HasPlaceholder for PersonaDataEntryEmailAddress {
     fn placeholder() -> Self {
         Self::new("alan@turing.hero").expect("Valid placeholder.")
     }
@@ -60,62 +65,67 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(EmailAddress::placeholder(), EmailAddress::placeholder());
         assert_eq!(
-            EmailAddress::placeholder_other(),
-            EmailAddress::placeholder_other()
+            PersonaDataEntryEmailAddress::placeholder(),
+            PersonaDataEntryEmailAddress::placeholder()
+        );
+        assert_eq!(
+            PersonaDataEntryEmailAddress::placeholder_other(),
+            PersonaDataEntryEmailAddress::placeholder_other()
         );
     }
 
     #[test]
     fn inequality() {
         assert_ne!(
-            EmailAddress::placeholder(),
-            EmailAddress::placeholder_other()
+            PersonaDataEntryEmailAddress::placeholder(),
+            PersonaDataEntryEmailAddress::placeholder_other()
         );
     }
 
     #[test]
     fn invalid_empty() {
         assert_eq!(
-            EmailAddress::new(""),
+            PersonaDataEntryEmailAddress::new(""),
             Err(CommonError::PersonaDataInvalidEmailAddressEmpty)
         );
     }
 
     #[test]
     fn json_roundtrip_placeholder() {
-        let model = EmailAddress::placeholder();
+        let model = PersonaDataEntryEmailAddress::placeholder();
         assert_json_value_eq_after_roundtrip(&model, json!("alan@turing.hero"));
     }
 
     #[test]
     fn id_is_email() {
         assert_eq!(
-            EmailAddress::placeholder().id(),
-            EmailAddress::placeholder().email
+            PersonaDataEntryEmailAddress::placeholder().id(),
+            PersonaDataEntryEmailAddress::placeholder().email
         );
     }
 
     #[test]
     fn new_from_string() {
         assert_eq!(
-            EmailAddress::new("alan@turing.hero".to_string()).unwrap(),
-            EmailAddress::placeholder()
+            PersonaDataEntryEmailAddress::new("alan@turing.hero".to_string())
+                .unwrap(),
+            PersonaDataEntryEmailAddress::placeholder()
         );
     }
 
     #[test]
     fn new_from_str() {
         assert_eq!(
-            EmailAddress::new("alan@turing.hero").unwrap(),
-            EmailAddress::placeholder()
+            PersonaDataEntryEmailAddress::new("alan@turing.hero").unwrap(),
+            PersonaDataEntryEmailAddress::placeholder()
         );
     }
 
     #[test]
     fn new_with_fromstr() {
-        let email: EmailAddress = "alan@turing.hero".parse().unwrap();
-        assert_eq!(email, EmailAddress::placeholder());
+        let email: PersonaDataEntryEmailAddress =
+            "alan@turing.hero".parse().unwrap();
+        assert_eq!(email, PersonaDataEntryEmailAddress::placeholder());
     }
 }

@@ -83,9 +83,15 @@ macro_rules! declare_identified_entry {
     };
 }
 
-declare_identified_entry!(Name, PersonaDataIdentifiedName);
-declare_identified_entry!(PhoneNumber, PersonaDataIdentifiedPhoneNumber);
-declare_identified_entry!(EmailAddress, PersonaDataIdentifiedEmailAddress);
+declare_identified_entry!(PersonaDataEntryName, PersonaDataIdentifiedName);
+declare_identified_entry!(
+    PersonaDataEntryPhoneNumber,
+    PersonaDataIdentifiedPhoneNumber
+);
+declare_identified_entry!(
+    PersonaDataEntryEmailAddress,
+    PersonaDataIdentifiedEmailAddress
+);
 
 #[cfg(test)]
 mod identified_name_tests {
@@ -93,7 +99,7 @@ mod identified_name_tests {
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = PersonaDataIdentifiedName;
-    type V = Name;
+    type V = PersonaDataEntryName;
 
     #[test]
     fn equality() {
@@ -194,7 +200,7 @@ mod identified_number_tests {
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = PersonaDataIdentifiedPhoneNumber;
-    type V = PhoneNumber;
+    type V = PersonaDataEntryPhoneNumber;
 
     #[test]
     fn equality() {
@@ -283,7 +289,7 @@ mod identified_email_tests {
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = PersonaDataIdentifiedEmailAddress;
-    type V = EmailAddress;
+    type V = PersonaDataEntryEmailAddress;
 
     #[test]
     fn equality() {
