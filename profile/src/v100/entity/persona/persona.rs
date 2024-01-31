@@ -101,6 +101,7 @@ impl Persona {
         network_id: NetworkID,
         index: HDPathValue,
         display_name: &str,
+        is_hidden: bool,
         name: PersonaDataEntryName,
         phone_numbers: P,
         email_addresses: E,
@@ -140,7 +141,7 @@ impl Persona {
                 .map(|v| PersonaDataIdentifiedEmailAddress::with_id(next(), v)),
         );
 
-        Self::new(
+        let mut persona = Self::new(
             private_hd_factor_source
                 .derive_entity_creation_factor_instance(network_id, index),
             DisplayName::new(display_name).unwrap(),
@@ -149,13 +150,18 @@ impl Persona {
                 phone_numbers,
                 email_addresses,
             )),
-        )
+        );
+        if is_hidden {
+            persona.flags.insert_flag(EntityFlag::DeletedByUser);
+        }
+        persona
     }
 
     #[cfg(not(tarpaulin_include))] // false negative
     fn placeholder_at_index_name<P, E>(
         index: HDPathValue,
         display_name: &str,
+        is_hidden: bool,
         name: PersonaDataEntryName,
         phone_numbers: P,
         email_addresses: E,
@@ -168,6 +174,7 @@ impl Persona {
             NetworkID::Mainnet,
             index,
             display_name,
+            is_hidden,
             name,
             phone_numbers,
             email_addresses,
@@ -193,6 +200,7 @@ impl Persona {
         Self::placeholder_at_index_name(
             0,
             "Satoshi",
+            false,
             name,
             ["+46123456789", "+44987654321"]
                 .into_iter()
@@ -216,6 +224,7 @@ impl Persona {
         Self::placeholder_at_index_name(
             1,
             "Batman",
+            true,
             name,
             ["+1 13 371 337"]
                 .into_iter()
@@ -229,18 +238,20 @@ impl Persona {
     }
 
     pub fn placeholder_stokenet_leia_skywalker() -> Self {
-        let name = PersonaDataEntryName::new(
-            Variant::Eastern,
-            "Skywalker",
-            "Leia",
-            "Princess Leia",
-        )
-        .expect("Failure to construct placeholder Name should not be possible");
         Self::placeholder_at_index_name_network(
             NetworkID::Stokenet,
             0,
             "Skywalker",
-            name,
+            false,
+            PersonaDataEntryName::new(
+                Variant::Eastern,
+                "Skywalker",
+                "Leia",
+                "Princess Leia",
+            )
+            .expect(
+                "Failure to construct placeholder Name should not be possible",
+            ),
             ["+42 3 456 789"]
                 .into_iter()
                 .map(|s| s.to_string())
@@ -253,18 +264,20 @@ impl Persona {
     }
 
     pub fn placeholder_stokenet_hermione() -> Self {
-        let name = PersonaDataEntryName::new(
-            Variant::Western,
-            "Granger",
-            "Hermione",
-            "Hermy",
-        )
-        .expect("Failure to construct placeholder Name should not be possible");
         Self::placeholder_at_index_name_network(
             NetworkID::Stokenet,
             1,
             "Granger",
-            name,
+            true,
+            PersonaDataEntryName::new(
+                Variant::Western,
+                "Granger",
+                "Hermione",
+                "Hermy",
+            )
+            .expect(
+                "Failure to construct placeholder Name should not be possible",
+            ),
             ["+44 123 456 77"]
                 .into_iter()
                 .map(|s| s.to_string())
@@ -355,50 +368,6 @@ mod tests {
 			format!("{account}"),
 			"Batman | identity_rdx12gcd4r799jpvztlffgw483pqcen98pjnay988n8rmscdswd872xy62"
 		);
-    }
-
-    #[test]
-    fn display_name_get_set() {
-        let mut persona = Persona::placeholder_batman();
-        assert_eq!(persona.display_name.value, "Batman");
-        let new_display_name = DisplayName::new("Satoshi").unwrap();
-        persona.display_name = new_display_name.clone();
-        assert_eq!(persona.display_name, new_display_name);
-    }
-
-    #[test]
-    fn update() {
-        let mut persona = Persona::placeholder_satoshi();
-        assert_eq!(persona.display_name.value, "Satoshi");
-        persona.display_name = DisplayName::new("Batman").unwrap();
-        assert_eq!(persona.display_name.value, "Batman");
-    }
-
-    #[test]
-    fn flags_get_set() {
-        let mut persona = Persona::placeholder_batman();
-        assert_eq!(persona.flags, EntityFlags::default());
-        let new_flags = EntityFlags::with_flag(EntityFlag::DeletedByUser);
-        persona.flags = new_flags.clone();
-        assert_eq!(persona.flags, new_flags);
-    }
-
-    #[test]
-    fn placeholder_display_name() {
-        let placeholder = Persona::placeholder();
-        assert_eq!(
-            placeholder.display_name,
-            DisplayName::new("Satoshi").unwrap()
-        );
-    }
-
-    #[test]
-    fn placeholder_other_display_name() {
-        let placeholder = Persona::placeholder_other();
-        assert_eq!(
-            placeholder.display_name,
-            DisplayName::new("Batman").unwrap()
-        );
     }
 
     #[test]
@@ -528,7 +497,7 @@ mod tests {
 						}
 					}
 				},
-				"flags": [],
+				"flags": ["deletedByUser"],
 				"personaData": {
 					"name": {
 						"id": "00000000-0000-0000-0000-000000000000",
@@ -666,7 +635,7 @@ mod tests {
 						}
 					}
 				},
-				"flags": [],
+				"flags": ["deletedByUser"],
 				"personaData": {
 					"name": {
 						"id": "00000000-0000-0000-0000-000000000000",

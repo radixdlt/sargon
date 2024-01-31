@@ -158,14 +158,11 @@ impl Account {
         }
     }
 
-    fn placeholder_at_index_name(index: HDPathValue, name: &str) -> Self {
-        Self::placeholder_at_index_name_network(NetworkID::Mainnet, index, name)
-    }
-
     fn placeholder_at_index_name_network(
         network_id: NetworkID,
         index: HDPathValue,
         name: &str,
+        is_hidden: bool,
     ) -> Self {
         let mwp = MnemonicWithPassphrase::placeholder();
         let bdfs = DeviceFactorSource::babylon(
@@ -178,29 +175,46 @@ impl Account {
         let account_creating_factor_instance = private_hd_factor_source
             .derive_entity_creation_factor_instance(network_id, index);
 
-        Self::new(
+        let mut account = Self::new(
             account_creating_factor_instance,
             DisplayName::new(name).unwrap(),
             AppearanceID::try_from(index as u8).unwrap(),
+        );
+        if is_hidden {
+            account.flags.insert_flag(EntityFlag::DeletedByUser);
+        }
+        account
+    }
+
+    fn placeholder_at_index_name(
+        index: HDPathValue,
+        name: &str,
+        is_hidden: bool,
+    ) -> Self {
+        Self::placeholder_at_index_name_network(
+            NetworkID::Mainnet,
+            index,
+            name,
+            is_hidden,
         )
     }
 
     /// A `Mainnet` account named "Alice", a placeholder used to facilitate unit tests, with
     /// derivation index 0,
     pub fn placeholder_mainnet_alice() -> Self {
-        Self::placeholder_at_index_name(0, "Alice")
+        Self::placeholder_at_index_name(0, "Alice", false)
     }
 
     /// A `Mainnet` account named "Bob", a placeholder used to facilitate unit tests, with
     /// derivation index 1.
     pub fn placeholder_mainnet_bob() -> Self {
-        Self::placeholder_at_index_name(1, "Bob")
+        Self::placeholder_at_index_name(1, "Bob", true)
     }
 
     /// A `Mainnet` account named "Carol", a placeholder used to facilitate unit tests, with
     /// derivation index 2.
     pub fn placeholder_mainnet_carol() -> Self {
-        Self::placeholder_at_index_name(2, "Carol")
+        Self::placeholder_at_index_name(2, "Carol", false)
     }
 
     /// A `Mainnet` account named "Alice", a placeholder used to facilitate unit tests, with
@@ -227,12 +241,22 @@ impl Account {
 
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_stokenet_carol() -> Self {
-        Self::placeholder_at_index_name_network(NetworkID::Stokenet, 0, "Carol")
+        Self::placeholder_at_index_name_network(
+            NetworkID::Stokenet,
+            0,
+            "Carol",
+            false,
+        )
     }
 
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_stokenet_diana() -> Self {
-        Self::placeholder_at_index_name_network(NetworkID::Stokenet, 1, "Diana")
+        Self::placeholder_at_index_name_network(
+            NetworkID::Stokenet,
+            1,
+            "Diana",
+            true,
+        )
     }
 
     pub fn placeholder_stokenet() -> Self {
@@ -282,6 +306,7 @@ mod tests {
         DepositAddressExceptionRule, DepositRule, DepositorAddress, EntityFlag,
         EntityFlags, HasPlaceholder, OnLedgerSettings, ThirdPartyDeposits,
     };
+    use identified_vec::IsIdentifiedVec;
     use radix_engine_common::prelude::HashSet;
 
     use crate::v100::{AccountAddress, AppearanceID, DisplayName};
@@ -429,7 +454,6 @@ mod tests {
 						"depositorsAllowList": []
 					}
 				},
-				"flags": [],
 				"address": "account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8"
 			}
             "#,
@@ -475,7 +499,7 @@ mod tests {
 				},
 				"networkID": 1,
 				"appearanceID": 1,
-				"flags": [],
+				"flags": ["deletedByUser"],
 				"displayName": "Bob",
 				"onLedgerSettings": {
 					"thirdPartyDeposits": {
@@ -484,7 +508,6 @@ mod tests {
 						"depositorsAllowList": []
 					}
 				},
-				"flags": [],
 				"address": "account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69"
 			}
             "#,
@@ -539,7 +562,6 @@ mod tests {
 						"depositorsAllowList": []
 					}
 				},
-				"flags": [],
 				"address": "account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql"
 			}
             "#,
@@ -585,7 +607,7 @@ mod tests {
 				},
 				"networkID": 2,
 				"appearanceID": 1,
-				"flags": [],
+				"flags": ["deletedByUser"],
 				"displayName": "Diana",
 				"onLedgerSettings": {
 					"thirdPartyDeposits": {
@@ -594,7 +616,6 @@ mod tests {
 						"depositorsAllowList": []
 					}
 				},
-				"flags": [],
 				"address": "account_tdx_2_129663ef7fj8azge3y6sl73lf9vyqt53ewzlf7ul2l76mg5wyqlqlpr"
 			}
             "#,

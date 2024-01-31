@@ -234,7 +234,7 @@ mod tests {
 							}
 						}
 					},
-					"flags": [],
+					"flags": ["deletedByUser"],
 					"personaData": {
 						"name": {
 							"id": "00000000-0000-0000-0000-000000000000",
@@ -364,7 +364,7 @@ mod tests {
 							}
 						}
 					},
-					"flags": [],
+					"flags": ["deletedByUser"],
 					"personaData": {
 						"name": {
 							"id": "00000000-0000-0000-0000-000000000000",

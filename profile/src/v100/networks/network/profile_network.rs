@@ -208,7 +208,6 @@ mod tests {
 								"depositorsAllowList": []
 							}
 						},
-						"flags": [],
 						"address": "account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8"
 					},
 					{
@@ -244,7 +243,7 @@ mod tests {
 						},
 						"networkID": 1,
 						"appearanceID": 1,
-						"flags": [],
+						"flags": ["deletedByUser"],
 						"displayName": "Bob",
 						"onLedgerSettings": {
 							"thirdPartyDeposits": {
@@ -253,7 +252,6 @@ mod tests {
 								"depositorsAllowList": []
 							}
 						},
-						"flags": [],
 						"address": "account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69"
 					}
 				],
@@ -359,7 +357,7 @@ mod tests {
 								}
 							}
 						},
-						"flags": [],
+						"flags": ["deletedByUser"],
 						"personaData": {
 							"name": {
 								"id": "00000000-0000-0000-0000-000000000000",
@@ -441,7 +439,6 @@ mod tests {
 								"depositorsAllowList": []
 							}
 						},
-						"flags": [],
 						"address": "account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql"
 					},
 					{
@@ -477,7 +474,7 @@ mod tests {
 						},
 						"networkID": 2,
 						"appearanceID": 1,
-						"flags": [],
+						"flags": ["deletedByUser"],
 						"displayName": "Diana",
 						"onLedgerSettings": {
 							"thirdPartyDeposits": {
@@ -486,7 +483,6 @@ mod tests {
 								"depositorsAllowList": []
 							}
 						},
-						"flags": [],
 						"address": "account_tdx_2_129663ef7fj8azge3y6sl73lf9vyqt53ewzlf7ul2l76mg5wyqlqlpr"
 					}
 				],
@@ -584,7 +580,7 @@ mod tests {
 								}
 							}
 						},
-						"flags": [],
+						"flags": ["deletedByUser"],
 						"personaData": {
 							"name": {
 								"id": "00000000-0000-0000-0000-000000000000",
