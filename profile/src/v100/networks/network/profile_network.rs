@@ -42,7 +42,14 @@ impl ProfileNetwork {
                 .get_all()
                 .into_iter()
                 .all(|a| a.network_id == network_id),
-            "Discrepancy, found accounts on other network than {network_id}"
+            "Discrepancy, found an Account on other network than {network_id}"
+        );
+        assert!(
+            personas
+                .get_all()
+                .into_iter()
+                .all(|p| p.network_id == network_id),
+            "Discrepancy, found a Persona on other network than {network_id}"
         );
         Self {
             id: network_id,
@@ -144,7 +151,7 @@ mod tests {
 
     #[test]
     #[should_panic(
-        expected = "Discrepancy, found accounts on other network than mainnet"
+        expected = "Discrepancy, found an Account on other network than mainnet"
     )]
     fn panic_when_network_id_mismatch_between_accounts_and_value() {
         ProfileNetwork::new(
@@ -154,6 +161,18 @@ mod tests {
                 Account::placeholder_stokenet(),
             ]),
             Personas::default(),
+        );
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "Discrepancy, found a Persona on other network than mainnet"
+    )]
+    fn panic_when_network_id_mismatch_between_persona_and_value() {
+        ProfileNetwork::new(
+            NetworkID::Mainnet,
+            Accounts::placeholder_mainnet(),
+            Personas::from_iter([Persona::placeholder_stokenet_hermione()]),
         );
     }
 
