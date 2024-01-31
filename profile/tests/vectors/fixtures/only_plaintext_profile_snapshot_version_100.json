@@ -87,8 +87,6 @@
                     "flags": [],
                     "displayName": "Sajjon",
                     "personaData": {
-                        "postalAddresses": [],
-                        "creditCards": [],
                         "emailAddresses": [
                             {
                                 "id": "8d8ab282-ab20-4d07-8461-06a31553af1c",
@@ -109,8 +107,7 @@
                                 "id": "f30a2a14-e25f-4597-8a49-e74fedb10f44",
                                 "value": "0700838198"
                             }
-                        ],
-                        "urls": []
+                        ]
                     },
                     "address": "identity_tdx_e_122k9saakdjazzwm98rlpjlwewy0wvx0csmtvstdut528r0t0z8cy30"
                 }
@@ -849,11 +846,8 @@
                     ],
                     "displayName": "Stokeman",
                     "personaData": {
-                        "postalAddresses": [],
-                        "creditCards": [],
                         "phoneNumbers": [],
-                        "emailAddresses": [],
-                        "urls": []
+                        "emailAddresses": []
                     },
                     "address": "identity_tdx_2_1224clayjwq45swgd0xj2uc4s3gq4l6g7q77f9d290su4flufq2lt9j"
                 },
@@ -894,8 +888,6 @@
                     ],
                     "displayName": "Dan",
                     "personaData": {
-                        "postalAddresses": [],
-                        "creditCards": [],
                         "emailAddresses": [
                             {
                                 "id": "f6cfe950-100c-4696-9aa2-68766d10b6be",
@@ -916,8 +908,7 @@
                                 "id": "fb3e1ac2-fcc7-474c-82a2-600e1a2d69e9",
                                 "value": "1337"
                             }
-                        ],
-                        "urls": []
+                        ]
                     },
                     "address": "identity_tdx_2_122tvh7nq6jd2mp7l8ar5kayc3wr5u5z5pew9r86vtvlwnsydx80pne"
                 }
