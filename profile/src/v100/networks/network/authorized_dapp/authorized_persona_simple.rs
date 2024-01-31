@@ -101,6 +101,20 @@ impl HasPlaceholder for AuthorizedPersonaSimple {
 mod tests {
     use crate::prelude::*;
 
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = AuthorizedPersonaSimple;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::placeholder(), SUT::placeholder());
+        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+    }
+
     #[test]
     fn json_roundtrip_placeholder() {
         let model = AuthorizedPersonaSimple::placeholder();

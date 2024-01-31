@@ -92,3 +92,73 @@ impl HasPlaceholder for PersonaDataEntryID {
         Self::placeholder_two()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::prelude::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = PersonaDataEntryID;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::placeholder(), SUT::placeholder());
+        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+    }
+
+    #[test]
+    fn deref() {
+        assert_eq!(*SUT::placeholder_one(), Uuid::from_u64_pair(0, 1));
+    }
+
+    #[test]
+    fn hash() {
+        assert_eq!(
+            HashSet::<_>::from_iter([
+                SUT::placeholder_one(),
+                SUT::placeholder_two(),
+                SUT::placeholder_three(),
+                SUT::placeholder_four(),
+                // twice
+                SUT::placeholder_one(),
+                SUT::placeholder_two(),
+                SUT::placeholder_three(),
+                SUT::placeholder_four(),
+            ])
+            .len(),
+            4
+        );
+    }
+
+    #[test]
+    fn generate() {
+        let n = 1000;
+        assert_eq!(
+            (0..n)
+                .map(|_| SUT::generate())
+                .collect::<HashSet<_>>()
+                .len(),
+            n
+        );
+    }
+
+    #[test]
+    fn from_str_ok() {
+        assert_eq!(
+            SUT::nil(),
+            "00000000-0000-0000-0000-000000000000".parse().unwrap()
+        );
+    }
+    #[test]
+    fn from_str_err() {
+        assert_eq!(
+            "foobar".parse::<SUT>(),
+            Err(CommonError::InvalidUUIDv4("foobar".to_owned()))
+        );
+    }
+}
