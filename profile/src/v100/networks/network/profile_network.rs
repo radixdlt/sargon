@@ -16,6 +16,8 @@ pub struct ProfileNetwork {
 
     /// An ordered set of Personas on this network.
     pub personas: Personas,
+
+    pub authorized_dapps: AuthorizedDapps,
 }
 
 impl Identifiable for ProfileNetwork {
@@ -36,6 +38,7 @@ impl ProfileNetwork {
         network_id: NetworkID,
         accounts: Accounts,
         personas: Personas,
+        authorized_dapps: AuthorizedDapps,
     ) -> Self {
         assert!(
             accounts
@@ -55,6 +58,7 @@ impl ProfileNetwork {
             id: network_id,
             accounts,
             personas,
+            authorized_dapps,
         }
     }
 }

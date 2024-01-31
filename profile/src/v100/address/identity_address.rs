@@ -57,6 +57,47 @@ impl EntityAddress for IdentityAddress {
     }
 }
 
+impl IdentityAddress {
+    pub fn placeholder_mainnet() -> Self {
+        let address: IdentityAddress = "identity_rdx122kttqch0eehzj6f9nkkxcw7msfeg9udurq5u0ysa0e92c59w0mg6x"
+            .parse()
+            .expect("Should have a valid placeholder value");
+        assert_eq!(address.network_id, NetworkID::Mainnet);
+        address
+    }
+    pub fn placeholder_mainnet_other() -> Self {
+        let address: IdentityAddress = "identity_rdx12gcd4r799jpvztlffgw483pqcen98pjnay988n8rmscdswd872xy62"
+            .parse()
+            .expect("Should have a valid placeholder value");
+        assert_eq!(address.network_id, NetworkID::Mainnet);
+        address
+    }
+    pub fn placeholder_stokenet() -> Self {
+        let address: IdentityAddress = "identity_tdx_2_12fk6qyu2860xyx2jk7j6ex464ccrnxrve4kpaa8qyxx99y5627ahhc"
+            .parse()
+            .expect("Should have a valid placeholder value");
+        assert_eq!(address.network_id, NetworkID::Stokenet);
+        address
+    }
+    pub fn placeholder_stokenet_other() -> Self {
+        let address: IdentityAddress = "identity_tdx_2_12gr0d9da3jvye7mdrreljyqs35esjyjsl9r8t5v96hq6fq367cln08"
+            .parse()
+            .expect("Should have a valid placeholder value");
+        assert_eq!(address.network_id, NetworkID::Stokenet);
+        address
+    }
+}
+
+impl HasPlaceholder for IdentityAddress {
+    fn placeholder() -> Self {
+        Self::placeholder_mainnet()
+    }
+
+    fn placeholder_other() -> Self {
+        Self::placeholder_mainnet_other()
+    }
+}
+
 impl FromStr for IdentityAddress {
     type Err = CommonError;
 
@@ -129,29 +170,22 @@ mod tests {
 
     #[test]
     fn equality() {
-        let i: IdentityAddress =
-            "identity_rdx12gzxlgre0glhh9jxaptm7tdth8j4w4r8ykpg2xjfv45nghzsjzrvmp"
-                .parse()
-                .unwrap();
         assert_eq!(
-            i,
-            "identity_rdx12gzxlgre0glhh9jxaptm7tdth8j4w4r8ykpg2xjfv45nghzsjzrvmp"
-                .parse()
-                .unwrap()
-        )
+            IdentityAddress::placeholder(),
+            IdentityAddress::placeholder()
+        );
+        assert_eq!(
+            IdentityAddress::placeholder_other(),
+            IdentityAddress::placeholder_other()
+        );
     }
 
     #[test]
-    fn not_equal() {
-        let i: IdentityAddress =
-            "identity_rdx12gzxlgre0glhh9jxaptm7tdth8j4w4r8ykpg2xjfv45nghzsjzrvmp"
-                .parse()
-                .unwrap();
-        let j: IdentityAddress =
-            "identity_rdx12tgzjrz9u0xz4l28vf04hz87eguclmfaq4d2p8f8lv7zg9ssnzku8j"
-                .parse()
-                .unwrap();
-        assert_ne!(i, j)
+    fn inequality() {
+        assert_ne!(
+            IdentityAddress::placeholder(),
+            IdentityAddress::placeholder_other()
+        );
     }
 
     #[test]

@@ -25,10 +25,44 @@ pub struct AuthorizedPersonaSimple {
     pub shared_accounts: Option<SharedAccounts>,
 }
 
+impl AuthorizedPersonaSimple {
+    pub fn new(identity_address: IdentityAddress, last_login: Timestamp, shared_accounts: Option<SharedAccounts>) -> Self {
+        Self {
+            identity_address,
+            last_login,
+            shared_accounts
+        }
+    }
+}
+
 impl Identifiable for AuthorizedPersonaSimple {
     type ID = IdentityAddress;
 
     fn id(&self) -> Self::ID {
         self.identity_address.clone()
+    }
+}
+
+impl AuthorizedPersonaSimple {
+    pub fn placeholder_mainnet_satoshi() -> Self {
+       Self::new(IdentityAddress::placeholder_mainnet(), now(), Some(SharedAccounts::placeholder()))
+    }
+    pub fn placeholder_mainnet_batman() -> Self {
+        todo!()
+    }
+    pub fn placeholder_stokenet_hermione() -> Self {
+        todo!()
+    }
+    pub fn placeholder_stokenet_leia() -> Self {
+        todo!()
+    }
+}
+impl HasPlaceholder for AuthorizedPersonaSimple {
+    fn placeholder() -> Self {
+        Self::placeholder_mainnet_satoshi()
+    }
+
+    fn placeholder_other() -> Self {
+        Self::placeholder_mainnet_batman()
     }
 }

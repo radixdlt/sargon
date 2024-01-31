@@ -20,12 +20,61 @@ pub struct AuthorizedDapp {
         IdentifiedVecVia<AuthorizedPersonaSimple>,
 }
 
+impl AuthorizedDapp {
+    pub fn new(
+        network_id: NetworkID,
+        dapp_definition_address: DappDefinitionAddress,
+        display_name: Option<impl AsRef<str>>,
+        references_to_authorized_personas: IdentifiedVecVia<
+            AuthorizedPersonaSimple,
+        >,
+    ) -> Self {
+        Self {
+            network_id,
+            dapp_definition_address,
+            display_name: display_name.map(|n| n.as_ref().to_string()),
+            references_to_authorized_personas,
+        }
+    }
+}
+
+impl Identifiable for AuthorizedDapp {
+    type ID = DappDefinitionAddress;
+
+    fn id(&self) -> Self::ID {
+        self.dapp_definition_address.clone()
+    }
+}
+
 pub type DappDefinitionAddress = AccountAddress;
 
-impl Identifiable for DappDefinitionAddress {
+impl Identifiable for AccountAddress {
     type ID = Self;
 
     fn id(&self) -> Self::ID {
         self.clone()
+    }
+}
+
+impl AuthorizedDapp {
+    pub fn placeholder_mainnet_dashboard() -> Self {
+        Self::new(NetworkID::Mainnet, dapp_definition_address: "account_rdx12x0xfz2yumu2qsh6yt0v8xjfc7et04vpsz775kc3yd3xvle4w5d5k5".parse().expect("Valid Dapp Def Address"), "Dashboard", references_to_authorized_personas: IdentifiedVecVia::from_iter([]))
+    }
+    pub fn placeholder_mainnet_gumballclub() -> Self {
+        todo!()
+    }
+    pub fn placeholder_stokenet_devconsole() -> Self {
+        todo!()
+    }
+    pub fn placeholder_stokenet_sandbox() -> Self {
+        todo!()
+    }
+}
+impl HasPlaceholder for AuthorizedDapp {
+    fn placeholder() -> Self {
+        Self::placeholder_mainnet_dashboard()
+    }
+    fn placeholder_other() -> Self {
+        Self::placeholder_mainnet_gumballclub()
     }
 }

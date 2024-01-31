@@ -1,7 +1,8 @@
 use crate::prelude::*;
 
-/// An ordered set of Accounts on a specific network, most commonly
-/// the set is non-empty.
+/// An ordered set of [`Account`]s on a specific network, most commonly
+/// the set is non-empty, since wallets guide user to create a first
+/// Account.
 pub type Accounts = IdentifiedVecVia<Account>;
 
 impl Accounts {

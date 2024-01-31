@@ -25,6 +25,14 @@ impl Identifiable for PersonaDataEntryID {
     }
 }
 
+impl std::ops::Deref for PersonaDataEntryID {
+    type Target = Uuid;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 impl PersonaDataEntryID {
     /// Generates a new `PersonaDataEntryID` (using Uuid::new_v4())
     pub fn generate() -> Self {

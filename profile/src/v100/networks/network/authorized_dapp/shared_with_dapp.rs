@@ -54,3 +54,14 @@ macro_rules! declare_shared_with_dapp {
 declare_shared_with_dapp!(AccountAddress, SharedAccounts);
 
 declare_shared_with_dapp!(PersonaDataEntryID, SharedCollection);
+
+impl
+impl HasPlaceholder for SharedAccounts {
+    fn placeholder() -> Self {
+        todo!()
+    }
+
+    fn placeholder_other() -> Self {
+        todo!()
+    }
+}
