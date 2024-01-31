@@ -363,7 +363,7 @@ mod tests {
     #[test]
     fn on_ledger_settings_get_set() {
         let mut account = Account::placeholder_with_values(
-            AccountAddress::placeholder_alice(),
+            AccountAddress::placeholder(),
             DisplayName::new("Test").unwrap(),
             AppearanceID::default(),
         );

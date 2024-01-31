@@ -61,8 +61,8 @@ impl Accounts {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_mainnet() -> Self {
         Self::with_accounts([
-            Account::placeholder_mainnet_alice(),
-            Account::placeholder_mainnet_bob(),
+            Account::placeholder_mainnet(),
+            Account::placeholder_mainnet_other(),
         ])
     }
 

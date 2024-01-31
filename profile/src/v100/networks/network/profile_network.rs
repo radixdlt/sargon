@@ -100,6 +100,7 @@ impl ProfileNetwork {
             NetworkID::Mainnet,
             Accounts::placeholder_mainnet(),
             Personas::placeholder_mainnet(),
+            AuthorizedDapps::placeholder_mainnet(),
         )
     }
 
@@ -109,6 +110,7 @@ impl ProfileNetwork {
             NetworkID::Stokenet,
             Accounts::placeholder_stokenet(),
             Personas::placeholder_stokenet(),
+            AuthorizedDapps::placeholder_stokenet(),
         )
     }
 }
@@ -145,7 +147,8 @@ mod tests {
                     [Account::placeholder(), Account::placeholder()]
                         .into_iter()
                 ),
-                Personas::default()
+                Personas::default(),
+                AuthorizedDapps::default(),
             )
             .accounts
             .len(),
@@ -165,6 +168,7 @@ mod tests {
                 Account::placeholder_stokenet(),
             ]),
             Personas::default(),
+            AuthorizedDapps::default(),
         );
     }
 
@@ -177,6 +181,7 @@ mod tests {
             NetworkID::Mainnet,
             Accounts::placeholder_mainnet(),
             Personas::from_iter([Persona::placeholder_stokenet_hermione()]),
+            AuthorizedDapps::default(),
         );
     }
 

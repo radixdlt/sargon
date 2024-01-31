@@ -26,11 +26,15 @@ pub struct AuthorizedPersonaSimple {
 }
 
 impl AuthorizedPersonaSimple {
-    pub fn new(identity_address: IdentityAddress, last_login: Timestamp, shared_accounts: Option<SharedAccounts>) -> Self {
+    pub fn new(
+        identity_address: IdentityAddress,
+        last_login: Timestamp,
+        shared_accounts: Option<SharedAccounts>,
+    ) -> Self {
         Self {
             identity_address,
             last_login,
-            shared_accounts
+            shared_accounts,
         }
     }
 }
@@ -44,25 +48,42 @@ impl Identifiable for AuthorizedPersonaSimple {
 }
 
 impl AuthorizedPersonaSimple {
-    pub fn placeholder_mainnet_satoshi() -> Self {
-       Self::new(IdentityAddress::placeholder_mainnet(), now(), Some(SharedAccounts::placeholder()))
+    pub fn placeholder_mainnet() -> Self {
+        Self::new(
+            IdentityAddress::placeholder_mainnet(),
+            Timestamp::parse("2024-01-31T14:23:45Z").unwrap(),
+            Some(SharedAccounts::placeholder_mainnet()),
+        )
     }
-    pub fn placeholder_mainnet_batman() -> Self {
-        todo!()
+    pub fn placeholder_mainnet_other() -> Self {
+        Self::new(
+            IdentityAddress::placeholder_mainnet_other(),
+            Timestamp::parse("2024-01-31T14:23:45Z").unwrap(),
+            Some(SharedAccounts::placeholder_mainnet_other()),
+        )
     }
-    pub fn placeholder_stokenet_hermione() -> Self {
-        todo!()
+
+    pub fn placeholder_stokenet() -> Self {
+        Self::new(
+            IdentityAddress::placeholder_stokenet(),
+            Timestamp::parse("2024-01-31T14:23:45Z").unwrap(),
+            Some(SharedAccounts::placeholder_stokenet()),
+        )
     }
-    pub fn placeholder_stokenet_leia() -> Self {
-        todo!()
+    pub fn placeholder_stokenet_other() -> Self {
+        Self::new(
+            IdentityAddress::placeholder_stokenet_other(),
+            Timestamp::parse("2024-01-31T14:23:45Z").unwrap(),
+            Some(SharedAccounts::placeholder_stokenet_other()),
+        )
     }
 }
 impl HasPlaceholder for AuthorizedPersonaSimple {
     fn placeholder() -> Self {
-        Self::placeholder_mainnet_satoshi()
+        Self::placeholder_mainnet()
     }
 
     fn placeholder_other() -> Self {
-        Self::placeholder_mainnet_batman()
+        Self::placeholder_mainnet_other()
     }
 }

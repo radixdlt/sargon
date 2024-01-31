@@ -126,12 +126,14 @@ mod tests {
                 Account::placeholder_mainnet_bob(),
             ]),
             Personas::default(),
+            AuthorizedDapps::default(),
         )]);
         assert!(
             !sut.append(ProfileNetwork::new(
                 NetworkID::Mainnet,
                 Accounts::from_iter([Account::placeholder_mainnet_carol()]),
-                Personas::default()
+                Personas::default(),
+                AuthorizedDapps::default(),
             ))
             .0
         );
@@ -217,6 +219,7 @@ mod tests {
             NetworkID::Mainnet,
             Accounts::with_account(Account::placeholder_mainnet()),
             Personas::default(),
+            AuthorizedDapps::default(),
         );
         assert_eq!(ProfileNetworks::with_network(network).len(), 1);
     }

@@ -34,6 +34,7 @@ macro_rules! declare_shared_with_dapp {
                 $struct_name::new(
                     RequestedQuantity::exactly(2),
                     IdentifiedVecVia::from_iter([
+                        <$id_ent_type>::placeholder(),
                         <$id_ent_type>::placeholder_other(),
                     ]),
                 )
@@ -55,13 +56,32 @@ declare_shared_with_dapp!(AccountAddress, SharedAccounts);
 
 declare_shared_with_dapp!(PersonaDataEntryID, SharedCollection);
 
-impl
-impl HasPlaceholder for SharedAccounts {
-    fn placeholder() -> Self {
-        todo!()
+impl SharedAccounts {
+    pub fn placeholder_mainnet() -> Self {
+        let value = Self::placeholder();
+        assert!(&value.ids.iter().all(|a| a.network_id == NetworkID::Mainnet));
+        value
     }
-
-    fn placeholder_other() -> Self {
-        todo!()
+    pub fn placeholder_mainnet_other() -> Self {
+        let value = Self::placeholder_other();
+        assert!(&value.ids.iter().all(|a| a.network_id == NetworkID::Mainnet));
+        value
+    }
+    pub fn placeholder_stokenet() -> Self {
+        Self::new(
+            RequestedQuantity::exactly(2),
+            IdentifiedVecVia::from_iter([
+                AccountAddress::placeholder_stokenet(),
+                AccountAddress::placeholder_stokenet_other(),
+            ]),
+        )
+    }
+    pub fn placeholder_stokenet_other() -> Self {
+        Self::new(
+            RequestedQuantity::at_least(1),
+            IdentifiedVecVia::from_iter([
+                AccountAddress::placeholder_stokenet_other(),
+            ]),
+        )
     }
 }

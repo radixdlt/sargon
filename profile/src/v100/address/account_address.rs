@@ -124,29 +124,54 @@ impl EntityAddress for AccountAddress {
 impl HasPlaceholder for AccountAddress {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
-        Self::placeholder_alice()
+        Self::placeholder_mainnet()
     }
 
+    /// A placeholder used to facilitate unit tests.
     fn placeholder_other() -> Self {
-        Self::placeholder_bob()
+        Self::placeholder_mainnet_other()
     }
 }
 
 impl AccountAddress {
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_alice() -> Self {
-        AccountAddress::try_from_bech32(
+    pub fn placeholder_mainnet() -> Self {
+        let address = AccountAddress::try_from_bech32(
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease",
         )
-        .unwrap()
+        .unwrap();
+        assert_eq!(address.network_id, NetworkID::Mainnet);
+        address
     }
 
     /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_bob() -> Self {
-        AccountAddress::try_from_bech32(
+    pub fn placeholder_mainnet_other() -> Self {
+        let address = AccountAddress::try_from_bech32(
             "account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master",
         )
-        .unwrap()
+        .unwrap();
+        assert_eq!(address.network_id, NetworkID::Mainnet);
+        address
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_stokenet() -> Self {
+        let address = AccountAddress::try_from_bech32(
+                "account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql",
+            )
+            .unwrap();
+        assert_eq!(address.network_id, NetworkID::Stokenet);
+        address
+    }
+
+    /// A placeholder used to facilitate unit tests.
+    pub fn placeholder_stokenet_other() -> Self {
+        let address = AccountAddress::try_from_bech32(
+                "account_tdx_2_129663ef7fj8azge3y6sl73lf9vyqt53ewzlf7ul2l76mg5wyqlqlpr",
+            )
+            .unwrap();
+        assert_eq!(address.network_id, NetworkID::Stokenet);
+        address
     }
 }
 
