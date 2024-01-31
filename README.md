@@ -113,12 +113,12 @@ All models have Swift/Kotlin bindings using [UniFFI](https://github.com/mozilla/
   - [x] Gateways
     - [x] Gateway
     - [x] RadixNetwork
-- [ ] Persona
+- [x] Persona
   - [x] Persona (without `PersonaData`)
-  - [ ] PersonaData
-    - [ ] Name
-    - [ ] Email
-    - [ ] Phone
+  - [x] PersonaData
+    - [x] Name
+    - [x] Email
+    - [x] Phone
 - [ ] Authorized Dapp
   - [ ] Shared Accounts
   - [ ] Shared Personas
