@@ -31,11 +31,11 @@ impl Name {
         let family_name = family_name.as_ref().trim().to_string();
         let given_names = given_names.as_ref().trim().to_string();
         let nickname = nickname.as_ref().trim().to_string();
-        if family_name.is_empty()
-            || given_names.is_empty()
-            || nickname.is_empty()
-        {
-            return Err(CommonError::InvalidDisplayNameEmpty);
+        if family_name.is_empty() {
+            return Err(CommonError::PersonaDataInvalidNameFamilyNameEmpty);
+        }
+        if given_names.is_empty() {
+            return Err(CommonError::PersonaDataInvalidNameGivenNamesEmpty);
         }
         Ok(Self {
             variant,
@@ -62,12 +62,12 @@ impl Name {
 impl HasPlaceholder for Name {
     fn placeholder() -> Self {
         Name::new(Variant::Western, "Wayne", "Bruce", "Batman")
-            .expect("Failed to construct placeholder")
+            .expect("Should have a valid Name placeholder")
     }
 
     fn placeholder_other() -> Self {
         Name::new(Variant::Eastern, "Jun-fan", "Lee", "Bruce")
-            .expect("Failed to construct placeholder")
+            .expect("Should have a valid Name placeholder")
     }
 }
 
@@ -86,25 +86,28 @@ mod tests {
 
     #[test]
     fn new_name() {
-        let name = Name::new(Variant::Western, "Wayne", "Bruce", "Batman")
-            .expect("Name construction should not fail");
+        let name =
+            Name::new(Variant::Western, "\n Wayne\n ", "  Bruce  ", "Batman ")
+                .unwrap(); // testing trim
         assert_eq!(name.family_name, "Wayne");
         assert_eq!(name.given_names, "Bruce");
         assert_eq!(name.nickname, "Batman");
     }
 
     #[test]
-    fn new_as_ref() {
+    fn new_from_string_multiple_given_names() {
         let name = Name::new(
             Variant::Western,
-            "Wayne".to_string(),
-            "Bruce".to_string(),
-            "Batman".to_string(),
+            "Långstrump".to_string(),
+            "Pippilotta Viktualia Rullgardina Krusmynta Efraimsdotter"
+                .to_string(),
+            "Pippi".to_string(),
         )
-        .expect("Name construction should not fail");
-        assert_eq!(name.family_name, "Wayne");
-        assert_eq!(name.given_names, "Bruce");
-        assert_eq!(name.nickname, "Batman");
+        .unwrap();
+        assert_eq!(
+            name.given_names,
+            "Pippilotta Viktualia Rullgardina Krusmynta Efraimsdotter"
+        );
     }
 
     #[test]
@@ -124,43 +127,45 @@ mod tests {
     }
 
     #[test]
-    fn name_get_set() {
-        let mut name = Name::placeholder();
-        assert_eq!(name.family_name, "Wayne");
-        assert_eq!(name.given_names, "Bruce");
-        assert_eq!(name.nickname, "Batman");
-        let new_name = Name::new(Variant::Western, "Kent", "Clark", "Superman")
-            .expect("Name construction should not fail");
-        name = new_name.clone();
-        assert_eq!(name, new_name);
+    fn empty_family_name_is_err() {
+        assert_eq!(
+            Name::new(Variant::Western, "", "Clark", "Superman"),
+            Err(CommonError::PersonaDataInvalidNameFamilyNameEmpty)
+        );
     }
 
     #[test]
-    fn update() {
-        let mut name = Name::placeholder();
-        assert_eq!(name.family_name, "Wayne");
-        let new_name = Name::new(Variant::Western, "Kent", "Clark", "Superman")
-            .expect("Name construction should not fail");
-        name.family_name = new_name.family_name;
-        assert_eq!(name.family_name, "Kent");
+    fn spaces_trimmed_empty_family_name_is_err() {
+        assert_eq!(
+            Name::new(Variant::Western, "  ", "Clark", "Superman"),
+            Err(CommonError::PersonaDataInvalidNameFamilyNameEmpty)
+        );
     }
 
     #[test]
-    fn empty_family_name() {
-        let name = Name::new(Variant::Western, "", "Clark", "Superman");
-        assert_eq!(name, Err(CommonError::InvalidDisplayNameEmpty));
+    fn empty_given_names_is_err() {
+        assert_eq!(
+            Name::new(Variant::Western, "Kent", "", "Superman"),
+            Err(CommonError::PersonaDataInvalidNameGivenNamesEmpty)
+        );
     }
 
     #[test]
-    fn empty_given_name() {
-        let name = Name::new(Variant::Western, "Kent", "", "Superman");
-        assert_eq!(name, Err(CommonError::InvalidDisplayNameEmpty));
+    fn spaces_trimmed_empty_given_names_is_err() {
+        assert_eq!(
+            Name::new(Variant::Western, "Kent", " ", "Superman"),
+            Err(CommonError::PersonaDataInvalidNameGivenNamesEmpty)
+        );
     }
 
     #[test]
-    fn empty_nickname() {
-        let name = Name::new(Variant::Western, "Kent", "Clark", "");
-        assert_eq!(name, Err(CommonError::InvalidDisplayNameEmpty));
+    fn empty_nickname_is_ok() {
+        assert_eq!(
+            Name::new(Variant::Western, "Kent", "Clark", "")
+                .unwrap()
+                .nickname,
+            ""
+        );
     }
 
     #[test]

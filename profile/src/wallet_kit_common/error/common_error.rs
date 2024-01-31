@@ -295,4 +295,10 @@ pub enum CommonError {
 
     #[error("Invalid PersonaData - email address empty")]
     PersonaDataInvalidEmailAddressEmpty = 10083,
+
+    #[error("Invalid PersonaData - family name empty ")]
+    PersonaDataInvalidNameFamilyNameEmpty = 10084,
+
+    #[error("Invalid PersonaData - given names empty")]
+    PersonaDataInvalidNameGivenNamesEmpty = 10085,
 }
