@@ -171,11 +171,11 @@ impl Persona {
         )
     }
 
-    pub fn placeholder_satoshi() -> Self {
+    pub fn placeholder_mainnet() -> Self {
         Self::placeholder_mainnet_satoshi()
     }
 
-    pub fn placeholder_batman() -> Self {
+    pub fn placeholder_mainnet_other() -> Self {
         Self::placeholder_mainnet_batman()
     }
 
@@ -278,6 +278,13 @@ impl Persona {
                 .collect_vec(),
         )
     }
+
+    pub fn placeholder_stokenet() -> Self {
+        Self::placeholder_stokenet_leia_skywalker()
+    }
+    pub fn placeholder_stokenet_other() -> Self {
+        Self::placeholder_stokenet_hermione()
+    }
 }
 
 impl Ord for Persona {
@@ -313,11 +320,11 @@ impl Identifiable for Persona {
 /// Placeholder conformance to facilitate unit-tests
 impl HasPlaceholder for Persona {
     fn placeholder() -> Self {
-        Self::placeholder_satoshi()
+        Self::placeholder_mainnet()
     }
 
     fn placeholder_other() -> Self {
-        Self::placeholder_batman()
+        Self::placeholder_mainnet_other()
     }
 }
 
@@ -329,16 +336,53 @@ mod tests {
     fn equality() {
         assert_eq!(Persona::placeholder(), Persona::placeholder());
         assert_eq!(Persona::placeholder_other(), Persona::placeholder_other());
+
+        assert_eq!(
+            Persona::placeholder_mainnet(),
+            Persona::placeholder_mainnet()
+        );
+        assert_eq!(
+            Persona::placeholder_mainnet_other(),
+            Persona::placeholder_mainnet_other()
+        );
+
+        assert_eq!(
+            Persona::placeholder_stokenet(),
+            Persona::placeholder_stokenet()
+        );
+        assert_eq!(
+            Persona::placeholder_stokenet_other(),
+            Persona::placeholder_stokenet_other()
+        );
     }
 
     #[test]
     fn inequality() {
         assert_ne!(Persona::placeholder(), Persona::placeholder_other());
+        assert_ne!(
+            Persona::placeholder_mainnet(),
+            Persona::placeholder_mainnet_other()
+        );
+        assert_ne!(
+            Persona::placeholder_stokenet(),
+            Persona::placeholder_stokenet_other()
+        );
+        assert_ne!(
+            Persona::placeholder_stokenet(),
+            Persona::placeholder_mainnet()
+        );
+        assert_ne!(
+            Persona::placeholder_stokenet_other(),
+            Persona::placeholder_mainnet_other()
+        );
     }
 
     #[test]
     fn compare() {
-        assert!(Persona::placeholder_batman() > Persona::placeholder_satoshi());
+        assert!(
+            Persona::placeholder_mainnet_other()
+                > Persona::placeholder_mainnet()
+        );
     }
 
     #[test]
@@ -347,13 +391,13 @@ mod tests {
 			"identity_rdx12gcd4r799jpvztlffgw483pqcen98pjnay988n8rmscdswd872xy62"
 				.parse()
 				.unwrap();
-        let persona = Persona::placeholder_batman();
+        let persona = Persona::placeholder_mainnet_other();
         assert_eq!(persona.address, identity_address);
     }
 
     #[test]
     fn display() {
-        let account = Persona::placeholder_batman();
+        let account = Persona::placeholder_mainnet_other();
         assert_eq!(
 			format!("{account}"),
 			"Batman | identity_rdx12gcd4r799jpvztlffgw483pqcen98pjnay988n8rmscdswd872xy62"
@@ -362,7 +406,7 @@ mod tests {
 
     #[test]
     fn identifiable() {
-        let persona = Persona::placeholder_batman();
+        let persona = Persona::placeholder_mainnet_other();
         let identity_address: IdentityAddress =
 			"identity_rdx12gcd4r799jpvztlffgw483pqcen98pjnay988n8rmscdswd872xy62"
 				.parse()
@@ -372,7 +416,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_mainnet_satoshi() {
-        let model = Persona::placeholder_satoshi();
+        let model = Persona::placeholder_mainnet();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -449,7 +493,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_mainnet_batman() {
-        let model = Persona::placeholder_batman();
+        let model = Persona::placeholder_mainnet_other();
         assert_eq_after_json_roundtrip(
             &model,
             r#"

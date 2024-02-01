@@ -471,7 +471,7 @@ mod tests {
 						"defaultDepositGuarantee": "0.975"
 					}
 				},
-				"networks": 				[
+				"networks": [
 					{
 						"networkID": 1,
 						"accounts": [
@@ -1031,7 +1031,7 @@ mod tests {
 							}
 						],
 						"authorizedDapps": 	[
-								{
+							{
 								"networkID": 2,
 								"dAppDefinitionAddress": "account_tdx_2_128evrrwfp8gj9240qq0m06ukhwaj2cmejluxxreanzjwq62vmlf8r4",
 								"displayName": "Dev Console",

@@ -12,18 +12,22 @@ pub struct SharedPersonaData {
 
     /// IDs of a `PersonaDataEntryEmailAddress`es the user has shared with some dApp on some network
     /// can be `None`, or can be `Some(<EMPTY>)`.
-    pub email_addresses: Option<SharedCollection>,
+    pub email_addresses: Option<SharedToDappWithPersonaIDsOfPersonaDataEntries>,
 
     /// IDs of a `PersonaDataEntryPhoneNumber`s the user has shared with some dApp on some network
     /// can be `None`, or can be `Some(<EMPTY>)`.
-    pub phone_numbers: Option<SharedCollection>,
+    pub phone_numbers: Option<SharedToDappWithPersonaIDsOfPersonaDataEntries>,
 }
 
 impl SharedPersonaData {
     pub fn new(
         name: impl Into<Option<PersonaDataEntryID>>,
-        email_addresses: impl Into<Option<SharedCollection>>,
-        phone_numbers: impl Into<Option<SharedCollection>>,
+        email_addresses: impl Into<
+            Option<SharedToDappWithPersonaIDsOfPersonaDataEntries>,
+        >,
+        phone_numbers: impl Into<
+            Option<SharedToDappWithPersonaIDsOfPersonaDataEntries>,
+        >,
     ) -> Self {
         Self {
             name: name.into(),
@@ -39,11 +43,11 @@ impl HasPlaceholder for SharedPersonaData {
         unsafe {
             Self::new(
                 id.next(),
-                SharedCollection::new(
+                SharedToDappWithPersonaIDsOfPersonaDataEntries::new(
                     RequestedQuantity::exactly(2),
                     IdentifiedVecVia::from_iter([id.next(), id.next()]),
                 ),
-                SharedCollection::new(
+                SharedToDappWithPersonaIDsOfPersonaDataEntries::new(
                     RequestedQuantity::at_least(1),
                     IdentifiedVecVia::from_iter([id.next(), id.next()]),
                 ),
@@ -56,11 +60,11 @@ impl HasPlaceholder for SharedPersonaData {
         unsafe {
             Self::new(
                 id.next(),
-                SharedCollection::new(
+                SharedToDappWithPersonaIDsOfPersonaDataEntries::new(
                     RequestedQuantity::exactly(2),
                     IdentifiedVecVia::from_iter([id.next(), id.next()]),
                 ),
-                SharedCollection::new(
+                SharedToDappWithPersonaIDsOfPersonaDataEntries::new(
                     RequestedQuantity::at_least(1),
                     IdentifiedVecVia::from_iter([id.next(), id.next()]),
                 ),

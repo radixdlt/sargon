@@ -22,7 +22,7 @@ pub struct AuthorizedPersonaSimple {
     pub last_login: Timestamp,
 
     /// List of "ongoing accountAddresses" that user given the dApp access to.
-    pub shared_accounts: Option<SharedAccounts>,
+    pub shared_accounts: Option<SharedToDappWithPersonaAccountAddresses>,
 
     /// ID to PersonaData entries to user has shared with a Dapp.
     pub shared_persona_data: SharedPersonaData,
@@ -32,13 +32,13 @@ impl AuthorizedPersonaSimple {
     pub fn new(
         identity_address: IdentityAddress,
         last_login: Timestamp,
-        shared_accounts: Option<SharedAccounts>,
+        shared_accounts: impl Into<Option<SharedToDappWithPersonaAccountAddresses>>,
         shared_persona_data: SharedPersonaData,
     ) -> Self {
         Self {
             identity_address,
             last_login,
-            shared_accounts,
+            shared_accounts: shared_accounts.into(),
             shared_persona_data,
         }
     }
@@ -57,7 +57,9 @@ impl AuthorizedPersonaSimple {
         Self::new(
             IdentityAddress::placeholder_mainnet(),
             Timestamp::parse("2024-01-31T14:23:45Z").unwrap(),
-            Some(SharedAccounts::placeholder_mainnet()),
+            Some(
+                SharedToDappWithPersonaAccountAddresses::placeholder_mainnet(),
+            ),
             SharedPersonaData::placeholder(),
         )
     }
@@ -65,7 +67,7 @@ impl AuthorizedPersonaSimple {
         Self::new(
             IdentityAddress::placeholder_mainnet_other(),
             Timestamp::parse("2024-01-31T14:23:45Z").unwrap(),
-            Some(SharedAccounts::placeholder_other()),
+            Some(SharedToDappWithPersonaAccountAddresses::placeholder_other()),
             SharedPersonaData::placeholder_other(),
         )
     }
@@ -74,7 +76,9 @@ impl AuthorizedPersonaSimple {
         Self::new(
             IdentityAddress::placeholder_stokenet(),
             Timestamp::parse("2024-01-31T14:23:45Z").unwrap(),
-            Some(SharedAccounts::placeholder_stokenet()),
+            Some(
+                SharedToDappWithPersonaAccountAddresses::placeholder_stokenet(),
+            ),
             SharedPersonaData::placeholder(),
         )
     }
@@ -82,7 +86,9 @@ impl AuthorizedPersonaSimple {
         Self::new(
             IdentityAddress::placeholder_stokenet_other(),
             Timestamp::parse("2024-01-31T14:23:45Z").unwrap(),
-            Some(SharedAccounts::placeholder_stokenet_other()),
+            Some(
+                SharedToDappWithPersonaAccountAddresses::placeholder_stokenet_other(),
+            ),
             SharedPersonaData::placeholder_other(),
         )
     }

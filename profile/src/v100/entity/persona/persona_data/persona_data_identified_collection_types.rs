@@ -2,6 +2,7 @@ use crate::prelude::*;
 
 macro_rules! declare_collection_of_identified_entry {
     ($id_ent_type:ty,$struct_name:ident) => {
+        /// A collection of identifiable PersonaData Entries.
         #[derive(
             Serialize,
             Deserialize,
@@ -49,7 +50,7 @@ macro_rules! declare_collection_of_identified_entry {
             }
 
             /// Creates a new CollectionOf PersonaDataEntries using just the *value*, which will be given a
-            /// generated ID and put in a `$id_ent_type`
+            /// generated ID and put in an identified entry.
             pub fn single_value(
                 value: <$id_ent_type as PersonaDataEntryValue>::Value,
             ) -> Self {

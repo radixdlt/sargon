@@ -239,7 +239,7 @@ mod tests {
             &sut,
             r#"
 			[	
-					{
+				{
 					"networkID": 1,
 					"accounts": [
 						{

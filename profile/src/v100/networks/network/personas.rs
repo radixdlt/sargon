@@ -22,7 +22,7 @@ impl Personas {
 
 // Trait: Default
 impl Default for Personas {
-    /// Instantiates a new empty networks collection.
+    /// Instantiates a new empty collection.
     fn default() -> Self {
         Self::new()
     }

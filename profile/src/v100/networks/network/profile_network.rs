@@ -1,7 +1,8 @@
 use crate::prelude::*;
 
-/// Accounts, Personas, Authorized dapps for some Radix Network that user
-/// has created and interacted with.
+/// [`Accounts`], [`Personas`] and [`AuthorizedDapps`] for some [`ProfileNetwork`]
+/// which user has created/interacted with, all on the same [Radix Network][`NetworkDefinition`],
+/// identified by `id` ([`NetworkID`]).
 #[derive(
     Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, uniffi::Record,
 )]
@@ -11,12 +12,16 @@ pub struct ProfileNetwork {
     #[serde(rename = "networkID")]
     pub id: NetworkID,
 
-    /// An ordered set of Accounts on this network.
+    /// An ordered set of [`Accounts`]` on this network, which are [`Account`]s
+    /// the user has created on this network.
     pub accounts: Accounts,
 
-    /// An ordered set of Personas on this network.
+    /// An ordered set of [`Personas`] on this network, which are [`Persona`]s
+    /// the user has created on this network.
     pub personas: Personas,
 
+    /// An ordered set of [`AuthorizedDapps`] on this network, which are
+    /// [`AuthorizedDapp`]s that the user has interacted with.
     #[serde(rename = "authorizedDapps")]
     pub authorized_dapps: AuthorizedDapps,
 }
@@ -54,6 +59,13 @@ impl ProfileNetwork {
                 .into_iter()
                 .all(|p| p.network_id == network_id),
             "Discrepancy, found a Persona on other network than {network_id}"
+        );
+        assert!(
+            authorized_dapps
+                .get_all()
+                .into_iter()
+                .all(|d| d.network_id == network_id),
+            "Discrepancy, found an AuthorizedDapp on other network than {network_id}"
         );
         Self {
             id: network_id,
@@ -164,10 +176,7 @@ mod tests {
     fn panic_when_network_id_mismatch_between_accounts_and_value() {
         ProfileNetwork::new(
             NetworkID::Mainnet,
-            Accounts::with_accounts([
-                Account::placeholder_mainnet(),
-                Account::placeholder_stokenet(),
-            ]),
+            Accounts::with_account(Account::placeholder_stokenet()),
             Personas::default(),
             AuthorizedDapps::default(),
         );
@@ -181,8 +190,23 @@ mod tests {
         ProfileNetwork::new(
             NetworkID::Mainnet,
             Accounts::placeholder_mainnet(),
-            Personas::from_iter([Persona::placeholder_stokenet_hermione()]),
+            Personas::with_persona(Persona::placeholder_stokenet()),
             AuthorizedDapps::default(),
+        );
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "Discrepancy, found an AuthorizedDapp on other network than mainnet"
+    )]
+    fn panic_when_network_id_mismatch_between_authorized_dapp_and_value() {
+        ProfileNetwork::new(
+            NetworkID::Mainnet,
+            Accounts::placeholder_mainnet(),
+            Personas::placeholder_mainnet(),
+            AuthorizedDapps::with_authorized_dapp(
+                AuthorizedDapp::placeholder_stokenet(),
+            ),
         );
     }
 

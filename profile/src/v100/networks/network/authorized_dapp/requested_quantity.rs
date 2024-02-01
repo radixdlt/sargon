@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-/// A requested (by dApp) quantity, e.g. "I want AT LEAST 3 account addresses" or
+/// A requested (by Dapp) quantity, e.g. "I want AT LEAST 3 account addresses" or
 /// "I want EXACTLY 2 email addresses".
 #[derive(
     Serialize,
@@ -22,10 +22,25 @@ pub struct RequestedQuantity {
 }
 
 impl RequestedQuantity {
-    pub fn is_valid(&self) -> bool {
+    pub fn assert_is_valid(&self) {
         match self.quantifier {
-            RequestedNumberQuantifier::Exactly => self.quantity != 0,
-            _ => true,
+            RequestedNumberQuantifier::Exactly => {
+                assert_ne!(self.quantity, 0, "Invalid quantity {self}")
+            }
+            _ => { /* valid */ }
+        }
+    }
+
+    /// Checks `len` can fulfill the [`RequestedQuantity`] (self), `len` is
+    /// considered to be fulfilling the requested quantity:
+    /// * if: quantifier == ::Exactly && len == quantity // ✅ fulfills
+    /// * else if: quantifier == ::AtLeast && len >= quantity // ✅ fulfills
+    /// * else false // ❌ does NOT fulfill
+    pub fn is_fulfilled_by_ids(&self, len: usize) -> bool {
+        let quantity = self.quantity as usize;
+        match self.quantifier {
+            RequestedNumberQuantifier::Exactly => len == quantity,
+            RequestedNumberQuantifier::AtLeast => len >= quantity,
         }
     }
 
@@ -34,15 +49,16 @@ impl RequestedQuantity {
             quantifier: RequestedNumberQuantifier::Exactly,
             quantity,
         };
-        assert!(value.is_valid());
+        value.assert_is_valid();
         value
     }
+
     pub fn at_least(quantity: u16) -> Self {
         let value = Self {
             quantifier: RequestedNumberQuantifier::AtLeast,
             quantity,
         };
-        assert!(value.is_valid());
+        value.assert_is_valid();
         value
     }
 }
@@ -51,6 +67,9 @@ impl RequestedQuantity {
 mod tests {
     use crate::prelude::*;
 
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = RequestedQuantity;
+
     #[test]
     fn display() {
         assert_eq!(format!("{}", RequestedQuantity::at_least(1)), "AtLeast: 1");
@@ -58,5 +77,54 @@ mod tests {
             format!("{}", RequestedQuantity::exactly(1337)),
             "Exactly: 1337"
         );
+    }
+
+    #[test]
+    fn at_least() {
+        let sut = SUT::at_least(0);
+        assert_eq!(sut.quantifier, RequestedNumberQuantifier::AtLeast);
+        assert_eq!(sut.quantity, 0);
+    }
+
+    #[test]
+    fn exactly() {
+        let sut = SUT::exactly(1337);
+        assert_eq!(sut.quantifier, RequestedNumberQuantifier::Exactly);
+        assert_eq!(sut.quantity, 1337);
+    }
+
+    #[test]
+    #[should_panic(expected = "Invalid quantity Exactly: 0")]
+    fn exactly_0_is_invalid() {
+        _ = SUT::exactly(0);
+    }
+
+    #[test]
+    fn at_least_fulfills_true() {
+        assert!(SUT::at_least(0).is_fulfilled_by_ids(0));
+        assert!(SUT::at_least(0).is_fulfilled_by_ids(1));
+        assert!(SUT::at_least(1).is_fulfilled_by_ids(1));
+        assert!(SUT::at_least(1).is_fulfilled_by_ids(2));
+    }
+
+    #[test]
+    fn at_least_fulfills_false() {
+        assert_eq!(SUT::at_least(1).is_fulfilled_by_ids(0), false);
+        assert_eq!(SUT::at_least(10).is_fulfilled_by_ids(0), false);
+        assert_eq!(SUT::at_least(10).is_fulfilled_by_ids(9), false);
+    }
+
+    #[test]
+    fn exactly_fulfills_true() {
+        assert!(SUT::exactly(1).is_fulfilled_by_ids(1));
+        assert!(SUT::exactly(10).is_fulfilled_by_ids(10));
+    }
+
+    #[test]
+    fn exactly_fulfills_false() {
+        assert_eq!(SUT::exactly(1).is_fulfilled_by_ids(0), false);
+        assert_eq!(SUT::exactly(1).is_fulfilled_by_ids(2), false);
+        assert_eq!(SUT::exactly(10).is_fulfilled_by_ids(9), false);
+        assert_eq!(SUT::exactly(10).is_fulfilled_by_ids(11), false);
     }
 }

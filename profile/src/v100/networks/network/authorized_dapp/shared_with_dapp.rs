@@ -1,7 +1,9 @@
 use crate::prelude::*;
 
 macro_rules! declare_shared_with_dapp {
-    ($id_ent_type:ty,$struct_name:ident) => {
+    ($id:ty,$struct_name:ident) => {
+        /// IDs that have been shared with an Dapp the user has interacted with
+        /// that fulfill a Dapp request's specified [`RequestedQuantity`].
         #[derive(
             Serialize,
             Deserialize,
@@ -16,21 +18,36 @@ macro_rules! declare_shared_with_dapp {
         #[debug("{}", self.shared_ids_string())]
         #[display("{request} - #{} ids shared", self.ids.len())]
         pub struct $struct_name {
+            /// The requested quantity to be shared by user, sent by a Dapp.
             pub request: RequestedQuantity,
-            pub ids: IdentifiedVecVia<$id_ent_type>,
+
+            /// The by user shared IDs of data identifiable data shared with the
+            /// Dapp.
+            pub ids: IdentifiedVecVia<$id>,
         }
 
         impl $struct_name {
+            /// Constructs a new $struct_name where `ids` "fulfills" the `request`.
+            ///
+            /// # Panic
+            /// Panics if `ids` does not fulfill `request`, for more information
+            /// see [`RequestedQuantity::is_fulfilled_by_ids`]
             pub fn new(
                 request: RequestedQuantity,
-                ids: impl Into<IdentifiedVecVia<$id_ent_type>>,
+                ids: impl Into<IdentifiedVecVia<$id>>,
             ) -> Self {
-                Self {
-                    request,
-                    ids: ids.into(),
-                }
+                let ids = ids.into();
+                let len = ids.len();
+                assert!(
+                    request.is_fulfilled_by_ids(len),
+                    "ids does not fulfill request, got: #{}, but requested: {}",
+                    len,
+                    request
+                );
+                Self { request, ids }
             }
 
+            /// String representation of the request and shared ids.
             pub fn shared_ids_string(&self) -> String {
                 let ids_str = self.ids.iter().map(|v| v.to_string()).join(", ");
                 format!("{} - shared ids: [{}]", self.request, ids_str)
@@ -39,10 +56,16 @@ macro_rules! declare_shared_with_dapp {
     };
 }
 
-declare_shared_with_dapp!(AccountAddress, SharedAccounts);
-declare_shared_with_dapp!(PersonaDataEntryID, SharedCollection);
+declare_shared_with_dapp!(
+    AccountAddress,
+    SharedToDappWithPersonaAccountAddresses
+);
+declare_shared_with_dapp!(
+    PersonaDataEntryID,
+    SharedToDappWithPersonaIDsOfPersonaDataEntries
+);
 
-impl HasPlaceholder for SharedAccounts {
+impl HasPlaceholder for SharedToDappWithPersonaAccountAddresses {
     fn placeholder() -> Self {
         Self::placeholder_mainnet()
     }
@@ -51,7 +74,7 @@ impl HasPlaceholder for SharedAccounts {
         Self::placeholder_mainnet_other()
     }
 }
-impl SharedAccounts {
+impl SharedToDappWithPersonaAccountAddresses {
     pub fn placeholder_mainnet() -> Self {
         Self::new(
             RequestedQuantity::exactly(2),
@@ -93,7 +116,7 @@ mod shared_accounts_tests {
     use crate::prelude::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = SharedAccounts;
+    type SUT = SharedToDappWithPersonaAccountAddresses;
 
     #[test]
     fn equality() {
@@ -113,6 +136,24 @@ mod shared_accounts_tests {
                 .len(),
             1
         );
+    }
+
+    #[test]
+    #[should_panic = "ids does not fulfill request, got: #0, but requested: AtLeast: 1"]
+    fn panics_when_at_least_is_not_fulfilled() {
+        _ = SUT::new(RequestedQuantity::at_least(1), IdentifiedVecVia::new())
+    }
+
+    #[test]
+    #[should_panic = "ids does not fulfill request, got: #0, but requested: Exactly: 1"]
+    fn panics_when_exactly_is_not_fulfilled() {
+        _ = SUT::new(RequestedQuantity::exactly(1), IdentifiedVecVia::new())
+    }
+
+    #[test]
+    #[should_panic = "Invalid quantity Exactly: 0"]
+    fn panics_when_exactly_0() {
+        _ = SUT::new(RequestedQuantity::exactly(0), IdentifiedVecVia::new())
     }
 
     #[test]

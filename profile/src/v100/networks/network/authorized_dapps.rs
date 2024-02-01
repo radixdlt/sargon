@@ -4,8 +4,8 @@ use crate::prelude::*;
 pub type AuthorizedDapps = IdentifiedVecVia<AuthorizedDapp>;
 
 impl AuthorizedDapps {
-    /// Instantiates a new collection of authorized_dapps from
-    /// and iterator of authorized_dapps.
+    /// Instantiates a new collection of [`AuthorizedDapp`]s from
+    /// and iterator.
     pub fn with_authorized_dapps<I>(authorized_dapps: I) -> Self
     where
         I: IntoIterator<Item = AuthorizedDapp>,
@@ -13,8 +13,8 @@ impl AuthorizedDapps {
         Self::from_iter(authorized_dapps)
     }
 
-    /// Instantiates a new collection of authorized_dapps from a
-    /// single authorized_dapp.
+    /// Instantiates a new collection of [`AuthorizedDapp`]s from a
+    /// single value.
     pub fn with_authorized_dapp(authorized_dapp: AuthorizedDapp) -> Self {
         Self::with_authorized_dapps([authorized_dapp])
     }
@@ -22,7 +22,7 @@ impl AuthorizedDapps {
 
 // Trait: Default
 impl Default for AuthorizedDapps {
-    /// Instantiates a new empty networks collection.
+    /// Instantiates a new empty collection.
     fn default() -> Self {
         Self::new()
     }

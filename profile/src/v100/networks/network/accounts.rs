@@ -24,7 +24,7 @@ impl Accounts {
 
 // Trait: Default
 impl Default for Accounts {
-    /// Instantiates a new empty networks collection.
+    /// Instantiates a new empty collection.
     fn default() -> Self {
         Self::new()
     }

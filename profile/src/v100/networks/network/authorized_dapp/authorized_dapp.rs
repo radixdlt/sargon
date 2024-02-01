@@ -6,16 +6,25 @@ use crate::prelude::*;
 )]
 #[serde(rename_all = "camelCase")]
 pub struct AuthorizedDapp {
+    /// The ID of the network the authorized Dapp is on.
     #[serde(rename = "networkID")]
     pub network_id: NetworkID,
 
+    /// A `DappDefinitionAddress` is in fact just an alias for
+    /// [`AccountAddress`], it is the address of the account
+    /// which owns controls the Dapp.
     #[serde(rename = "dAppDefinitionAddress")]
     pub dapp_definition_address: DappDefinitionAddress,
 
-    /// Will be nil if we failed to fetch the Dapp Metadata from On-Network for some reason, and
-    /// which is allowed if `isDeveloperMode: true` is set.
+    /// The Display name as sent by the Dapp in any interaction
+    /// request (CAP21), e.g. "Radix Dashboard".
     pub display_name: Option<String>,
 
+    /// An order set of `AuthorizedPersonaSimple`s, which is a collection of all
+    /// the Personas the user has used to interact with this Dapp, it is called
+    /// "references to", since the Personas are not stored in full, that would be
+    /// bad duplication of data (which might go stale), instead we refer to the
+    /// necessary data by IDs.
     pub references_to_authorized_personas:
         IdentifiedVecVia<AuthorizedPersonaSimple>,
 }
@@ -24,7 +33,7 @@ impl AuthorizedDapp {
     pub fn new(
         network_id: NetworkID,
         dapp_definition_address: DappDefinitionAddress,
-        display_name: Option<impl AsRef<str>>,
+        display_name: impl Into<Option<String>>,
         references_to_authorized_personas: IdentifiedVecVia<
             AuthorizedPersonaSimple,
         >,
@@ -34,7 +43,7 @@ impl AuthorizedDapp {
         Self {
             network_id,
             dapp_definition_address,
-            display_name: display_name.map(|n| n.as_ref().to_string()),
+            display_name: display_name.into(),
             references_to_authorized_personas,
         }
     }
@@ -65,7 +74,7 @@ impl AuthorizedDapp {
              "account_rdx12x0xfz2yumu2qsh6yt0v8xjfc7et04vpsz775kc3yd3xvle4w5d5k5"
              .parse()
              .expect("Valid Dapp Def Address"),
-              Some("Radix Dashboard"), 
+              "Radix Dashboard".to_owned(), 
              IdentifiedVecVia::from_iter([
                     AuthorizedPersonaSimple::placeholder_mainnet(),
                     AuthorizedPersonaSimple::placeholder_mainnet_other()
@@ -78,7 +87,7 @@ impl AuthorizedDapp {
              "account_rdx12xuhw6v30chdkhcu7qznz9vu926vxefr4h4tdvc0mdckg9rq4afx9t"
              .parse()
              .expect("Valid Dapp Def Address"),
-              Some("Gumball Club"), 
+              "Gumball Club".to_owned(), 
              IdentifiedVecVia::from_iter([
                     AuthorizedPersonaSimple::placeholder_mainnet_other()
                 ])
@@ -90,7 +99,7 @@ impl AuthorizedDapp {
              "account_tdx_2_128evrrwfp8gj9240qq0m06ukhwaj2cmejluxxreanzjwq62vmlf8r4"
              .parse()
              .expect("Valid Dapp Def Address"),
-              Some("Dev Console"), 
+              "Dev Console".to_owned(), 
              IdentifiedVecVia::from_iter([
                     AuthorizedPersonaSimple::placeholder_stokenet(),
                     AuthorizedPersonaSimple::placeholder_stokenet_other()
@@ -103,7 +112,7 @@ impl AuthorizedDapp {
              "account_tdx_2_12yf9gd53yfep7a669fv2t3wm7nz9zeezwd04n02a433ker8vza6rhe"
              .parse()
              .expect("Valid Dapp Def Address"),
-              Some("Sandbox"), 
+              "Sandbox".to_owned(), 
              IdentifiedVecVia::from_iter([
                     AuthorizedPersonaSimple::placeholder_stokenet_other()
                 ])
