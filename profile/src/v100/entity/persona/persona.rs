@@ -1,11 +1,4 @@
-use __private__::PhantomData;
-use rand::distributions::uniform::SampleBorrow;
-
 use crate::prelude::*;
-use std::borrow::BorrowMut;
-use std::ops::AddAssign;
-use std::sync::atomic::AtomicU64;
-use std::sync::Mutex;
 
 /// A Persona is an identity a user choses to login to a dApp with, using
 /// RadixConnect - Radix decentralized login solution. A persona is very
@@ -93,30 +86,6 @@ impl Persona {
             flags: EntityFlags::default(),
             persona_data: persona_data.unwrap_or_default(),
         }
-    }
-}
-
-pub struct IDGenerator<T: From<Uuid>> {
-    ctr: Arc<Mutex<u64>>,
-    phantom: PhantomData<T>,
-}
-impl<T: From<Uuid>> IDGenerator<T> {
-    pub fn starting_at(ctr: u64) -> Self {
-        Self {
-            ctr: Arc::new(Mutex::new(ctr)),
-            phantom: PhantomData,
-        }
-    }
-
-    #[allow(clippy::new_without_default)]
-    pub fn new() -> Self {
-        Self::starting_at(0)
-    }
-
-    pub fn next(&self) -> T {
-        let n = Uuid::from_u64_pair(0, *self.ctr.lock().unwrap().borrow());
-        self.ctr.lock().unwrap().borrow_mut().add_assign(1);
-        n.into()
     }
 }
 
