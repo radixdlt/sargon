@@ -128,10 +128,11 @@ mod identified_name_tests {
     #[test]
     fn new() {
         let value = V::placeholder_other();
-        let sut = SUT::with_id(PersonaDataEntryID::nil(), value.clone());
+        let sut =
+            SUT::with_id(PersonaDataEntryID::placeholder_one(), value.clone());
         assert_eq!(
             sut.id,
-            "00000000-0000-0000-0000-000000000000".parse().unwrap()
+            "00000000-0000-0000-0000-000000000001".parse().unwrap()
         );
         assert_eq!(sut.value, value)
     }
@@ -229,10 +230,11 @@ mod identified_number_tests {
     #[test]
     fn new() {
         let value = V::placeholder_other();
-        let sut = SUT::with_id(PersonaDataEntryID::nil(), value.clone());
+        let sut =
+            SUT::with_id(PersonaDataEntryID::placeholder_four(), value.clone());
         assert_eq!(
             sut.id,
-            "00000000-0000-0000-0000-000000000000".parse().unwrap()
+            "00000000-0000-0000-0000-000000000004".parse().unwrap()
         );
         assert_eq!(sut.value, value)
     }
@@ -318,10 +320,13 @@ mod identified_email_tests {
     #[test]
     fn new() {
         let value = V::placeholder_other();
-        let sut = SUT::with_id(PersonaDataEntryID::nil(), value.clone());
+        let sut = SUT::with_id(
+            PersonaDataEntryID::placeholder_three(),
+            value.clone(),
+        );
         assert_eq!(
             sut.id,
-            "00000000-0000-0000-0000-000000000000".parse().unwrap()
+            "00000000-0000-0000-0000-000000000003".parse().unwrap()
         );
         assert_eq!(sut.value, value)
     }

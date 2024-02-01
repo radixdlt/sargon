@@ -68,7 +68,7 @@ impl Persona {
     pub fn new(
         persona_creating_factor_instance: HDFactorInstanceIdentityCreation,
         display_name: DisplayName,
-        persona_data: Option<PersonaData>,
+        persona_data: impl Into<Option<PersonaData>>,
     ) -> Self {
         let address =
             IdentityAddress::from_hd_factor_instance_virtual_entity_creation(
@@ -84,7 +84,7 @@ impl Persona {
                 )
                 .into(),
             flags: EntityFlags::default(),
-            persona_data: persona_data.unwrap_or_default(),
+            persona_data: persona_data.into().unwrap_or_default(),
         }
     }
 }
@@ -114,12 +114,14 @@ impl Persona {
         let private_hd_factor_source =
             PrivateHierarchicalDeterministicFactorSource::new(mwp, bdfs);
 
-        let id = IDGenerator::<PersonaDataEntryID>::starting_at(1);
+        let id = IDStepper::<PersonaDataEntryID>::new();
+        let name =
+            PersonaDataIdentifiedName::with_id(unsafe { id.next() }, name);
         let phone_numbers = CollectionOfPhoneNumbers::entries(
             phone_numbers
                 .into_iter()
                 .map(|s| s.parse::<PersonaDataEntryPhoneNumber>().unwrap())
-                .map(|v| {
+                .map(|v| unsafe {
                     PersonaDataIdentifiedPhoneNumber::with_id(id.next(), v)
                 }),
         );
@@ -128,7 +130,7 @@ impl Persona {
             email_addresses
                 .into_iter()
                 .map(|s| s.parse::<PersonaDataEntryEmailAddress>().unwrap())
-                .map(|v| {
+                .map(|v| unsafe {
                     PersonaDataIdentifiedEmailAddress::with_id(id.next(), v)
                 }),
         );
@@ -137,14 +139,7 @@ impl Persona {
             private_hd_factor_source
                 .derive_entity_creation_factor_instance(network_id, index),
             DisplayName::new(display_name).unwrap(),
-            Some(PersonaData::new(
-                Some(PersonaDataIdentifiedName::with_id(
-                    PersonaDataEntryID::nil(),
-                    name,
-                )),
-                phone_numbers,
-                email_addresses,
-            )),
+            PersonaData::new(name, phone_numbers, email_addresses),
         );
         if is_hidden {
             persona.flags.insert_flag(EntityFlag::DeletedByUser);

@@ -57,12 +57,12 @@ pub struct PersonaData {
 
 impl PersonaData {
     pub fn new(
-        name: Option<PersonaDataIdentifiedName>,
+        name: impl Into<Option<PersonaDataIdentifiedName>>,
         phone_numbers: CollectionOfPhoneNumbers,
         email_addresses: CollectionOfEmailAddresses,
     ) -> Self {
         Self {
-            name,
+            name: name.into(),
             phone_numbers,
             email_addresses,
         }
@@ -137,7 +137,7 @@ impl PersonaData {
 impl HasPlaceholder for PersonaData {
     fn placeholder() -> Self {
         Self::new(
-            Some(PersonaDataIdentifiedName::placeholder()),
+            PersonaDataIdentifiedName::placeholder(),
             CollectionOfPhoneNumbers::placeholder(),
             CollectionOfEmailAddresses::placeholder(),
         )
@@ -145,7 +145,7 @@ impl HasPlaceholder for PersonaData {
 
     fn placeholder_other() -> Self {
         Self::new(
-            Some(PersonaDataIdentifiedName::placeholder_other()),
+            PersonaDataIdentifiedName::placeholder_other(),
             CollectionOfPhoneNumbers::placeholder_other(),
             CollectionOfEmailAddresses::placeholder(),
         )
@@ -182,17 +182,19 @@ mod tests {
             "Darth Vader",
         )
         .unwrap();
+
         let persona_data = PersonaData {
             name: Some(PersonaDataIdentifiedName::with_id(
-                PersonaDataEntryID::nil(),
+                PersonaDataEntryID::placeholder_one(),
                 name.clone(),
             )),
             ..Default::default()
         };
+
         assert_eq!(
             persona_data.name,
             Some(PersonaDataIdentifiedName::with_id(
-                "00000000-0000-0000-0000-000000000000".parse().unwrap(),
+                "00000000-0000-0000-0000-000000000001".parse().unwrap(),
                 name
             ))
         );

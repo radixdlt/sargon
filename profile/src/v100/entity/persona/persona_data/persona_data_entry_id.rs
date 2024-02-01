@@ -38,11 +38,6 @@ impl PersonaDataEntryID {
     pub fn generate() -> Self {
         id().into()
     }
-
-    /// Should only be used by unit tests and placeholder values
-    pub(crate) fn nil() -> Self {
-        Uuid::nil().into()
-    }
 }
 
 impl FromStr for PersonaDataEntryID {
@@ -149,10 +144,8 @@ mod tests {
 
     #[test]
     fn from_str_ok() {
-        assert_eq!(
-            SUT::nil(),
-            "00000000-0000-0000-0000-000000000000".parse().unwrap()
-        );
+        let s = "00000000-0000-0000-0000-000000000000";
+        assert_eq!(s.parse::<SUT>().unwrap().to_string(), s.to_string());
     }
     #[test]
     fn from_str_err() {

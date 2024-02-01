@@ -35,33 +35,37 @@ impl SharedPersonaData {
 
 impl HasPlaceholder for SharedPersonaData {
     fn placeholder() -> Self {
-        let id = IDGenerator::<PersonaDataEntryID>::starting_at(0);
-        Self::new(
-            id.next(),
-            SharedCollection::new(
-                RequestedQuantity::exactly(2),
-                IdentifiedVecVia::from_iter([id.next(), id.next()]),
-            ),
-            SharedCollection::new(
-                RequestedQuantity::at_least(1),
-                IdentifiedVecVia::from_iter([id.next(), id.next()]),
-            ),
-        )
+        let id = IDStepper::<PersonaDataEntryID>::starting_at(0);
+        unsafe {
+            Self::new(
+                id.next(),
+                SharedCollection::new(
+                    RequestedQuantity::exactly(2),
+                    IdentifiedVecVia::from_iter([id.next(), id.next()]),
+                ),
+                SharedCollection::new(
+                    RequestedQuantity::at_least(1),
+                    IdentifiedVecVia::from_iter([id.next(), id.next()]),
+                ),
+            )
+        }
     }
 
     fn placeholder_other() -> Self {
-        let id = IDGenerator::<PersonaDataEntryID>::starting_at(0xf0);
-        Self::new(
-            id.next(),
-            SharedCollection::new(
-                RequestedQuantity::exactly(2),
-                IdentifiedVecVia::from_iter([id.next(), id.next()]),
-            ),
-            SharedCollection::new(
-                RequestedQuantity::at_least(1),
-                IdentifiedVecVia::from_iter([id.next(), id.next()]),
-            ),
-        )
+        let id = IDStepper::<PersonaDataEntryID>::starting_at(0xf0);
+        unsafe {
+            Self::new(
+                id.next(),
+                SharedCollection::new(
+                    RequestedQuantity::exactly(2),
+                    IdentifiedVecVia::from_iter([id.next(), id.next()]),
+                ),
+                SharedCollection::new(
+                    RequestedQuantity::at_least(1),
+                    IdentifiedVecVia::from_iter([id.next(), id.next()]),
+                ),
+            )
+        }
     }
 }
 
