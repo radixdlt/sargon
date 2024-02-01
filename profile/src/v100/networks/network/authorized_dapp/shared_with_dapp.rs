@@ -65,6 +65,28 @@ declare_shared_with_dapp!(
     SharedToDappWithPersonaIDsOfPersonaDataEntries
 );
 
+impl HasPlaceholder for SharedToDappWithPersonaIDsOfPersonaDataEntries {
+    fn placeholder() -> Self {
+        Self::new(
+            RequestedQuantity::at_least(2),
+            IdentifiedVecVia::from_iter([
+                PersonaDataEntryID::placeholder_one(),
+                PersonaDataEntryID::placeholder_two(),
+                PersonaDataEntryID::placeholder_four(),
+            ]),
+        )
+    }
+
+    fn placeholder_other() -> Self {
+        Self::new(
+            RequestedQuantity::exactly(1),
+            IdentifiedVecVia::from_iter(
+                [PersonaDataEntryID::placeholder_one()],
+            ),
+        )
+    }
+}
+
 impl HasPlaceholder for SharedToDappWithPersonaAccountAddresses {
     fn placeholder() -> Self {
         Self::placeholder_mainnet()
@@ -210,6 +232,106 @@ mod shared_accounts_tests {
 				"ids": [
 					"account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master"
 				]
+			}
+        "#,
+        );
+    }
+}
+
+#[cfg(test)]
+mod shared_collection_of_ids_tests {
+    use crate::prelude::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = SharedToDappWithPersonaIDsOfPersonaDataEntries;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::placeholder(), SUT::placeholder());
+        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+    }
+
+    #[test]
+    fn hash() {
+        assert_eq!(
+            HashSet::<_>::from_iter([SUT::placeholder(), SUT::placeholder()])
+                .len(),
+            1
+        );
+    }
+
+    #[test]
+    #[should_panic = "ids does not fulfill request, got: #0, but requested: AtLeast: 1"]
+    fn panics_when_at_least_is_not_fulfilled() {
+        _ = SUT::new(RequestedQuantity::at_least(1), IdentifiedVecVia::new())
+    }
+
+    #[test]
+    #[should_panic = "ids does not fulfill request, got: #0, but requested: Exactly: 1"]
+    fn panics_when_exactly_is_not_fulfilled() {
+        _ = SUT::new(RequestedQuantity::exactly(1), IdentifiedVecVia::new())
+    }
+
+    #[test]
+    #[should_panic = "Invalid quantity Exactly: 0"]
+    fn panics_when_exactly_0() {
+        _ = SUT::new(RequestedQuantity::exactly(0), IdentifiedVecVia::new())
+    }
+
+    #[test]
+    fn display() {
+        assert_eq!(
+            format!("{}", SUT::placeholder()),
+            "AtLeast: 2 - #3 ids shared"
+        );
+        assert_eq!(
+            format!("{}", SUT::placeholder_other()),
+            "Exactly: 1 - #1 ids shared"
+        );
+    }
+
+    #[test]
+    fn debug() {
+        assert_eq!(
+            format!("{:?}", SUT::placeholder()),
+            "AtLeast: 2 - shared ids: [00000000-0000-0000-0000-000000000001, 00000000-0000-0000-0000-000000000002, 00000000-0000-0000-0000-000000000004]"
+        );
+    }
+
+    #[test]
+    fn json_roundtrip_placeholder() {
+        let model = SUT::placeholder();
+        assert_eq_after_json_roundtrip(
+            &model,
+            r#"
+            {
+		    	"request": {
+		    		"quantifier": "atLeast",
+		    		"quantity": 2
+		    	},
+		    	"ids": ["00000000-0000-0000-0000-000000000001", "00000000-0000-0000-0000-000000000002", "00000000-0000-0000-0000-000000000004"]
+		    }
+        "#,
+        );
+    }
+
+    #[test]
+    fn json_roundtrip_placeholder_other() {
+        let model = SUT::placeholder_other();
+        assert_eq_after_json_roundtrip(
+            &model,
+            r#"
+            {
+				"request": {
+					"quantifier": "exactly",
+					"quantity": 1
+				},
+				"ids": ["00000000-0000-0000-0000-000000000001"]
 			}
         "#,
         );
