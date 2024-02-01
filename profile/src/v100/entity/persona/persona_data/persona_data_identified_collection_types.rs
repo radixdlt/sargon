@@ -1,5 +1,8 @@
 use crate::prelude::*;
 
+// We have to use macros since UniFFI does not support generics, that is the only
+// reason this macro exists, if/when UniFFI supports generics, this macro should
+// be replaced by `CollectionOfIdentifiedPersonaDataEntries<T>`.
 macro_rules! declare_collection_of_identified_entry {
     ($id_ent_type:ty,$struct_name:ident) => {
         /// A collection of identifiable PersonaData Entries.
