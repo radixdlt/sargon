@@ -301,4 +301,7 @@ pub enum CommonError {
 
     #[error("Invalid PersonaData - given names empty")]
     PersonaDataInvalidNameGivenNamesEmpty = 10085,
+
+    #[error("Invalid UUID (v4), got: {0}")]
+    InvalidUUIDv4(String) = 10086,
 }

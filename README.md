@@ -42,9 +42,14 @@ Middleware that can power Radix Wallet clients (iOS/Android).
 - [x] Create LedgerFactorSource
 - [ ] Save LedgerFactorSource (trivially done)
 
+### Dapp Interaction
+
+- [ ] Map `AuthorizedPersonaSimple` -> `AuthorizedPersonaDetailed`
+- [ ] Update `AuthorizedPersonaSimple` based on a Dapp request
+
 ## MODELS
 
-`[=================================================-]`
+**All models used by iOS/Android wallet is fully implemented in Sargon 🎉**
 
 All models have JSON support and `Placeholder` with which "recursively" I've crafted two valid example Profiles.
 
@@ -113,20 +118,24 @@ All models have Swift/Kotlin bindings using [UniFFI](https://github.com/mozilla/
   - [x] Gateways
     - [x] Gateway
     - [x] RadixNetwork
-- [ ] Persona
-  - [x] Persona (without `PersonaData`)
-  - [ ] PersonaData
-    - [ ] Name
-    - [ ] Email
-    - [ ] Phone
-- [ ] Authorized Dapp
-  - [ ] Shared Accounts
-  - [ ] Shared Personas
+- [x] Persona
+  - [x] Persona
+  - [x] PersonaData
+    - [x] Name
+    - [x] Email
+    - [x] Phone
+    - [ ] Credit Card (not used by Radix Wallet yet)
+    - [ ] URL (not used by Radix Wallet yet)
+    - [ ] Company name (not used by Radix Wallet yet)
+    - [ ] Postal Address (not used by Radix Wallet yet)
+- [x] Authorized Dapp
+  - [x] Shared Accounts
+  - [x] Shared PersonaData
 - [ ] Network
   - [x] NetworkID
   - [x] Accounts
   - [x] Personas
-  - [ ] Authorized Dapps
+  - [x] Authorized Dapps
 - [x] Profile
 
 # Development

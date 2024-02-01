@@ -9,6 +9,7 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 serde_with = { workspace = true }
 thiserror = { workspace = true }
+strum_macros = { workspace = true }
 iso8601-timestamp = { workspace = true }
 uuid = { workspace = true }
 serde_repr = { workspace = true }
@@ -40,7 +41,7 @@ itertools = { version = "0.12.0" }
 bip39 = { version = "2.0.0", features = ["serde"] }
 time-util = { version = "0.3.4", features = ["chrono"] }
 derive_more = { workspace = true }
-
+assert-json-diff = "2.0.2"
 
 [build-dependencies]
 uniffi = { workspace = true, features = ["build"] }

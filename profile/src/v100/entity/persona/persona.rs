@@ -1,10 +1,4 @@
-use rand::distributions::uniform::SampleBorrow;
-
 use crate::prelude::*;
-use std::borrow::BorrowMut;
-use std::ops::AddAssign;
-use std::sync::atomic::AtomicU64;
-use std::sync::Mutex;
 
 /// A Persona is an identity a user choses to login to a dApp with, using
 /// RadixConnect - Radix decentralized login solution. A persona is very
@@ -74,7 +68,7 @@ impl Persona {
     pub fn new(
         persona_creating_factor_instance: HDFactorInstanceIdentityCreation,
         display_name: DisplayName,
-        persona_data: Option<PersonaData>,
+        persona_data: impl Into<Option<PersonaData>>,
     ) -> Self {
         let address =
             IdentityAddress::from_hd_factor_instance_virtual_entity_creation(
@@ -90,7 +84,7 @@ impl Persona {
                 )
                 .into(),
             flags: EntityFlags::default(),
-            persona_data: persona_data.unwrap_or_default(),
+            persona_data: persona_data.into().unwrap_or_default(),
         }
     }
 }
@@ -120,36 +114,32 @@ impl Persona {
         let private_hd_factor_source =
             PrivateHierarchicalDeterministicFactorSource::new(mwp, bdfs);
 
-        let ctr = Arc::<Mutex<u64>>::new(Mutex::new(1));
-        let next = || {
-            let n = Uuid::from_u64_pair(0, *ctr.lock().unwrap().borrow());
-            ctr.lock().unwrap().borrow_mut().add_assign(1);
-            n
-        };
-
+        let id = IDStepper::<PersonaDataEntryID>::new();
+        let name =
+            PersonaDataIdentifiedName::with_id(unsafe { id.next() }, name);
         let phone_numbers = CollectionOfPhoneNumbers::entries(
             phone_numbers
                 .into_iter()
                 .map(|s| s.parse::<PersonaDataEntryPhoneNumber>().unwrap())
-                .map(|v| PersonaDataIdentifiedPhoneNumber::with_id(next(), v)),
+                .map(|v| unsafe {
+                    PersonaDataIdentifiedPhoneNumber::with_id(id.next(), v)
+                }),
         );
 
         let email_addresses = CollectionOfEmailAddresses::entries(
             email_addresses
                 .into_iter()
                 .map(|s| s.parse::<PersonaDataEntryEmailAddress>().unwrap())
-                .map(|v| PersonaDataIdentifiedEmailAddress::with_id(next(), v)),
+                .map(|v| unsafe {
+                    PersonaDataIdentifiedEmailAddress::with_id(id.next(), v)
+                }),
         );
 
         let mut persona = Self::new(
             private_hd_factor_source
                 .derive_entity_creation_factor_instance(network_id, index),
             DisplayName::new(display_name).unwrap(),
-            Some(PersonaData::new(
-                Some(PersonaDataIdentifiedName::with_id(Uuid::nil(), name)),
-                phone_numbers,
-                email_addresses,
-            )),
+            PersonaData::new(name, phone_numbers, email_addresses),
         );
         if is_hidden {
             persona.flags.insert_flag(EntityFlag::DeletedByUser);
@@ -181,11 +171,11 @@ impl Persona {
         )
     }
 
-    pub fn placeholder_satoshi() -> Self {
+    pub fn placeholder_mainnet() -> Self {
         Self::placeholder_mainnet_satoshi()
     }
 
-    pub fn placeholder_batman() -> Self {
+    pub fn placeholder_mainnet_other() -> Self {
         Self::placeholder_mainnet_batman()
     }
 
@@ -288,6 +278,13 @@ impl Persona {
                 .collect_vec(),
         )
     }
+
+    pub fn placeholder_stokenet() -> Self {
+        Self::placeholder_stokenet_leia_skywalker()
+    }
+    pub fn placeholder_stokenet_other() -> Self {
+        Self::placeholder_stokenet_hermione()
+    }
 }
 
 impl Ord for Persona {
@@ -323,11 +320,11 @@ impl Identifiable for Persona {
 /// Placeholder conformance to facilitate unit-tests
 impl HasPlaceholder for Persona {
     fn placeholder() -> Self {
-        Self::placeholder_satoshi()
+        Self::placeholder_mainnet()
     }
 
     fn placeholder_other() -> Self {
-        Self::placeholder_batman()
+        Self::placeholder_mainnet_other()
     }
 }
 
@@ -339,16 +336,53 @@ mod tests {
     fn equality() {
         assert_eq!(Persona::placeholder(), Persona::placeholder());
         assert_eq!(Persona::placeholder_other(), Persona::placeholder_other());
+
+        assert_eq!(
+            Persona::placeholder_mainnet(),
+            Persona::placeholder_mainnet()
+        );
+        assert_eq!(
+            Persona::placeholder_mainnet_other(),
+            Persona::placeholder_mainnet_other()
+        );
+
+        assert_eq!(
+            Persona::placeholder_stokenet(),
+            Persona::placeholder_stokenet()
+        );
+        assert_eq!(
+            Persona::placeholder_stokenet_other(),
+            Persona::placeholder_stokenet_other()
+        );
     }
 
     #[test]
     fn inequality() {
         assert_ne!(Persona::placeholder(), Persona::placeholder_other());
+        assert_ne!(
+            Persona::placeholder_mainnet(),
+            Persona::placeholder_mainnet_other()
+        );
+        assert_ne!(
+            Persona::placeholder_stokenet(),
+            Persona::placeholder_stokenet_other()
+        );
+        assert_ne!(
+            Persona::placeholder_stokenet(),
+            Persona::placeholder_mainnet()
+        );
+        assert_ne!(
+            Persona::placeholder_stokenet_other(),
+            Persona::placeholder_mainnet_other()
+        );
     }
 
     #[test]
     fn compare() {
-        assert!(Persona::placeholder_batman() > Persona::placeholder_satoshi());
+        assert!(
+            Persona::placeholder_mainnet_other()
+                > Persona::placeholder_mainnet()
+        );
     }
 
     #[test]
@@ -357,13 +391,13 @@ mod tests {
 			"identity_rdx12gcd4r799jpvztlffgw483pqcen98pjnay988n8rmscdswd872xy62"
 				.parse()
 				.unwrap();
-        let persona = Persona::placeholder_batman();
+        let persona = Persona::placeholder_mainnet_other();
         assert_eq!(persona.address, identity_address);
     }
 
     #[test]
     fn display() {
-        let account = Persona::placeholder_batman();
+        let account = Persona::placeholder_mainnet_other();
         assert_eq!(
 			format!("{account}"),
 			"Batman | identity_rdx12gcd4r799jpvztlffgw483pqcen98pjnay988n8rmscdswd872xy62"
@@ -372,7 +406,7 @@ mod tests {
 
     #[test]
     fn identifiable() {
-        let persona = Persona::placeholder_batman();
+        let persona = Persona::placeholder_mainnet_other();
         let identity_address: IdentityAddress =
 			"identity_rdx12gcd4r799jpvztlffgw483pqcen98pjnay988n8rmscdswd872xy62"
 				.parse()
@@ -382,7 +416,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_mainnet_satoshi() {
-        let model = Persona::placeholder_satoshi();
+        let model = Persona::placeholder_mainnet();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -459,7 +493,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_mainnet_batman() {
-        let model = Persona::placeholder_batman();
+        let model = Persona::placeholder_mainnet_other();
         assert_eq_after_json_roundtrip(
             &model,
             r#"

@@ -1,11 +1,12 @@
 use crate::prelude::*;
 
-pub type PersonaDataEntryID = Uuid;
-
 pub trait PersonaDataEntryValue: From<Self::Value> {
     type Value;
 }
 
+// We have to use macros since UniFFI does not support generics, that is the only
+// reason this macro exists, if/when UniFFI supports generics, this macro should
+// be replaced by `PersonaDataIdentifiedEntry<T>`.
 macro_rules! declare_identified_entry {
     ($value_type:ty,$struct_name:ident) => {
         #[derive(
@@ -51,7 +52,7 @@ macro_rules! declare_identified_entry {
                 Self { id, value }
             }
             pub fn new(value: $value_type) -> Self {
-                Self::with_id(id(), value)
+                Self::with_id(PersonaDataEntryID::generate(), value)
             }
         }
 
@@ -66,16 +67,14 @@ macro_rules! declare_identified_entry {
         impl HasPlaceholder for $struct_name {
             fn placeholder() -> Self {
                 $struct_name::with_id(
-                    Uuid::from_str("00000000-0000-0000-0000-000000000001")
-                        .unwrap(),
+                    PersonaDataEntryID::placeholder(),
                     <$value_type>::placeholder(),
                 )
             }
 
             fn placeholder_other() -> Self {
                 $struct_name::with_id(
-                    Uuid::from_str("00000000-0000-0000-0000-000000000002")
-                        .unwrap(),
+                    PersonaDataEntryID::placeholder_other(),
                     <$value_type>::placeholder_other(),
                 )
             }
@@ -132,10 +131,11 @@ mod identified_name_tests {
     #[test]
     fn new() {
         let value = V::placeholder_other();
-        let sut = SUT::with_id(Uuid::nil(), value.clone());
+        let sut =
+            SUT::with_id(PersonaDataEntryID::placeholder_one(), value.clone());
         assert_eq!(
             sut.id,
-            Uuid::from_str("00000000-0000-0000-0000-000000000000").unwrap()
+            "00000000-0000-0000-0000-000000000001".parse().unwrap()
         );
         assert_eq!(sut.value, value)
     }
@@ -233,10 +233,11 @@ mod identified_number_tests {
     #[test]
     fn new() {
         let value = V::placeholder_other();
-        let sut = SUT::with_id(Uuid::nil(), value.clone());
+        let sut =
+            SUT::with_id(PersonaDataEntryID::placeholder_four(), value.clone());
         assert_eq!(
             sut.id,
-            Uuid::from_str("00000000-0000-0000-0000-000000000000").unwrap()
+            "00000000-0000-0000-0000-000000000004".parse().unwrap()
         );
         assert_eq!(sut.value, value)
     }
@@ -322,10 +323,13 @@ mod identified_email_tests {
     #[test]
     fn new() {
         let value = V::placeholder_other();
-        let sut = SUT::with_id(Uuid::nil(), value.clone());
+        let sut = SUT::with_id(
+            PersonaDataEntryID::placeholder_three(),
+            value.clone(),
+        );
         assert_eq!(
             sut.id,
-            Uuid::from_str("00000000-0000-0000-0000-000000000000").unwrap()
+            "00000000-0000-0000-0000-000000000003".parse().unwrap()
         );
         assert_eq!(sut.value, value)
     }

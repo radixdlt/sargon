@@ -1,3 +1,4 @@
+use assert_json_diff::assert_json_include;
 use core::fmt::Debug;
 use pretty_assertions::{assert_eq, assert_ne};
 use serde::{de::DeserializeOwned, ser::Serialize};
@@ -15,7 +16,7 @@ fn base_assert_equality_after_json_roundtrip<T>(
     let deserialized: T = serde_json::from_value(json.clone()).unwrap();
     if expect_eq {
         assert_eq!(&deserialized, model, "Expected `model: T` and `T` deserialized from `json_string`, to be equal, but they were not.");
-        assert_eq!(serialized, json, "Expected `json` (string) and json serialized from `model to be equal`, but they were not.");
+        assert_json_include!(actual: serialized, expected: json);
     } else {
         assert_ne!(model, &deserialized);
         assert_ne!(&deserialized, model, "Expected difference between `model: T` and `T` deserialized from `json_string`, but they were unexpectedly equal.");
@@ -33,6 +34,19 @@ where
 {
     let json = json_string.parse::<serde_json::Value>().unwrap();
     base_assert_equality_after_json_roundtrip(model, json, true)
+}
+
+#[cfg(not(tarpaulin_include))]
+pub fn print_json<T>(model: &T)
+where
+    T: Serialize,
+{
+    println!(
+        "{}",
+        serde_json::to_string_pretty(model).expect(
+            "Should be able to JSON serialize passed in serializable model."
+        )
+    );
 }
 
 /// Asserts that (pseudocode) `model.to_json() == json` (serialization)

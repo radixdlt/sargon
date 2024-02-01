@@ -170,7 +170,7 @@ mod tests {
                             .map(Some)
                             .map_err(|_| CommonError::Unknown)
                     }
-                    _ => todo!(),
+                    _ => panic!("FailSaveActiveProfileIDStorage does not implement `load_data` for {:?}", key),
                 }
             }
 
@@ -191,7 +191,7 @@ mod tests {
                 &self,
                 _key: SecureStorageKey,
             ) -> Result<()> {
-                todo!()
+                panic!("FailSaveActiveProfileIDStorage does not implement `delete_data_for_key`");
             }
         }
         let storage = Arc::new(FailSaveActiveProfileIDStorage {});

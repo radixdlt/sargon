@@ -1,7 +1,8 @@
 use crate::prelude::*;
 
-/// An ordered set of Accounts on a specific network, most commonly
-/// the set is non-empty.
+/// An ordered set of [`Account`]s on a specific network, most commonly
+/// the set is non-empty, since wallets guide user to create a first
+/// Account.
 pub type Accounts = IdentifiedVecVia<Account>;
 
 impl Accounts {
@@ -23,7 +24,7 @@ impl Accounts {
 
 // Trait: Default
 impl Default for Accounts {
-    /// Instantiates a new empty networks collection.
+    /// Instantiates a new empty collection.
     fn default() -> Self {
         Self::new()
     }
@@ -60,8 +61,8 @@ impl Accounts {
     /// A placeholder used to facilitate unit tests.
     pub fn placeholder_mainnet() -> Self {
         Self::with_accounts([
-            Account::placeholder_mainnet_alice(),
-            Account::placeholder_mainnet_bob(),
+            Account::placeholder_mainnet(),
+            Account::placeholder_mainnet_other(),
         ])
     }
 

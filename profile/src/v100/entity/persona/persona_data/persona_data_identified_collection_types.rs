@@ -1,7 +1,11 @@
 use crate::prelude::*;
 
+// We have to use macros since UniFFI does not support generics, that is the only
+// reason this macro exists, if/when UniFFI supports generics, this macro should
+// be replaced by `CollectionOfIdentifiedPersonaDataEntries<T>`.
 macro_rules! declare_collection_of_identified_entry {
     ($id_ent_type:ty,$struct_name:ident) => {
+        /// A collection of identifiable PersonaData Entries.
         #[derive(
             Serialize,
             Deserialize,
@@ -49,7 +53,7 @@ macro_rules! declare_collection_of_identified_entry {
             }
 
             /// Creates a new CollectionOf PersonaDataEntries using just the *value*, which will be given a
-            /// generated ID and put in a `$id_ent_type`
+            /// generated ID and put in an identified entry.
             pub fn single_value(
                 value: <$id_ent_type as PersonaDataEntryValue>::Value,
             ) -> Self {

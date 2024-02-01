@@ -1,7 +1,6 @@
 use crate::prelude::*;
 
-/// An ordered set of Personas on a specific network, most commonly
-/// the set is non-empty.
+/// An ordered set of Personas on a specific network.
 pub type Personas = IdentifiedVecVia<Persona>;
 
 impl Personas {
@@ -23,7 +22,7 @@ impl Personas {
 
 // Trait: Default
 impl Default for Personas {
-    /// Instantiates a new empty networks collection.
+    /// Instantiates a new empty collection.
     fn default() -> Self {
         Self::new()
     }

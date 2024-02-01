@@ -183,6 +183,7 @@ impl Wallet {
                     network_id,
                     Accounts::from_iter([account.to_owned()]),
                     Personas::default(),
+                    AuthorizedDapps::default(),
                 );
                 networks.append(network);
                 Ok(())
