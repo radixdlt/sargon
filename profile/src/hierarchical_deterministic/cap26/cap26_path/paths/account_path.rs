@@ -45,7 +45,7 @@ impl TryFrom<CAP26Path> for AccountPath {
 
     fn try_from(value: CAP26Path) -> Result<Self, Self::Error> {
         value
-            .as_account_path()
+            .as_account()
             .ok_or(CommonError::ExpectedAccountPathButGotSomethingElse)
             .cloned()
     }
@@ -106,7 +106,7 @@ impl Derivation for AccountPath {
     }
     fn derivation_path(&self) -> DerivationPath {
         DerivationPath::CAP26 {
-            value: CAP26Path::AccountPath {
+            value: CAP26Path::Account {
                 value: self.clone(),
             },
         }

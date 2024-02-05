@@ -21,9 +21,9 @@ pub enum CAP26Path {
     #[display("{value}")]
     GetID { value: GetIDPath },
     #[display("{value}")]
-    AccountPath { value: AccountPath },
+    Account { value: AccountPath },
     #[display("{value}")]
-    IdentityPath { value: IdentityPath },
+    Identity { value: IdentityPath },
 }
 
 impl TryFrom<&HDPath> for CAP26Path {
@@ -50,8 +50,8 @@ impl FromStr for CAP26Path {
 impl Derivation for CAP26Path {
     fn hd_path(&self) -> &HDPath {
         match self {
-            CAP26Path::AccountPath { value } => value.hd_path(),
-            CAP26Path::IdentityPath { value } => value.hd_path(),
+            CAP26Path::Account { value } => value.hd_path(),
+            CAP26Path::Identity { value } => value.hd_path(),
             CAP26Path::GetID { value } => value.hd_path(),
         }
     }
@@ -64,8 +64,8 @@ impl Derivation for CAP26Path {
 
     fn scheme(&self) -> DerivationPathScheme {
         match self {
-            CAP26Path::AccountPath { value } => value.scheme(),
-            CAP26Path::IdentityPath { value } => value.scheme(),
+            CAP26Path::Account { value } => value.scheme(),
+            CAP26Path::Identity { value } => value.scheme(),
             CAP26Path::GetID { value } => value.scheme(),
         }
     }
@@ -73,13 +73,13 @@ impl Derivation for CAP26Path {
 
 impl From<AccountPath> for CAP26Path {
     fn from(value: AccountPath) -> Self {
-        Self::AccountPath { value }
+        Self::Account { value }
     }
 }
 
 impl From<IdentityPath> for CAP26Path {
     fn from(value: IdentityPath) -> Self {
-        Self::IdentityPath { value }
+        Self::Identity { value }
     }
 }
 
@@ -101,13 +101,13 @@ impl HasPlaceholder for CAP26Path {
 
 impl CAP26Path {
     pub fn placeholder_account() -> Self {
-        Self::AccountPath {
+        Self::Account {
             value: AccountPath::placeholder(),
         }
     }
 
     pub fn placeholder_identity() -> Self {
-        Self::IdentityPath {
+        Self::Identity {
             value: IdentityPath::placeholder(),
         }
     }
@@ -181,7 +181,7 @@ mod tests {
     #[test]
     fn into_from_account_path() {
         assert_eq!(
-            CAP26Path::AccountPath {
+            CAP26Path::Account {
                 value: AccountPath::placeholder()
             },
             AccountPath::placeholder().into()
