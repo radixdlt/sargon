@@ -13,11 +13,12 @@ use crate::prelude::*;
     Ord,
     uniffi::Enum,
 )]
-#[serde(rename_all = "camelCase")]
 #[serde(tag = "discriminator")]
 pub enum DepositorAddress {
-    ResourceAddress { value: ResourceAddress },
-    NonFungibleGlobalID { value: NonFungibleGlobalId },
+    #[serde(rename = "resourceAddress")]
+    Resource { value: ResourceAddress },
+    #[serde(rename = "nonFungibleGlobalID")]
+    NFGlobalID { value: NonFungibleGlobalId },
 }
 
 #[cfg(test)]
@@ -26,7 +27,7 @@ mod tests {
     #[test]
     fn json_decode_deny_all_with_exceptions() {
         let model =
-            DepositorAddress::ResourceAddress {
+            DepositorAddress::Resource {
                 value: "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
                     .parse()
                     .unwrap(),
