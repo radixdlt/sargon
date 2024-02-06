@@ -22,7 +22,8 @@ mod tests {
     );
 
     uniffi::build_foreign_language_testcases!(
-        "tests/uniffi/bindings/test_factor_sources.swift"
+        "tests/uniffi/bindings/test_factor_sources.swift",
+        "tests/uniffi/bindings/test_factor_sources.kts"
     );
 
     uniffi::build_foreign_language_testcases!(
