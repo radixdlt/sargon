@@ -14,7 +14,8 @@ mod tests {
     );
 
     uniffi::build_foreign_language_testcases!(
-        "tests/uniffi/bindings/test_gateways.swift"
+        "tests/uniffi/bindings/test_gateways.swift",
+        "tests/uniffi/bindings/test_gateways.kts"
     );
 
     uniffi::build_foreign_language_testcases!(
