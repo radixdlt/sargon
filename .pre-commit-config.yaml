@@ -44,5 +44,5 @@ repos:
         name: uniffi bindgen tests
         language: system
         types: [file, rust]
-        entry: cargo test --package profile --test uniffi
+        entry: bash -c 'exec env CLASSPATH="$PWD/jna-5.13.0.jar"' && bash -c 'exec env JAVA_OPTS="-Xmx8g"' && cargo test --package profile --test uniffi
         pass_filenames: false

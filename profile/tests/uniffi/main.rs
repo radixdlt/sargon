@@ -6,6 +6,7 @@ mod tests {
 
     uniffi::build_foreign_language_testcases!(
         "tests/uniffi/bindings/test_account_address.swift",
+        "tests/uniffi/bindings/test_account_address.kts"
     );
 
     uniffi::build_foreign_language_testcases!(
