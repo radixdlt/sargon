@@ -1,4 +1,4 @@
-import uniffi.radix_wallet_kit.*
+import radix.wallet.kit.*
 
 val placeholder: List<FactorSource>
     get() = newFactorSourcesPlaceholder()

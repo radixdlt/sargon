@@ -4,6 +4,9 @@
 # mutated the stored properties on account.
 generate_immutable_records = false
 
+[bindings.kotlin]
+package_name = "radix.wallet.kit"
+
 [bindings.swift.custom_types.Uuid]
 # Name of the type in the Swift code
 type_name = "UUID"

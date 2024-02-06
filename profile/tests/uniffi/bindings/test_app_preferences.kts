@@ -1,4 +1,4 @@
-import uniffi.radix_wallet_kit.*
+import radix.wallet.kit.*
 
 val AppPreferences.Companion.placeholder
     get() = newAppPreferencesPlaceholder()

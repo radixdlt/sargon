@@ -1,4 +1,4 @@
-import uniffi.radix_wallet_kit.*
+import radix.wallet.kit.*
 
 fun testAddress() {
     val bech32 = "account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzdm"
