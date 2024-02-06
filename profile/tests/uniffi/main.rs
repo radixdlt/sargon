@@ -40,7 +40,8 @@ mod tests {
     );
 
     uniffi::build_foreign_language_testcases!(
-        "tests/uniffi/bindings/test_radix_connect_password.swift"
+        "tests/uniffi/bindings/test_radix_connect_password.swift",
+        "tests/uniffi/bindings/test_radix_connect_password.kts"
     );
 
     uniffi::build_foreign_language_testcases!(
