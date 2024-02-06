@@ -26,7 +26,8 @@ mod tests {
     );
 
     uniffi::build_foreign_language_testcases!(
-        "tests/uniffi/bindings/test_app_preferences.swift"
+        "tests/uniffi/bindings/test_app_preferences.swift",
+        "tests/uniffi/bindings/test_app_preferences.kts"
     );
 
     uniffi::build_foreign_language_testcases!(
