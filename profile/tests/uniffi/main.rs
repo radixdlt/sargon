@@ -35,7 +35,8 @@ mod tests {
     );
 
     uniffi::build_foreign_language_testcases!(
-        "tests/uniffi/bindings/test_profile.swift"
+        "tests/uniffi/bindings/test_profile.swift",
+        "tests/uniffi/bindings/test_profile.kts"
     );
 
     uniffi::build_foreign_language_testcases!(
