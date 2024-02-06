@@ -19,7 +19,8 @@ mod tests {
     );
 
     uniffi::build_foreign_language_testcases!(
-        "tests/uniffi/bindings/test_header.swift"
+        "tests/uniffi/bindings/test_header.swift",
+        "tests/uniffi/bindings/test_header.kts"
     );
 
     uniffi::build_foreign_language_testcases!(
