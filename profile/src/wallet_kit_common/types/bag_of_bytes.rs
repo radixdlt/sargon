@@ -43,62 +43,81 @@ impl Deref for BagOfBytes {
 /// left: Custom { module_path: "profile", name: "BagOfBytes", builtin: Bytes }
 /// right: Custom { module_path: "profile", name: "BagOfBytes", builtin: Sequence { inner_type: UInt8 } }
 ///
-/// So HACK HACK HACK we use i8 instead
+/// So HACK HACK HACK we use `sequence<i8>` (`Vec<i8>`) instead as an intermediary `Builtin`.
+///
+/// However, in `uniffi.toml` we provide `from_custom`` / `into_custom`` for Kotlin and Swift
+/// which using two's complement maps back Vec<i8> -> Vec<u8>, meaning Kotlin and Swift actually
+/// never see the `i8`, and only works with u8.
+///
+/// So we translate:
+/// Kotlin: `Rust[BagOfBytes <:2's comp.:> Vec<i8>] <:2's comp:> [Kotlin]List<UByte>`
+/// Swift:  `Rust[BagOfBytes <:2's comp.:> Vec<i8>] <:2's comp:> [Swift]Foundation.Data`
+///
 impl crate::UniffiCustomTypeConverter for BagOfBytes {
     type Builtin = Vec<i8>;
 
     fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
-        println!("Rust converting Vec<i8> -> BagOfBytes, Vec: '{:?}'", val);
-        let from_builtin: Self = val
+        Ok(val
             .into_iter()
             // Two's complement
             .map(|i| (i.neg() as u8).wrapping_neg())
             .collect_vec()
-            .into();
-        println!("Rust converted to BagOfBytes: '{:?}'", from_builtin);
-        Ok(from_builtin)
+            .into())
     }
 
     fn from_custom(obj: Self) -> Self::Builtin {
-        println!(
-            "Rust converting BagOfBytes -> Vec<i8>, BoB: '{:?}'",
-            obj.to_vec()
-        );
-        let builtin = obj
-            .to_vec()
+        obj.to_vec()
             .into_iter()
             // Two's complement
             .map(|u| (u.wrapping_neg() as i8).neg())
-            .collect_vec();
-        println!("Rust converted to Vec<iu>: '{:?}'", builtin);
-        builtin
+            .collect_vec()
     }
-}
-
-#[cfg(test)]
-#[test]
-fn test_twoscomplement_from_u8() {
-    let x: u8 = 129;
-    let y: i8 = (x.wrapping_neg() as i8).neg();
-    assert_eq!(y, -127);
-}
-
-#[cfg(test)]
-#[test]
-fn test_twoscomplement_from_i8() {
-    let x: i8 = -127;
-    let y: u8 = (x.neg() as u8).wrapping_neg();
-    assert_eq!(y, 129);
-}
-
-#[uniffi::export]
-pub fn new_bag_of_bytes_129() -> BagOfBytes {
-    BagOfBytes { bytes: vec![129] }
 }
 
 #[uniffi::export]
 pub fn new_bag_of_bytes_from(bytes: Vec<u8>) -> BagOfBytes {
     bytes.into()
+}
+
+#[uniffi::export]
+pub fn new_bag_of_bytes_placeholder_aced() -> BagOfBytes {
+    BagOfBytes::placeholder_aced()
+}
+#[uniffi::export]
+pub fn new_bag_of_bytes_placeholder_babe() -> BagOfBytes {
+    BagOfBytes::placeholder_babe()
+}
+#[uniffi::export]
+pub fn new_bag_of_bytes_placeholder_cafe() -> BagOfBytes {
+    BagOfBytes::placeholder_cafe()
+}
+#[uniffi::export]
+pub fn new_bag_of_bytes_placeholder_dead() -> BagOfBytes {
+    BagOfBytes::placeholder_dead()
+}
+#[uniffi::export]
+pub fn new_bag_of_bytes_placeholder_ecad() -> BagOfBytes {
+    BagOfBytes::placeholder_ecad()
+}
+#[uniffi::export]
+pub fn new_bag_of_bytes_placeholder_fade() -> BagOfBytes {
+    BagOfBytes::placeholder_fade()
+}
+#[uniffi::export]
+pub fn bag_of_bytes_prepend_deadbeef(in_front_of: &BagOfBytes) -> BagOfBytes {
+    in_front_of.prepending(vec![0xde, 0xad, 0xbe, 0xef])
+}
+#[uniffi::export]
+pub fn bag_of_bytes_append_deadbeef(to: &BagOfBytes) -> BagOfBytes {
+    to.appending(vec![0xde, 0xad, 0xbe, 0xef])
+}
+#[uniffi::export]
+pub fn bag_of_bytes_prepend_cafe(in_front_of: &BagOfBytes) -> BagOfBytes {
+    in_front_of.prepending(vec![0xca, 0xfe])
+}
+#[uniffi::export]
+pub fn bag_of_bytes_append_cafe(to: &BagOfBytes) -> BagOfBytes {
+    to.appending(vec![0xca, 0xfe])
 }
 
 impl BagOfBytes {
@@ -157,7 +176,7 @@ impl FromStr for BagOfBytes {
 }
 
 impl HasPlaceholder for BagOfBytes {
-    /// `deadbeef...``
+    /// `dead...` of length 32 bytes
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
         Self::placeholder_dead()
@@ -217,6 +236,20 @@ impl BagOfBytes {
     pub fn bytes(&self) -> &[u8] {
         &self.bytes
     }
+
+    /// For testing purposes
+    pub fn prepending(&self, prefix_bytes: Vec<u8>) -> Self {
+        let mut bytes = prefix_bytes;
+        bytes.extend(self.to_vec());
+        bytes.into()
+    }
+
+    /// For testing purposes
+    pub fn appending(&self, suffix_bytes: Vec<u8>) -> Self {
+        let mut bytes = self.to_vec();
+        bytes.extend(suffix_bytes);
+        bytes.into()
+    }
 }
 
 impl BagOfBytes {
@@ -231,7 +264,20 @@ impl BagOfBytes {
 #[cfg(test)]
 mod tests {
 
+    use std::ops::Neg;
+
     use crate::prelude::*;
+
+    #[test]
+    fn test_twos_complement() {
+        // u8 -> i8
+        let x: u8 = 129;
+        let y: i8 = (x.wrapping_neg() as i8).neg();
+        assert_eq!(y, -127);
+        // and back
+        let z: u8 = (y.neg() as u8).wrapping_neg();
+        assert_eq!(x, z);
+    }
 
     #[test]
     fn equality() {
@@ -325,15 +371,77 @@ mod tests {
         }
         assert_eq!(set.len(), n);
     }
+
+    #[test]
+    fn prepend_bytes() {
+        assert_eq!(
+            BagOfBytes::from(vec![0xab, 0xba])
+                .prepending(vec![0xca, 0xfe])
+                .to_hex(),
+            "cafeabba"
+        )
+    }
+    #[test]
+    fn append_bytes() {
+        assert_eq!(
+            BagOfBytes::from(vec![0xab, 0xba])
+                .appending(vec![0xca, 0xfe])
+                .to_hex(),
+            "abbacafe"
+        )
+    }
 }
 
 #[cfg(test)]
 mod uniffi_tests {
     use crate::prelude::*;
 
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = BagOfBytes;
+
     #[test]
     fn new_ok() {
         let bytes = generate_bytes::<5>();
         assert_eq!(new_bag_of_bytes_from(bytes.clone()).bytes, bytes);
+    }
+
+    #[test]
+    fn placeholders() {
+        assert_eq!(
+            SUT::placeholder_aced(),
+            new_bag_of_bytes_placeholder_aced()
+        );
+        assert_eq!(
+            SUT::placeholder_babe(),
+            new_bag_of_bytes_placeholder_babe()
+        );
+        assert_eq!(
+            SUT::placeholder_cafe(),
+            new_bag_of_bytes_placeholder_cafe()
+        );
+        assert_eq!(
+            SUT::placeholder_dead(),
+            new_bag_of_bytes_placeholder_dead()
+        );
+        assert_eq!(
+            SUT::placeholder_ecad(),
+            new_bag_of_bytes_placeholder_ecad()
+        );
+        assert_eq!(
+            SUT::placeholder_fade(),
+            new_bag_of_bytes_placeholder_fade()
+        );
+    }
+
+    #[test]
+    fn append_prepend() {
+        let sut: SUT = vec![0xbe, 0xef].into();
+        assert_eq!(bag_of_bytes_append_cafe(&sut).to_hex(), "beefcafe");
+        assert_eq!(bag_of_bytes_append_deadbeef(&sut).to_hex(), "beefdeadbeef");
+        assert_eq!(bag_of_bytes_prepend_cafe(&sut).to_hex(), "cafebeef");
+        assert_eq!(
+            bag_of_bytes_prepend_deadbeef(&sut).to_hex(),
+            "deadbeefbeef"
+        );
     }
 }

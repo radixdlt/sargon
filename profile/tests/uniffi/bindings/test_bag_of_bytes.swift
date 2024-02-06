@@ -62,31 +62,56 @@ extension Data {
 	}
 }
 
-
-
 extension BagOfBytes {
 	init(data: Data) {
 		self = newBagOfBytesFrom(bytes: data)
 	}
-	static let r129: Self = newBagOfBytes129()
+	static let aced = newBagOfBytesPlaceholderAced()
+	static let babe = newBagOfBytesPlaceholderBabe()
+	static let cafe = newBagOfBytesPlaceholderCafe()
+	static let dead = newBagOfBytesPlaceholderDead()
+	static let ecad = newBagOfBytesPlaceholderEcad()
+	static let fade = newBagOfBytesPlaceholderFade()
 }
 
 func test() throws {
-// 	print("UInt8(bitPattern: Int8(bitPattern: 7)) is", UInt8(bitPattern: Int8(bitPattern: 7)))
-// 	print("UInt8(bitPattern: Int8(bitPattern: 7)) is", UInt8(bitPattern: Int8(bitPattern: 7)))
-// 	print("Int8(bitPattern: UInt8(bitPattern: 7)) is", Int8(bitPattern: UInt8(bitPattern: 7)))
-// 	print("Int8(bitPattern: UInt8(bitPattern: -127)) is", Int8(bitPattern: UInt8(bitPattern: Int8(-127))))
-// 	print("UInt8(bitPattern: -127) is", UInt8(bitPattern: Int8(-127))
-// )
-// 	let x = BagOfBytes.r129
-// 	print("x: '\(Array(x))'")
-// 	let y = BagOfBytes(data: Data([127]))
-// 	print("y: '\(Array(y))'")
-	let a = Data([129])
-	let b = BagOfBytes(data: a)
-	print("a: '\(Array(a))'")
-	print("b: '\(Array(b))'")
+	var a = Data()
+	var b = Data()
 	assert(a == b)
+
+	a = Data([129])
+	b = BagOfBytes(data: a)
+	assert(a == b)
+
+	assert(
+		try! Data(hex: "acedacedacedacedacedacedacedacedacedacedacedacedacedacedacedaced")
+			== BagOfBytes.aced)
+	assert(
+		try! Data(hex: "babebabebabebabebabebabebabebabebabebabebabebabebabebabebabebabe")
+			== BagOfBytes.babe)
+	assert(
+		try! Data(hex: "cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe")
+			== BagOfBytes.cafe)
+
+	assert(
+		try! Data(hex: "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead")
+			== BagOfBytes.dead)
+
+	assert(
+		try! Data(hex: "ecadecadecadecadecadecadecadecadecadecadecadecadecadecadecadecad")
+			== BagOfBytes.ecad)
+
+	assert(
+		try! Data(hex: "fadefadefadefadefadefadefadefadefadefadefadefadefadefadefadefade")
+			== BagOfBytes.fade)
+
+	a = try! BagOfBytes(data: Data(hex: "beef"))
+
+	assert(bagOfBytesAppendCafe(to: a).hex == "beefcafe")
+	assert(bagOfBytesAppendDeadbeef(to: a).hex == "beefdeadbeef")
+	assert(bagOfBytesPrependCafe(inFrontOf: a).hex == "cafebeef")
+	assert(bagOfBytesPrependDeadbeef(inFrontOf: a).hex == "deadbeefbeef")
+
 }
 
 try! test()
