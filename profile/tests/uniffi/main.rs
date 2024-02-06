@@ -37,6 +37,10 @@ mod tests {
     );
 
     uniffi::build_foreign_language_testcases!(
+        "tests/uniffi/bindings/test_bag_of_bytes.swift"
+    );
+
+    uniffi::build_foreign_language_testcases!(
         "tests/uniffi/bindings/test_hex32_bytes.swift"
     );
 

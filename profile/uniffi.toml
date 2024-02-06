@@ -4,6 +4,26 @@
 # mutated the stored properties on account.
 generate_immutable_records = false
 
+
+[bindings.swift.custom_types.BagOfBytes]
+# Name of the type in the Swift code
+type_name = "Data"
+# Modules that need to be imported
+imports = ["Foundation"]
+# Functions to convert between strings and URLs
+into_custom = "{ print(\"SWIFT builtin: \", {});return Data({}.map({ i8 in UInt8(bitPattern: i8) })) }()"
+from_custom = "{ print(\"SWIFT data: \", {});return {}.map({ u8 in Int8(bitPattern: u8) }) }()"
+
+[bindings.kotlin.custom_types.BagOfBytes]
+# Name of the type in the Kotlin code
+type_name = "List<Byte>"
+# Classes that need to be imported
+imports = []
+# # Functions to convert between strings and URLs
+into_custom = "{}"
+from_custom = "{}"
+
+
 [bindings.swift.custom_types.Uuid]
 # Name of the type in the Swift code
 type_name = "UUID"
