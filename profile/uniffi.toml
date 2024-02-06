@@ -16,12 +16,12 @@ from_custom = "{ {}.map({ u8 in Int8(bitPattern: u8) }) }()"
 
 [bindings.kotlin.custom_types.BagOfBytes]
 # Name of the type in the Kotlin code
-type_name = "List<Byte>"
+type_name = "List<UByte>"
 # Classes that need to be imported
 imports = []
 # # Functions to convert between strings and URLs
-into_custom = "{}"
-from_custom = "{}"
+into_custom = "{}.map({ it.toUByte() })"
+from_custom = "{}.map({ it.toByte() })"
 
 
 [bindings.swift.custom_types.Uuid]
