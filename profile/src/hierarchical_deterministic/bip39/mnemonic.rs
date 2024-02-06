@@ -74,23 +74,28 @@ impl Mnemonic {
             language: language.into(),
         }
     }
+
     pub fn from_entropy(entropy: &[u8]) -> Self {
         let internal = bip39::Mnemonic::from_entropy(entropy).unwrap();
         Self::from_internal(internal)
     }
+
     pub fn from_hex32(bytes: Hex32Bytes) -> Self {
-        Self::from_entropy(&bytes.bytes())
+        Self::from_entropy(&bytes.to_vec())
     }
 
     pub fn generate_new() -> Self {
         Self::from_hex32(Hex32Bytes::generate())
     }
+
     fn internal(&self) -> bip39::Mnemonic {
         bip39::Mnemonic::from_str(&self.phrase()).unwrap()
     }
+
     pub fn phrase(&self) -> String {
         self.words.iter().map(|w| w.word.to_string()).join(" ")
     }
+
     pub fn from_phrase(phrase: &str) -> Result<Self> {
         bip39::Mnemonic::from_str(phrase)
             .map_err(|_| CommonError::InvalidMnemonicPhrase)

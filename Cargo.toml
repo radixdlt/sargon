@@ -31,6 +31,7 @@ transaction = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "038
 bip32 = "0.5.1" # only need Secp256k1, to do validation of PublicKey
 ed25519-dalek = "1.0.1"
 rand = "0.8.5"
+delegate = "0.12.0"
 itertools = { version = "0.12.0" }
 enum-as-inner = "0.6.0"
 identified_vec = { version = "0.1.11", features = ["serde", "id_prim"] }
