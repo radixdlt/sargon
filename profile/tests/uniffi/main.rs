@@ -2,6 +2,7 @@
 mod tests {
     uniffi::build_foreign_language_testcases!(
         "tests/uniffi/bindings/test_keys.swift",
+        "tests/uniffi/bindings/test_keys.kts"
     );
 
     uniffi::build_foreign_language_testcases!(
