@@ -289,7 +289,7 @@ mod tests {
 
     #[test]
     fn from_cap26() {
-        let derivation_path: DerivationPath = CAP26Path::AccountPath {
+        let derivation_path: DerivationPath = CAP26Path::Account {
             value: AccountPath::placeholder(),
         }
         .into();
@@ -304,7 +304,7 @@ mod tests {
         let path: DerivationPath = AccountPath::placeholder().into();
         assert_eq!(
             path.as_cap26().unwrap(),
-            &CAP26Path::AccountPath {
+            &CAP26Path::Account {
                 value: AccountPath::placeholder()
             }
         );

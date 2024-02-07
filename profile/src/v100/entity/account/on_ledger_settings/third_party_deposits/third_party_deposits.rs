@@ -125,7 +125,7 @@ mod tests {
             DepositRule::AcceptKnown,
             BTreeSet::from_iter([excp1, excp2]),
             BTreeSet::from_iter(
-                [DepositorAddress::NonFungibleGlobalID { value: "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>".parse().unwrap()}],
+                [DepositorAddress::NFGlobalID { value: "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>".parse().unwrap()}],
             ),
         );
 
@@ -215,7 +215,7 @@ mod tests {
         )
         .unwrap();
 
-        let depositor = DepositorAddress::NonFungibleGlobalID {
+        let depositor = DepositorAddress::NFGlobalID {
             value: "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>"
                 .parse()
                 .unwrap(),

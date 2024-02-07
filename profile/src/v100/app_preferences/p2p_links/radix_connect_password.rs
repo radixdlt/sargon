@@ -28,6 +28,16 @@ pub fn new_radix_connect_password(bytes: Hex32Bytes) -> RadixConnectPassword {
     RadixConnectPassword::new(bytes)
 }
 
+#[uniffi::export]
+pub fn new_radix_connect_password_placeholder() -> RadixConnectPassword {
+    RadixConnectPassword::placeholder()
+}
+
+#[uniffi::export]
+pub fn new_radix_connect_password_placeholder_other() -> RadixConnectPassword {
+    RadixConnectPassword::placeholder_other()
+}
+
 impl RadixConnectPassword {
     pub fn new(hex_32bytes: Hex32Bytes) -> Self {
         Self { value: hex_32bytes }

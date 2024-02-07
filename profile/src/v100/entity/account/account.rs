@@ -383,7 +383,7 @@ mod tests {
         let new_third_party_dep = ThirdPartyDeposits::with_rule_and_lists(
             DepositRule::DenyAll,
             [excp1, excp2],
-            [DepositorAddress::ResourceAddress {
+            [DepositorAddress::Resource {
                 value: "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
                     .parse()
                     .unwrap(),

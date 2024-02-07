@@ -4,6 +4,9 @@
 # mutated the stored properties on account.
 generate_immutable_records = false
 
+[bindings.kotlin]
+package_name = "radix.wallet.kit"
+
 
 [bindings.swift.custom_types.BagOfBytes]
 # Name of the type in the Swift code
@@ -64,7 +67,10 @@ from_custom = "String(describing: {})"
 # Name of the type in the Kotlin code
 type_name = "URL"
 # Classes that need to be imported
-imports = ["java.net.URI", "java.net.URL"]
+imports = [
+    "java.net.URI",
+    "java.net.URL"
+]
 # Functions to convert between strings and URLs
 into_custom = "URI({}).toURL()"
 from_custom = "{}.toString()"
@@ -90,7 +96,10 @@ from_custom = "{let df = DateFormatter();df.dateFormat = \"yyyy-MM-dd'T'HH:mm:ss
 
 [bindings.kotlin.custom_types.Timestamp]
 type_name = "OffsetDateTime"
-imports = ["java.time"]
+imports = [
+    "java.time.OffsetDateTime",
+    "java.time.format.DateTimeFormatter"
+]
 into_custom = "OffsetDateTime.parse({}, DateTimeFormatter.ISO_DATE_TIME)"
 from_custom = "{}.format(DateTimeFormatter.ISO_DATE_TIME)"
 

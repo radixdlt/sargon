@@ -2,5 +2,7 @@
 /Cargo.lock
 tarpaulin-report.html
 .vscode
+.idea
 build_rs_cov.profraw
 cobertura.xml
+jna-*.jar
