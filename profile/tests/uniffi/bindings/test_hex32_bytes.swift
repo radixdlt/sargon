@@ -21,7 +21,7 @@ extension Hex32Bytes {
 func test() throws {
     let bytes = try Data.random(byteCount: 32)
     let hex32 = try Hex32Bytes(data: bytes)
-    assert(hex32.bytes == bytes)
+    assert(hex32.bagOfBytes == bytes)
 }
 
 try! test()

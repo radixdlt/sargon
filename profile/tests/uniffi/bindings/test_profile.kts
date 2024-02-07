@@ -10,11 +10,11 @@ fun test_equals() {
 	val p = Profile.placeholder
 	val q = Profile.placeholderOther
 
-    // TODO will change these when HexCoded32Bytes is represented with a list of bytes
-	//assert(p == Profile.placeholder)
-	assert(p != q)
-	// TODO will change these when HexCoded32Bytes is represented with a list of bytes
-	//assert(q == Profile.placeholderOther)
+	assert(p == Profile.placeholder)
+	assert(p == p)
+	assert(q == q)
+	assert(q == Profile.placeholderOther)
+	assert(Profile.placeholder != Profile.placeholderOther)
 }
 
 fun test_hashCode() {

@@ -28,6 +28,16 @@ pub fn new_radix_connect_password(bytes: Hex32Bytes) -> RadixConnectPassword {
     RadixConnectPassword::new(bytes)
 }
 
+#[uniffi::export]
+pub fn new_radix_connect_password_placeholder() -> RadixConnectPassword {
+    RadixConnectPassword::placeholder()
+}
+
+#[uniffi::export]
+pub fn new_radix_connect_password_placeholder_other() -> RadixConnectPassword {
+    RadixConnectPassword::placeholder_other()
+}
+
 impl RadixConnectPassword {
     pub fn new(hex_32bytes: Hex32Bytes) -> Self {
         Self { value: hex_32bytes }
@@ -170,5 +180,17 @@ mod uniffi_tests {
     fn new() {
         let bytes = Hex32Bytes::generate();
         assert_eq!(new_radix_connect_password(bytes.clone()).value, bytes);
+    }
+
+    #[test]
+    fn placeholders() {
+        assert_eq!(
+            new_radix_connect_password_placeholder(),
+            RadixConnectPassword::placeholder()
+        );
+        assert_eq!(
+            new_radix_connect_password_placeholder_other(),
+            RadixConnectPassword::placeholder_other()
+        );
     }
 }

@@ -10,10 +10,10 @@ fun test_equals() {
 	val a = placeholder
 	val b = placeholderOther
 
-	// TODO will change these when HexCoded32Bytes is represented with a list of bytes
-	//assert(a == placeholder)
-	assert(a != b)
-	//assert(b == placeholderOther)
+	assert(a == a)
+	assert(b == b)
+	assert(b != a)
+	assert(b != a)
 }
 
 fun test_hashCode() {

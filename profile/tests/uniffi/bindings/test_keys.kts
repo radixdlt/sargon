@@ -30,8 +30,8 @@ inline fun <reified K: PublicKey> testKey(hex: String): PublicKey {
         else -> error("Not a valid PublicKey class")
     }
 	assert(pk0.toHex() == hex)
-	// TODO will change these when HexCoded32Bytes is represented with a list of bytes
-	//assert(pk0.toBytes() == bytes)
+	// N.B. `equals` wont work since `toBytes` returns ByteArray, we need to translate it into
+    // `BagOfBytes` (currently: `List<UByte>`) for it to work, since UByte != Byte
 	assert(pk0.toBytes().contentEquals(bytes))
 
     val pk1 = when (K::class.java) {
@@ -40,8 +40,6 @@ inline fun <reified K: PublicKey> testKey(hex: String): PublicKey {
         else -> error("Not a valid PublicKey class")
     }
 	assert(pk1.toHex() == hex)
-	// TODO will change these when HexCoded32Bytes is represented with a list of bytes
-	//assert(pk1.toBytes() == bytes)
     assert(pk1.toBytes().contentEquals(bytes))
 
 	return pk0

@@ -39,8 +39,7 @@ fun test() {
     main0.displayName = DisplayName.from(value = updatedNameOfFirstAccount)
     main0.appearanceId = AppearanceId.placeholderOther
     val main0Updated = wallet.updateAccount(to = main0)
-    // TODO will change these when HexCoded32Bytes is represented with a list of bytes
-    //assert(main0Updated == main0)
+    assert(main0Updated == main0)
     assert(wallet.profile().networks[0].accounts[0].displayName.value == updatedNameOfFirstAccount)
     assert(wallet.profile().networks[0].accounts[0].appearanceId == AppearanceId.placeholderOther)
     assert(storage.contains(value = updatedNameOfFirstAccount))
@@ -64,8 +63,7 @@ fun test() {
     assert(main0.address != main1.address)
     assert(main0.networkId == main1.networkId)
     assert(wallet.profile().networks.size == 1)
-    // TODO will change these when HexCoded32Bytes is represented with a list of bytes
-    //assert(wallet.profile().networks[0].accounts == listOf(main0, main1))
+    assert(wallet.profile().networks[0].accounts == listOf(main0, main1))
 
     print("🔮 Creating first testnet account")
     val testnetAccountName = "Hello Radix Account!"
@@ -74,8 +72,7 @@ fun test() {
         name = DisplayName.from(value = testnetAccountName)
     )
     assert(wallet.profile().networks.size == 2)
-    // TODO will change these when HexCoded32Bytes is represented with a list of bytes
-    //assert(wallet.profile().networks[1].accounts == listOf(test0))
+    assert(wallet.profile().networks[1].accounts == listOf(test0))
     assert(wallet.profile().networks[1].accounts[0].displayName.value == testnetAccountName)
     assert(wallet.profile().networks[1].accounts[0].networkId == NetworkId.STOKENET)
     assert(storage.contains(value = testnetAccountName))

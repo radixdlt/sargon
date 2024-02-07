@@ -142,7 +142,31 @@ All models have Swift/Kotlin bindings using [UniFFI](https://github.com/mozilla/
 
 ## Setup
 
-### Pre-commit
+### Swift
+
+```sh
+xcode-select — install
+```
+
+Or install `Xcode` from App Store
+
+### Kotlin
+
+```sh
+brew install kotlin
+```
+
+#### JNA
+> [!IMPORTANT]  
+> To run tests in Kotlin you also need to download [JNA](https://mvnrepository.com/artifact/net.java.dev.jna/jna) (currently tested under version `5.13.0`) 
+> ``` sh
+> curl https://repo1.maven.org/maven2/net/java/dev/jna/jna/5.13.0/jna-5.13.0.jar
+> ```
+
+### `direnv`
+Install [`direnv`](https://direnv.net/) in order to automatically load `CLASSPATH` and `JAVA_OPTS` in [`.envrc`](.envrc), so that you can run Kotlin bindgen tests from cli using the command in the bottom of this document - i.e. without having to export `CLASSPATH``.
+
+### `pre-commit`
 
 Recommended to use [`pre-commit` tool](https://pre-commit.com/)
 
@@ -154,6 +178,14 @@ This repo contains a [`.pre-commit-config.yaml`](./.pre-commit-config.yaml) whic
 
 ```sh
 pre-commit install
+```
+
+### `nextest`
+
+[Nextest](https://nexte.st/index.html) is a nice test runner for Rust!
+
+```sh
+cargo install cargo-nextest
 ```
 
 ### Code coverage
@@ -170,26 +202,9 @@ And then run:
 cargo tarpaulin --out Html
 ```
 
-### nextest
 
-[Nextest](https://nexte.st/index.html) is a nice test runner for Rust!
-
-```sh
-cargo install cargo-nextest
-```
-
-## Test
+## Run Tests
 
 ```sh
 cargo nextest run --package profile --test uniffi && cargo nextest run
 ```
-
-> [!IMPORTANT]  
-> To run tests in Kotlin you need to download [JNA](https://mvnrepository.com/artifact/net.java.dev.jna/jna) (currently tested under version `5.13.0`) 
-> ``` sh
-> wget https://repo1.maven.org/maven2/net/java/dev/jna/jna/5.13.0/jna-5.13.0.jar
-> ```
-> Then include the jar into the classpath and also increase the heap size like so
-> ```sh
-> JAVA_OPTS="-Xmx8g" CLASSPATH="path-to-jna/jna-5.13.0.jar" cargo nextest run --package profile --test uniffi && cargo nextest run
-> ```

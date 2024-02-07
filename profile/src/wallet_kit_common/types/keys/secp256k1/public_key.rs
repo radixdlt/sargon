@@ -29,10 +29,10 @@ pub struct Secp256k1PublicKey {
     inner: EngineSecp256k1PublicKey,
 }
 
-uniffi::custom_type!(EngineSecp256k1PublicKey, Vec<u8>);
+uniffi::custom_type!(EngineSecp256k1PublicKey, BagOfBytes);
 
 impl UniffiCustomTypeConverter for EngineSecp256k1PublicKey {
-    type Builtin = Vec<u8>;
+    type Builtin = BagOfBytes;
 
     #[cfg(not(tarpaulin_include))] // false negative | tested in bindgen tests
     fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
@@ -41,7 +41,7 @@ impl UniffiCustomTypeConverter for EngineSecp256k1PublicKey {
 
     #[cfg(not(tarpaulin_include))] // false negative | tested in bindgen tests
     fn from_custom(obj: Self) -> Self::Builtin {
-        obj.to_vec()
+        obj.to_vec().into()
     }
 }
 
