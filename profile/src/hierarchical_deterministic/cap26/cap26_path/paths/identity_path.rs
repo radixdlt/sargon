@@ -45,7 +45,7 @@ impl TryFrom<CAP26Path> for IdentityPath {
 
     fn try_from(value: CAP26Path) -> Result<Self, Self::Error> {
         value
-            .as_identity_path()
+            .as_identity()
             .ok_or(CommonError::ExpectedIdentityPathButGotSomethingElse)
             .cloned()
     }
@@ -106,7 +106,7 @@ impl Derivation for IdentityPath {
 
     fn derivation_path(&self) -> DerivationPath {
         DerivationPath::CAP26 {
-            value: CAP26Path::IdentityPath {
+            value: CAP26Path::Identity {
                 value: self.clone(),
             },
         }

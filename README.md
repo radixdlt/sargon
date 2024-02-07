@@ -183,3 +183,13 @@ cargo install cargo-nextest
 ```sh
 cargo nextest run --package profile --test uniffi && cargo nextest run
 ```
+
+> [!IMPORTANT]  
+> To run tests in Kotlin you need to download [JNA](https://mvnrepository.com/artifact/net.java.dev.jna/jna) (currently tested under version `5.13.0`) 
+> ``` sh
+> wget https://repo1.maven.org/maven2/net/java/dev/jna/jna/5.13.0/jna-5.13.0.jar
+> ```
+> Then include the jar into the classpath and also increase the heap size like so
+> ```sh
+> JAVA_OPTS="-Xmx8g" CLASSPATH="path-to-jna/jna-5.13.0.jar" cargo nextest run --package profile --test uniffi && cargo nextest run
+> ```
