@@ -61,6 +61,7 @@ mod tests {
     );
 
     uniffi::build_foreign_language_testcases!(
-        "tests/uniffi/bindings/test_bag_of_bytes.swift"
+        "tests/uniffi/bindings/test_bag_of_bytes.swift",
+        "tests/uniffi/bindings/test_bag_of_bytes.kts"
     );
 }
