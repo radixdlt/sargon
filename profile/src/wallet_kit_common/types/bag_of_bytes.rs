@@ -12,6 +12,7 @@ use radix_engine_common::crypto::{Hash, IsHash};
     Clone,
     PartialEq,
     Eq,
+    Default,
     PartialOrd,
     Ord,
     Hash,
@@ -121,6 +122,9 @@ pub fn bag_of_bytes_append_cafe(to: &BagOfBytes) -> BagOfBytes {
 }
 
 impl BagOfBytes {
+    pub fn new() -> Self {
+        Vec::new().into()
+    }
     pub fn to_hex(&self) -> String {
         hex_encode(self.bytes())
     }
@@ -302,6 +306,12 @@ mod tests {
     #[test]
     fn len() {
         assert_eq!(BagOfBytes::placeholder().len(), 32);
+    }
+
+    #[test]
+    fn default_is_empty() {
+        assert_eq!(BagOfBytes::default(), BagOfBytes::new());
+        assert_eq!(BagOfBytes::default().is_empty(), true);
     }
 
     #[test]

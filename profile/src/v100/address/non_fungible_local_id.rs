@@ -6,7 +6,7 @@ use radix_engine_common::data::scrypto::model::NonFungibleLocalId as NativeNonFu
 pub enum NonFungibleLocalId {
     Integer { value: u64 },
     Str { value: String },
-    Bytes { value: Vec<u8> },
+    Bytes { value: BagOfBytes },
     Ruid { value: Vec<u8> },
 }
 
@@ -32,7 +32,7 @@ impl From<NativeNonFungibleLocalId> for NonFungibleLocalId {
                 value: value.value(),
             },
             NativeNonFungibleLocalId::Bytes(value) => Self::Bytes {
-                value: value.value().to_vec(),
+                value: value.value().to_vec().into(),
             },
             NativeNonFungibleLocalId::RUID(value) => Self::Ruid {
                 value: value.value().to_vec(),
@@ -48,7 +48,7 @@ impl TryFrom<NonFungibleLocalId> for NativeNonFungibleLocalId {
         match value {
             NonFungibleLocalId::Str { value } => Self::string(value)
                 .map_err(|_| Self::Error::InvalidNonFungibleLocalIDString),
-            NonFungibleLocalId::Bytes { value } => Self::bytes(value)
+            NonFungibleLocalId::Bytes { value } => Self::bytes(value.to_vec())
                 .map_err(|_| Self::Error::InvalidNonFungibleLocalIDBytes),
             NonFungibleLocalId::Ruid { value } => value
                 .try_into()
@@ -112,7 +112,10 @@ mod tests {
     #[test]
     fn invalid_local_id_bytes() {
         assert_eq!(
-            NonFungibleLocalId::Bytes { value: Vec::new() }.try_into(),
+            NonFungibleLocalId::Bytes {
+                value: BagOfBytes::new()
+            }
+            .try_into(),
             Err::<NativeNonFungibleLocalId, _>(
                 CommonError::InvalidNonFungibleLocalIDBytes
             )
@@ -141,7 +144,7 @@ mod tests {
     fn from_native_bytes() {
         let bytes = [0xab; 64];
         let non_native = NonFungibleLocalId::Bytes {
-            value: bytes.clone().to_vec(),
+            value: bytes.clone().to_vec().into(),
         };
         let native = NativeNonFungibleLocalId::Bytes(
             BytesNonFungibleLocalId::new(bytes.clone().to_vec()).unwrap(),
