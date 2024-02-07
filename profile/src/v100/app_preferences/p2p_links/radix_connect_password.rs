@@ -181,4 +181,16 @@ mod uniffi_tests {
         let bytes = Hex32Bytes::generate();
         assert_eq!(new_radix_connect_password(bytes.clone()).value, bytes);
     }
+
+    #[test]
+    fn placeholders() {
+        assert_eq!(
+            new_radix_connect_password_placeholder(),
+            RadixConnectPassword::placeholder()
+        );
+        assert_eq!(
+            new_radix_connect_password_placeholder_other(),
+            RadixConnectPassword::placeholder_other()
+        );
+    }
 }

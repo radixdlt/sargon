@@ -57,6 +57,7 @@ impl Deref for BagOfBytes {
 impl crate::UniffiCustomTypeConverter for BagOfBytes {
     type Builtin = Vec<i8>;
 
+    #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
     fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
         Ok(val
             .into_iter()
@@ -65,6 +66,7 @@ impl crate::UniffiCustomTypeConverter for BagOfBytes {
             .into())
     }
 
+    #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
     fn from_custom(obj: Self) -> Self::Builtin {
         obj.to_vec()
             .into_iter()
@@ -374,6 +376,12 @@ mod tests {
     }
 
     #[test]
+    fn from_hash() {
+        let digest = hash(vec![0xde, 0xad]);
+        assert_eq!(BagOfBytes::from(digest).to_vec(), digest.to_vec());
+    }
+
+    #[test]
     fn to_hex() {
         let str =
             "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
@@ -388,6 +396,12 @@ mod tests {
             &model,
             json!("deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"),
         );
+    }
+
+    #[test]
+    fn deref() {
+        let bytes: &[u8] = &[0xde, 0xad];
+        assert_eq!(*BagOfBytes::from(bytes), bytes);
     }
 
     #[test]

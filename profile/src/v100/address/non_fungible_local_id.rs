@@ -260,4 +260,14 @@ mod tests {
             })
         );
     }
+
+    #[test]
+    fn display_rui() {
+        assert_eq!(
+            non_fungible_local_id_to_string(NonFungibleLocalId::Ruid {
+                    value: hex_decode("deadbeef12345678babecafe87654321fadedeaf01234567ecadabba76543210").unwrap().into()
+                }),
+            "{deadbeef12345678-babecafe87654321-fadedeaf01234567-ecadabba76543210}"
+        );
+    }
 }

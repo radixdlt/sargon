@@ -165,32 +165,32 @@ mod tests {
 
     use crate::prelude::*;
 
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = Hex32Bytes;
+
     #[test]
     fn equality() {
-        assert_eq!(Hex32Bytes::placeholder(), Hex32Bytes::placeholder());
-        assert_eq!(
-            Hex32Bytes::placeholder_other(),
-            Hex32Bytes::placeholder_other()
-        );
+        assert_eq!(SUT::placeholder(), SUT::placeholder());
+        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(Hex32Bytes::placeholder(), Hex32Bytes::placeholder_other());
+        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
     }
 
     #[test]
     fn from_string_roundtrip() {
         let str =
             "0000000000000000000000000000000000000000000000000000000000000000";
-        assert_eq!(Hex32Bytes::from_hex(str).unwrap().to_string(), str);
+        assert_eq!(SUT::from_hex(str).unwrap().to_string(), str);
     }
 
     #[test]
     fn debug() {
         let str =
             "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
-        let hex_bytes = Hex32Bytes::placeholder();
+        let hex_bytes = SUT::placeholder();
         assert_eq!(format!("{:?}", hex_bytes), str);
     }
 
@@ -198,7 +198,7 @@ mod tests {
     fn display() {
         let str =
             "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
-        let hex_bytes = Hex32Bytes::placeholder();
+        let hex_bytes = SUT::placeholder();
         assert_eq!(format!("{}", hex_bytes), str);
     }
 
@@ -206,13 +206,13 @@ mod tests {
     fn to_hex() {
         let str =
             "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
-        let hex_bytes = Hex32Bytes::placeholder();
+        let hex_bytes = SUT::placeholder();
         assert_eq!(hex_bytes.to_string(), str);
     }
 
     #[test]
     fn json_roundtrip() {
-        let model = Hex32Bytes::placeholder();
+        let model = SUT::placeholder();
         assert_json_value_eq_after_roundtrip(
             &model,
             json!("deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"),
@@ -221,21 +221,21 @@ mod tests {
 
     #[test]
     fn json_roundtrip_fails_for_invalid() {
-        assert_json_value_fails::<Hex32Bytes>(json!("not even hex"));
-        assert_json_value_fails::<Hex32Bytes>(json!("deadbeef"));
-        assert_json_value_fails::<Hex32Bytes>(json!("deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"));
+        assert_json_value_fails::<SUT>(json!("not even hex"));
+        assert_json_value_fails::<SUT>(json!("deadbeef"));
+        assert_json_value_fails::<SUT>(json!("deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"));
     }
 
     #[test]
     fn from_bytes_roundtrip() {
         let bytes = [0u8; 32];
-        assert_eq!(Hex32Bytes::from_bytes(&bytes).bytes(), bytes);
+        assert_eq!(SUT::from_bytes(&bytes).bytes(), bytes);
     }
 
     #[test]
     fn from_vec_roundtrip() {
         let vec = Vec::from([0u8; 32]);
-        let sut: Hex32Bytes = vec.clone().try_into().unwrap();
+        let sut: SUT = vec.clone().try_into().unwrap();
         assert_eq!(sut.to_vec(), vec);
     }
 
@@ -243,7 +243,7 @@ mod tests {
     fn invalid_str() {
         let s = "invalid str";
         assert_eq!(
-            Hex32Bytes::from_str(s),
+            SUT::from_str(s),
             Err(CommonError::StringNotHex(s.to_owned()))
         );
     }
@@ -251,7 +251,7 @@ mod tests {
     #[test]
     fn invalid_len() {
         assert_eq!(
-            Hex32Bytes::try_from(Vec::from([0u8; 5])),
+            SUT::try_from(Vec::from([0u8; 5])),
             Err(CommonError::InvalidByteCountExpected32(5))
         )
     }
@@ -261,7 +261,7 @@ mod tests {
         let mut set: HashSet<Vec<u8>> = HashSet::new();
         let n = 100;
         for _ in 0..n {
-            let bytes = Hex32Bytes::generate();
+            let bytes = SUT::generate();
             set.insert(bytes.to_vec());
         }
         assert_eq!(set.len(), n);

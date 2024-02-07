@@ -164,7 +164,7 @@ brew install kotlin
 > ```
 
 ### `direnv`
-Install [`direnv`](https://direnv.net/) in order to automatically load `CLASSPATH` and `JAVA_OPTS` in [`.envrc`](.envrc) so that you can run UniFFI Kotlin bindgen tests from your IDE.
+Install [`direnv`](https://direnv.net/) in order to automatically load `CLASSPATH` and `JAVA_OPTS` in [`.envrc`](.envrc), so that you can run Kotlin bindgen tests from cli using the command in the bottom of this document - i.e. without having to export `CLASSPATH``.
 
 ### `pre-commit`
 
