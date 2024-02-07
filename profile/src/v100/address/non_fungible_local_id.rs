@@ -7,7 +7,7 @@ pub enum NonFungibleLocalId {
     Integer { value: u64 },
     Str { value: String },
     Bytes { value: BagOfBytes },
-    Ruid { value: Vec<u8> },
+    Ruid { value: BagOfBytes },
 }
 
 impl NonFungibleLocalId {
@@ -35,7 +35,7 @@ impl From<NativeNonFungibleLocalId> for NonFungibleLocalId {
                 value: value.value().to_vec().into(),
             },
             NativeNonFungibleLocalId::RUID(value) => Self::Ruid {
-                value: value.value().to_vec(),
+                value: value.value().to_vec().into(),
             },
         }
     }
@@ -50,14 +50,15 @@ impl TryFrom<NonFungibleLocalId> for NativeNonFungibleLocalId {
                 .map_err(|_| Self::Error::InvalidNonFungibleLocalIDString),
             NonFungibleLocalId::Bytes { value } => Self::bytes(value.to_vec())
                 .map_err(|_| Self::Error::InvalidNonFungibleLocalIDBytes),
-            NonFungibleLocalId::Ruid { value } => value
-                .try_into()
-                .map(Self::ruid)
-                .map_err(|value| CommonError::InvalidLength {
-                    expected: 32,
-                    found: value.len(),
-                    data: value,
-                }),
+            NonFungibleLocalId::Ruid { value } => {
+                value.to_vec().try_into().map(Self::ruid).map_err(|value| {
+                    CommonError::InvalidLength {
+                        expected: 32,
+                        found: value.len(),
+                        data: value,
+                    }
+                })
+            }
             NonFungibleLocalId::Integer { value } => Ok(Self::integer(value)),
         }
     }
@@ -126,7 +127,7 @@ mod tests {
     fn from_native_ruid() {
         let bytes = Hex32Bytes::placeholder_dead().bytes().to_owned();
         let non_native = NonFungibleLocalId::Ruid {
-            value: bytes.clone().to_vec(),
+            value: bytes.clone().to_vec().into(),
         };
         let native =
             NativeNonFungibleLocalId::RUID(RUIDNonFungibleLocalId::new(bytes));
@@ -195,7 +196,9 @@ mod tests {
 
     #[test]
     fn to_native_from_invalid_byte_count_throws() {
-        let invalid = NonFungibleLocalId::Ruid { value: Vec::new() };
+        let invalid = NonFungibleLocalId::Ruid {
+            value: BagOfBytes::new(),
+        };
         assert_eq!(
             NativeNonFungibleLocalId::try_from(invalid),
             Err(CommonError::InvalidLength {
