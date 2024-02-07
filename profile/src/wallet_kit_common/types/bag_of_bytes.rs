@@ -4,7 +4,7 @@ use crate::prelude::*;
 use radix_engine_common::crypto::{Hash, IsHash};
 
 /// This is a TEMPORARY workaround until Kotlin => ByteArray equatable issue for
-/// Records has been solved, see: https://github.com/mozilla/uniffi-rs/issues/1980
+/// Records has been solved, see: https://github.com/mozilla/uniffi-rs/issues/1985
 ///
 /// A bytes collection that does NOT convert into `ByteArray` in Kotlin, but
 /// instead `List<Byte>`, which has a working `==`.
