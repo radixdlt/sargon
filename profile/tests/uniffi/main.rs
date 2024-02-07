@@ -7,6 +7,7 @@ mod tests {
 
     uniffi::build_foreign_language_testcases!(
         "tests/uniffi/bindings/test_non_fungible_local_id.swift",
+        "tests/uniffi/bindings/test_non_fungible_local_id.kts"
     );
 
     uniffi::build_foreign_language_testcases!(
