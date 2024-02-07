@@ -95,7 +95,9 @@ func testKey<K: PublicKeyProtocol>(
 	fromHex: (String) throws -> K,
 	hex: String
 ) throws -> K {
-	let bytes = try Data(hex: hex)
+	// Important we use `newBagOfBytesFrom:bytes` to test `fromBytes`,
+	// work as expected when using BagOfBytes
+	let bytes = try newBagOfBytesFrom(bytes: Data(hex: hex))
 	assert(bytes.hex == hex)
 	let pk0 = try fromHex(hex)
 	assert(pk0.toHex() == hex)

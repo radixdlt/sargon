@@ -62,6 +62,18 @@ extension Data {
 	}
 }
 
+extension Data {
+	public static func random(byteCount: Int) throws -> Self {
+		var bytes = [UInt8](repeating: 0, count: byteCount)
+		let status = SecRandomCopyBytes(kSecRandomDefault, byteCount, &bytes)
+		if status == errSecSuccess {
+			return Self(bytes)
+		}
+		struct UnableToGenerateBytes: Swift.Error {}
+		throw UnableToGenerateBytes()
+	}
+}
+
 extension BagOfBytes {
 	init(data: Data) {
 		self = newBagOfBytesFrom(bytes: data)
@@ -72,6 +84,23 @@ extension BagOfBytes {
 	static let dead = newBagOfBytesPlaceholderDead()
 	static let ecad = newBagOfBytesPlaceholderEcad()
 	static let fade = newBagOfBytesPlaceholderFade()
+
+	func appendingCafe() -> Self {
+		bagOfBytesAppendCafe(to: self)
+	}
+
+	func appendingDeadbeef() -> Self {
+		bagOfBytesAppendDeadbeef(to: self)
+	}
+
+	func prependingCafe() -> Self {
+		bagOfBytesPrependCafe(inFrontOf: self)
+	}
+
+	func prependingDeadbeef() -> Self {
+		bagOfBytesPrependDeadbeef(inFrontOf: self)
+	}
+
 }
 
 func test() throws {
@@ -107,11 +136,30 @@ func test() throws {
 
 	a = try! BagOfBytes(data: Data(hex: "beef"))
 
-	assert(bagOfBytesAppendCafe(to: a).hex == "beefcafe")
-	assert(bagOfBytesAppendDeadbeef(to: a).hex == "beefdeadbeef")
-	assert(bagOfBytesPrependCafe(inFrontOf: a).hex == "cafebeef")
-	assert(bagOfBytesPrependDeadbeef(inFrontOf: a).hex == "deadbeefbeef")
+	assert(a.appendingCafe().hex == "beefcafe")
+	assert(a.appendingDeadbeef().hex == "beefdeadbeef")
+	assert(a.prependingCafe().hex == "cafebeef")
+	assert(a.prependingDeadbeef().hex == "deadbeefbeef")
 
+	b = try! BagOfBytes(data: Data(hex: "42"))
+	assert(
+		b.appendingCafe().appendingDeadbeef().prependingCafe().prependingDeadbeef().hex
+			== "deadbeefcafe42cafedeadbeef")
+
+	// IMPORTANT to test all 256 values of a byte, asserting that we test
+	// every single byte value that twos complement work
+	(0...UInt8.max).forEach {
+		let d = Data([$0])
+		assert(BagOfBytes(data: d) == d)
+	}
+
+	let n = 100
+	let s = Set(
+		(0..<n).map {
+			// probability of collision is non-existing for 16 bytes
+			try! BagOfBytes(data: Data.random(byteCount: 16 + $0))
+		})
+	assert(s.count == n)
 }
 
 try! test()

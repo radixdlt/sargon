@@ -5,6 +5,10 @@ mod tests {
     );
 
     uniffi::build_foreign_language_testcases!(
+        "tests/uniffi/bindings/test_non_fungible_local_id.swift",
+    );
+
+    uniffi::build_foreign_language_testcases!(
         "tests/uniffi/bindings/test_account_address.swift",
     );
 

@@ -10,6 +10,11 @@ pub enum NonFungibleLocalId {
     Ruid { value: BagOfBytes },
 }
 
+#[uniffi::export]
+pub fn non_fungible_local_id_to_string(id: NonFungibleLocalId) -> String {
+    id.to_string()
+}
+
 impl NonFungibleLocalId {
     fn native(&self) -> NativeNonFungibleLocalId {
         NativeNonFungibleLocalId::try_from(self.clone()).unwrap()
@@ -89,6 +94,53 @@ mod tests {
             Ok(NonFungibleLocalId::Str {
                 value: "value".to_string()
             })
+        );
+    }
+
+    #[test]
+    fn display_integer() {
+        assert_eq!(
+            format!("{}", NonFungibleLocalId::Integer { value: 1234 }),
+            "#1234#"
+        );
+    }
+
+    #[test]
+    fn display_str() {
+        assert_eq!(
+            format!(
+                "{}",
+                NonFungibleLocalId::Str {
+                    value: "foo".to_owned()
+                }
+            ),
+            "<foo>"
+        );
+    }
+
+    #[test]
+    fn display_ruid() {
+        assert_eq!(
+            format!(
+                "{}",
+                NonFungibleLocalId::Ruid {
+                    value: hex_decode("deadbeef12345678babecafe87654321fadedeaf01234567ecadabba76543210").unwrap().into()
+                }
+            ),
+            "{deadbeef12345678-babecafe87654321-fadedeaf01234567-ecadabba76543210}"
+        );
+    }
+
+    #[test]
+    fn display_bytes() {
+        assert_eq!(
+            format!(
+                "{}",
+                NonFungibleLocalId::Bytes {
+                    value: vec![0xde, 0xad].into()
+                }
+            ),
+            "[dead]"
         );
     }
 

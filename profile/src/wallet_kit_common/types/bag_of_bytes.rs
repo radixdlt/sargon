@@ -60,8 +60,7 @@ impl crate::UniffiCustomTypeConverter for BagOfBytes {
     fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
         Ok(val
             .into_iter()
-            // Two's complement
-            .map(|i| (i.neg() as u8).wrapping_neg())
+            .map(twos_complement_of_i8)
             .collect_vec()
             .into())
     }
@@ -69,8 +68,7 @@ impl crate::UniffiCustomTypeConverter for BagOfBytes {
     fn from_custom(obj: Self) -> Self::Builtin {
         obj.to_vec()
             .into_iter()
-            // Two's complement
-            .map(|u| (u.wrapping_neg() as i8).neg())
+            .map(twos_complement_of_u8)
             .collect_vec()
     }
 }
@@ -271,6 +269,16 @@ impl BagOfBytes {
     }
 }
 
+fn twos_complement_of_u8(u: u8) -> i8 {
+    // Yes, it is this easy, Rust does all the heavy lifting
+    u as i8
+}
+
+fn twos_complement_of_i8(i: i8) -> u8 {
+    // Yes, it is this easy, Rust does all the heavy lifting
+    i as u8
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -278,15 +286,38 @@ mod tests {
 
     use crate::prelude::*;
 
+    use super::{twos_complement_of_i8, twos_complement_of_u8};
+
     #[test]
     fn test_twos_complement() {
-        // u8 -> i8
-        let x: u8 = 129;
-        let y: i8 = (x.wrapping_neg() as i8).neg();
-        assert_eq!(y, -127);
-        // and back
-        let z: u8 = (y.neg() as u8).wrapping_neg();
-        assert_eq!(x, z);
+        // basics
+        assert_eq!(twos_complement_of_u8(130), -126);
+
+        let uiu = |u: u8| twos_complement_of_i8(twos_complement_of_u8(u));
+        let t_uiu = |u: u8| assert_eq!(uiu(u), u);
+        t_uiu(0);
+        t_uiu(1);
+        t_uiu(2);
+        t_uiu(126);
+        t_uiu(127);
+        t_uiu(128);
+        t_uiu(129);
+        t_uiu(130);
+        t_uiu(254);
+        t_uiu(255);
+
+        let iui = |i: i8| twos_complement_of_u8(twos_complement_of_i8(i));
+        let t_iui = |i: i8| assert_eq!(iui(i), i);
+
+        t_iui(-128);
+        t_iui(-127);
+        t_iui(-2);
+        t_iui(-1);
+        t_iui(0);
+        t_iui(1);
+        t_iui(2);
+        t_iui(126);
+        t_iui(127);
     }
 
     #[test]
