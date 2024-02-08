@@ -22,22 +22,22 @@ fun ByteArray.toBagOfBytes() = newBagOfBytesFrom(bytes = this)
 val BagOfBytes.hex: String
     get() = toUByteArray().toHexString()
 
-val acedBugOfBytes: BagOfBytes
+val acedBagOfBytes: BagOfBytes
     get() = newBagOfBytesPlaceholderAced()
 
-val babeBugOfBytes: BagOfBytes
+val babeBagOfBytes: BagOfBytes
     get() = newBagOfBytesPlaceholderBabe()
 
-val cafeBugOfBytes: BagOfBytes
+val cafeBagOfBytes: BagOfBytes
     get() = newBagOfBytesPlaceholderCafe()
 
-val deadBugOfBytes: BagOfBytes
+val deadBagOfBytes: BagOfBytes
     get() = newBagOfBytesPlaceholderDead()
 
-val ecadBugOfBytes: BagOfBytes
+val ecadBagOfBytes: BagOfBytes
     get() = newBagOfBytesPlaceholderEcad()
 
-val fadeBugOfBytes: BagOfBytes
+val fadeBagOfBytes: BagOfBytes
     get() = newBagOfBytesPlaceholderFade()
 
 fun BagOfBytes.appendingCafe() = bagOfBytesAppendCafe(to = this)
@@ -54,12 +54,12 @@ fun test() {
     b = byteArrayOf(129.toByte()).toBagOfBytes()
     assert(a == b)
 
-    assert("acedacedacedacedacedacedacedacedacedacedacedacedacedacedacedaced".hexToBagOfBytes() == acedBugOfBytes)
-    assert("babebabebabebabebabebabebabebabebabebabebabebabebabebabebabebabe".hexToBagOfBytes() == babeBugOfBytes)
-    assert("cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe".hexToBagOfBytes() == cafeBugOfBytes)
-    assert("deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead".hexToBagOfBytes() == deadBugOfBytes)
-    assert("ecadecadecadecadecadecadecadecadecadecadecadecadecadecadecadecad".hexToBagOfBytes() == ecadBugOfBytes)
-    assert("fadefadefadefadefadefadefadefadefadefadefadefadefadefadefadefade".hexToBagOfBytes() == fadeBugOfBytes)
+    assert("acedacedacedacedacedacedacedacedacedacedacedacedacedacedacedaced".hexToBagOfBytes() == acedBagOfBytes)
+    assert("babebabebabebabebabebabebabebabebabebabebabebabebabebabebabebabe".hexToBagOfBytes() == babeBagOfBytes)
+    assert("cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe".hexToBagOfBytes() == cafeBagOfBytes)
+    assert("deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead".hexToBagOfBytes() == deadBagOfBytes)
+    assert("ecadecadecadecadecadecadecadecadecadecadecadecadecadecadecadecad".hexToBagOfBytes() == ecadBagOfBytes)
+    assert("fadefadefadefadefadefadefadefadefadefadefadefadefadefadefadefade".hexToBagOfBytes() == fadeBagOfBytes)
 
     a = "beef".hexToBagOfBytes()
     assert(a.appendingCafe().hex == "beefcafe")
