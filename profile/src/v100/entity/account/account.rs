@@ -303,8 +303,9 @@ mod tests {
 
     use crate::{
         assert_eq_after_json_roundtrip, AssetException,
-        DepositAddressExceptionRule, DepositRule, DepositorAddress, EntityFlag,
-        EntityFlags, HasPlaceholder, OnLedgerSettings, ThirdPartyDeposits,
+        DepositAddressExceptionRule, DepositRule, EntityFlag, EntityFlags,
+        HasPlaceholder, OnLedgerSettings, ResourceOrNonFungible,
+        ThirdPartyDeposits,
     };
     use identified_vec::IsIdentifiedVec;
     use radix_engine_common::prelude::HashSet;
@@ -383,7 +384,7 @@ mod tests {
         let new_third_party_dep = ThirdPartyDeposits::with_rule_and_lists(
             DepositRule::DenyAll,
             [excp1, excp2],
-            [DepositorAddress::Resource {
+            [ResourceOrNonFungible::Resource {
                 value: "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
                     .parse()
                     .unwrap(),
