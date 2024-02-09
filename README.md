@@ -2,11 +2,14 @@
 
 [![codecov](https://codecov.io/github/radixdlt/Sargon/graph/badge.svg?token=EQYDU0XPMX)](https://codecov.io/github/radixdlt/Sargon)
 
+**Sargon is library for sharing code between Radix iOS/Android wallets.**
+
 > [!IMPORTANT]  
 > This library is intended for **internal use only** in the official iOS and Android wallets. 
 > Interfaces will be changing regularly, and we do not recommend other developers integrate the library or align with these standards.
 
-Sargon - after [Sargon of Akkad](https://en.wikipedia.org/wiki/Sargon_of_Akkad) the first ruler rof the Akkadian Empire, the first empire of Mesopotamia (and Babylon was a city in southern Mesopotamia) - is library for sharing models and logic for Radix iOS and Android wallets.
+## Etymology
+Named after [Sargon of Akkad](https://en.wikipedia.org/wiki/Sargon_of_Akkad) the first ruler of the Akkadian Empire, the first empire of Mesopotamia. Babylon was a city in southern Mesopotamia, and of course the name of the Radix milestone with which the Radix wallets was launched.
 
 # Status
 
