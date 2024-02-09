@@ -1,0 +1,13 @@
+[Custom]
+typedef string Uuid;
+
+[Custom]
+typedef string Url;
+
+[Custom]
+typedef string Timestamp;
+
+[Custom]
+typedef sequence<i8> BagOfBytes;
+
+namespace sargon {};

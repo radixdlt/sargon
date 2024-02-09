@@ -1,8 +1,15 @@
-# Wallet Kit
+# Sargon
 
-[![codecov](https://codecov.io/github/Sajjon/RadixWalletKit/graph/badge.svg?token=EQYDU0XPMX)](https://codecov.io/github/Sajjon/RadixWalletKit)
+[![codecov](https://codecov.io/github/radixdlt/Sargon/graph/badge.svg?token=EQYDU0XPMX)](https://codecov.io/github/radixdlt/Sargon)
 
-Middleware that can power Radix Wallet clients (iOS/Android).
+**Sargon is library for sharing code between Radix iOS/Android wallets.**
+
+> [!IMPORTANT]  
+> This library is intended for **internal use only** in the official iOS and Android wallets. 
+> Interfaces will be changing regularly, and we do not recommend other developers integrate the library or align with these standards.
+
+## Etymology
+Named after [Sargon of Akkad](https://en.wikipedia.org/wiki/Sargon_of_Akkad) the first ruler of the Akkadian Empire, the first empire of Mesopotamia. Babylon was a city in southern Mesopotamia, and of course the name of the Radix milestone with which the Radix wallets was launched.
 
 # Status
 
@@ -53,7 +60,7 @@ Middleware that can power Radix Wallet clients (iOS/Android).
 
 All models have JSON support and `Placeholder` with which "recursively" I've crafted two valid example Profiles.
 
-All models have Swift/Kotlin bindings using [UniFFI](https://github.com/mozilla/uniffi-rs) generating immutable values types that are `Equatable` and `Hashable`!
+All models have Swift/Kotlin bindings using [UniFFI](https://github.com/mozilla/uniffi-rs) generating mutable (so they can be updated in FFI and sent as a whole to Rust side) values types that are `Equatable` and `Hashable`!
 
 ### Hierarchal Deterministic
 
@@ -160,7 +167,7 @@ brew install kotlin
 > [!IMPORTANT]  
 > To run tests in Kotlin you also need to download [JNA](https://mvnrepository.com/artifact/net.java.dev.jna/jna) (currently tested under version `5.13.0`) 
 > ``` sh
-> curl https://repo1.maven.org/maven2/net/java/dev/jna/jna/5.13.0/jna-5.13.0.jar
+> curl https://repo1.maven.org/maven2/net/java/dev/jna/jna/5.13.0/jna-5.13.0.jar --output jna-5.13.0.jar
 > ```
 
 ### `direnv`
@@ -206,5 +213,5 @@ cargo tarpaulin --out Html
 ## Run Tests
 
 ```sh
-cargo nextest run --package profile --test uniffi && cargo nextest run
+cargo nextest run --package sargon --test uniffi && cargo nextest run
 ```
