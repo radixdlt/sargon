@@ -15,7 +15,7 @@ pub struct ThirdPartyDeposits {
 
     /// Allows certain third-party depositors to deposit assets freely.
     /// Note: There is no `deny` counterpart for this.
-    pub depositors_allow_list: IdentifiedVecVia<DepositorAddress>,
+    pub depositors_allow_list: IdentifiedVecVia<ResourceOrNonFungible>,
 }
 
 impl Default for ThirdPartyDeposits {
@@ -24,7 +24,7 @@ impl Default for ThirdPartyDeposits {
     }
 }
 
-impl Identifiable for DepositorAddress {
+impl Identifiable for ResourceOrNonFungible {
     type ID = Self;
 
     fn id(&self) -> Self::ID {
@@ -53,7 +53,7 @@ impl ThirdPartyDeposits {
     ) -> Self
     where
         I: IntoIterator<Item = AssetException>,
-        J: IntoIterator<Item = DepositorAddress>,
+        J: IntoIterator<Item = ResourceOrNonFungible>,
     {
         Self {
             deposit_rule,
@@ -90,14 +90,17 @@ impl ThirdPartyDeposits {
     ///
     /// If the set did not previously contain an equal value, true is returned.
     /// If the set already contained an equal value, false is returned, and the entry is not updated.
-    pub fn allow_depositor(&mut self, depositor: DepositorAddress) -> bool {
+    pub fn allow_depositor(
+        &mut self,
+        depositor: ResourceOrNonFungible,
+    ) -> bool {
         self.depositors_allow_list.append(depositor).0
     }
 
     // If the set contains an element equal to `DepositorAddress`, removes it from the set and drops it. Returns whether such an element was present.
     pub fn remove_allowed_depositor(
         &mut self,
-        depositor: &DepositorAddress,
+        depositor: &ResourceOrNonFungible,
     ) -> bool {
         self.depositors_allow_list.remove(depositor).is_some()
     }
@@ -125,7 +128,7 @@ mod tests {
             DepositRule::AcceptKnown,
             BTreeSet::from_iter([excp1, excp2]),
             BTreeSet::from_iter(
-                [DepositorAddress::NFGlobalID { value: "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>".parse().unwrap()}],
+                [ResourceOrNonFungible::NonFungible { value: "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>".parse().unwrap()}],
             ),
         );
 
@@ -215,7 +218,7 @@ mod tests {
         )
         .unwrap();
 
-        let depositor = DepositorAddress::NFGlobalID {
+        let depositor = ResourceOrNonFungible::NonFungible {
             value: "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>"
                 .parse()
                 .unwrap(),

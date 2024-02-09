@@ -101,7 +101,7 @@ mod tests {
             DepositRule::DenyAll,
             Vec::from_iter([excp1, excp2]),
             Vec::from_iter(
-                [DepositorAddress::Resource {
+                [ResourceOrNonFungible::Resource {
                     value: "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
                         .parse()
                         .unwrap(),
