@@ -1,6 +1,6 @@
 # Wallet Kit
 
-[![codecov](https://codecov.io/github/Sajjon/RadixWalletKit/graph/badge.svg?token=EQYDU0XPMX)](https://codecov.io/github/Sajjon/RadixWalletKit)
+[![codecov](https://codecov.io/github/radixdlt/Sargon/graph/badge.svg?token=EQYDU0XPMX)](https://codecov.io/github/radixdlt/Sargon)
 
 Middleware that can power Radix Wallet clients (iOS/Android).
 
@@ -53,7 +53,7 @@ Middleware that can power Radix Wallet clients (iOS/Android).
 
 All models have JSON support and `Placeholder` with which "recursively" I've crafted two valid example Profiles.
 
-All models have Swift/Kotlin bindings using [UniFFI](https://github.com/mozilla/uniffi-rs) generating immutable values types that are `Equatable` and `Hashable`!
+All models have Swift/Kotlin bindings using [UniFFI](https://github.com/mozilla/uniffi-rs) generating mutable (so they can be updated in FFI and sent as a whole to Rust side) values types that are `Equatable` and `Hashable`!
 
 ### Hierarchal Deterministic
 
