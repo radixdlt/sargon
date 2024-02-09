@@ -1,8 +1,12 @@
-# Wallet Kit
+# Sargon
 
 [![codecov](https://codecov.io/github/radixdlt/Sargon/graph/badge.svg?token=EQYDU0XPMX)](https://codecov.io/github/radixdlt/Sargon)
 
-Middleware that can power Radix Wallet clients (iOS/Android).
+> [!IMPORTANT]  
+> This library is intended for **internal use only** in the official iOS and Android wallets. 
+> Interfaces will be changing regularly, and we do not recommend other developers integrate the library or align with these standards.
+
+Sargon - after [Sargon of Akkad](https://en.wikipedia.org/wiki/Sargon_of_Akkad) the first ruler rof the Akkadian Empire, the first empire of Mesopotamia (and Babylon was a city in southern Mesopotamia) - is library for sharing models and logic for Radix iOS and Android wallets.
 
 # Status
 
@@ -160,7 +164,7 @@ brew install kotlin
 > [!IMPORTANT]  
 > To run tests in Kotlin you also need to download [JNA](https://mvnrepository.com/artifact/net.java.dev.jna/jna) (currently tested under version `5.13.0`) 
 > ``` sh
-> curl https://repo1.maven.org/maven2/net/java/dev/jna/jna/5.13.0/jna-5.13.0.jar
+> curl https://repo1.maven.org/maven2/net/java/dev/jna/jna/5.13.0/jna-5.13.0.jar --output jna-5.13.0.jar
 > ```
 
 ### `direnv`
@@ -206,5 +210,5 @@ cargo tarpaulin --out Html
 ## Run Tests
 
 ```sh
-cargo nextest run --package profile --test uniffi && cargo nextest run
+cargo nextest run --package sargon --test uniffi && cargo nextest run
 ```

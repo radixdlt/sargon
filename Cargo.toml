@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["profile"]
+members = ["sargon"]
 
 [workspace.dependencies]
 log = "0.4.20"
