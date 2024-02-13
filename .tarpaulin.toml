@@ -1,11 +1,9 @@
 [all]
 exclude-files = [
-    "profile/bindings/*",
-    "profile/tests/test_generated_bindings.rs",
+    "tests/*",
 ]
 verbose = false
 all-features = true
-workspace = true
 timeout = "1800s"
 out = ["Xml"]
 force-clean = false

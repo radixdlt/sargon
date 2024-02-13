@@ -213,5 +213,5 @@ cargo tarpaulin --out Html
 ## Run Tests
 
 ```sh
-cargo nextest run --package sargon --test uniffi && cargo nextest run
+cargo nextest run
 ```

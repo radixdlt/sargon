@@ -1,8 +1,24 @@
-[workspace]
-resolver = "2"
-members = ["sargon"]
+[package]
+name = "sargon"
+version = "0.1.0"
+edition = "2021"
+build = "build.rs"
 
-[workspace.dependencies]
+[profile.release]
+incremental = false
+panic = 'unwind'
+codegen-units = 1
+
+[[test]]
+name = "vectors"
+
+[[test]]
+name = "uniffi"
+
+[lib]
+crate-type = ["staticlib", "cdylib", "lib"]
+
+[dependencies]
 log = "0.4.20"
 pretty_env_logger = "0.5.0"
 derive_more = { version = "1.0.0-beta.6", features = ["debug", "display"] }
@@ -15,33 +31,38 @@ uuid = { version = "1.6.1", features = ["v4", "serde"] }
 serde_repr = "0.1.17"
 strum = { version = "0.25.0", features = ["derive"] }
 strum_macros = { version = "0.26.1" }
-radix-engine-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "038ddee8b0f57aa90e36375c69946c4eb634efeb", features = [
+
+# 587d5988cd4ca3c5193ddf37027ff4e4ecd637dc is the Scrypto commit that RET 9dc3deeb3299b4f4c255f36bb3d504681379ad5a uses
+radix-engine-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "587d5988cd4ca3c5193ddf37027ff4e4ecd637dc", features = [
     "serde",
 ] }
-radix-engine-interface = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "038ddee8b0f57aa90e36375c69946c4eb634efeb", features = [
+radix-engine-interface = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "587d5988cd4ca3c5193ddf37027ff4e4ecd637dc", features = [
     "std",
 ] }
-radix-engine-toolkit-json = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "e848b6abb9c5e72c695819e4d61a2d0c25f695f5" }
-radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "e848b6abb9c5e72c695819e4d61a2d0c25f695f5" }
+radix-engine-toolkit-json = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "9dc3deeb3299b4f4c255f36bb3d504681379ad5a" }
+radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "9dc3deeb3299b4f4c255f36bb3d504681379ad5a" }
 enum-iterator = "1.4.1"
-hex = "0.4.3"
-transaction = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "038ddee8b0f57aa90e36375c69946c4eb634efeb", features = [
-    "serde",
-] }
-bip32 = "0.5.1" # only need Secp256k1, to do validation of PublicKey
+bip32 = "0.5.1"                                                                                                                       # only need Secp256k1, to do validation of PublicKey
 ed25519-dalek = "1.0.1"
 rand = "0.8.5"
+hex = "0.4.3"
 delegate = "0.12.0"
 itertools = { version = "0.12.0" }
 enum-as-inner = "0.6.0"
 identified_vec = { version = "0.1.11", features = ["serde", "id_prim"] }
 nutype = { version = "0.4.0", features = ["serde"] }
 schemars = { version = "0.8.12", features = ["preserve_order"] }
-uniffi = { git = "https://github.com/mozilla/uniffi-rs", rev = "fb8dd5c0f9406ea558d0d9d86804f4688ae95e44", features = [
-    "cli",
-] }
+uniffi = { version = "0.26.0", features = ["cli"] }
+pretty_assertions = "1.4.0"
+slip10 = "0.4.3"
+memoize = "0.4.1"
+bip39 = { version = "2.0.0", features = ["serde"] }
+time-util = { version = "0.3.4", features = ["chrono"] }
+assert-json-diff = "2.0.2"
+url = { version = "2.5.0", features = ["serde"] }
 
-[profile.release]
-incremental = false
-panic = 'unwind'
-codegen-units = 1
+[build-dependencies]
+uniffi = { version = "0.26.0", features = ["build"] }
+
+[dev-dependencies]
+uniffi = { version = "0.26.0", features = ["bindgen-tests"] }
