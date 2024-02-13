@@ -33,12 +33,12 @@ impl Default for TransactionPreferences {
 impl HasPlaceholder for TransactionPreferences {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
-        Self::new(Decimal::try_from_str("0.975").unwrap())
+        Self::new("0.975".parse().unwrap())
     }
 
     /// A placeholder used to facilitate unit tests.
     fn placeholder_other() -> Self {
-        Self::new(Decimal::try_from_str("0.765").unwrap())
+        Self::new("0.765".parse().unwrap())
     }
 }
 
