@@ -77,18 +77,6 @@ pub struct Decimal {
     __inner: InnerDecimal, // Strange field name to try as much as possible hide it in FFI land.
 }
 
-// impl From<InnerDecimal> for Decimal {
-//     fn from(value: InnerDecimal) -> Self {
-//         Decimal { __inner: value }
-//     }
-// }
-
-// impl From<Decimal> for InnerDecimal {
-//     fn from(value: Decimal) -> Self {
-//         value.__inner
-//     }
-// }
-
 impl From<Decimal> for ScryptoDecimal192 {
     fn from(value: Decimal) -> Self {
         value.native()
@@ -247,6 +235,49 @@ pub fn new_decimal_from_i32(value: i32) -> Decimal {
 #[uniffi::export]
 pub fn new_decimal_from_i64(value: i64) -> Decimal {
     value.into()
+}
+
+impl Decimal {
+    pub fn checked_powi(&self, exp: i64) -> Option<Self> {
+        self.native().checked_powi(exp).map(|n| n.into())
+    }
+
+    /// Creates the Decimal `10^exponent`
+    pub fn pow(exponent: u8) -> Self {
+        Self::from(10)
+            .checked_powi(exponent as i64)
+            .expect("Too large exponent, 10^39 is max.")
+    }
+}
+
+/// Creates the Decimal `10^exponent`
+#[uniffi::export]
+pub fn new_decimal_exponent(exponent: u8) -> Decimal {
+    Decimal::pow(exponent)
+}
+
+/// `lhs < rhs`
+#[uniffi::export]
+pub fn decimal_less_than(lhs: &Decimal, rhs: &Decimal) -> bool {
+    lhs < rhs
+}
+
+/// `lhs <= rhs`
+#[uniffi::export]
+pub fn decimal_less_than_or_equal(lhs: &Decimal, rhs: &Decimal) -> bool {
+    lhs <= rhs
+}
+
+/// `lhs > rhs`
+#[uniffi::export]
+pub fn decimal_greater_than(lhs: &Decimal, rhs: &Decimal) -> bool {
+    lhs > rhs
+}
+
+/// `lhs >= rhs`
+#[uniffi::export]
+pub fn decimal_greater_than_or_equal(lhs: &Decimal, rhs: &Decimal) -> bool {
+    lhs >= rhs
 }
 
 /// Whether this decimal is zero.
@@ -575,5 +606,56 @@ mod uniffi_tests {
         assert_eq!(decimal_sub(nine, nine), zero);
         assert_eq!(decimal_sub(zero, zero), zero);
         assert_eq!(decimal_sub(seven, two), five);
+    }
+
+    #[test]
+    fn exponent() {
+        assert_eq!(new_decimal_exponent(0).to_string(), "1");
+        assert_eq!(new_decimal_exponent(1).to_string(), "10");
+        assert_eq!(new_decimal_exponent(2).to_string(), "100");
+        assert_eq!(new_decimal_exponent(3).to_string(), "1000");
+        assert_eq!(new_decimal_exponent(4).to_string(), "10000");
+        assert_eq!(
+            new_decimal_exponent(20).to_string(),
+            "100000000000000000000"
+        );
+        assert_eq!(
+            new_decimal_exponent(39).to_string(),
+            "1000000000000000000000000000000000000000"
+        );
+    }
+
+    #[test]
+    #[should_panic(expected = "Too large exponent, 10^39 is max.")]
+    fn exponent_too_large() {
+        _ = new_decimal_exponent(40);
+    }
+
+    #[test]
+    fn compare() {
+        let zero = new_decimal_from_i32(0);
+        let one = new_decimal_from_i64(1);
+        let two = new_decimal_from_u32(2);
+        let three = new_decimal_from_u64(3);
+
+        assert_eq!(decimal_less_than(&zero, &one), true);
+        assert_eq!(decimal_less_than(&zero, &two), true);
+        assert_eq!(decimal_less_than(&one, &two), true);
+        assert_eq!(decimal_less_than(&zero, &zero), false);
+        assert_eq!(decimal_less_than_or_equal(&zero, &zero), true);
+        assert_eq!(decimal_less_than_or_equal(&zero, &one), true);
+        assert_eq!(decimal_less_than_or_equal(&zero, &two), true);
+        assert_eq!(decimal_less_than_or_equal(&one, &two), true);
+        assert_eq!(decimal_less_than_or_equal(&two, &three), true);
+        assert_eq!(decimal_less_than_or_equal(&three, &three), true);
+
+        assert_eq!(decimal_greater_than(&three, &three), false);
+        assert_eq!(decimal_greater_than_or_equal(&three, &three), true);
+        assert_eq!(decimal_greater_than_or_equal(&three, &two), true);
+        assert_eq!(decimal_greater_than(&three, &two), true);
+        assert_eq!(decimal_greater_than(&three, &one), true);
+        assert_eq!(decimal_greater_than(&two, &one), true);
+        assert_eq!(decimal_greater_than(&one, &one), false);
+        assert_eq!(decimal_greater_than(&one, &zero), true);
     }
 }
