@@ -1,1 +1,1 @@
-extension Decimal192: Comparable {}
+//extension Decimal192: Comparable {}
