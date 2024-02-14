@@ -58,7 +58,7 @@ jobs:
           default: true
           components: rustfmt, clippy
       - name: Install cargo nextest
-        uses: RDXWorks-actions/cargo-install@v1
+        uses: RDXWorks-actions/cargo-install@main
         with:
           crate: cargo-nextest
           locked: true
@@ -84,9 +84,10 @@ jobs:
           toolchain: nightly-2024-01-11
           default: true
       - name: Install cargo tarpaulin
-        uses: RDXWorks-actions/cargo-install@v1
+        uses: RDXWorks-actions/cargo-install@main
         with:
-          crate: cargo-tarpaulin = "0.27.3"
+          crate: cargo-tarpaulin
+          tag: 0.27.3
           locked: true
       - uses: radixdlt/public-iac-resuable-artifacts/fetch-secrets@main
         with:
