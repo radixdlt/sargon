@@ -2187,7 +2187,7 @@ public func FfiConverterTypeContentHint_lower(_ value: ContentHint) -> RustBuffe
     return FfiConverterTypeContentHint.lower(value)
 }
 
-public struct Decimal {
+public struct Decimal192 {
     public var base10String: String
 
     // Default memberwise initializers are never public by default, so we
@@ -2199,8 +2199,8 @@ public struct Decimal {
     }
 }
 
-extension Decimal: Equatable, Hashable {
-    public static func == (lhs: Decimal, rhs: Decimal) -> Bool {
+extension Decimal192: Equatable, Hashable {
+    public static func == (lhs: Decimal192, rhs: Decimal192) -> Bool {
         if lhs.base10String != rhs.base10String {
             return false
         }
@@ -2212,25 +2212,25 @@ extension Decimal: Equatable, Hashable {
     }
 }
 
-public struct FfiConverterTypeDecimal: FfiConverterRustBuffer {
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Decimal {
+public struct FfiConverterTypeDecimal192: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Decimal192 {
         return
-            try Decimal(
+            try Decimal192(
                 base10String: FfiConverterString.read(from: &buf)
             )
     }
 
-    public static func write(_ value: Decimal, into buf: inout [UInt8]) {
+    public static func write(_ value: Decimal192, into buf: inout [UInt8]) {
         FfiConverterString.write(value.base10String, into: &buf)
     }
 }
 
-public func FfiConverterTypeDecimal_lift(_ buf: RustBuffer) throws -> Decimal {
-    return try FfiConverterTypeDecimal.lift(buf)
+public func FfiConverterTypeDecimal192_lift(_ buf: RustBuffer) throws -> Decimal192 {
+    return try FfiConverterTypeDecimal192.lift(buf)
 }
 
-public func FfiConverterTypeDecimal_lower(_ value: Decimal) -> RustBuffer {
-    return FfiConverterTypeDecimal.lower(value)
+public func FfiConverterTypeDecimal192_lower(_ value: Decimal192) -> RustBuffer {
+    return FfiConverterTypeDecimal192.lower(value)
 }
 
 /**
@@ -5947,7 +5947,7 @@ public struct TransactionPreferences {
      * The deposit guarantee that will automatically be added for
      * all deposits in transactions.
      */
-    public var defaultDepositGuarantee: Decimal
+    public var defaultDepositGuarantee: Decimal192
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
@@ -5956,7 +5956,7 @@ public struct TransactionPreferences {
          * The deposit guarantee that will automatically be added for
          * all deposits in transactions.
          */
-        defaultDepositGuarantee: Decimal
+        defaultDepositGuarantee: Decimal192
     ) {
         self.defaultDepositGuarantee = defaultDepositGuarantee
     }
@@ -5979,12 +5979,12 @@ public struct FfiConverterTypeTransactionPreferences: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> TransactionPreferences {
         return
             try TransactionPreferences(
-                defaultDepositGuarantee: FfiConverterTypeDecimal.read(from: &buf)
+                defaultDepositGuarantee: FfiConverterTypeDecimal192.read(from: &buf)
             )
     }
 
     public static func write(_ value: TransactionPreferences, into buf: inout [UInt8]) {
-        FfiConverterTypeDecimal.write(value.defaultDepositGuarantee, into: &buf)
+        FfiConverterTypeDecimal192.write(value.defaultDepositGuarantee, into: &buf)
     }
 }
 

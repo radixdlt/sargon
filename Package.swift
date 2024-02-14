@@ -16,7 +16,7 @@ if useLocalFramework {
 	)
 } else {
 	let releaseTag = "0.1.0"
-	let releaseChecksum = "4716b9370ed6cc848c2ae7435f7daeeb0528647b4e23ffd843e1ef6381c7b2c6"
+	let releaseChecksum = "223056bc286cd5210061ad64e31a2800717073e9527e6885e1e51cf2b3b4072f"
 	binaryTarget = .binaryTarget(
 		name: sargonBinaryTargetName,
 		url:
