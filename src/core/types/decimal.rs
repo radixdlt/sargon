@@ -41,7 +41,7 @@ impl From<InnerDecimal> for String {
     }
 }
 
-/// `Decimal` represents a 192 bit representation of a fixed-scale decimal number.
+/// `Decimal192` represents a 192 bit representation of a fixed-scale decimal number.
 ///
 /// The finite set of values are of the form `m / 10^18`, where `m` is
 /// an integer such that `-2^(192 - 1) <= m < 2^(192 - 1)`.
@@ -53,7 +53,11 @@ impl From<InnerDecimal> for String {
 ///
 /// Unless otherwise specified, all operations will panic if underflow/overflow.
 ///
-/// Powering it is the [Scrypto Decimal type, see docs][scrypto]
+/// Powering it is the [Scrypto Decimal type, see docs][scrypto].
+///
+/// Note: This type cannot be called `Decimal`, since it results in naming collision
+/// in the Swift land (clash with `Foundation.Decimal`) instead we have created a
+/// type alias `Decimal = Decimal192` which we use in Rust land.
 ///
 /// [scrypto]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/math/decimal.rs#L42
 #[derive(
@@ -71,11 +75,15 @@ impl From<InnerDecimal> for String {
     uniffi::Record,
 )]
 #[display("{}", self.native())]
-pub struct Decimal {
+pub struct Decimal192 {
     /// @Kotlin / Swift developer: Do not use this property/field. Instead use all the provided
     /// methods on the `Decimal` type.
     __inner: InnerDecimal, // Strange field name to try as much as possible hide it in FFI land.
 }
+
+/// Internally (in Rust land) we would like to call `Decimal192` just `Decimal`.
+/// Reusing the naming convention set by Scrypto.
+pub type Decimal = Decimal192;
 
 impl From<Decimal> for ScryptoDecimal192 {
     fn from(value: Decimal) -> Self {
@@ -256,6 +264,12 @@ pub fn new_decimal_exponent(exponent: u8) -> Decimal {
     Decimal::pow(exponent)
 }
 
+/// `decimal.to_string()`
+#[uniffi::export]
+pub fn decimal_to_string(decimal: &Decimal) -> String {
+    decimal.to_string()
+}
+
 /// `lhs < rhs`
 #[uniffi::export]
 pub fn decimal_less_than(lhs: &Decimal, rhs: &Decimal) -> bool {
@@ -423,6 +437,20 @@ mod tests {
     }
 
     #[test]
+    fn add_two_large() {
+        let a: Decimal = "958947355801916604025588861116008628224.01234"
+            .parse()
+            .unwrap();
+        let b: Decimal = "58947355801916604025588861116008628224.04321"
+            .parse()
+            .unwrap();
+        let c: Decimal = "1017894711603833208051177722232017256448.05555"
+            .parse()
+            .unwrap();
+        assert_eq!(a + b, c);
+    }
+
+    #[test]
     fn from_str() {
         let a: Decimal =
             "3138550867693340381917894711603833208051.177722232017256447"
@@ -487,11 +515,26 @@ mod tests {
             .collect::<HashSet<_>>();
         assert_eq!(set.len(), n);
     }
+
+    #[test]
+    fn many_zeros() {
+        let s = "0.000000000000000123";
+        let d: Decimal = s.parse().unwrap();
+        assert_eq!(d.to_string(), s);
+    }
 }
 
 #[cfg(test)]
 mod uniffi_tests {
     use crate::prelude::*;
+
+    #[test]
+    fn to_string() {
+        let s = "58947355801916604025588861116008628224.04321";
+        let a: Decimal192 = s.parse().unwrap();
+
+        assert_eq!(decimal_to_string(&a), s);
+    }
 
     #[test]
     fn arithmetic() {
