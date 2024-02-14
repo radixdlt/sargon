@@ -10,7 +10,7 @@ jobs:
   check-formatting:
     runs-on: ubuntu-latest
     steps:
-      - uses: RDXWorks-actions/checkout
+      - uses: RDXWorks-actions/checkout@main
       - name: Install Rust Toolchain
         uses: RDXWorks-actions/toolchain@master
         with:
@@ -22,7 +22,7 @@ jobs:
   cargo-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: RDXWorks-actions/checkout
+      - uses: RDXWorks-actions/checkout@main
       - name: Install Rust Toolchain
         uses: RDXWorks-actions/toolchain@master
         with:
@@ -34,7 +34,7 @@ jobs:
   clippy-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: RDXWorks-actions/checkout
+      - uses: RDXWorks-actions/checkout@main
       - name: Install Rust Toolchain
         uses: RDXWorks-actions/toolchain@master
         with:
@@ -46,7 +46,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: RDXWorks-actions/checkout
+      - uses: RDXWorks-actions/checkout@main@main
       - name: Install Rust Toolchain
         uses: RDXWorks-actions/toolchain@master
         with:
@@ -73,7 +73,7 @@ jobs:
   codecoverage:
     runs-on: ubuntu-latest
     steps:
-      - uses: RDXWorks-actions/checkout
+      - uses: RDXWorks-actions/checkout@main
       - name: Install Rust Toolchain
         uses: RDXWorks-actions/toolchain@master
         with:
