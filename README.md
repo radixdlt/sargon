@@ -215,3 +215,26 @@ cargo tarpaulin --out Html
 ```sh
 cargo nextest run
 ```
+
+# Build
+## CD
+See [`.github/workflows/release.yml`](.github/workflows/release.yml)
+
+## Local
+### iOS
+
+#### Prerequisites
+
+##### Rust targetse
+```sh
+rustup target add x86_64-apple-ios aarch64-apple-ios aarch64-apple-ios-sim
+```
+
+##### `jq`
+[_`jq` is a lightweight and flexible command-line JSON processor._](https://jqlang.github.io/jq/)
+Used in build script
+```sh
+brew install jq
+```
+
+We build using [`scripts/build-ios.sh`](scripts/build-ios.sh)
