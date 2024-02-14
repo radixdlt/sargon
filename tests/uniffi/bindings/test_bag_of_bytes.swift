@@ -62,7 +62,7 @@ extension Data {
 	}
 }
 
-func randomByteArray(byteCount count: Int) throws -> [UInt8] {
+func randomByteArray(byteCount count: Int) -> [UInt8] {
 	#if canImport(Darwin) || os(Linux) || os(Android) || os(Windows)
 		var rng = SystemRandomNumberGenerator()
 		return (0..<count).map { _ in rng.next() }
@@ -72,8 +72,8 @@ func randomByteArray(byteCount count: Int) throws -> [UInt8] {
 }
 
 extension Data {
-	public static func random(byteCount: Int) throws -> Self {
-		Data(randomBytesArray(byteCount: byteCount))
+	public static func random(byteCount: Int) -> Self {
+		Data(randomByteArray(byteCount: byteCount))
 	}
 }
 
@@ -160,7 +160,7 @@ func test() throws {
 	let s = Set(
 		(0..<n).map {
 			// probability of collision is non-existing for 16 bytes
-			try! BagOfBytes(data: Data.random(byteCount: 16 + $0))
+			BagOfBytes(data: Data.random(byteCount: 16 + $0))
 		})
 	assert(s.count == n)
 }
