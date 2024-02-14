@@ -1,0 +1,104 @@
+# Testing CI - Runs on each PR and Push
+
+name: Test
+on:
+  pull_request:
+  push:
+permissions:
+  id-token: write
+  contents: read
+env:
+  CARGO_TERM_COLOR: always
+jobs:
+  check-formatting:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: RDXWorks-actions/checkout@main
+      - name: Install Rust Toolchain
+        uses: RDXWorks-actions/toolchain@master
+        with:
+          toolchain: nightly-2024-01-11
+          default: true
+          components: rustfmt
+      - name: Check formatting
+        run: cargo fmt --check
+  cargo-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: RDXWorks-actions/checkout@main
+      - name: Install Rust Toolchain
+        uses: RDXWorks-actions/toolchain@master
+        with:
+          toolchain: nightly-2024-01-11
+          default: true
+          profile: minimal
+      - name: Cargo Check
+        run: cargo check --all
+  clippy-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: RDXWorks-actions/checkout@main
+      - name: Install Rust Toolchain
+        uses: RDXWorks-actions/toolchain@master
+        with:
+          toolchain: nightly-2024-01-11
+          default: true
+          components: rustfmt, clippy
+      - name: Clippy Check
+        run: cargo clippy --all
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: RDXWorks-actions/checkout@main
+      - name: Install Rust Toolchain
+        uses: RDXWorks-actions/toolchain@master
+        with:
+          toolchain: nightly-2024-01-11
+          default: true
+          components: rustfmt, clippy
+      - name: Install cargo nextest
+        uses: RDXWorks-actions/cargo-install@main
+        with:
+          crate: cargo-nextest
+          locked: true
+      - name: Install JNA
+        run: wget https://repo1.maven.org/maven2/net/java/dev/jna/jna/5.13.0/jna-5.13.0.jar
+      - name: Run sccache-cache
+        uses: RDXWorks-actions/sccache-action@main
+      - name: Run tests
+        run: CLASSPATH="$PWD/jna-5.13.0.jar" cargo nextest run
+        env:
+          # Required env-var to increase the heapsize when using `kotlinc`.
+          JAVA_OPTS: "-Xmx8g"
+          # Enable sccache
+          SCCACHE_GHA_ENABLED: "true"
+          RUSTC_WRAPPER: "sccache"
+  codecoverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: RDXWorks-actions/checkout@main
+      - name: Install Rust Toolchain
+        uses: RDXWorks-actions/toolchain@master
+        with:
+          toolchain: nightly-2024-01-11
+          default: true
+      - name: Install cargo tarpaulin
+        uses: RDXWorks-actions/cargo-install@main
+        with:
+          crate: cargo-tarpaulin
+          tag: 0.27.3
+          locked: true
+      - uses: radixdlt/public-iac-resuable-artifacts/fetch-secrets@main
+        with:
+          role_name: ${{ secrets.AWS_ROLE_NAME_SECRET }}
+          app_name: "sargon"
+          step_name: "codecoverage"
+          secret_prefix: "CODECOV"
+          secret_name: ${{ secrets.AWS_SECRET_NAME_CODECOV }}
+          parse_json: true
+      - name: Generate code coverage
+        run: cargo tarpaulin --lib
+      - name: Upload to codecov.io
+        uses: RDXWorks-actions/codecov-action@main
+        with:
+          fail_ci_if_error: true
