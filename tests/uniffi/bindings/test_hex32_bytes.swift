@@ -1,17 +1,21 @@
 import Sargon
 import Foundation
 
+func randomByteArray(byteCount count: Int) -> [UInt8] {
+	#if canImport(Darwin) || os(Linux) || os(Android) || os(Windows)
+		var rng = SystemRandomNumberGenerator()
+		return (0..<count).map { _ in rng.next() }
+	#else
+		fatalError("No secure random number generator on this platform.")
+	#endif
+}
+
 extension Data {
-	public static func random(byteCount: Int) throws -> Self {
-		var bytes = [UInt8](repeating: 0, count: byteCount)
-		let status = SecRandomCopyBytes(kSecRandomDefault, byteCount, &bytes)
-		if status == errSecSuccess {
-			return Self(bytes)
-		}
-		struct UnableToGenerateBytes: Swift.Error {}
-		throw UnableToGenerateBytes()
+	public static func random(byteCount: Int) -> Self {
+		Data(randomByteArray(byteCount: byteCount))
 	}
 }
+
 extension Hex32Bytes {
     init(data: Data) throws {
         self = try newHex32BytesFrom(bytes: data)
