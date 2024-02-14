@@ -4,6 +4,10 @@ name: Test
 on:
   pull_request:
   push:
+permissions:
+  id-token: write
+  pull-requests: read
+  contents: read
 env:
   CARGO_TERM_COLOR: always
 jobs:
@@ -46,7 +50,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: RDXWorks-actions/checkout@main@main
+      - uses: RDXWorks-actions/checkout@main
       - name: Install Rust Toolchain
         uses: RDXWorks-actions/toolchain@master
         with:
