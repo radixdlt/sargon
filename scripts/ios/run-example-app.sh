@@ -15,7 +15,7 @@ APP_XCODEPROJP_PATH=examples/iOS/App/$APP_SCHEME_NAME.xcodeproj
 TARGET_IOS_VERSION=17.2
 TARGET_IPHONE_NAME="iPhone 15 Pro Max"
 
-echo "✨📱 Start of '$me' (see: '$DIR/$me')"
+echo "📱 Start of '$me' (see: '$DIR/$me') 🔮"
 cd "$DIR" 
 cd "../../" # go to parent of parent, which is project root.
 
@@ -25,17 +25,17 @@ export SED_END="tvOS"
 export IOS_SIM_UDID=$(xcrun simctl list devices | sed -n "/$SED_START/,/$SED_END/p" | grep "$TARGET_IPHONE_NAME (" | grep -E -o -i "([0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12})");\
 
 IPHONE_SIM_DEST="platform=iOS Simulator,id=$IOS_SIM_UDID"
-# echo "✨📱 IPHONE_SIM_DEST '$IPHONE_SIM_DEST'"
+# echo "📱 IPHONE_SIM_DEST '$IPHONE_SIM_DEST'"
 XCODEBUILD_CMD_BASE="xcodebuild build -project $APP_XCODEPROJP_PATH -scheme $APP_SCHEME_NAME"
 BUILD_CMD="$XCODEBUILD_CMD_BASE -destination \"$IPHONE_SIM_DEST\" -configuration Debug -quiet CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO"
-echo "✨📱🛠️  Building app: '$APP_SCHEME_NAME'..."
+echo "📱🛠️  Building app: '$APP_SCHEME_NAME'..."
 eval $BUILD_CMD
 PRINT_API_DIR_CMD="$XCODEBUILD_CMD_BASE -showBuildSettings"
 BUILD_ROOT=$($PRINT_API_DIR_CMD | grep -m 1 'BUILD_ROOT' | grep -oEi "\/.*")
 
 APP_PATH="$BUILD_ROOT/Debug-iphonesimulator/$APP_SCHEME_NAME.app"
 
-echo "✨📱🛠️  Built app '$APP_SCHEME_NAME', folder: '$APP_PATH' ✅"
+echo "📱🛠️  Built app '$APP_SCHEME_NAME', binary is here: '$APP_PATH' ✅"
 
 # Open the simulator
 open -a 'Simulator' --args -CurrentDeviceUDID $IOS_SIM_UDID
@@ -51,26 +51,14 @@ do
 	sleep 1
 done
 
-echo "✨📱📦 Installing app '$APP_SCHEME_NAME'..."
+echo "📱📦 Installing app '$APP_SCHEME_NAME'..."
 xcrun simctl install booted $APP_PATH
-echo "✨📱📦 Installed app '$APP_SCHEME_NAME' ✅"
+echo "📱📦 Installed app '$APP_SCHEME_NAME' ✅"
 
-if [[ $DEBUGGER_ENABLED == "1" ]]; then
-	LAUNCH_DEBUGGER_ENABLED_FLAG=--wait-for-debugger
-	USE_CONSOLE_FLAG=""
-else
-	USE_CONSOLE_FLAG=--console
-	LAUNCH_DEBUGGER_ENABLED_FLAG=""
-fi
 
-LOG_FILE=/tmp/run_ios_sim.log
-echo "✨📱🚀 Launching app '$APP_SCHEME_NAME'..."
 
-# Launch the app program into the booted sim
-# - Pipe the output to a log file
-# - Run in the background
-`xcrun simctl launch $LAUNCH_DEBUGGER_ENABLED_FLAG $USE_CONSOLE_FLAG booted $BUNDLE_IDENTIFIER 2>&1 >> $LOG_FILE` &
+echo "📱🚀 Launching app '$APP_SCHEME_NAME'..."
+`xcrun simctl launch --console booted $BUNDLE_IDENTIFIER` &
+echo "📱🚀 Launched app '$APP_SCHEME_NAME' ✅"
 
-echo "✨📱🚀 Launched app '$APP_SCHEME_NAME' ✅"
-
-echo "✨📱 End of '$me'"
+echo "📱 End of '$me' ✨"
