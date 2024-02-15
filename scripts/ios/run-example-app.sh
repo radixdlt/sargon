@@ -1,13 +1,16 @@
-#!/bin/bash
+#!/usr/bin/env zsh
+
 # Inspired by: https://gist.github.com/jerrymarino/1f9eb6a06c423f9744ea297d80193a9b
 # Author: Jerry Marino - @jerrymarino
 # Edited by: Alexander Cyon @Sajjon
-# 
+
+set -e
+set -u
 
 me=$(basename "$0")
-# dir of script 
 REL_DIR=$0:P
 DIR="$( cd "$( dirname "$REL_DIR" )" && pwd )";
+
 BUNDLE_IDENTIFIER=works.rdx.planbok.Planbok;
 
 APP_SCHEME_NAME=PlanbokApp

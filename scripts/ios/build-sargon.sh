@@ -9,7 +9,7 @@ set -u
 
 # In release mode, we create a ZIP archive of the xcframework and update Package.swift with the computed checksum.
 # This is only needed when cutting a new release, not for local development.
-release=true
+release=false
 
 for arg in "$@"
 do
@@ -51,10 +51,11 @@ build_xcframework() {
   # Builds an XCFramework
   echo "📦 Generating XCFramework"
   rm -rf target/ios  # Delete the output folder so we can regenerate it
+  OUTDIR="target/ios/lib$1-rs.xcframework"
   xcodebuild -create-xcframework \
     -library target/aarch64-apple-ios/release/lib$1.a -headers target/uniffi-xcframework-staging \
     -library target/ios-simulator-fat/release/lib$1.a -headers target/uniffi-xcframework-staging \
-    -output target/ios/lib$1-rs.xcframework
+    -output $OUTDIR
 
   if $release; then
     echo "📦 ('release' is true) Building xcframework archive"
@@ -66,23 +67,25 @@ build_xcframework() {
   else
     echo "📦 'release' is false"
   fi
+  echo "$OUTDIR"
 }
 
 
 me=$(basename "$0")
-# dir of script 
-DIR="$( cd "$( dirname "${(%):-%x}" )" && pwd )";
-# parent dir of that dir
-PARENT_DIRECTORY="${DIR%/../*}"
+REL_DIR=$0:P
+DIR="$( cd "$( dirname "$REL_DIR" )" && pwd )";
+
+PARENT_DIRECTORY="${DIR%/../../*}"
 echo "📦 Start of '$me' (see: '$DIR/$me')"
-cd "$PARENT_DIRECTORY" # go to parent of parent, which is project root.
-basename=sargon
+cd "$DIR" 
+cd "../../" # go to parent of parent, which is project root.
 
 cargo build --lib --release --target x86_64-apple-ios
 cargo build --lib --release --target aarch64-apple-ios-sim
 cargo build --lib --release --target aarch64-apple-ios
 
+basename=sargon
 generate_ffi $basename
 create_fat_simulator_lib $basename
-build_xcframework $basename
-echo "📦 End of '$me' ✅"
+ZIP_PATH=$(build_xcframework $basename)
+echo "📦 End of '$me' ZIP_PATH: '$ZIP_PATH' ✅"
