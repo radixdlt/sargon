@@ -15,3 +15,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Sargon Android"
 include(":app")
+include(":sargon")
