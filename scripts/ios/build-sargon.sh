@@ -73,7 +73,7 @@ me=$(basename "$0")
 # dir of script 
 DIR="$( cd "$( dirname "${(%):-%x}" )" && pwd )";
 # parent dir of that dir
-PARENT_DIRECTORY="${DIR%/*}"
+PARENT_DIRECTORY="${DIR%/../*}"
 echo "📦 Start of '$me' (see: '$DIR/$me')"
 cd "$PARENT_DIRECTORY" # go to parent of parent, which is project root.
 basename=sargon

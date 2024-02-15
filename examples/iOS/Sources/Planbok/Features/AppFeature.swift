@@ -1,29 +1,22 @@
-//
-//  File.swift
-//  
-//
-//  Created by Alexander Cyon on 2024-02-14.
-//
-
-import Foundation
-import SwiftUI
-import ComposableArchitecture
-import Sargon
-import SargonUniFFI
-
 @Reducer
 public struct AppFeature {
 	public init() {}
 	
 	@ObservableState
-	public struct State {
-		public var decimal: Sargon.Decimal
+	public enum State {
+		case splash(SplashFeature.State)
+		case onboarding(OnboardingFeature.State)
+		case main(MainFeature.State)
 		public init() {
-			decimal = newDecimalFromString(string: "3.1416")
+			self = .splash(.init())
 		}
 	}
 	
-	public enum Action {}
+	public enum Action {
+		case splash(SplashFeature.Action)
+		case onboarding(OnboardingFeature.Action)
+		case main(MainFeature.Action)
+	}
 	
 	public struct View: SwiftUI.View {
 		public let store: StoreOf<AppFeature>
@@ -31,7 +24,21 @@ public struct AppFeature {
 			self.store = store
 		}
 		public var body: some SwiftUI.View {
-			Text("Decimal: \(store.decimal)")
+			switch store.state {
+			 case .splash:
+			   if let store = store.scope(state: \.splash, action: \.splash) {
+				   SplashFeature.View(store: store)
+			   }
+			 case .onboarding:
+			   if let store = store.scope(state: \.onboarding, action: \.onboarding) {
+				   OnboardingFeature.View(store: store)
+			   }
+			 case .main:
+			   if let store = store.scope(state: \.main, action: \.main) {
+				   MainFeature.View(store: store)
+			   }
+			 }
 		}
 	}
 }
+

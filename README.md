@@ -221,11 +221,12 @@ cargo nextest run
 See [`.github/workflows/release.yml`](.github/workflows/release.yml)
 
 ## Local
+
 ### iOS
 
 #### Prerequisites
 
-##### Rust targetse
+##### Rust targets
 ```sh
 rustup target add x86_64-apple-ios aarch64-apple-ios aarch64-apple-ios-sim
 ```
@@ -237,4 +238,18 @@ Used in build script
 brew install jq
 ```
 
-We build using [`scripts/build-ios.sh`](scripts/build-ios.sh)
+#### Build
+Find [script here](scripts/ios/build-sargon.sh)
+
+```sh
+./scripts/build-ios.sh
+```
+
+# Example apps
+## iOS
+
+Find [script here](scripts/ios/run-example.sh)
+
+```sh
+./scripts/run-ios.sh
+```

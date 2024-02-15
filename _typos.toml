@@ -1,5 +1,6 @@
 [files]
 extend-exclude = [
+    "scripts/**",
     "apple/Sources/UniFFI/Sargon.swift",
     "tarpaulin-report.html",
     "tests/vectors/fixtures/*.json",

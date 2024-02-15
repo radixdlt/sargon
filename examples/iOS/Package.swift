@@ -13,6 +13,8 @@ let package = Package(
 	dependencies: [
 		.package(name: "Sargon", path: "../.."),
 		.package(url: "https://github.com/pointfreeco/swift-composable-architecture", from: "1.8.0"),
+		.package(url: "https://github.com/tgrapperon/swift-dependencies-additions", from: "1.0.1"),
+		.package(url: "https://github.com/kishikawakatsumi/KeychainAccess", from: "4.2.2"),
 	],
     targets: [
         .target(
@@ -20,6 +22,8 @@ let package = Package(
 			dependencies: [
 				"Sargon",
 				.product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+				.product(name: "DependenciesAdditions", package: "swift-dependencies-additions"),
+				"KeychainAccess",
 			]
 		),
         .testTarget(

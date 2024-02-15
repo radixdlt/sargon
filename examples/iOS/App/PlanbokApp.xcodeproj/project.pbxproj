@@ -7,13 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		48C8EF4C2B7DEA0300EF7F97 /* Planbok in Frameworks */ = {isa = PBXBuildFile; productRef = 48C8EF4B2B7DEA0300EF7F97 /* Planbok */; };
 		48F0A6CD2B7D42D400929DC2 /* PlanbokApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48F0A6CC2B7D42D400929DC2 /* PlanbokApp.swift */; };
 		48F0A6D12B7D42D500929DC2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 48F0A6D02B7D42D500929DC2 /* Assets.xcassets */; };
 		48F0A6D52B7D42D500929DC2 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 48F0A6D42B7D42D500929DC2 /* Preview Assets.xcassets */; };
-		48F0A6DE2B7D444900929DC2 /* Planbok in Frameworks */ = {isa = PBXBuildFile; productRef = 48F0A6DD2B7D444900929DC2 /* Planbok */; };
-		48F0A6E12B7D45C200929DC2 /* Planbok in Frameworks */ = {isa = PBXBuildFile; productRef = 48F0A6E02B7D45C200929DC2 /* Planbok */; };
-		48F0A6E42B7D492400929DC2 /* Sargon in Frameworks */ = {isa = PBXBuildFile; productRef = 48F0A6E32B7D492400929DC2 /* Sargon */; };
-		48F0A6E72B7D4A4400929DC2 /* Planbok in Frameworks */ = {isa = PBXBuildFile; productRef = 48F0A6E62B7D4A4400929DC2 /* Planbok */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -29,10 +26,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				48F0A6E12B7D45C200929DC2 /* Planbok in Frameworks */,
-				48F0A6E42B7D492400929DC2 /* Sargon in Frameworks */,
-				48F0A6E72B7D4A4400929DC2 /* Planbok in Frameworks */,
-				48F0A6DE2B7D444900929DC2 /* Planbok in Frameworks */,
+				48C8EF4C2B7DEA0300EF7F97 /* Planbok in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -91,10 +85,7 @@
 			);
 			name = PlanbokApp;
 			packageProductDependencies = (
-				48F0A6DD2B7D444900929DC2 /* Planbok */,
-				48F0A6E02B7D45C200929DC2 /* Planbok */,
-				48F0A6E32B7D492400929DC2 /* Sargon */,
-				48F0A6E62B7D4A4400929DC2 /* Planbok */,
+				48C8EF4B2B7DEA0300EF7F97 /* Planbok */,
 			);
 			productName = Planbok;
 			productReference = 48F0A6C92B7D42D400929DC2 /* PlanbokApp.app */;
@@ -125,7 +116,7 @@
 			);
 			mainGroup = 48F0A6C02B7D42D400929DC2;
 			packageReferences = (
-				48F0A6E52B7D4A4400929DC2 /* XCLocalSwiftPackageReference ".." */,
+				48C8EF4A2B7DEA0300EF7F97 /* XCLocalSwiftPackageReference ".." */,
 			);
 			productRefGroup = 48F0A6CA2B7D42D400929DC2 /* Products */;
 			projectDirPath = "";
@@ -212,7 +203,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.2;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
@@ -269,7 +260,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.2;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
@@ -299,7 +290,7 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 17;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.2;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 14;
@@ -336,7 +327,7 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 17;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.2;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 14;
@@ -376,26 +367,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		48F0A6E52B7D4A4400929DC2 /* XCLocalSwiftPackageReference ".." */ = {
+		48C8EF4A2B7DEA0300EF7F97 /* XCLocalSwiftPackageReference ".." */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ..;
 		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		48F0A6DD2B7D444900929DC2 /* Planbok */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = Planbok;
-		};
-		48F0A6E02B7D45C200929DC2 /* Planbok */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = Planbok;
-		};
-		48F0A6E32B7D492400929DC2 /* Sargon */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = Sargon;
-		};
-		48F0A6E62B7D4A4400929DC2 /* Planbok */ = {
+		48C8EF4B2B7DEA0300EF7F97 /* Planbok */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Planbok;
 		};
