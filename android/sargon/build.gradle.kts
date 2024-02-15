@@ -1,8 +1,7 @@
-import com.android.build.gradle.internal.scope.ProjectInfo.Companion.getBaseName
-
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.android.cargo.ndk)
 }
 
 android {
@@ -34,6 +33,15 @@ android {
     }
 }
 
-dependencies {
+cargoNdk {
+    module  = "../sargon"  // Directory containing Cargo.toml
+    librariesNames = arrayListOf("libsargon.so")
+}
 
+dependencies {
+    implementation(libs.jna) {
+        artifact {
+            type = "aar"
+        }
+    }
 }
