@@ -1,6 +1,7 @@
 name: CD
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - develop
@@ -20,7 +21,15 @@ jobs:
         with:
           toolchain: nightly-2024-01-11
           default: true
+          target: x86_64-apple-ios aarch64-apple-ios aarch64-apple-ios-sim
+      - name: Config local env
+        run: |
+          brew install jq
+      
       - name: Run iOS build script
         run: |
-            zip_path = ./scripts/ios/release.sh
+            ZIP_PATH=$(sh ./scripts/ios/release.sh | tail -n 1)
+            echo "🔮 ZIP_PATH: $ZIP_PATH"
         
+      - name: Configure Package.swift for remote development
+        run: sed -i '' 's/let useLocalFramework = true/let useLocalFramework = false/' Package.swift

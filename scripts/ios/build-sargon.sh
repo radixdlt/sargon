@@ -88,4 +88,9 @@ basename=sargon
 generate_ffi $basename
 create_fat_simulator_lib $basename
 ZIP_PATH=$(build_xcframework $basename)
-echo "📦 End of '$me' ZIP_PATH: '$ZIP_PATH' ✅"
+echo "📦 ✅ End of '$me', xcframework can be found at"
+
+# This print MUST be the last print.
+# The path is read by `release.sh` script.
+# This is probably terrible... but I'm a Rust/Swift dev, not a bash script dev...
+echo "$ZIP_PATH"
