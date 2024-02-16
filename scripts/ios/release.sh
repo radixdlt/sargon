@@ -20,8 +20,11 @@ echo "🔮 Last tag: $(last_tag)"
 NEXT_TAG=$(echo $(last_tag) | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{if(length($NF+1)>length($NF))$(NF-1)++; $NF=sprintf("%0*d", length($NF), ($NF+1)%(10^length($NF))); print}')
 
 `git tag $NEXT_TAG`
-echo "🔮 Last tag: $(last_tag)"
-RELEASE_CMD="gh release create $NEXT_TAG $ZIP_PATH"
+echo "🔮 Pushing tag: $(last_tag)"
+`git push origin $NEXT_TAG`
+SWIFT_SARGON_BINARY_ASSET_NAME="SPM binaryTarget xcframework zip for Sargon v$NEXT_TAG"
+GH_RELEASE_TITLE="Sargon Swift Only v$NEXT_TAG"
+RELEASE_CMD="gh release create $NEXT_TAG '$ZIP_PATH#$SWIFT_SARGON_BINARY_ASSET_NAME' --generate-notes --title '$GH_RELEASE_TITLE'"
 echo "📦 will now run command: '$RELEASE_CMD'"
 eval $RELEASE_CMD
 
