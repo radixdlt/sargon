@@ -6,3 +6,4 @@ tarpaulin-report.html
 build_rs_cov.profraw
 cobertura.xml
 jna-*.jar
+.swiftpm/*

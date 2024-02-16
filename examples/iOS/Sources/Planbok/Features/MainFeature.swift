@@ -4,9 +4,12 @@ public struct MainFeature {
 	
 	@ObservableState
 	public struct State {
-		public let profile: Profile
-		public init(profile: Profile) {
-			self.profile = profile
+		public let walletHolder: WalletHolder
+		public init(walletHolder: WalletHolder) {
+			self.walletHolder = walletHolder
+		}
+		public init(wallet: Wallet) {
+			self.init(walletHolder: .init(wallet: wallet))
 		}
 	}
 	

@@ -1,6 +1,5 @@
 @Reducer
 public struct AppFeature {
-	public init() {}
 	
 	@ObservableState
 	public enum State {
@@ -38,6 +37,34 @@ public struct AppFeature {
 				   MainFeature.View(store: store)
 			   }
 			 }
+		}
+	}
+	
+	
+	public init() {}
+	
+	public var body: some ReducerOf<Self> {
+		Reduce { state, action in
+			switch action {
+			case let .splash(.delegate(.walletInitialized(wallet, hasAccount))):
+				if hasAccount {
+					state = .main(MainFeature.State(wallet: wallet))
+				} else {
+					state = .onboarding(OnboardingFeature.State(wallet: wallet))
+				}
+					return .none
+			default:
+					return .none
+			}
+		}
+		.ifCaseLet(\.splash, action: \.splash) {
+			SplashFeature()
+		}
+		.ifCaseLet(\.onboarding, action: \.onboarding) {
+			OnboardingFeature()
+		}
+		.ifCaseLet(\.main, action: \.main) {
+			MainFeature()
 		}
 	}
 }

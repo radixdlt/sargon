@@ -24,7 +24,8 @@ let package = Package(
 				.product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
 				.product(name: "DependenciesAdditions", package: "swift-dependencies-additions"),
 				"KeychainAccess",
-			]
+			],
+			resources: [.process("Assets")]
 		),
         .testTarget(
             name: "PlanbokTests",

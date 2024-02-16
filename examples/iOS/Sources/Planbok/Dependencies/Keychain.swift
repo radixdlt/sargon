@@ -5,7 +5,7 @@
 //  Created by Alexander Cyon on 2024-02-15.
 //
 
-import KeychainAccess
+@_exported import KeychainAccess
 
 extension DependencyValues {
   /// A dependency that exposes an ``Keychain.Dependency`` value that you can use to read and
@@ -16,15 +16,16 @@ extension DependencyValues {
   }
 }
 
+extension Keychain: @unchecked Sendable {}
 extension Keychain: SecureStorage {
 	@DependencyClient
-	public struct Dependency: TestDependencyKey {
+	public struct Dependency: DependencyKey {
 		
 		public let loadData: @Sendable (SecureStorageKey) throws -> Data?
 		public let saveData: @Sendable (SecureStorageKey, Data) throws -> Void
 		public let deleteDataForKey: @Sendable (SecureStorageKey) throws -> Void
 		
-		public static func with(keychain: Keychain) {
+		public static func with(keychain: Keychain) -> Self {
 			Self.init(
 				loadData: keychain.loadData(key:),
 				saveData: keychain.saveData(key:data:),
@@ -48,14 +49,17 @@ extension Keychain: SecureStorage {
 	
 	public static let shared = Keychain(service: "works.rdx.planbok")
 	
+	@Sendable
 	public func loadData(key: SecureStorageKey) throws -> Data? {
 		try getData(key.identifier)
 	}
 
+	@Sendable
 	public func saveData(key: SecureStorageKey, data: Data) throws {
 		self[data: key.identifier] = data
 	}
 
+	@Sendable
 	public func deleteDataForKey(key: SecureStorageKey) throws {
 		try self.remove(key.identifier)
 	}

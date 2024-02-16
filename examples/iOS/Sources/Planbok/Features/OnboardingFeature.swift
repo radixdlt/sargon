@@ -4,7 +4,13 @@ public struct OnboardingFeature {
 	
 	@ObservableState
 	public struct State {
-		public init() {}
+		public let walletHolder: WalletHolder
+		public init(walletHolder: WalletHolder) {
+			self.walletHolder = walletHolder
+		}
+		public init(wallet: Wallet) {
+			self.init(walletHolder: .init(wallet: wallet))
+		}
 	}
 	
 	public enum Action {}

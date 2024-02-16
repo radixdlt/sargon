@@ -11,8 +11,7 @@ public struct SplashFeature {
 	
 	public enum Action: ViewAction {
 		public enum DelegateAction {
-			case hasAccounts(in: Profile)
-			case noAccount
+			case walletInitialized(Wallet, hasAccount: Bool)
 		}
 		public enum ViewAction {
 			case appear
@@ -29,7 +28,9 @@ public struct SplashFeature {
 			self.store = store
 		}
 		public var body: some SwiftUI.View {
-			Text("SPLASH")
+				Image("Splash", bundle: Bundle.module)
+				.resizable()
+				.ignoresSafeArea(edges: [.top, .bottom])
 				.onAppear {
 					send(.appear)
 				}
@@ -43,8 +44,23 @@ public struct SplashFeature {
 			switch action {
 			case .view(.appear):
 					.run { send in
-						try await clock.sleep(for: .milliseconds(600))
-//						if let profile = keychain.loadData(key: .)
+						let secureStorage = Keychain.shared
+						try await clock.sleep(for: .milliseconds(1200))
+						if try keychain.loadData(SecureStorageKey.activeProfileId) != nil {
+							let wallet = try Wallet.byLoadingProfile(secureStorage: secureStorage)
+							let profile = wallet.profile()
+							let hasAccount = profile.networks.first?.accounts.isEmpty == false
+							await send(.delegate(.walletInitialized(wallet, hasAccount: hasAccount)))
+						} else {
+							
+							let wallet = try Wallet.byCreatingNewProfileAndSecretsWithEntropy(
+								entropy: BagOfBytes.random(byteCount: 32),
+								walletClientModel: .iphone,
+								walletClientName: "Unknown iPhone",
+								secureStorage: secureStorage
+							)
+							await send(.delegate(.walletInitialized(wallet, hasAccount: false)))
+						}
 					}
 			case .delegate:
 					.none

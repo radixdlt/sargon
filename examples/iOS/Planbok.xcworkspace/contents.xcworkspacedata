@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <Group
+      location = "container:"
+      name = "Sargon">
+      <Group
+         location = "group:../../apple/Sources"
+         name = "Sources">
+         <Group
+            location = "group:Sargon"
+            name = "Sargon">
+            <Group
+               location = "group:Util"
+               name = "Util">
+               <FileRef
+                  location = "group:Buffer+InitializeWithRandomBytes.swift">
+               </FileRef>
+            </Group>
+            <Group
+               location = "group:Extensions"
+               name = "Extensions">
+               <Group
+                  location = "group:Methods"
+                  name = "Methods">
+                  <FileRef
+                     location = "group:SecureStorageKey+Methods.swift">
+                  </FileRef>
+                  <FileRef
+                     location = "group:Decimal192+Methods.swift">
+                  </FileRef>
+               </Group>
+               <Group
+                  location = "group:Swiftified"
+                  name = "Swiftified">
+                  <FileRef
+                     location = "group:Decimal192+Swiftified.swift">
+                  </FileRef>
+                  <FileRef
+                     location = "group:BagOfBytes+Random.swift">
+                  </FileRef>
+                  <FileRef
+                     location = "group:Wallet+Swiftified.swift">
+                  </FileRef>
+               </Group>
+            </Group>
+            <FileRef
+               location = "group:Exports.swift">
+            </FileRef>
+         </Group>
+         <Group
+            location = "group:UniFFI"
+            name = "UniFFI">
+            <FileRef
+               location = "group:Sargon.swift">
+            </FileRef>
+         </Group>
+      </Group>
+      <FileRef
+         location = "group:../../Package.swift">
+      </FileRef>
+   </Group>
+   <FileRef
+      location = "group:App/PlanbokApp.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:">
+   </FileRef>
+</Workspace>
