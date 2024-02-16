@@ -79,7 +79,13 @@ REL_DIR=$0:P
 DIR="$( cd "$( dirname "$REL_DIR" )" && pwd )";
 
 PARENT_DIRECTORY="${DIR%/../../*}"
-echo "📦 Start of '$me' (see: '$DIR/$me'), TAG_OF_RELEASE = '$TAG_OF_RELEASE"
+
+if $release; then
+  echo "📦 Start of '$me' (see: '$DIR/$me'), TAG_OF_RELEASE = '$TAG_OF_RELEASE'"
+else
+  echo "📦 Start of '$me' (see: '$DIR/$me')"
+fi
+
 cd "$DIR" 
 cd "../../" # go to parent of parent, which is project root.
 
