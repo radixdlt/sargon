@@ -51,7 +51,8 @@ build_xcframework() {
   # Builds an XCFramework
   echo "📦 Generating XCFramework"
   rm -rf target/ios  # Delete the output folder so we can regenerate it
-  OUTDIR="target/ios/lib$1-rs.xcframework"
+  XCFRAME_PATH="target/ios/lib$1-rs.xcframework"
+  XCFRAME_ZIP_PATH="$XCFRAME_PATH.zip"
   xcodebuild -create-xcframework \
     -library target/aarch64-apple-ios/release/lib$1.a -headers target/uniffi-xcframework-staging \
     -library target/ios-simulator-fat/release/lib$1.a -headers target/uniffi-xcframework-staging \
@@ -59,15 +60,15 @@ build_xcframework() {
 
   if $release; then
     echo "📦 ('release' is true) Building xcframework archive"
-    zip -r target/ios/lib$1-rs.xcframework.zip target/ios/lib$1-rs.xcframework
-    checksum=$(swift package compute-checksum target/ios/lib$1-rs.xcframework.zip)
+    zip -r $XCFRAME_ZIP_PATH $XCFRAME_PATH
+    checksum=$(swift package compute-checksum $XCFRAME_ZIP_PATH)
     version=$(cargo metadata --format-version 1 | jq -r '.packages[] | select(.name=="sargon") .version')
     sed -i "" -E "s/(let releaseTag = \")[^\"]+(\")/\1$version\2/g" Package.swift
     sed -i "" -E "s/(let releaseChecksum = \")[^\"]+(\")/\1$checksum\2/g" Package.swift
   else
     echo "📦 'release' is false"
   fi
-  echo "$OUTDIR"
+  echo "$XCFRAME_ZIP_PATH"
 }
 
 
