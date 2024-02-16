@@ -227,13 +227,6 @@ cargo nextest run
 rustup target add x86_64-apple-ios aarch64-apple-ios aarch64-apple-ios-sim
 ```
 
-#### `jq`
-[_`jq` is a lightweight and flexible command-line JSON processor._](https://jqlang.github.io/jq/)
-Used in build script
-```sh
-brew install jq
-```
-
 ### Build
 Find [script here](scripts/ios/build-sargon.sh)
 

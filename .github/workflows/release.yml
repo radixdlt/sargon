@@ -22,9 +22,6 @@ jobs:
           toolchain: nightly-2024-01-11
           default: true
           target: x86_64-apple-ios aarch64-apple-ios aarch64-apple-ios-sim
-      - name: Config local env
-        run: |
-          brew install jq
       
       - name: Run iOS build script
         run: |

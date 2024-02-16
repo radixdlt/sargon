@@ -10,12 +10,14 @@ set -u
 # In release mode, we create a ZIP archive of the xcframework and update Package.swift with the computed checksum.
 # This is only needed when cutting a new release, not for local development.
 release=false
+TAG_OF_RELEASE=""
 
 for arg in "$@"
 do
     case $arg in
-        --release)
+        --release-tag)
             release=true
+            TAG_OF_RELEASE="$2"
             shift # Remove --release from processing
             ;;
         *)
@@ -51,24 +53,24 @@ build_xcframework() {
   # Builds an XCFramework
   echo "📦 Generating XCFramework"
   rm -rf target/ios  # Delete the output folder so we can regenerate it
-  XCFRAME_PATH="target/ios/lib$1-rs.xcframework"
-  XCFRAME_ZIP_PATH="$XCFRAME_PATH.zip"
+  local XCFRAME_PATH="target/ios/lib$1-rs.xcframework"
+  local XCFRAME_ZIP_PATH="$XCFRAME_PATH.zip"
   xcodebuild -create-xcframework \
     -library target/aarch64-apple-ios/release/lib$1.a -headers target/uniffi-xcframework-staging \
     -library target/ios-simulator-fat/release/lib$1.a -headers target/uniffi-xcframework-staging \
     -output $XCFRAME_PATH
 
   if $release; then
+    local CHKSUM="RELEASE_WAS_FALSE_THUS_NO_CHECKSUM"
     echo "📦 ('release' is true) Building xcframework archive"
     zip -r $XCFRAME_ZIP_PATH $XCFRAME_PATH
-    checksum=$(swift package compute-checksum $XCFRAME_ZIP_PATH)
-    version=$(cargo metadata --format-version 1 | jq -r '.packages[] | select(.name=="sargon") .version')
-    sed -i "" -E "s/(let releaseTag = \")[^\"]+(\")/\1$version\2/g" Package.swift
-    sed -i "" -E "s/(let releaseChecksum = \")[^\"]+(\")/\1$checksum\2/g" Package.swift
+    CHKSUM=$(swift package compute-checksum $XCFRAME_ZIP_PATH)
+    sed -i "" -E "s/(let releaseTag = \")[^\"]+(\")/\1$TAG_OF_RELEASE\2/g" Package.swift
+    sed -i "" -E "s/(let releaseChecksum = \")[^\"]+(\")/\1$CHKSUM\2/g" Package.swift
+    echo "$CHKSUM;$XCFRAME_ZIP_PATH"
   else
-    echo "📦 'release' is false"
+    echo "BUILT_WITHOUT_RELEASE"
   fi
-  echo "$XCFRAME_ZIP_PATH"
 }
 
 
@@ -77,7 +79,7 @@ REL_DIR=$0:P
 DIR="$( cd "$( dirname "$REL_DIR" )" && pwd )";
 
 PARENT_DIRECTORY="${DIR%/../../*}"
-echo "📦 Start of '$me' (see: '$DIR/$me')"
+echo "📦 Start of '$me' (see: '$DIR/$me'), TAG_OF_RELEASE = '$TAG_OF_RELEASE"
 cd "$DIR" 
 cd "../../" # go to parent of parent, which is project root.
 
@@ -88,10 +90,10 @@ cargo build --lib --release --target aarch64-apple-ios
 basename=sargon
 generate_ffi $basename
 create_fat_simulator_lib $basename
-ZIP_PATH=$(build_xcframework $basename)
-echo "📦 ✅ End of '$me', xcframework can be found at"
+OUTPUT_OF_BUILD=$(build_xcframework $basename)
+echo "📦 ✅ End of '$me', output"
 
 # This print MUST be the last print.
 # The path is read by `release.sh` script.
 # This is probably terrible... but I'm a Rust/Swift dev, not a bash script dev...
-echo "$ZIP_PATH"
+echo "$OUTPUT_OF_BUILD"

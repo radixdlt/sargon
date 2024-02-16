@@ -15,7 +15,7 @@ echo "🚢 PWD: $PWD"
 echo "🚢 Ensure 'useLocalFramework' is set to 'false' in Package.swift"
 sed -i '' 's/let useLocalFramework = true/let useLocalFramework = false/' Package.swift
 
-ZIP_PATH=$(sh $DIR/build-sargon.sh --release | tail -n 1)
+
 `git fetch --prune --tags`
 function last_tag() {
     local out=`git tag --sort=taggerdate | tail -1`
@@ -25,6 +25,20 @@ echo "🚢 🏷️ Last tag: $(last_tag)"
 
 # one liner from: https://stackoverflow.com/a/8653732
 NEXT_TAG=$(echo $(last_tag) | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{if(length($NF+1)>length($NF))$(NF-1)++; $NF=sprintf("%0*d", length($NF), ($NF+1)%(10^length($NF))); print}')
+
+# output is: "<CHKSUM>;<$XCFRAME_ZIP_PATH>"
+OUTPUT_OF_BUILD=`sh $DIR/build-sargon.sh --release-tag $NEXT_TAG | tail -n 1` || exit $?
+if [[ "$OUTPUT_OF_BUILD" == "BUILT_WITHOUT_RELEASE" ]]; then
+    echo "Error, failed to build, did you forget to pass '--release' to build script? Otherwise check if build-sargon.sh has recently been changed (to something incorrect...)"
+    exit 1;
+fi
+CHECKSUM=`echo "$OUTPUT_OF_BUILD" | cut -d ";" -f 1` || exit $?
+XCFRAME_ZIP_PATH=`echo "$OUTPUT_OF_BUILD" | cut -d ";" -f 2` || exit $?
+
+echo "🚢  CHECKSUM: $CHECKSUM"
+echo "🚢  CARGO_CRATE_VERSION: $CARGO_CRATE_VERSION"
+echo "🚢  XCFRAME_ZIP_PATH: $XCFRAME_ZIP_PATH"
+echo "killing script, by bye";exit 1
 
 `git tag $NEXT_TAG`
 echo "🚢 🏷️ 📡 Pushing tag: $(last_tag)"
