@@ -215,3 +215,95 @@ cargo tarpaulin --out Html
 ```sh
 cargo nextest run
 ```
+
+# Build local
+
+## iOS
+
+### Prerequisites
+
+#### Rust targets
+```sh
+rustup target add x86_64-apple-ios aarch64-apple-ios aarch64-apple-ios-sim
+```
+
+### Build
+Find [script here](scripts/ios/build-sargon.sh)
+
+```sh
+./scripts/build-ios.sh
+```
+
+## Android
+TBD
+
+# Release
+
+## iOS 
+### Locally
+
+#### Prerequisites
+
+> [!IMPORTANT]
+> You will need the prerequisites of _Build local_ above.
+
+##### Install `gh`
+
+```sh
+brew install gh
+```
+
+##### Github PAT
+Create a Github Personal Access Token (PAT) labeled "Classic" and give it these permissions:
+`write:packages`
+`admin:org -> read:org`
+
+#### Manually release
+
+For the first time, you must:
+```sh
+gh auth login
+```
+
+Do this:
+```sh
+? What account do you want to log into? GitHub.com
+? What is your preferred protocol for Git operations on this host? SSH
+? Upload your SSH public key to your GitHub account? Skip
+? How would you like to authenticate GitHub CLI? Paste an authentication token
+Tip: you can generate a Personal Access Token here https://github.com/settings/tokens
+The minimum required scopes are 'repo', 'read:org'.
+? Paste your authentication token: ****************************************
+```
+
+If successful you should see:
+```sh
+- gh config set -h github.com git_protocol ssh
+✓ Configured git protocol
+✓ Logged in as <YOUR_GH_USERNAME>
+```
+
+Find [script here](scripts/ios/release.sh)
+```sh
+./scripts/ios/release.sh
+```
+
+### CD
+See [`.github/workflows/release.yml`](.github/workflows/release.yml)
+
+
+## Android
+TBD
+
+# Example apps
+## iOS
+
+Find [script here](scripts/ios/run-example-app.sh)
+
+```sh
+./scripts/ios/run-example-app.sh
+```
+
+
+## Android
+TBD

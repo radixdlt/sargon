@@ -11,29 +11,33 @@ pub enum CommonError {
     #[error("Unknown Error")]
     Unknown = 10000,
 
-    #[error("Failed to create Ed25519 Private key from bytes {0:?}")]
-    InvalidEd25519PrivateKeyFromBytes(Vec<u8>) = 10001,
+    #[error("Failed to create Ed25519 Private key from bytes {bad_value:?}")]
+    InvalidEd25519PrivateKeyFromBytes { bad_value: BagOfBytes } = 10001,
 
-    #[error("Failed to create Ed25519 Private key from String {0}.")]
-    InvalidEd25519PrivateKeyFromString(String) = 10002,
+    #[error("Failed to create Ed25519 Private key from String {bad_value}.")]
+    InvalidEd25519PrivateKeyFromString { bad_value: String } = 10002,
 
-    #[error("Failed to create Secp256k1 Private key from bytes {0:?}.")]
-    InvalidSecp256k1PrivateKeyFromBytes(Vec<u8>) = 10003,
+    #[error(
+        "Failed to create Secp256k1 Private key from bytes {bad_value:?}."
+    )]
+    InvalidSecp256k1PrivateKeyFromBytes { bad_value: BagOfBytes } = 10003,
 
-    #[error("Failed to create Secp256k1 Private key from String {0:?}.")]
-    InvalidSecp256k1PrivateKeyFromString(String) = 10004,
+    #[error(
+        "Failed to create Secp256k1 Private key from String {bad_value:?}."
+    )]
+    InvalidSecp256k1PrivateKeyFromString { bad_value: String } = 10004,
 
-    #[error("Failed to create Ed25519 Public key from bytes {0:?}.")]
-    InvalidEd25519PublicKeyFromBytes(Vec<u8>) = 10005,
+    #[error("Failed to create Ed25519 Public key from bytes {bad_value:?}.")]
+    InvalidEd25519PublicKeyFromBytes { bad_value: BagOfBytes } = 10005,
 
-    #[error("Failed to create Ed25519 Public key from String {0}.")]
-    InvalidEd25519PublicKeyFromString(String) = 10006,
+    #[error("Failed to create Ed25519 Public key from String {bad_value}.")]
+    InvalidEd25519PublicKeyFromString { bad_value: String } = 10006,
 
-    #[error("Failed to create Secp256k1 Public key from bytes {0:?}.")]
-    InvalidSecp256k1PublicKeyFromBytes(Vec<u8>) = 10007,
+    #[error("Failed to create Secp256k1 Public key from bytes {bad_value:?}.")]
+    InvalidSecp256k1PublicKeyFromBytes { bad_value: BagOfBytes } = 10007,
 
-    #[error("Failed to create Secp256k1 Public key from String {0}.")]
-    InvalidSecp256k1PublicKeyFromString(String) = 10008,
+    #[error("Failed to create Secp256k1 Public key from String {bad_value}.")]
+    InvalidSecp256k1PublicKeyFromString { bad_value: String } = 10008,
 
     #[error(
         "Failed to create Secp256k1 Public key, invalid point, not on curve."
@@ -45,17 +49,17 @@ pub enum CommonError {
     )]
     InvalidEd25519PublicKeyPointNotOnCurve = 10010,
 
-    #[error("String not hex {0}")]
-    StringNotHex(String) = 10011,
+    #[error("String not hex {bad_value}")]
+    StringNotHex { bad_value: String } = 10011,
 
-    #[error("Invalid byte count, expected 32, found: {0}")]
-    InvalidByteCountExpected32(usize) = 10012,
+    #[error("Invalid byte count, expected 32, found: {bad_value}")]
+    InvalidByteCountExpected32 { bad_value: u64 } = 10012,
 
-    #[error("Invalid BIP32 path '{0}'.")]
-    InvalidBIP32Path(String) = 10013,
+    #[error("Invalid BIP32 path '{bad_value}'.")]
+    InvalidBIP32Path { bad_value: String } = 10013,
 
     #[error("Invalid depth of BIP44 Path, expected {expected}, found {found}")]
-    InvalidDepthOfBIP44Path { expected: usize, found: usize } = 10014,
+    InvalidDepthOfBIP44Path { expected: u64, found: u64 } = 10014,
 
     #[error("Invalid BIP44Like Path, account was not hardened")]
     InvalidBIP44LikePathAccountWasNotHardened = 10015,
@@ -73,22 +77,24 @@ pub enum CommonError {
     #[error(
         "Invalid depth of CAP26 Path, (expected {expected}, found {found})"
     )]
-    InvalidDepthOfCAP26Path { expected: usize, found: usize } = 10018,
+    InvalidDepthOfCAP26Path { expected: u64, found: u64 } = 10018,
 
     #[error("Found non hardened components in path, invalid!")]
     NotAllComponentsAreHardened = 10019,
 
-    #[error("Did not find 44H, found value: '{0}'")]
-    BIP44PurposeNotFound(u32) = 10020,
+    #[error("Did not find 44H, found value: '{bad_value}'")]
+    BIP44PurposeNotFound { bad_value: u32 } = 10020,
 
-    #[error("Did not find cointype 1022H, found value: '{0}'")]
-    CoinTypeNotFound(u32) = 10021,
+    #[error("Did not find cointype 1022H, found value: '{bad_value}'")]
+    CoinTypeNotFound { bad_value: u32 } = 10021,
 
-    #[error("Network ID exceeds limit of 255, will never be valid, at index 3, found value: '{0}', known network IDs: [1 (mainnet), 2 (stokenet)]")]
-    InvalidNetworkIDExceedsLimit(u32) = 10022,
+    #[error("Network ID exceeds limit of 255, will never be valid, at index 3, found value: '{bad_value}', known network IDs: [1 (mainnet), 2 (stokenet)]")]
+    InvalidNetworkIDExceedsLimit { bad_value: u32 } = 10022,
 
-    #[error("InvalidEntityKind, got: '{0}', expected any of: [525H, 618H].")]
-    InvalidEntityKind(u32) = 10023,
+    #[error(
+        "InvalidEntityKind, got: '{bad_value}', expected any of: [525H, 618H]."
+    )]
+    InvalidEntityKind { bad_value: u32 } = 10023,
 
     #[error("Wrong entity kind, (expected {expected}, found {found})")]
     WrongEntityKind {
@@ -97,15 +103,17 @@ pub enum CommonError {
     } = 10024,
 
     #[error(
-        "InvalidKeyKind, got: '{0}', expected any of: [1460H, 1678H, 1391H]."
+        "InvalidKeyKind, got: '{bad_value}', expected any of: [1460H, 1678H, 1391H]."
     )]
-    InvalidKeyKind(u32) = 10025,
+    InvalidKeyKind { bad_value: u32 } = 10025,
 
-    #[error("Unsupported NetworkID, got: '{0}', found value: '{0}', known network IDs: [1 (mainnet), 2 (stokenet)]")]
-    UnsupportedNetworkID(u8) = 10026,
+    #[error("Unsupported NetworkID, found value: '{bad_value}', known network IDs: [1 (mainnet), 2 (stokenet)]")]
+    UnsupportedNetworkID { bad_value: u8 } = 10026,
 
-    #[error("Invalid GetID path, last component was not 365' but {0}'")]
-    InvalidGetIDPath(u32) = 10027,
+    #[error(
+        "Invalid GetID path, last component was not 365' but {bad_value}'"
+    )]
+    InvalidGetIDPath { bad_value: u32 } = 10027,
 
     #[error("Unknown BIP39 word.")]
     UnknownBIP39Word = 10028,
@@ -113,20 +121,20 @@ pub enum CommonError {
     #[error("Invalid mnemonic phrase.")]
     InvalidMnemonicPhrase = 10029,
 
-    #[error("Invalid bip39 word count: '{0}', valid values are: 12-24 with multiples of 3.")]
-    InvalidBIP39WordCount(usize) = 10030,
+    #[error("Invalid bip39 word count: '{bad_value}', valid values are: 12-24 with multiples of 3.")]
+    InvalidBIP39WordCount { bad_value: u64 } = 10030,
 
-    #[error("Appearance id not recognized {0}")]
-    InvalidAppearanceID(u8) = 10031,
+    #[error("Appearance id not recognized {bad_value}")]
+    InvalidAppearanceID { bad_value: u8 } = 10031,
 
-    #[error("Invalid Account Address '{0}'.")]
-    InvalidAccountAddress(String) = 10032,
+    #[error("Invalid Account Address '{bad_value}'.")]
+    InvalidAccountAddress { bad_value: String } = 10032,
 
     #[error("Unsupported engine entity type.")]
     UnsupportedEntityType = 10033,
 
-    #[error("Failed to decode address from bech32 {0}.")]
-    FailedToDecodeAddressFromBech32(String) = 10034,
+    #[error("Failed to decode address from bech32 {bad_value}.")]
+    FailedToDecodeAddressFromBech32 { bad_value: String } = 10034,
 
     #[error("Failed to decode address mismatching entity type")]
     MismatchingEntityTypeWhileDecodingAddress = 10035,
@@ -134,11 +142,11 @@ pub enum CommonError {
     #[error("Failed to decode address mismatching HRP")]
     MismatchingHRPWhileDecodingAddress = 10036,
 
-    #[error("Unknown network ID '{0}'")]
-    UnknownNetworkID(u8) = 10037,
+    #[error("Unknown network ID '{bad_value}'")]
+    UnknownNetworkID { bad_value: u8 } = 10037,
 
-    #[error("Failed to parse InvalidNonFungibleGlobalID from {0}.")]
-    InvalidNonFungibleGlobalID(String) = 10038,
+    #[error("Failed to parse InvalidNonFungibleGlobalID from {bad_value}.")]
+    InvalidNonFungibleGlobalID { bad_value: String } = 10038,
 
     #[error("Supported SLIP10 curves in FactorSource crypto parameters is either empty or contains more elements than allowed.")]
     FactorSourceCryptoParametersSupportedCurvesInvalidSize = 10039,
@@ -169,11 +177,11 @@ pub enum CommonError {
     #[error("Expected LedgerHardwareWalletFactorSource")]
     ExpectedLedgerHardwareWalletFactorSourceGotSomethingElse = 10047,
 
-    #[error("No network found with name: '{0}'")]
-    UnknownNetworkWithName(String) = 10048,
+    #[error("No network found with name: '{bad_value}'")]
+    UnknownNetworkWithName { bad_value: String } = 10048,
 
-    #[error("No network found with id: '{0}'")]
-    UnknownNetworkForID(u8) = 10049,
+    #[error("No network found with id: '{bad_value}'")]
+    UnknownNetworkForID { bad_value: u8 } = 10049,
 
     #[error("Gateway discrepancy, 'other' should not contain 'current'.")]
     GatewaysDiscrepancyOtherShouldNotContainCurrent = 10050,
@@ -183,8 +191,8 @@ pub enum CommonError {
     )]
     InvalidGatewaysJSONCurrentNotFoundAmongstSaved = 10051,
 
-    #[error("Invalid URL: '{0}'")]
-    InvalidURL(String) = 10052,
+    #[error("Invalid URL: '{bad_value}'")]
+    InvalidURL { bad_value: String } = 10052,
 
     #[error(
         "Accounts on different networks, expected: {expected}, found: {found}"
@@ -208,9 +216,9 @@ pub enum CommonError {
 
     #[error("Length check failed, expected: {expected}, found: {found}, data: {data:?}")]
     InvalidLength {
-        expected: usize,
-        found: usize,
-        data: Vec<u8>,
+        expected: u64,
+        found: u64,
+        data: BagOfBytes,
     } = 10057,
 
     #[error("Invalid NonFungibleLocalID::String")]
@@ -222,17 +230,17 @@ pub enum CommonError {
     #[error("Invalid Decimal")]
     DecimalError = 10060,
 
-    #[error("Invalid BIP39 Index {0}")]
-    InvalidBIP39Index(u16) = 10061,
+    #[error("Invalid BIP39 Index {bad_value}")]
+    InvalidBIP39Index { bad_value: u16 } = 10061,
 
     #[error("Invalid DisplayName cannot be empty.")]
     InvalidDisplayNameEmpty = 10062,
 
     #[error("Invalid DisplayName too long, expected max: {expected}, found: {found}")]
-    InvalidDisplayNameTooLong { expected: usize, found: usize } = 10063,
+    InvalidDisplayNameTooLong { expected: u64, found: u64 } = 10063,
 
-    #[error("Invalid ISO8601 Time string: {0}")]
-    InvalidISO8601String(String) = 10064,
+    #[error("Invalid ISO8601 Time string: {bad_value}")]
+    InvalidISO8601String { bad_value: String } = 10064,
 
     #[error("Unknown account.")]
     UnknownAccount = 10065,
@@ -251,41 +259,44 @@ pub enum CommonError {
 
     #[error("Failed deserialize JSON with #{json_byte_count} bytes to value of type {type_name}")]
     FailedToDeserializeJSONToValue {
-        json_byte_count: usize,
+        json_byte_count: u64,
         type_name: String,
     } = 10070,
 
-    #[error("Failed To create ProfileID (UUID) from string: {0}")]
-    InvalidProfileID(String) = 10071,
+    #[error("Failed To create ProfileID (UUID) from string: {bad_value}")]
+    InvalidProfileID { bad_value: String } = 10071,
 
     #[error("Failed to load Profile Headers list")]
     FailedToLoadProfileHeadersList = 10072,
 
-    #[error("FactorSource with ID not found in Profile: {0:?}")]
-    ProfileDoesNotContainFactorSourceWithID(FactorSourceID) = 10073,
+    #[error("FactorSource with ID not found in Profile: {bad_value:?}")]
+    ProfileDoesNotContainFactorSourceWithID { bad_value: FactorSourceID } =
+        10073,
 
     #[error("No active ProfileID found in SecureStorage.")]
     NoActiveProfileIDSet = 10074,
 
-    #[error("No Profile snapshot found for ProfileID {0}")]
-    ProfileSnapshotNotFound(ProfileID) = 10075,
+    #[error("No Profile snapshot found for ProfileID {bad_value}")]
+    ProfileSnapshotNotFound { bad_value: ProfileID } = 10075,
 
-    #[error("Account Already Present {0}")]
-    AccountAlreadyPresent(AccountAddress) = 10076,
+    #[error("Account Already Present {bad_value}")]
+    AccountAlreadyPresent { bad_value: AccountAddress } = 10076,
 
     #[error("Unable to acquire write lock for Profile inside Wallet")]
     UnableToAcquireWriteLockForProfile = 10077,
 
-    #[error("Failed save Mnemonic to SecureStorage with FactorSourceID: {0}")]
-    UnableToSaveMnemonicToSecureStorage(FactorSourceIDFromHash) = 10078,
+    #[error("Failed save Mnemonic to SecureStorage with FactorSourceID: {bad_value}")]
+    UnableToSaveMnemonicToSecureStorage { bad_value: FactorSourceIDFromHash } =
+        10078,
 
     #[error(
-        "Failed load Mnemonic from SecureStorage with FactorSourceID: {0}"
+        "Failed load Mnemonic from SecureStorage with FactorSourceID: {bad_value}"
     )]
-    UnableToLoadMnemonicFromSecureStorage(FactorSourceIDFromHash) = 10079,
+    UnableToLoadMnemonicFromSecureStorage { bad_value: FactorSourceIDFromHash } =
+        10079,
 
-    #[error("Failed save FactorSource to SecureStorage, FactorSourceID: {0}")]
-    UnableToSaveFactorSourceToProfile(FactorSourceID) = 10080,
+    #[error("Failed save FactorSource to SecureStorage, FactorSourceID: {bad_value}")]
+    UnableToSaveFactorSourceToProfile { bad_value: FactorSourceID } = 10080,
 
     #[error("Expected IdentityPath but got something else.")]
     ExpectedIdentityPathButGotSomethingElse = 10081,
@@ -302,6 +313,26 @@ pub enum CommonError {
     #[error("Invalid PersonaData - given names empty")]
     PersonaDataInvalidNameGivenNamesEmpty = 10085,
 
-    #[error("Invalid UUID (v4), got: {0}")]
-    InvalidUUIDv4(String) = 10086,
+    #[error("Invalid UUID (v4), got: {bad_value}")]
+    InvalidUUIDv4 { bad_value: String } = 10086,
 }
+
+/*
+// FIXME: We want this! We want to be able to get the error description
+of an error, but we get some strange uniffi error!
+#[uniffi::export]
+pub fn error_message_from_error(error: &CommonError) -> String {
+    format!("{}", error)
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::prelude::*;
+
+    #[test]
+    fn error_message() {
+        let sut = CommonError::UnknownNetworkForID { bad_value: 0 };
+        // assert_eq!(error_message_from_error(&sut), "Unknown network ID '0'");
+    }
+}
+*/

@@ -53,7 +53,9 @@ impl Wallet {
         // Load Profile from storage with key
         let profile: Profile = wallet_client_storage.load_or(
             profile_key,
-            CommonError::ProfileSnapshotNotFound(profile_id.clone()),
+            CommonError::ProfileSnapshotNotFound {
+                bad_value: profile_id.clone(),
+            },
         )?;
 
         // Create wallet

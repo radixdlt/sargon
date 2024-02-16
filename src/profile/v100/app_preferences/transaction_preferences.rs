@@ -8,13 +8,13 @@ use crate::prelude::*;
 pub struct TransactionPreferences {
     /// The deposit guarantee that will automatically be added for
     /// all deposits in transactions.
-    pub default_deposit_guarantee: Decimal,
+    pub default_deposit_guarantee: Decimal192,
 }
 
 impl TransactionPreferences {
     /// Instantiates a new Transaction user preference with the
     /// specified `default_deposit_guarantee` value.
-    pub fn new(default_deposit_guarantee: Decimal) -> Self {
+    pub fn new(default_deposit_guarantee: Decimal192) -> Self {
         Self {
             default_deposit_guarantee,
         }
@@ -25,7 +25,7 @@ impl Default for TransactionPreferences {
     /// By default `1.0` is used.
     fn default() -> Self {
         Self {
-            default_deposit_guarantee: Decimal::one(),
+            default_deposit_guarantee: Decimal192::one(),
         }
     }
 }
@@ -33,12 +33,12 @@ impl Default for TransactionPreferences {
 impl HasPlaceholder for TransactionPreferences {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
-        Self::new(Decimal::try_from_str("0.975").unwrap())
+        Self::new(Decimal192::try_from_str("0.975").unwrap())
     }
 
     /// A placeholder used to facilitate unit tests.
     fn placeholder_other() -> Self {
-        Self::new(Decimal::try_from_str("0.765").unwrap())
+        Self::new(Decimal192::try_from_str("0.765").unwrap())
     }
 }
 
@@ -67,7 +67,7 @@ mod tests {
 
     #[test]
     fn get_decimal() {
-        let value = Decimal::new("0.975".to_string()).unwrap();
+        let value = Decimal192::new("0.975".to_string()).unwrap();
         let sut = TransactionPreferences::new(value.clone());
         assert_eq!(sut.default_deposit_guarantee, value)
     }

@@ -21,7 +21,7 @@ pub struct U11 {
 impl U11 {
     pub fn new(inner: u16) -> Result<Self> {
         if inner >= 2048 {
-            return Err(CommonError::InvalidBIP39Index(inner));
+            return Err(CommonError::InvalidBIP39Index { bad_value: inner });
         }
         Ok(Self { inner })
     }
@@ -34,7 +34,10 @@ mod tests {
 
     #[test]
     fn invalid_2048() {
-        assert_eq!(U11::new(2048), Err(CommonError::InvalidBIP39Index(2048)));
+        assert_eq!(
+            U11::new(2048),
+            Err(CommonError::InvalidBIP39Index { bad_value: 2048 })
+        );
     }
 
     #[test]
