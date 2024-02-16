@@ -18,9 +18,11 @@ uniffi::custom_newtype!(ProfileID, Uuid);
 impl FromStr for ProfileID {
     type Err = CommonError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Uuid::from_str(s)
-            .map(ProfileID)
-            .map_err(|_| CommonError::InvalidProfileID(s.to_owned()))
+        Uuid::from_str(s).map(ProfileID).map_err(|_| {
+            CommonError::InvalidProfileID {
+                bad_value: s.to_owned(),
+            }
+        })
     }
 }
 

@@ -57,6 +57,9 @@
                   <FileRef
                      location = "group:Profile+Swiftified.swift">
                   </FileRef>
+                  <FileRef
+                     location = "group:SargonError+Swiftified.swift">
+                  </FileRef>
                </Group>
             </Group>
             <FileRef

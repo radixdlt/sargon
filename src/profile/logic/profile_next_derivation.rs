@@ -8,9 +8,9 @@ impl Profile {
     {
         self.factor_sources
             .get(id)
-            .ok_or(CommonError::ProfileDoesNotContainFactorSourceWithID(
-                id.clone(),
-            ))
+            .ok_or(CommonError::ProfileDoesNotContainFactorSourceWithID {
+                bad_value: id.clone(),
+            })
             .and_then(|f| {
                 f.clone().try_into().map_err(|_| {
                     CommonError::CastFactorSourceWrongKind {
@@ -206,9 +206,9 @@ mod tests {
             profile.factor_source_by_id::<LedgerHardwareWalletFactorSource>(
                 &lfs.factor_source_id()
             ),
-            Err(CommonError::ProfileDoesNotContainFactorSourceWithID(
-                lfs.factor_source_id()
-            ))
+            Err(CommonError::ProfileDoesNotContainFactorSourceWithID {
+                bad_value: lfs.factor_source_id()
+            })
         );
     }
 
@@ -229,9 +229,9 @@ mod tests {
 
         assert_eq!(
             profile.device_factor_source_by_id(&id),
-            Err(CommonError::ProfileDoesNotContainFactorSourceWithID(
-                id.into()
-            ))
+            Err(CommonError::ProfileDoesNotContainFactorSourceWithID {
+                bad_value: id.into()
+            })
         );
     }
 

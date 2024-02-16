@@ -46,7 +46,7 @@ impl Gateway {
         id: NetworkID,
     ) -> Result<Arc<Self>, crate::CommonError> {
         let url = Url::try_from(url.as_str())
-            .map_err(|_| CommonError::InvalidURL(url))?;
+            .map_err(|_| CommonError::InvalidURL { bad_value: url })?;
         let network = NetworkDefinition::lookup_by_id(id)?;
         Ok(Self { url, network }.into())
     }

@@ -103,7 +103,8 @@ impl TryFrom<u8> for NetworkID {
 
     /// Tries to instantiate a NetworkID from its raw representation `u8`.
     fn try_from(value: u8) -> Result<Self> {
-        Self::from_repr(value).ok_or(Self::Error::UnknownNetworkID(value))
+        Self::from_repr(value)
+            .ok_or(Self::Error::UnknownNetworkID { bad_value: value })
     }
 }
 

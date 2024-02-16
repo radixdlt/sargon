@@ -126,8 +126,8 @@ impl TryFrom<&[u8]> for Ed25519PublicKey {
 
     fn try_from(slice: &[u8]) -> Result<Self> {
         ScryptoEd25519PublicKey::try_from(slice)
-            .map_err(|_| {
-                CommonError::InvalidEd25519PublicKeyFromBytes(slice.to_vec())
+            .map_err(|_| CommonError::InvalidEd25519PublicKeyFromBytes {
+                bad_value: slice.to_vec().into(),
             })
             .and_then(|k| k.try_into())
     }
@@ -137,7 +137,9 @@ impl Ed25519PublicKey {
     pub fn from_hex(hex: String) -> Result<Self> {
         // We want to ALWAYS go via `try_from(slice: &[u8])` since validates the EC point (`ScryptoEd25519PublicKey` doesn't!)
         Hex32Bytes::from_str(hex.as_str())
-            .map_err(|_| CommonError::InvalidEd25519PublicKeyFromString(hex))
+            .map_err(|_| CommonError::InvalidEd25519PublicKeyFromString {
+                bad_value: hex,
+            })
             .and_then(|b| b.to_vec().try_into())
     }
 }
@@ -265,7 +267,9 @@ mod tests {
     fn invalid_bytes() {
         assert_eq!(
             Ed25519PublicKey::try_from(&[0u8] as &[u8]),
-            Err(CommonError::InvalidEd25519PublicKeyFromBytes(vec![0]))
+            Err(CommonError::InvalidEd25519PublicKeyFromBytes {
+                bad_value: vec![0].into()
+            })
         );
     }
 
@@ -273,9 +277,9 @@ mod tests {
     fn invalid_hex_str() {
         assert_eq!(
             Ed25519PublicKey::from_str("not a valid hex string"),
-            Err(CommonError::InvalidEd25519PublicKeyFromString(
-                "not a valid hex string".to_owned()
-            ))
+            Err(CommonError::InvalidEd25519PublicKeyFromString {
+                bad_value: "not a valid hex string".to_owned()
+            })
         );
     }
 
@@ -283,9 +287,9 @@ mod tests {
     fn invalid_str_too_short() {
         assert_eq!(
             Ed25519PublicKey::from_str("dead"),
-            Err(CommonError::InvalidEd25519PublicKeyFromString(
-                "dead".to_owned()
-            ))
+            Err(CommonError::InvalidEd25519PublicKeyFromString {
+                bad_value: "dead".to_owned()
+            })
         );
     }
 

@@ -59,8 +59,8 @@ impl TryFrom<NonFungibleLocalId> for ScryptoNonFungibleLocalId {
                 value.to_vec().try_into().map(Self::ruid).map_err(|value| {
                     CommonError::InvalidLength {
                         expected: 32,
-                        found: value.len(),
-                        data: value,
+                        found: value.len() as u64,
+                        data: value.into(),
                     }
                 })
             }
@@ -261,7 +261,7 @@ mod tests {
             Err(CommonError::InvalidLength {
                 expected: 32,
                 found: 0,
-                data: Vec::new()
+                data: BagOfBytes::new()
             })
         );
     }

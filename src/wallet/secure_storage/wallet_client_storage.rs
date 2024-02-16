@@ -61,7 +61,7 @@ impl WalletClientStorage {
                     String::from_utf8(j.clone())
                 );
                 CommonError::FailedToDeserializeJSONToValue {
-                    json_byte_count: j.len(),
+                    json_byte_count: j.len() as u64,
                     type_name,
                 }
             }),
@@ -114,7 +114,9 @@ impl WalletClientStorage {
             mnemonic_with_passphrase,
         )
         .map_err(|_| {
-            CommonError::UnableToSaveMnemonicToSecureStorage(id.clone())
+            CommonError::UnableToSaveMnemonicToSecureStorage {
+                bad_value: id.clone(),
+            }
         })
     }
 
@@ -127,7 +129,9 @@ impl WalletClientStorage {
             SecureStorageKey::DeviceFactorSourceMnemonic {
                 factor_source_id: id.clone(),
             },
-            CommonError::UnableToLoadMnemonicFromSecureStorage(id.clone()),
+            CommonError::UnableToLoadMnemonicFromSecureStorage {
+                bad_value: id.clone(),
+            },
         )
     }
 
@@ -270,7 +274,9 @@ mod tests {
                 &MnemonicWithPassphrase::placeholder(),
                 &id
             ),
-            Err(CommonError::UnableToSaveMnemonicToSecureStorage(id.clone()))
+            Err(CommonError::UnableToSaveMnemonicToSecureStorage {
+                bad_value: id.clone()
+            })
         );
     }
 

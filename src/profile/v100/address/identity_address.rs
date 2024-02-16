@@ -192,7 +192,9 @@ mod tests {
     fn invalid() {
         assert_eq!(
             IdentityAddress::try_from_bech32("x"),
-            Err(CommonError::FailedToDecodeAddressFromBech32("x".to_owned()))
+            Err(CommonError::FailedToDecodeAddressFromBech32 {
+                bad_value: "x".to_owned()
+            })
         )
     }
 
@@ -201,7 +203,9 @@ mod tests {
         let s = "identity_rdx12tgzjrz9u0xz4l28vf04hz87eguclmfaq4d2p8f8lv7zg9ssnzku8x";
         assert_eq!(
             IdentityAddress::try_from_bech32(s),
-            Err(CommonError::FailedToDecodeAddressFromBech32(s.to_owned()))
+            Err(CommonError::FailedToDecodeAddressFromBech32 {
+                bad_value: s.to_owned()
+            })
         )
     }
 

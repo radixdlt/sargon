@@ -68,10 +68,8 @@ impl Wallet {
                 Err(CommonError::Unknown)
             }
         })
-        .map_err(|_| {
-            CommonError::UnableToSaveFactorSourceToProfile(
-                factor_source.factor_source_id(),
-            )
+        .map_err(|_| CommonError::UnableToSaveFactorSourceToProfile {
+            bad_value: factor_source.factor_source_id(),
         })
     }
 
@@ -162,8 +160,9 @@ impl Wallet {
     pub fn add_account(&self, account: Account) -> Result<()> {
         // TODO: clean this up, BAD code. messy, mostly because of (my) bad IdentifiedVec API.
         let network_id = account.network_id;
-        let err_exists =
-            CommonError::AccountAlreadyPresent(account.id().clone());
+        let err_exists = CommonError::AccountAlreadyPresent {
+            bad_value: account.id().clone(),
+        };
         self.try_update_profile_with(|mut p| {
             let networks = &mut p.networks;
             if networks.contains_id(&network_id) {
@@ -389,9 +388,9 @@ mod tests {
 
         assert_eq!(
             wallet.add_private_device_factor_source(new.clone()),
-            Err(CommonError::UnableToSaveFactorSourceToProfile(
-                new.factor_source.factor_source_id()
-            ))
+            Err(CommonError::UnableToSaveFactorSourceToProfile {
+                bad_value: new.factor_source.factor_source_id()
+            })
         );
         drop(lock);
 
@@ -417,9 +416,9 @@ mod tests {
         let (wallet, _) = Wallet::ephemeral(profile.clone());
         assert_eq!(
             wallet.add_factor_source(other.factor_source.clone().into()),
-            Err(CommonError::UnableToSaveFactorSourceToProfile(
-                other.factor_source.factor_source_id()
-            ))
+            Err(CommonError::UnableToSaveFactorSourceToProfile {
+                bad_value: other.factor_source.factor_source_id()
+            })
         )
     }
 

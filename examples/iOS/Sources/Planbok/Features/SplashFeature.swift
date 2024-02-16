@@ -52,19 +52,30 @@ public struct SplashFeature {
 							let hasAccount = profile.networks.first?.accounts.isEmpty == false
 							await send(.delegate(.walletInitialized(wallet, hasAccount: hasAccount)))
 						} else {
-							
-							let wallet = try Wallet.byCreatingNewProfileAndSecretsWithEntropy(
-								entropy: BagOfBytes.random(byteCount: 32),
-								walletClientModel: .iphone,
-								walletClientName: "Unknown iPhone",
-								secureStorage: secureStorage
-							)
-							await send(.delegate(.walletInitialized(wallet, hasAccount: false)))
+							await send(.delegate(.walletInitialized(
+								Wallet.generateNewBDFSAndEmptyProfile(secureStorage: secureStorage),
+								hasAccount: false)
+							))
 						}
 					}
 			case .delegate:
 					.none
 			}
+		}
+	}
+}
+
+extension Wallet {
+	static func generateNewBDFSAndEmptyProfile(secureStorage: SecureStorage = Keychain.shared) -> Wallet {
+		do {
+			return try Wallet.byCreatingNewProfileAndSecretsWithEntropy(
+				entropy: BagOfBytes.random(byteCount: 32),
+				walletClientModel: .iphone,
+				walletClientName: "Unknown iPhone",
+				secureStorage: secureStorage
+			)
+		} catch {
+			fatalError("TODO Handle errors: error \(error)")
 		}
 	}
 }

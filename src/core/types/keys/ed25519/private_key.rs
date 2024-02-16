@@ -63,8 +63,8 @@ impl Ed25519PrivateKey {
 
     pub fn from_bytes(slice: &[u8]) -> Result<Self> {
         ScryptoEd25519PrivateKey::from_bytes(slice)
-            .map_err(|_| {
-                CommonError::InvalidEd25519PrivateKeyFromBytes(slice.to_owned())
+            .map_err(|_| CommonError::InvalidEd25519PrivateKeyFromBytes {
+                bad_value: slice.into(),
             })
             .map(Self::from_engine)
     }
@@ -91,8 +91,8 @@ impl FromStr for Ed25519PrivateKey {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Hex32Bytes::from_hex(s)
-            .map_err(|_| {
-                CommonError::InvalidEd25519PrivateKeyFromString(s.to_owned())
+            .map_err(|_| CommonError::InvalidEd25519PrivateKeyFromString {
+                bad_value: s.to_owned(),
             })
             .and_then(|b| Self::from_bytes(&b.to_vec()))
     }
@@ -211,9 +211,9 @@ mod tests {
     fn invalid_hex() {
         assert_eq!(
             Ed25519PrivateKey::from_str("not hex"),
-            Err(CommonError::InvalidEd25519PrivateKeyFromString(
-                "not hex".to_owned()
-            ))
+            Err(CommonError::InvalidEd25519PrivateKeyFromString {
+                bad_value: "not hex".to_owned()
+            })
         );
     }
 
@@ -221,9 +221,9 @@ mod tests {
     fn invalid_hex_too_short() {
         assert_eq!(
             Ed25519PrivateKey::from_str("dead"),
-            Err(CommonError::InvalidEd25519PrivateKeyFromString(
-                "dead".to_owned()
-            ))
+            Err(CommonError::InvalidEd25519PrivateKeyFromString {
+                bad_value: "dead".to_owned()
+            })
         );
     }
 
@@ -231,7 +231,9 @@ mod tests {
     fn invalid_bytes() {
         assert_eq!(
             Ed25519PrivateKey::from_bytes(&[0u8] as &[u8]),
-            Err(CommonError::InvalidEd25519PrivateKeyFromBytes(vec![0]))
+            Err(CommonError::InvalidEd25519PrivateKeyFromBytes {
+                bad_value: vec![0].into()
+            })
         );
     }
 

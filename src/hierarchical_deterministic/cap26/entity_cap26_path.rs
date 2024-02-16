@@ -16,8 +16,8 @@ pub trait EntityCAP26Path: Derivation + FromStr {
     fn try_from_hdpath(hdpath: &HDPath) -> Result<Self> {
         let (path, components) = HDPath::try_parse_base_hdpath(hdpath, |v| {
             CommonError::InvalidDepthOfCAP26Path {
-                expected: ENTITY_PATH_DEPTH,
-                found: v,
+                expected: ENTITY_PATH_DEPTH as u64,
+                found: v as u64,
             }
         })?;
         if !components.clone().iter().all(|c| c.is_hardened()) {
@@ -25,8 +25,8 @@ pub trait EntityCAP26Path: Derivation + FromStr {
         }
         if path.depth() != ENTITY_PATH_DEPTH {
             return Err(CommonError::InvalidDepthOfCAP26Path {
-                expected: ENTITY_PATH_DEPTH,
-                found: path.depth(),
+                expected: ENTITY_PATH_DEPTH as u64,
+                found: path.depth() as u64,
             });
         }
         let network_id = HDPath::parse_try_map(
@@ -35,10 +35,13 @@ pub trait EntityCAP26Path: Derivation + FromStr {
             Box::new(|v| {
                 if v <= u8::MAX as u32 {
                     let d = v as u8;
-                    NetworkID::from_repr(d)
-                        .ok_or(CommonError::UnsupportedNetworkID(d))
+                    NetworkID::from_repr(d).ok_or(
+                        CommonError::UnsupportedNetworkID { bad_value: d },
+                    )
                 } else {
-                    Err(CommonError::InvalidNetworkIDExceedsLimit(v))
+                    Err(CommonError::InvalidNetworkIDExceedsLimit {
+                        bad_value: v,
+                    })
                 }
             }),
         )?;
@@ -47,7 +50,7 @@ pub trait EntityCAP26Path: Derivation + FromStr {
             3,
             Box::new(|v| {
                 CAP26EntityKind::from_repr(v)
-                    .ok_or(CommonError::InvalidEntityKind(v))
+                    .ok_or(CommonError::InvalidEntityKind { bad_value: v })
             }),
         )?;
 
@@ -62,7 +65,8 @@ pub trait EntityCAP26Path: Derivation + FromStr {
             &components,
             4,
             Box::new(|v| {
-                CAP26KeyKind::from_repr(v).ok_or(CommonError::InvalidKeyKind(v))
+                CAP26KeyKind::from_repr(v)
+                    .ok_or(CommonError::InvalidKeyKind { bad_value: v })
             }),
         )?;
 
@@ -81,8 +85,8 @@ pub trait EntityCAP26Path: Derivation + FromStr {
     fn from_bip32str(s: &str) -> Result<Self> {
         let (path, _) = HDPath::try_parse_base(s, |v| {
             CommonError::InvalidDepthOfCAP26Path {
-                expected: ENTITY_PATH_DEPTH,
-                found: v,
+                expected: ENTITY_PATH_DEPTH as u64,
+                found: v as u64,
             }
         })?;
         Self::try_from_hdpath(&path)

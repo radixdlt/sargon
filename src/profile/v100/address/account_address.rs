@@ -288,7 +288,9 @@ mod tests {
     fn invalid() {
         assert_eq!(
             AccountAddress::try_from_bech32("x"),
-            Err(CommonError::FailedToDecodeAddressFromBech32("x".to_owned()))
+            Err(CommonError::FailedToDecodeAddressFromBech32 {
+                bad_value: "x".to_owned()
+            })
         )
     }
 
@@ -297,7 +299,9 @@ mod tests {
         let s = "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3apleasx";
         assert_eq!(
             AccountAddress::try_from_bech32(s),
-            Err(CommonError::FailedToDecodeAddressFromBech32(s.to_owned()))
+            Err(CommonError::FailedToDecodeAddressFromBech32 {
+                bad_value: s.to_owned()
+            })
         )
     }
 
@@ -306,7 +310,9 @@ mod tests {
         let s = "identity_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease";
         assert_eq!(
             AccountAddress::try_from_bech32(s),
-            Err(CommonError::FailedToDecodeAddressFromBech32(s.to_owned()))
+            Err(CommonError::FailedToDecodeAddressFromBech32 {
+                bad_value: s.to_owned()
+            })
         )
     }
 

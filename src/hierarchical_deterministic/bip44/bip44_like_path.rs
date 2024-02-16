@@ -28,8 +28,8 @@ impl BIP44LikePath {
         let found = path.depth();
         if found != Self::PATH_DEPTH {
             return Err(CommonError::InvalidDepthOfBIP44Path {
-                expected: Self::PATH_DEPTH,
-                found,
+                expected: Self::PATH_DEPTH as u64,
+                found: found as u64,
             });
         }
         Ok(())
@@ -42,8 +42,8 @@ impl TryFrom<&HDPath> for BIP44LikePath {
     fn try_from(value: &HDPath) -> Result<Self> {
         let (path, components) = HDPath::try_parse_base_hdpath(value, |v| {
             CommonError::InvalidDepthOfBIP44Path {
-                expected: Self::PATH_DEPTH,
-                found: v,
+                expected: Self::PATH_DEPTH as u64,
+                found: v as u64,
             }
         })?;
 
@@ -108,8 +108,8 @@ impl FromStr for BIP44LikePath {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let (path, _) = HDPath::try_parse_base(s, |v| {
             CommonError::InvalidDepthOfBIP44Path {
-                expected: Self::PATH_DEPTH,
-                found: v,
+                expected: Self::PATH_DEPTH as u64,
+                found: v as u64,
             }
         })?;
         Self::try_from(&path)
@@ -170,7 +170,7 @@ mod tests {
         assert_eq!(
             BIP44LikePath::from_str("m/44H"),
             Err(CommonError::InvalidDepthOfBIP44Path {
-                expected: BIP44LikePath::PATH_DEPTH,
+                expected: BIP44LikePath::PATH_DEPTH as u64,
                 found: 1
             })
         );
@@ -181,7 +181,7 @@ mod tests {
         assert_eq!(
             BIP44LikePath::from_str("m/44H/1022H/0H"),
             Err(CommonError::InvalidDepthOfBIP44Path {
-                expected: BIP44LikePath::PATH_DEPTH,
+                expected: BIP44LikePath::PATH_DEPTH as u64,
                 found: 3
             })
         );

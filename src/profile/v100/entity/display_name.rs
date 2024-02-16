@@ -33,8 +33,8 @@ impl DisplayName {
         }
         if value.len() > Self::MAX_LEN {
             return Err(CommonError::InvalidDisplayNameTooLong {
-                expected: Self::MAX_LEN,
-                found: value.len(),
+                expected: Self::MAX_LEN as u64,
+                found: value.len() as u64,
             });
         }
 
@@ -65,8 +65,8 @@ mod tests {
         assert_eq!(
             DisplayName::new(s),
             Err(CommonError::InvalidDisplayNameTooLong {
-                expected: DisplayName::MAX_LEN,
-                found: s.len()
+                expected: DisplayName::MAX_LEN as u64,
+                found: s.len() as u64
             })
         );
     }

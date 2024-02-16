@@ -1,5 +1,7 @@
 @Reducer
 public struct MainFeature {
+	
+	@Dependency(\.keychain) var keychain
 	public init() {}
 	
 	public var body: some ReducerOf<Self> {
@@ -8,15 +10,47 @@ public struct MainFeature {
 		}
 		Reduce { state, action in
 			switch action {
-			case .accounts(.delegate(.createNewAccount)):
-				state.destination = .createAccount(CreateAccountFeature.State(walletHolder: state.walletHolder))
+			
+			case .accounts(.delegate(.deleteWallet)):
+				state.destination = .alert(.init(
+					title: TextState("Delete wallet?"),
+					message: TextState("Warning"),
+					buttons: [
+						.cancel(TextState("Cancel")),
+						.destructive(
+							TextState("Delete Wallet and mnemonic"),
+							action: .send(.confirmedDeleteWallet)
+						)
+					]
+				))
 				return .none
+				
+			case .accounts(.delegate(.createNewAccount)):
+				state.destination = .createAccount(
+					CreateAccountFeature.State(
+						walletHolder: state.walletHolder
+					)
+				)
+				return .none
+				
+			case .destination(.presented(.alert(.confirmedDeleteWallet))):
+				print("⚠️ Confirmed deletion of wallet")
+				state.destination = nil
+				let profileID = state.walletHolder.wallet.profile().id
+				do {
+					try keychain.deleteDataForKey(SecureStorageKey.profileSnapshot(profileId: profileID))
+					try keychain.deleteDataForKey(SecureStorageKey.activeProfileId)
+					return .send(.delegate(.deletedWallet))
+				} catch {
+					fatalError("Fix error handling, error: \(error)")
+				}
+			
 			case .destination(.presented(.createAccount(.createdAccount))):
 				state.destination = nil
-				state.accounts.refresh()
+				state.accounts.refresh() // FIXME: we really do not want this.
 				return .none
+			
 			default:
-				print("MainFeature ignored action: \(action)")
 				return .none
 			}
 		}
@@ -26,6 +60,11 @@ public struct MainFeature {
 	@Reducer(state: .equatable)
 	public enum Destination {
 		case createAccount(CreateAccountFeature)
+		case alert(AlertState<Alert>)
+		
+		public enum Alert {
+			case confirmedDeleteWallet
+		}
 	}
 	
 	@ObservableState
@@ -47,13 +86,18 @@ public struct MainFeature {
 	}
 	
 	public enum Action {
+		public enum DelegateAction {
+			case deletedWallet
+		}
 		case destination(PresentationAction<Destination.Action>)
 		case accounts(AccountsFeature.Action)
+		
+		case delegate(DelegateAction)
+		
 	}
 	
 	public struct View: SwiftUI.View {
 		
-//		public let store: StoreOf<MainFeature>
 		@Bindable public var store: StoreOf<MainFeature>
 		
 		public init(store: StoreOf<MainFeature>) {
@@ -61,24 +105,25 @@ public struct MainFeature {
 		}
 		
 		public var body: some SwiftUI.View {
-//			NavigationStack(path: $store.scope(state: \.path, action: \.path)) {
-//				SyncUpsListView(
-//					store: store.scope(state: \.syncUpsList, action: \.syncUpsList)
-//				)
-//			} destination: { store in
-//				switch store.case {
-//				case let .detail(store):
-//					SyncUpDetailView(store: store)
-//				case let .meeting(meeting, syncUp):
-//					MeetingView(meeting: meeting, syncUp: syncUp)
-//				case let .record(store):
-//					RecordMeetingView(store: store)
-//				}
-//			}
-			AccountsFeature.View(store: store.scope(state: \.accounts, action: \.accounts))
-				.sheet(item: $store.scope(state: \.destination?.createAccount, action: \.destination.createAccount)) { store in
-					CreateAccountFeature.View(store: store)
+			VStack {
+				VStack {
+					Text("ProfileID:")
+					Text("\(store.state.walletHolder.wallet.profile().id)")
 				}
+				
+				AccountsFeature.View(
+					store: store.scope(state: \.accounts, action: \.accounts)
+				)
+			}
+			.sheet(
+				item: $store.scope(
+					state: \.destination?.createAccount,
+					action: \.destination.createAccount
+				)
+			) { store in
+				CreateAccountFeature.View(store: store)
+			}
+			.alert($store.scope(state: \.destination?.alert, action: \.destination.alert))
 		}
 	}
 }
