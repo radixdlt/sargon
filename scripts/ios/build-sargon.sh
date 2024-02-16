@@ -56,7 +56,7 @@ build_xcframework() {
   xcodebuild -create-xcframework \
     -library target/aarch64-apple-ios/release/lib$1.a -headers target/uniffi-xcframework-staging \
     -library target/ios-simulator-fat/release/lib$1.a -headers target/uniffi-xcframework-staging \
-    -output $OUTDIR
+    -output $XCFRAME_PATH
 
   if $release; then
     echo "📦 ('release' is true) Building xcframework archive"
