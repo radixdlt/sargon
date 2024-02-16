@@ -46,7 +46,7 @@ echo "🚢 🏷️ 📡 Pushing tag: $(last_tag)"
 SWIFT_SARGON_BINARY_ASSET_NAME="libsargon-rs.xcframework.zip" 
 
 GH_RELEASE_TITLE="Sargon Swift Only v$NEXT_TAG"
-RELEASE_CMD="gh release create $NEXT_TAG '$ZIP_PATH#$SWIFT_SARGON_BINARY_ASSET_NAME' --generate-notes --title '$GH_RELEASE_TITLE'"
+RELEASE_CMD="gh release create $NEXT_TAG '$XCFRAME_ZIP_PATH#$SWIFT_SARGON_BINARY_ASSET_NAME' --generate-notes --title '$GH_RELEASE_TITLE'"
 eval $RELEASE_CMD
 
 echo "🚢  End of release script ✅"
