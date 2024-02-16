@@ -1,5 +1,5 @@
 @Reducer
-public struct CreateAccountFeature {
+public struct NameNewAccountFeature {
 	
 	@ObservableState
 	public struct State: Equatable {
@@ -14,22 +14,30 @@ public struct CreateAccountFeature {
 		}
 	}
 	
-	public enum Action {
-		case accountNameChanged(String)
-		case createAccountButtonTapped
-		case createdAccount
+	public enum Action: ViewAction {
+		public enum Delegate {
+			case named(DisplayName)
+		}
+		@CasePathable
+		public enum ViewAction {
+			case accountNameChanged(String)
+			case continueButtonTapped
+		}
+		case delegate(Delegate)
+		case view(ViewAction)
 	}
 	
+	@ViewAction(for: NameNewAccountFeature.self)
 	public struct View: SwiftUI.View {
-		@Bindable var store: StoreOf<CreateAccountFeature>
-		public init(store: StoreOf<CreateAccountFeature>) {
+		@Bindable public var store: StoreOf<NameNewAccountFeature>
+		public init(store: StoreOf<NameNewAccountFeature>) {
 			self.store = store
 		}
 		public var body: some SwiftUI.View {
 			VStack {
-				Text("Create Account").font(.largeTitle)
+				Text("Name Account").font(.largeTitle)
 				Spacer()
-				LabeledTextField(label: "Account Name", text: $store.accountName.sending(\.accountNameChanged))
+				LabeledTextField(label: "Account Name", text: $store.accountName.sending(\.view.accountNameChanged))
 				if let error = store.state.errorMessage {
 					Text("\(error)")
 						.foregroundStyle(Color.red)
@@ -37,10 +45,10 @@ public struct CreateAccountFeature {
 						.fontWeight(.bold)
 				}
 				Spacer()
-				Button("Create Account") {
-					store.send(.createAccountButtonTapped)
+				Button("Continue") {
+					send(.continueButtonTapped)
 				}
-				
+				.buttonStyle(.borderedProminent)
 			}
 			.padding()
 		}
@@ -51,44 +59,25 @@ public struct CreateAccountFeature {
 	public var body: some ReducerOf<Self> {
 		Reduce { state, action in
 			switch action {
-			case let .accountNameChanged(name):
+			case let .view(.accountNameChanged(name)):
 				state.errorMessage = nil
 				state.accountName = name
 				return .none
 				
-			case .createAccountButtonTapped:
+			case .view(.continueButtonTapped):
 				state.errorMessage = nil
 				do {
 					let displayName = try DisplayName(validating: state.accountName)
-					do {
-						_ = try state.walletHolder.wallet.createAndSaveNewAccount(
-							networkId: .mainnet,
-							name: displayName
-						)
-						return .send(.createdAccount)
-					} catch {
-						state.errorMessage = "Failed to create and save account. This is really bad."
-						return .none
-					}
+					return .send(.delegate(.named(displayName)))
 				} catch {
 					state.errorMessage = "Invalid DisplayName, can't be empty or too long."
 					return .none
 				}
 				
-			case .createdAccount:
+			case .delegate:
 				return .none
+		
 			}
-		}
-	}
-}
-
-public struct LabeledTextField: SwiftUI.View {
-	public let label: LocalizedStringKey
-	@Binding public var text: String
-	public var body: some View {
-		VStack {
-			Text(label)
-			TextField(label, text: $text)
 		}
 	}
 }

@@ -741,6 +741,18 @@ public protocol WalletProtocol: AnyObject {
     func jsonSnapshot() -> String
 
     /**
+     * Tries to load the  `MnemonicWithPassphrase` for the main "Babylon"
+     * `DeviceFactorSource` from secure storage.
+     */
+    func mainBdfsMnemonicWithPassphrase() throws -> MnemonicWithPassphrase
+
+    /**
+     * Tries to load a `MnemonicWithPassphrase` from secure storage
+     * by `factor_source_id`.
+     */
+    func mnemonicWithPassphraseOfDeviceFactorSourceByFactorSourceId(factorSourceId: FactorSourceId) throws -> MnemonicWithPassphrase
+
+    /**
      * Clone the profile and return it.
      */
     func profile() -> Profile
@@ -878,6 +890,31 @@ public class Wallet:
                 rustCall {
                     uniffi_sargon_fn_method_wallet_json_snapshot(self.uniffiClonePointer(), $0)
                 }
+        )
+    }
+
+    /**
+     * Tries to load the  `MnemonicWithPassphrase` for the main "Babylon"
+     * `DeviceFactorSource` from secure storage.
+     */
+    public func mainBdfsMnemonicWithPassphrase() throws -> MnemonicWithPassphrase {
+        return try FfiConverterTypeMnemonicWithPassphrase.lift(
+            rustCallWithError(FfiConverterTypeCommonError.lift) {
+                uniffi_sargon_fn_method_wallet_main_bdfs_mnemonic_with_passphrase(self.uniffiClonePointer(), $0)
+            }
+        )
+    }
+
+    /**
+     * Tries to load a `MnemonicWithPassphrase` from secure storage
+     * by `factor_source_id`.
+     */
+    public func mnemonicWithPassphraseOfDeviceFactorSourceByFactorSourceId(factorSourceId: FactorSourceId) throws -> MnemonicWithPassphrase {
+        return try FfiConverterTypeMnemonicWithPassphrase.lift(
+            rustCallWithError(FfiConverterTypeCommonError.lift) {
+                uniffi_sargon_fn_method_wallet_mnemonic_with_passphrase_of_device_factor_source_by_factor_source_id(self.uniffiClonePointer(),
+                                                                                                                    FfiConverterTypeFactorSourceID.lower(factorSourceId), $0)
+            }
         )
     }
 
@@ -10305,6 +10342,12 @@ private var initializationResult: InitializationResult {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_sargon_checksum_method_wallet_json_snapshot() != 24850 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_method_wallet_main_bdfs_mnemonic_with_passphrase() != 59906 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_method_wallet_mnemonic_with_passphrase_of_device_factor_source_by_factor_source_id() != 48090 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_sargon_checksum_method_wallet_profile() != 5221 {
