@@ -29,16 +29,14 @@ export IOS_SIM_UDID=$(xcrun simctl list devices | sed -n "/$SED_START/,/$SED_END
 
 IPHONE_SIM_DEST="platform=iOS Simulator,id=$IOS_SIM_UDID"
 # echo "📱 IPHONE_SIM_DEST '$IPHONE_SIM_DEST'"
-XCODEBUILD_CMD_BASE="xcodebuild build -project $APP_XCODEPROJP_PATH -scheme $APP_SCHEME_NAME"
-BUILD_CMD="$XCODEBUILD_CMD_BASE -destination \"$IPHONE_SIM_DEST\" -configuration Debug -quiet CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO"
+XCODEBUILD_CMD_BASE="xcodebuild -project $APP_XCODEPROJP_PATH -scheme $APP_SCHEME_NAME"
+BUILD_CMD="$XCODEBUILD_CMD_BASE build -destination \"$IPHONE_SIM_DEST\" -configuration Debug -quiet -showBuildSettings CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO | grep -m 1 'BUILD_ROOT' | grep -oEi \"\/.*\""
 echo "📱🛠️  Building app: '$APP_SCHEME_NAME'..."
-eval $BUILD_CMD
-PRINT_API_DIR_CMD="$XCODEBUILD_CMD_BASE -showBuildSettings"
-BUILD_ROOT=$($PRINT_API_DIR_CMD | grep -m 1 'BUILD_ROOT' | grep -oEi "\/.*")
-
+BUILD_ROOT=$(eval $BUILD_CMD)
 APP_PATH="$BUILD_ROOT/Debug-iphonesimulator/$APP_SCHEME_NAME.app"
+echo "📱🛠️  Built app '$APP_SCHEME_NAME' , it is here: '$APP_PATH' ✅"
 
-echo "📱🛠️  Built app '$APP_SCHEME_NAME', binary is here: '$APP_PATH' ✅"
+echo "📱 Starting simulator '$IOS_SIM_UDID'..."
 
 # Open the simulator
 open -a 'Simulator' --args -CurrentDeviceUDID $IOS_SIM_UDID
@@ -53,6 +51,8 @@ while [ `booted_sim_ct` -lt 1 ]
 do
 	sleep 1
 done
+
+echo "📱 Started simulator '$IOS_SIM_UDID' ✅"
 
 echo "📱📦 Installing app '$APP_SCHEME_NAME'..."
 xcrun simctl install booted $APP_PATH
