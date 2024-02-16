@@ -28,8 +28,4 @@ jobs:
       
       - name: Run iOS build script
         run: |
-            ZIP_PATH=$(sh ./scripts/ios/release.sh | tail -n 1)
-            echo "🔮 ZIP_PATH: $ZIP_PATH"
-        
-      - name: Configure Package.swift for remote development
-        run: sed -i '' 's/let useLocalFramework = true/let useLocalFramework = false/' Package.swift
+            sh ./scripts/ios/release.sh
