@@ -52,9 +52,12 @@ public struct AppFeature {
 				} else {
 					state = .onboarding(OnboardingFeature.State(wallet: wallet))
 				}
-					return .none
+				return .none
+			case let .onboarding(.createdAccount(walletHolder)):
+				state = .main(MainFeature.State(walletHolder: walletHolder))
+				return .none
 			default:
-					return .none
+				return .none
 			}
 		}
 		.ifCaseLet(\.splash, action: \.splash) {

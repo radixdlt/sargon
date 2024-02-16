@@ -8865,6 +8865,28 @@ private struct FfiConverterSequenceTypeAccountAddress: FfiConverterRustBuffer {
     }
 }
 
+private struct FfiConverterSequenceTypeAppearanceID: FfiConverterRustBuffer {
+    typealias SwiftType = [AppearanceId]
+
+    public static func write(_ value: [AppearanceId], into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        for item in value {
+            FfiConverterTypeAppearanceID.write(item, into: &buf)
+        }
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [AppearanceId] {
+        let len: Int32 = try readInt(&buf)
+        var seq = [AppearanceId]()
+        seq.reserveCapacity(Int(len))
+        for _ in 0 ..< len {
+            try seq.append(FfiConverterTypeAppearanceID.read(from: &buf))
+        }
+        return seq
+    }
+}
+
 private struct FfiConverterSequenceTypeAssetException: FfiConverterRustBuffer {
     typealias SwiftType = [AssetException]
 
@@ -9584,6 +9606,14 @@ public func accountAddressToShort(address: AccountAddress) -> String {
     )
 }
 
+public func appearanceIdsAll() -> [AppearanceId] {
+    return try! FfiConverterSequenceTypeAppearanceID.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_appearance_ids_all($0)
+        }
+    )
+}
+
 public func bagOfBytesAppendCafe(to: BagOfBytes) -> BagOfBytes {
     return try! FfiConverterTypeBagOfBytes.lift(
         try! rustCall {
@@ -10092,6 +10122,9 @@ private var initializationResult: InitializationResult {
         return InitializationResult.contractVersionMismatch
     }
     if uniffi_sargon_checksum_func_account_address_to_short() != 17327 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_appearance_ids_all() != 44342 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_sargon_checksum_func_bag_of_bytes_append_cafe() != 43605 {

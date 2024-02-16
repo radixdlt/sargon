@@ -42,6 +42,21 @@
                   <FileRef
                      location = "group:Wallet+Swiftified.swift">
                   </FileRef>
+                  <FileRef
+                     location = "group:DisplayName+Swiftified.swift">
+                  </FileRef>
+                  <FileRef
+                     location = "group:Account+Swiftified.swift">
+                  </FileRef>
+                  <FileRef
+                     location = "group:/Users/sajjon/Developer/Radix/sargon/apple/Sources/Sargon/Extensions/Swiftified/AccountAddress+Swiftified.swift">
+                  </FileRef>
+                  <FileRef
+                     location = "group:/Users/sajjon/Developer/Radix/sargon/apple/Sources/Sargon/Extensions/Swiftified/AppearanceID+Swiftified.swift">
+                  </FileRef>
+                  <FileRef
+                     location = "group:Profile+Swiftified.swift">
+                  </FileRef>
                </Group>
             </Group>
             <FileRef

@@ -20,6 +20,8 @@ struct PlanbokApp: App {
 					AppFeature()
 				}
 			)
+			.textFieldStyle(.roundedBorder)
+			.buttonStyle(.borderedProminent)
         }
     }
 }

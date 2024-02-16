@@ -36,6 +36,24 @@ pub fn new_appearance_id_placeholder_other() -> AppearanceID {
     AppearanceID::placeholder_other()
 }
 
+#[uniffi::export]
+pub fn appearance_ids_all() -> Vec<AppearanceID> {
+    vec![
+        AppearanceID::gradient0(),
+        AppearanceID::gradient1(),
+        AppearanceID::gradient2(),
+        AppearanceID::gradient3(),
+        AppearanceID::gradient4(),
+        AppearanceID::gradient5(),
+        AppearanceID::gradient6(),
+        AppearanceID::gradient7(),
+        AppearanceID::gradient8(),
+        AppearanceID::gradient9(),
+        AppearanceID::gradient10(),
+        AppearanceID::gradient11(),
+    ]
+}
+
 impl AppearanceID {
     /// The number of different appearances
     pub const MAX: u8 = 11;
@@ -188,23 +206,10 @@ mod tests {
 
     #[test]
     fn presets() {
-        let set = [
-            AppearanceID::gradient0(),
-            AppearanceID::gradient1(),
-            AppearanceID::gradient2(),
-            AppearanceID::gradient3(),
-            AppearanceID::gradient4(),
-            AppearanceID::gradient5(),
-            AppearanceID::gradient6(),
-            AppearanceID::gradient7(),
-            AppearanceID::gradient8(),
-            AppearanceID::gradient9(),
-            AppearanceID::gradient10(),
-            AppearanceID::gradient11(),
-        ]
-        .into_iter()
-        .map(|a| a.value)
-        .collect::<HashSet<_>>();
+        let set = appearance_ids_all()
+            .into_iter()
+            .map(|a| a.value)
+            .collect::<HashSet<_>>();
         assert_eq!(set.len(), (AppearanceID::MAX as usize) + 1);
     }
 }
