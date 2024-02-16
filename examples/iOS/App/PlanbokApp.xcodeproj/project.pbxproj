@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 60;
+	objectVersion = 56;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -11,6 +11,8 @@
 		48F0A6CD2B7D42D400929DC2 /* PlanbokApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48F0A6CC2B7D42D400929DC2 /* PlanbokApp.swift */; };
 		48F0A6D12B7D42D500929DC2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 48F0A6D02B7D42D500929DC2 /* Assets.xcassets */; };
 		48F0A6D52B7D42D500929DC2 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 48F0A6D42B7D42D500929DC2 /* Preview Assets.xcassets */; };
+		E6EF0F482B7FA6CC00889B69 /* Sargon in Frameworks */ = {isa = PBXBuildFile; productRef = E6EF0F472B7FA6CC00889B69 /* Sargon */; };
+		E6EF0F4B2B7FA6E500889B69 /* Planbok in Frameworks */ = {isa = PBXBuildFile; productRef = E6EF0F4A2B7FA6E500889B69 /* Planbok */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +28,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E6EF0F4B2B7FA6E500889B69 /* Planbok in Frameworks */,
+				E6EF0F482B7FA6CC00889B69 /* Sargon in Frameworks */,
 				48C8EF4C2B7DEA0300EF7F97 /* Planbok in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -86,6 +90,8 @@
 			name = PlanbokApp;
 			packageProductDependencies = (
 				48C8EF4B2B7DEA0300EF7F97 /* Planbok */,
+				E6EF0F472B7FA6CC00889B69 /* Sargon */,
+				E6EF0F4A2B7FA6E500889B69 /* Planbok */,
 			);
 			productName = Planbok;
 			productReference = 48F0A6C92B7D42D400929DC2 /* PlanbokApp.app */;
@@ -116,7 +122,6 @@
 			);
 			mainGroup = 48F0A6C02B7D42D400929DC2;
 			packageReferences = (
-				48C8EF4A2B7DEA0300EF7F97 /* XCLocalSwiftPackageReference ".." */,
 			);
 			productRefGroup = 48F0A6CA2B7D42D400929DC2 /* Products */;
 			projectDirPath = "";
@@ -370,15 +375,16 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCLocalSwiftPackageReference section */
-		48C8EF4A2B7DEA0300EF7F97 /* XCLocalSwiftPackageReference ".." */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = ..;
-		};
-/* End XCLocalSwiftPackageReference section */
-
 /* Begin XCSwiftPackageProductDependency section */
 		48C8EF4B2B7DEA0300EF7F97 /* Planbok */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Planbok;
+		};
+		E6EF0F472B7FA6CC00889B69 /* Sargon */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Sargon;
+		};
+		E6EF0F4A2B7FA6E500889B69 /* Planbok */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Planbok;
 		};
