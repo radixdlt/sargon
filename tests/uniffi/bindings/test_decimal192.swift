@@ -30,13 +30,8 @@ extension Decimal192: ExpressibleByIntegerLiteral {
 }
 
 extension Decimal192: ExpressibleByFloatLiteral {
-	public init(floatLiteral value: Double) {
-		let formatter = NumberFormatter()
-		formatter.numberStyle = .decimal
-		formatter.decimalSeparator = "."  // Sargon ALWAYS uses "."
-		formatter.maximumFractionDigits = 18
-		let string = formatter.string(from: NSNumber(value: value))!
-		try! self.init(string)
+	public init(floatLiteral value: Float32) {
+		self = newDecimalFromF32(value: value)
 	}
 }
 

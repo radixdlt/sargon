@@ -389,6 +389,19 @@ private struct FfiConverterInt64: FfiConverterPrimitive {
     }
 }
 
+private struct FfiConverterFloat: FfiConverterPrimitive {
+    typealias FfiType = Float
+    typealias SwiftType = Float
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Float {
+        return try lift(readFloat(&buf))
+    }
+
+    public static func write(_ value: Float, into buf: inout [UInt8]) {
+        writeFloat(&buf, lower(value))
+    }
+}
+
 private struct FfiConverterBool: FfiConverter {
     typealias FfiType = Int8
     typealias SwiftType = Bool
@@ -8742,6 +8755,104 @@ extension ResourceOrNonFungible: Equatable, Hashable {}
 // Note that we don't yet support `indirect` for enums.
 // See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
 /**
+ * Defines the rounding strategy used when you round e.g. `Decimal192`.
+ *
+ * Following the same naming convention as https://docs.rs/rust_decimal/latest/rust_decimal/enum.RoundingStrategy.html.
+ */
+public enum RoundingMode {
+    /**
+     * The number is always rounded toward positive infinity, e.g. `3.1 -> 4`, `-3.1 -> -3`.
+     */
+    case toPositiveInfinity
+    /**
+     * The number is always rounded toward negative infinity, e.g. `3.1 -> 3`, `-3.1 -> -4`.
+     */
+    case toNegativeInfinity
+    /**
+     * The number is always rounded toward zero, e.g. `3.1 -> 3`, `-3.1 -> -3`.
+     */
+    case toZero
+    /**
+     * The number is always rounded away from zero, e.g. `3.1 -> 4`, `-3.1 -> -4`.
+     */
+    case awayFromZero
+    /**
+     * The number is rounded to the nearest, and when it is halfway between two others, it's rounded toward zero, e.g. `3.5 -> 3`, `-3.5 -> -3`.
+     */
+    case toNearestMidpointTowardZero
+    /**
+     * The number is rounded to the nearest, and when it is halfway between two others, it's rounded away from zero, e.g. `3.5 -> 4`, `-3.5 -> -4`.
+     */
+    case toNearestMidpointAwayFromZero
+    /**
+     * The number is rounded to the nearest, and when it is halfway between two others, it's rounded toward the nearest even number. Also known as "Bankers Rounding".
+     */
+    case toNearestMidpointToEven
+}
+
+public struct FfiConverterTypeRoundingMode: FfiConverterRustBuffer {
+    typealias SwiftType = RoundingMode
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> RoundingMode {
+        let variant: Int32 = try readInt(&buf)
+        switch variant {
+        case 1: return .toPositiveInfinity
+
+        case 2: return .toNegativeInfinity
+
+        case 3: return .toZero
+
+        case 4: return .awayFromZero
+
+        case 5: return .toNearestMidpointTowardZero
+
+        case 6: return .toNearestMidpointAwayFromZero
+
+        case 7: return .toNearestMidpointToEven
+
+        default: throw UniffiInternalError.unexpectedEnumCase
+        }
+    }
+
+    public static func write(_ value: RoundingMode, into buf: inout [UInt8]) {
+        switch value {
+        case .toPositiveInfinity:
+            writeInt(&buf, Int32(1))
+
+        case .toNegativeInfinity:
+            writeInt(&buf, Int32(2))
+
+        case .toZero:
+            writeInt(&buf, Int32(3))
+
+        case .awayFromZero:
+            writeInt(&buf, Int32(4))
+
+        case .toNearestMidpointTowardZero:
+            writeInt(&buf, Int32(5))
+
+        case .toNearestMidpointAwayFromZero:
+            writeInt(&buf, Int32(6))
+
+        case .toNearestMidpointToEven:
+            writeInt(&buf, Int32(7))
+        }
+    }
+}
+
+public func FfiConverterTypeRoundingMode_lift(_ buf: RustBuffer) throws -> RoundingMode {
+    return try FfiConverterTypeRoundingMode.lift(buf)
+}
+
+public func FfiConverterTypeRoundingMode_lower(_ value: RoundingMode) -> RustBuffer {
+    return FfiConverterTypeRoundingMode.lower(value)
+}
+
+extension RoundingMode: Equatable, Hashable {}
+
+// Note that we don't yet support `indirect` for enums.
+// See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
+/**
  * Elliptic Curves which the SLIP10 derivation algorithm supports.
  *
  * We use SLIP10 for hierarchical deterministic derivation since we
@@ -10033,6 +10144,19 @@ public func decimalAdd(lhs: Decimal192, rhs: Decimal192) -> Decimal192 {
 }
 
 /**
+ * Clamps `decimal` to zero, i.e. `max(decimal, 0)`
+ */
+public func decimalClampedToZero(decimal: Decimal192) -> Decimal192 {
+    return try! FfiConverterTypeDecimal192.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_decimal_clamped_to_zero(
+                FfiConverterTypeDecimal192.lower(decimal), $0
+            )
+        }
+    )
+}
+
+/**
  * `lhs / rhs``
  */
 public func decimalDiv(lhs: Decimal192, rhs: Decimal192) -> Decimal192 {
@@ -10187,6 +10311,24 @@ public func decimalNeg(decimal: Decimal192) -> Decimal192 {
         try! rustCall {
             uniffi_sargon_fn_func_decimal_neg(
                 FfiConverterTypeDecimal192.lower(decimal), $0
+            )
+        }
+    )
+}
+
+/**
+ * Rounds this number to the specified decimal places.
+ *
+ * # Panics
+ * - Panic if the number of decimal places is not within [0..SCALE(=18)]
+ */
+public func decimalRound(decimal: Decimal192, decimalPlaces: Int32, roundingMode: RoundingMode) throws -> Decimal192 {
+    return try FfiConverterTypeDecimal192.lift(
+        rustCallWithError(FfiConverterTypeCommonError.lift) {
+            uniffi_sargon_fn_func_decimal_round(
+                FfiConverterTypeDecimal192.lower(decimal),
+                FfiConverterInt32.lower(decimalPlaces),
+                FfiConverterTypeRoundingMode.lower(roundingMode), $0
             )
         }
     )
@@ -10401,6 +10543,21 @@ public func newDecimalExponent(exponent: UInt8) -> Decimal192 {
         try! rustCall {
             uniffi_sargon_fn_func_new_decimal_exponent(
                 FfiConverterUInt8.lower(exponent), $0
+            )
+        }
+    )
+}
+
+/**
+ * Creates a new `Decimal192` from a f32 float, it does
+ * so by first converting the float to a String, using
+ * Rust's `to_string` on the float.
+ */
+public func newDecimalFromF32(value: Float) -> Decimal192 {
+    return try! FfiConverterTypeDecimal192.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_decimal_from_f32(
+                FfiConverterFloat.lower(value), $0
             )
         }
     )
@@ -10789,6 +10946,9 @@ private var initializationResult: InitializationResult {
     if uniffi_sargon_checksum_func_decimal_add() != 697 {
         return InitializationResult.apiChecksumMismatch
     }
+    if uniffi_sargon_checksum_func_decimal_clamped_to_zero() != 64928 {
+        return InitializationResult.apiChecksumMismatch
+    }
     if uniffi_sargon_checksum_func_decimal_div() != 19189 {
         return InitializationResult.apiChecksumMismatch
     }
@@ -10823,6 +10983,9 @@ private var initializationResult: InitializationResult {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_sargon_checksum_func_decimal_neg() != 41456 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_decimal_round() != 8832 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_sargon_checksum_func_decimal_sub() != 35224 {
@@ -10889,6 +11052,9 @@ private var initializationResult: InitializationResult {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_sargon_checksum_func_new_decimal_exponent() != 14207 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_new_decimal_from_f32() != 3137 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_sargon_checksum_func_new_decimal_from_i32() != 18727 {

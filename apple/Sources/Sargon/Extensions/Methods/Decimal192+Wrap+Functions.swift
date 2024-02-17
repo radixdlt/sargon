@@ -11,32 +11,55 @@ extension Decimal192: CustomStringConvertible {
 }
 
 extension Decimal192 {
-	public static let maxDivisibility: UInt = 18
+	public static let maxDivisibility: UInt8 = 18
 }
 
 // MARK: Truncation and rounding
 
 extension Decimal192 {
+	
+	private func rounded(decimalPlaces: UInt8, roundingMode: RoundingMode) -> Self {
+		precondition(
+			decimalPlaces <= Decimal192.maxDivisibility, 
+			"Decimal places MUST be 0...18, was: \(decimalPlaces)"
+		)
+		do {
+			return try decimalRound(
+				decimal: self,
+				decimalPlaces: Int32(decimalPlaces),
+				roundingMode: roundingMode
+			)
+		} catch {
+			fatalError("Failed to round, error: \(error)")
+		}
+	}
+	
+	
+	/// Rounds to `decimalPlaces` decimals
+	public func rounded(decimalPlaces: UInt8 = 0) -> Self {
+		rounded(
+			decimalPlaces: decimalPlaces,
+			roundingMode: .toNearestMidpointAwayFromZero
+		)
+	}
+	
 	/// Rounds to `decimalPlaces` decimals, in the direction of 0
-	public func floor(decimalPlaces: UInt) -> Self {
-		try! round(decimalPlaces: Int32(decimalPlaces), roundingMode: .toZero)
+	public func floor(decimalPlaces: UInt8) -> Self {
+		rounded(decimalPlaces: decimalPlaces, roundingMode: .toZero)
 	}
 
 	/// Rounds to `decimalPlaces` decimals, in the direction away from zero
-	public func ceil(decimalPlaces: UInt) -> Self {
-		try! round(decimalPlaces: Int32(decimalPlaces), roundingMode: .awayFromZero)
+	public func ceil(decimalPlaces: UInt8) -> Self {
+		rounded(decimalPlaces: decimalPlaces, roundingMode: .awayFromZero)
 	}
 
-	/// Rounds to `decimalPlaces` decimals
-	public func rounded(decimalPlaces: UInt = 0) -> Self {
-		try! round(decimalPlaces: Int32(decimalPlaces), roundingMode: .toNearestMidpointAwayFromZero)
-	}
 }
 
 extension Decimal192 {
 	public var clamped: Self {
-		isNegative() ? .zero : self
+		decimalClampedToZero(decimal: self)
 	}
+
 	public func isNegative() -> Bool {
 		decimalIsNegative(decimal: self)
 	}

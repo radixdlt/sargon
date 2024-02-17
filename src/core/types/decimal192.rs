@@ -145,6 +145,14 @@ impl From<i64> for Decimal {
     }
 }
 
+impl From<f32> for Decimal {
+    fn from(value: f32) -> Self {
+        value.to_string().parse::<Self>().expect(
+            "Expected to always be able to create a Decimal192 from 'f32'.",
+        )
+    }
+}
+
 impl Decimal {
     pub fn new(value: String) -> Result<Self> {
         value.parse()
@@ -243,8 +251,18 @@ impl Decimal {
 
     /// `abs(self)`
     /// Panics if Self is Self::MIN.
-    pub fn abs(self) -> Self {
+    pub fn abs(&self) -> Self {
         self.native().checked_abs().expect("Expected clients of Sargon to not use so large negative numbers (Self::MIN).").into()
+    }
+
+    /// `max(self, 0)`, which is often called
+    /// "clamping to zero"
+    pub fn clamped_to_zero(self) -> Self {
+        if self.is_negative() {
+            Self::zero()
+        } else {
+            self
+        }
     }
 
     /// Rounds this number to the specified decimal places.
@@ -263,23 +281,31 @@ impl Decimal {
     }
 }
 
+/// Defines the rounding strategy used when you round e.g. `Decimal192`.
+///
+/// Following the same naming convention as https://docs.rs/rust_decimal/latest/rust_decimal/enum.RoundingStrategy.html.
 #[derive(
     Clone, Copy, Debug, PartialEq, Eq, enum_iterator::Sequence, uniffi::Enum,
 )]
 pub enum RoundingMode {
     /// The number is always rounded toward positive infinity, e.g. `3.1 -> 4`, `-3.1 -> -3`.
     ToPositiveInfinity,
+
     /// The number is always rounded toward negative infinity, e.g. `3.1 -> 3`, `-3.1 -> -4`.
     ToNegativeInfinity,
+
     /// The number is always rounded toward zero, e.g. `3.1 -> 3`, `-3.1 -> -3`.
     ToZero,
+
     /// The number is always rounded away from zero, e.g. `3.1 -> 4`, `-3.1 -> -4`.
     AwayFromZero,
 
     /// The number is rounded to the nearest, and when it is halfway between two others, it's rounded toward zero, e.g. `3.5 -> 3`, `-3.5 -> -3`.
     ToNearestMidpointTowardZero,
+
     /// The number is rounded to the nearest, and when it is halfway between two others, it's rounded away from zero, e.g. `3.5 -> 4`, `-3.5 -> -4`.
     ToNearestMidpointAwayFromZero,
+
     /// The number is rounded to the nearest, and when it is halfway between two others, it's rounded toward the nearest even number. Also known as "Bankers Rounding".
     ToNearestMidpointToEven,
 }
@@ -378,6 +404,14 @@ pub fn new_decimal_from_i32(value: i32) -> Decimal192 {
 /// Creates a new `Decimal192` from a i64 integer.
 #[uniffi::export]
 pub fn new_decimal_from_i64(value: i64) -> Decimal192 {
+    value.into()
+}
+
+/// Creates a new `Decimal192` from a f32 float, it does
+/// so by first converting the float to a String, using
+/// Rust's `to_string` on the float.
+#[uniffi::export]
+pub fn new_decimal_from_f32(value: f32) -> Decimal192 {
     value.into()
 }
 
@@ -486,6 +520,12 @@ pub fn decimal_neg(decimal: &Decimal192) -> Decimal192 {
 #[uniffi::export]
 pub fn decimal_abs(decimal: &Decimal192) -> Decimal192 {
     decimal.abs()
+}
+
+/// Clamps `decimal` to zero, i.e. `max(decimal, 0)`
+#[uniffi::export]
+pub fn decimal_clamped_to_zero(decimal: &Decimal192) -> Decimal192 {
+    decimal.clamped_to_zero()
 }
 
 /// Rounds this number to the specified decimal places.
@@ -959,6 +999,18 @@ mod uniffi_tests {
     }
 
     #[test]
+    fn from_f32() {
+        let f: f32 = 208050.17;
+        assert_eq!(f.to_string(), "208050.17");
+        let sut = new_decimal_from_f32(f);
+        assert_eq!(sut.to_string(), "208050.17");
+        assert_eq!(
+            SUT::from(f32::MAX).to_string(),
+            "340282350000000000000000000000000000000"
+        )
+    }
+
+    #[test]
     fn rounding() {
         let mut sut: SUT = "3.1".parse().unwrap();
         let mut mode: RoundingMode = RoundingMode::ToPositiveInfinity;
@@ -1051,5 +1103,17 @@ mod uniffi_tests {
             decimal_round(&sut, 3, mode).unwrap(),
             "2.46".parse::<SUT>().unwrap()
         );
+    }
+
+    #[test]
+    fn abs() {
+        let sut = -SUT::one();
+        assert_eq!(decimal_abs(&sut), SUT::one());
+    }
+
+    #[test]
+    fn clamped() {
+        assert_eq!(decimal_clamped_to_zero(&-SUT::one()), SUT::zero());
+        assert_eq!(decimal_clamped_to_zero(&SUT::one()), SUT::one());
     }
 }

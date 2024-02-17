@@ -1,17 +1,5 @@
 extension Decimal192: Sendable {}
 
-extension Decimal192 {
-	public init(_ string: String) throws {
-		self = try newDecimalFromString(string: string)
-	}
-}
-
-extension Decimal192: CustomStringConvertible {
-	public var description: String {
-		decimalToString(decimal: self)
-	}
-}
-
 extension Decimal192: ExpressibleByStringLiteral {
 	public init(stringLiteral string: String) {
 		try! self.init(string)
@@ -23,16 +11,7 @@ extension Decimal192: ExpressibleByIntegerLiteral {
 	}
 }
 
-extension Decimal192: ExpressibleByFloatLiteral {
-	public init(floatLiteral value: Double) {
-		let formatter = NumberFormatter()
-		formatter.numberStyle = .decimal
-		formatter.decimalSeparator = "."  // Sargon ALWAYS uses "."
-		formatter.maximumFractionDigits = 18
-		let string = formatter.string(from: NSNumber(value: value))!
-		try! self.init(string)
-	}
-}
+
 extension Decimal192: AdditiveArithmetic {
 	public static var zero: Self {
 		newDecimalFromU64(value: 0)
@@ -41,11 +20,11 @@ extension Decimal192: AdditiveArithmetic {
 		decimalAdd(lhs: lhs, rhs: rhs)
 	}
 	public static func - (lhs: Self, rhs: Self) -> Self {
-		decimalSub(lhs, rhs)
+		decimalSub(lhs: lhs, rhs: rhs)
 	}
 }
 extension Decimal192: SignedNumeric {
-	public static func - (operand: Self) -> Self {
+	public prefix static func - (operand: Self) -> Self {
 		decimalNeg(decimal: operand)
 	}
 }
@@ -53,7 +32,7 @@ extension Decimal192: Numeric {
 	public typealias Magnitude = Self
 
 	public var magnitude: Magnitude {
-		decimalAbs(self)
+		decimalAbs(decimal: self)
 	}
 
 	public static func * (lhs: Self, rhs: Self) -> Self {
