@@ -1,9 +1,17 @@
 [all]
 exclude-files = [
     "tests/*",
+    "src/wrapped_radix_engine_toolkit/dummy_types.rs",
+    "example/*",
+    "target/*",
+    "apple/*",
+    ".swiftpm/*",
+    "scripts/*",
+    ".build/*",
+    "Package.swift",
 ]
 verbose = false
 all-features = true
-timeout = "1800s"
+timeout = "5m"
+skip-clean = true
 out = ["Xml"]
-force-clean = false

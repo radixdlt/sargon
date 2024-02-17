@@ -8,12 +8,12 @@ impl crate::UniffiCustomTypeConverter for InnerDecimal {
 
     #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
     fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
-        Self::try_from(val).map_err(|e| e.into())
+        val.parse::<Self>().map_err(|e| e.into())
     }
 
     #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
     fn from_custom(obj: Self) -> Self::Builtin {
-        obj.into()
+        obj.to_string()
     }
 }
 
@@ -24,20 +24,25 @@ impl crate::UniffiCustomTypeConverter for InnerDecimal {
 /// is not exported as a `String` in FFI land (Swift/Kotlin). The current
 /// design ensure that `Decimal` is converted into a Swift `struct` / Kotlin
 /// `data class` that **has** a `inner: String`
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    derive_more::Display,
+)]
 pub struct InnerDecimal(pub(crate) ScryptoDecimal192);
-impl TryFrom<String> for InnerDecimal {
-    type Error = crate::CommonError;
+impl FromStr for InnerDecimal {
+    type Err = crate::CommonError;
 
-    fn try_from(value: String) -> Result<Self> {
-        ScryptoDecimal192::from_str(&value)
+    fn from_str(s: &str) -> Result<Self> {
+        ScryptoDecimal192::from_str(&s)
             .map(InnerDecimal)
             .map_err(|_| CommonError::DecimalError)
-    }
-}
-impl From<InnerDecimal> for String {
-    fn from(value: InnerDecimal) -> Self {
-        value.0.to_string()
     }
 }
 
@@ -147,6 +152,14 @@ impl Decimal {
         Self::from_native(ScryptoDecimal192::zero())
     }
 
+    pub fn min() -> Self {
+        Self::from_native(ScryptoDecimal192::MIN)
+    }
+
+    pub fn max() -> Self {
+        Self::from_native(ScryptoDecimal192::MAX)
+    }
+
     pub fn one() -> Self {
         Self::from_native(ScryptoDecimal192::one())
     }
@@ -199,6 +212,14 @@ impl Neg for Decimal {
 }
 
 impl Decimal {
+    /// `abs(self)`
+    /// Panics if Self is Self::MIN.
+    pub fn abs(self) -> Self {
+        self.native().checked_abs().expect("Expected clients of Sargon to not use so large negative numbers (Self::MIN).").into()
+    }
+}
+
+impl Decimal {
     delegate! {
         to self.native() {
 
@@ -214,37 +235,6 @@ impl Decimal {
     }
 }
 
-/// Tries to creates a new `Decimal` from a String, throws a `CommonError`
-/// if the `string` was not a valid Decimal.
-#[uniffi::export]
-pub fn new_decimal_from_string(string: String) -> Result<Decimal> {
-    Decimal::new(string)
-}
-
-/// Creates a new `Decimal` from a u32 integer.
-#[uniffi::export]
-pub fn new_decimal_from_u32(value: u32) -> Decimal {
-    value.into()
-}
-
-/// Creates a new `Decimal` from a u64 integer.
-#[uniffi::export]
-pub fn new_decimal_from_u64(value: u64) -> Decimal {
-    value.into()
-}
-
-/// Creates a new `Decimal` from a i32 integer.
-#[uniffi::export]
-pub fn new_decimal_from_i32(value: i32) -> Decimal {
-    value.into()
-}
-
-/// Creates a new `Decimal` from a i64 integer.
-#[uniffi::export]
-pub fn new_decimal_from_i64(value: i64) -> Decimal {
-    value.into()
-}
-
 impl Decimal {
     pub fn checked_powi(&self, exp: i64) -> Option<Self> {
         self.native().checked_powi(exp).map(|n| n.into())
@@ -256,90 +246,6 @@ impl Decimal {
             .checked_powi(exponent as i64)
             .expect("Too large exponent, 10^39 is max.")
     }
-}
-
-/// Creates the Decimal `10^exponent`
-#[uniffi::export]
-pub fn new_decimal_exponent(exponent: u8) -> Decimal {
-    Decimal::pow(exponent)
-}
-
-/// `decimal.to_string()`
-#[uniffi::export]
-pub fn decimal_to_string(decimal: &Decimal) -> String {
-    decimal.to_string()
-}
-
-/// `lhs < rhs`
-#[uniffi::export]
-pub fn decimal_less_than(lhs: &Decimal, rhs: &Decimal) -> bool {
-    lhs < rhs
-}
-
-/// `lhs <= rhs`
-#[uniffi::export]
-pub fn decimal_less_than_or_equal(lhs: &Decimal, rhs: &Decimal) -> bool {
-    lhs <= rhs
-}
-
-/// `lhs > rhs`
-#[uniffi::export]
-pub fn decimal_greater_than(lhs: &Decimal, rhs: &Decimal) -> bool {
-    lhs > rhs
-}
-
-/// `lhs >= rhs`
-#[uniffi::export]
-pub fn decimal_greater_than_or_equal(lhs: &Decimal, rhs: &Decimal) -> bool {
-    lhs >= rhs
-}
-
-/// Whether this decimal is zero.
-#[uniffi::export]
-pub fn decimal_is_zero(decimal: &Decimal) -> bool {
-    decimal.is_zero()
-}
-
-/// Whether this decimal is positive.
-#[uniffi::export]
-pub fn decimal_is_positive(decimal: &Decimal) -> bool {
-    decimal.is_positive()
-}
-
-/// Whether this decimal is negative.
-#[uniffi::export]
-pub fn decimal_is_negative(decimal: &Decimal) -> bool {
-    decimal.is_negative()
-}
-
-/// `lhs + rhs``
-#[uniffi::export]
-pub fn decimal_add(lhs: Decimal, rhs: Decimal) -> Decimal {
-    lhs + rhs
-}
-
-/// `lhs - rhs``
-#[uniffi::export]
-pub fn decimal_sub(lhs: Decimal, rhs: Decimal) -> Decimal {
-    lhs - rhs
-}
-
-/// `lhs * rhs``
-#[uniffi::export]
-pub fn decimal_mul(lhs: Decimal, rhs: Decimal) -> Decimal {
-    lhs * rhs
-}
-
-/// `lhs / rhs``
-#[uniffi::export]
-pub fn decimal_div(lhs: Decimal, rhs: Decimal) -> Decimal {
-    lhs / rhs
-}
-
-/// Negates the `decimal`
-#[uniffi::export]
-pub fn decimal_neg(decimal: &Decimal) -> Decimal {
-    decimal.neg()
 }
 
 impl TryInto<Decimal192> for &str {
@@ -360,9 +266,167 @@ impl TryFrom<&[u8]> for Decimal192 {
     }
 }
 
+/// Tries to creates a new `Decimal192` from a String, throws a `CommonError`
+/// if the `string` was not a valid Decimal192.
+#[uniffi::export]
+pub fn new_decimal_from_string(string: String) -> Result<Decimal192> {
+    Decimal192::new(string)
+}
+
+/// Creates a new `Decimal192` from a u32 integer.
+#[uniffi::export]
+pub fn new_decimal_from_u32(value: u32) -> Decimal192 {
+    value.into()
+}
+
+/// Creates a new `Decimal192` from a u64 integer.
+#[uniffi::export]
+pub fn new_decimal_from_u64(value: u64) -> Decimal192 {
+    value.into()
+}
+
+/// Creates a new `Decimal192` from a i32 integer.
+#[uniffi::export]
+pub fn new_decimal_from_i32(value: i32) -> Decimal192 {
+    value.into()
+}
+
+/// Creates a new `Decimal192` from a i64 integer.
+#[uniffi::export]
+pub fn new_decimal_from_i64(value: i64) -> Decimal192 {
+    value.into()
+}
+
+/// The minimum possible value of `Decimal192`, being:
+/// `-3138550867693340381917894711603833208051.177722232017256448`
+#[uniffi::export]
+pub fn decimal_min() -> Decimal192 {
+    Decimal192::min()
+}
+
+/// The maximum possible value of `Decimal192`, being:
+/// `3138550867693340381917894711603833208051.177722232017256447`
+#[uniffi::export]
+pub fn decimal_max() -> Decimal192 {
+    Decimal192::max()
+}
+
+/// Creates the Decimal192 `10^exponent`
+#[uniffi::export]
+pub fn new_decimal_exponent(exponent: u8) -> Decimal192 {
+    Decimal192::pow(exponent)
+}
+
+/// `decimal.to_string()`
+#[uniffi::export]
+pub fn decimal_to_string(decimal: &Decimal192) -> String {
+    decimal.to_string()
+}
+
+/// `lhs < rhs`
+#[uniffi::export]
+pub fn decimal_less_than(lhs: &Decimal192, rhs: &Decimal192) -> bool {
+    lhs < rhs
+}
+
+/// `lhs <= rhs`
+#[uniffi::export]
+pub fn decimal_less_than_or_equal(lhs: &Decimal192, rhs: &Decimal192) -> bool {
+    lhs <= rhs
+}
+
+/// `lhs > rhs`
+#[uniffi::export]
+pub fn decimal_greater_than(lhs: &Decimal192, rhs: &Decimal192) -> bool {
+    lhs > rhs
+}
+
+/// `lhs >= rhs`
+#[uniffi::export]
+pub fn decimal_greater_than_or_equal(
+    lhs: &Decimal192,
+    rhs: &Decimal192,
+) -> bool {
+    lhs >= rhs
+}
+
+/// Whether this decimal is zero.
+#[uniffi::export]
+pub fn decimal_is_zero(decimal: &Decimal192) -> bool {
+    decimal.is_zero()
+}
+
+/// Whether this decimal is positive.
+#[uniffi::export]
+pub fn decimal_is_positive(decimal: &Decimal192) -> bool {
+    decimal.is_positive()
+}
+
+/// Whether this decimal is negative.
+#[uniffi::export]
+pub fn decimal_is_negative(decimal: &Decimal192) -> bool {
+    decimal.is_negative()
+}
+
+/// `lhs + rhs``
+#[uniffi::export]
+pub fn decimal_add(lhs: Decimal192, rhs: Decimal192) -> Decimal192 {
+    lhs + rhs
+}
+
+/// `lhs - rhs``
+#[uniffi::export]
+pub fn decimal_sub(lhs: Decimal192, rhs: Decimal192) -> Decimal192 {
+    lhs - rhs
+}
+
+/// `lhs * rhs``
+#[uniffi::export]
+pub fn decimal_mul(lhs: Decimal192, rhs: Decimal192) -> Decimal192 {
+    lhs * rhs
+}
+
+/// `lhs / rhs``
+#[uniffi::export]
+pub fn decimal_div(lhs: Decimal192, rhs: Decimal192) -> Decimal192 {
+    lhs / rhs
+}
+
+/// Negates the `decimal`
+#[uniffi::export]
+pub fn decimal_neg(decimal: &Decimal192) -> Decimal192 {
+    decimal.neg()
+}
+
+/// Returns `decimal.abs()`, panics if `decimal` is `Decimal192::MIN`
+#[uniffi::export]
+pub fn decimal_abs(decimal: &Decimal192) -> Decimal192 {
+    decimal.abs()
+}
+
 #[cfg(test)]
-mod tests {
+mod test_inner {
+    use super::*;
     use crate::prelude::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = InnerDecimal;
+
+    #[test]
+    fn string_roundtrip() {
+        let s = "3.1415";
+        let sut: SUT = s.parse().unwrap();
+        assert_eq!(sut.to_string(), s.to_owned());
+    }
+}
+
+#[cfg(test)]
+mod test_decimal {
+    use super::*;
+    use crate::prelude::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = Decimal;
 
     #[test]
     fn eq() {
@@ -370,6 +434,14 @@ mod tests {
         assert_eq!(Decimal::one(), Decimal::one());
         assert_eq!(Decimal::zero(), "0".parse().unwrap());
         assert_eq!(Decimal::one(), "1".parse().unwrap());
+    }
+
+    #[test]
+    fn scrypto_decimal_roundtrip() {
+        let scrypto: ScryptoDecimal192 = "2.718281828".parse().unwrap();
+        let sut: SUT = scrypto.into();
+        let scrypto_again: ScryptoDecimal192 = sut.into();
+        assert_eq!(scrypto, scrypto_again);
     }
 
     #[test]
@@ -522,11 +594,33 @@ mod tests {
         let d: Decimal = s.parse().unwrap();
         assert_eq!(d.to_string(), s);
     }
+
+    #[test]
+    fn arithmetic() {
+        assert_eq!(
+            SUT::two() + SUT::three(),
+            SUT::two() * SUT::three() - SUT::one()
+        );
+    }
+
+    #[test]
+    fn neg() {
+        assert_eq!(SUT::two() - SUT::three(), -SUT::one());
+    }
+
+    #[test]
+    fn from_negative_string() {
+        let sut: SUT = "-3.2".parse().unwrap();
+        assert_eq!(sut * sut, "10.24".parse().unwrap());
+    }
 }
 
 #[cfg(test)]
 mod uniffi_tests {
     use crate::prelude::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = Decimal192;
 
     #[test]
     fn to_string() {
@@ -675,6 +769,14 @@ mod uniffi_tests {
     }
 
     #[test]
+    #[should_panic(
+        expected = "Expected clients of Sargon to not use so large negative numbers (Self::MIN)."
+    )]
+    fn decimal_min_abs() {
+        _ = SUT::min().abs()
+    }
+
+    #[test]
     fn compare() {
         let zero = new_decimal_from_i32(0);
         let one = new_decimal_from_i64(1);
@@ -700,5 +802,47 @@ mod uniffi_tests {
         assert_eq!(decimal_greater_than(&two, &one), true);
         assert_eq!(decimal_greater_than(&one, &one), false);
         assert_eq!(decimal_greater_than(&one, &zero), true);
+    }
+
+    #[test]
+    fn is_zero() {
+        assert_eq!(decimal_is_zero(&SUT::zero()), true);
+        assert_eq!(decimal_is_zero(&SUT::one()), false);
+    }
+
+    #[test]
+    fn is_positive() {
+        // `0` is neither positive nor negative
+        // https://en.wikipedia.org/wiki/0
+        assert_eq!(decimal_is_positive(&SUT::zero()), false);
+
+        assert_eq!(decimal_is_positive(&SUT::one()), true);
+        assert_eq!(decimal_is_positive(&decimal_neg(&SUT::one())), false);
+    }
+
+    #[test]
+    fn is_negative() {
+        // `0` is neither positive nor negative
+        // https://en.wikipedia.org/wiki/0
+        assert_eq!(decimal_is_negative(&SUT::zero()), false);
+
+        assert_eq!(decimal_is_negative(&SUT::one()), false);
+        assert_eq!(decimal_is_negative(&decimal_neg(&SUT::one())), true);
+    }
+
+    #[test]
+    fn min() {
+        assert_eq!(
+            decimal_min().to_string(),
+            "-3138550867693340381917894711603833208051.177722232017256448"
+        );
+    }
+
+    #[test]
+    fn max() {
+        assert_eq!(
+            decimal_max().to_string(),
+            "3138550867693340381917894711603833208051.177722232017256447"
+        );
     }
 }

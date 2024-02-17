@@ -62,6 +62,10 @@ impl Wallet {
 
 #[uniffi::export]
 impl Wallet {
+    pub fn marco(&self) -> String {
+        "polo".to_owned()
+    }
+
     /// Tries to load a `MnemonicWithPassphrase` from secure storage
     /// by `factor_source_id`.
     pub fn mnemonic_with_passphrase_of_device_factor_source_by_factor_source_id(

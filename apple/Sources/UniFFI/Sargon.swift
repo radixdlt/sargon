@@ -350,6 +350,19 @@ private struct FfiConverterUInt32: FfiConverterPrimitive {
     }
 }
 
+private struct FfiConverterInt32: FfiConverterPrimitive {
+    typealias FfiType = Int32
+    typealias SwiftType = Int32
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Int32 {
+        return try lift(readInt(&buf))
+    }
+
+    public static func write(_ value: Int32, into buf: inout [UInt8]) {
+        writeInt(&buf, lower(value))
+    }
+}
+
 private struct FfiConverterUInt64: FfiConverterPrimitive {
     typealias FfiType = UInt64
     typealias SwiftType = UInt64
@@ -359,6 +372,19 @@ private struct FfiConverterUInt64: FfiConverterPrimitive {
     }
 
     public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        writeInt(&buf, lower(value))
+    }
+}
+
+private struct FfiConverterInt64: FfiConverterPrimitive {
+    typealias FfiType = Int64
+    typealias SwiftType = Int64
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Int64 {
+        return try lift(readInt(&buf))
+    }
+
+    public static func write(_ value: Int64, into buf: inout [UInt8]) {
         writeInt(&buf, lower(value))
     }
 }
@@ -746,6 +772,8 @@ public protocol WalletProtocol: AnyObject {
      */
     func mainBdfsMnemonicWithPassphrase() throws -> MnemonicWithPassphrase
 
+    func marco() -> String
+
     /**
      * Tries to load a `MnemonicWithPassphrase` from secure storage
      * by `factor_source_id`.
@@ -905,6 +933,15 @@ public class Wallet:
         )
     }
 
+    public func marco() -> String {
+        return try! FfiConverterString.lift(
+            try!
+                rustCall {
+                    uniffi_sargon_fn_method_wallet_marco(self.uniffiClonePointer(), $0)
+                }
+        )
+    }
+
     /**
      * Tries to load a `MnemonicWithPassphrase` from secure storage
      * by `factor_source_id`.
@@ -979,6 +1016,37 @@ public func FfiConverterTypeWallet_lift(_ pointer: UnsafeMutableRawPointer) thro
 
 public func FfiConverterTypeWallet_lower(_ value: Wallet) -> UnsafeMutableRawPointer {
     return FfiConverterTypeWallet.lower(value)
+}
+
+public struct AccessControllerAddress {
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init() {}
+}
+
+extension AccessControllerAddress: Equatable, Hashable {
+    public static func == (_: AccessControllerAddress, _: AccessControllerAddress) -> Bool {
+        return true
+    }
+
+    public func hash(into _: inout Hasher) {}
+}
+
+public struct FfiConverterTypeAccessControllerAddress: FfiConverterRustBuffer {
+    public static func read(from _: inout (data: Data, offset: Data.Index)) throws -> AccessControllerAddress {
+        return
+            AccessControllerAddress()
+    }
+
+    public static func write(_: AccessControllerAddress, into _: inout [UInt8]) {}
+}
+
+public func FfiConverterTypeAccessControllerAddress_lift(_ buf: RustBuffer) throws -> AccessControllerAddress {
+    return try FfiConverterTypeAccessControllerAddress.lift(buf)
+}
+
+public func FfiConverterTypeAccessControllerAddress_lower(_ value: AccessControllerAddress) -> RustBuffer {
+    return FfiConverterTypeAccessControllerAddress.lower(value)
 }
 
 /**
@@ -2104,6 +2172,37 @@ public func FfiConverterTypeCollectionOfPhoneNumbers_lower(_ value: CollectionOf
     return FfiConverterTypeCollectionOfPhoneNumbers.lower(value)
 }
 
+public struct ComponentAddress {
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init() {}
+}
+
+extension ComponentAddress: Equatable, Hashable {
+    public static func == (_: ComponentAddress, _: ComponentAddress) -> Bool {
+        return true
+    }
+
+    public func hash(into _: inout Hasher) {}
+}
+
+public struct FfiConverterTypeComponentAddress: FfiConverterRustBuffer {
+    public static func read(from _: inout (data: Data, offset: Data.Index)) throws -> ComponentAddress {
+        return
+            ComponentAddress()
+    }
+
+    public static func write(_: ComponentAddress, into _: inout [UInt8]) {}
+}
+
+public func FfiConverterTypeComponentAddress_lift(_ buf: RustBuffer) throws -> ComponentAddress {
+    return try FfiConverterTypeComponentAddress.lift(buf)
+}
+
+public func FfiConverterTypeComponentAddress_lower(_ value: ComponentAddress) -> RustBuffer {
+    return FfiConverterTypeComponentAddress.lower(value)
+}
+
 /**
  * A hint describing the contents of a Profile, acting as a
  * summary of a Profile used by a ProfileSnapshot Header.
@@ -2224,28 +2323,57 @@ public func FfiConverterTypeContentHint_lower(_ value: ContentHint) -> RustBuffe
     return FfiConverterTypeContentHint.lower(value)
 }
 
+/**
+ * `Decimal192` represents a 192 bit representation of a fixed-scale decimal number.
+ *
+ * The finite set of values are of the form `m / 10^18`, where `m` is
+ * an integer such that `-2^(192 - 1) <= m < 2^(192 - 1)`.
+ *
+ * Fractional part: ~60 bits/18 digits
+ * Integer part   : 132 bits /40 digits
+ * Max            :  3138550867693340381917894711603833208051.177722232017256447
+ * Min            : -3138550867693340381917894711603833208051.177722232017256448
+ *
+ * Unless otherwise specified, all operations will panic if underflow/overflow.
+ *
+ * Powering it is the [Scrypto Decimal type, see docs][scrypto].
+ *
+ * Note: This type cannot be called `Decimal`, since it results in naming collision
+ * in the Swift land (clash with `Foundation.Decimal`) instead we have created a
+ * type alias `Decimal = Decimal192` which we use in Rust land.
+ *
+ * [scrypto]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/math/decimal.rs#L42
+ */
 public struct Decimal192 {
-    public var base10String: String
+    /**
+     * @Kotlin / Swift developer: Do not use this property/field. Instead use all the provided
+     * methods on the `Decimal` type.
+     */
+    public var inner: InnerDecimal
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
     public init(
-        base10String: String)
-    {
-        self.base10String = base10String
+        /**
+         * @Kotlin / Swift developer: Do not use this property/field. Instead use all the provided
+         * methods on the `Decimal` type.
+         */
+        inner: InnerDecimal
+    ) {
+        self.inner = inner
     }
 }
 
 extension Decimal192: Equatable, Hashable {
     public static func == (lhs: Decimal192, rhs: Decimal192) -> Bool {
-        if lhs.base10String != rhs.base10String {
+        if lhs.inner != rhs.inner {
             return false
         }
         return true
     }
 
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(base10String)
+        hasher.combine(inner)
     }
 }
 
@@ -2253,12 +2381,12 @@ public struct FfiConverterTypeDecimal192: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Decimal192 {
         return
             try Decimal192(
-                base10String: FfiConverterString.read(from: &buf)
+                inner: FfiConverterTypeInnerDecimal.read(from: &buf)
             )
     }
 
     public static func write(_ value: Decimal192, into buf: inout [UInt8]) {
-        FfiConverterString.write(value.base10String, into: &buf)
+        FfiConverterTypeInnerDecimal.write(value.inner, into: &buf)
     }
 }
 
@@ -4436,6 +4564,37 @@ public func FfiConverterTypeP2PLink_lower(_ value: P2pLink) -> RustBuffer {
     return FfiConverterTypeP2PLink.lower(value)
 }
 
+public struct PackageAddress {
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init() {}
+}
+
+extension PackageAddress: Equatable, Hashable {
+    public static func == (_: PackageAddress, _: PackageAddress) -> Bool {
+        return true
+    }
+
+    public func hash(into _: inout Hasher) {}
+}
+
+public struct FfiConverterTypePackageAddress: FfiConverterRustBuffer {
+    public static func read(from _: inout (data: Data, offset: Data.Index)) throws -> PackageAddress {
+        return
+            PackageAddress()
+    }
+
+    public static func write(_: PackageAddress, into _: inout [UInt8]) {}
+}
+
+public func FfiConverterTypePackageAddress_lift(_ buf: RustBuffer) throws -> PackageAddress {
+    return try FfiConverterTypePackageAddress.lift(buf)
+}
+
+public func FfiConverterTypePackageAddress_lower(_ value: PackageAddress) -> RustBuffer {
+    return FfiConverterTypePackageAddress.lower(value)
+}
+
 /**
  * A Persona is an identity a user choses to login to a dApp with, using
  * RadixConnect - Radix decentralized login solution. A persona is very
@@ -5362,6 +5521,37 @@ public func FfiConverterTypeProfileNetwork_lower(_ value: ProfileNetwork) -> Rus
     return FfiConverterTypeProfileNetwork.lower(value)
 }
 
+public struct RetDecimal {
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init() {}
+}
+
+extension RetDecimal: Equatable, Hashable {
+    public static func == (_: RetDecimal, _: RetDecimal) -> Bool {
+        return true
+    }
+
+    public func hash(into _: inout Hasher) {}
+}
+
+public struct FfiConverterTypeRETDecimal: FfiConverterRustBuffer {
+    public static func read(from _: inout (data: Data, offset: Data.Index)) throws -> RetDecimal {
+        return
+            RetDecimal()
+    }
+
+    public static func write(_: RetDecimal, into _: inout [UInt8]) {}
+}
+
+public func FfiConverterTypeRETDecimal_lift(_ buf: RustBuffer) throws -> RetDecimal {
+    return try FfiConverterTypeRETDecimal.lift(buf)
+}
+
+public func FfiConverterTypeRETDecimal_lower(_ value: RetDecimal) -> RustBuffer {
+    return FfiConverterTypeRETDecimal.lower(value)
+}
+
 /**
  * The hash of the connection password is used to connect to the Radix Connect Signaling Server,
  * over web sockets. The actual `ConnectionPassword` is used to encrypt all messages sent via
@@ -5531,6 +5721,37 @@ public func FfiConverterTypeResourceAddress_lift(_ buf: RustBuffer) throws -> Re
 
 public func FfiConverterTypeResourceAddress_lower(_ value: ResourceAddress) -> RustBuffer {
     return FfiConverterTypeResourceAddress.lower(value)
+}
+
+public struct ResourcePoolAddress {
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init() {}
+}
+
+extension ResourcePoolAddress: Equatable, Hashable {
+    public static func == (_: ResourcePoolAddress, _: ResourcePoolAddress) -> Bool {
+        return true
+    }
+
+    public func hash(into _: inout Hasher) {}
+}
+
+public struct FfiConverterTypeResourcePoolAddress: FfiConverterRustBuffer {
+    public static func read(from _: inout (data: Data, offset: Data.Index)) throws -> ResourcePoolAddress {
+        return
+            ResourcePoolAddress()
+    }
+
+    public static func write(_: ResourcePoolAddress, into _: inout [UInt8]) {}
+}
+
+public func FfiConverterTypeResourcePoolAddress_lift(_ buf: RustBuffer) throws -> ResourcePoolAddress {
+    return try FfiConverterTypeResourcePoolAddress.lift(buf)
+}
+
+public func FfiConverterTypeResourcePoolAddress_lower(_ value: ResourcePoolAddress) -> RustBuffer {
+    return FfiConverterTypeResourcePoolAddress.lower(value)
 }
 
 /**
@@ -6144,6 +6365,68 @@ public func FfiConverterTypeUnsecuredEntityControl_lift(_ buf: RustBuffer) throw
 
 public func FfiConverterTypeUnsecuredEntityControl_lower(_ value: UnsecuredEntityControl) -> RustBuffer {
     return FfiConverterTypeUnsecuredEntityControl.lower(value)
+}
+
+public struct ValidatorAddress {
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init() {}
+}
+
+extension ValidatorAddress: Equatable, Hashable {
+    public static func == (_: ValidatorAddress, _: ValidatorAddress) -> Bool {
+        return true
+    }
+
+    public func hash(into _: inout Hasher) {}
+}
+
+public struct FfiConverterTypeValidatorAddress: FfiConverterRustBuffer {
+    public static func read(from _: inout (data: Data, offset: Data.Index)) throws -> ValidatorAddress {
+        return
+            ValidatorAddress()
+    }
+
+    public static func write(_: ValidatorAddress, into _: inout [UInt8]) {}
+}
+
+public func FfiConverterTypeValidatorAddress_lift(_ buf: RustBuffer) throws -> ValidatorAddress {
+    return try FfiConverterTypeValidatorAddress.lift(buf)
+}
+
+public func FfiConverterTypeValidatorAddress_lower(_ value: ValidatorAddress) -> RustBuffer {
+    return FfiConverterTypeValidatorAddress.lower(value)
+}
+
+public struct VaultAddress {
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init() {}
+}
+
+extension VaultAddress: Equatable, Hashable {
+    public static func == (_: VaultAddress, _: VaultAddress) -> Bool {
+        return true
+    }
+
+    public func hash(into _: inout Hasher) {}
+}
+
+public struct FfiConverterTypeVaultAddress: FfiConverterRustBuffer {
+    public static func read(from _: inout (data: Data, offset: Data.Index)) throws -> VaultAddress {
+        return
+            VaultAddress()
+    }
+
+    public static func write(_: VaultAddress, into _: inout [UInt8]) {}
+}
+
+public func FfiConverterTypeVaultAddress_lift(_ buf: RustBuffer) throws -> VaultAddress {
+    return try FfiConverterTypeVaultAddress.lift(buf)
+}
+
+public func FfiConverterTypeVaultAddress_lower(_ value: VaultAddress) -> RustBuffer {
+    return FfiConverterTypeVaultAddress.lower(value)
 }
 
 // Note that we don't yet support `indirect` for enums.
@@ -9391,6 +9674,37 @@ public func FfiConverterTypeBagOfBytes_lower(_ value: BagOfBytes) -> RustBuffer 
  * Typealias from the type name used in the UDL file to the builtin type.  This
  * is needed because the UDL type name is used in function/method signatures.
  */
+public typealias InnerDecimal = String
+public struct FfiConverterTypeInnerDecimal: FfiConverter {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> InnerDecimal {
+        return try FfiConverterString.read(from: &buf)
+    }
+
+    public static func write(_ value: InnerDecimal, into buf: inout [UInt8]) {
+        return FfiConverterString.write(value, into: &buf)
+    }
+
+    public static func lift(_ value: RustBuffer) throws -> InnerDecimal {
+        return try FfiConverterString.lift(value)
+    }
+
+    public static func lower(_ value: InnerDecimal) -> RustBuffer {
+        return FfiConverterString.lower(value)
+    }
+}
+
+public func FfiConverterTypeInnerDecimal_lift(_ value: RustBuffer) throws -> InnerDecimal {
+    return try FfiConverterTypeInnerDecimal.lift(value)
+}
+
+public func FfiConverterTypeInnerDecimal_lower(_ value: InnerDecimal) -> RustBuffer {
+    return FfiConverterTypeInnerDecimal.lower(value)
+}
+
+/**
+ * Typealias from the type name used in the UDL file to the builtin type.  This
+ * is needed because the UDL type name is used in function/method signatures.
+ */
 public typealias PersonaDataEntryID = Uuid
 public struct FfiConverterTypePersonaDataEntryID: FfiConverter {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> PersonaDataEntryID {
@@ -9691,6 +10005,220 @@ public func bagOfBytesPrependDeadbeef(inFrontOf: BagOfBytes) -> BagOfBytes {
     )
 }
 
+/**
+ * Returns `decimal.abs()`, panics if `decimal` is `Decimal192::MIN`
+ */
+public func decimalAbs(decimal: Decimal192) -> Decimal192 {
+    return try! FfiConverterTypeDecimal192.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_decimal_abs(
+                FfiConverterTypeDecimal192.lower(decimal), $0
+            )
+        }
+    )
+}
+
+/**
+ * `lhs + rhs``
+ */
+public func decimalAdd(lhs: Decimal192, rhs: Decimal192) -> Decimal192 {
+    return try! FfiConverterTypeDecimal192.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_decimal_add(
+                FfiConverterTypeDecimal192.lower(lhs),
+                FfiConverterTypeDecimal192.lower(rhs), $0
+            )
+        }
+    )
+}
+
+/**
+ * `lhs / rhs``
+ */
+public func decimalDiv(lhs: Decimal192, rhs: Decimal192) -> Decimal192 {
+    return try! FfiConverterTypeDecimal192.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_decimal_div(
+                FfiConverterTypeDecimal192.lower(lhs),
+                FfiConverterTypeDecimal192.lower(rhs), $0
+            )
+        }
+    )
+}
+
+/**
+ * `lhs > rhs`
+ */
+public func decimalGreaterThan(lhs: Decimal192, rhs: Decimal192) -> Bool {
+    return try! FfiConverterBool.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_decimal_greater_than(
+                FfiConverterTypeDecimal192.lower(lhs),
+                FfiConverterTypeDecimal192.lower(rhs), $0
+            )
+        }
+    )
+}
+
+/**
+ * `lhs >= rhs`
+ */
+public func decimalGreaterThanOrEqual(lhs: Decimal192, rhs: Decimal192) -> Bool {
+    return try! FfiConverterBool.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_decimal_greater_than_or_equal(
+                FfiConverterTypeDecimal192.lower(lhs),
+                FfiConverterTypeDecimal192.lower(rhs), $0
+            )
+        }
+    )
+}
+
+/**
+ * Whether this decimal is negative.
+ */
+public func decimalIsNegative(decimal: Decimal192) -> Bool {
+    return try! FfiConverterBool.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_decimal_is_negative(
+                FfiConverterTypeDecimal192.lower(decimal), $0
+            )
+        }
+    )
+}
+
+/**
+ * Whether this decimal is positive.
+ */
+public func decimalIsPositive(decimal: Decimal192) -> Bool {
+    return try! FfiConverterBool.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_decimal_is_positive(
+                FfiConverterTypeDecimal192.lower(decimal), $0
+            )
+        }
+    )
+}
+
+/**
+ * Whether this decimal is zero.
+ */
+public func decimalIsZero(decimal: Decimal192) -> Bool {
+    return try! FfiConverterBool.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_decimal_is_zero(
+                FfiConverterTypeDecimal192.lower(decimal), $0
+            )
+        }
+    )
+}
+
+/**
+ * `lhs < rhs`
+ */
+public func decimalLessThan(lhs: Decimal192, rhs: Decimal192) -> Bool {
+    return try! FfiConverterBool.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_decimal_less_than(
+                FfiConverterTypeDecimal192.lower(lhs),
+                FfiConverterTypeDecimal192.lower(rhs), $0
+            )
+        }
+    )
+}
+
+/**
+ * `lhs <= rhs`
+ */
+public func decimalLessThanOrEqual(lhs: Decimal192, rhs: Decimal192) -> Bool {
+    return try! FfiConverterBool.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_decimal_less_than_or_equal(
+                FfiConverterTypeDecimal192.lower(lhs),
+                FfiConverterTypeDecimal192.lower(rhs), $0
+            )
+        }
+    )
+}
+
+/**
+ * The maximum possible value of `Decimal192`, being:
+ * `3138550867693340381917894711603833208051.177722232017256447`
+ */
+public func decimalMax() -> Decimal192 {
+    return try! FfiConverterTypeDecimal192.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_decimal_max($0)
+        }
+    )
+}
+
+/**
+ * The minimum possible value of `Decimal192`, being:
+ * `-3138550867693340381917894711603833208051.177722232017256448`
+ */
+public func decimalMin() -> Decimal192 {
+    return try! FfiConverterTypeDecimal192.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_decimal_min($0)
+        }
+    )
+}
+
+/**
+ * `lhs * rhs``
+ */
+public func decimalMul(lhs: Decimal192, rhs: Decimal192) -> Decimal192 {
+    return try! FfiConverterTypeDecimal192.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_decimal_mul(
+                FfiConverterTypeDecimal192.lower(lhs),
+                FfiConverterTypeDecimal192.lower(rhs), $0
+            )
+        }
+    )
+}
+
+/**
+ * Negates the `decimal`
+ */
+public func decimalNeg(decimal: Decimal192) -> Decimal192 {
+    return try! FfiConverterTypeDecimal192.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_decimal_neg(
+                FfiConverterTypeDecimal192.lower(decimal), $0
+            )
+        }
+    )
+}
+
+/**
+ * `lhs - rhs``
+ */
+public func decimalSub(lhs: Decimal192, rhs: Decimal192) -> Decimal192 {
+    return try! FfiConverterTypeDecimal192.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_decimal_sub(
+                FfiConverterTypeDecimal192.lower(lhs),
+                FfiConverterTypeDecimal192.lower(rhs), $0
+            )
+        }
+    )
+}
+
+/**
+ * `decimal.to_string()`
+ */
+public func decimalToString(decimal: Decimal192) -> String {
+    return try! FfiConverterString.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_decimal_to_string(
+                FfiConverterTypeDecimal192.lower(decimal), $0
+            )
+        }
+    )
+}
+
 public func ed25519PublicKeyToBytes(publicKey: Ed25519PublicKey) -> Data {
     return try! FfiConverterData.lift(
         try! rustCall {
@@ -9861,6 +10389,85 @@ public func newBagOfBytesPlaceholderFade() -> BagOfBytes {
     return try! FfiConverterTypeBagOfBytes.lift(
         try! rustCall {
             uniffi_sargon_fn_func_new_bag_of_bytes_placeholder_fade($0)
+        }
+    )
+}
+
+/**
+ * Creates the Decimal192 `10^exponent`
+ */
+public func newDecimalExponent(exponent: UInt8) -> Decimal192 {
+    return try! FfiConverterTypeDecimal192.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_decimal_exponent(
+                FfiConverterUInt8.lower(exponent), $0
+            )
+        }
+    )
+}
+
+/**
+ * Creates a new `Decimal192` from a i32 integer.
+ */
+public func newDecimalFromI32(value: Int32) -> Decimal192 {
+    return try! FfiConverterTypeDecimal192.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_decimal_from_i32(
+                FfiConverterInt32.lower(value), $0
+            )
+        }
+    )
+}
+
+/**
+ * Creates a new `Decimal192` from a i64 integer.
+ */
+public func newDecimalFromI64(value: Int64) -> Decimal192 {
+    return try! FfiConverterTypeDecimal192.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_decimal_from_i64(
+                FfiConverterInt64.lower(value), $0
+            )
+        }
+    )
+}
+
+/**
+ * Tries to creates a new `Decimal192` from a String, throws a `CommonError`
+ * if the `string` was not a valid Decimal192.
+ */
+public func newDecimalFromString(string: String) throws -> Decimal192 {
+    return try FfiConverterTypeDecimal192.lift(
+        rustCallWithError(FfiConverterTypeCommonError.lift) {
+            uniffi_sargon_fn_func_new_decimal_from_string(
+                FfiConverterString.lower(string), $0
+            )
+        }
+    )
+}
+
+/**
+ * Creates a new `Decimal192` from a u32 integer.
+ */
+public func newDecimalFromU32(value: UInt32) -> Decimal192 {
+    return try! FfiConverterTypeDecimal192.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_decimal_from_u32(
+                FfiConverterUInt32.lower(value), $0
+            )
+        }
+    )
+}
+
+/**
+ * Creates a new `Decimal192` from a u64 integer.
+ */
+public func newDecimalFromU64(value: UInt64) -> Decimal192 {
+    return try! FfiConverterTypeDecimal192.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_decimal_from_u64(
+                FfiConverterUInt64.lower(value), $0
+            )
         }
     )
 }
@@ -10176,6 +10783,54 @@ private var initializationResult: InitializationResult {
     if uniffi_sargon_checksum_func_bag_of_bytes_prepend_deadbeef() != 6895 {
         return InitializationResult.apiChecksumMismatch
     }
+    if uniffi_sargon_checksum_func_decimal_abs() != 44067 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_decimal_add() != 697 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_decimal_div() != 19189 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_decimal_greater_than() != 48331 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_decimal_greater_than_or_equal() != 2033 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_decimal_is_negative() != 64178 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_decimal_is_positive() != 6024 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_decimal_is_zero() != 49608 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_decimal_less_than() != 56621 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_decimal_less_than_or_equal() != 59719 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_decimal_max() != 7974 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_decimal_min() != 12755 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_decimal_mul() != 26895 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_decimal_neg() != 41456 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_decimal_sub() != 35224 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_decimal_to_string() != 38303 {
+        return InitializationResult.apiChecksumMismatch
+    }
     if uniffi_sargon_checksum_func_ed25519_public_key_to_bytes() != 22077 {
         return InitializationResult.apiChecksumMismatch
     }
@@ -10231,6 +10886,24 @@ private var initializationResult: InitializationResult {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_sargon_checksum_func_new_bag_of_bytes_placeholder_fade() != 10852 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_new_decimal_exponent() != 14207 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_new_decimal_from_i32() != 18727 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_new_decimal_from_i64() != 60170 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_new_decimal_from_string() != 44503 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_new_decimal_from_u32() != 9150 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_new_decimal_from_u64() != 426 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_sargon_checksum_func_new_display_name() != 12714 {
@@ -10345,6 +11018,9 @@ private var initializationResult: InitializationResult {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_sargon_checksum_method_wallet_main_bdfs_mnemonic_with_passphrase() != 59906 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_method_wallet_marco() != 8520 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_sargon_checksum_method_wallet_mnemonic_with_passphrase_of_device_factor_source_by_factor_source_id() != 48090 {
