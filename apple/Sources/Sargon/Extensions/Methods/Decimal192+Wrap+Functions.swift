@@ -10,18 +10,31 @@ extension Decimal192: CustomStringConvertible {
 	}
 }
 
+extension Decimal192 {
+	public static let maxDivisibility: UInt = 18
+}
+
+extension Decimal192 {
+	public var clamped: Self {
+		isNegative() ? .zero : self
+	}
+	public func isNegative() -> Bool {
+		decimalIsNegative(decimal: self)
+	}
+}
+
 extension Decimal192: Comparable {
 	public static func > (lhs: Self, rhs: Self) -> Bool {
-		lhs.greaterThan(rhs)
+		lhs.greaterThan(other: rhs)
 	}
 	public static func < (lhs: Self, rhs: Self) -> Bool {
-		lhs.lessThan(rhs)
+		lhs.lessThan(other: rhs)
 	}
 	public static func >= (lhs: Self, rhs: Self) -> Bool {
-		lhs.greaterThanOrEqual(rhs)
+		lhs.greaterThanOrEqual(other: rhs)
 	}
 	public static func <= (lhs: Self, rhs: Self) -> Bool {
-		lhs.lessThanOrEqual(rhs)
+		lhs.lessThanOrEqual(other: rhs)
 	}
 }
 extension Decimal192 {
