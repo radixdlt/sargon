@@ -101,7 +101,9 @@ impl FromStr for NonFungibleGlobalId {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         RETNonFungibleGlobalIdInternal::from_str(s)
             .map(Self::from_internal_engine)
-            .map_err(|_| CommonError::InvalidNonFungibleGlobalID(s.to_owned()))
+            .map_err(|_| CommonError::InvalidNonFungibleGlobalID {
+                bad_value: s.to_owned(),
+            })
     }
 }
 

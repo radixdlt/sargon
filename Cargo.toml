@@ -18,6 +18,10 @@ name = "uniffi"
 [lib]
 crate-type = ["staticlib", "cdylib", "lib"]
 
+[[bin]]
+name = "uniffi-bindgen"
+path = "src/bin.rs"
+
 [dependencies]
 log = "0.4.20"
 pretty_env_logger = "0.5.0"

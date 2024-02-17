@@ -107,7 +107,7 @@ impl Decimal {
     }
 }
 
-impl FromStr for Decimal {
+impl FromStr for Decimal192 {
     type Err = crate::CommonError;
 
     fn from_str(s: &str) -> Result<Self> {
@@ -342,7 +342,7 @@ pub fn decimal_neg(decimal: &Decimal) -> Decimal {
     decimal.neg()
 }
 
-impl TryInto<Decimal> for &str {
+impl TryInto<Decimal192> for &str {
     type Error = crate::CommonError;
 
     fn try_into(self) -> Result<Decimal, Self::Error> {
@@ -350,7 +350,7 @@ impl TryInto<Decimal> for &str {
     }
 }
 
-impl TryFrom<&[u8]> for Decimal {
+impl TryFrom<&[u8]> for Decimal192 {
     type Error = crate::CommonError;
 
     fn try_from(slice: &[u8]) -> Result<Self> {
@@ -374,19 +374,19 @@ mod tests {
 
     #[test]
     fn inequality() {
-        assert_ne!(Decimal::one(), Decimal::zero());
+        assert_ne!(Decimal192::one(), Decimal192::zero());
     }
 
     #[test]
     fn is_zero() {
-        assert!(Decimal::zero().is_zero());
-        assert!(!Decimal::one().is_zero());
+        assert!(Decimal192::zero().is_zero());
+        assert!(!Decimal192::one().is_zero());
     }
 
     #[test]
     fn is_positive() {
-        assert!(!Decimal::zero().is_positive());
-        assert!(Decimal::one().is_positive());
+        assert!(!Decimal192::zero().is_positive());
+        assert!(Decimal192::one().is_positive());
     }
 
     #[test]
@@ -398,42 +398,42 @@ mod tests {
 
     #[test]
     fn not_less() {
-        assert!(Decimal::zero() >= Decimal::zero());
-        assert!(Decimal::one() >= Decimal::one());
-        assert!(Decimal::one() >= Decimal::zero());
+        assert!(Decimal192::zero() >= Decimal192::zero());
+        assert!(Decimal192::one() >= Decimal192::one());
+        assert!(Decimal192::one() >= Decimal192::zero());
     }
 
     #[test]
     fn less() {
-        assert!(Decimal::zero() < Decimal::one());
+        assert!(Decimal192::zero() < Decimal192::one());
     }
 
     #[test]
     fn leq() {
-        assert!(Decimal::zero() <= Decimal::zero());
-        assert!(Decimal::one() <= Decimal::one());
+        assert!(Decimal192::zero() <= Decimal192::zero());
+        assert!(Decimal192::one() <= Decimal192::one());
 
-        assert!(Decimal::one() > Decimal::zero());
+        assert!(Decimal192::one() > Decimal192::zero());
     }
 
     #[test]
     fn not_greater_than() {
-        assert!(Decimal::zero() <= Decimal::zero());
-        assert!(Decimal::one() <= Decimal::one());
-        assert!(Decimal::zero() <= Decimal::one());
+        assert!(Decimal192::zero() <= Decimal192::zero());
+        assert!(Decimal192::one() <= Decimal192::one());
+        assert!(Decimal192::zero() <= Decimal192::one());
     }
 
     #[test]
     fn geq() {
-        assert!(Decimal::zero() >= Decimal::zero());
-        assert!(Decimal::one() >= Decimal::one());
+        assert!(Decimal192::zero() >= Decimal192::zero());
+        assert!(Decimal192::one() >= Decimal192::one());
 
-        assert!(Decimal::zero() < Decimal::one());
+        assert!(Decimal192::zero() < Decimal192::one());
     }
 
     #[test]
     fn greater() {
-        assert!(Decimal::one() > Decimal::zero());
+        assert!(Decimal192::one() > Decimal192::zero());
     }
 
     #[test]
@@ -471,26 +471,26 @@ mod tests {
     #[test]
     fn try_from_invalid_bytes() {
         assert_eq!(
-            Decimal::try_from(generate_32_bytes().as_slice()),
+            Decimal192::try_from(generate_32_bytes().as_slice()),
             Err(CommonError::DecimalError)
         );
     }
 
     #[test]
     fn try_from_valid_bytes() {
-        assert!(Decimal::try_from(generate_bytes::<24>().as_slice()).is_ok());
+        assert!(Decimal192::try_from(generate_bytes::<24>().as_slice()).is_ok());
     }
 
     #[test]
     fn display() {
         let s = "3138550867693340381917894711603833208051.177722232017256447";
-        let a: Decimal = s.try_into().unwrap();
+        let a: Decimal192 = s.try_into().unwrap();
         assert_eq!(format!("{}", a), s);
     }
 
     #[test]
     fn json_roundtrip() {
-        let a: Decimal =
+        let a: Decimal192 =
             "3138550867693340381917894711603833208051.177722232017256447"
                 .try_into()
                 .unwrap();
@@ -510,7 +510,7 @@ mod tests {
         let n = 100;
         let set = (0..n)
             .map(|_| {
-                Decimal::try_from(generate_bytes::<24>().as_slice()).unwrap()
+                Decimal192::try_from(generate_bytes::<24>().as_slice()).unwrap()
             })
             .collect::<HashSet<_>>();
         assert_eq!(set.len(), n);

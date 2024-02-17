@@ -166,7 +166,9 @@ impl FromStr for BagOfBytes {
     /// not have length 32.
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         hex_decode(s)
-            .map_err(|_| CommonError::StringNotHex(s.to_owned()))
+            .map_err(|_| CommonError::StringNotHex {
+                bad_value: s.to_owned(),
+            })
             .map(|v| v.into())
     }
 }
@@ -428,7 +430,9 @@ mod tests {
         let s = "invalid str";
         assert_eq!(
             BagOfBytes::from_str(s),
-            Err(CommonError::StringNotHex(s.to_owned()))
+            Err(CommonError::StringNotHex {
+                bad_value: s.to_owned()
+            })
         );
     }
 

@@ -133,8 +133,8 @@ impl TryFrom<&[u8]> for Secp256k1PublicKey {
 
     fn try_from(slice: &[u8]) -> Result<Self> {
         ScryptoSecp256k1PublicKey::try_from(slice)
-            .map_err(|_| {
-                CommonError::InvalidSecp256k1PublicKeyFromBytes(slice.to_vec())
+            .map_err(|_| CommonError::InvalidSecp256k1PublicKeyFromBytes {
+                bad_value: slice.to_vec().into(),
             })
             .and_then(|k| k.try_into())
     }
@@ -143,7 +143,9 @@ impl TryFrom<&[u8]> for Secp256k1PublicKey {
 impl Secp256k1PublicKey {
     pub fn from_hex(hex: String) -> Result<Self> {
         hex_decode(hex.clone())
-            .map_err(|_| CommonError::InvalidSecp256k1PublicKeyFromString(hex))
+            .map_err(|_| CommonError::InvalidSecp256k1PublicKeyFromString {
+                bad_value: hex,
+            })
             .and_then(|b| Secp256k1PublicKey::try_from(b.as_slice()))
     }
 }
@@ -264,9 +266,9 @@ mod tests {
     fn invalid_hex_str() {
         assert_eq!(
             Secp256k1PublicKey::from_str("hi"),
-            Err(CommonError::InvalidSecp256k1PublicKeyFromString(
-                "hi".to_owned()
-            ))
+            Err(CommonError::InvalidSecp256k1PublicKeyFromString {
+                bad_value: "hi".to_owned()
+            })
         );
     }
 
@@ -274,9 +276,9 @@ mod tests {
     fn invalid_str_too_short() {
         assert_eq!(
             Secp256k1PublicKey::from_str("dead"),
-            Err(CommonError::InvalidSecp256k1PublicKeyFromBytes(vec![
-                0xde, 0xad
-            ]))
+            Err(CommonError::InvalidSecp256k1PublicKeyFromBytes {
+                bad_value: vec![0xde, 0xad].into()
+            })
         );
     }
 
@@ -285,9 +287,9 @@ mod tests {
         let bytes: &[u8] = &[0u8];
         assert_eq!(
             Secp256k1PublicKey::try_from(bytes),
-            Err(CommonError::InvalidSecp256k1PublicKeyFromBytes(
-                bytes.to_vec()
-            ))
+            Err(CommonError::InvalidSecp256k1PublicKeyFromBytes {
+                bad_value: bytes.to_vec().into()
+            })
         );
     }
 

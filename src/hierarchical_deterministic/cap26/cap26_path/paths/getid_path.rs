@@ -51,19 +51,19 @@ impl TryFrom<&HDPath> for GetIDPath {
         let expected_depth = 3;
         let (path, components) = HDPath::try_parse_base_hdpath(value, |v| {
             CommonError::InvalidDepthOfCAP26Path {
-                expected: Self::PATH_DEPTH,
-                found: v,
+                expected: Self::PATH_DEPTH as u64,
+                found: v as u64,
             }
         })?;
         if path.depth() != expected_depth {
             return Err(CommonError::InvalidDepthOfCAP26Path {
-                expected: expected_depth,
-                found: path.depth(),
+                expected: expected_depth as u64,
+                found: path.depth() as u64,
             });
         }
         let value = HDPath::parse_try_map(&components, 2, Box::new(Ok))?;
         if value != Self::LAST_COMPONENT_VALUE {
-            return Err(CommonError::InvalidGetIDPath(value));
+            return Err(CommonError::InvalidGetIDPath { bad_value: value });
         }
         let hd_path = HDPath::from_components(components);
         assert_eq!(Self { path: hd_path }, Self::default());
@@ -83,8 +83,8 @@ impl FromStr for GetIDPath {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let (path, _) = HDPath::try_parse_base(s, |v| {
             CommonError::InvalidDepthOfCAP26Path {
-                expected: Self::PATH_DEPTH,
-                found: v,
+                expected: Self::PATH_DEPTH as u64,
+                found: v as u64,
             }
         })?;
         Self::try_from(&path)
@@ -112,7 +112,7 @@ mod tests {
     fn invalid_value() {
         assert_eq!(
             GetIDPath::from_str("m/44H/1022H/1337H"),
-            Err(CommonError::InvalidGetIDPath(1337))
+            Err(CommonError::InvalidGetIDPath { bad_value: 1337 })
         );
     }
     #[test]

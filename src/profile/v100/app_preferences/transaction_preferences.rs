@@ -8,13 +8,13 @@ use crate::prelude::*;
 pub struct TransactionPreferences {
     /// The deposit guarantee that will automatically be added for
     /// all deposits in transactions.
-    pub default_deposit_guarantee: Decimal,
+    pub default_deposit_guarantee: Decimal192,
 }
 
 impl TransactionPreferences {
     /// Instantiates a new Transaction user preference with the
     /// specified `default_deposit_guarantee` value.
-    pub fn new(default_deposit_guarantee: Decimal) -> Self {
+    pub fn new(default_deposit_guarantee: Decimal192) -> Self {
         Self {
             default_deposit_guarantee,
         }
@@ -25,7 +25,7 @@ impl Default for TransactionPreferences {
     /// By default `1.0` is used.
     fn default() -> Self {
         Self {
-            default_deposit_guarantee: Decimal::one(),
+            default_deposit_guarantee: Decimal192::one(),
         }
     }
 }

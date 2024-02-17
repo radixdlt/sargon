@@ -45,7 +45,9 @@ impl FromStr for PersonaDataEntryID {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Uuid::from_str(s)
-            .map_err(|_| CommonError::InvalidUUIDv4(s.to_owned()))
+            .map_err(|_| CommonError::InvalidUUIDv4 {
+                bad_value: s.to_owned(),
+            })
             .map(|v| v.into())
     }
 }
@@ -151,7 +153,9 @@ mod tests {
     fn from_str_err() {
         assert_eq!(
             "foobar".parse::<SUT>(),
-            Err(CommonError::InvalidUUIDv4("foobar".to_owned()))
+            Err(CommonError::InvalidUUIDv4 {
+                bad_value: "foobar".to_owned()
+            })
         );
     }
 }

@@ -48,10 +48,16 @@ impl BIP39WordCount {
     }
 
     pub fn from_count(count: usize) -> Result<Self> {
-        let repr = u8::try_from(count)
-            .map_err(|_| CommonError::InvalidBIP39WordCount(count))?;
-        let self_ = Self::from_repr(repr)
-            .ok_or(CommonError::InvalidBIP39WordCount(count))?;
+        let repr = u8::try_from(count).map_err(|_| {
+            CommonError::InvalidBIP39WordCount {
+                bad_value: count as u64,
+            }
+        })?;
+        let self_ = Self::from_repr(repr).ok_or(
+            CommonError::InvalidBIP39WordCount {
+                bad_value: count as u64,
+            },
+        )?;
         Ok(self_)
     }
 }

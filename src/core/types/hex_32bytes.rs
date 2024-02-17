@@ -29,7 +29,9 @@ impl TryFrom<BagOfBytes> for Hex32Bytes {
 
     fn try_from(value: BagOfBytes) -> Result<Self> {
         if value.len() != 32 {
-            return Err(CommonError::InvalidByteCountExpected32(value.len()));
+            return Err(CommonError::InvalidByteCountExpected32 {
+                bad_value: value.len() as u64,
+            });
         }
         Ok(Self {
             bag_of_bytes: value,
@@ -244,7 +246,9 @@ mod tests {
         let s = "invalid str";
         assert_eq!(
             SUT::from_str(s),
-            Err(CommonError::StringNotHex(s.to_owned()))
+            Err(CommonError::StringNotHex {
+                bad_value: s.to_owned()
+            })
         );
     }
 
@@ -252,7 +256,7 @@ mod tests {
     fn invalid_len() {
         assert_eq!(
             SUT::try_from(Vec::from([0u8; 5])),
-            Err(CommonError::InvalidByteCountExpected32(5))
+            Err(CommonError::InvalidByteCountExpected32 { bad_value: 5 })
         )
     }
 

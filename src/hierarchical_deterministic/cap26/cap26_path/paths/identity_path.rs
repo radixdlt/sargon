@@ -215,7 +215,7 @@ mod tests {
     fn cointype_not_found() {
         assert_eq!(
             IdentityPath::from_str("m/44H/33H/1H/618H/1460H/0"), // `33` instead of 1022
-            Err(CommonError::CoinTypeNotFound(33))
+            Err(CommonError::CoinTypeNotFound { bad_value: 33 })
         )
     }
 
@@ -234,7 +234,7 @@ mod tests {
     fn fails_when_entity_type_does_not_exist() {
         assert_eq!(
             IdentityPath::from_str("m/44H/1022H/1H/99999H/1460H/0H"),
-            Err(CommonError::InvalidEntityKind(99999))
+            Err(CommonError::InvalidEntityKind { bad_value: 99999 })
         )
     }
 
@@ -242,7 +242,7 @@ mod tests {
     fn fails_when_key_kind_does_not_exist() {
         assert_eq!(
             IdentityPath::from_str("m/44H/1022H/1H/618H/22222H/0H"),
-            Err(CommonError::InvalidKeyKind(22222))
+            Err(CommonError::InvalidKeyKind { bad_value: 22222 })
         )
     }
 
@@ -250,7 +250,7 @@ mod tests {
     fn fails_when_network_id_is_out_of_bounds() {
         assert_eq!(
             IdentityPath::from_str("m/44H/1022H/4444H/618H/1460H/0H"),
-            Err(CommonError::InvalidNetworkIDExceedsLimit(4444))
+            Err(CommonError::InvalidNetworkIDExceedsLimit { bad_value: 4444 })
         )
     }
 
@@ -258,7 +258,7 @@ mod tests {
     fn fails_when_not_bip44() {
         assert_eq!(
             IdentityPath::from_str("m/777H/1022H/1H/618H/1460H/0H"),
-            Err(CommonError::BIP44PurposeNotFound(777))
+            Err(CommonError::BIP44PurposeNotFound { bad_value: 777 })
         )
     }
 
@@ -271,9 +271,9 @@ mod tests {
     fn fails_when_index_is_too_large() {
         assert_eq!(
             IdentityPath::from_str("m/44H/1022H/1H/618H/1460H/4294967296H"),
-            Err(CommonError::InvalidBIP32Path(
-                "m/44H/1022H/1H/618H/1460H/4294967296H".to_string()
-            ))
+            Err(CommonError::InvalidBIP32Path {
+                bad_value: "m/44H/1022H/1H/618H/1460H/4294967296H".to_string()
+            })
         )
     }
 

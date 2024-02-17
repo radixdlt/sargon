@@ -25,7 +25,9 @@ impl FromStr for HDPath {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         slip10::path::BIP32Path::from_str(s)
             .map(|p| p.into())
-            .map_err(|_| CommonError::InvalidBIP32Path(s.to_string()))
+            .map_err(|_| CommonError::InvalidBIP32Path {
+                bad_value: s.to_string(),
+            })
     }
 }
 
@@ -120,14 +122,14 @@ impl HDPath {
             components,
             0,
             HDPathComponent::bip44_purpose(),
-            Box::new(CommonError::BIP44PurposeNotFound),
+            |v| CommonError::BIP44PurposeNotFound { bad_value: v },
         )?;
 
         _ = Self::parse(
             components,
             1,
             HDPathComponent::bip44_cointype(),
-            Box::new(CommonError::CoinTypeNotFound),
+            |v| CommonError::CoinTypeNotFound { bad_value: v },
         )?;
         Ok((path.clone(), components.clone()))
     }
@@ -140,7 +142,9 @@ impl HDPath {
         F: FnOnce(usize) -> CommonError,
     {
         HDPath::from_str(s)
-            .map_err(|_| CommonError::InvalidBIP32Path(s.to_string()))
+            .map_err(|_| CommonError::InvalidBIP32Path {
+                bad_value: s.to_string(),
+            })
             .and_then(|p| Self::try_parse_base_hdpath(&p, depth_error))
     }
 }

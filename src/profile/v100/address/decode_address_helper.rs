@@ -8,7 +8,9 @@ pub type DecodeAddressOutput =
 
 fn engine_decode_address(s: &str) -> Result<EngineDecodeAddressOutput> {
     let Some(tuple) = decode(s) else {
-        return Err(CommonError::FailedToDecodeAddressFromBech32(s.to_owned()));
+        return Err(CommonError::FailedToDecodeAddressFromBech32 {
+            bad_value: s.to_owned(),
+        });
     };
     Ok(tuple)
 }

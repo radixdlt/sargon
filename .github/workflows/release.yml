@@ -1,0 +1,29 @@
+name: CD
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - develop
+
+permissions:
+  id-token: write
+  contents: read
+env:
+  CARGO_TERM_COLOR: always
+jobs:
+  build:
+    runs-on: macos-13-xlarge
+    steps:
+      - uses: RDXWorks-actions/checkout@main
+      - name: Install Rust Toolchain
+        uses: RDXWorks-actions/toolchain@master
+        with:
+          toolchain: nightly-2024-01-11
+          default: true
+          target: x86_64-apple-ios aarch64-apple-ios aarch64-apple-ios-sim
+          components: rust-std
+      
+      - name: Run iOS build script
+        run: |
+            sh ./scripts/ios/release.sh

@@ -114,7 +114,9 @@ impl NetworkDefinition {
     pub fn lookup_by_id(id: NetworkID) -> Result<Self> {
         let map = Self::lookup_map();
         let Some(network) = map.get(&id) else {
-            return Err(CommonError::UnknownNetworkForID(id.discriminant()));
+            return Err(CommonError::UnknownNetworkForID {
+                bad_value: id.discriminant(),
+            });
         };
         Ok(network.clone())
     }
@@ -125,8 +127,8 @@ impl NetworkDefinition {
         map.iter()
             .find(|p| p.1.logical_name == logical_name)
             .map(|p| p.0)
-            .ok_or_else(|| {
-                CommonError::UnknownNetworkWithName(logical_name.to_string())
+            .ok_or_else(|| CommonError::UnknownNetworkWithName {
+                bad_value: logical_name.to_string(),
             })
             .and_then(|id| Self::lookup_by_id(*id))
     }
@@ -222,7 +224,9 @@ mod tests {
     fn lookup_by_name_error() {
         assert_eq!(
             NetworkDefinition::lookup_by_name("x"),
-            Err(CommonError::UnknownNetworkWithName("x".to_string()))
+            Err(CommonError::UnknownNetworkWithName {
+                bad_value: "x".to_string()
+            })
         );
     }
 
@@ -230,9 +234,9 @@ mod tests {
     fn lookup_by_id_error() {
         assert_eq!(
             NetworkDefinition::lookup_by_id(NetworkID::Simulator),
-            Err(CommonError::UnknownNetworkForID(
-                NetworkID::Simulator.discriminant()
-            ))
+            Err(CommonError::UnknownNetworkForID {
+                bad_value: NetworkID::Simulator.discriminant()
+            })
         );
     }
 
