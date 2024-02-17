@@ -1,6 +1,8 @@
 use crate::prelude::*;
 use delegate::delegate;
-use radix_engine_common::math::Decimal as ScryptoDecimal192;
+use radix_engine_common::math::{
+    Decimal as ScryptoDecimal192, RoundingMode as ScryptoRoundingMode,
+};
 
 /// UniFFI conversion for InnerDecimal using String as builtin.
 impl crate::UniffiCustomTypeConverter for InnerDecimal {
@@ -40,7 +42,7 @@ impl FromStr for InnerDecimal {
     type Err = crate::CommonError;
 
     fn from_str(s: &str) -> Result<Self> {
-        ScryptoDecimal192::from_str(&s)
+        ScryptoDecimal192::from_str(s)
             .map(InnerDecimal)
             .map_err(|_| CommonError::DecimalError)
     }
@@ -212,14 +214,6 @@ impl Neg for Decimal {
 }
 
 impl Decimal {
-    /// `abs(self)`
-    /// Panics if Self is Self::MIN.
-    pub fn abs(self) -> Self {
-        self.native().checked_abs().expect("Expected clients of Sargon to not use so large negative numbers (Self::MIN).").into()
-    }
-}
-
-impl Decimal {
     delegate! {
         to self.native() {
 
@@ -245,6 +239,96 @@ impl Decimal {
         Self::from(10)
             .checked_powi(exponent as i64)
             .expect("Too large exponent, 10^39 is max.")
+    }
+
+    /// `abs(self)`
+    /// Panics if Self is Self::MIN.
+    pub fn abs(self) -> Self {
+        self.native().checked_abs().expect("Expected clients of Sargon to not use so large negative numbers (Self::MIN).").into()
+    }
+
+    /// Rounds this number to the specified decimal places.
+    ///
+    /// # Panics
+    /// - Panic if the number of decimal places is not within [0..SCALE(=18)]
+    pub fn round(
+        &self,
+        decimal_places: i32,
+        rounding_mode: RoundingMode,
+    ) -> Result<Self> {
+        self.native()
+            .checked_round(decimal_places, rounding_mode.into())
+            .ok_or(CommonError::DecimalError)
+            .map(Into::<Self>::into)
+    }
+}
+
+#[derive(
+    Clone, Copy, Debug, PartialEq, Eq, enum_iterator::Sequence, uniffi::Enum,
+)]
+pub enum RoundingMode {
+    /// The number is always rounded toward positive infinity, e.g. `3.1 -> 4`, `-3.1 -> -3`.
+    ToPositiveInfinity,
+    /// The number is always rounded toward negative infinity, e.g. `3.1 -> 3`, `-3.1 -> -4`.
+    ToNegativeInfinity,
+    /// The number is always rounded toward zero, e.g. `3.1 -> 3`, `-3.1 -> -3`.
+    ToZero,
+    /// The number is always rounded away from zero, e.g. `3.1 -> 4`, `-3.1 -> -4`.
+    AwayFromZero,
+
+    /// The number is rounded to the nearest, and when it is halfway between two others, it's rounded toward zero, e.g. `3.5 -> 3`, `-3.5 -> -3`.
+    ToNearestMidpointTowardZero,
+    /// The number is rounded to the nearest, and when it is halfway between two others, it's rounded away from zero, e.g. `3.5 -> 4`, `-3.5 -> -4`.
+    ToNearestMidpointAwayFromZero,
+    /// The number is rounded to the nearest, and when it is halfway between two others, it's rounded toward the nearest even number. Also known as "Bankers Rounding".
+    ToNearestMidpointToEven,
+}
+
+impl From<RoundingMode> for ScryptoRoundingMode {
+    fn from(value: RoundingMode) -> Self {
+        match value {
+            RoundingMode::ToPositiveInfinity => {
+                ScryptoRoundingMode::ToPositiveInfinity
+            }
+            RoundingMode::ToNegativeInfinity => {
+                ScryptoRoundingMode::ToNegativeInfinity
+            }
+            RoundingMode::ToZero => ScryptoRoundingMode::ToZero,
+            RoundingMode::AwayFromZero => ScryptoRoundingMode::AwayFromZero,
+            RoundingMode::ToNearestMidpointTowardZero => {
+                ScryptoRoundingMode::ToNearestMidpointTowardZero
+            }
+            RoundingMode::ToNearestMidpointAwayFromZero => {
+                ScryptoRoundingMode::ToNearestMidpointAwayFromZero
+            }
+            RoundingMode::ToNearestMidpointToEven => {
+                ScryptoRoundingMode::ToNearestMidpointToEven
+            }
+        }
+    }
+}
+
+impl From<ScryptoRoundingMode> for RoundingMode {
+    fn from(value: ScryptoRoundingMode) -> Self {
+        match value {
+            ScryptoRoundingMode::ToPositiveInfinity => {
+                RoundingMode::ToPositiveInfinity
+            }
+            ScryptoRoundingMode::ToNegativeInfinity => {
+                RoundingMode::ToNegativeInfinity
+            }
+            ScryptoRoundingMode::ToZero => RoundingMode::ToZero,
+            ScryptoRoundingMode::AwayFromZero => RoundingMode::AwayFromZero,
+            ScryptoRoundingMode::ToNearestMidpointTowardZero => {
+                RoundingMode::ToNearestMidpointTowardZero
+            }
+            ScryptoRoundingMode::ToNearestMidpointAwayFromZero => {
+                RoundingMode::ToNearestMidpointAwayFromZero
+            }
+            ScryptoRoundingMode::ToNearestMidpointToEven => {
+                RoundingMode::ToNearestMidpointToEven
+            }
+        }
     }
 }
 
@@ -404,6 +488,19 @@ pub fn decimal_abs(decimal: &Decimal192) -> Decimal192 {
     decimal.abs()
 }
 
+/// Rounds this number to the specified decimal places.
+///
+/// # Panics
+/// - Panic if the number of decimal places is not within [0..SCALE(=18)]
+#[uniffi::export]
+pub fn decimal_round(
+    decimal: &Decimal192,
+    decimal_places: i32,
+    rounding_mode: RoundingMode,
+) -> Result<Decimal192> {
+    decimal.round(decimal_places, rounding_mode)
+}
+
 #[cfg(test)]
 mod test_inner {
     use super::*;
@@ -422,6 +519,8 @@ mod test_inner {
 
 #[cfg(test)]
 mod test_decimal {
+    use enum_iterator::all;
+
     use super::*;
     use crate::prelude::*;
 
@@ -613,6 +712,19 @@ mod test_decimal {
         let sut: SUT = "-3.2".parse().unwrap();
         assert_eq!(sut * sut, "10.24".parse().unwrap());
     }
+
+    #[test]
+    fn rounding_mode_conversion() {
+        let test = |m: RoundingMode| {
+            assert_eq!(
+                Into::<RoundingMode>::into(Into::<ScryptoRoundingMode>::into(
+                    m
+                )),
+                m
+            )
+        };
+        all::<RoundingMode>().for_each(test);
+    }
 }
 
 #[cfg(test)]
@@ -783,51 +895,51 @@ mod uniffi_tests {
         let two = new_decimal_from_u32(2);
         let three = new_decimal_from_u64(3);
 
-        assert_eq!(decimal_less_than(&zero, &one), true);
-        assert_eq!(decimal_less_than(&zero, &two), true);
-        assert_eq!(decimal_less_than(&one, &two), true);
-        assert_eq!(decimal_less_than(&zero, &zero), false);
-        assert_eq!(decimal_less_than_or_equal(&zero, &zero), true);
-        assert_eq!(decimal_less_than_or_equal(&zero, &one), true);
-        assert_eq!(decimal_less_than_or_equal(&zero, &two), true);
-        assert_eq!(decimal_less_than_or_equal(&one, &two), true);
-        assert_eq!(decimal_less_than_or_equal(&two, &three), true);
-        assert_eq!(decimal_less_than_or_equal(&three, &three), true);
+        assert!(decimal_less_than(&zero, &one));
+        assert!(decimal_less_than(&zero, &two));
+        assert!(decimal_less_than(&one, &two));
+        assert!(!decimal_less_than(&zero, &zero));
+        assert!(decimal_less_than_or_equal(&zero, &zero));
+        assert!(decimal_less_than_or_equal(&zero, &one));
+        assert!(decimal_less_than_or_equal(&zero, &two));
+        assert!(decimal_less_than_or_equal(&one, &two));
+        assert!(decimal_less_than_or_equal(&two, &three));
+        assert!(decimal_less_than_or_equal(&three, &three));
 
-        assert_eq!(decimal_greater_than(&three, &three), false);
-        assert_eq!(decimal_greater_than_or_equal(&three, &three), true);
-        assert_eq!(decimal_greater_than_or_equal(&three, &two), true);
-        assert_eq!(decimal_greater_than(&three, &two), true);
-        assert_eq!(decimal_greater_than(&three, &one), true);
-        assert_eq!(decimal_greater_than(&two, &one), true);
-        assert_eq!(decimal_greater_than(&one, &one), false);
-        assert_eq!(decimal_greater_than(&one, &zero), true);
+        assert!(!decimal_greater_than(&three, &three));
+        assert!(decimal_greater_than_or_equal(&three, &three));
+        assert!(decimal_greater_than_or_equal(&three, &two));
+        assert!(decimal_greater_than(&three, &two));
+        assert!(decimal_greater_than(&three, &one));
+        assert!(decimal_greater_than(&two, &one));
+        assert!(!decimal_greater_than(&one, &one));
+        assert!(decimal_greater_than(&one, &zero));
     }
 
     #[test]
     fn is_zero() {
-        assert_eq!(decimal_is_zero(&SUT::zero()), true);
-        assert_eq!(decimal_is_zero(&SUT::one()), false);
+        assert!(decimal_is_zero(&SUT::zero()));
+        assert!(!decimal_is_zero(&SUT::one()));
     }
 
     #[test]
     fn is_positive() {
         // `0` is neither positive nor negative
         // https://en.wikipedia.org/wiki/0
-        assert_eq!(decimal_is_positive(&SUT::zero()), false);
+        assert!(!decimal_is_positive(&SUT::zero()));
 
-        assert_eq!(decimal_is_positive(&SUT::one()), true);
-        assert_eq!(decimal_is_positive(&decimal_neg(&SUT::one())), false);
+        assert!(decimal_is_positive(&SUT::one()));
+        assert!(!decimal_is_positive(&decimal_neg(&SUT::one())));
     }
 
     #[test]
     fn is_negative() {
         // `0` is neither positive nor negative
         // https://en.wikipedia.org/wiki/0
-        assert_eq!(decimal_is_negative(&SUT::zero()), false);
+        assert!(!decimal_is_negative(&SUT::zero()));
 
-        assert_eq!(decimal_is_negative(&SUT::one()), false);
-        assert_eq!(decimal_is_negative(&decimal_neg(&SUT::one())), true);
+        assert!(!decimal_is_negative(&SUT::one()));
+        assert!(decimal_is_negative(&decimal_neg(&SUT::one())));
     }
 
     #[test]
@@ -843,6 +955,101 @@ mod uniffi_tests {
         assert_eq!(
             decimal_max().to_string(),
             "3138550867693340381917894711603833208051.177722232017256447"
+        );
+    }
+
+    #[test]
+    fn rounding() {
+        let mut sut: SUT = "3.1".parse().unwrap();
+        let mut mode: RoundingMode = RoundingMode::ToPositiveInfinity;
+        assert_eq!(
+            decimal_round(&sut, 0, mode).unwrap(),
+            new_decimal_from_i32(4)
+        );
+        assert_eq!(
+            decimal_round(&-sut, 0, mode).unwrap(),
+            new_decimal_from_i32(-3)
+        );
+
+        mode = RoundingMode::ToNegativeInfinity;
+        assert_eq!(
+            decimal_round(&sut, 0, mode).unwrap(),
+            new_decimal_from_i32(3)
+        );
+        assert_eq!(
+            decimal_round(&-sut, 0, mode).unwrap(),
+            new_decimal_from_i32(-4)
+        );
+
+        mode = RoundingMode::ToZero;
+        assert_eq!(
+            decimal_round(&sut, 0, mode).unwrap(),
+            new_decimal_from_i32(3)
+        );
+        assert_eq!(
+            decimal_round(&-sut, 0, mode).unwrap(),
+            new_decimal_from_i32(-3)
+        );
+
+        mode = RoundingMode::AwayFromZero;
+        assert_eq!(
+            decimal_round(&sut, 0, mode).unwrap(),
+            new_decimal_from_i32(4)
+        );
+        assert_eq!(
+            decimal_round(&-sut, 0, mode).unwrap(),
+            new_decimal_from_i32(-4)
+        );
+
+        sut = "3.5".parse().unwrap();
+        mode = RoundingMode::ToNearestMidpointTowardZero;
+        assert_eq!(
+            decimal_round(&sut, 0, mode).unwrap(),
+            new_decimal_from_i32(3)
+        );
+        assert_eq!(
+            decimal_round(&-sut, 0, mode).unwrap(),
+            new_decimal_from_i32(-3)
+        );
+
+        mode = RoundingMode::ToNearestMidpointAwayFromZero;
+        assert_eq!(
+            decimal_round(&sut, 0, mode).unwrap(),
+            new_decimal_from_i32(4)
+        );
+        assert_eq!(
+            decimal_round(&-sut, 0, mode).unwrap(),
+            new_decimal_from_i32(-4)
+        );
+
+        mode = RoundingMode::ToNearestMidpointToEven;
+        assert_eq!(
+            decimal_round(&sut, 0, mode).unwrap(),
+            new_decimal_from_i32(4)
+        );
+        assert_eq!(
+            decimal_round(&-sut, 0, mode).unwrap(),
+            new_decimal_from_i32(-4)
+        );
+
+        // more decimals
+        sut = "2.4595".parse().unwrap();
+        mode = RoundingMode::AwayFromZero;
+        assert_eq!(
+            decimal_round(&sut, 0, mode).unwrap(),
+            "3".parse::<SUT>().unwrap()
+        );
+        assert_eq!(
+            decimal_round(&sut, 1, mode).unwrap(),
+            "2.5".parse::<SUT>().unwrap()
+        );
+        assert_eq!(
+            decimal_round(&sut, 2, mode).unwrap(),
+            "2.46".parse::<SUT>().unwrap()
+        );
+        assert_eq!(
+            decimal_round(&sut, 3, mode).unwrap(),
+            "2.46".parse::<SUT>().unwrap()
         );
     }
 }

@@ -14,6 +14,25 @@ extension Decimal192 {
 	public static let maxDivisibility: UInt = 18
 }
 
+// MARK: Truncation and rounding
+
+extension Decimal192 {
+	/// Rounds to `decimalPlaces` decimals, in the direction of 0
+	public func floor(decimalPlaces: UInt) -> Self {
+		try! round(decimalPlaces: Int32(decimalPlaces), roundingMode: .toZero)
+	}
+
+	/// Rounds to `decimalPlaces` decimals, in the direction away from zero
+	public func ceil(decimalPlaces: UInt) -> Self {
+		try! round(decimalPlaces: Int32(decimalPlaces), roundingMode: .awayFromZero)
+	}
+
+	/// Rounds to `decimalPlaces` decimals
+	public func rounded(decimalPlaces: UInt = 0) -> Self {
+		try! round(decimalPlaces: Int32(decimalPlaces), roundingMode: .toNearestMidpointAwayFromZero)
+	}
+}
+
 extension Decimal192 {
 	public var clamped: Self {
 		isNegative() ? .zero : self

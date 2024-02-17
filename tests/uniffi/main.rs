@@ -66,6 +66,6 @@ mod tests {
     );
 
     uniffi::build_foreign_language_testcases!(
-        "tests/uniffi/bindings/test_decimal.swift",
+        "tests/uniffi/bindings/test_decimal192.swift",
     );
 }

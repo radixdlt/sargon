@@ -109,9 +109,9 @@ mod tests {
 
     #[test]
     fn at_least_fulfills_false() {
-        assert_eq!(SUT::at_least(1).is_fulfilled_by_ids(0), false);
-        assert_eq!(SUT::at_least(10).is_fulfilled_by_ids(0), false);
-        assert_eq!(SUT::at_least(10).is_fulfilled_by_ids(9), false);
+        assert!(!SUT::at_least(1).is_fulfilled_by_ids(0));
+        assert!(!SUT::at_least(10).is_fulfilled_by_ids(0));
+        assert!(!SUT::at_least(10).is_fulfilled_by_ids(9));
     }
 
     #[test]
@@ -122,9 +122,9 @@ mod tests {
 
     #[test]
     fn exactly_fulfills_false() {
-        assert_eq!(SUT::exactly(1).is_fulfilled_by_ids(0), false);
-        assert_eq!(SUT::exactly(1).is_fulfilled_by_ids(2), false);
-        assert_eq!(SUT::exactly(10).is_fulfilled_by_ids(9), false);
-        assert_eq!(SUT::exactly(10).is_fulfilled_by_ids(11), false);
+        assert!(!SUT::exactly(1).is_fulfilled_by_ids(0));
+        assert!(!SUT::exactly(1).is_fulfilled_by_ids(2));
+        assert!(!SUT::exactly(10).is_fulfilled_by_ids(9));
+        assert!(!SUT::exactly(10).is_fulfilled_by_ids(11));
     }
 }

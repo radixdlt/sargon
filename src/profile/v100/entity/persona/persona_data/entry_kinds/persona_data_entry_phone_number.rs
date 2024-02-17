@@ -110,8 +110,7 @@ mod tests {
     #[test]
     fn new_from_string() {
         assert_eq!(
-            PersonaDataEntryPhoneNumber::new("+46123456789".to_string())
-                .unwrap(),
+            PersonaDataEntryPhoneNumber::new("+46123456789").unwrap(),
             PersonaDataEntryPhoneNumber::placeholder()
         );
     }

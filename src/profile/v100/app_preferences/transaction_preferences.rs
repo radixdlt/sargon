@@ -68,7 +68,7 @@ mod tests {
     #[test]
     fn get_decimal() {
         let value = Decimal::new("0.975".to_string()).unwrap();
-        let sut = TransactionPreferences::new(value.clone());
+        let sut = TransactionPreferences::new(value);
         assert_eq!(sut.default_deposit_guarantee, value)
     }
 

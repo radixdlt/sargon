@@ -346,12 +346,12 @@ mod tests {
     #[test]
     fn default_is_empty() {
         assert_eq!(BagOfBytes::default(), BagOfBytes::new());
-        assert_eq!(BagOfBytes::default().is_empty(), true);
+        assert!(BagOfBytes::default().is_empty());
     }
 
     #[test]
     fn is_empty() {
-        assert_eq!(BagOfBytes::placeholder().is_empty(), false);
+        assert!(!BagOfBytes::placeholder().is_empty());
     }
 
     #[test]
@@ -421,7 +421,7 @@ mod tests {
     #[test]
     fn from_vec_roundtrip() {
         let vec = Vec::from([0u8; 32]);
-        let sut: BagOfBytes = vec.clone().try_into().unwrap();
+        let sut: BagOfBytes = vec.clone().into();
         assert_eq!(sut.to_vec(), vec);
     }
 
