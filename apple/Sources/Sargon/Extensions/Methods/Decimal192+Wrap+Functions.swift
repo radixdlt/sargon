@@ -14,6 +14,20 @@ extension Decimal192 {
 	public static let maxDivisibility: UInt8 = 18
 }
 
+extension Decimal192 {
+	/// Parse a local respecting string
+	public init(
+		formattedString: String,
+		locale: Locale = .autoupdatingCurrent
+	) throws {
+		let localConfig: LocaleConfig = LocaleConfig(locale: locale)
+		self = try newDecimalFromFormattedString(
+			formattedString: formattedString,
+			locale: localConfig
+		)
+	}
+}
+
 // MARK: Truncation and rounding
 
 extension Decimal192 {

@@ -4175,6 +4175,61 @@ public func FfiConverterTypeLedgerHardwareWalletHint_lower(_ value: LedgerHardwa
     return FfiConverterTypeLedgerHardwareWalletHint.lower(value)
 }
 
+public struct LocaleConfig {
+    public var decimalSeparator: String?
+    public var groupingSeparator: String?
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(
+        decimalSeparator: String?,
+        groupingSeparator: String?
+    ) {
+        self.decimalSeparator = decimalSeparator
+        self.groupingSeparator = groupingSeparator
+    }
+}
+
+extension LocaleConfig: Equatable, Hashable {
+    public static func == (lhs: LocaleConfig, rhs: LocaleConfig) -> Bool {
+        if lhs.decimalSeparator != rhs.decimalSeparator {
+            return false
+        }
+        if lhs.groupingSeparator != rhs.groupingSeparator {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(decimalSeparator)
+        hasher.combine(groupingSeparator)
+    }
+}
+
+public struct FfiConverterTypeLocaleConfig: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> LocaleConfig {
+        return
+            try LocaleConfig(
+                decimalSeparator: FfiConverterOptionString.read(from: &buf),
+                groupingSeparator: FfiConverterOptionString.read(from: &buf)
+            )
+    }
+
+    public static func write(_ value: LocaleConfig, into buf: inout [UInt8]) {
+        FfiConverterOptionString.write(value.decimalSeparator, into: &buf)
+        FfiConverterOptionString.write(value.groupingSeparator, into: &buf)
+    }
+}
+
+public func FfiConverterTypeLocaleConfig_lift(_ buf: RustBuffer) throws -> LocaleConfig {
+    return try FfiConverterTypeLocaleConfig.lift(buf)
+}
+
+public func FfiConverterTypeLocaleConfig_lower(_ value: LocaleConfig) -> RustBuffer {
+    return FfiConverterTypeLocaleConfig.lower(value)
+}
+
 public struct Mnemonic {
     public var words: [Bip39Word]
     public var wordCount: Bip39WordCount
@@ -6926,6 +6981,8 @@ public enum CommonError {
 
     case InvalidUuiDv4(message: String)
 
+    case UnrecognizedLocaleIdentifier(message: String)
+
     fileprivate static func uniffiErrorHandler(_ error: RustBuffer) throws -> Error {
         return try FfiConverterTypeCommonError.lift(error)
     }
@@ -7285,6 +7342,10 @@ public struct FfiConverterTypeCommonError: FfiConverterRustBuffer {
                 message: FfiConverterString.read(from: &buf)
             )
 
+        case 88: return try .UnrecognizedLocaleIdentifier(
+                message: FfiConverterString.read(from: &buf)
+            )
+
         default: throw UniffiInternalError.unexpectedEnumCase
         }
     }
@@ -7465,6 +7526,8 @@ public struct FfiConverterTypeCommonError: FfiConverterRustBuffer {
             writeInt(&buf, Int32(86))
         case .InvalidUuiDv4(_ /* message is ignored*/ ):
             writeInt(&buf, Int32(87))
+        case .UnrecognizedLocaleIdentifier(_ /* message is ignored*/ ):
+            writeInt(&buf, Int32(88))
         }
     }
 }
@@ -10564,6 +10627,21 @@ public func newDecimalFromF32(value: Float) -> Decimal192 {
 }
 
 /**
+ * Tries to creates a new `Decimal192` from a formatted String for
+ * a specific locale.
+ */
+public func newDecimalFromFormattedString(formattedString: String, locale: LocaleConfig) throws -> Decimal192 {
+    return try FfiConverterTypeDecimal192.lift(
+        rustCallWithError(FfiConverterTypeCommonError.lift) {
+            uniffi_sargon_fn_func_new_decimal_from_formatted_string(
+                FfiConverterString.lower(formattedString),
+                FfiConverterTypeLocaleConfig.lower(locale), $0
+            )
+        }
+    )
+}
+
+/**
  * Creates a new `Decimal192` from a i32 integer.
  */
 public func newDecimalFromI32(value: Int32) -> Decimal192 {
@@ -11055,6 +11133,9 @@ private var initializationResult: InitializationResult {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_sargon_checksum_func_new_decimal_from_f32() != 3137 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_new_decimal_from_formatted_string() != 41914 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_sargon_checksum_func_new_decimal_from_i32() != 18727 {
