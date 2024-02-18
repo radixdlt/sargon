@@ -533,6 +533,11 @@ mod test_inner {
         let sut: SUT = s.parse().unwrap();
         assert_eq!(sut.to_string(), s.to_owned());
     }
+
+    #[test]
+    fn from_str_invalid() {
+        assert_eq!("invalid".parse::<SUT>(), Err(CommonError::DecimalError));
+    }
 }
 
 #[cfg(test)]

@@ -89,4 +89,14 @@ mod tests {
         let sut = LocaleConfig::default();
         assert_eq!(&sut.decimal_separator.unwrap(), ".");
     }
+
+    #[test]
+    fn from_identifier_invalid() {
+        assert_eq!(
+            LocaleConfig::from_identifier("foo"),
+            Err(CommonError::UnrecognizedLocaleIdentifier {
+                bad_value: "foo".to_owned()
+            })
+        );
+    }
 }
