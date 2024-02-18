@@ -62,10 +62,6 @@ impl Wallet {
 
 #[uniffi::export]
 impl Wallet {
-    pub fn marco(&self) -> String {
-        "polo".to_owned()
-    }
-
     /// Tries to load a `MnemonicWithPassphrase` from secure storage
     /// by `factor_source_id`.
     pub fn mnemonic_with_passphrase_of_device_factor_source_by_factor_source_id(
@@ -112,6 +108,20 @@ mod tests {
         assert_eq!(
             wallet.main_bdfs_mnemonic_with_passphrase().unwrap(),
             MnemonicWithPassphrase::placeholder()
+        );
+        assert_eq!(
+            wallet.mnemonic_with_passphrase_of_device_factor_source_by_factor_source_id(&dfs.factor_source_id()).unwrap(),
+            MnemonicWithPassphrase::placeholder()
+        );
+    }
+
+    #[test]
+    fn mnemonic_with_passphrase_of_device_factor_source_by_factor_source_id_fail_not_factor_source_id_from_hash(
+    ) {
+        let (wallet, _) = Wallet::ephemeral(Profile::placeholder());
+        assert_eq!(
+            wallet.mnemonic_with_passphrase_of_device_factor_source_by_factor_source_id(&FactorSourceIDFromAddress::placeholder().into()),
+          Err(CommonError::FactorSourceIDNotFromHash)
         );
     }
 }
