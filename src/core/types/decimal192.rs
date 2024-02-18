@@ -281,80 +281,48 @@ impl Decimal {
     }
 }
 
-/// Defines the rounding strategy used when you round e.g. `Decimal192`.
-///
-/// Following the same naming convention as https://docs.rs/rust_decimal/latest/rust_decimal/enum.RoundingStrategy.html.
-#[derive(
-    Clone, Copy, Debug, PartialEq, Eq, enum_iterator::Sequence, uniffi::Enum,
-)]
-pub enum RoundingMode {
-    /// The number is always rounded toward positive infinity, e.g. `3.1 -> 4`, `-3.1 -> -3`.
-    ToPositiveInfinity,
+impl Decimal192 {
+    pub const MACHINE_READABLE_DECIMAL_SEPARATOR: &'static str = ".";
 
-    /// The number is always rounded toward negative infinity, e.g. `3.1 -> 3`, `-3.1 -> -4`.
-    ToNegativeInfinity,
+    /// Parse a local respecting string
+    pub fn new_with_formatted_string(
+        formatted_string: impl AsRef<str>,
+        locale: LocaleConfig,
+    ) -> Result<Self> {
+        let formatted_string = formatted_string.as_ref().to_owned();
+        // Pad with a leading zero, to make numbers with leading decimal separator parsable
+        let mut string = format!("0{}", formatted_string);
 
-    /// The number is always rounded toward zero, e.g. `3.1 -> 3`, `-3.1 -> -3`.
-    ToZero,
+        // If the locale recognizes a grouping separator, we strip that from the string
+        if let Some(grouping_separator) = locale.grouping_separator {
+            string = string.replace(&grouping_separator, "");
+        }
+        // `num` crate defines some pretty specific grouping separators: `"\u{a0}"` and `"\u{202f}"` for
+        // for some locales, but in unit tests we might use _normal_ space (`"U+0020"`), so we remove
+        // those (being a bit lenient...).
+        string = string.replace(' ', "");
 
-    /// The number is always rounded away from zero, e.g. `3.1 -> 4`, `-3.1 -> -4`.
-    AwayFromZero,
+        // If the locale recognizes a decimal separator that is different from the machine readable one, we replace it with that
+        if let Some(decimal_separator) = locale.decimal_separator {
+            if decimal_separator != Self::MACHINE_READABLE_DECIMAL_SEPARATOR {
+                // If `decimal_separator != Self::MACHINE_READABLE_DECIMAL_SEPARATOR`,
+                // but if the string contains it, it might have been used incorrectly as
+                // a grouping separator. i.e. often "." is used in Swedish as a grouping
+                // separator, even though a space is the canonical one. So BEFORE
+                // we replace occurrences of decimal separator with "."
+                // (`Self::MACHINE_READABLE_DECIMAL_SEPARATOR`), we replace
+                // occurrences of `Self::MACHINE_READABLE_DECIMAL_SEPARATOR` with "".
+                string = string
+                    .replace(Self::MACHINE_READABLE_DECIMAL_SEPARATOR, "");
 
-    /// The number is rounded to the nearest, and when it is halfway between two others, it's rounded toward zero, e.g. `3.5 -> 3`, `-3.5 -> -3`.
-    ToNearestMidpointTowardZero,
-
-    /// The number is rounded to the nearest, and when it is halfway between two others, it's rounded away from zero, e.g. `3.5 -> 4`, `-3.5 -> -4`.
-    ToNearestMidpointAwayFromZero,
-
-    /// The number is rounded to the nearest, and when it is halfway between two others, it's rounded toward the nearest even number. Also known as "Bankers Rounding".
-    ToNearestMidpointToEven,
-}
-
-impl From<RoundingMode> for ScryptoRoundingMode {
-    fn from(value: RoundingMode) -> Self {
-        match value {
-            RoundingMode::ToPositiveInfinity => {
-                ScryptoRoundingMode::ToPositiveInfinity
-            }
-            RoundingMode::ToNegativeInfinity => {
-                ScryptoRoundingMode::ToNegativeInfinity
-            }
-            RoundingMode::ToZero => ScryptoRoundingMode::ToZero,
-            RoundingMode::AwayFromZero => ScryptoRoundingMode::AwayFromZero,
-            RoundingMode::ToNearestMidpointTowardZero => {
-                ScryptoRoundingMode::ToNearestMidpointTowardZero
-            }
-            RoundingMode::ToNearestMidpointAwayFromZero => {
-                ScryptoRoundingMode::ToNearestMidpointAwayFromZero
-            }
-            RoundingMode::ToNearestMidpointToEven => {
-                ScryptoRoundingMode::ToNearestMidpointToEven
+                string = string.replace(
+                    &decimal_separator,
+                    Self::MACHINE_READABLE_DECIMAL_SEPARATOR,
+                );
             }
         }
-    }
-}
 
-impl From<ScryptoRoundingMode> for RoundingMode {
-    fn from(value: ScryptoRoundingMode) -> Self {
-        match value {
-            ScryptoRoundingMode::ToPositiveInfinity => {
-                RoundingMode::ToPositiveInfinity
-            }
-            ScryptoRoundingMode::ToNegativeInfinity => {
-                RoundingMode::ToNegativeInfinity
-            }
-            ScryptoRoundingMode::ToZero => RoundingMode::ToZero,
-            ScryptoRoundingMode::AwayFromZero => RoundingMode::AwayFromZero,
-            ScryptoRoundingMode::ToNearestMidpointTowardZero => {
-                RoundingMode::ToNearestMidpointTowardZero
-            }
-            ScryptoRoundingMode::ToNearestMidpointAwayFromZero => {
-                RoundingMode::ToNearestMidpointAwayFromZero
-            }
-            ScryptoRoundingMode::ToNearestMidpointToEven => {
-                RoundingMode::ToNearestMidpointToEven
-            }
-        }
+        string.parse::<Self>()
     }
 }
 
@@ -381,6 +349,16 @@ impl TryFrom<&[u8]> for Decimal192 {
 #[uniffi::export]
 pub fn new_decimal_from_string(string: String) -> Result<Decimal192> {
     Decimal192::new(string)
+}
+
+/// Tries to creates a new `Decimal192` from a formatted String for
+/// a specific locale.
+#[uniffi::export]
+pub fn new_decimal_from_formatted_string(
+    formatted_string: String,
+    locale: LocaleConfig,
+) -> Result<Decimal192> {
+    Decimal192::new_with_formatted_string(formatted_string, locale)
 }
 
 /// Creates a new `Decimal192` from a u32 integer.
@@ -559,7 +537,6 @@ mod test_inner {
 
 #[cfg(test)]
 mod test_decimal {
-    use enum_iterator::all;
 
     use super::*;
     use crate::prelude::*;
@@ -754,16 +731,44 @@ mod test_decimal {
     }
 
     #[test]
-    fn rounding_mode_conversion() {
-        let test = |m: RoundingMode| {
+    fn test_parse_formatted_decimal() {
+        let test = |s: &str, l: &LocaleConfig, exp: &str| {
             assert_eq!(
-                Into::<RoundingMode>::into(Into::<ScryptoRoundingMode>::into(
-                    m
-                )),
-                m
+                Decimal192::new_with_formatted_string(s, l.clone()).unwrap(),
+                exp.parse::<Decimal192>().unwrap()
             )
         };
-        all::<RoundingMode>().for_each(test);
+        let fail = |s: &str, l: &LocaleConfig| {
+            assert!(Decimal192::new_with_formatted_string(s, l.clone()).is_err())
+        };
+        let swedish = LocaleConfig::swedish();
+        let us = LocaleConfig::us();
+        test(",005", &swedish, "0.005");
+        test(".005", &us, "0.005");
+        test("1,001", &swedish, "1.001");
+        test("1,001", &us, "1001");
+        test("1\u{a0}001,45", &swedish, "1001.45");
+        test("1 001,45", &swedish, "1001.45");
+        test("1.001,45", &swedish, "1001.45");
+        test("1.001,45", &us, "1.00145");
+
+        fail("1.000.000", &us);
+        test("1.000.000", &swedish, "1000000");
+
+        fail("1.000.000,23", &us);
+        test("1.000.000,23", &swedish, "1000000.23");
+
+        test("1 000 000,23", &us, "100000023");
+        test("1 000 000,23", &swedish, "1000000.23");
+
+        test("1 000 000.23", &us, "1000000.23");
+        test("1 000 000.23", &swedish, "100000023");
+
+        fail("1,000,000", &swedish);
+        test("1,000,000", &us, "1000000");
+
+        fail("1,000,000.23", &swedish);
+        test("1,000,000.23", &us, "1000000.23");
     }
 }
 
@@ -1115,5 +1120,29 @@ mod uniffi_tests {
     fn clamped() {
         assert_eq!(decimal_clamped_to_zero(&-SUT::one()), SUT::zero());
         assert_eq!(decimal_clamped_to_zero(&SUT::one()), SUT::one());
+    }
+
+    #[test]
+    fn from_formatted_string() {
+        let test = |s: &str, l: &LocaleConfig, exp: &str| {
+            assert_eq!(
+                new_decimal_from_formatted_string(s.to_owned(), l.clone())
+                    .unwrap(),
+                exp.parse::<Decimal192>().unwrap()
+            )
+        };
+        let fail = |s: &str, l: &LocaleConfig| {
+            assert!(new_decimal_from_formatted_string(s.to_owned(), l.clone())
+                .is_err())
+        };
+        let swedish = LocaleConfig::swedish();
+        let us = LocaleConfig::us();
+        test(",005", &swedish, "0.005");
+        test(".005", &us, "0.005");
+        test("1,001", &swedish, "1.001");
+        test("1,001", &us, "1001");
+
+        fail("1,000,000.23", &swedish);
+        test("1,000,000.23", &us, "1000000.23");
     }
 }

@@ -4,7 +4,9 @@ mod entity_kind;
 mod hex_32bytes;
 mod identified_vec_via;
 mod keys;
+mod locale_config;
 mod logged_result;
+mod rounding_mode;
 mod safe_to_log;
 
 pub use bag_of_bytes::*;
@@ -13,5 +15,7 @@ pub use entity_kind::*;
 pub use hex_32bytes::*;
 pub use identified_vec_via::*;
 pub use keys::*;
+pub use locale_config::*;
 pub use logged_result::*;
+pub use rounding_mode::*;
 pub use safe_to_log::*;

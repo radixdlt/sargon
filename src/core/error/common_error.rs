@@ -315,6 +315,9 @@ pub enum CommonError {
 
     #[error("Invalid UUID (v4), got: {bad_value}")]
     InvalidUUIDv4 { bad_value: String } = 10086,
+
+    #[error("Unrecognized Locale Identifier: {bad_value}")]
+    UnrecognizedLocaleIdentifier { bad_value: String } = 10087,
 }
 
 /*
