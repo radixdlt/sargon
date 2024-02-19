@@ -2,7 +2,7 @@
 module_name = "Sargon"
 
 [bindings.kotlin]
-package_name = "sargon"
+package_name = "com.radixdlt.sargon"
 
 [bindings.swift.custom_types.BagOfBytes]
 type_name = "Data"

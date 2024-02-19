@@ -139,3 +139,31 @@ android.libraryVariants.all {
         }
     }
 }
+
+tasks.register("generateBindings") {
+    val aarch64Binary =
+        File("$rootDir/sargon/src/main/jniLibs/${TargetTriple.Aarch64.nativeTarget}/libsargon.so")
+    val armeabiv7aBinary =
+        File("$rootDir/sargon/src/main/jniLibs/${TargetTriple.ArmeabiV7a.nativeTarget}/libsargon.so")
+
+    val binary = when {
+        aarch64Binary.exists() -> aarch64Binary
+        armeabiv7aBinary.exists() -> armeabiv7aBinary
+        else -> null
+    }
+
+    onlyIf {
+        (binary != null).also {
+            if (!it) System.err.println("Missing .so library in jniLibs directory")
+        }
+    }
+
+    exec {
+        workingDir = rootDir.parentFile
+        commandLine(
+            "cargo", "run", "--bin", "uniffi-bindgen", "generate", "--library",
+            binary!!.toRelativeString(workingDir), "--language", "kotlin", "--out-dir",
+            "android/sargon/src/main/java"
+        )
+    }
+}
