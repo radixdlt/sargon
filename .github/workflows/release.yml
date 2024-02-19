@@ -13,16 +13,7 @@ env:
   CARGO_TERM_COLOR: always
 jobs:
   build:
-    strategy:
-      matrix:
-        build-target:
-          - target-triple: x86_64-apple-ios
-            runner: macos-13-xlarge
-          - target-triple: aarch64-apple-ios
-            runner: macos-13-xlarge
-          - target-triple: aarch64-apple-ios-sim
-            runner: macos-13-xlarge
-    runs-on: ${{ matrix.build-target.runner }}
+    runs-on: macos-13-xlarge
     steps:
       - uses: RDXWorks-actions/checkout@main
 
@@ -34,10 +25,7 @@ jobs:
           target: ${{ matrix.build-target.target-triple }}
           components: rust-std
 
-      - name: Install rust target
-        run: rustup target add ${{ matrix.build-target.target-triple }}
-      
       - name: Run iOS build script
         run: |
-          ls -R
+          rustup target add x86_64-apple-ios aarch64-apple-ios arch64-apple-ios-sim
           sh ./scripts/ios/release.sh
