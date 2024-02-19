@@ -6,9 +6,7 @@ on:
     branches:
       - develop
 
-permissions:
-  id-token: write
-  contents: read
+permissions: write-all
 env:
   CARGO_TERM_COLOR: always
 jobs:
