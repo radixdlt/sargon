@@ -25,7 +25,11 @@ path = "src/bin.rs"
 [dependencies]
 log = "0.4.20"
 pretty_env_logger = "0.5.0"
-derive_more = { version = "1.0.0-beta.6", features = ["debug", "display"] }
+derive_more = { version = "1.0.0-beta.6", features = [
+    "debug",
+    "display",
+    "from_str",
+] }
 serde = { version = "1.0.193", features = ["derive", "rc", "std"] }
 serde_json = { version = "1.0.108", features = ["preserve_order"] }
 serde_with = { version = "3.4.0" }
@@ -46,7 +50,7 @@ radix-engine-interface = { git = "https://github.com/radixdlt/radixdlt-scrypto",
 radix-engine-toolkit-json = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "9dc3deeb3299b4f4c255f36bb3d504681379ad5a" }
 radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "9dc3deeb3299b4f4c255f36bb3d504681379ad5a" }
 enum-iterator = "1.4.1"
-bip32 = "0.5.1"                                                                                                                       # only need Secp256k1, to do validation of PublicKey
+bip32 = "0.5.1" # only need Secp256k1, to do validation of PublicKey
 ed25519-dalek = "1.0.1"
 rand = "0.8.5"
 hex = "0.4.3"

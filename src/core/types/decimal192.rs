@@ -83,8 +83,11 @@ impl FromStr for InnerDecimal {
 )]
 #[display("{}", self.native())]
 pub struct Decimal192 {
-    /// @Kotlin / Swift developer: Do not use this property/field. Instead use all the provided
-    /// methods on the `Decimal` type.
+    /// @Kotlin / Swift developer: Do NOT use this property/field. Instead use all the provided methods on the `Decimal192` type.
+    /// (which are in fact vendored as freestanding global functions,
+    /// due to limitations in UniFII as of Feb 2024, but you should
+    /// create extension methods on Decimal192 in FFI land, translating
+    /// these functions into methods.)
     __inner: InnerDecimal, // Strange field name to try as much as possible hide it in FFI land.
 }
 

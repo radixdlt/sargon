@@ -78,14 +78,18 @@ pub fn ed25519_public_key_to_bytes(public_key: &Ed25519PublicKey) -> Vec<u8> {
     public_key.to_bytes()
 }
 
-impl IsPublicKey<ScryptoEd25519Signature> for Ed25519PublicKey {
+impl IsPublicKey<Ed25519Signature> for Ed25519PublicKey {
     /// Verifies an EdDSA signature over Curve25519.
     fn is_valid(
         &self,
-        signature: &ScryptoEd25519Signature,
+        signature: &Ed25519Signature,
         for_hash: &impl IsHash,
     ) -> bool {
-        scrypto_verify_ed25519(for_hash.as_hash(), &self.to_engine(), signature)
+        scrypto_verify_ed25519(
+            for_hash.as_hash(),
+            &self.to_engine(),
+            &signature.clone().into(),
+        )
     }
 }
 

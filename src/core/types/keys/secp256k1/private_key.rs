@@ -2,7 +2,6 @@ use crate::prelude::*;
 
 use radix_engine_common::crypto::{
     IsHash, Secp256k1PrivateKey as ScryptoSecp256k1PrivateKey,
-    Secp256k1Signature as ScryptoSecp256k1Signature,
 };
 
 /// A secp256k1 private key used to create cryptographic signatures, more specifically
@@ -85,7 +84,7 @@ impl IsPrivateKey<Secp256k1PublicKey> for Secp256k1PrivateKey {
         SLIP10Curve::Secp256k1
     }
 
-    type Signature = ScryptoSecp256k1Signature;
+    type Signature = Secp256k1Signature;
 
     fn public_key(&self) -> Secp256k1PublicKey {
         Secp256k1PublicKey::try_from(self.0.public_key()).expect(
@@ -94,7 +93,7 @@ impl IsPrivateKey<Secp256k1PublicKey> for Secp256k1PrivateKey {
     }
 
     fn sign(&self, msg_hash: &impl IsHash) -> Self::Signature {
-        self.0.sign(msg_hash)
+        self.0.sign(msg_hash).into()
     }
 }
 
@@ -182,10 +181,12 @@ mod tests {
             pk.to_hex(),
             "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
         );
-        let sig = ScryptoSecp256k1Signature::from_str("00eb8dcd5bb841430dd0a6f45565a1b8bdb4a204eb868832cd006f963a89a662813ab844a542fcdbfda4086a83fbbde516214113051b9c8e42a206c98d564d7122").unwrap();
+        let sig_hex = "00eb8dcd5bb841430dd0a6f45565a1b8bdb4a204eb868832cd006f963a89a662813ab844a542fcdbfda4086a83fbbde516214113051b9c8e42a206c98d564d7122";
+        let sig = Secp256k1Signature::from_str(sig_hex).unwrap();
 
         assert_eq!(sk.sign(&msg), sig);
-        assert!(pk.is_valid(&sig, &msg))
+        assert!(pk.is_valid(&sig, &msg));
+        assert_eq!(sig.to_hex(), sig_hex);
     }
 
     #[test]
