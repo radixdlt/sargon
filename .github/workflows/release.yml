@@ -11,31 +11,33 @@ permissions:
   contents: read
 env:
   CARGO_TERM_COLOR: always
+  RUST_TOOLCHAIN: nightly-2024-01-11
+  RUST_COMPONENTS: "rust-std"
 jobs:
   build:
     runs-on: macos-13-xlarge
     steps:
       - uses: RDXWorks-actions/checkout@main
 
-      - uses: RDXWorks-actions/toolchain@master
+      - name: Install Rust Toolchain for x86_64-apple-ios
+        uses: RDXWorks-actions/toolchain@master
         with:
-          toolchain: nightly-2024-01-11
-          default: true
-          components: rust-std
+          toolchain: $RUST_TOOLCHAIN
+          components: $RUST_COMPONENTS
           target: x86_64-apple-ios
 
-      - uses: RDXWorks-actions/toolchain@master
+      - name: Install Rust Toolchain for aarch64-apple-ios
+        uses: RDXWorks-actions/toolchain@master
         with:
-          toolchain: nightly-2024-01-11
-          default: true
-          components: rust-std
+          toolchain: $RUST_TOOLCHAIN
+          components: $RUST_COMPONENTS
           target: aarch64-apple-ios
 
-      - uses: RDXWorks-actions/toolchain@master
+      - name: Install Rust Toolchain for aarch64-apple-ios-sim
+        uses: RDXWorks-actions/toolchain@master
         with:
-          toolchain: nightly-2024-01-11
-          default: true
-          components: rust-std
+          toolchain: $RUST_TOOLCHAIN
+          components: $RUST_COMPONENTS
           target: aarch64-apple-ios-sim
 
       - name: Run iOS build script
