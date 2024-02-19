@@ -17,12 +17,26 @@ jobs:
     steps:
       - uses: RDXWorks-actions/checkout@main
 
-      - name: Install Rust Toolchain
-        uses: RDXWorks-actions/toolchain@master
+      - uses: RDXWorks-actions/toolchain@master
         with:
           toolchain: nightly-2024-01-11
           default: true
           components: rust-std
+          target: x86_64-apple-ios
+
+      - uses: RDXWorks-actions/toolchain@master
+        with:
+          toolchain: nightly-2024-01-11
+          default: true
+          components: rust-std
+          target: aarch64-apple-ios
+
+      - uses: RDXWorks-actions/toolchain@master
+        with:
+          toolchain: nightly-2024-01-11
+          default: true
+          components: rust-std
+          target: aarch64-apple-ios-sim
 
       - name: Run iOS build script
         run: |
