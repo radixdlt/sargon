@@ -128,3 +128,51 @@ impl HasPlaceholder for Ed25519Signature {
         "06cd3772c5c70d44819db80192a5b2521525e2529f770bff970ec4edc7c1bd76e41fcfa8e59ff93b1675c48f4af3b1697765286d999ee8b5bb8257691e3b7b09".parse().expect("Should produce a valid placeholder Ed25519Signature")
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::HasPlaceholder;
+
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = Ed25519Signature;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::placeholder(), SUT::placeholder());
+        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+    }
+
+    #[test]
+    fn scrypto_roundtrip() {
+        let sut = SUT::placeholder();
+        assert_eq!(
+            Into::<SUT>::into(Into::<ScryptoEd25519Signature>::into(
+                sut.clone()
+            )),
+            sut
+        );
+    }
+
+    #[test]
+    fn scrypto_roundtrip_start_scrypto() {
+        let sig: ScryptoEd25519Signature = "2150c2f6b6c496d197ae03afb23f6adf23b275c675394f23786250abd006d5a2c7543566403cb414f70d0e229b0a9b55b4c74f42fc38cdf1aba2307f97686f0b".parse().unwrap();
+        assert_eq!(
+            Into::<ScryptoEd25519Signature>::into(Into::<SUT>::into(
+                sig.clone()
+            )),
+            sig
+        );
+    }
+
+    #[test]
+    fn to_hex() {
+        assert_eq!(SUT::placeholder_other().to_hex(), "06cd3772c5c70d44819db80192a5b2521525e2529f770bff970ec4edc7c1bd76e41fcfa8e59ff93b1675c48f4af3b1697765286d999ee8b5bb8257691e3b7b09");
+    }
+}

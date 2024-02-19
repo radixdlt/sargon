@@ -87,7 +87,7 @@ impl HasPlaceholder for Secp256k1Signature {
         "018ad795353658a0cd1b513c4414cbafd0f990d329522977f8885a27876976a7d41ed8a81c1ac34551819627689cf940c4e27cacab217f00a0a899123c021ff6ef".parse().expect("Should construct valid placeholders.")
     }
 
-     /// Returns a valid Secp256k1Signature, see doc test below,
+    /// Returns a valid Secp256k1Signature, see doc test below,
     /// with the value:
     ///
     /// `"01aa1c4f46f8437b7f8ec9008ae10e6f33bb8be3e81e35c63f3498070dfbd6a20b2daee6073ead3c9e72d8909bc32a02e46cede3885cf8568d4c380ac97aa7fbcd"`
@@ -127,5 +127,53 @@ impl HasPlaceholder for Secp256k1Signature {
     ///
     fn placeholder_other() -> Self {
         "01aa1c4f46f8437b7f8ec9008ae10e6f33bb8be3e81e35c63f3498070dfbd6a20b2daee6073ead3c9e72d8909bc32a02e46cede3885cf8568d4c380ac97aa7fbcd".parse().expect("Should construct valid placeholders.")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::HasPlaceholder;
+
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = Secp256k1Signature;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::placeholder(), SUT::placeholder());
+        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+    }
+
+    #[test]
+    fn scrypto_roundtrip() {
+        let sut = SUT::placeholder();
+        assert_eq!(
+            Into::<SUT>::into(Into::<ScryptoSecp256k1Signature>::into(
+                sut.clone()
+            )),
+            sut
+        );
+    }
+
+    #[test]
+    fn scrypto_roundtrip_start_scrypto() {
+        let sig: ScryptoSecp256k1Signature = "01aa1c4f46f8437b7f8ec9008ae10e6f33bb8be3e81e35c63f3498070dfbd6a20b2daee6073ead3c9e72d8909bc32a02e46cede3885cf8568d4c380ac97aa7fbcd".parse().unwrap();
+        assert_eq!(
+            Into::<ScryptoSecp256k1Signature>::into(Into::<SUT>::into(
+                sig.clone()
+            )),
+            sig
+        );
+    }
+
+    #[test]
+    fn to_hex() {
+        assert_eq!(SUT::placeholder().to_hex(), "018ad795353658a0cd1b513c4414cbafd0f990d329522977f8885a27876976a7d41ed8a81c1ac34551819627689cf940c4e27cacab217f00a0a899123c021ff6ef");
     }
 }
