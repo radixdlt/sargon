@@ -13,7 +13,16 @@ env:
   CARGO_TERM_COLOR: always
 jobs:
   build:
-    runs-on: macos-13-xlarge
+    strategy:
+      matrix:
+        build-target:
+          - target-triple: x86_64-apple-ios
+            runner: macos-13-xlarge
+          - target-triple: aarch64-apple-ios
+            runner: macos-13-xlarge
+          - target-triple: aarch64-apple-ios-sim
+            runner: macos-13-xlarge
+    runs-on: ${{ matrix.build-target.runner }}
     steps:
       - uses: RDXWorks-actions/checkout@main
       - name: Install Rust Toolchain
@@ -21,7 +30,7 @@ jobs:
         with:
           toolchain: nightly-2024-01-11
           default: true
-          target: x86_64-apple-ios aarch64-apple-ios aarch64-apple-ios-sim
+          target: ${{ matrix.build-target.target-triple }}
           components: rust-std
       
       - name: Run iOS build script
