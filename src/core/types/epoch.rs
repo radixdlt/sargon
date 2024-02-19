@@ -1,0 +1,62 @@
+pub use crate::prelude::*;
+
+// use radix_engine_common::types::Epoch as ScryptoEpoch;
+
+// Generate the FfiConverter needed by UniFFI for newtype `Epoch`.
+uniffi::custom_newtype!(Epoch, u64);
+
+/// A type-safe consensus epoch number.
+#[derive(
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    Ord,
+    PartialOrd,
+    derive_more::Display,
+    derive_more::Debug,
+)]
+pub struct Epoch(pub u64);
+
+impl From<u64> for Epoch {
+    fn from(value: u64) -> Self {
+        Self(value)
+    }
+}
+
+impl From<Epoch> for u64 {
+    fn from(value: Epoch) -> Self {
+        value.0
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::prelude::*;
+
+    #[test]
+    fn from_u64() {
+        let test =
+            |u: u64| assert_eq!(Into::<u64>::into(Into::<Epoch>::into(u)), u);
+        test(0);
+        test(1);
+        test(2);
+        test(1337);
+    }
+
+    #[test]
+    fn to_u64() {
+        let test = |u: u64| {
+            assert_eq!(
+                Into::<Epoch>::into(Into::<u64>::into(Into::<Epoch>::into(u)))
+                    .0,
+                u
+            )
+        };
+        test(0);
+        test(1);
+        test(2);
+        test(1337);
+    }
+}
