@@ -26,3 +26,44 @@ impl From<Ed25519Signature> for Signature {
         Self::Ed25519 { value: signature }
     }
 }
+
+impl HasPlaceholder for Signature {
+    fn placeholder() -> Self {
+        Ed25519Signature::placeholder().into()
+    }
+
+    fn placeholder_other() -> Self {
+        Secp256k1Signature::placeholder().into()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = Signature;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::placeholder(), SUT::placeholder());
+        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+    }
+
+    #[test]
+    fn enum_as_inner() {
+        assert_eq!(
+            SUT::placeholder().as_ed25519().unwrap(),
+            &Ed25519Signature::placeholder()
+        );
+        assert_eq!(
+            SUT::placeholder_other().as_secp256k1().unwrap(),
+            &Secp256k1Signature::placeholder()
+        );
+    }
+}
