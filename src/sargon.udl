@@ -10,4 +10,7 @@ typedef string Timestamp;
 [Custom]
 typedef sequence<i8> BagOfBytes;
 
+[Custom]
+typedef string InnerDecimal;
+
 namespace sargon {};

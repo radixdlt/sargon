@@ -55,7 +55,7 @@ public struct AppFeature {
 				}
 				return .none
 			
-			case let .onboarding(.createdAccount(walletHolder)):
+			case let .onboarding(.delegate(.createdAccount(with: walletHolder))):
 				state = .main(MainFeature.State(walletHolder: walletHolder))
 				return .none
 				

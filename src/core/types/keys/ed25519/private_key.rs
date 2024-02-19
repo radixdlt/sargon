@@ -1,8 +1,7 @@
 use crate::prelude::*;
 
 use radix_engine_common::crypto::{
-    Ed25519PrivateKey as ScryptoEd25519PrivateKey,
-    Ed25519Signature as ScryptoEd25519Signature, IsHash,
+    Ed25519PrivateKey as ScryptoEd25519PrivateKey, IsHash,
 };
 
 /// An Ed25519 private key used to create cryptographic signatures, using
@@ -35,7 +34,7 @@ impl IsPrivateKey<Ed25519PublicKey> for Ed25519PrivateKey {
         SLIP10Curve::Curve25519
     }
 
-    type Signature = ScryptoEd25519Signature;
+    type Signature = Ed25519Signature;
 
     fn public_key(&self) -> Ed25519PublicKey {
         self.0.public_key().try_into().expect(
@@ -43,8 +42,8 @@ impl IsPrivateKey<Ed25519PublicKey> for Ed25519PrivateKey {
         )
     }
 
-    fn sign(&self, msg_hash: &impl IsHash) -> ScryptoEd25519Signature {
-        self.0.sign(msg_hash)
+    fn sign(&self, msg_hash: &impl IsHash) -> Self::Signature {
+        self.0.sign(msg_hash).into()
     }
 }
 
@@ -111,6 +110,8 @@ impl HasPlaceholder for Ed25519PrivateKey {
 }
 
 impl Ed25519PrivateKey {
+    /// A placeholder used to facilitate unit tests.
+    ///
     /// `833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42`
     ///
     /// expected public key:
@@ -124,8 +125,10 @@ impl Ed25519PrivateKey {
         .unwrap()
     }
 
+    /// A placeholder used to facilitate unit tests.
+    ///
     /// `1498b5467a63dffa2dc9d9e069caf075d16fc33fdd4c3b01bfadae6433767d93``
-
+    ///
     /// expected public key:
     /// `b7a3c12dc0c8c748ab07525b701122b88bd78f600c76342d27f25e5f92444cde`
     ///
@@ -180,10 +183,12 @@ mod tests {
             pk.to_hex(),
             "4cb5abf6ad79fbf5abbccafcc269d85cd2651ed4b885b5869f241aedf0a5ba29"
         );
-        let sig = ScryptoEd25519Signature::from_str("cf0ca64435609b85ab170da339d415bbac87d678dfd505969be20adc6b5971f4ee4b4620c602bcbc34fd347596546675099d696265f4a42a16df343da1af980e").unwrap();
+        let sig_hex = "cf0ca64435609b85ab170da339d415bbac87d678dfd505969be20adc6b5971f4ee4b4620c602bcbc34fd347596546675099d696265f4a42a16df343da1af980e";
+        let sig = Ed25519Signature::from_str(sig_hex).unwrap();
 
         assert_eq!(sk.sign(&msg), sig);
-        assert!(pk.is_valid(&sig, &msg))
+        assert!(pk.is_valid(&sig, &msg));
+        assert_eq!(sig.to_hex(), sig_hex);
     }
 
     #[test]

@@ -111,10 +111,9 @@ mod tests {
     fn new_from_string_multiple_given_names() {
         let name = PersonaDataEntryName::new(
             Variant::Western,
-            "Långstrump".to_string(),
-            "Pippilotta Viktualia Rullgardina Krusmynta Efraimsdotter"
-                .to_string(),
-            "Pippi".to_string(),
+            "Långstrump",
+            "Pippilotta Viktualia Rullgardina Krusmynta Efraimsdotter",
+            "Pippi",
         )
         .unwrap();
         assert_eq!(

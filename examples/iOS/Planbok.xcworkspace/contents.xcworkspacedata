@@ -22,12 +22,24 @@
                name = "Extensions">
                <Group
                   location = "group:Methods"
-                  name = "Methods">
+                  name = "WrapFunctions">
                   <FileRef
-                     location = "group:SecureStorageKey+Methods.swift">
+                     location = "group:/Users/sajjon/Developer/Radix/sargon/apple/Sources/Sargon/Extensions/Methods/SecureStorageKey+Wrap+Functions.swift">
                   </FileRef>
                   <FileRef
-                     location = "group:Decimal192+Methods.swift">
+                     location = "group:/Users/sajjon/Developer/Radix/sargon/apple/Sources/Sargon/Extensions/Methods/Decimal192+Wrap+Functions.swift">
+                  </FileRef>
+                  <FileRef
+                     location = "group:/Users/sajjon/Developer/Radix/sargon/apple/Sources/Sargon/Extensions/Methods/AppearanceID+Wrap+Functions.swift">
+                  </FileRef>
+                  <FileRef
+                     location = "group:Mnemonic+Wrap+Functions.swift">
+                  </FileRef>
+                  <FileRef
+                     location = "group:DisplayName+Wrap+Functions.swift">
+                  </FileRef>
+                  <FileRef
+                     location = "group:BagOfBytes+Wrap+Functions.swift">
                   </FileRef>
                </Group>
                <Group
@@ -59,6 +71,12 @@
                   </FileRef>
                   <FileRef
                      location = "group:SargonError+Swiftified.swift">
+                  </FileRef>
+                  <FileRef
+                     location = "group:Mnemonic+Swiftified.swift">
+                  </FileRef>
+                  <FileRef
+                     location = "group:LocaleConfig+Swiftified.swift">
                   </FileRef>
                </Group>
             </Group>

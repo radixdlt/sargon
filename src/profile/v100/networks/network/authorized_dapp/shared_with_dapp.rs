@@ -32,7 +32,7 @@ macro_rules! declare_shared_with_dapp {
         impl $struct_name {
             /// Constructs a new $struct_name where `ids` "fulfills" the `request`.
             ///
-            /// # Panic
+            /// # Panics
             /// Panics if `ids` does not fulfill `request`, for more information
             /// see [`RequestedQuantity::is_fulfilled_by_ids`]
             pub fn new(

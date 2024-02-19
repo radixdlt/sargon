@@ -33,12 +33,12 @@ impl Default for TransactionPreferences {
 impl HasPlaceholder for TransactionPreferences {
     /// A placeholder used to facilitate unit tests.
     fn placeholder() -> Self {
-        Self::new(Decimal192::try_from_str("0.975").unwrap())
+        Self::new("0.975".parse().unwrap())
     }
 
     /// A placeholder used to facilitate unit tests.
     fn placeholder_other() -> Self {
-        Self::new(Decimal192::try_from_str("0.765").unwrap())
+        Self::new("0.765".parse().unwrap())
     }
 }
 
@@ -67,8 +67,8 @@ mod tests {
 
     #[test]
     fn get_decimal() {
-        let value = Decimal192::new("0.975".to_string()).unwrap();
-        let sut = TransactionPreferences::new(value.clone());
+        let value = Decimal::new("0.975".to_string()).unwrap();
+        let sut = TransactionPreferences::new(value);
         assert_eq!(sut.default_deposit_guarantee, value)
     }
 

@@ -17,6 +17,13 @@ pub fn generate_32_bytes() -> Vec<u8> {
     generate_bytes::<32>()
 }
 
+/// Generates `64` random bytes using a cryptographically
+/// secure random generator and returns these bytes as
+/// a Vec<u8>.
+pub fn generate_64_bytes() -> Vec<u8> {
+    generate_bytes::<64>()
+}
+
 #[cfg(test)]
 mod tests {
     use std::collections::HashSet;

@@ -4,6 +4,7 @@ mod core;
 mod hierarchical_deterministic;
 mod profile;
 mod wallet;
+mod wrapped_radix_engine_toolkit;
 
 pub mod prelude {
 
@@ -11,6 +12,7 @@ pub mod prelude {
     pub use crate::hierarchical_deterministic::*;
     pub use crate::profile::*;
     pub use crate::wallet::*;
+    pub use crate::wrapped_radix_engine_toolkit::*;
 
     pub(crate) use std::collections::{BTreeSet, HashMap, HashSet};
 
@@ -32,6 +34,7 @@ pub mod prelude {
     pub(crate) use serde_repr::{Deserialize_repr, Serialize_repr};
     pub(crate) use serde_with::*;
     pub(crate) use std::cmp::Ordering;
+    pub(crate) use std::ops::{Add, Div, Mul, Neg, Sub};
     pub(crate) use std::str::FromStr;
     pub(crate) use std::sync::Arc;
     pub(crate) use strum::FromRepr;

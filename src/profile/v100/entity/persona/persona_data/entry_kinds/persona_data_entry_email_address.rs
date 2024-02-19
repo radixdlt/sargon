@@ -108,8 +108,7 @@ mod tests {
     #[test]
     fn new_from_string() {
         assert_eq!(
-            PersonaDataEntryEmailAddress::new("alan@turing.hero".to_string())
-                .unwrap(),
+            PersonaDataEntryEmailAddress::new("alan@turing.hero").unwrap(),
             PersonaDataEntryEmailAddress::placeholder()
         );
     }

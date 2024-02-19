@@ -13,7 +13,6 @@ public struct AccountView: SwiftUI.View {
 				
 					AddressView(account.address)
 						.foregroundColor(.app.whiteTransparent)
-						.foregroundColor(.app.whiteTransparent)
 			}
 			.padding(.horizontal, .medium1)
 			.padding(.vertical, .medium2)

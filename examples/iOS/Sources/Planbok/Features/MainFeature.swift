@@ -1,6 +1,47 @@
 @Reducer
 public struct MainFeature {
 	
+	@Reducer(state: .equatable)
+	public enum Destination {
+		case createAccount(CreateAccountFlowFeature)
+		case alert(AlertState<Alert>)
+		
+		public enum Alert {
+			case confirmedDeleteWallet
+		}
+	}
+	
+	@ObservableState
+	public struct State: Equatable {
+		
+		@Presents var destination: Destination.State?
+		
+		public var accounts: AccountsFeature.State
+		public let walletHolder: WalletHolder
+	
+		public init(walletHolder: WalletHolder) {
+			self.walletHolder = walletHolder
+			self.accounts = AccountsFeature.State(walletHolder: walletHolder)
+		}
+		
+		public init(wallet: Wallet) {
+			self.init(walletHolder: .init(wallet: wallet))
+		}
+	}
+	
+	@CasePathable
+	public enum Action {
+		@CasePathable
+		public enum DelegateAction {
+			case deletedWallet
+		}
+		case destination(PresentationAction<Destination.Action>)
+		case accounts(AccountsFeature.Action)
+		
+		case delegate(DelegateAction)
+		
+	}
+	
 	@Dependency(\.keychain) var keychain
 	public init() {}
 	
@@ -27,7 +68,7 @@ public struct MainFeature {
 				
 			case .accounts(.delegate(.createNewAccount)):
 				state.destination = .createAccount(
-					CreateAccountFeature.State(
+					CreateAccountFlowFeature.State(
 						walletHolder: state.walletHolder
 					)
 				)
@@ -45,7 +86,7 @@ public struct MainFeature {
 					fatalError("Fix error handling, error: \(error)")
 				}
 			
-			case .destination(.presented(.createAccount(.createdAccount))):
+			case .destination(.presented(.createAccount(.delegate(.createdAccount)))):
 				state.destination = nil
 				state.accounts.refresh() // FIXME: we really do not want this.
 				return .none
@@ -57,44 +98,7 @@ public struct MainFeature {
 		.ifLet(\.$destination, action: \.destination)
 	}
 	
-	@Reducer(state: .equatable)
-	public enum Destination {
-		case createAccount(CreateAccountFeature)
-		case alert(AlertState<Alert>)
-		
-		public enum Alert {
-			case confirmedDeleteWallet
-		}
-	}
-	
-	@ObservableState
-	public struct State: Equatable {
-		
-		@Presents var destination: Destination.State?
-		
-		public var accounts: AccountsFeature.State
-		public let walletHolder: WalletHolder
-	
-		public init(walletHolder: WalletHolder) {
-			self.walletHolder = walletHolder
-			self.accounts = AccountsFeature.State(walletHolder: walletHolder)
-		}
-		
-		public init(wallet: Wallet) {
-			self.init(walletHolder: .init(wallet: wallet))
-		}
-	}
-	
-	public enum Action {
-		public enum DelegateAction {
-			case deletedWallet
-		}
-		case destination(PresentationAction<Destination.Action>)
-		case accounts(AccountsFeature.Action)
-		
-		case delegate(DelegateAction)
-		
-	}
+
 	
 	public struct View: SwiftUI.View {
 		
@@ -121,7 +125,7 @@ public struct MainFeature {
 					action: \.destination.createAccount
 				)
 			) { store in
-				CreateAccountFeature.View(store: store)
+				CreateAccountFlowFeature.View(store: store)
 			}
 			.alert($store.scope(state: \.destination?.alert, action: \.destination.alert))
 		}

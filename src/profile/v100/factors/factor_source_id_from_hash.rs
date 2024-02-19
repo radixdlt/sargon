@@ -9,8 +9,6 @@ use radix_engine_common::crypto::{blake2b_256_hash, Hash};
     Clone,
     PartialEq,
     Eq,
-    PartialOrd,
-    Ord,
     Hash,
     derive_more::Display,
     derive_more::Debug,

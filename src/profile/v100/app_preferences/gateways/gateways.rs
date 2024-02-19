@@ -236,7 +236,7 @@ mod tests {
         )
         .unwrap();
         assert_eq!(sut.clone().len(), 1 + 2);
-        assert_eq!(sut.is_empty(), false);
+        assert!(!sut.is_empty());
     }
 
     #[test]

@@ -52,8 +52,8 @@ pub enum CommonError {
     #[error("String not hex {bad_value}")]
     StringNotHex { bad_value: String } = 10011,
 
-    #[error("Invalid byte count, expected 32, found: {bad_value}")]
-    InvalidByteCountExpected32 { bad_value: u64 } = 10012,
+    #[error("Invalid byte count, expected {expected}, found: {found}")]
+    InvalidByteCount { expected: u64, found: u64 } = 10012,
 
     #[error("Invalid BIP32 path '{bad_value}'.")]
     InvalidBIP32Path { bad_value: String } = 10013,
@@ -315,6 +315,9 @@ pub enum CommonError {
 
     #[error("Invalid UUID (v4), got: {bad_value}")]
     InvalidUUIDv4 { bad_value: String } = 10086,
+
+    #[error("Unrecognized Locale Identifier: {bad_value}")]
+    UnrecognizedLocaleIdentifier { bad_value: String } = 10087,
 }
 
 /*

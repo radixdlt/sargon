@@ -5,3 +5,10 @@ extend-exclude = [
     "tarpaulin-report.html",
     "tests/vectors/fixtures/*.json",
 ]
+
+
+[default.extend-identifiers]
+inout = "inout"
+
+[default.extend-words]
+inout = "inout"

@@ -1,14 +1,12 @@
 use crate::{prelude::*, UniffiCustomTypeConverter};
 
 use bip32::secp256k1::PublicKey as BIP32Secp256k1PublicKey; // the bip32 crate actually does validation of the PublicKey whereas `radix_engine_common` does not.
+
 use radix_engine_common::crypto::{
     verify_secp256k1, Hash, IsHash,
     Secp256k1PublicKey as ScryptoSecp256k1PublicKey,
     Secp256k1Signature as ScryptoSecp256k1Signature,
 };
-// use transaction::{
-//     signing::secp256k1::Secp256k1Signature, validation::verify_secp256k1,
-// };
 
 /// A `secp256k1` public key used to verify cryptographic signatures (ECDSA signatures).
 #[serde_as]
@@ -85,14 +83,18 @@ pub fn new_secp256k1_public_key_placeholder_other() -> Secp256k1PublicKey {
     Secp256k1PublicKey::placeholder_other()
 }
 
-impl IsPublicKey<ScryptoSecp256k1Signature> for Secp256k1PublicKey {
+impl IsPublicKey<Secp256k1Signature> for Secp256k1PublicKey {
     /// Verifies an ECDSA signature over Secp256k1.
     fn is_valid(
         &self,
-        signature: &ScryptoSecp256k1Signature,
+        signature: &Secp256k1Signature,
         for_hash: &impl IsHash,
     ) -> bool {
-        verify_secp256k1(for_hash.as_hash(), &self.to_engine(), signature)
+        verify_secp256k1(
+            for_hash.as_hash(),
+            &self.to_engine(),
+            &signature.clone().into(),
+        )
     }
 }
 
