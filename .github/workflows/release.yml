@@ -8,22 +8,42 @@ on:
 
 permissions:
   id-token: write
-  contents: read
+  contents: write
 env:
   CARGO_TERM_COLOR: always
 jobs:
   build:
     runs-on: macos-13-xlarge
+    env:
+      RUST_TOOLCHAIN: nightly-2024-01-11
+      RUST_COMPONENTS: "rust-std"
     steps:
       - uses: RDXWorks-actions/checkout@main
-      - name: Install Rust Toolchain
+
+      - name: Install Rust Toolchain for x86_64-apple-ios
         uses: RDXWorks-actions/toolchain@master
         with:
-          toolchain: nightly-2024-01-11
-          default: true
-          target: x86_64-apple-ios aarch64-apple-ios aarch64-apple-ios-sim
-          components: rust-std
-      
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          components: ${{ env.RUST_COMPONENTS }}
+          target: x86_64-apple-ios
+
+      - name: Install Rust Toolchain for aarch64-apple-ios
+        uses: RDXWorks-actions/toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          components: ${{ env.RUST_COMPONENTS }}
+          target: aarch64-apple-ios
+
+      - name: Install Rust Toolchain for aarch64-apple-ios-sim
+        uses: RDXWorks-actions/toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          components: ${{ env.RUST_COMPONENTS }}
+          target: aarch64-apple-ios-sim
+
       - name: Run iOS build script
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-            sh ./scripts/ios/release.sh
+          rustup target add x86_64-apple-ios aarch64-apple-ios aarch64-apple-ios-sim
+          sh ./scripts/ios/release.sh
