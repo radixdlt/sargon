@@ -1,5 +1,6 @@
 use crate::prelude::*;
 
+/// Either a Signature on `Curve25519` or `Secp256k1`
 #[derive(
     Clone,
     PartialEq,
