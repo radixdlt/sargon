@@ -39,4 +39,5 @@ jobs:
       
       - name: Run iOS build script
         run: |
-            sh ./scripts/ios/release.sh
+          ls -R
+          sh ./scripts/ios/release.sh
