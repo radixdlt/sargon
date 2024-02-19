@@ -41,6 +41,11 @@ jobs:
           target: aarch64-apple-ios-sim
 
       - name: Run iOS build script
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           rustup target add x86_64-apple-ios aarch64-apple-ios aarch64-apple-ios-sim
-          sh ./scripts/ios/release.sh
+          sh ./scripts/ios/build-sargon.sh
+
+
+

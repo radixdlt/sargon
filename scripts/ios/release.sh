@@ -38,8 +38,6 @@ XCFRAME_ZIP_PATH=`echo "$OUTPUT_OF_BUILD" | cut -d ";" -f 2` || exit $?
 echo "🚢  CHECKSUM: $CHECKSUM"
 echo "🚢  XCFRAME_ZIP_PATH: $XCFRAME_ZIP_PATH"
 
-exit 1 # TEMPORARY
-
 `git tag $NEXT_TAG`
 echo "🚢 🏷️ 📡 Pushing tag: $(last_tag)"
 `git push origin $NEXT_TAG`
