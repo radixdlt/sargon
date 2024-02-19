@@ -27,5 +27,5 @@ jobs:
 
       - name: Run iOS build script
         run: |
-          rustup target add x86_64-apple-ios aarch64-apple-ios arch64-apple-ios-sim
+          rustup target add x86_64-apple-ios aarch64-apple-ios aarch64-apple-ios-sim
           sh ./scripts/ios/release.sh
