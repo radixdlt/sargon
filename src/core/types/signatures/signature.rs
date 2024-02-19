@@ -4,8 +4,6 @@ use crate::prelude::*;
     Clone,
     PartialEq,
     Eq,
-    PartialOrd,
-    Ord,
     Hash,
     EnumAsInner,
     derive_more::Display,

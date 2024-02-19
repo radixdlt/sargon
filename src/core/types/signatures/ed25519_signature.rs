@@ -7,8 +7,6 @@ use radix_engine_common::crypto::Ed25519Signature as ScryptoEd25519Signature;
     Clone,
     PartialEq,
     Eq,
-    PartialOrd,
-    Ord,
     Hash,
     derive_more::Display,
     derive_more::Debug,

@@ -11,8 +11,6 @@ macro_rules! decl_bag_of_n_bytes {
             Clone,
             PartialEq,
             Eq,
-            PartialOrd,
-            Ord,
             Hash,
             SerializeDisplay,
             DeserializeFromStr,

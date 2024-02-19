@@ -11,8 +11,6 @@ use radix_engine_common::crypto::Hash;
     Clone,
     PartialEq,
     Eq,
-    Ord,
-    PartialOrd,
     Hash,
     derive_more::Debug,
     derive_more::Display,

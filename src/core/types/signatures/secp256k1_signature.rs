@@ -7,8 +7,6 @@ use radix_engine_common::crypto::Secp256k1Signature as ScryptoSecp256k1Signature
     Clone,
     PartialEq,
     Eq,
-    PartialOrd,
-    Ord,
     Hash,
     derive_more::Display,
     derive_more::Debug,
