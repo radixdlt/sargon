@@ -5,6 +5,13 @@ repos:
       - id: typos
   - repo: local
     hooks:
+      - id: ensure Swift not changed to local development
+        name: ensure Swift not changed to local development
+        language: system
+        types: [file, swift]
+        entry: ./scripts/ios/ensure-not-local.sh
+        pass_filenames: false
+
       - id: fmt
         name: fmt
         language: system
