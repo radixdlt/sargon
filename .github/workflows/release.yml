@@ -22,7 +22,7 @@ jobs:
         with:
           toolchain: nightly-2024-01-11
           default: true
-          target: ${{ matrix.build-target.target-triple }}
+          target: x86_64-apple-ios aarch64-apple-ios aarch64-apple-ios-sim
           components: rust-std
 
       - name: Run iOS build script
