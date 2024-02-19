@@ -25,6 +25,7 @@ jobs:
     runs-on: ${{ matrix.build-target.runner }}
     steps:
       - uses: RDXWorks-actions/checkout@main
+
       - name: Install Rust Toolchain
         uses: RDXWorks-actions/toolchain@master
         with:
@@ -32,6 +33,9 @@ jobs:
           default: true
           target: ${{ matrix.build-target.target-triple }}
           components: rust-std
+
+      - name: Install rust target
+        run: rustup target add ${{ matrix.build-target.target-triple }}
       
       - name: Run iOS build script
         run: |
