@@ -36,9 +36,9 @@ XCFRAME_ZIP_PATH=`echo "$OUTPUT_OF_BUILD" | cut -d ";" -f 2` || exit $?
 
 echo "🚢  CHECKSUM: $CHECKSUM"
 echo "🚢  XCFRAME_ZIP_PATH: $XCFRAME_ZIP_PATH"
-
+`git commit -m "Release of '$NEXT_TAG' (updated Package.swift with new checksum and path to zip on Github). This commit is not merged into main/develop branch (and need not be)."`
 `git tag $NEXT_TAG`
-echo "🚢 🏷️ 📡 Pushing tag: $(last_tag)"
+echo "🚢 🏷️ 📡 Pushing tag: $(NEXT_TAG), but only tag, not commit."
 `git push origin $NEXT_TAG`
 
 # This MUST match whatever you we have declared in `$PROJECT_ROOT/Package.swift`
