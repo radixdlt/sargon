@@ -16,6 +16,3 @@ macro_rules! dummy_sargon {
         pub struct $struct_name {}
     };
 }
-
-// Rename and use Decimal type!
-dummy_sargon!(RETDecimal);

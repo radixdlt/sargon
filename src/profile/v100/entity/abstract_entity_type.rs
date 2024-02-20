@@ -24,22 +24,3 @@ pub enum AbstractEntityType {
     /// The entity type used by Personas.
     Identity,
 }
-
-// impl TryFrom<ScryptoEntityType> for AbstractEntityType {
-//     type Error = crate::CommonError;
-
-//     fn try_from(value: ScryptoEntityType) -> Result<Self, Self::Error> {
-//         match value {
-//             ScryptoEntityType::GlobalVirtualEd25519Account => {
-//                 Ok(Self::Account)
-//             }
-//             ScryptoEntityType::GlobalVirtualSecp256k1Account => {
-//                 Ok(Self::Account)
-//             }
-//             ScryptoEntityType::GlobalVirtualEd25519Identity => {
-//                 Ok(Self::Identity)
-//             }
-//             _ => Err(CommonError::UnsupportedEntityType),
-//         }
-//     }
-// }

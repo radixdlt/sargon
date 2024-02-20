@@ -17,11 +17,6 @@ pub struct PoolAddress {
     pub(crate) __inner: InnerPoolAddress,
 }
 
-#[uniffi::export]
-pub fn new_pool_address(bech32: String) -> Result<PoolAddress> {
-    PoolAddress::try_from_bech32(bech32.as_str())
-}
-
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;

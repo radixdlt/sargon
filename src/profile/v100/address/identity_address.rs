@@ -24,12 +24,26 @@ pub struct IdentityAddress {
     pub(crate) __inner: InnerIdentityAddress,
 }
 
+#[uniffi::export]
+pub fn new_identity_address_from(
+    public_key: PublicKey,
+    network_id: NetworkID,
+) -> IdentityAddress {
+    IdentityAddress::new(public_key, network_id)
+}
+
 impl EntityAddress for IdentityAddress {
     /// Identifies that IdentityAddresses uses the `EntityType::Identity`, which are used
     /// to validate the HRP (`"identity_"`) and is also used when forming HD derivation
     /// paths as per CAP26.
     fn entity_type() -> AbstractEntityType {
         AbstractEntityType::Identity
+    }
+}
+
+impl IdentityAddress {
+    pub fn new(public_key: PublicKey, network_id: NetworkID) -> Self {
+        <Self as EntityAddress>::from_public_key(public_key, network_id)
     }
 }
 
@@ -116,13 +130,13 @@ mod tests {
 
     #[test]
     fn from_public_key_bytes_and_network_id() {
-        let public_key = ScryptoEd25519PublicKey::from_str(
+        let public_key = Ed25519PublicKey::from_str(
             "6c28952be5cdade99c7dd5d003b6b692714b6b74c5fdb5fdc9a8e4ee1d297838",
         )
         .unwrap();
         assert_eq!(
             SUT::from_public_key(
-                ScryptoPublicKey::Ed25519(public_key),
+                PublicKey::Ed25519 { value: public_key },
                 NetworkID::Mainnet
             )
             .address(),
@@ -209,5 +223,32 @@ mod tests {
             json!("identity_rdx12tgzjrz9u0xz4l28vf04hz87eguclmfaq4d2p8f8lv7zg9ssnzkuxx")
         );
         assert_json_value_fails::<SUT>(json!("super invalid"));
+    }
+}
+
+#[cfg(test)]
+mod uniffi_tests {
+    use super::*;
+    use crate::prelude::*;
+
+    #[test]
+    fn new_from_bech32_get_network_id_and_address() {
+        let b32 = "identity_rdx122kttqch0eehzj6f9nkkxcw7msfeg9udurq5u0ysa0e92c59w0mg6x";
+        let address = new_identity_address(b32.to_owned()).unwrap();
+        assert_eq!(identity_address_network_id(&address), NetworkID::Mainnet);
+        assert_eq!(identity_address_bech32_address(&address), b32);
+    }
+
+    #[test]
+    fn new_from_public_key_bytes_and_network_id() {
+        let public_key = Ed25519PublicKey::from_str(
+            "6c28952be5cdade99c7dd5d003b6b692714b6b74c5fdb5fdc9a8e4ee1d297838",
+        )
+        .unwrap();
+        assert_eq!(
+            new_identity_address_from(PublicKey::Ed25519 { value: public_key }, NetworkID::Mainnet)
+            .address(),
+            "identity_rdx12tgzjrz9u0xz4l28vf04hz87eguclmfaq4d2p8f8lv7zg9ssnzku8j"
+        )
     }
 }

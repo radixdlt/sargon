@@ -25,8 +25,24 @@ pub trait AddressViaRet: Sized {
 }
 
 macro_rules! decl_ret_wrapped_address {
-    ($addr_name:ty,$ret_addr:ty) => {
+    ($addr_name:ty, $ret_addr:ty, $addr_uniffi_fn_name:ident) => {
         paste! {
+
+            #[uniffi::export]
+            pub fn [<new_ $addr_uniffi_fn_name _address>](bech32: String) -> Result<$addr_name> {
+                $addr_name::try_from_bech32(&bech32)
+            }
+
+            #[uniffi::export]
+            pub fn [<$addr_uniffi_fn_name _address_network_id>](address: &$addr_name) -> NetworkID {
+                address.network_id()
+            }
+
+            #[uniffi::export]
+            pub fn [<$addr_uniffi_fn_name _address_bech32_address>](address: &$addr_name) -> String {
+                address.address()
+            }
+
              /// UniFFI conversion for RET types which are DisplayFromStr using String as builtin.
             impl crate::UniffiCustomTypeConverter for [<Inner $addr_name>] {
                 type Builtin = String;
@@ -126,12 +142,16 @@ macro_rules! decl_ret_wrapped_address {
     };
 }
 
-decl_ret_wrapped_address!(AccessControllerAddress, RetAccessControllerAddress);
-decl_ret_wrapped_address!(AccountAddress, RetAccountAddress);
-decl_ret_wrapped_address!(ComponentAddress, RetComponentAddress);
-decl_ret_wrapped_address!(IdentityAddress, RetIdentityAddress);
-decl_ret_wrapped_address!(PoolAddress, RetPoolAddress);
-decl_ret_wrapped_address!(PackageAddress, RetPackageAddress);
-decl_ret_wrapped_address!(ResourceAddress, RetResourceAddress);
-decl_ret_wrapped_address!(ValidatorAddress, RetValidatorAddress);
-decl_ret_wrapped_address!(VaultAddress, RetVaultAddress);
+decl_ret_wrapped_address!(
+    AccessControllerAddress,
+    RetAccessControllerAddress,
+    access_controller
+);
+decl_ret_wrapped_address!(AccountAddress, RetAccountAddress, account);
+decl_ret_wrapped_address!(ComponentAddress, RetComponentAddress, component);
+decl_ret_wrapped_address!(IdentityAddress, RetIdentityAddress, identity);
+decl_ret_wrapped_address!(PoolAddress, RetPoolAddress, pool);
+decl_ret_wrapped_address!(PackageAddress, RetPackageAddress, package);
+decl_ret_wrapped_address!(ResourceAddress, RetResourceAddress, resource);
+decl_ret_wrapped_address!(ValidatorAddress, RetValidatorAddress, validator);
+decl_ret_wrapped_address!(VaultAddress, RetVaultAddress, vault);

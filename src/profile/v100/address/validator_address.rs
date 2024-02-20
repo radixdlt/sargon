@@ -17,11 +17,6 @@ pub struct ValidatorAddress {
     pub(crate) __inner: InnerValidatorAddress,
 }
 
-#[uniffi::export]
-pub fn new_validator_address(bech32: String) -> Result<ValidatorAddress> {
-    ValidatorAddress::try_from_bech32(bech32.as_str())
-}
-
 impl HasPlaceholder for ValidatorAddress {
     fn placeholder() -> Self {
         "validator_rdx1sd5368vqdmjk0y2w7ymdts02cz9c52858gpyny56xdvzuheepdeyy0"

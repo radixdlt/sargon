@@ -17,12 +17,6 @@ pub struct ComponentAddress {
     pub(crate) __inner: InnerComponentAddress,
 }
 
-#[uniffi::export]
-pub fn new_component_address(bech32: String) -> Result<ComponentAddress> {
-    // ComponentAddress::try_from_bech32(bech32.as_str())
-    todo!()
-}
-
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;

@@ -17,11 +17,6 @@ pub struct VaultAddress {
     pub(crate) __inner: InnerVaultAddress,
 }
 
-#[uniffi::export]
-pub fn new_vault_address(bech32: String) -> Result<VaultAddress> {
-    VaultAddress::try_from_bech32(bech32.as_str())
-}
-
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
@@ -83,7 +78,7 @@ mod tests {
 
 #[cfg(test)]
 mod uniffi_tests {
-    use crate::{new_resource_address, EntityAddress};
+    use crate::prelude::*;
 
     use super::*;
 

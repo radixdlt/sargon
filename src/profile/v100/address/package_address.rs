@@ -17,11 +17,6 @@ pub struct PackageAddress {
     pub(crate) __inner: InnerPackageAddress,
 }
 
-#[uniffi::export]
-pub fn new_package_address(bech32: String) -> Result<PackageAddress> {
-    PackageAddress::try_from_bech32(bech32.as_str())
-}
-
 impl HasPlaceholder for PackageAddress {
     fn placeholder() -> Self {
         Self::placeholder_mainnet_gumball_club()

@@ -30,12 +30,6 @@ pub struct AccountAddress {
 }
 
 #[uniffi::export]
-pub fn new_account_address(bech32: String) -> Result<AccountAddress> {
-    // AccountAddress::try_from_bech32(bech32.as_str())
-    todo!()
-}
-
-#[uniffi::export]
 pub fn new_account_address_from(
     public_key: PublicKey,
     network_id: NetworkID,
@@ -177,10 +171,10 @@ mod tests {
     fn from_bech32_invalid_entity_type() {
         let s = "identity_tdx_21_12tljxea3s0mse52jmpvsphr0haqs86sung8d3qlhr763nxttj59650";
         assert_eq!(
-            SUT::try_from_bech32(
-                s,
-            ),
-            Err(CommonError::FailedToDecodeAddressFromBech32 { bad_value: s.to_owned() })
+            SUT::try_from_bech32(s,),
+            Err(CommonError::FailedToDecodeAddressFromBech32 {
+                bad_value: s.to_owned()
+            })
         );
     }
 
@@ -321,6 +315,14 @@ mod uniffi_tests {
     type SUT = AccountAddress;
 
     #[test]
+    fn new_from_bech32_get_network_id_and_address() {
+        let b32 = "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease";
+        let address = new_account_address(b32.to_owned()).unwrap();
+        assert_eq!(account_address_network_id(&address), NetworkID::Mainnet);
+        assert_eq!(account_address_bech32_address(&address), b32);
+    }
+
+    #[test]
     fn short() {
         let sut: SUT = SUT::try_from_bech32(
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease",
@@ -330,7 +332,7 @@ mod uniffi_tests {
     }
 
     #[test]
-    fn new() {
+    fn new_from_key() {
         let public_key: PublicKey = Ed25519PublicKey::from_str(
             "3e9b96a2a863f1be4658ea66aa0584d2a8847d4c0f658b20e62e3594d994d73d",
         )

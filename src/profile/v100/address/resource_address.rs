@@ -83,11 +83,6 @@ impl ResourceAddress {
     }
 }
 
-#[uniffi::export]
-pub fn new_resource_address(bech32: String) -> Result<ResourceAddress> {
-    ResourceAddress::try_from_bech32(bech32.as_str())
-}
-
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
@@ -101,7 +96,10 @@ mod tests {
         assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
 
         assert_eq!(SUT::placeholder_stokenet(), SUT::placeholder_stokenet());
-        assert_eq!(SUT::placeholder_stokenet_other(), SUT::placeholder_stokenet_other());
+        assert_eq!(
+            SUT::placeholder_stokenet_other(),
+            SUT::placeholder_stokenet_other()
+        );
     }
 
     #[test]
@@ -179,7 +177,7 @@ mod tests {
 
 #[cfg(test)]
 mod uniffi_tests {
-    use crate::{new_resource_address, EntityAddress};
+    use crate::prelude::*;
 
     use super::*;
 
@@ -187,11 +185,10 @@ mod uniffi_tests {
     type SUT = ResourceAddress;
 
     #[test]
-    fn new() {
-        let s = "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd";
-        let a = SUT::try_from_bech32(s).unwrap();
-        let b = new_resource_address(s.to_string()).unwrap();
-        assert_eq!(b.address(), s);
-        assert_eq!(a, b);
+    fn new_from_bech32_get_network_id_and_address() {
+        let b32 = "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd";
+        let address = new_resource_address(b32.to_owned()).unwrap();
+        assert_eq!(resource_address_network_id(&address), NetworkID::Mainnet);
+        assert_eq!(resource_address_bech32_address(&address), b32);
     }
 }
