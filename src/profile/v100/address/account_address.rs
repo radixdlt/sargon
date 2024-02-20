@@ -1,7 +1,6 @@
 pub use crate::prelude::*;
 // use crate::InnerAccountAddress;
 
-
 /// Human readable address of an account. Always starts with `"account_"``, for example:
 ///
 /// `account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease`
@@ -63,8 +62,7 @@ pub fn account_address_to_short(address: &AccountAddress) -> String {
 
 impl AccountAddress {
     pub fn new(public_key: PublicKey, network_id: NetworkID) -> Self {
-        // <Self as EntityAddress>::from_public_key(public_key, network_id)
-        todo!();
+        <Self as EntityAddress>::from_public_key(public_key, network_id)
     }
 
     /// Formats the AccountAddress to its abbreviated form which is what the user
@@ -153,29 +151,23 @@ mod tests {
 
     use crate::prelude::*;
 
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = AccountAddress;
+
     #[test]
     fn equality() {
-        assert_eq!(
-            AccountAddress::placeholder(),
-            AccountAddress::placeholder()
-        );
-        assert_eq!(
-            AccountAddress::placeholder_other(),
-            AccountAddress::placeholder_other()
-        );
+        assert_eq!(SUT::placeholder(), SUT::placeholder());
+        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(
-            AccountAddress::placeholder(),
-            AccountAddress::placeholder_other()
-        );
+        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
     }
 
     #[test]
     fn try_from_bech32() {
-        assert!(AccountAddress::try_from_bech32(
+        assert!(SUT::try_from_bech32(
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease",
         )
         .is_ok());
@@ -183,17 +175,18 @@ mod tests {
 
     #[test]
     fn from_bech32_invalid_entity_type() {
+        let s = "identity_tdx_21_12tljxea3s0mse52jmpvsphr0haqs86sung8d3qlhr763nxttj59650";
         assert_eq!(
-            AccountAddress::try_from_bech32(
-                "identity_tdx_21_12tljxea3s0mse52jmpvsphr0haqs86sung8d3qlhr763nxttj59650",
+            SUT::try_from_bech32(
+                s,
             ),
-            Err(CommonError::MismatchingEntityTypeWhileDecodingAddress)
+            Err(CommonError::FailedToDecodeAddressFromBech32 { bad_value: s.to_owned() })
         );
     }
 
     #[test]
     fn format() {
-        let a = AccountAddress::try_from_bech32(
+        let a = SUT::try_from_bech32(
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease",
         )
         .unwrap();
@@ -211,7 +204,7 @@ mod tests {
         .unwrap();
 
         assert_eq!(
-            AccountAddress::from_public_key::<PublicKey>(public_key.into(), NetworkID::Mainnet)
+            SUT::from_public_key::<PublicKey>(public_key.into(), NetworkID::Mainnet)
                 .address(),
             "account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzdm"
         )
@@ -225,14 +218,14 @@ mod tests {
         .unwrap();
 
         assert_eq!(
-            AccountAddress::new(public_key.into(), NetworkID::Mainnet).address(),
+            SUT::new(public_key.into(), NetworkID::Mainnet).address(),
             "account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzdm"
         )
     }
 
     #[test]
     fn nebunet() {
-        let address = AccountAddress::try_from_bech32(
+        let address = SUT::try_from_bech32(
             "account_tdx_b_1286wrrqrfcrfhthfrtdywe8alney8zu0ja5xrhcq2475ej08m9raqq",
         )
         .unwrap();
@@ -241,7 +234,7 @@ mod tests {
 
     #[test]
     fn network_id() {
-        let sut = AccountAddress::try_from_bech32(
+        let sut = SUT::try_from_bech32(
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease",
         )
         .unwrap();
@@ -250,7 +243,7 @@ mod tests {
 
     #[test]
     fn short() {
-        let sut: AccountAddress = AccountAddress::try_from_bech32(
+        let sut: SUT = SUT::try_from_bech32(
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease",
         )
         .unwrap();
@@ -260,7 +253,7 @@ mod tests {
     #[test]
     fn invalid() {
         assert_eq!(
-            AccountAddress::try_from_bech32("x"),
+            SUT::try_from_bech32("x"),
             Err(CommonError::FailedToDecodeAddressFromBech32 {
                 bad_value: "x".to_owned()
             })
@@ -271,7 +264,7 @@ mod tests {
     fn invalid_checksum() {
         let s = "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3apleasx";
         assert_eq!(
-            AccountAddress::try_from_bech32(s),
+            SUT::try_from_bech32(s),
             Err(CommonError::FailedToDecodeAddressFromBech32 {
                 bad_value: s.to_owned()
             })
@@ -282,7 +275,7 @@ mod tests {
     fn invalid_entity_type() {
         let s = "identity_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease";
         assert_eq!(
-            AccountAddress::try_from_bech32(s),
+            SUT::try_from_bech32(s),
             Err(CommonError::FailedToDecodeAddressFromBech32 {
                 bad_value: s.to_owned()
             })
@@ -291,7 +284,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip() {
-        let a: AccountAddress =
+        let a: SUT =
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
                 .parse()
                 .unwrap();
@@ -309,31 +302,27 @@ mod tests {
 
     #[test]
     fn json_roundtrip_fails_for_invalid() {
-        assert_json_value_fails::<AccountAddress>(
+        assert_json_value_fails::<SUT>(
             json!("identity_rdx12gzxlgre0glhh9jxaptm7tdth8j4w4r8ykpg2xjfv45nghzsjzrvmp")
         );
-        assert_json_value_fails::<AccountAddress>(
+        assert_json_value_fails::<SUT>(
             json!("account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzzz")
         );
-        assert_json_value_fails::<AccountAddress>(json!("super invalid"));
+        assert_json_value_fails::<SUT>(json!("super invalid"));
     }
 }
 
 #[cfg(test)]
 mod uniffi_tests {
-    use std::str::FromStr;
 
-    use crate::{
-        account_address_to_short, new_account_address,
-        new_account_address_from, Ed25519PublicKey, EntityAddress, NetworkID,
-        PublicKey,
-    };
+    use super::*;
 
-    use super::AccountAddress;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = AccountAddress;
 
     #[test]
     fn short() {
-        let sut: AccountAddress = AccountAddress::try_from_bech32(
+        let sut: SUT = SUT::try_from_bech32(
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease",
         )
         .unwrap();
@@ -350,14 +339,11 @@ mod uniffi_tests {
 
         let bech32 = "account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzdm";
         assert_eq!(
-            AccountAddress::new(public_key.clone(), NetworkID::Mainnet),
+            SUT::new(public_key.clone(), NetworkID::Mainnet),
             new_account_address_from(public_key, NetworkID::Mainnet)
         );
         let from_bech32 = new_account_address(bech32.to_string()).unwrap();
-        assert_eq!(
-            AccountAddress::try_from_bech32(bech32).unwrap(),
-            from_bech32.clone()
-        );
+        assert_eq!(SUT::try_from_bech32(bech32).unwrap(), from_bech32.clone());
         assert_eq!(from_bech32.address(), bech32)
     }
 }

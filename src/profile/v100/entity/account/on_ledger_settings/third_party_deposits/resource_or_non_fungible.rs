@@ -15,6 +15,7 @@ use crate::prelude::*;
 pub enum ResourceOrNonFungible {
     #[serde(rename = "resourceAddress")]
     Resource { value: ResourceAddress },
+    
     #[serde(rename = "nonFungibleGlobalID")]
     NonFungible { value: NonFungibleGlobalId },
 }

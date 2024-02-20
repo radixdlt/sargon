@@ -22,50 +22,95 @@ pub fn new_validator_address(bech32: String) -> Result<ValidatorAddress> {
     ValidatorAddress::try_from_bech32(bech32.as_str())
 }
 
+impl HasPlaceholder for ValidatorAddress {
+    fn placeholder() -> Self {
+        "validator_rdx1sd5368vqdmjk0y2w7ymdts02cz9c52858gpyny56xdvzuheepdeyy0"
+            .parse()
+            .expect("Valid placeholder")
+    }
+
+    fn placeholder_other() -> Self {
+        "validator_rdx1sw5rrhkxs65kl9xcxu7t9yu3k8ptscjwamum4phclk297j6r28g8kd"
+            .parse()
+            .expect("Valid placeholder other")
+    }
+}
+
+impl ValidatorAddress {
+    pub fn placeholder_stokenet() -> Self {
+        "validator_tdx_2_1sdatqsl6rx05yy2yvpf6ckfl7x8dluvzkcyljkn0x4lxkgucc0xz2w".parse().expect("Valid placeholder")
+    }
+
+    pub fn placeholder_stokenet_other() -> Self {
+        "validator_tdx_2_1sdtnujyn3720ymg8lakydkvc5tw4q3zecdj95akdwt9de362mvtd94".parse().expect("Valid placeholder")
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
 
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = ValidatorAddress;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::placeholder(), SUT::placeholder());
+        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+
+        assert_eq!(SUT::placeholder_stokenet(), SUT::placeholder_stokenet());
+        assert_eq!(
+            SUT::placeholder_stokenet_other(),
+            SUT::placeholder_stokenet_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+        assert_ne!(SUT::placeholder(), SUT::placeholder_stokenet());
+    }
+
     #[test]
     fn display() {
-        let s = "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd";
-        let a = ValidatorAddress::try_from_bech32(s).unwrap();
+        let s = "validator_rdx1sdcmd3ymwzvswgyva8lpknqrzuzzmmkac9my4auk29j5feumfh77fs";
+        let a = SUT::try_from_bech32(s).unwrap();
         assert_eq!(format!("{a}"), s);
     }
 
     #[test]
     fn json_roundtrip() {
-        let a: ValidatorAddress =
-            "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
+        let a: SUT =
+            "validator_rdx1sd4eq4vvnrmtxy0l4wxaykugwjmyflnnkn4sz3p9jv79ac2sv5sh88"
                 .parse()
                 .unwrap();
 
         assert_json_value_eq_after_roundtrip(
             &a,
-            json!("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"),
+            json!("validator_rdx1sd4eq4vvnrmtxy0l4wxaykugwjmyflnnkn4sz3p9jv79ac2sv5sh88"),
         );
         assert_json_roundtrip(&a);
         assert_json_value_ne_after_roundtrip(
             &a,
-            json!("resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"),
+            json!("validator_rdx1sdcmd3ymwzvswgyva8lpknqrzuzzmmkac9my4auk29j5feumfh77fs"),
         );
     }
 
     #[test]
     fn json_roundtrip_fails_for_invalid() {
-        assert_json_value_fails::<ValidatorAddress>(
-            json!("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxxx")
+        assert_json_value_fails::<SUT>(
+            json!("validator_rdx1sdcmd3ymwzvswgyva8lpknqrzuzzmmkac9my4auk29j5feumfh77ff")
         );
-        assert_json_value_fails::<ValidatorAddress>(
-            json!("account_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+        assert_json_value_fails::<SUT>(
+            json!("account_rdx1sdcmd3ymwzvswgyva8lpknqrzuzzmmkac9my4auk29j5feumfh77ff")
         );
-        assert_json_value_fails::<ValidatorAddress>(json!("super invalid"));
+        assert_json_value_fails::<SUT>(json!("super invalid"));
     }
 
     #[test]
     fn network_id_stokenet() {
-        let a: ValidatorAddress =
-            "resource_tdx_2_1tkckx9fynl9f7756z8wxphq7wce6vk874nuq4f2nnxgh3nzrwhjdlp"
+        let a: SUT =
+            "validator_tdx_2_1sdatqsl6rx05yy2yvpf6ckfl7x8dluvzkcyljkn0x4lxkgucc0xz2w"
                 .parse()
                 .unwrap();
         assert_eq!(a.network_id(), NetworkID::Stokenet);
@@ -73,7 +118,7 @@ mod tests {
 
     #[test]
     fn network_id_mainnet() {
-        let a: ValidatorAddress =
+        let a: SUT =
             "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
                 .parse()
                 .unwrap();
@@ -93,7 +138,7 @@ mod uniffi_tests {
     #[test]
     fn new() {
         let s = "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd";
-        let a = ValidatorAddress::try_from_bech32(s).unwrap();
+        let a = SUT::try_from_bech32(s).unwrap();
         let b = new_validator_address(s.to_string()).unwrap();
         assert_eq!(b.address(), s);
         assert_eq!(a, b);

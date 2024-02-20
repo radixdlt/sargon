@@ -22,27 +22,74 @@ pub fn new_package_address(bech32: String) -> Result<PackageAddress> {
     PackageAddress::try_from_bech32(bech32.as_str())
 }
 
+impl HasPlaceholder for PackageAddress {
+    fn placeholder() -> Self {
+        Self::placeholder_mainnet_gumball_club()
+    }
+
+    fn placeholder_other() -> Self {
+        Self::placeholder_stokenet_gumball_club()
+    }
+}
+
+impl PackageAddress {
+    pub fn placeholder_mainnet_gumball_club() -> Self {
+        "package_rdx1p589ehmmvqa2dnw0jaky3kesjdjvln94hzunsqse8k52083hfcjh63"
+            .parse()
+            .expect("Valid Mainnet package placeholder address")
+    }
+    pub fn placeholder_stokenet_gumball_club() -> Self {
+        "package_tdx_2_1pkaw4m82c89hy0gk4dwqtqlln6md8anr2ysnrvegxar53mr6nvn5ay"
+            .parse()
+            .expect("Valid Stokenet package placeholder address")
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
 
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = PackageAddress;
+
+
+    #[test]
+    fn equality() {
+        assert_eq!(
+            SUT::placeholder(),
+            SUT::placeholder()
+        );
+        assert_eq!(
+            SUT::placeholder_other(),
+            SUT::placeholder_other()
+        );
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(
+            SUT::placeholder(),
+            SUT::placeholder_other()
+        );
+    }
+
     #[test]
     fn display() {
-        let s = "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd";
-        let a = PackageAddress::try_from_bech32(s).unwrap();
+        let s = "package_rdx1p589ehmmvqa2dnw0jaky3kesjdjvln94hzunsqse8k52083hfcjh63";
+        let a = SUT::try_from_bech32(s).unwrap();
         assert_eq!(format!("{a}"), s);
     }
 
     #[test]
     fn json_roundtrip() {
         let a: PackageAddress =
-            "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
+            "package_tdx_2_1pkaw4m82c89hy0gk4dwqtqlln6md8anr2ysnrvegxar53mr6nvn5ay"
                 .parse()
                 .unwrap();
 
         assert_json_value_eq_after_roundtrip(
             &a,
-            json!("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"),
+            json!("package_tdx_2_1pkaw4m82c89hy0gk4dwqtqlln6md8anr2ysnrvegxar53mr6nvn5ay"),
         );
         assert_json_roundtrip(&a);
         assert_json_value_ne_after_roundtrip(
@@ -53,19 +100,19 @@ mod tests {
 
     #[test]
     fn json_roundtrip_fails_for_invalid() {
-        assert_json_value_fails::<PackageAddress>(
-            json!("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxxx")
+        assert_json_value_fails::<SUT>(
+            json!("package_tdx_2_1pkaw4m82c89hy0gk4dwqtqlln6md8anr2ysnrvegxar53mr6nvn5ax")
         );
-        assert_json_value_fails::<PackageAddress>(
-            json!("account_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+        assert_json_value_fails::<SUT>(
+            json!("account_tdx_2_1pkaw4m82c89hy0gk4dwqtqlln6md8anr2ysnrvegxar53mr6nvn5ay")
         );
-        assert_json_value_fails::<PackageAddress>(json!("super invalid"));
+        assert_json_value_fails::<SUT>(json!("super invalid"));
     }
 
     #[test]
     fn network_id_stokenet() {
-        let a: PackageAddress =
-            "resource_tdx_2_1tkckx9fynl9f7756z8wxphq7wce6vk874nuq4f2nnxgh3nzrwhjdlp"
+        let a: SUT =
+            "package_tdx_2_1pkaw4m82c89hy0gk4dwqtqlln6md8anr2ysnrvegxar53mr6nvn5ay"
                 .parse()
                 .unwrap();
         assert_eq!(a.network_id(), NetworkID::Stokenet);
@@ -74,7 +121,7 @@ mod tests {
     #[test]
     fn network_id_mainnet() {
         let a: PackageAddress =
-            "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
+            "package_rdx1p589ehmmvqa2dnw0jaky3kesjdjvln94hzunsqse8k52083hfcjh63"
                 .parse()
                 .unwrap();
         assert_eq!(a.network_id(), NetworkID::Mainnet);
@@ -92,8 +139,8 @@ mod uniffi_tests {
 
     #[test]
     fn new() {
-        let s = "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd";
-        let a = PackageAddress::try_from_bech32(s).unwrap();
+        let s = "package_rdx1p589ehmmvqa2dnw0jaky3kesjdjvln94hzunsqse8k52083hfcjh63";
+        let a = SUT::try_from_bech32(s).unwrap();
         let b = new_package_address(s.to_string()).unwrap();
         assert_eq!(b.address(), s);
         assert_eq!(a, b);
