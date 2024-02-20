@@ -10,8 +10,6 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Hash,
-    PartialOrd,
-    Ord,
     uniffi::Record,
 )]
 #[serde(rename_all = "camelCase")]

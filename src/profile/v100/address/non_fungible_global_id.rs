@@ -27,10 +27,12 @@ pub struct NonFungibleGlobalId {
 impl From<ResourceAddress> for radix_engine_common::types::ResourceAddress {
     fn from(value: ResourceAddress) -> Self {
         radix_engine_common::types::ResourceAddress::try_from_bech32(
-            &AddressBech32Decoder::new(&value.network_id.network_definition()),
-            value.address.clone().as_str(),
+            &AddressBech32Decoder::new(
+                &value.network_id().network_definition(),
+            ),
+            value.address().clone().as_str(),
         )
-        .unwrap()
+        .expect("Should always be able to convert from Sargon to RET for ResourceAddress")
     }
 }
 
@@ -43,23 +45,23 @@ impl NonFungibleGlobalId {
             .network_id
             .try_into()
             .expect("should be able to know network");
-        let resource_address_bech32 = ResourceAddress::address_from_node_id(
-            engine_resource_address.into_node_id(),
-            network_id,
-        );
 
         let non_fungible_local_id: NonFungibleLocalId = engine_local_id.into();
+
+        let resource_address = ResourceAddress::new(
+            engine_resource_address.into_node_id(),
+            network_id,
+        )
+        .expect("Should always be able to convert between Sargon and RET");
+
         Self {
-            resource_address: ResourceAddress {
-                address: resource_address_bech32,
-                network_id: NetworkID::from_repr(internal.network_id).unwrap(),
-            },
+            resource_address,
             non_fungible_local_id,
         }
     }
 
     fn network_id(&self) -> NetworkID {
-        self.resource_address.network_id
+        self.resource_address.network_id()
     }
 
     fn engine(&self) -> RETNonFungibleGlobalId {
@@ -139,7 +141,7 @@ mod tests {
         let str = "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd:#2244#";
         let id: NonFungibleGlobalId = str.parse().unwrap();
         assert_eq!(
-            id.resource_address.address,
+            id.resource_address.address(),
             "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd"
         );
     }

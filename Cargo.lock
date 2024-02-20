@@ -1993,6 +1993,7 @@ dependencies = [
  "memoize",
  "num-format",
  "nutype",
+ "paste",
  "pretty_assertions",
  "pretty_env_logger",
  "radix-engine-common",

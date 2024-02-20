@@ -19,37 +19,27 @@ use radix_engine_common::types::EntityType as ScryptoEntityType;
 )]
 #[repr(u32)] // it is u32 since used in Derivation Paths (CAP26) where each component is a u32.
 pub enum AbstractEntityType {
-    /// The entity type used by Accounts.
+    /// The entity type used by Accounts created by the Radix Wallet.
     Account,
     /// The entity type used by Personas.
     Identity,
-    /// Resource address
-    Resource,
 }
-impl AbstractEntityType {
-    /// Conversion of the Radix Engines type for EntityType to Self.
-    pub fn try_from(value: ScryptoEntityType) -> Result<Self> {
-        match value {
-            ScryptoEntityType::GlobalVirtualEd25519Account => Ok(Self::Account),
-            ScryptoEntityType::GlobalVirtualSecp256k1Account => {
-                Ok(Self::Account)
-            }
-            ScryptoEntityType::GlobalVirtualEd25519Identity => {
-                Ok(Self::Identity)
-            }
-            ScryptoEntityType::GlobalFungibleResourceManager => {
-                Ok(Self::Resource)
-            }
-            _ => Err(CommonError::UnsupportedEntityType),
-        }
-    }
 
-    /// Human Readable Part (HRP) used to create account and identity addresses.
-    pub fn hrp(&self) -> String {
-        match self {
-            Self::Account => "account".to_string(),
-            Self::Identity => "identity".to_string(),
-            Self::Resource => "resource".to_string(),
-        }
-    }
-}
+// impl TryFrom<ScryptoEntityType> for AbstractEntityType {
+//     type Error = crate::CommonError;
+
+//     fn try_from(value: ScryptoEntityType) -> Result<Self, Self::Error> {
+//         match value {
+//             ScryptoEntityType::GlobalVirtualEd25519Account => {
+//                 Ok(Self::Account)
+//             }
+//             ScryptoEntityType::GlobalVirtualSecp256k1Account => {
+//                 Ok(Self::Account)
+//             }
+//             ScryptoEntityType::GlobalVirtualEd25519Identity => {
+//                 Ok(Self::Identity)
+//             }
+//             _ => Err(CommonError::UnsupportedEntityType),
+//         }
+//     }
+// }

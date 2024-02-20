@@ -9,8 +9,6 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Hash,
-    PartialOrd,
-    Ord,
     uniffi::Enum,
 )]
 #[serde(tag = "discriminator")]

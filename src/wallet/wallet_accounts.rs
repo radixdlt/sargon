@@ -458,7 +458,7 @@ mod tests {
             },
             |a, q| {
                 assert_eq!(
-                    a.address.address,
+                    a.address.address(),
                     "account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8"
                 );
                 assert_eq!(a.appearance_id, AppearanceID::new(0).unwrap()); // using `0` since first.
@@ -496,7 +496,7 @@ mod tests {
             },
             |a, q| {
                 assert_eq!(
-                    a.address.address,
+                    a.address.address(),
                     "account_rdx12xvg2sssh0rpca6e8xyqv5vf4nqu928083yzf0fdrnvjdz2pvc000x" // pretty cool address! Random!
                 );
                 assert_eq!(a.appearance_id, AppearanceID::new(2).unwrap());

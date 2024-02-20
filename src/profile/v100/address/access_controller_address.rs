@@ -1,9 +1,5 @@
 use crate::prelude::*;
 
-/// The address of an Account, a bech32 encoding of a public key hash
-/// that starts with the prefix `"account_"`, dependent on NetworkID, meaning the same
-/// public key used for two AccountAddresses on two different networks will not have
-/// the same address.
 #[derive(
     Clone,
     Debug,
@@ -17,13 +13,15 @@ use crate::prelude::*;
     uniffi::Record,
 )]
 #[display("{__inner}")]
-pub struct ResourceAddress {
-    pub(crate) __inner: InnerResourceAddress,
+pub struct AccessControllerAddress {
+    pub(crate) __inner: InnerAccessControllerAddress,
 }
 
 #[uniffi::export]
-pub fn new_resource_address(bech32: String) -> Result<ResourceAddress> {
-    ResourceAddress::try_from_bech32(bech32.as_str())
+pub fn new_access_controller_address(
+    bech32: String,
+) -> Result<AccessControllerAddress> {
+    AccessControllerAddress::try_from_bech32(bech32.as_str())
 }
 
 #[cfg(test)]
@@ -33,13 +31,13 @@ mod tests {
     #[test]
     fn display() {
         let s = "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd";
-        let a = ResourceAddress::try_from_bech32(s).unwrap();
+        let a = AccessControllerAddress::try_from_bech32(s).unwrap();
         assert_eq!(format!("{a}"), s);
     }
 
     #[test]
     fn json_roundtrip() {
-        let a: ResourceAddress =
+        let a: AccessControllerAddress =
             "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
                 .parse()
                 .unwrap();
@@ -57,18 +55,20 @@ mod tests {
 
     #[test]
     fn json_roundtrip_fails_for_invalid() {
-        assert_json_value_fails::<ResourceAddress>(
+        assert_json_value_fails::<AccessControllerAddress>(
             json!("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxxx")
         );
-        assert_json_value_fails::<ResourceAddress>(
+        assert_json_value_fails::<AccessControllerAddress>(
             json!("account_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
         );
-        assert_json_value_fails::<ResourceAddress>(json!("super invalid"));
+        assert_json_value_fails::<AccessControllerAddress>(json!(
+            "super invalid"
+        ));
     }
 
     #[test]
     fn network_id_stokenet() {
-        let a: ResourceAddress =
+        let a: AccessControllerAddress =
             "resource_tdx_2_1tkckx9fynl9f7756z8wxphq7wce6vk874nuq4f2nnxgh3nzrwhjdlp"
                 .parse()
                 .unwrap();
@@ -77,7 +77,7 @@ mod tests {
 
     #[test]
     fn network_id_mainnet() {
-        let a: ResourceAddress =
+        let a: AccessControllerAddress =
             "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
                 .parse()
                 .unwrap();
@@ -92,13 +92,13 @@ mod uniffi_tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = ResourceAddress;
+    type SUT = AccessControllerAddress;
 
     #[test]
     fn new() {
         let s = "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd";
-        let a = ResourceAddress::try_from_bech32(s).unwrap();
-        let b = new_resource_address(s.to_string()).unwrap();
+        let a = AccessControllerAddress::try_from_bech32(s).unwrap();
+        let b = new_access_controller_address(s.to_string()).unwrap();
         assert_eq!(b.address(), s);
         assert_eq!(a, b);
     }

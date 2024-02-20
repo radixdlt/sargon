@@ -38,8 +38,8 @@ impl AuthorizedDapp {
             AuthorizedPersonaSimple,
         >,
     ) -> Self {
-        assert_eq!(dapp_definition_address.network_id, network_id,  "Discrepancy, found an DappDefinitionAddress on other network than {network_id}");
-        assert!(references_to_authorized_personas.ids().iter().all(|i| i.network_id == network_id), "Discrepancy, found an (Authorized)Persona(Simple) on other network than {network_id}");
+        assert_eq!(dapp_definition_address.network_id(), network_id,  "Discrepancy, found an DappDefinitionAddress on other network than {network_id}");
+        assert!(references_to_authorized_personas.ids().iter().all(|i| i.network_id() == network_id), "Discrepancy, found an (Authorized)Persona(Simple) on other network than {network_id}");
         Self {
             network_id,
             dapp_definition_address,

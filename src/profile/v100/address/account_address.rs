@@ -1,103 +1,39 @@
-use radix_engine_toolkit::models::canonical_address_types::{
-    CanonicalAccountAddress as RetAccountAddress,
-    CanonicalAddress as RetIsAddressTrait,
-};
+pub use crate::prelude::*;
+// use crate::InnerAccountAddress;
 
-use crate::prelude::*;
 
-pub trait RetStringType:
-    RetIsAddressTrait + std::fmt::Display + FromStr
-{
-}
-
-/// UniFFI conversion for RET types which are DisplayFromStr using String as builtin.
-impl<U: RetStringType> crate::UniffiCustomTypeConverter for U {
-    type Builtin = String;
-
-    #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
-    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
-        val.parse::<U>().map_err(|e| e.into())
-    }
-
-    #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
-    fn from_custom(obj: Self) -> Self::Builtin {
-        obj.to_string()
-    }
-}
-
-pub trait WrappingRetStringType: From<Self::Inner> + Into<Self::Inner> + std::fmt::Display + FromStr<Err = CommonError> {
-    type Inner: RetStringType;
-}
-
-impl RetStringType for RetAccountAddress {}
-
-pub struct InnerAccountAddress {}
-
-/// The address of an Account, a bech32 encoding of a public key hash
-/// that starts with the prefix `"account_"`, dependent on NetworkID, meaning the same
-/// public key used for two AccountAddresses on two different networks will not have
-/// the same address.
+/// Human readable address of an account. Always starts with `"account_"``, for example:
+///
+/// `account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease`
+///
+/// Most commonly the user will see this address in its abbreviated
+/// form which is:
+///
+/// `acco...please`
+///
+/// Addresses are checksummed, as per Bech32. **Only** *Account* addresses starts with
+/// the prefix `account_`.
 #[derive(
     Clone,
     Debug,
-    Default,
     PartialEq,
     Eq,
     Hash,
-    // SerializeDisplay,
-    // DeserializeFromStr,
+    derive_more::FromStr,
     derive_more::Display,
+    SerializeDisplay,
+    DeserializeFromStr,
     uniffi::Record,
 )]
 #[display("{__inner}")]
-struct AccountAddress2 {
-    __inner: RetAccountAddress,
-}
-
-impl WrappingRetStringType for AccountAddress2 {
-    type Inner = RetAccountAddress;
-}
-
-/// The address of an Account, a bech32 encoding of a public key hash
-/// that starts with the prefix `"account_"`, dependent on NetworkID, meaning the same
-/// public key used for two AccountAddresses on two different networks will not have
-/// the same address.
-#[derive(
-    Clone,
-    Debug,
-    Default,
-    PartialEq,
-    Eq,
-    Hash,
-    SerializeDisplay,
-    DeserializeFromStr,
-    derive_more::Display,
-    uniffi::Record,
-)]
-#[display("{address}")]
 pub struct AccountAddress {
-    /// Human readable address of an account. Always starts with `"account_"``, for example:
-    ///
-    /// `account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease`
-    ///
-    /// Most commonly the user will see this address in its abbreviated
-    /// form which is:
-    ///
-    /// `acco...please`
-    ///
-    /// Addresses are checksummed, as per Bech32. **Only** *Account* addresses starts with
-    /// the prefix `account_`.
-    pub address: String,
-
-    /// The network this account address is tied to, i.e. which was used when a public key
-    /// hash was used to bech32 encode it. This means that two public key hashes will result
-    /// in two different account address on two different networks.
-    pub network_id: NetworkID,
+    pub(crate) __inner: InnerAccountAddress,
 }
 
 #[uniffi::export]
 pub fn new_account_address(bech32: String) -> Result<AccountAddress> {
-    AccountAddress::try_from_bech32(bech32.as_str())
+    // AccountAddress::try_from_bech32(bech32.as_str())
+    todo!()
 }
 
 #[uniffi::export]
@@ -127,7 +63,8 @@ pub fn account_address_to_short(address: &AccountAddress) -> String {
 
 impl AccountAddress {
     pub fn new(public_key: PublicKey, network_id: NetworkID) -> Self {
-        <Self as EntityAddress>::from_public_key(public_key, network_id)
+        // <Self as EntityAddress>::from_public_key(public_key, network_id)
+        todo!();
     }
 
     /// Formats the AccountAddress to its abbreviated form which is what the user
@@ -143,16 +80,8 @@ impl AccountAddress {
     /// `account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease`
     ///
     pub fn short(&self) -> String {
-        let suffix = suffix_str(6, &self.address);
-        format!("{}...{}", &self.address[0..4], suffix)
-    }
-}
-
-impl FromStr for AccountAddress {
-    type Err = CommonError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        AccountAddress::try_from_bech32(s)
+        let suffix = suffix_str(6, &self.address());
+        format!("{}...{}", &self.address()[0..4], suffix)
     }
 }
 
@@ -162,20 +91,6 @@ impl EntityAddress for AccountAddress {
     /// paths as per CAP26.
     fn entity_type() -> AbstractEntityType {
         AbstractEntityType::Account
-    }
-
-    // Underscored to decrease visibility. You SHOULD NOT call this function directly,
-    // instead use `try_from_bech32` which performs proper validation. Impl types SHOULD
-    // `panic` if `address` does not start with `Self::entity_type().hrp()`
-    fn __with_address_and_network_id(
-        address: &str,
-        network_id: NetworkID,
-    ) -> Self {
-        assert!(address.starts_with(&Self::entity_type().hrp()), "Invalid address, you SHOULD NOT call this function directly, you should use `try_from_bech32` instead.");
-        Self {
-            address: address.to_string(),
-            network_id,
-        }
     }
 }
 
@@ -198,7 +113,7 @@ impl AccountAddress {
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease",
         )
         .unwrap();
-        assert_eq!(address.network_id, NetworkID::Mainnet);
+        assert_eq!(address.network_id(), NetworkID::Mainnet);
         address
     }
 
@@ -208,7 +123,7 @@ impl AccountAddress {
             "account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master",
         )
         .unwrap();
-        assert_eq!(address.network_id, NetworkID::Mainnet);
+        assert_eq!(address.network_id(), NetworkID::Mainnet);
         address
     }
 
@@ -218,7 +133,7 @@ impl AccountAddress {
                 "account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql",
             )
             .unwrap();
-        assert_eq!(address.network_id, NetworkID::Stokenet);
+        assert_eq!(address.network_id(), NetworkID::Stokenet);
         address
     }
 
@@ -228,7 +143,7 @@ impl AccountAddress {
                 "account_tdx_2_129663ef7fj8azge3y6sl73lf9vyqt53ewzlf7ul2l76mg5wyqlqlpr",
             )
             .unwrap();
-        assert_eq!(address.network_id, NetworkID::Stokenet);
+        assert_eq!(address.network_id(), NetworkID::Stokenet);
         address
     }
 }
@@ -297,7 +212,7 @@ mod tests {
 
         assert_eq!(
             AccountAddress::from_public_key::<PublicKey>(public_key.into(), NetworkID::Mainnet)
-                .address,
+                .address(),
             "account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzdm"
         )
     }
@@ -310,7 +225,7 @@ mod tests {
         .unwrap();
 
         assert_eq!(
-            AccountAddress::new(public_key.into(), NetworkID::Mainnet).address,
+            AccountAddress::new(public_key.into(), NetworkID::Mainnet).address(),
             "account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzdm"
         )
     }
@@ -321,7 +236,7 @@ mod tests {
             "account_tdx_b_1286wrrqrfcrfhthfrtdywe8alney8zu0ja5xrhcq2475ej08m9raqq",
         )
         .unwrap();
-        assert_eq!(address.network_id, NetworkID::Nebunet)
+        assert_eq!(address.network_id(), NetworkID::Nebunet)
     }
 
     #[test]
@@ -330,7 +245,7 @@ mod tests {
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease",
         )
         .unwrap();
-        assert_eq!(sut.network_id, NetworkID::Mainnet);
+        assert_eq!(sut.network_id(), NetworkID::Mainnet);
     }
 
     #[test]
@@ -443,6 +358,6 @@ mod uniffi_tests {
             AccountAddress::try_from_bech32(bech32).unwrap(),
             from_bech32.clone()
         );
-        assert_eq!(from_bech32.address, bech32)
+        assert_eq!(from_bech32.address(), bech32)
     }
 }
