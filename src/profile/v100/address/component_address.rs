@@ -111,7 +111,7 @@ mod tests {
         assert_json_roundtrip(&a);
         assert_json_value_ne_after_roundtrip(
             &a,
-            json!("resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"),
+            json!("internal_component_rdx1lrhpef83s2c25zp9kzlk7qjak4en6llr7pw2zpuv5cswzufh9ff2ug"),
         );
     }
 
@@ -155,9 +155,8 @@ mod uniffi_tests {
     type SUT = ComponentAddress;
 
     #[test]
-    fn internal_component_rdx1lrhpef83s2c25zp9kzlk7qjak4en6llr7pw2zpuv5cswzufh9ff2ug(
-    ) {
-        let b32 = "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease";
+    fn new_from_bech32_get_network_id_and_address() {
+        let b32 = "internal_component_rdx1lrhpef83s2c25zp9kzlk7qjak4en6llr7pw2zpuv5cswzufh9ff2ug";
         let address = new_component_address(b32.to_owned()).unwrap();
         assert_eq!(component_address_network_id(&address), NetworkID::Mainnet);
         assert_eq!(component_address_bech32_address(&address), b32);

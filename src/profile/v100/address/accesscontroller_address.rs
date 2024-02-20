@@ -28,45 +28,30 @@ impl HasPlaceholder for AccessControllerAddress {
 }
 
 impl AccessControllerAddress {
-    /*
-        these should all be valid
-        [
-        "accesscontroller_rdx1c0duj4lq0dc3cpl8qd420fpn5eckh8ljeysvjm894lyl5ja5yq6y5a",
-        "accesscontroller_rdx1cv93xuha64eay8ctkx9km0el2jgkuh6gqlwec7tzecccyu0rj37xak",
-        "accesscontroller_rdx1cva6mtja4crwxxhmd63q2xlhew7fh0af67zw3snhzj8cm7xq2cm06g",
-        "accesscontroller_rdx1cvlu8kvmqu56arywyzkkewyuv7mdg448d69k083dpq0nvrd44me6qd",
-        "accesscontroller_rdx1cw9383xuqx6cme0knucw5aggknvrqmc8lzu7jcn3kwherk8x55zmtt",
-        "accesscontroller_rdx1cwggxzkqxwg9zjhv3jvyvkcn2hl7gxgwgjeqxl2d7xyuyx3tklg77y",
-        "accesscontroller_rdx1cwtvlhhg0pwyrlcujv9gv2adastmcc03ewg9vww8ke3s5t9gjf7jmp",
-        "accesscontroller_rdx1cwufa4a2j7klu5hh72uwxvd9gyevxfuxspxynne7fqnnzzr7nh4uya"
-      ]
-      and these:
-      accesscontroller_rdx1c0llllllllllllllllllllllllllllllllllllllllllllllkl2v3s
-      accesscontroller_rdx1cvqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq09959m
-
-      from GW:
-      accesscontroller_rdx1cw9383xuqx6cme0knucw5aggknvrqmc8lzu7jcn3kwherk8x55zmtt
-      accesscontroller_tdx_2_1cw68j9ca4fye09mz3hshp4qydjnxhsahm68hvmz9cjhftcz9f53juq
-
-      Working roundtrip test from OA:
-      #[test]
-    fn access_controller() {
-        let address = CanonicalAccessControllerAddress::from_str("accesscontroller_rdx1c0duj4lq0dc3cpl8qd420fpn5eckh8ljeysvjm894lyl5ja5yq6y5a").unwrap();
-        assert_eq!(CanonicalAccessControllerAddress::from_str(&address.to_string()).unwrap().to_string(), "accesscontroller_rdx1c0duj4lq0dc3cpl8qd420fpn5eckh8ljeysvjm894lyl5ja5yq6y5a");
-    }
-        */
     pub fn placeholder_mainnet() -> Self {
         "accesscontroller_rdx1c0duj4lq0dc3cpl8qd420fpn5eckh8ljeysvjm894lyl5ja5yq6y5a".parse().expect("Placeholder")
     }
 
+    pub fn placeholder_mainnet_other() -> Self {
+        "accesscontroller_rdx1cv93xuha64eay8ctkx9km0el2jgkuh6gqlwec7tzecccyu0rj37xak".parse().expect("Placeholder")
+    }
+
     pub fn placeholder_stokenet() -> Self {
+        "accesscontroller_tdx_2_1cw68j9ca4fye09mz3hshp4qydjnxhsahm68hvmz9cjhftcz9f53juq".parse().expect("Placeholder")
+    }
+
+    pub fn placeholder_stokenet_other() -> Self {
         "accesscontroller_tdx_2_1c0llllllllllllllllllllllllllllllllllllllllllllllhcg0ny".parse().expect("Placeholder")
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use radix_engine_toolkit::models::canonical_address_types::CanonicalAccessControllerAddress;
+    use radix_engine_common::address::AddressBech32DecodeError;
+    use radix_engine_toolkit::models::canonical_address_types::{
+        CanonicalAccessControllerAddress, CanonicalAddress,
+        CanonicalAddressError,
+    };
 
     use crate::prelude::*;
 
@@ -75,13 +60,29 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::placeholder(), SUT::placeholder());
-        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+        assert_eq!(SUT::placeholder_mainnet(), SUT::placeholder_mainnet());
+        assert_eq!(
+            SUT::placeholder_mainnet_other(),
+            SUT::placeholder_mainnet_other()
+        );
+        assert_eq!(SUT::placeholder_stokenet(), SUT::placeholder_stokenet());
+        assert_eq!(
+            SUT::placeholder_stokenet_other(),
+            SUT::placeholder_stokenet_other()
+        );
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+        assert_ne!(
+            SUT::placeholder_mainnet(),
+            SUT::placeholder_mainnet_other()
+        );
+        assert_ne!(SUT::placeholder_mainnet(), SUT::placeholder_stokenet());
+        assert_ne!(
+            SUT::placeholder_mainnet_other(),
+            SUT::placeholder_stokenet_other()
+        );
     }
 
     #[test]
@@ -105,14 +106,14 @@ mod tests {
         assert_json_roundtrip(&a);
         assert_json_value_ne_after_roundtrip(
             &a,
-            json!("resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"),
+            json!("accesscontroller_rdx1cv93xuha64eay8ctkx9km0el2jgkuh6gqlwec7tzecccyu0rj37xak"),
         );
     }
 
     #[test]
     fn json_roundtrip_fails_for_invalid() {
         assert_json_value_fails::<SUT>(
-            json!("accesscontroller_rdx1c0llllllllllllllllllllllllllllllllllllllllllllllkl2v3s")
+            json!("accesscontroller_rdx1c0llllllllllllllllllllllllllllllllllllllllllllllkl2vxx")
         );
         assert_json_value_fails::<SUT>(
             json!("account_rdx1c0duj4lq0dc3cpl8qd420fpn5eckh8ljeysvjm894lyl5ja5yq6y5a")
@@ -136,12 +137,6 @@ mod tests {
                 .parse()
                 .unwrap();
         assert_eq!(a.network_id(), NetworkID::Mainnet);
-    }
-
-    #[test]
-    fn access_controller() {
-        let address = CanonicalAccessControllerAddress::from_str("accesscontroller_rdx1c0duj4lq0dc3cpl8qd420fpn5eckh8ljeysvjm894lyl5ja5yq6y5a").unwrap();
-        println!("{address}");
     }
 }
 

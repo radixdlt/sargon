@@ -79,7 +79,7 @@ mod tests {
         assert_json_roundtrip(&a);
         assert_json_value_ne_after_roundtrip(
             &a,
-            json!("resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"),
+            json!("package_rdx1p589ehmmvqa2dnw0jaky3kesjdjvln94hzunsqse8k52083hfcjh63"),
         );
     }
 

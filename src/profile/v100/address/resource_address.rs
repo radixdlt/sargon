@@ -122,7 +122,7 @@ mod tests {
                 SUT::placeholder_stokenet_candy(),
             ])
             .len(),
-            8
+            6
         )
     }
 

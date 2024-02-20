@@ -1,5 +1,15 @@
 import Sargon
 
+extension AccountAddress {
+	public var address: String {
+		accountAddressBech32Address(address: self)
+	}
+
+	public var networkId: NetworkId {
+		accountAddressNetworkId(address: self)
+	}
+}
+
 func testAddress() throws {
 	let bech32 = "account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzdm"
 	let key = try newEd25519PublicKeyFromHex(

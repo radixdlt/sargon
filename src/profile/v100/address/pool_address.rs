@@ -101,7 +101,7 @@ mod tests {
         assert_json_roundtrip(&a);
         assert_json_value_ne_after_roundtrip(
             &a,
-            json!("resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"),
+            json!("pool_rdx1c5dkfdtdqvczcwzdyvzeuhddyha768p2q28erden533fty8h68ay6m"),
         );
     }
 
@@ -119,7 +119,7 @@ mod tests {
     #[test]
     fn network_id_stokenet() {
         let a: SUT =
-            "pool_rdx1c325zs6dz3un8ykkjavy9fkvvyzarkaehgsl408qup6f95aup3le3w"
+            "pool_tdx_2_1c3qzq55xdg6a66kn0qsdnw2zwvvxwljx5m3cp7xcdzeym3kpnzmpcp"
                 .parse()
                 .unwrap();
         assert_eq!(a.network_id(), NetworkID::Stokenet);
@@ -128,7 +128,7 @@ mod tests {
     #[test]
     fn network_id_mainnet() {
         let a: SUT =
-            "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
+            "pool_rdx1c325zs6dz3un8ykkjavy9fkvvyzarkaehgsl408qup6f95aup3le3w"
                 .parse()
                 .unwrap();
         assert_eq!(a.network_id(), NetworkID::Mainnet);
