@@ -47,25 +47,15 @@ mod tests {
     #[allow(clippy::upper_case_acronyms)]
     type SUT = PackageAddress;
 
-
     #[test]
     fn equality() {
-        assert_eq!(
-            SUT::placeholder(),
-            SUT::placeholder()
-        );
-        assert_eq!(
-            SUT::placeholder_other(),
-            SUT::placeholder_other()
-        );
+        assert_eq!(SUT::placeholder(), SUT::placeholder());
+        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(
-            SUT::placeholder(),
-            SUT::placeholder_other()
-        );
+        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
     }
 
     #[test]
@@ -131,6 +121,14 @@ mod uniffi_tests {
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = PackageAddress;
+
+    #[test]
+    fn new_from_bech32_get_network_id_and_address() {
+        let b32 = "package_rdx1p589ehmmvqa2dnw0jaky3kesjdjvln94hzunsqse8k52083hfcjh63";
+        let address = new_package_address(b32.to_owned()).unwrap();
+        assert_eq!(package_address_network_id(&address), NetworkID::Mainnet);
+        assert_eq!(package_address_bech32_address(&address), b32);
+    }
 
     #[test]
     fn new() {

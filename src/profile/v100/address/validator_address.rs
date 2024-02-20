@@ -114,7 +114,7 @@ mod tests {
     #[test]
     fn network_id_mainnet() {
         let a: SUT =
-            "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
+            "validator_rdx1sd5368vqdmjk0y2w7ymdts02cz9c52858gpyny56xdvzuheepdeyy0"
                 .parse()
                 .unwrap();
         assert_eq!(a.network_id(), NetworkID::Mainnet);
@@ -131,11 +131,11 @@ mod uniffi_tests {
     type SUT = ValidatorAddress;
 
     #[test]
-    fn new() {
-        let s = "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd";
-        let a = SUT::try_from_bech32(s).unwrap();
-        let b = new_validator_address(s.to_string()).unwrap();
-        assert_eq!(b.address(), s);
-        assert_eq!(a, b);
+    fn new_from_bech32_get_network_id_and_address() {
+        let b32 = "validator_rdx1sd5368vqdmjk0y2w7ymdts02cz9c52858gpyny56xdvzuheepdeyy0";
+        let address = new_validator_address(b32.to_owned()).unwrap();
+        assert_eq!(SUT::try_from_bech32(b32).unwrap(), address);
+        assert_eq!(validator_address_network_id(&address), NetworkID::Mainnet);
+        assert_eq!(validator_address_bech32_address(&address), b32);
     }
 }

@@ -17,27 +17,71 @@ pub struct ComponentAddress {
     pub(crate) __inner: InnerComponentAddress,
 }
 
+impl HasPlaceholder for ComponentAddress {
+    fn placeholder() -> Self {
+        Self::placeholder_mainnet_global()
+    }
+
+    fn placeholder_other() -> Self {
+        Self::placeholder_mainnet_internal()
+    }
+}
+
+impl ComponentAddress {
+    pub fn placeholder_mainnet_global() -> Self {
+        "component_rdx1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxfaucet"
+            .parse()
+            .expect("Placeholder")
+    }
+
+    pub fn placeholder_mainnet_internal() -> Self {
+        "internal_component_rdx1lrhpef83s2c25zp9kzlk7qjak4en6llr7pw2zpuv5cswzufh9ff2ug".parse().expect("Placeholder")
+    }
+
+    pub fn placeholder_stokenet_global() -> Self {
+        "component_tdx_2_1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxyulkzl".parse().expect("Placeholder")
+    }
+
+    pub fn placeholder_stokenet_internal() -> Self {
+        "internal_component_tdx_2_1lpjekpazrlrf2726kc29vur0nhpjk2p3jlswu3yyl72h9jghyq498r".parse().expect("Placeholder")
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
 
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = ComponentAddress;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::placeholder(), SUT::placeholder());
+        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+    }
+
     #[test]
     fn display() {
-        let s = "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd";
-        let a = ComponentAddress::try_from_bech32(s).unwrap();
+        let s = "component_rdx1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxfaucet";
+        let a = SUT::try_from_bech32(s).unwrap();
         assert_eq!(format!("{a}"), s);
     }
 
     #[test]
     fn json_roundtrip() {
-        let a: ComponentAddress =
-            "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
+        let a: SUT =
+            "component_rdx1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxfaucet"
                 .parse()
                 .unwrap();
 
         assert_json_value_eq_after_roundtrip(
             &a,
-            json!("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"),
+            json!("component_rdx1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxfaucet"),
         );
         assert_json_roundtrip(&a);
         assert_json_value_ne_after_roundtrip(
@@ -48,19 +92,19 @@ mod tests {
 
     #[test]
     fn json_roundtrip_fails_for_invalid() {
-        assert_json_value_fails::<ComponentAddress>(
-            json!("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxxx")
+        assert_json_value_fails::<SUT>(
+            json!("component_rdx1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxfaucex")
         );
-        assert_json_value_fails::<ComponentAddress>(
-            json!("account_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+        assert_json_value_fails::<SUT>(
+            json!("account_rdx1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxfaucet")
         );
-        assert_json_value_fails::<ComponentAddress>(json!("super invalid"));
+        assert_json_value_fails::<SUT>(json!("super invalid"));
     }
 
     #[test]
     fn network_id_stokenet() {
-        let a: ComponentAddress =
-            "resource_tdx_2_1tkckx9fynl9f7756z8wxphq7wce6vk874nuq4f2nnxgh3nzrwhjdlp"
+        let a: SUT =
+            "component_tdx_2_1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxyulkzl"
                 .parse()
                 .unwrap();
         assert_eq!(a.network_id(), NetworkID::Stokenet);
@@ -68,8 +112,8 @@ mod tests {
 
     #[test]
     fn network_id_mainnet() {
-        let a: ComponentAddress =
-            "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
+        let a: SUT =
+            "component_rdx1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxfaucet"
                 .parse()
                 .unwrap();
         assert_eq!(a.network_id(), NetworkID::Mainnet);
@@ -86,9 +130,18 @@ mod uniffi_tests {
     type SUT = ComponentAddress;
 
     #[test]
+    fn internal_component_rdx1lrhpef83s2c25zp9kzlk7qjak4en6llr7pw2zpuv5cswzufh9ff2ug(
+    ) {
+        let b32 = "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease";
+        let address = new_component_address(b32.to_owned()).unwrap();
+        assert_eq!(component_address_network_id(&address), NetworkID::Mainnet);
+        assert_eq!(component_address_bech32_address(&address), b32);
+    }
+
+    #[test]
     fn new() {
-        let s = "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd";
-        let a = ComponentAddress::try_from_bech32(s).unwrap();
+        let s = "component_rdx1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxfaucet";
+        let a = SUT::try_from_bech32(s).unwrap();
         let b = new_component_address(s.to_string()).unwrap();
         assert_eq!(b.address(), s);
         assert_eq!(a, b);

@@ -99,7 +99,6 @@ impl Account {
     }
 }
 
-
 impl Identifiable for Account {
     type ID = AccountAddress;
 

@@ -33,6 +33,7 @@ impl HasPlaceholder for ResourceAddress {
     }
 }
 
+#[allow(unused)]
 impl ResourceAddress {
     fn placeholder_stokenet() -> Self {
         Self::placeholder_stokenet_xrd()
@@ -43,6 +44,7 @@ impl ResourceAddress {
     }
 }
 
+#[allow(unused)]
 impl ResourceAddress {
     /// The RAD on mainnet
     fn placeholder_mainnet_xrd() -> Self {
@@ -188,6 +190,7 @@ mod uniffi_tests {
     fn new_from_bech32_get_network_id_and_address() {
         let b32 = "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd";
         let address = new_resource_address(b32.to_owned()).unwrap();
+        assert_eq!(SUT::try_from_bech32(b32).unwrap(), address);
         assert_eq!(resource_address_network_id(&address), NetworkID::Mainnet);
         assert_eq!(resource_address_bech32_address(&address), b32);
     }
