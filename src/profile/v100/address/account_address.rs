@@ -1,4 +1,47 @@
+use radix_engine_toolkit::models::canonical_address_types::{CanonicalAccountAddress as RETAccountAddress, CanonicalAddress as RETIsAddressTrait};
+
 use crate::prelude::*;
+
+pub trait RETType: RETIsAddressTrait {
+    type UniFFIBuiltin;
+}
+
+/// UniFFI conversion for InnerDecimal using String as builtin.
+impl<U: RETType> crate::UniffiCustomTypeConverter for U {
+    type Builtin = String;
+
+    #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
+    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
+        val.parse::<Self>().map_err(|e| e.into())
+    }
+
+    #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
+    fn from_custom(obj: Self) -> Self::Builtin {
+        obj.to_string()
+    }
+}
+
+
+/// The address of an Account, a bech32 encoding of a public key hash
+/// that starts with the prefix `"account_"`, dependent on NetworkID, meaning the same
+/// public key used for two AccountAddresses on two different networks will not have
+/// the same address.
+#[derive(
+    Clone,
+    Debug,
+    Default,
+    PartialEq,
+    Eq,
+    Hash,
+    SerializeDisplay,
+    DeserializeFromStr,
+    derive_more::Display,
+    uniffi::Record,
+)]
+#[display("{address}")]
+struct AccountAddress2 {
+    __inner: RETAccountAddress
+}
 
 /// The address of an Account, a bech32 encoding of a public key hash
 /// that starts with the prefix `"account_"`, dependent on NetworkID, meaning the same

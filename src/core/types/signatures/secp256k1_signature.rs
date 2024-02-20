@@ -175,5 +175,5 @@ mod tests {
     #[test]
     fn to_hex() {
         assert_eq!(SUT::placeholder().to_hex(), "018ad795353658a0cd1b513c4414cbafd0f990d329522977f8885a27876976a7d41ed8a81c1ac34551819627689cf940c4e27cacab217f00a0a899123c021ff6ef");
-    }
+        }
 }
