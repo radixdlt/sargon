@@ -155,3 +155,22 @@ decl_ret_wrapped_address!(PackageAddress, RetPackageAddress, package);
 decl_ret_wrapped_address!(ResourceAddress, RetResourceAddress, resource);
 decl_ret_wrapped_address!(ValidatorAddress, RetValidatorAddress, validator);
 decl_ret_wrapped_address!(VaultAddress, RetVaultAddress, vault);
+
+#[cfg(test)]
+mod tests {
+    use radix_engine_common::types::NodeId;
+
+    use crate::prelude::*;
+
+    #[test]
+    fn account_address_from_invalid_node_id() {
+        let unknown_node_id = NodeId::new(222, &[0xff; 29]);
+        assert_eq!(
+            <AccountAddress as AddressViaRet>::new(unknown_node_id, NetworkID::Mainnet),
+            Err(CommonError::FailedToCreateAddressViaRetAddressFromNodeIdAndNetworkID {
+                node_id_as_hex: "deffffffffffffffffffffffffffffffffffffffffffffffffffffffffff".to_owned(), 
+                network_id: NetworkID::Mainnet,
+            })
+        );
+    }
+}

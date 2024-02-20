@@ -21,6 +21,26 @@ pub struct ResourceAddress {
     pub(crate) __inner: InnerResourceAddress,
 }
 
+impl ResourceAddress {
+    pub fn is_fungible(&self) -> bool {
+        self.__inner.0.is_fungible()
+    }
+
+    pub fn is_non_fungible(&self) -> bool {
+        self.__inner.0.is_non_fungible()
+    }
+}
+
+#[uniffi::export]
+pub fn resource_address_is_fungible(address: &ResourceAddress) -> bool {
+    address.is_fungible()
+}
+
+#[uniffi::export]
+pub fn resource_address_is_non_fungible(address: &ResourceAddress) -> bool {
+    address.is_non_fungible()
+}
+
 impl HasPlaceholder for ResourceAddress {
     /// The RAD on mainnet
     fn placeholder() -> Self {
@@ -58,6 +78,12 @@ impl ResourceAddress {
         "resource_rdx1t4dy69k6s0gv040xa64cyadyefwtett62ng6xfdnljyydnml7t6g3j"
             .parse()
             .expect("Candy")
+    }
+
+    fn placeholder_mainnet_nft_gc_membership() -> Self {
+        "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa"
+            .parse()
+            .expect("GC Membership")
     }
 
     fn placeholder_stokenet_xrd() -> Self {
@@ -111,18 +137,34 @@ mod tests {
     }
 
     #[test]
+    fn is_fungible() {
+        assert_eq!(
+            SUT::placeholder_mainnet_nft_gc_membership().is_non_fungible(),
+            true
+        );
+        assert_eq!(
+            SUT::placeholder_mainnet_nft_gc_membership().is_fungible(),
+            false
+        );
+
+        assert_eq!(SUT::placeholder_mainnet_xrd().is_non_fungible(), false);
+        assert_eq!(SUT::placeholder_mainnet_xrd().is_fungible(), true);
+    }
+
+    #[test]
     fn hash() {
         assert_eq!(
             HashSet::<SUT>::from_iter([
                 SUT::placeholder_mainnet_xrd(),
                 SUT::placeholder_mainnet_candy(),
+                SUT::placeholder_mainnet_nft_gc_membership(),
                 SUT::placeholder_stokenet_xrd(),
                 SUT::placeholder_stokenet_gc_tokens(),
                 SUT::placeholder_stokenet_gum(),
                 SUT::placeholder_stokenet_candy(),
             ])
             .len(),
-            6
+            7
         )
     }
 
@@ -193,5 +235,30 @@ mod uniffi_tests {
         assert_eq!(SUT::try_from_bech32(b32).unwrap(), address);
         assert_eq!(resource_address_network_id(&address), NetworkID::Mainnet);
         assert_eq!(resource_address_bech32_address(&address), b32);
+    }
+
+    #[test]
+    fn is_fungible() {
+        assert_eq!(
+            resource_address_is_fungible(
+                &SUT::placeholder_mainnet_nft_gc_membership()
+            ),
+            false
+        );
+        assert_eq!(
+            resource_address_is_non_fungible(
+                &SUT::placeholder_mainnet_nft_gc_membership()
+            ),
+            true
+        );
+
+        assert_eq!(
+            resource_address_is_fungible(&SUT::placeholder_mainnet_xrd()),
+            true
+        );
+        assert_eq!(
+            resource_address_is_non_fungible(&SUT::placeholder_mainnet_xrd()),
+            false
+        );
     }
 }

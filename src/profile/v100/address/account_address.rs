@@ -1,5 +1,5 @@
 pub use crate::prelude::*;
-// use crate::InnerAccountAddress;
+use radix_engine_common::types::EntityType as ScryptoEntityType;
 
 /// Human readable address of an account. Always starts with `"account_"``, for example:
 ///
@@ -54,6 +54,11 @@ pub fn account_address_to_short(address: &AccountAddress) -> String {
     address.short()
 }
 
+#[uniffi::export]
+pub fn account_address_is_legacy(address: &AccountAddress) -> bool {
+    address.is_legacy_address()
+}
+
 impl AccountAddress {
     pub fn new(public_key: PublicKey, network_id: NetworkID) -> Self {
         <Self as EntityAddress>::from_public_key(public_key, network_id)
@@ -74,6 +79,14 @@ impl AccountAddress {
     pub fn short(&self) -> String {
         let suffix = suffix_str(6, self.address());
         format!("{}...{}", &self.address()[0..4], suffix)
+    }
+
+    /// Returns `false` for all addresses created with `Ed25519PublicKey`s, i.e.
+    /// for all accounts created by the Babylon Radix Wallets.
+    /// Returns `true` for all addresses created with `Secp256k1PublicKey`s, i.e.
+    /// imported from the Olympia Wallet.
+    pub fn is_legacy_address(&self) -> bool {
+        self.entity_type() == ScryptoEntityType::GlobalVirtualSecp256k1Account
     }
 }
 
@@ -157,6 +170,37 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+    }
+
+    #[test]
+    fn is_legacy_address() {
+        assert_eq!(SUT::placeholder_mainnet().is_legacy_address(), true);
+        assert_eq!(SUT::placeholder_stokenet().is_legacy_address(), false);
+    }
+
+    #[test]
+    fn zabanet() {
+        let public_key: Ed25519PublicKey =
+            "3feb8194ead2e526fbcc4c1673a7a8b29d8cee0b32bb9393692f739821dd256b"
+                .parse()
+                .unwrap();
+        let network_id = NetworkID::Zabanet;
+        let address = AccountAddress::new(
+            PublicKey::Ed25519 { value: public_key },
+            network_id,
+        );
+        assert_eq!(address.address(), "account_tdx_e_128vkt2fur65p4hqhulfv3h0cknrppwtjsstlttkfamj4jnnpm82gsw");
+
+        use radix_engine_toolkit::models::canonical_address_types::{
+            CanonicalAccountAddress, CanonicalAddress,
+        };
+        let s = "account_tdx_e_128vkt2fur65p4hqhulfv3h0cknrppwtjsstlttkfamj4jnnpm82gsw";
+        let from_str = CanonicalAccountAddress::from_str(s).unwrap();
+        assert_eq!(from_str.network_id(), 0xe); // Zabanet (0x0e / 0d14)
+        assert_eq!(from_str.to_string(), s);
+        let from_json: CanonicalAccountAddress =
+            serde_json::from_value(json!(s)).unwrap();
+        assert_eq!(from_json.to_string(), s);
     }
 
     #[test]
@@ -347,5 +391,17 @@ mod uniffi_tests {
         let from_bech32 = new_account_address(bech32.to_string()).unwrap();
         assert_eq!(SUT::try_from_bech32(bech32).unwrap(), from_bech32.clone());
         assert_eq!(from_bech32.address(), bech32)
+    }
+
+    #[test]
+    fn is_legacy_address() {
+        assert_eq!(
+            account_address_is_legacy(&SUT::placeholder_mainnet()),
+            true
+        );
+        assert_eq!(
+            account_address_is_legacy(&SUT::placeholder_stokenet()),
+            false
+        );
     }
 }
