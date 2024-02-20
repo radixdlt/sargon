@@ -13,4 +13,7 @@ typedef sequence<i8> BagOfBytes;
 [Custom]
 typedef string InnerDecimal;
 
+[Custom]
+typedef string RetAccountAddress;
+
 namespace sargon {};

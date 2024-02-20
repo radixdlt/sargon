@@ -1,18 +1,22 @@
-use radix_engine_toolkit::models::canonical_address_types::{CanonicalAccountAddress as RETAccountAddress, CanonicalAddress as RETIsAddressTrait};
+use radix_engine_toolkit::models::canonical_address_types::{
+    CanonicalAccountAddress as RetAccountAddress,
+    CanonicalAddress as RetIsAddressTrait,
+};
 
 use crate::prelude::*;
 
-pub trait RETType: RETIsAddressTrait {
-    type UniFFIBuiltin;
+pub trait RetStringType:
+    RetIsAddressTrait + std::fmt::Display + FromStr
+{
 }
 
-/// UniFFI conversion for InnerDecimal using String as builtin.
-impl<U: RETType> crate::UniffiCustomTypeConverter for U {
+/// UniFFI conversion for RET types which are DisplayFromStr using String as builtin.
+impl<U: RetStringType> crate::UniffiCustomTypeConverter for U {
     type Builtin = String;
 
     #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
     fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
-        val.parse::<Self>().map_err(|e| e.into())
+        val.parse::<U>().map_err(|e| e.into())
     }
 
     #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
@@ -21,6 +25,13 @@ impl<U: RETType> crate::UniffiCustomTypeConverter for U {
     }
 }
 
+pub trait WrappingRetStringType: From<Self::Inner> + Into<Self::Inner> + std::fmt::Display + FromStr<Err = CommonError> {
+    type Inner: RetStringType;
+}
+
+impl RetStringType for RetAccountAddress {}
+
+pub struct InnerAccountAddress {}
 
 /// The address of an Account, a bech32 encoding of a public key hash
 /// that starts with the prefix `"account_"`, dependent on NetworkID, meaning the same
@@ -33,14 +44,18 @@ impl<U: RETType> crate::UniffiCustomTypeConverter for U {
     PartialEq,
     Eq,
     Hash,
-    SerializeDisplay,
-    DeserializeFromStr,
+    // SerializeDisplay,
+    // DeserializeFromStr,
     derive_more::Display,
     uniffi::Record,
 )]
-#[display("{address}")]
+#[display("{__inner}")]
 struct AccountAddress2 {
-    __inner: RETAccountAddress
+    __inner: RetAccountAddress,
+}
+
+impl WrappingRetStringType for AccountAddress2 {
+    type Inner = RetAccountAddress;
 }
 
 /// The address of an Account, a bech32 encoding of a public key hash
