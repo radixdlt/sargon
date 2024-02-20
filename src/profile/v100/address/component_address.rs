@@ -56,13 +56,38 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::placeholder(), SUT::placeholder());
-        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+        assert_eq!(
+            SUT::placeholder_mainnet_internal(),
+            SUT::placeholder_mainnet_internal()
+        );
+        assert_eq!(
+            SUT::placeholder_mainnet_global(),
+            SUT::placeholder_mainnet_global()
+        );
+        assert_eq!(
+            SUT::placeholder_stokenet_internal(),
+            SUT::placeholder_stokenet_internal()
+        );
+        assert_eq!(
+            SUT::placeholder_stokenet_global(),
+            SUT::placeholder_stokenet_global()
+        );
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+        assert_ne!(
+            SUT::placeholder_mainnet_internal(),
+            SUT::placeholder_mainnet_global()
+        );
+        assert_ne!(
+            SUT::placeholder_stokenet_internal(),
+            SUT::placeholder_mainnet_internal()
+        );
+        assert_ne!(
+            SUT::placeholder_stokenet_global(),
+            SUT::placeholder_mainnet_global()
+        );
     }
 
     #[test]

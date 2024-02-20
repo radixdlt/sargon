@@ -1,4 +1,4 @@
-mod access_controller_address;
+mod accesscontroller_address;
 mod account_address;
 mod component_address;
 mod entity_address;
@@ -12,7 +12,7 @@ mod validator_address;
 mod vault_address;
 mod wrap_ret_address;
 
-pub use access_controller_address::*;
+pub use accesscontroller_address::*;
 pub use account_address::*;
 pub use component_address::*;
 

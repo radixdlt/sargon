@@ -145,7 +145,7 @@ macro_rules! decl_ret_wrapped_address {
 decl_ret_wrapped_address!(
     AccessControllerAddress,
     RetAccessControllerAddress,
-    access_controller
+    accesscontroller
 );
 decl_ret_wrapped_address!(AccountAddress, RetAccountAddress, account);
 decl_ret_wrapped_address!(ComponentAddress, RetComponentAddress, component);
