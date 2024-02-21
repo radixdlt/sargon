@@ -157,6 +157,29 @@ mod tests {
     }
 
     #[test]
+    fn hash() {
+        assert_eq!(
+            HashSet::<SUT>::from_iter([
+                SUT::placeholder_mainnet_single_pool(),
+                SUT::placeholder_mainnet_bi_pool(),
+                SUT::placeholder_mainnet_multi_pool(),
+                SUT::placeholder_stokenet_single_pool(),
+                SUT::placeholder_stokenet_bi_pool(),
+                SUT::placeholder_stokenet_multi_pool(),
+                // twice => duplicates should be removed
+                SUT::placeholder_mainnet_single_pool(),
+                SUT::placeholder_mainnet_bi_pool(),
+                SUT::placeholder_mainnet_multi_pool(),
+                SUT::placeholder_stokenet_single_pool(),
+                SUT::placeholder_stokenet_bi_pool(),
+                SUT::placeholder_stokenet_multi_pool(),
+            ])
+            .len(),
+            6
+        )
+    }
+
+    #[test]
     fn display() {
         let s =
             "pool_rdx1c325zs6dz3un8ykkjavy9fkvvyzarkaehgsl408qup6f95aup3le3w";

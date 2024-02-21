@@ -215,6 +215,14 @@ mod tests {
                 SUT::placeholder_stokenet_gc_tokens(),
                 SUT::placeholder_stokenet_gum(),
                 SUT::placeholder_stokenet_candy(),
+                // twice => duplicates should be removed
+                SUT::placeholder_mainnet_xrd(),
+                SUT::placeholder_mainnet_candy(),
+                SUT::placeholder_mainnet_nft_gc_membership(),
+                SUT::placeholder_stokenet_xrd(),
+                SUT::placeholder_stokenet_gc_tokens(),
+                SUT::placeholder_stokenet_gum(),
+                SUT::placeholder_stokenet_candy(),
             ])
             .len(),
             7
