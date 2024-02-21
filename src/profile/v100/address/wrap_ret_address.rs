@@ -32,7 +32,9 @@ macro_rules! decl_ret_wrapped_address {
         $address_type:ident
     ) => {
         paste! {
-
+            $(
+                #[doc = $expr]
+            )*
             #[derive(
                 Clone,
                 Debug,
@@ -47,12 +49,7 @@ macro_rules! decl_ret_wrapped_address {
             )]
             #[display("{secret_magic}")]
             pub struct [< $address_type:camel Address >] {
-                /// @Kotlin / Swift developer: Do NOT use this property/field. Instead use all the provided methods on this address type.
-                /// (which are in fact vendored as freestanding global functions,
-                /// due to limitations in UniFII as of Feb 2024, but you should
-                /// create extension methods on this address type in FFI land, translating
-                /// these functions into methods.)
-                pub(crate) secret_magic: [< Ret $address_type:camel Address >],
+                pub(crate) secret_magic: [< Ret $address_type:camel Address >], // Do NOT add comments above
             }
 
             #[uniffi::export]
@@ -71,10 +68,10 @@ macro_rules! decl_ret_wrapped_address {
             }
 
              /// UniFFI conversion for RET types which are DisplayFromStr using String as builtin.
+             #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
             impl crate::UniffiCustomTypeConverter for [< Ret $address_type:camel Address >] {
                 type Builtin = String;
 
-                #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
                 fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
                     val.parse::<Self>()
                     .map_err(|e| {
@@ -84,7 +81,6 @@ macro_rules! decl_ret_wrapped_address {
                     .map_err(|e| e.into())
                 }
 
-                #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
                 fn from_custom(obj: Self) -> Self::Builtin {
                     obj.to_string()
                 }
@@ -93,12 +89,6 @@ macro_rules! decl_ret_wrapped_address {
             impl From<[< Ret $address_type:camel Address >]> for [< $address_type:camel Address >] {
                 fn from(value: [< Ret $address_type:camel Address >]) -> Self {
                     Self { secret_magic: value }
-                }
-            }
-
-            impl From<[< $address_type:camel Address >]> for [< Ret $address_type:camel Address >] {
-                fn from(value: [< $address_type:camel Address >]) -> Self {
-                    value.secret_magic
                 }
             }
 
