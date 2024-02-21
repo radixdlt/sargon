@@ -37,7 +37,9 @@ XCFRAME_ZIP_PATH=`echo "$OUTPUT_OF_BUILD" | cut -d ";" -f 2` || exit $?
 echo "🚢  CHECKSUM: $CHECKSUM"
 echo "🚢  XCFRAME_ZIP_PATH: $XCFRAME_ZIP_PATH"
 
-GIT_ADD_CMD="git add Package.swift apple/Sources/UniFFI/Sargon.swift"
+# We have .gitigored Sargon.swift because we dont need it in git history, but we
+# need it for this release, so we must FORCE add it (since it is ignored).
+GIT_ADD_CMD="git add --force Package.swift apple/Sources/UniFFI/Sargon.swift"
 echo "🚢  Staging (potentially) changed files with: $GIT_ADD_CMD"
 eval $GIT_ADD_CMD
 
