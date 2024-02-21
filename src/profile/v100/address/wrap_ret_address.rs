@@ -69,17 +69,15 @@ macro_rules! decl_ret_wrapped_address {
             }
 
              /// UniFFI conversion for RET types which are DisplayFromStr using String as builtin.
-             #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
+            #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
             impl crate::UniffiCustomTypeConverter for [< Ret $address_type:camel Address >] {
                 type Builtin = String;
 
                 fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
                     val.parse::<Self>()
-                    .map_err(|e| {
-                        error!("Failed to UniFFI decode String from FFI via RET, RET error: {:?}", e);
-                        CommonError::FailedToDecodeAddressFromBech32 { bad_value: val }
+                    .map_err(|_| {
+                        CommonError::FailedToDecodeAddressFromBech32 { bad_value: val }.into()
                     })
-                    .map_err(|e| e.into())
                 }
 
                 fn from_custom(obj: Self) -> Self::Builtin {
