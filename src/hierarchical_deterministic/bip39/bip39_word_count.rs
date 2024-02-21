@@ -116,6 +116,14 @@ mod tests {
     }
 
     #[test]
+    fn invalid_word_count_error() {
+        assert_eq!(
+            BIP39WordCount::from_count(23),
+            Err(CommonError::InvalidBIP39WordCount { bad_value: 23 })
+        )
+    }
+
+    #[test]
     fn ord() {
         assert!(BIP39WordCount::Twelve < BIP39WordCount::TwentyFour);
     }

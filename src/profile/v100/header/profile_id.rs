@@ -39,16 +39,28 @@ impl HasPlaceholder for ProfileID {
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = ProfileID;
+
     #[test]
     fn equality() {
-        assert_eq!(ProfileID::placeholder(), ProfileID::placeholder());
-        assert_eq!(
-            ProfileID::placeholder_other(),
-            ProfileID::placeholder_other()
-        );
+        assert_eq!(SUT::placeholder(), SUT::placeholder());
+        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
     }
+
     #[test]
     fn inequality() {
-        assert_ne!(ProfileID::placeholder(), ProfileID::placeholder_other());
+        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+    }
+
+    #[test]
+    fn from_str_invalid() {
+        assert_eq!(
+            "bad".parse::<SUT>(),
+            Err(CommonError::InvalidProfileID {
+                bad_value: "bad".to_owned()
+            })
+        );
     }
 }
