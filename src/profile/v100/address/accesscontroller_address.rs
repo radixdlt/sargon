@@ -39,6 +39,17 @@ pub struct AccessControllerAddress {
     pub(crate) secret_magic: RetAccessControllerAddress,
 }
 
+#[uniffi::export]
+pub fn new_accesscontroller_address_placeholder() -> AccessControllerAddress {
+    AccessControllerAddress::placeholder()
+}
+
+#[uniffi::export]
+pub fn new_accesscontroller_address_placeholder_other(
+) -> AccessControllerAddress {
+    AccessControllerAddress::placeholder_other()
+}
+
 impl HasPlaceholder for AccessControllerAddress {
     fn placeholder() -> Self {
         Self::placeholder_mainnet()
@@ -189,5 +200,18 @@ mod uniffi_tests {
         let b = new_accesscontroller_address(s.to_string()).unwrap();
         assert_eq!(b.address(), s);
         assert_eq!(a, b);
+    }
+
+    #[test]
+    fn placeholder() {
+        assert_eq!(
+            new_accesscontroller_address_placeholder(),
+            SUT::placeholder()
+        );
+
+        assert_eq!(
+            new_accesscontroller_address_placeholder_other(),
+            SUT::placeholder_other()
+        );
     }
 }

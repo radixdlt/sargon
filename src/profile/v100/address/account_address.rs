@@ -54,6 +54,26 @@ pub fn new_account_address_from(
     AccountAddress::new(public_key, network_id)
 }
 
+#[uniffi::export]
+pub fn new_account_address_placeholder_mainnet() -> AccountAddress {
+    AccountAddress::placeholder_mainnet()
+}
+
+#[uniffi::export]
+pub fn new_account_address_placeholder_mainnet_other() -> AccountAddress {
+    AccountAddress::placeholder_mainnet_other()
+}
+
+#[uniffi::export]
+pub fn new_account_address_placeholder_stokenet() -> AccountAddress {
+    AccountAddress::placeholder_stokenet()
+}
+
+#[uniffi::export]
+pub fn new_account_address_placeholder_stokenet_other() -> AccountAddress {
+    AccountAddress::placeholder_stokenet_other()
+}
+
 /// Formats the AccountAddress to its abbreviated form which is what the user
 /// is most used to, since it is what we most commonly display in the Radix
 /// ecosystem.
@@ -71,6 +91,10 @@ pub fn account_address_to_short(address: &AccountAddress) -> String {
     address.short()
 }
 
+/// Returns `false` for all addresses created with `Ed25519PublicKey`s, i.e.
+/// for all accounts created by the Babylon Radix Wallets.
+/// Returns `true` for all addresses created with `Secp256k1PublicKey`s, i.e.
+/// imported from the Olympia Wallet.
 #[uniffi::export]
 pub fn account_address_is_legacy(address: &AccountAddress) -> bool {
     address.is_legacy_address()
@@ -419,6 +443,29 @@ mod uniffi_tests {
         assert_eq!(
             account_address_is_legacy(&SUT::placeholder_stokenet()),
             false
+        );
+    }
+
+    #[test]
+    fn placeholder() {
+        assert_eq!(
+            new_account_address_placeholder_mainnet(),
+            SUT::placeholder_mainnet()
+        );
+
+        assert_eq!(
+            new_account_address_placeholder_mainnet_other(),
+            SUT::placeholder_mainnet_other()
+        );
+
+        assert_eq!(
+            new_account_address_placeholder_stokenet(),
+            SUT::placeholder_stokenet()
+        );
+
+        assert_eq!(
+            new_account_address_placeholder_stokenet_other(),
+            SUT::placeholder_stokenet_other()
         );
     }
 }

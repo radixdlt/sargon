@@ -36,21 +36,49 @@ pub struct ValidatorAddress {
     pub(crate) secret_magic: RetValidatorAddress,
 }
 
+#[uniffi::export]
+pub fn new_validator_address_placeholder_mainnet() -> ValidatorAddress {
+    ValidatorAddress::placeholder_mainnet()
+}
+
+#[uniffi::export]
+pub fn new_validator_address_placeholder_mainnet_other() -> ValidatorAddress {
+    ValidatorAddress::placeholder_mainnet_other()
+}
+
+#[uniffi::export]
+pub fn new_validator_address_placeholder_stokenet() -> ValidatorAddress {
+    ValidatorAddress::placeholder_stokenet()
+}
+
+#[uniffi::export]
+pub fn new_validator_address_placeholder_stokenet_other() -> ValidatorAddress {
+    ValidatorAddress::placeholder_stokenet_other()
+}
+
 impl HasPlaceholder for ValidatorAddress {
     fn placeholder() -> Self {
+        Self::placeholder_mainnet()
+    }
+
+    fn placeholder_other() -> Self {
+        Self::placeholder_mainnet_other()
+    }
+}
+
+impl ValidatorAddress {
+    pub fn placeholder_mainnet() -> Self {
         "validator_rdx1sd5368vqdmjk0y2w7ymdts02cz9c52858gpyny56xdvzuheepdeyy0"
             .parse()
             .expect("Valid placeholder")
     }
 
-    fn placeholder_other() -> Self {
+    pub fn placeholder_mainnet_other() -> Self {
         "validator_rdx1sw5rrhkxs65kl9xcxu7t9yu3k8ptscjwamum4phclk297j6r28g8kd"
             .parse()
             .expect("Valid placeholder other")
     }
-}
 
-impl ValidatorAddress {
     pub fn placeholder_stokenet() -> Self {
         "validator_tdx_2_1sdatqsl6rx05yy2yvpf6ckfl7x8dluvzkcyljkn0x4lxkgucc0xz2w".parse().expect("Valid placeholder")
     }
@@ -156,5 +184,28 @@ mod uniffi_tests {
         assert_eq!(SUT::try_from_bech32(b32).unwrap(), address);
         assert_eq!(validator_address_network_id(&address), NetworkID::Mainnet);
         assert_eq!(validator_address_bech32_address(&address), b32);
+    }
+
+    #[test]
+    fn placeholder() {
+        assert_eq!(
+            new_validator_address_placeholder_mainnet(),
+            SUT::placeholder_mainnet()
+        );
+
+        assert_eq!(
+            new_validator_address_placeholder_mainnet_other(),
+            SUT::placeholder_mainnet_other()
+        );
+
+        assert_eq!(
+            new_validator_address_placeholder_stokenet(),
+            SUT::placeholder_stokenet()
+        );
+
+        assert_eq!(
+            new_validator_address_placeholder_stokenet_other(),
+            SUT::placeholder_stokenet_other()
+        );
     }
 }

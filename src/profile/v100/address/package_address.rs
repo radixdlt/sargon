@@ -34,6 +34,16 @@ pub struct PackageAddress {
     pub(crate) secret_magic: RetPackageAddress,
 }
 
+#[uniffi::export]
+pub fn new_package_address_placeholder() -> PackageAddress {
+    PackageAddress::placeholder()
+}
+
+#[uniffi::export]
+pub fn new_package_address_placeholder_other() -> PackageAddress {
+    PackageAddress::placeholder_other()
+}
+
 impl HasPlaceholder for PackageAddress {
     fn placeholder() -> Self {
         Self::placeholder_mainnet_gumball_club()
@@ -154,5 +164,15 @@ mod uniffi_tests {
         let b = new_package_address(s.to_string()).unwrap();
         assert_eq!(b.address(), s);
         assert_eq!(a, b);
+    }
+
+    #[test]
+    fn placeholder() {
+        assert_eq!(new_package_address_placeholder(), SUT::placeholder());
+
+        assert_eq!(
+            new_package_address_placeholder_other(),
+            SUT::placeholder_other()
+        );
     }
 }

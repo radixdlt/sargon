@@ -13,13 +13,15 @@ import ComposableArchitecture
 struct PlanbokApp: App {
     var body: some Scene {
         WindowGroup {
-			AppFeature.View(
-				store: Store(
-					initialState: AppFeature.State()
-				) {
-					AppFeature()
-				}
-			)
+			VStack {
+				AppFeature.View(
+					store: Store(
+						initialState: AppFeature.State()
+					) {
+						AppFeature()
+					}
+				)
+			}
 			.textFieldStyle(.roundedBorder)
 			.buttonStyle(.borderedProminent)
         }

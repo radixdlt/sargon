@@ -57,6 +57,26 @@ pub fn vault_address_is_non_fungible(address: &VaultAddress) -> bool {
     address.is_non_fungible()
 }
 
+#[uniffi::export]
+pub fn new_vault_address_placeholder_mainnet_fungible() -> VaultAddress {
+    VaultAddress::placeholder_mainnet_fungible()
+}
+
+#[uniffi::export]
+pub fn new_vault_address_placeholder_mainnet_non_fungible() -> VaultAddress {
+    VaultAddress::placeholder_mainnet_non_fungible()
+}
+
+#[uniffi::export]
+pub fn new_vault_address_placeholder_stokenet_fungible() -> VaultAddress {
+    VaultAddress::placeholder_stokenet_fungible()
+}
+
+#[uniffi::export]
+pub fn new_vault_address_placeholder_stokenet_non_fungible() -> VaultAddress {
+    VaultAddress::placeholder_stokenet_non_fungible()
+}
+
 impl VaultAddress {
     pub fn placeholder_mainnet_fungible() -> Self {
         "internal_vault_rdx1tz474x29nxxd4k2p2reete9xyz4apawv63dphxkr00qt23vyju49fq".parse().expect("Placeholder")
@@ -217,6 +237,29 @@ mod uniffi_tests {
         assert_eq!(
             vault_address_is_non_fungible(&SUT::placeholder_stokenet_fungible()),
             false
+        );
+    }
+
+    #[test]
+    fn placeholder() {
+        assert_eq!(
+            new_vault_address_placeholder_mainnet_fungible(),
+            SUT::placeholder_mainnet_fungible()
+        );
+
+        assert_eq!(
+            new_vault_address_placeholder_mainnet_non_fungible(),
+            SUT::placeholder_mainnet_non_fungible()
+        );
+
+        assert_eq!(
+            new_vault_address_placeholder_stokenet_fungible(),
+            SUT::placeholder_stokenet_fungible()
+        );
+
+        assert_eq!(
+            new_vault_address_placeholder_stokenet_non_fungible(),
+            SUT::placeholder_stokenet_non_fungible()
         );
     }
 }

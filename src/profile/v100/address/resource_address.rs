@@ -57,6 +57,43 @@ pub fn resource_address_is_non_fungible(address: &ResourceAddress) -> bool {
     address.is_non_fungible()
 }
 
+#[uniffi::export]
+pub fn new_resource_address_placeholder_mainnet_xrd() -> ResourceAddress {
+    ResourceAddress::placeholder_mainnet_xrd()
+}
+
+#[uniffi::export]
+pub fn new_resource_address_placeholder_mainnet_candy() -> ResourceAddress {
+    ResourceAddress::placeholder_mainnet_candy()
+}
+
+#[uniffi::export]
+pub fn new_resource_address_placeholder_mainnet_nft_gc_membership(
+) -> ResourceAddress {
+    ResourceAddress::placeholder_mainnet_nft_gc_membership()
+}
+
+#[uniffi::export]
+pub fn new_resource_address_placeholder_stokenet_xrd() -> ResourceAddress {
+    ResourceAddress::placeholder_stokenet_xrd()
+}
+
+#[uniffi::export]
+pub fn new_resource_address_placeholder_stokenet_gum() -> ResourceAddress {
+    ResourceAddress::placeholder_stokenet_gum()
+}
+
+#[uniffi::export]
+pub fn new_resource_address_placeholder_stokenet_gc_tokens() -> ResourceAddress
+{
+    ResourceAddress::placeholder_stokenet_gc_tokens()
+}
+
+#[uniffi::export]
+pub fn new_resource_address_placeholder_stokenet_candy() -> ResourceAddress {
+    ResourceAddress::placeholder_stokenet_candy()
+}
+
 impl HasPlaceholder for ResourceAddress {
     /// The RAD on mainnet
     fn placeholder() -> Self {
@@ -275,6 +312,38 @@ mod uniffi_tests {
         assert_eq!(
             resource_address_is_non_fungible(&SUT::placeholder_mainnet_xrd()),
             false
+        );
+    }
+
+    #[test]
+    fn placeholder() {
+        assert_eq!(
+            new_resource_address_placeholder_mainnet_xrd(),
+            SUT::placeholder_mainnet_xrd()
+        );
+        assert_eq!(
+            new_resource_address_placeholder_mainnet_candy(),
+            SUT::placeholder_mainnet_candy()
+        );
+        assert_eq!(
+            new_resource_address_placeholder_mainnet_nft_gc_membership(),
+            SUT::placeholder_mainnet_nft_gc_membership()
+        );
+        assert_eq!(
+            new_resource_address_placeholder_stokenet_xrd(),
+            SUT::placeholder_stokenet_xrd()
+        );
+        assert_eq!(
+            new_resource_address_placeholder_stokenet_gum(),
+            SUT::placeholder_stokenet_gum()
+        );
+        assert_eq!(
+            new_resource_address_placeholder_stokenet_gc_tokens(),
+            SUT::placeholder_stokenet_gc_tokens()
+        );
+        assert_eq!(
+            new_resource_address_placeholder_stokenet_candy(),
+            SUT::placeholder_stokenet_candy()
         );
     }
 }

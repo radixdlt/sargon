@@ -4,6 +4,7 @@ public struct MainFeature {
 	@Reducer(state: .equatable)
 	public enum Destination {
 		case createAccount(CreateAccountFlowFeature)
+		case previewAddresses(PreviewAddressesFeature)
 		case alert(AlertState<Alert>)
 		
 		public enum Alert {
@@ -30,11 +31,16 @@ public struct MainFeature {
 	}
 	
 	@CasePathable
-	public enum Action {
+	public enum Action: ViewAction {
+		@CasePathable
+		public enum ViewAction {
+			case previewAddressButtonTapped
+		}
 		@CasePathable
 		public enum DelegateAction {
 			case deletedWallet
 		}
+		case view(ViewAction)
 		case destination(PresentationAction<Destination.Action>)
 		case accounts(AccountsFeature.Action)
 		
@@ -51,6 +57,10 @@ public struct MainFeature {
 		}
 		Reduce { state, action in
 			switch action {
+				
+			case .view(.previewAddressButtonTapped):
+				state.destination = .previewAddresses(PreviewAddressesFeature.State())
+				return .none
 			
 			case .accounts(.delegate(.deleteWallet)):
 				state.destination = .alert(.init(
@@ -98,8 +108,7 @@ public struct MainFeature {
 		.ifLet(\.$destination, action: \.destination)
 	}
 	
-
-	
+	@ViewAction(for: MainFeature.self)
 	public struct View: SwiftUI.View {
 		
 		@Bindable public var store: StoreOf<MainFeature>
@@ -109,25 +118,42 @@ public struct MainFeature {
 		}
 		
 		public var body: some SwiftUI.View {
-			VStack {
+			NavigationView {
 				VStack {
-					Text("ProfileID:")
-					Text("\(store.state.walletHolder.wallet.profile().id)")
+					VStack {
+						Text("ProfileID:")
+						Text("\(store.state.walletHolder.wallet.profile().id)")
+					}
+					
+					AccountsFeature.View(
+						store: store.scope(state: \.accounts, action: \.accounts)
+					)
 				}
-				
-				AccountsFeature.View(
-					store: store.scope(state: \.accounts, action: \.accounts)
-				)
+				.sheet(
+					item: $store.scope(
+						state: \.destination?.previewAddresses,
+						action: \.destination.previewAddresses
+					)
+				) { store in
+					PreviewAddressesFeature.View(store: store)
+				}
+				.sheet(
+					item: $store.scope(
+						state: \.destination?.createAccount,
+						action: \.destination.createAccount
+					)
+				) { store in
+					CreateAccountFlowFeature.View(store: store)
+				}
+				.alert($store.scope(state: \.destination?.alert, action: \.destination.alert))
+				.toolbar {
+					ToolbarItem(placement: .topBarTrailing) {
+						Button("Preview") {
+							send(.previewAddressButtonTapped)
+						}
+					}
+				}
 			}
-			.sheet(
-				item: $store.scope(
-					state: \.destination?.createAccount,
-					action: \.destination.createAccount
-				)
-			) { store in
-				CreateAccountFlowFeature.View(store: store)
-			}
-			.alert($store.scope(state: \.destination?.alert, action: \.destination.alert))
 		}
 	}
 }

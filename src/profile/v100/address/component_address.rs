@@ -37,6 +37,18 @@ pub struct ComponentAddress {
     pub(crate) secret_magic: RetComponentAddress,
 }
 
+/// Placeholder to a mainnet ComponentAddress (global)
+#[uniffi::export]
+pub fn new_component_address_placeholder() -> ComponentAddress {
+    ComponentAddress::placeholder_mainnet_global()
+}
+
+/// Placeholder to a mainnet ComponentAddress (internal)
+#[uniffi::export]
+pub fn new_component_address_placeholder_other() -> ComponentAddress {
+    ComponentAddress::placeholder_mainnet_internal()
+}
+
 impl HasPlaceholder for ComponentAddress {
     fn placeholder() -> Self {
         Self::placeholder_mainnet_global()
@@ -189,5 +201,17 @@ mod uniffi_tests {
         let b = new_component_address(s.to_string()).unwrap();
         assert_eq!(b.address(), s);
         assert_eq!(a, b);
+    }
+
+    #[test]
+    fn placeholder() {
+        assert_eq!(
+            SUT::placeholder_mainnet_global(),
+            new_component_address_placeholder()
+        );
+        assert_eq!(
+            SUT::placeholder_mainnet_internal(),
+            new_component_address_placeholder_other()
+        );
     }
 }

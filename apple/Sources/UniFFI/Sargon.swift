@@ -1020,28 +1020,59 @@ public func FfiConverterTypeWallet_lower(_ value: Wallet) -> UnsafeMutableRawPoi
     return FfiConverterTypeWallet.lower(value)
 }
 
+/**
+ * Address to an AccessController that controls an Account or Identity (Persona),
+ * it said entity has been "securified", e.g.:
+ * `"accesscontroller_rdx1c0duj4lq0dc3cpl8qd420fpn5eckh8ljeysvjm894lyl5ja5yq6y5a"`
+ *
+ * When a user applies a SecurityStructureConfiguration for the first time on a
+ * non-securified entity (and signs and submit the resulting TX) said entity is
+ * "assigned" an AccessControllerAddress by the network.
+ *
+ * An `AccessControllerAddress` has the [Scrypto's `EntityType`][entt] `GlobalAccessController`.
+ *
+ * Implementation wise we wrap [Radix Engine Toolkit's `CanonicalAccessControllerAddress`][ret], and
+ * give it UniFFI support, as a `uniffi::Record` (we also own Serde).
+ *
+ * [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
+ * [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L247-L248
+ */
 public struct AccessControllerAddress {
-    public var inner: InnerAccessControllerAddress
+    /**
+     * @Kotlin / Swift developer: Do NOT use this property/field. Instead use all the provided methods on this address type.
+     * (which are in fact vendored as freestanding global functions,
+     * due to limitations in UniFII as of Feb 2024, but you should
+     * create extension methods on this address type in FFI land, translating
+     * these functions into methods.)
+     */
+    public var secretMagic: RetAccessControllerAddress
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
     public init(
-        inner: InnerAccessControllerAddress)
-    {
-        self.inner = inner
+        /**
+         * @Kotlin / Swift developer: Do NOT use this property/field. Instead use all the provided methods on this address type.
+         * (which are in fact vendored as freestanding global functions,
+         * due to limitations in UniFII as of Feb 2024, but you should
+         * create extension methods on this address type in FFI land, translating
+         * these functions into methods.)
+         */
+        secretMagic: RetAccessControllerAddress
+    ) {
+        self.secretMagic = secretMagic
     }
 }
 
 extension AccessControllerAddress: Equatable, Hashable {
     public static func == (lhs: AccessControllerAddress, rhs: AccessControllerAddress) -> Bool {
-        if lhs.inner != rhs.inner {
+        if lhs.secretMagic != rhs.secretMagic {
             return false
         }
         return true
     }
 
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(inner)
+        hasher.combine(secretMagic)
     }
 }
 
@@ -1049,12 +1080,12 @@ public struct FfiConverterTypeAccessControllerAddress: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> AccessControllerAddress {
         return
             try AccessControllerAddress(
-                inner: FfiConverterTypeInnerAccessControllerAddress.read(from: &buf)
+                secretMagic: FfiConverterTypeRetAccessControllerAddress.read(from: &buf)
             )
     }
 
     public static func write(_ value: AccessControllerAddress, into buf: inout [UInt8]) {
-        FfiConverterTypeInnerAccessControllerAddress.write(value.inner, into: &buf)
+        FfiConverterTypeRetAccessControllerAddress.write(value.secretMagic, into: &buf)
     }
 }
 
@@ -1273,29 +1304,54 @@ public func FfiConverterTypeAccount_lower(_ value: Account) -> RustBuffer {
  *
  * Addresses are checksummed, as per Bech32. **Only** *Account* addresses starts with
  * the prefix `account_`.
+ *
+ * There are fundamentally three different sub-types ([Scrypto's `EntityType`][entt]) of AccountAddresses:
+ * * GlobalAccount
+ * * GlobalVirtualSecp256k1Account
+ * * GlobalVirtualEd25519Account
+ *
+ * Implementation wise we wrap [Radix Engine Toolkit's `CanonicalAccountAddress`][ret], and
+ * give it UniFFI support, as a `uniffi::Record` (we also own Serde).
+ *
+ * [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
+ * [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L224-L228
  */
 public struct AccountAddress {
-    public var inner: InnerAccountAddress
+    /**
+     * @Kotlin / Swift developer: Do NOT use this property/field. Instead use all the provided methods on this address type.
+     * (which are in fact vendored as freestanding global functions,
+     * due to limitations in UniFII as of Feb 2024, but you should
+     * create extension methods on this address type in FFI land, translating
+     * these functions into methods.)
+     */
+    public var secretMagic: RetAccountAddress
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
     public init(
-        inner: InnerAccountAddress)
-    {
-        self.inner = inner
+        /**
+         * @Kotlin / Swift developer: Do NOT use this property/field. Instead use all the provided methods on this address type.
+         * (which are in fact vendored as freestanding global functions,
+         * due to limitations in UniFII as of Feb 2024, but you should
+         * create extension methods on this address type in FFI land, translating
+         * these functions into methods.)
+         */
+        secretMagic: RetAccountAddress
+    ) {
+        self.secretMagic = secretMagic
     }
 }
 
 extension AccountAddress: Equatable, Hashable {
     public static func == (lhs: AccountAddress, rhs: AccountAddress) -> Bool {
-        if lhs.inner != rhs.inner {
+        if lhs.secretMagic != rhs.secretMagic {
             return false
         }
         return true
     }
 
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(inner)
+        hasher.combine(secretMagic)
     }
 }
 
@@ -1303,12 +1359,12 @@ public struct FfiConverterTypeAccountAddress: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> AccountAddress {
         return
             try AccountAddress(
-                inner: FfiConverterTypeInnerAccountAddress.read(from: &buf)
+                secretMagic: FfiConverterTypeRetAccountAddress.read(from: &buf)
             )
     }
 
     public static func write(_ value: AccountAddress, into buf: inout [UInt8]) {
-        FfiConverterTypeInnerAccountAddress.write(value.inner, into: &buf)
+        FfiConverterTypeRetAccountAddress.write(value.secretMagic, into: &buf)
     }
 }
 
@@ -2151,28 +2207,57 @@ public func FfiConverterTypeCollectionOfPhoneNumbers_lower(_ value: CollectionOf
     return FfiConverterTypeCollectionOfPhoneNumbers.lower(value)
 }
 
+/**
+ * An address to some On-Ledger (OnNetwork) component, e.g. a Dapp, being an instantiation
+ * of some Scrypto blueprint, e.g:
+ * `"component_rdx1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxfaucet"`
+ *
+ * There are fundamentally two different sub-types ([Scrypto's `EntityType`][entt]) of ComponentAddress:
+ * * GlobalGenericComponent
+ * * InternalGenericComponent
+ *
+ * Implementation wise we wrap [Radix Engine Toolkit's `CanonicalComponentAddress`][ret], and
+ * give it UniFFI support, as a `uniffi::Record` (we also own Serde).
+ *
+ * [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
+ * [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L243-L246
+ */
 public struct ComponentAddress {
-    public var inner: InnerComponentAddress
+    /**
+     * @Kotlin / Swift developer: Do NOT use this property/field. Instead use all the provided methods on this address type.
+     * (which are in fact vendored as freestanding global functions,
+     * due to limitations in UniFII as of Feb 2024, but you should
+     * create extension methods on this address type in FFI land, translating
+     * these functions into methods.)
+     */
+    public var secretMagic: RetComponentAddress
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
     public init(
-        inner: InnerComponentAddress)
-    {
-        self.inner = inner
+        /**
+         * @Kotlin / Swift developer: Do NOT use this property/field. Instead use all the provided methods on this address type.
+         * (which are in fact vendored as freestanding global functions,
+         * due to limitations in UniFII as of Feb 2024, but you should
+         * create extension methods on this address type in FFI land, translating
+         * these functions into methods.)
+         */
+        secretMagic: RetComponentAddress
+    ) {
+        self.secretMagic = secretMagic
     }
 }
 
 extension ComponentAddress: Equatable, Hashable {
     public static func == (lhs: ComponentAddress, rhs: ComponentAddress) -> Bool {
-        if lhs.inner != rhs.inner {
+        if lhs.secretMagic != rhs.secretMagic {
             return false
         }
         return true
     }
 
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(inner)
+        hasher.combine(secretMagic)
     }
 }
 
@@ -2180,12 +2265,12 @@ public struct FfiConverterTypeComponentAddress: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> ComponentAddress {
         return
             try ComponentAddress(
-                inner: FfiConverterTypeInnerComponentAddress.read(from: &buf)
+                secretMagic: FfiConverterTypeRetComponentAddress.read(from: &buf)
             )
     }
 
     public static func write(_ value: ComponentAddress, into buf: inout [UInt8]) {
-        FfiConverterTypeInnerComponentAddress.write(value.inner, into: &buf)
+        FfiConverterTypeRetComponentAddress.write(value.secretMagic, into: &buf)
     }
 }
 
@@ -2346,7 +2431,7 @@ public struct Decimal192 {
      * create extension methods on Decimal192 in FFI land, translating
      * these functions into methods.)
      */
-    public var inner: InnerDecimal
+    public var secretMagic: ScryptoDecimal192
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
@@ -2358,22 +2443,22 @@ public struct Decimal192 {
          * create extension methods on Decimal192 in FFI land, translating
          * these functions into methods.)
          */
-        inner: InnerDecimal
+        secretMagic: ScryptoDecimal192
     ) {
-        self.inner = inner
+        self.secretMagic = secretMagic
     }
 }
 
 extension Decimal192: Equatable, Hashable {
     public static func == (lhs: Decimal192, rhs: Decimal192) -> Bool {
-        if lhs.inner != rhs.inner {
+        if lhs.secretMagic != rhs.secretMagic {
             return false
         }
         return true
     }
 
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(inner)
+        hasher.combine(secretMagic)
     }
 }
 
@@ -2381,12 +2466,12 @@ public struct FfiConverterTypeDecimal192: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Decimal192 {
         return
             try Decimal192(
-                inner: FfiConverterTypeInnerDecimal.read(from: &buf)
+                secretMagic: FfiConverterTypeScryptoDecimal192.read(from: &buf)
             )
     }
 
     public static func write(_ value: Decimal192, into buf: inout [UInt8]) {
-        FfiConverterTypeInnerDecimal.write(value.inner, into: &buf)
+        FfiConverterTypeScryptoDecimal192.write(value.secretMagic, into: &buf)
     }
 }
 
@@ -4071,29 +4156,54 @@ public func FfiConverterTypeHierarchicalDeterministicPublicKey_lower(_ value: Hi
  *
  * Addresses are checksummed, as per Bech32. **Only** *Identity* addresses starts with
  * the prefix `"identity_"`.
+ *
+ * There are fundamentally three different sub-types ([Scrypto's `EntityType`][entt]) of IdentityAddresses:
+ * * GlobalIdentity,
+ * * GlobalVirtualSecp256k1Identity,
+ * * GlobalVirtualEd25519Identity
+ *
+ * Implementation wise we wrap [Radix Engine Toolkit's `CanonicalIdentityAddress`][ret], and
+ * give it UniFFI support, as a `uniffi::Record` (we also own Serde).
+ *
+ * [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
+ * [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L229-L234
  */
 public struct IdentityAddress {
-    public var inner: InnerIdentityAddress
+    /**
+     * @Kotlin / Swift developer: Do NOT use this property/field. Instead use all the provided methods on this address type.
+     * (which are in fact vendored as freestanding global functions,
+     * due to limitations in UniFII as of Feb 2024, but you should
+     * create extension methods on this address type in FFI land, translating
+     * these functions into methods.)
+     */
+    public var secretMagic: RetIdentityAddress
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
     public init(
-        inner: InnerIdentityAddress)
-    {
-        self.inner = inner
+        /**
+         * @Kotlin / Swift developer: Do NOT use this property/field. Instead use all the provided methods on this address type.
+         * (which are in fact vendored as freestanding global functions,
+         * due to limitations in UniFII as of Feb 2024, but you should
+         * create extension methods on this address type in FFI land, translating
+         * these functions into methods.)
+         */
+        secretMagic: RetIdentityAddress
+    ) {
+        self.secretMagic = secretMagic
     }
 }
 
 extension IdentityAddress: Equatable, Hashable {
     public static func == (lhs: IdentityAddress, rhs: IdentityAddress) -> Bool {
-        if lhs.inner != rhs.inner {
+        if lhs.secretMagic != rhs.secretMagic {
             return false
         }
         return true
     }
 
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(inner)
+        hasher.combine(secretMagic)
     }
 }
 
@@ -4101,12 +4211,12 @@ public struct FfiConverterTypeIdentityAddress: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> IdentityAddress {
         return
             try IdentityAddress(
-                inner: FfiConverterTypeInnerIdentityAddress.read(from: &buf)
+                secretMagic: FfiConverterTypeRetIdentityAddress.read(from: &buf)
             )
     }
 
     public static func write(_ value: IdentityAddress, into buf: inout [UInt8]) {
-        FfiConverterTypeInnerIdentityAddress.write(value.inner, into: &buf)
+        FfiConverterTypeRetIdentityAddress.write(value.secretMagic, into: &buf)
     }
 }
 
@@ -4880,28 +4990,54 @@ public func FfiConverterTypeP2PLink_lower(_ value: P2pLink) -> RustBuffer {
     return FfiConverterTypeP2PLink.lower(value)
 }
 
+/**
+ * The unique address identifying a package - which is a collection of blueprints on Ledger, e.g.:
+ * `"package_rdx1pkgxxxxxxxxxfaucetxxxxxxxxx000034355863xxxxxxxxxfaucet"`
+ *
+ * PackageAddress has [Scrypto's `EntityType`][entt] type `GlobalPackage`.
+ *
+ * Implementation wise we wrap [Radix Engine Toolkit's `CanonicalPackageAddress`][ret], and
+ * give it UniFFI support, as a `uniffi::Record` (we also own Serde).
+ *
+ * [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
+ * [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L241C29-L241C42
+ */
 public struct PackageAddress {
-    public var inner: InnerPackageAddress
+    /**
+     * @Kotlin / Swift developer: Do NOT use this property/field. Instead use all the provided methods on this address type.
+     * (which are in fact vendored as freestanding global functions,
+     * due to limitations in UniFII as of Feb 2024, but you should
+     * create extension methods on this address type in FFI land, translating
+     * these functions into methods.)
+     */
+    public var secretMagic: RetPackageAddress
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
     public init(
-        inner: InnerPackageAddress)
-    {
-        self.inner = inner
+        /**
+         * @Kotlin / Swift developer: Do NOT use this property/field. Instead use all the provided methods on this address type.
+         * (which are in fact vendored as freestanding global functions,
+         * due to limitations in UniFII as of Feb 2024, but you should
+         * create extension methods on this address type in FFI land, translating
+         * these functions into methods.)
+         */
+        secretMagic: RetPackageAddress
+    ) {
+        self.secretMagic = secretMagic
     }
 }
 
 extension PackageAddress: Equatable, Hashable {
     public static func == (lhs: PackageAddress, rhs: PackageAddress) -> Bool {
-        if lhs.inner != rhs.inner {
+        if lhs.secretMagic != rhs.secretMagic {
             return false
         }
         return true
     }
 
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(inner)
+        hasher.combine(secretMagic)
     }
 }
 
@@ -4909,12 +5045,12 @@ public struct FfiConverterTypePackageAddress: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> PackageAddress {
         return
             try PackageAddress(
-                inner: FfiConverterTypeInnerPackageAddress.read(from: &buf)
+                secretMagic: FfiConverterTypeRetPackageAddress.read(from: &buf)
             )
     }
 
     public static func write(_ value: PackageAddress, into buf: inout [UInt8]) {
-        FfiConverterTypeInnerPackageAddress.write(value.inner, into: &buf)
+        FfiConverterTypeRetPackageAddress.write(value.secretMagic, into: &buf)
     }
 }
 
@@ -5570,28 +5706,60 @@ public func FfiConverterTypePersonaDataIdentifiedPhoneNumber_lower(_ value: Pers
     return FfiConverterTypePersonaDataIdentifiedPhoneNumber.lower(value)
 }
 
+/**
+ * Addresses identifying an OnLedger (OnNetwork) Liquidity Pool (LP) of tokens that users can contribute
+ * Liquidity too, e.g.:
+ * `"pool_rdx1c325zs6dz3un8ykkjavy9fkvvyzarkaehgsl408qup6f95aup3le3w"`
+ *
+ * Typically users contribute to Liquidity Pools by using a Dapp and the Radix Wallet.
+ *
+ * There are fundamentally three different sub-types ([Scrypto's `EntityType`][entt]) of PoolAddresses:
+ * * GlobalOneResourcePool
+ * * GlobalTwoResourcePool
+ * * GlobalMultiResourcePool
+ *
+ * Implementation wise we wrap [Radix Engine Toolkit's `CanonicalPoolAddress`][ret], and
+ * give it UniFFI support, as a `uniffi::Record` (we also own Serde).
+ *
+ * [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
+ * [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L256-L261
+ */
 public struct PoolAddress {
-    public var inner: InnerPoolAddress
+    /**
+     * @Kotlin / Swift developer: Do NOT use this property/field. Instead use all the provided methods on this address type.
+     * (which are in fact vendored as freestanding global functions,
+     * due to limitations in UniFII as of Feb 2024, but you should
+     * create extension methods on this address type in FFI land, translating
+     * these functions into methods.)
+     */
+    public var secretMagic: RetPoolAddress
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
     public init(
-        inner: InnerPoolAddress)
-    {
-        self.inner = inner
+        /**
+         * @Kotlin / Swift developer: Do NOT use this property/field. Instead use all the provided methods on this address type.
+         * (which are in fact vendored as freestanding global functions,
+         * due to limitations in UniFII as of Feb 2024, but you should
+         * create extension methods on this address type in FFI land, translating
+         * these functions into methods.)
+         */
+        secretMagic: RetPoolAddress
+    ) {
+        self.secretMagic = secretMagic
     }
 }
 
 extension PoolAddress: Equatable, Hashable {
     public static func == (lhs: PoolAddress, rhs: PoolAddress) -> Bool {
-        if lhs.inner != rhs.inner {
+        if lhs.secretMagic != rhs.secretMagic {
             return false
         }
         return true
     }
 
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(inner)
+        hasher.combine(secretMagic)
     }
 }
 
@@ -5599,12 +5767,12 @@ public struct FfiConverterTypePoolAddress: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> PoolAddress {
         return
             try PoolAddress(
-                inner: FfiConverterTypeInnerPoolAddress.read(from: &buf)
+                secretMagic: FfiConverterTypeRetPoolAddress.read(from: &buf)
             )
     }
 
     public static func write(_ value: PoolAddress, into buf: inout [UInt8]) {
-        FfiConverterTypeInnerPoolAddress.write(value.inner, into: &buf)
+        FfiConverterTypeRetPoolAddress.write(value.secretMagic, into: &buf)
     }
 }
 
@@ -6009,33 +6177,56 @@ public func FfiConverterTypeRequestedQuantity_lower(_ value: RequestedQuantity) 
 }
 
 /**
- * The address of an Account, a bech32 encoding of a public key hash
- * that starts with the prefix `"account_"`, dependent on NetworkID, meaning the same
- * public key used for two AccountAddresses on two different networks will not have
- * the same address.
+ * Addresses identifying an asset, either fungible (Token) or non-fungible (NFT), on the Radix network, e.g.
+ * `"resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"`
+ * Being the unique identifier of the Radix Token, the Rad, on mainnet.
+ *
+ * There are fundamentally two different sub-types ([Scrypto's `EntityType`][entt]) of ResourceAddresses:
+ * * GlobalFungibleResourceManager
+ * * GlobalNonFungibleResourceManager
+ *
+ * Implementation wise we wrap [Radix Engine Toolkit's `CanonicalResourceAddress`][ret], and
+ * give it UniFFI support, as a `uniffi::Record` (we also own Serde).
+ *
+ * [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
+ * [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L236-L239
  */
 public struct ResourceAddress {
-    public var inner: InnerResourceAddress
+    /**
+     * @Kotlin / Swift developer: Do NOT use this property/field. Instead use all the provided methods on this address type.
+     * (which are in fact vendored as freestanding global functions,
+     * due to limitations in UniFII as of Feb 2024, but you should
+     * create extension methods on this address type in FFI land, translating
+     * these functions into methods.)
+     */
+    public var secretMagic: RetResourceAddress
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
     public init(
-        inner: InnerResourceAddress)
-    {
-        self.inner = inner
+        /**
+         * @Kotlin / Swift developer: Do NOT use this property/field. Instead use all the provided methods on this address type.
+         * (which are in fact vendored as freestanding global functions,
+         * due to limitations in UniFII as of Feb 2024, but you should
+         * create extension methods on this address type in FFI land, translating
+         * these functions into methods.)
+         */
+        secretMagic: RetResourceAddress
+    ) {
+        self.secretMagic = secretMagic
     }
 }
 
 extension ResourceAddress: Equatable, Hashable {
     public static func == (lhs: ResourceAddress, rhs: ResourceAddress) -> Bool {
-        if lhs.inner != rhs.inner {
+        if lhs.secretMagic != rhs.secretMagic {
             return false
         }
         return true
     }
 
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(inner)
+        hasher.combine(secretMagic)
     }
 }
 
@@ -6043,12 +6234,12 @@ public struct FfiConverterTypeResourceAddress: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> ResourceAddress {
         return
             try ResourceAddress(
-                inner: FfiConverterTypeInnerResourceAddress.read(from: &buf)
+                secretMagic: FfiConverterTypeRetResourceAddress.read(from: &buf)
             )
     }
 
     public static func write(_ value: ResourceAddress, into buf: inout [UInt8]) {
-        FfiConverterTypeInnerResourceAddress.write(value.inner, into: &buf)
+        FfiConverterTypeRetResourceAddress.write(value.secretMagic, into: &buf)
     }
 }
 
@@ -6915,28 +7106,56 @@ public func FfiConverterTypeUnsecuredEntityControl_lower(_ value: UnsecuredEntit
     return FfiConverterTypeUnsecuredEntityControl.lower(value)
 }
 
+/**
+ * Address to a Validator that secures the network by validating transactions, users can stake to these
+ * validators (Delegated Proof of Stake) by using the Dashboard and sending a TX to the Radix Wallet to sign;
+ * e.g.:
+ * `"validator_rdx1sd5368vqdmjk0y2w7ymdts02cz9c52858gpyny56xdvzuheepdeyy0"`
+ *
+ * A `ValidatorAddress` has the [Scrypto's `EntityType`][entt] `GlobalValidator`.
+ *
+ * Implementation wise we wrap [Radix Engine Toolkit's `CanonicalValidatorAddress`][ret], and
+ * give it UniFFI support, as a `uniffi::Record` (we also own Serde).
+ *
+ * [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
+ * [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L249-L250
+ */
 public struct ValidatorAddress {
-    public var inner: InnerValidatorAddress
+    /**
+     * @Kotlin / Swift developer: Do NOT use this property/field. Instead use all the provided methods on this address type.
+     * (which are in fact vendored as freestanding global functions,
+     * due to limitations in UniFII as of Feb 2024, but you should
+     * create extension methods on this address type in FFI land, translating
+     * these functions into methods.)
+     */
+    public var secretMagic: RetValidatorAddress
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
     public init(
-        inner: InnerValidatorAddress)
-    {
-        self.inner = inner
+        /**
+         * @Kotlin / Swift developer: Do NOT use this property/field. Instead use all the provided methods on this address type.
+         * (which are in fact vendored as freestanding global functions,
+         * due to limitations in UniFII as of Feb 2024, but you should
+         * create extension methods on this address type in FFI land, translating
+         * these functions into methods.)
+         */
+        secretMagic: RetValidatorAddress
+    ) {
+        self.secretMagic = secretMagic
     }
 }
 
 extension ValidatorAddress: Equatable, Hashable {
     public static func == (lhs: ValidatorAddress, rhs: ValidatorAddress) -> Bool {
-        if lhs.inner != rhs.inner {
+        if lhs.secretMagic != rhs.secretMagic {
             return false
         }
         return true
     }
 
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(inner)
+        hasher.combine(secretMagic)
     }
 }
 
@@ -6944,12 +7163,12 @@ public struct FfiConverterTypeValidatorAddress: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> ValidatorAddress {
         return
             try ValidatorAddress(
-                inner: FfiConverterTypeInnerValidatorAddress.read(from: &buf)
+                secretMagic: FfiConverterTypeRetValidatorAddress.read(from: &buf)
             )
     }
 
     public static func write(_ value: ValidatorAddress, into buf: inout [UInt8]) {
-        FfiConverterTypeInnerValidatorAddress.write(value.inner, into: &buf)
+        FfiConverterTypeRetValidatorAddress.write(value.secretMagic, into: &buf)
     }
 }
 
@@ -6961,28 +7180,57 @@ public func FfiConverterTypeValidatorAddress_lower(_ value: ValidatorAddress) ->
     return FfiConverterTypeValidatorAddress.lower(value)
 }
 
+/**
+ * Addresses to a specific vault, owned by a user, holding asset of one kind, either fungible or non-fungible.
+ * Identities cannot own assets so they do not have vaults, but Accounts do, e.g.:
+ * `"internal_vault_rdx1tz474x29nxxd4k2p2reete9xyz4apawv63dphxkr00qt23vyju49fq"`
+ *
+ * There are fundamentally two different sub-types ([Scrypto's `EntityType`][entt]) of VaultAddresses:
+ * * InternalFungibleVault
+ * * InternalNonFungibleVault
+ *
+ * Implementation wise we wrap [Radix Engine Toolkit's `CanonicalVaultAddress`][ret], and
+ * give it UniFFI support, as a `uniffi::Record` (we also own Serde).
+ *
+ * [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
+ * [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L251-L255
+ */
 public struct VaultAddress {
-    public var inner: InnerVaultAddress
+    /**
+     * @Kotlin / Swift developer: Do NOT use this property/field. Instead use all the provided methods on this address type.
+     * (which are in fact vendored as freestanding global functions,
+     * due to limitations in UniFII as of Feb 2024, but you should
+     * create extension methods on this address type in FFI land, translating
+     * these functions into methods.)
+     */
+    public var secretMagic: RetVaultAddress
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
     public init(
-        inner: InnerVaultAddress)
-    {
-        self.inner = inner
+        /**
+         * @Kotlin / Swift developer: Do NOT use this property/field. Instead use all the provided methods on this address type.
+         * (which are in fact vendored as freestanding global functions,
+         * due to limitations in UniFII as of Feb 2024, but you should
+         * create extension methods on this address type in FFI land, translating
+         * these functions into methods.)
+         */
+        secretMagic: RetVaultAddress
+    ) {
+        self.secretMagic = secretMagic
     }
 }
 
 extension VaultAddress: Equatable, Hashable {
     public static func == (lhs: VaultAddress, rhs: VaultAddress) -> Bool {
-        if lhs.inner != rhs.inner {
+        if lhs.secretMagic != rhs.secretMagic {
             return false
         }
         return true
     }
 
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(inner)
+        hasher.combine(secretMagic)
     }
 }
 
@@ -6990,12 +7238,12 @@ public struct FfiConverterTypeVaultAddress: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> VaultAddress {
         return
             try VaultAddress(
-                inner: FfiConverterTypeInnerVaultAddress.read(from: &buf)
+                secretMagic: FfiConverterTypeRetVaultAddress.read(from: &buf)
             )
     }
 
     public static func write(_ value: VaultAddress, into buf: inout [UInt8]) {
-        FfiConverterTypeInnerVaultAddress.write(value.inner, into: &buf)
+        FfiConverterTypeRetVaultAddress.write(value.secretMagic, into: &buf)
     }
 }
 
@@ -9160,6 +9408,69 @@ extension NonFungibleLocalId: Equatable, Hashable {}
 // Note that we don't yet support `indirect` for enums.
 // See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
 /**
+ * The kind of the Pool, either One, Two or Multi resources.
+ */
+public enum PoolKind {
+    /**
+     * A Pool to which user can contribute liquidity of a single
+     * resource kind.
+     */
+    case oneResource
+    /**
+     * A Pool to which user can contribute liquidity of two different
+     * resources
+     */
+    case twoResources
+    /**
+     * A Pool to which user can contribute liquidity of many different
+     * resources
+     */
+    case multiResources
+}
+
+public struct FfiConverterTypePoolKind: FfiConverterRustBuffer {
+    typealias SwiftType = PoolKind
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> PoolKind {
+        let variant: Int32 = try readInt(&buf)
+        switch variant {
+        case 1: return .oneResource
+
+        case 2: return .twoResources
+
+        case 3: return .multiResources
+
+        default: throw UniffiInternalError.unexpectedEnumCase
+        }
+    }
+
+    public static func write(_ value: PoolKind, into buf: inout [UInt8]) {
+        switch value {
+        case .oneResource:
+            writeInt(&buf, Int32(1))
+
+        case .twoResources:
+            writeInt(&buf, Int32(2))
+
+        case .multiResources:
+            writeInt(&buf, Int32(3))
+        }
+    }
+}
+
+public func FfiConverterTypePoolKind_lift(_ buf: RustBuffer) throws -> PoolKind {
+    return try FfiConverterTypePoolKind.lift(buf)
+}
+
+public func FfiConverterTypePoolKind_lower(_ value: PoolKind) -> RustBuffer {
+    return FfiConverterTypePoolKind.lower(value)
+}
+
+extension PoolKind: Equatable, Hashable {}
+
+// Note that we don't yet support `indirect` for enums.
+// See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
+/**
  * The version of the Profile Snapshot data format (JSON).
  */
 public enum ProfileSnapshotVersion {
@@ -10493,316 +10804,6 @@ public func FfiConverterTypeEpoch_lower(_ value: Epoch) -> UInt64 {
  * Typealias from the type name used in the UDL file to the builtin type.  This
  * is needed because the UDL type name is used in function/method signatures.
  */
-public typealias InnerAccessControllerAddress = String
-public struct FfiConverterTypeInnerAccessControllerAddress: FfiConverter {
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> InnerAccessControllerAddress {
-        return try FfiConverterString.read(from: &buf)
-    }
-
-    public static func write(_ value: InnerAccessControllerAddress, into buf: inout [UInt8]) {
-        return FfiConverterString.write(value, into: &buf)
-    }
-
-    public static func lift(_ value: RustBuffer) throws -> InnerAccessControllerAddress {
-        return try FfiConverterString.lift(value)
-    }
-
-    public static func lower(_ value: InnerAccessControllerAddress) -> RustBuffer {
-        return FfiConverterString.lower(value)
-    }
-}
-
-public func FfiConverterTypeInnerAccessControllerAddress_lift(_ value: RustBuffer) throws -> InnerAccessControllerAddress {
-    return try FfiConverterTypeInnerAccessControllerAddress.lift(value)
-}
-
-public func FfiConverterTypeInnerAccessControllerAddress_lower(_ value: InnerAccessControllerAddress) -> RustBuffer {
-    return FfiConverterTypeInnerAccessControllerAddress.lower(value)
-}
-
-/**
- * Typealias from the type name used in the UDL file to the builtin type.  This
- * is needed because the UDL type name is used in function/method signatures.
- */
-public typealias InnerAccountAddress = String
-public struct FfiConverterTypeInnerAccountAddress: FfiConverter {
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> InnerAccountAddress {
-        return try FfiConverterString.read(from: &buf)
-    }
-
-    public static func write(_ value: InnerAccountAddress, into buf: inout [UInt8]) {
-        return FfiConverterString.write(value, into: &buf)
-    }
-
-    public static func lift(_ value: RustBuffer) throws -> InnerAccountAddress {
-        return try FfiConverterString.lift(value)
-    }
-
-    public static func lower(_ value: InnerAccountAddress) -> RustBuffer {
-        return FfiConverterString.lower(value)
-    }
-}
-
-public func FfiConverterTypeInnerAccountAddress_lift(_ value: RustBuffer) throws -> InnerAccountAddress {
-    return try FfiConverterTypeInnerAccountAddress.lift(value)
-}
-
-public func FfiConverterTypeInnerAccountAddress_lower(_ value: InnerAccountAddress) -> RustBuffer {
-    return FfiConverterTypeInnerAccountAddress.lower(value)
-}
-
-/**
- * Typealias from the type name used in the UDL file to the builtin type.  This
- * is needed because the UDL type name is used in function/method signatures.
- */
-public typealias InnerComponentAddress = String
-public struct FfiConverterTypeInnerComponentAddress: FfiConverter {
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> InnerComponentAddress {
-        return try FfiConverterString.read(from: &buf)
-    }
-
-    public static func write(_ value: InnerComponentAddress, into buf: inout [UInt8]) {
-        return FfiConverterString.write(value, into: &buf)
-    }
-
-    public static func lift(_ value: RustBuffer) throws -> InnerComponentAddress {
-        return try FfiConverterString.lift(value)
-    }
-
-    public static func lower(_ value: InnerComponentAddress) -> RustBuffer {
-        return FfiConverterString.lower(value)
-    }
-}
-
-public func FfiConverterTypeInnerComponentAddress_lift(_ value: RustBuffer) throws -> InnerComponentAddress {
-    return try FfiConverterTypeInnerComponentAddress.lift(value)
-}
-
-public func FfiConverterTypeInnerComponentAddress_lower(_ value: InnerComponentAddress) -> RustBuffer {
-    return FfiConverterTypeInnerComponentAddress.lower(value)
-}
-
-/**
- * Typealias from the type name used in the UDL file to the builtin type.  This
- * is needed because the UDL type name is used in function/method signatures.
- */
-public typealias InnerDecimal = String
-public struct FfiConverterTypeInnerDecimal: FfiConverter {
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> InnerDecimal {
-        return try FfiConverterString.read(from: &buf)
-    }
-
-    public static func write(_ value: InnerDecimal, into buf: inout [UInt8]) {
-        return FfiConverterString.write(value, into: &buf)
-    }
-
-    public static func lift(_ value: RustBuffer) throws -> InnerDecimal {
-        return try FfiConverterString.lift(value)
-    }
-
-    public static func lower(_ value: InnerDecimal) -> RustBuffer {
-        return FfiConverterString.lower(value)
-    }
-}
-
-public func FfiConverterTypeInnerDecimal_lift(_ value: RustBuffer) throws -> InnerDecimal {
-    return try FfiConverterTypeInnerDecimal.lift(value)
-}
-
-public func FfiConverterTypeInnerDecimal_lower(_ value: InnerDecimal) -> RustBuffer {
-    return FfiConverterTypeInnerDecimal.lower(value)
-}
-
-/**
- * Typealias from the type name used in the UDL file to the builtin type.  This
- * is needed because the UDL type name is used in function/method signatures.
- */
-public typealias InnerIdentityAddress = String
-public struct FfiConverterTypeInnerIdentityAddress: FfiConverter {
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> InnerIdentityAddress {
-        return try FfiConverterString.read(from: &buf)
-    }
-
-    public static func write(_ value: InnerIdentityAddress, into buf: inout [UInt8]) {
-        return FfiConverterString.write(value, into: &buf)
-    }
-
-    public static func lift(_ value: RustBuffer) throws -> InnerIdentityAddress {
-        return try FfiConverterString.lift(value)
-    }
-
-    public static func lower(_ value: InnerIdentityAddress) -> RustBuffer {
-        return FfiConverterString.lower(value)
-    }
-}
-
-public func FfiConverterTypeInnerIdentityAddress_lift(_ value: RustBuffer) throws -> InnerIdentityAddress {
-    return try FfiConverterTypeInnerIdentityAddress.lift(value)
-}
-
-public func FfiConverterTypeInnerIdentityAddress_lower(_ value: InnerIdentityAddress) -> RustBuffer {
-    return FfiConverterTypeInnerIdentityAddress.lower(value)
-}
-
-/**
- * Typealias from the type name used in the UDL file to the builtin type.  This
- * is needed because the UDL type name is used in function/method signatures.
- */
-public typealias InnerPackageAddress = String
-public struct FfiConverterTypeInnerPackageAddress: FfiConverter {
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> InnerPackageAddress {
-        return try FfiConverterString.read(from: &buf)
-    }
-
-    public static func write(_ value: InnerPackageAddress, into buf: inout [UInt8]) {
-        return FfiConverterString.write(value, into: &buf)
-    }
-
-    public static func lift(_ value: RustBuffer) throws -> InnerPackageAddress {
-        return try FfiConverterString.lift(value)
-    }
-
-    public static func lower(_ value: InnerPackageAddress) -> RustBuffer {
-        return FfiConverterString.lower(value)
-    }
-}
-
-public func FfiConverterTypeInnerPackageAddress_lift(_ value: RustBuffer) throws -> InnerPackageAddress {
-    return try FfiConverterTypeInnerPackageAddress.lift(value)
-}
-
-public func FfiConverterTypeInnerPackageAddress_lower(_ value: InnerPackageAddress) -> RustBuffer {
-    return FfiConverterTypeInnerPackageAddress.lower(value)
-}
-
-/**
- * Typealias from the type name used in the UDL file to the builtin type.  This
- * is needed because the UDL type name is used in function/method signatures.
- */
-public typealias InnerPoolAddress = String
-public struct FfiConverterTypeInnerPoolAddress: FfiConverter {
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> InnerPoolAddress {
-        return try FfiConverterString.read(from: &buf)
-    }
-
-    public static func write(_ value: InnerPoolAddress, into buf: inout [UInt8]) {
-        return FfiConverterString.write(value, into: &buf)
-    }
-
-    public static func lift(_ value: RustBuffer) throws -> InnerPoolAddress {
-        return try FfiConverterString.lift(value)
-    }
-
-    public static func lower(_ value: InnerPoolAddress) -> RustBuffer {
-        return FfiConverterString.lower(value)
-    }
-}
-
-public func FfiConverterTypeInnerPoolAddress_lift(_ value: RustBuffer) throws -> InnerPoolAddress {
-    return try FfiConverterTypeInnerPoolAddress.lift(value)
-}
-
-public func FfiConverterTypeInnerPoolAddress_lower(_ value: InnerPoolAddress) -> RustBuffer {
-    return FfiConverterTypeInnerPoolAddress.lower(value)
-}
-
-/**
- * Typealias from the type name used in the UDL file to the builtin type.  This
- * is needed because the UDL type name is used in function/method signatures.
- */
-public typealias InnerResourceAddress = String
-public struct FfiConverterTypeInnerResourceAddress: FfiConverter {
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> InnerResourceAddress {
-        return try FfiConverterString.read(from: &buf)
-    }
-
-    public static func write(_ value: InnerResourceAddress, into buf: inout [UInt8]) {
-        return FfiConverterString.write(value, into: &buf)
-    }
-
-    public static func lift(_ value: RustBuffer) throws -> InnerResourceAddress {
-        return try FfiConverterString.lift(value)
-    }
-
-    public static func lower(_ value: InnerResourceAddress) -> RustBuffer {
-        return FfiConverterString.lower(value)
-    }
-}
-
-public func FfiConverterTypeInnerResourceAddress_lift(_ value: RustBuffer) throws -> InnerResourceAddress {
-    return try FfiConverterTypeInnerResourceAddress.lift(value)
-}
-
-public func FfiConverterTypeInnerResourceAddress_lower(_ value: InnerResourceAddress) -> RustBuffer {
-    return FfiConverterTypeInnerResourceAddress.lower(value)
-}
-
-/**
- * Typealias from the type name used in the UDL file to the builtin type.  This
- * is needed because the UDL type name is used in function/method signatures.
- */
-public typealias InnerValidatorAddress = String
-public struct FfiConverterTypeInnerValidatorAddress: FfiConverter {
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> InnerValidatorAddress {
-        return try FfiConverterString.read(from: &buf)
-    }
-
-    public static func write(_ value: InnerValidatorAddress, into buf: inout [UInt8]) {
-        return FfiConverterString.write(value, into: &buf)
-    }
-
-    public static func lift(_ value: RustBuffer) throws -> InnerValidatorAddress {
-        return try FfiConverterString.lift(value)
-    }
-
-    public static func lower(_ value: InnerValidatorAddress) -> RustBuffer {
-        return FfiConverterString.lower(value)
-    }
-}
-
-public func FfiConverterTypeInnerValidatorAddress_lift(_ value: RustBuffer) throws -> InnerValidatorAddress {
-    return try FfiConverterTypeInnerValidatorAddress.lift(value)
-}
-
-public func FfiConverterTypeInnerValidatorAddress_lower(_ value: InnerValidatorAddress) -> RustBuffer {
-    return FfiConverterTypeInnerValidatorAddress.lower(value)
-}
-
-/**
- * Typealias from the type name used in the UDL file to the builtin type.  This
- * is needed because the UDL type name is used in function/method signatures.
- */
-public typealias InnerVaultAddress = String
-public struct FfiConverterTypeInnerVaultAddress: FfiConverter {
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> InnerVaultAddress {
-        return try FfiConverterString.read(from: &buf)
-    }
-
-    public static func write(_ value: InnerVaultAddress, into buf: inout [UInt8]) {
-        return FfiConverterString.write(value, into: &buf)
-    }
-
-    public static func lift(_ value: RustBuffer) throws -> InnerVaultAddress {
-        return try FfiConverterString.lift(value)
-    }
-
-    public static func lower(_ value: InnerVaultAddress) -> RustBuffer {
-        return FfiConverterString.lower(value)
-    }
-}
-
-public func FfiConverterTypeInnerVaultAddress_lift(_ value: RustBuffer) throws -> InnerVaultAddress {
-    return try FfiConverterTypeInnerVaultAddress.lift(value)
-}
-
-public func FfiConverterTypeInnerVaultAddress_lower(_ value: InnerVaultAddress) -> RustBuffer {
-    return FfiConverterTypeInnerVaultAddress.lower(value)
-}
-
-/**
- * Typealias from the type name used in the UDL file to the builtin type.  This
- * is needed because the UDL type name is used in function/method signatures.
- */
 public typealias Nonce = UInt32
 public struct FfiConverterTypeNonce: FfiConverter {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Nonce {
@@ -10890,6 +10891,316 @@ public func FfiConverterTypeProfileID_lift(_ value: RustBuffer) throws -> Profil
 
 public func FfiConverterTypeProfileID_lower(_ value: ProfileID) -> RustBuffer {
     return FfiConverterTypeProfileID.lower(value)
+}
+
+/**
+ * Typealias from the type name used in the UDL file to the builtin type.  This
+ * is needed because the UDL type name is used in function/method signatures.
+ */
+public typealias RetAccessControllerAddress = String
+public struct FfiConverterTypeRetAccessControllerAddress: FfiConverter {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> RetAccessControllerAddress {
+        return try FfiConverterString.read(from: &buf)
+    }
+
+    public static func write(_ value: RetAccessControllerAddress, into buf: inout [UInt8]) {
+        return FfiConverterString.write(value, into: &buf)
+    }
+
+    public static func lift(_ value: RustBuffer) throws -> RetAccessControllerAddress {
+        return try FfiConverterString.lift(value)
+    }
+
+    public static func lower(_ value: RetAccessControllerAddress) -> RustBuffer {
+        return FfiConverterString.lower(value)
+    }
+}
+
+public func FfiConverterTypeRetAccessControllerAddress_lift(_ value: RustBuffer) throws -> RetAccessControllerAddress {
+    return try FfiConverterTypeRetAccessControllerAddress.lift(value)
+}
+
+public func FfiConverterTypeRetAccessControllerAddress_lower(_ value: RetAccessControllerAddress) -> RustBuffer {
+    return FfiConverterTypeRetAccessControllerAddress.lower(value)
+}
+
+/**
+ * Typealias from the type name used in the UDL file to the builtin type.  This
+ * is needed because the UDL type name is used in function/method signatures.
+ */
+public typealias RetAccountAddress = String
+public struct FfiConverterTypeRetAccountAddress: FfiConverter {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> RetAccountAddress {
+        return try FfiConverterString.read(from: &buf)
+    }
+
+    public static func write(_ value: RetAccountAddress, into buf: inout [UInt8]) {
+        return FfiConverterString.write(value, into: &buf)
+    }
+
+    public static func lift(_ value: RustBuffer) throws -> RetAccountAddress {
+        return try FfiConverterString.lift(value)
+    }
+
+    public static func lower(_ value: RetAccountAddress) -> RustBuffer {
+        return FfiConverterString.lower(value)
+    }
+}
+
+public func FfiConverterTypeRetAccountAddress_lift(_ value: RustBuffer) throws -> RetAccountAddress {
+    return try FfiConverterTypeRetAccountAddress.lift(value)
+}
+
+public func FfiConverterTypeRetAccountAddress_lower(_ value: RetAccountAddress) -> RustBuffer {
+    return FfiConverterTypeRetAccountAddress.lower(value)
+}
+
+/**
+ * Typealias from the type name used in the UDL file to the builtin type.  This
+ * is needed because the UDL type name is used in function/method signatures.
+ */
+public typealias RetComponentAddress = String
+public struct FfiConverterTypeRetComponentAddress: FfiConverter {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> RetComponentAddress {
+        return try FfiConverterString.read(from: &buf)
+    }
+
+    public static func write(_ value: RetComponentAddress, into buf: inout [UInt8]) {
+        return FfiConverterString.write(value, into: &buf)
+    }
+
+    public static func lift(_ value: RustBuffer) throws -> RetComponentAddress {
+        return try FfiConverterString.lift(value)
+    }
+
+    public static func lower(_ value: RetComponentAddress) -> RustBuffer {
+        return FfiConverterString.lower(value)
+    }
+}
+
+public func FfiConverterTypeRetComponentAddress_lift(_ value: RustBuffer) throws -> RetComponentAddress {
+    return try FfiConverterTypeRetComponentAddress.lift(value)
+}
+
+public func FfiConverterTypeRetComponentAddress_lower(_ value: RetComponentAddress) -> RustBuffer {
+    return FfiConverterTypeRetComponentAddress.lower(value)
+}
+
+/**
+ * Typealias from the type name used in the UDL file to the builtin type.  This
+ * is needed because the UDL type name is used in function/method signatures.
+ */
+public typealias RetIdentityAddress = String
+public struct FfiConverterTypeRetIdentityAddress: FfiConverter {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> RetIdentityAddress {
+        return try FfiConverterString.read(from: &buf)
+    }
+
+    public static func write(_ value: RetIdentityAddress, into buf: inout [UInt8]) {
+        return FfiConverterString.write(value, into: &buf)
+    }
+
+    public static func lift(_ value: RustBuffer) throws -> RetIdentityAddress {
+        return try FfiConverterString.lift(value)
+    }
+
+    public static func lower(_ value: RetIdentityAddress) -> RustBuffer {
+        return FfiConverterString.lower(value)
+    }
+}
+
+public func FfiConverterTypeRetIdentityAddress_lift(_ value: RustBuffer) throws -> RetIdentityAddress {
+    return try FfiConverterTypeRetIdentityAddress.lift(value)
+}
+
+public func FfiConverterTypeRetIdentityAddress_lower(_ value: RetIdentityAddress) -> RustBuffer {
+    return FfiConverterTypeRetIdentityAddress.lower(value)
+}
+
+/**
+ * Typealias from the type name used in the UDL file to the builtin type.  This
+ * is needed because the UDL type name is used in function/method signatures.
+ */
+public typealias RetPackageAddress = String
+public struct FfiConverterTypeRetPackageAddress: FfiConverter {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> RetPackageAddress {
+        return try FfiConverterString.read(from: &buf)
+    }
+
+    public static func write(_ value: RetPackageAddress, into buf: inout [UInt8]) {
+        return FfiConverterString.write(value, into: &buf)
+    }
+
+    public static func lift(_ value: RustBuffer) throws -> RetPackageAddress {
+        return try FfiConverterString.lift(value)
+    }
+
+    public static func lower(_ value: RetPackageAddress) -> RustBuffer {
+        return FfiConverterString.lower(value)
+    }
+}
+
+public func FfiConverterTypeRetPackageAddress_lift(_ value: RustBuffer) throws -> RetPackageAddress {
+    return try FfiConverterTypeRetPackageAddress.lift(value)
+}
+
+public func FfiConverterTypeRetPackageAddress_lower(_ value: RetPackageAddress) -> RustBuffer {
+    return FfiConverterTypeRetPackageAddress.lower(value)
+}
+
+/**
+ * Typealias from the type name used in the UDL file to the builtin type.  This
+ * is needed because the UDL type name is used in function/method signatures.
+ */
+public typealias RetPoolAddress = String
+public struct FfiConverterTypeRetPoolAddress: FfiConverter {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> RetPoolAddress {
+        return try FfiConverterString.read(from: &buf)
+    }
+
+    public static func write(_ value: RetPoolAddress, into buf: inout [UInt8]) {
+        return FfiConverterString.write(value, into: &buf)
+    }
+
+    public static func lift(_ value: RustBuffer) throws -> RetPoolAddress {
+        return try FfiConverterString.lift(value)
+    }
+
+    public static func lower(_ value: RetPoolAddress) -> RustBuffer {
+        return FfiConverterString.lower(value)
+    }
+}
+
+public func FfiConverterTypeRetPoolAddress_lift(_ value: RustBuffer) throws -> RetPoolAddress {
+    return try FfiConverterTypeRetPoolAddress.lift(value)
+}
+
+public func FfiConverterTypeRetPoolAddress_lower(_ value: RetPoolAddress) -> RustBuffer {
+    return FfiConverterTypeRetPoolAddress.lower(value)
+}
+
+/**
+ * Typealias from the type name used in the UDL file to the builtin type.  This
+ * is needed because the UDL type name is used in function/method signatures.
+ */
+public typealias RetResourceAddress = String
+public struct FfiConverterTypeRetResourceAddress: FfiConverter {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> RetResourceAddress {
+        return try FfiConverterString.read(from: &buf)
+    }
+
+    public static func write(_ value: RetResourceAddress, into buf: inout [UInt8]) {
+        return FfiConverterString.write(value, into: &buf)
+    }
+
+    public static func lift(_ value: RustBuffer) throws -> RetResourceAddress {
+        return try FfiConverterString.lift(value)
+    }
+
+    public static func lower(_ value: RetResourceAddress) -> RustBuffer {
+        return FfiConverterString.lower(value)
+    }
+}
+
+public func FfiConverterTypeRetResourceAddress_lift(_ value: RustBuffer) throws -> RetResourceAddress {
+    return try FfiConverterTypeRetResourceAddress.lift(value)
+}
+
+public func FfiConverterTypeRetResourceAddress_lower(_ value: RetResourceAddress) -> RustBuffer {
+    return FfiConverterTypeRetResourceAddress.lower(value)
+}
+
+/**
+ * Typealias from the type name used in the UDL file to the builtin type.  This
+ * is needed because the UDL type name is used in function/method signatures.
+ */
+public typealias RetValidatorAddress = String
+public struct FfiConverterTypeRetValidatorAddress: FfiConverter {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> RetValidatorAddress {
+        return try FfiConverterString.read(from: &buf)
+    }
+
+    public static func write(_ value: RetValidatorAddress, into buf: inout [UInt8]) {
+        return FfiConverterString.write(value, into: &buf)
+    }
+
+    public static func lift(_ value: RustBuffer) throws -> RetValidatorAddress {
+        return try FfiConverterString.lift(value)
+    }
+
+    public static func lower(_ value: RetValidatorAddress) -> RustBuffer {
+        return FfiConverterString.lower(value)
+    }
+}
+
+public func FfiConverterTypeRetValidatorAddress_lift(_ value: RustBuffer) throws -> RetValidatorAddress {
+    return try FfiConverterTypeRetValidatorAddress.lift(value)
+}
+
+public func FfiConverterTypeRetValidatorAddress_lower(_ value: RetValidatorAddress) -> RustBuffer {
+    return FfiConverterTypeRetValidatorAddress.lower(value)
+}
+
+/**
+ * Typealias from the type name used in the UDL file to the builtin type.  This
+ * is needed because the UDL type name is used in function/method signatures.
+ */
+public typealias RetVaultAddress = String
+public struct FfiConverterTypeRetVaultAddress: FfiConverter {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> RetVaultAddress {
+        return try FfiConverterString.read(from: &buf)
+    }
+
+    public static func write(_ value: RetVaultAddress, into buf: inout [UInt8]) {
+        return FfiConverterString.write(value, into: &buf)
+    }
+
+    public static func lift(_ value: RustBuffer) throws -> RetVaultAddress {
+        return try FfiConverterString.lift(value)
+    }
+
+    public static func lower(_ value: RetVaultAddress) -> RustBuffer {
+        return FfiConverterString.lower(value)
+    }
+}
+
+public func FfiConverterTypeRetVaultAddress_lift(_ value: RustBuffer) throws -> RetVaultAddress {
+    return try FfiConverterTypeRetVaultAddress.lift(value)
+}
+
+public func FfiConverterTypeRetVaultAddress_lower(_ value: RetVaultAddress) -> RustBuffer {
+    return FfiConverterTypeRetVaultAddress.lower(value)
+}
+
+/**
+ * Typealias from the type name used in the UDL file to the builtin type.  This
+ * is needed because the UDL type name is used in function/method signatures.
+ */
+public typealias ScryptoDecimal192 = String
+public struct FfiConverterTypeScryptoDecimal192: FfiConverter {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> ScryptoDecimal192 {
+        return try FfiConverterString.read(from: &buf)
+    }
+
+    public static func write(_ value: ScryptoDecimal192, into buf: inout [UInt8]) {
+        return FfiConverterString.write(value, into: &buf)
+    }
+
+    public static func lift(_ value: RustBuffer) throws -> ScryptoDecimal192 {
+        return try FfiConverterString.lift(value)
+    }
+
+    public static func lower(_ value: ScryptoDecimal192) -> RustBuffer {
+        return FfiConverterString.lower(value)
+    }
+}
+
+public func FfiConverterTypeScryptoDecimal192_lift(_ value: RustBuffer) throws -> ScryptoDecimal192 {
+    return try FfiConverterTypeScryptoDecimal192.lift(value)
+}
+
+public func FfiConverterTypeScryptoDecimal192_lower(_ value: ScryptoDecimal192) -> RustBuffer {
+    return FfiConverterTypeScryptoDecimal192.lower(value)
 }
 
 /**
@@ -11092,6 +11403,12 @@ public func accountAddressBech32Address(address: AccountAddress) -> String {
     )
 }
 
+/**
+ * Returns `false` for all addresses created with `Ed25519PublicKey`s, i.e.
+ * for all accounts created by the Babylon Radix Wallets.
+ * Returns `true` for all addresses created with `Secp256k1PublicKey`s, i.e.
+ * imported from the Olympia Wallet.
+ */
 public func accountAddressIsLegacy(address: AccountAddress) -> Bool {
     return try! FfiConverterBool.lift(
         try! rustCall {
@@ -11532,6 +11849,22 @@ public func newAccesscontrollerAddress(bech32: String) throws -> AccessControlle
     )
 }
 
+public func newAccesscontrollerAddressPlaceholder() -> AccessControllerAddress {
+    return try! FfiConverterTypeAccessControllerAddress.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_accesscontroller_address_placeholder($0)
+        }
+    )
+}
+
+public func newAccesscontrollerAddressPlaceholderOther() -> AccessControllerAddress {
+    return try! FfiConverterTypeAccessControllerAddress.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_accesscontroller_address_placeholder_other($0)
+        }
+    )
+}
+
 public func newAccountAddress(bech32: String) throws -> AccountAddress {
     return try FfiConverterTypeAccountAddress.lift(
         rustCallWithError(FfiConverterTypeCommonError.lift) {
@@ -11549,6 +11882,38 @@ public func newAccountAddressFrom(publicKey: PublicKey, networkId: NetworkId) ->
                 FfiConverterTypePublicKey.lower(publicKey),
                 FfiConverterTypeNetworkID.lower(networkId), $0
             )
+        }
+    )
+}
+
+public func newAccountAddressPlaceholderMainnet() -> AccountAddress {
+    return try! FfiConverterTypeAccountAddress.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_account_address_placeholder_mainnet($0)
+        }
+    )
+}
+
+public func newAccountAddressPlaceholderMainnetOther() -> AccountAddress {
+    return try! FfiConverterTypeAccountAddress.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_account_address_placeholder_mainnet_other($0)
+        }
+    )
+}
+
+public func newAccountAddressPlaceholderStokenet() -> AccountAddress {
+    return try! FfiConverterTypeAccountAddress.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_account_address_placeholder_stokenet($0)
+        }
+    )
+}
+
+public func newAccountAddressPlaceholderStokenetOther() -> AccountAddress {
+    return try! FfiConverterTypeAccountAddress.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_account_address_placeholder_stokenet_other($0)
         }
     )
 }
@@ -11659,6 +12024,28 @@ public func newComponentAddress(bech32: String) throws -> ComponentAddress {
             uniffi_sargon_fn_func_new_component_address(
                 FfiConverterString.lower(bech32), $0
             )
+        }
+    )
+}
+
+/**
+ * Placeholder to a mainnet ComponentAddress (global)
+ */
+public func newComponentAddressPlaceholder() -> ComponentAddress {
+    return try! FfiConverterTypeComponentAddress.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_component_address_placeholder($0)
+        }
+    )
+}
+
+/**
+ * Placeholder to a mainnet ComponentAddress (internal)
+ */
+public func newComponentAddressPlaceholderOther() -> ComponentAddress {
+    return try! FfiConverterTypeComponentAddress.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_component_address_placeholder_other($0)
         }
     )
 }
@@ -11986,6 +12373,38 @@ public func newIdentityAddressFrom(publicKey: PublicKey, networkId: NetworkId) -
     )
 }
 
+public func newIdentityAddressPlaceholderMainnet() -> IdentityAddress {
+    return try! FfiConverterTypeIdentityAddress.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_identity_address_placeholder_mainnet($0)
+        }
+    )
+}
+
+public func newIdentityAddressPlaceholderMainnetOther() -> IdentityAddress {
+    return try! FfiConverterTypeIdentityAddress.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_identity_address_placeholder_mainnet_other($0)
+        }
+    )
+}
+
+public func newIdentityAddressPlaceholderStokenet() -> IdentityAddress {
+    return try! FfiConverterTypeIdentityAddress.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_identity_address_placeholder_stokenet($0)
+        }
+    )
+}
+
+public func newIdentityAddressPlaceholderStokenetOther() -> IdentityAddress {
+    return try! FfiConverterTypeIdentityAddress.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_identity_address_placeholder_stokenet_other($0)
+        }
+    )
+}
+
 public func newPackageAddress(bech32: String) throws -> PackageAddress {
     return try FfiConverterTypePackageAddress.lift(
         rustCallWithError(FfiConverterTypeCommonError.lift) {
@@ -11996,12 +12415,61 @@ public func newPackageAddress(bech32: String) throws -> PackageAddress {
     )
 }
 
+public func newPackageAddressPlaceholder() -> PackageAddress {
+    return try! FfiConverterTypePackageAddress.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_package_address_placeholder($0)
+        }
+    )
+}
+
+public func newPackageAddressPlaceholderOther() -> PackageAddress {
+    return try! FfiConverterTypePackageAddress.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_package_address_placeholder_other($0)
+        }
+    )
+}
+
 public func newPoolAddress(bech32: String) throws -> PoolAddress {
     return try FfiConverterTypePoolAddress.lift(
         rustCallWithError(FfiConverterTypeCommonError.lift) {
             uniffi_sargon_fn_func_new_pool_address(
                 FfiConverterString.lower(bech32), $0
             )
+        }
+    )
+}
+
+/**
+ * Placeholder to a mainnet PoolAddress with three resources.
+ */
+public func newPoolAddressPlaceholderMulti() -> PoolAddress {
+    return try! FfiConverterTypePoolAddress.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_pool_address_placeholder_multi($0)
+        }
+    )
+}
+
+/**
+ * Placeholder to a mainnet PoolAddress with single resource.
+ */
+public func newPoolAddressPlaceholderSingle() -> PoolAddress {
+    return try! FfiConverterTypePoolAddress.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_pool_address_placeholder_single($0)
+        }
+    )
+}
+
+/**
+ * Placeholder to a mainnet PoolAddress with two resources.
+ */
+public func newPoolAddressPlaceholderTwo() -> PoolAddress {
+    return try! FfiConverterTypePoolAddress.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_pool_address_placeholder_two($0)
         }
     )
 }
@@ -12080,6 +12548,62 @@ public func newResourceAddress(bech32: String) throws -> ResourceAddress {
     )
 }
 
+public func newResourceAddressPlaceholderMainnetCandy() -> ResourceAddress {
+    return try! FfiConverterTypeResourceAddress.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_resource_address_placeholder_mainnet_candy($0)
+        }
+    )
+}
+
+public func newResourceAddressPlaceholderMainnetNftGcMembership() -> ResourceAddress {
+    return try! FfiConverterTypeResourceAddress.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_resource_address_placeholder_mainnet_nft_gc_membership($0)
+        }
+    )
+}
+
+public func newResourceAddressPlaceholderMainnetXrd() -> ResourceAddress {
+    return try! FfiConverterTypeResourceAddress.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_resource_address_placeholder_mainnet_xrd($0)
+        }
+    )
+}
+
+public func newResourceAddressPlaceholderStokenetCandy() -> ResourceAddress {
+    return try! FfiConverterTypeResourceAddress.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_resource_address_placeholder_stokenet_candy($0)
+        }
+    )
+}
+
+public func newResourceAddressPlaceholderStokenetGcTokens() -> ResourceAddress {
+    return try! FfiConverterTypeResourceAddress.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_resource_address_placeholder_stokenet_gc_tokens($0)
+        }
+    )
+}
+
+public func newResourceAddressPlaceholderStokenetGum() -> ResourceAddress {
+    return try! FfiConverterTypeResourceAddress.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_resource_address_placeholder_stokenet_gum($0)
+        }
+    )
+}
+
+public func newResourceAddressPlaceholderStokenetXrd() -> ResourceAddress {
+    return try! FfiConverterTypeResourceAddress.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_resource_address_placeholder_stokenet_xrd($0)
+        }
+    )
+}
+
 public func newSecp256k1PublicKeyFromBytes(bytes: Data) throws -> Secp256k1PublicKey {
     return try FfiConverterTypeSecp256k1PublicKey.lift(
         rustCallWithError(FfiConverterTypeCommonError.lift) {
@@ -12126,12 +12650,76 @@ public func newValidatorAddress(bech32: String) throws -> ValidatorAddress {
     )
 }
 
+public func newValidatorAddressPlaceholderMainnet() -> ValidatorAddress {
+    return try! FfiConverterTypeValidatorAddress.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_validator_address_placeholder_mainnet($0)
+        }
+    )
+}
+
+public func newValidatorAddressPlaceholderMainnetOther() -> ValidatorAddress {
+    return try! FfiConverterTypeValidatorAddress.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_validator_address_placeholder_mainnet_other($0)
+        }
+    )
+}
+
+public func newValidatorAddressPlaceholderStokenet() -> ValidatorAddress {
+    return try! FfiConverterTypeValidatorAddress.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_validator_address_placeholder_stokenet($0)
+        }
+    )
+}
+
+public func newValidatorAddressPlaceholderStokenetOther() -> ValidatorAddress {
+    return try! FfiConverterTypeValidatorAddress.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_validator_address_placeholder_stokenet_other($0)
+        }
+    )
+}
+
 public func newVaultAddress(bech32: String) throws -> VaultAddress {
     return try FfiConverterTypeVaultAddress.lift(
         rustCallWithError(FfiConverterTypeCommonError.lift) {
             uniffi_sargon_fn_func_new_vault_address(
                 FfiConverterString.lower(bech32), $0
             )
+        }
+    )
+}
+
+public func newVaultAddressPlaceholderMainnetFungible() -> VaultAddress {
+    return try! FfiConverterTypeVaultAddress.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_vault_address_placeholder_mainnet_fungible($0)
+        }
+    )
+}
+
+public func newVaultAddressPlaceholderMainnetNonFungible() -> VaultAddress {
+    return try! FfiConverterTypeVaultAddress.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_vault_address_placeholder_mainnet_non_fungible($0)
+        }
+    )
+}
+
+public func newVaultAddressPlaceholderStokenetFungible() -> VaultAddress {
+    return try! FfiConverterTypeVaultAddress.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_vault_address_placeholder_stokenet_fungible($0)
+        }
+    )
+}
+
+public func newVaultAddressPlaceholderStokenetNonFungible() -> VaultAddress {
+    return try! FfiConverterTypeVaultAddress.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_new_vault_address_placeholder_stokenet_non_fungible($0)
         }
     )
 }
@@ -12170,6 +12758,19 @@ public func poolAddressBech32Address(address: PoolAddress) -> String {
     return try! FfiConverterString.lift(
         try! rustCall {
             uniffi_sargon_fn_func_pool_address_bech32_address(
+                FfiConverterTypePoolAddress.lower(address), $0
+            )
+        }
+    )
+}
+
+/**
+ * Returns the kind of pool, either 1, 2 or Multi resources.
+ */
+public func poolAddressKind(address: PoolAddress) -> PoolKind {
+    return try! FfiConverterTypePoolKind.lift(
+        try! rustCall {
+            uniffi_sargon_fn_func_pool_address_kind(
                 FfiConverterTypePoolAddress.lower(address), $0
             )
         }
@@ -12345,7 +12946,7 @@ private var initializationResult: InitializationResult {
     if uniffi_sargon_checksum_func_account_address_bech32_address() != 1871 {
         return InitializationResult.apiChecksumMismatch
     }
-    if uniffi_sargon_checksum_func_account_address_is_legacy() != 34575 {
+    if uniffi_sargon_checksum_func_account_address_is_legacy() != 55930 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_sargon_checksum_func_account_address_network_id() != 2179 {
@@ -12453,10 +13054,28 @@ private var initializationResult: InitializationResult {
     if uniffi_sargon_checksum_func_new_accesscontroller_address() != 38016 {
         return InitializationResult.apiChecksumMismatch
     }
+    if uniffi_sargon_checksum_func_new_accesscontroller_address_placeholder() != 55419 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_new_accesscontroller_address_placeholder_other() != 17734 {
+        return InitializationResult.apiChecksumMismatch
+    }
     if uniffi_sargon_checksum_func_new_account_address() != 35088 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_sargon_checksum_func_new_account_address_from() != 38710 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_new_account_address_placeholder_mainnet() != 28692 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_new_account_address_placeholder_mainnet_other() != 46600 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_new_account_address_placeholder_stokenet() != 54707 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_new_account_address_placeholder_stokenet_other() != 61686 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_sargon_checksum_func_new_app_preferences_placeholder() != 33404 {
@@ -12496,6 +13115,12 @@ private var initializationResult: InitializationResult {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_sargon_checksum_func_new_component_address() != 37962 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_new_component_address_placeholder() != 38909 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_new_component_address_placeholder_other() != 4319 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_sargon_checksum_func_new_decimal_exponent() != 14207 {
@@ -12588,10 +13213,37 @@ private var initializationResult: InitializationResult {
     if uniffi_sargon_checksum_func_new_identity_address_from() != 35055 {
         return InitializationResult.apiChecksumMismatch
     }
+    if uniffi_sargon_checksum_func_new_identity_address_placeholder_mainnet() != 52677 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_new_identity_address_placeholder_mainnet_other() != 9667 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_new_identity_address_placeholder_stokenet() != 13448 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_new_identity_address_placeholder_stokenet_other() != 35315 {
+        return InitializationResult.apiChecksumMismatch
+    }
     if uniffi_sargon_checksum_func_new_package_address() != 9704 {
         return InitializationResult.apiChecksumMismatch
     }
+    if uniffi_sargon_checksum_func_new_package_address_placeholder() != 62822 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_new_package_address_placeholder_other() != 55234 {
+        return InitializationResult.apiChecksumMismatch
+    }
     if uniffi_sargon_checksum_func_new_pool_address() != 55001 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_new_pool_address_placeholder_multi() != 48647 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_new_pool_address_placeholder_single() != 25574 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_new_pool_address_placeholder_two() != 58221 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_sargon_checksum_func_new_private_hd_factor_source() != 4402 {
@@ -12618,6 +13270,27 @@ private var initializationResult: InitializationResult {
     if uniffi_sargon_checksum_func_new_resource_address() != 17661 {
         return InitializationResult.apiChecksumMismatch
     }
+    if uniffi_sargon_checksum_func_new_resource_address_placeholder_mainnet_candy() != 24716 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_new_resource_address_placeholder_mainnet_nft_gc_membership() != 63142 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_new_resource_address_placeholder_mainnet_xrd() != 23920 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_new_resource_address_placeholder_stokenet_candy() != 13522 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_new_resource_address_placeholder_stokenet_gc_tokens() != 58449 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_new_resource_address_placeholder_stokenet_gum() != 59346 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_new_resource_address_placeholder_stokenet_xrd() != 36113 {
+        return InitializationResult.apiChecksumMismatch
+    }
     if uniffi_sargon_checksum_func_new_secp256k1_public_key_from_bytes() != 54701 {
         return InitializationResult.apiChecksumMismatch
     }
@@ -12633,7 +13306,31 @@ private var initializationResult: InitializationResult {
     if uniffi_sargon_checksum_func_new_validator_address() != 30897 {
         return InitializationResult.apiChecksumMismatch
     }
+    if uniffi_sargon_checksum_func_new_validator_address_placeholder_mainnet() != 41601 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_new_validator_address_placeholder_mainnet_other() != 24438 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_new_validator_address_placeholder_stokenet() != 51420 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_new_validator_address_placeholder_stokenet_other() != 9924 {
+        return InitializationResult.apiChecksumMismatch
+    }
     if uniffi_sargon_checksum_func_new_vault_address() != 1877 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_new_vault_address_placeholder_mainnet_fungible() != 22376 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_new_vault_address_placeholder_mainnet_non_fungible() != 25788 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_new_vault_address_placeholder_stokenet_fungible() != 36244 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_new_vault_address_placeholder_stokenet_non_fungible() != 28716 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_sargon_checksum_func_non_fungible_local_id_to_string() != 48364 {
@@ -12646,6 +13343,9 @@ private var initializationResult: InitializationResult {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_sargon_checksum_func_pool_address_bech32_address() != 24983 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_sargon_checksum_func_pool_address_kind() != 22197 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_sargon_checksum_func_pool_address_network_id() != 46890 {

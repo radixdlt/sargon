@@ -2,6 +2,8 @@ use crate::prelude::*;
 
 use radix_engine_toolkit::models::canonical_address_types::CanonicalPoolAddress as RetPoolAddress;
 
+use radix_engine_common::types::EntityType as ScryptoEntityType;
+
 /// Addresses identifying an OnLedger (OnNetwork) Liquidity Pool (LP) of tokens that users can contribute
 /// Liquidity too, e.g.:
 /// `"pool_rdx1c325zs6dz3un8ykkjavy9fkvvyzarkaehgsl408qup6f95aup3le3w"`
@@ -38,6 +40,58 @@ pub struct PoolAddress {
     /// create extension methods on this address type in FFI land, translating
     /// these functions into methods.)
     pub(crate) secret_magic: RetPoolAddress,
+}
+
+/// Placeholder to a mainnet PoolAddress with single resource.
+#[uniffi::export]
+pub fn new_pool_address_placeholder_single() -> PoolAddress {
+    PoolAddress::placeholder_mainnet_single_pool()
+}
+
+/// Placeholder to a mainnet PoolAddress with two resources.
+#[uniffi::export]
+pub fn new_pool_address_placeholder_two() -> PoolAddress {
+    PoolAddress::placeholder_mainnet_bi_pool()
+}
+
+/// Placeholder to a mainnet PoolAddress with three resources.
+#[uniffi::export]
+pub fn new_pool_address_placeholder_multi() -> PoolAddress {
+    PoolAddress::placeholder_mainnet_multi_pool()
+}
+
+/// The kind of the Pool, either One, Two or Multi resources.
+#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
+pub enum PoolKind {
+    /// A Pool to which user can contribute liquidity of a single
+    /// resource kind.
+    OneResource,
+
+    /// A Pool to which user can contribute liquidity of two different
+    /// resources
+    TwoResources,
+
+    /// A Pool to which user can contribute liquidity of many different
+    /// resources
+    MultiResources,
+}
+
+/// Returns the kind of pool, either 1, 2 or Multi resources.
+#[uniffi::export]
+pub fn pool_address_kind(address: &PoolAddress) -> PoolKind {
+    address.pool_address_kind()
+}
+
+impl PoolAddress {
+    /// Returns the kind of pool, either 1, 2 or Multi resources.
+    pub fn pool_address_kind(&self) -> PoolKind {
+        match self.entity_type() {
+            ScryptoEntityType::GlobalOneResourcePool => PoolKind::OneResource,
+            ScryptoEntityType::GlobalTwoResourcePool => PoolKind::TwoResources,
+            ScryptoEntityType::GlobalMultiResourcePool => PoolKind::MultiResources,
+            _ => panic!("Bug in radix-engine-toolkit's CanonicalPoolAddress implementation, wrong entity type returned")
+        }
+    }
 }
 
 impl HasPlaceholder for PoolAddress {
@@ -156,6 +210,22 @@ mod tests {
                 .unwrap();
         assert_eq!(a.network_id(), NetworkID::Mainnet);
     }
+
+    #[test]
+    fn pool_kind() {
+        assert_eq!(
+            SUT::placeholder_mainnet_single_pool().pool_address_kind(),
+            PoolKind::OneResource
+        );
+        assert_eq!(
+            SUT::placeholder_mainnet_bi_pool().pool_address_kind(),
+            PoolKind::TwoResources
+        );
+        assert_eq!(
+            SUT::placeholder_mainnet_multi_pool().pool_address_kind(),
+            PoolKind::MultiResources
+        );
+    }
 }
 
 #[cfg(test)]
@@ -184,5 +254,37 @@ mod uniffi_tests {
         let b = new_pool_address(s.to_string()).unwrap();
         assert_eq!(b.address(), s);
         assert_eq!(a, b);
+    }
+
+    #[test]
+    fn pool_kind() {
+        assert_eq!(
+            pool_address_kind(&SUT::placeholder_mainnet_single_pool()),
+            PoolKind::OneResource
+        );
+        assert_eq!(
+            pool_address_kind(&SUT::placeholder_mainnet_bi_pool()),
+            PoolKind::TwoResources
+        );
+        assert_eq!(
+            pool_address_kind(&SUT::placeholder_mainnet_multi_pool()),
+            PoolKind::MultiResources
+        );
+    }
+
+    #[test]
+    fn placeholder() {
+        assert_eq!(
+            SUT::placeholder_mainnet_single_pool(),
+            new_pool_address_placeholder_single()
+        );
+        assert_eq!(
+            SUT::placeholder_mainnet_bi_pool(),
+            new_pool_address_placeholder_two()
+        );
+        assert_eq!(
+            SUT::placeholder_mainnet_multi_pool(),
+            new_pool_address_placeholder_multi()
+        );
     }
 }

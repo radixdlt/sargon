@@ -50,6 +50,26 @@ pub fn new_identity_address_from(
     IdentityAddress::new(public_key, network_id)
 }
 
+#[uniffi::export]
+pub fn new_identity_address_placeholder_mainnet() -> IdentityAddress {
+    IdentityAddress::placeholder_mainnet()
+}
+
+#[uniffi::export]
+pub fn new_identity_address_placeholder_mainnet_other() -> IdentityAddress {
+    IdentityAddress::placeholder_mainnet_other()
+}
+
+#[uniffi::export]
+pub fn new_identity_address_placeholder_stokenet() -> IdentityAddress {
+    IdentityAddress::placeholder_stokenet()
+}
+
+#[uniffi::export]
+pub fn new_identity_address_placeholder_stokenet_other() -> IdentityAddress {
+    IdentityAddress::placeholder_stokenet_other()
+}
+
 impl EntityAddress for IdentityAddress {
     /// Identifies that IdentityAddresses uses the `EntityType::Identity`, which are used
     /// to validate the HRP (`"identity_"`) and is also used when forming HD derivation
@@ -249,6 +269,9 @@ mod uniffi_tests {
     use super::*;
     use crate::prelude::*;
 
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = IdentityAddress;
+
     #[test]
     fn new_from_bech32_get_network_id_and_address() {
         let b32 = "identity_rdx122kttqch0eehzj6f9nkkxcw7msfeg9udurq5u0ysa0e92c59w0mg6x";
@@ -268,5 +291,28 @@ mod uniffi_tests {
             .address(),
             "identity_rdx12tgzjrz9u0xz4l28vf04hz87eguclmfaq4d2p8f8lv7zg9ssnzku8j"
         )
+    }
+
+    #[test]
+    fn placeholder() {
+        assert_eq!(
+            new_identity_address_placeholder_mainnet(),
+            SUT::placeholder_mainnet()
+        );
+
+        assert_eq!(
+            new_identity_address_placeholder_mainnet_other(),
+            SUT::placeholder_mainnet_other()
+        );
+
+        assert_eq!(
+            new_identity_address_placeholder_stokenet(),
+            SUT::placeholder_stokenet()
+        );
+
+        assert_eq!(
+            new_identity_address_placeholder_stokenet_other(),
+            SUT::placeholder_stokenet_other()
+        );
     }
 }
