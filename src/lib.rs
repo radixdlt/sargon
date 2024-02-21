@@ -45,6 +45,7 @@ pub mod prelude {
 }
 
 pub use prelude::*;
+pub use radix_engine_common::math::Decimal as ScryptoDecimal192;
 
 // Use `url::Url` as a custom type, with `String` as the Builtin
 #[cfg(not(tarpaulin_include))] // Tested in binding tests (e.g. test*.swift files)

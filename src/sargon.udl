@@ -11,7 +11,7 @@ typedef string Timestamp;
 typedef sequence<i8> BagOfBytes;
 
 [Custom]
-typedef string InnerDecimal;
+typedef string ScryptoDecimal192;
 
 [Custom]
 typedef string InnerAccountAddress;

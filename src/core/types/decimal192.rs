@@ -5,7 +5,7 @@ use radix_engine_common::math::{
 };
 
 /// UniFFI conversion for InnerDecimal using String as builtin.
-impl crate::UniffiCustomTypeConverter for InnerDecimal {
+impl crate::UniffiCustomTypeConverter for ScryptoDecimal192 {
     type Builtin = String;
 
     #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
@@ -16,35 +16,6 @@ impl crate::UniffiCustomTypeConverter for InnerDecimal {
     #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
     fn from_custom(obj: Self) -> Self::Builtin {
         obj.to_string()
-    }
-}
-
-/// A 192 bit precision Decimal wrapping Scrypto's `Decimal` type, but
-/// giving it UniFFI conversion.
-///
-/// The purpose of this "Inner" Decimal is ensuring that the `Decimal` type
-/// is not exported as a `String` in FFI land (Swift/Kotlin). The current
-/// design ensure that `Decimal` is converted into a Swift `struct` / Kotlin
-/// `data class` that **has** a `inner: String`
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    PartialEq,
-    Eq,
-    PartialOrd,
-    Ord,
-    Hash,
-    derive_more::Display,
-)]
-pub struct InnerDecimal(pub(crate) ScryptoDecimal192);
-impl FromStr for InnerDecimal {
-    type Err = crate::CommonError;
-
-    fn from_str(s: &str) -> Result<Self> {
-        ScryptoDecimal192::from_str(s)
-            .map(InnerDecimal)
-            .map_err(|_| CommonError::DecimalError)
     }
 }
 
@@ -88,7 +59,7 @@ pub struct Decimal192 {
     /// due to limitations in UniFII as of Feb 2024, but you should
     /// create extension methods on Decimal192 in FFI land, translating
     /// these functions into methods.)
-    __inner: InnerDecimal, // Strange field name to try as much as possible hide it in FFI land.
+    __inner: ScryptoDecimal192, // Strange field name to try as much as possible hide it in FFI land.
 }
 
 /// Internally (in Rust land) we would like to call `Decimal192` just `Decimal`.
@@ -107,13 +78,11 @@ impl From<ScryptoDecimal192> for Decimal {
 }
 impl Decimal {
     fn native(&self) -> ScryptoDecimal192 {
-        self.__inner.0
+        self.__inner
     }
 
     fn from_native(decimal: ScryptoDecimal192) -> Self {
-        Decimal {
-            __inner: InnerDecimal(decimal),
-        }
+        Decimal { __inner: decimal }
     }
 }
 
@@ -520,27 +489,6 @@ pub fn decimal_round(
     rounding_mode: RoundingMode,
 ) -> Result<Decimal192> {
     decimal.round(decimal_places, rounding_mode)
-}
-
-#[cfg(test)]
-mod test_inner {
-    use super::*;
-    use crate::prelude::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = InnerDecimal;
-
-    #[test]
-    fn string_roundtrip() {
-        let s = "3.1415";
-        let sut: SUT = s.parse().unwrap();
-        assert_eq!(sut.to_string(), s.to_owned());
-    }
-
-    #[test]
-    fn from_str_invalid() {
-        assert_eq!("invalid".parse::<SUT>(), Err(CommonError::DecimalError));
-    }
 }
 
 #[cfg(test)]
