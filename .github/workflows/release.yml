@@ -76,18 +76,22 @@ jobs:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
           components: ${{ env.RUST_COMPONENTS }}
           target: x86_64-apple-darwin
-      
-      - name: Build Dependencies (android)
-        uses: RDXWorks-actions/setup-ndk@v1
-        id: setup-ndk
-        with:
-          ndk-version: r26c
 
       - name: Set up JDK 17
         uses: RDXWorks-actions/setup-java@v3
         with:
           distribution: 'adopt'
           java-version: '17'
+      
+      - name: Setup Android SDK
+        uses: RDXWorks-actions/setup-android@v2
+
+      - name: Setup Android NDK
+        uses: RDXWorks-actions/setup-ndk@v1
+        id: setup-ndk
+        with:
+          ndk-version: r26c
+          link-to-sdk: true
 
       - name: Setup Env Variables
         env:
