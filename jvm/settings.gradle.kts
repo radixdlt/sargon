@@ -16,3 +16,4 @@ dependencyResolutionManagement {
 rootProject.name = "Sargon JVM"
 include(":app")
 include(":sargon-android")
+include(":sargon-desktop-bins")

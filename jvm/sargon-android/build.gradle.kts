@@ -33,10 +33,18 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+    sourceSets {
+        getByName("debug") {
+            java.srcDir("${buildDir}/generated/src/debug/java")
+        }
+        getByName("release") {
+            java.srcDir("${buildDir}/generated/src/release/java")
+        }
+    }
 }
 
 cargoNdk {
-//    targets = arrayListOf("arm64", "arm")
+    targets = arrayListOf("arm64", "arm")
     module = "../"
     librariesNames = arrayListOf("libsargon.so")
 }
@@ -57,11 +65,13 @@ android.libraryVariants.all {
         "generate${buildTypeUpper}UniFFIBindings",
         Exec::class
     ) {
+        group = BasePlugin.BUILD_GROUP
+
         workingDir = rootDir.parentFile
         commandLine(
             "cargo", "run", "--bin", "uniffi-bindgen", "generate", "--library",
             "${rootDir}/${project.name}/src/main/jniLibs/arm64-v8a/libsargon.so", "--language", "kotlin",
-            "--out-dir", "${rootDir}/${project.name}/src/main/java"
+            "--out-dir", "${buildDir}/generated/src/${buildType}/java"
         )
 
         dependsOn("buildCargoNdk${buildTypeUpper}")
@@ -80,9 +90,20 @@ android.libraryVariants.all {
     }
 }
 
-tasks.register("cargoClean", Exec::class) {
-    workingDir = rootDir.parentFile
-    commandLine("cargo", "clean")
+tasks.register("cargoClean") {
+    group = BasePlugin.BUILD_GROUP
+    doLast {
+        exec {
+            workingDir = rootDir.parentFile
+            println("Cleaning for aarch64-linux-android")
+            commandLine("cargo", "clean", "--target", "aarch64-linux-android")
+        }
+        exec {
+            workingDir = rootDir.parentFile
+            println("Cleaning for armv7-linux-androideabi")
+            commandLine("cargo", "clean", "--target", "armv7-linux-androideabi")
+        }
+    }
 }
 
 tasks.getByName("clean") {
