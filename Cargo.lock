@@ -1744,7 +1744,7 @@ dependencies = [
 [[package]]
 name = "radix-engine-toolkit"
 version = "1.0.10"
-source = "git+https://github.com/radixdlt/radix-engine-toolkit?rev=34fcc3d5953f4fe131d63d4ee2c41259a087e7a5#34fcc3d5953f4fe131d63d4ee2c41259a087e7a5"
+source = "git+https://github.com/radixdlt/radix-engine-toolkit?rev=6c8caeace584086f175c01b65ce58002e90d8f97#6c8caeace584086f175c01b65ce58002e90d8f97"
 dependencies = [
  "bech32",
  "cargo_toml",
@@ -1769,7 +1769,7 @@ dependencies = [
 [[package]]
 name = "radix-engine-toolkit-json"
 version = "1.0.10"
-source = "git+https://github.com/radixdlt/radix-engine-toolkit?rev=34fcc3d5953f4fe131d63d4ee2c41259a087e7a5#34fcc3d5953f4fe131d63d4ee2c41259a087e7a5"
+source = "git+https://github.com/radixdlt/radix-engine-toolkit?rev=6c8caeace584086f175c01b65ce58002e90d8f97#6c8caeace584086f175c01b65ce58002e90d8f97"
 dependencies = [
  "bech32",
  "indexmap 1.9.3",
@@ -2054,7 +2054,7 @@ dependencies = [
 [[package]]
 name = "sbor-json"
 version = "1.0.10"
-source = "git+https://github.com/radixdlt/radix-engine-toolkit?rev=34fcc3d5953f4fe131d63d4ee2c41259a087e7a5#34fcc3d5953f4fe131d63d4ee2c41259a087e7a5"
+source = "git+https://github.com/radixdlt/radix-engine-toolkit?rev=6c8caeace584086f175c01b65ce58002e90d8f97#6c8caeace584086f175c01b65ce58002e90d8f97"
 dependencies = [
  "bech32",
  "radix-engine-common",
