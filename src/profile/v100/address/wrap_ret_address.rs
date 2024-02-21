@@ -37,17 +37,18 @@ macro_rules! decl_ret_wrapped_address {
             )*
             #[derive(
                 Clone,
-                Debug,
                 PartialEq,
                 Eq,
                 Hash,
                 derive_more::FromStr,
                 derive_more::Display,
+                derive_more::Debug,
                 SerializeDisplay,
                 DeserializeFromStr,
                 uniffi::Record,
             )]
             #[display("{secret_magic}")]
+            #[debug("{secret_magic}")]
             pub struct [< $address_type:camel Address >] {
                 pub(crate) secret_magic: [< Ret $address_type:camel Address >], // Do NOT add comments above
             }

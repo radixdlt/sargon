@@ -86,7 +86,14 @@ mod tests {
     fn display() {
         let s = "accesscontroller_rdx1cw9383xuqx6cme0knucw5aggknvrqmc8lzu7jcn3kwherk8x55zmtt";
         let a = SUT::try_from_bech32(s).unwrap();
-        assert_eq!(format!("{a}"), s);
+        assert_eq!(format!("{}", a), s);
+    }
+
+    #[test]
+    fn debug() {
+        let s = "accesscontroller_rdx1cw9383xuqx6cme0knucw5aggknvrqmc8lzu7jcn3kwherk8x55zmtt";
+        let a = SUT::try_from_bech32(s).unwrap();
+        assert_eq!(format!("{:?}", a), s);
     }
 
     #[test]

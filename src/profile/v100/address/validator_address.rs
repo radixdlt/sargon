@@ -83,7 +83,14 @@ mod tests {
     fn display() {
         let s = "validator_rdx1sdcmd3ymwzvswgyva8lpknqrzuzzmmkac9my4auk29j5feumfh77fs";
         let a = SUT::try_from_bech32(s).unwrap();
-        assert_eq!(format!("{a}"), s);
+        assert_eq!(format!("{}", a), s);
+    }
+
+    #[test]
+    fn debug() {
+        let s = "validator_rdx1sdcmd3ymwzvswgyva8lpknqrzuzzmmkac9my4auk29j5feumfh77fs";
+        let a = SUT::try_from_bech32(s).unwrap();
+        assert_eq!(format!("{:?}", a), s);
     }
 
     #[test]

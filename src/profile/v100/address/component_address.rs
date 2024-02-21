@@ -96,6 +96,13 @@ mod tests {
     }
 
     #[test]
+    fn debug() {
+        let s = "component_rdx1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxfaucet";
+        let a = SUT::try_from_bech32(s).unwrap();
+        assert_eq!(format!("{:?}", a), s);
+    }
+
+    #[test]
     fn json_roundtrip() {
         let a: SUT =
             "component_rdx1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxfaucet"

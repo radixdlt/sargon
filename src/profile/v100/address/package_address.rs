@@ -57,7 +57,14 @@ mod tests {
     fn display() {
         let s = "package_rdx1pkgxxxxxxxxxfaucetxxxxxxxxx000034355863xxxxxxxxxfaucet";
         let a = SUT::try_from_bech32(s).unwrap();
-        assert_eq!(format!("{a}"), s);
+        assert_eq!(format!("{}", a), s);
+    }
+
+    #[test]
+    fn debug() {
+        let s = "package_rdx1pkgxxxxxxxxxfaucetxxxxxxxxx000034355863xxxxxxxxxfaucet";
+        let a = SUT::try_from_bech32(s).unwrap();
+        assert_eq!(format!("{:?}", a), s);
     }
 
     #[test]

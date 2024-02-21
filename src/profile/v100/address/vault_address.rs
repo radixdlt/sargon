@@ -107,7 +107,14 @@ mod tests {
     fn display() {
         let s = "internal_vault_rdx1nz8nsf78zrrxq7r2r059vzsnmleawr36470chegf84p06fhze6wq3d";
         let a = SUT::try_from_bech32(s).unwrap();
-        assert_eq!(format!("{a}"), s);
+        assert_eq!(format!("{}", a), s);
+    }
+
+    #[test]
+    fn debug() {
+        let s = "internal_vault_rdx1nz8nsf78zrrxq7r2r059vzsnmleawr36470chegf84p06fhze6wq3d";
+        let a = SUT::try_from_bech32(s).unwrap();
+        assert_eq!(format!("{:?}", a), s);
     }
 
     #[test]

@@ -198,7 +198,14 @@ mod tests {
     fn display() {
         let s = "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd";
         let a = SUT::try_from_bech32(s).unwrap();
-        assert_eq!(format!("{a}"), s);
+        assert_eq!(format!("{}", a), s);
+    }
+
+    #[test]
+    fn debug() {
+        let s = "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd";
+        let a = SUT::try_from_bech32(s).unwrap();
+        assert_eq!(format!("{:?}", a), s);
     }
 
     #[test]

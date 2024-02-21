@@ -220,13 +220,25 @@ mod tests {
     }
 
     #[test]
-    fn format() {
+    fn display() {
         let a = SUT::try_from_bech32(
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease",
         )
         .unwrap();
         assert_eq!(
             format!("{}", a),
+            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+        );
+    }
+
+    #[test]
+    fn debug() {
+        let a = SUT::try_from_bech32(
+            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease",
+        )
+        .unwrap();
+        assert_eq!(
+            format!("{:?}", a),
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
         );
     }
