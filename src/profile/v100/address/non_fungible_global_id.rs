@@ -118,7 +118,7 @@ mod tests {
     use crate::prelude::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = ComponentAddress;
+    type SUT = NonFungibleGlobalId;
 
     #[test]
     fn equality() {
@@ -134,7 +134,7 @@ mod tests {
     #[test]
     fn test_deserialize() {
         let str = "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd:#2244#";
-        let id: NonFungibleGlobalId = str.parse().unwrap();
+        let id: SUT = str.parse().unwrap();
         match id.clone().non_fungible_local_id {
             NonFungibleLocalId::Integer { value } => assert_eq!(value, 2244),
             _ => panic!("wrong"),
@@ -146,7 +146,7 @@ mod tests {
     #[test]
     fn test_address() {
         let str = "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd:#2244#";
-        let id: NonFungibleGlobalId = str.parse().unwrap();
+        let id: SUT = str.parse().unwrap();
         assert_eq!(
             id.resource_address.address(),
             "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd"
@@ -156,27 +156,27 @@ mod tests {
     #[test]
     fn test_network_id() {
         let str = "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd:#2244#";
-        let id: NonFungibleGlobalId = str.parse().unwrap();
+        let id: SUT = str.parse().unwrap();
         assert_eq!(id.to_string(), str);
     }
 
     #[test]
     fn test_as_str() {
         let str = "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd:#2244#";
-        let id: NonFungibleGlobalId = str.parse().unwrap();
+        let id: SUT = str.parse().unwrap();
         assert_eq!(id.to_string(), str);
     }
 
     #[test]
     fn display() {
         let str = "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd:#2244#";
-        let id: NonFungibleGlobalId = str.parse().unwrap();
+        let id: SUT = str.parse().unwrap();
         assert_eq!(format!("{}", id), str);
     }
 
     #[test]
     fn json_roundtrip() {
-        let id: NonFungibleGlobalId =
+        let id: SUT =
             "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd:#2244#"
                 .parse()
                 .unwrap();
@@ -194,7 +194,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_str() {
-        let sut: NonFungibleGlobalId =
+        let sut: SUT =
             "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>"
                 .parse()
                 .unwrap();
@@ -207,26 +207,26 @@ mod tests {
 
     #[test]
     fn json_roundtrip_fails_for_invalid() {
-        assert_json_value_fails::<NonFungibleGlobalId>(
+        assert_json_value_fails::<SUT>(
             json!("resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha : foobar")
         );
-        assert_json_value_fails::<NonFungibleGlobalId>(
+        assert_json_value_fails::<SUT>(
             json!("account_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>")
         );
-        assert_json_value_fails::<NonFungibleGlobalId>(json!("super invalid"));
+        assert_json_value_fails::<SUT>(json!("super invalid"));
     }
 
     #[test]
     fn hash() {
-        let a: NonFungibleGlobalId =
+        let a: SUT =
             "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd:#1#"
                 .parse()
                 .unwrap();
-        let b: NonFungibleGlobalId =
+        let b: SUT =
             "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd:#2#"
                 .parse()
                 .unwrap();
-        let mut set = HashSet::<NonFungibleGlobalId>::new();
+        let mut set = HashSet::<SUT>::new();
         set.insert(a.clone());
         assert_eq!(set.len(), 1);
         set.insert(a);
