@@ -2,7 +2,7 @@ import org.gradle.configurationcache.extensions.capitalized
 
 plugins {
     id("java-library")
-    alias(libs.plugins.kotlin.jvm)
+    id("maven-publish")
 }
 
 java {
@@ -12,6 +12,29 @@ java {
 
 dependencies {
     implementation(libs.jna)
+}
+
+publishing {
+    publications {
+        register<MavenPublication>("release") {
+            groupId = "com.radixdlt.sargon"
+            artifactId = "sargon-desktop-bins"
+            version = System.getenv("SARGON_VERSION")
+
+            from(components["java"])
+        }
+    }
+
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/radixdlt/sargon")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
 }
 
 sealed interface TargetTriple {
@@ -93,9 +116,7 @@ listOf("debug", "release").forEach {
     }
 }
 
-
-
-tasks.getByName("compileKotlin") {
+tasks.getByName("compileJava") {
     dependsOn("buildCargoRelease")
 }
 

@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.android.cargo.ndk)
+    id("maven-publish")
 }
 
 android {
@@ -53,6 +54,31 @@ dependencies {
     implementation(libs.jna) {
         artifact {
             type = "aar"
+        }
+    }
+}
+
+publishing {
+    publications {
+        register<MavenPublication>("release") {
+            groupId = "com.radixdlt.sargon"
+            artifactId = "sargon-desktop-bins"
+            version = System.getenv("SARGON_VERSION")
+
+            afterEvaluate {
+                from(components["release"])
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/radixdlt/sargon")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
         }
     }
 }
