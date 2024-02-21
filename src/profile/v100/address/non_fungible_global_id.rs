@@ -13,6 +13,7 @@ use radix_engine_toolkit_json::models::scrypto::non_fungible_global_id::{
     Debug,
     PartialEq,
     Eq,
+    Hash,
     SerializeDisplay,
     DeserializeFromStr,
     derive_more::Display,
@@ -79,24 +80,6 @@ impl NonFungibleGlobalId {
     }
 }
 
-impl Ord for NonFungibleGlobalId {
-    fn cmp(&self, other: &Self) -> Ordering {
-        self.to_string().cmp(&other.to_string())
-    }
-}
-
-impl PartialOrd for NonFungibleGlobalId {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl std::hash::Hash for NonFungibleGlobalId {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.to_canonical_string().hash(state);
-    }
-}
-
 impl FromStr for NonFungibleGlobalId {
     type Err = CommonError;
 
@@ -133,6 +116,20 @@ impl HasPlaceholder for NonFungibleGlobalId {
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = ComponentAddress;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::placeholder(), SUT::placeholder());
+        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+    }
 
     #[test]
     fn test_deserialize() {
@@ -217,20 +214,6 @@ mod tests {
             json!("account_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>")
         );
         assert_json_value_fails::<NonFungibleGlobalId>(json!("super invalid"));
-    }
-
-    #[test]
-    fn compare() {
-        let a: NonFungibleGlobalId =
-            "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd:#3333#"
-                .parse()
-                .unwrap();
-        let b: NonFungibleGlobalId =
-            "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd:#8888#"
-                .parse()
-                .unwrap();
-        assert!(a < b);
-        assert!(b > a);
     }
 
     #[test]

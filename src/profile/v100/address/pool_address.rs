@@ -51,7 +51,7 @@ impl PoolAddress {
             ScryptoEntityType::GlobalOneResourcePool => PoolKind::OneResource,
             ScryptoEntityType::GlobalTwoResourcePool => PoolKind::TwoResources,
             ScryptoEntityType::GlobalMultiResourcePool => PoolKind::MultiResources,
-            _ => panic!("Bug in radix-engine-toolkit's CanonicalPoolAddress implementation, wrong entity type returned")
+            _ => unreachable!("Bug in radix-engine-toolkit's CanonicalPoolAddress implementation, wrong entity type returned")
         }
     }
 }
