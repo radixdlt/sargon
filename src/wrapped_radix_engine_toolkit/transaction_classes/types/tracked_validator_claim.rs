@@ -1,11 +1,8 @@
 use crate::prelude::*;
 
 #[derive(
-    Serialize,
-    Deserialize,
     Clone,
     Debug,
-    Default,
     PartialEq,
     Eq,
     Hash,
