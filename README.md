@@ -15,7 +15,7 @@ Named after [Sargon of Akkad](https://en.wikipedia.org/wiki/Sargon_of_Akkad) the
 
 ## LOGIC
 
-`[======--------------------------------------------]`
+`[=======-------------------------------------------]`
 
 ### Hierarchal Deterministic
 
@@ -152,7 +152,7 @@ All models have Swift/Kotlin bindings using [UniFFI](https://github.com/mozilla/
 ### Swift
 
 ```sh
-xcode-select — install
+xcode-select --install
 ```
 
 Or install `Xcode` from App Store
@@ -297,13 +297,7 @@ TBD
 
 # Example apps
 ## iOS
-
-Find [script here](scripts/ios/run-example-app.sh)
-
-```sh
-./scripts/ios/run-example-app.sh
-```
-
+See iOS example app in [examples/iOS](examples/iOS)
 
 ## Android
 TBD

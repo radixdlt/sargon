@@ -10,7 +10,9 @@ mod transaction_hash;
 mod transaction_header;
 mod transaction_intent;
 mod transaction_manifest;
+mod transaction_classes;
 
+pub use transaction_classes::*;
 pub use dummy_types::*;
 pub use execution_summary::*;
 pub use manifest_summary::*;
