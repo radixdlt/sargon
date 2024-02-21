@@ -70,6 +70,7 @@ mod tests {
 
     #[test]
     fn inequality() {
+        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
         assert_ne!(
             SUT::placeholder_mainnet(),
             SUT::placeholder_mainnet_other()

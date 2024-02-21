@@ -155,11 +155,21 @@ mod tests {
     fn equality() {
         assert_eq!(SUT::placeholder(), SUT::placeholder());
         assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+        assert_eq!(SUT::placeholder_stokenet(), SUT::placeholder_stokenet());
+        assert_eq!(
+            SUT::placeholder_stokenet_other(),
+            SUT::placeholder_stokenet_other()
+        );
     }
 
     #[test]
     fn inequality() {
         assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+        assert_ne!(SUT::placeholder_mainnet(), SUT::placeholder_stokenet());
+        assert_ne!(
+            SUT::placeholder_mainnet_other(),
+            SUT::placeholder_stokenet_other()
+        );
     }
 
     #[test]
