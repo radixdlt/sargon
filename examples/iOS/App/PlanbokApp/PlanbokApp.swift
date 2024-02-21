@@ -11,19 +11,17 @@ import ComposableArchitecture
 
 @main
 struct PlanbokApp: App {
-    var body: some Scene {
-        WindowGroup {
-			VStack {
-				AppFeature.View(
-					store: Store(
-						initialState: AppFeature.State()
-					) {
-						AppFeature()
-					}
-				)
-			}
+	var body: some Scene {
+		WindowGroup {
+			AppFeature.View(
+				store: Store(
+					initialState: AppFeature.State()
+				) {
+					AppFeature()
+				}
+			)
 			.textFieldStyle(.roundedBorder)
 			.buttonStyle(.borderedProminent)
-        }
+		}
     }
 }
