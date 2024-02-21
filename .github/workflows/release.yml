@@ -4,6 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
+      - android
       - develop
 
 permissions:
@@ -20,30 +21,93 @@ jobs:
     steps:
       - uses: RDXWorks-actions/checkout@main
 
-      - name: Install Rust Toolchain for x86_64-apple-ios
+      # - name: Install Rust Toolchain for x86_64-apple-ios
+      #   uses: RDXWorks-actions/toolchain@master
+      #   with:
+      #     toolchain: ${{ env.RUST_TOOLCHAIN }}
+      #     components: ${{ env.RUST_COMPONENTS }}
+      #     target: x86_64-apple-ios
+
+      # - name: Install Rust Toolchain for aarch64-apple-ios
+      #   uses: RDXWorks-actions/toolchain@master
+      #   with:
+      #     toolchain: ${{ env.RUST_TOOLCHAIN }}
+      #     components: ${{ env.RUST_COMPONENTS }}
+      #     target: aarch64-apple-ios
+
+      # - name: Install Rust Toolchain for aarch64-apple-ios-sim
+      #   uses: RDXWorks-actions/toolchain@master
+      #   with:
+      #     toolchain: ${{ env.RUST_TOOLCHAIN }}
+      #     components: ${{ env.RUST_COMPONENTS }}
+      #     target: aarch64-apple-ios-sim
+
+      # - name: Run iOS build script
+      #   env:
+      #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: |
+      #     rustup target add x86_64-apple-ios aarch64-apple-ios aarch64-apple-ios-sim
+      #     sh ./scripts/ios/release.sh
+
+      - name: Install Rust Toolchain for aarch64-linux-android
         uses: RDXWorks-actions/toolchain@master
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
           components: ${{ env.RUST_COMPONENTS }}
-          target: x86_64-apple-ios
-
-      - name: Install Rust Toolchain for aarch64-apple-ios
+          target: aarch64-linux-android
+          
+      - name: Install Rust Toolchain for armv7-linux-androideabi
         uses: RDXWorks-actions/toolchain@master
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
           components: ${{ env.RUST_COMPONENTS }}
-          target: aarch64-apple-ios
+          target: armv7-linux-androideabi
 
-      - name: Install Rust Toolchain for aarch64-apple-ios-sim
+      - name: Install Rust Toolchain for aarch64-apple-darwin
         uses: RDXWorks-actions/toolchain@master
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
           components: ${{ env.RUST_COMPONENTS }}
-          target: aarch64-apple-ios-sim
+          target: aarch64-apple-darwin
 
-      - name: Run iOS build script
+      - name: Install Rust Toolchain for x86_64-apple-darwin
+        uses: RDXWorks-actions/toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          components: ${{ env.RUST_COMPONENTS }}
+          target: x86_64-apple-darwin
+      
+      - name: Build Dependencies (android)
+        uses: RDXWorks-actions/setup-ndk@v1
+        id: setup-ndk
+        with:
+          ndk-version: r26c
+
+      - name: Set up JDK 17
+        uses: RDXWorks-actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          java-version: '17'
+
+      - name: Setup Env Variables
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
         run: |
-          rustup target add x86_64-apple-ios aarch64-apple-ios aarch64-apple-ios-sim
-          sh ./scripts/ios/release.sh
+          echo "SARGON_VERSION=`git tag --sort=taggerdate | tail -1`" >> $GITHUB_ENV
+
+      - name: Build and publish Android
+        uses: RDXWorks-actions/gradle-build-action@main
+        with:
+          arguments: sargon-android:publish
+          build-root-directory: jvm
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and publish Desktop binaries
+        uses: RDXWorks-actions/gradle-build-action@main
+        with:
+          arguments: sargon-desktop-bins:publish
+          build-root-directory: jvm
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
