@@ -1,3 +1,13 @@
+# Attention! This is the HEART of iOS, ignoring it leads to better
+# PR since less noisy Lines of Code change delta, and smaller git 
+# history. And we CAN ignore it because:
+# CD will add and commit it and tag that commit and push it to GH releases,
+# so the file is updated and included in releases, so will work with SPM.
+# And locally, when we run `./scripts/ios/build-sargon.sh` the file gets
+# updated to something runnable and we can run locally... So we never need
+# this file part of git history.
+apple/Sources/UniFFI/Sargon.swift 
+
 /target
 tarpaulin-report.html
 .vscode
