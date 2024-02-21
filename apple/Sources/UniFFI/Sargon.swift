@@ -11376,7 +11376,7 @@ public func FfiConverterTypeUuid_lower(_ value: Uuid) -> RustBuffer {
 public func accesscontrollerAddressBech32Address(address: AccessControllerAddress) -> String {
     return try! FfiConverterString.lift(
         try! rustCall {
-            uniffi_sargon_fn_func_accesscontroller_address_bech32_address(
+            uniffi_sargon_fn_func_access_controller_address_bech32_address(
                 FfiConverterTypeAccessControllerAddress.lower(address), $0
             )
         }
@@ -11386,7 +11386,7 @@ public func accesscontrollerAddressBech32Address(address: AccessControllerAddres
 public func accesscontrollerAddressNetworkId(address: AccessControllerAddress) -> NetworkId {
     return try! FfiConverterTypeNetworkID.lift(
         try! rustCall {
-            uniffi_sargon_fn_func_accesscontroller_address_network_id(
+            uniffi_sargon_fn_func_access_controller_address_network_id(
                 FfiConverterTypeAccessControllerAddress.lower(address), $0
             )
         }
@@ -11842,7 +11842,7 @@ public func mnemonicPhrase(from: Mnemonic) -> String {
 public func newAccesscontrollerAddress(bech32: String) throws -> AccessControllerAddress {
     return try FfiConverterTypeAccessControllerAddress.lift(
         rustCallWithError(FfiConverterTypeCommonError.lift) {
-            uniffi_sargon_fn_func_new_accesscontroller_address(
+            uniffi_sargon_fn_func_new_access_controller_address(
                 FfiConverterString.lower(bech32), $0
             )
         }
@@ -11852,7 +11852,7 @@ public func newAccesscontrollerAddress(bech32: String) throws -> AccessControlle
 public func newAccesscontrollerAddressPlaceholder() -> AccessControllerAddress {
     return try! FfiConverterTypeAccessControllerAddress.lift(
         try! rustCall {
-            uniffi_sargon_fn_func_new_accesscontroller_address_placeholder($0)
+            uniffi_sargon_fn_func_new_access_controller_address_placeholder($0)
         }
     )
 }
@@ -11860,7 +11860,7 @@ public func newAccesscontrollerAddressPlaceholder() -> AccessControllerAddress {
 public func newAccesscontrollerAddressPlaceholderOther() -> AccessControllerAddress {
     return try! FfiConverterTypeAccessControllerAddress.lift(
         try! rustCall {
-            uniffi_sargon_fn_func_new_accesscontroller_address_placeholder_other($0)
+            uniffi_sargon_fn_func_new_access_controller_address_placeholder_other($0)
         }
     )
 }
@@ -12937,10 +12937,10 @@ private var initializationResult: InitializationResult {
     if bindings_contract_version != scaffolding_contract_version {
         return InitializationResult.contractVersionMismatch
     }
-    if uniffi_sargon_checksum_func_accesscontroller_address_bech32_address() != 63850 {
+    if uniffi_sargon_checksum_func_access_controller_address_bech32_address() != 63850 {
         return InitializationResult.apiChecksumMismatch
     }
-    if uniffi_sargon_checksum_func_accesscontroller_address_network_id() != 59691 {
+    if uniffi_sargon_checksum_func_access_controller_address_network_id() != 59691 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_sargon_checksum_func_account_address_bech32_address() != 1871 {
@@ -13051,13 +13051,13 @@ private var initializationResult: InitializationResult {
     if uniffi_sargon_checksum_func_mnemonic_phrase() != 1392 {
         return InitializationResult.apiChecksumMismatch
     }
-    if uniffi_sargon_checksum_func_new_accesscontroller_address() != 38016 {
+    if uniffi_sargon_checksum_func_new_access_controller_address() != 38016 {
         return InitializationResult.apiChecksumMismatch
     }
-    if uniffi_sargon_checksum_func_new_accesscontroller_address_placeholder() != 55419 {
+    if uniffi_sargon_checksum_func_new_access_controller_address_placeholder() != 55419 {
         return InitializationResult.apiChecksumMismatch
     }
-    if uniffi_sargon_checksum_func_new_accesscontroller_address_placeholder_other() != 17734 {
+    if uniffi_sargon_checksum_func_new_access_controller_address_placeholder_other() != 17734 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_sargon_checksum_func_new_account_address() != 35088 {

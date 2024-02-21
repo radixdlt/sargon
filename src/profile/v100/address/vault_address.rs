@@ -2,41 +2,6 @@ use crate::prelude::*;
 
 use radix_engine_toolkit::models::canonical_address_types::CanonicalVaultAddress as RetVaultAddress;
 
-/// Addresses to a specific vault, owned by a user, holding asset of one kind, either fungible or non-fungible.
-/// Identities cannot own assets so they do not have vaults, but Accounts do, e.g.:
-/// `"internal_vault_rdx1tz474x29nxxd4k2p2reete9xyz4apawv63dphxkr00qt23vyju49fq"`
-///
-/// There are fundamentally two different sub-types ([Scrypto's `EntityType`][entt]) of VaultAddresses:
-/// * InternalFungibleVault
-/// * InternalNonFungibleVault
-///
-/// Implementation wise we wrap [Radix Engine Toolkit's `CanonicalVaultAddress`][ret], and
-/// give it UniFFI support, as a `uniffi::Record` (we also own Serde).
-///
-/// [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
-/// [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L251-L255
-#[derive(
-    Clone,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash,
-    derive_more::FromStr,
-    derive_more::Display,
-    SerializeDisplay,
-    DeserializeFromStr,
-    uniffi::Record,
-)]
-#[display("{secret_magic}")]
-pub struct VaultAddress {
-    /// @Kotlin / Swift developer: Do NOT use this property/field. Instead use all the provided methods on this address type.
-    /// (which are in fact vendored as freestanding global functions,
-    /// due to limitations in UniFII as of Feb 2024, but you should
-    /// create extension methods on this address type in FFI land, translating
-    /// these functions into methods.)
-    pub(crate) secret_magic: RetVaultAddress,
-}
-
 impl VaultAddress {
     pub fn is_fungible(&self) -> bool {
         self.secret_magic.is_fungible()

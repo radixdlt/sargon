@@ -2,50 +2,6 @@ pub use crate::prelude::*;
 use radix_engine_common::types::EntityType as ScryptoEntityType;
 use radix_engine_toolkit::models::canonical_address_types::CanonicalAccountAddress as RetAccountAddress;
 
-/// Human readable address of an account. Always starts with `"account_"``, for example:
-///
-/// `account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease`
-///
-/// Most commonly the user will see this address in its abbreviated
-/// form which is:
-///
-/// `acco...please`
-///
-/// Addresses are checksummed, as per Bech32. **Only** *Account* addresses starts with
-/// the prefix `account_`.
-///
-/// There are fundamentally three different sub-types ([Scrypto's `EntityType`][entt]) of AccountAddresses:
-/// * GlobalAccount
-/// * GlobalVirtualSecp256k1Account
-/// * GlobalVirtualEd25519Account
-///
-/// Implementation wise we wrap [Radix Engine Toolkit's `CanonicalAccountAddress`][ret], and
-/// give it UniFFI support, as a `uniffi::Record` (we also own Serde).
-///
-/// [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
-/// [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L224-L228
-#[derive(
-    Clone,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash,
-    derive_more::FromStr,
-    derive_more::Display,
-    SerializeDisplay,
-    DeserializeFromStr,
-    uniffi::Record,
-)]
-#[display("{secret_magic}")]
-pub struct AccountAddress {
-    /// @Kotlin / Swift developer: Do NOT use this property/field. Instead use all the provided methods on this address type.
-    /// (which are in fact vendored as freestanding global functions,
-    /// due to limitations in UniFII as of Feb 2024, but you should
-    /// create extension methods on this address type in FFI land, translating
-    /// these functions into methods.)
-    pub(crate) secret_magic: RetAccountAddress,
-}
-
 #[uniffi::export]
 pub fn new_account_address_from(
     public_key: PublicKey,

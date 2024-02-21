@@ -2,50 +2,13 @@ use crate::prelude::*;
 
 use radix_engine_toolkit::models::canonical_address_types::CanonicalAccessControllerAddress as RetAccessControllerAddress;
 
-/// Address to an AccessController that controls an Account or Identity (Persona),
-/// it said entity has been "securified", e.g.:
-/// `"accesscontroller_rdx1c0duj4lq0dc3cpl8qd420fpn5eckh8ljeysvjm894lyl5ja5yq6y5a"`
-///
-/// When a user applies a SecurityStructureConfiguration for the first time on a
-/// non-securified entity (and signs and submit the resulting TX) said entity is
-/// "assigned" an AccessControllerAddress by the network.
-///
-/// An `AccessControllerAddress` has the [Scrypto's `EntityType`][entt] `GlobalAccessController`.
-///
-/// Implementation wise we wrap [Radix Engine Toolkit's `CanonicalAccessControllerAddress`][ret], and
-/// give it UniFFI support, as a `uniffi::Record` (we also own Serde).
-///
-/// [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
-/// [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L247-L248
-#[derive(
-    Clone,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash,
-    derive_more::FromStr,
-    derive_more::Display,
-    SerializeDisplay,
-    DeserializeFromStr,
-    uniffi::Record,
-)]
-#[display("{secret_magic}")]
-pub struct AccessControllerAddress {
-    /// @Kotlin / Swift developer: Do NOT use this property/field. Instead use all the provided methods on this address type.
-    /// (which are in fact vendored as freestanding global functions,
-    /// due to limitations in UniFII as of Feb 2024, but you should
-    /// create extension methods on this address type in FFI land, translating
-    /// these functions into methods.)
-    pub(crate) secret_magic: RetAccessControllerAddress,
-}
-
 #[uniffi::export]
-pub fn new_accesscontroller_address_placeholder() -> AccessControllerAddress {
+pub fn new_access_controller_address_placeholder() -> AccessControllerAddress {
     AccessControllerAddress::placeholder()
 }
 
 #[uniffi::export]
-pub fn new_accesscontroller_address_placeholder_other(
+pub fn new_access_controller_address_placeholder_other(
 ) -> AccessControllerAddress {
     AccessControllerAddress::placeholder_other()
 }
@@ -185,19 +148,19 @@ mod uniffi_tests {
     #[test]
     fn new_from_bech32_get_network_id_and_address() {
         let b32 = "accesscontroller_rdx1c0llllllllllllllllllllllllllllllllllllllllllllllkl2v3s";
-        let address = new_accesscontroller_address(b32.to_owned()).unwrap();
+        let address = new_access_controller_address(b32.to_owned()).unwrap();
         assert_eq!(
-            accesscontroller_address_network_id(&address),
+            access_controller_address_network_id(&address),
             NetworkID::Mainnet
         );
-        assert_eq!(accesscontroller_address_bech32_address(&address), b32);
+        assert_eq!(access_controller_address_bech32_address(&address), b32);
     }
 
     #[test]
     fn new() {
         let s = "accesscontroller_rdx1c0llllllllllllllllllllllllllllllllllllllllllllllkl2v3s";
         let a = SUT::try_from_bech32(s).unwrap();
-        let b = new_accesscontroller_address(s.to_string()).unwrap();
+        let b = new_access_controller_address(s.to_string()).unwrap();
         assert_eq!(b.address(), s);
         assert_eq!(a, b);
     }
@@ -205,12 +168,12 @@ mod uniffi_tests {
     #[test]
     fn placeholder() {
         assert_eq!(
-            new_accesscontroller_address_placeholder(),
+            new_access_controller_address_placeholder(),
             SUT::placeholder()
         );
 
         assert_eq!(
-            new_accesscontroller_address_placeholder_other(),
+            new_access_controller_address_placeholder_other(),
             SUT::placeholder_other()
         );
     }
