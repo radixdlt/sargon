@@ -64,7 +64,9 @@ impl Profile {
         factor_source_id: FactorSourceIDFromHash,
     ) -> HDPathValue {
         match kind {
-            EntityKind::Persona => panic!("Personas are not supported yet"),
+            EntityKind::Persona => {
+                unreachable!("Personas are not supported yet")
+            }
             EntityKind::Accounts => {}
         };
         let index = self

@@ -1744,12 +1744,13 @@ dependencies = [
 [[package]]
 name = "radix-engine-toolkit"
 version = "1.0.10"
-source = "git+https://github.com/radixdlt/radix-engine-toolkit?rev=9dc3deeb3299b4f4c255f36bb3d504681379ad5a#9dc3deeb3299b4f4c255f36bb3d504681379ad5a"
+source = "git+https://github.com/radixdlt/radix-engine-toolkit?rev=e0e79548e71066d7569f8871c5b002fd5805d9d5#e0e79548e71066d7569f8871c5b002fd5805d9d5"
 dependencies = [
  "bech32",
  "cargo_toml",
  "extend",
  "lazy_static",
+ "paste",
  "radix-engine",
  "radix-engine-common",
  "radix-engine-interface",
@@ -1761,13 +1762,14 @@ dependencies = [
  "sbor-json",
  "scrypto",
  "serde_json",
+ "serde_with",
  "transaction",
 ]
 
 [[package]]
 name = "radix-engine-toolkit-json"
 version = "1.0.10"
-source = "git+https://github.com/radixdlt/radix-engine-toolkit?rev=9dc3deeb3299b4f4c255f36bb3d504681379ad5a#9dc3deeb3299b4f4c255f36bb3d504681379ad5a"
+source = "git+https://github.com/radixdlt/radix-engine-toolkit?rev=e0e79548e71066d7569f8871c5b002fd5805d9d5#e0e79548e71066d7569f8871c5b002fd5805d9d5"
 dependencies = [
  "bech32",
  "indexmap 1.9.3",
@@ -1991,6 +1993,7 @@ dependencies = [
  "memoize",
  "num-format",
  "nutype",
+ "paste",
  "pretty_assertions",
  "pretty_env_logger",
  "radix-engine-common",
@@ -2051,7 +2054,7 @@ dependencies = [
 [[package]]
 name = "sbor-json"
 version = "1.0.10"
-source = "git+https://github.com/radixdlt/radix-engine-toolkit?rev=9dc3deeb3299b4f4c255f36bb3d504681379ad5a#9dc3deeb3299b4f4c255f36bb3d504681379ad5a"
+source = "git+https://github.com/radixdlt/radix-engine-toolkit?rev=e0e79548e71066d7569f8871c5b002fd5805d9d5#e0e79548e71066d7569f8871c5b002fd5805d9d5"
 dependencies = [
  "bech32",
  "radix-engine-common",

@@ -25,7 +25,7 @@ impl ProfileNetworks {
 
 impl ProfileNetworks {
     pub fn get_account(&self, address: &AccountAddress) -> Option<Account> {
-        self.get(&address.network_id)
+        self.get(&address.network_id())
             .and_then(|n| n.accounts.get_account_by_address(address))
             .cloned()
     }
@@ -39,7 +39,7 @@ impl ProfileNetworks {
     where
         F: FnMut(&mut Account),
     {
-        self.update_with(&address.network_id, |n| {
+        self.update_with(&address.network_id(), |n| {
             _ = n.update_account(address, |a| mutate(a))
         });
         self.get_account(address)

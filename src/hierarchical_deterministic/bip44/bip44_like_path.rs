@@ -188,6 +188,18 @@ mod tests {
     }
 
     #[test]
+    fn invalid_depth_3_via_hdpath() {
+        let hdpath: HDPath = "m/44H/1022H/0H".parse().unwrap();
+        assert_eq!(
+            BIP44LikePath::try_from(&hdpath),
+            Err(CommonError::InvalidDepthOfBIP44Path {
+                expected: BIP44LikePath::PATH_DEPTH as u64,
+                found: 3
+            })
+        );
+    }
+
+    #[test]
     fn invalid_account_not_hardened() {
         assert_eq!(
             BIP44LikePath::from_str("m/44H/1022H/0/1/2H"),

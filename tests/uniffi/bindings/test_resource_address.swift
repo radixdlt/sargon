@@ -1,5 +1,15 @@
 import Sargon
 
+extension ResourceAddress {
+	public var address: String {
+		resourceAddressBech32Address(address: self)
+	}
+
+	public var networkId: NetworkId {
+		resourceAddressNetworkId(address: self)
+	}
+}
+
 func test() throws {
 	let bech32 =
 		"resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"

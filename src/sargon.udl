@@ -11,6 +11,33 @@ typedef string Timestamp;
 typedef sequence<i8> BagOfBytes;
 
 [Custom]
-typedef string InnerDecimal;
+typedef string ScryptoDecimal192;
+
+[Custom]
+typedef string RetAccessControllerAddress;
+
+[Custom]
+typedef string RetAccountAddress;
+
+[Custom]
+typedef string RetComponentAddress;
+
+[Custom]
+typedef string RetIdentityAddress;
+
+[Custom]
+typedef string RetPackageAddress;
+
+[Custom]
+typedef string RetPoolAddress;
+
+[Custom]
+typedef string RetResourceAddress;
+
+[Custom]
+typedef string RetValidatorAddress;
+
+[Custom]
+typedef string RetVaultAddress;
 
 namespace sargon {};

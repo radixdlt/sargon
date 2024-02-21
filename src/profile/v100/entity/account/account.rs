@@ -148,7 +148,7 @@ impl Account {
         appearance_id: AppearanceID,
     ) -> Self {
         Self {
-            network_id: address.network_id,
+            network_id: address.network_id(),
             address,
             display_name,
             appearance_id,

@@ -318,6 +318,12 @@ pub enum CommonError {
 
     #[error("Unrecognized Locale Identifier: {bad_value}")]
     UnrecognizedLocaleIdentifier { bad_value: String } = 10087,
+
+    #[error("Failed to create Address (via RetAddress) from node_id (hex): {node_id_as_hex}, network_id: {network_id}")]
+    FailedToCreateAddressViaRetAddressFromNodeIdAndNetworkID {
+        node_id_as_hex: String,
+        network_id: NetworkID,
+    } = 10088,
 }
 
 /*

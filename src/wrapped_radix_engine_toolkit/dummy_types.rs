@@ -16,13 +16,3 @@ macro_rules! dummy_sargon {
         pub struct $struct_name {}
     };
 }
-
-dummy_sargon!(PackageAddress);
-dummy_sargon!(ComponentAddress);
-dummy_sargon!(AccessControllerAddress);
-dummy_sargon!(VaultAddress);
-dummy_sargon!(ValidatorAddress);
-dummy_sargon!(ResourcePoolAddress);
-
-// Rename and use Decimal type!
-dummy_sargon!(RETDecimal);
