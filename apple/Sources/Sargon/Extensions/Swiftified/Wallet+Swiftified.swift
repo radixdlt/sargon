@@ -1,1 +1,1 @@
-extension Wallet: Sendable {}
+extension Wallet: @unchecked Sendable {}

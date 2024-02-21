@@ -1,3 +1,3 @@
 public typealias NetworkID = NetworkId
 
-extension NetworkID: Sendable {}
+extension NetworkID: @unchecked Sendable {}

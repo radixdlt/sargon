@@ -1,1 +1,1 @@
-extension Mnemonic: Sendable {}
+extension Mnemonic: @unchecked Sendable {}
