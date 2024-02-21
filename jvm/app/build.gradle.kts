@@ -51,6 +51,7 @@ android {
 
 dependencies {
     implementation(project(":sargon-android"))
+    testImplementation(libs.jna)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

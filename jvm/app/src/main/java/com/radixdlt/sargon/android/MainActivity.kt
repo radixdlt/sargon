@@ -49,6 +49,11 @@ import com.radixdlt.sargon.newProfilePlaceholder
 import kotlin.random.Random
 
 class MainActivity : ComponentActivity() {
+
+    init {
+        System.setProperty("jna.debug_load.jna", "true")
+        System.setProperty("jna.debug_load", "true")
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
