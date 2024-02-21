@@ -46,6 +46,17 @@ pub mod prelude {
 
 pub use prelude::*;
 pub use radix_engine_common::math::Decimal as ScryptoDecimal192;
+pub use radix_engine_toolkit::models::canonical_address_types::{
+    CanonicalAccessControllerAddress as RetAccessControllerAddress,
+    CanonicalAccountAddress as RetAccountAddress,
+    CanonicalComponentAddress as RetComponentAddress,
+    CanonicalIdentityAddress as RetIdentityAddress,
+    CanonicalPackageAddress as RetPackageAddress,
+    CanonicalPoolAddress as RetPoolAddress,
+    CanonicalResourceAddress as RetResourceAddress,
+    CanonicalValidatorAddress as RetValidatorAddress,
+    CanonicalVaultAddress as RetVaultAddress,
+};
 
 // Use `url::Url` as a custom type, with `String` as the Builtin
 #[cfg(not(tarpaulin_include))] // Tested in binding tests (e.g. test*.swift files)

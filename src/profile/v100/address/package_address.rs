@@ -1,5 +1,17 @@
 use crate::prelude::*;
 
+use radix_engine_toolkit::models::canonical_address_types::CanonicalPackageAddress as RetPackageAddress;
+
+/// The unique address identifying a package - which is a collection of blueprints on Ledger, e.g.:
+/// `"package_rdx1pkgxxxxxxxxxfaucetxxxxxxxxx000034355863xxxxxxxxxfaucet"`
+///
+/// PackageAddress has [Scrypto's `EntityType`][entt] type `GlobalPackage`.
+///
+/// Implementation wise we wrap [Radix Engine Toolkit's `CanonicalPackageAddress`][ret], and
+/// give it UniFFI support, as a `uniffi::Record` (we also own Serde).
+///
+/// [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
+/// [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L241C29-L241C42
 #[derive(
     Clone,
     Debug,
@@ -12,9 +24,14 @@ use crate::prelude::*;
     DeserializeFromStr,
     uniffi::Record,
 )]
-#[display("{__inner}")]
+#[display("{secret_magic}")]
 pub struct PackageAddress {
-    pub(crate) __inner: InnerPackageAddress,
+    /// @Kotlin / Swift developer: Do NOT use this property/field. Instead use all the provided methods on this address type.
+    /// (which are in fact vendored as freestanding global functions,
+    /// due to limitations in UniFII as of Feb 2024, but you should
+    /// create extension methods on this address type in FFI land, translating
+    /// these functions into methods.)
+    pub(crate) secret_magic: RetPackageAddress,
 }
 
 impl HasPlaceholder for PackageAddress {
@@ -29,7 +46,7 @@ impl HasPlaceholder for PackageAddress {
 
 impl PackageAddress {
     pub fn placeholder_mainnet_gumball_club() -> Self {
-        "package_rdx1p589ehmmvqa2dnw0jaky3kesjdjvln94hzunsqse8k52083hfcjh63"
+        "package_rdx1pkgxxxxxxxxxfaucetxxxxxxxxx000034355863xxxxxxxxxfaucet"
             .parse()
             .expect("Valid Mainnet package placeholder address")
     }
@@ -60,7 +77,7 @@ mod tests {
 
     #[test]
     fn display() {
-        let s = "package_rdx1p589ehmmvqa2dnw0jaky3kesjdjvln94hzunsqse8k52083hfcjh63";
+        let s = "package_rdx1pkgxxxxxxxxxfaucetxxxxxxxxx000034355863xxxxxxxxxfaucet";
         let a = SUT::try_from_bech32(s).unwrap();
         assert_eq!(format!("{a}"), s);
     }
@@ -132,7 +149,7 @@ mod uniffi_tests {
 
     #[test]
     fn new() {
-        let s = "package_rdx1p589ehmmvqa2dnw0jaky3kesjdjvln94hzunsqse8k52083hfcjh63";
+        let s = "package_rdx1pkgxxxxxxxxxfaucetxxxxxxxxx000034355863xxxxxxxxxfaucet";
         let a = SUT::try_from_bech32(s).unwrap();
         let b = new_package_address(s.to_string()).unwrap();
         assert_eq!(b.address(), s);

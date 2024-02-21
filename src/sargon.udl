@@ -14,30 +14,30 @@ typedef sequence<i8> BagOfBytes;
 typedef string ScryptoDecimal192;
 
 [Custom]
-typedef string InnerAccountAddress;
+typedef string RetAccessControllerAddress;
 
 [Custom]
-typedef string InnerIdentityAddress;
+typedef string RetAccountAddress;
 
 [Custom]
-typedef string InnerResourceAddress;
+typedef string RetComponentAddress;
 
 [Custom]
-typedef string InnerVaultAddress;
+typedef string RetIdentityAddress;
 
 [Custom]
-typedef string InnerPoolAddress;
+typedef string RetPackageAddress;
 
 [Custom]
-typedef string InnerAccessControllerAddress;
+typedef string RetPoolAddress;
 
 [Custom]
-typedef string InnerValidatorAddress;
+typedef string RetResourceAddress;
 
 [Custom]
-typedef string InnerPackageAddress;
+typedef string RetValidatorAddress;
 
 [Custom]
-typedef string InnerComponentAddress;
+typedef string RetVaultAddress;
 
 namespace sargon {};

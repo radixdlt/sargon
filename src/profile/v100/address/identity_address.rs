@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+use radix_engine_toolkit::models::canonical_address_types::CanonicalIdentityAddress as RetIdentityAddress;
+
 /// Human readable address of an identity, which are used by Personas. Always starts with
 /// the prefix `"identity_"`, for example:
 ///
@@ -7,6 +9,17 @@ use crate::prelude::*;
 ///
 /// Addresses are checksummed, as per Bech32. **Only** *Identity* addresses starts with
 /// the prefix `"identity_"`.
+///
+/// There are fundamentally three different sub-types ([Scrypto's `EntityType`][entt]) of IdentityAddresses:
+/// * GlobalIdentity,
+/// * GlobalVirtualSecp256k1Identity,
+/// * GlobalVirtualEd25519Identity
+///
+/// Implementation wise we wrap [Radix Engine Toolkit's `CanonicalIdentityAddress`][ret], and
+/// give it UniFFI support, as a `uniffi::Record` (we also own Serde).
+///
+/// [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
+/// [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L229-L234
 #[derive(
     Clone,
     Debug,
@@ -19,9 +32,14 @@ use crate::prelude::*;
     DeserializeFromStr,
     uniffi::Record,
 )]
-#[display("{__inner}")]
+#[display("{secret_magic}")]
 pub struct IdentityAddress {
-    pub(crate) __inner: InnerIdentityAddress,
+    /// @Kotlin / Swift developer: Do NOT use this property/field. Instead use all the provided methods on this address type.
+    /// (which are in fact vendored as freestanding global functions,
+    /// due to limitations in UniFII as of Feb 2024, but you should
+    /// create extension methods on this address type in FFI land, translating
+    /// these functions into methods.)
+    pub(crate) secret_magic: RetIdentityAddress,
 }
 
 #[uniffi::export]

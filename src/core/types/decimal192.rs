@@ -59,7 +59,7 @@ pub struct Decimal192 {
     /// due to limitations in UniFII as of Feb 2024, but you should
     /// create extension methods on Decimal192 in FFI land, translating
     /// these functions into methods.)
-    __inner: ScryptoDecimal192, // Strange field name to try as much as possible hide it in FFI land.
+    secret_magic: ScryptoDecimal192,
 }
 
 /// Internally (in Rust land) we would like to call `Decimal192` just `Decimal`.
@@ -78,11 +78,13 @@ impl From<ScryptoDecimal192> for Decimal {
 }
 impl Decimal {
     fn native(&self) -> ScryptoDecimal192 {
-        self.__inner
+        self.secret_magic
     }
 
     fn from_native(decimal: ScryptoDecimal192) -> Self {
-        Decimal { __inner: decimal }
+        Decimal {
+            secret_magic: decimal,
+        }
     }
 }
 

@@ -44,7 +44,7 @@ macro_rules! decl_ret_wrapped_address {
             }
 
              /// UniFFI conversion for RET types which are DisplayFromStr using String as builtin.
-            impl crate::UniffiCustomTypeConverter for [<Inner $addr_name>] {
+            impl crate::UniffiCustomTypeConverter for $ret_addr {
                 type Builtin = String;
 
                 #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
@@ -63,40 +63,15 @@ macro_rules! decl_ret_wrapped_address {
                 }
             }
 
-            #[derive(
-                Clone,
-                Copy,
-                Debug,
-                PartialEq,
-                Eq,
-                Hash,
-                derive_more::FromStr,
-                derive_more::Display,
-                SerializeDisplay,
-                DeserializeFromStr,
-            )]
-            pub struct [<Inner $addr_name>](pub(crate) $ret_addr); // MUST add [Custom]typedef string Inner to sargon.udl as well
-
-            impl From<$ret_addr> for [<Inner $addr_name>] {
+            impl From<$ret_addr> for $addr_name {
                 fn from(value: $ret_addr) -> Self {
-                    Self(value)
-                }
-            }
-            impl From<[<Inner $addr_name>]> for $ret_addr {
-                fn from(value: [<Inner $addr_name>]) -> Self {
-                    value.0
+                    Self { secret_magic: value }
                 }
             }
 
-            impl From<[<Inner $addr_name>]> for $addr_name {
-                fn from(value: [<Inner $addr_name>]) -> Self {
-                    Self { __inner: value }
-                }
-            }
-
-            impl From<$addr_name> for [<Inner $addr_name>] {
+            impl From<$addr_name> for $ret_addr {
                 fn from(value: $addr_name) -> Self {
-                    value.__inner
+                    value.secret_magic
                 }
             }
 
@@ -106,15 +81,15 @@ macro_rules! decl_ret_wrapped_address {
                 }
 
                 pub fn network_id(&self) -> NetworkID {
-                    self.__inner.0.network_id().try_into().expect("Should have known all network ids")
+                    self.secret_magic.network_id().try_into().expect("Should have known all network ids")
                 }
 
                 pub fn entity_type(&self) -> ScryptoEntityType {
-                    self.__inner.0.entity_type()
+                    self.secret_magic.entity_type()
                 }
 
                 pub fn try_from_bech32(bech32: impl AsRef<str>) -> Result<Self> {
-                    bech32.as_ref().parse::<[<Inner $addr_name>]>()
+                    bech32.as_ref().parse::<$ret_addr>()
                     .map_err(|e| {
                         error!("Failed Bech32 decode String, RET error: {:?}", e);
                         CommonError::FailedToDecodeAddressFromBech32 { bad_value: bech32.as_ref().to_owned() }
@@ -134,7 +109,6 @@ macro_rules! decl_ret_wrapped_address {
                         error!("Failed create address, from node and network_id, RET error: {:?}", e);
                         CommonError::FailedToCreateAddressViaRetAddressFromNodeIdAndNetworkID { node_id_as_hex: node_id.to_hex(), network_id }
                     })
-                    .map(|r| Into::<[<Inner $addr_name>]>::into(r))
                     .map(|i| Into::<$addr_name>::into(i))
                 }
             }
