@@ -90,7 +90,7 @@ jobs:
         uses: RDXWorks-actions/setup-ndk@v1
         id: setup-ndk
         with:
-          ndk-version: r26c
+          ndk-version: r25b
           link-to-sdk: true
 
       - name: Setup Env Variables
