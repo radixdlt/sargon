@@ -379,7 +379,7 @@ mod tests {
 
     #[test]
     fn from_hash() {
-        let digest = hash(vec![0xde, 0xad]);
+        let digest = hash_of(vec![0xde, 0xad]);
         assert_eq!(BagOfBytes::from(digest).to_vec(), digest.to_vec());
     }
 

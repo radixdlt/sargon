@@ -171,7 +171,7 @@ mod tests {
 
     #[test]
     fn sign_and_verify() {
-        let msg = hash("Test");
+        let msg = hash_of("Test");
         let sk: Secp256k1PrivateKey =
             "0000000000000000000000000000000000000000000000000000000000000001"
                 .parse()

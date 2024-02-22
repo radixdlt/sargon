@@ -42,7 +42,7 @@ impl RadixConnectPassword {
     }
 
     pub fn hash(&self) -> Hash {
-        hash(self.value.bytes())
+        hash_of(self.value.bytes())
     }
 }
 

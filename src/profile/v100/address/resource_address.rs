@@ -156,17 +156,11 @@ mod tests {
 
     #[test]
     fn is_fungible() {
-        assert_eq!(
-            SUT::placeholder_mainnet_nft_gc_membership().is_non_fungible(),
-            true
-        );
-        assert_eq!(
-            SUT::placeholder_mainnet_nft_gc_membership().is_fungible(),
-            false
-        );
+        assert!(SUT::placeholder_mainnet_nft_gc_membership().is_non_fungible());
+        assert!(!SUT::placeholder_mainnet_nft_gc_membership().is_fungible());
 
-        assert_eq!(SUT::placeholder_mainnet_xrd().is_non_fungible(), false);
-        assert_eq!(SUT::placeholder_mainnet_xrd().is_fungible(), true);
+        assert!(!SUT::placeholder_mainnet_xrd().is_non_fungible());
+        assert!(SUT::placeholder_mainnet_xrd().is_fungible());
     }
 
     #[test]
@@ -272,27 +266,17 @@ mod uniffi_tests {
 
     #[test]
     fn is_fungible() {
-        assert_eq!(
-            resource_address_is_fungible(
-                &SUT::placeholder_mainnet_nft_gc_membership()
-            ),
-            false
-        );
-        assert_eq!(
-            resource_address_is_non_fungible(
-                &SUT::placeholder_mainnet_nft_gc_membership()
-            ),
-            true
-        );
+        assert!(!resource_address_is_fungible(
+            &SUT::placeholder_mainnet_nft_gc_membership()
+        ));
+        assert!(resource_address_is_non_fungible(
+            &SUT::placeholder_mainnet_nft_gc_membership()
+        ));
 
-        assert_eq!(
-            resource_address_is_fungible(&SUT::placeholder_mainnet_xrd()),
-            true
-        );
-        assert_eq!(
-            resource_address_is_non_fungible(&SUT::placeholder_mainnet_xrd()),
-            false
-        );
+        assert!(resource_address_is_fungible(&SUT::placeholder_mainnet_xrd()));
+        assert!(!resource_address_is_non_fungible(
+            &SUT::placeholder_mainnet_xrd()
+        ));
     }
 
     #[test]

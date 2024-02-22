@@ -128,8 +128,8 @@ mod tests {
         let nf: NonFungibleGlobalId = "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>".parse().unwrap();
         let model = ThirdPartyDeposits::with_rule_and_lists(
             DepositRule::AcceptKnown,
-            [excp1, excp2].into_iter(),
-            [ResourceOrNonFungible::NonFungible { value: nf }].into_iter(),
+            [excp1, excp2],
+            [ResourceOrNonFungible::NonFungible { value: nf }],
         );
 
         assert_eq_after_json_roundtrip(

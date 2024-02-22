@@ -68,7 +68,7 @@ impl HasPlaceholder for Secp256k1Signature {
     ///
     /// let message = "There is a computer disease that anybody who works with computers knows about. It's a very serious disease and it interferes completely with the work. The trouble with computers is that you 'play' with them!";
     ///
-    /// let hash = hash(message.as_bytes());
+    /// let hash = hash_of(message.as_bytes());
     ///
     /// let signature: Secp256k1Signature = "018ad795353658a0cd1b513c4414cbafd0f990d329522977f8885a27876976a7d41ed8a81c1ac34551819627689cf940c4e27cacab217f00a0a899123c021ff6ef".parse().unwrap();
     ///
@@ -110,7 +110,7 @@ impl HasPlaceholder for Secp256k1Signature {
     ///
     /// let message = "All those moments will be lost in time, like tears in rain. Time to die...";
     ///
-    /// let hash = hash(message.as_bytes());
+    /// let hash = hash_of(message.as_bytes());
     ///
     /// let signature: Secp256k1Signature = "01aa1c4f46f8437b7f8ec9008ae10e6f33bb8be3e81e35c63f3498070dfbd6a20b2daee6073ead3c9e72d8909bc32a02e46cede3885cf8568d4c380ac97aa7fbcd".parse().unwrap();
     ///
@@ -165,9 +165,7 @@ mod tests {
     fn scrypto_roundtrip_start_scrypto() {
         let sig: ScryptoSecp256k1Signature = "01aa1c4f46f8437b7f8ec9008ae10e6f33bb8be3e81e35c63f3498070dfbd6a20b2daee6073ead3c9e72d8909bc32a02e46cede3885cf8568d4c380ac97aa7fbcd".parse().unwrap();
         assert_eq!(
-            Into::<ScryptoSecp256k1Signature>::into(Into::<SUT>::into(
-                sig.clone()
-            )),
+            Into::<ScryptoSecp256k1Signature>::into(Into::<SUT>::into(sig)),
             sig
         );
     }

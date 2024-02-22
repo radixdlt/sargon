@@ -1,13 +1,6 @@
 use crate::prelude::*;
 
-#[derive(
-    Clone,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash,
-    uniffi::Record,
-)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct TrackedValidatorClaim {
     pub validator_address: ValidatorAddress,
     /* Input */

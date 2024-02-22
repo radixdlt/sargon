@@ -73,6 +73,7 @@ paste = "1.0.14"
 
 [build-dependencies]
 uniffi = { version = "0.26.0", features = ["build"] }
+cargo_toml = { version = "0.15.3" }
 
 [dev-dependencies]
 uniffi = { version = "0.26.0", features = ["bindgen-tests"] }

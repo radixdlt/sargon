@@ -1980,6 +1980,7 @@ dependencies = [
  "assert-json-diff",
  "bip32",
  "bip39",
+ "cargo_toml",
  "delegate",
  "derive_more",
  "ed25519-dalek",

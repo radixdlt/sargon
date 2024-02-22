@@ -90,17 +90,11 @@ mod tests {
 
     #[test]
     fn is_fungible() {
-        assert_eq!(SUT::placeholder_mainnet_fungible().is_fungible(), true);
-        assert_eq!(
-            SUT::placeholder_mainnet_fungible().is_non_fungible(),
-            false
-        );
+        assert!(SUT::placeholder_mainnet_fungible().is_fungible());
+        assert!(!SUT::placeholder_mainnet_fungible().is_non_fungible());
 
-        assert_eq!(SUT::placeholder_stokenet_fungible().is_fungible(), true);
-        assert_eq!(
-            SUT::placeholder_stokenet_fungible().is_non_fungible(),
-            false
-        );
+        assert!(SUT::placeholder_stokenet_fungible().is_fungible());
+        assert!(!SUT::placeholder_stokenet_fungible().is_non_fungible());
     }
 
     #[test]
@@ -193,23 +187,19 @@ mod uniffi_tests {
 
     #[test]
     fn is_fungible() {
-        assert_eq!(
-            vault_address_is_fungible(&SUT::placeholder_mainnet_fungible()),
-            true
-        );
-        assert_eq!(
-            vault_address_is_non_fungible(&SUT::placeholder_mainnet_fungible()),
-            false
-        );
+        assert!(vault_address_is_fungible(
+            &SUT::placeholder_mainnet_fungible()
+        ));
+        assert!(!vault_address_is_non_fungible(
+            &SUT::placeholder_mainnet_fungible()
+        ));
 
-        assert_eq!(
-            vault_address_is_fungible(&SUT::placeholder_stokenet_fungible()),
-            true
-        );
-        assert_eq!(
-            vault_address_is_non_fungible(&SUT::placeholder_stokenet_fungible()),
-            false
-        );
+        assert!(vault_address_is_fungible(
+            &SUT::placeholder_stokenet_fungible()
+        ));
+        assert!(!vault_address_is_non_fungible(
+            &SUT::placeholder_stokenet_fungible()
+        ));
     }
 
     #[test]

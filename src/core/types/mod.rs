@@ -1,8 +1,8 @@
 mod bag_of_bytes;
+mod bag_of_n_bytes;
 mod decimal192;
 mod entity_kind;
 mod epoch;
-mod hex_32bytes;
 mod identified_vec_via;
 mod keys;
 mod locale_config;
@@ -13,10 +13,10 @@ mod safe_to_log;
 mod signatures;
 
 pub use bag_of_bytes::*;
+pub use bag_of_n_bytes::*;
 pub use decimal192::*;
 pub use entity_kind::*;
 pub use epoch::*;
-pub use hex_32bytes::*;
 pub use identified_vec_via::*;
 pub use keys::*;
 pub use locale_config::*;

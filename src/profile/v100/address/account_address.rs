@@ -171,8 +171,8 @@ mod tests {
 
     #[test]
     fn is_legacy_address() {
-        assert_eq!(SUT::placeholder_mainnet().is_legacy_address(), true);
-        assert_eq!(SUT::placeholder_stokenet().is_legacy_address(), false);
+        assert!(SUT::placeholder_mainnet().is_legacy_address());
+        assert!(!SUT::placeholder_stokenet().is_legacy_address());
     }
 
     #[test]
@@ -404,14 +404,8 @@ mod uniffi_tests {
 
     #[test]
     fn is_legacy_address() {
-        assert_eq!(
-            account_address_is_legacy(&SUT::placeholder_mainnet()),
-            true
-        );
-        assert_eq!(
-            account_address_is_legacy(&SUT::placeholder_stokenet()),
-            false
-        );
+        assert!(account_address_is_legacy(&SUT::placeholder_mainnet()));
+        assert!(!account_address_is_legacy(&SUT::placeholder_stokenet()));
     }
 
     #[test]
