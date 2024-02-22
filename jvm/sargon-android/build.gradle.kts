@@ -83,6 +83,23 @@ publishing {
     }
 }
 
+// buildCargoNdk(Debug/Release) require for the existence of local.properties file
+// Since it is ignored, we have to create it on CI's workflow
+tasks.register("prepareLocalProperties") {
+    onlyIf {
+        // Will only run when file does not exist. Will not affect local builds.
+        !File("${rootDir}/local.properties").exists()
+    }
+
+    doLast {
+        file("${rootDir}/local.properties").writeText(
+            "local.properties=${System.getenv("ANDROID_HOME")}"
+        )
+    }
+
+    tasks.getByName("preBuild").dependsOn(this)
+}
+
 android.libraryVariants.all {
     val buildType = name
     val buildTypeUpper = buildType.capitalized()
