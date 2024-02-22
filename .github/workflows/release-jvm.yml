@@ -1,0 +1,88 @@
+name: CD JVM
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - android
+
+permissions:
+  id-token: write
+  contents: write
+env:
+  CARGO_TERM_COLOR: always
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      RUST_TOOLCHAIN: nightly-2024-01-11
+      RUST_COMPONENTS: "rust-std"
+    steps:
+      - uses: RDXWorks-actions/checkout@main
+
+      - name: Install Rust Toolchain for aarch64-linux-android
+        uses: RDXWorks-actions/toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          components: ${{ env.RUST_COMPONENTS }}
+          target: aarch64-linux-android
+          
+      - name: Install Rust Toolchain for armv7-linux-androideabi
+        uses: RDXWorks-actions/toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          components: ${{ env.RUST_COMPONENTS }}
+          target: armv7-linux-androideabi
+
+      - name: Install Rust Toolchain for aarch64-apple-darwin
+        uses: RDXWorks-actions/toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          components: ${{ env.RUST_COMPONENTS }}
+          target: aarch64-apple-darwin
+
+      - name: Install Rust Toolchain for x86_64-apple-darwin
+        uses: RDXWorks-actions/toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          components: ${{ env.RUST_COMPONENTS }}
+          target: x86_64-apple-darwin
+
+      - name: Set up JDK 17
+        uses: RDXWorks-actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          java-version: '17'
+      
+      - name: Setup Android SDK
+        uses: RDXWorks-actions/setup-android@v2
+
+      - name: Setup Android NDK
+        uses: RDXWorks-actions/setup-ndk@v1
+        id: setup-ndk
+        with:
+          ndk-version: r25b
+          link-to-sdk: true
+
+      - name: Setup Env Variables
+        env:
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+        run: |
+          echo "SARGON_VERSION=`git tag --sort=taggerdate | tail -1`" >> $GITHUB_ENV
+
+      - name: Build and publish Android
+        uses: RDXWorks-actions/gradle-build-action@main
+        with:
+          arguments: sargon-android:publish
+          build-root-directory: jvm
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and publish Desktop binaries
+        uses: RDXWorks-actions/gradle-build-action@main
+        with:
+          arguments: sargon-desktop-bins:publish
+          build-root-directory: jvm
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
