@@ -9,6 +9,7 @@ on:
 permissions:
   id-token: write
   contents: write
+  packages: write
 env:
   CARGO_TERM_COLOR: always
 jobs:
