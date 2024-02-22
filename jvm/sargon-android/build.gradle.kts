@@ -62,7 +62,7 @@ publishing {
     publications {
         register<MavenPublication>("release") {
             groupId = "com.radixdlt.sargon"
-            artifactId = "sargon-desktop-bins"
+            artifactId = "sargon-android"
             version = System.getenv("SARGON_VERSION")
 
             afterEvaluate {
