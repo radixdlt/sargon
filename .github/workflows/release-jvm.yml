@@ -63,6 +63,9 @@ jobs:
         with:
           ndk-version: r25b
           link-to-sdk: true
+      
+      - name: Install cargo-ndk
+        run: cargo install cargo-ndk
 
       - name: Setup Env Variables
         env:
