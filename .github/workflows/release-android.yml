@@ -1,4 +1,4 @@
-name: CD JVM
+name: CD Android
 
 on:
   workflow_dispatch:
@@ -21,28 +21,41 @@ jobs:
     steps:
       - uses: RDXWorks-actions/checkout@main
 
-      - name: Install Rust Toolchain for aarch64-apple-darwin
+      - name: Install Rust Toolchain for aarch64-linux-android
         uses: RDXWorks-actions/toolchain@master
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
           components: ${{ env.RUST_COMPONENTS }}
-          target: aarch64-apple-darwin
+          target: aarch64-linux-android
+          
+      - name: Install Rust Toolchain for armv7-linux-androideabi
+        uses: RDXWorks-actions/toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          components: ${{ env.RUST_COMPONENTS }}
+          target: armv7-linux-androideabi
 
       - name: Set up JDK 17
         uses: RDXWorks-actions/setup-java@v3
         with:
           distribution: 'adopt'
           java-version: '17'
+      
+      - name: Setup Android SDK
+        uses: RDXWorks-actions/setup-android@v2
+      
+      - name: Install cargo-ndk
+        run: cargo install cargo-ndk
 
       - name: Setup Env Variables
         run: |
           git fetch --prune --tags
           echo "SARGON_VERSION=`git tag --sort=taggerdate | tail -1`-`git rev-parse --short @`" >> $GITHUB_ENV
 
-      - name: Build and publish Desktop binaries
+      - name: Build and publish Android
         uses: RDXWorks-actions/gradle-build-action@main
         with:
-          arguments: sargon-desktop-bins:publish
+          arguments: sargon-android:publish
           build-root-directory: jvm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
