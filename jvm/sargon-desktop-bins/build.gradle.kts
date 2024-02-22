@@ -40,37 +40,41 @@ publishing {
 sealed interface TargetTriple {
 
     val jnaName: String
-    val extension: String
+    val binaryName: String
     val rustTargetTripleName: String
     object DarwinAArch64: TargetTriple {
         override val jnaName: String = "darwin-aarch64"
-        override val extension: String = "dylib"
+        override val binaryName: String = "libsargon.dylib"
         override val rustTargetTripleName: String = "aarch64-apple-darwin"
     }
 
     object DarwinX8664: TargetTriple {
         override val jnaName: String = "darwin-x86-64"
-        override val extension: String = "dylib"
+        override val binaryName: String = "libsargon.dylib"
         override val rustTargetTripleName: String = "x86_64-apple-darwin"
     }
     object LinuxArmel: TargetTriple {
         override val jnaName: String = "linux-armel"
-        override val extension: String = "so"
+        override val binaryName: String = "libsargon.so"
         override val rustTargetTripleName: String = "aarch64-unknown-linux-gnu"
     }
     object LinuxX8664: TargetTriple {
         override val jnaName: String = "linux-x86-64"
-        override val extension: String = "so"
+        override val binaryName: String = "libsargon.so"
         override val rustTargetTripleName: String = "x86_64-unknown-linux-gnu"
     }
     object LinuxWin32X8664: TargetTriple {
         override val jnaName: String = "win32-x86-64"
-        override val extension: String = "dll"
+        override val binaryName: String = "sargon.dll"
         override val rustTargetTripleName: String = "x86_64-pc-windows-gnu"
     }
 
     companion object {
-        val all = listOf(DarwinAArch64, DarwinX8664, /*LinuxArmel, LinuxX8664, LinuxWin32X8664*/)
+        val all = listOf(DarwinAArch64, DarwinX8664, LinuxArmel, LinuxX8664, LinuxWin32X8664)
+
+        // Currently our CI supports building on Mac OS and we don't care about Mac Intel for now.
+        // So we skip the rest.
+        val supported = listOf(DarwinAArch64)
     }
 }
 
@@ -82,7 +86,7 @@ listOf("debug", "release").forEach {
         group = BasePlugin.BUILD_GROUP
 
         doFirst {
-            TargetTriple.all.forEach { triple ->
+            TargetTriple.supported.forEach { triple ->
                 exec {
                     commandLine("mkdir", "-p", "src/main/resources/${triple.jnaName}")
                 }
@@ -107,8 +111,8 @@ listOf("debug", "release").forEach {
                     workingDir = projectDir.parentFile.parentFile
                     commandLine(
                         "cp",
-                        "target/${triple.rustTargetTripleName}/${buildType}/libsargon.${triple.extension}",
-                        "${rootDir}/${project.name}/src/main/resources/${triple.jnaName}/libsargon.${triple.extension}"
+                        "target/${triple.rustTargetTripleName}/${buildType}/libsargon.${triple.binaryName}",
+                        "${rootDir}/${project.name}/src/main/resources/${triple.jnaName}/${triple.binaryName}"
                     )
                 }
             }

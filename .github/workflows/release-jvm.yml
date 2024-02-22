@@ -21,6 +21,7 @@ jobs:
     steps:
       - uses: RDXWorks-actions/checkout@main
 
+      # Needed for Android
       - name: Install Rust Toolchain for aarch64-linux-android
         uses: RDXWorks-actions/toolchain@master
         with:
@@ -28,6 +29,7 @@ jobs:
           components: ${{ env.RUST_COMPONENTS }}
           target: aarch64-linux-android
           
+      # Needed for Android
       - name: Install Rust Toolchain for armv7-linux-androideabi
         uses: RDXWorks-actions/toolchain@master
         with:
@@ -35,19 +37,13 @@ jobs:
           components: ${{ env.RUST_COMPONENTS }}
           target: armv7-linux-androideabi
 
+      # Needed for unit tests running locally
       - name: Install Rust Toolchain for aarch64-apple-darwin
         uses: RDXWorks-actions/toolchain@master
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
           components: ${{ env.RUST_COMPONENTS }}
           target: aarch64-apple-darwin
-
-      - name: Install Rust Toolchain for x86_64-apple-darwin
-        uses: RDXWorks-actions/toolchain@master
-        with:
-          toolchain: ${{ env.RUST_TOOLCHAIN }}
-          components: ${{ env.RUST_COMPONENTS }}
-          target: x86_64-apple-darwin
 
       - name: Set up JDK 17
         uses: RDXWorks-actions/setup-java@v3
@@ -62,13 +58,9 @@ jobs:
         run: cargo install cargo-ndk
 
       - name: Setup Env Variables
-        env:
-          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
-          MACOSX_DEPLOYMENT_TARGET: "11.0"
         run: |
           git fetch --prune --tags
           echo "SARGON_VERSION=`git tag --sort=taggerdate | tail -1`-`git rev-parse --short @`" >> $GITHUB_ENV
-          echo $SARGON_VERSION
 
       - name: Build and publish Android
         uses: RDXWorks-actions/gradle-build-action@main
