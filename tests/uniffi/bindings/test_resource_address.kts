@@ -1,4 +1,4 @@
-import sargon.*
+import com.radixdlt.sargon.*
 
 fun test() {
 	val bech32 = "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"

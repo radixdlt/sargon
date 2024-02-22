@@ -1,4 +1,4 @@
-import sargon.*
+import com.radixdlt.sargon.*
 
 val AppPreferences.Companion.placeholder
     get() = newAppPreferencesPlaceholder()

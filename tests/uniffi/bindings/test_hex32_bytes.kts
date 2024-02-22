@@ -1,4 +1,4 @@
-import sargon.*
+import com.radixdlt.sargon.*
 import kotlin.random.Random
 
 fun randomByteArray(byteCount: Int): ByteArray {
