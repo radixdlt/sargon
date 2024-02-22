@@ -68,6 +68,8 @@ jobs:
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
         run: |
+          echo $ANDROID_HOME
+          echo $ANDROID_NDK_HOME
           echo "SARGON_VERSION=`git tag --sort=taggerdate | tail -1`" >> $GITHUB_ENV
 
       - name: Build and publish Android
