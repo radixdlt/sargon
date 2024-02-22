@@ -111,7 +111,7 @@ listOf("debug", "release").forEach {
                     workingDir = projectDir.parentFile.parentFile
                     commandLine(
                         "cp",
-                        "target/${triple.rustTargetTripleName}/${buildType}/libsargon.${triple.binaryName}",
+                        "target/${triple.rustTargetTripleName}/${buildType}/${triple.binaryName}",
                         "${rootDir}/${project.name}/src/main/resources/${triple.jnaName}/${triple.binaryName}"
                     )
                 }
