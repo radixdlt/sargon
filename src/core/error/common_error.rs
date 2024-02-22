@@ -324,6 +324,9 @@ pub enum CommonError {
         node_id_as_hex: String,
         network_id: NetworkID,
     } = 10088,
+
+    #[error("Invalid Olympia address string: {bad_value}")]
+    InvalidOlympiaAddressString { bad_value: String } = 10089,
 }
 
 /*

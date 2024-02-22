@@ -29,6 +29,12 @@ pub struct Secp256k1PublicKey {
     inner: ScryptoSecp256k1PublicKey,
 }
 
+impl From<Secp256k1PublicKey> for ScryptoSecp256k1PublicKey {
+    fn from(value: Secp256k1PublicKey) -> Self {
+        value.inner.clone()
+    }
+}
+
 uniffi::custom_type!(ScryptoSecp256k1PublicKey, BagOfBytes);
 
 impl UniffiCustomTypeConverter for ScryptoSecp256k1PublicKey {

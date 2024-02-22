@@ -11,10 +11,12 @@ mod resource_address;
 mod validator_address;
 mod vault_address;
 mod wrap_ret_address;
+mod olympia_account_address;
 
 pub use access_controller_address::*;
 pub use account_address::*;
 pub use component_address::*;
+
 
 pub use entity_address::*;
 pub use identity_address::*;
