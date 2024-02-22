@@ -67,7 +67,7 @@ jobs:
           MACOSX_DEPLOYMENT_TARGET: "11.0"
         run: |
           git fetch --prune --tags
-          echo "SARGON_VERSION=`git tag --sort=taggerdate | tail -1`" >> $GITHUB_ENV
+          echo "SARGON_VERSION=`git tag --sort=taggerdate | tail -1`-`git rev-parse --short @`" >> $GITHUB_ENV
           echo $SARGON_VERSION
 
       - name: Build and publish Android
