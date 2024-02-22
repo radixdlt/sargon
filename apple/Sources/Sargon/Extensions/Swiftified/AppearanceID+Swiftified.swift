@@ -1,6 +1,6 @@
 public typealias AppearanceID = AppearanceId
 
-extension AppearanceID: Sendable {}
+extension AppearanceID: @unchecked Sendable {}
 extension AppearanceID: Identifiable {
 	public typealias ID = UInt8
 	public var id: ID {

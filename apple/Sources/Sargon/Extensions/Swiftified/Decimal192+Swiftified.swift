@@ -1,4 +1,4 @@
-extension Decimal192: Sendable {}
+extension Decimal192: @unchecked Sendable {}
 
 extension Decimal192: ExpressibleByStringLiteral {
 	public init(stringLiteral string: String) {
@@ -10,7 +10,6 @@ extension Decimal192: ExpressibleByIntegerLiteral {
 		self = newDecimalFromI64(value: i64)
 	}
 }
-
 
 extension Decimal192: AdditiveArithmetic {
 	public static var zero: Self {
