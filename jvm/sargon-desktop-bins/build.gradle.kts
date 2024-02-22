@@ -94,7 +94,7 @@ listOf("debug", "release").forEach {
         }
 
         doLast {
-            TargetTriple.all.forEach { triple ->
+            TargetTriple.supported.forEach { triple ->
                 println("Building for ${triple.rustTargetTripleName}")
                 exec {
                     workingDir = projectDir.parentFile.parentFile
