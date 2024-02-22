@@ -71,9 +71,9 @@ jobs:
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
         run: |
-          echo $ANDROID_HOME
-          echo $ANDROID_NDK_HOME
+          git fetch --prune --tags
           echo "SARGON_VERSION=`git tag --sort=taggerdate | tail -1`" >> $GITHUB_ENV
+          echo $SARGON_VERSION
 
       - name: Build and publish Android
         uses: RDXWorks-actions/gradle-build-action@main
