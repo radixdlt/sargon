@@ -15,7 +15,7 @@ material = "1.11.0"
 cargo-ndk = "0.3.4"
 jna = "5.13.0"
 compose-bom = "2024.02.00"
-sargon = "0.1.9-f82e358"
+sargon = "0.1.9-fe4c5b4"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity-compose" }
