@@ -1,6 +1,6 @@
 @file:OptIn(kotlin.ExperimentalStdlibApi::class)
 
-import sargon.*
+import com.radixdlt.sargon.*
 import kotlin.random.Random
 
 fun String.hexToBagOfBytes(): BagOfBytes {

@@ -1,4 +1,4 @@
-import sargon.*
+import com.radixdlt.sargon.*
 
 val NonFungibleLocalId.description: String
     get() = nonFungibleLocalIdToString(id = this)

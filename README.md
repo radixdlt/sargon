@@ -235,7 +235,40 @@ Find [script here](scripts/ios/build-sargon.sh)
 ```
 
 ## Android
-TBD
+
+### Prerequisites
+#### Rust targets (Android)
+```sh
+rustup target add aarch64-linux-android armv7-linux-androideabi
+```
+#### Rust targets (Desktop Binaries)
+```sh
+rustup target add aarch64-apple-darwin
+```
+#### NDK
+Download the latest NDK from android studio
+
+Then make sure that you have added these in your path
+```
+export ANDROID_HOME=<path-to-your-sdk>
+export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/<version>
+
+# Make sure to also include the SDK ROOT in order to build the mac os desktop binaries
+export SDKROOT="`xcrun --show-sdk-path`"
+```
+
+Then you can build both libraries as a usual 
+```sh
+cd jvm
+
+# For android library (Debug)
+./gradlew sargon-android:assembleDebug 
+# For android library (Release)
+./gradlew sargon-android:assembleRelease
+
+# For desktop binaries
+./gradlew sargon-desktop-bins:assemble
+```
 
 # Release
 
@@ -293,11 +326,36 @@ See [`.github/workflows/release.yml`](.github/workflows/release.yml)
 
 
 ## Android
-TBD
+Two modules are published in [Github's maven](https://github.com/radixdlt/sargon/packages/).
+
+* `sargon-android`
+   
+   (See [`.github/workflows/release-android.yml`](.github/workflows/release-android.yml))
+
+   Contains the generated UniFFi Kotlin code and the runtime sargon binaries, in different architectures. It also contains the JNA dependency.
+
+   Import with:
+   ```
+   implementation("com.radixdlt.sargon:sargon-android:<version>")
+   ```
+
+* `sargon-desktop-bins`
+   
+   (See [`.github/workflows/release-desktop-bins.yml`](.github/workflows/release-desktop-bins.yml))
+
+   Contains only the runtime sargon binaries, built for desktop. Used when running Unit tests.
+  
+   Import with:
+   ```
+   testRuntimeOnly("com.radixdlt.sargon:sargon-desktop-bins:<version>")
+   ```
+
+> [!IMPORTANT]  
+> Currently only supporting `aarch64-apple-darwin` (apple silicon). So when running Unit tests for your client app, make sure to run them on an apple silicon machine. In the future we will try to add more target architectures.
 
 # Example apps
 ## iOS
 See iOS example app in [examples/iOS](examples/iOS)
 
 ## Android
-TBD
+Import the `/jvm` directory in Android Studio and run the `app` configuration.

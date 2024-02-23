@@ -1,4 +1,4 @@
-import sargon.*
+import com.radixdlt.sargon.*
 
 fun ResourceAddress.networkId(): NetworkId {
 	return resourceAddressNetworkId(address = this)

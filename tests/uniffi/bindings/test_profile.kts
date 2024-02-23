@@ -1,4 +1,4 @@
-import sargon.*
+import com.radixdlt.sargon.*
 
 val Profile.Companion.placeholder
     get() = newProfilePlaceholder()
