@@ -350,8 +350,8 @@ Two modules are published in [Github's maven](https://github.com/radixdlt/sargon
    testRuntimeOnly("com.radixdlt.sargon:sargon-desktop-bins:<version>")
    ```
 
-   > [!IMPORTANT]  
-   > Currently only supporting `aarch64-apple-darwin` (apple silicon). In the future we will try to add more target architectures.
+> [!IMPORTANT]  
+> Currently only supporting `aarch64-apple-darwin` (apple silicon). So when running Unit tests for your client app, make sure to run them on an apple silicon machine. In the future we will try to add more target architectures.
 
 # Example apps
 ## iOS
