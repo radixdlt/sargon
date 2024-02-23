@@ -40,12 +40,4 @@ typedef string RetValidatorAddress;
 [Custom]
 typedef string RetVaultAddress;
 
-[ExternalExport="radix_engine_toolkit_uniffi"]
-typedef extern TransactionManifest;
-
-// dictionary ManifestInner {
-//     TransactionManifest ret;
-// };
-
-
 namespace sargon {};

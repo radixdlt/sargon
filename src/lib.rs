@@ -58,8 +58,6 @@ pub use radix_engine_toolkit::models::canonical_address_types::{
     CanonicalVaultAddress as RetVaultAddress,
 };
 
-pub use radix_engine_toolkit_uniffi::TransactionManifest;
-
 // Use `url::Url` as a custom type, with `String` as the Builtin
 #[cfg(not(tarpaulin_include))] // Tested in binding tests (e.g. test*.swift files)
 impl UniffiCustomTypeConverter for Url {

@@ -2,20 +2,26 @@ use std::ops::Deref;
 
 use crate::prelude::*;
 
-use radix_engine_toolkit_uniffi::{
-    Instructions as RetInstructions, ManifestSummary as RetManifestSummary,
-    TransactionManifest as RetTransactionManifest,
+// use radix_engine_toolkit_uniffi::{
+//     Instructions as RetInstructions, ManifestSummary as RetManifestSummary,
+//     TransactionManifest as RetTransactionManifest,
+// };
+use transaction::prelude::{
+    InstructionV1 as ScryptoInstruction,
+    ManifestBuilder as ScryptoManifestBuilder,
+    TransactionManifestV1 as ScryptoTransactionManifest,
 };
 
 pub type Blob = BagOfBytes;
 pub type Blobs = Vec<Blob>;
+pub type ScryptoInstructions = Vec<ScryptoInstruction>;
 
 #[derive(Clone, PartialEq, Eq, Debug, uniffi::Object)]
 pub struct ManifestInner {
-    pub ret: Arc<RetTransactionManifest>,
+    pub ret: ScryptoTransactionManifest,
 }
 impl Deref for ManifestInner {
-    type Target = RetTransactionManifest;
+    type Target = ScryptoTransactionManifest;
 
     fn deref(&self) -> &Self::Target {
         &self.ret
@@ -35,20 +41,20 @@ impl From<ManifestInner> for Manifest {
     }
 }
 
-impl From<Arc<RetTransactionManifest>> for Manifest {
-    fn from(value: Arc<RetTransactionManifest>) -> Self {
+impl From<ScryptoTransactionManifest> for Manifest {
+    fn from(value: ScryptoTransactionManifest) -> Self {
         ManifestInner { ret: value }.into()
     }
 }
 
-impl From<Manifest> for Arc<RetTransactionManifest> {
+impl From<Manifest> for ScryptoTransactionManifest {
     fn from(value: Manifest) -> Self {
         value.secret_magic.ret.clone()
     }
 }
 
 impl Deref for Manifest {
-    type Target = RetTransactionManifest;
+    type Target = ScryptoTransactionManifest;
 
     fn deref(&self) -> &Self::Target {
         &self.secret_magic
@@ -62,40 +68,51 @@ impl Manifest {
         network_id: NetworkID,
         blobs: Blobs,
     ) -> Result<Self> {
-        RetInstructions::from_string(
-            instructions_string,
-            network_id.discriminant(),
-        )
-        .map_err(|e| CommonError::InvalidInstructionsString)
-        .map(|i| {
-            RetTransactionManifest::new(
-                i,
-                blobs.into_iter().map(|b| b.to_vec()).collect_vec(),
-            )
-        })
-        .map(|r: Arc<RetTransactionManifest>| r.into())
-        .map(|m: Manifest| m)
+        // ScryptoInstructions::from_string(
+        //     instructions_string,
+        //     network_id.discriminant(),
+        // )
+        // .map_err(|e| CommonError::InvalidInstructionsString)
+        // .map(|i| {
+        //     ScryptoTransactionManifest::new(
+        //         i,
+        //         blobs.into_iter().map(|b| b.to_vec()).collect_vec(),
+        //     )
+        // })
+        // // .map(|r: Arc<RetTransactionManifest>| r.into())
+        // .map(|m: Manifest| m.into())
+        todo!()
     }
 
     pub fn instructions_string(&self) -> String {
-        self.instructions.as_str().expect("Should always be able to string representation of a TransactionManifest's instructions.").to_string()
+        // self.instructions.as_str().expect("Should always be able to string representation of a TransactionManifest's instructions.").to_string()
+
+        // RET does:
+        /*
+            let network_definition =
+            core_network_definition_from_network_id(self.1);
+        native_decompile(&self.0, &network_definition).map_err(Into::into)
+        */
+        todo!()
     }
 
     /// This clones the blobs which might be expensive resource wise.
     pub fn blobs(&self) -> Blobs {
         self.blobs
             .clone()
+            .values()
             .into_iter()
-            .map(|v| v.into())
+            .map(|v| v.clone().into())
             .collect_vec()
     }
 
     pub fn summary(&self, network_id: NetworkID) -> ManifestSummary {
-        self.secret_magic
-            .ret
-            .summary(network_id.discriminant())
-            .try_into()
-            .expect("to always work")
+        // self.secret_magic
+        //     .ret
+        //     .summary(network_id.discriminant())
+        //     .try_into()
+        //     .expect("to always work")
+        todo!()
     }
 
     pub fn execution_summary(
@@ -103,15 +120,16 @@ impl Manifest {
         network_id: NetworkID,
         encoded_receipt: BagOfBytes, // TODO: Replace with TYPE - read from GW.
     ) -> ExecutionSummary {
-        self.secret_magic
-            .ret
-            .execution_summary(
-                network_id.discriminant(),
-                encoded_receipt.to_vec(),
-            )
-            .expect("to always work")
-            .try_into()
-            .expect("to always work")
+        // self.secret_magic
+        //     .ret
+        //     .execution_summary(
+        //         network_id.discriminant(),
+        //         encoded_receipt.to_vec(),
+        //     )
+        //     .expect("to always work")
+        //     .try_into()
+        //     .expect("to always work")
+        todo!()
     }
 
     pub fn resource_addresses_to_refresh(

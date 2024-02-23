@@ -1,8 +1,10 @@
 use crate::prelude::*;
-use radix_engine_toolkit_uniffi::{
-    ManifestBuilder as RetManifestBuilder,
-    TransactionManifest as RetTransactionManifest,
-};
+// use transaction::{
+//     ManifestBuilder as RetManifestBuilder,
+//     TransactionManifest as RetTransactionManifest,
+// };
+
+use transaction::prelude::{ManifestBuilder as ScryptoManifestBuilder, TransactionManifestV1 as ScryptoTransactionManifest};
 
 #[uniffi::export]
 pub fn manifest_third_party_deposit_update(
@@ -17,19 +19,20 @@ pub fn manifest_for_faucet(
     network_id: NetworkID,
     _address_of_receiving_account: AccountAddress,
 ) -> Result<Manifest> {
-    RetManifestBuilder::new()
-        .faucet_free_xrd()
-        .and_then(|b| {
-            if include_lock_fee_instruction {
-                b.faucet_lock_fee()
-            } else {
-                Ok(b)
-            }
-        })
-        .map(|b| b.build(network_id.discriminant()))
-        .map(|r: Arc<RetTransactionManifest>| r.into())
-        .map(|m: Manifest| m)
-        .map_err(|_e| CommonError::Unknown)
+    // RetManifestBuilder::new()
+    //     .faucet_free_xrd()
+    //     .and_then(|b| {
+    //         if include_lock_fee_instruction {
+    //             b.faucet_lock_fee()
+    //         } else {
+    //             Ok(b)
+    //         }
+    //     })
+    //     .map(|b| b.build(network_id.discriminant()))
+    //     .map(|r: Arc<RetTransactionManifest>| r.into())
+    //     .map(|m: Manifest| m)
+    //     .map_err(|_e| CommonError::Unknown)
+    todo!()
 }
 
 #[uniffi::export]

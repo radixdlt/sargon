@@ -1,6 +1,7 @@
 use crate::prelude::*;
 
-use radix_engine_toolkit_uniffi::ExecutionSummary as RetExecutionSummary;
+
+use radix_engine_toolkit::transaction_types::ExecutionSummary as RetExecutionSummary;
 
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct ExecutionSummary {
