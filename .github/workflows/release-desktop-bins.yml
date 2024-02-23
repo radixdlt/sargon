@@ -3,8 +3,8 @@ name: CD Desktop Binaries
 on:
   workflow_dispatch:
   push:
-    branches:
-      - android
+    tags:
+      - '**'
 
 permissions:
   id-token: write

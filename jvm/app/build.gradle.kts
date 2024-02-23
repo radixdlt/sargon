@@ -51,8 +51,7 @@ android {
 }
 
 dependencies {
-//    implementation(project(":sargon-android"))
-    implementation(libs.sargon.android)
+    implementation(project(":sargon-android"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
@@ -67,8 +66,7 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(platform(libs.androidx.compose.bom))
 
-//    testImplementation(project(":sargon-desktop-bins"))
-//    testImplementation(libs.sargon.desktop.bins)
+    testRuntimeOnly(project(":sargon-desktop-bins"))
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
