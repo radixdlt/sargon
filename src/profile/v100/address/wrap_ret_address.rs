@@ -17,7 +17,9 @@ use radix_engine_toolkit::models::canonical_address_types::{
     CanonicalVaultAddress as RetVaultAddress,
 };
 
-pub trait AddressViaRet: Sized {
+pub trait AddressViaRet:
+    Sized + TryFrom<radix_engine_toolkit_uniffi::prelude::Address>
+{
     fn new(
         node_id: impl Into<ScryptoNodeId>,
         network_id: NetworkID,
@@ -126,6 +128,15 @@ macro_rules! decl_ret_wrapped_address {
                         CommonError::FailedToCreateAddressViaRetAddressFromNodeIdAndNetworkID { node_id_as_hex: node_id.to_hex(), network_id }
                     })
                     .map(|i| Into::<[< $address_type:camel Address >]>::into(i))
+                }
+            }
+
+
+            impl TryFrom<radix_engine_toolkit_uniffi::prelude::Address> for [< $address_type:camel Address >] {
+                type Error = crate::CommonError;
+
+                fn try_from(address: radix_engine_toolkit_uniffi::prelude::Address) -> Result<Self, Self::Error> {
+                    Self::try_from_bech32(address.address_string())
                 }
             }
         }
