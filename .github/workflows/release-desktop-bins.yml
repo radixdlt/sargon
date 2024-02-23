@@ -1,4 +1,4 @@
-name: CD JVM
+name: CD Desktop Binaries
 
 on:
   workflow_dispatch:

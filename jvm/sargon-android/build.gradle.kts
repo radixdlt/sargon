@@ -51,13 +51,9 @@ cargoNdk {
 }
 
 dependencies {
-    implementation(libs.jna) {
-        artifact {
-            name = "jna"
-            type = "aar"
-        }
-    }
-//    implementation("net.java.dev.jna:jna:5.13.0@aar")
+    // Cannot use version catalogues here. For some reason when published to Maven,
+    // the jna dependency cannot be resolved
+    implementation("net.java.dev.jna:jna:5.13.0@aar")
 }
 
 publishing {

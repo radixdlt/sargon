@@ -11,7 +11,7 @@ java {
 }
 
 dependencies {
-    implementation(libs.jna)
+    implementation("net.java.dev.jna:jna:5.13.0")
 }
 
 publishing {

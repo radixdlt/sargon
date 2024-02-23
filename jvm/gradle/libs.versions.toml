@@ -13,9 +13,8 @@ kotlin = "1.9.22"
 agp = "8.2.2"
 material = "1.11.0"
 cargo-ndk = "0.3.4"
-jna = "5.13.0"
 compose-bom = "2024.02.00"
-sargon = "0.1.9-56d4f5c"
+sargon = "0.1.9-e408997"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity-compose" }
@@ -34,7 +33,6 @@ sargon-desktop-bins = { module = "com.radixdlt.sargon:sargon-desktop-bins", vers
 
 junit = { module = "junit:junit", version.ref = "junit" }
 material = { module = "com.google.android.material:material", version.ref = "material" }
-jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
 ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
