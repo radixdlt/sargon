@@ -1,4 +1,4 @@
-name: CD
+name: CD iOS
 
 on:
   workflow_dispatch:
@@ -47,3 +47,4 @@ jobs:
         run: |
           rustup target add x86_64-apple-ios aarch64-apple-ios aarch64-apple-ios-sim
           sh ./scripts/ios/release.sh
+      

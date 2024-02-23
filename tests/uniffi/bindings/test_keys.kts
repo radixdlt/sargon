@@ -1,4 +1,4 @@
-import sargon.*
+import com.radixdlt.sargon.*
 
 fun String.hexToByteArray(): ByteArray {
     check(length % 2 == 0) { "Must have an even length" }

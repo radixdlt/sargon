@@ -1,4 +1,4 @@
-import sargon.*
+import com.radixdlt.sargon.*
 
 val Gateways.Companion.placeholder
     get() = newGatewaysPlaceholder()
