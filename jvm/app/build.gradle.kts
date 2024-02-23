@@ -51,8 +51,8 @@ android {
 }
 
 dependencies {
-    implementation(project(":sargon-android"))
-//    implementation(libs.sargon.android)
+//    implementation(project(":sargon-android"))
+    implementation(libs.sargon.android)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

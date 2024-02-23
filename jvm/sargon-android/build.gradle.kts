@@ -51,13 +51,13 @@ cargoNdk {
 }
 
 dependencies {
-//    implementation(libs.jna) {
-//        artifact {
-//            name = ""
-//            type = "aar"
-//        }
-//    }
-    implementation("net.java.dev.jna:jna:5.13.0@aar")
+    implementation(libs.jna) {
+        artifact {
+            name = "jna"
+            type = "aar"
+        }
+    }
+//    implementation("net.java.dev.jna:jna:5.13.0@aar")
 }
 
 publishing {
