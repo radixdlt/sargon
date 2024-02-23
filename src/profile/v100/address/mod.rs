@@ -5,18 +5,17 @@ mod entity_address;
 mod identity_address;
 mod non_fungible_global_id;
 mod non_fungible_local_id;
+mod olympia_account_address;
 mod package_address;
 mod pool_address;
 mod resource_address;
 mod validator_address;
 mod vault_address;
 mod wrap_ret_address;
-mod olympia_account_address;
 
 pub use access_controller_address::*;
 pub use account_address::*;
 pub use component_address::*;
-
 
 pub use entity_address::*;
 pub use identity_address::*;

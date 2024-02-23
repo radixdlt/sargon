@@ -31,7 +31,7 @@ pub struct Secp256k1PublicKey {
 
 impl From<Secp256k1PublicKey> for ScryptoSecp256k1PublicKey {
     fn from(value: Secp256k1PublicKey) -> Self {
-        value.inner.clone()
+        value.inner
     }
 }
 

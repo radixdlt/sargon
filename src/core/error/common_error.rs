@@ -327,6 +327,9 @@ pub enum CommonError {
 
     #[error("Invalid Olympia address string: {bad_value}")]
     InvalidOlympiaAddressString { bad_value: String } = 10089,
+
+    #[error("Invalid Transaction Manifest Instructions String")]
+    InvalidInstructionsString = 10090,
 }
 
 /*

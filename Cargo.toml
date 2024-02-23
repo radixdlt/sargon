@@ -4,6 +4,11 @@ version = "0.1.0"
 edition = "2021"
 build = "build.rs"
 
+[package.metadata.uniffi.testing]
+external-crates = [
+    "radix-engine-toolkit-uniffi",
+]
+
 [profile.release]
 incremental = false
 panic = 'unwind'
@@ -47,8 +52,12 @@ radix-engine-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", re
 radix-engine-interface = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "587d5988cd4ca3c5193ddf37027ff4e4ecd637dc", features = [
     "std",
 ] }
-radix-engine-toolkit-json = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "e0e79548e71066d7569f8871c5b002fd5805d9d5" }
-radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "e0e79548e71066d7569f8871c5b002fd5805d9d5" }
+transaction = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "587d5988cd4ca3c5193ddf37027ff4e4ecd637dc", features = [
+    "std",
+] }
+radix-engine-toolkit-json = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "3d61797c726c25c3bf7752003fdca30613146e42" }
+radix-engine-toolkit-uniffi = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "3d61797c726c25c3bf7752003fdca30613146e42" }
+radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "3d61797c726c25c3bf7752003fdca30613146e42" }
 enum-iterator = "1.4.1"
 bip32 = "0.5.1" # only need Secp256k1, to do validation of PublicKey
 ed25519-dalek = "1.0.1"

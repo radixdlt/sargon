@@ -6,7 +6,6 @@ use radix_engine_toolkit::functions::derive::{
 
 use radix_engine_common::crypto::Secp256k1PublicKey as ScryptoSecp256k1PublicKey;
 
-
 #[derive(
     Clone,
     Debug,
@@ -35,6 +34,7 @@ impl OlympiaAccountAddress {
         }
     }
 
+    #[allow(unused)]
     pub fn new(public_key: &Secp256k1PublicKey) -> Self {
         let olympia_address = RET_olympia_account_address_from_public_key(
             &public_key.clone().into(),
@@ -74,6 +74,7 @@ impl FromStr for OlympiaAccountAddress {
 }
 
 impl OlympiaAccountAddress {
+    #[allow(unused)]
     pub fn to_babylon_account_address(&self) -> AccountAddress {
         AccountAddress::new(self.public_key.clone().into(), NetworkID::Mainnet)
     }
