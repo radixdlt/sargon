@@ -63,29 +63,9 @@ impl Deref for Manifest {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct Instructions(pub(crate) Vec<ScryptoInstruction>, NetworkID);
-
-impl Instructions {
-    pub fn new(
-        instructions_string: String,
-        network_id: NetworkID,
-    ) -> Result<Self> {
-        let network_definition = network_id.network_definition();
-        let blob_provider = ScryptoMockBlobProvider::new();
-        scrypto_compile(
-            &instructions_string,
-            &network_definition,
-            blob_provider,
-        )
-        .map_err(|_e| CommonError::InvalidInstructionsString)
-        .map(|manifest| Self(manifest.instructions, network_id))
-    }
-}
-
 impl Manifest {
     pub fn new(
-        instructions_string: String,
+        instructions_string: impl AsRef<str>,
         network_id: NetworkID,
         blobs: Blobs,
     ) -> Result<Self> {
@@ -154,43 +134,31 @@ impl Manifest {
     }
 }
 
-#[derive(Clone, Debug)]
-pub struct TransactionReceipt(pub(crate) ScryptoTransactionReceipt);
-impl TryFrom<Vec<u8>> for TransactionReceipt {
-    type Error = crate::CommonError;
-
-    fn try_from(value: Vec<u8>) -> Result<Self, Self::Error> {
-        scrypto_decode(&value).map_err(|e| {
-            error!("Failed to decode encoded Transaction Receipt (bytes) into a (Scrypto)TransactionReceipt, error: {:?}", e);
-            CommonError::FailedToDecodeEncodedReceipt
-        }).map(Self)
-    }
-}
-impl TryFrom<BagOfBytes> for TransactionReceipt {
-    type Error = crate::CommonError;
-
-    fn try_from(value: BagOfBytes) -> Result<Self, Self::Error> {
-        Self::try_from(value.to_vec())
-    }
+#[uniffi::export]
+pub fn new_transaction_manifest_placeholder() -> Manifest {
+    Manifest::placeholder_simulator()
 }
 
-#[cfg(test)]
-mod tests {
-    use crate::prelude::*;
+#[uniffi::export]
+pub fn new_transaction_manifest_placeholder_other() -> Manifest {
+    Manifest::placeholder_simulator_other()
+}
 
-    impl FromStr for Manifest {
-        type Err = crate::CommonError;
-
-        fn from_str(s: &str) -> Result<Self> {
-            Self::new(s.to_owned(), NetworkID::Simulator, Vec::new())
-        }
+impl HasPlaceholder for Manifest {
+    fn placeholder() -> Self {
+        Self::placeholder_simulator()
     }
 
+    fn placeholder_other() -> Self {
+        Self::placeholder_simulator_other()
+    }
+}
+
+impl Manifest {
     // https://github.com/radixdlt/radix-engine-toolkit/blob/cf2f4b4d6de56233872e11959861fbf12db8ddf6/crates/radix-engine-toolkit/tests/manifests/account/resource_transfer.rtm
-    #[test]
-    fn resource_transfer() {
-        let manifest_str = r#"
-CALL_METHOD
+    // but modified, changed `None` -> `Enum<0u8>()`
+    fn placeholder_simulator_instructions_string() -> String {
+r#"CALL_METHOD
     Address("account_sim1cyvgx33089ukm2pl97pv4max0x40ruvfy4lt60yvya744cve475w0q")
     "lock_fee"
     Decimal("500")
@@ -207,15 +175,109 @@ CALL_METHOD
     Expression("ENTIRE_WORKTOP")
     Enum<0u8>()
 ;
-"#;
+"#
+.to_owned()
+    }
 
-        let manifest: Manifest = manifest_str.parse().unwrap();
+    pub fn placeholder_simulator() -> Self {
+        Self::new(
+            Self::placeholder_simulator_instructions_string(),
+            NetworkID::Simulator,
+            Vec::new(),
+        )
+        .expect("Valid placeholder value")
+    }
 
-        assert_eq!(manifest.clone(), manifest.clone());
-        assert_eq!(
-            manifest.clone().instructions_string().trim(),
-            manifest_str.trim()
-        );
-        assert_eq!(manifest.secret_magic.instructions.len(), 3);
+    // https://github.com/radixdlt/radix-engine-toolkit/blob/cf2f4b4d6de56233872e11959861fbf12db8ddf6/crates/radix-engine-toolkit/tests/manifests/account/multi_account_resource_transfer.rtm
+    // but modified, changed `None` -> `Enum<0u8>()`, also changed `"account_a_bucket"` -> `"bucket1"`, `"account_b_bucket"` -> `"bucket2"`, etc.
+    fn placeholder_other_simulator_instructions_string() -> String {
+r#"CALL_METHOD
+    Address("account_sim1cyvgx33089ukm2pl97pv4max0x40ruvfy4lt60yvya744cve475w0q")
+    "lock_fee"
+    Decimal("500")
+;
+CALL_METHOD
+    Address("account_sim1cyvgx33089ukm2pl97pv4max0x40ruvfy4lt60yvya744cve475w0q")
+    "withdraw"
+    Address("resource_sim1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxakj8n3")
+    Decimal("330")
+;
+TAKE_FROM_WORKTOP
+    Address("resource_sim1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxakj8n3")
+    Decimal("150")
+    Bucket("bucket1")
+;
+CALL_METHOD
+    Address("account_sim1c8mulhl5yrk6hh4jsyldps5sdrp08r5v9wusupvzxgqvhlp4c4nwjz")
+    "try_deposit_or_abort"
+    Bucket("bucket1")
+    Enum<0u8>()
+;
+TAKE_FROM_WORKTOP
+    Address("resource_sim1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxakj8n3")
+    Decimal("130")
+    Bucket("bucket2")
+;
+CALL_METHOD
+    Address("account_sim1c8s2hass5g62ckwpv78y8ykdqljtetv4ve6etcz64gveykxznj36tr")
+    "try_deposit_or_abort"
+    Bucket("bucket2")
+    Enum<0u8>()
+;
+TAKE_FROM_WORKTOP
+    Address("resource_sim1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxakj8n3")
+    Decimal("50")
+    Bucket("bucket3")
+;
+CALL_METHOD
+    Address("account_sim1c8ct6jdcwqrg3gzskyxuy0z933fe55fyjz6p56730r95ulzwl3ppva")
+    "try_deposit_or_abort"
+    Bucket("bucket3")
+    Enum<0u8>()
+;
+"#
+.to_owned()
+    }
+
+    pub fn placeholder_simulator_other() -> Self {
+        Self::new(
+            Self::placeholder_other_simulator_instructions_string(),
+            NetworkID::Simulator,
+            Vec::new(),
+        )
+        .expect("Valid placeholder value")
+    }
+
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::prelude::*;
+
+    impl FromStr for Manifest {
+        type Err = crate::CommonError;
+
+        fn from_str(s: &str) -> Result<Self> {
+            Self::new(s.to_owned(), NetworkID::Simulator, Vec::new())
+        }
+    }
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = Manifest;
+
+    #[test]
+    fn placeholder_string_roundtrip() {
+        let sut = SUT::placeholder();
+        assert_eq!(sut.clone(), sut.clone());
+        assert_eq!(SUT::placeholder_simulator_instructions_string(), sut.clone().instructions_string());
+        assert_eq!(sut.secret_magic.instructions.len(), 3);
+    }
+
+    #[test]
+    fn multi_account_resource_transfer() {
+        let sut = SUT::placeholder_other();
+        assert_eq!(sut.clone(), sut.clone());
+        assert_eq!(SUT::placeholder_other_simulator_instructions_string(), sut.clone().instructions_string());
+        assert_eq!(sut.secret_magic.instructions.len(), 8);
     }
 }
