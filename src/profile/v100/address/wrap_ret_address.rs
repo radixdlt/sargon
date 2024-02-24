@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use paste::*;
+use radix_engine::types::GlobalAddress as ScryptoGlobalAddress;
 use radix_engine_common::types::{
     EntityType as ScryptoEntityType, NodeId as ScryptoNodeId,
 };
@@ -91,7 +92,22 @@ macro_rules! decl_ret_wrapped_address {
                 }
             }
 
+            impl From<[< $address_type:camel Address >]> for ScryptoGlobalAddress {
+                fn from(value: [< $address_type:camel Address >]) -> ScryptoGlobalAddress {
+                    value.scrypto()
+                }
+            }
+
             impl [< $address_type:camel Address >] {
+
+                pub(crate) fn scrypto(&self) -> ScryptoGlobalAddress {
+                    ScryptoGlobalAddress::try_from(self.node_id())
+                    .expect("Should always be able to convert a Sargon Address into radix engine 'GlobalAddress'.")
+                }
+                pub(crate) fn node_id(&self) -> ScryptoNodeId {
+                    self.secret_magic.node_id()
+                }
+
                 pub fn address(&self) -> String {
                     self.to_string()
                 }

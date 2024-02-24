@@ -45,7 +45,8 @@ impl TransactionManifest {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record, derive_more::Display)]
+#[display("{}", self.instructions_string())] // TODO add blobs
 pub struct TransactionManifest {
     secret_magic: TransactionManifestInner,
 }
@@ -67,6 +68,30 @@ impl From<TransactionManifest> for ScryptoTransactionManifest {
 impl TransactionManifest {
     pub(crate) fn instructions(&self) -> &Vec<ScryptoInstruction> {
         &self.secret_magic.instructions.secret_magic.0
+    }
+
+    pub(crate) fn from_scrypto(
+        scrypto_manifest: ScryptoTransactionManifest,
+        network_id: NetworkID,
+    ) -> Self {
+        let value = Self {
+            secret_magic: TransactionManifestInner {
+                instructions: Instructions {
+                    secret_magic: InstructionsInner(
+                        scrypto_manifest.instructions.clone(),
+                    ),
+                    network_id,
+                },
+                blobs: scrypto_manifest
+                    .blobs
+                    .clone()
+                    .values()
+                    .map(|b| b.to_owned().into())
+                    .collect_vec(),
+            },
+        };
+        assert_eq!(value.scrypto_manifest(), scrypto_manifest);
+        value
     }
 
     pub fn new(
