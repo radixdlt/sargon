@@ -91,7 +91,7 @@ impl EntityAddress for AccountAddress {
     /// Identifies that AccountAddress uses the `EntityType::Account`, which are used
     /// to validate the HRP (`"account_"`) and is also used when forming HD derivation
     /// paths as per CAP26.
-    fn entity_type() -> AbstractEntityType {
+    fn abstract_entity_type() -> AbstractEntityType {
         AbstractEntityType::Account
     }
 }

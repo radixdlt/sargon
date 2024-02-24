@@ -3,11 +3,20 @@ use crate::prelude::*;
 #[uniffi::export]
 pub fn manifest_for_faucet(
     include_lock_fee_instruction: bool,
-    address_of_receiving_account: AccountAddress,
-) -> Result<TransactionManifest> {
+    address_of_receiving_account: &AccountAddress,
+) -> TransactionManifest {
     TransactionManifest::manifest_for_faucet(
         include_lock_fee_instruction,
         address_of_receiving_account,
+    )
+}
+
+#[uniffi::export]
+pub fn manifest_marking_account_as_dapp_definition_type(
+    account_address: &AccountAddress,
+) -> TransactionManifest {
+    TransactionManifest::manifest_marking_account_as_dapp_definition_type(
+        account_address,
     )
 }
 
@@ -55,13 +64,6 @@ pub fn manifest_for_create_multiple_non_fungible_tokens(
 pub fn manifest_for_create_non_fungible_token(
     _address_of_owner: AccountAddress,
     _network_id: NetworkID,
-) -> Result<TransactionManifest> {
-    todo!()
-}
-
-#[uniffi::export]
-pub fn manifest_marking_account_as_dapp_definition_type(
-    _account_address: AccountAddress,
 ) -> Result<TransactionManifest> {
     todo!()
 }
