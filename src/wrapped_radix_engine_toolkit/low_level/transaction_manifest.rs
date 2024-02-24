@@ -3,7 +3,9 @@ use std::ops::Deref;
 use crate::prelude::*;
 
 use radix_engine::transaction::TransactionReceipt as ScryptoTransactionReceipt;
+use radix_engine_common::data::scrypto::scrypto_decode;
 use radix_engine_common::network::NetworkDefinition as ScryptoNetworkDefinition;
+use radix_engine_toolkit::functions::instructions::extract_addresses as RET_ins_extract_addresses;
 use radix_engine_toolkit::functions::manifest::{
     execution_summary as RET_execution_summary, summary as RET_summary,
 };
@@ -18,8 +20,6 @@ use transaction::{
     },
 };
 
-use radix_engine_common::data::scrypto::scrypto_decode;
-
 pub type Blob = BagOfBytes;
 pub type Blobs = Vec<Blob>;
 pub type ScryptoInstructions = Vec<ScryptoInstruction>;
@@ -29,18 +29,19 @@ pub struct TransactionManifestInner {
     pub instructions: Instructions,
     pub blobs: Blobs,
 }
-impl TransactionManifestInner {
+impl TransactionManifest {
     fn scrypto_manifest(&self) -> ScryptoTransactionManifest {
-        /*
-                blobs: blobs
-                    .into_iter()
-                    .map(|b| b.to_vec())
-                    .collect_vec()
-                    .iter()
-                    .map(|blob| (hash_of(blob), blob.clone()))
-                    .collect(),
-        */
-        todo!()
+        ScryptoTransactionManifest {
+            instructions: self.instructions().clone(),
+            blobs: self
+                .secret_magic
+                .blobs
+                .clone()
+                .into_iter()
+                .map(|b| b.to_vec())
+                .map(|blob| (hash_of(blob.clone()), blob))
+                .collect(),
+        }
     }
 }
 
@@ -59,11 +60,15 @@ impl From<TransactionManifestInner> for TransactionManifest {
 
 impl From<TransactionManifest> for ScryptoTransactionManifest {
     fn from(value: TransactionManifest) -> Self {
-        value.secret_magic.scrypto_manifest()
+        value.scrypto_manifest()
     }
 }
 
 impl TransactionManifest {
+    pub(crate) fn instructions(&self) -> &Vec<ScryptoInstruction> {
+        &self.secret_magic.instructions.secret_magic.0
+    }
+
     pub fn new(
         instructions_string: impl AsRef<str>,
         network_id: NetworkID,
@@ -84,7 +89,7 @@ impl TransactionManifest {
     }
 
     pub fn summary(&self, network_id: NetworkID) -> ManifestSummary {
-        let ret_summary = RET_summary(&self.secret_magic.scrypto_manifest());
+        let ret_summary = RET_summary(&self.scrypto_manifest());
         ManifestSummary::from_ret(ret_summary, network_id)
     }
 
@@ -94,22 +99,38 @@ impl TransactionManifest {
         encoded_receipt: BagOfBytes, // TODO: Replace with TYPE - read from GW.
     ) -> Result<ExecutionSummary> {
         let receipt: TransactionReceipt = encoded_receipt.try_into()?;
-        let ret_execution_summary = RET_execution_summary(
-            &self.secret_magic.scrypto_manifest(),
-            &receipt.0,
-        )
-        .map_err(|e| {
-            error!("Failed to get execution summary from RET, error: {:?}", e);
-            CommonError::FailedToGetRetExecutionSummaryFromManifest
-        })?;
+        let ret_execution_summary =
+            RET_execution_summary(&self.scrypto_manifest(), &receipt.0)
+                .map_err(|e| {
+                    error!(
+                        "Failed to get execution summary from RET, error: {:?}",
+                        e
+                    );
+                    CommonError::FailedToGetRetExecutionSummaryFromManifest
+                })?;
 
         ExecutionSummary::from_ret(ret_execution_summary, network_id)
+    }
+
+    pub fn network_id(&self) -> NetworkID {
+        self.secret_magic.instructions.network_id
     }
 
     pub fn resource_addresses_to_refresh(
         &self,
     ) -> Option<Vec<ResourceAddress>> {
-        todo!()
+        let (addresses, _) = RET_ins_extract_addresses(self.instructions());
+        let resource_addresses: Vec<ResourceAddress> = addresses
+            .into_iter()
+            .filter_map(|a| {
+                ResourceAddress::new(*a.as_node_id(), self.network_id()).ok()
+            })
+            .collect_vec();
+        if resource_addresses.is_empty() {
+            None
+        } else {
+            Some(resource_addresses)
+        }
     }
 }
 
@@ -253,7 +274,7 @@ mod tests {
         type Err = crate::CommonError;
 
         fn from_str(s: &str) -> Result<Self> {
-            Self::new(s.to_owned(), NetworkID::Simulator, Vec::new())
+            Self::new(s, NetworkID::Simulator, Vec::new())
         }
     }
 
@@ -268,7 +289,7 @@ mod tests {
             SUT::placeholder_simulator_instructions_string(),
             sut.clone().instructions_string()
         );
-        assert_eq!(sut.secret_magic.instructions.instructions.0.len(), 3);
+        assert_eq!(sut.instructions().len(), 3);
     }
 
     #[test]
@@ -279,6 +300,6 @@ mod tests {
             SUT::placeholder_other_simulator_instructions_string(),
             sut.clone().instructions_string()
         );
-        assert_eq!(sut.secret_magic.instructions.instructions.0.len(), 8);
+        assert_eq!(sut.instructions().len(), 8);
     }
 }

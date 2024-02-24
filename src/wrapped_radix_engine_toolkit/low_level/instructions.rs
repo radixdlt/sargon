@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use crate::prelude::*;
 
 use radix_engine_toolkit::functions::instructions::{
@@ -39,14 +41,22 @@ impl crate::UniffiCustomTypeConverter for InstructionsInner {
 
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct Instructions {
-    pub(crate) instructions: InstructionsInner,
+    pub(crate) secret_magic: InstructionsInner,
     pub network_id: NetworkID,
+}
+
+impl Deref for Instructions {
+    type Target = Vec<ScryptoInstruction>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.secret_magic.0
+    }
 }
 
 impl Instructions {
     pub fn instructions_string(&self) -> String {
         let network_definition = self.network_id.network_definition();
-        scrypto_decompile(&self.instructions.0, &network_definition).expect("Should never fail, because should never have allowed invalid instructions")
+        scrypto_decompile(self, &network_definition).expect("Should never fail, because should never have allowed invalid instructions")
     }
 
     pub fn new(
@@ -62,7 +72,7 @@ impl Instructions {
         )
         .map_err(|_e| CommonError::InvalidInstructionsString)
         .map(|manifest| Self {
-            instructions: InstructionsInner(manifest.instructions),
+            secret_magic: InstructionsInner(manifest.instructions),
             network_id,
         })
     }
