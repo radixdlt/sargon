@@ -1,7 +1,7 @@
 import com.radixdlt.sargon.*
 
 val NonFungibleLocalId.description: String
-    get() = nonFungibleLocalIdToString(id = this)
+    get() = nonFungibleLocalIdAsStr(id = this)
 
 fun String.hexToByteArray(): ByteArray {
     check(length % 2 == 0) { "Must have an even length" }

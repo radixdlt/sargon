@@ -64,7 +64,7 @@ extension Data {
 
 extension NonFungibleLocalId: CustomStringConvertible {
 	public var description: String {
-		nonFungibleLocalIdToString(id: self)
+		nonFungibleLocalIdAsStr(id: self)
 	}
 }
 
