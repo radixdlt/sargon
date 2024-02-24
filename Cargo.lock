@@ -1997,6 +1997,7 @@ dependencies = [
  "paste",
  "pretty_assertions",
  "pretty_env_logger",
+ "radix-engine",
  "radix-engine-common",
  "radix-engine-interface",
  "radix-engine-toolkit",

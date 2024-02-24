@@ -1,6 +1,5 @@
 use crate::prelude::*;
 
-
 use radix_engine_toolkit::transaction_types::ExecutionSummary as RetExecutionSummary;
 
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
@@ -8,10 +7,11 @@ pub struct ExecutionSummary {
     detailed_manifest_class: Option<DetailedManifestClass>,
 }
 
-impl TryFrom<RetExecutionSummary> for ExecutionSummary {
-    type Error = crate::CommonError;
-
-    fn try_from(_value: RetExecutionSummary) -> Result<Self> {
+impl ExecutionSummary {
+    pub fn from_ret(
+        _ret_summary: RetExecutionSummary,
+        _network_id: NetworkID,
+    ) -> Result<Self> {
         todo!()
     }
 }

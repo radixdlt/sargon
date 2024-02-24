@@ -330,6 +330,14 @@ pub enum CommonError {
 
     #[error("Invalid Transaction Manifest Instructions String")]
     InvalidInstructionsString = 10090,
+
+    #[error(
+        "Failed to get execution summary from TransactionManifest using RET"
+    )]
+    FailedToGetRetExecutionSummaryFromManifest = 10091,
+
+    #[error("Failed to get TransactionReceipt from encoded bytes.")]
+    FailedToDecodeEncodedReceipt = 10092,
 }
 
 /*

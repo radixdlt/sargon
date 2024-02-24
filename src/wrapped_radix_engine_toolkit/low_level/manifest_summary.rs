@@ -15,10 +15,11 @@ pub struct ManifestSummary {
     pub addresses_of_personas_requiring_auth: Vec<IdentityAddress>,
 }
 
-impl TryFrom<RetManifestSummary> for ManifestSummary {
-    type Error = crate::CommonError;
-
-    fn try_from(value: RetManifestSummary) -> Result<Self> {
+impl ManifestSummary {
+    pub fn from_ret(
+        _ret_summary: RetManifestSummary,
+        _network_id: NetworkID,
+    ) -> Self {
         // let addresses_of_accounts_deposited_into =
         //     try_map_addresses_from_ret(value.accounts_deposited_into)?;
         // let addresses_of_accounts_withdrawn_from =
@@ -37,6 +38,7 @@ impl TryFrom<RetManifestSummary> for ManifestSummary {
         todo!()
     }
 }
+
 // // need also from, GlobalAddress, maybe best if we change from `TryFrom` to `TryInto<>`
 // pub fn try_map_addresses_from_ret<
 //     A: TryFrom<

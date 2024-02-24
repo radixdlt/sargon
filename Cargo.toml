@@ -5,9 +5,7 @@ edition = "2021"
 build = "build.rs"
 
 [package.metadata.uniffi.testing]
-external-crates = [
-    "radix-engine-toolkit-uniffi",
-]
+external-crates = ["radix-engine-toolkit-uniffi"]
 
 [profile.release]
 incremental = false
@@ -49,6 +47,7 @@ strum_macros = { version = "0.26.1" }
 radix-engine-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "587d5988cd4ca3c5193ddf37027ff4e4ecd637dc", features = [
     "serde",
 ] }
+radix-engine = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "587d5988cd4ca3c5193ddf37027ff4e4ecd637dc" }
 radix-engine-interface = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "587d5988cd4ca3c5193ddf37027ff4e4ecd637dc", features = [
     "std",
 ] }

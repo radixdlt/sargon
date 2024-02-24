@@ -4,7 +4,10 @@ use crate::prelude::*;
 //     TransactionManifest as RetTransactionManifest,
 // };
 
-use transaction::prelude::{ManifestBuilder as ScryptoManifestBuilder, TransactionManifestV1 as ScryptoTransactionManifest};
+use transaction::prelude::{
+    ManifestBuilder as ScryptoManifestBuilder,
+    TransactionManifestV1 as ScryptoTransactionManifest,
+};
 
 #[uniffi::export]
 pub fn manifest_third_party_deposit_update(
@@ -15,8 +18,8 @@ pub fn manifest_third_party_deposit_update(
 
 #[uniffi::export]
 pub fn manifest_for_faucet(
-    include_lock_fee_instruction: bool,
-    network_id: NetworkID,
+    _include_lock_fee_instruction: bool,
+    _network_id: NetworkID,
     _address_of_receiving_account: AccountAddress,
 ) -> Result<Manifest> {
     // RetManifestBuilder::new()
