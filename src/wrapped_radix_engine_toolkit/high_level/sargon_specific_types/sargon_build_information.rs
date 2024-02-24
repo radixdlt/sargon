@@ -20,7 +20,7 @@ impl SargonBuildInformation {
 #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct SargonDependencies {
     pub radix_engine_toolkit: DependencyInformation,
-    pub scrypto_radix_engine_common: DependencyInformation,
+    pub scrypto_radix_engine: DependencyInformation,
 }
 impl SargonDependencies {
     pub fn get() -> Self {
@@ -28,8 +28,8 @@ impl SargonDependencies {
             radix_engine_toolkit: DependencyInformation::of(
                 "RADIX-ENGINE-TOOLKIT-DEPENDENCY",
             ),
-            scrypto_radix_engine_common: DependencyInformation::of(
-                "RADIX-ENGINE-COMMON-DEPENDENCY",
+            scrypto_radix_engine: DependencyInformation::of(
+                "RADIX-ENGINE-DEPENDENCY",
             ),
         }
     }

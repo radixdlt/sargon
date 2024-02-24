@@ -33,7 +33,7 @@ pub fn main() {
         println!("cargo:rustc-env={}", env_var);
     };
 
-    set_dep_env("radix-engine-common");
+    set_dep_env("radix-engine");
     set_dep_env("radix-engine-toolkit");
 
     uniffi::generate_scaffolding("src/sargon.udl")
