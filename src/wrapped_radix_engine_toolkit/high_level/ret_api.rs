@@ -95,13 +95,14 @@ pub fn manifest_stakes_claim(
 }
 
 /// REQUIRES NETWORK CALL (and probable cache)
-#[uniffi::export]
-pub async fn manifest_assets_transfers(
-    _transfers: AssetsTransfersTransactionPrototype,
-    _message: Option<Message>,
-) -> Result<Manifest> {
-    todo!()
-}
+/// Requires kotlinx to be setup
+// #[uniffi::export]
+// pub async fn manifest_assets_transfers(
+//     _transfers: AssetsTransfersTransactionPrototype,
+//     _message: Option<Message>,
+// ) -> Result<Manifest> {
+//     todo!()
+// }
 
 #[uniffi::export]
 pub fn updating_manifest_lock_fee(
@@ -121,13 +122,14 @@ pub fn updating_manifest_add_guarantees(
 }
 
 /// REQUIRES NETWORK CALL (and probable cache)
-#[uniffi::export]
-pub async fn needs_signature_for_depositing(
-    _into_account: Account,
-    _resource: ResourceAddress,
-) -> Result<bool> {
-    todo!()
-}
+/// Requires kotlinx to be setup
+// #[uniffi::export]
+// pub async fn needs_signature_for_depositing(
+//     _into_account: Account,
+//     _resource: ResourceAddress,
+// ) -> Result<bool> {
+//     todo!()
+// }
 
 #[uniffi::export]
 pub fn build_information() -> SargonBuildInformation {

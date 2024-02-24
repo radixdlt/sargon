@@ -158,7 +158,7 @@ impl Manifest {
     // https://github.com/radixdlt/radix-engine-toolkit/blob/cf2f4b4d6de56233872e11959861fbf12db8ddf6/crates/radix-engine-toolkit/tests/manifests/account/resource_transfer.rtm
     // but modified, changed `None` -> `Enum<0u8>()`
     fn placeholder_simulator_instructions_string() -> String {
-r#"CALL_METHOD
+        r#"CALL_METHOD
     Address("account_sim1cyvgx33089ukm2pl97pv4max0x40ruvfy4lt60yvya744cve475w0q")
     "lock_fee"
     Decimal("500")
@@ -191,7 +191,7 @@ CALL_METHOD
     // https://github.com/radixdlt/radix-engine-toolkit/blob/cf2f4b4d6de56233872e11959861fbf12db8ddf6/crates/radix-engine-toolkit/tests/manifests/account/multi_account_resource_transfer.rtm
     // but modified, changed `None` -> `Enum<0u8>()`, also changed `"account_a_bucket"` -> `"bucket1"`, `"account_b_bucket"` -> `"bucket2"`, etc.
     fn placeholder_other_simulator_instructions_string() -> String {
-r#"CALL_METHOD
+        r#"CALL_METHOD
     Address("account_sim1cyvgx33089ukm2pl97pv4max0x40ruvfy4lt60yvya744cve475w0q")
     "lock_fee"
     Decimal("500")
@@ -247,7 +247,6 @@ CALL_METHOD
         )
         .expect("Valid placeholder value")
     }
-
 }
 
 #[cfg(test)]
@@ -269,15 +268,21 @@ mod tests {
     fn placeholder_string_roundtrip() {
         let sut = SUT::placeholder();
         assert_eq!(sut.clone(), sut.clone());
-        assert_eq!(SUT::placeholder_simulator_instructions_string(), sut.clone().instructions_string());
+        assert_eq!(
+            SUT::placeholder_simulator_instructions_string(),
+            sut.clone().instructions_string()
+        );
         assert_eq!(sut.secret_magic.instructions.len(), 3);
     }
 
     #[test]
-    fn multi_account_resource_transfer() {
+    fn placeholder_other_string_roundtrip() {
         let sut = SUT::placeholder_other();
         assert_eq!(sut.clone(), sut.clone());
-        assert_eq!(SUT::placeholder_other_simulator_instructions_string(), sut.clone().instructions_string());
+        assert_eq!(
+            SUT::placeholder_other_simulator_instructions_string(),
+            sut.clone().instructions_string()
+        );
         assert_eq!(sut.secret_magic.instructions.len(), 8);
     }
 }
