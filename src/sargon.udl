@@ -11,6 +11,9 @@ typedef string Timestamp;
 typedef sequence<i8> BagOfBytes;
 
 [Custom]
+typedef BagOfBytes InstructionsInner;
+
+[Custom]
 typedef string ScryptoDecimal192;
 
 [Custom]

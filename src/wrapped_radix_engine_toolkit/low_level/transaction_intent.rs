@@ -6,7 +6,7 @@ dummy_sargon!(TransactionIntent);
 impl TransactionIntent {
     pub fn new(
         header: TransactionHeader,
-        manifest: Manifest,
+        manifest: TransactionManifest,
         message: Message,
     ) -> Self {
         todo!()

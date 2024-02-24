@@ -24,7 +24,6 @@ use radix_engine_common::crypto::{Hash, IsHash};
 #[display("{}", self.to_hex())]
 #[debug("{}", self.to_hex())]
 pub struct BagOfBytes {
-    ///
     bytes: Vec<u8>,
 }
 

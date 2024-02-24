@@ -3,6 +3,7 @@ use std::ops::Deref;
 use crate::prelude::*;
 
 use radix_engine::transaction::TransactionReceipt as ScryptoTransactionReceipt;
+use radix_engine_common::network::NetworkDefinition as ScryptoNetworkDefinition;
 use radix_engine_toolkit::functions::manifest::{
     execution_summary as RET_execution_summary, summary as RET_summary,
 };
@@ -23,55 +24,14 @@ pub type Blob = BagOfBytes;
 pub type Blobs = Vec<Blob>;
 pub type ScryptoInstructions = Vec<ScryptoInstruction>;
 
-#[derive(Clone, PartialEq, Eq, Debug, uniffi::Object)]
-pub struct ManifestInner {
-    pub network_id: NetworkID,
-    pub scrypto_manifest: ScryptoTransactionManifest,
+#[derive(Clone, PartialEq, Eq, Debug, uniffi::Record)]
+pub struct TransactionManifestInner {
+    pub instructions: Instructions,
+    pub blobs: Blobs,
 }
-impl Deref for ManifestInner {
-    type Target = ScryptoTransactionManifest;
-
-    fn deref(&self) -> &Self::Target {
-        &self.scrypto_manifest
-    }
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
-pub struct Manifest {
-    secret_magic: Arc<ManifestInner>,
-}
-
-impl From<ManifestInner> for Manifest {
-    fn from(value: ManifestInner) -> Self {
-        Self {
-            secret_magic: Arc::new(value),
-        }
-    }
-}
-
-impl From<Manifest> for ScryptoTransactionManifest {
-    fn from(value: Manifest) -> Self {
-        value.secret_magic.scrypto_manifest.clone()
-    }
-}
-
-impl Deref for Manifest {
-    type Target = ScryptoTransactionManifest;
-
-    fn deref(&self) -> &Self::Target {
-        &self.secret_magic
-    }
-}
-
-impl Manifest {
-    pub fn new(
-        instructions_string: impl AsRef<str>,
-        network_id: NetworkID,
-        blobs: Blobs,
-    ) -> Result<Self> {
-        Instructions::new(instructions_string, network_id)
-            .map(|i| ScryptoTransactionManifest {
-                instructions: i.0,
+impl TransactionManifestInner {
+    fn scrypto_manifest(&self) -> ScryptoTransactionManifest {
+        /*
                 blobs: blobs
                     .into_iter()
                     .map(|b| b.to_vec())
@@ -79,33 +39,52 @@ impl Manifest {
                     .iter()
                     .map(|blob| (hash_of(blob), blob.clone()))
                     .collect(),
-            })
-            .map(|scrypto_manifest| Self {
-                secret_magic: ManifestInner {
-                    network_id,
-                    scrypto_manifest,
-                }
-                .into(),
-            })
+        */
+        todo!()
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct TransactionManifest {
+    secret_magic: TransactionManifestInner,
+}
+
+impl From<TransactionManifestInner> for TransactionManifest {
+    fn from(value: TransactionManifestInner) -> Self {
+        Self {
+            secret_magic: value,
+        }
+    }
+}
+
+impl From<TransactionManifest> for ScryptoTransactionManifest {
+    fn from(value: TransactionManifest) -> Self {
+        value.secret_magic.scrypto_manifest()
+    }
+}
+
+impl TransactionManifest {
+    pub fn new(
+        instructions_string: impl AsRef<str>,
+        network_id: NetworkID,
+        blobs: Blobs,
+    ) -> Result<Self> {
+        Instructions::new(instructions_string, network_id).map(|instructions| {
+            Self {
+                secret_magic: TransactionManifestInner {
+                    instructions,
+                    blobs,
+                },
+            }
+        })
     }
 
     pub fn instructions_string(&self) -> String {
-        let network_definition =
-            self.secret_magic.network_id.network_definition();
-        scrypto_decompile(&self.secret_magic.scrypto_manifest.instructions, &network_definition).expect("Should never fail, because should never have allowed invalid instructions")
-    }
-
-    /// This clones the blobs which might be expensive resource wise.
-    pub fn blobs(&self) -> Blobs {
-        self.blobs
-            .clone()
-            .values()
-            .map(|v| v.clone().into())
-            .collect_vec()
+        self.secret_magic.instructions.instructions_string()
     }
 
     pub fn summary(&self, network_id: NetworkID) -> ManifestSummary {
-        let ret_summary = RET_summary(&self.secret_magic.scrypto_manifest);
+        let ret_summary = RET_summary(&self.secret_magic.scrypto_manifest());
         ManifestSummary::from_ret(ret_summary, network_id)
     }
 
@@ -116,7 +95,7 @@ impl Manifest {
     ) -> Result<ExecutionSummary> {
         let receipt: TransactionReceipt = encoded_receipt.try_into()?;
         let ret_execution_summary = RET_execution_summary(
-            &self.secret_magic.scrypto_manifest,
+            &self.secret_magic.scrypto_manifest(),
             &receipt.0,
         )
         .map_err(|e| {
@@ -135,16 +114,33 @@ impl Manifest {
 }
 
 #[uniffi::export]
-pub fn new_transaction_manifest_placeholder() -> Manifest {
-    Manifest::placeholder_simulator()
+pub fn new_transaction_manifest_from_instructions_string_and_blobs(
+    instructions_string: String,
+    network_id: NetworkID,
+    blobs: Blobs,
+) -> Result<TransactionManifest> {
+    TransactionManifest::new(instructions_string, network_id, blobs)
 }
 
 #[uniffi::export]
-pub fn new_transaction_manifest_placeholder_other() -> Manifest {
-    Manifest::placeholder_simulator_other()
+pub fn new_transaction_manifest_placeholder() -> TransactionManifest {
+    TransactionManifest::placeholder_simulator()
 }
 
-impl HasPlaceholder for Manifest {
+#[uniffi::export]
+pub fn new_transaction_manifest_placeholder_other() -> TransactionManifest {
+    TransactionManifest::placeholder_simulator_other()
+}
+
+#[uniffi::export]
+pub fn transaction_manifest_to_string(
+    manifest: &TransactionManifest,
+) -> String {
+    // FIXME add blobs
+    manifest.instructions_string()
+}
+
+impl HasPlaceholder for TransactionManifest {
     fn placeholder() -> Self {
         Self::placeholder_simulator()
     }
@@ -154,7 +150,7 @@ impl HasPlaceholder for Manifest {
     }
 }
 
-impl Manifest {
+impl TransactionManifest {
     // https://github.com/radixdlt/radix-engine-toolkit/blob/cf2f4b4d6de56233872e11959861fbf12db8ddf6/crates/radix-engine-toolkit/tests/manifests/account/resource_transfer.rtm
     // but modified, changed `None` -> `Enum<0u8>()`
     fn placeholder_simulator_instructions_string() -> String {
@@ -253,7 +249,7 @@ CALL_METHOD
 mod tests {
     use crate::prelude::*;
 
-    impl FromStr for Manifest {
+    impl FromStr for TransactionManifest {
         type Err = crate::CommonError;
 
         fn from_str(s: &str) -> Result<Self> {
@@ -262,7 +258,7 @@ mod tests {
     }
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = Manifest;
+    type SUT = TransactionManifest;
 
     #[test]
     fn placeholder_string_roundtrip() {
@@ -272,7 +268,7 @@ mod tests {
             SUT::placeholder_simulator_instructions_string(),
             sut.clone().instructions_string()
         );
-        assert_eq!(sut.secret_magic.instructions.len(), 3);
+        assert_eq!(sut.secret_magic.instructions.instructions.0.len(), 3);
     }
 
     #[test]
@@ -283,6 +279,6 @@ mod tests {
             SUT::placeholder_other_simulator_instructions_string(),
             sut.clone().instructions_string()
         );
-        assert_eq!(sut.secret_magic.instructions.len(), 8);
+        assert_eq!(sut.secret_magic.instructions.instructions.0.len(), 8);
     }
 }
