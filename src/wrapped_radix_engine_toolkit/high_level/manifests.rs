@@ -12,6 +12,7 @@ use radix_engine::{
 use radix_engine_common::math::Decimal as ScryptoDecimal;
 use radix_engine_toolkit::models::node_id::TypedNodeId as RetTypedNodeId;
 use std::collections::BTreeMap;
+use std::fs;
 use transaction::{
     builder::ResolvableComponentAddress as ScryptoResolvableComponentAddress,
     model::DynamicGlobalAddress as ScryptoDynamicGlobalAddress,
@@ -23,7 +24,7 @@ use transaction::{
 };
 
 impl TransactionManifest {
-    pub fn manifest_for_faucet(
+    pub fn faucet(
         include_lock_fee_instruction: bool,
         address_of_receiving_account: &AccountAddress,
     ) -> Self {
@@ -47,7 +48,7 @@ impl TransactionManifest {
         )
     }
 
-    pub fn manifest_marking_account_as_dapp_definition_type(
+    pub fn marking_account_as_dapp_definition_type(
         account_address: &AccountAddress,
     ) -> Self {
         Self::set_metadata(
@@ -57,7 +58,7 @@ impl TransactionManifest {
         )
     }
 
-    pub fn manifest_set_owner_keys_hashes(
+    pub fn set_owner_keys_hashes(
         address_of_account_or_persona: &AddressOfAccountOrPersona,
         owner_key_hashes: Vec<PublicKeyHash>,
     ) -> Self {
@@ -70,31 +71,82 @@ impl TransactionManifest {
         )
     }
 
-    pub fn manifest_for_create_fungible_token(
-        address_of_owner: &AccountAddress,
-    ) -> Self {
-        Self::manifest_for_create_fungible_token_with_metadata(
+    pub fn create_fungible_token(address_of_owner: &AccountAddress) -> Self {
+        Self::create_fungible_token_with_metadata(
             address_of_owner,
             FungibleResourceDefinitionMetadata::placeholder(),
         )
     }
 
-    pub fn manifest_for_create_fungible_token_with_metadata(
+    pub fn create_fungible_token_with_metadata(
         address_of_owner: &AccountAddress,
         metadata: FungibleResourceDefinitionMetadata,
     ) -> Self {
-        let initial_supply: ScryptoDecimal = metadata.initial_supply.into();
-        let scrypto_manifest = ScryptoManifestBuilder::new()
-            .create_fungible_resource(
-                ScryptoOwnerRole::None,
-                true,
-                10,
-                ScryptoFungibleResourceRoles::single_locked_rule(
-                    radix_engine::types::AccessRule::DenyAll,
-                ),
-                metadata.into(),
-                Some(initial_supply),
+        let mut builder = ScryptoManifestBuilder::new();
+        builder = Self::create_fungible_token_with_metadata_without_deposit(
+            builder, metadata,
+        );
+        let scrypto_manifest = builder
+            .try_deposit_entire_worktop_or_abort(
+                address_of_owner.scrypto(),
+                None,
             )
+            .build();
+
+        TransactionManifest::from_scrypto(
+            scrypto_manifest,
+            address_of_owner.network_id(),
+        )
+    }
+
+    pub fn create_fungible_token_with_metadata_without_deposit(
+        builder: ScryptoManifestBuilder,
+        metadata: FungibleResourceDefinitionMetadata,
+    ) -> ScryptoManifestBuilder {
+        let initial_supply: ScryptoDecimal = metadata.initial_supply.into();
+        builder.create_fungible_resource(
+            ScryptoOwnerRole::None,
+            true,
+            10,
+            ScryptoFungibleResourceRoles::single_locked_rule(
+                radix_engine::types::AccessRule::DenyAll,
+            ),
+            metadata.into(),
+            Some(initial_supply),
+        )
+    }
+
+    pub fn create_multiple_fungible_tokens(
+        address_of_owner: &AccountAddress,
+    ) -> TransactionManifest {
+        if address_of_owner.network_id() == NetworkID::Mainnet {
+            panic!("To be 100% sure about license of the images, we do not allow these placeholder fungible tokens to be created on Mainnet.");
+        }
+        let path = "src/wrapped_radix_engine_toolkit/high_level/placeholder_resource_definition_metadata.json";
+        let json_str = fs::read_to_string(path).unwrap();
+        let json = serde_json::Value::from_str(&json_str).unwrap();
+
+        #[derive(Deserialize)]
+        struct MultipleFungibleTokens {
+            description: String,
+            tokens: Vec<FungibleResourceDefinitionMetadata>,
+        }
+
+        let multiple_fungibles: MultipleFungibleTokens =
+            serde_json::from_value(json).unwrap();
+        info!("Generating multiple fungibles using bundled vector in file at '{}'\nDescription:\n'{}'", path, &multiple_fungibles.description);
+        let fungibles = multiple_fungibles.tokens;
+
+        let mut builder = ScryptoManifestBuilder::new();
+
+        for metadata in fungibles.iter() {
+            builder = Self::create_fungible_token_with_metadata_without_deposit(
+                builder,
+                metadata.clone(),
+            );
+        }
+
+        let scrypto_manifest = builder
             .try_deposit_entire_worktop_or_abort(
                 address_of_owner.scrypto(),
                 None,
@@ -167,17 +219,15 @@ impl ScryptoToMetadataEntry for MetadataValueStr {
 mod tests {
     use crate::prelude::*;
     use pretty_assertions::{assert_eq, assert_ne};
+    use rand::Rng;
     #[allow(clippy::upper_case_acronyms)]
     type SUT = TransactionManifest;
 
     #[test]
     fn manifest_for_faucet() {
         assert_eq!(
-            SUT::manifest_for_faucet(
-                true,
-                &AccountAddress::placeholder_mainnet()
-            )
-            .to_string(),
+            SUT::faucet(true, &AccountAddress::placeholder_mainnet())
+                .to_string(),
             r#"CALL_METHOD
     Address("component_rdx1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxfaucet")
     "lock_fee"
@@ -200,7 +250,7 @@ CALL_METHOD
     #[test]
     fn manifest_for_set_account_to_dapp_definition_address() {
         assert_eq!(
-            SUT::manifest_marking_account_as_dapp_definition_type(
+            SUT::marking_account_as_dapp_definition_type(
                 &AccountAddress::placeholder_mainnet()
             )
             .to_string(),
@@ -218,7 +268,7 @@ CALL_METHOD
     #[test]
     fn manifest_for_owner_keys() {
         assert_eq!(
-            SUT::manifest_set_owner_keys_hashes(
+            SUT::set_owner_keys_hashes(
                 &AccountAddress::placeholder_mainnet().into(),
                 vec![
                     PublicKeyHash::hash(Ed25519PublicKey::placeholder_alice()),
@@ -247,7 +297,7 @@ CALL_METHOD
     #[test]
     fn manifest_for_create_fungible_token_stella() {
         assert_eq!(
-            SUT::manifest_for_create_fungible_token(
+            SUT::create_fungible_token(
                 &AccountAddress::placeholder_mainnet().into(),
             )
             .to_string(),
@@ -370,7 +420,7 @@ CALL_METHOD
     #[test]
     fn manifest_for_create_fungible_token_with_metadata_zelda() {
         assert_eq!(
-            SUT::manifest_for_create_fungible_token_with_metadata(
+            SUT::create_fungible_token_with_metadata(
                 &AccountAddress::placeholder_mainnet_other().into(),
                 FungibleResourceDefinitionMetadata::placeholder_other()
             )
@@ -488,6 +538,24 @@ CALL_METHOD
     Enum<0u8>()
 ;
 "#
+        );
+    }
+
+    #[test]
+    fn create_multiple_fungible_tokens() {
+        let manifest = TransactionManifest::create_multiple_fungible_tokens(
+            &AccountAddress::placeholder_stokenet(),
+        );
+        assert_eq!(manifest.instructions().len(), 26);
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "To be 100% sure about license of the images, we do not allow these placeholder fungible tokens to be created on Mainnet."
+    )]
+    fn create_multiple_fungible_tokens_panics_for_mainnet() {
+        TransactionManifest::create_multiple_fungible_tokens(
+            &AccountAddress::placeholder_mainnet(),
         );
     }
 }

@@ -8,7 +8,9 @@ use radix_engine::types::{
 use std::collections::BTreeMap;
 use transaction::prelude::MetadataValue as ScryptoMetadataValue;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(
+    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
+)]
 pub struct FungibleResourceDefinitionMetadata {
     pub name: String,
     pub description: String,

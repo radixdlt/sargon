@@ -5,7 +5,7 @@ pub fn manifest_for_faucet(
     include_lock_fee_instruction: bool,
     address_of_receiving_account: &AccountAddress,
 ) -> TransactionManifest {
-    TransactionManifest::manifest_for_faucet(
+    TransactionManifest::faucet(
         include_lock_fee_instruction,
         address_of_receiving_account,
     )
@@ -15,7 +15,7 @@ pub fn manifest_for_faucet(
 pub fn manifest_marking_account_as_dapp_definition_type(
     account_address: &AccountAddress,
 ) -> TransactionManifest {
-    TransactionManifest::manifest_marking_account_as_dapp_definition_type(
+    TransactionManifest::marking_account_as_dapp_definition_type(
         account_address,
     )
 }
@@ -25,7 +25,7 @@ pub fn manifest_set_owner_keys_hashes(
     address_of_account_or_persona: &AddressOfAccountOrPersona,
     owner_key_hashes: Vec<PublicKeyHash>,
 ) -> TransactionManifest {
-    TransactionManifest::manifest_set_owner_keys_hashes(
+    TransactionManifest::set_owner_keys_hashes(
         address_of_account_or_persona,
         owner_key_hashes,
     )
@@ -36,7 +36,7 @@ pub fn manifest_for_create_fungible_token_with_metadata(
     address_of_owner: &AccountAddress,
     metadata: FungibleResourceDefinitionMetadata,
 ) -> TransactionManifest {
-    TransactionManifest::manifest_for_create_fungible_token_with_metadata(
+    TransactionManifest::create_fungible_token_with_metadata(
         address_of_owner,
         metadata,
     )
@@ -46,15 +46,14 @@ pub fn manifest_for_create_fungible_token_with_metadata(
 pub fn manifest_for_create_fungible_token(
     address_of_owner: &AccountAddress,
 ) -> TransactionManifest {
-    TransactionManifest::manifest_for_create_fungible_token(address_of_owner)
+    TransactionManifest::create_fungible_token(address_of_owner)
 }
 
 #[uniffi::export]
 pub fn manifest_for_create_multiple_fungible_tokens(
-    _address_of_owner: AccountAddress,
-    _network_id: NetworkID,
-) -> Result<TransactionManifest> {
-    todo!()
+    address_of_owner: &AccountAddress,
+) -> TransactionManifest {
+    TransactionManifest::create_multiple_fungible_tokens(address_of_owner)
 }
 
 #[uniffi::export]
