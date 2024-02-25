@@ -34,10 +34,12 @@ pub fn manifest_set_owner_keys_hashes(
 #[uniffi::export]
 pub fn manifest_for_create_fungible_token_with_metadata(
     address_of_owner: &AccountAddress,
-    metadata: FungibleResourceDefinitionMetadata,
+    initial_supply: Decimal192,
+    metadata: TokenDefinitionMetadata,
 ) -> TransactionManifest {
     TransactionManifest::create_fungible_token_with_metadata(
         address_of_owner,
+        initial_supply,
         metadata,
     )
 }

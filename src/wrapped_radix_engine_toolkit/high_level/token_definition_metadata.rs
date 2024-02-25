@@ -11,17 +11,16 @@ use transaction::prelude::MetadataValue as ScryptoMetadataValue;
 #[derive(
     Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
 )]
-pub struct FungibleResourceDefinitionMetadata {
+pub struct TokenDefinitionMetadata {
     pub name: String,
     pub description: String,
     pub symbol: String,
     pub icon_url: String,
-    pub initial_supply: Decimal192,
 }
-impl From<FungibleResourceDefinitionMetadata>
+impl From<TokenDefinitionMetadata>
     for ScryptoModuleConfig<ScryptoMetadataInit>
 {
-    fn from(value: FungibleResourceDefinitionMetadata) -> Self {
+    fn from(value: TokenDefinitionMetadata) -> Self {
         let map = BTreeMap::<String, ScryptoMetadataValue>::from([
             ("name".to_owned(), ScryptoMetadataValue::String(value.name)),
             (
@@ -44,41 +43,48 @@ impl From<FungibleResourceDefinitionMetadata>
         }
     }
 }
-impl FungibleResourceDefinitionMetadata {
+impl TokenDefinitionMetadata {
     pub fn new(
         name: impl AsRef<str>,
         description: impl AsRef<str>,
         symbol: impl AsRef<str>,
         icon_url: impl AsRef<str>,
-        initial_supply: Decimal192,
     ) -> Self {
         Self {
             name: name.as_ref().to_owned(),
             description: description.as_ref().to_owned(),
             symbol: symbol.as_ref().to_owned(),
             icon_url: icon_url.as_ref().to_owned(),
-            initial_supply,
         }
     }
 }
-impl HasPlaceholder for FungibleResourceDefinitionMetadata {
+
+impl HasPlaceholder for TokenDefinitionMetadata {
     fn placeholder() -> Self {
+        Self::fungible()
+    }
+
+    fn placeholder_other() -> Self {
+        Self::non_fungible()
+    }
+}
+
+impl TokenDefinitionMetadata {
+    fn fungible() -> Self {
         Self::new(
             "Stella", 
             "The brightest component in the Radix ecosystem.", 
             "STAR", 
-            "https://uxwing.com/wp-content/themes/uxwing/download/arts-graphic-shapes/star-full-icon.png", 
-            "24000000000".parse().unwrap()
+            "https://uxwing.com/wp-content/themes/uxwing/download/arts-graphic-shapes/star-full-icon.png"
         )
     }
 
-    fn placeholder_other() -> Self {
+    fn non_fungible() -> Self {
         Self::new(
-            "Zelda", 
-            "A brave soul.", 
-            "HERO", 
-            "https://uxwing.com/wp-content/themes/uxwing/download/crime-security-military-law/shield-black-icon.png", 
-            "21000000".parse().unwrap()
+            "Heroes", 
+            "An NFT collection of heroes", 
+            "HEROES", 
+            "https://uxwing.com/wp-content/themes/uxwing/download/crime-security-military-law/shield-black-icon.png"
         )
     }
 }

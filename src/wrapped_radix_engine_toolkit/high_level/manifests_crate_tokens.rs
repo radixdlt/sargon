@@ -35,17 +35,21 @@ impl TransactionManifest {
     pub fn create_fungible_token(address_of_owner: &AccountAddress) -> Self {
         Self::create_fungible_token_with_metadata(
             address_of_owner,
-            FungibleResourceDefinitionMetadata::placeholder(),
+            21_000_000.into(),
+            TokenDefinitionMetadata::placeholder(),
         )
     }
 
     pub fn create_fungible_token_with_metadata(
         address_of_owner: &AccountAddress,
-        metadata: FungibleResourceDefinitionMetadata,
+        initial_supply: Decimal192,
+        metadata: TokenDefinitionMetadata,
     ) -> Self {
         let mut builder = ScryptoManifestBuilder::new();
         builder = Self::create_fungible_token_with_metadata_without_deposit(
-            builder, metadata,
+            builder,
+            initial_supply,
+            metadata,
         );
         let scrypto_manifest = builder
             .try_deposit_entire_worktop_or_abort(
@@ -104,7 +108,7 @@ impl TransactionManifest {
                 ScryptoNonFungibleResourceRoles::single_locked_rule(
                     ScryptoAccessRule::DenyAll,
                 ),
-                FungibleResourceDefinitionMetadata::placeholder().into(),
+                TokenDefinitionMetadata::placeholder().into(),
                 Some(
                     initial_supply
                         .into_iter()
@@ -128,9 +132,10 @@ impl TransactionManifest {
 
     pub fn create_fungible_token_with_metadata_without_deposit(
         builder: ScryptoManifestBuilder,
-        metadata: FungibleResourceDefinitionMetadata,
+        initial_supply: Decimal192,
+        metadata: TokenDefinitionMetadata,
     ) -> ScryptoManifestBuilder {
-        let initial_supply: ScryptoDecimal = metadata.initial_supply.into();
+        let initial_supply: ScryptoDecimal = initial_supply.into();
         builder.create_fungible_resource(
             ScryptoOwnerRole::None,
             true,
@@ -156,7 +161,7 @@ impl TransactionManifest {
         #[derive(Deserialize)]
         struct MultipleFungibleTokens {
             description: String,
-            tokens: Vec<FungibleResourceDefinitionMetadata>,
+            tokens: Vec<TokenDefinitionMetadata>,
         }
 
         let multiple_fungibles: MultipleFungibleTokens =
@@ -169,6 +174,7 @@ impl TransactionManifest {
         for metadata in fungibles.iter() {
             builder = Self::create_fungible_token_with_metadata_without_deposit(
                 builder,
+                21_000_000.into(),
                 metadata.clone(),
             );
         }
@@ -207,7 +213,7 @@ mod tests {
     Enum<0u8>()
     true
     10u8
-    Decimal("24000000000")
+    Decimal("21000000")
     Tuple(
         Enum<1u8>(
             Tuple(
@@ -311,130 +317,6 @@ mod tests {
 ;
 CALL_METHOD
     Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
-    "try_deposit_batch_or_abort"
-    Expression("ENTIRE_WORKTOP")
-    Enum<0u8>()
-;
-"#
-        );
-    }
-
-    #[test]
-    fn manifest_for_create_fungible_token_with_metadata_zelda() {
-        assert_eq!(
-            SUT::create_fungible_token_with_metadata(
-                &AccountAddress::placeholder_mainnet_other().into(),
-                FungibleResourceDefinitionMetadata::placeholder_other()
-            )
-            .to_string(),
-            r#"CREATE_FUNGIBLE_RESOURCE_WITH_INITIAL_SUPPLY
-    Enum<0u8>()
-    true
-    10u8
-    Decimal("21000000")
-    Tuple(
-        Enum<1u8>(
-            Tuple(
-                Enum<1u8>(
-                    Enum<1u8>()
-                ),
-                Enum<1u8>(
-                    Enum<1u8>()
-                )
-            )
-        ),
-        Enum<1u8>(
-            Tuple(
-                Enum<1u8>(
-                    Enum<1u8>()
-                ),
-                Enum<1u8>(
-                    Enum<1u8>()
-                )
-            )
-        ),
-        Enum<1u8>(
-            Tuple(
-                Enum<1u8>(
-                    Enum<1u8>()
-                ),
-                Enum<1u8>(
-                    Enum<1u8>()
-                )
-            )
-        ),
-        Enum<1u8>(
-            Tuple(
-                Enum<1u8>(
-                    Enum<1u8>()
-                ),
-                Enum<1u8>(
-                    Enum<1u8>()
-                )
-            )
-        ),
-        Enum<1u8>(
-            Tuple(
-                Enum<1u8>(
-                    Enum<1u8>()
-                ),
-                Enum<1u8>(
-                    Enum<1u8>()
-                )
-            )
-        ),
-        Enum<1u8>(
-            Tuple(
-                Enum<1u8>(
-                    Enum<1u8>()
-                ),
-                Enum<1u8>(
-                    Enum<1u8>()
-                )
-            )
-        )
-    )
-    Tuple(
-        Map<String, Tuple>(
-            "description" => Tuple(
-                Enum<1u8>(
-                    Enum<0u8>(
-                        "A brave soul."
-                    )
-                ),
-                false
-            ),
-            "icon_url" => Tuple(
-                Enum<1u8>(
-                    Enum<0u8>(
-                        "https://uxwing.com/wp-content/themes/uxwing/download/crime-security-military-law/shield-black-icon.png"
-                    )
-                ),
-                false
-            ),
-            "name" => Tuple(
-                Enum<1u8>(
-                    Enum<0u8>(
-                        "Zelda"
-                    )
-                ),
-                false
-            ),
-            "symbol" => Tuple(
-                Enum<1u8>(
-                    Enum<0u8>(
-                        "HERO"
-                    )
-                ),
-                false
-            )
-        ),
-        Map<String, Enum>()
-    )
-    Enum<0u8>()
-;
-CALL_METHOD
-    Address("account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master")
     "try_deposit_batch_or_abort"
     Expression("ENTIRE_WORKTOP")
     Enum<0u8>()
