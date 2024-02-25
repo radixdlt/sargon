@@ -32,11 +32,21 @@ pub fn manifest_set_owner_keys_hashes(
 }
 
 #[uniffi::export]
+pub fn manifest_for_create_fungible_token_with_metadata(
+    address_of_owner: &AccountAddress,
+    metadata: FungibleResourceDefinitionMetadata,
+) -> TransactionManifest {
+    TransactionManifest::manifest_for_create_fungible_token_with_metadata(
+        address_of_owner,
+        metadata,
+    )
+}
+
+#[uniffi::export]
 pub fn manifest_for_create_fungible_token(
-    _address_of_owner: AccountAddress,
-    _network_id: NetworkID,
-) -> Result<TransactionManifest> {
-    todo!()
+    address_of_owner: &AccountAddress,
+) -> TransactionManifest {
+    TransactionManifest::manifest_for_create_fungible_token(address_of_owner)
 }
 
 #[uniffi::export]

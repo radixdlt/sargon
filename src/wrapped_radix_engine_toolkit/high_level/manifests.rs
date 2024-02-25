@@ -1,7 +1,17 @@
 use crate::prelude::*;
-use radix_engine::prelude::ToMetadataEntry as ScryptoToMetadataEntry;
-use radix_engine::types::GlobalAddress as ScryptoGlobalAddress;
+use radix_engine::types::node_modules::ModuleConfig as ScryptoModuleConfig;
+use radix_engine::types::{
+    FungibleResourceRoles as ScryptoFungibleResourceRoles,
+    GlobalAddress as ScryptoGlobalAddress, MetadataInit as ScryptoMetadataInit,
+    RoleAssignmentInit as ScryptoRoleAssignmentInit,
+};
+use radix_engine::{
+    prelude::ToMetadataEntry as ScryptoToMetadataEntry,
+    types::OwnerRole as ScryptoOwnerRole,
+};
+use radix_engine_common::math::Decimal as ScryptoDecimal;
 use radix_engine_toolkit::models::node_id::TypedNodeId as RetTypedNodeId;
+use std::collections::BTreeMap;
 use transaction::{
     builder::ResolvableComponentAddress as ScryptoResolvableComponentAddress,
     model::DynamicGlobalAddress as ScryptoDynamicGlobalAddress,
@@ -60,6 +70,45 @@ impl TransactionManifest {
         )
     }
 
+    pub fn manifest_for_create_fungible_token(
+        address_of_owner: &AccountAddress,
+    ) -> Self {
+        Self::manifest_for_create_fungible_token_with_metadata(
+            address_of_owner,
+            FungibleResourceDefinitionMetadata::placeholder(),
+        )
+    }
+
+    pub fn manifest_for_create_fungible_token_with_metadata(
+        address_of_owner: &AccountAddress,
+        metadata: FungibleResourceDefinitionMetadata,
+    ) -> Self {
+        let initial_supply: ScryptoDecimal = metadata.initial_supply.into();
+        let scrypto_manifest = ScryptoManifestBuilder::new()
+            .create_fungible_resource(
+                ScryptoOwnerRole::None,
+                true,
+                10,
+                ScryptoFungibleResourceRoles::single_locked_rule(
+                    radix_engine::types::AccessRule::DenyAll,
+                ),
+                metadata.into(),
+                Some(initial_supply),
+            )
+            .try_deposit_entire_worktop_or_abort(
+                address_of_owner.scrypto(),
+                None,
+            )
+            .build();
+
+        TransactionManifest::from_scrypto(
+            scrypto_manifest,
+            address_of_owner.network_id(),
+        )
+    }
+}
+
+impl TransactionManifest {
     fn set_metadata<A>(
         address: &A,
         key: MetadataKey,
@@ -117,7 +166,7 @@ impl ScryptoToMetadataEntry for MetadataValueStr {
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
-
+    use pretty_assertions::{assert_eq, assert_ne};
     #[allow(clippy::upper_case_acronyms)]
     type SUT = TransactionManifest;
 
@@ -190,6 +239,253 @@ CALL_METHOD
             )
         )
     )
+;
+"#
+        );
+    }
+
+    #[test]
+    fn manifest_for_create_fungible_token_stella() {
+        assert_eq!(
+            SUT::manifest_for_create_fungible_token(
+                &AccountAddress::placeholder_mainnet().into(),
+            )
+            .to_string(),
+            r#"CREATE_FUNGIBLE_RESOURCE_WITH_INITIAL_SUPPLY
+    Enum<0u8>()
+    true
+    10u8
+    Decimal("24000000000")
+    Tuple(
+        Enum<1u8>(
+            Tuple(
+                Enum<1u8>(
+                    Enum<1u8>()
+                ),
+                Enum<1u8>(
+                    Enum<1u8>()
+                )
+            )
+        ),
+        Enum<1u8>(
+            Tuple(
+                Enum<1u8>(
+                    Enum<1u8>()
+                ),
+                Enum<1u8>(
+                    Enum<1u8>()
+                )
+            )
+        ),
+        Enum<1u8>(
+            Tuple(
+                Enum<1u8>(
+                    Enum<1u8>()
+                ),
+                Enum<1u8>(
+                    Enum<1u8>()
+                )
+            )
+        ),
+        Enum<1u8>(
+            Tuple(
+                Enum<1u8>(
+                    Enum<1u8>()
+                ),
+                Enum<1u8>(
+                    Enum<1u8>()
+                )
+            )
+        ),
+        Enum<1u8>(
+            Tuple(
+                Enum<1u8>(
+                    Enum<1u8>()
+                ),
+                Enum<1u8>(
+                    Enum<1u8>()
+                )
+            )
+        ),
+        Enum<1u8>(
+            Tuple(
+                Enum<1u8>(
+                    Enum<1u8>()
+                ),
+                Enum<1u8>(
+                    Enum<1u8>()
+                )
+            )
+        )
+    )
+    Tuple(
+        Map<String, Tuple>(
+            "description" => Tuple(
+                Enum<1u8>(
+                    Enum<0u8>(
+                        "The brightest component in the Radix ecosystem."
+                    )
+                ),
+                false
+            ),
+            "icon_url" => Tuple(
+                Enum<1u8>(
+                    Enum<0u8>(
+                        "https://uxwing.com/wp-content/themes/uxwing/download/arts-graphic-shapes/star-full-icon.png"
+                    )
+                ),
+                false
+            ),
+            "name" => Tuple(
+                Enum<1u8>(
+                    Enum<0u8>(
+                        "Stella"
+                    )
+                ),
+                false
+            ),
+            "symbol" => Tuple(
+                Enum<1u8>(
+                    Enum<0u8>(
+                        "STAR"
+                    )
+                ),
+                false
+            )
+        ),
+        Map<String, Enum>()
+    )
+    Enum<0u8>()
+;
+CALL_METHOD
+    Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+    "try_deposit_batch_or_abort"
+    Expression("ENTIRE_WORKTOP")
+    Enum<0u8>()
+;
+"#
+        );
+    }
+
+    #[test]
+    fn manifest_for_create_fungible_token_with_metadata_zelda() {
+        assert_eq!(
+            SUT::manifest_for_create_fungible_token_with_metadata(
+                &AccountAddress::placeholder_mainnet_other().into(),
+                FungibleResourceDefinitionMetadata::placeholder_other()
+            )
+            .to_string(),
+            r#"CREATE_FUNGIBLE_RESOURCE_WITH_INITIAL_SUPPLY
+    Enum<0u8>()
+    true
+    10u8
+    Decimal("21000000")
+    Tuple(
+        Enum<1u8>(
+            Tuple(
+                Enum<1u8>(
+                    Enum<1u8>()
+                ),
+                Enum<1u8>(
+                    Enum<1u8>()
+                )
+            )
+        ),
+        Enum<1u8>(
+            Tuple(
+                Enum<1u8>(
+                    Enum<1u8>()
+                ),
+                Enum<1u8>(
+                    Enum<1u8>()
+                )
+            )
+        ),
+        Enum<1u8>(
+            Tuple(
+                Enum<1u8>(
+                    Enum<1u8>()
+                ),
+                Enum<1u8>(
+                    Enum<1u8>()
+                )
+            )
+        ),
+        Enum<1u8>(
+            Tuple(
+                Enum<1u8>(
+                    Enum<1u8>()
+                ),
+                Enum<1u8>(
+                    Enum<1u8>()
+                )
+            )
+        ),
+        Enum<1u8>(
+            Tuple(
+                Enum<1u8>(
+                    Enum<1u8>()
+                ),
+                Enum<1u8>(
+                    Enum<1u8>()
+                )
+            )
+        ),
+        Enum<1u8>(
+            Tuple(
+                Enum<1u8>(
+                    Enum<1u8>()
+                ),
+                Enum<1u8>(
+                    Enum<1u8>()
+                )
+            )
+        )
+    )
+    Tuple(
+        Map<String, Tuple>(
+            "description" => Tuple(
+                Enum<1u8>(
+                    Enum<0u8>(
+                        "A brave soul."
+                    )
+                ),
+                false
+            ),
+            "icon_url" => Tuple(
+                Enum<1u8>(
+                    Enum<0u8>(
+                        "https://uxwing.com/wp-content/themes/uxwing/download/crime-security-military-law/shield-black-icon.png"
+                    )
+                ),
+                false
+            ),
+            "name" => Tuple(
+                Enum<1u8>(
+                    Enum<0u8>(
+                        "Zelda"
+                    )
+                ),
+                false
+            ),
+            "symbol" => Tuple(
+                Enum<1u8>(
+                    Enum<0u8>(
+                        "HERO"
+                    )
+                ),
+                false
+            )
+        ),
+        Map<String, Enum>()
+    )
+    Enum<0u8>()
+;
+CALL_METHOD
+    Address("account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master")
+    "try_deposit_batch_or_abort"
+    Expression("ENTIRE_WORKTOP")
+    Enum<0u8>()
 ;
 "#
         );
