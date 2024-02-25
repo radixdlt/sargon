@@ -23,13 +23,11 @@ pub trait AddressViaRet: Sized {
         node_id: impl Into<ScryptoNodeId>,
         network_id: NetworkID,
     ) -> Result<Self>;
+}
 
+pub trait IntoScryptoAddress {
     fn scrypto(&self) -> ScryptoGlobalAddress;
-    fn node_id(&self) -> ScryptoNodeId;
-    fn address(&self) -> String;
     fn network_id(&self) -> NetworkID;
-    fn entity_type(&self) -> ScryptoEntityType;
-    fn try_from_bech32(bech32: impl AsRef<str>) -> Result<Self>;
 }
 
 macro_rules! decl_ret_wrapped_address {
@@ -105,13 +103,46 @@ macro_rules! decl_ret_wrapped_address {
                 }
             }
 
-            impl AddressViaRet for [< $address_type:camel Address >] {
+            impl [< $address_type:camel Address >] {
 
+                pub(crate) fn scrypto(&self) -> ScryptoGlobalAddress {
+                    ScryptoGlobalAddress::try_from(self.node_id())
+                    .expect("Should always be able to convert a Sargon Address into radix engine 'GlobalAddress'.")
+                }
+                pub(crate) fn node_id(&self) -> ScryptoNodeId {
+                    self.secret_magic.node_id()
+                }
+
+                pub fn address(&self) -> String {
+                    self.to_string()
+                }
+
+                pub fn entity_type(&self) -> ScryptoEntityType {
+                    self.secret_magic.entity_type()
+                }
+
+                pub fn try_from_bech32(bech32: impl AsRef<str>) -> Result<Self> {
+                    bech32.as_ref().parse::<[< Ret $address_type:camel Address >]>()
+                    .map_err(|e| {
+                        error!("Failed Bech32 decode String, RET error: {:?}", e);
+                        CommonError::FailedToDecodeAddressFromBech32 { bad_value: bech32.as_ref().to_owned() }
+                    })
+                    .map(Into::<Self>::into)
+                }
+            }
+
+            impl IntoScryptoAddress for [< $address_type:camel Address >] {
                 fn scrypto(&self) -> ScryptoGlobalAddress {
                     ScryptoGlobalAddress::try_from(self.node_id())
                     .expect("Should always be able to convert a Sargon Address into radix engine 'GlobalAddress'.")
                 }
 
+                fn network_id(&self) -> NetworkID {
+                    self.secret_magic.network_id().try_into().expect("Should have known all network ids")
+                }
+            }
+
+            impl AddressViaRet for [< $address_type:camel Address >] {
                 fn new(
                     node_id: impl Into<ScryptoNodeId>,
                     network_id: NetworkID,
@@ -123,31 +154,6 @@ macro_rules! decl_ret_wrapped_address {
                         CommonError::FailedToCreateAddressViaRetAddressFromNodeIdAndNetworkID { node_id_as_hex: node_id.to_hex(), network_id }
                     })
                     .map(|i| Into::<[< $address_type:camel Address >]>::into(i))
-                }
-
-                fn node_id(&self) -> ScryptoNodeId {
-                    self.secret_magic.node_id()
-                }
-
-                fn address(&self) -> String {
-                    self.to_string()
-                }
-
-                fn network_id(&self) -> NetworkID {
-                    self.secret_magic.network_id().try_into().expect("Should have known all network ids")
-                }
-
-                fn entity_type(&self) -> ScryptoEntityType {
-                    self.secret_magic.entity_type()
-                }
-
-                fn try_from_bech32(bech32: impl AsRef<str>) -> Result<Self> {
-                    bech32.as_ref().parse::<[< Ret $address_type:camel Address >]>()
-                    .map_err(|e| {
-                        error!("Failed Bech32 decode String, RET error: {:?}", e);
-                        CommonError::FailedToDecodeAddressFromBech32 { bad_value: bech32.as_ref().to_owned() }
-                    })
-                    .map(Into::<Self>::into)
                 }
             }
         }

@@ -21,19 +21,14 @@ pub fn manifest_marking_account_as_dapp_definition_type(
 }
 
 #[uniffi::export]
-pub fn manifest_third_party_deposit_update(
-    _to: ThirdPartyDeposits,
-) -> Result<TransactionManifest> {
-    todo!()
-}
-
-#[uniffi::export]
-pub fn manifest_set_owner_keys(
-    _address_of_account_or_persona: AddressOfAccountOrPersona,
-    _owner_key_hashes: Vec<PublicKeyHash>,
-    _network_id: NetworkID,
+pub fn manifest_set_owner_keys_hashes(
+    address_of_account_or_persona: &AddressOfAccountOrPersona,
+    owner_key_hashes: Vec<PublicKeyHash>,
 ) -> TransactionManifest {
-    todo!()
+    TransactionManifest::manifest_set_owner_keys_hashes(
+        address_of_account_or_persona,
+        owner_key_hashes,
+    )
 }
 
 #[uniffi::export]
@@ -72,6 +67,13 @@ pub fn manifest_for_create_non_fungible_token(
 pub fn manifest_stakes_claim(
     _account_address: AccountAddress,
     _stake_claims: Vec<StakeClaim>,
+) -> Result<TransactionManifest> {
+    todo!()
+}
+
+#[uniffi::export]
+pub fn manifest_third_party_deposit_update(
+    _to: ThirdPartyDeposits,
 ) -> Result<TransactionManifest> {
     todo!()
 }

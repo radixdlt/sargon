@@ -47,13 +47,26 @@ impl TransactionManifest {
         )
     }
 
-    pub fn set_metadata<A>(
+    pub fn manifest_set_owner_keys_hashes(
+        address_of_account_or_persona: &AddressOfAccountOrPersona,
+        owner_key_hashes: Vec<PublicKeyHash>,
+    ) -> Self {
+        Self::set_metadata(
+            address_of_account_or_persona,
+            MetadataKey::OwnerKeys,
+            ScryptoMetadataValue::PublicKeyHashArray(
+                owner_key_hashes.into_iter().map(|h| h.into()).collect_vec(),
+            ),
+        )
+    }
+
+    fn set_metadata<A>(
         address: &A,
         key: MetadataKey,
-        value: MetadataValueStr,
+        value: impl ScryptoToMetadataEntry,
     ) -> Self
     where
-        A: AddressViaRet,
+        A: IntoScryptoAddress,
     {
         let scrypto_manifest = ScryptoManifestBuilder::new()
             .set_metadata(address.scrypto(), key, value)
@@ -70,12 +83,24 @@ impl TransactionManifest {
 pub enum MetadataKey {
     #[display("account_type")]
     AccountType,
+
+    #[display("owner_keys")]
+    OwnerKeys,
 }
 
 impl From<MetadataKey> for String {
     fn from(value: MetadataKey) -> Self {
         value.to_string()
     }
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum MetadataValue {
+    Str(MetadataValueStr),
+}
+impl MetadataValue {
+    pub const DAPP_DEFINITION: Self =
+        Self::Str(MetadataValueStr::DappDefinition);
 }
 
 #[derive(Debug, PartialEq, Eq, derive_more::Display)]
@@ -135,6 +160,35 @@ CALL_METHOD
     "account_type"
     Enum<0u8>(
         "dapp definition"
+    )
+;
+"#
+        );
+    }
+
+    #[test]
+    fn manifest_for_owner_keys() {
+        assert_eq!(
+            SUT::manifest_set_owner_keys_hashes(
+                &AccountAddress::placeholder_mainnet().into(),
+                vec![
+                    PublicKeyHash::hash(Ed25519PublicKey::placeholder_alice()),
+                    PublicKeyHash::hash(Secp256k1PublicKey::placeholder_bob()),
+                ]
+            )
+            .to_string(),
+            r#"SET_METADATA
+    Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+    "owner_keys"
+    Enum<143u8>(
+        Array<Enum>(
+            Enum<1u8>(
+                Bytes("f4e18c034e069baee91ada4764fdfcf2438b8f976861df00557d4cc9e7")
+            ),
+            Enum<0u8>(
+                Bytes("169b4cc19da76c93d4ec3d13ad12cdd5762a8318a643d50f09d0121d94")
+            )
+        )
     )
 ;
 "#
