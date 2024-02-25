@@ -68,10 +68,7 @@ impl NonFungibleGlobalId {
     fn engine(&self) -> RETNonFungibleGlobalId {
         let scrypto_global_id = ScryptoNonFungibleGlobalId::new(
             self.resource_address.clone().into(),
-            self.non_fungible_local_id
-                .clone()
-                .try_into()
-                .expect("Should always be able to convert into Engine"),
+            self.non_fungible_local_id.clone().into(),
         );
         RETNonFungibleGlobalId::new(
             scrypto_global_id,

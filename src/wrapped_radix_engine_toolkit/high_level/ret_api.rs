@@ -57,17 +57,15 @@ pub fn manifest_for_create_multiple_fungible_tokens(
 }
 
 #[uniffi::export]
-pub fn manifest_for_create_multiple_non_fungible_tokens(
-    _address_of_owner: AccountAddress,
-    _network_id: NetworkID,
-) -> Result<TransactionManifest> {
-    todo!()
+pub fn manifest_for_create_non_fungible_token(
+    address_of_owner: &AccountAddress,
+) -> TransactionManifest {
+    TransactionManifest::create_non_fungible_token(address_of_owner)
 }
 
 #[uniffi::export]
-pub fn manifest_for_create_non_fungible_token(
-    _address_of_owner: AccountAddress,
-    _network_id: NetworkID,
+pub fn manifest_for_create_multiple_non_fungible_tokens(
+    _address_of_owner: &AccountAddress,
 ) -> Result<TransactionManifest> {
     todo!()
 }

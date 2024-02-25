@@ -93,6 +93,35 @@ macro_rules! decl_bag_of_n_bytes {
                 }
             }
 
+            impl AsRef<[u8]> for [< Hex $byte_count Bytes  >] {
+                fn as_ref(&self) -> &[u8] {
+                    self.bag_of_bytes.as_ref()
+                }
+            }
+
+            impl TryFrom<&[u8]> for [< Hex $byte_count Bytes  >] {
+                type Error = CommonError;
+
+                fn try_from(value: &[u8]) -> Result<Self> {
+                   Self::try_from(Vec::from(value))
+                }
+            }
+
+            impl From<&[u8; $byte_count]> for [< Hex $byte_count Bytes  >] {
+
+                fn from(value: &[u8; $byte_count]) -> Self {
+                    Self { bag_of_bytes: value.into() }
+                }
+            }
+
+            impl From<&[u8; $byte_count]> for BagOfBytes {
+                fn from(value: &[u8; $byte_count]) -> Self {
+                    Self {
+                        bytes: value.to_vec(),
+                    }
+                }
+            }
+
             impl FromStr for [< Hex $byte_count Bytes  >] {
                 type Err = CommonError;
 

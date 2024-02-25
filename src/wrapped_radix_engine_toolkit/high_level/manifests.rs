@@ -1,18 +1,27 @@
 use crate::prelude::*;
-use radix_engine::types::node_modules::ModuleConfig as ScryptoModuleConfig;
+use radix_engine::prelude::ToMetadataEntry as ScryptoToMetadataEntry;
 use radix_engine::types::{
+    node_modules::ModuleConfig as ScryptoModuleConfig,
+    AccessRule as ScryptoAccessRule,
     FungibleResourceRoles as ScryptoFungibleResourceRoles,
-    GlobalAddress as ScryptoGlobalAddress, MetadataInit as ScryptoMetadataInit,
+    GlobalAddress as ScryptoGlobalAddress,
+    ManifestEncode as ScryptoManifestEncode,
+    MetadataInit as ScryptoMetadataInit,
+    NonFungibleData as ScryptoNonFungibleData,
+    NonFungibleIdType as ScryptoNonFungibleIdType,
+    NonFungibleResourceRoles as ScryptoNonFungibleResourceRoles,
+    OwnerRole as ScryptoOwnerRole,
     RoleAssignmentInit as ScryptoRoleAssignmentInit,
 };
-use radix_engine::{
-    prelude::ToMetadataEntry as ScryptoToMetadataEntry,
-    types::OwnerRole as ScryptoOwnerRole,
-};
+
 use radix_engine_common::math::Decimal as ScryptoDecimal;
+use radix_engine_common::prelude::NonFungibleLocalId as ScryptoNonFungibleLocalId;
+use radix_engine_derive::{ManifestSbor as ScryptoManifestSbor, ScryptoSbor};
 use radix_engine_toolkit::models::node_id::TypedNodeId as RetTypedNodeId;
+
 use std::collections::BTreeMap;
 use std::fs;
+
 use transaction::{
     builder::ResolvableComponentAddress as ScryptoResolvableComponentAddress,
     model::DynamicGlobalAddress as ScryptoDynamicGlobalAddress,
@@ -99,6 +108,72 @@ impl TransactionManifest {
         )
     }
 
+    pub fn create_non_fungible_token(
+        address_of_owner: &AccountAddress,
+    ) -> Self {
+        let count = 10;
+
+        #[derive(Clone, PartialEq, Eq, ScryptoSbor, ScryptoManifestSbor)]
+        pub struct NfData {
+            pub name: String,
+        }
+        impl NfData {
+            fn new(i: u64) -> Self {
+                Self {
+                    name: format!("nf-number-{}", i),
+                }
+            }
+        }
+        impl ScryptoNonFungibleData for NfData {
+            const MUTABLE_FIELDS: &'static [&'static str] = &["name"];
+        }
+
+        Self::create_non_fungible_tokens(
+            address_of_owner,
+            (0..count).map(|i| {
+                (NonFungibleLocalId::Integer { value: i }, NfData::new(i))
+            }),
+        )
+    }
+
+    fn create_non_fungible_tokens<T, V>(
+        address_of_owner: &AccountAddress,
+        initial_supply: T,
+    ) -> Self
+    where
+        T: IntoIterator<Item = (NonFungibleLocalId, V)>,
+        V: ScryptoManifestEncode + ScryptoNonFungibleData,
+    {
+        let scrypto_manifest = ScryptoManifestBuilder::new()
+            .create_non_fungible_resource(
+                ScryptoOwnerRole::None,
+                ScryptoNonFungibleIdType::Integer,
+                true,
+                ScryptoNonFungibleResourceRoles::single_locked_rule(
+                    ScryptoAccessRule::DenyAll,
+                ),
+                FungibleResourceDefinitionMetadata::placeholder().into(),
+                Some(
+                    initial_supply
+                        .into_iter()
+                        .map(|t| {
+                            (Into::<ScryptoNonFungibleLocalId>::into(t.0), t.1)
+                        })
+                        .collect::<Vec<(ScryptoNonFungibleLocalId, V)>>(),
+                ),
+            )
+            .try_deposit_entire_worktop_or_abort(
+                address_of_owner.scrypto(),
+                None,
+            )
+            .build();
+
+        TransactionManifest::from_scrypto(
+            scrypto_manifest,
+            address_of_owner.network_id(),
+        )
+    }
+
     pub fn create_fungible_token_with_metadata_without_deposit(
         builder: ScryptoManifestBuilder,
         metadata: FungibleResourceDefinitionMetadata,
@@ -109,7 +184,7 @@ impl TransactionManifest {
             true,
             10,
             ScryptoFungibleResourceRoles::single_locked_rule(
-                radix_engine::types::AccessRule::DenyAll,
+                ScryptoAccessRule::DenyAll,
             ),
             metadata.into(),
             Some(initial_supply),
@@ -557,5 +632,14 @@ CALL_METHOD
         TransactionManifest::create_multiple_fungible_tokens(
             &AccountAddress::placeholder_mainnet(),
         );
+    }
+
+    #[test]
+    fn create_non_fungible_token() {
+        let manifest = TransactionManifest::create_non_fungible_token(
+            &AccountAddress::placeholder_stokenet(),
+        );
+        assert_eq!(manifest.instructions().len(), 2);
+        assert_eq!(manifest.to_string().len(), 5048);
     }
 }

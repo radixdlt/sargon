@@ -17,6 +17,9 @@ typedef BagOfBytes InstructionsInner;
 typedef string ScryptoDecimal192;
 
 [Custom]
+typedef string ScryptoStringNonFungibleLocalId;
+
+[Custom]
 typedef string RetAccessControllerAddress;
 
 [Custom]

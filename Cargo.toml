@@ -45,6 +45,8 @@ radix-engine-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", re
     "serde",
 ] }
 radix-engine = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "587d5988cd4ca3c5193ddf37027ff4e4ecd637dc" }
+sbor = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "587d5988cd4ca3c5193ddf37027ff4e4ecd637dc" }
+radix-engine-derive = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "587d5988cd4ca3c5193ddf37027ff4e4ecd637dc" }
 radix-engine-interface = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "587d5988cd4ca3c5193ddf37027ff4e4ecd637dc", features = [
     "std",
 ] }

@@ -24,7 +24,13 @@ use radix_engine_common::crypto::{Hash, IsHash};
 #[display("{}", self.to_hex())]
 #[debug("{}", self.to_hex())]
 pub struct BagOfBytes {
-    bytes: Vec<u8>,
+    pub(crate) bytes: Vec<u8>,
+}
+
+impl AsRef<[u8]> for BagOfBytes {
+    fn as_ref(&self) -> &[u8] {
+        self.bytes.as_ref()
+    }
 }
 
 impl Deref for BagOfBytes {
@@ -141,13 +147,7 @@ impl From<Vec<u8>> for BagOfBytes {
         Self { bytes: value }
     }
 }
-impl From<&[u8; 32]> for BagOfBytes {
-    fn from(value: &[u8; 32]) -> Self {
-        Self {
-            bytes: value.to_vec(),
-        }
-    }
-}
+
 impl From<&[u8]> for BagOfBytes {
     /// Instantiates a new `BagOfBytes` from the bytes.
     fn from(value: &[u8]) -> Self {
