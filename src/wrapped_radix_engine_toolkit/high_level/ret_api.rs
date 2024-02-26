@@ -147,3 +147,69 @@ pub fn debug_print_compiled_notarized_intent(
 ) -> String {
     todo!()
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::prelude::*;
+
+    #[test]
+    fn test_manifest_for_faucet() {
+        manifest_eq(
+            manifest_for_faucet(false, &AccountAddress::placeholder_mainnet()),
+            r#"
+            CALL_METHOD
+                Address("component_rdx1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxfaucet")
+                "free"
+            ;
+            CALL_METHOD
+                Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+                "try_deposit_batch_or_abort"
+                Expression("ENTIRE_WORKTOP")
+                Enum<0u8>()
+            ;
+            "#,
+        );
+
+        manifest_eq(
+            manifest_for_faucet(
+                true,
+                &AccountAddress::placeholder_stokenet_other(),
+            ),
+            r#"
+            CALL_METHOD
+                Address("component_tdx_2_1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxyulkzl")
+                "lock_fee"
+                Decimal("5000")
+            ;
+            CALL_METHOD
+                Address("component_tdx_2_1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxyulkzl")
+                "free"
+            ;
+            CALL_METHOD
+                Address("account_tdx_2_129663ef7fj8azge3y6sl73lf9vyqt53ewzlf7ul2l76mg5wyqlqlpr")
+                "try_deposit_batch_or_abort"
+                Expression("ENTIRE_WORKTOP")
+                Enum<0u8>()
+            ;
+            "#,
+        );
+    }
+
+    #[test]
+    fn test_manifest_marking_account_as_dapp_definition_type() {
+        manifest_eq(
+            manifest_marking_account_as_dapp_definition_type(
+                &AccountAddress::placeholder_stokenet_other(),
+            ),
+            r#"
+            SET_METADATA
+                Address("account_tdx_2_129663ef7fj8azge3y6sl73lf9vyqt53ewzlf7ul2l76mg5wyqlqlpr")
+                "account_type"
+                Enum<0u8>(
+                    "dapp definition"
+                )
+            ;
+            "#,
+        );
+    }
+}

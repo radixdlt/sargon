@@ -121,72 +121,72 @@ mod tests {
 
     #[test]
     fn manifest_for_faucet() {
-        assert_eq!(
-            SUT::faucet(true, &AccountAddress::placeholder_mainnet())
-                .to_string(),
-            r#"CALL_METHOD
-    Address("component_rdx1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxfaucet")
-    "lock_fee"
-    Decimal("5000")
-;
-CALL_METHOD
-    Address("component_rdx1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxfaucet")
-    "free"
-;
-CALL_METHOD
-    Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
-    "try_deposit_batch_or_abort"
-    Expression("ENTIRE_WORKTOP")
-    Enum<0u8>()
-;
-"#
+        manifest_eq(
+            SUT::faucet(true, &AccountAddress::placeholder_mainnet()),
+            r#"
+            CALL_METHOD
+                Address("component_rdx1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxfaucet")
+                "lock_fee"
+                Decimal("5000")
+            ;
+            CALL_METHOD
+                Address("component_rdx1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxfaucet")
+                "free"
+            ;
+            CALL_METHOD
+                Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+                "try_deposit_batch_or_abort"
+                Expression("ENTIRE_WORKTOP")
+                Enum<0u8>()
+            ;
+            "#,
         );
     }
 
     #[test]
     fn manifest_for_set_account_to_dapp_definition_address() {
-        assert_eq!(
+        manifest_eq(
             SUT::marking_account_as_dapp_definition_type(
-                &AccountAddress::placeholder_mainnet()
-            )
-            .to_string(),
-            r#"SET_METADATA
-    Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
-    "account_type"
-    Enum<0u8>(
-        "dapp definition"
-    )
-;
-"#
+                &AccountAddress::placeholder_mainnet(),
+            ),
+            r#"
+            SET_METADATA
+                Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+                "account_type"
+                Enum<0u8>(
+                    "dapp definition"
+                )
+            ;
+            "#,
         );
     }
 
     #[test]
     fn manifest_for_owner_keys() {
-        assert_eq!(
+        manifest_eq(
             SUT::set_owner_keys_hashes(
                 &AccountAddress::placeholder_mainnet().into(),
                 vec![
                     PublicKeyHash::hash(Ed25519PublicKey::placeholder_alice()),
                     PublicKeyHash::hash(Secp256k1PublicKey::placeholder_bob()),
-                ]
-            )
-            .to_string(),
-            r#"SET_METADATA
-    Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
-    "owner_keys"
-    Enum<143u8>(
-        Array<Enum>(
-            Enum<1u8>(
-                Bytes("f4e18c034e069baee91ada4764fdfcf2438b8f976861df00557d4cc9e7")
+                ],
             ),
-            Enum<0u8>(
-                Bytes("169b4cc19da76c93d4ec3d13ad12cdd5762a8318a643d50f09d0121d94")
-            )
-        )
-    )
-;
-"#
+            r#"
+            SET_METADATA
+                Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+                "owner_keys"
+                Enum<143u8>(
+                    Array<Enum>(
+                        Enum<1u8>(
+                            Bytes("f4e18c034e069baee91ada4764fdfcf2438b8f976861df00557d4cc9e7")
+                        ),
+                        Enum<0u8>(
+                            Bytes("169b4cc19da76c93d4ec3d13ad12cdd5762a8318a643d50f09d0121d94")
+                        )
+                    )
+                )
+            ;
+            "#,
         );
     }
 }
