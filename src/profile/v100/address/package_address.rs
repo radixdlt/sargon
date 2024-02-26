@@ -54,6 +54,24 @@ mod tests {
     }
 
     #[test]
+    fn manual_perform_uniffi_conversion() {
+        type RetAddr = <SUT as FromRetAddress>::RetAddress;
+        let sut = SUT::placeholder();
+        let bech32 = sut.to_string();
+        let ret = RetAddr::try_from_bech32(&bech32).unwrap();
+
+        let ffi_side =
+            <RetAddr as crate::UniffiCustomTypeConverter>::from_custom(ret);
+        assert_eq!(ffi_side, bech32);
+        let from_ffi_side =
+            <RetAddr as crate::UniffiCustomTypeConverter>::into_custom(
+                ffi_side,
+            )
+            .unwrap();
+        assert_eq!(ret, from_ffi_side);
+    }
+
+    #[test]
     fn display() {
         let s = "package_rdx1pkgxxxxxxxxxfaucetxxxxxxxxx000034355863xxxxxxxxxfaucet";
         let a = SUT::try_from_bech32(s).unwrap();

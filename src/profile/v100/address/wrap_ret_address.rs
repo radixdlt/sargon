@@ -25,6 +25,13 @@ pub trait AddressViaRet: Sized {
     ) -> Result<Self>;
 }
 
+/// Helps with unit testing, so that we do not need to explicitly specify each
+/// (Sargon) Address types corresponding RET address type, but can use, e.g.
+/// `AccountAddress::RetAddress` instead of `radix_engine_toolkit::models::canonical_address_types::CanonicalAccountAddress`
+pub(crate) trait FromRetAddress {
+    type RetAddress;
+}
+
 pub trait IntoScryptoAddress {
     fn scrypto(&self) -> ScryptoGlobalAddress;
     fn network_id(&self) -> NetworkID;
@@ -75,7 +82,6 @@ macro_rules! decl_ret_wrapped_address {
             }
 
              /// UniFFI conversion for RET types which are DisplayFromStr using String as builtin.
-            #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
             impl crate::UniffiCustomTypeConverter for [< Ret $address_type:camel Address >] {
                 type Builtin = String;
 
@@ -95,6 +101,10 @@ macro_rules! decl_ret_wrapped_address {
                 fn from(value: [< Ret $address_type:camel Address >]) -> Self {
                     Self { secret_magic: value }
                 }
+            }
+
+            impl FromRetAddress for [< $address_type:camel Address >] {
+                type RetAddress = [< Ret $address_type:camel Address >];
             }
 
             impl From<[< $address_type:camel Address >]> for ScryptoGlobalAddress {

@@ -342,6 +342,29 @@ mod tests {
     }
 
     #[test]
+    fn into_scrypto_global_address() {
+        assert_eq!(Into::<radix_engine::types::GlobalAddress>::into(SUT::placeholder()).into_node_id().as_bytes()[0], radix_engine_common::types::EntityType::GlobalVirtualSecp256k1Account as u8);
+    }
+
+    #[test]
+    fn manual_perform_uniffi_conversion() {
+        type RetAddr = <SUT as FromRetAddress>::RetAddress;
+        let sut = SUT::placeholder();
+        let bech32 = sut.to_string();
+        let ret = RetAddr::try_from_bech32(&bech32).unwrap();
+
+        let ffi_side =
+            <RetAddr as crate::UniffiCustomTypeConverter>::from_custom(ret);
+        assert_eq!(ffi_side, bech32);
+        let from_ffi_side =
+            <RetAddr as crate::UniffiCustomTypeConverter>::into_custom(
+                ffi_side,
+            )
+            .unwrap();
+        assert_eq!(ret, from_ffi_side);
+    }
+
+    #[test]
     fn json_roundtrip() {
         let a: SUT =
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
