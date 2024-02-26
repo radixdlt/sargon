@@ -409,6 +409,15 @@ mod tests_hex32_bytes {
     }
 
     #[test]
+    fn as_ref() {
+        let b: &[u8] = &hex_decode(
+            "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead",
+        )
+        .unwrap();
+        assert_eq!(SUT::try_from(b).unwrap().as_ref(), b);
+    }
+
+    #[test]
     fn json_roundtrip() {
         let model = SUT::placeholder();
         assert_json_value_eq_after_roundtrip(

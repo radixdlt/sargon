@@ -343,6 +343,12 @@ mod tests {
     }
 
     #[test]
+    fn as_ref() {
+        let b: &[u8] = &[0xde, 0xad, 0xbe, 0xef];
+        assert_eq!(BagOfBytes::from(b).as_ref(), b);
+    }
+
+    #[test]
     fn default_is_empty() {
         assert_eq!(BagOfBytes::default(), BagOfBytes::new());
         assert!(BagOfBytes::default().is_empty());

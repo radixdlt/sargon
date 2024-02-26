@@ -6,7 +6,6 @@ mod identity_address;
 mod non_fungible_global_id;
 mod non_fungible_local_id;
 mod non_fungible_local_id_string;
-mod olympia_account_address;
 mod package_address;
 mod pool_address;
 mod resource_address;
