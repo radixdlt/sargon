@@ -26,12 +26,12 @@ use radix_engine_common::crypto::{
 #[display("{}", self.to_hex())]
 #[debug("{}", self.to_hex())]
 pub struct Secp256k1PublicKey {
-    inner: ScryptoSecp256k1PublicKey,
+    secret_magic: ScryptoSecp256k1PublicKey,
 }
 
 impl From<Secp256k1PublicKey> for ScryptoSecp256k1PublicKey {
     fn from(value: Secp256k1PublicKey) -> Self {
-        value.inner
+        value.secret_magic
     }
 }
 
@@ -98,19 +98,19 @@ impl IsPublicKey<Secp256k1Signature> for Secp256k1PublicKey {
     ) -> bool {
         verify_secp256k1(
             for_hash.as_hash(),
-            &self.to_engine(),
+            &self.scrypto(),
             &signature.clone().into(),
         )
     }
 }
 
 impl Secp256k1PublicKey {
-    pub(crate) fn to_engine(&self) -> ScryptoSecp256k1PublicKey {
-        self.inner
+    pub(crate) fn scrypto(&self) -> ScryptoSecp256k1PublicKey {
+        self.secret_magic
     }
 
     pub fn to_bytes(&self) -> Vec<u8> {
-        self.to_engine().to_vec()
+        self.scrypto().to_vec()
     }
 
     pub fn to_hex(&self) -> String {
@@ -124,7 +124,9 @@ impl TryFrom<ScryptoSecp256k1PublicKey> for Secp256k1PublicKey {
     fn try_from(value: ScryptoSecp256k1PublicKey) -> Result<Self, Self::Error> {
         BIP32Secp256k1PublicKey::from_sec1_bytes(value.to_vec().as_slice())
             .map_err(|_| CommonError::InvalidSecp256k1PublicKeyPointNotOnCurve)
-            .map(|_| Self { inner: value })
+            .map(|_| Self {
+                secret_magic: value,
+            })
     }
 }
 
@@ -245,8 +247,8 @@ mod tests {
     }
 
     #[test]
-    fn from_engine() {
-        let from_engine: Secp256k1PublicKey = ScryptoSecp256k1PublicKey::from_str(
+    fn from_scrypto() {
+        let from_scrypto: Secp256k1PublicKey = ScryptoSecp256k1PublicKey::from_str(
             "033083620d1596d3f8988ff3270e42970dd2a031e2b9b6488052a4170ff999f3e8",
         )
         .unwrap()
@@ -254,11 +256,22 @@ mod tests {
         .unwrap();
 
         assert_eq!(
-            from_engine,
+            from_scrypto.clone(),
             Secp256k1PublicKey::from_str(
                 "033083620d1596d3f8988ff3270e42970dd2a031e2b9b6488052a4170ff999f3e8"
             )
             .unwrap()
+        );
+
+        // and back
+        assert_eq!(
+            TryInto::<Secp256k1PublicKey>::try_into(Into::<
+                ScryptoSecp256k1PublicKey,
+            >::into(
+                from_scrypto.clone()
+            ))
+            .unwrap(),
+            from_scrypto
         );
     }
 

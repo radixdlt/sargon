@@ -24,7 +24,13 @@ use radix_engine_common::crypto::{
 #[display("{}", self.to_hex())]
 #[debug("{}", self.to_hex())]
 pub struct Ed25519PublicKey {
-    inner: ScryptoEd25519PublicKey,
+    secret_magic: ScryptoEd25519PublicKey,
+}
+
+impl From<Ed25519PublicKey> for ScryptoEd25519PublicKey {
+    fn from(value: Ed25519PublicKey) -> Self {
+        value.secret_magic
+    }
 }
 
 uniffi::custom_type!(ScryptoEd25519PublicKey, BagOfBytes);
@@ -87,19 +93,19 @@ impl IsPublicKey<Ed25519Signature> for Ed25519PublicKey {
     ) -> bool {
         scrypto_verify_ed25519(
             for_hash.as_hash(),
-            &self.to_engine(),
+            &self.scrypto(),
             &signature.clone().into(),
         )
     }
 }
 
 impl Ed25519PublicKey {
-    pub(crate) fn to_engine(&self) -> ScryptoEd25519PublicKey {
-        self.inner
+    pub(crate) fn scrypto(&self) -> ScryptoEd25519PublicKey {
+        self.secret_magic
     }
 
     pub fn to_bytes(&self) -> Vec<u8> {
-        self.to_engine().to_vec()
+        self.scrypto().to_vec()
     }
 
     pub fn to_hex(&self) -> String {
@@ -113,7 +119,9 @@ impl TryFrom<ScryptoEd25519PublicKey> for Ed25519PublicKey {
     fn try_from(value: ScryptoEd25519PublicKey) -> Result<Self, Self::Error> {
         ed25519_dalek::PublicKey::from_bytes(value.to_vec().as_slice())
             .map_err(|_| CommonError::InvalidEd25519PublicKeyPointNotOnCurve)
-            .map(|_| Self { inner: value })
+            .map(|_| Self {
+                secret_magic: value,
+            })
     }
 }
 
@@ -220,19 +228,30 @@ mod tests {
     }
 
     #[test]
-    fn from_engine() {
-        let from_engine: Ed25519PublicKey = ScryptoEd25519PublicKey::from_str(
+    fn from_scrypto() {
+        let from_scrypto: Ed25519PublicKey = ScryptoEd25519PublicKey::from_str(
             "ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf",
         )
         .unwrap()
         .try_into()
         .unwrap();
         assert_eq!(
-            from_engine,
+            from_scrypto,
             Ed25519PublicKey::from_str(
                 "ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf"
             )
             .unwrap()
+        );
+
+        // and back
+        assert_eq!(
+            TryInto::<Ed25519PublicKey>::try_into(Into::<
+                ScryptoEd25519PublicKey,
+            >::into(
+                from_scrypto.clone()
+            ))
+            .unwrap(),
+            from_scrypto
         );
     }
 

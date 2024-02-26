@@ -190,8 +190,8 @@ impl Serialize for PublicKey {
 impl From<PublicKey> for ScryptoPublicKey {
     fn from(value: PublicKey) -> Self {
         match value {
-            PublicKey::Ed25519 { value: key } => key.to_engine().into(),
-            PublicKey::Secp256k1 { value: key } => key.to_engine().into(),
+            PublicKey::Ed25519 { value: key } => Self::Ed25519(key.into()),
+            PublicKey::Secp256k1 { value: key } => Self::Secp256k1(key.into()),
         }
     }
 }
