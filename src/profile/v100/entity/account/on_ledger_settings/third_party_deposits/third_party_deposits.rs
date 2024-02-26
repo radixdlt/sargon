@@ -18,6 +18,30 @@ pub struct ThirdPartyDeposits {
     pub depositors_allow_list: IdentifiedVecVia<ResourceOrNonFungible>,
 }
 
+impl HasPlaceholder for ThirdPartyDeposits {
+    fn placeholder() -> Self {
+        Self::with_rule_and_lists(
+            DepositRule::AcceptKnown,
+            [
+                AssetException::placeholder(),
+                AssetException::placeholder_other(),
+            ],
+            [
+                ResourceOrNonFungible::placeholder(),
+                ResourceOrNonFungible::placeholder_other(),
+            ],
+        )
+    }
+
+    fn placeholder_other() -> Self {
+        Self::with_rule_and_lists(
+            DepositRule::DenyAll,
+            [AssetException::placeholder_other()],
+            [ResourceOrNonFungible::placeholder_other()],
+        )
+    }
+}
+
 impl Default for ThirdPartyDeposits {
     fn default() -> Self {
         Self::new(Default::default())
@@ -110,50 +134,49 @@ impl ThirdPartyDeposits {
 mod tests {
     use crate::prelude::*;
 
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = ThirdPartyDeposits;
+
     #[test]
-    fn json_roundtrip() {
-        let excp1 = AssetException::new(
-            "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
-                .parse()
-                .unwrap(),
-            DepositAddressExceptionRule::Deny,
-        );
-        let excp2 = AssetException::new(
-            "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
-                .parse()
-                .unwrap(),
-            DepositAddressExceptionRule::Allow,
-        );
+    fn equality() {
+        assert_eq!(SUT::placeholder(), SUT::placeholder());
+        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+    }
 
-        let nf: NonFungibleGlobalId = "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>".parse().unwrap();
-        let model = ThirdPartyDeposits::with_rule_and_lists(
-            DepositRule::AcceptKnown,
-            [excp1, excp2],
-            [ResourceOrNonFungible::NonFungible { value: nf }],
-        );
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+    }
 
+    #[test]
+    fn json_roundtrip_placeholder() {
+        let sut = SUT::placeholder();
         assert_eq_after_json_roundtrip(
-            &model,
+            &sut,
             r#"
             {
-            	"depositRule" : "acceptKnown",
-            	"assetsExceptionList" : [
-            		{
-			            "address" : "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq",
-			            "exceptionRule" : "deny"
-            		},
-            		{
-            			"address" : "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd",
-			            "exceptionRule" : "allow"
-            		}
-            	],
-                "depositorsAllowList" : [
-            		{
-            			"value" : "resource_sim1ngktvyeenvvqetnqwysevcx5fyvl6hqe36y3rkhdfdn6uzvt5366ha:<foobar>",
-            			"discriminator" : "nonFungibleGlobalID"
-            		}
-               	]
-            }
+                "depositRule": "acceptKnown",
+                "assetsExceptionList": [
+                  {
+                    "address": "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd",
+                    "exceptionRule": "allow"
+                  },
+                  {
+                    "address": "resource_rdx1t4dy69k6s0gv040xa64cyadyefwtett62ng6xfdnljyydnml7t6g3j",
+                    "exceptionRule": "deny"
+                  }
+                ],
+                "depositorsAllowList": [
+                  {
+                    "discriminator": "resourceAddress",
+                    "value": "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
+                  },
+                  {
+                    "discriminator": "nonFungibleGlobalID",
+                    "value": "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa:<Member_237>"
+                  }
+                ]
+              }
             "#,
         );
     }

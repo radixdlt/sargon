@@ -14,6 +14,22 @@ pub struct AssetException {
     pub exception_rule: DepositAddressExceptionRule,
 }
 
+impl HasPlaceholder for AssetException {
+    fn placeholder() -> Self {
+        Self::new(
+            ResourceAddress::placeholder(),
+            DepositAddressExceptionRule::Allow,
+        )
+    }
+
+    fn placeholder_other() -> Self {
+        Self::new(
+            ResourceAddress::placeholder_other(),
+            DepositAddressExceptionRule::Deny,
+        )
+    }
+}
+
 impl Identifiable for AssetException {
     type ID = ResourceAddress;
 
@@ -39,19 +55,28 @@ impl AssetException {
 mod tests {
     use crate::prelude::*;
 
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = AssetException;
+
     #[test]
-    fn json_decode_deny_all_with_exceptions() {
-        let model = AssetException::new(
-            "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
-                .parse()
-                .unwrap(),
-            DepositAddressExceptionRule::Allow,
-        );
+    fn equality() {
+        assert_eq!(SUT::placeholder(), SUT::placeholder());
+        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+    }
+
+    #[test]
+    fn json_roundtrip_placeholder() {
+        let sut = SUT::placeholder();
         assert_eq_after_json_roundtrip(
-            &model,
+            &sut,
             r#"
             {
-                "address" : "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq",
+                "address" : "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd",
                 "exceptionRule" : "allow"
             }
             "#,
@@ -59,14 +84,28 @@ mod tests {
     }
 
     #[test]
+    fn json_roundtrip_placeholder_other() {
+        let sut = SUT::placeholder_other();
+        assert_eq_after_json_roundtrip(
+            &sut,
+            r#"
+            {
+                "address" : "resource_rdx1t4dy69k6s0gv040xa64cyadyefwtett62ng6xfdnljyydnml7t6g3j",
+                "exceptionRule" : "deny"
+            }
+            "#,
+        )
+    }
+
+    #[test]
     fn inequality_allow_ne_deny() {
-        let a = AssetException::new(
+        let a = SUT::new(
             "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
                 .parse()
                 .unwrap(),
             DepositAddressExceptionRule::Allow,
         );
-        let b = AssetException::new(
+        let b = SUT::new(
             "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
                 .parse()
                 .unwrap(),
@@ -77,35 +116,18 @@ mod tests {
 
     #[test]
     fn inequality_allow_different_addresses() {
-        let a = AssetException::new(
+        let a = SUT::new(
             "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
                 .parse()
                 .unwrap(),
             DepositAddressExceptionRule::Allow,
         );
-        let b = AssetException::new(
+        let b = SUT::new(
             "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
                 .parse()
                 .unwrap(),
             DepositAddressExceptionRule::Allow,
         );
         assert_ne!(a, b);
-    }
-
-    #[test]
-    fn equality() {
-        let a = AssetException::new(
-            "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
-                .parse()
-                .unwrap(),
-            DepositAddressExceptionRule::Allow,
-        );
-        let b = AssetException::new(
-            "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
-                .parse()
-                .unwrap(),
-            DepositAddressExceptionRule::Allow,
-        );
-        assert_eq!(a, b);
     }
 }

@@ -35,7 +35,7 @@ impl SargonDependencies {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, EnumAsInner, uniffi::Enum)]
 pub enum DependencyInformation {
     // Crates.io
     Version { value: String },
@@ -51,8 +51,8 @@ impl DependencyInformation {
         let version = std::env::var(name).expect("Valid env variable");
 
         let mut split = version.split('=');
-        let identifier = split.next().expect("Should never fail");
-        let value = split.next().expect("Should never fail");
+        let identifier = split.next().expect("Should never fail").trim();
+        let value = split.next().expect("Should never fail").trim();
 
         match identifier {
             "version" => Self::Version {
@@ -67,7 +67,9 @@ impl DependencyInformation {
             "rev" => Self::Rev {
                 value: value.into(),
             },
-            _ => unreachable!("Unknown identifier encountered: {}", identifier),
+            _ => {
+                unreachable!("Unknown identifier encountered: '{}'", identifier)
+            }
         }
     }
 }
