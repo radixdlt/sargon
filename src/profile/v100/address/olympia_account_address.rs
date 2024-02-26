@@ -85,9 +85,12 @@ mod tests {
 
     use super::*;
 
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = OlympiaAccountAddress;
+
     #[test]
     fn public_key_to_olympia_to_babylon() {
-        let olympia: OlympiaAccountAddress =
+        let olympia: SUT =
             "rdx1qspx7zxmnrh36q33av24srdfzg7m3cj65968erpjuh7ja3rm3kmn6hq4j9842"
                 .parse()
                 .unwrap();
@@ -99,6 +102,41 @@ mod tests {
         );
         assert_eq!(olympia.public_key, pubkey.clone());
         assert_eq!(olympia.to_babylon_account_address(), babylon.clone());
-        assert_eq!(olympia, OlympiaAccountAddress::new(&pubkey));
+        assert_eq!(olympia, SUT::new(&pubkey));
+    }
+
+    #[test]
+    fn parse_invalid_bech32_str_invalid_checksum() {
+        let s =
+            "rdx1qspx7zxmnrh36q33av24srdfzg7m3cj65968erpjuh7ja3rm3kmn6hq4j9841"; // replaced trailing "2" with "1" => fail checksum
+        assert_eq!(
+            s.parse::<SUT>(),
+            Err(CommonError::InvalidOlympiaAddressString {
+                bad_value: s.to_owned()
+            })
+        )
+    }
+
+    #[test]
+    fn parse_invalid_bech32_str_wrong_hrp() {
+        let s =
+            "foo1qspx7zxmnrh36q33av24srdfzg7m3cj65968erpjuh7ja3rm3kmn6hq4j9842"; // replaced prefix "rdx" with "foo" => wrong hrp
+        assert_eq!(
+            s.parse::<SUT>(),
+            Err(CommonError::InvalidOlympiaAddressString {
+                bad_value: s.to_owned()
+            })
+        )
+    }
+
+    #[test]
+    fn parse_invalid_got_babylon_address() {
+        let s = "account_rdx168e8u653alt59xm8ple6khu6cgce9cfx9mlza6wxf7qs3wwdh0pwrf"; // OlympiaAddresses cannot be parsed from Babylon ones.
+        assert_eq!(
+            s.parse::<SUT>(),
+            Err(CommonError::InvalidOlympiaAddressString {
+                bad_value: s.to_owned()
+            })
+        )
     }
 }

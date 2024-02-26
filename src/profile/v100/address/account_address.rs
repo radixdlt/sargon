@@ -330,6 +330,18 @@ mod tests {
     }
 
     #[test]
+    fn invalid_got_olympia_address() {
+        let s =
+            "rdx1qspx7zxmnrh36q33av24srdfzg7m3cj65968erpjuh7ja3rm3kmn6hq4j9842";
+        assert_eq!(
+            SUT::try_from_bech32(s),
+            Err(CommonError::FailedToDecodeAddressFromBech32 {
+                bad_value: s.to_owned()
+            })
+        )
+    }
+
+    #[test]
     fn json_roundtrip() {
         let a: SUT =
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
