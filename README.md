@@ -237,6 +237,22 @@ Find [script here](scripts/ios/build-sargon.sh)
 ## Android
 
 ### Prerequisites
+
+#### Java
+```sh
+brew install java
+```
+
+#### `ktlint`
+```sh
+brew install ktlint
+```
+
+#### `cargo-ndk`
+```sh
+cargo install cargo-ndk
+```
+
 #### Rust targets (Android)
 ```sh
 rustup target add aarch64-linux-android armv7-linux-androideabi

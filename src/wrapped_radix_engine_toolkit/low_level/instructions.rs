@@ -41,7 +41,7 @@ impl crate::UniffiCustomTypeConverter for InstructionsInner {
 
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct Instructions {
-    pub(crate) secret_magic: InstructionsInner,
+    pub(crate) secret_magic: InstructionsInner, // MUST be first prop, else you break build.
     pub network_id: NetworkID,
 }
 
