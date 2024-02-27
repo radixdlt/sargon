@@ -20,7 +20,7 @@ crate-type = ["staticlib", "cdylib", "lib"]
 
 [[bin]]
 name = "uniffi-bindgen"
-path = "src/bin.rs"
+path = "src/bindgen/bin.rs"
 
 [dependencies]
 log = "0.4.20"
