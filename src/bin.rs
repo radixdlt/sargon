@@ -77,6 +77,11 @@ fn mutate_swift(contents: String) -> Result<String, BindgenError> {
         "🔮 Post processing swift: Made '{}' stored properties immutable. ✨ ",
         NEEDLE
     );
+    // hiding constructors
+    let init_from = "public init(\n        secretMagic:";
+    let init_to = "fileprivate init(\n        secretMagic:";
+    contents = contents.replace(init_from, init_to);
+    println!("🔮 Post processing swift: Hid some dangerous initializers. ✨ ");
     Ok(contents)
 }
 
@@ -104,10 +109,6 @@ fn main() {
     let out_dir = args.out_dir.expect("Expected to have specified out_dir");
 
     let languages = args.language;
-    let no_format = args.no_format;
-    if !no_format {
-        panic!("You MUST specify '--no-format'");
-    }
 
     uniffi::uniffi_bindgen_main();
     println!(
