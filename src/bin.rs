@@ -99,18 +99,20 @@ fn better_swift(out_dir: String) -> Result<(), BindgenError> {
 
 fn main() {
     println!("🔮 Running uniffi-bindgen");
+
+    let args = argh::from_env::<Arguments>().nested;
+    let out_dir = args.out_dir.expect("Expected to have specified out_dir");
+
+    let languages = args.language;
+    let no_format = args.no_format;
+    if !no_format {
+        panic!("You MUST specify '--no-format'");
+    }
+
     uniffi::uniffi_bindgen_main();
     println!(
         "🔮 Finished with uniffi-bindgen, proceeding with post processing..."
     );
-
-    let args: Arguments = argh::from_env();
-    let out_dir = args
-        .nested
-        .out_dir
-        .expect("Expected to have specified out_dir");
-
-    let languages = args.nested.language;
 
     if languages.contains(&"swift".to_owned()) {
         better_swift(out_dir)
