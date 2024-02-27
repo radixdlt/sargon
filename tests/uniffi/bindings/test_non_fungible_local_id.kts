@@ -11,17 +11,20 @@ fun String.hexToByteArray(): ByteArray {
         .toByteArray()
 }
 
+
+
 fun test() {
     val hex = "deadbeef12345678babecafe87654321fadedeaf01234567ecadabba76543210"
-	val bagOfBytes = newBagOfBytesFrom(bytes = hex.hexToByteArray())
+	val hex32Bytes = newHex32BytesFrom(bytes = hex.hexToByteArray())
 	assert(NonFungibleLocalId.Integer(value = 1234.toULong()).description == "#1234#")
-	assert(NonFungibleLocalId.Str(value = "foo").description == "<foo>")
+	val str = newNonFungibleLocalIdString(string = "foo")
+	assert(NonFungibleLocalId.Str(value = str).description == "<foo>")
 	assert(
-	    NonFungibleLocalId.Ruid(value = bagOfBytes).description
+	    NonFungibleLocalId.Ruid(value = hex32Bytes).description
 	        == "{deadbeef12345678-babecafe87654321-fadedeaf01234567-ecadabba76543210}"
     )
 	assert(
-		NonFungibleLocalId.Bytes(value = bagOfBytes).description
+		NonFungibleLocalId.Bytes(value = hex32Bytes.bagOfBytes).description
 			== "[deadbeef12345678babecafe87654321fadedeaf01234567ecadabba76543210]"
     )
 
