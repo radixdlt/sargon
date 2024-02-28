@@ -20,15 +20,20 @@ use transaction::{
     },
 };
 
-pub type Blob = BagOfBytes;
-pub type Blobs = Vec<Blob>;
-pub type ScryptoInstructions = Vec<ScryptoInstruction>;
-
-#[derive(Clone, PartialEq, Eq, Debug, uniffi::Record)]
-pub struct TransactionManifestInner {
-    pub instructions: Instructions,
-    pub blobs: Blobs,
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record, derive_more::Display)]
+#[display("{}", self.instructions_string())] // TODO add blobs
+pub struct TransactionManifest {
+    secret_magic: TransactionManifestSecretMagic,
 }
+
+impl From<TransactionManifestSecretMagic> for TransactionManifest {
+    fn from(value: TransactionManifestSecretMagic) -> Self {
+        Self {
+            secret_magic: value,
+        }
+    }
+}
+
 impl TransactionManifest {
     fn scrypto_manifest(&self) -> ScryptoTransactionManifest {
         ScryptoTransactionManifest {
@@ -41,20 +46,6 @@ impl TransactionManifest {
                 .map(|b| b.to_vec())
                 .map(|blob| (hash_of(blob.clone()), blob))
                 .collect(),
-        }
-    }
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record, derive_more::Display)]
-#[display("{}", self.instructions_string())] // TODO add blobs
-pub struct TransactionManifest {
-    secret_magic: TransactionManifestInner,
-}
-
-impl From<TransactionManifestInner> for TransactionManifest {
-    fn from(value: TransactionManifestInner) -> Self {
-        Self {
-            secret_magic: value,
         }
     }
 }
@@ -75,9 +66,9 @@ impl TransactionManifest {
         network_id: NetworkID,
     ) -> Self {
         let value = Self {
-            secret_magic: TransactionManifestInner {
+            secret_magic: TransactionManifestSecretMagic {
                 instructions: Instructions {
-                    secret_magic: InstructionsInner(
+                    secret_magic: InstructionsSecretMagic(
                         scrypto_manifest.instructions.clone(),
                     ),
                     network_id,
@@ -101,7 +92,7 @@ impl TransactionManifest {
     ) -> Result<Self> {
         Instructions::new(instructions_string, network_id).map(|instructions| {
             Self {
-                secret_magic: TransactionManifestInner {
+                secret_magic: TransactionManifestSecretMagic {
                     instructions,
                     blobs,
                 },

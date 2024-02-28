@@ -3,7 +3,6 @@ mod dummy_types;
 
 mod compiled_notarized_intent;
 mod execution_summary;
-mod instructions;
 mod manifest_summary;
 mod message;
 mod notarized_transaction;
@@ -19,7 +18,6 @@ mod transaction_receipt;
 pub use compiled_notarized_intent::*;
 pub use dummy_types::*;
 pub use execution_summary::*;
-pub use instructions::*;
 pub use manifest_summary::*;
 pub use message::*;
 pub use notarized_transaction::*;
