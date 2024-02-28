@@ -100,20 +100,20 @@ impl Default for FactorSourceCommon {
     }
 }
 
-impl HasPlaceholder for FactorSourceCommon {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
-        Self::placeholder_main_babylon()
+impl HasSampleValues for FactorSourceCommon {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
+        Self::sample_main_babylon()
     }
 
-    fn placeholder_other() -> Self {
-        Self::placeholder_olympia()
+    fn sample_other() -> Self {
+        Self::sample_olympia()
     }
 }
 
 impl FactorSourceCommon {
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_main_babylon() -> Self {
+    /// A sample used to facilitate unit tests.
+    pub fn sample_main_babylon() -> Self {
         let date = Timestamp::parse("2023-09-11T16:05:56.000Z").unwrap();
         FactorSourceCommon::with_values(
             FactorSourceCryptoParameters::babylon(),
@@ -123,8 +123,8 @@ impl FactorSourceCommon {
         )
     }
 
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_olympia() -> Self {
+    /// A sample used to facilitate unit tests.
+    pub fn sample_olympia() -> Self {
         let date = Timestamp::parse("2023-09-11T16:05:56.000Z").unwrap();
         FactorSourceCommon::with_values(
             FactorSourceCryptoParameters::olympia(),
@@ -141,21 +141,18 @@ mod tests {
     use crate::prelude::*;
     #[test]
     fn equality() {
+        assert_eq!(FactorSourceCommon::sample(), FactorSourceCommon::sample());
         assert_eq!(
-            FactorSourceCommon::placeholder(),
-            FactorSourceCommon::placeholder()
-        );
-        assert_eq!(
-            FactorSourceCommon::placeholder_other(),
-            FactorSourceCommon::placeholder_other()
+            FactorSourceCommon::sample_other(),
+            FactorSourceCommon::sample_other()
         );
     }
 
     #[test]
     fn inequality() {
         assert_ne!(
-            FactorSourceCommon::placeholder(),
-            FactorSourceCommon::placeholder_other()
+            FactorSourceCommon::sample(),
+            FactorSourceCommon::sample_other()
         );
     }
 

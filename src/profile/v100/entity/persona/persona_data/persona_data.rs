@@ -134,20 +134,20 @@ impl PersonaData {
     }
 }
 
-impl HasPlaceholder for PersonaData {
-    fn placeholder() -> Self {
+impl HasSampleValues for PersonaData {
+    fn sample() -> Self {
         Self::new(
-            PersonaDataIdentifiedName::placeholder(),
-            CollectionOfPhoneNumbers::placeholder(),
-            CollectionOfEmailAddresses::placeholder(),
+            PersonaDataIdentifiedName::sample(),
+            CollectionOfPhoneNumbers::sample(),
+            CollectionOfEmailAddresses::sample(),
         )
     }
 
-    fn placeholder_other() -> Self {
+    fn sample_other() -> Self {
         Self::new(
-            PersonaDataIdentifiedName::placeholder_other(),
-            CollectionOfPhoneNumbers::placeholder_other(),
-            CollectionOfEmailAddresses::placeholder(),
+            PersonaDataIdentifiedName::sample_other(),
+            CollectionOfPhoneNumbers::sample_other(),
+            CollectionOfEmailAddresses::sample(),
         )
     }
 }
@@ -158,19 +158,13 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(PersonaData::placeholder(), PersonaData::placeholder());
-        assert_eq!(
-            PersonaData::placeholder_other(),
-            PersonaData::placeholder_other()
-        );
+        assert_eq!(PersonaData::sample(), PersonaData::sample());
+        assert_eq!(PersonaData::sample_other(), PersonaData::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(
-            PersonaData::placeholder(),
-            PersonaData::placeholder_other()
-        );
+        assert_ne!(PersonaData::sample(), PersonaData::sample_other());
     }
 
     #[test]
@@ -185,7 +179,7 @@ mod tests {
 
         let persona_data = PersonaData {
             name: Some(PersonaDataIdentifiedName::with_id(
-                PersonaDataEntryID::placeholder_one(),
+                PersonaDataEntryID::sample_one(),
                 name.clone(),
             )),
             ..Default::default()
@@ -201,23 +195,23 @@ mod tests {
     }
 
     #[test]
-    fn placeholder() {
-        let persona_data = PersonaData::placeholder();
-        let identified_entry = PersonaDataIdentifiedName::placeholder();
+    fn sample() {
+        let persona_data = PersonaData::sample();
+        let identified_entry = PersonaDataIdentifiedName::sample();
         assert_eq!(persona_data.name, Some(identified_entry));
     }
 
     #[test]
-    fn placeholder_other() {
+    fn sample_other() {
         assert_eq!(
-            PersonaData::placeholder_other().name,
-            Some(PersonaDataIdentifiedName::placeholder_other())
+            PersonaData::sample_other().name,
+            Some(PersonaDataIdentifiedName::sample_other())
         );
     }
 
     #[test]
-    fn json_roundtrip_placeholder() {
-        let model = PersonaData::placeholder();
+    fn json_roundtrip_sample() {
+        let model = PersonaData::sample();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -258,11 +252,11 @@ mod tests {
 
     #[test]
     fn display() {
-        assert_eq!(format!("{}", PersonaData::placeholder()), "name: Bruce Batman Wayne\nphone: +46123456789\nphone: +44987654321\nemail: alan@turing.hero\nemail: satoshi@nakamoto.btc");
+        assert_eq!(format!("{}", PersonaData::sample()), "name: Bruce Batman Wayne\nphone: +46123456789\nphone: +44987654321\nemail: alan@turing.hero\nemail: satoshi@nakamoto.btc");
     }
 
     #[test]
     fn debug() {
-        assert_eq!(format!("{:?}", PersonaData::placeholder()), "name: Bruce Batman Wayne\nphone: +46123456789 - 00000000-0000-0000-0000-000000000001\nphone: +44987654321 - 00000000-0000-0000-0000-000000000002\nemail: alan@turing.hero - 00000000-0000-0000-0000-000000000001\nemail: satoshi@nakamoto.btc - 00000000-0000-0000-0000-000000000002");
+        assert_eq!(format!("{:?}", PersonaData::sample()), "name: Bruce Batman Wayne\nphone: +46123456789 - 00000000-0000-0000-0000-000000000001\nphone: +44987654321 - 00000000-0000-0000-0000-000000000002\nemail: alan@turing.hero - 00000000-0000-0000-0000-000000000001\nemail: satoshi@nakamoto.btc - 00000000-0000-0000-0000-000000000002");
     }
 }

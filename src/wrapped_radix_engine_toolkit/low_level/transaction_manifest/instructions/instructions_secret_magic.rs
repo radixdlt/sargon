@@ -36,15 +36,15 @@ impl crate::UniffiCustomTypeConverter for InstructionsSecretMagic {
     }
 }
 
-impl HasPlaceholder for InstructionsSecretMagic {
-    fn placeholder() -> Self {
+impl HasSampleValues for InstructionsSecretMagic {
+    fn sample() -> Self {
         Self(vec![
             ScryptoInstruction::DropAuthZoneProofs, // 0x12
             ScryptoInstruction::DropAuthZoneRegularProofs, // 0x13
         ])
     }
 
-    fn placeholder_other() -> Self {
+    fn sample_other() -> Self {
         Self(vec![ScryptoInstruction::DropAuthZoneSignatureProofs]) // 0x17
     }
 }
@@ -58,18 +58,18 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::placeholder(), SUT::placeholder());
-        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn manual_perform_uniffi_conversion() {
-        let sut = SUT::placeholder();
+        let sut = SUT::sample();
         let builtin = BagOfBytes::from_hex("4d20220212001300").unwrap();
 
         let ffi_side =

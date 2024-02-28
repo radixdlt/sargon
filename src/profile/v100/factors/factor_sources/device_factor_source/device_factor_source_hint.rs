@@ -59,13 +59,13 @@ impl DeviceFactorSourceHint {
     }
 }
 
-impl HasPlaceholder for DeviceFactorSourceHint {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
-        Self::placeholder_iphone_unknown()
+impl HasSampleValues for DeviceFactorSourceHint {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
+        Self::sample_iphone_unknown()
     }
 
-    fn placeholder_other() -> Self {
+    fn sample_other() -> Self {
         Self::new(
             "Android".to_string(),
             "Samsung Galaxy S23 Ultra".to_string(),
@@ -75,8 +75,8 @@ impl HasPlaceholder for DeviceFactorSourceHint {
 }
 
 impl DeviceFactorSourceHint {
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_iphone_unknown() -> Self {
+    /// A sample used to facilitate unit tests.
+    pub fn sample_iphone_unknown() -> Self {
         Self::iphone_unknown_model_with_word_count(BIP39WordCount::TwentyFour)
     }
 }
@@ -87,26 +87,26 @@ mod tests {
     #[test]
     fn equality() {
         assert_eq!(
-            DeviceFactorSourceHint::placeholder(),
-            DeviceFactorSourceHint::placeholder()
+            DeviceFactorSourceHint::sample(),
+            DeviceFactorSourceHint::sample()
         );
         assert_eq!(
-            DeviceFactorSourceHint::placeholder_other(),
-            DeviceFactorSourceHint::placeholder_other()
+            DeviceFactorSourceHint::sample_other(),
+            DeviceFactorSourceHint::sample_other()
         );
     }
 
     #[test]
     fn inequality() {
         assert_ne!(
-            DeviceFactorSourceHint::placeholder(),
-            DeviceFactorSourceHint::placeholder_other()
+            DeviceFactorSourceHint::sample(),
+            DeviceFactorSourceHint::sample_other()
         );
     }
 
     #[test]
     fn set_model() {
-        let mut sut = DeviceFactorSourceHint::placeholder();
+        let mut sut = DeviceFactorSourceHint::sample();
         assert_eq!(sut.model, "iPhone".to_string());
         sut.model = "Android".to_string();
         assert_eq!(sut.model, "Android".to_string());
@@ -114,7 +114,7 @@ mod tests {
 
     #[test]
     fn set_name() {
-        let mut sut = DeviceFactorSourceHint::placeholder();
+        let mut sut = DeviceFactorSourceHint::sample();
         sut.name = "Foo".to_string();
         assert_eq!(sut.name, "Foo".to_string());
     }
@@ -122,14 +122,14 @@ mod tests {
     #[test]
     fn get_word_count() {
         assert_eq!(
-            DeviceFactorSourceHint::placeholder().mnemonic_word_count,
+            DeviceFactorSourceHint::sample().mnemonic_word_count,
             BIP39WordCount::TwentyFour
         );
     }
 
     #[test]
     fn json() {
-        let model = DeviceFactorSourceHint::placeholder_iphone_unknown();
+        let model = DeviceFactorSourceHint::sample_iphone_unknown();
         assert_eq_after_json_roundtrip(
             &model,
             r#"

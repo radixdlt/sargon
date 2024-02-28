@@ -61,18 +61,18 @@ impl Default for ProfileNetworks {
     }
 }
 
-impl HasPlaceholder for ProfileNetworks {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
+impl HasSampleValues for ProfileNetworks {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
         Self::with_networks([
-            ProfileNetwork::placeholder_mainnet(),
-            ProfileNetwork::placeholder_stokenet(),
+            ProfileNetwork::sample_mainnet(),
+            ProfileNetwork::sample_stokenet(),
         ])
     }
 
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder_other() -> Self {
-        Self::with_network(ProfileNetwork::placeholder_other())
+    /// A sample used to facilitate unit tests.
+    fn sample_other() -> Self {
+        Self::with_network(ProfileNetwork::sample_other())
     }
 }
 
@@ -87,21 +87,15 @@ mod tests {
 
     #[test]
     fn inequality() {
-        assert_ne!(
-            ProfileNetworks::placeholder(),
-            ProfileNetworks::placeholder_other()
-        );
+        assert_ne!(ProfileNetworks::sample(), ProfileNetworks::sample_other());
     }
 
     #[test]
     fn equality() {
+        assert_eq!(ProfileNetworks::sample(), ProfileNetworks::sample());
         assert_eq!(
-            ProfileNetworks::placeholder(),
-            ProfileNetworks::placeholder()
-        );
-        assert_eq!(
-            ProfileNetworks::placeholder_other(),
-            ProfileNetworks::placeholder_other()
+            ProfileNetworks::sample_other(),
+            ProfileNetworks::sample_other()
         );
     }
 
@@ -109,7 +103,7 @@ mod tests {
     fn duplicates_are_prevented() {
         assert_eq!(
             ProfileNetworks::from_iter(
-                [ProfileNetwork::placeholder(), ProfileNetwork::placeholder()]
+                [ProfileNetwork::sample(), ProfileNetwork::sample()]
                     .into_iter()
             )
             .len(),
@@ -122,8 +116,8 @@ mod tests {
         let mut sut = ProfileNetworks::from_iter([ProfileNetwork::new(
             NetworkID::Mainnet,
             Accounts::from_iter([
-                Account::placeholder_mainnet_alice(),
-                Account::placeholder_mainnet_bob(),
+                Account::sample_mainnet_alice(),
+                Account::sample_mainnet_bob(),
             ]),
             Personas::default(),
             AuthorizedDapps::default(),
@@ -131,7 +125,7 @@ mod tests {
         assert!(
             !sut.append(ProfileNetwork::new(
                 NetworkID::Mainnet,
-                Accounts::from_iter([Account::placeholder_mainnet_carol()]),
+                Accounts::from_iter([Account::sample_mainnet_carol()]),
                 Personas::default(),
                 AuthorizedDapps::default(),
             ))
@@ -141,17 +135,17 @@ mod tests {
         assert_eq!(
             sut.get(&NetworkID::Mainnet).unwrap().accounts.items(),
             [
-                Account::placeholder_mainnet_alice(),
-                Account::placeholder_mainnet_bob()
+                Account::sample_mainnet_alice(),
+                Account::sample_mainnet_bob()
             ]
         );
     }
 
     #[test]
     fn update_account() {
-        let mut sut = ProfileNetworks::placeholder();
+        let mut sut = ProfileNetworks::sample();
         let id = &NetworkID::Mainnet;
-        let account_address = Account::placeholder().address;
+        let account_address = Account::sample().address;
         assert_eq!(
             sut.get(id)
                 .unwrap()
@@ -181,9 +175,9 @@ mod tests {
 
     #[test]
     fn update_account_unknown_network() {
-        let mut sut = ProfileNetworks::placeholder();
+        let mut sut = ProfileNetworks::sample();
         let id = &NetworkID::Mainnet;
-        let account_address = Account::placeholder_nebunet().address;
+        let account_address = Account::sample_nebunet().address;
         assert_eq!(sut.get(id).unwrap().accounts.get(&account_address), None);
 
         assert!(sut
@@ -193,14 +187,14 @@ mod tests {
             .is_none());
 
         // Assert unchanged
-        assert_eq!(sut, ProfileNetworks::placeholder());
+        assert_eq!(sut, ProfileNetworks::sample());
     }
 
     #[test]
     fn update_account_unknown_account() {
-        let mut sut = ProfileNetworks::placeholder();
+        let mut sut = ProfileNetworks::sample();
         let id = &NetworkID::Mainnet;
-        let account_address = Account::placeholder_mainnet_carol().address;
+        let account_address = Account::sample_mainnet_carol().address;
         assert_eq!(sut.get(id).unwrap().accounts.get(&account_address), None);
 
         assert!(sut
@@ -210,14 +204,14 @@ mod tests {
             .is_none());
 
         // Assert unchanged
-        assert_eq!(sut, ProfileNetworks::placeholder());
+        assert_eq!(sut, ProfileNetworks::sample());
     }
 
     #[test]
     fn with_network() {
         let network = ProfileNetwork::new(
             NetworkID::Mainnet,
-            Accounts::with_account(Account::placeholder_mainnet()),
+            Accounts::with_account(Account::sample_mainnet()),
             Personas::default(),
             AuthorizedDapps::default(),
         );
@@ -227,14 +221,14 @@ mod tests {
     #[test]
     fn content_hint() {
         assert_eq!(
-            ProfileNetworks::placeholder().content_hint(),
+            ProfileNetworks::sample().content_hint(),
             ContentHint::with_counters(4, 0, 2)
         );
     }
 
     #[test]
     fn json_roundtrip() {
-        let sut = ProfileNetworks::placeholder();
+        let sut = ProfileNetworks::sample();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"

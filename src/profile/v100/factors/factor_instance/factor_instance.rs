@@ -43,20 +43,17 @@ impl FactorInstance {
     }
 }
 
-impl HasPlaceholder for FactorInstance {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
-        Self::new(
-            FactorSourceID::placeholder(),
-            FactorInstanceBadge::placeholder(),
-        )
+impl HasSampleValues for FactorInstance {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
+        Self::new(FactorSourceID::sample(), FactorInstanceBadge::sample())
     }
 
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder_other() -> Self {
+    /// A sample used to facilitate unit tests.
+    fn sample_other() -> Self {
         Self::new(
-            FactorSourceID::placeholder_other(),
-            FactorInstanceBadge::placeholder_other(),
+            FactorSourceID::sample_other(),
+            FactorInstanceBadge::sample_other(),
         )
     }
 }
@@ -67,27 +64,21 @@ mod tests {
 
     #[test]
     fn equality() {
+        assert_eq!(FactorInstance::sample(), FactorInstance::sample());
         assert_eq!(
-            FactorInstance::placeholder(),
-            FactorInstance::placeholder()
-        );
-        assert_eq!(
-            FactorInstance::placeholder_other(),
-            FactorInstance::placeholder_other()
+            FactorInstance::sample_other(),
+            FactorInstance::sample_other()
         );
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(
-            FactorInstance::placeholder(),
-            FactorInstance::placeholder_other()
-        );
+        assert_ne!(FactorInstance::sample(), FactorInstance::sample_other());
     }
 
     #[test]
     fn json_roundtrip() {
-        let model = FactorInstance::placeholder();
+        let model = FactorInstance::sample();
         assert_eq_after_json_roundtrip(
             &model,
             r#"

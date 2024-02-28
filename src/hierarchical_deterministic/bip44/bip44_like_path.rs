@@ -116,15 +116,15 @@ impl FromStr for BIP44LikePath {
     }
 }
 
-impl HasPlaceholder for BIP44LikePath {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
-        Self::from_str("m/44H/1022H/0H/0/0H").expect("Valid placeholder")
+impl HasSampleValues for BIP44LikePath {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
+        Self::from_str("m/44H/1022H/0H/0/0H").expect("Valid sample")
     }
 
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder_other() -> Self {
-        Self::from_str("m/44H/1022H/0H/0/1H").expect("Valid placeholder")
+    /// A sample used to facilitate unit tests.
+    fn sample_other() -> Self {
+        Self::from_str("m/44H/1022H/0H/0/1H").expect("Valid sample")
     }
 }
 
@@ -135,19 +135,16 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(BIP44LikePath::placeholder(), BIP44LikePath::placeholder());
+        assert_eq!(BIP44LikePath::sample(), BIP44LikePath::sample());
         assert_eq!(
-            BIP44LikePath::placeholder_other(),
-            BIP44LikePath::placeholder_other()
+            BIP44LikePath::sample_other(),
+            BIP44LikePath::sample_other()
         );
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(
-            BIP44LikePath::placeholder(),
-            BIP44LikePath::placeholder_other()
-        );
+        assert_ne!(BIP44LikePath::sample(), BIP44LikePath::sample_other());
     }
 
     #[test]
@@ -158,11 +155,8 @@ mod tests {
     }
 
     #[test]
-    fn placeholder() {
-        assert_eq!(
-            BIP44LikePath::placeholder().to_string(),
-            "m/44H/1022H/0H/0/0H"
-        );
+    fn sample() {
+        assert_eq!(BIP44LikePath::sample().to_string(), "m/44H/1022H/0H/0/0H");
     }
 
     #[test]

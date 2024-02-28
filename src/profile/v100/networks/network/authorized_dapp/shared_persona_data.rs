@@ -37,8 +37,8 @@ impl SharedPersonaData {
     }
 }
 
-impl HasPlaceholder for SharedPersonaData {
-    fn placeholder() -> Self {
+impl HasSampleValues for SharedPersonaData {
+    fn sample() -> Self {
         let id = IDStepper::<PersonaDataEntryID>::starting_at(0);
         unsafe {
             Self::new(
@@ -55,7 +55,7 @@ impl HasPlaceholder for SharedPersonaData {
         }
     }
 
-    fn placeholder_other() -> Self {
+    fn sample_other() -> Self {
         let id = IDStepper::<PersonaDataEntryID>::starting_at(0xf0);
         unsafe {
             Self::new(
@@ -82,18 +82,18 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::placeholder(), SUT::placeholder());
-        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
-    fn json_roundtrip_placeholder() {
-        let model = SharedPersonaData::placeholder();
+    fn json_roundtrip_sample() {
+        let model = SharedPersonaData::sample();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -125,8 +125,8 @@ mod tests {
     }
 
     #[test]
-    fn json_roundtrip_placeholder_other() {
-        let model = SharedPersonaData::placeholder_other();
+    fn json_roundtrip_sample_other() {
+        let model = SharedPersonaData::sample_other();
         assert_eq_after_json_roundtrip(
             &model,
             r#"

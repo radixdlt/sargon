@@ -44,7 +44,7 @@ impl Secp256k1Signature {
     }
 }
 
-impl HasPlaceholder for Secp256k1Signature {
+impl HasSampleValues for Secp256k1Signature {
     /// Returns a valid Secp256k1Signature, see doc test below,
     /// with the value:
     ///
@@ -83,8 +83,8 @@ impl HasPlaceholder for Secp256k1Signature {
     /// );
     /// ```
     ///
-    fn placeholder() -> Self {
-        "018ad795353658a0cd1b513c4414cbafd0f990d329522977f8885a27876976a7d41ed8a81c1ac34551819627689cf940c4e27cacab217f00a0a899123c021ff6ef".parse().expect("Should construct valid placeholders.")
+    fn sample() -> Self {
+        "018ad795353658a0cd1b513c4414cbafd0f990d329522977f8885a27876976a7d41ed8a81c1ac34551819627689cf940c4e27cacab217f00a0a899123c021ff6ef".parse().expect("Should construct valid sample values.")
     }
 
     /// Returns a valid Secp256k1Signature, see doc test below,
@@ -125,14 +125,14 @@ impl HasPlaceholder for Secp256k1Signature {
     /// );
     /// ```
     ///
-    fn placeholder_other() -> Self {
-        "01aa1c4f46f8437b7f8ec9008ae10e6f33bb8be3e81e35c63f3498070dfbd6a20b2daee6073ead3c9e72d8909bc32a02e46cede3885cf8568d4c380ac97aa7fbcd".parse().expect("Should construct valid placeholders.")
+    fn sample_other() -> Self {
+        "01aa1c4f46f8437b7f8ec9008ae10e6f33bb8be3e81e35c63f3498070dfbd6a20b2daee6073ead3c9e72d8909bc32a02e46cede3885cf8568d4c380ac97aa7fbcd".parse().expect("Should construct valid sample values.")
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::HasPlaceholder;
+    use crate::HasSampleValues;
 
     use super::*;
 
@@ -141,18 +141,18 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::placeholder(), SUT::placeholder());
-        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn scrypto_roundtrip() {
-        let sut = SUT::placeholder();
+        let sut = SUT::sample();
         assert_eq!(
             Into::<SUT>::into(Into::<ScryptoSecp256k1Signature>::into(
                 sut.clone()
@@ -172,6 +172,6 @@ mod tests {
 
     #[test]
     fn to_hex() {
-        assert_eq!(SUT::placeholder().to_hex(), "018ad795353658a0cd1b513c4414cbafd0f990d329522977f8885a27876976a7d41ed8a81c1ac34551819627689cf940c4e27cacab217f00a0a899123c021ff6ef");
+        assert_eq!(SUT::sample().to_hex(), "018ad795353658a0cd1b513c4414cbafd0f990d329522977f8885a27876976a7d41ed8a81c1ac34551819627689cf940c4e27cacab217f00a0a899123c021ff6ef");
     }
 }

@@ -49,15 +49,13 @@ impl PersonaDataEntryPhoneNumber {
     }
 }
 
-impl HasPlaceholder for PersonaDataEntryPhoneNumber {
-    fn placeholder() -> Self {
-        PersonaDataEntryPhoneNumber::new("+46123456789")
-            .expect("Valid placeholder.")
+impl HasSampleValues for PersonaDataEntryPhoneNumber {
+    fn sample() -> Self {
+        PersonaDataEntryPhoneNumber::new("+46123456789").expect("Valid sample.")
     }
 
-    fn placeholder_other() -> Self {
-        PersonaDataEntryPhoneNumber::new("+44987654321")
-            .expect("Valid placeholder.")
+    fn sample_other() -> Self {
+        PersonaDataEntryPhoneNumber::new("+44987654321").expect("Valid sample.")
     }
 }
 
@@ -68,20 +66,20 @@ mod tests {
     #[test]
     fn equality() {
         assert_eq!(
-            PersonaDataEntryPhoneNumber::placeholder(),
-            PersonaDataEntryPhoneNumber::placeholder()
+            PersonaDataEntryPhoneNumber::sample(),
+            PersonaDataEntryPhoneNumber::sample()
         );
         assert_eq!(
-            PersonaDataEntryPhoneNumber::placeholder_other(),
-            PersonaDataEntryPhoneNumber::placeholder_other()
+            PersonaDataEntryPhoneNumber::sample_other(),
+            PersonaDataEntryPhoneNumber::sample_other()
         );
     }
 
     #[test]
     fn inequality() {
         assert_ne!(
-            PersonaDataEntryPhoneNumber::placeholder(),
-            PersonaDataEntryPhoneNumber::placeholder_other()
+            PersonaDataEntryPhoneNumber::sample(),
+            PersonaDataEntryPhoneNumber::sample_other()
         );
     }
 
@@ -94,16 +92,16 @@ mod tests {
     }
 
     #[test]
-    fn json_roundtrip_placeholder() {
-        let model = PersonaDataEntryPhoneNumber::placeholder();
+    fn json_roundtrip_sample() {
+        let model = PersonaDataEntryPhoneNumber::sample();
         assert_json_value_eq_after_roundtrip(&model, json!("+46123456789"));
     }
 
     #[test]
     fn id_is_number() {
         assert_eq!(
-            PersonaDataEntryPhoneNumber::placeholder().id(),
-            PersonaDataEntryPhoneNumber::placeholder().number
+            PersonaDataEntryPhoneNumber::sample().id(),
+            PersonaDataEntryPhoneNumber::sample().number
         );
     }
 
@@ -111,7 +109,7 @@ mod tests {
     fn new_from_string() {
         assert_eq!(
             PersonaDataEntryPhoneNumber::new("+46123456789").unwrap(),
-            PersonaDataEntryPhoneNumber::placeholder()
+            PersonaDataEntryPhoneNumber::sample()
         );
     }
 
@@ -119,7 +117,7 @@ mod tests {
     fn new_from_str() {
         assert_eq!(
             PersonaDataEntryPhoneNumber::new("+46123456789").unwrap(),
-            PersonaDataEntryPhoneNumber::placeholder()
+            PersonaDataEntryPhoneNumber::sample()
         );
     }
 
@@ -127,6 +125,6 @@ mod tests {
     fn new_with_fromstr() {
         let phone: PersonaDataEntryPhoneNumber =
             "+46123456789".parse().unwrap();
-        assert_eq!(phone, PersonaDataEntryPhoneNumber::placeholder());
+        assert_eq!(phone, PersonaDataEntryPhoneNumber::sample());
     }
 }

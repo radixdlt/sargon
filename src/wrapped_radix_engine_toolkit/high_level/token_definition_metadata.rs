@@ -59,12 +59,12 @@ impl TokenDefinitionMetadata {
     }
 }
 
-impl HasPlaceholder for TokenDefinitionMetadata {
-    fn placeholder() -> Self {
+impl HasSampleValues for TokenDefinitionMetadata {
+    fn sample() -> Self {
         Self::fungible()
     }
 
-    fn placeholder_other() -> Self {
+    fn sample_other() -> Self {
         Self::non_fungible()
     }
 }

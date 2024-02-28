@@ -1,6 +1,5 @@
 extension PackageAddress: @unchecked Sendable {}
 
-
 #if DEBUG
 	extension PackageAddress {
 		/// Namespace for preview values of `PackageAddress`
@@ -8,8 +7,8 @@ extension PackageAddress: @unchecked Sendable {}
 			fileprivate init() {}
 			public static let of = Self()
 
-			public let first: PackageAddress = newPackageAddressPlaceholder()
-			public let second: PackageAddress = newPackageAddressPlaceholderOther()
+			public let first: PackageAddress = newPackageAddressSample()
+			public let second: PackageAddress = newPackageAddressSampleOther()
 		}
 
 		/// Preview values for `PackageAddress`, e.g.:

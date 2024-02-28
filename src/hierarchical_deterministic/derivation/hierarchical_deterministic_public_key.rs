@@ -36,10 +36,10 @@ impl HierarchicalDeterministicPublicKey {
     }
 }
 
-impl HasPlaceholder for HierarchicalDeterministicPublicKey {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
-        let mwp = MnemonicWithPassphrase::placeholder();
+impl HasSampleValues for HierarchicalDeterministicPublicKey {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
+        let mwp = MnemonicWithPassphrase::sample();
         let path = AccountPath::new(
             NetworkID::Mainnet,
             CAP26KeyKind::TransactionSigning,
@@ -62,7 +62,7 @@ impl HasPlaceholder for HierarchicalDeterministicPublicKey {
         public_key
     }
 
-    fn placeholder_other() -> Self {
+    fn sample_other() -> Self {
         let mwp = MnemonicWithPassphrase::with_passphrase(
             Mnemonic::from_phrase(
      "habit special recipe upon giraffe manual evil badge dwarf welcome inspire shrug post arrive van",
@@ -97,14 +97,14 @@ mod tests {
     #[test]
     fn to_hex() {
         assert_eq!(
-            HierarchicalDeterministicPublicKey::placeholder().to_hex(),
+            HierarchicalDeterministicPublicKey::sample().to_hex(),
             "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b"
         );
     }
 
     #[test]
     fn json() {
-        let model = HierarchicalDeterministicPublicKey::placeholder();
+        let model = HierarchicalDeterministicPublicKey::sample();
         assert_eq_after_json_roundtrip(
             &model,
             r#"

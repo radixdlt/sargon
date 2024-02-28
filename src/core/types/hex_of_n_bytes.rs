@@ -174,59 +174,59 @@ decl_bag_of_n_bytes!(
     65
 );
 
-macro_rules! decl_placeholders_for_bag_of_n_bytes {
+macro_rules! decl_samples_for_bag_of_n_bytes {
     ($struct_name:ident, $byte_count:expr) => {
-        impl HasPlaceholder for $struct_name {
+        impl HasSampleValues for $struct_name {
             /// `deadbeef...``
-            /// A placeholder used to facilitate unit tests.
-            fn placeholder() -> Self {
-                Self::placeholder_dead()
+            /// A sample used to facilitate unit tests.
+            fn sample() -> Self {
+                Self::sample_dead()
             }
 
-            /// A placeholder used to facilitate unit tests.
-            fn placeholder_other() -> Self {
-                Self::placeholder_fade()
+            /// A sample used to facilitate unit tests.
+            fn sample_other() -> Self {
+                Self::sample_fade()
             }
         }
 
         impl $struct_name {
             /// `aced...``
-            /// A placeholder used to facilitate unit tests.
-            pub fn placeholder_aced() -> Self {
+            /// A sample used to facilitate unit tests.
+            pub fn sample_aced() -> Self {
                 Self::from_str(&"aced".repeat($byte_count / 2))
                     .expect("aced...")
             }
 
             /// `babe...``
-            /// A placeholder used to facilitate unit tests.
-            pub fn placeholder_babe() -> Self {
+            /// A sample used to facilitate unit tests.
+            pub fn sample_babe() -> Self {
                 Self::from_str(&"babe".repeat($byte_count / 2))
                     .expect("babe...")
             }
 
             /// `cafe...``
-            /// A placeholder used to facilitate unit tests.
-            pub fn placeholder_cafe() -> Self {
+            /// A sample used to facilitate unit tests.
+            pub fn sample_cafe() -> Self {
                 Self::from_str(&"cafe".repeat($byte_count / 2))
                     .expect("cafe...")
             }
 
             /// `dead...``
-            /// A placeholder used to facilitate unit tests.
-            pub fn placeholder_dead() -> Self {
+            /// A sample used to facilitate unit tests.
+            pub fn sample_dead() -> Self {
                 Self::from_str(&"dead".repeat($byte_count / 2))
                     .expect("dead...")
             }
 
             /// `ecad...``
-            /// A placeholder used to facilitate unit tests.
-            pub fn placeholder_ecad() -> Self {
+            /// A sample used to facilitate unit tests.
+            pub fn sample_ecad() -> Self {
                 Self::from_str(&"ecad".repeat(16)).expect("ecad...")
             }
 
             /// `fade...``
-            /// A placeholder used to facilitate unit tests.
-            pub fn placeholder_fade() -> Self {
+            /// A sample used to facilitate unit tests.
+            pub fn sample_fade() -> Self {
                 Self::from_str(&"fade".repeat($byte_count / 2))
                     .expect("fade...")
             }
@@ -234,61 +234,61 @@ macro_rules! decl_placeholders_for_bag_of_n_bytes {
     };
 }
 
-// The impl of placeholders require an equal number of bytes
-decl_placeholders_for_bag_of_n_bytes!(Hex32Bytes, 32);
-decl_placeholders_for_bag_of_n_bytes!(Hex64Bytes, 64);
+// The impl of sample values require an equal number of bytes
+decl_samples_for_bag_of_n_bytes!(Hex32Bytes, 32);
+decl_samples_for_bag_of_n_bytes!(Hex64Bytes, 64);
 
-impl HasPlaceholder for Hex33Bytes {
+impl HasSampleValues for Hex33Bytes {
     /// `33deadbeefdead...``
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
         let s = "dead".repeat(16);
         Self::from_str(&format!("33{s}"))
-            .expect("Should have declared a valid Hex33Bytes placeholder")
+            .expect("Should have declared a valid Hex33Bytes sample")
     }
 
     /// `33beefbeefbeef...``
-    /// Another placeholder used to facilitate unit tests.
-    fn placeholder_other() -> Self {
+    /// Another sample used to facilitate unit tests.
+    fn sample_other() -> Self {
         let s = "beef".repeat(16);
         Self::from_str(&format!("33{s}"))
-            .expect("Should have declared a valid Hex33Bytes placeholder")
+            .expect("Should have declared a valid Hex33Bytes sample")
     }
 }
 
-impl HasPlaceholder for Hex65Bytes {
+impl HasSampleValues for Hex65Bytes {
     /// `65deadbeefdead...``
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
         let s = "dead".repeat(32);
         Self::from_str(&format!("65{s}"))
-            .expect("Should have declared a valid Hex65Bytes placeholder")
+            .expect("Should have declared a valid Hex65Bytes sample")
     }
 
     /// `65beefbeefbeef...``
-    /// Another placeholder used to facilitate unit tests.
-    fn placeholder_other() -> Self {
+    /// Another sample used to facilitate unit tests.
+    fn sample_other() -> Self {
         let s = "beef".repeat(32);
         Self::from_str(&format!("65{s}"))
-            .expect("Should have declared a valid Hex65Bytes placeholder")
+            .expect("Should have declared a valid Hex65Bytes sample")
     }
 }
 
-impl HasPlaceholder for Hex29Bytes {
+impl HasSampleValues for Hex29Bytes {
     /// `29deadbeefdead...``
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
         let s = "dead".repeat(14);
         Self::from_str(&format!("29{s}"))
-            .expect("Should have declared a valid Hex29Bytes placeholder")
+            .expect("Should have declared a valid Hex29Bytes sample")
     }
 
     /// `20beefbeefbeef...``
-    /// Another placeholder used to facilitate unit tests.
-    fn placeholder_other() -> Self {
+    /// Another sample used to facilitate unit tests.
+    fn sample_other() -> Self {
         let s = "beef".repeat(14);
         Self::from_str(&format!("29{s}"))
-            .expect("Should have declared a valid Hex29Bytes placeholder")
+            .expect("Should have declared a valid Hex29Bytes sample")
     }
 }
 
@@ -368,13 +368,13 @@ mod tests_hex32_bytes {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::placeholder(), SUT::placeholder());
-        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
@@ -388,7 +388,7 @@ mod tests_hex32_bytes {
     fn debug() {
         let str =
             "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
-        let hex_bytes = SUT::placeholder();
+        let hex_bytes = SUT::sample();
         assert_eq!(format!("{:?}", hex_bytes), str);
     }
 
@@ -396,7 +396,7 @@ mod tests_hex32_bytes {
     fn display() {
         let str =
             "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
-        let hex_bytes = SUT::placeholder();
+        let hex_bytes = SUT::sample();
         assert_eq!(format!("{}", hex_bytes), str);
     }
 
@@ -404,7 +404,7 @@ mod tests_hex32_bytes {
     fn to_hex() {
         let str =
             "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
-        let hex_bytes = SUT::placeholder();
+        let hex_bytes = SUT::sample();
         assert_eq!(hex_bytes.to_string(), str);
     }
 
@@ -419,7 +419,7 @@ mod tests_hex32_bytes {
 
     #[test]
     fn json_roundtrip() {
-        let model = SUT::placeholder();
+        let model = SUT::sample();
         assert_json_value_eq_after_roundtrip(
             &model,
             json!("deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"),
@@ -522,13 +522,13 @@ mod tests_hex64_bytes {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::placeholder(), SUT::placeholder());
-        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
@@ -542,7 +542,7 @@ mod tests_hex64_bytes {
     fn debug() {
         let str =
             "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
-        let hex_bytes = SUT::placeholder();
+        let hex_bytes = SUT::sample();
         assert_eq!(format!("{:?}", hex_bytes), str);
     }
 
@@ -550,7 +550,7 @@ mod tests_hex64_bytes {
     fn display() {
         let str =
             "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
-        let hex_bytes = SUT::placeholder();
+        let hex_bytes = SUT::sample();
         assert_eq!(format!("{}", hex_bytes), str);
     }
 
@@ -558,13 +558,13 @@ mod tests_hex64_bytes {
     fn to_hex() {
         let str =
             "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
-        let hex_bytes = SUT::placeholder();
+        let hex_bytes = SUT::sample();
         assert_eq!(hex_bytes.to_string(), str);
     }
 
     #[test]
     fn json_roundtrip() {
-        let model = SUT::placeholder();
+        let model = SUT::sample();
         assert_json_value_eq_after_roundtrip(
             &model,
             json!("deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"),
@@ -667,13 +667,13 @@ mod tests_hex33_bytes {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::placeholder(), SUT::placeholder());
-        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
@@ -687,7 +687,7 @@ mod tests_hex33_bytes {
     fn debug() {
         let str =
             "33deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
-        let hex_bytes = SUT::placeholder();
+        let hex_bytes = SUT::sample();
         assert_eq!(format!("{:?}", hex_bytes), str);
     }
 
@@ -695,7 +695,7 @@ mod tests_hex33_bytes {
     fn display() {
         let str =
             "33deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
-        let hex_bytes = SUT::placeholder();
+        let hex_bytes = SUT::sample();
         assert_eq!(format!("{}", hex_bytes), str);
     }
 
@@ -703,13 +703,13 @@ mod tests_hex33_bytes {
     fn to_hex() {
         let str =
             "33deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
-        let hex_bytes = SUT::placeholder();
+        let hex_bytes = SUT::sample();
         assert_eq!(hex_bytes.to_string(), str);
     }
 
     #[test]
     fn json_roundtrip() {
-        let model = SUT::placeholder();
+        let model = SUT::sample();
         assert_json_value_eq_after_roundtrip(
             &model,
             json!("33deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"),
@@ -812,13 +812,13 @@ mod tests_hex65_bytes {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::placeholder(), SUT::placeholder());
-        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
@@ -832,7 +832,7 @@ mod tests_hex65_bytes {
     fn debug() {
         let str =
             "65deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
-        let hex_bytes = SUT::placeholder();
+        let hex_bytes = SUT::sample();
         assert_eq!(format!("{:?}", hex_bytes), str);
     }
 
@@ -840,7 +840,7 @@ mod tests_hex65_bytes {
     fn display() {
         let str =
             "65deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
-        let hex_bytes = SUT::placeholder();
+        let hex_bytes = SUT::sample();
         assert_eq!(format!("{}", hex_bytes), str);
     }
 
@@ -848,13 +848,13 @@ mod tests_hex65_bytes {
     fn to_hex() {
         let str =
             "65deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
-        let hex_bytes = SUT::placeholder();
+        let hex_bytes = SUT::sample();
         assert_eq!(hex_bytes.to_string(), str);
     }
 
     #[test]
     fn json_roundtrip() {
-        let model = SUT::placeholder();
+        let model = SUT::sample();
         assert_json_value_eq_after_roundtrip(
             &model,
             json!("65deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"),
@@ -957,13 +957,13 @@ mod tests_hex29_bytes {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::placeholder(), SUT::placeholder());
-        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
@@ -975,27 +975,27 @@ mod tests_hex29_bytes {
     #[test]
     fn debug() {
         let str = "29deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
-        let hex_bytes = SUT::placeholder();
+        let hex_bytes = SUT::sample();
         assert_eq!(format!("{:?}", hex_bytes), str);
     }
 
     #[test]
     fn display() {
         let str = "29deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
-        let hex_bytes = SUT::placeholder();
+        let hex_bytes = SUT::sample();
         assert_eq!(format!("{}", hex_bytes), str);
     }
 
     #[test]
     fn to_hex() {
         let str = "29deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
-        let hex_bytes = SUT::placeholder();
+        let hex_bytes = SUT::sample();
         assert_eq!(hex_bytes.to_string(), str);
     }
 
     #[test]
     fn json_roundtrip() {
-        let model = SUT::placeholder();
+        let model = SUT::sample();
         assert_json_value_eq_after_roundtrip(
             &model,
             json!("29deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"),

@@ -30,14 +30,14 @@ impl Default for TransactionPreferences {
     }
 }
 
-impl HasPlaceholder for TransactionPreferences {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
+impl HasSampleValues for TransactionPreferences {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
         Self::new("0.975".parse().unwrap())
     }
 
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder_other() -> Self {
+    /// A sample used to facilitate unit tests.
+    fn sample_other() -> Self {
         Self::new("0.765".parse().unwrap())
     }
 }
@@ -48,20 +48,20 @@ mod tests {
     #[test]
     fn equality() {
         assert_eq!(
-            TransactionPreferences::placeholder(),
-            TransactionPreferences::placeholder()
+            TransactionPreferences::sample(),
+            TransactionPreferences::sample()
         );
         assert_eq!(
-            TransactionPreferences::placeholder_other(),
-            TransactionPreferences::placeholder_other()
+            TransactionPreferences::sample_other(),
+            TransactionPreferences::sample_other()
         );
     }
 
     #[test]
     fn inequality() {
         assert_ne!(
-            TransactionPreferences::placeholder(),
-            TransactionPreferences::placeholder_other()
+            TransactionPreferences::sample(),
+            TransactionPreferences::sample_other()
         );
     }
 
@@ -74,7 +74,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip() {
-        let sut = TransactionPreferences::placeholder();
+        let sut = TransactionPreferences::sample();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"

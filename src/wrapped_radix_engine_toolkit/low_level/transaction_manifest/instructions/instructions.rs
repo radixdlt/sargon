@@ -49,43 +49,43 @@ impl Instructions {
     }
 }
 
-impl HasPlaceholder for Instructions {
-    fn placeholder() -> Self {
-        Self::placeholder_simulator()
+impl HasSampleValues for Instructions {
+    fn sample() -> Self {
+        Self::sample_simulator()
     }
 
-    fn placeholder_other() -> Self {
-        Self::placeholder_simulator_other()
+    fn sample_other() -> Self {
+        Self::sample_simulator_other()
     }
 }
 
 impl Instructions {
     // https://github.com/radixdlt/radix-engine-toolkit/blob/cf2f4b4d6de56233872e11959861fbf12db8ddf6/crates/radix-engine-toolkit/tests/manifests/account/resource_transfer.rtm
     // but modified, changed `None` -> `Enum<0u8>()`
-    pub(crate) fn placeholder_simulator_instructions_string() -> String {
+    pub(crate) fn sample_simulator_instructions_string() -> String {
         include_str!("resource_transfer.rtm").to_owned()
     }
 
-    pub fn placeholder_simulator() -> Self {
+    pub fn sample_simulator() -> Self {
         Self::new(
-            Self::placeholder_simulator_instructions_string(),
+            Self::sample_simulator_instructions_string(),
             NetworkID::Simulator,
         )
-        .expect("Valid placeholder value")
+        .expect("Valid sample value")
     }
 
     // https://github.com/radixdlt/radix-engine-toolkit/blob/cf2f4b4d6de56233872e11959861fbf12db8ddf6/crates/radix-engine-toolkit/tests/manifests/account/multi_account_resource_transfer.rtm
     // but modified, changed `None` -> `Enum<0u8>()`, also changed `"account_a_bucket"` -> `"bucket1"`, `"account_b_bucket"` -> `"bucket2"`, etc.
-    pub(crate) fn placeholder_other_simulator_instructions_string() -> String {
+    pub(crate) fn sample_other_simulator_instructions_string() -> String {
         include_str!("multi_account_resource_transfer.rtm").to_owned()
     }
 
-    pub fn placeholder_simulator_other() -> Self {
+    pub fn sample_simulator_other() -> Self {
         Self::new(
-            Self::placeholder_other_simulator_instructions_string(),
+            Self::sample_other_simulator_instructions_string(),
             NetworkID::Simulator,
         )
-        .expect("Valid placeholder value")
+        .expect("Valid sample value")
     }
 }
 
@@ -98,20 +98,17 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::placeholder(), SUT::placeholder());
-        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn network_id() {
-        assert_eq!(
-            SUT::placeholder_simulator().network_id,
-            NetworkID::Simulator
-        );
+        assert_eq!(SUT::sample_simulator().network_id, NetworkID::Simulator);
     }
 }

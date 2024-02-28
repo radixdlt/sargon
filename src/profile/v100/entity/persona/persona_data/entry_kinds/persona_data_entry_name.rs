@@ -68,15 +68,15 @@ impl PersonaDataEntryName {
     }
 }
 
-impl HasPlaceholder for PersonaDataEntryName {
-    fn placeholder() -> Self {
+impl HasSampleValues for PersonaDataEntryName {
+    fn sample() -> Self {
         PersonaDataEntryName::new(Variant::Western, "Wayne", "Bruce", "Batman")
-            .expect("Should have a valid Name placeholder")
+            .expect("Should have a valid Name sample")
     }
 
-    fn placeholder_other() -> Self {
+    fn sample_other() -> Self {
         PersonaDataEntryName::new(Variant::Eastern, "Jun-fan", "Lee", "Bruce")
-            .expect("Should have a valid Name placeholder")
+            .expect("Should have a valid Name sample")
     }
 }
 
@@ -123,19 +123,19 @@ mod tests {
     }
 
     #[test]
-    fn placeholder() {
-        let placeholder = PersonaDataEntryName::placeholder();
-        assert_eq!(placeholder.family_name, "Wayne");
-        assert_eq!(placeholder.given_names, "Bruce");
-        assert_eq!(placeholder.nickname, "Batman");
+    fn sample() {
+        let sample = PersonaDataEntryName::sample();
+        assert_eq!(sample.family_name, "Wayne");
+        assert_eq!(sample.given_names, "Bruce");
+        assert_eq!(sample.nickname, "Batman");
     }
 
     #[test]
-    fn placeholder_other() {
-        let placeholder = PersonaDataEntryName::placeholder_other();
-        assert_eq!(placeholder.family_name, "Jun-fan");
-        assert_eq!(placeholder.given_names, "Lee");
-        assert_eq!(placeholder.nickname, "Bruce");
+    fn sample_other() {
+        let sample = PersonaDataEntryName::sample_other();
+        assert_eq!(sample.family_name, "Jun-fan");
+        assert_eq!(sample.given_names, "Lee");
+        assert_eq!(sample.nickname, "Bruce");
     }
 
     #[test]
@@ -197,19 +197,19 @@ mod tests {
 
     #[test]
     fn display_western() {
-        let placeholder = PersonaDataEntryName::placeholder();
-        assert_eq!(format!("{placeholder}"), "Bruce Batman Wayne")
+        let sample = PersonaDataEntryName::sample();
+        assert_eq!(format!("{sample}"), "Bruce Batman Wayne")
     }
 
     #[test]
     fn display_eastern() {
-        let placeholder = PersonaDataEntryName::placeholder_other();
-        assert_eq!(format!("{placeholder}"), "Jun-fan Bruce Lee")
+        let sample = PersonaDataEntryName::sample_other();
+        assert_eq!(format!("{sample}"), "Jun-fan Bruce Lee")
     }
 
     #[test]
-    fn json_roundtrip_placeholder() {
-        let model = PersonaDataEntryName::placeholder();
+    fn json_roundtrip_sample() {
+        let model = PersonaDataEntryName::sample();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -224,8 +224,8 @@ mod tests {
     }
 
     #[test]
-    fn json_roundtrip_placeholder_other() {
-        let model = PersonaDataEntryName::placeholder_other();
+    fn json_roundtrip_sample_other() {
+        let model = PersonaDataEntryName::sample_other();
         assert_eq_after_json_roundtrip(
             &model,
             r#"

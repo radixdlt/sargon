@@ -1,6 +1,5 @@
 extension ComponentAddress: @unchecked Sendable {}
 
-
 #if DEBUG
 	extension ComponentAddress {
 		/// Namespace for preview values of `ComponentAddress`
@@ -8,10 +7,10 @@ extension ComponentAddress: @unchecked Sendable {}
 			fileprivate init() {}
 			public static let of = Self()
 
-			public let mainnet: ComponentAddress = newComponentAddressPlaceholder()
+			public let mainnet: ComponentAddress = newComponentAddressSample()
 
 			public let mainnetOther: ComponentAddress =
-				newComponentAddressPlaceholderOther()
+				newComponentAddressSampleOther()
 
 		}
 

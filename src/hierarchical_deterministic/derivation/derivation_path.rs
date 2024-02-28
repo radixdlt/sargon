@@ -72,15 +72,15 @@ impl Serialize for DerivationPath {
     }
 }
 
-impl HasPlaceholder for DerivationPath {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
-        AccountPath::placeholder().into()
+impl HasSampleValues for DerivationPath {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
+        AccountPath::sample().into()
     }
 
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder_other() -> Self {
-        IdentityPath::placeholder().into()
+    /// A sample used to facilitate unit tests.
+    fn sample_other() -> Self {
+        IdentityPath::sample().into()
     }
 }
 
@@ -105,9 +105,9 @@ impl Derivation for DerivationPath {
 }
 
 impl DerivationPath {
-    pub fn placeholder_cap26() -> Self {
+    pub fn sample_cap26() -> Self {
         DerivationPath::CAP26 {
-            value: CAP26Path::placeholder_account(),
+            value: CAP26Path::sample_account(),
         }
     }
 }
@@ -155,28 +155,22 @@ mod tests {
 
     #[test]
     fn equality() {
+        assert_eq!(DerivationPath::sample(), DerivationPath::sample());
         assert_eq!(
-            DerivationPath::placeholder(),
-            DerivationPath::placeholder()
-        );
-        assert_eq!(
-            DerivationPath::placeholder_other(),
-            DerivationPath::placeholder_other()
+            DerivationPath::sample_other(),
+            DerivationPath::sample_other()
         );
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(
-            DerivationPath::placeholder(),
-            DerivationPath::placeholder_other()
-        );
+        assert_ne!(DerivationPath::sample(), DerivationPath::sample_other());
     }
 
     #[test]
     fn cap26_scheme() {
         assert_eq!(
-            DerivationPath::placeholder_cap26().scheme(),
+            DerivationPath::sample_cap26().scheme(),
             DerivationPathScheme::Cap26
         );
     }
@@ -184,8 +178,8 @@ mod tests {
     #[test]
     fn cap26_hdpath() {
         assert_eq!(
-            DerivationPath::placeholder_cap26().hd_path(),
-            AccountPath::placeholder().hd_path()
+            DerivationPath::sample_cap26().hd_path(),
+            AccountPath::sample().hd_path()
         );
     }
 
@@ -215,28 +209,25 @@ mod tests {
     fn into_from_account_bip44_path() {
         assert_eq!(
             DerivationPath::BIP44Like {
-                value: BIP44LikePath::placeholder()
+                value: BIP44LikePath::sample()
             },
-            BIP44LikePath::placeholder().into()
+            BIP44LikePath::sample().into()
         );
     }
 
     #[test]
     fn as_bip44_path() {
-        let path: DerivationPath = BIP44LikePath::placeholder().into();
-        assert_eq!(
-            path.as_bip44_like().unwrap(),
-            &BIP44LikePath::placeholder()
-        );
+        let path: DerivationPath = BIP44LikePath::sample().into();
+        assert_eq!(path.as_bip44_like().unwrap(), &BIP44LikePath::sample());
     }
 
     #[test]
     fn into_from_account_cap26_path() {
         assert_eq!(
             DerivationPath::CAP26 {
-                value: AccountPath::placeholder().into()
+                value: AccountPath::sample().into()
             },
-            AccountPath::placeholder().into()
+            AccountPath::sample().into()
         );
     }
 
@@ -244,38 +235,35 @@ mod tests {
     fn into_from_identity_cap26_path() {
         assert_eq!(
             DerivationPath::CAP26 {
-                value: IdentityPath::placeholder().into()
+                value: IdentityPath::sample().into()
             },
-            IdentityPath::placeholder().into()
+            IdentityPath::sample().into()
         );
     }
 
     #[test]
     fn derivation_path_identity() {
-        let derivation_path: DerivationPath =
-            IdentityPath::placeholder().into();
+        let derivation_path: DerivationPath = IdentityPath::sample().into();
         assert_eq!(derivation_path, derivation_path.derivation_path());
     }
 
     #[test]
     fn try_from_hdpath_account() {
-        let derivation_path: DerivationPath = AccountPath::placeholder().into();
+        let derivation_path: DerivationPath = AccountPath::sample().into();
         let hd_path = derivation_path.hd_path();
         assert_eq!(DerivationPath::try_from(hd_path), Ok(derivation_path));
     }
 
     #[test]
     fn try_from_hdpath_identity() {
-        let derivation_path: DerivationPath =
-            IdentityPath::placeholder().into();
+        let derivation_path: DerivationPath = IdentityPath::sample().into();
         let hd_path = derivation_path.hd_path();
         assert_eq!(DerivationPath::try_from(hd_path), Ok(derivation_path));
     }
 
     #[test]
     fn try_from_hdpath_bip44() {
-        let derivation_path: DerivationPath =
-            BIP44LikePath::placeholder().into();
+        let derivation_path: DerivationPath = BIP44LikePath::sample().into();
         let hd_path = derivation_path.hd_path();
         assert_eq!(DerivationPath::try_from(hd_path), Ok(derivation_path));
     }
@@ -290,22 +278,22 @@ mod tests {
     #[test]
     fn from_cap26() {
         let derivation_path: DerivationPath = CAP26Path::Account {
-            value: AccountPath::placeholder(),
+            value: AccountPath::sample(),
         }
         .into();
         assert_eq!(
             derivation_path.derivation_path(),
-            AccountPath::placeholder().derivation_path()
+            AccountPath::sample().derivation_path()
         )
     }
 
     #[test]
     fn as_cap26_path() {
-        let path: DerivationPath = AccountPath::placeholder().into();
+        let path: DerivationPath = AccountPath::sample().into();
         assert_eq!(
             path.as_cap26().unwrap(),
             &CAP26Path::Account {
-                value: AccountPath::placeholder()
+                value: AccountPath::sample()
             }
         );
     }
@@ -322,7 +310,7 @@ mod tests {
 
     #[test]
     fn json_cap26_account() {
-        let model = DerivationPath::placeholder();
+        let model = DerivationPath::sample();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -336,13 +324,13 @@ mod tests {
 
     #[test]
     fn display() {
-        let model = DerivationPath::placeholder();
+        let model = DerivationPath::sample();
         assert_eq!(format!("{}", model), "m/44H/1022H/1H/525H/1460H/0H")
     }
 
     #[test]
     fn debug() {
-        let model = DerivationPath::placeholder();
+        let model = DerivationPath::sample();
         assert_eq!(format!("{:?}", model), "m/44H/1022H/1H/525H/1460H/0H")
     }
 
@@ -363,7 +351,7 @@ mod tests {
 
     #[test]
     fn json_bip44like_account() {
-        let path = BIP44LikePath::placeholder();
+        let path = BIP44LikePath::sample();
         let model: DerivationPath = path.into();
         assert_eq_after_json_roundtrip(
             &model,

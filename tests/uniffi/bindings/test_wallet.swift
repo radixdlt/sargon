@@ -46,7 +46,7 @@ func test() throws {
 	print("🔮 Update account using `update_account`")
 	var updatedNameOfFirstAccount = "Stella"
 	main0.displayName = try DisplayName(validating: updatedNameOfFirstAccount)
-	main0.appearanceId = .placeholderOther
+	main0.appearanceId = .sampleOther
 	let main0Updated = try wallet.updateAccount(to: main0)
 	assert(main0Updated == main0)
 	assert(
@@ -55,7 +55,7 @@ func test() throws {
 	)
 	assert(
 		wallet.profile().networks[0].accounts[0].appearanceId
-			== .placeholderOther
+			== .sampleOther
 	)
 
 	assert(
@@ -127,7 +127,7 @@ try! test()
 // MARK: Helpers
 
 extension Profile {
-	fileprivate static let placeholder = newProfilePlaceholder()
+	fileprivate static let sample = newProfileSample()
 }
 extension DisplayName {
 	init(validating value: String) throws {
@@ -136,8 +136,8 @@ extension DisplayName {
 }
 typealias AppearanceID = AppearanceId
 extension AppearanceID {
-	static let placeholder: Self = newAppearanceIdPlaceholder()
-	static let placeholderOther: Self = newAppearanceIdPlaceholderOther()
+	static let sample: Self = newAppearanceIdSample()
+	static let sampleOther: Self = newAppearanceIdSampleOther()
 }
 func randomByteArray(byteCount count: Int) -> [UInt8] {
 	#if canImport(Darwin) || os(Linux) || os(Android) || os(Windows)
@@ -153,7 +153,6 @@ extension Data {
 		Data(randomByteArray(byteCount: byteCount))
 	}
 }
-
 
 extension Wallet {
 	public static let defaultIphoneName: String = "iPhone"

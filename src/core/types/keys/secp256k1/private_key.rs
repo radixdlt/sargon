@@ -97,14 +97,14 @@ impl IsPrivateKey<Secp256k1PublicKey> for Secp256k1PrivateKey {
     }
 }
 
-impl HasPlaceholder for Secp256k1PrivateKey {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
-        Self::placeholder_alice()
+impl HasSampleValues for Secp256k1PrivateKey {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
+        Self::sample_alice()
     }
 
-    fn placeholder_other() -> Self {
-        Self::placeholder_bob()
+    fn sample_other() -> Self {
+        Self::sample_bob()
     }
 }
 
@@ -116,7 +116,7 @@ impl Secp256k1PrivateKey {
     /// `02517b88916e7f315bb682f9926b14bc67a0e4246f8a419b986269e1a7e61fffa7`
     ///
     /// https://github.com/Sajjon/K1/blob/main/Tests/K1Tests/TestVectors/cyon_ecdh_two_variants_with_kdf.json#L10
-    pub fn placeholder_alice() -> Self {
+    pub fn sample_alice() -> Self {
         Self::from_str(
             "d78b6578b33f3446bdd9d09d057d6598bc915fec4008a54c509dc3b8cdc7dbe5",
         )
@@ -130,7 +130,7 @@ impl Secp256k1PrivateKey {
     /// `033083620d1596d3f8988ff3270e42970dd2a031e2b9b6488052a4170ff999f3e8`
     ///
     /// https://github.com/Sajjon/K1/blob/main/Tests/K1Tests/TestVectors/cyon_ecdh_two_variants_with_kdf.json#L12
-    pub fn placeholder_bob() -> Self {
+    pub fn sample_bob() -> Self {
         Self::from_str(
             "871761c9921a467059e090a0422ae76af87fa8eb905da91c9b554bd6a028c760",
         )
@@ -147,20 +147,20 @@ mod tests {
     #[test]
     fn equality() {
         assert_eq!(
-            Secp256k1PrivateKey::placeholder(),
-            Secp256k1PrivateKey::placeholder()
+            Secp256k1PrivateKey::sample(),
+            Secp256k1PrivateKey::sample()
         );
         assert_eq!(
-            Secp256k1PrivateKey::placeholder_other(),
-            Secp256k1PrivateKey::placeholder_other()
+            Secp256k1PrivateKey::sample_other(),
+            Secp256k1PrivateKey::sample_other()
         );
     }
 
     #[test]
     fn inequality() {
         assert_ne!(
-            Secp256k1PrivateKey::placeholder(),
-            Secp256k1PrivateKey::placeholder_other()
+            Secp256k1PrivateKey::sample(),
+            Secp256k1PrivateKey::sample_other()
         );
     }
 
@@ -304,9 +304,9 @@ mod tests {
     }
 
     #[test]
-    fn placeholder() {
+    fn sample() {
         assert_eq!(
-            Secp256k1PrivateKey::placeholder().public_key().to_hex(),
+            Secp256k1PrivateKey::sample().public_key().to_hex(),
             "02517b88916e7f315bb682f9926b14bc67a0e4246f8a419b986269e1a7e61fffa7"
         );
     }

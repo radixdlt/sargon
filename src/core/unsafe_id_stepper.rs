@@ -7,7 +7,7 @@ use std::sync::Mutex;
 use std::sync::MutexGuard;
 
 /// An UNSAFE IDStepper, which `next` returns the consecutive next ID,
-/// should only be used by tests and placeholder value creation.
+/// should only be used by tests and sample value creation.
 pub struct IDStepper<T: From<Uuid>> {
     ctr: Arc<Mutex<u64>>,
     phantom: PhantomData<T>,
@@ -26,7 +26,7 @@ impl<T: From<Uuid>> IDStepper<T> {
         Self::starting_at(0)
     }
 
-    /// ONLY Use this in a test or when creating placeholder (preview) values.
+    /// ONLY Use this in a test or when creating sample (preview) values.
     ///
     /// # Safety
     /// This is completely unsafe, it does not generate a random UUID, it creates

@@ -1,6 +1,5 @@
 extension AccessControllerAddress: @unchecked Sendable {}
 
-
 #if DEBUG
 	extension AccessControllerAddress {
 		/// Namespace for preview values of `AccessControllerAddress`
@@ -9,10 +8,10 @@ extension AccessControllerAddress: @unchecked Sendable {}
 			public static let of = Self()
 
 			public let first: AccessControllerAddress =
-				newAccessControllerAddressPlaceholder()
+				newAccessControllerAddressSample()
 
 			public let second: AccessControllerAddress =
-				newAccessControllerAddressPlaceholderOther()
+				newAccessControllerAddressSampleOther()
 
 		}
 

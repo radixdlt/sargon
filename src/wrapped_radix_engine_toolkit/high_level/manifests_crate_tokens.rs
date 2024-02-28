@@ -36,7 +36,7 @@ impl TransactionManifest {
         Self::create_fungible_token_with_metadata(
             address_of_owner,
             21_000_000.into(),
-            TokenDefinitionMetadata::placeholder(),
+            TokenDefinitionMetadata::sample(),
         )
     }
 
@@ -108,7 +108,7 @@ impl TransactionManifest {
                 ScryptoNonFungibleResourceRoles::single_locked_rule(
                     ScryptoAccessRule::DenyAll,
                 ),
-                TokenDefinitionMetadata::placeholder().into(),
+                TokenDefinitionMetadata::sample().into(),
                 Some(
                     initial_supply
                         .into_iter()
@@ -152,9 +152,9 @@ impl TransactionManifest {
         address_of_owner: &AccountAddress,
     ) -> TransactionManifest {
         if address_of_owner.network_id() == NetworkID::Mainnet {
-            panic!("To be 100% sure about license of the images, we do not allow these placeholder fungible tokens to be created on Mainnet.");
+            panic!("To be 100% sure about license of the images, we do not allow these sample fungible tokens to be created on Mainnet.");
         }
-        let path = "src/wrapped_radix_engine_toolkit/high_level/placeholder_resource_definition_metadata.json";
+        let path = "src/wrapped_radix_engine_toolkit/high_level/sample_resource_definition_metadata.json";
         let json_str = fs::read_to_string(path).unwrap();
         let json = serde_json::Value::from_str(&json_str).unwrap();
 
@@ -206,7 +206,7 @@ mod tests {
     fn manifest_for_create_fungible_token_stella() {
         assert_eq!(
             SUT::create_fungible_token(
-                &AccountAddress::placeholder_mainnet().into(),
+                &AccountAddress::sample_mainnet().into(),
             )
             .to_string(),
             r#"CREATE_FUNGIBLE_RESOURCE_WITH_INITIAL_SUPPLY
@@ -328,25 +328,25 @@ CALL_METHOD
     #[test]
     fn create_multiple_fungible_tokens() {
         let manifest = TransactionManifest::create_multiple_fungible_tokens(
-            &AccountAddress::placeholder_stokenet(),
+            &AccountAddress::sample_stokenet(),
         );
         assert_eq!(manifest.instructions().len(), 26);
     }
 
     #[test]
     #[should_panic(
-        expected = "To be 100% sure about license of the images, we do not allow these placeholder fungible tokens to be created on Mainnet."
+        expected = "To be 100% sure about license of the images, we do not allow these sample fungible tokens to be created on Mainnet."
     )]
     fn create_multiple_fungible_tokens_panics_for_mainnet() {
         TransactionManifest::create_multiple_fungible_tokens(
-            &AccountAddress::placeholder_mainnet(),
+            &AccountAddress::sample_mainnet(),
         );
     }
 
     #[test]
     fn create_non_fungible_token() {
         let manifest = TransactionManifest::create_non_fungible_token(
-            &AccountAddress::placeholder_stokenet(),
+            &AccountAddress::sample_stokenet(),
         );
         assert_eq!(manifest.instructions().len(), 2);
         assert_eq!(manifest.to_string().len(), 5048);

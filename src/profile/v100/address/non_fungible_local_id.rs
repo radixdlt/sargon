@@ -158,7 +158,7 @@ mod tests {
 
     #[test]
     fn from_native_ruid() {
-        let bytes = Hex32Bytes::placeholder_dead();
+        let bytes = Hex32Bytes::sample_dead();
         let value = NonFungibleLocalId::ruid(bytes.clone()).unwrap();
         let scrypto = ScryptoNonFungibleLocalId::RUID(
             ScryptoRUIDNonFungibleLocalId::new(bytes.clone().bytes()),

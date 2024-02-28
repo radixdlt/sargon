@@ -4,22 +4,22 @@ use radix_engine_toolkit::models::canonical_address_types::CanonicalPoolAddress 
 
 use radix_engine_common::types::EntityType as ScryptoEntityType;
 
-/// Placeholder to a mainnet PoolAddress with single resource.
+/// Sample to a mainnet PoolAddress with single resource.
 #[uniffi::export]
-pub fn new_pool_address_placeholder_single() -> PoolAddress {
-    PoolAddress::placeholder_mainnet_single_pool()
+pub fn new_pool_address_sample_single() -> PoolAddress {
+    PoolAddress::sample_mainnet_single_pool()
 }
 
-/// Placeholder to a mainnet PoolAddress with two resources.
+/// Sample to a mainnet PoolAddress with two resources.
 #[uniffi::export]
-pub fn new_pool_address_placeholder_two() -> PoolAddress {
-    PoolAddress::placeholder_mainnet_bi_pool()
+pub fn new_pool_address_sample_two() -> PoolAddress {
+    PoolAddress::sample_mainnet_bi_pool()
 }
 
-/// Placeholder to a mainnet PoolAddress with three resources.
+/// Sample to a mainnet PoolAddress with three resources.
 #[uniffi::export]
-pub fn new_pool_address_placeholder_multi() -> PoolAddress {
-    PoolAddress::placeholder_mainnet_multi_pool()
+pub fn new_pool_address_sample_multi() -> PoolAddress {
+    PoolAddress::sample_mainnet_multi_pool()
 }
 
 /// The kind of the Pool, either One, Two or Multi resources.
@@ -56,47 +56,47 @@ impl PoolAddress {
     }
 }
 
-impl HasPlaceholder for PoolAddress {
-    fn placeholder() -> Self {
-        Self::placeholder_mainnet_bi_pool()
+impl HasSampleValues for PoolAddress {
+    fn sample() -> Self {
+        Self::sample_mainnet_bi_pool()
     }
 
-    fn placeholder_other() -> Self {
-        Self::placeholder_mainnet_single_pool()
+    fn sample_other() -> Self {
+        Self::sample_mainnet_single_pool()
     }
 }
 
 impl PoolAddress {
-    pub fn placeholder_mainnet_single_pool() -> Self {
+    pub fn sample_mainnet_single_pool() -> Self {
         "pool_rdx1c325zs6dz3un8ykkjavy9fkvvyzarkaehgsl408qup6f95aup3le3w"
             .parse()
-            .expect("Placeholder")
+            .expect("Sample")
     }
-    pub fn placeholder_mainnet_bi_pool() -> Self {
+    pub fn sample_mainnet_bi_pool() -> Self {
         "pool_rdx1c5dkfdtdqvczcwzdyvzeuhddyha768p2q28erden533fty8h68ay6m"
             .parse()
-            .expect("Placeholder")
+            .expect("Sample")
     }
-    pub fn placeholder_mainnet_multi_pool() -> Self {
+    pub fn sample_mainnet_multi_pool() -> Self {
         "pool_rdx1cc7etecr23e77z9aqvq9rg43ndh9jkt7dzmaygg4t8c36z8qe6k47t"
             .parse()
-            .expect("Placeholder")
+            .expect("Sample")
     }
 
-    pub fn placeholder_stokenet_single_pool() -> Self {
+    pub fn sample_stokenet_single_pool() -> Self {
         "pool_tdx_2_1c3qzq55xdg6a66kn0qsdnw2zwvvxwljx5m3cp7xcdzeym3kpnzmpcp"
             .parse()
-            .expect("Placeholder")
+            .expect("Sample")
     }
-    pub fn placeholder_stokenet_bi_pool() -> Self {
+    pub fn sample_stokenet_bi_pool() -> Self {
         "pool_tdx_2_1c4ml86h8lvfk7jma0jy0vksh8srcxhmtax8nd3aur29qtd2k2wmlzk"
             .parse()
-            .expect("Placeholder")
+            .expect("Sample")
     }
-    pub fn placeholder_stokenet_multi_pool() -> Self {
+    pub fn sample_stokenet_multi_pool() -> Self {
         "pool_tdx_2_1ce2v6h4qqwuy7m55luappx2u2puutgfs9punuz8lpc33xhfh32gsw3"
             .parse()
-            .expect("Placeholder")
+            .expect("Sample")
     }
 }
 
@@ -109,32 +109,32 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::placeholder(), SUT::placeholder());
-        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn hash() {
         assert_eq!(
             HashSet::<SUT>::from_iter([
-                SUT::placeholder_mainnet_single_pool(),
-                SUT::placeholder_mainnet_bi_pool(),
-                SUT::placeholder_mainnet_multi_pool(),
-                SUT::placeholder_stokenet_single_pool(),
-                SUT::placeholder_stokenet_bi_pool(),
-                SUT::placeholder_stokenet_multi_pool(),
+                SUT::sample_mainnet_single_pool(),
+                SUT::sample_mainnet_bi_pool(),
+                SUT::sample_mainnet_multi_pool(),
+                SUT::sample_stokenet_single_pool(),
+                SUT::sample_stokenet_bi_pool(),
+                SUT::sample_stokenet_multi_pool(),
                 // twice => duplicates should be removed
-                SUT::placeholder_mainnet_single_pool(),
-                SUT::placeholder_mainnet_bi_pool(),
-                SUT::placeholder_mainnet_multi_pool(),
-                SUT::placeholder_stokenet_single_pool(),
-                SUT::placeholder_stokenet_bi_pool(),
-                SUT::placeholder_stokenet_multi_pool(),
+                SUT::sample_mainnet_single_pool(),
+                SUT::sample_mainnet_bi_pool(),
+                SUT::sample_mainnet_multi_pool(),
+                SUT::sample_stokenet_single_pool(),
+                SUT::sample_stokenet_bi_pool(),
+                SUT::sample_stokenet_multi_pool(),
             ])
             .len(),
             6
@@ -160,7 +160,7 @@ mod tests {
     #[test]
     fn manual_perform_uniffi_conversion() {
         type RetAddr = <SUT as FromRetAddress>::RetAddress;
-        let sut = SUT::placeholder();
+        let sut = SUT::sample();
         let bech32 = sut.to_string();
         let ret = RetAddr::try_from_bech32(&bech32).unwrap();
 
@@ -225,15 +225,15 @@ mod tests {
     #[test]
     fn pool_kind() {
         assert_eq!(
-            SUT::placeholder_mainnet_single_pool().pool_address_kind(),
+            SUT::sample_mainnet_single_pool().pool_address_kind(),
             PoolKind::OneResource
         );
         assert_eq!(
-            SUT::placeholder_mainnet_bi_pool().pool_address_kind(),
+            SUT::sample_mainnet_bi_pool().pool_address_kind(),
             PoolKind::TwoResources
         );
         assert_eq!(
-            SUT::placeholder_mainnet_multi_pool().pool_address_kind(),
+            SUT::sample_mainnet_multi_pool().pool_address_kind(),
             PoolKind::MultiResources
         );
     }
@@ -270,32 +270,32 @@ mod uniffi_tests {
     #[test]
     fn pool_kind() {
         assert_eq!(
-            pool_address_kind(&SUT::placeholder_mainnet_single_pool()),
+            pool_address_kind(&SUT::sample_mainnet_single_pool()),
             PoolKind::OneResource
         );
         assert_eq!(
-            pool_address_kind(&SUT::placeholder_mainnet_bi_pool()),
+            pool_address_kind(&SUT::sample_mainnet_bi_pool()),
             PoolKind::TwoResources
         );
         assert_eq!(
-            pool_address_kind(&SUT::placeholder_mainnet_multi_pool()),
+            pool_address_kind(&SUT::sample_mainnet_multi_pool()),
             PoolKind::MultiResources
         );
     }
 
     #[test]
-    fn placeholder() {
+    fn sample() {
         assert_eq!(
-            SUT::placeholder_mainnet_single_pool(),
-            new_pool_address_placeholder_single()
+            SUT::sample_mainnet_single_pool(),
+            new_pool_address_sample_single()
         );
         assert_eq!(
-            SUT::placeholder_mainnet_bi_pool(),
-            new_pool_address_placeholder_two()
+            SUT::sample_mainnet_bi_pool(),
+            new_pool_address_sample_two()
         );
         assert_eq!(
-            SUT::placeholder_mainnet_multi_pool(),
-            new_pool_address_placeholder_multi()
+            SUT::sample_mainnet_multi_pool(),
+            new_pool_address_sample_multi()
         );
     }
 }

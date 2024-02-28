@@ -26,13 +26,13 @@ impl TransactionManifestSecretMagic {
     }
 }
 
-impl HasPlaceholder for TransactionManifestSecretMagic {
-    fn placeholder() -> Self {
-        Self::new(Instructions::placeholder_simulator(), Vec::new())
+impl HasSampleValues for TransactionManifestSecretMagic {
+    fn sample() -> Self {
+        Self::new(Instructions::sample_simulator(), Vec::new())
     }
 
-    fn placeholder_other() -> Self {
-        Self::new(Instructions::placeholder_simulator_other(), Vec::new())
+    fn sample_other() -> Self {
+        Self::new(Instructions::sample_simulator_other(), Vec::new())
     }
 }
 
@@ -46,12 +46,12 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::placeholder(), SUT::placeholder());
-        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 }

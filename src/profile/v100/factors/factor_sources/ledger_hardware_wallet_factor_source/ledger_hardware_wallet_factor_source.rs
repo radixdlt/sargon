@@ -41,20 +41,20 @@ impl LedgerHardwareWalletFactorSource {
     }
 }
 
-impl HasPlaceholder for LedgerHardwareWalletFactorSource {
-    fn placeholder() -> Self {
+impl HasSampleValues for LedgerHardwareWalletFactorSource {
+    fn sample() -> Self {
         Self::new(
-            FactorSourceIDFromHash::placeholder_ledger(),
-            FactorSourceCommon::placeholder(),
-            LedgerHardwareWalletHint::placeholder(),
+            FactorSourceIDFromHash::sample_ledger(),
+            FactorSourceCommon::sample(),
+            LedgerHardwareWalletHint::sample(),
         )
     }
 
-    fn placeholder_other() -> Self {
+    fn sample_other() -> Self {
         Self::new(
-            FactorSourceIDFromHash::placeholder_ledger_other(),
-            FactorSourceCommon::placeholder_other(),
-            LedgerHardwareWalletHint::placeholder_other(),
+            FactorSourceIDFromHash::sample_ledger_other(),
+            FactorSourceCommon::sample_other(),
+            LedgerHardwareWalletHint::sample_other(),
         )
     }
 }
@@ -93,26 +93,26 @@ mod tests {
     #[test]
     fn equality() {
         assert_eq!(
-            LedgerHardwareWalletFactorSource::placeholder(),
-            LedgerHardwareWalletFactorSource::placeholder()
+            LedgerHardwareWalletFactorSource::sample(),
+            LedgerHardwareWalletFactorSource::sample()
         );
         assert_eq!(
-            LedgerHardwareWalletFactorSource::placeholder_other(),
-            LedgerHardwareWalletFactorSource::placeholder_other()
+            LedgerHardwareWalletFactorSource::sample_other(),
+            LedgerHardwareWalletFactorSource::sample_other()
         );
     }
 
     #[test]
     fn inequality() {
         assert_ne!(
-            LedgerHardwareWalletFactorSource::placeholder(),
-            LedgerHardwareWalletFactorSource::placeholder_other()
+            LedgerHardwareWalletFactorSource::sample(),
+            LedgerHardwareWalletFactorSource::sample_other()
         );
     }
 
     #[test]
     fn json_roundtrip() {
-        let model = LedgerHardwareWalletFactorSource::placeholder();
+        let model = LedgerHardwareWalletFactorSource::sample();
         assert_eq_after_json_roundtrip(
             &model,
             r#"            
@@ -141,7 +141,7 @@ mod tests {
 
     #[test]
     fn from_factor_source() {
-        let sut = LedgerHardwareWalletFactorSource::placeholder();
+        let sut = LedgerHardwareWalletFactorSource::sample();
         let factor_source: FactorSource = sut.clone().into();
         assert_eq!(
             LedgerHardwareWalletFactorSource::try_from(factor_source),
@@ -151,7 +151,7 @@ mod tests {
 
     #[test]
     fn from_factor_source_invalid_got_device() {
-        let wrong = DeviceFactorSource::placeholder();
+        let wrong = DeviceFactorSource::sample();
         let factor_source: FactorSource = wrong.clone().into();
         assert_eq!(
             LedgerHardwareWalletFactorSource::try_from(factor_source),
@@ -162,17 +162,16 @@ mod tests {
     #[test]
     fn factor_source_id() {
         assert_eq!(
-            LedgerHardwareWalletFactorSource::placeholder().factor_source_id(),
-            LedgerHardwareWalletFactorSource::placeholder().id.into()
+            LedgerHardwareWalletFactorSource::sample().factor_source_id(),
+            LedgerHardwareWalletFactorSource::sample().id.into()
         );
     }
 
     #[test]
     fn factor_source_kind() {
         assert_eq!(
-            LedgerHardwareWalletFactorSource::placeholder()
-                .factor_source_kind(),
-            LedgerHardwareWalletFactorSource::placeholder().id.kind
+            LedgerHardwareWalletFactorSource::sample().factor_source_kind(),
+            LedgerHardwareWalletFactorSource::sample().id.kind
         );
     }
 }

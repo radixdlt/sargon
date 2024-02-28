@@ -71,20 +71,20 @@ impl UnsecuredEntityControl {
     }
 }
 
-impl HasPlaceholder for UnsecuredEntityControl {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
+impl HasSampleValues for UnsecuredEntityControl {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
         Self::with_transaction_signing_only(
-            HierarchicalDeterministicFactorInstance::placeholder(),
+            HierarchicalDeterministicFactorInstance::sample(),
         )
-        .expect("Valid placeholder")
+        .expect("Valid sample")
     }
 
-    fn placeholder_other() -> Self {
+    fn sample_other() -> Self {
         Self::with_transaction_signing_only(
-            HierarchicalDeterministicFactorInstance::placeholder_other(),
+            HierarchicalDeterministicFactorInstance::sample_other(),
         )
-        .expect("Valid placeholder")
+        .expect("Valid sample")
     }
 }
 
@@ -95,28 +95,28 @@ mod tests {
     #[test]
     fn equality() {
         assert_eq!(
-            UnsecuredEntityControl::placeholder(),
-            UnsecuredEntityControl::placeholder()
+            UnsecuredEntityControl::sample(),
+            UnsecuredEntityControl::sample()
         );
         assert_eq!(
-            UnsecuredEntityControl::placeholder_other(),
-            UnsecuredEntityControl::placeholder_other()
+            UnsecuredEntityControl::sample_other(),
+            UnsecuredEntityControl::sample_other()
         );
     }
 
     #[test]
     fn inequality() {
         assert_ne!(
-            UnsecuredEntityControl::placeholder(),
-            UnsecuredEntityControl::placeholder_other()
+            UnsecuredEntityControl::sample(),
+            UnsecuredEntityControl::sample_other()
         );
     }
 
     #[test]
     fn with_auth_signing() {
-        let tx_sign = HierarchicalDeterministicFactorInstance::placeholder();
+        let tx_sign = HierarchicalDeterministicFactorInstance::sample();
         let auth_sign =
-            HierarchicalDeterministicFactorInstance::placeholder_auth_signing();
+            HierarchicalDeterministicFactorInstance::sample_auth_signing();
         let control =
             UnsecuredEntityControl::new(tx_sign, Some(auth_sign.clone()))
                 .unwrap();
@@ -125,7 +125,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip() {
-        let model = UnsecuredEntityControl::placeholder();
+        let model = UnsecuredEntityControl::sample();
         assert_eq_after_json_roundtrip(
             &model,
             r#"

@@ -49,13 +49,13 @@ impl PersonaDataEntryEmailAddress {
     }
 }
 
-impl HasPlaceholder for PersonaDataEntryEmailAddress {
-    fn placeholder() -> Self {
-        Self::new("alan@turing.hero").expect("Valid placeholder.")
+impl HasSampleValues for PersonaDataEntryEmailAddress {
+    fn sample() -> Self {
+        Self::new("alan@turing.hero").expect("Valid sample.")
     }
 
-    fn placeholder_other() -> Self {
-        Self::new("satoshi@nakamoto.btc").expect("Valid placeholder.")
+    fn sample_other() -> Self {
+        Self::new("satoshi@nakamoto.btc").expect("Valid sample.")
     }
 }
 
@@ -66,20 +66,20 @@ mod tests {
     #[test]
     fn equality() {
         assert_eq!(
-            PersonaDataEntryEmailAddress::placeholder(),
-            PersonaDataEntryEmailAddress::placeholder()
+            PersonaDataEntryEmailAddress::sample(),
+            PersonaDataEntryEmailAddress::sample()
         );
         assert_eq!(
-            PersonaDataEntryEmailAddress::placeholder_other(),
-            PersonaDataEntryEmailAddress::placeholder_other()
+            PersonaDataEntryEmailAddress::sample_other(),
+            PersonaDataEntryEmailAddress::sample_other()
         );
     }
 
     #[test]
     fn inequality() {
         assert_ne!(
-            PersonaDataEntryEmailAddress::placeholder(),
-            PersonaDataEntryEmailAddress::placeholder_other()
+            PersonaDataEntryEmailAddress::sample(),
+            PersonaDataEntryEmailAddress::sample_other()
         );
     }
 
@@ -92,16 +92,16 @@ mod tests {
     }
 
     #[test]
-    fn json_roundtrip_placeholder() {
-        let model = PersonaDataEntryEmailAddress::placeholder();
+    fn json_roundtrip_sample() {
+        let model = PersonaDataEntryEmailAddress::sample();
         assert_json_value_eq_after_roundtrip(&model, json!("alan@turing.hero"));
     }
 
     #[test]
     fn id_is_email() {
         assert_eq!(
-            PersonaDataEntryEmailAddress::placeholder().id(),
-            PersonaDataEntryEmailAddress::placeholder().email
+            PersonaDataEntryEmailAddress::sample().id(),
+            PersonaDataEntryEmailAddress::sample().email
         );
     }
 
@@ -109,7 +109,7 @@ mod tests {
     fn new_from_string() {
         assert_eq!(
             PersonaDataEntryEmailAddress::new("alan@turing.hero").unwrap(),
-            PersonaDataEntryEmailAddress::placeholder()
+            PersonaDataEntryEmailAddress::sample()
         );
     }
 
@@ -117,7 +117,7 @@ mod tests {
     fn new_from_str() {
         assert_eq!(
             PersonaDataEntryEmailAddress::new("alan@turing.hero").unwrap(),
-            PersonaDataEntryEmailAddress::placeholder()
+            PersonaDataEntryEmailAddress::sample()
         );
     }
 
@@ -125,6 +125,6 @@ mod tests {
     fn new_with_fromstr() {
         let email: PersonaDataEntryEmailAddress =
             "alan@turing.hero".parse().unwrap();
-        assert_eq!(email, PersonaDataEntryEmailAddress::placeholder());
+        assert_eq!(email, PersonaDataEntryEmailAddress::sample());
     }
 }

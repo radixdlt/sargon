@@ -89,26 +89,26 @@ impl From<GetIDPath> for CAP26Path {
     }
 }
 
-impl HasPlaceholder for CAP26Path {
-    fn placeholder() -> Self {
-        Self::placeholder_account()
+impl HasSampleValues for CAP26Path {
+    fn sample() -> Self {
+        Self::sample_account()
     }
 
-    fn placeholder_other() -> Self {
-        Self::placeholder_identity()
+    fn sample_other() -> Self {
+        Self::sample_identity()
     }
 }
 
 impl CAP26Path {
-    pub fn placeholder_account() -> Self {
+    pub fn sample_account() -> Self {
         Self::Account {
-            value: AccountPath::placeholder(),
+            value: AccountPath::sample(),
         }
     }
 
-    pub fn placeholder_identity() -> Self {
+    pub fn sample_identity() -> Self {
         Self::Identity {
-            value: IdentityPath::placeholder(),
+            value: IdentityPath::sample(),
         }
     }
 }
@@ -120,22 +120,19 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(CAP26Path::placeholder(), CAP26Path::placeholder());
-        assert_eq!(
-            CAP26Path::placeholder_other(),
-            CAP26Path::placeholder_other()
-        );
+        assert_eq!(CAP26Path::sample(), CAP26Path::sample());
+        assert_eq!(CAP26Path::sample_other(), CAP26Path::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(CAP26Path::placeholder(), CAP26Path::placeholder_other());
+        assert_ne!(CAP26Path::sample(), CAP26Path::sample_other());
     }
 
     #[test]
     fn scheme_account_path() {
         assert_eq!(
-            CAP26Path::placeholder_account().scheme(),
+            CAP26Path::sample_account().scheme(),
             DerivationPathScheme::Cap26
         );
     }
@@ -143,7 +140,7 @@ mod tests {
     #[test]
     fn scheme_identity_path() {
         assert_eq!(
-            CAP26Path::placeholder_identity().scheme(),
+            CAP26Path::sample_identity().scheme(),
             DerivationPathScheme::Cap26
         );
     }
@@ -162,8 +159,8 @@ mod tests {
     #[test]
     fn hdpath_account_path() {
         assert_eq!(
-            CAP26Path::placeholder_account().hd_path(),
-            AccountPath::placeholder().hd_path()
+            CAP26Path::sample_account().hd_path(),
+            AccountPath::sample().hd_path()
         );
     }
 
@@ -182,9 +179,9 @@ mod tests {
     fn into_from_account_path() {
         assert_eq!(
             CAP26Path::Account {
-                value: AccountPath::placeholder()
+                value: AccountPath::sample()
             },
-            AccountPath::placeholder().into()
+            AccountPath::sample().into()
         );
     }
 
@@ -206,7 +203,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_account() {
-        let model: CAP26Path = AccountPath::placeholder().into();
+        let model: CAP26Path = AccountPath::sample().into();
         assert_json_value_eq_after_roundtrip(
             &model,
             json!("m/44H/1022H/1H/525H/1460H/0H"),

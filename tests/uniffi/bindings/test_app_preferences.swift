@@ -2,23 +2,23 @@ import Sargon
 
 public typealias SUT = AppPreferences
 extension SUT {
-	public static let placeholder: Self = newAppPreferencesPlaceholder()
-	public static let placeholderOther: Self = newAppPreferencesPlaceholderOther()
+	public static let sample: Self = newAppPreferencesSample()
+	public static let sampleOther: Self = newAppPreferencesSampleOther()
 }
 
 func test_equatable() throws {
-	let a = SUT.placeholder
-	let b = SUT.placeholderOther
+	let a = SUT.sample
+	let b = SUT.sampleOther
 	assert(
-		a == SUT.placeholder
+		a == SUT.sample
 	)
 	assert(a != b)
-	assert(b == SUT.placeholderOther)
+	assert(b == SUT.sampleOther)
 }
 
 func test_hashable() throws {
-	let a = SUT.placeholder
-	let b = SUT.placeholderOther
+	let a = SUT.sample
+	let b = SUT.sampleOther
 	assert(Set([a, a]).count == 1)
 	assert(Set([b, b]).count == 1)
 	assert(Set([a, b, b, a]).count == 2)

@@ -194,7 +194,7 @@ mod tests {
 
     #[test]
     fn change_display_name_of_accounts() {
-        let profile = Profile::placeholder();
+        let profile = Profile::sample();
         let (wallet, _) = Wallet::ephemeral(profile.clone());
         let account =
             wallet.access_profile_with(|p| p.networks[0].accounts[0].clone());
@@ -211,7 +211,7 @@ mod tests {
 
         assert_eq!(
             wallet.change_name_of_account(
-                AccountAddress::placeholder_other(),
+                AccountAddress::sample_other(),
                 DisplayName::new("not used").unwrap()
             ),
             Err(CommonError::UnknownAccount)
@@ -220,7 +220,7 @@ mod tests {
 
     #[test]
     fn update_account() {
-        let profile = Profile::placeholder();
+        let profile = Profile::sample();
         let (wallet, _) = Wallet::ephemeral(profile.clone());
         let mut account =
             wallet.access_profile_with(|p| p.networks[0].accounts[0].clone());
@@ -244,10 +244,9 @@ mod tests {
 
     #[test]
     fn load_private_device_factor_source() {
-        let private =
-            PrivateHierarchicalDeterministicFactorSource::placeholder();
+        let private = PrivateHierarchicalDeterministicFactorSource::sample();
         let dfs = private.factor_source;
-        let profile = Profile::placeholder();
+        let profile = Profile::sample();
         let (wallet, storage) = Wallet::ephemeral(profile.clone());
         let data =
             serde_json::to_vec(&private.mnemonic_with_passphrase).unwrap();
@@ -260,13 +259,13 @@ mod tests {
                 .load_private_device_factor_source(&dfs)
                 .unwrap()
                 .mnemonic_with_passphrase,
-            MnemonicWithPassphrase::placeholder()
+            MnemonicWithPassphrase::sample()
         );
     }
 
     #[test]
     pub fn add_private_device_factor_source_successful() {
-        let profile = Profile::placeholder();
+        let profile = Profile::sample();
         let new = PrivateHierarchicalDeterministicFactorSource::generate_new(
             WalletClientModel::Unknown,
         );
@@ -295,7 +294,7 @@ mod tests {
     #[test]
     pub fn add_private_device_factor_source_ok_storage_when_save_to_profile_fails_then_deleted_from_storage(
     ) {
-        let profile = Profile::placeholder();
+        let profile = Profile::sample();
         let new = PrivateHierarchicalDeterministicFactorSource::generate_new(
             WalletClientModel::Unknown,
         );
@@ -368,8 +367,8 @@ mod tests {
 
     #[test]
     fn add_factor_source_fails_when_already_exists() {
-        let profile = Profile::placeholder();
-        let other = PrivateHierarchicalDeterministicFactorSource::placeholder();
+        let profile = Profile::sample();
+        let other = PrivateHierarchicalDeterministicFactorSource::sample();
         let (wallet, _) = Wallet::ephemeral(profile.clone());
         assert_eq!(
             wallet.add_factor_source(other.factor_source.clone().into()),
@@ -381,9 +380,8 @@ mod tests {
 
     #[test]
     fn load_private_device_factor_source_by_id() {
-        let profile = Profile::placeholder();
-        let private =
-            PrivateHierarchicalDeterministicFactorSource::placeholder();
+        let profile = Profile::sample();
+        let private = PrivateHierarchicalDeterministicFactorSource::sample();
         let (wallet, storage) = Wallet::ephemeral(profile.clone());
 
         let data =
@@ -401,7 +399,7 @@ mod tests {
         assert_eq!(loaded, private);
     }
 
-    // Profile `init_profile`'s BDFS MUST eq `PrivateHierarchicalDeterministicFactorSource::placeholder()`
+    // Profile `init_profile`'s BDFS MUST eq `PrivateHierarchicalDeterministicFactorSource::sample()`
     fn test_new_account<F, G>(
         init_profile: Profile,
         also_save: bool,
@@ -411,8 +409,7 @@ mod tests {
         F: Fn(Profile),
         G: Fn(Account, Profile),
     {
-        let private =
-            PrivateHierarchicalDeterministicFactorSource::placeholder();
+        let private = PrivateHierarchicalDeterministicFactorSource::sample();
         assert_eq!(
             init_profile.bdfs().factor_source_id(),
             private.clone().factor_source.factor_source_id()
@@ -449,7 +446,7 @@ mod tests {
     {
         test_new_account(
             Profile::new(
-                PrivateHierarchicalDeterministicFactorSource::placeholder(),
+                PrivateHierarchicalDeterministicFactorSource::sample(),
                 "Test",
             ),
             also_save,
@@ -489,7 +486,7 @@ mod tests {
         F: Fn(Account, Profile),
     {
         test_new_account(
-            Profile::placeholder(),
+            Profile::sample(),
             also_save,
             |p| {
                 assert_eq!(p.networks[0].accounts.len(), 2);

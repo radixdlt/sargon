@@ -31,12 +31,12 @@ impl FromStr for HDPath {
     }
 }
 
-impl HasPlaceholder for HDPath {
-    fn placeholder() -> Self {
+impl HasSampleValues for HDPath {
+    fn sample() -> Self {
         Self::from_str("m/44H/1022H/1H/525H/1460H/1H").unwrap()
     }
 
-    fn placeholder_other() -> Self {
+    fn sample_other() -> Self {
         Self::from_str("m/44H/1022H/0H/0/0H").unwrap()
     }
 }
@@ -177,13 +177,13 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(HDPath::placeholder(), HDPath::placeholder());
-        assert_eq!(HDPath::placeholder_other(), HDPath::placeholder_other());
+        assert_eq!(HDPath::sample(), HDPath::sample());
+        assert_eq!(HDPath::sample_other(), HDPath::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(HDPath::placeholder(), HDPath::placeholder_other());
+        assert_ne!(HDPath::sample(), HDPath::sample_other());
     }
 
     #[test]

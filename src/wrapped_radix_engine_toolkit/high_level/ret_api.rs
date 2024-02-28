@@ -156,7 +156,7 @@ mod tests {
     #[test]
     fn test_manifest_for_faucet() {
         manifest_eq(
-            manifest_for_faucet(false, &AccountAddress::placeholder_mainnet()),
+            manifest_for_faucet(false, &AccountAddress::sample_mainnet()),
             r#"
             CALL_METHOD
                 Address("component_rdx1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxfaucet")
@@ -172,10 +172,7 @@ mod tests {
         );
 
         manifest_eq(
-            manifest_for_faucet(
-                true,
-                &AccountAddress::placeholder_stokenet_other(),
-            ),
+            manifest_for_faucet(true, &AccountAddress::sample_stokenet_other()),
             r#"
             CALL_METHOD
                 Address("component_tdx_2_1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxyulkzl")
@@ -200,7 +197,7 @@ mod tests {
     fn test_manifest_marking_account_as_dapp_definition_type() {
         manifest_eq(
             manifest_marking_account_as_dapp_definition_type(
-                &AccountAddress::placeholder_stokenet_other(),
+                &AccountAddress::sample_stokenet_other(),
             ),
             r#"
             SET_METADATA
@@ -218,10 +215,10 @@ mod tests {
     fn test_manifest_set_owner_keys_hashes() {
         manifest_eq(
             manifest_set_owner_keys_hashes(
-                &AccountAddress::placeholder_mainnet().into(),
+                &AccountAddress::sample_mainnet().into(),
                 vec![
-                    PublicKeyHash::hash(Ed25519PublicKey::placeholder_alice()),
-                    PublicKeyHash::hash(Secp256k1PublicKey::placeholder_bob()),
+                    PublicKeyHash::hash(Ed25519PublicKey::sample_alice()),
+                    PublicKeyHash::hash(Secp256k1PublicKey::sample_bob()),
                 ],
             ),
             r#"
@@ -246,7 +243,7 @@ mod tests {
     #[test]
     fn test_manifest_for_create_fungible_token_with_metadata() {
         let string = manifest_for_create_fungible_token_with_metadata(
-            &AccountAddress::placeholder_stokenet_other(),
+            &AccountAddress::sample_stokenet_other(),
             748392.into(),
             TokenDefinitionMetadata::new(
                 "Foobar",
@@ -262,9 +259,8 @@ mod tests {
         assert!(string.contains("foobar"));
         assert!(string.contains("FOO"));
         assert!(string.contains("example.com"));
-        assert!(string.contains(
-            &AccountAddress::placeholder_stokenet_other().to_string()
-        ));
+        assert!(string
+            .contains(&AccountAddress::sample_stokenet_other().to_string()));
     }
 
     #[test]
@@ -273,10 +269,10 @@ mod tests {
             let manifest = manifest_for_create_fungible_token(&a);
             assert!(manifest.to_string().contains(&a.to_string()))
         };
-        test(AccountAddress::placeholder_mainnet());
-        test(AccountAddress::placeholder_mainnet_other());
-        test(AccountAddress::placeholder_stokenet());
-        test(AccountAddress::placeholder_stokenet_other());
+        test(AccountAddress::sample_mainnet());
+        test(AccountAddress::sample_mainnet_other());
+        test(AccountAddress::sample_stokenet());
+        test(AccountAddress::sample_stokenet_other());
     }
 
     #[test]
@@ -285,14 +281,14 @@ mod tests {
             let manifest = manifest_for_create_multiple_fungible_tokens(&a);
             assert!(manifest.to_string().contains(&a.to_string()))
         };
-        test(AccountAddress::placeholder_stokenet());
-        test(AccountAddress::placeholder_stokenet_other());
+        test(AccountAddress::sample_stokenet());
+        test(AccountAddress::sample_stokenet_other());
     }
 
     #[test]
     fn test_manifest_for_create_multiple_fungible_tokens_number_of_tokens() {
         let manifest = manifest_for_create_multiple_fungible_tokens(
-            &AccountAddress::placeholder_stokenet(),
+            &AccountAddress::sample_stokenet(),
         );
         assert_eq!(manifest.to_string().matches("symbol").count(), 25);
     }
@@ -302,7 +298,7 @@ mod tests {
     fn test_manifest_for_create_multiple_non_fungible_tokens() {
         manifest_eq(
             manifest_for_create_multiple_non_fungible_tokens(
-                &AccountAddress::placeholder_mainnet(),
+                &AccountAddress::sample_mainnet(),
             ),
             r#"
             todo
@@ -314,10 +310,7 @@ mod tests {
     #[should_panic(expected = "not yet implemented")]
     fn test_manifest_stakes_claim() {
         manifest_eq(
-            manifest_stakes_claim(
-                &AccountAddress::placeholder_mainnet(),
-                vec![],
-            ),
+            manifest_stakes_claim(&AccountAddress::sample_mainnet(), vec![]),
             r#"
             todo
             "#,
@@ -329,8 +322,8 @@ mod tests {
     fn test_manifest_third_party_deposit_update() {
         manifest_eq(
             manifest_third_party_deposit_update(
-                ThirdPartyDeposits::placeholder(),
-                &AccountAddress::placeholder_mainnet(),
+                ThirdPartyDeposits::sample(),
+                &AccountAddress::sample_mainnet(),
             ),
             r#"
             todo
@@ -343,8 +336,8 @@ mod tests {
     fn test_updating_manifest_lock_fee() {
         manifest_eq(
             updating_manifest_lock_fee(
-                TransactionManifest::placeholder(),
-                &AccountAddress::placeholder_mainnet(),
+                TransactionManifest::sample(),
+                &AccountAddress::sample_mainnet(),
                 Some(1000.into()),
             ),
             r#"
@@ -358,7 +351,7 @@ mod tests {
     fn test_updating_manifest_add_guarantees() {
         manifest_eq(
             updating_manifest_add_guarantees(
-                TransactionManifest::placeholder(),
+                TransactionManifest::sample(),
                 vec![],
             ),
             r#"

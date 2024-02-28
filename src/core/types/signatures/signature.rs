@@ -28,13 +28,13 @@ impl From<Ed25519Signature> for Signature {
     }
 }
 
-impl HasPlaceholder for Signature {
-    fn placeholder() -> Self {
-        Ed25519Signature::placeholder().into()
+impl HasSampleValues for Signature {
+    fn sample() -> Self {
+        Ed25519Signature::sample().into()
     }
 
-    fn placeholder_other() -> Self {
-        Secp256k1Signature::placeholder().into()
+    fn sample_other() -> Self {
+        Secp256k1Signature::sample().into()
     }
 }
 
@@ -47,24 +47,24 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::placeholder(), SUT::placeholder());
-        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn enum_as_inner() {
         assert_eq!(
-            SUT::placeholder().as_ed25519().unwrap(),
-            &Ed25519Signature::placeholder()
+            SUT::sample().as_ed25519().unwrap(),
+            &Ed25519Signature::sample()
         );
         assert_eq!(
-            SUT::placeholder_other().as_secp256k1().unwrap(),
-            &Secp256k1Signature::placeholder()
+            SUT::sample_other().as_secp256k1().unwrap(),
+            &Secp256k1Signature::sample()
         );
     }
 }

@@ -81,14 +81,14 @@ impl EntityCAP26Path for AccountPath {
     }
 }
 
-impl HasPlaceholder for AccountPath {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
+impl HasSampleValues for AccountPath {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
         Self::from_str("m/44H/1022H/1H/525H/1460H/0H").unwrap()
     }
 
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder_other() -> Self {
+    /// A sample used to facilitate unit tests.
+    fn sample_other() -> Self {
         Self::from_str("m/44H/1022H/1H/525H/1460H/1H").unwrap()
     }
 }
@@ -122,32 +122,23 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(AccountPath::placeholder(), AccountPath::placeholder());
-        assert_eq!(
-            AccountPath::placeholder_other(),
-            AccountPath::placeholder_other()
-        );
+        assert_eq!(AccountPath::sample(), AccountPath::sample());
+        assert_eq!(AccountPath::sample_other(), AccountPath::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(
-            AccountPath::placeholder(),
-            AccountPath::placeholder_other()
-        );
+        assert_ne!(AccountPath::sample(), AccountPath::sample_other());
     }
 
     #[test]
     fn index() {
-        assert_eq!(AccountPath::placeholder().index(), 0);
+        assert_eq!(AccountPath::sample().index(), 0);
     }
 
     #[test]
     fn entity_kind() {
-        assert_eq!(
-            AccountPath::placeholder().entity_kind,
-            CAP26EntityKind::Account
-        );
+        assert_eq!(AccountPath::sample().entity_kind, CAP26EntityKind::Account);
     }
 
     #[test]
@@ -300,7 +291,7 @@ mod tests {
 
     #[test]
     fn is_entity_path_index() {
-        let sut = AccountPath::placeholder();
+        let sut = AccountPath::sample();
         assert_eq!(sut.index(), 0);
         assert_eq!(sut.network_id(), NetworkID::Mainnet);
         assert_eq!(sut.key_kind(), CAP26KeyKind::TransactionSigning);

@@ -94,36 +94,36 @@ impl ProfileNetwork {
     }
 }
 
-impl HasPlaceholder for ProfileNetwork {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
-        Self::placeholder_mainnet()
+impl HasSampleValues for ProfileNetwork {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
+        Self::sample_mainnet()
     }
 
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder_other() -> Self {
-        Self::placeholder_stokenet()
+    /// A sample used to facilitate unit tests.
+    fn sample_other() -> Self {
+        Self::sample_stokenet()
     }
 }
 
 impl ProfileNetwork {
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_mainnet() -> Self {
+    /// A sample used to facilitate unit tests.
+    pub fn sample_mainnet() -> Self {
         Self::new(
             NetworkID::Mainnet,
-            Accounts::placeholder_mainnet(),
-            Personas::placeholder_mainnet(),
-            AuthorizedDapps::placeholder_mainnet(),
+            Accounts::sample_mainnet(),
+            Personas::sample_mainnet(),
+            AuthorizedDapps::sample_mainnet(),
         )
     }
 
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_stokenet() -> Self {
+    /// A sample used to facilitate unit tests.
+    pub fn sample_stokenet() -> Self {
         Self::new(
             NetworkID::Stokenet,
-            Accounts::placeholder_stokenet(),
-            Personas::placeholder_stokenet(),
-            AuthorizedDapps::placeholder_stokenet(),
+            Accounts::sample_stokenet(),
+            Personas::sample_stokenet(),
+            AuthorizedDapps::sample_stokenet(),
         )
     }
 }
@@ -134,21 +134,18 @@ mod tests {
 
     #[test]
     fn inequality() {
-        assert_ne!(
-            ProfileNetwork::placeholder(),
-            ProfileNetwork::placeholder_other()
-        );
+        assert_ne!(ProfileNetwork::sample(), ProfileNetwork::sample_other());
     }
 
     #[test]
     fn get_id() {
-        assert_eq!(ProfileNetwork::placeholder().id(), NetworkID::Mainnet);
+        assert_eq!(ProfileNetwork::sample().id(), NetworkID::Mainnet);
     }
 
     #[test]
     fn get_accounts() {
-        let sut = ProfileNetwork::placeholder();
-        assert_eq!(sut.accounts, Accounts::placeholder());
+        let sut = ProfileNetwork::sample();
+        assert_eq!(sut.accounts, Accounts::sample());
     }
 
     #[test]
@@ -157,8 +154,7 @@ mod tests {
             ProfileNetwork::new(
                 NetworkID::Mainnet,
                 Accounts::with_accounts(
-                    [Account::placeholder(), Account::placeholder()]
-                        .into_iter()
+                    [Account::sample(), Account::sample()].into_iter()
                 ),
                 Personas::default(),
                 AuthorizedDapps::default(),
@@ -176,7 +172,7 @@ mod tests {
     fn panic_when_network_id_mismatch_between_accounts_and_value() {
         ProfileNetwork::new(
             NetworkID::Mainnet,
-            Accounts::with_account(Account::placeholder_stokenet()),
+            Accounts::with_account(Account::sample_stokenet()),
             Personas::default(),
             AuthorizedDapps::default(),
         );
@@ -189,8 +185,8 @@ mod tests {
     fn panic_when_network_id_mismatch_between_persona_and_value() {
         ProfileNetwork::new(
             NetworkID::Mainnet,
-            Accounts::placeholder_mainnet(),
-            Personas::with_persona(Persona::placeholder_stokenet()),
+            Accounts::sample_mainnet(),
+            Personas::with_persona(Persona::sample_stokenet()),
             AuthorizedDapps::default(),
         );
     }
@@ -202,17 +198,17 @@ mod tests {
     fn panic_when_network_id_mismatch_between_authorized_dapp_and_value() {
         ProfileNetwork::new(
             NetworkID::Mainnet,
-            Accounts::placeholder_mainnet(),
-            Personas::placeholder_mainnet(),
+            Accounts::sample_mainnet(),
+            Personas::sample_mainnet(),
             AuthorizedDapps::with_authorized_dapp(
-                AuthorizedDapp::placeholder_stokenet(),
+                AuthorizedDapp::sample_stokenet(),
             ),
         );
     }
 
     #[test]
-    fn json_roundtrip_placeholder_mainnet() {
-        let sut = ProfileNetwork::placeholder_mainnet();
+    fn json_roundtrip_sample_mainnet() {
+        let sut = ProfileNetwork::sample_mainnet();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"
@@ -567,8 +563,8 @@ mod tests {
     }
 
     #[test]
-    fn json_roundtrip_placeholder_stokenet() {
-        let sut = ProfileNetwork::placeholder_stokenet();
+    fn json_roundtrip_sample_stokenet() {
+        let sut = ProfileNetwork::sample_stokenet();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"

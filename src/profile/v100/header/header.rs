@@ -39,12 +39,12 @@ pub struct Header {
 }
 
 #[uniffi::export]
-pub fn new_header_placeholder() -> Header {
-    Header::placeholder()
+pub fn new_header_sample() -> Header {
+    Header::sample()
 }
 #[uniffi::export]
-pub fn new_header_placeholder_other() -> Header {
-    Header::placeholder_other()
+pub fn new_header_sample_other() -> Header {
+    Header::sample_other()
 }
 
 impl Header {
@@ -92,9 +92,9 @@ impl Default for Header {
     }
 }
 
-impl HasPlaceholder for Header {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
+impl HasSampleValues for Header {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
         let date = Timestamp::parse("2023-09-11T16:05:56Z").unwrap();
         let device = DeviceInfo::new(
             Uuid::from_str("66f07ca2-a9d9-49e5-8152-77aca3d1dd74").unwrap(),
@@ -110,8 +110,8 @@ impl HasPlaceholder for Header {
         )
     }
 
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder_other() -> Self {
+    /// A sample used to facilitate unit tests.
+    fn sample_other() -> Self {
         let date = Timestamp::parse("2023-12-20T16:05:56Z").unwrap();
         let device = DeviceInfo::new(
             Uuid::from_str("aabbccdd-a9d9-49e5-8152-beefbeefbeef").unwrap(),
@@ -134,18 +134,18 @@ pub mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(Header::placeholder(), Header::placeholder());
-        assert_eq!(Header::placeholder_other(), Header::placeholder_other());
+        assert_eq!(Header::sample(), Header::sample());
+        assert_eq!(Header::sample_other(), Header::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(Header::placeholder(), Header::placeholder_other());
+        assert_ne!(Header::sample(), Header::sample_other());
     }
 
     #[test]
-    fn json_roundtrip_placeholder() {
-        let sut = Header::placeholder();
+    fn json_roundtrip_sample() {
+        let sut = Header::sample();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"
@@ -231,22 +231,20 @@ pub mod tests {
 
 #[cfg(test)]
 mod uniffi_tests {
-    use crate::{
-        new_header_placeholder, new_header_placeholder_other, HasPlaceholder,
-    };
+    use crate::{new_header_sample, new_header_sample_other, HasSampleValues};
 
     use super::Header;
 
     #[test]
-    fn equality_placeholders() {
-        assert_eq!(Header::placeholder(), new_header_placeholder());
-        assert_eq!(Header::placeholder_other(), new_header_placeholder_other());
+    fn equality_samples() {
+        assert_eq!(Header::sample(), new_header_sample());
+        assert_eq!(Header::sample_other(), new_header_sample_other());
     }
 
     #[test]
     fn header_identifiable() {
         use identified_vec::Identifiable;
-        let sut = Header::placeholder();
+        let sut = Header::sample();
         assert_eq!(&sut.id(), &sut.id);
     }
 }

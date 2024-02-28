@@ -81,14 +81,14 @@ impl EntityCAP26Path for IdentityPath {
     }
 }
 
-impl HasPlaceholder for IdentityPath {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
+impl HasSampleValues for IdentityPath {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
         Self::from_str("m/44H/1022H/1H/618H/1460H/0H").unwrap()
     }
 
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder_other() -> Self {
+    /// A sample used to facilitate unit tests.
+    fn sample_other() -> Self {
         Self::from_str("m/44H/1022H/1H/618H/1460H/1H").unwrap()
     }
 }
@@ -124,38 +124,29 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(IdentityPath::placeholder(), IdentityPath::placeholder());
-        assert_eq!(
-            IdentityPath::placeholder_other(),
-            IdentityPath::placeholder_other()
-        );
+        assert_eq!(IdentityPath::sample(), IdentityPath::sample());
+        assert_eq!(IdentityPath::sample_other(), IdentityPath::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(
-            IdentityPath::placeholder(),
-            IdentityPath::placeholder_other()
-        );
+        assert_ne!(IdentityPath::sample(), IdentityPath::sample_other());
     }
 
     #[test]
     fn index() {
-        assert_eq!(IdentityPath::placeholder().index(), 0);
+        assert_eq!(IdentityPath::sample().index(), 0);
     }
 
     #[test]
     fn network_id() {
-        assert_eq!(
-            IdentityPath::placeholder().network_id(),
-            NetworkID::Mainnet
-        );
+        assert_eq!(IdentityPath::sample().network_id(), NetworkID::Mainnet);
     }
 
     #[test]
     fn entity_kind() {
         assert_eq!(
-            IdentityPath::placeholder().entity_kind,
+            IdentityPath::sample().entity_kind,
             CAP26EntityKind::Identity
         );
     }
@@ -311,7 +302,7 @@ mod tests {
     #[test]
     fn identity_path_scheme() {
         assert_eq!(
-            IdentityPath::placeholder().scheme(),
+            IdentityPath::sample().scheme(),
             DerivationPathScheme::Cap26
         );
     }
@@ -319,7 +310,7 @@ mod tests {
     #[test]
     fn identity_path_derivation_path() {
         assert_eq!(
-            IdentityPath::placeholder()
+            IdentityPath::sample()
                 .derivation_path()
                 .hd_path()
                 .to_string(),
@@ -347,7 +338,7 @@ mod tests {
 
     #[test]
     fn is_entity_path_index() {
-        let sut = IdentityPath::placeholder();
+        let sut = IdentityPath::sample();
         assert_eq!(sut.index(), 0);
         assert_eq!(sut.network_id(), NetworkID::Mainnet);
         assert_eq!(sut.key_kind(), CAP26KeyKind::TransactionSigning);

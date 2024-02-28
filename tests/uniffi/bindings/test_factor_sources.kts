@@ -1,32 +1,32 @@
 import com.radixdlt.sargon.*
 
-val placeholder: List<FactorSource>
-    get() = newFactorSourcesPlaceholder()
+val sample: List<FactorSource>
+    get() = newFactorSourcesSample()
 
-val placeholderOther: List<FactorSource>
-    get() = newFactorSourcesPlaceholderOther()
+val SampleOther: List<FactorSource>
+    get() = newFactorSourcesSampleOther()
 
 fun test_equals() {
-	val a = placeholder
-	val b = placeholderOther
+    val a = sample
+    val b = SampleOther
 
-	assert(a == a)
-	assert(b == b)
-	assert(b != a)
-	assert(b != a)
+    assert(a == a)
+    assert(b == b)
+    assert(b != a)
+    assert(b != a)
 }
 
 fun test_hashCode() {
-	val a = placeholder
-	val b = placeholderOther
-	assert(setOf(a, a).size == 1)
-	assert(setOf(b, b).size == 1)
-	assert(setOf(a, b, b, a).size == 2)
+    val a = sample
+    val b = SampleOther
+    assert(setOf(a, a).size == 1)
+    assert(setOf(b, b).size == 1)
+    assert(setOf(a, b, b, a).size == 2)
 }
 
 fun test() {
-	test_equals()
-	test_hashCode()
+    test_equals()
+    test_hashCode()
 }
 
 test()

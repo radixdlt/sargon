@@ -1,8 +1,8 @@
 import Sargon
 
 extension TransactionManifest {
-	static let placeholder: Self = newTransactionManifestPlaceholder()
-	static let placeholderOther: Self = newTransactionManifestPlaceholderOther()
+	static let sample: Self = newTransactionManifestSample()
+	static let sampleOther: Self = newTransactionManifestSampleOther()
 }
 extension TransactionManifest: CustomStringConvertible {
 	public var description: String {
@@ -21,9 +21,9 @@ extension TransactionManifest {
 func test() throws {
 	print("🚀 Test TransactionManifest in Swift start")
 	defer { print("✅ Test TransactionManifest in Swift completed ") }
-	assert(TransactionManifest.placeholder == TransactionManifest.placeholder)
-	assert(TransactionManifest.placeholderOther == TransactionManifest.placeholderOther)
-	assert(TransactionManifest.placeholder != TransactionManifest.placeholderOther)
+	assert(TransactionManifest.sample == TransactionManifest.sample)
+	assert(TransactionManifest.sampleOther == TransactionManifest.sampleOther)
+	assert(TransactionManifest.sample != TransactionManifest.sampleOther)
 
 	let instructionsString = """
 		CALL_METHOD
@@ -46,12 +46,12 @@ func test() throws {
 
 		"""
 	print("🔮 🔮 🔮 🔮 🔮 ")
-	print(TransactionManifest.placeholder.description)
+	print(TransactionManifest.sample.description)
 	print("✨ ✨ ✨ ✨ ✨")
-	assert(TransactionManifest.placeholder.description == instructionsString)
+	assert(TransactionManifest.sample.description == instructionsString)
 	let sut = try TransactionManifest(
 		instructionsString: instructionsString, networkID: .simulator)
-	assert(sut == TransactionManifest.placeholder)
+	assert(sut == TransactionManifest.sample)
 
 }
 

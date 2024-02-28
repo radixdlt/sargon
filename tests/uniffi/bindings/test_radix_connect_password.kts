@@ -1,13 +1,11 @@
 import com.radixdlt.sargon.*
 import kotlin.random.Random
 
+val RadixConnectPassword.Companion.sample
+    get() = newRadixConnectPasswordSample()
 
-val RadixConnectPassword.Companion.placeholder
-    get() = newRadixConnectPasswordPlaceholder()
-
-val RadixConnectPassword.Companion.placeholderOther
-    get() = newRadixConnectPasswordPlaceholderOther()
-
+val RadixConnectPassword.Companion.sampleOther
+    get() = newRadixConnectPasswordSampleOther()
 
 fun randomByteArray(byteCount: Int): ByteArray {
     val bytes = ByteArray(byteCount)
@@ -17,13 +15,16 @@ fun randomByteArray(byteCount: Int): ByteArray {
 fun test() {
     val byteArray = randomByteArray(byteCount = 32)
     // test identity
-    assert(RadixConnectPassword(value = newHex32BytesFrom(bytes = byteArray)) == RadixConnectPassword(value = newHex32BytesFrom(bytes = byteArray)))
-    assert(RadixConnectPassword.placeholder == RadixConnectPassword.placeholder)
-    assert(RadixConnectPassword.placeholderOther == RadixConnectPassword.placeholderOther)
+    assert(
+            RadixConnectPassword(value = newHex32BytesFrom(bytes = byteArray)) ==
+                    RadixConnectPassword(value = newHex32BytesFrom(bytes = byteArray))
+    )
+    assert(RadixConnectPassword.sample == RadixConnectPassword.sample)
+    assert(RadixConnectPassword.sampleOther == RadixConnectPassword.sampleOther)
 
     // inequality
-    assert(RadixConnectPassword.placeholderOther != RadixConnectPassword.placeholder)
-    assert(RadixConnectPassword.placeholder != RadixConnectPassword.placeholderOther)
+    assert(RadixConnectPassword.sampleOther != RadixConnectPassword.sample)
+    assert(RadixConnectPassword.sample != RadixConnectPassword.sampleOther)
 }
 
 test()

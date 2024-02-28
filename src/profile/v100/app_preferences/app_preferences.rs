@@ -37,13 +37,13 @@ pub struct AppPreferences {
 }
 
 #[uniffi::export]
-pub fn new_app_preferences_placeholder() -> AppPreferences {
-    AppPreferences::placeholder()
+pub fn new_app_preferences_sample() -> AppPreferences {
+    AppPreferences::sample()
 }
 
 #[uniffi::export]
-pub fn new_app_preferences_placeholder_other() -> AppPreferences {
-    AppPreferences::placeholder_other()
+pub fn new_app_preferences_sample_other() -> AppPreferences {
+    AppPreferences::sample_other()
 }
 
 impl AppPreferences {
@@ -64,26 +64,26 @@ impl AppPreferences {
     }
 }
 
-impl HasPlaceholder for AppPreferences {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
+impl HasSampleValues for AppPreferences {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
         Self::new(
-            AppDisplay::placeholder(),
-            Gateways::placeholder(),
-            P2PLinks::placeholder(),
-            Security::placeholder(),
-            TransactionPreferences::placeholder(),
+            AppDisplay::sample(),
+            Gateways::sample(),
+            P2PLinks::sample(),
+            Security::sample(),
+            TransactionPreferences::sample(),
         )
     }
 
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder_other() -> Self {
+    /// A sample used to facilitate unit tests.
+    fn sample_other() -> Self {
         Self::new(
-            AppDisplay::placeholder_other(),
-            Gateways::placeholder_other(),
-            P2PLinks::placeholder(),
-            Security::placeholder_other(),
-            TransactionPreferences::placeholder_other(),
+            AppDisplay::sample_other(),
+            Gateways::sample_other(),
+            P2PLinks::sample(),
+            Security::sample_other(),
+            TransactionPreferences::sample_other(),
         )
     }
 }
@@ -94,67 +94,49 @@ mod tests {
 
     #[test]
     fn equality() {
+        assert_eq!(AppPreferences::sample(), AppPreferences::sample());
         assert_eq!(
-            AppPreferences::placeholder(),
-            AppPreferences::placeholder()
-        );
-        assert_eq!(
-            AppPreferences::placeholder_other(),
-            AppPreferences::placeholder_other()
+            AppPreferences::sample_other(),
+            AppPreferences::sample_other()
         );
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(
-            AppPreferences::placeholder(),
-            AppPreferences::placeholder_other()
-        );
+        assert_ne!(AppPreferences::sample(), AppPreferences::sample_other());
     }
 
     #[test]
     fn get_display() {
-        assert_eq!(
-            AppPreferences::placeholder().display,
-            AppDisplay::placeholder()
-        )
+        assert_eq!(AppPreferences::sample().display, AppDisplay::sample())
     }
 
     #[test]
     fn get_gateways() {
-        assert_eq!(
-            AppPreferences::placeholder().gateways,
-            Gateways::placeholder()
-        )
+        assert_eq!(AppPreferences::sample().gateways, Gateways::sample())
     }
 
     #[test]
     fn get_p2p_links() {
-        assert_eq!(
-            AppPreferences::placeholder().p2p_links,
-            P2PLinks::placeholder()
-        )
+        assert_eq!(AppPreferences::sample().p2p_links, P2PLinks::sample())
     }
 
     #[test]
     fn get_security() {
-        assert_eq!(
-            AppPreferences::placeholder().security,
-            Security::placeholder()
-        )
+        assert_eq!(AppPreferences::sample().security, Security::sample())
     }
 
     #[test]
     fn get_transaction() {
         assert_eq!(
-            AppPreferences::placeholder().transaction,
-            TransactionPreferences::placeholder()
+            AppPreferences::sample().transaction,
+            TransactionPreferences::sample()
         )
     }
 
     #[test]
     fn json_roundtrip() {
-        let sut = AppPreferences::placeholder();
+        let sut = AppPreferences::sample();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"
@@ -219,21 +201,18 @@ mod tests {
 #[cfg(test)]
 mod uniffi_tests {
     use crate::{
-        new_app_preferences_placeholder, new_app_preferences_placeholder_other,
-        HasPlaceholder,
+        new_app_preferences_sample, new_app_preferences_sample_other,
+        HasSampleValues,
     };
 
     use super::AppPreferences;
 
     #[test]
-    fn equality_placeholders() {
+    fn equality_samples() {
+        assert_eq!(AppPreferences::sample(), new_app_preferences_sample());
         assert_eq!(
-            AppPreferences::placeholder(),
-            new_app_preferences_placeholder()
-        );
-        assert_eq!(
-            AppPreferences::placeholder_other(),
-            new_app_preferences_placeholder_other()
+            AppPreferences::sample_other(),
+            new_app_preferences_sample_other()
         );
     }
 }

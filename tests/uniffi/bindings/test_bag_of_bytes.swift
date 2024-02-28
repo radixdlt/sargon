@@ -81,12 +81,12 @@ extension BagOfBytes {
 	init(data: Data) {
 		self = newBagOfBytesFrom(bytes: data)
 	}
-	static let aced = newBagOfBytesPlaceholderAced()
-	static let babe = newBagOfBytesPlaceholderBabe()
-	static let cafe = newBagOfBytesPlaceholderCafe()
-	static let dead = newBagOfBytesPlaceholderDead()
-	static let ecad = newBagOfBytesPlaceholderEcad()
-	static let fade = newBagOfBytesPlaceholderFade()
+	static let aced = newBagOfBytesSampleAced()
+	static let babe = newBagOfBytesSampleBabe()
+	static let cafe = newBagOfBytesSampleCafe()
+	static let dead = newBagOfBytesSampleDead()
+	static let ecad = newBagOfBytesSampleEcad()
+	static let fade = newBagOfBytesSampleFade()
 
 	func appendingCafe() -> Self {
 		bagOfBytesAppendCafe(to: self)

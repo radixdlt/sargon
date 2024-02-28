@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 // FIXME: MFA this is in fact not used, so ok to be a `bool` for now. The AppPreferences Security type has
 // a field `structure_configuration_references` but no client can populate it yet, so the list will always
-// be empty, thus save to used a serializable trivial type such as `bool` as a placeholder for now.
+// be empty, thus save to used a serializable trivial type such as `bool` as a sample for now.
 pub type SecurityStructureConfigurationReference = bool;
 
 /// Controls e.g. if Profile Snapshot gets synced to iCloud or not, and whether
@@ -43,14 +43,14 @@ impl Default for Security {
     }
 }
 
-impl HasPlaceholder for Security {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
+impl HasSampleValues for Security {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
         Self::new(true, true, IdentifiedVecVia::new())
     }
 
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder_other() -> Self {
+    /// A sample used to facilitate unit tests.
+    fn sample_other() -> Self {
         Self::new(false, false, IdentifiedVecVia::new())
     }
 }
@@ -61,16 +61,13 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(Security::placeholder(), Security::placeholder());
-        assert_eq!(
-            Security::placeholder_other(),
-            Security::placeholder_other()
-        );
+        assert_eq!(Security::sample(), Security::sample());
+        assert_eq!(Security::sample_other(), Security::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(Security::placeholder(), Security::placeholder_other());
+        assert_ne!(Security::sample(), Security::sample_other());
     }
 
     #[test]
@@ -92,7 +89,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip() {
-        let sut = Security::placeholder();
+        let sut = Security::sample();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"

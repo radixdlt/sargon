@@ -6,10 +6,7 @@ import kotlin.random.Random
 fun String.hexToBagOfBytes(): BagOfBytes {
     check(length % 2 == 0) { "Must have an even length" }
 
-    return chunked(2)
-        .map { it.toInt(16).toByte() }
-        .toByteArray()
-        .toBagOfBytes()
+    return chunked(2).map { it.toInt(16).toByte() }.toByteArray().toBagOfBytes()
 }
 
 fun randomBagOfBytes(byteCount: Int): BagOfBytes {
@@ -23,43 +20,64 @@ val BagOfBytes.hex: String
     get() = toUByteArray().toHexString()
 
 val acedBagOfBytes: BagOfBytes
-    get() = newBagOfBytesPlaceholderAced()
+    get() = newBagOfBytesSampleAced()
 
 val babeBagOfBytes: BagOfBytes
-    get() = newBagOfBytesPlaceholderBabe()
+    get() = newBagOfBytesSampleBabe()
 
 val cafeBagOfBytes: BagOfBytes
-    get() = newBagOfBytesPlaceholderCafe()
+    get() = newBagOfBytesSampleCafe()
 
 val deadBagOfBytes: BagOfBytes
-    get() = newBagOfBytesPlaceholderDead()
+    get() = newBagOfBytesSampleDead()
 
 val ecadBagOfBytes: BagOfBytes
-    get() = newBagOfBytesPlaceholderEcad()
+    get() = newBagOfBytesSampleEcad()
 
 val fadeBagOfBytes: BagOfBytes
-    get() = newBagOfBytesPlaceholderFade()
+    get() = newBagOfBytesSampleFade()
 
 fun BagOfBytes.appendingCafe() = bagOfBytesAppendCafe(to = this)
+
 fun BagOfBytes.appendingDeadbeef() = bagOfBytesAppendDeadbeef(to = this)
+
 fun BagOfBytes.prependingCafe() = bagOfBytesPrependCafe(inFrontOf = this)
+
 fun BagOfBytes.prependingDeadbeef() = bagOfBytesPrependDeadbeef(inFrontOf = this)
 
 fun test() {
-	var a = ubyteArrayOf().toList()
-	var b = ubyteArrayOf().toList()
+    var a = ubyteArrayOf().toList()
+    var b = ubyteArrayOf().toList()
     assert(a == b)
 
     a = ubyteArrayOf(129.toUByte()).toList()
     b = byteArrayOf(129.toByte()).toBagOfBytes()
     assert(a == b)
 
-    assert("acedacedacedacedacedacedacedacedacedacedacedacedacedacedacedaced".hexToBagOfBytes() == acedBagOfBytes)
-    assert("babebabebabebabebabebabebabebabebabebabebabebabebabebabebabebabe".hexToBagOfBytes() == babeBagOfBytes)
-    assert("cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe".hexToBagOfBytes() == cafeBagOfBytes)
-    assert("deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead".hexToBagOfBytes() == deadBagOfBytes)
-    assert("ecadecadecadecadecadecadecadecadecadecadecadecadecadecadecadecad".hexToBagOfBytes() == ecadBagOfBytes)
-    assert("fadefadefadefadefadefadefadefadefadefadefadefadefadefadefadefade".hexToBagOfBytes() == fadeBagOfBytes)
+    assert(
+            "acedacedacedacedacedacedacedacedacedacedacedacedacedacedacedaced".hexToBagOfBytes() ==
+                    acedBagOfBytes
+    )
+    assert(
+            "babebabebabebabebabebabebabebabebabebabebabebabebabebabebabebabe".hexToBagOfBytes() ==
+                    babeBagOfBytes
+    )
+    assert(
+            "cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe".hexToBagOfBytes() ==
+                    cafeBagOfBytes
+    )
+    assert(
+            "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead".hexToBagOfBytes() ==
+                    deadBagOfBytes
+    )
+    assert(
+            "ecadecadecadecadecadecadecadecadecadecadecadecadecadecadecadecad".hexToBagOfBytes() ==
+                    ecadBagOfBytes
+    )
+    assert(
+            "fadefadefadefadefadefadefadefadefadefadefadefadefadefadefadefade".hexToBagOfBytes() ==
+                    fadeBagOfBytes
+    )
 
     a = "beef".hexToBagOfBytes()
     assert(a.appendingCafe().hex == "beefcafe")
@@ -69,7 +87,8 @@ fun test() {
 
     b = "42".hexToBagOfBytes()
     assert(
-        b.appendingCafe().appendingDeadbeef().prependingCafe().prependingDeadbeef().hex == "deadbeefcafe42cafedeadbeef"
+            b.appendingCafe().appendingDeadbeef().prependingCafe().prependingDeadbeef().hex ==
+                    "deadbeefcafe42cafedeadbeef"
     )
 
     (0.toUByte()..UByte.MAX_VALUE).forEach {
@@ -78,9 +97,7 @@ fun test() {
     }
 
     val size = 100
-    val set = (0..<size).map {
-        randomBagOfBytes(byteCount = 16 + it)
-    }.toSet()
+    val set = (0 ..< size).map { randomBagOfBytes(byteCount = 16 + it) }.toSet()
     assert(set.size == size)
 }
 

@@ -1,6 +1,5 @@
 extension VaultAddress: @unchecked Sendable {}
 
-
 #if DEBUG
 	extension VaultAddress {
 		/// Namespace for preview values of `VaultAddress`
@@ -9,16 +8,16 @@ extension VaultAddress: @unchecked Sendable {}
 			public static let of = Self()
 
 			public let mainnetFungible: VaultAddress =
-				newVaultAddressPlaceholderMainnetFungible()
+				newVaultAddressSampleMainnetFungible()
 
 			public let mainnetNonFungible: VaultAddress =
-				newVaultAddressPlaceholderMainnetNonFungible()
+				newVaultAddressSampleMainnetNonFungible()
 
 			public let stokenetFungible: VaultAddress =
-				newVaultAddressPlaceholderStokenetFungible()
+				newVaultAddressSampleStokenetFungible()
 
 			public let stokenetNonFungible: VaultAddress =
-				newVaultAddressPlaceholderStokenetNonFungible()
+				newVaultAddressSampleStokenetNonFungible()
 
 		}
 

@@ -91,7 +91,7 @@ impl Persona {
 
 impl Persona {
     #[cfg(not(tarpaulin_include))] // false negative
-    fn placeholder_at_index_name_network<P, E>(
+    fn sample_at_index_name_network<P, E>(
         network_id: NetworkID,
         index: HDPathValue,
         display_name: &str,
@@ -104,7 +104,7 @@ impl Persona {
         P: IntoIterator<Item = String>,
         E: IntoIterator<Item = String>,
     {
-        let mwp = MnemonicWithPassphrase::placeholder();
+        let mwp = MnemonicWithPassphrase::sample();
         let bdfs = DeviceFactorSource::babylon(
             true,
             mwp.clone(),
@@ -148,7 +148,7 @@ impl Persona {
     }
 
     #[cfg(not(tarpaulin_include))] // false negative
-    fn placeholder_at_index_name<P, E>(
+    fn sample_at_index_name<P, E>(
         index: HDPathValue,
         display_name: &str,
         is_hidden: bool,
@@ -160,7 +160,7 @@ impl Persona {
         P: IntoIterator<Item = String>,
         E: IntoIterator<Item = String>,
     {
-        Self::placeholder_at_index_name_network(
+        Self::sample_at_index_name_network(
             NetworkID::Mainnet,
             index,
             display_name,
@@ -171,23 +171,23 @@ impl Persona {
         )
     }
 
-    pub fn placeholder_mainnet() -> Self {
-        Self::placeholder_mainnet_satoshi()
+    pub fn sample_mainnet() -> Self {
+        Self::sample_mainnet_satoshi()
     }
 
-    pub fn placeholder_mainnet_other() -> Self {
-        Self::placeholder_mainnet_batman()
+    pub fn sample_mainnet_other() -> Self {
+        Self::sample_mainnet_batman()
     }
 
-    pub fn placeholder_mainnet_satoshi() -> Self {
+    pub fn sample_mainnet_satoshi() -> Self {
         let name = PersonaDataEntryName::new(
             Variant::Eastern,
             "Nakamoto",
             "Satoshi",
             "Satoshi",
         )
-        .expect("Failure to construct placeholder Name should not be possible");
-        Self::placeholder_at_index_name(
+        .expect("Failure to construct sample Name should not be possible");
+        Self::sample_at_index_name(
             0,
             "Satoshi",
             false,
@@ -203,15 +203,15 @@ impl Persona {
         )
     }
 
-    pub fn placeholder_mainnet_batman() -> Self {
+    pub fn sample_mainnet_batman() -> Self {
         let name = PersonaDataEntryName::new(
             Variant::Western,
             "Wayne",
             "Bruce",
             "Batman",
         )
-        .expect("Failure to construct placeholder Name should not be possible");
-        Self::placeholder_at_index_name(
+        .expect("Failure to construct sample Name should not be possible");
+        Self::sample_at_index_name(
             1,
             "Batman",
             true,
@@ -227,8 +227,8 @@ impl Persona {
         )
     }
 
-    pub fn placeholder_stokenet_leia_skywalker() -> Self {
-        Self::placeholder_at_index_name_network(
+    pub fn sample_stokenet_leia_skywalker() -> Self {
+        Self::sample_at_index_name_network(
             NetworkID::Stokenet,
             0,
             "Skywalker",
@@ -239,9 +239,7 @@ impl Persona {
                 "Leia",
                 "Princess Leia",
             )
-            .expect(
-                "Failure to construct placeholder Name should not be possible",
-            ),
+            .expect("Failure to construct sample Name should not be possible"),
             ["+42 3 456 789"]
                 .into_iter()
                 .map(|s| s.to_string())
@@ -253,8 +251,8 @@ impl Persona {
         )
     }
 
-    pub fn placeholder_stokenet_hermione() -> Self {
-        Self::placeholder_at_index_name_network(
+    pub fn sample_stokenet_hermione() -> Self {
+        Self::sample_at_index_name_network(
             NetworkID::Stokenet,
             1,
             "Granger",
@@ -265,9 +263,7 @@ impl Persona {
                 "Hermione",
                 "Hermy",
             )
-            .expect(
-                "Failure to construct placeholder Name should not be possible",
-            ),
+            .expect("Failure to construct sample Name should not be possible"),
             ["+44 123 456 77"]
                 .into_iter()
                 .map(|s| s.to_string())
@@ -279,11 +275,11 @@ impl Persona {
         )
     }
 
-    pub fn placeholder_stokenet() -> Self {
-        Self::placeholder_stokenet_leia_skywalker()
+    pub fn sample_stokenet() -> Self {
+        Self::sample_stokenet_leia_skywalker()
     }
-    pub fn placeholder_stokenet_other() -> Self {
-        Self::placeholder_stokenet_hermione()
+    pub fn sample_stokenet_other() -> Self {
+        Self::sample_stokenet_hermione()
     }
 }
 
@@ -317,14 +313,14 @@ impl Identifiable for Persona {
     }
 }
 
-/// Placeholder conformance to facilitate unit-tests
-impl HasPlaceholder for Persona {
-    fn placeholder() -> Self {
-        Self::placeholder_mainnet()
+/// Sample conformance to facilitate unit-tests
+impl HasSampleValues for Persona {
+    fn sample() -> Self {
+        Self::sample_mainnet()
     }
 
-    fn placeholder_other() -> Self {
-        Self::placeholder_mainnet_other()
+    fn sample_other() -> Self {
+        Self::sample_mainnet_other()
     }
 }
 
@@ -334,55 +330,40 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(Persona::placeholder(), Persona::placeholder());
-        assert_eq!(Persona::placeholder_other(), Persona::placeholder_other());
+        assert_eq!(Persona::sample(), Persona::sample());
+        assert_eq!(Persona::sample_other(), Persona::sample_other());
 
+        assert_eq!(Persona::sample_mainnet(), Persona::sample_mainnet());
         assert_eq!(
-            Persona::placeholder_mainnet(),
-            Persona::placeholder_mainnet()
-        );
-        assert_eq!(
-            Persona::placeholder_mainnet_other(),
-            Persona::placeholder_mainnet_other()
+            Persona::sample_mainnet_other(),
+            Persona::sample_mainnet_other()
         );
 
+        assert_eq!(Persona::sample_stokenet(), Persona::sample_stokenet());
         assert_eq!(
-            Persona::placeholder_stokenet(),
-            Persona::placeholder_stokenet()
-        );
-        assert_eq!(
-            Persona::placeholder_stokenet_other(),
-            Persona::placeholder_stokenet_other()
+            Persona::sample_stokenet_other(),
+            Persona::sample_stokenet_other()
         );
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(Persona::placeholder(), Persona::placeholder_other());
+        assert_ne!(Persona::sample(), Persona::sample_other());
+        assert_ne!(Persona::sample_mainnet(), Persona::sample_mainnet_other());
         assert_ne!(
-            Persona::placeholder_mainnet(),
-            Persona::placeholder_mainnet_other()
+            Persona::sample_stokenet(),
+            Persona::sample_stokenet_other()
         );
+        assert_ne!(Persona::sample_stokenet(), Persona::sample_mainnet());
         assert_ne!(
-            Persona::placeholder_stokenet(),
-            Persona::placeholder_stokenet_other()
-        );
-        assert_ne!(
-            Persona::placeholder_stokenet(),
-            Persona::placeholder_mainnet()
-        );
-        assert_ne!(
-            Persona::placeholder_stokenet_other(),
-            Persona::placeholder_mainnet_other()
+            Persona::sample_stokenet_other(),
+            Persona::sample_mainnet_other()
         );
     }
 
     #[test]
     fn compare() {
-        assert!(
-            Persona::placeholder_mainnet_other()
-                > Persona::placeholder_mainnet()
-        );
+        assert!(Persona::sample_mainnet_other() > Persona::sample_mainnet());
     }
 
     #[test]
@@ -391,13 +372,13 @@ mod tests {
 			"identity_rdx12gcd4r799jpvztlffgw483pqcen98pjnay988n8rmscdswd872xy62"
 				.parse()
 				.unwrap();
-        let persona = Persona::placeholder_mainnet_other();
+        let persona = Persona::sample_mainnet_other();
         assert_eq!(persona.address, identity_address);
     }
 
     #[test]
     fn display() {
-        let account = Persona::placeholder_mainnet_other();
+        let account = Persona::sample_mainnet_other();
         assert_eq!(
 			format!("{account}"),
 			"Batman | identity_rdx12gcd4r799jpvztlffgw483pqcen98pjnay988n8rmscdswd872xy62"
@@ -406,7 +387,7 @@ mod tests {
 
     #[test]
     fn identifiable() {
-        let persona = Persona::placeholder_mainnet_other();
+        let persona = Persona::sample_mainnet_other();
         let identity_address: IdentityAddress =
 			"identity_rdx12gcd4r799jpvztlffgw483pqcen98pjnay988n8rmscdswd872xy62"
 				.parse()
@@ -416,7 +397,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_mainnet_satoshi() {
-        let model = Persona::placeholder_mainnet();
+        let model = Persona::sample_mainnet();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -493,7 +474,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_mainnet_batman() {
-        let model = Persona::placeholder_mainnet_other();
+        let model = Persona::sample_mainnet_other();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -562,7 +543,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_stokenet_leia() {
-        let model = Persona::placeholder_stokenet_leia_skywalker();
+        let model = Persona::sample_stokenet_leia_skywalker();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -631,7 +612,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_stokenet_hermione() {
-        let model = Persona::placeholder_stokenet_hermione();
+        let model = Persona::sample_stokenet_hermione();
         assert_eq_after_json_roundtrip(
             &model,
             r#"

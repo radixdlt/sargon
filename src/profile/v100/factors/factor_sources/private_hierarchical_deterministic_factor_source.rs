@@ -94,22 +94,22 @@ impl PrivateHierarchicalDeterministicFactorSource {
     }
 }
 
-impl HasPlaceholder for PrivateHierarchicalDeterministicFactorSource {
-    fn placeholder() -> Self {
+impl HasSampleValues for PrivateHierarchicalDeterministicFactorSource {
+    fn sample() -> Self {
         Self::new(
-            MnemonicWithPassphrase::placeholder(),
-            DeviceFactorSource::placeholder_babylon(),
+            MnemonicWithPassphrase::sample(),
+            DeviceFactorSource::sample_babylon(),
         )
     }
 
-    fn placeholder_other() -> Self {
-        let mwp = MnemonicWithPassphrase::placeholder_other();
+    fn sample_other() -> Self {
+        let mwp = MnemonicWithPassphrase::sample_other();
         Self::new(
             mwp.clone(),
             DeviceFactorSource::new(
                 FactorSourceIDFromHash::new_for_device(mwp),
-                FactorSourceCommon::placeholder_olympia(),
-                DeviceFactorSourceHint::placeholder_other(),
+                FactorSourceCommon::sample_olympia(),
+                DeviceFactorSourceHint::sample_other(),
             ),
         )
     }

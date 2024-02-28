@@ -20,16 +20,16 @@ pub fn new_gateways(current: Gateway) -> Gateways {
     Gateways::new(current)
 }
 
-/// A placeholder value useful for tests and previews.
+/// A sample value useful for tests and previews.
 #[uniffi::export]
-pub fn new_gateways_placeholder() -> Gateways {
-    Gateways::placeholder()
+pub fn new_gateways_sample() -> Gateways {
+    Gateways::sample()
 }
 
-/// A placeholder value useful for tests and previews.
+/// A sample value useful for tests and previews.
 #[uniffi::export]
-pub fn new_gateways_placeholder_other() -> Gateways {
-    Gateways::placeholder_other()
+pub fn new_gateways_sample_other() -> Gateways {
+    Gateways::sample_other()
 }
 
 impl Gateways {
@@ -159,15 +159,15 @@ impl Default for Gateways {
     }
 }
 
-impl HasPlaceholder for Gateways {
-    fn placeholder() -> Self {
+impl HasSampleValues for Gateways {
+    fn sample() -> Self {
         let mut sut = Gateways::new(Gateway::rcnet());
         sut.append(Gateway::mainnet());
         sut.append(Gateway::stokenet());
         sut
     }
 
-    fn placeholder_other() -> Self {
+    fn sample_other() -> Self {
         Gateways::default()
     }
 }
@@ -177,16 +177,13 @@ mod tests {
     use crate::prelude::*;
     #[test]
     fn equality() {
-        assert_eq!(Gateways::placeholder(), Gateways::placeholder());
-        assert_eq!(
-            Gateways::placeholder_other(),
-            Gateways::placeholder_other()
-        );
+        assert_eq!(Gateways::sample(), Gateways::sample());
+        assert_eq!(Gateways::sample_other(), Gateways::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(Gateways::placeholder(), Gateways::placeholder_other());
+        assert_ne!(Gateways::sample(), Gateways::sample_other());
     }
 
     #[test]
@@ -253,7 +250,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip() {
-        let sut = Gateways::placeholder();
+        let sut = Gateways::sample();
 
         assert_eq_after_json_roundtrip(
             &sut,
@@ -298,19 +295,16 @@ mod tests {
 #[cfg(test)]
 mod uniffi_tests {
     use crate::{
-        new_gateways, new_gateways_placeholder, new_gateways_placeholder_other,
-        Gateway, HasPlaceholder,
+        new_gateways, new_gateways_sample, new_gateways_sample_other, Gateway,
+        HasSampleValues,
     };
 
     use super::Gateways;
 
     #[test]
-    fn equality_placeholders() {
-        assert_eq!(Gateways::placeholder(), new_gateways_placeholder());
-        assert_eq!(
-            Gateways::placeholder_other(),
-            new_gateways_placeholder_other()
-        );
+    fn equality_samples() {
+        assert_eq!(Gateways::sample(), new_gateways_sample());
+        assert_eq!(Gateways::sample_other(), new_gateways_sample_other());
     }
 
     #[test]

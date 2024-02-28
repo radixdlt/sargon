@@ -68,7 +68,7 @@ impl Identifiable for AccountAddress {
 }
 
 impl AuthorizedDapp {
-    pub fn placeholder_mainnet_dashboard() -> Self {
+    pub fn sample_mainnet_dashboard() -> Self {
         Self::new(
             NetworkID::Mainnet,
              "account_rdx12x0xfz2yumu2qsh6yt0v8xjfc7et04vpsz775kc3yd3xvle4w5d5k5"
@@ -76,12 +76,12 @@ impl AuthorizedDapp {
              .expect("Valid Dapp Def Address"),
               "Radix Dashboard".to_owned(), 
              IdentifiedVecVia::from_iter([
-                    AuthorizedPersonaSimple::placeholder_mainnet(),
-                    AuthorizedPersonaSimple::placeholder_mainnet_other()
+                    AuthorizedPersonaSimple::sample_mainnet(),
+                    AuthorizedPersonaSimple::sample_mainnet_other()
                 ])
             )
     }
-    pub fn placeholder_mainnet_gumballclub() -> Self {
+    pub fn sample_mainnet_gumballclub() -> Self {
         Self::new(
             NetworkID::Mainnet,
              "account_rdx12xuhw6v30chdkhcu7qznz9vu926vxefr4h4tdvc0mdckg9rq4afx9t"
@@ -89,11 +89,11 @@ impl AuthorizedDapp {
              .expect("Valid Dapp Def Address"),
               "Gumball Club".to_owned(), 
              IdentifiedVecVia::from_iter([
-                    AuthorizedPersonaSimple::placeholder_mainnet_other()
+                    AuthorizedPersonaSimple::sample_mainnet_other()
                 ])
             )
     }
-    pub fn placeholder_stokenet_devconsole() -> Self {
+    pub fn sample_stokenet_devconsole() -> Self {
         Self::new(
             NetworkID::Stokenet,
              "account_tdx_2_128evrrwfp8gj9240qq0m06ukhwaj2cmejluxxreanzjwq62vmlf8r4"
@@ -101,12 +101,12 @@ impl AuthorizedDapp {
              .expect("Valid Dapp Def Address"),
               "Dev Console".to_owned(), 
              IdentifiedVecVia::from_iter([
-                    AuthorizedPersonaSimple::placeholder_stokenet(),
-                    AuthorizedPersonaSimple::placeholder_stokenet_other()
+                    AuthorizedPersonaSimple::sample_stokenet(),
+                    AuthorizedPersonaSimple::sample_stokenet_other()
                 ])
             )
     }
-    pub fn placeholder_stokenet_sandbox() -> Self {
+    pub fn sample_stokenet_sandbox() -> Self {
         Self::new(
             NetworkID::Stokenet,
              "account_tdx_2_12yf9gd53yfep7a669fv2t3wm7nz9zeezwd04n02a433ker8vza6rhe"
@@ -114,33 +114,33 @@ impl AuthorizedDapp {
              .expect("Valid Dapp Def Address"),
               "Sandbox".to_owned(), 
              IdentifiedVecVia::from_iter([
-                    AuthorizedPersonaSimple::placeholder_stokenet_other()
+                    AuthorizedPersonaSimple::sample_stokenet_other()
                 ])
             )
     }
 
-    pub fn placeholder_mainnet() -> Self {
-        Self::placeholder_mainnet_dashboard()
+    pub fn sample_mainnet() -> Self {
+        Self::sample_mainnet_dashboard()
     }
 
-    pub fn placeholder_mainnet_other() -> Self {
-        Self::placeholder_mainnet_gumballclub()
+    pub fn sample_mainnet_other() -> Self {
+        Self::sample_mainnet_gumballclub()
     }
 
-    pub fn placeholder_stokenet() -> Self {
-        Self::placeholder_stokenet_devconsole()
+    pub fn sample_stokenet() -> Self {
+        Self::sample_stokenet_devconsole()
     }
 
-    pub fn placeholder_stokenet_other() -> Self {
-        Self::placeholder_stokenet_sandbox()
+    pub fn sample_stokenet_other() -> Self {
+        Self::sample_stokenet_sandbox()
     }
 }
-impl HasPlaceholder for AuthorizedDapp {
-    fn placeholder() -> Self {
-        Self::placeholder_mainnet_dashboard()
+impl HasSampleValues for AuthorizedDapp {
+    fn sample() -> Self {
+        Self::sample_mainnet_dashboard()
     }
-    fn placeholder_other() -> Self {
-        Self::placeholder_mainnet_gumballclub()
+    fn sample_other() -> Self {
+        Self::sample_mainnet_gumballclub()
     }
 }
 
@@ -153,18 +153,18 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::placeholder(), SUT::placeholder());
-        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn json_mainnet_roundtrip() {
-        let model = AuthorizedDapp::placeholder_mainnet();
+        let model = AuthorizedDapp::sample_mainnet();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -254,7 +254,7 @@ mod tests {
 
     #[test]
     fn json_mainnet_other_roundtrip() {
-        let model = AuthorizedDapp::placeholder_mainnet_other();
+        let model = AuthorizedDapp::sample_mainnet_other();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -307,7 +307,7 @@ mod tests {
 
     #[test]
     fn json_stokenet_roundtrip() {
-        let model = AuthorizedDapp::placeholder_stokenet();
+        let model = AuthorizedDapp::sample_stokenet();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -397,7 +397,7 @@ mod tests {
 
     #[test]
     fn json_stokenet_other_roundtrip() {
-        let model = AuthorizedDapp::placeholder_stokenet_other();
+        let model = AuthorizedDapp::sample_stokenet_other();
         assert_eq_after_json_roundtrip(
             &model,
             r#"

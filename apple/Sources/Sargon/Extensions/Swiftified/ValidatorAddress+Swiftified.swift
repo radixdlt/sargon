@@ -1,6 +1,5 @@
 extension ValidatorAddress: @unchecked Sendable {}
 
-
 #if DEBUG
 	extension ValidatorAddress {
 		/// Namespace for preview values of `ValidatorAddress`
@@ -9,16 +8,16 @@ extension ValidatorAddress: @unchecked Sendable {}
 			public static let of = Self()
 
 			public let mainnet: ValidatorAddress =
-				newValidatorAddressPlaceholderMainnet()
+				newValidatorAddressSampleMainnet()
 
 			public let mainnetOther: ValidatorAddress =
-				newValidatorAddressPlaceholderMainnetOther()
+				newValidatorAddressSampleMainnetOther()
 
 			public let stokenet: ValidatorAddress =
-				newValidatorAddressPlaceholderStokenet()
+				newValidatorAddressSampleStokenet()
 
 			public let stokenetOther: ValidatorAddress =
-				newValidatorAddressPlaceholderStokenetOther()
+				newValidatorAddressSampleStokenetOther()
 
 		}
 

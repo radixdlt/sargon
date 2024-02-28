@@ -100,12 +100,12 @@ impl NonFungibleGlobalId {
     }
 }
 
-impl HasPlaceholder for NonFungibleGlobalId {
-    fn placeholder() -> Self {
+impl HasSampleValues for NonFungibleGlobalId {
+    fn sample() -> Self {
         "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa:<Member_237>".parse().expect("Valid GC NFT Global ID")
     }
 
-    fn placeholder_other() -> Self {
+    fn sample_other() -> Self {
         "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd:#1337#".parse().expect("Valid Scorpion NFT Global ID")
     }
 }
@@ -119,13 +119,13 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::placeholder(), SUT::placeholder());
-        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]

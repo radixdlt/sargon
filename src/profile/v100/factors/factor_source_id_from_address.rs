@@ -35,20 +35,17 @@ impl FactorSourceIDFromAddress {
     }
 }
 
-impl HasPlaceholder for FactorSourceIDFromAddress {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
-        Self::new(
-            FactorSourceKind::TrustedContact,
-            AccountAddress::placeholder(),
-        )
+impl HasSampleValues for FactorSourceIDFromAddress {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
+        Self::new(FactorSourceKind::TrustedContact, AccountAddress::sample())
     }
 
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder_other() -> Self {
+    /// A sample used to facilitate unit tests.
+    fn sample_other() -> Self {
         Self::new(
             FactorSourceKind::TrustedContact,
-            AccountAddress::placeholder_other(),
+            AccountAddress::sample_other(),
         )
     }
 }
@@ -60,27 +57,27 @@ mod tests {
     #[test]
     fn equality() {
         assert_eq!(
-            FactorSourceIDFromAddress::placeholder(),
-            FactorSourceIDFromAddress::placeholder()
+            FactorSourceIDFromAddress::sample(),
+            FactorSourceIDFromAddress::sample()
         );
         assert_eq!(
-            FactorSourceIDFromAddress::placeholder_other(),
-            FactorSourceIDFromAddress::placeholder_other()
+            FactorSourceIDFromAddress::sample_other(),
+            FactorSourceIDFromAddress::sample_other()
         );
     }
 
     #[test]
     fn inequality() {
         assert_ne!(
-            FactorSourceIDFromAddress::placeholder(),
-            FactorSourceIDFromAddress::placeholder_other()
+            FactorSourceIDFromAddress::sample(),
+            FactorSourceIDFromAddress::sample_other()
         );
     }
 
     #[test]
     fn display() {
         assert_eq!(
-            format!("{}", FactorSourceIDFromAddress::placeholder()),
+            format!("{}", FactorSourceIDFromAddress::sample()),
             "trustedContact:account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
         );
     }
@@ -88,14 +85,14 @@ mod tests {
     #[test]
     fn debug() {
         assert_eq!(
-            format!("{:?}", FactorSourceIDFromAddress::placeholder()),
+            format!("{:?}", FactorSourceIDFromAddress::sample()),
             "trustedContact:account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
         );
     }
 
     #[test]
     fn json_roundtrip() {
-        let model = FactorSourceIDFromAddress::placeholder();
+        let model = FactorSourceIDFromAddress::sample();
 
         assert_eq_after_json_roundtrip(
             &model,

@@ -203,11 +203,11 @@ mod tests {
         let sut = make_sut();
 
         assert!(sut
-            .save(SecureStorageKey::ActiveProfileID, &Profile::placeholder())
+            .save(SecureStorageKey::ActiveProfileID, &Profile::sample())
             .is_ok());
         assert_eq!(
             sut.load::<Profile>(SecureStorageKey::ActiveProfileID),
-            Ok(Some(Profile::placeholder()))
+            Ok(Some(Profile::sample()))
         );
     }
 
@@ -216,14 +216,14 @@ mod tests {
         let sut = make_sut();
 
         assert!(sut
-            .save(SecureStorageKey::ActiveProfileID, &Profile::placeholder())
+            .save(SecureStorageKey::ActiveProfileID, &Profile::sample())
             .is_ok());
         assert_eq!(
             sut.load_unwrap_or::<Profile>(
                 SecureStorageKey::ActiveProfileID,
-                Profile::placeholder_other()
+                Profile::sample_other()
             ),
-            Profile::placeholder()
+            Profile::sample()
         );
     }
 
@@ -234,16 +234,16 @@ mod tests {
         assert_eq!(
             sut.load_unwrap_or::<Profile>(
                 SecureStorageKey::ActiveProfileID,
-                Profile::placeholder_other()
+                Profile::sample_other()
             ),
-            Profile::placeholder_other()
+            Profile::sample_other()
         );
     }
 
     #[test]
     fn save_mnemonic_with_passphrase() {
         let private =
-            PrivateHierarchicalDeterministicFactorSource::placeholder_other();
+            PrivateHierarchicalDeterministicFactorSource::sample_other();
         let factor_source_id = private.factor_source.id.clone();
         let (sut, storage) = WalletClientStorage::ephemeral();
         let key = SecureStorageKey::DeviceFactorSourceMnemonic {
@@ -268,10 +268,10 @@ mod tests {
     #[test]
     fn save_mnemonic_with_passphrase_failure() {
         let sut = WalletClientStorage::always_fail();
-        let id = FactorSourceIDFromHash::placeholder();
+        let id = FactorSourceIDFromHash::sample();
         assert_eq!(
             sut.save_mnemonic_with_passphrase(
-                &MnemonicWithPassphrase::placeholder(),
+                &MnemonicWithPassphrase::sample(),
                 &id
             ),
             Err(CommonError::UnableToSaveMnemonicToSecureStorage {
@@ -284,7 +284,7 @@ mod tests {
     fn delete_mnemonic() {
         // ARRANGE
         let private =
-            PrivateHierarchicalDeterministicFactorSource::placeholder_other();
+            PrivateHierarchicalDeterministicFactorSource::sample_other();
         let factor_source_id = private.factor_source.id.clone();
         let (sut, storage) = WalletClientStorage::ephemeral();
         let key = SecureStorageKey::DeviceFactorSourceMnemonic {

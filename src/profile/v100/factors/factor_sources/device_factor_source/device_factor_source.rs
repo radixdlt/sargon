@@ -94,34 +94,34 @@ impl DeviceFactorSource {
     }
 }
 
-impl HasPlaceholder for DeviceFactorSource {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
-        Self::placeholder_babylon()
+impl HasSampleValues for DeviceFactorSource {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
+        Self::sample_babylon()
     }
 
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder_other() -> Self {
-        Self::placeholder_olympia()
+    /// A sample used to facilitate unit tests.
+    fn sample_other() -> Self {
+        Self::sample_olympia()
     }
 }
 
 impl DeviceFactorSource {
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_babylon() -> Self {
+    /// A sample used to facilitate unit tests.
+    pub fn sample_babylon() -> Self {
         Self::new(
-            FactorSourceIDFromHash::placeholder(),
-            FactorSourceCommon::placeholder_main_babylon(),
-            DeviceFactorSourceHint::placeholder(),
+            FactorSourceIDFromHash::sample(),
+            FactorSourceCommon::sample_main_babylon(),
+            DeviceFactorSourceHint::sample(),
         )
     }
 
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_olympia() -> Self {
+    /// A sample used to facilitate unit tests.
+    pub fn sample_olympia() -> Self {
         Self::new(
-            FactorSourceIDFromHash::placeholder_other(),
-            FactorSourceCommon::placeholder_olympia(),
-            DeviceFactorSourceHint::placeholder(),
+            FactorSourceIDFromHash::sample_other(),
+            FactorSourceCommon::sample_olympia(),
+            DeviceFactorSourceHint::sample(),
         )
     }
 }
@@ -132,21 +132,18 @@ mod tests {
 
     #[test]
     fn equality() {
+        assert_eq!(DeviceFactorSource::sample(), DeviceFactorSource::sample());
         assert_eq!(
-            DeviceFactorSource::placeholder(),
-            DeviceFactorSource::placeholder()
-        );
-        assert_eq!(
-            DeviceFactorSource::placeholder_other(),
-            DeviceFactorSource::placeholder_other()
+            DeviceFactorSource::sample_other(),
+            DeviceFactorSource::sample_other()
         );
     }
 
     #[test]
     fn inequality() {
         assert_ne!(
-            DeviceFactorSource::placeholder(),
-            DeviceFactorSource::placeholder_other()
+            DeviceFactorSource::sample(),
+            DeviceFactorSource::sample_other()
         );
     }
 
@@ -154,15 +151,15 @@ mod tests {
     fn main_babylon() {
         assert!(DeviceFactorSource::babylon(
             true,
-            MnemonicWithPassphrase::placeholder(),
-            WalletClientModel::placeholder()
+            MnemonicWithPassphrase::sample(),
+            WalletClientModel::sample()
         )
         .is_main_bdfs());
     }
 
     #[test]
     fn json() {
-        let model = DeviceFactorSource::placeholder();
+        let model = DeviceFactorSource::sample();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -192,14 +189,14 @@ mod tests {
 
     #[test]
     fn factor_source_id() {
-        let sut = DeviceFactorSource::placeholder();
+        let sut = DeviceFactorSource::sample();
         let factor_source_id: FactorSourceID = sut.clone().id.into();
         assert_eq!(factor_source_id, sut.factor_source_id());
     }
 
     #[test]
     fn from_factor_source() {
-        let sut = DeviceFactorSource::placeholder();
+        let sut = DeviceFactorSource::sample();
         let factor_source: FactorSource = sut.clone().into();
         assert_eq!(DeviceFactorSource::try_from(factor_source), Ok(sut));
     }
@@ -211,7 +208,7 @@ mod tests {
 
     #[test]
     fn from_factor_source_invalid_got_ledger() {
-        let ledger = LedgerHardwareWalletFactorSource::placeholder();
+        let ledger = LedgerHardwareWalletFactorSource::sample();
         let factor_source: FactorSource = ledger.clone().into();
         assert_eq!(
             DeviceFactorSource::try_from(factor_source),
@@ -220,9 +217,9 @@ mod tests {
     }
 
     #[test]
-    fn placeholder_olympia_has_crypto_parameters_olympia() {
+    fn sample_olympia_has_crypto_parameters_olympia() {
         assert_eq!(
-            DeviceFactorSource::placeholder_olympia()
+            DeviceFactorSource::sample_olympia()
                 .common
                 .crypto_parameters,
             FactorSourceCryptoParameters::olympia()
@@ -232,7 +229,7 @@ mod tests {
     #[test]
     fn hint() {
         assert_eq!(
-            DeviceFactorSource::placeholder().hint.mnemonic_word_count,
+            DeviceFactorSource::sample().hint.mnemonic_word_count,
             BIP39WordCount::TwentyFour
         );
     }

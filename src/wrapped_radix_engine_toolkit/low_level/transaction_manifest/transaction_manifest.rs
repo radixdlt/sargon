@@ -160,13 +160,13 @@ pub fn new_transaction_manifest_from_instructions_string_and_blobs(
 }
 
 #[uniffi::export]
-pub fn new_transaction_manifest_placeholder() -> TransactionManifest {
-    TransactionManifest::placeholder()
+pub fn new_transaction_manifest_sample() -> TransactionManifest {
+    TransactionManifest::sample()
 }
 
 #[uniffi::export]
-pub fn new_transaction_manifest_placeholder_other() -> TransactionManifest {
-    TransactionManifest::placeholder_other()
+pub fn new_transaction_manifest_sample_other() -> TransactionManifest {
+    TransactionManifest::sample_other()
 }
 
 #[uniffi::export]
@@ -177,13 +177,13 @@ pub fn transaction_manifest_to_string(
     manifest.instructions_string()
 }
 
-impl HasPlaceholder for TransactionManifest {
-    fn placeholder() -> Self {
-        TransactionManifestSecretMagic::placeholder().into()
+impl HasSampleValues for TransactionManifest {
+    fn sample() -> Self {
+        TransactionManifestSecretMagic::sample().into()
     }
 
-    fn placeholder_other() -> Self {
-        TransactionManifestSecretMagic::placeholder_other().into()
+    fn sample_other() -> Self {
+        TransactionManifestSecretMagic::sample_other().into()
     }
 }
 
@@ -204,33 +204,33 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::placeholder(), SUT::placeholder());
-        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
-    fn placeholder_string_roundtrip() {
-        let sut = SUT::placeholder();
+    fn sample_string_roundtrip() {
+        let sut = SUT::sample();
         assert_eq!(sut.clone(), sut.clone());
         instructions_eq(
             sut.clone().secret_magic.instructions,
-            Instructions::placeholder_simulator_instructions_string(),
+            Instructions::sample_simulator_instructions_string(),
         );
         assert_eq!(sut.instructions().len(), 3);
     }
 
     #[test]
-    fn placeholder_other_string_roundtrip() {
-        let sut = SUT::placeholder_other();
+    fn sample_other_string_roundtrip() {
+        let sut = SUT::sample_other();
         assert_eq!(sut.clone(), sut.clone());
         instructions_eq(
             sut.clone().secret_magic.instructions,
-            Instructions::placeholder_other_simulator_instructions_string(),
+            Instructions::sample_other_simulator_instructions_string(),
         );
         assert_eq!(sut.instructions().len(), 8);
     }

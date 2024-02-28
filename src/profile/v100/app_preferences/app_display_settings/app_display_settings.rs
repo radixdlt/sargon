@@ -25,17 +25,17 @@ impl Default for AppDisplay {
     }
 }
 
-impl HasPlaceholder for AppDisplay {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
+impl HasSampleValues for AppDisplay {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
         Self {
             is_currency_amount_visible: true,
             fiat_currency_price_target: FiatCurrency::default(),
         }
     }
 
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder_other() -> Self {
+    /// A sample used to facilitate unit tests.
+    fn sample_other() -> Self {
         Self {
             is_currency_amount_visible: false,
             fiat_currency_price_target: FiatCurrency::default(),
@@ -48,16 +48,13 @@ mod tests {
     use crate::prelude::*;
     #[test]
     fn equality() {
-        assert_eq!(AppDisplay::placeholder(), AppDisplay::placeholder());
-        assert_eq!(
-            AppDisplay::placeholder_other(),
-            AppDisplay::placeholder_other()
-        );
+        assert_eq!(AppDisplay::sample(), AppDisplay::sample());
+        assert_eq!(AppDisplay::sample_other(), AppDisplay::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(AppDisplay::placeholder(), AppDisplay::placeholder_other());
+        assert_ne!(AppDisplay::sample(), AppDisplay::sample_other());
     }
 
     #[test]
@@ -67,7 +64,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip() {
-        let sut = AppDisplay::placeholder();
+        let sut = AppDisplay::sample();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"

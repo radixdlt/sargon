@@ -23,106 +23,105 @@ pub fn resource_address_is_non_fungible(address: &ResourceAddress) -> bool {
 }
 
 #[uniffi::export]
-pub fn new_resource_address_placeholder_mainnet_xrd() -> ResourceAddress {
-    ResourceAddress::placeholder_mainnet_xrd()
+pub fn new_resource_address_sample_mainnet_xrd() -> ResourceAddress {
+    ResourceAddress::sample_mainnet_xrd()
 }
 
 #[uniffi::export]
-pub fn new_resource_address_placeholder_mainnet_candy() -> ResourceAddress {
-    ResourceAddress::placeholder_mainnet_candy()
+pub fn new_resource_address_sample_mainnet_candy() -> ResourceAddress {
+    ResourceAddress::sample_mainnet_candy()
 }
 
 #[uniffi::export]
-pub fn new_resource_address_placeholder_mainnet_nft_gc_membership(
-) -> ResourceAddress {
-    ResourceAddress::placeholder_mainnet_nft_gc_membership()
-}
-
-#[uniffi::export]
-pub fn new_resource_address_placeholder_stokenet_xrd() -> ResourceAddress {
-    ResourceAddress::placeholder_stokenet_xrd()
-}
-
-#[uniffi::export]
-pub fn new_resource_address_placeholder_stokenet_gum() -> ResourceAddress {
-    ResourceAddress::placeholder_stokenet_gum()
-}
-
-#[uniffi::export]
-pub fn new_resource_address_placeholder_stokenet_gc_tokens() -> ResourceAddress
+pub fn new_resource_address_sample_mainnet_nft_gc_membership() -> ResourceAddress
 {
-    ResourceAddress::placeholder_stokenet_gc_tokens()
+    ResourceAddress::sample_mainnet_nft_gc_membership()
 }
 
 #[uniffi::export]
-pub fn new_resource_address_placeholder_stokenet_candy() -> ResourceAddress {
-    ResourceAddress::placeholder_stokenet_candy()
+pub fn new_resource_address_sample_stokenet_xrd() -> ResourceAddress {
+    ResourceAddress::sample_stokenet_xrd()
 }
 
-impl HasPlaceholder for ResourceAddress {
+#[uniffi::export]
+pub fn new_resource_address_sample_stokenet_gum() -> ResourceAddress {
+    ResourceAddress::sample_stokenet_gum()
+}
+
+#[uniffi::export]
+pub fn new_resource_address_sample_stokenet_gc_tokens() -> ResourceAddress {
+    ResourceAddress::sample_stokenet_gc_tokens()
+}
+
+#[uniffi::export]
+pub fn new_resource_address_sample_stokenet_candy() -> ResourceAddress {
+    ResourceAddress::sample_stokenet_candy()
+}
+
+impl HasSampleValues for ResourceAddress {
     /// The RAD on mainnet
-    fn placeholder() -> Self {
-        Self::placeholder_mainnet_xrd()
+    fn sample() -> Self {
+        Self::sample_mainnet_xrd()
     }
 
     /// Candy by Gumball club on mainnet
-    fn placeholder_other() -> Self {
-        Self::placeholder_mainnet_candy()
+    fn sample_other() -> Self {
+        Self::sample_mainnet_candy()
     }
 }
 
 #[allow(unused)]
 impl ResourceAddress {
-    fn placeholder_stokenet() -> Self {
-        Self::placeholder_stokenet_xrd()
+    fn sample_stokenet() -> Self {
+        Self::sample_stokenet_xrd()
     }
 
-    fn placeholder_stokenet_other() -> Self {
-        Self::placeholder_stokenet_gum()
+    fn sample_stokenet_other() -> Self {
+        Self::sample_stokenet_gum()
     }
 }
 
 #[allow(unused)]
 impl ResourceAddress {
     /// The RAD on mainnet
-    fn placeholder_mainnet_xrd() -> Self {
+    fn sample_mainnet_xrd() -> Self {
         "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
             .parse()
             .expect("XRD")
     }
 
     /// Candy by Gumball club on mainnet
-    fn placeholder_mainnet_candy() -> Self {
+    fn sample_mainnet_candy() -> Self {
         "resource_rdx1t4dy69k6s0gv040xa64cyadyefwtett62ng6xfdnljyydnml7t6g3j"
             .parse()
             .expect("Candy")
     }
 
-    fn placeholder_mainnet_nft_gc_membership() -> Self {
+    fn sample_mainnet_nft_gc_membership() -> Self {
         "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa"
             .parse()
             .expect("GC Membership")
     }
 
-    fn placeholder_stokenet_xrd() -> Self {
+    fn sample_stokenet_xrd() -> Self {
         "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc"
             .parse()
             .expect("XRD")
     }
 
-    fn placeholder_stokenet_gum() -> Self {
+    fn sample_stokenet_gum() -> Self {
         "resource_tdx_2_1t4kep9ldg9t0cszj78z6fcr2zvfxfq7muetq7pyvhdtctwxum90scq"
             .parse()
             .expect("Gum")
     }
 
-    fn placeholder_stokenet_gc_tokens() -> Self {
+    fn sample_stokenet_gc_tokens() -> Self {
         "resource_tdx_2_1thqcgjw37fjgycpvqr52nx4jcsdeuq75mf2nywme07kzsuds9a4psp"
             .parse()
             .expect("GC Tokens")
     }
 
-    fn placeholder_stokenet_candy() -> Self {
+    fn sample_stokenet_candy() -> Self {
         "resource_tdx_2_1tk30vj4ene95e3vhymtf2p35fzl29rv4us36capu2rz0vretw9gzr3"
             .parse()
             .expect("Candy")
@@ -138,50 +137,47 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::placeholder(), SUT::placeholder());
-        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
 
-        assert_eq!(SUT::placeholder_stokenet(), SUT::placeholder_stokenet());
-        assert_eq!(
-            SUT::placeholder_stokenet_other(),
-            SUT::placeholder_stokenet_other()
-        );
+        assert_eq!(SUT::sample_stokenet(), SUT::sample_stokenet());
+        assert_eq!(SUT::sample_stokenet_other(), SUT::sample_stokenet_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
-        assert_ne!(SUT::placeholder_stokenet(), SUT::placeholder());
+        assert_ne!(SUT::sample(), SUT::sample_other());
+        assert_ne!(SUT::sample_stokenet(), SUT::sample());
     }
 
     #[test]
     fn is_fungible() {
-        assert!(SUT::placeholder_mainnet_nft_gc_membership().is_non_fungible());
-        assert!(!SUT::placeholder_mainnet_nft_gc_membership().is_fungible());
+        assert!(SUT::sample_mainnet_nft_gc_membership().is_non_fungible());
+        assert!(!SUT::sample_mainnet_nft_gc_membership().is_fungible());
 
-        assert!(!SUT::placeholder_mainnet_xrd().is_non_fungible());
-        assert!(SUT::placeholder_mainnet_xrd().is_fungible());
+        assert!(!SUT::sample_mainnet_xrd().is_non_fungible());
+        assert!(SUT::sample_mainnet_xrd().is_fungible());
     }
 
     #[test]
     fn hash() {
         assert_eq!(
             HashSet::<SUT>::from_iter([
-                SUT::placeholder_mainnet_xrd(),
-                SUT::placeholder_mainnet_candy(),
-                SUT::placeholder_mainnet_nft_gc_membership(),
-                SUT::placeholder_stokenet_xrd(),
-                SUT::placeholder_stokenet_gc_tokens(),
-                SUT::placeholder_stokenet_gum(),
-                SUT::placeholder_stokenet_candy(),
+                SUT::sample_mainnet_xrd(),
+                SUT::sample_mainnet_candy(),
+                SUT::sample_mainnet_nft_gc_membership(),
+                SUT::sample_stokenet_xrd(),
+                SUT::sample_stokenet_gc_tokens(),
+                SUT::sample_stokenet_gum(),
+                SUT::sample_stokenet_candy(),
                 // twice => duplicates should be removed
-                SUT::placeholder_mainnet_xrd(),
-                SUT::placeholder_mainnet_candy(),
-                SUT::placeholder_mainnet_nft_gc_membership(),
-                SUT::placeholder_stokenet_xrd(),
-                SUT::placeholder_stokenet_gc_tokens(),
-                SUT::placeholder_stokenet_gum(),
-                SUT::placeholder_stokenet_candy(),
+                SUT::sample_mainnet_xrd(),
+                SUT::sample_mainnet_candy(),
+                SUT::sample_mainnet_nft_gc_membership(),
+                SUT::sample_stokenet_xrd(),
+                SUT::sample_stokenet_gc_tokens(),
+                SUT::sample_stokenet_gum(),
+                SUT::sample_stokenet_candy(),
             ])
             .len(),
             7
@@ -205,7 +201,7 @@ mod tests {
     #[test]
     fn manual_perform_uniffi_conversion() {
         type RetAddr = <SUT as FromRetAddress>::RetAddress;
-        let sut = SUT::placeholder();
+        let sut = SUT::sample();
         let bech32 = sut.to_string();
         let ret = RetAddr::try_from_bech32(&bech32).unwrap();
 
@@ -222,7 +218,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip() {
-        let a = SUT::placeholder();
+        let a = SUT::sample();
         assert_json_value_eq_after_roundtrip(
             &a,
             json!("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"),
@@ -285,47 +281,45 @@ mod uniffi_tests {
     #[test]
     fn is_fungible() {
         assert!(!resource_address_is_fungible(
-            &SUT::placeholder_mainnet_nft_gc_membership()
+            &SUT::sample_mainnet_nft_gc_membership()
         ));
         assert!(resource_address_is_non_fungible(
-            &SUT::placeholder_mainnet_nft_gc_membership()
+            &SUT::sample_mainnet_nft_gc_membership()
         ));
 
-        assert!(resource_address_is_fungible(&SUT::placeholder_mainnet_xrd()));
-        assert!(!resource_address_is_non_fungible(
-            &SUT::placeholder_mainnet_xrd()
-        ));
+        assert!(resource_address_is_fungible(&SUT::sample_mainnet_xrd()));
+        assert!(!resource_address_is_non_fungible(&SUT::sample_mainnet_xrd()));
     }
 
     #[test]
-    fn placeholder() {
+    fn sample() {
         assert_eq!(
-            new_resource_address_placeholder_mainnet_xrd(),
-            SUT::placeholder_mainnet_xrd()
+            new_resource_address_sample_mainnet_xrd(),
+            SUT::sample_mainnet_xrd()
         );
         assert_eq!(
-            new_resource_address_placeholder_mainnet_candy(),
-            SUT::placeholder_mainnet_candy()
+            new_resource_address_sample_mainnet_candy(),
+            SUT::sample_mainnet_candy()
         );
         assert_eq!(
-            new_resource_address_placeholder_mainnet_nft_gc_membership(),
-            SUT::placeholder_mainnet_nft_gc_membership()
+            new_resource_address_sample_mainnet_nft_gc_membership(),
+            SUT::sample_mainnet_nft_gc_membership()
         );
         assert_eq!(
-            new_resource_address_placeholder_stokenet_xrd(),
-            SUT::placeholder_stokenet_xrd()
+            new_resource_address_sample_stokenet_xrd(),
+            SUT::sample_stokenet_xrd()
         );
         assert_eq!(
-            new_resource_address_placeholder_stokenet_gum(),
-            SUT::placeholder_stokenet_gum()
+            new_resource_address_sample_stokenet_gum(),
+            SUT::sample_stokenet_gum()
         );
         assert_eq!(
-            new_resource_address_placeholder_stokenet_gc_tokens(),
-            SUT::placeholder_stokenet_gc_tokens()
+            new_resource_address_sample_stokenet_gc_tokens(),
+            SUT::sample_stokenet_gc_tokens()
         );
         assert_eq!(
-            new_resource_address_placeholder_stokenet_candy(),
-            SUT::placeholder_stokenet_candy()
+            new_resource_address_sample_stokenet_candy(),
+            SUT::sample_stokenet_candy()
         );
     }
 }

@@ -122,7 +122,7 @@ mod tests {
     #[test]
     fn manifest_for_faucet() {
         manifest_eq(
-            SUT::faucet(true, &AccountAddress::placeholder_mainnet()),
+            SUT::faucet(true, &AccountAddress::sample_mainnet()),
             r#"
             CALL_METHOD
                 Address("component_rdx1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxfaucet")
@@ -147,7 +147,7 @@ mod tests {
     fn manifest_for_set_account_to_dapp_definition_address() {
         manifest_eq(
             SUT::marking_account_as_dapp_definition_type(
-                &AccountAddress::placeholder_mainnet(),
+                &AccountAddress::sample_mainnet(),
             ),
             r#"
             SET_METADATA
@@ -165,10 +165,10 @@ mod tests {
     fn manifest_for_owner_keys() {
         manifest_eq(
             SUT::set_owner_keys_hashes(
-                &AccountAddress::placeholder_mainnet().into(),
+                &AccountAddress::sample_mainnet().into(),
                 vec![
-                    PublicKeyHash::hash(Ed25519PublicKey::placeholder_alice()),
-                    PublicKeyHash::hash(Secp256k1PublicKey::placeholder_bob()),
+                    PublicKeyHash::hash(Ed25519PublicKey::sample_alice()),
+                    PublicKeyHash::hash(Secp256k1PublicKey::sample_bob()),
                 ],
             ),
             r#"

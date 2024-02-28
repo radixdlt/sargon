@@ -18,26 +18,23 @@ pub struct ThirdPartyDeposits {
     pub depositors_allow_list: IdentifiedVecVia<ResourceOrNonFungible>,
 }
 
-impl HasPlaceholder for ThirdPartyDeposits {
-    fn placeholder() -> Self {
+impl HasSampleValues for ThirdPartyDeposits {
+    fn sample() -> Self {
         Self::with_rule_and_lists(
             DepositRule::AcceptKnown,
+            [AssetException::sample(), AssetException::sample_other()],
             [
-                AssetException::placeholder(),
-                AssetException::placeholder_other(),
-            ],
-            [
-                ResourceOrNonFungible::placeholder(),
-                ResourceOrNonFungible::placeholder_other(),
+                ResourceOrNonFungible::sample(),
+                ResourceOrNonFungible::sample_other(),
             ],
         )
     }
 
-    fn placeholder_other() -> Self {
+    fn sample_other() -> Self {
         Self::with_rule_and_lists(
             DepositRule::DenyAll,
-            [AssetException::placeholder_other()],
-            [ResourceOrNonFungible::placeholder_other()],
+            [AssetException::sample_other()],
+            [ResourceOrNonFungible::sample_other()],
         )
     }
 }
@@ -139,18 +136,18 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::placeholder(), SUT::placeholder());
-        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
-    fn json_roundtrip_placeholder() {
-        let sut = SUT::placeholder();
+    fn json_roundtrip_sample() {
+        let sut = SUT::sample();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"

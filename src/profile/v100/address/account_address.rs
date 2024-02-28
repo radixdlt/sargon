@@ -11,23 +11,23 @@ pub fn new_account_address_from(
 }
 
 #[uniffi::export]
-pub fn new_account_address_placeholder_mainnet() -> AccountAddress {
-    AccountAddress::placeholder_mainnet()
+pub fn new_account_address_sample_mainnet() -> AccountAddress {
+    AccountAddress::sample_mainnet()
 }
 
 #[uniffi::export]
-pub fn new_account_address_placeholder_mainnet_other() -> AccountAddress {
-    AccountAddress::placeholder_mainnet_other()
+pub fn new_account_address_sample_mainnet_other() -> AccountAddress {
+    AccountAddress::sample_mainnet_other()
 }
 
 #[uniffi::export]
-pub fn new_account_address_placeholder_stokenet() -> AccountAddress {
-    AccountAddress::placeholder_stokenet()
+pub fn new_account_address_sample_stokenet() -> AccountAddress {
+    AccountAddress::sample_stokenet()
 }
 
 #[uniffi::export]
-pub fn new_account_address_placeholder_stokenet_other() -> AccountAddress {
-    AccountAddress::placeholder_stokenet_other()
+pub fn new_account_address_sample_stokenet_other() -> AccountAddress {
+    AccountAddress::sample_stokenet_other()
 }
 
 /// Formats the AccountAddress to its abbreviated form which is what the user
@@ -96,21 +96,21 @@ impl EntityAddress for AccountAddress {
     }
 }
 
-impl HasPlaceholder for AccountAddress {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
-        Self::placeholder_mainnet()
+impl HasSampleValues for AccountAddress {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
+        Self::sample_mainnet()
     }
 
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder_other() -> Self {
-        Self::placeholder_mainnet_other()
+    /// A sample used to facilitate unit tests.
+    fn sample_other() -> Self {
+        Self::sample_mainnet_other()
     }
 }
 
 impl AccountAddress {
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_mainnet() -> Self {
+    /// A sample used to facilitate unit tests.
+    pub fn sample_mainnet() -> Self {
         let address = AccountAddress::try_from_bech32(
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease",
         )
@@ -119,8 +119,8 @@ impl AccountAddress {
         address
     }
 
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_mainnet_other() -> Self {
+    /// A sample used to facilitate unit tests.
+    pub fn sample_mainnet_other() -> Self {
         let address = AccountAddress::try_from_bech32(
             "account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master",
         )
@@ -129,8 +129,8 @@ impl AccountAddress {
         address
     }
 
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_stokenet() -> Self {
+    /// A sample used to facilitate unit tests.
+    pub fn sample_stokenet() -> Self {
         let address = AccountAddress::try_from_bech32(
                 "account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql",
             )
@@ -139,8 +139,8 @@ impl AccountAddress {
         address
     }
 
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_stokenet_other() -> Self {
+    /// A sample used to facilitate unit tests.
+    pub fn sample_stokenet_other() -> Self {
         let address = AccountAddress::try_from_bech32(
                 "account_tdx_2_129663ef7fj8azge3y6sl73lf9vyqt53ewzlf7ul2l76mg5wyqlqlpr",
             )
@@ -160,19 +160,19 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::placeholder(), SUT::placeholder());
-        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn is_legacy_address() {
-        assert!(SUT::placeholder_mainnet().is_legacy_address());
-        assert!(!SUT::placeholder_stokenet().is_legacy_address());
+        assert!(SUT::sample_mainnet().is_legacy_address());
+        assert!(!SUT::sample_stokenet().is_legacy_address());
     }
 
     #[test]
@@ -343,13 +343,13 @@ mod tests {
 
     #[test]
     fn into_scrypto_global_address() {
-        assert_eq!(Into::<radix_engine::types::GlobalAddress>::into(SUT::placeholder()).into_node_id().as_bytes()[0], radix_engine_common::types::EntityType::GlobalVirtualSecp256k1Account as u8);
+        assert_eq!(Into::<radix_engine::types::GlobalAddress>::into(SUT::sample()).into_node_id().as_bytes()[0], radix_engine_common::types::EntityType::GlobalVirtualSecp256k1Account as u8);
     }
 
     #[test]
     fn manual_perform_uniffi_conversion() {
         type RetAddr = <SUT as FromRetAddress>::RetAddress;
-        let sut = SUT::placeholder();
+        let sut = SUT::sample();
         let bech32 = sut.to_string();
         let ret = RetAddr::try_from_bech32(&bech32).unwrap();
 
@@ -439,30 +439,27 @@ mod uniffi_tests {
 
     #[test]
     fn is_legacy_address() {
-        assert!(account_address_is_legacy(&SUT::placeholder_mainnet()));
-        assert!(!account_address_is_legacy(&SUT::placeholder_stokenet()));
+        assert!(account_address_is_legacy(&SUT::sample_mainnet()));
+        assert!(!account_address_is_legacy(&SUT::sample_stokenet()));
     }
 
     #[test]
-    fn placeholder() {
+    fn sample() {
+        assert_eq!(new_account_address_sample_mainnet(), SUT::sample_mainnet());
+
         assert_eq!(
-            new_account_address_placeholder_mainnet(),
-            SUT::placeholder_mainnet()
+            new_account_address_sample_mainnet_other(),
+            SUT::sample_mainnet_other()
         );
 
         assert_eq!(
-            new_account_address_placeholder_mainnet_other(),
-            SUT::placeholder_mainnet_other()
+            new_account_address_sample_stokenet(),
+            SUT::sample_stokenet()
         );
 
         assert_eq!(
-            new_account_address_placeholder_stokenet(),
-            SUT::placeholder_stokenet()
-        );
-
-        assert_eq!(
-            new_account_address_placeholder_stokenet_other(),
-            SUT::placeholder_stokenet_other()
+            new_account_address_sample_stokenet_other(),
+            SUT::sample_stokenet_other()
         );
     }
 }

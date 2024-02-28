@@ -3,35 +3,35 @@ use crate::prelude::*;
 use radix_engine_toolkit::models::canonical_address_types::CanonicalPackageAddress as RetPackageAddress;
 
 #[uniffi::export]
-pub fn new_package_address_placeholder() -> PackageAddress {
-    PackageAddress::placeholder()
+pub fn new_package_address_sample() -> PackageAddress {
+    PackageAddress::sample()
 }
 
 #[uniffi::export]
-pub fn new_package_address_placeholder_other() -> PackageAddress {
-    PackageAddress::placeholder_other()
+pub fn new_package_address_sample_other() -> PackageAddress {
+    PackageAddress::sample_other()
 }
 
-impl HasPlaceholder for PackageAddress {
-    fn placeholder() -> Self {
-        Self::placeholder_mainnet_gumball_club()
+impl HasSampleValues for PackageAddress {
+    fn sample() -> Self {
+        Self::sample_mainnet_gumball_club()
     }
 
-    fn placeholder_other() -> Self {
-        Self::placeholder_stokenet_gumball_club()
+    fn sample_other() -> Self {
+        Self::sample_stokenet_gumball_club()
     }
 }
 
 impl PackageAddress {
-    pub fn placeholder_mainnet_gumball_club() -> Self {
+    pub fn sample_mainnet_gumball_club() -> Self {
         "package_rdx1pkgxxxxxxxxxfaucetxxxxxxxxx000034355863xxxxxxxxxfaucet"
             .parse()
-            .expect("Valid Mainnet package placeholder address")
+            .expect("Valid Mainnet package sample address")
     }
-    pub fn placeholder_stokenet_gumball_club() -> Self {
+    pub fn sample_stokenet_gumball_club() -> Self {
         "package_tdx_2_1pkaw4m82c89hy0gk4dwqtqlln6md8anr2ysnrvegxar53mr6nvn5ay"
             .parse()
-            .expect("Valid Stokenet package placeholder address")
+            .expect("Valid Stokenet package sample address")
     }
 }
 
@@ -44,19 +44,19 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::placeholder(), SUT::placeholder());
-        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn manual_perform_uniffi_conversion() {
         type RetAddr = <SUT as FromRetAddress>::RetAddress;
-        let sut = SUT::placeholder();
+        let sut = SUT::sample();
         let bech32 = sut.to_string();
         let ret = RetAddr::try_from_bech32(&bech32).unwrap();
 
@@ -160,12 +160,9 @@ mod uniffi_tests {
     }
 
     #[test]
-    fn placeholder() {
-        assert_eq!(new_package_address_placeholder(), SUT::placeholder());
+    fn sample() {
+        assert_eq!(new_package_address_sample(), SUT::sample());
 
-        assert_eq!(
-            new_package_address_placeholder_other(),
-            SUT::placeholder_other()
-        );
+        assert_eq!(new_package_address_sample_other(), SUT::sample_other());
     }
 }

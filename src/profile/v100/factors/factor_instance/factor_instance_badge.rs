@@ -22,18 +22,18 @@ pub enum FactorInstanceBadge {
     },
 }
 
-impl HasPlaceholder for FactorInstanceBadge {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
+impl HasSampleValues for FactorInstanceBadge {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
         FactorInstanceBadge::Virtual {
-            value: FactorInstanceBadgeVirtualSource::placeholder(),
+            value: FactorInstanceBadgeVirtualSource::sample(),
         }
     }
 
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder_other() -> Self {
+    /// A sample used to facilitate unit tests.
+    fn sample_other() -> Self {
         FactorInstanceBadge::Virtual {
-            value: FactorInstanceBadgeVirtualSource::placeholder_other(),
+            value: FactorInstanceBadgeVirtualSource::sample_other(),
         }
     }
 }
@@ -95,26 +95,26 @@ mod tests {
     #[test]
     fn equality() {
         assert_eq!(
-            FactorInstanceBadge::placeholder(),
-            FactorInstanceBadge::placeholder()
+            FactorInstanceBadge::sample(),
+            FactorInstanceBadge::sample()
         );
         assert_eq!(
-            FactorInstanceBadge::placeholder_other(),
-            FactorInstanceBadge::placeholder_other()
+            FactorInstanceBadge::sample_other(),
+            FactorInstanceBadge::sample_other()
         );
     }
 
     #[test]
     fn inequality() {
         assert_ne!(
-            FactorInstanceBadge::placeholder(),
-            FactorInstanceBadge::placeholder_other()
+            FactorInstanceBadge::sample(),
+            FactorInstanceBadge::sample_other()
         );
     }
 
     #[test]
     fn json_roundtrip() {
-        let model = FactorInstanceBadge::placeholder();
+        let model = FactorInstanceBadge::sample();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -141,12 +141,12 @@ mod tests {
     #[test]
     fn into_from_hd_pubkey() {
         let sut: FactorInstanceBadge =
-            HierarchicalDeterministicPublicKey::placeholder().into();
+            HierarchicalDeterministicPublicKey::sample().into();
         assert_eq!(
             sut,
             FactorInstanceBadge::Virtual {
                 value: FactorInstanceBadgeVirtualSource::HierarchicalDeterministic {
-                    value: HierarchicalDeterministicPublicKey::placeholder()
+                    value: HierarchicalDeterministicPublicKey::sample()
                 }
             }
         )
@@ -155,12 +155,12 @@ mod tests {
     #[test]
     fn into_from_virtual_source() {
         let sut: FactorInstanceBadge =
-            FactorInstanceBadgeVirtualSource::placeholder().into();
+            FactorInstanceBadgeVirtualSource::sample().into();
         assert_eq!(
             sut,
             FactorInstanceBadge::Virtual {
                 value: FactorInstanceBadgeVirtualSource::HierarchicalDeterministic {
-                    value: HierarchicalDeterministicPublicKey::placeholder()
+                    value: HierarchicalDeterministicPublicKey::sample()
                 }
             }
         )

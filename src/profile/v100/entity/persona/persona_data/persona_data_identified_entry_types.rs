@@ -64,18 +64,18 @@ macro_rules! declare_identified_entry {
             }
         }
 
-        impl HasPlaceholder for $struct_name {
-            fn placeholder() -> Self {
+        impl HasSampleValues for $struct_name {
+            fn sample() -> Self {
                 $struct_name::with_id(
-                    PersonaDataEntryID::placeholder(),
-                    <$value_type>::placeholder(),
+                    PersonaDataEntryID::sample(),
+                    <$value_type>::sample(),
                 )
             }
 
-            fn placeholder_other() -> Self {
+            fn sample_other() -> Self {
                 $struct_name::with_id(
-                    PersonaDataEntryID::placeholder_other(),
-                    <$value_type>::placeholder_other(),
+                    PersonaDataEntryID::sample_other(),
+                    <$value_type>::sample_other(),
                 )
             }
         }
@@ -102,14 +102,14 @@ mod identified_name_tests {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::placeholder(), SUT::placeholder());
-        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
-        assert_ne!(SUT::new(V::placeholder()), SUT::new(V::placeholder()));
+        assert_ne!(SUT::sample(), SUT::sample_other());
+        assert_ne!(SUT::new(V::sample()), SUT::new(V::sample()));
     }
 
     #[test]
@@ -117,7 +117,7 @@ mod identified_name_tests {
         let n = 100;
         let set = (0..n)
             .map(|_| {
-                SUT::new(V::placeholder()) // generates a new ID
+                SUT::new(V::sample()) // generates a new ID
             })
             .collect::<HashSet<_>>();
         assert_eq!(set.len(), n);
@@ -125,14 +125,13 @@ mod identified_name_tests {
 
     #[test]
     fn deref() {
-        assert_eq!(*SUT::placeholder(), V::placeholder());
+        assert_eq!(*SUT::sample(), V::sample());
     }
 
     #[test]
     fn new() {
-        let value = V::placeholder_other();
-        let sut =
-            SUT::with_id(PersonaDataEntryID::placeholder_one(), value.clone());
+        let value = V::sample_other();
+        let sut = SUT::with_id(PersonaDataEntryID::sample_one(), value.clone());
         assert_eq!(
             sut.id,
             "00000000-0000-0000-0000-000000000001".parse().unwrap()
@@ -143,19 +142,19 @@ mod identified_name_tests {
     #[test]
     fn debug() {
         assert_eq!(
-            format!("{:?}", SUT::placeholder()),
+            format!("{:?}", SUT::sample()),
             "Bruce Batman Wayne - 00000000-0000-0000-0000-000000000001"
         );
     }
 
     #[test]
     fn display() {
-        assert_eq!(format!("{}", SUT::placeholder()), "Bruce Batman Wayne");
+        assert_eq!(format!("{}", SUT::sample()), "Bruce Batman Wayne");
     }
 
     #[test]
-    fn json_roundtrip_placeholder() {
-        let model = SUT::placeholder();
+    fn json_roundtrip_sample() {
+        let model = SUT::sample();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -173,8 +172,8 @@ mod identified_name_tests {
     }
 
     #[test]
-    fn json_roundtrip_placeholder_other() {
-        let model = SUT::placeholder_other();
+    fn json_roundtrip_sample_other() {
+        let model = SUT::sample_other();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -204,19 +203,19 @@ mod identified_number_tests {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::placeholder(), SUT::placeholder());
-        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn deref() {
-        assert_eq!(*SUT::placeholder(), V::placeholder());
+        assert_eq!(*SUT::sample(), V::sample());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
-        assert_ne!(SUT::new(V::placeholder()), SUT::new(V::placeholder()));
+        assert_ne!(SUT::sample(), SUT::sample_other());
+        assert_ne!(SUT::new(V::sample()), SUT::new(V::sample()));
     }
 
     #[test]
@@ -224,7 +223,7 @@ mod identified_number_tests {
         let n = 100;
         let set = (0..n)
             .map(|_| {
-                SUT::new(V::placeholder()) // generates a new ID
+                SUT::new(V::sample()) // generates a new ID
             })
             .collect::<HashSet<_>>();
         assert_eq!(set.len(), n);
@@ -232,9 +231,9 @@ mod identified_number_tests {
 
     #[test]
     fn new() {
-        let value = V::placeholder_other();
+        let value = V::sample_other();
         let sut =
-            SUT::with_id(PersonaDataEntryID::placeholder_four(), value.clone());
+            SUT::with_id(PersonaDataEntryID::sample_four(), value.clone());
         assert_eq!(
             sut.id,
             "00000000-0000-0000-0000-000000000004".parse().unwrap()
@@ -245,19 +244,19 @@ mod identified_number_tests {
     #[test]
     fn debug() {
         assert_eq!(
-            format!("{:?}", SUT::placeholder()),
+            format!("{:?}", SUT::sample()),
             "+46123456789 - 00000000-0000-0000-0000-000000000001"
         );
     }
 
     #[test]
     fn display() {
-        assert_eq!(format!("{}", SUT::placeholder()), "+46123456789");
+        assert_eq!(format!("{}", SUT::sample()), "+46123456789");
     }
 
     #[test]
-    fn json_roundtrip_placeholder() {
-        let model = SUT::placeholder();
+    fn json_roundtrip_sample() {
+        let model = SUT::sample();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -270,8 +269,8 @@ mod identified_number_tests {
     }
 
     #[test]
-    fn json_roundtrip_placeholder_other() {
-        let model = SUT::placeholder_other();
+    fn json_roundtrip_sample_other() {
+        let model = SUT::sample_other();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -294,19 +293,19 @@ mod identified_email_tests {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::placeholder(), SUT::placeholder());
-        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn deref() {
-        assert_eq!(*SUT::placeholder(), V::placeholder());
+        assert_eq!(*SUT::sample(), V::sample());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
-        assert_ne!(SUT::new(V::placeholder()), SUT::new(V::placeholder()));
+        assert_ne!(SUT::sample(), SUT::sample_other());
+        assert_ne!(SUT::new(V::sample()), SUT::new(V::sample()));
     }
 
     #[test]
@@ -314,7 +313,7 @@ mod identified_email_tests {
         let n = 100;
         let set = (0..n)
             .map(|_| {
-                SUT::new(V::placeholder()) // generates a new ID
+                SUT::new(V::sample()) // generates a new ID
             })
             .collect::<HashSet<_>>();
         assert_eq!(set.len(), n);
@@ -322,11 +321,9 @@ mod identified_email_tests {
 
     #[test]
     fn new() {
-        let value = V::placeholder_other();
-        let sut = SUT::with_id(
-            PersonaDataEntryID::placeholder_three(),
-            value.clone(),
-        );
+        let value = V::sample_other();
+        let sut =
+            SUT::with_id(PersonaDataEntryID::sample_three(), value.clone());
         assert_eq!(
             sut.id,
             "00000000-0000-0000-0000-000000000003".parse().unwrap()
@@ -337,19 +334,19 @@ mod identified_email_tests {
     #[test]
     fn debug() {
         assert_eq!(
-            format!("{:?}", SUT::placeholder()),
+            format!("{:?}", SUT::sample()),
             "alan@turing.hero - 00000000-0000-0000-0000-000000000001"
         );
     }
 
     #[test]
     fn display() {
-        assert_eq!(format!("{}", SUT::placeholder()), "alan@turing.hero");
+        assert_eq!(format!("{}", SUT::sample()), "alan@turing.hero");
     }
 
     #[test]
-    fn json_roundtrip_placeholder() {
-        let model = SUT::placeholder();
+    fn json_roundtrip_sample() {
+        let model = SUT::sample();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -362,8 +359,8 @@ mod identified_email_tests {
     }
 
     #[test]
-    fn json_roundtrip_placeholder_other() {
-        let model = SUT::placeholder_other();
+    fn json_roundtrip_sample_other() {
+        let model = SUT::sample_other();
         assert_eq_after_json_roundtrip(
             &model,
             r#"

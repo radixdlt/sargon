@@ -45,32 +45,32 @@ impl Accounts {
     }
 }
 
-impl HasPlaceholder for Accounts {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
-        Self::placeholder_mainnet()
+impl HasSampleValues for Accounts {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
+        Self::sample_mainnet()
     }
 
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder_other() -> Self {
-        Self::placeholder_stokenet()
+    /// A sample used to facilitate unit tests.
+    fn sample_other() -> Self {
+        Self::sample_stokenet()
     }
 }
 
 impl Accounts {
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_mainnet() -> Self {
+    /// A sample used to facilitate unit tests.
+    pub fn sample_mainnet() -> Self {
         Self::with_accounts([
-            Account::placeholder_mainnet(),
-            Account::placeholder_mainnet_other(),
+            Account::sample_mainnet(),
+            Account::sample_mainnet_other(),
         ])
     }
 
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_stokenet() -> Self {
+    /// A sample used to facilitate unit tests.
+    pub fn sample_stokenet() -> Self {
         Self::with_accounts([
-            Account::placeholder_stokenet_carol(),
-            Account::placeholder_stokenet_diana(),
+            Account::sample_stokenet_carol(),
+            Account::sample_stokenet_diana(),
         ])
     }
 }
@@ -86,23 +86,20 @@ mod tests {
 
     #[test]
     fn inequality() {
-        assert_ne!(Accounts::placeholder(), Accounts::placeholder_other());
+        assert_ne!(Accounts::sample(), Accounts::sample_other());
     }
 
     #[test]
     fn equality() {
-        assert_eq!(Accounts::placeholder(), Accounts::placeholder());
-        assert_eq!(
-            Accounts::placeholder_other(),
-            Accounts::placeholder_other()
-        );
+        assert_eq!(Accounts::sample(), Accounts::sample());
+        assert_eq!(Accounts::sample_other(), Accounts::sample_other());
     }
 
     #[test]
     fn duplicates_are_prevented() {
         assert_eq!(
             Accounts::with_accounts(
-                [Account::placeholder(), Account::placeholder()].into_iter()
+                [Account::sample(), Account::sample()].into_iter()
             )
             .len(),
             1
@@ -111,18 +108,18 @@ mod tests {
 
     #[test]
     fn with_one() {
-        assert_eq!(Accounts::with_account(Account::placeholder()).len(), 1)
+        assert_eq!(Accounts::with_account(Account::sample()).len(), 1)
     }
 
     #[test]
     fn get_all() {
-        assert_eq!(Accounts::placeholder().get_all().len(), 2);
+        assert_eq!(Accounts::sample().get_all().len(), 2);
     }
 
     #[test]
     fn get_by_address() {
-        let address = AccountAddress::placeholder();
-        let account = Account::placeholder_with_values(
+        let address = AccountAddress::sample();
+        let account = Account::sample_with_values(
             address.clone(),
             DisplayName::default(),
             AppearanceID::default(),
@@ -133,7 +130,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_stokenet() {
-        let sut = Accounts::placeholder_stokenet();
+        let sut = Accounts::sample_stokenet();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"
@@ -233,7 +230,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_mainnet() {
-        let sut = Accounts::placeholder_mainnet();
+        let sut = Accounts::sample_mainnet();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"

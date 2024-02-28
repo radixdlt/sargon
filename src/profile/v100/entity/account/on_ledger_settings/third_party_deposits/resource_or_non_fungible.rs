@@ -13,16 +13,16 @@ pub enum ResourceOrNonFungible {
     NonFungible { value: NonFungibleGlobalId },
 }
 
-impl HasPlaceholder for ResourceOrNonFungible {
-    fn placeholder() -> Self {
+impl HasSampleValues for ResourceOrNonFungible {
+    fn sample() -> Self {
         Self::Resource {
-            value: ResourceAddress::placeholder(),
+            value: ResourceAddress::sample(),
         }
     }
 
-    fn placeholder_other() -> Self {
+    fn sample_other() -> Self {
         Self::NonFungible {
-            value: NonFungibleGlobalId::placeholder(),
+            value: NonFungibleGlobalId::sample(),
         }
     }
 }
@@ -36,18 +36,18 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::placeholder(), SUT::placeholder());
-        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
-    fn json_roundtrip_placeholder() {
-        let sut = SUT::placeholder();
+    fn json_roundtrip_sample() {
+        let sut = SUT::sample();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"
@@ -60,8 +60,8 @@ mod tests {
     }
 
     #[test]
-    fn json_roundtrip_placeholder_other() {
-        let sut = SUT::placeholder_other();
+    fn json_roundtrip_sample_other() {
+        let sut = SUT::sample_other();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"

@@ -80,13 +80,13 @@ pub fn secp256k1_public_key_to_bytes(
 }
 
 #[uniffi::export]
-pub fn new_secp256k1_public_key_placeholder() -> Secp256k1PublicKey {
-    Secp256k1PublicKey::placeholder()
+pub fn new_secp256k1_public_key_sample() -> Secp256k1PublicKey {
+    Secp256k1PublicKey::sample()
 }
 
 #[uniffi::export]
-pub fn new_secp256k1_public_key_placeholder_other() -> Secp256k1PublicKey {
-    Secp256k1PublicKey::placeholder_other()
+pub fn new_secp256k1_public_key_sample_other() -> Secp256k1PublicKey {
+    Secp256k1PublicKey::sample_other()
 }
 
 impl IsPublicKey<Secp256k1Signature> for Secp256k1PublicKey {
@@ -160,24 +160,24 @@ impl Secp256k1PublicKey {
     }
 }
 
-impl HasPlaceholder for Secp256k1PublicKey {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
-        Self::placeholder_alice()
+impl HasSampleValues for Secp256k1PublicKey {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
+        Self::sample_alice()
     }
 
-    fn placeholder_other() -> Self {
-        Self::placeholder_bob()
+    fn sample_other() -> Self {
+        Self::sample_bob()
     }
 }
 
 impl Secp256k1PublicKey {
-    pub fn placeholder_alice() -> Self {
-        Secp256k1PrivateKey::placeholder_alice().public_key()
+    pub fn sample_alice() -> Self {
+        Secp256k1PrivateKey::sample_alice().public_key()
     }
 
-    pub fn placeholder_bob() -> Self {
-        Secp256k1PrivateKey::placeholder_bob().public_key()
+    pub fn sample_bob() -> Self {
+        Secp256k1PrivateKey::sample_bob().public_key()
     }
 }
 
@@ -197,21 +197,18 @@ mod tests {
 
     #[test]
     fn equality() {
+        assert_eq!(Secp256k1PublicKey::sample(), Secp256k1PublicKey::sample());
         assert_eq!(
-            Secp256k1PublicKey::placeholder(),
-            Secp256k1PublicKey::placeholder()
-        );
-        assert_eq!(
-            Secp256k1PublicKey::placeholder_other(),
-            Secp256k1PublicKey::placeholder_other()
+            Secp256k1PublicKey::sample_other(),
+            Secp256k1PublicKey::sample_other()
         );
     }
 
     #[test]
     fn inequality() {
         assert_ne!(
-            Secp256k1PublicKey::placeholder(),
-            Secp256k1PublicKey::placeholder_other()
+            Secp256k1PublicKey::sample(),
+            Secp256k1PublicKey::sample_other()
         );
     }
 
@@ -239,9 +236,9 @@ mod tests {
     }
 
     #[test]
-    fn placeholder_alice() {
+    fn sample_alice() {
         assert_eq!(
-            Secp256k1PublicKey::placeholder_alice().to_hex(),
+            Secp256k1PublicKey::sample_alice().to_hex(),
             "02517b88916e7f315bb682f9926b14bc67a0e4246f8a419b986269e1a7e61fffa7"
         );
     }
@@ -276,9 +273,9 @@ mod tests {
     }
 
     #[test]
-    fn placeholder_bob() {
+    fn sample_bob() {
         assert_eq!(
-            Secp256k1PublicKey::placeholder_bob().to_hex(),
+            Secp256k1PublicKey::sample_bob().to_hex(),
             "033083620d1596d3f8988ff3270e42970dd2a031e2b9b6488052a4170ff999f3e8"
         );
     }
@@ -327,14 +324,14 @@ mod tests {
     #[test]
     fn debug() {
         assert_eq!(
-            format!("{:?}", Secp256k1PublicKey::placeholder_alice()),
+            format!("{:?}", Secp256k1PublicKey::sample_alice()),
             "02517b88916e7f315bb682f9926b14bc67a0e4246f8a419b986269e1a7e61fffa7"
         );
     }
 
     #[test]
     fn json() {
-        let model = Secp256k1PublicKey::placeholder();
+        let model = Secp256k1PublicKey::sample();
         assert_json_value_eq_after_roundtrip(
             &model,
             json!("02517b88916e7f315bb682f9926b14bc67a0e4246f8a419b986269e1a7e61fffa7"),
@@ -352,8 +349,8 @@ mod tests {
     fn hash() {
         assert_eq!(
             BTreeSet::from_iter([
-                Secp256k1PublicKey::placeholder_alice(),
-                Secp256k1PublicKey::placeholder_alice()
+                Secp256k1PublicKey::sample_alice(),
+                Secp256k1PublicKey::sample_alice()
             ])
             .len(),
             1
@@ -365,23 +362,22 @@ mod tests {
 mod uniffi_tests {
     use crate::{
         new_secp256k1_public_key_from_bytes, new_secp256k1_public_key_from_hex,
-        new_secp256k1_public_key_placeholder,
-        new_secp256k1_public_key_placeholder_other,
+        new_secp256k1_public_key_sample, new_secp256k1_public_key_sample_other,
         secp256k1_public_key_to_bytes, secp256k1_public_key_to_hex,
-        HasPlaceholder,
+        HasSampleValues,
     };
 
     use super::Secp256k1PublicKey;
 
     #[test]
-    fn equality_placeholders() {
+    fn equality_samples() {
         assert_eq!(
-            Secp256k1PublicKey::placeholder(),
-            new_secp256k1_public_key_placeholder()
+            Secp256k1PublicKey::sample(),
+            new_secp256k1_public_key_sample()
         );
         assert_eq!(
-            Secp256k1PublicKey::placeholder_other(),
-            new_secp256k1_public_key_placeholder_other()
+            Secp256k1PublicKey::sample_other(),
+            new_secp256k1_public_key_sample_other()
         );
     }
 
