@@ -35,3 +35,52 @@ impl crate::UniffiCustomTypeConverter for InstructionsSecretMagic {
             .expect("to never fail")
     }
 }
+
+impl HasPlaceholder for InstructionsSecretMagic {
+    fn placeholder() -> Self {
+        Self(vec![
+            ScryptoInstruction::DropAuthZoneProofs, // 0x12
+            ScryptoInstruction::DropAuthZoneRegularProofs, // 0x13
+        ])
+    }
+
+    fn placeholder_other() -> Self {
+        Self(vec![ScryptoInstruction::DropAuthZoneSignatureProofs]) // 0x17
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::prelude::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = InstructionsSecretMagic;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::placeholder(), SUT::placeholder());
+        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+    }
+
+    #[test]
+    fn manual_perform_uniffi_conversion() {
+        let sut = SUT::placeholder();
+        let builtin = BagOfBytes::from_hex("4d20220212001300").unwrap();
+
+        let ffi_side =
+            <SUT as crate::UniffiCustomTypeConverter>::from_custom(sut.clone());
+
+        assert_eq!(ffi_side.to_hex(), builtin.to_hex());
+
+        let from_ffi_side =
+            <SUT as crate::UniffiCustomTypeConverter>::into_custom(ffi_side)
+                .unwrap();
+
+        assert_eq!(sut, from_ffi_side);
+    }
+}

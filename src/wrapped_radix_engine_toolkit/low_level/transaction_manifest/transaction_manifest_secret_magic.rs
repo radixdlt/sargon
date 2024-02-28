@@ -16,3 +16,42 @@ pub struct TransactionManifestSecretMagic {
     pub instructions: Instructions,
     pub blobs: Blobs,
 }
+
+impl TransactionManifestSecretMagic {
+    pub fn new(instructions: Instructions, blobs: Blobs) -> Self {
+        Self {
+            instructions,
+            blobs,
+        }
+    }
+}
+
+impl HasPlaceholder for TransactionManifestSecretMagic {
+    fn placeholder() -> Self {
+        Self::new(Instructions::placeholder_simulator(), Vec::new())
+    }
+
+    fn placeholder_other() -> Self {
+        Self::new(Instructions::placeholder_simulator_other(), Vec::new())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::prelude::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = TransactionManifestSecretMagic;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::placeholder(), SUT::placeholder());
+        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+    }
+}

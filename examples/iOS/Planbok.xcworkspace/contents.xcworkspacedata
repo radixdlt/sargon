@@ -78,6 +78,9 @@
                   <FileRef
                      location = "group:LocaleConfig+Swiftified.swift">
                   </FileRef>
+                  <FileRef
+                     location = "group:TransactionManifest+Swiftified.swift">
+                  </FileRef>
                </Group>
             </Group>
             <FileRef

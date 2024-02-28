@@ -4,7 +4,7 @@ public struct MainFeature {
 	@Reducer(state: .equatable)
 	public enum Destination {
 		case createAccount(CreateAccountFlowFeature)
-		case previewAddresses(PreviewAddressesFeature)
+		case sampleValues(SampleValuesFeature)
 		case alert(AlertState<Alert>)
 		
 		public enum Alert {
@@ -34,7 +34,7 @@ public struct MainFeature {
 	public enum Action: ViewAction {
 		@CasePathable
 		public enum ViewAction {
-			case previewAddressButtonTapped
+			case sampleValuesButtonTapped
 		}
 		@CasePathable
 		public enum DelegateAction {
@@ -58,8 +58,8 @@ public struct MainFeature {
 		Reduce { state, action in
 			switch action {
 				
-			case .view(.previewAddressButtonTapped):
-				state.destination = .previewAddresses(PreviewAddressesFeature.State())
+			case .view(.sampleValuesButtonTapped):
+				state.destination = .sampleValues(SampleValuesFeature.State())
 				return .none
 			
 			case .accounts(.delegate(.deleteWallet)):
@@ -131,11 +131,11 @@ public struct MainFeature {
 				}
 				.sheet(
 					item: $store.scope(
-						state: \.destination?.previewAddresses,
-						action: \.destination.previewAddresses
+						state: \.destination?.sampleValues,
+						action: \.destination.sampleValues
 					)
 				) { store in
-					PreviewAddressesFeature.View(store: store)
+					SampleValuesFeature.View(store: store)
 				}
 				.sheet(
 					item: $store.scope(
@@ -148,8 +148,8 @@ public struct MainFeature {
 				.alert($store.scope(state: \.destination?.alert, action: \.destination.alert))
 				.toolbar {
 					ToolbarItem(placement: .topBarTrailing) {
-						Button("Preview") {
-							send(.previewAddressButtonTapped)
+						Button("Samples") {
+							send(.sampleValuesButtonTapped)
 						}
 					}
 				}
