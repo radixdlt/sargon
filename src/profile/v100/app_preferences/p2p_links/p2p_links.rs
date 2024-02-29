@@ -11,21 +11,15 @@ impl Default for P2PLinks {
     }
 }
 
-impl HasPlaceholder for P2PLinks {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
-        Self::from_iter([
-            P2PLink::placeholder_brave(),
-            P2PLink::placeholder_chrome(),
-        ])
+impl HasSampleValues for P2PLinks {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
+        Self::from_iter([P2PLink::sample_brave(), P2PLink::sample_chrome()])
     }
 
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder_other() -> Self {
-        Self::from_iter([
-            P2PLink::placeholder_arc(),
-            P2PLink::placeholder_duckduckgo(),
-        ])
+    /// A sample used to facilitate unit tests.
+    fn sample_other() -> Self {
+        Self::from_iter([P2PLink::sample_arc(), P2PLink::sample_duckduckgo()])
     }
 }
 
@@ -34,30 +28,27 @@ mod tests {
     use crate::prelude::*;
     #[test]
     fn equality() {
-        assert_eq!(P2PLinks::placeholder(), P2PLinks::placeholder());
-        assert_eq!(
-            P2PLinks::placeholder_other(),
-            P2PLinks::placeholder_other()
-        );
+        assert_eq!(P2PLinks::sample(), P2PLinks::sample());
+        assert_eq!(P2PLinks::sample_other(), P2PLinks::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(P2PLinks::placeholder(), P2PLinks::placeholder_other());
+        assert_ne!(P2PLinks::sample(), P2PLinks::sample_other());
     }
 
     #[test]
     fn display() {
         let mut sut = P2PLinks::new();
-        sut.append(P2PLink::placeholder_duckduckgo());
+        sut.append(P2PLink::sample_duckduckgo());
         assert_eq!(format!("{}", sut), "[P2PLink { display_name: 'DuckDuckGo on Mac Pro', connection_password: 'deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead' }]");
     }
 
     #[test]
     fn into_iter() {
         let mut sut = P2PLinks::new();
-        sut.append(P2PLink::placeholder_duckduckgo());
-        sut.append(P2PLink::placeholder_chrome());
+        sut.append(P2PLink::sample_duckduckgo());
+        sut.append(P2PLink::sample_chrome());
         assert!(sut.into_iter().any(|p| p.display_name.contains("Chrome")));
     }
 
@@ -68,7 +59,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip() {
-        let sut = P2PLinks::placeholder();
+        let sut = P2PLinks::sample();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"
@@ -89,19 +80,19 @@ mod tests {
     #[test]
     fn duplicates_are_not_allowed() {
         let mut sut = P2PLinks::from_iter([
-            P2PLink::placeholder_brave(),
-            P2PLink::placeholder_chrome(),
+            P2PLink::sample_brave(),
+            P2PLink::sample_chrome(),
         ]);
-        let (inserted, _) = sut.append(P2PLink::placeholder_brave());
+        let (inserted, _) = sut.append(P2PLink::sample_brave());
         assert!(!inserted);
     }
 
     #[test]
     fn order_is_maintained() {
-        let a = P2PLink::placeholder_arc();
-        let b = P2PLink::placeholder_brave();
-        let c = P2PLink::placeholder_chrome();
-        let d = P2PLink::placeholder_duckduckgo();
+        let a = P2PLink::sample_arc();
+        let b = P2PLink::sample_brave();
+        let c = P2PLink::sample_chrome();
+        let d = P2PLink::sample_duckduckgo();
         let mut sut = P2PLinks::from_iter([&a, &b, &c].into_iter().cloned());
         assert_eq!(sut.elements(), [&a, &b, &c]);
         sut.insert(d.clone(), 1);

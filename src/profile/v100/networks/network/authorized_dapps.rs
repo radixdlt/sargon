@@ -43,32 +43,32 @@ impl AuthorizedDapps {
     }
 }
 
-impl HasPlaceholder for AuthorizedDapps {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
-        Self::placeholder_mainnet()
+impl HasSampleValues for AuthorizedDapps {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
+        Self::sample_mainnet()
     }
 
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder_other() -> Self {
-        Self::placeholder_stokenet()
+    /// A sample used to facilitate unit tests.
+    fn sample_other() -> Self {
+        Self::sample_stokenet()
     }
 }
 
 impl AuthorizedDapps {
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_mainnet() -> Self {
+    /// A sample used to facilitate unit tests.
+    pub fn sample_mainnet() -> Self {
         Self::with_authorized_dapps([
-            AuthorizedDapp::placeholder_mainnet_dashboard(),
-            AuthorizedDapp::placeholder_mainnet_gumballclub(),
+            AuthorizedDapp::sample_mainnet_dashboard(),
+            AuthorizedDapp::sample_mainnet_gumballclub(),
         ])
     }
 
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_stokenet() -> Self {
+    /// A sample used to facilitate unit tests.
+    pub fn sample_stokenet() -> Self {
         Self::with_authorized_dapps([
-            AuthorizedDapp::placeholder_stokenet_devconsole(),
-            AuthorizedDapp::placeholder_stokenet_sandbox(),
+            AuthorizedDapp::sample_stokenet_devconsole(),
+            AuthorizedDapp::sample_stokenet_sandbox(),
         ])
     }
 }
@@ -84,21 +84,15 @@ mod tests {
 
     #[test]
     fn inequality() {
-        assert_ne!(
-            AuthorizedDapps::placeholder(),
-            AuthorizedDapps::placeholder_other()
-        );
+        assert_ne!(AuthorizedDapps::sample(), AuthorizedDapps::sample_other());
     }
 
     #[test]
     fn equality() {
+        assert_eq!(AuthorizedDapps::sample(), AuthorizedDapps::sample());
         assert_eq!(
-            AuthorizedDapps::placeholder(),
-            AuthorizedDapps::placeholder()
-        );
-        assert_eq!(
-            AuthorizedDapps::placeholder_other(),
-            AuthorizedDapps::placeholder_other()
+            AuthorizedDapps::sample_other(),
+            AuthorizedDapps::sample_other()
         );
     }
 
@@ -106,7 +100,7 @@ mod tests {
     fn duplicates_are_prevented() {
         assert_eq!(
             AuthorizedDapps::with_authorized_dapps(
-                [AuthorizedDapp::placeholder(), AuthorizedDapp::placeholder()]
+                [AuthorizedDapp::sample(), AuthorizedDapp::sample()]
                     .into_iter()
             )
             .len(),
@@ -116,17 +110,21 @@ mod tests {
 
     #[test]
     fn with_one() {
-        assert_eq!(AuthorizedDapps::with_authorized_dapp(AuthorizedDapp::placeholder()).len(), 1)
+        assert_eq!(
+            AuthorizedDapps::with_authorized_dapp(AuthorizedDapp::sample())
+                .len(),
+            1
+        )
     }
 
     #[test]
     fn get_all() {
-        assert_eq!(AuthorizedDapps::placeholder().get_all().len(), 2);
+        assert_eq!(AuthorizedDapps::sample().get_all().len(), 2);
     }
 
     #[test]
     fn get_by_address() {
-        let authorized_dapp = AuthorizedDapp::placeholder();
+        let authorized_dapp = AuthorizedDapp::sample();
         let address = authorized_dapp.dapp_definition_address.clone();
         let authorized_dapps =
             AuthorizedDapps::with_authorized_dapp(authorized_dapp.clone());
@@ -138,7 +136,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_mainnet() {
-        let sut = AuthorizedDapps::placeholder_mainnet();
+        let sut = AuthorizedDapps::sample_mainnet();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"
@@ -273,7 +271,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_stokenet() {
-        let sut = AuthorizedDapps::placeholder_stokenet();
+        let sut = AuthorizedDapps::sample_stokenet();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"

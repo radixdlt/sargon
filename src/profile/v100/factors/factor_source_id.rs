@@ -86,18 +86,18 @@ impl Serialize for FactorSourceID {
     }
 }
 
-impl HasPlaceholder for FactorSourceID {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
+impl HasSampleValues for FactorSourceID {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
         FactorSourceID::Hash {
-            value: FactorSourceIDFromHash::placeholder(),
+            value: FactorSourceIDFromHash::sample(),
         }
     }
 
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder_other() -> Self {
+    /// A sample used to facilitate unit tests.
+    fn sample_other() -> Self {
         FactorSourceID::Hash {
-            value: FactorSourceIDFromHash::placeholder_other(),
+            value: FactorSourceIDFromHash::sample_other(),
         }
     }
 }
@@ -108,27 +108,21 @@ mod tests {
 
     #[test]
     fn equality() {
+        assert_eq!(FactorSourceID::sample(), FactorSourceID::sample());
         assert_eq!(
-            FactorSourceID::placeholder(),
-            FactorSourceID::placeholder()
-        );
-        assert_eq!(
-            FactorSourceID::placeholder_other(),
-            FactorSourceID::placeholder_other()
+            FactorSourceID::sample_other(),
+            FactorSourceID::sample_other()
         );
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(
-            FactorSourceID::placeholder(),
-            FactorSourceID::placeholder_other()
-        );
+        assert_ne!(FactorSourceID::sample(), FactorSourceID::sample_other());
     }
 
     #[test]
     fn json_roundtrip_from_hash() {
-        let model = FactorSourceID::placeholder();
+        let model = FactorSourceID::sample();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -146,7 +140,7 @@ mod tests {
     #[test]
     fn json_roundtrip_from_address() {
         let model = FactorSourceID::Address {
-            value: FactorSourceIDFromAddress::placeholder(),
+            value: FactorSourceIDFromAddress::sample(),
         };
         assert_eq_after_json_roundtrip(
             &model,
@@ -164,28 +158,28 @@ mod tests {
 
     #[test]
     fn hash_into_as_roundtrip() {
-        let from_hash = FactorSourceIDFromHash::placeholder();
+        let from_hash = FactorSourceIDFromHash::sample();
         let id: FactorSourceID = from_hash.clone().into(); // test `into()`
         assert_eq!(id.as_hash().unwrap(), &from_hash);
     }
 
     #[test]
     fn hash_into_as_wrong_fails() {
-        let from_hash = FactorSourceIDFromHash::placeholder();
+        let from_hash = FactorSourceIDFromHash::sample();
         let id: FactorSourceID = from_hash.into(); // test `into()`
         assert!(id.as_address().is_none());
     }
 
     #[test]
     fn address_into_as_roundtrip() {
-        let from_address = FactorSourceIDFromAddress::placeholder();
+        let from_address = FactorSourceIDFromAddress::sample();
         let id: FactorSourceID = from_address.clone().into(); // test `into()`
         assert_eq!(id.as_address().unwrap(), &from_address);
     }
 
     #[test]
     fn address_into_as_wrong_fails() {
-        let from_address = FactorSourceIDFromAddress::placeholder();
+        let from_address = FactorSourceIDFromAddress::sample();
         let id: FactorSourceID = from_address.into(); // test `into()`
         assert!(id.as_hash().is_none());
     }

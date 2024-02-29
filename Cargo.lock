@@ -1744,7 +1744,7 @@ dependencies = [
 [[package]]
 name = "radix-engine-toolkit"
 version = "1.0.10"
-source = "git+https://github.com/radixdlt/radix-engine-toolkit?rev=e0e79548e71066d7569f8871c5b002fd5805d9d5#e0e79548e71066d7569f8871c5b002fd5805d9d5"
+source = "git+https://github.com/radixdlt/radix-engine-toolkit?rev=1cfe879c7370cfa497857ada7a8973f8a3388abc#1cfe879c7370cfa497857ada7a8973f8a3388abc"
 dependencies = [
  "bech32",
  "cargo_toml",
@@ -1769,7 +1769,7 @@ dependencies = [
 [[package]]
 name = "radix-engine-toolkit-json"
 version = "1.0.10"
-source = "git+https://github.com/radixdlt/radix-engine-toolkit?rev=e0e79548e71066d7569f8871c5b002fd5805d9d5#e0e79548e71066d7569f8871c5b002fd5805d9d5"
+source = "git+https://github.com/radixdlt/radix-engine-toolkit?rev=1cfe879c7370cfa497857ada7a8973f8a3388abc#1cfe879c7370cfa497857ada7a8973f8a3388abc"
 dependencies = [
  "bech32",
  "indexmap 1.9.3",
@@ -1980,6 +1980,9 @@ dependencies = [
  "assert-json-diff",
  "bip32",
  "bip39",
+ "camino",
+ "cargo_toml",
+ "clap",
  "delegate",
  "derive_more",
  "ed25519-dalek",
@@ -1996,11 +1999,14 @@ dependencies = [
  "paste",
  "pretty_assertions",
  "pretty_env_logger",
+ "radix-engine",
  "radix-engine-common",
+ "radix-engine-derive",
  "radix-engine-interface",
  "radix-engine-toolkit",
  "radix-engine-toolkit-json",
  "rand 0.8.5",
+ "sbor",
  "schemars",
  "serde",
  "serde_json",
@@ -2011,6 +2017,7 @@ dependencies = [
  "strum_macros 0.26.1",
  "thiserror",
  "time-util",
+ "transaction",
  "uniffi",
  "url",
  "uuid",
@@ -2054,7 +2061,7 @@ dependencies = [
 [[package]]
 name = "sbor-json"
 version = "1.0.10"
-source = "git+https://github.com/radixdlt/radix-engine-toolkit?rev=e0e79548e71066d7569f8871c5b002fd5805d9d5#e0e79548e71066d7569f8871c5b002fd5805d9d5"
+source = "git+https://github.com/radixdlt/radix-engine-toolkit?rev=1cfe879c7370cfa497857ada7a8973f8a3388abc#1cfe879c7370cfa497857ada7a8973f8a3388abc"
 dependencies = [
  "bech32",
  "radix-engine-common",
@@ -3054,7 +3061,7 @@ dependencies = [
 [[package]]
 name = "wasm-instrument"
 version = "0.4.0"
-source = "git+https://github.com/radixdlt/wasm-instrument?branch=radix-master#9b1177a9f1076892d85a454c999cedc421f5a893"
+source = "git+https://github.com/radixdlt/wasm-instrument?branch=radix-master#fe2390722be31ace255bca1887b48f43ec1e2622"
 dependencies = [
  "anyhow",
  "paste",

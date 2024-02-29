@@ -72,15 +72,15 @@ impl P2PLink {
     }
 }
 
-impl HasPlaceholder for P2PLink {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
-        Self::placeholder_chrome()
+impl HasSampleValues for P2PLink {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
+        Self::sample_chrome()
     }
 
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder_other() -> Self {
-        Self::placeholder_brave()
+    /// A sample used to facilitate unit tests.
+    fn sample_other() -> Self {
+        Self::sample_brave()
     }
 }
 
@@ -90,34 +90,28 @@ impl P2PLink {
     }
 
     /// `aced`... "Arc on MacStudio"
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_arc() -> Self {
-        Self::declare(
-            RadixConnectPassword::placeholder_aced(),
-            "Arc on MacStudio",
-        )
+    /// A sample used to facilitate unit tests.
+    pub fn sample_arc() -> Self {
+        Self::declare(RadixConnectPassword::sample_aced(), "Arc on MacStudio")
     }
 
     /// `babe`... "Brave on PC"
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_brave() -> Self {
-        Self::declare(RadixConnectPassword::placeholder_babe(), "Brave on PC")
+    /// A sample used to facilitate unit tests.
+    pub fn sample_brave() -> Self {
+        Self::declare(RadixConnectPassword::sample_babe(), "Brave on PC")
     }
 
     /// `cafe`... "Chrome on Macbook"
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_chrome() -> Self {
-        Self::declare(
-            RadixConnectPassword::placeholder_cafe(),
-            "Chrome on Macbook",
-        )
+    /// A sample used to facilitate unit tests.
+    pub fn sample_chrome() -> Self {
+        Self::declare(RadixConnectPassword::sample_cafe(), "Chrome on Macbook")
     }
 
     /// `dead`... "DuckDuckGo on Mac Pro"
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_duckduckgo() -> Self {
+    /// A sample used to facilitate unit tests.
+    pub fn sample_duckduckgo() -> Self {
         Self::declare(
-            RadixConnectPassword::placeholder_dead(),
+            RadixConnectPassword::sample_dead(),
             "DuckDuckGo on Mac Pro",
         )
     }
@@ -129,18 +123,18 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(P2PLink::placeholder(), P2PLink::placeholder());
-        assert_eq!(P2PLink::placeholder_other(), P2PLink::placeholder_other());
+        assert_eq!(P2PLink::sample(), P2PLink::sample());
+        assert_eq!(P2PLink::sample_other(), P2PLink::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(P2PLink::placeholder(), P2PLink::placeholder_other());
+        assert_ne!(P2PLink::sample(), P2PLink::sample_other());
     }
 
     #[test]
     fn json_roundtrip() {
-        let sut = P2PLink::placeholder();
+        let sut = P2PLink::sample();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"
@@ -154,36 +148,33 @@ mod tests {
 
     #[test]
     fn display_name() {
-        assert_eq!(P2PLink::placeholder().display_name, "Chrome on Macbook");
+        assert_eq!(P2PLink::sample().display_name, "Chrome on Macbook");
     }
 
     #[test]
     fn connection_password() {
         assert_eq!(
-            P2PLink::placeholder()
-                .connection_password()
-                .hash()
-                .to_string(),
+            P2PLink::sample().connection_password().hash().to_string(),
             "98e140d9c01c069aa927797627b1bca4d25971a76549ca59df8ef9d8397afa97"
         );
     }
 
     #[test]
     fn debug() {
-        assert_eq!(format!("{:?}", P2PLink::placeholder()), "P2PLink { display_name: 'Chrome on Macbook', connection_password: 'cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe' }");
+        assert_eq!(format!("{:?}", P2PLink::sample()), "P2PLink { display_name: 'Chrome on Macbook', connection_password: 'cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe' }");
     }
 
     #[test]
     fn display() {
         assert_eq!(
-            format!("{}", P2PLink::placeholder()),
+            format!("{}", P2PLink::sample()),
             "P2PLink( name: 'Chrome on Macbook', password: <OMITTED>)"
         );
     }
 
     #[test]
     fn safe_to_log() {
-        let sut = P2PLink::placeholder();
+        let sut = P2PLink::sample();
         assert_eq!(
             format!("{:?}", sut.to_string()),
             format!("{:?}", sut.non_sensitive())

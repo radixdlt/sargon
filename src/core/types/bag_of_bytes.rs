@@ -24,8 +24,13 @@ use radix_engine_common::crypto::{Hash, IsHash};
 #[display("{}", self.to_hex())]
 #[debug("{}", self.to_hex())]
 pub struct BagOfBytes {
-    ///
-    bytes: Vec<u8>,
+    pub(crate) bytes: Vec<u8>,
+}
+
+impl AsRef<[u8]> for BagOfBytes {
+    fn as_ref(&self) -> &[u8] {
+        self.bytes.as_ref()
+    }
 }
 
 impl Deref for BagOfBytes {
@@ -81,28 +86,28 @@ pub fn new_bag_of_bytes_from(bytes: Vec<u8>) -> BagOfBytes {
 }
 
 #[uniffi::export]
-pub fn new_bag_of_bytes_placeholder_aced() -> BagOfBytes {
-    BagOfBytes::placeholder_aced()
+pub fn new_bag_of_bytes_sample_aced() -> BagOfBytes {
+    BagOfBytes::sample_aced()
 }
 #[uniffi::export]
-pub fn new_bag_of_bytes_placeholder_babe() -> BagOfBytes {
-    BagOfBytes::placeholder_babe()
+pub fn new_bag_of_bytes_sample_babe() -> BagOfBytes {
+    BagOfBytes::sample_babe()
 }
 #[uniffi::export]
-pub fn new_bag_of_bytes_placeholder_cafe() -> BagOfBytes {
-    BagOfBytes::placeholder_cafe()
+pub fn new_bag_of_bytes_sample_cafe() -> BagOfBytes {
+    BagOfBytes::sample_cafe()
 }
 #[uniffi::export]
-pub fn new_bag_of_bytes_placeholder_dead() -> BagOfBytes {
-    BagOfBytes::placeholder_dead()
+pub fn new_bag_of_bytes_sample_dead() -> BagOfBytes {
+    BagOfBytes::sample_dead()
 }
 #[uniffi::export]
-pub fn new_bag_of_bytes_placeholder_ecad() -> BagOfBytes {
-    BagOfBytes::placeholder_ecad()
+pub fn new_bag_of_bytes_sample_ecad() -> BagOfBytes {
+    BagOfBytes::sample_ecad()
 }
 #[uniffi::export]
-pub fn new_bag_of_bytes_placeholder_fade() -> BagOfBytes {
-    BagOfBytes::placeholder_fade()
+pub fn new_bag_of_bytes_sample_fade() -> BagOfBytes {
+    BagOfBytes::sample_fade()
 }
 #[uniffi::export]
 pub fn bag_of_bytes_prepend_deadbeef(in_front_of: &BagOfBytes) -> BagOfBytes {
@@ -142,13 +147,7 @@ impl From<Vec<u8>> for BagOfBytes {
         Self { bytes: value }
     }
 }
-impl From<&[u8; 32]> for BagOfBytes {
-    fn from(value: &[u8; 32]) -> Self {
-        Self {
-            bytes: value.to_vec(),
-        }
-    }
-}
+
 impl From<&[u8]> for BagOfBytes {
     /// Instantiates a new `BagOfBytes` from the bytes.
     fn from(value: &[u8]) -> Self {
@@ -173,60 +172,60 @@ impl FromStr for BagOfBytes {
     }
 }
 
-impl HasPlaceholder for BagOfBytes {
+impl HasSampleValues for BagOfBytes {
     /// `dead...` of length 32 bytes
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
-        Self::placeholder_dead()
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
+        Self::sample_dead()
     }
 
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder_other() -> Self {
-        Self::placeholder_fade()
+    /// A sample used to facilitate unit tests.
+    fn sample_other() -> Self {
+        Self::sample_fade()
     }
 }
 
-impl From<Hex32Bytes> for BagOfBytes {
-    fn from(value: Hex32Bytes) -> Self {
+impl From<Exactly32Bytes> for BagOfBytes {
+    fn from(value: Exactly32Bytes) -> Self {
         value.to_vec().into()
     }
 }
 
 impl BagOfBytes {
     /// `aced...``
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_aced() -> Self {
-        Hex32Bytes::placeholder_aced().into()
+    /// A sample used to facilitate unit tests.
+    pub fn sample_aced() -> Self {
+        Exactly32Bytes::sample_aced().into()
     }
 
     /// `babe...``
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_babe() -> Self {
-        Hex32Bytes::placeholder_babe().into()
+    /// A sample used to facilitate unit tests.
+    pub fn sample_babe() -> Self {
+        Exactly32Bytes::sample_babe().into()
     }
 
     /// `cafe...``
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_cafe() -> Self {
-        Hex32Bytes::placeholder_cafe().into()
+    /// A sample used to facilitate unit tests.
+    pub fn sample_cafe() -> Self {
+        Exactly32Bytes::sample_cafe().into()
     }
 
     /// `dead...``
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_dead() -> Self {
-        Hex32Bytes::placeholder_dead().into()
+    /// A sample used to facilitate unit tests.
+    pub fn sample_dead() -> Self {
+        Exactly32Bytes::sample_dead().into()
     }
 
     /// `ecad...``
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_ecad() -> Self {
-        Hex32Bytes::placeholder_ecad().into()
+    /// A sample used to facilitate unit tests.
+    pub fn sample_ecad() -> Self {
+        Exactly32Bytes::sample_ecad().into()
     }
 
     /// `fade...``
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_fade() -> Self {
-        Hex32Bytes::placeholder_fade().into()
+    /// A sample used to facilitate unit tests.
+    pub fn sample_fade() -> Self {
+        Exactly32Bytes::sample_fade().into()
     }
 }
 
@@ -326,21 +325,24 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(BagOfBytes::placeholder(), BagOfBytes::placeholder());
-        assert_eq!(
-            BagOfBytes::placeholder_other(),
-            BagOfBytes::placeholder_other()
-        );
+        assert_eq!(BagOfBytes::sample(), BagOfBytes::sample());
+        assert_eq!(BagOfBytes::sample_other(), BagOfBytes::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(BagOfBytes::placeholder(), BagOfBytes::placeholder_other());
+        assert_ne!(BagOfBytes::sample(), BagOfBytes::sample_other());
     }
 
     #[test]
     fn len() {
-        assert_eq!(BagOfBytes::placeholder().len(), 32);
+        assert_eq!(BagOfBytes::sample().len(), 32);
+    }
+
+    #[test]
+    fn as_ref() {
+        let b: &[u8] = &[0xde, 0xad, 0xbe, 0xef];
+        assert_eq!(BagOfBytes::from(b).as_ref(), b);
     }
 
     #[test]
@@ -351,7 +353,7 @@ mod tests {
 
     #[test]
     fn is_empty() {
-        assert!(!BagOfBytes::placeholder().is_empty());
+        assert!(!BagOfBytes::sample().is_empty());
     }
 
     #[test]
@@ -365,7 +367,7 @@ mod tests {
     fn debug() {
         let str =
             "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
-        let hex_bytes = BagOfBytes::placeholder();
+        let hex_bytes = BagOfBytes::sample();
         assert_eq!(format!("{:?}", hex_bytes), str);
     }
 
@@ -373,13 +375,13 @@ mod tests {
     fn display() {
         let str =
             "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
-        let hex_bytes = BagOfBytes::placeholder();
+        let hex_bytes = BagOfBytes::sample();
         assert_eq!(format!("{}", hex_bytes), str);
     }
 
     #[test]
     fn from_hash() {
-        let digest = hash(vec![0xde, 0xad]);
+        let digest = hash_of(vec![0xde, 0xad]);
         assert_eq!(BagOfBytes::from(digest).to_vec(), digest.to_vec());
     }
 
@@ -387,13 +389,13 @@ mod tests {
     fn to_hex() {
         let str =
             "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
-        let hex_bytes = BagOfBytes::placeholder();
+        let hex_bytes = BagOfBytes::sample();
         assert_eq!(hex_bytes.to_string(), str);
     }
 
     #[test]
     fn json_roundtrip() {
-        let model = BagOfBytes::placeholder();
+        let model = BagOfBytes::sample();
         assert_json_value_eq_after_roundtrip(
             &model,
             json!("deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"),
@@ -481,31 +483,13 @@ mod uniffi_tests {
     }
 
     #[test]
-    fn placeholders() {
-        assert_eq!(
-            SUT::placeholder_aced(),
-            new_bag_of_bytes_placeholder_aced()
-        );
-        assert_eq!(
-            SUT::placeholder_babe(),
-            new_bag_of_bytes_placeholder_babe()
-        );
-        assert_eq!(
-            SUT::placeholder_cafe(),
-            new_bag_of_bytes_placeholder_cafe()
-        );
-        assert_eq!(
-            SUT::placeholder_dead(),
-            new_bag_of_bytes_placeholder_dead()
-        );
-        assert_eq!(
-            SUT::placeholder_ecad(),
-            new_bag_of_bytes_placeholder_ecad()
-        );
-        assert_eq!(
-            SUT::placeholder_fade(),
-            new_bag_of_bytes_placeholder_fade()
-        );
+    fn sample_values() {
+        assert_eq!(SUT::sample_aced(), new_bag_of_bytes_sample_aced());
+        assert_eq!(SUT::sample_babe(), new_bag_of_bytes_sample_babe());
+        assert_eq!(SUT::sample_cafe(), new_bag_of_bytes_sample_cafe());
+        assert_eq!(SUT::sample_dead(), new_bag_of_bytes_sample_dead());
+        assert_eq!(SUT::sample_ecad(), new_bag_of_bytes_sample_ecad());
+        assert_eq!(SUT::sample_fade(), new_bag_of_bytes_sample_fade());
     }
 
     #[test]

@@ -18,74 +18,76 @@ use radix_engine_common::crypto::Hash;
 #[serde(transparent)]
 #[debug("{value}")]
 pub struct RadixConnectPassword {
-    pub value: Hex32Bytes,
+    pub value: Exactly32Bytes,
 }
 
 #[uniffi::export]
-pub fn new_radix_connect_password(bytes: Hex32Bytes) -> RadixConnectPassword {
+pub fn new_radix_connect_password(
+    bytes: Exactly32Bytes,
+) -> RadixConnectPassword {
     RadixConnectPassword::new(bytes)
 }
 
 #[uniffi::export]
-pub fn new_radix_connect_password_placeholder() -> RadixConnectPassword {
-    RadixConnectPassword::placeholder()
+pub fn new_radix_connect_password_sample() -> RadixConnectPassword {
+    RadixConnectPassword::sample()
 }
 
 #[uniffi::export]
-pub fn new_radix_connect_password_placeholder_other() -> RadixConnectPassword {
-    RadixConnectPassword::placeholder_other()
+pub fn new_radix_connect_password_sample_other() -> RadixConnectPassword {
+    RadixConnectPassword::sample_other()
 }
 
 impl RadixConnectPassword {
-    pub fn new(hex_32bytes: Hex32Bytes) -> Self {
+    pub fn new(hex_32bytes: Exactly32Bytes) -> Self {
         Self { value: hex_32bytes }
     }
 
     pub fn hash(&self) -> Hash {
-        hash(self.value.bytes())
+        hash_of(self.value.bytes())
     }
 }
 
-impl HasPlaceholder for RadixConnectPassword {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
-        Self::new(Hex32Bytes::placeholder())
+impl HasSampleValues for RadixConnectPassword {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
+        Self::new(Exactly32Bytes::sample())
     }
 
-    fn placeholder_other() -> Self {
-        Self::new(Hex32Bytes::placeholder_other())
+    fn sample_other() -> Self {
+        Self::new(Exactly32Bytes::sample_other())
     }
 }
 
 impl RadixConnectPassword {
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_aced() -> Self {
-        Self::new(Hex32Bytes::placeholder_aced())
+    /// A sample used to facilitate unit tests.
+    pub fn sample_aced() -> Self {
+        Self::new(Exactly32Bytes::sample_aced())
     }
 
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_babe() -> Self {
-        Self::new(Hex32Bytes::placeholder_babe())
+    /// A sample used to facilitate unit tests.
+    pub fn sample_babe() -> Self {
+        Self::new(Exactly32Bytes::sample_babe())
     }
 
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_cafe() -> Self {
-        Self::new(Hex32Bytes::placeholder_cafe())
+    /// A sample used to facilitate unit tests.
+    pub fn sample_cafe() -> Self {
+        Self::new(Exactly32Bytes::sample_cafe())
     }
 
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_dead() -> Self {
-        Self::new(Hex32Bytes::placeholder_dead())
+    /// A sample used to facilitate unit tests.
+    pub fn sample_dead() -> Self {
+        Self::new(Exactly32Bytes::sample_dead())
     }
 
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_ecad() -> Self {
-        Self::new(Hex32Bytes::placeholder_ecad())
+    /// A sample used to facilitate unit tests.
+    pub fn sample_ecad() -> Self {
+        Self::new(Exactly32Bytes::sample_ecad())
     }
 
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_fade() -> Self {
-        Self::new(Hex32Bytes::placeholder_fade())
+    /// A sample used to facilitate unit tests.
+    pub fn sample_fade() -> Self {
+        Self::new(Exactly32Bytes::sample_fade())
     }
 }
 
@@ -96,27 +98,27 @@ mod tests {
     #[test]
     fn equality() {
         assert_eq!(
-            RadixConnectPassword::placeholder(),
-            RadixConnectPassword::placeholder()
+            RadixConnectPassword::sample(),
+            RadixConnectPassword::sample()
         );
         assert_eq!(
-            RadixConnectPassword::placeholder_other(),
-            RadixConnectPassword::placeholder_other()
+            RadixConnectPassword::sample_other(),
+            RadixConnectPassword::sample_other()
         );
     }
 
     #[test]
     fn inequality() {
         assert_ne!(
-            RadixConnectPassword::placeholder(),
-            RadixConnectPassword::placeholder_other()
+            RadixConnectPassword::sample(),
+            RadixConnectPassword::sample_other()
         );
     }
 
     #[test]
     fn debug() {
         assert_eq!(
-            format!("{:?}", RadixConnectPassword::placeholder()),
+            format!("{:?}", RadixConnectPassword::sample()),
             "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"
         );
     }
@@ -124,14 +126,14 @@ mod tests {
     #[test]
     fn display() {
         assert_eq!(
-            format!("{}", RadixConnectPassword::placeholder()),
+            format!("{}", RadixConnectPassword::sample()),
             "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"
         );
     }
 
     #[test]
     fn json_roundtrip() {
-        let sut = RadixConnectPassword::placeholder();
+        let sut = RadixConnectPassword::sample();
 
         assert_json_value_eq_after_roundtrip(
             &sut,
@@ -148,8 +150,8 @@ mod tests {
     fn hash() {
         assert_eq!(
             HashSet::<RadixConnectPassword>::from_iter([
-                RadixConnectPassword::placeholder(),
-                RadixConnectPassword::placeholder_dead()
+                RadixConnectPassword::sample(),
+                RadixConnectPassword::sample_dead()
             ])
             .len(),
             1
@@ -157,12 +159,12 @@ mod tests {
 
         assert_eq!(
             HashSet::<RadixConnectPassword>::from_iter([
-                RadixConnectPassword::placeholder_aced(),
-                RadixConnectPassword::placeholder_babe(),
-                RadixConnectPassword::placeholder_cafe(),
-                RadixConnectPassword::placeholder_dead(),
-                RadixConnectPassword::placeholder_ecad(),
-                RadixConnectPassword::placeholder_fade(),
+                RadixConnectPassword::sample_aced(),
+                RadixConnectPassword::sample_babe(),
+                RadixConnectPassword::sample_cafe(),
+                RadixConnectPassword::sample_dead(),
+                RadixConnectPassword::sample_ecad(),
+                RadixConnectPassword::sample_fade(),
             ])
             .len(),
             6
@@ -176,19 +178,19 @@ mod uniffi_tests {
 
     #[test]
     fn new() {
-        let bytes = Hex32Bytes::generate();
+        let bytes = Exactly32Bytes::generate();
         assert_eq!(new_radix_connect_password(bytes.clone()).value, bytes);
     }
 
     #[test]
-    fn placeholders() {
+    fn sample_values() {
         assert_eq!(
-            new_radix_connect_password_placeholder(),
-            RadixConnectPassword::placeholder()
+            new_radix_connect_password_sample(),
+            RadixConnectPassword::sample()
         );
         assert_eq!(
-            new_radix_connect_password_placeholder_other(),
-            RadixConnectPassword::placeholder_other()
+            new_radix_connect_password_sample_other(),
+            RadixConnectPassword::sample_other()
         );
     }
 }

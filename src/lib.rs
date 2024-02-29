@@ -46,6 +46,7 @@ pub mod prelude {
 
 pub use prelude::*;
 pub use radix_engine_common::math::Decimal as ScryptoDecimal192;
+use radix_engine_common::prelude::StringNonFungibleLocalId as ScryptoStringNonFungibleLocalId;
 pub use radix_engine_toolkit::models::canonical_address_types::{
     CanonicalAccessControllerAddress as RetAccessControllerAddress,
     CanonicalAccountAddress as RetAccountAddress,

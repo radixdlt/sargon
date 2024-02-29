@@ -1,5 +1,5 @@
-import Sargon
 import Foundation
+import Sargon
 
 func randomByteArray(byteCount count: Int) -> [UInt8] {
 	#if canImport(Darwin) || os(Linux) || os(Android) || os(Windows)
@@ -17,16 +17,16 @@ extension Data {
 }
 
 extension RadixConnectPassword {
-    init(bytes: Hex32Bytes) {
-        self = newRadixConnectPassword(bytes: bytes)
-    }
+	init(bytes: Exactly32Bytes) {
+		self = newRadixConnectPassword(bytes: bytes)
+	}
 }
 
 func test() throws {
-    let data = try Data.random(byteCount: 32)
-    let bytes = try newHex32BytesFrom(bytes: data)
-    let password = RadixConnectPassword(bytes: bytes)
-    assert(password.value == bytes)
+	let data = try Data.random(byteCount: 32)
+	let bytes = try newExactly32Bytes(bytes: data)
+	let password = RadixConnectPassword(bytes: bytes)
+	assert(password.value == bytes)
 }
 
 try! test()

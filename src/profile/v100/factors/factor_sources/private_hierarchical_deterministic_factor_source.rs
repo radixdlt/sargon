@@ -52,11 +52,11 @@ impl PrivateHierarchicalDeterministicFactorSource {
     }
 
     pub fn new_with_entropy(
-        entropy: Hex32Bytes,
+        entropy: Exactly32Bytes,
         passphrase: BIP39Passphrase,
         wallet_client_model: WalletClientModel,
     ) -> Self {
-        let mnemonic = Mnemonic::from_hex32(entropy);
+        let mnemonic = Mnemonic::from_exactly32(entropy);
         let mnemonic_with_passphrase =
             MnemonicWithPassphrase::with_passphrase(mnemonic, passphrase);
         Self::new_with_mnemonic_with_passphrase(
@@ -67,7 +67,7 @@ impl PrivateHierarchicalDeterministicFactorSource {
 
     pub fn generate_new(wallet_client_model: WalletClientModel) -> Self {
         Self::new_with_entropy(
-            Hex32Bytes::generate(),
+            Exactly32Bytes::generate(),
             BIP39Passphrase::default(),
             wallet_client_model,
         )
@@ -94,22 +94,22 @@ impl PrivateHierarchicalDeterministicFactorSource {
     }
 }
 
-impl HasPlaceholder for PrivateHierarchicalDeterministicFactorSource {
-    fn placeholder() -> Self {
+impl HasSampleValues for PrivateHierarchicalDeterministicFactorSource {
+    fn sample() -> Self {
         Self::new(
-            MnemonicWithPassphrase::placeholder(),
-            DeviceFactorSource::placeholder_babylon(),
+            MnemonicWithPassphrase::sample(),
+            DeviceFactorSource::sample_babylon(),
         )
     }
 
-    fn placeholder_other() -> Self {
-        let mwp = MnemonicWithPassphrase::placeholder_other();
+    fn sample_other() -> Self {
+        let mwp = MnemonicWithPassphrase::sample_other();
         Self::new(
             mwp.clone(),
             DeviceFactorSource::new(
                 FactorSourceIDFromHash::new_for_device(mwp),
-                FactorSourceCommon::placeholder_olympia(),
-                DeviceFactorSourceHint::placeholder_other(),
+                FactorSourceCommon::sample_olympia(),
+                DeviceFactorSourceHint::sample_other(),
             ),
         )
     }

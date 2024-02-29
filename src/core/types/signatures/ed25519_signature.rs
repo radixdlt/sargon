@@ -16,13 +16,13 @@ use radix_engine_common::crypto::Ed25519Signature as ScryptoEd25519Signature;
 #[display("{}", self.to_hex())]
 #[debug("{}", self.to_hex())]
 pub struct Ed25519Signature {
-    pub bytes: Hex64Bytes,
+    pub bytes: Exactly64Bytes,
 }
 
 impl From<ScryptoEd25519Signature> for Ed25519Signature {
     fn from(value: ScryptoEd25519Signature) -> Self {
         Self {
-            bytes: Hex64Bytes::from_bytes(&value.0),
+            bytes: Exactly64Bytes::from_bytes(&value.0),
         }
     }
 }
@@ -43,7 +43,7 @@ impl Ed25519Signature {
     }
 }
 
-impl HasPlaceholder for Ed25519Signature {
+impl HasSampleValues for Ed25519Signature {
     /// Returns a valid Ed25519Signature, see doc test below,
     /// with the value:
     ///
@@ -67,7 +67,7 @@ impl HasPlaceholder for Ed25519Signature {
     ///
     /// let message = "There is a computer disease that anybody who works with computers knows about. It's a very serious disease and it interferes completely with the work. The trouble with computers is that you 'play' with them!";
     ///
-    /// let hash = hash(message.as_bytes());
+    /// let hash = hash_of(message.as_bytes());
     ///
     /// let signature: Ed25519Signature = "2150c2f6b6c496d197ae03afb23f6adf23b275c675394f23786250abd006d5a2c7543566403cb414f70d0e229b0a9b55b4c74f42fc38cdf1aba2307f97686f0b".parse().unwrap();
     ///
@@ -82,8 +82,8 @@ impl HasPlaceholder for Ed25519Signature {
     /// );
     /// ```
     ///
-    fn placeholder() -> Self {
-        "2150c2f6b6c496d197ae03afb23f6adf23b275c675394f23786250abd006d5a2c7543566403cb414f70d0e229b0a9b55b4c74f42fc38cdf1aba2307f97686f0b".parse().expect("Should produce a valid placeholder Ed25519Signature")
+    fn sample() -> Self {
+        "2150c2f6b6c496d197ae03afb23f6adf23b275c675394f23786250abd006d5a2c7543566403cb414f70d0e229b0a9b55b4c74f42fc38cdf1aba2307f97686f0b".parse().expect("Should produce a valid sample Ed25519Signature")
     }
 
     /// Returns a valid Ed25519Signature, see doc test below,
@@ -109,7 +109,7 @@ impl HasPlaceholder for Ed25519Signature {
     ///
     /// let message = "All those moments will be lost in time, like tears in rain. Time to die...";
     ///
-    /// let hash = hash(message.as_bytes());
+    /// let hash = hash_of(message.as_bytes());
     ///
     /// let signature: Ed25519Signature = "06cd3772c5c70d44819db80192a5b2521525e2529f770bff970ec4edc7c1bd76e41fcfa8e59ff93b1675c48f4af3b1697765286d999ee8b5bb8257691e3b7b09".parse().unwrap();
     ///
@@ -124,14 +124,14 @@ impl HasPlaceholder for Ed25519Signature {
     /// );
     /// ```
     ///
-    fn placeholder_other() -> Self {
-        "06cd3772c5c70d44819db80192a5b2521525e2529f770bff970ec4edc7c1bd76e41fcfa8e59ff93b1675c48f4af3b1697765286d999ee8b5bb8257691e3b7b09".parse().expect("Should produce a valid placeholder Ed25519Signature")
+    fn sample_other() -> Self {
+        "06cd3772c5c70d44819db80192a5b2521525e2529f770bff970ec4edc7c1bd76e41fcfa8e59ff93b1675c48f4af3b1697765286d999ee8b5bb8257691e3b7b09".parse().expect("Should produce a valid sample Ed25519Signature")
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::HasPlaceholder;
+    use crate::HasSampleValues;
 
     use super::*;
 
@@ -140,18 +140,18 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::placeholder(), SUT::placeholder());
-        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn scrypto_roundtrip() {
-        let sut = SUT::placeholder();
+        let sut = SUT::sample();
         assert_eq!(
             Into::<SUT>::into(Into::<ScryptoEd25519Signature>::into(
                 sut.clone()
@@ -164,15 +164,13 @@ mod tests {
     fn scrypto_roundtrip_start_scrypto() {
         let sig: ScryptoEd25519Signature = "2150c2f6b6c496d197ae03afb23f6adf23b275c675394f23786250abd006d5a2c7543566403cb414f70d0e229b0a9b55b4c74f42fc38cdf1aba2307f97686f0b".parse().unwrap();
         assert_eq!(
-            Into::<ScryptoEd25519Signature>::into(Into::<SUT>::into(
-                sig.clone()
-            )),
+            Into::<ScryptoEd25519Signature>::into(Into::<SUT>::into(sig)),
             sig
         );
     }
 
     #[test]
     fn to_hex() {
-        assert_eq!(SUT::placeholder_other().to_hex(), "06cd3772c5c70d44819db80192a5b2521525e2529f770bff970ec4edc7c1bd76e41fcfa8e59ff93b1675c48f4af3b1697765286d999ee8b5bb8257691e3b7b09");
+        assert_eq!(SUT::sample_other().to_hex(), "06cd3772c5c70d44819db80192a5b2521525e2529f770bff970ec4edc7c1bd76e41fcfa8e59ff93b1675c48f4af3b1697765286d999ee8b5bb8257691e3b7b09");
     }
 }

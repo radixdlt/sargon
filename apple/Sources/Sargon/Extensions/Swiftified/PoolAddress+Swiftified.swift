@@ -1,6 +1,5 @@
 extension PoolAddress: @unchecked Sendable {}
 
-
 #if DEBUG
 	extension PoolAddress {
 		/// Namespace for preview values of `PoolAddress`
@@ -8,11 +7,11 @@ extension PoolAddress: @unchecked Sendable {}
 			fileprivate init() {}
 			public static let of = Self()
 
-			public let mainnetSingle: PoolAddress = newPoolAddressPlaceholderSingle()
+			public let mainnetSingle: PoolAddress = newPoolAddressSampleSingle()
 
-			public let mainnetTwo: PoolAddress = newPoolAddressPlaceholderTwo()
+			public let mainnetTwo: PoolAddress = newPoolAddressSampleTwo()
 
-			public let mainnetMulti: PoolAddress = newPoolAddressPlaceholderMulti()
+			public let mainnetMulti: PoolAddress = newPoolAddressSampleMulti()
 
 		}
 

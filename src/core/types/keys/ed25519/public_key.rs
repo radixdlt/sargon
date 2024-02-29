@@ -24,7 +24,13 @@ use radix_engine_common::crypto::{
 #[display("{}", self.to_hex())]
 #[debug("{}", self.to_hex())]
 pub struct Ed25519PublicKey {
-    inner: ScryptoEd25519PublicKey,
+    secret_magic: ScryptoEd25519PublicKey,
+}
+
+impl From<Ed25519PublicKey> for ScryptoEd25519PublicKey {
+    fn from(value: Ed25519PublicKey) -> Self {
+        value.secret_magic
+    }
 }
 
 uniffi::custom_type!(ScryptoEd25519PublicKey, BagOfBytes);
@@ -57,13 +63,13 @@ pub fn new_ed25519_public_key_from_bytes(
 }
 
 #[uniffi::export]
-pub fn new_ed25519_public_key_placeholder() -> Ed25519PublicKey {
-    Ed25519PublicKey::placeholder()
+pub fn new_ed25519_public_key_sample() -> Ed25519PublicKey {
+    Ed25519PublicKey::sample()
 }
 
 #[uniffi::export]
-pub fn new_ed25519_public_key_placeholder_other() -> Ed25519PublicKey {
-    Ed25519PublicKey::placeholder_other()
+pub fn new_ed25519_public_key_sample_other() -> Ed25519PublicKey {
+    Ed25519PublicKey::sample_other()
 }
 
 /// Encodes the `Ed25519PublicKey` to a hexadecimal string, lowercased, without any `0x` prefix, e.g.
@@ -87,19 +93,19 @@ impl IsPublicKey<Ed25519Signature> for Ed25519PublicKey {
     ) -> bool {
         scrypto_verify_ed25519(
             for_hash.as_hash(),
-            &self.to_engine(),
+            &self.scrypto(),
             &signature.clone().into(),
         )
     }
 }
 
 impl Ed25519PublicKey {
-    pub(crate) fn to_engine(&self) -> ScryptoEd25519PublicKey {
-        self.inner
+    pub(crate) fn scrypto(&self) -> ScryptoEd25519PublicKey {
+        self.secret_magic
     }
 
     pub fn to_bytes(&self) -> Vec<u8> {
-        self.to_engine().to_vec()
+        self.scrypto().to_vec()
     }
 
     pub fn to_hex(&self) -> String {
@@ -113,7 +119,9 @@ impl TryFrom<ScryptoEd25519PublicKey> for Ed25519PublicKey {
     fn try_from(value: ScryptoEd25519PublicKey) -> Result<Self, Self::Error> {
         ed25519_dalek::PublicKey::from_bytes(value.to_vec().as_slice())
             .map_err(|_| CommonError::InvalidEd25519PublicKeyPointNotOnCurve)
-            .map(|_| Self { inner: value })
+            .map(|_| Self {
+                secret_magic: value,
+            })
     }
 }
 
@@ -140,7 +148,7 @@ impl TryFrom<&[u8]> for Ed25519PublicKey {
 impl Ed25519PublicKey {
     pub fn from_hex(hex: String) -> Result<Self> {
         // We want to ALWAYS go via `try_from(slice: &[u8])` since validates the EC point (`ScryptoEd25519PublicKey` doesn't!)
-        Hex32Bytes::from_str(hex.as_str())
+        Exactly32Bytes::from_str(hex.as_str())
             .map_err(|_| CommonError::InvalidEd25519PublicKeyFromString {
                 bad_value: hex,
             })
@@ -148,14 +156,14 @@ impl Ed25519PublicKey {
     }
 }
 
-impl HasPlaceholder for Ed25519PublicKey {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
-        Self::placeholder_alice()
+impl HasSampleValues for Ed25519PublicKey {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
+        Self::sample_alice()
     }
 
-    fn placeholder_other() -> Self {
-        Self::placeholder_bob()
+    fn sample_other() -> Self {
+        Self::sample_bob()
     }
 }
 
@@ -168,12 +176,12 @@ impl FromStr for Ed25519PublicKey {
 }
 
 impl Ed25519PublicKey {
-    pub fn placeholder_alice() -> Self {
-        Ed25519PrivateKey::placeholder_alice().public_key()
+    pub fn sample_alice() -> Self {
+        Ed25519PrivateKey::sample_alice().public_key()
     }
 
-    pub fn placeholder_bob() -> Self {
-        Ed25519PrivateKey::placeholder_bob().public_key()
+    pub fn sample_bob() -> Self {
+        Ed25519PrivateKey::sample_bob().public_key()
     }
 }
 
@@ -184,27 +192,24 @@ mod tests {
 
     #[test]
     fn equality() {
+        assert_eq!(Ed25519PublicKey::sample(), Ed25519PublicKey::sample());
         assert_eq!(
-            Ed25519PublicKey::placeholder(),
-            Ed25519PublicKey::placeholder()
-        );
-        assert_eq!(
-            Ed25519PublicKey::placeholder_other(),
-            Ed25519PublicKey::placeholder_other()
+            Ed25519PublicKey::sample_other(),
+            Ed25519PublicKey::sample_other()
         );
     }
 
     #[test]
     fn inequality() {
         assert_ne!(
-            Ed25519PublicKey::placeholder(),
-            Ed25519PublicKey::placeholder_other()
+            Ed25519PublicKey::sample(),
+            Ed25519PublicKey::sample_other()
         );
     }
 
     #[test]
     fn json() {
-        let model = Ed25519PublicKey::placeholder_alice();
+        let model = Ed25519PublicKey::sample_alice();
         assert_json_value_eq_after_roundtrip(
             &model,
             json!("ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf"),
@@ -220,19 +225,30 @@ mod tests {
     }
 
     #[test]
-    fn from_engine() {
-        let from_engine: Ed25519PublicKey = ScryptoEd25519PublicKey::from_str(
+    fn from_scrypto() {
+        let from_scrypto: Ed25519PublicKey = ScryptoEd25519PublicKey::from_str(
             "ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf",
         )
         .unwrap()
         .try_into()
         .unwrap();
         assert_eq!(
-            from_engine,
+            from_scrypto,
             Ed25519PublicKey::from_str(
                 "ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf"
             )
             .unwrap()
+        );
+
+        // and back
+        assert_eq!(
+            TryInto::<Ed25519PublicKey>::try_into(Into::<
+                ScryptoEd25519PublicKey,
+            >::into(
+                from_scrypto.clone()
+            ))
+            .unwrap(),
+            from_scrypto
         );
     }
 
@@ -252,17 +268,17 @@ mod tests {
     }
 
     #[test]
-    fn placeholder_alice() {
+    fn sample_alice() {
         assert_eq!(
-            Ed25519PublicKey::placeholder_alice().to_hex(),
+            Ed25519PublicKey::sample_alice().to_hex(),
             "ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf"
         );
     }
 
     #[test]
-    fn placeholder_bob() {
+    fn sample_bob() {
         assert_eq!(
-            Ed25519PublicKey::placeholder_bob().to_hex(),
+            Ed25519PublicKey::sample_bob().to_hex(),
             "b7a3c12dc0c8c748ab07525b701122b88bd78f600c76342d27f25e5f92444cde"
         );
     }
@@ -318,7 +334,7 @@ mod tests {
     #[test]
     fn debug() {
         assert_eq!(
-            format!("{:?}", Ed25519PublicKey::placeholder_alice()),
+            format!("{:?}", Ed25519PublicKey::sample_alice()),
             "ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf"
         );
     }
@@ -327,8 +343,8 @@ mod tests {
     fn hash() {
         assert_eq!(
             BTreeSet::from_iter([
-                Ed25519PublicKey::placeholder_alice(),
-                Ed25519PublicKey::placeholder_alice()
+                Ed25519PublicKey::sample_alice(),
+                Ed25519PublicKey::sample_alice()
             ])
             .len(),
             1
@@ -341,21 +357,18 @@ mod uniffi_tests {
     use crate::{
         ed25519_public_key_to_bytes, ed25519_public_key_to_hex,
         new_ed25519_public_key_from_bytes, new_ed25519_public_key_from_hex,
-        new_ed25519_public_key_placeholder,
-        new_ed25519_public_key_placeholder_other, HasPlaceholder,
+        new_ed25519_public_key_sample, new_ed25519_public_key_sample_other,
+        HasSampleValues,
     };
 
     use super::Ed25519PublicKey;
 
     #[test]
-    fn equality_placeholders() {
+    fn equality_samples() {
+        assert_eq!(Ed25519PublicKey::sample(), new_ed25519_public_key_sample());
         assert_eq!(
-            Ed25519PublicKey::placeholder(),
-            new_ed25519_public_key_placeholder()
-        );
-        assert_eq!(
-            Ed25519PublicKey::placeholder_other(),
-            new_ed25519_public_key_placeholder_other()
+            Ed25519PublicKey::sample_other(),
+            new_ed25519_public_key_sample_other()
         );
     }
 

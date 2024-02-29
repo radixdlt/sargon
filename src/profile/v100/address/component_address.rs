@@ -2,45 +2,45 @@ use crate::prelude::*;
 
 use radix_engine_toolkit::models::canonical_address_types::CanonicalComponentAddress as RetComponentAddress;
 
-/// Placeholder to a mainnet ComponentAddress (global)
+/// Sample to a mainnet ComponentAddress (global)
 #[uniffi::export]
-pub fn new_component_address_placeholder() -> ComponentAddress {
-    ComponentAddress::placeholder_mainnet_global()
+pub fn new_component_address_sample() -> ComponentAddress {
+    ComponentAddress::sample_mainnet_global()
 }
 
-/// Placeholder to a mainnet ComponentAddress (internal)
+/// Sample to a mainnet ComponentAddress (internal)
 #[uniffi::export]
-pub fn new_component_address_placeholder_other() -> ComponentAddress {
-    ComponentAddress::placeholder_mainnet_internal()
+pub fn new_component_address_sample_other() -> ComponentAddress {
+    ComponentAddress::sample_mainnet_internal()
 }
 
-impl HasPlaceholder for ComponentAddress {
-    fn placeholder() -> Self {
-        Self::placeholder_mainnet_global()
+impl HasSampleValues for ComponentAddress {
+    fn sample() -> Self {
+        Self::sample_mainnet_global()
     }
 
-    fn placeholder_other() -> Self {
-        Self::placeholder_mainnet_internal()
+    fn sample_other() -> Self {
+        Self::sample_mainnet_internal()
     }
 }
 
 impl ComponentAddress {
-    pub fn placeholder_mainnet_global() -> Self {
+    pub fn sample_mainnet_global() -> Self {
         "component_rdx1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxfaucet"
             .parse()
-            .expect("Placeholder")
+            .expect("Sample")
     }
 
-    pub fn placeholder_mainnet_internal() -> Self {
-        "internal_component_rdx1lrhpef83s2c25zp9kzlk7qjak4en6llr7pw2zpuv5cswzufh9ff2ug".parse().expect("Placeholder")
+    pub fn sample_mainnet_internal() -> Self {
+        "internal_component_rdx1lrhpef83s2c25zp9kzlk7qjak4en6llr7pw2zpuv5cswzufh9ff2ug".parse().expect("Sample")
     }
 
-    pub fn placeholder_stokenet_global() -> Self {
-        "component_tdx_2_1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxyulkzl".parse().expect("Placeholder")
+    pub fn sample_stokenet_global() -> Self {
+        "component_tdx_2_1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxyulkzl".parse().expect("Sample")
     }
 
-    pub fn placeholder_stokenet_internal() -> Self {
-        "internal_component_tdx_2_1lpjekpazrlrf2726kc29vur0nhpjk2p3jlswu3yyl72h9jghyq498r".parse().expect("Placeholder")
+    pub fn sample_stokenet_internal() -> Self {
+        "internal_component_tdx_2_1lpjekpazrlrf2726kc29vur0nhpjk2p3jlswu3yyl72h9jghyq498r".parse().expect("Sample")
     }
 }
 
@@ -54,38 +54,50 @@ mod tests {
     #[test]
     fn equality() {
         assert_eq!(
-            SUT::placeholder_mainnet_internal(),
-            SUT::placeholder_mainnet_internal()
+            SUT::sample_mainnet_internal(),
+            SUT::sample_mainnet_internal()
+        );
+        assert_eq!(SUT::sample_mainnet_global(), SUT::sample_mainnet_global());
+        assert_eq!(
+            SUT::sample_stokenet_internal(),
+            SUT::sample_stokenet_internal()
         );
         assert_eq!(
-            SUT::placeholder_mainnet_global(),
-            SUT::placeholder_mainnet_global()
-        );
-        assert_eq!(
-            SUT::placeholder_stokenet_internal(),
-            SUT::placeholder_stokenet_internal()
-        );
-        assert_eq!(
-            SUT::placeholder_stokenet_global(),
-            SUT::placeholder_stokenet_global()
+            SUT::sample_stokenet_global(),
+            SUT::sample_stokenet_global()
         );
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
         assert_ne!(
-            SUT::placeholder_mainnet_internal(),
-            SUT::placeholder_mainnet_global()
+            SUT::sample_mainnet_internal(),
+            SUT::sample_mainnet_global()
         );
         assert_ne!(
-            SUT::placeholder_stokenet_internal(),
-            SUT::placeholder_mainnet_internal()
+            SUT::sample_stokenet_internal(),
+            SUT::sample_mainnet_internal()
         );
-        assert_ne!(
-            SUT::placeholder_stokenet_global(),
-            SUT::placeholder_mainnet_global()
-        );
+        assert_ne!(SUT::sample_stokenet_global(), SUT::sample_mainnet_global());
+    }
+
+    #[test]
+    fn manual_perform_uniffi_conversion() {
+        type RetAddr = <SUT as FromRetAddress>::RetAddress;
+        let sut = SUT::sample();
+        let bech32 = sut.to_string();
+        let ret = RetAddr::try_from_bech32(&bech32).unwrap();
+
+        let ffi_side =
+            <RetAddr as crate::UniffiCustomTypeConverter>::from_custom(ret);
+        assert_eq!(ffi_side, bech32);
+        let from_ffi_side =
+            <RetAddr as crate::UniffiCustomTypeConverter>::into_custom(
+                ffi_side,
+            )
+            .unwrap();
+        assert_eq!(ret, from_ffi_side);
     }
 
     #[test]
@@ -177,14 +189,14 @@ mod uniffi_tests {
     }
 
     #[test]
-    fn placeholder() {
+    fn sample() {
         assert_eq!(
-            SUT::placeholder_mainnet_global(),
-            new_component_address_placeholder()
+            SUT::sample_mainnet_global(),
+            new_component_address_sample()
         );
         assert_eq!(
-            SUT::placeholder_mainnet_internal(),
-            new_component_address_placeholder_other()
+            SUT::sample_mainnet_internal(),
+            new_component_address_sample_other()
         );
     }
 }

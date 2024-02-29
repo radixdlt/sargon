@@ -89,7 +89,7 @@ impl Wallet {
 
         log::info!("Instantiating Wallet by creating a new Profile from entropy (provided), for client: {}", wallet_client_model);
 
-        let entropy_32bytes: Hex32Bytes = entropy.try_into()?;
+        let entropy_32bytes: Exactly32Bytes = entropy.try_into()?;
         let private_hd_factor_source =
             PrivateHierarchicalDeterministicFactorSource::new_with_entropy(
                 entropy_32bytes,
@@ -184,13 +184,13 @@ impl Wallet {
     }
 }
 #[cfg(test)]
-impl HasPlaceholder for Wallet {
-    fn placeholder() -> Self {
-        Self::ephemeral(Profile::placeholder()).0
+impl HasSampleValues for Wallet {
+    fn sample() -> Self {
+        Self::ephemeral(Profile::sample()).0
     }
 
-    fn placeholder_other() -> Self {
-        Self::ephemeral(Profile::placeholder_other()).0
+    fn sample_other() -> Self {
+        Self::ephemeral(Profile::sample_other()).0
     }
 }
 
@@ -260,16 +260,16 @@ mod tests {
     use crate::prelude::*;
     #[test]
     fn read_header() {
-        let wallet = Wallet::placeholder();
+        let wallet = Wallet::sample();
         wallet.access_profile_with(|p| {
-            assert_eq!(p.header, Profile::placeholder().header)
+            assert_eq!(p.header, Profile::sample().header)
         })
     }
 
     #[test]
     fn take_snapshot() {
-        let wallet = Wallet::placeholder();
-        assert_eq!(wallet.profile(), Profile::placeholder())
+        let wallet = Wallet::sample();
+        assert_eq!(wallet.profile(), Profile::sample())
     }
 }
 
@@ -279,7 +279,7 @@ mod uniffi_tests {
 
     #[test]
     fn by_loading_profile_with_id() {
-        let profile = Profile::placeholder();
+        let profile = Profile::sample();
         let secure_storage = EphemeralSecureStorage::new();
         let data = serde_json::to_vec(&profile).unwrap();
         assert!(secure_storage
@@ -310,7 +310,7 @@ mod uniffi_tests {
 
     #[test]
     fn by_loading_profile() {
-        let profile = Profile::placeholder();
+        let profile = Profile::sample();
         let secure_storage = EphemeralSecureStorage::new();
         let active_profile_id_data = serde_json::to_vec(&profile.id()).unwrap();
         assert!(secure_storage
@@ -334,7 +334,7 @@ mod uniffi_tests {
 
     #[test]
     fn snapshot_json() {
-        let profile = Profile::placeholder();
+        let profile = Profile::sample();
         let secure_storage = EphemeralSecureStorage::new();
         let wallet =
             Wallet::by_importing_profile(profile.clone(), secure_storage);

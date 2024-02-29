@@ -100,12 +100,12 @@ impl NetworkDefinition {
     }
 }
 
-impl HasPlaceholder for NetworkDefinition {
-    fn placeholder() -> Self {
+impl HasSampleValues for NetworkDefinition {
+    fn sample() -> Self {
         Self::mainnet()
     }
 
-    fn placeholder_other() -> Self {
+    fn sample_other() -> Self {
         Self::stokenet()
     }
 }
@@ -157,21 +157,18 @@ mod tests {
 
     #[test]
     fn equality() {
+        assert_eq!(NetworkDefinition::sample(), NetworkDefinition::sample());
         assert_eq!(
-            NetworkDefinition::placeholder(),
-            NetworkDefinition::placeholder()
-        );
-        assert_eq!(
-            NetworkDefinition::placeholder_other(),
-            NetworkDefinition::placeholder_other()
+            NetworkDefinition::sample_other(),
+            NetworkDefinition::sample_other()
         );
     }
 
     #[test]
     fn inequality() {
         assert_ne!(
-            NetworkDefinition::placeholder(),
-            NetworkDefinition::placeholder_other()
+            NetworkDefinition::sample(),
+            NetworkDefinition::sample_other()
         );
     }
 
@@ -181,8 +178,8 @@ mod tests {
     }
 
     #[test]
-    fn placeholder() {
-        assert_eq!(NetworkDefinition::placeholder().logical_name, "mainnet");
+    fn sample() {
+        assert_eq!(NetworkDefinition::sample().logical_name, "mainnet");
     }
 
     #[test]

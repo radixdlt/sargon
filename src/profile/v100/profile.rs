@@ -37,13 +37,13 @@ pub fn new_profile(
 }
 
 #[uniffi::export]
-pub fn new_profile_placeholder() -> Profile {
-    Profile::placeholder()
+pub fn new_profile_sample() -> Profile {
+    Profile::sample()
 }
 
 #[uniffi::export]
-pub fn new_profile_placeholder_other() -> Profile {
-    Profile::placeholder_other()
+pub fn new_profile_sample_other() -> Profile {
+    Profile::sample_other()
 }
 
 impl Profile {
@@ -123,27 +123,27 @@ impl Profile {
     }
 }
 
-impl HasPlaceholder for Profile {
-    fn placeholder() -> Self {
-        let networks = ProfileNetworks::placeholder();
-        let mut header = Header::placeholder();
+impl HasSampleValues for Profile {
+    fn sample() -> Self {
+        let networks = ProfileNetworks::sample();
+        let mut header = Header::sample();
         header.content_hint = networks.content_hint();
         Self::with(
             header,
-            FactorSources::placeholder(),
-            AppPreferences::placeholder(),
+            FactorSources::sample(),
+            AppPreferences::sample(),
             networks,
         )
     }
 
-    fn placeholder_other() -> Self {
-        let networks = ProfileNetworks::placeholder_other();
-        let mut header = Header::placeholder_other();
+    fn sample_other() -> Self {
+        let networks = ProfileNetworks::sample_other();
+        let mut header = Header::sample_other();
         header.content_hint = networks.content_hint();
         Self::with(
             header,
-            FactorSources::placeholder_other(),
-            AppPreferences::placeholder_other(),
+            FactorSources::sample_other(),
+            AppPreferences::sample_other(),
             networks,
         )
     }
@@ -155,22 +155,20 @@ mod tests {
 
     #[test]
     fn inequality() {
-        assert_ne!(Profile::placeholder(), Profile::placeholder_other());
+        assert_ne!(Profile::sample(), Profile::sample_other());
     }
 
     #[test]
     fn equality() {
-        assert_eq!(Profile::placeholder(), Profile::placeholder());
-        assert_eq!(Profile::placeholder_other(), Profile::placeholder_other());
+        assert_eq!(Profile::sample(), Profile::sample());
+        assert_eq!(Profile::sample_other(), Profile::sample_other());
     }
 
     #[test]
     fn update_factor_source_not_update_when_factor_source_not_found() {
-        let mut sut = Profile::placeholder();
+        let mut sut = Profile::sample();
         let wrong_id: &FactorSourceID =
-            &LedgerHardwareWalletFactorSource::placeholder_other()
-                .id
-                .into();
+            &LedgerHardwareWalletFactorSource::sample_other().id.into();
 
         assert_eq!(
             sut.update_factor_source(
@@ -183,11 +181,11 @@ mod tests {
 
     #[test]
     fn change_supported_curve_of_factor_source() {
-        let mut sut = Profile::placeholder();
-        let id: &FactorSourceID = &DeviceFactorSource::placeholder().id.into();
+        let mut sut = Profile::sample();
+        let id: &FactorSourceID = &DeviceFactorSource::sample().id.into();
         assert!(sut
             .factor_sources
-            .contains_id(&DeviceFactorSource::placeholder().id.into()));
+            .contains_id(&DeviceFactorSource::sample().id.into()));
 
         assert_eq!(
             sut.factor_sources
@@ -236,12 +234,12 @@ mod tests {
     #[test]
     fn add_supported_curve_to_factor_source_failure_cast_wrong_factor_source_kind(
     ) {
-        let mut sut = Profile::placeholder();
-        let id: &FactorSourceID = &DeviceFactorSource::placeholder().id.into();
+        let mut sut = Profile::sample();
+        let id: &FactorSourceID = &DeviceFactorSource::sample().id.into();
 
         assert!(sut
             .factor_sources
-            .contains_id(&DeviceFactorSource::placeholder().id.into()));
+            .contains_id(&DeviceFactorSource::sample().id.into()));
 
         assert_eq!(
             sut.factor_sources
@@ -288,7 +286,7 @@ mod tests {
 
     #[test]
     fn update_name_of_accounts() {
-        let mut sut = Profile::placeholder();
+        let mut sut = Profile::sample();
         let account = sut
             .networks
             .get(&NetworkID::Mainnet)
@@ -321,10 +319,10 @@ mod tests {
     #[test]
     fn panic_when_factor_sources_empty_in_profile_constructor() {
         Profile::with(
-            Header::placeholder(),
+            Header::sample(),
             FactorSources::new(),
-            AppPreferences::placeholder(),
-            ProfileNetworks::placeholder(),
+            AppPreferences::sample(),
+            ProfileNetworks::sample(),
         );
     }
 
@@ -346,7 +344,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip() {
-        let sut = Profile::placeholder();
+        let sut = Profile::sample();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"
@@ -1166,26 +1164,21 @@ mod tests {
 #[cfg(test)]
 mod uniffi_tests {
     use crate::{
-        new_profile_placeholder, new_profile_placeholder_other,
-        BaseIsFactorSource, HasPlaceholder,
-        PrivateHierarchicalDeterministicFactorSource,
+        new_profile_sample, new_profile_sample_other, BaseIsFactorSource,
+        HasSampleValues, PrivateHierarchicalDeterministicFactorSource,
     };
 
     use super::Profile;
 
     #[test]
-    fn equality_placeholders() {
-        assert_eq!(Profile::placeholder(), new_profile_placeholder());
-        assert_eq!(
-            Profile::placeholder_other(),
-            new_profile_placeholder_other()
-        );
+    fn equality_samples() {
+        assert_eq!(Profile::sample(), new_profile_sample());
+        assert_eq!(Profile::sample_other(), new_profile_sample_other());
     }
 
     #[test]
     fn new_private_hd() {
-        let private =
-            PrivateHierarchicalDeterministicFactorSource::placeholder();
+        let private = PrivateHierarchicalDeterministicFactorSource::sample();
         let lhs = super::new_profile(private.clone(), "iPhone".to_string());
         assert_eq!(
             lhs.bdfs().factor_source_id(),

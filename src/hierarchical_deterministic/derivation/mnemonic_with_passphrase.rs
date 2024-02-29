@@ -68,17 +68,14 @@ impl MnemonicWithPassphrase {
     }
 }
 
-impl HasPlaceholder for MnemonicWithPassphrase {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
-        Self::with_passphrase(
-            Mnemonic::placeholder(),
-            BIP39Passphrase::placeholder(),
-        )
+impl HasSampleValues for MnemonicWithPassphrase {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
+        Self::with_passphrase(Mnemonic::sample(), BIP39Passphrase::sample())
     }
 
-    fn placeholder_other() -> Self {
-        Self::new(Mnemonic::placeholder_other())
+    fn sample_other() -> Self {
+        Self::new(Mnemonic::sample_other())
     }
 }
 
@@ -163,27 +160,27 @@ mod tests {
     #[test]
     fn equality() {
         assert_eq!(
-            MnemonicWithPassphrase::placeholder(),
-            MnemonicWithPassphrase::placeholder()
+            MnemonicWithPassphrase::sample(),
+            MnemonicWithPassphrase::sample()
         );
         assert_eq!(
-            MnemonicWithPassphrase::placeholder_other(),
-            MnemonicWithPassphrase::placeholder_other()
+            MnemonicWithPassphrase::sample_other(),
+            MnemonicWithPassphrase::sample_other()
         );
     }
 
     #[test]
     fn inequality() {
         assert_ne!(
-            MnemonicWithPassphrase::placeholder(),
-            MnemonicWithPassphrase::placeholder_other()
+            MnemonicWithPassphrase::sample(),
+            MnemonicWithPassphrase::sample_other()
         );
     }
 
     #[test]
     fn display() {
         assert_eq!(
-            format!("{}", MnemonicWithPassphrase::placeholder()),
+            format!("{}", MnemonicWithPassphrase::sample()),
             "<OBFUSCATED>"
         );
     }
@@ -191,11 +188,11 @@ mod tests {
     #[test]
     fn debug() {
         assert_eq!(
-            format!("{:?}", MnemonicWithPassphrase::placeholder()),
+            format!("{:?}", MnemonicWithPassphrase::sample()),
             format!("{:?}", "24 words (bright...mandate) + <NOT EMPTY>")
         );
         assert_eq!(
-            format!("{:?}", MnemonicWithPassphrase::placeholder_other()),
+            format!("{:?}", MnemonicWithPassphrase::sample_other()),
             format!("{:?}", "12 words (zoo...wrong) + <EMPTY>")
         );
     }
@@ -203,16 +200,13 @@ mod tests {
     #[test]
     fn non_sensitive() {
         assert_eq!(
-            format!(
-                "{:?}",
-                MnemonicWithPassphrase::placeholder().non_sensitive()
-            ),
+            format!("{:?}", MnemonicWithPassphrase::sample().non_sensitive()),
             format!("{:?}", "24 words (bright...mandate) + <NOT EMPTY>")
         );
         assert_eq!(
             format!(
                 "{:?}",
-                MnemonicWithPassphrase::placeholder_other().non_sensitive()
+                MnemonicWithPassphrase::sample_other().non_sensitive()
             ),
             format!("{:?}", "12 words (zoo...wrong) + <EMPTY>")
         );
@@ -312,8 +306,8 @@ mod tests {
     }
 
     #[test]
-    fn keys_for_placeholder() {
-        let mwp = MnemonicWithPassphrase::placeholder();
+    fn keys_for_sample() {
+        let mwp = MnemonicWithPassphrase::sample();
         let path = AccountPath::new(
             NetworkID::Mainnet,
             CAP26KeyKind::TransactionSigning,

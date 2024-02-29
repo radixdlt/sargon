@@ -63,30 +63,30 @@ impl PersonaDataEntryID {
         Uuid::from_u64_pair(0, value).into()
     }
 
-    pub fn placeholder_one() -> Self {
+    pub fn sample_one() -> Self {
         Self::from_u64(1)
     }
 
-    pub fn placeholder_two() -> Self {
+    pub fn sample_two() -> Self {
         Self::from_u64(2)
     }
 
-    pub fn placeholder_three() -> Self {
+    pub fn sample_three() -> Self {
         Self::from_u64(3)
     }
 
-    pub fn placeholder_four() -> Self {
+    pub fn sample_four() -> Self {
         Self::from_u64(4)
     }
 }
 
-impl HasPlaceholder for PersonaDataEntryID {
-    fn placeholder() -> Self {
-        Self::placeholder_one()
+impl HasSampleValues for PersonaDataEntryID {
+    fn sample() -> Self {
+        Self::sample_one()
     }
 
-    fn placeholder_other() -> Self {
-        Self::placeholder_two()
+    fn sample_other() -> Self {
+        Self::sample_two()
     }
 }
 
@@ -99,33 +99,33 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::placeholder(), SUT::placeholder());
-        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn deref() {
-        assert_eq!(*SUT::placeholder_one(), Uuid::from_u64_pair(0, 1));
+        assert_eq!(*SUT::sample_one(), Uuid::from_u64_pair(0, 1));
     }
 
     #[test]
     fn hash() {
         assert_eq!(
             HashSet::<_>::from_iter([
-                SUT::placeholder_one(),
-                SUT::placeholder_two(),
-                SUT::placeholder_three(),
-                SUT::placeholder_four(),
+                SUT::sample_one(),
+                SUT::sample_two(),
+                SUT::sample_three(),
+                SUT::sample_four(),
                 // twice
-                SUT::placeholder_one(),
-                SUT::placeholder_two(),
-                SUT::placeholder_three(),
-                SUT::placeholder_four(),
+                SUT::sample_one(),
+                SUT::sample_two(),
+                SUT::sample_three(),
+                SUT::sample_four(),
             ])
             .len(),
             4

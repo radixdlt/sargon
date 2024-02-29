@@ -115,39 +115,39 @@ impl<'de> serde::Deserialize<'de> for HierarchicalDeterministicFactorInstance {
     }
 }
 
-impl HasPlaceholder for HierarchicalDeterministicFactorInstance {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
-        Self::placeholder_transaction_signing_0()
+impl HasSampleValues for HierarchicalDeterministicFactorInstance {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
+        Self::sample_transaction_signing_0()
     }
 
-    fn placeholder_other() -> Self {
-        Self::placeholder_transaction_signing_1()
+    fn sample_other() -> Self {
+        Self::sample_transaction_signing_1()
     }
 }
 
 impl HierarchicalDeterministicFactorInstance {
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_transaction_signing_0() -> Self {
-        Self::placeholder_with_key_kind(CAP26KeyKind::TransactionSigning, 0)
+    /// A sample used to facilitate unit tests.
+    pub fn sample_transaction_signing_0() -> Self {
+        Self::sample_with_key_kind(CAP26KeyKind::TransactionSigning, 0)
     }
 
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_transaction_signing_1() -> Self {
-        Self::placeholder_with_key_kind(CAP26KeyKind::TransactionSigning, 1)
+    /// A sample used to facilitate unit tests.
+    pub fn sample_transaction_signing_1() -> Self {
+        Self::sample_with_key_kind(CAP26KeyKind::TransactionSigning, 1)
     }
 
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_auth_signing() -> Self {
-        Self::placeholder_with_key_kind(CAP26KeyKind::AuthenticationSigning, 0)
+    /// A sample used to facilitate unit tests.
+    pub fn sample_auth_signing() -> Self {
+        Self::sample_with_key_kind(CAP26KeyKind::AuthenticationSigning, 0)
     }
 
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder_with_key_kind(
+    /// A sample used to facilitate unit tests.
+    fn sample_with_key_kind(
         key_kind: CAP26KeyKind,
         index: HDPathValue,
     ) -> Self {
-        let mwp = MnemonicWithPassphrase::placeholder();
+        let mwp = MnemonicWithPassphrase::sample();
         let path = AccountPath::new(NetworkID::Mainnet, key_kind, index);
         let private_key = mwp.derive_private_key(path.clone());
         let public_key = private_key.public_key();
@@ -165,26 +165,26 @@ mod tests {
     #[test]
     fn equality() {
         assert_eq!(
-            HierarchicalDeterministicFactorInstance::placeholder(),
-            HierarchicalDeterministicFactorInstance::placeholder()
+            HierarchicalDeterministicFactorInstance::sample(),
+            HierarchicalDeterministicFactorInstance::sample()
         );
         assert_eq!(
-            HierarchicalDeterministicFactorInstance::placeholder_other(),
-            HierarchicalDeterministicFactorInstance::placeholder_other()
+            HierarchicalDeterministicFactorInstance::sample_other(),
+            HierarchicalDeterministicFactorInstance::sample_other()
         );
     }
 
     #[test]
     fn inequality() {
         assert_ne!(
-            HierarchicalDeterministicFactorInstance::placeholder(),
-            HierarchicalDeterministicFactorInstance::placeholder_other()
+            HierarchicalDeterministicFactorInstance::sample(),
+            HierarchicalDeterministicFactorInstance::sample_other()
         );
     }
 
     #[test]
     fn json_roundtrip() {
-        let model = HierarchicalDeterministicFactorInstance::placeholder();
+        let model = HierarchicalDeterministicFactorInstance::sample();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -219,12 +219,11 @@ mod tests {
 
     #[test]
     fn key_kind_bip44_is_none() {
-        let derivation_path: DerivationPath =
-            BIP44LikePath::placeholder().into();
+        let derivation_path: DerivationPath = BIP44LikePath::sample().into();
         let sut = HierarchicalDeterministicFactorInstance::new(
-            FactorSourceIDFromHash::placeholder(),
+            FactorSourceIDFromHash::sample(),
             HierarchicalDeterministicPublicKey::new(
-                PublicKey::placeholder_ed25519(),
+                PublicKey::sample_ed25519(),
                 derivation_path,
             ),
         );
@@ -233,12 +232,11 @@ mod tests {
 
     #[test]
     fn key_kind_identity() {
-        let derivation_path: DerivationPath =
-            IdentityPath::placeholder().into();
+        let derivation_path: DerivationPath = IdentityPath::sample().into();
         let sut = HierarchicalDeterministicFactorInstance::new(
-            FactorSourceIDFromHash::placeholder(),
+            FactorSourceIDFromHash::sample(),
             HierarchicalDeterministicPublicKey::new(
-                PublicKey::placeholder_ed25519(),
+                PublicKey::sample_ed25519(),
                 derivation_path,
             ),
         );
@@ -249,9 +247,9 @@ mod tests {
     fn key_kind_cap26_getid_is_none() {
         let derivation_path: DerivationPath = GetIDPath::default().into();
         let sut = HierarchicalDeterministicFactorInstance::new(
-            FactorSourceIDFromHash::placeholder(),
+            FactorSourceIDFromHash::sample(),
             HierarchicalDeterministicPublicKey::new(
-                PublicKey::placeholder_ed25519(),
+                PublicKey::sample_ed25519(),
                 derivation_path,
             ),
         );
@@ -259,9 +257,9 @@ mod tests {
     }
 
     #[test]
-    fn placeholder_auth() {
+    fn sample_auth() {
         assert_eq!(
-            HierarchicalDeterministicFactorInstance::placeholder_auth_signing()
+            HierarchicalDeterministicFactorInstance::sample_auth_signing()
                 .derivation_path()
                 .to_string(),
             "m/44H/1022H/1H/525H/1678H/0H"

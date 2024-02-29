@@ -27,13 +27,13 @@ pub fn new_appearance_id(validating: u8) -> Result<AppearanceID> {
 }
 
 #[uniffi::export]
-pub fn new_appearance_id_placeholder() -> AppearanceID {
-    AppearanceID::placeholder()
+pub fn new_appearance_id_sample() -> AppearanceID {
+    AppearanceID::sample()
 }
 
 #[uniffi::export]
-pub fn new_appearance_id_placeholder_other() -> AppearanceID {
-    AppearanceID::placeholder_other()
+pub fn new_appearance_id_sample_other() -> AppearanceID {
+    AppearanceID::sample_other()
 }
 
 #[uniffi::export]
@@ -112,11 +112,11 @@ impl AppearanceID {
     }
 }
 
-impl HasPlaceholder for AppearanceID {
-    fn placeholder() -> Self {
+impl HasSampleValues for AppearanceID {
+    fn sample() -> Self {
         Self::gradient0()
     }
-    fn placeholder_other() -> Self {
+    fn sample_other() -> Self {
         Self::gradient11()
     }
 }
@@ -147,19 +147,13 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(AppearanceID::placeholder(), AppearanceID::placeholder());
-        assert_eq!(
-            AppearanceID::placeholder_other(),
-            AppearanceID::placeholder_other()
-        );
+        assert_eq!(AppearanceID::sample(), AppearanceID::sample());
+        assert_eq!(AppearanceID::sample_other(), AppearanceID::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(
-            AppearanceID::placeholder(),
-            AppearanceID::placeholder_other()
-        );
+        assert_ne!(AppearanceID::sample(), AppearanceID::sample_other());
     }
 
     #[test]
@@ -224,10 +218,10 @@ mod uniffi_tests {
     }
 
     #[test]
-    fn placeholders() {
+    fn sample_values() {
         assert_ne!(
-            new_appearance_id_placeholder(),
-            new_appearance_id_placeholder_other()
+            new_appearance_id_sample(),
+            new_appearance_id_sample_other()
         );
     }
 }

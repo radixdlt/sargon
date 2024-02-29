@@ -104,34 +104,34 @@ impl Profile {
 }
 
 impl Profile {
-    pub fn placeholder_no_device_factor_source() -> Self {
-        let networks = ProfileNetworks::placeholder();
-        let mut header = Header::placeholder();
+    pub fn sample_no_device_factor_source() -> Self {
+        let networks = ProfileNetworks::sample();
+        let mut header = Header::sample();
         header.content_hint = networks.content_hint();
         Self::with(
             header,
-            FactorSources::from_iter([FactorSource::placeholder_ledger()]),
-            AppPreferences::placeholder(),
+            FactorSources::from_iter([FactorSource::sample_ledger()]),
+            AppPreferences::sample(),
             networks,
         )
     }
 
-    pub fn placeholder_no_babylon_device_factor_source() -> Self {
-        let networks = ProfileNetworks::placeholder();
-        let mut header = Header::placeholder();
+    pub fn sample_no_babylon_device_factor_source() -> Self {
+        let networks = ProfileNetworks::sample();
+        let mut header = Header::sample();
         header.content_hint = networks.content_hint();
         Self::with(
             header,
             FactorSources::from_iter([
-                DeviceFactorSource::placeholder_olympia().into(),
+                DeviceFactorSource::sample_olympia().into()
             ]),
-            AppPreferences::placeholder(),
+            AppPreferences::sample(),
             networks,
         )
     }
 
-    pub fn placeholder_no_factor_source_explicitly_marked_as_main() -> Self {
-        let mut profile = Profile::placeholder();
+    pub fn sample_no_factor_source_explicitly_marked_as_main() -> Self {
+        let mut profile = Profile::sample();
 
         let main_factors = profile
             .factor_sources
@@ -163,8 +163,8 @@ mod tests {
 
     #[test]
     fn factor_source_by_id_success_device() {
-        let profile = Profile::placeholder();
-        let dfs = DeviceFactorSource::placeholder_babylon();
+        let profile = Profile::sample();
+        let dfs = DeviceFactorSource::sample_babylon();
         assert_eq!(
             profile.factor_source_by_id::<DeviceFactorSource>(
                 &dfs.factor_source_id()
@@ -175,8 +175,8 @@ mod tests {
 
     #[test]
     fn factor_source_by_id_success_ledger() {
-        let profile = Profile::placeholder();
-        let lfs = LedgerHardwareWalletFactorSource::placeholder();
+        let profile = Profile::sample();
+        let lfs = LedgerHardwareWalletFactorSource::sample();
         assert_eq!(
             profile.factor_source_by_id::<LedgerHardwareWalletFactorSource>(
                 &lfs.factor_source_id()
@@ -187,8 +187,8 @@ mod tests {
 
     #[test]
     fn factor_source_by_id_fail_wrong_kind() {
-        let profile = Profile::placeholder();
-        let dfs = DeviceFactorSource::placeholder_babylon();
+        let profile = Profile::sample();
+        let dfs = DeviceFactorSource::sample_babylon();
         assert_eq!(
             profile.factor_source_by_id::<LedgerHardwareWalletFactorSource>(
                 &dfs.factor_source_id()
@@ -202,8 +202,8 @@ mod tests {
 
     #[test]
     fn factor_source_by_id_fail_unknown_id() {
-        let profile = Profile::placeholder();
-        let lfs = LedgerHardwareWalletFactorSource::placeholder_other();
+        let profile = Profile::sample();
+        let lfs = LedgerHardwareWalletFactorSource::sample_other();
         assert_eq!(
             profile.factor_source_by_id::<LedgerHardwareWalletFactorSource>(
                 &lfs.factor_source_id()
@@ -216,17 +216,17 @@ mod tests {
 
     #[test]
     fn device_factor_source_by_id_success_device() {
-        let profile = Profile::placeholder();
-        let dfs = DeviceFactorSource::placeholder_babylon();
+        let profile = Profile::sample();
+        let dfs = DeviceFactorSource::sample_babylon();
         assert_eq!(profile.device_factor_source_by_id(&dfs.id), Ok(dfs));
     }
 
     #[test]
     fn device_factor_source_by_id_fail_unknown_id() {
-        let profile = Profile::placeholder();
+        let profile = Profile::sample();
 
         let id = FactorSourceIDFromHash::new_for_device(
-            MnemonicWithPassphrase::placeholder_other(),
+            MnemonicWithPassphrase::sample_other(),
         );
 
         assert_eq!(
@@ -240,14 +240,14 @@ mod tests {
     #[test]
     fn bdfs_success_without_explicit_main_flag() {
         let profile =
-            Profile::placeholder_no_factor_source_explicitly_marked_as_main();
-        assert_eq!(profile.bdfs().id, DeviceFactorSource::placeholder().id);
+            Profile::sample_no_factor_source_explicitly_marked_as_main();
+        assert_eq!(profile.bdfs().id, DeviceFactorSource::sample().id);
     }
 
     #[test]
     fn bdfs_success_with_explicit_main_flag() {
-        let profile = Profile::placeholder();
-        assert_eq!(profile.bdfs().id, DeviceFactorSource::placeholder().id);
+        let profile = Profile::sample();
+        assert_eq!(profile.bdfs().id, DeviceFactorSource::sample().id);
     }
 
     #[test]
@@ -255,7 +255,7 @@ mod tests {
         expected = "A Profile should always contain Babylon DeviceFactorSource"
     )]
     fn bdfs_fail_for_invalid_profile_without_device_factor_source() {
-        let profile = Profile::placeholder_no_device_factor_source();
+        let profile = Profile::sample_no_device_factor_source();
         _ = profile.bdfs();
     }
 
@@ -264,13 +264,13 @@ mod tests {
         expected = "A Profile should always contain Babylon DeviceFactorSource"
     )]
     fn bdfs_fail_for_invalid_profile_without_babylon_device_factor_source() {
-        let profile = Profile::placeholder_no_babylon_device_factor_source();
+        let profile = Profile::sample_no_babylon_device_factor_source();
         _ = profile.bdfs();
     }
 
     #[test]
     fn next_derivation_index_for_entity_account_bdfs_mainnet() {
-        let profile = Profile::placeholder();
+        let profile = Profile::sample();
         assert_eq!(
             profile.next_derivation_index_for_entity(
                 EntityKind::Accounts,
@@ -282,7 +282,7 @@ mod tests {
 
     #[test]
     fn next_derivation_index_for_entity_account_bdfs_stokenet() {
-        let profile = Profile::placeholder();
+        let profile = Profile::sample();
         assert_eq!(
             profile.next_derivation_index_for_entity(
                 EntityKind::Accounts,
@@ -294,12 +294,12 @@ mod tests {
 
     #[test]
     fn next_derivation_index_for_entity_account_olympia_dfs_mainnet() {
-        let profile = Profile::placeholder();
+        let profile = Profile::sample();
         assert_eq!(
             profile.next_derivation_index_for_entity_for_factor_source(
                 EntityKind::Accounts,
                 NetworkID::Mainnet,
-                DeviceFactorSource::placeholder_olympia().id
+                DeviceFactorSource::sample_olympia().id
             ),
             0
         );

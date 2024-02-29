@@ -68,69 +68,67 @@ declare_shared_with_dapp!(
     SharedToDappWithPersonaIDsOfPersonaDataEntries
 );
 
-impl HasPlaceholder for SharedToDappWithPersonaIDsOfPersonaDataEntries {
-    fn placeholder() -> Self {
+impl HasSampleValues for SharedToDappWithPersonaIDsOfPersonaDataEntries {
+    fn sample() -> Self {
         Self::new(
             RequestedQuantity::at_least(2),
             IdentifiedVecVia::from_iter([
-                PersonaDataEntryID::placeholder_one(),
-                PersonaDataEntryID::placeholder_two(),
-                PersonaDataEntryID::placeholder_four(),
+                PersonaDataEntryID::sample_one(),
+                PersonaDataEntryID::sample_two(),
+                PersonaDataEntryID::sample_four(),
             ]),
         )
     }
 
-    fn placeholder_other() -> Self {
+    fn sample_other() -> Self {
         Self::new(
             RequestedQuantity::exactly(1),
-            IdentifiedVecVia::from_iter(
-                [PersonaDataEntryID::placeholder_one()],
-            ),
+            IdentifiedVecVia::from_iter([PersonaDataEntryID::sample_one()]),
         )
     }
 }
 
-impl HasPlaceholder for SharedToDappWithPersonaAccountAddresses {
-    fn placeholder() -> Self {
-        Self::placeholder_mainnet()
+impl HasSampleValues for SharedToDappWithPersonaAccountAddresses {
+    fn sample() -> Self {
+        Self::sample_mainnet()
     }
 
-    fn placeholder_other() -> Self {
-        Self::placeholder_mainnet_other()
+    fn sample_other() -> Self {
+        Self::sample_mainnet_other()
     }
 }
 impl SharedToDappWithPersonaAccountAddresses {
-    pub fn placeholder_mainnet() -> Self {
+    pub fn sample_mainnet() -> Self {
         Self::new(
             RequestedQuantity::exactly(2),
             IdentifiedVecVia::from_iter([
-                AccountAddress::placeholder_mainnet(),
-                AccountAddress::placeholder_mainnet_other(),
+                AccountAddress::sample_mainnet(),
+                AccountAddress::sample_mainnet_other(),
             ]),
         )
     }
-    pub fn placeholder_mainnet_other() -> Self {
+    pub fn sample_mainnet_other() -> Self {
         Self::new(
             RequestedQuantity::at_least(1),
             IdentifiedVecVia::from_iter([
-                AccountAddress::placeholder_mainnet_other(),
+                AccountAddress::sample_mainnet_other(),
             ]),
         )
     }
-    pub fn placeholder_stokenet() -> Self {
+    pub fn sample_stokenet() -> Self {
         Self::new(
             RequestedQuantity::exactly(2),
             IdentifiedVecVia::from_iter([
-                AccountAddress::placeholder_stokenet(),
-                AccountAddress::placeholder_stokenet_other(),
+                AccountAddress::sample_stokenet(),
+                AccountAddress::sample_stokenet_other(),
             ]),
         )
     }
-    pub fn placeholder_stokenet_other() -> Self {
+    pub fn sample_stokenet_other() -> Self {
         Self::new(
             RequestedQuantity::at_least(1),
             IdentifiedVecVia::from_iter([
-                AccountAddress::placeholder_stokenet_other(),
+                AccountAddress::sample_stokenet_other(),
             ]),
         )
     }
@@ -145,20 +143,19 @@ mod shared_accounts_tests {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::placeholder(), SUT::placeholder());
-        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn hash() {
         assert_eq!(
-            HashSet::<_>::from_iter([SUT::placeholder(), SUT::placeholder()])
-                .len(),
+            HashSet::<_>::from_iter([SUT::sample(), SUT::sample()]).len(),
             1
         );
     }
@@ -183,12 +180,9 @@ mod shared_accounts_tests {
 
     #[test]
     fn display() {
+        assert_eq!(format!("{}", SUT::sample()), "Exactly: 2 - #2 ids shared");
         assert_eq!(
-            format!("{}", SUT::placeholder()),
-            "Exactly: 2 - #2 ids shared"
-        );
-        assert_eq!(
-            format!("{}", SUT::placeholder_other()),
+            format!("{}", SUT::sample_other()),
             "AtLeast: 1 - #1 ids shared"
         );
     }
@@ -196,14 +190,14 @@ mod shared_accounts_tests {
     #[test]
     fn debug() {
         assert_eq!(
-            format!("{:?}", SUT::placeholder()),
+            format!("{:?}", SUT::sample()),
             "Exactly: 2 - shared ids: [account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease, account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master]"
         );
     }
 
     #[test]
-    fn json_roundtrip_placeholder() {
-        let model = SUT::placeholder();
+    fn json_roundtrip_sample() {
+        let model = SUT::sample();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -222,8 +216,8 @@ mod shared_accounts_tests {
     }
 
     #[test]
-    fn json_roundtrip_placeholder_other() {
-        let model = SUT::placeholder_other();
+    fn json_roundtrip_sample_other() {
+        let model = SUT::sample_other();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -250,20 +244,19 @@ mod shared_collection_of_ids_tests {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::placeholder(), SUT::placeholder());
-        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn hash() {
         assert_eq!(
-            HashSet::<_>::from_iter([SUT::placeholder(), SUT::placeholder()])
-                .len(),
+            HashSet::<_>::from_iter([SUT::sample(), SUT::sample()]).len(),
             1
         );
     }
@@ -288,12 +281,9 @@ mod shared_collection_of_ids_tests {
 
     #[test]
     fn display() {
+        assert_eq!(format!("{}", SUT::sample()), "AtLeast: 2 - #3 ids shared");
         assert_eq!(
-            format!("{}", SUT::placeholder()),
-            "AtLeast: 2 - #3 ids shared"
-        );
-        assert_eq!(
-            format!("{}", SUT::placeholder_other()),
+            format!("{}", SUT::sample_other()),
             "Exactly: 1 - #1 ids shared"
         );
     }
@@ -301,14 +291,14 @@ mod shared_collection_of_ids_tests {
     #[test]
     fn debug() {
         assert_eq!(
-            format!("{:?}", SUT::placeholder()),
+            format!("{:?}", SUT::sample()),
             "AtLeast: 2 - shared ids: [00000000-0000-0000-0000-000000000001, 00000000-0000-0000-0000-000000000002, 00000000-0000-0000-0000-000000000004]"
         );
     }
 
     #[test]
-    fn json_roundtrip_placeholder() {
-        let model = SUT::placeholder();
+    fn json_roundtrip_sample() {
+        let model = SUT::sample();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -324,8 +314,8 @@ mod shared_collection_of_ids_tests {
     }
 
     #[test]
-    fn json_roundtrip_placeholder_other() {
-        let model = SUT::placeholder_other();
+    fn json_roundtrip_sample_other() {
+        let model = SUT::sample_other();
         assert_eq_after_json_roundtrip(
             &model,
             r#"

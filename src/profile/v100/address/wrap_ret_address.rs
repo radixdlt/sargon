@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use paste::*;
+use radix_engine::types::GlobalAddress as ScryptoGlobalAddress;
 use radix_engine_common::types::{
     EntityType as ScryptoEntityType, NodeId as ScryptoNodeId,
 };
@@ -22,6 +23,18 @@ pub trait AddressViaRet: Sized {
         node_id: impl Into<ScryptoNodeId>,
         network_id: NetworkID,
     ) -> Result<Self>;
+}
+
+/// Helps with unit testing, so that we do not need to explicitly specify each
+/// (Sargon) Address types corresponding RET address type, but can use, e.g.
+/// `AccountAddress::RetAddress` instead of `radix_engine_toolkit::models::canonical_address_types::CanonicalAccountAddress`
+pub(crate) trait FromRetAddress {
+    type RetAddress;
+}
+
+pub trait IntoScryptoAddress {
+    fn scrypto(&self) -> ScryptoGlobalAddress;
+    fn network_id(&self) -> NetworkID;
 }
 
 macro_rules! decl_ret_wrapped_address {
@@ -69,7 +82,6 @@ macro_rules! decl_ret_wrapped_address {
             }
 
              /// UniFFI conversion for RET types which are DisplayFromStr using String as builtin.
-            #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
             impl crate::UniffiCustomTypeConverter for [< Ret $address_type:camel Address >] {
                 type Builtin = String;
 
@@ -91,13 +103,28 @@ macro_rules! decl_ret_wrapped_address {
                 }
             }
 
+            impl FromRetAddress for [< $address_type:camel Address >] {
+                type RetAddress = [< Ret $address_type:camel Address >];
+            }
+
+            impl From<[< $address_type:camel Address >]> for ScryptoGlobalAddress {
+                fn from(value: [< $address_type:camel Address >]) -> ScryptoGlobalAddress {
+                    value.scrypto()
+                }
+            }
+
             impl [< $address_type:camel Address >] {
-                pub fn address(&self) -> String {
-                    self.to_string()
+
+                pub(crate) fn scrypto(&self) -> ScryptoGlobalAddress {
+                    ScryptoGlobalAddress::try_from(self.node_id())
+                    .expect("Should always be able to convert a Sargon Address into radix engine 'GlobalAddress'.")
+                }
+                pub(crate) fn node_id(&self) -> ScryptoNodeId {
+                    self.secret_magic.node_id()
                 }
 
-                pub fn network_id(&self) -> NetworkID {
-                    self.secret_magic.network_id().try_into().expect("Should have known all network ids")
+                pub fn address(&self) -> String {
+                    self.to_string()
                 }
 
                 pub fn entity_type(&self) -> ScryptoEntityType {
@@ -111,6 +138,17 @@ macro_rules! decl_ret_wrapped_address {
                         CommonError::FailedToDecodeAddressFromBech32 { bad_value: bech32.as_ref().to_owned() }
                     })
                     .map(Into::<Self>::into)
+                }
+            }
+
+            impl IntoScryptoAddress for [< $address_type:camel Address >] {
+                fn scrypto(&self) -> ScryptoGlobalAddress {
+                    ScryptoGlobalAddress::try_from(self.node_id())
+                    .expect("Should always be able to convert a Sargon Address into radix engine 'GlobalAddress'.")
+                }
+
+                fn network_id(&self) -> NetworkID {
+                    self.secret_magic.network_id().try_into().expect("Should have known all network ids")
                 }
             }
 

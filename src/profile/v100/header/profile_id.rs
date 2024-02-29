@@ -26,12 +26,12 @@ impl FromStr for ProfileID {
     }
 }
 
-impl HasPlaceholder for ProfileID {
-    fn placeholder() -> Self {
+impl HasSampleValues for ProfileID {
+    fn sample() -> Self {
         ProfileID(Uuid::from_bytes([0xff; 16]))
     }
 
-    fn placeholder_other() -> Self {
+    fn sample_other() -> Self {
         ProfileID(Uuid::from_bytes([0xde; 16]))
     }
 }
@@ -45,13 +45,13 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::placeholder(), SUT::placeholder());
-        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]

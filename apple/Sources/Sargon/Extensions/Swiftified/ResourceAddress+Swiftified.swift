@@ -1,6 +1,5 @@
 extension ResourceAddress: @unchecked Sendable {}
 
-
 #if DEBUG
 	extension ResourceAddress {
 		/// Namespace for preview values of `ResourceAddress`
@@ -9,21 +8,21 @@ extension ResourceAddress: @unchecked Sendable {}
 			public static let of = Self()
 
 			public let mainnetXRD: ResourceAddress =
-				newResourceAddressPlaceholderMainnetXrd()
+				newResourceAddressSampleMainnetXrd()
 			public let mainnetCandy: ResourceAddress =
-				newResourceAddressPlaceholderMainnetCandy()
+				newResourceAddressSampleMainnetCandy()
 			/// Gumball Club membership NFT resource address
 			public let mainnetNonFungbleGCMembership: ResourceAddress =
-				newResourceAddressPlaceholderMainnetNftGcMembership()
+				newResourceAddressSampleMainnetNftGcMembership()
 
 			public let stokenetXRD: ResourceAddress =
-				newResourceAddressPlaceholderStokenetXrd()
+				newResourceAddressSampleStokenetXrd()
 			public let stokenetGum: ResourceAddress =
-				newResourceAddressPlaceholderStokenetGum()
+				newResourceAddressSampleStokenetGum()
 			public let stokenetGC: ResourceAddress =
-				newResourceAddressPlaceholderStokenetGcTokens()
+				newResourceAddressSampleStokenetGcTokens()
 			public let stokenetCandy: ResourceAddress =
-				newResourceAddressPlaceholderStokenetCandy()
+				newResourceAddressSampleStokenetCandy()
 		}
 
 		/// Preview values for `ResourceAddress`, e.g.:

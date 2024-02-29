@@ -39,12 +39,12 @@ pub struct Header {
 }
 
 #[uniffi::export]
-pub fn new_header_placeholder() -> Header {
-    Header::placeholder()
+pub fn new_header_sample() -> Header {
+    Header::sample()
 }
 #[uniffi::export]
-pub fn new_header_placeholder_other() -> Header {
-    Header::placeholder_other()
+pub fn new_header_sample_other() -> Header {
+    Header::sample_other()
 }
 
 impl Header {
@@ -92,9 +92,9 @@ impl Default for Header {
     }
 }
 
-impl HasPlaceholder for Header {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
+impl HasSampleValues for Header {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
         let date = Timestamp::parse("2023-09-11T16:05:56Z").unwrap();
         let device = DeviceInfo::new(
             Uuid::from_str("66f07ca2-a9d9-49e5-8152-77aca3d1dd74").unwrap(),
@@ -110,8 +110,8 @@ impl HasPlaceholder for Header {
         )
     }
 
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder_other() -> Self {
+    /// A sample used to facilitate unit tests.
+    fn sample_other() -> Self {
         let date = Timestamp::parse("2023-12-20T16:05:56Z").unwrap();
         let device = DeviceInfo::new(
             Uuid::from_str("aabbccdd-a9d9-49e5-8152-beefbeefbeef").unwrap(),
@@ -132,20 +132,23 @@ impl HasPlaceholder for Header {
 pub mod tests {
     use crate::prelude::*;
 
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = Header;
+
     #[test]
     fn equality() {
-        assert_eq!(Header::placeholder(), Header::placeholder());
-        assert_eq!(Header::placeholder_other(), Header::placeholder_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(Header::placeholder(), Header::placeholder_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
-    fn json_roundtrip_placeholder() {
-        let sut = Header::placeholder();
+    fn json_roundtrip_sample() {
+        let sut = SUT::sample();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"
@@ -175,8 +178,8 @@ pub mod tests {
 
     #[test]
     fn last_updated() {
-        let a = Header::default();
-        let b = Header::default();
+        let a = SUT::default();
+        let b = SUT::default();
         assert_ne!(a.last_modified, b.last_modified);
     }
 
@@ -188,7 +191,7 @@ pub mod tests {
             date,
             "iPhone".to_string(),
         );
-        let sut = Header::with_values(
+        let sut = SUT::with_values(
             ProfileID::from_str("12345678-bbbb-cccc-dddd-abcd12345678")
                 .unwrap(),
             device,
@@ -201,7 +204,7 @@ pub mod tests {
     #[test]
     fn creating_device() {
         let value = DeviceInfo::new_iphone();
-        let sut = Header {
+        let sut = SUT {
             creating_device: value.clone(),
             ..Default::default()
         };
@@ -211,7 +214,7 @@ pub mod tests {
     #[test]
     fn get_id() {
         let value = profile_id();
-        let sut = Header {
+        let sut = SUT {
             id: value.clone(),
             ..Default::default()
         };
@@ -221,7 +224,7 @@ pub mod tests {
     #[test]
     fn snapshot_version() {
         let value = ProfileSnapshotVersion::default();
-        let sut = Header {
+        let sut = SUT {
             snapshot_version: value,
             ..Default::default()
         };
@@ -231,22 +234,23 @@ pub mod tests {
 
 #[cfg(test)]
 mod uniffi_tests {
-    use crate::{
-        new_header_placeholder, new_header_placeholder_other, HasPlaceholder,
-    };
+    use crate::{new_header_sample, new_header_sample_other, HasSampleValues};
 
-    use super::Header;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = Header;
 
     #[test]
-    fn equality_placeholders() {
-        assert_eq!(Header::placeholder(), new_header_placeholder());
-        assert_eq!(Header::placeholder_other(), new_header_placeholder_other());
+    fn equality_samples() {
+        assert_eq!(SUT::sample(), new_header_sample());
+        assert_eq!(SUT::sample_other(), new_header_sample_other());
     }
 
     #[test]
     fn header_identifiable() {
         use identified_vec::Identifiable;
-        let sut = Header::placeholder();
+        let sut = SUT::sample();
         assert_eq!(&sut.id(), &sut.id);
     }
 }

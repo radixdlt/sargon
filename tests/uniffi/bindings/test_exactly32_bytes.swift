@@ -16,15 +16,15 @@ extension Data {
 	}
 }
 
-extension Hex32Bytes {
+extension Exactly32Bytes {
     init(data: Data) throws {
-        self = try newHex32BytesFrom(bytes: data)
+        self = try newExactly32Bytes(bytes: data)
     }
 }
 
 func test() throws {
     let bytes = try Data.random(byteCount: 32)
-    let hex32 = try Hex32Bytes(data: bytes)
+    let hex32 = try Exactly32Bytes(data: bytes)
     assert(hex32.bagOfBytes == bytes)
 }
 

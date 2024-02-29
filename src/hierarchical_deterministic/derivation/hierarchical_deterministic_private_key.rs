@@ -40,9 +40,9 @@ impl HierarchicalDeterministicPrivateKey {
     }
 }
 
-impl HasPlaceholder for HierarchicalDeterministicPrivateKey {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
+impl HasSampleValues for HierarchicalDeterministicPrivateKey {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
         Self::new(
             Ed25519PrivateKey::from_str(
                 "cf52dbc7bb2663223e99fb31799281b813b939440a372d0aa92eb5f5b8516003",
@@ -55,7 +55,7 @@ impl HasPlaceholder for HierarchicalDeterministicPrivateKey {
         )
     }
 
-    fn placeholder_other() -> Self {
+    fn sample_other() -> Self {
         Self::new(
             Secp256k1PrivateKey::from_str(
                 "111323d507d9d690836798e3ef2e5292cfd31092b75b9b59fa584ff593a3d7e4",
@@ -77,26 +77,26 @@ mod tests {
     #[test]
     fn equality() {
         assert_eq!(
-            HierarchicalDeterministicPrivateKey::placeholder(),
-            HierarchicalDeterministicPrivateKey::placeholder()
+            HierarchicalDeterministicPrivateKey::sample(),
+            HierarchicalDeterministicPrivateKey::sample()
         );
         assert_eq!(
-            HierarchicalDeterministicPrivateKey::placeholder_other(),
-            HierarchicalDeterministicPrivateKey::placeholder_other()
+            HierarchicalDeterministicPrivateKey::sample_other(),
+            HierarchicalDeterministicPrivateKey::sample_other()
         );
     }
 
     #[test]
     fn inequality() {
         assert_ne!(
-            HierarchicalDeterministicPrivateKey::placeholder(),
-            HierarchicalDeterministicPrivateKey::placeholder_other()
+            HierarchicalDeterministicPrivateKey::sample(),
+            HierarchicalDeterministicPrivateKey::sample_other()
         );
     }
 
     #[test]
-    fn publickey_of_placeholder() {
-        let sut = HierarchicalDeterministicPrivateKey::placeholder();
+    fn publickey_of_sample() {
+        let sut = HierarchicalDeterministicPrivateKey::sample();
         assert_eq!(
             sut.public_key().to_hex(),
             "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b"

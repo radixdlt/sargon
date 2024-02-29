@@ -95,36 +95,36 @@ impl Serialize for FactorSource {
     }
 }
 
-impl HasPlaceholder for FactorSource {
-    fn placeholder() -> Self {
-        Self::placeholder_device()
+impl HasSampleValues for FactorSource {
+    fn sample() -> Self {
+        Self::sample_device()
     }
 
-    fn placeholder_other() -> Self {
-        Self::placeholder_ledger()
+    fn sample_other() -> Self {
+        Self::sample_ledger()
     }
 }
 
 impl FactorSource {
-    pub fn placeholder_device() -> Self {
-        Self::placeholder_device_babylon()
+    pub fn sample_device() -> Self {
+        Self::sample_device_babylon()
     }
 
-    pub fn placeholder_device_babylon() -> Self {
+    pub fn sample_device_babylon() -> Self {
         Self::Device {
-            value: DeviceFactorSource::placeholder_babylon(),
+            value: DeviceFactorSource::sample_babylon(),
         }
     }
 
-    pub fn placeholder_device_olympia() -> Self {
+    pub fn sample_device_olympia() -> Self {
         Self::Device {
-            value: DeviceFactorSource::placeholder_olympia(),
+            value: DeviceFactorSource::sample_olympia(),
         }
     }
 
-    pub fn placeholder_ledger() -> Self {
+    pub fn sample_ledger() -> Self {
         Self::Ledger {
-            value: LedgerHardwareWalletFactorSource::placeholder(),
+            value: LedgerHardwareWalletFactorSource::sample(),
         }
     }
 }
@@ -135,41 +135,35 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(FactorSource::placeholder(), FactorSource::placeholder());
-        assert_eq!(
-            FactorSource::placeholder_other(),
-            FactorSource::placeholder_other()
-        );
+        assert_eq!(FactorSource::sample(), FactorSource::sample());
+        assert_eq!(FactorSource::sample_other(), FactorSource::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(
-            FactorSource::placeholder(),
-            FactorSource::placeholder_other()
-        );
+        assert_ne!(FactorSource::sample(), FactorSource::sample_other());
     }
 
     #[test]
     fn factor_source_id_device() {
         assert_eq!(
-            FactorSource::placeholder_device().factor_source_id(),
-            DeviceFactorSource::placeholder().factor_source_id()
+            FactorSource::sample_device().factor_source_id(),
+            DeviceFactorSource::sample().factor_source_id()
         );
     }
 
     #[test]
     fn factor_source_id_ledger() {
         assert_eq!(
-            FactorSource::placeholder_ledger().factor_source_id(),
-            LedgerHardwareWalletFactorSource::placeholder().factor_source_id()
+            FactorSource::sample_ledger().factor_source_id(),
+            LedgerHardwareWalletFactorSource::sample().factor_source_id()
         );
     }
 
     #[test]
     fn factor_source_kind_device() {
         assert_eq!(
-            FactorSource::placeholder_device().factor_source_kind(),
+            FactorSource::sample_device().factor_source_kind(),
             FactorSourceKind::Device
         );
     }
@@ -177,19 +171,18 @@ mod tests {
     #[test]
     fn factor_source_kind_ledger() {
         assert_eq!(
-            FactorSource::placeholder_ledger().factor_source_kind(),
+            FactorSource::sample_ledger().factor_source_kind(),
             FactorSourceKind::LedgerHQHardwareWallet
         );
     }
 
     #[test]
     fn into_from_device() {
-        let factor_source: FactorSource =
-            DeviceFactorSource::placeholder().into();
+        let factor_source: FactorSource = DeviceFactorSource::sample().into();
         assert_eq!(
             factor_source,
             FactorSource::Device {
-                value: DeviceFactorSource::placeholder()
+                value: DeviceFactorSource::sample()
             }
         );
     }
@@ -197,18 +190,18 @@ mod tests {
     #[test]
     fn into_from_ledger() {
         let factor_source: FactorSource =
-            LedgerHardwareWalletFactorSource::placeholder().into();
+            LedgerHardwareWalletFactorSource::sample().into();
         assert_eq!(
             factor_source,
             FactorSource::Ledger {
-                value: LedgerHardwareWalletFactorSource::placeholder()
+                value: LedgerHardwareWalletFactorSource::sample()
             }
         );
     }
 
     #[test]
     fn json_roundtrip_device() {
-        let model = FactorSource::placeholder_device();
+        let model = FactorSource::sample_device();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -241,7 +234,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_ledger() {
-        let model = FactorSource::placeholder_ledger();
+        let model = FactorSource::sample_ledger();
         assert_eq_after_json_roundtrip(
             &model,
             r#"

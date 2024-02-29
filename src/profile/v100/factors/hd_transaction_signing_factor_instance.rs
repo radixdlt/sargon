@@ -91,11 +91,11 @@ mod tests {
     #[test]
     fn account_creation_valid() {
         let hd_key = HierarchicalDeterministicPublicKey::new(
-            PublicKey::placeholder_ed25519(),
-            AccountPath::placeholder().into(),
+            PublicKey::sample_ed25519(),
+            AccountPath::sample().into(),
         );
         let hd_fi = HierarchicalDeterministicFactorInstance::new(
-            FactorSourceIDFromHash::placeholder(),
+            FactorSourceIDFromHash::sample(),
             hd_key,
         );
         assert_eq!(
@@ -110,11 +110,11 @@ mod tests {
     #[test]
     fn account_creation_wrong_entity_kind() {
         let hd_key = HierarchicalDeterministicPublicKey::new(
-            PublicKey::placeholder_ed25519(),
-            IdentityPath::placeholder().into(),
+            PublicKey::sample_ed25519(),
+            IdentityPath::sample().into(),
         );
         let hd_fi = HierarchicalDeterministicFactorInstance::new(
-            FactorSourceIDFromHash::placeholder(),
+            FactorSourceIDFromHash::sample(),
             hd_key,
         );
         assert_eq!(
@@ -126,7 +126,7 @@ mod tests {
     #[test]
     fn account_creation_wrong_key_kind() {
         let hd_key = HierarchicalDeterministicPublicKey::new(
-            PublicKey::placeholder_ed25519(),
+            PublicKey::sample_ed25519(),
             AccountPath::new(
                 NetworkID::Mainnet,
                 CAP26KeyKind::AuthenticationSigning,
@@ -135,7 +135,7 @@ mod tests {
             .into(),
         );
         let hd_fi = HierarchicalDeterministicFactorInstance::new(
-            FactorSourceIDFromHash::placeholder(),
+            FactorSourceIDFromHash::sample(),
             hd_key,
         );
         assert_eq!(
@@ -147,11 +147,11 @@ mod tests {
     #[test]
     fn identity_creation_valid() {
         let hd_key = HierarchicalDeterministicPublicKey::new(
-            PublicKey::placeholder_ed25519(),
-            IdentityPath::placeholder().into(),
+            PublicKey::sample_ed25519(),
+            IdentityPath::sample().into(),
         );
         let hd_fi = HierarchicalDeterministicFactorInstance::new(
-            FactorSourceIDFromHash::placeholder(),
+            FactorSourceIDFromHash::sample(),
             hd_key,
         );
         assert_eq!(
@@ -166,11 +166,11 @@ mod tests {
     #[test]
     fn identity_creation_wrong_entity_kind() {
         let hd_key = HierarchicalDeterministicPublicKey::new(
-            PublicKey::placeholder_ed25519(),
-            AccountPath::placeholder().into(),
+            PublicKey::sample_ed25519(),
+            AccountPath::sample().into(),
         );
         let hd_fi = HierarchicalDeterministicFactorInstance::new(
-            FactorSourceIDFromHash::placeholder(),
+            FactorSourceIDFromHash::sample(),
             hd_key,
         );
         assert_eq!(
@@ -182,7 +182,7 @@ mod tests {
     #[test]
     fn identity_creation_wrong_key_kind() {
         let hd_key = HierarchicalDeterministicPublicKey::new(
-            PublicKey::placeholder_ed25519(),
+            PublicKey::sample_ed25519(),
             IdentityPath::new(
                 NetworkID::Mainnet,
                 CAP26KeyKind::AuthenticationSigning,
@@ -191,7 +191,7 @@ mod tests {
             .into(),
         );
         let hd_fi = HierarchicalDeterministicFactorInstance::new(
-            FactorSourceIDFromHash::placeholder(),
+            FactorSourceIDFromHash::sample(),
             hd_key,
         );
         assert_eq!(

@@ -51,8 +51,8 @@ mod tests {
     );
 
     uniffi::build_foreign_language_testcases!(
-        "tests/uniffi/bindings/test_hex32_bytes.swift",
-        "tests/uniffi/bindings/test_hex32_bytes.kts"
+        "tests/uniffi/bindings/test_exactly32_bytes.swift",
+        "tests/uniffi/bindings/test_exactly32_bytes.kts"
     );
 
     uniffi::build_foreign_language_testcases!(
@@ -67,5 +67,9 @@ mod tests {
 
     uniffi::build_foreign_language_testcases!(
         "tests/uniffi/bindings/test_decimal192.swift",
+    );
+
+    uniffi::build_foreign_language_testcases!(
+        "tests/uniffi/bindings/test_tx_manifest.swift",
     );
 }

@@ -128,21 +128,21 @@ impl Ord for Account {
     }
 }
 
-impl HasPlaceholder for Account {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
-        Self::placeholder_mainnet()
+impl HasSampleValues for Account {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
+        Self::sample_mainnet()
     }
 
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder_other() -> Self {
-        Self::placeholder_mainnet_other()
+    /// A sample used to facilitate unit tests.
+    fn sample_other() -> Self {
+        Self::sample_mainnet_other()
     }
 }
 
 impl Account {
     /// Instantiates an account with a display name, address and appearance id.
-    pub fn placeholder_with_values(
+    pub fn sample_with_values(
         address: AccountAddress,
         display_name: DisplayName,
         appearance_id: AppearanceID,
@@ -154,17 +154,17 @@ impl Account {
             appearance_id,
             flags: EntityFlags::default(),
             on_ledger_settings: OnLedgerSettings::default(),
-            security_state: EntitySecurityState::placeholder(),
+            security_state: EntitySecurityState::sample(),
         }
     }
 
-    fn placeholder_at_index_name_network(
+    fn sample_at_index_name_network(
         network_id: NetworkID,
         index: HDPathValue,
         name: &str,
         is_hidden: bool,
     ) -> Self {
-        let mwp = MnemonicWithPassphrase::placeholder();
+        let mwp = MnemonicWithPassphrase::sample();
         let bdfs = DeviceFactorSource::babylon(
             true,
             mwp.clone(),
@@ -186,12 +186,12 @@ impl Account {
         account
     }
 
-    fn placeholder_at_index_name(
+    fn sample_at_index_name(
         index: HDPathValue,
         name: &str,
         is_hidden: bool,
     ) -> Self {
-        Self::placeholder_at_index_name_network(
+        Self::sample_at_index_name_network(
             NetworkID::Mainnet,
             index,
             name,
@@ -199,49 +199,49 @@ impl Account {
         )
     }
 
-    /// A `Mainnet` account named "Alice", a placeholder used to facilitate unit tests, with
+    /// A `Mainnet` account named "Alice", a sample used to facilitate unit tests, with
     /// derivation index 0,
-    pub fn placeholder_mainnet_alice() -> Self {
-        Self::placeholder_at_index_name(0, "Alice", false)
+    pub fn sample_mainnet_alice() -> Self {
+        Self::sample_at_index_name(0, "Alice", false)
     }
 
-    /// A `Mainnet` account named "Bob", a placeholder used to facilitate unit tests, with
+    /// A `Mainnet` account named "Bob", a sample used to facilitate unit tests, with
     /// derivation index 1.
-    pub fn placeholder_mainnet_bob() -> Self {
-        Self::placeholder_at_index_name(1, "Bob", true)
+    pub fn sample_mainnet_bob() -> Self {
+        Self::sample_at_index_name(1, "Bob", true)
     }
 
-    /// A `Mainnet` account named "Carol", a placeholder used to facilitate unit tests, with
+    /// A `Mainnet` account named "Carol", a sample used to facilitate unit tests, with
     /// derivation index 2.
-    pub fn placeholder_mainnet_carol() -> Self {
-        Self::placeholder_at_index_name(2, "Carol", false)
+    pub fn sample_mainnet_carol() -> Self {
+        Self::sample_at_index_name(2, "Carol", false)
     }
 
-    /// A `Mainnet` account named "Alice", a placeholder used to facilitate unit tests, with
+    /// A `Mainnet` account named "Alice", a sample used to facilitate unit tests, with
     /// derivation index 0,
-    pub fn placeholder_alice() -> Self {
-        Self::placeholder_mainnet_alice()
+    pub fn sample_alice() -> Self {
+        Self::sample_mainnet_alice()
     }
 
-    /// A `Mainnet` account named "Bob", a placeholder used to facilitate unit tests, with
+    /// A `Mainnet` account named "Bob", a sample used to facilitate unit tests, with
     /// derivation index 1.
-    pub fn placeholder_bob() -> Self {
-        Self::placeholder_mainnet_bob()
+    pub fn sample_bob() -> Self {
+        Self::sample_mainnet_bob()
     }
 
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_mainnet() -> Self {
-        Self::placeholder_mainnet_alice()
+    /// A sample used to facilitate unit tests.
+    pub fn sample_mainnet() -> Self {
+        Self::sample_mainnet_alice()
     }
 
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_mainnet_other() -> Self {
-        Self::placeholder_mainnet_bob()
+    /// A sample used to facilitate unit tests.
+    pub fn sample_mainnet_other() -> Self {
+        Self::sample_mainnet_bob()
     }
 
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_stokenet_carol() -> Self {
-        Self::placeholder_at_index_name_network(
+    /// A sample used to facilitate unit tests.
+    pub fn sample_stokenet_carol() -> Self {
+        Self::sample_at_index_name_network(
             NetworkID::Stokenet,
             0,
             "Carol",
@@ -249,9 +249,9 @@ impl Account {
         )
     }
 
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_stokenet_diana() -> Self {
-        Self::placeholder_at_index_name_network(
+    /// A sample used to facilitate unit tests.
+    pub fn sample_stokenet_diana() -> Self {
+        Self::sample_at_index_name_network(
             NetworkID::Stokenet,
             1,
             "Diana",
@@ -259,13 +259,13 @@ impl Account {
         )
     }
 
-    pub fn placeholder_stokenet() -> Self {
-        Self::placeholder_stokenet_carol()
+    pub fn sample_stokenet() -> Self {
+        Self::sample_stokenet_carol()
     }
 
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_nebunet() -> Self {
-        Self::placeholder_with_values(
+    /// A sample used to facilitate unit tests.
+    pub fn sample_nebunet() -> Self {
+        Self::sample_with_values(
             "account_tdx_b_1286wrrqrfcrfhthfrtdywe8alney8zu0ja5xrhcq2475ej08m9raqq"
                 .parse()
                 .unwrap(),
@@ -274,9 +274,9 @@ impl Account {
         )
     }
 
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_kisharnet() -> Self {
-        Self::placeholder_with_values(
+    /// A sample used to facilitate unit tests.
+    pub fn sample_kisharnet() -> Self {
+        Self::sample_with_values(
             "account_tdx_c_1286wrrqrfcrfhthfrtdywe8alney8zu0ja5xrhcq2475ej0898vkq9"
                 .parse()
                 .unwrap(),
@@ -285,9 +285,9 @@ impl Account {
         )
     }
 
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_adapanet() -> Self {
-        Self::placeholder_with_values(
+    /// A sample used to facilitate unit tests.
+    pub fn sample_adapanet() -> Self {
+        Self::sample_with_values(
             "account_tdx_a_1286wrrqrfcrfhthfrtdywe8alney8zu0ja5xrhcq2475ej08srjqq0"
                 .parse()
                 .unwrap(),
@@ -303,13 +303,13 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(Account::placeholder(), Account::placeholder());
-        assert_eq!(Account::placeholder_other(), Account::placeholder_other());
+        assert_eq!(Account::sample(), Account::sample());
+        assert_eq!(Account::sample_other(), Account::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(Account::placeholder(), Account::placeholder_other());
+        assert_ne!(Account::sample(), Account::sample_other());
     }
 
     #[test]
@@ -318,7 +318,7 @@ mod tests {
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
                 .parse()
                 .unwrap();
-        let account = Account::placeholder_with_values(
+        let account = Account::sample_with_values(
             address.clone(),
             DisplayName::default(),
             AppearanceID::default(),
@@ -328,7 +328,7 @@ mod tests {
 
     #[test]
     fn display() {
-        let account = Account::placeholder();
+        let account = Account::sample();
         assert_eq!(
             format!("{account}"),
             "Alice | account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8"
@@ -337,12 +337,12 @@ mod tests {
 
     #[test]
     fn compare() {
-        assert!(Account::placeholder_alice() < Account::placeholder_bob());
+        assert!(Account::sample_alice() < Account::sample_bob());
     }
 
     #[test]
     fn update() {
-        let mut account = Account::placeholder();
+        let mut account = Account::sample();
         assert_eq!(account.display_name.value, "Alice");
         account.display_name = DisplayName::new("Satoshi").unwrap();
         assert_eq!(account.display_name.value, "Satoshi");
@@ -350,8 +350,8 @@ mod tests {
 
     #[test]
     fn on_ledger_settings_get_set() {
-        let mut account = Account::placeholder_with_values(
-            AccountAddress::placeholder(),
+        let mut account = Account::sample_with_values(
+            AccountAddress::sample(),
             DisplayName::new("Test").unwrap(),
             AppearanceID::default(),
         );
@@ -396,7 +396,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_mainnet_alice() {
-        let model = Account::placeholder_mainnet_alice();
+        let model = Account::sample_mainnet_alice();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -450,7 +450,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_mainnet_bob() {
-        let model = Account::placeholder_mainnet_bob();
+        let model = Account::sample_mainnet_bob();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -504,7 +504,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_stokenet_carol() {
-        let model = Account::placeholder_stokenet_carol();
+        let model = Account::sample_stokenet_carol();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -558,7 +558,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_stokenet_diana() {
-        let model = Account::placeholder_stokenet_diana();
+        let model = Account::sample_stokenet_diana();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -683,11 +683,11 @@ mod tests {
     fn hash() {
         assert_eq!(
             HashSet::<Account>::from_iter([
-                Account::placeholder(),
-                Account::placeholder_stokenet(),
-                Account::placeholder_nebunet(),
-                Account::placeholder_kisharnet(),
-                Account::placeholder_adapanet(),
+                Account::sample(),
+                Account::sample_stokenet(),
+                Account::sample_nebunet(),
+                Account::sample_kisharnet(),
+                Account::sample_adapanet(),
             ])
             .len(),
             5

@@ -43,32 +43,32 @@ impl Personas {
     }
 }
 
-impl HasPlaceholder for Personas {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
-        Self::placeholder_mainnet()
+impl HasSampleValues for Personas {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
+        Self::sample_mainnet()
     }
 
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder_other() -> Self {
-        Self::placeholder_stokenet()
+    /// A sample used to facilitate unit tests.
+    fn sample_other() -> Self {
+        Self::sample_stokenet()
     }
 }
 
 impl Personas {
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_mainnet() -> Self {
+    /// A sample used to facilitate unit tests.
+    pub fn sample_mainnet() -> Self {
         Self::with_personas([
-            Persona::placeholder_mainnet_satoshi(),
-            Persona::placeholder_mainnet_batman(),
+            Persona::sample_mainnet_satoshi(),
+            Persona::sample_mainnet_batman(),
         ])
     }
 
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_stokenet() -> Self {
+    /// A sample used to facilitate unit tests.
+    pub fn sample_stokenet() -> Self {
         Self::with_personas([
-            Persona::placeholder_stokenet_leia_skywalker(),
-            Persona::placeholder_stokenet_hermione(),
+            Persona::sample_stokenet_leia_skywalker(),
+            Persona::sample_stokenet_hermione(),
         ])
     }
 }
@@ -84,23 +84,20 @@ mod tests {
 
     #[test]
     fn inequality() {
-        assert_ne!(Personas::placeholder(), Personas::placeholder_other());
+        assert_ne!(Personas::sample(), Personas::sample_other());
     }
 
     #[test]
     fn equality() {
-        assert_eq!(Personas::placeholder(), Personas::placeholder());
-        assert_eq!(
-            Personas::placeholder_other(),
-            Personas::placeholder_other()
-        );
+        assert_eq!(Personas::sample(), Personas::sample());
+        assert_eq!(Personas::sample_other(), Personas::sample_other());
     }
 
     #[test]
     fn duplicates_are_prevented() {
         assert_eq!(
             Personas::with_personas(
-                [Persona::placeholder(), Persona::placeholder()].into_iter()
+                [Persona::sample(), Persona::sample()].into_iter()
             )
             .len(),
             1
@@ -109,17 +106,17 @@ mod tests {
 
     #[test]
     fn with_one() {
-        assert_eq!(Personas::with_persona(Persona::placeholder()).len(), 1)
+        assert_eq!(Personas::with_persona(Persona::sample()).len(), 1)
     }
 
     #[test]
     fn get_all() {
-        assert_eq!(Personas::placeholder().get_all().len(), 2);
+        assert_eq!(Personas::sample().get_all().len(), 2);
     }
 
     #[test]
     fn get_by_address() {
-        let persona = Persona::placeholder();
+        let persona = Persona::sample();
         let address = persona.address.clone();
         let personas = Personas::with_persona(persona.clone());
         assert_eq!(personas.get_persona_by_address(&address), Some(&persona));
@@ -127,7 +124,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_mainnet() {
-        let sut = Personas::placeholder_mainnet();
+        let sut = Personas::sample_mainnet();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"
@@ -265,7 +262,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_stokenet() {
-        let sut = Personas::placeholder_stokenet();
+        let sut = Personas::sample_stokenet();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"

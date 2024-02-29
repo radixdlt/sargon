@@ -13,24 +13,61 @@ pub enum ResourceOrNonFungible {
     NonFungible { value: NonFungibleGlobalId },
 }
 
+impl HasSampleValues for ResourceOrNonFungible {
+    fn sample() -> Self {
+        Self::Resource {
+            value: ResourceAddress::sample(),
+        }
+    }
+
+    fn sample_other() -> Self {
+        Self::NonFungible {
+            value: NonFungibleGlobalId::sample(),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
-    #[test]
-    fn json_decode_deny_all_with_exceptions() {
-        let model =
-            ResourceOrNonFungible::Resource {
-                value: "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq"
-                    .parse()
-                    .unwrap(),
-            };
 
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = ResourceOrNonFungible;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn json_roundtrip_sample() {
+        let sut = SUT::sample();
         assert_eq_after_json_roundtrip(
-            &model,
+            &sut,
             r#"
             {
-              "value" : "resource_rdx1tkk83magp3gjyxrpskfsqwkg4g949rmcjee4tu2xmw93ltw2cz94sq",
+              "value" : "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd",
               "discriminator" : "resourceAddress"
+            }
+            "#,
+        )
+    }
+
+    #[test]
+    fn json_roundtrip_sample_other() {
+        let sut = SUT::sample_other();
+        assert_eq_after_json_roundtrip(
+            &sut,
+            r#"
+            {
+              "value" : "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa:<Member_237>",
+              "discriminator" : "nonFungibleGlobalID"
             }
             "#,
         )

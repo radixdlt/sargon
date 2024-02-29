@@ -42,10 +42,7 @@ import com.radixdlt.sargon.SecureStorage
 import com.radixdlt.sargon.Wallet
 import com.radixdlt.sargon.WalletClientModel
 import com.radixdlt.sargon.android.ui.theme.SargonAndroidTheme
-import com.radixdlt.sargon.newAppearanceIdPlaceholder
-import com.radixdlt.sargon.newAppearanceIdPlaceholderOther
 import com.radixdlt.sargon.newDisplayName
-import com.radixdlt.sargon.newProfilePlaceholder
 import kotlin.random.Random
 
 class MainActivity : ComponentActivity() {
@@ -59,84 +56,69 @@ class MainActivity : ComponentActivity() {
 
         val storage = EphemeralKeystore()
 
-        setContent {
-            SargonAndroidTheme {
-                WalletContent(storage = storage)
-            }
-        }
+        setContent { SargonAndroidTheme { WalletContent(storage = storage) } }
     }
 }
 
 @Composable
-fun WalletContent(
-    modifier: Modifier = Modifier,
-    storage: SecureStorage
-) {
+fun WalletContent(modifier: Modifier = Modifier, storage: SecureStorage) {
     var walletState: Wallet? by remember { mutableStateOf(null) }
     var profile: Profile? by remember { mutableStateOf(null) }
 
     Scaffold(
-        modifier = modifier,
-        topBar = {
-            TopAppBar(title = { Text(text = "Wallet Test") })
-        },
-        bottomBar = {
-            if (walletState == null) {
-                Button(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth(),
-                    onClick = {
-                        walletState = Wallet.with(
-                            entropy = ByteArray(32) { 0xFF.toByte() },
-                            secureStorage = storage
-                        )
-                        profile = walletState?.profile()
-                    }
-                ) {
-                    Text(text = "Generate new Wallet")
-                }
-            } else if (profile?.networks?.isEmpty() == true) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    var accountName by remember {
-                        mutableStateOf("")
-                    }
-                    TextField(
-                        modifier = Modifier.fillMaxWidth(),
-                        value = accountName,
-                        onValueChange = { accountName = it },
-                        label = {
-                            Text(text = "New Account Name")
-                        },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                        keyboardActions = KeyboardActions(onDone = {
-                            walletState?.createAndSaveNewAccount(
-                                networkId = NetworkId.MAINNET,
-                                name = DisplayName(accountName)
-                            )
+            modifier = modifier,
+            topBar = { TopAppBar(title = { Text(text = "Wallet Test") }) },
+            bottomBar = {
+                if (walletState == null) {
+                    Button(
+                            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                            onClick = {
+                                walletState =
+                                        Wallet.with(
+                                                entropy = ByteArray(32) { 0xFF.toByte() },
+                                                secureStorage = storage
+                                        )
+                                profile = walletState?.profile()
+                            }
+                    ) { Text(text = "Generate new Wallet") }
+                } else if (profile?.networks?.isEmpty() == true) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        var accountName by remember { mutableStateOf("") }
+                        TextField(
+                                modifier = Modifier.fillMaxWidth(),
+                                value = accountName,
+                                onValueChange = { accountName = it },
+                                label = { Text(text = "New Account Name") },
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                                keyboardActions =
+                                        KeyboardActions(
+                                                onDone = {
+                                                    walletState?.createAndSaveNewAccount(
+                                                            networkId = NetworkId.MAINNET,
+                                                            name = DisplayName(accountName)
+                                                    )
 
-                            profile = walletState?.profile()
-                        })
-                    )
+                                                    profile = walletState?.profile()
+                                                }
+                                        )
+                        )
+                    }
                 }
             }
-        }
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier.padding(padding),
-            contentPadding = PaddingValues(16.dp)
-        ) {
+        LazyColumn(modifier = Modifier.padding(padding), contentPadding = PaddingValues(16.dp)) {
             items(profile?.networks.orEmpty()) {
                 Network(
-                    network = it,
-                    onAccountAdd = { newName ->
-                        walletState?.createNewAccount(NetworkId.MAINNET, DisplayName(newName))?.let {
-                            walletState?.addAccount(it)
+                        network = it,
+                        onAccountAdd = { newName ->
+                            walletState?.createNewAccount(NetworkId.MAINNET, DisplayName(newName))
+                                    ?.let {
+                                        walletState?.addAccount(it)
 
-                            profile = walletState?.profile()
+                                        profile = walletState?.profile()
+                                    }
                         }
-                    }
                 )
             }
         }
@@ -145,29 +127,24 @@ fun WalletContent(
 
 @Composable
 fun Network(
-    modifier: Modifier = Modifier,
-    network: ProfileNetwork,
-    onAccountAdd: (String) -> Unit
+        modifier: Modifier = Modifier,
+        network: ProfileNetwork,
+        onAccountAdd: (String) -> Unit
 ) {
-    ElevatedCard(
-        modifier = modifier.fillMaxWidth()
-    ) {
+    ElevatedCard(modifier = modifier.fillMaxWidth()) {
         Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            text = "${network.id}"
-        )
+        Text(modifier = Modifier.padding(horizontal = 16.dp), text = "${network.id}")
 
         network.accounts.forEach { account ->
             Text(
-                modifier = Modifier.padding(horizontal = 32.dp),
-                text = account.displayName.value,
-                style = MaterialTheme.typography.labelLarge
+                    modifier = Modifier.padding(horizontal = 32.dp),
+                    text = account.displayName.value,
+                    style = MaterialTheme.typography.labelLarge
             )
             Text(
-                modifier = Modifier.padding(horizontal = 32.dp),
-                text = account.address.address,
-                style = MaterialTheme.typography.labelSmall
+                    modifier = Modifier.padding(horizontal = 32.dp),
+                    text = account.address.address,
+                    style = MaterialTheme.typography.labelSmall
             )
             HorizontalDivider(modifier = Modifier.padding(horizontal = 32.dp))
         }
@@ -175,53 +152,55 @@ fun Network(
         Column(modifier = Modifier.padding(16.dp)) {
             var newAccountName by remember { mutableStateOf("") }
             TextField(
-                modifier = Modifier.fillMaxWidth(),
-                value = newAccountName,
-                onValueChange = { newAccountName = it },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(onDone = {
-                    onAccountAdd(newAccountName)
-                    newAccountName = ""
-                })
+                    modifier = Modifier.fillMaxWidth(),
+                    value = newAccountName,
+                    onValueChange = { newAccountName = it },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    keyboardActions =
+                            KeyboardActions(
+                                    onDone = {
+                                        onAccountAdd(newAccountName)
+                                        newAccountName = ""
+                                    }
+                            )
             )
         }
-
     }
 }
 
-val Profile.Companion.placeholder: Profile
-    get() = newProfilePlaceholder()
+val Profile.Companion.sample: Profile
+    get() = newProfileSample()
 
 fun DisplayName.Companion.from(value: String): DisplayName {
     return newDisplayName(name = value)
 }
 
-val AppearanceId.Companion.placeholder: AppearanceId
-    get() = newAppearanceIdPlaceholder()
+val AppearanceId.Companion.sample: AppearanceId
+    get() = newAppearanceIdSample()
 
-val AppearanceId.Companion.placeholderOther: AppearanceId
-    get() = newAppearanceIdPlaceholderOther()
+val AppearanceId.Companion.sampleOther: AppearanceId
+    get() = newAppearanceIdSampleOther()
 
 val Wallet.Companion.defaultPhoneName: String
     get() = "Android Phone"
 
 fun Wallet.Companion.with(
-    entropy: ByteArray = ByteArray(32).apply { Random.nextBytes(this) },
-    phoneName: String = Wallet.Companion.defaultPhoneName,
-    secureStorage: SecureStorage
+        entropy: ByteArray = ByteArray(32).apply { Random.nextBytes(this) },
+        phoneName: String = Wallet.Companion.defaultPhoneName,
+        secureStorage: SecureStorage
 ): Wallet {
     return Wallet.byCreatingNewProfileAndSecretsWithEntropy(
-        entropy = entropy,
-        walletClientModel = WalletClientModel.ANDROID,
-        walletClientName = phoneName,
-        secureStorage = secureStorage
+            entropy = entropy,
+            walletClientModel = WalletClientModel.ANDROID,
+            walletClientName = phoneName,
+            secureStorage = secureStorage
     )
 }
 
 @Preview(showBackground = true)
 @Composable
 fun NetworkPreview() {
-    val profile = Profile.placeholder
+    val profile = Profile.sample
     Network(network = profile.networks.first(), onAccountAdd = {})
 }

@@ -107,7 +107,7 @@ mod tests {
         }
         let storage = Arc::new(FailSaveActiveProfileIDStorage {});
 
-        _ = Wallet::by_importing_profile(Profile::placeholder(), storage);
+        _ = Wallet::by_importing_profile(Profile::sample(), storage);
     }
 
     #[should_panic(
@@ -148,7 +148,7 @@ mod tests {
         }
         let storage = Arc::new(FailSaveProfileStorage {});
 
-        _ = Wallet::by_importing_profile(Profile::placeholder(), storage);
+        _ = Wallet::by_importing_profile(Profile::sample(), storage);
     }
 
     #[should_panic(
@@ -166,7 +166,7 @@ mod tests {
             ) -> Result<Option<Vec<u8>>> {
                 match key {
                     SecureStorageKey::ProfileSnapshot { profile_id: _ } => {
-                        serde_json::to_vec(&Profile::placeholder())
+                        serde_json::to_vec(&Profile::sample())
                             .map(Some)
                             .map_err(|_| CommonError::Unknown)
                     }
@@ -196,10 +196,7 @@ mod tests {
         }
         let storage = Arc::new(FailSaveActiveProfileIDStorage {});
 
-        _ = Wallet::by_loading_profile_with_id(
-            ProfileID::placeholder(),
-            storage,
-        )
-        .unwrap();
+        _ = Wallet::by_loading_profile_with_id(ProfileID::sample(), storage)
+            .unwrap();
     }
 }

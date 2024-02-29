@@ -42,20 +42,20 @@ impl PrivateHierarchicalDeterministicFactorInstance {
     }
 }
 
-impl HasPlaceholder for PrivateHierarchicalDeterministicFactorInstance {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
+impl HasSampleValues for PrivateHierarchicalDeterministicFactorInstance {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
         Self::new(
-            HierarchicalDeterministicPrivateKey::placeholder(),
-            FactorSourceID::placeholder(),
+            HierarchicalDeterministicPrivateKey::sample(),
+            FactorSourceID::sample(),
         )
     }
 
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder_other() -> Self {
+    /// A sample used to facilitate unit tests.
+    fn sample_other() -> Self {
         Self::new(
-            HierarchicalDeterministicPrivateKey::placeholder_other(),
-            FactorSourceID::placeholder_other(),
+            HierarchicalDeterministicPrivateKey::sample_other(),
+            FactorSourceID::sample_other(),
         )
     }
 }
@@ -66,26 +66,26 @@ mod tests {
     #[test]
     fn equality() {
         assert_eq!(
-            PrivateHierarchicalDeterministicFactorInstance::placeholder(),
-            PrivateHierarchicalDeterministicFactorInstance::placeholder()
+            PrivateHierarchicalDeterministicFactorInstance::sample(),
+            PrivateHierarchicalDeterministicFactorInstance::sample()
         );
         assert_eq!(
-            PrivateHierarchicalDeterministicFactorInstance::placeholder_other(),
-            PrivateHierarchicalDeterministicFactorInstance::placeholder_other()
+            PrivateHierarchicalDeterministicFactorInstance::sample_other(),
+            PrivateHierarchicalDeterministicFactorInstance::sample_other()
         );
     }
 
     #[test]
     fn inequality() {
         assert_ne!(
-            PrivateHierarchicalDeterministicFactorInstance::placeholder(),
-            PrivateHierarchicalDeterministicFactorInstance::placeholder_other()
+            PrivateHierarchicalDeterministicFactorInstance::sample(),
+            PrivateHierarchicalDeterministicFactorInstance::sample_other()
         );
     }
 
     #[test]
     fn new() {
-        let sut = PrivateHierarchicalDeterministicFactorInstance::placeholder();
+        let sut = PrivateHierarchicalDeterministicFactorInstance::sample();
         assert_eq!(
             sut.private_key.derivation_path.to_string(),
             "m/44H/1022H/1H/525H/1460H/0H"
@@ -98,21 +98,21 @@ mod tests {
 
     #[test]
     fn into_hierarchical_deterministic_private_key() {
-        let sut = PrivateHierarchicalDeterministicFactorInstance::placeholder();
+        let sut = PrivateHierarchicalDeterministicFactorInstance::sample();
         let key: HierarchicalDeterministicPrivateKey = sut.into();
         assert_eq!(
             key.public_key(),
-            HierarchicalDeterministicPrivateKey::placeholder().public_key()
+            HierarchicalDeterministicPrivateKey::sample().public_key()
         );
     }
 
     #[test]
     fn into_factor_instance() {
-        let sut = PrivateHierarchicalDeterministicFactorInstance::placeholder();
+        let sut = PrivateHierarchicalDeterministicFactorInstance::sample();
         let key: FactorInstance = sut.into();
         assert_eq!(
             key.factor_source_id,
-            PrivateHierarchicalDeterministicFactorInstance::placeholder()
+            PrivateHierarchicalDeterministicFactorInstance::sample()
                 .factor_source_id
         );
     }

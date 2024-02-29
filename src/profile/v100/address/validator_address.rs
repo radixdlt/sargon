@@ -3,54 +3,54 @@ use crate::prelude::*;
 use radix_engine_toolkit::models::canonical_address_types::CanonicalValidatorAddress as RetValidatorAddress;
 
 #[uniffi::export]
-pub fn new_validator_address_placeholder_mainnet() -> ValidatorAddress {
-    ValidatorAddress::placeholder_mainnet()
+pub fn new_validator_address_sample_mainnet() -> ValidatorAddress {
+    ValidatorAddress::sample_mainnet()
 }
 
 #[uniffi::export]
-pub fn new_validator_address_placeholder_mainnet_other() -> ValidatorAddress {
-    ValidatorAddress::placeholder_mainnet_other()
+pub fn new_validator_address_sample_mainnet_other() -> ValidatorAddress {
+    ValidatorAddress::sample_mainnet_other()
 }
 
 #[uniffi::export]
-pub fn new_validator_address_placeholder_stokenet() -> ValidatorAddress {
-    ValidatorAddress::placeholder_stokenet()
+pub fn new_validator_address_sample_stokenet() -> ValidatorAddress {
+    ValidatorAddress::sample_stokenet()
 }
 
 #[uniffi::export]
-pub fn new_validator_address_placeholder_stokenet_other() -> ValidatorAddress {
-    ValidatorAddress::placeholder_stokenet_other()
+pub fn new_validator_address_sample_stokenet_other() -> ValidatorAddress {
+    ValidatorAddress::sample_stokenet_other()
 }
 
-impl HasPlaceholder for ValidatorAddress {
-    fn placeholder() -> Self {
-        Self::placeholder_mainnet()
+impl HasSampleValues for ValidatorAddress {
+    fn sample() -> Self {
+        Self::sample_mainnet()
     }
 
-    fn placeholder_other() -> Self {
-        Self::placeholder_mainnet_other()
+    fn sample_other() -> Self {
+        Self::sample_mainnet_other()
     }
 }
 
 impl ValidatorAddress {
-    pub fn placeholder_mainnet() -> Self {
+    pub fn sample_mainnet() -> Self {
         "validator_rdx1sd5368vqdmjk0y2w7ymdts02cz9c52858gpyny56xdvzuheepdeyy0"
             .parse()
-            .expect("Valid placeholder")
+            .expect("Valid sample")
     }
 
-    pub fn placeholder_mainnet_other() -> Self {
+    pub fn sample_mainnet_other() -> Self {
         "validator_rdx1sw5rrhkxs65kl9xcxu7t9yu3k8ptscjwamum4phclk297j6r28g8kd"
             .parse()
-            .expect("Valid placeholder other")
+            .expect("Valid sample other")
     }
 
-    pub fn placeholder_stokenet() -> Self {
-        "validator_tdx_2_1sdatqsl6rx05yy2yvpf6ckfl7x8dluvzkcyljkn0x4lxkgucc0xz2w".parse().expect("Valid placeholder")
+    pub fn sample_stokenet() -> Self {
+        "validator_tdx_2_1sdatqsl6rx05yy2yvpf6ckfl7x8dluvzkcyljkn0x4lxkgucc0xz2w".parse().expect("Valid sample")
     }
 
-    pub fn placeholder_stokenet_other() -> Self {
-        "validator_tdx_2_1sdtnujyn3720ymg8lakydkvc5tw4q3zecdj95akdwt9de362mvtd94".parse().expect("Valid placeholder")
+    pub fn sample_stokenet_other() -> Self {
+        "validator_tdx_2_1sdtnujyn3720ymg8lakydkvc5tw4q3zecdj95akdwt9de362mvtd94".parse().expect("Valid sample")
     }
 }
 
@@ -63,20 +63,17 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::placeholder(), SUT::placeholder());
-        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
 
-        assert_eq!(SUT::placeholder_stokenet(), SUT::placeholder_stokenet());
-        assert_eq!(
-            SUT::placeholder_stokenet_other(),
-            SUT::placeholder_stokenet_other()
-        );
+        assert_eq!(SUT::sample_stokenet(), SUT::sample_stokenet());
+        assert_eq!(SUT::sample_stokenet_other(), SUT::sample_stokenet_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
-        assert_ne!(SUT::placeholder(), SUT::placeholder_stokenet());
+        assert_ne!(SUT::sample(), SUT::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_stokenet());
     }
 
     #[test]
@@ -91,6 +88,24 @@ mod tests {
         let s = "validator_rdx1sdcmd3ymwzvswgyva8lpknqrzuzzmmkac9my4auk29j5feumfh77fs";
         let a = SUT::try_from_bech32(s).unwrap();
         assert_eq!(format!("{:?}", a), s);
+    }
+
+    #[test]
+    fn manual_perform_uniffi_conversion() {
+        type RetAddr = <SUT as FromRetAddress>::RetAddress;
+        let sut = SUT::sample();
+        let bech32 = sut.to_string();
+        let ret = RetAddr::try_from_bech32(&bech32).unwrap();
+
+        let ffi_side =
+            <RetAddr as crate::UniffiCustomTypeConverter>::from_custom(ret);
+        assert_eq!(ffi_side, bech32);
+        let from_ffi_side =
+            <RetAddr as crate::UniffiCustomTypeConverter>::into_custom(
+                ffi_side,
+            )
+            .unwrap();
+        assert_eq!(ret, from_ffi_side);
     }
 
     #[test]
@@ -160,25 +175,25 @@ mod uniffi_tests {
     }
 
     #[test]
-    fn placeholder() {
+    fn sample() {
         assert_eq!(
-            new_validator_address_placeholder_mainnet(),
-            SUT::placeholder_mainnet()
+            new_validator_address_sample_mainnet(),
+            SUT::sample_mainnet()
         );
 
         assert_eq!(
-            new_validator_address_placeholder_mainnet_other(),
-            SUT::placeholder_mainnet_other()
+            new_validator_address_sample_mainnet_other(),
+            SUT::sample_mainnet_other()
         );
 
         assert_eq!(
-            new_validator_address_placeholder_stokenet(),
-            SUT::placeholder_stokenet()
+            new_validator_address_sample_stokenet(),
+            SUT::sample_stokenet()
         );
 
         assert_eq!(
-            new_validator_address_placeholder_stokenet_other(),
-            SUT::placeholder_stokenet_other()
+            new_validator_address_sample_stokenet_other(),
+            SUT::sample_stokenet_other()
         );
     }
 }

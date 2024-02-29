@@ -94,10 +94,9 @@ mod tests {
 
     #[test]
     fn main_bdfs_mnemonic_with_passphrase() {
-        let private =
-            PrivateHierarchicalDeterministicFactorSource::placeholder();
+        let private = PrivateHierarchicalDeterministicFactorSource::sample();
         let dfs = private.factor_source;
-        let profile = Profile::placeholder();
+        let profile = Profile::sample();
         let (wallet, storage) = Wallet::ephemeral(profile.clone());
         let data =
             serde_json::to_vec(&private.mnemonic_with_passphrase).unwrap();
@@ -107,20 +106,20 @@ mod tests {
         storage.save_data(key.clone(), data.clone()).unwrap();
         assert_eq!(
             wallet.main_bdfs_mnemonic_with_passphrase().unwrap(),
-            MnemonicWithPassphrase::placeholder()
+            MnemonicWithPassphrase::sample()
         );
         assert_eq!(
             wallet.mnemonic_with_passphrase_of_device_factor_source_by_factor_source_id(&dfs.factor_source_id()).unwrap(),
-            MnemonicWithPassphrase::placeholder()
+            MnemonicWithPassphrase::sample()
         );
     }
 
     #[test]
     fn mnemonic_with_passphrase_of_device_factor_source_by_factor_source_id_fail_not_factor_source_id_from_hash(
     ) {
-        let (wallet, _) = Wallet::ephemeral(Profile::placeholder());
+        let (wallet, _) = Wallet::ephemeral(Profile::sample());
         assert_eq!(
-            wallet.mnemonic_with_passphrase_of_device_factor_source_by_factor_source_id(&FactorSourceIDFromAddress::placeholder().into()),
+            wallet.mnemonic_with_passphrase_of_device_factor_source_by_factor_source_id(&FactorSourceIDFromAddress::sample().into()),
           Err(CommonError::FactorSourceIDNotFromHash)
         );
     }

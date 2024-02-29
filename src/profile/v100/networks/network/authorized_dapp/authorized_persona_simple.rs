@@ -53,53 +53,50 @@ impl Identifiable for AuthorizedPersonaSimple {
 }
 
 impl AuthorizedPersonaSimple {
-    pub fn placeholder_mainnet() -> Self {
+    pub fn sample_mainnet() -> Self {
         Self::new(
-            IdentityAddress::placeholder_mainnet(),
+            IdentityAddress::sample_mainnet(),
             Timestamp::parse("2024-01-31T14:23:45Z").unwrap(),
-            Some(
-                SharedToDappWithPersonaAccountAddresses::placeholder_mainnet(),
-            ),
-            SharedPersonaData::placeholder(),
+            Some(SharedToDappWithPersonaAccountAddresses::sample_mainnet()),
+            SharedPersonaData::sample(),
         )
     }
-    pub fn placeholder_mainnet_other() -> Self {
+    pub fn sample_mainnet_other() -> Self {
         Self::new(
-            IdentityAddress::placeholder_mainnet_other(),
+            IdentityAddress::sample_mainnet_other(),
             Timestamp::parse("2024-01-31T14:23:45Z").unwrap(),
-            Some(SharedToDappWithPersonaAccountAddresses::placeholder_other()),
-            SharedPersonaData::placeholder_other(),
+            Some(SharedToDappWithPersonaAccountAddresses::sample_other()),
+            SharedPersonaData::sample_other(),
         )
     }
 
-    pub fn placeholder_stokenet() -> Self {
+    pub fn sample_stokenet() -> Self {
         Self::new(
-            IdentityAddress::placeholder_stokenet(),
+            IdentityAddress::sample_stokenet(),
             Timestamp::parse("2024-01-31T14:23:45Z").unwrap(),
-            Some(
-                SharedToDappWithPersonaAccountAddresses::placeholder_stokenet(),
-            ),
-            SharedPersonaData::placeholder(),
+            Some(SharedToDappWithPersonaAccountAddresses::sample_stokenet()),
+            SharedPersonaData::sample(),
         )
     }
-    pub fn placeholder_stokenet_other() -> Self {
+    pub fn sample_stokenet_other() -> Self {
         Self::new(
-            IdentityAddress::placeholder_stokenet_other(),
+            IdentityAddress::sample_stokenet_other(),
             Timestamp::parse("2024-01-31T14:23:45Z").unwrap(),
             Some(
-                SharedToDappWithPersonaAccountAddresses::placeholder_stokenet_other(),
+                SharedToDappWithPersonaAccountAddresses::sample_stokenet_other(
+                ),
             ),
-            SharedPersonaData::placeholder_other(),
+            SharedPersonaData::sample_other(),
         )
     }
 }
-impl HasPlaceholder for AuthorizedPersonaSimple {
-    fn placeholder() -> Self {
-        Self::placeholder_mainnet()
+impl HasSampleValues for AuthorizedPersonaSimple {
+    fn sample() -> Self {
+        Self::sample_mainnet()
     }
 
-    fn placeholder_other() -> Self {
-        Self::placeholder_mainnet_other()
+    fn sample_other() -> Self {
+        Self::sample_mainnet_other()
     }
 }
 
@@ -112,18 +109,18 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::placeholder(), SUT::placeholder());
-        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
-    fn json_roundtrip_placeholder() {
-        let model = AuthorizedPersonaSimple::placeholder();
+    fn json_roundtrip_sample() {
+        let model = AuthorizedPersonaSimple::sample();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -169,8 +166,8 @@ mod tests {
     }
 
     #[test]
-    fn json_roundtrip_placeholder_other() {
-        let model = AuthorizedPersonaSimple::placeholder_other();
+    fn json_roundtrip_sample_other() {
+        let model = AuthorizedPersonaSimple::sample_other();
         assert_eq_after_json_roundtrip(
             &model,
             r#"

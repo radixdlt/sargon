@@ -324,6 +324,37 @@ pub enum CommonError {
         node_id_as_hex: String,
         network_id: NetworkID,
     } = 10088,
+
+    #[error("Invalid Olympia address string: {bad_value}")]
+    InvalidOlympiaAddressString { bad_value: String } = 10089,
+
+    #[error("Invalid Transaction Manifest Instructions String")]
+    InvalidInstructionsString = 10090,
+
+    #[error(
+        "Failed to get execution summary from TransactionManifest using RET"
+    )]
+    FailedToGetRetExecutionSummaryFromManifest = 10091,
+
+    #[error("Failed to get TransactionReceipt from encoded bytes.")]
+    FailedToDecodeEncodedReceipt = 10092,
+
+    #[error("Invalid byte count, was empty")]
+    BytesEmpty = 10093,
+
+    #[error("Invalid byte count, expected at most {max}, found: {found}")]
+    TooManyBytes { max: u64, found: u64 } = 10094,
+
+    #[error("Invalid Manifest Instructions String, found network in instructions {found_in_instructions}, but specified to constructor: {specified_to_instructions_ctor}")]
+    InvalidInstructionsWrongNetwork {
+        found_in_instructions: NetworkID,
+        specified_to_instructions_ctor: NetworkID,
+    } = 10095,
+
+    #[error(
+        "Failed to UniFFI decode bytes into Transaction Manifest Instructions"
+    )]
+    FailedToUniFFIDecodeBytesToManifestInstructions = 10096,
 }
 
 /*

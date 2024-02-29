@@ -64,18 +64,18 @@ impl From<UnsecuredEntityControl> for EntitySecurityState {
     }
 }
 
-impl HasPlaceholder for EntitySecurityState {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
+impl HasSampleValues for EntitySecurityState {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
         Self::Unsecured {
-            value: UnsecuredEntityControl::placeholder(),
+            value: UnsecuredEntityControl::sample(),
         }
     }
 
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder_other() -> Self {
+    /// A sample used to facilitate unit tests.
+    fn sample_other() -> Self {
         Self::Unsecured {
-            value: UnsecuredEntityControl::placeholder_other(),
+            value: UnsecuredEntityControl::sample_other(),
         }
     }
 }
@@ -87,26 +87,26 @@ mod tests {
     #[test]
     fn equality() {
         assert_eq!(
-            EntitySecurityState::placeholder(),
-            EntitySecurityState::placeholder()
+            EntitySecurityState::sample(),
+            EntitySecurityState::sample()
         );
         assert_eq!(
-            EntitySecurityState::placeholder_other(),
-            EntitySecurityState::placeholder_other()
+            EntitySecurityState::sample_other(),
+            EntitySecurityState::sample_other()
         );
     }
 
     #[test]
     fn inequality() {
         assert_ne!(
-            EntitySecurityState::placeholder(),
-            EntitySecurityState::placeholder_other()
+            EntitySecurityState::sample(),
+            EntitySecurityState::sample_other()
         );
     }
 
     #[test]
     fn json_roundtrip() {
-        let model = EntitySecurityState::placeholder();
+        let model = EntitySecurityState::sample();
         assert_eq_after_json_roundtrip(
             &model,
             r#"

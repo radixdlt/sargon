@@ -51,14 +51,14 @@ mod tests {
         );
         assert_eq!(
             SecureStorageKey::DeviceFactorSourceMnemonic {
-                factor_source_id: FactorSourceIDFromHash::placeholder()
+                factor_source_id: FactorSourceIDFromHash::sample()
             }
             .identifier(),
             "secure_storage_key_device_factor_source_device:3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
         );
         assert_eq!(
             SecureStorageKey::ProfileSnapshot {
-                profile_id: ProfileID::placeholder()
+                profile_id: ProfileID::sample()
             }
             .identifier(),
             "secure_storage_key_profile_snapshot_ffffffff-ffff-ffff-ffff-ffffffffffff"
@@ -73,7 +73,7 @@ mod uniffi_tests {
     #[test]
     fn identifier() {
         let key = SecureStorageKey::ProfileSnapshot {
-            profile_id: ProfileID::placeholder(),
+            profile_id: ProfileID::sample(),
         };
         assert_eq!(
             key.clone().identifier(),

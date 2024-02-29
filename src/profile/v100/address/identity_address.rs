@@ -11,30 +11,30 @@ pub fn new_identity_address_from(
 }
 
 #[uniffi::export]
-pub fn new_identity_address_placeholder_mainnet() -> IdentityAddress {
-    IdentityAddress::placeholder_mainnet()
+pub fn new_identity_address_sample_mainnet() -> IdentityAddress {
+    IdentityAddress::sample_mainnet()
 }
 
 #[uniffi::export]
-pub fn new_identity_address_placeholder_mainnet_other() -> IdentityAddress {
-    IdentityAddress::placeholder_mainnet_other()
+pub fn new_identity_address_sample_mainnet_other() -> IdentityAddress {
+    IdentityAddress::sample_mainnet_other()
 }
 
 #[uniffi::export]
-pub fn new_identity_address_placeholder_stokenet() -> IdentityAddress {
-    IdentityAddress::placeholder_stokenet()
+pub fn new_identity_address_sample_stokenet() -> IdentityAddress {
+    IdentityAddress::sample_stokenet()
 }
 
 #[uniffi::export]
-pub fn new_identity_address_placeholder_stokenet_other() -> IdentityAddress {
-    IdentityAddress::placeholder_stokenet_other()
+pub fn new_identity_address_sample_stokenet_other() -> IdentityAddress {
+    IdentityAddress::sample_stokenet_other()
 }
 
 impl EntityAddress for IdentityAddress {
     /// Identifies that IdentityAddresses uses the `EntityType::Identity`, which are used
     /// to validate the HRP (`"identity_"`) and is also used when forming HD derivation
     /// paths as per CAP26.
-    fn entity_type() -> AbstractEntityType {
+    fn abstract_entity_type() -> AbstractEntityType {
         AbstractEntityType::Identity
     }
 }
@@ -46,43 +46,43 @@ impl IdentityAddress {
 }
 
 impl IdentityAddress {
-    pub fn placeholder_mainnet() -> Self {
+    pub fn sample_mainnet() -> Self {
         let address: IdentityAddress = "identity_rdx122kttqch0eehzj6f9nkkxcw7msfeg9udurq5u0ysa0e92c59w0mg6x"
             .parse()
-            .expect("Should have a valid placeholder value");
+            .expect("Should have a valid sample value");
         assert_eq!(address.network_id(), NetworkID::Mainnet);
         address
     }
-    pub fn placeholder_mainnet_other() -> Self {
+    pub fn sample_mainnet_other() -> Self {
         let address: IdentityAddress = "identity_rdx12gcd4r799jpvztlffgw483pqcen98pjnay988n8rmscdswd872xy62"
             .parse()
-            .expect("Should have a valid placeholder value");
+            .expect("Should have a valid sample value");
         assert_eq!(address.network_id(), NetworkID::Mainnet);
         address
     }
-    pub fn placeholder_stokenet() -> Self {
+    pub fn sample_stokenet() -> Self {
         let address: IdentityAddress = "identity_tdx_2_12fk6qyu2860xyx2jk7j6ex464ccrnxrve4kpaa8qyxx99y5627ahhc"
             .parse()
-            .expect("Should have a valid placeholder value");
+            .expect("Should have a valid sample value");
         assert_eq!(address.network_id(), NetworkID::Stokenet);
         address
     }
-    pub fn placeholder_stokenet_other() -> Self {
+    pub fn sample_stokenet_other() -> Self {
         let address: IdentityAddress = "identity_tdx_2_12gr0d9da3jvye7mdrreljyqs35esjyjsl9r8t5v96hq6fq367cln08"
             .parse()
-            .expect("Should have a valid placeholder value");
+            .expect("Should have a valid sample value");
         assert_eq!(address.network_id(), NetworkID::Stokenet);
         address
     }
 }
 
-impl HasPlaceholder for IdentityAddress {
-    fn placeholder() -> Self {
-        Self::placeholder_mainnet()
+impl HasSampleValues for IdentityAddress {
+    fn sample() -> Self {
+        Self::sample_mainnet()
     }
 
-    fn placeholder_other() -> Self {
-        Self::placeholder_mainnet_other()
+    fn sample_other() -> Self {
+        Self::sample_mainnet_other()
     }
 }
 
@@ -165,23 +165,17 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::placeholder(), SUT::placeholder());
-        assert_eq!(SUT::placeholder_other(), SUT::placeholder_other());
-        assert_eq!(SUT::placeholder_stokenet(), SUT::placeholder_stokenet());
-        assert_eq!(
-            SUT::placeholder_stokenet_other(),
-            SUT::placeholder_stokenet_other()
-        );
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+        assert_eq!(SUT::sample_stokenet(), SUT::sample_stokenet());
+        assert_eq!(SUT::sample_stokenet_other(), SUT::sample_stokenet_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
-        assert_ne!(SUT::placeholder_mainnet(), SUT::placeholder_stokenet());
-        assert_ne!(
-            SUT::placeholder_mainnet_other(),
-            SUT::placeholder_stokenet_other()
-        );
+        assert_ne!(SUT::sample(), SUT::sample_other());
+        assert_ne!(SUT::sample_mainnet(), SUT::sample_stokenet());
+        assert_ne!(SUT::sample_mainnet_other(), SUT::sample_stokenet_other());
     }
 
     #[test]
@@ -214,6 +208,24 @@ mod tests {
                 bad_value: s.to_owned()
             })
         )
+    }
+
+    #[test]
+    fn manual_perform_uniffi_conversion() {
+        type RetAddr = <SUT as FromRetAddress>::RetAddress;
+        let sut = SUT::sample();
+        let bech32 = sut.to_string();
+        let ret = RetAddr::try_from_bech32(&bech32).unwrap();
+
+        let ffi_side =
+            <RetAddr as crate::UniffiCustomTypeConverter>::from_custom(ret);
+        assert_eq!(ffi_side, bech32);
+        let from_ffi_side =
+            <RetAddr as crate::UniffiCustomTypeConverter>::into_custom(
+                ffi_side,
+            )
+            .unwrap();
+        assert_eq!(ret, from_ffi_side);
     }
 
     #[test]
@@ -276,25 +288,25 @@ mod uniffi_tests {
     }
 
     #[test]
-    fn placeholder() {
+    fn sample() {
         assert_eq!(
-            new_identity_address_placeholder_mainnet(),
-            SUT::placeholder_mainnet()
+            new_identity_address_sample_mainnet(),
+            SUT::sample_mainnet()
         );
 
         assert_eq!(
-            new_identity_address_placeholder_mainnet_other(),
-            SUT::placeholder_mainnet_other()
+            new_identity_address_sample_mainnet_other(),
+            SUT::sample_mainnet_other()
         );
 
         assert_eq!(
-            new_identity_address_placeholder_stokenet(),
-            SUT::placeholder_stokenet()
+            new_identity_address_sample_stokenet(),
+            SUT::sample_stokenet()
         );
 
         assert_eq!(
-            new_identity_address_placeholder_stokenet_other(),
-            SUT::placeholder_stokenet_other()
+            new_identity_address_sample_stokenet_other(),
+            SUT::sample_stokenet_other()
         );
     }
 }

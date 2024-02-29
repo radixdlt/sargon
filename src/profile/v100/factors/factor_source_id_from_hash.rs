@@ -21,12 +21,12 @@ pub struct FactorSourceIDFromHash {
     pub kind: FactorSourceKind,
 
     /// The blake2b hash of the special HD public key derived at `CAP26::GetID`.
-    pub body: Hex32Bytes,
+    pub body: Exactly32Bytes,
 }
 
 impl FactorSourceIDFromHash {
     /// Instantiates a new `FactorSourceIDFromHash` from the `kind` and `body`.
-    pub fn new(kind: FactorSourceKind, body: Hex32Bytes) -> Self {
+    pub fn new(kind: FactorSourceKind, body: Exactly32Bytes) -> Self {
         Self { kind, body }
     }
 
@@ -38,7 +38,7 @@ impl FactorSourceIDFromHash {
             mnemonic_with_passphrase.derive_private_key(GetIDPath::default());
         let public_key_bytes = private_key.public_key().to_bytes();
         let hash: Hash = blake2b_256_hash(public_key_bytes);
-        let body = Hex32Bytes::from(hash);
+        let body = Exactly32Bytes::from(hash);
         Self::new(factor_source_kind, body)
     }
 
@@ -58,37 +58,37 @@ impl FactorSourceIDFromHash {
     }
 }
 
-impl HasPlaceholder for FactorSourceIDFromHash {
-    /// A placeholder used to facilitate unit tests, just an alias
-    /// for `placeholder_device`
-    fn placeholder() -> Self {
-        Self::placeholder_device()
+impl HasSampleValues for FactorSourceIDFromHash {
+    /// A sample used to facilitate unit tests, just an alias
+    /// for `sample_device`
+    fn sample() -> Self {
+        Self::sample_device()
     }
 
-    fn placeholder_other() -> Self {
-        Self::placeholder_ledger()
+    fn sample_other() -> Self {
+        Self::sample_ledger()
     }
 }
 
 impl FactorSourceIDFromHash {
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_device() -> Self {
-        Self::new_for_device(MnemonicWithPassphrase::placeholder())
+    /// A sample used to facilitate unit tests.
+    pub fn sample_device() -> Self {
+        Self::new_for_device(MnemonicWithPassphrase::sample())
     }
 
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_ledger() -> Self {
+    /// A sample used to facilitate unit tests.
+    pub fn sample_ledger() -> Self {
         Self::from_mnemonic_with_passphrase(
             FactorSourceKind::LedgerHQHardwareWallet,
-            MnemonicWithPassphrase::placeholder(),
+            MnemonicWithPassphrase::sample(),
         )
     }
 
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_ledger_other() -> Self {
+    /// A sample used to facilitate unit tests.
+    pub fn sample_ledger_other() -> Self {
         Self::from_mnemonic_with_passphrase(
             FactorSourceKind::LedgerHQHardwareWallet,
-            MnemonicWithPassphrase::placeholder_other(),
+            MnemonicWithPassphrase::sample_other(),
         )
     }
 }
@@ -100,27 +100,27 @@ mod tests {
     #[test]
     fn equality() {
         assert_eq!(
-            FactorSourceIDFromHash::placeholder(),
-            FactorSourceIDFromHash::placeholder()
+            FactorSourceIDFromHash::sample(),
+            FactorSourceIDFromHash::sample()
         );
         assert_eq!(
-            FactorSourceIDFromHash::placeholder_other(),
-            FactorSourceIDFromHash::placeholder_other()
+            FactorSourceIDFromHash::sample_other(),
+            FactorSourceIDFromHash::sample_other()
         );
     }
 
     #[test]
     fn inequality() {
         assert_ne!(
-            FactorSourceIDFromHash::placeholder(),
-            FactorSourceIDFromHash::placeholder_other()
+            FactorSourceIDFromHash::sample(),
+            FactorSourceIDFromHash::sample_other()
         );
     }
 
     #[test]
     fn display() {
         assert_eq!(
-            format!("{}", FactorSourceIDFromHash::placeholder()),
+            format!("{}", FactorSourceIDFromHash::sample()),
             "device:3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
         );
     }
@@ -128,14 +128,14 @@ mod tests {
     #[test]
     fn debug() {
         assert_eq!(
-            format!("{:?}", FactorSourceIDFromHash::placeholder()),
+            format!("{:?}", FactorSourceIDFromHash::sample()),
             "device:3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
         );
     }
 
     #[test]
-    fn json_roundtrip_placeholder() {
-        let model = FactorSourceIDFromHash::placeholder();
+    fn json_roundtrip_sample() {
+        let model = FactorSourceIDFromHash::sample();
 
         assert_eq_after_json_roundtrip(
             &model,
@@ -149,8 +149,8 @@ mod tests {
     }
 
     #[test]
-    fn json_from_placeholder_mnemonic() {
-        let mwp = MnemonicWithPassphrase::placeholder();
+    fn json_from_sample_mnemonic() {
+        let mwp = MnemonicWithPassphrase::sample();
         let model = FactorSourceIDFromHash::new_for_device(mwp);
         assert_eq_after_json_roundtrip(
             &model,

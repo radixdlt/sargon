@@ -29,12 +29,12 @@ impl LedgerHardwareWalletHint {
     }
 }
 
-impl HasPlaceholder for LedgerHardwareWalletHint {
-    fn placeholder() -> Self {
+impl HasSampleValues for LedgerHardwareWalletHint {
+    fn sample() -> Self {
         Self::new("Orange, scratched", LedgerHardwareWalletModel::NanoSPlus)
     }
 
-    fn placeholder_other() -> Self {
+    fn sample_other() -> Self {
         Self::new("Old cracked", LedgerHardwareWalletModel::NanoS)
     }
 }
@@ -46,26 +46,26 @@ mod tests {
     #[test]
     fn equality() {
         assert_eq!(
-            LedgerHardwareWalletHint::placeholder(),
-            LedgerHardwareWalletHint::placeholder()
+            LedgerHardwareWalletHint::sample(),
+            LedgerHardwareWalletHint::sample()
         );
         assert_eq!(
-            LedgerHardwareWalletHint::placeholder_other(),
-            LedgerHardwareWalletHint::placeholder_other()
+            LedgerHardwareWalletHint::sample_other(),
+            LedgerHardwareWalletHint::sample_other()
         );
     }
 
     #[test]
     fn inequality() {
         assert_ne!(
-            LedgerHardwareWalletHint::placeholder(),
-            LedgerHardwareWalletHint::placeholder_other()
+            LedgerHardwareWalletHint::sample(),
+            LedgerHardwareWalletHint::sample_other()
         );
     }
 
     #[test]
     fn json_roundtrip() {
-        let model = LedgerHardwareWalletHint::placeholder();
+        let model = LedgerHardwareWalletHint::sample();
         assert_eq_after_json_roundtrip(
             &model,
             r#"

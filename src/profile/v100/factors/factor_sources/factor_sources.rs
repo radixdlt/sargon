@@ -13,12 +13,12 @@ impl Identifiable for FactorSource {
 pub type FactorSources = IdentifiedVecVia<FactorSource>;
 
 #[uniffi::export]
-pub fn new_factor_sources_placeholder() -> FactorSources {
-    FactorSources::placeholder()
+pub fn new_factor_sources_sample() -> FactorSources {
+    FactorSources::sample()
 }
 #[uniffi::export]
-pub fn new_factor_sources_placeholder_other() -> FactorSources {
-    FactorSources::placeholder_other()
+pub fn new_factor_sources_sample_other() -> FactorSources {
+    FactorSources::sample_other()
 }
 
 impl FactorSources {
@@ -39,18 +39,18 @@ impl FactorSources {
     }
 }
 
-impl HasPlaceholder for FactorSources {
-    fn placeholder() -> Self {
+impl HasSampleValues for FactorSources {
+    fn sample() -> Self {
         Self::from_iter([
-            FactorSource::placeholder_device(),
-            FactorSource::placeholder_ledger(),
+            FactorSource::sample_device(),
+            FactorSource::sample_ledger(),
         ])
     }
 
-    fn placeholder_other() -> Self {
+    fn sample_other() -> Self {
         Self::from_iter([
-            FactorSource::placeholder_device_olympia(),
-            FactorSource::placeholder_device_babylon(),
+            FactorSource::sample_device_olympia(),
+            FactorSource::sample_device_babylon(),
         ])
     }
 }
@@ -62,25 +62,21 @@ mod tests {
     #[test]
     fn identifiable_id_uses_factor_source_id() {
         assert_eq!(
-            FactorSource::placeholder_device().id(),
-            FactorSource::placeholder_device().factor_source_id()
+            FactorSource::sample_device().id(),
+            FactorSource::sample_device().factor_source_id()
         )
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(
-            FactorSources::placeholder(),
-            FactorSources::placeholder_other()
-        );
+        assert_ne!(FactorSources::sample(), FactorSources::sample_other());
     }
 
     #[test]
     fn duplicates_are_prevented() {
         assert_eq!(
             FactorSources::from_iter(
-                [FactorSource::placeholder(), FactorSource::placeholder()]
-                    .into_iter()
+                [FactorSource::sample(), FactorSource::sample()].into_iter()
             )
             .len(),
             1
@@ -88,8 +84,8 @@ mod tests {
     }
 
     #[test]
-    fn json_roundtrip_placeholder() {
-        let sut = FactorSources::placeholder();
+    fn json_roundtrip_sample() {
+        let sut = FactorSources::sample();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"
@@ -148,21 +144,18 @@ mod tests {
 #[cfg(test)]
 mod uniffi_tests {
     use crate::{
-        new_factor_sources_placeholder, new_factor_sources_placeholder_other,
-        HasPlaceholder,
+        new_factor_sources_sample, new_factor_sources_sample_other,
+        HasSampleValues,
     };
 
     use super::FactorSources;
 
     #[test]
-    fn equality_placeholders() {
+    fn equality_samples() {
+        assert_eq!(FactorSources::sample(), new_factor_sources_sample());
         assert_eq!(
-            FactorSources::placeholder(),
-            new_factor_sources_placeholder()
-        );
-        assert_eq!(
-            FactorSources::placeholder_other(),
-            new_factor_sources_placeholder_other()
+            FactorSources::sample_other(),
+            new_factor_sources_sample_other()
         );
     }
 }

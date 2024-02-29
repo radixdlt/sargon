@@ -43,12 +43,12 @@ impl BIP39Passphrase {
     }
 }
 
-impl HasPlaceholder for BIP39Passphrase {
-    fn placeholder() -> Self {
+impl HasSampleValues for BIP39Passphrase {
+    fn sample() -> Self {
         Self::new("radix")
     }
 
-    fn placeholder_other() -> Self {
+    fn sample_other() -> Self {
         Self::new("just imagine...")
     }
 }
@@ -75,22 +75,16 @@ mod tests {
 
     #[test]
     fn equality() {
+        assert_eq!(BIP39Passphrase::sample(), BIP39Passphrase::sample());
         assert_eq!(
-            BIP39Passphrase::placeholder(),
-            BIP39Passphrase::placeholder()
-        );
-        assert_eq!(
-            BIP39Passphrase::placeholder_other(),
-            BIP39Passphrase::placeholder_other()
+            BIP39Passphrase::sample_other(),
+            BIP39Passphrase::sample_other()
         );
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(
-            BIP39Passphrase::placeholder(),
-            BIP39Passphrase::placeholder_other()
-        );
+        assert_ne!(BIP39Passphrase::sample(), BIP39Passphrase::sample_other());
     }
 
     #[test]

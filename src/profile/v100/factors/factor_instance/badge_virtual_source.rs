@@ -69,18 +69,18 @@ impl Serialize for FactorInstanceBadgeVirtualSource {
     }
 }
 
-impl HasPlaceholder for FactorInstanceBadgeVirtualSource {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
+impl HasSampleValues for FactorInstanceBadgeVirtualSource {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
         Self::HierarchicalDeterministic {
-            value: HierarchicalDeterministicPublicKey::placeholder(),
+            value: HierarchicalDeterministicPublicKey::sample(),
         }
     }
 
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder_other() -> Self {
+    /// A sample used to facilitate unit tests.
+    fn sample_other() -> Self {
         Self::HierarchicalDeterministic {
-            value: HierarchicalDeterministicPublicKey::placeholder_other(),
+            value: HierarchicalDeterministicPublicKey::sample_other(),
         }
     }
 }
@@ -92,26 +92,26 @@ mod tests {
     #[test]
     fn equality() {
         assert_eq!(
-            FactorInstanceBadgeVirtualSource::placeholder(),
-            FactorInstanceBadgeVirtualSource::placeholder()
+            FactorInstanceBadgeVirtualSource::sample(),
+            FactorInstanceBadgeVirtualSource::sample()
         );
         assert_eq!(
-            FactorInstanceBadgeVirtualSource::placeholder_other(),
-            FactorInstanceBadgeVirtualSource::placeholder_other()
+            FactorInstanceBadgeVirtualSource::sample_other(),
+            FactorInstanceBadgeVirtualSource::sample_other()
         );
     }
 
     #[test]
     fn inequality() {
         assert_ne!(
-            FactorInstanceBadgeVirtualSource::placeholder(),
-            FactorInstanceBadgeVirtualSource::placeholder_other()
+            FactorInstanceBadgeVirtualSource::sample(),
+            FactorInstanceBadgeVirtualSource::sample_other()
         );
     }
 
     #[test]
     fn json_roundtrip() {
-        let model = FactorInstanceBadgeVirtualSource::placeholder();
+        let model = FactorInstanceBadgeVirtualSource::sample();
         assert_eq_after_json_roundtrip(
             &model,
             r#"

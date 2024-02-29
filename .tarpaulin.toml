@@ -1,7 +1,8 @@
 [all]
 exclude-files = [
     "tests/*",
-    "src/wrapped_radix_engine_toolkit/*",
+    "src/bindgen/*",
+    "src/wrapped_radix_engine_toolkit/low_level/dummy_types.rs",
     "example/*",
     "target/*",
     "apple/*",

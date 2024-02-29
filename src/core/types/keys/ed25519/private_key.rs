@@ -16,7 +16,7 @@ impl Ed25519PrivateKey {
     /// used by wallets, which tend to rather use a Mnemonic and
     /// derive hierarchical deterministic keys.
     pub fn generate() -> Self {
-        Self::from_hex32_bytes(Hex32Bytes::generate())
+        Self::from_exactly32_bytes(Exactly32Bytes::generate())
             .expect("Should be able to generate 32 bytes")
     }
 }
@@ -72,7 +72,7 @@ impl Ed25519PrivateKey {
         Self::from_bytes(bytes.as_slice())
     }
 
-    pub fn from_hex32_bytes(bytes: Hex32Bytes) -> Result<Self> {
+    pub fn from_exactly32_bytes(bytes: Exactly32Bytes) -> Result<Self> {
         Self::from_vec(bytes.to_vec())
     }
 }
@@ -89,7 +89,7 @@ impl FromStr for Ed25519PrivateKey {
     type Err = CommonError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Hex32Bytes::from_hex(s)
+        Exactly32Bytes::from_hex(s)
             .map_err(|_| CommonError::InvalidEd25519PrivateKeyFromString {
                 bad_value: s.to_owned(),
             })
@@ -97,20 +97,20 @@ impl FromStr for Ed25519PrivateKey {
     }
 }
 
-impl HasPlaceholder for Ed25519PrivateKey {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
-        Self::placeholder_alice()
+impl HasSampleValues for Ed25519PrivateKey {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
+        Self::sample_alice()
     }
 
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder_other() -> Self {
-        Self::placeholder_bob()
+    /// A sample used to facilitate unit tests.
+    fn sample_other() -> Self {
+        Self::sample_bob()
     }
 }
 
 impl Ed25519PrivateKey {
-    /// A placeholder used to facilitate unit tests.
+    /// A sample used to facilitate unit tests.
     ///
     /// `833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42`
     ///
@@ -118,14 +118,14 @@ impl Ed25519PrivateKey {
     /// `ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf`
     ///
     /// https://github.com/dalek-cryptography/ed25519-dalek/blob/main/tests/ed25519.rs#L103
-    pub fn placeholder_alice() -> Self {
+    pub fn sample_alice() -> Self {
         Self::from_str(
             "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42",
         )
         .unwrap()
     }
 
-    /// A placeholder used to facilitate unit tests.
+    /// A sample used to facilitate unit tests.
     ///
     /// `1498b5467a63dffa2dc9d9e069caf075d16fc33fdd4c3b01bfadae6433767d93``
     ///
@@ -133,7 +133,7 @@ impl Ed25519PrivateKey {
     /// `b7a3c12dc0c8c748ab07525b701122b88bd78f600c76342d27f25e5f92444cde`
     ///
     /// https://cryptobook.nakov.com/digital-signatures/eddsa-sign-verify-examples
-    pub fn placeholder_bob() -> Self {
+    pub fn sample_bob() -> Self {
         Self::from_str(
             "1498b5467a63dffa2dc9d9e069caf075d16fc33fdd4c3b01bfadae6433767d93",
         )
@@ -148,21 +148,18 @@ mod tests {
 
     #[test]
     fn equality() {
+        assert_eq!(Ed25519PrivateKey::sample(), Ed25519PrivateKey::sample());
         assert_eq!(
-            Ed25519PrivateKey::placeholder(),
-            Ed25519PrivateKey::placeholder()
-        );
-        assert_eq!(
-            Ed25519PrivateKey::placeholder_other(),
-            Ed25519PrivateKey::placeholder_other()
+            Ed25519PrivateKey::sample_other(),
+            Ed25519PrivateKey::sample_other()
         );
     }
 
     #[test]
     fn inequality() {
         assert_ne!(
-            Ed25519PrivateKey::placeholder(),
-            Ed25519PrivateKey::placeholder_other()
+            Ed25519PrivateKey::sample(),
+            Ed25519PrivateKey::sample_other()
         );
     }
 
@@ -173,7 +170,7 @@ mod tests {
 
     #[test]
     fn sign_and_verify() {
-        let msg = hash("Test");
+        let msg = hash_of("Test");
         let sk: Ed25519PrivateKey =
             "0000000000000000000000000000000000000000000000000000000000000001"
                 .parse()
@@ -265,12 +262,12 @@ mod tests {
     }
 
     #[test]
-    fn from_hex32() {
+    fn from_exactly32() {
         let hex =
             "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef";
         assert_eq!(
-            Ed25519PrivateKey::from_hex32_bytes(
-                Hex32Bytes::from_hex(hex).unwrap()
+            Ed25519PrivateKey::from_exactly32_bytes(
+                Exactly32Bytes::from_hex(hex).unwrap()
             )
             .unwrap()
             .to_hex(),
@@ -292,11 +289,11 @@ mod tests {
     }
 
     #[test]
-    fn from_hex32_bytes() {
+    fn from_exactly32_bytes() {
         let str =
             "0000000000000000000000000000000000000000000000000000000000000001";
-        let hex32 = Hex32Bytes::from_hex(str).unwrap();
-        let key = Ed25519PrivateKey::from_hex32_bytes(hex32).unwrap();
+        let hex32 = Exactly32Bytes::from_hex(str).unwrap();
+        let key = Ed25519PrivateKey::from_exactly32_bytes(hex32).unwrap();
         assert_eq!(key.to_hex(), str);
     }
 
@@ -310,9 +307,9 @@ mod tests {
     }
 
     #[test]
-    fn placeholder() {
+    fn sample() {
         assert_eq!(
-            Ed25519PrivateKey::placeholder().public_key().to_hex(),
+            Ed25519PrivateKey::sample().public_key().to_hex(),
             "ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf"
         );
     }

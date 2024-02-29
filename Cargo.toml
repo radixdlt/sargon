@@ -20,7 +20,7 @@ crate-type = ["staticlib", "cdylib", "lib"]
 
 [[bin]]
 name = "uniffi-bindgen"
-path = "src/bin.rs"
+path = "src/bindgen/bin.rs"
 
 [dependencies]
 log = "0.4.20"
@@ -40,15 +40,21 @@ serde_repr = "0.1.17"
 strum = { version = "0.25.0", features = ["derive"] }
 strum_macros = { version = "0.26.1" }
 
-# 587d5988cd4ca3c5193ddf37027ff4e4ecd637dc is the Scrypto commit that RET e0e79548e71066d7569f8871c5b002fd5805d9d5 uses
+# 587d5988cd4ca3c5193ddf37027ff4e4ecd637dc is the Scrypto commit that RET 1cfe879c7370cfa497857ada7a8973f8a3388abc uses
 radix-engine-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "587d5988cd4ca3c5193ddf37027ff4e4ecd637dc", features = [
     "serde",
 ] }
+radix-engine = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "587d5988cd4ca3c5193ddf37027ff4e4ecd637dc" }
+sbor = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "587d5988cd4ca3c5193ddf37027ff4e4ecd637dc" }
+radix-engine-derive = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "587d5988cd4ca3c5193ddf37027ff4e4ecd637dc" }
 radix-engine-interface = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "587d5988cd4ca3c5193ddf37027ff4e4ecd637dc", features = [
     "std",
 ] }
-radix-engine-toolkit-json = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "e0e79548e71066d7569f8871c5b002fd5805d9d5" }
-radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "e0e79548e71066d7569f8871c5b002fd5805d9d5" }
+transaction = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "587d5988cd4ca3c5193ddf37027ff4e4ecd637dc", features = [
+    "std",
+] }
+radix-engine-toolkit-json = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "1cfe879c7370cfa497857ada7a8973f8a3388abc" }
+radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "1cfe879c7370cfa497857ada7a8973f8a3388abc" }
 enum-iterator = "1.4.1"
 bip32 = "0.5.1" # only need Secp256k1, to do validation of PublicKey
 ed25519-dalek = "1.0.1"
@@ -70,9 +76,12 @@ assert-json-diff = "2.0.2"
 url = { version = "2.5.0", features = ["serde"] }
 num-format = "0.4.4"
 paste = "1.0.14"
+clap = { version = "4", default-features = false, features = ["std", "derive"] }
+camino = "1.0.8"
 
 [build-dependencies]
 uniffi = { version = "0.26.0", features = ["build"] }
+cargo_toml = { version = "0.15.3" }
 
 [dev-dependencies]
 uniffi = { version = "0.26.0", features = ["bindgen-tests"] }

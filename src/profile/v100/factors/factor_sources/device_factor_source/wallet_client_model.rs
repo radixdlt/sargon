@@ -10,12 +10,12 @@ pub enum WalletClientModel {
     Unknown,
 }
 
-impl HasPlaceholder for WalletClientModel {
-    fn placeholder() -> Self {
+impl HasSampleValues for WalletClientModel {
+    fn sample() -> Self {
         WalletClientModel::Iphone
     }
 
-    fn placeholder_other() -> Self {
+    fn sample_other() -> Self {
         WalletClientModel::Android
     }
 }
@@ -25,21 +25,18 @@ mod tests {
     use crate::prelude::*;
     #[test]
     fn equality() {
+        assert_eq!(WalletClientModel::sample(), WalletClientModel::sample());
         assert_eq!(
-            WalletClientModel::placeholder(),
-            WalletClientModel::placeholder()
-        );
-        assert_eq!(
-            WalletClientModel::placeholder_other(),
-            WalletClientModel::placeholder_other()
+            WalletClientModel::sample_other(),
+            WalletClientModel::sample_other()
         );
     }
 
     #[test]
     fn inequality() {
         assert_ne!(
-            WalletClientModel::placeholder(),
-            WalletClientModel::placeholder_other()
+            WalletClientModel::sample(),
+            WalletClientModel::sample_other()
         );
     }
 

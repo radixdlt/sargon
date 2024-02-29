@@ -80,12 +80,12 @@ impl Mnemonic {
         Self::from_internal(internal)
     }
 
-    pub fn from_hex32(bytes: Hex32Bytes) -> Self {
+    pub fn from_exactly32(bytes: Exactly32Bytes) -> Self {
         Self::from_entropy(&bytes.to_vec())
     }
 
     pub fn generate_new() -> Self {
-        Self::from_hex32(Hex32Bytes::generate())
+        Self::from_exactly32(Exactly32Bytes::generate())
     }
 
     fn internal(&self) -> bip39::Mnemonic {
@@ -117,13 +117,13 @@ impl FromStr for Mnemonic {
     }
 }
 
-impl HasPlaceholder for Mnemonic {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
+impl HasSampleValues for Mnemonic {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
         Self::from_phrase("bright club bacon dinner achieve pull grid save ramp cereal blush woman humble limb repeat video sudden possible story mask neutral prize goose mandate").expect("Valid mnemonic")
     }
 
-    fn placeholder_other() -> Self {
+    fn sample_other() -> Self {
         Self::from_phrase("zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong")
             .expect("Valid mnemonic")
     }
@@ -136,21 +136,18 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(Mnemonic::placeholder(), Mnemonic::placeholder());
-        assert_eq!(
-            Mnemonic::placeholder_other(),
-            Mnemonic::placeholder_other()
-        );
+        assert_eq!(Mnemonic::sample(), Mnemonic::sample());
+        assert_eq!(Mnemonic::sample_other(), Mnemonic::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(Mnemonic::placeholder(), Mnemonic::placeholder_other());
+        assert_ne!(Mnemonic::sample(), Mnemonic::sample_other());
     }
 
     #[test]
     fn debug() {
-        let mnemonic = Mnemonic::placeholder();
+        let mnemonic = Mnemonic::sample();
         assert_eq!(
             format!("{:?}", mnemonic),
             format!("{:?}", "24 words (bright...mandate)")
@@ -159,13 +156,13 @@ mod tests {
 
     #[test]
     fn display() {
-        let mnemonic = Mnemonic::placeholder();
+        let mnemonic = Mnemonic::sample();
         assert_eq!(format!("{}", mnemonic), "Mnemonic in English obfuscated.")
     }
 
     #[test]
     fn non_sensitive() {
-        let mnemonic = Mnemonic::placeholder();
+        let mnemonic = Mnemonic::sample();
         assert_eq!(
             format!("{:?}", mnemonic.non_sensitive()),
             format!("{:?}", "24 words (bright...mandate)")
@@ -200,7 +197,7 @@ mod tests {
 
     #[test]
     fn words() {
-        let mnemonic = Mnemonic::placeholder();
+        let mnemonic = Mnemonic::sample();
         assert_eq!(mnemonic.words[0].word, "bright");
         assert_eq!(mnemonic.words[1].word, "club");
         assert_eq!(mnemonic.words[2].word, "bacon");

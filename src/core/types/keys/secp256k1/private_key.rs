@@ -16,7 +16,7 @@ impl Secp256k1PrivateKey {
     /// used by wallets, which tend to rather use a Mnemonic and
     /// derive hierarchical deterministic keys.
     pub fn generate() -> Self {
-        Self::from_hex32_bytes(Hex32Bytes::generate())
+        Self::from_exactly32_bytes(Exactly32Bytes::generate())
             .expect("Should be able to generate 32 bytes")
     }
 }
@@ -54,7 +54,7 @@ impl Secp256k1PrivateKey {
         Self::from_bytes(bytes.as_slice())
     }
 
-    pub fn from_hex32_bytes(bytes: Hex32Bytes) -> Result<Self> {
+    pub fn from_exactly32_bytes(bytes: Exactly32Bytes) -> Result<Self> {
         Self::from_vec(bytes.to_vec())
     }
 }
@@ -63,11 +63,11 @@ impl FromStr for Secp256k1PrivateKey {
     type Err = CommonError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Hex32Bytes::from_hex(s)
+        Exactly32Bytes::from_hex(s)
             .map_err(|_| CommonError::InvalidSecp256k1PrivateKeyFromString {
                 bad_value: s.to_owned(),
             })
-            .and_then(Self::from_hex32_bytes)
+            .and_then(Self::from_exactly32_bytes)
     }
 }
 
@@ -97,14 +97,14 @@ impl IsPrivateKey<Secp256k1PublicKey> for Secp256k1PrivateKey {
     }
 }
 
-impl HasPlaceholder for Secp256k1PrivateKey {
-    /// A placeholder used to facilitate unit tests.
-    fn placeholder() -> Self {
-        Self::placeholder_alice()
+impl HasSampleValues for Secp256k1PrivateKey {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
+        Self::sample_alice()
     }
 
-    fn placeholder_other() -> Self {
-        Self::placeholder_bob()
+    fn sample_other() -> Self {
+        Self::sample_bob()
     }
 }
 
@@ -116,7 +116,7 @@ impl Secp256k1PrivateKey {
     /// `02517b88916e7f315bb682f9926b14bc67a0e4246f8a419b986269e1a7e61fffa7`
     ///
     /// https://github.com/Sajjon/K1/blob/main/Tests/K1Tests/TestVectors/cyon_ecdh_two_variants_with_kdf.json#L10
-    pub fn placeholder_alice() -> Self {
+    pub fn sample_alice() -> Self {
         Self::from_str(
             "d78b6578b33f3446bdd9d09d057d6598bc915fec4008a54c509dc3b8cdc7dbe5",
         )
@@ -130,7 +130,7 @@ impl Secp256k1PrivateKey {
     /// `033083620d1596d3f8988ff3270e42970dd2a031e2b9b6488052a4170ff999f3e8`
     ///
     /// https://github.com/Sajjon/K1/blob/main/Tests/K1Tests/TestVectors/cyon_ecdh_two_variants_with_kdf.json#L12
-    pub fn placeholder_bob() -> Self {
+    pub fn sample_bob() -> Self {
         Self::from_str(
             "871761c9921a467059e090a0422ae76af87fa8eb905da91c9b554bd6a028c760",
         )
@@ -147,20 +147,20 @@ mod tests {
     #[test]
     fn equality() {
         assert_eq!(
-            Secp256k1PrivateKey::placeholder(),
-            Secp256k1PrivateKey::placeholder()
+            Secp256k1PrivateKey::sample(),
+            Secp256k1PrivateKey::sample()
         );
         assert_eq!(
-            Secp256k1PrivateKey::placeholder_other(),
-            Secp256k1PrivateKey::placeholder_other()
+            Secp256k1PrivateKey::sample_other(),
+            Secp256k1PrivateKey::sample_other()
         );
     }
 
     #[test]
     fn inequality() {
         assert_ne!(
-            Secp256k1PrivateKey::placeholder(),
-            Secp256k1PrivateKey::placeholder_other()
+            Secp256k1PrivateKey::sample(),
+            Secp256k1PrivateKey::sample_other()
         );
     }
 
@@ -171,7 +171,7 @@ mod tests {
 
     #[test]
     fn sign_and_verify() {
-        let msg = hash("Test");
+        let msg = hash_of("Test");
         let sk: Secp256k1PrivateKey =
             "0000000000000000000000000000000000000000000000000000000000000001"
                 .parse()
@@ -273,11 +273,11 @@ mod tests {
     }
 
     #[test]
-    fn from_hex32_bytes() {
+    fn from_exactly32_bytes() {
         let str =
             "0000000000000000000000000000000000000000000000000000000000000001";
-        let hex32 = Hex32Bytes::from_hex(str).unwrap();
-        let key = Secp256k1PrivateKey::from_hex32_bytes(hex32).unwrap();
+        let hex32 = Exactly32Bytes::from_hex(str).unwrap();
+        let key = Secp256k1PrivateKey::from_exactly32_bytes(hex32).unwrap();
         assert_eq!(key.to_hex(), str);
     }
 
@@ -304,9 +304,9 @@ mod tests {
     }
 
     #[test]
-    fn placeholder() {
+    fn sample() {
         assert_eq!(
-            Secp256k1PrivateKey::placeholder().public_key().to_hex(),
+            Secp256k1PrivateKey::sample().public_key().to_hex(),
             "02517b88916e7f315bb682f9926b14bc67a0e4246f8a419b986269e1a7e61fffa7"
         );
     }

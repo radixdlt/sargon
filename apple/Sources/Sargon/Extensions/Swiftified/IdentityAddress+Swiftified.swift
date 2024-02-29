@@ -1,6 +1,5 @@
 extension IdentityAddress: @unchecked Sendable {}
 
-
 #if DEBUG
 	extension IdentityAddress {
 		/// Namespace for preview values of `IdentityAddress`
@@ -8,14 +7,14 @@ extension IdentityAddress: @unchecked Sendable {}
 			fileprivate init() {}
 			public static let of = Self()
 
-			public let mainnet: IdentityAddress = newIdentityAddressPlaceholderMainnet()
+			public let mainnet: IdentityAddress = newIdentityAddressSampleMainnet()
 			public let mainnetOther: IdentityAddress =
-				newIdentityAddressPlaceholderMainnetOther()
+				newIdentityAddressSampleMainnetOther()
 
 			public let stokenet: IdentityAddress =
-				newIdentityAddressPlaceholderStokenet()
+				newIdentityAddressSampleStokenet()
 			public let stokenetOther: IdentityAddress =
-				newIdentityAddressPlaceholderStokenetOther()
+				newIdentityAddressSampleStokenetOther()
 		}
 
 		/// Preview values for `IdentityAddress`, e.g.:

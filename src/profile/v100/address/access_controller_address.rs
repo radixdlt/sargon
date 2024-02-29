@@ -3,41 +3,40 @@ use crate::prelude::*;
 use radix_engine_toolkit::models::canonical_address_types::CanonicalAccessControllerAddress as RetAccessControllerAddress;
 
 #[uniffi::export]
-pub fn new_access_controller_address_placeholder() -> AccessControllerAddress {
-    AccessControllerAddress::placeholder()
+pub fn new_access_controller_address_sample() -> AccessControllerAddress {
+    AccessControllerAddress::sample()
 }
 
 #[uniffi::export]
-pub fn new_access_controller_address_placeholder_other(
-) -> AccessControllerAddress {
-    AccessControllerAddress::placeholder_other()
+pub fn new_access_controller_address_sample_other() -> AccessControllerAddress {
+    AccessControllerAddress::sample_other()
 }
 
-impl HasPlaceholder for AccessControllerAddress {
-    fn placeholder() -> Self {
-        Self::placeholder_mainnet()
+impl HasSampleValues for AccessControllerAddress {
+    fn sample() -> Self {
+        Self::sample_mainnet()
     }
 
-    fn placeholder_other() -> Self {
-        Self::placeholder_stokenet()
+    fn sample_other() -> Self {
+        Self::sample_stokenet()
     }
 }
 
 impl AccessControllerAddress {
-    pub fn placeholder_mainnet() -> Self {
-        "accesscontroller_rdx1c0duj4lq0dc3cpl8qd420fpn5eckh8ljeysvjm894lyl5ja5yq6y5a".parse().expect("Placeholder")
+    pub fn sample_mainnet() -> Self {
+        "accesscontroller_rdx1c0duj4lq0dc3cpl8qd420fpn5eckh8ljeysvjm894lyl5ja5yq6y5a".parse().expect("Sample")
     }
 
-    pub fn placeholder_mainnet_other() -> Self {
-        "accesscontroller_rdx1cv93xuha64eay8ctkx9km0el2jgkuh6gqlwec7tzecccyu0rj37xak".parse().expect("Placeholder")
+    pub fn sample_mainnet_other() -> Self {
+        "accesscontroller_rdx1cv93xuha64eay8ctkx9km0el2jgkuh6gqlwec7tzecccyu0rj37xak".parse().expect("Sample")
     }
 
-    pub fn placeholder_stokenet() -> Self {
-        "accesscontroller_tdx_2_1cw68j9ca4fye09mz3hshp4qydjnxhsahm68hvmz9cjhftcz9f53juq".parse().expect("Placeholder")
+    pub fn sample_stokenet() -> Self {
+        "accesscontroller_tdx_2_1cw68j9ca4fye09mz3hshp4qydjnxhsahm68hvmz9cjhftcz9f53juq".parse().expect("Sample")
     }
 
-    pub fn placeholder_stokenet_other() -> Self {
-        "accesscontroller_tdx_2_1c0llllllllllllllllllllllllllllllllllllllllllllllhcg0ny".parse().expect("Placeholder")
+    pub fn sample_stokenet_other() -> Self {
+        "accesscontroller_tdx_2_1c0llllllllllllllllllllllllllllllllllllllllllllllhcg0ny".parse().expect("Sample")
     }
 }
 
@@ -56,30 +55,18 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::placeholder_mainnet(), SUT::placeholder_mainnet());
-        assert_eq!(
-            SUT::placeholder_mainnet_other(),
-            SUT::placeholder_mainnet_other()
-        );
-        assert_eq!(SUT::placeholder_stokenet(), SUT::placeholder_stokenet());
-        assert_eq!(
-            SUT::placeholder_stokenet_other(),
-            SUT::placeholder_stokenet_other()
-        );
+        assert_eq!(SUT::sample_mainnet(), SUT::sample_mainnet());
+        assert_eq!(SUT::sample_mainnet_other(), SUT::sample_mainnet_other());
+        assert_eq!(SUT::sample_stokenet(), SUT::sample_stokenet());
+        assert_eq!(SUT::sample_stokenet_other(), SUT::sample_stokenet_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(SUT::placeholder(), SUT::placeholder_other());
-        assert_ne!(
-            SUT::placeholder_mainnet(),
-            SUT::placeholder_mainnet_other()
-        );
-        assert_ne!(SUT::placeholder_mainnet(), SUT::placeholder_stokenet());
-        assert_ne!(
-            SUT::placeholder_mainnet_other(),
-            SUT::placeholder_stokenet_other()
-        );
+        assert_ne!(SUT::sample(), SUT::sample_other());
+        assert_ne!(SUT::sample_mainnet(), SUT::sample_mainnet_other());
+        assert_ne!(SUT::sample_mainnet(), SUT::sample_stokenet());
+        assert_ne!(SUT::sample_mainnet_other(), SUT::sample_stokenet_other());
     }
 
     #[test]
@@ -94,6 +81,24 @@ mod tests {
         let s = "accesscontroller_rdx1cw9383xuqx6cme0knucw5aggknvrqmc8lzu7jcn3kwherk8x55zmtt";
         let a = SUT::try_from_bech32(s).unwrap();
         assert_eq!(format!("{:?}", a), s);
+    }
+
+    #[test]
+    fn manual_perform_uniffi_conversion() {
+        type RetAddr = <SUT as FromRetAddress>::RetAddress;
+        let sut = SUT::sample();
+        let bech32 = sut.to_string();
+        let ret = RetAddr::try_from_bech32(&bech32).unwrap();
+
+        let ffi_side =
+            <RetAddr as crate::UniffiCustomTypeConverter>::from_custom(ret);
+        assert_eq!(ffi_side, bech32);
+        let from_ffi_side =
+            <RetAddr as crate::UniffiCustomTypeConverter>::into_custom(
+                ffi_side,
+            )
+            .unwrap();
+        assert_eq!(ret, from_ffi_side);
     }
 
     #[test]
@@ -174,15 +179,12 @@ mod uniffi_tests {
     }
 
     #[test]
-    fn placeholder() {
-        assert_eq!(
-            new_access_controller_address_placeholder(),
-            SUT::placeholder()
-        );
+    fn sample() {
+        assert_eq!(new_access_controller_address_sample(), SUT::sample());
 
         assert_eq!(
-            new_access_controller_address_placeholder_other(),
-            SUT::placeholder_other()
+            new_access_controller_address_sample_other(),
+            SUT::sample_other()
         );
     }
 }

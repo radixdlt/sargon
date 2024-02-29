@@ -99,52 +99,52 @@ impl PublicKey {
     }
 }
 
-impl HasPlaceholder for PublicKey {
-    fn placeholder() -> Self {
-        Self::placeholder_ed25519_alice()
+impl HasSampleValues for PublicKey {
+    fn sample() -> Self {
+        Self::sample_ed25519_alice()
     }
 
-    fn placeholder_other() -> Self {
-        Self::placeholder_secp256k1_bob()
+    fn sample_other() -> Self {
+        Self::sample_secp256k1_bob()
     }
 }
 
 impl PublicKey {
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_secp256k1() -> Self {
-        Self::placeholder_secp256k1_alice()
+    /// A sample used to facilitate unit tests.
+    pub fn sample_secp256k1() -> Self {
+        Self::sample_secp256k1_alice()
     }
 
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_secp256k1_alice() -> Self {
+    /// A sample used to facilitate unit tests.
+    pub fn sample_secp256k1_alice() -> Self {
         Self::Secp256k1 {
-            value: Secp256k1PublicKey::placeholder_alice(),
+            value: Secp256k1PublicKey::sample_alice(),
         }
     }
 
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_secp256k1_bob() -> Self {
+    /// A sample used to facilitate unit tests.
+    pub fn sample_secp256k1_bob() -> Self {
         Self::Secp256k1 {
-            value: Secp256k1PublicKey::placeholder_bob(),
+            value: Secp256k1PublicKey::sample_bob(),
         }
     }
 
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_ed25519() -> Self {
-        Self::placeholder_ed25519_alice()
+    /// A sample used to facilitate unit tests.
+    pub fn sample_ed25519() -> Self {
+        Self::sample_ed25519_alice()
     }
 
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_ed25519_alice() -> Self {
+    /// A sample used to facilitate unit tests.
+    pub fn sample_ed25519_alice() -> Self {
         Self::Ed25519 {
-            value: Ed25519PublicKey::placeholder_alice(),
+            value: Ed25519PublicKey::sample_alice(),
         }
     }
 
-    /// A placeholder used to facilitate unit tests.
-    pub fn placeholder_ed25519_bob() -> Self {
+    /// A sample used to facilitate unit tests.
+    pub fn sample_ed25519_bob() -> Self {
         Self::Ed25519 {
-            value: Ed25519PublicKey::placeholder_bob(),
+            value: Ed25519PublicKey::sample_bob(),
         }
     }
 }
@@ -190,8 +190,8 @@ impl Serialize for PublicKey {
 impl From<PublicKey> for ScryptoPublicKey {
     fn from(value: PublicKey) -> Self {
         match value {
-            PublicKey::Ed25519 { value: key } => key.to_engine().into(),
-            PublicKey::Secp256k1 { value: key } => key.to_engine().into(),
+            PublicKey::Ed25519 { value: key } => Self::Ed25519(key.into()),
+            PublicKey::Secp256k1 { value: key } => Self::Secp256k1(key.into()),
         }
     }
 }
@@ -205,22 +205,19 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(PublicKey::placeholder(), PublicKey::placeholder());
-        assert_eq!(
-            PublicKey::placeholder_other(),
-            PublicKey::placeholder_other()
-        );
+        assert_eq!(PublicKey::sample(), PublicKey::sample());
+        assert_eq!(PublicKey::sample_other(), PublicKey::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(PublicKey::placeholder(), PublicKey::placeholder_other());
+        assert_ne!(PublicKey::sample(), PublicKey::sample_other());
     }
 
     #[test]
     fn engine_roundtrip_secp256k1() {
         let public_key_secp256k1: PublicKey =
-            Secp256k1PublicKey::placeholder().into();
+            Secp256k1PublicKey::sample().into();
         let engine_key_secp256k1: ScryptoPublicKey =
             public_key_secp256k1.clone().into();
         match engine_key_secp256k1 {
@@ -233,8 +230,7 @@ mod tests {
 
     #[test]
     fn engine_roundtrip_ed25519() {
-        let public_key_ed25519: PublicKey =
-            Ed25519PublicKey::placeholder().into();
+        let public_key_ed25519: PublicKey = Ed25519PublicKey::sample().into();
         let engine_key_ed25519: ScryptoPublicKey =
             public_key_ed25519.clone().into();
         match engine_key_ed25519 {
@@ -247,7 +243,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_ed25519() {
-        let model = PublicKey::placeholder_ed25519_alice();
+        let model = PublicKey::sample_ed25519_alice();
 
         assert_eq_after_json_roundtrip(
             &model,
@@ -286,7 +282,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_secp256k1() {
-        let model = PublicKey::placeholder_secp256k1_alice();
+        let model = PublicKey::sample_secp256k1_alice();
 
         assert_eq_after_json_roundtrip(
             &model,
@@ -302,16 +298,16 @@ mod tests {
     #[test]
     fn inequality_secp256k1() {
         assert_ne!(
-            PublicKey::placeholder_secp256k1_alice(),
-            PublicKey::placeholder_secp256k1_bob(),
+            PublicKey::sample_secp256k1_alice(),
+            PublicKey::sample_secp256k1_bob(),
         );
     }
 
     #[test]
     fn equality_secp256k1() {
         assert_eq!(
-            PublicKey::placeholder_secp256k1(),
-            PublicKey::placeholder_secp256k1_alice()
+            PublicKey::sample_secp256k1(),
+            PublicKey::sample_secp256k1_alice()
         );
     }
 
@@ -319,8 +315,8 @@ mod tests {
     fn hash_secp256k1() {
         assert_eq!(
             BTreeSet::from_iter([
-                PublicKey::placeholder_secp256k1_alice(),
-                PublicKey::placeholder_secp256k1_alice()
+                PublicKey::sample_secp256k1_alice(),
+                PublicKey::sample_secp256k1_alice()
             ])
             .len(),
             1
@@ -330,16 +326,16 @@ mod tests {
     #[test]
     fn inequality_ed25519() {
         assert_ne!(
-            PublicKey::placeholder_ed25519_alice(),
-            PublicKey::placeholder_ed25519_bob(),
+            PublicKey::sample_ed25519_alice(),
+            PublicKey::sample_ed25519_bob(),
         );
     }
 
     #[test]
     fn equality_ed25519() {
         assert_eq!(
-            PublicKey::placeholder_ed25519(),
-            PublicKey::placeholder_ed25519_alice()
+            PublicKey::sample_ed25519(),
+            PublicKey::sample_ed25519_alice()
         );
     }
 
@@ -347,8 +343,8 @@ mod tests {
     fn hash_ed25519() {
         assert_eq!(
             BTreeSet::from_iter([
-                PublicKey::placeholder_ed25519_alice(),
-                PublicKey::placeholder_ed25519_alice()
+                PublicKey::sample_ed25519_alice(),
+                PublicKey::sample_ed25519_alice()
             ])
             .len(),
             1
@@ -358,8 +354,8 @@ mod tests {
     #[test]
     fn inequality_different_curves() {
         assert_ne!(
-            PublicKey::placeholder_ed25519_alice(),
-            PublicKey::placeholder_secp256k1_alice(),
+            PublicKey::sample_ed25519_alice(),
+            PublicKey::sample_secp256k1_alice(),
         );
     }
 
@@ -410,14 +406,14 @@ mod tests {
 
     #[test]
     fn ed25519_into_as_roundtrip() {
-        let ed25519 = Ed25519PublicKey::placeholder();
+        let ed25519 = Ed25519PublicKey::sample();
         let key: PublicKey = ed25519.clone().into();
         assert_eq!(key.as_ed25519().unwrap(), &ed25519);
     }
 
     #[test]
     fn secp256k1_into_as_roundtrip() {
-        let secp256k1 = Secp256k1PublicKey::placeholder();
+        let secp256k1 = Secp256k1PublicKey::sample();
         let key: PublicKey = secp256k1.clone().into();
         assert_eq!(key.as_secp256k1().unwrap(), &secp256k1);
     }
