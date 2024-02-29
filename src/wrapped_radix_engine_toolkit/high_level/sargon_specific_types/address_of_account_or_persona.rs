@@ -69,6 +69,7 @@ mod tests {
     #[test]
     fn network_id() {
         assert_eq!(SUT::sample().network_id(), NetworkID::Mainnet);
+        assert_eq!(SUT::sample_other().network_id(), NetworkID::Mainnet);
     }
 
     #[test]
