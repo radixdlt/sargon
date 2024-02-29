@@ -15,8 +15,8 @@ if useLocalFramework {
 		path: "./target/ios/libsargon-rs.xcframework"
 	)
 } else {
-	let releaseTag = "0.1.0"
-	let releaseChecksum = "befef7d56108305ff6ff69d67483471395c3e603e299b3b15f5a826328de272b"
+	let releaseTag = "0.2.1"
+	let releaseChecksum = "48cebdaa541a35f1954e03d330f335c32fdedc897dc9bfed5523facbf9202c51"
 	binaryTarget = .binaryTarget(
 		name: sargonBinaryTargetName,
 		url:
