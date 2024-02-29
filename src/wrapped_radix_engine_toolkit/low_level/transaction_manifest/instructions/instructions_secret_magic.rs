@@ -24,7 +24,8 @@ impl crate::UniffiCustomTypeConverter for InstructionsSecretMagic {
             .map_err(|e| {
                 let err_msg = format!("{:?}", e);
                 error!("{}", err_msg);
-                CommonError::Unknown.into()
+                CommonError::FailedToUniFFIDecodeBytesToManifestInstructions
+                    .into()
             })
             .map(|i: Vec<ScryptoInstruction>| Self(i))
     }
@@ -68,7 +69,7 @@ mod tests {
     }
 
     #[test]
-    fn manual_perform_uniffi_conversion() {
+    fn manual_perform_uniffi_conversion_successful() {
         let sut = SUT::sample();
         let builtin = BagOfBytes::from_hex("4d20220212001300").unwrap();
 
@@ -82,5 +83,14 @@ mod tests {
                 .unwrap();
 
         assert_eq!(sut, from_ffi_side);
+    }
+
+    #[test]
+    fn manual_perform_uniffi_conversion_fail() {
+        let builtin = BagOfBytes::from_hex("deadbeef").unwrap();
+        assert!(<SUT as crate::UniffiCustomTypeConverter>::into_custom(
+            builtin
+        )
+        .is_err());
     }
 }

@@ -350,6 +350,11 @@ pub enum CommonError {
         found_in_instructions: NetworkID,
         specified_to_instructions_ctor: NetworkID,
     } = 10095,
+
+    #[error(
+        "Failed to UniFFI decode bytes into Transaction Manifest Instructions"
+    )]
+    FailedToUniFFIDecodeBytesToManifestInstructions = 10096,
 }
 
 /*
