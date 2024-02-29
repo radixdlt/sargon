@@ -203,7 +203,7 @@ mod tests {
     type SUT = TransactionManifest;
 
     #[test]
-    fn manifest_for_create_fungible_token_stella() {
+    fn manifest_create_fungible_token_stella() {
         assert_eq!(
             SUT::create_fungible_token(
                 &AccountAddress::sample_mainnet().into(),

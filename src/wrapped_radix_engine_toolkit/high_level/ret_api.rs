@@ -32,7 +32,7 @@ pub fn manifest_set_owner_keys_hashes(
 }
 
 #[uniffi::export]
-pub fn manifest_for_create_fungible_token_with_metadata(
+pub fn manifest_create_fungible_token_with_metadata(
     address_of_owner: &AccountAddress,
     initial_supply: Decimal192,
     metadata: TokenDefinitionMetadata,
@@ -45,28 +45,28 @@ pub fn manifest_for_create_fungible_token_with_metadata(
 }
 
 #[uniffi::export]
-pub fn manifest_for_create_fungible_token(
+pub fn manifest_create_fungible_token(
     address_of_owner: &AccountAddress,
 ) -> TransactionManifest {
     TransactionManifest::create_fungible_token(address_of_owner)
 }
 
 #[uniffi::export]
-pub fn manifest_for_create_multiple_fungible_tokens(
+pub fn manifest_create_multiple_fungible_tokens(
     address_of_owner: &AccountAddress,
 ) -> TransactionManifest {
     TransactionManifest::create_multiple_fungible_tokens(address_of_owner)
 }
 
 #[uniffi::export]
-pub fn manifest_for_create_non_fungible_token(
+pub fn manifest_create_non_fungible_token(
     address_of_owner: &AccountAddress,
 ) -> TransactionManifest {
     TransactionManifest::create_non_fungible_token(address_of_owner)
 }
 
 #[uniffi::export]
-pub fn manifest_for_create_multiple_non_fungible_tokens(
+pub fn manifest_create_multiple_non_fungible_tokens(
     _address_of_owner: &AccountAddress,
 ) -> TransactionManifest {
     todo!()
@@ -241,8 +241,8 @@ mod tests {
     }
 
     #[test]
-    fn test_manifest_for_create_fungible_token_with_metadata() {
-        let string = manifest_for_create_fungible_token_with_metadata(
+    fn test_manifest_create_fungible_token_with_metadata() {
+        let string = manifest_create_fungible_token_with_metadata(
             &AccountAddress::sample_stokenet_other(),
             748392.into(),
             TokenDefinitionMetadata::new(
@@ -264,9 +264,9 @@ mod tests {
     }
 
     #[test]
-    fn test_manifest_for_create_fungible_token_owner() {
+    fn test_manifest_create_fungible_token_owner() {
         let test = |a| {
-            let manifest = manifest_for_create_fungible_token(&a);
+            let manifest = manifest_create_fungible_token(&a);
             assert!(manifest.to_string().contains(&a.to_string()))
         };
         test(AccountAddress::sample_mainnet());
@@ -276,9 +276,9 @@ mod tests {
     }
 
     #[test]
-    fn test_manifest_for_create_multiple_fungible_tokens_owner() {
+    fn test_manifest_create_multiple_fungible_tokens_owner() {
         let test = |a| {
-            let manifest = manifest_for_create_multiple_fungible_tokens(&a);
+            let manifest = manifest_create_multiple_fungible_tokens(&a);
             assert!(manifest.to_string().contains(&a.to_string()))
         };
         test(AccountAddress::sample_stokenet());
@@ -286,18 +286,28 @@ mod tests {
     }
 
     #[test]
-    fn test_manifest_for_create_multiple_fungible_tokens_number_of_tokens() {
-        let manifest = manifest_for_create_multiple_fungible_tokens(
+    fn test_manifest_create_multiple_fungible_tokens_number_of_tokens() {
+        let manifest = manifest_create_multiple_fungible_tokens(
             &AccountAddress::sample_stokenet(),
         );
         assert_eq!(manifest.to_string().matches("symbol").count(), 25);
     }
 
     #[test]
+    fn test_manifest_create_non_fungible_token() {
+        assert_eq!(
+            manifest_create_non_fungible_token(&AccountAddress::sample())
+                .instructions()
+                .len(),
+            2
+        );
+    }
+
+    #[test]
     #[should_panic(expected = "not yet implemented")]
-    fn test_manifest_for_create_multiple_non_fungible_tokens() {
+    fn test_manifest_create_multiple_non_fungible_tokens() {
         manifest_eq(
-            manifest_for_create_multiple_non_fungible_tokens(
+            manifest_create_multiple_non_fungible_tokens(
                 &AccountAddress::sample_mainnet(),
             ),
             r#"
