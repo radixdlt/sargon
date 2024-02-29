@@ -132,6 +132,7 @@ impl Instructions {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use crate::prelude::*;
 
     #[allow(clippy::upper_case_acronyms)]
@@ -168,6 +169,68 @@ mod tests {
                 found_in_instructions: NetworkID::Mainnet,
                 specified_to_instructions_ctor: NetworkID::Stokenet
             })
+        );
+    }
+
+    #[test]
+    fn extract_error_from_addr_fallbacks_to_invalid_ins_err() {
+        assert_eq!(
+            extract_error_from_addr("foo".to_owned(), NetworkID::Simulator),
+            CommonError::InvalidInstructionsString
+        );
+    }
+    #[test]
+    fn extract_error_from_addr_uses_invalid_instructions_string_if_same_network(
+    ) {
+        assert_eq!(
+            extract_error_from_addr("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease".to_owned(), NetworkID::Mainnet),
+            CommonError::InvalidInstructionsString
+        );
+    }
+
+    #[test]
+    fn extract_error_from_error_non_gen_err() {
+        assert_eq!(
+            extract_error_from_error(
+                ScryptoCompileError::LexerError(
+                    transaction::manifest::lexer::LexerError::UnexpectedEof
+                ),
+                NetworkID::Simulator
+            ),
+            CommonError::InvalidInstructionsString
+        );
+    }
+
+    #[test]
+    fn extract_error_from_error_gen_err_package_addr() {
+        assert_eq!(
+            extract_error_from_error(
+                ScryptoCompileError::GeneratorError(transaction::manifest::generator::GeneratorError::InvalidPackageAddress(PackageAddress::sample().to_string())),
+                NetworkID::Simulator
+            ),
+            CommonError::InvalidInstructionsWrongNetwork { found_in_instructions: NetworkID::Mainnet, specified_to_instructions_ctor: NetworkID::Simulator }
+        );
+    }
+
+    #[test]
+    fn extract_error_from_error_gen_err_component_addr() {
+        assert_eq!(
+            extract_error_from_error(
+                ScryptoCompileError::GeneratorError(transaction::manifest::generator::GeneratorError::InvalidPackageAddress(ComponentAddress::sample().to_string())),
+                NetworkID::Simulator
+            ),
+            CommonError::InvalidInstructionsWrongNetwork { found_in_instructions: NetworkID::Mainnet, specified_to_instructions_ctor: NetworkID::Simulator }
+        );
+    }
+
+    #[test]
+    fn extract_error_from_error_gen_err_resource_addr() {
+        assert_eq!(
+            extract_error_from_error(
+                ScryptoCompileError::GeneratorError(transaction::manifest::generator::GeneratorError::InvalidPackageAddress(ResourceAddress::sample().to_string())),
+                NetworkID::Simulator
+            ),
+            CommonError::InvalidInstructionsWrongNetwork { found_in_instructions: NetworkID::Mainnet, specified_to_instructions_ctor: NetworkID::Simulator }
         );
     }
 }

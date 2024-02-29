@@ -337,6 +337,15 @@ mod tests_non_empty_max_64_bytes {
     }
 
     #[test]
+    fn as_ref() {
+        let b: &[u8] = &hex_decode(
+            "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead",
+        )
+        .unwrap();
+        assert_eq!(SUT::try_from(b).unwrap().as_ref(), b);
+    }
+
+    #[test]
     fn random() {
         let mut set: HashSet<Vec<u8>> = HashSet::new();
         let n = 100;
