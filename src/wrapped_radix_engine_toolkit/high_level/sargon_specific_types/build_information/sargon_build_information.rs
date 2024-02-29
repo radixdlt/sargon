@@ -38,7 +38,7 @@ mod tests {
     use crate::prelude::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = SargonDependencies;
+    type SUT = SargonBuildInformation;
 
     #[test]
     fn equality() {
