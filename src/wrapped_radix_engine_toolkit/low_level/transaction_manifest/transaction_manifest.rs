@@ -104,9 +104,9 @@ impl TransactionManifest {
         self.secret_magic.instructions.instructions_string()
     }
 
-    pub fn summary(&self, network_id: NetworkID) -> ManifestSummary {
+    pub fn summary(&self) -> ManifestSummary {
         let ret_summary = RET_summary(&self.scrypto_manifest());
-        ManifestSummary::from_ret(ret_summary, network_id)
+        ManifestSummary::from_ret(ret_summary, self.network_id())
     }
 
     pub fn execution_summary(
@@ -131,21 +131,14 @@ impl TransactionManifest {
         self.secret_magic.instructions.network_id
     }
 
-    pub fn resource_addresses_to_refresh(
-        &self,
-    ) -> Option<Vec<ResourceAddress>> {
+    pub fn resource_addresses_to_refresh(&self) -> Vec<ResourceAddress> {
         let (addresses, _) = RET_ins_extract_addresses(self.instructions());
-        let resource_addresses: Vec<ResourceAddress> = addresses
+        addresses
             .into_iter()
             .filter_map(|a| {
                 ResourceAddress::new(*a.as_node_id(), self.network_id()).ok()
             })
-            .collect_vec();
-        if resource_addresses.is_empty() {
-            None
-        } else {
-            Some(resource_addresses)
-        }
+            .collect_vec()
     }
 }
 
@@ -328,6 +321,68 @@ mod tests {
                 DetailedManifestClass::Transfer,
                 DetailedManifestClass::General
             ]
+        );
+    }
+
+    #[test]
+    fn network_id() {
+        assert_eq!(SUT::sample().network_id(), NetworkID::Mainnet);
+        assert_eq!(SUT::sample_other().network_id(), NetworkID::Simulator);
+    }
+
+    #[test]
+    #[should_panic(expected = "not yet implemented")]
+    fn manifest_summary() {
+        let manifest = SUT::sample();
+        let summary = manifest.summary();
+        assert_eq!(summary.addresses_of_accounts_requiring_auth[0].address(), "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease");
+    }
+
+    #[test]
+    fn resource_addresses_to_refresh() {
+        let manifest = SUT::sample();
+        let resources = manifest.resource_addresses_to_refresh();
+        assert_eq!(resources[0].address(), "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd");
+    }
+}
+
+#[cfg(test)]
+mod uniffi_tests {
+    use crate::prelude::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = TransactionManifest;
+
+    #[test]
+    fn samples() {
+        assert_eq!(new_transaction_manifest_sample(), SUT::sample());
+        assert_eq!(
+            new_transaction_manifest_sample_other(),
+            SUT::sample_other()
+        );
+    }
+
+    #[test]
+    fn to_string() {
+        assert_eq!(
+            transaction_manifest_to_string(&SUT::sample()),
+            SUT::sample().to_string()
+        );
+    }
+
+    #[test]
+    fn test_new_transaction_manifest_from_instructions_string_and_blobs() {
+        let s = new_transaction_manifest_sample().instructions_string();
+
+        assert_eq!(
+            new_transaction_manifest_from_instructions_string_and_blobs(
+                s.clone(),
+                NetworkID::Mainnet,
+                Blobs::new()
+            )
+            .unwrap()
+            .instructions_string(),
+            s
         );
     }
 }
