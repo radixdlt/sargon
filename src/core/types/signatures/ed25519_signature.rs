@@ -16,13 +16,13 @@ use radix_engine_common::crypto::Ed25519Signature as ScryptoEd25519Signature;
 #[display("{}", self.to_hex())]
 #[debug("{}", self.to_hex())]
 pub struct Ed25519Signature {
-    pub bytes: Hex64Bytes,
+    pub bytes: Exactly64Bytes,
 }
 
 impl From<ScryptoEd25519Signature> for Ed25519Signature {
     fn from(value: ScryptoEd25519Signature) -> Self {
         Self {
-            bytes: Hex64Bytes::from_bytes(&value.0),
+            bytes: Exactly64Bytes::from_bytes(&value.0),
         }
     }
 }

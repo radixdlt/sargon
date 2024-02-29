@@ -10,8 +10,8 @@ use radix_engine_common::crypto::PublicKey as ScryptoPublicKey;
 /// Hashes of public keys, either Ed25519PublicKey or Secp256k1PublicKey
 #[derive(Clone, Debug, PartialEq, EnumAsInner, Eq, Hash, uniffi::Enum)]
 pub enum PublicKeyHash {
-    Ed25519 { value: Hex29Bytes },
-    Secp256k1 { value: Hex29Bytes },
+    Ed25519 { value: Exactly29Bytes },
+    Secp256k1 { value: Exactly29Bytes },
 }
 
 impl PublicKeyHash {
@@ -30,12 +30,12 @@ impl From<ScryptoPublicKeyHash> for PublicKeyHash {
             ScryptoPublicKeyHash::Secp256k1(ScryptoSecp256k1PublicKeyHash(
                 bytes,
             )) => Self::Secp256k1 {
-                value: Hex29Bytes::from_bytes(&bytes),
+                value: Exactly29Bytes::from_bytes(&bytes),
             },
             ScryptoPublicKeyHash::Ed25519(ScryptoEd25519PublicKeyHash(
                 bytes,
             )) => Self::Ed25519 {
-                value: Hex29Bytes::from_bytes(&bytes),
+                value: Exactly29Bytes::from_bytes(&bytes),
             },
         }
     }

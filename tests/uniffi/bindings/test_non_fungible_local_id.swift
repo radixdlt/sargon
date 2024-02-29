@@ -62,20 +62,23 @@ extension Data {
 	}
 }
 
-extension NonFungibleLocalIdString {
+
+extension NonFungibleLocalId {
+
+	public init(bytes: BagOfBytes) throws {
+		self = try newNonFungibleLocalIdBytes(bytes: bytes)
+	}
+
 	public init(string: String) throws {
 		self = try newNonFungibleLocalIdString(string: string)
 	}
-}
-extension NonFungibleLocalIdString: ExpressibleByStringLiteral {
-	public init(stringLiteral string: String) {
-		do {
-			try self.init(string: string)
-		} catch {
-			fatalError(
-				"Invalid NonFungibleLocalIdString, error: \(error), value was: \(string)"
-			)
-		}
+
+	public init(ruid bytes: BagOfBytes) throws {
+		self = try newNonFungibleLocalIdRuid(bytes: bytes)
+	}
+
+	public init(int: UInt64) {
+		self = newNonFungibleLocalIdInt(value: int)
 	}
 }
 
@@ -86,16 +89,22 @@ extension NonFungibleLocalId: CustomStringConvertible {
 }
 
 func test() throws {
-	let hex32bytes = try newHex32BytesFrom(
-		bytes: Data(hex: "deadbeef12345678babecafe87654321fadedeaf01234567ecadabba76543210")
-	)
-	assert(NonFungibleLocalId.integer(value: 1234).description == "#1234#")
-	assert(NonFungibleLocalId.str(value: "foo").description == "<foo>")
+	let data = try Data(hex: "deadbeef12345678babecafe87654321fadedeaf01234567ecadabba76543210")
+	
+	var id = NonFungibleLocalId(int: 1234)
+	assert(id.description == "#1234#")
+
+	id = try NonFungibleLocalId(string: "foo")
+	assert(id.description == "<foo>")
+
+	id = try NonFungibleLocalId(ruid: data)
 	assert(
-		NonFungibleLocalId.ruid(value: hex32bytes).description
+		id.description
 			== "{deadbeef12345678-babecafe87654321-fadedeaf01234567-ecadabba76543210}")
+
+	id = try NonFungibleLocalId(bytes: data)
 	assert(
-		NonFungibleLocalId.bytes(value: hex32bytes.bagOfBytes).description
+		id.description
 			== "[deadbeef12345678babecafe87654321fadedeaf01234567ecadabba76543210]")
 
 }

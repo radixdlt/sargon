@@ -18,11 +18,13 @@ use radix_engine_common::crypto::Hash;
 #[serde(transparent)]
 #[debug("{value}")]
 pub struct RadixConnectPassword {
-    pub value: Hex32Bytes,
+    pub value: Exactly32Bytes,
 }
 
 #[uniffi::export]
-pub fn new_radix_connect_password(bytes: Hex32Bytes) -> RadixConnectPassword {
+pub fn new_radix_connect_password(
+    bytes: Exactly32Bytes,
+) -> RadixConnectPassword {
     RadixConnectPassword::new(bytes)
 }
 
@@ -37,7 +39,7 @@ pub fn new_radix_connect_password_sample_other() -> RadixConnectPassword {
 }
 
 impl RadixConnectPassword {
-    pub fn new(hex_32bytes: Hex32Bytes) -> Self {
+    pub fn new(hex_32bytes: Exactly32Bytes) -> Self {
         Self { value: hex_32bytes }
     }
 
@@ -49,43 +51,43 @@ impl RadixConnectPassword {
 impl HasSampleValues for RadixConnectPassword {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {
-        Self::new(Hex32Bytes::sample())
+        Self::new(Exactly32Bytes::sample())
     }
 
     fn sample_other() -> Self {
-        Self::new(Hex32Bytes::sample_other())
+        Self::new(Exactly32Bytes::sample_other())
     }
 }
 
 impl RadixConnectPassword {
     /// A sample used to facilitate unit tests.
     pub fn sample_aced() -> Self {
-        Self::new(Hex32Bytes::sample_aced())
+        Self::new(Exactly32Bytes::sample_aced())
     }
 
     /// A sample used to facilitate unit tests.
     pub fn sample_babe() -> Self {
-        Self::new(Hex32Bytes::sample_babe())
+        Self::new(Exactly32Bytes::sample_babe())
     }
 
     /// A sample used to facilitate unit tests.
     pub fn sample_cafe() -> Self {
-        Self::new(Hex32Bytes::sample_cafe())
+        Self::new(Exactly32Bytes::sample_cafe())
     }
 
     /// A sample used to facilitate unit tests.
     pub fn sample_dead() -> Self {
-        Self::new(Hex32Bytes::sample_dead())
+        Self::new(Exactly32Bytes::sample_dead())
     }
 
     /// A sample used to facilitate unit tests.
     pub fn sample_ecad() -> Self {
-        Self::new(Hex32Bytes::sample_ecad())
+        Self::new(Exactly32Bytes::sample_ecad())
     }
 
     /// A sample used to facilitate unit tests.
     pub fn sample_fade() -> Self {
-        Self::new(Hex32Bytes::sample_fade())
+        Self::new(Exactly32Bytes::sample_fade())
     }
 }
 
@@ -176,7 +178,7 @@ mod uniffi_tests {
 
     #[test]
     fn new() {
-        let bytes = Hex32Bytes::generate();
+        let bytes = Exactly32Bytes::generate();
         assert_eq!(new_radix_connect_password(bytes.clone()).value, bytes);
     }
 

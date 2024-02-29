@@ -148,7 +148,7 @@ impl TryFrom<&[u8]> for Ed25519PublicKey {
 impl Ed25519PublicKey {
     pub fn from_hex(hex: String) -> Result<Self> {
         // We want to ALWAYS go via `try_from(slice: &[u8])` since validates the EC point (`ScryptoEd25519PublicKey` doesn't!)
-        Hex32Bytes::from_str(hex.as_str())
+        Exactly32Bytes::from_str(hex.as_str())
             .map_err(|_| CommonError::InvalidEd25519PublicKeyFromString {
                 bad_value: hex,
             })

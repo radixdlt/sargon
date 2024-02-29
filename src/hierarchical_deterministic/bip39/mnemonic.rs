@@ -80,12 +80,12 @@ impl Mnemonic {
         Self::from_internal(internal)
     }
 
-    pub fn from_hex32(bytes: Hex32Bytes) -> Self {
+    pub fn from_exactly32(bytes: Exactly32Bytes) -> Self {
         Self::from_entropy(&bytes.to_vec())
     }
 
     pub fn generate_new() -> Self {
-        Self::from_hex32(Hex32Bytes::generate())
+        Self::from_exactly32(Exactly32Bytes::generate())
     }
 
     fn internal(&self) -> bip39::Mnemonic {

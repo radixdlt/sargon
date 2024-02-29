@@ -16,7 +16,7 @@ impl Secp256k1PrivateKey {
     /// used by wallets, which tend to rather use a Mnemonic and
     /// derive hierarchical deterministic keys.
     pub fn generate() -> Self {
-        Self::from_hex32_bytes(Hex32Bytes::generate())
+        Self::from_exactly32_bytes(Exactly32Bytes::generate())
             .expect("Should be able to generate 32 bytes")
     }
 }
@@ -54,7 +54,7 @@ impl Secp256k1PrivateKey {
         Self::from_bytes(bytes.as_slice())
     }
 
-    pub fn from_hex32_bytes(bytes: Hex32Bytes) -> Result<Self> {
+    pub fn from_exactly32_bytes(bytes: Exactly32Bytes) -> Result<Self> {
         Self::from_vec(bytes.to_vec())
     }
 }
@@ -63,11 +63,11 @@ impl FromStr for Secp256k1PrivateKey {
     type Err = CommonError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Hex32Bytes::from_hex(s)
+        Exactly32Bytes::from_hex(s)
             .map_err(|_| CommonError::InvalidSecp256k1PrivateKeyFromString {
                 bad_value: s.to_owned(),
             })
-            .and_then(Self::from_hex32_bytes)
+            .and_then(Self::from_exactly32_bytes)
     }
 }
 
@@ -273,11 +273,11 @@ mod tests {
     }
 
     #[test]
-    fn from_hex32_bytes() {
+    fn from_exactly32_bytes() {
         let str =
             "0000000000000000000000000000000000000000000000000000000000000001";
-        let hex32 = Hex32Bytes::from_hex(str).unwrap();
-        let key = Secp256k1PrivateKey::from_hex32_bytes(hex32).unwrap();
+        let hex32 = Exactly32Bytes::from_hex(str).unwrap();
+        let key = Secp256k1PrivateKey::from_exactly32_bytes(hex32).unwrap();
         assert_eq!(key.to_hex(), str);
     }
 

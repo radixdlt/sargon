@@ -338,6 +338,12 @@ pub enum CommonError {
 
     #[error("Failed to get TransactionReceipt from encoded bytes.")]
     FailedToDecodeEncodedReceipt = 10092,
+
+    #[error("Invalid byte count, was empty")]
+    BytesEmpty = 10093,
+
+    #[error("Invalid byte count, expected at most {max}, found: {found}")]
+    TooManyBytes { max: u64, found: u64 } = 10094,
 }
 
 /*

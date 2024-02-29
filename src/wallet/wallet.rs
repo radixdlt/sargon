@@ -89,7 +89,7 @@ impl Wallet {
 
         log::info!("Instantiating Wallet by creating a new Profile from entropy (provided), for client: {}", wallet_client_model);
 
-        let entropy_32bytes: Hex32Bytes = entropy.try_into()?;
+        let entropy_32bytes: Exactly32Bytes = entropy.try_into()?;
         let private_hd_factor_source =
             PrivateHierarchicalDeterministicFactorSource::new_with_entropy(
                 entropy_32bytes,

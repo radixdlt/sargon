@@ -131,7 +131,7 @@ pub fn build_information() -> SargonBuildInformation {
 }
 
 #[uniffi::export]
-pub fn hash(data: BagOfBytes) -> Hex32Bytes {
+pub fn hash(data: BagOfBytes) -> Exactly32Bytes {
     let h: radix_engine_common::crypto::Hash =
         hash_of::<Vec<u8>>(data.to_vec());
     h.into()

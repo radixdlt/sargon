@@ -12,12 +12,15 @@ fun randomByteArray(byteCount: Int): ByteArray {
     return Random.nextBytes(bytes)
 }
 
+fun ByteArray.toBagOfBytes() = newBagOfBytesFrom(bytes = this)
+
+
 fun test() {
-    val byteArray = randomByteArray(byteCount = 32)
+    val byteArray = randomByteArray(byteCount = 32).toBagOfBytes()
     // test identity
     assert(
-            RadixConnectPassword(value = newHex32BytesFrom(bytes = byteArray)) ==
-                    RadixConnectPassword(value = newHex32BytesFrom(bytes = byteArray))
+            RadixConnectPassword(value = newExactly32Bytes(bytes = byteArray)) ==
+                    RadixConnectPassword(value = newExactly32Bytes(bytes = byteArray))
     )
     assert(RadixConnectPassword.sample == RadixConnectPassword.sample)
     assert(RadixConnectPassword.sampleOther == RadixConnectPassword.sampleOther)
@@ -28,3 +31,4 @@ fun test() {
 }
 
 test()
+

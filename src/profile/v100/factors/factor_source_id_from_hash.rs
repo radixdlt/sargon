@@ -21,12 +21,12 @@ pub struct FactorSourceIDFromHash {
     pub kind: FactorSourceKind,
 
     /// The blake2b hash of the special HD public key derived at `CAP26::GetID`.
-    pub body: Hex32Bytes,
+    pub body: Exactly32Bytes,
 }
 
 impl FactorSourceIDFromHash {
     /// Instantiates a new `FactorSourceIDFromHash` from the `kind` and `body`.
-    pub fn new(kind: FactorSourceKind, body: Hex32Bytes) -> Self {
+    pub fn new(kind: FactorSourceKind, body: Exactly32Bytes) -> Self {
         Self { kind, body }
     }
 
@@ -38,7 +38,7 @@ impl FactorSourceIDFromHash {
             mnemonic_with_passphrase.derive_private_key(GetIDPath::default());
         let public_key_bytes = private_key.public_key().to_bytes();
         let hash: Hash = blake2b_256_hash(public_key_bytes);
-        let body = Hex32Bytes::from(hash);
+        let body = Exactly32Bytes::from(hash);
         Self::new(factor_source_kind, body)
     }
 

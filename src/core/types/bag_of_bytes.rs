@@ -185,8 +185,8 @@ impl HasSampleValues for BagOfBytes {
     }
 }
 
-impl From<Hex32Bytes> for BagOfBytes {
-    fn from(value: Hex32Bytes) -> Self {
+impl From<Exactly32Bytes> for BagOfBytes {
+    fn from(value: Exactly32Bytes) -> Self {
         value.to_vec().into()
     }
 }
@@ -195,37 +195,37 @@ impl BagOfBytes {
     /// `aced...``
     /// A sample used to facilitate unit tests.
     pub fn sample_aced() -> Self {
-        Hex32Bytes::sample_aced().into()
+        Exactly32Bytes::sample_aced().into()
     }
 
     /// `babe...``
     /// A sample used to facilitate unit tests.
     pub fn sample_babe() -> Self {
-        Hex32Bytes::sample_babe().into()
+        Exactly32Bytes::sample_babe().into()
     }
 
     /// `cafe...``
     /// A sample used to facilitate unit tests.
     pub fn sample_cafe() -> Self {
-        Hex32Bytes::sample_cafe().into()
+        Exactly32Bytes::sample_cafe().into()
     }
 
     /// `dead...``
     /// A sample used to facilitate unit tests.
     pub fn sample_dead() -> Self {
-        Hex32Bytes::sample_dead().into()
+        Exactly32Bytes::sample_dead().into()
     }
 
     /// `ecad...``
     /// A sample used to facilitate unit tests.
     pub fn sample_ecad() -> Self {
-        Hex32Bytes::sample_ecad().into()
+        Exactly32Bytes::sample_ecad().into()
     }
 
     /// `fade...``
     /// A sample used to facilitate unit tests.
     pub fn sample_fade() -> Self {
-        Hex32Bytes::sample_fade().into()
+        Exactly32Bytes::sample_fade().into()
     }
 }
 

@@ -17,13 +17,13 @@ use radix_engine_common::crypto::Secp256k1Signature as ScryptoSecp256k1Signature
 #[debug("{}", self.to_hex())]
 pub struct Secp256k1Signature {
     // recovery id + signature
-    pub bytes: Hex65Bytes,
+    pub bytes: Exactly65Bytes,
 }
 
 impl From<ScryptoSecp256k1Signature> for Secp256k1Signature {
     fn from(value: ScryptoSecp256k1Signature) -> Self {
         Self {
-            bytes: Hex65Bytes::from_bytes(&value.0),
+            bytes: Exactly65Bytes::from_bytes(&value.0),
         }
     }
 }

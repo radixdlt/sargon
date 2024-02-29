@@ -2,6 +2,14 @@ use crate::prelude::*;
 
 use radix_engine_common::prelude::StringNonFungibleLocalId as ScryptoStringNonFungibleLocalId;
 
+/// A string matching `[_0-9a-zA-Z]{1,64}`.
+///
+/// This is an internal wrapping of Scrypto's `StringNonFungibleLocalId`
+/// with a UniFFI custom converter using `String` as `Builtin`.
+///
+/// Using this type instead of `String` directly in `NonFungibleLocalId::Str`,
+/// allows us to do impl `From<NonFungibleLocalId> for NonFungibleLocalId` instead
+/// of `TryFrom<NonFungibleLocalId>`.
 #[derive(
     Clone,
     PartialEq,
@@ -22,7 +30,7 @@ pub struct NonFungibleLocalIdString {
 }
 
 #[uniffi::export]
-pub fn new_non_fungible_local_id_string(
+pub fn new_non_fungible_local_id_string_from_str(
     string: String,
 ) -> Result<NonFungibleLocalIdString> {
     string.parse()
@@ -124,7 +132,8 @@ mod uniffi_tests {
     #[test]
     fn from_str() {
         let s = "foo";
-        let sut: SUT = new_non_fungible_local_id_string(s.to_owned()).unwrap();
+        let sut: SUT =
+            new_non_fungible_local_id_string_from_str(s.to_owned()).unwrap();
         assert_eq!(sut.to_string(), s.to_owned());
     }
 

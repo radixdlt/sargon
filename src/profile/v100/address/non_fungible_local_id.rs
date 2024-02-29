@@ -1,31 +1,84 @@
 use crate::prelude::*;
 
+use radix_engine_common::prelude::BytesNonFungibleLocalId as ScryptoBytesNonFungibleLocalId;
 use radix_engine_common::prelude::NonFungibleLocalId as ScryptoNonFungibleLocalId;
 use radix_engine_common::prelude::StringNonFungibleLocalId as ScryptoStringNonFungibleLocalId;
 use radix_engine_toolkit_json::models::common::SerializableNonFungibleLocalId as RetNonFungibleLocalId;
 
 #[derive(Clone, Debug, Hash, PartialEq, Eq, uniffi::Enum)]
 pub enum NonFungibleLocalId {
+    /// Unsigned integers, up to u64.
+    ///
+    /// Create using `NonFungibleLocalId::integer(...)`.
     Integer { value: u64 },
+
+    /// String matching `[_0-9a-zA-Z]{1,64}`.
+    ///
+    /// Create using `NonFungibleLocalId::string(...).unwrap()`.
     Str { value: NonFungibleLocalIdString },
-    Bytes { value: BagOfBytes },
-    Ruid { value: Hex32Bytes },
+
+    /// Bytes, of length between 1 and 64.
+    ///
+    /// Create using `NonFungibleLocalId::bytes(...).unwrap()`.
+    Bytes { value: NonEmptyMax64Bytes },
+
+    /// RUID, v4, variant 1, big endian. See https://www.rfc-editor.org/rfc/rfc4122
+    ///
+    /// Create using `NonFungibleLocalId::ruid(...).unwrap()`.
+    Ruid { value: Exactly32Bytes },
 }
 
 impl NonFungibleLocalId {
+    pub fn integer(i: u64) -> Self {
+        Self::Integer { value: i }
+    }
+
     pub fn string(id: impl AsRef<str>) -> Result<Self> {
         id.as_ref()
             .parse::<NonFungibleLocalIdString>()
             .map(|value| Self::Str { value })
     }
+
     pub fn ruid(bytes: impl AsRef<[u8]>) -> Result<Self> {
-        Hex32Bytes::try_from(bytes.as_ref()).map(|value| Self::Ruid { value })
+        Exactly32Bytes::try_from(bytes.as_ref())
+            .map(|value| Self::Ruid { value })
+    }
+
+    pub fn bytes(bytes: impl AsRef<[u8]>) -> Result<Self> {
+        NonEmptyMax64Bytes::try_from(bytes.as_ref())
+            .map(|value| Self::Bytes { value })
     }
 }
 
 #[uniffi::export]
 pub fn non_fungible_local_id_as_str(id: NonFungibleLocalId) -> String {
     id.to_string()
+}
+
+#[uniffi::export]
+pub fn new_non_fungible_local_id_int(value: u64) -> NonFungibleLocalId {
+    NonFungibleLocalId::integer(value)
+}
+
+#[uniffi::export]
+pub fn new_non_fungible_local_id_string(
+    string: String,
+) -> Result<NonFungibleLocalId> {
+    NonFungibleLocalId::string(string)
+}
+
+#[uniffi::export]
+pub fn new_non_fungible_local_id_bytes(
+    bytes: BagOfBytes,
+) -> Result<NonFungibleLocalId> {
+    NonFungibleLocalId::bytes(bytes)
+}
+
+#[uniffi::export]
+pub fn new_non_fungible_local_id_ruid(
+    bytes: BagOfBytes,
+) -> Result<NonFungibleLocalId> {
+    NonFungibleLocalId::ruid(bytes)
 }
 
 impl NonFungibleLocalId {
@@ -40,6 +93,12 @@ impl std::fmt::Display for NonFungibleLocalId {
     }
 }
 
+impl From<ScryptoBytesNonFungibleLocalId> for NonEmptyMax64Bytes {
+    fn from(value: ScryptoBytesNonFungibleLocalId) -> Self {
+        Self::try_from(value.value()).expect("Should not be possible, since ScryptoBytesNonFungibleLocalId have validated length")
+    }
+}
+
 impl From<ScryptoNonFungibleLocalId> for NonFungibleLocalId {
     fn from(value: ScryptoNonFungibleLocalId) -> Self {
         match value {
@@ -50,7 +109,7 @@ impl From<ScryptoNonFungibleLocalId> for NonFungibleLocalId {
                 value: value.value(),
             },
             ScryptoNonFungibleLocalId::Bytes(value) => Self::Bytes {
-                value: value.value().to_vec().into(),
+                value: value.into(),
             },
             ScryptoNonFungibleLocalId::RUID(value) => Self::Ruid {
                 value: value.value().into(),
@@ -91,28 +150,25 @@ mod tests {
 
     use super::*;
 
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = NonFungibleLocalId;
+
     #[test]
     fn from_str_ok() {
         assert_eq!(
-            "<value>".parse::<NonFungibleLocalId>().unwrap(),
-            NonFungibleLocalId::string("value").unwrap()
+            "<value>".parse::<SUT>().unwrap(),
+            SUT::string("value").unwrap()
         );
     }
 
     #[test]
     fn display_integer() {
-        assert_eq!(
-            format!("{}", NonFungibleLocalId::Integer { value: 1234 }),
-            "#1234#"
-        );
+        assert_eq!(format!("{}", SUT::integer(1234)), "#1234#");
     }
 
     #[test]
     fn display_str() {
-        assert_eq!(
-            format!("{}", NonFungibleLocalId::string("foo").unwrap()),
-            "<foo>"
-        );
+        assert_eq!(format!("{}", SUT::string("foo").unwrap()), "<foo>");
     }
 
     #[test]
@@ -120,7 +176,7 @@ mod tests {
         assert_eq!(
             format!(
                 "{}",
-                NonFungibleLocalId::ruid(
+                SUT::ruid(
                     hex_decode("deadbeef12345678babecafe87654321fadedeaf01234567ecadabba76543210").unwrap()
                 ).unwrap()
             ),
@@ -130,53 +186,40 @@ mod tests {
 
     #[test]
     fn display_bytes() {
-        assert_eq!(
-            format!(
-                "{}",
-                NonFungibleLocalId::Bytes {
-                    value: vec![0xde, 0xad].into()
-                }
-            ),
-            "[dead]"
-        );
+        assert_eq!(format!("{}", SUT::bytes([0xde, 0xad]).unwrap()), "[dead]");
     }
 
     #[test]
     fn from_str_err() {
-        assert!(NonFungibleLocalId::from_str("no_angle_brackets").is_err());
+        assert!(SUT::from_str("no_angle_brackets").is_err());
     }
 
     #[test]
     fn invalid_local_id_string() {
         assert_eq!(
-            NonFungibleLocalId::string(""),
-            Err::<NonFungibleLocalId, _>(
-                CommonError::InvalidNonFungibleLocalIDString
-            )
+            SUT::string(""),
+            Err::<SUT, _>(CommonError::InvalidNonFungibleLocalIDString)
         );
     }
 
     #[test]
     fn from_native_ruid() {
-        let bytes = Hex32Bytes::sample_dead();
-        let value = NonFungibleLocalId::ruid(bytes.clone()).unwrap();
+        let bytes = Exactly32Bytes::sample_dead();
+        let value = SUT::ruid(bytes.clone()).unwrap();
         let scrypto = ScryptoNonFungibleLocalId::RUID(
             ScryptoRUIDNonFungibleLocalId::new(bytes.clone().bytes()),
         );
         assert_eq!(value.clone(), scrypto.clone().into());
         assert_eq!(value.clone().try_into(), Ok(scrypto.clone()));
         assert_eq!(
-            NonFungibleLocalId::from_str(value.clone().to_string().as_str()),
+            SUT::from_str(value.clone().to_string().as_str()),
             Ok(value)
         );
     }
 
-    #[test]
-    fn from_native_bytes() {
-        let bytes = [0xab; 64];
-        let non_native = NonFungibleLocalId::Bytes {
-            value: bytes.clone().to_vec().into(),
-        };
+    fn test_from_bytes<const N: usize>() {
+        let bytes = [0xab; N];
+        let non_native = SUT::bytes(bytes).unwrap();
         let native = ScryptoNonFungibleLocalId::Bytes(
             ScryptoBytesNonFungibleLocalId::new(bytes.clone().to_vec())
                 .unwrap(),
@@ -184,39 +227,44 @@ mod tests {
         assert_eq!(non_native.clone(), native.clone().into());
         assert_eq!(non_native.clone().try_into(), Ok(native.clone()));
         assert_eq!(
-            NonFungibleLocalId::from_str(
-                non_native.clone().to_string().as_str()
-            ),
+            SUT::from_str(non_native.clone().to_string().as_str()),
             Ok(non_native)
         );
     }
 
     #[test]
+    fn from_bytes() {
+        assert_eq!(SUT::bytes([]), Err(CommonError::BytesEmpty));
+        test_from_bytes::<1>();
+        test_from_bytes::<2>();
+        test_from_bytes::<63>();
+        test_from_bytes::<64>();
+    }
+
+    #[test]
     fn from_native_str() {
-        let value = NonFungibleLocalId::string("test").unwrap();
+        let value = SUT::string("test").unwrap();
         let scrypto = ScryptoNonFungibleLocalId::String(
             ScryptoStringNonFungibleLocalId::new("test").unwrap(),
         );
         assert_eq!(value.clone(), scrypto.clone().into());
         assert_eq!(value.clone().try_into(), Ok(scrypto.clone()));
         assert_eq!(
-            NonFungibleLocalId::from_str(value.clone().to_string().as_str()),
+            SUT::from_str(value.clone().to_string().as_str()),
             Ok(value)
         );
     }
 
     #[test]
     fn from_native_integer() {
-        let non_native = NonFungibleLocalId::Integer { value: 1234 };
+        let non_native = SUT::Integer { value: 1234 };
         let native = ScryptoNonFungibleLocalId::Integer(
             ScryptoIntegerNonFungibleLocalId::new(1234),
         );
         assert_eq!(non_native.clone(), native.clone().into());
         assert_eq!(non_native.clone().try_into(), Ok(native.clone()));
         assert_eq!(
-            NonFungibleLocalId::from_str(
-                non_native.clone().to_string().as_str()
-            ),
+            SUT::from_str(non_native.clone().to_string().as_str()),
             Ok(non_native)
         );
     }
@@ -224,10 +272,37 @@ mod tests {
     #[test]
     fn display_rui() {
         assert_eq!(
-            non_fungible_local_id_as_str(NonFungibleLocalId::ruid(
+            non_fungible_local_id_as_str(SUT::ruid(
                 hex_decode("deadbeef12345678babecafe87654321fadedeaf01234567ecadabba76543210").unwrap()
             ).unwrap()),
             "{deadbeef12345678-babecafe87654321-fadedeaf01234567-ecadabba76543210}"
+        );
+    }
+}
+
+#[cfg(test)]
+mod uniffi_tests {
+    use crate::prelude::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = NonFungibleLocalId;
+
+    #[test]
+    fn integer() {
+        assert_eq!(
+            new_non_fungible_local_id_int(1337),
+            SUT::Integer { value: 1337 }
+        );
+    }
+
+    #[test]
+    fn bytes() {
+        let s = "dead";
+        let b = NonEmptyMax64Bytes::from_hex(s).unwrap();
+        assert_eq!(
+            new_non_fungible_local_id_bytes(BagOfBytes::from_hex(s).unwrap())
+                .unwrap(),
+            SUT::Bytes { value: b }
         );
     }
 }
