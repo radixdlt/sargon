@@ -111,21 +111,20 @@ impl TransactionManifest {
 
     pub fn execution_summary(
         &self,
-        network_id: NetworkID,
-        encoded_receipt: BagOfBytes, // TODO: Replace with TYPE - read from GW.
+        encoded_receipt: BagOfBytes, // is: Vec<u8>
     ) -> Result<ExecutionSummary> {
         let receipt: TransactionReceipt = encoded_receipt.try_into()?;
         let ret_execution_summary =
-            RET_execution_summary(&self.scrypto_manifest(), &receipt.0)
+            RET_execution_summary(&self.scrypto_manifest(), &receipt.decoded)
                 .map_err(|e| {
-                    error!(
-                        "Failed to get execution summary from RET, error: {:?}",
-                        e
-                    );
-                    CommonError::FailedToGetRetExecutionSummaryFromManifest
-                })?;
+                error!(
+                    "Failed to get execution summary from RET, error: {:?}",
+                    e
+                );
+                CommonError::FailedToGetRetExecutionSummaryFromManifest
+            })?;
 
-        ExecutionSummary::from_ret(ret_execution_summary, network_id)
+        ExecutionSummary::from_ret(ret_execution_summary, self.network_id())
     }
 
     pub fn network_id(&self) -> NetworkID {
@@ -221,9 +220,9 @@ mod tests {
         assert_eq!(sut.clone(), sut.clone());
         instructions_eq(
             sut.clone().secret_magic.instructions,
-            Instructions::sample_simulator_instructions_string(),
+            Instructions::sample_mainnet_instructions_string(),
         );
-        assert_eq!(sut.instructions().len(), 3);
+        assert_eq!(sut.instructions().len(), 4);
     }
 
     #[test]
@@ -308,6 +307,27 @@ mod tests {
                 found_in_instructions: NetworkID::Mainnet,
                 specified_to_instructions_ctor: NetworkID::Stokenet
             })
+        );
+    }
+
+    #[test]
+    #[should_panic(expected = "not yet implemented")]
+    fn execution_summary() {
+        let instructions_string = "CALL_METHOD Address(\"account_tdx_2_128h2zv5m4mnprnfjxn4nf96pglgx064mut8np26hp7w9mm064es2dn\") \"withdraw\" Address(\"resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc\") Decimal(\"123\"); TAKE_FROM_WORKTOP Address(\"resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc\") Decimal(\"123\") Bucket(\"bucket1\"); CALL_METHOD Address(\"account_tdx_2_128x8q5es2dstqtcc8wqm843xdtfs0lgetfcdn62a54wxspj6yhpxkf\") \"try_deposit_or_abort\" Bucket(\"bucket1\") Enum<0u8>();";
+        let manifest =
+            SUT::new(instructions_string, NetworkID::Stokenet, Blobs::new())
+                .unwrap();
+
+        let summary = manifest
+            .execution_summary(TransactionReceipt::sample().encoded)
+            .unwrap();
+
+        assert_eq!(
+            summary.detailed_manifest_class,
+            vec![
+                DetailedManifestClass::Transfer,
+                DetailedManifestClass::General
+            ]
         );
     }
 }

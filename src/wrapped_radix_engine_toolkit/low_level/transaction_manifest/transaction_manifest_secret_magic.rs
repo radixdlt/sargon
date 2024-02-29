@@ -28,7 +28,7 @@ impl TransactionManifestSecretMagic {
 
 impl HasSampleValues for TransactionManifestSecretMagic {
     fn sample() -> Self {
-        Self::new(Instructions::sample_simulator(), Vec::new())
+        Self::new(Instructions::sample_mainnet(), Vec::new())
     }
 
     fn sample_other() -> Self {

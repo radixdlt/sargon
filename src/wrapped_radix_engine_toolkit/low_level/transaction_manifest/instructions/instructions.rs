@@ -94,7 +94,7 @@ fn extract_error_from_error(
 
 impl HasSampleValues for Instructions {
     fn sample() -> Self {
-        Self::sample_simulator()
+        Self::sample_mainnet()
     }
 
     fn sample_other() -> Self {
@@ -103,16 +103,14 @@ impl HasSampleValues for Instructions {
 }
 
 impl Instructions {
-    // https://github.com/radixdlt/radix-engine-toolkit/blob/cf2f4b4d6de56233872e11959861fbf12db8ddf6/crates/radix-engine-toolkit/tests/manifests/account/resource_transfer.rtm
-    // but modified, changed `None` -> `Enum<0u8>()`
-    pub(crate) fn sample_simulator_instructions_string() -> String {
+    pub(crate) fn sample_mainnet_instructions_string() -> String {
         include_str!("resource_transfer.rtm").to_owned()
     }
 
-    pub fn sample_simulator() -> Self {
+    pub fn sample_mainnet() -> Self {
         Self::new(
-            Self::sample_simulator_instructions_string(),
-            NetworkID::Simulator,
+            Self::sample_mainnet_instructions_string(),
+            NetworkID::Mainnet,
         )
         .expect("Valid sample value")
     }
@@ -152,19 +150,23 @@ mod tests {
 
     #[test]
     fn network_id() {
-        assert_eq!(SUT::sample_simulator().network_id, NetworkID::Simulator);
+        assert_eq!(SUT::sample_mainnet().network_id, NetworkID::Mainnet);
+        assert_eq!(
+            SUT::sample_simulator_other().network_id,
+            NetworkID::Simulator
+        );
     }
 
     #[test]
     fn new_from_instructions_string_wrong_network_id() {
         assert_eq!(
             SUT::new(
-                SUT::sample_simulator_instructions_string(),
-                NetworkID::Mainnet
+                SUT::sample_mainnet_instructions_string(),
+                NetworkID::Stokenet
             ),
             Err(CommonError::InvalidInstructionsWrongNetwork {
-                found_in_instructions: NetworkID::Simulator,
-                specified_to_instructions_ctor: NetworkID::Mainnet
+                found_in_instructions: NetworkID::Mainnet,
+                specified_to_instructions_ctor: NetworkID::Stokenet
             })
         );
     }

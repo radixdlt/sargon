@@ -4,7 +4,7 @@ use radix_engine_toolkit::transaction_types::ExecutionSummary as RetExecutionSum
 
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct ExecutionSummary {
-    detailed_manifest_class: Option<DetailedManifestClass>,
+    pub(crate) detailed_manifest_class: Vec<DetailedManifestClass>,
 }
 
 impl ExecutionSummary {

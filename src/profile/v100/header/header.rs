@@ -132,20 +132,23 @@ impl HasSampleValues for Header {
 pub mod tests {
     use crate::prelude::*;
 
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = Header;
+
     #[test]
     fn equality() {
-        assert_eq!(Header::sample(), Header::sample());
-        assert_eq!(Header::sample_other(), Header::sample_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(Header::sample(), Header::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn json_roundtrip_sample() {
-        let sut = Header::sample();
+        let sut = SUT::sample();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"
@@ -175,8 +178,8 @@ pub mod tests {
 
     #[test]
     fn last_updated() {
-        let a = Header::default();
-        let b = Header::default();
+        let a = SUT::default();
+        let b = SUT::default();
         assert_ne!(a.last_modified, b.last_modified);
     }
 
@@ -188,7 +191,7 @@ pub mod tests {
             date,
             "iPhone".to_string(),
         );
-        let sut = Header::with_values(
+        let sut = SUT::with_values(
             ProfileID::from_str("12345678-bbbb-cccc-dddd-abcd12345678")
                 .unwrap(),
             device,
@@ -201,7 +204,7 @@ pub mod tests {
     #[test]
     fn creating_device() {
         let value = DeviceInfo::new_iphone();
-        let sut = Header {
+        let sut = SUT {
             creating_device: value.clone(),
             ..Default::default()
         };
@@ -211,7 +214,7 @@ pub mod tests {
     #[test]
     fn get_id() {
         let value = profile_id();
-        let sut = Header {
+        let sut = SUT {
             id: value.clone(),
             ..Default::default()
         };
@@ -221,7 +224,7 @@ pub mod tests {
     #[test]
     fn snapshot_version() {
         let value = ProfileSnapshotVersion::default();
-        let sut = Header {
+        let sut = SUT {
             snapshot_version: value,
             ..Default::default()
         };
@@ -233,18 +236,21 @@ pub mod tests {
 mod uniffi_tests {
     use crate::{new_header_sample, new_header_sample_other, HasSampleValues};
 
-    use super::Header;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = Header;
 
     #[test]
     fn equality_samples() {
-        assert_eq!(Header::sample(), new_header_sample());
-        assert_eq!(Header::sample_other(), new_header_sample_other());
+        assert_eq!(SUT::sample(), new_header_sample());
+        assert_eq!(SUT::sample_other(), new_header_sample_other());
     }
 
     #[test]
     fn header_identifiable() {
         use identified_vec::Identifiable;
-        let sut = Header::sample();
+        let sut = SUT::sample();
         assert_eq!(&sut.id(), &sut.id);
     }
 }
