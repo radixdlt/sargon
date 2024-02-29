@@ -202,6 +202,17 @@ mod tests {
     }
 
     #[test]
+    fn extract_error_from_error_gen_non_addr_err() {
+        assert_eq!(
+            extract_error_from_error(
+                ScryptoCompileError::GeneratorError(transaction::manifest::generator::GeneratorError::BlobNotFound("dead".to_owned())),
+                NetworkID::Simulator
+            ),
+            CommonError::InvalidInstructionsString
+        );
+    }
+
+    #[test]
     fn extract_error_from_error_gen_err_package_addr() {
         assert_eq!(
             extract_error_from_error(
@@ -216,7 +227,7 @@ mod tests {
     fn extract_error_from_error_gen_err_component_addr() {
         assert_eq!(
             extract_error_from_error(
-                ScryptoCompileError::GeneratorError(transaction::manifest::generator::GeneratorError::InvalidPackageAddress(ComponentAddress::sample().to_string())),
+                ScryptoCompileError::GeneratorError(transaction::manifest::generator::GeneratorError::InvalidComponentAddress(ComponentAddress::sample().to_string())),
                 NetworkID::Simulator
             ),
             CommonError::InvalidInstructionsWrongNetwork { found_in_instructions: NetworkID::Mainnet, specified_to_instructions_ctor: NetworkID::Simulator }
@@ -227,7 +238,7 @@ mod tests {
     fn extract_error_from_error_gen_err_resource_addr() {
         assert_eq!(
             extract_error_from_error(
-                ScryptoCompileError::GeneratorError(transaction::manifest::generator::GeneratorError::InvalidPackageAddress(ResourceAddress::sample().to_string())),
+                ScryptoCompileError::GeneratorError(transaction::manifest::generator::GeneratorError::InvalidResourceAddress(ResourceAddress::sample().to_string())),
                 NetworkID::Simulator
             ),
             CommonError::InvalidInstructionsWrongNetwork { found_in_instructions: NetworkID::Mainnet, specified_to_instructions_ctor: NetworkID::Simulator }

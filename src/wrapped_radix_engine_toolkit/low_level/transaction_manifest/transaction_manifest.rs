@@ -123,7 +123,6 @@ impl TransactionManifest {
                 );
                 CommonError::FailedToGetRetExecutionSummaryFromManifest
             })?;
-
         ExecutionSummary::from_ret(ret_execution_summary, self.network_id())
     }
 
@@ -321,6 +320,15 @@ mod tests {
                 DetailedManifestClass::Transfer,
                 DetailedManifestClass::General
             ]
+        );
+    }
+
+    #[test]
+    fn execution_summary_invalid_receipt() {
+        assert_eq!(
+            TransactionManifest::sample()
+                .execution_summary(BagOfBytes::from_hex("dead").unwrap()),
+            Err(CommonError::FailedToDecodeEncodedReceipt)
         );
     }
 
