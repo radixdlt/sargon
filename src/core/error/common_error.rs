@@ -344,6 +344,12 @@ pub enum CommonError {
 
     #[error("Invalid byte count, expected at most {max}, found: {found}")]
     TooManyBytes { max: u64, found: u64 } = 10094,
+
+    #[error("Invalid Manifest Instructions String, found network in instructions {found_in_instructions}, but specified to constructor: {specified_to_instructions_ctor}")]
+    InvalidInstructionsWrongNetwork {
+        found_in_instructions: NetworkID,
+        specified_to_instructions_ctor: NetworkID,
+    } = 10095,
 }
 
 /*

@@ -189,7 +189,9 @@ impl HasSampleValues for TransactionManifest {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use crate::prelude::*;
+    use std::collections::BTreeMap;
 
     impl FromStr for TransactionManifest {
         type Err = crate::CommonError;
@@ -233,5 +235,79 @@ mod tests {
             Instructions::sample_other_simulator_instructions_string(),
         );
         assert_eq!(sut.instructions().len(), 8);
+    }
+
+    #[test]
+    fn scrypto_roundtrip() {
+        let ins = vec![
+            ScryptoInstruction::DropAllProofs,
+            ScryptoInstruction::DropAuthZoneProofs,
+        ];
+        let scrypto = ScryptoTransactionManifest {
+            instructions: ins.clone(),
+            blobs: BTreeMap::new(),
+        };
+        let sut = SUT {
+            secret_magic: TransactionManifestSecretMagic::new(
+                Instructions {
+                    secret_magic: InstructionsSecretMagic(ins),
+                    network_id: NetworkID::Mainnet,
+                },
+                Vec::new(),
+            ),
+        };
+        assert_eq!(scrypto.clone(), sut.clone().into());
+        assert_eq!(sut.scrypto_manifest(), scrypto);
+    }
+
+    #[test]
+    fn new_from_instructions_string() {
+        let instructions_str = r#"CALL_METHOD
+        Address("account_sim1cyvgx33089ukm2pl97pv4max0x40ruvfy4lt60yvya744cve475w0q")
+        "lock_fee"
+        Decimal("500");
+                "#;
+
+        assert_eq!(
+            SUT::new(instructions_str, NetworkID::Simulator, Blobs::new())
+                .unwrap()
+                .instructions()
+                .len(),
+            1
+        );
+    }
+
+    #[test]
+    fn new_from_instructions_string_wrong_network_id_sim_main() {
+        let instructions_str = r#"CALL_METHOD
+        Address("account_sim1cyvgx33089ukm2pl97pv4max0x40ruvfy4lt60yvya744cve475w0q")
+        "lock_fee"
+        Decimal("500");
+                "#;
+
+        assert_eq!(
+            SUT::new(instructions_str, NetworkID::Mainnet, Blobs::new()),
+            Err(CommonError::InvalidInstructionsWrongNetwork {
+                found_in_instructions: NetworkID::Simulator,
+                specified_to_instructions_ctor: NetworkID::Mainnet
+            })
+        );
+    }
+
+    #[test]
+    fn new_from_instructions_string_wrong_network_id_main_sim() {
+        let instructions_str = r#"CALL_METHOD
+        Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+        "lock_fee"
+        Decimal("500");
+                "#;
+
+        assert_eq!(
+            SUT::new(instructions_str, NetworkID::Stokenet, Blobs::new()),
+            Err(CommonError::InvalidInstructionsWrongNetwork {
+                found_in_instructions: NetworkID::Mainnet,
+                specified_to_instructions_ctor: NetworkID::Stokenet
+            })
+        );
     }
 }

@@ -2,10 +2,13 @@ use std::ops::Deref;
 
 use crate::prelude::*;
 
+use radix_engine::types::GlobalAddress;
 use transaction::{
-    manifest::compile as scrypto_compile,
-    manifest::decompile as scrypto_decompile,
-    manifest::MockBlobProvider as ScryptoMockBlobProvider,
+    manifest::{
+        compile as scrypto_compile, decompile as scrypto_decompile,
+        CompileError as ScryptoCompileError,
+        MockBlobProvider as ScryptoMockBlobProvider,
+    },
     prelude::InstructionV1 as ScryptoInstruction,
 };
 
@@ -41,11 +44,51 @@ impl Instructions {
             &network_definition,
             blob_provider,
         )
-        .map_err(|_e| CommonError::InvalidInstructionsString)
+        .map_err(|e| extract_error_from_error(e, network_id))
         .map(|manifest| Self {
             secret_magic: InstructionsSecretMagic(manifest.instructions),
             network_id,
         })
+    }
+}
+
+use radix_engine_toolkit::functions::address::decode as RET_decode_address;
+
+fn extract_error_from_addr(
+    s: String,
+    expected_network: NetworkID,
+) -> CommonError {
+    let Some(Some(network_id)) = RET_decode_address(&s)
+        .map(|t| t.0)
+        .map(NetworkID::from_repr)
+    else {
+        return CommonError::InvalidInstructionsString;
+    };
+    if network_id != expected_network {
+        CommonError::InvalidInstructionsWrongNetwork {
+            found_in_instructions: network_id,
+            specified_to_instructions_ctor: expected_network,
+        }
+    } else {
+        CommonError::InvalidInstructionsString
+    }
+}
+
+fn extract_error_from_error(
+    err: ScryptoCompileError,
+    expected_network: NetworkID,
+) -> CommonError {
+    use transaction::manifest::generator::GeneratorError::*;
+    let n = expected_network;
+    match err {
+        ScryptoCompileError::GeneratorError(gen_err) => match gen_err {
+            InvalidPackageAddress(a) => extract_error_from_addr(a, n),
+            InvalidComponentAddress(a) => extract_error_from_addr(a, n),
+            InvalidResourceAddress(a) => extract_error_from_addr(a, n),
+            InvalidGlobalAddress(a) => extract_error_from_addr(a, n),
+            _ => CommonError::InvalidInstructionsString,
+        },
+        _ => CommonError::InvalidInstructionsString,
     }
 }
 
@@ -110,5 +153,19 @@ mod tests {
     #[test]
     fn network_id() {
         assert_eq!(SUT::sample_simulator().network_id, NetworkID::Simulator);
+    }
+
+    #[test]
+    fn new_from_instructions_string_wrong_network_id() {
+        assert_eq!(
+            SUT::new(
+                SUT::sample_simulator_instructions_string(),
+                NetworkID::Mainnet
+            ),
+            Err(CommonError::InvalidInstructionsWrongNetwork {
+                found_in_instructions: NetworkID::Simulator,
+                specified_to_instructions_ctor: NetworkID::Mainnet
+            })
+        );
     }
 }
