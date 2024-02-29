@@ -376,14 +376,13 @@ mod tests {
         let re_rev =
             "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef";
         std::env::set_var(
-            "RADIX-ENGINE-TOOLKIT-DEPENDENCY",
+            RADIX_ENGINE_TOOLKIT_DEPENDENCY,
             format!("version = {}", ret_v),
         );
-        std::env::set_var(
-            "RADIX-ENGINE-DEPENDENCY",
-            format!("rev = {}", re_rev),
-        );
+        std::env::set_var(RADIX_ENGINE_DEPENDENCY, format!("rev = {}", re_rev));
         let info = build_information();
+        std::env::remove_var(RADIX_ENGINE_TOOLKIT_DEPENDENCY);
+        std::env::remove_var(RADIX_ENGINE_DEPENDENCY);
         assert_eq!(info.sargon_version.matches(".").count(), 2);
         assert_eq!(
             info.dependencies

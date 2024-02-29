@@ -305,4 +305,19 @@ mod uniffi_tests {
             SUT::Bytes { value: b }
         );
     }
+
+    #[test]
+    fn ruid() {
+        assert_eq!(new_non_fungible_local_id_ruid(BagOfBytes::sample_aced()).unwrap().to_string(), "{acedacedacedaced-acedacedacedaced-acedacedacedaced-acedacedacedaced}");
+    }
+
+    #[test]
+    fn string() {
+        assert_eq!(
+            new_non_fungible_local_id_string("foo".to_owned())
+                .unwrap()
+                .to_string(),
+            "<foo>"
+        );
+    }
 }
