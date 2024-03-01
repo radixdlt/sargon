@@ -1,0 +1,81 @@
+use crate::prelude::*;
+
+use transaction::model::{
+    MessageContentsV1 as ScryptoMessageContents, MessageV1 as ScryptoMessage,
+    PlaintextMessageV1 as ScryptoPlaintextMessage,
+};
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Record)]
+pub struct PlaintextMessage {
+    pub mime_type: String,
+    pub message: MessageContents,
+}
+
+impl PlaintextMessage {
+    pub fn new(message: impl AsRef<str>) -> Self {
+        Self {
+            mime_type: "text/plain".to_owned(),
+            message: MessageContents::StringMessage {
+                string: message.as_ref().to_owned(),
+            },
+        }
+    }
+}
+
+impl From<PlaintextMessage> for ScryptoPlaintextMessage {
+    fn from(value: PlaintextMessage) -> Self {
+        Self {
+            mime_type: value.mime_type,
+            message: value.message.into(),
+        }
+    }
+}
+
+impl From<ScryptoPlaintextMessage> for PlaintextMessage {
+    fn from(value: ScryptoPlaintextMessage) -> Self {
+        Self {
+            mime_type: value.mime_type,
+            message: value.message.into(),
+        }
+    }
+}
+
+impl HasSampleValues for PlaintextMessage {
+    fn sample() -> Self {
+        Self::new("Hello Radix!")
+    }
+
+    fn sample_other() -> Self {
+        Self::new("Lorem ipsum!!")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+    use crate::prelude::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = PlaintextMessage;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn to_from_scrypto() {
+        let roundtrip = |s: SUT| {
+            Into::<SUT>::into(Into::<ScryptoPlaintextMessage>::into(s))
+        };
+        roundtrip(SUT::sample());
+        roundtrip(SUT::sample_other());
+    }
+}

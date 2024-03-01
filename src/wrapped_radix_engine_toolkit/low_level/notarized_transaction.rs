@@ -51,7 +51,15 @@ impl TryFrom<ScryptoNotarizedTransaction> for NotarizedTransaction {
 
 impl HasSampleValues for NotarizedTransaction {
     fn sample() -> Self {
-        todo!()
+        let private_key = Ed25519PrivateKey::sample_alice();
+        let intent = TransactionIntent::sample();
+
+        let signed_intent =
+            SignedIntent::new(intent, IntentSignatures::default());
+
+        let signed_intent_hash = signed_intent.hash().unwrap();
+        let notary_signature = private_key.sign(&signed_intent_hash.hash);
+        NotarizedTransaction::new(signed_intent, notary_signature.into())
     }
 
     // Identical to: https://github.com/radixdlt/radixdlt-scrypto/blob/ff21f24952318387803ae720105eec079afe33f3/transaction/src/model/hash/encoder.rs#L115
@@ -59,34 +67,22 @@ impl HasSampleValues for NotarizedTransaction {
     // bech32 encoded   (mainnet): `"txid_rdx1vrjkzlt8pekg5s46tum5na8lzpulvc3p72p92nkdm2dd8p0vkx2syss63y"`
     // bech32 encoded (simulator): `"txid_sim1vrjkzlt8pekg5s46tum5na8lzpulvc3p72p92nkdm2dd8p0vkx2svr7ejr"`
     fn sample_other() -> Self {
-        let secret_key: Secp256k1PrivateKey =
+        let private_key: Secp256k1PrivateKey =
             radix_engine::types::Secp256k1PrivateKey::from_u64(1)
                 .unwrap()
                 .into();
-        // let network_id = NetworkID::Simulator;
-        // let header = TransactionHeader {
-        //     network_id,
-        //     start_epoch_inclusive: 0.into(),
-        //     end_epoch_exclusive: 10.into(),
-        //     nonce: 10.into(),
-        //     notary_is_signatory: true,
-        //     notary_public_key: pk.public_key().into(),
-        //     tip_percentage: 0,
-        // };
-        // let intent = TransactionIntent::new(
-        //     header,
-        //     TransactionManifest::empty(network_id),
-        //     Message::None,
-        // );
+
         let intent = TransactionIntent::sample_other();
         assert_eq!(intent.intent_hash().unwrap().to_string(), "txid_sim1vrjkzlt8pekg5s46tum5na8lzpulvc3p72p92nkdm2dd8p0vkx2svr7ejr");
         let signed_intent =
             SignedIntent::new(intent, IntentSignatures::new(Vec::new()));
 
         let signed_intent_hash = signed_intent.hash().unwrap();
-        let notary_signature_secp = secret_key.sign(&signed_intent_hash.hash);
-        let notary_signature: NotarySignature = notary_signature_secp.into();
-
-        NotarizedTransaction::new(signed_intent, notary_signature)
+        // let notary_signature = private_key.sign(&signed_intent_hash.hash);
+        // NotarizedTransaction::new(signed_intent, notary_signature.into())
+        NotarizedTransaction::new(
+            signed_intent,
+            private_key.notarize(&signed_intent_hash),
+        )
     }
 }
