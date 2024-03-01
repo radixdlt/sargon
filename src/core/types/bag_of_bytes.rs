@@ -1,7 +1,6 @@
 use std::ops::{Deref, Neg};
 
 use crate::prelude::*;
-use radix_engine_common::crypto::{Hash, IsHash};
 
 /// This is a TEMPORARY workaround until Kotlin => ByteArray equatable issue for
 /// Records has been solved, see: https://github.com/mozilla/uniffi-rs/issues/1985
@@ -138,7 +137,7 @@ impl BagOfBytes {
 impl From<Hash> for BagOfBytes {
     /// Instantiates a new `BagOfBytes` from the `Hash` (32 bytes).
     fn from(value: Hash) -> Self {
-        value.into_bytes().as_slice().into()
+        value.bytes().as_slice().into()
     }
 }
 
@@ -382,7 +381,7 @@ mod tests {
     #[test]
     fn from_hash() {
         let digest = hash_of(vec![0xde, 0xad]);
-        assert_eq!(BagOfBytes::from(digest).to_vec(), digest.to_vec());
+        assert_eq!(BagOfBytes::from(digest.clone()).to_vec(), digest.bytes());
     }
 
     #[test]

@@ -6,6 +6,8 @@ use radix_engine_toolkit::functions::instructions::{
 };
 use transaction::prelude::InstructionV1 as ScryptoInstruction;
 
+use transaction::model::InstructionsV1 as ScryptoInstructions;
+
 /// An internal representation of a collection of Instructions,
 /// which intentions is to allow the `struct Instructions`
 /// to have no public initializers in Swift/Kotlin land, since it
@@ -37,21 +39,28 @@ impl crate::UniffiCustomTypeConverter for InstructionsSecretMagic {
     }
 }
 
+impl From<ScryptoInstructions> for InstructionsSecretMagic {
+    fn from(value: ScryptoInstructions) -> Self {
+        Self(value.0)
+    }
+}
+
 impl HasSampleValues for InstructionsSecretMagic {
     fn sample() -> Self {
         Self(vec![
-            ScryptoInstruction::DropAuthZoneProofs, // 0x12
-            ScryptoInstruction::DropAuthZoneRegularProofs, // 0x13
+            ScryptoInstruction::DropAuthZoneProofs, // sbor: 0x12
+            ScryptoInstruction::DropAuthZoneRegularProofs, // sbor: 0x13
         ])
     }
 
     fn sample_other() -> Self {
-        Self(vec![ScryptoInstruction::DropAuthZoneSignatureProofs]) // 0x17
+        Self(vec![ScryptoInstruction::DropAuthZoneSignatureProofs]) // sbor: 0x17
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use crate::prelude::*;
 
     #[allow(clippy::upper_case_acronyms)]
@@ -61,6 +70,18 @@ mod tests {
     fn equality() {
         assert_eq!(SUT::sample(), SUT::sample());
         assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn from_scrypto() {
+        assert_eq!(
+            SUT::sample(),
+            ScryptoInstructions(vec![
+                ScryptoInstruction::DropAuthZoneProofs,
+                ScryptoInstruction::DropAuthZoneRegularProofs,
+            ])
+            .into()
+        );
     }
 
     #[test]

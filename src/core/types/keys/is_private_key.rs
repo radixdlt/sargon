@@ -7,8 +7,5 @@ pub trait IsPrivateKey<P: IsPublicKey<Self::Signature>>: Sized {
 
     fn public_key(&self) -> P;
 
-    fn sign(
-        &self,
-        msg_hash: &impl radix_engine_common::crypto::IsHash,
-    ) -> Self::Signature;
+    fn sign(&self, msg_hash: &Hash) -> Self::Signature;
 }

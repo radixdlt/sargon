@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine_common::crypto::Hash;
-
 /// A client the user have connected P2P with, typically a
 /// WebRTC connections with a DApp, but might be Android or iPhone
 /// client as well.

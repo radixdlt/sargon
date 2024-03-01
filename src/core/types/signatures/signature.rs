@@ -1,3 +1,5 @@
+use transaction::model::SignatureV1 as ScryptoSignature;
+
 use crate::prelude::*;
 
 /// Either a Signature on `Curve25519` or `Secp256k1`
@@ -14,6 +16,25 @@ use crate::prelude::*;
 pub enum Signature {
     Secp256k1 { value: Secp256k1Signature },
     Ed25519 { value: Ed25519Signature },
+}
+
+impl From<ScryptoSignature> for Signature {
+    fn from(value: ScryptoSignature) -> Self {
+        match value {
+            ScryptoSignature::Secp256k1(s) => {
+                Self::Secp256k1 { value: s.into() }
+            }
+            ScryptoSignature::Ed25519(s) => Self::Ed25519 { value: s.into() },
+        }
+    }
+}
+impl From<Signature> for ScryptoSignature {
+    fn from(value: Signature) -> Self {
+        match value {
+            Signature::Secp256k1 { value } => Self::Secp256k1(value.into()),
+            Signature::Ed25519 { value } => Self::Ed25519(value.into()),
+        }
+    }
 }
 
 impl From<Secp256k1Signature> for Signature {

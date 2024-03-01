@@ -196,6 +196,21 @@ impl From<PublicKey> for ScryptoPublicKey {
     }
 }
 
+impl TryFrom<ScryptoPublicKey> for PublicKey {
+    type Error = crate::CommonError;
+
+    fn try_from(value: ScryptoPublicKey) -> Result<Self, Self::Error> {
+        match value {
+            ScryptoPublicKey::Secp256k1(key) => {
+                Secp256k1PublicKey::try_from(key).map(|k| k.into())
+            }
+            ScryptoPublicKey::Ed25519(key) => {
+                Ed25519PublicKey::try_from(key).map(|k| k.into())
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
 

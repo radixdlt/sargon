@@ -355,6 +355,20 @@ pub enum CommonError {
         "Failed to UniFFI decode bytes into Transaction Manifest Instructions"
     )]
     FailedToUniFFIDecodeBytesToManifestInstructions = 10096,
+
+    #[error("Failed to decode Transaction Hash, value: {bad_value}")]
+    FailedToDecodeTransactionHash { bad_value: String } = 10097,
+
+    #[error("Failed to hash transaction intent")]
+    FailedToHashIntent = 10098,
+
+    #[error("Encrypted Messages are not yet supported")]
+    EncryptedMessagesAreNotYetSupported = 10099,
+
+    #[error("Failed to Bech32 decode transaction Hash after having tested all Network IDs, from: {bad_value}")]
+    FailedToBech32DecodeTransactionHashAfterHavingTestedAllNetworkID {
+        bad_value: String,
+    } = 100100,
 }
 
 /*

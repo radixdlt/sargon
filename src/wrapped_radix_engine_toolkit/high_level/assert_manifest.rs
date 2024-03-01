@@ -20,7 +20,7 @@ use crate::prelude::*;
 #[cfg(test)]
 pub fn manifest_eq(manifest: TransactionManifest, expected: impl AsRef<str>) {
     let trim =
-        |s: &str| s.replace(" ", "").replace("\t", " ").trim().to_owned();
+        |s: &str| s.replace(' ', "").replace('\t', " ").trim().to_owned();
     pretty_assertions::assert_eq!(
         trim(&manifest.to_string()),
         trim(expected.as_ref())
@@ -47,7 +47,7 @@ pub fn manifest_eq(manifest: TransactionManifest, expected: impl AsRef<str>) {
 #[cfg(test)]
 pub fn instructions_eq(instructions: Instructions, expected: impl AsRef<str>) {
     let trim =
-        |s: &str| s.replace(" ", "").replace("\t", " ").trim().to_owned();
+        |s: &str| s.replace(' ', "").replace('\t', " ").trim().to_owned();
     pretty_assertions::assert_eq!(
         trim(&instructions.to_string()),
         trim(expected.as_ref())

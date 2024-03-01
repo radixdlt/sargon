@@ -1,3 +1,4 @@
+import Foundation
 import Sargon
 
 extension TransactionManifest {
@@ -9,8 +10,16 @@ extension TransactionManifest: CustomStringConvertible {
 		transactionManifestToString(manifest: self)
 	}
 }
-public typealias Blob = BagOfBytes
-public typealias Blobs = [Blob]
+extension Blob {
+	public init(data: Data) {
+		self = newBlobFromBytes(bytes: data)
+	}
+}
+extension Blobs: ExpressibleByArrayLiteral {
+	public init(arrayLiteral blobs: Blob...) {
+		self = newBlobsFromBlobList(blobs: blobs)
+	}
+}
 extension TransactionManifest {
 	public init(instructionsString: String, networkID: NetworkId, blobs: Blobs = []) throws {
 		self = try newTransactionManifestFromInstructionsStringAndBlobs(
@@ -55,7 +64,7 @@ func test() throws {
 	print("✨ ✨ ✨ ✨ ✨")
 	assert(TransactionManifest.sample.description == instructionsString)
 	let sut = try TransactionManifest(
-		instructionsString: instructionsString, 
+		instructionsString: instructionsString,
 		networkID: .mainnet
 	)
 	assert(sut == TransactionManifest.sample)

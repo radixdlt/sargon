@@ -1,7 +1,15 @@
 use crate::prelude::*;
 
 macro_rules! dummy_sargon {
-    ($struct_name:ident) => {
+    (
+        $(
+            #[doc = $expr: expr]
+        )*
+        $struct_name:ident
+    ) => {
+        $(
+            #[doc = $expr]
+        )*
         #[derive(
             Serialize,
             Deserialize,
