@@ -102,6 +102,22 @@ pub fn hash_of<T: AsRef<[u8]>>(data: T) -> Hash {
     blake2b_256_hash(data).into()
 }
 
+impl HasSampleValues for Hash {
+    fn sample() -> Self {
+        // "Hello Radix".as_bytes()
+        "48f1bd08444b5e713db9e14caac2faae71836786ac94d645b00679728202a935"
+            .parse::<Self>()
+            .unwrap()
+    }
+
+    fn sample_other() -> Self {
+        // "Radix... just imagine".as_bytes()
+        "196ca16b4a35c1c3df18e20cb199c99d129cec6ea62eb03a29fde16db897f4b1"
+            .parse::<Self>()
+            .unwrap()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
@@ -110,10 +126,39 @@ mod tests {
     type SUT = Hash;
 
     #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
     fn test_hash() {
         assert_eq!(
             hash_of("Hello Radix".as_bytes()).to_string(),
             "48f1bd08444b5e713db9e14caac2faae71836786ac94d645b00679728202a935"
+        );
+    }
+
+    #[test]
+    fn to_string() {
+        assert_eq!(
+            SUT::sample_other().to_string(),
+            "196ca16b4a35c1c3df18e20cb199c99d129cec6ea62eb03a29fde16db897f4b1"
+        );
+    }
+
+    #[test]
+    fn from_str() {
+        assert_eq!(
+            "48f1bd08444b5e713db9e14caac2faae71836786ac94d645b00679728202a935"
+                .parse::<SUT>()
+                .unwrap(),
+            hash_of("Hello Radix".as_bytes())
         );
     }
 }

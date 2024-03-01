@@ -16,6 +16,18 @@ pub struct SignedIntent {
 }
 
 impl SignedIntent {
+    pub fn new(
+        intent: TransactionIntent,
+        intent_signatures: IntentSignatures,
+    ) -> Self {
+        Self {
+            intent,
+            intent_signatures,
+        }
+    }
+}
+
+impl SignedIntent {
     pub fn network_id(&self) -> NetworkID {
         self.intent.network_id()
     }
@@ -32,18 +44,6 @@ impl SignedIntent {
     }
 }
 
-impl SignedIntent {
-    pub fn new(
-        intent: TransactionIntent,
-        intent_signatures: IntentSignatures,
-    ) -> Self {
-        Self {
-            intent,
-            intent_signatures,
-        }
-    }
-}
-
 impl TryFrom<ScryptoSignedIntent> for SignedIntent {
     type Error = crate::CommonError;
 
@@ -57,56 +57,12 @@ impl TryFrom<ScryptoSignedIntent> for SignedIntent {
         })
     }
 }
+
 impl From<SignedIntent> for ScryptoSignedIntent {
     fn from(value: SignedIntent) -> Self {
         Self {
             intent: value.intent.into(),
             intent_signatures: value.intent_signatures.into(),
-        }
-    }
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
-pub struct IntentSignature {
-    pub(crate) secret_magic: SignatureWithPublicKey,
-}
-impl From<IntentSignature> for ScryptoIntentSignature {
-    fn from(value: IntentSignature) -> Self {
-        ScryptoIntentSignature(value.secret_magic.into())
-    }
-}
-impl From<ScryptoIntentSignature> for IntentSignature {
-    fn from(value: ScryptoIntentSignature) -> Self {
-        Self {
-            secret_magic: value.0.into(),
-        }
-    }
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
-pub struct IntentSignatures {
-    pub signatures: Vec<IntentSignature>,
-}
-
-impl IntentSignatures {
-    pub fn new(signatures: Vec<IntentSignature>) -> Self {
-        Self { signatures }
-    }
-}
-
-impl From<ScryptoIntentSignatures> for IntentSignatures {
-    fn from(value: ScryptoIntentSignatures) -> Self {
-        Self::new(value.signatures.into_iter().map(|s| s.into()).collect_vec())
-    }
-}
-impl From<IntentSignatures> for ScryptoIntentSignatures {
-    fn from(value: IntentSignatures) -> Self {
-        Self {
-            signatures: value
-                .signatures
-                .into_iter()
-                .map(|s| s.into())
-                .collect_vec(),
         }
     }
 }
