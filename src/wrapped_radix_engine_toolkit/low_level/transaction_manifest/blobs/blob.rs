@@ -62,6 +62,11 @@ pub fn new_blob_from_bytes(bytes: BagOfBytes) -> Blob {
 }
 
 #[uniffi::export]
+pub fn blob_to_bytes(blob: &Blob) -> BagOfBytes {
+    blob.secret_magic.clone()
+}
+
+#[uniffi::export]
 pub fn blob_to_string(blob: &Blob) -> String {
     blob.to_string()
 }
@@ -106,6 +111,12 @@ mod tests {
         roundtrip(SUT::sample());
         roundtrip(SUT::sample_other());
     }
+
+    #[test]
+    fn from_vec() {
+        let vec = vec![0xde, 0xad];
+        assert_eq!(SUT::from(&vec).to_string(), "dead");
+    }
 }
 
 #[cfg(test)]
@@ -116,10 +127,21 @@ mod uniffi_tests {
     type SUT = Blob;
 
     #[test]
-    fn name() {
+    fn test_blob_to_string() {
         assert_eq!(
             blob_to_string(&SUT::sample()),
             "acedacedacedacedacedacedacedacedacedacedacedacedacedacedacedaced"
         );
+    }
+
+    #[test]
+    fn test_new_blob_from_bytes() {
+        let bytes = BagOfBytes::from_hex("dead").unwrap();
+        assert_eq!(new_blob_from_bytes(bytes.clone()).secret_magic, bytes);
+    }
+
+    #[test]
+    fn test_blob_to_bytes() {
+        assert_eq!(blob_to_bytes(&SUT::sample()), BagOfBytes::sample_aced());
     }
 }
