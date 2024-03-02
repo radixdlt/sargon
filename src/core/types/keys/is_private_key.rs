@@ -9,7 +9,10 @@ pub trait IsPrivateKey<P: IsPublicKey<Self::Signature>>: Sized {
 
     fn sign(&self, msg_hash: &Hash) -> Self::Signature;
 
-    fn notarize(&self, signed_intent_hash: &SignedIntentHash) -> NotarySignature
+    fn notarize_hash(
+        &self,
+        signed_intent_hash: &SignedIntentHash,
+    ) -> NotarySignature
     where
         Self::Signature: Into<NotarySignature>,
     {

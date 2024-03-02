@@ -76,6 +76,15 @@ mod tests {
     }
 
     #[test]
+    fn to_from_scrypto() {
+        let roundtrip = |s: SUT| {
+            TryInto::<SUT>::try_into(Into::<ScryptoMessage>::into(s)).unwrap()
+        };
+        roundtrip(SUT::sample());
+        roundtrip(SUT::sample_other());
+    }
+
+    #[test]
     fn into_scrypto() {
         assert_eq!(
             Into::<ScryptoMessage>::into(SUT::sample()),
@@ -86,14 +95,5 @@ mod tests {
                 mime_type: "text/plain".to_owned(),
             })
         );
-    }
-
-    #[test]
-    fn to_from_scrypto() {
-        let roundtrip = |s: SUT| {
-            TryInto::<SUT>::try_into(Into::<ScryptoMessage>::into(s)).unwrap()
-        };
-        roundtrip(SUT::sample());
-        roundtrip(SUT::sample_other());
     }
 }

@@ -58,8 +58,11 @@ impl HasSampleValues for NotarizedTransaction {
             SignedIntent::new(intent, IntentSignatures::default());
 
         let signed_intent_hash = signed_intent.hash().unwrap();
-        let notary_signature = private_key.sign(&signed_intent_hash.hash);
-        NotarizedTransaction::new(signed_intent, notary_signature.into())
+
+        Self::new(
+            signed_intent,
+            private_key.notarize_hash(&signed_intent_hash),
+        )
     }
 
     // Identical to: https://github.com/radixdlt/radixdlt-scrypto/blob/ff21f24952318387803ae720105eec079afe33f3/transaction/src/model/hash/encoder.rs#L115
@@ -78,11 +81,47 @@ impl HasSampleValues for NotarizedTransaction {
             SignedIntent::new(intent, IntentSignatures::new(Vec::new()));
 
         let signed_intent_hash = signed_intent.hash().unwrap();
-        // let notary_signature = private_key.sign(&signed_intent_hash.hash);
-        // NotarizedTransaction::new(signed_intent, notary_signature.into())
-        NotarizedTransaction::new(
+
+        Self::new(
             signed_intent,
-            private_key.notarize(&signed_intent_hash),
+            private_key.notarize_hash(&signed_intent_hash),
         )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = NotarizedTransaction;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn to_from_scrypto() {
+        let roundtrip = |s: SUT| {
+            TryInto::<SUT>::try_into(Into::<ScryptoNotarizedTransaction>::into(
+                s,
+            ))
+            .unwrap()
+        };
+        roundtrip(SUT::sample());
+        roundtrip(SUT::sample_other());
+    }
+
+    #[test]
+    #[should_panic(expected = "not yet implemented")]
+    fn todo_compile() {
+        _ = SUT::sample().compile();
     }
 }

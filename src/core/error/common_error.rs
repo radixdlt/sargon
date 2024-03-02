@@ -368,7 +368,10 @@ pub enum CommonError {
     #[error("Failed to Bech32 decode transaction Hash after having tested all Network IDs, from: {bad_value}")]
     FailedToBech32DecodeTransactionHashAfterHavingTestedAllNetworkID {
         bad_value: String,
-    } = 100100,
+    } = 10100,
+
+    #[error("Failed to parse Signature from {bad_value}")]
+    FailedToParseSignatureFromString { bad_value: String } = 10101,
 }
 
 /*
