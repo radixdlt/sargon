@@ -109,7 +109,7 @@ impl HasSampleValues for TransactionHeader {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = TransactionHeader;
@@ -123,6 +123,16 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn to_from_scrypto() {
+        let roundtrip = |s: SUT| {
+            TryInto::<SUT>::try_into(Into::<ScryptoTransactionHeader>::into(s))
+                .unwrap()
+        };
+        roundtrip(SUT::sample());
+        roundtrip(SUT::sample_other());
     }
 
     #[test]

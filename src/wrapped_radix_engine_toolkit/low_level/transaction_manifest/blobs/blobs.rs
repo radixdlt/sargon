@@ -5,14 +5,16 @@ use transaction::model::{BlobV1 as ScryptoBlob, BlobsV1 as ScryptoBlobs};
 
 /// Vec of Blobs
 #[derive(Clone, PartialEq, Eq, Debug, uniffi::Record)]
-pub struct BlobsSecretMagic {
-    pub(crate) secret_magic: Vec<Blob>,
-}
-
-/// Vec of Blobs
-#[derive(Clone, PartialEq, Eq, Debug, uniffi::Record)]
 pub struct Blobs {
     pub(crate) secret_magic: BlobsSecretMagic,
+}
+
+impl From<BlobsSecretMagic> for Blobs {
+    fn from(value: BlobsSecretMagic) -> Self {
+        Self {
+            secret_magic: value,
+        }
+    }
 }
 
 #[uniffi::export]
@@ -22,24 +24,14 @@ pub fn blobs_list_of_blobs(blobs: &Blobs) -> Vec<Blob> {
 
 impl Blobs {
     pub fn blobs(&self) -> Vec<Blob> {
-        self.secret_magic.secret_magic.clone()
+        self.secret_magic.blobs()
     }
 
     pub fn new<I>(blobs: I) -> Self
     where
         I: IntoIterator<Item = Blob>,
     {
-        Self {
-            secret_magic: BlobsSecretMagic {
-                secret_magic: blobs.into_iter().collect_vec(),
-            },
-        }
-    }
-    pub(crate) fn from_bags<I>(bags: I) -> Self
-    where
-        I: IntoIterator<Item = BagOfBytes>,
-    {
-        Self::new(bags.into_iter().map(Blob::from))
+        BlobsSecretMagic::new(blobs).into()
     }
 }
 
@@ -54,34 +46,7 @@ impl Default for Blobs {
     }
 }
 
-impl From<ScryptoBlobs> for BlobsSecretMagic {
-    fn from(value: ScryptoBlobs) -> Self {
-        Self {
-            secret_magic: value
-                .blobs
-                .into_iter()
-                .map(|b| b.into())
-                .collect_vec(),
-        }
-    }
-}
-impl From<ScryptoBlobs> for Blobs {
-    fn from(value: ScryptoBlobs) -> Self {
-        Self {
-            secret_magic: value.into(),
-        }
-    }
-}
-
-impl From<BTreeMap<radix_engine::types::Hash, Vec<u8>>> for BlobsSecretMagic {
-    fn from(value: BTreeMap<radix_engine::types::Hash, Vec<u8>>) -> Self {
-        BlobsSecretMagic {
-            secret_magic: value.values().map(Into::<Blob>::into).collect_vec(),
-        }
-    }
-}
-
-impl From<BTreeMap<radix_engine::types::Hash, Vec<u8>>> for Blobs {
+impl From<ScryptoBlobsMap> for Blobs {
     fn from(value: BTreeMap<radix_engine::types::Hash, Vec<u8>>) -> Self {
         Blobs {
             secret_magic: value.into(),
@@ -89,7 +54,7 @@ impl From<BTreeMap<radix_engine::types::Hash, Vec<u8>>> for Blobs {
     }
 }
 
-impl From<Blobs> for BTreeMap<radix_engine::types::Hash, Vec<u8>> {
+impl From<Blobs> for ScryptoBlobsMap {
     fn from(value: Blobs) -> Self {
         value
             .secret_magic
@@ -107,37 +72,28 @@ impl From<Blobs> for BTreeMap<radix_engine::types::Hash, Vec<u8>> {
     }
 }
 
-impl From<BlobsSecretMagic> for ScryptoBlobs {
-    fn from(value: BlobsSecretMagic) -> Self {
-        ScryptoBlobs {
-            blobs: value
-                .secret_magic
-                .clone()
-                .into_iter()
-                .map(|b| b.into())
-                .collect_vec(),
-        }
-    }
-}
-
+// To From `ScryptoBlobs` (via `BlobsSecretMagic`)
 impl From<Blobs> for ScryptoBlobs {
     fn from(value: Blobs) -> Self {
         value.secret_magic.into()
     }
 }
 
+impl From<ScryptoBlobs> for Blobs {
+    fn from(value: ScryptoBlobs) -> Self {
+        Self {
+            secret_magic: value.into(),
+        }
+    }
+}
+
 impl HasSampleValues for Blobs {
     fn sample() -> Self {
-        Self::from_bags([
-            BagOfBytes::sample_aced(),
-            BagOfBytes::sample_babe(),
-            BagOfBytes::sample_cafe(),
-            BagOfBytes::sample_dead(),
-        ])
+        BlobsSecretMagic::sample().into()
     }
 
     fn sample_other() -> Self {
-        Self::new([Blob::sample_other()])
+        BlobsSecretMagic::sample_other().into()
     }
 }
 
@@ -158,7 +114,7 @@ pub fn new_blobs_sample_other() -> Blobs {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = Blobs;
@@ -189,6 +145,14 @@ mod tests {
                 BagOfBytes::sample_dead(),
             ]
         );
+    }
+
+    #[test]
+    fn to_from_scrypto() {
+        let roundtrip =
+            |s: SUT| Into::<SUT>::into(Into::<ScryptoBlobs>::into(s));
+        roundtrip(SUT::sample());
+        roundtrip(SUT::sample_other());
     }
 }
 

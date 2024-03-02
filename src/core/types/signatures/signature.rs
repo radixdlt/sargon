@@ -126,4 +126,12 @@ mod tests {
         assert_eq!(
             "018ad795353658a0cd1b513c4414cbafd0f990d329522977f8885a27876976a7d41ed8a81c1ac34551819627689cf940c4e27cacab217f00a0a899123c021ff6ef".parse::<SUT>().unwrap(), SUT::sample_other());
     }
+
+    #[test]
+    fn to_from_scrypto() {
+        let roundtrip =
+            |s: SUT| Into::<SUT>::into(Into::<ScryptoSignature>::into(s));
+        roundtrip(SUT::sample());
+        roundtrip(SUT::sample_other());
+    }
 }

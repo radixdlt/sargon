@@ -16,6 +16,12 @@ impl From<BagOfBytes> for Blob {
     }
 }
 
+impl From<Blob> for BagOfBytes {
+    fn from(value: Blob) -> BagOfBytes {
+        value.secret_magic
+    }
+}
+
 impl From<ScryptoBlob> for Blob {
     fn from(value: ScryptoBlob) -> Self {
         Self {
@@ -62,7 +68,7 @@ pub fn blob_to_string(blob: &Blob) -> String {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = Blob;
@@ -84,6 +90,21 @@ mod tests {
             SUT::sample().to_string(),
             "acedacedacedacedacedacedacedacedacedacedacedacedacedacedacedaced"
         );
+    }
+
+    #[test]
+    fn to_from_scrypto() {
+        let roundtrip =
+            |s: SUT| Into::<SUT>::into(Into::<ScryptoBlob>::into(s));
+        roundtrip(SUT::sample());
+        roundtrip(SUT::sample_other());
+    }
+
+    #[test]
+    fn to_from_bag_of_bytes() {
+        let roundtrip = |s: SUT| Into::<SUT>::into(Into::<BagOfBytes>::into(s));
+        roundtrip(SUT::sample());
+        roundtrip(SUT::sample_other());
     }
 }
 

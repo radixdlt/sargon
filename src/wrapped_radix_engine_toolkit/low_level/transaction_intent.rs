@@ -105,7 +105,7 @@ impl HasSampleValues for TransactionIntent {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = TransactionIntent;
@@ -125,6 +125,21 @@ mod tests {
     fn intent_hash() {
         let hash = SUT::sample().intent_hash().unwrap();
         assert_eq!(hash.to_string(), "txid_rdx12nnrygyt3p5v5pft5e3vu93v38qp5k7fh9v59kd6vtu8506880nq5vsxx6")
+    }
+
+    #[test]
+    fn network_id() {
+        assert_eq!(SUT::sample().network_id(), NetworkID::Mainnet);
+        assert_eq!(SUT::sample_other().network_id(), NetworkID::Simulator);
+    }
+
+    #[test]
+    fn to_from_scrypto() {
+        let roundtrip = |s: SUT| {
+            TryInto::<SUT>::try_into(Into::<ScryptoIntent>::into(s)).unwrap()
+        };
+        roundtrip(SUT::sample());
+        roundtrip(SUT::sample_other());
     }
 
     #[test]
