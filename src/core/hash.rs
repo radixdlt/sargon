@@ -161,4 +161,28 @@ mod tests {
             hash_of("Hello Radix".as_bytes())
         );
     }
+
+    #[test]
+    fn manual_perform_uniffi_conversion_successful() {
+        let sut = SUT::sample().secret_magic;
+        let builtin = BagOfBytes::from_hex(
+            "48f1bd08444b5e713db9e14caac2faae71836786ac94d645b00679728202a935",
+        )
+        .unwrap();
+
+        let ffi_side =
+            <HashSecretMagic as crate::UniffiCustomTypeConverter>::from_custom(
+                sut.clone(),
+            );
+
+        assert_eq!(ffi_side.to_hex(), builtin.to_hex());
+
+        let from_ffi_side =
+            <HashSecretMagic as crate::UniffiCustomTypeConverter>::into_custom(
+                ffi_side,
+            )
+            .unwrap();
+
+        assert_eq!(sut, from_ffi_side);
+    }
 }
