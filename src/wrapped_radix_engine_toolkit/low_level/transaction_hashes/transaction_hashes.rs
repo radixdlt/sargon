@@ -81,6 +81,12 @@ macro_rules! decl_tx_hash {
                     Self::from_bech32(s)
                 }
             }
+
+            impl From<[< $hash_type:camel Hash >]> for Hash {
+                fn from(value: [< $hash_type:camel Hash >]) -> Hash {
+                    value.hash.clone()
+                }
+            }
         }
     };
 }

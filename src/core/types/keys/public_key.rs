@@ -1,6 +1,8 @@
 use crate::prelude::*;
 
-use radix_engine_common::crypto::PublicKey as ScryptoPublicKey;
+use radix_engine_common::crypto::{
+    IsHash as ScryptoIsHash, PublicKey as ScryptoPublicKey,
+};
 
 /// A tagged union of supported public keys on different curves, supported
 /// curves are `secp256k1` and `Curve25519`
@@ -21,6 +23,37 @@ pub enum PublicKey {
 
     /// A secp256k1 public key used to verify cryptographic signatures (ECDSA signatures).
     Secp256k1 { value: Secp256k1PublicKey },
+}
+
+impl PublicKey {
+    /// Verifies an EdDSA signature over Curve25519.
+    pub fn is_valid(
+        &self,
+        signature: impl Into<Signature>,
+        for_hash: &impl ScryptoIsHash,
+    ) -> bool {
+        let signature = signature.into();
+        match self {
+            PublicKey::Ed25519 { value: key } => match &signature {
+                Signature::Secp256k1 { value: _ } => {
+                    error!("Trying to validate Secp256k1 signature with Ed25519 PublicKey, that does not work.");
+                    false
+                }
+                Signature::Ed25519 { value: signature } => {
+                    key.is_valid(signature, for_hash)
+                }
+            },
+            PublicKey::Secp256k1 { value: key } => match &signature {
+                Signature::Secp256k1 { value: signature } => {
+                    key.is_valid(signature, for_hash)
+                }
+                Signature::Ed25519 { value: _ } => {
+                    error!("Trying to validate Ed25519 signature with Secp256k1 PublicKey, that does not work.");
+                    false
+                }
+            },
+        }
+    }
 }
 
 impl From<Ed25519PublicKey> for PublicKey {
@@ -431,5 +464,98 @@ mod tests {
         let secp256k1 = Secp256k1PublicKey::sample();
         let key: PublicKey = secp256k1.clone().into();
         assert_eq!(key.as_secp256k1().unwrap(), &secp256k1);
+    }
+
+    #[test]
+    fn is_valid_with_secp256k1() {
+        let secp256k1_public_key: Secp256k1PublicKey =
+        "02f0d85a3b9082683f689e6115f37e1e24b7448fff14b14877e3a4e750e86fba8b"
+            .parse()
+            .unwrap();
+
+        let message = "All those moments will be lost in time, like tears in rain. Time to die...";
+
+        let hash = hash_of(message.as_bytes());
+        let secp256k1_signature: Secp256k1Signature = "01aa1c4f46f8437b7f8ec9008ae10e6f33bb8be3e81e35c63f3498070dfbd6a20b2daee6073ead3c9e72d8909bc32a02e46cede3885cf8568d4c380ac97aa7fbcd".parse().unwrap();
+
+        assert!(PublicKey::Secp256k1 {
+            value: secp256k1_public_key
+        }
+        .is_valid(
+            Signature::Secp256k1 {
+                value: secp256k1_signature
+            },
+            &hash
+        ));
+    }
+
+    #[test]
+    fn is_valid_with_ed25519() {
+        let message = "All those moments will be lost in time, like tears in rain. Time to die...";
+        let hash = hash_of(message.as_bytes());
+
+        let ed25519_public_key: Ed25519PublicKey =
+            "08740a2fd178c40ce71966a6537f780978f7f00548cfb59196344b5d7d67e9cf"
+                .parse()
+                .unwrap();
+
+        let ed25519_signature: Ed25519Signature = "06cd3772c5c70d44819db80192a5b2521525e2529f770bff970ec4edc7c1bd76e41fcfa8e59ff93b1675c48f4af3b1697765286d999ee8b5bb8257691e3b7b09".parse().unwrap();
+
+        assert!(PublicKey::Ed25519 {
+            value: ed25519_public_key
+        }
+        .is_valid(
+            Signature::Ed25519 {
+                value: ed25519_signature
+            },
+            &hash
+        ));
+    }
+
+    #[test]
+    fn is_valid_with_ed25519_public_key_for_secp256k1_signature_fails() {
+        let message = "All those moments will be lost in time, like tears in rain. Time to die...";
+
+        let hash = hash_of(message.as_bytes());
+        let secp256k1_signature: Secp256k1Signature = "01aa1c4f46f8437b7f8ec9008ae10e6f33bb8be3e81e35c63f3498070dfbd6a20b2daee6073ead3c9e72d8909bc32a02e46cede3885cf8568d4c380ac97aa7fbcd".parse().unwrap();
+
+        let ed25519_public_key: Ed25519PublicKey =
+            "08740a2fd178c40ce71966a6537f780978f7f00548cfb59196344b5d7d67e9cf"
+                .parse()
+                .unwrap();
+
+        assert!(!PublicKey::Ed25519 {
+            value: ed25519_public_key
+        }
+        .is_valid(
+            Signature::Secp256k1 {
+                value: secp256k1_signature
+            },
+            &hash
+        ));
+    }
+
+    #[test]
+    fn is_valid_with_secp256k1_public_key_for_ed25519_signature_fails() {
+        let secp256k1_public_key: Secp256k1PublicKey =
+        "02f0d85a3b9082683f689e6115f37e1e24b7448fff14b14877e3a4e750e86fba8b"
+            .parse()
+            .unwrap();
+
+        let message = "All those moments will be lost in time, like tears in rain. Time to die...";
+
+        let hash = hash_of(message.as_bytes());
+
+        let ed25519_signature: Ed25519Signature = "06cd3772c5c70d44819db80192a5b2521525e2529f770bff970ec4edc7c1bd76e41fcfa8e59ff93b1675c48f4af3b1697765286d999ee8b5bb8257691e3b7b09".parse().unwrap();
+
+        assert!(!PublicKey::Secp256k1 {
+            value: secp256k1_public_key
+        }
+        .is_valid(
+            Signature::Ed25519 {
+                value: ed25519_signature
+            },
+            &hash
+        ));
     }
 }

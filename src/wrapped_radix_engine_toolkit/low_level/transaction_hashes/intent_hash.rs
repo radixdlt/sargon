@@ -7,7 +7,7 @@ impl HasSampleValues for IntentHash {
 
     fn sample_other() -> Self {
         let intent = TransactionIntent::sample_other();
-        intent.intent_hash().unwrap()
+        intent.intent_hash()
     }
 }
 
@@ -48,5 +48,15 @@ mod tests {
                 .parse()
                 .unwrap();
         assert_eq!(SUT::new(hash, NetworkID::Simulator), SUT::sample_other())
+    }
+
+    #[test]
+    fn into_hash() {
+        assert_eq!(
+            Into::<Hash>::into(SUT::sample_other()),
+            "60e5617d670e6c8a42ba5f3749f4ff1079f66221f282554ecdda9ad385ecb195"
+                .parse::<Hash>()
+                .unwrap()
+        );
     }
 }

@@ -4,6 +4,8 @@ use transaction::model::{
     SignedIntentV1 as ScryptoSignedIntent,
 };
 
+use radix_engine_toolkit::functions::notarized_transaction::compile as RET_compile_notarized_tx;
+
 #[derive(Debug, Clone, Eq, PartialEq, uniffi::Record)]
 pub struct NotarizedTransaction {
     pub signed_intent: SignedIntent,
@@ -22,7 +24,10 @@ impl NotarizedTransaction {
     }
 
     pub fn compile(&self) -> Result<BagOfBytes> {
-        todo!()
+        let scrypto: ScryptoNotarizedTransaction = self.clone().into();
+        RET_compile_notarized_tx(&scrypto)
+            .map_err(|_e| CommonError::Unknown)
+            .map(Into::<BagOfBytes>::into)
     }
 }
 
@@ -35,29 +40,18 @@ impl From<NotarizedTransaction> for ScryptoNotarizedTransaction {
     }
 }
 
-impl TryFrom<ScryptoNotarizedTransaction> for NotarizedTransaction {
-    type Error = crate::CommonError;
-
-    fn try_from(
-        value: ScryptoNotarizedTransaction,
-    ) -> Result<Self, Self::Error> {
-        let signed_intent: SignedIntent = value.signed_intent.try_into()?;
-        Ok(Self {
-            signed_intent,
-            notary_signature: value.notary_signature.into(),
-        })
-    }
-}
-
 impl HasSampleValues for NotarizedTransaction {
     fn sample() -> Self {
         let private_key = Ed25519PrivateKey::sample_alice();
         let intent = TransactionIntent::sample();
 
-        let signed_intent =
-            SignedIntent::new(intent, IntentSignatures::default());
+        let signed_intent = SignedIntent::new_validating_signatures(
+            intent,
+            IntentSignatures::default(),
+        )
+        .unwrap();
 
-        let signed_intent_hash = signed_intent.hash().unwrap();
+        let signed_intent_hash = signed_intent.hash();
 
         Self::new(
             signed_intent,
@@ -76,11 +70,14 @@ impl HasSampleValues for NotarizedTransaction {
                 .into();
 
         let intent = TransactionIntent::sample_other();
-        assert_eq!(intent.intent_hash().unwrap().to_string(), "txid_sim1vrjkzlt8pekg5s46tum5na8lzpulvc3p72p92nkdm2dd8p0vkx2svr7ejr");
-        let signed_intent =
-            SignedIntent::new(intent, IntentSignatures::new(Vec::new()));
+        assert_eq!(intent.intent_hash().to_string(), "txid_sim1vrjkzlt8pekg5s46tum5na8lzpulvc3p72p92nkdm2dd8p0vkx2svr7ejr");
+        let signed_intent = SignedIntent::new_validating_signatures(
+            intent,
+            IntentSignatures::new(Vec::new()),
+        )
+        .unwrap();
 
-        let signed_intent_hash = signed_intent.hash().unwrap();
+        let signed_intent_hash = signed_intent.hash();
 
         Self::new(
             signed_intent,
@@ -108,20 +105,12 @@ mod tests {
     }
 
     #[test]
-    fn to_from_scrypto() {
-        let roundtrip = |s: SUT| {
-            TryInto::<SUT>::try_into(Into::<ScryptoNotarizedTransaction>::into(
-                s,
-            ))
-            .unwrap()
-        };
-        roundtrip(SUT::sample());
-        roundtrip(SUT::sample_other());
+    fn test_compile() {
+        assert_eq!(SUT::sample().compile().unwrap().to_hex(), "4d22030221022104210707010a872c0100000000000a912c01000000000009092f2400220101200720ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf010108000020220441038000d1be9c042f627d98a01383987916d43cf439631ca1d8c8076d6754ab263d0c086c6f636b5f6665652101850000fda0c42777080000000000000000000000000000000041038000d1be9c042f627d98a01383987916d43cf439631ca1d8c8076d6754ab263d0c087769746864726177210280005da66318c6318c61f5a61b4c6318c6318cf794aa8d295f14e6318c6318c6850000443945309a7a48000000000000000000000000000000000280005da66318c6318c61f5a61b4c6318c6318cf794aa8d295f14e6318c6318c6850000443945309a7a4800000000000000000000000000000041038000d1127918c16af09af521951adcf3a20ab2cc87c0e72e85814764853ce5e70c147472795f6465706f7369745f6f725f61626f72742102810000000022000020200022010121020c0a746578742f706c61696e2200010c0c48656c6c6f205261646978212022002201012101200740839ac9c47db45950fc0cd453c5ebbbfa7ae5f7c20753abe2370b5b40fdee89e522c4d810d060e0c56211d036043fd32b9908e97bf114c1835ca02d74018fdd09")
     }
 
     #[test]
-    #[should_panic(expected = "not yet implemented")]
-    fn todo_compile() {
-        _ = SUT::sample().compile();
+    fn test_compile_other() {
+        assert_eq!(SUT::sample_other().compile().unwrap().to_hex(), "4d22030221022104210707f20a00000000000000000a0a00000000000000090a0000002200012007210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f817980101080000202200202000220000202200220001210120074101ebfc1f10a3b6ed83531f16249477ab86b77ce85980ef330abafbbd758caa98c665f68b8536112b6d1519feddeea01fd8429124dd75121d4bd88c14a27b68a123")
     }
 }

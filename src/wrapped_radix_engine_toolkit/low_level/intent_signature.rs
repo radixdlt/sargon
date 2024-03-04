@@ -7,6 +7,27 @@ pub struct IntentSignature {
     pub(crate) secret_magic: SignatureWithPublicKey,
 }
 
+impl IntentSignature {
+    pub fn signature(&self) -> Signature {
+        self.secret_magic.clone().signature()
+    }
+
+    pub fn public_key(&self) -> PublicKey {
+        self.secret_magic.clone().public_key()
+    }
+
+    pub fn validate(&self, hash: impl Into<Hash>) -> bool {
+        let hash = hash.into();
+        self.public_key().is_valid(self.signature(), &hash)
+    }
+}
+
+impl From<IntentSignature> for Signature {
+    fn from(value: IntentSignature) -> Self {
+        value.signature()
+    }
+}
+
 impl From<SignatureWithPublicKey> for IntentSignature {
     fn from(value: SignatureWithPublicKey) -> Self {
         Self {
@@ -18,14 +39,6 @@ impl From<SignatureWithPublicKey> for IntentSignature {
 impl From<IntentSignature> for ScryptoIntentSignature {
     fn from(value: IntentSignature) -> Self {
         ScryptoIntentSignature(value.secret_magic.into())
-    }
-}
-
-impl From<ScryptoIntentSignature> for IntentSignature {
-    fn from(value: ScryptoIntentSignature) -> Self {
-        Self {
-            secret_magic: value.0.into(),
-        }
     }
 }
 
@@ -58,10 +71,15 @@ mod tests {
     }
 
     #[test]
-    fn to_from_scrypto() {
-        let roundtrip =
-            |s: SUT| Into::<SUT>::into(Into::<ScryptoIntentSignature>::into(s));
-        roundtrip(SUT::sample());
-        roundtrip(SUT::sample_other());
+    fn into_signature_for_ed25519() {
+        assert_eq!(Into::<Signature>::into(SUT::sample()), Signature::sample());
+    }
+
+    #[test]
+    fn into_signature_for_secp256k1() {
+        assert_eq!(
+            Into::<Signature>::into(SUT::sample_other()),
+            Signature::sample_other()
+        );
     }
 }

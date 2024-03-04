@@ -372,6 +372,11 @@ pub enum CommonError {
 
     #[error("Failed to parse Signature from {bad_value}")]
     FailedToParseSignatureFromString { bad_value: String } = 10101,
+
+    #[error(
+        "Invalid IntentSignatures for Intent some didn't validate IntentHash"
+    )]
+    InvalidSignaturesForIntentSomeDidNotValidateIntentHash = 10102,
 }
 
 /*

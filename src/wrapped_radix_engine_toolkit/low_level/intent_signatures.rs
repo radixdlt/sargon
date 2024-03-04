@@ -8,16 +8,22 @@ pub struct IntentSignatures {
 }
 
 impl IntentSignatures {
-    pub fn new(signatures: Vec<IntentSignature>) -> Self {
-        Self { signatures }
+    pub fn new<I>(signatures: I) -> Self
+    where
+        I: IntoIterator<Item = IntentSignature>,
+    {
+        Self {
+            signatures: signatures.into_iter().collect_vec(),
+        }
+    }
+
+    pub fn validate(&self, hash: impl Into<Hash>) -> bool {
+        let hash = hash.into();
+
+        self.signatures.iter().all(|s| s.validate(hash.clone()))
     }
 }
 
-impl From<ScryptoIntentSignatures> for IntentSignatures {
-    fn from(value: ScryptoIntentSignatures) -> Self {
-        Self::new(value.signatures.into_iter().map(|s| s.into()).collect_vec())
-    }
-}
 impl From<IntentSignatures> for ScryptoIntentSignatures {
     fn from(value: IntentSignatures) -> Self {
         Self {
@@ -27,5 +33,56 @@ impl From<IntentSignatures> for ScryptoIntentSignatures {
                 .map(|s| s.into())
                 .collect_vec(),
         }
+    }
+}
+
+impl HasSampleValues for IntentSignatures {
+    fn sample() -> Self {
+        let intent = TransactionIntent::sample();
+        let mut signatures = Vec::<IntentSignature>::new();
+        for n in 1..4 {
+            let private_key: Secp256k1PrivateKey =
+                radix_engine::types::Secp256k1PrivateKey::from_u64(n)
+                    .unwrap()
+                    .into();
+
+            signatures.push(private_key.sign_intent_hash(&intent.intent_hash()))
+        }
+
+        IntentSignatures::new(signatures)
+    }
+
+    fn sample_other() -> Self {
+        let intent = TransactionIntent::sample_other();
+        let mut signatures = Vec::<IntentSignature>::new();
+        for n in 1..4 {
+            let private_key: Secp256k1PrivateKey =
+                radix_engine::types::Secp256k1PrivateKey::from_u64(n)
+                    .unwrap()
+                    .into();
+
+            signatures.push(private_key.sign_intent_hash(&intent.intent_hash()))
+        }
+
+        IntentSignatures::new(signatures)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = IntentSignatures;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 }

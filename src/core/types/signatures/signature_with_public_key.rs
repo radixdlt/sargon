@@ -1,13 +1,27 @@
 use crate::prelude::*;
 
-use radix_engine_common::crypto::Ed25519Signature as ScryptoEd25519Signature;
-use radix_engine_common::crypto::Secp256k1Signature as ScryptoSecp256k1Signature;
+use radix_engine_common::crypto::{
+    Ed25519Signature as ScryptoEd25519Signature,
+    Secp256k1PublicKey as ScryptoSecp256k1PublicKey,
+    Secp256k1Signature as ScryptoSecp256k1Signature,
+};
 use transaction::model::SignatureWithPublicKeyV1 as ScryptoSignatureWithPublicKey;
 
 /// Represents any natively supported signature, including public key.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Enum, EnumAsInner)]
 pub enum SignatureWithPublicKey {
+    // N.B. `transaction::model::SignatureWithPublicKeyV1::Secp256k1` does
+    // NOT include the public key, it relies on ECDSA Signature supporting
+    // recovery, but it is not reliable since passing the wrong hash to
+    // a signature will return the WRONG public key. In other words one might
+    // naively believe that recovery should fail for the wrong hash passed in,
+    // but instead the wrong public key is returned. In the context of Scrypto
+    // or Node, they might have a mechanism by which they can validate the
+    // public key against some address or sub-state, but we play it safe, the
+    // cost of having the public key around in the ephemeral operations working
+    // with `SignatureWithPublicKey` is near-zero, so we have it explicit in state.
     Secp256k1 {
+        public_key: Secp256k1PublicKey,
         signature: Secp256k1Signature,
     },
     Ed25519 {
@@ -16,34 +30,15 @@ pub enum SignatureWithPublicKey {
     },
 }
 
-impl From<ScryptoSignatureWithPublicKey> for SignatureWithPublicKey {
-    fn from(value: ScryptoSignatureWithPublicKey) -> Self {
-        match value {
-            ScryptoSignatureWithPublicKey::Secp256k1 { signature } => {
-                Self::Secp256k1 {
-                    signature: signature.into(),
-                }
-            }
-            ScryptoSignatureWithPublicKey::Ed25519 {
-                public_key,
-                signature,
-            } => Self::Ed25519 {
-                public_key: public_key
-                    .try_into()
-                    .expect("Invalid public key found."),
-                signature: signature.into(),
-            },
-        }
-    }
-}
 impl From<SignatureWithPublicKey> for ScryptoSignatureWithPublicKey {
     fn from(value: SignatureWithPublicKey) -> Self {
         match value {
-            SignatureWithPublicKey::Secp256k1 { signature } => {
-                Self::Secp256k1 {
-                    signature: signature.into(),
-                }
-            }
+            SignatureWithPublicKey::Secp256k1 {
+                public_key: _,
+                signature,
+            } => Self::Secp256k1 {
+                signature: signature.into(),
+            },
             SignatureWithPublicKey::Ed25519 {
                 public_key,
                 signature,
@@ -58,15 +53,27 @@ impl From<SignatureWithPublicKey> for ScryptoSignatureWithPublicKey {
 impl SignatureWithPublicKey {
     pub fn signature(&self) -> Signature {
         match &self {
-            Self::Secp256k1 { signature } => signature.clone().into(),
+            Self::Secp256k1 { signature, .. } => signature.clone().into(),
             Self::Ed25519 { signature, .. } => signature.clone().into(),
+        }
+    }
+
+    pub fn public_key(&self) -> PublicKey {
+        match &self {
+            Self::Secp256k1 { public_key, .. } => public_key.clone().into(),
+            Self::Ed25519 { public_key, .. } => public_key.clone().into(),
         }
     }
 }
 
-impl From<Secp256k1Signature> for SignatureWithPublicKey {
-    fn from(signature: Secp256k1Signature) -> Self {
-        Self::Secp256k1 { signature }
+impl From<(Secp256k1PublicKey, Secp256k1Signature)> for SignatureWithPublicKey {
+    fn from(
+        (public_key, signature): (Secp256k1PublicKey, Secp256k1Signature),
+    ) -> Self {
+        Self::Secp256k1 {
+            public_key,
+            signature,
+        }
     }
 }
 
@@ -118,7 +125,7 @@ impl HasSampleValues for SignatureWithPublicKey {
         let signature: Secp256k1Signature = "018ad795353658a0cd1b513c4414cbafd0f990d329522977f8885a27876976a7d41ed8a81c1ac34551819627689cf940c4e27cacab217f00a0a899123c021ff6ef".parse().unwrap();
         public_key.is_valid(&signature, &Self::sample_hash());
 
-        signature.into()
+        (public_key, signature).into()
     }
 }
 
@@ -154,16 +161,36 @@ mod tests {
     }
 
     #[test]
-    fn to_from_scrypto() {
-        let roundtrip = |s: SUT| {
-            assert_eq!(
-                Into::<SUT>::into(Into::<ScryptoSignatureWithPublicKey>::into(
-                    s.clone()
-                )),
-                s
-            )
-        };
-        roundtrip(SUT::sample());
-        roundtrip(SUT::sample_other());
+    fn to_scrypto() {
+        match Into::<ScryptoSignatureWithPublicKey>::into(SUT::sample()) {
+            ScryptoSignatureWithPublicKey::Ed25519 {
+                signature,
+                public_key: _,
+            } => {
+                assert_eq!(
+                    Into::<Ed25519Signature>::into(signature),
+                    Ed25519Signature::sample()
+                );
+            }
+            ScryptoSignatureWithPublicKey::Secp256k1 { signature: _ } => {
+                panic!("wrong curve")
+            }
+        }
+    }
+
+    #[test]
+    fn to_scrypto_other() {
+        match Into::<ScryptoSignatureWithPublicKey>::into(SUT::sample_other()) {
+            ScryptoSignatureWithPublicKey::Secp256k1 { signature } => {
+                assert_eq!(
+                    Into::<Secp256k1Signature>::into(signature),
+                    Secp256k1Signature::sample()
+                )
+            }
+            ScryptoSignatureWithPublicKey::Ed25519 {
+                public_key: _,
+                signature: _,
+            } => panic!("wrong curve"),
+        }
     }
 }

@@ -3,7 +3,7 @@ use crate::{prelude::*, UniffiCustomTypeConverter};
 use bip32::secp256k1::PublicKey as BIP32Secp256k1PublicKey; // the bip32 crate actually does validation of the PublicKey whereas `radix_engine_common` does not.
 
 use radix_engine_common::crypto::{
-    verify_secp256k1, Hash, IsHash,
+    verify_secp256k1 as scrypto_verify_secp256k1, IsHash as ScryptoIsHash,
     Secp256k1PublicKey as ScryptoSecp256k1PublicKey,
     Secp256k1Signature as ScryptoSecp256k1Signature,
 };
@@ -94,9 +94,9 @@ impl IsPublicKey<Secp256k1Signature> for Secp256k1PublicKey {
     fn is_valid(
         &self,
         signature: &Secp256k1Signature,
-        for_hash: &impl IsHash,
+        for_hash: &impl ScryptoIsHash,
     ) -> bool {
-        verify_secp256k1(
+        scrypto_verify_secp256k1(
             for_hash.as_hash(),
             &self.scrypto(),
             &signature.clone().into(),
@@ -191,30 +191,25 @@ impl FromStr for Secp256k1PublicKey {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
 
-    use radix_engine_common::crypto::Secp256k1PublicKey as ScryptoSecp256k1PublicKey;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = Secp256k1PublicKey;
 
     #[test]
     fn equality() {
-        assert_eq!(Secp256k1PublicKey::sample(), Secp256k1PublicKey::sample());
-        assert_eq!(
-            Secp256k1PublicKey::sample_other(),
-            Secp256k1PublicKey::sample_other()
-        );
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(
-            Secp256k1PublicKey::sample(),
-            Secp256k1PublicKey::sample_other()
-        );
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn from_str() {
-        assert!(Secp256k1PublicKey::from_str(
+        assert!(SUT::from_str(
             "02517b88916e7f315bb682f9926b14bc67a0e4246f8a419b986269e1a7e61fffa7"
         )
         .is_ok());
@@ -227,7 +222,7 @@ mod tests {
             0xf9, 0x92, 0x6b, 0x14, 0xbc, 0x67, 0xa0, 0xe4, 0x24, 0x6f, 0x8a,
             0x41, 0x9b, 0x98, 0x62, 0x69, 0xe1, 0xa7, 0xe6, 0x1f, 0xff, 0xa7,
         ];
-        let key = Secp256k1PublicKey::try_from(bytes).unwrap();
+        let key = SUT::try_from(bytes).unwrap();
         assert_eq!(
             key.to_hex(),
             "02517b88916e7f315bb682f9926b14bc67a0e4246f8a419b986269e1a7e61fffa7"
@@ -238,14 +233,14 @@ mod tests {
     #[test]
     fn sample_alice() {
         assert_eq!(
-            Secp256k1PublicKey::sample_alice().to_hex(),
+            SUT::sample_alice().to_hex(),
             "02517b88916e7f315bb682f9926b14bc67a0e4246f8a419b986269e1a7e61fffa7"
         );
     }
 
     #[test]
     fn from_scrypto() {
-        let from_scrypto: Secp256k1PublicKey = ScryptoSecp256k1PublicKey::from_str(
+        let from_scrypto: SUT = ScryptoSecp256k1PublicKey::from_str(
             "033083620d1596d3f8988ff3270e42970dd2a031e2b9b6488052a4170ff999f3e8",
         )
         .unwrap()
@@ -254,7 +249,7 @@ mod tests {
 
         assert_eq!(
             from_scrypto.clone(),
-            Secp256k1PublicKey::from_str(
+            SUT::from_str(
                 "033083620d1596d3f8988ff3270e42970dd2a031e2b9b6488052a4170ff999f3e8"
             )
             .unwrap()
@@ -262,9 +257,7 @@ mod tests {
 
         // and back
         assert_eq!(
-            TryInto::<Secp256k1PublicKey>::try_into(Into::<
-                ScryptoSecp256k1PublicKey,
-            >::into(
+            TryInto::<SUT>::try_into(Into::<ScryptoSecp256k1PublicKey>::into(
                 from_scrypto.clone()
             ))
             .unwrap(),
@@ -275,7 +268,7 @@ mod tests {
     #[test]
     fn sample_bob() {
         assert_eq!(
-            Secp256k1PublicKey::sample_bob().to_hex(),
+            SUT::sample_bob().to_hex(),
             "033083620d1596d3f8988ff3270e42970dd2a031e2b9b6488052a4170ff999f3e8"
         );
     }
@@ -283,7 +276,7 @@ mod tests {
     #[test]
     fn invalid_hex_str() {
         assert_eq!(
-            Secp256k1PublicKey::from_str("hi"),
+            SUT::from_str("hi"),
             Err(CommonError::InvalidSecp256k1PublicKeyFromString {
                 bad_value: "hi".to_owned()
             })
@@ -293,7 +286,7 @@ mod tests {
     #[test]
     fn invalid_str_too_short() {
         assert_eq!(
-            Secp256k1PublicKey::from_str("dead"),
+            SUT::from_str("dead"),
             Err(CommonError::InvalidSecp256k1PublicKeyFromBytes {
                 bad_value: vec![0xde, 0xad].into()
             })
@@ -304,7 +297,7 @@ mod tests {
     fn invalid_bytes() {
         let bytes: &[u8] = &[0u8];
         assert_eq!(
-            Secp256k1PublicKey::try_from(bytes),
+            SUT::try_from(bytes),
             Err(CommonError::InvalidSecp256k1PublicKeyFromBytes {
                 bad_value: bytes.to_vec().into()
             })
@@ -314,7 +307,7 @@ mod tests {
     #[test]
     fn invalid_key_not_on_curve() {
         assert_eq!(
-            Secp256k1PublicKey::from_str(
+            SUT::from_str(
                 "99deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
             ),
             Err(CommonError::InvalidSecp256k1PublicKeyPointNotOnCurve)
@@ -324,14 +317,14 @@ mod tests {
     #[test]
     fn debug() {
         assert_eq!(
-            format!("{:?}", Secp256k1PublicKey::sample_alice()),
+            format!("{:?}", SUT::sample_alice()),
             "02517b88916e7f315bb682f9926b14bc67a0e4246f8a419b986269e1a7e61fffa7"
         );
     }
 
     #[test]
     fn json() {
-        let model = Secp256k1PublicKey::sample();
+        let model = SUT::sample();
         assert_json_value_eq_after_roundtrip(
             &model,
             json!("02517b88916e7f315bb682f9926b14bc67a0e4246f8a419b986269e1a7e61fffa7"),
@@ -341,20 +334,53 @@ mod tests {
     #[test]
     fn try_into_from_str() {
         let str = "02517b88916e7f315bb682f9926b14bc67a0e4246f8a419b986269e1a7e61fffa7";
-        let key: Secp256k1PublicKey = str.parse().unwrap();
+        let key: SUT = str.parse().unwrap();
         assert_eq!(key.to_hex(), str);
     }
 
     #[test]
     fn hash() {
         assert_eq!(
-            BTreeSet::from_iter([
-                Secp256k1PublicKey::sample_alice(),
-                Secp256k1PublicKey::sample_alice()
-            ])
-            .len(),
+            BTreeSet::from_iter([SUT::sample_alice(), SUT::sample_alice()])
+                .len(),
             1
         );
+    }
+
+    #[test]
+    fn is_valid_is_false_for_mismatch() {
+        assert!(!SUT::sample()
+            .is_valid(&Secp256k1Signature::sample(), &Hash::sample()));
+        assert!(!SUT::sample()
+            .is_valid(&Secp256k1Signature::sample(), &Hash::sample_other()));
+
+        assert!(!SUT::sample()
+            .is_valid(&Secp256k1Signature::sample_other(), &Hash::sample()));
+        assert!(!SUT::sample().is_valid(
+            &Secp256k1Signature::sample_other(),
+            &Hash::sample_other()
+        ));
+
+        assert!(!SUT::sample_other()
+            .is_valid(&Secp256k1Signature::sample(), &Hash::sample()));
+        assert!(!SUT::sample_other()
+            .is_valid(&Secp256k1Signature::sample(), &Hash::sample_other()));
+
+        assert!(!SUT::sample_other()
+            .is_valid(&Secp256k1Signature::sample_other(), &Hash::sample()));
+        assert!(!SUT::sample_other().is_valid(
+            &Secp256k1Signature::sample_other(),
+            &Hash::sample_other()
+        ));
+    }
+
+    #[test]
+    fn is_valid_is_true_for_valid() {
+        let sut: SUT = "02f0d85a3b9082683f689e6115f37e1e24b7448fff14b14877e3a4e750e86fba8b".parse().unwrap();
+        let message = "All those moments will be lost in time, like tears in rain. Time to die...";
+        let hash = hash_of(message.as_bytes());
+        let signature: Secp256k1Signature = "01aa1c4f46f8437b7f8ec9008ae10e6f33bb8be3e81e35c63f3498070dfbd6a20b2daee6073ead3c9e72d8909bc32a02e46cede3885cf8568d4c380ac97aa7fbcd".parse().unwrap();
+        assert!(sut.is_valid(&signature, &hash));
     }
 }
 
