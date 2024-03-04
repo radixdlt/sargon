@@ -94,7 +94,7 @@ mod tests {
 
     use super::*;
 
-    #[allow(clippy::uppercase_acronyms)]
+    #[allow(clippy::upper_case_acronyms)]
     type SUT = TokenDefinitionMetadata;
 
     #[test]

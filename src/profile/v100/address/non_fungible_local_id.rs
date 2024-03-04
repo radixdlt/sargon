@@ -210,7 +210,10 @@ mod tests {
             ScryptoRUIDNonFungibleLocalId::new(bytes.clone().bytes()),
         );
         assert_eq!(value.clone(), scrypto.clone().into());
-        assert_eq!(value.clone().try_into(), Ok(scrypto.clone()));
+        assert_eq!(
+            Into::<ScryptoNonFungibleLocalId>::into(value.clone()),
+            scrypto.clone()
+        );
         assert_eq!(
             SUT::from_str(value.clone().to_string().as_str()),
             Ok(value)
@@ -219,16 +222,19 @@ mod tests {
 
     fn test_from_bytes<const N: usize>() {
         let bytes = [0xab; N];
-        let non_native = SUT::bytes(bytes).unwrap();
-        let native = ScryptoNonFungibleLocalId::Bytes(
+        let value = SUT::bytes(bytes).unwrap();
+        let scrypto = ScryptoNonFungibleLocalId::Bytes(
             ScryptoBytesNonFungibleLocalId::new(bytes.clone().to_vec())
                 .unwrap(),
         );
-        assert_eq!(non_native.clone(), native.clone().into());
-        assert_eq!(non_native.clone().try_into(), Ok(native.clone()));
+
         assert_eq!(
-            SUT::from_str(non_native.clone().to_string().as_str()),
-            Ok(non_native)
+            Into::<ScryptoNonFungibleLocalId>::into(value.clone()),
+            scrypto.clone()
+        );
+        assert_eq!(
+            SUT::from_str(value.clone().to_string().as_str()),
+            Ok(value)
         );
     }
 
@@ -248,7 +254,6 @@ mod tests {
             ScryptoStringNonFungibleLocalId::new("test").unwrap(),
         );
         assert_eq!(value.clone(), scrypto.clone().into());
-        assert_eq!(value.clone().try_into(), Ok(scrypto.clone()));
         assert_eq!(
             SUT::from_str(value.clone().to_string().as_str()),
             Ok(value)

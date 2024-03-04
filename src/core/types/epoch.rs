@@ -1,4 +1,5 @@
 pub use crate::prelude::*;
+use radix_engine::types::Epoch as ScryptoEpoch;
 
 // use radix_engine_common::types::Epoch as ScryptoEpoch;
 
@@ -31,9 +32,32 @@ impl From<Epoch> for u64 {
     }
 }
 
+impl From<Epoch> for ScryptoEpoch {
+    fn from(value: Epoch) -> Self {
+        Self::of(value.0)
+    }
+}
+
+impl From<ScryptoEpoch> for Epoch {
+    fn from(value: ScryptoEpoch) -> Self {
+        Self(value.number())
+    }
+}
+
 #[cfg(test)]
 mod tests {
+    use super::*;
     use crate::prelude::*;
+
+    #[test]
+    fn into_from_scrypto() {
+        let test =
+            |u: u64| assert_eq!(Into::<Epoch>::into(ScryptoEpoch::of(u)).0, u);
+        test(0);
+        test(1);
+        test(2);
+        test(1337);
+    }
 
     #[test]
     fn from_u64() {

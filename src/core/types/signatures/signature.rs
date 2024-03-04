@@ -1,3 +1,5 @@
+use transaction::model::SignatureV1 as ScryptoSignature;
+
 use crate::prelude::*;
 
 /// Either a Signature on `Curve25519` or `Secp256k1`
@@ -14,6 +16,25 @@ use crate::prelude::*;
 pub enum Signature {
     Secp256k1 { value: Secp256k1Signature },
     Ed25519 { value: Ed25519Signature },
+}
+
+impl From<ScryptoSignature> for Signature {
+    fn from(value: ScryptoSignature) -> Self {
+        match value {
+            ScryptoSignature::Secp256k1(s) => {
+                Self::Secp256k1 { value: s.into() }
+            }
+            ScryptoSignature::Ed25519(s) => Self::Ed25519 { value: s.into() },
+        }
+    }
+}
+impl From<Signature> for ScryptoSignature {
+    fn from(value: Signature) -> Self {
+        match value {
+            Signature::Secp256k1 { value } => Self::Secp256k1(value.into()),
+            Signature::Ed25519 { value } => Self::Ed25519(value.into()),
+        }
+    }
 }
 
 impl From<Secp256k1Signature> for Signature {
@@ -35,6 +56,22 @@ impl HasSampleValues for Signature {
 
     fn sample_other() -> Self {
         Secp256k1Signature::sample().into()
+    }
+}
+
+impl FromStr for Signature {
+    type Err = crate::CommonError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if let Ok(sig) = Ed25519Signature::from_str(s) {
+            Ok(Self::Ed25519 { value: sig })
+        } else if let Ok(sig) = Secp256k1Signature::from_str(s) {
+            Ok(Self::Secp256k1 { value: sig })
+        } else {
+            Err(CommonError::FailedToParseSignatureFromString {
+                bad_value: s.to_owned(),
+            })
+        }
     }
 }
 
@@ -66,5 +103,35 @@ mod tests {
             SUT::sample_other().as_secp256k1().unwrap(),
             &Secp256k1Signature::sample()
         );
+    }
+
+    #[test]
+    fn parse_bad_str() {
+        assert_eq!(
+            "foobar".parse::<SUT>(),
+            Err(CommonError::FailedToParseSignatureFromString {
+                bad_value: "foobar".to_owned()
+            })
+        );
+    }
+
+    #[test]
+    fn parse_ed25519() {
+        assert_eq!(
+            "2150c2f6b6c496d197ae03afb23f6adf23b275c675394f23786250abd006d5a2c7543566403cb414f70d0e229b0a9b55b4c74f42fc38cdf1aba2307f97686f0b".parse::<SUT>().unwrap(), SUT::sample());
+    }
+
+    #[test]
+    fn parse_secp256k1() {
+        assert_eq!(
+            "018ad795353658a0cd1b513c4414cbafd0f990d329522977f8885a27876976a7d41ed8a81c1ac34551819627689cf940c4e27cacab217f00a0a899123c021ff6ef".parse::<SUT>().unwrap(), SUT::sample_other());
+    }
+
+    #[test]
+    fn to_from_scrypto() {
+        let roundtrip =
+            |s: SUT| Into::<SUT>::into(Into::<ScryptoSignature>::into(s));
+        roundtrip(SUT::sample());
+        roundtrip(SUT::sample_other());
     }
 }

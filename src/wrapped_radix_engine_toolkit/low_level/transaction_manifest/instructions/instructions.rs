@@ -9,6 +9,7 @@ use transaction::{
         CompileError as ScryptoCompileError,
         MockBlobProvider as ScryptoMockBlobProvider,
     },
+    model::InstructionsV1 as ScryptoInstructions,
     prelude::InstructionV1 as ScryptoInstruction,
 };
 
@@ -24,6 +25,18 @@ impl Deref for Instructions {
 
     fn deref(&self) -> &Self::Target {
         &self.secret_magic.0
+    }
+}
+
+impl Instructions {
+    pub(crate) fn from_scrypto(
+        instructions: ScryptoInstructions,
+        network_id: NetworkID,
+    ) -> Self {
+        Self {
+            secret_magic: instructions.into(),
+            network_id,
+        }
     }
 }
 
@@ -103,6 +116,15 @@ impl HasSampleValues for Instructions {
 }
 
 impl Instructions {
+    pub(crate) fn empty(network_id: NetworkID) -> Self {
+        Self {
+            secret_magic: InstructionsSecretMagic(Vec::new()),
+            network_id,
+        }
+    }
+}
+
+impl Instructions {
     pub(crate) fn sample_mainnet_instructions_string() -> String {
         include_str!("resource_transfer.rtm").to_owned()
     }
@@ -159,6 +181,13 @@ mod tests {
     }
 
     #[test]
+    fn empty() {
+        let sut = SUT::empty(NetworkID::Simulator);
+        assert_eq!(sut.network_id, NetworkID::Simulator);
+        assert_eq!(sut.instructions_string(), "");
+    }
+
+    #[test]
     fn new_from_instructions_string_wrong_network_id() {
         assert_eq!(
             SUT::new(
@@ -198,6 +227,24 @@ mod tests {
                 NetworkID::Simulator
             ),
             CommonError::InvalidInstructionsString
+        );
+    }
+
+    #[test]
+    fn from_scrypto() {
+        let network_id = NetworkID::Mainnet;
+        assert_eq!(
+            SUT {
+                secret_magic: InstructionsSecretMagic::sample(),
+                network_id
+            },
+            SUT::from_scrypto(
+                ScryptoInstructions(vec![
+                    ScryptoInstruction::DropAuthZoneProofs,
+                    ScryptoInstruction::DropAuthZoneRegularProofs,
+                ]),
+                network_id
+            )
         );
     }
 

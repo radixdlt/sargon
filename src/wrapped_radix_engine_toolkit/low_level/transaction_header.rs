@@ -1,3 +1,5 @@
+use transaction::model::TransactionHeaderV1 as ScryptoTransactionHeader;
+
 use crate::prelude::*;
 
 #[derive(
@@ -46,6 +48,39 @@ impl TransactionHeader {
     }
 }
 
+impl From<TransactionHeader> for ScryptoTransactionHeader {
+    fn from(value: TransactionHeader) -> Self {
+        Self {
+            network_id: value.network_id.into(),
+            start_epoch_inclusive: value.start_epoch_inclusive.into(),
+            end_epoch_exclusive: value.end_epoch_exclusive.into(),
+            nonce: value.nonce.into(),
+            notary_public_key: value.notary_public_key.into(),
+            notary_is_signatory: value.notary_is_signatory,
+            tip_percentage: value.tip_percentage,
+        }
+    }
+}
+
+impl TryFrom<ScryptoTransactionHeader> for TransactionHeader {
+    type Error = crate::CommonError;
+
+    fn try_from(value: ScryptoTransactionHeader) -> Result<Self, Self::Error> {
+        let network_id: NetworkID = value.network_id.try_into()?;
+        let notary_public_key: PublicKey =
+            value.notary_public_key.try_into()?;
+        Ok(Self {
+            network_id,
+            start_epoch_inclusive: value.start_epoch_inclusive.into(),
+            end_epoch_exclusive: value.end_epoch_exclusive.into(),
+            nonce: value.nonce.into(),
+            notary_public_key,
+            notary_is_signatory: value.notary_is_signatory,
+            tip_percentage: value.tip_percentage,
+        })
+    }
+}
+
 impl HasSampleValues for TransactionHeader {
     fn sample() -> Self {
         Self::new(
@@ -59,22 +94,22 @@ impl HasSampleValues for TransactionHeader {
         )
     }
 
+    // The Header of:
+    // https://github.com/radixdlt/radixdlt-scrypto/blob/ff21f24952318387803ae720105eec079afe33f3/transaction/src/model/hash/encoder.rs#L115
     fn sample_other() -> Self {
-        Self::new(
-            NetworkID::Mainnet,
-            237,
-            237,
-            421337237,
-            Ed25519PublicKey::sample_other(),
-            false,
-            10,
-        )
+        let private_key: Secp256k1PrivateKey =
+            radix_engine::types::Secp256k1PrivateKey::from_u64(1)
+                .unwrap()
+                .into();
+        let public_key: Secp256k1PublicKey = private_key.public_key();
+        let network_id = NetworkID::Simulator;
+        Self::new(network_id, 0, 10, 10, public_key, true, 0)
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = TransactionHeader;
@@ -88,6 +123,16 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn to_from_scrypto() {
+        let roundtrip = |s: SUT| {
+            TryInto::<SUT>::try_into(Into::<ScryptoTransactionHeader>::into(s))
+                .unwrap()
+        };
+        roundtrip(SUT::sample());
+        roundtrip(SUT::sample_other());
     }
 
     #[test]

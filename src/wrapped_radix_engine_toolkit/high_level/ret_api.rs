@@ -93,7 +93,7 @@ pub fn manifest_third_party_deposit_update(
 // #[uniffi::export]
 // pub async fn manifest_assets_transfers(
 //     _transfers: AssetsTransfersTransactionPrototype,
-//     _message: Option<Message>,
+//     _message: Message,
 // ) -> Result<Manifest> {
 //     todo!()
 // }
@@ -132,8 +132,7 @@ pub fn build_information() -> SargonBuildInformation {
 
 #[uniffi::export]
 pub fn hash(data: BagOfBytes) -> Exactly32Bytes {
-    let h: radix_engine_common::crypto::Hash =
-        hash_of::<Vec<u8>>(data.to_vec());
+    let h = hash_of::<Vec<u8>>(data.to_vec());
     h.into()
 }
 
@@ -383,7 +382,7 @@ mod tests {
         let info = build_information();
         std::env::remove_var(RADIX_ENGINE_TOOLKIT_DEPENDENCY);
         std::env::remove_var(RADIX_ENGINE_DEPENDENCY);
-        assert_eq!(info.sargon_version.matches(".").count(), 2);
+        assert_eq!(info.sargon_version.matches('.').count(), 2);
         assert_eq!(
             info.dependencies
                 .radix_engine_toolkit

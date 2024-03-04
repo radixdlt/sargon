@@ -205,10 +205,8 @@ mod tests {
     #[test]
     fn manifest_create_fungible_token_stella() {
         assert_eq!(
-            SUT::create_fungible_token(
-                &AccountAddress::sample_mainnet().into(),
-            )
-            .to_string(),
+            SUT::create_fungible_token(&AccountAddress::sample_mainnet(),)
+                .to_string(),
             r#"CREATE_FUNGIBLE_RESOURCE_WITH_INITIAL_SUPPLY
     Enum<0u8>()
     true

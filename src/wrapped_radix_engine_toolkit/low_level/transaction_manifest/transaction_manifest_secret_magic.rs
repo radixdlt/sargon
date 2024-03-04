@@ -1,11 +1,5 @@
 use crate::prelude::*;
 
-/// Blob is just a bag of bytes (must be, for Kotlin compat)
-pub type Blob = BagOfBytes;
-
-/// Vec of Blobs
-pub type Blobs = Vec<Blob>;
-
 /// An internal representation of a TransactionManifest,
 /// which intentions is to allow the `struct TransactionManifest`
 /// to have no public initializers in Swift/Kotlin land, since it
@@ -28,11 +22,11 @@ impl TransactionManifestSecretMagic {
 
 impl HasSampleValues for TransactionManifestSecretMagic {
     fn sample() -> Self {
-        Self::new(Instructions::sample_mainnet(), Vec::new())
+        Self::new(Instructions::sample_mainnet(), Blobs::default())
     }
 
     fn sample_other() -> Self {
-        Self::new(Instructions::sample_simulator_other(), Vec::new())
+        Self::new(Instructions::sample_simulator_other(), Blobs::default())
     }
 }
 

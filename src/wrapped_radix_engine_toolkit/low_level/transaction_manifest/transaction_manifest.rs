@@ -9,6 +9,8 @@ use radix_engine_toolkit::functions::instructions::extract_addresses as RET_ins_
 use radix_engine_toolkit::functions::manifest::{
     execution_summary as RET_execution_summary, summary as RET_summary,
 };
+use transaction::model::{BlobV1 as ScryptoBlob, BlobsV1 as ScryptoBlobs};
+
 use transaction::{
     manifest::compile as scrypto_compile,
     manifest::decompile as scrypto_decompile,
@@ -23,7 +25,32 @@ use transaction::{
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record, derive_more::Display)]
 #[display("{}", self.instructions_string())] // TODO add blobs
 pub struct TransactionManifest {
-    secret_magic: TransactionManifestSecretMagic,
+    pub(crate) secret_magic: TransactionManifestSecretMagic,
+}
+
+impl TransactionManifest {
+    pub fn with_instructions_and_blobs(
+        instructions: Instructions,
+        blobs: Blobs,
+    ) -> Self {
+        Self {
+            secret_magic: TransactionManifestSecretMagic::new(
+                instructions,
+                blobs,
+            ),
+        }
+    }
+}
+
+impl TransactionManifest {
+    pub(crate) fn empty(network_id: NetworkID) -> Self {
+        Self {
+            secret_magic: TransactionManifestSecretMagic {
+                instructions: Instructions::empty(network_id),
+                blobs: Blobs::default(),
+            },
+        }
+    }
 }
 
 impl From<TransactionManifestSecretMagic> for TransactionManifest {
@@ -38,14 +65,7 @@ impl TransactionManifest {
     fn scrypto_manifest(&self) -> ScryptoTransactionManifest {
         ScryptoTransactionManifest {
             instructions: self.instructions().clone(),
-            blobs: self
-                .secret_magic
-                .blobs
-                .clone()
-                .into_iter()
-                .map(|b| b.to_vec())
-                .map(|blob| (hash_of(blob.clone()), blob))
-                .collect(),
+            blobs: self.secret_magic.blobs.clone().into(),
         }
     }
 }
@@ -61,6 +81,10 @@ impl TransactionManifest {
         &self.secret_magic.instructions.secret_magic.0
     }
 
+    pub(crate) fn blobs(&self) -> &Blobs {
+        &self.secret_magic.blobs
+    }
+
     pub(crate) fn from_scrypto(
         scrypto_manifest: ScryptoTransactionManifest,
         network_id: NetworkID,
@@ -73,12 +97,7 @@ impl TransactionManifest {
                     ),
                     network_id,
                 },
-                blobs: scrypto_manifest
-                    .blobs
-                    .clone()
-                    .values()
-                    .map(|b| b.to_owned().into())
-                    .collect_vec(),
+                blobs: scrypto_manifest.blobs.clone().into(),
             },
         };
         assert_eq!(value.scrypto_manifest(), scrypto_manifest);
@@ -188,7 +207,7 @@ mod tests {
         type Err = crate::CommonError;
 
         fn from_str(s: &str) -> Result<Self> {
-            Self::new(s, NetworkID::Simulator, Vec::new())
+            Self::new(s, NetworkID::Simulator, Blobs::default())
         }
     }
 
@@ -244,7 +263,7 @@ mod tests {
                     secret_magic: InstructionsSecretMagic(ins),
                     network_id: NetworkID::Mainnet,
                 },
-                Vec::new(),
+                Blobs::default(),
             ),
         };
         assert_eq!(scrypto.clone(), sut.clone().into());
@@ -260,7 +279,7 @@ mod tests {
                 "#;
 
         assert_eq!(
-            SUT::new(instructions_str, NetworkID::Simulator, Blobs::new())
+            SUT::new(instructions_str, NetworkID::Simulator, Blobs::default())
                 .unwrap()
                 .instructions()
                 .len(),
@@ -277,7 +296,7 @@ mod tests {
                 "#;
 
         assert_eq!(
-            SUT::new(instructions_str, NetworkID::Mainnet, Blobs::new()),
+            SUT::new(instructions_str, NetworkID::Mainnet, Blobs::default()),
             Err(CommonError::InvalidInstructionsWrongNetwork {
                 found_in_instructions: NetworkID::Simulator,
                 specified_to_instructions_ctor: NetworkID::Mainnet
@@ -294,7 +313,7 @@ mod tests {
                 "#;
 
         assert_eq!(
-            SUT::new(instructions_str, NetworkID::Stokenet, Blobs::new()),
+            SUT::new(instructions_str, NetworkID::Stokenet, Blobs::default()),
             Err(CommonError::InvalidInstructionsWrongNetwork {
                 found_in_instructions: NetworkID::Mainnet,
                 specified_to_instructions_ctor: NetworkID::Stokenet
@@ -306,9 +325,12 @@ mod tests {
     #[should_panic(expected = "not yet implemented")]
     fn execution_summary() {
         let instructions_string = "CALL_METHOD Address(\"account_tdx_2_128h2zv5m4mnprnfjxn4nf96pglgx064mut8np26hp7w9mm064es2dn\") \"withdraw\" Address(\"resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc\") Decimal(\"123\"); TAKE_FROM_WORKTOP Address(\"resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc\") Decimal(\"123\") Bucket(\"bucket1\"); CALL_METHOD Address(\"account_tdx_2_128x8q5es2dstqtcc8wqm843xdtfs0lgetfcdn62a54wxspj6yhpxkf\") \"try_deposit_or_abort\" Bucket(\"bucket1\") Enum<0u8>();";
-        let manifest =
-            SUT::new(instructions_string, NetworkID::Stokenet, Blobs::new())
-                .unwrap();
+        let manifest = SUT::new(
+            instructions_string,
+            NetworkID::Stokenet,
+            Blobs::default(),
+        )
+        .unwrap();
 
         let summary = manifest
             .execution_summary(TransactionReceipt::sample().encoded)
@@ -386,7 +408,7 @@ mod uniffi_tests {
             new_transaction_manifest_from_instructions_string_and_blobs(
                 s.clone(),
                 NetworkID::Mainnet,
-                Blobs::new()
+                Blobs::default()
             )
             .unwrap()
             .instructions_string(),

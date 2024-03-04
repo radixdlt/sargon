@@ -24,6 +24,9 @@ typedef sequence<i8> BagOfBytes;
 typedef BagOfBytes InstructionsSecretMagic;
 
 [Custom]
+typedef BagOfBytes HashSecretMagic;
+
+[Custom]
 typedef string ScryptoDecimal192;
 
 [Custom]

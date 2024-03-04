@@ -42,14 +42,14 @@ impl IsPrivateKey<Ed25519PublicKey> for Ed25519PrivateKey {
         )
     }
 
-    fn sign(&self, msg_hash: &impl IsHash) -> Self::Signature {
+    fn sign(&self, msg_hash: &Hash) -> Self::Signature {
         self.0.sign(msg_hash).into()
     }
 }
 
 impl Ed25519PrivateKey {
-    pub fn from_engine(engine: ScryptoEd25519PrivateKey) -> Self {
-        Self(engine)
+    pub fn from_scrypto(scrypto: ScryptoEd25519PrivateKey) -> Self {
+        Self(scrypto)
     }
 
     pub fn to_bytes(&self) -> Vec<u8> {
@@ -65,7 +65,7 @@ impl Ed25519PrivateKey {
             .map_err(|_| CommonError::InvalidEd25519PrivateKeyFromBytes {
                 bad_value: slice.into(),
             })
-            .map(Self::from_engine)
+            .map(Self::from_scrypto)
     }
 
     pub fn from_vec(bytes: Vec<u8>) -> Result<Self> {

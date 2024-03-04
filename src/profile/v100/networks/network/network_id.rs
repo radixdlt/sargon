@@ -85,6 +85,12 @@ impl Default for NetworkID {
     }
 }
 
+impl From<NetworkID> for u8 {
+    fn from(value: NetworkID) -> Self {
+        value.discriminant()
+    }
+}
+
 impl NetworkID {
     /// The raw representation of this network id, an `u8`.
     pub fn discriminant(&self) -> u8 {
@@ -180,6 +186,11 @@ mod tests {
     }
 
     #[test]
+    fn into_u8() {
+        assert_eq!(Into::<u8>::into(NetworkID::Mainnet), 1);
+    }
+
+    #[test]
     fn from_repr() {
         assert_eq!(NetworkID::Mainnet, NetworkID::from_repr(0x01).unwrap());
         assert_eq!(NetworkID::Stokenet, NetworkID::from_repr(0x02).unwrap());
@@ -243,7 +254,6 @@ mod tests {
             ids.len()
         );
     }
-    /*
     #[test]
     fn lookup_network_definition() {
         assert_eq!(
@@ -259,7 +269,6 @@ mod tests {
             NetworkID::Enkinet.discriminant()
         )
     }
-    */
 
     #[test]
     fn logical_name() {
