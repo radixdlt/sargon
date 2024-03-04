@@ -28,6 +28,17 @@ impl From<IntentSignature> for Signature {
     }
 }
 
+impl TryFrom<(ScryptoIntentSignature, Hash)> for IntentSignature {
+    type Error = crate::CommonError;
+
+    fn try_from(
+        value: (ScryptoIntentSignature, Hash),
+    ) -> Result<Self, Self::Error> {
+        TryInto::<SignatureWithPublicKey>::try_into((value.0 .0, value.1))
+            .map(Into::<Self>::into)
+    }
+}
+
 impl From<SignatureWithPublicKey> for IntentSignature {
     fn from(value: SignatureWithPublicKey) -> Self {
         Self {

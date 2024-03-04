@@ -1,6 +1,8 @@
 use crate::prelude::*;
 
+use radix_engine::types::recover_secp256k1 as Scrypto_recover_secp256k1;
 use radix_engine_common::crypto::{
+    Ed25519PublicKey as ScryptoEd25519PublicKey,
     Ed25519Signature as ScryptoEd25519Signature,
     Secp256k1PublicKey as ScryptoSecp256k1PublicKey,
     Secp256k1Signature as ScryptoSecp256k1Signature,
@@ -46,6 +48,41 @@ impl From<SignatureWithPublicKey> for ScryptoSignatureWithPublicKey {
                 public_key: public_key.into(),
                 signature: signature.into(),
             },
+        }
+    }
+}
+
+impl TryFrom<(ScryptoSignatureWithPublicKey, Hash)> for SignatureWithPublicKey {
+    type Error = crate::CommonError;
+
+    fn try_from(
+        value: (ScryptoSignatureWithPublicKey, Hash),
+    ) -> Result<Self, Self::Error> {
+        match value.0 {
+            ScryptoSignatureWithPublicKey::Secp256k1 { signature } => {
+                let hash: radix_engine_common::crypto::Hash = value.1.into();
+                let scrypto_public_key = Scrypto_recover_secp256k1(
+                    &hash, &signature,
+                )
+                .ok_or(
+                    CommonError::FailedToRecoverSecp256k1PublicKeyFromSignature,
+                )?;
+                TryInto::<Secp256k1PublicKey>::try_into(scrypto_public_key).map(
+                    |public_key| Self::Secp256k1 {
+                        public_key,
+                        signature: signature.into(),
+                    },
+                )
+            }
+            ScryptoSignatureWithPublicKey::Ed25519 {
+                public_key: scrypto_public_key,
+                signature,
+            } => TryInto::<Ed25519PublicKey>::try_into(scrypto_public_key).map(
+                |public_key| Self::Ed25519 {
+                    public_key,
+                    signature: signature.into(),
+                },
+            ),
         }
     }
 }
@@ -192,5 +229,48 @@ mod tests {
                 signature: _,
             } => panic!("wrong curve"),
         }
+    }
+
+    #[test]
+    fn try_from_scrypto_invalid_ed25519() {
+        assert_eq!(
+            TryInto::<SUT>::try_into((
+                ScryptoSignatureWithPublicKey::Ed25519 {
+                    public_key: ScryptoEd25519PublicKey([4u8; 32]),
+                    signature: ScryptoEd25519Signature([2u8; 64])
+                },
+                Hash::sample()
+            )),
+            Err(CommonError::InvalidEd25519PublicKeyPointNotOnCurve)
+        );
+    }
+
+    #[test]
+    fn try_from_scrypto_invalid_secp256k1_public_key() {
+        assert_eq!(
+            TryInto::<SUT>::try_into((
+                ScryptoSignatureWithPublicKey::Secp256k1 {
+                    signature: ScryptoSecp256k1Signature([2u8; 65])
+                },
+                Hash::sample()
+            )),
+            Err(CommonError::FailedToRecoverSecp256k1PublicKeyFromSignature)
+        );
+    }
+
+    // This is unfortunate, but it is how ECDSA recoverable signatures work, a
+    // WRONG hash will produce the WRONG publickey instead of error, given a
+    // secp256k1 signature
+    #[test]
+    fn try_from_scrypto_invalid_secp256k1_ok_even_for_wrong_hash() {
+        assert_eq!(
+            TryInto::<SUT>::try_into((
+                ScryptoSignatureWithPublicKey::Secp256k1 {
+                    signature: ScryptoSecp256k1Signature::from_str("018ad795353658a0cd1b513c4414cbafd0f990d329522977f8885a27876976a7d41ed8a81c1ac34551819627689cf940c4e27cacab217f00a0a899123c021ff6ef").unwrap()
+                },
+                Hash::sample()
+            )).unwrap().into_secp256k1().unwrap().0,
+            Secp256k1PublicKey::from_str("02634e157ed84916e1a79c8c0e802772d2b095ea4e5636243a0cade9896dd4b500").unwrap()
+        );
     }
 }

@@ -56,6 +56,20 @@ impl From<SignedIntent> for ScryptoSignedIntent {
     }
 }
 
+impl TryFrom<ScryptoSignedIntent> for SignedIntent {
+    type Error = crate::CommonError;
+
+    fn try_from(value: ScryptoSignedIntent) -> Result<Self, Self::Error> {
+        let intent: TransactionIntent = value.intent.try_into()?;
+        let intent_signatures: IntentSignatures =
+            (value.intent_signatures, intent.intent_hash().hash).try_into()?;
+        Ok(Self {
+            intent,
+            intent_signatures,
+        })
+    }
+}
+
 impl HasSampleValues for SignedIntent {
     fn sample() -> Self {
         Self::new_validating_signatures(
