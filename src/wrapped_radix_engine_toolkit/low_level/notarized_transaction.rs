@@ -25,20 +25,19 @@ impl NotarizedTransaction {
         }
     }
 
-    pub fn compile(&self) -> BagOfBytes {
+    pub fn compile(&self) -> CompiledNotarizedIntent {
         let scrypto: ScryptoNotarizedTransaction = self.clone().into();
-        RET_compile_notarized_tx(&scrypto)
+        let bytes: BagOfBytes = RET_compile_notarized_tx(&scrypto)
             .expect("Should always be able to compile a notarized tx")
-            .into()
+            .into();
+
+        CompiledNotarizedIntent::new(bytes)
     }
 
-    pub fn decompile(compiled_notarized_tx: &BagOfBytes) -> Result<Self> {
-        RET_decompile_notarize_tx(compiled_notarized_tx.bytes())
-        .map_err(|e| {
-            error!("Failed to decompile bytes into Notarized Transaction, error: {:?}", e);
-            CommonError::FailedToDecompileBytesIntoNotarizedTransaction
-        })
-        .and_then(TryInto::<Self>::try_into)
+    pub fn decompile(
+        compiled_notarized_tx: &CompiledNotarizedIntent,
+    ) -> Result<Self> {
+        compiled_notarized_tx.decompile()
     }
 }
 
@@ -48,20 +47,6 @@ impl From<NotarizedTransaction> for ScryptoNotarizedTransaction {
             signed_intent: value.signed_intent.into(),
             notary_signature: value.notary_signature.into(),
         }
-    }
-}
-
-impl TryFrom<ScryptoNotarizedTransaction> for NotarizedTransaction {
-    type Error = crate::CommonError;
-
-    fn try_from(
-        value: ScryptoNotarizedTransaction,
-    ) -> Result<Self, Self::Error> {
-        let signed_intent: SignedIntent = value.signed_intent.try_into()?;
-        Ok(Self {
-            signed_intent,
-            notary_signature: value.notary_signature.into(),
-        })
     }
 }
 
