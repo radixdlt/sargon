@@ -185,4 +185,14 @@ mod tests {
 
         assert_eq!(sut, from_ffi_side);
     }
+
+    #[test]
+    fn manual_perform_uniffi_conversion_fail() {
+        assert!(
+            <HashSecretMagic as crate::UniffiCustomTypeConverter>::into_custom(
+                BagOfBytes::from_hex("deadbeef").unwrap(),
+            )
+            .is_err()
+        );
+    }
 }

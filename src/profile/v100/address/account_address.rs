@@ -347,7 +347,7 @@ mod tests {
     }
 
     #[test]
-    fn manual_perform_uniffi_conversion() {
+    fn manual_perform_uniffi_conversion_successful() {
         type RetAddr = <SUT as FromRetAddress>::RetAddress;
         let sut = SUT::sample();
         let bech32 = sut.to_string();
@@ -362,6 +362,15 @@ mod tests {
             )
             .unwrap();
         assert_eq!(ret, from_ffi_side);
+    }
+
+    #[test]
+    fn manual_perform_uniffi_conversion_fail() {
+        type RetAddr = <SUT as FromRetAddress>::RetAddress;
+        assert!(<RetAddr as crate::UniffiCustomTypeConverter>::into_custom(
+            "invalid".to_string()
+        )
+        .is_err());
     }
 
     #[test]
