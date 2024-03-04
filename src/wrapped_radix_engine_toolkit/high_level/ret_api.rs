@@ -62,14 +62,18 @@ pub fn manifest_create_multiple_fungible_tokens(
 pub fn manifest_create_non_fungible_token(
     address_of_owner: &AccountAddress,
 ) -> TransactionManifest {
-    TransactionManifest::create_non_fungible_token(address_of_owner)
+    TransactionManifest::create_single_nft_collection(address_of_owner, 20)
 }
 
 #[uniffi::export]
 pub fn manifest_create_multiple_non_fungible_tokens(
-    _address_of_owner: &AccountAddress,
+    address_of_owner: &AccountAddress,
 ) -> TransactionManifest {
-    todo!()
+    TransactionManifest::create_multiple_nft_collections(
+        address_of_owner,
+        15,
+        10,
+    )
 }
 
 #[uniffi::export]
@@ -306,16 +310,11 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "not yet implemented")]
     fn test_manifest_create_multiple_non_fungible_tokens() {
-        manifest_eq(
-            manifest_create_multiple_non_fungible_tokens(
-                &AccountAddress::sample_mainnet(),
-            ),
-            r#"
-            todo
-            "#,
+        let manifest = manifest_create_multiple_non_fungible_tokens(
+            &AccountAddress::sample_mainnet(),
         );
+        assert_eq!(manifest.instructions().len(), 16);
     }
 
     #[test]

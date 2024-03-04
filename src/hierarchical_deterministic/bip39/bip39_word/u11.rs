@@ -19,8 +19,9 @@ pub struct U11 {
 }
 
 impl U11 {
+    pub const MAX: u16 = 2047;
     pub fn new(inner: u16) -> Result<Self> {
-        if inner >= 2048 {
+        if inner > Self::MAX {
             return Err(CommonError::InvalidBIP39Index { bad_value: inner });
         }
         Ok(Self { inner })
