@@ -10,6 +10,11 @@ impl ResourceAddress {
     pub fn is_non_fungible(&self) -> bool {
         self.secret_magic.is_non_fungible()
     }
+
+    pub fn xrd_on_network(id: NetworkID) -> Self {
+        Self::new(radix_engine::types::XRD, id)
+            .expect("Should never fail to get XRD on network.")
+    }
 }
 
 #[uniffi::export]
@@ -257,6 +262,16 @@ mod tests {
                 .parse()
                 .unwrap();
         assert_eq!(a.network_id(), NetworkID::Mainnet);
+    }
+
+    #[test]
+    fn xrd_on_mainnet() {
+        assert_eq!(SUT::xrd_on_network(NetworkID::Mainnet).to_string(), "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd");
+    }
+
+    #[test]
+    fn xrd_on_stokenet() {
+        assert_eq!(SUT::xrd_on_network(NetworkID::Stokenet).to_string(), "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc");
     }
 }
 

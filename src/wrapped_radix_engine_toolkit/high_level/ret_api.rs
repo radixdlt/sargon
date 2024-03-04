@@ -137,8 +137,8 @@ pub fn hash(data: BagOfBytes) -> Exactly32Bytes {
 }
 
 #[uniffi::export]
-pub fn xrd_address_of_network(_network_id: NetworkID) -> ResourceAddress {
-    todo!()
+pub fn xrd_address_of_network(network_id: NetworkID) -> ResourceAddress {
+    ResourceAddress::xrd_on_network(network_id)
 }
 
 #[uniffi::export]
@@ -405,9 +405,13 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "not yet implemented")]
-    fn test_xrd_address_of_network() {
+    fn xrd_address_of_network_mainnet() {
         assert_eq!(xrd_address_of_network(NetworkID::Mainnet).to_string(), "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd");
+    }
+
+    #[test]
+    fn xrd_address_of_network_stokenet() {
+        assert_eq!(xrd_address_of_network(NetworkID::Stokenet).to_string(), "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc");
     }
 
     #[test]
