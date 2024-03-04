@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
 use transaction::model::{
-    MessageContentsV1 as ScryptoMessageContents, MessageV1 as ScryptoMessage,
-    PlaintextMessageV1 as ScryptoPlaintextMessage,
+    EncryptedMessageV1, MessageContentsV1 as ScryptoMessageContents,
+    MessageV1 as ScryptoMessage, PlaintextMessageV1 as ScryptoPlaintextMessage,
 };
 
 #[derive(Clone, Debug, PartialEq, EnumAsInner, Eq, Hash, uniffi::Enum)]
@@ -94,6 +94,18 @@ mod tests {
                 ),
                 mime_type: "text/plain".to_owned(),
             })
+        );
+    }
+
+    #[test]
+    fn encrypted_msg_are_not_yet_supported() {
+        let dummy = EncryptedMessageV1 {
+            encrypted: transaction::prelude::AesGcmPayload(vec![]),
+            decryptors_by_curve: [].into(),
+        };
+        assert_eq!(
+            TryInto::<SUT>::try_into(ScryptoMessage::Encrypted(dummy)),
+            Err(CommonError::EncryptedMessagesAreNotYetSupported)
         );
     }
 }

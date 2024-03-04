@@ -15,10 +15,8 @@ pub trait IsPrivateKey<P: IsPublicKey<Self::Signature>>: Sized {
     {
         let public_key: P = self.public_key();
         let signature = self.sign(&intent_hash.hash);
-        let signature_with_public_key: SignatureWithPublicKey =
-            (public_key, signature).into();
-
-        signature_with_public_key.into()
+        let tuple: SignatureWithPublicKey = (public_key, signature).into();
+        tuple.into()
     }
 
     fn notarize_hash(

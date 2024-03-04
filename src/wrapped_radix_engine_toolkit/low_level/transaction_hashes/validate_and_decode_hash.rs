@@ -43,4 +43,15 @@ mod tests {
             Err(CommonError::FailedToBech32DecodeTransactionHashAfterHavingTestedAllNetworkID { bad_value: s.to_owned() })
         );
     }
+
+    #[test]
+    fn decode_sim_success() {
+        let s = "txid_sim1vrjkzlt8pekg5s46tum5na8lzpulvc3p72p92nkdm2dd8p0vkx2svr7ejr";
+        assert_eq!(
+            validate_and_decode_hash::<transaction::model::IntentHash>(s)
+                .unwrap()
+                .1,
+            NetworkID::Simulator.into()
+        );
+    }
 }

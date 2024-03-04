@@ -82,4 +82,13 @@ mod tests {
             Signature::sample_other()
         );
     }
+
+    #[test]
+    fn into_scrypto() {
+        let scrypto: ScryptoIntentSignature = SUT::sample_other().into();
+        assert_eq!(
+            scrypto.0.signature(),
+            SUT::sample_other().signature().into()
+        )
+    }
 }
