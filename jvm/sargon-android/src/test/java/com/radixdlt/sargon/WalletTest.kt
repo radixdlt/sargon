@@ -3,6 +3,10 @@ package com.radixdlt.sargon
 import com.radixdlt.sargon.extensions.identifier
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.sample.sample
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import kotlin.random.Random
 
@@ -13,12 +17,12 @@ class WalletTest {
         println("🚀 Test Wallet in Kotlin start")
 
         val storage = EphemeralKeystore() // Cannot use Object in kotlin script
-        assert(storage.isEmpty())
+        assertTrue(storage.isEmpty())
 
         println("🔮 GENERATING NEW WALLET")
         val wallet = Wallet.with(entropy = ByteArray(32) { 0xFF.toByte() }, secureStorage = storage)
 
-        assert(
+        assertTrue(
             storage.contains(
                 value =
                 "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo vote"
@@ -29,74 +33,73 @@ class WalletTest {
         println("🔮 Creating first account on mainnet")
         val initialNameOfFirstAccount = "Alice"
         // Not created any account yet...
-        assert(!storage.contains(value = initialNameOfFirstAccount))
-        assert(wallet.profile().networks.isEmpty())
-        var main0 =
-            wallet.createAndSaveNewAccount(
-                networkId = NetworkId.MAINNET,
-                name = DisplayName.init(validating = initialNameOfFirstAccount)
-            )
-        assert(main0.networkId == NetworkId.MAINNET)
-        assert(wallet.profile().networks.size == 1)
-        assert(wallet.profile().networks[0].accounts.size == 1)
-        assert(
-            wallet.profile().networks[0].accounts[0].displayName.value ==
-                    initialNameOfFirstAccount
+        assertFalse(storage.contains(value = initialNameOfFirstAccount))
+        assertTrue(wallet.profile().networks.isEmpty())
+        var main0 = wallet.createAndSaveNewAccount(
+            networkId = NetworkId.MAINNET,
+            name = DisplayName.init(validating = initialNameOfFirstAccount)
         )
-        assert(storage.contains(value = initialNameOfFirstAccount))
-        print("✨ Successfully created first account ✅")
+        assertEquals(NetworkId.MAINNET, main0.networkId)
+        assertEquals(1, wallet.profile().networks.size)
+        assertEquals(1, wallet.profile().networks[0].accounts.size)
+        assertEquals(
+            initialNameOfFirstAccount,
+            wallet.profile().networks[0].accounts[0].displayName.value
+        )
+        assertTrue(storage.contains(value = initialNameOfFirstAccount))
+        println("✨ Successfully created first account ✅")
 
-        print("🔮 Update account using `update_account`")
+        println("🔮 Update account using `update_account`")
         var updatedNameOfFirstAccount = "Stella"
         main0.displayName = DisplayName.init(validating = updatedNameOfFirstAccount)
         main0.appearanceId = AppearanceId.sample.other()
         val main0Updated = wallet.updateAccount(to = main0)
-        assert(main0Updated == main0)
-        assert(
-            wallet.profile().networks[0].accounts[0].displayName.value ==
-                    updatedNameOfFirstAccount
+        assertEquals(main0, main0Updated)
+        assertEquals(
+            updatedNameOfFirstAccount,
+            wallet.profile().networks[0].accounts[0].displayName.value
         )
-        assert(wallet.profile().networks[0].accounts[0].appearanceId == AppearanceId.sample.other())
-        assert(storage.contains(value = updatedNameOfFirstAccount))
-        print("✨ Successfully updated first account using `update_account` ✅")
+        assertEquals(
+            AppearanceId.sample.other(),
+            wallet.profile().networks[0].accounts[0].appearanceId
+        )
+        assertTrue(storage.contains(value = updatedNameOfFirstAccount))
+        println("✨ Successfully updated first account using `update_account` ✅")
 
-        print("🔮 Renaming account using changeNameOfAccount")
+        println("🔮 Renaming account using changeNameOfAccount")
         updatedNameOfFirstAccount = "Satoshi"
-        main0 =
-            wallet.changeNameOfAccount(
-                address = main0.address,
-                to = DisplayName.init(validating = updatedNameOfFirstAccount)
-            )
-        assert(
-            wallet.profile().networks[0].accounts[0].displayName.value ==
-                    updatedNameOfFirstAccount
+        main0 = wallet.changeNameOfAccount(
+            address = main0.address,
+            to = DisplayName.init(validating = updatedNameOfFirstAccount)
         )
-        assert(storage.contains(value = updatedNameOfFirstAccount))
-        print("✨ Successfully renamed first account using changeNameOfAccount ✅")
+        assertEquals(
+            updatedNameOfFirstAccount,
+            wallet.profile().networks[0].accounts[0].displayName.value
+        )
+        assertTrue(storage.contains(value = updatedNameOfFirstAccount))
+        println("✨ Successfully renamed first account using changeNameOfAccount ✅")
 
-        print("🔮 Creating second mainnet account")
-        val main1 =
-            wallet.createAndSaveNewAccount(
-                networkId = NetworkId.MAINNET,
-                name = DisplayName.init(validating = "Bob")
-            )
-        assert(main0.address != main1.address)
-        assert(main0.networkId == main1.networkId)
-        assert(wallet.profile().networks.size == 1)
-        assert(wallet.profile().networks[0].accounts == listOf(main0, main1))
+        println("🔮 Creating second mainnet account")
+        val main1 = wallet.createAndSaveNewAccount(
+            networkId = NetworkId.MAINNET,
+            name = DisplayName.init(validating = "Bob")
+        )
+        assertNotEquals(main0.address, main1.address)
+        assertEquals(main0.networkId, main1.networkId)
+        assertEquals(1, wallet.profile().networks.size)
+        assertEquals(listOf(main0, main1), wallet.profile().networks[0].accounts)
 
-        print("🔮 Creating first testnet account")
+        println("🔮 Creating first testnet account")
         val testnetAccountName = "Hello Radix Account!"
-        val test0 =
-            wallet.createAndSaveNewAccount(
-                networkId = NetworkId.STOKENET,
-                name = DisplayName.init(validating = testnetAccountName)
-            )
-        assert(wallet.profile().networks.size == 2)
-        assert(wallet.profile().networks[1].accounts == listOf(test0))
-        assert(wallet.profile().networks[1].accounts[0].displayName.value == testnetAccountName)
-        assert(wallet.profile().networks[1].accounts[0].networkId == NetworkId.STOKENET)
-        assert(storage.contains(value = testnetAccountName))
+        val test0 = wallet.createAndSaveNewAccount(
+            networkId = NetworkId.STOKENET,
+            name = DisplayName.init(validating = testnetAccountName)
+        )
+        assertEquals(2, wallet.profile().networks.size)
+        assertEquals(listOf(test0), wallet.profile().networks[1].accounts)
+        assertEquals(testnetAccountName, wallet.profile().networks[1].accounts[0].displayName.value)
+        assertEquals(NetworkId.STOKENET, wallet.profile().networks[1].accounts[0].networkId)
+        assertTrue(storage.contains(value = testnetAccountName))
         println("✨ Successfully created first testnet account ✅")
 
         println("✅ Test Wallet in Kotlin completed ")
