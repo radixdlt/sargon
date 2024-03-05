@@ -3,15 +3,15 @@ package com.radixdlt.sargon.android
 import com.radixdlt.sargon.AppearanceId
 import com.radixdlt.sargon.DisplayName
 import com.radixdlt.sargon.NetworkId
-import com.radixdlt.sargon.Profile
 import com.radixdlt.sargon.SecureStorage
 import com.radixdlt.sargon.SecureStorageKey
 import com.radixdlt.sargon.Wallet
 import com.radixdlt.sargon.WalletClientModel
 import com.radixdlt.sargon.newDisplayName
+import com.radixdlt.sargon.sample.sample
 import com.radixdlt.sargon.secureStorageKeyIdentifier
-import kotlin.random.Random
 import org.junit.Test
+import kotlin.random.Random
 
 class WalletTest {
 
@@ -37,7 +37,7 @@ class WalletTest {
         val initialNameOfFirstAccount = "Alice"
         // Not created any account yet...
         assert(!storage.contains(value = initialNameOfFirstAccount))
-        assert(wallet.profile().networks.size == 0)
+        assert(wallet.profile().networks.isEmpty())
         var main0 =
                 wallet.createAndSaveNewAccount(
                         networkId = NetworkId.MAINNET,
@@ -56,14 +56,14 @@ class WalletTest {
         print("🔮 Update account using `update_account`")
         var updatedNameOfFirstAccount = "Stella"
         main0.displayName = DisplayName.from(value = updatedNameOfFirstAccount)
-        main0.appearanceId = AppearanceId.sampleOther
+        main0.appearanceId = AppearanceId.sample.other()
         val main0Updated = wallet.updateAccount(to = main0)
         assert(main0Updated == main0)
         assert(
                 wallet.profile().networks[0].accounts[0].displayName.value ==
                         updatedNameOfFirstAccount
         )
-        assert(wallet.profile().networks[0].accounts[0].appearanceId == AppearanceId.sampleOther)
+        assert(wallet.profile().networks[0].accounts[0].appearanceId == AppearanceId.sample.other())
         assert(storage.contains(value = updatedNameOfFirstAccount))
         print("✨ Successfully updated first account using `update_account` ✅")
 
@@ -109,18 +109,9 @@ class WalletTest {
         println("✅ Test Wallet in Kotlin completed ")
     }
 
-    val Profile.Companion.sample: Profile
-        get() = newProfileSample()
-
     fun DisplayName.Companion.from(value: String): DisplayName {
         return newDisplayName(name = value)
     }
-
-    val AppearanceId.Companion.sample: AppearanceId
-        get() = newAppearanceIdSample()
-
-    val AppearanceId.Companion.sampleOther: AppearanceId
-        get() = newAppearanceIdSampleOther()
 
     val Wallet.Companion.defaultPhoneName: String
         get() = "Android Phone"
