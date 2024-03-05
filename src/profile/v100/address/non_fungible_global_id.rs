@@ -22,28 +22,46 @@ use radix_engine_toolkit_json::models::scrypto::non_fungible_global_id::{
 )]
 #[display("{}", self.to_canonical_string())]
 pub struct NonFungibleGlobalId {
-    non_fungible_resource_address: NonFungibleResourceAddress,
+    // N.B. we WANT This to be a `NonFungibleResourceAddress` type, alas, it
+    // cannot, since that validation does not happen part of Engine, so it is
+    // possible (maybe even likely) that some Non Fungible tokens have addresses
+    // which are "fungible" (i.e. entity type `GlobalFungibleResourceManager`
+    // instead of `GlobalNonFungibleResourceManager`).
+    //
+    // For more info see slack:
+    // https://rdxworks.slack.com/archives/C01HK4QFXNY/p1709633826502809?thread_ts=1709633374.199459&channel=C01HK4QFXNY&message_ts=1709633826.502809
+    resource_address: ResourceAddress,
     non_fungible_local_id: NonFungibleLocalId,
 }
 
 impl NonFungibleGlobalId {
-    pub fn new(
-        resource_address: NonFungibleResourceAddress,
+    /// Creates a`NonFungibleGlobalId` from an unchecked resource address, i.e.
+    /// a `ResourceAddress` instead of `NonFungibleResourceAddress`, since
+    /// unfortunately Radix Engine / Network does not validate that all `NonFungibleGlobalId`
+    /// indeed consists of a non fungible `ResourceAddress` we must be lenient and
+    /// accept that unchecked address type.
+    pub fn new_unchecked(
+        resource_address: impl Into<ResourceAddress>,
         local_id: NonFungibleLocalId,
     ) -> Self {
+        let resource_address = resource_address.into();
+        if resource_address.is_fungible() {
+            info!("Notice: Fungible resource address used with NonFungible Global ID.")
+        }
         Self {
-            non_fungible_resource_address: resource_address,
+            resource_address,
             non_fungible_local_id: local_id,
         }
     }
 
-    /// Validates that the `ResourceAddress` is indeed non fungible (ScryptoEntityType)
-    pub fn new_validating_address(
-        resource_address: ResourceAddress,
-        non_fungible_local_id: NonFungibleLocalId,
-    ) -> Result<Self> {
-        TryInto::<NonFungibleResourceAddress>::try_into(resource_address)
-            .map(|r| Self::new(r, non_fungible_local_id))
+    /// Crates a `NonFungibleGlobalId` from a checked resource address, i.e.
+    /// `NonFungibleResourceAddress` instead of `ResourceAddress`, internally we
+    /// prefer using this constructor.
+    pub fn new(
+        resource_address: NonFungibleResourceAddress,
+        local_id: NonFungibleLocalId,
+    ) -> Self {
+        Self::new_unchecked(resource_address, local_id)
     }
 }
 
@@ -70,18 +88,14 @@ impl TryFrom<RETNonFungibleGlobalIdInternal> for NonFungibleGlobalId {
                     network_id,
                 )
             })
-            .and_then(|r| {
-                Self::new_validating_address(r, scrypto_local_id.into())
-            })
+            .map(|r| Self::new_unchecked(r, scrypto_local_id.into()))
     }
 }
 
 impl From<NonFungibleGlobalId> for RETNonFungibleGlobalId {
     fn from(value: NonFungibleGlobalId) -> Self {
         let scrypto_global_id = ScryptoNonFungibleGlobalId::new(
-            Into::<ScryptoResourceAddress>::into(
-                &*value.non_fungible_resource_address,
-            ),
+            Into::<ScryptoResourceAddress>::into(&value.resource_address),
             value.non_fungible_local_id.clone().into(),
         );
         RETNonFungibleGlobalId::new(
@@ -93,7 +107,7 @@ impl From<NonFungibleGlobalId> for RETNonFungibleGlobalId {
 
 impl NonFungibleGlobalId {
     fn network_id(&self) -> NetworkID {
-        self.non_fungible_resource_address.network_id()
+        self.resource_address.network_id()
     }
 
     fn engine(&self) -> RETNonFungibleGlobalId {
@@ -175,7 +189,7 @@ mod tests {
         let str = "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd:#2244#";
         let id: SUT = str.parse().unwrap();
         assert_eq!(
-            id.non_fungible_resource_address.address(),
+            id.resource_address.address(),
             "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd"
         );
     }
@@ -260,5 +274,10 @@ mod tests {
         assert_eq!(set.len(), 1);
         set.insert(b);
         assert_eq!(set.len(), 2);
+    }
+
+    #[test]
+    fn global_id_with_fungible_resource_addresses_are_accepted() {
+        assert!("resource_tdx_2_1t4kep9ldg9t0cszj78z6fcr2zvfxfq7muetq7pyvhdtctwxum90scq:#1#".parse::<SUT>().unwrap().resource_address.is_fungible());
     }
 }

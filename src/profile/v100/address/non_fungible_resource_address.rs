@@ -43,6 +43,12 @@ macro_rules! decl_specialized_address {
                 &self.0
             }
         }
+
+        impl From<$specialized_address_type> for $base_addr {
+            fn from(value: $specialized_address_type) -> Self {
+                value.0
+            }
+        }
     };
 }
 
@@ -129,5 +135,15 @@ mod tests {
             &a,
             json!("resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd"),
         );
+    }
+
+    #[test]
+    fn deref() {
+        assert_eq!(*SUT::sample(), "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa".parse::<ResourceAddress>().unwrap());
+    }
+
+    #[test]
+    fn into_resource_address() {
+        assert_eq!(Into::<ResourceAddress>::into(SUT::sample()), "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa".parse::<ResourceAddress>().unwrap());
     }
 }
