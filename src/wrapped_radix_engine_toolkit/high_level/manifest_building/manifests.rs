@@ -1,21 +1,9 @@
-use std::ops::AddAssign;
-
 use crate::prelude::*;
 
-use radix_engine::{
-    prelude::ToMetadataEntry as ScryptoToMetadataEntry,
-    types::ManifestBucket as ScryptoManifestBucket,
-};
-use transaction::{
-    builder::{
-        ExistingManifestBucket as ScryptoExistingManifestBucket,
-        ManifestNameRegistrar as ScryptoManifestNameRegistrar,
-        NewManifestBucket as ScryptoNewManifestBucket,
-    },
-    prelude::{
-        ManifestBuilder as ScryptoManifestBuilder,
-        MetadataValue as ScryptoMetadataValue,
-    },
+use radix_engine::prelude::ToMetadataEntry as ScryptoToMetadataEntry;
+use transaction::prelude::{
+    ManifestBuilder as ScryptoManifestBuilder,
+    MetadataValue as ScryptoMetadataValue,
 };
 
 use radix_engine_common::prelude::NonFungibleLocalId as ScryptoNonFungibleLocalId;
@@ -132,52 +120,6 @@ impl TransactionManifest {
     }
 }
 
-#[derive(Default)]
-pub(crate) struct BucketFactory {
-    next_id: std::cell::Cell<u64>,
-}
-impl BucketFactory {
-    pub(crate) fn next(&self) -> Bucket {
-        let next = self.next_id.get();
-        let bucket = Bucket {
-            name: format!("bucket_{}", next),
-        };
-        self.next_id.set(next + 1);
-        bucket
-    }
-}
-
-#[derive(Clone)]
-pub(crate) struct Bucket {
-    pub(crate) name: String,
-}
-// impl Bucket {
-//     pub(crate) fn unique() -> Self {
-//         Self {
-//             name: id().to_string(),
-//         }
-//     }
-// }
-impl AsRef<str> for Bucket {
-    fn as_ref(&self) -> &str {
-        self.name.as_str()
-    }
-}
-impl ScryptoNewManifestBucket for &Bucket {
-    fn register(self, registrar: &ScryptoManifestNameRegistrar) {
-        registrar.register_bucket(registrar.new_bucket(self.name.clone()));
-    }
-}
-
-impl ScryptoExistingManifestBucket for &Bucket {
-    fn resolve(
-        self,
-        registrar: &ScryptoManifestNameRegistrar,
-    ) -> ScryptoManifestBucket {
-        registrar.name_lookup().bucket(self)
-    }
-}
-
 impl TransactionManifest {
     fn set_metadata<A>(
         address: &A,
@@ -195,42 +137,6 @@ impl TransactionManifest {
             scrypto_manifest,
             address.network_id(),
         )
-    }
-}
-
-#[derive(Debug, PartialEq, Eq, derive_more::Display)]
-pub enum MetadataKey {
-    #[display("account_type")]
-    AccountType,
-
-    #[display("owner_keys")]
-    OwnerKeys,
-}
-
-impl From<MetadataKey> for String {
-    fn from(value: MetadataKey) -> Self {
-        value.to_string()
-    }
-}
-
-#[derive(Debug, PartialEq, Eq)]
-pub enum MetadataValue {
-    Str(MetadataValueStr),
-}
-impl MetadataValue {
-    pub const DAPP_DEFINITION: Self =
-        Self::Str(MetadataValueStr::DappDefinition);
-}
-
-#[derive(Debug, PartialEq, Eq, derive_more::Display)]
-pub enum MetadataValueStr {
-    #[display("dapp definition")]
-    DappDefinition,
-}
-
-impl ScryptoToMetadataEntry for MetadataValueStr {
-    fn to_metadata_entry(self) -> Option<ScryptoMetadataValue> {
-        Some(ScryptoMetadataValue::String(self.to_string()))
     }
 }
 
@@ -312,14 +218,6 @@ mod tests {
             ;
             "#,
         );
-    }
-
-    #[test]
-    fn bucket_factory() {
-        let sut = BucketFactory::default();
-        assert_eq!(sut.next().name, "bucket_0");
-        assert_eq!(sut.next().name, "bucket_1");
-        assert_eq!(sut.next().name, "bucket_2");
     }
 
     #[test]
