@@ -1,58 +1,104 @@
 use crate::prelude::*;
+use paste::*;
 use std::ops::Deref;
 
 macro_rules! decl_specialized_address {
-    ($specialized_address_type: ident, $base_addr: ty, $validate: ident, $validation_err: ident) => {
-        uniffi::custom_newtype!($specialized_address_type, $base_addr);
+    (
+        $(
+            #[doc = $expr: expr]
+        )*
+        $specialized_address_type: ident,
+        $base_addr: ty,
+        $validate: ident,
+        $validation_err: ident
+    ) => {
 
-        #[derive(
-            Clone,
-            PartialEq,
-            Eq,
-            Hash,
-            derive_more::Display,
-            derive_more::Debug,
-            derive_more::FromStr,
-            SerializeDisplay,
-            DeserializeFromStr,
-        )]
-        #[debug("{:?}", self.0)]
-        pub struct $specialized_address_type($base_addr);
-        impl $specialized_address_type {
-            pub fn new(address: $base_addr) -> Result<Self> {
-                if <$base_addr>::$validate(&address) {
-                    Ok(Self(address))
-                } else {
-                    Err(CommonError::$validation_err)
+        paste! {
+            $(
+                #[doc = $expr]
+            )*
+            #[derive(
+                Clone,
+                PartialEq,
+                Eq,
+                Hash,
+                derive_more::Display,
+                derive_more::Debug,
+                derive_more::FromStr,
+                SerializeDisplay,
+                DeserializeFromStr,
+                uniffi::Record,
+            )]
+            #[debug("{:?}", self.secret_magic)]
+            pub struct $specialized_address_type {
+                secret_magic: $base_addr
+            }
+
+            /// Tries to bech32 decode the string into a specialized address.
+            #[uniffi::export]
+            pub fn [< new_ $specialized_address_type:snake >](bech32: String) -> Result<$specialized_address_type> {
+                $base_addr::try_from_bech32(&bech32).and_then(TryInto::<$specialized_address_type>::try_into)
+            }
+
+                /// Returns the bech32 encoding of this address
+                #[uniffi::export]
+                pub fn [< $specialized_address_type:snake _bech32_address >](address: &$specialized_address_type) -> String {
+                  address.to_string()
+                }
+
+            impl $specialized_address_type {
+                pub fn new(address: $base_addr) -> Result<Self> {
+                    if <$base_addr>::$validate(&address) {
+                        Ok(Self {
+                            secret_magic: address
+                        })
+                    } else {
+                        Err(CommonError::$validation_err)
+                    }
                 }
             }
-        }
 
-        impl TryFrom<$base_addr> for $specialized_address_type {
-            type Error = CommonError;
+            impl TryFrom<$base_addr> for $specialized_address_type {
+                type Error = CommonError;
 
-            fn try_from(value: $base_addr) -> Result<Self> {
-                $specialized_address_type::new(value)
+                fn try_from(value: $base_addr) -> Result<Self> {
+                    $specialized_address_type::new(value)
+                }
             }
-        }
 
-        impl Deref for $specialized_address_type {
-            type Target = $base_addr;
+            impl Deref for $specialized_address_type {
+                type Target = $base_addr;
 
-            fn deref(&self) -> &Self::Target {
-                &self.0
+                fn deref(&self) -> &Self::Target {
+                    &self.secret_magic
+                }
             }
-        }
 
-        impl From<$specialized_address_type> for $base_addr {
-            fn from(value: $specialized_address_type) -> Self {
-                value.0
+            impl From<$specialized_address_type> for $base_addr {
+                fn from(value: $specialized_address_type) -> Self {
+                    value.secret_magic
+                }
             }
         }
     };
 }
 
 decl_specialized_address!(
+    /// NonFungibleResourceAddress is a specialized ResourceAddress for resources
+    /// which are non fungible, it ALWAYS has an `'n'` after bech32 separator `'1'`, e.g.:
+    /// `"resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa"`.
+    ///
+    /// As opposed to a fungible resource address, e.g. that of XRD which has `'t'`
+    /// after bech32 separator `'1'`, see:
+    /// `"resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"`
+    ///
+    /// This means that given an instance of `NonFungibleResourceAddress`, it is
+    /// guaranteed that its entity type is [`::GlobalNonFungibleResourceManager`],
+    /// and not `::GlobalFungibleResourceManager`.
+    ///
+    /// This type can safely be used with [`StakeClaim`]s, unfortunately since Radix Engine
+    /// and/or network does not validate the resource address of a `NonFungibleGlobalId`,
+    /// we cannot use this for that type.
     NonFungibleResourceAddress,
     ResourceAddress,
     is_non_fungible,
@@ -159,21 +205,24 @@ mod tests {
     fn try_from_err() {
         assert_eq!(SUT::try_from(ResourceAddress::sample_mainnet_xrd()), Err(CommonError::FungibleResourceAddressNotAcceptedInNonFungibleContext));
     }
+}
+
+#[cfg(test)]
+mod uniffi_tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = NonFungibleResourceAddress;
 
     #[test]
-    fn manual_perform_uniffi_conversion_successful() {
-        let sut = SUT::sample();
-        let builtin = sut.clone().0;
+    fn from_bech32() {
+        assert_eq!(new_non_fungible_resource_address("resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa".to_owned()).unwrap(), SUT::sample());
+        assert_eq!(new_non_fungible_resource_address("resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd".to_owned()).unwrap(), SUT::sample_other());
+    }
 
-        let ffi_side =
-            <SUT as crate::UniffiCustomTypeConverter>::from_custom(sut.clone());
-
-        assert_eq!(ffi_side.clone(), builtin.clone());
-
-        let from_ffi_side =
-            <SUT as crate::UniffiCustomTypeConverter>::into_custom(ffi_side)
-                .unwrap();
-
-        assert_eq!(sut, from_ffi_side);
+    #[test]
+    fn to_bech32() {
+        assert_eq!(non_fungible_resource_address_bech32_address(&SUT::sample()), "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa");
+        assert_eq!(non_fungible_resource_address_bech32_address(&SUT::sample_other()), "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd");
     }
 }
