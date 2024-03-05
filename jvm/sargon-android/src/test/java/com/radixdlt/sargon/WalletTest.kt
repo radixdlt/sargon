@@ -1,16 +1,9 @@
-package com.radixdlt.sargon.android
+package com.radixdlt.sargon
 
-import com.radixdlt.sargon.AppearanceId
-import com.radixdlt.sargon.DisplayName
-import com.radixdlt.sargon.NetworkId
-import com.radixdlt.sargon.SecureStorage
-import com.radixdlt.sargon.SecureStorageKey
-import com.radixdlt.sargon.Wallet
-import com.radixdlt.sargon.WalletClientModel
-import com.radixdlt.sargon.newDisplayName
+import com.radixdlt.sargon.extensions.identifier
+import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.sample.sample
-import com.radixdlt.sargon.secureStorageKeyIdentifier
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import kotlin.random.Random
 
 class WalletTest {
@@ -26,10 +19,10 @@ class WalletTest {
         val wallet = Wallet.with(entropy = ByteArray(32) { 0xFF.toByte() }, secureStorage = storage)
 
         assert(
-                storage.contains(
-                        value =
-                                "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo vote"
-                )
+            storage.contains(
+                value =
+                "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo vote"
+            )
         )
         println("✨ SUCCESSFULLY GENERATED NEW WALLET ✅")
 
@@ -39,29 +32,29 @@ class WalletTest {
         assert(!storage.contains(value = initialNameOfFirstAccount))
         assert(wallet.profile().networks.isEmpty())
         var main0 =
-                wallet.createAndSaveNewAccount(
-                        networkId = NetworkId.MAINNET,
-                        name = DisplayName.from(value = initialNameOfFirstAccount)
-                )
+            wallet.createAndSaveNewAccount(
+                networkId = NetworkId.MAINNET,
+                name = DisplayName.init(validating = initialNameOfFirstAccount)
+            )
         assert(main0.networkId == NetworkId.MAINNET)
         assert(wallet.profile().networks.size == 1)
         assert(wallet.profile().networks[0].accounts.size == 1)
         assert(
-                wallet.profile().networks[0].accounts[0].displayName.value ==
-                        initialNameOfFirstAccount
+            wallet.profile().networks[0].accounts[0].displayName.value ==
+                    initialNameOfFirstAccount
         )
         assert(storage.contains(value = initialNameOfFirstAccount))
         print("✨ Successfully created first account ✅")
 
         print("🔮 Update account using `update_account`")
         var updatedNameOfFirstAccount = "Stella"
-        main0.displayName = DisplayName.from(value = updatedNameOfFirstAccount)
+        main0.displayName = DisplayName.init(validating = updatedNameOfFirstAccount)
         main0.appearanceId = AppearanceId.sample.other()
         val main0Updated = wallet.updateAccount(to = main0)
         assert(main0Updated == main0)
         assert(
-                wallet.profile().networks[0].accounts[0].displayName.value ==
-                        updatedNameOfFirstAccount
+            wallet.profile().networks[0].accounts[0].displayName.value ==
+                    updatedNameOfFirstAccount
         )
         assert(wallet.profile().networks[0].accounts[0].appearanceId == AppearanceId.sample.other())
         assert(storage.contains(value = updatedNameOfFirstAccount))
@@ -70,23 +63,23 @@ class WalletTest {
         print("🔮 Renaming account using changeNameOfAccount")
         updatedNameOfFirstAccount = "Satoshi"
         main0 =
-                wallet.changeNameOfAccount(
-                        address = main0.address,
-                        to = DisplayName.from(value = updatedNameOfFirstAccount)
-                )
+            wallet.changeNameOfAccount(
+                address = main0.address,
+                to = DisplayName.init(validating = updatedNameOfFirstAccount)
+            )
         assert(
-                wallet.profile().networks[0].accounts[0].displayName.value ==
-                        updatedNameOfFirstAccount
+            wallet.profile().networks[0].accounts[0].displayName.value ==
+                    updatedNameOfFirstAccount
         )
         assert(storage.contains(value = updatedNameOfFirstAccount))
         print("✨ Successfully renamed first account using changeNameOfAccount ✅")
 
         print("🔮 Creating second mainnet account")
         val main1 =
-                wallet.createAndSaveNewAccount(
-                        networkId = NetworkId.MAINNET,
-                        name = DisplayName.from(value = "Bob")
-                )
+            wallet.createAndSaveNewAccount(
+                networkId = NetworkId.MAINNET,
+                name = DisplayName.init(validating = "Bob")
+            )
         assert(main0.address != main1.address)
         assert(main0.networkId == main1.networkId)
         assert(wallet.profile().networks.size == 1)
@@ -95,10 +88,10 @@ class WalletTest {
         print("🔮 Creating first testnet account")
         val testnetAccountName = "Hello Radix Account!"
         val test0 =
-                wallet.createAndSaveNewAccount(
-                        networkId = NetworkId.STOKENET,
-                        name = DisplayName.from(value = testnetAccountName)
-                )
+            wallet.createAndSaveNewAccount(
+                networkId = NetworkId.STOKENET,
+                name = DisplayName.init(validating = testnetAccountName)
+            )
         assert(wallet.profile().networks.size == 2)
         assert(wallet.profile().networks[1].accounts == listOf(test0))
         assert(wallet.profile().networks[1].accounts[0].displayName.value == testnetAccountName)
@@ -109,23 +102,19 @@ class WalletTest {
         println("✅ Test Wallet in Kotlin completed ")
     }
 
-    fun DisplayName.Companion.from(value: String): DisplayName {
-        return newDisplayName(name = value)
-    }
-
     val Wallet.Companion.defaultPhoneName: String
         get() = "Android Phone"
 
     fun Wallet.Companion.with(
-            entropy: ByteArray = ByteArray(32).apply { Random.nextBytes(this) },
-            phoneName: String = Wallet.Companion.defaultPhoneName,
-            secureStorage: SecureStorage
+        entropy: ByteArray = ByteArray(32).apply { Random.nextBytes(this) },
+        phoneName: String = Wallet.Companion.defaultPhoneName,
+        secureStorage: SecureStorage
     ): Wallet {
         return Wallet.byCreatingNewProfileAndSecretsWithEntropy(
-                entropy = entropy,
-                walletClientModel = WalletClientModel.ANDROID,
-                walletClientName = phoneName,
-                secureStorage = secureStorage
+            entropy = entropy,
+            walletClientModel = WalletClientModel.ANDROID,
+            walletClientName = phoneName,
+            secureStorage = secureStorage
         )
     }
 
@@ -147,8 +136,5 @@ class WalletTest {
         fun contains(value: String): Boolean {
             return storage.any { entry -> entry.value.decodeToString().contains(value) }
         }
-
-        private val SecureStorageKey.identifier: String
-            get() = secureStorageKeyIdentifier(this)
     }
 }
