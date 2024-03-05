@@ -248,8 +248,7 @@ impl TokenDefinitionMetadata {
             name.clone(),
             format!("{}: An amazingly innovative and rare NFT collection", name),
             word.to_uppercase(),
-            // The white space in the URL below is intentional, keep it!
-            "https://image-service-test-images.s3.eu-west-2.amazonaws.com/wallet_test_images/KL    Haze-medium.jpg",
+            "https://image-service-test-images.s3.eu-west-2.amazonaws.com/wallet_test_images/KLHaze-medium.jpg",
         )
     }
 }
@@ -587,7 +586,7 @@ CALL_METHOD
                 "icon_url" => Tuple(
                     Enum<1u8>(
                         Enum<0u8>(
-                            "https://image-service-test-images.s3.eu-west-2.amazonaws.com/wallet_test_images/KL    Haze-medium.jpg"
+                            "https://image-service-test-images.s3.eu-west-2.amazonaws.com/wallet_test_images/KLHaze-medium.jpg"
                         )
                     ),
                     false
@@ -752,7 +751,7 @@ CALL_METHOD
                 "icon_url" => Tuple(
                     Enum<1u8>(
                         Enum<0u8>(
-                            "https://image-service-test-images.s3.eu-west-2.amazonaws.com/wallet_test_images/KL    Haze-medium.jpg"
+                            "https://image-service-test-images.s3.eu-west-2.amazonaws.com/wallet_test_images/KLHaze-medium.jpg"
                         )
                     ),
                     false

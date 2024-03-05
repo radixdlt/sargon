@@ -24,62 +24,95 @@
                   location = "group:Methods"
                   name = "WrapFunctions">
                   <FileRef
-                     location = "group:/Users/sajjon/Developer/Radix/sargon/apple/Sources/Sargon/Extensions/Methods/SecureStorageKey+Wrap+Functions.swift">
+                     location = "group:Addresses+Wrap+Functions.swift">
                   </FileRef>
                   <FileRef
-                     location = "group:/Users/sajjon/Developer/Radix/sargon/apple/Sources/Sargon/Extensions/Methods/Decimal192+Wrap+Functions.swift">
+                     location = "group:AppearanceID+Wrap+Functions.swift">
                   </FileRef>
                   <FileRef
-                     location = "group:/Users/sajjon/Developer/Radix/sargon/apple/Sources/Sargon/Extensions/Methods/AppearanceID+Wrap+Functions.swift">
+                     location = "group:BagOfBytes+Wrap+Functions.swift">
                   </FileRef>
                   <FileRef
-                     location = "group:Mnemonic+Wrap+Functions.swift">
+                     location = "group:Decimal192+Wrap+Functions.swift">
                   </FileRef>
                   <FileRef
                      location = "group:DisplayName+Wrap+Functions.swift">
                   </FileRef>
                   <FileRef
-                     location = "group:BagOfBytes+Wrap+Functions.swift">
+                     location = "group:Mnemonic+Wrap+Functions.swift">
+                  </FileRef>
+                  <FileRef
+                     location = "group:SecureStorageKey+Wrap+Functions.swift">
                   </FileRef>
                </Group>
                <Group
                   location = "group:Swiftified"
                   name = "Swiftified">
                   <FileRef
-                     location = "group:Decimal192+Swiftified.swift">
-                  </FileRef>
-                  <FileRef
-                     location = "group:BagOfBytes+Random.swift">
-                  </FileRef>
-                  <FileRef
-                     location = "group:Wallet+Swiftified.swift">
-                  </FileRef>
-                  <FileRef
-                     location = "group:DisplayName+Swiftified.swift">
+                     location = "group:AccessControllerAddress+Swiftified.swift">
                   </FileRef>
                   <FileRef
                      location = "group:Account+Swiftified.swift">
                   </FileRef>
                   <FileRef
-                     location = "group:/Users/sajjon/Developer/Radix/sargon/apple/Sources/Sargon/Extensions/Swiftified/AccountAddress+Swiftified.swift">
+                     location = "group:AccountAddress+Swiftified.swift">
                   </FileRef>
                   <FileRef
-                     location = "group:/Users/sajjon/Developer/Radix/sargon/apple/Sources/Sargon/Extensions/Swiftified/AppearanceID+Swiftified.swift">
+                     location = "group:AppearanceID+Swiftified.swift">
                   </FileRef>
                   <FileRef
-                     location = "group:Profile+Swiftified.swift">
+                     location = "group:BagOfBytes+Random.swift">
                   </FileRef>
                   <FileRef
-                     location = "group:SargonError+Swiftified.swift">
+                     location = "group:ComponentAddress+Swiftified.swift">
                   </FileRef>
                   <FileRef
-                     location = "group:Mnemonic+Swiftified.swift">
+                     location = "group:Decimal192+Swiftified.swift">
+                  </FileRef>
+                  <FileRef
+                     location = "group:DisplayName+Swiftified.swift">
+                  </FileRef>
+                  <FileRef
+                     location = "group:IdentityAddress+Swiftified.swift">
                   </FileRef>
                   <FileRef
                      location = "group:LocaleConfig+Swiftified.swift">
                   </FileRef>
                   <FileRef
+                     location = "group:Mnemonic+Swiftified.swift">
+                  </FileRef>
+                  <FileRef
+                     location = "group:NetworkID+Swiftified.swift">
+                  </FileRef>
+                  <FileRef
+                     location = "group:/Users/alexandercyon/Developer/Babylon/Sargon/apple/Sources/Sargon/Extensions/Swiftified/NonFungibleResourceAddress+Swiftified.swift">
+                  </FileRef>
+                  <FileRef
+                     location = "group:PackageAddress+Swiftified.swift">
+                  </FileRef>
+                  <FileRef
+                     location = "group:PoolAddress+Swiftified.swift">
+                  </FileRef>
+                  <FileRef
+                     location = "group:Profile+Swiftified.swift">
+                  </FileRef>
+                  <FileRef
+                     location = "group:ResourceAddress+Swiftified.swift">
+                  </FileRef>
+                  <FileRef
+                     location = "group:SargonError+Swiftified.swift">
+                  </FileRef>
+                  <FileRef
                      location = "group:TransactionManifest+Swiftified.swift">
+                  </FileRef>
+                  <FileRef
+                     location = "group:ValidatorAddress+Swiftified.swift">
+                  </FileRef>
+                  <FileRef
+                     location = "group:VaultAddress+Swiftified.swift">
+                  </FileRef>
+                  <FileRef
+                     location = "group:Wallet+Swiftified.swift">
                   </FileRef>
                </Group>
             </Group>

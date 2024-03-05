@@ -116,6 +116,12 @@ impl ResourceAddress {
             .expect("GC Membership")
     }
 
+    pub(crate) fn sample_mainnet_nft_other() -> Self {
+        "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd"
+            .parse()
+            .expect("Valid Scorpion NFT Global ID")
+    }
+
     pub(crate) fn sample_stokenet_xrd() -> Self {
         "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc"
             .parse()
@@ -138,6 +144,18 @@ impl ResourceAddress {
         "resource_tdx_2_1tk30vj4ene95e3vhymtf2p35fzl29rv4us36capu2rz0vretw9gzr3"
             .parse()
             .expect("Candy")
+    }
+
+    pub(crate) fn sample_stokenet_nft_gc_membership() -> Self {
+        "resource_tdx_2_1ng88qk08hrgmad30rzdxpyx779yuta4cwcjc3gstk60jhachsv94g9"
+            .parse()
+            .expect("GC membership")
+    }
+
+    pub(crate) fn sample_stokenet_nft_other() -> Self {
+        "resource_tdx_2_1ngw6cufaxs5p82kw49juy2yfkt53se76vr0xfsu3tvyduuw6s0y6lc"
+            .parse()
+            .expect("valid sample value")
     }
 }
 

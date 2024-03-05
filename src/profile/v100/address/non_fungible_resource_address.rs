@@ -40,11 +40,17 @@ macro_rules! decl_specialized_address {
                 $base_addr::try_from_bech32(&bech32).and_then(TryInto::<$specialized_address_type>::try_into)
             }
 
-                /// Returns the bech32 encoding of this address
-                #[uniffi::export]
-                pub fn [< $specialized_address_type:snake _bech32_address >](address: &$specialized_address_type) -> String {
-                  address.to_string()
-                }
+            /// Returns the bech32 encoding of this address
+            #[uniffi::export]
+            pub fn [< $specialized_address_type:snake _bech32_address >](address: &$specialized_address_type) -> String {
+                address.to_string()
+            }
+
+            /// Returns the network id this address
+            #[uniffi::export]
+            pub fn [< $specialized_address_type:snake _network_id >](address: &$specialized_address_type) -> NetworkID {
+                address.secret_magic.network_id()
+            }
 
             impl $specialized_address_type {
                 pub fn new(address: $base_addr) -> Result<Self> {
@@ -107,16 +113,62 @@ decl_specialized_address!(
 
 impl HasSampleValues for NonFungibleResourceAddress {
     fn sample() -> Self {
-        "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa"
-            .parse()
-            .expect("Valid GC NFT Global ID")
+        Self::sample_mainnet()
     }
 
     fn sample_other() -> Self {
-        "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd"
-            .parse()
-            .expect("Valid Scorpion NFT Global ID")
+        Self::sample_mainnet_other()
     }
+}
+
+impl NonFungibleResourceAddress {
+    pub fn sample_mainnet() -> Self {
+        ResourceAddress::sample_mainnet_nft_gc_membership()
+            .try_into()
+            .expect("Valid sample")
+    }
+
+    pub fn sample_mainnet_other() -> Self {
+        ResourceAddress::sample_mainnet_nft_other()
+            .try_into()
+            .expect("Valid sample")
+    }
+
+    pub fn sample_stokenet() -> Self {
+        ResourceAddress::sample_stokenet_nft_gc_membership()
+            .try_into()
+            .expect("Valid sample")
+    }
+
+    pub fn sample_stokenet_other() -> Self {
+        ResourceAddress::sample_stokenet_nft_other()
+            .try_into()
+            .expect("Valid sample")
+    }
+}
+
+#[uniffi::export]
+pub fn new_non_fungible_resource_address_sample_mainnet(
+) -> NonFungibleResourceAddress {
+    NonFungibleResourceAddress::sample_mainnet()
+}
+
+#[uniffi::export]
+pub fn new_non_fungible_resource_address_sample_mainnet_other(
+) -> NonFungibleResourceAddress {
+    NonFungibleResourceAddress::sample_mainnet_other()
+}
+
+#[uniffi::export]
+pub fn new_non_fungible_resource_address_sample_stokenet(
+) -> NonFungibleResourceAddress {
+    NonFungibleResourceAddress::sample_stokenet()
+}
+
+#[uniffi::export]
+pub fn new_non_fungible_resource_address_sample_stokenet_other(
+) -> NonFungibleResourceAddress {
+    NonFungibleResourceAddress::sample_stokenet_other()
 }
 
 #[cfg(test)]
@@ -128,13 +180,17 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
+        assert_eq!(SUT::sample_mainnet(), SUT::sample_mainnet());
+        assert_eq!(SUT::sample_mainnet_other(), SUT::sample_mainnet_other());
+        assert_eq!(SUT::sample_stokenet(), SUT::sample_stokenet());
+        assert_eq!(SUT::sample_stokenet_other(), SUT::sample_stokenet_other());
     }
 
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+        assert_ne!(SUT::sample_mainnet(), SUT::sample_stokenet());
+        assert_ne!(SUT::sample_mainnet_other(), SUT::sample_stokenet_other());
     }
 
     #[test]
@@ -224,5 +280,36 @@ mod uniffi_tests {
     fn to_bech32() {
         assert_eq!(non_fungible_resource_address_bech32_address(&SUT::sample()), "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa");
         assert_eq!(non_fungible_resource_address_bech32_address(&SUT::sample_other()), "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd");
+    }
+
+    #[test]
+    fn network_id() {
+        assert_eq!(
+            non_fungible_resource_address_network_id(&SUT::sample_mainnet()),
+            NetworkID::Mainnet
+        );
+        assert_eq!(
+            non_fungible_resource_address_network_id(&SUT::sample_stokenet()),
+            NetworkID::Stokenet
+        );
+    }
+
+    #[test]
+    fn hash_samples() {
+        assert_eq!(
+            HashSet::<SUT>::from_iter([
+                new_non_fungible_resource_address_sample_mainnet(),
+                new_non_fungible_resource_address_sample_mainnet_other(),
+                new_non_fungible_resource_address_sample_stokenet(),
+                new_non_fungible_resource_address_sample_stokenet_other(),
+                // duplicates should be removed
+                new_non_fungible_resource_address_sample_mainnet(),
+                new_non_fungible_resource_address_sample_mainnet_other(),
+                new_non_fungible_resource_address_sample_stokenet(),
+                new_non_fungible_resource_address_sample_stokenet_other(),
+            ])
+            .len(),
+            4
+        );
     }
 }
