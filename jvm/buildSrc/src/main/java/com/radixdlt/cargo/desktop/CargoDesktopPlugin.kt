@@ -9,7 +9,7 @@ abstract class CargoDesktopConfiguration {
     var buildType: BuildType = BuildType.RELEASE
 }
 
-class DesktopCargoPlugin : Plugin<Project> {
+class CargoDesktopPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         val extension = target.extensions.create<CargoDesktopConfiguration>("cargoDesktop")
         target.afterEvaluate {
