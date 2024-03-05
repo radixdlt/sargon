@@ -7,15 +7,16 @@ macro_rules! decl_specialized_address {
 
         #[derive(
             Clone,
-            Debug,
             PartialEq,
             Eq,
             Hash,
             derive_more::Display,
+            derive_more::Debug,
             derive_more::FromStr,
             SerializeDisplay,
             DeserializeFromStr,
         )]
+        #[debug("{:?}", self.0)]
         pub struct $specialized_address_type($base_addr);
         impl $specialized_address_type {
             pub fn new(address: $base_addr) -> Result<Self> {
@@ -82,5 +83,51 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn display() {
+        let s = "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa";
+        let a = s.parse::<SUT>().unwrap();
+        assert_eq!(format!("{}", a), s);
+    }
+
+    #[test]
+    fn debug() {
+        let s = "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa";
+        let a = s.parse::<SUT>().unwrap();
+        assert_eq!(format!("{:?}", a), s);
+    }
+
+    #[test]
+    fn manual_perform_uniffi_conversion() {
+        type RetAddr = <ResourceAddress as FromRetAddress>::RetAddress;
+        let sut = SUT::sample();
+        let bech32 = sut.to_string();
+        let ret = RetAddr::try_from_bech32(&bech32).unwrap();
+
+        let ffi_side =
+            <RetAddr as crate::UniffiCustomTypeConverter>::from_custom(ret);
+        assert_eq!(ffi_side, bech32);
+        let from_ffi_side =
+            <RetAddr as crate::UniffiCustomTypeConverter>::into_custom(
+                ffi_side,
+            )
+            .unwrap();
+        assert_eq!(ret, from_ffi_side);
+    }
+
+    #[test]
+    fn json_roundtrip() {
+        let a = SUT::sample();
+        assert_json_value_eq_after_roundtrip(
+            &a,
+            json!("resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa"),
+        );
+        assert_json_roundtrip(&a);
+        assert_json_value_ne_after_roundtrip(
+            &a,
+            json!("resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd"),
+        );
     }
 }

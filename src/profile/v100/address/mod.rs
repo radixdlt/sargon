@@ -1,5 +1,6 @@
 mod access_controller_address;
 mod account_address;
+mod addresses_manifest_builder_support;
 mod component_address;
 mod entity_address;
 mod identity_address;
@@ -16,6 +17,7 @@ mod wrap_ret_address;
 
 pub use access_controller_address::*;
 pub use account_address::*;
+pub use addresses_manifest_builder_support::*;
 pub use component_address::*;
 pub use entity_address::*;
 pub use identity_address::*;

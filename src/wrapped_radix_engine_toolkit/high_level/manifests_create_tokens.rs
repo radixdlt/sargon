@@ -109,25 +109,11 @@ impl TransactionManifest {
     where
         F: Fn(u64) -> NonFungibleLocalId,
     {
-        #[derive(Clone, PartialEq, Eq, ScryptoSbor, ScryptoManifestSbor)]
-        pub struct NfData {
-            pub name: String,
-        }
-        impl NfData {
-            fn new(i: u64) -> Self {
-                Self {
-                    name: format!("nf-number-{}", i),
-                }
-            }
-        }
-        impl ScryptoNonFungibleData for NfData {
-            const MUTABLE_FIELDS: &'static [&'static str] = &["name"];
-        }
-
         Self::create_non_fungible_tokens(
             address_of_owner,
             collection_count,
-            (0..nfts_per_collection).map(|i| (local_id(i), NfData::new(i))),
+            (0..nfts_per_collection)
+                .map(|i| (local_id(i), NonFungibleTokenData::new(i))),
         )
     }
 
@@ -264,6 +250,21 @@ impl TokenDefinitionMetadata {
             "https://image-service-test-images.s3.eu-west-2.amazonaws.com/wallet_test_images/KL    Haze-medium.jpg",
         )
     }
+}
+
+#[derive(Clone, PartialEq, Eq, ScryptoSbor, ScryptoManifestSbor)]
+struct NonFungibleTokenData {
+    pub name: String,
+}
+impl NonFungibleTokenData {
+    fn new(i: u64) -> Self {
+        Self {
+            name: format!("nf-number-{}", i),
+        }
+    }
+}
+impl ScryptoNonFungibleData for NonFungibleTokenData {
+    const MUTABLE_FIELDS: &'static [&'static str] = &["name"];
 }
 
 #[cfg(test)]
@@ -464,7 +465,7 @@ CALL_METHOD
                     Array<Tuple>(
                         Tuple(
                             Enum<1u8>(
-                                "NfData"
+                                "NonFungibleTokenData"
                             ),
                             Enum<1u8>(
                                 Enum<0u8>(
@@ -629,7 +630,7 @@ CALL_METHOD
                     Array<Tuple>(
                         Tuple(
                             Enum<1u8>(
-                                "NfData"
+                                "NonFungibleTokenData"
                             ),
                             Enum<1u8>(
                                 Enum<0u8>(
@@ -783,5 +784,16 @@ CALL_METHOD
     ;
         "#;
         manifest_eq(manifest, expected_manifest);
+    }
+
+    #[test]
+    #[should_panic(expected = "Must not be greater than 2047")]
+    fn create_non_fungible_tokens_panics_if_collection_count_greater_than_max()
+    {
+        _ = SUT::create_non_fungible_tokens_collections(
+            &AccountAddress::sample(),
+            2048,
+            1,
+        );
     }
 }

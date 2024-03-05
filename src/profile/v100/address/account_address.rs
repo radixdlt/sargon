@@ -3,50 +3,6 @@ use radix_engine_common::types::ComponentAddress as ScryptoComponentAddress;
 use radix_engine_common::types::EntityType as ScryptoEntityType;
 use radix_engine_common::types::ResourceAddress as ScryptoResourceAddress;
 use radix_engine_toolkit::models::canonical_address_types::CanonicalAccountAddress as RetAccountAddress;
-use transaction::model::DynamicComponentAddress as ScryptoDynamicComponentAddress;
-use transaction::model::DynamicResourceAddress as ScryptoDynamicResourceAddress;
-
-macro_rules! is_dynamic_component_address {
-    ($address_type: ty) => {
-        impl TryInto<ScryptoDynamicComponentAddress> for &$address_type {
-            type Error = crate::CommonError;
-
-            fn try_into(
-                self,
-            ) -> Result<ScryptoDynamicComponentAddress, Self::Error> {
-                TryInto::<ScryptoComponentAddress>::try_into(self.node_id())
-                    .map(ScryptoDynamicComponentAddress::Static)
-                    .map_err(|_| CommonError::Unknown)
-            }
-        }
-    };
-}
-
-macro_rules! is_dynamic_resource_address {
-    ($address_type: ty) => {
-        impl TryInto<ScryptoDynamicResourceAddress> for &$address_type {
-            type Error = crate::CommonError;
-
-            fn try_into(
-                self,
-            ) -> Result<ScryptoDynamicResourceAddress, Self::Error> {
-                TryInto::<ScryptoResourceAddress>::try_into(self.node_id())
-                    .map(ScryptoDynamicResourceAddress::Static)
-                    .map_err(|_| CommonError::Unknown)
-            }
-        }
-    };
-}
-
-is_dynamic_component_address!(AccountAddress);
-is_dynamic_component_address!(AccessControllerAddress);
-is_dynamic_component_address!(ComponentAddress);
-is_dynamic_component_address!(IdentityAddress);
-is_dynamic_component_address!(ValidatorAddress);
-is_dynamic_component_address!(VaultAddress);
-
-is_dynamic_resource_address!(ResourceAddress);
-is_dynamic_resource_address!(NonFungibleResourceAddress);
 
 #[uniffi::export]
 pub fn new_account_address_from(

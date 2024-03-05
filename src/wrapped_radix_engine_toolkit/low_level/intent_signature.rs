@@ -102,4 +102,17 @@ mod tests {
             SUT::sample_other().signature().into()
         )
     }
+
+    use radix_engine_common::crypto::{
+        Secp256k1PublicKey as ScryptoSecp256k1PublicKey,
+        Secp256k1Signature as ScryptoSecp256k1Signature,
+    };
+    use transaction::model::SignatureWithPublicKeyV1 as ScryptoSignatureWithPublicKey;
+
+    #[test]
+    fn try_from_scrypto_valid() {
+        let scrypto =
+            ScryptoIntentSignature(SignatureWithPublicKey::sample().into());
+        assert!(SUT::try_from((scrypto, Hash::sample())).is_ok());
+    }
 }

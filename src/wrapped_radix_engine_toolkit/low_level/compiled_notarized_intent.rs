@@ -113,4 +113,15 @@ mod tests {
             Ok(NotarizedTransaction::sample_other())
         );
     }
+
+    #[test]
+    fn decompile_fail() {
+        assert_eq!(
+            SUT {
+                secret_magic: BagOfBytes::sample_aced()
+            }
+            .decompile(),
+            Err(CommonError::FailedToDecompileBytesIntoNotarizedTransaction)
+        );
+    }
 }
