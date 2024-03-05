@@ -66,7 +66,7 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(platform(libs.androidx.compose.bom))
 
-    testRuntimeOnly(project(":sargon-desktop-bins"))
+    testRuntimeOnly(project(":sargon-desktop-debug"))
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
