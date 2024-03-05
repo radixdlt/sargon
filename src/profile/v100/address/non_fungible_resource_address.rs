@@ -146,4 +146,34 @@ mod tests {
     fn into_resource_address() {
         assert_eq!(Into::<ResourceAddress>::into(SUT::sample()), "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa".parse::<ResourceAddress>().unwrap());
     }
+
+    #[test]
+    fn new_ok() {
+        assert!(
+            SUT::new(ResourceAddress::sample_mainnet_nft_gc_membership())
+                .is_ok()
+        );
+    }
+
+    #[test]
+    fn try_from_err() {
+        assert_eq!(SUT::try_from(ResourceAddress::sample_mainnet_xrd()), Err(CommonError::FungibleResourceAddressNotAcceptedInNonFungibleContext));
+    }
+
+    #[test]
+    fn manual_perform_uniffi_conversion_successful() {
+        let sut = SUT::sample();
+        let builtin = sut.clone().0;
+
+        let ffi_side =
+            <SUT as crate::UniffiCustomTypeConverter>::from_custom(sut.clone());
+
+        assert_eq!(ffi_side.clone(), builtin.clone());
+
+        let from_ffi_side =
+            <SUT as crate::UniffiCustomTypeConverter>::into_custom(ffi_side)
+                .unwrap();
+
+        assert_eq!(sut, from_ffi_side);
+    }
 }

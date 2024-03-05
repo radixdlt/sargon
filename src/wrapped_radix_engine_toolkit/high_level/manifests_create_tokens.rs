@@ -100,6 +100,7 @@ impl TransactionManifest {
         )
     }
 
+    #[cfg(not(tarpaulin_include))] // false negative, tested
     fn create_non_fungible_tokens_collections_with_local_id_fn<F>(
         address_of_owner: &AccountAddress,
         collection_count: u16,
@@ -117,6 +118,7 @@ impl TransactionManifest {
         )
     }
 
+    #[cfg(not(tarpaulin_include))] // false negative, tested
     fn create_non_fungible_tokens<T, V>(
         address_of_owner: &AccountAddress,
         collection_count: u16,

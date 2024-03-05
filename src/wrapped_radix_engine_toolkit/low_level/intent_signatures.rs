@@ -104,4 +104,22 @@ mod tests {
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
     }
+
+    #[test]
+    fn to_from_scrypto() {
+        // We use `SignedIntent` instead of `SUT`, since `SignedIntent` contains
+        // both SUT and Hash, needed for `TryFrom`.
+        let roundtrip = |si: SignedIntent| {
+            let first = Into::<ScryptoIntentSignatures>::into(
+                si.clone().intent_signatures,
+            );
+            let second = si.clone().intent.intent_hash().hash;
+            assert_eq!(
+                SUT::try_from((first, second)).unwrap(),
+                si.intent_signatures
+            );
+        };
+        roundtrip(SignedIntent::sample());
+        roundtrip(SignedIntent::sample_other());
+    }
 }

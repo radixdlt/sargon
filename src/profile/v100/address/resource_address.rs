@@ -97,44 +97,44 @@ impl ResourceAddress {
 
 impl ResourceAddress {
     /// The RAD on mainnet
-    fn sample_mainnet_xrd() -> Self {
+    pub(crate) fn sample_mainnet_xrd() -> Self {
         "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
             .parse()
             .expect("XRD")
     }
 
     /// Candy by Gumball club on mainnet
-    fn sample_mainnet_candy() -> Self {
+    pub(crate) fn sample_mainnet_candy() -> Self {
         "resource_rdx1t4dy69k6s0gv040xa64cyadyefwtett62ng6xfdnljyydnml7t6g3j"
             .parse()
             .expect("Candy")
     }
 
-    fn sample_mainnet_nft_gc_membership() -> Self {
+    pub(crate) fn sample_mainnet_nft_gc_membership() -> Self {
         "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa"
             .parse()
             .expect("GC Membership")
     }
 
-    fn sample_stokenet_xrd() -> Self {
+    pub(crate) fn sample_stokenet_xrd() -> Self {
         "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc"
             .parse()
             .expect("XRD")
     }
 
-    fn sample_stokenet_gum() -> Self {
+    pub(crate) fn sample_stokenet_gum() -> Self {
         "resource_tdx_2_1t4kep9ldg9t0cszj78z6fcr2zvfxfq7muetq7pyvhdtctwxum90scq"
             .parse()
             .expect("Gum")
     }
 
-    fn sample_stokenet_gc_tokens() -> Self {
+    pub(crate) fn sample_stokenet_gc_tokens() -> Self {
         "resource_tdx_2_1thqcgjw37fjgycpvqr52nx4jcsdeuq75mf2nywme07kzsuds9a4psp"
             .parse()
             .expect("GC Tokens")
     }
 
-    fn sample_stokenet_candy() -> Self {
+    pub(crate) fn sample_stokenet_candy() -> Self {
         "resource_tdx_2_1tk30vj4ene95e3vhymtf2p35fzl29rv4us36capu2rz0vretw9gzr3"
             .parse()
             .expect("Candy")
