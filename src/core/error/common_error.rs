@@ -383,6 +383,9 @@ pub enum CommonError {
 
     #[error("Failed to recover secp256k1 PublicKey from signature")]
     FailedToRecoverSecp256k1PublicKeyFromSignature = 10104,
+
+    #[error("Fungible ResourceAddress in NonFungible context is not allowed.")]
+    FungibleResourceAddressNotAcceptedInNonFungibleContext = 10105,
 }
 
 /*

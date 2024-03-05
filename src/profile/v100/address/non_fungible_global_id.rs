@@ -1,6 +1,7 @@
 use crate::prelude::*;
 
 use radix_engine_common::address::AddressBech32Decoder;
+use radix_engine_common::types::ResourceAddress as ScryptoResourceAddress;
 use radix_engine_interface::blueprints::resource::NonFungibleGlobalId as ScryptoNonFungibleGlobalId;
 
 use radix_engine_toolkit_json::models::scrypto::non_fungible_global_id::{
@@ -21,59 +22,82 @@ use radix_engine_toolkit_json::models::scrypto::non_fungible_global_id::{
 )]
 #[display("{}", self.to_canonical_string())]
 pub struct NonFungibleGlobalId {
-    pub resource_address: ResourceAddress,
-    pub non_fungible_local_id: NonFungibleLocalId,
+    non_fungible_resource_address: NonFungibleResourceAddress,
+    non_fungible_local_id: NonFungibleLocalId,
 }
 
-impl From<ResourceAddress> for radix_engine_common::types::ResourceAddress {
-    fn from(value: ResourceAddress) -> Self {
-        radix_engine_common::types::ResourceAddress::try_from_bech32(
-            &AddressBech32Decoder::new(
-                &value.network_id().network_definition(),
+impl NonFungibleGlobalId {
+    pub fn new(
+        resource_address: NonFungibleResourceAddress,
+        local_id: NonFungibleLocalId,
+    ) -> Self {
+        Self {
+            non_fungible_resource_address: resource_address,
+            non_fungible_local_id: local_id,
+        }
+    }
+
+    /// Validates that the `ResourceAddress` is indeed non fungible (ScryptoEntityType)
+    pub fn new_validating_address(
+        resource_address: ResourceAddress,
+        non_fungible_local_id: NonFungibleLocalId,
+    ) -> Result<Self> {
+        TryInto::<NonFungibleResourceAddress>::try_into(resource_address)
+            .map(|r| Self::new(r, non_fungible_local_id))
+    }
+}
+
+impl From<&ResourceAddress> for ScryptoResourceAddress {
+    fn from(value: &ResourceAddress) -> Self {
+        TryInto::<ScryptoResourceAddress>::try_into(value.node_id())
+        .expect("Should always be able to convert from Sargon to ScryptoResourceAddress")
+    }
+}
+
+impl TryFrom<RETNonFungibleGlobalIdInternal> for NonFungibleGlobalId {
+    type Error = crate::CommonError;
+
+    fn try_from(
+        value: RETNonFungibleGlobalIdInternal,
+    ) -> sbor::prelude::Result<Self, Self::Error> {
+        let (scrypto_resource_address, scrypto_local_id) =
+            value.non_fungible_global_id.into_parts();
+
+        TryInto::<NetworkID>::try_into(value.network_id)
+            .and_then(|network_id| {
+                ResourceAddress::new(
+                    scrypto_resource_address.into_node_id(),
+                    network_id,
+                )
+            })
+            .and_then(|r| {
+                Self::new_validating_address(r, scrypto_local_id.into())
+            })
+    }
+}
+
+impl From<NonFungibleGlobalId> for RETNonFungibleGlobalId {
+    fn from(value: NonFungibleGlobalId) -> Self {
+        let scrypto_global_id = ScryptoNonFungibleGlobalId::new(
+            Into::<ScryptoResourceAddress>::into(
+                &*value.non_fungible_resource_address,
             ),
-            value.address().clone().as_str(),
+            value.non_fungible_local_id.clone().into(),
+        );
+        RETNonFungibleGlobalId::new(
+            scrypto_global_id,
+            value.network_id().discriminant(),
         )
-        .expect("Should always be able to convert from Sargon to RET for ResourceAddress")
     }
 }
 
 impl NonFungibleGlobalId {
-    fn from_internal_engine(internal: RETNonFungibleGlobalIdInternal) -> Self {
-        let (engine_resource_address, engine_local_id) =
-            internal.non_fungible_global_id.into_parts();
-
-        let network_id: NetworkID = internal
-            .network_id
-            .try_into()
-            .expect("should be able to know network");
-
-        let non_fungible_local_id: NonFungibleLocalId = engine_local_id.into();
-
-        let resource_address = ResourceAddress::new(
-            engine_resource_address.into_node_id(),
-            network_id,
-        )
-        .expect("Should always be able to convert between Sargon and RET");
-
-        Self {
-            resource_address,
-            non_fungible_local_id,
-        }
-    }
-
     fn network_id(&self) -> NetworkID {
-        self.resource_address.network_id()
+        self.non_fungible_resource_address.network_id()
     }
 
     fn engine(&self) -> RETNonFungibleGlobalId {
-        let scrypto_global_id = ScryptoNonFungibleGlobalId::new(
-            self.resource_address.clone().into(),
-            self.non_fungible_local_id.clone().into(),
-        );
-        RETNonFungibleGlobalId::new(
-            scrypto_global_id,
-            self.network_id().discriminant(),
-        )
+        self.clone().into()
     }
 }
 
@@ -82,10 +106,10 @@ impl FromStr for NonFungibleGlobalId {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         RETNonFungibleGlobalIdInternal::from_str(s)
-            .map(Self::from_internal_engine)
             .map_err(|_| CommonError::InvalidNonFungibleGlobalID {
                 bad_value: s.to_owned(),
             })
+            .and_then(TryInto::<Self>::try_into)
     }
 }
 
@@ -102,11 +126,17 @@ impl NonFungibleGlobalId {
 
 impl HasSampleValues for NonFungibleGlobalId {
     fn sample() -> Self {
-        "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa:<Member_237>".parse().expect("Valid GC NFT Global ID")
+        Self::new(
+            NonFungibleResourceAddress::sample(),
+            NonFungibleLocalId::string("Member_237").unwrap(),
+        )
     }
 
     fn sample_other() -> Self {
-        "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd:#1337#".parse().expect("Valid Scorpion NFT Global ID")
+        Self::new(
+            NonFungibleResourceAddress::sample_other(),
+            NonFungibleLocalId::sample_other(),
+        )
     }
 }
 
@@ -145,7 +175,7 @@ mod tests {
         let str = "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd:#2244#";
         let id: SUT = str.parse().unwrap();
         assert_eq!(
-            id.resource_address.address(),
+            id.non_fungible_resource_address.address(),
             "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd"
         );
     }

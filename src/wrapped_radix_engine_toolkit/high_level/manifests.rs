@@ -1,10 +1,24 @@
+use std::ops::AddAssign;
+
 use crate::prelude::*;
 
-use radix_engine::prelude::ToMetadataEntry as ScryptoToMetadataEntry;
-use transaction::prelude::{
-    ManifestBuilder as ScryptoManifestBuilder,
-    MetadataValue as ScryptoMetadataValue,
+use radix_engine::{
+    prelude::ToMetadataEntry as ScryptoToMetadataEntry,
+    types::ManifestBucket as ScryptoManifestBucket,
 };
+use transaction::{
+    builder::{
+        ExistingManifestBucket as ScryptoExistingManifestBucket,
+        ManifestNameRegistrar as ScryptoManifestNameRegistrar,
+        NewManifestBucket as ScryptoNewManifestBucket,
+    },
+    prelude::{
+        ManifestBuilder as ScryptoManifestBuilder,
+        MetadataValue as ScryptoMetadataValue,
+    },
+};
+
+use radix_engine_common::prelude::NonFungibleLocalId as ScryptoNonFungibleLocalId;
 
 impl TransactionManifest {
     pub fn faucet(
@@ -52,6 +66,115 @@ impl TransactionManifest {
                 owner_key_hashes.into_iter().map(|h| h.into()).collect_vec(),
             ),
         )
+    }
+
+    fn account_withdraw_non_fungibles(
+        builder: ScryptoManifestBuilder,
+        owner: &AccountAddress,
+        resource_address: &ResourceAddress,
+        non_fungible_local_ids: &[NonFungibleLocalId],
+    ) -> ScryptoManifestBuilder {
+        builder.withdraw_non_fungibles_from_account(
+            owner,
+            resource_address,
+            non_fungible_local_ids
+                .iter()
+                .cloned()
+                .map(Into::<ScryptoNonFungibleLocalId>::into),
+        )
+    }
+
+    pub fn stake_claims(
+        owner: &AccountAddress,
+        stake_claims: Vec<StakeClaim>,
+    ) -> Self {
+        let account_address = owner;
+        let network_id = account_address.network_id();
+        let xrd_address = &ResourceAddress::xrd_on_network(network_id);
+
+        let mut builder = ScryptoManifestBuilder::new();
+
+        let bucket_factory = BucketFactory::default();
+
+        for stake_claim in stake_claims.iter() {
+            let claim_address = &stake_claim.resource_address;
+            let validator_address = &stake_claim.validator_address;
+
+            // Withdraw non fungibles from account
+            builder = Self::account_withdraw_non_fungibles(
+                builder,
+                account_address,
+                claim_address,
+                &stake_claim.ids,
+            );
+
+            let bucket = &bucket_factory.next();
+            builder = builder.take_all_from_worktop(claim_address, bucket);
+
+            // Claim XRDs for the given nft ids.
+            builder = builder.claim_xrd(validator_address, bucket);
+
+            // Deposit the claimed amount
+            let xrd_bucket = &bucket_factory.next();
+
+            builder = builder.take_from_worktop(
+                xrd_address,
+                stake_claim.amount,
+                xrd_bucket,
+            );
+
+            builder = builder.deposit(account_address, xrd_bucket)
+        }
+
+        let scrypto_manifest = builder.build();
+
+        TransactionManifest::from_scrypto(scrypto_manifest, network_id)
+    }
+}
+
+#[derive(Default)]
+pub(crate) struct BucketFactory {
+    next_id: std::cell::Cell<u64>,
+}
+impl BucketFactory {
+    pub(crate) fn next(&self) -> Bucket {
+        let next = self.next_id.get();
+        let bucket = Bucket {
+            name: format!("bucket_{}", next),
+        };
+        self.next_id.set(next + 1);
+        bucket
+    }
+}
+
+#[derive(Clone)]
+pub(crate) struct Bucket {
+    pub(crate) name: String,
+}
+// impl Bucket {
+//     pub(crate) fn unique() -> Self {
+//         Self {
+//             name: id().to_string(),
+//         }
+//     }
+// }
+impl AsRef<str> for Bucket {
+    fn as_ref(&self) -> &str {
+        self.name.as_str()
+    }
+}
+impl ScryptoNewManifestBucket for &Bucket {
+    fn register(self, registrar: &ScryptoManifestNameRegistrar) {
+        registrar.register_bucket(registrar.new_bucket(self.name.clone()));
+    }
+}
+
+impl ScryptoExistingManifestBucket for &Bucket {
+    fn resolve(
+        self,
+        registrar: &ScryptoManifestNameRegistrar,
+    ) -> ScryptoManifestBucket {
+        registrar.name_lookup().bucket(self)
     }
 }
 
@@ -113,9 +236,10 @@ impl ScryptoToMetadataEntry for MetadataValueStr {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
     use pretty_assertions::{assert_eq, assert_ne};
     use rand::Rng;
+
     #[allow(clippy::upper_case_acronyms)]
     type SUT = TransactionManifest;
 
@@ -186,6 +310,82 @@ mod tests {
                     )
                 )
             ;
+            "#,
+        );
+    }
+
+    #[test]
+    fn bucket_factory() {
+        let sut = BucketFactory::default();
+        assert_eq!(sut.next().name, "bucket_0");
+        assert_eq!(sut.next().name, "bucket_1");
+        assert_eq!(sut.next().name, "bucket_2");
+    }
+
+    #[test]
+    fn stake_claims() {
+        let stake_claims =
+            vec![StakeClaim::sample(), StakeClaim::sample_other()];
+        let manifest =
+            SUT::stake_claims(&AccountAddress::sample_mainnet(), stake_claims);
+        manifest_eq(
+            manifest,
+            r#"
+        CALL_METHOD
+            Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+            "withdraw_non_fungibles"
+            Address("resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa")
+            Array<NonFungibleLocalId>(
+                NonFungibleLocalId("{deaddeaddeaddead-deaddeaddeaddead-deaddeaddeaddead-deaddeaddeaddead}"),
+                NonFungibleLocalId("<foobar>")
+            )
+        ;
+        TAKE_ALL_FROM_WORKTOP
+            Address("resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa")
+            Bucket("bucket1")
+        ;
+        CALL_METHOD
+            Address("validator_rdx1sd5368vqdmjk0y2w7ymdts02cz9c52858gpyny56xdvzuheepdeyy0")
+            "claim_xrd"
+            Bucket("bucket1")
+        ;
+        TAKE_FROM_WORKTOP
+            Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+            Decimal("1337")
+            Bucket("bucket2")
+        ;
+        CALL_METHOD
+            Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+            "deposit"
+            Bucket("bucket2")
+        ;
+        CALL_METHOD
+            Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+            "withdraw_non_fungibles"
+            Address("resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd")
+            Array<NonFungibleLocalId>(
+                NonFungibleLocalId("<foobar>")
+            )
+        ;
+        TAKE_ALL_FROM_WORKTOP
+            Address("resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd")
+            Bucket("bucket3")
+        ;
+        CALL_METHOD
+            Address("validator_rdx1sw5rrhkxs65kl9xcxu7t9yu3k8ptscjwamum4phclk297j6r28g8kd")
+            "claim_xrd"
+            Bucket("bucket3")
+        ;
+        TAKE_FROM_WORKTOP
+            Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+            Decimal("237")
+            Bucket("bucket4")
+        ;
+        CALL_METHOD
+            Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+            "deposit"
+            Bucket("bucket4")
+        ;
             "#,
         );
     }

@@ -78,10 +78,10 @@ pub fn manifest_create_multiple_non_fungible_tokens(
 
 #[uniffi::export]
 pub fn manifest_stakes_claim(
-    _account_address: &AccountAddress,
-    _stake_claims: Vec<StakeClaim>,
+    account_address: &AccountAddress,
+    stake_claims: Vec<StakeClaim>,
 ) -> TransactionManifest {
-    todo!()
+    TransactionManifest::stake_claims(account_address, stake_claims)
 }
 
 #[uniffi::export]
@@ -318,14 +318,12 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "not yet implemented")]
     fn test_manifest_stakes_claim() {
-        manifest_eq(
-            manifest_stakes_claim(&AccountAddress::sample_mainnet(), vec![]),
-            r#"
-            todo
-            "#,
+        let manifest = manifest_stakes_claim(
+            &AccountAddress::sample_mainnet(),
+            vec![StakeClaim::sample(), StakeClaim::sample_other()],
         );
+        assert_eq!(manifest.instructions().len(), 10);
     }
 
     #[test]

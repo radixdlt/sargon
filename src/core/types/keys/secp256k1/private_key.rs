@@ -106,6 +106,10 @@ impl IsPrivateKey<Secp256k1PublicKey> for Secp256k1PrivateKey {
 #[cfg(test)]
 impl Secp256k1PrivateKey {
     /// ONLY Use this in a test or when creating sample (preview) values.
+    ///
+    /// # Safety
+    /// This is completely unsafe, it uses u64 as keys, which you should never
+    /// ever do. ONLY use this for tests (this impl SHOULD be marked #[cfg(test)]).
     pub unsafe fn from_u64(n: u64) -> Self {
         assert!(n > 0);
         Self::from_scrypto(ScryptoSecp256k1PrivateKey::from_u64(n).unwrap())

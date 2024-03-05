@@ -1,6 +1,7 @@
 use crate::prelude::*;
 
 use radix_engine_toolkit::models::canonical_address_types::CanonicalResourceAddress as RetResourceAddress;
+use transaction::model::DynamicResourceAddress as ScryptoDynamicResourceAddress;
 
 impl ResourceAddress {
     pub fn is_fungible(&self) -> bool {
@@ -14,6 +15,14 @@ impl ResourceAddress {
     pub fn xrd_on_network(id: NetworkID) -> Self {
         Self::new(radix_engine::types::XRD, id)
             .expect("Should never fail to get XRD on network.")
+    }
+}
+
+impl TryInto<ScryptoDynamicResourceAddress> for ResourceAddress {
+    type Error = crate::CommonError;
+
+    fn try_into(self) -> Result<ScryptoDynamicResourceAddress, Self::Error> {
+        todo!()
     }
 }
 
@@ -86,7 +95,6 @@ impl ResourceAddress {
     }
 }
 
-#[allow(unused)]
 impl ResourceAddress {
     /// The RAD on mainnet
     fn sample_mainnet_xrd() -> Self {
