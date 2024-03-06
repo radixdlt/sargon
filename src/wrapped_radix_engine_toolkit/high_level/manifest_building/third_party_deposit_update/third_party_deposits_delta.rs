@@ -7,6 +7,7 @@ use radix_engine_interface::blueprints::account::DefaultDepositRule as ScryptoDe
 use radix_engine_interface::blueprints::account::ResourcePreference as ScryptoResourcePreference;
 use transaction::prelude::ManifestValue as ScryptoManifestValue;
 
+#[derive(Debug, PartialEq, Eq, Default)]
 pub struct ThirdPartyDepositsDelta {
     pub(crate) deposit_rule: Option<ScryptoDefaultDepositRule>,
     pub(crate) asset_exceptions_to_be_removed: Vec<ScryptoManifestValue>,
@@ -34,7 +35,6 @@ impl ThirdPartyDepositsDelta {
                 .clone()
                 .into_iter()
                 .filter(|x| !to.assets_exception_list.contains(x))
-                .map(|x| x.address)
                 .map(Into::<ScryptoManifestValue>::into)
                 .collect(),
             asset_exceptions_to_add_or_update: to
@@ -88,17 +88,24 @@ impl From<ResourceOrNonFungible>
                 resource_address: value.into(),
             },
             ResourceOrNonFungible::NonFungible { value } => Self {
-                resource_address: value.resource_address.into(), // IS THIS CORRECT?
+                resource_address: value.resource_address.into(),
             },
         }
     }
 }
+
 impl From<AssetException> for ScryptoAccountSetResourcePreferenceInput {
     fn from(value: AssetException) -> Self {
         Self {
             resource_address: value.address.into(),
             resource_preference: value.exception_rule.into(),
         }
+    }
+}
+
+impl From<AssetException> for ScryptoManifestValue {
+    fn from(value: AssetException) -> Self {
+        Into::<ScryptoManifestValue>::into(value.address)
     }
 }
 
@@ -113,6 +120,7 @@ impl From<DepositRule> for ScryptoDefaultDepositRule {
         }
     }
 }
+
 impl From<DepositAddressExceptionRule> for ScryptoResourcePreference {
     fn from(value: DepositAddressExceptionRule) -> Self {
         match value {
@@ -123,5 +131,174 @@ impl From<DepositAddressExceptionRule> for ScryptoResourcePreference {
                 ScryptoResourcePreference::Disallowed
             }
         }
+    }
+}
+
+impl HasSampleValues for ThirdPartyDepositsDelta {
+    fn sample() -> Self {
+        Self::new(
+            ThirdPartyDeposits::sample(),
+            ThirdPartyDeposits::sample_other(),
+        )
+    }
+
+    fn sample_other() -> Self {
+        Self::new(
+            ThirdPartyDeposits::sample_other(),
+            ThirdPartyDeposits::sample(),
+        )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = ThirdPartyDepositsDelta;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn default_is_empty() {
+        let sut = SUT::default();
+        assert_eq!(sut.deposit_rule, None);
+        assert_eq!(sut.asset_exceptions_to_add_or_update, Vec::new());
+        assert_eq!(sut.asset_exceptions_to_be_removed, Vec::new());
+        assert_eq!(sut.depositor_addresses_to_add, Vec::new());
+        assert_eq!(sut.depositor_addresses_to_remove, Vec::new());
+    }
+
+    #[test]
+    fn delta_between_same_is_empty() {
+        assert_eq!(
+            SUT::new(
+                ThirdPartyDeposits::sample(),
+                ThirdPartyDeposits::sample()
+            ),
+            SUT::default()
+        );
+        assert_eq!(
+            SUT::new(
+                ThirdPartyDeposits::sample_other(),
+                ThirdPartyDeposits::sample_other()
+            ),
+            SUT::default()
+        );
+    }
+
+    #[test]
+    fn delta_deposit_rule() {
+        let new_deposit_rule = DepositRule::DenyAll;
+        let sut = SUT::new(
+            ThirdPartyDeposits::new(DepositRule::AcceptAll),
+            ThirdPartyDeposits::new(new_deposit_rule),
+        );
+        assert_eq!(sut.deposit_rule, Some(new_deposit_rule.into()));
+        assert_eq!(sut.asset_exceptions_to_add_or_update, Vec::new());
+        assert_eq!(sut.asset_exceptions_to_be_removed, Vec::new());
+        assert_eq!(sut.depositor_addresses_to_add, Vec::new());
+        assert_eq!(sut.depositor_addresses_to_remove, Vec::new());
+    }
+
+    #[test]
+    fn delta_asset_exceptions_to_add_or_update() {
+        let asset_exceptions = [AssetException::sample()];
+        let sut = SUT::new(
+            ThirdPartyDeposits::new(DepositRule::AcceptAll),
+            ThirdPartyDeposits::with_rule_and_lists(
+                DepositRule::AcceptAll,
+                asset_exceptions.clone(),
+                [],
+            ),
+        );
+        assert_eq!(sut.deposit_rule, None);
+        assert_eq!(
+            sut.asset_exceptions_to_add_or_update,
+            asset_exceptions
+                .clone()
+                .into_iter()
+                .map(Into::<ScryptoAccountSetResourcePreferenceInput>::into)
+                .collect_vec()
+        );
+        assert_eq!(sut.asset_exceptions_to_be_removed, Vec::new());
+        assert_eq!(sut.depositor_addresses_to_add, Vec::new());
+        assert_eq!(sut.depositor_addresses_to_remove, Vec::new());
+    }
+
+    #[test]
+    fn delta_asset_exceptions_to_remove() {
+        let asset_exceptions = [AssetException::sample()];
+        let sut = SUT::new(
+            ThirdPartyDeposits::with_rule_and_lists(
+                DepositRule::AcceptAll,
+                asset_exceptions.clone(),
+                [],
+            ),
+            ThirdPartyDeposits::new(DepositRule::AcceptAll),
+        );
+        assert_eq!(sut.deposit_rule, None);
+        assert_eq!(sut.asset_exceptions_to_add_or_update, Vec::new());
+        assert_eq!(
+            sut.asset_exceptions_to_be_removed,
+            asset_exceptions
+                .clone()
+                .into_iter()
+                .map(Into::<ScryptoManifestValue>::into)
+                .collect_vec()
+        );
+        assert_eq!(sut.depositor_addresses_to_add, Vec::new());
+        assert_eq!(sut.depositor_addresses_to_remove, Vec::new());
+    }
+
+    #[test]
+    fn delta_asset_exceptions_to_remove_and_to_add() {
+        let asset_exception_from = AssetException::sample();
+        let asset_exceptions_from = [asset_exception_from.clone()];
+        let asset_exception_to = AssetException::sample_other();
+        let asset_exceptions_to = [asset_exception_to.clone()];
+        let expected_asset_exceptions_to_remove = [asset_exception_from];
+        let expected_asset_exceptions_to_add = [asset_exception_to];
+
+        let sut = SUT::new(
+            ThirdPartyDeposits::with_rule_and_lists(
+                DepositRule::AcceptAll,
+                asset_exceptions_from.clone(),
+                [],
+            ),
+            ThirdPartyDeposits::with_rule_and_lists(
+                DepositRule::AcceptAll,
+                asset_exceptions_to.clone(),
+                [],
+            ),
+        );
+        assert_eq!(sut.deposit_rule, None);
+        assert_eq!(
+            sut.asset_exceptions_to_add_or_update,
+            expected_asset_exceptions_to_add
+                .clone()
+                .into_iter()
+                .map(Into::<ScryptoAccountSetResourcePreferenceInput>::into)
+                .collect_vec()
+        );
+        assert_eq!(
+            sut.asset_exceptions_to_be_removed,
+            expected_asset_exceptions_to_remove
+                .clone()
+                .into_iter()
+                .map(Into::<ScryptoManifestValue>::into)
+                .collect_vec()
+        );
+        assert_eq!(sut.depositor_addresses_to_add, Vec::new());
+        assert_eq!(sut.depositor_addresses_to_remove, Vec::new());
     }
 }

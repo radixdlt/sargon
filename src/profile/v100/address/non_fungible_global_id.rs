@@ -167,7 +167,7 @@ impl HasSampleValues for NonFungibleGlobalId {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = NonFungibleGlobalId;
@@ -290,5 +290,21 @@ mod tests {
     #[test]
     fn global_id_with_fungible_resource_addresses_are_accepted() {
         assert!("resource_tdx_2_1t4kep9ldg9t0cszj78z6fcr2zvfxfq7muetq7pyvhdtctwxum90scq:#1#".parse::<SUT>().unwrap().resource_address.is_fungible());
+    }
+
+    #[test]
+    fn into_scrypto() {
+        let resource_address =
+            ResourceAddress::sample_mainnet_nft_gc_membership();
+        let local_id = NonFungibleLocalId::string("Member_237").unwrap();
+        let sut =
+            SUT::new_unchecked(resource_address.clone(), local_id.clone());
+        assert_eq!(
+            Into::<ScryptoNonFungibleGlobalId>::into(sut),
+            ScryptoNonFungibleGlobalId::new(
+                resource_address.into(),
+                local_id.into()
+            )
+        );
     }
 }
