@@ -9,7 +9,7 @@ import com.radixdlt.sargon.transactionManifestToString
 fun TransactionManifest.Companion.init(
     instructionsString: String,
     networkId: NetworkId,
-    blobs: Blobs
+    blobs: Blobs = Blobs.init()
 ) = newTransactionManifestFromInstructionsStringAndBlobs(
     instructionsString = instructionsString,
     networkId = networkId,
