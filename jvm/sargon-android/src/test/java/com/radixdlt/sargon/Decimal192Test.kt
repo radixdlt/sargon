@@ -1,11 +1,14 @@
 package com.radixdlt.sargon
 
 import com.radixdlt.sargon.extensions.ceil
+import com.radixdlt.sargon.extensions.clamped
 import com.radixdlt.sargon.extensions.compareTo
 import com.radixdlt.sargon.extensions.floor
+import com.radixdlt.sargon.extensions.isNegative
 import com.radixdlt.sargon.extensions.plus
 import com.radixdlt.sargon.extensions.rounded
 import com.radixdlt.sargon.extensions.string
+import com.radixdlt.sargon.extensions.times
 import com.radixdlt.sargon.extensions.toDecimal192
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -52,5 +55,7 @@ class Decimal192Test {
         assertEquals("1.23", a.rounded(decimalPlaces = 2).string)
         assertEquals("1.23", a.floor(decimalPlaces = 2).string)
         assertEquals("1.24", a.ceil(decimalPlaces = 2).string)
+        assertEquals("0", (a * (-1).toDecimal192()).clamped.string)
+        assertEquals(a.string, a.clamped.string)
     }
 }
