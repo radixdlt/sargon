@@ -11,7 +11,7 @@ import com.radixdlt.sargon.poolAddressNetworkId
 fun PoolAddress.Companion.init(validatingAddress: String) =
     newPoolAddress(bech32 = validatingAddress)
 
-val PoolAddress.address: String
+val PoolAddress.string: String
     get() = poolAddressBech32Address(address = this)
 
 val PoolAddress.networkId: NetworkId

@@ -11,7 +11,7 @@ import com.radixdlt.sargon.vaultAddressNetworkId
 fun VaultAddress.Companion.init(validatingAddress: String) =
     newVaultAddress(bech32 = validatingAddress)
 
-val VaultAddress.address: String
+val VaultAddress.string: String
     get() = vaultAddressBech32Address(address = this)
 
 val VaultAddress.networkId: NetworkId

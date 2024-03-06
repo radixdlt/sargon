@@ -14,7 +14,7 @@ fun IdentityAddress.Companion.init(validatingAddress: String) =
 fun IdentityAddress.Companion.init(publicKey: PublicKey, networkId: NetworkId) =
     newIdentityAddressFrom(publicKey = publicKey, networkId = networkId)
 
-val IdentityAddress.address: String
+val IdentityAddress.string: String
     get() = identityAddressBech32Address(address = this)
 
 val IdentityAddress.networkId: NetworkId

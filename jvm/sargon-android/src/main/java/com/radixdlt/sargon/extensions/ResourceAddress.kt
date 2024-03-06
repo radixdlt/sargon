@@ -11,7 +11,7 @@ import com.radixdlt.sargon.resourceAddressNetworkId
 fun ResourceAddress.Companion.init(validatingAddress: String) =
     newResourceAddress(bech32 = validatingAddress)
 
-val ResourceAddress.address: String
+val ResourceAddress.string: String
     get() = resourceAddressBech32Address(address = this)
 
 val ResourceAddress.networkId: NetworkId

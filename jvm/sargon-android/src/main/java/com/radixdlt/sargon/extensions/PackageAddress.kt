@@ -9,7 +9,7 @@ import com.radixdlt.sargon.packageAddressNetworkId
 fun PackageAddress.Companion.init(validatingAddress: String) =
     newPackageAddress(bech32 = validatingAddress)
 
-val PackageAddress.address: String
+val PackageAddress.string: String
     get() = packageAddressBech32Address(address = this)
 
 val PackageAddress.networkId: NetworkId

@@ -9,7 +9,7 @@ import com.radixdlt.sargon.validatorAddressNetworkId
 fun ValidatorAddress.Companion.init(validatingAddress: String) =
     newValidatorAddress(bech32 = validatingAddress)
 
-val ValidatorAddress.address: String
+val ValidatorAddress.string: String
     get() = validatorAddressBech32Address(address = this)
 
 val ValidatorAddress.networkId: NetworkId
