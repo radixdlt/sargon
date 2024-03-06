@@ -20,3 +20,6 @@ fun ByteArray.toBagOfBytes() = newBagOfBytesFrom(bytes = this)
 
 val BagOfBytes.hex: String
     get() = toUByteArray().toHexString()
+
+internal val BagOfBytes.byteArray: ByteArray
+    get() = toUByteArray().toByteArray()
