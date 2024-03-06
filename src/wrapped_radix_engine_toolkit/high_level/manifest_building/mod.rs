@@ -7,6 +7,7 @@ mod bucket_factory;
 mod manifests;
 mod manifests_create_tokens;
 mod metadata;
+mod modify_manifest;
 mod third_party_deposit_update;
 
 pub use addresses_manifest_builder_support::*;
@@ -16,4 +17,5 @@ pub use bucket_factory::*;
 pub use manifests::*;
 pub use manifests_create_tokens::*;
 pub use metadata::*;
+pub use modify_manifest::*;
 pub use third_party_deposit_update::*;

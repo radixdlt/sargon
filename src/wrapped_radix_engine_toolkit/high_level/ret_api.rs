@@ -94,12 +94,12 @@ pub fn manifest_third_party_deposit_update(
 }
 
 #[uniffi::export]
-pub fn updating_manifest_lock_fee(
-    _manifest: TransactionManifest,
-    _address_of_fee_payer: &AccountAddress,
-    _fee: Option<Decimal192>,
+pub fn modify_manifest_lock_fee(
+    manifest: TransactionManifest,
+    address_of_fee_payer: &AccountAddress,
+    fee: Option<Decimal192>,
 ) -> TransactionManifest {
-    todo!()
+    manifest.modify_add_lock_fee(address_of_fee_payer, fee)
 }
 
 #[uniffi::export]
@@ -338,16 +338,63 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "not yet implemented")]
-    fn test_updating_manifest_lock_fee() {
+    fn test_modify_manifest_lock_fee() {
+        let instructions_string = r#"
+CALL_METHOD
+    Address("account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8")
+    "withdraw"
+    Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+    Decimal("1337")
+;
+TAKE_FROM_WORKTOP
+    Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+    Decimal("1337")
+    Bucket("bucket1")
+;
+CALL_METHOD
+    Address("account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69")
+    "try_deposit_or_abort"
+    Bucket("bucket1")
+    Enum<0u8>()
+;
+        "#;
+
+        let manifest = TransactionManifest::new(
+            instructions_string,
+            NetworkID::Mainnet,
+            Blobs::default(),
+        )
+        .unwrap();
+
         manifest_eq(
-            updating_manifest_lock_fee(
-                TransactionManifest::sample(),
-                &AccountAddress::sample_mainnet(),
-                Some(1000.into()),
+            modify_manifest_lock_fee(
+                manifest,
+                &"account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master".parse().unwrap(),
+                Some(42.into()),
             ),
             r#"
-            todo
+        CALL_METHOD
+            Address("account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master")
+            "lock_fee"
+            Decimal("42")
+        ;
+        CALL_METHOD
+            Address("account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8")
+            "withdraw"
+            Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+            Decimal("1337")
+        ;
+        TAKE_FROM_WORKTOP
+            Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+            Decimal("1337")
+            Bucket("bucket1")
+        ;
+        CALL_METHOD
+            Address("account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69")
+            "try_deposit_or_abort"
+            Bucket("bucket1")
+            Enum<0u8>()
+        ;
             "#,
         );
     }
