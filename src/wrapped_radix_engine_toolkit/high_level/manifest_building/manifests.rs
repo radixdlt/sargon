@@ -1,12 +1,19 @@
 use crate::prelude::*;
 
 use radix_engine::prelude::ToMetadataEntry as ScryptoToMetadataEntry;
-use transaction::prelude::{
-    ManifestBuilder as ScryptoManifestBuilder,
-    MetadataValue as ScryptoMetadataValue,
-};
-
+use radix_engine::types::ManifestAddress as ScryptoManifestAddress;
+use radix_engine::types::ManifestCustomValue as ScryptoManifestCustomValue;
+use radix_engine::types::ManifestCustomValueKind as ScryptoManifestCustomValueKind;
 use radix_engine_common::prelude::NonFungibleLocalId as ScryptoNonFungibleLocalId;
+
+use transaction::prelude::ManifestValue as ScryptoManifestValue;
+use transaction::{
+    builder::ResolvableArguments as ScryptoResolvableArguments,
+    prelude::{
+        ManifestBuilder as ScryptoManifestBuilder,
+        MetadataValue as ScryptoMetadataValue,
+    },
+};
 
 impl TransactionManifest {
     pub fn faucet(

@@ -5,6 +5,8 @@ use radix_engine_common::types::ResourceAddress as ScryptoResourceAddress;
 use transaction::model::DynamicComponentAddress as ScryptoDynamicComponentAddress;
 use transaction::model::DynamicResourceAddress as ScryptoDynamicResourceAddress;
 
+use radix_engine_interface::blueprints::resource::ResourceOrNonFungible as ScryptoResourceOrNonFungible;
+
 macro_rules! is_dynamic_component_address {
     ($address_type: ty) => {
         impl TryInto<ScryptoDynamicComponentAddress> for &$address_type {
@@ -49,6 +51,27 @@ is_dynamic_component_address!(VaultAddress);
 
 is_dynamic_resource_address!(ResourceAddress);
 is_dynamic_resource_address!(NonFungibleResourceAddress);
+
+impl From<ResourceAddress> for ScryptoResourceAddress {
+    fn from(value: ResourceAddress) -> Self {
+        ScryptoResourceAddress::try_from(value.node_id()).expect(
+            "Should always be able to convert to Scrypto ResourceAddress",
+        )
+    }
+}
+
+impl From<ResourceOrNonFungible> for ScryptoResourceOrNonFungible {
+    fn from(value: ResourceOrNonFungible) -> Self {
+        match value {
+            ResourceOrNonFungible::Resource { value } => {
+                ScryptoResourceOrNonFungible::Resource(value.into())
+            }
+            ResourceOrNonFungible::NonFungible { value } => {
+                ScryptoResourceOrNonFungible::NonFungible(value.into())
+            }
+        }
+    }
+}
 
 #[cfg(test)]
 mod tests {

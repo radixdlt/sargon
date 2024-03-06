@@ -18,6 +18,13 @@ use radix_engine_toolkit::models::canonical_address_types::{
     CanonicalVaultAddress as RetVaultAddress,
 };
 
+use radix_engine::types::ManifestAddress as ScryptoManifestAddress;
+use radix_engine::types::ManifestCustomValue as ScryptoManifestCustomValue;
+use radix_engine::types::ManifestCustomValueKind as ScryptoManifestCustomValueKind;
+use transaction::prelude::ManifestValue as ScryptoManifestValue;
+
+use transaction::model::DynamicGlobalAddress as ScryptoDynamicGlobalAddress;
+
 pub trait AddressViaRet: Sized {
     fn new(
         node_id: impl Into<ScryptoNodeId>,
@@ -141,6 +148,18 @@ macro_rules! decl_ret_wrapped_address {
                 }
             }
 
+            impl From<[< $address_type:camel Address >]> for ScryptoManifestValue {
+                fn from(value: [< $address_type:camel Address >]) -> ScryptoManifestValue {
+                    ScryptoManifestValue::Custom {
+                        value: ScryptoManifestCustomValue::Address(
+                            ScryptoManifestAddress::Static(
+                                value.node_id(),
+                            ),
+                        ),
+                    }
+                }
+            }
+
             impl IntoScryptoAddress for [< $address_type:camel Address >] {
                 fn scrypto(&self) -> ScryptoGlobalAddress {
                     ScryptoGlobalAddress::try_from(self.node_id())
@@ -164,6 +183,16 @@ macro_rules! decl_ret_wrapped_address {
                         CommonError::FailedToCreateAddressViaRetAddressFromNodeIdAndNetworkID { node_id_as_hex: node_id.to_hex(), network_id }
                     })
                     .map(|i| Into::<[< $address_type:camel Address >]>::into(i))
+                }
+            }
+
+            impl TryInto<ScryptoDynamicGlobalAddress> for &[< $address_type:camel Address >] {
+                type Error = crate::CommonError;
+
+                fn try_into(
+                    self,
+                ) -> Result<ScryptoDynamicGlobalAddress, Self::Error> {
+                    Ok(ScryptoDynamicGlobalAddress::Static(self.scrypto()))
                 }
             }
         }

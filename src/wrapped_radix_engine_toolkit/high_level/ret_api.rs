@@ -86,21 +86,12 @@ pub fn manifest_stakes_claim(
 
 #[uniffi::export]
 pub fn manifest_third_party_deposit_update(
-    _to: ThirdPartyDeposits,
-    _owner: &AccountAddress,
+    account_address: &AccountAddress,
+    from: ThirdPartyDeposits,
+    to: ThirdPartyDeposits,
 ) -> TransactionManifest {
-    todo!()
+    TransactionManifest::third_party_deposit_update(account_address, from, to)
 }
-
-/// REQUIRES NETWORK CALL (and probable cache)
-/// Requires kotlinx to be setup
-// #[uniffi::export]
-// pub async fn manifest_assets_transfers(
-//     _transfers: AssetsTransfersTransactionPrototype,
-//     _message: Message,
-// ) -> Result<Manifest> {
-//     todo!()
-// }
 
 #[uniffi::export]
 pub fn updating_manifest_lock_fee(
@@ -118,16 +109,6 @@ pub fn updating_manifest_add_guarantees(
 ) -> TransactionManifest {
     todo!()
 }
-
-/// REQUIRES NETWORK CALL (and probable cache)
-/// Requires kotlinx to be setup
-// #[uniffi::export]
-// pub async fn needs_signature_for_depositing(
-//     _into_account: Account,
-//     _resource: ResourceAddress,
-// ) -> Result<bool> {
-//     todo!()
-// }
 
 #[uniffi::export]
 pub fn build_information() -> SargonBuildInformation {
@@ -154,6 +135,26 @@ pub fn debug_print_compiled_notarized_intent(
         .expect("Should never failed to decompile");
     format!("{:?}", notarized)
 }
+
+/// REQUIRES NETWORK CALL (and probable cache)
+/// Requires kotlinx to be setup
+// #[uniffi::export]
+// pub async fn manifest_assets_transfers(
+//     _transfers: AssetsTransfersTransactionPrototype,
+//     _message: Message,
+// ) -> Result<Manifest> {
+//     todo!()
+// }
+
+/// REQUIRES NETWORK CALL (and probable cache)
+/// Requires kotlinx to be setup
+// #[uniffi::export]
+// pub async fn needs_signature_for_depositing(
+//     _into_account: Account,
+//     _resource: ResourceAddress,
+// ) -> Result<bool> {
+//     todo!()
+// }
 
 #[cfg(test)]
 mod tests {
@@ -327,17 +328,13 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "not yet implemented")]
     fn test_manifest_third_party_deposit_update() {
-        manifest_eq(
-            manifest_third_party_deposit_update(
-                ThirdPartyDeposits::sample(),
-                &AccountAddress::sample_mainnet(),
-            ),
-            r#"
-            todo
-            "#,
+        let manifest = manifest_third_party_deposit_update(
+            &AccountAddress::sample_mainnet(),
+            ThirdPartyDeposits::sample(),
+            ThirdPartyDeposits::sample_other(),
         );
+        assert_eq!(manifest.instructions().len(), 3);
     }
 
     #[test]

@@ -2,7 +2,9 @@ use crate::prelude::*;
 
 use radix_engine_common::address::AddressBech32Decoder;
 use radix_engine_common::types::ResourceAddress as ScryptoResourceAddress;
-use radix_engine_interface::blueprints::resource::NonFungibleGlobalId as ScryptoNonFungibleGlobalId;
+// use radix_engine_interface::blueprints::resource::NonFungibleGlobalId as ScryptoNonFungibleGlobalId;
+
+use radix_engine::types::NonFungibleGlobalId as ScryptoNonFungibleGlobalId;
 
 use radix_engine_toolkit_json::models::scrypto::non_fungible_global_id::{
     SerializableNonFungibleGlobalId as RETNonFungibleGlobalId,
@@ -30,8 +32,8 @@ pub struct NonFungibleGlobalId {
     //
     // For more info see slack:
     // https://rdxworks.slack.com/archives/C01HK4QFXNY/p1709633826502809?thread_ts=1709633374.199459&channel=C01HK4QFXNY&message_ts=1709633826.502809
-    resource_address: ResourceAddress,
-    non_fungible_local_id: NonFungibleLocalId,
+    pub(crate) resource_address: ResourceAddress,
+    pub(crate) non_fungible_local_id: NonFungibleLocalId,
 }
 
 impl NonFungibleGlobalId {
@@ -101,6 +103,15 @@ impl From<NonFungibleGlobalId> for RETNonFungibleGlobalId {
         RETNonFungibleGlobalId::new(
             scrypto_global_id,
             value.network_id().discriminant(),
+        )
+    }
+}
+
+impl From<NonFungibleGlobalId> for ScryptoNonFungibleGlobalId {
+    fn from(value: NonFungibleGlobalId) -> Self {
+        Self::new(
+            value.resource_address.into(),
+            value.non_fungible_local_id.into(),
         )
     }
 }
