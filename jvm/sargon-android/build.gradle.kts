@@ -55,13 +55,14 @@ tasks.withType<Test> {
 }
 
 dependencies {
-    // Cannot use version catalogues here. For some reason when published to Maven,
+    // Cannot use version catalogues for aar. For some reason when published to Maven,
     // the jna dependency cannot be resolved
     implementation("net.java.dev.jna:jna:5.13.0@aar")
     implementation("androidx.annotation:annotation:1.7.1")
     implementation("androidx.compose.ui:ui-tooling-preview-android:1.6.2")
 
-    testRuntimeOnly(project(":sargon-desktop-debug"))
+    testDebugRuntimeOnly(project(":sargon-desktop-debug"))
+    testReleaseRuntimeOnly(project(":sargon-desktop-release"))
     testImplementation(libs.junit)
 }
 
