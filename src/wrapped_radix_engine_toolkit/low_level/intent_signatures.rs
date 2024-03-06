@@ -36,6 +36,25 @@ impl From<IntentSignatures> for ScryptoIntentSignatures {
     }
 }
 
+impl TryFrom<(ScryptoIntentSignatures, Hash)> for IntentSignatures {
+    type Error = crate::CommonError;
+
+    fn try_from(
+        value: (ScryptoIntentSignatures, Hash),
+    ) -> Result<Self, Self::Error> {
+        value
+            .clone()
+            .0
+            .signatures
+            .into_iter()
+            .map(|s| {
+                TryInto::<IntentSignature>::try_into((s, value.1.to_owned()))
+            })
+            .collect::<Result<Vec<IntentSignature>>>()
+            .map(|signatures| Self { signatures })
+    }
+}
+
 impl HasSampleValues for IntentSignatures {
     fn sample() -> Self {
         let intent = TransactionIntent::sample();
@@ -84,5 +103,23 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn to_from_scrypto() {
+        // We use `SignedIntent` instead of `SUT`, since `SignedIntent` contains
+        // both SUT and Hash, needed for `TryFrom`.
+        let roundtrip = |si: SignedIntent| {
+            let first = Into::<ScryptoIntentSignatures>::into(
+                si.clone().intent_signatures,
+            );
+            let second = si.clone().intent.intent_hash().hash;
+            assert_eq!(
+                SUT::try_from((first, second)).unwrap(),
+                si.intent_signatures
+            );
+        };
+        roundtrip(SignedIntent::sample());
+        roundtrip(SignedIntent::sample_other());
     }
 }

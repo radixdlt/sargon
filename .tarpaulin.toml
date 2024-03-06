@@ -1,8 +1,11 @@
 [all]
 exclude-files = [
+    # Too many false negatives (macro usage)
+    "src/profile/v100/address/non_fungible_resource_address.rs",
+    "src/profile/v100/address/wrap_ret_address.rs",
+    # Rest
     "tests/*",
     "src/bindgen/*",
-    "src/wrapped_radix_engine_toolkit/low_level/dummy_types.rs",
     "example/*",
     "target/*",
     "apple/*",
@@ -12,7 +15,7 @@ exclude-files = [
     "Package.swift",
 ]
 verbose = false
-all-features = true
+run-types = ["Lib"]
 timeout = "5m"
 skip-clean = true
 out = ["Xml"]

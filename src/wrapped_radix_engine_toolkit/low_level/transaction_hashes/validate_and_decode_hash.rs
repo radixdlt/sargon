@@ -51,7 +51,7 @@ mod tests {
             validate_and_decode_hash::<transaction::model::IntentHash>(s)
                 .unwrap()
                 .1,
-            NetworkID::Simulator.into()
+            NetworkID::Simulator
         );
     }
 }

@@ -62,22 +62,26 @@ pub fn manifest_create_multiple_fungible_tokens(
 pub fn manifest_create_non_fungible_token(
     address_of_owner: &AccountAddress,
 ) -> TransactionManifest {
-    TransactionManifest::create_non_fungible_token(address_of_owner)
+    TransactionManifest::create_single_nft_collection(address_of_owner, 20)
 }
 
 #[uniffi::export]
 pub fn manifest_create_multiple_non_fungible_tokens(
-    _address_of_owner: &AccountAddress,
+    address_of_owner: &AccountAddress,
 ) -> TransactionManifest {
-    todo!()
+    TransactionManifest::create_multiple_nft_collections(
+        address_of_owner,
+        15,
+        10,
+    )
 }
 
 #[uniffi::export]
 pub fn manifest_stakes_claim(
-    _account_address: &AccountAddress,
-    _stake_claims: Vec<StakeClaim>,
+    account_address: &AccountAddress,
+    stake_claims: Vec<StakeClaim>,
 ) -> TransactionManifest {
-    todo!()
+    TransactionManifest::stake_claims(account_address, stake_claims)
 }
 
 #[uniffi::export]
@@ -137,15 +141,18 @@ pub fn hash(data: BagOfBytes) -> Exactly32Bytes {
 }
 
 #[uniffi::export]
-pub fn xrd_address_of_network(_network_id: NetworkID) -> ResourceAddress {
-    todo!()
+pub fn xrd_address_of_network(network_id: NetworkID) -> ResourceAddress {
+    ResourceAddress::xrd_on_network(network_id)
 }
 
 #[uniffi::export]
 pub fn debug_print_compiled_notarized_intent(
-    _data: CompiledNotarizedIntent,
+    compiled: CompiledNotarizedIntent,
 ) -> String {
-    todo!()
+    let notarized = compiled
+        .decompile()
+        .expect("Should never failed to decompile");
+    format!("{:?}", notarized)
 }
 
 #[cfg(test)]
@@ -303,27 +310,20 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "not yet implemented")]
     fn test_manifest_create_multiple_non_fungible_tokens() {
-        manifest_eq(
-            manifest_create_multiple_non_fungible_tokens(
-                &AccountAddress::sample_mainnet(),
-            ),
-            r#"
-            todo
-            "#,
+        let manifest = manifest_create_multiple_non_fungible_tokens(
+            &AccountAddress::sample_mainnet(),
         );
+        assert_eq!(manifest.instructions().len(), 16);
     }
 
     #[test]
-    #[should_panic(expected = "not yet implemented")]
     fn test_manifest_stakes_claim() {
-        manifest_eq(
-            manifest_stakes_claim(&AccountAddress::sample_mainnet(), vec![]),
-            r#"
-            todo
-            "#,
+        let manifest = manifest_stakes_claim(
+            &AccountAddress::sample_mainnet(),
+            vec![StakeClaim::sample(), StakeClaim::sample_other()],
         );
+        assert_eq!(manifest.instructions().len(), 10);
     }
 
     #[test]
@@ -405,17 +405,20 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "not yet implemented")]
-    fn test_xrd_address_of_network() {
+    fn xrd_address_of_network_mainnet() {
         assert_eq!(xrd_address_of_network(NetworkID::Mainnet).to_string(), "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd");
     }
 
     #[test]
-    #[should_panic(expected = "not yet implemented")]
+    fn xrd_address_of_network_stokenet() {
+        assert_eq!(xrd_address_of_network(NetworkID::Stokenet).to_string(), "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc");
+    }
+
+    #[test]
     fn test_debug_print_compiled_notarized_intent() {
         assert_eq!(
-            debug_print_compiled_notarized_intent(CompiledNotarizedIntent {}),
-            "todo"
+            debug_print_compiled_notarized_intent(CompiledNotarizedIntent::sample()),
+            "NotarizedTransaction { signed_intent: SignedIntent { intent: header:\nTransactionHeader { network_id: Mainnet, start_epoch_inclusive: Epoch(76935), end_epoch_exclusive: Epoch(76945), nonce: Nonce(2371337), notary_public_key: Ed25519 { value: ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf }, notary_is_signatory: true, tip_percentage: 0 }\n\nmessage:\nPlainText { plaintext: PlaintextMessage { mime_type: \"text/plain\", message: StringMessage { string: \"Hello Radix!\" } } }\n\nmanifest:\nCALL_METHOD\n    Address(\"account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease\")\n    \"lock_fee\"\n    Decimal(\"0.61\")\n;\nCALL_METHOD\n    Address(\"account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease\")\n    \"withdraw\"\n    Address(\"resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd\")\n    Decimal(\"1337\")\n;\nTAKE_FROM_WORKTOP\n    Address(\"resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd\")\n    Decimal(\"1337\")\n    Bucket(\"bucket1\")\n;\nCALL_METHOD\n    Address(\"account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master\")\n    \"try_deposit_or_abort\"\n    Bucket(\"bucket1\")\n    Enum<0u8>()\n;\n\n\n, intent_signatures: IntentSignatures { signatures: [] } }, notary_signature: NotarySignature { secret_magic: Ed25519 { value: 839ac9c47db45950fc0cd453c5ebbbfa7ae5f7c20753abe2370b5b40fdee89e522c4d810d060e0c56211d036043fd32b9908e97bf114c1835ca02d74018fdd09 } } }"
         );
     }
 }

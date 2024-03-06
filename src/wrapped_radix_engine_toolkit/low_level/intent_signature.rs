@@ -28,6 +28,17 @@ impl From<IntentSignature> for Signature {
     }
 }
 
+impl TryFrom<(ScryptoIntentSignature, Hash)> for IntentSignature {
+    type Error = crate::CommonError;
+
+    fn try_from(
+        value: (ScryptoIntentSignature, Hash),
+    ) -> Result<Self, Self::Error> {
+        TryInto::<SignatureWithPublicKey>::try_into((value.0 .0, value.1))
+            .map(Into::<Self>::into)
+    }
+}
+
 impl From<SignatureWithPublicKey> for IntentSignature {
     fn from(value: SignatureWithPublicKey) -> Self {
         Self {
@@ -90,5 +101,18 @@ mod tests {
             scrypto.0.signature(),
             SUT::sample_other().signature().into()
         )
+    }
+
+    use radix_engine_common::crypto::{
+        Secp256k1PublicKey as ScryptoSecp256k1PublicKey,
+        Secp256k1Signature as ScryptoSecp256k1Signature,
+    };
+    use transaction::model::SignatureWithPublicKeyV1 as ScryptoSignatureWithPublicKey;
+
+    #[test]
+    fn try_from_scrypto_valid() {
+        let scrypto =
+            ScryptoIntentSignature(SignatureWithPublicKey::sample().into());
+        assert!(SUT::try_from((scrypto, Hash::sample())).is_ok());
     }
 }

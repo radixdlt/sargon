@@ -8,8 +8,14 @@
 		case identity(IdentityAddress)
 		case package(PackageAddress)
 		case pool(PoolAddress)
-		case resource(ResourceAddress)
-		case validator(ValidatorAddress)
+       
+        /// Both Non-Fungible and Fungible Resource addresses
+        case resource(ResourceAddress)
+       
+        /// Only Non-Fungible Resource addresses
+        case nonFungibleResource(NonFungibleResourceAddress)
+		
+        case validator(ValidatorAddress)
 		case vault(VaultAddress)
 	}
 	extension Address: AddressProtocol {
@@ -44,7 +50,9 @@
 				self = .validator(address)
 			} else if let address = try? VaultAddress(validatingAddress: bech32String) {
 				self = .vault(address)
-			} else {
+            } else if let address = try? NonFungibleResourceAddress(validatingAddress: bech32String) {
+                self = .nonFungibleResource(address)
+            } else {
 				struct UnknownAddressType: Swift.Error {}
 				throw UnknownAddressType()
 			}
@@ -68,7 +76,8 @@
 			case let .identity(address): address[keyPath: keyPath]
 			case let .package(address): address[keyPath: keyPath]
 			case let .pool(address): address[keyPath: keyPath]
-			case let .resource(address): address[keyPath: keyPath]
+            case let .resource(address): address[keyPath: keyPath]
+            case let .nonFungibleResource(address): address[keyPath: keyPath]
 			case let .validator(address): address[keyPath: keyPath]
 			case let .vault(address): address[keyPath: keyPath]
 			}
@@ -83,7 +92,8 @@
 				+ IdentityAddress.allCases.map(Self.identity)
 				+ PackageAddress.allCases.map(Self.package)
 				+ PoolAddress.allCases.map(Self.pool)
-				+ ResourceAddress.allCases.map(Self.resource)
+                + ResourceAddress.allCases.map(Self.resource)
+                + NonFungibleResourceAddress.allCases.map(Self.nonFungibleResource)
 				+ ValidatorAddress.allCases.map(Self.validator)
 				+ VaultAddress.allCases.map(Self.vault)
 		}

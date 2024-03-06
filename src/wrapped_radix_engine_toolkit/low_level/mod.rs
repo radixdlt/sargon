@@ -1,6 +1,3 @@
-#[macro_use]
-mod dummy_types;
-
 mod compiled_notarized_intent;
 mod execution_summary;
 mod intent_signature;
@@ -19,7 +16,6 @@ mod transaction_manifest;
 mod transaction_receipt;
 
 pub use compiled_notarized_intent::*;
-pub use dummy_types::*;
 pub use execution_summary::*;
 pub use intent_signature::*;
 pub use intent_signatures::*;

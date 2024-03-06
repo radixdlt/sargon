@@ -7,7 +7,8 @@ use transaction::model::{
 
 use radix_engine_toolkit::functions::intent::compile as RET_intent_compile;
 
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, derive_more::Debug, uniffi::Record)]
+#[debug("header:\n{:?}\n\nmessage:\n{:?}\n\nmanifest:\n{}\n\n", self.header, self.message, self.manifest.instructions_string())]
 pub struct TransactionIntent {
     pub header: TransactionHeader,
     pub manifest: TransactionManifest,

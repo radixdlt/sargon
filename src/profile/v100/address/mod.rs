@@ -1,11 +1,13 @@
 mod access_controller_address;
 mod account_address;
+mod addresses_manifest_builder_support;
 mod component_address;
 mod entity_address;
 mod identity_address;
 mod non_fungible_global_id;
 mod non_fungible_local_id;
 mod non_fungible_local_id_string;
+mod non_fungible_resource_address;
 mod package_address;
 mod pool_address;
 mod resource_address;
@@ -15,12 +17,14 @@ mod wrap_ret_address;
 
 pub use access_controller_address::*;
 pub use account_address::*;
+pub use addresses_manifest_builder_support::*;
 pub use component_address::*;
 pub use entity_address::*;
 pub use identity_address::*;
 pub use non_fungible_global_id::*;
 pub use non_fungible_local_id::*;
 pub use non_fungible_local_id_string::*;
+pub use non_fungible_resource_address::*;
 pub use package_address::*;
 pub use pool_address::*;
 pub use resource_address::*;

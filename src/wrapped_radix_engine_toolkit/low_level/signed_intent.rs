@@ -56,27 +56,45 @@ impl From<SignedIntent> for ScryptoSignedIntent {
     }
 }
 
+impl TryFrom<ScryptoSignedIntent> for SignedIntent {
+    type Error = crate::CommonError;
+
+    fn try_from(value: ScryptoSignedIntent) -> Result<Self, Self::Error> {
+        let intent: TransactionIntent = value.intent.try_into()?;
+        let intent_signatures: IntentSignatures =
+            (value.intent_signatures, intent.intent_hash().hash).try_into()?;
+        Ok(Self {
+            intent,
+            intent_signatures,
+        })
+    }
+}
+
 impl HasSampleValues for SignedIntent {
     fn sample() -> Self {
-        Self::new_validating_signatures(
-            TransactionIntent::sample(),
-            IntentSignatures::default(),
-        )
-        .unwrap()
+        let intent = TransactionIntent::sample_other();
+
+        let mut signatures = Vec::<IntentSignature>::new();
+        for n in 1..4 {
+            let private_key: Secp256k1PrivateKey =
+                radix_engine::types::Secp256k1PrivateKey::from_u64(n)
+                    .unwrap()
+                    .into();
+
+            let intent_signature =
+                private_key.sign_intent_hash(&intent.intent_hash());
+            signatures.push(intent_signature)
+        }
+
+        let intent_signatures = IntentSignatures::new(signatures);
+
+        Self::new_validating_signatures(intent, intent_signatures).unwrap()
     }
 
     fn sample_other() -> Self {
-        let intent = TransactionIntent::sample_other();
-        let private_key: Secp256k1PrivateKey =
-            radix_engine::types::Secp256k1PrivateKey::from_u64(1)
-                .unwrap()
-                .into();
-        let intent_signature =
-            private_key.sign_intent_hash(&intent.intent_hash());
-
         Self::new_validating_signatures(
-            intent,
-            IntentSignatures::new([intent_signature]),
+            TransactionIntent::sample(),
+            IntentSignatures::default(),
         )
         .unwrap()
     }

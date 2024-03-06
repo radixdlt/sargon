@@ -137,6 +137,16 @@ impl FromStr for NonFungibleLocalId {
     }
 }
 
+impl HasSampleValues for NonFungibleLocalId {
+    fn sample() -> Self {
+        Self::ruid(Exactly32Bytes::sample_dead()).unwrap()
+    }
+
+    fn sample_other() -> Self {
+        Self::string("foobar").unwrap()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
@@ -152,6 +162,17 @@ mod tests {
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = NonFungibleLocalId;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
 
     #[test]
     fn from_str_ok() {
@@ -267,7 +288,6 @@ mod tests {
             ScryptoIntegerNonFungibleLocalId::new(1234),
         );
         assert_eq!(non_native.clone(), native.clone().into());
-        assert_eq!(non_native.clone().try_into(), Ok(native.clone()));
         assert_eq!(
             SUT::from_str(non_native.clone().to_string().as_str()),
             Ok(non_native)

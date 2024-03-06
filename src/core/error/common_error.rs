@@ -377,6 +377,15 @@ pub enum CommonError {
         "Invalid IntentSignatures for Intent some didn't validate IntentHash"
     )]
     InvalidSignaturesForIntentSomeDidNotValidateIntentHash = 10102,
+
+    #[error("Failed to decompile bytes into NotarizedTransaction")]
+    FailedToDecompileBytesIntoNotarizedTransaction = 10103,
+
+    #[error("Failed to recover secp256k1 PublicKey from signature")]
+    FailedToRecoverSecp256k1PublicKeyFromSignature = 10104,
+
+    #[error("Fungible ResourceAddress in NonFungible context is not allowed.")]
+    FungibleResourceAddressNotAcceptedInNonFungibleContext = 10105,
 }
 
 /*

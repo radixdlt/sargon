@@ -48,6 +48,21 @@ fn index_of_word_in_bip39_wordlist_of_language(
         .map(|i| U11::new(i).expect("Less than 2048"))
 }
 
+#[memoize]
+fn word_by_index(u11: U11, language: bip39::Language) -> BIP39Word {
+    let index = u11.inner as usize;
+    let word = language.word_list()[index];
+    BIP39Word {
+        word: word.to_owned(),
+        index: u11,
+        language: language.into(),
+    }
+}
+
+pub(crate) fn bip39_word_by_index(u11: U11) -> BIP39Word {
+    word_by_index(u11, bip39::Language::English)
+}
+
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
