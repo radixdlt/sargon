@@ -12,13 +12,21 @@ fn default_fee() -> Decimal192 {
     Decimal192::from(25)
 }
 
+/// Creates a single manifest Instruction using the `ScryptoManifestBuilder`,
+///
+/// # Panics
+/// You MUST NOT chain calls to the manifest builder, only call a single method
+/// on it, thus creating just a single instruction.
 fn single<F>(by: F) -> ScryptoInstruction
 where
     F: Fn(ScryptoManifestBuilder) -> ScryptoManifestBuilder,
 {
     let instruction = by(ScryptoManifestBuilder::new()).build().instructions;
+
+    // This might be a silly assertion since it seems that ScryptoManifestBuilder
+    // in fact always adds just a single instruction
     if instruction.len() != 1 {
-        panic!("expected single instruction")
+        panic!("Expected single instruction. You MUST NOT chain calls with the manifest builder.")
     }
     instruction[0].clone()
 }
@@ -74,6 +82,14 @@ mod tests {
     #[test]
     fn default_dev_fee_is() {
         assert_eq!(default_fee().to_string(), "25");
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "Expected single instruction. You MUST NOT chain calls with the manifest builder."
+    )]
+    fn single_when_more_than_one_panic() {
+        _ = single(|b| b.drop_all_proofs().drop_auth_zone_proofs())
     }
 
     #[test]

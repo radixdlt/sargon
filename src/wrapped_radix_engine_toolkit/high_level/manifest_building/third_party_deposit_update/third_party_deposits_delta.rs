@@ -169,6 +169,22 @@ mod tests {
     }
 
     #[test]
+    fn deposit_rule_into_scrypto() {
+        assert_eq!(
+            Into::<ScryptoDefaultDepositRule>::into(DepositRule::AcceptAll),
+            ScryptoDefaultDepositRule::Accept
+        );
+        assert_eq!(
+            Into::<ScryptoDefaultDepositRule>::into(DepositRule::AcceptKnown),
+            ScryptoDefaultDepositRule::AllowExisting
+        );
+        assert_eq!(
+            Into::<ScryptoDefaultDepositRule>::into(DepositRule::DenyAll),
+            ScryptoDefaultDepositRule::Reject
+        );
+    }
+
+    #[test]
     fn default_is_empty() {
         let sut = SUT::default();
         assert_eq!(sut.deposit_rule, None);
@@ -304,7 +320,10 @@ mod tests {
 
     #[test]
     fn delta_depositor_addresses_to_add() {
-        let depositor_addresses = [ResourceOrNonFungible::sample()];
+        let depositor_addresses = [
+            ResourceOrNonFungible::sample(),
+            ResourceOrNonFungible::sample_other(),
+        ];
         let sut = SUT::new(
             ThirdPartyDeposits::new(DepositRule::AcceptAll),
             ThirdPartyDeposits::with_rule_and_lists(
