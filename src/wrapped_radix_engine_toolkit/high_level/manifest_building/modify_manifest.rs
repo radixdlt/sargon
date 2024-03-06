@@ -140,32 +140,7 @@ CALL_METHOD
 
     #[test]
     fn test_modify_manifest_lock_fee_default_added_if_none_provided() {
-        let instructions_string = r#"
-        CALL_METHOD
-            Address("account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8")
-            "withdraw"
-            Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
-            Decimal("1337")
-        ;
-        TAKE_FROM_WORKTOP
-            Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
-            Decimal("1337")
-            Bucket("bucket1")
-        ;
-        CALL_METHOD
-            Address("account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69")
-            "try_deposit_or_abort"
-            Bucket("bucket1")
-            Enum<0u8>()
-        ;
-                "#;
-
-        let manifest = TransactionManifest::new(
-            instructions_string,
-            NetworkID::Mainnet,
-            Blobs::default(),
-        )
-        .unwrap();
+        let manifest = TransactionManifest::sample_mainnet_without_lock_fee();
 
         manifest_eq(
                     modify_manifest_lock_fee(

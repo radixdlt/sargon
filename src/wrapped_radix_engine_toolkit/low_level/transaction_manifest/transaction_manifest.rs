@@ -197,6 +197,13 @@ impl HasSampleValues for TransactionManifest {
     }
 }
 
+#[allow(unused)]
+impl TransactionManifest {
+    pub(crate) fn sample_mainnet_without_lock_fee() -> Self {
+        TransactionManifestSecretMagic::sample_mainnet_without_lock_fee().into()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
