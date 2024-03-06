@@ -8,8 +8,6 @@ import kotlin.random.Random
 
 fun bagOfBytesOf(byteArray: ByteArray) = newBagOfBytesFrom(bytes = byteArray)
 
-fun randomBagOfBytes(byteCount: Int) = Random.nextBytes(size = byteCount).toBagOfBytes()
-
 fun String.hexToBagOfBytes(): BagOfBytes {
     check(length % 2 == 0) { "Must have an even length" }
 
@@ -23,3 +21,5 @@ val BagOfBytes.hex: String
 
 internal val BagOfBytes.byteArray: ByteArray
     get() = toUByteArray().toByteArray()
+
+internal fun randomBagOfBytes(byteCount: Int) = Random.nextBytes(size = byteCount).toBagOfBytes()
