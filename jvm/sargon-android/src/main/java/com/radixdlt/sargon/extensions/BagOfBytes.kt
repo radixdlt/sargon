@@ -14,7 +14,7 @@ fun String.hexToBagOfBytes(): BagOfBytes {
     return chunked(2).map { it.toInt(16).toByte() }.toByteArray().toBagOfBytes()
 }
 
-fun ByteArray.toBagOfBytes() = newBagOfBytesFrom(bytes = this)
+fun ByteArray.toBagOfBytes() = bagOfBytesOf(byteArray = this)
 
 val BagOfBytes.hex: String
     get() = toUByteArray().toHexString()

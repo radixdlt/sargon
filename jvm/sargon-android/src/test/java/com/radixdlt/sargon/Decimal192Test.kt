@@ -4,7 +4,6 @@ import com.radixdlt.sargon.extensions.ceil
 import com.radixdlt.sargon.extensions.clamped
 import com.radixdlt.sargon.extensions.compareTo
 import com.radixdlt.sargon.extensions.floor
-import com.radixdlt.sargon.extensions.isNegative
 import com.radixdlt.sargon.extensions.plus
 import com.radixdlt.sargon.extensions.rounded
 import com.radixdlt.sargon.extensions.string
