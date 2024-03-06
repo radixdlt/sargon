@@ -24,4 +24,5 @@ dependencyResolutionManagement {
 rootProject.name = "Sargon JVM"
 include(":app")
 include(":sargon-android")
-include(":sargon-desktop-bins")
+include(":sargon-desktop-debug")
+include(":sargon-desktop-release")

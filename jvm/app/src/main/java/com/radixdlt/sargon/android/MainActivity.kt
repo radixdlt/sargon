@@ -32,8 +32,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.radixdlt.sargon.AppearanceId
 import com.radixdlt.sargon.DisplayName
 import com.radixdlt.sargon.NetworkId
 import com.radixdlt.sargon.Profile
@@ -42,7 +42,8 @@ import com.radixdlt.sargon.SecureStorage
 import com.radixdlt.sargon.Wallet
 import com.radixdlt.sargon.WalletClientModel
 import com.radixdlt.sargon.android.ui.theme.SargonAndroidTheme
-import com.radixdlt.sargon.newDisplayName
+import com.radixdlt.sargon.extensions.string
+import com.radixdlt.sargon.sample.ProfilePreviewParameterProvider
 import kotlin.random.Random
 
 class MainActivity : ComponentActivity() {
@@ -143,7 +144,7 @@ fun Network(
             )
             Text(
                     modifier = Modifier.padding(horizontal = 32.dp),
-                    text = account.address.address,
+                    text = account.address.string,
                     style = MaterialTheme.typography.labelSmall
             )
             HorizontalDivider(modifier = Modifier.padding(horizontal = 32.dp))
@@ -169,19 +170,6 @@ fun Network(
     }
 }
 
-val Profile.Companion.sample: Profile
-    get() = newProfileSample()
-
-fun DisplayName.Companion.from(value: String): DisplayName {
-    return newDisplayName(name = value)
-}
-
-val AppearanceId.Companion.sample: AppearanceId
-    get() = newAppearanceIdSample()
-
-val AppearanceId.Companion.sampleOther: AppearanceId
-    get() = newAppearanceIdSampleOther()
-
 val Wallet.Companion.defaultPhoneName: String
     get() = "Android Phone"
 
@@ -200,7 +188,9 @@ fun Wallet.Companion.with(
 
 @Preview(showBackground = true)
 @Composable
-fun NetworkPreview() {
-    val profile = Profile.sample
+fun NetworkPreview(
+    @PreviewParameter(provider = ProfilePreviewParameterProvider::class, limit = 1)
+    profile: Profile
+) {
     Network(network = profile.networks.first(), onAccountAdd = {})
 }
