@@ -102,12 +102,21 @@ pub fn modify_manifest_lock_fee(
     manifest.modify_add_lock_fee(address_of_fee_payer, fee)
 }
 
+/// Modifies `manifest` by inserting transaction "guarantees", which is the wallet
+/// term for `assert_worktop_contains`.
+///
+/// # Panics
+/// Panics if any of the TransactionGuarantee's `instruction_index` is out of
+/// bounds.
+///
+/// Also panics if the number of TransactionGuarantee's is larger than the number
+/// of instructions of `manifest` (does not make any sense).
 #[uniffi::export]
-pub fn updating_manifest_add_guarantees(
-    _manifest: TransactionManifest,
-    _guarantees: Vec<TransactionGuarantee>,
+pub fn modify_manifest_add_guarantees(
+    manifest: TransactionManifest,
+    guarantees: Vec<TransactionGuarantee>,
 ) -> TransactionManifest {
-    todo!()
+    manifest.modify_add_guarantees(guarantees)
 }
 
 #[uniffi::export]
@@ -353,17 +362,102 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "not yet implemented")]
-    fn test_updating_manifest_add_guarantees() {
-        manifest_eq(
-            updating_manifest_add_guarantees(
-                TransactionManifest::sample(),
-                vec![],
-            ),
-            r#"
-            todo
-            "#,
+    fn test_modify_manifest_add_guarantees_unchanged_if_no_guarantees() {
+        let manifest = TransactionManifest::sample();
+        assert_eq!(
+            modify_manifest_add_guarantees(manifest.clone(), vec![]),
+            manifest
         );
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "Transaction Guarantee's 'instruction_index' is out of bounds, the provided manifest contains #4, but an 'instruction_index' of 4 was specified."
+    )]
+    fn test_modify_manifest_add_guarantees_panics_index_equal_to_instruction_count(
+    ) {
+        let manifest = TransactionManifest::sample();
+        assert_eq!(
+            modify_manifest_add_guarantees(
+                manifest.clone(),
+                vec![TransactionGuarantee::new(
+                    0,
+                    4,
+                    ResourceAddress::sample(),
+                    None
+                )]
+            ),
+            manifest
+        );
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "Does not make sense to add more guarantees than there are instructions."
+    )]
+    fn test_modify_manifest_add_guarantees_panics_if_more_guarantees_than_instructions(
+    ) {
+        let manifest = TransactionManifest::sample();
+        assert_eq!(
+            modify_manifest_add_guarantees(
+                manifest.clone(),
+                (0u32..manifest.instructions().len() as u32 + 1)
+                    .map(|i| TransactionGuarantee::new(
+                        i,
+                        0,
+                        ResourceAddress::sample(),
+                        None
+                    ))
+                    .collect_vec()
+            ),
+            manifest
+        );
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "Transaction Guarantee's 'instruction_index' is out of bounds, the provided manifest contains #4, but an 'instruction_index' of 5 was specified."
+    )]
+    fn test_modify_manifest_add_guarantees_panics_index_larger_than_instruction_count(
+    ) {
+        let manifest = TransactionManifest::sample();
+        assert_eq!(
+            modify_manifest_add_guarantees(
+                manifest.clone(),
+                vec![TransactionGuarantee::new(
+                    0,
+                    5,
+                    ResourceAddress::sample(),
+                    None
+                )]
+            ),
+            manifest
+        );
+    }
+
+    #[test]
+    fn test_modify_manifest_add_guarantees_to_manifest_with_or_without_lock_fee(
+    ) {
+        let do_test = |manifest: TransactionManifest, i: usize| {
+            let modified = modify_manifest_add_guarantees(
+                manifest,
+                vec![TransactionGuarantee::new(
+                    0,
+                    0,
+                    ResourceAddress::sample(),
+                    None,
+                )],
+            );
+            let idx = modified
+                .instructions()
+                .clone()
+                .into_iter()
+                .position(|i| i.is_assert_worktop_contains())
+                .unwrap();
+            assert_eq!(idx, i)
+        };
+        do_test(TransactionManifest::sample(), 1);
+        do_test(TransactionManifest::sample_mainnet_without_lock_fee(), 0);
     }
 
     #[test]

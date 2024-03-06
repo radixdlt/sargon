@@ -1,8 +1,40 @@
+use std::ops::AddAssign;
+
 use crate::prelude::*;
 
+use radix_engine_interface::blueprints::account::ACCOUNT_LOCK_FEE_IDENT;
 use transaction::model::{
     InstructionV1 as ScryptoInstruction, InstructionsV1 as ScryptoInstructions,
 };
+
+pub trait InspectInstruction {
+    fn is_lock_fee(&self) -> bool;
+    fn is_assert_worktop_contains(&self) -> bool;
+}
+
+impl InspectInstruction for ScryptoInstruction {
+    fn is_lock_fee(&self) -> bool {
+        match self {
+            ScryptoInstruction::CallMethod {
+                address: _,
+                method_name,
+                args: _,
+            } => method_name == ACCOUNT_LOCK_FEE_IDENT,
+            _ => false,
+        }
+    }
+
+    // FIXME: this will be simpler once we get EnumAsInner on `ScryptoInstruction`
+    fn is_assert_worktop_contains(&self) -> bool {
+        matches!(
+            self,
+            ScryptoInstruction::AssertWorktopContains {
+                resource_address: _,
+                amount: _,
+            }
+        )
+    }
+}
 
 use transaction::prelude::ManifestBuilder as ScryptoManifestBuilder;
 
@@ -32,6 +64,78 @@ where
 }
 
 impl TransactionManifest {
+    /// Modifies `manifest` by inserting transaction "guarantees", which is the wallet
+    /// term for `assert_worktop_contains`.
+    ///
+    /// # Panics
+    /// Panics if any of the TransactionGuarantee's `instruction_index` is out of
+    /// bounds.
+    ///
+    /// Also panics if the number of TransactionGuarantee's is larger than the number
+    /// of instructions of `manifest` (does not make any sense).
+    pub(crate) fn modify_add_guarantees(
+        self,
+        guarantees: Vec<TransactionGuarantee>,
+    ) -> Self {
+        if guarantees.is_empty() {
+            return self;
+        };
+        let instruction_count = self.instructions().len() as u64;
+        if instruction_count == 0 {
+            return self;
+        };
+        if guarantees.len() > self.instructions().len() {
+            panic!("Does not make sense to add more guarantees than there are instructions.")
+        }
+
+        if let Some(oob) = guarantees
+            .clone()
+            .into_iter()
+            .find(|g| g.instruction_index >= instruction_count)
+        {
+            panic!("Transaction Guarantee's 'instruction_index' is out of bounds, the provided manifest contains #{}, but an 'instruction_index' of {} was specified.", instruction_count, oob.instruction_index)
+        }
+
+        // Will be increased with each added guarantee to account for the
+        // difference in indexes from the initial manifest.
+        let mut offset = 0;
+
+        let first = self.instructions().first().unwrap();
+        if first.is_lock_fee() {
+            offset = 1;
+        }
+
+        let mut manifest = self;
+
+        for guarantee in guarantees {
+            let decimal_places = guarantee
+                .resource_divisibility
+                .unwrap_or(Decimal192::SCALE as i32);
+
+            let amount = guarantee
+                .amount
+                .clone()
+                .round(
+                    decimal_places,
+                    RoundingMode::ToNearestMidpointAwayFromZero,
+                )
+                .expect("Rounding to never fail.");
+
+            let guarantee_instruction = single(|b| {
+                b.assert_worktop_contains(&guarantee.resource_address, amount)
+            });
+
+            manifest = manifest.insert_instruction(
+                InstructionPosition::At(guarantee.instruction_index + offset),
+                guarantee_instruction,
+            );
+
+            offset.add_assign(1);
+        }
+
+        manifest
+    }
+
     pub(crate) fn modify_add_lock_fee(
         self,
         address_of_fee_payer: &AccountAddress,
@@ -55,6 +159,9 @@ impl TransactionManifest {
 
         match position {
             InstructionPosition::First => instructions.insert(0, instruction),
+            InstructionPosition::At(index) => {
+                instructions.insert(index as usize, instruction)
+            }
         };
 
         let instructions = Instructions::from_scrypto(
@@ -71,6 +178,7 @@ impl TransactionManifest {
 
 enum InstructionPosition {
     First,
+    At(u64),
 }
 
 #[cfg(test)]
@@ -122,10 +230,9 @@ CALL_METHOD
         .unwrap();
 
         manifest_eq(
-            modify_manifest_lock_fee(
-                manifest,
+            manifest.modify_add_lock_fee(
                 &"account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master".parse().unwrap(),
-                Some(42.into()),
+            Some(42.into())
             ),
             r#"
         CALL_METHOD
@@ -159,8 +266,7 @@ CALL_METHOD
         let manifest = TransactionManifest::sample_mainnet_without_lock_fee();
 
         manifest_eq(
-                    modify_manifest_lock_fee(
-                        manifest,
+                    manifest.modify_add_lock_fee(
                         &"account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master".parse().unwrap(),
                         None,
                     ),
@@ -189,5 +295,84 @@ CALL_METHOD
                 ;
                     "#,
                 );
+    }
+
+    #[test]
+    fn test_modify_manifest_add_guarantees_to_manifest_without_lock_fee() {
+        let manifest = TransactionManifest::sample_mainnet_without_lock_fee();
+
+        manifest_eq(
+            manifest.modify_add_guarantees(vec![TransactionGuarantee::new(
+                1337,
+                1,
+                ResourceAddress::sample(),
+                10,
+            )]),
+            r#"
+CALL_METHOD
+    Address("account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8")
+    "withdraw"
+    Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+    Decimal("1337")
+;
+ASSERT_WORKTOP_CONTAINS
+    Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+    Decimal("1337")
+;
+TAKE_FROM_WORKTOP
+    Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+    Decimal("1337")
+    Bucket("bucket1")
+;
+CALL_METHOD
+    Address("account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69")
+    "try_deposit_or_abort"
+    Bucket("bucket1")
+    Enum<0u8>()
+;
+            "#,
+        );
+    }
+
+    #[test]
+    fn test_modify_manifest_add_guarantees_to_manifest_with_lock_fee() {
+        let manifest = TransactionManifest::sample();
+
+        manifest_eq(
+            manifest.modify_add_guarantees(vec![TransactionGuarantee::new(
+                1337,
+                1,
+                ResourceAddress::sample(),
+                10,
+            )]),
+            r#"
+CALL_METHOD
+    Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+    "lock_fee"
+    Decimal("0.61")
+;
+CALL_METHOD
+    Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+    "withdraw"
+    Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+    Decimal("1337")
+;
+ASSERT_WORKTOP_CONTAINS
+    Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+    Decimal("1337")
+;
+TAKE_FROM_WORKTOP
+    Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+    Decimal("1337")
+    Bucket("bucket1")
+;
+CALL_METHOD
+    Address("account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master")
+    "try_deposit_or_abort"
+    Bucket("bucket1")
+    Enum<0u8>()
+;
+            "#,
+        );
     }
 }
