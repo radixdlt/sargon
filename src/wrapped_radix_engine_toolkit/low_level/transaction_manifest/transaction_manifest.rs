@@ -344,7 +344,7 @@ mod tests {
             .unwrap();
 
         assert_eq!(
-            summary.detailed_manifest_class,
+            summary.detailed_classification,
             vec![
                 DetailedManifestClass::Transfer,
                 DetailedManifestClass::General

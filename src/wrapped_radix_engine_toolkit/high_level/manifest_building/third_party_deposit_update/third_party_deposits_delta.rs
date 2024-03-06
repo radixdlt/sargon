@@ -169,6 +169,31 @@ mod tests {
     }
 
     #[test]
+    fn scrypto_account_remove_resource_preference_input_from_resource_or_nf() {
+        assert_eq!(
+            Into::<ScryptoAccountRemoveResourcePreferenceInput>::into(
+                ResourceOrNonFungible::Resource {
+                    value: ResourceAddress::sample()
+                }
+            )
+            .resource_address
+            .into_node_id(),
+            ResourceAddress::sample().node_id()
+        );
+
+        assert_eq!(
+            Into::<ScryptoAccountRemoveResourcePreferenceInput>::into(
+                ResourceOrNonFungible::NonFungible {
+                    value: NonFungibleGlobalId::sample()
+                }
+            )
+            .resource_address
+            .into_node_id(),
+            NonFungibleResourceAddress::sample().node_id()
+        );
+    }
+
+    #[test]
     fn deposit_rule_into_scrypto() {
         assert_eq!(
             Into::<ScryptoDefaultDepositRule>::into(DepositRule::AcceptAll),

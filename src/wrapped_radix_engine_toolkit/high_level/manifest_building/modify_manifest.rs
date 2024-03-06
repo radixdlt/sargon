@@ -73,20 +73,24 @@ impl TransactionManifest {
     ///
     /// Also panics if the number of TransactionGuarantee's is larger than the number
     /// of instructions of `manifest` (does not make any sense).
-    pub(crate) fn modify_add_guarantees(
-        self,
-        guarantees: Vec<TransactionGuarantee>,
-    ) -> Self {
+    pub(crate) fn modify_add_guarantees<I>(self, guarantees: I) -> Self
+    where
+        I: IntoIterator<Item = TransactionGuarantee>,
+    {
+        let guarantees = guarantees.into_iter().collect_vec();
         if guarantees.is_empty() {
             return self;
         };
+
         let instruction_count = self.instructions().len() as u64;
-        if instruction_count == 0 {
-            return self;
-        };
+
         if guarantees.len() > self.instructions().len() {
             panic!("Does not make sense to add more guarantees than there are instructions.")
         }
+
+        if instruction_count == 0 {
+            return self;
+        };
 
         if let Some(oob) = guarantees
             .clone()
@@ -193,6 +197,11 @@ mod tests {
     }
 
     #[test]
+    fn is_lock_fee() {
+        assert!(!ScryptoInstruction::DropAllProofs.is_lock_fee());
+    }
+
+    #[test]
     #[should_panic(
         expected = "Expected single instruction. You MUST NOT chain calls with the manifest builder."
     )]
@@ -266,35 +275,35 @@ CALL_METHOD
         let manifest = TransactionManifest::sample_mainnet_without_lock_fee();
 
         manifest_eq(
-                    manifest.modify_add_lock_fee(
-                        &"account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master".parse().unwrap(),
-                        None,
-                    ),
-                    r#"
-                CALL_METHOD
-                    Address("account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master")
-                    "lock_fee"
-                    Decimal("25")
-                ;
-                CALL_METHOD
-                    Address("account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8")
-                    "withdraw"
-                    Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
-                    Decimal("1337")
-                ;
-                TAKE_FROM_WORKTOP
-                    Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
-                    Decimal("1337")
-                    Bucket("bucket1")
-                ;
-                CALL_METHOD
-                    Address("account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69")
-                    "try_deposit_or_abort"
-                    Bucket("bucket1")
-                    Enum<0u8>()
-                ;
-                    "#,
-                );
+        manifest.modify_add_lock_fee(
+            &"account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master".parse().unwrap(),
+            None,
+        ),
+        r#"
+        CALL_METHOD
+            Address("account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master")
+            "lock_fee"
+            Decimal("25")
+        ;
+        CALL_METHOD
+            Address("account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8")
+            "withdraw"
+            Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+            Decimal("1337")
+        ;
+        TAKE_FROM_WORKTOP
+            Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+            Decimal("1337")
+            Bucket("bucket1")
+        ;
+        CALL_METHOD
+            Address("account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69")
+            "try_deposit_or_abort"
+            Bucket("bucket1")
+            Enum<0u8>()
+        ;
+        "#,
+        );
     }
 
     #[test]
@@ -302,34 +311,34 @@ CALL_METHOD
         let manifest = TransactionManifest::sample_mainnet_without_lock_fee();
 
         manifest_eq(
-            manifest.modify_add_guarantees(vec![TransactionGuarantee::new(
+            manifest.modify_add_guarantees([TransactionGuarantee::new(
                 1337,
                 1,
                 ResourceAddress::sample(),
                 10,
             )]),
             r#"
-CALL_METHOD
-    Address("account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8")
-    "withdraw"
-    Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
-    Decimal("1337")
-;
-ASSERT_WORKTOP_CONTAINS
-    Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
-    Decimal("1337")
-;
-TAKE_FROM_WORKTOP
-    Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
-    Decimal("1337")
-    Bucket("bucket1")
-;
-CALL_METHOD
-    Address("account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69")
-    "try_deposit_or_abort"
-    Bucket("bucket1")
-    Enum<0u8>()
-;
+            CALL_METHOD
+                Address("account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8")
+                "withdraw"
+                Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+                Decimal("1337")
+            ;
+            ASSERT_WORKTOP_CONTAINS
+                Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+                Decimal("1337")
+            ;
+            TAKE_FROM_WORKTOP
+                Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+                Decimal("1337")
+                Bucket("bucket1")
+            ;
+            CALL_METHOD
+                Address("account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69")
+                "try_deposit_or_abort"
+                Bucket("bucket1")
+                Enum<0u8>()
+            ;
             "#,
         );
     }
@@ -339,40 +348,130 @@ CALL_METHOD
         let manifest = TransactionManifest::sample();
 
         manifest_eq(
-            manifest.modify_add_guarantees(vec![TransactionGuarantee::new(
+            manifest.modify_add_guarantees([TransactionGuarantee::new(
                 1337,
                 1,
                 ResourceAddress::sample(),
                 10,
             )]),
             r#"
-CALL_METHOD
-    Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
-    "lock_fee"
-    Decimal("0.61")
-;
-CALL_METHOD
-    Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
-    "withdraw"
-    Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
-    Decimal("1337")
-;
-ASSERT_WORKTOP_CONTAINS
-    Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
-    Decimal("1337")
-;
-TAKE_FROM_WORKTOP
-    Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
-    Decimal("1337")
-    Bucket("bucket1")
-;
-CALL_METHOD
-    Address("account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master")
-    "try_deposit_or_abort"
-    Bucket("bucket1")
-    Enum<0u8>()
-;
+            CALL_METHOD
+                Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+                "lock_fee"
+                Decimal("0.61")
+            ;
+            CALL_METHOD
+                Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+                "withdraw"
+                Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+                Decimal("1337")
+            ;
+            ASSERT_WORKTOP_CONTAINS
+                Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+                Decimal("1337")
+            ;
+            TAKE_FROM_WORKTOP
+                Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+                Decimal("1337")
+                Bucket("bucket1")
+            ;
+            CALL_METHOD
+                Address("account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master")
+                "try_deposit_or_abort"
+                Bucket("bucket1")
+                Enum<0u8>()
+            ;
             "#,
+        );
+    }
+
+    #[test]
+    fn test_modify_manifest_add_guarantees_unchanged_if_no_guarantees() {
+        let manifest = TransactionManifest::sample();
+        assert_eq!(manifest.clone().modify_add_guarantees([]), manifest);
+    }
+
+    #[test]
+    fn test_modify_manifest_add_guarantees_unchanged_if_instructions_empty() {
+        let manifest = TransactionManifest::empty(NetworkID::Mainnet);
+        assert_eq!(manifest.clone().modify_add_guarantees([]), manifest);
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "Does not make sense to add more guarantees than there are instructions."
+    )]
+    fn test_modify_manifest_add_guarantees_panics_if_instructions_empty_but_guarantees_is_not_empty(
+    ) {
+        let manifest = TransactionManifest::empty(NetworkID::Mainnet);
+        assert_eq!(
+            manifest
+                .clone()
+                .modify_add_guarantees([TransactionGuarantee::sample()]),
+            manifest
+        );
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "Transaction Guarantee's 'instruction_index' is out of bounds, the provided manifest contains #4, but an 'instruction_index' of 4 was specified."
+    )]
+    fn test_modify_manifest_add_guarantees_panics_index_equal_to_instruction_count(
+    ) {
+        let manifest = TransactionManifest::sample();
+        assert_eq!(
+            manifest.clone().modify_add_guarantees([
+                TransactionGuarantee::new(
+                    0,
+                    4,
+                    ResourceAddress::sample(),
+                    None
+                )
+            ]),
+            manifest
+        );
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "Does not make sense to add more guarantees than there are instructions."
+    )]
+    fn test_modify_manifest_add_guarantees_panics_if_more_guarantees_than_instructions(
+    ) {
+        let manifest = TransactionManifest::sample();
+        assert_eq!(
+            manifest.clone().modify_add_guarantees(
+                (0u32..manifest.instructions().len() as u32 + 1).map(|i| {
+                    TransactionGuarantee::new(
+                        i,
+                        0,
+                        ResourceAddress::sample(),
+                        None,
+                    )
+                })
+            ),
+            manifest
+        );
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "Transaction Guarantee's 'instruction_index' is out of bounds, the provided manifest contains #4, but an 'instruction_index' of 5 was specified."
+    )]
+    fn test_modify_manifest_add_guarantees_panics_index_larger_than_instruction_count(
+    ) {
+        let manifest = TransactionManifest::sample();
+        assert_eq!(
+            modify_manifest_add_guarantees(
+                manifest.clone(),
+                vec![TransactionGuarantee::new(
+                    0,
+                    5,
+                    ResourceAddress::sample(),
+                    None
+                )]
+            ),
+            manifest
         );
     }
 }

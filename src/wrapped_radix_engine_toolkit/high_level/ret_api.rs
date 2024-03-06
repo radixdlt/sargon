@@ -351,87 +351,14 @@ mod tests {
         let mut manifest =
             TransactionManifest::sample_mainnet_without_lock_fee();
         let instruction_count_before_lock_fee = manifest.instructions().len();
-        manifest = manifest.modify_add_lock_fee(
+        manifest = modify_manifest_lock_fee(
+            manifest,
             &AccountAddress::sample(),
             Some(Decimal192::one()),
         );
         assert_eq!(
             manifest.instructions().len(),
             instruction_count_before_lock_fee + 1
-        );
-    }
-
-    #[test]
-    fn test_modify_manifest_add_guarantees_unchanged_if_no_guarantees() {
-        let manifest = TransactionManifest::sample();
-        assert_eq!(
-            modify_manifest_add_guarantees(manifest.clone(), vec![]),
-            manifest
-        );
-    }
-
-    #[test]
-    #[should_panic(
-        expected = "Transaction Guarantee's 'instruction_index' is out of bounds, the provided manifest contains #4, but an 'instruction_index' of 4 was specified."
-    )]
-    fn test_modify_manifest_add_guarantees_panics_index_equal_to_instruction_count(
-    ) {
-        let manifest = TransactionManifest::sample();
-        assert_eq!(
-            modify_manifest_add_guarantees(
-                manifest.clone(),
-                vec![TransactionGuarantee::new(
-                    0,
-                    4,
-                    ResourceAddress::sample(),
-                    None
-                )]
-            ),
-            manifest
-        );
-    }
-
-    #[test]
-    #[should_panic(
-        expected = "Does not make sense to add more guarantees than there are instructions."
-    )]
-    fn test_modify_manifest_add_guarantees_panics_if_more_guarantees_than_instructions(
-    ) {
-        let manifest = TransactionManifest::sample();
-        assert_eq!(
-            modify_manifest_add_guarantees(
-                manifest.clone(),
-                (0u32..manifest.instructions().len() as u32 + 1)
-                    .map(|i| TransactionGuarantee::new(
-                        i,
-                        0,
-                        ResourceAddress::sample(),
-                        None
-                    ))
-                    .collect_vec()
-            ),
-            manifest
-        );
-    }
-
-    #[test]
-    #[should_panic(
-        expected = "Transaction Guarantee's 'instruction_index' is out of bounds, the provided manifest contains #4, but an 'instruction_index' of 5 was specified."
-    )]
-    fn test_modify_manifest_add_guarantees_panics_index_larger_than_instruction_count(
-    ) {
-        let manifest = TransactionManifest::sample();
-        assert_eq!(
-            modify_manifest_add_guarantees(
-                manifest.clone(),
-                vec![TransactionGuarantee::new(
-                    0,
-                    5,
-                    ResourceAddress::sample(),
-                    None
-                )]
-            ),
-            manifest
         );
     }
 

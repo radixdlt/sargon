@@ -4,7 +4,12 @@ use radix_engine_toolkit::transaction_types::ExecutionSummary as RetExecutionSum
 
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct ExecutionSummary {
-    pub(crate) detailed_manifest_class: Vec<DetailedManifestClass>,
+    /// Information on the global entities created in the transaction.
+    pub new_entities: NewEntities,
+
+    /// The various classifications that this manifest matched against. Note
+    /// that an empty set means that the manifest is non-conforming.
+    pub(crate) detailed_classification: Vec<DetailedManifestClass>,
 }
 
 impl ExecutionSummary {
@@ -21,16 +26,6 @@ import Foundation
 
 // MARK: - ExecutionSummary
 public struct ExecutionSummary: DummySargon {
-    public struct NewEntities: DummySargon {
-        public var metadata: [String: [String: MetadataValue?]] {
-            sargon()
-        }
-    }
-
-    public var newEntities: NewEntities {
-        sargon()
-    }
-
     public var accountWithdraws: [String: [ResourceIndicator]] {
         sargon()
     }

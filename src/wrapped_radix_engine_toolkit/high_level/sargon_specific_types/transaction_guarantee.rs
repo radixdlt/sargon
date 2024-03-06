@@ -23,3 +23,32 @@ impl TransactionGuarantee {
         }
     }
 }
+
+impl HasSampleValues for TransactionGuarantee {
+    fn sample() -> Self {
+        TransactionGuarantee::new(1337, 3, ResourceAddress::sample(), Some(12))
+    }
+
+    fn sample_other() -> Self {
+        TransactionGuarantee::new(42, 12, ResourceAddress::sample_other(), None)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = TransactionGuarantee;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+}
