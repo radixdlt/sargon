@@ -301,4 +301,101 @@ mod tests {
         assert_eq!(sut.depositor_addresses_to_add, Vec::new());
         assert_eq!(sut.depositor_addresses_to_remove, Vec::new());
     }
+
+    #[test]
+    fn delta_depositor_addresses_to_add() {
+        let depositor_addresses = [ResourceOrNonFungible::sample()];
+        let sut = SUT::new(
+            ThirdPartyDeposits::new(DepositRule::AcceptAll),
+            ThirdPartyDeposits::with_rule_and_lists(
+                DepositRule::AcceptAll,
+                [],
+                depositor_addresses.clone(),
+            ),
+        );
+        assert_eq!(sut.deposit_rule, None);
+
+        assert_eq!(sut.asset_exceptions_to_add_or_update, Vec::new());
+        assert_eq!(sut.asset_exceptions_to_be_removed, Vec::new());
+        assert_eq!(
+            sut.depositor_addresses_to_add,
+            depositor_addresses
+                .clone()
+                .into_iter()
+                .map(Into::<ScryptoAccountAddAuthorizedDepositorInput>::into)
+                .collect_vec()
+        );
+        assert_eq!(sut.depositor_addresses_to_remove, Vec::new());
+    }
+
+    #[test]
+    fn delta_depositor_addresses_to_remove() {
+        let depositor_addresses = [ResourceOrNonFungible::sample()];
+        let sut = SUT::new(
+            ThirdPartyDeposits::with_rule_and_lists(
+                DepositRule::AcceptAll,
+                [],
+                depositor_addresses.clone(),
+            ),
+            ThirdPartyDeposits::new(DepositRule::AcceptAll),
+        );
+        assert_eq!(sut.deposit_rule, None);
+
+        assert_eq!(sut.asset_exceptions_to_add_or_update, Vec::new());
+        assert_eq!(sut.asset_exceptions_to_be_removed, Vec::new());
+        assert_eq!(sut.depositor_addresses_to_add, Vec::new());
+        assert_eq!(
+            sut.depositor_addresses_to_remove,
+            depositor_addresses
+                .clone()
+                .into_iter()
+                .map(Into::<ScryptoAccountRemoveResourcePreferenceInput>::into)
+                .collect_vec()
+        );
+    }
+
+    #[test]
+    fn delta_depositor_addresses_to_remove_and_to_add() {
+        let depositor_address_from = ResourceOrNonFungible::sample();
+        let depositor_addresses_from = [depositor_address_from.clone()];
+        let depositor_address_to = ResourceOrNonFungible::sample_other();
+        let depositor_addresses_to = [depositor_address_to.clone()];
+
+        let expected_depositor_addresses_to_remove = [depositor_address_from];
+        let expected_depositor_addresses_to_add = [depositor_address_to];
+
+        let sut = SUT::new(
+            ThirdPartyDeposits::with_rule_and_lists(
+                DepositRule::AcceptAll,
+                [],
+                depositor_addresses_from.clone(),
+            ),
+            ThirdPartyDeposits::with_rule_and_lists(
+                DepositRule::AcceptAll,
+                [],
+                depositor_addresses_to.clone(),
+            ),
+        );
+        assert_eq!(sut.deposit_rule, None);
+        assert_eq!(sut.asset_exceptions_to_add_or_update, Vec::new());
+        assert_eq!(sut.asset_exceptions_to_be_removed, Vec::new());
+
+        assert_eq!(
+            sut.depositor_addresses_to_add,
+            expected_depositor_addresses_to_add
+                .clone()
+                .into_iter()
+                .map(Into::<ScryptoAccountAddAuthorizedDepositorInput>::into)
+                .collect_vec()
+        );
+
+        assert_eq!(
+            sut.depositor_addresses_to_remove,
+            expected_depositor_addresses_to_remove
+                .clone()
+                .into_iter()
+                .map(Into::<ScryptoAccountRemoveResourcePreferenceInput>::into)
+                .collect_vec()
+        );
+    }
 }
