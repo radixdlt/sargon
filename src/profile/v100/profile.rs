@@ -1,8 +1,16 @@
 use crate::prelude::*;
+
 /// Representation of the Radix Wallet, contains a list of
 /// users Accounts, Personas, Authorized Dapps per network
 /// the user has used. It also contains all FactorSources,
 /// FactorInstances and wallet App preferences.
+///
+/// ```
+/// extern crate sargon;
+/// use sargon::prelude::*;
+///
+/// assert_eq!(Profile::sample(), Profile::sample())
+/// ```
 #[derive(
     Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, uniffi::Record,
 )]
