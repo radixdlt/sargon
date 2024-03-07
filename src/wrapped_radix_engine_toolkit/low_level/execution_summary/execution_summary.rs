@@ -51,6 +51,12 @@ impl From<(RetExecutionSummary, NetworkID)> for ExecutionSummary {
         let _new_entities: NewEntities =
             (ret_summary.new_entities, network_id).into();
 
+        let _detailed_classification: Vec<DetailedManifestClass> = ret_summary
+            .detailed_classification
+            .into_iter()
+            .map(|d| Into::<DetailedManifestClass>::into((d, network_id)))
+            .collect_vec();
+
         todo!()
     }
 }

@@ -24,6 +24,10 @@ impl From<(RetNewEntities, NetworkID)> for NewEntities {
     fn from(value: (RetNewEntities, NetworkID)) -> Self {
         let (ret, network_id) = value;
         Self::new(
+            // We map from `IndexMap<GlobalAddress, IndexMap<String, Option<MetadataValue>>>`
+            // into: `HashMap<ResourceAddress, NewlyCreatedResource>`,
+            // and "filter out" (ignore) any GlobalAddress that is not a ResourceAddress,
+            // why? Since Radix Wallets actually only use the ResourceAddress...
             ret.metadata
                 .into_iter()
                 .filter_map(|(k, v)| {

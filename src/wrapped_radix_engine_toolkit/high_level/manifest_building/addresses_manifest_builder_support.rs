@@ -64,6 +64,9 @@ macro_rules! from_scrypto_component_address {
 }
 
 from_scrypto_component_address!(AccountAddress);
+from_scrypto_component_address!(ComponentAddress);
+from_scrypto_component_address!(ValidatorAddress);
+from_scrypto_component_address!(PoolAddress);
 
 macro_rules! is_dynamic_component_address {
     ($address_type: ty) => {
