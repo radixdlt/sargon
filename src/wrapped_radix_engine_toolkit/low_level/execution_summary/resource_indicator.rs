@@ -1,6 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine::types::ResourceAddress as ScryptoResourceAddress;
 use radix_engine_toolkit::transaction_types::FungibleResourceIndicator as RetFungibleResourceIndicator;
 use radix_engine_toolkit::transaction_types::NonFungibleResourceIndicator as RetNonFungibleResourceIndicator;
 use radix_engine_toolkit::transaction_types::Predicted as RetPredicted;

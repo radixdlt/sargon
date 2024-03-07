@@ -24,9 +24,11 @@ impl From<(RetDetailedManifestClass, NetworkID)> for DetailedManifestClass {
         let n = value.1;
         match value.0 {
             RetDetailedManifestClass::General => Self::General,
+
             RetDetailedManifestClass::Transfer { is_one_to_one: _ } => {
                 Self::Transfer
             }
+
             RetDetailedManifestClass::PoolContribution {
                 pool_addresses,
                 pool_contributions,
@@ -34,6 +36,7 @@ impl From<(RetDetailedManifestClass, NetworkID)> for DetailedManifestClass {
                 pool_addresses: to_vec_network_aware(pool_addresses, n),
                 pool_contributions: to_vec_network_aware(pool_contributions, n),
             },
+
             RetDetailedManifestClass::PoolRedemption {
                 pool_addresses,
                 pool_redemptions,
@@ -41,6 +44,7 @@ impl From<(RetDetailedManifestClass, NetworkID)> for DetailedManifestClass {
                 pool_addresses: to_vec_network_aware(pool_addresses, n),
                 pool_contributions: to_vec_network_aware(pool_redemptions, n),
             },
+
             RetDetailedManifestClass::ValidatorStake {
                 validator_addresses,
                 validator_stakes,
@@ -51,20 +55,43 @@ impl From<(RetDetailedManifestClass, NetworkID)> for DetailedManifestClass {
                 ),
                 validator_stakes: to_vec_network_aware(validator_stakes, n),
             },
+
             RetDetailedManifestClass::ValidatorUnstake {
                 validator_addresses,
-                validator_unstakes,
+                validator_unstakes: _,
                 claims_non_fungible_data,
-            } => todo!(),
+            } => Self::ValidatorUnstake {
+                validator_addresses: to_vec_network_aware(
+                    validator_addresses,
+                    n,
+                ),
+                claims_non_fungible_data: claims_non_fungible_data
+                    .into_iter()
+                    .map(|(k, v)| {
+                        (
+                            NonFungibleGlobalId::from((k, n)),
+                            UnstakeData::from(v),
+                        )
+                    })
+                    .collect::<HashMap<_, _>>(),
+            },
+
             RetDetailedManifestClass::ValidatorClaim {
                 validator_addresses,
                 validator_claims,
-            } => todo!(),
+            } => Self::ValidatorClaim {
+                validator_addresses: to_vec_network_aware(
+                    validator_addresses,
+                    n,
+                ),
+                validator_claims: to_vec_network_aware(validator_claims, n),
+            },
+
             RetDetailedManifestClass::AccountDepositSettingsUpdate {
                 resource_preferences_updates,
                 deposit_mode_updates,
                 authorized_depositors_updates,
-            } => todo!(),
+            } => Self::AccountDepositSettingsUpdate { resource_preferences_updates: todo!(), deposit_mode_updates: to_hashmap_network_aware_key(deposit_mode_updates, n), authorized_depositors_added: authorized_depositors_updates.clone().into_iter().filter_map(|x| x.), authorized_depositors_removed: () },
         }
     }
 }
@@ -86,7 +113,7 @@ pub enum DetailedManifestClass {
 
     ValidatorUnstake {
         validator_addresses: Vec<ValidatorAddress>,
-        claims_non_fungible_data: Vec<UnstakeDataEntry>,
+        claims_non_fungible_data: HashMap<NonFungibleGlobalId, UnstakeData>,
     },
 
     AccountDepositSettingsUpdate {

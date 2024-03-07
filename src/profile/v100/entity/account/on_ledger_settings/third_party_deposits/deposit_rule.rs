@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+use radix_engine_interface::blueprints::account::DefaultDepositRule as ScryptoDefaultDepositRule;
+
 /// The general deposit rule to apply
 #[derive(
     Serialize,
@@ -31,6 +33,28 @@ impl Default for DepositRule {
     /// By default an account accepts all.
     fn default() -> Self {
         Self::AcceptAll
+    }
+}
+
+impl From<DepositRule> for ScryptoDefaultDepositRule {
+    fn from(value: DepositRule) -> Self {
+        match value {
+            DepositRule::AcceptKnown => {
+                ScryptoDefaultDepositRule::AllowExisting
+            }
+            DepositRule::AcceptAll => ScryptoDefaultDepositRule::Accept,
+            DepositRule::DenyAll => ScryptoDefaultDepositRule::Reject,
+        }
+    }
+}
+
+impl From<ScryptoDefaultDepositRule> for DepositRule {
+    fn from(value: ScryptoDefaultDepositRule) -> Self {
+        match value {
+            ScryptoDefaultDepositRule::Accept => Self::AcceptAll,
+            ScryptoDefaultDepositRule::Reject => Self::DenyAll,
+            ScryptoDefaultDepositRule::AllowExisting => Self::AcceptKnown,
+        }
     }
 }
 

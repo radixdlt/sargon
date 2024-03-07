@@ -24,28 +24,29 @@ impl From<IndexMap<String, Option<ScryptoMetadataValue>>>
             _ => None,
         };
 
-        // let get_url = |s: &str| {
-        //     value.get(&s.to_string()).map(|smv| match smv {
-        //         ScryptoMetadataValue::Url(value) => Some(value.0),
-        //         _ => None,
-        //     })
-        // };
-        // let get_str_arr = |s: &str| {
-        //     value.get(&s.to_string()).map(|smv| match smv {
-        //         ScryptoMetadataValue::StringArray(value) => value.cloned(),
-        //         _ => Vec::new(),
-        //     })
-        // };
+        let get_str_arr = |k: MetadataKey| match value.get(&k.to_string()) {
+            Some(Some(ScryptoMetadataValue::StringArray(value))) => {
+                value.to_owned()
+            }
+            _ => Vec::new(),
+        };
+
+        let get_url = |k: MetadataKey| match value.get(&k.to_string()) {
+            Some(Some(ScryptoMetadataValue::Url(value))) => {
+                Some(value.to_owned().0)
+            }
+            _ => None,
+        };
+
         use MetadataKey::*;
-        let _name: Option<String> = get_str(Name);
-        // Self {
-        //     name: get_str(Name),
-        //     symbol: get_str(Symbol),
-        //     description: get_str(Description),
-        //     icon_url: get_url(IconUrl),
-        //     tags: get_str_arr(Tags),
-        // }
-        todo!()
+
+        Self {
+            name: get_str(Name),
+            symbol: get_str(Symbol),
+            description: get_str(Description),
+            icon_url: get_url(IconUrl),
+            tags: get_str_arr(Tags),
+        }
     }
 }
 

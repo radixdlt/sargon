@@ -29,7 +29,7 @@ impl ThirdPartyDepositsDelta {
             };
 
         Self {
-            deposit_rule: deposit_rule.map(Into::into),
+            deposit_rule: deposit_rule.map(ScryptoDefaultDepositRule::from),
             asset_exceptions_to_be_removed: from
                 .assets_exception_list
                 .clone()
@@ -106,18 +106,6 @@ impl From<AssetException> for ScryptoAccountSetResourcePreferenceInput {
 impl From<AssetException> for ScryptoManifestValue {
     fn from(value: AssetException) -> Self {
         Into::<ScryptoManifestValue>::into(value.address)
-    }
-}
-
-impl From<DepositRule> for ScryptoDefaultDepositRule {
-    fn from(value: DepositRule) -> Self {
-        match value {
-            DepositRule::AcceptKnown => {
-                ScryptoDefaultDepositRule::AllowExisting
-            }
-            DepositRule::AcceptAll => ScryptoDefaultDepositRule::Accept,
-            DepositRule::DenyAll => ScryptoDefaultDepositRule::Reject,
-        }
     }
 }
 

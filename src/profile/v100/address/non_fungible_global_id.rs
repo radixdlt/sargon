@@ -2,7 +2,6 @@ use crate::prelude::*;
 
 use radix_engine_common::address::AddressBech32Decoder;
 use radix_engine_common::types::ResourceAddress as ScryptoResourceAddress;
-// use radix_engine_interface::blueprints::resource::NonFungibleGlobalId as ScryptoNonFungibleGlobalId;
 
 use radix_engine::types::NonFungibleGlobalId as ScryptoNonFungibleGlobalId;
 
@@ -112,6 +111,16 @@ impl From<NonFungibleGlobalId> for ScryptoNonFungibleGlobalId {
         Self::new(
             value.resource_address.into(),
             value.non_fungible_local_id.into(),
+        )
+    }
+}
+
+impl From<(ScryptoNonFungibleGlobalId, NetworkID)> for NonFungibleGlobalId {
+    fn from(value: (ScryptoNonFungibleGlobalId, NetworkID)) -> Self {
+        let (global_id, network_id) = value;
+        Self::new_unchecked(
+            (global_id.resource_address(), network_id),
+            global_id.local_id().clone().into(),
         )
     }
 }
