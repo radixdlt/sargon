@@ -248,7 +248,7 @@ impl Decimal {
         self.native()
             .checked_round(decimal_places, rounding_mode.into())
             .ok_or(CommonError::DecimalError)
-            .map(Into::<Self>::into)
+            .map(Self::from)
     }
 }
 

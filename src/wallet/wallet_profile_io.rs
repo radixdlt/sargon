@@ -82,7 +82,7 @@ mod tests {
                 &self,
                 _key: SecureStorageKey,
             ) -> Result<Option<Vec<u8>>> {
-                todo!()
+                unreachable!()
             }
 
             fn save_data(
@@ -102,7 +102,7 @@ mod tests {
                 &self,
                 _key: SecureStorageKey,
             ) -> Result<()> {
-                todo!()
+                unreachable!()
             }
         }
         let storage = Arc::new(FailSaveActiveProfileIDStorage {});
@@ -123,7 +123,7 @@ mod tests {
                 &self,
                 _key: SecureStorageKey,
             ) -> Result<Option<Vec<u8>>> {
-                todo!()
+                unreachable!()
             }
 
             fn save_data(
@@ -143,7 +143,7 @@ mod tests {
                 &self,
                 _key: SecureStorageKey,
             ) -> Result<()> {
-                todo!()
+                unreachable!()
             }
         }
         let storage = Arc::new(FailSaveProfileStorage {});

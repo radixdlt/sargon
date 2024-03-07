@@ -38,22 +38,3 @@ impl ManifestSummary {
         todo!()
     }
 }
-
-// // need also from, GlobalAddress, maybe best if we change from `TryFrom` to `TryInto<>`
-// pub fn try_map_addresses_from_ret<
-//     A: TryFrom<
-//         radix_engine_common::prelude::ComponentAddress,
-//         Error = CommonError,
-//     >,
-// >(
-//     addresses: Vec<Arc<radix_engine_common::prelude::ComponentAddress>>,
-// ) -> Result<Vec<A>> {
-//     // addresses
-//     //     .into_iter()
-//     //     .map(|a: radix_engine_common::prelude::ComponentAddress| {
-//     //         let res: Result<A, CommonError> = a.try_into();
-//     //         res
-//     //     })
-//     //     .collect()
-//     todo!()
-// }

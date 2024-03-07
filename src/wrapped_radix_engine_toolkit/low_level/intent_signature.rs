@@ -35,7 +35,7 @@ impl TryFrom<(ScryptoIntentSignature, Hash)> for IntentSignature {
         value: (ScryptoIntentSignature, Hash),
     ) -> Result<Self, Self::Error> {
         TryInto::<SignatureWithPublicKey>::try_into((value.0 .0, value.1))
-            .map(Into::<Self>::into)
+            .map(Self::from)
     }
 }
 

@@ -144,7 +144,7 @@ macro_rules! decl_ret_wrapped_address {
                         error!("Failed Bech32 decode String, RET error: {:?}", e);
                         CommonError::FailedToDecodeAddressFromBech32 { bad_value: bech32.as_ref().to_owned() }
                     })
-                    .map(Into::<Self>::into)
+                    .map(Self::from)
                 }
             }
 

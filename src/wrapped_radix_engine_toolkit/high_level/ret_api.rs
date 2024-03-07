@@ -152,7 +152,7 @@ pub fn debug_print_compiled_notarized_intent(
 //     _transfers: AssetsTransfersTransactionPrototype,
 //     _message: Message,
 // ) -> Result<Manifest> {
-//     todo!()
+//     unreachable!()
 // }
 
 /// REQUIRES NETWORK CALL (and probable cache)
@@ -162,7 +162,7 @@ pub fn debug_print_compiled_notarized_intent(
 //     _into_account: Account,
 //     _resource: ResourceAddress,
 // ) -> Result<bool> {
-//     todo!()
+//     unreachable!()
 // }
 
 #[cfg(test)]

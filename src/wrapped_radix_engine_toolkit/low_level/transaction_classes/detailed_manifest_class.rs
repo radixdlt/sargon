@@ -5,16 +5,19 @@ use radix_engine_toolkit::transaction_types::DetailedManifestClass as RetDetaile
 
 use radix_engine_common::types::ComponentAddress as ScryptoComponentAddress;
 
-fn map<T>(
-    addresses: IndexSet<ScryptoComponentAddress>,
+pub(crate) fn to_vec_network_aware<T, U>(
+    values: impl IntoIterator<Item = T>,
     network_id: NetworkID,
-) -> Vec<T>
+) -> Vec<U>
 where
-    T: From<(ScryptoComponentAddress, NetworkID)>,
+    U: From<(T, NetworkID)>,
 {
-    vec![]
+    values
+        .into_iter()
+        .map(|x| (x, network_id))
+        .map(U::from)
+        .collect_vec()
 }
-
 
 impl From<(RetDetailedManifestClass, NetworkID)> for DetailedManifestClass {
     fn from(value: (RetDetailedManifestClass, NetworkID)) -> Self {
@@ -28,17 +31,26 @@ impl From<(RetDetailedManifestClass, NetworkID)> for DetailedManifestClass {
                 pool_addresses,
                 pool_contributions,
             } => Self::PoolContribution {
-                pool_addresses: map(pool_addresses, n),
-                pool_contributions: pool_contributions.into_iter().map(Into::<TrackedPoolContribution>::into).collect_vec(),
+                pool_addresses: to_vec_network_aware(pool_addresses, n),
+                pool_contributions: to_vec_network_aware(pool_contributions, n),
             },
             RetDetailedManifestClass::PoolRedemption {
                 pool_addresses,
                 pool_redemptions,
-            } => todo!(),
+            } => Self::PoolRedemption {
+                pool_addresses: to_vec_network_aware(pool_addresses, n),
+                pool_contributions: to_vec_network_aware(pool_redemptions, n),
+            },
             RetDetailedManifestClass::ValidatorStake {
                 validator_addresses,
                 validator_stakes,
-            } => todo!(),
+            } => Self::ValidatorStake {
+                validator_addresses: to_vec_network_aware(
+                    validator_addresses,
+                    n,
+                ),
+                validator_stakes: to_vec_network_aware(validator_stakes, n),
+            },
             RetDetailedManifestClass::ValidatorUnstake {
                 validator_addresses,
                 validator_unstakes,

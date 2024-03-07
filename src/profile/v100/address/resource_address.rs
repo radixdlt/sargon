@@ -18,13 +18,7 @@ impl ResourceAddress {
     }
 }
 
-impl TryInto<ScryptoDynamicResourceAddress> for ResourceAddress {
-    type Error = crate::CommonError;
 
-    fn try_into(self) -> Result<ScryptoDynamicResourceAddress, Self::Error> {
-        todo!()
-    }
-}
 
 #[uniffi::export]
 pub fn resource_address_is_fungible(address: &ResourceAddress) -> bool {
