@@ -37,8 +37,7 @@ thiserror = "1.0.50"
 iso8601-timestamp = { version = "0.2.16", features = ["serde", "std"] }
 uuid = { version = "1.6.1", features = ["v4", "serde"] }
 serde_repr = "0.1.17"
-strum = { version = "0.25.0", features = ["derive"] }
-strum_macros = { version = "0.26.1" }
+strum = { version = "0.26.0", features = ["derive"] }
 
 # 587d5988cd4ca3c5193ddf37027ff4e4ecd637dc is the Scrypto commit that RET 1cfe879c7370cfa497857ada7a8973f8a3388abc uses
 radix-engine-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "587d5988cd4ca3c5193ddf37027ff4e4ecd637dc", features = [

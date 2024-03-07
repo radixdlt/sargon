@@ -142,7 +142,11 @@ impl TransactionManifest {
                 );
                 CommonError::FailedToGetRetExecutionSummaryFromManifest
             })?;
-        ExecutionSummary::from_ret(ret_execution_summary, self.network_id())
+
+        Ok(Into::<ExecutionSummary>::into((
+            ret_execution_summary,
+            self.network_id(),
+        )))
     }
 
     pub fn network_id(&self) -> NetworkID {
@@ -331,7 +335,25 @@ mod tests {
     #[test]
     #[should_panic(expected = "not yet implemented")]
     fn execution_summary() {
-        let instructions_string = "CALL_METHOD Address(\"account_tdx_2_128h2zv5m4mnprnfjxn4nf96pglgx064mut8np26hp7w9mm064es2dn\") \"withdraw\" Address(\"resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc\") Decimal(\"123\"); TAKE_FROM_WORKTOP Address(\"resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc\") Decimal(\"123\") Bucket(\"bucket1\"); CALL_METHOD Address(\"account_tdx_2_128x8q5es2dstqtcc8wqm843xdtfs0lgetfcdn62a54wxspj6yhpxkf\") \"try_deposit_or_abort\" Bucket(\"bucket1\") Enum<0u8>();";
+        let instructions_string = r#"
+        CALL_METHOD
+            Address("account_tdx_2_128h2zv5m4mnprnfjxn4nf96pglgx064mut8np26hp7w9mm064es2dn")
+            "withdraw"
+            Address("resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc")
+            Decimal("123");
+
+        TAKE_FROM_WORKTOP
+            Address("resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc")
+            Decimal("123")
+            Bucket("bucket1");
+
+        CALL_METHOD
+            Address("account_tdx_2_128x8q5es2dstqtcc8wqm843xdtfs0lgetfcdn62a54wxspj6yhpxkf")
+            "try_deposit_or_abort"
+            Bucket("bucket1")
+            Enum<0u8>()
+          ;
+        "#;
         let manifest = SUT::new(
             instructions_string,
             NetworkID::Stokenet,

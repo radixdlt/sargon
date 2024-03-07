@@ -1,15 +1,24 @@
 use crate::prelude::*;
-
 use radix_engine::prelude::ToMetadataEntry as ScryptoToMetadataEntry;
+use strum::*;
 use transaction::prelude::MetadataValue as ScryptoMetadataValue;
 
-#[derive(Debug, PartialEq, Eq, derive_more::Display)]
+#[derive(Debug, PartialEq, Eq, strum::EnumString, strum::Display)]
+#[strum(serialize_all = "snake_case")]
 pub enum MetadataKey {
-    #[display("account_type")]
     AccountType,
 
-    #[display("owner_keys")]
     OwnerKeys,
+
+    Name,
+
+    Symbol,
+
+    IconUrl,
+
+    Description,
+
+    Tags,
 }
 
 impl From<MetadataKey> for String {
@@ -52,5 +61,21 @@ mod tests {
                 .unwrap(),
             ScryptoMetadataValue::String("dapp definition".to_owned())
         );
+    }
+
+    #[test]
+    fn metadata_values() {
+        use MetadataKey::*;
+        let eq = |v: MetadataKey, e| {
+            assert_eq!(v.to_string(), e);
+        };
+
+        eq(AccountType, "account_type");
+        eq(OwnerKeys, "owner_keys");
+        eq(Name, "name");
+        eq(Symbol, "symbol");
+        eq(IconUrl, "icon_url");
+        eq(Description, "description");
+        eq(Tags, "tags");
     }
 }

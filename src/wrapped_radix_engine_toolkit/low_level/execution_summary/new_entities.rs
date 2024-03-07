@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+use radix_engine_toolkit::transaction_types::NewEntities as RetNewEntities;
+
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct NewEntities {
     pub metadata: HashMap<ResourceAddress, NewlyCreatedResource>,
@@ -8,29 +10,57 @@ pub struct NewEntities {
 impl NewEntities {
     pub fn new<I>(resources: I) -> Self
     where
-        I: IntoIterator<Item = NewlyCreatedResource>,
+        I: IntoIterator<Item = (ResourceAddress, NewlyCreatedResource)>,
     {
         Self {
             metadata: resources
                 .into_iter()
-                .map(|r| (r.resource_address.clone(), r))
                 .collect::<HashMap<ResourceAddress, NewlyCreatedResource>>(),
         }
+    }
+}
+
+impl From<(RetNewEntities, NetworkID)> for NewEntities {
+    fn from(value: (RetNewEntities, NetworkID)) -> Self {
+        let (ret, network_id) = value;
+        Self::new(
+            ret.metadata
+                .into_iter()
+                .filter_map(|(k, v)| {
+                    // We only care about `ResourceAddress`, and ignore other address types.
+                    TryInto::<ResourceAddress>::try_into((k, network_id))
+                        .map(|a| (a, v))
+                        .ok()
+                })
+                .map(|t| (t.0, Into::<NewlyCreatedResource>::into(t.1))),
+        )
     }
 }
 
 impl HasSampleValues for NewEntities {
     fn sample() -> Self {
         Self::new([
-            NewlyCreatedResource::sample_mainnet_xrd(),
-            NewlyCreatedResource::sample_mainnet_candy(),
+            (
+                ResourceAddress::sample_mainnet_xrd(),
+                NewlyCreatedResource::sample_mainnet_xrd(),
+            ),
+            (
+                ResourceAddress::sample_mainnet_candy(),
+                NewlyCreatedResource::sample_mainnet_candy(),
+            ),
         ])
     }
 
     fn sample_other() -> Self {
         Self::new([
-            NewlyCreatedResource::sample_stokenet_gc(),
-            NewlyCreatedResource::sample_stokenet_gum(),
+            (
+                ResourceAddress::sample_stokenet_gc_tokens(),
+                NewlyCreatedResource::sample_stokenet_gc(),
+            ),
+            (
+                ResourceAddress::sample_stokenet_gum(),
+                NewlyCreatedResource::sample_stokenet_gum(),
+            ),
         ])
     }
 }
