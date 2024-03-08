@@ -4,9 +4,9 @@ pub trait PersonaDataEntryValue: From<Self::Value> {
     type Value;
 }
 
-// We have to use macros since UniFFI does not support generics, that is the only
-// reason this macro exists, if/when UniFFI supports generics, this macro should
-// be replaced by `PersonaDataIdentifiedEntry<T>`.
+/// This macro exists since UniFFI does not support generics currently, when/if
+/// UniFFI does, we SHOULD remove this macro and use generics.
+/// Something akin to: `PersonaDataIdentifiedEntry<T>`.
 macro_rules! declare_identified_entry {
     ($value_type:ty,$struct_name:ident) => {
         #[derive(

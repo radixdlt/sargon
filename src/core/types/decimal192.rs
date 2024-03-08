@@ -158,28 +158,28 @@ impl Add for Decimal {
     type Output = Self;
     /// self + rhs
     fn add(self, rhs: Self) -> Self::Output {
-        Into::into(self.native() + rhs.native())
+        Self::from(self.native() + rhs.native())
     }
 }
 impl Sub for Decimal {
     type Output = Self;
     /// self - rhs
     fn sub(self, rhs: Self) -> Self::Output {
-        Into::into(self.native() - rhs.native())
+        Self::from(self.native() - rhs.native())
     }
 }
 impl Mul for Decimal {
     type Output = Self;
     /// self * rhs
     fn mul(self, rhs: Self) -> Self::Output {
-        Into::into(self.native() * rhs.native())
+        Self::from(self.native() * rhs.native())
     }
 }
 impl Div for Decimal {
     type Output = Self;
     /// self / rhs
     fn div(self, rhs: Self) -> Self::Output {
-        Into::into(self.native() / rhs.native())
+        Self::from(self.native() / rhs.native())
     }
 }
 

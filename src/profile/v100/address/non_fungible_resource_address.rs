@@ -5,6 +5,8 @@ use radix_engine_common::types::{
 };
 use std::ops::Deref;
 
+/// This macro exists since UniFFI does not support generics currently, when/if
+/// UniFFI does, we SHOULD remove this macro and use generics.
 macro_rules! decl_specialized_address {
     (
         $(

@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
-// We have to use macros since UniFFI does not support generics, that is the only
-// reason this macro exists, if/when UniFFI supports generics, this macro should
-// be replaced by `SharedToDappWithPersonaIDs<T>`.
+/// This macro exists since UniFFI does not support generics currently, when/if
+/// UniFFI does, we SHOULD remove this macro and use generics.
+/// Something akin to `SharedToDappWithPersonaIDs<T>`.
 macro_rules! declare_shared_with_dapp {
     ($id:ty,$struct_name:ident) => {
         /// IDs that have been shared with an Dapp the user has interacted with

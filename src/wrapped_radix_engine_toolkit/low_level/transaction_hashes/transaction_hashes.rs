@@ -14,6 +14,8 @@ use radix_engine_common::crypto::{
     Hash as ScryptoHash, IsHash as ScryptoIsHash,
 };
 
+/// This macro exists since UniFFI does not support generics currently, when/if
+/// UniFFI does, we SHOULD remove this macro and use generics.
 macro_rules! decl_tx_hash {
     (
         $(
