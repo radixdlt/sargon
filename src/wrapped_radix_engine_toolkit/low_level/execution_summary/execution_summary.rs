@@ -72,10 +72,10 @@ impl HasResourceAddressOnNetwork for ScryptoResourceSpecifier {
     fn resource_address(&self, network_id: NetworkID) -> ResourceAddress {
         match self {
             ScryptoResourceSpecifier::Amount(resource_address, _) => {
-                (resource_address.clone(), network_id).into()
+                (*resource_address, network_id).into()
             }
             ScryptoResourceSpecifier::Ids(resource_address, _) => {
-                (resource_address.clone(), network_id).into()
+                (*resource_address, network_id).into()
             }
         }
     }
@@ -120,7 +120,6 @@ impl From<(RetExecutionSummary, NetworkID)> for ExecutionSummary {
         let presented_proofs = ret_summary
             .presented_proofs
             .values()
-            .into_iter()
             .cloned()
             .flat_map(|x| x.into_iter().map(|y| y.resource_address(network_id)))
             .collect_vec();
