@@ -70,10 +70,8 @@ mod tests {
 
     #[test]
     fn equality() {
-        for _ in 0..100 {
-            assert_eq!(SUT::sample(), SUT::sample());
-            assert_eq!(SUT::sample_other(), SUT::sample_other());
-        }
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]

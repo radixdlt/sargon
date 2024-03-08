@@ -13,6 +13,7 @@ pool_tdx_2_1c4ml86h8lvfk7jma0jy0vksh8srcxhmtax8nd3aur29qtd2k2wmlzk = "pool_tdx_2
 account_sim1c8s2hass5g62ckwpv78y8ykdqljtetv4ve6etcz64gveykxznj36tr = "account_sim1c8s2hass5g62ckwpv78y8ykdqljtetv4ve6etcz64gveykxznj36tr"
 resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy = "resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy"
 ec4892a8ba3b86f1 = "ec4892a8ba3b86f1"
+f87611f279e0daa3 = "f87611f279e0daa3"
 
 [default.extend-words]
 inout = "inout"

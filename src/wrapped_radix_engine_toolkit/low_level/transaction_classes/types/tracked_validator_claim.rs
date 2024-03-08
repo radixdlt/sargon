@@ -14,18 +14,31 @@ pub struct TrackedValidatorClaim {
     pub xrd_amount: Decimal192,
 }
 
+impl TrackedValidatorClaim {
+    pub fn new(
+        validator_address: impl Into<ValidatorAddress>,
+        claim_nft_address: impl Into<ResourceAddress>,
+        claim_nft_ids: impl IntoIterator<Item = NonFungibleLocalId>,
+        xrd_amount: impl Into<Decimal>,
+    ) -> Self {
+        Self {
+            validator_address: validator_address.into(),
+            claim_nft_address: claim_nft_address.into(),
+            claim_nft_ids: claim_nft_ids.into_iter().collect(),
+            xrd_amount: xrd_amount.into(),
+        }
+    }
+}
+
 impl From<(RetTrackedValidatorClaim, NetworkID)> for TrackedValidatorClaim {
     fn from(value: (RetTrackedValidatorClaim, NetworkID)) -> Self {
         let (ret, n) = value;
-        Self {
-            validator_address: (ret.validator_address, n).into(),
-            claim_nft_address: (ret.claim_nft_address, n).into(),
-            claim_nft_ids: ret
-                .claim_nft_ids
-                .into_iter()
-                .map(NonFungibleLocalId::from)
-                .collect(),
-            xrd_amount: ret.xrd_amount.into(),
-        }
+
+        Self::new(
+            (ret.validator_address, n),
+            (ret.claim_nft_address, n),
+            ret.claim_nft_ids.into_iter().map(NonFungibleLocalId::from),
+            ret.xrd_amount,
+        )
     }
 }
