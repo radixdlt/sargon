@@ -19,6 +19,22 @@ where
         .collect_vec()
 }
 
+
+pub(crate) fn filter_try_to_vec_network_aware<T, U>(
+    values: impl IntoIterator<Item = T>,
+    network_id: NetworkID,
+) -> Vec<U>
+where
+    U: TryFrom<(T, NetworkID)>,
+{
+    values
+        .into_iter()
+        .map(|x| (x, network_id))
+        .map(U::try_from)
+        .filter_map(Result::ok)
+        .collect_vec()
+}
+
 impl From<(RetDetailedManifestClass, NetworkID)> for DetailedManifestClass {
     fn from(value: (RetDetailedManifestClass, NetworkID)) -> Self {
         let n = value.1;
@@ -91,7 +107,12 @@ impl From<(RetDetailedManifestClass, NetworkID)> for DetailedManifestClass {
                 resource_preferences_updates,
                 deposit_mode_updates,
                 authorized_depositors_updates,
-            } => Self::AccountDepositSettingsUpdate { resource_preferences_updates: todo!(), deposit_mode_updates: to_hashmap_network_aware_key(deposit_mode_updates, n), authorized_depositors_added: authorized_depositors_updates.clone().into_iter().filter_map(|x| x.), authorized_depositors_removed: () },
+            } => {
+                /*
+                Self::AccountDepositSettingsUpdate { resource_preferences_updates: todo!(), deposit_mode_updates: to_hashmap_network_aware_key(deposit_mode_updates, n), authorized_depositors_added: authorized_depositors_updates.clone().into_iter().filter_map(|x| x.), authorized_depositors_removed: () }
+                */
+                todo!()
+            }
         }
     }
 }
