@@ -10,7 +10,21 @@ pub struct UnstakeData {
     pub claim_epoch: Epoch,
 
     /// An XRD amount to be claimed.
-    pub claim_amount: Decimal,
+    pub claim_amount: Decimal192,
+}
+
+impl UnstakeData {
+    pub fn new(
+        name: impl AsRef<str>,
+        claim_epoch: impl Into<Epoch>,
+        claim_amount: impl Into<Decimal192>,
+    ) -> Self {
+        Self {
+            name: name.as_ref().to_owned(),
+            claim_epoch: claim_epoch.into(),
+            claim_amount: claim_amount.into(),
+        }
+    }
 }
 
 impl From<ScryptoUnstakeData> for UnstakeData {
