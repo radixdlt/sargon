@@ -639,8 +639,6 @@ mod tests {
         )
     }
 
-
-
     #[test]
     fn execution_summary_create_pool() {
         let instructions_string = r#"
@@ -747,47 +745,6 @@ mod tests {
             )
             .unwrap();
 
-         /*
-✨✨✨✨✨✨✨
- exeuction summary:
-
-🌱 encounteredEntities ["account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk", "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc", "resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy", "pool_tdx_2_1ckfjmjswvvf6y635f8l89uunu9cwgnglhqdk8627wrpf8ultdx2vc3"]
-🌱 accountsRequiringAuth ["account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk"]
-🌱 identitiesRequiringAuth []
-▿ EngineToolkit.DetailedManifestClass.poolContribution
-  ▿ poolContribution: (2 elements)
-    ▿ poolAddresses: 1 element
-      ▿ EngineToolkit.Address #0
-        ▿ pointer: 0x00000002827cd750
-          - pointerValue: 10779154256
-    ▿ poolContributions: 1 element
-      ▿ EngineToolkit.TrackedPoolContribution
-        ▿ poolAddress: EngineToolkit.Address #1
-          ▿ pointer: 0x00000002827cc250
-            - pointerValue: 10779148880
-        ▿ contributedResources: 2 key/value pairs
-          ▿ (2 elements)
-            - key: "resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy"
-            ▿ value: EngineToolkit.Decimal #2
-              ▿ pointer: 0x00000002827cd060
-                - pointerValue: 10779152480
-          ▿ (2 elements)
-            - key: "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc"
-            ▿ value: EngineToolkit.Decimal #3
-              ▿ pointer: 0x00000002827cd120
-                - pointerValue: 10779152672
-        ▿ poolUnitsResourceAddress: EngineToolkit.Address #4
-          ▿ pointer: 0x00000002827cff10
-            - pointerValue: 10779164432
-        ▿ poolUnitsAmount: EngineToolkit.Decimal #5
-          ▿ pointer: 0x00000002827ce6b0
-            - pointerValue: 10779158192
-🌱 manifestClass: poolContribution(poolAddresses: [EngineToolkit.Address], poolContributions: [EngineToolkit.TrackedPoolContribution(poolAddress: EngineToolkit.Address, contributedResources: ["resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy": EngineToolkit.Decimal, "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc": EngineToolkit.Decimal], poolUnitsResourceAddress: EngineToolkit.Address, poolUnitsAmount: EngineToolkit.Decimal)])
-
-✨✨✨✨✨✨✨✨✨
-
-         */
-
         assert_eq!(sut.fee_locks, FeeLocks::new(0, 0));
         assert_eq!(
             sut.fee_summary,
@@ -805,16 +762,33 @@ mod tests {
         assert_eq!(sut.addresses_of_accounts_requiring_auth, vec![acc_gk]);
         assert_eq!(sut.addresses_of_identities_requiring_auth, Vec::default());
 
+        assert_eq!(sut.detailed_classification.len(), 1);
+
+        let (pool_addresses, pool_contributions) = sut.detailed_classification
+            [0]
+        .clone()
+        .into_pool_contribution()
+        .unwrap();
+
+        let resource_address_of_pool: ResourceAddress = "resource_tdx_2_1thnhmen4wg29tnqrfpk9w2v90s64z8at9sethnjma76866rfvcc2gs".parse().unwrap();
+        let pool_address: PoolAddress = "pool_tdx_2_1ckfjmjswvvf6y635f8l89uunu9cwgnglhqdk8627wrpf8ultdx2vc3".parse().unwrap();
+        let token0: ResourceAddress = "resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy".parse().unwrap();
+        let token1 = ResourceAddress::sample_stokenet_xrd();
+        assert_eq!(pool_addresses, vec![pool_address.clone()]);
+
         assert_eq!(
-            sut.detailed_classification.len(),
-            1
+            pool_contributions,
+            vec![TrackedPoolContribution::new(
+                pool_address,
+                [
+                    (token0.clone(), Decimal::from(1337)),
+                    (token1.clone(), Decimal::from(237)),
+                ],
+                resource_address_of_pool,
+                Decimal::from_str("562.91118304755680169").unwrap()
+            )]
         );
-
-        let (pool_addresses, pool_contributions) = sut.detailed_classification[0].clone().into_pool_contribution().unwrap();
-        assert_eq!(pool_addresses, vec!["".parse::<>()]);
     }
-
-
 
     #[test]
     fn execution_summary_invalid_receipt() {
