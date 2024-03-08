@@ -92,64 +92,76 @@ impl HasResourceAddressOnNetwork for ScryptoResourceSpecifier {
 impl From<(RetExecutionSummary, NetworkID)> for ExecutionSummary {
     fn from(value: (RetExecutionSummary, NetworkID)) -> Self {
         let (ret_summary, network_id) = value;
-
+        println!("🧵 start ");
         let addresses_of_account_withdraws = addresses_of_accounts_from_ret(
             ret_summary.account_withdraws,
             network_id,
         );
-
+        
+        println!("🧵 addresses_of_account_withdraws ✅ ");
         let addresses_of_account_deposits = addresses_of_accounts_from_ret(
             ret_summary.account_deposits,
             network_id,
         );
-
+        println!("🧵 addresses_of_account_deposits ✅ ");
+        
         let new_entities: NewEntities =
-            (ret_summary.new_entities, network_id).into();
-
+        (ret_summary.new_entities, network_id).into();
+        println!("🧵 new_entities ✅ ");
+        
         let detailed_classification: Vec<DetailedManifestClass> = ret_summary
-            .detailed_classification
-            .into_iter()
-            .map(|d| Into::<DetailedManifestClass>::into((d, network_id)))
-            .collect_vec();
-
+        .detailed_classification
+        .into_iter()
+        .map(|d| DetailedManifestClass::from((d, network_id)))
+        .collect_vec();
+        println!("🧵 detailed_classification ✅ ");
+        
         let reserved_instructions: Vec<ReservedInstruction> = ret_summary
-            .reserved_instructions
-            .into_iter()
-            .map(ReservedInstruction::from)
-            .collect();
-
+        .reserved_instructions
+        .into_iter()
+        .map(ReservedInstruction::from)
+        .collect();
+        println!("🧵 reserved_instructions ✅ ");
+        
         let newly_created_non_fungibles = to_vec_network_aware(
             ret_summary.newly_created_non_fungibles,
             network_id,
         );
-
+        println!("🧵 newly_created_non_fungibles ✅ ");
+        
         // iOS Wallet only use `Vec<ResourceAddress>` for `presented_proofs` today,
         // have to assert Android does the same.
         let presented_proofs = ret_summary
-            .presented_proofs
-            .values()
-            .cloned()
-            .flat_map(|x| x.into_iter().map(|y| y.resource_address(network_id)))
-            .collect_vec();
-
+        .presented_proofs
+        .values()
+        .cloned()
+        .flat_map(|x| x.into_iter().map(|y| y.resource_address(network_id)))
+        .collect_vec();
+        println!("🧵 presented_proofs ✅ ");
+        
         let encountered_component_addresses = filter_try_to_vec_network_aware(
             ret_summary.encountered_entities,
             network_id,
         );
-
+        println!("🧵 encountered_component_addresses ✅ ");
+        
         let fee_locks = ret_summary.fee_locks.into();
-
+        println!("🧵 fee_locks ✅ ");
+        
         let fee_summary = ret_summary.fee_summary.into();
-
+        println!("🧵 fee_summary ✅ ");
+        
         let addresses_of_accounts_requiring_auth = to_vec_network_aware(
             ret_summary.accounts_requiring_auth,
             network_id,
         );
-
+        println!("🧵 addresses_of_accounts_requiring_auth ✅ ");
+        
         let addresses_of_identities_requiring_auth = to_vec_network_aware(
             ret_summary.identities_requiring_auth,
             network_id,
         );
+        println!("🧵 addresses_of_identities_requiring_auth ✅ ");
 
         Self {
             addresses_of_account_withdraws,
@@ -180,26 +192,26 @@ impl FeeSummary {
     pub fn new(
         execution_cost: impl Into<Decimal192>,
         finalization_cost: impl Into<Decimal192>,
-        royalty_cost: impl Into<Decimal192>,
         storage_expansion_cost: impl Into<Decimal192>,
+        royalty_cost: impl Into<Decimal192>,
     ) -> Self {
         Self {
             execution_cost: execution_cost.into(),
             finalization_cost: finalization_cost.into(),
-            royalty_cost: royalty_cost.into(),
             storage_expansion_cost: storage_expansion_cost.into(),
+            royalty_cost: royalty_cost.into(),
         }
     }
 }
 
 impl From<RetFeeSummary> for FeeSummary {
     fn from(value: RetFeeSummary) -> Self {
-        Self {
-            execution_cost: value.execution_cost.into(),
-            finalization_cost: value.finalization_cost.into(),
-            royalty_cost: value.royalty_cost.into(),
-            storage_expansion_cost: value.storage_expansion_cost.into(),
-        }
+        Self::new(
+            value.execution_cost,
+            value.finalization_cost,
+            value.storage_expansion_cost,
+            value.royalty_cost,
+        )
     }
 }
 

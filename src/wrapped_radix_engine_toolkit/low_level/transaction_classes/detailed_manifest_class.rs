@@ -8,8 +8,6 @@ use radix_engine_toolkit::transaction_types::{
 
 use radix_engine_interface::blueprints::resource::ResourceOrNonFungible as ScryptoResourceOrNonFungible;
 
-use radix_engine_common::types::ComponentAddress as ScryptoComponentAddress;
-
 pub(crate) fn to_vec_network_aware<T, U>(
     values: impl IntoIterator<Item = T>,
     network_id: NetworkID,
@@ -66,10 +64,16 @@ impl From<(RetDetailedManifestClass, NetworkID)> for DetailedManifestClass {
             RetDetailedManifestClass::PoolContribution {
                 pool_addresses,
                 pool_contributions,
-            } => Self::PoolContribution {
-                pool_addresses: to_vec_network_aware(pool_addresses, n),
-                pool_contributions: to_vec_network_aware(pool_contributions, n),
-            },
+            } => {
+                let pool_contributions =
+                    to_vec_network_aware(pool_contributions, n);
+                let pool_addresses = to_vec_network_aware(pool_addresses, n);
+
+                Self::PoolContribution {
+                    pool_addresses,
+                    pool_contributions,
+                }
+            }
 
             RetDetailedManifestClass::PoolRedemption {
                 pool_addresses,
@@ -230,11 +234,11 @@ pub enum DetailedManifestClass {
             HashMap<AccountAddress, Vec<ResourceOrNonFungible>>,
     },
     PoolContribution {
-        pool_addresses: Vec<ComponentAddress>,
+        pool_addresses: Vec<PoolAddress>,
         pool_contributions: Vec<TrackedPoolContribution>,
     },
     PoolRedemption {
-        pool_addresses: Vec<ComponentAddress>,
+        pool_addresses: Vec<PoolAddress>,
         pool_contributions: Vec<TrackedPoolRedemption>,
     },
 }
