@@ -14,15 +14,30 @@ pub struct TrackedValidatorStake {
     pub liquid_stake_unit_amount: Decimal,
 }
 
+impl TrackedValidatorStake {
+    pub fn new(
+        validator_address: impl Into<ValidatorAddress>,
+        xrd_amount: impl Into<Decimal>,
+        liquid_stake_unit_address: impl Into<ResourceAddress>,
+        liquid_stake_unit_amount: impl Into<Decimal192>,
+    ) -> Self {
+        Self {
+            validator_address: validator_address.into(),
+            xrd_amount: xrd_amount.into(),
+            liquid_stake_unit_address: liquid_stake_unit_address.into(),
+            liquid_stake_unit_amount: liquid_stake_unit_amount.into(),
+        }
+    }
+}
+
 impl From<(RetTrackedValidatorStake, NetworkID)> for TrackedValidatorStake {
     fn from(value: (RetTrackedValidatorStake, NetworkID)) -> Self {
         let (ret, n) = value;
-        Self {
-            validator_address: (ret.validator_address, n).into(),
-            xrd_amount: ret.xrd_amount.into(),
-            liquid_stake_unit_address: (ret.liquid_stake_unit_address, n)
-                .into(),
-            liquid_stake_unit_amount: ret.liquid_stake_unit_amount.into(),
-        }
+        Self::new(
+            (ret.validator_address, n),
+            ret.xrd_amount,
+            (ret.liquid_stake_unit_address, n),
+            ret.liquid_stake_unit_amount,
+        )
     }
 }
