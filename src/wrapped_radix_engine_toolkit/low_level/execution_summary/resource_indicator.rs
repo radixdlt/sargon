@@ -149,11 +149,19 @@ macro_rules! decl_predicted {
             }
 
             impl [< Predicted $struct_name_suffix >] {
-                pub fn from_ret<T>(ret_predicted: RetPredicted<T>) -> Self where T: Into<$wrapped_type> {
+
+                pub fn new(value: impl Into<$wrapped_type>, instruction_index: u64) -> Self {
                     Self {
-                        value: Into::<$wrapped_type>::into(ret_predicted.value),
-                        instruction_index: ret_predicted.instruction_index as u64
+                        value: value.into(),
+                        instruction_index
                     }
+                }
+
+                pub fn from_ret<T>(ret_predicted: RetPredicted<T>) -> Self where T: Into<$wrapped_type> {
+                    Self::new(
+                        ret_predicted.value,
+                        ret_predicted.instruction_index as u64
+                    )
                 }
             }
         }

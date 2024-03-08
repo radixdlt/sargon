@@ -1,7 +1,12 @@
 use crate::prelude::*;
 
 use radix_engine::types::indexmap::IndexSet;
-use radix_engine_toolkit::transaction_types::DetailedManifestClass as RetDetailedManifestClass;
+use radix_engine_toolkit::transaction_types::{
+    DetailedManifestClass as RetDetailedManifestClass,
+    Operation as RetOperation,
+};
+
+use radix_engine_interface::blueprints::resource::ResourceOrNonFungible as ScryptoResourceOrNonFungible;
 
 use radix_engine_common::types::ComponentAddress as ScryptoComponentAddress;
 
@@ -18,7 +23,6 @@ where
         .map(U::from)
         .collect_vec()
 }
-
 
 pub(crate) fn filter_try_to_vec_network_aware<T, U>(
     values: impl IntoIterator<Item = T>,
@@ -108,10 +112,73 @@ impl From<(RetDetailedManifestClass, NetworkID)> for DetailedManifestClass {
                 deposit_mode_updates,
                 authorized_depositors_updates,
             } => {
-                /*
-                Self::AccountDepositSettingsUpdate { resource_preferences_updates: todo!(), deposit_mode_updates: to_hashmap_network_aware_key(deposit_mode_updates, n), authorized_depositors_added: authorized_depositors_updates.clone().into_iter().filter_map(|x| x.), authorized_depositors_removed: () }
-                */
-                todo!()
+                let deposit_mode_updates: HashMap<AccountAddress, DepositRule> =
+                    to_hashmap_network_aware_key(deposit_mode_updates, n);
+
+                let resource_preferences_updates = resource_preferences_updates
+                    .into_iter()
+                    .map(|(k, v)| {
+                        (
+                            AccountAddress::from((k, n)),
+                            v.into_iter()
+                                .map(|(k, v)| {
+                                    (
+                                        ResourceAddress::from((k, n)),
+                                        ResourcePreferenceUpdate::from(v),
+                                    )
+                                })
+                                .collect::<HashMap<
+                                    ResourceAddress,
+                                    ResourcePreferenceUpdate,
+                                >>(),
+                        )
+                    })
+                    .collect::<HashMap<
+                        AccountAddress,
+                        HashMap<ResourceAddress, ResourcePreferenceUpdate>,
+                    >>();
+
+                let split_map_auth_dep = |o: &RetOperation| {
+                    authorized_depositors_updates.clone().into_iter().map(|(k, v)| {
+                            (
+                                AccountAddress::from((k, n)),
+                                v.into_iter().filter(|x| matches!(&x.1, o)).map(|x| (x.0, n)).map(ResourceOrNonFungible::from).collect_vec()
+                            )
+                        }).collect::<HashMap<
+                        AccountAddress,
+                        Vec<ResourceOrNonFungible>,
+                    >>()
+                };
+
+                let authorized_depositors_added =
+                    split_map_auth_dep(&RetOperation::Added);
+                let authorized_depositors_removed =
+                    split_map_auth_dep(&RetOperation::Removed);
+
+                Self::AccountDepositSettingsUpdate {
+                    resource_preferences_updates,
+                    deposit_mode_updates,
+                    authorized_depositors_added,
+                    authorized_depositors_removed,
+                }
+            }
+        }
+    }
+}
+
+impl From<(ScryptoResourceOrNonFungible, NetworkID)> for ResourceOrNonFungible {
+    fn from(value: (ScryptoResourceOrNonFungible, NetworkID)) -> Self {
+        let (resource_or_non_fungible, network_id) = value;
+        match resource_or_non_fungible {
+            ScryptoResourceOrNonFungible::NonFungible(nf) => {
+                Self::NonFungible {
+                    value: (nf, network_id).into(),
+                }
+            }
+            ScryptoResourceOrNonFungible::Resource(resource_address) => {
+                Self::Resource {
+                    value: (resource_address, network_id).into(),
+                }
             }
         }
     }

@@ -333,26 +333,25 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "not yet implemented")]
     fn execution_summary() {
         let instructions_string = r#"
         CALL_METHOD
             Address("account_tdx_2_128h2zv5m4mnprnfjxn4nf96pglgx064mut8np26hp7w9mm064es2dn")
             "withdraw"
             Address("resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc")
-            Decimal("123");
-
+            Decimal("123")
+        ;
         TAKE_FROM_WORKTOP
             Address("resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc")
             Decimal("123")
-            Bucket("bucket1");
-
+            Bucket("bucket1")
+        ;
         CALL_METHOD
             Address("account_tdx_2_128x8q5es2dstqtcc8wqm843xdtfs0lgetfcdn62a54wxspj6yhpxkf")
             "try_deposit_or_abort"
             Bucket("bucket1")
             Enum<0u8>()
-          ;
+        ;
         "#;
         let manifest = SUT::new(
             instructions_string,
@@ -371,6 +370,53 @@ mod tests {
                 DetailedManifestClass::Transfer,
                 DetailedManifestClass::General
             ]
+        );
+        assert_eq!(
+            summary.addresses_of_account_deposits,
+            HashMap::from_iter([
+                ("account_tdx_2_128x8q5es2dstqtcc8wqm843xdtfs0lgetfcdn62a54wxspj6yhpxkf".parse::<AccountAddress>().unwrap(), 
+                vec![
+                    ResourceIndicator::Fungible {
+                        resource_address: ResourceAddress::sample_stokenet_xrd(),
+                        indicator: FungibleResourceIndicator::Guaranteed { decimal: 123.into() }
+                    }
+                ])
+            ])
+        );
+
+        assert_eq!(
+            summary.addresses_of_account_withdraws,
+            HashMap::from_iter([
+                ("account_tdx_2_128h2zv5m4mnprnfjxn4nf96pglgx064mut8np26hp7w9mm064es2dn".parse::<AccountAddress>().unwrap(), 
+                vec![
+                    ResourceIndicator::Fungible {
+                        resource_address: ResourceAddress::sample_stokenet_xrd(),
+                        indicator: FungibleResourceIndicator::Guaranteed { decimal: 123.into() }
+                    }
+                ])
+            ])
+        );
+
+        assert_eq!(summary.presented_proofs, Vec::default());
+
+        assert_eq!(summary.encountered_component_addresses, Vec::default());
+
+        assert_eq!(summary.reserved_instructions, Vec::default());
+
+        assert_eq!(summary.newly_created_non_fungibles, Vec::default());
+
+        assert_eq!(summary.new_entities, NewEntities::default());
+
+        assert_eq!(summary.fee_locks, FeeLocks::new(0, 0),);
+
+        assert_eq!(
+            summary.fee_summary,
+            FeeSummary::new(
+                "0.1951564".parse::<Decimal>().unwrap(),
+                "0.05126075".parse::<Decimal>().unwrap(),
+                0,
+                "0.16679763507".parse::<Decimal>().unwrap()
+            ),
         );
     }
 

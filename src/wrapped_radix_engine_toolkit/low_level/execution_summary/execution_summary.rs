@@ -157,6 +157,22 @@ pub struct FeeSummary {
     pub storage_expansion_cost: Decimal192,
 }
 
+impl FeeSummary {
+    pub fn new(
+        execution_cost: impl Into<Decimal192>,
+        finalization_cost: impl Into<Decimal192>,
+        royalty_cost: impl Into<Decimal192>,
+        storage_expansion_cost: impl Into<Decimal192>,
+    ) -> Self {
+        Self {
+            execution_cost: execution_cost.into(),
+            finalization_cost: finalization_cost.into(),
+            royalty_cost: royalty_cost.into(),
+            storage_expansion_cost: storage_expansion_cost.into(),
+        }
+    }
+}
+
 impl From<RetFeeSummary> for FeeSummary {
     fn from(value: RetFeeSummary) -> Self {
         Self {
@@ -172,6 +188,18 @@ impl From<RetFeeSummary> for FeeSummary {
 pub struct FeeLocks {
     pub lock: Decimal192,
     pub contingent_lock: Decimal192,
+}
+
+impl FeeLocks {
+    pub fn new(
+        lock: impl Into<Decimal192>,
+        contingent_lock: impl Into<Decimal192>,
+    ) -> Self {
+        Self {
+            lock: lock.into(),
+            contingent_lock: contingent_lock.into(),
+        }
+    }
 }
 
 impl From<ScryptoFeeLocks> for FeeLocks {

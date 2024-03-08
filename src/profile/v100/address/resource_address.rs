@@ -18,8 +18,6 @@ impl ResourceAddress {
     }
 }
 
-
-
 #[uniffi::export]
 pub fn resource_address_is_fungible(address: &ResourceAddress) -> bool {
     address.is_fungible()
