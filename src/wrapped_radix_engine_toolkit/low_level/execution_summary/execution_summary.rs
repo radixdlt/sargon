@@ -1,12 +1,10 @@
 use crate::prelude::*;
 
 use radix_engine::system::system_modules::execution_trace::ResourceSpecifier as ScryptoResourceSpecifier;
-use radix_engine::transaction::FeeLocks as ScryptoFeeLocks;
 use radix_engine::types::indexmap::IndexMap;
 use radix_engine_common::types::ComponentAddress as ScryptoComponentAddress;
 
 use radix_engine_toolkit::transaction_types::ExecutionSummary as RetExecutionSummary;
-use radix_engine_toolkit::transaction_types::FeeSummary as RetFeeSummary;
 use radix_engine_toolkit::transaction_types::ResourceIndicator as RetResourceIndicator;
 
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
@@ -163,68 +161,6 @@ impl From<(RetExecutionSummary, NetworkID)> for ExecutionSummary {
             encountered_component_addresses,
             fee_locks,
             fee_summary,
-        }
-    }
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
-pub struct FeeSummary {
-    pub execution_cost: Decimal192,
-    pub finalization_cost: Decimal192,
-    pub royalty_cost: Decimal192,
-    pub storage_expansion_cost: Decimal192,
-}
-
-impl FeeSummary {
-    pub fn new(
-        execution_cost: impl Into<Decimal192>,
-        finalization_cost: impl Into<Decimal192>,
-        storage_expansion_cost: impl Into<Decimal192>,
-        royalty_cost: impl Into<Decimal192>,
-    ) -> Self {
-        Self {
-            execution_cost: execution_cost.into(),
-            finalization_cost: finalization_cost.into(),
-            storage_expansion_cost: storage_expansion_cost.into(),
-            royalty_cost: royalty_cost.into(),
-        }
-    }
-}
-
-impl From<RetFeeSummary> for FeeSummary {
-    fn from(value: RetFeeSummary) -> Self {
-        Self::new(
-            value.execution_cost,
-            value.finalization_cost,
-            value.storage_expansion_cost,
-            value.royalty_cost,
-        )
-    }
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
-pub struct FeeLocks {
-    pub lock: Decimal192,
-    pub contingent_lock: Decimal192,
-}
-
-impl FeeLocks {
-    pub fn new(
-        lock: impl Into<Decimal192>,
-        contingent_lock: impl Into<Decimal192>,
-    ) -> Self {
-        Self {
-            lock: lock.into(),
-            contingent_lock: contingent_lock.into(),
-        }
-    }
-}
-
-impl From<ScryptoFeeLocks> for FeeLocks {
-    fn from(value: ScryptoFeeLocks) -> Self {
-        Self {
-            lock: value.lock.into(),
-            contingent_lock: value.contingent_lock.into(),
         }
     }
 }
