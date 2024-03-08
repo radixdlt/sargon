@@ -24,6 +24,20 @@ where
         .collect_vec()
 }
 
+pub(crate) fn to_hashmap_network_aware_key<K, V, L, U>(
+    values: impl IntoIterator<Item = (K, V)>,
+    network_id: NetworkID,
+) -> HashMap<L, U>
+where
+    L: Eq + std::hash::Hash + From<(K, NetworkID)>,
+    U: From<V>,
+{
+    values
+        .into_iter()
+        .map(|(k, v)| (L::from((k, network_id)), U::from(v)))
+        .collect::<HashMap<L, U>>()
+}
+
 pub(crate) fn filter_try_to_vec_network_aware<T, U>(
     values: impl IntoIterator<Item = T>,
     network_id: NetworkID,
@@ -138,11 +152,11 @@ impl From<(RetDetailedManifestClass, NetworkID)> for DetailedManifestClass {
                         HashMap<ResourceAddress, ResourcePreferenceUpdate>,
                     >>();
 
-                let split_map_auth_dep = |o: &RetOperation| {
+                let split_map_auth_dep = |o: RetOperation| {
                     authorized_depositors_updates.clone().into_iter().map(|(k, v)| {
                             (
                                 AccountAddress::from((k, n)),
-                                v.into_iter().filter(|x| matches!(&x.1, o)).map(|x| (x.0, n)).map(ResourceOrNonFungible::from).collect_vec()
+                                v.into_iter().filter(|x| x.1 == o).map(|x| (x.0, n)).map(ResourceOrNonFungible::from).collect_vec()
                             )
                         }).collect::<HashMap<
                         AccountAddress,
@@ -151,9 +165,9 @@ impl From<(RetDetailedManifestClass, NetworkID)> for DetailedManifestClass {
                 };
 
                 let authorized_depositors_added =
-                    split_map_auth_dep(&RetOperation::Added);
+                    split_map_auth_dep(RetOperation::Added);
                 let authorized_depositors_removed =
-                    split_map_auth_dep(&RetOperation::Removed);
+                    split_map_auth_dep(RetOperation::Removed);
 
                 Self::AccountDepositSettingsUpdate {
                     resource_preferences_updates,
@@ -184,7 +198,7 @@ impl From<(ScryptoResourceOrNonFungible, NetworkID)> for ResourceOrNonFungible {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Enum)]
+#[derive(Clone, Debug, PartialEq, Eq, EnumAsInner, uniffi::Enum)]
 pub enum DetailedManifestClass {
     General,
     Transfer,

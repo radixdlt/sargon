@@ -64,6 +64,7 @@ macro_rules! from_scrypto_component_address {
 }
 
 from_scrypto_component_address!(AccountAddress);
+from_scrypto_component_address!(IdentityAddress);
 from_scrypto_component_address!(ComponentAddress);
 from_scrypto_component_address!(ValidatorAddress);
 from_scrypto_component_address!(PoolAddress);

@@ -19,6 +19,14 @@ pub struct ExecutionSummary {
     pub addresses_of_account_deposits:
         HashMap<AccountAddress, Vec<ResourceIndicator>>,
 
+    /// Addresses of accounts encountered in the manifest where privileged
+    /// methods were called.
+    pub addresses_of_accounts_requiring_auth: Vec<AccountAddress>,
+
+    /// Addresses of identities (Personas) encountered in the manifest where privileged
+    /// methods were called.
+    pub addresses_of_identities_requiring_auth: Vec<IdentityAddress>,
+
     /// Information on the global entities created in the transaction.
     pub new_entities: NewEntities,
 
@@ -133,9 +141,21 @@ impl From<(RetExecutionSummary, NetworkID)> for ExecutionSummary {
 
         let fee_summary = ret_summary.fee_summary.into();
 
+        let addresses_of_accounts_requiring_auth = to_vec_network_aware(
+            ret_summary.accounts_requiring_auth,
+            network_id,
+        );
+
+        let addresses_of_identities_requiring_auth = to_vec_network_aware(
+            ret_summary.identities_requiring_auth,
+            network_id,
+        );
+
         Self {
             addresses_of_account_withdraws,
             addresses_of_account_deposits,
+            addresses_of_accounts_requiring_auth,
+            addresses_of_identities_requiring_auth,
             new_entities,
             detailed_classification,
             newly_created_non_fungibles,
