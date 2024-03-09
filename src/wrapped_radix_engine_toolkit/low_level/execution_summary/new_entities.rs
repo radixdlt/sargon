@@ -23,6 +23,7 @@ impl NewEntities {
 impl From<(RetNewEntities, NetworkID)> for NewEntities {
     fn from(value: (RetNewEntities, NetworkID)) -> Self {
         let (ret, network_id) = value;
+
         Self::new(
             // We map from `IndexMap<GlobalAddress, IndexMap<String, Option<MetadataValue>>>`
             // into: `HashMap<ResourceAddress, NewlyCreatedResource>`,
@@ -36,7 +37,7 @@ impl From<(RetNewEntities, NetworkID)> for NewEntities {
                         .map(|a| (a, v))
                         .ok()
                 })
-                .map(|t| (t.0, Into::<NewlyCreatedResource>::into(t.1))),
+                .map(|t| (t.0, NewlyCreatedResource::from(t.1))),
         )
     }
 }

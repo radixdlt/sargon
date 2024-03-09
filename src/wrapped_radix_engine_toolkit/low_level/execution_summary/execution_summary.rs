@@ -115,10 +115,11 @@ impl From<(RetExecutionSummary, NetworkID)> for ExecutionSummary {
             .map(ReservedInstruction::from)
             .collect();
 
-        let newly_created_non_fungibles = to_vec_network_aware(
+        let mut newly_created_non_fungibles = to_vec_network_aware(
             ret_summary.newly_created_non_fungibles,
             network_id,
         );
+        newly_created_non_fungibles.sort();
 
         // iOS Wallet only use `Vec<ResourceAddress>` for `presented_proofs` today,
         // have to assert Android does the same.

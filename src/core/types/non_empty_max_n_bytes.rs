@@ -22,6 +22,8 @@ macro_rules! decl_non_empty_max_n_bytes {
                 Eq,
                 Hash,
                 SerializeDisplay,
+                Ord,
+                PartialOrd,
                 DeserializeFromStr,
                 derive_more::Display,
                 derive_more::Debug,

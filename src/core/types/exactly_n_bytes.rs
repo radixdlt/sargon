@@ -21,6 +21,8 @@ macro_rules! decl_exactly_n_bytes {
                 PartialEq,
                 Eq,
                 Hash,
+                Ord,
+                PartialOrd,
                 SerializeDisplay,
                 DeserializeFromStr,
                 derive_more::Display,

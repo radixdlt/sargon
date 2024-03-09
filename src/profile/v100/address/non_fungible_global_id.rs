@@ -17,6 +17,8 @@ use radix_engine_toolkit_json::models::scrypto::non_fungible_global_id::{
     Eq,
     Hash,
     SerializeDisplay,
+    Ord,
+    PartialOrd,
     DeserializeFromStr,
     derive_more::Display,
     uniffi::Record,

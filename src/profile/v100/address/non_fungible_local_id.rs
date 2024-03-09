@@ -5,7 +5,7 @@ use radix_engine_common::prelude::NonFungibleLocalId as ScryptoNonFungibleLocalI
 use radix_engine_common::prelude::StringNonFungibleLocalId as ScryptoStringNonFungibleLocalId;
 use radix_engine_toolkit_json::models::common::SerializableNonFungibleLocalId as RetNonFungibleLocalId;
 
-#[derive(Clone, Debug, Hash, PartialEq, Eq, uniffi::Enum)]
+#[derive(Clone, Debug, Hash, Ord, PartialOrd, PartialEq, Eq, uniffi::Enum)]
 pub enum NonFungibleLocalId {
     /// Unsigned integers, up to u64.
     ///

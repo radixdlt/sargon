@@ -141,11 +141,11 @@ impl TransactionManifest {
 
         for metadata in metadata_vec.iter() {
             builder = builder.create_non_fungible_resource(
-                ScryptoOwnerRole::None,
+                ScryptoOwnerRole::Updatable(ScryptoAccessRule::AllowAll),
                 ScryptoNonFungibleIdType::Integer,
                 true,
                 ScryptoNonFungibleResourceRoles::single_locked_rule(
-                    ScryptoAccessRule::DenyAll,
+                    ScryptoAccessRule::AllowAll,
                 ),
                 Into::<
                     radix_engine::types::node_modules::ModuleConfig<
@@ -184,11 +184,11 @@ impl TransactionManifest {
     ) -> ScryptoManifestBuilder {
         let initial_supply: ScryptoDecimal = initial_supply.into();
         builder.create_fungible_resource(
-            ScryptoOwnerRole::None,
+            ScryptoOwnerRole::Updatable(ScryptoAccessRule::AllowAll),
             true,
             10,
             ScryptoFungibleResourceRoles::single_locked_rule(
-                ScryptoAccessRule::DenyAll,
+                ScryptoAccessRule::AllowAll,
             ),
             metadata.into(),
             Some(initial_supply),
@@ -249,6 +249,7 @@ impl TokenDefinitionMetadata {
             format!("{}: An amazingly innovative and rare NFT collection", name),
             word.to_uppercase(),
             "https://image-service-test-images.s3.eu-west-2.amazonaws.com/wallet_test_images/KLHaze-medium.jpg",
+            ["Unique".to_string(), "FOMO".to_string(), "Advanced".to_string()],
         )
     }
 }
@@ -283,7 +284,9 @@ mod tests {
             SUT::create_fungible_token(&AccountAddress::sample_mainnet(),)
                 .to_string(),
             r#"CREATE_FUNGIBLE_RESOURCE_WITH_INITIAL_SUPPLY
-    Enum<0u8>()
+    Enum<2u8>(
+        Enum<0u8>()
+    )
     true
     10u8
     Decimal("21000000")
@@ -291,7 +294,7 @@ mod tests {
         Enum<1u8>(
             Tuple(
                 Enum<1u8>(
-                    Enum<1u8>()
+                    Enum<0u8>()
                 ),
                 Enum<1u8>(
                     Enum<1u8>()
@@ -301,7 +304,7 @@ mod tests {
         Enum<1u8>(
             Tuple(
                 Enum<1u8>(
-                    Enum<1u8>()
+                    Enum<0u8>()
                 ),
                 Enum<1u8>(
                     Enum<1u8>()
@@ -311,7 +314,7 @@ mod tests {
         Enum<1u8>(
             Tuple(
                 Enum<1u8>(
-                    Enum<1u8>()
+                    Enum<0u8>()
                 ),
                 Enum<1u8>(
                     Enum<1u8>()
@@ -321,7 +324,7 @@ mod tests {
         Enum<1u8>(
             Tuple(
                 Enum<1u8>(
-                    Enum<1u8>()
+                    Enum<0u8>()
                 ),
                 Enum<1u8>(
                     Enum<1u8>()
@@ -331,7 +334,7 @@ mod tests {
         Enum<1u8>(
             Tuple(
                 Enum<1u8>(
-                    Enum<1u8>()
+                    Enum<0u8>()
                 ),
                 Enum<1u8>(
                     Enum<1u8>()
@@ -341,7 +344,7 @@ mod tests {
         Enum<1u8>(
             Tuple(
                 Enum<1u8>(
-                    Enum<1u8>()
+                    Enum<0u8>()
                 ),
                 Enum<1u8>(
                     Enum<1u8>()
@@ -379,6 +382,16 @@ mod tests {
                 Enum<1u8>(
                     Enum<0u8>(
                         "STAR"
+                    )
+                ),
+                false
+            ),
+            "tags" => Tuple(
+                Enum<1u8>(
+                    Enum<128u8>(
+                        Array<String>(
+                            "Bright"
+                        )
                     )
                 ),
                 false
@@ -434,21 +447,18 @@ CALL_METHOD
     }
 
     #[test]
-    fn create_single_nft_collection_assert_manifest() {
-        // This is fun! Below we use `#"` multi-line string literal in Rust,
-        // however, since string format of NonFungibleLocalId::Integer is "#,
-        // it makes a hassle, so I'm lazy and use `NonFungibleLocalId:Str` for test
-        // instead of integer to avoid this :D
+    fn create_two_nft_collections_assert_manifest() {
         let manifest =
-            TransactionManifest::create_non_fungible_tokens_collections_with_local_id_fn(
+            TransactionManifest::create_non_fungible_tokens_collections(
                 &AccountAddress::sample_stokenet(),
                 2,
                 2,
-                |i| NonFungibleLocalId::string(format!("{i}")).unwrap()
             );
-        let expected_manifest = r#"
+        let expected_manifest = r##"
         CREATE_NON_FUNGIBLE_RESOURCE_WITH_INITIAL_SUPPLY
-        Enum<0u8>()
+        Enum<2u8>(
+            Enum<0u8>()
+        )
         Enum<1u8>()
         true
         Enum<0u8>(
@@ -490,12 +500,12 @@ CALL_METHOD
             )
         )
         Map<NonFungibleLocalId, Tuple>(
-            NonFungibleLocalId("<0>") => Tuple(
+            NonFungibleLocalId("#0#") => Tuple(
                 Tuple(
                     "nf-number-0"
                 )
             ),
-            NonFungibleLocalId("<1>") => Tuple(
+            NonFungibleLocalId("#1#") => Tuple(
                 Tuple(
                     "nf-number-1"
                 )
@@ -505,7 +515,7 @@ CALL_METHOD
             Enum<1u8>(
                 Tuple(
                     Enum<1u8>(
-                        Enum<1u8>()
+                        Enum<0u8>()
                     ),
                     Enum<1u8>(
                         Enum<1u8>()
@@ -515,7 +525,7 @@ CALL_METHOD
             Enum<1u8>(
                 Tuple(
                     Enum<1u8>(
-                        Enum<1u8>()
+                        Enum<0u8>()
                     ),
                     Enum<1u8>(
                         Enum<1u8>()
@@ -525,7 +535,7 @@ CALL_METHOD
             Enum<1u8>(
                 Tuple(
                     Enum<1u8>(
-                        Enum<1u8>()
+                        Enum<0u8>()
                     ),
                     Enum<1u8>(
                         Enum<1u8>()
@@ -535,7 +545,7 @@ CALL_METHOD
             Enum<1u8>(
                 Tuple(
                     Enum<1u8>(
-                        Enum<1u8>()
+                        Enum<0u8>()
                     ),
                     Enum<1u8>(
                         Enum<1u8>()
@@ -545,7 +555,7 @@ CALL_METHOD
             Enum<1u8>(
                 Tuple(
                     Enum<1u8>(
-                        Enum<1u8>()
+                        Enum<0u8>()
                     ),
                     Enum<1u8>(
                         Enum<1u8>()
@@ -555,7 +565,7 @@ CALL_METHOD
             Enum<1u8>(
                 Tuple(
                     Enum<1u8>(
-                        Enum<1u8>()
+                        Enum<0u8>()
                     ),
                     Enum<1u8>(
                         Enum<1u8>()
@@ -565,7 +575,7 @@ CALL_METHOD
             Enum<1u8>(
                 Tuple(
                     Enum<1u8>(
-                        Enum<1u8>()
+                        Enum<0u8>()
                     ),
                     Enum<1u8>(
                         Enum<1u8>()
@@ -606,6 +616,18 @@ CALL_METHOD
                         )
                     ),
                     false
+                ),
+                "tags" => Tuple(
+                    Enum<1u8>(
+                        Enum<128u8>(
+                            Array<String>(
+                                "Unique",
+                                "FOMO",
+                                "Advanced"
+                            )
+                        )
+                    ),
+                    false
                 )
             ),
             Map<String, Enum>()
@@ -613,7 +635,9 @@ CALL_METHOD
         Enum<0u8>()
     ;
     CREATE_NON_FUNGIBLE_RESOURCE_WITH_INITIAL_SUPPLY
-        Enum<0u8>()
+        Enum<2u8>(
+            Enum<0u8>()
+        )
         Enum<1u8>()
         true
         Enum<0u8>(
@@ -655,12 +679,12 @@ CALL_METHOD
             )
         )
         Map<NonFungibleLocalId, Tuple>(
-            NonFungibleLocalId("<0>") => Tuple(
+            NonFungibleLocalId("#0#") => Tuple(
                 Tuple(
                     "nf-number-0"
                 )
             ),
-            NonFungibleLocalId("<1>") => Tuple(
+            NonFungibleLocalId("#1#") => Tuple(
                 Tuple(
                     "nf-number-1"
                 )
@@ -670,7 +694,7 @@ CALL_METHOD
             Enum<1u8>(
                 Tuple(
                     Enum<1u8>(
-                        Enum<1u8>()
+                        Enum<0u8>()
                     ),
                     Enum<1u8>(
                         Enum<1u8>()
@@ -680,7 +704,7 @@ CALL_METHOD
             Enum<1u8>(
                 Tuple(
                     Enum<1u8>(
-                        Enum<1u8>()
+                        Enum<0u8>()
                     ),
                     Enum<1u8>(
                         Enum<1u8>()
@@ -690,7 +714,7 @@ CALL_METHOD
             Enum<1u8>(
                 Tuple(
                     Enum<1u8>(
-                        Enum<1u8>()
+                        Enum<0u8>()
                     ),
                     Enum<1u8>(
                         Enum<1u8>()
@@ -700,7 +724,7 @@ CALL_METHOD
             Enum<1u8>(
                 Tuple(
                     Enum<1u8>(
-                        Enum<1u8>()
+                        Enum<0u8>()
                     ),
                     Enum<1u8>(
                         Enum<1u8>()
@@ -710,7 +734,7 @@ CALL_METHOD
             Enum<1u8>(
                 Tuple(
                     Enum<1u8>(
-                        Enum<1u8>()
+                        Enum<0u8>()
                     ),
                     Enum<1u8>(
                         Enum<1u8>()
@@ -720,7 +744,7 @@ CALL_METHOD
             Enum<1u8>(
                 Tuple(
                     Enum<1u8>(
-                        Enum<1u8>()
+                        Enum<0u8>()
                     ),
                     Enum<1u8>(
                         Enum<1u8>()
@@ -730,7 +754,7 @@ CALL_METHOD
             Enum<1u8>(
                 Tuple(
                     Enum<1u8>(
-                        Enum<1u8>()
+                        Enum<0u8>()
                     ),
                     Enum<1u8>(
                         Enum<1u8>()
@@ -771,6 +795,18 @@ CALL_METHOD
                         )
                     ),
                     false
+                ),
+                "tags" => Tuple(
+                    Enum<1u8>(
+                        Enum<128u8>(
+                            Array<String>(
+                                "Unique",
+                                "FOMO",
+                                "Advanced"
+                            )
+                        )
+                    ),
+                    false
                 )
             ),
             Map<String, Enum>()
@@ -783,7 +819,7 @@ CALL_METHOD
         Expression("ENTIRE_WORKTOP")
         Enum<0u8>()
     ;
-        "#;
+        "##;
         manifest_eq(manifest, expected_manifest);
     }
 

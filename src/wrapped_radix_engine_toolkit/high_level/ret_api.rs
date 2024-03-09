@@ -266,6 +266,7 @@ mod tests {
                 "foobar",
                 "FOO",
                 "example.com",
+                ["Tag0".to_string(), "Tag1".to_string()],
             ),
         )
         .to_string();
@@ -275,6 +276,8 @@ mod tests {
         assert!(string.contains("foobar"));
         assert!(string.contains("FOO"));
         assert!(string.contains("example.com"));
+        assert!(string.contains("Tag0"));
+        assert!(string.contains("Tag1"));
         assert!(string
             .contains(&AccountAddress::sample_stokenet_other().to_string()));
     }

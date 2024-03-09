@@ -35,6 +35,10 @@ impl From<IndexMap<String, Option<ScryptoMetadataValue>>>
             Some(Some(ScryptoMetadataValue::Url(value))) => {
                 Some(value.to_owned().0)
             }
+            // TODO: Should we do this? Fallback to `::String` like this?
+            Some(Some(ScryptoMetadataValue::String(value))) => {
+                Some(value.to_owned())
+            }
             _ => None,
         };
 

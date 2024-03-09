@@ -88,10 +88,6 @@ impl TransactionManifest {
             panic!("Does not make sense to add more guarantees than there are instructions.")
         }
 
-        if instruction_count == 0 {
-            return self;
-        };
-
         if let Some(oob) = guarantees
             .clone()
             .into_iter()

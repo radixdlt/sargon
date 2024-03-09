@@ -122,6 +122,18 @@ macro_rules! decl_ret_wrapped_address {
                 }
             }
 
+            impl Ord for [< $address_type:camel Address >] {
+                fn cmp(&self, other: &Self) -> Ordering {
+                    self.address().cmp(&other.address())
+                }
+            }
+
+            impl PartialOrd for [< $address_type:camel Address >] {
+                fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+                    Some(self.cmp(other))
+                }
+            }
+
             impl [< $address_type:camel Address >] {
 
                 pub(crate) fn scrypto(&self) -> ScryptoGlobalAddress {
