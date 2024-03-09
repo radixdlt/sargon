@@ -49,10 +49,12 @@ impl HasSampleValues for ResourceOrNonFungible {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = ResourceOrNonFungible;
+
+    use radix_engine::types::NonFungibleGlobalId as ScryptoNonFungibleGlobalId;
 
     #[test]
     fn equality() {
@@ -91,5 +93,44 @@ mod tests {
             }
             "#,
         )
+    }
+
+    #[test]
+    fn from_scrypto_non_fungible() {
+        let global_id = NonFungibleGlobalId::sample();
+        let scrypto = ScryptoResourceOrNonFungible::NonFungible(
+            ScryptoNonFungibleGlobalId::new(
+                global_id.resource_address.into(),
+                global_id.non_fungible_local_id.into(),
+            ),
+        );
+        assert_eq!(
+            SUT::from((scrypto.clone(), NetworkID::Mainnet)),
+            SUT::sample_other()
+        );
+
+        // Not equals when wrong network
+        assert_ne!(
+            SUT::from((scrypto, NetworkID::Stokenet)),
+            SUT::sample_other()
+        );
+    }
+
+    #[test]
+    fn from_scrypto_fungible() {
+        let resource_address = ResourceAddress::sample_stokenet_gum();
+        let scrypto = ScryptoResourceOrNonFungible::Resource(
+            resource_address.clone().into(),
+        );
+        let expected = SUT::Resource {
+            value: resource_address,
+        };
+        assert_eq!(
+            SUT::from((scrypto.clone(), NetworkID::Stokenet)),
+            expected.clone()
+        );
+
+        // Not equals, when wrong NetworkID
+        assert_ne!(SUT::from((scrypto, NetworkID::Mainnet)), expected);
     }
 }
