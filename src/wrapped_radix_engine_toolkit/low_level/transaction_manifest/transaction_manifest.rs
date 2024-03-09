@@ -367,7 +367,9 @@ mod tests {
         assert_eq!(
             summary.detailed_classification,
             vec![
-                DetailedManifestClass::Transfer,
+                DetailedManifestClass::Transfer {
+                    is_one_to_one: true
+                },
                 DetailedManifestClass::General
             ]
         );
@@ -533,7 +535,9 @@ mod tests {
         assert_eq!(
             sut.detailed_classification,
             vec![
-                DetailedManifestClass::Transfer,
+                DetailedManifestClass::Transfer {
+                    is_one_to_one: false
+                },
                 DetailedManifestClass::General
             ]
         );

@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+use radix_engine_interface::blueprints::resource::ResourceOrNonFungible as ScryptoResourceOrNonFungible;
+
 /// The addresses that can be added as exception to the `DepositRule`
 #[derive(
     Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum,
@@ -11,6 +13,24 @@ pub enum ResourceOrNonFungible {
 
     #[serde(rename = "nonFungibleGlobalID")]
     NonFungible { value: NonFungibleGlobalId },
+}
+
+impl From<(ScryptoResourceOrNonFungible, NetworkID)> for ResourceOrNonFungible {
+    fn from(value: (ScryptoResourceOrNonFungible, NetworkID)) -> Self {
+        let (resource_or_non_fungible, network_id) = value;
+        match resource_or_non_fungible {
+            ScryptoResourceOrNonFungible::NonFungible(nf) => {
+                Self::NonFungible {
+                    value: (nf, network_id).into(),
+                }
+            }
+            ScryptoResourceOrNonFungible::Resource(resource_address) => {
+                Self::Resource {
+                    value: (resource_address, network_id).into(),
+                }
+            }
+        }
+    }
 }
 
 impl HasSampleValues for ResourceOrNonFungible {

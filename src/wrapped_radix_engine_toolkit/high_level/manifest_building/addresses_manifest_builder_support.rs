@@ -135,6 +135,49 @@ impl From<ResourceOrNonFungible> for ScryptoResourceOrNonFungible {
     }
 }
 
+pub(crate) fn to_vec_network_aware<T, U>(
+    values: impl IntoIterator<Item = T>,
+    network_id: NetworkID,
+) -> Vec<U>
+where
+    U: From<(T, NetworkID)>,
+{
+    values
+        .into_iter()
+        .map(|x| (x, network_id))
+        .map(U::from)
+        .collect_vec()
+}
+
+pub(crate) fn to_hashmap_network_aware_key<K, V, L, U>(
+    values: impl IntoIterator<Item = (K, V)>,
+    network_id: NetworkID,
+) -> HashMap<L, U>
+where
+    L: Eq + std::hash::Hash + From<(K, NetworkID)>,
+    U: From<V>,
+{
+    values
+        .into_iter()
+        .map(|(k, v)| (L::from((k, network_id)), U::from(v)))
+        .collect::<HashMap<L, U>>()
+}
+
+pub(crate) fn filter_try_to_vec_network_aware<T, U>(
+    values: impl IntoIterator<Item = T>,
+    network_id: NetworkID,
+) -> Vec<U>
+where
+    U: TryFrom<(T, NetworkID)>,
+{
+    values
+        .into_iter()
+        .map(|x| (x, network_id))
+        .map(U::try_from)
+        .filter_map(Result::ok)
+        .collect_vec()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
