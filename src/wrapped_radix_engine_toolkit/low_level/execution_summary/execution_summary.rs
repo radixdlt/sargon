@@ -1,6 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine::system::system_modules::execution_trace::ResourceSpecifier as ScryptoResourceSpecifier;
 use radix_engine::types::indexmap::IndexMap;
 use radix_engine_common::types::ComponentAddress as ScryptoComponentAddress;
 
@@ -69,20 +68,6 @@ fn addresses_of_accounts_from_ret(
             )
         })
         .collect::<HashMap<_, _>>()
-}
-
-impl From<(ScryptoResourceSpecifier, NetworkID)> for ResourceAddress {
-    fn from(value: (ScryptoResourceSpecifier, NetworkID)) -> Self {
-        let (ret, network_id) = value;
-        match ret {
-            ScryptoResourceSpecifier::Amount(resource_address, _) => {
-                (resource_address, network_id).into()
-            }
-            ScryptoResourceSpecifier::Ids(resource_address, _) => {
-                (resource_address, network_id).into()
-            }
-        }
-    }
 }
 
 impl From<(RetExecutionSummary, NetworkID)> for ExecutionSummary {

@@ -1,3 +1,4 @@
+mod address_conversion;
 mod compiled_notarized_intent;
 mod execution_summary;
 mod intent_signature;
@@ -15,6 +16,7 @@ mod transaction_intent;
 mod transaction_manifest;
 mod transaction_receipt;
 
+pub use address_conversion::*;
 pub use compiled_notarized_intent::*;
 pub use execution_summary::*;
 pub use intent_signature::*;
