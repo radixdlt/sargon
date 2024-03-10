@@ -195,6 +195,30 @@ mod tests {
     }
 
     #[test]
+    fn ord_same_resource_address() {
+        let r = ResourceAddress::sample();
+        assert!(
+            SUT::new_unchecked(r.clone(), NonFungibleLocalId::integer(1))
+                < SUT::new_unchecked(r.clone(), NonFungibleLocalId::integer(2))
+        );
+    }
+
+    #[test]
+    fn ord_diff_resource_address_addr_takes_precedence_over_local_id_integer() {
+        assert!(
+            // lazy test, using FUNGIBLE Resource address instead of Non-Fungible ResourceAddress
+            // as we should be doing... alas we accept fungible ones since they can appear "in the wild".
+            SUT::new_unchecked(
+                ResourceAddress::sample_mainnet_candy(),
+                NonFungibleLocalId::integer(99999)
+            ) < SUT::new_unchecked(
+                ResourceAddress::sample_mainnet_xrd(),
+                NonFungibleLocalId::integer(111)
+            )
+        );
+    }
+
+    #[test]
     fn test_deserialize() {
         let str = "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd:#2244#";
         let id: SUT = str.parse().unwrap();

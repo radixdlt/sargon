@@ -232,6 +232,11 @@ mod tests_non_empty_max_64_bytes {
     }
 
     #[test]
+    fn ord() {
+        assert!(SUT::sample() < SUT::sample_other());
+    }
+
+    #[test]
     fn cannot_be_empty() {
         assert_eq!(SUT::from_hex(""), Err(CommonError::BytesEmpty));
     }

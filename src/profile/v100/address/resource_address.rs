@@ -174,6 +174,11 @@ mod tests {
     }
 
     #[test]
+    fn ord() {
+        assert!(SUT::sample_mainnet_candy() < SUT::sample_mainnet_xrd());
+    }
+
+    #[test]
     fn is_fungible() {
         assert!(SUT::sample_mainnet_nft_gc_membership().is_non_fungible());
         assert!(!SUT::sample_mainnet_nft_gc_membership().is_fungible());

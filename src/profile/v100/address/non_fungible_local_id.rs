@@ -175,6 +175,11 @@ mod tests {
     }
 
     #[test]
+    fn ord() {
+        assert!(SUT::integer(1) < SUT::integer(2));
+    }
+
+    #[test]
     fn from_str_ok() {
         assert_eq!(
             "<value>".parse::<SUT>().unwrap(),

@@ -333,6 +333,11 @@ mod tests_exactly32_bytes {
     }
 
     #[test]
+    fn ord() {
+        assert!(SUT::sample() < SUT::sample_other());
+    }
+
+    #[test]
     fn hash() {
         assert_eq!(
             HashSet::<SUT>::from_iter([
