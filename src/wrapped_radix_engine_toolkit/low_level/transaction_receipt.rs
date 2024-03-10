@@ -8,14 +8,7 @@ use sbor::HasLatestVersion;
 #[derive(Clone, Debug)]
 pub struct TransactionReceipt {
     pub(crate) decoded: ScryptoTransactionReceipt,
-    pub(crate) encoded: BagOfBytes,
 }
-impl PartialEq for TransactionReceipt {
-    fn eq(&self, other: &Self) -> bool {
-        self.encoded == other.encoded
-    }
-}
-impl Eq for TransactionReceipt {}
 
 impl TryFrom<BagOfBytes> for TransactionReceipt {
     type Error = crate::CommonError;
@@ -27,6 +20,6 @@ impl TryFrom<BagOfBytes> for TransactionReceipt {
                 error!("Failed to decode encoded receipt, {:?}", e);
                 CommonError::FailedToDecodeEncodedReceipt
             })
-            .map(|decoded| Self { decoded, encoded })
+            .map(|decoded| Self { decoded })
     }
 }

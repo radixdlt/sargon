@@ -8,6 +8,13 @@ impl TransactionManifest {
         encoded_receipt: BagOfBytes,
     ) -> Result<ExecutionSummary> {
         let receipt: TransactionReceipt = encoded_receipt.try_into()?;
+        self.execution_summary_with_receipt(receipt)
+    }
+
+    fn execution_summary_with_receipt(
+        &self,
+        receipt: TransactionReceipt,
+    ) -> Result<ExecutionSummary> {
         let ret_execution_summary =
             RET_execution_summary(&self.scrypto_manifest(), &receipt.decoded)
                 .map_err(|e| {
@@ -27,10 +34,11 @@ impl TransactionManifest {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use radix_engine::transaction::{
+        AbortReason, AbortResult, TransactionResult,
+    };
 
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = ExecutionSummary;
+    use super::*;
 
     #[test]
     fn invalid_receipt() {
@@ -38,6 +46,23 @@ mod tests {
             TransactionManifest::sample()
                 .execution_summary(BagOfBytes::from_hex("dead").unwrap()),
             Err(CommonError::FailedToDecodeEncodedReceipt)
+        );
+    }
+
+    #[test]
+    fn failure_if_receipt_result_is_abort() {
+        let encoded_receipt_hex = include_str!("create_pool.dat");
+        let wrong_receipt_raw =
+            BagOfBytes::from_hex(encoded_receipt_hex).unwrap();
+        let mut wrong_receipt: TransactionReceipt =
+            wrong_receipt_raw.try_into().unwrap();
+        wrong_receipt.decoded.result = TransactionResult::Abort(AbortResult {
+            reason: AbortReason::ConfiguredAbortTriggeredOnFeeLoanRepayment,
+        });
+        assert_eq!(
+            TransactionManifest::sample()
+                .execution_summary_with_receipt(wrong_receipt),
+            Err(CommonError::FailedToGetRetExecutionSummaryFromManifest)
         );
     }
 
