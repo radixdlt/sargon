@@ -198,6 +198,70 @@ mod tests {
     }
 
     #[test]
+    fn add_guarantees_divisibility_rounding() {
+        let instructions_string = r#"
+        CALL_METHOD
+    Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+    "lock_fee"
+    Decimal("0.61")
+;
+CALL_METHOD
+    Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+    "withdraw"
+    Address("resource_rdx1t4dy69k6s0gv040xa64cyadyefwtett62ng6xfdnljyydnml7t6g3j")
+    Decimal("0.12344")
+;
+TAKE_FROM_WORKTOP
+    Address("resource_rdx1t4dy69k6s0gv040xa64cyadyefwtett62ng6xfdnljyydnml7t6g3j")
+    Decimal("0.12344")
+    Bucket("bucket1")
+;
+CALL_METHOD
+    Address("account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master")
+    "try_deposit_or_abort"
+    Bucket("bucket1")
+    Enum<0u8>()
+;
+"#;
+        let index = 2;
+        let resource = ResourceAddress::sample_mainnet_candy();
+        let added_guaranteed_amount: Decimal = "0.12344".parse().unwrap();
+        let divisibility = 4;
+        let rounded_guaranteed_amount: Decimal = "0.1234".parse().unwrap();
+        assert_eq!(
+            added_guaranteed_amount
+                .clone()
+                .round(
+                    divisibility,
+                    RoundingMode::ToNearestMidpointAwayFromZero // ofc must match mode in impl of `modify_add_guarantees`
+                )
+                .unwrap(),
+            rounded_guaranteed_amount.clone()
+        );
+        let mut manifest = TransactionManifest::new(
+            instructions_string,
+            NetworkID::Mainnet,
+            Blobs::default(),
+        )
+        .unwrap();
+        manifest = manifest.modify_add_guarantees([TransactionGuarantee::new(
+            added_guaranteed_amount,
+            index,
+            resource.clone(),
+            divisibility,
+        )]);
+        let instructions = manifest.instructions().to_owned();
+        let instruction = instructions[index as usize + 1].clone();
+        assert_eq!(
+            instruction,
+            ScryptoInstruction::AssertWorktopContains {
+                resource_address: resource.into(),
+                amount: rounded_guaranteed_amount.into()
+            }
+        );
+    }
+
+    #[test]
     #[should_panic(
         expected = "Expected single instruction. You MUST NOT chain calls with the manifest builder."
     )]
