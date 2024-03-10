@@ -71,17 +71,15 @@ fn addresses_of_accounts_from_ret(
         .collect::<HashMap<_, _>>()
 }
 
-trait HasResourceAddressOnNetwork {
-    fn resource_address(&self, network_id: NetworkID) -> ResourceAddress;
-}
-impl HasResourceAddressOnNetwork for ScryptoResourceSpecifier {
-    fn resource_address(&self, network_id: NetworkID) -> ResourceAddress {
-        match self {
+impl From<(ScryptoResourceSpecifier, NetworkID)> for ResourceAddress {
+    fn from(value: (ScryptoResourceSpecifier, NetworkID)) -> Self {
+        let (ret, network_id) = value;
+        match ret {
             ScryptoResourceSpecifier::Amount(resource_address, _) => {
-                (*resource_address, network_id).into()
+                (resource_address, network_id).into()
             }
             ScryptoResourceSpecifier::Ids(resource_address, _) => {
-                (*resource_address, network_id).into()
+                (resource_address, network_id).into()
             }
         }
     }
@@ -89,64 +87,64 @@ impl HasResourceAddressOnNetwork for ScryptoResourceSpecifier {
 
 impl From<(RetExecutionSummary, NetworkID)> for ExecutionSummary {
     fn from(value: (RetExecutionSummary, NetworkID)) -> Self {
-        let (ret_summary, network_id) = value;
+        let (ret, n) = value;
         let addresses_of_account_withdraws = addresses_of_accounts_from_ret(
-            ret_summary.account_withdraws,
-            network_id,
+            ret.account_withdraws,
+            n,
         );
 
         let addresses_of_account_deposits = addresses_of_accounts_from_ret(
-            ret_summary.account_deposits,
-            network_id,
+            ret.account_deposits,
+            n,
         );
 
         let new_entities: NewEntities =
-            (ret_summary.new_entities, network_id).into();
+            (ret.new_entities, n).into();
 
-        let detailed_classification: Vec<DetailedManifestClass> = ret_summary
+        let detailed_classification: Vec<DetailedManifestClass> = ret
             .detailed_classification
             .into_iter()
-            .map(|d| DetailedManifestClass::from((d, network_id)))
+            .map(|d| DetailedManifestClass::from((d, n)))
             .collect_vec();
 
-        let reserved_instructions: Vec<ReservedInstruction> = ret_summary
+        let reserved_instructions: Vec<ReservedInstruction> = ret
             .reserved_instructions
             .into_iter()
             .map(ReservedInstruction::from)
             .collect();
 
         let mut newly_created_non_fungibles = to_vec_network_aware(
-            ret_summary.newly_created_non_fungibles,
-            network_id,
+            ret.newly_created_non_fungibles,
+            n,
         );
         newly_created_non_fungibles.sort();
 
         // iOS Wallet only use `Vec<ResourceAddress>` for `presented_proofs` today,
         // have to assert Android does the same.
-        let presented_proofs = ret_summary
+        let presented_proofs = ret
             .presented_proofs
             .values()
             .cloned()
-            .flat_map(|x| x.into_iter().map(|y| y.resource_address(network_id)))
+            .flat_map(|vec| filter_try_to_vec_network_aware(vec, n))
             .collect_vec();
 
         let encountered_component_addresses = filter_try_to_vec_network_aware(
-            ret_summary.encountered_entities,
-            network_id,
+            ret.encountered_entities,
+            n,
         );
 
-        let fee_locks = ret_summary.fee_locks.into();
+        let fee_locks = ret.fee_locks.into();
 
-        let fee_summary = ret_summary.fee_summary.into();
+        let fee_summary = ret.fee_summary.into();
 
         let addresses_of_accounts_requiring_auth = to_vec_network_aware(
-            ret_summary.accounts_requiring_auth,
-            network_id,
+            ret.accounts_requiring_auth,
+            n,
         );
 
         let addresses_of_identities_requiring_auth = to_vec_network_aware(
-            ret_summary.identities_requiring_auth,
-            network_id,
+            ret.identities_requiring_auth,
+            n,
         );
 
         Self {
