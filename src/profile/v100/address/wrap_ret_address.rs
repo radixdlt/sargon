@@ -286,6 +286,16 @@ decl_ret_wrapped_address!(
     /// * GlobalVirtualSecp256k1Identity,
     /// * GlobalVirtualEd25519Identity
     ///
+    /// ```
+    /// extern crate sargon;
+    /// use sargon::prelude::*;
+    ///
+    /// assert_eq!(
+    ///     "identity_rdx12tgzjrz9u0xz4l28vf04hz87eguclmfaq4d2p8f8lv7zg9ssnzku8j".parse::<IdentityAddress>().unwrap().network_id(),
+    ///     NetworkID::Mainnet
+    /// );
+    /// ```
+    ///
     /// Implementation wise we wrap [Radix Engine Toolkit's `CanonicalIdentityAddress`][ret], and
     /// give it UniFFI support, as a `uniffi::Record` (we also own Serde).
     ///

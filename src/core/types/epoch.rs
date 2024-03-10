@@ -1,8 +1,6 @@
 pub use crate::prelude::*;
 use radix_engine::types::Epoch as ScryptoEpoch;
 
-// use radix_engine_common::types::Epoch as ScryptoEpoch;
-
 // Generate the FfiConverter needed by UniFFI for newtype `Epoch`.
 uniffi::custom_newtype!(Epoch, u64);
 

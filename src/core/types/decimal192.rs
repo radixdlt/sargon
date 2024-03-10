@@ -93,26 +93,19 @@ impl FromStr for Decimal192 {
     }
 }
 
-impl From<u32> for Decimal {
-    fn from(value: u32) -> Self {
-        ScryptoDecimal192::from(value).into()
-    }
+macro_rules! forward_from_for_num {
+    ($num_type: ty) => {
+        impl From<$num_type> for Decimal {
+            fn from(value: $num_type) -> Self {
+                ScryptoDecimal192::from(value).into()
+            }
+        }
+    };
 }
-impl From<u64> for Decimal {
-    fn from(value: u64) -> Self {
-        ScryptoDecimal192::from(value).into()
-    }
-}
-impl From<i32> for Decimal {
-    fn from(value: i32) -> Self {
-        ScryptoDecimal192::from(value).into()
-    }
-}
-impl From<i64> for Decimal {
-    fn from(value: i64) -> Self {
-        ScryptoDecimal192::from(value).into()
-    }
-}
+forward_from_for_num!(u32);
+forward_from_for_num!(u64);
+forward_from_for_num!(i32);
+forward_from_for_num!(i64);
 
 impl From<f32> for Decimal {
     fn from(value: f32) -> Self {
