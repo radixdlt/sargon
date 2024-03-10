@@ -53,6 +53,62 @@ pub struct ExecutionSummary {
     pub fee_summary: FeeSummary,
 }
 
+impl ExecutionSummary {
+    #[allow(clippy::too_many_arguments)]
+    pub fn new(
+        addresses_of_account_withdraws: impl Into<
+            HashMap<AccountAddress, Vec<ResourceIndicator>>,
+        >,
+        addresses_of_account_deposits: impl Into<
+            HashMap<AccountAddress, Vec<ResourceIndicator>>,
+        >,
+        addresses_of_accounts_requiring_auth: impl IntoIterator<
+            Item = AccountAddress,
+        >,
+        addresses_of_identities_requiring_auth: impl IntoIterator<
+            Item = IdentityAddress,
+        >,
+        newly_created_non_fungibles: impl IntoIterator<Item = NonFungibleGlobalId>,
+        reserved_instructions: impl IntoIterator<Item = ReservedInstruction>,
+        presented_proofs: impl IntoIterator<Item = ResourceAddress>,
+        encountered_component_addresses: impl IntoIterator<Item = ComponentAddress>,
+        detailed_classification: impl IntoIterator<Item = DetailedManifestClass>,
+        fee_locks: impl Into<FeeLocks>,
+        fee_summary: impl Into<FeeSummary>,
+        new_entities: impl Into<NewEntities>,
+    ) -> Self {
+        Self {
+            addresses_of_account_withdraws: addresses_of_account_withdraws
+                .into(),
+            addresses_of_account_deposits: addresses_of_account_deposits.into(),
+            addresses_of_accounts_requiring_auth:
+                addresses_of_accounts_requiring_auth
+                    .into_iter()
+                    .collect_vec(),
+            addresses_of_identities_requiring_auth:
+                addresses_of_identities_requiring_auth
+                    .into_iter()
+                    .collect_vec(),
+            newly_created_non_fungibles: newly_created_non_fungibles
+                .into_iter()
+                .collect_vec(),
+            reserved_instructions: reserved_instructions
+                .into_iter()
+                .collect_vec(),
+            presented_proofs: presented_proofs.into_iter().collect_vec(),
+            encountered_component_addresses: encountered_component_addresses
+                .into_iter()
+                .collect_vec(),
+            detailed_classification: detailed_classification
+                .into_iter()
+                .collect_vec(),
+            fee_locks: fee_locks.into(),
+            fee_summary: fee_summary.into(),
+            new_entities: new_entities.into(),
+        }
+    }
+}
+
 fn addresses_of_accounts_from_ret(
     ret: IndexMap<ScryptoComponentAddress, Vec<RetResourceIndicator>>,
     network_id: NetworkID,
@@ -73,65 +129,34 @@ fn addresses_of_accounts_from_ret(
 impl From<(RetExecutionSummary, NetworkID)> for ExecutionSummary {
     fn from(value: (RetExecutionSummary, NetworkID)) -> Self {
         let (ret, n) = value;
-        let addresses_of_account_withdraws =
-            addresses_of_accounts_from_ret(ret.account_withdraws, n);
-
-        let addresses_of_account_deposits =
-            addresses_of_accounts_from_ret(ret.account_deposits, n);
-
-        let new_entities: NewEntities = (ret.new_entities, n).into();
-
-        let detailed_classification: Vec<DetailedManifestClass> = ret
-            .detailed_classification
-            .into_iter()
-            .map(|d| DetailedManifestClass::from((d, n)))
-            .collect_vec();
-
-        let reserved_instructions: Vec<ReservedInstruction> = ret
-            .reserved_instructions
-            .into_iter()
-            .map(ReservedInstruction::from)
-            .collect();
 
         let mut newly_created_non_fungibles =
             to_vec_network_aware(ret.newly_created_non_fungibles, n);
         newly_created_non_fungibles.sort();
 
-        // iOS Wallet only use `Vec<ResourceAddress>` for `presented_proofs` today,
-        // have to assert Android does the same.
-        let presented_proofs = ret
-            .presented_proofs
-            .values()
-            .cloned()
-            .flat_map(|vec| filter_try_to_vec_network_aware(vec, n))
-            .collect_vec();
-
-        let encountered_component_addresses =
-            filter_try_to_vec_network_aware(ret.encountered_entities, n);
-
-        let fee_locks = ret.fee_locks.into();
-
-        let fee_summary = ret.fee_summary.into();
-
-        let addresses_of_accounts_requiring_auth =
-            to_vec_network_aware(ret.accounts_requiring_auth, n);
-
-        let addresses_of_identities_requiring_auth =
-            to_vec_network_aware(ret.identities_requiring_auth, n);
-
-        Self {
-            addresses_of_account_withdraws,
-            addresses_of_account_deposits,
-            addresses_of_accounts_requiring_auth,
-            addresses_of_identities_requiring_auth,
-            new_entities,
-            detailed_classification,
+        Self::new(
+            addresses_of_accounts_from_ret(ret.account_withdraws, n),
+            addresses_of_accounts_from_ret(ret.account_deposits, n),
+            to_vec_network_aware(ret.accounts_requiring_auth, n),
+            to_vec_network_aware(ret.identities_requiring_auth, n),
             newly_created_non_fungibles,
-            reserved_instructions,
-            presented_proofs,
-            encountered_component_addresses,
-            fee_locks,
-            fee_summary,
-        }
+            ret.reserved_instructions
+                .into_iter()
+                .map(ReservedInstruction::from),
+            ret
+                // iOS Wallet only use `Vec<ResourceAddress>` for `presented_proofs` today,
+                // have to assert Android does the same.
+                .presented_proofs
+                .values()
+                .cloned()
+                .flat_map(|vec| filter_try_to_vec_network_aware(vec, n)),
+            filter_try_to_vec_network_aware(ret.encountered_entities, n),
+            ret.detailed_classification
+                .into_iter()
+                .map(|d| DetailedManifestClass::from((d, n))),
+            ret.fee_locks,
+            ret.fee_summary,
+            (ret.new_entities, n),
+        )
     }
 }

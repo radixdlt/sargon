@@ -29,6 +29,9 @@ impl TransactionManifest {
 mod tests {
     use super::*;
 
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = ExecutionSummary;
+
     #[test]
     fn invalid_receipt() {
         assert_eq!(
