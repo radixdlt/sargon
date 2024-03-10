@@ -1,0 +1,53 @@
+CALL_METHOD
+    Address("account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk")
+    "withdraw_non_fungibles"
+    Address("resource_tdx_2_1ng3g2nj5pfpmdphgz0nrh8z0gtqcxx5z5dn48t85ar0z0zjhefufaw")
+    Array<NonFungibleLocalId>(
+    NonFungibleLocalId("{97c2b05d8529be58-152d79c176d61d68-f87611f279e0daa3-d486426d5330795c}")
+    )
+;
+TAKE_ALL_FROM_WORKTOP
+    Address("resource_tdx_2_1ng3g2nj5pfpmdphgz0nrh8z0gtqcxx5z5dn48t85ar0z0zjhefufaw")
+    Bucket("bucket1")
+;
+CALL_METHOD
+    Address("validator_tdx_2_1sdtnujyn3720ymg8lakydkvc5tw4q3zecdj95akdwt9de362mvtd94")
+    "claim_xrd"
+    Bucket("bucket1")
+;
+TAKE_FROM_WORKTOP
+    Address("resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc")
+    Decimal("110")
+    Bucket("bucket2")
+;
+CALL_METHOD
+    Address("account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk")
+    "deposit"
+    Bucket("bucket2")
+;
+CALL_METHOD
+    Address("account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk")
+    "withdraw_non_fungibles"
+    Address("resource_tdx_2_1ngw8z6ut9mw54am4rr65kwcuz24q3n7waxtzyfvug5g4yuc00jydqj")
+    Array<NonFungibleLocalId>(
+    NonFungibleLocalId("{f1edc2f0f8f54d33-dab8e1bf90e196ce-9714ef7b85478c6c-82486b47a79b3002}")
+    )
+;
+TAKE_ALL_FROM_WORKTOP
+    Address("resource_tdx_2_1ngw8z6ut9mw54am4rr65kwcuz24q3n7waxtzyfvug5g4yuc00jydqj")
+    Bucket("bucket3")
+;
+CALL_METHOD
+    Address("validator_tdx_2_1sdlkptcwjpajqawnuya8r2mgl3eqt89hw27ww6du8kxmx3thmyu8l4")
+    "claim_xrd"
+    Bucket("bucket3")
+;
+TAKE_FROM_WORKTOP
+    Address("resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc")
+    Decimal("1234")
+    Bucket("bucket4")
+;
+CALL_METHOD
+    Address("account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk")
+    "deposit"
+    Bucket("bucket4");

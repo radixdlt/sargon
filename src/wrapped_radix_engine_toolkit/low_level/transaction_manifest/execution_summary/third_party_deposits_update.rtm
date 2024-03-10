@@ -1,0 +1,24 @@
+CALL_METHOD
+    Address("account_tdx_2_12xx9jz27aa0mqjj8cwhk7pzkhtkthv09yclmurse42hlyme2gegyg2")
+    "set_default_deposit_rule"
+    Enum<1u8>()
+;
+CALL_METHOD
+    Address("account_tdx_2_12xx9jz27aa0mqjj8cwhk7pzkhtkthv09yclmurse42hlyme2gegyg2")
+    "remove_resource_preference"
+    Address("resource_tdx_2_1thqcgjw37fjgycpvqr52nx4jcsdeuq75mf2nywme07kzsuds9a4psp")
+;
+CALL_METHOD
+    Address("account_tdx_2_12xx9jz27aa0mqjj8cwhk7pzkhtkthv09yclmurse42hlyme2gegyg2")
+    "remove_authorized_depositor"
+    Enum<1u8>(
+        Address("resource_tdx_2_1ngw6cufaxs5p82kw49juy2yfkt53se76vr0xfsu3tvyduuw6s0y6lc")
+    )
+;
+CALL_METHOD
+    Address("account_tdx_2_12xx9jz27aa0mqjj8cwhk7pzkhtkthv09yclmurse42hlyme2gegyg2")
+    "add_authorized_depositor"
+    Enum<1u8>(
+        Address("resource_tdx_2_1ng88qk08hrgmad30rzdxpyx779yuta4cwcjc3gstk60jhachsv94g9")
+    )
+;

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 /// Metadata about a newly created Resource
-#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, uniffi::Record)]
 pub struct NewlyCreatedResource {
     pub name: Option<String>,
     pub symbol: Option<String>,
@@ -44,13 +44,13 @@ impl From<IndexMap<String, Option<ScryptoMetadataValue>>>
 
         use MetadataKey::*;
 
-        Self {
-            name: get_str(Name),
-            symbol: get_str(Symbol),
-            description: get_str(Description),
-            icon_url: get_url(IconUrl),
-            tags: get_str_arr(Tags),
-        }
+        Self::new(
+            get_str(Name),
+            get_str(Symbol),
+            get_str(Description),
+            get_url(IconUrl),
+            get_str_arr(Tags),
+        )
     }
 }
 
@@ -72,6 +72,14 @@ impl NewlyCreatedResource {
             icon_url: icon_url.into(),
             tags: tags.into_iter().collect_vec(),
         }
+    }
+
+    /// This can happen for e.g. creation of a new Pool, actually, the metadata
+    /// from RET execution summary DOES contain a "pool" key, with value being
+    /// a PoolAddress, but it is not the same pool address as the resulting pool,
+    /// since it is an ephemeral PREVIEWED NodeId...
+    pub fn empty() -> Self {
+        Self::default()
     }
 
     pub fn with<I>(
@@ -163,5 +171,10 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn default_is_empty() {
+        assert_eq!(SUT::empty(), SUT::default());
     }
 }

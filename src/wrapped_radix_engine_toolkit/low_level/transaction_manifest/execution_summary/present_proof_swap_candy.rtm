@@ -1,0 +1,29 @@
+CALL_METHOD
+    Address("account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk")
+    "create_proof_of_non_fungibles"
+    Address("resource_tdx_2_1ng88qk08hrgmad30rzdxpyx779yuta4cwcjc3gstk60jhachsv94g9")
+    Array<NonFungibleLocalId>(
+        NonFungibleLocalId("<Member_44>")
+    )
+;
+CALL_METHOD
+    Address("account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk")
+    "withdraw"
+    Address("resource_tdx_2_1thqcgjw37fjgycpvqr52nx4jcsdeuq75mf2nywme07kzsuds9a4psp")
+    Decimal("1")
+;
+TAKE_FROM_WORKTOP
+    Address("resource_tdx_2_1thqcgjw37fjgycpvqr52nx4jcsdeuq75mf2nywme07kzsuds9a4psp")
+    Decimal("1")
+    Bucket("bucket1")
+;
+CALL_METHOD
+    Address("component_tdx_2_1crje3en7zsrna9t5vyywn3z3t9ht34l9udxjcpjvdhpcw9v6vlzru8")
+    "buy_candy_with_member_card"
+    Bucket("bucket1")
+;
+CALL_METHOD
+    Address("account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk")
+    "deposit_batch"
+    Expression("ENTIRE_WORKTOP")
+;

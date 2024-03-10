@@ -102,6 +102,8 @@ impl PoolAddress {
 
 #[cfg(test)]
 mod tests {
+    use radix_engine::types::NodeId;
+
     use crate::prelude::*;
 
     #[allow(clippy::upper_case_acronyms)]
