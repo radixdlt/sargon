@@ -261,7 +261,7 @@ mod tests {
 
     #[test]
     fn into_resource_address() {
-        assert_eq!(Into::<ResourceAddress>::into(SUT::sample()), "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa".parse::<ResourceAddress>().unwrap());
+        assert_eq!(ResourceAddress::from(SUT::sample()), "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa".parse::<ResourceAddress>().unwrap());
     }
 
     #[test]

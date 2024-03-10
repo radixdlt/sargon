@@ -345,7 +345,7 @@ mod tests {
 
     #[test]
     fn into_scrypto_global_address() {
-        assert_eq!(Into::<radix_engine::types::GlobalAddress>::into(SUT::sample()).into_node_id().as_bytes()[0], radix_engine_common::types::EntityType::GlobalVirtualSecp256k1Account as u8);
+        assert_eq!(radix_engine::types::GlobalAddress::from(SUT::sample()).into_node_id().as_bytes()[0], radix_engine_common::types::EntityType::GlobalVirtualSecp256k1Account as u8);
     }
 
     #[test]

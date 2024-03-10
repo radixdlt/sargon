@@ -88,18 +88,13 @@ impl From<(ScryptoResourceSpecifier, NetworkID)> for ResourceAddress {
 impl From<(RetExecutionSummary, NetworkID)> for ExecutionSummary {
     fn from(value: (RetExecutionSummary, NetworkID)) -> Self {
         let (ret, n) = value;
-        let addresses_of_account_withdraws = addresses_of_accounts_from_ret(
-            ret.account_withdraws,
-            n,
-        );
+        let addresses_of_account_withdraws =
+            addresses_of_accounts_from_ret(ret.account_withdraws, n);
 
-        let addresses_of_account_deposits = addresses_of_accounts_from_ret(
-            ret.account_deposits,
-            n,
-        );
+        let addresses_of_account_deposits =
+            addresses_of_accounts_from_ret(ret.account_deposits, n);
 
-        let new_entities: NewEntities =
-            (ret.new_entities, n).into();
+        let new_entities: NewEntities = (ret.new_entities, n).into();
 
         let detailed_classification: Vec<DetailedManifestClass> = ret
             .detailed_classification
@@ -113,10 +108,8 @@ impl From<(RetExecutionSummary, NetworkID)> for ExecutionSummary {
             .map(ReservedInstruction::from)
             .collect();
 
-        let mut newly_created_non_fungibles = to_vec_network_aware(
-            ret.newly_created_non_fungibles,
-            n,
-        );
+        let mut newly_created_non_fungibles =
+            to_vec_network_aware(ret.newly_created_non_fungibles, n);
         newly_created_non_fungibles.sort();
 
         // iOS Wallet only use `Vec<ResourceAddress>` for `presented_proofs` today,
@@ -128,24 +121,18 @@ impl From<(RetExecutionSummary, NetworkID)> for ExecutionSummary {
             .flat_map(|vec| filter_try_to_vec_network_aware(vec, n))
             .collect_vec();
 
-        let encountered_component_addresses = filter_try_to_vec_network_aware(
-            ret.encountered_entities,
-            n,
-        );
+        let encountered_component_addresses =
+            filter_try_to_vec_network_aware(ret.encountered_entities, n);
 
         let fee_locks = ret.fee_locks.into();
 
         let fee_summary = ret.fee_summary.into();
 
-        let addresses_of_accounts_requiring_auth = to_vec_network_aware(
-            ret.accounts_requiring_auth,
-            n,
-        );
+        let addresses_of_accounts_requiring_auth =
+            to_vec_network_aware(ret.accounts_requiring_auth, n);
 
-        let addresses_of_identities_requiring_auth = to_vec_network_aware(
-            ret.identities_requiring_auth,
-            n,
-        );
+        let addresses_of_identities_requiring_auth =
+            to_vec_network_aware(ret.identities_requiring_auth, n);
 
         Self {
             addresses_of_account_withdraws,

@@ -199,13 +199,13 @@ mod tests {
 
     #[test]
     fn to_scrypto() {
-        match Into::<ScryptoSignatureWithPublicKey>::into(SUT::sample()) {
+        match ScryptoSignatureWithPublicKey::from(SUT::sample()) {
             ScryptoSignatureWithPublicKey::Ed25519 {
                 signature,
                 public_key: _,
             } => {
                 assert_eq!(
-                    Into::<Ed25519Signature>::into(signature),
+                    Ed25519Signature::from(signature),
                     Ed25519Signature::sample()
                 );
             }
@@ -217,10 +217,10 @@ mod tests {
 
     #[test]
     fn to_scrypto_other() {
-        match Into::<ScryptoSignatureWithPublicKey>::into(SUT::sample_other()) {
+        match ScryptoSignatureWithPublicKey::from(SUT::sample_other()) {
             ScryptoSignatureWithPublicKey::Secp256k1 { signature } => {
                 assert_eq!(
-                    Into::<Secp256k1Signature>::into(signature),
+                    Secp256k1Signature::from(signature),
                     Secp256k1Signature::sample()
                 )
             }

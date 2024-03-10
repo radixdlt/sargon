@@ -98,7 +98,7 @@ impl TryFrom<RETNonFungibleGlobalIdInternal> for NonFungibleGlobalId {
 impl From<NonFungibleGlobalId> for RETNonFungibleGlobalId {
     fn from(value: NonFungibleGlobalId) -> Self {
         let scrypto_global_id = ScryptoNonFungibleGlobalId::new(
-            Into::<ScryptoResourceAddress>::into(&value.resource_address),
+            ScryptoResourceAddress::from(&value.resource_address),
             value.non_fungible_local_id.clone().into(),
         );
         RETNonFungibleGlobalId::new(
@@ -311,7 +311,7 @@ mod tests {
         let sut =
             SUT::new_unchecked(resource_address.clone(), local_id.clone());
         assert_eq!(
-            Into::<ScryptoNonFungibleGlobalId>::into(sut),
+            ScryptoNonFungibleGlobalId::from(sut),
             ScryptoNonFungibleGlobalId::new(
                 resource_address.into(),
                 local_id.into()

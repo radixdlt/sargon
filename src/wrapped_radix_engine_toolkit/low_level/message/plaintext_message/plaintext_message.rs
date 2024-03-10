@@ -72,9 +72,7 @@ mod tests {
 
     #[test]
     fn to_from_scrypto() {
-        let roundtrip = |s: SUT| {
-            Into::<SUT>::into(Into::<ScryptoPlaintextMessage>::into(s))
-        };
+        let roundtrip = |s: SUT| SUT::from(ScryptoPlaintextMessage::from(s));
         roundtrip(SUT::sample());
         roundtrip(SUT::sample_other());
     }

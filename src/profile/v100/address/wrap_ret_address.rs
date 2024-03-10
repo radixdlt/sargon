@@ -196,7 +196,7 @@ macro_rules! decl_ret_wrapped_address {
                         error!("Failed create address, from node and network_id, RET error: {:?}", e);
                         CommonError::FailedToCreateAddressViaRetAddressFromNodeIdAndNetworkID { node_id_as_hex: node_id.to_hex(), network_id }
                     })
-                    .map(|i| Into::<[< $address_type:camel Address >]>::into(i))
+                    .map(|i| [< $address_type:camel Address >]::from(i))
                 }
             }
 

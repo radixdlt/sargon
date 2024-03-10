@@ -35,7 +35,7 @@ impl ThirdPartyDepositsDelta {
                 .clone()
                 .into_iter()
                 .filter(|x| !to.assets_exception_list.contains(x))
-                .map(Into::<ScryptoManifestValue>::into)
+                .map(ScryptoManifestValue::from)
                 .collect(),
             asset_exceptions_to_add_or_update: to
                 .assets_exception_list
@@ -48,7 +48,7 @@ impl ThirdPartyDepositsDelta {
                         .into_iter()
                         .any(|w| w.exception_rule == x.exception_rule)
                 })
-                .map(Into::<ScryptoAccountSetResourcePreferenceInput>::into)
+                .map(ScryptoAccountSetResourcePreferenceInput::from)
                 .collect(),
             depositor_addresses_to_remove: from
                 .depositors_allow_list
@@ -57,7 +57,7 @@ impl ThirdPartyDepositsDelta {
                 .filter(|x| {
                     !to.depositors_allow_list.clone().into_iter().contains(x)
                 })
-                .map(Into::<ScryptoAccountRemoveResourcePreferenceInput>::into)
+                .map(ScryptoAccountRemoveResourcePreferenceInput::from)
                 .collect(),
             depositor_addresses_to_add: to
                 .depositors_allow_list
@@ -66,7 +66,7 @@ impl ThirdPartyDepositsDelta {
                 .filter(|x| {
                     !from.depositors_allow_list.clone().into_iter().contains(x)
                 })
-                .map(Into::<ScryptoAccountAddAuthorizedDepositorInput>::into)
+                .map(ScryptoAccountAddAuthorizedDepositorInput::from)
                 .collect(),
         }
     }
@@ -105,7 +105,7 @@ impl From<AssetException> for ScryptoAccountSetResourcePreferenceInput {
 
 impl From<AssetException> for ScryptoManifestValue {
     fn from(value: AssetException) -> Self {
-        Into::<ScryptoManifestValue>::into(value.address)
+        ScryptoManifestValue::from(value.address)
     }
 }
 
@@ -159,7 +159,7 @@ mod tests {
     #[test]
     fn scrypto_account_remove_resource_preference_input_from_resource_or_nf() {
         assert_eq!(
-            Into::<ScryptoAccountRemoveResourcePreferenceInput>::into(
+            ScryptoAccountRemoveResourcePreferenceInput::from(
                 ResourceOrNonFungible::Resource {
                     value: ResourceAddress::sample()
                 }
@@ -170,7 +170,7 @@ mod tests {
         );
 
         assert_eq!(
-            Into::<ScryptoAccountRemoveResourcePreferenceInput>::into(
+            ScryptoAccountRemoveResourcePreferenceInput::from(
                 ResourceOrNonFungible::NonFungible {
                     value: NonFungibleGlobalId::sample()
                 }
@@ -184,15 +184,15 @@ mod tests {
     #[test]
     fn deposit_rule_into_scrypto() {
         assert_eq!(
-            Into::<ScryptoDefaultDepositRule>::into(DepositRule::AcceptAll),
+            ScryptoDefaultDepositRule::from(DepositRule::AcceptAll),
             ScryptoDefaultDepositRule::Accept
         );
         assert_eq!(
-            Into::<ScryptoDefaultDepositRule>::into(DepositRule::AcceptKnown),
+            ScryptoDefaultDepositRule::from(DepositRule::AcceptKnown),
             ScryptoDefaultDepositRule::AllowExisting
         );
         assert_eq!(
-            Into::<ScryptoDefaultDepositRule>::into(DepositRule::DenyAll),
+            ScryptoDefaultDepositRule::from(DepositRule::DenyAll),
             ScryptoDefaultDepositRule::Reject
         );
     }
@@ -256,7 +256,7 @@ mod tests {
             asset_exceptions
                 .clone()
                 .into_iter()
-                .map(Into::<ScryptoAccountSetResourcePreferenceInput>::into)
+                .map(ScryptoAccountSetResourcePreferenceInput::from)
                 .collect_vec()
         );
         assert_eq!(sut.asset_exceptions_to_be_removed, Vec::new());
@@ -282,7 +282,7 @@ mod tests {
             asset_exceptions
                 .clone()
                 .into_iter()
-                .map(Into::<ScryptoManifestValue>::into)
+                .map(ScryptoManifestValue::from)
                 .collect_vec()
         );
         assert_eq!(sut.depositor_addresses_to_add, Vec::new());
@@ -316,7 +316,7 @@ mod tests {
             expected_asset_exceptions_to_add
                 .clone()
                 .into_iter()
-                .map(Into::<ScryptoAccountSetResourcePreferenceInput>::into)
+                .map(ScryptoAccountSetResourcePreferenceInput::from)
                 .collect_vec()
         );
         assert_eq!(
@@ -324,7 +324,7 @@ mod tests {
             expected_asset_exceptions_to_remove
                 .clone()
                 .into_iter()
-                .map(Into::<ScryptoManifestValue>::into)
+                .map(ScryptoManifestValue::from)
                 .collect_vec()
         );
         assert_eq!(sut.depositor_addresses_to_add, Vec::new());
@@ -354,7 +354,7 @@ mod tests {
             depositor_addresses
                 .clone()
                 .into_iter()
-                .map(Into::<ScryptoAccountAddAuthorizedDepositorInput>::into)
+                .map(ScryptoAccountAddAuthorizedDepositorInput::from)
                 .collect_vec()
         );
         assert_eq!(sut.depositor_addresses_to_remove, Vec::new());
@@ -381,7 +381,7 @@ mod tests {
             depositor_addresses
                 .clone()
                 .into_iter()
-                .map(Into::<ScryptoAccountRemoveResourcePreferenceInput>::into)
+                .map(ScryptoAccountRemoveResourcePreferenceInput::from)
                 .collect_vec()
         );
     }
@@ -417,7 +417,7 @@ mod tests {
             expected_depositor_addresses_to_add
                 .clone()
                 .into_iter()
-                .map(Into::<ScryptoAccountAddAuthorizedDepositorInput>::into)
+                .map(ScryptoAccountAddAuthorizedDepositorInput::from)
                 .collect_vec()
         );
 
@@ -426,7 +426,7 @@ mod tests {
             expected_depositor_addresses_to_remove
                 .clone()
                 .into_iter()
-                .map(Into::<ScryptoAccountRemoveResourcePreferenceInput>::into)
+                .map(ScryptoAccountRemoveResourcePreferenceInput::from)
                 .collect_vec()
         );
     }

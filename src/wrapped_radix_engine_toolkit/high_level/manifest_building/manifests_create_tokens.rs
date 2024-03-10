@@ -156,9 +156,7 @@ impl TransactionManifest {
                     initial_supply
                         .clone()
                         .into_iter()
-                        .map(|t| {
-                            (Into::<ScryptoNonFungibleLocalId>::into(t.0), t.1)
-                        })
+                        .map(|t| (ScryptoNonFungibleLocalId::from(t.0), t.1))
                         .collect::<Vec<(ScryptoNonFungibleLocalId, V)>>(),
                 ),
             )

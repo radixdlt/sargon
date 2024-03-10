@@ -232,7 +232,7 @@ mod tests {
         );
         assert_eq!(value.clone(), scrypto.clone().into());
         assert_eq!(
-            Into::<ScryptoNonFungibleLocalId>::into(value.clone()),
+            ScryptoNonFungibleLocalId::from(value.clone()),
             scrypto.clone()
         );
         assert_eq!(
@@ -250,7 +250,7 @@ mod tests {
         );
 
         assert_eq!(
-            Into::<ScryptoNonFungibleLocalId>::into(value.clone()),
+            ScryptoNonFungibleLocalId::from(value.clone()),
             scrypto.clone()
         );
         assert_eq!(

@@ -83,13 +83,13 @@ mod tests {
 
     #[test]
     fn into_signature_for_ed25519() {
-        assert_eq!(Into::<Signature>::into(SUT::sample()), Signature::sample());
+        assert_eq!(Signature::from(SUT::sample()), Signature::sample());
     }
 
     #[test]
     fn into_signature_for_secp256k1() {
         assert_eq!(
-            Into::<Signature>::into(SUT::sample_other()),
+            Signature::from(SUT::sample_other()),
             Signature::sample_other()
         );
     }

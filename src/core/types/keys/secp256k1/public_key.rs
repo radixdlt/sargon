@@ -257,7 +257,7 @@ mod tests {
 
         // and back
         assert_eq!(
-            TryInto::<SUT>::try_into(Into::<ScryptoSecp256k1PublicKey>::into(
+            SUT::try_from(ScryptoSecp256k1PublicKey::from(
                 from_scrypto.clone()
             ))
             .unwrap(),

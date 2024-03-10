@@ -149,16 +149,14 @@ mod tests {
 
     #[test]
     fn to_from_scrypto() {
-        let roundtrip =
-            |s: SUT| Into::<SUT>::into(Into::<ScryptoBlobs>::into(s));
+        let roundtrip = |s: SUT| SUT::from(ScryptoBlobs::from(s));
         roundtrip(SUT::sample());
         roundtrip(SUT::sample_other());
     }
 
     #[test]
     fn to_from_scrypto_blobs_map() {
-        let roundtrip =
-            |s: SUT| Into::<SUT>::into(Into::<ScryptoBlobsMap>::into(s));
+        let roundtrip = |s: SUT| SUT::from(ScryptoBlobsMap::from(s));
         roundtrip(SUT::sample());
         roundtrip(SUT::sample_other());
     }

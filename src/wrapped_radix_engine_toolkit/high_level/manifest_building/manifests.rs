@@ -75,7 +75,7 @@ impl TransactionManifest {
             non_fungible_local_ids
                 .iter()
                 .cloned()
-                .map(Into::<ScryptoNonFungibleLocalId>::into),
+                .map(ScryptoNonFungibleLocalId::from),
         )
     }
 
