@@ -135,6 +135,7 @@ impl From<ResourceOrNonFungible> for ScryptoResourceOrNonFungible {
     }
 }
 
+#[cfg(not(tarpaulin_include))] // false negative, tested.
 pub(crate) fn to_vec_network_aware<T, U>(
     values: impl IntoIterator<Item = T>,
     network_id: NetworkID,
@@ -163,6 +164,7 @@ where
         .collect::<HashMap<L, U>>()
 }
 
+#[cfg(not(tarpaulin_include))] // false negative, tested.
 pub(crate) fn filter_try_to_vec_network_aware<T, U>(
     values: impl IntoIterator<Item = T>,
     network_id: NetworkID,

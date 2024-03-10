@@ -75,6 +75,15 @@ mod tests {
         );
 
         assert_eq!(
+            SUT::from(RetUpdate::<RetResourcePreference>::Set(
+                RetResourcePreference::Disallowed
+            )),
+            SUT::Set {
+                value: ResourcePreference::Disallowed
+            }
+        );
+
+        assert_eq!(
             SUT::from(RetUpdate::<RetResourcePreference>::Remove),
             SUT::sample_other()
         );
