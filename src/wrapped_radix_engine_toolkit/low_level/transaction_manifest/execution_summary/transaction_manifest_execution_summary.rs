@@ -40,6 +40,9 @@ mod tests {
 
     use super::*;
 
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = ExecutionSummary;
+
     #[test]
     fn invalid_receipt() {
         assert_eq!(
@@ -66,6 +69,12 @@ mod tests {
         );
     }
 
+    impl Default for FeeLocks {
+        fn default() -> Self {
+            Self::new(0, 0)
+        }
+    }
+
     #[test]
     fn transfer_1to2_multiple_nf_and_f_tokens() {
         let encoded_receipt_hex =
@@ -86,32 +95,85 @@ mod tests {
             )
             .unwrap();
 
-        assert_eq!(sut.fee_locks, FeeLocks::new(0, 0));
-        assert_eq!(
-            sut.fee_summary,
-            FeeSummary::new(
-                "0.4077857".parse::<Decimal>().unwrap(),
-                "0.1307814".parse::<Decimal>().unwrap(),
-                "0.52433013014".parse::<Decimal>().unwrap(),
-                0,
+        pretty_assertions::assert_eq!(
+            sut,
+            SUT::new(
+                [
+                    (
+                        "account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk".parse::<AccountAddress>().unwrap(),
+                        vec![
+                            ResourceIndicator::Fungible {
+                                resource_address: "resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy".parse::<ResourceAddress>().unwrap(), 
+                                indicator: FungibleResourceIndicator::Guaranteed { decimal: "36.4567896543".parse::<Decimal>().unwrap() } 
+                            },
+                            ResourceIndicator::Fungible {
+                                resource_address: "resource_tdx_2_1th6hufew82dpntmcn7kt9f7au50cr59996tawh4syph0kz5e99v2u6".parse::<ResourceAddress>().unwrap(), 
+                                indicator: FungibleResourceIndicator::Guaranteed { decimal: "5.24".parse::<Decimal>().unwrap() } 
+                            },
+                            ResourceIndicator::Fungible {
+                                resource_address: "resource_tdx_2_1thnhmen4wg29tnqrfpk9w2v90s64z8at9sethnjma76866rfvcc2gs".parse::<ResourceAddress>().unwrap(), 
+                                indicator: FungibleResourceIndicator::Guaranteed { decimal: "42.23727".parse::<Decimal>().unwrap() } 
+                            },
+                            ResourceIndicator::Fungible {
+                                resource_address: "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc".parse::<ResourceAddress>().unwrap(), 
+                                indicator: FungibleResourceIndicator::Guaranteed { decimal: "237.987654".parse::<Decimal>().unwrap() } 
+                            },
+                        ]
+                    )
+                ],
+                [
+                    (
+                        "account_tdx_2_12x0xzsa3dm2tthpz3nwsvh94e8kq7acu0x2kfjlpv5kulsynt7rpwp".parse::<AccountAddress>().unwrap(),
+                        vec![
+                            ResourceIndicator::Fungible {
+                                resource_address: "resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy".parse::<ResourceAddress>().unwrap(), 
+                                indicator: FungibleResourceIndicator::Guaranteed { decimal: "12.4567896543".parse::<Decimal>().unwrap() } 
+                            }
+                        ]
+                    ),
+                    (
+                        "account_tdx_2_12xwdc3gsu48juzkj56s0zz0vqx26xcmw9kehcudm85w57cynter9z4".parse::<AccountAddress>().unwrap(),
+                        vec![
+                            ResourceIndicator::Fungible {
+                                resource_address: "resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy".parse::<ResourceAddress>().unwrap(), 
+                                indicator: FungibleResourceIndicator::Guaranteed { decimal: "24".parse::<Decimal>().unwrap() } 
+                            },
+                            ResourceIndicator::Fungible {
+                                resource_address: "resource_tdx_2_1th6hufew82dpntmcn7kt9f7au50cr59996tawh4syph0kz5e99v2u6".parse::<ResourceAddress>().unwrap(), 
+                                indicator: FungibleResourceIndicator::Guaranteed { decimal: "5.24".parse::<Decimal>().unwrap() } 
+                            },
+                            ResourceIndicator::Fungible {
+                                resource_address: "resource_tdx_2_1thnhmen4wg29tnqrfpk9w2v90s64z8at9sethnjma76866rfvcc2gs".parse::<ResourceAddress>().unwrap(), 
+                                indicator: FungibleResourceIndicator::Guaranteed { decimal: "42.23727".parse::<Decimal>().unwrap() } 
+                            },
+                            ResourceIndicator::Fungible {
+                                resource_address: "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc".parse::<ResourceAddress>().unwrap(), 
+                                indicator: FungibleResourceIndicator::Guaranteed { decimal: "237.987654".parse::<Decimal>().unwrap() } 
+                            }
+                        ]
+                    )
+                ],
+                ["account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk".parse().unwrap()],
+                [],
+                [],
+                [],
+                [],
+                [],
+                [
+                    DetailedManifestClass::Transfer {
+                        is_one_to_one: false
+                    },
+                    DetailedManifestClass::General
+                ],
+                FeeLocks::default(),
+                FeeSummary::new(
+                    "0.4077857".parse::<Decimal>().unwrap(),
+                    "0.1307814".parse::<Decimal>().unwrap(),
+                    "0.52433013014".parse::<Decimal>().unwrap(),
+                    0,
+                ),
+                NewEntities::default()
             )
-        );
-        let acc_gk: AccountAddress = "account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk".parse().unwrap();
-        assert_eq!(sut.newly_created_non_fungibles, Vec::default());
-        assert_eq!(sut.new_entities, NewEntities::default());
-        assert_eq!(sut.presented_proofs, Vec::default());
-        assert_eq!(sut.encountered_component_addresses, Vec::default());
-        assert_eq!(sut.addresses_of_accounts_requiring_auth, vec![acc_gk]);
-        assert_eq!(sut.addresses_of_identities_requiring_auth, Vec::default());
-
-        assert_eq!(
-            sut.detailed_classification,
-            vec![
-                DetailedManifestClass::Transfer {
-                    is_one_to_one: false
-                },
-                DetailedManifestClass::General
-            ]
         );
     }
 
