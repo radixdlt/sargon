@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct TransactionGuarantee {
-    pub amount: Decimal192,
+    amount: Decimal192,
     pub instruction_index: u64,
     pub resource_address: ResourceAddress,
     pub resource_divisibility: Option<i32>,
@@ -21,6 +21,19 @@ impl TransactionGuarantee {
             resource_address,
             resource_divisibility: resource_divisibility.into(),
         }
+    }
+}
+
+impl TransactionGuarantee {
+    pub(crate) fn rounded_amount(&self) -> Decimal192 {
+        let decimal_places = self
+            .resource_divisibility
+            .unwrap_or(Decimal192::SCALE as i32);
+
+        self.amount
+            .clone()
+            .round(decimal_places, RoundingMode::ToNearestMidpointAwayFromZero)
+            .expect("Rounding to never fail.")
     }
 }
 
@@ -50,5 +63,20 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn rounding() {
+        let sut = SUT::new(
+            "0.12344".parse::<Decimal192>().unwrap(),
+            2,
+            ResourceAddress::sample_mainnet_candy(),
+            4,
+        );
+
+        assert_eq!(
+            sut.rounded_amount(),
+            "0.1234".parse::<Decimal192>().unwrap()
+        );
     }
 }

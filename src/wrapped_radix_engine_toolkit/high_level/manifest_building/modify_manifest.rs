@@ -108,21 +108,13 @@ impl TransactionManifest {
         let mut manifest = self;
 
         for guarantee in guarantees {
-            let decimal_places = guarantee
-                .resource_divisibility
-                .unwrap_or(Decimal192::SCALE as i32);
-
-            let amount = guarantee
-                .amount
-                .clone()
-                .round(
-                    decimal_places,
-                    RoundingMode::ToNearestMidpointAwayFromZero,
-                )
-                .expect("Rounding to never fail.");
+            let rounded_amount = guarantee.rounded_amount();
 
             let guarantee_instruction = single(|b| {
-                b.assert_worktop_contains(&guarantee.resource_address, amount)
+                b.assert_worktop_contains(
+                    &guarantee.resource_address,
+                    rounded_amount,
+                )
             });
 
             manifest = manifest.insert_instruction(
