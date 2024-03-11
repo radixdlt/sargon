@@ -107,10 +107,27 @@ forward_from_for_num!(u64);
 forward_from_for_num!(i32);
 forward_from_for_num!(i64);
 
-impl From<f32> for Decimal {
-    fn from(value: f32) -> Self {
-        value.to_string().parse::<Self>().expect(
-            "Expected to always be able to create a Decimal192 from 'f32'.",
+impl TryFrom<f32> for Decimal {
+    type Error = crate::CommonError;
+
+    /// Enables:
+    ///
+    /// ```
+    /// extern crate sargon;
+    /// use sargon::prelude::*;
+    /// 
+    /// let decimal: Decimal = 208050.17.try_into().unwrap();
+    /// 
+    /// let error = f32::MIN_POSITIVE.try_into();
+    /// assert_eq!(Err(CommonError::DecimalOverflow { bad_value: F32::MIN_POSITIVE.to_string() }), error);
+    /// ```
+    fn try_from(value: f32) -> Result<Self, Self::Error> {
+        let str_value = value.to_string();
+
+        str_value.parse::<Self>().map_err(
+            |_| CommonError::DecimalOverflow {
+                bad_value: str_value,
+            }
         )
     }
 }
@@ -351,8 +368,8 @@ pub fn new_decimal_from_i64(value: i64) -> Decimal192 {
 /// so by first converting the float to a String, using
 /// Rust's `to_string` on the float.
 #[uniffi::export]
-pub fn new_decimal_from_f32(value: f32) -> Decimal192 {
-    value.into()
+pub fn new_decimal_from_f32(value: f32) -> Result<Decimal192, CommonError> {
+    value.try_into()
 }
 
 /// The minimum possible value of `Decimal192`, being:
@@ -954,11 +971,15 @@ mod uniffi_tests {
         let f: f32 = 208050.17;
         assert_eq!(f.to_string(), "208050.17");
         let sut = new_decimal_from_f32(f);
-        assert_eq!(sut.to_string(), "208050.17");
+        assert_eq!(sut.unwrap().to_string(), "208050.17");
         assert_eq!(
-            SUT::from(f32::MAX).to_string(),
+            SUT::try_from(f32::MAX).unwrap().to_string(),
             "340282350000000000000000000000000000000"
-        )
+        );
+        assert_eq!(
+            SUT::try_from(f32::MIN_POSITIVE),
+            Err(CommonError::DecimalOverflow { bad_value: f32::MIN_POSITIVE.to_string() })
+        );
     }
 
     #[test]

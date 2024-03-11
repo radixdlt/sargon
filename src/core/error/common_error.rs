@@ -386,6 +386,11 @@ pub enum CommonError {
 
     #[error("Fungible ResourceAddress in NonFungible context is not allowed.")]
     FungibleResourceAddressNotAcceptedInNonFungibleContext = 10105,
+    
+    #[error("Failed to convert to Decimal192 from f32 due to oveflow, value: {bad_value}")]
+    DecimalOverflow {
+        bad_value: String,
+    } = 10106
 }
 
 /*
