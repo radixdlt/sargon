@@ -11,11 +11,11 @@ use radix_engine_toolkit::transaction_types::ResourceIndicator as RetResourceInd
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct ExecutionSummary {
     /// Addresses of accounts withdraws from in the manifest.
-    pub addresses_of_account_withdraws:
+    pub addresses_of_accounts_withdrawn_from:
         HashMap<AccountAddress, Vec<ResourceIndicator>>,
 
-    /// Addresses of accounts deposited to in the manifest.
-    pub addresses_of_account_deposits:
+    /// Addresses of accounts deposited into in the manifest.
+    pub addresses_of_accounts_deposited_into:
         HashMap<AccountAddress, Vec<ResourceIndicator>>,
 
     /// Addresses of accounts encountered in the manifest where privileged
@@ -58,10 +58,10 @@ pub struct ExecutionSummary {
 impl ExecutionSummary {
     #[allow(clippy::too_many_arguments)]
     pub fn new(
-        addresses_of_account_withdraws: impl Into<
+        addresses_of_accounts_withdrawn_from: impl Into<
             HashMap<AccountAddress, Vec<ResourceIndicator>>,
         >,
-        addresses_of_account_deposits: impl Into<
+        addresses_of_accounts_deposited_into: impl Into<
             HashMap<AccountAddress, Vec<ResourceIndicator>>,
         >,
         addresses_of_accounts_requiring_auth: impl IntoIterator<
@@ -80,9 +80,10 @@ impl ExecutionSummary {
         new_entities: impl Into<NewEntities>,
     ) -> Self {
         Self {
-            addresses_of_account_withdraws: addresses_of_account_withdraws
-                .into(),
-            addresses_of_account_deposits: addresses_of_account_deposits.into(),
+            addresses_of_accounts_withdrawn_from:
+                addresses_of_accounts_withdrawn_from.into(),
+            addresses_of_accounts_deposited_into:
+                addresses_of_accounts_deposited_into.into(),
             addresses_of_accounts_requiring_auth:
                 addresses_of_accounts_requiring_auth
                     .into_iter()

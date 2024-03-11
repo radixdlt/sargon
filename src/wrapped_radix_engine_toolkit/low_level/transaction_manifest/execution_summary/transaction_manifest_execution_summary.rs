@@ -344,8 +344,8 @@ mod tests {
         pretty_assertions::assert_eq!(
                 sut,
                 SUT::new(
-                    [], // addresses_of_account_withdraws
-                    [], // addresses_of_account_deposits
+                    [], // addresses_of_accounts_withdrawn_from
+                    [], // addresses_of_accounts_deposited_into
                     [], // addresses_of_accounts_requiring_auth
                     [], // addresses_of_identities_requiring_auth
                     [
@@ -502,7 +502,7 @@ mod tests {
                                 },
                             ]
                         )
-                    ], // addresses_of_account_withdraws
+                    ], // addresses_of_accounts_withdrawn_from
                     [
                         (
                             acc_gk.clone(),
@@ -518,7 +518,7 @@ mod tests {
                                 }
                             ]
                         ),
-                    ], // addresses_of_account_deposits
+                    ], // addresses_of_accounts_deposited_into
                     [acc_gk], // addresses_of_accounts_requiring_auth
                     [], // addresses_of_identities_requiring_auth
                     [], // newly_created_non_fungibles
@@ -562,7 +562,7 @@ mod tests {
                 sut,
                 SUT::new(
                     [], // addresses_of_account_withdrawls
-                    [], // addresses_of_account_deposits
+                    [], // addresses_of_accounts_deposited_into
                     [], // addresses_of_accounts_requiring_auth
                     [], // addresses_of_identities_requiring_auth
                     [], // newly_created_non_fungibles
@@ -637,7 +637,7 @@ mod tests {
                                 },
                             ]
                         )
-                    ], // addresses_of_account_deposits
+                    ], // addresses_of_accounts_deposited_into
                     [acc_gk], // addresses_of_accounts_requiring_auth
                     [], // addresses_of_identities_requiring_auth
                     [], // newly_created_non_fungibles
@@ -713,7 +713,7 @@ mod tests {
                             decimal: "3566".parse::<Decimal>().unwrap()
                         }
                     },]
-                )], // addresses_of_account_withdraws
+                )], // addresses_of_accounts_withdrawn_from
                 [(
                     acc_gk.clone(),
                     vec![
@@ -748,7 +748,7 @@ mod tests {
                             }
                         },
                     ]
-                )], // addresses_of_account_deposits
+                )], // addresses_of_accounts_deposited_into
                 [acc_gk.clone()], // addresses_of_accounts_requiring_auth
                 [],               // addresses_of_identities_requiring_auth
                 [],               // newly_created_non_fungibles
@@ -829,7 +829,7 @@ mod tests {
                             decimal: "500".parse::<Decimal>().unwrap()
                         }
                     },]
-                )], // addresses_of_account_withdraws
+                )], // addresses_of_accounts_withdrawn_from
                 [(
                     acc_gk.clone(),
                     vec![
@@ -857,7 +857,7 @@ mod tests {
                             }
                         }
                     ]
-                )], // addresses_of_account_deposits
+                )], // addresses_of_accounts_deposited_into
                 [acc_gk], // addresses_of_accounts_requiring_auth
                 [],       // addresses_of_identities_requiring_auth
                 [],       // newly_created_non_fungibles
@@ -933,7 +933,7 @@ mod tests {
                                 },
                             ]
                         )
-                    ], // addresses_of_account_withdraws
+                    ], // addresses_of_accounts_withdrawn_from
                     [
                       (
                         acc_gk.clone(),
@@ -955,7 +955,7 @@ mod tests {
                             )
                         ]
                       )
-                    ], // addresses_of_account_deposits
+                    ], // addresses_of_accounts_deposited_into
                     [acc_gk],
                     [], // addresses_of_identities_requiring_auth
                     [nf_global_id.clone()], // newly_created_non_fungibles
@@ -1032,7 +1032,7 @@ mod tests {
                                 },
                             ]
                         )
-                    ], // addresses_of_account_withdraws
+                    ], // addresses_of_accounts_withdrawn_from
                     [
                         (
                             acc_gk.clone(),
@@ -1047,7 +1047,7 @@ mod tests {
                                 },
                             ]
                         ),
-                    ], // addresses_of_account_deposits
+                    ], // addresses_of_accounts_deposited_into
                     [acc_gk], // addresses_of_accounts_requiring_auth
                     [], // addresses_of_identities_requiring_auth
                     [], // newly_created_non_fungibles
