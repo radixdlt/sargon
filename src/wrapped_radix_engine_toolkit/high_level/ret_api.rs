@@ -145,25 +145,13 @@ pub fn debug_print_compiled_notarized_intent(
     format!("{:?}", notarized)
 }
 
-/// REQUIRES NETWORK CALL (and probable cache)
-/// Requires kotlinx to be setup
-// #[uniffi::export]
-// pub async fn manifest_assets_transfers(
-//     _transfers: AssetsTransfersTransactionPrototype,
-//     _message: Message,
-// ) -> Result<Manifest> {
-//     unreachable!()
-// }
-
-/// REQUIRES NETWORK CALL (and probable cache)
-/// Requires kotlinx to be setup
-// #[uniffi::export]
-// pub async fn needs_signature_for_depositing(
-//     _into_account: Account,
-//     _resource: ResourceAddress,
-// ) -> Result<bool> {
-//     unreachable!()
-// }
+#[uniffi::export]
+pub fn manifest_assets_transfers(
+    transfers: AssetsTransfersTransactionPrototype,
+    message: Message,
+) -> Result<TransactionManifest> {
+    unreachable!()
+}
 
 #[cfg(test)]
 mod tests {
