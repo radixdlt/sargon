@@ -23,7 +23,7 @@ import java.text.DecimalFormatSymbols
 
 fun String.toDecimal192() = newDecimalFromString(string = this)
 fun Long.toDecimal192() = newDecimalFromI64(value = this)
-fun Float.toDecimal192() = newDecimalFromF32(value = this)
+fun Float.toDecimal192() = newDecimalFromF32(value = this).getOrThrow()
 fun Int.toDecimal192() = newDecimalFromI32(value = this)
 fun ULong.toDecimal192() = newDecimalFromU64(value = this)
 fun UInt.toDecimal192() = newDecimalFromU32(value = this)

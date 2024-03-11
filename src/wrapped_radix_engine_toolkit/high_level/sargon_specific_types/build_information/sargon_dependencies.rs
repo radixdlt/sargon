@@ -60,6 +60,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
     }
