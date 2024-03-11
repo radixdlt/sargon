@@ -1,11 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine::types::indexmap::IndexSet;
-use radix_engine_toolkit::transaction_types::{
-    DetailedManifestClass as RetDetailedManifestClass,
-    Operation as RetOperation,
-};
-
 /// The execution summary process not only determines the class of the manifest,
 /// but also includes additional information about this class that the wallet
 /// requires to display to the user.

@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-use transaction::model::TransactionHeaderV1 as ScryptoTransactionHeader;
-
 #[derive(
     Debug, Clone, PartialEq, Eq, Hash, derive_more::Display, uniffi::Record,
 )]

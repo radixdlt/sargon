@@ -1,10 +1,5 @@
 use crate::prelude::*;
 
-use paste::*;
-use radix_engine::prelude::IndexSet;
-use radix_engine_common::prelude::NonFungibleLocalId as ScryptoNonFungibleLocalId;
-use radix_engine_toolkit::transaction_types::Predicted as RetPredicted;
-
 /// This macro exists since UniFFI does not support generics currently, when/if
 /// UniFFI does, we SHOULD remove this macro and use generics.
 ///

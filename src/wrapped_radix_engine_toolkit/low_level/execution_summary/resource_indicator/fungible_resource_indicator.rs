@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine_toolkit::transaction_types::FungibleResourceIndicator as RetFungibleResourceIndicator;
-
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Enum)]
 pub enum FungibleResourceIndicator {
     Guaranteed { decimal: Decimal },

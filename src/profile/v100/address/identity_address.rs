@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine_toolkit::models::canonical_address_types::CanonicalIdentityAddress as RetIdentityAddress;
-
 #[uniffi::export]
 pub fn new_identity_address_from(
     public_key: PublicKey,

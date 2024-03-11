@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine_toolkit::models::canonical_address_types::CanonicalPackageAddress as RetPackageAddress;
-
 #[uniffi::export]
 pub fn new_package_address_sample() -> PackageAddress {
     PackageAddress::sample()

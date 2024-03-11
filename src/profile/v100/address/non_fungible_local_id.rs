@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine_toolkit_json::models::common::SerializableNonFungibleLocalId as RetNonFungibleLocalId;
-
 #[derive(Clone, Debug, Hash, Ord, PartialOrd, PartialEq, Eq, uniffi::Enum)]
 pub enum NonFungibleLocalId {
     /// Unsigned integers, up to u64.
@@ -146,12 +144,6 @@ impl HasSampleValues for NonFungibleLocalId {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
-
-    use radix_engine_common::data::scrypto::model::{
-
-    };
-
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]

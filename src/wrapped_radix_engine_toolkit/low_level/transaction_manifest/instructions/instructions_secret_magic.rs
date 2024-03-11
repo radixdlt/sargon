@@ -1,13 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine_toolkit::functions::instructions::{
-    compile as RET_compile_instructions,
-    decompile as RET_decompile_instructions,
-};
-use transaction::prelude::InstructionV1 as ScryptoInstruction;
-
-use transaction::model::InstructionsV1 as ScryptoInstructions;
-
 /// An internal representation of a collection of Instructions,
 /// which intentions is to allow the `struct Instructions`
 /// to have no public initializers in Swift/Kotlin land, since it

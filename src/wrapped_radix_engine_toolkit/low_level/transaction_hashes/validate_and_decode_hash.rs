@@ -1,10 +1,5 @@
 use crate::prelude::*;
 
-use transaction::model::{
-    HashHasHrp as ScryptoHashHasHrp, IntentHash as ScryptoIntentHash,
-    TransactionHashBech32Decoder as ScryptoTransactionHashBech32Decoder,
-};
-
 fn validate_and_decode_hash_try_network<T: ScryptoHashHasHrp>(
     bech32_encoded_hash: &str,
     network_id: NetworkID,

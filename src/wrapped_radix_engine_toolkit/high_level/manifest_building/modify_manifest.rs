@@ -31,7 +31,6 @@ impl InspectInstruction for ScryptoInstruction {
     }
 }
 
-
 /// Used by development, in production we SHOULD use the fee given by analyzing
 /// the manifest.
 fn default_fee() -> Decimal192 {

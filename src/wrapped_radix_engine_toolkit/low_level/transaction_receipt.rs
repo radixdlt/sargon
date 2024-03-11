@@ -1,10 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine::transaction::TransactionReceiptV1 as ScryptoTransactionReceipt;
-use radix_engine::transaction::VersionedTransactionReceipt as ScryptoVersionedTransactionReceipt;
-use radix_engine_common::data::scrypto::{scrypto_decode, scrypto_encode};
-use sbor::HasLatestVersion;
-
 #[derive(Clone, Debug)]
 pub struct TransactionReceipt {
     pub(crate) decoded: ScryptoTransactionReceipt,

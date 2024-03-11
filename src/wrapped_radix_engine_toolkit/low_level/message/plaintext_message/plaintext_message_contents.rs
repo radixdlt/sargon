@@ -1,10 +1,5 @@
 use crate::prelude::*;
 
-use transaction::model::{
-    MessageContentsV1 as ScryptoMessageContents, MessageV1 as ScryptoMessage,
-    PlaintextMessageV1 as ScryptoPlaintextMessage,
-};
-
 /// We explicitly mark content as either String or Bytes - this distinguishes (along with the mime type)
 /// whether the message is intended to be displayable as text, or not.
 ///

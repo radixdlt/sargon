@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine::system::system_modules::execution_trace::ResourceSpecifier as ScryptoResourceSpecifier;
-
 impl From<(ScryptoResourceSpecifier, NetworkID)> for ResourceAddress {
     fn from(value: (ScryptoResourceSpecifier, NetworkID)) -> Self {
         let (ret, network_id) = value;

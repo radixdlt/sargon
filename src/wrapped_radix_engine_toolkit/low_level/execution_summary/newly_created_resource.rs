@@ -10,9 +10,6 @@ pub struct NewlyCreatedResource {
     pub tags: Vec<String>,
 }
 
-use radix_engine::types::indexmap::IndexMap;
-use transaction::prelude::MetadataValue as ScryptoMetadataValue;
-
 impl From<IndexMap<String, Option<ScryptoMetadataValue>>>
     for NewlyCreatedResource
 {

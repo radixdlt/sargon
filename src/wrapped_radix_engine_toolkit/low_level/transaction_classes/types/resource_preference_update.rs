@@ -1,8 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine_interface::blueprints::account::ResourcePreference as RetResourcePreference;
-use radix_engine_toolkit::transaction_types::Update as RetUpdate;
-
 #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
 pub enum ResourcePreference {
     Allowed,
@@ -15,17 +12,17 @@ pub enum ResourcePreferenceUpdate {
     Remove,
 }
 
-impl From<RetResourcePreference> for ResourcePreference {
-    fn from(value: RetResourcePreference) -> Self {
+impl From<ScryptoResourcePreference> for ResourcePreference {
+    fn from(value: ScryptoResourcePreference) -> Self {
         match value {
-            RetResourcePreference::Allowed => Self::Allowed,
-            RetResourcePreference::Disallowed => Self::Disallowed,
+            ScryptoResourcePreference::Allowed => Self::Allowed,
+            ScryptoResourcePreference::Disallowed => Self::Disallowed,
         }
     }
 }
 
-impl From<RetUpdate<RetResourcePreference>> for ResourcePreferenceUpdate {
-    fn from(value: RetUpdate<RetResourcePreference>) -> Self {
+impl From<RetUpdate<ScryptoResourcePreference>> for ResourcePreferenceUpdate {
+    fn from(value: RetUpdate<ScryptoResourcePreference>) -> Self {
         match value {
             RetUpdate::Set(preference) => Self::Set {
                 value: preference.into(),
@@ -68,15 +65,15 @@ mod tests {
     #[test]
     fn from_ret() {
         assert_eq!(
-            SUT::from(RetUpdate::<RetResourcePreference>::Set(
-                RetResourcePreference::Allowed
+            SUT::from(RetUpdate::<ScryptoResourcePreference>::Set(
+                ScryptoResourcePreference::Allowed
             )),
             SUT::sample()
         );
 
         assert_eq!(
-            SUT::from(RetUpdate::<RetResourcePreference>::Set(
-                RetResourcePreference::Disallowed
+            SUT::from(RetUpdate::<ScryptoResourcePreference>::Set(
+                ScryptoResourcePreference::Disallowed
             )),
             SUT::Set {
                 value: ResourcePreference::Disallowed
@@ -84,7 +81,7 @@ mod tests {
         );
 
         assert_eq!(
-            SUT::from(RetUpdate::<RetResourcePreference>::Remove),
+            SUT::from(RetUpdate::<ScryptoResourcePreference>::Remove),
             SUT::sample_other()
         );
     }

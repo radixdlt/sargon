@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine_toolkit::transaction_types::ReservedInstruction as RetReservedInstruction;
-
 /// The set of instructions that is only allowed in manifests created by the
 /// wallet itself.
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Enum)]

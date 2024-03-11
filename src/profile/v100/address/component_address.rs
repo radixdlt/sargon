@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine_toolkit::models::canonical_address_types::CanonicalComponentAddress as RetComponentAddress;
-
 /// Sample to a mainnet ComponentAddress (global)
 #[uniffi::export]
 pub fn new_component_address_sample() -> ComponentAddress {

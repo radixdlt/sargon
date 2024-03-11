@@ -1,17 +1,4 @@
-use std::ops::Deref;
-
 use crate::prelude::*;
-
-use radix_engine::types::GlobalAddress;
-use transaction::{
-    manifest::{
-        compile as scrypto_compile, decompile as scrypto_decompile,
-        CompileError as ScryptoCompileError,
-        MockBlobProvider as ScryptoMockBlobProvider,
-    },
-    model::InstructionsV1 as ScryptoInstructions,
-    prelude::InstructionV1 as ScryptoInstruction,
-};
 
 #[derive(Clone, Debug, PartialEq, Eq, derive_more::Display, uniffi::Record)]
 #[display("{}", self.instructions_string())]
@@ -181,7 +168,6 @@ impl Instructions {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::prelude::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = Instructions;

@@ -45,31 +45,41 @@ pub mod prelude {
     pub(crate) use url::Url;
     pub(crate) use uuid::Uuid;
 
-    pub(crate) use paste::*;
-
     pub(crate) use enum_as_inner::EnumAsInner;
-
-    pub(crate) use radix_engine::types::{
-        node_modules::{
-            metadata::ToMetadataEntry as ScryptoToMetadataEntry,
-            ModuleConfig as ScryptoModuleConfig,
+    pub(crate) use paste::*;
+    pub(crate) use radix_engine::{
+        blueprints::consensus_manager::UnstakeData as ScryptoUnstakeData,
+        system::system_modules::execution_trace::ResourceSpecifier as ScryptoResourceSpecifier,
+        transaction::{
+            FeeLocks as ScryptoFeeLocks,
+            TransactionReceiptV1 as ScryptoTransactionReceipt,
+            VersionedTransactionReceipt as ScryptoVersionedTransactionReceipt,
         },
-        recover_secp256k1 as Scrypto_recover_secp256k1,
-        AccessRule as ScryptoAccessRule, Epoch as ScryptoEpoch,
-        FungibleResourceRoles as ScryptoFungibleResourceRoles,
-        ManifestAddress as ScryptoManifestAddress,
-        ManifestBucket as ScryptoManifestBucket,
-        ManifestCustomValue as ScryptoManifestCustomValue,
-        ManifestCustomValueKind as ScryptoManifestCustomValueKind,
-        ManifestEncode as ScryptoManifestEncode,
-        MetadataInit as ScryptoMetadataInit,
-        NonFungibleData as ScryptoNonFungibleData,
-        NonFungibleGlobalId as ScryptoNonFungibleGlobalId,
-        NonFungibleIdType as ScryptoNonFungibleIdType,
-        NonFungibleResourceRoles as ScryptoNonFungibleResourceRoles,
-        OwnerRole as ScryptoOwnerRole,
-        RoleAssignmentInit as ScryptoRoleAssignmentInit,
+        types::{
+            indexmap::{IndexMap, IndexSet},
+            node_modules::{
+                metadata::ToMetadataEntry as ScryptoToMetadataEntry,
+                ModuleConfig as ScryptoModuleConfig,
+            },
+            recover_secp256k1 as Scrypto_recover_secp256k1,
+            AccessRule as ScryptoAccessRule, Epoch as ScryptoEpoch,
+            FungibleResourceRoles as ScryptoFungibleResourceRoles,
+            ManifestAddress as ScryptoManifestAddress,
+            ManifestBucket as ScryptoManifestBucket,
+            ManifestCustomValue as ScryptoManifestCustomValue,
+            ManifestCustomValueKind as ScryptoManifestCustomValueKind,
+            ManifestEncode as ScryptoManifestEncode,
+            MetadataInit as ScryptoMetadataInit,
+            NonFungibleData as ScryptoNonFungibleData,
+            NonFungibleGlobalId as ScryptoNonFungibleGlobalId,
+            NonFungibleIdType as ScryptoNonFungibleIdType,
+            NonFungibleResourceRoles as ScryptoNonFungibleResourceRoles,
+            OwnerRole as ScryptoOwnerRole,
+            RoleAssignmentInit as ScryptoRoleAssignmentInit,
+        },
     };
+    pub(crate) use sbor::HasLatestVersion;
+
     pub(crate) use radix_engine_common::{
         address::AddressBech32Encoder as ScryptoAddressBech32Encoder,
         crypto::{
@@ -77,18 +87,24 @@ pub mod prelude {
             verify_secp256k1 as scrypto_verify_secp256k1,
             Ed25519PrivateKey as ScryptoEd25519PrivateKey,
             Ed25519PublicKey as ScryptoEd25519PublicKey,
+            Ed25519PublicKeyHash as ScryptoEd25519PublicKeyHash,
             Ed25519Signature as ScryptoEd25519Signature, Hash as ScryptoHash,
             IsHash as ScryptoIsHash, PublicKey as ScryptoPublicKey,
+            PublicKeyHash as ScryptoPublicKeyHash,
             Secp256k1PrivateKey as ScryptoSecp256k1PrivateKey,
             Secp256k1PublicKey as ScryptoSecp256k1PublicKey,
+            Secp256k1PublicKeyHash as ScryptoSecp256k1PublicKeyHash,
             Secp256k1Signature as ScryptoSecp256k1Signature,
         },
-        data::scrypto::model::{
-            BytesNonFungibleLocalId as ScryptoBytesNonFungibleLocalId,
-            IntegerNonFungibleLocalId as ScryptoIntegerNonFungibleLocalId,
-            NonFungibleLocalId as ScryptoNonFungibleLocalId,
-            RUIDNonFungibleLocalId as ScryptoRUIDNonFungibleLocalId,
-            StringNonFungibleLocalId as ScryptoStringNonFungibleLocalId,
+        data::scrypto::{
+            model::{
+                BytesNonFungibleLocalId as ScryptoBytesNonFungibleLocalId,
+                IntegerNonFungibleLocalId as ScryptoIntegerNonFungibleLocalId,
+                NonFungibleLocalId as ScryptoNonFungibleLocalId,
+                RUIDNonFungibleLocalId as ScryptoRUIDNonFungibleLocalId,
+                StringNonFungibleLocalId as ScryptoStringNonFungibleLocalId,
+            },
+            scrypto_decode, scrypto_encode,
         },
         math::{
             Decimal as ScryptoDecimal192, RoundingMode as ScryptoRoundingMode,
@@ -119,19 +135,35 @@ pub mod prelude {
             ResolvableArguments as ScryptoResolvableArguments,
             ResolvableComponentAddress as ScryptoResolvableComponentAddress,
         },
+        manifest::{
+            compile as scrypto_compile, decompile as scrypto_decompile,
+            CompileError as ScryptoCompileError,
+            MockBlobProvider as ScryptoMockBlobProvider,
+        },
         model::{
+            BlobV1 as ScryptoBlob, BlobsV1 as ScryptoBlobs,
             DynamicComponentAddress as ScryptoDynamicComponentAddress,
             DynamicGlobalAddress as ScryptoDynamicGlobalAddress,
             DynamicResourceAddress as ScryptoDynamicResourceAddress,
+            HashHasHrp as ScryptoHashHasHrp,
             InstructionV1 as ScryptoInstruction,
             InstructionsV1 as ScryptoInstructions,
+            IntentHash as ScryptoIntentHash,
             IntentSignatureV1 as ScryptoIntentSignature,
             IntentSignaturesV1 as ScryptoIntentSignatures,
+            IntentV1 as ScryptoIntent,
+            MessageContentsV1 as ScryptoMessageContents,
+            MessageV1 as ScryptoMessage,
             NotarizedTransactionV1 as ScryptoNotarizedTransaction,
             NotarySignatureV1 as ScryptoNotarySignature,
+            PlaintextMessageV1 as ScryptoPlaintextMessage,
             SignatureV1 as ScryptoSignature,
             SignatureWithPublicKeyV1 as ScryptoSignatureWithPublicKey,
+            SignedIntentHash as ScryptoSignedIntentHash,
             SignedIntentV1 as ScryptoSignedIntent,
+            TransactionHashBech32Decoder as ScryptoTransactionHashBech32Decoder,
+            TransactionHashBech32Encoder as ScryptoTransactionHashBech32Encoder,
+            TransactionHeaderV1 as ScryptoTransactionHeader,
         },
         prelude::{
             ManifestBuilder as ScryptoManifestBuilder,
@@ -154,9 +186,19 @@ pub mod prelude {
     };
 
     pub use radix_engine_toolkit::{
-        functions::notarized_transaction::{
-            compile as RET_compile_notarized_tx,
-            decompile as RET_decompile_notarize_tx,
+        functions::{
+            instructions::{
+                compile as RET_compile_instructions,
+                decompile as RET_decompile_instructions,
+                extract_addresses as RET_ins_extract_addresses,
+            },
+            intent::{compile as RET_intent_compile, hash as ret_hash_intent},
+            manifest::summary as RET_summary,
+            notarized_transaction::{
+                compile as RET_compile_notarized_tx,
+                decompile as RET_decompile_notarize_tx,
+            },
+            signed_intent::hash as RET_signed_intent_hash,
         },
         models::{
             canonical_address_types::{
@@ -173,7 +215,23 @@ pub mod prelude {
             },
             node_id::TypedNodeId as RetTypedNodeId,
         },
-        transaction_types::ManifestSummary as RetManifestSummary,
+        transaction_types::{
+            DetailedManifestClass as RetDetailedManifestClass,
+            ExecutionSummary as RetExecutionSummary,
+            FeeSummary as RetFeeSummary,
+            FungibleResourceIndicator as RetFungibleResourceIndicator,
+            ManifestSummary as RetManifestSummary,
+            NewEntities as RetNewEntities,
+            NonFungibleResourceIndicator as RetNonFungibleResourceIndicator,
+            Operation as RetOperation, Predicted as RetPredicted,
+            ReservedInstruction as RetReservedInstruction,
+            ResourceIndicator as RetResourceIndicator,
+            TrackedPoolContribution as RetTrackedPoolContribution,
+            TrackedPoolRedemption as RetTrackedPoolRedemption,
+            TrackedValidatorClaim as RetTrackedValidatorClaim,
+            TrackedValidatorStake as RetTrackedValidatorStake,
+            Update as RetUpdate,
+        },
     };
 }
 

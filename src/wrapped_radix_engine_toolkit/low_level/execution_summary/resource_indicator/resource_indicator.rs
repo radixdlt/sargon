@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine_toolkit::transaction_types::ResourceIndicator as RetResourceIndicator;
-
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Enum)]
 pub enum ResourceIndicator {
     Fungible {
@@ -54,12 +52,6 @@ impl HasSampleValues for ResourceIndicator {
 
 #[cfg(test)]
 mod tests {
-    use radix_engine_common::prelude::NonFungibleLocalId as ScryptoNonFungibleLocalId;
-    use radix_engine_toolkit::transaction_types::{
-        FungibleResourceIndicator as RetFungibleResourceIndicator,
-        NonFungibleResourceIndicator as RetNonFungibleResourceIndicator,
-        Predicted as RetPredicted,
-    };
 
     use super::*;
 
