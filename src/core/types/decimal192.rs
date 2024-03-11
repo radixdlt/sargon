@@ -110,25 +110,29 @@ forward_from_for_num!(i64);
 impl TryFrom<f32> for Decimal {
     type Error = crate::CommonError;
 
-    /// Enables:
+    /// Creates a new `Decimal192` from a f32 float. Will
+    /// fail if the f32 cannot be losslessly represented
+    /// by the underlying Decimal from Scrypto.
     ///
     /// ```
     /// extern crate sargon;
     /// use sargon::prelude::*;
-    /// 
-    /// let decimal: Decimal = 208050.17.try_into().unwrap();
-    /// 
-    /// let error = f32::MIN_POSITIVE.try_into();
-    /// assert_eq!(Err(CommonError::DecimalOverflow { bad_value: F32::MIN_POSITIVE.to_string() }), error);
+    ///
+    /// assert!(Decimal::try_from(208050.17).is_ok());
+    ///
+    /// assert_eq!(
+    ///     Decimal::try_from(f32::MIN_POSITIVE),
+    ///     Err(CommonError::DecimalOverflow { bad_value: f32::MIN_POSITIVE.to_string() })
+    /// );
     /// ```
     fn try_from(value: f32) -> Result<Self, Self::Error> {
         let str_value = value.to_string();
 
-        str_value.parse::<Self>().map_err(
-            |_| CommonError::DecimalOverflow {
+        str_value
+            .parse::<Self>()
+            .map_err(|_| CommonError::DecimalOverflow {
                 bad_value: str_value,
-            }
-        )
+            })
     }
 }
 
@@ -366,11 +370,23 @@ pub fn new_decimal_from_i64(value: i64) -> Decimal192 {
     value.into()
 }
 
-/// Creates a new `Decimal192` from a f32 float, it does
-/// so by first converting the float to a String, using
-/// Rust's `to_string` on the float.
+/// Creates a new `Decimal192` from a f32 float. Will
+/// fail if the f32 cannot be losslessly represented
+/// by the underlying Decimal from Scrypto.
+///
+/// ```
+/// extern crate sargon;
+/// use sargon::prelude::*;
+///
+/// assert!(new_decimal_from_f32(208050.17).is_ok());
+///
+/// assert_eq!(
+///     new_decimal_from_f32(f32::MIN_POSITIVE),
+///     Err(CommonError::DecimalOverflow { bad_value: f32::MIN_POSITIVE.to_string() })
+/// );
+/// ```
 #[uniffi::export]
-pub fn new_decimal_from_f32(value: f32) -> Result<Decimal192, CommonError> {
+pub fn new_decimal_from_f32(value: f32) -> Result<Decimal192> {
     value.try_into()
 }
 
@@ -985,7 +1001,9 @@ mod uniffi_tests {
         );
         assert_eq!(
             SUT::try_from(f32::MIN_POSITIVE),
-            Err(CommonError::DecimalOverflow { bad_value: f32::MIN_POSITIVE.to_string() })
+            Err(CommonError::DecimalOverflow {
+                bad_value: f32::MIN_POSITIVE.to_string()
+            })
         );
     }
 

@@ -29,10 +29,20 @@ extension Decimal192: ExpressibleByIntegerLiteral {
 	}
 }
 
+extension Decimal192 {
+    public init(float: Float32) throws {
+        self = try newDecimalFromF32(value: float)
+    }
+}
+
 extension Decimal192: ExpressibleByFloatLiteral {
-	public init(floatLiteral value: Float32) {
-		self = newDecimalFromF32(value: value)
-	}
+    public init(floatLiteral value: Float32) {
+        do {
+            try self.init(float: value)
+        } catch {
+            fatalError("Error: \(error)")
+        }
+    }
 }
 
 func test() throws {
