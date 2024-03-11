@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine_toolkit::transaction_types::FeeSummary as RetFeeSummary;
-
 /// Detailed information on the amount of cost units consumed.
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct FeeSummary {
@@ -78,7 +76,6 @@ mod tests {
 
     #[test]
     fn from_ret() {
-        use radix_engine_common::math::Decimal as ScryptoDecimal192;
         assert_eq!(
             SUT::from(RetFeeSummary {
                 execution_cost: "0.092499"

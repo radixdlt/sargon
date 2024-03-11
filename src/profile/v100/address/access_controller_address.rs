@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine_toolkit::models::canonical_address_types::CanonicalAccessControllerAddress as RetAccessControllerAddress;
-
 #[uniffi::export]
 pub fn new_access_controller_address_sample() -> AccessControllerAddress {
     AccessControllerAddress::sample()

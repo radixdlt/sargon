@@ -1,18 +1,6 @@
 use crate::prelude::*;
-use paste::*;
-use transaction::model::{
-    HashHasHrp as ScryptoHashHasHrp, IntentHash as ScryptoIntentHash,
-    NotarizedTransactionV1 as ScryptoNotarizedTransaction,
-    SignedIntentHash as ScryptoSignedIntentHash,
-    TransactionHashBech32Decoder as ScryptoTransactionHashBech32Decoder,
-    TransactionHashBech32Encoder as ScryptoTransactionHashBech32Encoder,
-};
 
 use crate::wrapped_radix_engine_toolkit::low_level::transaction_hashes::validate_and_decode_hash::validate_and_decode_hash;
-
-use radix_engine_common::crypto::{
-    Hash as ScryptoHash, IsHash as ScryptoIsHash,
-};
 
 /// This macro exists since UniFFI does not support generics currently, when/if
 /// UniFFI does, we SHOULD remove this macro and use generics.

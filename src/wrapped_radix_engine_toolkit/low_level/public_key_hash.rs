@@ -1,11 +1,4 @@
 use crate::prelude::*;
-use radix_engine_common::crypto::{
-    Ed25519PublicKeyHash as ScryptoEd25519PublicKeyHash,
-    PublicKeyHash as ScryptoPublicKeyHash,
-    Secp256k1PublicKeyHash as ScryptoSecp256k1PublicKeyHash,
-};
-
-use radix_engine_common::crypto::PublicKey as ScryptoPublicKey;
 
 /// Hashes of public keys, either Ed25519PublicKey or Secp256k1PublicKey
 #[derive(Clone, Debug, PartialEq, EnumAsInner, Eq, Hash, uniffi::Enum)]

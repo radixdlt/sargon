@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use radix_engine_common::types::EntityType as ScryptoEntityType;
 
 /// Type of a wallet Radix Entity - Account or Identity (used by Personas).
 ///

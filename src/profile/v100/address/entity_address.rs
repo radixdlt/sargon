@@ -1,7 +1,5 @@
 use crate::prelude::*;
-use radix_engine_common::{
-    address::AddressBech32Encoder, crypto::PublicKey as ScryptoPublicKey,
-};
+
 use radix_engine_toolkit::functions::derive::{
     virtual_account_address_from_public_key as RET_new_account_address,
     virtual_identity_address_from_public_key as RET_new_identity_address,

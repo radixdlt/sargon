@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine_common::crypto::Ed25519Signature as ScryptoEd25519Signature;
-
 /// Represents an ED25519 signature.
 #[derive(
     Clone,

@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use radix_engine::types::GlobalAddress as ScryptoGlobalAddress;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
 pub enum AddressOfAccountOrPersona {
@@ -50,7 +49,7 @@ impl HasSampleValues for AddressOfAccountOrPersona {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = AddressOfAccountOrPersona;

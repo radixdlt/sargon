@@ -1,9 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine_common::crypto::{
-    Ed25519PrivateKey as ScryptoEd25519PrivateKey, IsHash,
-};
-
 /// An Ed25519 private key used to create cryptographic signatures, using
 /// EdDSA scheme.
 #[derive(derive_more::Debug)]

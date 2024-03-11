@@ -1,9 +1,4 @@
 use crate::prelude::*;
-use paste::*;
-use radix_engine_common::types::{
-    EntityType as ScryptoEntityType, NodeId as ScryptoNodeId,
-};
-use std::ops::Deref;
 
 /// This macro exists since UniFFI does not support generics currently, when/if
 /// UniFFI does, we SHOULD remove this macro and use generics.
@@ -188,7 +183,7 @@ pub fn new_non_fungible_resource_address_sample_stokenet_other(
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = NonFungibleResourceAddress;

@@ -1,14 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine_toolkit::functions::signed_intent::hash as RET_signed_intent_hash;
-use transaction::model::{
-    IntentSignatureV1 as ScryptoIntentSignature,
-    IntentSignaturesV1 as ScryptoIntentSignatures,
-    SignatureWithPublicKeyV1 as ScryptoSignatureWithPublicKey,
-    SignedIntentHash as ScryptoSignedIntentHash,
-    SignedIntentV1 as ScryptoSignedIntent,
-};
-
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct SignedIntent {
     pub intent: TransactionIntent,

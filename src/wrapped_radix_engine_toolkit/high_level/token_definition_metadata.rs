@@ -1,13 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine::types::node_modules::ModuleConfig as ScryptoModuleConfig;
-use radix_engine::types::{
-    MetadataInit as ScryptoMetadataInit,
-    RoleAssignmentInit as ScryptoRoleAssignmentInit,
-};
-use std::collections::BTreeMap;
-use transaction::prelude::MetadataValue as ScryptoMetadataValue;
-
 #[derive(
     Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
 )]
@@ -18,6 +10,7 @@ pub struct TokenDefinitionMetadata {
     pub icon_url: String,
     pub tags: Vec<String>,
 }
+
 impl From<TokenDefinitionMetadata>
     for ScryptoModuleConfig<ScryptoMetadataInit>
 {
@@ -51,6 +44,7 @@ impl From<TokenDefinitionMetadata>
         }
     }
 }
+
 impl TokenDefinitionMetadata {
     pub fn new(
         name: impl AsRef<str>,

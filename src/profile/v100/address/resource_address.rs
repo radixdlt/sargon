@@ -1,8 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine_toolkit::models::canonical_address_types::CanonicalResourceAddress as RetResourceAddress;
-use transaction::model::DynamicResourceAddress as ScryptoDynamicResourceAddress;
-
 impl ResourceAddress {
     pub fn is_fungible(&self) -> bool {
         self.secret_magic.is_fungible()
@@ -153,7 +150,7 @@ impl ResourceAddress {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = ResourceAddress;

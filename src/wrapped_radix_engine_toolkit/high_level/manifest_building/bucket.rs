@@ -1,12 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine::types::ManifestBucket as ScryptoManifestBucket;
-use transaction::builder::{
-    ExistingManifestBucket as ScryptoExistingManifestBucket,
-    ManifestNameRegistrar as ScryptoManifestNameRegistrar,
-    NewManifestBucket as ScryptoNewManifestBucket,
-};
-
 #[derive(Clone)]
 pub(crate) struct Bucket {
     pub(crate) name: String,

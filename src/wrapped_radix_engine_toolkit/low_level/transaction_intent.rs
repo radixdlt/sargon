@@ -1,11 +1,4 @@
 use crate::prelude::*;
-use radix_engine_toolkit::functions::intent::hash as ret_hash_intent;
-use transaction::model::{
-    InstructionsV1 as ScryptoInstructions, IntentHash as ScryptoIntentHash,
-    IntentV1 as ScryptoIntent, MessageV1 as ScryptoMessage,
-};
-
-use radix_engine_toolkit::functions::intent::compile as RET_intent_compile;
 
 #[derive(Clone, PartialEq, Eq, derive_more::Debug, uniffi::Record)]
 #[debug("header:\n{:?}\n\nmessage:\n{:?}\n\nmanifest:\n{}\n\n", self.header, self.message, self.manifest.instructions_string())]

@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use radix_engine_common::math::RoundingMode as ScryptoRoundingMode;
 
 /// Defines the rounding strategy used when you round e.g. `Decimal192`.
 ///

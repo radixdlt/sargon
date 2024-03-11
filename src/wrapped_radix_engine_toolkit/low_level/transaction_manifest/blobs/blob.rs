@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-use transaction::model::BlobV1 as ScryptoBlob;
-
 /// Blob is a wrapper a bag of bytes
 #[derive(Clone, PartialEq, Eq, Debug, derive_more::Display, uniffi::Record)]
 pub struct Blob {

@@ -1,10 +1,5 @@
 use crate::prelude::*;
 
-use transaction::model::{
-    EncryptedMessageV1, MessageContentsV1 as ScryptoMessageContents,
-    MessageV1 as ScryptoMessage, PlaintextMessageV1 as ScryptoPlaintextMessage,
-};
-
 #[derive(Clone, Debug, PartialEq, EnumAsInner, Eq, Hash, uniffi::Enum)]
 pub enum Message {
     PlainText { plaintext: PlaintextMessage },
@@ -59,7 +54,8 @@ impl HasSampleValues for Message {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::prelude::*;
+
+    use transaction::model::EncryptedMessageV1;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = Message;

@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine_toolkit::models::canonical_address_types::CanonicalIdentityAddress as RetIdentityAddress;
-
 #[uniffi::export]
 pub fn new_identity_address_from(
     public_key: PublicKey,
@@ -88,11 +86,7 @@ impl HasSampleValues for IdentityAddress {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
-    use radix_engine_common::crypto::{
-        Ed25519PublicKey as ScryptoEd25519PublicKey,
-        PublicKey as ScryptoPublicKey,
-    };
+    use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = IdentityAddress;

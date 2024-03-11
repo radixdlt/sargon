@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine_toolkit::transaction_types::NonFungibleResourceIndicator as RetNonFungibleResourceIndicator;
-
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Enum)]
 pub enum NonFungibleResourceIndicator {
     ByAll {
@@ -79,7 +77,6 @@ mod tests {
 
     #[test]
     fn from_ret() {
-        use radix_engine_common::prelude::NonFungibleLocalId as ScryptoNonFungibleLocalId;
         let ret = RetNonFungibleResourceIndicator::ByAmount {
             amount: 3.into(),
             predicted_ids: Predicted {

@@ -2,12 +2,6 @@ use crate::{prelude::*, UniffiCustomTypeConverter};
 
 use bip32::secp256k1::PublicKey as BIP32Secp256k1PublicKey; // the bip32 crate actually does validation of the PublicKey whereas `radix_engine_common` does not.
 
-use radix_engine_common::crypto::{
-    verify_secp256k1 as scrypto_verify_secp256k1, IsHash as ScryptoIsHash,
-    Secp256k1PublicKey as ScryptoSecp256k1PublicKey,
-    Secp256k1Signature as ScryptoSecp256k1Signature,
-};
-
 /// A `secp256k1` public key used to verify cryptographic signatures (ECDSA signatures).
 #[serde_as]
 #[derive(

@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine_toolkit::models::canonical_address_types::CanonicalVaultAddress as RetVaultAddress;
-
 impl VaultAddress {
     pub fn is_fungible(&self) -> bool {
         self.secret_magic.is_fungible()

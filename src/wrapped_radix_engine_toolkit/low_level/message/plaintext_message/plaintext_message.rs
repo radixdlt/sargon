@@ -1,10 +1,5 @@
 use crate::prelude::*;
 
-use transaction::model::{
-    MessageContentsV1 as ScryptoMessageContents, MessageV1 as ScryptoMessage,
-    PlaintextMessageV1 as ScryptoPlaintextMessage,
-};
-
 #[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct PlaintextMessage {
     pub mime_type: String,

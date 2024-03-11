@@ -1,8 +1,4 @@
 use crate::prelude::*;
-use radix_engine::types::IsHash;
-use radix_engine_common::crypto::{
-    blake2b_256_hash, Hash as ScryptoHash, IsHash as ScryptoIsHash,
-};
 
 /// Represents a 32-byte hash digest.
 ///

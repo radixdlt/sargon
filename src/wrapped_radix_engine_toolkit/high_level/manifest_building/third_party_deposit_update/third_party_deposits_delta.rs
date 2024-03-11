@@ -1,11 +1,10 @@
 use crate::prelude::*;
 
-use radix_engine_interface::blueprints::account::AccountAddAuthorizedDepositorInput as ScryptoAccountAddAuthorizedDepositorInput;
-use radix_engine_interface::blueprints::account::AccountRemoveResourcePreferenceInput as ScryptoAccountRemoveResourcePreferenceInput;
-use radix_engine_interface::blueprints::account::AccountSetResourcePreferenceInput as ScryptoAccountSetResourcePreferenceInput;
-use radix_engine_interface::blueprints::account::DefaultDepositRule as ScryptoDefaultDepositRule;
-use radix_engine_interface::blueprints::account::ResourcePreference as ScryptoResourcePreference;
-use transaction::prelude::ManifestValue as ScryptoManifestValue;
+use radix_engine_interface::blueprints::account::{
+    AccountAddAuthorizedDepositorInput as ScryptoAccountAddAuthorizedDepositorInput,
+    AccountRemoveResourcePreferenceInput as ScryptoAccountRemoveResourcePreferenceInput,
+    AccountSetResourcePreferenceInput as ScryptoAccountSetResourcePreferenceInput,
+};
 
 #[derive(Debug, PartialEq, Eq, Default)]
 pub struct ThirdPartyDepositsDelta {

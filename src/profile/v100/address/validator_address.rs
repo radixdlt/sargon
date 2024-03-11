@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine_toolkit::models::canonical_address_types::CanonicalValidatorAddress as RetValidatorAddress;
-
 #[uniffi::export]
 pub fn new_validator_address_sample_mainnet() -> ValidatorAddress {
     ValidatorAddress::sample_mainnet()

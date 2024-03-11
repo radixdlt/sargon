@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine_toolkit::transaction_types::TrackedPoolRedemption as RetTrackedPoolRedemption;
-
 /// A pool redemptions observed in the transaction
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct TrackedPoolRedemption {

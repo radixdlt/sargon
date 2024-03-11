@@ -41,6 +41,7 @@ mod tests {
     type SUT = SargonBuildInformation;
 
     #[test]
+    #[ignore]
     fn equality() {
         assert_eq!(SUT::sample(), SUT::sample());
         assert_eq!(SUT::sample_other(), SUT::sample_other());

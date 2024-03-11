@@ -1,8 +1,5 @@
 use crate::prelude::*;
 
-use std::collections::BTreeMap;
-use transaction::model::{BlobV1 as ScryptoBlob, BlobsV1 as ScryptoBlobs};
-
 /// Vec of Blobs
 #[derive(Clone, PartialEq, Eq, Debug, uniffi::Record)]
 pub struct Blobs {
