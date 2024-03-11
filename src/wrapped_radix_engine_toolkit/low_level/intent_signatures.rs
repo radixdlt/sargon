@@ -110,9 +110,8 @@ mod tests {
         // We use `SignedIntent` instead of `SUT`, since `SignedIntent` contains
         // both SUT and Hash, needed for `TryFrom`.
         let roundtrip = |si: SignedIntent| {
-            let first = Into::<ScryptoIntentSignatures>::into(
-                si.clone().intent_signatures,
-            );
+            let first =
+                ScryptoIntentSignatures::from(si.clone().intent_signatures);
             let second = si.clone().intent.intent_hash().hash;
             assert_eq!(
                 SUT::try_from((first, second)).unwrap(),

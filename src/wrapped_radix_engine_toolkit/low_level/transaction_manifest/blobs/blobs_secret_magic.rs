@@ -48,7 +48,7 @@ pub(crate) type ScryptoBlobsMap = BTreeMap<radix_engine::types::Hash, Vec<u8>>;
 impl From<ScryptoBlobsMap> for BlobsSecretMagic {
     fn from(value: ScryptoBlobsMap) -> Self {
         BlobsSecretMagic {
-            secret_magic: value.values().map(Into::<Blob>::into).collect_vec(),
+            secret_magic: value.values().map(Blob::from).collect_vec(),
         }
     }
 }
@@ -118,8 +118,7 @@ mod tests {
 
     #[test]
     fn to_from_scrypto() {
-        let roundtrip =
-            |s: SUT| Into::<SUT>::into(Into::<ScryptoBlobs>::into(s));
+        let roundtrip = |s: SUT| SUT::from(ScryptoBlobs::from(s));
         roundtrip(SUT::sample());
         roundtrip(SUT::sample_other());
     }

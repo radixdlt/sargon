@@ -17,6 +17,14 @@ Named after [Sargon of Akkad](https://en.wikipedia.org/wiki/Sargon_of_Akkad) the
 
 We recommend installing the Radix [Transaction Manifest Extension for VS Code][vscodeext] if you use that IDE
 
+### Snippets
+
+For VS Code IDE users, we recommend installing the Rust snippet vendored with this repo:
+
+```sh
+./scripts/install_snippets.sh
+```
+
 ### Swift
 
 ```sh

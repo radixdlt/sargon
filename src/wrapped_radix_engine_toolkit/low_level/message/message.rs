@@ -77,9 +77,8 @@ mod tests {
 
     #[test]
     fn to_from_scrypto() {
-        let roundtrip = |s: SUT| {
-            TryInto::<SUT>::try_into(Into::<ScryptoMessage>::into(s)).unwrap()
-        };
+        let roundtrip =
+            |s: SUT| SUT::try_from(ScryptoMessage::from(s)).unwrap();
         roundtrip(SUT::sample());
         roundtrip(SUT::sample_other());
     }
@@ -87,7 +86,7 @@ mod tests {
     #[test]
     fn into_scrypto() {
         assert_eq!(
-            Into::<ScryptoMessage>::into(SUT::sample()),
+            ScryptoMessage::from(SUT::sample()),
             ScryptoMessage::Plaintext(ScryptoPlaintextMessage {
                 message: ScryptoMessageContents::String(
                     "Hello Radix!".to_owned()

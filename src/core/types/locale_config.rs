@@ -45,7 +45,7 @@ impl LocaleConfig {
             .map_err(|_| CommonError::UnrecognizedLocaleIdentifier {
                 bad_value: identifier,
             })
-            .map(Into::<Self>::into)
+            .map(Self::from)
     }
 }
 

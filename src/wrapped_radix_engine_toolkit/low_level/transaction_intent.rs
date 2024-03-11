@@ -138,9 +138,7 @@ mod tests {
 
     #[test]
     fn to_from_scrypto() {
-        let roundtrip = |s: SUT| {
-            TryInto::<SUT>::try_into(Into::<ScryptoIntent>::into(s)).unwrap()
-        };
+        let roundtrip = |s: SUT| SUT::try_from(ScryptoIntent::from(s)).unwrap();
         roundtrip(SUT::sample());
         roundtrip(SUT::sample_other());
     }

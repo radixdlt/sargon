@@ -49,8 +49,7 @@ mod tests {
 
     #[test]
     fn into_from_scrypto() {
-        let test =
-            |u: u64| assert_eq!(Into::<Epoch>::into(ScryptoEpoch::of(u)).0, u);
+        let test = |u: u64| assert_eq!(Epoch::from(ScryptoEpoch::of(u)).0, u);
         test(0);
         test(1);
         test(2);
@@ -59,8 +58,7 @@ mod tests {
 
     #[test]
     fn from_u64() {
-        let test =
-            |u: u64| assert_eq!(Into::<u64>::into(Into::<Epoch>::into(u)), u);
+        let test = |u: u64| assert_eq!(u64::from(Epoch::from(u)), u);
         test(0);
         test(1);
         test(2);
@@ -69,13 +67,8 @@ mod tests {
 
     #[test]
     fn to_u64() {
-        let test = |u: u64| {
-            assert_eq!(
-                Into::<Epoch>::into(Into::<u64>::into(Into::<Epoch>::into(u)))
-                    .0,
-                u
-            )
-        };
+        let test =
+            |u: u64| assert_eq!(Epoch::from(u64::from(Epoch::from(u))).0, u);
         test(0);
         test(1);
         test(2);

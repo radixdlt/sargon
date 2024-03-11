@@ -18,14 +18,6 @@ impl ResourceAddress {
     }
 }
 
-impl TryInto<ScryptoDynamicResourceAddress> for ResourceAddress {
-    type Error = crate::CommonError;
-
-    fn try_into(self) -> Result<ScryptoDynamicResourceAddress, Self::Error> {
-        todo!()
-    }
-}
-
 #[uniffi::export]
 pub fn resource_address_is_fungible(address: &ResourceAddress) -> bool {
     address.is_fungible()
@@ -179,6 +171,11 @@ mod tests {
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
         assert_ne!(SUT::sample_stokenet(), SUT::sample());
+    }
+
+    #[test]
+    fn ord() {
+        assert!(SUT::sample_mainnet_candy() < SUT::sample_mainnet_xrd());
     }
 
     #[test]

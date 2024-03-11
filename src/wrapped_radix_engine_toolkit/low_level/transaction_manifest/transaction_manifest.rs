@@ -3,18 +3,20 @@ use std::ops::Deref;
 use crate::prelude::*;
 
 use radix_engine::transaction::TransactionReceipt as ScryptoTransactionReceipt;
-use radix_engine_common::data::scrypto::scrypto_decode;
-use radix_engine_common::network::NetworkDefinition as ScryptoNetworkDefinition;
-use radix_engine_toolkit::functions::instructions::extract_addresses as RET_ins_extract_addresses;
-use radix_engine_toolkit::functions::manifest::{
-    execution_summary as RET_execution_summary, summary as RET_summary,
+use radix_engine_common::{
+    data::scrypto::scrypto_decode,
+    network::NetworkDefinition as ScryptoNetworkDefinition,
 };
-use transaction::model::{BlobV1 as ScryptoBlob, BlobsV1 as ScryptoBlobs};
+use radix_engine_toolkit::functions::{
+    instructions::extract_addresses as RET_ins_extract_addresses,
+    manifest::summary as RET_summary,
+};
 
 use transaction::{
     manifest::compile as scrypto_compile,
     manifest::decompile as scrypto_decompile,
     manifest::MockBlobProvider as ScryptoMockBlobProvider,
+    model::{BlobV1 as ScryptoBlob, BlobsV1 as ScryptoBlobs},
     prelude::{
         InstructionV1 as ScryptoInstruction,
         ManifestBuilder as ScryptoManifestBuilder,
@@ -23,7 +25,7 @@ use transaction::{
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record, derive_more::Display)]
-#[display("{}", self.instructions_string())] // TODO add blobs
+#[display("{}", self.instructions_string())] // TODO add blobs to Display
 pub struct TransactionManifest {
     pub(crate) secret_magic: TransactionManifestSecretMagic,
 }
@@ -62,7 +64,7 @@ impl From<TransactionManifestSecretMagic> for TransactionManifest {
 }
 
 impl TransactionManifest {
-    fn scrypto_manifest(&self) -> ScryptoTransactionManifest {
+    pub(crate) fn scrypto_manifest(&self) -> ScryptoTransactionManifest {
         ScryptoTransactionManifest {
             instructions: self.instructions().clone(),
             blobs: self.secret_magic.blobs.clone().into(),
@@ -128,23 +130,6 @@ impl TransactionManifest {
         ManifestSummary::from_ret(ret_summary, self.network_id())
     }
 
-    pub fn execution_summary(
-        &self,
-        encoded_receipt: BagOfBytes, // is: Vec<u8>
-    ) -> Result<ExecutionSummary> {
-        let receipt: TransactionReceipt = encoded_receipt.try_into()?;
-        let ret_execution_summary =
-            RET_execution_summary(&self.scrypto_manifest(), &receipt.decoded)
-                .map_err(|e| {
-                error!(
-                    "Failed to get execution summary from RET, error: {:?}",
-                    e
-                );
-                CommonError::FailedToGetRetExecutionSummaryFromManifest
-            })?;
-        ExecutionSummary::from_ret(ret_execution_summary, self.network_id())
-    }
-
     pub fn network_id(&self) -> NetworkID {
         self.secret_magic.instructions.network_id
     }
@@ -194,6 +179,13 @@ impl HasSampleValues for TransactionManifest {
 
     fn sample_other() -> Self {
         TransactionManifestSecretMagic::sample_other().into()
+    }
+}
+
+#[allow(unused)]
+impl TransactionManifest {
+    pub(crate) fn sample_mainnet_without_lock_fee() -> Self {
+        TransactionManifestSecretMagic::sample_mainnet_without_lock_fee().into()
     }
 }
 
@@ -318,39 +310,6 @@ mod tests {
                 found_in_instructions: NetworkID::Mainnet,
                 specified_to_instructions_ctor: NetworkID::Stokenet
             })
-        );
-    }
-
-    #[test]
-    #[should_panic(expected = "not yet implemented")]
-    fn execution_summary() {
-        let instructions_string = "CALL_METHOD Address(\"account_tdx_2_128h2zv5m4mnprnfjxn4nf96pglgx064mut8np26hp7w9mm064es2dn\") \"withdraw\" Address(\"resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc\") Decimal(\"123\"); TAKE_FROM_WORKTOP Address(\"resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc\") Decimal(\"123\") Bucket(\"bucket1\"); CALL_METHOD Address(\"account_tdx_2_128x8q5es2dstqtcc8wqm843xdtfs0lgetfcdn62a54wxspj6yhpxkf\") \"try_deposit_or_abort\" Bucket(\"bucket1\") Enum<0u8>();";
-        let manifest = SUT::new(
-            instructions_string,
-            NetworkID::Stokenet,
-            Blobs::default(),
-        )
-        .unwrap();
-
-        let summary = manifest
-            .execution_summary(TransactionReceipt::sample().encoded)
-            .unwrap();
-
-        assert_eq!(
-            summary.detailed_manifest_class,
-            vec![
-                DetailedManifestClass::Transfer,
-                DetailedManifestClass::General
-            ]
-        );
-    }
-
-    #[test]
-    fn execution_summary_invalid_receipt() {
-        assert_eq!(
-            TransactionManifest::sample()
-                .execution_summary(BagOfBytes::from_hex("dead").unwrap()),
-            Err(CommonError::FailedToDecodeEncodedReceipt)
         );
     }
 

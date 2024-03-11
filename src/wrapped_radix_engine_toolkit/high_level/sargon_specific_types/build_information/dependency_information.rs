@@ -39,21 +39,25 @@ impl DependencyInformation {
     }
 }
 
+// this is very unfortunate, but unit tests fail 1/20 due to `Valid env variable: NotPresent`
+// probably due to multi thread, maybe we should ignore the tests below, or
+// add some kind of lock, perhaps using `rusty_fork`
+// see: https://crates.io/crates/rusty-fork
+// see: https://github.com/numtide/treefmt/pull/253/files
+fn set_get_unset(key: &str, value: &str) -> DependencyInformation {
+    std::env::set_var(key, value);
+    let val = DependencyInformation::of(key);
+    std::env::remove_var(key);
+    val
+}
+
 impl HasSampleValues for DependencyInformation {
     fn sample() -> Self {
-        let dep = "alamofire-rs";
-        std::env::set_var(dep, format!("branch = {}", "develop"));
-        let val = Self::of(dep);
-        std::env::remove_var(dep);
-        val
+        set_get_unset("alamofire-rs", "branch = develop")
     }
 
     fn sample_other() -> Self {
-        let dep = "the-composable-arc-rs";
-        std::env::set_var(dep, format!("tag = {}", "2.3.7"));
-        let val = Self::of(dep);
-        std::env::remove_var(dep);
-        val
+        set_get_unset("the-composable-arc-rs", "tag = 2.3.7")
     }
 }
 

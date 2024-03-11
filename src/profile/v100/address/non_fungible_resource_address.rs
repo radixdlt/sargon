@@ -1,7 +1,12 @@
 use crate::prelude::*;
 use paste::*;
+use radix_engine_common::types::{
+    EntityType as ScryptoEntityType, NodeId as ScryptoNodeId,
+};
 use std::ops::Deref;
 
+/// This macro exists since UniFFI does not support generics currently, when/if
+/// UniFFI does, we SHOULD remove this macro and use generics.
 macro_rules! decl_specialized_address {
     (
         $(
@@ -85,6 +90,16 @@ macro_rules! decl_specialized_address {
                     value.secret_magic
                 }
             }
+
+            impl AddressViaRet for $specialized_address_type {
+                fn new(
+                    node_id: impl Into<ScryptoNodeId>,
+                    network_id: NetworkID,
+                ) -> Result<Self, CommonError> {
+                    <$base_addr as AddressViaRet>::new(node_id, network_id).and_then(Self::new)
+                }
+            }
+
         }
     };
 }
@@ -246,7 +261,7 @@ mod tests {
 
     #[test]
     fn into_resource_address() {
-        assert_eq!(Into::<ResourceAddress>::into(SUT::sample()), "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa".parse::<ResourceAddress>().unwrap());
+        assert_eq!(ResourceAddress::from(SUT::sample()), "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa".parse::<ResourceAddress>().unwrap());
     }
 
     #[test]

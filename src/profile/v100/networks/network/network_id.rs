@@ -187,7 +187,7 @@ mod tests {
 
     #[test]
     fn into_u8() {
-        assert_eq!(Into::<u8>::into(NetworkID::Mainnet), 1);
+        assert_eq!(u8::from(NetworkID::Mainnet), 1);
     }
 
     #[test]

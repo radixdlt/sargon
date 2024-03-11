@@ -18,6 +18,13 @@ use radix_engine_toolkit::models::canonical_address_types::{
     CanonicalVaultAddress as RetVaultAddress,
 };
 
+use radix_engine::types::ManifestAddress as ScryptoManifestAddress;
+use radix_engine::types::ManifestCustomValue as ScryptoManifestCustomValue;
+use radix_engine::types::ManifestCustomValueKind as ScryptoManifestCustomValueKind;
+use transaction::prelude::ManifestValue as ScryptoManifestValue;
+
+use transaction::model::DynamicGlobalAddress as ScryptoDynamicGlobalAddress;
+
 pub trait AddressViaRet: Sized {
     fn new(
         node_id: impl Into<ScryptoNodeId>,
@@ -37,6 +44,8 @@ pub trait IntoScryptoAddress {
     fn network_id(&self) -> NetworkID;
 }
 
+/// This macro exists since UniFFI does not support generics currently, when/if
+/// UniFFI does, we SHOULD remove this macro and use generics.
 macro_rules! decl_ret_wrapped_address {
     (
         $(
@@ -113,6 +122,18 @@ macro_rules! decl_ret_wrapped_address {
                 }
             }
 
+            impl Ord for [< $address_type:camel Address >] {
+                fn cmp(&self, other: &Self) -> Ordering {
+                    self.address().cmp(&other.address())
+                }
+            }
+
+            impl PartialOrd for [< $address_type:camel Address >] {
+                fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+                    Some(self.cmp(other))
+                }
+            }
+
             impl [< $address_type:camel Address >] {
 
                 pub(crate) fn scrypto(&self) -> ScryptoGlobalAddress {
@@ -137,7 +158,19 @@ macro_rules! decl_ret_wrapped_address {
                         error!("Failed Bech32 decode String, RET error: {:?}", e);
                         CommonError::FailedToDecodeAddressFromBech32 { bad_value: bech32.as_ref().to_owned() }
                     })
-                    .map(Into::<Self>::into)
+                    .map(Self::from)
+                }
+            }
+
+            impl From<[< $address_type:camel Address >]> for ScryptoManifestValue {
+                fn from(value: [< $address_type:camel Address >]) -> ScryptoManifestValue {
+                    ScryptoManifestValue::Custom {
+                        value: ScryptoManifestCustomValue::Address(
+                            ScryptoManifestAddress::Static(
+                                value.node_id(),
+                            ),
+                        ),
+                    }
                 }
             }
 
@@ -163,7 +196,17 @@ macro_rules! decl_ret_wrapped_address {
                         error!("Failed create address, from node and network_id, RET error: {:?}", e);
                         CommonError::FailedToCreateAddressViaRetAddressFromNodeIdAndNetworkID { node_id_as_hex: node_id.to_hex(), network_id }
                     })
-                    .map(|i| Into::<[< $address_type:camel Address >]>::into(i))
+                    .map(|i| [< $address_type:camel Address >]::from(i))
+                }
+            }
+
+            impl TryInto<ScryptoDynamicGlobalAddress> for &[< $address_type:camel Address >] {
+                type Error = crate::CommonError;
+
+                fn try_into(
+                    self,
+                ) -> Result<ScryptoDynamicGlobalAddress, Self::Error> {
+                    Ok(ScryptoDynamicGlobalAddress::Static(self.scrypto()))
                 }
             }
         }
