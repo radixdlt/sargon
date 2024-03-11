@@ -86,48 +86,38 @@ pub fn manifest_stakes_claim(
 
 #[uniffi::export]
 pub fn manifest_third_party_deposit_update(
-    _to: ThirdPartyDeposits,
-    _owner: &AccountAddress,
+    account_address: &AccountAddress,
+    from: ThirdPartyDeposits,
+    to: ThirdPartyDeposits,
 ) -> TransactionManifest {
-    todo!()
-}
-
-/// REQUIRES NETWORK CALL (and probable cache)
-/// Requires kotlinx to be setup
-// #[uniffi::export]
-// pub async fn manifest_assets_transfers(
-//     _transfers: AssetsTransfersTransactionPrototype,
-//     _message: Message,
-// ) -> Result<Manifest> {
-//     todo!()
-// }
-
-#[uniffi::export]
-pub fn updating_manifest_lock_fee(
-    _manifest: TransactionManifest,
-    _address_of_fee_payer: &AccountAddress,
-    _fee: Option<Decimal192>,
-) -> TransactionManifest {
-    todo!()
+    TransactionManifest::third_party_deposit_update(account_address, from, to)
 }
 
 #[uniffi::export]
-pub fn updating_manifest_add_guarantees(
-    _manifest: TransactionManifest,
-    _guarantees: Vec<TransactionGuarantee>,
+pub fn modify_manifest_lock_fee(
+    manifest: TransactionManifest,
+    address_of_fee_payer: &AccountAddress,
+    fee: Option<Decimal192>,
 ) -> TransactionManifest {
-    todo!()
+    manifest.modify_add_lock_fee(address_of_fee_payer, fee)
 }
 
-/// REQUIRES NETWORK CALL (and probable cache)
-/// Requires kotlinx to be setup
-// #[uniffi::export]
-// pub async fn needs_signature_for_depositing(
-//     _into_account: Account,
-//     _resource: ResourceAddress,
-// ) -> Result<bool> {
-//     todo!()
-// }
+/// Modifies `manifest` by inserting transaction "guarantees", which is the wallet
+/// term for `assert_worktop_contains`.
+///
+/// # Panics
+/// Panics if any of the TransactionGuarantee's `instruction_index` is out of
+/// bounds.
+///
+/// Also panics if the number of TransactionGuarantee's is larger than the number
+/// of instructions of `manifest` (does not make any sense).
+#[uniffi::export]
+pub fn modify_manifest_add_guarantees(
+    manifest: TransactionManifest,
+    guarantees: Vec<TransactionGuarantee>,
+) -> TransactionManifest {
+    manifest.modify_add_guarantees(guarantees)
+}
 
 #[uniffi::export]
 pub fn build_information() -> SargonBuildInformation {
@@ -154,6 +144,26 @@ pub fn debug_print_compiled_notarized_intent(
         .expect("Should never failed to decompile");
     format!("{:?}", notarized)
 }
+
+/// REQUIRES NETWORK CALL (and probable cache)
+/// Requires kotlinx to be setup
+// #[uniffi::export]
+// pub async fn manifest_assets_transfers(
+//     _transfers: AssetsTransfersTransactionPrototype,
+//     _message: Message,
+// ) -> Result<Manifest> {
+//     unreachable!()
+// }
+
+/// REQUIRES NETWORK CALL (and probable cache)
+/// Requires kotlinx to be setup
+// #[uniffi::export]
+// pub async fn needs_signature_for_depositing(
+//     _into_account: Account,
+//     _resource: ResourceAddress,
+// ) -> Result<bool> {
+//     unreachable!()
+// }
 
 #[cfg(test)]
 mod tests {
@@ -256,6 +266,7 @@ mod tests {
                 "foobar",
                 "FOO",
                 "example.com",
+                ["Tag0".to_string(), "Tag1".to_string()],
             ),
         )
         .to_string();
@@ -265,6 +276,8 @@ mod tests {
         assert!(string.contains("foobar"));
         assert!(string.contains("FOO"));
         assert!(string.contains("example.com"));
+        assert!(string.contains("Tag0"));
+        assert!(string.contains("Tag1"));
         assert!(string
             .contains(&AccountAddress::sample_stokenet_other().to_string()));
     }
@@ -327,46 +340,54 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "not yet implemented")]
     fn test_manifest_third_party_deposit_update() {
-        manifest_eq(
-            manifest_third_party_deposit_update(
-                ThirdPartyDeposits::sample(),
-                &AccountAddress::sample_mainnet(),
-            ),
-            r#"
-            todo
-            "#,
+        let manifest = manifest_third_party_deposit_update(
+            &AccountAddress::sample_mainnet(),
+            ThirdPartyDeposits::sample(),
+            ThirdPartyDeposits::sample_other(),
+        );
+        assert_eq!(manifest.instructions().len(), 3);
+    }
+
+    #[test]
+    fn test_modify_manifest_lock_fee() {
+        let mut manifest =
+            TransactionManifest::sample_mainnet_without_lock_fee();
+        let instruction_count_before_lock_fee = manifest.instructions().len();
+        manifest = modify_manifest_lock_fee(
+            manifest,
+            &AccountAddress::sample(),
+            Some(Decimal192::one()),
+        );
+        assert_eq!(
+            manifest.instructions().len(),
+            instruction_count_before_lock_fee + 1
         );
     }
 
     #[test]
-    #[should_panic(expected = "not yet implemented")]
-    fn test_updating_manifest_lock_fee() {
-        manifest_eq(
-            updating_manifest_lock_fee(
-                TransactionManifest::sample(),
-                &AccountAddress::sample_mainnet(),
-                Some(1000.into()),
-            ),
-            r#"
-            todo
-            "#,
-        );
-    }
-
-    #[test]
-    #[should_panic(expected = "not yet implemented")]
-    fn test_updating_manifest_add_guarantees() {
-        manifest_eq(
-            updating_manifest_add_guarantees(
-                TransactionManifest::sample(),
-                vec![],
-            ),
-            r#"
-            todo
-            "#,
-        );
+    fn test_modify_manifest_add_guarantees_to_manifest_with_or_without_lock_fee(
+    ) {
+        let do_test = |manifest: TransactionManifest, i: usize| {
+            let modified = modify_manifest_add_guarantees(
+                manifest,
+                vec![TransactionGuarantee::new(
+                    0,
+                    0,
+                    ResourceAddress::sample(),
+                    None,
+                )],
+            );
+            let idx = modified
+                .instructions()
+                .clone()
+                .into_iter()
+                .position(|i| i.is_assert_worktop_contains())
+                .unwrap();
+            assert_eq!(idx, i)
+        };
+        do_test(TransactionManifest::sample(), 1);
+        do_test(TransactionManifest::sample_mainnet_without_lock_fee(), 0);
     }
 
     #[test]

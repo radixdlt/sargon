@@ -5,7 +5,7 @@ use radix_engine_common::prelude::NonFungibleLocalId as ScryptoNonFungibleLocalI
 use radix_engine_common::prelude::StringNonFungibleLocalId as ScryptoStringNonFungibleLocalId;
 use radix_engine_toolkit_json::models::common::SerializableNonFungibleLocalId as RetNonFungibleLocalId;
 
-#[derive(Clone, Debug, Hash, PartialEq, Eq, uniffi::Enum)]
+#[derive(Clone, Debug, Hash, Ord, PartialOrd, PartialEq, Eq, uniffi::Enum)]
 pub enum NonFungibleLocalId {
     /// Unsigned integers, up to u64.
     ///
@@ -175,6 +175,11 @@ mod tests {
     }
 
     #[test]
+    fn ord() {
+        assert!(SUT::integer(1) < SUT::integer(2));
+    }
+
+    #[test]
     fn from_str_ok() {
         assert_eq!(
             "<value>".parse::<SUT>().unwrap(),
@@ -232,7 +237,7 @@ mod tests {
         );
         assert_eq!(value.clone(), scrypto.clone().into());
         assert_eq!(
-            Into::<ScryptoNonFungibleLocalId>::into(value.clone()),
+            ScryptoNonFungibleLocalId::from(value.clone()),
             scrypto.clone()
         );
         assert_eq!(
@@ -250,7 +255,7 @@ mod tests {
         );
 
         assert_eq!(
-            Into::<ScryptoNonFungibleLocalId>::into(value.clone()),
+            ScryptoNonFungibleLocalId::from(value.clone()),
             scrypto.clone()
         );
         assert_eq!(

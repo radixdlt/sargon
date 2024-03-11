@@ -1,0 +1,59 @@
+CREATE_FUNGIBLE_RESOURCE_WITH_INITIAL_SUPPLY
+    Enum<0u8>()									# Owner role
+    true										# Whether the engine should track supply
+    10u8										# Divisibility (between 0u8 and 18u8)
+    Decimal("100000")							# Initial supply
+    Tuple(
+        Enum<0u8>(),							# None | Mint Roles (if None: defaults to DenyAll, DenyAll)
+        Enum<0u8>(),							# None | Burn Roles (if None: defaults to DenyAll, DenyAll)
+        Enum<0u8>(),							# None | Freeze Roles (if None: defaults to DenyAll, DenyAll)
+        Enum<0u8>(),							# None | Recall Roles (if None: defaults to DenyAll, DenyAll)
+        Enum<0u8>(),							# None | Withdraw Roles (if None: defaults to AllowAll, DenyAll)
+        Enum<0u8>()								# None | Deposit Roles (if None: defaults to AllowAll, DenyAll)
+    )
+    Tuple(										# Metadata initialization
+        Map<String, Tuple>(						# Initial metadata values
+            "name" => Tuple(
+                Enum<1u8>(
+                    Enum<0u8>("MyResource")		# Resource NAME
+                ),
+                false							# Locked
+            ),
+            "description" => Tuple(				# Resource DESCRIPTION
+                Enum<1u8>(
+                    Enum<0u8>(
+                        "A
+                        very
+                        innovative
+                        and
+                        important
+                        resource"
+                    )
+                ),
+                false							# Locked
+            ),
+            "icon_url" => Tuple(				# Resource URL
+                Enum<1u8>(
+                    Enum<13u8>(
+                        "https://i.imgur.com/A2itmif.jpeg"
+                    )
+                ),
+                false							# Locked
+            ),
+            "symbol" => Tuple(					# Resource SYMBOL
+                Enum<1u8>(
+                    Enum<0u8>("VIP")
+                ),
+                false							# Locked
+            )
+        ),
+        Map<String, Enum>()						# Metadata roles
+    )
+    Enum<0u8>()									# None | No Address Reservation
+;
+CALL_METHOD
+    Address("account_tdx_2_12xx9jz27aa0mqjj8cwhk7pzkhtkthv09yclmurse42hlyme2gegyg2")
+    "try_deposit_batch_or_abort"
+    Expression("ENTIRE_WORKTOP")
+    Enum<0u8>()
+;

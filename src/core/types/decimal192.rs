@@ -133,6 +133,8 @@ impl TryFrom<f32> for Decimal {
 }
 
 impl Decimal {
+    pub const SCALE: u32 = ScryptoDecimal192::SCALE;
+
     pub fn new(value: String) -> Result<Self> {
         value.parse()
     }
@@ -166,28 +168,28 @@ impl Add for Decimal {
     type Output = Self;
     /// self + rhs
     fn add(self, rhs: Self) -> Self::Output {
-        Into::into(self.native() + rhs.native())
+        Self::from(self.native() + rhs.native())
     }
 }
 impl Sub for Decimal {
     type Output = Self;
     /// self - rhs
     fn sub(self, rhs: Self) -> Self::Output {
-        Into::into(self.native() - rhs.native())
+        Self::from(self.native() - rhs.native())
     }
 }
 impl Mul for Decimal {
     type Output = Self;
     /// self * rhs
     fn mul(self, rhs: Self) -> Self::Output {
-        Into::into(self.native() * rhs.native())
+        Self::from(self.native() * rhs.native())
     }
 }
 impl Div for Decimal {
     type Output = Self;
     /// self / rhs
     fn div(self, rhs: Self) -> Self::Output {
-        Into::into(self.native() / rhs.native())
+        Self::from(self.native() / rhs.native())
     }
 }
 
@@ -256,7 +258,7 @@ impl Decimal {
         self.native()
             .checked_round(decimal_places, rounding_mode.into())
             .ok_or(CommonError::DecimalError)
-            .map(Into::<Self>::into)
+            .map(Self::from)
     }
 }
 
@@ -733,6 +735,11 @@ mod test_decimal {
         fail("1,000,000.23", &swedish);
         test("1,000,000.23", &us, "1000000.23");
     }
+
+    #[test]
+    fn scale_is_18() {
+        assert_eq!(SUT::SCALE, 18);
+    }
 }
 
 #[cfg(test)]
@@ -1075,6 +1082,29 @@ mod uniffi_tests {
             decimal_round(&sut, 3, mode).unwrap(),
             "2.46".parse::<SUT>().unwrap()
         );
+
+        let max: SUT =
+            "3138550867693340381917894711603833208051.177722232017256447"
+                .parse()
+                .unwrap();
+
+        assert!(max
+            .round(0, RoundingMode::ToNearestMidpointAwayFromZero)
+            .is_ok());
+        assert!(max
+            .round(0, RoundingMode::ToNearestMidpointTowardZero)
+            .is_ok());
+        assert!(max.round(0, RoundingMode::ToZero).is_ok());
+
+        assert!(max
+            .round(18, RoundingMode::ToNearestMidpointAwayFromZero)
+            .is_ok());
+        assert!(max
+            .round(18, RoundingMode::ToNearestMidpointTowardZero)
+            .is_ok());
+        assert!(max.round(18, RoundingMode::ToZero).is_ok());
+
+        assert!(max.round(0, RoundingMode::AwayFromZero).is_err());
     }
 
     #[test]

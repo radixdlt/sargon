@@ -3,6 +3,8 @@ use delegate::delegate;
 use paste::*;
 use radix_engine_common::crypto::{Hash, IsHash};
 
+/// This macro exists since UniFFI does not support generics currently, when/if
+/// UniFFI does, we SHOULD remove this macro and use generics.
 macro_rules! decl_exactly_n_bytes {
     (
         $(
@@ -19,6 +21,8 @@ macro_rules! decl_exactly_n_bytes {
                 PartialEq,
                 Eq,
                 Hash,
+                Ord,
+                PartialOrd,
                 SerializeDisplay,
                 DeserializeFromStr,
                 derive_more::Display,
@@ -181,6 +185,8 @@ decl_exactly_n_bytes!(
     65
 );
 
+/// This macro exists since UniFFI does not support generics currently, when/if
+/// UniFFI does, we SHOULD remove this macro and use generics.
 macro_rules! decl_samples_for_bag_of_n_bytes {
     ($struct_name:ident, $byte_count:expr) => {
         impl HasSampleValues for $struct_name {
@@ -324,6 +330,11 @@ mod tests_exactly32_bytes {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn ord() {
+        assert!(SUT::sample() < SUT::sample_other());
     }
 
     #[test]

@@ -1,0 +1,38 @@
+{
+    // Rust snippets inspired by:
+    // https://github.com/Metalymph/rust-flash-snippets/blob/master/snippets/snippets.code-snippets
+    "test_mod": {
+        "prefix": "mod_test",
+        "body": [
+            "#[cfg(test)]",
+            "mod tests {",
+            "\tuse super::*;",
+            "",
+            "\t#[allow(clippy::upper_case_acronyms)]",
+            "\ttype SUT = ${TM_FILENAME_BASE/(?:^|-|_|\\.)(\\w)/${1:/upcase}/g};",
+            "",
+            "\t#[test]",
+            "\tfn equality() {",
+            "\t    assert_eq!(SUT::sample(), SUT::sample());",
+            "\t    assert_eq!(SUT::sample_other(), SUT::sample_other());",
+            "\t}",
+            "",
+            "\t#[test]",
+            "\tfn inequality() {",
+            "\t    assert_ne!(SUT::sample(), SUT::sample_other());",
+            "\t}",
+            "",
+            "}"
+        ],
+        "description": "tests module decl"
+    },
+    "test_fn": {
+        "prefix": "fn_test",
+        "body": [
+            "#[test]",
+            "fn ${1:name}($0) {",
+            "}"
+        ],
+        "description": "test fn decl"
+    }
+}

@@ -1,0 +1,14 @@
+CALL_FUNCTION
+    Address("package_tdx_2_1pkgxxxxxxxxxplxxxxxxxxxxxxx020379220524xxxxxxxxxe4r780")
+    "TwoResourcePool"
+    "instantiate"
+    Enum<1u8>(
+        Enum<0u8>()
+    )
+    Enum<0u8>()
+        Tuple(
+        Address("resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc"),
+        Address("resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy")
+    )
+    Enum<0u8>()
+;

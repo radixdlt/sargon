@@ -2,7 +2,8 @@ use crate::prelude::*;
 
 use radix_engine_common::address::AddressBech32Decoder;
 use radix_engine_common::types::ResourceAddress as ScryptoResourceAddress;
-use radix_engine_interface::blueprints::resource::NonFungibleGlobalId as ScryptoNonFungibleGlobalId;
+
+use radix_engine::types::NonFungibleGlobalId as ScryptoNonFungibleGlobalId;
 
 use radix_engine_toolkit_json::models::scrypto::non_fungible_global_id::{
     SerializableNonFungibleGlobalId as RETNonFungibleGlobalId,
@@ -16,6 +17,8 @@ use radix_engine_toolkit_json::models::scrypto::non_fungible_global_id::{
     Eq,
     Hash,
     SerializeDisplay,
+    Ord,
+    PartialOrd,
     DeserializeFromStr,
     derive_more::Display,
     uniffi::Record,
@@ -30,8 +33,8 @@ pub struct NonFungibleGlobalId {
     //
     // For more info see slack:
     // https://rdxworks.slack.com/archives/C01HK4QFXNY/p1709633826502809?thread_ts=1709633374.199459&channel=C01HK4QFXNY&message_ts=1709633826.502809
-    resource_address: ResourceAddress,
-    non_fungible_local_id: NonFungibleLocalId,
+    pub(crate) resource_address: ResourceAddress,
+    pub(crate) non_fungible_local_id: NonFungibleLocalId,
 }
 
 impl NonFungibleGlobalId {
@@ -95,12 +98,31 @@ impl TryFrom<RETNonFungibleGlobalIdInternal> for NonFungibleGlobalId {
 impl From<NonFungibleGlobalId> for RETNonFungibleGlobalId {
     fn from(value: NonFungibleGlobalId) -> Self {
         let scrypto_global_id = ScryptoNonFungibleGlobalId::new(
-            Into::<ScryptoResourceAddress>::into(&value.resource_address),
+            ScryptoResourceAddress::from(&value.resource_address),
             value.non_fungible_local_id.clone().into(),
         );
         RETNonFungibleGlobalId::new(
             scrypto_global_id,
             value.network_id().discriminant(),
+        )
+    }
+}
+
+impl From<NonFungibleGlobalId> for ScryptoNonFungibleGlobalId {
+    fn from(value: NonFungibleGlobalId) -> Self {
+        Self::new(
+            value.resource_address.into(),
+            value.non_fungible_local_id.into(),
+        )
+    }
+}
+
+impl From<(ScryptoNonFungibleGlobalId, NetworkID)> for NonFungibleGlobalId {
+    fn from(value: (ScryptoNonFungibleGlobalId, NetworkID)) -> Self {
+        let (global_id, network_id) = value;
+        Self::new_unchecked(
+            (global_id.resource_address(), network_id),
+            global_id.local_id().clone().into(),
         )
     }
 }
@@ -156,7 +178,7 @@ impl HasSampleValues for NonFungibleGlobalId {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = NonFungibleGlobalId;
@@ -170,6 +192,30 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn ord_same_resource_address() {
+        let r = ResourceAddress::sample();
+        assert!(
+            SUT::new_unchecked(r.clone(), NonFungibleLocalId::integer(1))
+                < SUT::new_unchecked(r.clone(), NonFungibleLocalId::integer(2))
+        );
+    }
+
+    #[test]
+    fn ord_diff_resource_address_addr_takes_precedence_over_local_id_integer() {
+        assert!(
+            // lazy test, using FUNGIBLE Resource address instead of Non-Fungible ResourceAddress
+            // as we should be doing... alas we accept fungible ones since they can appear "in the wild".
+            SUT::new_unchecked(
+                ResourceAddress::sample_mainnet_candy(),
+                NonFungibleLocalId::integer(99999)
+            ) < SUT::new_unchecked(
+                ResourceAddress::sample_mainnet_xrd(),
+                NonFungibleLocalId::integer(111)
+            )
+        );
     }
 
     #[test]
@@ -279,5 +325,21 @@ mod tests {
     #[test]
     fn global_id_with_fungible_resource_addresses_are_accepted() {
         assert!("resource_tdx_2_1t4kep9ldg9t0cszj78z6fcr2zvfxfq7muetq7pyvhdtctwxum90scq:#1#".parse::<SUT>().unwrap().resource_address.is_fungible());
+    }
+
+    #[test]
+    fn into_scrypto() {
+        let resource_address =
+            ResourceAddress::sample_mainnet_nft_gc_membership();
+        let local_id = NonFungibleLocalId::string("Member_237").unwrap();
+        let sut =
+            SUT::new_unchecked(resource_address.clone(), local_id.clone());
+        assert_eq!(
+            ScryptoNonFungibleGlobalId::from(sut),
+            ScryptoNonFungibleGlobalId::new(
+                resource_address.into(),
+                local_id.into()
+            )
+        );
     }
 }

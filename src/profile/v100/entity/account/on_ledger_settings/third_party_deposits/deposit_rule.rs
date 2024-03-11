@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+use radix_engine_interface::blueprints::account::DefaultDepositRule as ScryptoDefaultDepositRule;
+
 /// The general deposit rule to apply
 #[derive(
     Serialize,
@@ -34,37 +36,72 @@ impl Default for DepositRule {
     }
 }
 
+impl From<DepositRule> for ScryptoDefaultDepositRule {
+    fn from(value: DepositRule) -> Self {
+        match value {
+            DepositRule::AcceptKnown => {
+                ScryptoDefaultDepositRule::AllowExisting
+            }
+            DepositRule::AcceptAll => ScryptoDefaultDepositRule::Accept,
+            DepositRule::DenyAll => ScryptoDefaultDepositRule::Reject,
+        }
+    }
+}
+
+impl From<ScryptoDefaultDepositRule> for DepositRule {
+    fn from(value: ScryptoDefaultDepositRule) -> Self {
+        match value {
+            ScryptoDefaultDepositRule::Accept => Self::AcceptAll,
+            ScryptoDefaultDepositRule::Reject => Self::DenyAll,
+            ScryptoDefaultDepositRule::AllowExisting => Self::AcceptKnown,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = DepositRule;
 
     #[test]
     fn json_roundtrip_accept_all() {
         assert_json_value_eq_after_roundtrip(
-            &DepositRule::AcceptAll,
+            &SUT::AcceptAll,
             json!("acceptAll"),
         );
-        assert_json_roundtrip(&DepositRule::AcceptAll);
+        assert_json_roundtrip(&SUT::AcceptAll);
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(DepositRule::AcceptAll, DepositRule::DenyAll);
-        assert_ne!(DepositRule::DenyAll, DepositRule::AcceptKnown);
-        assert_ne!(DepositRule::AcceptAll, DepositRule::AcceptKnown);
+        assert_ne!(SUT::AcceptAll, SUT::DenyAll);
+        assert_ne!(SUT::DenyAll, SUT::AcceptKnown);
+        assert_ne!(SUT::AcceptAll, SUT::AcceptKnown);
     }
 
     #[test]
     fn display() {
-        assert_eq!(format!("{}", DepositRule::AcceptAll), "AcceptAll");
-        assert_eq!(format!("{}", DepositRule::AcceptKnown), "AcceptKnown");
-        assert_eq!(format!("{}", DepositRule::DenyAll), "DenyAll");
+        assert_eq!(format!("{}", SUT::AcceptAll), "AcceptAll");
+        assert_eq!(format!("{}", SUT::AcceptKnown), "AcceptKnown");
+        assert_eq!(format!("{}", SUT::DenyAll), "DenyAll");
     }
 
     #[test]
     fn debug() {
-        assert_eq!(format!("{:?}", DepositRule::AcceptAll), "AcceptAll");
-        assert_eq!(format!("{:?}", DepositRule::AcceptKnown), "AcceptKnown");
-        assert_eq!(format!("{:?}", DepositRule::DenyAll), "DenyAll");
+        assert_eq!(format!("{:?}", SUT::AcceptAll), "AcceptAll");
+        assert_eq!(format!("{:?}", SUT::AcceptKnown), "AcceptKnown");
+        assert_eq!(format!("{:?}", SUT::DenyAll), "DenyAll");
+    }
+
+    #[test]
+    fn scrypto_roundtrip() {
+        let roundtrip = |s: SUT| {
+            assert_eq!(SUT::from(ScryptoDefaultDepositRule::from(s)), s)
+        };
+        roundtrip(SUT::AcceptKnown);
+        roundtrip(SUT::AcceptAll);
+        roundtrip(SUT::DenyAll);
     }
 }

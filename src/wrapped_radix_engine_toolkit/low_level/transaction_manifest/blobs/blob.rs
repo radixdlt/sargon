@@ -99,15 +99,14 @@ mod tests {
 
     #[test]
     fn to_from_scrypto() {
-        let roundtrip =
-            |s: SUT| Into::<SUT>::into(Into::<ScryptoBlob>::into(s));
+        let roundtrip = |s: SUT| SUT::from(ScryptoBlob::from(s));
         roundtrip(SUT::sample());
         roundtrip(SUT::sample_other());
     }
 
     #[test]
     fn to_from_bag_of_bytes() {
-        let roundtrip = |s: SUT| Into::<SUT>::into(Into::<BagOfBytes>::into(s));
+        let roundtrip = |s: SUT| SUT::from(BagOfBytes::from(s));
         roundtrip(SUT::sample());
         roundtrip(SUT::sample_other());
     }

@@ -152,21 +152,13 @@ mod tests {
     #[test]
     fn scrypto_roundtrip() {
         let sut = SUT::sample();
-        assert_eq!(
-            Into::<SUT>::into(Into::<ScryptoEd25519Signature>::into(
-                sut.clone()
-            )),
-            sut
-        );
+        assert_eq!(SUT::from(ScryptoEd25519Signature::from(sut.clone())), sut);
     }
 
     #[test]
     fn scrypto_roundtrip_start_scrypto() {
         let sig: ScryptoEd25519Signature = "2150c2f6b6c496d197ae03afb23f6adf23b275c675394f23786250abd006d5a2c7543566403cb414f70d0e229b0a9b55b4c74f42fc38cdf1aba2307f97686f0b".parse().unwrap();
-        assert_eq!(
-            Into::<ScryptoEd25519Signature>::into(Into::<SUT>::into(sig)),
-            sig
-        );
+        assert_eq!(ScryptoEd25519Signature::from(SUT::from(sig)), sig);
     }
 
     #[test]

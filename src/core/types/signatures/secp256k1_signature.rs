@@ -154,9 +154,7 @@ mod tests {
     fn scrypto_roundtrip() {
         let sut = SUT::sample();
         assert_eq!(
-            Into::<SUT>::into(Into::<ScryptoSecp256k1Signature>::into(
-                sut.clone()
-            )),
+            SUT::from(ScryptoSecp256k1Signature::from(sut.clone())),
             sut
         );
     }
@@ -164,10 +162,7 @@ mod tests {
     #[test]
     fn scrypto_roundtrip_start_scrypto() {
         let sig: ScryptoSecp256k1Signature = "01aa1c4f46f8437b7f8ec9008ae10e6f33bb8be3e81e35c63f3498070dfbd6a20b2daee6073ead3c9e72d8909bc32a02e46cede3885cf8568d4c380ac97aa7fbcd".parse().unwrap();
-        assert_eq!(
-            Into::<ScryptoSecp256k1Signature>::into(Into::<SUT>::into(sig)),
-            sig
-        );
+        assert_eq!(ScryptoSecp256k1Signature::from(SUT::from(sig)), sig);
     }
 
     #[test]

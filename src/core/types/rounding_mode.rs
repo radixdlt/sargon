@@ -88,12 +88,7 @@ mod tests {
     #[test]
     fn rounding_mode_conversion() {
         let test = |m: RoundingMode| {
-            assert_eq!(
-                Into::<RoundingMode>::into(Into::<ScryptoRoundingMode>::into(
-                    m
-                )),
-                m
-            )
+            assert_eq!(RoundingMode::from(ScryptoRoundingMode::from(m)), m)
         };
         all::<RoundingMode>().for_each(test);
     }

@@ -137,6 +137,32 @@ impl Instructions {
         .expect("Valid sample value")
     }
 
+    pub fn sample_mainnet_without_lock_fee() -> Self {
+        Self::new(
+            r#"
+            CALL_METHOD
+            Address("account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8")
+            "withdraw"
+            Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+            Decimal("1337")
+        ;
+        TAKE_FROM_WORKTOP
+            Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+            Decimal("1337")
+            Bucket("bucket1")
+        ;
+        CALL_METHOD
+            Address("account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69")
+            "try_deposit_or_abort"
+            Bucket("bucket1")
+            Enum<0u8>()
+        ;
+            "#,
+            NetworkID::Mainnet,
+        )
+        .expect("Valid sample value")
+    }
+
     // https://github.com/radixdlt/radix-engine-toolkit/blob/cf2f4b4d6de56233872e11959861fbf12db8ddf6/crates/radix-engine-toolkit/tests/manifests/account/multi_account_resource_transfer.rtm
     // but modified, changed `None` -> `Enum<0u8>()`, also changed `"account_a_bucket"` -> `"bucket1"`, `"account_b_bucket"` -> `"bucket2"`, etc.
     pub(crate) fn sample_other_simulator_instructions_string() -> String {

@@ -1,0 +1,24 @@
+CALL_METHOD
+    Address("account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk")
+    "withdraw"
+    Address("resource_tdx_2_1t5hpjckz9tm63gqvxsl60ejhzvnlguly77tltvywnj06s2x9wjdxjn")
+    Decimal("1234")
+;
+TAKE_ALL_FROM_WORKTOP
+    Address("resource_tdx_2_1t5hpjckz9tm63gqvxsl60ejhzvnlguly77tltvywnj06s2x9wjdxjn")
+    Bucket("bucket1")
+;
+CALL_METHOD
+    Address("validator_tdx_2_1sdlkptcwjpajqawnuya8r2mgl3eqt89hw27ww6du8kxmx3thmyu8l4")
+    "unstake"
+    Bucket("bucket1")
+;
+TAKE_ALL_FROM_WORKTOP
+    Address("resource_tdx_2_1ngw8z6ut9mw54am4rr65kwcuz24q3n7waxtzyfvug5g4yuc00jydqj")
+    Bucket("bucket2")
+;
+CALL_METHOD
+    Address("account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk")
+    "deposit"
+    Bucket("bucket2")
+;

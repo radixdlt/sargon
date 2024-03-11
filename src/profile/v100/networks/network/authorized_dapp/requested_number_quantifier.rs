@@ -16,7 +16,7 @@ use crate::prelude::*;
     Hash,
     PartialOrd,
     Ord,
-    strum_macros::Display,
+    strum::Display,
     uniffi::Enum,
 )]
 #[serde(rename_all = "camelCase")]
