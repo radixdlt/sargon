@@ -1,11 +1,6 @@
-use std::ops::AddAssign;
-
 use crate::prelude::*;
 
 use radix_engine_interface::blueprints::account::ACCOUNT_LOCK_FEE_IDENT;
-use transaction::model::{
-    InstructionV1 as ScryptoInstruction, InstructionsV1 as ScryptoInstructions,
-};
 
 pub trait InspectInstruction {
     fn is_lock_fee(&self) -> bool;
@@ -36,7 +31,6 @@ impl InspectInstruction for ScryptoInstruction {
     }
 }
 
-use transaction::prelude::ManifestBuilder as ScryptoManifestBuilder;
 
 /// Used by development, in production we SHOULD use the fee given by analyzing
 /// the manifest.

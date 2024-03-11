@@ -1,36 +1,5 @@
 use crate::prelude::*;
-use radix_engine::prelude::ToMetadataEntry as ScryptoToMetadataEntry;
-use radix_engine::types::{
-    node_modules::ModuleConfig as ScryptoModuleConfig,
-    AccessRule as ScryptoAccessRule,
-    FungibleResourceRoles as ScryptoFungibleResourceRoles,
-    GlobalAddress as ScryptoGlobalAddress,
-    ManifestEncode as ScryptoManifestEncode,
-    MetadataInit as ScryptoMetadataInit,
-    NonFungibleData as ScryptoNonFungibleData,
-    NonFungibleIdType as ScryptoNonFungibleIdType,
-    NonFungibleResourceRoles as ScryptoNonFungibleResourceRoles,
-    OwnerRole as ScryptoOwnerRole,
-    RoleAssignmentInit as ScryptoRoleAssignmentInit,
-};
 
-use radix_engine_common::math::Decimal as ScryptoDecimal;
-use radix_engine_common::prelude::NonFungibleLocalId as ScryptoNonFungibleLocalId;
-use radix_engine_derive::{ManifestSbor as ScryptoManifestSbor, ScryptoSbor};
-use radix_engine_toolkit::models::node_id::TypedNodeId as RetTypedNodeId;
-
-use std::collections::BTreeMap;
-use std::fs;
-
-use transaction::{
-    builder::ResolvableComponentAddress as ScryptoResolvableComponentAddress,
-    model::DynamicGlobalAddress as ScryptoDynamicGlobalAddress,
-    prelude::{
-        ManifestBuilder as ScryptoManifestBuilder,
-        MetadataValue as ScryptoMetadataValue,
-        TransactionManifestV1 as ScryptoTransactionManifest,
-    },
-};
 impl TransactionManifest {
     pub fn create_fungible_token(address_of_owner: &AccountAddress) -> Self {
         Self::create_fungible_token_with_metadata(
@@ -180,7 +149,7 @@ impl TransactionManifest {
         initial_supply: Decimal192,
         metadata: TokenDefinitionMetadata,
     ) -> ScryptoManifestBuilder {
-        let initial_supply: ScryptoDecimal = initial_supply.into();
+        let initial_supply: ScryptoDecimal192 = initial_supply.into();
         builder.create_fungible_resource(
             ScryptoOwnerRole::Updatable(ScryptoAccessRule::AllowAll),
             true,

@@ -1,6 +1,5 @@
 use crate::prelude::*;
 
-use transaction::model::NotarySignatureV1 as ScryptoNotarySignature;
 
 #[derive(
     Debug,

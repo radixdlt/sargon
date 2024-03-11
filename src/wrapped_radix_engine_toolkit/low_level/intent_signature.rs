@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-use transaction::model::IntentSignatureV1 as ScryptoIntentSignature;
-
 #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct IntentSignature {
     pub(crate) secret_magic: SignatureWithPublicKey,
@@ -102,12 +100,6 @@ mod tests {
             SUT::sample_other().signature().into()
         )
     }
-
-    use radix_engine_common::crypto::{
-        Secp256k1PublicKey as ScryptoSecp256k1PublicKey,
-        Secp256k1Signature as ScryptoSecp256k1Signature,
-    };
-    use transaction::model::SignatureWithPublicKeyV1 as ScryptoSignatureWithPublicKey;
 
     #[test]
     fn try_from_scrypto_valid() {

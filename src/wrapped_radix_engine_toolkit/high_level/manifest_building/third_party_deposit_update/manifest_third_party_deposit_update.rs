@@ -6,7 +6,6 @@ use radix_engine_interface::blueprints::account::{
     ACCOUNT_SET_DEFAULT_DEPOSIT_RULE_IDENT,
     ACCOUNT_SET_RESOURCE_PREFERENCE_IDENT,
 };
-use transaction::prelude::ManifestBuilder as ScryptoManifestBuilder;
 
 impl TransactionManifest {
     pub fn third_party_deposit_update(

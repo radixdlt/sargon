@@ -1,29 +1,4 @@
 use crate::prelude::*;
-use paste::*;
-use radix_engine::types::GlobalAddress as ScryptoGlobalAddress;
-use radix_engine_common::types::{
-    EntityType as ScryptoEntityType, NodeId as ScryptoNodeId,
-};
-use radix_engine_toolkit::models::canonical_address_types::{
-    CanonicalAccessControllerAddress as RetAccessControllerAddress,
-    CanonicalAccountAddress as RetAccountAddress,
-    CanonicalAddress as RetIsAddressTrait,
-    CanonicalAddressError as RetCanonicalAddressError,
-    CanonicalComponentAddress as RetComponentAddress,
-    CanonicalIdentityAddress as RetIdentityAddress,
-    CanonicalPackageAddress as RetPackageAddress,
-    CanonicalPoolAddress as RetPoolAddress,
-    CanonicalResourceAddress as RetResourceAddress,
-    CanonicalValidatorAddress as RetValidatorAddress,
-    CanonicalVaultAddress as RetVaultAddress,
-};
-
-use radix_engine::types::ManifestAddress as ScryptoManifestAddress;
-use radix_engine::types::ManifestCustomValue as ScryptoManifestCustomValue;
-use radix_engine::types::ManifestCustomValueKind as ScryptoManifestCustomValueKind;
-use transaction::prelude::ManifestValue as ScryptoManifestValue;
-
-use transaction::model::DynamicGlobalAddress as ScryptoDynamicGlobalAddress;
 
 pub trait AddressViaRet: Sized {
     fn new(
@@ -385,13 +360,11 @@ decl_ret_wrapped_address!(
 
 #[cfg(test)]
 mod tests {
-    use radix_engine_common::types::NodeId;
-
-    use crate::prelude::*;
+    use super::*;
 
     #[test]
     fn account_address_from_invalid_node_id() {
-        let unknown_node_id = NodeId::new(222, &[0xff; 29]);
+        let unknown_node_id = ScryptoNodeId::new(222, &[0xff; 29]);
         assert_eq!(
             <AccountAddress as AddressViaRet>::new(unknown_node_id, NetworkID::Mainnet),
             Err(CommonError::FailedToCreateAddressViaRetAddressFromNodeIdAndNetworkID {

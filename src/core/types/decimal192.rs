@@ -1,8 +1,5 @@
 use crate::prelude::*;
 use delegate::delegate;
-use radix_engine_common::math::{
-    Decimal as ScryptoDecimal192, RoundingMode as ScryptoRoundingMode,
-};
 
 /// UniFFI conversion for InnerDecimal using String as builtin.
 impl crate::UniffiCustomTypeConverter for ScryptoDecimal192 {

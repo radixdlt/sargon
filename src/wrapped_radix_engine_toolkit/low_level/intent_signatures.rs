@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-use transaction::model::IntentSignaturesV1 as ScryptoIntentSignatures;
-
 #[derive(Clone, Debug, PartialEq, Eq, Default, Hash, uniffi::Record)]
 pub struct IntentSignatures {
     pub signatures: Vec<IntentSignature>,

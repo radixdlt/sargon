@@ -1,9 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine_common::crypto::{
-    IsHash as ScryptoIsHash, PublicKey as ScryptoPublicKey,
-};
-
 /// A tagged union of supported public keys on different curves, supported
 /// curves are `secp256k1` and `Curve25519`
 #[derive(
@@ -247,9 +243,7 @@ impl TryFrom<ScryptoPublicKey> for PublicKey {
 #[cfg(test)]
 mod tests {
 
-    use crate::prelude::*;
-
-    use radix_engine_common::crypto::PublicKey as ScryptoPublicKey;
+    use super::*;
 
     #[test]
     fn equality() {

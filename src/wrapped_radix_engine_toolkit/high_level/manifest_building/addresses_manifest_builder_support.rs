@@ -1,16 +1,5 @@
 use crate::prelude::*;
 
-use paste::*;
-
-use radix_engine_common::types::ComponentAddress as ScryptoComponentAddress;
-use radix_engine_common::types::GlobalAddress as ScryptoGlobalAddress;
-use radix_engine_common::types::ResourceAddress as ScryptoResourceAddress;
-
-use transaction::model::DynamicComponentAddress as ScryptoDynamicComponentAddress;
-use transaction::model::DynamicResourceAddress as ScryptoDynamicResourceAddress;
-
-use radix_engine_interface::blueprints::resource::ResourceOrNonFungible as ScryptoResourceOrNonFungible;
-
 macro_rules! from_scrypto_global_address {
     ($address_type: ty) => {
         paste! {

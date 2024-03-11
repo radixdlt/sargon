@@ -1,7 +1,5 @@
 use crate::prelude::*;
-use radix_engine::prelude::ToMetadataEntry as ScryptoToMetadataEntry;
 use strum::*;
-use transaction::prelude::MetadataValue as ScryptoMetadataValue;
 
 #[derive(Debug, PartialEq, Eq, strum::EnumString, strum::Display)]
 #[strum(serialize_all = "snake_case")]

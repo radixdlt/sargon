@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine_interface::blueprints::account::DefaultDepositRule as ScryptoDefaultDepositRule;
-
 /// The general deposit rule to apply
 #[derive(
     Serialize,

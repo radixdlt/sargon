@@ -1,14 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine::types::recover_secp256k1 as Scrypto_recover_secp256k1;
-use radix_engine_common::crypto::{
-    Ed25519PublicKey as ScryptoEd25519PublicKey,
-    Ed25519Signature as ScryptoEd25519Signature,
-    Secp256k1PublicKey as ScryptoSecp256k1PublicKey,
-    Secp256k1Signature as ScryptoSecp256k1Signature,
-};
-use transaction::model::SignatureWithPublicKeyV1 as ScryptoSignatureWithPublicKey;
-
 /// Represents any natively supported signature, including public key.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Enum, EnumAsInner)]
 pub enum SignatureWithPublicKey {

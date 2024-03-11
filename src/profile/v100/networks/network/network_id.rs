@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use radix_engine_common::network::NetworkDefinition as ScryptoNetworkDefinition;
 
 #[derive(
     Serialize_repr,
@@ -161,94 +160,96 @@ impl NetworkID {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
-    use enum_iterator::all;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = NetworkID;
 
     #[test]
     fn mainnet_is_default() {
-        assert_eq!(NetworkID::default(), NetworkID::Mainnet);
+        assert_eq!(SUT::default(), SUT::Mainnet);
     }
 
     #[test]
     fn mainnet_logical_name_is_lowercase_mainnet() {
-        assert_eq!(NetworkID::Mainnet.logical_name(), "mainnet");
+        assert_eq!(SUT::Mainnet.logical_name(), "mainnet");
     }
 
     #[test]
     fn mainnet_fmt() {
-        assert_eq!(format!("{}", NetworkID::Mainnet), "mainnet");
+        assert_eq!(format!("{}", SUT::Mainnet), "mainnet");
     }
 
     #[test]
     fn json() {
-        assert_json_value_eq_after_roundtrip(&NetworkID::Mainnet, json!(1));
-        assert_json_value_fails::<NetworkID>(json!("1"));
+        assert_json_value_eq_after_roundtrip(&SUT::Mainnet, json!(1));
+        assert_json_value_fails::<SUT>(json!("1"));
     }
 
     #[test]
     fn into_u8() {
-        assert_eq!(u8::from(NetworkID::Mainnet), 1);
+        assert_eq!(u8::from(SUT::Mainnet), 1);
     }
 
     #[test]
     fn from_repr() {
-        assert_eq!(NetworkID::Mainnet, NetworkID::from_repr(0x01).unwrap());
-        assert_eq!(NetworkID::Stokenet, NetworkID::from_repr(0x02).unwrap());
+        assert_eq!(SUT::Mainnet, SUT::from_repr(0x01).unwrap());
+        assert_eq!(SUT::Stokenet, SUT::from_repr(0x02).unwrap());
     }
 
     #[test]
     fn discriminant_mainnet() {
-        assert_eq!(NetworkID::Mainnet.discriminant(), 0x01);
+        assert_eq!(SUT::Mainnet.discriminant(), 0x01);
     }
 
     #[test]
     fn discriminant_stokenet() {
-        assert_eq!(NetworkID::Stokenet.discriminant(), 0x02);
+        assert_eq!(SUT::Stokenet.discriminant(), 0x02);
     }
 
     #[test]
     fn discriminant_simulator() {
-        assert_eq!(NetworkID::Simulator.discriminant(), 242);
+        assert_eq!(SUT::Simulator.discriminant(), 242);
     }
 
     #[test]
     fn discriminant_adapanet() {
-        assert_eq!(NetworkID::Adapanet.discriminant(), 0x0a);
+        assert_eq!(SUT::Adapanet.discriminant(), 0x0a);
     }
 
     #[test]
     fn discriminant_enkinet() {
-        assert_eq!(NetworkID::Enkinet.discriminant(), 0x21);
+        assert_eq!(SUT::Enkinet.discriminant(), 0x21);
     }
 
     #[test]
     fn discriminant_hammunet() {
-        assert_eq!(NetworkID::Hammunet.discriminant(), 0x22);
+        assert_eq!(SUT::Hammunet.discriminant(), 0x22);
     }
 
     #[test]
     fn discriminant_nebunet() {
-        assert_eq!(NetworkID::Nebunet.discriminant(), 0x0b);
+        assert_eq!(SUT::Nebunet.discriminant(), 0x0b);
     }
 
     #[test]
     fn discriminant_kisharnet() {
-        assert_eq!(NetworkID::Kisharnet.discriminant(), 0x0c);
+        assert_eq!(SUT::Kisharnet.discriminant(), 0x0c);
     }
 
     #[test]
     fn discriminant_ansharnet() {
-        assert_eq!(NetworkID::Ansharnet.discriminant(), 0x0d);
+        assert_eq!(SUT::Ansharnet.discriminant(), 0x0d);
     }
 
     #[test]
     fn discriminant_zabanet() {
-        assert_eq!(NetworkID::Zabanet.discriminant(), 0x0e);
+        assert_eq!(SUT::Zabanet.discriminant(), 0x0e);
     }
 
     #[test]
     fn no_mixup() {
-        let ids = all::<NetworkID>().collect::<Vec<NetworkID>>();
+        let ids = all::<SUT>().collect::<Vec<SUT>>();
         assert_eq!(
             BTreeSet::from_iter(ids.iter().map(|id| id.logical_name())).len(),
             ids.len()
@@ -257,22 +258,22 @@ mod tests {
     #[test]
     fn lookup_network_definition() {
         assert_eq!(
-            NetworkID::Mainnet.network_definition().id,
-            NetworkID::Mainnet.discriminant()
+            SUT::Mainnet.network_definition().id,
+            SUT::Mainnet.discriminant()
         )
     }
 
     #[test]
     fn lookup_network_definition_enkinet() {
         assert_eq!(
-            NetworkID::Enkinet.network_definition().id,
-            NetworkID::Enkinet.discriminant()
+            SUT::Enkinet.network_definition().id,
+            SUT::Enkinet.discriminant()
         )
     }
 
     #[test]
     fn logical_name() {
-        assert_eq!(NetworkID::Mainnet.logical_name(), "mainnet");
-        assert_eq!(NetworkID::Stokenet.logical_name(), "stokenet");
+        assert_eq!(SUT::Mainnet.logical_name(), "mainnet");
+        assert_eq!(SUT::Stokenet.logical_name(), "stokenet");
     }
 }

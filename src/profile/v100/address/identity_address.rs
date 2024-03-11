@@ -88,11 +88,7 @@ impl HasSampleValues for IdentityAddress {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
-    use radix_engine_common::crypto::{
-        Ed25519PublicKey as ScryptoEd25519PublicKey,
-        PublicKey as ScryptoPublicKey,
-    };
+    use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = IdentityAddress;

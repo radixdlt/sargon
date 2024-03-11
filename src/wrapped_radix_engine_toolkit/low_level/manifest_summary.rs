@@ -1,12 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine_toolkit::transaction_types::ManifestSummary as RetManifestSummary;
-use transaction::prelude::{
-    InstructionV1 as ScryptoInstruction,
-    ManifestBuilder as ScryptoManifestBuilder,
-    TransactionManifestV1 as ScryptoTransactionManifest,
-};
-
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct ManifestSummary {
     pub addresses_of_accounts_deposited_into: Vec<AccountAddress>,

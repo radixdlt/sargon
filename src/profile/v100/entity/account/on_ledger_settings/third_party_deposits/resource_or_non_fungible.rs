@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine_interface::blueprints::resource::ResourceOrNonFungible as ScryptoResourceOrNonFungible;
-
 /// The addresses that can be added as exception to the `DepositRule`
 #[derive(
     Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum,
@@ -53,8 +51,6 @@ mod tests {
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = ResourceOrNonFungible;
-
-    use radix_engine::types::NonFungibleGlobalId as ScryptoNonFungibleGlobalId;
 
     #[test]
     fn equality() {

@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine_common::prelude::StringNonFungibleLocalId as ScryptoStringNonFungibleLocalId;
-
 /// A string matching `[_0-9a-zA-Z]{1,64}`.
 ///
 /// This is an internal wrapping of Scrypto's `StringNonFungibleLocalId`

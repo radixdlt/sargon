@@ -1,11 +1,5 @@
 use crate::{prelude::*, UniffiCustomTypeConverter};
 
-use radix_engine_common::crypto::{
-    verify_ed25519 as scrypto_verify_ed25519,
-    Ed25519PublicKey as ScryptoEd25519PublicKey,
-    Ed25519Signature as ScryptoEd25519Signature, IsHash as ScryptoIsHash,
-};
-
 /// An Ed25519 public key used to verify cryptographic signatures (EdDSA signatures).
 #[serde_as]
 #[derive(

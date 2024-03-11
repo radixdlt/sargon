@@ -1,8 +1,4 @@
 pub use crate::prelude::*;
-use radix_engine_common::types::ComponentAddress as ScryptoComponentAddress;
-use radix_engine_common::types::EntityType as ScryptoEntityType;
-use radix_engine_common::types::ResourceAddress as ScryptoResourceAddress;
-use radix_engine_toolkit::models::canonical_address_types::CanonicalAccountAddress as RetAccountAddress;
 
 #[uniffi::export]
 pub fn new_account_address_from(

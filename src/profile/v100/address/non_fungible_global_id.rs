@@ -1,15 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine_common::address::AddressBech32Decoder;
-use radix_engine_common::types::ResourceAddress as ScryptoResourceAddress;
-
-use radix_engine::types::NonFungibleGlobalId as ScryptoNonFungibleGlobalId;
-
-use radix_engine_toolkit_json::models::scrypto::non_fungible_global_id::{
-    SerializableNonFungibleGlobalId as RETNonFungibleGlobalId,
-    SerializableNonFungibleGlobalIdInternal as RETNonFungibleGlobalIdInternal,
-};
-
 #[derive(
     Clone,
     Debug,
@@ -75,11 +65,11 @@ impl From<&ResourceAddress> for ScryptoResourceAddress {
     }
 }
 
-impl TryFrom<RETNonFungibleGlobalIdInternal> for NonFungibleGlobalId {
+impl TryFrom<RetNonFungibleGlobalIdInternal> for NonFungibleGlobalId {
     type Error = crate::CommonError;
 
     fn try_from(
-        value: RETNonFungibleGlobalIdInternal,
+        value: RetNonFungibleGlobalIdInternal,
     ) -> sbor::prelude::Result<Self, Self::Error> {
         let (scrypto_resource_address, scrypto_local_id) =
             value.non_fungible_global_id.into_parts();
@@ -95,13 +85,13 @@ impl TryFrom<RETNonFungibleGlobalIdInternal> for NonFungibleGlobalId {
     }
 }
 
-impl From<NonFungibleGlobalId> for RETNonFungibleGlobalId {
+impl From<NonFungibleGlobalId> for RetNonFungibleGlobalId {
     fn from(value: NonFungibleGlobalId) -> Self {
         let scrypto_global_id = ScryptoNonFungibleGlobalId::new(
             ScryptoResourceAddress::from(&value.resource_address),
             value.non_fungible_local_id.clone().into(),
         );
-        RETNonFungibleGlobalId::new(
+        RetNonFungibleGlobalId::new(
             scrypto_global_id,
             value.network_id().discriminant(),
         )
@@ -132,7 +122,7 @@ impl NonFungibleGlobalId {
         self.resource_address.network_id()
     }
 
-    fn engine(&self) -> RETNonFungibleGlobalId {
+    fn engine(&self) -> RetNonFungibleGlobalId {
         self.clone().into()
     }
 }
@@ -141,7 +131,7 @@ impl FromStr for NonFungibleGlobalId {
     type Err = CommonError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        RETNonFungibleGlobalIdInternal::from_str(s)
+        RetNonFungibleGlobalIdInternal::from_str(s)
             .map_err(|_| CommonError::InvalidNonFungibleGlobalID {
                 bad_value: s.to_owned(),
             })

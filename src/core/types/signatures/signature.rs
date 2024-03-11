@@ -1,5 +1,3 @@
-use transaction::model::SignatureV1 as ScryptoSignature;
-
 use crate::prelude::*;
 
 /// Either a Signature on `Curve25519` or `Secp256k1`

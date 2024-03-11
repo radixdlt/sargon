@@ -1,9 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine_common::crypto::{
-    IsHash, Secp256k1PrivateKey as ScryptoSecp256k1PrivateKey,
-};
-
 /// A secp256k1 private key used to create cryptographic signatures, more specifically
 /// ECDSA signatures, that offer recovery of the public key.
 #[derive(derive_more::Debug)]

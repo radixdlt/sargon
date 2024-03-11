@@ -1,9 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine_toolkit::models::canonical_address_types::CanonicalPoolAddress as RetPoolAddress;
-
-use radix_engine_common::types::EntityType as ScryptoEntityType;
-
 /// Sample to a mainnet PoolAddress with single resource.
 #[uniffi::export]
 pub fn new_pool_address_sample_single() -> PoolAddress {

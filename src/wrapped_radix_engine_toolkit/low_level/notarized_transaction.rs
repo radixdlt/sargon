@@ -1,12 +1,4 @@
 use crate::prelude::*;
-use transaction::model::{
-    NotarizedTransactionV1 as ScryptoNotarizedTransaction,
-    SignedIntentV1 as ScryptoSignedIntent,
-};
-
-use radix_engine_toolkit::functions::notarized_transaction::{
-    compile as RET_compile_notarized_tx, decompile as RET_decompile_notarize_tx,
-};
 
 #[derive(Debug, Clone, Eq, PartialEq, uniffi::Record)]
 pub struct NotarizedTransaction {
