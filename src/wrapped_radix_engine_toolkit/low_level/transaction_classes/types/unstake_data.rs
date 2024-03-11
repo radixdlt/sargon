@@ -2,6 +2,7 @@ use crate::prelude::*;
 
 use radix_engine::blueprints::consensus_manager::UnstakeData as ScryptoUnstakeData;
 
+/// The data associated with the various validator claim NFTs
 #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct UnstakeData {
     pub name: String,

@@ -6,6 +6,8 @@ use radix_engine_common::types::ComponentAddress as ScryptoComponentAddress;
 use radix_engine_toolkit::transaction_types::ExecutionSummary as RetExecutionSummary;
 use radix_engine_toolkit::transaction_types::ResourceIndicator as RetResourceIndicator;
 
+/// A summary of the execution of the manifest and the information that helps
+/// wallets present the contents of a transaction.
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct ExecutionSummary {
     /// Addresses of accounts withdraws from in the manifest.

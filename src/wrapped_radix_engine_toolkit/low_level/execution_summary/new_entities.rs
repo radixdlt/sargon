@@ -2,6 +2,7 @@ use crate::prelude::*;
 
 use radix_engine_toolkit::transaction_types::NewEntities as RetNewEntities;
 
+/// Information on the global entities created in the transaction.
 #[derive(Clone, Debug, Default, PartialEq, Eq, uniffi::Record)]
 pub struct NewEntities {
     pub metadata: HashMap<ResourceAddress, NewlyCreatedResource>,

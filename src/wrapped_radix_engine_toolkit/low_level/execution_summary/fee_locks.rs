@@ -2,6 +2,7 @@ use crate::prelude::*;
 
 use radix_engine::transaction::FeeLocks as ScryptoFeeLocks;
 
+/// Information on how much fees were contingent and how much were not.
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct FeeLocks {
     pub lock: Decimal192,

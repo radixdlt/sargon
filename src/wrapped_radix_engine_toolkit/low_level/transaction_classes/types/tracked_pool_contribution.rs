@@ -2,6 +2,7 @@ use crate::prelude::*;
 
 use radix_engine_toolkit::transaction_types::TrackedPoolContribution as RetTrackedPoolContribution;
 
+/// A contribution to a pool observed in the transaction
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct TrackedPoolContribution {
     pub pool_address: PoolAddress,

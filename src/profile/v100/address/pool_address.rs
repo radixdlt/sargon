@@ -102,9 +102,7 @@ impl PoolAddress {
 
 #[cfg(test)]
 mod tests {
-    use radix_engine::types::NodeId;
-
-    use crate::prelude::*;
+    use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = PoolAddress;

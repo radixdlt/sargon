@@ -2,6 +2,7 @@ use crate::prelude::*;
 
 use radix_engine_toolkit::transaction_types::FeeSummary as RetFeeSummary;
 
+/// Detailed information on the amount of cost units consumed.
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct FeeSummary {
     pub execution_cost: Decimal192,
