@@ -214,13 +214,7 @@ CALL_METHOD
         let divisibility = 4;
         let rounded_guaranteed_amount: Decimal = "0.1234".parse().unwrap();
         assert_eq!(
-            added_guaranteed_amount
-                .clone()
-                .round(
-                    divisibility,
-                    RoundingMode::ToNearestMidpointAwayFromZero // ofc must match mode in impl of `modify_add_guarantees`
-                )
-                .unwrap(),
+            added_guaranteed_amount.clone().round(divisibility),
             rounded_guaranteed_amount.clone()
         );
         let mut manifest = TransactionManifest::new(

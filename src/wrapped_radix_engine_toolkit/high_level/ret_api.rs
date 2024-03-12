@@ -147,10 +147,9 @@ pub fn debug_print_compiled_notarized_intent(
 
 #[uniffi::export]
 pub fn manifest_assets_transfers(
-    transfers: AssetsTransfersTransactionPrototype,
-    message: Message,
-) -> Result<TransactionManifest> {
-    unreachable!()
+    transfers: AssetsTransfers,
+) -> TransactionManifest {
+    TransactionManifest::assets_transfers(transfers)
 }
 
 #[cfg(test)]

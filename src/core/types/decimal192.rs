@@ -247,11 +247,28 @@ impl Decimal {
         }
     }
 
+    /// Rounds this number to the specified decimal places, or if
+    /// None, rounds to `Decimal192::SCALE` places, using the
+    /// rounding mode `ToNearestMidpointAwayFromZero`.
+    ///
+    /// # Panics
+    /// - Panic if the number of decimal places is not within [0..SCALE(=18)]
+    pub fn round(&self, decimal_places: impl Into<Option<i32>>) -> Self {
+        let mode = RoundingMode::ToNearestMidpointAwayFromZero;
+        self.round_with_mode(
+            decimal_places.into().unwrap_or(Decimal192::SCALE as i32),
+            mode,
+        )
+        .unwrap_or_else(|_| {
+            panic!("Should always be able to round using mode {}", mode)
+        })
+    }
+
     /// Rounds this number to the specified decimal places.
     ///
     /// # Panics
     /// - Panic if the number of decimal places is not within [0..SCALE(=18)]
-    pub fn round(
+    pub fn round_with_mode(
         &self,
         decimal_places: i32,
         rounding_mode: RoundingMode,
@@ -510,7 +527,7 @@ pub fn decimal_round(
     decimal_places: i32,
     rounding_mode: RoundingMode,
 ) -> Result<Decimal192> {
-    decimal.round(decimal_places, rounding_mode)
+    decimal.round_with_mode(decimal_places, rounding_mode)
 }
 
 #[cfg(test)]
@@ -1104,22 +1121,22 @@ mod uniffi_tests {
                 .unwrap();
 
         assert!(max
-            .round(0, RoundingMode::ToNearestMidpointAwayFromZero)
+            .round_with_mode(0, RoundingMode::ToNearestMidpointAwayFromZero)
             .is_ok());
         assert!(max
-            .round(0, RoundingMode::ToNearestMidpointTowardZero)
+            .round_with_mode(0, RoundingMode::ToNearestMidpointTowardZero)
             .is_ok());
-        assert!(max.round(0, RoundingMode::ToZero).is_ok());
+        assert!(max.round_with_mode(0, RoundingMode::ToZero).is_ok());
 
         assert!(max
-            .round(18, RoundingMode::ToNearestMidpointAwayFromZero)
+            .round_with_mode(18, RoundingMode::ToNearestMidpointAwayFromZero)
             .is_ok());
         assert!(max
-            .round(18, RoundingMode::ToNearestMidpointTowardZero)
+            .round_with_mode(18, RoundingMode::ToNearestMidpointTowardZero)
             .is_ok());
-        assert!(max.round(18, RoundingMode::ToZero).is_ok());
+        assert!(max.round_with_mode(18, RoundingMode::ToZero).is_ok());
 
-        assert!(max.round(0, RoundingMode::AwayFromZero).is_err());
+        assert!(max.round_with_mode(0, RoundingMode::AwayFromZero).is_err());
     }
 
     #[test]

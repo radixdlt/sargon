@@ -26,14 +26,7 @@ impl TransactionGuarantee {
 
 impl TransactionGuarantee {
     pub(crate) fn rounded_amount(&self) -> Decimal192 {
-        let decimal_places = self
-            .resource_divisibility
-            .unwrap_or(Decimal192::SCALE as i32);
-
-        self.amount
-            .clone()
-            .round(decimal_places, RoundingMode::ToNearestMidpointAwayFromZero)
-            .expect("Rounding to never fail.")
+        self.amount.clone().round(self.resource_divisibility)
     }
 }
 
