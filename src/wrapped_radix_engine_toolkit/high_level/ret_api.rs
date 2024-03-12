@@ -145,11 +145,22 @@ pub fn debug_print_compiled_notarized_intent(
     format!("{:?}", notarized)
 }
 
+/// Uses `per_asset_transfers` after having transposed the `PerRecipientAssetTransfers`
+/// into `PerAssetTransfers`. We always use `PerAssetTransfers` when building the manifest
+/// since it is more efficient (allows a single withdraw per resource) => fewer instruction =>
+/// cheaper TX fee for user.
 #[uniffi::export]
-pub fn manifest_assets_transfers(
+pub fn manifest_per_recipient_transfers(
+    transfers: PerRecipientAssetTransfers,
+) -> TransactionManifest {
+    TransactionManifest::per_recipient_transfers(transfers)
+}
+
+#[uniffi::export]
+pub fn manifest_per_asset_transfers(
     transfers: PerAssetTransfers,
 ) -> TransactionManifest {
-    TransactionManifest::assets_transfers(transfers)
+    TransactionManifest::per_asset_transfers(transfers)
 }
 
 #[cfg(test)]

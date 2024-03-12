@@ -18,6 +18,53 @@ impl PerRecipientAssetTransfers {
     }
 }
 
+#[allow(unused)]
+impl PerRecipientAssetTransfers {
+    pub(crate) fn sample_mainnet() -> Self {
+        Self::new(
+            AccountAddress::sample_mainnet(),
+            [
+                PerRecipientAssetTransfer::sample_mainnet(),
+                PerRecipientAssetTransfer::sample_mainnet_other(),
+            ],
+        )
+    }
+
+    pub(crate) fn sample_mainnet_other() -> Self {
+        Self::new(
+            AccountAddress::sample_mainnet_other(),
+            [PerRecipientAssetTransfer::sample_mainnet_other()],
+        )
+    }
+
+    pub(crate) fn sample_stokenet() -> Self {
+        Self::new(
+            AccountAddress::sample_stokenet(),
+            [
+                PerRecipientAssetTransfer::sample_stokenet(),
+                PerRecipientAssetTransfer::sample_stokenet_other(),
+            ],
+        )
+    }
+
+    pub(crate) fn sample_stokenet_other() -> Self {
+        Self::new(
+            AccountAddress::sample_stokenet_other(),
+            [PerRecipientAssetTransfer::sample_stokenet_other()],
+        )
+    }
+}
+
+impl HasSampleValues for PerRecipientAssetTransfers {
+    fn sample() -> Self {
+        Self::sample_mainnet()
+    }
+
+    fn sample_other() -> Self {
+        Self::sample_stokenet_other()
+    }
+}
+
 impl PerRecipientAssetTransfers {
     /// Transpose: `PerRecipient` -> `PerAsset`
     pub fn transpose(&self) -> PerAssetTransfers {
@@ -83,4 +130,47 @@ impl PerRecipientAssetTransfers {
             per_asset_non_fungibles.values().cloned(),
         )
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = PerRecipientAssetTransfers;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn hash() {
+        assert_eq!(
+            HashSet::<SUT>::from_iter([
+                SUT::sample_mainnet(),
+                SUT::sample_mainnet_other(),
+                SUT::sample_stokenet(),
+                SUT::sample_stokenet_other(),
+                // duplicates should be removed
+                SUT::sample_mainnet(),
+                SUT::sample_mainnet_other(),
+                SUT::sample_stokenet(),
+                SUT::sample_stokenet_other(),
+            ])
+            .len(),
+            4
+        )
+    }
+
+    // #[test]
+    // fn transpose() {
+    //     pretty_assertions::assert_eq!(SUT::sample().transpose(), PerAssetTransfers::sample())
+    // }
 }

@@ -1,7 +1,17 @@
 use crate::prelude::*;
 
 impl TransactionManifest {
-    pub fn assets_transfers(transfers: PerAssetTransfers) -> Self {
+    /// Uses `per_asset_transfers` after having transposed the `PerRecipientAssetTransfers`
+    /// into `PerAssetTransfers`. We always use `PerAssetTransfers` when building the manifest
+    /// since it is more efficient (allows a single withdraw per resource) => fewer instruction =>
+    /// cheaper TX fee for user.
+    pub fn per_recipient_transfers(
+        transfers: PerRecipientAssetTransfers,
+    ) -> Self {
+        Self::per_asset_transfers(transfers.transpose())
+    }
+
+    pub fn per_asset_transfers(transfers: PerAssetTransfers) -> Self {
         let mut builder = ScryptoManifestBuilder::new();
         let bucket_factory = BucketFactory::default();
         let from_account = &transfers.from_account;
@@ -71,13 +81,16 @@ mod tests {
 
     #[test]
     fn trivial() {
-        let sut = SUT::assets_transfers(PerAssetTransfers::new(
+        let sut = SUT::per_asset_transfers(PerAssetTransfers::new(
             AccountAddress::sample(),
             [],
             [],
         ));
         manifest_eq(sut, ""); // empty!
     }
+
+    #[test]
+    fn name() {}
 
     #[test]
     fn multi_token_multi_recipient() {
@@ -234,10 +247,15 @@ mod tests {
             ],
         );
 
-        let transposed = per_recipient_transfers.transpose();
+        let transposed = per_recipient_transfers.clone().transpose();
         pretty_assertions::assert_eq!(per_asset_transfers.clone(), transposed);
 
-        let sut = SUT::assets_transfers(per_asset_transfers);
+        let sut = SUT::per_asset_transfers(per_asset_transfers.clone());
+        assert_eq!(
+            SUT::per_recipient_transfers(per_recipient_transfers),
+            sut.clone()
+        );
+
         manifest_eq(
             sut,
             r##"
@@ -383,7 +401,7 @@ mod tests {
 
     #[test]
     fn simple() {
-        let sut = SUT::assets_transfers(PerAssetTransfers::sample());
+        let sut = SUT::per_asset_transfers(PerAssetTransfers::sample());
         manifest_eq(
             sut,
             r##"

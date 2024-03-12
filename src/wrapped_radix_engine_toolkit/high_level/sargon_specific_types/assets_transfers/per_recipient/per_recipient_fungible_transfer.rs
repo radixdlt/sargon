@@ -1,42 +1,40 @@
 use crate::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
-pub struct PerAssetFungibleResource {
-    pub resource_address: ResourceAddress,
-    pub divisibility: Option<i32>,
-}
-
-impl PerAssetFungibleResource {
+impl PerRecipientFungibleTransfer {
     pub fn new(
         resource_address: ResourceAddress,
+        amount: impl Into<Decimal192>,
+        use_try_deposit_or_abort: bool,
         divisibility: impl Into<Option<i32>>,
     ) -> Self {
         Self {
             resource_address,
+            amount: amount.into(),
+            use_try_deposit_or_abort,
             divisibility: divisibility.into(),
         }
     }
 }
 
-impl PerAssetFungibleResource {
+impl PerRecipientFungibleTransfer {
     pub(crate) fn sample_mainnet() -> Self {
-        Self::new(ResourceAddress::sample_mainnet_xrd(), None)
+        Self::new(ResourceAddress::sample_mainnet_xrd(), 237, true, None)
     }
 
     pub(crate) fn sample_mainnet_other() -> Self {
-        Self::new(ResourceAddress::sample_mainnet_candy(), 4)
+        Self::new(ResourceAddress::sample_mainnet_candy(), 1337, true, 4)
     }
 
     pub(crate) fn sample_stokenet() -> Self {
-        Self::new(ResourceAddress::sample_stokenet_xrd(), None)
+        Self::new(ResourceAddress::sample_stokenet_xrd(), 42, false, None)
     }
 
     pub(crate) fn sample_stokenet_other() -> Self {
-        Self::new(ResourceAddress::sample_stokenet_gum(), 6)
+        Self::new(ResourceAddress::sample_stokenet_candy(), 3, true, 6)
     }
 }
 
-impl HasSampleValues for PerAssetFungibleResource {
+impl HasSampleValues for PerRecipientFungibleTransfer {
     fn sample() -> Self {
         Self::sample_mainnet()
     }
@@ -51,7 +49,7 @@ mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = PerAssetFungibleResource;
+    type SUT = PerRecipientFungibleTransfer;
 
     #[test]
     fn equality() {
