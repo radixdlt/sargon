@@ -112,12 +112,12 @@ mod tests {
         #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
         pub struct PerRecipientAssetTransfer {
             pub recipient: AssetsTransfersRecipient,
-            pub fungibles: Vec<FungibleTokenWithAmount>,
-            pub non_fungibles: Vec<NonFungibleGlobalId>,
+            pub fungibles: Vec<PerRecipientFungibleTransfer>,
+            pub non_fungibles: Vec<PerRecipientNonFungiblesTransfer>,
         }
 
         #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
-        pub struct FungibleTokenWithAmount {
+        pub struct PerRecipientFungibleTransfer {
             pub resource_address: ResourceAddress,
             pub amount: Decimal192,
             /// If `true` the `try_deposit_batch_or_abort` method will be used instead of `deposit`,
@@ -129,7 +129,33 @@ mod tests {
             pub divisibility: Option<i32>,
         }
 
-        impl FungibleTokenWithAmount {
+        #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+        pub struct PerRecipientNonFungiblesTransfer {
+            pub resource_address: ResourceAddress,
+            /// If `true` the `try_deposit_batch_or_abort` method will be used instead of `deposit`,
+            /// typically wallets sets this to try if and only if the recipient is a self-owned account
+            /// (`AssetsTransfersRecipient::MyOwnAccount`) controlled by a DeviceFactorSource thy have
+            /// access to and which third party deposit setting's `DepositRule` is `AcceptKnown` and
+            /// which resource is known (`resource_address` is owned or has been owned before).
+            use_try_deposit_or_abort: bool,
+            local_ids: Vec<NonFungibleLocalId>,
+        }
+
+        impl PerRecipientNonFungiblesTransfer {
+            pub fn new(
+                resource_address: impl Into<ResourceAddress>,
+                use_try_deposit_or_abort: bool,
+                local_ids: impl IntoIterator<Item = NonFungibleLocalId>,
+            ) -> Self {
+                Self {
+                    resource_address: resource_address.into(),
+                    use_try_deposit_or_abort,
+                    local_ids: local_ids.into_iter().collect_vec(),
+                }
+            }
+        }
+
+        impl PerRecipientFungibleTransfer {
             pub fn new(
                 resource_address: ResourceAddress,
                 amount: impl Into<Decimal192>,
@@ -147,23 +173,28 @@ mod tests {
 
         impl PerRecipientAssetTransfer {
             pub fn new(
-                recipient: AssetsTransfersRecipient,
-                fungibles: impl IntoIterator<Item = FungibleTokenWithAmount>,
-                non_fungibles: impl IntoIterator<Item = NonFungibleGlobalId>,
+                recipient: impl Into<AssetsTransfersRecipient>,
+                fungibles: impl IntoIterator<Item = PerRecipientFungibleTransfer>,
+                non_fungibles: impl IntoIterator<
+                    Item = PerRecipientNonFungiblesTransfer,
+                >,
             ) -> Self {
                 Self {
-                    recipient,
+                    recipient: recipient.into(),
                     fungibles: fungibles.into_iter().collect_vec(),
                     non_fungibles: non_fungibles.into_iter().collect_vec(),
                 }
             }
         }
 
-        impl From<(&AssetsTransfersRecipient, FungibleTokenWithAmount)>
+        impl From<(&AssetsTransfersRecipient, PerRecipientFungibleTransfer)>
             for PerAssetTransfersOfFungibleResource
         {
             fn from(
-                value: (&AssetsTransfersRecipient, FungibleTokenWithAmount),
+                value: (
+                    &AssetsTransfersRecipient,
+                    PerRecipientFungibleTransfer,
+                ),
             ) -> Self {
                 let (recipient, fungible_with_amount) = value;
                 Self::new(
@@ -180,34 +211,144 @@ mod tests {
             }
         }
 
-        impl PerRecipientAssetTransfers {
-            pub fn transpose(&self) -> PerAssetTransfers {
-                let mut fungibles =
-                    Vec::<PerAssetTransfersOfFungibleResource>::new();
-                fungibles = self
-                    .transfers
-                    .clone()
-                    .into_iter()
-                    .flat_map(|t| {
-                        let x = t.clone();
-                        let recipient = &x.recipient;
-                        x.fungibles
-                            .clone()
-                            .into_iter()
-                            .map(|a| (recipient, a))
-                            .map(PerAssetTransfersOfFungibleResource::from)
-                    })
-                    .collect_vec();
-                PerAssetTransfers::new(
-                    self.address_of_sender.clone(),
-                    fungibles,
-                    [],
+        impl From<(&AssetsTransfersRecipient, PerRecipientNonFungiblesTransfer)>
+            for PerAssetTransfersOfNonFungibleResource
+        {
+            fn from(
+                value: (
+                    &AssetsTransfersRecipient,
+                    PerRecipientNonFungiblesTransfer,
+                ),
+            ) -> Self {
+                let (recipient, non_fungibles) = value;
+
+                PerAssetTransfersOfNonFungibleResource::new(
+                    non_fungibles.resource_address.clone(),
+                    [PerAssetNonFungibleTransfer::new(
+                        recipient.clone(),
+                        non_fungibles.use_try_deposit_or_abort,
+                        non_fungibles.local_ids,
+                    )],
                 )
             }
         }
 
-        let transfers = PerAssetTransfers::new(
-            sender,
+        impl PerRecipientAssetTransfers {
+            pub fn transpose(&self) -> PerAssetTransfers {
+                PerAssetTransfers::new(
+                    self.address_of_sender.clone(),
+                    self.transfers
+                        .clone()
+                        .into_iter()
+                        .flat_map(|t| {
+                            let x = t.clone();
+                            let recipient = &x.recipient;
+                            x.fungibles
+                                .clone()
+                                .into_iter()
+                                .map(|a| (recipient, a))
+                                .map(PerAssetTransfersOfFungibleResource::from)
+                                .collect_vec()
+                        })
+                        .collect_vec(),
+                    self
+                        .transfers
+                        .clone()
+                        .into_iter()
+                        .flat_map(|t| {
+                            let x = t.clone();
+                            let recipient = &x.recipient;
+                            x.non_fungibles
+                                .clone()
+                                .into_iter()
+                                .map(|a| (recipient, a))
+                                .map(PerAssetTransfersOfNonFungibleResource::from)
+                                .collect_vec()
+                        })
+                        .collect_vec(),
+                )
+            }
+        }
+
+        let per_recipient_transfers = PerRecipientAssetTransfers::new(
+            sender.clone(),
+            [
+                PerRecipientAssetTransfer::new(
+                    recip0.clone(),
+                    [
+                        PerRecipientFungibleTransfer::new(
+                            fung_0.clone(),
+                            30,
+                            true,
+                            18,
+                        ),
+                        PerRecipientFungibleTransfer::new(
+                            fung_1.clone(),
+                            3,
+                            true,
+                            18,
+                        ),
+                    ],
+                    [
+                        PerRecipientNonFungiblesTransfer::new(
+                            nft_c0.clone(),
+                            true,
+                            [
+                                NonFungibleLocalId::integer(40),
+                                NonFungibleLocalId::integer(48),
+                            ],
+                        ),
+                        PerRecipientNonFungiblesTransfer::new(
+                            nft_c1.clone(),
+                            true,
+                            [
+                                NonFungibleLocalId::integer(21),
+                                NonFungibleLocalId::integer(3),
+                            ],
+                        ),
+                    ],
+                ),
+                PerRecipientAssetTransfer::new(
+                    recip1.clone(),
+                    [
+                        PerRecipientFungibleTransfer::new(
+                            fung_0.clone(),
+                            50,
+                            true,
+                            18,
+                        ),
+                        PerRecipientFungibleTransfer::new(
+                            fung_1.clone(),
+                            5,
+                            true,
+                            18,
+                        ),
+                    ],
+                    [
+                        PerRecipientNonFungiblesTransfer::new(
+                            nft_c0.clone(),
+                            true,
+                            [
+                                NonFungibleLocalId::integer(34),
+                                NonFungibleLocalId::integer(22),
+                            ],
+                        ),
+                        PerRecipientNonFungiblesTransfer::new(
+                            nft_c1.clone(),
+                            true,
+                            [
+                                NonFungibleLocalId::integer(15),
+                                NonFungibleLocalId::integer(9),
+                                NonFungibleLocalId::integer(13),
+                            ],
+                        ),
+                    ],
+                ),
+            ],
+        );
+
+        let per_asset_transfers = PerAssetTransfers::new(
+            sender.clone(),
             [
                 PerAssetTransfersOfFungibleResource::new(
                     PerAssetFungibleResource::new(fung_0.clone(), 18),
@@ -270,8 +411,17 @@ mod tests {
                 ),
             ],
         );
+        let transposed = per_recipient_transfers.transpose();
+        assert_eq!(transposed.fungible_resources.len(), 2);
+        assert_eq!(transposed.fungible_resources[0].transfers.len(), 2);
+        assert_eq!(transposed.fungible_resources[1].transfers.len(), 2);
 
-        let sut = SUT::assets_transfers(transfers);
+        assert_eq!(transposed.non_fungible_resources.len(), 2);
+        assert_eq!(transposed.non_fungible_resources[0].transfers.len(), 2);
+        assert_eq!(transposed.non_fungible_resources[1].transfers.len(), 2);
+
+        // pretty_assertions::assert_eq!(transposed, per_asset_transfers.clone());
+        let sut = SUT::assets_transfers(per_asset_transfers);
         manifest_eq(
             sut,
             r##"
