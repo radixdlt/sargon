@@ -1,11 +1,12 @@
 use crate::prelude::*;
 
-macro_rules! decl_per_assert_transfer_of {
+macro_rules! decl_transfer_of {
     (
         $(
             #[doc = $expr: expr]
         )*
         $struct_prefix: ident,
+        $struct_name: ident,
         $($fields:tt)*
     ) => {
         paste! {
@@ -13,22 +14,44 @@ macro_rules! decl_per_assert_transfer_of {
                 #[doc = $expr]
             )*
             #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
-            pub struct [< PerAsset $struct_prefix Transfer >] {
-                /// The account or account address to send the tokens to.
-                pub recipient: AssetsTransfersRecipient,
+            pub struct [< $struct_prefix $struct_name >] {
 
                 /// If `true` the `try_deposit_batch_or_abort` method will be used instead of `deposit`,
                 /// typically wallets sets this to try if and only if the recipient is a self-owned account
                 /// (`AssetsTransfersRecipient::MyOwnAccount`) controlled by a DeviceFactorSource thy have
                 /// access to and which third party deposit setting's `DepositRule` is `AcceptKnown` and
                 /// which resource is known (`resource_address` is owned or has been owned before).
-                use_try_deposit_or_abort: bool,
+                pub(crate) use_try_deposit_or_abort: bool,
 
                 $($fields)*
 
             }
+        }
+    };
+}
 
-            impl [< PerAsset $struct_prefix Transfer >] {
+macro_rules! decl_per_asset_transfer_of {
+    (
+        $(
+            #[doc = $expr: expr]
+        )*
+        $struct_name: ident,
+        $($fields:tt)*
+    ) => {
+
+        decl_transfer_of!(
+            $(
+                #[doc = $expr]
+            )*
+            PerAsset,
+            $struct_name,
+            $($fields)*
+            /// The account or account address to send the tokens to.
+            pub recipient: AssetsTransfersRecipient,
+        );
+
+        paste! {
+            impl [< PerAsset $struct_name >] {
 
                 pub(crate) fn deposit_instruction(&self, builder: ScryptoManifestBuilder, bucket: &Bucket) -> ScryptoManifestBuilder {
 
@@ -48,18 +71,56 @@ macro_rules! decl_per_assert_transfer_of {
     };
 }
 
-decl_per_assert_transfer_of!(
-    /// A fungible transfer with specified amount of the resource.
-    Fungible,
+macro_rules! decl_per_reci_transfer_of {
+    (
+        $(
+            #[doc = $expr: expr]
+        )*
+        $struct_name: ident,
+        $($fields:tt)*
+    ) => {
+
+        decl_transfer_of!(
+            $(
+                #[doc = $expr]
+            )*
+            PerRecipient,
+            $struct_name,
+            $($fields)*
+            /// The address of the resource being sent
+            pub resource_address: ResourceAddress,
+        );
+    };
+}
+
+decl_per_asset_transfer_of!(
+    /// A fungible transfer to `recipient`, with a specified amount of tokens to send.
+    FungibleTransfer,
     /// Amount
     pub(crate) amount: Decimal192,
 );
 
-decl_per_assert_transfer_of!(
-    /// A fungible transfer with specified amount of the resource.
-    NonFungible,
+decl_per_asset_transfer_of!(
+    /// A non fungible transfer to `recipient`, with specified Local IDs to send.
+    NonFungibleTransfer,
     /// Amount
     pub(crate) non_fungible_local_ids: Vec<NonFungibleLocalId>,
+);
+
+decl_per_reci_transfer_of!(
+    /// A fungible transfer of `resource_address` token, with a specified amount
+    /// of tokens and divisibility.
+    FungibleTransfer,
+    /// Amount
+    pub(crate) amount: Decimal192,
+    pub divisibility: Option<i32>,
+);
+
+decl_per_reci_transfer_of!(
+    /// A non fungible transfer of `resource_address` token, with specified Local IDs to send.
+    NonFungiblesTransfer,
+    /// The local IDS of the NonFungible tokens being sent
+    pub(crate) local_ids: Vec<NonFungibleLocalId>,
 );
 
 impl PerAssetFungibleTransfer {
@@ -80,6 +141,21 @@ impl PerAssetFungibleTransfer {
         divisibility: impl Into<Option<i32>>,
     ) -> ScryptoDecimal192 {
         self.amount.round(divisibility).into()
+    }
+}
+
+impl From<(&AssetsTransfersRecipient, PerRecipientFungibleTransfer)>
+    for PerAssetFungibleTransfer
+{
+    fn from(
+        value: (&AssetsTransfersRecipient, PerRecipientFungibleTransfer),
+    ) -> Self {
+        let (recipient, transfer) = value;
+        Self::new(
+            recipient.clone(),
+            transfer.use_try_deposit_or_abort,
+            transfer.amount,
+        )
     }
 }
 
@@ -155,6 +231,21 @@ impl PerAssetNonFungibleTransfer {
     }
 }
 
+impl From<(&AssetsTransfersRecipient, PerRecipientNonFungiblesTransfer)>
+    for PerAssetNonFungibleTransfer
+{
+    fn from(
+        value: (&AssetsTransfersRecipient, PerRecipientNonFungiblesTransfer),
+    ) -> Self {
+        let (recipient, non_fungibles) = value;
+        Self::new(
+            recipient.clone(),
+            non_fungibles.use_try_deposit_or_abort,
+            non_fungibles.local_ids,
+        )
+    }
+}
+
 impl PerAssetNonFungibleTransfer {
     pub(crate) fn sample_mainnet() -> Self {
         Self::new(
@@ -210,5 +301,35 @@ impl HasSampleValues for PerAssetNonFungibleTransfer {
 
     fn sample_other() -> Self {
         Self::sample_stokenet_other()
+    }
+}
+
+impl PerRecipientNonFungiblesTransfer {
+    pub fn new(
+        resource_address: impl Into<ResourceAddress>,
+        use_try_deposit_or_abort: bool,
+        local_ids: impl IntoIterator<Item = NonFungibleLocalId>,
+    ) -> Self {
+        Self {
+            resource_address: resource_address.into(),
+            use_try_deposit_or_abort,
+            local_ids: local_ids.into_iter().collect_vec(),
+        }
+    }
+}
+
+impl PerRecipientFungibleTransfer {
+    pub fn new(
+        resource_address: ResourceAddress,
+        amount: impl Into<Decimal192>,
+        use_try_deposit_or_abort: bool,
+        divisibility: impl Into<Option<i32>>,
+    ) -> Self {
+        Self {
+            resource_address,
+            amount: amount.into(),
+            use_try_deposit_or_abort,
+            divisibility: divisibility.into(),
+        }
     }
 }
