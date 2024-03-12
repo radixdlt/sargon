@@ -63,6 +63,7 @@ impl TransactionManifest {
 
 #[cfg(test)]
 mod tests {
+
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
@@ -233,24 +234,89 @@ mod tests {
             }
         }
 
+        impl From<(&AssetsTransfersRecipient, PerRecipientFungibleTransfer)>
+            for PerAssetFungibleTransfer
+        {
+            fn from(
+                value: (
+                    &AssetsTransfersRecipient,
+                    PerRecipientFungibleTransfer,
+                ),
+            ) -> Self {
+                let (recipient, transfer) = value;
+                Self::new(
+                    recipient.clone(),
+                    transfer.use_try_deposit_or_abort,
+                    transfer.amount,
+                )
+            }
+        }
+
+        impl PerAssetTransfersOfFungibleResource {
+            fn expanded(
+                &mut self,
+                transfer: impl Into<PerAssetFungibleTransfer>,
+            ) {
+                self.transfers.push(transfer.into());
+            }
+        }
+
         impl PerRecipientAssetTransfers {
             pub fn transpose(&self) -> PerAssetTransfers {
+                let mut per_asset_fungibles = HashMap::<
+                    ResourceAddress,
+                    PerAssetTransfersOfFungibleResource,
+                >::new();
+
+                self.transfers.clone().into_iter().for_each(|t| {
+                    let x = t.clone();
+                    let recipient = &x.recipient;
+                    x.fungibles.clone().into_iter().for_each(|y| {
+                        if let Some(existing_transfers) =
+                            per_asset_fungibles.get_mut(&y.resource_address)
+                        {
+                            existing_transfers.expanded((recipient, y.clone()));
+                        } else {
+                            per_asset_fungibles.insert(
+                                y.resource_address.clone(),
+                                PerAssetTransfersOfFungibleResource::new(
+                                    PerAssetFungibleResource::new(
+                                        y.clone().resource_address,
+                                        y.clone().divisibility,
+                                    ),
+                                    [PerAssetFungibleTransfer::from((
+                                        recipient,
+                                        y.clone(),
+                                    ))],
+                                ),
+                            );
+                        }
+                    })
+                });
+
+                let network_id = self.address_of_sender.network_id();
+                let mut fungibles: Vec<PerAssetTransfersOfFungibleResource> =
+                    per_asset_fungibles.values().cloned().collect_vec();
+                fungibles.sort_by(|a, b| {
+                    if a.resource.resource_address.is_xrd_on_network(network_id)
+                    {
+                        std::cmp::Ordering::Less
+                    } else if b
+                        .resource
+                        .resource_address
+                        .is_xrd_on_network(network_id)
+                    {
+                        std::cmp::Ordering::Less
+                    } else {
+                        a.resource
+                            .resource_address
+                            .cmp(&b.resource.resource_address)
+                    }
+                });
+
                 PerAssetTransfers::new(
                     self.address_of_sender.clone(),
-                    self.transfers
-                        .clone()
-                        .into_iter()
-                        .flat_map(|t| {
-                            let x = t.clone();
-                            let recipient = &x.recipient;
-                            x.fungibles
-                                .clone()
-                                .into_iter()
-                                .map(|a| (recipient, a))
-                                .map(PerAssetTransfersOfFungibleResource::from)
-                                .collect_vec()
-                        })
-                        .collect_vec(),
+                   fungibles,
                     self
                         .transfers
                         .clone()
