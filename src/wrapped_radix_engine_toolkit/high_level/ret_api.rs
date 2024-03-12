@@ -147,7 +147,7 @@ pub fn debug_print_compiled_notarized_intent(
 
 #[uniffi::export]
 pub fn manifest_assets_transfers(
-    transfers: AssetsTransfers,
+    transfers: PerAssetTransfers,
 ) -> TransactionManifest {
     TransactionManifest::assets_transfers(transfers)
 }

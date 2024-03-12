@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-macro_rules! decl_transfer {
+macro_rules! decl_per_assert_transfer_of {
     (
         $(
             #[doc = $expr: expr]
@@ -13,7 +13,7 @@ macro_rules! decl_transfer {
                 #[doc = $expr]
             )*
             #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
-            pub struct [< $struct_prefix Transfer >] {
+            pub struct [< PerAsset $struct_prefix Transfer >] {
                 /// The account or account address to send the tokens to.
                 pub recipient: AssetsTransfersRecipient,
 
@@ -28,7 +28,7 @@ macro_rules! decl_transfer {
 
             }
 
-            impl [< $struct_prefix Transfer >] {
+            impl [< PerAsset $struct_prefix Transfer >] {
 
                 pub(crate) fn deposit_instruction(&self, builder: ScryptoManifestBuilder, bucket: &Bucket) -> ScryptoManifestBuilder {
 
@@ -48,21 +48,21 @@ macro_rules! decl_transfer {
     };
 }
 
-decl_transfer!(
+decl_per_assert_transfer_of!(
     /// A fungible transfer with specified amount of the resource.
     Fungible,
     /// Amount
     pub(crate) amount: Decimal192,
 );
 
-decl_transfer!(
+decl_per_assert_transfer_of!(
     /// A fungible transfer with specified amount of the resource.
     NonFungible,
     /// Amount
     pub(crate) non_fungible_local_ids: Vec<NonFungibleLocalId>,
 );
 
-impl FungibleTransfer {
+impl PerAssetFungibleTransfer {
     pub fn new(
         recipient: impl Into<AssetsTransfersRecipient>,
         use_try_deposit_or_abort: bool,
@@ -83,7 +83,7 @@ impl FungibleTransfer {
     }
 }
 
-impl HasSampleValues for FungibleTransfer {
+impl HasSampleValues for PerAssetFungibleTransfer {
     fn sample() -> Self {
         Self::sample_mainnet()
     }
@@ -93,7 +93,7 @@ impl HasSampleValues for FungibleTransfer {
     }
 }
 
-impl FungibleTransfer {
+impl PerAssetFungibleTransfer {
     pub(crate) fn sample_mainnet() -> Self {
         Self::new(
             AssetsTransfersRecipient::MyOwnAccount {
@@ -131,7 +131,7 @@ impl FungibleTransfer {
     }
 }
 
-impl NonFungibleTransfer {
+impl PerAssetNonFungibleTransfer {
     pub fn new(
         recipient: impl Into<AssetsTransfersRecipient>,
         use_try_deposit_or_abort: bool,
@@ -155,7 +155,7 @@ impl NonFungibleTransfer {
     }
 }
 
-impl NonFungibleTransfer {
+impl PerAssetNonFungibleTransfer {
     pub(crate) fn sample_mainnet() -> Self {
         Self::new(
             AssetsTransfersRecipient::MyOwnAccount {
@@ -203,7 +203,7 @@ impl NonFungibleTransfer {
     }
 }
 
-impl HasSampleValues for NonFungibleTransfer {
+impl HasSampleValues for PerAssetNonFungibleTransfer {
     fn sample() -> Self {
         Self::sample_mainnet()
     }

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 impl TransactionManifest {
-    pub fn assets_transfers(transfers: AssetsTransfers) -> Self {
+    pub fn assets_transfers(transfers: PerAssetTransfers) -> Self {
         let mut builder = ScryptoManifestBuilder::new();
         let bucket_factory = BucketFactory::default();
         let from_account = &transfers.from_account;
@@ -9,7 +9,7 @@ impl TransactionManifest {
         for fungible in transfers.fungible_resources {
             let divisibility = fungible.resource.divisibility;
 
-            let resource_address = &fungible.resource.address;
+            let resource_address = &fungible.resource.resource_address;
 
             builder = builder.withdraw_from_account(
                 from_account,
@@ -70,7 +70,7 @@ mod tests {
 
     #[test]
     fn trivial() {
-        let sut = SUT::assets_transfers(AssetsTransfers::new(
+        let sut = SUT::assets_transfers(PerAssetTransfers::new(
             AccountAddress::sample(),
             [],
             [],
@@ -91,29 +91,144 @@ mod tests {
         let fung_1: ResourceAddress =
             ResourceAddress::sample_stokenet_gc_tokens();
 
-        let transfers = AssetsTransfers::new(
+        #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+        pub struct PerRecipientAssetTransfers {
+            pub address_of_sender: AccountAddress,
+            pub transfers: Vec<PerRecipientAssetTransfer>,
+        }
+
+        impl PerRecipientAssetTransfers {
+            pub fn new(
+                address_of_sender: AccountAddress,
+                transfers: impl IntoIterator<Item = PerRecipientAssetTransfer>,
+            ) -> Self {
+                Self {
+                    address_of_sender,
+                    transfers: transfers.into_iter().collect_vec(),
+                }
+            }
+        }
+
+        #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+        pub struct PerRecipientAssetTransfer {
+            pub recipient: AssetsTransfersRecipient,
+            pub fungibles: Vec<FungibleTokenWithAmount>,
+            pub non_fungibles: Vec<NonFungibleGlobalId>,
+        }
+
+        #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+        pub struct FungibleTokenWithAmount {
+            pub resource_address: ResourceAddress,
+            pub amount: Decimal192,
+            /// If `true` the `try_deposit_batch_or_abort` method will be used instead of `deposit`,
+            /// typically wallets sets this to try if and only if the recipient is a self-owned account
+            /// (`AssetsTransfersRecipient::MyOwnAccount`) controlled by a DeviceFactorSource thy have
+            /// access to and which third party deposit setting's `DepositRule` is `AcceptKnown` and
+            /// which resource is known (`resource_address` is owned or has been owned before).
+            use_try_deposit_or_abort: bool,
+            pub divisibility: Option<i32>,
+        }
+
+        impl FungibleTokenWithAmount {
+            pub fn new(
+                resource_address: ResourceAddress,
+                amount: impl Into<Decimal192>,
+                use_try_deposit_or_abort: bool,
+                divisibility: impl Into<Option<i32>>,
+            ) -> Self {
+                Self {
+                    resource_address,
+                    amount: amount.into(),
+                    use_try_deposit_or_abort,
+                    divisibility: divisibility.into(),
+                }
+            }
+        }
+
+        impl PerRecipientAssetTransfer {
+            pub fn new(
+                recipient: AssetsTransfersRecipient,
+                fungibles: impl IntoIterator<Item = FungibleTokenWithAmount>,
+                non_fungibles: impl IntoIterator<Item = NonFungibleGlobalId>,
+            ) -> Self {
+                Self {
+                    recipient,
+                    fungibles: fungibles.into_iter().collect_vec(),
+                    non_fungibles: non_fungibles.into_iter().collect_vec(),
+                }
+            }
+        }
+
+        impl From<(&AssetsTransfersRecipient, FungibleTokenWithAmount)>
+            for PerAssetTransfersOfFungibleResource
+        {
+            fn from(
+                value: (&AssetsTransfersRecipient, FungibleTokenWithAmount),
+            ) -> Self {
+                let (recipient, fungible_with_amount) = value;
+                Self::new(
+                    PerAssetFungibleResource::new(
+                        fungible_with_amount.resource_address,
+                        fungible_with_amount.divisibility,
+                    ),
+                    [PerAssetFungibleTransfer::new(
+                        recipient.clone(),
+                        fungible_with_amount.use_try_deposit_or_abort,
+                        fungible_with_amount.amount,
+                    )],
+                )
+            }
+        }
+
+        impl PerRecipientAssetTransfers {
+            pub fn transpose(&self) -> PerAssetTransfers {
+                let mut fungibles =
+                    Vec::<PerAssetTransfersOfFungibleResource>::new();
+                fungibles = self
+                    .transfers
+                    .clone()
+                    .into_iter()
+                    .flat_map(|t| {
+                        let x = t.clone();
+                        let recipient = &x.recipient;
+                        x.fungibles
+                            .clone()
+                            .into_iter()
+                            .map(|a| (recipient, a))
+                            .map(PerAssetTransfersOfFungibleResource::from)
+                    })
+                    .collect_vec();
+                PerAssetTransfers::new(
+                    self.address_of_sender.clone(),
+                    fungibles,
+                    [],
+                )
+            }
+        }
+
+        let transfers = PerAssetTransfers::new(
             sender,
             [
-                TransfersOfFungibleResource::new(
-                    FungibleResource::new(fung_0.clone(), 18),
+                PerAssetTransfersOfFungibleResource::new(
+                    PerAssetFungibleResource::new(fung_0.clone(), 18),
                     [
-                        FungibleTransfer::new(recip0.clone(), true, 30),
-                        FungibleTransfer::new(recip1.clone(), true, 50),
+                        PerAssetFungibleTransfer::new(recip0.clone(), true, 30),
+                        PerAssetFungibleTransfer::new(recip1.clone(), true, 50),
                     ],
                 ),
-                TransfersOfFungibleResource::new(
-                    FungibleResource::new(fung_1.clone(), 18),
+                PerAssetTransfersOfFungibleResource::new(
+                    PerAssetFungibleResource::new(fung_1.clone(), 18),
                     [
-                        FungibleTransfer::new(recip0.clone(), true, 3),
-                        FungibleTransfer::new(recip1.clone(), true, 5),
+                        PerAssetFungibleTransfer::new(recip0.clone(), true, 3),
+                        PerAssetFungibleTransfer::new(recip1.clone(), true, 5),
                     ],
                 ),
             ],
             [
-                TransfersOfNonFungibleResource::new(
+                PerAssetTransfersOfNonFungibleResource::new(
                     nft_c0.clone(),
                     [
-                        NonFungibleTransfer::new(
+                        PerAssetNonFungibleTransfer::new(
                             recip0.clone(),
                             true,
                             [
@@ -121,7 +236,7 @@ mod tests {
                                 NonFungibleLocalId::integer(48),
                             ],
                         ),
-                        NonFungibleTransfer::new(
+                        PerAssetNonFungibleTransfer::new(
                             recip1.clone(),
                             true,
                             [
@@ -131,10 +246,10 @@ mod tests {
                         ),
                     ],
                 ),
-                TransfersOfNonFungibleResource::new(
+                PerAssetTransfersOfNonFungibleResource::new(
                     nft_c1.clone(),
                     [
-                        NonFungibleTransfer::new(
+                        PerAssetNonFungibleTransfer::new(
                             recip0.clone(),
                             true,
                             [
@@ -142,7 +257,7 @@ mod tests {
                                 NonFungibleLocalId::integer(3),
                             ],
                         ),
-                        NonFungibleTransfer::new(
+                        PerAssetNonFungibleTransfer::new(
                             recip1.clone(),
                             true,
                             [
@@ -302,7 +417,7 @@ mod tests {
 
     #[test]
     fn simple() {
-        let sut = SUT::assets_transfers(AssetsTransfers::sample());
+        let sut = SUT::assets_transfers(PerAssetTransfers::sample());
         manifest_eq(
             sut,
             r##"

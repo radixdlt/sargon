@@ -1,24 +1,24 @@
 use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
-pub struct FungibleResource {
-    pub address: ResourceAddress,
+pub struct PerAssetFungibleResource {
+    pub resource_address: ResourceAddress,
     pub divisibility: Option<i32>,
 }
 
-impl FungibleResource {
+impl PerAssetFungibleResource {
     pub fn new(
-        address: ResourceAddress,
+        resource_address: ResourceAddress,
         divisibility: impl Into<Option<i32>>,
     ) -> Self {
         Self {
-            address,
+            resource_address,
             divisibility: divisibility.into(),
         }
     }
 }
 
-impl FungibleResource {
+impl PerAssetFungibleResource {
     pub(crate) fn sample_mainnet() -> Self {
         Self::new(ResourceAddress::sample_mainnet_xrd(), None)
     }

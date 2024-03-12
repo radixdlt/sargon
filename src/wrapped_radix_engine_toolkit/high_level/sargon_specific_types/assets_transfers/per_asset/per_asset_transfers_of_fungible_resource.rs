@@ -1,15 +1,15 @@
 use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
-pub struct TransfersOfFungibleResource {
-    pub resource: FungibleResource,
-    pub transfers: Vec<FungibleTransfer>,
+pub struct PerAssetTransfersOfFungibleResource {
+    pub resource: PerAssetFungibleResource,
+    pub transfers: Vec<PerAssetFungibleTransfer>,
 }
 
-impl TransfersOfFungibleResource {
+impl PerAssetTransfersOfFungibleResource {
     pub fn new(
-        resource: FungibleResource,
-        transfers: impl IntoIterator<Item = FungibleTransfer>,
+        resource: PerAssetFungibleResource,
+        transfers: impl IntoIterator<Item = PerAssetFungibleTransfer>,
     ) -> Self {
         Self {
             resource,
@@ -32,43 +32,43 @@ impl TransfersOfFungibleResource {
     }
 }
 
-impl TransfersOfFungibleResource {
+impl PerAssetTransfersOfFungibleResource {
     pub(crate) fn sample_mainnet() -> Self {
         Self::new(
-            FungibleResource::sample_mainnet(),
+            PerAssetFungibleResource::sample_mainnet(),
             [
-                FungibleTransfer::sample_mainnet(),
-                FungibleTransfer::sample_mainnet_other(),
+                PerAssetFungibleTransfer::sample_mainnet(),
+                PerAssetFungibleTransfer::sample_mainnet_other(),
             ],
         )
     }
 
     pub(crate) fn sample_mainnet_other() -> Self {
         Self::new(
-            FungibleResource::sample_mainnet_other(),
-            [FungibleTransfer::sample_mainnet_other()],
+            PerAssetFungibleResource::sample_mainnet_other(),
+            [PerAssetFungibleTransfer::sample_mainnet_other()],
         )
     }
 
     pub(crate) fn sample_stokenet() -> Self {
         Self::new(
-            FungibleResource::sample_stokenet(),
+            PerAssetFungibleResource::sample_stokenet(),
             [
-                FungibleTransfer::sample_stokenet(),
-                FungibleTransfer::sample_stokenet_other(),
+                PerAssetFungibleTransfer::sample_stokenet(),
+                PerAssetFungibleTransfer::sample_stokenet_other(),
             ],
         )
     }
 
     pub(crate) fn sample_stokenet_other() -> Self {
         Self::new(
-            FungibleResource::sample_stokenet_other(),
-            [FungibleTransfer::sample_stokenet_other()],
+            PerAssetFungibleResource::sample_stokenet_other(),
+            [PerAssetFungibleTransfer::sample_stokenet_other()],
         )
     }
 }
 
-impl HasSampleValues for TransfersOfFungibleResource {
+impl HasSampleValues for PerAssetTransfersOfFungibleResource {
     fn sample() -> Self {
         Self::sample_mainnet()
     }

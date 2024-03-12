@@ -1,15 +1,15 @@
 use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
-pub struct TransfersOfNonFungibleResource {
+pub struct PerAssetTransfersOfNonFungibleResource {
     pub resource: ResourceAddress,
-    pub transfers: Vec<NonFungibleTransfer>,
+    pub transfers: Vec<PerAssetNonFungibleTransfer>,
 }
 
-impl TransfersOfNonFungibleResource {
+impl PerAssetTransfersOfNonFungibleResource {
     pub fn new(
         resource: impl Into<ResourceAddress>,
-        transfers: impl IntoIterator<Item = NonFungibleTransfer>,
+        transfers: impl IntoIterator<Item = PerAssetNonFungibleTransfer>,
     ) -> Self {
         Self {
             resource: resource.into(),
@@ -18,7 +18,7 @@ impl TransfersOfNonFungibleResource {
     }
 }
 
-impl TransfersOfNonFungibleResource {
+impl PerAssetTransfersOfNonFungibleResource {
     pub fn all_ids(&self) -> Vec<ScryptoNonFungibleLocalId> {
         self.transfers
             .clone()
@@ -29,13 +29,13 @@ impl TransfersOfNonFungibleResource {
     }
 }
 
-impl TransfersOfNonFungibleResource {
+impl PerAssetTransfersOfNonFungibleResource {
     pub(crate) fn sample_mainnet() -> Self {
         Self::new(
             ResourceAddress::sample_mainnet_xrd(),
             [
-                NonFungibleTransfer::sample_mainnet(),
-                NonFungibleTransfer::sample_mainnet_other(),
+                PerAssetNonFungibleTransfer::sample_mainnet(),
+                PerAssetNonFungibleTransfer::sample_mainnet_other(),
             ],
         )
     }
@@ -43,7 +43,7 @@ impl TransfersOfNonFungibleResource {
     pub(crate) fn sample_mainnet_other() -> Self {
         Self::new(
             ResourceAddress::sample_mainnet_candy(),
-            [NonFungibleTransfer::sample_mainnet_other()],
+            [PerAssetNonFungibleTransfer::sample_mainnet_other()],
         )
     }
 
@@ -51,8 +51,8 @@ impl TransfersOfNonFungibleResource {
         Self::new(
             ResourceAddress::sample_stokenet_candy(),
             [
-                NonFungibleTransfer::sample_stokenet(),
-                NonFungibleTransfer::sample_stokenet_other(),
+                PerAssetNonFungibleTransfer::sample_stokenet(),
+                PerAssetNonFungibleTransfer::sample_stokenet_other(),
             ],
         )
     }
@@ -60,12 +60,12 @@ impl TransfersOfNonFungibleResource {
     pub(crate) fn sample_stokenet_other() -> Self {
         Self::new(
             ResourceAddress::sample_stokenet_gum(),
-            [NonFungibleTransfer::sample_stokenet_other()],
+            [PerAssetNonFungibleTransfer::sample_stokenet_other()],
         )
     }
 }
 
-impl HasSampleValues for TransfersOfNonFungibleResource {
+impl HasSampleValues for PerAssetTransfersOfNonFungibleResource {
     fn sample() -> Self {
         Self::sample_mainnet()
     }
