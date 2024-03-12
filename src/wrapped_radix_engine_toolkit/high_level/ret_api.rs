@@ -165,7 +165,7 @@ pub fn manifest_per_asset_transfers(
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
 
     #[test]
     fn test_manifest_for_faucet() {
@@ -438,6 +438,15 @@ mod tests {
         assert_eq!(
             debug_print_compiled_notarized_intent(CompiledNotarizedIntent::sample()),
             "NotarizedTransaction { signed_intent: SignedIntent { intent: header:\nTransactionHeader { network_id: Mainnet, start_epoch_inclusive: Epoch(76935), end_epoch_exclusive: Epoch(76945), nonce: Nonce(2371337), notary_public_key: Ed25519 { value: ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf }, notary_is_signatory: true, tip_percentage: 0 }\n\nmessage:\nPlainText { plaintext: PlaintextMessage { mime_type: \"text/plain\", message: StringMessage { string: \"Hello Radix!\" } } }\n\nmanifest:\nCALL_METHOD\n    Address(\"account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease\")\n    \"lock_fee\"\n    Decimal(\"0.61\")\n;\nCALL_METHOD\n    Address(\"account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease\")\n    \"withdraw\"\n    Address(\"resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd\")\n    Decimal(\"1337\")\n;\nTAKE_FROM_WORKTOP\n    Address(\"resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd\")\n    Decimal(\"1337\")\n    Bucket(\"bucket1\")\n;\nCALL_METHOD\n    Address(\"account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master\")\n    \"try_deposit_or_abort\"\n    Bucket(\"bucket1\")\n    Enum<0u8>()\n;\n\n\n, intent_signatures: IntentSignatures { signatures: [] } }, notary_signature: NotarySignature { secret_magic: Ed25519 { value: 839ac9c47db45950fc0cd453c5ebbbfa7ae5f7c20753abe2370b5b40fdee89e522c4d810d060e0c56211d036043fd32b9908e97bf114c1835ca02d74018fdd09 } } }"
+        );
+    }
+
+    #[test]
+    fn per_recipient_uses_per_asset_transfer() {
+        let transfers = PerRecipientAssetTransfers::sample();
+        assert_eq!(
+            manifest_per_asset_transfers(transfers.clone().transpose()),
+            manifest_per_recipient_transfers(transfers)
         );
     }
 }
