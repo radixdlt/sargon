@@ -90,6 +90,69 @@ mod tests {
     }
 
     #[test]
+    fn use_try_deposit_or_abort_is_false() {
+        let transfers = PerRecipientAssetTransfers::new(
+            AccountAddress::sample_mainnet(),
+            [PerRecipientAssetTransfer::new(
+                AccountAddress::sample_mainnet_other(),
+                [PerRecipientFungibleTransfer::new(
+                    ResourceAddress::sample_mainnet_candy(),
+                    1337,
+                    false,
+                    None,
+                )],
+                [PerRecipientNonFungiblesTransfer::new(
+                    NonFungibleResourceAddress::sample_mainnet_other(),
+                    false,
+                    [NonFungibleLocalId::integer(237)],
+                )],
+            )],
+        );
+        let manifest = SUT::per_recipient_transfers(transfers);
+        manifest_eq(
+            manifest,
+            r##"
+            CALL_METHOD
+            Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+            "withdraw"
+            Address("resource_rdx1t4dy69k6s0gv040xa64cyadyefwtett62ng6xfdnljyydnml7t6g3j")
+            Decimal("1337")
+        ;
+        TAKE_FROM_WORKTOP
+            Address("resource_rdx1t4dy69k6s0gv040xa64cyadyefwtett62ng6xfdnljyydnml7t6g3j")
+            Decimal("1337")
+            Bucket("bucket1")
+        ;
+        CALL_METHOD
+            Address("account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master")
+            "deposit"
+            Bucket("bucket1")
+        ;
+        CALL_METHOD
+            Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+            "withdraw_non_fungibles"
+            Address("resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd")
+            Array<NonFungibleLocalId>(
+                NonFungibleLocalId("#237#")
+            )
+        ;
+        TAKE_NON_FUNGIBLES_FROM_WORKTOP
+            Address("resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd")
+            Array<NonFungibleLocalId>(
+                NonFungibleLocalId("#237#")
+            )
+            Bucket("bucket2")
+        ;
+        CALL_METHOD
+            Address("account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master")
+            "deposit"
+            Bucket("bucket2")
+        ;
+        "##,
+        );
+    }
+
+    #[test]
     fn multi_token_multi_recipient() {
         let sender: AccountAddress = "account_tdx_2_128rkfzdztjpgajucstydar2gz2vp9jj779k33jy3gect2rh5r28rgn".parse().unwrap();
         let recip0: AccountAddress = "account_tdx_2_129e9h6zp5z08qkc0q5tdqz9zc67gg2k7tergrj9erznmke6qeevmsv".parse().unwrap();
