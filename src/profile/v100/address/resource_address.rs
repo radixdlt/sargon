@@ -13,6 +13,10 @@ impl ResourceAddress {
         Self::new(radix_engine::types::XRD, id)
             .expect("Should never fail to get XRD on network.")
     }
+
+    pub fn is_xrd_on_network(&self, id: NetworkID) -> bool {
+        self == &Self::xrd_on_network(id)
+    }
 }
 
 #[uniffi::export]
@@ -182,6 +186,35 @@ mod tests {
 
         assert!(!SUT::sample_mainnet_xrd().is_non_fungible());
         assert!(SUT::sample_mainnet_xrd().is_fungible());
+    }
+
+    #[test]
+    fn is_xrd_on_network() {
+        assert!(SUT::sample_mainnet_xrd().is_xrd_on_network(NetworkID::Mainnet));
+        assert!(
+            SUT::sample_stokenet_xrd().is_xrd_on_network(NetworkID::Stokenet)
+        );
+
+        // Not XRD
+        assert!(
+            !SUT::sample_mainnet_xrd().is_xrd_on_network(NetworkID::Stokenet)
+        );
+        assert!(
+            !SUT::sample_stokenet_xrd().is_xrd_on_network(NetworkID::Mainnet)
+        );
+
+        assert!(
+            !SUT::sample_mainnet_candy().is_xrd_on_network(NetworkID::Mainnet)
+        );
+        assert!(
+            !SUT::sample_mainnet_candy().is_xrd_on_network(NetworkID::Stokenet)
+        );
+
+        assert!(!SUT::sample_stokenet_candy()
+            .is_xrd_on_network(NetworkID::Stokenet));
+        assert!(
+            !SUT::sample_stokenet_candy().is_xrd_on_network(NetworkID::Mainnet)
+        );
     }
 
     #[test]

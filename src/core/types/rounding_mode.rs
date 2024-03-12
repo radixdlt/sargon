@@ -4,7 +4,14 @@ use crate::prelude::*;
 ///
 /// Following the same naming convention as https://docs.rs/rust_decimal/latest/rust_decimal/enum.RoundingStrategy.html.
 #[derive(
-    Clone, Copy, Debug, PartialEq, Eq, enum_iterator::Sequence, uniffi::Enum,
+    Clone,
+    Copy,
+    Debug,
+    PartialEq,
+    Eq,
+    enum_iterator::Sequence,
+    strum::Display,
+    uniffi::Enum,
 )]
 pub enum RoundingMode {
     /// The number is always rounded toward positive infinity, e.g. `3.1 -> 4`, `-3.1 -> -3`.

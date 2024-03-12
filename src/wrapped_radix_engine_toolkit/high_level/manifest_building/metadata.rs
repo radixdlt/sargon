@@ -5,17 +5,11 @@ use strum::*;
 #[strum(serialize_all = "snake_case")]
 pub enum MetadataKey {
     AccountType,
-
     OwnerKeys,
-
     Name,
-
     Symbol,
-
     IconUrl,
-
     Description,
-
     Tags,
 }
 
