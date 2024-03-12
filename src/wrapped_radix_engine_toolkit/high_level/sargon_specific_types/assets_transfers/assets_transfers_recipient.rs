@@ -100,4 +100,17 @@ mod tests {
             4
         )
     }
+
+    #[test]
+    fn from_account() {
+        let acc = Account::sample();
+        let exp = &acc.clone().address;
+        assert_eq!(SUT::from(acc).account_address(), exp)
+    }
+
+    #[test]
+    fn from_address() {
+        let exp = &AccountAddress::sample();
+        assert_eq!(SUT::from(exp.clone()).account_address(), exp)
+    }
 }

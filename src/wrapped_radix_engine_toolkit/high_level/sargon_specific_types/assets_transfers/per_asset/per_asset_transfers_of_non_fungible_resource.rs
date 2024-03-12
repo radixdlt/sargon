@@ -27,25 +27,6 @@ impl PerAssetTransfersOfNonFungibleResource {
     }
 }
 
-impl From<(&AssetsTransfersRecipient, PerRecipientNonFungiblesTransfer)>
-    for PerAssetTransfersOfNonFungibleResource
-{
-    fn from(
-        value: (&AssetsTransfersRecipient, PerRecipientNonFungiblesTransfer),
-    ) -> Self {
-        let (recipient, non_fungibles) = value;
-
-        PerAssetTransfersOfNonFungibleResource::new(
-            non_fungibles.resource_address.clone(),
-            [PerAssetNonFungibleTransfer::new(
-                recipient.clone(),
-                non_fungibles.use_try_deposit_or_abort,
-                non_fungibles.local_ids,
-            )],
-        )
-    }
-}
-
 impl PerAssetTransfersOfNonFungibleResource {
     pub fn all_ids(&self) -> Vec<ScryptoNonFungibleLocalId> {
         self.transfers
