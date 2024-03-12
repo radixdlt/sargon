@@ -252,10 +252,37 @@ mod tests {
             }
         }
 
+        impl From<(&AssetsTransfersRecipient, PerRecipientNonFungiblesTransfer)>
+            for PerAssetNonFungibleTransfer
+        {
+            fn from(
+                value: (
+                    &AssetsTransfersRecipient,
+                    PerRecipientNonFungiblesTransfer,
+                ),
+            ) -> Self {
+                let (recipient, non_fungibles) = value;
+                Self::new(
+                    recipient.clone(),
+                    non_fungibles.use_try_deposit_or_abort,
+                    non_fungibles.local_ids,
+                )
+            }
+        }
+
         impl PerAssetTransfersOfFungibleResource {
             fn expanded(
                 &mut self,
                 transfer: impl Into<PerAssetFungibleTransfer>,
+            ) {
+                self.transfers.push(transfer.into());
+            }
+        }
+
+        impl PerAssetTransfersOfNonFungibleResource {
+            fn expanded(
+                &mut self,
+                transfer: impl Into<PerAssetNonFungibleTransfer>,
             ) {
                 self.transfers.push(transfer.into());
             }
@@ -298,40 +325,56 @@ mod tests {
                 let mut fungibles: Vec<PerAssetTransfersOfFungibleResource> =
                     per_asset_fungibles.values().cloned().collect_vec();
                 fungibles.sort_by(|a, b| {
-                    if a.resource.resource_address.is_xrd_on_network(network_id)
-                    {
+                    let a = &a.resource.resource_address;
+                    let b = &b.resource.resource_address;
+                    let a_is_xrd = a.is_xrd_on_network(network_id);
+                    let b_is_xrd = b.is_xrd_on_network(network_id);
+                    if a_is_xrd && b_is_xrd {
+                        std::cmp::Ordering::Equal
+                    } else if a_is_xrd {
                         std::cmp::Ordering::Less
-                    } else if b
-                        .resource
-                        .resource_address
-                        .is_xrd_on_network(network_id)
-                    {
-                        std::cmp::Ordering::Less
+                    } else if b_is_xrd {
+                        std::cmp::Ordering::Greater
                     } else {
-                        a.resource
-                            .resource_address
-                            .cmp(&b.resource.resource_address)
+                        a.cmp(b)
                     }
                 });
 
+                let mut per_asset_non_fungibles = HashMap::<
+                    ResourceAddress,
+                    PerAssetTransfersOfNonFungibleResource,
+                >::new();
+
+                self.transfers.clone().into_iter().for_each(|t| {
+                    let x = t.clone();
+                    let recipient = &x.recipient;
+                    x.non_fungibles.clone().into_iter().for_each(|y| {
+                        if let Some(existing_transfers) =
+                            per_asset_non_fungibles.get_mut(&y.resource_address)
+                        {
+                            existing_transfers.expanded((recipient, y.clone()));
+                        } else {
+                            per_asset_non_fungibles.insert(
+                                y.resource_address.clone(),
+                                PerAssetTransfersOfNonFungibleResource::new(
+                                    y.clone().resource_address,
+                                    [PerAssetNonFungibleTransfer::from((
+                                        recipient,
+                                        y.clone(),
+                                    ))],
+                                ),
+                            );
+                        }
+                    })
+                });
+
+                let non_fungibles: Vec<PerAssetTransfersOfNonFungibleResource> =
+                    per_asset_non_fungibles.values().cloned().collect_vec();
+
                 PerAssetTransfers::new(
                     self.address_of_sender.clone(),
-                   fungibles,
-                    self
-                        .transfers
-                        .clone()
-                        .into_iter()
-                        .flat_map(|t| {
-                            let x = t.clone();
-                            let recipient = &x.recipient;
-                            x.non_fungibles
-                                .clone()
-                                .into_iter()
-                                .map(|a| (recipient, a))
-                                .map(PerAssetTransfersOfNonFungibleResource::from)
-                                .collect_vec()
-                        })
-                        .collect_vec(),
+                    fungibles,
+                    non_fungibles,
                 )
             }
         }
@@ -477,16 +520,10 @@ mod tests {
                 ),
             ],
         );
+
         let transposed = per_recipient_transfers.transpose();
-        assert_eq!(transposed.fungible_resources.len(), 2);
-        assert_eq!(transposed.fungible_resources[0].transfers.len(), 2);
-        assert_eq!(transposed.fungible_resources[1].transfers.len(), 2);
+        pretty_assertions::assert_eq!(per_asset_transfers.clone(), transposed);
 
-        assert_eq!(transposed.non_fungible_resources.len(), 2);
-        assert_eq!(transposed.non_fungible_resources[0].transfers.len(), 2);
-        assert_eq!(transposed.non_fungible_resources[1].transfers.len(), 2);
-
-        // pretty_assertions::assert_eq!(transposed, per_asset_transfers.clone());
         let sut = SUT::assets_transfers(per_asset_transfers);
         manifest_eq(
             sut,
