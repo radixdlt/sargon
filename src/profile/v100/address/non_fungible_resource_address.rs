@@ -22,6 +22,8 @@ macro_rules! decl_specialized_address {
                 PartialEq,
                 Eq,
                 Hash,
+                Ord,
+                PartialOrd,
                 derive_more::Display,
                 derive_more::Debug,
                 derive_more::FromStr,
@@ -201,6 +203,12 @@ mod tests {
         assert_ne!(SUT::sample(), SUT::sample_other());
         assert_ne!(SUT::sample_mainnet(), SUT::sample_stokenet());
         assert_ne!(SUT::sample_mainnet_other(), SUT::sample_stokenet_other());
+    }
+
+    #[test]
+    fn ord() {
+        assert!(SUT::sample_mainnet_other() < SUT::sample_mainnet());
+        assert!(SUT::sample_stokenet_other() > SUT::sample_stokenet());
     }
 
     #[test]

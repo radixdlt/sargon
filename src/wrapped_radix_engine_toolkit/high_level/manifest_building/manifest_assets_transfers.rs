@@ -290,14 +290,20 @@ mod tests {
 
         impl PerRecipientAssetTransfers {
             pub fn transpose(&self) -> PerAssetTransfers {
-                let mut per_asset_fungibles = HashMap::<
+                let mut per_asset_fungibles = IndexMap::<
                     ResourceAddress,
                     PerAssetTransfersOfFungibleResource,
+                >::new();
+
+                let mut per_asset_non_fungibles = IndexMap::<
+                    ResourceAddress,
+                    PerAssetTransfersOfNonFungibleResource,
                 >::new();
 
                 self.transfers.clone().into_iter().for_each(|t| {
                     let x = t.clone();
                     let recipient = &x.recipient;
+
                     x.fungibles.clone().into_iter().for_each(|y| {
                         if let Some(existing_transfers) =
                             per_asset_fungibles.get_mut(&y.resource_address)
@@ -318,36 +324,8 @@ mod tests {
                                 ),
                             );
                         }
-                    })
-                });
+                    });
 
-                let network_id = self.address_of_sender.network_id();
-                let mut fungibles: Vec<PerAssetTransfersOfFungibleResource> =
-                    per_asset_fungibles.values().cloned().collect_vec();
-                fungibles.sort_by(|a, b| {
-                    let a = &a.resource.resource_address;
-                    let b = &b.resource.resource_address;
-                    let a_is_xrd = a.is_xrd_on_network(network_id);
-                    let b_is_xrd = b.is_xrd_on_network(network_id);
-                    if a_is_xrd && b_is_xrd {
-                        std::cmp::Ordering::Equal
-                    } else if a_is_xrd {
-                        std::cmp::Ordering::Less
-                    } else if b_is_xrd {
-                        std::cmp::Ordering::Greater
-                    } else {
-                        a.cmp(b)
-                    }
-                });
-
-                let mut per_asset_non_fungibles = HashMap::<
-                    ResourceAddress,
-                    PerAssetTransfersOfNonFungibleResource,
-                >::new();
-
-                self.transfers.clone().into_iter().for_each(|t| {
-                    let x = t.clone();
-                    let recipient = &x.recipient;
                     x.non_fungibles.clone().into_iter().for_each(|y| {
                         if let Some(existing_transfers) =
                             per_asset_non_fungibles.get_mut(&y.resource_address)
@@ -365,16 +343,13 @@ mod tests {
                                 ),
                             );
                         }
-                    })
+                    });
                 });
-
-                let non_fungibles: Vec<PerAssetTransfersOfNonFungibleResource> =
-                    per_asset_non_fungibles.values().cloned().collect_vec();
 
                 PerAssetTransfers::new(
                     self.address_of_sender.clone(),
-                    fungibles,
-                    non_fungibles,
+                    per_asset_fungibles.values().cloned(),
+                    per_asset_non_fungibles.values().cloned(),
                 )
             }
         }
