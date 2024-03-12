@@ -41,27 +41,6 @@ impl PerAssetTransfersOfFungibleResource {
     }
 }
 
-impl From<(&AssetsTransfersRecipient, PerRecipientFungibleTransfer)>
-    for PerAssetTransfersOfFungibleResource
-{
-    fn from(
-        value: (&AssetsTransfersRecipient, PerRecipientFungibleTransfer),
-    ) -> Self {
-        let (recipient, fungible_with_amount) = value;
-        Self::new(
-            PerAssetFungibleResource::new(
-                fungible_with_amount.resource_address,
-                fungible_with_amount.divisibility,
-            ),
-            [PerAssetFungibleTransfer::new(
-                recipient.clone(),
-                fungible_with_amount.use_try_deposit_or_abort,
-                fungible_with_amount.amount,
-            )],
-        )
-    }
-}
-
 impl PerAssetTransfersOfFungibleResource {
     pub(crate) fn sample_mainnet() -> Self {
         Self::new(

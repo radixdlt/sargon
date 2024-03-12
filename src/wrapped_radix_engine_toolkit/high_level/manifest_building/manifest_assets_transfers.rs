@@ -90,9 +90,6 @@ mod tests {
     }
 
     #[test]
-    fn name() {}
-
-    #[test]
     fn multi_token_multi_recipient() {
         let sender: AccountAddress = "account_tdx_2_128rkfzdztjpgajucstydar2gz2vp9jj779k33jy3gect2rh5r28rgn".parse().unwrap();
         let recip0: AccountAddress = "account_tdx_2_129e9h6zp5z08qkc0q5tdqz9zc67gg2k7tergrj9erznmke6qeevmsv".parse().unwrap();
