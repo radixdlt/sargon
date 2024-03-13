@@ -10,6 +10,7 @@ impl AsRef<str> for Bucket {
         self.name.as_str()
     }
 }
+
 impl ScryptoNewManifestBucket for &Bucket {
     fn register(self, registrar: &ScryptoManifestNameRegistrar) {
         registrar.register_bucket(registrar.new_bucket(self.name.clone()));

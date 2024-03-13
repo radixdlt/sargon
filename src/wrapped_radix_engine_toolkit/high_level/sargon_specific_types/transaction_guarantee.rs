@@ -60,16 +60,9 @@ mod tests {
 
     #[test]
     fn rounding() {
-        let sut = SUT::new(
-            "0.12344".parse::<Decimal192>().unwrap(),
-            2,
-            ResourceAddress::sample_mainnet_candy(),
-            4,
-        );
+        let sut =
+            SUT::new("0.12344", 2, ResourceAddress::sample_mainnet_candy(), 4);
 
-        assert_eq!(
-            sut.rounded_amount(),
-            "0.1234".parse::<Decimal192>().unwrap()
-        );
+        assert_eq!(sut.rounded_amount(), "0.1234".into());
     }
 }
