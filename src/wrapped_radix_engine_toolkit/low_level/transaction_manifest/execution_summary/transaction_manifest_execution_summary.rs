@@ -95,7 +95,7 @@ mod tests {
             )
             .unwrap();
 
-        let acc_gk: AccountAddress = "account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk".parse().unwrap();
+        let acc_gk: AccountAddress = "account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk".into();
 
         pretty_assertions::assert_eq!(
             sut,
@@ -104,54 +104,54 @@ mod tests {
                     (
                         acc_gk.clone(),
                         vec![
-                            ResourceIndicator::Fungible {
-                                resource_address: "resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy".parse::<ResourceAddress>().unwrap(),
-                                indicator: FungibleResourceIndicator::Guaranteed { decimal: "36.4567896543".parse::<Decimal>().unwrap() }
-                            },
-                            ResourceIndicator::Fungible {
-                                resource_address: "resource_tdx_2_1th6hufew82dpntmcn7kt9f7au50cr59996tawh4syph0kz5e99v2u6".parse::<ResourceAddress>().unwrap(),
-                                indicator: FungibleResourceIndicator::Guaranteed { decimal: "5.24".parse::<Decimal>().unwrap() }
-                            },
-                            ResourceIndicator::Fungible {
-                                resource_address: "resource_tdx_2_1thnhmen4wg29tnqrfpk9w2v90s64z8at9sethnjma76866rfvcc2gs".parse::<ResourceAddress>().unwrap(),
-                                indicator: FungibleResourceIndicator::Guaranteed { decimal: "42.23727".parse::<Decimal>().unwrap() }
-                            },
-                            ResourceIndicator::Fungible {
-                                resource_address: "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc".parse::<ResourceAddress>().unwrap(),
-                                indicator: FungibleResourceIndicator::Guaranteed { decimal: "237.987654".parse::<Decimal>().unwrap() }
-                            },
+                            ResourceIndicator::fungible(
+                                "resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy",
+                                FungibleResourceIndicator::guaranteed("36.4567896543")
+                            ),
+                            ResourceIndicator::fungible(
+                                "resource_tdx_2_1th6hufew82dpntmcn7kt9f7au50cr59996tawh4syph0kz5e99v2u6",
+                                FungibleResourceIndicator::guaranteed("5.24")
+                            ),
+                            ResourceIndicator::fungible(
+                                "resource_tdx_2_1thnhmen4wg29tnqrfpk9w2v90s64z8at9sethnjma76866rfvcc2gs",
+                                FungibleResourceIndicator::guaranteed("42.23727")
+                            ),
+                            ResourceIndicator::fungible(
+                                "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc",
+                                FungibleResourceIndicator::guaranteed("237.987654")
+                            ),
                         ]
                     )
                 ],
                 [
                     (
-                        "account_tdx_2_12x0xzsa3dm2tthpz3nwsvh94e8kq7acu0x2kfjlpv5kulsynt7rpwp".parse::<AccountAddress>().unwrap(),
+                        AccountAddress::from("account_tdx_2_12x0xzsa3dm2tthpz3nwsvh94e8kq7acu0x2kfjlpv5kulsynt7rpwp"),
                         vec![
-                            ResourceIndicator::Fungible {
-                                resource_address: "resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy".parse::<ResourceAddress>().unwrap(),
-                                indicator: FungibleResourceIndicator::Guaranteed { decimal: "12.4567896543".parse::<Decimal>().unwrap() }
-                            }
+                            ResourceIndicator::fungible(
+                                "resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy",
+                                FungibleResourceIndicator::guaranteed("12.4567896543")
+                            )
                         ]
                     ),
                     (
-                        "account_tdx_2_12xwdc3gsu48juzkj56s0zz0vqx26xcmw9kehcudm85w57cynter9z4".parse::<AccountAddress>().unwrap(),
+                        AccountAddress::from("account_tdx_2_12xwdc3gsu48juzkj56s0zz0vqx26xcmw9kehcudm85w57cynter9z4"),
                         vec![
-                            ResourceIndicator::Fungible {
-                                resource_address: "resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy".parse::<ResourceAddress>().unwrap(),
-                                indicator: FungibleResourceIndicator::Guaranteed { decimal: "24".parse::<Decimal>().unwrap() }
-                            },
-                            ResourceIndicator::Fungible {
-                                resource_address: "resource_tdx_2_1th6hufew82dpntmcn7kt9f7au50cr59996tawh4syph0kz5e99v2u6".parse::<ResourceAddress>().unwrap(),
-                                indicator: FungibleResourceIndicator::Guaranteed { decimal: "5.24".parse::<Decimal>().unwrap() }
-                            },
-                            ResourceIndicator::Fungible {
-                                resource_address: "resource_tdx_2_1thnhmen4wg29tnqrfpk9w2v90s64z8at9sethnjma76866rfvcc2gs".parse::<ResourceAddress>().unwrap(),
-                                indicator: FungibleResourceIndicator::Guaranteed { decimal: "42.23727".parse::<Decimal>().unwrap() }
-                            },
-                            ResourceIndicator::Fungible {
-                                resource_address: "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc".parse::<ResourceAddress>().unwrap(),
-                                indicator: FungibleResourceIndicator::Guaranteed { decimal: "237.987654".parse::<Decimal>().unwrap() }
-                            }
+                            ResourceIndicator::fungible(
+                                "resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy",
+                                FungibleResourceIndicator::guaranteed(24)
+                            ),
+                            ResourceIndicator::fungible(
+                                "resource_tdx_2_1th6hufew82dpntmcn7kt9f7au50cr59996tawh4syph0kz5e99v2u6",
+                                FungibleResourceIndicator::guaranteed("5.24")
+                            ),
+                            ResourceIndicator::fungible(
+                                "resource_tdx_2_1thnhmen4wg29tnqrfpk9w2v90s64z8at9sethnjma76866rfvcc2gs",
+                                FungibleResourceIndicator::guaranteed("42.23727")
+                            ),
+                            ResourceIndicator::fungible(
+                                "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc",
+                                FungibleResourceIndicator::guaranteed("237.987654")
+                            )
                         ]
                     )
                 ],
@@ -169,9 +169,9 @@ mod tests {
                 ],
                 FeeLocks::default(),
                 FeeSummary::new(
-                    "0.4077857".parse::<Decimal>().unwrap(),
-                    "0.1307814".parse::<Decimal>().unwrap(),
-                    "0.52433013014".parse::<Decimal>().unwrap(),
+                    "0.4077857",
+                    "0.1307814",
+                    "0.52433013014",
                     0,
                 ),
                 NewEntities::default()
@@ -199,7 +199,7 @@ mod tests {
             )
             .unwrap();
 
-        let acc_g2: AccountAddress = "account_tdx_2_12xx9jz27aa0mqjj8cwhk7pzkhtkthv09yclmurse42hlyme2gegyg2".parse().unwrap();
+        let acc_g2: AccountAddress = "account_tdx_2_12xx9jz27aa0mqjj8cwhk7pzkhtkthv09yclmurse42hlyme2gegyg2".into();
 
         pretty_assertions::assert_eq!(
             sut,
@@ -251,9 +251,9 @@ mod tests {
                 ],
                 FeeLocks::default(),
                 FeeSummary::new(
-                    "0.092499".parse::<Decimal>().unwrap(),
-                    "0.02100205".parse::<Decimal>().unwrap(),
-                    "0.08459091041".parse::<Decimal>().unwrap(),
+                    "0.092499",
+                    "0.02100205",
+                    "0.08459091041",
                     0
                 ),
                 NewEntities::default()
@@ -279,8 +279,8 @@ mod tests {
             )
             .unwrap();
 
-        let acc_g2: AccountAddress = "account_tdx_2_12xx9jz27aa0mqjj8cwhk7pzkhtkthv09yclmurse42hlyme2gegyg2".parse().unwrap();
-        let token_address: ResourceAddress = "resource_tdx_2_1t4wty7nq976ej4wtx7p4ckm073p32cyaajk4cq256rcvzz20e7qrm9".parse().unwrap();
+        let acc_g2: AccountAddress = "account_tdx_2_12xx9jz27aa0mqjj8cwhk7pzkhtkthv09yclmurse42hlyme2gegyg2".into();
+        let token_address: ResourceAddress = "resource_tdx_2_1t4wty7nq976ej4wtx7p4ckm073p32cyaajk4cq256rcvzz20e7qrm9".into();
 
         pretty_assertions::assert_eq!(
             sut,
@@ -288,12 +288,10 @@ mod tests {
                 [],
                 [(
                     acc_g2.clone(),
-                    vec![ResourceIndicator::Fungible {
-                        resource_address: token_address.clone(),
-                        indicator: FungibleResourceIndicator::Predicted {
-                            predicted_decimal: PredictedDecimal::new(100000, 1)
-                        }
-                    },]
+                    vec![ResourceIndicator::fungible(
+                        token_address.clone(),
+                        FungibleResourceIndicator::predicted(100000, 1)
+                    )]
                 )],
                 [], // addresses_of_accounts_requiring_auth
                 [], // addresses_of_identities_requiring_auth
@@ -303,12 +301,7 @@ mod tests {
                 [], // encountered_component_addresses
                 [DetailedManifestClass::General],
                 FeeLocks::default(),
-                FeeSummary::new(
-                    "0.15800815".parse::<Decimal>().unwrap(),
-                    "0.1160115".parse::<Decimal>().unwrap(),
-                    "0.25339126151".parse::<Decimal>().unwrap(),
-                    0,
-                ),
+                FeeSummary::new("0.15800815", "0.1160115", "0.25339126151", 0,),
                 NewEntities::new([(
                     token_address.clone(),
                     NewlyCreatedResource::with(
@@ -362,14 +355,14 @@ mod tests {
                     ],
                     FeeLocks::default(),
                     FeeSummary::new(
-                        "0.21852455".parse::<Decimal>().unwrap(),
-                        "0.3320334".parse::<Decimal>().unwrap(),
-                        "0.73328016927".parse::<Decimal>().unwrap(),
+                        "0.21852455",
+                        "0.3320334",
+                        "0.73328016927",
                         0,
                     ),
                     NewEntities::new([
                         (
-                            "resource_tdx_2_1ntwlumm8g8hsx0emmxgj3akcx6aajspx06llvfmq733x2ssm4v3g0e".parse::<ResourceAddress>().unwrap(),
+                            ResourceAddress::from("resource_tdx_2_1ntwlumm8g8hsx0emmxgj3akcx6aajspx06llvfmq733x2ssm4v3g0e"),
                             NewlyCreatedResource::with(
                                 "Abandon",
                                 "ABANDON",
@@ -379,7 +372,7 @@ mod tests {
                             )
                         ),
                         (
-                            "resource_tdx_2_1nfe6ugwjvuqc7aqhcltnwmp8xfkpqnm9mc8n9jh5xcvnx38r2wncre".parse::<ResourceAddress>().unwrap(),
+                            ResourceAddress::from("resource_tdx_2_1nfe6ugwjvuqc7aqhcltnwmp8xfkpqnm9mc8n9jh5xcvnx38r2wncre"),
                             NewlyCreatedResource::with(
                                 "Ability",
                                 "ABILITY",
@@ -411,7 +404,7 @@ mod tests {
             )
             .unwrap();
 
-        let acc_gk: AccountAddress = "account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk".parse().unwrap();
+        let acc_gk: AccountAddress = "account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk".into();
 
         pretty_assertions::assert_eq!(
             sut,
@@ -420,10 +413,10 @@ mod tests {
                     (
                         acc_gk.clone(),
                         vec![
-                            ResourceIndicator::Fungible {
-                                resource_address: "resource_tdx_2_1thqcgjw37fjgycpvqr52nx4jcsdeuq75mf2nywme07kzsuds9a4psp".parse::<ResourceAddress>().unwrap(), 
-                                indicator: FungibleResourceIndicator::Guaranteed { decimal: "5".parse::<Decimal>().unwrap() } 
-                            },
+                            ResourceIndicator::fungible(
+                                "resource_tdx_2_1thqcgjw37fjgycpvqr52nx4jcsdeuq75mf2nywme07kzsuds9a4psp",
+                                FungibleResourceIndicator::guaranteed(5)
+                            ),
                         ]
                     )
                 ],
@@ -431,18 +424,15 @@ mod tests {
                     (
                         acc_gk.clone(),
                         vec![
-                            ResourceIndicator::NonFungible {
-                                resource_address: "resource_tdx_2_1ng88qk08hrgmad30rzdxpyx779yuta4cwcjc3gstk60jhachsv94g9".parse::<ResourceAddress>().unwrap(), 
-                                indicator: NonFungibleResourceIndicator::ByAmount {
-                                    amount: Decimal::from(1),
-                                    predicted_ids: PredictedNonFungibleLocalIds::new(
-                                        [
-                                            NonFungibleLocalId::string("Member_44").unwrap()
-                                        ],
-                                        3
-                                    )
-                                }
-                            }
+                            ResourceIndicator::non_fungible(
+                                "resource_tdx_2_1ng88qk08hrgmad30rzdxpyx779yuta4cwcjc3gstk60jhachsv94g9",
+                                NonFungibleResourceIndicator::by_amount(1, PredictedNonFungibleLocalIds::new(
+                                    [
+                                        NonFungibleLocalId::string("Member_44").unwrap()
+                                    ],
+                                    3
+                                ))
+                            )
                         ]
                     )
                 ],
@@ -459,9 +449,9 @@ mod tests {
                 ],
                 FeeLocks::default(),
                 FeeSummary::new(
-                    "0.3751137".parse::<Decimal>().unwrap(),
-                    "0.0467599".parse::<Decimal>().unwrap(),
-                    "0.14677047477".parse::<Decimal>().unwrap(),
+                    "0.3751137",
+                    "0.0467599",
+                    "0.14677047477",
                     0,
                 ),
                 NewEntities::default()
@@ -498,7 +488,7 @@ mod tests {
                             vec![
                                 ResourceIndicator::Fungible {
                                     resource_address: "resource_tdx_2_1thqcgjw37fjgycpvqr52nx4jcsdeuq75mf2nywme07kzsuds9a4psp".parse::<ResourceAddress>().unwrap(), 
-                                    indicator: FungibleResourceIndicator::Guaranteed { decimal: "1".parse::<Decimal>().unwrap() } 
+                                    indicator: FungibleResourceIndicator::guaranteed(1)
                                 },
                             ]
                         )
@@ -509,12 +499,7 @@ mod tests {
                             vec![
                                 ResourceIndicator::Fungible {
                                     resource_address: "resource_tdx_2_1tk30vj4ene95e3vhymtf2p35fzl29rv4us36capu2rz0vretw9gzr3".parse::<ResourceAddress>().unwrap(),
-                                    indicator: FungibleResourceIndicator::Predicted {
-                                        predicted_decimal: PredictedDecimal::new(
-                                            Decimal::from(30),
-                                            4
-                                        )
-                                    }
+                                    indicator: FungibleResourceIndicator::predicted(30, 4)
                                 }
                             ]
                         ),
@@ -530,9 +515,9 @@ mod tests {
                     ],
                     FeeLocks::default(),
                     FeeSummary::new(
-                        "0.50142635".parse::<Decimal>().unwrap(),
-                        "0.0467589".parse::<Decimal>().unwrap(),
-                        "0.13551711803".parse::<Decimal>().unwrap(),
+                        "0.50142635",
+                        "0.0467589",
+                        "0.13551711803",
                         0,
                     ),
                     NewEntities::default()
@@ -574,9 +559,9 @@ mod tests {
                     ],
                     FeeLocks::default(),
                     FeeSummary::new(
-                        "0.1495719".parse::<Decimal>().unwrap(),
-                        "0.1557717".parse::<Decimal>().unwrap(),
-                        "0.3290176335".parse::<Decimal>().unwrap(),
+                        "0.1495719",
+                        "0.1557717",
+                        "0.3290176335",
                         0,
                     ),
                     NewEntities::new([
@@ -662,9 +647,9 @@ mod tests {
                     ],
                     FeeLocks::default(),
                     FeeSummary::new(
-                        "0.27435815".parse::<Decimal>().unwrap(),
-                        "0.04276125".parse::<Decimal>().unwrap(),
-                        "0.17910003354".parse::<Decimal>().unwrap(),
+                        "0.27435815",
+                        "0.04276125",
+                        "0.17910003354",
                         0,
                     ),
                     NewEntities::default()
@@ -720,32 +705,23 @@ mod tests {
                         ResourceIndicator::Fungible {
                             resource_address:
                                 validator_0_resource_address_of_stake.clone(),
-                            indicator: FungibleResourceIndicator::Predicted {
-                                predicted_decimal: PredictedDecimal::new(
-                                    "11".parse::<Decimal>().unwrap(),
-                                    3
-                                )
-                            }
+                            indicator: FungibleResourceIndicator::predicted(
+                                11, 3
+                            )
                         },
                         ResourceIndicator::Fungible {
                             resource_address:
                                 validator_1_resource_address_of_stake.clone(),
-                            indicator: FungibleResourceIndicator::Predicted {
-                                predicted_decimal: PredictedDecimal::new(
-                                    "222".parse::<Decimal>().unwrap(),
-                                    7
-                                )
-                            }
+                            indicator: FungibleResourceIndicator::predicted(
+                                222, 7
+                            )
                         },
                         ResourceIndicator::Fungible {
                             resource_address:
                                 validator_2_resource_address_of_stake.clone(),
-                            indicator: FungibleResourceIndicator::Predicted {
-                                predicted_decimal: PredictedDecimal::new(
-                                    "3333".parse::<Decimal>().unwrap(),
-                                    11
-                                )
-                            }
+                            indicator: FungibleResourceIndicator::predicted(
+                                3333, 11
+                            )
                         },
                     ]
                 )], // addresses_of_accounts_deposited_into
@@ -783,12 +759,7 @@ mod tests {
                     ]
                 }],
                 FeeLocks::default(),
-                FeeSummary::new(
-                    "0.34071685".parse::<Decimal>().unwrap(),
-                    "0.1150347".parse::<Decimal>().unwrap(),
-                    "0.32796859177".parse::<Decimal>().unwrap(),
-                    0,
-                ),
+                FeeSummary::new("0.34071685", "0.1150347", "0.32796859177", 0,),
                 NewEntities::default()
             )
         );
@@ -812,10 +783,10 @@ mod tests {
             )
             .unwrap();
 
-        let acc_gk: AccountAddress = "account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk".parse().unwrap();
-        let resource_address_of_pool: ResourceAddress = "resource_tdx_2_1thnhmen4wg29tnqrfpk9w2v90s64z8at9sethnjma76866rfvcc2gs".parse().unwrap();
-        let pool_address: PoolAddress = "pool_tdx_2_1ckfjmjswvvf6y635f8l89uunu9cwgnglhqdk8627wrpf8ultdx2vc3".parse().unwrap();
-        let token0: ResourceAddress = "resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy".parse().unwrap();
+        let acc_gk = AccountAddress::from("account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk");
+        let resource_address_of_pool = ResourceAddress::from("resource_tdx_2_1thnhmen4wg29tnqrfpk9w2v90s64z8at9sethnjma76866rfvcc2gs");
+        let pool_address = PoolAddress::from("pool_tdx_2_1ckfjmjswvvf6y635f8l89uunu9cwgnglhqdk8627wrpf8ultdx2vc3");
+        let token0 = ResourceAddress::from("resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy");
         let token1 = ResourceAddress::sample_stokenet_xrd();
 
         pretty_assertions::assert_eq!(
@@ -825,10 +796,8 @@ mod tests {
                     acc_gk.clone(),
                     vec![ResourceIndicator::Fungible {
                         resource_address: resource_address_of_pool.clone(),
-                        indicator: FungibleResourceIndicator::Guaranteed {
-                            decimal: "500".parse::<Decimal>().unwrap()
-                        }
-                    },]
+                        indicator: FungibleResourceIndicator::guaranteed(500)
+                    }]
                 )], // addresses_of_accounts_withdrawn_from
                 [(
                     acc_gk.clone(),
@@ -836,25 +805,17 @@ mod tests {
                         ResourceIndicator::Fungible {
                             resource_address:
                                 ResourceAddress::sample_stokenet_xrd(),
-                            indicator: FungibleResourceIndicator::Predicted {
-                                predicted_decimal: PredictedDecimal::new(
-                                    "210.512783488241137505"
-                                        .parse::<Decimal>()
-                                        .unwrap(),
-                                    3
-                                )
-                            }
+                            indicator: FungibleResourceIndicator::predicted(
+                                "210.512783488241137505",
+                                3
+                            )
                         },
                         ResourceIndicator::Fungible {
                             resource_address: token0.clone(),
-                            indicator: FungibleResourceIndicator::Predicted {
-                                predicted_decimal: PredictedDecimal::new(
-                                    "1187.5763355433"
-                                        .parse::<Decimal>()
-                                        .unwrap(),
-                                    3
-                                )
-                            }
+                            indicator: FungibleResourceIndicator::predicted(
+                                "1187.5763355433",
+                                3
+                            )
                         }
                     ]
                 )], // addresses_of_accounts_deposited_into
@@ -883,12 +844,7 @@ mod tests {
                     )]
                 }],
                 FeeLocks::default(),
-                FeeSummary::new(
-                    "0.25753315".parse::<Decimal>().unwrap(),
-                    "0.0325088".parse::<Decimal>().unwrap(),
-                    "0.12760162134".parse::<Decimal>().unwrap(),
-                    0,
-                ),
+                FeeSummary::new("0.25753315", "0.0325088", "0.12760162134", 0,),
                 NewEntities::default()
             )
         );
@@ -914,11 +870,11 @@ mod tests {
             )
             .unwrap();
 
-        let acc_gk: AccountAddress = "account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk".parse().unwrap();
+        let acc_gk: AccountAddress = "account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk".into();
 
-        let nf_global_id: NonFungibleGlobalId = "resource_tdx_2_1ngw8z6ut9mw54am4rr65kwcuz24q3n7waxtzyfvug5g4yuc00jydqj:{192ed08c15075e36-ec4892a8ba3b86f1-a1e050a6563b787e-adc9813f7fc90480}".parse().unwrap();
+        let nf_global_id: NonFungibleGlobalId = "resource_tdx_2_1ngw8z6ut9mw54am4rr65kwcuz24q3n7waxtzyfvug5g4yuc00jydqj:{192ed08c15075e36-ec4892a8ba3b86f1-a1e050a6563b787e-adc9813f7fc90480}".into();
 
-        let validator: ValidatorAddress = "validator_tdx_2_1sdlkptcwjpajqawnuya8r2mgl3eqt89hw27ww6du8kxmx3thmyu8l4".parse().unwrap();
+        let validator: ValidatorAddress = "validator_tdx_2_1sdlkptcwjpajqawnuya8r2mgl3eqt89hw27ww6du8kxmx3thmyu8l4".into();
 
         pretty_assertions::assert_eq!(
                 sut,
@@ -927,10 +883,10 @@ mod tests {
                         (
                            acc_gk.clone(),
                             vec![
-                                ResourceIndicator::Fungible {
-                                    resource_address: "resource_tdx_2_1t5hpjckz9tm63gqvxsl60ejhzvnlguly77tltvywnj06s2x9wjdxjn".parse::<ResourceAddress>().unwrap(), 
-                                    indicator: FungibleResourceIndicator::Guaranteed { decimal: "1234".parse::<Decimal>().unwrap() } 
-                                },
+                                ResourceIndicator::fungible(
+                                    "resource_tdx_2_1t5hpjckz9tm63gqvxsl60ejhzvnlguly77tltvywnj06s2x9wjdxjn", 
+                                    FungibleResourceIndicator::guaranteed(1234)
+                                ),
                             ]
                         )
                     ], // addresses_of_accounts_withdrawn_from
@@ -939,19 +895,18 @@ mod tests {
                         acc_gk.clone(),
                         vec![
                             (
-                               ResourceIndicator::NonFungible {
-                                resource_address:  "resource_tdx_2_1ngw8z6ut9mw54am4rr65kwcuz24q3n7waxtzyfvug5g4yuc00jydqj".parse::<ResourceAddress>().unwrap(), 
-                                indicator: NonFungibleResourceIndicator::ByAll {
-                                    predicted_amount: PredictedDecimal::new(
-                                        1,
-                                        3
-                                    ),
-                                    predicted_ids: PredictedNonFungibleLocalIds::new(
-                                        [NonFungibleLocalId::ruid(hex_decode("192ed08c15075e36ec4892a8ba3b86f1a1e050a6563b787eadc9813f7fc90480").unwrap()).unwrap()],
+                               ResourceIndicator::non_fungible(
+                                "resource_tdx_2_1ngw8z6ut9mw54am4rr65kwcuz24q3n7waxtzyfvug5g4yuc00jydqj",
+                                NonFungibleResourceIndicator::by_all(
+                                    PredictedDecimal::new(1, 3),
+                                    PredictedNonFungibleLocalIds::new(
+                                        [
+                                            NonFungibleLocalId::ruid(hex_decode("192ed08c15075e36ec4892a8ba3b86f1a1e050a6563b787eadc9813f7fc90480").unwrap()).unwrap()
+                                        ],
                                         3
                                     )
-                                }
-                             }
+                                )
+                            )
                             )
                         ]
                       )
@@ -973,9 +928,9 @@ mod tests {
                     ],
                     FeeLocks::default(),
                     FeeSummary::new(
-                        "0.2788849".parse::<Decimal>().unwrap(),
-                        "0.06251535".parse::<Decimal>().unwrap(),
-                        "0.16927718825".parse::<Decimal>().unwrap(),
+                        "0.2788849",
+                        "0.06251535",
+                        "0.16927718825",
                         0,
                     ),
                     NewEntities::default()
@@ -1003,13 +958,13 @@ mod tests {
             )
             .unwrap();
 
-        let acc_gk: AccountAddress = "account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk".parse().unwrap();
+        let acc_gk: AccountAddress = "account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk".into();
 
-        let validator_1: ValidatorAddress = "validator_tdx_2_1sdtnujyn3720ymg8lakydkvc5tw4q3zecdj95akdwt9de362mvtd94".parse().unwrap();
-        let validator_1_resource_address_of_stake: NonFungibleResourceAddress = "resource_tdx_2_1ng3g2nj5pfpmdphgz0nrh8z0gtqcxx5z5dn48t85ar0z0zjhefufaw".parse().unwrap();
+        let validator_1: ValidatorAddress = "validator_tdx_2_1sdtnujyn3720ymg8lakydkvc5tw4q3zecdj95akdwt9de362mvtd94".into();
+        let validator_1_resource_address_of_stake: NonFungibleResourceAddress = "resource_tdx_2_1ng3g2nj5pfpmdphgz0nrh8z0gtqcxx5z5dn48t85ar0z0zjhefufaw".into();
 
-        let validator_2: ValidatorAddress = "validator_tdx_2_1sdlkptcwjpajqawnuya8r2mgl3eqt89hw27ww6du8kxmx3thmyu8l4".parse().unwrap();
-        let validator_2_resource_address_of_stake: NonFungibleResourceAddress = "resource_tdx_2_1ngw8z6ut9mw54am4rr65kwcuz24q3n7waxtzyfvug5g4yuc00jydqj".parse().unwrap();
+        let validator_2: ValidatorAddress = "validator_tdx_2_1sdlkptcwjpajqawnuya8r2mgl3eqt89hw27ww6du8kxmx3thmyu8l4".into();
+        let validator_2_resource_address_of_stake: NonFungibleResourceAddress = "resource_tdx_2_1ngw8z6ut9mw54am4rr65kwcuz24q3n7waxtzyfvug5g4yuc00jydqj".into();
 
         pretty_assertions::assert_eq!(
                 sut,
@@ -1018,18 +973,18 @@ mod tests {
                         (
                             acc_gk.clone(),
                             vec![
-                                ResourceIndicator::NonFungible {
-                                    resource_address: "resource_tdx_2_1ng3g2nj5pfpmdphgz0nrh8z0gtqcxx5z5dn48t85ar0z0zjhefufaw".parse::<ResourceAddress>().unwrap(), 
-                                    indicator: NonFungibleResourceIndicator::ByIds { ids: vec![
+                                ResourceIndicator::non_fungible(
+                                    "resource_tdx_2_1ng3g2nj5pfpmdphgz0nrh8z0gtqcxx5z5dn48t85ar0z0zjhefufaw",
+                                    NonFungibleResourceIndicator::by_ids([
                                         NonFungibleLocalId::ruid(hex_decode("97c2b05d8529be58152d79c176d61d68f87611f279e0daa3d486426d5330795c").unwrap()).unwrap()
-                                    ] }
-                                },
-                                ResourceIndicator::NonFungible {
-                                    resource_address: "resource_tdx_2_1ngw8z6ut9mw54am4rr65kwcuz24q3n7waxtzyfvug5g4yuc00jydqj".parse::<ResourceAddress>().unwrap(), 
-                                    indicator: NonFungibleResourceIndicator::ByIds { ids: vec![
+                                    ])
+                                ),
+                                ResourceIndicator::non_fungible(
+                                    "resource_tdx_2_1ngw8z6ut9mw54am4rr65kwcuz24q3n7waxtzyfvug5g4yuc00jydqj",
+                                    NonFungibleResourceIndicator::by_ids([
                                         NonFungibleLocalId::ruid(hex_decode("f1edc2f0f8f54d33dab8e1bf90e196ce9714ef7b85478c6c82486b47a79b3002").unwrap()).unwrap()
-                                    ] }
-                                },
+                                    ])
+                                ),
                             ]
                         )
                     ], // addresses_of_accounts_withdrawn_from
@@ -1062,7 +1017,7 @@ mod tests {
                                     validator_1,
                                     validator_1_resource_address_of_stake,
                                     [
-                                        NonFungibleLocalId::from_str("{97c2b05d8529be58-152d79c176d61d68-f87611f279e0daa3-d486426d5330795c}").unwrap()
+                                        NonFungibleLocalId::from("{97c2b05d8529be58-152d79c176d61d68-f87611f279e0daa3-d486426d5330795c}")
                                     ],
                                     110
                                 ),
@@ -1070,7 +1025,7 @@ mod tests {
                                     validator_2,
                                     validator_2_resource_address_of_stake,
                                     [
-                                        NonFungibleLocalId::from_str("{f1edc2f0f8f54d33-dab8e1bf90e196ce-9714ef7b85478c6c-82486b47a79b3002}").unwrap()
+                                        NonFungibleLocalId::from("{f1edc2f0f8f54d33-dab8e1bf90e196ce-9714ef7b85478c6c-82486b47a79b3002}")
                                     ],
                                     1234
                                 ),
@@ -1079,9 +1034,9 @@ mod tests {
                     ],
                     FeeLocks::default(),
                     FeeSummary::new(
-                        "0.30518895".parse::<Decimal>().unwrap(),
-                        "0.05851055".parse::<Decimal>().unwrap(),
-                        "0.1916885343".parse::<Decimal>().unwrap(),
+                        "0.30518895",
+                        "0.05851055",
+                        "0.1916885343",
                         0,
                     ),
                     NewEntities::default()

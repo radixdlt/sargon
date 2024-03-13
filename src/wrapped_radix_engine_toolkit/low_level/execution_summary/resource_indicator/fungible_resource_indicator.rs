@@ -6,6 +6,25 @@ pub enum FungibleResourceIndicator {
     Predicted { predicted_decimal: PredictedDecimal },
 }
 
+impl FungibleResourceIndicator {
+    pub fn guaranteed(decimal: impl Into<Decimal>) -> Self {
+        Self::Guaranteed {
+            decimal: decimal.into(),
+        }
+    }
+    pub fn predicted(
+        decimal: impl Into<Decimal>,
+        instruction_index: u64,
+    ) -> Self {
+        Self::Predicted {
+            predicted_decimal: PredictedDecimal::new(
+                decimal,
+                instruction_index,
+            ),
+        }
+    }
+}
+
 impl From<RetFungibleResourceIndicator> for FungibleResourceIndicator {
     fn from(value: RetFungibleResourceIndicator) -> Self {
         match value {
@@ -27,15 +46,11 @@ impl From<RetFungibleResourceIndicator> for FungibleResourceIndicator {
 
 impl HasSampleValues for FungibleResourceIndicator {
     fn sample() -> Self {
-        Self::Guaranteed {
-            decimal: Decimal::one(),
-        }
+        Self::guaranteed(1)
     }
 
     fn sample_other() -> Self {
-        Self::Predicted {
-            predicted_decimal: PredictedDecimal::new(Decimal::two(), 0),
-        }
+        Self::predicted(2, 0)
     }
 }
 
