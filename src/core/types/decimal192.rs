@@ -251,17 +251,75 @@ impl Decimal {
     /// None, rounds to `Decimal192::SCALE` places, using the
     /// rounding mode `ToNearestMidpointAwayFromZero`.
     ///
+    /// Note:
+    /// Rounding with mode `ToNearestMidpointAwayFromZero` will fail for `Decimal192::max()`,
+    /// and in fact it will fail for numbers very close to `Decimal192::max()`.
+    /// The max value is a "integer_part_of_max" followed by the decimal part:
+    /// `.177722232017256447`
+    /// If the rounding fails using `ToNearestMidpointAwayFromZero`, we fallback
+    /// to rounding using `ToZero` which never fails.
+    ///
+    /// ```
+    /// extern crate sargon;
+    /// use sargon::prelude::*;
+    ///
+    /// assert_eq!(
+    ///     "3138550867693340381917894711603833208051.149".parse::<Decimal192>().unwrap().round(2),
+    ///     "3138550867693340381917894711603833208051.15".parse::<Decimal192>().unwrap()
+    /// );
+    ///
+    /// assert_eq!(
+    ///     "3138550867693340381917894711603833208051.1499".parse::<Decimal192>().unwrap().round(3),
+    ///     "3138550867693340381917894711603833208051.15".parse::<Decimal192>().unwrap()
+    /// );
+    ///
+    /// assert_eq!(
+    ///     "3138550867693340381917894711603833208051.1499".parse::<Decimal192>().unwrap().round(2),
+    ///     "3138550867693340381917894711603833208051.15".parse::<Decimal192>().unwrap()
+    /// );
+    ///
+    /// assert_eq!(
+    ///     "3138550867693340381917894711603833208051.151".parse::<Decimal192>().unwrap().round(2),
+    ///     "3138550867693340381917894711603833208051.15".parse::<Decimal192>().unwrap()
+    /// );
+    ///
+    /// assert_eq!(
+    ///     "3138550867693340381917894711603833208051.1519".parse::<Decimal192>().unwrap().round(3),
+    ///     "3138550867693340381917894711603833208051.152".parse::<Decimal192>().unwrap()
+    /// );
+    ///
+    /// assert_eq!(
+    ///     Decimal192::max().round(12),
+    ///     "3138550867693340381917894711603833208051.177722232017".parse::<Decimal192>().unwrap()
+    /// );
+    /// assert_eq!(
+    ///     Decimal192::max().round(Decimal192::SCALE as i32),
+    ///     Decimal192::max()
+    /// );
+    /// assert_eq!(
+    ///     Decimal192::max().round(3),
+    ///     "3138550867693340381917894711603833208051.177".parse::<Decimal192>().unwrap()
+    /// );
+    /// ```
+    ///
+    /// Why not ALWAYS use `ToNearestMidpointAwayFromZero`? Well maybe we should!
+    /// But in this initial release of Sargon I wanted to be using a rounding
+    /// behavior as close as wallets use today (at least iOS uses today).
+    ///
     /// # Panics
     /// - Panic if the number of decimal places is not within [0..SCALE(=18)]
     pub fn round(&self, decimal_places: impl Into<Option<i32>>) -> Self {
-        let mode = RoundingMode::ToNearestMidpointAwayFromZero;
+        let decimal_places =
+            decimal_places.into().unwrap_or(Decimal192::SCALE as i32);
+
         self.round_with_mode(
-            decimal_places.into().unwrap_or(Decimal192::SCALE as i32),
-            mode,
+            decimal_places,
+            RoundingMode::ToNearestMidpointAwayFromZero,
         )
-        .unwrap_or_else(|_| {
-            panic!("Should always be able to round using mode {}", mode)
-        })
+        .unwrap_or(
+            self.round_with_mode(decimal_places, RoundingMode::ToZero)
+                .unwrap_or_else(|_| unreachable!()),
+        )
     }
 
     /// Rounds this number to the specified decimal places.
@@ -277,6 +335,14 @@ impl Decimal {
             .checked_round(decimal_places, rounding_mode.into())
             .ok_or(CommonError::DecimalError)
             .map(Self::from)
+    }
+}
+
+#[cfg(test)]
+impl From<&str> for Decimal192 {
+    /// TEST ONLY
+    fn from(value: &str) -> Self {
+        value.parse().expect(&format!("Test failed since the passed in str is not a valid Decimal192: '{}'", value))
     }
 }
 
@@ -322,14 +388,6 @@ impl Decimal192 {
         }
 
         string.parse::<Self>()
-    }
-}
-
-impl TryInto<Decimal192> for &str {
-    type Error = crate::CommonError;
-
-    fn try_into(self) -> Result<Decimal, Self::Error> {
-        self.parse::<Decimal>()
     }
 }
 
@@ -534,7 +592,6 @@ pub fn decimal_round(
 mod test_decimal {
 
     use super::*;
-    use crate::prelude::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = Decimal;
@@ -769,6 +826,156 @@ mod test_decimal {
     #[test]
     fn scale_is_18() {
         assert_eq!(SUT::SCALE, 18);
+    }
+
+    #[test]
+    fn round() {
+        let test = |x: SUT, d: i32, y: &str| {
+            assert_eq!(x.round(d), y.into());
+        };
+
+        let mut x = SUT::max();
+
+        test(
+            x.clone(),
+            18,
+            "3138550867693340381917894711603833208051.177722232017256447",
+        );
+        test(
+            x.clone(),
+            17,
+            "3138550867693340381917894711603833208051.17772223201725644",
+        );
+        test(
+            x.clone(),
+            16,
+            "3138550867693340381917894711603833208051.1777222320172564",
+        );
+        test(
+            x.clone(),
+            15,
+            "3138550867693340381917894711603833208051.177722232017256",
+        );
+        test(
+            x.clone(),
+            14,
+            "3138550867693340381917894711603833208051.17772223201725",
+        );
+        test(
+            x.clone(),
+            13,
+            "3138550867693340381917894711603833208051.1777222320172",
+        );
+        test(
+            x.clone(),
+            12,
+            "3138550867693340381917894711603833208051.177722232017",
+        );
+        test(
+            x.clone(),
+            11,
+            "3138550867693340381917894711603833208051.17772223201",
+        );
+        test(
+            x.clone(),
+            10,
+            "3138550867693340381917894711603833208051.1777222320",
+        );
+        test(
+            x.clone(),
+            9,
+            "3138550867693340381917894711603833208051.177722232",
+        );
+        test(
+            x.clone(),
+            8,
+            "3138550867693340381917894711603833208051.17772223",
+        );
+        test(
+            x.clone(),
+            7,
+            "3138550867693340381917894711603833208051.1777222",
+        );
+        test(
+            x.clone(),
+            6,
+            "3138550867693340381917894711603833208051.177722",
+        );
+        test(
+            x.clone(),
+            5,
+            "3138550867693340381917894711603833208051.17772",
+        );
+        test(
+            x.clone(),
+            4,
+            "3138550867693340381917894711603833208051.1777",
+        );
+        test(x.clone(), 3, "3138550867693340381917894711603833208051.177");
+        test(x.clone(), 2, "3138550867693340381917894711603833208051.17");
+        test(x.clone(), 1, "3138550867693340381917894711603833208051.1");
+        test(x.clone(), 0, "3138550867693340381917894711603833208051");
+
+        x = "3138550867693340381917894711603833208051.14".into();
+        test(x.clone(), 0, "3138550867693340381917894711603833208051");
+        test(x.clone(), 1, "3138550867693340381917894711603833208051.1");
+        test(x.clone(), 2, "3138550867693340381917894711603833208051.14");
+        test(x.clone(), 3, "3138550867693340381917894711603833208051.14");
+
+        x = "3138550867693340381917894711603833208051.148".into();
+        test(x.clone(), 0, "3138550867693340381917894711603833208051");
+        test(x.clone(), 1, "3138550867693340381917894711603833208051.1");
+        test(x.clone(), 2, "3138550867693340381917894711603833208051.15");
+        test(x.clone(), 3, "3138550867693340381917894711603833208051.148");
+        test(x.clone(), 4, "3138550867693340381917894711603833208051.148");
+
+        x = "3138550867693340381917894711603833208051.149".into();
+        test(x.clone(), 0, "3138550867693340381917894711603833208051");
+        test(x.clone(), 1, "3138550867693340381917894711603833208051.1");
+        test(x.clone(), 2, "3138550867693340381917894711603833208051.15");
+        test(x.clone(), 3, "3138550867693340381917894711603833208051.149");
+        test(x.clone(), 4, "3138550867693340381917894711603833208051.149");
+
+        x = "3138550867693340381917894711603833208051.1499".into();
+        test(x.clone(), 0, "3138550867693340381917894711603833208051");
+        test(x.clone(), 1, "3138550867693340381917894711603833208051.1");
+        test(x.clone(), 2, "3138550867693340381917894711603833208051.15");
+        test(x.clone(), 3, "3138550867693340381917894711603833208051.15");
+        test(
+            x.clone(),
+            4,
+            "3138550867693340381917894711603833208051.1499",
+        );
+        test(
+            x.clone(),
+            5,
+            "3138550867693340381917894711603833208051.1499",
+        );
+
+        x = "3138550867693340381917894711603833208051.15".into();
+        test(x.clone(), 0, "3138550867693340381917894711603833208051");
+        test(x.clone(), 1, "3138550867693340381917894711603833208051.1");
+        test(x.clone(), 2, "3138550867693340381917894711603833208051.15");
+        test(x.clone(), 3, "3138550867693340381917894711603833208051.15");
+        test(x.clone(), 4, "3138550867693340381917894711603833208051.15");
+        test(x.clone(), 5, "3138550867693340381917894711603833208051.15");
+
+        x = "3138550867693340381917894711603833208051.15999".into();
+        test(x.clone(), 0, "3138550867693340381917894711603833208051");
+        test(x.clone(), 1, "3138550867693340381917894711603833208051.1");
+        test(x.clone(), 2, "3138550867693340381917894711603833208051.16");
+        test(x.clone(), 3, "3138550867693340381917894711603833208051.16");
+        test(x.clone(), 4, "3138550867693340381917894711603833208051.16");
+        test(
+            x.clone(),
+            5,
+            "3138550867693340381917894711603833208051.15999",
+        );
+        test(
+            x.clone(),
+            6,
+            "3138550867693340381917894711603833208051.15999",
+        );
     }
 }
 
