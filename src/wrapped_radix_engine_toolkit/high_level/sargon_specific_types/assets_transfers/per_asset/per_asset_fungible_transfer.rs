@@ -59,7 +59,7 @@ impl PerAssetFungibleTransfer {
 
     pub(crate) fn sample_mainnet_other() -> Self {
         Self::new(AssetsTransfersRecipient::ForeignAccount {
-            value: AccountAddress::from_str("account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69").unwrap() 
+            value: AccountAddress::from_str("account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69").unwrap()
         },
         true,
         Decimal192::from_str("987654.1234").unwrap())

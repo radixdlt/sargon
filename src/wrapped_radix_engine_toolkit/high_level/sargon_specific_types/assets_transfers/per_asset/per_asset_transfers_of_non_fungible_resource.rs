@@ -41,7 +41,7 @@ impl PerAssetTransfersOfNonFungibleResource {
 impl PerAssetTransfersOfNonFungibleResource {
     pub(crate) fn sample_mainnet() -> Self {
         Self::new(
-            ResourceAddress::sample_mainnet_xrd(),
+            NonFungibleResourceAddress::sample_mainnet(),
             [
                 PerAssetNonFungibleTransfer::sample_mainnet(),
                 PerAssetNonFungibleTransfer::sample_mainnet_other(),
@@ -51,14 +51,14 @@ impl PerAssetTransfersOfNonFungibleResource {
 
     pub(crate) fn sample_mainnet_other() -> Self {
         Self::new(
-            ResourceAddress::sample_mainnet_candy(),
+            NonFungibleResourceAddress::sample_mainnet_other(),
             [PerAssetNonFungibleTransfer::sample_mainnet_other()],
         )
     }
 
     pub(crate) fn sample_stokenet() -> Self {
         Self::new(
-            ResourceAddress::sample_stokenet_candy(),
+            NonFungibleResourceAddress::sample_stokenet(),
             [
                 PerAssetNonFungibleTransfer::sample_stokenet(),
                 PerAssetNonFungibleTransfer::sample_stokenet_other(),
@@ -68,7 +68,7 @@ impl PerAssetTransfersOfNonFungibleResource {
 
     pub(crate) fn sample_stokenet_other() -> Self {
         Self::new(
-            ResourceAddress::sample_stokenet_gum(),
+            NonFungibleResourceAddress::sample_stokenet_other(),
             [PerAssetNonFungibleTransfer::sample_stokenet_other()],
         )
     }
