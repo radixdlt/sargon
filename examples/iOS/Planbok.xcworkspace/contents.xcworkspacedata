@@ -49,6 +49,9 @@
                   location = "group:Swiftified"
                   name = "Swiftified">
                   <FileRef
+                     location = "group:NonFungibleResourceAddress+Swiftified.swift">
+                  </FileRef>
+                  <FileRef
                      location = "group:AccessControllerAddress+Swiftified.swift">
                   </FileRef>
                   <FileRef
@@ -83,9 +86,6 @@
                   </FileRef>
                   <FileRef
                      location = "group:NetworkID+Swiftified.swift">
-                  </FileRef>
-                  <FileRef
-                     location = "group:/Users/alexandercyon/Developer/Babylon/Sargon/apple/Sources/Sargon/Extensions/Swiftified/NonFungibleResourceAddress+Swiftified.swift">
                   </FileRef>
                   <FileRef
                      location = "group:PackageAddress+Swiftified.swift">

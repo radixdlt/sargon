@@ -50,7 +50,7 @@ public struct SelectGradientFeature {
 					let height: CGFloat = 20
 					ForEach(AppearanceID.allCases) { appearanceID in
 						let isSelected = appearanceID == store.state.gradient
-						Button.init(action: { send(.selectedGradient(appearanceID)) }, label: {
+						Button(action: { send(.selectedGradient(appearanceID)) }, label: {
 							HStack {
 								Text("Gradient \(String(describing: appearanceID))")
 									.font(isSelected ? .headline : .subheadline)
@@ -65,7 +65,7 @@ public struct SelectGradientFeature {
 								}
 							}
 						})
-						
+						.buttonStyle(.borderless)
 						.foregroundColor(.app.white)
 						.frame(maxWidth: .infinity, idealHeight: height, alignment: .leading)
 						.padding()

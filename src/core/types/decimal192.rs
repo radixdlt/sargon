@@ -763,10 +763,10 @@ fn split_str(s: impl AsRef<str>, after: i8) -> (String, String) {
 pub fn decimal_formatted(
     decimal: &Decimal192,
     locale: LocaleConfig,
-    decimal_places: u8,
+    total_places: u8,
     use_grouping_separator: bool,
 ) -> String {
-    decimal.formatted(locale, decimal_places, use_grouping_separator)
+    decimal.formatted(locale, total_places, use_grouping_separator)
 }
 
 /// A human readable, locale respecting string. Does not perform any rounding or truncation.
@@ -779,6 +779,23 @@ pub fn decimal_formatted_plain(
     decimal.formatted_plain(locale, use_grouping_separator)
 }
 
+/// Formats decimal using engineering notation: `5e20`.
+///
+/// If no `None` is passed to `total_places`, then
+/// `Self::MAX_PLACES_ENGINEERING_NOTATION` (4) will
+/// be used.
+///
+/// ```
+/// extern crate sargon;
+/// use sargon::prelude::*;
+/// #[allow(clippy::upper_case_acronyms)]
+/// type SUT = Decimal192;
+///
+/// assert_eq!(SUT::max().formatted_engineering_notation(LocaleConfig::default(), None), "3.138e39");
+/// assert_eq!(SUT::min().formatted_engineering_notation(LocaleConfig::default(), None), "-3.138e39");
+/// assert_eq!(SUT::MAX_PLACES_ENGINEERING_NOTATION, 4);
+/// ```
+///
 #[uniffi::export]
 pub fn decimal_formatted_engineering_notation(
     decimal: &Decimal192,
@@ -912,7 +929,7 @@ impl Decimal192 {
         format!("{}e{}", scaled.formatted_plain(locale, false), exponent)
     }
 
-    /// A human readable, locale respecting string, rounded to `decimal_places`
+    /// A human readable, locale respecting string, rounded to `total_places`
     /// places, counting all digits.
     ///
     /// ```
@@ -927,19 +944,19 @@ impl Decimal192 {
     pub fn formatted(
         &self,
         locale: LocaleConfig,
-        decimal_places: u8,
+        total_places: u8,
         use_grouping_separator: bool,
     ) -> String {
         let format = |number: Self| {
             number.formatted_plain(locale.clone(), use_grouping_separator)
         };
         let rounded_to_total_places =
-            self.rounded_to_total_places(decimal_places);
+            self.rounded_to_total_places(total_places);
 
         if let Some(multiplier) = rounded_to_total_places.multiplier() {
             let scaled = rounded_to_total_places / multiplier.value();
             let integer_count = scaled.digits().len() as u8 - Self::SCALE;
-            if integer_count > decimal_places {
+            if integer_count > total_places {
                 self.formatted_engineering_notation(
                     locale,
                     Self::MAX_PLACES_ENGINEERING_NOTATION,

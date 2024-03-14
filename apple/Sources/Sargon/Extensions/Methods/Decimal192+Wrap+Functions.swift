@@ -29,42 +29,30 @@ extension Decimal192 {
 }
 
 // MARK: Formatting
-extension Option<UInt> {
-	fileprivate var asU8: UInt8? {
-		if let value = self {
-		precondition(
-			value < UInt(UInt8.max),
-			"Must not specify more than \(UInt8.max) places, got: \(value).")
-			value
-		} else {
-			nil
-		}
-
-
-	}
-}
 extension Decimal192 {
 
 	/// A human readable, locale respecting string, rounded to `totalPlaces` places, counting all digits
 	public func formatted(
 		locale: Locale = .autoupdatingCurrent,
-		totalPlaces: UInt? = nil,
+		totalPlaces: UInt8,
 		useGroupingSeparator: Bool = true
 	) -> String {
 		decimalFormatted(
-			locale: LocaleConfig(locale: local),
-			totalPlaces: totalPlaces.asU8,
+			decimal: self,
+			locale: LocaleConfig(locale: locale),
+			totalPlaces: totalPlaces,
 			useGroupingSeparator: useGroupingSeparator
 		)
 	}
 
 	public func formattedEngineeringNotation(
 		locale: Locale = .autoupdatingCurrent,
-		totalPlaces: UInt? = nil
+		totalPlaces: UInt8? = nil
 	) -> String {
 		decimalFormattedEngineeringNotation(
-			locale: LocaleConfig(locale: local),
-			totalPlaces: totalPlaces.asU8
+			decimal: self,
+			locale: LocaleConfig(locale: locale),
+			totalPlaces: totalPlaces
 		)
 	}
 
@@ -74,7 +62,8 @@ extension Decimal192 {
 		useGroupingSeparator: Bool = true
 	) -> String {
 		decimalFormattedPlain(
-			locale: LocaleConfig(locale: local),
+			decimal: self,
+			locale: LocaleConfig(locale: locale),
 			useGroupingSeparator: useGroupingSeparator
 		)
 	}
@@ -91,7 +80,7 @@ extension Decimal192 {
 		do {
 			return try decimalRound(
 				decimal: self,
-				decimalPlaces: Int32(decimalPlaces),
+				decimalPlaces: decimalPlaces,
 				roundingMode: roundingMode
 			)
 		} catch {
