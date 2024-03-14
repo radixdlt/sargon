@@ -142,55 +142,236 @@ impl Decimal {
         value.parse()
     }
 
+    /// The number `0` as a `Decimal192`.
+    ///
+    /// ```
+    /// extern crate sargon;
+    /// use sargon::prelude::*;
+    ///
+    /// assert_eq!(Decimal192::zero().to_string(), "0");
+    /// ```
+    ///
     pub fn zero() -> Self {
         Self::from_native(ScryptoDecimal192::zero())
     }
 
+    /// The minimum possible value of `Decimal192`:
+    ///
+    /// ```
+    /// extern crate sargon;
+    /// use sargon::prelude::*;
+    ///
+    /// assert_eq!(Decimal192::min().to_string(), "-3138550867693340381917894711603833208051.177722232017256448");
+    /// ```
+    ///
     pub fn min() -> Self {
         Self::from_native(ScryptoDecimal192::MIN)
     }
 
+    /// The maximum possible value of `Decimal192`
+    ///
+    /// ```
+    /// extern crate sargon;
+    /// use sargon::prelude::*;
+    ///
+    /// assert_eq!(Decimal192::max().to_string(), "3138550867693340381917894711603833208051.177722232017256447");
+    /// ```
+    ///
     pub fn max() -> Self {
         Self::from_native(ScryptoDecimal192::MAX)
     }
 
+    /// The number `1` as a `Decimal192`.
+    ///
+    /// ```
+    /// extern crate sargon;
+    /// use sargon::prelude::*;
+    ///
+    /// assert_eq!(Decimal192::one().to_string(), "1");
+    /// ```
+    ///
     pub fn one() -> Self {
         Self::from_native(ScryptoDecimal192::one())
     }
 
+    /// The number `2` as a `Decimal192`.
+    ///
+    /// ```
+    /// extern crate sargon;
+    /// use sargon::prelude::*;
+    ///
+    /// assert_eq!(Decimal192::two().to_string(), "2");
+    /// ```
+    ///
     pub fn two() -> Self {
         Self::from_native(ScryptoDecimal192::from(2))
     }
 
+    /// The number `3` as a `Decimal192`.
+    ///
+    /// ```
+    /// extern crate sargon;
+    /// use sargon::prelude::*;
+    ///
+    /// assert_eq!(Decimal192::three().to_string(), "3");
+    /// ```
+    ///
     pub fn three() -> Self {
         Self::from_native(ScryptoDecimal192::from(3))
+    }
+
+    /// The number `4` as a `Decimal192`.
+    ///
+    /// ```
+    /// extern crate sargon;
+    /// use sargon::prelude::*;
+    ///
+    /// assert_eq!(Decimal192::four().to_string(), "4");
+    /// ```
+    ///
+    pub fn four() -> Self {
+        Self::from_native(ScryptoDecimal192::from(4))
+    }
+
+    /// The number `5` as a `Decimal192`.
+    ///
+    /// ```
+    /// extern crate sargon;
+    /// use sargon::prelude::*;
+    ///
+    /// assert_eq!(Decimal192::five().to_string(), "5");
+    /// ```
+    ///
+    pub fn five() -> Self {
+        Self::from_native(ScryptoDecimal192::from(5))
+    }
+
+    /// The number `6` as a `Decimal192`.
+    ///
+    /// ```
+    /// extern crate sargon;
+    /// use sargon::prelude::*;
+    ///
+    /// assert_eq!(Decimal192::six().to_string(), "6");
+    /// ```
+    ///
+    pub fn six() -> Self {
+        Self::from_native(ScryptoDecimal192::from(6))
+    }
+
+    /// The number `7` as a `Decimal192`.
+    ///
+    /// ```
+    /// extern crate sargon;
+    /// use sargon::prelude::*;
+    ///
+    /// assert_eq!(Decimal192::seven().to_string(), "7");
+    /// ```
+    ///
+    pub fn seven() -> Self {
+        Self::from_native(ScryptoDecimal192::from(7))
+    }
+
+    /// The number `8` as a `Decimal192`.
+    ///
+    /// ```
+    /// extern crate sargon;
+    /// use sargon::prelude::*;
+    ///
+    /// assert_eq!(Decimal192::eight().to_string(), "8");
+    /// ```
+    ///
+    pub fn eight() -> Self {
+        Self::from_native(ScryptoDecimal192::from(8))
+    }
+
+    /// The number `9` as a `Decimal192`.
+    ///
+    /// ```
+    /// extern crate sargon;
+    /// use sargon::prelude::*;
+    ///
+    /// assert_eq!(Decimal192::nine().to_string(), "9");
+    /// ```
+    ///
+    pub fn nine() -> Self {
+        Self::from_native(ScryptoDecimal192::from(9))
+    }
+
+    /// The number `10` as a `Decimal192`.
+    ///
+    /// ```
+    /// extern crate sargon;
+    /// use sargon::prelude::*;
+    ///
+    /// assert_eq!(Decimal192::ten().to_string(), "10");
+    /// ```
+    ///
+    pub fn ten() -> Self {
+        Self::from_native(ScryptoDecimal192::from(10))
     }
 }
 
 impl Add for Decimal {
     type Output = Self;
-    /// self + rhs
+    /// Addition: `self + rhs`
+    ///
+    /// ```
+    /// extern crate sargon;
+    /// use sargon::prelude::*;
+    ///
+    /// assert_eq!(Decimal::one().add(Decimal::two()), Decimal::three());
+    /// ```
+    ///
     fn add(self, rhs: Self) -> Self::Output {
         Self::from(self.native() + rhs.native())
     }
 }
 impl Sub for Decimal {
     type Output = Self;
-    /// self - rhs
+    /// Subtraction: `self - rhs`
+    ///
+    /// ```
+    /// extern crate sargon;
+    /// use sargon::prelude::*;
+    /// type SUT = Decimal;
+    ///
+    /// assert_eq!(SUT::three().sub(SUT::two()), SUT::one());
+    /// ```
+    ///
     fn sub(self, rhs: Self) -> Self::Output {
         Self::from(self.native() - rhs.native())
     }
 }
 impl Mul for Decimal {
     type Output = Self;
-    /// self * rhs
+    /// Multiplication: `self * rhs`
+    ///
+    /// ```
+    /// extern crate sargon;
+    /// use sargon::prelude::*;
+    /// type SUT = Decimal;
+    ///
+    /// assert_eq!(SUT::two().mul(SUT::three()), SUT::six());
+    /// ```
+    ///
     fn mul(self, rhs: Self) -> Self::Output {
         Self::from(self.native() * rhs.native())
     }
 }
 impl Div for Decimal {
     type Output = Self;
-    /// self / rhs
+    /// Division: `self / rhs`
+    ///
+    /// ```
+    /// extern crate sargon;
+    /// use sargon::prelude::*;
+    /// #[allow(clippy::upper_case_acronyms)]
+    /// type SUT = Decimal;
+    ///
+    /// assert_eq!(SUT::eight().div(SUT::four()), SUT::two());
+    /// ```
+    ///
     fn div(self, rhs: Self) -> Self::Output {
         Self::from(self.native() / rhs.native())
     }
@@ -199,7 +380,17 @@ impl Div for Decimal {
 impl Neg for Decimal {
     type Output = Self;
 
-    /// `-self`
+    /// Negates `self`
+    ///
+    /// ```
+    /// extern crate sargon;
+    /// use sargon::prelude::*;
+    /// #[allow(clippy::upper_case_acronyms)]
+    /// type SUT = Decimal;
+    ///
+    /// assert_eq!(SUT::five().neg().to_string(), "-5");
+    /// ```
+    ///
     fn neg(self) -> Self::Output {
         self.native().neg().into()
     }
@@ -209,38 +400,110 @@ impl Decimal {
     delegate! {
         to self.native() {
 
-            /// Whether this decimal is zero.
+            /// Whether this decimal is zero
+            ///
+            /// ```
+            /// extern crate sargon;
+            /// use sargon::prelude::*;
+            /// #[allow(clippy::upper_case_acronyms)]
+            /// type SUT = Decimal;
+            ///
+            /// assert!(SUT::zero().is_zero());
+            /// assert!(!SUT::one().is_zero());
+            /// assert!(!SUT::one().neg().is_zero());
+            /// ```
+            ///
             pub fn is_zero(&self) -> bool;
 
             /// Whether this decimal is positive.
+            ///
+            /// ```
+            /// extern crate sargon;
+            /// use sargon::prelude::*;
+            /// #[allow(clippy::upper_case_acronyms)]
+            /// type SUT = Decimal;
+            ///
+            /// assert!(SUT::one().is_positive());
+            /// assert!(!SUT::zero().is_positive());
+            /// assert!(!SUT::one().neg().is_positive());
+            /// ```
+            ///
             pub fn is_positive(&self) -> bool;
 
             /// Whether this decimal is negative.
+            ///
+            /// ```
+            /// extern crate sargon;
+            /// use sargon::prelude::*;
+            /// #[allow(clippy::upper_case_acronyms)]
+            /// type SUT = Decimal;
+            ///
+            /// assert!(SUT::one().neg().is_negative());
+            /// assert!(!SUT::one().is_negative());
+            /// assert!(!SUT::zero().is_negative());
+            /// ```
+            ///
             pub fn is_negative(&self) -> bool;
         }
     }
 }
 
 impl Decimal {
-    pub fn checked_powi(&self, exp: i64) -> Option<Self> {
+    /// Creates the Decimal `10^exponent`, returns `None` if overflows.
+    pub(crate) fn checked_powi(&self, exp: i64) -> Option<Self> {
         self.native().checked_powi(exp).map(|n| n.into())
     }
 
     /// Creates the Decimal `10^exponent`
+    ///
+    /// ```
+    /// extern crate sargon;
+    /// use sargon::prelude::*;
+    /// #[allow(clippy::upper_case_acronyms)]
+    /// type SUT = Decimal192;
+    ///
+    /// assert_eq!(SUT::pow(2).to_string(), "100");
+    /// assert_eq!(SUT::pow(3).to_string(), "1000");
+    /// ```
+    ///
     pub fn pow(exponent: u8) -> Self {
         Self::from(10)
             .checked_powi(exponent as i64)
             .expect("Too large exponent, 10^39 is max.")
     }
 
-    /// `abs(self)`
-    /// Panics if Self is Self::MIN.
+    /// Returns the absolute value.
+    ///
+    /// ```
+    /// extern crate sargon;
+    /// use sargon::prelude::*;
+    /// #[allow(clippy::upper_case_acronyms)]
+    /// type SUT = Decimal192;
+    ///
+    /// assert_eq!(SUT::two().neg().abs(), SUT::two());
+    /// assert_eq!(SUT::three().abs(), SUT::three());
+    /// assert_eq!(SUT::max().abs(), SUT::max());
+    /// ```
+    ///
+    /// # Panics
+    /// Panics if Self is `Self::min*(`.
+    ///
     pub fn abs(&self) -> Self {
         self.native().checked_abs().expect("Expected clients of Sargon to not use so large negative numbers (Self::MIN).").into()
     }
 
-    /// `max(self, 0)`, which is often called
-    /// "clamping to zero"
+    /// `max(self, 0)`, which is often called "clamping to zero"
+    ///
+    /// ```
+    /// extern crate sargon;
+    /// use sargon::prelude::*;
+    /// #[allow(clippy::upper_case_acronyms)]
+    /// type SUT = Decimal192;
+    ///
+    /// assert_eq!(SUT::one().neg().clamped_to_zero(), SUT::zero());
+    /// assert_eq!(SUT::two().clamped_to_zero(), SUT::two());
+    /// ```
+    ///
     pub fn clamped_to_zero(self) -> Self {
         if self.is_negative() {
             Self::zero()
@@ -392,6 +655,7 @@ impl Decimal192 {
     }
 }
 
+/// Million, Billion or Trillion, helper for Decimal192 formatting.
 #[derive(
     Serialize_repr,
     Deserialize_repr,
@@ -413,24 +677,30 @@ pub(crate) enum Multiplier {
     Billion = 9,
     Trillion = 12,
 }
+
 impl Multiplier {
     /// The exponent of this multiplier
     pub fn discriminant(&self) -> u8 {
         *self as u8
     }
+
+    /// The exponent of a `Multiplier`, i.e. `6` for `Million`.
     pub(crate) fn value(&self) -> Decimal192 {
         Decimal192::pow(self.discriminant())
     }
-    pub(crate) fn suffix(&self) -> String {
+
+    /// Symbol of a `Multiplier`, i.e. 'M' for `Million`.
+    pub(crate) fn suffix(&self) -> char {
         match self {
-            Self::Million => "M",
-            Self::Billion => "B",
-            Self::Trillion => "T",
+            Self::Million => 'M',
+            Self::Billion => 'B',
+            Self::Trillion => 'T',
         }
         .to_owned()
     }
 }
 
+/// Format decimal helper - counts '0' at end of `s`.
 fn trailing_zero_count_of(s: impl AsRef<str>) -> usize {
     let str = s.as_ref();
     str.chars()
@@ -441,6 +711,7 @@ fn trailing_zero_count_of(s: impl AsRef<str>) -> usize {
         .unwrap_or(str.len())
 }
 
+/// Format decimal helper - inserts `separator` at every `3` places.
 fn insert_grouping_separator_into(s: &mut String, separator: String) {
     let digits = s.len();
     let zeroes_per_thousand = 3;
@@ -457,13 +728,14 @@ fn insert_grouping_separator_into(s: &mut String, separator: String) {
     }
 }
 
+/// Format decimal helper - splits string after `after` if pos, else at 0.
 fn split_str(s: impl AsRef<str>, after: i8) -> (String, String) {
     let mut s = s.as_ref().to_owned();
     if after <= 0 {
-        return ("".to_owned(), s);
+        ("".to_owned(), s)
+    } else {
+        (s.drain(0..after as usize).collect(), s)
     }
-    let other: String = s.drain(0..after as usize).collect();
-    (other, s)
 }
 
 impl Decimal192 {
@@ -500,32 +772,19 @@ impl Decimal192 {
             }
         }
         if trailing_zero_count >= Self::SCALE as usize {
-            // println!("🔮🥓 No non-zero decimals, we only have an integer part");
             // No non-zero decimals, we only have an integer part
             format!("{}{}", sign, integer_part)
         } else {
             let zeros_to_pad = std::cmp::max(-integer_count, 0) as usize;
             let zeroes = "0".repeat(zeros_to_pad);
-            // println!("🔮 trailing_zero_count: '{}'", trailing_zero_count);
-            // println!("🔮 decimal_part: '{}'", decimal_part);
             decimal_part = decimal_part
                 .drain(0..decimal_part.len() - trailing_zero_count)
                 .collect();
-            // println!("🔮 AFTER decimal_part: '{}'", decimal_part);
 
-            let a = sign.to_owned();
-            let b = integer_part.clone();
-            let c = decimal_separator.clone();
-            let d = zeroes.clone();
-            let e = decimal_part.clone();
-            let res = format!("{}{}{}{}{}", a, b, c, d, e);
-            // println!("🔮 a: '{}'", a);
-            // println!("🔮 b: '{}'", b);
-            // println!("🔮 c: '{}'", c);
-            // println!("🔮 d: '{}'", d);
-            // println!("🔮 e: '{}'", e);
-            // println!("🔮 RES: {}", res);
-            res
+            format!(
+                "{}{}{}{}{}",
+                sign, integer_part, decimal_separator, zeroes, decimal_part
+            )
         }
     }
 
@@ -544,32 +803,18 @@ impl Decimal192 {
         locale: LocaleConfig,
         decimal_places: u8,
     ) -> String {
-        let rounded = self.rounded_n_digits(decimal_places);
+        let rounded = self.rounded_to_total_places(decimal_places);
         let integer_count = rounded.digits().len() as u8 - Self::SCALE;
         let exponent = integer_count - 1;
         let scaled = rounded / Self::pow(exponent);
-
-        // println!("🚀 engineer - decimal_places: '{}", &decimal_places);
-        // println!("🚀 engineer - rounded: '{}", &rounded);
-        // println!("🚀 engineer - rounded.digits(): '{}", &rounded.digits());
-        // println!("🚀 engineer - integerCount: '{}'", &integer_count);
-        // println!("🚀 engineer - exponent: '{}'", &exponent);
-        // println!("🚀 engineer - scaled: '{}'", &scaled);
-        // println!("🚀 engineer - scaled.digits(): '{}'", &scaled.digits());
-
-        let a = scaled.formatted_plain(locale, false);
-        let b = exponent;
-        // println!("🚀 engineer - a: '{}'", &a);
-        // println!("🚀 engineer - b: '{}'", &b);
-        let res = format!("{}e{}", a, b);
-        // println!("🚀 res: '{}'", &res);
-        res
+        format!("{}e{}", scaled.formatted_plain(locale, false), exponent)
     }
 }
 
 impl Decimal192 {
-    /// Rounds to `n` digits, counting both the integer and decimal parts, as well as any leading zeros
-    fn rounded_n_digits(&self, n: u8) -> Self {
+    /// Rounds `self`` to `n` places, counting both the integer and decimal parts,
+    /// as well as any leading zeros.
+    pub(crate) fn rounded_to_total_places(&self, n: u8) -> Self {
         let total_places = n;
         let digits = self.digits();
         // If we only have decimals, we will still count the 0 before the separator as an integer
@@ -587,18 +832,6 @@ impl Decimal192 {
     }
 }
 
-#[cfg(test)]
-#[test]
-fn do_test_formatted_engineering_notation() {
-    let test = |x: &str, n: u8, expected: &str| {
-        let a = Decimal192::from(x);
-        let actual = a.formatted_engineering_notation(LocaleConfig::us(), n);
-        assert_eq!(actual, expected);
-    };
-    test("111222111222111222333.222333", 18, "1.11222111222111222e20");
-    test("111222111222111222333.222333", 8, "1.1122211e20");
-}
-
 impl Decimal192 {
     /// A human readable, locale respecting string, rounded to `decimal_places` places, counting all digits
     pub fn formatted(
@@ -610,30 +843,19 @@ impl Decimal192 {
         let format = |number: Self| {
             number.formatted_plain(locale.clone(), use_grouping_separator)
         };
-        // println!("🌱 decimal_places: '{}'", &decimal_places);
-        let rounded_to_total_places = self.rounded_n_digits(decimal_places);
-        // println!("🌱 rounded_to_total_places: '{}'", &rounded_to_total_places);
+        let rounded_to_total_places =
+            self.rounded_to_total_places(decimal_places);
 
         if let Some(multiplier) = rounded_to_total_places.multiplier() {
-            // println!("✨ multiplier '{:?}'", &multiplier);
             let scaled = rounded_to_total_places / multiplier.value();
-            // println!("✨ scaled '{}'", &scaled);
             let integer_count = scaled.digits().len() as u8 - Self::SCALE;
-            // println!("✨ integer_count '{}'", &integer_count);
             if integer_count > decimal_places {
-                // println!("✨ USING ENGINEERING");
                 self.formatted_engineering_notation(
                     locale,
                     Self::MAX_PLACES_ENGINEERING_NOTATION,
                 )
             } else {
-                let a = format(scaled);
-                let b = multiplier.suffix();
-                let res = format!("{} {}", a, b);
-                // println!("✨ a '{}'", &a);
-                // println!("✨ b '{}'", &b);
-                // println!("✨ RES '{}'", &res);
-                res
+                format!("{} {}", format(scaled), multiplier.suffix())
             }
         } else {
             format(rounded_to_total_places)
@@ -1029,6 +1251,18 @@ mod test_decimal {
     fn from_negative_string() {
         let sut: SUT = "-3.2".parse().unwrap();
         assert_eq!(sut * sut, "10.24".parse().unwrap());
+    }
+
+    #[test]
+    fn test_formatted_engineering_notation() {
+        let test = |x: &str, n: u8, expected: &str| {
+            let a = Decimal192::from(x);
+            let actual =
+                a.formatted_engineering_notation(LocaleConfig::us(), n);
+            assert_eq!(actual, expected);
+        };
+        test("111222111222111222333.222333", 18, "1.11222111222111222e20");
+        test("111222111222111222333.222333", 8, "1.1122211e20");
     }
 
     #[test]

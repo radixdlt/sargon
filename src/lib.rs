@@ -37,7 +37,7 @@ pub mod prelude {
     pub(crate) use std::cmp::Ordering;
     pub(crate) use std::collections::BTreeMap;
     pub(crate) use std::fs;
-    pub(crate) use std::ops::{Add, AddAssign, Deref, Div, Mul, Neg, Sub};
+    pub use std::ops::{Add, AddAssign, Deref, Div, Mul, Neg, Sub};
     pub(crate) use std::str::FromStr;
     pub(crate) use std::sync::Arc;
 
