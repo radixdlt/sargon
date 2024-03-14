@@ -136,7 +136,7 @@ impl FromStr for NonFungibleLocalId {
 impl From<&str> for NonFungibleLocalId {
     /// TEST ONLY
     fn from(value: &str) -> Self {
-        value.parse().expect(&format!("Test failed since the passed in str is not a valid NonFungibleLocalId: '{}'", value))
+        value.parse().unwrap_or_else(|_| panic!("Test failed since the passed in str is not a valid NonFungibleLocalId: '{}'", value))
     }
 }
 

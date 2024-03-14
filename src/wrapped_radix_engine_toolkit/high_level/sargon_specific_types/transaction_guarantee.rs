@@ -5,7 +5,7 @@ pub struct TransactionGuarantee {
     amount: Decimal192,
     pub instruction_index: u64,
     pub resource_address: ResourceAddress,
-    pub resource_divisibility: Option<i32>,
+    pub resource_divisibility: Option<u8>,
 }
 
 impl TransactionGuarantee {
@@ -13,7 +13,7 @@ impl TransactionGuarantee {
         amount: impl Into<Decimal192>,
         instruction_index: u64,
         resource_address: ResourceAddress,
-        resource_divisibility: impl Into<Option<i32>>,
+        resource_divisibility: impl Into<Option<u8>>,
     ) -> Self {
         Self {
             amount: amount.into(),

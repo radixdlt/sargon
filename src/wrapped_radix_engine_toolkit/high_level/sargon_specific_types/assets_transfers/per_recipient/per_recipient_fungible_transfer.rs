@@ -5,7 +5,7 @@ impl PerRecipientFungibleTransfer {
         resource_address: ResourceAddress,
         amount: impl Into<Decimal192>,
         use_try_deposit_or_abort: bool,
-        divisibility: impl Into<Option<i32>>,
+        divisibility: impl Into<Option<u8>>,
     ) -> Self {
         Self {
             resource_address,

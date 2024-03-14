@@ -77,7 +77,7 @@ mod tests {
 
     #[test]
     fn to_from_scrypto() {
-        let roundtrip = |s: SUT| SUT::from(NotarySignature::from(s));
+        let roundtrip = |s: SUT| SUT::from(s);
         roundtrip(SUT::sample());
         roundtrip(SUT::sample_other());
     }

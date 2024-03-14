@@ -15,7 +15,7 @@ impl PerAssetFungibleTransfer {
 
     pub fn amount(
         &self,
-        divisibility: impl Into<Option<i32>>,
+        divisibility: impl Into<Option<u8>>,
     ) -> ScryptoDecimal192 {
         self.amount.round(divisibility).into()
     }

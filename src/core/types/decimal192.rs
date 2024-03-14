@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use delegate::delegate;
+use enum_iterator::reverse_all;
 
 /// UniFFI conversion for InnerDecimal using String as builtin.
 impl crate::UniffiCustomTypeConverter for ScryptoDecimal192 {
@@ -134,7 +135,8 @@ impl TryFrom<f32> for Decimal {
 }
 
 impl Decimal {
-    pub const SCALE: u32 = ScryptoDecimal192::SCALE;
+    pub const SCALE: u8 = ScryptoDecimal192::SCALE as u8;
+    pub const MAX_PLACES_ENGINEERING_NOTATION: u8 = 4;
 
     pub fn new(value: String) -> Result<Self> {
         value.parse()
@@ -293,7 +295,7 @@ impl Decimal {
     ///     "3138550867693340381917894711603833208051.177722232017".parse::<Decimal192>().unwrap()
     /// );
     /// assert_eq!(
-    ///     Decimal192::max().round(Decimal192::SCALE as i32),
+    ///     Decimal192::max().round(Decimal192::SCALE),
     ///     Decimal192::max()
     /// );
     /// assert_eq!(
@@ -308,9 +310,8 @@ impl Decimal {
     ///
     /// # Panics
     /// - Panic if the number of decimal places is not within [0..SCALE(=18)]
-    pub fn round(&self, decimal_places: impl Into<Option<i32>>) -> Self {
-        let decimal_places =
-            decimal_places.into().unwrap_or(Decimal192::SCALE as i32);
+    pub fn round(&self, decimal_places: impl Into<Option<u8>>) -> Self {
+        let decimal_places = decimal_places.into().unwrap_or(Decimal192::SCALE);
 
         self.round_with_mode(
             decimal_places,
@@ -328,11 +329,11 @@ impl Decimal {
     /// - Panic if the number of decimal places is not within [0..SCALE(=18)]
     pub fn round_with_mode(
         &self,
-        decimal_places: i32,
+        decimal_places: u8,
         rounding_mode: RoundingMode,
     ) -> Result<Self> {
         self.native()
-            .checked_round(decimal_places, rounding_mode.into())
+            .checked_round(decimal_places as i32, rounding_mode.into())
             .ok_or(CommonError::DecimalError)
             .map(Self::from)
     }
@@ -342,7 +343,7 @@ impl Decimal {
 impl From<&str> for Decimal192 {
     /// TEST ONLY
     fn from(value: &str) -> Self {
-        value.parse().expect(&format!("Test failed since the passed in str is not a valid Decimal192: '{}'", value))
+        value.parse().unwrap_or_else(|_| panic!("Test failed since the passed in str is not a valid Decimal192: '{}'", value))
     }
 }
 
@@ -388,6 +389,337 @@ impl Decimal192 {
         }
 
         string.parse::<Self>()
+    }
+}
+
+#[derive(
+    Serialize_repr,
+    Deserialize_repr,
+    FromRepr,
+    Clone,
+    Copy,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    PartialOrd,
+    Ord,
+    enum_iterator::Sequence,
+    uniffi::Enum,
+)]
+#[repr(u8)]
+pub(crate) enum Multiplier {
+    Million = 6,
+    Billion = 9,
+    Trillion = 12,
+}
+impl Multiplier {
+    /// The exponent of this multiplier
+    pub fn discriminant(&self) -> u8 {
+        *self as u8
+    }
+    pub(crate) fn value(&self) -> Decimal192 {
+        Decimal192::pow(self.discriminant())
+    }
+    pub(crate) fn suffix(&self) -> String {
+        match self {
+            Self::Million => "M",
+            Self::Billion => "B",
+            Self::Trillion => "T",
+        }
+        .to_owned()
+    }
+}
+
+fn trailing_zero_count_of(s: impl AsRef<str>) -> usize {
+    let str = s.as_ref();
+    str.chars()
+        .rev()
+        .enumerate()
+        .find(|x| x.1 != '0')
+        .map(|x| x.0)
+        .unwrap_or(str.len())
+}
+
+#[cfg(test)]
+#[test]
+fn test_trailing_zero_count_of() {
+    let test = |s: &str, exp: usize| assert_eq!(trailing_zero_count_of(s), exp);
+
+    test("", 0);
+    test("1", 0);
+    test("0", 1);
+    test("100", 2);
+    test("1001", 0);
+    test("90000", 4);
+    test("9000.0", 1);
+    test("9.000", 3);
+}
+
+fn insert_grouping_separator_into(s: &mut String, separator: String) {
+    let digits = s.len();
+    let zeroes_per_thousand = 3;
+    if digits <= zeroes_per_thousand {
+        return;
+    }
+    let number_of_separators_to_insert = (digits - 1) / zeroes_per_thousand;
+    if number_of_separators_to_insert == 0 {
+        return;
+    }
+    for i in 1..=number_of_separators_to_insert {
+        let idx = digits - zeroes_per_thousand * i;
+        s.insert_str(idx, &separator);
+    }
+}
+
+#[cfg(test)]
+#[test]
+fn test_insert_grouping_separator_into() {
+    let test_w = |s: &str, exp: &str, sep: char| {
+        let mut string = s.to_owned();
+        insert_grouping_separator_into(&mut string, sep.to_string());
+        assert_eq!(string, exp.to_owned())
+    };
+    let test = |s: &str, exp: &str| test_w(s, exp, ' ');
+
+    test("", "");
+    test("1", "1");
+    test("22", "22");
+    test("333", "333");
+    test("4444", "4 444");
+    test("123456789", "123 456 789");
+    test("12345678987654321", "12 345 678 987 654 321");
+
+    test_w("123456789", "123.456.789", '.');
+    test_w("123456789", "123,456,789", ',');
+}
+
+fn split_str(s: impl AsRef<str>, after: i8) -> (String, String) {
+    let mut s = s.as_ref().to_owned();
+    if after <= 0 {
+        return ("".to_owned(), s);
+    }
+    let other: String = s.drain(0..after as usize).collect();
+    (other, s)
+}
+
+#[cfg(test)]
+#[test]
+fn test_split_str() {
+    let test = |s: &str, a: i8, exp: (&str, &str)| {
+        let res = split_str(s, a);
+        assert_eq!(res.0, exp.0.to_string());
+        assert_eq!(res.1, exp.1.to_string());
+    };
+
+    test("12345.09876", -2, ("", "12345.09876"));
+
+    test("9.8", 0, ("", "9.8"));
+    test("9.8", 1, ("9", ".8"));
+    test("9.8", 2, ("9.", "8"));
+
+    test("3.1415", 0, ("", "3.1415"));
+    test("3.1415", 1, ("3", ".1415"));
+    test("3.1415", 2, ("3.", "1415"));
+
+    test("42.1828", 0, ("", "42.1828"));
+    test("42.1828", 1, ("4", "2.1828"));
+    test("42.1828", 2, ("42", ".1828"));
+    test("42.1828", 3, ("42.", "1828"));
+    test("42.1828", 4, ("42.1", "828"));
+    test("42.1828", 5, ("42.18", "28"));
+    test("42.1828", 6, ("42.182", "8"));
+    test("42.1828", 7, ("42.1828", ""));
+}
+
+#[cfg(test)]
+#[test]
+fn test_digits() {
+    let test = |s: &str, e: &str| {
+        let x = Decimal192::from(s);
+        assert_eq!(x.digits(), e);
+    };
+    test("1", "1000000000000000000");
+    test("1.2", "1200000000000000000");
+    test("123456789.098765432105", "123456789098765432105000000");
+    test(
+        "123456789.098765432105000098",
+        "123456789098765432105000098",
+    );
+}
+
+impl Decimal192 {
+    /// A human readable, locale respecting string. Does not perform any rounding or truncation.
+    pub fn formatted_plain(
+        &self,
+        locale: LocaleConfig,
+        use_grouping_separator: bool,
+    ) -> String {
+        if self.is_zero() {
+            return 0.to_string();
+        }
+
+        let sign = if self.is_negative() { "-" } else { "" };
+        let decimal_separator =
+            locale.decimal_separator.unwrap_or(".".to_owned());
+        let digits = self.digits();
+        let integer_count = digits.len() as i8 - Self::SCALE as i8;
+
+        let trailing_zero_count = trailing_zero_count_of(digits.clone());
+
+        let (mut integer_part, mut decimal_part) =
+            split_str(digits, integer_count);
+
+        if integer_count <= 0 {
+            // If we don't have any integers, we just use "0"
+            integer_part = "0".to_owned();
+        } else if use_grouping_separator {
+            if let Some(grouping_separator) = locale.grouping_separator {
+                insert_grouping_separator_into(
+                    &mut integer_part,
+                    grouping_separator,
+                )
+            }
+        }
+        if trailing_zero_count >= Self::SCALE as usize {
+            // println!("🔮🥓 No non-zero decimals, we only have an integer part");
+            // No non-zero decimals, we only have an integer part
+            format!("{}{}", sign, integer_part)
+        } else {
+            let zeros_to_pad = std::cmp::max(-integer_count, 0) as usize;
+            let zeroes = "0".repeat(zeros_to_pad);
+            // println!("🔮 trailing_zero_count: '{}'", trailing_zero_count);
+            // println!("🔮 decimal_part: '{}'", decimal_part);
+            decimal_part = decimal_part
+                .drain(0..decimal_part.len() - trailing_zero_count)
+                .collect();
+            // println!("🔮 AFTER decimal_part: '{}'", decimal_part);
+
+            let a = sign.to_owned();
+            let b = integer_part.clone();
+            let c = decimal_separator.clone();
+            let d = zeroes.clone();
+            let e = decimal_part.clone();
+            let res = format!("{}{}{}{}{}", a, b, c, d, e);
+            // println!("🔮 a: '{}'", a);
+            // println!("🔮 b: '{}'", b);
+            // println!("🔮 c: '{}'", c);
+            // println!("🔮 d: '{}'", d);
+            // println!("🔮 e: '{}'", e);
+            // println!("🔮 RES: {}", res);
+            res
+        }
+    }
+
+    pub(crate) fn multiplier(&self) -> Option<Multiplier> {
+        let abs = self.abs();
+        reverse_all::<Multiplier>().find(|x| x.value() <= abs)
+    }
+
+    /// The digits of the number, without separators or sign. The scale is fixed at 18, meaning the last 18 digits correspond to the decimal part.
+    pub fn digits(&self) -> String {
+        self.abs().secret_magic.0.to_string() // mantissa
+    }
+
+    pub fn formatted_engineering_notation(
+        &self,
+        locale: LocaleConfig,
+        decimal_places: u8,
+    ) -> String {
+        let rounded = self.rounded_n_digits(decimal_places);
+        let integer_count = rounded.digits().len() as u8 - Self::SCALE;
+        let exponent = integer_count - 1;
+        let scaled = rounded / Self::pow(exponent);
+
+        // println!("🚀 engineer - decimal_places: '{}", &decimal_places);
+        // println!("🚀 engineer - rounded: '{}", &rounded);
+        // println!("🚀 engineer - rounded.digits(): '{}", &rounded.digits());
+        // println!("🚀 engineer - integerCount: '{}'", &integer_count);
+        // println!("🚀 engineer - exponent: '{}'", &exponent);
+        // println!("🚀 engineer - scaled: '{}'", &scaled);
+        // println!("🚀 engineer - scaled.digits(): '{}'", &scaled.digits());
+
+        let a = scaled.formatted_plain(locale, false);
+        let b = exponent;
+        // println!("🚀 engineer - a: '{}'", &a);
+        // println!("🚀 engineer - b: '{}'", &b);
+        let res = format!("{}e{}", a, b);
+        // println!("🚀 res: '{}'", &res);
+        res
+    }
+}
+
+impl Decimal192 {
+    /// Rounds to `n` digits, counting both the integer and decimal parts, as well as any leading zeros
+    fn rounded_n_digits(&self, n: u8) -> Self {
+        let total_places = n;
+        let digits = self.digits();
+        // If we only have decimals, we will still count the 0 before the separator as an integer
+        let integer_count =
+            std::cmp::max(digits.len() as i8 - Self::SCALE as i8, 1) as u8;
+
+        if integer_count > total_places {
+            let scale = Self::pow(integer_count - total_places);
+            (*self / scale).round(0) * scale
+        } else {
+            // The remaining digits are decimals and we keep up to totalPlaces of them
+            let decimals_to_keep = total_places - integer_count;
+            self.round(decimals_to_keep)
+        }
+    }
+}
+
+#[cfg(test)]
+#[test]
+fn do_test_formatted_engineering_notation() {
+    let test = |x: &str, n: u8, expected: &str| {
+        let a = Decimal192::from(x);
+        let actual = a.formatted_engineering_notation(LocaleConfig::us(), n);
+        assert_eq!(actual, expected);
+    };
+    test("111222111222111222333.222333", 18, "1.11222111222111222e20");
+    test("111222111222111222333.222333", 8, "1.1122211e20");
+}
+
+impl Decimal192 {
+    /// A human readable, locale respecting string, rounded to `decimal_places` places, counting all digits
+    pub fn formatted(
+        &self,
+        locale: LocaleConfig,
+        decimal_places: u8,
+        use_grouping_separator: bool,
+    ) -> String {
+        let format = |number: Self| {
+            number.formatted_plain(locale.clone(), use_grouping_separator)
+        };
+        // println!("🌱 decimal_places: '{}'", &decimal_places);
+        let rounded_to_total_places = self.rounded_n_digits(decimal_places);
+        // println!("🌱 rounded_to_total_places: '{}'", &rounded_to_total_places);
+
+        if let Some(multiplier) = rounded_to_total_places.multiplier() {
+            // println!("✨ multiplier '{:?}'", &multiplier);
+            let scaled = rounded_to_total_places / multiplier.value();
+            // println!("✨ scaled '{}'", &scaled);
+            let integer_count = scaled.digits().len() as u8 - Self::SCALE;
+            // println!("✨ integer_count '{}'", &integer_count);
+            if integer_count > decimal_places {
+                // println!("✨ USING ENGINEERING");
+                self.formatted_engineering_notation(
+                    locale,
+                    Self::MAX_PLACES_ENGINEERING_NOTATION,
+                )
+            } else {
+                let a = format(scaled);
+                let b = multiplier.suffix();
+                let res = format!("{} {}", a, b);
+                // println!("✨ a '{}'", &a);
+                // println!("✨ b '{}'", &b);
+                // println!("✨ RES '{}'", &res);
+                res
+            }
+        } else {
+            format(rounded_to_total_places)
+        }
     }
 }
 
@@ -582,7 +914,7 @@ pub fn decimal_clamped_to_zero(decimal: &Decimal192) -> Decimal192 {
 #[uniffi::export]
 pub fn decimal_round(
     decimal: &Decimal192,
-    decimal_places: i32,
+    decimal_places: u8,
     rounding_mode: RoundingMode,
 ) -> Result<Decimal192> {
     decimal.round_with_mode(decimal_places, rounding_mode)
@@ -724,7 +1056,7 @@ mod test_decimal {
     #[test]
     fn display() {
         let s = "3138550867693340381917894711603833208051.177722232017256447";
-        let a: Decimal192 = s.try_into().unwrap();
+        let a: Decimal192 = s.into();
         assert_eq!(format!("{}", a), s);
     }
 
@@ -732,8 +1064,7 @@ mod test_decimal {
     fn json_roundtrip() {
         let a: Decimal192 =
             "3138550867693340381917894711603833208051.177722232017256447"
-                .try_into()
-                .unwrap();
+                .into();
 
         assert_json_value_eq_after_roundtrip(
             &a,
@@ -830,152 +1161,329 @@ mod test_decimal {
 
     #[test]
     fn round() {
-        let test = |x: SUT, d: i32, y: &str| {
+        let test = |x: SUT, d: u8, y: &str| {
             assert_eq!(x.round(d), y.into());
         };
 
         let mut x = SUT::max();
 
         test(
-            x.clone(),
+            x,
             18,
             "3138550867693340381917894711603833208051.177722232017256447",
         );
         test(
-            x.clone(),
+            x,
             17,
             "3138550867693340381917894711603833208051.17772223201725644",
         );
         test(
-            x.clone(),
+            x,
             16,
             "3138550867693340381917894711603833208051.1777222320172564",
         );
         test(
-            x.clone(),
+            x,
             15,
             "3138550867693340381917894711603833208051.177722232017256",
         );
         test(
-            x.clone(),
+            x,
             14,
             "3138550867693340381917894711603833208051.17772223201725",
         );
         test(
-            x.clone(),
+            x,
             13,
             "3138550867693340381917894711603833208051.1777222320172",
         );
         test(
-            x.clone(),
+            x,
             12,
             "3138550867693340381917894711603833208051.177722232017",
         );
         test(
-            x.clone(),
+            x,
             11,
             "3138550867693340381917894711603833208051.17772223201",
         );
-        test(
-            x.clone(),
-            10,
-            "3138550867693340381917894711603833208051.1777222320",
-        );
-        test(
-            x.clone(),
-            9,
-            "3138550867693340381917894711603833208051.177722232",
-        );
-        test(
-            x.clone(),
-            8,
-            "3138550867693340381917894711603833208051.17772223",
-        );
-        test(
-            x.clone(),
-            7,
-            "3138550867693340381917894711603833208051.1777222",
-        );
-        test(
-            x.clone(),
-            6,
-            "3138550867693340381917894711603833208051.177722",
-        );
-        test(
-            x.clone(),
-            5,
-            "3138550867693340381917894711603833208051.17772",
-        );
-        test(
-            x.clone(),
-            4,
-            "3138550867693340381917894711603833208051.1777",
-        );
-        test(x.clone(), 3, "3138550867693340381917894711603833208051.177");
-        test(x.clone(), 2, "3138550867693340381917894711603833208051.17");
-        test(x.clone(), 1, "3138550867693340381917894711603833208051.1");
-        test(x.clone(), 0, "3138550867693340381917894711603833208051");
+        test(x, 10, "3138550867693340381917894711603833208051.1777222320");
+        test(x, 9, "3138550867693340381917894711603833208051.177722232");
+        test(x, 8, "3138550867693340381917894711603833208051.17772223");
+        test(x, 7, "3138550867693340381917894711603833208051.1777222");
+        test(x, 6, "3138550867693340381917894711603833208051.177722");
+        test(x, 5, "3138550867693340381917894711603833208051.17772");
+        test(x, 4, "3138550867693340381917894711603833208051.1777");
+        test(x, 3, "3138550867693340381917894711603833208051.177");
+        test(x, 2, "3138550867693340381917894711603833208051.17");
+        test(x, 1, "3138550867693340381917894711603833208051.1");
+        test(x, 0, "3138550867693340381917894711603833208051");
 
         x = "3138550867693340381917894711603833208051.14".into();
-        test(x.clone(), 0, "3138550867693340381917894711603833208051");
-        test(x.clone(), 1, "3138550867693340381917894711603833208051.1");
-        test(x.clone(), 2, "3138550867693340381917894711603833208051.14");
-        test(x.clone(), 3, "3138550867693340381917894711603833208051.14");
+        test(x, 0, "3138550867693340381917894711603833208051");
+        test(x, 1, "3138550867693340381917894711603833208051.1");
+        test(x, 2, "3138550867693340381917894711603833208051.14");
+        test(x, 3, "3138550867693340381917894711603833208051.14");
 
         x = "3138550867693340381917894711603833208051.148".into();
-        test(x.clone(), 0, "3138550867693340381917894711603833208051");
-        test(x.clone(), 1, "3138550867693340381917894711603833208051.1");
-        test(x.clone(), 2, "3138550867693340381917894711603833208051.15");
-        test(x.clone(), 3, "3138550867693340381917894711603833208051.148");
-        test(x.clone(), 4, "3138550867693340381917894711603833208051.148");
+        test(x, 0, "3138550867693340381917894711603833208051");
+        test(x, 1, "3138550867693340381917894711603833208051.1");
+        test(x, 2, "3138550867693340381917894711603833208051.15");
+        test(x, 3, "3138550867693340381917894711603833208051.148");
+        test(x, 4, "3138550867693340381917894711603833208051.148");
 
         x = "3138550867693340381917894711603833208051.149".into();
-        test(x.clone(), 0, "3138550867693340381917894711603833208051");
-        test(x.clone(), 1, "3138550867693340381917894711603833208051.1");
-        test(x.clone(), 2, "3138550867693340381917894711603833208051.15");
-        test(x.clone(), 3, "3138550867693340381917894711603833208051.149");
-        test(x.clone(), 4, "3138550867693340381917894711603833208051.149");
+        test(x, 0, "3138550867693340381917894711603833208051");
+        test(x, 1, "3138550867693340381917894711603833208051.1");
+        test(x, 2, "3138550867693340381917894711603833208051.15");
+        test(x, 3, "3138550867693340381917894711603833208051.149");
+        test(x, 4, "3138550867693340381917894711603833208051.149");
 
         x = "3138550867693340381917894711603833208051.1499".into();
-        test(x.clone(), 0, "3138550867693340381917894711603833208051");
-        test(x.clone(), 1, "3138550867693340381917894711603833208051.1");
-        test(x.clone(), 2, "3138550867693340381917894711603833208051.15");
-        test(x.clone(), 3, "3138550867693340381917894711603833208051.15");
-        test(
-            x.clone(),
-            4,
-            "3138550867693340381917894711603833208051.1499",
-        );
-        test(
-            x.clone(),
-            5,
-            "3138550867693340381917894711603833208051.1499",
-        );
+        test(x, 0, "3138550867693340381917894711603833208051");
+        test(x, 1, "3138550867693340381917894711603833208051.1");
+        test(x, 2, "3138550867693340381917894711603833208051.15");
+        test(x, 3, "3138550867693340381917894711603833208051.15");
+        test(x, 4, "3138550867693340381917894711603833208051.1499");
+        test(x, 5, "3138550867693340381917894711603833208051.1499");
 
         x = "3138550867693340381917894711603833208051.15".into();
-        test(x.clone(), 0, "3138550867693340381917894711603833208051");
-        test(x.clone(), 1, "3138550867693340381917894711603833208051.1");
-        test(x.clone(), 2, "3138550867693340381917894711603833208051.15");
-        test(x.clone(), 3, "3138550867693340381917894711603833208051.15");
-        test(x.clone(), 4, "3138550867693340381917894711603833208051.15");
-        test(x.clone(), 5, "3138550867693340381917894711603833208051.15");
+        test(x, 0, "3138550867693340381917894711603833208051");
+        test(x, 1, "3138550867693340381917894711603833208051.1");
+        test(x, 2, "3138550867693340381917894711603833208051.15");
+        test(x, 3, "3138550867693340381917894711603833208051.15");
+        test(x, 4, "3138550867693340381917894711603833208051.15");
+        test(x, 5, "3138550867693340381917894711603833208051.15");
 
         x = "3138550867693340381917894711603833208051.15999".into();
-        test(x.clone(), 0, "3138550867693340381917894711603833208051");
-        test(x.clone(), 1, "3138550867693340381917894711603833208051.1");
-        test(x.clone(), 2, "3138550867693340381917894711603833208051.16");
-        test(x.clone(), 3, "3138550867693340381917894711603833208051.16");
-        test(x.clone(), 4, "3138550867693340381917894711603833208051.16");
-        test(
-            x.clone(),
-            5,
-            "3138550867693340381917894711603833208051.15999",
-        );
-        test(
-            x.clone(),
-            6,
-            "3138550867693340381917894711603833208051.15999",
-        );
+        test(x, 0, "3138550867693340381917894711603833208051");
+        test(x, 1, "3138550867693340381917894711603833208051.1");
+        test(x, 2, "3138550867693340381917894711603833208051.16");
+        test(x, 3, "3138550867693340381917894711603833208051.16");
+        test(x, 4, "3138550867693340381917894711603833208051.16");
+        test(x, 5, "3138550867693340381917894711603833208051.15999");
+        test(x, 6, "3138550867693340381917894711603833208051.15999");
+    }
+
+    #[test]
+    fn format_decimal() {
+        let test = |x: &str, exp: &str| {
+            let locale = LocaleConfig::us();
+            let decimal: Decimal192 = x.into();
+            let actual = decimal.formatted(locale, 8, false);
+            assert_eq!(actual, exp);
+        };
+
+        test("0.009999999999999", "0.01");
+        test("12341234", "12.341234 M");
+        test("1234123.4", "1.2341234 M");
+        test("123456.34", "123456.34");
+        test("12345.234", "12345.234");
+        test("1234.1234", "1234.1234");
+        test("123.41234", "123.41234");
+        test("12.341234", "12.341234");
+        test("1.2341234", "1.2341234");
+
+        test("0.1234123", "0.1234123");
+        test("0.0234123", "0.0234123");
+        test("0.0034123", "0.0034123");
+        test("0.0004123", "0.0004123");
+        test("0.0000123", "0.0000123");
+        test("0.0000023", "0.0000023");
+        test("0.0000003", "0.0000003");
+
+        test("1234123.44", "1.2341234 M");
+        test("123456.344", "123456.34");
+        test("12345.2344", "12345.234");
+        test("1234.12344", "1234.1234");
+        test("123.412344", "123.41234");
+        test("12.3412344", "12.341234");
+        test("1.23412344", "1.2341234");
+
+        test("0.12341234", "0.1234123");
+        test("0.02341234", "0.0234123");
+        test("0.00341234", "0.0034123");
+        test("0.00041234", "0.0004123");
+        test("0.00001234", "0.0000123");
+        test("0.00000234", "0.0000023");
+        test("0.00000034", "0.0000003");
+
+        test("9999999.99", "10 M");
+        test("999999.999", "1 M");
+        test("99999.9999", "100000");
+        test("9999.99999", "10000");
+        test("999.999999", "1000");
+        test("99.9999999", "100");
+        test("9.99999999", "10");
+
+        test("0.99999999", "1");
+        test("0.09999999", "0.1");
+        test("0.00999999", "0.01");
+        test("0.00099999", "0.001");
+        test("0.00009999", "0.0001");
+        test("0.00000999", "0.00001");
+        test("0.00000099", "0.000001");
+        test("0.00000009", "0.0000001");
+
+        test("0.000000009", "0");
+
+        test("12.3456789", "12.345679");
+
+        test("0.123456789", "0.1234568");
+        test("0.4321", "0.4321");
+        test("0.0000000000001", "0");
+        test("0.9999999999999", "1");
+        test("1000", "1000");
+        test("1000.01", "1000.01");
+        test("1000.123456789", "1000.1235");
+        test("1000000.1234", "1.0000001 M");
+        test("10000000.1234", "10 M");
+        test("10000000.5234", "10.000001 M");
+        test("999.999999999943", "1000");
+
+        test("-0.123456789", "-0.1234568");
+        test("-0.4321", "-0.4321");
+        test("-0.0000000000001", "0");
+        test("-0.9999999999999", "-1");
+        test("-1000", "-1000");
+        test("-1000.01", "-1000.01");
+        test("-1000.123456789", "-1000.1235");
+        test("-1000000.1234", "-1.0000001 M");
+        test("-10000000.1234", "-10 M");
+        test("-10000000.5234", "-10.000001 M");
+        test("-999.999999999943", "-1000");
+
+        // No suffix
+        test("1.112221112221112223", "1.1122211");
+        test("11.12221112221112223", "11.122211");
+        test("111.2221112221112223", "111.22211");
+        test("1112.221112221112223", "1112.2211");
+        test("11122.21112221112223", "11122.211");
+        test("111222.1112221112223", "111222.11");
+
+        // Million
+        test("1112221.112221112223332223", "1.1122211 M");
+        test("11122211.12221112223332223", "11.122211 M");
+        test("111222111.2221112223332223", "111.22211 M");
+
+        // Billion
+        test("1112221112.22111222333222333", "1.1122211 B");
+        test("11122211122.2111222333222333", "11.122211 B");
+        test("111222111222.111222333222333", "111.22211 B");
+
+        // Trillion
+        test("1112221112221.11222333222333", "1.1122211 T");
+        test("11122211122211.1222333222333", "11.122211 T");
+        test("111222111222111.222333222333", "111.22211 T");
+        test("1112221112221112.22333222333", "1112.2211 T");
+        test("11122211122211122.2333222333", "11122.211 T");
+        test("111222111222111222.333222333", "111222.11 T");
+        test("1112221112221112223.33222333", "1112221.1 T");
+        test("11122211122211122233.3222333", "11122211 T");
+
+        // Too large, we have to use engineering notation
+        test("111222111222111222333.222333", "1.112e20");
+        test("1112221112221112223332.22333", "1.112e21");
+        test("11122211122211122233322.2333", "1.112e22");
+        test("111222111222111222333222.333", "1.112e23");
+        test("1112221112221112223332223.33", "1.112e24");
+        test("11122211122211122233322233.3", "1.112e25");
+        test("111222111222111222333222333", "1.112e26");
+
+        test("999999999999999999999.922333", "1e21");
+        test("9999999999999999999999.92333", "1e22");
+        test("99999999999999999999999.9333", "1e23");
+        test("999999999999999999999999.933", "1e24");
+        test("9999999999999999999999999.93", "1e25");
+        test("99999999999999999999999999.9", "1e26");
+        test("999999999999999999999999999", "1e27");
+
+        test("99999994", "99.999994 M");
+        test("999999956", "999.99996 M");
+
+        test("9999999462", "9.9999995 B");
+        test("100123454", "100.12345 M");
+        test("1000123446", "1.0001234 B");
+        test("10001234462", "10.001234 B");
+
+        test("100123456", "100.12346 M");
+        test("1000123450", "1.0001235 B");
+        test("10000123500", "10.000124 B");
+
+        test("9999999900", "9.9999999 B");
+        test("9999999900", "9.9999999 B");
+        test("9999999900", "9.9999999 B");
+        test("9999999500", "9.9999995 B");
+        test("9999999400", "9.9999994 B");
+        test("9999999000", "9.999999 B");
+
+        test("10000012445.678", "10.000012 B");
+        test("10000012445.678", "10.000012 B");
+        test("10000012445.678", "10.000012 B");
+        test("10000002445.678", "10.000002 B");
+        test("10000002445.678", "10.000002 B");
+
+        test("10000012545.678", "10.000013 B");
+        test("10000012545.678", "10.000013 B");
+        test("10000012545.678", "10.000013 B");
+        test("10000002545.678", "10.000003 B");
+        test("10000002545.678", "10.000003 B");
+        test("10000000055.678", "10 B");
+
+        test("999999999900.00", "1 T");
+        test("999999999000.00", "1 T");
+        test("999999990000.00", "999.99999 B");
+        test("999999950000.00", "999.99995 B");
+        test("999999940000.00", "999.99994 B");
+        test("999999900000.00", "999.9999 B");
+
+        test("9999999999900.00", "10 T");
+        test("9999999999000.00", "10 T");
+        test("9999999990000.00", "10 T");
+        test("9999999950000.00", "10 T");
+        test("9999999940000.00", "9.9999999 T");
+        test("9999999900000.00", "9.9999999 T");
+
+        test("10000012445678.9", "10.000012 T");
+        test("10000012445678.92", "10.000012 T");
+        test("10000012445678.923", "10.000012 T");
+        test("10000002445678.9", "10.000002 T");
+        test("10000000445678.92", "10 T");
+        test("10000000045678.923", "10 T");
+
+        test("10000012545678", "10.000013 T");
+        test("10000012545678.2", "10.000013 T");
+        test("10000012545678.23", "10.000013 T");
+        test("10000002545678", "10.000003 T");
+        test("10000002545678.2", "10.000003 T");
+        test("10000000055678.23", "10 T");
+
+        test("01434.234", "1434.234");
+        test("1434.234", "1434.234");
+        test("112.234", "112.234");
+        test("12.234", "12.234");
+        test("1.234", "1.234");
+        test("0.01", "0.01");
+        test("0.001", "0.001");
+        test("0.00100", "0.001");
+        test("0.001000", "0.001");
+
+        test("57896044618.658097719968", "57.896045 B");
+        test("1000000000.1", "1 B");
+        test("999999999.1", "1 B");
+        test("1000000000", "1 B");
+
+        test("1000.1234", "1000.1234");
+        test("1000.5", "1000.5");
+        test("0.12345674", "0.1234567");
+        test("0.12345675", "0.1234568");
+        test("0.4321", "0.4321");
+        test("0.99999999999999999", "1");
+        test("0.00000000000000001", "0");
+        test("0", "0");
+        test("1", "1");
+        test("0.0", "0");
+        test("1.0", "1");
     }
 }
 
