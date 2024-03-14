@@ -323,6 +323,7 @@ impl Add for Decimal {
     /// assert_eq!(Decimal::one().add(Decimal::two()), Decimal::three());
     /// ```
     ///
+    #[inline]
     fn add(self, rhs: Self) -> Self::Output {
         Self::from(self.native() + rhs.native())
     }
@@ -339,6 +340,7 @@ impl Sub for Decimal {
     /// assert_eq!(SUT::three().sub(SUT::two()), SUT::one());
     /// ```
     ///
+    #[inline]
     fn sub(self, rhs: Self) -> Self::Output {
         Self::from(self.native() - rhs.native())
     }
@@ -355,8 +357,17 @@ impl Mul for Decimal {
     /// assert_eq!(SUT::two().mul(SUT::three()), SUT::six());
     /// ```
     ///
+    #[inline]
     fn mul(self, rhs: Self) -> Self::Output {
         Self::from(self.native() * rhs.native())
+    }
+}
+impl ScryptoCheckedMul for Decimal {
+    type Output = Self;
+
+    #[inline]
+    fn checked_mul(self, other: Self) -> Option<Self> {
+        self.native().checked_mul(other.native()).map(Self::from)
     }
 }
 impl Div for Decimal {
@@ -372,6 +383,7 @@ impl Div for Decimal {
     /// assert_eq!(SUT::eight().div(SUT::four()), SUT::two());
     /// ```
     ///
+    #[inline]
     fn div(self, rhs: Self) -> Self::Output {
         Self::from(self.native() / rhs.native())
     }
@@ -391,6 +403,7 @@ impl Neg for Decimal {
     /// assert_eq!(SUT::five().neg().to_string(), "-5");
     /// ```
     ///
+    #[inline]
     fn neg(self) -> Self::Output {
         self.native().neg().into()
     }
@@ -450,6 +463,7 @@ impl Decimal {
 
 impl Decimal {
     /// Creates the Decimal `10^exponent`, returns `None` if overflows.
+    #[inline]
     pub(crate) fn checked_powi(&self, exp: i64) -> Option<Self> {
         self.native().checked_powi(exp).map(|n| n.into())
     }
@@ -466,13 +480,15 @@ impl Decimal {
     /// assert_eq!(SUT::pow(3).to_string(), "1000");
     /// ```
     ///
+    #[inline]
     pub fn pow(exponent: u8) -> Self {
         Self::from(10)
             .checked_powi(exponent as i64)
             .expect("Too large exponent, 10^39 is max.")
     }
 
-    /// Returns the absolute value.
+    /// Returns the absolute value, if `self` is `Decimal::min()` then `Decimal::max()`
+    /// is returned, since `Decimal::min().abs()` would overflow.
     ///
     /// ```
     /// extern crate sargon;
@@ -485,11 +501,16 @@ impl Decimal {
     /// assert_eq!(SUT::max().abs(), SUT::max());
     /// ```
     ///
-    /// # Panics
-    /// Panics if Self is `Self::min*(`.
-    ///
+    #[inline]
     pub fn abs(&self) -> Self {
-        self.native().checked_abs().expect("Expected clients of Sargon to not use so large negative numbers (Self::MIN).").into()
+        if self == &Self::min() {
+            Self::max()
+        } else {
+            self.native()
+                .checked_abs()
+                .expect("Should never fail")
+                .into()
+        }
     }
 
     /// `max(self, 0)`, which is often called "clamping to zero"
@@ -738,6 +759,77 @@ fn split_str(s: impl AsRef<str>, after: i8) -> (String, String) {
     }
 }
 
+#[uniffi::export]
+pub fn decimal_formatted(
+    decimal: Decimal192,
+    locale: LocaleConfig,
+    decimal_places: u8,
+    use_grouping_separator: bool,
+) -> String {
+    decimal.formatted(locale, decimal_places, use_grouping_separator)
+}
+
+/// A human readable, locale respecting string. Does not perform any rounding or truncation.
+#[uniffi::export]
+pub fn decimal_formatted_plain(
+    decimal: Decimal192,
+    locale: LocaleConfig,
+    use_grouping_separator: bool,
+) -> String {
+    decimal.formatted_plain(locale, use_grouping_separator)
+}
+
+#[uniffi::export]
+pub fn decimal_formatted_engineering_notation(
+    decimal: Decimal192,
+    locale: LocaleConfig,
+    total_places: Option<u8>,
+) -> String {
+    decimal.formatted_engineering_notation(locale, total_places)
+}
+
+// Helper for formatting
+impl Decimal192 {
+    pub(crate) fn multiplier(&self) -> Option<Multiplier> {
+        let abs = self.abs();
+        reverse_all::<Multiplier>().find(|x| x.value() <= abs)
+    }
+
+    /// The digits of the number, without separators or sign. The scale is fixed at 18, meaning the last 18 digits correspond to the decimal part.
+    pub fn digits(&self) -> String {
+        self.abs().secret_magic.0.to_string() // mantissa
+    }
+
+    /// Rounds `self`` to `n` places, counting both the integer and decimal parts,
+    /// as well as any leading zeros.
+    pub(crate) fn rounded_to_total_places(&self, n: u8) -> Self {
+        let total_places = n;
+        let digits = self.digits();
+        // If we only have decimals, we will still count the 0 before the separator as an integer
+        let integer_count =
+            std::cmp::max(digits.len() as i8 - Self::SCALE as i8, 1) as u8;
+
+        if integer_count > total_places {
+            let scale = Self::pow(integer_count - total_places);
+            let base = *self / scale;
+            let base_rounded = base.round(0);
+
+            if let Some(val) = base_rounded.checked_mul(scale) {
+                val
+            } else {
+                let base_rounded_safe = base
+                    .round_with_mode(0, RoundingMode::ToZero)
+                    .expect("Rounding to Zero should never fail.");
+                base_rounded_safe * scale
+            }
+        } else {
+            // The remaining digits are decimals and we keep up to totalPlaces of them
+            let decimals_to_keep = total_places - integer_count;
+            self.round(decimals_to_keep)
+        }
+    }
+}
+
 impl Decimal192 {
     /// A human readable, locale respecting string. Does not perform any rounding or truncation.
     pub fn formatted_plain(
@@ -788,52 +880,50 @@ impl Decimal192 {
         }
     }
 
-    pub(crate) fn multiplier(&self) -> Option<Multiplier> {
-        let abs = self.abs();
-        reverse_all::<Multiplier>().find(|x| x.value() <= abs)
-    }
-
-    /// The digits of the number, without separators or sign. The scale is fixed at 18, meaning the last 18 digits correspond to the decimal part.
-    pub fn digits(&self) -> String {
-        self.abs().secret_magic.0.to_string() // mantissa
-    }
-
+    /// Formats decimal using engineering notation: `5e20`.
+    ///
+    /// If no `None` is passed to `total_places`, then
+    /// `Self::MAX_PLACES_ENGINEERING_NOTATION` (4) will
+    /// be used.
+    ///
+    /// ```
+    /// extern crate sargon;
+    /// use sargon::prelude::*;
+    /// #[allow(clippy::upper_case_acronyms)]
+    /// type SUT = Decimal192;
+    ///
+    /// assert_eq!(SUT::max().formatted_engineering_notation(LocaleConfig::default(), None), "3.138e39");
+    /// assert_eq!(SUT::min().formatted_engineering_notation(LocaleConfig::default(), None), "-3.138e39");
+    /// assert_eq!(SUT::MAX_PLACES_ENGINEERING_NOTATION, 4);
+    /// ```
+    ///
     pub fn formatted_engineering_notation(
         &self,
         locale: LocaleConfig,
-        decimal_places: u8,
+        total_places: impl Into<Option<u8>>,
     ) -> String {
-        let rounded = self.rounded_to_total_places(decimal_places);
+        let total_places = total_places
+            .into()
+            .unwrap_or(Self::MAX_PLACES_ENGINEERING_NOTATION);
+        let rounded = self.rounded_to_total_places(total_places);
         let integer_count = rounded.digits().len() as u8 - Self::SCALE;
         let exponent = integer_count - 1;
         let scaled = rounded / Self::pow(exponent);
         format!("{}e{}", scaled.formatted_plain(locale, false), exponent)
     }
-}
 
-impl Decimal192 {
-    /// Rounds `self`` to `n` places, counting both the integer and decimal parts,
-    /// as well as any leading zeros.
-    pub(crate) fn rounded_to_total_places(&self, n: u8) -> Self {
-        let total_places = n;
-        let digits = self.digits();
-        // If we only have decimals, we will still count the 0 before the separator as an integer
-        let integer_count =
-            std::cmp::max(digits.len() as i8 - Self::SCALE as i8, 1) as u8;
-
-        if integer_count > total_places {
-            let scale = Self::pow(integer_count - total_places);
-            (*self / scale).round(0) * scale
-        } else {
-            // The remaining digits are decimals and we keep up to totalPlaces of them
-            let decimals_to_keep = total_places - integer_count;
-            self.round(decimals_to_keep)
-        }
-    }
-}
-
-impl Decimal192 {
-    /// A human readable, locale respecting string, rounded to `decimal_places` places, counting all digits
+    /// A human readable, locale respecting string, rounded to `decimal_places`
+    /// places, counting all digits.
+    ///
+    /// ```
+    /// extern crate sargon;
+    /// use sargon::prelude::*;
+    /// #[allow(clippy::upper_case_acronyms)]
+    /// type SUT = Decimal192;
+    ///
+    /// assert_eq!("12345678.975".parse::<SUT>().unwrap().formatted(LocaleConfig::default(), 8, true), "12.345679 M");
+    /// ```
+    ///
     pub fn formatted(
         &self,
         locale: LocaleConfig,
@@ -1255,14 +1345,25 @@ mod test_decimal {
 
     #[test]
     fn test_formatted_engineering_notation() {
-        let test = |x: &str, n: u8, expected: &str| {
-            let a = Decimal192::from(x);
+        let test_ = |x: Decimal, n: u8, expected: &str| {
             let actual =
-                a.formatted_engineering_notation(LocaleConfig::us(), n);
+                x.formatted_engineering_notation(LocaleConfig::us(), n);
             assert_eq!(actual, expected);
+        };
+        let test = |x: &str, n: u8, expected: &str| {
+            test_(Decimal192::from(x), n, expected)
         };
         test("111222111222111222333.222333", 18, "1.11222111222111222e20");
         test("111222111222111222333.222333", 8, "1.1122211e20");
+        test("-1234567890.987654321", 8, "-1.2345679e9");
+        test("-1234567890.987654321", 11, "-1.234567891e9");
+        test("-1234567890.987654321", 14, "-1.2345678909877e9");
+        test_(SUT::max(), SUT::MAX_PLACES_ENGINEERING_NOTATION, "3.138e39");
+        test_(
+            SUT::min(),
+            SUT::MAX_PLACES_ENGINEERING_NOTATION,
+            "-3.138e39",
+        );
     }
 
     #[test]
@@ -1526,13 +1627,14 @@ mod test_decimal {
 
     #[test]
     fn format_decimal() {
-        let test = |x: &str, exp: &str| {
+        let test_ = |decimal: SUT, exp: &str| {
             let locale = LocaleConfig::us();
-            let decimal: Decimal192 = x.into();
             let actual = decimal.formatted(locale, 8, false);
             assert_eq!(actual, exp);
         };
+        let test = |x: &str, exp: &str| test_(SUT::from(x), exp);
 
+        test_(SUT::max(), "3.138e39");
         test("0.009999999999999", "0.01");
         test("12341234", "12.341234 M");
         test("1234123.4", "1.2341234 M");
@@ -1763,17 +1865,23 @@ mod uniffi_tests {
 
     #[test]
     fn arithmetic() {
-        let zero = new_decimal_from_i32(0);
-        let one = new_decimal_from_i64(1);
-        let two = new_decimal_from_u32(2);
-        let three = new_decimal_from_u64(3);
-        let four = new_decimal_from_string("4".to_string()).unwrap();
-        let five = new_decimal_from_i32(5);
-        let six = new_decimal_from_i32(6);
-        let seven = new_decimal_from_i32(7);
-        let eight = new_decimal_from_i32(8);
-        let nine = new_decimal_from_i32(9);
-        let ten = new_decimal_from_i32(10);
+        let zero = SUT::zero();
+        let one = SUT::one();
+        let two = SUT::two();
+        let three = SUT::three();
+        let four = SUT::four();
+        let five = SUT::five();
+        let six = SUT::six();
+        let seven = SUT::seven();
+        let eight = SUT::eight();
+        let nine = SUT::nine();
+        let ten = SUT::ten();
+
+        assert_eq!(zero, new_decimal_from_i32(0));
+        assert_eq!(one, new_decimal_from_i64(1));
+        assert_eq!(two, new_decimal_from_u32(2));
+        assert_eq!(three, new_decimal_from_u64(3));
+        assert_eq!(four, new_decimal_from_string("4".to_string()).unwrap());
 
         assert_eq!(zero + zero, zero);
         assert_eq!(one + zero, one);
@@ -1900,11 +2008,8 @@ mod uniffi_tests {
     }
 
     #[test]
-    #[should_panic(
-        expected = "Expected clients of Sargon to not use so large negative numbers (Self::MIN)."
-    )]
-    fn decimal_min_abs() {
-        _ = SUT::min().abs()
+    fn decimal_min_abs_is_decimal_max() {
+        assert_eq!(SUT::min().abs(), SUT::max())
     }
 
     #[test]

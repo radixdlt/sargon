@@ -28,13 +28,64 @@ extension Decimal192 {
 	}
 }
 
-// MARK: Truncation and rounding
+// MARK: Formatting
+extension Option<UInt> {
+	fileprivate var asU8: UInt8? {
+		if let value = self {
+		precondition(
+			value < UInt(UInt8.max),
+			"Must not specify more than \(UInt8.max) places, got: \(value).")
+			value
+		} else {
+			nil
+		}
 
+
+	}
+}
 extension Decimal192 {
-	
+
+	/// A human readable, locale respecting string, rounded to `totalPlaces` places, counting all digits
+	public func formatted(
+		locale: Locale = .autoupdatingCurrent,
+		totalPlaces: UInt? = nil,
+		useGroupingSeparator: Bool = true
+	) -> String {
+		decimalFormatted(
+			locale: LocaleConfig(locale: local),
+			totalPlaces: totalPlaces.asU8,
+			useGroupingSeparator: useGroupingSeparator
+		)
+	}
+
+	public func formattedEngineeringNotation(
+		locale: Locale = .autoupdatingCurrent,
+		totalPlaces: UInt? = nil
+	) -> String {
+		decimalFormattedEngineeringNotation(
+			locale: LocaleConfig(locale: local),
+			totalPlaces: totalPlaces.asU8
+		)
+	}
+
+	/// A human readable, locale respecting string. Does not perform any rounding or truncation.
+	public func formattedPlain(
+		locale: Locale = .autoupdatingCurrent,
+		useGroupingSeparator: Bool = true
+	) -> String {
+		decimalFormattedPlain(
+			locale: LocaleConfig(locale: local),
+			useGroupingSeparator: useGroupingSeparator
+		)
+	}
+}
+
+// MARK: Truncation and rounding
+extension Decimal192 {
+
 	private func rounded(decimalPlaces: UInt8, roundingMode: RoundingMode) -> Self {
 		precondition(
-			decimalPlaces <= Decimal192.maxDivisibility, 
+			decimalPlaces <= Decimal192.maxDivisibility,
 			"Decimal places MUST be 0...18, was: \(decimalPlaces)"
 		)
 		do {
@@ -47,8 +98,7 @@ extension Decimal192 {
 			fatalError("Failed to round, error: \(error)")
 		}
 	}
-	
-	
+
 	/// Rounds to `decimalPlaces` decimals
 	public func rounded(decimalPlaces: UInt8 = 0) -> Self {
 		rounded(
@@ -56,7 +106,7 @@ extension Decimal192 {
 			roundingMode: .toNearestMidpointAwayFromZero
 		)
 	}
-	
+
 	/// Rounds to `decimalPlaces` decimals, in the direction of 0
 	public func floor(decimalPlaces: UInt8) -> Self {
 		rounded(decimalPlaces: decimalPlaces, roundingMode: .toZero)
