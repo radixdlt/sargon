@@ -441,21 +441,6 @@ fn trailing_zero_count_of(s: impl AsRef<str>) -> usize {
         .unwrap_or(str.len())
 }
 
-#[cfg(test)]
-#[test]
-fn test_trailing_zero_count_of() {
-    let test = |s: &str, exp: usize| assert_eq!(trailing_zero_count_of(s), exp);
-
-    test("", 0);
-    test("1", 0);
-    test("0", 1);
-    test("100", 2);
-    test("1001", 0);
-    test("90000", 4);
-    test("9000.0", 1);
-    test("9.000", 3);
-}
-
 fn insert_grouping_separator_into(s: &mut String, separator: String) {
     let digits = s.len();
     let zeroes_per_thousand = 3;
@@ -472,28 +457,6 @@ fn insert_grouping_separator_into(s: &mut String, separator: String) {
     }
 }
 
-#[cfg(test)]
-#[test]
-fn test_insert_grouping_separator_into() {
-    let test_w = |s: &str, exp: &str, sep: char| {
-        let mut string = s.to_owned();
-        insert_grouping_separator_into(&mut string, sep.to_string());
-        assert_eq!(string, exp.to_owned())
-    };
-    let test = |s: &str, exp: &str| test_w(s, exp, ' ');
-
-    test("", "");
-    test("1", "1");
-    test("22", "22");
-    test("333", "333");
-    test("4444", "4 444");
-    test("123456789", "123 456 789");
-    test("12345678987654321", "12 345 678 987 654 321");
-
-    test_w("123456789", "123.456.789", '.');
-    test_w("123456789", "123,456,789", ',');
-}
-
 fn split_str(s: impl AsRef<str>, after: i8) -> (String, String) {
     let mut s = s.as_ref().to_owned();
     if after <= 0 {
@@ -501,51 +464,6 @@ fn split_str(s: impl AsRef<str>, after: i8) -> (String, String) {
     }
     let other: String = s.drain(0..after as usize).collect();
     (other, s)
-}
-
-#[cfg(test)]
-#[test]
-fn test_split_str() {
-    let test = |s: &str, a: i8, exp: (&str, &str)| {
-        let res = split_str(s, a);
-        assert_eq!(res.0, exp.0.to_string());
-        assert_eq!(res.1, exp.1.to_string());
-    };
-
-    test("12345.09876", -2, ("", "12345.09876"));
-
-    test("9.8", 0, ("", "9.8"));
-    test("9.8", 1, ("9", ".8"));
-    test("9.8", 2, ("9.", "8"));
-
-    test("3.1415", 0, ("", "3.1415"));
-    test("3.1415", 1, ("3", ".1415"));
-    test("3.1415", 2, ("3.", "1415"));
-
-    test("42.1828", 0, ("", "42.1828"));
-    test("42.1828", 1, ("4", "2.1828"));
-    test("42.1828", 2, ("42", ".1828"));
-    test("42.1828", 3, ("42.", "1828"));
-    test("42.1828", 4, ("42.1", "828"));
-    test("42.1828", 5, ("42.18", "28"));
-    test("42.1828", 6, ("42.182", "8"));
-    test("42.1828", 7, ("42.1828", ""));
-}
-
-#[cfg(test)]
-#[test]
-fn test_digits() {
-    let test = |s: &str, e: &str| {
-        let x = Decimal192::from(s);
-        assert_eq!(x.digits(), e);
-    };
-    test("1", "1000000000000000000");
-    test("1.2", "1200000000000000000");
-    test("123456789.098765432105", "123456789098765432105000000");
-    test(
-        "123456789.098765432105000098",
-        "123456789098765432105000098",
-    );
 }
 
 impl Decimal192 {
@@ -1263,6 +1181,113 @@ mod test_decimal {
         test(x, 4, "3138550867693340381917894711603833208051.16");
         test(x, 5, "3138550867693340381917894711603833208051.15999");
         test(x, 6, "3138550867693340381917894711603833208051.15999");
+    }
+
+    /// Low level test, testing helper function used by formatting of decimal
+    #[test]
+    fn test_insert_grouping_separator_into() {
+        let test_w = |s: &str, exp: &str, sep: char| {
+            let mut string = s.to_owned();
+            insert_grouping_separator_into(&mut string, sep.to_string());
+            assert_eq!(string, exp.to_owned())
+        };
+        let test = |s: &str, exp: &str| test_w(s, exp, ' ');
+
+        test("", "");
+        test("1", "1");
+        test("22", "22");
+        test("333", "333");
+        test("4444", "4 444");
+        test("123456789", "123 456 789");
+        test("12345678987654321", "12 345 678 987 654 321");
+
+        test_w("123456789", "123.456.789", '.');
+        test_w("123456789", "123,456,789", ',');
+    }
+
+    /// Low level test, testing helper function used by formatting of decimal
+    #[test]
+    fn test_trailing_zero_count_of() {
+        let test =
+            |s: &str, exp: usize| assert_eq!(trailing_zero_count_of(s), exp);
+
+        test("", 0);
+        test("1", 0);
+        test("0", 1);
+        test("100", 2);
+        test("1001", 0);
+        test("90000", 4);
+        test("9000.0", 1);
+        test("9.000", 3);
+    }
+
+    /// Low level test, testing helper function used by formatting of decimal
+    #[test]
+    fn test_split_str() {
+        let test = |s: &str, a: i8, exp: (&str, &str)| {
+            let res = split_str(s, a);
+            assert_eq!(res.0, exp.0.to_string());
+            assert_eq!(res.1, exp.1.to_string());
+        };
+
+        test("12345.09876", -2, ("", "12345.09876"));
+
+        test("9.8", 0, ("", "9.8"));
+        test("9.8", 1, ("9", ".8"));
+        test("9.8", 2, ("9.", "8"));
+
+        test("3.1415", 0, ("", "3.1415"));
+        test("3.1415", 1, ("3", ".1415"));
+        test("3.1415", 2, ("3.", "1415"));
+
+        test("42.1828", 0, ("", "42.1828"));
+        test("42.1828", 1, ("4", "2.1828"));
+        test("42.1828", 2, ("42", ".1828"));
+        test("42.1828", 3, ("42.", "1828"));
+        test("42.1828", 4, ("42.1", "828"));
+        test("42.1828", 5, ("42.18", "28"));
+        test("42.1828", 6, ("42.182", "8"));
+        test("42.1828", 7, ("42.1828", ""));
+    }
+
+    /// Low level test, testing helper function used by formatting of decimal
+    #[test]
+    fn test_digits() {
+        let test = |s: &str, e: &str| {
+            let x = Decimal192::from(s);
+            assert_eq!(x.digits(), e);
+        };
+        test("1", "1000000000000000000");
+        test("1.2", "1200000000000000000");
+        test("123456789.098765432105", "123456789098765432105000000");
+        test(
+            "123456789.098765432105000098",
+            "123456789098765432105000098",
+        );
+    }
+
+    #[test]
+    fn format_grouping_separator() {
+        let test = |x: &str, exp: &str| {
+            let locale = LocaleConfig::us();
+            let decimal: Decimal192 = x.into();
+            let actual = decimal.formatted(locale, 8, true);
+            assert_eq!(actual, exp);
+        };
+
+        test("123456789", "123.45679 M");
+        test("12345678", "12.345678 M");
+        test("1234567", "1.234567 M");
+
+        test("123456", "123,456");
+        test("12345", "12,345");
+        test("1234", "1,234");
+        test("123", "123");
+
+        test("123456.4321", "123,456.43");
+        test("12345.4321", "12,345.432");
+        test("1234.4321", "1,234.4321");
+        test("123.4321", "123.4321");
     }
 
     #[test]
