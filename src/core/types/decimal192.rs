@@ -761,7 +761,7 @@ fn split_str(s: impl AsRef<str>, after: i8) -> (String, String) {
 
 #[uniffi::export]
 pub fn decimal_formatted(
-    decimal: Decimal192,
+    decimal: &Decimal192,
     locale: LocaleConfig,
     decimal_places: u8,
     use_grouping_separator: bool,
@@ -772,7 +772,7 @@ pub fn decimal_formatted(
 /// A human readable, locale respecting string. Does not perform any rounding or truncation.
 #[uniffi::export]
 pub fn decimal_formatted_plain(
-    decimal: Decimal192,
+    decimal: &Decimal192,
     locale: LocaleConfig,
     use_grouping_separator: bool,
 ) -> String {
@@ -781,7 +781,7 @@ pub fn decimal_formatted_plain(
 
 #[uniffi::export]
 pub fn decimal_formatted_engineering_notation(
-    decimal: Decimal192,
+    decimal: &Decimal192,
     locale: LocaleConfig,
     total_places: Option<u8>,
 ) -> String {
@@ -1346,8 +1346,10 @@ mod test_decimal {
     #[test]
     fn test_formatted_engineering_notation() {
         let test_ = |x: Decimal, n: u8, expected: &str| {
-            let actual =
-                x.formatted_engineering_notation(LocaleConfig::us(), n);
+            let actual = x.formatted_engineering_notation(
+                LocaleConfig::english_united_states(),
+                n,
+            );
             assert_eq!(actual, expected);
         };
         let test = |x: &str, n: u8, expected: &str| {
@@ -1377,8 +1379,8 @@ mod test_decimal {
         let fail = |s: &str, l: &LocaleConfig| {
             assert!(Decimal192::new_with_formatted_string(s, l.clone()).is_err())
         };
-        let swedish = LocaleConfig::swedish();
-        let us = LocaleConfig::us();
+        let swedish = LocaleConfig::swedish_sweden();
+        let us = LocaleConfig::english_united_states();
         test(",005", &swedish, "0.005");
         test(".005", &us, "0.005");
         test("1,001", &swedish, "1.001");
@@ -1604,7 +1606,7 @@ mod test_decimal {
     #[test]
     fn format_grouping_separator() {
         let test = |x: &str, exp: &str| {
-            let locale = LocaleConfig::us();
+            let locale = LocaleConfig::english_united_states();
             let decimal: Decimal192 = x.into();
             let actual = decimal.formatted(locale, 8, true);
             assert_eq!(actual, exp);
@@ -1628,7 +1630,7 @@ mod test_decimal {
     #[test]
     fn format_decimal() {
         let test_ = |decimal: SUT, exp: &str| {
-            let locale = LocaleConfig::us();
+            let locale = LocaleConfig::english_united_states();
             let actual = decimal.formatted(locale, 8, false);
             assert_eq!(actual, exp);
         };
@@ -2243,8 +2245,8 @@ mod uniffi_tests {
             assert!(new_decimal_from_formatted_string(s.to_owned(), l.clone())
                 .is_err())
         };
-        let swedish = LocaleConfig::swedish();
-        let us = LocaleConfig::us();
+        let swedish = LocaleConfig::swedish_sweden();
+        let us = LocaleConfig::english_united_states();
         test(",005", &swedish, "0.005");
         test(".005", &us, "0.005");
         test("1,001", &swedish, "1.001");
@@ -2252,5 +2254,83 @@ mod uniffi_tests {
 
         fail("1,000,000.23", &swedish);
         test("1,000,000.23", &us, "1000000.23");
+    }
+
+    #[test]
+    fn formatted() {
+        assert_eq!(
+            decimal_formatted(
+                &SUT::max(),
+                LocaleConfig::english_united_states(),
+                4,
+                true
+            ),
+            "3.138e39"
+        );
+        assert_eq!(
+            decimal_formatted(
+                &SUT::from("12345678.975"),
+                LocaleConfig::default(),
+                8,
+                true
+            ),
+            "12.345679 M"
+        );
+    }
+
+    #[test]
+    fn formatted_plain() {
+        assert_eq!(
+            decimal_formatted_plain(
+                &SUT::from("123456789.042"),
+                LocaleConfig::english_united_states(),
+                true
+            ),
+            "123,456,789.042"
+        );
+        assert_eq!(
+            decimal_formatted_plain(
+                &SUT::from("123456789.042"),
+                LocaleConfig::english_united_states(),
+                false
+            ),
+            "123456789.042"
+        );
+        assert_eq!(
+            decimal_formatted_plain(
+                &SUT::from("123456789.042"),
+                LocaleConfig::swedish_sweden(),
+                true
+            ),
+            "123\u{a0}456\u{a0}789,042"
+        );
+        assert_eq!(
+            decimal_formatted_plain(
+                &SUT::from("123456789.042"),
+                LocaleConfig::swedish_sweden(),
+                false
+            ),
+            "123456789,042"
+        );
+    }
+
+    #[test]
+    fn formatted_engineering() {
+        assert_eq!(
+            decimal_formatted_engineering_notation(
+                &SUT::max(),
+                LocaleConfig::english_united_states(),
+                None
+            ),
+            "3.138e39"
+        );
+        assert_eq!(
+            decimal_formatted_engineering_notation(
+                &SUT::min(),
+                LocaleConfig::english_united_states(),
+                None
+            ),
+            "-3.138e39"
+        );
     }
 }

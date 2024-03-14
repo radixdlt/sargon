@@ -73,7 +73,6 @@ bip39 = { version = "2.0.0", features = ["serde"] }
 time-util = { version = "0.3.4", features = ["chrono"] }
 assert-json-diff = "2.0.2"
 url = { version = "2.5.0", features = ["serde"] }
-num-format = "0.4.4"
 paste = "1.0.14"
 clap = { version = "4", default-features = false, features = ["std", "derive"] }
 camino = "1.0.8"
