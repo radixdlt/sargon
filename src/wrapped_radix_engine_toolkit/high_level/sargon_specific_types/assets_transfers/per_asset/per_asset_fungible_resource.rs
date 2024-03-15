@@ -3,13 +3,13 @@ use crate::prelude::*;
 #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct PerAssetFungibleResource {
     pub resource_address: ResourceAddress,
-    pub divisibility: Option<i32>,
+    pub divisibility: Option<u8>,
 }
 
 impl PerAssetFungibleResource {
     pub fn new(
         resource_address: ResourceAddress,
-        divisibility: impl Into<Option<i32>>,
+        divisibility: impl Into<Option<u8>>,
     ) -> Self {
         Self {
             resource_address,

@@ -113,7 +113,7 @@ decl_per_recipient_transfer_of!(
     Fungible,
     /// Amount
     pub(crate) amount: Decimal192,
-    pub divisibility: Option<i32>,
+    pub divisibility: Option<u8>,
 );
 
 decl_per_recipient_transfer_of!(

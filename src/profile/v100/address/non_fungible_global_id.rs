@@ -139,6 +139,15 @@ impl FromStr for NonFungibleGlobalId {
     }
 }
 
+#[cfg(test)]
+impl From<&str> for NonFungibleGlobalId {
+    /// TEST ONLY
+    fn from(value: &str) -> Self {
+        value.parse().unwrap_or_else(|_| panic!("Test failed since the passed in str is not a NonFungibleGlobalId: '{}'",
+            value))
+    }
+}
+
 impl NonFungibleGlobalId {
     /// Returns the canonical string representation of a NonFungibleGlobalID: "<resource>:<local>"
     ///

@@ -18,10 +18,11 @@ impl From<(ScryptoResourceSpecifier, NetworkID)> for ResourceAddress {
 mod tests {
     use super::*;
 
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = ResourceAddress;
+
     #[test]
     fn resource_address_from_scrypto_resource_specifier_amount_mainnet() {
-        type SUT = ResourceAddress;
-
         let exp = SUT::sample_mainnet_candy();
         let ret =
             ScryptoResourceSpecifier::Amount(exp.clone().into(), 0.into());
@@ -33,8 +34,6 @@ mod tests {
 
     #[test]
     fn resource_address_from_scrypto_resource_specifier_amount_stokenet() {
-        type SUT = ResourceAddress;
-
         let exp = SUT::sample_stokenet_gum();
         let ret =
             ScryptoResourceSpecifier::Amount(exp.clone().into(), 0.into());
@@ -46,8 +45,6 @@ mod tests {
 
     #[test]
     fn resource_address_from_scrypto_resource_specifier_ids_mainnet() {
-        type SUT = ResourceAddress;
-
         let exp = SUT::sample_mainnet_candy();
         let ret = ScryptoResourceSpecifier::Ids(exp.clone().into(), [].into());
         assert_eq!(SUT::from((ret.clone(), NetworkID::Mainnet)), exp.clone());
@@ -58,8 +55,6 @@ mod tests {
 
     #[test]
     fn resource_address_from_scrypto_resource_specifier_ids_stokenet() {
-        type SUT = ResourceAddress;
-
         let exp = SUT::sample_stokenet_gum();
         let ret = ScryptoResourceSpecifier::Ids(exp.clone().into(), [].into());
         assert_eq!(SUT::from((ret.clone(), NetworkID::Stokenet)), exp.clone());

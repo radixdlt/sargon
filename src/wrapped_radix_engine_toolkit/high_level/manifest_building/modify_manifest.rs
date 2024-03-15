@@ -174,7 +174,7 @@ mod tests {
 
     #[test]
     fn default_dev_fee_is() {
-        assert_eq!(default_fee().to_string(), "25");
+        assert_eq!(default_fee(), 25.into());
     }
 
     #[test]

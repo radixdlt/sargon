@@ -132,6 +132,14 @@ impl FromStr for NonFungibleLocalId {
     }
 }
 
+#[cfg(test)]
+impl From<&str> for NonFungibleLocalId {
+    /// TEST ONLY
+    fn from(value: &str) -> Self {
+        value.parse().unwrap_or_else(|_| panic!("Test failed since the passed in str is not a valid NonFungibleLocalId: '{}'", value))
+    }
+}
+
 impl HasSampleValues for NonFungibleLocalId {
     fn sample() -> Self {
         Self::ruid(Exactly32Bytes::sample_dead()).unwrap()

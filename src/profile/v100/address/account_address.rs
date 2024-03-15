@@ -184,6 +184,7 @@ mod tests {
             PublicKey::Ed25519 { value: public_key },
             network_id,
         );
+
         assert_eq!(address.address(), "account_tdx_e_128vkt2fur65p4hqhulfv3h0cknrppwtjsstlttkfamj4jnnpm82gsw");
 
         use radix_engine_toolkit::models::canonical_address_types::{

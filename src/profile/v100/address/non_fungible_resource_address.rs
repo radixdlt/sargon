@@ -88,6 +88,14 @@ macro_rules! decl_specialized_address {
                 }
             }
 
+            #[cfg(test)]
+            impl From<&str> for $specialized_address_type {
+                /// TEST ONLY
+                fn from(value: &str) -> Self {
+                    value.parse().expect(&format!("Test failed since the passed in str is not a valid address: '{}'", value))
+                }
+            }
+
             impl AddressViaRet for $specialized_address_type {
                 fn new(
                     node_id: impl Into<ScryptoNodeId>,

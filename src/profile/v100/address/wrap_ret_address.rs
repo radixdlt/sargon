@@ -87,6 +87,14 @@ macro_rules! decl_ret_wrapped_address {
                 }
             }
 
+            #[cfg(test)]
+            impl From<&str> for [< $address_type:camel Address >] {
+                /// TEST ONLY
+                fn from(value: &str) -> Self {
+                    value.parse().expect(&format!("Test failed since the passed in str is not a valid address: '{}'", value))
+                }
+            }
+
             impl FromRetAddress for [< $address_type:camel Address >] {
                 type RetAddress = [< Ret $address_type:camel Address >];
             }

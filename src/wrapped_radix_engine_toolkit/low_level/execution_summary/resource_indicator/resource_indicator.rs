@@ -12,6 +12,27 @@ pub enum ResourceIndicator {
     },
 }
 
+impl ResourceIndicator {
+    pub fn fungible(
+        resource_address: impl Into<ResourceAddress>,
+        indicator: FungibleResourceIndicator,
+    ) -> Self {
+        Self::Fungible {
+            resource_address: resource_address.into(),
+            indicator,
+        }
+    }
+    pub fn non_fungible(
+        resource_address: impl Into<ResourceAddress>,
+        indicator: NonFungibleResourceIndicator,
+    ) -> Self {
+        Self::NonFungible {
+            resource_address: resource_address.into(),
+            indicator,
+        }
+    }
+}
+
 impl From<(RetResourceIndicator, NetworkID)> for ResourceIndicator {
     fn from(value: (RetResourceIndicator, NetworkID)) -> Self {
         let (ret, network_id) = value;
@@ -36,17 +57,17 @@ impl From<(RetResourceIndicator, NetworkID)> for ResourceIndicator {
 
 impl HasSampleValues for ResourceIndicator {
     fn sample() -> Self {
-        Self::Fungible {
-            resource_address: ResourceAddress::sample(),
-            indicator: FungibleResourceIndicator::sample(),
-        }
+        Self::fungible(
+            ResourceAddress::sample(),
+            FungibleResourceIndicator::sample(),
+        )
     }
 
     fn sample_other() -> Self {
-        Self::NonFungible {
-            resource_address: ResourceAddress::sample_other(),
-            indicator: NonFungibleResourceIndicator::sample_other(),
-        }
+        Self::non_fungible(
+            NonFungibleResourceAddress::sample_other(),
+            NonFungibleResourceIndicator::sample_other(),
+        )
     }
 }
 
@@ -85,10 +106,10 @@ mod tests {
 
     #[test]
     fn from_ret_non_fungible() {
-        let resource_address = ResourceAddress::sample_other();
+        let resource_address = NonFungibleResourceAddress::sample_other();
 
         let ret = RetResourceIndicator::NonFungible(
-            resource_address.into(),
+            ResourceAddress::from(resource_address).into(),
             RetNonFungibleResourceIndicator::ByAll {
                 predicted_amount: RetPredicted {
                     value: 1.into(),

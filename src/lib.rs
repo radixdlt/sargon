@@ -34,10 +34,11 @@ pub mod prelude {
     pub(crate) use serde_repr::{Deserialize_repr, Serialize_repr};
     pub(crate) use serde_with::*;
 
+    pub use radix_engine_common::math::traits::CheckedMul as ScryptoCheckedMul;
     pub(crate) use std::cmp::Ordering;
     pub(crate) use std::collections::BTreeMap;
     pub(crate) use std::fs;
-    pub(crate) use std::ops::{Add, AddAssign, Deref, Div, Mul, Neg, Sub};
+    pub use std::ops::{Add, AddAssign, Deref, Div, Mul, Neg, Sub};
     pub(crate) use std::str::FromStr;
     pub(crate) use std::sync::Arc;
 

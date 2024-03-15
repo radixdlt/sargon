@@ -57,11 +57,135 @@ impl PerRecipientAssetTransfers {
 
 impl HasSampleValues for PerRecipientAssetTransfers {
     fn sample() -> Self {
-        Self::sample_mainnet()
+        Self::new(
+            AccountAddress::sample_mainnet(),
+            [PerRecipientAssetTransfer::new(
+                Account::sample_mainnet_carol(),
+                [PerRecipientFungibleTransfer::new(
+                    ResourceAddress::sample_mainnet_xrd(),
+                    Decimal192::from_str("237.13372718281828").unwrap(),
+                    true,
+                    None,
+                )],
+                [
+                    PerRecipientNonFungiblesTransfer::new(NonFungibleResourceAddress::sample_mainnet(), true, [
+                        NonFungibleLocalId::sample(),
+                        NonFungibleLocalId::sample_other(),
+                    ])
+                ],
+            ),
+            PerRecipientAssetTransfer::new(
+                AccountAddress::from_str("account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69").unwrap(),
+                [PerRecipientFungibleTransfer::new(
+                    ResourceAddress::sample_mainnet_xrd(),
+                    Decimal192::from_str("987654.1234").unwrap(),
+                    true,
+                    None,
+                ),
+                PerRecipientFungibleTransfer::new(
+                    ResourceAddress::sample_mainnet_candy(),
+                    Decimal192::from_str("987654.1234").unwrap(),
+                    true,
+                    4
+                )
+                ],
+                [
+                    PerRecipientNonFungiblesTransfer::new(NonFungibleResourceAddress::sample_mainnet(), true, [NonFungibleLocalId::sample_other()]),
+                    PerRecipientNonFungiblesTransfer::new(NonFungibleResourceAddress::sample_mainnet_other(), true, [NonFungibleLocalId::sample_other()])
+                ],
+            )
+            ],
+        )
     }
 
     fn sample_other() -> Self {
-        Self::sample_stokenet_other()
+        let sender: AccountAddress = "account_tdx_2_128rkfzdztjpgajucstydar2gz2vp9jj779k33jy3gect2rh5r28rgn".parse().unwrap();
+        let recip0: AccountAddress = "account_tdx_2_129e9h6zp5z08qkc0q5tdqz9zc67gg2k7tergrj9erznmke6qeevmsv".parse().unwrap();
+        let recip1: AccountAddress = "account_tdx_2_128a45a7hetjfpfqdlsp07eyrmhq7edldefgd7263jd58puzuq09qks".parse().unwrap();
+
+        let nft_c0: NonFungibleResourceAddress = "resource_tdx_2_1n2sjxxtk6vm6pvk8dxr798e8zpxqz50q5wlmldlat0qhh04u2mwmy8".parse().unwrap();
+        let nft_c1: NonFungibleResourceAddress = "resource_tdx_2_1ntuaekqexa73m9en04jj3vdt3fk9u9kdk8q9su4efldun2y7nd3cga".parse().unwrap();
+
+        let fung_0: ResourceAddress = ResourceAddress::sample_stokenet_xrd();
+        let fung_1: ResourceAddress =
+            ResourceAddress::sample_stokenet_gc_tokens();
+
+        Self::new(
+            sender.clone(),
+            [
+                PerRecipientAssetTransfer::new(
+                    recip0.clone(),
+                    [
+                        PerRecipientFungibleTransfer::new(
+                            fung_0.clone(),
+                            30,
+                            true,
+                            18,
+                        ),
+                        PerRecipientFungibleTransfer::new(
+                            fung_1.clone(),
+                            3,
+                            true,
+                            18,
+                        ),
+                    ],
+                    [
+                        PerRecipientNonFungiblesTransfer::new(
+                            nft_c0.clone(),
+                            true,
+                            [
+                                NonFungibleLocalId::integer(40),
+                                NonFungibleLocalId::integer(48),
+                            ],
+                        ),
+                        PerRecipientNonFungiblesTransfer::new(
+                            nft_c1.clone(),
+                            true,
+                            [
+                                NonFungibleLocalId::integer(21),
+                                NonFungibleLocalId::integer(3),
+                            ],
+                        ),
+                    ],
+                ),
+                PerRecipientAssetTransfer::new(
+                    recip1.clone(),
+                    [
+                        PerRecipientFungibleTransfer::new(
+                            fung_0.clone(),
+                            50,
+                            true,
+                            18,
+                        ),
+                        PerRecipientFungibleTransfer::new(
+                            fung_1.clone(),
+                            5,
+                            true,
+                            18,
+                        ),
+                    ],
+                    [
+                        PerRecipientNonFungiblesTransfer::new(
+                            nft_c0.clone(),
+                            true,
+                            [
+                                NonFungibleLocalId::integer(34),
+                                NonFungibleLocalId::integer(22),
+                            ],
+                        ),
+                        PerRecipientNonFungiblesTransfer::new(
+                            nft_c1.clone(),
+                            true,
+                            [
+                                NonFungibleLocalId::integer(15),
+                                NonFungibleLocalId::integer(9),
+                                NonFungibleLocalId::integer(13),
+                            ],
+                        ),
+                    ],
+                ),
+            ],
+        )
     }
 }
 
@@ -169,8 +293,92 @@ mod tests {
         )
     }
 
-    // #[test]
-    // fn transpose() {
-    //     pretty_assertions::assert_eq!(SUT::sample().transpose(), PerAssetTransfers::sample())
-    // }
+    #[test]
+    fn transpose_simple() {
+        pretty_assertions::assert_eq!(
+            SUT::sample().transpose(),
+            PerAssetTransfers::sample()
+        )
+    }
+
+    #[test]
+    fn transpose_complex() {
+        let sender: AccountAddress = "account_tdx_2_128rkfzdztjpgajucstydar2gz2vp9jj779k33jy3gect2rh5r28rgn".into();
+        let recip0: AccountAddress = "account_tdx_2_129e9h6zp5z08qkc0q5tdqz9zc67gg2k7tergrj9erznmke6qeevmsv".into();
+        let recip1: AccountAddress = "account_tdx_2_128a45a7hetjfpfqdlsp07eyrmhq7edldefgd7263jd58puzuq09qks".into();
+
+        let nft_c0: NonFungibleResourceAddress = "resource_tdx_2_1n2sjxxtk6vm6pvk8dxr798e8zpxqz50q5wlmldlat0qhh04u2mwmy8".into();
+        let nft_c1: NonFungibleResourceAddress = "resource_tdx_2_1ntuaekqexa73m9en04jj3vdt3fk9u9kdk8q9su4efldun2y7nd3cga".into();
+
+        let fung_0: ResourceAddress = ResourceAddress::sample_stokenet_xrd();
+        let fung_1: ResourceAddress =
+            ResourceAddress::sample_stokenet_gc_tokens();
+
+        let per_asset_transfers = PerAssetTransfers::new(
+            sender.clone(),
+            [
+                PerAssetTransfersOfFungibleResource::new(
+                    PerAssetFungibleResource::new(fung_0.clone(), 18),
+                    [
+                        PerAssetFungibleTransfer::new(recip0.clone(), true, 30),
+                        PerAssetFungibleTransfer::new(recip1.clone(), true, 50),
+                    ],
+                ),
+                PerAssetTransfersOfFungibleResource::new(
+                    PerAssetFungibleResource::new(fung_1.clone(), 18),
+                    [
+                        PerAssetFungibleTransfer::new(recip0.clone(), true, 3),
+                        PerAssetFungibleTransfer::new(recip1.clone(), true, 5),
+                    ],
+                ),
+            ],
+            [
+                PerAssetTransfersOfNonFungibleResource::new(
+                    nft_c0.clone(),
+                    [
+                        PerAssetNonFungibleTransfer::new(
+                            recip0.clone(),
+                            true,
+                            [
+                                NonFungibleLocalId::integer(40),
+                                NonFungibleLocalId::integer(48),
+                            ],
+                        ),
+                        PerAssetNonFungibleTransfer::new(
+                            recip1.clone(),
+                            true,
+                            [
+                                NonFungibleLocalId::integer(34),
+                                NonFungibleLocalId::integer(22),
+                            ],
+                        ),
+                    ],
+                ),
+                PerAssetTransfersOfNonFungibleResource::new(
+                    nft_c1.clone(),
+                    [
+                        PerAssetNonFungibleTransfer::new(
+                            recip0.clone(),
+                            true,
+                            [
+                                NonFungibleLocalId::integer(21),
+                                NonFungibleLocalId::integer(3),
+                            ],
+                        ),
+                        PerAssetNonFungibleTransfer::new(
+                            recip1.clone(),
+                            true,
+                            [
+                                NonFungibleLocalId::integer(15),
+                                NonFungibleLocalId::integer(9),
+                                NonFungibleLocalId::integer(13),
+                            ],
+                        ),
+                    ],
+                ),
+            ],
+        );
+
+        assert_eq!(SUT::sample_other().transpose(), per_asset_transfers);
+    }
 }
