@@ -85,9 +85,9 @@ extension Exactly32Bytes {
 }
 
 func test() throws {
-	let bytes = try Data.random(byteCount: 32)
-	let hex32 = try Exactly32Bytes(data: bytes)
-	assert(hex32.bagOfBytes == bytes)
+	let bytes = Data.random(byteCount: 32)
+	let exactly32Bytes = try Exactly32Bytes(data: bytes)
+	assert(exactly32BytesToBytes(bytes: exactly32Bytes) == bytes)
 }
 
 try! test()
