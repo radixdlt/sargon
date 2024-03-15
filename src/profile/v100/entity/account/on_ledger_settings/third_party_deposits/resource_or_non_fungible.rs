@@ -115,9 +115,8 @@ mod tests {
     #[test]
     fn from_scrypto_fungible() {
         let resource_address = ResourceAddress::sample_stokenet_gum();
-        let scrypto = ScryptoResourceOrNonFungible::Resource(
-            resource_address.clone().into(),
-        );
+        let scrypto =
+            ScryptoResourceOrNonFungible::Resource(resource_address.into());
         let expected = SUT::Resource {
             value: resource_address,
         };

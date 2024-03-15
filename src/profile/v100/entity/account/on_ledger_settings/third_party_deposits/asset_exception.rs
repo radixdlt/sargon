@@ -34,7 +34,7 @@ impl Identifiable for AssetException {
     type ID = ResourceAddress;
 
     fn id(&self) -> Self::ID {
-        self.address.clone()
+        self.address
     }
 }
 

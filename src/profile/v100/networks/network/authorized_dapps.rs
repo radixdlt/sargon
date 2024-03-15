@@ -125,7 +125,7 @@ mod tests {
     #[test]
     fn get_by_address() {
         let authorized_dapp = AuthorizedDapp::sample();
-        let address = authorized_dapp.dapp_definition_address.clone();
+        let address = authorized_dapp.dapp_definition_address;
         let authorized_dapps =
             AuthorizedDapps::with_authorized_dapp(authorized_dapp.clone());
         assert_eq!(

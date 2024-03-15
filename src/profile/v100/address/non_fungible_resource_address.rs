@@ -19,6 +19,7 @@ macro_rules! decl_specialized_address {
             )*
             #[derive(
                 Clone,
+                Copy,
                 PartialEq,
                 Eq,
                 Hash,

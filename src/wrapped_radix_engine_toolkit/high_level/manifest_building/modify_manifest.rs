@@ -226,7 +226,7 @@ CALL_METHOD
         manifest = manifest.modify_add_guarantees([TransactionGuarantee::new(
             added_guaranteed_amount,
             index,
-            resource.clone(),
+            resource,
             divisibility,
         )]);
         let instructions = manifest.instructions().to_owned();

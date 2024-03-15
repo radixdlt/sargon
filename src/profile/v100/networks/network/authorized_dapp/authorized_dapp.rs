@@ -53,7 +53,7 @@ impl Identifiable for AuthorizedDapp {
     type ID = DappDefinitionAddress;
 
     fn id(&self) -> Self::ID {
-        self.dapp_definition_address.clone()
+        self.dapp_definition_address
     }
 }
 
@@ -63,7 +63,7 @@ impl Identifiable for AccountAddress {
     type ID = Self;
 
     fn id(&self) -> Self::ID {
-        self.clone()
+        *self
     }
 }
 

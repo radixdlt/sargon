@@ -118,7 +118,7 @@ impl Wallet {
         // TODO: clean this up, BAD code. messy, mostly because of (my) bad IdentifiedVec API.
         let network_id = account.network_id;
         let err_exists = CommonError::AccountAlreadyPresent {
-            bad_value: account.id().clone(),
+            bad_value: account.id(),
         };
         self.try_update_profile_with(|mut p| {
             let networks = &mut p.networks;

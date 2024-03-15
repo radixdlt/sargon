@@ -102,7 +102,7 @@ mod tests {
             SUT::new(
                 [
                     (
-                        acc_gk.clone(),
+                        acc_gk,
                         vec![
                             ResourceIndicator::fungible(
                                 "resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy",
@@ -206,7 +206,7 @@ mod tests {
             SUT::new(
                 [],
                 [],
-                [acc_g2.clone()], // addresses_of_accounts_requiring_auth
+                [acc_g2], // addresses_of_accounts_requiring_auth
                 [],               // addresses_of_identities_requiring_auth
                 [],               // newly_created_non_fungibles
                 [],               // reserved_instructions
@@ -218,7 +218,7 @@ mod tests {
                             AccountAddress,
                             HashMap<ResourceAddress, ResourcePreferenceUpdate>,
                         >::from_iter([(
-                            acc_g2.clone(),
+                            acc_g2,
                             HashMap::<_, _>::from_iter([(
                                 ResourceAddress::sample_stokenet_gc_tokens(),
                                 ResourcePreferenceUpdate::Remove,
@@ -226,14 +226,14 @@ mod tests {
                         )]),
                         deposit_mode_updates:
                             HashMap::<AccountAddress, DepositRule>::from_iter([(
-                                acc_g2.clone(),
+                                acc_g2,
                                 DepositRule::DenyAll,
                             )]),
                         authorized_depositors_added: HashMap::<
                             AccountAddress,
                             Vec<ResourceOrNonFungible>,
                         >::from_iter([(
-                            acc_g2.clone(),
+                            acc_g2,
                             vec![ResourceOrNonFungible::Resource {
                                 value: ResourceAddress::sample_stokenet_nft_gc_membership(),
                             }],
@@ -242,7 +242,7 @@ mod tests {
                             AccountAddress,
                             Vec<ResourceOrNonFungible>,
                         >::from_iter([(
-                            acc_g2.clone(),
+                            acc_g2,
                             vec![ResourceOrNonFungible::Resource {
                                 value: ResourceAddress::sample_stokenet_nft_other(),
                             }],
@@ -287,9 +287,9 @@ mod tests {
             SUT::new(
                 [],
                 [(
-                    acc_g2.clone(),
+                    acc_g2,
                     vec![ResourceIndicator::fungible(
-                        token_address.clone(),
+                        token_address,
                         FungibleResourceIndicator::predicted(100000, 1)
                     )]
                 )],
@@ -303,7 +303,7 @@ mod tests {
                 FeeLocks::default(),
                 FeeSummary::new("0.15800815", "0.1160115", "0.25339126151", 0,),
                 NewEntities::new([(
-                    token_address.clone(),
+                    token_address,
                     NewlyCreatedResource::with(
                         "MyResource",
                         "VIP",
@@ -411,7 +411,7 @@ mod tests {
             SUT::new(
                 [
                     (
-                        acc_gk.clone(),
+                        acc_gk,
                         vec![
                             ResourceIndicator::fungible(
                                 "resource_tdx_2_1thqcgjw37fjgycpvqr52nx4jcsdeuq75mf2nywme07kzsuds9a4psp",
@@ -422,7 +422,7 @@ mod tests {
                 ],
                 [
                     (
-                        acc_gk.clone(),
+                        acc_gk,
                         vec![
                             ResourceIndicator::non_fungible(
                                 "resource_tdx_2_1ng88qk08hrgmad30rzdxpyx779yuta4cwcjc3gstk60jhachsv94g9",
@@ -484,7 +484,7 @@ mod tests {
                 SUT::new(
                     [
                         (
-                            acc_gk.clone(),
+                            acc_gk,
                             vec![
                                 ResourceIndicator::Fungible {
                                     resource_address: "resource_tdx_2_1thqcgjw37fjgycpvqr52nx4jcsdeuq75mf2nywme07kzsuds9a4psp".parse::<ResourceAddress>().unwrap(), 
@@ -495,7 +495,7 @@ mod tests {
                     ], // addresses_of_accounts_withdrawn_from
                     [
                         (
-                            acc_gk.clone(),
+                            acc_gk,
                             vec![
                                 ResourceIndicator::Fungible {
                                     resource_address: "resource_tdx_2_1tk30vj4ene95e3vhymtf2p35fzl29rv4us36capu2rz0vretw9gzr3".parse::<ResourceAddress>().unwrap(),
@@ -599,7 +599,7 @@ mod tests {
                 SUT::new(
                     [
                         (
-                            acc_gk.clone(),
+                            acc_gk,
                             vec![
                                 ResourceIndicator::Fungible {
                                     resource_address: ResourceAddress::sample_stokenet_xrd(),
@@ -614,7 +614,7 @@ mod tests {
                     ],
                     [
                         (
-                            acc_gk.clone(),
+                            acc_gk,
                             vec![
                                 ResourceIndicator::Fungible {
                                     resource_address: "resource_tdx_2_1thnhmen4wg29tnqrfpk9w2v90s64z8at9sethnjma76866rfvcc2gs".parse::<ResourceAddress>().unwrap(), 
@@ -631,7 +631,7 @@ mod tests {
                     [], // encountered_component_addresses
                     [
                         DetailedManifestClass::PoolContribution {
-                            pool_addresses: vec![pool_address.clone()],
+                            pool_addresses: vec![pool_address],
                             pool_contributions: vec![
                                 TrackedPoolContribution::new(
                                     pool_address,
@@ -690,7 +690,7 @@ mod tests {
             sut,
             SUT::new(
                 [(
-                    acc_gk.clone(),
+                    acc_gk,
                     vec![ResourceIndicator::Fungible {
                         resource_address: ResourceAddress::sample_stokenet_xrd(
                         ),
@@ -700,42 +700,42 @@ mod tests {
                     },]
                 )], // addresses_of_accounts_withdrawn_from
                 [(
-                    acc_gk.clone(),
+                    acc_gk,
                     vec![
                         ResourceIndicator::Fungible {
                             resource_address:
-                                validator_0_resource_address_of_stake.clone(),
+                                validator_0_resource_address_of_stake,
                             indicator: FungibleResourceIndicator::predicted(
                                 11, 3
                             )
                         },
                         ResourceIndicator::Fungible {
                             resource_address:
-                                validator_1_resource_address_of_stake.clone(),
+                                validator_1_resource_address_of_stake,
                             indicator: FungibleResourceIndicator::predicted(
                                 222, 7
                             )
                         },
                         ResourceIndicator::Fungible {
                             resource_address:
-                                validator_2_resource_address_of_stake.clone(),
+                                validator_2_resource_address_of_stake,
                             indicator: FungibleResourceIndicator::predicted(
                                 3333, 11
                             )
                         },
                     ]
                 )], // addresses_of_accounts_deposited_into
-                [acc_gk.clone()], // addresses_of_accounts_requiring_auth
-                [],               // addresses_of_identities_requiring_auth
-                [],               // newly_created_non_fungibles
-                [],               // reserved_instructions
-                [],               // presented_proofs
-                [],               // encountered_component_addresses
+                [acc_gk], // addresses_of_accounts_requiring_auth
+                [],       // addresses_of_identities_requiring_auth
+                [],       // newly_created_non_fungibles
+                [],       // reserved_instructions
+                [],       // presented_proofs
+                [],       // encountered_component_addresses
                 [DetailedManifestClass::ValidatorStake {
                     validator_addresses: vec![
-                        validator_0.clone(),
-                        validator_1.clone(),
-                        validator_2.clone()
+                        validator_0,
+                        validator_1,
+                        validator_2
                     ],
                     validator_stakes: vec![
                         TrackedValidatorStake::new(
@@ -793,14 +793,14 @@ mod tests {
             sut,
             SUT::new(
                 [(
-                    acc_gk.clone(),
+                    acc_gk,
                     vec![ResourceIndicator::Fungible {
-                        resource_address: resource_address_of_pool.clone(),
+                        resource_address: resource_address_of_pool,
                         indicator: FungibleResourceIndicator::guaranteed(500)
                     }]
                 )], // addresses_of_accounts_withdrawn_from
                 [(
-                    acc_gk.clone(),
+                    acc_gk,
                     vec![
                         ResourceIndicator::Fungible {
                             resource_address:
@@ -811,7 +811,7 @@ mod tests {
                             )
                         },
                         ResourceIndicator::Fungible {
-                            resource_address: token0.clone(),
+                            resource_address: token0,
                             indicator: FungibleResourceIndicator::predicted(
                                 "1187.5763355433",
                                 3
@@ -826,20 +826,14 @@ mod tests {
                 [],       // presented_proofs
                 [],       // encountered_component_addresses
                 [DetailedManifestClass::PoolRedemption {
-                    pool_addresses: vec![pool_address.clone()],
+                    pool_addresses: vec![pool_address],
                     pool_contributions: vec![TrackedPoolRedemption::new(
                         pool_address,
                         resource_address_of_pool,
                         500,
                         [
-                            (
-                                token0.clone(),
-                                "1187.5763355433".parse().unwrap()
-                            ),
-                            (
-                                token1.clone(),
-                                "210.512783488241137505".parse().unwrap()
-                            ),
+                            (token0, "1187.5763355433".parse().unwrap()),
+                            (token1, "210.512783488241137505".parse().unwrap()),
                         ]
                     )]
                 }],
@@ -881,7 +875,7 @@ mod tests {
                 SUT::new(
                     [
                         (
-                           acc_gk.clone(),
+                           acc_gk,
                             vec![
                                 ResourceIndicator::fungible(
                                     "resource_tdx_2_1t5hpjckz9tm63gqvxsl60ejhzvnlguly77tltvywnj06s2x9wjdxjn", 
@@ -892,7 +886,7 @@ mod tests {
                     ], // addresses_of_accounts_withdrawn_from
                     [
                       (
-                        acc_gk.clone(),
+                        acc_gk,
                         vec![
                             (
                                ResourceIndicator::non_fungible(
@@ -971,7 +965,7 @@ mod tests {
                 SUT::new(
                     [
                         (
-                            acc_gk.clone(),
+                            acc_gk,
                             vec![
                                 ResourceIndicator::non_fungible(
                                     "resource_tdx_2_1ng3g2nj5pfpmdphgz0nrh8z0gtqcxx5z5dn48t85ar0z0zjhefufaw",
@@ -990,7 +984,7 @@ mod tests {
                     ], // addresses_of_accounts_withdrawn_from
                     [
                         (
-                            acc_gk.clone(),
+                            acc_gk,
                             vec![
                                 ResourceIndicator::Fungible {
                                     resource_address: ResourceAddress::sample_stokenet_xrd(),
@@ -1011,7 +1005,7 @@ mod tests {
                     [], // encountered_component_addresses
                     [
                         DetailedManifestClass::ValidatorClaim {
-                            validator_addresses: vec![validator_1.clone(), validator_2.clone()],
+                            validator_addresses: vec![validator_1, validator_2],
                             validator_claims: vec![
                                 TrackedValidatorClaim::new(
                                     validator_1,

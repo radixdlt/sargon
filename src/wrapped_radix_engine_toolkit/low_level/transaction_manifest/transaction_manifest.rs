@@ -320,7 +320,7 @@ mod tests {
             summary,
             ManifestSummary::new(
                 [
-                    a.clone()
+                    a
                 ],
                 [
                     AccountAddress::from("account_sim1c8mulhl5yrk6hh4jsyldps5sdrp08r5v9wusupvzxgqvhlp4c4nwjz"),
