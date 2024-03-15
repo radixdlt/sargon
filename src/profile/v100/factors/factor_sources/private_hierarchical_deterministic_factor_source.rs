@@ -87,7 +87,7 @@ impl PrivateHierarchicalDeterministicFactorSource {
         let hd_private_key =
             self.mnemonic_with_passphrase.derive_private_key(path);
         let hd_factor_instance = HierarchicalDeterministicFactorInstance::new(
-            self.factor_source.id.clone(),
+            self.factor_source.id,
             hd_private_key.public_key(),
         );
         HDFactorInstanceTransactionSigning::new(hd_factor_instance).unwrap()

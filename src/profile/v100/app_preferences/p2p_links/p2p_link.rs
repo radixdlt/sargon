@@ -66,7 +66,7 @@ impl Identifiable for P2PLink {
 
 impl P2PLink {
     pub fn connection_password(&self) -> RadixConnectPassword {
-        self.connection_password.clone()
+        self.connection_password
     }
 }
 

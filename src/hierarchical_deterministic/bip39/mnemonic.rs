@@ -2,6 +2,7 @@ use crate::prelude::*;
 
 #[derive(
     Clone,
+    /* NEVER COPY! We wanna require explicit copying */
     PartialEq,
     Eq,
     Hash,

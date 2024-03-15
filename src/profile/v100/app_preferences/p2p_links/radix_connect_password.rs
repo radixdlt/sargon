@@ -4,9 +4,10 @@ use crate::prelude::*;
 /// over web sockets. The actual `ConnectionPassword` is used to encrypt all messages sent via
 /// the Signaling Server.
 #[derive(
+    Clone,
+    Copy,
     Serialize,
     Deserialize,
-    Clone,
     PartialEq,
     Eq,
     Hash,

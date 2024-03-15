@@ -1,7 +1,18 @@
 use crate::prelude::*;
 
 /// Hashes of public keys, either Ed25519PublicKey or Secp256k1PublicKey
-#[derive(Clone, Debug, PartialEq, EnumAsInner, Eq, Hash, uniffi::Enum)]
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    PartialEq,
+    PartialOrd,
+    Ord,
+    EnumAsInner,
+    Eq,
+    Hash,
+    uniffi::Enum,
+)]
 pub enum PublicKeyHash {
     Ed25519 { value: Exactly29Bytes },
     Secp256k1 { value: Exactly29Bytes },

@@ -3,9 +3,12 @@ use crate::prelude::*;
 /// Represents an Secp256k1 signature.
 #[derive(
     Clone,
+    Copy,
     PartialEq,
     Eq,
     Hash,
+    PartialOrd,
+    Ord,
     derive_more::Display,
     derive_more::Debug,
     derive_more::FromStr,
@@ -152,7 +155,7 @@ mod tests {
     fn scrypto_roundtrip() {
         let sut = SUT::sample();
         assert_eq!(
-            SUT::from(ScryptoSecp256k1Signature::from(sut.clone())),
+            SUT::from(ScryptoSecp256k1Signature::from(sut)),
             sut
         );
     }

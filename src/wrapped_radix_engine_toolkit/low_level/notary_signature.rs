@@ -3,8 +3,11 @@ use crate::prelude::*;
 #[derive(
     Debug,
     Clone,
+    Copy,
     Eq,
     PartialEq,
+    PartialOrd,
+    Ord,
     derive_more::Display,
     derive_more::FromStr,
     uniffi::Record,

@@ -44,7 +44,7 @@ impl HierarchicalDeterministicFactorInstance {
             .as_hash()
             .ok_or(CommonError::FactorSourceIDNotFromHash)?;
         Ok(Self::with_key_and_path(
-            factor_source_id.clone(),
+            *factor_source_id,
             public_key,
             derivation_path,
         ))
@@ -69,7 +69,7 @@ impl HierarchicalDeterministicFactorInstance {
 
     pub fn factor_instance(&self) -> FactorInstance {
         FactorInstance::new(
-            self.factor_source_id.clone().into(),
+            self.factor_source_id.into(),
             FactorInstanceBadge::Virtual {
                 value: self.public_key.clone().into(),
             },

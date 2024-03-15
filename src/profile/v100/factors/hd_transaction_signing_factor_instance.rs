@@ -30,7 +30,7 @@ impl<T: IsEntityPath + Clone> HDFactorInstanceTransactionSigning<T> {
                 }
             })
             .map(|p| Self {
-                factor_source_id: value.factor_source_id.clone(),
+                factor_source_id: value.factor_source_id,
                 public_key: value.public_key.public_key,
                 path: p.clone(),
             })

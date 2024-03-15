@@ -3,9 +3,12 @@ use crate::prelude::*;
 /// Represents an ED25519 signature.
 #[derive(
     Clone,
+    Copy,
     PartialEq,
     Eq,
     Hash,
+    PartialOrd,
+    Ord,
     derive_more::Display,
     derive_more::Debug,
     derive_more::FromStr,
@@ -150,7 +153,7 @@ mod tests {
     #[test]
     fn scrypto_roundtrip() {
         let sut = SUT::sample();
-        assert_eq!(SUT::from(ScryptoEd25519Signature::from(sut.clone())), sut);
+        assert_eq!(SUT::from(ScryptoEd25519Signature::from(sut)), sut);
     }
 
     #[test]

@@ -106,8 +106,7 @@ impl Wallet {
             SecureStorageKey::DeviceFactorSourceMnemonic {
                 factor_source_id: private_hd_factor_source
                     .factor_source
-                    .id
-                    .clone(),
+                    .id,
             },
             &private_hd_factor_source.mnemonic_with_passphrase,
         )?;

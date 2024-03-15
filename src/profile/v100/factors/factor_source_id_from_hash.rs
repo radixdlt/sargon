@@ -4,9 +4,10 @@ use radix_engine_common::crypto::{blake2b_256_hash, Hash};
 /// FactorSourceID from the blake2b hash of the special HD public key derived at `CAP26::GetID`,
 /// for a certain `FactorSourceKind`
 #[derive(
+    Clone,
+    Copy,
     Serialize,
     Deserialize,
-    Clone,
     PartialEq,
     Eq,
     Hash,

@@ -94,7 +94,7 @@ impl IsPublicKey<Secp256k1Signature> for Secp256k1PublicKey {
         scrypto_verify_secp256k1(
             for_hash.as_hash(),
             &self.scrypto(),
-            &signature.clone().into(),
+            &(*signature).into(),
         )
     }
 }
