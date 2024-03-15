@@ -25,6 +25,7 @@ private func itoh(_ value: UInt8) -> UInt8 {
 }
 
 extension DataProtocol {
+	
 	var hex: String {
 		let hexLen = self.count * 2
 		var hexChars = [UInt8](repeating: 0, count: hexLen)
