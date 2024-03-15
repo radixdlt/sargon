@@ -103,7 +103,7 @@ impl TransactionManifest {
 
     pub fn summary(&self) -> ManifestSummary {
         let ret_summary = RET_summary(&self.scrypto_manifest());
-        ManifestSummary::from_ret(ret_summary, self.network_id())
+        ManifestSummary::from((ret_summary, self.network_id()))
     }
 
     pub fn network_id(&self) -> NetworkID {
@@ -296,11 +296,41 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "not yet implemented")]
-    fn manifest_summary() {
+    fn manifest_summary_simple() {
         let manifest = SUT::sample();
         let summary = manifest.summary();
-        assert_eq!(summary.addresses_of_accounts_requiring_auth[0].address(), "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease");
+        pretty_assertions::assert_eq!(
+            summary,
+            ManifestSummary::new(
+                [AccountAddress::sample()],
+                [AccountAddress::sample_other()],
+                [AccountAddress::sample()],
+                [],
+            )
+        );
+    }
+
+    #[test]
+    fn manifest_summary_multi_account_resources_transfer() {
+        let a = AccountAddress::from("account_sim1cyvgx33089ukm2pl97pv4max0x40ruvfy4lt60yvya744cve475w0q");
+
+        let manifest = SUT::sample_other();
+        let summary = manifest.summary();
+        pretty_assertions::assert_eq!(
+            summary,
+            ManifestSummary::new(
+                [
+                    a
+                ],
+                [
+                    AccountAddress::from("account_sim1c8mulhl5yrk6hh4jsyldps5sdrp08r5v9wusupvzxgqvhlp4c4nwjz"),
+                    AccountAddress::from("account_sim1c8s2hass5g62ckwpv78y8ykdqljtetv4ve6etcz64gveykxznj36tr"),
+                    AccountAddress::from("account_sim1c8ct6jdcwqrg3gzskyxuy0z933fe55fyjz6p56730r95ulzwl3ppva"),
+                ],
+                [a],
+                []
+            )
+        );
     }
 
     #[test]

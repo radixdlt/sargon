@@ -437,7 +437,7 @@ mod uniffi_tests {
 
         let bech32 = "account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzdm";
         assert_eq!(
-            SUT::new(public_key.clone(), NetworkID::Mainnet),
+            SUT::new(public_key, NetworkID::Mainnet),
             new_account_address_from(public_key, NetworkID::Mainnet)
         );
         let from_bech32 = new_account_address(bech32.to_string()).unwrap();

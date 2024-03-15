@@ -120,7 +120,7 @@ mod tests {
     fn get_by_address() {
         let address = AccountAddress::sample();
         let account = Account::sample_with_values(
-            address.clone(),
+            address,
             DisplayName::default(),
             AppearanceID::default(),
         );

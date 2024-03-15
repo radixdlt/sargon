@@ -5,6 +5,7 @@ use crate::prelude::*;
 #[derive(
     Clone,
     Debug,
+    Copy,
     PartialEq,
     EnumAsInner,
     Eq,
@@ -261,7 +262,7 @@ mod tests {
         let public_key_secp256k1: PublicKey =
             Secp256k1PublicKey::sample().into();
         let engine_key_secp256k1: ScryptoPublicKey =
-            public_key_secp256k1.clone().into();
+            public_key_secp256k1.into();
         match engine_key_secp256k1 {
             ScryptoPublicKey::Secp256k1(k) => {
                 assert_eq!(k.to_vec(), public_key_secp256k1.to_bytes())
@@ -273,8 +274,7 @@ mod tests {
     #[test]
     fn engine_roundtrip_ed25519() {
         let public_key_ed25519: PublicKey = Ed25519PublicKey::sample().into();
-        let engine_key_ed25519: ScryptoPublicKey =
-            public_key_ed25519.clone().into();
+        let engine_key_ed25519: ScryptoPublicKey = public_key_ed25519.into();
         match engine_key_ed25519 {
             ScryptoPublicKey::Ed25519(k) => {
                 assert_eq!(k.to_vec(), public_key_ed25519.to_bytes())
@@ -449,14 +449,14 @@ mod tests {
     #[test]
     fn ed25519_into_as_roundtrip() {
         let ed25519 = Ed25519PublicKey::sample();
-        let key: PublicKey = ed25519.clone().into();
+        let key: PublicKey = ed25519.into();
         assert_eq!(key.as_ed25519().unwrap(), &ed25519);
     }
 
     #[test]
     fn secp256k1_into_as_roundtrip() {
         let secp256k1 = Secp256k1PublicKey::sample();
-        let key: PublicKey = secp256k1.clone().into();
+        let key: PublicKey = secp256k1.into();
         assert_eq!(key.as_secp256k1().unwrap(), &secp256k1);
     }
 

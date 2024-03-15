@@ -197,8 +197,8 @@ mod tests {
     fn ord_same_resource_address() {
         let r = ResourceAddress::sample();
         assert!(
-            SUT::new_unchecked(r.clone(), NonFungibleLocalId::integer(1))
-                < SUT::new_unchecked(r.clone(), NonFungibleLocalId::integer(2))
+            SUT::new_unchecked(r, NonFungibleLocalId::integer(1))
+                < SUT::new_unchecked(r, NonFungibleLocalId::integer(2))
         );
     }
 
@@ -331,8 +331,7 @@ mod tests {
         let resource_address =
             ResourceAddress::sample_mainnet_nft_gc_membership();
         let local_id = NonFungibleLocalId::string("Member_237").unwrap();
-        let sut =
-            SUT::new_unchecked(resource_address.clone(), local_id.clone());
+        let sut = SUT::new_unchecked(resource_address, local_id.clone());
         assert_eq!(
             ScryptoNonFungibleGlobalId::from(sut),
             ScryptoNonFungibleGlobalId::new(

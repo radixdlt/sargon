@@ -88,8 +88,8 @@ impl SignatureWithPublicKey {
 
     pub fn public_key(&self) -> PublicKey {
         match &self {
-            Self::Secp256k1 { public_key, .. } => public_key.clone().into(),
-            Self::Ed25519 { public_key, .. } => public_key.clone().into(),
+            Self::Secp256k1 { public_key, .. } => (*public_key).into(),
+            Self::Ed25519 { public_key, .. } => (*public_key).into(),
         }
     }
 }

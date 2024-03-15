@@ -41,8 +41,7 @@ pub trait EntityAddress: AddressViaRet {
         Self::from_public_key(
             hd_factor_instance_virtual_entity_creation
                 .public_key()
-                .public_key
-                .clone(),
+                .public_key,
             network_id,
         )
     }

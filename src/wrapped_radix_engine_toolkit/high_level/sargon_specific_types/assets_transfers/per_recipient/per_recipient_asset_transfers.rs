@@ -111,27 +111,17 @@ impl HasSampleValues for PerRecipientAssetTransfers {
             ResourceAddress::sample_stokenet_gc_tokens();
 
         Self::new(
-            sender.clone(),
+            sender,
             [
                 PerRecipientAssetTransfer::new(
-                    recip0.clone(),
+                    recip0,
                     [
-                        PerRecipientFungibleTransfer::new(
-                            fung_0.clone(),
-                            30,
-                            true,
-                            18,
-                        ),
-                        PerRecipientFungibleTransfer::new(
-                            fung_1.clone(),
-                            3,
-                            true,
-                            18,
-                        ),
+                        PerRecipientFungibleTransfer::new(fung_0, 30, true, 18),
+                        PerRecipientFungibleTransfer::new(fung_1, 3, true, 18),
                     ],
                     [
                         PerRecipientNonFungiblesTransfer::new(
-                            nft_c0.clone(),
+                            nft_c0,
                             true,
                             [
                                 NonFungibleLocalId::integer(40),
@@ -139,7 +129,7 @@ impl HasSampleValues for PerRecipientAssetTransfers {
                             ],
                         ),
                         PerRecipientNonFungiblesTransfer::new(
-                            nft_c1.clone(),
+                            nft_c1,
                             true,
                             [
                                 NonFungibleLocalId::integer(21),
@@ -149,24 +139,14 @@ impl HasSampleValues for PerRecipientAssetTransfers {
                     ],
                 ),
                 PerRecipientAssetTransfer::new(
-                    recip1.clone(),
+                    recip1,
                     [
-                        PerRecipientFungibleTransfer::new(
-                            fung_0.clone(),
-                            50,
-                            true,
-                            18,
-                        ),
-                        PerRecipientFungibleTransfer::new(
-                            fung_1.clone(),
-                            5,
-                            true,
-                            18,
-                        ),
+                        PerRecipientFungibleTransfer::new(fung_0, 50, true, 18),
+                        PerRecipientFungibleTransfer::new(fung_1, 5, true, 18),
                     ],
                     [
                         PerRecipientNonFungiblesTransfer::new(
-                            nft_c0.clone(),
+                            nft_c0,
                             true,
                             [
                                 NonFungibleLocalId::integer(34),
@@ -174,7 +154,7 @@ impl HasSampleValues for PerRecipientAssetTransfers {
                             ],
                         ),
                         PerRecipientNonFungiblesTransfer::new(
-                            nft_c1.clone(),
+                            nft_c1,
                             true,
                             [
                                 NonFungibleLocalId::integer(15),
@@ -213,7 +193,7 @@ impl PerRecipientAssetTransfers {
                     existing_transfers.expanded((recipient, y.clone()));
                 } else {
                     per_asset_fungibles.insert(
-                        y.resource_address.clone(),
+                        y.resource_address,
                         PerAssetTransfersOfFungibleResource::new(
                             PerAssetFungibleResource::new(
                                 y.clone().resource_address,
@@ -235,7 +215,7 @@ impl PerRecipientAssetTransfers {
                     existing_transfers.expanded((recipient, y.clone()));
                 } else {
                     per_asset_non_fungibles.insert(
-                        y.resource_address.clone(),
+                        y.resource_address,
                         PerAssetTransfersOfNonFungibleResource::new(
                             y.clone().resource_address,
                             [PerAssetNonFungibleTransfer::from((
@@ -249,7 +229,7 @@ impl PerRecipientAssetTransfers {
         });
 
         PerAssetTransfers::new(
-            self.address_of_sender.clone(),
+            self.address_of_sender,
             per_asset_fungibles.values().cloned(),
             per_asset_non_fungibles.values().cloned(),
         )
@@ -315,29 +295,29 @@ mod tests {
             ResourceAddress::sample_stokenet_gc_tokens();
 
         let per_asset_transfers = PerAssetTransfers::new(
-            sender.clone(),
+            sender,
             [
                 PerAssetTransfersOfFungibleResource::new(
-                    PerAssetFungibleResource::new(fung_0.clone(), 18),
+                    PerAssetFungibleResource::new(fung_0, 18),
                     [
-                        PerAssetFungibleTransfer::new(recip0.clone(), true, 30),
-                        PerAssetFungibleTransfer::new(recip1.clone(), true, 50),
+                        PerAssetFungibleTransfer::new(recip0, true, 30),
+                        PerAssetFungibleTransfer::new(recip1, true, 50),
                     ],
                 ),
                 PerAssetTransfersOfFungibleResource::new(
-                    PerAssetFungibleResource::new(fung_1.clone(), 18),
+                    PerAssetFungibleResource::new(fung_1, 18),
                     [
-                        PerAssetFungibleTransfer::new(recip0.clone(), true, 3),
-                        PerAssetFungibleTransfer::new(recip1.clone(), true, 5),
+                        PerAssetFungibleTransfer::new(recip0, true, 3),
+                        PerAssetFungibleTransfer::new(recip1, true, 5),
                     ],
                 ),
             ],
             [
                 PerAssetTransfersOfNonFungibleResource::new(
-                    nft_c0.clone(),
+                    nft_c0,
                     [
                         PerAssetNonFungibleTransfer::new(
-                            recip0.clone(),
+                            recip0,
                             true,
                             [
                                 NonFungibleLocalId::integer(40),
@@ -345,7 +325,7 @@ mod tests {
                             ],
                         ),
                         PerAssetNonFungibleTransfer::new(
-                            recip1.clone(),
+                            recip1,
                             true,
                             [
                                 NonFungibleLocalId::integer(34),
@@ -355,10 +335,10 @@ mod tests {
                     ],
                 ),
                 PerAssetTransfersOfNonFungibleResource::new(
-                    nft_c1.clone(),
+                    nft_c1,
                     [
                         PerAssetNonFungibleTransfer::new(
-                            recip0.clone(),
+                            recip0,
                             true,
                             [
                                 NonFungibleLocalId::integer(21),
@@ -366,7 +346,7 @@ mod tests {
                             ],
                         ),
                         PerAssetNonFungibleTransfer::new(
-                            recip1.clone(),
+                            recip1,
                             true,
                             [
                                 NonFungibleLocalId::integer(15),

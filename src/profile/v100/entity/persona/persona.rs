@@ -309,7 +309,7 @@ impl Identifiable for Persona {
     type ID = IdentityAddress;
 
     fn id(&self) -> Self::ID {
-        self.address.clone()
+        self.address
     }
 }
 

@@ -48,7 +48,7 @@ impl Identifiable for AuthorizedPersonaSimple {
     type ID = IdentityAddress;
 
     fn id(&self) -> Self::ID {
-        self.identity_address.clone()
+        self.identity_address
     }
 }
 

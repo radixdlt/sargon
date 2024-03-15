@@ -117,7 +117,7 @@ mod tests {
     #[test]
     fn get_by_address() {
         let persona = Persona::sample();
-        let address = persona.address.clone();
+        let address = persona.address;
         let personas = Personas::with_persona(persona.clone());
         assert_eq!(personas.get_persona_by_address(&address), Some(&persona));
     }

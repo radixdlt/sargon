@@ -103,7 +103,7 @@ impl Identifiable for Account {
     type ID = AccountAddress;
 
     fn id(&self) -> Self::ID {
-        self.address.clone()
+        self.address
     }
 }
 
@@ -319,7 +319,7 @@ mod tests {
                 .parse()
                 .unwrap();
         let account = Account::sample_with_values(
-            address.clone(),
+            address,
             DisplayName::default(),
             AppearanceID::default(),
         );

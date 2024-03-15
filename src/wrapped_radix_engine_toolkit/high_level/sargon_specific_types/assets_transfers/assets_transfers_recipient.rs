@@ -111,6 +111,6 @@ mod tests {
     #[test]
     fn from_address() {
         let exp = &AccountAddress::sample();
-        assert_eq!(SUT::from(exp.clone()).account_address(), exp)
+        assert_eq!(SUT::from(*exp).account_address(), exp)
     }
 }

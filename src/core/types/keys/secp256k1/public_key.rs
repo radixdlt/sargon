@@ -6,6 +6,7 @@ use bip32::secp256k1::PublicKey as BIP32Secp256k1PublicKey; // the bip32 crate a
 #[serde_as]
 #[derive(
     Clone,
+    Copy,
     PartialEq,
     Eq,
     Hash,
@@ -251,10 +252,8 @@ mod tests {
 
         // and back
         assert_eq!(
-            SUT::try_from(ScryptoSecp256k1PublicKey::from(
-                from_scrypto.clone()
-            ))
-            .unwrap(),
+            SUT::try_from(ScryptoSecp256k1PublicKey::from(from_scrypto))
+                .unwrap(),
             from_scrypto
         );
     }

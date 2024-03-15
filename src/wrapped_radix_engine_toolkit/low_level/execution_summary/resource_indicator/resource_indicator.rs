@@ -15,20 +15,20 @@ pub enum ResourceIndicator {
 impl ResourceIndicator {
     pub fn fungible(
         resource_address: impl Into<ResourceAddress>,
-        indicator: FungibleResourceIndicator,
+        indicator: impl Into<FungibleResourceIndicator>,
     ) -> Self {
         Self::Fungible {
             resource_address: resource_address.into(),
-            indicator,
+            indicator: indicator.into(),
         }
     }
     pub fn non_fungible(
         resource_address: impl Into<ResourceAddress>,
-        indicator: NonFungibleResourceIndicator,
+        indicator: impl Into<NonFungibleResourceIndicator>,
     ) -> Self {
         Self::NonFungible {
             resource_address: resource_address.into(),
-            indicator,
+            indicator: indicator.into(),
         }
     }
 }
@@ -40,17 +40,17 @@ impl From<(RetResourceIndicator, NetworkID)> for ResourceIndicator {
             RetResourceIndicator::Fungible(
                 resource_address,
                 fungible_indicator,
-            ) => Self::Fungible {
-                resource_address: (resource_address, network_id).into(),
-                indicator: fungible_indicator.into(),
-            },
+            ) => Self::fungible(
+                (resource_address, network_id),
+                fungible_indicator,
+            ),
             RetResourceIndicator::NonFungible(
                 resource_address,
                 non_fungible_indicator,
-            ) => Self::NonFungible {
-                resource_address: (resource_address, network_id).into(),
-                indicator: non_fungible_indicator.into(),
-            },
+            ) => Self::non_fungible(
+                (resource_address, network_id),
+                non_fungible_indicator,
+            ),
         }
     }
 }
