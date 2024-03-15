@@ -215,6 +215,8 @@ macro_rules! decl_exactly_n_bytes {
                 derive_more::Debug,
                 uniffi::Record,
             )]
+            #[display("{}", self.to_hex())]
+            #[debug("{}", self.to_hex())]
             pub struct [<Exactly $byte_count Bytes>] {
                 secret_magic: [<Exactly $byte_count Bytes SecretMagic>],
             }
@@ -254,7 +256,6 @@ macro_rules! decl_exactly_n_bytes {
                     }
                 }
             }
-
 
             impl TryFrom<&[u8]> for [<Exactly $byte_count Bytes>] {
                 type Error = CommonError;
@@ -302,7 +303,7 @@ macro_rules! decl_exactly_n_bytes {
 
                 /// A sample used to facilitate unit tests.
                 fn sample_other() -> Self {
-                    <ExactlyNBytes<$byte_count>>::sample().into()
+                    <ExactlyNBytes<$byte_count>>::sample_other().into()
                 }
             }
 
@@ -346,26 +347,38 @@ macro_rules! decl_exactly_n_bytes {
                 }
             }
 
-
             #[uniffi::export]
             pub fn [<new_exactly_ $byte_count _bytes>](
                 bytes: BagOfBytes,
-            ) -> Result<[< Exactly $byte_count Bytes  >]> {
-                [< Exactly $byte_count Bytes  >]::try_from(bytes)
+            ) -> Result<[< Exactly $byte_count Bytes >]> {
+                [< Exactly $byte_count Bytes >]::try_from(bytes)
             }
 
             #[uniffi::export]
             pub fn [<new_exactly_ $byte_count _bytes_sample>](
-            ) -> [< Exactly $byte_count Bytes  >] {
-                [< Exactly $byte_count Bytes  >]::sample()
+            ) -> [< Exactly $byte_count Bytes >] {
+                [< Exactly $byte_count Bytes >]::sample()
             }
 
             #[uniffi::export]
             pub fn [<new_exactly_ $byte_count _bytes_sample_other>](
-            ) -> [< Exactly $byte_count Bytes  >] {
-                [< Exactly $byte_count Bytes  >]::sample_other()
+            ) -> [< Exactly $byte_count Bytes >] {
+                [< Exactly $byte_count Bytes >]::sample_other()
             }
 
+            #[uniffi::export]
+            pub fn [<exactly_ $byte_count _bytes_to_bytes>](
+                bytes: &[< Exactly $byte_count Bytes >],
+            ) -> BagOfBytes {
+                BagOfBytes::from(bytes.bytes())
+            }
+
+            #[uniffi::export]
+            pub fn [<exactly_ $byte_count _bytes_to_hex>](
+                bytes: &[< Exactly $byte_count Bytes >],
+            ) -> String {
+                bytes.to_hex()
+            }
 
             #[cfg(test)]
             mod [<test_exactly_ $byte_count _bytes_macro>] {
@@ -373,8 +386,7 @@ macro_rules! decl_exactly_n_bytes {
                 use crate::prelude::*;
 
                 #[allow(clippy::upper_case_acronyms)]
-                type SUT = [< Exactly $byte_count Bytes  >];
-
+                type SUT = [< Exactly $byte_count Bytes >];
 
                 #[test]
                 fn equality() {
@@ -467,6 +479,9 @@ macro_rules! decl_exactly_n_bytes {
 
                 use crate::prelude::*;
 
+                #[allow(clippy::upper_case_acronyms)]
+                type SUT = [< Exactly $byte_count Bytes >];
+
                 #[test]
                 fn new_from_bag_of_bytes() {
                     let bytes = generate_bytes::<$byte_count>();
@@ -479,6 +494,26 @@ macro_rules! decl_exactly_n_bytes {
                 #[test]
                 fn new_fail() {
                     assert!([<new_exactly_ $byte_count _bytes>](generate_bytes::<5>().into()).is_err());
+                }
+
+                #[test]
+                fn to_bytes() {
+                    let bytes = generate_byte_array::<$byte_count>();
+                    let sut = SUT::from(&bytes);
+                    assert_eq!(
+                        [<exactly_ $byte_count _bytes_to_bytes>](&sut),
+                        BagOfBytes::from(&bytes)
+                    );
+                }
+
+                #[test]
+                fn to_hex() {
+                    let bytes = generate_byte_array::<$byte_count>();
+                    let sut = SUT::from(&bytes);
+                    assert_eq!(
+                        [<exactly_ $byte_count _bytes_to_hex>](&sut),
+                        hex_encode(&bytes)
+                    );
                 }
             }
         }
