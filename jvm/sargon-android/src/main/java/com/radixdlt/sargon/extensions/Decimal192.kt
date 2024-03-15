@@ -65,7 +65,11 @@ fun Decimal192.rounded(decimalPlaces: UByte, roundingMode: RoundingMode): Decima
     }
 
     return try {
-        decimalRound(decimal = this, decimalPlaces = decimalPlaces, roundingMode = roundingMode)
+        decimalRound(
+            decimal = this,
+            decimalPlaces = decimalPlaces.toUByte(),
+            roundingMode = roundingMode
+        )
     } catch (exception: Exception) {
         error("Failed to round, error: $exception")
     }
