@@ -52,6 +52,6 @@ repos:
       - id: uniffi bindgen tests
         name: uniffi bindgen tests
         language: system
-        types: [file, rust]
+        types: [file, rust, swift]
         entry: cargo test --package sargon --test uniffi
         pass_filenames: false

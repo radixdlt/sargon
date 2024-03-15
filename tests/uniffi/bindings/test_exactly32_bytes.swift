@@ -62,7 +62,6 @@ extension Data {
 	}
 }
 
-
 func randomByteArray(byteCount count: Int) -> [UInt8] {
 	#if canImport(Darwin) || os(Linux) || os(Android) || os(Windows)
 		var rng = SystemRandomNumberGenerator()
