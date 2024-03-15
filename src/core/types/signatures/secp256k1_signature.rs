@@ -154,10 +154,7 @@ mod tests {
     #[test]
     fn scrypto_roundtrip() {
         let sut = SUT::sample();
-        assert_eq!(
-            SUT::from(ScryptoSecp256k1Signature::from(sut)),
-            sut
-        );
+        assert_eq!(SUT::from(ScryptoSecp256k1Signature::from(sut)), sut);
     }
 
     #[test]

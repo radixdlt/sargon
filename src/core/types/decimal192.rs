@@ -2,6 +2,8 @@ use crate::prelude::*;
 use delegate::delegate;
 use enum_iterator::reverse_all;
 
+uniffi::custom_type!(ScryptoDecimal192, String);
+
 /// UniFFI conversion for InnerDecimal using String as builtin.
 impl crate::UniffiCustomTypeConverter for ScryptoDecimal192 {
     type Builtin = String;

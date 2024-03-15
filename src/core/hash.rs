@@ -20,6 +20,8 @@ impl From<HashSecretMagic> for Exactly32Bytes {
     }
 }
 
+uniffi::custom_type!(HashSecretMagic, BagOfBytes);
+
 impl crate::UniffiCustomTypeConverter for HashSecretMagic {
     type Builtin = BagOfBytes;
 
@@ -53,12 +55,6 @@ pub struct Hash {
     pub(crate) secret_magic: HashSecretMagic,
 }
 
-impl From<Hash> for Exactly32Bytes {
-    fn from(value: Hash) -> Self {
-        value.secret_magic.into()
-    }
-}
-
 impl AsRef<ScryptoHash> for Hash {
     fn as_ref(&self) -> &ScryptoHash {
         &self.secret_magic.0
@@ -68,6 +64,12 @@ impl AsRef<ScryptoHash> for Hash {
 impl AsRef<[u8]> for Hash {
     fn as_ref(&self) -> &[u8] {
         self.secret_magic.0.as_ref()
+    }
+}
+impl From<Hash> for Exactly32Bytes {
+    /// Instantiates a new `ExactlyNBytes<N>` from the `Hash` (N bytes).
+    fn from(value: Hash) -> Self {
+        Self::from(&value.into_bytes())
     }
 }
 

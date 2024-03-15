@@ -104,9 +104,7 @@ impl Wallet {
         let wallet = Self::with_imported_profile(profile, secure_storage);
         wallet.wallet_client_storage.save(
             SecureStorageKey::DeviceFactorSourceMnemonic {
-                factor_source_id: private_hd_factor_source
-                    .factor_source
-                    .id,
+                factor_source_id: private_hd_factor_source.factor_source.id,
             },
             &private_hd_factor_source.mnemonic_with_passphrase,
         )?;

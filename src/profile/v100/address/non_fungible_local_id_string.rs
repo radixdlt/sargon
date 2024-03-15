@@ -64,6 +64,8 @@ fn scrypto_string_non_fungible_local_id(
     })
 }
 
+uniffi::custom_type!(ScryptoStringNonFungibleLocalId, String);
+
 impl crate::UniffiCustomTypeConverter for ScryptoStringNonFungibleLocalId {
     type Builtin = String;
 

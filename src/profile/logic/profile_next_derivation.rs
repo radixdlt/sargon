@@ -2,7 +2,10 @@ use crate::prelude::*;
 
 impl Profile {
     #[cfg(not(tarpaulin_include))] // false negative
-    pub fn factor_source_by_id<F>(&self, id: impl Into<FactorSourceID>) -> Result<F>
+    pub fn factor_source_by_id<F>(
+        &self,
+        id: impl Into<FactorSourceID>,
+    ) -> Result<F>
     where
         F: IsFactorSource,
     {
