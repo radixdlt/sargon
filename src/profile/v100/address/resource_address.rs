@@ -150,6 +150,13 @@ impl ResourceAddress {
             .parse()
             .expect("valid sample value")
     }
+
+    #[allow(unused)]
+    pub(crate) fn sample_sim_xrd() -> Self {
+        "resource_sim1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxakj8n3"
+            .parse()
+            .expect("valid sample value")
+    }
 }
 
 #[cfg(test)]
@@ -172,6 +179,7 @@ mod tests {
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
         assert_ne!(SUT::sample_stokenet(), SUT::sample());
+        assert_ne!(SUT::sample_sim_xrd(), SUT::sample_stokenet_xrd());
     }
 
     #[test]

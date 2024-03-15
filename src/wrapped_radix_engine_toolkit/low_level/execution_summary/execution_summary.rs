@@ -13,11 +13,15 @@ pub struct ExecutionSummary {
         HashMap<AccountAddress, Vec<ResourceIndicator>>,
 
     /// Addresses of accounts encountered in the manifest where privileged
-    /// methods were called.
+    /// methods were called. The wallets will need to collect signatures
+    /// of the accounts of all those addresses, which might be multiple
+    /// signatures per Account, if MFA has been setup.
     pub addresses_of_accounts_requiring_auth: Vec<AccountAddress>,
 
     /// Addresses of identities (Personas) encountered in the manifest where privileged
-    /// methods were called.
+    /// methods were called. The wallets will need to collect signatures
+    /// of the identities of all those addresses, which might be multiple
+    /// signatures per Persona, if MFA has been setup.
     pub addresses_of_identities_requiring_auth: Vec<IdentityAddress>,
 
     /// Information on the global entities created in the transaction.
