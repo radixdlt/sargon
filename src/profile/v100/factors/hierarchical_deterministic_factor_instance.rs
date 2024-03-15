@@ -62,7 +62,7 @@ impl HierarchicalDeterministicFactorInstance {
 
         Self::try_from(
             factor_instance.factor_source_id.clone(),
-            badge.public_key.clone(),
+            badge.public_key,
             badge.derivation_path.clone(),
         )
     }

@@ -4,6 +4,7 @@ use crate::{prelude::*, UniffiCustomTypeConverter};
 #[serde_as]
 #[derive(
     Clone,
+    Copy,
     PartialEq,
     Eq,
     Hash,
@@ -239,7 +240,7 @@ mod tests {
             TryInto::<Ed25519PublicKey>::try_into(Into::<
                 ScryptoEd25519PublicKey,
             >::into(
-                from_scrypto.clone()
+                from_scrypto
             ))
             .unwrap(),
             from_scrypto

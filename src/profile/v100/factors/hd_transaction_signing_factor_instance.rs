@@ -31,7 +31,7 @@ impl<T: IsEntityPath + Clone> HDFactorInstanceTransactionSigning<T> {
             })
             .map(|p| Self {
                 factor_source_id: value.factor_source_id.clone(),
-                public_key: value.public_key.public_key.clone(),
+                public_key: value.public_key.public_key,
                 path: p.clone(),
             })
     }
@@ -48,7 +48,7 @@ impl<E: IsEntityPath + Clone> HasEntityPath<E>
 impl<E: IsEntityPath + Clone> HDFactorInstanceTransactionSigning<E> {
     pub fn public_key(&self) -> HierarchicalDeterministicPublicKey {
         HierarchicalDeterministicPublicKey::new(
-            self.public_key.clone(),
+            self.public_key,
             self.path.derivation_path(),
         )
     }
