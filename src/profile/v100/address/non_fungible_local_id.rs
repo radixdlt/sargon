@@ -118,7 +118,7 @@ impl From<NonFungibleLocalId> for ScryptoNonFungibleLocalId {
         match value {
             NonFungibleLocalId::Str { value } => Self::String(value.into()),
             NonFungibleLocalId::Bytes { value } => Self::bytes(value.to_vec()).expect("Should always be able to create Scrypto NonFungibleLocalId from bytes."),
-            NonFungibleLocalId::Ruid { value } => Self::ruid(value.bytes()),
+            NonFungibleLocalId::Ruid { value } => Self::ruid(*value.bytes()),
             NonFungibleLocalId::Integer { value } => Self::integer(value),
         }
     }
@@ -225,9 +225,9 @@ mod tests {
     #[test]
     fn from_native_ruid() {
         let bytes = Exactly32Bytes::sample_dead();
-        let value = SUT::ruid(bytes.clone()).unwrap();
+        let value = SUT::ruid(bytes).unwrap();
         let scrypto = ScryptoNonFungibleLocalId::RUID(
-            ScryptoRUIDNonFungibleLocalId::new(bytes.clone().bytes()),
+            ScryptoRUIDNonFungibleLocalId::new(*bytes.bytes()),
         );
         assert_eq!(value.clone(), scrypto.clone().into());
         assert_eq!(

@@ -16,7 +16,7 @@ pub struct HashSecretMagic(ScryptoHash);
 
 impl From<HashSecretMagic> for Exactly32Bytes {
     fn from(value: HashSecretMagic) -> Self {
-        Exactly32Bytes::from_bytes(value.0.as_bytes())
+        Exactly32Bytes::from(value.0.as_bytes())
     }
 }
 
@@ -25,8 +25,7 @@ impl crate::UniffiCustomTypeConverter for HashSecretMagic {
 
     fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
         Exactly32Bytes::try_from(val.bytes)
-            .map(|e| e.bytes())
-            .map(|b: [u8; 32]| HashSecretMagic(ScryptoHash::from_bytes(b)))
+            .map(|e| HashSecretMagic(ScryptoHash::from_bytes(*e.bytes())))
             .map_err(|e| e.into())
     }
 

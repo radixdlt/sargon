@@ -21,14 +21,14 @@ pub struct Secp256k1Signature {
 impl From<ScryptoSecp256k1Signature> for Secp256k1Signature {
     fn from(value: ScryptoSecp256k1Signature) -> Self {
         Self {
-            bytes: Exactly65Bytes::from_bytes(&value.0),
+            bytes: Exactly65Bytes::from(&value.0),
         }
     }
 }
 
 impl From<Secp256k1Signature> for ScryptoSecp256k1Signature {
     fn from(value: Secp256k1Signature) -> Self {
-        ScryptoSecp256k1Signature(value.bytes.bytes())
+        ScryptoSecp256k1Signature(*value.bytes.bytes())
     }
 }
 

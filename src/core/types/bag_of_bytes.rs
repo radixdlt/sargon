@@ -413,7 +413,7 @@ mod tests {
     }
 
     #[test]
-    fn from_bytes_roundtrip() {
+    fn from_roundtrip() {
         let bytes = &[0u8; 32];
         let data: BagOfBytes = bytes.into();
         assert_eq!(data.bytes(), bytes);

@@ -118,7 +118,7 @@ impl MnemonicWithPassphrase {
 
         let private_key_bytes: PrivateKeyBytes =
             child_xprv.private_key().to_bytes().into();
-        Secp256k1PrivateKey::from_bytes(&private_key_bytes)
+        Secp256k1PrivateKey::from(&private_key_bytes)
             .expect("Valid Secp256k1PrivateKey bytes")
     }
 

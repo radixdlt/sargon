@@ -20,14 +20,14 @@ pub struct Ed25519Signature {
 impl From<ScryptoEd25519Signature> for Ed25519Signature {
     fn from(value: ScryptoEd25519Signature) -> Self {
         Self {
-            bytes: Exactly64Bytes::from_bytes(&value.0),
+            bytes: Exactly64Bytes::from(&value.0),
         }
     }
 }
 
 impl From<Ed25519Signature> for ScryptoEd25519Signature {
     fn from(value: Ed25519Signature) -> Self {
-        ScryptoEd25519Signature(value.bytes.bytes())
+        ScryptoEd25519Signature(*value.bytes.bytes())
     }
 }
 

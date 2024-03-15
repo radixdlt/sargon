@@ -21,6 +21,21 @@ typedef string Timestamp;
 typedef sequence<i8> BagOfBytes;
 
 [Custom]
+typedef BagOfBytes Exactly29BytesSecretMagic;
+
+[Custom]
+typedef BagOfBytes Exactly32BytesSecretMagic;
+
+[Custom]
+typedef BagOfBytes Exactly33BytesSecretMagic;
+
+[Custom]
+typedef BagOfBytes Exactly64BytesSecretMagic;
+
+[Custom]
+typedef BagOfBytes Exactly65BytesSecretMagic;
+
+[Custom]
 typedef BagOfBytes InstructionsSecretMagic;
 
 [Custom]

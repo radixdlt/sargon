@@ -178,7 +178,7 @@ mod uniffi_tests {
     #[test]
     fn new() {
         let bytes = Exactly32Bytes::generate();
-        assert_eq!(new_radix_connect_password(bytes.clone()).value, bytes);
+        assert_eq!(new_radix_connect_password(bytes).value, bytes);
     }
 
     #[test]
