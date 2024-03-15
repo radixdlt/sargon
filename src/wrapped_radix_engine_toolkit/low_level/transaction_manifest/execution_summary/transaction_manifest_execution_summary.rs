@@ -486,10 +486,10 @@ mod tests {
                         (
                             acc_gk,
                             vec![
-                                ResourceIndicator::Fungible {
-                                    resource_address: "resource_tdx_2_1thqcgjw37fjgycpvqr52nx4jcsdeuq75mf2nywme07kzsuds9a4psp".parse::<ResourceAddress>().unwrap(), 
-                                    indicator: FungibleResourceIndicator::guaranteed(1)
-                                },
+                                ResourceIndicator::fungible(
+                                    "resource_tdx_2_1thqcgjw37fjgycpvqr52nx4jcsdeuq75mf2nywme07kzsuds9a4psp",
+                                    FungibleResourceIndicator::guaranteed(1)
+                                ),
                             ]
                         )
                     ], // addresses_of_accounts_withdrawn_from
@@ -497,10 +497,10 @@ mod tests {
                         (
                             acc_gk,
                             vec![
-                                ResourceIndicator::Fungible {
-                                    resource_address: "resource_tdx_2_1tk30vj4ene95e3vhymtf2p35fzl29rv4us36capu2rz0vretw9gzr3".parse::<ResourceAddress>().unwrap(),
-                                    indicator: FungibleResourceIndicator::predicted(30, 4)
-                                }
+                                ResourceIndicator::fungible(
+                                     "resource_tdx_2_1tk30vj4ene95e3vhymtf2p35fzl29rv4us36capu2rz0vretw9gzr3",
+                                    FungibleResourceIndicator::predicted(30, 4)
+                                )
                             ]
                         ),
                     ], // addresses_of_accounts_deposited_into
@@ -601,14 +601,14 @@ mod tests {
                         (
                             acc_gk,
                             vec![
-                                ResourceIndicator::Fungible {
-                                    resource_address: ResourceAddress::sample_stokenet_xrd(),
-                                    indicator: FungibleResourceIndicator::Guaranteed { decimal: "237".parse::<Decimal>().unwrap() } 
-                                },
-                                ResourceIndicator::Fungible {
-                                    resource_address: "resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy".parse::<ResourceAddress>().unwrap(), 
-                                    indicator: FungibleResourceIndicator::Guaranteed { decimal: "1337".parse::<Decimal>().unwrap() } 
-                                },
+                                ResourceIndicator::fungible(
+                                    ResourceAddress::sample_stokenet_xrd(),
+                                    FungibleResourceIndicator::guaranteed(237)
+                                ),
+                                ResourceIndicator::fungible(
+                                    r"resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy",
+                                    FungibleResourceIndicator::guaranteed(1337)
+                                ),
                             ]
                         )
                     ],
@@ -616,10 +616,10 @@ mod tests {
                         (
                             acc_gk,
                             vec![
-                                ResourceIndicator::Fungible {
-                                    resource_address: "resource_tdx_2_1thnhmen4wg29tnqrfpk9w2v90s64z8at9sethnjma76866rfvcc2gs".parse::<ResourceAddress>().unwrap(), 
-                                    indicator: FungibleResourceIndicator::Predicted { predicted_decimal: PredictedDecimal::new("562.91118304755680169".parse::<Decimal>().unwrap(), 5) }
-                                },
+                                ResourceIndicator::fungible(
+                                    "resource_tdx_2_1thnhmen4wg29tnqrfpk9w2v90s64z8at9sethnjma76866rfvcc2gs",
+                                    FungibleResourceIndicator::predicted("562.91118304755680169", 5)
+                                ),
                             ]
                         )
                     ], // addresses_of_accounts_deposited_into
@@ -691,38 +691,26 @@ mod tests {
             SUT::new(
                 [(
                     acc_gk,
-                    vec![ResourceIndicator::Fungible {
-                        resource_address: ResourceAddress::sample_stokenet_xrd(
-                        ),
-                        indicator: FungibleResourceIndicator::Guaranteed {
-                            decimal: "3566".parse::<Decimal>().unwrap()
-                        }
-                    },]
+                    vec![ResourceIndicator::fungible(
+                        ResourceAddress::sample_stokenet_xrd(),
+                        FungibleResourceIndicator::guaranteed(3566)
+                    )]
                 )], // addresses_of_accounts_withdrawn_from
                 [(
                     acc_gk,
                     vec![
-                        ResourceIndicator::Fungible {
-                            resource_address:
-                                validator_0_resource_address_of_stake,
-                            indicator: FungibleResourceIndicator::predicted(
-                                11, 3
-                            )
-                        },
-                        ResourceIndicator::Fungible {
-                            resource_address:
-                                validator_1_resource_address_of_stake,
-                            indicator: FungibleResourceIndicator::predicted(
-                                222, 7
-                            )
-                        },
-                        ResourceIndicator::Fungible {
-                            resource_address:
-                                validator_2_resource_address_of_stake,
-                            indicator: FungibleResourceIndicator::predicted(
-                                3333, 11
-                            )
-                        },
+                        ResourceIndicator::fungible(
+                            validator_0_resource_address_of_stake,
+                            FungibleResourceIndicator::predicted(11, 3)
+                        ),
+                        ResourceIndicator::fungible(
+                            validator_1_resource_address_of_stake,
+                            FungibleResourceIndicator::predicted(222, 7)
+                        ),
+                        ResourceIndicator::fungible(
+                            validator_2_resource_address_of_stake,
+                            FungibleResourceIndicator::predicted(3333, 11)
+                        ),
                     ]
                 )], // addresses_of_accounts_deposited_into
                 [acc_gk], // addresses_of_accounts_requiring_auth
@@ -794,29 +782,28 @@ mod tests {
             SUT::new(
                 [(
                     acc_gk,
-                    vec![ResourceIndicator::Fungible {
-                        resource_address: resource_address_of_pool,
-                        indicator: FungibleResourceIndicator::guaranteed(500)
-                    }]
+                    vec![ResourceIndicator::fungible(
+                        resource_address_of_pool,
+                        FungibleResourceIndicator::guaranteed(500)
+                    )]
                 )], // addresses_of_accounts_withdrawn_from
                 [(
                     acc_gk,
                     vec![
-                        ResourceIndicator::Fungible {
-                            resource_address:
-                                ResourceAddress::sample_stokenet_xrd(),
-                            indicator: FungibleResourceIndicator::predicted(
+                        ResourceIndicator::fungible(
+                            ResourceAddress::sample_stokenet_xrd(),
+                            FungibleResourceIndicator::predicted(
                                 "210.512783488241137505",
                                 3
                             )
-                        },
-                        ResourceIndicator::Fungible {
-                            resource_address: token0,
-                            indicator: FungibleResourceIndicator::predicted(
+                        ),
+                        ResourceIndicator::fungible(
+                            token0,
+                            FungibleResourceIndicator::predicted(
                                 "1187.5763355433",
                                 3
                             )
-                        }
+                        )
                     ]
                 )], // addresses_of_accounts_deposited_into
                 [acc_gk], // addresses_of_accounts_requiring_auth
@@ -986,14 +973,14 @@ mod tests {
                         (
                             acc_gk,
                             vec![
-                                ResourceIndicator::Fungible {
-                                    resource_address: ResourceAddress::sample_stokenet_xrd(),
-                                    indicator: FungibleResourceIndicator::Guaranteed { decimal: Decimal192::from(110) }
-                                },
-                                ResourceIndicator::Fungible {
-                                    resource_address: ResourceAddress::sample_stokenet_xrd(),
-                                    indicator: FungibleResourceIndicator::Guaranteed { decimal: Decimal192::from(1234) }
-                                },
+                                ResourceIndicator::fungible(
+                                    ResourceAddress::sample_stokenet_xrd(),
+                                    FungibleResourceIndicator::guaranteed(110)
+                                ),
+                                ResourceIndicator::fungible(
+                                    ResourceAddress::sample_stokenet_xrd(),
+                                    FungibleResourceIndicator::guaranteed(1234)
+                        ),
                             ]
                         ),
                     ], // addresses_of_accounts_deposited_into
