@@ -3,7 +3,7 @@ use crate::prelude::*;
 /// A summary of the manifest
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct ManifestSummary {
-    /// Addresses of accounts withdraws from in the manifest.
+    /// Addresses of accounts withdrawn from in the manifest.
     pub addresses_of_accounts_withdrawn_from: Vec<AccountAddress>,
 
     /// Addresses of accounts deposited into in the manifest.
