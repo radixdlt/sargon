@@ -1,8 +1,6 @@
-package com.radixdlt.sargon.sample
+package com.radixdlt.sargon.samples
 
 import androidx.annotation.VisibleForTesting
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.radixdlt.sargon.AppPreferences
 import com.radixdlt.sargon.BagOfBytes
 import com.radixdlt.sargon.bagOfBytesAppendCafe
 import com.radixdlt.sargon.bagOfBytesAppendDeadbeef

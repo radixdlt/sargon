@@ -7,9 +7,13 @@ import com.radixdlt.sargon.resourceAddressBech32Address
 import com.radixdlt.sargon.resourceAddressIsFungible
 import com.radixdlt.sargon.resourceAddressIsNonFungible
 import com.radixdlt.sargon.resourceAddressNetworkId
+import com.radixdlt.sargon.xrdAddressOfNetwork
 
 fun ResourceAddress.Companion.init(validatingAddress: String) =
     newResourceAddress(bech32 = validatingAddress)
+
+fun ResourceAddress.Companion.xrd(networkId: NetworkId) =
+    xrdAddressOfNetwork(networkId = networkId)
 
 val ResourceAddress.string: String
     get() = resourceAddressBech32Address(address = this)

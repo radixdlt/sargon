@@ -1,4 +1,4 @@
-package com.radixdlt.sargon.sample
+package com.radixdlt.sargon.samples
 
 import androidx.annotation.VisibleForTesting
 

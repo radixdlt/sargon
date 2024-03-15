@@ -2,7 +2,7 @@ package com.radixdlt.sargon
 
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.string
-import com.radixdlt.sargon.sample.sample
+import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test

@@ -2,7 +2,7 @@ package com.radixdlt.sargon.android
 
 import com.radixdlt.sargon.SecureStorage
 import com.radixdlt.sargon.SecureStorageKey
-import com.radixdlt.sargon.secureStorageKeyIdentifier
+import com.radixdlt.sargon.extensions.identifier
 
 class EphemeralKeystore: SecureStorage {
     private val storage: MutableMap<String, ByteArray> = mutableMapOf()
@@ -24,9 +24,6 @@ class EphemeralKeystore: SecureStorage {
             entry.value.decodeToString().contains(value)
         }
     }
-
-    private val SecureStorageKey.identifier: String
-        get() = secureStorageKeyIdentifier(this)
 
     override fun toString(): String {
         return storage.toList().joinToString(prefix = "[", postfix = "\n]") { pair ->

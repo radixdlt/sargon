@@ -3,15 +3,24 @@ package com.radixdlt.sargon.extensions
 import com.radixdlt.sargon.Decimal192
 import com.radixdlt.sargon.LocaleConfig
 import com.radixdlt.sargon.RoundingMode
+import com.radixdlt.sargon.decimalAbs
 import com.radixdlt.sargon.decimalAdd
 import com.radixdlt.sargon.decimalClampedToZero
 import com.radixdlt.sargon.decimalDiv
+import com.radixdlt.sargon.decimalFormatted
+import com.radixdlt.sargon.decimalFormattedEngineeringNotation
+import com.radixdlt.sargon.decimalFormattedPlain
 import com.radixdlt.sargon.decimalIsNegative
+import com.radixdlt.sargon.decimalIsPositive
 import com.radixdlt.sargon.decimalIsZero
+import com.radixdlt.sargon.decimalMax
+import com.radixdlt.sargon.decimalMin
 import com.radixdlt.sargon.decimalMul
+import com.radixdlt.sargon.decimalNeg
 import com.radixdlt.sargon.decimalRound
 import com.radixdlt.sargon.decimalSub
 import com.radixdlt.sargon.decimalToString
+import com.radixdlt.sargon.newDecimalExponent
 import com.radixdlt.sargon.newDecimalFromF32
 import com.radixdlt.sargon.newDecimalFromFormattedString
 import com.radixdlt.sargon.newDecimalFromI32
@@ -46,6 +55,15 @@ fun Decimal192.Companion.init(
     )
 }
 
+val Decimal192.Companion.MAX: Decimal192
+    get() = decimalMax()
+
+val Decimal192.Companion.MIN: Decimal192
+    get() = decimalMin()
+
+fun Decimal192.Companion.exponent(exponent: UByte): Decimal192 =
+    newDecimalExponent(exponent = exponent)
+
 val Decimal192.string: String
     get() = decimalToString(decimal = this)
 
@@ -54,6 +72,9 @@ val Decimal192.clamped: Decimal192
 
 val Decimal192.isNegative: Boolean
     get() = decimalIsNegative(decimal = this)
+
+val Decimal192.isPositive: Boolean
+    get() = decimalIsPositive(decimal = this)
 
 val Decimal192.isZero: Boolean
     get() = decimalIsZero(decimal = this)
@@ -116,3 +137,36 @@ operator fun Decimal192.compareTo(other: Decimal192): Int {
         else -> 1
     }
 }
+
+fun Decimal192.abs(): Decimal192 = decimalAbs(decimal = this)
+
+fun Decimal192.negative(): Decimal192 = decimalNeg(decimal = this)
+
+fun Decimal192.formatted(
+    locale: LocaleConfig,
+    totalPlaces: UByte,
+    useGroupingSeparator: Boolean
+) = decimalFormatted(
+    decimal = this,
+    locale = locale,
+    totalPlaces = totalPlaces,
+    useGroupingSeparator = useGroupingSeparator
+)
+
+fun Decimal192.formattedEngineeringNotation(
+    locale: LocaleConfig,
+    totalPlaces: UByte?
+) = decimalFormattedEngineeringNotation(
+    decimal = this,
+    locale = locale,
+    totalPlaces = totalPlaces
+)
+
+fun Decimal192.formattedPlain(
+    locale: LocaleConfig,
+    useGroupingSeparator: Boolean
+) = decimalFormattedPlain(
+    decimal = this,
+    locale = locale,
+    useGroupingSeparator = useGroupingSeparator
+)

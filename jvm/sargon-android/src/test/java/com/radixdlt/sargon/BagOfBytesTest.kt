@@ -4,16 +4,16 @@ import com.radixdlt.sargon.extensions.hex
 import com.radixdlt.sargon.extensions.hexToBagOfBytes
 import com.radixdlt.sargon.extensions.randomBagOfBytes
 import com.radixdlt.sargon.extensions.toBagOfBytes
-import com.radixdlt.sargon.sample.acedBagOfBytesSample
-import com.radixdlt.sargon.sample.appendingCafeSample
-import com.radixdlt.sargon.sample.appendingDeadbeefSample
-import com.radixdlt.sargon.sample.babeBagOfBytesSample
-import com.radixdlt.sargon.sample.cafeBagOfBytesSample
-import com.radixdlt.sargon.sample.deadBagOfBytesSample
-import com.radixdlt.sargon.sample.ecadBagOfBytesSample
-import com.radixdlt.sargon.sample.fadeBagOfBytesSample
-import com.radixdlt.sargon.sample.prependingCafeSample
-import com.radixdlt.sargon.sample.prependingDeadbeefSample
+import com.radixdlt.sargon.samples.acedBagOfBytesSample
+import com.radixdlt.sargon.samples.appendingCafeSample
+import com.radixdlt.sargon.samples.appendingDeadbeefSample
+import com.radixdlt.sargon.samples.babeBagOfBytesSample
+import com.radixdlt.sargon.samples.cafeBagOfBytesSample
+import com.radixdlt.sargon.samples.deadBagOfBytesSample
+import com.radixdlt.sargon.samples.ecadBagOfBytesSample
+import com.radixdlt.sargon.samples.fadeBagOfBytesSample
+import com.radixdlt.sargon.samples.prependingCafeSample
+import com.radixdlt.sargon.samples.prependingDeadbeefSample
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
