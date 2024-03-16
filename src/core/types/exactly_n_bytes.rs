@@ -7,7 +7,8 @@ macro_rules! decl_exactly_n_bytes {
         $(
             #[doc = $expr: expr]
         )*
-        $byte_count:literal
+        $byte_count:literal,
+        $exp_sample_value:literal,
     ) => {
         paste! {
 
@@ -388,8 +389,58 @@ macro_rules! decl_exactly_n_bytes {
                         <[<Exactly $byte_count Bytes SecretMagic>] as crate::UniffiCustomTypeConverter>::into_custom(
                             BagOfBytes::from(vec![0xde, 0xad]),
                         )
-                    .is_err()
-                 );
+                        .is_err()
+                    );
+                }
+
+                #[test]
+                fn from_string_roundtrip() {
+                    assert_eq!(SUT::from_hex($exp_sample_value).unwrap().to_string(), $exp_sample_value);
+                }
+
+                #[test]
+                fn debug() {
+                    let hex_bytes = SUT::sample();
+                    assert_eq!(format!("{:?}", hex_bytes), $exp_sample_value);
+                }
+
+                #[test]
+                fn display() {
+                    let hex_bytes = SUT::sample();
+                    assert_eq!(format!("{}", hex_bytes), $exp_sample_value);
+                }
+
+                #[test]
+                fn to_hex() {
+                    let hex_bytes = SUT::sample();
+                    assert_eq!(hex_bytes.to_string(), $exp_sample_value);
+                }
+
+                #[test]
+                fn as_ref() {
+                    let b: &[u8] = &hex_decode(
+                        $exp_sample_value
+                    )
+                    .unwrap();
+                    assert_eq!(SUT::try_from(b).unwrap().as_ref(), b);
+                }
+
+                #[test]
+                fn json_roundtrip() {
+                    let model = SUT::sample();
+                    assert_json_value_eq_after_roundtrip(
+                        &model,
+                        json!($exp_sample_value),
+                    );
+                }
+
+                #[test]
+                fn json_roundtrip_fails_for_invalid() {
+                    assert_json_value_fails::<SUT>(json!("not even hex"));
+                    // too short
+                    assert_json_value_fails::<SUT>(json!("deadbeef"));
+                    // too long
+                    assert_json_value_fails::<SUT>(json!("deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"));
                 }
             }
 
@@ -413,6 +464,18 @@ macro_rules! decl_exactly_n_bytes {
                 #[test]
                 fn new_fail() {
                     assert!([<new_exactly_ $byte_count _bytes>](generate_bytes::<5>().into()).is_err());
+                }
+
+                #[test]
+                fn sample_values() {
+                    assert_eq!(
+                        [<new_exactly_ $byte_count _bytes_sample>](),
+                        [<new_exactly_ $byte_count _bytes_sample>](),
+                    );
+                    assert_ne!(
+                        [<new_exactly_ $byte_count _bytes_sample>](),
+                        [<new_exactly_ $byte_count _bytes_sample_other>](),
+                    );
                 }
 
                 #[test]
@@ -443,153 +506,35 @@ decl_exactly_n_bytes!(
     /// 29 bytes, typically used as PublicKeyHash, or otherwise NodeId payload,
     /// implementation wise those bytes are stored inside a `BagOfBytes`
     /// (wrapper of `Vec<u8>`) for UniFFI compat.
-    29
+    29,
+    "29deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead", // expected sample value for tests
 );
 
 decl_exactly_n_bytes!(
     /// 32 bytes, most commonly used fixed length bytes, used by PrivateKeys,
     /// Ed25519PublicKey, and BIP39 entropy, implementation wise those bytes are
     /// stored inside a `BagOfBytes` (wrapper of `Vec<u8>`) for UniFFI compat.
-    32
+    32,
+    "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead", // expected sample value for tests
 );
 
 decl_exactly_n_bytes!(
     /// 64 bytes, used by Ed25519Signatures, implementation wise those bytes are
     /// stored inside a `BagOfBytes` (wrapper of `Vec<u8>`) for UniFFI compat.
-    64
+    64,
+    "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead", // expected sample value for tests
 );
 
 decl_exactly_n_bytes!(
     /// 33 bytes, used by Secp256k1PublicKeys, implementation wise those bytes are
     /// stored inside a `BagOfBytes` (wrapper of `Vec<u8>`) for UniFFI compat.
-    33
+    33,
+    "33deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead", // expected sample value for tests
 );
 
 decl_exactly_n_bytes!(
     /// 65 bytes, used by Secp256k1Signatures, implementation wise those bytes are
     /// stored inside a `BagOfBytes` (wrapper of `Vec<u8>`) for UniFFI compat.
-    65
+    65,
+    "65deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead", // expected sample value for tests
 );
-
-#[cfg(test)]
-mod tests_exactly32_bytes_simple_soundness {
-
-    use crate::prelude::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = Exactly32Bytes;
-
-    #[test]
-    fn from_string_roundtrip() {
-        let str =
-            "0000000000000000000000000000000000000000000000000000000000000000";
-        assert_eq!(SUT::from_hex(str).unwrap().to_string(), str);
-    }
-
-    #[test]
-    fn debug() {
-        let str =
-            "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
-        let hex_bytes = SUT::sample();
-        assert_eq!(format!("{:?}", hex_bytes), str);
-    }
-
-    #[test]
-    fn display() {
-        let str =
-            "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
-        let hex_bytes = SUT::sample();
-        assert_eq!(format!("{}", hex_bytes), str);
-    }
-
-    #[test]
-    fn to_hex() {
-        let str =
-            "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
-        let hex_bytes = SUT::sample();
-        assert_eq!(hex_bytes.to_string(), str);
-    }
-
-    #[test]
-    fn as_ref() {
-        let b: &[u8] = &hex_decode(
-            "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead",
-        )
-        .unwrap();
-        assert_eq!(SUT::try_from(b).unwrap().as_ref(), b);
-    }
-
-    #[test]
-    fn json_roundtrip() {
-        let model = SUT::sample();
-        assert_json_value_eq_after_roundtrip(
-            &model,
-            json!("deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"),
-        );
-    }
-
-    #[test]
-    fn json_roundtrip_fails_for_invalid() {
-        assert_json_value_fails::<SUT>(json!("not even hex"));
-        assert_json_value_fails::<SUT>(json!("deadbeef"));
-        assert_json_value_fails::<SUT>(json!("deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"));
-    }
-}
-
-// Copy paste
-
-#[cfg(test)]
-mod tests_exactly64_bytes_simple_soundness {
-
-    use crate::prelude::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = Exactly64Bytes;
-
-    #[test]
-    fn from_string_roundtrip() {
-        let str =
-            "10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002";
-        assert_eq!(SUT::from_hex(str).unwrap().to_string(), str);
-    }
-
-    #[test]
-    fn debug() {
-        let str =
-            "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
-        let hex_bytes = SUT::sample();
-        assert_eq!(format!("{:?}", hex_bytes), str);
-    }
-
-    #[test]
-    fn display() {
-        let str =
-            "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
-        let hex_bytes = SUT::sample();
-        assert_eq!(format!("{}", hex_bytes), str);
-    }
-
-    #[test]
-    fn to_hex() {
-        let str =
-            "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
-        let hex_bytes = SUT::sample();
-        assert_eq!(hex_bytes.to_string(), str);
-    }
-
-    #[test]
-    fn json_roundtrip() {
-        let model = SUT::sample();
-        assert_json_value_eq_after_roundtrip(
-            &model,
-            json!("deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"),
-        );
-    }
-
-    #[test]
-    fn json_roundtrip_fails_for_invalid() {
-        assert_json_value_fails::<SUT>(json!("not even hex"));
-        assert_json_value_fails::<SUT>(json!("deadbeef"));
-        assert_json_value_fails::<SUT>(json!("deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"));
-    }
-}
