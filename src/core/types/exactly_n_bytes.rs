@@ -14,6 +14,7 @@ macro_rules! decl_exactly_n_bytes {
             #[derive(
                 Clone,
                 Copy,
+                Debug,
                 PartialEq,
                 Eq,
                 Hash,
@@ -271,9 +272,9 @@ macro_rules! decl_exactly_n_bytes {
             }
 
             #[cfg(test)]
-            mod [<test_exactly_ $byte_count _bytes_macro>] {
+            mod [<tests_ exactly_ $byte_count _bytes >] {
 
-                use crate::prelude::*;
+                use super::*;
 
                 #[allow(clippy::upper_case_acronyms)]
                 type SUT = [< Exactly $byte_count Bytes >];
@@ -362,12 +363,40 @@ macro_rules! decl_exactly_n_bytes {
                     }
                     assert_eq!(set.len(), n);
                 }
+
+                #[test]
+                fn manual_perform_uniffi_conversion_successful() {
+                    let bytes = generate_byte_array::<$byte_count>();
+                    let bag_of_bytes = BagOfBytes::from(&bytes);
+                    let secret_magic = [<Exactly $byte_count Bytes SecretMagic>](bytes);
+
+                    let ffi_side =
+                        <[<Exactly $byte_count Bytes SecretMagic>] as crate::UniffiCustomTypeConverter>::from_custom(secret_magic);
+
+                    assert_eq!(ffi_side, bag_of_bytes);
+
+                      let from_ffi_side =  <[<Exactly $byte_count Bytes SecretMagic>] as crate::UniffiCustomTypeConverter>::into_custom(
+                            bag_of_bytes,
+                        )
+                        .unwrap();
+                    assert_eq!(secret_magic, from_ffi_side);
+                }
+
+                #[test]
+                fn manual_perform_uniffi_conversion_fail() {
+                    assert!(
+                        <[<Exactly $byte_count Bytes SecretMagic>] as crate::UniffiCustomTypeConverter>::into_custom(
+                            BagOfBytes::from(vec![0xde, 0xad]),
+                        )
+                    .is_err()
+                 );
+                }
             }
 
             #[cfg(test)]
-            mod [<uniffi_ test_exactly_ $byte_count _bytes_macro>] {
+            mod [<uniffi_ tests_ exactly_ $byte_count _bytes>] {
 
-                use crate::prelude::*;
+                use super::*;
 
                 #[allow(clippy::upper_case_acronyms)]
                 type SUT = [< Exactly $byte_count Bytes >];
