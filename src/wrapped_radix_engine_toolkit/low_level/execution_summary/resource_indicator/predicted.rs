@@ -9,35 +9,52 @@ macro_rules! decl_predicted {
         $(
             #[doc = $expr: expr]
         )*
-        $wrapped_type:ty,
-        $struct_name_suffix:ident
+        $struct_name: ident,
+        $wrapped_type: ty,
+        $mod_test_name: ident
     ) => {
-        paste! {
 
-            $(
-                #[doc = $expr]
-            )*
-            #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
-            pub struct [< Predicted $struct_name_suffix >] {
-                pub value: $wrapped_type,
-                pub instruction_index: u64,
+
+        $(
+            #[doc = $expr]
+        )*
+        #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+        pub struct $struct_name {
+            pub value: $wrapped_type,
+            pub instruction_index: u64,
+        }
+        impl $struct_name {
+            pub fn new(value: impl Into<$wrapped_type>, instruction_index: u64) -> Self {
+                Self {
+                    value: value.into(),
+                    instruction_index
+                }
+            }
+            pub fn from_ret<T>(ret_predicted: RetPredicted<T>) -> Self where T: Into<$wrapped_type> {
+                Self::new(
+                    ret_predicted.value,
+                    ret_predicted.instruction_index as u64
+                )
+            }
+        }
+
+
+        #[cfg(test)]
+        mod $mod_test_name {
+            use super::*;
+
+            #[allow(clippy::upper_case_acronyms)]
+            type SUT = $struct_name;
+
+            #[test]
+            fn equality() {
+                assert_eq!(SUT::sample(), SUT::sample());
+                assert_eq!(SUT::sample_other(), SUT::sample_other());
             }
 
-            impl [< Predicted $struct_name_suffix >] {
-
-                pub fn new(value: impl Into<$wrapped_type>, instruction_index: u64) -> Self {
-                    Self {
-                        value: value.into(),
-                        instruction_index
-                    }
-                }
-
-                pub fn from_ret<T>(ret_predicted: RetPredicted<T>) -> Self where T: Into<$wrapped_type> {
-                    Self::new(
-                        ret_predicted.value,
-                        ret_predicted.instruction_index as u64
-                    )
-                }
+            #[test]
+            fn inequality() {
+                assert_ne!(SUT::sample(), SUT::sample_other());
             }
         }
     };
@@ -53,8 +70,9 @@ macro_rules! decl_predicted {
                 $(
                     #[doc = $expr]
                 )*
+                [< Predicted $wrapped_type >],
                 $wrapped_type,
-                [< $wrapped_type >]
+                [< tests_ predicted_ $wrapped_type:snake >]
             );
         }
     };
@@ -69,8 +87,9 @@ decl_predicted!(
 
 decl_predicted!(
     /// A prediction of a collection of NonFungibleLocalId
+    PredictedNonFungibleLocalIds,
     Vec<NonFungibleLocalId>,
-    NonFungibleLocalIds
+    tests_predicted_non_fungible_local_ids
 );
 
 type ScryptoNonFungibleLocalIds = IndexSet<ScryptoNonFungibleLocalId>;
@@ -112,43 +131,5 @@ impl HasSampleValues for PredictedNonFungibleLocalIds {
 
     fn sample_other() -> Self {
         Self::new(vec![NonFungibleLocalId::sample_other()], 1)
-    }
-}
-
-#[cfg(test)]
-mod predicted_decimal_tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = PredictedDecimal;
-
-    #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-}
-
-#[cfg(test)]
-mod predicted_local_ids_tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = PredictedNonFungibleLocalIds;
-
-    #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 }
