@@ -3,10 +3,13 @@ use crate::prelude::*;
 /// Either a Signature on `Curve25519` or `Secp256k1`
 #[derive(
     Clone,
+    Copy,
     PartialEq,
     Eq,
     Hash,
     EnumAsInner,
+    PartialOrd,
+    Ord,
     derive_more::Display,
     derive_more::Debug,
     uniffi::Enum,

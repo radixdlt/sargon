@@ -159,7 +159,7 @@ mod tests {
     #[test]
     fn hash_into_as_roundtrip() {
         let from_hash = FactorSourceIDFromHash::sample();
-        let id: FactorSourceID = from_hash.clone().into(); // test `into()`
+        let id: FactorSourceID = from_hash.into(); // test `into()`
         assert_eq!(id.as_hash().unwrap(), &from_hash);
     }
 

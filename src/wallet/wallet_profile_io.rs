@@ -7,7 +7,7 @@ impl Wallet {
     pub(crate) fn save_profile(&self, profile: &Profile) -> Result<()> {
         self.wallet_client_storage.save(
             SecureStorageKey::ProfileSnapshot {
-                profile_id: profile.header.id.clone(),
+                profile_id: profile.header.id,
             },
             profile,
         )

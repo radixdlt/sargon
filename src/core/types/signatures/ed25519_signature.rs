@@ -3,9 +3,12 @@ use crate::prelude::*;
 /// Represents an ED25519 signature.
 #[derive(
     Clone,
+    Copy,
     PartialEq,
     Eq,
     Hash,
+    PartialOrd,
+    Ord,
     derive_more::Display,
     derive_more::Debug,
     derive_more::FromStr,
@@ -20,14 +23,14 @@ pub struct Ed25519Signature {
 impl From<ScryptoEd25519Signature> for Ed25519Signature {
     fn from(value: ScryptoEd25519Signature) -> Self {
         Self {
-            bytes: Exactly64Bytes::from_bytes(&value.0),
+            bytes: Exactly64Bytes::from(&value.0),
         }
     }
 }
 
 impl From<Ed25519Signature> for ScryptoEd25519Signature {
     fn from(value: Ed25519Signature) -> Self {
-        ScryptoEd25519Signature(value.bytes.bytes())
+        ScryptoEd25519Signature(*value.bytes.bytes())
     }
 }
 
@@ -150,7 +153,7 @@ mod tests {
     #[test]
     fn scrypto_roundtrip() {
         let sut = SUT::sample();
-        assert_eq!(SUT::from(ScryptoEd25519Signature::from(sut.clone())), sut);
+        assert_eq!(SUT::from(ScryptoEd25519Signature::from(sut)), sut);
     }
 
     #[test]

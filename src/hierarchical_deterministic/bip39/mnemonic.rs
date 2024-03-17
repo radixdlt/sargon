@@ -2,6 +2,7 @@ use crate::prelude::*;
 
 #[derive(
     Clone,
+    /* NEVER COPY! We wanna require explicit copying */
     PartialEq,
     Eq,
     Hash,
@@ -211,18 +212,18 @@ mod tests {
         let zoo: Mnemonic = "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"
             .parse()
             .unwrap();
-        assert_eq!(zoo.words[0].index.clone().inner, 2047);
-        assert_eq!(zoo.words[1].index.clone().inner, 2047);
-        assert_eq!(zoo.words[10].index.clone().inner, 2047);
-        assert_eq!(zoo.words[11].index.clone().inner, 2037);
+        assert_eq!(zoo.words[0].index.inner, 2047);
+        assert_eq!(zoo.words[1].index.inner, 2047);
+        assert_eq!(zoo.words[10].index.inner, 2047);
+        assert_eq!(zoo.words[11].index.inner, 2037);
 
         let abandon: Mnemonic = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
             .parse()
             .unwrap();
-        assert_eq!(abandon.words[0].index.clone().inner, 0);
-        assert_eq!(abandon.words[1].index.clone().inner, 0);
-        assert_eq!(abandon.words[10].index.clone().inner, 0);
-        assert_eq!(abandon.words[11].index.clone().inner, 3);
+        assert_eq!(abandon.words[0].index.inner, 0);
+        assert_eq!(abandon.words[1].index.inner, 0);
+        assert_eq!(abandon.words[10].index.inner, 0);
+        assert_eq!(abandon.words[11].index.inner, 3);
     }
 
     #[test]

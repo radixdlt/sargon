@@ -6,6 +6,7 @@ use crate::prelude::*;
 #[derive(
     Clone,
     Debug,
+    Copy,
     PartialEq,
     Eq,
     std::hash::Hash,
@@ -14,19 +15,14 @@ use crate::prelude::*;
 )]
 pub struct HashSecretMagic(ScryptoHash);
 
-impl From<HashSecretMagic> for Exactly32Bytes {
-    fn from(value: HashSecretMagic) -> Self {
-        Exactly32Bytes::from_bytes(value.0.as_bytes())
-    }
-}
+uniffi::custom_type!(HashSecretMagic, BagOfBytes);
 
 impl crate::UniffiCustomTypeConverter for HashSecretMagic {
     type Builtin = BagOfBytes;
 
     fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
         Exactly32Bytes::try_from(val.bytes)
-            .map(|e| e.bytes())
-            .map(|b: [u8; 32]| HashSecretMagic(ScryptoHash::from_bytes(b)))
+            .map(|e| HashSecretMagic(ScryptoHash::from_bytes(*e.bytes())))
             .map_err(|e| e.into())
     }
 
@@ -44,6 +40,7 @@ impl crate::UniffiCustomTypeConverter for HashSecretMagic {
     Clone,
     Debug,
     PartialEq,
+    Copy,
     Eq,
     std::hash::Hash,
     derive_more::Display,
@@ -52,12 +49,6 @@ impl crate::UniffiCustomTypeConverter for HashSecretMagic {
 )]
 pub struct Hash {
     pub(crate) secret_magic: HashSecretMagic,
-}
-
-impl From<Hash> for Exactly32Bytes {
-    fn from(value: Hash) -> Self {
-        value.secret_magic.into()
-    }
 }
 
 impl AsRef<ScryptoHash> for Hash {
@@ -69,6 +60,12 @@ impl AsRef<ScryptoHash> for Hash {
 impl AsRef<[u8]> for Hash {
     fn as_ref(&self) -> &[u8] {
         self.secret_magic.0.as_ref()
+    }
+}
+impl From<Hash> for Exactly32Bytes {
+    /// Instantiates a new `ExactlyNBytes<N>` from the `Hash` (N bytes).
+    fn from(value: Hash) -> Self {
+        Self::from(&value.into_bytes())
     }
 }
 
@@ -168,7 +165,7 @@ mod tests {
 
         let ffi_side =
             <HashSecretMagic as crate::UniffiCustomTypeConverter>::from_custom(
-                sut.clone(),
+                sut,
             );
 
         assert_eq!(ffi_side.to_hex(), builtin.to_hex());

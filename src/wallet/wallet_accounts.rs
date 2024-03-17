@@ -19,7 +19,7 @@ impl Wallet {
         &self,
         private_device_factor_source: PrivateHierarchicalDeterministicFactorSource,
     ) -> Result<()> {
-        let id = private_device_factor_source.factor_source.id.clone();
+        let id = private_device_factor_source.factor_source.id;
 
         info!(
             "Save Private DeviceFactorSource to SecureStorage, factor source id: {}",
@@ -251,7 +251,7 @@ mod tests {
         let data =
             serde_json::to_vec(&private.mnemonic_with_passphrase).unwrap();
         let key = SecureStorageKey::DeviceFactorSourceMnemonic {
-            factor_source_id: dfs.id.clone(),
+            factor_source_id: dfs.id,
         };
         storage.save_data(key.clone(), data.clone()).unwrap();
         assert_eq!(
@@ -387,7 +387,7 @@ mod tests {
         let data =
             serde_json::to_vec(&private.mnemonic_with_passphrase).unwrap();
         let key = SecureStorageKey::DeviceFactorSourceMnemonic {
-            factor_source_id: private.clone().factor_source.id.clone(),
+            factor_source_id: private.clone().factor_source.id,
         };
         assert!(storage.save_data(key.clone(), data).is_ok());
 
@@ -421,7 +421,7 @@ mod tests {
         let data =
             serde_json::to_vec(&private.mnemonic_with_passphrase).unwrap();
         let key = SecureStorageKey::DeviceFactorSourceMnemonic {
-            factor_source_id: private.clone().factor_source.id.clone(),
+            factor_source_id: private.clone().factor_source.id,
         };
         assert!(storage.save_data(key.clone(), data).is_ok());
 

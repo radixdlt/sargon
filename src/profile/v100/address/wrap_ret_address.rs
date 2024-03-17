@@ -66,6 +66,8 @@ macro_rules! decl_ret_wrapped_address {
                 address.address()
             }
 
+            uniffi::custom_type!([< Ret $address_type:camel Address >], String);
+
              /// UniFFI conversion for RET types which are DisplayFromStr using String as builtin.
             impl crate::UniffiCustomTypeConverter for [< Ret $address_type:camel Address >] {
                 type Builtin = String;

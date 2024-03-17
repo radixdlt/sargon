@@ -94,7 +94,7 @@ impl IsPublicKey<Secp256k1Signature> for Secp256k1PublicKey {
         scrypto_verify_secp256k1(
             for_hash.as_hash(),
             &self.scrypto(),
-            &signature.clone().into(),
+            &(*signature).into(),
         )
     }
 }
@@ -243,7 +243,7 @@ mod tests {
         .unwrap();
 
         assert_eq!(
-            from_scrypto.clone(),
+            from_scrypto,
             SUT::from_str(
                 "033083620d1596d3f8988ff3270e42970dd2a031e2b9b6488052a4170ff999f3e8"
             )

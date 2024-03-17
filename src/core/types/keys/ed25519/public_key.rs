@@ -89,7 +89,7 @@ impl IsPublicKey<Ed25519Signature> for Ed25519PublicKey {
         scrypto_verify_ed25519(
             for_hash.as_hash(),
             &self.scrypto(),
-            &signature.clone().into(),
+            &(*signature).into(),
         )
     }
 }

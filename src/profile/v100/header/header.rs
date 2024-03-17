@@ -82,7 +82,7 @@ impl Identifiable for Header {
     type ID = ProfileID;
 
     fn id(&self) -> Self::ID {
-        self.id.clone()
+        self.id
     }
 }
 
@@ -215,7 +215,7 @@ pub mod tests {
     fn get_id() {
         let value = profile_id();
         let sut = SUT {
-            id: value.clone(),
+            id: value,
             ..Default::default()
         };
         assert_eq!(sut.id, value)

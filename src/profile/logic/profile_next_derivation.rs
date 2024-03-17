@@ -2,12 +2,16 @@ use crate::prelude::*;
 
 impl Profile {
     #[cfg(not(tarpaulin_include))] // false negative
-    pub fn factor_source_by_id<F>(&self, id: &FactorSourceID) -> Result<F>
+    pub fn factor_source_by_id<F>(
+        &self,
+        id: impl Into<FactorSourceID>,
+    ) -> Result<F>
     where
         F: IsFactorSource,
     {
+        let id = id.into();
         self.factor_sources
-            .get(id)
+            .get(&id)
             .ok_or(CommonError::ProfileDoesNotContainFactorSourceWithID {
                 bad_value: id.clone(),
             })
@@ -25,7 +29,7 @@ impl Profile {
         &self,
         id: &FactorSourceIDFromHash,
     ) -> Result<DeviceFactorSource> {
-        self.factor_source_by_id(&id.clone().into())
+        self.factor_source_by_id(*id)
     }
 
     pub fn bdfs(&self) -> DeviceFactorSource {
@@ -167,7 +171,7 @@ mod tests {
         let dfs = DeviceFactorSource::sample_babylon();
         assert_eq!(
             profile.factor_source_by_id::<DeviceFactorSource>(
-                &dfs.factor_source_id()
+                dfs.factor_source_id()
             ),
             Ok(dfs)
         );
@@ -179,7 +183,7 @@ mod tests {
         let lfs = LedgerHardwareWalletFactorSource::sample();
         assert_eq!(
             profile.factor_source_by_id::<LedgerHardwareWalletFactorSource>(
-                &lfs.factor_source_id()
+                lfs.factor_source_id()
             ),
             Ok(lfs)
         );
@@ -191,7 +195,7 @@ mod tests {
         let dfs = DeviceFactorSource::sample_babylon();
         assert_eq!(
             profile.factor_source_by_id::<LedgerHardwareWalletFactorSource>(
-                &dfs.factor_source_id()
+                dfs.factor_source_id()
             ),
             Err(CommonError::CastFactorSourceWrongKind {
                 expected: FactorSourceKind::LedgerHQHardwareWallet,
@@ -206,7 +210,7 @@ mod tests {
         let lfs = LedgerHardwareWalletFactorSource::sample_other();
         assert_eq!(
             profile.factor_source_by_id::<LedgerHardwareWalletFactorSource>(
-                &lfs.factor_source_id()
+                lfs.factor_source_id()
             ),
             Err(CommonError::ProfileDoesNotContainFactorSourceWithID {
                 bad_value: lfs.factor_source_id()

@@ -3,9 +3,12 @@ use crate::prelude::*;
 /// Represents an Secp256k1 signature.
 #[derive(
     Clone,
+    Copy,
     PartialEq,
     Eq,
     Hash,
+    PartialOrd,
+    Ord,
     derive_more::Display,
     derive_more::Debug,
     derive_more::FromStr,
@@ -21,14 +24,14 @@ pub struct Secp256k1Signature {
 impl From<ScryptoSecp256k1Signature> for Secp256k1Signature {
     fn from(value: ScryptoSecp256k1Signature) -> Self {
         Self {
-            bytes: Exactly65Bytes::from_bytes(&value.0),
+            bytes: Exactly65Bytes::from(&value.0),
         }
     }
 }
 
 impl From<Secp256k1Signature> for ScryptoSecp256k1Signature {
     fn from(value: Secp256k1Signature) -> Self {
-        ScryptoSecp256k1Signature(value.bytes.bytes())
+        ScryptoSecp256k1Signature(*value.bytes.bytes())
     }
 }
 
@@ -151,10 +154,7 @@ mod tests {
     #[test]
     fn scrypto_roundtrip() {
         let sut = SUT::sample();
-        assert_eq!(
-            SUT::from(ScryptoSecp256k1Signature::from(sut.clone())),
-            sut
-        );
+        assert_eq!(SUT::from(ScryptoSecp256k1Signature::from(sut)), sut);
     }
 
     #[test]

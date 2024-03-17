@@ -4,6 +4,7 @@ pub type HDPathValue = u32;
 
 #[derive(
     Clone,
+    Copy,
     PartialEq,
     Eq,
     Hash,
@@ -13,8 +14,8 @@ pub type HDPathValue = u32;
     derive_more::Debug,
     uniffi::Record,
 )]
-#[display("{}", self.to_bip32_string())]
-#[debug("{}", self.to_bip32_string())]
+#[display("{}", self.bip32_string())]
+#[debug("{}", self.bip32_string())]
 pub struct HDPathComponent {
     pub value: HDPathValue,
 }
@@ -58,7 +59,7 @@ impl HDPathComponent {
 }
 
 impl HDPathComponent {
-    fn to_bip32_string(&self) -> String {
+    fn bip32_string(&self) -> String {
         let h_or_empty = if self.is_hardened() { "H" } else { "" };
         format!("{}{}", self.index(), h_or_empty)
     }

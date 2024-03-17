@@ -8,6 +8,7 @@ uniffi::custom_newtype!(PersonaDataEntryID, Uuid);
     Serialize,
     Deserialize,
     Clone,
+    Copy,
     PartialEq,
     Eq,
     derive_more::Display,
@@ -21,7 +22,7 @@ impl Identifiable for PersonaDataEntryID {
     type ID = Self;
 
     fn id(&self) -> Self::ID {
-        self.clone()
+        *self
     }
 }
 

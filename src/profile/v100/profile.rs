@@ -94,7 +94,7 @@ impl Profile {
 impl Profile {
     /// Returns the unique ID of this Profile (just an alias for `header.id`).
     pub fn id(&self) -> ProfileID {
-        self.header.id.clone()
+        self.header.id
     }
 
     /// Returns a clone of the updated account if found, else None.

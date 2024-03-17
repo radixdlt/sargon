@@ -1,16 +1,6 @@
 
 namespace sargon {};
 
-// Converters for foreign types
-[Custom]
-typedef string Uuid;
-
-[Custom]
-typedef string Url;
-
-[Custom]
-typedef string Timestamp;
-
 // HERE BE DRAGONS
 // Due to Kotlin equals being broken for ByteArray
 // Which otherwise UniFFI converts `Vec<u8>` to, we MUST use
@@ -19,42 +9,3 @@ typedef string Timestamp;
 // HERE BE DRAGONS
 [Custom]
 typedef sequence<i8> BagOfBytes;
-
-[Custom]
-typedef BagOfBytes InstructionsSecretMagic;
-
-[Custom]
-typedef BagOfBytes HashSecretMagic;
-
-[Custom]
-typedef string ScryptoDecimal192;
-
-[Custom]
-typedef string ScryptoStringNonFungibleLocalId;
-
-[Custom]
-typedef string RetAccessControllerAddress;
-
-[Custom]
-typedef string RetAccountAddress;
-
-[Custom]
-typedef string RetComponentAddress;
-
-[Custom]
-typedef string RetIdentityAddress;
-
-[Custom]
-typedef string RetPackageAddress;
-
-[Custom]
-typedef string RetPoolAddress;
-
-[Custom]
-typedef string RetResourceAddress;
-
-[Custom]
-typedef string RetValidatorAddress;
-
-[Custom]
-typedef string RetVaultAddress;

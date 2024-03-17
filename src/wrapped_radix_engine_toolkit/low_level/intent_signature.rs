@@ -1,6 +1,8 @@
 use crate::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(
+    Clone, Copy, PartialOrd, Ord, Debug, PartialEq, Eq, Hash, uniffi::Record,
+)]
 pub struct IntentSignature {
     pub(crate) secret_magic: SignatureWithPublicKey,
 }

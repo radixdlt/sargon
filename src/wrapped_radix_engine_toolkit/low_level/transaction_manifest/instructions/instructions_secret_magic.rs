@@ -9,6 +9,8 @@ use crate::prelude::*;
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct InstructionsSecretMagic(pub(crate) Vec<ScryptoInstruction>);
 
+uniffi::custom_type!(InstructionsSecretMagic, BagOfBytes);
+
 impl crate::UniffiCustomTypeConverter for InstructionsSecretMagic {
     type Builtin = BagOfBytes;
 

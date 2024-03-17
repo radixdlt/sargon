@@ -101,7 +101,7 @@ mod tests {
         let data =
             serde_json::to_vec(&private.mnemonic_with_passphrase).unwrap();
         let key = SecureStorageKey::DeviceFactorSourceMnemonic {
-            factor_source_id: dfs.id.clone(),
+            factor_source_id: dfs.id,
         };
         storage.save_data(key.clone(), data.clone()).unwrap();
         assert_eq!(

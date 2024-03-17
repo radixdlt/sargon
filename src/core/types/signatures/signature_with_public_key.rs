@@ -1,7 +1,18 @@
 use crate::prelude::*;
 
 /// Represents any natively supported signature, including public key.
-#[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Enum, EnumAsInner)]
+#[derive(
+    Debug,
+    Copy,
+    Clone,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    uniffi::Enum,
+    EnumAsInner,
+)]
 pub enum SignatureWithPublicKey {
     // N.B. `transaction::model::SignatureWithPublicKeyV1::Secp256k1` does
     // NOT include the public key, it relies on ECDSA Signature supporting
@@ -81,8 +92,8 @@ impl TryFrom<(ScryptoSignatureWithPublicKey, Hash)> for SignatureWithPublicKey {
 impl SignatureWithPublicKey {
     pub fn signature(&self) -> Signature {
         match &self {
-            Self::Secp256k1 { signature, .. } => signature.clone().into(),
-            Self::Ed25519 { signature, .. } => signature.clone().into(),
+            Self::Secp256k1 { signature, .. } => (*signature).into(),
+            Self::Ed25519 { signature, .. } => (*signature).into(),
         }
     }
 

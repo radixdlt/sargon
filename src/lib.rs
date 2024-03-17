@@ -238,6 +238,9 @@ pub mod prelude {
 
 pub use prelude::*;
 
+// Use `Url` as a custom type, with `String` as the Builtin
+uniffi::custom_type!(Url, String);
+
 // Use `url::Url` as a custom type, with `String` as the Builtin
 #[cfg(not(tarpaulin_include))] // Tested in binding tests (e.g. test*.swift files)
 impl UniffiCustomTypeConverter for Url {
@@ -251,6 +254,9 @@ impl UniffiCustomTypeConverter for Url {
         obj.into()
     }
 }
+
+// Use `Timestamp` as a custom type, with `String` as the Builtin
+uniffi::custom_type!(Timestamp, String);
 
 #[cfg(not(tarpaulin_include))] // Tested in binding tests (e.g. test*.swift files)
 impl UniffiCustomTypeConverter for Timestamp {
@@ -266,6 +272,9 @@ impl UniffiCustomTypeConverter for Timestamp {
         obj.to_string()
     }
 }
+
+// Use `Uuid` as a custom type, with `String` as the Builtin
+uniffi::custom_type!(Uuid, String);
 
 #[cfg(not(tarpaulin_include))] // Tested in binding tests (e.g. test*.swift files)
 impl UniffiCustomTypeConverter for Uuid {

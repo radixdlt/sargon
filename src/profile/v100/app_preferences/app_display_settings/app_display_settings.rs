@@ -4,7 +4,15 @@ use crate::prelude::*;
 ///
 /// **N.B. neither of these settings are in fact not yet used by clients.**
 #[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
+    Serialize,
+    Deserialize,
+    Clone,
+    Copy,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    uniffi::Record,
 )]
 #[serde(rename_all = "camelCase")]
 pub struct AppDisplay {

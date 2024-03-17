@@ -4,9 +4,10 @@ use radix_engine_common::crypto::{blake2b_256_hash, Hash};
 /// FactorSourceID from the blake2b hash of the special HD public key derived at `CAP26::GetID`,
 /// for a certain `FactorSourceKind`
 #[derive(
+    Clone,
+    Copy,
     Serialize,
     Deserialize,
-    Clone,
     PartialEq,
     Eq,
     Hash,
@@ -37,7 +38,7 @@ impl FactorSourceIDFromHash {
         let private_key =
             mnemonic_with_passphrase.derive_private_key(GetIDPath::default());
         let public_key_bytes = private_key.public_key().to_bytes();
-        let hash: Hash = blake2b_256_hash(public_key_bytes);
+        let hash = hash_of(public_key_bytes);
         let body = Exactly32Bytes::from(hash);
         Self::new(factor_source_kind, body)
     }
