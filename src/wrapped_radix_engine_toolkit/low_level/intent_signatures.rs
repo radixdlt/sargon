@@ -18,7 +18,7 @@ impl IntentSignatures {
     pub fn validate(&self, hash: impl Into<Hash>) -> bool {
         let hash = hash.into();
 
-        self.signatures.iter().all(|s| s.validate(hash.clone()))
+        self.signatures.iter().all(|s| s.validate(hash))
     }
 }
 

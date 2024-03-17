@@ -381,7 +381,7 @@ mod tests {
     #[test]
     fn from_hash() {
         let digest = hash_of(vec![0xde, 0xad]);
-        assert_eq!(BagOfBytes::from(digest.clone()).to_vec(), digest.bytes());
+        assert_eq!(BagOfBytes::from(digest).to_vec(), digest.bytes());
     }
 
     #[test]

@@ -6,6 +6,7 @@ use crate::prelude::*;
 #[derive(
     Clone,
     Debug,
+    Copy,
     PartialEq,
     Eq,
     std::hash::Hash,
@@ -13,12 +14,6 @@ use crate::prelude::*;
     derive_more::FromStr,
 )]
 pub struct HashSecretMagic(ScryptoHash);
-
-impl From<HashSecretMagic> for Exactly32Bytes {
-    fn from(value: HashSecretMagic) -> Self {
-        Exactly32Bytes::from(value.0.as_bytes())
-    }
-}
 
 uniffi::custom_type!(HashSecretMagic, BagOfBytes);
 
@@ -45,6 +40,7 @@ impl crate::UniffiCustomTypeConverter for HashSecretMagic {
     Clone,
     Debug,
     PartialEq,
+    Copy,
     Eq,
     std::hash::Hash,
     derive_more::Display,
@@ -169,7 +165,7 @@ mod tests {
 
         let ffi_side =
             <HashSecretMagic as crate::UniffiCustomTypeConverter>::from_custom(
-                sut.clone(),
+                sut,
             );
 
         assert_eq!(ffi_side.to_hex(), builtin.to_hex());
