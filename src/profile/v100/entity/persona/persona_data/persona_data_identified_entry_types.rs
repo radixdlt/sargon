@@ -8,7 +8,20 @@ pub trait PersonaDataEntryValue: From<Self::Value> {
 /// UniFFI does, we SHOULD remove this macro and use generics.
 /// Something akin to: `PersonaDataIdentifiedEntry<T>`.
 macro_rules! declare_identified_entry {
-    ($value_type:ty,$struct_name:ident) => {
+    (
+        $(
+            #[doc = $expr: expr]
+        )*
+        $struct_name: ident,
+        $value_type: ty,
+        $mod_test_name: ident,
+        $expected_sample_display: literal,
+        $expected_sample_debug: literal,
+        $expected_sample_json: literal
+    ) => {
+        $(
+            #[doc = $expr]
+        )*
         #[derive(
             Serialize,
             Deserialize,
@@ -26,7 +39,6 @@ macro_rules! declare_identified_entry {
             pub id: PersonaDataEntryID,
             pub value: $value_type,
         }
-
         impl From<$value_type> for $struct_name {
             fn from(value: $value_type) -> Self {
                 Self::new(value)
@@ -35,15 +47,12 @@ macro_rules! declare_identified_entry {
         impl PersonaDataEntryValue for $struct_name {
             type Value = $value_type;
         }
-
         impl Identifiable for $struct_name {
             type ID = PersonaDataEntryID;
-
             fn id(&self) -> Self::ID {
                 self.id.clone()
             }
         }
-
         impl $struct_name {
             pub(crate) fn with_id(
                 id: PersonaDataEntryID,
@@ -55,15 +64,12 @@ macro_rules! declare_identified_entry {
                 Self::with_id(PersonaDataEntryID::generate(), value)
             }
         }
-
         impl std::ops::Deref for $struct_name {
             type Target = $value_type;
-
             fn deref(&self) -> &Self::Target {
                 &self.value
             }
         }
-
         impl HasSampleValues for $struct_name {
             fn sample() -> Self {
                 $struct_name::with_id(
@@ -71,7 +77,6 @@ macro_rules! declare_identified_entry {
                     <$value_type>::sample(),
                 )
             }
-
             fn sample_other() -> Self {
                 $struct_name::with_id(
                     PersonaDataEntryID::sample_other(),
@@ -79,296 +84,136 @@ macro_rules! declare_identified_entry {
                 )
             }
         }
+        #[cfg(test)]
+        mod $mod_test_name {
+            use super::*;
+            #[allow(clippy::upper_case_acronyms)]
+            type SUT = $struct_name;
+            type V = $value_type;
+            #[test]
+            fn equality() {
+                assert_eq!(SUT::sample(), SUT::sample());
+                assert_eq!(SUT::sample_other(), SUT::sample_other());
+            }
+            #[test]
+            fn inequality() {
+                assert_ne!(SUT::sample(), SUT::sample_other());
+                assert_ne!(SUT::new(V::sample()), SUT::new(V::sample()));
+            }
+            #[test]
+            fn hash() {
+                let n = 100;
+                let set = (0..n)
+                    .map(|_| {
+                        SUT::new(V::sample()) // generates a new ID
+                    })
+                    .collect::<HashSet<_>>();
+                assert_eq!(set.len(), n);
+            }
+            #[test]
+            fn deref() {
+                assert_eq!(*SUT::sample(), V::sample());
+            }
+            #[test]
+            fn new() {
+                let value = V::sample_other();
+                let sut = SUT::with_id(PersonaDataEntryID::sample_one(), value.clone());
+                assert_eq!(
+                    sut.id,
+                    "00000000-0000-0000-0000-000000000001".parse().unwrap()
+                );
+                assert_eq!(sut.value, value)
+            }
+            #[test]
+            fn debug() {
+                assert_eq!(
+                    format!("{:?}", SUT::sample()),
+                    $expected_sample_debug
+                );
+            }
+            #[test]
+            fn display() {
+                assert_eq!(format!("{}", SUT::sample()), $expected_sample_display);
+            }
+            #[test]
+            fn json_roundtrip_sample() {
+                let model = SUT::sample();
+                assert_eq_after_json_roundtrip(
+                    &model,
+                    $expected_sample_json
+                )
+            }
+        }
+    };
+
+    (
+        $(
+            #[doc = $expr: expr]
+        )*
+        $type:ident,
+        $expected_sample_display: literal,
+        $expected_sample_debug: literal,
+        $expected_sample_json: literal
+    ) => {
+        paste! {
+            declare_identified_entry!(
+                $(
+                    #[doc = $expr]
+                )*
+                [< PersonaDataIdentified $type>],                   // "PhoneNumber" => "PersonaDataIdentifiedPhoneNumber"
+                [< PersonaDataEntry $type>],                        // "PhoneNumber" => "PersonaDataEntryPhoneNumber"
+                [< tests_persona_data_identified_ $type:snake >],   // "PhoneNumber" => "tests_persona_data_identified_phone_number"
+                $expected_sample_display,
+                $expected_sample_debug,
+                $expected_sample_json
+            );
+        }
     };
 }
 
-declare_identified_entry!(PersonaDataEntryName, PersonaDataIdentifiedName);
 declare_identified_entry!(
-    PersonaDataEntryPhoneNumber,
-    PersonaDataIdentifiedPhoneNumber
+    /// An identifiable Persona name. Essentially it is a tuple of a
+    /// [`(PersonaDataEntryName, Uuid)`].
+    Name,
+    "Bruce Batman Wayne",
+    "Bruce Batman Wayne - 00000000-0000-0000-0000-000000000001",
+    r#"
+    {
+        "id": "00000000-0000-0000-0000-000000000001",
+        "value": {
+            "variant": "western",
+            "familyName": "Wayne",
+            "givenNames": "Bruce",
+            "nickname": "Batman"
+        }
+    }
+    "#
 );
+
 declare_identified_entry!(
-    PersonaDataEntryEmailAddress,
-    PersonaDataIdentifiedEmailAddress
+    /// An identifiable Persona phone number. Essentially it is a tuple of a
+    /// [`(PersonaDataEntryPhoneNumber, Uuid)`].
+    PhoneNumber,
+    "+46123456789",
+    "+46123456789 - 00000000-0000-0000-0000-000000000001",
+    r#"
+    {
+        "id": "00000000-0000-0000-0000-000000000001",
+        "value": "+46123456789"
+    }
+    "#
 );
 
-#[cfg(test)]
-mod identified_name_tests {
-    use crate::prelude::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = PersonaDataIdentifiedName;
-    type V = PersonaDataEntryName;
-
-    #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
+declare_identified_entry!(
+    /// An identifiable Persona email address. Essentially it is a tuple of a
+    /// [`(PersonaDataEntryEmailAddress, Uuid)`].
+    EmailAddress,
+    "alan@turing.hero",
+    "alan@turing.hero - 00000000-0000-0000-0000-000000000001",
+    r#"
+    {
+        "id": "00000000-0000-0000-0000-000000000001",
+        "value": "alan@turing.hero"
     }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-        assert_ne!(SUT::new(V::sample()), SUT::new(V::sample()));
-    }
-
-    #[test]
-    fn hash() {
-        let n = 100;
-        let set = (0..n)
-            .map(|_| {
-                SUT::new(V::sample()) // generates a new ID
-            })
-            .collect::<HashSet<_>>();
-        assert_eq!(set.len(), n);
-    }
-
-    #[test]
-    fn deref() {
-        assert_eq!(*SUT::sample(), V::sample());
-    }
-
-    #[test]
-    fn new() {
-        let value = V::sample_other();
-        let sut = SUT::with_id(PersonaDataEntryID::sample_one(), value.clone());
-        assert_eq!(
-            sut.id,
-            "00000000-0000-0000-0000-000000000001".parse().unwrap()
-        );
-        assert_eq!(sut.value, value)
-    }
-
-    #[test]
-    fn debug() {
-        assert_eq!(
-            format!("{:?}", SUT::sample()),
-            "Bruce Batman Wayne - 00000000-0000-0000-0000-000000000001"
-        );
-    }
-
-    #[test]
-    fn display() {
-        assert_eq!(format!("{}", SUT::sample()), "Bruce Batman Wayne");
-    }
-
-    #[test]
-    fn json_roundtrip_sample() {
-        let model = SUT::sample();
-        assert_eq_after_json_roundtrip(
-            &model,
-            r#"
-            {
-                "id": "00000000-0000-0000-0000-000000000001",
-                "value": {
-                    "variant": "western",
-                    "familyName": "Wayne",
-                    "givenNames": "Bruce",
-                    "nickname": "Batman"
-                }
-            }
-        "#,
-        )
-    }
-
-    #[test]
-    fn json_roundtrip_sample_other() {
-        let model = SUT::sample_other();
-        assert_eq_after_json_roundtrip(
-            &model,
-            r#"
-            {
-                "id": "00000000-0000-0000-0000-000000000002",
-                "value": {
-                    "variant": "eastern",
-                    "familyName": "Jun-fan",
-                    "givenNames": "Lee",
-                    "nickname": "Bruce"
-                }
-            }
-            "#,
-        )
-    }
-}
-
-// Uh copy paste of tests :/ since sharing tests with `macro_rules` does not really work
-
-#[cfg(test)]
-mod identified_number_tests {
-    use crate::prelude::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = PersonaDataIdentifiedPhoneNumber;
-    type V = PersonaDataEntryPhoneNumber;
-
-    #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn deref() {
-        assert_eq!(*SUT::sample(), V::sample());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-        assert_ne!(SUT::new(V::sample()), SUT::new(V::sample()));
-    }
-
-    #[test]
-    fn hash() {
-        let n = 100;
-        let set = (0..n)
-            .map(|_| {
-                SUT::new(V::sample()) // generates a new ID
-            })
-            .collect::<HashSet<_>>();
-        assert_eq!(set.len(), n);
-    }
-
-    #[test]
-    fn new() {
-        let value = V::sample_other();
-        let sut =
-            SUT::with_id(PersonaDataEntryID::sample_four(), value.clone());
-        assert_eq!(
-            sut.id,
-            "00000000-0000-0000-0000-000000000004".parse().unwrap()
-        );
-        assert_eq!(sut.value, value)
-    }
-
-    #[test]
-    fn debug() {
-        assert_eq!(
-            format!("{:?}", SUT::sample()),
-            "+46123456789 - 00000000-0000-0000-0000-000000000001"
-        );
-    }
-
-    #[test]
-    fn display() {
-        assert_eq!(format!("{}", SUT::sample()), "+46123456789");
-    }
-
-    #[test]
-    fn json_roundtrip_sample() {
-        let model = SUT::sample();
-        assert_eq_after_json_roundtrip(
-            &model,
-            r#"
-            {
-                "id": "00000000-0000-0000-0000-000000000001",
-                "value": "+46123456789"
-            }
-            "#,
-        )
-    }
-
-    #[test]
-    fn json_roundtrip_sample_other() {
-        let model = SUT::sample_other();
-        assert_eq_after_json_roundtrip(
-            &model,
-            r#"
-            {
-                "id": "00000000-0000-0000-0000-000000000002",
-                "value": "+44987654321"
-            }
-            "#,
-        )
-    }
-}
-
-#[cfg(test)]
-mod identified_email_tests {
-    use crate::prelude::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = PersonaDataIdentifiedEmailAddress;
-    type V = PersonaDataEntryEmailAddress;
-
-    #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn deref() {
-        assert_eq!(*SUT::sample(), V::sample());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-        assert_ne!(SUT::new(V::sample()), SUT::new(V::sample()));
-    }
-
-    #[test]
-    fn hash() {
-        let n = 100;
-        let set = (0..n)
-            .map(|_| {
-                SUT::new(V::sample()) // generates a new ID
-            })
-            .collect::<HashSet<_>>();
-        assert_eq!(set.len(), n);
-    }
-
-    #[test]
-    fn new() {
-        let value = V::sample_other();
-        let sut =
-            SUT::with_id(PersonaDataEntryID::sample_three(), value.clone());
-        assert_eq!(
-            sut.id,
-            "00000000-0000-0000-0000-000000000003".parse().unwrap()
-        );
-        assert_eq!(sut.value, value)
-    }
-
-    #[test]
-    fn debug() {
-        assert_eq!(
-            format!("{:?}", SUT::sample()),
-            "alan@turing.hero - 00000000-0000-0000-0000-000000000001"
-        );
-    }
-
-    #[test]
-    fn display() {
-        assert_eq!(format!("{}", SUT::sample()), "alan@turing.hero");
-    }
-
-    #[test]
-    fn json_roundtrip_sample() {
-        let model = SUT::sample();
-        assert_eq_after_json_roundtrip(
-            &model,
-            r#"
-            {
-                "id": "00000000-0000-0000-0000-000000000001",
-                "value": "alan@turing.hero"
-            }
-            "#,
-        )
-    }
-
-    #[test]
-    fn json_roundtrip_sample_other() {
-        let model = SUT::sample_other();
-        assert_eq_after_json_roundtrip(
-            &model,
-            r#"
-            {
-                "id": "00000000-0000-0000-0000-000000000002",
-                "value": "satoshi@nakamoto.btc"
-            }
-            "#,
-        )
-    }
-}
+    "#
+);
