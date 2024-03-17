@@ -46,15 +46,13 @@ impl Wallet {
         wallet_client_storage: WalletClientStorage,
     ) -> Result<Self> {
         // Form storage key
-        let profile_key = SecureStorageKey::ProfileSnapshot {
-            profile_id: profile_id.clone(),
-        };
+        let profile_key = SecureStorageKey::ProfileSnapshot { profile_id };
 
         // Load Profile from storage with key
         let profile: Profile = wallet_client_storage.load_or(
             profile_key,
             CommonError::ProfileSnapshotNotFound {
-                bad_value: profile_id.clone(),
+                bad_value: profile_id,
             },
         )?;
 

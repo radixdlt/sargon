@@ -5,6 +5,7 @@ use crate::prelude::*;
     Serialize,
     Deserialize,
     Debug,
+    Copy,
     derive_more::Display,
     Clone,
     PartialEq,

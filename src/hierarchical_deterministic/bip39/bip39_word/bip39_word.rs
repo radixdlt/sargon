@@ -98,10 +98,7 @@ mod tests {
 
     #[test]
     fn index_of_zoo_is_2047() {
-        assert_eq!(
-            BIP39Word::english("zoo").unwrap().index.clone().inner,
-            2047
-        );
+        assert_eq!(BIP39Word::english("zoo").unwrap().index.inner, 2047);
     }
 
     #[test]

@@ -2,7 +2,15 @@ use crate::prelude::*;
 
 /// User Preferences relating to submission of transactions.
 #[derive(
-    Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Hash, uniffi::Record,
+    Serialize,
+    Deserialize,
+    Debug,
+    Copy,
+    PartialEq,
+    Eq,
+    Clone,
+    Hash,
+    uniffi::Record,
 )]
 #[serde(rename_all = "camelCase")]
 pub struct TransactionPreferences {

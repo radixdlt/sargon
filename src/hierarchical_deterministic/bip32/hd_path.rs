@@ -13,8 +13,8 @@ use crate::prelude::*;
     derive_more::Debug,
     uniffi::Record,
 )]
-#[display("{}", self.to_bip32_string())]
-#[debug("{}", self.to_bip32_string())]
+#[display("{}", self.bip32_string())]
+#[debug("{}", self.bip32_string())]
 pub struct HDPath {
     pub components: Vec<HDPathComponent>,
 }
@@ -150,7 +150,7 @@ impl HDPath {
 }
 
 impl HDPath {
-    fn to_bip32_string(&self) -> String {
+    fn bip32_string(&self) -> String {
         let rest = self.components.iter().map(|c| c.to_string()).join("/");
         format!("m/{}", rest)
     }

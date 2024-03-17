@@ -5,6 +5,7 @@ use crate::prelude::*;
     Deserialize,
     Debug,
     Clone,
+    Copy,
     PartialEq,
     Eq,
     PartialOrd,
