@@ -43,8 +43,8 @@ generate_ffi() {
 build_xcframework() {
   # Builds an XCFramework
   echo "📦 Generating XCFramework"
-  rm -rf target/ios  # Delete the output folder so we can regenerate it
-  local XCFRAME_PATH="target/ios/lib$1-rs.xcframework"
+  rm -rf target/swift  # Delete the output folder so we can regenerate it
+  local XCFRAME_PATH="target/swift/lib$1-rs.xcframework"
   local XCFRAME_ZIP_PATH="$XCFRAME_PATH.zip"
   xcodebuild -create-xcframework \
     -library target/aarch64-apple-darwin/release/lib$1.a -headers target/uniffi-xcframework-staging \
@@ -87,7 +87,6 @@ cargo build --lib --release --target aarch64-apple-ios
 
 basename=sargon
 generate_ffi $basename
-create_fat_simulator_lib $basename
 OUTPUT_OF_BUILD=$(build_xcframework $basename)
 echo "📦 ✅ End of '$me', output"
 

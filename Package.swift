@@ -12,7 +12,7 @@ if useLocalFramework {
 		name: sargonBinaryTargetName,
 		// IMPORTANT: Swift packages importing this locally will not be able to
 		// import SargonCore unless you specify this as a relative path!
-		path: "./target/ios/libsargon-rs.xcframework"
+		path: "./target/swift/libsargon-rs.xcframework"
 	)
 } else {
 	let releaseTag = "0.1.0"
@@ -28,7 +28,7 @@ if useLocalFramework {
 let package = Package(
 	name: "Sargon",
 	platforms: [
-		.iOS(.v15)
+		.iOS(.v16), .macOS(.v13),
 	],
 	products: [
 		.library(
@@ -47,6 +47,11 @@ let package = Package(
 			name: "Sargon",
 			dependencies: [.target(name: "SargonUniFFI")],
 			path: "apple/Sources/Sargon"
+		),
+		.testTarget(
+			name: "SargonTests",
+			dependencies: [.target(name: "Sargon")],
+			path: "apple/Tests/SargonTests"
 		),
 	]
 )

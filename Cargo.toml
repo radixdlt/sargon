@@ -12,9 +12,6 @@ codegen-units = 1
 [[test]]
 name = "vectors"
 
-[[test]]
-name = "uniffi"
-
 [lib]
 crate-type = ["staticlib", "cdylib", "lib"]
 
