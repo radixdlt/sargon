@@ -6,7 +6,7 @@ on:
   push:
     branches:
       - main
-      
+
 permissions:
   id-token: write
   contents: read
@@ -74,8 +74,8 @@ jobs:
           locked: true
       - name: Run tests
         run: cargo nextest run
-  
-  test-swift:
+
+  setup-ffi-tests:
     runs-on: macos-13-xlarge
     needs: test-rust
     steps:
@@ -87,6 +87,10 @@ jobs:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
           target: aarch64-apple-darwin
 
+  test-swift:
+    runs-on: macos-13-xlarge
+    needs: setup-ffi-tests
+    steps:
       - name: Build for macOS target and run swift test
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -94,11 +98,35 @@ jobs:
           rustup target add aarch64-apple-darwin
           sh ./scripts/ios/test.sh
 
+  test-android:
+    runs-on: macos-13-xlarge
+    needs: test-swift # run after since we use same target (aarch64-apple-darwin, right?)
+    steps:
+      - name: Set up JDK 17
+        uses: RDXWorks-actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          java-version: '17'
+      
+      - name: Setup Android SDK
+        uses: RDXWorks-actions/setup-android@v2
+      
+      - name: Install cargo-ndk
+        run: cargo install cargo-ndk
+  
+      - name: Test JVM
+        run: ./jvm/gradlew -p jvm/sargon-android test
+                
   codecoverage:
     runs-on: macos-13-xlarge
     needs: test-rust
     steps:
       - uses: RDXWorks-actions/checkout@main
+
+      - name: Install current Bash on macOS
+        if: runner.os == 'macOS'
+        run: brew install bash
+
       - name: Install Rust Toolchain
         uses: RDXWorks-actions/toolchain@master
         with:

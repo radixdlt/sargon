@@ -168,6 +168,40 @@ cd jvm
 ./gradlew sargon-desktop-bins:assemble
 ```
 
+### Test JVM
+
+#### Install `jenv`
+```sh
+brew install jenv
+```
+
+Dont forget to add to eval to zsh
+```sh
+export PATH="$HOME/.jenv/bin:$PATH"
+eval "$(jenv init -)"
+```
+(or similar)
+
+#### Install Java (openjdk@17)
+
+```sh
+brew install openjdk@17
+```
+
+#### Add `openjdk` version to `jenv`
+
+```sh
+jenv add /opt/homebrew/Cellar/openjdk@17/17.0.10/libexec/openjdk.jdk/Contents/Home/
+```
+(or similar)
+
+#### Run tests
+
+```sh
+./jvm/gradlew -p jvm/sargon-android test
+```
+
+
 # Release
 
 ## iOS 

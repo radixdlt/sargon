@@ -51,9 +51,9 @@ class Decimal192Test {
     @Test
     fun testRounding() {
         val a = 1.233445f.toDecimal192()
-        assertEquals("1.23", a.rounded(decimalPlaces = 2).string)
-        assertEquals("1.23", a.floor(decimalPlaces = 2).string)
-        assertEquals("1.24", a.ceil(decimalPlaces = 2).string)
+        assertEquals("1.23", a.rounded(decimalPlaces = 2u).string)
+        assertEquals("1.23", a.floor(decimalPlaces = 2u).string)
+        assertEquals("1.24", a.ceil(decimalPlaces = 2u).string)
         assertEquals("0", (a * (-1).toDecimal192()).clamped.string)
         assertEquals(a.string, a.clamped.string)
     }
