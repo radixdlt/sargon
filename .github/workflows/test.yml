@@ -12,19 +12,6 @@ env:
   RUST_TOOLCHAIN: nightly-2024-01-11
 jobs:
   
-  check-formatting:
-    runs-on: macos-13-xlarge
-    steps:
-      - uses: RDXWorks-actions/checkout@main
-      - name: Install Rust Toolchain
-        uses: RDXWorks-actions/toolchain@master
-        with:
-          toolchain: ${{ env.RUST_TOOLCHAIN }}
-          default: true
-          components: rustfmt
-      - name: Check formatting
-        run: cargo fmt --check
-  
   cargo-check:
     runs-on: macos-13-xlarge
     steps:
@@ -37,9 +24,24 @@ jobs:
           profile: minimal
       - name: Cargo Check
         run: cargo check --all
+
+  check-formatting:
+    runs-on: macos-13-xlarge
+    needs: cargo-check
+    steps:
+      - uses: RDXWorks-actions/checkout@main
+      - name: Install Rust Toolchain
+        uses: RDXWorks-actions/toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          default: true
+          components: rustfmt
+      - name: Check formatting
+        run: cargo fmt --check
   
   clippy-check:
     runs-on: macos-13-xlarge
+    needs: check-formatting
     steps:
       - uses: RDXWorks-actions/checkout@main
       - name: Install Rust Toolchain
@@ -53,6 +55,7 @@ jobs:
   
   test-rust:
     runs-on: macos-13-xlarge
+    needs: clippy-check
     steps:
       - uses: RDXWorks-actions/checkout@main
       - name: Install Rust Toolchain
@@ -71,6 +74,7 @@ jobs:
   
   test-swift:
     runs-on: macos-13-xlarge
+    needs: test-rust
     steps:
       - uses: RDXWorks-actions/checkout@main
 
@@ -89,6 +93,7 @@ jobs:
 
   codecoverage:
     runs-on: macos-13-xlarge
+    needs: test-rust
     steps:
       - uses: RDXWorks-actions/checkout@main
       - name: Install Rust Toolchain
