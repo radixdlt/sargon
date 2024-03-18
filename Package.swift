@@ -5,7 +5,7 @@ import PackageDescription
 
 let sargonBinaryTargetName = "SargonCoreRS"
 let binaryTarget: Target
-let useLocalFramework = false
+let useLocalFramework = true
 
 if useLocalFramework {
 	binaryTarget = .binaryTarget(

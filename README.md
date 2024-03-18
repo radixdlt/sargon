@@ -85,7 +85,6 @@ And then run:
 cargo tarpaulin --out Html
 ```
 
-
 ## Run Tests
 
 ```sh
@@ -98,9 +97,14 @@ cargo nextest run
 
 ### Prerequisites
 
-#### Rust targets
+#### Rust targets for iOS
 ```sh
-rustup target add x86_64-apple-ios aarch64-apple-ios aarch64-apple-ios-sim
+rustup target add aarch64-apple-ios aarch64-apple-ios-sim
+```
+
+#### Rust targets (macOS)
+```sh
+rustup target add aarch64-apple-darwin
 ```
 
 ### Build
@@ -133,10 +137,12 @@ cargo install cargo-ndk
 ```sh
 rustup target add aarch64-linux-android armv7-linux-androideabi
 ```
+
 #### Rust targets (Desktop Binaries)
 ```sh
 rustup target add aarch64-apple-darwin
 ```
+
 #### NDK
 Download the latest NDK from android studio
 
