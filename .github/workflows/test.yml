@@ -95,11 +95,25 @@ jobs:
           rustup target add aarch64-apple-darwin
           sh ./scripts/ios/test.sh
 
-  test-android:
+  test-kotlin:
     runs-on: macos-13-xlarge
     needs: test-swift
     steps:
       - uses: RDXWorks-actions/checkout@main
+
+      - name: Install Rust Toolchain for aarch64-linux-android
+        uses: RDXWorks-actions/toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          components: ${{ env.RUST_COMPONENTS }}
+          target: aarch64-linux-android
+        
+      - name: Install Rust Toolchain for armv7-linux-androideabi
+        uses: RDXWorks-actions/toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          components: ${{ env.RUST_COMPONENTS }}
+          target: armv7-linux-androideabi
 
       - name: Install Rust Toolchain for aarch64-apple-darwin
         uses: RDXWorks-actions/toolchain@master
