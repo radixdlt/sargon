@@ -55,3 +55,10 @@ repos:
         types_or: [rust, swift]
         entry: ./scripts/ios/test.sh
         pass_filenames: false
+
+      - id: kotlin tests
+        name: kotlin (jvm) tests
+        language: system
+        types_or: [rust, kotlin]
+        entry: ./jvm/gradlew -p jvm/sargon-android testDebug
+        pass_filenames: false

@@ -115,7 +115,7 @@ jobs:
         run: cargo install cargo-ndk
   
       - name: Test JVM
-        run: ./jvm/gradlew -p jvm/sargon-android test
+        run: ./jvm/gradlew -p jvm/sargon-android testDebug
                 
   codecoverage:
     runs-on: macos-13-xlarge

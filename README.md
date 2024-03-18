@@ -198,7 +198,7 @@ jenv add /opt/homebrew/Cellar/openjdk@17/17.0.10/libexec/openjdk.jdk/Contents/Ho
 #### Run tests
 
 ```sh
-./jvm/gradlew -p jvm/sargon-android test
+./jvm/gradlew -p jvm/sargon-android testDebug
 ```
 
 
