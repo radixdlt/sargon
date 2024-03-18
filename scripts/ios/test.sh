@@ -16,7 +16,7 @@ echo "✨ Ensure 'useLocalFramework' is set to 'true' in Package.swift"
 sh ./scripts/ios/ensure-is-local.sh || exit $?
 
 echo "✨ Building Sargon..."
-sh ./scripts/ios/build-sargon.sh || exit $?
+sh ./scripts/ios/build-sargon.sh --maconly || exit $?
 echo "✨ Sargon built"
 
 echo "✨ Calling 'swift test'"

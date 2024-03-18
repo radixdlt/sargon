@@ -10,6 +10,8 @@ set -u
 # In release mode, we create a ZIP archive of the xcframework and update Package.swift with the computed checksum.
 # This is only needed when cutting a new release, not for local development.
 release=false
+# When we test we only need to build for macos.
+maconly=false
 TAG_OF_RELEASE=""
 
 for arg in "$@"
@@ -18,7 +20,11 @@ do
         --release-tag)
             release=true
             TAG_OF_RELEASE="$2"
-            shift # Remove --release from processing
+            shift # Remove --release-tag from processing
+            ;;
+        --maconly)
+            maconly=true
+            shift # Remove --maconly from processing
             ;;
         *)
             shift # Ignore other argument from processing
@@ -46,11 +52,18 @@ build_xcframework() {
   rm -rf target/swift  # Delete the output folder so we can regenerate it
   local XCFRAME_PATH="target/swift/lib$1-rs.xcframework"
   local XCFRAME_ZIP_PATH="$XCFRAME_PATH.zip"
-  xcodebuild -create-xcframework \
+
+  if $maconly; then
+    xcodebuild -create-xcframework \
+    -library target/aarch64-apple-darwin/release/lib$1.a -headers target/uniffi-xcframework-staging \
+    -output $XCFRAME_PATH
+  else
+    xcodebuild -create-xcframework \
     -library target/aarch64-apple-darwin/release/lib$1.a -headers target/uniffi-xcframework-staging \
     -library target/aarch64-apple-ios/release/lib$1.a -headers target/uniffi-xcframework-staging \
     -library target/aarch64-apple-ios-sim/release/lib$1.a -headers target/uniffi-xcframework-staging \
     -output $XCFRAME_PATH
+  fi
 
   if $release; then
     local CHKSUM="RELEASE_WAS_FALSE_THUS_NO_CHECKSUM"
@@ -82,8 +95,14 @@ cd "$DIR"
 cd "../../" # go to parent of parent, which is project root.
 
 cargo build --lib --release --target aarch64-apple-darwin
-cargo build --lib --release --target aarch64-apple-ios-sim
-cargo build --lib --release --target aarch64-apple-ios
+if $maconly; then
+  echo "📦 Skip building iOS (test on macOS only)."
+else
+  echo "📦 Building iOS targets (apart from macOS)."
+  cargo build --lib --release --target aarch64-apple-ios-sim
+  cargo build --lib --release --target aarch64-apple-ios
+fi
+
 
 basename=sargon
 generate_ffi $basename

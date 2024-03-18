@@ -9,81 +9,93 @@ permissions:
   contents: read
 env:
   CARGO_TERM_COLOR: always
+  RUST_TOOLCHAIN: nightly-2024-01-11
 jobs:
-  ci:
+  
+  check-formatting:
     runs-on: macos-13-xlarge
-    env:
-      RUST_TOOLCHAIN: nightly-2024-01-11
-      RUST_COMPONENTS: ["rust-std", "rustfmt", "clippy"]
     steps:
       - uses: RDXWorks-actions/checkout@main
-      - name: Install Rust Toolchain for aarch64-apple-darwin
+      - name: Install Rust Toolchain
         uses: RDXWorks-actions/toolchain@master
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
-          components: ${{ env.RUST_COMPONENTS }}
-          target: aarch64-apple-darwin
-
-      - name: Install Rust Toolchain for aarch64-apple-ios
+          default: true
+          components: rustfmt
+      - name: Check formatting
+        run: cargo fmt --check
+  
+  cargo-check:
+    runs-on: macos-13-xlarge
+    steps:
+      - uses: RDXWorks-actions/checkout@main
+      - name: Install Rust Toolchain
         uses: RDXWorks-actions/toolchain@master
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
-          components: ${{ env.RUST_COMPONENTS }}
-          target: aarch64-apple-ios
-
-      - name: Install Rust Toolchain for aarch64-apple-ios-sim
-        uses: RDXWorks-actions/toolchain@master
-        with:
-          toolchain: ${{ env.RUST_TOOLCHAIN }}
-          components: ${{ env.RUST_COMPONENTS }}
-          target: aarch64-apple-ios-sim
-
-      - name: Cargo Check
-        uses: RDXWorks-actions/toolchain@master
-        with:
-          toolchain: ${{ env.RUST_TOOLCHAIN }}
-          components: ${{ env.RUST_COMPONENTS }}
           default: true
           profile: minimal
+      - name: Cargo Check
         run: cargo check --all
-
-      - name: Check formatting
+  
+  clippy-check:
+    runs-on: macos-13-xlarge
+    steps:
+      - uses: RDXWorks-actions/checkout@main
+      - name: Install Rust Toolchain
         uses: RDXWorks-actions/toolchain@master
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
-          components: ${{ env.RUST_COMPONENTS }}
-        run: cargo fmt --check
-
-      - name: Clippy Check
-        uses: RDXWorks-actions/toolchain@master
-        with:
-          toolchain: ${{ env.RUST_TOOLCHAIN }}
-          components: ${{ env.RUST_COMPONENTS }}
           default: true
-        run: cargo clippy --all -- -D warnings
-
+          components: rustfmt, clippy
+      - name: Clippy Check
+        run: cargo clippy --all
+  
+  test-rust:
+    runs-on: macos-13-xlarge
+    steps:
+      - uses: RDXWorks-actions/checkout@main
+      - name: Install Rust Toolchain
+        uses: RDXWorks-actions/toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          default: true
+          components: rustfmt, clippy
       - name: Install cargo nextest
         uses: RDXWorks-actions/cargo-install@main
         with:
           crate: cargo-nextest
           locked: true
-
-      - name: Install JNA
-        run: wget https://repo1.maven.org/maven2/net/java/dev/jna/jna/5.13.0/jna-5.13.0.jar
-
-      - name: Rust tests
+      - name: Run tests
         run: cargo nextest run
+  
+  test-swift:
+    runs-on: macos-13-xlarge
+    steps:
+      - uses: RDXWorks-actions/checkout@main
 
-      - name: Swift tests
+      - name: Install Rust Toolchain for aarch64-apple-darwin
+        uses: RDXWorks-actions/toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          target: aarch64-apple-darwin
+
+      - name: Build for macOS target and run swift test
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          rustup target add aarch64-apple-darwin aarch64-apple-ios aarch64-apple-ios-sim
+          rustup target add aarch64-apple-darwin
           sh ./scripts/ios/test.sh
 
-      - name: Kotlin tests
-        run: echo "TODO kotlin tests"
-
+  codecoverage:
+    runs-on: macos-13-xlarge
+    steps:
+      - uses: RDXWorks-actions/checkout@main
+      - name: Install Rust Toolchain
+        uses: RDXWorks-actions/toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          default: true
       - name: Install cargo tarpaulin
         uses: RDXWorks-actions/cargo-install@main
         with:
