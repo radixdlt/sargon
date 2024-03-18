@@ -117,20 +117,14 @@ jobs:
       - name: Test JVM
         run: ./jvm/gradlew -p jvm/sargon-android testDebug
                 
-  codecoverage:
-    runs-on: macos-13-xlarge
-    needs: test-rust
+  codecoverage: # TODO! Change runner to macOS when AWS secrets actions run on mac!
+    runs-on: ubuntu-latest
     steps:
       - uses: RDXWorks-actions/checkout@main
-
-      - name: Install current Bash on macOS
-        if: runner.os == 'macOS'
-        run: brew install bash
-
       - name: Install Rust Toolchain
         uses: RDXWorks-actions/toolchain@master
         with:
-          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          toolchain: nightly-2024-01-11
           default: true
       - name: Install cargo tarpaulin
         uses: RDXWorks-actions/cargo-install@main
