@@ -20,12 +20,12 @@ jobs:
     steps:
       - uses: RDXWorks-actions/checkout@main
 
-      - name: Install Rust Toolchain for x86_64-apple-ios
+      - name: Install Rust Toolchain for aarch64-apple-darwin
         uses: RDXWorks-actions/toolchain@master
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
           components: ${{ env.RUST_COMPONENTS }}
-          target: x86_64-apple-ios
+          target: aarch64-apple-darwin
 
       - name: Install Rust Toolchain for aarch64-apple-ios
         uses: RDXWorks-actions/toolchain@master
@@ -45,6 +45,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          rustup target add x86_64-apple-ios aarch64-apple-ios aarch64-apple-ios-sim
+          rustup target add aarch64-apple-darwin aarch64-apple-ios aarch64-apple-ios-sim
           sh ./scripts/ios/release.sh
       

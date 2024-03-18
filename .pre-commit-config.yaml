@@ -52,6 +52,6 @@ repos:
       - id: swift tests
         name: swift tests
         language: system
-        types_or: [text, rust, swift]
+        types_or: [rust, swift]
         entry: ./scripts/ios/test.sh
         pass_filenames: false
