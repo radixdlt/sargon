@@ -75,7 +75,8 @@ jobs:
       - name: Run tests
         run: cargo nextest run
 
-  setup-ffi-tests:
+
+  test-swift:
     runs-on: macos-13-xlarge
     needs: test-rust
     steps:
@@ -87,10 +88,6 @@ jobs:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
           target: aarch64-apple-darwin
 
-  test-swift:
-    runs-on: macos-13-xlarge
-    needs: setup-ffi-tests
-    steps:
       - name: Build for macOS target and run swift test
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -100,8 +97,16 @@ jobs:
 
   test-android:
     runs-on: macos-13-xlarge
-    needs: test-swift # run after since we use same target (aarch64-apple-darwin, right?)
+    needs: test-swift
     steps:
+      - uses: RDXWorks-actions/checkout@main
+
+      - name: Install Rust Toolchain for aarch64-apple-darwin
+        uses: RDXWorks-actions/toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          target: aarch64-apple-darwin
+
       - name: Set up JDK 17
         uses: RDXWorks-actions/setup-java@v3
         with:
