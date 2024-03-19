@@ -1,6 +1,8 @@
 use crate::{prelude::*, UniffiCustomTypeConverter};
 
-use bip32::secp256k1::PublicKey as BIP32Secp256k1PublicKey; // the bip32 crate actually does validation of the PublicKey whereas `radix_engine_common` does not.
+use bip32::secp256k1::{
+    elliptic_curve::sec1::ToEncodedPoint, PublicKey as BIP32Secp256k1PublicKey,
+}; // the bip32 crate actually does validation of the PublicKey whereas `radix_engine_common` does not.
 
 /// A `secp256k1` public key used to verify cryptographic signatures (ECDSA signatures).
 #[serde_as]
@@ -46,44 +48,6 @@ impl UniffiCustomTypeConverter for ScryptoSecp256k1PublicKey {
     }
 }
 
-#[uniffi::export]
-pub fn new_secp256k1_public_key_from_hex(
-    hex: String,
-) -> Result<Secp256k1PublicKey> {
-    hex.parse()
-}
-
-#[uniffi::export]
-pub fn new_secp256k1_public_key_from_bytes(
-    bytes: BagOfBytes,
-) -> Result<Secp256k1PublicKey> {
-    bytes.to_vec().try_into()
-}
-
-/// Encodes the compressed form (33 bytes) of a `Secp256k1PublicKey` to a hexadecimal string, lowercased, without any `0x` prefix, e.g.
-/// `"033083620d1596d3f8988ff3270e42970dd2a031e2b9b6488052a4170ff999f3e8"`
-#[uniffi::export]
-pub fn secp256k1_public_key_to_hex(public_key: &Secp256k1PublicKey) -> String {
-    public_key.to_hex()
-}
-
-#[uniffi::export]
-pub fn secp256k1_public_key_to_bytes(
-    public_key: &Secp256k1PublicKey,
-) -> BagOfBytes {
-    public_key.to_bytes().into()
-}
-
-#[uniffi::export]
-pub fn new_secp256k1_public_key_sample() -> Secp256k1PublicKey {
-    Secp256k1PublicKey::sample()
-}
-
-#[uniffi::export]
-pub fn new_secp256k1_public_key_sample_other() -> Secp256k1PublicKey {
-    Secp256k1PublicKey::sample_other()
-}
-
 impl IsPublicKey<Secp256k1Signature> for Secp256k1PublicKey {
     /// Verifies an ECDSA signature over Secp256k1.
     fn is_valid(
@@ -111,17 +75,21 @@ impl Secp256k1PublicKey {
     pub fn to_hex(&self) -> String {
         hex_encode(self.to_bytes())
     }
+
+    pub fn uncompressed(&self) -> Vec<u8> {
+        BIP32Secp256k1PublicKey::from_sec1_bytes(&self.to_bytes())
+            .expect("should always be able to create a BIP32 PublicKey")
+            .to_encoded_point(false)
+            .as_bytes()
+            .to_owned()
+    }
 }
 
 impl TryFrom<ScryptoSecp256k1PublicKey> for Secp256k1PublicKey {
     type Error = CommonError;
 
     fn try_from(value: ScryptoSecp256k1PublicKey) -> Result<Self, Self::Error> {
-        BIP32Secp256k1PublicKey::from_sec1_bytes(value.to_vec().as_slice())
-            .map_err(|_| CommonError::InvalidSecp256k1PublicKeyPointNotOnCurve)
-            .map(|_| Self {
-                secret_magic: value,
-            })
+        <Self as TryFrom<&[u8]>>::try_from(&value.to_vec())
     }
 }
 
@@ -129,7 +97,7 @@ impl TryFrom<Vec<u8>> for Secp256k1PublicKey {
     type Error = CommonError;
 
     fn try_from(value: Vec<u8>) -> Result<Self, Self::Error> {
-        value.as_slice().try_into()
+        Self::try_from(value.as_slice())
     }
 }
 
@@ -137,16 +105,20 @@ impl TryFrom<&[u8]> for Secp256k1PublicKey {
     type Error = crate::CommonError;
 
     fn try_from(slice: &[u8]) -> Result<Self> {
+        
         BIP32Secp256k1PublicKey::from_sec1_bytes(slice)
-        .map_err(|_| CommonError::InvalidSecp256k1PublicKeyPointNotOnCurve)
-        .map(|key| Self {
-            secret_magic: value,
-        })
-        // ScryptoSecp256k1PublicKey::try_from(slice)
-        //     .map_err(|_| CommonError::InvalidSecp256k1PublicKeyFromBytes {
-        //         bad_value: slice.to_vec().into(),
-        //     })
-        //     .and_then(|k| k.try_into())
+            .map_err(|_| CommonError::InvalidSecp256k1PublicKeyPointNotOnCurve)
+            .and_then(|key| {
+                ScryptoSecp256k1PublicKey::try_from(
+                    key.to_encoded_point(true).as_ref(),
+                )
+                .map_err(|_| {
+                    CommonError::InvalidSecp256k1PublicKeyFromBytes {
+                        bad_value: slice.to_vec().into(),
+                    }
+                })
+            })
+            .map(|secret_magic| Self { secret_magic })
     }
 }
 
@@ -222,7 +194,12 @@ mod tests {
         SUT::from_str("040202020202020202020202020202020202020202020202020202020202020202415456f0fc01d66476251cab4525d9db70bfec652b2d8130608675674cde64b2").unwrap().to_hex(),
         // compressed is this...
         "020202020202020202020202020202020202020202020202020202020202020202"
-      )
+      );
+
+        assert_eq!(
+        hex_encode(SUT::from_str("020202020202020202020202020202020202020202020202020202020202020202").unwrap().uncompressed()),
+        "040202020202020202020202020202020202020202020202020202020202020202415456f0fc01d66476251cab4525d9db70bfec652b2d8130608675674cde64b2"
+      );
     }
 
     #[test]
@@ -389,46 +366,5 @@ mod tests {
         let hash = hash_of(message.as_bytes());
         let signature: Secp256k1Signature = "01aa1c4f46f8437b7f8ec9008ae10e6f33bb8be3e81e35c63f3498070dfbd6a20b2daee6073ead3c9e72d8909bc32a02e46cede3885cf8568d4c380ac97aa7fbcd".parse().unwrap();
         assert!(sut.is_valid(&signature, &hash));
-    }
-}
-
-#[cfg(test)]
-mod uniffi_tests {
-    use super::*;
-
-    #[test]
-    fn equality_samples() {
-        assert_eq!(
-            Secp256k1PublicKey::sample(),
-            new_secp256k1_public_key_sample()
-        );
-        assert_eq!(
-            Secp256k1PublicKey::sample_other(),
-            new_secp256k1_public_key_sample_other()
-        );
-    }
-
-    #[test]
-    fn new_from_bytes() {
-        let bag_of_bytes: BagOfBytes = "033083620d1596d3f8988ff3270e42970dd2a031e2b9b6488052a4170ff999f3e8".parse().unwrap();
-        let from_bytes =
-            new_secp256k1_public_key_from_bytes(bag_of_bytes.clone()).unwrap();
-        assert_eq!(
-            from_bytes,
-            Secp256k1PublicKey::try_from(bag_of_bytes.as_ref()).unwrap()
-        );
-        assert_eq!(secp256k1_public_key_to_bytes(&from_bytes), bag_of_bytes);
-    }
-
-    #[test]
-    fn new_from_hex() {
-        let hex = "033083620d1596d3f8988ff3270e42970dd2a031e2b9b6488052a4170ff999f3e8";
-        let from_hex =
-            new_secp256k1_public_key_from_hex(hex.to_string()).unwrap();
-        assert_eq!(
-            from_hex,
-            Secp256k1PublicKey::from_hex(hex.to_string()).unwrap()
-        );
-        assert_eq!(secp256k1_public_key_to_hex(&from_hex), hex)
     }
 }

@@ -206,16 +206,16 @@ mod tests {
                 .unwrap(),
             DepositAddressExceptionRule::Deny,
         );
-        assert!(settings.add_asset_exception(exception.clone()));
+        assert!(settings.add_asset_exception(exception));
         assert_eq!(settings.assets_exception_list.len(), 2);
         assert!(settings.remove_asset_exception(&exception));
         assert_eq!(settings.assets_exception_list.len(), 1);
         // settings.set_assets_exception_list(BTreeSet::from_iter([exception.clone()]));
         settings.assets_exception_list =
-            IdentifiedVecVia::from_iter([exception.clone()]);
+            IdentifiedVecVia::from_iter([exception]);
 
         assert!(
-            !settings.add_asset_exception(exception.clone()),
+            !settings.add_asset_exception(exception),
             "Expected `false` since already present."
         );
     }
