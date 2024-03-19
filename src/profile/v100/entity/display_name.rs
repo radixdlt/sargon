@@ -1,5 +1,18 @@
 use crate::prelude::*;
 
+/// A max 30 chars long string used for display purposes, e.g.
+/// the name of an Account or Persona.
+///
+/// ```
+/// extern crate sargon;
+/// use sargon::prelude::*;
+/// #[allow(clippy::upper_case_acronyms)]
+/// type SUT = DisplayName;
+///
+/// assert_eq!(SUT::MAX_LEN, 30);
+/// assert_eq!("Satoshi".parse::<SUT>().unwrap().to_string(), "Satoshi");
+/// ```
+///
 #[derive(
     Clone,
     Debug,
@@ -16,11 +29,6 @@ use crate::prelude::*;
 #[display("{value}")]
 pub struct DisplayName {
     pub value: String,
-}
-
-#[uniffi::export]
-pub fn new_display_name(name: String) -> Result<DisplayName> {
-    DisplayName::new(name.as_str())
 }
 
 impl DisplayName {
@@ -56,16 +64,41 @@ impl FromStr for DisplayName {
     }
 }
 
+impl HasSampleValues for DisplayName {
+    fn sample() -> Self {
+        "Spending Account".parse().unwrap()
+    }
+
+    fn sample_other() -> Self {
+        "Savings Account".parse().unwrap()
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = DisplayName;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
     #[test]
     fn invalid() {
         let s = "this is a much much too long display name";
         assert_eq!(
-            DisplayName::new(s),
+            SUT::new(s),
             Err(CommonError::InvalidDisplayNameTooLong {
-                expected: DisplayName::MAX_LEN as u64,
+                expected: SUT::MAX_LEN as u64,
                 found: s.len() as u64
             })
         );
@@ -73,44 +106,32 @@ mod tests {
 
     #[test]
     fn max_is_ok() {
-        assert!(DisplayName::new("0|RDX|Dev Nano S|Some very lon").is_ok());
+        assert!(SUT::new("0|RDX|Dev Nano S|Some very lon").is_ok());
     }
 
     #[test]
     fn valid_try_from() {
-        assert_eq!(
-            DisplayName::new("Main"),
-            Ok(DisplayName::new("Main").unwrap())
-        );
+        assert_eq!(SUT::new("Main"), Ok(SUT::new("Main").unwrap()));
     }
 
     #[test]
     fn empty_is_invalid() {
-        assert_eq!(
-            DisplayName::new(""),
-            Err(CommonError::InvalidDisplayNameEmpty)
-        );
+        assert_eq!(SUT::new(""), Err(CommonError::InvalidDisplayNameEmpty));
     }
 
     #[test]
     fn spaces_trimmed_into_empty_is_invalid() {
-        assert_eq!(
-            DisplayName::new("   "),
-            Err(CommonError::InvalidDisplayNameEmpty)
-        );
+        assert_eq!(SUT::new("   "), Err(CommonError::InvalidDisplayNameEmpty));
     }
 
     #[test]
     fn inner() {
-        assert_eq!(
-            DisplayName::new("Main account").unwrap().value,
-            "Main account"
-        );
+        assert_eq!(SUT::new("Main account").unwrap().value, "Main account");
     }
 
     #[test]
     fn json_roundtrip() {
-        let a: DisplayName = "Cool persona".parse().unwrap();
+        let a: SUT = "Cool persona".parse().unwrap();
 
         assert_json_value_eq_after_roundtrip(&a, json!("Cool persona"));
         assert_json_roundtrip(&a);
@@ -119,23 +140,10 @@ mod tests {
 
     #[test]
     fn json_fails_for_invalid() {
-        assert_json_value_fails::<DisplayName>(json!(
+        assert_json_value_fails::<SUT>(json!(
             "this is a much much too long display name"
         ));
-        assert_json_value_fails::<DisplayName>(json!(""));
-        assert_json_value_fails::<DisplayName>(json!("   "));
-    }
-}
-
-#[cfg(test)]
-mod uniffi_tests {
-    use crate::{new_display_name, DisplayName};
-
-    #[test]
-    fn new() {
-        assert_eq!(
-            new_display_name("Main".to_string()).unwrap(),
-            DisplayName::new("Main").unwrap(),
-        );
+        assert_json_value_fails::<SUT>(json!(""));
+        assert_json_value_fails::<SUT>(json!("   "));
     }
 }

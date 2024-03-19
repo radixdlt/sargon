@@ -1,10 +1,35 @@
 extension Decimal192: @unchecked Sendable {}
 
+extension Decimal192: SargonModel {
+	public static var sample: Self {
+		123456789
+	}
+	
+	public static var sampleOther: Self {
+		Self.max
+	}
+}
+
+extension Decimal192 {
+	/// Positive value
+	public static var max: Self {
+		decimalMax()
+	}
+	
+	/// Negative value
+	public static var min: Self {
+		decimalMin()
+	}
+}
+
+#if DEBUG
 extension Decimal192: ExpressibleByStringLiteral {
 	public init(stringLiteral string: String) {
 		try! self.init(string)
 	}
 }
+#endif
+
 extension Decimal192: ExpressibleByIntegerLiteral {
 	public init(integerLiteral i64: Int64) {
 		self = newDecimalFromI64(value: i64)

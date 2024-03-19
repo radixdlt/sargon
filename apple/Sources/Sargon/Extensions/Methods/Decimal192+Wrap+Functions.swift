@@ -6,7 +6,7 @@ extension Decimal192 {
 
 extension Decimal192: CustomStringConvertible {
 	public var description: String {
-		decimalToString(decimal: self)
+		formattedPlain()
 	}
 }
 

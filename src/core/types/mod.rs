@@ -1,5 +1,6 @@
 mod bag_of_bytes;
 mod decimal192;
+mod decimal192_uniffi_fn;
 mod entity_kind;
 mod epoch;
 mod exactly_n_bytes;
@@ -15,6 +16,7 @@ mod signatures;
 
 pub use bag_of_bytes::*;
 pub use decimal192::*;
+pub use decimal192_uniffi_fn::*;
 pub use entity_kind::*;
 pub use epoch::*;
 pub use exactly_n_bytes::*;
