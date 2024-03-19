@@ -16,17 +16,37 @@ env:
   RUST_COMPONENTS: "rust-std"
 jobs:
 
-# cargo check
-  check-cargo-check:
+# typos
+  check-typos:
     runs-on: macos-13-xlarge
     steps:
       - uses: RDXWorks-actions/checkout@main
+      
       - name: Install Rust Toolchain
         uses: RDXWorks-actions/toolchain@master
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
           default: true
           profile: minimal
+      
+      - name: Check typos
+        uses: RDXWorks-actions/typos@master
+        with: 
+          config: ./_typos.toml
+
+# cargo check
+  check-cargo-check:
+    runs-on: macos-13-xlarge
+    steps:
+      - uses: RDXWorks-actions/checkout@main
+      
+      - name: Install Rust Toolchain
+        uses: RDXWorks-actions/toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          default: true
+          profile: minimal
+      
       - name: Cargo Check
         run: cargo check --all
 
@@ -36,12 +56,14 @@ jobs:
     needs: check-cargo-check
     steps:
       - uses: RDXWorks-actions/checkout@main
+      
       - name: Install Rust Toolchain
         uses: RDXWorks-actions/toolchain@master
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
           default: true
           components: rustfmt
+      
       - name: Check formatting
         run: cargo fmt --check
 
@@ -51,12 +73,14 @@ jobs:
     needs: check-formatting
     steps:
       - uses: RDXWorks-actions/checkout@main
+      
       - name: Install Rust Toolchain
         uses: RDXWorks-actions/toolchain@master
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
           default: true
           components: clippy
+      
       - name: Clippy Check
         run: cargo clippy --all
  
