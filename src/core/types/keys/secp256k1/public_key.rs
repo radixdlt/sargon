@@ -137,11 +137,16 @@ impl TryFrom<&[u8]> for Secp256k1PublicKey {
     type Error = crate::CommonError;
 
     fn try_from(slice: &[u8]) -> Result<Self> {
-        ScryptoSecp256k1PublicKey::try_from(slice)
-            .map_err(|_| CommonError::InvalidSecp256k1PublicKeyFromBytes {
-                bad_value: slice.to_vec().into(),
-            })
-            .and_then(|k| k.try_into())
+        BIP32Secp256k1PublicKey::from_sec1_bytes(slice)
+        .map_err(|_| CommonError::InvalidSecp256k1PublicKeyPointNotOnCurve)
+        .map(|key| Self {
+            secret_magic: value,
+        })
+        // ScryptoSecp256k1PublicKey::try_from(slice)
+        //     .map_err(|_| CommonError::InvalidSecp256k1PublicKeyFromBytes {
+        //         bad_value: slice.to_vec().into(),
+        //     })
+        //     .and_then(|k| k.try_into())
     }
 }
 
@@ -208,6 +213,16 @@ mod tests {
             "02517b88916e7f315bb682f9926b14bc67a0e4246f8a419b986269e1a7e61fffa7"
         )
         .is_ok());
+    }
+
+    #[test]
+    fn uncompressed() {
+        // https://github.com/Sajjon/K1/blob/main/Tests/K1Tests/TestCases/Keys/PublicKey/PublicKeyImportTests.swift#L48
+        assert_eq!(
+        SUT::from_str("040202020202020202020202020202020202020202020202020202020202020202415456f0fc01d66476251cab4525d9db70bfec652b2d8130608675674cde64b2").unwrap().to_hex(),
+        // compressed is this...
+        "020202020202020202020202020202020202020202020202020202020202020202"
+      )
     }
 
     #[test]

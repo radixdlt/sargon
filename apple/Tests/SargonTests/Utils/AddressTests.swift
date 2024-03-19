@@ -1,7 +1,3 @@
-import Foundation
-import Sargon
-import XCTest
-
 class AddressTest<SUT_: AddressProtocol>: Test<SUT_> {
 	
 	func test_network_id_of_mainnet_sample() {
