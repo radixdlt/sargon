@@ -101,24 +101,77 @@ impl TryFrom<Vec<u8>> for Secp256k1PublicKey {
     }
 }
 
-impl TryFrom<&[u8]> for Secp256k1PublicKey {
-    type Error = crate::CommonError;
+/// Correct amount of bytes, however, the contents of the bytes
+/// have not been checked to see it is a valid Secp256k1PublicKey.
+pub enum Secp256k1PublicKeyUncheckedBytes {
+    Compressed(Exactly33Bytes),
+    Uncompressed(Exactly65Bytes),
+}
+impl AsRef<[u8]> for Secp256k1PublicKeyUncheckedBytes {
+    fn as_ref(&self) -> &[u8] {
+        match self {
+            Secp256k1PublicKeyUncheckedBytes::Compressed(bytes) => {
+                bytes.as_ref()
+            }
+            Secp256k1PublicKeyUncheckedBytes::Uncompressed(bytes) => {
+                bytes.as_ref()
+            }
+        }
+    }
+}
+impl TryFrom<&[u8]> for Secp256k1PublicKeyUncheckedBytes {
+    type Error = CommonError;
 
-    fn try_from(slice: &[u8]) -> Result<Self> {
-        
-        BIP32Secp256k1PublicKey::from_sec1_bytes(slice)
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Exactly33Bytes::try_from(value)
+            .map(Self::Compressed)
+            .or(Exactly65Bytes::try_from(value).map(Self::Uncompressed))
+            .map_err(|_| CommonError::InvalidSecp256k1PublicKeyFromBytes {
+                bad_value: BagOfBytes::from(value),
+            })
+    }
+}
+
+impl TryFrom<Secp256k1PublicKeyUncheckedBytes> for Secp256k1PublicKey {
+    type Error = CommonError;
+
+    fn try_from(
+        value: Secp256k1PublicKeyUncheckedBytes,
+    ) -> Result<Self, Self::Error> {
+        BIP32Secp256k1PublicKey::from_sec1_bytes(value.as_ref())
             .map_err(|_| CommonError::InvalidSecp256k1PublicKeyPointNotOnCurve)
-            .and_then(|key| {
+            .map(|key| {
                 ScryptoSecp256k1PublicKey::try_from(
                     key.to_encoded_point(true).as_ref(),
                 )
-                .map_err(|_| {
-                    CommonError::InvalidSecp256k1PublicKeyFromBytes {
-                        bad_value: slice.to_vec().into(),
-                    }
-                })
+                .expect("Discrepancy: Scrypto's Secp256k1PublicKey library considers key invalid, but BIP32 crate considers it valid. We trust BIP32 crate.")
             })
             .map(|secret_magic| Self { secret_magic })
+    }
+}
+
+impl TryFrom<Exactly33Bytes> for Secp256k1PublicKey {
+    type Error = CommonError;
+
+    fn try_from(value: Exactly33Bytes) -> Result<Self, Self::Error> {
+        Self::try_from(Secp256k1PublicKeyUncheckedBytes::Compressed(value))
+    }
+}
+
+impl TryFrom<Exactly65Bytes> for Secp256k1PublicKey {
+    type Error = CommonError;
+
+    fn try_from(value: Exactly65Bytes) -> Result<Self, Self::Error> {
+        Self::try_from(Secp256k1PublicKeyUncheckedBytes::Uncompressed(value))
+    }
+}
+
+impl TryFrom<&[u8]> for Secp256k1PublicKey {
+    type Error = CommonError;
+
+    fn try_from(slice: &[u8]) -> Result<Self> {
+        Secp256k1PublicKeyUncheckedBytes::try_from(slice)
+            .and_then(Self::try_from)
     }
 }
 
