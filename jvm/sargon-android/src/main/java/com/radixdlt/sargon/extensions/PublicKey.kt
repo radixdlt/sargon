@@ -18,10 +18,10 @@ fun PublicKey.Secp256k1.Companion.init(hex: String): PublicKey.Secp256k1 =
     PublicKey.Secp256k1(newSecp256k1PublicKeyFromHex(hex = hex))
 
 fun PublicKey.Ed25519.Companion.init(bytes: BagOfBytes): PublicKey.Ed25519 =
-    PublicKey.Ed25519(newEd25519PublicKeyFromBytes(bytes = bytes.byteArray))
+    PublicKey.Ed25519(newEd25519PublicKeyFromBytes(bytes = bytes))
 
 fun PublicKey.Secp256k1.Companion.init(bytes: BagOfBytes): PublicKey.Secp256k1 =
-    PublicKey.Secp256k1(newSecp256k1PublicKeyFromBytes(bytes = bytes.byteArray))
+    PublicKey.Secp256k1(newSecp256k1PublicKeyFromBytes(bytes = bytes))
 
 val PublicKey.hex: String
     get() = when (this) {
@@ -31,6 +31,6 @@ val PublicKey.hex: String
 
 val PublicKey.bagOfBytes: BagOfBytes
     get() = when (this) {
-    is PublicKey.Ed25519 -> ed25519PublicKeyToBytes(publicKey = this.value).toBagOfBytes()
-    is PublicKey.Secp256k1 -> secp256k1PublicKeyToBytes(publicKey = this.value).toBagOfBytes()
+    is PublicKey.Ed25519 -> ed25519PublicKeyToBytes(publicKey = this.value)
+    is PublicKey.Secp256k1 -> secp256k1PublicKeyToBytes(publicKey = this.value)
 }

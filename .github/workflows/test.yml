@@ -29,14 +29,19 @@ jobs:
           default: true
           profile: minimal
       
+      - name: Install typos
+        uses: RDXWorks-actions/cargo-install@main
+        with:
+          crate: typos-cli
+          locked: true
+      
       - name: Check typos
-        uses: RDXWorks-actions/typos@master
-        with: 
-          config: ./_typos.toml
+        run: typos
 
 # cargo check
   check-cargo-check:
     runs-on: macos-13-xlarge
+    needs: check-typos
     steps:
       - uses: RDXWorks-actions/checkout@main
       
