@@ -41,7 +41,6 @@ jobs:
 # cargo check
   check-cargo-check:
     runs-on: macos-13-xlarge
-    needs: check-typos
     steps:
       - uses: RDXWorks-actions/checkout@main
       
