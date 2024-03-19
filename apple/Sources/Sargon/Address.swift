@@ -20,8 +20,10 @@ public enum Address: Hashable, Equatable, Sendable {
 }
 extension Address: AddressProtocol {
 	
-	public static let sample = Self.account(.sample)
-	public static let sampleOther = Self.resource(.sampleOther)
+	public static let sampleMainnet = Self.account(.sampleMainnet)
+	public static let sampleMainnetOther = Self.resource(.sampleMainnetOther)
+	public static let sampleStokenet = Self.account(.sampleStokenet)
+	public static let sampleStokenetOther = Self.resource(.sampleStokenetOther)
 	
 	public init(validatingAddress bech32String: String) throws {
 		if let address = try? AccessControllerAddress(
@@ -90,16 +92,21 @@ extension Address: AddressProtocol {
 extension Address: CaseIterable {
 	public typealias AllCases = [Self]
 	public static var allCases: AllCases {
-		AccountAddress.allCases.map(Self.account)
-		+ AccessControllerAddress.allCases.map(Self.accesscontroller)
-		+ ComponentAddress.allCases.map(Self.component)
-		+ IdentityAddress.allCases.map(Self.identity)
-		+ PackageAddress.allCases.map(Self.package)
-		+ PoolAddress.allCases.map(Self.pool)
-		+ ResourceAddress.allCases.map(Self.resource)
-		+ NonFungibleResourceAddress.allCases.map(Self.nonFungibleResource)
-		+ ValidatorAddress.allCases.map(Self.validator)
-		+ VaultAddress.allCases.map(Self.vault)
+		var addresses: [Self] = []
+		
+		// Using `+` operator results in Swift compiler dying.
+		addresses.append(contentsOf: AccountAddress.allCases.map(Self.account))
+		addresses.append(contentsOf: AccessControllerAddress.allCases.map(Self.accesscontroller))
+		addresses.append(contentsOf: ComponentAddress.allCases.map(Self.component))
+		addresses.append(contentsOf: IdentityAddress.allCases.map(Self.identity))
+		addresses.append(contentsOf: PackageAddress.allCases.map(Self.package))
+		addresses.append(contentsOf: PoolAddress.allCases.map(Self.pool))
+		addresses.append(contentsOf: ResourceAddress.allCases.map(Self.resource))
+		addresses.append(contentsOf: NonFungibleResourceAddress.allCases.map(Self.nonFungibleResource))
+		addresses.append(contentsOf: ValidatorAddress.allCases.map(Self.validator))
+		addresses.append(contentsOf: VaultAddress.allCases.map(Self.vault))
+		
+		return addresses
 	}
 }
 #endif

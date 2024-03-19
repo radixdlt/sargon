@@ -2,14 +2,26 @@ use crate::prelude::*;
 
 /// Sample to a mainnet ComponentAddress (global)
 #[uniffi::export]
-pub fn new_component_address_sample() -> ComponentAddress {
+pub fn new_component_address_sample_mainnet_global() -> ComponentAddress {
     ComponentAddress::sample_mainnet_global()
 }
 
 /// Sample to a mainnet ComponentAddress (internal)
 #[uniffi::export]
-pub fn new_component_address_sample_other() -> ComponentAddress {
+pub fn new_component_address_sample_mainnet_internal() -> ComponentAddress {
     ComponentAddress::sample_mainnet_internal()
+}
+
+/// Sample to a stokenet ComponentAddress (global)
+#[uniffi::export]
+pub fn new_component_address_sample_stokenet_global() -> ComponentAddress {
+    ComponentAddress::sample_stokenet_global()
+}
+
+/// Sample to a stokenet ComponentAddress (internal)
+#[uniffi::export]
+pub fn new_component_address_sample_stokenet_internal() -> ComponentAddress {
+    ComponentAddress::sample_stokenet_internal()
 }
 
 impl HasSampleValues for ComponentAddress {
@@ -187,14 +199,21 @@ mod uniffi_tests {
     }
 
     #[test]
-    fn sample() {
+    fn hash_of_sample() {
         assert_eq!(
-            SUT::sample_mainnet_global(),
-            new_component_address_sample()
-        );
-        assert_eq!(
-            SUT::sample_mainnet_internal(),
-            new_component_address_sample_other()
+            HashSet::<SUT>::from_iter([
+                new_component_address_sample_mainnet_global(),
+                new_component_address_sample_mainnet_internal(),
+                new_component_address_sample_stokenet_global(),
+                new_component_address_sample_stokenet_internal(),
+                // duplicates should be removed
+                new_component_address_sample_mainnet_global(),
+                new_component_address_sample_mainnet_internal(),
+                new_component_address_sample_stokenet_global(),
+                new_component_address_sample_stokenet_internal(),
+            ])
+            .len(),
+            4
         );
     }
 }

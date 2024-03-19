@@ -1,18 +1,28 @@
 use crate::prelude::*;
 
 #[uniffi::export]
-pub fn new_package_address_sample() -> PackageAddress {
-    PackageAddress::sample()
+pub fn new_package_address_sample_mainnet() -> PackageAddress {
+    PackageAddress::sample_mainnet_faucet()
 }
 
 #[uniffi::export]
-pub fn new_package_address_sample_other() -> PackageAddress {
-    PackageAddress::sample_other()
+pub fn new_package_address_sample_mainnet_other() -> PackageAddress {
+    PackageAddress::sample_mainnet_royalty()
+}
+
+#[uniffi::export]
+pub fn new_package_address_sample_stokenet() -> PackageAddress {
+    PackageAddress::sample_stokenet_gumball_club()
+}
+
+#[uniffi::export]
+pub fn new_package_address_sample_stokenet_other() -> PackageAddress {
+    PackageAddress::sample_stokenet_other()
 }
 
 impl HasSampleValues for PackageAddress {
     fn sample() -> Self {
-        Self::sample_mainnet_gumball_club()
+        Self::sample_mainnet_faucet()
     }
 
     fn sample_other() -> Self {
@@ -21,13 +31,26 @@ impl HasSampleValues for PackageAddress {
 }
 
 impl PackageAddress {
-    pub fn sample_mainnet_gumball_club() -> Self {
+    pub fn sample_mainnet_faucet() -> Self {
         "package_rdx1pkgxxxxxxxxxfaucetxxxxxxxxx000034355863xxxxxxxxxfaucet"
             .parse()
             .expect("Valid Mainnet package sample address")
     }
+
+    pub fn sample_mainnet_royalty() -> Self {
+        "package_rdx1pkgxxxxxxxxxryaltyxxxxxxxxx003849573396xxxxxxxxxryalty"
+            .parse()
+            .expect("Valid Mainnet package sample address")
+    }
+
     pub fn sample_stokenet_gumball_club() -> Self {
         "package_tdx_2_1pkaw4m82c89hy0gk4dwqtqlln6md8anr2ysnrvegxar53mr6nvn5ay"
+            .parse()
+            .expect("Valid Stokenet package sample address")
+    }
+
+    pub fn sample_stokenet_other() -> Self {
+        "package_tdx_2_1p4lftg7zjtmvyw5dwv3fg9cxyumlrya03p5uecqdge9thje4nm5qtk"
             .parse()
             .expect("Valid Stokenet package sample address")
     }
@@ -158,9 +181,21 @@ mod uniffi_tests {
     }
 
     #[test]
-    fn sample() {
-        assert_eq!(new_package_address_sample(), SUT::sample());
-
-        assert_eq!(new_package_address_sample_other(), SUT::sample_other());
+    fn hash_of_sample() {
+        assert_eq!(
+            HashSet::<SUT>::from_iter([
+                new_package_address_sample_mainnet(),
+                new_package_address_sample_mainnet_other(),
+                new_package_address_sample_stokenet(),
+                new_package_address_sample_stokenet_other(),
+                // duplicates should be removed
+                new_package_address_sample_mainnet(),
+                new_package_address_sample_mainnet_other(),
+                new_package_address_sample_stokenet(),
+                new_package_address_sample_stokenet_other(),
+            ])
+            .len(),
+            4
+        );
     }
 }

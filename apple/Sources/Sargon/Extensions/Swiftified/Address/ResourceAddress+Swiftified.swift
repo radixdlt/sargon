@@ -3,8 +3,10 @@ extension ResourceAddress: @unchecked Sendable {}
 #if DEBUG
 extension ResourceAddress {
 	
-	public static let sample = Self.sampleMainnetXRD
-	public static let sampleOther = Self.sampleMainnetCandy
+	public static let sampleMainnet = Self.sampleMainnetXRD
+	public static let sampleMainnetOther = Self.sampleMainnetCandy
+	public static let sampleStokenet = Self.sampleStokenetXRD
+	public static let sampleStokenetOther = Self.sampleStokenetGum
 	
 	public static let sampleMainnetXRD: Self = newResourceAddressSampleMainnetXrd()
 	public static let sampleMainnetCandy: Self = newResourceAddressSampleMainnetCandy()

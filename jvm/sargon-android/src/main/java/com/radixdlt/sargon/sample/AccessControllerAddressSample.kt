@@ -3,18 +3,18 @@ package com.radixdlt.sargon.sample
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.radixdlt.sargon.AccessControllerAddress
-import com.radixdlt.sargon.newAccessControllerAddressSample
-import com.radixdlt.sargon.newAccessControllerAddressSampleOther
+import com.radixdlt.sargon.newAccessControllerAddressSampleMainnet
+import com.radixdlt.sargon.newAccessControllerAddressSampleMainnetOther
 
 @VisibleForTesting
 val AccessControllerAddress.Companion.sample: Sample<AccessControllerAddress>
     get() = object : Sample<AccessControllerAddress> {
 
         override fun invoke(): AccessControllerAddress =
-            newAccessControllerAddressSample()
+            newAccessControllerAddressSampleMainnet()
 
         override fun other(): AccessControllerAddress =
-            newAccessControllerAddressSampleOther()
+            newAccessControllerAddressSampleMainnetOther()
 
     }
 
