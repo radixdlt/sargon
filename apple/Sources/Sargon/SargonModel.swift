@@ -4,3 +4,9 @@ public protocol SargonModel: Sendable, Hashable, CustomStringConvertible {
     static var sampleOther: Self { get }
     #endif
 }
+
+#if DEBUG
+extension SargonModel where Self: CaseIterable, AllCases == [Self] {
+	public static var allCases: AllCases { [Self.sample, Self.sampleOther] }
+}
+#endif

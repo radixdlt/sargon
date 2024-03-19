@@ -2,37 +2,9 @@ extension AccessControllerAddress: @unchecked Sendable {}
 
 
 #if DEBUG
-	extension AccessControllerAddress {
-		/// Namespace for preview values of `AccessControllerAddress`
-		public struct Preview {
-			fileprivate init() {}
-			public static let of = Self()
-
-            public let sample: AccessControllerAddress =
-				newAccessControllerAddressSample()
-
-			public let sampleOther: AccessControllerAddress =
-				newAccessControllerAddressSampleOther()
-
-		}
-
-		/// Preview values for `AccessControllerAddress`, e.g.:
-		/// `AccessControllerAddress.preview.first`
-		/// or
-		/// `AccessControllerAddress.preview.second`
-		public static let preview = Preview.of
-	}
+extension AccessControllerAddress {
+	public static let sample: Self = newAccessControllerAddressSample()
+	public static let sampleOther: Self = newAccessControllerAddressSampleOther()
+}
 #endif
 
-#if DEBUG
-	extension AccessControllerAddress: CaseIterable {
-		public typealias AllCases = [Self]
-		public static var allCases: AllCases {
-			let of = Preview.of
-			return [
-				of.sample,
-				of.sampleOther,
-			]
-		}
-	}
-#endif

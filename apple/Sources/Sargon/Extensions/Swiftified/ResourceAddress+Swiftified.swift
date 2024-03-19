@@ -1,52 +1,38 @@
 extension ResourceAddress: @unchecked Sendable {}
 
 #if DEBUG
-	extension ResourceAddress {
-		/// Namespace for preview values of `ResourceAddress`
-		public struct Preview {
-			fileprivate init() {}
-			public static let of = Self()
-
-			public let mainnetXRD: ResourceAddress =
-				newResourceAddressSampleMainnetXrd()
-			public let mainnetCandy: ResourceAddress =
-				newResourceAddressSampleMainnetCandy()
-			/// Gumball Club membership NFT resource address
-			public let mainnetNonFungbleGCMembership: ResourceAddress =
-				newResourceAddressSampleMainnetNftGcMembership()
-
-			public let stokenetXRD: ResourceAddress =
-				newResourceAddressSampleStokenetXrd()
-			public let stokenetGum: ResourceAddress =
-				newResourceAddressSampleStokenetGum()
-			public let stokenetGC: ResourceAddress =
-				newResourceAddressSampleStokenetGcTokens()
-			public let stokenetCandy: ResourceAddress =
-				newResourceAddressSampleStokenetCandy()
-		}
-
-		/// Preview values for `ResourceAddress`, e.g.:
-		/// `ResourceAddress.preview.mainnetXRD`
-		/// or
-		/// `ResourceAddress.preview.stokenetCandy`
-		public static let preview = Preview.of
-	}
+extension ResourceAddress {
+	
+	public static let sample = Self.sampleMainnetXRD
+	public static let sampleOther = Self.sampleMainnetCandy
+	
+	public static let sampleMainnetXRD: Self = newResourceAddressSampleMainnetXrd()
+	public static let sampleMainnetCandy: Self = newResourceAddressSampleMainnetCandy()
+	
+	/// Gumball Club membership NFT resource address
+	public static let sampleMainnetNonFungbleGCMembership: Self = newResourceAddressSampleMainnetNftGcMembership()
+	
+	public static let sampleStokenetXRD: Self = newResourceAddressSampleStokenetXrd()
+	public static let sampleStokenetGum: Self = newResourceAddressSampleStokenetGum()
+	public static let sampleStokenetGC: Self = newResourceAddressSampleStokenetGcTokens()
+	public static let sampleStokenetCandy: Self = newResourceAddressSampleStokenetCandy()
+	
+}
 #endif
 
 #if DEBUG
-	extension ResourceAddress: CaseIterable {
-		public typealias AllCases = [Self]
-		public static var allCases: AllCases {
-			let of = Preview.of
-			return [
-				of.mainnetXRD,
-				of.mainnetCandy,
-				of.mainnetNonFungbleGCMembership,
-				of.stokenetXRD,
-				of.stokenetGum,
-				of.stokenetGC,
-				of.stokenetCandy,
-			]
-		}
+extension ResourceAddress {
+	public typealias AllCases = [Self]
+	public static var allCases: AllCases {
+		return [
+			Self.sampleMainnetXRD,
+			.sampleMainnetCandy,
+			.sampleMainnetNonFungbleGCMembership,
+			.sampleStokenetXRD,
+			.sampleStokenetGum,
+			.sampleStokenetGC,
+			.sampleStokenetCandy,
+		]
 	}
+}
 #endif

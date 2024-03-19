@@ -1,40 +1,29 @@
 extension NonFungibleResourceAddress: @unchecked Sendable {}
 
 #if DEBUG
-    extension NonFungibleResourceAddress {
-        /// Namespace for preview values of `NonFungibleResourceAddress`
-        public struct Preview {
-            fileprivate init() {}
-            public static let of = Self()
-
-            public let mainnet: NonFungibleResourceAddress = newNonFungibleResourceAddressSampleMainnet()
-            public let mainnetOther: NonFungibleResourceAddress =
-            newNonFungibleResourceAddressSampleMainnetOther()
-
-            public let stokenet: NonFungibleResourceAddress = newNonFungibleResourceAddressSampleStokenet()
-            public let stokenetOther: NonFungibleResourceAddress =
-            newNonFungibleResourceAddressSampleStokenetOther()
-        }
-
-        /// Preview values for `NonFungibleResourceAddress`, e.g.:
-        /// `NonFungibleResourceAddress.preview.mainnet`
-        /// or
-        /// `NonFungibleResourceAddress.preview.stokenetOther`
-        public static let preview = Preview.of
-    }
+extension NonFungibleResourceAddress {
+	
+	public static let sample = Self.sampleMainnet
+	public static let sampleOther = Self.sampleMainnetOther
+	
+	public static let sampleMainnet: Self = newNonFungibleResourceAddressSampleMainnet()
+	public static let sampleMainnetOther: Self = newNonFungibleResourceAddressSampleMainnetOther()
+	public static let sampleStokenet: Self = newNonFungibleResourceAddressSampleStokenet()
+	public static let sampleStokenetOther: Self = newNonFungibleResourceAddressSampleStokenetOther()
+	
+}
 #endif
 
 #if DEBUG
-    extension NonFungibleResourceAddress: CaseIterable {
-        public typealias AllCases = [Self]
-        public static var allCases: AllCases {
-            let of = Preview.of
-            return [
-                of.mainnet,
-                of.mainnetOther,
-                of.stokenet,
-                of.stokenetOther,
-            ]
-        }
-    }
+extension NonFungibleResourceAddress {
+	public typealias AllCases = [Self]
+	public static var allCases: AllCases {
+		[
+			Self.sampleMainnet,
+			.sampleMainnetOther,
+			.sampleStokenet,
+			.sampleStokenetOther,
+		]
+	}
+}
 #endif

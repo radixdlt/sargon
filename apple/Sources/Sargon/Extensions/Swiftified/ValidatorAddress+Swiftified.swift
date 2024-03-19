@@ -1,45 +1,27 @@
 extension ValidatorAddress: @unchecked Sendable {}
 
 #if DEBUG
-	extension ValidatorAddress {
-		/// Namespace for preview values of `ValidatorAddress`
-		public struct Preview {
-			fileprivate init() {}
-			public static let of = Self()
-
-			public let mainnet: ValidatorAddress =
-				newValidatorAddressSampleMainnet()
-
-			public let mainnetOther: ValidatorAddress =
-				newValidatorAddressSampleMainnetOther()
-
-			public let stokenet: ValidatorAddress =
-				newValidatorAddressSampleStokenet()
-
-			public let stokenetOther: ValidatorAddress =
-				newValidatorAddressSampleStokenetOther()
-
-		}
-
-		/// Preview values for `ValidatorAddress`, e.g.:
-		/// `ValidatorAddress.preview.mainnet`
-		/// or
-		/// `ValidatorAddress.preview.stokenetOther`
-		public static let preview = Preview.of
-	}
+extension ValidatorAddress {
+	public static let sample = Self.sampleMainnet
+	public static let sampleOther = Self.sampleMainnetOther
+	
+	public static let sampleMainnet: Self = newValidatorAddressSampleMainnet()
+	public static let sampleMainnetOther: Self = newValidatorAddressSampleMainnetOther()
+	public static let sampleStokenet: Self = newValidatorAddressSampleStokenet()
+	public static let sampleStokenetOther: Self = newValidatorAddressSampleStokenetOther()
+}
 #endif
 
 #if DEBUG
-	extension ValidatorAddress: CaseIterable {
-		public typealias AllCases = [Self]
-		public static var allCases: AllCases {
-			let of = Preview.of
-			return [
-				of.mainnet,
-				of.mainnetOther,
-				of.stokenet,
-				of.stokenetOther,
-			]
-		}
+extension ValidatorAddress {
+	public typealias AllCases = [Self]
+	public static var allCases: AllCases {
+		[
+			Self.sampleMainnet,
+			.sampleMainnetOther,
+			.sampleStokenet,
+			.sampleStokenetOther,
+		]
 	}
+}
 #endif

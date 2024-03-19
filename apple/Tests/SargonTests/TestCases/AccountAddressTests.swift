@@ -2,8 +2,39 @@ import Foundation
 import Sargon
 import XCTest
 
-final class AccountAddressTests: XCTestCase {
-    
+class AddressTest<SUT_: AddressProtocol>: Test<SUT_> {
+	
+	func test_bech32_roundtrip_sample() throws {
+		try XCTAssertEqual(
+			SUT(validatingAddress: SUT.sample.address),
+			SUT.sample
+		)
+	}
+	
+	func test_bech32_roundtrip_sample_other() throws {
+		try XCTAssertEqual(
+			SUT(validatingAddress: SUT.sampleOther.address),
+			SUT.sampleOther
+		)
+	}
+	
+//	func test_equality() throws {
+//		XCTAssertEqual(SUT.sample, SUT.sample)
+//	}
+//
+//	func test_inequality() throws {
+//		XCTAssertNotEqual(SUT.sample, SUT.sampleOther)
+//	}
+//
+//	func test_custom_string_convertible() throws {
+//		XCTAssertEqual(SUT.sample.description, SUT.sample.description)
+//		XCTAssertEqual(SUT.sampleOther.description, SUT.sampleOther.description)
+//	}
+	
+}
+
+
+final class AccountAddressTests: Test<AccountAddress> {
     
     func testAddress() throws {
         let bech32 = "account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzdm"
