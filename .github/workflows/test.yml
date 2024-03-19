@@ -13,9 +13,11 @@ permissions:
 env:
   CARGO_TERM_COLOR: always
   RUST_TOOLCHAIN: nightly-2024-01-11
+  RUST_COMPONENTS: "rust-std"
 jobs:
-  
-  cargo-check:
+
+# cargo check
+  check-cargo-check:
     runs-on: macos-13-xlarge
     steps:
       - uses: RDXWorks-actions/checkout@main
@@ -28,9 +30,10 @@ jobs:
       - name: Cargo Check
         run: cargo check --all
 
+# cargo fmt check
   check-formatting:
     runs-on: macos-13-xlarge
-    needs: cargo-check
+    needs: check-cargo-check
     steps:
       - uses: RDXWorks-actions/checkout@main
       - name: Install Rust Toolchain
@@ -41,8 +44,9 @@ jobs:
           components: rustfmt
       - name: Check formatting
         run: cargo fmt --check
-  
-  clippy-check:
+
+# clippy
+  check-clippy:
     runs-on: macos-13-xlarge
     needs: check-formatting
     steps:
@@ -52,33 +56,30 @@ jobs:
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
           default: true
-          components: rustfmt, clippy
+          components: clippy
       - name: Clippy Check
         run: cargo clippy --all
-  
+ 
+# Rust unit, doc and integration
   test-rust:
     runs-on: macos-13-xlarge
-    needs: clippy-check
+    needs: check-clippy
     steps:
       - uses: RDXWorks-actions/checkout@main
+      
       - name: Install Rust Toolchain
         uses: RDXWorks-actions/toolchain@master
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
           default: true
-          components: rustfmt, clippy
-      - name: Install cargo nextest
-        uses: RDXWorks-actions/cargo-install@main
-        with:
-          crate: cargo-nextest
-          locked: true
+            
       - name: Run tests
-        run: cargo nextest run
+        run: cargo test
 
-
+# Swift testing on macOS (Apple Silicon)
   test-swift:
     runs-on: macos-13-xlarge
-    needs: test-rust
+    needs: check-clippy
     steps:
       - uses: RDXWorks-actions/checkout@main
 
@@ -95,9 +96,10 @@ jobs:
           rustup target add aarch64-apple-darwin
           sh ./scripts/ios/test.sh
 
+# Kotlin test run on JVM on macOS (Apple Silicon)
   test-kotlin:
     runs-on: macos-13-xlarge
-    needs: test-swift
+    needs: check-clippy
     steps:
       - uses: RDXWorks-actions/checkout@main
 
@@ -135,33 +137,32 @@ jobs:
   
       - name: Test JVM
         run: ./jvm/gradlew -p jvm/sargon-android testDebug
-                
-  codecoverage: # TODO! Change runner to macOS when AWS secrets actions run on mac!
-    runs-on: ubuntu-latest
+  
+# Code Coverage uses Tarpaulin and uploads to CodeCov.io        
+  code-coverage: 
+    runs-on: macos-13-xlarge
+    needs: check-clippy
     steps:
       - uses: RDXWorks-actions/checkout@main
+      
       - name: Install Rust Toolchain
         uses: RDXWorks-actions/toolchain@master
         with:
-          toolchain: nightly-2024-01-11
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
           default: true
+
       - name: Install cargo tarpaulin
         uses: RDXWorks-actions/cargo-install@main
         with:
           crate: cargo-tarpaulin
           tag: 0.27.3
           locked: true
-      - uses: radixdlt/public-iac-resuable-artifacts/fetch-secrets@main
-        with:
-          role_name: ${{ secrets.AWS_ROLE_NAME_SECRET }}
-          app_name: "sargon"
-          step_name: "codecoverage"
-          secret_prefix: "CODECOV"
-          secret_name: ${{ secrets.AWS_SECRET_NAME_CODECOV }}
-          parse_json: true
-      - name: Generate code coverage
+     
+      - name: Code Coverage - Generate
         run: cargo tarpaulin --lib
-      - name: Upload to codecov.io
+      
+      - name: Code Coverage - Upload to CodeCov.io
         uses: RDXWorks-actions/codecov-action@main
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
