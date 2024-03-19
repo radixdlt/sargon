@@ -1,5 +1,6 @@
 extension AccessControllerAddress: @unchecked Sendable {}
 
+
 #if DEBUG
 	extension AccessControllerAddress {
 		/// Namespace for preview values of `AccessControllerAddress`
@@ -7,10 +8,10 @@ extension AccessControllerAddress: @unchecked Sendable {}
 			fileprivate init() {}
 			public static let of = Self()
 
-			public let first: AccessControllerAddress =
+            public let sample: AccessControllerAddress =
 				newAccessControllerAddressSample()
 
-			public let second: AccessControllerAddress =
+			public let sampleOther: AccessControllerAddress =
 				newAccessControllerAddressSampleOther()
 
 		}
@@ -29,8 +30,8 @@ extension AccessControllerAddress: @unchecked Sendable {}
 		public static var allCases: AllCases {
 			let of = Preview.of
 			return [
-				of.first,
-				of.second,
+				of.sample,
+				of.sampleOther,
 			]
 		}
 	}

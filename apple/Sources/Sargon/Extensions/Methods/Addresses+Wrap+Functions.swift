@@ -1,4 +1,4 @@
-public protocol AddressProtocol: CustomStringConvertible {
+public protocol AddressProtocol: SargonModel {
 	init(validatingAddress bech32String: String) throws
 	var networkID: NetworkID { get }
 	var address: String { get }
