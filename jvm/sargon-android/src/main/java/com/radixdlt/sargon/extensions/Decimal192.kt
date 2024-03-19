@@ -1,5 +1,6 @@
 package com.radixdlt.sargon.extensions
 
+import com.radixdlt.sargon.CommonException
 import com.radixdlt.sargon.Decimal192
 import com.radixdlt.sargon.LocaleConfig
 import com.radixdlt.sargon.RoundingMode
@@ -30,11 +31,39 @@ import com.radixdlt.sargon.newDecimalFromU32
 import com.radixdlt.sargon.newDecimalFromU64
 import java.text.DecimalFormatSymbols
 
+/**
+ * Tries to creates a new [Decimal192] from a String, throws a `CommonError`
+ * if the `string` was not a valid Decimal192.
+ */
+@Throws(SargonException::class)
 fun String.toDecimal192() = newDecimalFromString(string = this)
+
+/**
+ * Creates a new [Decimal192] from a i64 integer.
+ */
 fun Long.toDecimal192() = newDecimalFromI64(value = this)
+
+/**
+ * Creates a new [Decimal192] from a f32 float. Will
+ * fail if the f32 cannot be losslessly represented
+ * by the underlying Decimal from Scrypto.
+ */
+@Throws(SargonException::class)
 fun Float.toDecimal192() = newDecimalFromF32(value = this)
+
+/**
+ * Creates a new [Decimal192] from a i32 integer.
+ */
 fun Int.toDecimal192() = newDecimalFromI32(value = this)
+
+/**
+ * Creates a new [Decimal192] from a u64 integer.
+ */
 fun ULong.toDecimal192() = newDecimalFromU64(value = this)
+
+/**
+ * Creates a new [Decimal192] from a u32 integer.
+ */
 fun UInt.toDecimal192() = newDecimalFromU32(value = this)
 
 val Decimal192.Companion.MAX_DIVISIBILITY: UByte
@@ -55,31 +84,60 @@ fun Decimal192.Companion.init(
     )
 }
 
+/**
+ * The maximum possible value of [Decimal192], being:
+ * `3138550867693340381917894711603833208051.177722232017256447`
+ */
 val Decimal192.Companion.MAX: Decimal192
     get() = decimalMax()
 
+/**
+ * The minimum possible value of [Decimal192], being:
+ * `-3138550867693340381917894711603833208051.177722232017256448`
+ */
 val Decimal192.Companion.MIN: Decimal192
     get() = decimalMin()
 
+/**
+ * Creates the [Decimal192] `10^exponent`
+ */
 fun Decimal192.Companion.exponent(exponent: UByte): Decimal192 =
     newDecimalExponent(exponent = exponent)
 
 val Decimal192.string: String
     get() = decimalToString(decimal = this)
 
+/**
+ * Clamps `decimal` to zero, i.e. `max(decimal, 0)`
+ */
 val Decimal192.clamped: Decimal192
     get() = decimalClampedToZero(decimal = this)
 
+/**
+ * Whether this decimal is negative.
+ */
 val Decimal192.isNegative: Boolean
     get() = decimalIsNegative(decimal = this)
 
+/**
+ * Whether this decimal is positive.
+ */
 val Decimal192.isPositive: Boolean
     get() = decimalIsPositive(decimal = this)
 
+/**
+ * Whether this decimal is zero.
+ */
 val Decimal192.isZero: Boolean
     get() = decimalIsZero(decimal = this)
 
 
+/**
+ * Rounds this number to the specified decimal places.
+ *
+ * @throws CommonException if the number of decimal places is not within [0..SCALE(=18)]
+ */
+@Throws(SargonException::class)
 fun Decimal192.rounded(decimalPlaces: UByte, roundingMode: RoundingMode): Decimal192 {
     require(decimalPlaces <= Decimal192.MAX_DIVISIBILITY) {
         "Decimal places MUST be 0...18, was: $decimalPlaces"
@@ -138,8 +196,14 @@ operator fun Decimal192.compareTo(other: Decimal192): Int {
     }
 }
 
+/**
+ * Returns `decimal.abs()`, throws if `decimal` is [Decimal192.Companion.MIN]
+ */
 fun Decimal192.abs(): Decimal192 = decimalAbs(decimal = this)
 
+/**
+ * Negates the `decimal`
+ */
 fun Decimal192.negative(): Decimal192 = decimalNeg(decimal = this)
 
 fun Decimal192.formatted(
@@ -153,6 +217,13 @@ fun Decimal192.formatted(
     useGroupingSeparator = useGroupingSeparator
 )
 
+/**
+ * Formats decimal using engineering notation: `5e20`.
+ *
+ * If no `null` is passed to [totalPlaces], then
+ * `Decimal192::MAX_PLACES_ENGINEERING_NOTATION` (4) will
+ * be used.
+ */
 fun Decimal192.formattedEngineeringNotation(
     locale: LocaleConfig,
     totalPlaces: UByte?
@@ -162,6 +233,9 @@ fun Decimal192.formattedEngineeringNotation(
     totalPlaces = totalPlaces
 )
 
+/**
+ * A human readable, locale respecting string. Does not perform any rounding or truncation.
+ */
 fun Decimal192.formattedPlain(
     locale: LocaleConfig,
     useGroupingSeparator: Boolean

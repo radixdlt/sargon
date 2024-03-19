@@ -8,6 +8,7 @@ import com.radixdlt.sargon.identityAddressNetworkId
 import com.radixdlt.sargon.newIdentityAddress
 import com.radixdlt.sargon.newIdentityAddressFrom
 
+@Throws(SargonException::class)
 fun IdentityAddress.Companion.init(validatingAddress: String) =
     newIdentityAddress(bech32 = validatingAddress)
 

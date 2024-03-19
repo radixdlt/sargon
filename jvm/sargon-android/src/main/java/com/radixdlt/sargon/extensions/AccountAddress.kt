@@ -10,6 +10,7 @@ import com.radixdlt.sargon.accountAddressToShort
 import com.radixdlt.sargon.newAccountAddress
 import com.radixdlt.sargon.newAccountAddressFrom
 
+@Throws(SargonException::class)
 fun AccountAddress.Companion.init(validatingAddress: String) =
     newAccountAddress(bech32 = validatingAddress)
 

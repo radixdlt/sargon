@@ -9,6 +9,7 @@ import com.radixdlt.sargon.resourceAddressIsNonFungible
 import com.radixdlt.sargon.resourceAddressNetworkId
 import com.radixdlt.sargon.xrdAddressOfNetwork
 
+@Throws(SargonException::class)
 fun ResourceAddress.Companion.init(validatingAddress: String) =
     newResourceAddress(bech32 = validatingAddress)
 

@@ -30,6 +30,7 @@ import com.radixdlt.sargon.modifyManifestLockFee
 import com.radixdlt.sargon.newTransactionManifestFromInstructionsStringAndBlobs
 import com.radixdlt.sargon.transactionManifestToString
 
+@Throws(SargonException::class)
 fun TransactionManifest.Companion.init(
     instructionsString: String,
     networkId: NetworkId,
@@ -86,6 +87,12 @@ fun TransactionManifest.Companion.perAssetTransfers(
     transfers = transfers
 )
 
+/**
+ * Uses [transfers] after having transposed the [PerRecipientAssetTransfers]
+ * into [PerAssetTransfers]. We always use [PerAssetTransfers] when building the manifest
+ * since it is more efficient (allows a single withdraw per resource) => fewer instruction =>
+ * cheaper TX fee for user.
+ */
 fun TransactionManifest.Companion.perRecipientTransfers(
     transfers: PerRecipientAssetTransfers
 ) = manifestPerRecipientTransfers(
@@ -118,6 +125,16 @@ fun TransactionManifest.Companion.thirdPartyDepositUpdate(
     to = to
 )
 
+/**
+ * Modifies `manifest` by inserting transaction "guarantees", which is the wallet
+ * term for `assert_worktop_contains`.
+ *
+ * Fails if any of the TransactionGuarantee's `instruction_index` is out of
+ * bounds.
+ *
+ * Also fails if the number of TransactionGuarantee's is larger than the number
+ * of instructions of `manifest` (does not make any sense).
+ */
 fun TransactionManifest.modifyAddGuarantees(
     guarantees: List<TransactionGuarantee>
 ) = modifyManifestAddGuarantees(manifest = this, guarantees = guarantees)
