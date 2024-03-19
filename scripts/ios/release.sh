@@ -12,8 +12,8 @@ cd "../../" # go to parent of parent, which is project root.
 echo "🚢 Start of '$me' (see: '$DIR/$me')"
 echo "🚢 PWD: $PWD"
 
-echo "🚢 Ensure 'useLocalFramework' is set to 'false' in Package.swift"
-sh ./scripts/ios/ensure-not-local.sh || exit $?
+echo "🚢 Switch 'useLocalFramework' to 'false' in Package.swift for release"
+sed -i '' 's/let useLocalFramework = true/let useLocalFramework = false/' Package.swift
 
 `git fetch --prune --tags`
 function last_tag() {

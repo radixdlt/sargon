@@ -85,7 +85,6 @@ And then run:
 cargo tarpaulin --out Html
 ```
 
-
 ## Run Tests
 
 ```sh
@@ -98,9 +97,14 @@ cargo nextest run
 
 ### Prerequisites
 
-#### Rust targets
+#### Rust targets for iOS
 ```sh
-rustup target add x86_64-apple-ios aarch64-apple-ios aarch64-apple-ios-sim
+rustup target add aarch64-apple-ios aarch64-apple-ios-sim
+```
+
+#### Rust targets (macOS)
+```sh
+rustup target add aarch64-apple-darwin
 ```
 
 ### Build
@@ -114,10 +118,30 @@ Find [script here](scripts/ios/build-sargon.sh)
 
 ### Prerequisites
 
-#### Java
+#### Install `jenv`
 ```sh
-brew install java
+brew install jenv
 ```
+
+Dont forget to add to eval to zsh
+```sh
+export PATH="$HOME/.jenv/bin:$PATH"
+eval "$(jenv init -)"
+```
+(or similar)
+
+#### Install Java (openjdk@17)
+
+```sh
+brew install openjdk@17
+```
+
+#### Add `openjdk` version to `jenv`
+
+```sh
+jenv add /opt/homebrew/Cellar/openjdk@17/17.0.10/libexec/openjdk.jdk/Contents/Home/
+```
+(or similar)
 
 #### `ktlint`
 ```sh
@@ -133,10 +157,12 @@ cargo install cargo-ndk
 ```sh
 rustup target add aarch64-linux-android armv7-linux-androideabi
 ```
+
 #### Rust targets (Desktop Binaries)
 ```sh
 rustup target add aarch64-apple-darwin
 ```
+
 #### NDK
 Download the latest NDK from android studio
 
@@ -160,6 +186,12 @@ cd jvm
 
 # For desktop binaries
 ./gradlew sargon-desktop-bins:assemble
+```
+
+### Test JVM
+
+```sh
+./jvm/gradlew -p jvm/sargon-android testDebugUnitTest
 ```
 
 # Release

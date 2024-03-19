@@ -23,13 +23,13 @@ import java.text.DecimalFormatSymbols
 
 fun String.toDecimal192() = newDecimalFromString(string = this)
 fun Long.toDecimal192() = newDecimalFromI64(value = this)
-fun Float.toDecimal192() = newDecimalFromF32(value = this).getOrThrow()
+fun Float.toDecimal192() = newDecimalFromF32(value = this)
 fun Int.toDecimal192() = newDecimalFromI32(value = this)
 fun ULong.toDecimal192() = newDecimalFromU64(value = this)
 fun UInt.toDecimal192() = newDecimalFromU32(value = this)
 
-val Decimal192.Companion.MAX_DIVISIBILITY: Int
-    get() = 18
+val Decimal192.Companion.MAX_DIVISIBILITY: UByte
+    get() = 18u.toUByte()
 
 fun Decimal192.Companion.init(
     formattedString: String,
@@ -59,7 +59,7 @@ val Decimal192.isZero: Boolean
     get() = decimalIsZero(decimal = this)
 
 
-fun Decimal192.rounded(decimalPlaces: Int, roundingMode: RoundingMode): Decimal192 {
+fun Decimal192.rounded(decimalPlaces: UByte, roundingMode: RoundingMode): Decimal192 {
     require(decimalPlaces <= Decimal192.MAX_DIVISIBILITY) {
         "Decimal places MUST be 0...18, was: $decimalPlaces"
     }
@@ -74,7 +74,7 @@ fun Decimal192.rounded(decimalPlaces: Int, roundingMode: RoundingMode): Decimal1
 /**
  * Rounds to [decimalPlaces] decimals
  */
-fun Decimal192.rounded(decimalPlaces: Int = 0): Decimal192 = rounded(
+fun Decimal192.rounded(decimalPlaces: UByte = 0u.toUByte()): Decimal192 = rounded(
     decimalPlaces = decimalPlaces,
     roundingMode = RoundingMode.TO_NEAREST_MIDPOINT_AWAY_FROM_ZERO
 )
@@ -82,7 +82,7 @@ fun Decimal192.rounded(decimalPlaces: Int = 0): Decimal192 = rounded(
 /**
  * Rounds to [decimalPlaces] decimals, in the direction of 0
  */
-fun Decimal192.floor(decimalPlaces: Int): Decimal192 = rounded(
+fun Decimal192.floor(decimalPlaces: UByte): Decimal192 = rounded(
     decimalPlaces = decimalPlaces,
     roundingMode = RoundingMode.TO_ZERO
 )
@@ -90,7 +90,7 @@ fun Decimal192.floor(decimalPlaces: Int): Decimal192 = rounded(
 /**
  * Rounds to [decimalPlaces] decimals, in the direction away of 0
  */
-fun Decimal192.ceil(decimalPlaces: Int): Decimal192 = rounded(
+fun Decimal192.ceil(decimalPlaces: UByte): Decimal192 = rounded(
     decimalPlaces = decimalPlaces,
     roundingMode = RoundingMode.AWAY_FROM_ZERO
 )

@@ -118,7 +118,7 @@ public struct MainFeature {
 		}
 		
 		public var body: some SwiftUI.View {
-			NavigationView {
+			NavigationStack {
 				VStack {
 					VStack {
 						Text("ProfileID:")
@@ -135,7 +135,9 @@ public struct MainFeature {
 						action: \.destination.sampleValues
 					)
 				) { store in
-					SampleValuesFeature.View(store: store)
+					NavigationView {
+						SampleValuesFeature.View(store: store)
+					}
 				}
 				.sheet(
 					item: $store.scope(
@@ -147,7 +149,7 @@ public struct MainFeature {
 				}
 				.alert($store.scope(state: \.destination?.alert, action: \.destination.alert))
 				.toolbar {
-					ToolbarItem(placement: .topBarTrailing) {
+					ToolbarItem(placement: .primaryAction) {
 						Button("Samples") {
 							send(.sampleValuesButtonTapped)
 						}

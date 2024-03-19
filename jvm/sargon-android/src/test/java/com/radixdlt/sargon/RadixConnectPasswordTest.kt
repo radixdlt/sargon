@@ -13,8 +13,8 @@ class RadixConnectPasswordTest {
         val bytes = randomBagOfBytes(byteCount = 32)
         // test identity
         assertEquals(
-            RadixConnectPassword(value = Exactly32Bytes(bagOfBytes = bytes)),
-            RadixConnectPassword(value = Exactly32Bytes(bagOfBytes = bytes))
+            RadixConnectPassword(value = newExactly32Bytes(bytes = bytes)),
+            RadixConnectPassword(value = newExactly32Bytes(bytes = bytes))
         )
         assertEquals(RadixConnectPassword.sample(), RadixConnectPassword.sample())
         assertEquals(RadixConnectPassword.sample.other(), RadixConnectPassword.sample.other())

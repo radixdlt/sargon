@@ -7,11 +7,11 @@ repos:
       - id: typos
   - repo: local
     hooks:
-      - id: ensure Swift not changed to local development
-        name: ensure Swift not changed to local development
+      - id: ensure Swift setup for local development
+        name: ensure Swift setup for local development
         language: system
         types: [file, swift]
-        entry: ./scripts/ios/ensure-not-local.sh
+        entry: ./scripts/ios/ensure-is-local.sh
         pass_filenames: false
 
       - id: fmt
@@ -49,9 +49,16 @@ repos:
         entry: cargo test --package sargon --test vectors
         pass_filenames: false
 
-      - id: uniffi bindgen tests
-        name: uniffi bindgen tests
+      - id: swift tests
+        name: swift tests
         language: system
-        types_or: [file, rust, swift]
-        entry: cargo test --package sargon --test uniffi
+        types_or: [rust, swift]
+        entry: ./scripts/ios/test.sh
+        pass_filenames: false
+
+      - id: kotlin tests
+        name: kotlin (jvm) tests
+        language: system
+        types_or: [rust, kotlin]
+        entry: ./jvm/gradlew -p jvm/sargon-android testDebugUnitTest
         pass_filenames: false

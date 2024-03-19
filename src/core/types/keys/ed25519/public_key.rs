@@ -52,9 +52,9 @@ pub fn new_ed25519_public_key_from_hex(
 
 #[uniffi::export]
 pub fn new_ed25519_public_key_from_bytes(
-    bytes: Vec<u8>,
+    bytes: BagOfBytes,
 ) -> Result<Ed25519PublicKey> {
-    bytes.try_into()
+    bytes.to_vec().try_into()
 }
 
 #[uniffi::export]
@@ -75,8 +75,10 @@ pub fn ed25519_public_key_to_hex(public_key: &Ed25519PublicKey) -> String {
 }
 
 #[uniffi::export]
-pub fn ed25519_public_key_to_bytes(public_key: &Ed25519PublicKey) -> Vec<u8> {
-    public_key.to_bytes()
+pub fn ed25519_public_key_to_bytes(
+    public_key: &Ed25519PublicKey,
+) -> BagOfBytes {
+    public_key.to_bytes().into()
 }
 
 impl IsPublicKey<Ed25519Signature> for Ed25519PublicKey {
@@ -349,14 +351,7 @@ mod tests {
 
 #[cfg(test)]
 mod uniffi_tests {
-    use crate::{
-        ed25519_public_key_to_bytes, ed25519_public_key_to_hex,
-        new_ed25519_public_key_from_bytes, new_ed25519_public_key_from_hex,
-        new_ed25519_public_key_sample, new_ed25519_public_key_sample_other,
-        HasSampleValues,
-    };
-
-    use super::Ed25519PublicKey;
+    use super::*;
 
     #[test]
     fn equality_samples() {
@@ -369,17 +364,18 @@ mod uniffi_tests {
 
     #[test]
     fn new_from_bytes() {
-        let bytes = hex::decode(
+        let bag_of_bytes = BagOfBytes::from_str(
             "b7a3c12dc0c8c748ab07525b701122b88bd78f600c76342d27f25e5f92444cde",
         )
         .unwrap();
+
         let from_bytes =
-            new_ed25519_public_key_from_bytes(bytes.clone()).unwrap();
+            new_ed25519_public_key_from_bytes(bag_of_bytes.clone()).unwrap();
         assert_eq!(
             from_bytes,
-            Ed25519PublicKey::try_from(bytes.clone()).unwrap()
+            Ed25519PublicKey::try_from(bag_of_bytes.as_ref()).unwrap()
         );
-        assert_eq!(ed25519_public_key_to_bytes(&from_bytes), bytes);
+        assert_eq!(ed25519_public_key_to_bytes(&from_bytes), bag_of_bytes);
     }
 
     #[test]
