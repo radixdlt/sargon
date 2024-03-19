@@ -60,5 +60,5 @@ repos:
         name: kotlin (jvm) tests
         language: system
         types_or: [rust, kotlin]
-        entry: ./jvm/gradlew -p jvm/sargon-android testDebug
+        entry: ./jvm/gradlew -p jvm/sargon-android testDebugUnitTest
         pass_filenames: false

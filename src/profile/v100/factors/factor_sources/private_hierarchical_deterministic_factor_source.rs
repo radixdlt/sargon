@@ -8,7 +8,7 @@ pub struct PrivateHierarchicalDeterministicFactorSource {
 
 #[uniffi::export]
 pub fn new_private_hd_factor_source(
-    entropy: Vec<u8>,
+    entropy: BagOfBytes,
     wallet_client_model: WalletClientModel,
 ) -> Result<PrivateHierarchicalDeterministicFactorSource> {
     entropy.try_into().map(|e| {
@@ -150,7 +150,7 @@ mod uniffi_tests {
     #[test]
     fn new_uses_empty_bip39_passphrase() {
         let private = new_private_hd_factor_source(
-            Vec::from_iter([0xff; 32]),
+            BagOfBytes::from(Vec::from_iter([0xff; 32])),
             WalletClientModel::Unknown,
         )
         .unwrap();

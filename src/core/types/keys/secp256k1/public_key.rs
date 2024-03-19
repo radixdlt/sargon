@@ -55,9 +55,9 @@ pub fn new_secp256k1_public_key_from_hex(
 
 #[uniffi::export]
 pub fn new_secp256k1_public_key_from_bytes(
-    bytes: Vec<u8>,
+    bytes: BagOfBytes,
 ) -> Result<Secp256k1PublicKey> {
-    bytes.try_into()
+    bytes.to_vec().try_into()
 }
 
 /// Encodes the compressed form (33 bytes) of a `Secp256k1PublicKey` to a hexadecimal string, lowercased, without any `0x` prefix, e.g.
@@ -70,8 +70,8 @@ pub fn secp256k1_public_key_to_hex(public_key: &Secp256k1PublicKey) -> String {
 #[uniffi::export]
 pub fn secp256k1_public_key_to_bytes(
     public_key: &Secp256k1PublicKey,
-) -> Vec<u8> {
-    public_key.to_bytes()
+) -> BagOfBytes {
+    public_key.to_bytes().into()
 }
 
 #[uniffi::export]
@@ -379,14 +379,7 @@ mod tests {
 
 #[cfg(test)]
 mod uniffi_tests {
-    use crate::{
-        new_secp256k1_public_key_from_bytes, new_secp256k1_public_key_from_hex,
-        new_secp256k1_public_key_sample, new_secp256k1_public_key_sample_other,
-        secp256k1_public_key_to_bytes, secp256k1_public_key_to_hex,
-        HasSampleValues,
-    };
-
-    use super::Secp256k1PublicKey;
+    use super::*;
 
     #[test]
     fn equality_samples() {
@@ -402,16 +395,14 @@ mod uniffi_tests {
 
     #[test]
     fn new_from_bytes() {
-        let bytes =
-            hex::decode("033083620d1596d3f8988ff3270e42970dd2a031e2b9b6488052a4170ff999f3e8")
-                .unwrap();
+        let bag_of_bytes: BagOfBytes = "033083620d1596d3f8988ff3270e42970dd2a031e2b9b6488052a4170ff999f3e8".parse().unwrap();
         let from_bytes =
-            new_secp256k1_public_key_from_bytes(bytes.clone()).unwrap();
+            new_secp256k1_public_key_from_bytes(bag_of_bytes.clone()).unwrap();
         assert_eq!(
             from_bytes,
-            Secp256k1PublicKey::try_from(bytes.clone()).unwrap()
+            Secp256k1PublicKey::try_from(bag_of_bytes.as_ref()).unwrap()
         );
-        assert_eq!(secp256k1_public_key_to_bytes(&from_bytes), bytes);
+        assert_eq!(secp256k1_public_key_to_bytes(&from_bytes), bag_of_bytes);
     }
 
     #[test]

@@ -99,6 +99,7 @@ fi
 cd "$DIR" 
 cd "../../" # go to parent of parent, which is project root.
 
+
 cargo build --lib --release --target aarch64-apple-darwin
 if $maconly; then
   echo "📦 Skip building iOS (test on macOS only)."
@@ -111,6 +112,13 @@ fi
 
 basename=sargon
 generate_ffi $basename
+
+# Unrelated to needs of building/release... we piggyback on this build script
+# since we know that there must know be a `target/` folder, we copy the dummy
+# Package.swift there so that `target/` folder gets hidden by Xcode when opening
+# Swift Sargon SPM in Xcode, which gives a nicer Xcode experience :).
+cp ./examples/Package.swift target/
+
 OUTPUT_OF_BUILD=$(build_xcframework $basename)
 echo "📦 ✅ End of '$me', output"
 
