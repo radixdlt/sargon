@@ -1,9 +1,5 @@
 use crate::prelude::*;
 
-pub(crate) const RADIX_ENGINE_TOOLKIT_DEPENDENCY: &str =
-    "RADIX-ENGINE-TOOLKIT-DEPENDENCY";
-pub(crate) const RADIX_ENGINE_DEPENDENCY: &str = "RADIX-ENGINE-DEPENDENCY";
-
 #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct SargonDependencies {
     pub radix_engine_toolkit: DependencyInformation,
@@ -13,12 +9,12 @@ pub struct SargonDependencies {
 impl SargonDependencies {
     pub fn get() -> Self {
         Self {
-            radix_engine_toolkit: DependencyInformation::of(
-                RADIX_ENGINE_TOOLKIT_DEPENDENCY,
-            ),
-            scrypto_radix_engine: DependencyInformation::of(
-                RADIX_ENGINE_DEPENDENCY,
-            ),
+            radix_engine_toolkit: DependencyInformation::with_value(env!(
+                "RADIX-ENGINE-TOOLKIT_DEPENDENCY"
+            )),
+            scrypto_radix_engine: DependencyInformation::with_value(env!(
+                "RADIX-ENGINE_DEPENDENCY"
+            )),
         }
     }
 }
@@ -31,18 +27,10 @@ impl HasSampleValues for SargonDependencies {
         }
     }
     fn sample_other() -> Self {
-        let ret_v = "0.0.1";
-        let re_rev =
-            "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef";
-        std::env::set_var(
-            RADIX_ENGINE_TOOLKIT_DEPENDENCY,
-            format!("version = {}", ret_v),
-        );
-        std::env::set_var(RADIX_ENGINE_DEPENDENCY, format!("rev = {}", re_rev));
-        let val = Self::get();
-        std::env::remove_var(RADIX_ENGINE_TOOLKIT_DEPENDENCY);
-        std::env::remove_var(RADIX_ENGINE_DEPENDENCY);
-        val
+        Self {
+            radix_engine_toolkit: DependencyInformation::sample_other(),
+            scrypto_radix_engine: DependencyInformation::sample(),
+        }
     }
 }
 

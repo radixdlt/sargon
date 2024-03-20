@@ -12,9 +12,7 @@ pub enum DependencyInformation {
 }
 
 impl DependencyInformation {
-    pub(crate) fn of(name: &str) -> Self {
-        let version = std::env::var(name).expect("Valid env variable");
-
+    pub(crate) fn with_value(version: &str) -> Self {
         let mut split = version.split('=');
         let identifier = split.next().expect("Should never fail").trim();
         let value = split.next().expect("Should never fail").trim();
@@ -39,25 +37,17 @@ impl DependencyInformation {
     }
 }
 
-// this is very unfortunate, but unit tests fail 1/20 due to `Valid env variable: NotPresent`
-// probably due to multi thread, maybe we should ignore the tests below, or
-// add some kind of lock, perhaps using `rusty_fork`
-// see: https://crates.io/crates/rusty-fork
-// see: https://github.com/numtide/treefmt/pull/253/files
-fn set_get_unset(key: &str, value: &str) -> DependencyInformation {
-    std::env::set_var(key, value);
-    let val = DependencyInformation::of(key);
-    std::env::remove_var(key);
-    val
-}
-
 impl HasSampleValues for DependencyInformation {
     fn sample() -> Self {
-        set_get_unset("alamofire-rs", "branch = develop")
+        Self::Branch {
+            value: "develop".to_owned(),
+        }
     }
 
     fn sample_other() -> Self {
-        set_get_unset("the-composable-arc-rs", "tag = 2.3.7")
+        Self::Tag {
+            value: "2.3.7".to_owned(),
+        }
     }
 }
 

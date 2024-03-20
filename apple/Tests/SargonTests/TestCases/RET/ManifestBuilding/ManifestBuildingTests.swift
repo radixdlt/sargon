@@ -1,3 +1,5 @@
+import RegexBuilder
+
 final class ManifestBuildingTests: XCTestCase {
 	
 	func test_manifest_for_faucet_with_lock_fee() {
@@ -34,13 +36,26 @@ final class ManifestBuildingTests: XCTestCase {
 		AccountAddress.allCases.forEach(doTest)
 	}
 	
-//	func test_manifest_set_owner_keys_hashes() {
-//		func doTest(_ address: AddressOfAccountOrPersona) {
-//			let manifest = manifestSetOwnerKeysHashes(addressOfAccountOrPersona: address, ownerKeyHashes: [PublicKeyHash.ed25519(value: <#T##Exactly29Bytes#>)])
-//			XCTAssert(manifest.description.contains(address.description))
-//			XCTAssert(manifest.description.contains("SET_METADATA"))
-//			XCTAssert(manifest.description.contains("dapp definition"))
-//		}
-//		AccountAddress.allCases.forEach(doTest)
-//	}
+	func test_manifest_set_owner_keys_hashes() {
+		func doTest(_ address: AddressOfAccountOrPersona, keyHashes: [PublicKeyHash]) {
+			let manifest = manifestSetOwnerKeysHashes(addressOfAccountOrPersona: address, ownerKeyHashes: keyHashes)
+			XCTAssert(manifest.description.contains(address.description))
+			XCTAssert(manifest.description.contains("SET_METADATA"))
+			XCTAssert(manifest.description.contains("owner_keys"))
+		}
+		
+		AddressOfAccountOrPersona.allCases.forEach {
+			doTest($0, keyHashes: [.sample])
+			doTest($0, keyHashes: [.sample, .sampleOther])
+			doTest($0, keyHashes: [.sampleOther])
+		}
+	}
+	
+	func test_create_many_fungible_tokens() {
+		func doTest(_ accountAddress: AccountAddress) {
+			let manifest = manifestCreateMultipleFungibleTokens(addressOfOwner: accountAddress)
+			XCTAssertEqual(manifest.description.ranges(of: "symbol").count, 25)
+		}
+		[AccountAddress.sampleStokenet, AccountAddress.sampleStokenetOther].forEach(doTest)
+	}
 }
