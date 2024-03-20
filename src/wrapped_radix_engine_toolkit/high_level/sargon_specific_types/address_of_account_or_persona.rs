@@ -20,18 +20,6 @@ impl AddressOfAccountOrPersona {
                 bad_value: s.to_owned(),
             })
     }
-
-    /// Returns the [`NetworkID`] of this [`AddressOfAccountOrPersona`].
-    pub fn network_id(&self) -> NetworkID {
-        match self {
-            AddressOfAccountOrPersona::Account { address } => {
-                address.network_id()
-            }
-            AddressOfAccountOrPersona::Persona { address } => {
-                address.network_id()
-            }
-        }
-    }
 }
 
 impl From<AccountAddress> for AddressOfAccountOrPersona {
@@ -53,6 +41,8 @@ impl IntoScryptoAddress for AddressOfAccountOrPersona {
             AddressOfAccountOrPersona::Persona { address } => address.scrypto(),
         }
     }
+
+    /// Returns the [`NetworkID`] of this [`AddressOfAccountOrPersona`].
     fn network_id(&self) -> NetworkID {
         match self {
             AddressOfAccountOrPersona::Account { address } => {
@@ -127,5 +117,11 @@ mod tests {
             SUT::sample_other().scrypto().as_node_id(),
             &IdentityAddress::sample().node_id()
         );
+    }
+
+    #[test]
+    fn new_from_bech32_invalid_addr() {
+        assert!(SUT::new_from_bech32(&PackageAddress::sample().to_string())
+            .is_err());
     }
 }
