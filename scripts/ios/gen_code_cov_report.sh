@@ -11,5 +11,5 @@ fi
 xcrun llvm-cov report \
 	"${COV_BIN}" \
 	-instr-profile=.build/debug/codecov/default.profdata \
-	-ignore-filename-regex=".build|Tests" \
+	-ignore-filename-regex=".build|Tests|UniFFI/Sargon.swift" \
 	-use-color
