@@ -6,9 +6,6 @@ public protocol PublicKeyProtocol: SargonModel, CustomStringConvertible {
 	var hex: String { get }
 }
 
-extension Ed25519PublicKey: PublicKeyProtocol {}
-extension Secp256k1PublicKey: PublicKeyProtocol {}
-
 extension PublicKeyProtocol {
 	public var description: String {
 		hex

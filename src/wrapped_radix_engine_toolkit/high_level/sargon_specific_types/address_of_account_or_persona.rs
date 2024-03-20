@@ -1,9 +1,37 @@
 use crate::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(
+    Clone, Debug, PartialEq, Eq, Hash, derive_more::Display, uniffi::Enum,
+)]
 pub enum AddressOfAccountOrPersona {
     Account { address: AccountAddress },
     Persona { address: IdentityAddress },
+}
+
+impl AddressOfAccountOrPersona {
+    /// First tries to decode the string as an `AccountAddress`, if that we try
+    /// as an `IdentityAddress`, if that fails, an error is thrown.
+    pub fn new_from_bech32(s: &str) -> Result<Self> {
+        AccountAddress::from_str(s)
+            .map(|address| Self::Account { address })
+            .or(IdentityAddress::from_str(s)
+                .map(|address| Self::Persona { address }))
+            .map_err(|_| CommonError::InvalidAccountAddress {
+                bad_value: s.to_owned(),
+            })
+    }
+
+    /// Returns the [`NetworkID`] of this [`AddressOfAccountOrPersona`].
+    pub fn network_id(&self) -> NetworkID {
+        match self {
+            AddressOfAccountOrPersona::Account { address } => {
+                address.network_id()
+            }
+            AddressOfAccountOrPersona::Persona { address } => {
+                address.network_id()
+            }
+        }
+    }
 }
 
 impl From<AccountAddress> for AddressOfAccountOrPersona {
@@ -39,11 +67,29 @@ impl IntoScryptoAddress for AddressOfAccountOrPersona {
 
 impl HasSampleValues for AddressOfAccountOrPersona {
     fn sample() -> Self {
-        AccountAddress::sample().into()
+        Self::sample_mainnet()
     }
 
     fn sample_other() -> Self {
-        IdentityAddress::sample().into()
+        Self::sample_mainnet_other()
+    }
+}
+
+impl AddressOfAccountOrPersona {
+    pub(crate) fn sample_mainnet() -> Self {
+        AccountAddress::sample_mainnet().into()
+    }
+
+    pub(crate) fn sample_mainnet_other() -> Self {
+        IdentityAddress::sample_mainnet().into()
+    }
+
+    pub(crate) fn sample_stokenet() -> Self {
+        AccountAddress::sample_stokenet().into()
+    }
+
+    pub(crate) fn sample_stokenet_other() -> Self {
+        IdentityAddress::sample_stokenet().into()
     }
 }
 

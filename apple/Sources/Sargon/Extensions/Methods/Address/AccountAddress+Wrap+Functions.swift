@@ -1,9 +1,14 @@
 extension AccountAddress: EntityAddressProtocol {
-	public init(validatingAddress bech32String: String) throws {
+	public init(
+		validatingAddress bech32String: String
+	) throws {
 		self = try newAccountAddress(bech32: bech32String)
 	}
 
-	public init(publicKey: PublicKey, networkID: NetworkID) {
+	public init(
+		publicKey: PublicKey,
+		networkID: NetworkID
+	) {
 		self = newAccountAddressFrom(
 			publicKey: publicKey,
 			networkId: networkID
