@@ -8,7 +8,7 @@ import com.radixdlt.sargon.newVaultAddressSampleMainnetNonFungible
 import com.radixdlt.sargon.newVaultAddressSampleStokenetFungible
 import com.radixdlt.sargon.newVaultAddressSampleStokenetNonFungible
 
-@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+@VisibleForTesting
 val VaultAddress.Companion.sampleMainnet: Sample<VaultAddress>
     get() = object : Sample<VaultAddress> {
 
@@ -17,7 +17,7 @@ val VaultAddress.Companion.sampleMainnet: Sample<VaultAddress>
         override fun other(): VaultAddress = newVaultAddressSampleMainnetNonFungible()
     }
 
-@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+@VisibleForTesting
 val VaultAddress.Companion.sampleStokenet: Sample<VaultAddress>
     get() = object : Sample<VaultAddress> {
 

@@ -2,7 +2,8 @@ package com.radixdlt.sargon.extensions
 
 import com.radixdlt.sargon.CompiledNotarizedIntent
 import com.radixdlt.sargon.debugPrintCompiledNotarizedIntent
+import com.radixdlt.sargon.utils.KoverIgnore
 
-// TODO debug?
-val CompiledNotarizedIntent.string: String
-    get() = debugPrintCompiledNotarizedIntent(compiled = this)
+@KoverIgnore
+fun CompiledNotarizedIntent.debugPrint(): String =
+    debugPrintCompiledNotarizedIntent(compiled = this)

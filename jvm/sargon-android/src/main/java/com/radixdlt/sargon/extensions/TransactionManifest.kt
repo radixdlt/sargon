@@ -29,6 +29,7 @@ import com.radixdlt.sargon.modifyManifestAddGuarantees
 import com.radixdlt.sargon.modifyManifestLockFee
 import com.radixdlt.sargon.newTransactionManifestFromInstructionsStringAndBlobs
 import com.radixdlt.sargon.transactionManifestToString
+import com.radixdlt.sargon.utils.KoverIgnore
 
 @Throws(SargonException::class)
 fun TransactionManifest.Companion.init(
@@ -59,6 +60,7 @@ fun TransactionManifest.Companion.createFungibleTokenWithMetadata(
     metadata = metadata
 )
 
+@KoverIgnore
 fun TransactionManifest.Companion.createMultipleFungibleTokens(
     addressOfOwner: AccountAddress
 ) = manifestCreateMultipleFungibleTokens(addressOfOwner = addressOfOwner)

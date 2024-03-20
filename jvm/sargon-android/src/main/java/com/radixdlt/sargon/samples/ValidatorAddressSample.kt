@@ -15,12 +15,6 @@ val ValidatorAddress.Companion.sampleMainnet: Sample<ValidatorAddress>
         override fun invoke(): ValidatorAddress = newValidatorAddressSampleMainnet()
 
         override fun other(): ValidatorAddress = newValidatorAddressSampleMainnetOther()
-
-        val stokenet: ValidatorAddress
-            get() = newValidatorAddressSampleStokenet()
-
-        val stokenetOther: ValidatorAddress
-            get() = newValidatorAddressSampleStokenetOther()
     }
 
 @VisibleForTesting

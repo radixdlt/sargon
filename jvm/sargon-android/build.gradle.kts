@@ -59,6 +59,7 @@ koverReport {
     filters {
         excludes {
             packages("com.radixdlt.sargon.samples")
+            annotatedBy("com.radixdlt.sargon.utils.KoverIgnore")
         }
         includes {
             packages("com.radixdlt.sargon.extensions")

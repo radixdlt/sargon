@@ -1,5 +1,6 @@
 package com.radixdlt.sargon
 
+import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.randomBagOfBytes
 import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -13,8 +14,8 @@ class RadixConnectPasswordTest {
         val bytes = randomBagOfBytes(byteCount = 32)
         // test identity
         assertEquals(
-            RadixConnectPassword(value = newExactly32Bytes(bytes = bytes)),
-            RadixConnectPassword(value = newExactly32Bytes(bytes = bytes))
+            RadixConnectPassword.init(bytes = Exactly32Bytes.init(bytes = bytes)),
+            RadixConnectPassword.init(bytes = Exactly32Bytes.init(bytes = bytes))
         )
         assertEquals(RadixConnectPassword.sample(), RadixConnectPassword.sample())
         assertEquals(RadixConnectPassword.sample.other(), RadixConnectPassword.sample.other())

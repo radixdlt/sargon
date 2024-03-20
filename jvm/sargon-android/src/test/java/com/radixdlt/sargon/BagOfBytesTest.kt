@@ -1,7 +1,10 @@
 package com.radixdlt.sargon
 
+import com.radixdlt.sargon.extensions.bagOfBytesOf
+import com.radixdlt.sargon.extensions.hash
 import com.radixdlt.sargon.extensions.hex
 import com.radixdlt.sargon.extensions.hexToBagOfBytes
+import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.randomBagOfBytes
 import com.radixdlt.sargon.extensions.toBagOfBytes
 import com.radixdlt.sargon.samples.acedBagOfBytesSample
@@ -78,6 +81,13 @@ class BagOfBytesTest {
         val size = 100
         val set = (0..<size).map { randomBagOfBytes(byteCount = 16 + it) }.toSet()
         assertEquals(size, set.size)
+
+        assertEquals(
+            Exactly32Bytes.init(
+                "6d489e03addfb79d72a06af90ecfe3c13fe4026effa0f8940cd1232e825e6792".hexToBagOfBytes()
+            ),
+            acedBagOfBytesSample.hash()
+        )
     }
 
 }

@@ -1,0 +1,26 @@
+package com.radixdlt.sargon
+
+import com.radixdlt.sargon.extensions.init
+import com.radixdlt.sargon.extensions.isFungible
+import com.radixdlt.sargon.extensions.isNonFungible
+import com.radixdlt.sargon.extensions.networkId
+import com.radixdlt.sargon.extensions.string
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
+
+class VaultAddressTest {
+
+    @Test
+    fun test() {
+        val addressString = "internal_vault_rdx1tz474x29nxxd4k2p2reete9xyz4apawv63dphxkr00qt23vyju49fq"
+        val vaultAddress = VaultAddress.init(validatingAddress = addressString)
+
+        assertEquals(addressString, vaultAddress.string)
+        assertEquals(NetworkId.MAINNET, vaultAddress.networkId)
+        assertTrue(vaultAddress.isFungible)
+        assertFalse(vaultAddress.isNonFungible)
+    }
+
+}

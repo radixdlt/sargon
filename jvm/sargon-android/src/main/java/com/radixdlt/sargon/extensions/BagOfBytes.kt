@@ -23,7 +23,4 @@ val BagOfBytes.hex: String
 
 fun BagOfBytes.hash(): Exactly32Bytes = hash(data = this)
 
-internal val BagOfBytes.byteArray: ByteArray
-    get() = toUByteArray().toByteArray()
-
 internal fun randomBagOfBytes(byteCount: Int) = Random.nextBytes(size = byteCount).toBagOfBytes()

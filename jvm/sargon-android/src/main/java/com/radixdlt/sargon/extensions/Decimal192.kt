@@ -9,7 +9,6 @@ import com.radixdlt.sargon.decimalAdd
 import com.radixdlt.sargon.decimalClampedToZero
 import com.radixdlt.sargon.decimalDiv
 import com.radixdlt.sargon.decimalFormatted
-import com.radixdlt.sargon.decimalFormattedEngineeringNotation
 import com.radixdlt.sargon.decimalFormattedPlain
 import com.radixdlt.sargon.decimalIsNegative
 import com.radixdlt.sargon.decimalIsPositive
@@ -215,22 +214,6 @@ fun Decimal192.formatted(
     locale = locale,
     totalPlaces = totalPlaces,
     useGroupingSeparator = useGroupingSeparator
-)
-
-/**
- * Formats decimal using engineering notation: `5e20`.
- *
- * If no `null` is passed to [totalPlaces], then
- * `Decimal192::MAX_PLACES_ENGINEERING_NOTATION` (4) will
- * be used.
- */
-fun Decimal192.formattedEngineeringNotation(
-    locale: LocaleConfig,
-    totalPlaces: UByte?
-) = decimalFormattedEngineeringNotation(
-    decimal = this,
-    locale = locale,
-    totalPlaces = totalPlaces
 )
 
 /**

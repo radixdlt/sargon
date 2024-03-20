@@ -8,23 +8,24 @@ import com.radixdlt.sargon.newPoolAddressSampleMainnetSingle
 import com.radixdlt.sargon.newPoolAddressSampleMainnetTwo
 
 @VisibleForTesting
-val PoolAddress.Companion.sample: Sample<PoolAddress>
-    get() = object : Sample<PoolAddress> {
+object PoolAddressSample: Sample<PoolAddress> {
+    override fun invoke(): PoolAddress = mainnetSingle
 
-        override fun invoke(): PoolAddress = mainnetSingle
+    override fun other(): PoolAddress = mainnetTwo
 
-        override fun other(): PoolAddress = mainnetTwo
+    val mainnetSingle: PoolAddress
+        get() = newPoolAddressSampleMainnetSingle()
 
-        val mainnetSingle: PoolAddress
-            get() = newPoolAddressSampleMainnetSingle()
+    val mainnetTwo: PoolAddress
+        get() = newPoolAddressSampleMainnetTwo()
 
-        val mainnetTwo: PoolAddress
-            get() = newPoolAddressSampleMainnetTwo()
+    val mainnetMulti: PoolAddress
+        get() = newPoolAddressSampleMainnetMulti()
+}
 
-        val mainnetMulti: PoolAddress
-            get() = newPoolAddressSampleMainnetMulti()
-
-    }
+@VisibleForTesting
+val PoolAddress.Companion.sample: PoolAddressSample
+    get() = PoolAddressSample
 
 class PoolAddressPreviewParameterProvider: PreviewParameterProvider<PoolAddress> {
     override val values: Sequence<PoolAddress>
