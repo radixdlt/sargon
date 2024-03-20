@@ -14,9 +14,11 @@ use crate::prelude::*;
     Eq,
     Clone,
     Hash,
+    derive_more::Display,
     uniffi::Record,
 )]
 #[serde(rename_all = "camelCase")]
+#[display("{}", self.description())]
 pub struct AppPreferences {
     /// Display settings in the wallet app, such as appearances, currency etc.
     pub display: AppDisplay,
@@ -34,6 +36,25 @@ pub struct AppPreferences {
 
     /// Default config related to making of transactions
     pub transaction: TransactionPreferences,
+}
+
+impl AppPreferences {
+    pub fn description(&self) -> String {
+        format!(
+            r#"
+        display: {}
+        gateways: {}
+        p2p_links: {}
+        security: {}
+        transaction: {}
+        "#,
+            self.display,
+            self.gateways,
+            self.p2p_links,
+            self.security,
+            self.transaction
+        )
+    }
 }
 
 #[uniffi::export]

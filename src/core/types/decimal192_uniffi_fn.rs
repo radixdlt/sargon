@@ -61,32 +61,6 @@ pub fn decimal_formatted_plain(
     decimal.formatted_plain(locale, use_grouping_separator)
 }
 
-/// Formats decimal using engineering notation: `5e20`.
-///
-/// If no `None` is passed to `total_places`, then
-/// `Self::MAX_PLACES_ENGINEERING_NOTATION` (4) will
-/// be used.
-///
-/// ```
-/// extern crate sargon;
-/// use sargon::prelude::*;
-/// #[allow(clippy::upper_case_acronyms)]
-/// type SUT = Decimal192;
-///
-/// assert_eq!(SUT::max().formatted_engineering_notation(LocaleConfig::default(), None), "3.138e39");
-/// assert_eq!(SUT::min().formatted_engineering_notation(LocaleConfig::default(), None), "-3.138e39");
-/// assert_eq!(SUT::MAX_PLACES_ENGINEERING_NOTATION, 4);
-/// ```
-///
-#[uniffi::export]
-pub fn decimal_formatted_engineering_notation(
-    decimal: &Decimal192,
-    locale: LocaleConfig,
-    total_places: Option<u8>,
-) -> String {
-    decimal.formatted_engineering_notation(locale, total_places)
-}
-
 /// Creates a new `Decimal192` from a f32 float. Will
 /// fail if the f32 cannot be losslessly represented
 /// by the underlying Decimal from Scrypto.
@@ -694,26 +668,6 @@ mod uniffi_tests {
                 false
             ),
             "123456789,042"
-        );
-    }
-
-    #[test]
-    fn formatted_engineering() {
-        assert_eq!(
-            decimal_formatted_engineering_notation(
-                &SUT::max(),
-                LocaleConfig::english_united_states(),
-                None
-            ),
-            "3.138e39"
-        );
-        assert_eq!(
-            decimal_formatted_engineering_notation(
-                &SUT::min(),
-                LocaleConfig::english_united_states(),
-                None
-            ),
-            "-3.138e39"
         );
     }
 }

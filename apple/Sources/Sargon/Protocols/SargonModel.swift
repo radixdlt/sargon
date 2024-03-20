@@ -1,4 +1,4 @@
-public protocol SargonModel: Sendable, Hashable, CustomStringConvertible {
+public protocol SargonModel: Sendable, Hashable {
     #if DEBUG
     static var sample: Self { get }
     static var sampleOther: Self { get }

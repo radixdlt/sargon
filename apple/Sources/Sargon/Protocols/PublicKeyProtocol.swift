@@ -1,4 +1,4 @@
-public protocol PublicKeyProtocol: SargonModel {
+public protocol PublicKeyProtocol: SargonModel, CustomStringConvertible {
 	init(hex: String) throws
 	init(bytes: some DataProtocol) throws
 

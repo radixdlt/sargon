@@ -10,9 +10,11 @@ use crate::prelude::*;
     Eq,
     Clone,
     Hash,
+    derive_more::Display,
     uniffi::Record,
 )]
 #[serde(rename_all = "camelCase")]
+#[display("default guarantee: {}", default_deposit_guarantee)]
 pub struct TransactionPreferences {
     /// The deposit guarantee that will automatically be added for
     /// all deposits in transactions.

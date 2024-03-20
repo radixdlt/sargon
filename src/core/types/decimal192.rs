@@ -870,16 +870,40 @@ impl Decimal192 {
     /// assert_eq!(SUT::MAX_PLACES_ENGINEERING_NOTATION, 4);
     /// ```
     ///
+    /// # Panics
+    /// Panics if `self.abs()` is smaller than 1
+    ///
+    /// ```
+    /// extern crate sargon;
+    /// use sargon::prelude::*;
+    /// #[allow(clippy::upper_case_acronyms)]
+    /// type SUT = Decimal192;
+    ///
+    /// // Positive small
+    /// let mut result = std::panic::catch_unwind(|| SUT::try_from(0.9).unwrap().formatted_engineering_notation(LocaleConfig::default(), None));
+    /// assert!(result.is_err());
+    ///
+    /// // Negative small
+    /// result = std::panic::catch_unwind(|| SUT::try_from(-0.9).unwrap().formatted_engineering_notation(LocaleConfig::default(), None));
+    /// assert!(result.is_err());
+    /// ```
+    ///
     pub fn formatted_engineering_notation(
         &self,
         locale: LocaleConfig,
         total_places: impl Into<Option<u8>>,
     ) -> String {
+        if self.abs() < Self::one() {
+            panic!("You MUST NOT use 'formatted_engineering_notation' on a number which abs() is smaller than 1.");
+        }
+
         let total_places = total_places
             .into()
             .unwrap_or(Self::MAX_PLACES_ENGINEERING_NOTATION);
         let rounded = self.rounded_to_total_places(total_places);
-        let integer_count = rounded.digits().len() as u8 - Self::SCALE;
+        let digit_count = rounded.digits().len() as u8;
+
+        let integer_count = digit_count - Self::SCALE;
         let exponent = integer_count - 1;
         let scaled = rounded / Self::pow(exponent);
         format!("{}e{}", scaled.formatted_plain(locale, false), exponent)
@@ -969,6 +993,32 @@ mod test_decimal {
     fn is_zero() {
         assert!(Decimal192::zero().is_zero());
         assert!(!Decimal192::one().is_zero());
+    }
+
+    #[should_panic(
+        expected = "You MUST NOT use 'formatted_engineering_notation' on a number which abs() is smaller than 1."
+    )]
+    #[test]
+    fn engineering_for_abs_less_than_1_fails_pos() {
+        _ = SUT::try_from(0.9f32)
+            .unwrap()
+            .formatted_engineering_notation(
+                LocaleConfig::swedish_sweden(),
+                None,
+            );
+    }
+
+    #[should_panic(
+        expected = "You MUST NOT use 'formatted_engineering_notation' on a number which abs() is smaller than 1."
+    )]
+    #[test]
+    fn engineering_for_abs_less_than_1_fails_neg() {
+        _ = SUT::try_from(-0.9f32)
+            .unwrap()
+            .formatted_engineering_notation(
+                LocaleConfig::swedish_sweden(),
+                None,
+            );
     }
 
     #[test]

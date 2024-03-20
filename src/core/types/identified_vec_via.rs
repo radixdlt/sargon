@@ -3,6 +3,7 @@ use identified_vec::{
     IdentifiedVecOf, IsIdentifiableVecOfVia, IsIdentifiedVec,
     IsIdentifiedVecOf, ViaMarker,
 };
+use itertools::Itertools;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::{
     fmt::{Debug, Display, Formatter},
@@ -14,7 +15,8 @@ use uniffi::{
     metadata, Lift, Lower, LowerReturn, MetadataBuffer, RustBuffer,
 };
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Clone, Eq, PartialEq, Hash, derive_more::Debug)]
+#[debug("{}", self.debug_string())]
 pub struct IdentifiedVecVia<Element: Identifiable + Debug + Clone> {
     id_vec: IdentifiedVecOf<Element>,
 }
@@ -82,11 +84,43 @@ impl<Element: Identifiable + Debug + Clone> IsIdentifiableVecOfVia<Element>
     }
 }
 
-impl<Element: Identifiable + Debug + Clone> Display
+impl<Element: Identifiable + Debug + Clone + Display> Display
     for IdentifiedVecVia<Element>
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(&self.id_vec, f)
+        write!(f, "{}", self.description())?;
+        Ok(())
+    }
+}
+
+impl<Element: Identifiable + Debug + Clone + Display>
+    IdentifiedVecVia<Element>
+{
+    fn description(&self) -> String {
+        [
+            "[".to_owned(),
+            self.clone()
+                .into_iter()
+                .map(|e| format!("{}", e))
+                .join(", "),
+            "]".to_owned(),
+        ]
+        .join("")
+    }
+}
+
+#[allow(unused)] // false, it is used by `derive_more::Debug` macro above
+impl<Element: Identifiable + Debug + Clone> IdentifiedVecVia<Element> {
+    fn debug_string(&self) -> String {
+        [
+            "[".to_owned(),
+            self.clone()
+                .into_iter()
+                .map(|e| format!("{:?}", e))
+                .join(", "),
+            "]".to_owned(),
+        ]
+        .join("")
     }
 }
 

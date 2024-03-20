@@ -79,52 +79,6 @@ impl crate::UniffiCustomTypeConverter for BagOfBytes {
     }
 }
 
-#[uniffi::export]
-pub fn new_bag_of_bytes_from(bytes: Vec<u8>) -> BagOfBytes {
-    bytes.into()
-}
-
-#[uniffi::export]
-pub fn new_bag_of_bytes_sample_aced() -> BagOfBytes {
-    BagOfBytes::sample_aced()
-}
-#[uniffi::export]
-pub fn new_bag_of_bytes_sample_babe() -> BagOfBytes {
-    BagOfBytes::sample_babe()
-}
-#[uniffi::export]
-pub fn new_bag_of_bytes_sample_cafe() -> BagOfBytes {
-    BagOfBytes::sample_cafe()
-}
-#[uniffi::export]
-pub fn new_bag_of_bytes_sample_dead() -> BagOfBytes {
-    BagOfBytes::sample_dead()
-}
-#[uniffi::export]
-pub fn new_bag_of_bytes_sample_ecad() -> BagOfBytes {
-    BagOfBytes::sample_ecad()
-}
-#[uniffi::export]
-pub fn new_bag_of_bytes_sample_fade() -> BagOfBytes {
-    BagOfBytes::sample_fade()
-}
-#[uniffi::export]
-pub fn bag_of_bytes_prepend_deadbeef(in_front_of: &BagOfBytes) -> BagOfBytes {
-    in_front_of.prepending(vec![0xde, 0xad, 0xbe, 0xef])
-}
-#[uniffi::export]
-pub fn bag_of_bytes_append_deadbeef(to: &BagOfBytes) -> BagOfBytes {
-    to.appending(vec![0xde, 0xad, 0xbe, 0xef])
-}
-#[uniffi::export]
-pub fn bag_of_bytes_prepend_cafe(in_front_of: &BagOfBytes) -> BagOfBytes {
-    in_front_of.prepending(vec![0xca, 0xfe])
-}
-#[uniffi::export]
-pub fn bag_of_bytes_append_cafe(to: &BagOfBytes) -> BagOfBytes {
-    to.appending(vec![0xca, 0xfe])
-}
-
 impl BagOfBytes {
     pub fn new() -> Self {
         Vec::new().into()
@@ -284,11 +238,10 @@ fn twos_complement_of_i8(i: i8) -> u8 {
 #[cfg(test)]
 mod tests {
 
-    use std::ops::Neg;
+    use super::*;
 
-    use crate::prelude::*;
-
-    use super::{twos_complement_of_i8, twos_complement_of_u8};
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = BagOfBytes;
 
     #[test]
     fn test_twos_complement() {
@@ -324,49 +277,49 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(BagOfBytes::sample(), BagOfBytes::sample());
-        assert_eq!(BagOfBytes::sample_other(), BagOfBytes::sample_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(BagOfBytes::sample(), BagOfBytes::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn len() {
-        assert_eq!(BagOfBytes::sample().len(), 32);
+        assert_eq!(SUT::sample().len(), 32);
     }
 
     #[test]
     fn as_ref() {
         let b: &[u8] = &[0xde, 0xad, 0xbe, 0xef];
-        assert_eq!(BagOfBytes::from(b).as_ref(), b);
+        assert_eq!(SUT::from(b).as_ref(), b);
     }
 
     #[test]
     fn default_is_empty() {
-        assert_eq!(BagOfBytes::default(), BagOfBytes::new());
-        assert!(BagOfBytes::default().is_empty());
+        assert_eq!(SUT::default(), SUT::new());
+        assert!(SUT::default().is_empty());
     }
 
     #[test]
     fn is_empty() {
-        assert!(!BagOfBytes::sample().is_empty());
+        assert!(!SUT::sample().is_empty());
     }
 
     #[test]
     fn from_string_roundtrip() {
         let str =
             "0000000000000000000000000000000000000000000000000000000000000000";
-        assert_eq!(BagOfBytes::from_hex(str).unwrap().to_string(), str);
+        assert_eq!(SUT::from_hex(str).unwrap().to_string(), str);
     }
 
     #[test]
     fn debug() {
         let str =
             "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
-        let hex_bytes = BagOfBytes::sample();
+        let hex_bytes = SUT::sample();
         assert_eq!(format!("{:?}", hex_bytes), str);
     }
 
@@ -374,27 +327,27 @@ mod tests {
     fn display() {
         let str =
             "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
-        let hex_bytes = BagOfBytes::sample();
+        let hex_bytes = SUT::sample();
         assert_eq!(format!("{}", hex_bytes), str);
     }
 
     #[test]
     fn from_hash() {
         let digest = hash_of(vec![0xde, 0xad]);
-        assert_eq!(BagOfBytes::from(digest).to_vec(), digest.bytes());
+        assert_eq!(SUT::from(digest).to_vec(), digest.bytes());
     }
 
     #[test]
     fn to_hex() {
         let str =
             "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
-        let hex_bytes = BagOfBytes::sample();
+        let hex_bytes = SUT::sample();
         assert_eq!(hex_bytes.to_string(), str);
     }
 
     #[test]
     fn json_roundtrip() {
-        let model = BagOfBytes::sample();
+        let model = SUT::sample();
         assert_json_value_eq_after_roundtrip(
             &model,
             json!("deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"),
@@ -404,7 +357,7 @@ mod tests {
     #[test]
     fn deref() {
         let bytes: &[u8] = &[0xde, 0xad];
-        assert_eq!(*BagOfBytes::from(bytes), bytes);
+        assert_eq!(*SUT::from(bytes), bytes);
     }
 
     #[test]
@@ -430,7 +383,7 @@ mod tests {
     fn invalid_str() {
         let s = "invalid str";
         assert_eq!(
-            BagOfBytes::from_str(s),
+            SUT::from_str(s),
             Err(CommonError::StringNotHex {
                 bad_value: s.to_owned()
             })
@@ -442,7 +395,7 @@ mod tests {
         let mut set: HashSet<Vec<u8>> = HashSet::new();
         let n = 100;
         for _ in 0..n {
-            let bytes = BagOfBytes::from(generate_32_bytes());
+            let bytes = SUT::from(generate_32_bytes());
             set.insert(bytes.to_vec());
         }
         assert_eq!(set.len(), n);
@@ -451,7 +404,7 @@ mod tests {
     #[test]
     fn prepend_bytes() {
         assert_eq!(
-            BagOfBytes::from(vec![0xab, 0xba])
+            SUT::from(vec![0xab, 0xba])
                 .prepending(vec![0xca, 0xfe])
                 .to_hex(),
             "cafeabba"
@@ -460,46 +413,10 @@ mod tests {
     #[test]
     fn append_bytes() {
         assert_eq!(
-            BagOfBytes::from(vec![0xab, 0xba])
+            SUT::from(vec![0xab, 0xba])
                 .appending(vec![0xca, 0xfe])
                 .to_hex(),
             "abbacafe"
         )
-    }
-}
-
-#[cfg(test)]
-mod uniffi_tests {
-    use crate::prelude::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = BagOfBytes;
-
-    #[test]
-    fn new_ok() {
-        let bytes = generate_bytes::<5>();
-        assert_eq!(new_bag_of_bytes_from(bytes.clone()).bytes, bytes);
-    }
-
-    #[test]
-    fn sample_values() {
-        assert_eq!(SUT::sample_aced(), new_bag_of_bytes_sample_aced());
-        assert_eq!(SUT::sample_babe(), new_bag_of_bytes_sample_babe());
-        assert_eq!(SUT::sample_cafe(), new_bag_of_bytes_sample_cafe());
-        assert_eq!(SUT::sample_dead(), new_bag_of_bytes_sample_dead());
-        assert_eq!(SUT::sample_ecad(), new_bag_of_bytes_sample_ecad());
-        assert_eq!(SUT::sample_fade(), new_bag_of_bytes_sample_fade());
-    }
-
-    #[test]
-    fn append_prepend() {
-        let sut: SUT = vec![0xbe, 0xef].into();
-        assert_eq!(bag_of_bytes_append_cafe(&sut).to_hex(), "beefcafe");
-        assert_eq!(bag_of_bytes_append_deadbeef(&sut).to_hex(), "beefdeadbeef");
-        assert_eq!(bag_of_bytes_prepend_cafe(&sut).to_hex(), "cafebeef");
-        assert_eq!(
-            bag_of_bytes_prepend_deadbeef(&sut).to_hex(),
-            "deadbeefbeef"
-        );
     }
 }

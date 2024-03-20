@@ -1,19 +1,19 @@
 class AddressTest<SUT_: AddressProtocol>: Test<SUT_> {
 	
 	func test_network_id_of_mainnet_sample() {
-		XCTAssertEqual(SUT.sampleMainnet.networkID, .mainnet)
+		XCTAssertNoDifference(SUT.sampleMainnet.networkID, .mainnet)
 	}
 	
 	func test_network_id_of_mainnet_sampleOther() {
-		XCTAssertEqual(SUT.sampleMainnetOther.networkID, .mainnet)
+		XCTAssertNoDifference(SUT.sampleMainnetOther.networkID, .mainnet)
 	}
 	
 	func test_network_id_of_stokenet_sample() {
-		XCTAssertEqual(SUT.sampleStokenet.networkID, .stokenet)
+		XCTAssertNoDifference(SUT.sampleStokenet.networkID, .stokenet)
 	}
 	
 	func test_network_id_of_stokenet_sampleOther() {
-		XCTAssertEqual(SUT.sampleStokenetOther.networkID, .stokenet)
+		XCTAssertNoDifference(SUT.sampleStokenetOther.networkID, .stokenet)
 	}
 	
 	func test_all_address_different() {
@@ -22,7 +22,7 @@ class AddressTest<SUT_: AddressProtocol>: Test<SUT_> {
 
 	func test_bech32_roundtrip() throws {
 		func doTest(_ address: SUT) throws {
-			try XCTAssertEqual(
+			try XCTAssertNoDifference(
 				SUT(validatingAddress: address.address),
 				address
 			)
@@ -33,7 +33,7 @@ class AddressTest<SUT_: AddressProtocol>: Test<SUT_> {
 	
 	func test_description_is_bech32() {
 		func doTest(_ address: SUT) {
-			XCTAssertEqual(
+			XCTAssertNoDifference(
 				address.description,
 				address.address
 			)

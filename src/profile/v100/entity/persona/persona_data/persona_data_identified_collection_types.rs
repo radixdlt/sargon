@@ -30,7 +30,7 @@ macro_rules! declare_collection_of_identified_entry {
             derive_more::Debug,
             uniffi::Record,
         )]
-        #[debug("{collection}")]
+        #[debug("{:?}", collection)]
         #[display("{}", self.display_string())]
         #[serde(transparent)]
         pub struct $struct_name {

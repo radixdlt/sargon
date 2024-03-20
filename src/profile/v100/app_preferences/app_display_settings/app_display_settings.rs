@@ -12,9 +12,11 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Hash,
+    derive_more::Display,
     uniffi::Record,
 )]
 #[serde(rename_all = "camelCase")]
+#[display("is_currency_amount_visible: {is_currency_amount_visible}")]
 pub struct AppDisplay {
     /// If we should show the aggregate value of users portfolio in fiat currency
     /// of hide it.

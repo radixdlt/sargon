@@ -1,4 +1,4 @@
-public protocol AddressProtocol: SargonModel, CaseIterable where Self.AllCases == [Self] {
+public protocol AddressProtocol: SargonModel, CustomStringConvertible, CaseIterable where Self.AllCases == [Self] {
 	init(validatingAddress bech32String: String) throws
 	var networkID: NetworkID { get }
 	var address: String { get }

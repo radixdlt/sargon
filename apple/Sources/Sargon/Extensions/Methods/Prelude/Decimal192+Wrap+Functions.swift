@@ -45,17 +45,6 @@ extension Decimal192 {
 		)
 	}
 
-	public func formattedEngineeringNotation(
-		locale: Locale = .autoupdatingCurrent,
-		totalPlaces: UInt8? = nil
-	) -> String {
-		decimalFormattedEngineeringNotation(
-			decimal: self,
-			locale: LocaleConfig(locale: locale),
-			totalPlaces: totalPlaces
-		)
-	}
-
 	/// A human readable, locale respecting string. Does not perform any rounding or truncation.
 	public func formattedPlain(
 		locale: Locale = .autoupdatingCurrent,

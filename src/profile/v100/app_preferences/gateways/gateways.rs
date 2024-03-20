@@ -2,7 +2,10 @@ use crate::prelude::*;
 
 /// The currently used Gateway and a collection of other by user added
 /// or predefined Gateways the user can switch to.
-#[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(
+    Debug, Clone, PartialEq, Eq, Hash, derive_more::Display, uniffi::Record,
+)]
+#[display("current: {}, other: {}", current, other)]
 pub struct Gateways {
     /// The currently used Gateway, when a user query's asset balances of
     /// accounts or submits transactions, this Gateway will be used.

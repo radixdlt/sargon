@@ -4,8 +4,17 @@ use crate::prelude::*;
 /// which user has created/interacted with, all on the same [Radix Network][`NetworkDefinition`],
 /// identified by `id` ([`NetworkID`]).
 #[derive(
-    Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, uniffi::Record,
+    Serialize,
+    Deserialize,
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    Hash,
+    derive_more::Display,
+    uniffi::Record,
 )]
+#[display("{}", self.description())]
 pub struct ProfileNetwork {
     /// The ID of the network that has been used to generate the `accounts` and `personas`
     /// and on which the `authorizedDapps` have been deployed on.
@@ -24,6 +33,20 @@ pub struct ProfileNetwork {
     /// [`AuthorizedDapp`]s that the user has interacted with.
     #[serde(rename = "authorizedDapps")]
     pub authorized_dapps: AuthorizedDapps,
+}
+
+impl ProfileNetwork {
+    pub fn description(&self) -> String {
+        format!(
+            r#"
+			id: {}
+			accounts: {}
+			personas: {}
+			authorized_dapps: {}
+			"#,
+            self.id, self.accounts, self.personas, self.authorized_dapps,
+        )
+    }
 }
 
 impl Identifiable for ProfileNetwork {
