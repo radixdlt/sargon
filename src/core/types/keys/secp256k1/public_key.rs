@@ -241,18 +241,30 @@ mod tests {
     }
 
     #[test]
-    fn uncompressed() {
+    fn uncompressed_hex() {
         // https://github.com/Sajjon/K1/blob/main/Tests/K1Tests/TestCases/Keys/PublicKey/PublicKeyImportTests.swift#L48
         assert_eq!(
-        SUT::from_str("040202020202020202020202020202020202020202020202020202020202020202415456f0fc01d66476251cab4525d9db70bfec652b2d8130608675674cde64b2").unwrap().to_hex(),
-        // compressed is this...
-        "020202020202020202020202020202020202020202020202020202020202020202"
-      );
+            SUT::from_str("040202020202020202020202020202020202020202020202020202020202020202415456f0fc01d66476251cab4525d9db70bfec652b2d8130608675674cde64b2").unwrap().to_hex(),
+            // compressed is this...
+            "020202020202020202020202020202020202020202020202020202020202020202"
+        );
 
         assert_eq!(
-        hex_encode(SUT::from_str("020202020202020202020202020202020202020202020202020202020202020202").unwrap().uncompressed()),
-        "040202020202020202020202020202020202020202020202020202020202020202415456f0fc01d66476251cab4525d9db70bfec652b2d8130608675674cde64b2"
-      );
+            hex_encode(SUT::from_str("020202020202020202020202020202020202020202020202020202020202020202").unwrap().uncompressed()),
+            "040202020202020202020202020202020202020202020202020202020202020202415456f0fc01d66476251cab4525d9db70bfec652b2d8130608675674cde64b2"
+        );
+    }
+
+    #[test]
+    fn from_exactly_65_bytes() {
+        // https://github.com/Sajjon/K1/blob/main/Tests/K1Tests/TestCases/Keys/PublicKey/PublicKeyImportTests.swift#L48
+        let bytes = Exactly65Bytes::from_str("040202020202020202020202020202020202020202020202020202020202020202415456f0fc01d66476251cab4525d9db70bfec652b2d8130608675674cde64b2").unwrap();
+
+        assert_eq!(
+            SUT::try_from(bytes).unwrap().to_hex(),
+            // compressed is this...
+            "020202020202020202020202020202020202020202020202020202020202020202"
+        );
     }
 
     #[test]
@@ -268,6 +280,17 @@ mod tests {
             "02517b88916e7f315bb682f9926b14bc67a0e4246f8a419b986269e1a7e61fffa7"
         );
         assert_eq!(key.to_bytes(), bytes);
+    }
+
+    #[test]
+    fn from_exactly_33_bytes() {
+        let bytes = Exactly33Bytes::from_str("020202020202020202020202020202020202020202020202020202020202020202").unwrap();
+
+        assert_eq!(
+            hex_encode(SUT::try_from(bytes).unwrap().uncompressed()),
+            // compressed is this...
+            "040202020202020202020202020202020202020202020202020202020202020202415456f0fc01d66476251cab4525d9db70bfec652b2d8130608675674cde64b2"
+        );
     }
 
     #[test]

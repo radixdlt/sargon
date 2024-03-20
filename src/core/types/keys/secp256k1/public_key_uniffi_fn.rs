@@ -75,6 +75,7 @@ mod uniffi_tests {
         assert_eq!(from_bytes, SUT::try_from(bag_of_bytes.as_ref()).unwrap());
         // compressed is this...
         assert_eq!(secp256k1_public_key_to_bytes(&from_bytes).to_hex(), "020202020202020202020202020202020202020202020202020202020202020202");
+        assert_eq!(secp256k1_public_key_to_bytes_uncompressed(&from_bytes).to_hex(), "040202020202020202020202020202020202020202020202020202020202020202415456f0fc01d66476251cab4525d9db70bfec652b2d8130608675674cde64b2");
     }
 
     #[test]
