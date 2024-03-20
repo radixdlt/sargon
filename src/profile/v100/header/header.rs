@@ -130,7 +130,7 @@ impl HasSampleValues for Header {
 
 #[cfg(test)]
 pub mod tests {
-    use crate::prelude::*;
+    use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = Header;

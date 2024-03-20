@@ -1,13 +1,27 @@
 use crate::prelude::*;
 
 #[uniffi::export]
-pub fn new_access_controller_address_sample() -> AccessControllerAddress {
-    AccessControllerAddress::sample()
+pub fn new_access_controller_address_sample_mainnet() -> AccessControllerAddress
+{
+    AccessControllerAddress::sample_mainnet()
 }
 
 #[uniffi::export]
-pub fn new_access_controller_address_sample_other() -> AccessControllerAddress {
-    AccessControllerAddress::sample_other()
+pub fn new_access_controller_address_sample_mainnet_other(
+) -> AccessControllerAddress {
+    AccessControllerAddress::sample_mainnet_other()
+}
+
+#[uniffi::export]
+pub fn new_access_controller_address_sample_stokenet() -> AccessControllerAddress
+{
+    AccessControllerAddress::sample_stokenet()
+}
+
+#[uniffi::export]
+pub fn new_access_controller_address_sample_stokenet_other(
+) -> AccessControllerAddress {
+    AccessControllerAddress::sample_stokenet_other()
 }
 
 impl HasSampleValues for AccessControllerAddress {
@@ -177,12 +191,21 @@ mod uniffi_tests {
     }
 
     #[test]
-    fn sample() {
-        assert_eq!(new_access_controller_address_sample(), SUT::sample());
-
+    fn hash_of_sample() {
         assert_eq!(
-            new_access_controller_address_sample_other(),
-            SUT::sample_other()
+            HashSet::<SUT>::from_iter([
+                new_access_controller_address_sample_mainnet(),
+                new_access_controller_address_sample_mainnet_other(),
+                new_access_controller_address_sample_stokenet(),
+                new_access_controller_address_sample_stokenet_other(),
+                // duplicates should be removed
+                new_access_controller_address_sample_mainnet(),
+                new_access_controller_address_sample_mainnet_other(),
+                new_access_controller_address_sample_stokenet(),
+                new_access_controller_address_sample_stokenet_other(),
+            ])
+            .len(),
+            4
         );
     }
 }

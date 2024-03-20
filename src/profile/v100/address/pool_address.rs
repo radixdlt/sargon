@@ -2,20 +2,38 @@ use crate::prelude::*;
 
 /// Sample to a mainnet PoolAddress with single resource.
 #[uniffi::export]
-pub fn new_pool_address_sample_single() -> PoolAddress {
+pub fn new_pool_address_sample_mainnet_single() -> PoolAddress {
     PoolAddress::sample_mainnet_single_pool()
 }
 
 /// Sample to a mainnet PoolAddress with two resources.
 #[uniffi::export]
-pub fn new_pool_address_sample_two() -> PoolAddress {
+pub fn new_pool_address_sample_mainnet_two() -> PoolAddress {
     PoolAddress::sample_mainnet_bi_pool()
 }
 
 /// Sample to a mainnet PoolAddress with three resources.
 #[uniffi::export]
-pub fn new_pool_address_sample_multi() -> PoolAddress {
+pub fn new_pool_address_sample_mainnet_multi() -> PoolAddress {
     PoolAddress::sample_mainnet_multi_pool()
+}
+
+/// Sample to a stokenet PoolAddress with single resource.
+#[uniffi::export]
+pub fn new_pool_address_sample_stokenet_single() -> PoolAddress {
+    PoolAddress::sample_stokenet_single_pool()
+}
+
+/// Sample to a stokenet PoolAddress with two resources.
+#[uniffi::export]
+pub fn new_pool_address_sample_stokenet_two() -> PoolAddress {
+    PoolAddress::sample_stokenet_bi_pool()
+}
+
+/// Sample to a stokenet PoolAddress with three resources.
+#[uniffi::export]
+pub fn new_pool_address_sample_stokenet_multi() -> PoolAddress {
+    PoolAddress::sample_stokenet_multi_pool()
 }
 
 /// The kind of the Pool, either One, Two or Multi resources.
@@ -68,11 +86,13 @@ impl PoolAddress {
             .parse()
             .expect("Sample")
     }
+
     pub fn sample_mainnet_bi_pool() -> Self {
         "pool_rdx1c5dkfdtdqvczcwzdyvzeuhddyha768p2q28erden533fty8h68ay6m"
             .parse()
             .expect("Sample")
     }
+
     pub fn sample_mainnet_multi_pool() -> Self {
         "pool_rdx1cc7etecr23e77z9aqvq9rg43ndh9jkt7dzmaygg4t8c36z8qe6k47t"
             .parse()
@@ -84,11 +104,13 @@ impl PoolAddress {
             .parse()
             .expect("Sample")
     }
+
     pub fn sample_stokenet_bi_pool() -> Self {
         "pool_tdx_2_1c4ml86h8lvfk7jma0jy0vksh8srcxhmtax8nd3aur29qtd2k2wmlzk"
             .parse()
             .expect("Sample")
     }
+
     pub fn sample_stokenet_multi_pool() -> Self {
         "pool_tdx_2_1ce2v6h4qqwuy7m55luappx2u2puutgfs9punuz8lpc33xhfh32gsw3"
             .parse()
@@ -280,18 +302,25 @@ mod uniffi_tests {
     }
 
     #[test]
-    fn sample() {
+    fn hash_of_sample() {
         assert_eq!(
-            SUT::sample_mainnet_single_pool(),
-            new_pool_address_sample_single()
-        );
-        assert_eq!(
-            SUT::sample_mainnet_bi_pool(),
-            new_pool_address_sample_two()
-        );
-        assert_eq!(
-            SUT::sample_mainnet_multi_pool(),
-            new_pool_address_sample_multi()
+            HashSet::<SUT>::from_iter([
+                new_pool_address_sample_mainnet_single(),
+                new_pool_address_sample_mainnet_two(),
+                new_pool_address_sample_mainnet_multi(),
+                new_pool_address_sample_stokenet_single(),
+                new_pool_address_sample_stokenet_two(),
+                new_pool_address_sample_stokenet_multi(),
+                // duplicates should be removed
+                new_pool_address_sample_mainnet_single(),
+                new_pool_address_sample_mainnet_two(),
+                new_pool_address_sample_mainnet_multi(),
+                new_pool_address_sample_stokenet_single(),
+                new_pool_address_sample_stokenet_two(),
+                new_pool_address_sample_stokenet_multi(),
+            ])
+            .len(),
+            6
         );
     }
 }

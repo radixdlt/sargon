@@ -10,9 +10,18 @@ use crate::prelude::*;
 /// to migrate `Sargon` into iOS/Android clients, thus we will defer the work
 /// of mapping `AuthorizedPersonaSimple` -> `AuthorizedPersonaDetailed`.
 #[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Hash, Eq, uniffi::Record,
+    Serialize,
+    Deserialize,
+    Clone,
+    Debug,
+    PartialEq,
+    Hash,
+    Eq,
+    derive_more::Display,
+    uniffi::Record,
 )]
 #[serde(rename_all = "camelCase")]
+#[display("{}", self.description())]
 pub struct AuthorizedPersonaSimple {
     /// The globally unique identifier of a Persona is its address, used
     /// to lookup persona
@@ -29,6 +38,24 @@ pub struct AuthorizedPersonaSimple {
 }
 
 impl AuthorizedPersonaSimple {
+    pub fn description(&self) -> String {
+        format!(
+            r#"
+			identity_address: {}
+			last_login: {}
+			shared_accounts: {}
+			shared_persona_data: {}
+			"#,
+            self.identity_address,
+            self.last_login,
+            self.shared_accounts
+                .clone()
+                .map(|s| s.to_string())
+                .unwrap_or("<NONE>".to_owned()),
+            self.shared_persona_data,
+        )
+    }
+
     pub fn new(
         identity_address: IdentityAddress,
         last_login: Timestamp,

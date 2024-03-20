@@ -245,7 +245,7 @@ mod tests {
             ThirdPartyDeposits::new(DepositRule::AcceptAll),
             ThirdPartyDeposits::with_rule_and_lists(
                 DepositRule::AcceptAll,
-                asset_exceptions.clone(),
+                asset_exceptions,
                 [],
             ),
         );
@@ -253,7 +253,6 @@ mod tests {
         assert_eq!(
             sut.asset_exceptions_to_add_or_update,
             asset_exceptions
-                .clone()
                 .into_iter()
                 .map(ScryptoAccountSetResourcePreferenceInput::from)
                 .collect_vec()
@@ -269,7 +268,7 @@ mod tests {
         let sut = SUT::new(
             ThirdPartyDeposits::with_rule_and_lists(
                 DepositRule::AcceptAll,
-                asset_exceptions.clone(),
+                asset_exceptions,
                 [],
             ),
             ThirdPartyDeposits::new(DepositRule::AcceptAll),
@@ -279,7 +278,6 @@ mod tests {
         assert_eq!(
             sut.asset_exceptions_to_be_removed,
             asset_exceptions
-                .clone()
                 .into_iter()
                 .map(ScryptoManifestValue::from)
                 .collect_vec()
@@ -291,21 +289,21 @@ mod tests {
     #[test]
     fn delta_asset_exceptions_to_remove_and_to_add() {
         let asset_exception_from = AssetException::sample();
-        let asset_exceptions_from = [asset_exception_from.clone()];
+        let asset_exceptions_from = [asset_exception_from];
         let asset_exception_to = AssetException::sample_other();
-        let asset_exceptions_to = [asset_exception_to.clone()];
+        let asset_exceptions_to = [asset_exception_to];
         let expected_asset_exceptions_to_remove = [asset_exception_from];
         let expected_asset_exceptions_to_add = [asset_exception_to];
 
         let sut = SUT::new(
             ThirdPartyDeposits::with_rule_and_lists(
                 DepositRule::AcceptAll,
-                asset_exceptions_from.clone(),
+                asset_exceptions_from,
                 [],
             ),
             ThirdPartyDeposits::with_rule_and_lists(
                 DepositRule::AcceptAll,
-                asset_exceptions_to.clone(),
+                asset_exceptions_to,
                 [],
             ),
         );
@@ -313,7 +311,6 @@ mod tests {
         assert_eq!(
             sut.asset_exceptions_to_add_or_update,
             expected_asset_exceptions_to_add
-                .clone()
                 .into_iter()
                 .map(ScryptoAccountSetResourcePreferenceInput::from)
                 .collect_vec()
@@ -321,7 +318,6 @@ mod tests {
         assert_eq!(
             sut.asset_exceptions_to_be_removed,
             expected_asset_exceptions_to_remove
-                .clone()
                 .into_iter()
                 .map(ScryptoManifestValue::from)
                 .collect_vec()

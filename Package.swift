@@ -36,6 +36,9 @@ let package = Package(
 			targets: ["Sargon"]
 		)
 	],
+	dependencies: [
+		.package(url: "https://github.com/pointfreeco/swift-custom-dump", from: "1.0.0"),
+	],
 	targets: [
 		binaryTarget,
 		.target(
@@ -50,7 +53,10 @@ let package = Package(
 		),
 		.testTarget(
 			name: "SargonTests",
-			dependencies: [.target(name: "Sargon")],
+			dependencies: [
+				.target(name: "Sargon"),
+				.product(name: "CustomDump", package: "swift-custom-dump"),
+			],
 			path: "apple/Tests/SargonTests"
 		),
 	]

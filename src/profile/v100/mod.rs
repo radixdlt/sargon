@@ -6,6 +6,7 @@ mod factors;
 mod header;
 mod networks;
 mod profile;
+mod profile_uniffi_fn;
 
 pub use address::*;
 pub use app_preferences::*;
@@ -15,3 +16,4 @@ pub use factors::*;
 pub use header::*;
 pub use networks::*;
 pub use profile::*;
+pub use profile_uniffi_fn::*;

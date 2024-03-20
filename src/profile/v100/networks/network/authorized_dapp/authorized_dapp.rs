@@ -2,9 +2,18 @@ use crate::prelude::*;
 
 /// A connection made between a Radix Dapp and the user.
 #[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Hash, Eq, uniffi::Record,
+    Serialize,
+    Deserialize,
+    Clone,
+    Debug,
+    PartialEq,
+    Hash,
+    Eq,
+    derive_more::Display,
+    uniffi::Record,
 )]
 #[serde(rename_all = "camelCase")]
+#[display("{}", self.description())]
 pub struct AuthorizedDapp {
     /// The ID of the network the authorized Dapp is on.
     #[serde(rename = "networkID")]
@@ -30,6 +39,21 @@ pub struct AuthorizedDapp {
 }
 
 impl AuthorizedDapp {
+    pub fn description(&self) -> String {
+        format!(
+            r#"
+			network_id: {}
+			dapp_definition_address: {}
+			display_name: {}
+			references_to_authorized_personas: {}
+			"#,
+            self.network_id,
+            self.dapp_definition_address,
+            self.display_name.clone().unwrap_or("<NONE>".to_owned()),
+            self.references_to_authorized_personas,
+        )
+    }
+
     pub fn new(
         network_id: NetworkID,
         dapp_definition_address: DappDefinitionAddress,

@@ -2,9 +2,18 @@ use crate::prelude::*;
 
 /// Identities for PersonaData entry values a user have shared with a dApp.
 #[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, Hash, Eq, uniffi::Record,
+    Serialize,
+    Deserialize,
+    Clone,
+    Debug,
+    PartialEq,
+    Hash,
+    Eq,
+    derive_more::Display,
+    uniffi::Record,
 )]
 #[serde(rename_all = "camelCase")]
+#[display("{}", self.description())]
 pub struct SharedPersonaData {
     /// ID of a `PersonaDataEntryName` the user has shared with some dApp on some network,
     /// can be `None`.
@@ -20,6 +29,27 @@ pub struct SharedPersonaData {
 }
 
 impl SharedPersonaData {
+    pub fn description(&self) -> String {
+        format!(
+            r#"
+			name: {}
+			email_addresses: {}
+			phone_numbers: {}
+			"#,
+            self.name
+                .map(|s| s.to_string())
+                .unwrap_or("<NONE>".to_owned()),
+            self.email_addresses
+                .clone()
+                .map(|s| s.to_string())
+                .unwrap_or("<NONE>".to_owned()),
+            self.phone_numbers
+                .clone()
+                .map(|s| s.to_string())
+                .unwrap_or("<NONE>".to_owned()),
+        )
+    }
+
     pub fn new(
         name: impl Into<Option<PersonaDataEntryID>>,
         email_addresses: impl Into<

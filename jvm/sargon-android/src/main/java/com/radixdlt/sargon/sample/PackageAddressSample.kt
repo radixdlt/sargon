@@ -3,16 +3,16 @@ package com.radixdlt.sargon.sample
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.radixdlt.sargon.PackageAddress
-import com.radixdlt.sargon.newPackageAddressSample
-import com.radixdlt.sargon.newPackageAddressSampleOther
+import com.radixdlt.sargon.newPackageAddressSampleMainnet
+import com.radixdlt.sargon.newPackageAddressSampleMainnetOther
 
 @VisibleForTesting
 val PackageAddress.Companion.sample: Sample<PackageAddress>
     get() = object : Sample<PackageAddress> {
+        
+        override fun invoke(): PackageAddress = newPackageAddressSampleMainnet()
 
-        override fun invoke(): PackageAddress = newPackageAddressSample()
-
-        override fun other(): PackageAddress = newPackageAddressSampleOther()
+        override fun other(): PackageAddress = newPackageAddressSampleMainnetOther()
 
     }
 

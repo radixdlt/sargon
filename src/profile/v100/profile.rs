@@ -12,9 +12,19 @@ use crate::prelude::*;
 /// assert_eq!(Profile::sample(), Profile::sample())
 /// ```
 #[derive(
-    Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, uniffi::Record,
+    Serialize,
+    Deserialize,
+    Clone,
+    PartialEq,
+    Eq,
+    Hash,
+    derive_more::Display,
+    derive_more::Debug,
+    uniffi::Record,
 )]
 #[serde(rename_all = "camelCase")]
+#[display("{}", self.description())]
+#[debug("{}", self.pretty_json())]
 pub struct Profile {
     /// The header of a Profile(Snapshot) contains crucial metadata
     /// about this Profile, such as which JSON data format it is
@@ -36,22 +46,25 @@ pub struct Profile {
     pub networks: ProfileNetworks,
 }
 
-#[uniffi::export]
-pub fn new_profile(
-    private_hd_factor_source: PrivateHierarchicalDeterministicFactorSource,
-    creating_device_name: String,
-) -> Profile {
-    Profile::new(private_hd_factor_source, creating_device_name.as_str())
-}
+impl Profile {
+    pub fn description(&self) -> String {
+        format!(
+            r#"
+			header: {}
+			factor_sources: {}
+			networks: {}
+			app_pref: {}
+			"#,
+            self.header,
+            self.factor_sources,
+            self.networks,
+            self.app_preferences,
+        )
+    }
 
-#[uniffi::export]
-pub fn new_profile_sample() -> Profile {
-    Profile::sample()
-}
-
-#[uniffi::export]
-pub fn new_profile_sample_other() -> Profile {
-    Profile::sample_other()
+    pub fn pretty_json(&self) -> String {
+        serde_json::to_string_pretty(self).expect("should never fail")
+    }
 }
 
 impl Profile {
@@ -159,22 +172,49 @@ impl HasSampleValues for Profile {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = Profile;
 
     #[test]
     fn inequality() {
-        assert_ne!(Profile::sample(), Profile::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn equality() {
-        assert_eq!(Profile::sample(), Profile::sample());
-        assert_eq!(Profile::sample_other(), Profile::sample_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn equality_display() {
+        // This test might seem trivial, in fact it is not,
+        // Profile is such a big data type that it is easy
+        // to accidentally print internals (debug) for display
+        // if not done right.
+        pretty_assertions::assert_eq!(
+            SUT::sample().to_string(),
+            SUT::sample().to_string(),
+        );
+    }
+
+    #[test]
+    fn equality_debug() {
+        // This test might seem trivial, in fact it is not,
+        // Profile is such a big data type that it is easy
+        // to accidentally print internals (debug) for display
+        // if not done right.
+        pretty_assertions::assert_eq!(
+            format!("{:?}", SUT::sample()),
+            format!("{:?}", SUT::sample())
+        );
     }
 
     #[test]
     fn update_factor_source_not_update_when_factor_source_not_found() {
-        let mut sut = Profile::sample();
+        let mut sut = SUT::sample();
         let wrong_id: &FactorSourceID =
             &LedgerHardwareWalletFactorSource::sample_other().id.into();
 
@@ -189,7 +229,7 @@ mod tests {
 
     #[test]
     fn change_supported_curve_of_factor_source() {
-        let mut sut = Profile::sample();
+        let mut sut = SUT::sample();
         let id: &FactorSourceID = &DeviceFactorSource::sample().id.into();
         assert!(sut
             .factor_sources
@@ -242,7 +282,7 @@ mod tests {
     #[test]
     fn add_supported_curve_to_factor_source_failure_cast_wrong_factor_source_kind(
     ) {
-        let mut sut = Profile::sample();
+        let mut sut = SUT::sample();
         let id: &FactorSourceID = &DeviceFactorSource::sample().id.into();
 
         assert!(sut
@@ -294,7 +334,7 @@ mod tests {
 
     #[test]
     fn update_name_of_accounts() {
-        let mut sut = Profile::sample();
+        let mut sut = SUT::sample();
         let account = sut
             .networks
             .get(&NetworkID::Mainnet)
@@ -326,7 +366,7 @@ mod tests {
     #[should_panic(expected = "FactorSources empty, which must never happen.")]
     #[test]
     fn panic_when_factor_sources_empty_in_profile_constructor() {
-        Profile::with(
+        SUT::with(
             Header::sample(),
             FactorSources::new(),
             AppPreferences::sample(),
@@ -339,7 +379,7 @@ mod tests {
         let n = 100;
         let set = (0..n)
             .map(|_| {
-                Profile::new(
+                SUT::new(
                     PrivateHierarchicalDeterministicFactorSource::generate_new(
                         WalletClientModel::Unknown,
                     ),
@@ -352,7 +392,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip() {
-        let sut = Profile::sample();
+        let sut = SUT::sample();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"
@@ -1165,32 +1205,6 @@ mod tests {
 				]
 			}
             "#,
-        );
-    }
-}
-
-#[cfg(test)]
-mod uniffi_tests {
-    use crate::{
-        new_profile_sample, new_profile_sample_other, BaseIsFactorSource,
-        HasSampleValues, PrivateHierarchicalDeterministicFactorSource,
-    };
-
-    use super::Profile;
-
-    #[test]
-    fn equality_samples() {
-        assert_eq!(Profile::sample(), new_profile_sample());
-        assert_eq!(Profile::sample_other(), new_profile_sample_other());
-    }
-
-    #[test]
-    fn new_private_hd() {
-        let private = PrivateHierarchicalDeterministicFactorSource::sample();
-        let lhs = super::new_profile(private.clone(), "iPhone".to_string());
-        assert_eq!(
-            lhs.bdfs().factor_source_id(),
-            private.factor_source.factor_source_id()
         );
     }
 }

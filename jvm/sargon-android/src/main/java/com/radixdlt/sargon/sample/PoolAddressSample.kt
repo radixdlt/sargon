@@ -3,9 +3,9 @@ package com.radixdlt.sargon.sample
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.radixdlt.sargon.PoolAddress
-import com.radixdlt.sargon.newPoolAddressSampleMulti
-import com.radixdlt.sargon.newPoolAddressSampleSingle
-import com.radixdlt.sargon.newPoolAddressSampleTwo
+import com.radixdlt.sargon.newPoolAddressSampleMainnetMulti
+import com.radixdlt.sargon.newPoolAddressSampleMainnetSingle
+import com.radixdlt.sargon.newPoolAddressSampleMainnetTwo
 
 @VisibleForTesting
 val PoolAddress.Companion.sample: Sample<PoolAddress>
@@ -16,13 +16,13 @@ val PoolAddress.Companion.sample: Sample<PoolAddress>
         override fun other(): PoolAddress = mainnetTwo
 
         val mainnetSingle: PoolAddress
-            get() = newPoolAddressSampleSingle()
+            get() = newPoolAddressSampleMainnetSingle()
 
         val mainnetTwo: PoolAddress
-            get() = newPoolAddressSampleTwo()
+            get() = newPoolAddressSampleMainnetTwo()
 
         val mainnetMulti: PoolAddress
-            get() = newPoolAddressSampleMulti()
+            get() = newPoolAddressSampleMainnetMulti()
 
     }
 

@@ -3,16 +3,16 @@ package com.radixdlt.sargon.sample
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.radixdlt.sargon.ComponentAddress
-import com.radixdlt.sargon.newComponentAddressSample
-import com.radixdlt.sargon.newComponentAddressSampleOther
+import com.radixdlt.sargon.newComponentAddressSampleMainnetGlobal
+import com.radixdlt.sargon.newComponentAddressSampleMainnetInternal
 
 @VisibleForTesting
 val ComponentAddress.Companion.sample: Sample<ComponentAddress>
     get() = object : Sample<ComponentAddress> {
 
-        override fun invoke(): ComponentAddress = newComponentAddressSample()
+        override fun invoke(): ComponentAddress = newComponentAddressSampleMainnetGlobal()
 
-        override fun other(): ComponentAddress = newComponentAddressSampleOther()
+        override fun other(): ComponentAddress = newComponentAddressSampleMainnetInternal()
     }
 
 class ComponentAddressPreviewParameterProvider: PreviewParameterProvider<ComponentAddress> {

@@ -9,9 +9,22 @@ pub type SecurityStructureConfigurationReference = bool;
 /// developer mode is enabled or not. In future (MFA) we will also save a list of
 /// MFA security structure configurations.
 #[derive(
-    Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Hash, uniffi::Record,
+    Serialize,
+    Deserialize,
+    Debug,
+    PartialEq,
+    Eq,
+    Clone,
+    Hash,
+    derive_more::Display,
+    uniffi::Record,
 )]
 #[serde(rename_all = "camelCase")]
+#[display(
+    "cloud? {}, dev? {}",
+    is_cloud_profile_sync_enabled,
+    is_developer_mode_enabled
+)]
 pub struct Security {
     pub is_cloud_profile_sync_enabled: bool,
     pub is_developer_mode_enabled: bool,

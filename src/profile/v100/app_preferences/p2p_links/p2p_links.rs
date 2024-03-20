@@ -41,7 +41,17 @@ mod tests {
     fn display() {
         let mut sut = P2PLinks::new();
         sut.append(P2PLink::sample_duckduckgo());
-        assert_eq!(format!("{}", sut), "[P2PLink { display_name: 'DuckDuckGo on Mac Pro', connection_password: 'deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead' }]");
+        assert_eq!(
+            format!("{}", sut),
+            "[P2PLink( name: 'DuckDuckGo on Mac Pro', password: <OMITTED>)]"
+        );
+    }
+
+    #[test]
+    fn debug() {
+        let mut sut = P2PLinks::new();
+        sut.append(P2PLink::sample_duckduckgo());
+        assert_eq!(format!("{:?}", sut), "[P2PLink { display_name: 'DuckDuckGo on Mac Pro', connection_password: 'deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead' }]");
     }
 
     #[test]
