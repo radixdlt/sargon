@@ -5,9 +5,11 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.radixdlt.sargon.AccessControllerAddress
 import com.radixdlt.sargon.newAccessControllerAddressSampleMainnet
 import com.radixdlt.sargon.newAccessControllerAddressSampleMainnetOther
+import com.radixdlt.sargon.newAccessControllerAddressSampleStokenet
+import com.radixdlt.sargon.newAccessControllerAddressSampleStokenetOther
 
 @VisibleForTesting
-val AccessControllerAddress.Companion.sample: Sample<AccessControllerAddress>
+val AccessControllerAddress.Companion.sampleMainnet: Sample<AccessControllerAddress>
     get() = object : Sample<AccessControllerAddress> {
 
         override fun invoke(): AccessControllerAddress =
@@ -18,9 +20,28 @@ val AccessControllerAddress.Companion.sample: Sample<AccessControllerAddress>
 
     }
 
-class AccessControllerAddressPreviewParameterProvider :
+@VisibleForTesting
+val AccessControllerAddress.Companion.sampleStokenet: Sample<AccessControllerAddress>
+    get() = object : Sample<AccessControllerAddress> {
+
+        override fun invoke(): AccessControllerAddress =
+            newAccessControllerAddressSampleStokenet()
+
+        override fun other(): AccessControllerAddress =
+            newAccessControllerAddressSampleStokenetOther()
+
+    }
+
+class AccessControllerAddressMainnetPreviewParameterProvider :
     PreviewParameterProvider<AccessControllerAddress> {
     override val values: Sequence<AccessControllerAddress>
-        get() = AccessControllerAddress.sample.all.asSequence()
+        get() = AccessControllerAddress.sampleMainnet.all.asSequence()
+
+}
+
+class AccessControllerAddressStokenetPreviewParameterProvider :
+    PreviewParameterProvider<AccessControllerAddress> {
+    override val values: Sequence<AccessControllerAddress>
+        get() = AccessControllerAddress.sampleStokenet.all.asSequence()
 
 }

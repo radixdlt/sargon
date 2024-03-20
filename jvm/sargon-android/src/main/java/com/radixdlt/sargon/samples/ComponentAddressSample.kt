@@ -5,9 +5,11 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.radixdlt.sargon.ComponentAddress
 import com.radixdlt.sargon.newComponentAddressSampleMainnetGlobal
 import com.radixdlt.sargon.newComponentAddressSampleMainnetInternal
+import com.radixdlt.sargon.newComponentAddressSampleStokenetGlobal
+import com.radixdlt.sargon.newComponentAddressSampleStokenetInternal
 
 @VisibleForTesting
-val ComponentAddress.Companion.sample: Sample<ComponentAddress>
+val ComponentAddress.Companion.sampleMainnet: Sample<ComponentAddress>
     get() = object : Sample<ComponentAddress> {
 
         override fun invoke(): ComponentAddress = newComponentAddressSampleMainnetGlobal()
@@ -15,8 +17,23 @@ val ComponentAddress.Companion.sample: Sample<ComponentAddress>
         override fun other(): ComponentAddress = newComponentAddressSampleMainnetInternal()
     }
 
-class ComponentAddressPreviewParameterProvider: PreviewParameterProvider<ComponentAddress> {
+@VisibleForTesting
+val ComponentAddress.Companion.sampleStokenet: Sample<ComponentAddress>
+    get() = object : Sample<ComponentAddress> {
+
+        override fun invoke(): ComponentAddress = newComponentAddressSampleStokenetGlobal()
+
+        override fun other(): ComponentAddress = newComponentAddressSampleStokenetInternal()
+    }
+
+class ComponentAddressMainnetPreviewParameterProvider: PreviewParameterProvider<ComponentAddress> {
     override val values: Sequence<ComponentAddress>
-        get() = ComponentAddress.sample.all.asSequence()
+        get() = ComponentAddress.sampleMainnet.all.asSequence()
+
+}
+
+class ComponentAddressStokenetPreviewParameterProvider: PreviewParameterProvider<ComponentAddress> {
+    override val values: Sequence<ComponentAddress>
+        get() = ComponentAddress.sampleStokenet.all.asSequence()
 
 }

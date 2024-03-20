@@ -9,6 +9,7 @@ import com.radixdlt.sargon.newEd25519PublicKeyFromHex
 import com.radixdlt.sargon.newSecp256k1PublicKeyFromBytes
 import com.radixdlt.sargon.newSecp256k1PublicKeyFromHex
 import com.radixdlt.sargon.secp256k1PublicKeyToBytes
+import com.radixdlt.sargon.secp256k1PublicKeyToBytesUncompressed
 import com.radixdlt.sargon.secp256k1PublicKeyToHex
 
 @Throws(SargonException::class)
@@ -41,8 +42,26 @@ val PublicKey.hex: String
         is PublicKey.Secp256k1 -> secp256k1PublicKeyToHex(publicKey = this.value)
     }
 
-val PublicKey.bagOfBytes: BagOfBytes
+val PublicKey.Ed25519.bytes: BagOfBytes
+    get() = ed25519PublicKeyToBytes(publicKey = value)
+
+/**
+ * Returns the key on **compressed** form (33 bytes)
+ */
+val PublicKey.Secp256k1.bytes: BagOfBytes
+    get() = secp256k1PublicKeyToBytes(publicKey = value)
+
+/**
+ * Returns the key on **uncompressed** form (65 bytes)
+ *
+ * Use `compressedData` for compressed format (33 bytes)
+ */
+val PublicKey.Secp256k1.uncompressedBytes: BagOfBytes
+    get() = secp256k1PublicKeyToBytesUncompressed(publicKey = value)
+
+
+val PublicKey.bytes: BagOfBytes
     get() = when (this) {
-        is PublicKey.Ed25519 -> ed25519PublicKeyToBytes(publicKey = this.value)
-        is PublicKey.Secp256k1 -> secp256k1PublicKeyToBytes(publicKey = this.value)
+        is PublicKey.Ed25519 -> bytes
+        is PublicKey.Secp256k1 -> bytes
     }

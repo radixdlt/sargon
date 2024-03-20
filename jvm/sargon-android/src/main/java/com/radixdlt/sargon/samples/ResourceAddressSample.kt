@@ -15,22 +15,22 @@ import com.radixdlt.sargon.newResourceAddressSampleStokenetXrd
 object ResourceAddressSampleMainnet: Sample<ResourceAddress> {
     override val all: List<ResourceAddress>
         get() = listOf(
-            mainnetXrd,
-            mainnetCandy,
-            mainnetNonFungibleGCMembership
+            xrd,
+            candy,
+            nonFungibleGCMembership
         )
 
-    override fun invoke(): ResourceAddress = mainnetXrd
+    override fun invoke(): ResourceAddress = xrd
 
-    override fun other(): ResourceAddress = mainnetCandy
+    override fun other(): ResourceAddress = candy
 
-    val mainnetXrd: ResourceAddress
+    val xrd: ResourceAddress
         get() = newResourceAddressSampleMainnetXrd()
 
-    val mainnetCandy: ResourceAddress
+    val candy: ResourceAddress
         get() = newResourceAddressSampleMainnetCandy()
 
-    val mainnetNonFungibleGCMembership: ResourceAddress
+    val nonFungibleGCMembership: ResourceAddress
         get() = newResourceAddressSampleMainnetNftGcMembership()
 }
 
@@ -38,26 +38,26 @@ object ResourceAddressSampleMainnet: Sample<ResourceAddress> {
 object ResourceAddressSampleStokenet: Sample<ResourceAddress> {
     override val all: List<ResourceAddress>
         get() = listOf(
-            stokenetXRD,
-            stokenetGC,
-            stokenetGum,
-            stokenetCandy
+            xrd,
+            gc,
+            gum,
+            candy
         )
 
-    override fun invoke(): ResourceAddress = stokenetXRD
+    override fun invoke(): ResourceAddress = xrd
 
-    override fun other(): ResourceAddress = stokenetCandy
+    override fun other(): ResourceAddress = candy
 
-    val stokenetXRD: ResourceAddress
+    val xrd: ResourceAddress
         get() = newResourceAddressSampleStokenetXrd()
 
-    val stokenetGum: ResourceAddress
+    val gum: ResourceAddress
         get() = newResourceAddressSampleStokenetGum()
 
-    val stokenetGC: ResourceAddress
+    val gc: ResourceAddress
         get() = newResourceAddressSampleStokenetGcTokens()
 
-    val stokenetCandy: ResourceAddress
+    val candy: ResourceAddress
         get() = newResourceAddressSampleStokenetCandy()
 }
 
