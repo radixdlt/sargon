@@ -6,6 +6,7 @@ import com.radixdlt.sargon.componentAddressBech32Address
 import com.radixdlt.sargon.componentAddressNetworkId
 import com.radixdlt.sargon.newComponentAddress
 
+@Throws(SargonException::class)
 fun ComponentAddress.Companion.init(validatingAddress: String) =
     newComponentAddress(bech32 = validatingAddress)
 

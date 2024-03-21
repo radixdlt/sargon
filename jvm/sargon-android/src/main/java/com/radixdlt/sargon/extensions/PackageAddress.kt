@@ -6,6 +6,7 @@ import com.radixdlt.sargon.newPackageAddress
 import com.radixdlt.sargon.packageAddressBech32Address
 import com.radixdlt.sargon.packageAddressNetworkId
 
+@Throws(SargonException::class)
 fun PackageAddress.Companion.init(validatingAddress: String) =
     newPackageAddress(bech32 = validatingAddress)
 

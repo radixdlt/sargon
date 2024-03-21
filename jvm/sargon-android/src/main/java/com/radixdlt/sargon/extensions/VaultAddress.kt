@@ -8,6 +8,7 @@ import com.radixdlt.sargon.vaultAddressIsFungible
 import com.radixdlt.sargon.vaultAddressIsNonFungible
 import com.radixdlt.sargon.vaultAddressNetworkId
 
+@Throws(SargonException::class)
 fun VaultAddress.Companion.init(validatingAddress: String) =
     newVaultAddress(bech32 = validatingAddress)
 

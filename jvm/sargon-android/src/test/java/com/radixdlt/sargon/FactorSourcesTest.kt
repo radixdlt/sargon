@@ -1,7 +1,7 @@
 package com.radixdlt.sargon
 
-import com.radixdlt.sargon.sample.factorSourcesSample
-import com.radixdlt.sargon.sample.factorSourcesSampleOther
+import com.radixdlt.sargon.samples.factorSourcesSample
+import com.radixdlt.sargon.samples.factorSourcesSampleOther
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test

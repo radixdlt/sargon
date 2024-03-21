@@ -6,6 +6,7 @@ import com.radixdlt.sargon.accessControllerAddressBech32Address
 import com.radixdlt.sargon.accessControllerAddressNetworkId
 import com.radixdlt.sargon.newAccessControllerAddress
 
+@Throws(SargonException::class)
 fun AccessControllerAddress.Companion.init(validatingAddress: String) =
     newAccessControllerAddress(bech32 = validatingAddress)
 
