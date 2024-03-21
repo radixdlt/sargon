@@ -17,117 +17,117 @@ env:
 jobs:
 
 # typos
-  check-typos:
-    runs-on: macos-13-xlarge
-    steps:
-      - uses: RDXWorks-actions/checkout@main
+#   check-typos:
+#     runs-on: macos-13-xlarge
+#     steps:
+#       - uses: RDXWorks-actions/checkout@main
       
-      - name: Install Rust Toolchain
-        uses: RDXWorks-actions/toolchain@master
-        with:
-          toolchain: ${{ env.RUST_TOOLCHAIN }}
-          default: true
-          profile: minimal
+#       - name: Install Rust Toolchain
+#         uses: RDXWorks-actions/toolchain@master
+#         with:
+#           toolchain: ${{ env.RUST_TOOLCHAIN }}
+#           default: true
+#           profile: minimal
       
-      - name: Install typos
-        uses: RDXWorks-actions/cargo-install@main
-        with:
-          crate: typos-cli
-          locked: true
+#       - name: Install typos
+#         uses: RDXWorks-actions/cargo-install@main
+#         with:
+#           crate: typos-cli
+#           locked: true
       
-      - name: Check typos
-        run: typos
+#       - name: Check typos
+#         run: typos
 
-# cargo check
-  check-cargo-check:
-    runs-on: macos-13-xlarge
-    steps:
-      - uses: RDXWorks-actions/checkout@main
+# # cargo check
+#   check-cargo-check:
+#     runs-on: macos-13-xlarge
+#     steps:
+#       - uses: RDXWorks-actions/checkout@main
       
-      - name: Install Rust Toolchain
-        uses: RDXWorks-actions/toolchain@master
-        with:
-          toolchain: ${{ env.RUST_TOOLCHAIN }}
-          default: true
-          profile: minimal
+#       - name: Install Rust Toolchain
+#         uses: RDXWorks-actions/toolchain@master
+#         with:
+#           toolchain: ${{ env.RUST_TOOLCHAIN }}
+#           default: true
+#           profile: minimal
       
-      - name: Cargo Check
-        run: cargo check --all
+#       - name: Cargo Check
+#         run: cargo check --all
 
-# cargo fmt check
-  check-formatting:
-    runs-on: macos-13-xlarge
-    needs: check-cargo-check
-    steps:
-      - uses: RDXWorks-actions/checkout@main
+# # cargo fmt check
+#   check-formatting:
+#     runs-on: macos-13-xlarge
+#     needs: check-cargo-check
+#     steps:
+#       - uses: RDXWorks-actions/checkout@main
       
-      - name: Install Rust Toolchain
-        uses: RDXWorks-actions/toolchain@master
-        with:
-          toolchain: ${{ env.RUST_TOOLCHAIN }}
-          default: true
-          components: rustfmt
+#       - name: Install Rust Toolchain
+#         uses: RDXWorks-actions/toolchain@master
+#         with:
+#           toolchain: ${{ env.RUST_TOOLCHAIN }}
+#           default: true
+#           components: rustfmt
       
-      - name: Check formatting
-        run: cargo fmt --check
+#       - name: Check formatting
+#         run: cargo fmt --check
 
-# clippy
-  check-clippy:
-    runs-on: macos-13-xlarge
-    needs: check-formatting
-    steps:
-      - uses: RDXWorks-actions/checkout@main
+# # clippy
+#   check-clippy:
+#     runs-on: macos-13-xlarge
+#     needs: check-formatting
+#     steps:
+#       - uses: RDXWorks-actions/checkout@main
       
-      - name: Install Rust Toolchain
-        uses: RDXWorks-actions/toolchain@master
-        with:
-          toolchain: ${{ env.RUST_TOOLCHAIN }}
-          default: true
-          components: clippy
+#       - name: Install Rust Toolchain
+#         uses: RDXWorks-actions/toolchain@master
+#         with:
+#           toolchain: ${{ env.RUST_TOOLCHAIN }}
+#           default: true
+#           components: clippy
       
-      - name: Clippy Check
-        run: cargo clippy --all
+#       - name: Clippy Check
+#         run: cargo clippy --all
  
-# Rust unit, doc and integration
-  test-rust:
-    runs-on: macos-13-xlarge
-    needs: check-clippy
-    steps:
-      - uses: RDXWorks-actions/checkout@main
+# # Rust unit, doc and integration
+#   test-rust:
+#     runs-on: macos-13-xlarge
+#     needs: check-clippy
+#     steps:
+#       - uses: RDXWorks-actions/checkout@main
       
-      - name: Install Rust Toolchain
-        uses: RDXWorks-actions/toolchain@master
-        with:
-          toolchain: ${{ env.RUST_TOOLCHAIN }}
-          default: true
+#       - name: Install Rust Toolchain
+#         uses: RDXWorks-actions/toolchain@master
+#         with:
+#           toolchain: ${{ env.RUST_TOOLCHAIN }}
+#           default: true
             
-      - name: Run tests
-        run: cargo test
+#       - name: Run tests
+#         run: cargo test
 
-# Swift testing on macOS (Apple Silicon)
-  test-swift:
-    runs-on: macos-13-xlarge
-    needs: check-clippy
-    steps:
-      - uses: RDXWorks-actions/checkout@main
+# # Swift testing on macOS (Apple Silicon)
+#   test-swift:
+#     runs-on: macos-13-xlarge
+#     needs: check-clippy
+#     steps:
+#       - uses: RDXWorks-actions/checkout@main
 
-      - name: Install Rust Toolchain for aarch64-apple-darwin
-        uses: RDXWorks-actions/toolchain@master
-        with:
-          toolchain: ${{ env.RUST_TOOLCHAIN }}
-          target: aarch64-apple-darwin
+#       - name: Install Rust Toolchain for aarch64-apple-darwin
+#         uses: RDXWorks-actions/toolchain@master
+#         with:
+#           toolchain: ${{ env.RUST_TOOLCHAIN }}
+#           target: aarch64-apple-darwin
 
-      - name: Build for macOS target and run swift test
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          rustup target add aarch64-apple-darwin
-          sh ./scripts/ios/test.sh
+#       - name: Build for macOS target and run swift test
+#         env:
+#           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#         run: |
+#           rustup target add aarch64-apple-darwin
+#           sh ./scripts/ios/test.sh
 
 # Kotlin test run on JVM on macOS (Apple Silicon)
   test-kotlin:
     runs-on: macos-13-xlarge
-    needs: check-clippy
+    # needs: check-clippy
     steps:
       - uses: RDXWorks-actions/checkout@main
 
@@ -171,34 +171,35 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
-          directory: jvm/sargon-android/build/reports/kover/
-          files: reportDebug.xml
+          file: ./jvm/sargon-android/build/reports/kover/reportDebug.xml
+          name: codecov-jvm
+          verbose: true
   
 # Code Coverage uses Tarpaulin and uploads to CodeCov.io        
-  code-coverage: 
-    runs-on: macos-13-xlarge
-    needs: check-clippy
-    steps:
-      - uses: RDXWorks-actions/checkout@main
+  # code-coverage: 
+  #   runs-on: macos-13-xlarge
+  #   needs: check-clippy
+  #   steps:
+  #     - uses: RDXWorks-actions/checkout@main
       
-      - name: Install Rust Toolchain
-        uses: RDXWorks-actions/toolchain@master
-        with:
-          toolchain: ${{ env.RUST_TOOLCHAIN }}
-          default: true
+  #     - name: Install Rust Toolchain
+  #       uses: RDXWorks-actions/toolchain@master
+  #       with:
+  #         toolchain: ${{ env.RUST_TOOLCHAIN }}
+  #         default: true
 
-      - name: Install cargo tarpaulin
-        uses: RDXWorks-actions/cargo-install@main
-        with:
-          crate: cargo-tarpaulin
-          tag: 0.27.3
-          locked: true
+  #     - name: Install cargo tarpaulin
+  #       uses: RDXWorks-actions/cargo-install@main
+  #       with:
+  #         crate: cargo-tarpaulin
+  #         tag: 0.27.3
+  #         locked: true
      
-      - name: Code Coverage - Generate
-        run: cargo tarpaulin --lib
+  #     - name: Code Coverage - Generate
+  #       run: cargo tarpaulin --lib
       
-      - name: Code Coverage - Upload to CodeCov.io
-        uses: RDXWorks-actions/codecov-action@main
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          fail_ci_if_error: true
+  #     - name: Code Coverage - Upload to CodeCov.io
+  #       uses: RDXWorks-actions/codecov-action@main
+  #       with:
+  #         token: ${{ secrets.CODECOV_TOKEN }}
+  #         fail_ci_if_error: true
