@@ -20,6 +20,4 @@ sh ./scripts/ios/build-sargon.sh --maconly || exit $?
 echo "✨ Sargon built"
 
 echo "✨ Calling 'swift test'"
-swift test
-
-exit 0;
+swift test --enable-code-coverage && scripts/ios/display_code_cov_details.sh

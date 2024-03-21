@@ -124,6 +124,15 @@ jobs:
           rustup target add aarch64-apple-darwin
           sh ./scripts/ios/test.sh
 
+      - name: Upload to CodeCov.io
+        uses: RDXWorks-actions/codecov-action@main
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
+          file: ./.build/debug/codecov/Sargon.json
+          name: codecov-swift
+          flags: swift
+
 # Kotlin test run on JVM on macOS (Apple Silicon)
   test-kotlin:
     runs-on: macos-13-xlarge
