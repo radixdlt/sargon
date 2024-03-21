@@ -5,10 +5,15 @@ import com.radixdlt.sargon.extensions.hex
 import com.radixdlt.sargon.extensions.hexToBagOfBytes
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.uncompressedBytes
+import com.radixdlt.sargon.samples.Sample
+import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class PublicKeyTest {
+class PublicKeyTest: SampleTestable<PublicKey> {
+
+    override val samples: List<Sample<PublicKey>>
+        get() = listOf(PublicKey.sample)
 
     inline fun <reified K : PublicKey> testKey(hex: String): PublicKey {
         val bytes = hex.hexToBagOfBytes()
@@ -39,7 +44,11 @@ class PublicKeyTest {
     fun testKeysCurve25519() {
         val hex = "ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf"
         when (val key = testKey<PublicKey.Ed25519>(hex = hex)) {
-            is PublicKey.Ed25519 -> assert(key.hex == hex)
+            is PublicKey.Ed25519 -> {
+                assertEquals(hex, key.hex)
+
+                assertEquals(key, PublicKey.init(bytes = key.bytes))
+            }
             is PublicKey.Secp256k1 -> error("Expected Ed25519 key")
         }
     }
@@ -54,6 +63,7 @@ class PublicKeyTest {
                     "04517b88916e7f315bb682f9926b14bc67a0e4246f8a419b986269e1a7e61fffa71159e5614fb40739f4d22004380670cbc99ee4a2a73899d084098f3a139130c4",
                     key.uncompressedBytes.hex
                 )
+                assertEquals(key, PublicKey.init(bytes = key.bytes))
             }
             is PublicKey.Ed25519 -> error("Expected secp256k1 key")
         }
