@@ -19,6 +19,8 @@ import com.radixdlt.sargon.samples.prependingCafeSample
 import com.radixdlt.sargon.samples.prependingDeadbeefSample
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import java.lang.IllegalStateException
 
 class BagOfBytesTest {
 
@@ -88,6 +90,10 @@ class BagOfBytesTest {
             ),
             acedBagOfBytesSample.hash()
         )
+
+        assertThrows<IllegalStateException>("Should throw exception due to not even character length") {
+            "acedacedacedacedacedacedacedacedacedacedacedacedacedacedacedaceda".hexToBagOfBytes()
+        }
     }
 
 }
