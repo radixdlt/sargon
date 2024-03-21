@@ -163,8 +163,17 @@ jobs:
       - name: Install cargo-ndk
         run: cargo install cargo-ndk
   
-      - name: Test JVM
-        run: ./jvm/gradlew -p jvm/sargon-android testDebugUnitTest
+      - name: Test JVM with coverage
+        run: ./jvm/gradlew -p jvm/sargon-android koverXmlReportDebug
+
+      - name: Upload to CodeCov.io
+        uses: RDXWorks-actions/codecov-action@main
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
+          file: ./jvm/sargon-android/build/reports/kover/reportDebug.xml
+          name: codecov-jvm
+          flags: kotlin
   
 # Code Coverage uses Tarpaulin and uploads to CodeCov.io        
   code-coverage: 
@@ -194,3 +203,4 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
+          flags: rust

@@ -6,6 +6,7 @@ import com.radixdlt.sargon.newValidatorAddress
 import com.radixdlt.sargon.validatorAddressBech32Address
 import com.radixdlt.sargon.validatorAddressNetworkId
 
+@Throws(SargonException::class)
 fun ValidatorAddress.Companion.init(validatingAddress: String) =
     newValidatorAddress(bech32 = validatingAddress)
 

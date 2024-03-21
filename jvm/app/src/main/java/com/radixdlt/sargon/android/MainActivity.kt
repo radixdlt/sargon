@@ -43,7 +43,7 @@ import com.radixdlt.sargon.Wallet
 import com.radixdlt.sargon.WalletClientModel
 import com.radixdlt.sargon.android.ui.theme.SargonAndroidTheme
 import com.radixdlt.sargon.extensions.string
-import com.radixdlt.sargon.sample.ProfilePreviewParameterProvider
+import com.radixdlt.sargon.samples.ProfilePreviewParameterProvider
 import kotlin.random.Random
 
 class MainActivity : ComponentActivity() {

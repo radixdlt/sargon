@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.android.cargo.ndk)
+    alias(libs.plugins.kotlin.kover)
     id("maven-publish")
 }
 
@@ -52,6 +53,24 @@ cargoNdk {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+koverReport {
+    filters {
+        excludes {
+            packages("com.radixdlt.sargon.samples")
+            annotatedBy("com.radixdlt.sargon.utils.KoverIgnore")
+        }
+        includes {
+            packages("com.radixdlt.sargon.extensions")
+        }
+    }
+
+    verify {
+        rule {
+            minBound(100)
+        }
+    }
 }
 
 dependencies {

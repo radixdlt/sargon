@@ -1,30 +1,11 @@
 package com.radixdlt.sargon
 
-import com.radixdlt.sargon.sample.sample
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Test
+import com.radixdlt.sargon.samples.Sample
+import com.radixdlt.sargon.samples.sample
 
-class HeaderTest {
+class HeaderTest: SampleTestable<Header> {
 
-    @Test
-    fun testEquals() {
-        val a = Header.sample()
-        val b = Header.sample.other()
-
-        assertEquals(Header.sample(), a)
-        assertNotEquals(a, b)
-        assertEquals(Header.sample.other(), b)
-    }
-
-    @Test
-    fun testHashCode() {
-        val a = Header.sample()
-        val b = Header.sample.other()
-
-        assertEquals(1, setOf(a, a).size)
-        assertEquals(1, setOf(b, b).size)
-        assertEquals(2, setOf(a, b, b, a).size)
-    }
+    override val samples: List<Sample<Header>>
+        get() = listOf(Header.sample)
 
 }
