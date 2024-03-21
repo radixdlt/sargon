@@ -14,7 +14,7 @@ env:
   CARGO_TERM_COLOR: always
   RUST_TOOLCHAIN: nightly-2024-01-11
   RUST_COMPONENTS: "rust-std"
-  CODE_COV_SWIFT_REPORT: "codecov-swift.txt" # chosen, update `.gitignore` if changed
+  CODE_COV_SWIFT_REPORT: ".build/artifacts/info.lcov" # chosen
 jobs:
 
 # typos
@@ -130,7 +130,7 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
-          file: ${{ env.CODE_COV_SWIFT_REPORT }}
+          files: ${{ env.CODE_COV_SWIFT_REPORT }}
           name: codecov-swift
           flags: swift
 

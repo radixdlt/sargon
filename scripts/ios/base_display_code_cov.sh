@@ -14,6 +14,6 @@ fi
 xcrun llvm-cov $1 \
 	"${COV_BIN}" \
 	-instr-profile=.build/debug/codecov/default.profdata \
-	-ignore-filename-regex=".build|Tests|UniFFI/Sargon.swift" \
+	-ignore-filename-regex="Tests|UniFFI/Sargon.swift" \
 	-region-coverage-lt=99 \
 	-use-color
