@@ -23,7 +23,7 @@ impl PublicKeyHash {
         Self::hash_scrypto(key.into())
     }
 
-    pub fn hash_scrypto(key: impl Into<ScryptoPublicKey>) -> Self {
+    fn hash_scrypto(key: impl Into<ScryptoPublicKey>) -> Self {
         ScryptoPublicKeyHash::new_from_public_key(&key.into()).into()
     }
 }
@@ -55,5 +55,15 @@ impl From<PublicKeyHash> for ScryptoPublicKeyHash {
                 ScryptoSecp256k1PublicKeyHash(*value.bytes()).into()
             }
         }
+    }
+}
+
+impl HasSampleValues for PublicKeyHash {
+    fn sample() -> Self {
+        Self::hash(Ed25519PublicKey::sample())
+    }
+
+    fn sample_other() -> Self {
+        Self::hash(Secp256k1PublicKey::sample())
     }
 }

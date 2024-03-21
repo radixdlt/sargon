@@ -66,7 +66,7 @@ impl PerAssetNonFungibleTransfer {
     pub(crate) fn sample_stokenet() -> Self {
         Self::new(
             AssetsTransfersRecipient::MyOwnAccount {
-                value: Account::sample_stokenet_carol(),
+                value: Account::sample_stokenet_nadia(),
             },
             true,
             [

@@ -162,15 +162,21 @@ impl TransactionManifest {
         )
     }
 
+    /// Creates many fungible tokens, with initial supply, to be owned by `address_of_owner`.
+    ///
+    /// # Panics
+    /// Panics if `address_of_owner` is on `Mainnet`, use a testnet instead.
     pub fn create_multiple_fungible_tokens(
         address_of_owner: &AccountAddress,
     ) -> TransactionManifest {
         if address_of_owner.network_id() == NetworkID::Mainnet {
             panic!("To be 100% sure about license of the images, we do not allow these sample fungible tokens to be created on Mainnet.");
         }
-        let path = "src/wrapped_radix_engine_toolkit/high_level/sample_resource_definition_metadata.json";
-        let json_str = fs::read_to_string(path).unwrap();
-        let json = serde_json::Value::from_str(&json_str).unwrap();
+
+        let json = serde_json::Value::from_str(include_str!(
+            "sample_resource_definition_metadata.json"
+        ))
+        .expect("Should not have moved the metadata file.");
 
         #[derive(Deserialize)]
         struct MultipleFungibleTokens {
@@ -180,7 +186,7 @@ impl TransactionManifest {
 
         let multiple_fungibles: MultipleFungibleTokens =
             serde_json::from_value(json).unwrap();
-        info!("Generating multiple fungibles using bundled vector in file at '{}'\nDescription:\n'{}'", path, &multiple_fungibles.description);
+        info!("Generating multiple fungibles using bundled file, '\nDescription:\n'{}'", &multiple_fungibles.description);
         let fungibles = multiple_fungibles.tokens;
 
         let mut builder = ScryptoManifestBuilder::new();

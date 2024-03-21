@@ -1,4 +1,6 @@
 extension Profile: @unchecked Sendable {}
+extension Profile: SargonModel {}
+
 extension Profile: Identifiable {
 	public typealias ID = ProfileID
 	public var id: ID {
@@ -6,7 +8,7 @@ extension Profile: Identifiable {
 	}
 }
 
-extension Profile: SargonModel {
+extension Profile: CustomStringConvertible {
 	public var description: String {
 		profileToString(profile: self)
 	}
@@ -18,10 +20,3 @@ extension Profile: CustomDebugStringConvertible {
 		profileToDebugString(profile: self)
 	}
 }
-
-#if DEBUG
-extension Profile {
-	public static let sample: Self = newProfileSample()
-	public static let sampleOther: Self = newProfileSampleOther()
-}
-#endif

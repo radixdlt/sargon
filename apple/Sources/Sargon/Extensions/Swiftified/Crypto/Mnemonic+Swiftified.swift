@@ -1,5 +1,4 @@
 extension Mnemonic: @unchecked Sendable {}
-
 extension Mnemonic: SargonModel {}
 
 extension Mnemonic: CustomStringConvertible {
@@ -7,15 +6,3 @@ extension Mnemonic: CustomStringConvertible {
 		phrase
 	}
 }
-
-#if DEBUG
-extension Mnemonic {
-	public static var sample: Self {
-		newMnemonicSample()
-	}
-	
-	public static var sampleOther: Self {
-		newMnemonicSampleOther()
-	}
-}
-#endif // DEBUG

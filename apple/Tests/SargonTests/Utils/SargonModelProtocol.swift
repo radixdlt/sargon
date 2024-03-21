@@ -6,6 +6,10 @@
 class Test<SUT_: SargonModel>: XCTestCase {
 	typealias SUT = SUT_
 	
+	override func setUp() {
+		self.continueAfterFailure = false
+	}
+	
 	func test_equality() throws {
 		XCTAssertNoDifference(SUT.sample, SUT.sample)
 	}
@@ -17,7 +21,11 @@ class Test<SUT_: SargonModel>: XCTestCase {
 	func test_hashable() {
 		XCTAssertNoDifference(Set([SUT.sample, SUT.sample]).count, 1)
 		XCTAssertNoDifference(Set([SUT.sampleOther, SUT.sampleOther]).count, 1)
-		XCTAssertNoDifference(Set([SUT.sample, SUT.sampleOther, SUT.sampleOther, SUT.sample]).count, 2)
+		
+		var set = Set<SUT>()
+		SUT.allCases.forEach { set.insert($0) }
+		SUT.allCases.forEach { set.insert($0) } // duplicates removed.
+		XCTAssertGreaterThanOrEqual(set.count, 2)
 	}
 
 	func test_custom_string_convertible() throws {

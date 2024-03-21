@@ -12,4 +12,8 @@ final class ProfileTests: Test<Profile> {
 		XCTAssertNoDifference(SUT.sample.debugDescription, SUT.sample.debugDescription)
 		XCTAssertNoDifference(SUT.sampleOther.debugDescription, SUT.sampleOther.debugDescription)
 	}
+	
+	func test_id_is_header_id() {
+		XCTAssertNoDifference(SUT.sample.id, SUT.sample.header.id)
+	}
 }

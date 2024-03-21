@@ -6,9 +6,9 @@ pub fn main() {
     let manifest_path =
         Path::new(env!("CARGO_MANIFEST_DIR")).join("Cargo.toml");
     let manifest = Manifest::from_path(manifest_path).expect("Can't panic");
-
+    let dependencies = manifest.dependencies;
     let set_dep_env = |key: &str| {
-        let dependency = manifest.dependencies.get(key).expect("Can't panic");
+        let dependency = dependencies.get(key).expect("Can't panic");
         let env_var_value = match dependency {
             Dependency::Simple(version) => format!("version={version}"),
             Dependency::Inherited(_) => {

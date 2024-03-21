@@ -43,7 +43,7 @@ impl AssetsTransfersRecipient {
 
     pub(crate) fn sample_stokenet() -> Self {
         Self::MyOwnAccount {
-            value: Account::sample_stokenet_carol(),
+            value: Account::sample_stokenet_nadia(),
         }
     }
 

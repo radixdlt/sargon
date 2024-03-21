@@ -46,18 +46,18 @@ extension Address: AddressProtocol {
 			self = .package(address)
 		} else if let address = try? PoolAddress(validatingAddress: bech32String) {
 			self = .pool(address)
-		} else if let address = try? ResourceAddress(
-			validatingAddress: bech32String)
-		{
-			self = .resource(address)
 		} else if let address = try? ValidatorAddress(
 			validatingAddress: bech32String)
 		{
 			self = .validator(address)
 		} else if let address = try? VaultAddress(validatingAddress: bech32String) {
 			self = .vault(address)
-		} else if let address = try? NonFungibleResourceAddress(validatingAddress: bech32String) {
+		} else if let address = try? NonFungibleResourceAddress(validatingAddress: bech32String) /* Must try `NonFungibleResourceAddress` before ResourceAddress */ {
 			self = .nonFungibleResource(address)
+		} else if let address = try? ResourceAddress(
+			validatingAddress: bech32String)
+		{
+			self = .resource(address)
 		} else {
 			struct UnknownAddressType: Swift.Error {}
 			throw UnknownAddressType()

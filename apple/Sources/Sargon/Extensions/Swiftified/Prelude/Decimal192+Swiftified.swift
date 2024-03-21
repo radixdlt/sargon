@@ -1,26 +1,5 @@
 extension Decimal192: @unchecked Sendable {}
-
-extension Decimal192: SargonModel {
-	public static var sample: Self {
-		123456789
-	}
-	
-	public static var sampleOther: Self {
-		Self.max
-	}
-}
-
-extension Decimal192 {
-	/// Positive value
-	public static var max: Self {
-		decimalMax()
-	}
-	
-	/// Negative value
-	public static var min: Self {
-		decimalMin()
-	}
-}
+extension Decimal192: SargonModel {}
 
 #if DEBUG
 extension Decimal192: ExpressibleByStringLiteral {
@@ -28,39 +7,60 @@ extension Decimal192: ExpressibleByStringLiteral {
 		try! self.init(string)
 	}
 }
+
+extension Decimal192: ExpressibleByFloatLiteral {
+	public init(floatLiteral float: Float32) {
+		try! self.init(float)
+	}
+}
 #endif
 
 extension Decimal192: ExpressibleByIntegerLiteral {
 	public init(integerLiteral i64: Int64) {
-		self = newDecimalFromI64(value: i64)
+		self = Self(i64)
+	}
+}
+
+
+extension Decimal192: Comparable {
+	public static func > (lhs: Self, rhs: Self) -> Bool {
+		lhs.greaterThan(other: rhs)
+	}
+	public static func < (lhs: Self, rhs: Self) -> Bool {
+		lhs.lessThan(other: rhs)
+	}
+	public static func >= (lhs: Self, rhs: Self) -> Bool {
+		lhs.greaterThanOrEqual(other: rhs)
+	}
+	public static func <= (lhs: Self, rhs: Self) -> Bool {
+		lhs.lessThanOrEqual(other: rhs)
 	}
 }
 
 extension Decimal192: AdditiveArithmetic {
-	public static var zero: Self {
-		newDecimalFromU64(value: 0)
-	}
 	public static func + (lhs: Self, rhs: Self) -> Self {
-		decimalAdd(lhs: lhs, rhs: rhs)
+		lhs.add(rhs: rhs)
 	}
 	public static func - (lhs: Self, rhs: Self) -> Self {
-		decimalSub(lhs: lhs, rhs: rhs)
+		lhs.sub(rhs: rhs)
 	}
 }
+
 extension Decimal192: SignedNumeric {
 	public prefix static func - (operand: Self) -> Self {
-		decimalNeg(decimal: operand)
+		operand.negate()
 	}
 }
+
 extension Decimal192: Numeric {
 	public typealias Magnitude = Self
 
 	public var magnitude: Magnitude {
-		decimalAbs(decimal: self)
+		abs()
 	}
 
 	public static func * (lhs: Self, rhs: Self) -> Self {
-		decimalMul(lhs: lhs, rhs: rhs)
+		lhs.mul(rhs: rhs)
 	}
 
 	public static func *= (lhs: inout Self, rhs: Self) {
@@ -69,11 +69,17 @@ extension Decimal192: Numeric {
 
 	public init?<T>(exactly source: T) where T: BinaryInteger {
 		if let i64 = Int64(exactly: source) {
-			self = newDecimalFromI64(value: i64)
+			self = Self(i64)
 		} else if let u64 = UInt64(exactly: source) {
-			self = newDecimalFromU64(value: u64)
+			self = Self(u64)
 		} else {
 			return nil
 		}
+	}
+}
+
+extension Decimal192 {
+	public static func / (lhs: Self, rhs: Self) -> Self {
+		lhs.div(rhs: rhs)
 	}
 }
