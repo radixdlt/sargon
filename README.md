@@ -125,9 +125,35 @@ Find [script here](scripts/ios/build-sargon.sh)
 
 Find [script here](scripts/ios/test.sh)
 
+### Code coverage
+
+#### Details
+
 ```sh
 ./scripts/ios/test.sh
 ```
+
+#### Summary
+
+```sh
+./scripts/ios/test.sh --summary
+```
+
+### Test only
+
+```sh
+./scripts/ios/test.sh --testonly
+```
+
+### Export code coverage
+
+If you change `lcov` format in `export_code.cov.sh` please use an updated file name.
+
+```sh
+./scripts/ios/test.sh --codecov swift_code_cov.lcov
+```
+
+Alternatively if you wanna skip code cove
 
 ## Android
 

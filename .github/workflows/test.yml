@@ -14,6 +14,7 @@ env:
   CARGO_TERM_COLOR: always
   RUST_TOOLCHAIN: nightly-2024-01-11
   RUST_COMPONENTS: "rust-std"
+  CODE_COV_SWIFT_REPORT: "codecov-swift.lcov" # chosen, update `.gitignore` if changed
 jobs:
 
 # typos
@@ -122,14 +123,14 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           rustup target add aarch64-apple-darwin
-          sh ./scripts/ios/test.sh
+          sh ./scripts/ios/test.sh --codecov $CODE_COV_SWIFT_REPORT
 
       - name: Upload to CodeCov.io
         uses: RDXWorks-actions/codecov-action@main
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
-          file: ./.build/debug/codecov/Sargon.json
+          file: $CODE_COV_SWIFT_REPORT
           name: codecov-swift
           flags: swift
 
