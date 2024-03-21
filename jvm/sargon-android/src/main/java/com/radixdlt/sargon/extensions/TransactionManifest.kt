@@ -60,7 +60,6 @@ fun TransactionManifest.Companion.createFungibleTokenWithMetadata(
     metadata = metadata
 )
 
-@KoverIgnore
 fun TransactionManifest.Companion.createMultipleFungibleTokens(
     addressOfOwner: AccountAddress
 ) = manifestCreateMultipleFungibleTokens(addressOfOwner = addressOfOwner)
