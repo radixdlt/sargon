@@ -68,7 +68,7 @@ impl PerAssetFungibleTransfer {
     pub(crate) fn sample_stokenet() -> Self {
         Self::new(
             AssetsTransfersRecipient::MyOwnAccount {
-                value: Account::sample_stokenet_diana(),
+                value: Account::sample_stokenet_olivia(),
             },
             true,
             Decimal192::from_str("42.311415").unwrap(),

@@ -1,14 +1,50 @@
 extension Decimal192 {
+	
 	public init(_ string: String) throws {
 		self = try newDecimalFromString(string: string)
 	}
+	
+	public init(_ float32: Float32) throws {
+		self = try newDecimalFromF32(value: float32)
+	}
+	
+	public init(_ value: Int64) {
+		self = newDecimalFromI64(value: value)
+	}
+	
+	public init(_ value: UInt64) {
+		self = newDecimalFromU64(value: value)
+	}
+
 }
 
+#if DEBUG
+extension Locale {
+	public static let test = Self(identifier: "en_US_POSIX")
+}
+#endif // DEBUG
+
+import XCTestDynamicOverlay
 extension Decimal192: CustomStringConvertible {
 	public var description: String {
 		formattedPlain()
 	}
 }
+
+extension Decimal192: CustomDebugStringConvertible {
+	public var debugDescription: String {
+#if DEBUG
+		if !_XCTIsTesting {
+			formattedPlain()
+		} else {
+			formattedPlain(locale: .test, useGroupingSeparator: false)
+		}
+#else
+		formattedPlain()
+#endif // DEBUG
+	}
+}
+
 
 extension Decimal192 {
 	public static let maxDivisibility: UInt8 = 18
@@ -34,7 +70,7 @@ extension Decimal192 {
 	/// A human readable, locale respecting string, rounded to `totalPlaces` places, counting all digits
 	public func formatted(
 		locale: Locale = .autoupdatingCurrent,
-		totalPlaces: UInt8,
+		totalPlaces: UInt8 = 8,
 		useGroupingSeparator: Bool = true
 	) -> String {
 		decimalFormatted(
@@ -107,20 +143,6 @@ extension Decimal192 {
 	}
 }
 
-extension Decimal192: Comparable {
-	public static func > (lhs: Self, rhs: Self) -> Bool {
-		lhs.greaterThan(other: rhs)
-	}
-	public static func < (lhs: Self, rhs: Self) -> Bool {
-		lhs.lessThan(other: rhs)
-	}
-	public static func >= (lhs: Self, rhs: Self) -> Bool {
-		lhs.greaterThanOrEqual(other: rhs)
-	}
-	public static func <= (lhs: Self, rhs: Self) -> Bool {
-		lhs.lessThanOrEqual(other: rhs)
-	}
-}
 extension Decimal192 {
 
 	public func lessThan(other: Self) -> Bool {
@@ -137,5 +159,48 @@ extension Decimal192 {
 
 	public func greaterThanOrEqual(other: Self) -> Bool {
 		decimalGreaterThanOrEqual(lhs: self, rhs: other)
+	}
+}
+
+extension Decimal192 {
+	
+	public static var zero: Self {
+		newDecimalFromU64(value: 0)
+	}
+	
+	public func add(rhs: Self) -> Self {
+		decimalAdd(lhs: self, rhs: rhs)
+	}
+	
+	public func sub(rhs: Self) -> Self {
+		decimalSub(lhs: self, rhs: rhs)
+	}
+	
+	public func mul(rhs: Self) -> Self {
+		decimalMul(lhs: self, rhs: rhs)
+	}
+	
+	public func div(rhs: Self) -> Self {
+		decimalDiv(lhs: self, rhs: rhs)
+	}
+	
+	public func abs() -> Self {
+		decimalAbs(decimal: self)
+	}
+	
+	public func negate() -> Self {
+		decimalNeg(decimal: self)
+	}
+}
+
+extension Decimal192 {
+	/// Positive value
+	public static var max: Self {
+		decimalMax()
+	}
+	
+	/// Negative value
+	public static var min: Self {
+		decimalMin()
 	}
 }

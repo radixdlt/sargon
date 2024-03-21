@@ -240,27 +240,37 @@ impl Account {
     }
 
     /// A sample used to facilitate unit tests.
-    pub fn sample_stokenet_carol() -> Self {
+    pub fn sample_stokenet_nadia() -> Self {
         Self::sample_at_index_name_network(
             NetworkID::Stokenet,
             0,
-            "Carol",
+            "Nadia",
             false,
         )
     }
 
     /// A sample used to facilitate unit tests.
-    pub fn sample_stokenet_diana() -> Self {
+    pub fn sample_stokenet_olivia() -> Self {
         Self::sample_at_index_name_network(
             NetworkID::Stokenet,
             1,
-            "Diana",
+            "Olivia",
             true,
         )
     }
 
+    /// A sample used to facilitate unit tests.
+    pub fn sample_stokenet_paige() -> Self {
+        Self::sample_at_index_name_network(
+            NetworkID::Stokenet,
+            2,
+            "Paige",
+            false,
+        )
+    }
+
     pub fn sample_stokenet() -> Self {
-        Self::sample_stokenet_carol()
+        Self::sample_stokenet_nadia()
     }
 
     /// A sample used to facilitate unit tests.
@@ -299,17 +309,20 @@ impl Account {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = Account;
 
     #[test]
     fn equality() {
-        assert_eq!(Account::sample(), Account::sample());
-        assert_eq!(Account::sample_other(), Account::sample_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(Account::sample(), Account::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
@@ -318,7 +331,7 @@ mod tests {
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
                 .parse()
                 .unwrap();
-        let account = Account::sample_with_values(
+        let account = SUT::sample_with_values(
             address,
             DisplayName::default(),
             AppearanceID::default(),
@@ -328,7 +341,7 @@ mod tests {
 
     #[test]
     fn display() {
-        let account = Account::sample();
+        let account = SUT::sample();
         assert_eq!(
             format!("{account}"),
             "Alice | account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8"
@@ -337,12 +350,12 @@ mod tests {
 
     #[test]
     fn compare() {
-        assert!(Account::sample_alice() < Account::sample_bob());
+        assert!(SUT::sample_alice() < SUT::sample_bob());
     }
 
     #[test]
     fn update() {
-        let mut account = Account::sample();
+        let mut account = SUT::sample();
         assert_eq!(account.display_name.value, "Alice");
         account.display_name = DisplayName::new("Satoshi").unwrap();
         assert_eq!(account.display_name.value, "Satoshi");
@@ -350,7 +363,7 @@ mod tests {
 
     #[test]
     fn on_ledger_settings_get_set() {
-        let mut account = Account::sample_with_values(
+        let mut account = SUT::sample_with_values(
             AccountAddress::sample(),
             DisplayName::new("Test").unwrap(),
             AppearanceID::default(),
@@ -396,7 +409,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_mainnet_alice() {
-        let model = Account::sample_mainnet_alice();
+        let model = SUT::sample_mainnet_alice();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -450,7 +463,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_mainnet_bob() {
-        let model = Account::sample_mainnet_bob();
+        let model = SUT::sample_mainnet_bob();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -504,7 +517,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_stokenet_carol() {
-        let model = Account::sample_stokenet_carol();
+        let model = SUT::sample_stokenet_nadia();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -542,7 +555,7 @@ mod tests {
 				"networkID": 2,
 				"appearanceID": 0,
 				"flags": [],
-				"displayName": "Carol",
+				"displayName": "Nadia",
 				"onLedgerSettings": {
 					"thirdPartyDeposits": {
 						"depositRule": "acceptAll",
@@ -557,8 +570,8 @@ mod tests {
     }
 
     #[test]
-    fn json_roundtrip_stokenet_diana() {
-        let model = Account::sample_stokenet_diana();
+    fn json_roundtrip_stokenet_olivia() {
+        let model = SUT::sample_stokenet_olivia();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -596,7 +609,7 @@ mod tests {
 				"networkID": 2,
 				"appearanceID": 1,
 				"flags": ["deletedByUser"],
-				"displayName": "Diana",
+				"displayName": "Olivia",
 				"onLedgerSettings": {
 					"thirdPartyDeposits": {
 						"depositRule": "acceptAll",
@@ -683,11 +696,11 @@ mod tests {
     fn hash() {
         assert_eq!(
             HashSet::<Account>::from_iter([
-                Account::sample(),
-                Account::sample_stokenet(),
-                Account::sample_nebunet(),
-                Account::sample_kisharnet(),
-                Account::sample_adapanet(),
+                SUT::sample(),
+                SUT::sample_stokenet(),
+                SUT::sample_nebunet(),
+                SUT::sample_kisharnet(),
+                SUT::sample_adapanet(),
             ])
             .len(),
             5

@@ -25,7 +25,8 @@ extension AddressProtocol where Self: CaseIterable, AllCases == [Self] {
 			Self.sampleMainnet,
 			Self.sampleMainnetOther,
 			Self.sampleStokenet,
-			Self.sampleStokenetOther]
+			Self.sampleStokenetOther
+		]
 		
 	}
 }

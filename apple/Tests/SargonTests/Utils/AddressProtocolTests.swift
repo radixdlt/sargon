@@ -23,8 +23,8 @@ class AddressTest<SUT_: AddressProtocol>: Test<SUT_> {
 	func test_bech32_roundtrip() throws {
 		func doTest(_ address: SUT) throws {
 			try XCTAssertNoDifference(
-				SUT(validatingAddress: address.address),
-				address
+				SUT(validatingAddress: address.address).address,
+				address.address
 			)
 		}
 		

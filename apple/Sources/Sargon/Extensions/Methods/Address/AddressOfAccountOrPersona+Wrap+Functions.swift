@@ -1,5 +1,5 @@
 
-extension AddressOfAccountOrPersona: AddressProtocol {
+extension AddressOfAccountOrPersona {
 	public init(validatingAddress bech32String: String) throws {
 		self = try newAddressOfAccountOrPersonaFromBech32(string: bech32String)
 	}

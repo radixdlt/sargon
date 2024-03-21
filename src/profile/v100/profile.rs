@@ -901,7 +901,7 @@ mod tests {
 								"networkID": 2,
 								"appearanceID": 0,
 								"flags": [],
-								"displayName": "Carol",
+								"displayName": "Nadia",
 								"onLedgerSettings": {
 									"thirdPartyDeposits": {
 										"depositRule": "acceptAll",
@@ -945,7 +945,7 @@ mod tests {
 								"networkID": 2,
 								"appearanceID": 1,
 								"flags": ["deletedByUser"],
-								"displayName": "Diana",
+								"displayName": "Olivia",
 								"onLedgerSettings": {
 									"thirdPartyDeposits": {
 										"depositRule": "acceptAll",

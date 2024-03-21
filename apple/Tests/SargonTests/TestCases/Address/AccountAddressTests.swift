@@ -19,4 +19,13 @@ final class AccountAddressTests: AddressTest<AccountAddress> {
 	func test_short() {
 		XCTAssertEqual(SUT.sample.shortFormat, "acco...please")
 	}
+	
+	func test_is_legacy() {
+		XCTAssertTrue(SUT.sample.isLegacy)
+		XCTAssertTrue(SUT.sampleOther.isLegacy)
+
+		// not legacy
+		XCTAssertFalse(SUT.sampleStokenet.isLegacy)
+		XCTAssertFalse(SUT.sampleStokenetOther.isLegacy)
+	}
 }

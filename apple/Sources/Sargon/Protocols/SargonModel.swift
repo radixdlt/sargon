@@ -1,12 +1,15 @@
-public protocol SargonModel: Sendable, Hashable {
-    #if DEBUG
+#if DEBUG
+public protocol SargonModel: Sendable, Hashable, CaseIterable {
     static var sample: Self { get }
     static var sampleOther: Self { get }
-    #endif
 }
+#else
+public protocol SargonModel: Sendable, Hashable {}
+#endif
+
 
 #if DEBUG
-extension SargonModel where Self: CaseIterable, AllCases == [Self] {
-	public static var allCases: AllCases { [Self.sample, Self.sampleOther] }
+extension SargonModel {
+	public static var allCases: [Self] { [Self.sample, Self.sampleOther] }
 }
 #endif
