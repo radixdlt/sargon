@@ -14,7 +14,7 @@ env:
   CARGO_TERM_COLOR: always
   RUST_TOOLCHAIN: nightly-2024-01-11
   RUST_COMPONENTS: "rust-std"
-  CODE_COV_SWIFT_REPORT: "codecov-swift.lcov" # chosen, update `.gitignore` if changed
+  CODE_COV_SWIFT_REPORT: "codecov-swift.txt" # chosen, update `.gitignore` if changed
 jobs:
 
 # typos

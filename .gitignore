@@ -17,4 +17,4 @@ build_rs_cov.profraw
 cobertura.xml
 jna-*.jar
 .swiftpm/*
-codecov-swift.lcov
+codecov-swift.txt
