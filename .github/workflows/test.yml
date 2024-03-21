@@ -164,7 +164,7 @@ jobs:
         run: cargo install cargo-ndk
   
       - name: Test JVM
-        run: ./jvm/gradlew -p jvm/sargon-android testDebugUnitTest
+        run: ./jvm/gradlew -p jvm/sargon-android koverXmlReportDebug
   
 # Code Coverage uses Tarpaulin and uploads to CodeCov.io        
   code-coverage: 

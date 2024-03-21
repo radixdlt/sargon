@@ -3,11 +3,16 @@ package com.radixdlt.sargon
 import com.radixdlt.sargon.extensions.discriminant
 import com.radixdlt.sargon.extensions.from
 import com.radixdlt.sargon.extensions.string
+import com.radixdlt.sargon.samples.Sample
+import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-class NetworkIdTest {
+class NetworkIdTest: SampleTestable<NetworkId> {
+
+    override val samples: List<Sample<NetworkId>>
+        get() = listOf(NetworkId.sample)
 
     @Test
     fun test() {

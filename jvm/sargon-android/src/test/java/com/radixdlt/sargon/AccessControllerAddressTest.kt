@@ -3,11 +3,17 @@ package com.radixdlt.sargon
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.networkId
 import com.radixdlt.sargon.extensions.string
+import com.radixdlt.sargon.samples.Sample
+import com.radixdlt.sargon.samples.sampleMainnet
+import com.radixdlt.sargon.samples.sampleStokenet
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-class AccessControllerAddressTest {
+class AccessControllerAddressTest: SampleTestable<AccessControllerAddress> {
+
+    override val samples: List<Sample<AccessControllerAddress>>
+        get() = listOf(AccessControllerAddress.sampleMainnet, AccessControllerAddress.sampleStokenet)
 
     @Test
     fun test() {

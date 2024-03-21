@@ -3,34 +3,16 @@ package com.radixdlt.sargon
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.randomBagOfBytes
 import com.radixdlt.sargon.extensions.string
+import com.radixdlt.sargon.samples.Sample
 import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 
-class ProfileTest {
+class ProfileTest: SampleTestable<Profile> {
 
-    @Test
-    fun testEquals() {
-        val p = Profile.sample()
-        val q = Profile.sample.other()
-
-        assertEquals(Profile.sample(), p)
-        assertEquals(p, p)
-        assertEquals(q, q)
-        assertEquals(Profile.sample.other(), q)
-        assertNotEquals(Profile.sample(), Profile.sample.other())
-    }
-
-    @Test
-    fun testHashCode() {
-        val a = Profile.sample()
-        val b = Profile.sample.other()
-
-        assertEquals(1, setOf(a, a).size)
-        assertEquals(1, setOf(b, b).size)
-        assertEquals(2, setOf(a, b, b, a).size)
-    }
+    override val samples: List<Sample<Profile>>
+        get() = listOf(Profile.sample)
 
     @Test
     fun testInit() {

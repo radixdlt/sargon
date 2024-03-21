@@ -5,12 +5,18 @@ import com.radixdlt.sargon.extensions.isLegacy
 import com.radixdlt.sargon.extensions.networkId
 import com.radixdlt.sargon.extensions.shortFormat
 import com.radixdlt.sargon.extensions.string
+import com.radixdlt.sargon.samples.Sample
+import com.radixdlt.sargon.samples.sampleMainnet
+import com.radixdlt.sargon.samples.sampleStokenet
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-class AccountAddressTest {
+class AccountAddressTest: SampleTestable<AccountAddress> {
+
+    override val samples: List<Sample<AccountAddress>>
+        get() = listOf(AccountAddress.sampleMainnet, AccountAddress.sampleStokenet)
 
     @Test
     fun test() {

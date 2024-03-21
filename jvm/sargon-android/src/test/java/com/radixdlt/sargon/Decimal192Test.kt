@@ -20,6 +20,8 @@ import com.radixdlt.sargon.extensions.rounded
 import com.radixdlt.sargon.extensions.string
 import com.radixdlt.sargon.extensions.times
 import com.radixdlt.sargon.extensions.toDecimal192
+import com.radixdlt.sargon.samples.Sample
+import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -31,7 +33,10 @@ import java.text.DecimalFormatSymbols
 import java.util.Locale
 import kotlin.math.PI
 
-class Decimal192Test {
+class Decimal192Test: SampleTestable<Decimal192> {
+
+    override val samples: List<Sample<Decimal192>>
+        get() = listOf(Decimal192.sample)
 
     @Test
     fun test() {

@@ -2,11 +2,16 @@ package com.radixdlt.sargon
 
 import com.radixdlt.sargon.extensions.all
 import com.radixdlt.sargon.extensions.init
+import com.radixdlt.sargon.samples.Sample
+import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-class AppearanceIdTest {
+class AppearanceIdTest: SampleTestable<AppearanceId> {
+
+    override val samples: List<Sample<AppearanceId>>
+        get() = listOf(AppearanceId.sample)
 
     @Test
     fun test() {

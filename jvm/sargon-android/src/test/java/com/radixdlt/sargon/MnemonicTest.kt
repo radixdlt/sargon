@@ -1,10 +1,15 @@
 package com.radixdlt.sargon
 
 import com.radixdlt.sargon.extensions.phrase
+import com.radixdlt.sargon.samples.Sample
+import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class MnemonicTest {
+class MnemonicTest: SampleTestable<Mnemonic> {
+
+    override val samples: List<Sample<Mnemonic>>
+        get() = listOf(Mnemonic.sample)
 
     @Test
     fun test() {

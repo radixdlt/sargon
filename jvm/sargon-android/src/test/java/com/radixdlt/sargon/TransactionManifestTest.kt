@@ -19,20 +19,20 @@ import com.radixdlt.sargon.extensions.stakesClaim
 import com.radixdlt.sargon.extensions.string
 import com.radixdlt.sargon.extensions.thirdPartyDepositUpdate
 import com.radixdlt.sargon.extensions.toDecimal192
+import com.radixdlt.sargon.samples.Sample
 import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
-class TransactionManifestTest {
+class TransactionManifestTest: SampleTestable<TransactionManifest> {
+
+    override val samples: List<Sample<TransactionManifest>>
+        get() = listOf(TransactionManifest.sample)
 
     @Test
     fun test() {
-        assertEquals(TransactionManifest.sample(), TransactionManifest.sample())
-        assertEquals(TransactionManifest.sample.other(), TransactionManifest.sample.other())
-        assertNotEquals(TransactionManifest.sample(), TransactionManifest.sample.other())
-
         val instructionsString = """
             CALL_METHOD
                 Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")

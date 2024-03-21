@@ -3,10 +3,16 @@ package com.radixdlt.sargon
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.networkId
 import com.radixdlt.sargon.extensions.string
+import com.radixdlt.sargon.samples.Sample
+import com.radixdlt.sargon.samples.sampleMainnet
+import com.radixdlt.sargon.samples.sampleStokenet
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class NonFungibleResourceAddressTest {
+class NonFungibleResourceAddressTest: SampleTestable<NonFungibleResourceAddress> {
+
+    override val samples: List<Sample<NonFungibleResourceAddress>>
+        get() = listOf(NonFungibleResourceAddress.sampleMainnet, NonFungibleResourceAddress.sampleStokenet)
 
     @Test
     fun test() {
