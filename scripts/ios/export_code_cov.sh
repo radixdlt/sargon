@@ -3,10 +3,5 @@
 set -e
 set -u
 
-echo "🗂️  exporting report to $1"
-
-REL_DIR=$0:P
-DIR="$( cd "$( dirname "$REL_DIR" )" && pwd )";
-
-sh $DIR/base_display_code_cov.sh report
-sh $DIR/base_display_code_cov.sh export -format="lcov" > $1
+sh base_display_code_cov.sh report
+sh base_display_code_cov.sh export -format="lcov" > $1

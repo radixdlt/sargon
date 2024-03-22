@@ -14,7 +14,8 @@ env:
   CARGO_TERM_COLOR: always
   RUST_TOOLCHAIN: nightly-2024-01-11
   RUST_COMPONENTS: "rust-std"
-  CODE_COV_SWIFT_REPORT: ".build/artifacts/info.lcov" # chosen
+  SWIFT_CODE_COV_DATA_PATH: ".build/debug/codecov/default.profdata"
+  SWIFT_CODE_COV_REPORT_PATH: ".build/artifacts/info.lcov" # chosen
 jobs:
 
 # typos
@@ -123,14 +124,14 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           rustup target add aarch64-apple-darwin
-          sh ./scripts/ios/test.sh --codecov ${{ env.CODE_COV_SWIFT_REPORT }}
+          sh ./scripts/ios/test.sh --codecov ${{ env.SWIFT_CODE_COV_REPORT_PATH }}
 
       - name: Upload to CodeCov.io
         uses: RDXWorks-actions/codecov-action@main
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
-          files: ${{ env.CODE_COV_SWIFT_REPORT }}
+          files: ${{ env.SWIFT_CODE_COV_REPORT_PATH }}
           name: codecov-swift
           flags: swift
 

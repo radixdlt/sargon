@@ -45,16 +45,23 @@ echo "✨ Ensure 'useLocalFramework' is set to 'true' in Package.swift"
 sh ./scripts/ios/ensure-is-local.sh || exit $?
 
 echo "✨ Building Sargon..."
-sh ./scripts/ios/build-sargon.sh --maconly || exit $?
+# sh ./scripts/ios/build-sargon.sh --maconly || exit $?
 echo "✨ Sargon built"
 
 echo "✨ Calling 'swift test'"
 if $testonly; then
     swift test
-elif $summary; then
-    swift test --enable-code-coverage && scripts/ios/display_code_cov_summary.sh
-elif $export_code_cov; then
-    swift test --enable-code-coverage && scripts/ios/export_code_cov.sh $code_cov_report_file_path
 else
-    swift test --enable-code-coverage && scripts/ios/display_code_cov_details.sh
+    swift test --enable-code-coverage
+    COV_BUILD_FOLDER="$(sh ./scripts/ios/get_cov_bin_path.sh)"
+fi
+
+COV_ARGS="$COV_BUILD_FOLDER -instr-profile=\"$SWIFT_CODE_COV_DATA_PATH\" -ignore-filename-regex=\".build|Tests|UniFFI/Sargon.swift\""
+NON_EXPORT_COV_ARGS="$COV_ARGS -region-coverage-lt=99 -use-color"
+if $summary; then
+    eval "xcrun llvm-cov report $NON_EXPORT_COV_ARGS"
+elif $export_code_cov; then
+    eval "xcrun llvm-cov export -format="lcov" $COV_ARGS > $code_cov_report_file_path"
+elif [[ "$testonly" = false ]]; then # details
+    eval "xcrun llvm-cov show $NON_EXPORT_COV_ARGS"
 fi
