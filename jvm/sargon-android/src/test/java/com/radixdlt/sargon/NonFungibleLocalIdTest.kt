@@ -1,5 +1,6 @@
 package com.radixdlt.sargon
 
+import com.radixdlt.sargon.extensions.from
 import com.radixdlt.sargon.extensions.fromBytes
 import com.radixdlt.sargon.extensions.fromInt
 import com.radixdlt.sargon.extensions.fromRuid
@@ -24,6 +25,20 @@ class NonFungibleLocalIdTest {
         assertEquals(
             "[deadbeef12345678babecafe87654321fadedeaf01234567ecadabba76543210]",
             NonFungibleLocalId.fromBytes(bytes = bagOfBytes).string
+        )
+    }
+
+    @Test
+    fun testLocalIdFromString() {
+        assertEquals("#1234#", NonFungibleLocalId.from(localId = "#1234#").string)
+        assertEquals("<foo>", NonFungibleLocalId.from(localId = "<foo>").string)
+        assertEquals(
+            "{deadbeef12345678-babecafe87654321-fadedeaf01234567-ecadabba76543210}",
+            NonFungibleLocalId.from(localId = "{deadbeef12345678-babecafe87654321-fadedeaf01234567-ecadabba76543210}").string
+        )
+        assertEquals(
+            "[deadbeef12345678babecafe87654321fadedeaf01234567ecadabba76543210]",
+            NonFungibleLocalId.from(localId = "[deadbeef12345678babecafe87654321fadedeaf01234567ecadabba76543210]").string
         )
     }
 

@@ -45,37 +45,6 @@ impl NonFungibleLocalId {
     }
 }
 
-#[uniffi::export]
-pub fn non_fungible_local_id_as_str(id: NonFungibleLocalId) -> String {
-    id.to_string()
-}
-
-#[uniffi::export]
-pub fn new_non_fungible_local_id_int(value: u64) -> NonFungibleLocalId {
-    NonFungibleLocalId::integer(value)
-}
-
-#[uniffi::export]
-pub fn new_non_fungible_local_id_string(
-    string: String,
-) -> Result<NonFungibleLocalId> {
-    NonFungibleLocalId::string(string)
-}
-
-#[uniffi::export]
-pub fn new_non_fungible_local_id_bytes(
-    bytes: BagOfBytes,
-) -> Result<NonFungibleLocalId> {
-    NonFungibleLocalId::bytes(bytes)
-}
-
-#[uniffi::export]
-pub fn new_non_fungible_local_id_ruid(
-    bytes: BagOfBytes,
-) -> Result<NonFungibleLocalId> {
-    NonFungibleLocalId::ruid(bytes)
-}
-
 impl NonFungibleLocalId {
     fn scrypto(&self) -> ScryptoNonFungibleLocalId {
         self.clone().into()
@@ -125,10 +94,12 @@ impl From<NonFungibleLocalId> for ScryptoNonFungibleLocalId {
 }
 
 impl FromStr for NonFungibleLocalId {
-    type Err = <ScryptoNonFungibleLocalId as std::str::FromStr>::Err;
+    type Err = CommonError;
 
     fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
-        ScryptoNonFungibleLocalId::from_str(s).map(Into::into)
+        ScryptoNonFungibleLocalId::from_str(s)
+            .map(Into::into)
+            .map_err(|_| CommonError::InvalidNonFungibleLocalIDString)
     }
 }
 
@@ -178,6 +149,14 @@ mod tests {
         assert_eq!(
             "<value>".parse::<SUT>().unwrap(),
             SUT::string("value").unwrap()
+        );
+    }
+
+    #[test]
+    fn from_invalid_str_error() {
+        assert_eq!(
+            "#value#".parse::<SUT>(),
+            Err::<SUT, _>(CommonError::InvalidNonFungibleLocalIDString)
         );
     }
 

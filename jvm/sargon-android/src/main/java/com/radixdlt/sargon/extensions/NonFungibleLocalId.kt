@@ -3,10 +3,15 @@ package com.radixdlt.sargon.extensions
 import com.radixdlt.sargon.BagOfBytes
 import com.radixdlt.sargon.NonFungibleLocalId
 import com.radixdlt.sargon.newNonFungibleLocalIdBytes
+import com.radixdlt.sargon.newNonFungibleLocalIdFromString
 import com.radixdlt.sargon.newNonFungibleLocalIdInt
 import com.radixdlt.sargon.newNonFungibleLocalIdRuid
 import com.radixdlt.sargon.newNonFungibleLocalIdString
 import com.radixdlt.sargon.nonFungibleLocalIdAsStr
+
+@Throws(SargonException::class)
+fun NonFungibleLocalId.Companion.from(localId: String): NonFungibleLocalId =
+    newNonFungibleLocalIdFromString(localId = localId)
 
 @Throws(SargonException::class)
 fun NonFungibleLocalId.Companion.fromBytes(bytes: BagOfBytes): NonFungibleLocalId =
