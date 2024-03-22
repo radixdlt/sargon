@@ -58,7 +58,6 @@ jobs:
 # cargo fmt check
   check-formatting:
     runs-on: macos-13-xlarge
-    needs: check-cargo-check
     steps:
       - uses: RDXWorks-actions/checkout@main
       
@@ -75,7 +74,6 @@ jobs:
 # clippy
   check-clippy:
     runs-on: macos-13-xlarge
-    needs: check-formatting
     steps:
       - uses: RDXWorks-actions/checkout@main
       
@@ -92,7 +90,6 @@ jobs:
 # Rust unit, doc and integration
   test-rust:
     runs-on: macos-13-xlarge
-    needs: check-clippy
     steps:
       - uses: RDXWorks-actions/checkout@main
       
@@ -108,7 +105,6 @@ jobs:
 # Swift testing on macOS (Apple Silicon)
   test-swift:
     runs-on: macos-13-xlarge
-    needs: check-clippy
     steps:
       - uses: RDXWorks-actions/checkout@main
 
@@ -137,7 +133,6 @@ jobs:
 # Kotlin test run on JVM on macOS (Apple Silicon)
   test-kotlin:
     runs-on: macos-13-xlarge
-    needs: check-clippy
     steps:
       - uses: RDXWorks-actions/checkout@main
 
@@ -188,7 +183,6 @@ jobs:
 # Code Coverage uses Tarpaulin and uploads to CodeCov.io        
   code-coverage: 
     runs-on: macos-13-xlarge
-    needs: check-clippy
     steps:
       - uses: RDXWorks-actions/checkout@main
       
