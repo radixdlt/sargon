@@ -191,6 +191,18 @@ final class ManifestBuildingTests: Test<TransactionManifest> {
 		
 	}
 	
+	func test_assets_transfers() throws {
+		let transfers = PerAssetTransfers.sample
+		let manifest = TransactionManifest.assetsTransfers(transfers: transfers)
+		XCTAssert(manifest.description.contains(transfers.fromAccount.address))
+		transfers.fungibleResources.forEach {
+			XCTAssert(manifest.description.contains($0.resource.resourceAddress.address))
+			$0.transfers.forEach {
+				XCTAssert(manifest.description.contains($0.recipient.description))
+			}
+		}
+	}
+	
 	func rtm(_ rtm_file: String) throws -> TransactionManifest {
 		let testsDirectory: String = URL(fileURLWithPath: "\(#file)").pathComponents.dropLast(6).joined(separator: "/")
 		
