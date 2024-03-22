@@ -1,5 +1,6 @@
 package com.radixdlt.sargon
 
+import com.radixdlt.sargon.extensions.blobs
 import com.radixdlt.sargon.extensions.createFungibleToken
 import com.radixdlt.sargon.extensions.createFungibleTokenWithMetadata
 import com.radixdlt.sargon.extensions.createMultipleFungibleTokens
@@ -16,7 +17,8 @@ import com.radixdlt.sargon.extensions.perAssetTransfers
 import com.radixdlt.sargon.extensions.perRecipientTransfers
 import com.radixdlt.sargon.extensions.setOwnerKeysHashes
 import com.radixdlt.sargon.extensions.stakesClaim
-import com.radixdlt.sargon.extensions.string
+import com.radixdlt.sargon.extensions.instructionsString
+import com.radixdlt.sargon.extensions.networkId
 import com.radixdlt.sargon.extensions.thirdPartyDepositUpdate
 import com.radixdlt.sargon.extensions.toDecimal192
 import com.radixdlt.sargon.samples.Sample
@@ -59,14 +61,15 @@ class TransactionManifestTest: SampleTestable<TransactionManifest> {
         
         """.trimIndent()
 
-        assertEquals(TransactionManifest.sample().string, instructionsString)
-
         val manifest = TransactionManifest.init(
             instructionsString = instructionsString,
-            networkId = NetworkId.MAINNET
+            networkId = NetworkId.MAINNET,
+            blobs = Blobs.sample()
         )
 
-        assertEquals(TransactionManifest.sample(), manifest)
+        assertEquals(instructionsString, manifest.instructionsString)
+        assertEquals(NetworkId.MAINNET, manifest.networkId)
+        assertEquals(Blobs.sample(), manifest.blobs)
     }
 
     @Test
@@ -204,7 +207,7 @@ class TransactionManifestTest: SampleTestable<TransactionManifest> {
             )
         )
 
-        assertEquals(instructionsString, manifest.string)
+        assertEquals(instructionsString, manifest.instructionsString)
     }
 
     @Test
@@ -493,7 +496,7 @@ class TransactionManifestTest: SampleTestable<TransactionManifest> {
             )
         )
 
-        assertEquals(instructionsString, manifest.string)
+        assertEquals(instructionsString, manifest.instructionsString)
     }
 
     @Test
@@ -639,7 +642,7 @@ class TransactionManifestTest: SampleTestable<TransactionManifest> {
             )
         )
 
-        assertEquals(instructionsString, manifest.string)
+        assertEquals(instructionsString, manifest.instructionsString)
     }
 
     @Test
@@ -3634,7 +3637,7 @@ class TransactionManifestTest: SampleTestable<TransactionManifest> {
             )
         )
 
-        assertEquals(instructionsString, manifest.string)
+        assertEquals(instructionsString, manifest.instructionsString)
     }
 
     @Test
@@ -6939,7 +6942,7 @@ class TransactionManifestTest: SampleTestable<TransactionManifest> {
             )
         )
 
-        assertEquals(instructionsString, manifest.string)
+        assertEquals(instructionsString, manifest.instructionsString)
     }
 
     @Test
@@ -6969,7 +6972,7 @@ class TransactionManifestTest: SampleTestable<TransactionManifest> {
             )
         )
 
-        assertEquals(instructionsString, manifest.string)
+        assertEquals(instructionsString, manifest.instructionsString)
     }
 
     @Test
@@ -6990,7 +6993,7 @@ class TransactionManifestTest: SampleTestable<TransactionManifest> {
             )
         )
 
-        assertEquals(instructionsString, manifest.string)
+        assertEquals(instructionsString, manifest.instructionsString)
     }
 
     @Test
@@ -7042,7 +7045,7 @@ class TransactionManifestTest: SampleTestable<TransactionManifest> {
             )
         )
 
-        assertEquals(instructionsString, manifest.string)
+        assertEquals(instructionsString, manifest.instructionsString)
     }
 
     @Test
@@ -7092,7 +7095,7 @@ class TransactionManifestTest: SampleTestable<TransactionManifest> {
             )
         )
 
-        assertEquals(instructionsString, manifest.string)
+        assertEquals(instructionsString, manifest.instructionsString)
     }
 
     @Test
@@ -7122,7 +7125,7 @@ class TransactionManifestTest: SampleTestable<TransactionManifest> {
                 )
             )
         )
-        assertEquals(instructionsString, manifest.string)
+        assertEquals(instructionsString, manifest.instructionsString)
     }
 
     @Test
@@ -7175,7 +7178,7 @@ class TransactionManifestTest: SampleTestable<TransactionManifest> {
                 )
             )
         )
-        assertEquals(instructionsString, manifest.string)
+        assertEquals(instructionsString, manifest.instructionsString)
     }
 
     @Test
@@ -7204,7 +7207,7 @@ class TransactionManifestTest: SampleTestable<TransactionManifest> {
                 depositorsAllowList = emptyList()
             )
         )
-        assertEquals(instructionsString, manifest.string)
+        assertEquals(instructionsString, manifest.instructionsString)
     }
 
     @Test
@@ -7281,7 +7284,7 @@ class TransactionManifestTest: SampleTestable<TransactionManifest> {
 
         """.trimIndent()
 
-        assertEquals(expectedModified, modifiedManifest.string)
+        assertEquals(expectedModified, modifiedManifest.instructionsString)
     }
 
     @Test
@@ -7343,6 +7346,6 @@ class TransactionManifestTest: SampleTestable<TransactionManifest> {
 
         """.trimIndent()
 
-        assertEquals(expectedModified, modifiedManifest.string)
+        assertEquals(expectedModified, modifiedManifest.instructionsString)
     }
 }
