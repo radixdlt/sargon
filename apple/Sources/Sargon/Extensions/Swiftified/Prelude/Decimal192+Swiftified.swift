@@ -68,10 +68,10 @@ extension Decimal192: Numeric {
 	}
 
 	public init?<T>(exactly source: T) where T: BinaryInteger {
-		if let i64 = Int64(exactly: source) {
-			self = Self(i64)
-		} else if let u64 = UInt64(exactly: source) {
+		if let u64 = UInt64(exactly: source) {
 			self = Self(u64)
+		} else if let i64 = Int64(exactly: source) {
+			self = Self(i64)
 		} else {
 			return nil
 		}

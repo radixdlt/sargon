@@ -5,10 +5,11 @@
 **Sargon is library for sharing code between Radix iOS/Android wallets.**
 
 > [!IMPORTANT]  
-> This library is intended for **internal use only** in the official iOS and Android wallets. 
+> This library is intended for **internal use only** in the official iOS and Android wallets.
 > Interfaces will be changing regularly, and we do not recommend other developers integrate the library or align with these standards.
 
 ## Etymology
+
 Named after [Sargon of Akkad](https://en.wikipedia.org/wiki/Sargon_of_Akkad) the first ruler of the Akkadian Empire, the first empire of Mesopotamia. Babylon was a city in southern Mesopotamia, and of course the name of the Radix milestone with which the Radix wallets was launched.
 
 # Development
@@ -40,13 +41,16 @@ brew install kotlin
 ```
 
 #### JNA
+
 > [!IMPORTANT]  
-> To run tests in Kotlin you also need to download [JNA](https://mvnrepository.com/artifact/net.java.dev.jna/jna) (currently tested under version `5.13.0`) 
-> ``` sh
+> To run tests in Kotlin you also need to download [JNA](https://mvnrepository.com/artifact/net.java.dev.jna/jna) (currently tested under version `5.13.0`)
+>
+> ```sh
 > curl https://repo1.maven.org/maven2/net/java/dev/jna/jna/5.13.0/jna-5.13.0.jar --output jna-5.13.0.jar
 > ```
 
 ### `direnv`
+
 Install [`direnv`](https://direnv.net/) in order to automatically load `CLASSPATH` and `JAVA_OPTS` in [`.envrc`](.envrc), so that you can run Kotlin bindgen tests from cli using the command in the bottom of this document - i.e. without having to export `CLASSPATH``.
 
 ### `pre-commit`
@@ -98,36 +102,76 @@ cargo nextest run
 ### Prerequisites
 
 #### Rust targets for iOS
+
 ```sh
 rustup target add aarch64-apple-ios aarch64-apple-ios-sim
 ```
 
 #### Rust targets (macOS)
+
 ```sh
 rustup target add aarch64-apple-darwin
 ```
 
 ### Build
+
 Find [script here](scripts/ios/build-sargon.sh)
 
 ```sh
-./scripts/build-ios.sh
+./scripts/ios/build-ios.sh
 ```
+
+## Test Swift
+
+Find [script here](scripts/ios/test.sh)
+
+### Code coverage
+
+#### Details
+
+```sh
+./scripts/ios/test.sh
+```
+
+#### Summary
+
+```sh
+./scripts/ios/test.sh --summary
+```
+
+### Test only
+
+```sh
+./scripts/ios/test.sh --testonly
+```
+
+### Export code coverage
+
+If you change `lcov` format in `export_code.cov.sh` please use an updated file name.
+
+```sh
+./scripts/ios/test.sh --codecov swift_code_cov.lcov
+```
+
+Alternatively if you wanna skip code cove
 
 ## Android
 
 ### Prerequisites
 
 #### Install `jenv`
+
 ```sh
 brew install jenv
 ```
 
 Dont forget to add to eval to zsh
+
 ```sh
 export PATH="$HOME/.jenv/bin:$PATH"
 eval "$(jenv init -)"
 ```
+
 (or similar)
 
 #### Install Java (openjdk@17)
@@ -141,32 +185,39 @@ brew install openjdk@17
 ```sh
 jenv add /opt/homebrew/Cellar/openjdk@17/17.0.10/libexec/openjdk.jdk/Contents/Home/
 ```
+
 (or similar)
 
 #### `ktlint`
+
 ```sh
 brew install ktlint
 ```
 
 #### `cargo-ndk`
+
 ```sh
 cargo install cargo-ndk
 ```
 
 #### Rust targets (Android)
+
 ```sh
 rustup target add aarch64-linux-android armv7-linux-androideabi
 ```
 
 #### Rust targets (Desktop Binaries)
+
 ```sh
 rustup target add aarch64-apple-darwin
 ```
 
 #### NDK
+
 Download the latest NDK from android studio
 
 Then make sure that you have added these in your path
+
 ```
 export ANDROID_HOME=<path-to-your-sdk>
 export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/<version>
@@ -175,12 +226,13 @@ export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/<version>
 export SDKROOT="`xcrun --show-sdk-path`"
 ```
 
-Then you can build both libraries as a usual 
+Then you can build both libraries as a usual
+
 ```sh
 cd jvm
 
 # For android library (Debug)
-./gradlew sargon-android:assembleDebug 
+./gradlew sargon-android:assembleDebug
 # For android library (Release)
 ./gradlew sargon-android:assembleRelease
 
@@ -196,7 +248,8 @@ cd jvm
 
 # Release
 
-## iOS 
+## iOS
+
 ### Locally
 
 #### Prerequisites
@@ -211,6 +264,7 @@ brew install gh
 ```
 
 ##### Github PAT
+
 Create a Github Personal Access Token (PAT) labeled "Classic" and give it these permissions:
 `write:packages`
 `admin:org -> read:org`
@@ -218,11 +272,13 @@ Create a Github Personal Access Token (PAT) labeled "Classic" and give it these 
 #### Manually release
 
 For the first time, you must:
+
 ```sh
 gh auth login
 ```
 
 Do this:
+
 ```sh
 ? What account do you want to log into? GitHub.com
 ? What is your preferred protocol for Git operations on this host? SSH
@@ -234,6 +290,7 @@ The minimum required scopes are 'repo', 'read:org'.
 ```
 
 If successful you should see:
+
 ```sh
 - gh config set -h github.com git_protocol ssh
 ✓ Configured git protocol
@@ -241,47 +298,54 @@ If successful you should see:
 ```
 
 Find [script here](scripts/ios/release.sh)
+
 ```sh
 ./scripts/ios/release.sh
 ```
 
 ### CD
+
 See [`.github/workflows/release.yml`](.github/workflows/release.yml)
 
-
 ## Android
+
 Two modules are published in [Github's maven](https://github.com/radixdlt/sargon/packages/).
 
-* `sargon-android`
-   
-   (See [`.github/workflows/release-android.yml`](.github/workflows/release-android.yml))
+- `sargon-android`
 
-   Contains the generated UniFFi Kotlin code and the runtime sargon binaries, in different architectures. It also contains the JNA dependency.
+  (See [`.github/workflows/release-android.yml`](.github/workflows/release-android.yml))
 
-   Import with:
-   ```
-   implementation("com.radixdlt.sargon:sargon-android:<version>")
-   ```
+  Contains the generated UniFFi Kotlin code and the runtime sargon binaries, in different architectures. It also contains the JNA dependency.
 
-* `sargon-desktop-bins`
-   
-   (See [`.github/workflows/release-desktop-bins.yml`](.github/workflows/release-desktop-bins.yml))
+  Import with:
 
-   Contains only the runtime sargon binaries, built for desktop. Used when running Unit tests.
-  
-   Import with:
-   ```
-   testRuntimeOnly("com.radixdlt.sargon:sargon-desktop-bins:<version>")
-   ```
+  ```
+  implementation("com.radixdlt.sargon:sargon-android:<version>")
+  ```
+
+- `sargon-desktop-bins`
+
+  (See [`.github/workflows/release-desktop-bins.yml`](.github/workflows/release-desktop-bins.yml))
+
+  Contains only the runtime sargon binaries, built for desktop. Used when running Unit tests.
+
+  Import with:
+
+  ```
+  testRuntimeOnly("com.radixdlt.sargon:sargon-desktop-bins:<version>")
+  ```
 
 > [!IMPORTANT]  
 > Currently only supporting `aarch64-apple-darwin` (apple silicon). So when running Unit tests for your client app, make sure to run them on an apple silicon machine. In the future we will try to add more target architectures.
 
 # Example apps
+
 ## iOS
+
 See iOS example app in [examples/iOS](examples/iOS)
 
 ## Android
+
 Import the `/jvm` directory in Android Studio and run the `app` configuration.
 
 [vscodeext]: https://github.com/radixdlt/radix-transaction-manifest-extension

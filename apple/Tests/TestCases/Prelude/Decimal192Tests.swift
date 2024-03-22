@@ -250,7 +250,7 @@ final class Decimal192Tests: Test<Decimal192> {
 	
 	func test_init_source_exactly() {
 		XCTAssertEqual(SUT(exactly: UInt64(12345678912345678)), 12345678912345678)
-		XCTAssertEqual(SUT(exactly: Int64(12345678912345678)), 12345678912345678)
+		XCTAssertEqual(SUT(exactly: Int64(-12345678912345678)), SUT("12345678912345678").negate())
 	}
 	
 	func test_from_and_from_formatted() {

@@ -53,7 +53,7 @@ repos:
         name: swift tests
         language: system
         types_or: [rust, swift]
-        entry: ./scripts/ios/test.sh
+        entry: ./scripts/ios/test.sh --testonly # no code coverage
         pass_filenames: false
 
       - id: kotlin tests
