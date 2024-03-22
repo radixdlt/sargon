@@ -121,33 +121,6 @@ impl TransactionManifest {
     }
 }
 
-#[uniffi::export]
-pub fn new_transaction_manifest_from_instructions_string_and_blobs(
-    instructions_string: String,
-    network_id: NetworkID,
-    blobs: Blobs,
-) -> Result<TransactionManifest> {
-    TransactionManifest::new(instructions_string, network_id, blobs)
-}
-
-#[uniffi::export]
-pub fn new_transaction_manifest_sample() -> TransactionManifest {
-    TransactionManifest::sample()
-}
-
-#[uniffi::export]
-pub fn new_transaction_manifest_sample_other() -> TransactionManifest {
-    TransactionManifest::sample_other()
-}
-
-#[uniffi::export]
-pub fn transaction_manifest_to_string(
-    manifest: &TransactionManifest,
-) -> String {
-    // FIXME add blobs
-    manifest.instructions_string()
-}
-
 impl HasSampleValues for TransactionManifest {
     fn sample() -> Self {
         TransactionManifestSecretMagic::sample().into()
@@ -338,46 +311,5 @@ mod tests {
         let manifest = SUT::sample();
         let resources = manifest.resource_addresses_to_refresh();
         assert_eq!(resources[0].address(), "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd");
-    }
-}
-
-#[cfg(test)]
-mod uniffi_tests {
-    use crate::prelude::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = TransactionManifest;
-
-    #[test]
-    fn samples() {
-        assert_eq!(new_transaction_manifest_sample(), SUT::sample());
-        assert_eq!(
-            new_transaction_manifest_sample_other(),
-            SUT::sample_other()
-        );
-    }
-
-    #[test]
-    fn to_string() {
-        assert_eq!(
-            transaction_manifest_to_string(&SUT::sample()),
-            SUT::sample().to_string()
-        );
-    }
-
-    #[test]
-    fn test_new_transaction_manifest_from_instructions_string_and_blobs() {
-        let s = new_transaction_manifest_sample().instructions_string();
-
-        assert_eq!(
-            new_transaction_manifest_from_instructions_string_and_blobs(
-                s.clone(),
-                NetworkID::Mainnet,
-                Blobs::default()
-            )
-            .unwrap()
-            .instructions_string(),
-            s
-        );
     }
 }
