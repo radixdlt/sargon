@@ -5,6 +5,8 @@ on:
   push:
     tags:
       - '**'
+    branches:
+      - develop
 
 permissions:
   id-token: write
