@@ -9,9 +9,9 @@ final class ManifestBuildingTests: XCTestCase {
 			addressOfReceivingAccount: AccountAddress.sample
 		)
 		
-		XCTAssert(manifest.instructionsString.contains("CALL_METHOD"))
-		XCTAssert(manifest.instructionsString.contains(AccountAddress.sample.description))
-		XCTAssert(manifest.instructionsString.contains("lock_fee"))
+		XCTAssert(manifest.description.contains("CALL_METHOD"))
+		XCTAssert(manifest.description.contains(AccountAddress.sample.description))
+		XCTAssert(manifest.description.contains("lock_fee"))
 	}
 	
 	func test_manifest_for_faucet_without_lock_fee() {
@@ -21,17 +21,17 @@ final class ManifestBuildingTests: XCTestCase {
 			addressOfReceivingAccount: AccountAddress.sampleOther
 		)
 		
-		XCTAssert(manifest.instructionsString.contains("CALL_METHOD"))
-		XCTAssert(manifest.instructionsString.contains(AccountAddress.sampleOther.description))
-		XCTAssertFalse(manifest.instructionsString.contains("lock_fee"))
+		XCTAssert(manifest.description.contains("CALL_METHOD"))
+		XCTAssert(manifest.description.contains(AccountAddress.sampleOther.description))
+		XCTAssertFalse(manifest.description.contains("lock_fee"))
 	}
 	
     func test_manifest_set_owner_keys_hashes() {
         func doTest(_ address: AddressOfAccountOrPersona, keyHashes: [PublicKeyHash]) {
             let manifest = manifestSetOwnerKeysHashes(addressOfAccountOrPersona: address, ownerKeyHashes: keyHashes)
-            XCTAssert(manifest.instructionsString.contains(address.description))
-            XCTAssert(manifest.instructionsString.contains("SET_METADATA"))
-            XCTAssert(manifest.instructionsString.contains("owner_keys"))
+            XCTAssert(manifest.description.contains(address.description))
+            XCTAssert(manifest.description.contains("SET_METADATA"))
+            XCTAssert(manifest.description.contains("owner_keys"))
         }
         
         AddressOfAccountOrPersona.allCases.forEach {
@@ -57,7 +57,7 @@ final class ManifestBuildingTests: XCTestCase {
                 metadata: metadata
             )
             func oneOf(_ needle: String, line: UInt = #line) {
-                XCTAssertEqual(manifest.instructionsString.ranges(of: needle).count, 1, line: line)
+                XCTAssertEqual(manifest.description.ranges(of: needle).count, 1, line: line)
             }
             func oneIn<P: CustomStringConvertible>(metadata keyPath: KeyPath<TokenDefinitionMetadata, P>, line: UInt = #line) {
                 let property = metadata[keyPath: keyPath]
@@ -75,7 +75,7 @@ final class ManifestBuildingTests: XCTestCase {
     func test_create_multiple_fungible_tokens() {
         func doTest(_ accountAddress: AccountAddress) {
             let manifest = manifestCreateMultipleFungibleTokens(addressOfOwner: accountAddress)
-            XCTAssertEqual(manifest.instructionsString.ranges(of: "symbol").count, 25)
+            XCTAssertEqual(manifest.description.ranges(of: "symbol").count, 25)
         }
         [
             AccountAddress.sampleStokenet,
@@ -86,9 +86,9 @@ final class ManifestBuildingTests: XCTestCase {
 	func test_manifest_marking_account_as_dapp_definition_type() {
 		func doTest(_ accountAddress: AccountAddress) {
 			let manifest = manifestMarkingAccountAsDappDefinitionType(accountAddress: accountAddress)
-			XCTAssert(manifest.instructionsString.contains(accountAddress.description))
-			XCTAssert(manifest.instructionsString.contains("SET_METADATA"))
-			XCTAssert(manifest.instructionsString.contains("dapp definition"))
+			XCTAssert(manifest.description.contains(accountAddress.description))
+			XCTAssert(manifest.description.contains("SET_METADATA"))
+			XCTAssert(manifest.description.contains("dapp definition"))
 		}
 		AccountAddress.allCases.forEach(doTest)
 	}

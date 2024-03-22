@@ -11,13 +11,13 @@ final class TransactionManifestTests: Test<TransactionManifest> {
 		
 		let manifest = TransactionManifest.sample
 		
-		XCTAssert(manifest.networkID == .mainnet)
+		XCTAssertEqual(manifest.networkID, .mainnet)
 	}
 
     func test_manifest_blobs() {
 		
 		let manifest = TransactionManifest.sample
 		
-		XCTAssert(manifest.blobs == newBlobsFromBlobList(blobs: []))
+		XCTAssertEqual(manifest.blobs, newBlobsFromBlobList(blobs: []))
 	}
 }

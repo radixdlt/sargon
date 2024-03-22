@@ -1,3 +1,7 @@
+extension TransactionManifest: CustomStringConvertible {
+	public var description: String { instructionsString }
+}
+
 extension TransactionManifest {
 
 	public var instructionsString: String {
