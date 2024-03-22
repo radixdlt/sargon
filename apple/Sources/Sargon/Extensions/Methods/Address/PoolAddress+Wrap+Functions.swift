@@ -18,3 +18,14 @@ extension PoolAddress: AddressProtocol {
 		poolAddressKind(address: self)
 	}
 }
+
+#if DEBUG
+extension PoolAddress {
+	public func embed() -> Address {
+		.pool(self)
+	}
+	public func mapTo(networkID: NetworkID) -> Self {
+		poolAddressMapToNetwork(address: self, networkId: networkID)
+	}
+}
+#endif // DEBUG

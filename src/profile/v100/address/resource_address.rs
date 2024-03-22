@@ -226,6 +226,61 @@ mod tests {
     }
 
     #[test]
+    fn map_to_network() {
+        assert_eq!(
+            SUT::sample_mainnet_xrd().map_to_network(NetworkID::Mainnet),
+            SUT::sample_mainnet_xrd()
+        ); // self
+        assert_eq!(
+            SUT::sample_stokenet_xrd().map_to_network(NetworkID::Stokenet),
+            SUT::sample_stokenet_xrd()
+        ); // self
+        assert_eq!(
+            SUT::sample_sim_xrd().map_to_network(NetworkID::Simulator),
+            SUT::sample_sim_xrd()
+        ); // self
+
+        // From Mainnet
+        assert_eq!(
+            SUT::sample_mainnet_xrd().map_to_network(NetworkID::Stokenet),
+            SUT::sample_stokenet_xrd()
+        );
+        assert_eq!(
+            SUT::sample_mainnet_xrd().map_to_network(NetworkID::Simulator),
+            SUT::sample_sim_xrd()
+        );
+
+        // From Stokenet
+        assert_eq!(
+            SUT::sample_stokenet_xrd().map_to_network(NetworkID::Mainnet),
+            SUT::sample_mainnet_xrd()
+        );
+        assert_eq!(
+            SUT::sample_stokenet_xrd().map_to_network(NetworkID::Simulator),
+            SUT::sample_sim_xrd()
+        );
+
+        // From Sim
+        assert_eq!(
+            SUT::sample_sim_xrd().map_to_network(NetworkID::Stokenet),
+            SUT::sample_stokenet_xrd()
+        );
+        assert_eq!(
+            SUT::sample_sim_xrd().map_to_network(NetworkID::Mainnet),
+            SUT::sample_mainnet_xrd()
+        );
+
+        // UniFFI exported func
+        assert_eq!(
+            resource_address_map_to_network(
+                &SUT::sample_mainnet_xrd(),
+                NetworkID::Stokenet
+            ),
+            SUT::sample_stokenet_xrd()
+        );
+    }
+
+    #[test]
     fn hash() {
         assert_eq!(
             HashSet::<SUT>::from_iter([

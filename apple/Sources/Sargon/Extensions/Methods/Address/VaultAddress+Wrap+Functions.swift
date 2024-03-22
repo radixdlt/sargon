@@ -22,3 +22,14 @@ extension VaultAddress: AddressProtocol {
 		vaultAddressIsNonFungible(address: self)
 	}
 }
+
+#if DEBUG
+extension VaultAddress {
+	public func embed() -> Address {
+		.vault(self)
+	}
+	public func mapTo(networkID: NetworkID) -> Self {
+		vaultAddressMapToNetwork(address: self, networkId: networkID)
+	}
+}
+#endif // DEBUG

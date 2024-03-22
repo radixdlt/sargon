@@ -14,3 +14,16 @@ extension AddressOfAccountOrPersona {
 	}
 }
 
+#if DEBUG
+extension AddressOfAccountOrPersona {
+	public func embed() -> Address {
+		switch self {
+		case let .account(accountAddress): return Address.account(accountAddress)
+		case let .persona(identityAddress): return Address.identity(identityAddress)
+		}
+	}
+	public func mapTo(networkID: NetworkID) -> Self {
+		addressOfAccountOrPersonaMapToNetwork(address: self, networkId: networkID)
+	}
+}
+#endif // DEBUG

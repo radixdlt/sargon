@@ -49,6 +49,16 @@ pub fn address_of_account_or_persona_network_id(
     address.network_id()
 }
 
+/// Returns a new address, with the same node_id, but using `network_id` as
+/// network.
+#[uniffi::export]
+pub fn address_of_account_or_persona_map_to_network(
+    address: &AddressOfAccountOrPersona,
+    network_id: NetworkID,
+) -> AddressOfAccountOrPersona {
+    address.map_to_network(network_id)
+}
+
 #[cfg(test)]
 mod uniffi_tests {
     use super::*;
@@ -96,6 +106,17 @@ mod uniffi_tests {
             ])
             .len(),
             4
+        );
+    }
+
+    #[test]
+    fn map_to_network() {
+        let to = NetworkID::Stokenet;
+        assert_eq!(
+            address_of_account_or_persona_map_to_network(&SUT::sample(), to),
+            SUT::Account {
+                address: AccountAddress::sample_mainnet().map_to_network(to)
+            }
         );
     }
 }

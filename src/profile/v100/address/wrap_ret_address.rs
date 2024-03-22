@@ -56,6 +56,14 @@ macro_rules! decl_ret_wrapped_address {
                 [< $address_type:camel Address >]::try_from_bech32(&bech32)
             }
 
+
+            /// Returns a new address, with the same node_id, but using `network_id` as
+            /// network.
+            #[uniffi::export]
+            pub fn [<$address_type:snake _address_map_to_network>](address: &[< $address_type:camel Address >], network_id: NetworkID) -> [< $address_type:camel Address >] {
+                address.map_to_network(network_id)
+            }
+
             #[uniffi::export]
             pub fn [<$address_type:snake _address_network_id>](address: &[< $address_type:camel Address >]) -> NetworkID {
                 address.network_id()
@@ -130,6 +138,15 @@ macro_rules! decl_ret_wrapped_address {
                     self.secret_magic.node_id()
                 }
 
+                /// Returns a new address, with the same node_id, but using `network_id` as
+                /// network.
+                pub fn map_to_network(&self, network_id: NetworkID) -> Self {
+                    if network_id == self.network_id() {
+                        return *self
+                    }
+                    <Self as AddressViaRet>::new(self.node_id(), network_id).expect("Should always be able to map an address to a different network.")
+                }
+
                 pub fn address(&self) -> String {
                     self.to_string()
                 }
@@ -160,6 +177,20 @@ macro_rules! decl_ret_wrapped_address {
                 }
             }
 
+            #[cfg(test)]
+            mod [<uniffi_tests_of_ $address_type:snake>] {
+                use super::*;
+
+                #[allow(clippy::upper_case_acronyms)]
+                type SUT = [< $address_type:camel Address >];
+
+                #[test]
+                fn map_to_network() {
+                    let sut = SUT::sample();
+                    assert_eq!([<$address_type:snake _address_map_to_network>](&sut, sut.network_id()), sut); // unchanged
+                }
+            }
+
             impl IntoScryptoAddress for [< $address_type:camel Address >] {
                 fn scrypto(&self) -> ScryptoGlobalAddress {
                     ScryptoGlobalAddress::try_from(self.node_id())
@@ -184,6 +215,8 @@ macro_rules! decl_ret_wrapped_address {
                     })
                     .map(|i| [< $address_type:camel Address >]::from(i))
                 }
+
+
             }
 
             impl TryInto<ScryptoDynamicGlobalAddress> for &[< $address_type:camel Address >] {

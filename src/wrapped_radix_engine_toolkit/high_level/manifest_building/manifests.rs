@@ -70,6 +70,14 @@ impl TransactionManifest {
     ) -> Self {
         let account_address = owner;
         let network_id = account_address.network_id();
+        if stake_claims
+            .clone()
+            .into_iter()
+            .map(|c| c.validator_address.network_id())
+            .any(|n| n != network_id)
+        {
+            warn!("ValidatorAddress of stake are not on the same network as 'owner' (AccountAddress), the ValidatorAddresses will automatically be switch to the network of owner: {network_id}")
+        }
         let xrd_address = &ResourceAddress::xrd_on_network(network_id);
 
         let mut builder = ScryptoManifestBuilder::new();
@@ -277,6 +285,45 @@ mod tests {
             Bucket("bucket4")
         ;
             "#,
+        );
+    }
+
+    #[test]
+    fn manifest_builder_switches_network_of_validators_to_that_of_account_address(
+    ) {
+        let stake_claim = StakeClaim::sample();
+        let validator_address = stake_claim.validator_address;
+        let owner_address = AccountAddress::sample_stokenet();
+
+        // The network of Validator address and owner address are different!
+        // However, when Scrypto builds manifest, it is network agnostic!
+        // and we have setup our builder to always use the network of
+        // the "owner" (AccountAddress)!
+        assert_ne!(validator_address.network_id(), owner_address.network_id());
+
+        let stake_claims = vec![stake_claim];
+        let manifest = SUT::stake_claims(&owner_address, stake_claims);
+
+        // This might be surprising! The built manifest does NOT contain
+        // the specified validator address, it is because the network id
+        // (of the ValidatorAddress) has changed from mainnet to stokenet,
+        // since the account address is on stokenet!
+        assert_eq!(
+            manifest
+                .instructions_string()
+                .contains(&validator_address.address()),
+            false
+        );
+
+        // However, if we map the validator_address -> same network as owner
+        // THAT address should indeed be present!
+        assert_eq!(
+            manifest.instructions_string().contains(
+                &validator_address
+                    .map_to_network(owner_address.network_id())
+                    .address()
+            ),
+            true,
         );
     }
 }

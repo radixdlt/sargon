@@ -4,6 +4,8 @@ public protocol AddressProtocol: SargonModel, CustomStringConvertible, CaseItera
 	var address: String { get }
 	
 #if DEBUG
+	func embed() -> Address
+	func mapTo(networkID: NetworkID) -> Self
 	static var sampleMainnet: Self { get }
 	static var sampleMainnetOther: Self { get }
 	static var sampleStokenet: Self { get }
@@ -36,5 +38,11 @@ extension AddressProtocol where Self: CaseIterable, AllCases == [Self] {
 extension AddressProtocol {
 	public var description: String {
 		address
+	}
+	
+	/// Returns the`ResourceAddress` of `XRD` on the same network
+	/// as this address.
+	public var xrd: ResourceAddress {
+		ResourceAddress.xrd(on: networkID)
 	}
 }

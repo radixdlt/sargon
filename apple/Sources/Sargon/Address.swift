@@ -20,6 +20,25 @@ public enum Address: Hashable, Equatable, Sendable {
 }
 extension Address: AddressProtocol {
 	
+	public func embed() -> Address {
+		self
+	}
+	
+	public func mapTo(networkID: NetworkID) -> Address {
+		switch self {
+		case let .accesscontroller(address): address.mapTo(networkID: networkID).embed()
+		case let .account(address): address.mapTo(networkID: networkID).embed()
+		case let .component(address): address.mapTo(networkID: networkID).embed()
+		case let .identity(address): address.mapTo(networkID: networkID).embed()
+		case let .package(address): address.mapTo(networkID: networkID).embed()
+		case let .pool(address): address.mapTo(networkID: networkID).embed()
+		case let .resource(address): address.mapTo(networkID: networkID).embed()
+		case let .nonFungibleResource(address): address.mapTo(networkID: networkID).embed()
+		case let .validator(address): address.mapTo(networkID: networkID).embed()
+		case let .vault(address): address.mapTo(networkID: networkID).embed()
+		}
+	}
+	
 	public static let sampleMainnet = Self.account(.sampleMainnet)
 	public static let sampleMainnetOther = Self.resource(.sampleMainnetOther)
 	public static let sampleStokenet = Self.account(.sampleStokenet)
@@ -95,16 +114,16 @@ extension Address: CaseIterable {
 		var addresses: [Self] = []
 		
 		// Using `+` operator results in Swift compiler dying.
-		addresses.append(contentsOf: AccountAddress.allCases.map(Self.account))
-		addresses.append(contentsOf: AccessControllerAddress.allCases.map(Self.accesscontroller))
-		addresses.append(contentsOf: ComponentAddress.allCases.map(Self.component))
-		addresses.append(contentsOf: IdentityAddress.allCases.map(Self.identity))
-		addresses.append(contentsOf: PackageAddress.allCases.map(Self.package))
-		addresses.append(contentsOf: PoolAddress.allCases.map(Self.pool))
-		addresses.append(contentsOf: ResourceAddress.allCases.map(Self.resource))
-		addresses.append(contentsOf: NonFungibleResourceAddress.allCases.map(Self.nonFungibleResource))
-		addresses.append(contentsOf: ValidatorAddress.allCases.map(Self.validator))
-		addresses.append(contentsOf: VaultAddress.allCases.map(Self.vault))
+		addresses.append(contentsOf: AccountAddress.allCases.map({ $0.embed() }))
+		addresses.append(contentsOf: AccessControllerAddress.allCases.map({ $0.embed() }))
+		addresses.append(contentsOf: ComponentAddress.allCases.map({ $0.embed() }))
+		addresses.append(contentsOf: IdentityAddress.allCases.map({ $0.embed() }))
+		addresses.append(contentsOf: PackageAddress.allCases.map({ $0.embed() }))
+		addresses.append(contentsOf: PoolAddress.allCases.map({ $0.embed() }))
+		addresses.append(contentsOf: ResourceAddress.allCases.map({ $0.embed() }))
+		addresses.append(contentsOf: NonFungibleResourceAddress.allCases.map({ $0.embed() }))
+		addresses.append(contentsOf: ValidatorAddress.allCases.map({ $0.embed() }))
+		addresses.append(contentsOf: VaultAddress.allCases.map({ $0.embed() }))
 		
 		return addresses
 	}

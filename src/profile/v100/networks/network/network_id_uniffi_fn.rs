@@ -15,6 +15,11 @@ pub fn network_id_discriminant(id: NetworkID) -> u8 {
     id.discriminant()
 }
 
+#[uniffi::export]
+pub fn network_ids_all() -> Vec<NetworkID> {
+    NetworkID::all()
+}
+
 #[cfg(test)]
 mod uniffi_tests {
     use super::*;
@@ -36,5 +41,10 @@ mod uniffi_tests {
     fn test_network_id_discriminant() {
         assert_eq!(network_id_discriminant(SUT::Mainnet), 1);
         assert_eq!(network_id_discriminant(SUT::Stokenet), 2);
+    }
+
+    #[test]
+    fn all() {
+        assert_eq!(network_ids_all().len(), 12);
     }
 }

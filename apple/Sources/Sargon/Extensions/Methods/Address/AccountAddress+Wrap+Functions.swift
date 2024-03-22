@@ -48,3 +48,14 @@ extension AccountAddress: EntityAddressProtocol {
 		accountAddressToShort(address: self)
 	}
 }
+
+#if DEBUG
+extension AccountAddress {
+	public func embed() -> Address {
+		.account(self)
+	}
+	public func mapTo(networkID: NetworkID) -> Self {
+		accountAddressMapToNetwork(address: self, networkId: networkID)
+	}
+}
+#endif // DEBUG

@@ -19,6 +19,13 @@ class AddressTest<SUT_: AddressProtocol>: Test<SUT_> {
 	func test_all_address_different() {
 		XCTAssertGreaterThanOrEqual(Set(SUT.allCases).count, 4)
 	}
+	
+	func test_xrd_on_same_network_as_address() {
+		XCTAssertEqual(SUT.sampleMainnet.xrd, ResourceAddress.sampleMainnetXRD)
+		XCTAssertEqual(SUT.sampleMainnetOther.xrd, ResourceAddress.sampleMainnetXRD)
+		XCTAssertEqual(SUT.sampleStokenet.xrd, ResourceAddress.sampleStokenetXRD)
+		XCTAssertEqual(SUT.sampleStokenetOther.xrd, ResourceAddress.sampleStokenetXRD)
+	}
 
 	func test_bech32_roundtrip() throws {
 		func doTest(_ address: SUT) throws {
@@ -37,6 +44,48 @@ class AddressTest<SUT_: AddressProtocol>: Test<SUT_> {
 				address.description,
 				address.address
 			)
+		}
+		
+		SUT.allCases.forEach(doTest)
+	}
+	
+	func test_embed() {
+		func doTest(_ address: SUT) {
+			XCTAssertNoDifference(
+				address.embed().address,
+				address.address
+			)
+			
+			XCTAssertNoDifference(
+				address.embed().networkID,
+				address.networkID
+			)
+		}
+		
+		SUT.allCases.forEach(doTest)
+	}
+	
+	func test_map_to_same_network_does_not_change() {
+		func doTest(_ address: SUT) {
+			XCTAssertNoDifference(
+				address.mapTo(networkID: address.networkID),
+				address
+			)
+		}
+		
+		SUT.allCases.forEach(doTest)
+	}
+	
+	
+	func test_map_to_other_networks() {
+		func doTest(_ address: SUT) {
+			NetworkID.allCases.forEach {
+				let addressMapped = address.mapTo(networkID: $0)
+				XCTAssertEqual(addressMapped.networkID, $0)
+				if address.networkID != $0 {
+					XCTAssertNotEqual(addressMapped, address)
+				}
+			}
 		}
 		
 		SUT.allCases.forEach(doTest)
