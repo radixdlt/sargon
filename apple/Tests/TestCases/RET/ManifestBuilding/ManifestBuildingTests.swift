@@ -1,10 +1,10 @@
 import RegexBuilder
 
-final class ManifestBuildingTests: TestCase {
+final class ManifestBuildingTests: Test<TransactionManifest> {
 	
 	func test_manifest_for_faucet_with_lock_fee() {
 		
-		let manifest = manifestForFaucet(
+        let manifest = SUT.faucet(
 			includeLockFeeInstruction: true,
 			addressOfReceivingAccount: AccountAddress.sample
 		)
@@ -16,7 +16,7 @@ final class ManifestBuildingTests: TestCase {
 
 	func test_manifest_for_faucet_without_lock_fee() {
 		
-		let manifest = manifestForFaucet(
+        let manifest = SUT.faucet(
 			includeLockFeeInstruction: false,
 			addressOfReceivingAccount: AccountAddress.sampleOther
 		)
@@ -29,7 +29,7 @@ final class ManifestBuildingTests: TestCase {
 	
 	func test_manifest_marking_account_as_dapp_definition_type() {
 		func doTest(_ accountAddress: AccountAddress) {
-			let manifest = manifestMarkingAccountAsDappDefinitionType(accountAddress: accountAddress)
+            let manifest = SUT.markingAccountAsDappDefinitionType(accountAddress: accountAddress)
 			XCTAssert(manifest.description.contains(accountAddress.description))
 			XCTAssert(manifest.description.contains("SET_METADATA"))
 			XCTAssert(manifest.description.contains("dapp definition"))
@@ -40,7 +40,7 @@ final class ManifestBuildingTests: TestCase {
 	
     func test_manifest_set_owner_keys_hashes() {
         func doTest(_ address: AddressOfAccountOrPersona, keyHashes: [PublicKeyHash]) {
-            let manifest = manifestSetOwnerKeysHashes(addressOfAccountOrPersona: address, ownerKeyHashes: keyHashes)
+            let manifest = SUT.setOwnerKeys(addressOfAccountOrPersona: address, ownerKeyHashes: keyHashes)
             XCTAssert(manifest.description.contains(address.description))
             XCTAssert(manifest.description.contains("SET_METADATA"))
             XCTAssert(manifest.description.contains("owner_keys"))
@@ -63,7 +63,7 @@ final class ManifestBuildingTests: TestCase {
                 tags: ["swift test"]
             )
             let initialSupply: Decimal192 = .pi
-            let manifest = manifestCreateFungibleTokenWithMetadata(
+            let manifest = SUT.createFungibleTokenWithMetadata(
                 addressOfOwner: accountAddress,
                 initialSupply: initialSupply,
                 metadata: metadata
@@ -86,8 +86,10 @@ final class ManifestBuildingTests: TestCase {
 	
 	func test_create_single_fungible_token() {
 		func doTest(_ accountAddress: AccountAddress) {
-			let manifest = manifestCreateFungibleToken(addressOfOwner: accountAddress)
-			XCTAssertEqual(manifest.description.ranges(of: "Stella").count, 1)
+            
+            let manifest = SUT.createFungibleToken(addressOfOwner: accountAddress)
+			
+            XCTAssertEqual(manifest.description.ranges(of: "Stella").count, 1)
 			XCTAssertEqual(manifest.description.ranges(of: "STAR").count, 1)
 			XCTAssertEqual(manifest.description.ranges(of: "The brightest component in the Radix ecosystem.").count, 1)
 			XCTAssert(manifest.description.contains(accountAddress.address))
@@ -97,7 +99,7 @@ final class ManifestBuildingTests: TestCase {
 
     func test_create_multiple_fungible_tokens() {
         func doTest(_ accountAddress: AccountAddress) {
-            let manifest = manifestCreateMultipleFungibleTokens(addressOfOwner: accountAddress)
+            let manifest = SUT.createMultipleFungibleTokens(addressOfOwner: accountAddress)
             XCTAssertEqual(manifest.description.ranges(of: "symbol").count, 25)
 			XCTAssert(manifest.description.contains(accountAddress.address))
         }
@@ -110,7 +112,7 @@ final class ManifestBuildingTests: TestCase {
 	
 	func test_create_single_nft_collection() {
 		func doTest(_ accountAddress: AccountAddress) {
-			let manifest = manifestCreateNonFungibleToken(addressOfOwner: accountAddress)
+            let manifest = SUT.createNonFungibleToken(addressOfOwner: accountAddress)
 			XCTAssertEqual(manifest.description.ranges(of: "An amazingly innovative and rare NFT collection").count, 1)
 			XCTAssertEqual(manifest.description.ranges(of: "nf-number").count, 20)
 			XCTAssert(manifest.description.contains(accountAddress.address))
@@ -120,7 +122,7 @@ final class ManifestBuildingTests: TestCase {
 
 	func test_create_multiple_nft_collection() {
 		func doTest(_ accountAddress: AccountAddress) {
-			let manifest = manifestCreateMultipleNonFungibleTokens(addressOfOwner: accountAddress)
+            let manifest = SUT.createMultipleNonFungibleTokens(addressOfOwner: accountAddress)
 			let collections = 15
 			let nftsPerCollection = 10
 			XCTAssertEqual(manifest.description.ranges(of: "An amazingly innovative and rare NFT collection").count, collections)
@@ -132,7 +134,7 @@ final class ManifestBuildingTests: TestCase {
 	
 	func test_stakes_claim() {
 		func doTest(_ accountAddress: AccountAddress) {
-			let manifest = manifestStakesClaim(accountAddress: accountAddress, stakeClaims: StakeClaim.allCases)
+            let manifest = SUT.stakesClaim(accountAddress: accountAddress, stakeClaims: StakeClaim.allCases)
 			XCTAssertEqual(manifest.description.ranges(of: StakeClaim.sample.validatorAddress.mapTo(networkID: accountAddress.networkID).address).count, 1)
 			XCTAssertEqual(manifest.description.ranges(of: accountAddress.xrd.address).count, 2)
 			XCTAssert(manifest.description.contains(accountAddress.address))
@@ -140,4 +142,22 @@ final class ManifestBuildingTests: TestCase {
 		
 		AccountAddress.allCases.forEach(doTest)
 	}
+    
+    func test_update_third_party_deposits() {
+        func doTest(_ accountAddress: AccountAddress) {
+            let manifest = SUT.thirdPartyDepositUpdate(
+                accountAddress: accountAddress,
+                from: .sample,
+                to: .sampleOther
+            )
+            XCTAssert(manifest.description.contains(accountAddress.address))
+            XCTAssertEqual(manifest.description.ranges(of: ";").count, 3) // 3 instructions
+        }
+        AccountAddress.allCases.forEach(doTest)
+    }
+    
+    func test_modify_manifest_add_lock_fee() {
+        XCTAssertFalse(SUT.sample.description.contains("lock_fee"))
+    }
 }
+

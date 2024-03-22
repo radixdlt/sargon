@@ -17,6 +17,12 @@ pub fn new_decimal_from_formatted_string(
     Decimal192::new_with_formatted_string(formatted_string, locale)
 }
 
+/// The standard transaction fee
+#[uniffi::export]
+pub fn transaction_fee_preset() -> Decimal192 {
+    Decimal192::transaction_fee_preset()
+}
+
 /// Creates a new `Decimal192` from a u32 integer.
 #[uniffi::export]
 pub fn new_decimal_from_u32(value: u32) -> Decimal192 {
@@ -438,6 +444,14 @@ mod uniffi_tests {
         assert_eq!(
             decimal_max().to_string(),
             "3138550867693340381917894711603833208051.177722232017256447"
+        );
+    }
+
+    #[test]
+    fn transaction_fee_preset_value() {
+        assert_eq!(
+            Decimal192::transaction_fee_preset(),
+            transaction_fee_preset()
         );
     }
 
