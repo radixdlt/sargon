@@ -10,7 +10,7 @@ import com.radixdlt.sargon.newNonFungibleLocalIdString
 import com.radixdlt.sargon.nonFungibleLocalIdAsStr
 
 @Throws(SargonException::class)
-fun NonFungibleLocalId.Companion.from(localId: String): NonFungibleLocalId =
+fun NonFungibleLocalId.Companion.init(localId: String): NonFungibleLocalId =
     newNonFungibleLocalIdFromString(localId = localId)
 
 @Throws(SargonException::class)
