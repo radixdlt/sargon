@@ -2,7 +2,7 @@ fail_fast: true
 
 repos:
   - repo: https://github.com/crate-ci/typos
-    rev: v1.17.2
+    rev: v1.19.0
     hooks:
       - id: typos
   - repo: local

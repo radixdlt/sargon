@@ -102,6 +102,7 @@ impl NetworkID {
         self.network_definition().logical_name
     }
 
+    /// Returns collection of all by Sargon known network ids.
     pub fn all() -> Vec<Self> {
         all::<Self>().collect()
     }

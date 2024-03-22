@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.assertDoesNotThrow
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Locale
@@ -152,12 +153,16 @@ class Decimal192Test: SampleTestable<Decimal192> {
         }
 
         assertEquals(
-            Decimal192.init(usFormat.format(PI)),
+            Decimal192.init(usFormat.format(PI), DecimalFormatSymbols(Locale.US)),
             Decimal192.init(greekFormat.format(PI), DecimalFormatSymbols(Locale.forLanguageTag("el")))
         )
 
         assertThrows<CommonException.DecimalException> {
             greekFormat.format(PI).toDecimal192()
+        }
+        
+        assertDoesNotThrow {
+            Decimal192.init(DecimalFormat().format(PI))
         }
     }
 
