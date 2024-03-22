@@ -19,3 +19,14 @@ extension IdentityAddress: EntityAddressProtocol {
 		identityAddressNetworkId(address: self)
 	}
 }
+
+#if DEBUG
+extension IdentityAddress {
+	public func embed() -> Address {
+		.identity(self)
+	}
+	public func mapTo(networkID: NetworkID) -> Self {
+		identityAddressMapToNetwork(address: self, networkId: networkID)
+	}
+}
+#endif // DEBUG

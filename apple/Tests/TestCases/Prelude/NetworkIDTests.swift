@@ -10,4 +10,8 @@ final class NetworkIDTests: Test<NetworkID> {
 	func test_description() {
 		XCTAssertNoDifference(SUT.mainnet.description, "mainnet")
 	}
+	
+	func test_network_id_all_cases_is_12() {
+		XCTAssertEqual(SUT.allCases.count, 12)
+	}
 }

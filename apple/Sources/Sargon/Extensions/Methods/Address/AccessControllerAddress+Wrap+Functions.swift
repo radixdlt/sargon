@@ -12,3 +12,14 @@ extension AccessControllerAddress: AddressProtocol {
 		accessControllerAddressNetworkId(address: self)
 	}
 }
+
+#if DEBUG
+extension AccessControllerAddress {
+	public func embed() -> Address {
+		.accesscontroller(self)
+	}
+	public func mapTo(networkID: NetworkID) -> Self {
+		accessControllerAddressMapToNetwork(address: self, networkId: networkID)
+	}
+}
+#endif // DEBUG

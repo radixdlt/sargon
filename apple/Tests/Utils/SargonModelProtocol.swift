@@ -3,12 +3,14 @@
 @_exported import XCTest
 @_exported import CustomDump
 
-class Test<SUT_: SargonModel>: XCTestCase {
-	typealias SUT = SUT_
-	
+class TestCase: XCTestCase {
 	override func setUp() {
 		self.continueAfterFailure = false
 	}
+}
+
+class Test<SUT_: SargonModel>: TestCase {
+	typealias SUT = SUT_
 	
 	func test_equality() throws {
 		XCTAssertNoDifference(SUT.sample, SUT.sample)

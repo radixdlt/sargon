@@ -12,3 +12,14 @@ extension ComponentAddress: AddressProtocol {
 		componentAddressNetworkId(address: self)
 	}
 }
+
+#if DEBUG
+extension ComponentAddress {
+	public func embed() -> Address {
+		.component(self)
+	}
+	public func mapTo(networkID: NetworkID) -> Self {
+		componentAddressMapToNetwork(address: self, networkId: networkID)
+	}
+}
+#endif // DEBUG

@@ -20,6 +20,19 @@ impl AddressOfAccountOrPersona {
                 bad_value: s.to_owned(),
             })
     }
+
+    /// Returns a new address, with the same node_id, but using `network_id` as
+    /// network.
+    pub fn map_to_network(&self, network_id: NetworkID) -> Self {
+        match self {
+            AddressOfAccountOrPersona::Account { address } => {
+                address.map_to_network(network_id).into()
+            }
+            AddressOfAccountOrPersona::Persona { address } => {
+                address.map_to_network(network_id).into()
+            }
+        }
+    }
 }
 
 impl From<AccountAddress> for AddressOfAccountOrPersona {
@@ -105,6 +118,23 @@ mod tests {
     fn network_id() {
         assert_eq!(SUT::sample().network_id(), NetworkID::Mainnet);
         assert_eq!(SUT::sample_other().network_id(), NetworkID::Mainnet);
+    }
+
+    #[test]
+    fn map_to_network() {
+        let to = NetworkID::Stokenet;
+        assert_eq!(
+            SUT::sample().map_to_network(to),
+            SUT::Account {
+                address: AccountAddress::sample_mainnet().map_to_network(to)
+            }
+        );
+        assert_eq!(
+            SUT::sample_other().map_to_network(to),
+            SUT::Persona {
+                address: IdentityAddress::sample_mainnet().map_to_network(to)
+            }
+        );
     }
 
     #[test]

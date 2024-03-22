@@ -12,3 +12,14 @@ extension ValidatorAddress: AddressProtocol {
 		validatorAddressNetworkId(address: self)
 	}
 }
+
+#if DEBUG
+extension ValidatorAddress {
+	public func embed() -> Address {
+		.validator(self)
+	}
+	public func mapTo(networkID: NetworkID) -> Self {
+		validatorAddressMapToNetwork(address: self, networkId: networkID)
+	}
+}
+#endif // DEBUG

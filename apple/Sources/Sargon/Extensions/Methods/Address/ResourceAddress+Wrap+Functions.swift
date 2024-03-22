@@ -21,4 +21,20 @@ extension ResourceAddress: AddressProtocol {
 	public var isNonFungible: Bool {
 		resourceAddressIsNonFungible(address: self)
 	}
+	
+	/// Returns the XRD resource on network identified by `networkID`.
+	public static func xrd(on networkID: NetworkID) -> Self {
+		xrdAddressOfNetwork(networkId: networkID)
+	}
 }
+
+#if DEBUG
+extension ResourceAddress {
+	public func embed() -> Address {
+		.resource(self)
+	}
+	public func mapTo(networkID: NetworkID) -> Self {
+		resourceAddressMapToNetwork(address: self, networkId: networkID)
+	}
+}
+#endif // DEBUG

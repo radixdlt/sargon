@@ -1,6 +1,6 @@
 # Sargon
 
-[![codecov](https://codecov.io/github/radixdlt/Sargon/graph/badge.svg?token=EQYDU0XPMX)](https://codecov.io/github/radixdlt/Sargon)
+[![codecov](https://codecov.io/gh/radixdlt/Sargon/graph/badge.svg?token=8QPKIUSAQD)](https://codecov.io/github/radixdlt/Sargon)
 
 **Sargon is library for sharing code between Radix iOS/Android wallets.**
 

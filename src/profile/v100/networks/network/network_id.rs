@@ -101,6 +101,11 @@ impl NetworkID {
     pub fn logical_name(&self) -> String {
         self.network_definition().logical_name
     }
+
+    /// Returns collection of all by Sargon known network ids.
+    pub fn all() -> Vec<Self> {
+        all::<Self>().collect()
+    }
 }
 
 impl TryFrom<u8> for NetworkID {
@@ -249,7 +254,7 @@ mod tests {
 
     #[test]
     fn no_mixup() {
-        let ids = all::<SUT>().collect::<Vec<SUT>>();
+        let ids = SUT::all();
         assert_eq!(
             BTreeSet::from_iter(ids.iter().map(|id| id.logical_name())).len(),
             ids.len()

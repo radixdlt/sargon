@@ -12,3 +12,17 @@ extension NonFungibleResourceAddress: AddressProtocol {
 		nonFungibleResourceAddressNetworkId(address: self)
 	}
 }
+
+#if DEBUG
+extension NonFungibleResourceAddress {
+	
+	public func embed() -> Address {
+		.nonFungibleResource(self)
+	}
+	
+	public func mapTo(networkID: NetworkID) -> Self {
+		nonFungibleResourceAddressMapToNetwork(address: self, networkId: networkID)
+	}
+	
+}
+#endif // DEBUG

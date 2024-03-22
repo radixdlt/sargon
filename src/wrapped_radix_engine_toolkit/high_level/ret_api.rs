@@ -397,13 +397,11 @@ mod tests {
         let info = build_information();
 
         assert_eq!(info.sargon_version.matches('.').count(), 2);
-        assert_eq!(
-            format!("{:?}", info.dependencies.radix_engine_toolkit).is_empty(),
-            false
+        assert!(
+            !format!("{:?}", info.dependencies.radix_engine_toolkit).is_empty()
         );
-        assert_eq!(
-            format!("{:?}", info.dependencies.scrypto_radix_engine).is_empty(),
-            false
+        assert!(
+            !format!("{:?}", info.dependencies.scrypto_radix_engine).is_empty()
         );
     }
 

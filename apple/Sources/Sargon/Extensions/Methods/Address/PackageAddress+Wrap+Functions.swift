@@ -12,3 +12,14 @@ extension PackageAddress: AddressProtocol {
 		packageAddressNetworkId(address: self)
 	}
 }
+
+#if DEBUG
+extension PackageAddress {
+	public func embed() -> Address {
+		.package(self)
+	}
+	public func mapTo(networkID: NetworkID) -> Self {
+		packageAddressMapToNetwork(address: self, networkId: networkID)
+	}
+}
+#endif // DEBUG
