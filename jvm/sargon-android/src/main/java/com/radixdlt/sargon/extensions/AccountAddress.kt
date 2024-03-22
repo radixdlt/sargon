@@ -9,6 +9,7 @@ import com.radixdlt.sargon.accountAddressNetworkId
 import com.radixdlt.sargon.accountAddressToShort
 import com.radixdlt.sargon.newAccountAddress
 import com.radixdlt.sargon.newAccountAddressFrom
+import org.jetbrains.annotations.VisibleForTesting
 
 @Throws(SargonException::class)
 fun AccountAddress.Companion.init(validatingAddress: String) =
