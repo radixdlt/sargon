@@ -45,19 +45,31 @@ echo "✨ Ensure 'useLocalFramework' is set to 'true' in Package.swift"
 sh ./scripts/ios/ensure-is-local.sh || exit $?
 
 echo "✨ Building Sargon..."
-# sh ./scripts/ios/build-sargon.sh --maconly || exit $?
+sh ./scripts/ios/build-sargon.sh --maconly || exit $?
 echo "✨ Sargon built"
 
 echo "✨ Calling 'swift test'"
 if $testonly; then
     swift test
-else
-    swift test --enable-code-coverage
-    COV_BUILD_FOLDER="$(sh ./scripts/ios/get_cov_bin_path.sh)"
+    exit 0;
 fi
 
-COV_ARGS="$COV_BUILD_FOLDER -instr-profile=\"$SWIFT_CODE_COV_DATA_PATH\" -ignore-filename-regex=\".build|Tests|UniFFI/Sargon.swift\""
+swift test --enable-code-coverage
+    
+BIN_PATH="$(swift build --show-bin-path)"
+XCTEST_PATH="$(find ${BIN_PATH} -name '*.xctest')"
+COV_BUILD_FOLDER=$XCTEST_PATH
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    f="$(basename $XCTEST_PATH .xctest)"
+    COV_BUILD_FOLDER="${COV_BUILD_FOLDER}/Contents/MacOS/$f"
+fi
+
+COV_DATA_PATH=".build/debug/codecov/default.profdata"
+
+COV_ARGS="$COV_BUILD_FOLDER -instr-profile=\"$COV_DATA_PATH\" -ignore-filename-regex=\".build|Tests|UniFFI/Sargon.swift\""
+
 NON_EXPORT_COV_ARGS="$COV_ARGS -region-coverage-lt=99 -use-color"
+
 if $summary; then
     eval "xcrun llvm-cov report $NON_EXPORT_COV_ARGS"
 elif $export_code_cov; then

@@ -14,7 +14,6 @@ env:
   CARGO_TERM_COLOR: always
   RUST_TOOLCHAIN: nightly-2024-01-11
   RUST_COMPONENTS: "rust-std"
-  SWIFT_CODE_COV_DATA_PATH: ".build/debug/codecov/default.profdata"
   SWIFT_CODE_COV_REPORT_PATH: ".build/artifacts/info.lcov" # chosen
 jobs:
 
