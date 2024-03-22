@@ -3,6 +3,14 @@ extension TransactionManifest: CustomStringConvertible {
 }
 
 extension TransactionManifest {
+	
+	public init(instructionsString: String, networkID: NetworkID, blobs: Blobs) throws {
+		self = try newTransactionManifestFromInstructionsStringAndBlobs(
+			instructionsString: instructionsString,
+			networkId: networkID,
+			blobs: blobs
+		)
+	}
 
 	public var instructionsString: String {
 		transactionManifestInstructionsString(manifest: self)

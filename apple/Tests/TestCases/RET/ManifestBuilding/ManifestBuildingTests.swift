@@ -156,8 +156,54 @@ final class ManifestBuildingTests: Test<TransactionManifest> {
         AccountAddress.allCases.forEach(doTest)
     }
     
-    func test_modify_manifest_add_lock_fee() {
-        XCTAssertFalse(SUT.sample.description.contains("lock_fee"))
+    func test_modify_manifest_add_lock_fee() throws {
+		func doTest(_ addressOfFeePayer: AccountAddress) throws {
+			var manifest = try rtm("create_pool")
+			func hasLockFee() -> Bool {
+				manifest.description.contains("lock_fee")
+			}
+			XCTAssertFalse(hasLockFee())
+			let fee: Decimal192 = 531
+			manifest = manifest.modify(lockFee: fee, addressOfFeePayer: addressOfFeePayer)
+			XCTAssertTrue(hasLockFee())
+			XCTAssert(manifest.description.contains(addressOfFeePayer.address))
+		}
+
+		try [
+			AccountAddress.sampleStokenet,
+			AccountAddress.sampleStokenetOther,
+		].forEach(doTest)
     }
+	
+	func test_modify_manifest_add_guarantee() throws {
+		var manifest = try rtm("transfer_1to2_multiple_nf_and_f_tokens")
+		
+		let guarantee = TransactionGuarantee(
+			amount: 642,
+			instructionIndex: 12,
+			resourceAddress: .sampleStokenetXRD,
+			resourceDivisibility: nil
+		)
+
+		XCTAssertFalse(manifest.description.contains(guarantee.amount.description))
+		manifest = manifest.modify(addGuarantees: [guarantee])
+		XCTAssertTrue(manifest.description.contains(guarantee.amount.description))
+		
+	}
+	
+	func rtm(_ rtm_file: String) throws -> TransactionManifest {
+		let testsDirectory: String = URL(fileURLWithPath: "\(#file)").pathComponents.dropLast(6).joined(separator: "/")
+		
+		let fileURL = try XCTUnwrap(URL(fileURLWithPath: "\(testsDirectory)/src/wrapped_radix_engine_toolkit/low_level/transaction_manifest/execution_summary/\(rtm_file).rtm"))
+		
+		let data = try Data(contentsOf: fileURL)
+		let instructionsString = try XCTUnwrap(String(data: data, encoding: .utf8))
+		
+		return try TransactionManifest(
+			instructionsString: instructionsString,
+			networkID: .stokenet,
+			blobs: []
+		)
+	}
 }
 
