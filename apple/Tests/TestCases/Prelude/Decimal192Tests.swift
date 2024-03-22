@@ -326,4 +326,8 @@ final class Decimal192Tests: Test<Decimal192> {
 	func test_magnitude() {
 		XCTAssertEqual(SUT.min.magnitude, SUT.max)
 	}
+    
+    func test_standard_transaction_fee() {
+        XCTAssertEqual(SUT.temporaryStandardFee, 25)
+    }
 }

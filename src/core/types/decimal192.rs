@@ -81,6 +81,10 @@ impl Decimal {
             secret_magic: decimal,
         }
     }
+
+    pub fn transaction_fee_preset() -> Self {
+        25.into()
+    }
 }
 
 impl FromStr for Decimal192 {
@@ -1072,6 +1076,11 @@ mod test_decimal {
     #[test]
     fn greater() {
         assert!(Decimal192::one() > Decimal192::zero());
+    }
+
+    #[test]
+    fn transaction_fee_preset_value() {
+        assert_eq!(Decimal192::transaction_fee_preset(), 25.into());
     }
 
     #[test]

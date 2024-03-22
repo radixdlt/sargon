@@ -48,6 +48,8 @@ extension Decimal192: CustomDebugStringConvertible {
 
 extension Decimal192 {
 	public static let maxDivisibility: UInt8 = 18
+    
+    public static let temporaryStandardFee: Self = transactionFeePreset()
 }
 
 extension Decimal192 {
