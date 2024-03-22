@@ -64,3 +64,9 @@ extension Keychain: SecureStorage {
 		try self.remove(key.identifier)
 	}
 }
+
+extension SecureStorageKey {
+	public var identifier: String {
+		secureStorageKeyIdentifier(key: self)
+	}
+}
