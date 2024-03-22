@@ -28,7 +28,9 @@ import com.radixdlt.sargon.manifestThirdPartyDepositUpdate
 import com.radixdlt.sargon.modifyManifestAddGuarantees
 import com.radixdlt.sargon.modifyManifestLockFee
 import com.radixdlt.sargon.newTransactionManifestFromInstructionsStringAndBlobs
-import com.radixdlt.sargon.transactionManifestToString
+import com.radixdlt.sargon.transactionManifestBlobs
+import com.radixdlt.sargon.transactionManifestInstructionsString
+import com.radixdlt.sargon.transactionManifestNetworkId
 import com.radixdlt.sargon.utils.KoverIgnore
 
 @Throws(SargonException::class)
@@ -145,5 +147,11 @@ fun TransactionManifest.modifyLockFee(
     fee: Decimal192?
 ) = modifyManifestLockFee(manifest = this, addressOfFeePayer = addressOfFeePayer, fee = fee)
 
-val TransactionManifest.string: String
-    get() = transactionManifestToString(manifest = this)
+val TransactionManifest.instructionsString: String
+    get() = transactionManifestInstructionsString(manifest = this)
+
+val TransactionManifest.networkId: NetworkId
+    get() = transactionManifestNetworkId(manifest = this)
+
+val TransactionManifest.blobs: Blobs
+    get() = transactionManifestBlobs(manifest = this)
