@@ -136,7 +136,7 @@ final class ManifestBuildingTests: Test<TransactionManifest> {
 		func doTest(_ accountAddress: AccountAddress) {
             let manifest = SUT.stakesClaim(accountAddress: accountAddress, stakeClaims: StakeClaim.allCases)
 			XCTAssertEqual(manifest.description.ranges(of: StakeClaim.sample.validatorAddress.mapTo(networkID: accountAddress.networkID).address).count, 1)
-			XCTAssertEqual(manifest.description.ranges(of: accountAddress.xrd.address).count, 2)
+			XCTAssertEqual(manifest.description.ranges(of: accountAddress.xrdOnSameNetwork.address).count, 2)
 			XCTAssert(manifest.description.contains(accountAddress.address))
 		}
 		

@@ -1,15 +1,21 @@
 extension LegacyOlympiaAccountAddress {
 	public init(validatingAddress bech32String: String) throws {
-		self = try newLegacyOlympiaAccountAddressFromString(string: bech32String)
+        self = try newLegacyOlympiaAccountAddressFromString(
+            string: bech32String
+        )
 	}
 	
 	public init(publicKey: Secp256k1PublicKey) {
-		self = newLegacyOlympiaAccountAddressFromPublicKey(publicKey: publicKey)
+        self = newLegacyOlympiaAccountAddressFromPublicKey(
+            publicKey: publicKey
+        )
 	}
 	
 	/// The bech32 encoded string for this address.
 	public var address: String {
-		legacyOlympiaAccountAddressToString(address: self)
+        legacyOlympiaAccountAddressToString(
+            address: self
+        )
 	}
 	
 	public var networkID: NetworkId {
@@ -18,16 +24,23 @@ extension LegacyOlympiaAccountAddress {
 	}
 	
 	public func toBabylonAddress() -> AccountAddress {
-		legacyOlympiaAccountAddressToBabylonAccountAddress(address: self)
+        legacyOlympiaAccountAddressToBabylonAccountAddress(
+            address: self
+        )
 	}
 	
 	public func isLegacyOfBabylonAddress(_ babylon: AccountAddress) -> Bool {
-		legacyOlympiaAccountAddressIsLegacyOfBabylon(legacyOlympiaAddress: self, babylonAccountAddress: babylon)
+        legacyOlympiaAccountAddressIsLegacyOfBabylon(
+            legacyOlympiaAddress: self,
+            babylonAccountAddress: babylon
+        )
 	}
 }
 
 extension AccountAddress {
-	public func wasMigratedFromLegacyOlympia(address legacy: LegacyOlympiaAccountAddress) -> Bool {
+    public func wasMigratedFromLegacyOlympia(
+        address legacy: LegacyOlympiaAccountAddress
+    ) -> Bool {
 		legacy.isLegacyOfBabylonAddress(self)
 	}
 }

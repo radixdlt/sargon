@@ -62,7 +62,7 @@ extension AddressProtocol {
 	
 	/// Returns the`ResourceAddress` of `XRD` on the same network
 	/// as this address.
-	public var xrd: ResourceAddress {
+	public var xrdOnSameNetwork: ResourceAddress {
 		ResourceAddress.xrd(on: networkID)
 	}
 }
