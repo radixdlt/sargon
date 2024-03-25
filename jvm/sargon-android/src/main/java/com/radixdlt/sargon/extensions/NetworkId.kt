@@ -6,7 +6,7 @@ import com.radixdlt.sargon.networkIdToString
 import com.radixdlt.sargon.newNetworkIdFromDiscriminant
 
 @Throws(SargonException::class)
-fun NetworkId.Companion.from(discriminant: UByte) =
+fun NetworkId.Companion.init(discriminant: UByte) =
     newNetworkIdFromDiscriminant(discriminant = discriminant)
 
 val NetworkId.string: String

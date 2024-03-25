@@ -1,7 +1,7 @@
 package com.radixdlt.sargon
 
 import com.radixdlt.sargon.extensions.discriminant
-import com.radixdlt.sargon.extensions.from
+import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.string
 import com.radixdlt.sargon.samples.Sample
 import com.radixdlt.sargon.samples.sample
@@ -18,10 +18,10 @@ class NetworkIdTest: SampleTestable<NetworkId> {
     fun test() {
         assertEquals(
             NetworkId.MAINNET,
-            NetworkId.from(discriminant = 1.toUByte())
+            NetworkId.init(discriminant = 1.toUByte())
         )
         assertThrows<CommonException.UnknownNetworkId> {
-            NetworkId.from(discriminant = UByte.MAX_VALUE)
+            NetworkId.init(discriminant = UByte.MAX_VALUE)
         }
         assertEquals(
             "mainnet",
