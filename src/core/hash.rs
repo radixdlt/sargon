@@ -105,7 +105,7 @@ impl HasSampleValues for Hash {
 
     fn sample_other() -> Self {
         // "Radix... just imagine".as_bytes()
-        "196ca16b4a35c1c3df18e20cb199c99d129cec6ea62eb03a29fde16db897f4b1"
+        "679dfbbda16d3f9669da8552ab6594d2b0446d03d96c076a0ec9dc550ea41fad"
             .parse::<Self>()
             .unwrap()
     }
@@ -113,6 +113,8 @@ impl HasSampleValues for Hash {
 
 #[cfg(test)]
 mod tests {
+    use ::hex::ToHex;
+
     use crate::prelude::*;
 
     #[allow(clippy::upper_case_acronyms)]
@@ -135,13 +137,26 @@ mod tests {
             hash_of("Hello Radix".as_bytes()).to_string(),
             "48f1bd08444b5e713db9e14caac2faae71836786ac94d645b00679728202a935"
         );
+
+        assert_eq!(
+            hash_of("Radix... just imagine".as_bytes()).to_string(),
+            "679dfbbda16d3f9669da8552ab6594d2b0446d03d96c076a0ec9dc550ea41fad"
+        );
+    }
+
+    #[test]
+    fn hash_of_hash() {
+        assert_eq!(
+            hash_of(SUT::sample()).to_string(),
+            "0c18fa9b3e94d9b879d631e791ee0699ad2f98d914f16a35a70f6312abe4474a"
+        );
     }
 
     #[test]
     fn to_string() {
         assert_eq!(
             SUT::sample_other().to_string(),
-            "196ca16b4a35c1c3df18e20cb199c99d129cec6ea62eb03a29fde16db897f4b1"
+            "679dfbbda16d3f9669da8552ab6594d2b0446d03d96c076a0ec9dc550ea41fad"
         );
     }
 
