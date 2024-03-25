@@ -38,6 +38,16 @@ pub fn new_non_fungible_local_id_ruid(
     NonFungibleLocalId::ruid(bytes)
 }
 
+#[uniffi::export]
+pub fn new_non_fungible_local_id_sample() -> NonFungibleLocalId {
+    NonFungibleLocalId::sample()
+}
+
+#[uniffi::export]
+pub fn new_non_fungible_local_id_sample_other() -> NonFungibleLocalId {
+    NonFungibleLocalId::sample_other()
+}
+
 #[cfg(test)]
 mod uniffi_tests {
     use super::*;
@@ -122,6 +132,19 @@ mod uniffi_tests {
                 .unwrap()
                 .to_string(),
             "<foo>"
+        );
+    }
+
+    #[test]
+    fn test_samples() {
+        assert_eq!(
+            NonFungibleLocalId::sample(),
+            new_non_fungible_local_id_sample(),
+        );
+
+        assert_eq!(
+            NonFungibleLocalId::sample_other(),
+            new_non_fungible_local_id_sample_other(),
         );
     }
 }

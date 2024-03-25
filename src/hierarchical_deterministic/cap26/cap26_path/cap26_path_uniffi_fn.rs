@@ -2,9 +2,9 @@ use crate::prelude::*;
 
 #[uniffi::export]
 pub fn new_cap26_path_from_string(
-    cap26_path_string: String,
+    string: String,
 ) -> Result<CAP26Path, CommonError> {
-    CAP26Path::from_str(&cap26_path_string)
+    CAP26Path::from_str(&string)
 }
 
 #[uniffi::export]
@@ -43,33 +43,19 @@ mod tests {
 
     #[test]
     fn test_account_path() {
-        let path = CAP26Path::from(new_account_path_sample());
+        let path = CAP26Path::sample_account();
         assert_eq!(
             path,
             new_cap26_path_from_string(cap26_path_to_string(&path)).unwrap()
-        );
-
-        let path_other = CAP26Path::from(new_account_path_sample_other());
-        assert_eq!(
-            path_other,
-            new_cap26_path_from_string(cap26_path_to_string(&path_other))
-                .unwrap()
         );
     }
 
     #[test]
     fn test_identity_path() {
-        let path = CAP26Path::from(new_identity_path_sample());
+        let path = CAP26Path::sample_identity();
         assert_eq!(
             path,
             new_cap26_path_from_string(cap26_path_to_string(&path)).unwrap()
-        );
-
-        let path_other = CAP26Path::from(new_identity_path_sample_other());
-        assert_eq!(
-            path_other,
-            new_cap26_path_from_string(cap26_path_to_string(&path_other))
-                .unwrap()
         );
     }
 
@@ -78,7 +64,25 @@ mod tests {
         let path = CAP26Path::from(default_get_id_path());
         assert_eq!(
             path,
-            new_cap26_path_from_string(cap26_path_to_string(&path)).unwrap()
+            new_cap26_path_from_string(String::from("m/44H/1022H/365H"))
+                .unwrap()
+        );
+    }
+
+    #[test]
+    fn test_samples() {
+        assert_eq!(IdentityPath::sample(), new_identity_path_sample());
+
+        assert_eq!(
+            IdentityPath::sample_other(),
+            new_identity_path_sample_other()
+        );
+
+        assert_eq!(AccountPath::sample(), new_account_path_sample());
+
+        assert_eq!(
+            AccountPath::sample_other(),
+            new_account_path_sample_other()
         );
     }
 }

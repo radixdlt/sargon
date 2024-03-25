@@ -8,14 +8,14 @@ import com.radixdlt.sargon.newCap26PathFromString
 
 @Throws(SargonException::class)
 fun DerivationPath.Cap26.Companion.init(cap26Path: String): DerivationPath.Cap26 =
-    DerivationPath.Cap26(newCap26PathFromString(cap26PathString = cap26Path))
+    DerivationPath.Cap26(newCap26PathFromString(string = cap26Path))
 
 val DerivationPath.Cap26.string: String
     get() = cap26PathToString(path = value)
 
 @Throws(SargonException::class)
 fun DerivationPath.Bip44Like.Companion.init(bip44LikePath: String): DerivationPath.Bip44Like =
-    DerivationPath.Bip44Like(newBip44LikePathFromString(bip44LikePathString = bip44LikePath))
+    DerivationPath.Bip44Like(newBip44LikePathFromString(string = bip44LikePath))
 
 val DerivationPath.Bip44Like.string: String
     get() = bip44LikePathToString(path = value)

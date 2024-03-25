@@ -2,9 +2,9 @@ use crate::prelude::*;
 
 #[uniffi::export]
 pub fn new_bip44_like_path_from_string(
-    bip44_like_path_string: String,
+    string: String,
 ) -> Result<BIP44LikePath, CommonError> {
-    BIP44LikePath::from_str(&bip44_like_path_string)
+    BIP44LikePath::from_str(&string)
 }
 
 #[uniffi::export]

@@ -96,9 +96,9 @@ impl From<NonFungibleLocalId> for ScryptoNonFungibleLocalId {
 impl FromStr for NonFungibleLocalId {
     type Err = CommonError;
 
-    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+    fn from_str(s: &str) -> Result<Self> {
         ScryptoNonFungibleLocalId::from_str(s)
-            .map(Into::into)
+            .map(Self::from)
             .map_err(|_| CommonError::InvalidNonFungibleLocalIDString)
     }
 }
@@ -155,7 +155,7 @@ mod tests {
     #[test]
     fn from_invalid_str_error() {
         assert_eq!(
-            "#value#".parse::<SUT>(),
+            "#super invalid string!!!!!#".parse::<SUT>(),
             Err::<SUT, _>(CommonError::InvalidNonFungibleLocalIDString)
         );
     }
