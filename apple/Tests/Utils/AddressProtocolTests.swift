@@ -1,32 +1,18 @@
-class AddressTest<SUT_: AddressProtocol>: Test<SUT_> {
+class BaseAddressTest<SUT_: BaseAddressProtocol>: Test<SUT_> {
 	
-	func test_network_id_of_mainnet_sample() {
-		XCTAssertNoDifference(SUT.sampleMainnet.networkID, .mainnet)
+	func test_network_id_of_sample() {
+		XCTAssertNoDifference(SUT.sample.networkID, .mainnet)
 	}
 	
-	func test_network_id_of_mainnet_sampleOther() {
-		XCTAssertNoDifference(SUT.sampleMainnetOther.networkID, .mainnet)
-	}
-	
-	func test_network_id_of_stokenet_sample() {
-		XCTAssertNoDifference(SUT.sampleStokenet.networkID, .stokenet)
-	}
-	
-	func test_network_id_of_stokenet_sampleOther() {
-		XCTAssertNoDifference(SUT.sampleStokenetOther.networkID, .stokenet)
+	func test_network_id_of_sampleOther() {
+		XCTAssertNoDifference(SUT.sampleOther.networkID, .mainnet)
 	}
 	
 	func test_all_address_different() {
-		XCTAssertGreaterThanOrEqual(Set(SUT.allCases).count, 4)
+		XCTAssertEqual(Set(SUT.allCases).count, SUT.allCases.count)
 	}
 	
-	func test_xrd_on_same_network_as_address() {
-		XCTAssertEqual(SUT.sampleMainnet.xrd, ResourceAddress.sampleMainnetXRD)
-		XCTAssertEqual(SUT.sampleMainnetOther.xrd, ResourceAddress.sampleMainnetXRD)
-		XCTAssertEqual(SUT.sampleStokenet.xrd, ResourceAddress.sampleStokenetXRD)
-		XCTAssertEqual(SUT.sampleStokenetOther.xrd, ResourceAddress.sampleStokenetXRD)
-	}
-
+	
 	func test_bech32_roundtrip() throws {
 		func doTest(_ address: SUT) throws {
 			try XCTAssertNoDifference(
@@ -49,6 +35,34 @@ class AddressTest<SUT_: AddressProtocol>: Test<SUT_> {
 		SUT.allCases.forEach(doTest)
 	}
 	
+	
+}
+
+class AddressTest<SUT_: AddressProtocol>: BaseAddressTest<SUT_> {
+
+	func test_network_id_of_mainnet_sample() {
+		XCTAssertNoDifference(SUT.sampleMainnet.networkID, .mainnet)
+	}
+	
+	func test_network_id_of_mainnet_sampleOther() {
+		XCTAssertNoDifference(SUT.sampleMainnetOther.networkID, .mainnet)
+	}
+	
+	func test_network_id_of_stokenet_sample() {
+		XCTAssertNoDifference(SUT.sampleStokenet.networkID, .stokenet)
+	}
+	
+	func test_network_id_of_stokenet_sampleOther() {
+		XCTAssertNoDifference(SUT.sampleStokenetOther.networkID, .stokenet)
+	}
+
+	func test_xrd_on_same_network_as_address() {
+		XCTAssertEqual(SUT.sampleMainnet.xrd, ResourceAddress.sampleMainnetXRD)
+		XCTAssertEqual(SUT.sampleMainnetOther.xrd, ResourceAddress.sampleMainnetXRD)
+		XCTAssertEqual(SUT.sampleStokenet.xrd, ResourceAddress.sampleStokenetXRD)
+		XCTAssertEqual(SUT.sampleStokenetOther.xrd, ResourceAddress.sampleStokenetXRD)
+	}
+
 	func test_embed() {
 		func doTest(_ address: SUT) {
 			XCTAssertNoDifference(

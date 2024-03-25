@@ -17,11 +17,3 @@ final class PublicKeyTests: PublicKeyTest<PublicKey> {
 		
 	}
 }
-
-#if DEBUG
-extension PublicKey: ExpressibleByStringLiteral {
-	public init(stringLiteral value: StringLiteralType) {
-		try! self.init(hex: value)
-	}
-}
-#endif // DEBUG
