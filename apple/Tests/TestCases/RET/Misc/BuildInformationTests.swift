@@ -1,7 +1,8 @@
 final class BuildInformationTests: XCTestCase {
 	func test_build_information() {
-		XCTAssert(buildInformation().sargonVersion.contains("."))
-		XCTAssertFalse(String(describing: buildInformation().dependencies.radixEngineToolkit).isEmpty)
-		XCTAssertFalse(String(describing: buildInformation().dependencies.scryptoRadixEngine).isEmpty)
+        let info = SargonBuildInformation.get()
+        XCTAssert(info.sargonVersion.contains("."))
+		XCTAssertFalse(String(describing: info.dependencies.radixEngineToolkit).isEmpty)
+		XCTAssertFalse(String(describing: info.dependencies.scryptoRadixEngine).isEmpty)
 	}
 }
