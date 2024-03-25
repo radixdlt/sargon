@@ -1,6 +1,7 @@
 package com.radixdlt.sargon.extensions
 
 import com.radixdlt.sargon.AccountAddress
+import com.radixdlt.sargon.LegacyOlympiaAccountAddress
 import com.radixdlt.sargon.NetworkId
 import com.radixdlt.sargon.PublicKey
 import com.radixdlt.sargon.accountAddressBech32Address
@@ -9,6 +10,7 @@ import com.radixdlt.sargon.accountAddressNetworkId
 import com.radixdlt.sargon.accountAddressToShort
 import com.radixdlt.sargon.newAccountAddress
 import com.radixdlt.sargon.newAccountAddressFrom
+import org.jetbrains.annotations.VisibleForTesting
 
 @Throws(SargonException::class)
 fun AccountAddress.Companion.init(validatingAddress: String) =
@@ -49,3 +51,6 @@ val AccountAddress.isLegacy
  */
 val AccountAddress.shortFormat: String
     get() = accountAddressToShort(address = this)
+
+fun AccountAddress.wasMigratedFromLegacyOlympia(legacy: LegacyOlympiaAccountAddress) =
+    legacy.isLegacyOfBabylonAddress(babylon = this)
