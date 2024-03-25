@@ -257,9 +257,9 @@ mod tests {
         let public_key: Secp256k1PublicKey = "026f08db98ef1d0231eb15580da9123db8e25aa1747c8c32e5fd2ec47b8db73d5c".parse().unwrap();
         let sut = SUT::from(public_key);
         assert_eq!(
-            sut.to_string(),
+            sut,
             // https://github.com/radixdlt/typescript-radix-engine-toolkit/blob/6b4d041fbffb0a42adb39b215b2f4c7381fdc77b/resources/fixtures/derive.json#L89C18-L89C84
-            "rdx1qspx7zxmnrh36q33av24srdfzg7m3cj65968erpjuh7ja3rm3kmn6hq4j9842"
+            SUT::sample()
         );
     }
 
@@ -268,9 +268,9 @@ mod tests {
         let public_key: Secp256k1PublicKey = "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798".parse().unwrap();
         let sut = SUT::from(public_key);
         assert_eq!(
-            sut.to_string(),
+            sut,
             // https://github.com/radixdlt/typescript-radix-engine-toolkit/blob/6b4d041fbffb0a42adb39b215b2f4c7381fdc77b/resources/fixtures/derive.json#L98C18-L98C83
-            "rdx1qsp8n0nx0muaewav2ksx99wwsu9swq5mlndjmn3gm9vl9q2mzmup0xqm2ylge"
+            SUT::sample_other()
         );
     }
 
