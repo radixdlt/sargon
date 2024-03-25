@@ -389,6 +389,9 @@ pub enum CommonError {
 
     #[error("Failed to convert to Decimal192 from f32 due to overflow, value: {bad_value}")]
     DecimalOverflow { bad_value: String } = 10106,
+
+    #[error("Invalid Olympia address, not mainnet: {bad_value}")]
+    InvalidAddressNotOlympiaMainnet { bad_value: String } = 10107,
 }
 
 /*
