@@ -7,7 +7,22 @@ extension NonFungibleLocalID {
 		self = newNonFungibleLocalIdInt(value: value)
 	}
 	
-	/// Tries to decode an String as NonFungibleLocalID.string
+    /// Tries to decode an String representation of any NonFungibleLocalID, either:
+    /// * integer
+    /// * bytes
+    /// * ruid
+    /// * string
+    ///
+    /// Not to be confused with `init(string:)` which tries to decode
+    /// `NonFungibleLocalID.string`
+    public init(localId: String) throws {
+        self = try newNonFungibleLocalIdFromString(localId: localId)
+    }
+    
+    /// Tries to decode a `NonFungibleLocalID.string`
+    ///
+    /// Not to be confused with `init(localId:)` which tries to decode
+    /// a string into any case of `NonFungibleLocalID` 
 	public init(string: String) throws {
 		self = try newNonFungibleLocalIdString(string: string)
 	}

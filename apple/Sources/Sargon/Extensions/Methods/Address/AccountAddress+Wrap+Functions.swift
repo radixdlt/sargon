@@ -1,4 +1,4 @@
-extension AccountAddress: EntityAddressProtocol {
+extension AccountAddress {
 	public init(
 		validatingAddress bech32String: String
 	) throws {

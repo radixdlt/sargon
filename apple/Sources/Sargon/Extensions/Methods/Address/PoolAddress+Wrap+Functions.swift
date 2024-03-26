@@ -1,5 +1,5 @@
 
-extension PoolAddress: AddressProtocol {
+extension PoolAddress {
 	public init(validatingAddress bech32String: String) throws {
 		self = try newPoolAddress(bech32: bech32String)
 	}

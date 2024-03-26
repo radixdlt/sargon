@@ -255,9 +255,7 @@ mod tests {
 
     #[test]
     fn display() {
-        let str = "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd:#2244#";
-        let id: SUT = str.parse().unwrap();
-        assert_eq!(format!("{}", id), str);
+        assert_eq!(format!("{}", SUT::sample()), "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa:<Member_237>");
     }
 
     #[test]

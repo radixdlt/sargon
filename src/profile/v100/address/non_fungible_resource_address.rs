@@ -43,6 +43,11 @@ macro_rules! decl_specialized_address {
                 $base_addr::try_from_bech32(&bech32).and_then(TryInto::<$specialized_address_type>::try_into)
             }
 
+            /// Returns the base address of this specialized address.
+            #[uniffi::export]
+            pub fn [< $specialized_address_type:snake _as_ $base_addr:snake>](address: &$specialized_address_type) -> $base_addr {
+                address.secret_magic
+            }
 
             /// Returns a new address, with the same node_id, but using `network_id` as
             /// network.
@@ -243,6 +248,16 @@ mod tests {
         let s = "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa";
         let a = s.parse::<SUT>().unwrap();
         assert_eq!(format!("{}", a), s);
+    }
+
+    #[test]
+    fn as_base() {
+        assert_eq!(
+            non_fungible_resource_address_as_resource_address(
+                &SUT::sample_mainnet()
+            ),
+            ResourceAddress::sample_mainnet_nft_gc_membership()
+        );
     }
 
     #[test]

@@ -1,5 +1,22 @@
 final class NonFungibleLocalIDTests: Test<NonFungibleLocalID> {
 	
+    // MARK: LocalID String
+    func test_valid_local_id_string_from_string() {
+        XCTAssertEqual(try SUT(localId: "<foo>"), SUT.str(value: "foo"))
+    }
+    
+    func test_valid_local_id_string_from_integer() {
+        XCTAssertEqual(try SUT(localId: "#666#"), SUT.integer(value: 666))
+    }
+    
+    func test_valid_local_id_string_from_ruid() {
+        XCTAssertEqual(try SUT(localId: "{deaddeaddeaddead-deaddeaddeaddead-deaddeaddeaddead-deaddeaddeaddead}"), SUT.ruid(value: .sample))
+    }
+    
+    func test_valid_local_id_string_from_bytes() {
+        XCTAssertEqual(try SUT(localId: "[acedacedacedacedacedacedacedacedacedacedacedacedacedacedacedaced]"), SUT.bytes(value: NonEmptyMax64Bytes(bagOfBytes: Data.sampleAced)))
+    }
+    
 	// MARK: Integer
 	func test_integer_valid() {
 		XCTAssertEqual(

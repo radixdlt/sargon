@@ -24,7 +24,7 @@ extension BaseAddressProtocol {
 }
 #endif // DEBUG
 
-public protocol AddressProtocol: BaseAddressProtocol {
+public protocol AddressProtocol: BaseAddressProtocol & Identifiable where Self.ID == String {
 	
 #if DEBUG
 	func embed() -> Address
@@ -59,6 +59,10 @@ extension AddressProtocol where Self: CaseIterable, AllCases == [Self] {
 
 
 extension AddressProtocol {
+    
+    public var id: ID {
+        address
+    }
 	
 	/// Returns the`ResourceAddress` of `XRD` on the same network
 	/// as this address.
