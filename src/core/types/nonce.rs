@@ -138,4 +138,15 @@ mod tests {
         }
         assert_eq!(set.len(), n); // with a low probability this might fail yes.
     }
+
+    #[test]
+    fn manual_perform_uniffi_conversion() {
+        let sut = SUT::sample();
+        let ffi_side =
+            <NonceSecretMagic as crate::UniffiCustomTypeConverter>::from_custom(
+                sut.secret_magic,
+            );
+        let from_ffi_side = <NonceSecretMagic as crate::UniffiCustomTypeConverter>::into_custom(ffi_side).unwrap();
+        assert_eq!(sut, from_ffi_side.into());
+    }
 }
