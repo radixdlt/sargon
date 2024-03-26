@@ -1,4 +1,4 @@
-extension NonFungibleResourceAddress: AddressProtocol {
+extension NonFungibleResourceAddress {
 	public init(validatingAddress bech32String: String) throws {
 		self = try newNonFungibleResourceAddress(bech32: bech32String)
 	}
@@ -11,6 +11,10 @@ extension NonFungibleResourceAddress: AddressProtocol {
 	public var networkID: NetworkId {
 		nonFungibleResourceAddressNetworkId(address: self)
 	}
+    
+    public var asResourceAddress: ResourceAddress {
+        nonFungibleResourceAddressAsResourceAddress(address: self)
+    }
 }
 
 #if DEBUG

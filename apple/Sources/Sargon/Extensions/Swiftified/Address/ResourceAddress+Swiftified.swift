@@ -1,4 +1,5 @@
 extension ResourceAddress: @unchecked Sendable {}
+extension ResourceAddress: AddressProtocol {}
 
 extension ResourceAddress {
 

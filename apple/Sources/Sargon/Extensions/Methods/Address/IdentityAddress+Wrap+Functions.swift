@@ -1,4 +1,4 @@
-extension IdentityAddress: EntityAddressProtocol {
+extension IdentityAddress {
 	public init(validatingAddress bech32String: String) throws {
 		self = try newIdentityAddress(bech32: bech32String)
 	}

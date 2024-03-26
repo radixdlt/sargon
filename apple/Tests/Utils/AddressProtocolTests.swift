@@ -55,6 +55,12 @@ class AddressTest<SUT_: AddressProtocol>: BaseAddressTest<SUT_> {
 	func test_network_id_of_stokenet_sampleOther() {
 		XCTAssertNoDifference(SUT.sampleStokenetOther.networkID, .stokenet)
 	}
+    
+    func test_identifiable() {
+        SUT.allCases.forEach {
+            XCTAssertEqual($0.id, $0.address)
+        }
+    }
 
 	func test_xrd_on_same_network_as_address() {
 		XCTAssertEqual(SUT.sampleMainnet.xrdOnSameNetwork, ResourceAddress.sampleMainnetXRD)

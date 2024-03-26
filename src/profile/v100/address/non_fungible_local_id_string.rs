@@ -138,6 +138,14 @@ mod uniffi_tests {
     }
 
     #[test]
+    fn underscore_is_allowed() {
+        let s = "Member_237";
+        let sut: SUT =
+            new_non_fungible_local_id_string_from_str(s.to_owned()).unwrap();
+        assert_eq!(sut.to_string(), s.to_owned());
+    }
+
+    #[test]
     fn invalid_forbidden_chars() {
         let s = "<foo>";
         assert_eq!(

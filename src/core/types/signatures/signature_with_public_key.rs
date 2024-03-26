@@ -10,8 +10,8 @@ use crate::prelude::*;
     PartialOrd,
     Ord,
     Hash,
-    uniffi::Enum,
     EnumAsInner,
+    uniffi::Enum,
 )]
 pub enum SignatureWithPublicKey {
     // N.B. `transaction::model::SignatureWithPublicKeyV1::Secp256k1` does

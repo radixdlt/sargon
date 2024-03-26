@@ -19,6 +19,18 @@ final class AccountAddressTests: AddressTest<AccountAddress> {
 	func test_short() {
 		XCTAssertEqual(SUT.sample.shortFormat, "acco...please")
 	}
+    
+    func test_from_bech32_on_stokenet() throws {
+        let address = try SUT(
+            validatingAddress: "account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk"
+        )
+        XCTAssertEqual(address.networkID, .stokenet)
+
+        XCTAssertEqual(
+            address,
+            "account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk" // ExpressibleByStringLiteral
+        )
+    }
 	
 	func test_is_legacy() {
 		XCTAssertTrue(SUT.sample.isLegacy)

@@ -1,4 +1,4 @@
-extension PackageAddress: AddressProtocol {
+extension PackageAddress {
 	public init(validatingAddress bech32String: String) throws {
 		self = try newPackageAddress(bech32: bech32String)
 	}
