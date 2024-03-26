@@ -23,4 +23,23 @@ extension TransactionManifest {
 	public var blobs: Blobs {
 		transactionManifestBlobs(manifest: self)
 	}
+    
+    public var involvedPoolAddresses: [PoolAddress] {
+        transactionManifestInvolvedPoolAddresses(manifest: self)
+    }
+    
+    public var involvedResourceAddresses: [ResourceAddress] {
+        transactionManifestInvolvedResourceAddresses(manifest: self)
+    }
+    
+    public var summary: ManifestSummary {
+        transactionManifestSummary(manifest: self)
+    }
+    
+    public func executionSummary(encodedReceipt: Data) throws -> ExecutionSummary {
+        try transactionManifestExecutionSummary(
+            manifest: self,
+            encodedReceipt: encodedReceipt
+        )
+    }
 }

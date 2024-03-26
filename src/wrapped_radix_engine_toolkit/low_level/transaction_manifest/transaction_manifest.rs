@@ -110,12 +110,22 @@ impl TransactionManifest {
         self.secret_magic.instructions.network_id
     }
 
-    pub fn resource_addresses_to_refresh(&self) -> Vec<ResourceAddress> {
+    pub fn involved_resource_addresses(&self) -> Vec<ResourceAddress> {
         let (addresses, _) = RET_ins_extract_addresses(self.instructions());
         addresses
             .into_iter()
             .filter_map(|a| {
                 ResourceAddress::new(*a.as_node_id(), self.network_id()).ok()
+            })
+            .collect_vec()
+    }
+
+    pub fn involved_pool_addresses(&self) -> Vec<PoolAddress> {
+        let (addresses, _) = RET_ins_extract_addresses(self.instructions());
+        addresses
+            .into_iter()
+            .filter_map(|a| {
+                PoolAddress::new(*a.as_node_id(), self.network_id()).ok()
             })
             .collect_vec()
     }
@@ -307,9 +317,23 @@ mod tests {
     }
 
     #[test]
-    fn resource_addresses_to_refresh() {
+    fn involved_resource_addresses() {
         let manifest = SUT::sample();
-        let resources = manifest.resource_addresses_to_refresh();
+        let resources = manifest.involved_resource_addresses();
         assert_eq!(resources[0].address(), "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd");
+    }
+
+    #[test]
+    fn involved_pool_addresses() {
+        let instructions_string =
+            include_str!("execution_summary/redeem_from_bi_pool.rtm");
+        let sut = SUT::new(
+            instructions_string,
+            NetworkID::Stokenet,
+            Blobs::default(),
+        )
+        .unwrap();
+        let pool_addresses = sut.involved_pool_addresses();
+        assert_eq!(pool_addresses, ["pool_tdx_2_1ckfjmjswvvf6y635f8l89uunu9cwgnglhqdk8627wrpf8ultdx2vc3"].into_iter().map(PoolAddress::from).collect_vec());
     }
 }

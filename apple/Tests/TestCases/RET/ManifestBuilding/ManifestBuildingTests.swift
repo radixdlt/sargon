@@ -1,3 +1,4 @@
+@testable import Sargon
 import RegexBuilder
 
 final class ManifestBuildingTests: Test<TransactionManifest> {
@@ -202,20 +203,33 @@ final class ManifestBuildingTests: Test<TransactionManifest> {
 			}
 		}
 	}
-	
-	func rtm(_ rtm_file: String) throws -> TransactionManifest {
-		let testsDirectory: String = URL(fileURLWithPath: "\(#file)").pathComponents.dropLast(6).joined(separator: "/")
-		
-		let fileURL = try XCTUnwrap(URL(fileURLWithPath: "\(testsDirectory)/src/wrapped_radix_engine_toolkit/low_level/transaction_manifest/execution_summary/\(rtm_file).rtm"))
-		
-		let data = try Data(contentsOf: fileURL)
-		let instructionsString = try XCTUnwrap(String(data: data, encoding: .utf8))
-		
-		return try TransactionManifest(
-			instructionsString: instructionsString,
-			networkID: .stokenet,
-			blobs: []
-		)
-	}
 }
 
+extension XCTestCase {
+    
+    func encodedReceipt(_ name: String) throws -> Data {
+        let utf8 = try openFile(name, extension: "dat")
+        let hex = try XCTUnwrap(String(data: utf8, encoding: .utf8))
+        return try Data(hex: hex)
+    }
+    
+    func rtm(_ rtmFile: String) throws -> TransactionManifest {
+        let data = try openFile(rtmFile, extension: "rtm")
+        let instructionsString = try XCTUnwrap(String(data: data, encoding: .utf8))
+        
+        return try TransactionManifest(
+            instructionsString: instructionsString,
+            networkID: .stokenet,
+            blobs: []
+        )
+    }
+    
+    private func openFile(_ fileName: String, extension fileExtension: String) throws -> Data {
+        let testsDirectory: String = URL(fileURLWithPath: "\(#file)").pathComponents.dropLast(6).joined(separator: "/")
+        
+        let fileURL = try XCTUnwrap(URL(fileURLWithPath: "\(testsDirectory)/src/wrapped_radix_engine_toolkit/low_level/transaction_manifest/execution_summary/\(fileName).\(fileExtension)"))
+        
+        return try Data(contentsOf: fileURL)
+      
+    }
+}
