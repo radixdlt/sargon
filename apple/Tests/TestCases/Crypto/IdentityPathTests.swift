@@ -9,4 +9,8 @@ final class IdentityPathTests: HDPathProtocolTests<IdentityPath> {
             SUT.sample
         )
     }
+	
+	func test_invalid_got_account() {
+		XCTAssertThrowsError(try SUT(string: "m/44H/1022H/1H/525H/1460H/0H"))
+	}
 }

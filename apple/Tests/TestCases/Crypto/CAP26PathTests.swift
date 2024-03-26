@@ -13,4 +13,8 @@ final class CAP26PathTests: HDPathProtocolTests<CAP26Path> {
             SUT.sample
         )
     }
+	
+	func test_invalid_got_bip44_like_legacy_path() {
+		XCTAssertThrowsError(try SUT(string: "m/44H/1022H/0H/0/0H"))
+	}
 }

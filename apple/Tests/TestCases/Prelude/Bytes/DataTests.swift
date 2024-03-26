@@ -11,13 +11,18 @@ final class RandomBytesTests: XCTestCase {
 		XCTAssert(Data.random(byteCount: 0).isEmpty)
 	}
 	
-	func test_invalid_hex() throws {
-		XCTAssertThrowsError(try Data(hex: "hey"))
+	func test_invalid_hex_non_hex_char() {
+		XCTAssertThrowsError(try Data(hex: "nothex"))
 		XCTAssertThrowsError(try Data(hex: "abc"))
 	}
 	
-	func test_valid_hex() throws {
+	func test_invalid_hex_odd_length() {
+		XCTAssertThrowsError(try Data(hex: "abc"))
+	}
+	
+	func test_valid_hex() {
 		let s = "1234567890abcdef"
 		XCTAssertEqual(try Data(hex: s).hex, s)
 	}
+
 }

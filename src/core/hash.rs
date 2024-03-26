@@ -113,7 +113,6 @@ impl HasSampleValues for Hash {
 
 #[cfg(test)]
 mod tests {
-    use ::hex::ToHex;
 
     use crate::prelude::*;
 

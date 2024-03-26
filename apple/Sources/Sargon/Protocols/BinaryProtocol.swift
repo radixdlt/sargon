@@ -10,9 +10,15 @@ public protocol BinaryProtocol: BaseBinaryProtocol, CustomStringConvertible {
 	
 	var data: Data { get }
 	var hex: String { get }
+	
+	func hash() -> Exactly32Bytes
 }
 
 extension BinaryProtocol {
+	
+	public func hash() -> Exactly32Bytes {
+		data.hash()
+	}
 	
 	public init(hex: String) throws {
 		try self.init(bytes: Data(hex: hex))
