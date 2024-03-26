@@ -1,10 +1,12 @@
+public protocol BaseSargonModel: Sendable, Hashable {}
+
 #if DEBUG
-public protocol SargonModel: Sendable, Hashable, CaseIterable {
+public protocol SargonModel: BaseSargonModel, CaseIterable {
     static var sample: Self { get }
     static var sampleOther: Self { get }
 }
 #else
-public protocol SargonModel: Sendable, Hashable {}
+public protocol SargonModel: BaseSargonModel {}
 #endif
 
 

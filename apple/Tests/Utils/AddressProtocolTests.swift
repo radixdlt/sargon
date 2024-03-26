@@ -57,11 +57,12 @@ class AddressTest<SUT_: AddressProtocol>: BaseAddressTest<SUT_> {
 	}
 
 	func test_xrd_on_same_network_as_address() {
-		XCTAssertEqual(SUT.sampleMainnet.xrd, ResourceAddress.sampleMainnetXRD)
-		XCTAssertEqual(SUT.sampleMainnetOther.xrd, ResourceAddress.sampleMainnetXRD)
-		XCTAssertEqual(SUT.sampleStokenet.xrd, ResourceAddress.sampleStokenetXRD)
-		XCTAssertEqual(SUT.sampleStokenetOther.xrd, ResourceAddress.sampleStokenetXRD)
+		XCTAssertEqual(SUT.sampleMainnet.xrdOnSameNetwork, ResourceAddress.sampleMainnetXRD)
+		XCTAssertEqual(SUT.sampleMainnetOther.xrdOnSameNetwork, ResourceAddress.sampleMainnetXRD)
+		XCTAssertEqual(SUT.sampleStokenet.xrdOnSameNetwork, ResourceAddress.sampleStokenetXRD)
+		XCTAssertEqual(SUT.sampleStokenetOther.xrdOnSameNetwork, ResourceAddress.sampleStokenetXRD)
 	}
+
 
 	func test_embed() {
 		func doTest(_ address: SUT) {
