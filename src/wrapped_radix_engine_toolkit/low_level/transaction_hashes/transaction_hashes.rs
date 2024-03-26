@@ -14,13 +14,15 @@ macro_rules! decl_tx_hash {
         $mod_test_name: ident,
         $expected_sample_str: literal
     ) => {
+
         $(
             #[doc = $expr]
         )*
         #[derive(
-            Debug, Clone, PartialEq, Eq, Hash, derive_more::Display, uniffi::Record,
+            Clone, PartialEq, Eq, Hash, derive_more::Display, derive_more::Debug, uniffi::Record,
         )]
         #[display("{}", self.bech32_encoded_tx_id)]
+        #[debug("{}", self.bech32_encoded_tx_id)]
         pub struct $struct_name {
             /// Which network this transaction hash is used on
             pub network_id: NetworkID,
@@ -29,6 +31,27 @@ macro_rules! decl_tx_hash {
             /// Bech32 encoded TX id
             pub bech32_encoded_tx_id: String,
         }
+
+        paste! {
+            #[uniffi::export]
+            pub fn [< new_$struct_name:snake _from_string>](string: String) -> Result<$struct_name> {
+                $struct_name::from_str(&string)
+            }
+
+            #[cfg(test)]
+            mod [< uniffi_ $struct_name:snake _tests>] {
+                use super::*;
+
+                #[allow(clippy::upper_case_acronyms)]
+                type SUT = $struct_name;
+
+                #[test]
+                fn from_str() {
+                    assert_eq!(SUT::sample(), [< new_$struct_name:snake _from_string>]($expected_sample_str.to_owned()).unwrap());
+                }
+            }
+        }
+
         impl $struct_name {
             pub(crate) fn from_scrypto(
                 scrypto: $scrypto_struct_name,
@@ -59,21 +82,23 @@ macro_rules! decl_tx_hash {
                     .map(|t| Self::from_scrypto(t.0, t.1))
             }
         }
+
         impl FromStr for $struct_name {
             type Err = crate::CommonError;
             fn from_str(s: &str) -> Result<Self, Self::Err> {
                 Self::from_bech32(s)
             }
         }
+
         impl From<$struct_name> for Hash {
             fn from(value: $struct_name) -> Hash {
                 value.hash.clone()
             }
         }
+
         #[cfg(test)]
         mod $mod_test_name {
             use super::*;
-            use crate::prelude::*;
 
             #[allow(clippy::upper_case_acronyms)]
             type SUT = $struct_name;
