@@ -23,11 +23,16 @@ mod tests {
     type SUT = SignedIntent;
 
     #[test]
-    fn equality() {
-        assert_eq!(
+    fn inequality() {
+        assert_ne!(
             new_signed_intent_sample(),
             new_signed_intent_sample_other()
         );
+    }
+
+    #[test]
+    fn equality() {
+        assert_eq!(new_signed_intent_sample(), new_signed_intent_sample());
     }
 
     #[test]

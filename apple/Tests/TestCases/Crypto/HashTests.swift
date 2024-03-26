@@ -1,4 +1,4 @@
-final class HashTests: TestCase {
+final class HashTests: Test<Hash> {
 	func test_blake2b() {
 		func doTest(_ msg: String, expected: Exactly32Bytes) {
 			let sut = Data(msg.utf8).hash()
