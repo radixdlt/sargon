@@ -1,6 +1,6 @@
 # Sargon
 
-[![Average](https://codecov.io/gh/radixdlt/Sargon/graph/badge.svg?token=8QPKIUSAQD) ![Swift](https://codecov.io/gh/radixdlt/Sargon/graph/badge.svg?token=8QPKIUSAQD&flag=swift)](https://codecov.io/github/radixdlt/Sargon)
+[![Average](https://codecov.io/gh/radixdlt/Sargon/graph/badge.svg?token=8QPKIUSAQD) Apa ![Swift](https://codecov.io/gh/radixdlt/Sargon/graph/badge.svg?token=8QPKIUSAQD&flag=swift)](https://codecov.io/github/radixdlt/Sargon)
 
 
 **Sargon is library for sharing code between Radix iOS/Android wallets.**
