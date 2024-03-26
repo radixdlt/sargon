@@ -1,11 +1,8 @@
 # Sargon
 
-| Language  | Coverage |
-| ------------- | ------------- |
-| AVERAGE  | [![Average](https://codecov.io/gh/radixdlt/Sargon/graph/badge.svg?token=8QPKIUSAQD)](https://codecov.io/github/radixdlt/Sargon)  |
-| Rust  | [![Rust](https://codecov.io/gh/radixdlt/Sargon/graph/badge.svg?token=8QPKIUSAQD&flag=rust)](https://app.codecov.io/gh/radixdlt/sargon?flags%5B0%5D=rust) |
-| Kotlin  | [![Kotlin](https://codecov.io/gh/radixdlt/Sargon/graph/badge.svg?token=8QPKIUSAQD&flag=kotlin)](https://app.codecov.io/gh/radixdlt/sargon?flags%5B0%5D=kotlin) |
-| Swift  | [![Swift](https://codecov.io/gh/radixdlt/Sargon/graph/badge.svg?token=8QPKIUSAQD&flag=swift)](https://app.codecov.io/gh/radixdlt/sargon?flags%5B0%5D=swift) |
+|   | Rust | Swift | Kotlin | _Average_ |
+| ------------- | ------------- | ------------- | ------------- |
+| [![Average](https://codecov.io/gh/radixdlt/Sargon/graph/badge.svg?token=8QPKIUSAQD)](https://codecov.io/github/radixdlt/Sargon) | [![Rust](https://codecov.io/gh/radixdlt/Sargon/graph/badge.svg?token=8QPKIUSAQD&flag=rust)](https://app.codecov.io/gh/radixdlt/sargon?flags%5B0%5D=rust) | [![Kotlin](https://codecov.io/gh/radixdlt/Sargon/graph/badge.svg?token=8QPKIUSAQD&flag=kotlin)](https://app.codecov.io/gh/radixdlt/sargon?flags%5B0%5D=kotlin) | [![Swift](https://codecov.io/gh/radixdlt/Sargon/graph/badge.svg?token=8QPKIUSAQD&flag=swift)](https://app.codecov.io/gh/radixdlt/sargon?flags%5B0%5D=swift) |
 
 
 **Sargon is library for sharing code between Radix iOS/Android wallets.**
