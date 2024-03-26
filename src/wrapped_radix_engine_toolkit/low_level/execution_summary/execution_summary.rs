@@ -4,13 +4,11 @@ use crate::prelude::*;
 /// wallets present the contents of a transaction.
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
 pub struct ExecutionSummary {
-    /// Addresses of accounts withdrawn from in the manifest.
-    pub addresses_of_accounts_withdrawn_from:
-        HashMap<AccountAddress, Vec<ResourceIndicator>>,
+    /// Per account, a list of all token balances that has been withdrawn from that account.
+    pub withdrawals: HashMap<AccountAddress, Vec<ResourceIndicator>>,
 
-    /// Addresses of accounts deposited into in the manifest.
-    pub addresses_of_accounts_deposited_into:
-        HashMap<AccountAddress, Vec<ResourceIndicator>>,
+    /// Per account, a list of all token balances that has been deposited into that account.
+    pub deposits: HashMap<AccountAddress, Vec<ResourceIndicator>>,
 
     /// Addresses of accounts encountered in the manifest where privileged
     /// methods were called. The wallets will need to collect signatures
@@ -78,10 +76,8 @@ impl ExecutionSummary {
         new_entities: impl Into<NewEntities>,
     ) -> Self {
         Self {
-            addresses_of_accounts_withdrawn_from:
-                addresses_of_accounts_withdrawn_from.into(),
-            addresses_of_accounts_deposited_into:
-                addresses_of_accounts_deposited_into.into(),
+            withdrawals: addresses_of_accounts_withdrawn_from.into(),
+            deposits: addresses_of_accounts_deposited_into.into(),
             addresses_of_accounts_requiring_auth:
                 addresses_of_accounts_requiring_auth
                     .into_iter()
