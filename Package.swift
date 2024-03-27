@@ -3,6 +3,11 @@
 
 import PackageDescription
 
+let swiftSettings: [SwiftSetting] = [
+	.enableExperimentalFeature("StrictConcurrency"),
+	.unsafeFlags(["-warnings-as-errors"])
+]
+
 let sargonBinaryTargetName = "SargonCoreRS"
 let binaryTarget: Target
 let useLocalFramework = true
@@ -49,7 +54,8 @@ let package = Package(
 		.target(
 			name: "Sargon",
 			dependencies: [.target(name: "SargonUniFFI")],
-			path: "apple/Sources/Sargon"
+			path: "apple/Sources/Sargon",
+			swiftSettings: swiftSettings
 		),
 		.testTarget(
 			name: "SargonTests",
@@ -57,7 +63,8 @@ let package = Package(
 				.target(name: "Sargon"),
 				.product(name: "CustomDump", package: "swift-custom-dump"),
 			],
-			path: "apple/Tests"
+			path: "apple/Tests",
+			swiftSettings: swiftSettings
 		),
 	]
 )

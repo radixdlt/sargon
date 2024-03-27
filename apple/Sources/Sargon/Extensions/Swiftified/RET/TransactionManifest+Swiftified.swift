@@ -1,4 +1,3 @@
-extension TransactionManifest: @unchecked Sendable {}
 extension TransactionManifest: SargonModel {}
 
 // MARK: Build Manifest

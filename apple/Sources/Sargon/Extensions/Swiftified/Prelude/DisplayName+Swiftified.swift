@@ -1,4 +1,3 @@
-extension DisplayName: @unchecked Sendable {}
 extension DisplayName: SargonModel {}
 
 extension DisplayName: CustomStringConvertible {

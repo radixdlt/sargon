@@ -1,4 +1,3 @@
-extension Hash: @unchecked Sendable {}
 extension Hash: SargonModel {}
 
 extension Hash {

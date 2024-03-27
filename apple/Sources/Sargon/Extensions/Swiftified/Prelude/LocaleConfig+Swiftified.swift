@@ -1,4 +1,3 @@
-extension LocaleConfig: @unchecked Sendable {}
 extension LocaleConfig {
 	public init(locale: Locale) {
 		self.init(

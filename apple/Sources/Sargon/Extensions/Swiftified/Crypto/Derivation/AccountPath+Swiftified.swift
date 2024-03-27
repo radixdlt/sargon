@@ -1,4 +1,3 @@
-extension AccountPath: @unchecked Sendable {}
 extension AccountPath: SargonModel, CAP26PathProtocol {}
 
 extension AccountPath {

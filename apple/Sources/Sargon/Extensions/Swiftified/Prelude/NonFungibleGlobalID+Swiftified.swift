@@ -1,5 +1,4 @@
 public typealias NonFungibleGlobalID = NonFungibleGlobalId
-extension NonFungibleGlobalID: @unchecked Sendable {}
 extension NonFungibleGlobalID: SargonModel {}
 
 extension NonFungibleGlobalID {
