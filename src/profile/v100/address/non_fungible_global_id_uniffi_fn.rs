@@ -36,8 +36,10 @@ mod uniffi_tests {
         let global_id = SUT::sample();
 
         assert_eq!(
-            new_non_fungible_global_id_from_string(global_id.to_string())
-                .unwrap(),
+            new_non_fungible_global_id_from_string(
+                non_fungible_global_id_to_string(&global_id)
+            )
+            .unwrap(),
             global_id
         );
     }

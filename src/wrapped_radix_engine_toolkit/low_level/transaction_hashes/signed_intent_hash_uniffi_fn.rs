@@ -31,4 +31,9 @@ mod tests {
             2
         );
     }
+
+    #[test]
+    fn test_new_signed_intent_hash() {
+        assert_eq!(new_signed_intent_hash_from_string("signedintent_rdx1frcm6zzyfd08z0deu9x24sh64eccxeux4j2dv3dsqeuh9qsz4y6sxsk6nl".to_owned()).unwrap(), SUT::sample());
+    }
 }
