@@ -14,6 +14,10 @@ extension AccountAddress {
 			networkId: networkID
 		)
 	}
+    
+    public func formatted(_ format: AddressFormat = .default) -> String {
+        accountAddressFormatted(address: self, format: format)
+    }
 
 	/// The bech32 encoded string for this address.
 	public var address: String {
@@ -45,7 +49,7 @@ extension AccountAddress {
 	/// `account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease`
 	///
 	public var shortFormat: String {
-		accountAddressToShort(address: self)
+        formatted(AddressFormat.default)
 	}
 }
 

@@ -23,6 +23,21 @@ extension Address: AddressProtocol {
 	public func embed() -> Address {
 		self
 	}
+    
+    public func formatted(_ format: AddressFormat) -> String {
+        switch self {
+        case let .accesscontroller(address): address.formatted(format)
+        case let .account(address): address.formatted(format)
+        case let .component(address): address.formatted(format)
+        case let .identity(address): address.formatted(format)
+        case let .package(address): address.formatted(format)
+        case let .pool(address): address.formatted(format)
+        case let .resource(address): address.formatted(format)
+        case let .nonFungibleResource(address): address.formatted(format)
+        case let .validator(address): address.formatted(format)
+        case let .vault(address): address.formatted(format)
+        }
+    }
 	
 	public func mapTo(networkID: NetworkID) -> Address {
 		switch self {

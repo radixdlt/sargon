@@ -306,6 +306,24 @@ mod tests {
     }
 
     #[test]
+    fn formatted_full() {
+        assert_eq!(SUT::sample().formatted(AddressFormat::Full), "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd");
+    }
+
+    #[test]
+    fn formatted_raw() {
+        assert_eq!(SUT::sample().formatted(AddressFormat::Raw), "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd");
+    }
+
+    #[test]
+    fn formatted_default() {
+        assert_eq!(
+            SUT::sample().formatted(AddressFormat::Default),
+            "reso...radxrd"
+        );
+    }
+
+    #[test]
     fn display() {
         let s = "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd";
         let a = SUT::try_from_bech32(s).unwrap();

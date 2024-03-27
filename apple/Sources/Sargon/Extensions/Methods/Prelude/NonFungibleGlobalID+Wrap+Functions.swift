@@ -6,4 +6,8 @@ extension NonFungibleGlobalID {
     public func toString() -> String {
         nonFungibleGlobalIdToString(globalId: self)
     }
+    
+    public func formatted(_ format: AddressFormat = .default) -> String {
+        nonFungibleGlobalIdFormatted(globalId: self, format: format)
+    }
 }

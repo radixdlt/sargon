@@ -46,6 +46,27 @@ impl NonFungibleLocalId {
 }
 
 impl NonFungibleLocalId {
+    pub fn formatted(&self, format: AddressFormat) -> String {
+        match format {
+            AddressFormat::Default => match self {
+                NonFungibleLocalId::Ruid { value: _ } => {
+                    format_string(self.to_user_facing_string(), 4, 4)
+                }
+                _ => self.to_user_facing_string(),
+            },
+            AddressFormat::Full => self.to_user_facing_string(),
+            AddressFormat::Raw => self.to_string(),
+        }
+    }
+    pub fn to_user_facing_string(&self) -> String {
+        let mut raw = self.to_string();
+        _ = raw.drain(..1);
+        _ = raw.drain(raw.len() - 1..);
+        raw.to_owned()
+    }
+}
+
+impl NonFungibleLocalId {
     fn scrypto(&self) -> ScryptoNonFungibleLocalId {
         self.clone().into()
     }
@@ -186,6 +207,126 @@ mod tests {
     #[test]
     fn display_bytes() {
         assert_eq!(format!("{}", SUT::bytes([0xde, 0xad]).unwrap()), "[dead]");
+    }
+
+    #[test]
+    fn to_user_facing_string_variant_string() {
+        assert_eq!(SUT::string("foo").unwrap().to_user_facing_string(), "foo");
+    }
+
+    #[test]
+    fn to_user_facing_string_variant_integer() {
+        assert_eq!(SUT::integer(1234).to_user_facing_string(), "1234");
+    }
+
+    #[test]
+    fn to_user_facing_string_variant_bytes() {
+        assert_eq!(
+            SUT::bytes([0xde, 0xad]).unwrap().to_user_facing_string(),
+            "dead"
+        );
+    }
+
+    #[test]
+    fn to_user_facing_string_variant_ruid() {
+        assert_eq!( SUT::ruid(
+            hex_decode("deadbeef12345678babecafe87654321fadedeaf01234567ecadabba76543210").unwrap()
+        ).unwrap().to_user_facing_string(), "deadbeef12345678-babecafe87654321-fadedeaf01234567-ecadabba76543210");
+    }
+
+    #[test]
+    fn formatted_raw_variant_string() {
+        assert_eq!(
+            SUT::string("foo").unwrap().formatted(AddressFormat::Raw),
+            "<foo>"
+        );
+    }
+
+    #[test]
+    fn formatted_raw_variant_integer() {
+        assert_eq!(SUT::integer(1234).formatted(AddressFormat::Raw), "#1234#");
+    }
+
+    #[test]
+    fn formatted_raw_variant_bytes() {
+        assert_eq!(
+            SUT::bytes([0xde, 0xad])
+                .unwrap()
+                .formatted(AddressFormat::Raw),
+            "[dead]"
+        );
+    }
+
+    #[test]
+    fn formatted_raw_variant_ruid() {
+        assert_eq!( SUT::ruid(
+            hex_decode("deadbeef12345678babecafe87654321fadedeaf01234567ecadabba76543210").unwrap()
+        ).unwrap().formatted(AddressFormat::Raw), "{deadbeef12345678-babecafe87654321-fadedeaf01234567-ecadabba76543210}");
+    }
+
+    #[test]
+    fn formatted_default_variant_string() {
+        assert_eq!(
+            SUT::string("foo")
+                .unwrap()
+                .formatted(AddressFormat::Default),
+            "foo"
+        );
+    }
+
+    #[test]
+    fn formatted_default_variant_integer() {
+        assert_eq!(
+            SUT::integer(1234).formatted(AddressFormat::Default),
+            "1234"
+        );
+    }
+
+    #[test]
+    fn formatted_default_variant_bytes() {
+        assert_eq!(
+            SUT::bytes([0xde, 0xad])
+                .unwrap()
+                .formatted(AddressFormat::Default),
+            "dead"
+        );
+    }
+
+    #[test]
+    fn formatted_default_variant_ruid() {
+        assert_eq!( SUT::ruid(
+            hex_decode("deadbeef12345678babecafe87654321fadedeaf01234567ecadabba76543210").unwrap()
+        ).unwrap().formatted(AddressFormat::Default), "dead...3210");
+    }
+
+    #[test]
+    fn formatted_full_variant_string() {
+        assert_eq!(
+            SUT::string("foo").unwrap().formatted(AddressFormat::Full),
+            "foo"
+        );
+    }
+
+    #[test]
+    fn formatted_full_variant_integer() {
+        assert_eq!(SUT::integer(1234).formatted(AddressFormat::Full), "1234");
+    }
+
+    #[test]
+    fn formatted_full_variant_bytes() {
+        assert_eq!(
+            SUT::bytes([0xde, 0xad])
+                .unwrap()
+                .formatted(AddressFormat::Full),
+            "dead"
+        );
+    }
+
+    #[test]
+    fn formatted_full_variant_ruid() {
+        assert_eq!( SUT::ruid(
+            hex_decode("deadbeef12345678babecafe87654321fadedeaf01234567ecadabba76543210").unwrap()
+        ).unwrap().formatted(AddressFormat::Full), "deadbeef12345678-babecafe87654321-fadedeaf01234567-ecadabba76543210");
     }
 
     #[test]

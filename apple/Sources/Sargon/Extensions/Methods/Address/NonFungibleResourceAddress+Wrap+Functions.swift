@@ -15,6 +15,10 @@ extension NonFungibleResourceAddress {
     public var asResourceAddress: ResourceAddress {
         nonFungibleResourceAddressAsResourceAddress(address: self)
     }
+    
+    public func formatted(_ format: AddressFormat = .default) -> String {
+        asResourceAddress.formatted(format)
+    }
 }
 
 #if DEBUG

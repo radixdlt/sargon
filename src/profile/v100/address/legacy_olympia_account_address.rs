@@ -116,6 +116,15 @@ impl From<Secp256k1PublicKey> for LegacyOlympiaAccountAddress {
     }
 }
 
+impl LegacyOlympiaAccountAddress {
+    pub fn formatted(&self, format: AddressFormat) -> String {
+        match format {
+            AddressFormat::Default => format_string(self.to_string(), 3, 9),
+            AddressFormat::Full | AddressFormat::Raw => self.to_string(),
+        }
+    }
+}
+
 impl From<LegacyOlympiaAccountAddress> for AccountAddress {
     fn from(value: LegacyOlympiaAccountAddress) -> Self {
         value.to_babylon_account_address()
@@ -198,6 +207,30 @@ mod tests {
             format!("{}", SUT::sample_other()),
             "rdx1qsp8n0nx0muaewav2ksx99wwsu9swq5mlndjmn3gm9vl9q2mzmup0xqm2ylge"
         )
+    }
+
+    #[test]
+    fn formatted_default_short() {
+        assert_eq!(
+            SUT::sample_other().formatted(AddressFormat::Default),
+            "rdx...0xqm2ylge"
+        );
+    }
+
+    #[test]
+    fn formatted_full() {
+        assert_eq!(
+            SUT::sample_other().formatted(AddressFormat::Full),
+            "rdx1qsp8n0nx0muaewav2ksx99wwsu9swq5mlndjmn3gm9vl9q2mzmup0xqm2ylge"
+        );
+    }
+
+    #[test]
+    fn formatted_raw() {
+        assert_eq!(
+            SUT::sample_other().formatted(AddressFormat::Raw),
+            "rdx1qsp8n0nx0muaewav2ksx99wwsu9swq5mlndjmn3gm9vl9q2mzmup0xqm2ylge"
+        );
     }
 
     #[test]

@@ -11,6 +11,10 @@ extension ResourceAddress {
 	public var networkID: NetworkId {
 		resourceAddressNetworkId(address: self)
 	}
+    
+    public func formatted(_ format: AddressFormat = .default) -> String {
+        resourceAddressFormatted(address: self, format: format)
+    }
 
 	/// If this is an address of a **fungible** resource or not.
 	public var isFungible: Bool {

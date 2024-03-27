@@ -157,6 +157,17 @@ impl NonFungibleGlobalId {
     pub fn to_canonical_string(&self) -> String {
         format!("{}", self.engine().0)
     }
+
+    pub fn formatted(&self, format: AddressFormat) -> String {
+        match format {
+            AddressFormat::Default | AddressFormat::Full => format!(
+                "{}:{}",
+                self.resource_address.formatted(format),
+                self.non_fungible_local_id.formatted(format)
+            ),
+            AddressFormat::Raw => self.to_canonical_string(),
+        }
+    }
 }
 
 impl HasSampleValues for NonFungibleGlobalId {
@@ -171,6 +182,18 @@ impl HasSampleValues for NonFungibleGlobalId {
         Self::new(
             NonFungibleResourceAddress::sample_other(),
             NonFungibleLocalId::sample_other(),
+        )
+    }
+}
+
+impl NonFungibleGlobalId {
+    #[allow(unused)]
+    pub(crate) fn sample_ruid() -> Self {
+        Self::new(
+            NonFungibleResourceAddress::sample(),
+            NonFungibleLocalId::ruid(
+                hex_decode("deadbeef12345678babecafe87654321fadedeaf01234567ecadabba76543210").unwrap()
+            ).unwrap()
         )
     }
 }
@@ -256,6 +279,27 @@ mod tests {
     #[test]
     fn display() {
         assert_eq!(format!("{}", SUT::sample()), "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa:<Member_237>");
+    }
+
+    #[test]
+    fn formatted_raw() {
+        assert_eq!(SUT::sample_ruid().formatted(AddressFormat::Raw), "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa:{deadbeef12345678-babecafe87654321-fadedeaf01234567-ecadabba76543210}");
+    }
+
+    #[test]
+    fn formatted_default() {
+        assert_eq!(
+            SUT::sample_ruid().formatted(AddressFormat::Default),
+            "reso...c9wlxa:dead...3210"
+        );
+    }
+
+    #[test]
+    fn formatted_full() {
+        assert_eq!(
+            SUT::sample_ruid().formatted(AddressFormat::Full),
+            "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa:deadbeef12345678-babecafe87654321-fadedeaf01234567-ecadabba76543210"
+        );
     }
 
     #[test]

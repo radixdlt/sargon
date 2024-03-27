@@ -24,6 +24,14 @@ pub fn non_fungible_global_id_to_string(
     global_id.to_string()
 }
 
+#[uniffi::export]
+pub fn non_fungible_global_id_formatted(
+    global_id: &NonFungibleGlobalId,
+    format: AddressFormat,
+) -> String {
+    global_id.formatted(format)
+}
+
 #[cfg(test)]
 mod uniffi_tests {
     use super::*;
@@ -52,5 +60,14 @@ mod uniffi_tests {
             SUT::sample_other(),
             new_non_fungible_global_id_sample_other()
         );
+    }
+
+    #[test]
+    fn formatted_default() {
+        let sut = SUT::sample();
+        assert_eq!(
+            non_fungible_global_id_formatted(&sut, AddressFormat::Default),
+            sut.formatted(AddressFormat::Default)
+        )
     }
 }

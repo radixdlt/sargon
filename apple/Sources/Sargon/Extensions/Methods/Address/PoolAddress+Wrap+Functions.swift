@@ -4,6 +4,10 @@ extension PoolAddress {
 		self = try newPoolAddress(bech32: bech32String)
 	}
 
+    public func formatted(_ format: AddressFormat = .default) -> String {
+        poolAddressFormatted(address: self, format: format)
+    }
+    
 	/// The bech32 encoded string for this address.
 	public var address: String {
 		poolAddressBech32Address(address: self)

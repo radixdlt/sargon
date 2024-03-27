@@ -10,6 +10,10 @@ extension LegacyOlympiaAccountAddress {
             publicKey: publicKey
         )
 	}
+    
+    public func formatted(_ format: AddressFormat = .default) -> String {
+        legacyOlympiaAccountAddressFormatted(address: self, format: format)
+    }
 	
 	/// The bech32 encoded string for this address.
 	public var address: String {
