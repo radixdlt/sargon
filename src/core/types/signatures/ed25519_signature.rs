@@ -20,11 +20,22 @@ pub struct Ed25519Signature {
     pub bytes: Exactly64Bytes,
 }
 
+impl From<Exactly64Bytes> for Ed25519Signature {
+    fn from(value: Exactly64Bytes) -> Self {
+        Self { bytes: value }
+    }
+}
+
+impl TryFrom<BagOfBytes> for Ed25519Signature {
+    type Error = CommonError;
+    fn try_from(value: BagOfBytes) -> Result<Self> {
+        Exactly64Bytes::try_from(value).map(Self::from)
+    }
+}
+
 impl From<ScryptoEd25519Signature> for Ed25519Signature {
     fn from(value: ScryptoEd25519Signature) -> Self {
-        Self {
-            bytes: Exactly64Bytes::from(&value.0),
-        }
+        Self::from(Exactly64Bytes::from(&value.0))
     }
 }
 

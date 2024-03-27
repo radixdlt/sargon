@@ -5,6 +5,7 @@ use crate::prelude::*;
     Clone,
     Copy,
     Eq,
+    Hash,
     PartialEq,
     PartialOrd,
     Ord,

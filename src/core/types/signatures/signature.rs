@@ -19,6 +19,15 @@ pub enum Signature {
     Ed25519 { value: Ed25519Signature },
 }
 
+impl Signature {
+    pub fn to_bytes(&self) -> Vec<u8> {
+        match self {
+            Signature::Secp256k1 { value } => value.to_bytes(),
+            Signature::Ed25519 { value } => value.to_bytes(),
+        }
+    }
+}
+
 impl From<ScryptoSignature> for Signature {
     fn from(value: ScryptoSignature) -> Self {
         match value {
@@ -57,6 +66,22 @@ impl HasSampleValues for Signature {
 
     fn sample_other() -> Self {
         Secp256k1Signature::sample().into()
+    }
+}
+
+impl TryFrom<BagOfBytes> for Signature {
+    type Error = crate::CommonError;
+
+    fn try_from(value: BagOfBytes) -> Result<Self> {
+        if let Ok(sig) = Ed25519Signature::try_from(value.clone()) {
+            Ok(Self::Ed25519 { value: sig })
+        } else if let Ok(sig) = Secp256k1Signature::try_from(value.clone()) {
+            Ok(Self::Secp256k1 { value: sig })
+        } else {
+            Err(CommonError::FailedToParseSignatureFromBytes {
+                bad_value: value.to_hex(),
+            })
+        }
     }
 }
 
@@ -117,15 +142,38 @@ mod tests {
     }
 
     #[test]
-    fn parse_ed25519() {
+    fn parse_bad_bytes() {
+        let bytes = BagOfBytes::from_hex("dead").unwrap();
+        assert_eq!(
+            SUT::try_from(bytes),
+            Err(CommonError::FailedToParseSignatureFromBytes {
+                bad_value: "dead".to_owned()
+            })
+        );
+    }
+
+    #[test]
+    fn ed25519_from_str() {
         assert_eq!(
             "2150c2f6b6c496d197ae03afb23f6adf23b275c675394f23786250abd006d5a2c7543566403cb414f70d0e229b0a9b55b4c74f42fc38cdf1aba2307f97686f0b".parse::<SUT>().unwrap(), SUT::sample());
     }
 
     #[test]
-    fn parse_secp256k1() {
+    fn ed25519_from_bag_of_bytes() {
+        let bytes: BagOfBytes = "2150c2f6b6c496d197ae03afb23f6adf23b275c675394f23786250abd006d5a2c7543566403cb414f70d0e229b0a9b55b4c74f42fc38cdf1aba2307f97686f0b".parse().unwrap();
+        assert_eq!(SUT::try_from(bytes).unwrap(), SUT::sample());
+    }
+
+    #[test]
+    fn secp256k1_from_str() {
         assert_eq!(
             "018ad795353658a0cd1b513c4414cbafd0f990d329522977f8885a27876976a7d41ed8a81c1ac34551819627689cf940c4e27cacab217f00a0a899123c021ff6ef".parse::<SUT>().unwrap(), SUT::sample_other());
+    }
+
+    #[test]
+    fn secp256k1_from_bag_of_bytes() {
+        let bytes: BagOfBytes = "018ad795353658a0cd1b513c4414cbafd0f990d329522977f8885a27876976a7d41ed8a81c1ac34551819627689cf940c4e27cacab217f00a0a899123c021ff6ef".parse().unwrap();
+        assert_eq!(SUT::try_from(bytes).unwrap(), SUT::sample_other());
     }
 
     #[test]

@@ -5,20 +5,17 @@ public protocol BaseBinaryProtocol: SargonModel {}
 #endif
 
 public protocol BinaryProtocol: BaseBinaryProtocol, CustomStringConvertible {
+	associatedtype Digest
 	init(hex: String) throws
 	init(bytes: some DataProtocol) throws
 	
 	var data: Data { get }
 	var hex: String { get }
 	
-	func hash() -> Exactly32Bytes
+	func hash() -> Digest
 }
 
 extension BinaryProtocol {
-	
-	public func hash() -> Exactly32Bytes {
-		data.hash()
-	}
 	
 	public init(hex: String) throws {
 		try self.init(bytes: Data(hex: hex))
@@ -26,6 +23,12 @@ extension BinaryProtocol {
 	
 	public var description: String {
 		hex
+	}
+}
+
+extension BinaryProtocol where Digest == Exactly32Bytes {
+	public func hash() -> Exactly32Bytes {
+		data.hash()
 	}
 }
 

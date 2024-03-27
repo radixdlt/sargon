@@ -3,9 +3,8 @@
 
 import PackageDescription
 
-let swiftSettings: [SwiftSetting] = [
-	.enableExperimentalFeature("StrictConcurrency"),
-	.unsafeFlags(["-warnings-as-errors"])
+var swiftSettings: [SwiftSetting] = [
+	.enableExperimentalFeature("StrictConcurrency")
 ]
 
 let sargonBinaryTargetName = "SargonCoreRS"
@@ -18,6 +17,12 @@ if useLocalFramework {
 		// IMPORTANT: Swift packages importing this locally will not be able to
 		// import SargonCore unless you specify this as a relative path!
 		path: "./target/swift/libsargon-rs.xcframework"
+	)
+	
+	// MUST NOT be part of release, since results in compilation error:
+	// The package product 'Sargon' cannot be used as a dependency of this target because it uses unsafe build flags.
+	swiftSettings.append(
+		.unsafeFlags(["-warnings-as-errors"])
 	)
 } else {
 	let releaseTag = "0.1.0"
