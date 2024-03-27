@@ -8,25 +8,25 @@ pub(crate) fn kotlin_transform(
     needle: &str,
     contents: String,
 ) -> Result<String, BindgenError> {
-    let mut contents = contents;
-
-    // Replace `var` -> `internal val`
-    let stored_props_from = format!("var `{}`", needle);
-    let stored_props_to = format!("internal val `{}`", needle);
-    contents = contents.replace(&stored_props_from, &stored_props_to);
-    println!(
-        "🔮 Post processing Kotlin: Made '{}' properties private and immutable. ✨ ",
-        needle
-    );
-
-    let secret_magic_regex = Regex::new(
+    Regex::new(
         r"(.*class \w+) (\(\n{0,1}.*\n{0,1}.*secretMagic.*\n{0,1}\))",
-    )
-    .unwrap();
-    contents = secret_magic_regex
-        .replace_all(&contents, "$1 internal constructor $2")
-        .to_string();
+    ).map(|regex| {
+        println!("🔮 Post processing Kotlin: Hiding some dangerous initializers. ✨ ");
+        regex.replace_all(&contents, "$1 internal constructor $2")
+    }).map(|modified| {
+        println!(
+            "🔮 Post processing Kotlin: Made '{}' properties private and immutable. ✨ ",
+            needle
+        );
 
-    println!("🔮 Post processing Kotlin: Hid some dangerous initializers. ✨ ");
-    Ok(contents)
+        modified.replace(
+            &format!("var `{}`", needle), 
+            &format!("internal val `{}`", needle)
+        )
+    }).map_err(|e| {
+        BindgenError::WriteFile {
+            path: needle.to_owned(),
+            reason: format!("{:?}", e),
+        }
+    })
 }
