@@ -5,7 +5,7 @@ import PackageDescription
 
 let sargonBinaryTargetName = "SargonCoreRS"
 let binaryTarget: Target
-let useLocalFramework = true
+let useLocalFramework = false
 
 if useLocalFramework {
 	binaryTarget = .binaryTarget(
@@ -15,8 +15,8 @@ if useLocalFramework {
 		path: "./target/swift/libsargon-rs.xcframework"
 	)
 } else {
-	let releaseTag = "0.1.0"
-	let releaseChecksum = "befef7d56108305ff6ff69d67483471395c3e603e299b3b15f5a826328de272b"
+	let releaseTag = "0.4.9"
+	let releaseChecksum = "9b88f49ae71b043f7017ee84de814691f401c1c308608d2cfbe0feaa51a18369"
 	binaryTarget = .binaryTarget(
 		name: sargonBinaryTargetName,
 		url:
