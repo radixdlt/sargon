@@ -1,20 +1,8 @@
 extern crate sargon;
+use regex::Regex;
 use sargon::prelude::*;
 
 use crate::bindgen_error::BindgenError;
-
-macro_rules! name_of {
-    ($type: ty) => {{
-        const STRINGIFIED: &'static str = stringify!($type);
-
-        const _: () = {
-            // forces a check that the type actually exists.
-            type X = $type;
-        };
-
-        STRINGIFIED
-    }};
-}
 
 pub(crate) fn kotlin_transform(
     needle: &str,
@@ -30,33 +18,14 @@ pub(crate) fn kotlin_transform(
         "🔮 Post processing Kotlin: Made '{}' properties private and immutable. ✨ ",
         needle
     );
-    let mut hide = |t| {
-        contents = contents.replace(
-            &format!("data class {}(", t),
-            &format!("data class {} internal constructor(", t),
-        );
-    };
 
-    // Keys
-    hide(name_of!(Ed25519PublicKey));
-    hide(name_of!(Secp256k1PublicKey));
-
-    // Radix Engine (Toolkit) things
-    hide(name_of!(Instructions));
-    hide(name_of!(TransactionManifest));
-    hide(name_of!(Decimal192));
-    hide(name_of!(NonFungibleLocalIdString));
-
-    // Addresses
-    hide(name_of!(AccessControllerAddress));
-    hide(name_of!(AccountAddress));
-    hide(name_of!(ComponentAddress));
-    hide(name_of!(IdentityAddress));
-    hide(name_of!(PackageAddress));
-    hide(name_of!(PoolAddress));
-    hide(name_of!(ResourceAddress));
-    hide(name_of!(ValidatorAddress));
-    hide(name_of!(VaultAddress));
+    let secret_magic_regex = Regex::new(
+        r"(.*class \w+) (\(\n{0,1}.*\n{0,1}.*secretMagic.*\n{0,1}\))",
+    )
+    .unwrap();
+    contents = secret_magic_regex
+        .replace_all(&contents, "$1 internal constructor $2")
+        .to_string();
 
     println!("🔮 Post processing Kotlin: Hid some dangerous initializers. ✨ ");
     Ok(contents)

@@ -1989,6 +1989,7 @@ dependencies = [
  "radix-engine-toolkit",
  "radix-engine-toolkit-json",
  "rand 0.8.5",
+ "regex",
  "sbor",
  "schemars",
  "serde",
