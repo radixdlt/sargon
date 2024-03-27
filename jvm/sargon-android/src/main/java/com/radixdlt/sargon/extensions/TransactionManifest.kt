@@ -2,12 +2,16 @@ package com.radixdlt.sargon.extensions
 
 import com.radixdlt.sargon.AccountAddress
 import com.radixdlt.sargon.AddressOfAccountOrPersona
+import com.radixdlt.sargon.BagOfBytes
 import com.radixdlt.sargon.Blobs
 import com.radixdlt.sargon.Decimal192
+import com.radixdlt.sargon.ManifestSummary
 import com.radixdlt.sargon.NetworkId
 import com.radixdlt.sargon.PerAssetTransfers
 import com.radixdlt.sargon.PerRecipientAssetTransfers
+import com.radixdlt.sargon.PoolAddress
 import com.radixdlt.sargon.PublicKeyHash
+import com.radixdlt.sargon.ResourceAddress
 import com.radixdlt.sargon.StakeClaim
 import com.radixdlt.sargon.ThirdPartyDeposits
 import com.radixdlt.sargon.TokenDefinitionMetadata
@@ -29,8 +33,12 @@ import com.radixdlt.sargon.modifyManifestAddGuarantees
 import com.radixdlt.sargon.modifyManifestLockFee
 import com.radixdlt.sargon.newTransactionManifestFromInstructionsStringAndBlobs
 import com.radixdlt.sargon.transactionManifestBlobs
+import com.radixdlt.sargon.transactionManifestExecutionSummary
 import com.radixdlt.sargon.transactionManifestInstructionsString
+import com.radixdlt.sargon.transactionManifestInvolvedPoolAddresses
+import com.radixdlt.sargon.transactionManifestInvolvedResourceAddresses
 import com.radixdlt.sargon.transactionManifestNetworkId
+import com.radixdlt.sargon.transactionManifestSummary
 import com.radixdlt.sargon.utils.KoverIgnore
 
 @Throws(SargonException::class)
@@ -155,3 +163,16 @@ val TransactionManifest.networkId: NetworkId
 
 val TransactionManifest.blobs: Blobs
     get() = transactionManifestBlobs(manifest = this)
+
+val TransactionManifest.involvedPoolAddresses: List<PoolAddress>
+    get() = transactionManifestInvolvedPoolAddresses(manifest = this)
+
+val TransactionManifest.involvedResourceAddresses: List<ResourceAddress>
+    get() = transactionManifestInvolvedResourceAddresses(manifest = this)
+
+val TransactionManifest.summary: ManifestSummary
+    get() = transactionManifestSummary(manifest = this)
+
+@Throws(SargonException::class)
+fun TransactionManifest.executionSummary(encodedReceipt: BagOfBytes) =
+    transactionManifestExecutionSummary(manifest = this, encodedReceipt = encodedReceipt)

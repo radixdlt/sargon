@@ -6,6 +6,7 @@ import com.radixdlt.sargon.extensions.createFungibleTokenWithMetadata
 import com.radixdlt.sargon.extensions.createMultipleFungibleTokens
 import com.radixdlt.sargon.extensions.createMultipleNonFungibleTokens
 import com.radixdlt.sargon.extensions.createNonFungibleToken
+import com.radixdlt.sargon.extensions.executionSummary
 import com.radixdlt.sargon.extensions.faucet
 import com.radixdlt.sargon.extensions.fromInt
 import com.radixdlt.sargon.extensions.hexToBagOfBytes
@@ -18,13 +19,18 @@ import com.radixdlt.sargon.extensions.perRecipientTransfers
 import com.radixdlt.sargon.extensions.setOwnerKeysHashes
 import com.radixdlt.sargon.extensions.stakesClaim
 import com.radixdlt.sargon.extensions.instructionsString
+import com.radixdlt.sargon.extensions.involvedPoolAddresses
+import com.radixdlt.sargon.extensions.involvedResourceAddresses
 import com.radixdlt.sargon.extensions.networkId
 import com.radixdlt.sargon.extensions.string
+import com.radixdlt.sargon.extensions.summary
 import com.radixdlt.sargon.extensions.thirdPartyDepositUpdate
+import com.radixdlt.sargon.extensions.toBagOfBytes
 import com.radixdlt.sargon.extensions.toDecimal192
 import com.radixdlt.sargon.extensions.xrd
 import com.radixdlt.sargon.samples.Sample
 import com.radixdlt.sargon.samples.sample
+import com.radixdlt.sargon.samples.sampleMainnet
 import com.radixdlt.sargon.samples.sampleStokenet
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -40,31 +46,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
 
     @Test
     fun test() {
-        val instructionsString = """
-            CALL_METHOD
-                Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
-                "lock_fee"
-                Decimal("0.61")
-            ;
-            CALL_METHOD
-                Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
-                "withdraw"
-                Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
-                Decimal("1337")
-            ;
-            TAKE_FROM_WORKTOP
-                Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
-                Decimal("1337")
-                Bucket("bucket1")
-            ;
-            CALL_METHOD
-                Address("account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master")
-                "try_deposit_or_abort"
-                Bucket("bucket1")
-                Enum<0u8>()
-            ;
-        
-        """.trimIndent()
+        val instructionsString = TransactionManifest.sample().instructionsString
 
         val manifest = TransactionManifest.init(
             instructionsString = instructionsString,
@@ -369,6 +351,43 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
         }
     }
 
+    @Test
+    fun test_involved_resource_addresses() {
+        assertEquals(
+            listOf(ResourceAddress.sampleMainnet.xrd),
+            TransactionManifest.sample().involvedResourceAddresses
+        )
+    }
+
+    @Test
+    fun test_involved_pool_addresses() {
+        assertEquals(
+            emptyList<PoolAddress>(),
+            TransactionManifest.sample().involvedPoolAddresses
+        )
+    }
+
+    @Test
+    fun test_summary() {
+        assertEquals(
+            listOf(AccountAddress.sampleMainnet()),
+            TransactionManifest.sample().summary.addressesOfAccountsWithdrawnFrom
+        )
+    }
+
+    @Test
+    fun test_execution_summary() {
+        val name = "transfer_1to2_multiple_nf_and_f_tokens"
+        val receipt = encodedReceipt(name)
+        val manifest = manifest(name)
+
+        val summary = manifest.executionSummary(encodedReceipt = receipt)
+        assertEquals(
+            listOf(AccountAddress.init("account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk")),
+            summary.addressesOfAccountsRequiringAuth
+        )
+    }
+
     private fun String.occurrences(substring: String): Int {
         val matcher = Pattern.compile(substring).matcher(this)
         var counter = 0
@@ -386,5 +405,11 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
         ).readText(),
         networkId = NetworkId.STOKENET
     )
+
+    private fun encodedReceipt(name: String): BagOfBytes = File(
+        "../../" +
+                "src/wrapped_radix_engine_toolkit/low_level/" +
+                "transaction_manifest/execution_summary/$name.dat"
+    ).readText().hexToBagOfBytes()
 
 }
