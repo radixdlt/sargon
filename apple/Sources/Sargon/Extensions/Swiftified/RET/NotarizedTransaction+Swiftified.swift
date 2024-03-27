@@ -1,0 +1,1 @@
+extension NotarizedTransaction: SargonModel {}

@@ -392,6 +392,9 @@ pub enum CommonError {
 
     #[error("Invalid Olympia address, not mainnet: {bad_value}")]
     InvalidAddressNotOlympiaMainnet { bad_value: String } = 10107,
+
+    #[error("Failed to parse Signature from {bad_value}")]
+    FailedToParseSignatureFromBytes { bad_value: String } = 10108,
 }
 
 /*

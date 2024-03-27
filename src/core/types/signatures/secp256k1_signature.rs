@@ -21,11 +21,22 @@ pub struct Secp256k1Signature {
     pub bytes: Exactly65Bytes,
 }
 
+impl TryFrom<BagOfBytes> for Secp256k1Signature {
+    type Error = CommonError;
+    fn try_from(value: BagOfBytes) -> Result<Self> {
+        Exactly65Bytes::try_from(value).map(Self::from)
+    }
+}
+
+impl From<Exactly65Bytes> for Secp256k1Signature {
+    fn from(value: Exactly65Bytes) -> Self {
+        Self { bytes: value }
+    }
+}
+
 impl From<ScryptoSecp256k1Signature> for Secp256k1Signature {
     fn from(value: ScryptoSecp256k1Signature) -> Self {
-        Self {
-            bytes: Exactly65Bytes::from(&value.0),
-        }
+        Self::from(Exactly65Bytes::from(&value.0))
     }
 }
 

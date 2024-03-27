@@ -15,7 +15,11 @@ class BinaryProtocolTest<SUT_: BinaryProtocol>: Test<SUT_> {
 
 }
 
-class PublicKeyTest<SUT_: PublicKeyProtocol>: BinaryProtocolTest<SUT_> {}
+class PublicKeyTest<SUT_: PublicKeyProtocol>: BinaryProtocolTest<SUT_> {
+	
+}
+class SignatureTest<SUT_: SignatureProtocol>: BinaryProtocolTest<SUT_> {}
+
 class ExactlyNBytesTest<SUT_: ExactlyNBytesProtocol>: BinaryProtocolTest<SUT_> {
 	func test_length() throws {
 		SUT.allCases.forEach {

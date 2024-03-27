@@ -16,4 +16,8 @@ final class PublicKeyTests: PublicKeyTest<PublicKey> {
 		XCTAssertEqual(SUT.sampleOther, "043083620d1596d3f8988ff3270e42970dd2a031e2b9b6488052a4170ff999f3e8ab3efd3320b8f893cb421ed7ff0aa9ff43b43cad4e00e194f89845c6ac8233a7")
 		
 	}
+	
+	func test_embed_is_identity() {
+		XCTAssertEqual(SUT.sample, SUT.sample.embed())
+	}
 }

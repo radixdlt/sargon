@@ -1,0 +1,1 @@
+extension NotarySignature: SargonModel {}
