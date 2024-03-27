@@ -1,4 +1,3 @@
-extension SignedIntentHash: @unchecked Sendable {}
 extension SignedIntentHash: SargonModel {}
 
 extension SignedIntentHash: CustomStringConvertible {

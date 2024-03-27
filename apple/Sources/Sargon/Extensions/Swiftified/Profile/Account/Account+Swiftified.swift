@@ -1,4 +1,3 @@
-extension Account: @unchecked Sendable {}
 extension Account: EntityProtocol {}
 
 extension Account {

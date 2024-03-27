@@ -1,4 +1,3 @@
-extension Blobs: @unchecked Sendable {}
 extension Blobs: SargonModel {}
 
 extension Blobs: ExpressibleByArrayLiteral {

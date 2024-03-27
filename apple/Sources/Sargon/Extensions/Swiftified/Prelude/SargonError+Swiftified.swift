@@ -8,4 +8,3 @@
 import Foundation
 
 public typealias SargonError = CommonError
-extension SargonError: @unchecked Sendable {}

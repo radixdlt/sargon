@@ -1,4 +1,3 @@
-extension Decimal192: @unchecked Sendable {}
 extension Decimal192: SargonModel {}
 
 #if DEBUG

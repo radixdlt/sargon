@@ -1,4 +1,3 @@
-extension IdentityPath: @unchecked Sendable {}
 extension IdentityPath: SargonModel, CAP26PathProtocol {}
 
 extension IdentityPath {

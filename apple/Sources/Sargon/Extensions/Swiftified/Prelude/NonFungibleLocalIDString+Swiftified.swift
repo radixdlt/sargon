@@ -1,5 +1,4 @@
 public typealias NonFungibleLocalIDString = NonFungibleLocalIdString
-extension NonFungibleLocalIDString: @unchecked Sendable {}
 extension NonFungibleLocalIDString: SargonModel {}
 
 #if DEBUG

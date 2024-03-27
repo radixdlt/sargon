@@ -1,4 +1,3 @@
-extension Profile: @unchecked Sendable {}
 extension Profile: SargonModel {}
 
 extension Profile: Identifiable {
