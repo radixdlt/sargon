@@ -62,7 +62,7 @@ enum-as-inner = "0.6.0"
 identified_vec = { version = "0.1.11", features = ["serde", "id_prim"] }
 nutype = { version = "0.4.0", features = ["serde"] }
 schemars = { version = "0.8.12", features = ["preserve_order"] }
-uniffi = { git = "https://github.com/mozilla/uniffi-rs", rev = "6b09f11a427937183a99d311f04e6227d82d4f34", features = ["cli"] }
+uniffi = { version = "0.27.0", features = ["cli"] }
 pretty_assertions = "1.4.0"
 slip10 = "0.4.3"
 memoize = "0.4.1"
@@ -75,8 +75,8 @@ clap = { version = "4", default-features = false, features = ["std", "derive"] }
 camino = "1.0.8"
 
 [build-dependencies]
-uniffi = { git = "https://github.com/mozilla/uniffi-rs", rev = "6b09f11a427937183a99d311f04e6227d82d4f34", features = ["build"] }
+uniffi = { version = "0.27.0", features = ["build"] }
 cargo_toml = { version = "0.15.3" }
 
 [dev-dependencies]
-uniffi = { git = "https://github.com/mozilla/uniffi-rs", rev = "6b09f11a427937183a99d311f04e6227d82d4f34", features = ["bindgen-tests"] }
+uniffi = { version = "0.27.0", features = ["bindgen-tests"] }
