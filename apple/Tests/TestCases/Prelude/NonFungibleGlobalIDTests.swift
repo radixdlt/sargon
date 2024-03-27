@@ -26,4 +26,8 @@ final class NonFungibleGlobalIDTests: Test<NonFungibleGlobalID> {
             try SUT(string: "super invalid string!!!!")
         )
     }
+	
+	func test_id_is_description() {
+		XCTAssertEqual(SUT.sample.id, SUT.sample.description)
+	}
 }

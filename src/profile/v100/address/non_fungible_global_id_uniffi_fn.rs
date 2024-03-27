@@ -17,6 +17,13 @@ pub fn new_non_fungible_global_id_sample_other() -> NonFungibleGlobalId {
     NonFungibleGlobalId::sample_other()
 }
 
+#[uniffi::export]
+pub fn non_fungible_global_id_to_string(
+    global_id: &NonFungibleGlobalId,
+) -> String {
+    global_id.to_string()
+}
+
 #[cfg(test)]
 mod uniffi_tests {
     use super::*;
@@ -29,8 +36,10 @@ mod uniffi_tests {
         let global_id = SUT::sample();
 
         assert_eq!(
-            new_non_fungible_global_id_from_string(global_id.to_string())
-                .unwrap(),
+            new_non_fungible_global_id_from_string(
+                non_fungible_global_id_to_string(&global_id)
+            )
+            .unwrap(),
             global_id
         );
     }

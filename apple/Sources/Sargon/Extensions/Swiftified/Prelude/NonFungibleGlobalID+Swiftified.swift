@@ -14,6 +14,18 @@ extension NonFungibleGlobalID {
     }
 }
 
+extension NonFungibleGlobalID: CustomStringConvertible {
+    public var description: String {
+        toString()
+    }
+}
+
+extension NonFungibleGlobalID: Identifiable {
+    public typealias ID = String
+    public var id: String {
+        toString()
+    }
+}
 
 #if DEBUG
 extension NonFungibleGlobalID: ExpressibleByStringLiteral {

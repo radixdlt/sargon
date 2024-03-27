@@ -112,6 +112,15 @@ mod tests {
     }
 
     #[test]
+    fn hash() {
+        assert_eq!(SUT::sample().hash().to_string(), "signedintent_sim1ul0kjuvd63sslhxy869zdk4k3vcdg9e9244xwpuck4dyndzx9wnqrhxy5d");
+        assert_eq!(
+            hex_encode(SUT::sample().hash().hash),
+            "e7df69718dd4610fdcc43e8a26dab68b30d41725556a670798b55a49b4462ba6"
+        );
+    }
+
+    #[test]
     fn many_intent_signatures_all_valid() {
         let intent = TransactionIntent::sample_other();
 
