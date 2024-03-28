@@ -398,18 +398,17 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
     }
 
     private fun manifest(name: String) = TransactionManifest.init(
-        instructionsString = File(
-            "../../" +
-                    "src/wrapped_radix_engine_toolkit/low_level/" +
-                    "transaction_manifest/execution_summary/$name.rtm"
-        ).readText(),
+        instructionsString = openFile(name, "rtm").readText(),
         networkId = NetworkId.STOKENET
     )
 
-    private fun encodedReceipt(name: String): BagOfBytes = File(
+    private fun encodedReceipt(name: String): BagOfBytes = openFile(name, "dat")
+        .readText()
+        .hexToBagOfBytes()
+
+    private fun openFile(name: String, extension: String) = File(
         "../../" +
                 "src/wrapped_radix_engine_toolkit/low_level/" +
-                "transaction_manifest/execution_summary/$name.dat"
-    ).readText().hexToBagOfBytes()
-
+                "transaction_manifest/execution_summary/$name.$extension"
+    )
 }
