@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 extension Secp256k1Signature {
 	public init(bytes: some DataProtocol) throws {
 		self = try newSecp256k1SignatureFromBytes(bytes: Data(bytes))

@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 #if DEBUG
 extension NotarySignature {
 	public static let sample: Self = newNotarySignatureSample()

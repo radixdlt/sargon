@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 #if DEBUG
 extension PackageAddress {
 	public static let sampleMainnet: Self = newPackageAddressSampleMainnet()

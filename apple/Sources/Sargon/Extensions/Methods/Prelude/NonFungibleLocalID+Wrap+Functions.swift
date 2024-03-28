@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 extension NonFungibleLocalID {
 	public func toString() -> String {
 		nonFungibleLocalIdAsStr(id: self)

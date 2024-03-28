@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 #if DEBUG
 extension AccountPath {
     public static let sample: Self = newAccountPathSample()

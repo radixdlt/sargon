@@ -1,3 +1,4 @@
+import SargonUniFFI
 
 #if DEBUG
 extension NetworkID {

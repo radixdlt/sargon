@@ -24,7 +24,7 @@ class AddressOfAccountOrPersonaTest: SampleTestable<AddressOfAccountOrPersona> {
             assertEquals(NetworkId.MAINNET, networkId)
         }
 
-        assertThrows<CommonException.InvalidAccountAddress> {
+        assertThrows<CommonException.FailedToDecodeAddressFromBech32> {
             AddressOfAccountOrPersona.init(validating = PackageAddress.sampleMainnet().string)
         }
     }

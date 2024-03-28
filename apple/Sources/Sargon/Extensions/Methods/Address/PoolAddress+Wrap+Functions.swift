@@ -1,3 +1,4 @@
+import SargonUniFFI
 
 extension PoolAddress {
 	public init(validatingAddress bech32String: String) throws {

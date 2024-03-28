@@ -37,7 +37,7 @@ macro_rules! decl_ret_wrapped_address {
         $(
             #[doc = $expr: expr]
         )*
-        $address_type:ident
+        $address_type: ident
     ) => {
         paste! {
             $(
@@ -49,7 +49,6 @@ macro_rules! decl_ret_wrapped_address {
                 PartialEq,
                 Eq,
                 Hash,
-                derive_more::FromStr,
                 derive_more::Display,
                 derive_more::Debug,
                 SerializeDisplay,
@@ -111,6 +110,13 @@ macro_rules! decl_ret_wrapped_address {
             impl From<[< Ret $address_type:camel Address >]> for [< $address_type:camel Address >] {
                 fn from(value: [< Ret $address_type:camel Address >]) -> Self {
                     Self { secret_magic: value }
+                }
+            }
+
+            impl FromStr for [< $address_type:camel Address >] {
+                type Err = CommonError;
+                fn from_str(s: &str) -> Result<Self> {
+                    Self::try_from_bech32(s)
                 }
             }
 

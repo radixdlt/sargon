@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 #if DEBUG
 extension BIP44LikePath {
     public static let sample: Self = newBip44LikePathSample()

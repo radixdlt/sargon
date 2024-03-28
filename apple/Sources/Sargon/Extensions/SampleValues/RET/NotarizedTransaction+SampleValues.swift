@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 #if DEBUG
 extension NotarizedTransaction {
 	public static let sample: Self = newNotarizedTransactionSample()

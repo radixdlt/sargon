@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 extension Decimal192 {
 	
 	public init(_ string: String) throws {

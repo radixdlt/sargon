@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 #if DEBUG
 extension ComponentAddress {
 	public static let sampleMainnet: Self = newComponentAddressSampleMainnetGlobal()

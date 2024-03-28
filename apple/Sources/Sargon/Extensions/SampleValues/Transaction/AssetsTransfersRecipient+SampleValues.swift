@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 #if DEBUG
 extension AssetsTransfersRecipient {
 	public static let sample: Self = newAssetsTransfersRecipientSample()

@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 extension IntentSignature {
     public init(signatureWithPublicKey: SignatureWithPublicKey) {
         self = newIntentSignatureFromSignatureWithPublicKey(

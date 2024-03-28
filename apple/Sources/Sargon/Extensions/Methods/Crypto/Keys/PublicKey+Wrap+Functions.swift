@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 extension PublicKey {
 	public init(hex: String) throws {
 		self = try newPublicKeyFromHex(hex: hex)

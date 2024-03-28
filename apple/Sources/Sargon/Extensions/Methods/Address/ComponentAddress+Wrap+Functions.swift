@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 extension ComponentAddress {
 	public init(validatingAddress bech32String: String) throws {
 		self = try newComponentAddress(bech32: bech32String)

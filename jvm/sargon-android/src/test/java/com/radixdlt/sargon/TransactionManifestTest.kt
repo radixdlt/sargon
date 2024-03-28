@@ -286,7 +286,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
     fun testSetOwnerKeyHashes() {
         val manifest = TransactionManifest.setOwnerKeysHashes(
             addressOfAccountOrPersona = AddressOfAccountOrPersona.Account(
-                address = AccountAddress.init("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+                AccountAddress.init("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
             ),
             ownerKeyHashes = listOf(
                 PublicKeyHash.Ed25519(

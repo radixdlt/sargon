@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 extension AccessControllerAddress {
 	public init(validatingAddress bech32String: String) throws {
 		self = try newAccessControllerAddress(bech32: bech32String)
@@ -20,7 +22,7 @@ extension AccessControllerAddress {
 #if DEBUG
 extension AccessControllerAddress {
 	public func embed() -> Address {
-		.accesscontroller(self)
+		.accessController(self)
 	}
 	public func mapTo(networkID: NetworkID) -> Self {
 		accessControllerAddressMapToNetwork(address: self, networkId: networkID)

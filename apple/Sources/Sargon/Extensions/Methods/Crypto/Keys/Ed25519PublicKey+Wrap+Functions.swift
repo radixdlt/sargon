@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 // MARK: Initializers
 extension Ed25519PublicKey {
     public init(hex: String) throws {

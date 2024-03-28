@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 extension BIP44LikePath {
     public init(string: String) throws {
         self = try newBip44LikePathFromString(string: string)

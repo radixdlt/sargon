@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 extension LegacyOlympiaAccountAddress {
 	public init(validatingAddress bech32String: String) throws {
         self = try newLegacyOlympiaAccountAddressFromString(

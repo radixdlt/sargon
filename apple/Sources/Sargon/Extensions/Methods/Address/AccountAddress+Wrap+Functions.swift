@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 extension AccountAddress {
 	public init(
 		validatingAddress bech32String: String

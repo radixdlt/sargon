@@ -22,22 +22,40 @@ pub fn vault_address_is_non_fungible(address: &VaultAddress) -> bool {
 
 #[uniffi::export]
 pub fn new_vault_address_sample_mainnet_fungible() -> VaultAddress {
-    VaultAddress::sample_mainnet_fungible()
+    VaultAddress::sample_mainnet()
 }
 
 #[uniffi::export]
 pub fn new_vault_address_sample_mainnet_non_fungible() -> VaultAddress {
-    VaultAddress::sample_mainnet_non_fungible()
+    VaultAddress::sample_mainnet_other()
 }
 
 #[uniffi::export]
 pub fn new_vault_address_sample_stokenet_fungible() -> VaultAddress {
-    VaultAddress::sample_stokenet_fungible()
+    VaultAddress::sample_stokenet()
 }
 
 #[uniffi::export]
 pub fn new_vault_address_sample_stokenet_non_fungible() -> VaultAddress {
-    VaultAddress::sample_stokenet_non_fungible()
+    VaultAddress::sample_stokenet_other()
+}
+
+impl VaultAddress {
+    pub(crate) fn sample_mainnet() -> Self {
+        Self::sample_mainnet_fungible()
+    }
+
+    pub(crate) fn sample_mainnet_other() -> Self {
+        Self::sample_mainnet_non_fungible()
+    }
+
+    pub(crate) fn sample_stokenet() -> Self {
+        Self::sample_stokenet_fungible()
+    }
+
+    pub(crate) fn sample_stokenet_other() -> Self {
+        Self::sample_stokenet_non_fungible()
+    }
 }
 
 impl VaultAddress {

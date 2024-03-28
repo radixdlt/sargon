@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 // MARK: Initializers
 extension Secp256k1PublicKey {
 	public init(hex: String) throws {

@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 #if DEBUG
 extension Blobs {
 	public static let sample: Self = newBlobsSample()

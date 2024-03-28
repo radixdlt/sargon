@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 #if DEBUG
 extension Ed25519Signature {
 	public static let sample: Self = newEd25519SignatureSample()

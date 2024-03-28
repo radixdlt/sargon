@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 #if DEBUG
 extension SignedIntentHash {
     public static let sample: Self = newSignedIntentHashSample()

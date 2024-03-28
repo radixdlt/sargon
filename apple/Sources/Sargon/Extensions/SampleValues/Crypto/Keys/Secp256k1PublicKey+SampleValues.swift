@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 #if DEBUG
 // MARK: Sample Values
 extension Secp256k1PublicKey {

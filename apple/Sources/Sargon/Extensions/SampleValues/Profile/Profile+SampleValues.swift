@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 #if DEBUG
 extension Profile {
 	public static let sample: Self = newProfileSample()

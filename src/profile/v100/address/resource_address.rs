@@ -79,11 +79,19 @@ impl HasSampleValues for ResourceAddress {
 
 #[allow(unused)]
 impl ResourceAddress {
-    fn sample_stokenet() -> Self {
+    pub(crate) fn sample_mainnet() -> Self {
+        Self::sample_mainnet_xrd()
+    }
+
+    pub(crate) fn sample_mainnet_other() -> Self {
+        Self::sample_mainnet_candy()
+    }
+
+    pub(crate) fn sample_stokenet() -> Self {
         Self::sample_stokenet_xrd()
     }
 
-    fn sample_stokenet_other() -> Self {
+    pub(crate) fn sample_stokenet_other() -> Self {
         Self::sample_stokenet_gum()
     }
 }

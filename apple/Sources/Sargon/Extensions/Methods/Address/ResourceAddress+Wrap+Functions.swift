@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 extension ResourceAddress {
 	public init(validatingAddress bech32String: String) throws {
 		self = try newResourceAddress(bech32: bech32String)

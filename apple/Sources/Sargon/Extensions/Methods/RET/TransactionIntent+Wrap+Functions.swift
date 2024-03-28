@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 extension TransactionIntent {
 	public func hash() -> IntentHash {
 		transactionIntentHash(intent: self)

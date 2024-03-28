@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 extension VaultAddress {
 	public init(validatingAddress bech32String: String) throws {
 		self = try newVaultAddress(bech32: bech32String)

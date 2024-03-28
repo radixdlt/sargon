@@ -1,3 +1,4 @@
+import SargonUniFFI
 
 extension NetworkID {
 	public init(discriminant: UInt8) throws {

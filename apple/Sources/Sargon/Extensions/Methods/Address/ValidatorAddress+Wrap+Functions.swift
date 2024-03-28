@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 extension ValidatorAddress {
 	public init(validatingAddress bech32String: String) throws {
 		self = try newValidatorAddress(bech32: bech32String)

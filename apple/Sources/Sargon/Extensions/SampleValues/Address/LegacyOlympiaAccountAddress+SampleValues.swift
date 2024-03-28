@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 #if DEBUG
 extension LegacyOlympiaAccountAddress {
 	public static let sample: Self = newLegacyOlympiaAccountAddressSample()
