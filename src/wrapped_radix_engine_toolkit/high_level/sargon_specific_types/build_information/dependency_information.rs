@@ -1,14 +1,23 @@
 use crate::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, EnumAsInner, derive_more::Display, uniffi::Enum)]
+#[derive(
+    Clone,
+    PartialEq,
+    Eq,
+    Hash,
+    EnumAsInner,
+    derive_more::Display,
+    derive_more::Debug,
+    uniffi::Enum,
+)]
 pub enum DependencyInformation {
     // Crates.io
-    Version { value: String },
+    Version(String),
 
     // Github
-    Tag { value: String },
-    Branch { value: String },
-    Rev { value: String },
+    Tag(String),
+    Branch(String),
+    Rev(String),
 }
 
 impl DependencyInformation {
@@ -18,18 +27,10 @@ impl DependencyInformation {
         let value = split.next().expect("Should never fail").trim();
 
         match identifier {
-            "version" => Self::Version {
-                value: value.into(),
-            },
-            "tag" => Self::Tag {
-                value: value.into(),
-            },
-            "branch" => Self::Branch {
-                value: value.into(),
-            },
-            "rev" => Self::Rev {
-                value: value.into(),
-            },
+            "version" => Self::Version(value.into()),
+            "tag" => Self::Tag(value.into()),
+            "branch" => Self::Branch(value.into()),
+            "rev" => Self::Rev(value.into()),
             _ => {
                 unreachable!("Unknown identifier encountered: '{}'", identifier)
             }
@@ -39,15 +40,11 @@ impl DependencyInformation {
 
 impl HasSampleValues for DependencyInformation {
     fn sample() -> Self {
-        Self::Branch {
-            value: "develop".to_owned(),
-        }
+        Self::Branch("develop".to_owned())
     }
 
     fn sample_other() -> Self {
-        Self::Tag {
-            value: "2.3.7".to_owned(),
-        }
+        Self::Tag("2.3.7".to_owned())
     }
 }
 
@@ -72,23 +69,12 @@ mod tests {
     }
 
     #[test]
-    fn value_of_sample() {
-        assert_eq!(
-            SUT::sample(),
-            SUT::Branch {
-                value: "develop".to_owned()
-            }
-        );
+    fn display() {
+        assert_eq!(format!("{}", SUT::sample()), "develop");
     }
 
     #[test]
-    #[ignore]
-    fn value_of_sample_other() {
-        assert_eq!(
-            SUT::sample_other(),
-            SUT::Tag {
-                value: "2.3.7".to_owned()
-            }
-        );
+    fn debug() {
+        assert_eq!(format!("{:?}", SUT::sample_other()), "Tag(\"2.3.7\")");
     }
 }
