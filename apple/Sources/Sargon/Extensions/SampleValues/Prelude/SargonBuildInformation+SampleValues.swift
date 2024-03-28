@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 #if DEBUG
 extension SargonBuildInformation {
     public static let sample: Self = newSargonBuildInformationSample()

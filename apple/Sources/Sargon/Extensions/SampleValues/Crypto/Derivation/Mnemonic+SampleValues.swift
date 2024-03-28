@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 #if DEBUG
 extension Mnemonic {
 	public static var sample: Self {

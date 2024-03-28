@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 extension LegacyOlympiaAccountAddress {
 	public init(validatingAddress bech32String: String) throws {
         self = try newLegacyOlympiaAccountAddressFromString(
@@ -10,6 +12,10 @@ extension LegacyOlympiaAccountAddress {
             publicKey: publicKey
         )
 	}
+    
+    public func formatted(_ format: AddressFormat = .default) -> String {
+        legacyOlympiaAccountAddressFormatted(address: self, format: format)
+    }
 	
 	/// The bech32 encoded string for this address.
 	public var address: String {

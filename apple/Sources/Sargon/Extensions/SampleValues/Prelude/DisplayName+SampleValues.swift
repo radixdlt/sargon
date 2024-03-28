@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 #if DEBUG
 extension DisplayName {
 	public static let sample: Self = newDisplayNameSample()

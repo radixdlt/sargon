@@ -1,18 +1,32 @@
 use crate::prelude::*;
 
+impl PackageAddress {
+    pub(crate) fn sample_mainnet() -> Self {
+        Self::sample_mainnet_faucet()
+    }
+
+    pub(crate) fn sample_mainnet_other() -> Self {
+        Self::sample_mainnet_royalty()
+    }
+
+    pub(crate) fn sample_stokenet() -> Self {
+        Self::sample_stokenet_gumball_club()
+    }
+}
+
 #[uniffi::export]
 pub fn new_package_address_sample_mainnet() -> PackageAddress {
-    PackageAddress::sample_mainnet_faucet()
+    PackageAddress::sample_mainnet()
 }
 
 #[uniffi::export]
 pub fn new_package_address_sample_mainnet_other() -> PackageAddress {
-    PackageAddress::sample_mainnet_royalty()
+    PackageAddress::sample_mainnet_other()
 }
 
 #[uniffi::export]
 pub fn new_package_address_sample_stokenet() -> PackageAddress {
-    PackageAddress::sample_stokenet_gumball_club()
+    PackageAddress::sample_stokenet()
 }
 
 #[uniffi::export]

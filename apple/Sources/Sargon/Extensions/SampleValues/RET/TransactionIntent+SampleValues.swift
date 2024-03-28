@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 #if DEBUG
 extension TransactionIntent {
 	public static let sample: Self = newTransactionIntentSample()

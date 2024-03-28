@@ -1,7 +1,5 @@
-#[macro_use]
-mod assert_manifest;
-
 mod addresses_manifest_builder_support;
+mod assert_manifest;
 mod bucket;
 mod bucket_factory;
 mod manifest_assets_transfers;

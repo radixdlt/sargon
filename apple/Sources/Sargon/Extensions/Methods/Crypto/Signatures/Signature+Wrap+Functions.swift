@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 extension Signature {
 	public init(bytes: some DataProtocol) throws {
 		self = try newSignatureFromBytes(bytes: Data(bytes))

@@ -1,27 +1,45 @@
 use crate::prelude::*;
 
+impl ComponentAddress {
+    pub(crate) fn sample_mainnet() -> Self {
+        Self::sample_mainnet_global()
+    }
+
+    pub(crate) fn sample_mainnet_other() -> Self {
+        Self::sample_mainnet_internal()
+    }
+
+    pub(crate) fn sample_stokenet() -> Self {
+        Self::sample_stokenet_global()
+    }
+
+    pub(crate) fn sample_stokenet_other() -> Self {
+        Self::sample_stokenet_internal()
+    }
+}
+
 /// Sample to a mainnet ComponentAddress (global)
 #[uniffi::export]
 pub fn new_component_address_sample_mainnet_global() -> ComponentAddress {
-    ComponentAddress::sample_mainnet_global()
+    ComponentAddress::sample_mainnet()
 }
 
 /// Sample to a mainnet ComponentAddress (internal)
 #[uniffi::export]
 pub fn new_component_address_sample_mainnet_internal() -> ComponentAddress {
-    ComponentAddress::sample_mainnet_internal()
+    ComponentAddress::sample_mainnet_other()
 }
 
 /// Sample to a stokenet ComponentAddress (global)
 #[uniffi::export]
 pub fn new_component_address_sample_stokenet_global() -> ComponentAddress {
-    ComponentAddress::sample_stokenet_global()
+    ComponentAddress::sample_stokenet()
 }
 
 /// Sample to a stokenet ComponentAddress (internal)
 #[uniffi::export]
 pub fn new_component_address_sample_stokenet_internal() -> ComponentAddress {
-    ComponentAddress::sample_stokenet_internal()
+    ComponentAddress::sample_stokenet_other()
 }
 
 impl HasSampleValues for ComponentAddress {

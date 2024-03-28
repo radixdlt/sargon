@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 #if DEBUG
 extension SignatureWithPublicKey {
     public static let sample: Self = newSignatureWithPublicKeySample()

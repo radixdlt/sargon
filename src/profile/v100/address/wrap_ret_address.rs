@@ -14,6 +14,17 @@ pub(crate) trait FromRetAddress {
     type RetAddress;
 }
 
+pub(crate) fn format_string(
+    s: impl AsRef<str>,
+    start: usize,
+    end: usize,
+) -> String {
+    let s = s.as_ref();
+    let prefix = &s[0..start];
+    let suffix = suffix_str(end, s);
+    format!("{}...{}", prefix, suffix)
+}
+
 pub trait IntoScryptoAddress {
     fn scrypto(&self) -> ScryptoGlobalAddress;
     fn network_id(&self) -> NetworkID;
@@ -26,7 +37,7 @@ macro_rules! decl_ret_wrapped_address {
         $(
             #[doc = $expr: expr]
         )*
-        $address_type:ident
+        $address_type: ident
     ) => {
         paste! {
             $(
@@ -38,7 +49,6 @@ macro_rules! decl_ret_wrapped_address {
                 PartialEq,
                 Eq,
                 Hash,
-                derive_more::FromStr,
                 derive_more::Display,
                 derive_more::Debug,
                 SerializeDisplay,
@@ -74,6 +84,11 @@ macro_rules! decl_ret_wrapped_address {
                 address.address()
             }
 
+            #[uniffi::export]
+            pub fn [<$address_type:snake _address_formatted>](address: &[< $address_type:camel Address >], format: AddressFormat) -> String {
+                address.formatted(format)
+            }
+
             uniffi::custom_type!([< Ret $address_type:camel Address >], String);
 
              /// UniFFI conversion for RET types which are DisplayFromStr using String as builtin.
@@ -95,6 +110,13 @@ macro_rules! decl_ret_wrapped_address {
             impl From<[< Ret $address_type:camel Address >]> for [< $address_type:camel Address >] {
                 fn from(value: [< Ret $address_type:camel Address >]) -> Self {
                     Self { secret_magic: value }
+                }
+            }
+
+            impl FromStr for [< $address_type:camel Address >] {
+                type Err = CommonError;
+                fn from_str(s: &str) -> Result<Self> {
+                    Self::try_from_bech32(s)
                 }
             }
 
@@ -129,6 +151,13 @@ macro_rules! decl_ret_wrapped_address {
             }
 
             impl [< $address_type:camel Address >] {
+
+                pub fn formatted(&self, format: AddressFormat) -> String {
+                    match format {
+                        AddressFormat::Default => format_string(self.address(), 4, 6),
+                        AddressFormat::Full | AddressFormat::Raw => self.address(),
+                    }
+                }
 
                 pub(crate) fn scrypto(&self) -> ScryptoGlobalAddress {
                     ScryptoGlobalAddress::try_from(self.node_id())

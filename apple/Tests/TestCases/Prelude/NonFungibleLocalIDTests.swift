@@ -103,4 +103,13 @@ final class NonFungibleLocalIDTests: Test<NonFungibleLocalID> {
 	func test_ruid_invalid_too_long() {
 		XCTAssertThrowsError(try SUT(ruid: Data(repeating: 0xff, count: 128)))
 	}
+    
+    func test_to_user_facing_string() {
+        XCTAssertNoDifference(SUT.sampleOther.toUserFacingString(), "foobar")
+    }
+    
+    func test_formatted() {
+        XCTAssertNoDifference(SUT.sampleOther.formatted(.raw), "<foobar>")
+        XCTAssertNoDifference(SUT.sampleOther.formatted(.default), "foobar")
+    }
 }

@@ -79,11 +79,19 @@ impl HasSampleValues for ResourceAddress {
 
 #[allow(unused)]
 impl ResourceAddress {
-    fn sample_stokenet() -> Self {
+    pub(crate) fn sample_mainnet() -> Self {
+        Self::sample_mainnet_xrd()
+    }
+
+    pub(crate) fn sample_mainnet_other() -> Self {
+        Self::sample_mainnet_candy()
+    }
+
+    pub(crate) fn sample_stokenet() -> Self {
         Self::sample_stokenet_xrd()
     }
 
-    fn sample_stokenet_other() -> Self {
+    pub(crate) fn sample_stokenet_other() -> Self {
         Self::sample_stokenet_gum()
     }
 }
@@ -303,6 +311,24 @@ mod tests {
             .len(),
             7
         )
+    }
+
+    #[test]
+    fn formatted_full() {
+        assert_eq!(SUT::sample().formatted(AddressFormat::Full), "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd");
+    }
+
+    #[test]
+    fn formatted_raw() {
+        assert_eq!(SUT::sample().formatted(AddressFormat::Raw), "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd");
+    }
+
+    #[test]
+    fn formatted_default() {
+        assert_eq!(
+            SUT::sample().formatted(AddressFormat::Default),
+            "reso...radxrd"
+        );
     }
 
     #[test]

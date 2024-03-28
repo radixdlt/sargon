@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 #if DEBUG
 extension FactorSource {
 	public static let sample: Self = newFactorSourceSample()

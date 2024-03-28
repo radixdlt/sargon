@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 #if DEBUG
 extension Account {
 	public static let sampleMainnetAlice: Self = newAccountSampleMainnetAlice()

@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 #if DEBUG
 extension PublicKey {
 	public static let sample: Self = newPublicKeySample()

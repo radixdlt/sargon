@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 #if DEBUG
 extension Blob {
 	public static let sample = Self(data: BagOfBytes.sampleAced)

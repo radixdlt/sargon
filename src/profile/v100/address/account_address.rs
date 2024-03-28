@@ -28,23 +28,6 @@ pub fn new_account_address_sample_stokenet_other() -> AccountAddress {
     AccountAddress::sample_stokenet_other()
 }
 
-/// Formats the AccountAddress to its abbreviated form which is what the user
-/// is most used to, since it is what we most commonly display in the Radix
-/// ecosystem.
-///
-/// The abbreviated form returns:
-///
-/// `acco...please`
-///
-/// For the account address:
-///
-/// `account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease`
-///
-#[uniffi::export]
-pub fn account_address_to_short(address: &AccountAddress) -> String {
-    address.short()
-}
-
 /// Returns `false` for all addresses created with `Ed25519PublicKey`s, i.e.
 /// for all accounts created by the Babylon Radix Wallets.
 /// Returns `true` for all addresses created with `Secp256k1PublicKey`s, i.e.
@@ -57,23 +40,6 @@ pub fn account_address_is_legacy(address: &AccountAddress) -> bool {
 impl AccountAddress {
     pub fn new(public_key: PublicKey, network_id: NetworkID) -> Self {
         <Self as EntityAddress>::from_public_key(public_key, network_id)
-    }
-
-    /// Formats the AccountAddress to its abbreviated form which is what the user
-    /// is most used to, since it is what we most commonly display in the Radix
-    /// ecosystem.
-    ///
-    /// The abbreviated form returns:
-    ///
-    /// `acco...please`
-    ///
-    /// For the account address:
-    ///
-    /// `account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease`
-    ///
-    pub fn short(&self) -> String {
-        let suffix = suffix_str(6, self.address());
-        format!("{}...{}", &self.address()[0..4], suffix)
     }
 
     /// Returns `false` for all addresses created with `Ed25519PublicKey`s, i.e.
@@ -288,12 +254,21 @@ mod tests {
     }
 
     #[test]
-    fn short() {
-        let sut: SUT = SUT::try_from_bech32(
-            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease",
-        )
-        .unwrap();
-        assert_eq!(sut.short(), "acco...please");
+    fn formatted_full() {
+        assert_eq!(SUT::sample().formatted(AddressFormat::Full), "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease");
+    }
+
+    #[test]
+    fn formatted_raw() {
+        assert_eq!(SUT::sample().formatted(AddressFormat::Raw), "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease");
+    }
+
+    #[test]
+    fn formatted_default() {
+        assert_eq!(
+            SUT::sample().formatted(AddressFormat::Default),
+            "acco...please"
+        );
     }
 
     #[test]
@@ -419,12 +394,15 @@ mod uniffi_tests {
     }
 
     #[test]
-    fn short() {
+    fn address_format_default() {
         let sut: SUT = SUT::try_from_bech32(
             "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease",
         )
         .unwrap();
-        assert_eq!(account_address_to_short(&sut), "acco...please");
+        assert_eq!(
+            account_address_formatted(&sut, AddressFormat::Default),
+            "acco...please"
+        );
     }
 
     #[test]

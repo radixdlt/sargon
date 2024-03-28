@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 extension Exactly32Bytes {
 	
 	public init(bytes: some DataProtocol) throws {

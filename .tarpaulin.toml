@@ -3,6 +3,7 @@ exclude-files = [
     # Too many false negatives (macro usage)
     "src/profile/v100/address/non_fungible_resource_address.rs",
     "src/profile/v100/address/wrap_ret_address.rs",
+    "src/wrapped_radix_engine_toolkit/high_level/sargon_specific_types/address_union.rs",
     # Rest
     "tests/*",
     "src/bindgen/*",

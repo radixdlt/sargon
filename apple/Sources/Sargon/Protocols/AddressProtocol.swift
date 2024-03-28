@@ -25,7 +25,7 @@ extension BaseAddressProtocol {
 #endif // DEBUG
 
 public protocol AddressProtocol: BaseAddressProtocol & Identifiable where Self.ID == String {
-	
+    func formatted(_ format: AddressFormat) -> String
 #if DEBUG
 	func embed() -> Address
 	func mapTo(networkID: NetworkID) -> Self

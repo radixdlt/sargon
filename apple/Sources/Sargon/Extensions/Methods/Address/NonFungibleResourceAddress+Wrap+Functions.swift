@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 extension NonFungibleResourceAddress {
 	public init(validatingAddress bech32String: String) throws {
 		self = try newNonFungibleResourceAddress(bech32: bech32String)
@@ -15,13 +17,17 @@ extension NonFungibleResourceAddress {
     public var asResourceAddress: ResourceAddress {
         nonFungibleResourceAddressAsResourceAddress(address: self)
     }
+    
+    public func formatted(_ format: AddressFormat = .default) -> String {
+        asResourceAddress.formatted(format)
+    }
 }
 
 #if DEBUG
 extension NonFungibleResourceAddress {
 	
 	public func embed() -> Address {
-		.nonFungibleResource(self)
+		.resource(asResourceAddress)
 	}
 	
 	public func mapTo(networkID: NetworkID) -> Self {

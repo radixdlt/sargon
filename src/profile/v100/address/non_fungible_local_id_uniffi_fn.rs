@@ -13,6 +13,21 @@ pub fn non_fungible_local_id_as_str(id: NonFungibleLocalId) -> String {
 }
 
 #[uniffi::export]
+pub fn non_fungible_local_id_to_user_facing_string(
+    id: &NonFungibleLocalId,
+) -> String {
+    id.to_user_facing_string()
+}
+
+#[uniffi::export]
+pub fn non_fungible_local_id_formatted(
+    id: &NonFungibleLocalId,
+    format: AddressFormat,
+) -> String {
+    id.formatted(format)
+}
+
+#[uniffi::export]
 pub fn new_non_fungible_local_id_int(value: u64) -> NonFungibleLocalId {
     NonFungibleLocalId::integer(value)
 }
@@ -146,5 +161,23 @@ mod uniffi_tests {
             NonFungibleLocalId::sample_other(),
             new_non_fungible_local_id_sample_other(),
         );
+    }
+
+    #[test]
+    fn to_user_facing_str() {
+        let sut = SUT::sample();
+        assert_eq!(
+            non_fungible_local_id_to_user_facing_string(&sut),
+            sut.to_user_facing_string()
+        )
+    }
+
+    #[test]
+    fn formatted_default() {
+        let sut = SUT::sample();
+        assert_eq!(
+            non_fungible_local_id_formatted(&sut, AddressFormat::Default),
+            sut.formatted(AddressFormat::Default)
+        )
     }
 }

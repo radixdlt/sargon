@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 extension CAP26Path {
     public init(string: String) throws {
         self = try newCap26PathFromString(string: string)

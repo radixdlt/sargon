@@ -1,3 +1,4 @@
+import SargonUniFFI
 
 extension Blob {
 

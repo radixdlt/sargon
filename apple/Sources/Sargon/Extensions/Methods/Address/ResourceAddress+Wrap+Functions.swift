@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 extension ResourceAddress {
 	public init(validatingAddress bech32String: String) throws {
 		self = try newResourceAddress(bech32: bech32String)
@@ -11,6 +13,10 @@ extension ResourceAddress {
 	public var networkID: NetworkId {
 		resourceAddressNetworkId(address: self)
 	}
+    
+    public func formatted(_ format: AddressFormat = .default) -> String {
+        resourceAddressFormatted(address: self, format: format)
+    }
 
 	/// If this is an address of a **fungible** resource or not.
 	public var isFungible: Bool {

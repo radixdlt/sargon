@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 #if DEBUG
 extension IdentityPath {
     public static let sample: Self = newIdentityPathSample()

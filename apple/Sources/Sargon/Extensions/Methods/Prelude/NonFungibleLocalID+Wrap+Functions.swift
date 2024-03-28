@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 extension NonFungibleLocalID {
 	public func toString() -> String {
 		nonFungibleLocalIdAsStr(id: self)
@@ -6,6 +8,15 @@ extension NonFungibleLocalID {
 	public init(integer value: UInt64) {
 		self = newNonFungibleLocalIdInt(value: value)
 	}
+    
+    
+    public func formatted(_ format: AddressFormat = .default) -> String {
+        nonFungibleLocalIdFormatted(id: self, format: format)
+    }
+    
+    public func toUserFacingString() -> String {
+        nonFungibleLocalIdToUserFacingString(id: self)
+    }
 	
     /// Tries to decode an String representation of any NonFungibleLocalID, either:
     /// * integer

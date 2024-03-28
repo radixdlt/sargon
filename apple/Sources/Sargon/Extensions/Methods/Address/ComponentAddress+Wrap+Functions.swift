@@ -1,7 +1,13 @@
+import SargonUniFFI
+
 extension ComponentAddress {
 	public init(validatingAddress bech32String: String) throws {
 		self = try newComponentAddress(bech32: bech32String)
 	}
+    
+    public func formatted(_ format: AddressFormat = .default) -> String {
+        componentAddressFormatted(address: self, format: format)
+    }
 
 	/// The bech32 encoded string for this address.
 	public var address: String {

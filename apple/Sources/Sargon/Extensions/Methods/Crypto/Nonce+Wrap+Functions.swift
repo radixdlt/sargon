@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 extension Nonce {
     public static func secureRandom() -> Self {
         newNonceRandom()

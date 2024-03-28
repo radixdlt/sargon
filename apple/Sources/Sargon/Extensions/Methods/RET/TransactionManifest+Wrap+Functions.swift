@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 extension TransactionManifest: CustomStringConvertible {
 	public var description: String { instructionsString }
 }

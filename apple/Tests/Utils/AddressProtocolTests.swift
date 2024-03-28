@@ -61,6 +61,12 @@ class AddressTest<SUT_: AddressProtocol>: BaseAddressTest<SUT_> {
             XCTAssertEqual($0.id, $0.address)
         }
     }
+	
+	func test_formatted_full_is_address() {
+		SUT.allCases.forEach {
+			XCTAssertEqual($0.formatted(.full), $0.address)
+		}
+	}
 
 	func test_xrd_on_same_network_as_address() {
 		XCTAssertEqual(SUT.sampleMainnet.xrdOnSameNetwork, ResourceAddress.sampleMainnetXRD)

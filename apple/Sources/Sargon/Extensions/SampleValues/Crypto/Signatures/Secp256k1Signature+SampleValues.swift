@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 #if DEBUG
 extension Secp256k1Signature {
 	public static let sample: Self = newSecp256k1SignatureSample()

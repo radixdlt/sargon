@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 #if DEBUG
 extension NonFungibleLocalIDString {
     public static let sample: Self = "Member_237"

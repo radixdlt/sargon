@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 #if DEBUG
 extension TransactionManifest {
 	public static let sample: Self = newTransactionManifestSample()

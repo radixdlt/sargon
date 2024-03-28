@@ -7,7 +7,7 @@ import com.radixdlt.sargon.PublicKey
 import com.radixdlt.sargon.accountAddressBech32Address
 import com.radixdlt.sargon.accountAddressIsLegacy
 import com.radixdlt.sargon.accountAddressNetworkId
-import com.radixdlt.sargon.accountAddressToShort
+// import com.radixdlt.sargon.accountAddressFormatted
 import com.radixdlt.sargon.newAccountAddress
 import com.radixdlt.sargon.newAccountAddressFrom
 import org.jetbrains.annotations.VisibleForTesting
@@ -49,8 +49,8 @@ val AccountAddress.isLegacy
  * `account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease`
  *
  */
-val AccountAddress.shortFormat: String
-    get() = accountAddressToShort(address = this)
+// val AccountAddress.shortFormat: String
+//     get() = accountAddressFormatted(address = this, format = .default)
 
 fun AccountAddress.wasMigratedFromLegacyOlympia(legacy: LegacyOlympiaAccountAddress) =
     legacy.isLegacyOfBabylonAddress(babylon = this)

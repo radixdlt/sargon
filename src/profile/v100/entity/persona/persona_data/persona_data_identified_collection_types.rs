@@ -189,8 +189,8 @@ macro_rules! declare_collection_of_identified_entry {
         $(
             #[doc = $expr: expr]
         )*
-        $singular_form:ident,
-        $plural_form:ident,
+        $singular_form: ident,
+        $plural_form: ident,
         $expected_sample_display: literal,
         $expected_sample_debug: literal,
         $expected_sample_json: literal

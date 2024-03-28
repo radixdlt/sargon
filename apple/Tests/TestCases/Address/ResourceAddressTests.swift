@@ -10,6 +10,10 @@ final class ResourceAddressTests: AddressTest<ResourceAddress> {
 		XCTAssertTrue(SUT.sampleMainnetNonFungibleGCMembership.isNonFungible)
 	}
 	
+	func test_as_non_fungible() {
+		XCTAssertNotNil(SUT.sampleMainnetNonFungibleGCMembership.asNonFungibleResourceAddress)
+	}
+	
 	func test_xrd_on_network() {
 		XCTAssertEqual(SUT.xrd(on: .mainnet), SUT.sampleMainnet)
 		XCTAssertEqual(SUT.xrd(on: .stokenet), SUT.sampleStokenet)

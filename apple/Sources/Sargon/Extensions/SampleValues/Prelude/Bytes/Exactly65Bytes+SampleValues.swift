@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 #if DEBUG
 extension Exactly65Bytes {
 	public static let sample: Self = newExactly65BytesSample()

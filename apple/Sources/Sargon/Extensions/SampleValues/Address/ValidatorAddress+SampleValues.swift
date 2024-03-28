@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 #if DEBUG
 extension ValidatorAddress {
 	public static let sample = Self.sampleMainnet

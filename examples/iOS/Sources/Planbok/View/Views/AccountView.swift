@@ -22,17 +22,3 @@ public struct AccountView: SwiftUI.View {
 		}
 	}
 }
-extension AccountAddress: AddressProtocol {
-	public enum Format: AddressFormatProtocol {
-		case `default`
-		case full
-	}
-	public func formatted(_ format: Format) -> String {
-		switch format {
-		case .full:
-			self.address
-		case .default:
-			accountAddressToShort(address: self)
-		}
-	}
-}

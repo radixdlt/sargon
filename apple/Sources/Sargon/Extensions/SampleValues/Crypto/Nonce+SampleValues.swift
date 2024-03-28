@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 #if DEBUG
 extension Nonce {
     public static let sample: Self = newNonceSample()

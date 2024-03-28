@@ -1,15 +1,33 @@
 use crate::prelude::*;
 
+impl PoolAddress {
+    pub(crate) fn sample_mainnet() -> Self {
+        Self::sample_mainnet_single_pool()
+    }
+
+    pub(crate) fn sample_mainnet_other() -> Self {
+        Self::sample_mainnet_bi_pool()
+    }
+
+    pub(crate) fn sample_stokenet() -> Self {
+        Self::sample_stokenet_single_pool()
+    }
+
+    pub(crate) fn sample_stokenet_other() -> Self {
+        Self::sample_stokenet_bi_pool()
+    }
+}
+
 /// Sample to a mainnet PoolAddress with single resource.
 #[uniffi::export]
 pub fn new_pool_address_sample_mainnet_single() -> PoolAddress {
-    PoolAddress::sample_mainnet_single_pool()
+    PoolAddress::sample_mainnet()
 }
 
 /// Sample to a mainnet PoolAddress with two resources.
 #[uniffi::export]
 pub fn new_pool_address_sample_mainnet_two() -> PoolAddress {
-    PoolAddress::sample_mainnet_bi_pool()
+    PoolAddress::sample_mainnet_other()
 }
 
 /// Sample to a mainnet PoolAddress with three resources.
@@ -21,13 +39,13 @@ pub fn new_pool_address_sample_mainnet_multi() -> PoolAddress {
 /// Sample to a stokenet PoolAddress with single resource.
 #[uniffi::export]
 pub fn new_pool_address_sample_stokenet_single() -> PoolAddress {
-    PoolAddress::sample_stokenet_single_pool()
+    PoolAddress::sample_stokenet()
 }
 
 /// Sample to a stokenet PoolAddress with two resources.
 #[uniffi::export]
 pub fn new_pool_address_sample_stokenet_two() -> PoolAddress {
-    PoolAddress::sample_stokenet_bi_pool()
+    PoolAddress::sample_stokenet_other()
 }
 
 /// Sample to a stokenet PoolAddress with three resources.

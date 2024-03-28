@@ -34,6 +34,14 @@ pub fn legacy_olympia_account_address_to_string(
 }
 
 #[uniffi::export]
+pub fn legacy_olympia_account_address_formatted(
+    address: &LegacyOlympiaAccountAddress,
+    format: AddressFormat,
+) -> String {
+    address.formatted(format)
+}
+
+#[uniffi::export]
 pub fn legacy_olympia_account_address_to_babylon_account_address(
     address: LegacyOlympiaAccountAddress,
 ) -> AccountAddress {
@@ -62,6 +70,17 @@ mod tests {
             new_legacy_olympia_account_address_from_string(s.to_owned())
                 .unwrap(),
             SUT::sample_other()
+        );
+    }
+
+    #[test]
+    fn test_formatted() {
+        assert_eq!(
+            legacy_olympia_account_address_formatted(
+                &SUT::sample_other(),
+                AddressFormat::Default
+            ),
+            "rdx...0xqm2ylge"
         );
     }
 
