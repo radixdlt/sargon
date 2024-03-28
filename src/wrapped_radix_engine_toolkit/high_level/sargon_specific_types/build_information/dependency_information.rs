@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, EnumAsInner, uniffi::Enum)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, EnumAsInner, derive_more::Display, uniffi::Enum)]
 pub enum DependencyInformation {
     // Crates.io
     Version { value: String },
