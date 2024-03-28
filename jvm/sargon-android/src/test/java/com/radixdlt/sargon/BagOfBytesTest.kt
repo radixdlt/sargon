@@ -24,6 +24,7 @@ import java.lang.IllegalStateException
 
 class BagOfBytesTest {
 
+    @OptIn(ExperimentalUnsignedTypes::class)
     @Test
     fun test() {
         var a = ubyteArrayOf().toList()
