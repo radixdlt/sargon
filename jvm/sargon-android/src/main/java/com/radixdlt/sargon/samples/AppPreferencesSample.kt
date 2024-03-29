@@ -14,9 +14,3 @@ val AppPreferences.Companion.sample: Sample<AppPreferences>
 
         override fun other(): AppPreferences = newAppPreferencesSampleOther()
     }
-
-class AppPreferencesPreviewParameterProvider: PreviewParameterProvider<AppPreferences> {
-    override val values: Sequence<AppPreferences>
-        get() = AppPreferences.sample.all.asSequence()
-
-}

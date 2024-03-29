@@ -13,9 +13,3 @@ val LegacyOlympiaAccountAddress.Companion.sample: Sample<LegacyOlympiaAccountAdd
 
         override fun other(): LegacyOlympiaAccountAddress = newLegacyOlympiaAccountAddressSampleOther()
     }
-
-class LegacyOlympiaAccountAddressPreviewParameterProvider :
-    PreviewParameterProvider<LegacyOlympiaAccountAddress> {
-    override val values: Sequence<LegacyOlympiaAccountAddress>
-        get() = LegacyOlympiaAccountAddress.sample.all.asSequence()
-}

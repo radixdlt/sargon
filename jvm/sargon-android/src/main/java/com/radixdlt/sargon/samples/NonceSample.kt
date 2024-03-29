@@ -21,9 +21,3 @@ val Nonce.Companion.sample: Sample<Nonce>
 
         override fun other(): Nonce = newNonceSampleOther()
     }
-
-class NoncePreviewParameterProvider: PreviewParameterProvider<Nonce> {
-    override val values: Sequence<Nonce>
-        get() = Nonce.sample.all.asSequence()
-
-}

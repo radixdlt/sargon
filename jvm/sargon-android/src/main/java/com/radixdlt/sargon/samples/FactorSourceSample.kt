@@ -11,8 +11,3 @@ fun factorSourcesSample() = newFactorSourcesSample()
 
 @VisibleForTesting
 fun factorSourcesSampleOther() = newFactorSourcesSampleOther()
-
-class FactorSourcesPreviewParameterProvider : PreviewParameterProvider<List<FactorSource>> {
-    override val values: Sequence<List<FactorSource>>
-        get() = sequenceOf(factorSourcesSample(), factorSourcesSampleOther())
-}

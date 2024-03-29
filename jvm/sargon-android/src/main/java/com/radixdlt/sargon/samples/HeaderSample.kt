@@ -15,9 +15,3 @@ val Header.Companion.sample: Sample<Header>
         override fun other(): Header = newHeaderSampleOther()
 
     }
-
-class HeaderPreviewParameterProvider :
-    PreviewParameterProvider<Header> {
-    override val values: Sequence<Header>
-        get() = Header.sample.all.asSequence()
-}

@@ -35,21 +35,3 @@ val Bip44LikePath.Companion.sample: Sample<Bip44LikePath>
 
         override fun other(): Bip44LikePath = newBip44LikePathSampleOther()
     }
-
-class AccountPathPreviewParameterProvider : PreviewParameterProvider<AccountPath> {
-    override val values: Sequence<AccountPath>
-        get() = AccountPath.sample.all.asSequence()
-
-}
-
-class IdentityPathPreviewParameterProvider : PreviewParameterProvider<IdentityPath> {
-    override val values: Sequence<IdentityPath>
-        get() = IdentityPath.sample.all.asSequence()
-
-}
-
-class Bip44LikePathPreviewParameterProvider : PreviewParameterProvider<Bip44LikePath> {
-    override val values: Sequence<Bip44LikePath>
-        get() = Bip44LikePath.sample.all.asSequence()
-
-}

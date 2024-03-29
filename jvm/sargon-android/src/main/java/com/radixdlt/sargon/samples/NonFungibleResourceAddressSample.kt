@@ -20,12 +20,6 @@ val NonFungibleResourceAddress.Companion.sampleMainnet: Sample<NonFungibleResour
 
     }
 
-class NonFungibleResourceAddressMainnetPreviewParameterProvider :
-    PreviewParameterProvider<NonFungibleResourceAddress> {
-    override val values: Sequence<NonFungibleResourceAddress>
-        get() = NonFungibleResourceAddress.sampleMainnet.all.asSequence()
-}
-
 @VisibleForTesting
 val NonFungibleResourceAddress.Companion.sampleStokenet: Sample<NonFungibleResourceAddress>
     get() = object : Sample<NonFungibleResourceAddress> {

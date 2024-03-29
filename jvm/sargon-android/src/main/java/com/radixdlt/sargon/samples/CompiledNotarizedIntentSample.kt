@@ -17,9 +17,3 @@ val CompiledNotarizedIntent.Companion.sample: Sample<CompiledNotarizedIntent>
 
         override fun other(): CompiledNotarizedIntent = newCompiledNotarizedIntentSampleOther()
     }
-
-class CompiledNotarizedIntentPreviewParameterProvider: PreviewParameterProvider<CompiledNotarizedIntent> {
-    override val values: Sequence<CompiledNotarizedIntent>
-        get() = CompiledNotarizedIntent.sample.all.asSequence()
-
-}

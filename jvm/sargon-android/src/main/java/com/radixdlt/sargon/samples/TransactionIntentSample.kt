@@ -20,9 +20,3 @@ val TransactionIntent.Companion.sample: Sample<TransactionIntent>
 
         override fun other(): TransactionIntent = newTransactionIntentSampleOther()
     }
-
-class TransactionIntentPreviewParameterProvider: PreviewParameterProvider<TransactionIntent> {
-    override val values: Sequence<TransactionIntent>
-        get() = TransactionIntent.sample.all.asSequence()
-
-}

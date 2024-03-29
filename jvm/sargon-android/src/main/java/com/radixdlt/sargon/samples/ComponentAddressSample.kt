@@ -25,15 +25,3 @@ val ComponentAddress.Companion.sampleStokenet: Sample<ComponentAddress>
 
         override fun other(): ComponentAddress = newComponentAddressSampleStokenetInternal()
     }
-
-class ComponentAddressMainnetPreviewParameterProvider: PreviewParameterProvider<ComponentAddress> {
-    override val values: Sequence<ComponentAddress>
-        get() = ComponentAddress.sampleMainnet.all.asSequence()
-
-}
-
-class ComponentAddressStokenetPreviewParameterProvider: PreviewParameterProvider<ComponentAddress> {
-    override val values: Sequence<ComponentAddress>
-        get() = ComponentAddress.sampleStokenet.all.asSequence()
-
-}

@@ -14,9 +14,3 @@ val SargonBuildInformation.Companion.sample: Sample<SargonBuildInformation>
 
         override fun other(): SargonBuildInformation = newSargonBuildInformationSampleOther()
     }
-
-class SargonBuildInformationPreviewParameterProvider: PreviewParameterProvider<SargonBuildInformation> {
-    override val values: Sequence<SargonBuildInformation>
-        get() = SargonBuildInformation.sample.all.asSequence()
-
-}

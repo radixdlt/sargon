@@ -14,9 +14,3 @@ val Blobs.Companion.sample: Sample<Blobs>
 
         override fun other(): Blobs = newBlobsSampleOther()
     }
-
-class BlobsPreviewParameterProvider: PreviewParameterProvider<Blobs> {
-    override val values: Sequence<Blobs>
-        get() = Blobs.sample.all.asSequence()
-
-}

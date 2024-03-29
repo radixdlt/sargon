@@ -15,9 +15,3 @@ val Profile.Companion.sample: Sample<Profile>
         override fun other(): Profile = newProfileSampleOther()
 
     }
-
-class ProfilePreviewParameterProvider : PreviewParameterProvider<Profile> {
-    override val values: Sequence<Profile>
-        get() = Profile.sample.all.asSequence()
-
-}

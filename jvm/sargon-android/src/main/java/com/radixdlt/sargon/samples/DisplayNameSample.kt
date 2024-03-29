@@ -14,8 +14,3 @@ val DisplayName.Companion.sample: Sample<DisplayName>
 
         override fun other(): DisplayName = newDisplayNameSampleOther()
     }
-
-class DisplayNamePreviewParameterProvider : PreviewParameterProvider<DisplayName> {
-    override val values: Sequence<DisplayName>
-        get() = DisplayName.sample.all.asSequence()
-}

@@ -20,9 +20,3 @@ val NotarySignature.Companion.sample: Sample<NotarySignature>
 
         override fun other(): NotarySignature = newNotarySignatureSampleOther()
     }
-
-class NotarySignaturePreviewParameterProvider: PreviewParameterProvider<NotarySignature> {
-    override val values: Sequence<NotarySignature>
-        get() = NotarySignature.sample.all.asSequence()
-
-}

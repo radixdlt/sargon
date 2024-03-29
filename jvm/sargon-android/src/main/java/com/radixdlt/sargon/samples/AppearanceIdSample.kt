@@ -14,9 +14,3 @@ val AppearanceId.Companion.sample: Sample<AppearanceId>
 
         override fun other(): AppearanceId = newAppearanceIdSampleOther()
     }
-
-class AppearanceIdPreviewParameterProvider: PreviewParameterProvider<AppearanceId> {
-    override val values: Sequence<AppearanceId>
-        get() = AppearanceId.sample.all.asSequence()
-
-}

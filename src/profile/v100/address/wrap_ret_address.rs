@@ -89,6 +89,15 @@ macro_rules! decl_ret_wrapped_address {
                 address.formatted(format)
             }
 
+            /// Returns a random address in `network_id` as Network
+            #[uniffi::export]
+            pub fn [<new_ $address_type:snake _address_sample_random>](network_id: NetworkID) -> [<$address_type:camel Address >] {
+                let entity_byte = [< $address_type:camel Address >]::sample().node_id().as_bytes()[0];
+                let node_id = ScryptoNodeId::new(entity_byte, &generate_byte_array::<29>());
+                let ret_address = [<Ret $address_type:camel Address >]::new(node_id, network_id.discriminant()).unwrap();
+                [<$address_type:camel Address >]::from(ret_address)
+            }
+
             uniffi::custom_type!([< Ret $address_type:camel Address >], String);
 
              /// UniFFI conversion for RET types which are DisplayFromStr using String as builtin.
@@ -217,6 +226,14 @@ macro_rules! decl_ret_wrapped_address {
                 fn map_to_network() {
                     let sut = SUT::sample();
                     assert_eq!([<$address_type:snake _address_map_to_network>](&sut, sut.network_id()), sut); // unchanged
+                }
+
+                #[test]
+                fn random_address() {
+                    for network_id in NetworkID::all() {
+                        let sut = [<new_ $address_type:snake _address_sample_random>](network_id);
+                        assert_eq!(SUT::from_str(&sut.to_string()).unwrap(), sut); // unchanged
+                    }
                 }
             }
 

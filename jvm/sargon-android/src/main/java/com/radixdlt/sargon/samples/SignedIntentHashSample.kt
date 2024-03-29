@@ -26,9 +26,3 @@ val SignedIntentHash.Companion.sample: Sample<SignedIntentHash>
 
         override fun other(): SignedIntentHash = newSignedIntentHashSampleOther()
     }
-
-class SignedIntentHashPreviewParameterProvider: PreviewParameterProvider<SignedIntentHash> {
-    override val values: Sequence<SignedIntentHash>
-        get() = SignedIntentHash.sample.all.asSequence()
-
-}

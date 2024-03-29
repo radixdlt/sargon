@@ -17,9 +17,3 @@ val IntentSignature.Companion.sample: Sample<IntentSignature>
 
         override fun other(): IntentSignature = newIntentSignatureSampleOther()
     }
-
-class IntentSignaturePreviewParameterProvider: PreviewParameterProvider<IntentSignature> {
-    override val values: Sequence<IntentSignature>
-        get() = IntentSignature.sample.all.asSequence()
-
-}

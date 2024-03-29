@@ -15,8 +15,3 @@ val NonFungibleGlobalId.Companion.sample: Sample<NonFungibleGlobalId>
 
         override fun other(): NonFungibleGlobalId = newNonFungibleGlobalIdSampleOther()
     }
-
-class NonFungibleGlobalIdPreviewParameterProvider : PreviewParameterProvider<NonFungibleGlobalId> {
-    override val values: Sequence<NonFungibleGlobalId>
-        get() = NonFungibleGlobalId.sample.all.asSequence()
-}

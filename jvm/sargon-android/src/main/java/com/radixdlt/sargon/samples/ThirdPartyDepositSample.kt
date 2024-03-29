@@ -14,9 +14,3 @@ val ThirdPartyDeposits.Companion.sample: Sample<ThirdPartyDeposits>
         override fun other(): ThirdPartyDeposits = newThirdPartyDepositsSampleOther()
 
     }
-
-class ThirdPartyDepositsPreviewParameterProvider: PreviewParameterProvider<ThirdPartyDeposits> {
-    override val values: Sequence<ThirdPartyDeposits>
-        get() = ThirdPartyDeposits.sample.all.asSequence()
-
-}

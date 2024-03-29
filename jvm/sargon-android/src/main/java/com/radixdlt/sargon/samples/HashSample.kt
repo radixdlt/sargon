@@ -20,9 +20,3 @@ val Hash.Companion.sample: Sample<Hash>
 
         override fun other(): Hash = newHashSampleOther()
     }
-
-class HashPreviewParameterProvider: PreviewParameterProvider<Hash> {
-    override val values: Sequence<Hash>
-        get() = Hash.sample.all.asSequence()
-
-}

@@ -2,17 +2,19 @@ package com.radixdlt.sargon.samples
 
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import com.radixdlt.sargon.NetworkId
 import com.radixdlt.sargon.ResourceAddress
 import com.radixdlt.sargon.newResourceAddressSampleMainnetCandy
 import com.radixdlt.sargon.newResourceAddressSampleMainnetNftGcMembership
 import com.radixdlt.sargon.newResourceAddressSampleMainnetXrd
+import com.radixdlt.sargon.newResourceAddressSampleRandom
 import com.radixdlt.sargon.newResourceAddressSampleStokenetCandy
 import com.radixdlt.sargon.newResourceAddressSampleStokenetGcTokens
 import com.radixdlt.sargon.newResourceAddressSampleStokenetGum
 import com.radixdlt.sargon.newResourceAddressSampleStokenetXrd
 
 @VisibleForTesting
-object ResourceAddressSampleMainnet: Sample<ResourceAddress> {
+object ResourceAddressSampleMainnet: SampleWithRandomValues<ResourceAddress> {
     override val all: List<ResourceAddress>
         get() = listOf(
             xrd,
@@ -23,6 +25,10 @@ object ResourceAddressSampleMainnet: Sample<ResourceAddress> {
     override fun invoke(): ResourceAddress = xrd
 
     override fun other(): ResourceAddress = candy
+
+    override fun random(): ResourceAddress = newResourceAddressSampleRandom(
+        networkId = NetworkId.MAINNET
+    )
 
     val xrd: ResourceAddress
         get() = newResourceAddressSampleMainnetXrd()
@@ -35,7 +41,7 @@ object ResourceAddressSampleMainnet: Sample<ResourceAddress> {
 }
 
 @VisibleForTesting
-object ResourceAddressSampleStokenet: Sample<ResourceAddress> {
+object ResourceAddressSampleStokenet: SampleWithRandomValues<ResourceAddress> {
     override val all: List<ResourceAddress>
         get() = listOf(
             xrd,
@@ -47,6 +53,10 @@ object ResourceAddressSampleStokenet: Sample<ResourceAddress> {
     override fun invoke(): ResourceAddress = xrd
 
     override fun other(): ResourceAddress = candy
+
+    override fun random(): ResourceAddress = newResourceAddressSampleRandom(
+        networkId = NetworkId.STOKENET
+    )
 
     val xrd: ResourceAddress
         get() = newResourceAddressSampleStokenetXrd()

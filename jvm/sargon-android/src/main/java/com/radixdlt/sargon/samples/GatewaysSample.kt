@@ -14,8 +14,3 @@ val Gateways.Companion.sample: Sample<Gateways>
 
         override fun other(): Gateways = newGatewaysSampleOther()
     }
-
-class GatewaysPreviewParameterProvider : PreviewParameterProvider<Gateways> {
-    override val values: Sequence<Gateways>
-        get() = Gateways.sample.all.asSequence()
-}

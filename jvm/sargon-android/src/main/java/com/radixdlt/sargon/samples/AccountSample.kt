@@ -49,15 +49,3 @@ object AccountStokenetSample: Sample<Account> {
 @VisibleForTesting
 val Account.Companion.sampleStokenet: AccountStokenetSample
     get() = AccountStokenetSample
-
-class AccountMainnetAddressPreviewParameterProvider : PreviewParameterProvider<Account> {
-    override val values: Sequence<Account>
-        get() = Account.sampleMainnet.all.asSequence()
-
-}
-
-class AccountStokenetAddressPreviewParameterProvider : PreviewParameterProvider<Account> {
-    override val values: Sequence<Account>
-        get() = Account.sampleStokenet.all.asSequence()
-
-}

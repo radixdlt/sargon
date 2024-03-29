@@ -20,9 +20,3 @@ val NotarizedTransaction.Companion.sample: Sample<NotarizedTransaction>
 
         override fun other(): NotarizedTransaction = newNotarizedTransactionSampleOther()
     }
-
-class NotarizedTransactionPreviewParameterProvider: PreviewParameterProvider<NotarizedTransaction> {
-    override val values: Sequence<NotarizedTransaction>
-        get() = NotarizedTransaction.sample.all.asSequence()
-
-}

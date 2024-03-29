@@ -12,8 +12,3 @@ val NetworkId.Companion.sample: Sample<NetworkId>
 
         override fun other(): NetworkId = NetworkId.STOKENET
     }
-
-class NetworkIdPreviewParameterProvider : PreviewParameterProvider<NetworkId> {
-    override val values: Sequence<NetworkId>
-        get() = NetworkId.sample.all.asSequence()
-}

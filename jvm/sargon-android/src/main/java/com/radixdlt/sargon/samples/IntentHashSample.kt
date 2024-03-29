@@ -14,9 +14,3 @@ val IntentHash.Companion.sample: Sample<IntentHash>
 
         override fun other(): IntentHash = newIntentHashSampleOther()
     }
-
-class IntentHashPreviewParameterProvider: PreviewParameterProvider<IntentHash> {
-    override val values: Sequence<IntentHash>
-        get() = IntentHash.sample.all.asSequence()
-
-}

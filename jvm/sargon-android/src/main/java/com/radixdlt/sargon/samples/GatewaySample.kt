@@ -23,13 +23,3 @@ val Gateway.Companion.sampleStokenet: Sample<Gateway>
 
         override fun other(): Gateway = invoke()
     }
-
-class GatewayMainnetPreviewParameterProvider : PreviewParameterProvider<Gateway> {
-    override val values: Sequence<Gateway>
-        get() = Gateway.sampleMainnet.all.asSequence()
-}
-
-class GatewayStokenetPreviewParameterProvider : PreviewParameterProvider<Gateway> {
-    override val values: Sequence<Gateway>
-        get() = Gateway.sampleStokenet.all.asSequence()
-}

@@ -14,9 +14,3 @@ val Mnemonic.Companion.sample: Sample<Mnemonic>
 
         override fun other(): Mnemonic = newMnemonicSampleOther()
     }
-
-class MnemonicPreviewParameterProvider: PreviewParameterProvider<Mnemonic> {
-    override val values: Sequence<Mnemonic>
-        get() = Mnemonic.sample.all.asSequence()
-
-}

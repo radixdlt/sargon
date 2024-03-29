@@ -13,10 +13,3 @@ val StakeClaim.Companion.sample: Sample<StakeClaim>
 
         override fun other(): StakeClaim = newStakeClaimSampleOther()
     }
-
-class StakeClaimPreviewParameterProvider :
-    PreviewParameterProvider<StakeClaim> {
-    override val values: Sequence<StakeClaim>
-        get() = StakeClaim.sample.all.asSequence()
-
-}

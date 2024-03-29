@@ -14,8 +14,3 @@ val Decimal192.Companion.sample: Sample<Decimal192>
 
         override fun other(): Decimal192 = Decimal192.MAX
     }
-
-class Decimal192PreviewParameterProvider : PreviewParameterProvider<Decimal192> {
-    override val values: Sequence<Decimal192>
-        get() = Decimal192.sample.all.asSequence()
-}

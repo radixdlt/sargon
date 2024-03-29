@@ -14,9 +14,3 @@ val PublicKeyHash.Companion.sample: Sample<PublicKeyHash>
 
         override fun other(): PublicKeyHash = newPublicKeyHashSampleOther()
     }
-
-class PublicKeyHashPreviewParameterProvider: PreviewParameterProvider<PublicKeyHash> {
-    override val values: Sequence<PublicKeyHash>
-        get() = PublicKeyHash.sample.all.asSequence()
-
-}

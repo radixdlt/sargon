@@ -14,10 +14,3 @@ val SignatureWithPublicKey.Companion.sample: Sample<SignatureWithPublicKey>
 
         override fun other(): SignatureWithPublicKey = newSignatureWithPublicKeySampleOther()
     }
-
-class SignatureWithPublicKeyPreviewParameterProvider:
-    PreviewParameterProvider<SignatureWithPublicKey> {
-    override val values: Sequence<SignatureWithPublicKey>
-        get() = SignatureWithPublicKey.sample.all.asSequence()
-
-}

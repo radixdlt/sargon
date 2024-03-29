@@ -15,9 +15,3 @@ val RadixConnectPassword.Companion.sample: Sample<RadixConnectPassword>
         override fun other(): RadixConnectPassword = newRadixConnectPasswordSampleOther()
 
     }
-
-class RadixConnectPasswordPreviewParameterProvider : PreviewParameterProvider<RadixConnectPassword> {
-    override val values: Sequence<RadixConnectPassword>
-        get() = RadixConnectPassword.sample.all.asSequence()
-
-}
