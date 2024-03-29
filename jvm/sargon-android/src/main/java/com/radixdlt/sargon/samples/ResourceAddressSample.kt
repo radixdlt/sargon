@@ -1,9 +1,10 @@
 package com.radixdlt.sargon.samples
 
 import androidx.annotation.VisibleForTesting
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.radixdlt.sargon.NetworkId
+import com.radixdlt.sargon.PoolAddress
 import com.radixdlt.sargon.ResourceAddress
+import com.radixdlt.sargon.newPoolAddressSampleRandom
 import com.radixdlt.sargon.newResourceAddressSampleMainnetCandy
 import com.radixdlt.sargon.newResourceAddressSampleMainnetNftGcMembership
 import com.radixdlt.sargon.newResourceAddressSampleMainnetXrd
@@ -79,14 +80,7 @@ val ResourceAddress.Companion.sampleMainnet: ResourceAddressSampleMainnet
 val ResourceAddress.Companion.sampleStokenet: ResourceAddressSampleStokenet
     get() = ResourceAddressSampleStokenet
 
-class ResourceAddressMainnetPreviewParameterProvider: PreviewParameterProvider<ResourceAddress> {
-    override val values: Sequence<ResourceAddress>
-        get() = ResourceAddress.sampleMainnet.all.asSequence()
-
-}
-
-class ResourceAddressStokenetPreviewParameterProvider: PreviewParameterProvider<ResourceAddress> {
-    override val values: Sequence<ResourceAddress>
-        get() = ResourceAddress.sampleStokenet.all.asSequence()
-
-}
+@VisibleForTesting
+fun ResourceAddress.Companion.sampleRandom(
+    networkId: NetworkId
+) = newResourceAddressSampleRandom(networkId = networkId)

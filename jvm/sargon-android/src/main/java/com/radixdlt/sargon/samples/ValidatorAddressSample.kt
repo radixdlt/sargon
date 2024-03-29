@@ -2,7 +2,9 @@ package com.radixdlt.sargon.samples
 
 import androidx.annotation.VisibleForTesting
 import com.radixdlt.sargon.NetworkId
+import com.radixdlt.sargon.ResourceAddress
 import com.radixdlt.sargon.ValidatorAddress
+import com.radixdlt.sargon.newResourceAddressSampleRandom
 import com.radixdlt.sargon.newValidatorAddressSampleMainnet
 import com.radixdlt.sargon.newValidatorAddressSampleMainnetOther
 import com.radixdlt.sargon.newValidatorAddressSampleRandom
@@ -38,3 +40,8 @@ object ValidatorAddressSampleStokenet: SampleWithRandomValues<ValidatorAddress> 
 @VisibleForTesting
 val ValidatorAddress.Companion.sampleStokenet: ValidatorAddressSampleStokenet
     get() = ValidatorAddressSampleStokenet
+
+@VisibleForTesting
+fun ValidatorAddress.Companion.sampleRandom(
+    networkId: NetworkId
+) = newValidatorAddressSampleRandom(networkId = networkId)

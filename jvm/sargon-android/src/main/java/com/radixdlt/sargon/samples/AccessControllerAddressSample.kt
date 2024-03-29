@@ -45,3 +45,8 @@ object AccessControllerAddressSampleStokenet: SampleWithRandomValues<AccessContr
 @VisibleForTesting
 val AccessControllerAddress.Companion.sampleStokenet: AccessControllerAddressSampleStokenet
     get() = AccessControllerAddressSampleStokenet
+
+@VisibleForTesting
+fun AccessControllerAddress.Companion.sampleRandom(
+    networkId: NetworkId
+) = newAccessControllerAddressSampleRandom(networkId = networkId)

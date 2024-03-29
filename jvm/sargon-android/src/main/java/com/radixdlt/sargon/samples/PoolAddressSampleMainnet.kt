@@ -2,7 +2,9 @@ package com.radixdlt.sargon.samples
 
 import androidx.annotation.VisibleForTesting
 import com.radixdlt.sargon.NetworkId
+import com.radixdlt.sargon.PackageAddress
 import com.radixdlt.sargon.PoolAddress
+import com.radixdlt.sargon.newPackageAddressSampleRandom
 import com.radixdlt.sargon.newPoolAddressSampleMainnetMulti
 import com.radixdlt.sargon.newPoolAddressSampleMainnetSingle
 import com.radixdlt.sargon.newPoolAddressSampleMainnetTwo
@@ -54,3 +56,8 @@ val PoolAddress.Companion.sampleMainnet: PoolAddressSampleMainnet
 @VisibleForTesting
 val PoolAddress.Companion.sampleStokenet: PoolAddressSampleStokenet
     get() = PoolAddressSampleStokenet
+
+@VisibleForTesting
+fun PoolAddress.Companion.sampleRandom(
+    networkId: NetworkId
+) = newPoolAddressSampleRandom(networkId = networkId)

@@ -1,8 +1,10 @@
 package com.radixdlt.sargon.samples
 
 import androidx.annotation.VisibleForTesting
+import com.radixdlt.sargon.AccountAddress
 import com.radixdlt.sargon.IdentityAddress
 import com.radixdlt.sargon.NetworkId
+import com.radixdlt.sargon.newAccountAddressSampleRandom
 import com.radixdlt.sargon.newIdentityAddressSampleMainnet
 import com.radixdlt.sargon.newIdentityAddressSampleMainnetOther
 import com.radixdlt.sargon.newIdentityAddressSampleRandom
@@ -38,3 +40,8 @@ object IdentityAddressSampleStokenet: SampleWithRandomValues<IdentityAddress> {
 @VisibleForTesting
 val IdentityAddress.Companion.sampleStokenet: IdentityAddressSampleStokenet
     get() = IdentityAddressSampleStokenet
+
+@VisibleForTesting
+fun IdentityAddress.Companion.sampleRandom(
+    networkId: NetworkId
+) = newIdentityAddressSampleRandom(networkId = networkId)
