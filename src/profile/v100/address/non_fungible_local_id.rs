@@ -46,6 +46,14 @@ impl NonFungibleLocalId {
 }
 
 impl NonFungibleLocalId {
+    pub(crate) fn random() -> Self {
+        Self::Bytes {
+            value: NonEmptyMax64Bytes::generate(),
+        }
+    }
+}
+
+impl NonFungibleLocalId {
     pub fn formatted(&self, format: AddressFormat) -> String {
         match format {
             AddressFormat::Default => match self {
@@ -385,6 +393,16 @@ mod tests {
         test_from_bytes::<2>();
         test_from_bytes::<63>();
         test_from_bytes::<64>();
+    }
+
+    #[test]
+    fn random() {
+        let mut set: HashSet<SUT> = HashSet::new();
+        let n = 100;
+        for _ in 0..n {
+            set.insert(SUT::random());
+        }
+        assert_eq!(set.len(), n);
     }
 
     #[test]

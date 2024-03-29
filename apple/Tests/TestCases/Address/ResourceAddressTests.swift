@@ -38,12 +38,20 @@ final class ResourceAddressTests: AddressTest<ResourceAddress> {
 	}
     
     func test_is_xrd() {
-        XCTAssertTrue(ResourceAddress.sampleMainnetXRD.isXRD)
-        XCTAssertTrue(ResourceAddress.sampleStokenetXRD.isXRD)
+        XCTAssertTrue(SUT.sampleMainnetXRD.isXRD)
+        XCTAssertTrue(SUT.sampleStokenetXRD.isXRD)
 
-        XCTAssertFalse(ResourceAddress.sampleMainnetCandy.isXRD)
-        XCTAssertFalse(ResourceAddress.sampleMainnetNonFungibleGCMembership.isXRD)
-        XCTAssertFalse(ResourceAddress.sampleStokenetGum.isXRD)
-        XCTAssertFalse(ResourceAddress.sampleStokenetGC.isXRD)
+        XCTAssertFalse(SUT.sampleMainnetCandy.isXRD)
+        XCTAssertFalse(SUT.sampleMainnetNonFungibleGCMembership.isXRD)
+        XCTAssertFalse(SUT.sampleStokenetGum.isXRD)
+        XCTAssertFalse(SUT.sampleStokenetGC.isXRD)
     }
+	
+	func test_is_xrd_on_network() {
+		XCTAssertTrue(SUT.sampleMainnet.isXRD(on: .mainnet))
+		XCTAssertFalse(SUT.sampleMainnet.isXRD(on: .stokenet))
+		
+		XCTAssertFalse(SUT.sampleStokenet.isXRD(on: .mainnet))
+		XCTAssertTrue(SUT.sampleStokenet.isXRD(on: .stokenet))
+	}
 }

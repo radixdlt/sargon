@@ -9,3 +9,10 @@ extension Address: AddressProtocol {
 	}
 }
 
+public func == (lhs: Address, rhs: some AddressProtocol) -> Bool {
+	lhs == rhs.embed()
+}
+
+public func == (lhs: some AddressProtocol, rhs: Address) -> Bool {
+	rhs == lhs
+}

@@ -126,4 +126,10 @@ final class NonFungibleLocalIDTests: IdentifiableByStringProtocolTest<NonFungibl
         XCTAssertNoDifference(SUT.sampleOther.formatted(.raw), "<foobar>")
         XCTAssertNoDifference(SUT.sampleOther.formatted(.default), "foobar")
     }
+	
+	func test_random() {
+		let n = 20
+		let set = Set((0..<n).map { _ in SUT.random() })
+		XCTAssertEqual(set.count, n)
+	}
 }

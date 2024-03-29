@@ -130,4 +130,12 @@ class AddressTest<SUT_: AddressProtocol>: BaseAddressTest<SUT_> {
 		
 		SUT.allCases.forEach(doTest)
 	}
+	
+	
+	func test_asymmetric_type_equality() {
+		SUT.allCases.forEach {
+			XCTAssertTrue($0.embed() == $0)
+			XCTAssertTrue($0 == $0.embed())
+		}
+	}
 }
