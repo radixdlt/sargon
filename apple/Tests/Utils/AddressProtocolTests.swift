@@ -55,6 +55,19 @@ class AddressTest<SUT_: AddressProtocol>: BaseAddressTest<SUT_> {
 	func test_network_id_of_stokenet_sampleOther() {
 		XCTAssertNoDifference(SUT.sampleStokenetOther.networkID, .stokenet)
 	}
+	
+	func test_into_self() throws {
+		func doTestInto(_ sut: SUT) throws {
+			let embedded = sut.embed()
+			let extracted = try embedded.into(type: SUT.self)
+			XCTAssertEqual(extracted, sut)
+		}
+		try SUT.allCases.forEach(doTestInto)
+	}
+	
+	func test_codable_roundtrip() throws {
+		try SUT.allCases.forEach(doTestCodableRoundtrip)
+	}
     
     func test_identifiable() {
         SUT.allCases.forEach {

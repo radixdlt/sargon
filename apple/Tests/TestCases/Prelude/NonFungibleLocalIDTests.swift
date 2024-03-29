@@ -1,20 +1,22 @@
-final class NonFungibleLocalIDTests: Test<NonFungibleLocalID> {
+import Sargon
+
+final class NonFungibleLocalIDTests: IdentifiableByStringProtocolTest<NonFungibleLocalID> {
 	
     // MARK: LocalID String
     func test_valid_local_id_string_from_string() {
-        XCTAssertEqual(try SUT(localId: "<foo>"), SUT.str(value: "foo"))
+		XCTAssertEqual(try SUT.init("<foo>"), SUT.str(value: "foo"))
     }
     
     func test_valid_local_id_string_from_integer() {
-        XCTAssertEqual(try SUT(localId: "#666#"), SUT.integer(value: 666))
+		XCTAssertEqual(try SUT.init("#666#"), SUT.integer(value: 666))
     }
     
     func test_valid_local_id_string_from_ruid() {
-        XCTAssertEqual(try SUT(localId: "{deaddeaddeaddead-deaddeaddeaddead-deaddeaddeaddead-deaddeaddeaddead}"), SUT.ruid(value: .sample))
+		XCTAssertEqual(try SUT.init("{deaddeaddeaddead-deaddeaddeaddead-deaddeaddeaddead-deaddeaddeaddead}"), SUT.ruid(value: .sample))
     }
     
     func test_valid_local_id_string_from_bytes() {
-        XCTAssertEqual(try SUT(localId: "[acedacedacedacedacedacedacedacedacedacedacedacedacedacedacedaced]"), SUT.bytes(value: NonEmptyMax64Bytes(bagOfBytes: Data.sampleAced)))
+		XCTAssertEqual(try SUT.init("[acedacedacedacedacedacedacedacedacedacedacedacedacedacedacedaced]"), SUT.bytes(value: NonEmptyMax64Bytes(bagOfBytes: Data.sampleAced)))
     }
     
 	// MARK: Integer
@@ -32,29 +34,41 @@ final class NonFungibleLocalIDTests: Test<NonFungibleLocalID> {
 	// MARK: String
 	func test_string_valid_short() {
 		XCTAssertEqual(
-			try SUT(string: "x").description,
+			try SUT.stringID("x").description,
 			"<x>"
 		)
-		XCTAssertEqual(
-			try SUT(string: "x"),
-			"x" as SUT // ExpressibleByStringLiteral
-		)
+	}
+	
+	func test_init_string_fails_when_given_user_facing_string() throws {
+		XCTAssertThrowsError(try SUT.init("x"))
+	}
+	
+	func test_init_string_succeeds_when_given_raw_string() throws {
+		XCTAssertNoThrow(try SUT.init("<x>"))
+	}
+	
+	func test_from_stringID_fails_when_given_raw_string() throws {
+		XCTAssertThrowsError(try SUT.stringID("<x>"))
+	}
+	
+	func test_from_stringID_succeeds_when_given_user_facing_string() throws {
+		XCTAssertNoThrow(try SUT.stringID("x"))
 	}
 	
 	func test_string_valid_max_length() {
 		let s = String(repeating: "z", count: 64)
 		XCTAssertEqual(
-			try SUT(string: s).description,
+			try SUT.stringID(s).description,
 			"<\(s)>"
 		)
 	}
 	
 	func test_string_invalid_too_long() {
-		XCTAssertThrowsError(try SUT(string: "much2longmuch2longmuch2longmuch2longmuch2longmuch2longmuch2longmuch2long"))
+		XCTAssertThrowsError(try SUT.stringID("much2longmuch2longmuch2longmuch2longmuch2longmuch2longmuch2longmuch2long"))
 	}
 	
 	func test_string_invalid_forbidden_chars() {
-		XCTAssertThrowsError(try SUT(string: "#$^"))
+		XCTAssertThrowsError(try SUT.stringID("#$^"))
 	}
 	
 	// MARK: Bytes
