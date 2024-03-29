@@ -1,12 +1,6 @@
 public typealias NonFungibleLocalID = NonFungibleLocalId
 
-extension NonFungibleLocalID: SargonModel {}
-
-extension NonFungibleLocalID: CustomStringConvertible {
-	public var description: String {
-		toString()
-	}
-}
+extension NonFungibleLocalID: IdentifiableByStringProtocol {}
 
 extension NonFungibleLocalID: ExpressibleByIntegerLiteral {
 	public init(integerLiteral value: UInt64) {
@@ -15,14 +9,6 @@ extension NonFungibleLocalID: ExpressibleByIntegerLiteral {
 }
 
 #if DEBUG
-extension NonFungibleLocalID: ExpressibleByStringLiteral {
-	/// Tries to decode an String as NonFungibleLocalID.string
-	/// Crashes for invalid strings.
-	public init(stringLiteral value: StringLiteralType) {
-		try! self.init(string: value)
-	}
-}
-
 extension NonFungibleLocalID: ExpressibleByArrayLiteral {
 	/// Tries to create a `LocalID.bytes`
 	public init(arrayLiteral bytes: UInt8...) {

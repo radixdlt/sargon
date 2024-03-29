@@ -4,5 +4,8 @@ extension Address: AddressProtocol {
 		self
 	}
 	
+	public func into<A: AddressProtocol>(type: A.Type = A.self) throws -> A {
+		try A(validatingAddress: self.address)
+	}
 }
 

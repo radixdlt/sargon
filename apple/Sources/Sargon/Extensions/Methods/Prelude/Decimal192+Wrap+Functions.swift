@@ -17,6 +17,11 @@ extension Decimal192 {
 	public init(_ value: UInt64) {
 		self = newDecimalFromU64(value: value)
 	}
+	
+	/// Creates the Decimal `10^exponent`
+	public init(exponent: UInt8) {
+		self = newDecimalExponent(exponent: exponent)
+	}
 
 }
 
@@ -142,8 +147,16 @@ extension Decimal192 {
 		decimalClampedToZero(decimal: self)
 	}
 
-	public func isNegative() -> Bool {
+	public var isNegative: Bool {
 		decimalIsNegative(decimal: self)
+	}
+	
+	public var isPositive: Bool {
+		decimalIsPositive(decimal: self)
+	}
+	
+	public var isZero: Bool {
+		decimalIsZero(decimal: self)
 	}
 }
 

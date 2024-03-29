@@ -9,6 +9,8 @@ class TestCase: XCTestCase {
 	}
 }
 
+
+
 class Test<SUT_: SargonModel>: TestCase {
 	typealias SUT = SUT_
 	
@@ -41,4 +43,14 @@ class Test<SUT_: SargonModel>: TestCase {
 		XCTAssertNoDifference(sampleOther.description, sampleOther.description)
 	}
 	
+}
+
+extension Test where SUT: Codable {
+	func doTestCodableRoundtrip(_ sut: SUT) throws {
+		let jsonEncoder = JSONEncoder()
+		let jsonDecoder = JSONDecoder()
+		let data = try jsonEncoder.encode(sut)
+		let decoded = try jsonDecoder.decode(SUT.self, from: data)
+		XCTAssertEqual(decoded, sut)
+	}
 }
