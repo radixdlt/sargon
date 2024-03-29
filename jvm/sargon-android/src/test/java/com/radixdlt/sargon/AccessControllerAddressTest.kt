@@ -1,5 +1,6 @@
 package com.radixdlt.sargon
 
+import com.radixdlt.sargon.extensions.formatted
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.networkId
 import com.radixdlt.sargon.extensions.string
@@ -25,6 +26,22 @@ class AccessControllerAddressTest: SampleTestable<AccessControllerAddress> {
         assertThrows<CommonException.FailedToDecodeAddressFromBech32> {
             AccessControllerAddress.init(validatingAddress = "just text")
         }
+    }
+
+    @Test
+    fun testFormat() {
+        val addressString = "accesscontroller_rdx1c0duj4lq0dc3cpl8qd420fpn5eckh8ljeysvjm894lyl5ja5yq6y5a"
+        val address = AccessControllerAddress.init(validatingAddress = addressString)
+
+        assertEquals("acce...yq6y5a", address.formatted())
+        assertEquals(
+            addressString,
+            address.formatted(format = AddressFormat.FULL)
+        )
+        assertEquals(
+            addressString,
+            address.formatted(format = AddressFormat.RAW)
+        )
     }
 
 }

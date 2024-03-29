@@ -1,7 +1,6 @@
 package com.radixdlt.sargon.samples
 
 import androidx.annotation.VisibleForTesting
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.radixdlt.sargon.DisplayName
 import com.radixdlt.sargon.newDisplayNameSample
 import com.radixdlt.sargon.newDisplayNameSampleOther

@@ -1,9 +1,13 @@
 package com.radixdlt.sargon.extensions
 
 import com.radixdlt.sargon.AccountAddress
+import com.radixdlt.sargon.AddressFormat
+import com.radixdlt.sargon.IdentityAddress
 import com.radixdlt.sargon.LegacyOlympiaAccountAddress
 import com.radixdlt.sargon.NetworkId
 import com.radixdlt.sargon.PublicKey
+import com.radixdlt.sargon.identityAddressFormatted
+import com.radixdlt.sargon.legacyOlympiaAccountAddressFormatted
 import com.radixdlt.sargon.legacyOlympiaAccountAddressIsLegacyOfBabylon
 import com.radixdlt.sargon.legacyOlympiaAccountAddressToBabylonAccountAddress
 import com.radixdlt.sargon.legacyOlympiaAccountAddressToString
@@ -32,3 +36,7 @@ fun LegacyOlympiaAccountAddress.isLegacyOfBabylonAddress(babylon: AccountAddress
         legacyOlympiaAddress = this,
         babylonAccountAddress = babylon
     )
+
+fun LegacyOlympiaAccountAddress.formatted(
+    format: AddressFormat = AddressFormat.DEFAULT
+): String = legacyOlympiaAccountAddressFormatted(address = this, format = format)

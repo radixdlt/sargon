@@ -1,11 +1,9 @@
 package com.radixdlt.sargon.samples
 
 import androidx.annotation.VisibleForTesting
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.radixdlt.sargon.NonFungibleGlobalId
 import com.radixdlt.sargon.newNonFungibleGlobalIdSample
 import com.radixdlt.sargon.newNonFungibleGlobalIdSampleOther
-
 
 @VisibleForTesting
 val NonFungibleGlobalId.Companion.sample: Sample<NonFungibleGlobalId>

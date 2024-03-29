@@ -1,7 +1,6 @@
 package com.radixdlt.sargon.samples
 
 import androidx.annotation.VisibleForTesting
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.radixdlt.sargon.NetworkId
 import com.radixdlt.sargon.PackageAddress
 import com.radixdlt.sargon.newPackageAddressSampleMainnet

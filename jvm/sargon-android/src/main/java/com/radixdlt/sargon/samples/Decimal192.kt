@@ -1,7 +1,6 @@
 package com.radixdlt.sargon.samples
 
 import androidx.annotation.VisibleForTesting
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.radixdlt.sargon.Decimal192
 import com.radixdlt.sargon.extensions.MAX
 import com.radixdlt.sargon.extensions.toDecimal192

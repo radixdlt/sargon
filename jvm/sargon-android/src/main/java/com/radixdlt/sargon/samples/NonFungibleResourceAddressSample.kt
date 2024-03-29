@@ -1,7 +1,6 @@
 package com.radixdlt.sargon.samples
 
 import androidx.annotation.VisibleForTesting
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.radixdlt.sargon.NonFungibleResourceAddress
 import com.radixdlt.sargon.newNonFungibleResourceAddressSampleMainnet
 import com.radixdlt.sargon.newNonFungibleResourceAddressSampleMainnetOther
@@ -31,9 +30,3 @@ val NonFungibleResourceAddress.Companion.sampleStokenet: Sample<NonFungibleResou
             newNonFungibleResourceAddressSampleStokenetOther()
 
     }
-
-class NonFungibleResourceAddressStokenetPreviewParameterProvider :
-    PreviewParameterProvider<NonFungibleResourceAddress> {
-    override val values: Sequence<NonFungibleResourceAddress>
-        get() = NonFungibleResourceAddress.sampleStokenet.all.asSequence()
-}

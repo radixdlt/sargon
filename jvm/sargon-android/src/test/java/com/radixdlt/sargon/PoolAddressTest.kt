@@ -1,5 +1,6 @@
 package com.radixdlt.sargon
 
+import com.radixdlt.sargon.extensions.formatted
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.networkId
 import com.radixdlt.sargon.extensions.poolKind
@@ -39,6 +40,22 @@ class PoolAddressTest: SampleTestable<PoolAddress> {
             assertEquals(NetworkId.MAINNET, networkId)
             assertEquals(PoolKind.MULTI_RESOURCES, poolKind)
         }
+    }
+
+    @Test
+    fun testFormat() {
+        val addressString = "pool_rdx1c325zs6dz3un8ykkjavy9fkvvyzarkaehgsl408qup6f95aup3le3w"
+        val address = PoolAddress.init(validatingAddress = addressString)
+
+        assertEquals("pool...p3le3w", address.formatted())
+        assertEquals(
+            addressString,
+            address.formatted(format = AddressFormat.FULL)
+        )
+        assertEquals(
+            addressString,
+            address.formatted(format = AddressFormat.RAW)
+        )
     }
 
 }

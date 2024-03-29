@@ -1,7 +1,6 @@
 package com.radixdlt.sargon.samples
 
 import androidx.annotation.VisibleForTesting
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.radixdlt.sargon.Header
 import com.radixdlt.sargon.newHeaderSample
 import com.radixdlt.sargon.newHeaderSampleOther

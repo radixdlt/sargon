@@ -1,5 +1,6 @@
 package com.radixdlt.sargon
 
+import com.radixdlt.sargon.extensions.formatted
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.fromBytes
 import com.radixdlt.sargon.extensions.fromInt
@@ -7,6 +8,7 @@ import com.radixdlt.sargon.extensions.fromRuid
 import com.radixdlt.sargon.extensions.fromString
 import com.radixdlt.sargon.extensions.hexToBagOfBytes
 import com.radixdlt.sargon.extensions.string
+import com.radixdlt.sargon.samples.sampleMainnet
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -39,6 +41,21 @@ class NonFungibleLocalIdTest {
         assertEquals(
             "[deadbeef12345678babecafe87654321fadedeaf01234567ecadabba76543210]",
             NonFungibleLocalId.init(localId = "[deadbeef12345678babecafe87654321fadedeaf01234567ecadabba76543210]").string
+        )
+    }
+
+    @Test
+    fun testFormat() {
+        val address = NonFungibleLocalId.init(localId = "#1234#")
+
+        assertEquals("1234", address.formatted())
+        assertEquals(
+            "1234",
+            address.formatted(format = AddressFormat.FULL)
+        )
+        assertEquals(
+            address.string,
+            address.formatted(format = AddressFormat.RAW)
         )
     }
 

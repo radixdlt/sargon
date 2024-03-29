@@ -1,7 +1,6 @@
 package com.radixdlt.sargon.samples
 
 import androidx.annotation.VisibleForTesting
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.radixdlt.sargon.SignatureWithPublicKey
 import com.radixdlt.sargon.newSignatureWithPublicKeySample
 import com.radixdlt.sargon.newSignatureWithPublicKeySampleOther

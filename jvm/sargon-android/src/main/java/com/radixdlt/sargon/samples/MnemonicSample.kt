@@ -1,7 +1,6 @@
 package com.radixdlt.sargon.samples
 
 import androidx.annotation.VisibleForTesting
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.radixdlt.sargon.Mnemonic
 import com.radixdlt.sargon.newMnemonicSample
 import com.radixdlt.sargon.newMnemonicSampleOther

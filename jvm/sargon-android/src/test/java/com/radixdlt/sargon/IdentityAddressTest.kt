@@ -1,5 +1,6 @@
 package com.radixdlt.sargon
 
+import com.radixdlt.sargon.extensions.formatted
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.networkId
 import com.radixdlt.sargon.extensions.string
@@ -31,4 +32,19 @@ class IdentityAddressTest: SampleTestable<IdentityAddress> {
         )
     }
 
+    @Test
+    fun testFormat() {
+        val addressString = "identity_rdx122kttqch0eehzj6f9nkkxcw7msfeg9udurq5u0ysa0e92c59w0mg6x"
+        val address = IdentityAddress.init(validatingAddress = addressString)
+
+        assertEquals("iden...w0mg6x", address.formatted())
+        assertEquals(
+            addressString,
+            address.formatted(format = AddressFormat.FULL)
+        )
+        assertEquals(
+            addressString,
+            address.formatted(format = AddressFormat.RAW)
+        )
+    }
 }

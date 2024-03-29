@@ -1,10 +1,7 @@
 package com.radixdlt.sargon.samples
 
 import androidx.annotation.VisibleForTesting
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.radixdlt.sargon.Ed25519PublicKey
 import com.radixdlt.sargon.PublicKey
-import com.radixdlt.sargon.Secp256k1PublicKey
 import com.radixdlt.sargon.newEd25519PublicKeySample
 import com.radixdlt.sargon.newEd25519PublicKeySampleOther
 import com.radixdlt.sargon.newPublicKeySample

@@ -1,7 +1,6 @@
 package com.radixdlt.sargon.samples
 
 import androidx.annotation.VisibleForTesting
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.radixdlt.sargon.Blobs
 import com.radixdlt.sargon.newBlobsSample
 import com.radixdlt.sargon.newBlobsSampleOther
