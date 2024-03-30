@@ -4,10 +4,10 @@ import androidx.annotation.VisibleForTesting
 import com.radixdlt.sargon.AccountAddress
 import com.radixdlt.sargon.NetworkId
 import com.radixdlt.sargon.PackageAddress
-import com.radixdlt.sargon.newAccountAddressSampleRandom
+import com.radixdlt.sargon.newAccountAddressRandom
 import com.radixdlt.sargon.newPackageAddressSampleMainnet
 import com.radixdlt.sargon.newPackageAddressSampleMainnetOther
-import com.radixdlt.sargon.newPackageAddressSampleRandom
+import com.radixdlt.sargon.newPackageAddressRandom
 import com.radixdlt.sargon.newPackageAddressSampleStokenet
 import com.radixdlt.sargon.newPackageAddressSampleStokenetOther
 
@@ -17,7 +17,7 @@ object PackageAddressSampleMainnet: SampleWithRandomValues<PackageAddress> {
 
     override fun other(): PackageAddress = newPackageAddressSampleMainnetOther()
 
-    override fun random(): PackageAddress = newPackageAddressSampleRandom(
+    override fun random(): PackageAddress = newPackageAddressRandom(
         networkId = NetworkId.MAINNET
     )
 }
@@ -32,7 +32,7 @@ object PackageAddressSampleStokenet: SampleWithRandomValues<PackageAddress> {
 
     override fun other(): PackageAddress = newPackageAddressSampleStokenetOther()
 
-    override fun random(): PackageAddress = newPackageAddressSampleRandom(
+    override fun random(): PackageAddress = newPackageAddressRandom(
         networkId = NetworkId.STOKENET
     )
 }
@@ -44,4 +44,4 @@ val PackageAddress.Companion.sampleStokenet: PackageAddressSampleStokenet
 @VisibleForTesting
 fun PackageAddress.Companion.sampleRandom(
     networkId: NetworkId
-) = newPackageAddressSampleRandom(networkId = networkId)
+) = newPackageAddressRandom(networkId = networkId)

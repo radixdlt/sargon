@@ -24,6 +24,14 @@ pub fn new_non_fungible_resource_address_sample_stokenet_other(
     NonFungibleResourceAddress::sample_stokenet_other()
 }
 
+/// Returns a random address in `network_id` as Network
+#[uniffi::export]
+pub fn new_non_fungible_resource_address_random(
+    network_id: NetworkID,
+) -> NonFungibleResourceAddress {
+    NonFungibleResourceAddress::random(network_id)
+}
+
 #[cfg(test)]
 mod uniffi_tests {
     use super::*;
@@ -72,5 +80,16 @@ mod uniffi_tests {
             .len(),
             4
         );
+    }
+
+    #[test]
+    fn random_address() {
+        let n = 10;
+        for network_id in NetworkID::all() {
+            let addresses = (0..n)
+                .map(|_| new_non_fungible_resource_address_random(network_id))
+                .collect::<HashSet<SUT>>();
+            assert_eq!(addresses.len(), n);
+        }
     }
 }

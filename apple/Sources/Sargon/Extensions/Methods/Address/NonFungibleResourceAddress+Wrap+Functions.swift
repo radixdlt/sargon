@@ -21,13 +21,18 @@ extension NonFungibleResourceAddress {
     public func formatted(_ format: AddressFormat = .default) -> String {
         asResourceAddress.formatted(format)
     }
+	
+	public func embed() -> Address {
+		.resource(asResourceAddress)
+	}
+	
 }
 
 #if DEBUG
 extension NonFungibleResourceAddress {
 	
-	public func embed() -> Address {
-		.resource(asResourceAddress)
+	public static func random(networkID: NetworkID) -> Self {
+		newNonFungibleResourceAddressRandom(networkId: networkID)
 	}
 	
 	public func mapTo(networkID: NetworkID) -> Self {

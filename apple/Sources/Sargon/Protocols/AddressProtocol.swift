@@ -39,8 +39,9 @@ extension BaseAddressProtocol {
 
 public protocol AddressProtocol: BaseAddressProtocol & Identifiable where Self.ID == String {
     func formatted(_ format: AddressFormat) -> String
-#if DEBUG
 	func embed() -> Address
+#if DEBUG
+	static func random(networkID: NetworkID) -> Self
 	func mapTo(networkID: NetworkID) -> Self
 	static var sampleMainnet: Self { get }
 	static var sampleMainnetOther: Self { get }

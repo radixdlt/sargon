@@ -24,13 +24,19 @@ extension IdentityAddress {
 	public var networkID: NetworkId {
 		identityAddressNetworkId(address: self)
 	}
+	
+	public func embed() -> Address {
+		.identity(self)
+	}
 }
 
 #if DEBUG
 extension IdentityAddress {
-	public func embed() -> Address {
-		.identity(self)
+	
+	public static func random(networkID: NetworkID) -> Self {
+		newIdentityAddressRandom(networkId: networkID)
 	}
+	
 	public func mapTo(networkID: NetworkID) -> Self {
 		identityAddressMapToNetwork(address: self, networkId: networkID)
 	}

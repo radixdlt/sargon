@@ -138,4 +138,16 @@ class AddressTest<SUT_: AddressProtocol>: BaseAddressTest<SUT_> {
 			XCTAssertTrue($0 == $0.embed())
 		}
 	}
+	
+	func test_random() {
+		let n = 10
+		var set = Set<SUT>()
+		let networks = NetworkID.allCases
+		networks.forEach { networkID in
+			(0..<n).forEach { _ in
+				set.insert(SUT.random(networkID: networkID))
+			}
+		}
+		XCTAssertEqual(set.count, n * networks.count)
+	}
 }

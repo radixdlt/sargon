@@ -7,6 +7,10 @@ extension Address: AddressProtocol {
 	public func into<A: AddressProtocol>(type: A.Type = A.self) throws -> A {
 		try A(validatingAddress: self.address)
 	}
+	
+	public static func random(networkID: NetworkID) -> Self {
+		Self.account(.random(networkID: networkID))
+	}
 }
 
 public func == (lhs: Address, rhs: some AddressProtocol) -> Bool {

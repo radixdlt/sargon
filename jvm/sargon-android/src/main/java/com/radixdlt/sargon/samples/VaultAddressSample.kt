@@ -4,10 +4,10 @@ import androidx.annotation.VisibleForTesting
 import com.radixdlt.sargon.NetworkId
 import com.radixdlt.sargon.ValidatorAddress
 import com.radixdlt.sargon.VaultAddress
-import com.radixdlt.sargon.newValidatorAddressSampleRandom
+import com.radixdlt.sargon.newValidatorAddressRandom
 import com.radixdlt.sargon.newVaultAddressSampleMainnetFungible
 import com.radixdlt.sargon.newVaultAddressSampleMainnetNonFungible
-import com.radixdlt.sargon.newVaultAddressSampleRandom
+import com.radixdlt.sargon.newVaultAddressRandom
 import com.radixdlt.sargon.newVaultAddressSampleStokenetFungible
 import com.radixdlt.sargon.newVaultAddressSampleStokenetNonFungible
 
@@ -17,7 +17,7 @@ object VaultAddressSampleMainnet: SampleWithRandomValues<VaultAddress> {
 
     override fun other(): VaultAddress = newVaultAddressSampleMainnetNonFungible()
 
-    override fun random(): VaultAddress = newVaultAddressSampleRandom(networkId = NetworkId.MAINNET)
+    override fun random(): VaultAddress = newVaultAddressRandom(networkId = NetworkId.MAINNET)
 }
 
 @VisibleForTesting
@@ -30,7 +30,7 @@ object VaultAddressSampleStokenet: SampleWithRandomValues<VaultAddress> {
 
     override fun other(): VaultAddress = newVaultAddressSampleStokenetNonFungible()
 
-    override fun random(): VaultAddress = newVaultAddressSampleRandom(
+    override fun random(): VaultAddress = newVaultAddressRandom(
         networkId = NetworkId.STOKENET
     )
 }
@@ -42,4 +42,4 @@ val VaultAddress.Companion.sampleStokenet: VaultAddressSampleStokenet
 @VisibleForTesting
 fun VaultAddress.Companion.sampleRandom(
     networkId: NetworkId
-) = newVaultAddressSampleRandom(networkId = networkId)
+) = newVaultAddressRandom(networkId = networkId)

@@ -5,7 +5,7 @@ import com.radixdlt.sargon.AccessControllerAddress
 import com.radixdlt.sargon.NetworkId
 import com.radixdlt.sargon.newAccessControllerAddressSampleMainnet
 import com.radixdlt.sargon.newAccessControllerAddressSampleMainnetOther
-import com.radixdlt.sargon.newAccessControllerAddressSampleRandom
+import com.radixdlt.sargon.newAccessControllerAddressRandom
 import com.radixdlt.sargon.newAccessControllerAddressSampleStokenet
 import com.radixdlt.sargon.newAccessControllerAddressSampleStokenetOther
 
@@ -18,7 +18,7 @@ object AccessControllerAddressSampleMainnet: SampleWithRandomValues<AccessContro
     override fun other(): AccessControllerAddress =
         newAccessControllerAddressSampleMainnetOther()
 
-    override fun random(): AccessControllerAddress = newAccessControllerAddressSampleRandom(
+    override fun random(): AccessControllerAddress = newAccessControllerAddressRandom(
         networkId = NetworkId.MAINNET
     )
 
@@ -37,7 +37,7 @@ object AccessControllerAddressSampleStokenet: SampleWithRandomValues<AccessContr
     override fun other(): AccessControllerAddress =
         newAccessControllerAddressSampleStokenetOther()
 
-    override fun random(): AccessControllerAddress = newAccessControllerAddressSampleRandom(
+    override fun random(): AccessControllerAddress = newAccessControllerAddressRandom(
         networkId = NetworkId.STOKENET
     )
 }
@@ -49,4 +49,4 @@ val AccessControllerAddress.Companion.sampleStokenet: AccessControllerAddressSam
 @VisibleForTesting
 fun AccessControllerAddress.Companion.sampleRandom(
     networkId: NetworkId
-) = newAccessControllerAddressSampleRandom(networkId = networkId)
+) = newAccessControllerAddressRandom(networkId = networkId)

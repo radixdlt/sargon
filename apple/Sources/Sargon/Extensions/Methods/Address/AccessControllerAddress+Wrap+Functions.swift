@@ -17,13 +17,19 @@ extension AccessControllerAddress {
 	public var networkID: NetworkId {
 		accessControllerAddressNetworkId(address: self)
 	}
+	
+	public func embed() -> Address {
+		.accessController(self)
+	}
 }
 
 #if DEBUG
 extension AccessControllerAddress {
-	public func embed() -> Address {
-		.accessController(self)
+	
+	public static func random(networkID: NetworkID) -> Self {
+		newAccessControllerAddressRandom(networkId: networkID)
 	}
+	
 	public func mapTo(networkID: NetworkID) -> Self {
 		accessControllerAddressMapToNetwork(address: self, networkId: networkID)
 	}

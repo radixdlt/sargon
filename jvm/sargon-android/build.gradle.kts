@@ -79,6 +79,7 @@ dependencies {
     implementation("net.java.dev.jna:jna:5.13.0@aar")
     implementation("androidx.annotation:annotation:1.7.1")
     implementation("androidx.compose.ui:ui-tooling-preview-android:1.6.2")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     testDebugRuntimeOnly(project(":sargon-desktop-debug"))
     testReleaseRuntimeOnly(project(":sargon-desktop-release"))

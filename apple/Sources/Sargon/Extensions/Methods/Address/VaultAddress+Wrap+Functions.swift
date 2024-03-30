@@ -27,13 +27,19 @@ extension VaultAddress {
 	public var isNonFungible: Bool {
 		vaultAddressIsNonFungible(address: self)
 	}
+	
+	public func embed() -> Address {
+		.vault(self)
+	}
 }
 
 #if DEBUG
 extension VaultAddress {
-	public func embed() -> Address {
-		.vault(self)
+	
+	public static func random(networkID: NetworkID) -> Self {
+		newVaultAddressRandom(networkId: networkID)
 	}
+	
 	public func mapTo(networkID: NetworkID) -> Self {
 		vaultAddressMapToNetwork(address: self, networkId: networkID)
 	}
