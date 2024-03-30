@@ -101,6 +101,10 @@ mod tests {
             .as_plaintext(),
             None
         );
+        assert_eq!(
+            SUT::None.as_plaintext(),
+            None
+        );
     }
 
     #[test]

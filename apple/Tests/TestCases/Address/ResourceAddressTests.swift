@@ -54,4 +54,11 @@ final class ResourceAddressTests: AddressTest<ResourceAddress> {
 		XCTAssertFalse(SUT.sampleStokenet.isXRD(on: .mainnet))
 		XCTAssertTrue(SUT.sampleStokenet.isXRD(on: .stokenet))
 	}
+	
+	func test_xrd_of_mainnet() {
+		XCTAssertEqual(SUT.mainnetXRD, SUT.sampleMainnet)
+		XCTAssert(SUT.mainnetXRD.isXRD)
+		XCTAssert(SUT.mainnetXRD.isXRD(on: .mainnet))
+		XCTAssertFalse(SUT.mainnetXRD.isXRD(on: .stokenet))
+	}
 }

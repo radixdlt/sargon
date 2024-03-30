@@ -14,4 +14,6 @@ extension ResourceAddress {
 		self == Self.xrd(on: networkID)
 	}
 	
+	/// The ResourceAddress of XRD of mainnet
+	public static let mainnetXRD = Self.xrd(on: .mainnet)
 }
