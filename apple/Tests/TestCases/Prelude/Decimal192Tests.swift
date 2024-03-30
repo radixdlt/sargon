@@ -228,11 +228,31 @@ final class Decimal192Tests: Test<Decimal192> {
 	
 	func test_is_negative() {
 		SUT.negative.forEach {
-			XCTAssertTrue($0.isNegative())
+			XCTAssertTrue($0.isNegative)
 		}
 		SUT.positive.forEach {
-			XCTAssertFalse($0.isNegative())
+			XCTAssertFalse($0.isNegative)
 		}
+	}
+	
+	func test_is_positive() {
+		SUT.negative.forEach {
+			XCTAssertFalse($0.isPositive)
+		}
+		SUT.positive.forEach {
+			XCTAssertTrue($0.isPositive)
+		}
+	}
+	
+	func test_is_zero() {
+		SUT.negative.forEach {
+			XCTAssertFalse($0.isZero)
+		}
+		SUT.positive.forEach {
+			XCTAssertFalse($0.isZero)
+		}
+		
+		XCTAssert(SUT.zero.isZero)
 	}
 	
 	func test_clamped() {
@@ -242,6 +262,17 @@ final class Decimal192Tests: Test<Decimal192> {
 		SUT.positive.forEach {
 			XCTAssertEqual($0.clamped, $0)
 		}
+	}
+	
+	func test_exponent() {
+		func doTest(exponent: UInt8, expected: SUT) {
+			XCTAssertEqual(SUT(exponent: exponent), expected)
+		}
+		doTest(exponent: 0, expected: 1)
+		doTest(exponent: 1, expected: 10)
+		doTest(exponent: 2, expected: 100)
+		doTest(exponent: 3, expected: 1000)
+		doTest(exponent: 4, expected: 10000)
 	}
 	
 	func test_negation() {
@@ -330,4 +361,146 @@ final class Decimal192Tests: Test<Decimal192> {
     func test_standard_transaction_fee() {
         XCTAssertEqual(SUT.temporaryStandardFee, 25)
     }
+	
+	func test_decoding_to_Decimal192() throws {
+		struct TestStruct: Codable, Equatable {
+			let decimal: Decimal192
+			let optional: Decimal192?
+		}
+
+		func doTest(_ string: String, decimal expectedDecimal: Decimal192, optionalIsNil: Bool = false) throws {
+			if let data = string.data(using: .utf8) {
+				let actual = try JSONDecoder().decode(TestStruct.self, from: data)
+				let expected = TestStruct(decimal: expectedDecimal, optional: optionalIsNil ? nil : expectedDecimal)
+				XCTAssertEqual(actual, expected)
+			} else {
+				XCTFail()
+			}
+		}
+
+		try doTest("{\"decimal\":\"123.1234\",\"optional\":\"123.1234\"}", decimal: .init("123.1234"))
+		try doTest("{\"decimal\":\"1233434.1234\",\"optional\":\"1233434.1234\"}", decimal: .init("1233434.1234"))
+		try doTest("{\"decimal\":\"124300.1332\",\"optional\":\"124300.1332\"}", decimal: .init("124300.1332"))
+		try doTest("{\"decimal\":\"000124300.1332000\",\"optional\":\"000124300.1332000\"}", decimal: .init("000124300.1332000"))
+		try doTest("{\"decimal\":\"124300.000001332\",\"optional\":\"124300.000001332\"}", decimal: .init("124300.000001332"))
+		try doTest("{\"decimal\":\"0.0000000223\",\"optional\":\"0.0000000223\"}", decimal: .init("0.0000000223"))
+		try doTest("{\"decimal\":\"0.000\",\"optional\":\"0.000\"}", decimal: .init("0.000"))
+		try doTest("{\"decimal\":\"0.0\",\"optional\":\"0.0\"}", decimal: .init("0.0"))
+		try doTest("{\"decimal\":\"0.009999999999999\",\"optional\":\"0.009999999999999\"}", decimal: .init("0.009999999999999"))
+		try doTest("{\"decimal\":\"1234123.4\",\"optional\":\"1234123.4\"}", decimal: .init("1234123.4"))
+		try doTest("{\"decimal\":\"123456.34\",\"optional\":\"123456.34\"}", decimal: .init("123456.34"))
+		try doTest("{\"decimal\":\"12345.234\",\"optional\":\"12345.234\"}", decimal: .init("12345.234"))
+
+		try doTest("{\"decimal\":\"12341234\",\"optional\":\"12341234\"}", decimal: .init("12341234"))
+		try doTest("{\"decimal\":\"1234123412341234\",\"optional\":\"1234123412341234\"}", decimal: .init("1234123412341234"))
+
+		try doTest("{\"decimal\":\"00000123\",\"optional\":\"00000123\"}", decimal: .init("123"))
+		try doTest("{\"decimal\":\"00000123.1234\",\"optional\":\"00000123.1234\"}", decimal: .init("123.1234"))
+		try doTest("{\"decimal\":\"00000123.12340000\",\"optional\":\"00000123.12340000\"}", decimal: .init("123.1234"))
+		try doTest("{\"decimal\":\"123.12340000\",\"optional\":\"123.12340000\"}", decimal: .init("123.1234"))
+
+		try doTest("{\"decimal\":\"123.1234\"}", decimal: .init("123.1234"), optionalIsNil: true)
+		try doTest("{\"decimal\":\"12341234\"}", decimal: .init("12341234"), optionalIsNil: true)
+	}
+
+	func test_roundtrip_coding_Decimal192() throws {
+		struct TestStruct: Codable, Equatable {
+			let decimal: Decimal192?
+		}
+
+		func doTest(_ decimal: Decimal192?) throws {
+			let original = TestStruct(decimal: decimal)
+			let encoded = try JSONEncoder().encode(original)
+			let decoded = try JSONDecoder().decode(TestStruct.self, from: encoded)
+			XCTAssertEqual(original, decoded)
+		}
+
+		try doTest(nil)
+
+		for decimalString in smallDecimalStrings {
+			let sut = try Decimal192(decimalString)
+			try doTest(sut)
+			let fromRawString = try SUT(sut.toRawString())
+			XCTAssertNoDifference(sut, fromRawString)
+		}
+	}
+
+	func test_as_double() throws {
+		typealias LargeVector = (string: String, lostPrecision: UInt8)
+		let largeDecimalsStrings: [LargeVector] = [
+			(string: "000009876543212345678987654321.1415", lostPrecision: 10),
+			(string: "123459876543212345678987654321.2370", lostPrecision: 15),
+		]
+		let numberFormatter = NumberFormatter()
+		numberFormatter.maximumFractionDigits = 18
+		numberFormatter.locale = .test
+		
+		func testSmall(_ string: String) throws {
+			let sut = try SUT(string)
+			let double = sut.asDouble
+			let doubleFormatted = try XCTUnwrap(numberFormatter.string(for: double))
+			XCTAssertEqual(sut.toRawString(), doubleFormatted)
+		}
+		
+		func testLarge(_ vector: LargeVector) throws {
+			let sut = try SUT(vector.string)
+			let double = sut.asDouble
+			let doubleFormatted = try XCTUnwrap(numberFormatter.string(for: double))
+			let scale = SUT(exponent: vector.lostPrecision)
+			let rounded = (sut / scale).rounded(decimalPlaces: 0) * scale
+			XCTAssertEqual(rounded.toRawString(), doubleFormatted)
+		}
+		
+		
+		try smallDecimalStrings.forEach(testSmall)
+		try largeDecimalsStrings.forEach(testLarge)
+		
+		XCTAssertLessThan(SUT.min.asDouble, SUT.max.asDouble)
+		XCTAssertNoThrow(try SUT.init("12345678987654321.000000000000000001").asDouble)
+	}
+	
+	private var smallDecimalStrings: [String] {
+		[
+			"0.000000000000000001",
+			"123.1234",
+			"1233434.1234",
+			"124300.1332",
+			"000124300.1332000",
+			"124300.000001332",
+			"0.0000000223",
+			"0.000",
+			"0.0",
+			"0.009999999999999",
+			"12341234",
+			"1234123.4",
+			"123456.34",
+			"12345.234",
+			"0.00000009",
+			"0.000000009",
+			"12.3456789",
+			"0.123456789",
+			"0.4321",
+			"0.0000000000001",
+			"0.9999999999999",
+			"1000",
+			"1000.01",
+			"1000.123456789",
+			"1000000.1234",
+			"10000000.1234",
+			"10000000.5234",
+			"999.999999999943",
+			"-0.123456789",
+			"-0.4321",
+			"-0.0000000000001",
+			"-0.9999999999999",
+			"-1000",
+			"-1000.01",
+			"-1000.123456789",
+			"-1000000.1234",
+			"1",
+			"0.0",
+			"1.0",
+		]
+	}
 }
+

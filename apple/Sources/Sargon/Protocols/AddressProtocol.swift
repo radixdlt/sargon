@@ -4,7 +4,7 @@ public protocol BaseBaseAddressProtocol: SargonModel, ExpressibleByStringLiteral
 public protocol BaseBaseAddressProtocol: SargonModel {}
 #endif // DEBUG
 
-public protocol BaseAddressProtocol: BaseBaseAddressProtocol, CustomStringConvertible, CaseIterable where Self.AllCases == [Self] {
+public protocol BaseAddressProtocol: BaseBaseAddressProtocol, Codable, CustomStringConvertible, CaseIterable where Self.AllCases == [Self] {
 	init(validatingAddress bech32String: String) throws
 	var networkID: NetworkID { get }
 	var address: String { get }
@@ -13,6 +13,19 @@ public protocol BaseAddressProtocol: BaseBaseAddressProtocol, CustomStringConver
 extension BaseAddressProtocol {
 	public var description: String {
 		address
+	}
+}
+
+extension BaseAddressProtocol where Self: Codable {
+	public func encode(to encoder: Encoder) throws {
+		var container = encoder.singleValueContainer()
+		try container.encode(self.address)
+	}
+
+	public init(from decoder: Decoder) throws {
+		let container = try decoder.singleValueContainer()
+		let string = try container.decode(String.self)
+		try self.init(validatingAddress: string)
 	}
 }
 

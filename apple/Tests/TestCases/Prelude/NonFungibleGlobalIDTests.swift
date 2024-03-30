@@ -1,11 +1,11 @@
-final class NonFungibleGlobalIDTests: Test<NonFungibleGlobalID> {
+final class NonFungibleGlobalIDTests: IdentifiableByStringProtocolTest<NonFungibleGlobalID> {
     
     func test_from_parts() {
         XCTAssertEqual(
             SUT.sample,
             try SUT(
                 nonFungibleResourceAddress: NonFungibleResourceAddress.sample,
-                localID: .init(string: "Member_237")
+				localID: .stringID("Member_237")
             )
         )
     }
@@ -16,14 +16,14 @@ final class NonFungibleGlobalIDTests: Test<NonFungibleGlobalID> {
     
     func test_valid_from_str() {
         XCTAssertEqual(
-            try SUT(string: "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa:<Member_237>"),
+			try SUT.init("resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa:<Member_237>"),
             SUT.sample
         )
     }
     
     func test_invalid_from_str() {
         XCTAssertThrowsError(
-            try SUT(string: "super invalid string!!!!")
+			try SUT.init("super invalid string!!!!")
         )
     }
 	

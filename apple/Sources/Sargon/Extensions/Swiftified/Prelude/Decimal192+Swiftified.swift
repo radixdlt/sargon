@@ -82,3 +82,34 @@ extension Decimal192 {
 		lhs.div(rhs: rhs)
 	}
 }
+
+extension Decimal192 {
+	public var asDouble: Double {
+		// this can never fail
+		Double(self.toRawString())!
+	}
+	
+}
+
+
+extension Decimal192 {
+	
+	public func toRawString() -> String {
+		decimalToString(decimal: self)
+	}
+}
+
+extension Decimal192: Codable {
+	@inlinable
+	public func encode(to encoder: Encoder) throws {
+		var container = encoder.singleValueContainer()
+		try container.encode(toRawString())
+	}
+
+	@inlinable
+	public init(from decoder: Decoder) throws {
+		let container = try decoder.singleValueContainer()
+		let string = try container.decode(String.self)
+		try self.init(string)
+	}
+}
