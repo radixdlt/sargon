@@ -1,5 +1,6 @@
 package com.radixdlt.sargon
 
+import com.radixdlt.sargon.extensions.formatted
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.isFungible
 import com.radixdlt.sargon.extensions.isNonFungible
@@ -34,6 +35,22 @@ class ResourceAddressTest: SampleTestable<ResourceAddress> {
         )
         assertTrue(nonFungibleResourceAddress.isNonFungible)
         assertFalse(nonFungibleResourceAddress.isFungible)
+    }
+
+    @Test
+    fun testFormat() {
+        val addressString = "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
+        val address = ResourceAddress.init(validatingAddress = addressString)
+
+        assertEquals("reso...radxrd", address.formatted())
+        assertEquals(
+            addressString,
+            address.formatted(format = AddressFormat.FULL)
+        )
+        assertEquals(
+            addressString,
+            address.formatted(format = AddressFormat.RAW)
+        )
     }
 
 }

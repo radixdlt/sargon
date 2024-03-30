@@ -1,40 +1,47 @@
 package com.radixdlt.sargon.samples
 
 import androidx.annotation.VisibleForTesting
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import com.radixdlt.sargon.NetworkId
+import com.radixdlt.sargon.ResourceAddress
 import com.radixdlt.sargon.ValidatorAddress
+import com.radixdlt.sargon.newResourceAddressSampleRandom
 import com.radixdlt.sargon.newValidatorAddressSampleMainnet
 import com.radixdlt.sargon.newValidatorAddressSampleMainnetOther
+import com.radixdlt.sargon.newValidatorAddressSampleRandom
 import com.radixdlt.sargon.newValidatorAddressSampleStokenet
 import com.radixdlt.sargon.newValidatorAddressSampleStokenetOther
 
 @VisibleForTesting
-val ValidatorAddress.Companion.sampleMainnet: Sample<ValidatorAddress>
-    get() = object : Sample<ValidatorAddress> {
+object ValidatorAddressSampleMainnet: SampleWithRandomValues<ValidatorAddress> {
+    override fun invoke(): ValidatorAddress = newValidatorAddressSampleMainnet()
 
-        override fun invoke(): ValidatorAddress = newValidatorAddressSampleMainnet()
+    override fun other(): ValidatorAddress = newValidatorAddressSampleMainnetOther()
 
-        override fun other(): ValidatorAddress = newValidatorAddressSampleMainnetOther()
-    }
+    override fun random(): ValidatorAddress = newValidatorAddressSampleRandom(
+        networkId = NetworkId.MAINNET
+    )
+}
 
 @VisibleForTesting
-val ValidatorAddress.Companion.sampleStokenet: Sample<ValidatorAddress>
-    get() = object : Sample<ValidatorAddress> {
+val ValidatorAddress.Companion.sampleMainnet: ValidatorAddressSampleMainnet
+    get() = ValidatorAddressSampleMainnet
 
-        override fun invoke(): ValidatorAddress = newValidatorAddressSampleStokenet()
+@VisibleForTesting
+object ValidatorAddressSampleStokenet: SampleWithRandomValues<ValidatorAddress> {
+    override fun invoke(): ValidatorAddress = newValidatorAddressSampleStokenet()
 
-        override fun other(): ValidatorAddress = newValidatorAddressSampleStokenetOther()
-    }
+    override fun other(): ValidatorAddress = newValidatorAddressSampleStokenetOther()
 
-
-class ValidatorAddressMainnetPreviewParameterProvider: PreviewParameterProvider<ValidatorAddress> {
-    override val values: Sequence<ValidatorAddress>
-        get() = ValidatorAddress.sampleMainnet.all.asSequence()
-
+    override fun random(): ValidatorAddress = newValidatorAddressSampleRandom(
+        networkId = NetworkId.STOKENET
+    )
 }
 
-class ValidatorAddressStokenetPreviewParameterProvider: PreviewParameterProvider<ValidatorAddress> {
-    override val values: Sequence<ValidatorAddress>
-        get() = ValidatorAddress.sampleStokenet.all.asSequence()
+@VisibleForTesting
+val ValidatorAddress.Companion.sampleStokenet: ValidatorAddressSampleStokenet
+    get() = ValidatorAddressSampleStokenet
 
-}
+@VisibleForTesting
+fun ValidatorAddress.Companion.sampleRandom(
+    networkId: NetworkId
+) = newValidatorAddressSampleRandom(networkId = networkId)

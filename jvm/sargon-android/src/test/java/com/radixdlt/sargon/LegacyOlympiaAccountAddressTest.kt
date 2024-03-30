@@ -1,5 +1,6 @@
 package com.radixdlt.sargon
 
+import com.radixdlt.sargon.extensions.formatted
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.isLegacyOfBabylonAddress
 import com.radixdlt.sargon.extensions.networkId
@@ -45,6 +46,22 @@ class LegacyOlympiaAccountAddressTest: SampleTestable<LegacyOlympiaAccountAddres
         assertEquals(
             NetworkId.MAINNET,
             legacy.networkId
+        )
+    }
+
+    @Test
+    fun testFormat() {
+        val addressString = "rdx1qspx7zxmnrh36q33av24srdfzg7m3cj65968erpjuh7ja3rm3kmn6hq4j9842"
+        val address = LegacyOlympiaAccountAddress.init(validatingAddress = addressString)
+
+        assertEquals("rdx...6hq4j9842", address.formatted())
+        assertEquals(
+            addressString,
+            address.formatted(format = AddressFormat.FULL)
+        )
+        assertEquals(
+            addressString,
+            address.formatted(format = AddressFormat.RAW)
         )
     }
 

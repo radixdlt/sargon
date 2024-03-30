@@ -13,3 +13,12 @@ interface Sample<T> {
     fun other(): T
 
 }
+
+interface SampleWithRandomValues<T>: Sample<T> {
+
+    override val all: List<T>
+        get() = listOf(invoke(), other(), random(), random())
+
+    fun random(): T
+
+}

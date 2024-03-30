@@ -1,5 +1,6 @@
 package com.radixdlt.sargon
 
+import com.radixdlt.sargon.extensions.formatted
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.networkId
 import com.radixdlt.sargon.extensions.string
@@ -23,4 +24,19 @@ class PackageAddressTest: SampleTestable<PackageAddress> {
         assertEquals(NetworkId.MAINNET, packageAddress.networkId)
     }
 
+    @Test
+    fun testFormat() {
+        val addressString = "package_rdx1pkgxxxxxxxxxfaucetxxxxxxxxx000034355863xxxxxxxxxfaucet"
+        val address = PackageAddress.init(validatingAddress = addressString)
+
+        assertEquals("pack...faucet", address.formatted())
+        assertEquals(
+            addressString,
+            address.formatted(format = AddressFormat.FULL)
+        )
+        assertEquals(
+            addressString,
+            address.formatted(format = AddressFormat.RAW)
+        )
+    }
 }

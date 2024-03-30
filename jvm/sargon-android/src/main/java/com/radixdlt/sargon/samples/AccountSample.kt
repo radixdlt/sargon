@@ -1,7 +1,6 @@
 package com.radixdlt.sargon.samples
 
 import androidx.annotation.VisibleForTesting
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.radixdlt.sargon.Account
 import com.radixdlt.sargon.newAccountSampleMainnetAlice
 import com.radixdlt.sargon.newAccountSampleMainnetBob
@@ -49,15 +48,3 @@ object AccountStokenetSample: Sample<Account> {
 @VisibleForTesting
 val Account.Companion.sampleStokenet: AccountStokenetSample
     get() = AccountStokenetSample
-
-class AccountMainnetAddressPreviewParameterProvider : PreviewParameterProvider<Account> {
-    override val values: Sequence<Account>
-        get() = Account.sampleMainnet.all.asSequence()
-
-}
-
-class AccountStokenetAddressPreviewParameterProvider : PreviewParameterProvider<Account> {
-    override val values: Sequence<Account>
-        get() = Account.sampleStokenet.all.asSequence()
-
-}

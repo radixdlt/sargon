@@ -1,10 +1,14 @@
 package com.radixdlt.sargon.extensions
 
+import com.radixdlt.sargon.AddressFormat
 import com.radixdlt.sargon.NetworkId
+import com.radixdlt.sargon.PackageAddress
 import com.radixdlt.sargon.PoolAddress
 import com.radixdlt.sargon.PoolKind
 import com.radixdlt.sargon.newPoolAddress
+import com.radixdlt.sargon.packageAddressFormatted
 import com.radixdlt.sargon.poolAddressBech32Address
+import com.radixdlt.sargon.poolAddressFormatted
 import com.radixdlt.sargon.poolAddressKind
 import com.radixdlt.sargon.poolAddressNetworkId
 
@@ -23,3 +27,7 @@ val PoolAddress.networkId: NetworkId
  */
 val PoolAddress.poolKind: PoolKind
     get() = poolAddressKind(address = this)
+
+fun PoolAddress.formatted(
+    format: AddressFormat = AddressFormat.DEFAULT
+): String = poolAddressFormatted(address = this, format = format)

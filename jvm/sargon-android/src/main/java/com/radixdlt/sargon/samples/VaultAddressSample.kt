@@ -1,39 +1,45 @@
 package com.radixdlt.sargon.samples
 
 import androidx.annotation.VisibleForTesting
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import com.radixdlt.sargon.NetworkId
+import com.radixdlt.sargon.ValidatorAddress
 import com.radixdlt.sargon.VaultAddress
+import com.radixdlt.sargon.newValidatorAddressSampleRandom
 import com.radixdlt.sargon.newVaultAddressSampleMainnetFungible
 import com.radixdlt.sargon.newVaultAddressSampleMainnetNonFungible
+import com.radixdlt.sargon.newVaultAddressSampleRandom
 import com.radixdlt.sargon.newVaultAddressSampleStokenetFungible
 import com.radixdlt.sargon.newVaultAddressSampleStokenetNonFungible
 
 @VisibleForTesting
-val VaultAddress.Companion.sampleMainnet: Sample<VaultAddress>
-    get() = object : Sample<VaultAddress> {
+object VaultAddressSampleMainnet: SampleWithRandomValues<VaultAddress> {
+    override fun invoke(): VaultAddress = newVaultAddressSampleMainnetFungible()
 
-        override fun invoke(): VaultAddress = newVaultAddressSampleMainnetFungible()
+    override fun other(): VaultAddress = newVaultAddressSampleMainnetNonFungible()
 
-        override fun other(): VaultAddress = newVaultAddressSampleMainnetNonFungible()
-    }
+    override fun random(): VaultAddress = newVaultAddressSampleRandom(networkId = NetworkId.MAINNET)
+}
 
 @VisibleForTesting
-val VaultAddress.Companion.sampleStokenet: Sample<VaultAddress>
-    get() = object : Sample<VaultAddress> {
+val VaultAddress.Companion.sampleMainnet: VaultAddressSampleMainnet
+    get() = VaultAddressSampleMainnet
 
-        override fun invoke(): VaultAddress = newVaultAddressSampleStokenetFungible()
+@VisibleForTesting
+object VaultAddressSampleStokenet: SampleWithRandomValues<VaultAddress> {
+    override fun invoke(): VaultAddress = newVaultAddressSampleStokenetFungible()
 
-        override fun other(): VaultAddress = newVaultAddressSampleStokenetNonFungible()
-    }
+    override fun other(): VaultAddress = newVaultAddressSampleStokenetNonFungible()
 
-class VaultAddressMainnetPreviewParameterProvider: PreviewParameterProvider<VaultAddress> {
-    override val values: Sequence<VaultAddress>
-        get() = VaultAddress.sampleMainnet.all.asSequence()
-
+    override fun random(): VaultAddress = newVaultAddressSampleRandom(
+        networkId = NetworkId.STOKENET
+    )
 }
 
-class VaultAddressStokenetPreviewParameterProvider: PreviewParameterProvider<VaultAddress> {
-    override val values: Sequence<VaultAddress>
-        get() = VaultAddress.sampleStokenet.all.asSequence()
+@VisibleForTesting
+val VaultAddress.Companion.sampleStokenet: VaultAddressSampleStokenet
+    get() = VaultAddressSampleStokenet
 
-}
+@VisibleForTesting
+fun VaultAddress.Companion.sampleRandom(
+    networkId: NetworkId
+) = newVaultAddressSampleRandom(networkId = networkId)

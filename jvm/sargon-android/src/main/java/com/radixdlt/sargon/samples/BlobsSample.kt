@@ -1,7 +1,6 @@
 package com.radixdlt.sargon.samples
 
 import androidx.annotation.VisibleForTesting
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.radixdlt.sargon.Blobs
 import com.radixdlt.sargon.newBlobsSample
 import com.radixdlt.sargon.newBlobsSampleOther
@@ -14,9 +13,3 @@ val Blobs.Companion.sample: Sample<Blobs>
 
         override fun other(): Blobs = newBlobsSampleOther()
     }
-
-class BlobsPreviewParameterProvider: PreviewParameterProvider<Blobs> {
-    override val values: Sequence<Blobs>
-        get() = Blobs.sample.all.asSequence()
-
-}

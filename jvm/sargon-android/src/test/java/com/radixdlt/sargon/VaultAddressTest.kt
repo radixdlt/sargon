@@ -1,5 +1,6 @@
 package com.radixdlt.sargon
 
+import com.radixdlt.sargon.extensions.formatted
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.isFungible
 import com.radixdlt.sargon.extensions.isNonFungible
@@ -29,4 +30,19 @@ class VaultAddressTest: SampleTestable<VaultAddress> {
         assertFalse(vaultAddress.isNonFungible)
     }
 
+    @Test
+    fun testFormat() {
+        val addressString = "internal_vault_rdx1tz474x29nxxd4k2p2reete9xyz4apawv63dphxkr00qt23vyju49fq"
+        val address = VaultAddress.init(validatingAddress = addressString)
+
+        assertEquals("inte...ju49fq", address.formatted())
+        assertEquals(
+            addressString,
+            address.formatted(format = AddressFormat.FULL)
+        )
+        assertEquals(
+            addressString,
+            address.formatted(format = AddressFormat.RAW)
+        )
+    }
 }

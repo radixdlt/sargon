@@ -1,37 +1,47 @@
 package com.radixdlt.sargon.samples
 
 import androidx.annotation.VisibleForTesting
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import com.radixdlt.sargon.AccountAddress
 import com.radixdlt.sargon.IdentityAddress
+import com.radixdlt.sargon.NetworkId
+import com.radixdlt.sargon.newAccountAddressSampleRandom
 import com.radixdlt.sargon.newIdentityAddressSampleMainnet
 import com.radixdlt.sargon.newIdentityAddressSampleMainnetOther
+import com.radixdlt.sargon.newIdentityAddressSampleRandom
 import com.radixdlt.sargon.newIdentityAddressSampleStokenet
 import com.radixdlt.sargon.newIdentityAddressSampleStokenetOther
 
 @VisibleForTesting
-val IdentityAddress.Companion.sampleMainnet: Sample<IdentityAddress>
-    get() = object : Sample<IdentityAddress> {
-        override fun invoke(): IdentityAddress = newIdentityAddressSampleMainnet()
+object IdentityAddressSampleMainnet: SampleWithRandomValues<IdentityAddress> {
+    override fun invoke(): IdentityAddress = newIdentityAddressSampleMainnet()
 
-        override fun other(): IdentityAddress = newIdentityAddressSampleMainnetOther()
-    }
+    override fun other(): IdentityAddress = newIdentityAddressSampleMainnetOther()
+
+    override fun random(): IdentityAddress = newIdentityAddressSampleRandom(
+        networkId = NetworkId.MAINNET
+    )
+}
 
 @VisibleForTesting
-val IdentityAddress.Companion.sampleStokenet: Sample<IdentityAddress>
-    get() = object : Sample<IdentityAddress> {
-        override fun invoke(): IdentityAddress = newIdentityAddressSampleStokenet()
+val IdentityAddress.Companion.sampleMainnet: IdentityAddressSampleMainnet
+    get() = IdentityAddressSampleMainnet
 
-        override fun other(): IdentityAddress = newIdentityAddressSampleStokenetOther()
-    }
+@VisibleForTesting
+object IdentityAddressSampleStokenet: SampleWithRandomValues<IdentityAddress> {
+    override fun invoke(): IdentityAddress = newIdentityAddressSampleStokenet()
 
-class IdentityAddressMainnetPreviewParameterProvider: PreviewParameterProvider<IdentityAddress> {
-    override val values: Sequence<IdentityAddress>
-        get() = IdentityAddress.sampleMainnet.all.asSequence()
+    override fun other(): IdentityAddress = newIdentityAddressSampleStokenetOther()
 
+    override fun random(): IdentityAddress = newIdentityAddressSampleRandom(
+        networkId = NetworkId.STOKENET
+    )
 }
 
-class IdentityAddressStokenetPreviewParameterProvider: PreviewParameterProvider<IdentityAddress> {
-    override val values: Sequence<IdentityAddress>
-        get() = IdentityAddress.sampleStokenet.all.asSequence()
+@VisibleForTesting
+val IdentityAddress.Companion.sampleStokenet: IdentityAddressSampleStokenet
+    get() = IdentityAddressSampleStokenet
 
-}
+@VisibleForTesting
+fun IdentityAddress.Companion.sampleRandom(
+    networkId: NetworkId
+) = newIdentityAddressSampleRandom(networkId = networkId)

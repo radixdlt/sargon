@@ -1,7 +1,6 @@
 package com.radixdlt.sargon.samples
 
 import androidx.annotation.VisibleForTesting
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.radixdlt.sargon.ComponentAddress
 import com.radixdlt.sargon.newComponentAddressSampleMainnetGlobal
 import com.radixdlt.sargon.newComponentAddressSampleMainnetInternal
@@ -25,15 +24,3 @@ val ComponentAddress.Companion.sampleStokenet: Sample<ComponentAddress>
 
         override fun other(): ComponentAddress = newComponentAddressSampleStokenetInternal()
     }
-
-class ComponentAddressMainnetPreviewParameterProvider: PreviewParameterProvider<ComponentAddress> {
-    override val values: Sequence<ComponentAddress>
-        get() = ComponentAddress.sampleMainnet.all.asSequence()
-
-}
-
-class ComponentAddressStokenetPreviewParameterProvider: PreviewParameterProvider<ComponentAddress> {
-    override val values: Sequence<ComponentAddress>
-        get() = ComponentAddress.sampleStokenet.all.asSequence()
-
-}
