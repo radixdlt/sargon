@@ -1,18 +1,11 @@
-
-
-public protocol AddressFormatProtocol: Sendable {
-	static var `default`: Self { get }
-}
-public protocol AddressProtocol: Sendable {
-	associatedtype Format: AddressFormatProtocol
-	func formatted(_ format: Format) -> String
-}
+import SargonUniFFI
+import Sargon
 
 // MARK: - AddressView
 public struct AddressView<Address: AddressProtocol>: SwiftUI.View {
 	public let address: Address
-	public let format: Address.Format
-	public init(_ address: Address, format: Address.Format = .default) {
+	public let format: AddressFormat
+	public init(_ address: Address, format: AddressFormat = .default) {
 		self.address = address
 		self.format = format
 	}

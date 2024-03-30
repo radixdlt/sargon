@@ -3,10 +3,11 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		48601C3D2BB869270032792E /* Planbok in Frameworks */ = {isa = PBXBuildFile; productRef = 48601C3C2BB869270032792E /* Planbok */; };
 		48C8EF4C2B7DEA0300EF7F97 /* Planbok in Frameworks */ = {isa = PBXBuildFile; productRef = 48C8EF4B2B7DEA0300EF7F97 /* Planbok */; };
 		48F0A6CD2B7D42D400929DC2 /* PlanbokApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48F0A6CC2B7D42D400929DC2 /* PlanbokApp.swift */; };
 		48F0A6D12B7D42D500929DC2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 48F0A6D02B7D42D500929DC2 /* Assets.xcassets */; };
@@ -30,6 +31,7 @@
 			files = (
 				E6EF0F4B2B7FA6E500889B69 /* Planbok in Frameworks */,
 				E6EF0F482B7FA6CC00889B69 /* Sargon in Frameworks */,
+				48601C3D2BB869270032792E /* Planbok in Frameworks */,
 				48C8EF4C2B7DEA0300EF7F97 /* Planbok in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -92,6 +94,7 @@
 				48C8EF4B2B7DEA0300EF7F97 /* Planbok */,
 				E6EF0F472B7FA6CC00889B69 /* Sargon */,
 				E6EF0F4A2B7FA6E500889B69 /* Planbok */,
+				48601C3C2BB869270032792E /* Planbok */,
 			);
 			productName = Planbok;
 			productReference = 48F0A6C92B7D42D400929DC2 /* PlanbokApp.app */;
@@ -105,7 +108,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1520;
-				LastUpgradeCheck = 1520;
+				LastUpgradeCheck = 1530;
 				TargetAttributes = {
 					48F0A6C82B7D42D400929DC2 = {
 						CreatedOnToolsVersion = 15.2;
@@ -122,6 +125,7 @@
 			);
 			mainGroup = 48F0A6C02B7D42D400929DC2;
 			packageReferences = (
+				48601C3B2BB869270032792E /* XCLocalSwiftPackageReference "../Backend" */,
 			);
 			productRefGroup = 48F0A6CA2B7D42D400929DC2 /* Products */;
 			projectDirPath = "";
@@ -190,6 +194,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -253,6 +258,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -283,6 +289,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"PlanbokApp/Preview Content\"";
 				DEVELOPMENT_TEAM = MDH99V28LM;
 				ENABLE_PREVIEWS = YES;
@@ -324,6 +331,7 @@
 				CODE_SIGN_ENTITLEMENTS = PlanbokApp/Planbok.entitlements;
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"PlanbokApp/Preview Content\"";
 				DEVELOPMENT_TEAM = MDH99V28LM;
 				ENABLE_PREVIEWS = YES;
@@ -378,7 +386,18 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		48601C3B2BB869270032792E /* XCLocalSwiftPackageReference "../Backend" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../Backend;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
+		48601C3C2BB869270032792E /* Planbok */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Planbok;
+		};
 		48C8EF4B2B7DEA0300EF7F97 /* Planbok */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Planbok;
