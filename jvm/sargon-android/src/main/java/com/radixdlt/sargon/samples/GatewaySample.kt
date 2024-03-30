@@ -1,7 +1,6 @@
 package com.radixdlt.sargon.samples
 
 import androidx.annotation.VisibleForTesting
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.radixdlt.sargon.Gateway
 import com.radixdlt.sargon.gatewayMainnet
 import com.radixdlt.sargon.gatewayStokenet
@@ -23,13 +22,3 @@ val Gateway.Companion.sampleStokenet: Sample<Gateway>
 
         override fun other(): Gateway = invoke()
     }
-
-class GatewayMainnetPreviewParameterProvider : PreviewParameterProvider<Gateway> {
-    override val values: Sequence<Gateway>
-        get() = Gateway.sampleMainnet.all.asSequence()
-}
-
-class GatewayStokenetPreviewParameterProvider : PreviewParameterProvider<Gateway> {
-    override val values: Sequence<Gateway>
-        get() = Gateway.sampleStokenet.all.asSequence()
-}

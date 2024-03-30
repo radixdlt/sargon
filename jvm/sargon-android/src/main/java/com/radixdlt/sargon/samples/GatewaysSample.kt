@@ -1,7 +1,6 @@
 package com.radixdlt.sargon.samples
 
 import androidx.annotation.VisibleForTesting
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.radixdlt.sargon.Gateways
 import com.radixdlt.sargon.newGatewaysSample
 import com.radixdlt.sargon.newGatewaysSampleOther
@@ -14,8 +13,3 @@ val Gateways.Companion.sample: Sample<Gateways>
 
         override fun other(): Gateways = newGatewaysSampleOther()
     }
-
-class GatewaysPreviewParameterProvider : PreviewParameterProvider<Gateways> {
-    override val values: Sequence<Gateways>
-        get() = Gateways.sample.all.asSequence()
-}

@@ -1,16 +1,17 @@
 package com.radixdlt.sargon.extensions
 
+// import com.radixdlt.sargon.accountAddressFormatted
 import com.radixdlt.sargon.AccountAddress
+import com.radixdlt.sargon.AddressFormat
 import com.radixdlt.sargon.LegacyOlympiaAccountAddress
 import com.radixdlt.sargon.NetworkId
 import com.radixdlt.sargon.PublicKey
 import com.radixdlt.sargon.accountAddressBech32Address
+import com.radixdlt.sargon.accountAddressFormatted
 import com.radixdlt.sargon.accountAddressIsLegacy
 import com.radixdlt.sargon.accountAddressNetworkId
-// import com.radixdlt.sargon.accountAddressFormatted
 import com.radixdlt.sargon.newAccountAddress
 import com.radixdlt.sargon.newAccountAddressFrom
-import org.jetbrains.annotations.VisibleForTesting
 
 @Throws(SargonException::class)
 fun AccountAddress.Companion.init(validatingAddress: String) =
@@ -35,22 +36,9 @@ val AccountAddress.networkId: NetworkId
 val AccountAddress.isLegacy
     get() = accountAddressIsLegacy(address = this)
 
-/**
- * Formats the [AccountAddress] to its abbreviated form which is what the user
- * is most used to, since it is what we most commonly display in the Radix
- * ecosystem.
- *
- * The abbreviated form returns:
- *
- * `acco...please`
- *
- * For the account address:
- *
- * `account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease`
- *
- */
-// val AccountAddress.shortFormat: String
-//     get() = accountAddressFormatted(address = this, format = .default)
+fun AccountAddress.formatted(
+    format: AddressFormat = AddressFormat.DEFAULT
+): String = accountAddressFormatted(address = this, format = format)
 
 fun AccountAddress.wasMigratedFromLegacyOlympia(legacy: LegacyOlympiaAccountAddress) =
     legacy.isLegacyOfBabylonAddress(babylon = this)

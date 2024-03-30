@@ -1,7 +1,6 @@
 package com.radixdlt.sargon.samples
 
 import androidx.annotation.VisibleForTesting
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.radixdlt.sargon.Profile
 import com.radixdlt.sargon.newProfileSample
 import com.radixdlt.sargon.newProfileSampleOther
@@ -15,9 +14,3 @@ val Profile.Companion.sample: Sample<Profile>
         override fun other(): Profile = newProfileSampleOther()
 
     }
-
-class ProfilePreviewParameterProvider : PreviewParameterProvider<Profile> {
-    override val values: Sequence<Profile>
-        get() = Profile.sample.all.asSequence()
-
-}

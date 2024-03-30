@@ -89,6 +89,12 @@ macro_rules! decl_ret_wrapped_address {
                 address.formatted(format)
             }
 
+            /// Returns a random address in `network_id` as Network
+            #[uniffi::export]
+            pub fn [<new_ $address_type:snake _address_sample_random>](network_id: NetworkID) -> [<$address_type:camel Address >] {
+                [<$address_type:camel Address >]::random_sample(network_id)
+            }
+
             uniffi::custom_type!([< Ret $address_type:camel Address >], String);
 
              /// UniFFI conversion for RET types which are DisplayFromStr using String as builtin.
@@ -152,12 +158,20 @@ macro_rules! decl_ret_wrapped_address {
 
             impl [< $address_type:camel Address >] {
 
+                pub fn random_sample(network_id: NetworkID) -> Self {
+                    let entity_byte = Self::sample().node_id().as_bytes()[0];
+                    let node_id = ScryptoNodeId::new(entity_byte, &generate_byte_array::<29>());
+                    let ret_address = [<Ret $address_type:camel Address>]::new(node_id, network_id.discriminant()).unwrap();
+                    Self::from(ret_address)
+                }
+
                 pub fn formatted(&self, format: AddressFormat) -> String {
                     match format {
                         AddressFormat::Default => format_string(self.address(), 4, 6),
                         AddressFormat::Full | AddressFormat::Raw => self.address(),
                     }
                 }
+
 
                 pub(crate) fn scrypto(&self) -> ScryptoGlobalAddress {
                     ScryptoGlobalAddress::try_from(self.node_id())
@@ -207,6 +221,35 @@ macro_rules! decl_ret_wrapped_address {
             }
 
             #[cfg(test)]
+            mod [<tests_of_ $address_type:snake>] {
+                use super::*;
+
+                #[allow(clippy::upper_case_acronyms)]
+                type SUT = [< $address_type:camel Address >];
+
+                /// Roundtrip test that ensures the correct entity was used across all network ids.
+                #[test]
+                fn random_address_roundtrip() {
+                    for network_id in NetworkID::all() {
+                        let sut = SUT::random_sample(network_id);
+                        assert_eq!(SUT::from_str(&sut.to_string()).unwrap(), sut); // unchanged
+                    }
+                }
+
+                #[test]
+                fn random_address_randomness() {
+                    let n = 1000;
+
+                    for network_id in NetworkID::all() {
+                        let addresses = (0..n)
+                            .map(|_| SUT::random_sample(network_id))
+                            .collect::<HashSet<SUT>>();
+                        assert_eq!(addresses.len(), n);
+                    }
+                }
+            }
+
+            #[cfg(test)]
             mod [<uniffi_tests_of_ $address_type:snake>] {
                 use super::*;
 
@@ -217,6 +260,14 @@ macro_rules! decl_ret_wrapped_address {
                 fn map_to_network() {
                     let sut = SUT::sample();
                     assert_eq!([<$address_type:snake _address_map_to_network>](&sut, sut.network_id()), sut); // unchanged
+                }
+
+                #[test]
+                fn random_address() {
+                    for network_id in NetworkID::all() {
+                        let sut = [<new_ $address_type:snake _address_sample_random>](network_id);
+                        assert_eq!(SUT::from_str(&sut.to_string()).unwrap(), sut); // unchanged
+                    }
                 }
             }
 

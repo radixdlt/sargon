@@ -1,5 +1,6 @@
 package com.radixdlt.sargon
 
+import com.radixdlt.sargon.extensions.formatted
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.networkId
 import com.radixdlt.sargon.extensions.string
@@ -27,6 +28,22 @@ class AddressOfAccountOrPersonaTest: SampleTestable<AddressOfAccountOrPersona> {
         assertThrows<CommonException.FailedToDecodeAddressFromBech32> {
             AddressOfAccountOrPersona.init(validating = PackageAddress.sampleMainnet().string)
         }
+    }
+
+    @Test
+    fun testFormat() {
+        val addressString = "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+        val address = AddressOfAccountOrPersona.init(validating = addressString)
+
+        assertEquals("acco...please", address.formatted())
+        assertEquals(
+            addressString,
+            address.formatted(format = AddressFormat.FULL)
+        )
+        assertEquals(
+            addressString,
+            address.formatted(format = AddressFormat.RAW)
+        )
     }
 
 }

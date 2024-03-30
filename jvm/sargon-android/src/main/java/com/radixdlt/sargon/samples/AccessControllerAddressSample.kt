@@ -1,47 +1,52 @@
 package com.radixdlt.sargon.samples
 
 import androidx.annotation.VisibleForTesting
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.radixdlt.sargon.AccessControllerAddress
+import com.radixdlt.sargon.NetworkId
 import com.radixdlt.sargon.newAccessControllerAddressSampleMainnet
 import com.radixdlt.sargon.newAccessControllerAddressSampleMainnetOther
+import com.radixdlt.sargon.newAccessControllerAddressSampleRandom
 import com.radixdlt.sargon.newAccessControllerAddressSampleStokenet
 import com.radixdlt.sargon.newAccessControllerAddressSampleStokenetOther
 
 @VisibleForTesting
-val AccessControllerAddress.Companion.sampleMainnet: Sample<AccessControllerAddress>
-    get() = object : Sample<AccessControllerAddress> {
+object AccessControllerAddressSampleMainnet: SampleWithRandomValues<AccessControllerAddress> {
 
-        override fun invoke(): AccessControllerAddress =
-            newAccessControllerAddressSampleMainnet()
+    override fun invoke(): AccessControllerAddress =
+        newAccessControllerAddressSampleMainnet()
 
-        override fun other(): AccessControllerAddress =
-            newAccessControllerAddressSampleMainnetOther()
+    override fun other(): AccessControllerAddress =
+        newAccessControllerAddressSampleMainnetOther()
 
-    }
+    override fun random(): AccessControllerAddress = newAccessControllerAddressSampleRandom(
+        networkId = NetworkId.MAINNET
+    )
+
+}
 
 @VisibleForTesting
-val AccessControllerAddress.Companion.sampleStokenet: Sample<AccessControllerAddress>
-    get() = object : Sample<AccessControllerAddress> {
+val AccessControllerAddress.Companion.sampleMainnet: AccessControllerAddressSampleMainnet
+    get() = AccessControllerAddressSampleMainnet
 
-        override fun invoke(): AccessControllerAddress =
-            newAccessControllerAddressSampleStokenet()
+@VisibleForTesting
+object AccessControllerAddressSampleStokenet: SampleWithRandomValues<AccessControllerAddress> {
 
-        override fun other(): AccessControllerAddress =
-            newAccessControllerAddressSampleStokenetOther()
+    override fun invoke(): AccessControllerAddress =
+        newAccessControllerAddressSampleStokenet()
 
-    }
+    override fun other(): AccessControllerAddress =
+        newAccessControllerAddressSampleStokenetOther()
 
-class AccessControllerAddressMainnetPreviewParameterProvider :
-    PreviewParameterProvider<AccessControllerAddress> {
-    override val values: Sequence<AccessControllerAddress>
-        get() = AccessControllerAddress.sampleMainnet.all.asSequence()
-
+    override fun random(): AccessControllerAddress = newAccessControllerAddressSampleRandom(
+        networkId = NetworkId.STOKENET
+    )
 }
 
-class AccessControllerAddressStokenetPreviewParameterProvider :
-    PreviewParameterProvider<AccessControllerAddress> {
-    override val values: Sequence<AccessControllerAddress>
-        get() = AccessControllerAddress.sampleStokenet.all.asSequence()
+@VisibleForTesting
+val AccessControllerAddress.Companion.sampleStokenet: AccessControllerAddressSampleStokenet
+    get() = AccessControllerAddressSampleStokenet
 
-}
+@VisibleForTesting
+fun AccessControllerAddress.Companion.sampleRandom(
+    networkId: NetworkId
+) = newAccessControllerAddressSampleRandom(networkId = networkId)
