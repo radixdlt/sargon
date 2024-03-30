@@ -1,2 +1,1 @@
-final class AddressTests: AddressTest<Address> {
-}
+final class AddressTests: AddressTest<Address> {}

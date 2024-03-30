@@ -13,6 +13,21 @@ pub enum ResourceIndicator {
 }
 
 impl ResourceIndicator {
+    pub fn get_address(&self) -> ResourceAddress {
+        match self {
+            ResourceIndicator::Fungible {
+                resource_address,
+                indicator: _,
+            } => *resource_address,
+            ResourceIndicator::NonFungible {
+                resource_address,
+                indicator: _,
+            } => *resource_address,
+        }
+    }
+}
+
+impl ResourceIndicator {
     pub fn fungible(
         resource_address: impl Into<ResourceAddress>,
         indicator: impl Into<FungibleResourceIndicator>,
@@ -78,6 +93,15 @@ mod tests {
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = ResourceIndicator;
+
+    #[test]
+    fn get_address() {
+        assert_eq!(SUT::sample().get_address(), ResourceAddress::sample());
+        assert_eq!(
+            SUT::sample_other().get_address(),
+            ResourceAddress::sample_mainnet_nft_other()
+        );
+    }
 
     #[test]
     fn equality() {

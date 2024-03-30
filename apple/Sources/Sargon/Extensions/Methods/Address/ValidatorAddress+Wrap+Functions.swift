@@ -17,13 +17,19 @@ extension ValidatorAddress {
 	public var networkID: NetworkId {
 		validatorAddressNetworkId(address: self)
 	}
+	
+	public func embed() -> Address {
+		.validator(self)
+	}
 }
 
 #if DEBUG
 extension ValidatorAddress {
-	public func embed() -> Address {
-		.validator(self)
+	
+	public static func random(networkID: NetworkID) -> Self {
+		newValidatorAddressRandom(networkId: networkID)
 	}
+	
 	public func mapTo(networkID: NetworkID) -> Self {
 		validatorAddressMapToNetwork(address: self, networkId: networkID)
 	}

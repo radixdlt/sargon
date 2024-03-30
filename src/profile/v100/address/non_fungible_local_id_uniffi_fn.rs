@@ -63,6 +63,11 @@ pub fn new_non_fungible_local_id_sample_other() -> NonFungibleLocalId {
     NonFungibleLocalId::sample_other()
 }
 
+#[uniffi::export]
+pub fn new_non_fungible_local_id_random() -> NonFungibleLocalId {
+    NonFungibleLocalId::random()
+}
+
 #[cfg(test)]
 mod uniffi_tests {
     use super::*;
@@ -179,5 +184,15 @@ mod uniffi_tests {
             non_fungible_local_id_formatted(&sut, AddressFormat::Default),
             sut.formatted(AddressFormat::Default)
         )
+    }
+
+    #[test]
+    fn test_new_non_fungible_local_id_random() {
+        let mut set: HashSet<SUT> = HashSet::new();
+        let n = 100;
+        for _ in 0..n {
+            set.insert(new_non_fungible_local_id_random());
+        }
+        assert_eq!(set.len(), n);
     }
 }

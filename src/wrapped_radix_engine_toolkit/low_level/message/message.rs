@@ -14,6 +14,15 @@ impl Message {
     }
 }
 
+impl Message {
+    pub fn as_plaintext(&self) -> Option<String> {
+        match self {
+            Message::PlainText { plaintext } => plaintext.as_string(),
+            Message::None => None,
+        }
+    }
+}
+
 impl From<Message> for ScryptoMessage {
     fn from(value: Message) -> Self {
         match value {
@@ -77,6 +86,22 @@ mod tests {
             |s: SUT| SUT::try_from(ScryptoMessage::from(s)).unwrap();
         roundtrip(SUT::sample());
         roundtrip(SUT::sample_other());
+    }
+
+    #[test]
+    fn as_string() {
+        assert_eq!(
+            SUT::sample().as_plaintext(),
+            Some("Hello Radix!".to_owned())
+        );
+        assert_eq!(
+            SUT::PlainText {
+                plaintext: PlaintextMessage::sample_binary()
+            }
+            .as_plaintext(),
+            None
+        );
+        assert_eq!(SUT::None.as_plaintext(), None);
     }
 
     #[test]

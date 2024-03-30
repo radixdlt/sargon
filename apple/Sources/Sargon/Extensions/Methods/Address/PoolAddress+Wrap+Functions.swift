@@ -22,13 +22,19 @@ extension PoolAddress {
 	public var poolKind: PoolKind {
 		poolAddressKind(address: self)
 	}
+	
+	public func embed() -> Address {
+		.pool(self)
+	}
 }
 
 #if DEBUG
 extension PoolAddress {
-	public func embed() -> Address {
-		.pool(self)
+	
+	public static func random(networkID: NetworkID) -> Self {
+		newPoolAddressRandom(networkId: networkID)
 	}
+	
 	public func mapTo(networkID: NetworkID) -> Self {
 		poolAddressMapToNetwork(address: self, networkId: networkID)
 	}

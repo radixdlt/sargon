@@ -17,13 +17,18 @@ extension ComponentAddress {
 	public var networkID: NetworkId {
 		componentAddressNetworkId(address: self)
 	}
+	public func embed() -> Address {
+		.component(self)
+	}
 }
 
 #if DEBUG
 extension ComponentAddress {
-	public func embed() -> Address {
-		.component(self)
+	
+	public static func random(networkID: NetworkID) -> Self {
+		newComponentAddressRandom(networkId: networkID)
 	}
+	
 	public func mapTo(networkID: NetworkID) -> Self {
 		componentAddressMapToNetwork(address: self, networkId: networkID)
 	}

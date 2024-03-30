@@ -10,6 +10,17 @@ pub enum MessageContents {
     BinaryMessage { bag_of_bytes: BagOfBytes },
 }
 
+impl MessageContents {
+    pub fn as_string(&self) -> Option<String> {
+        match self {
+            MessageContents::StringMessage { string } => {
+                Some(string.to_owned())
+            }
+            MessageContents::BinaryMessage { bag_of_bytes: _ } => None,
+        }
+    }
+}
+
 impl From<ScryptoMessageContents> for MessageContents {
     fn from(value: ScryptoMessageContents) -> Self {
         match value {
@@ -67,6 +78,12 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn as_string() {
+        assert_eq!(SUT::sample().as_string(), Some("Hello Radix!".to_owned()));
+        assert_eq!(SUT::sample_other().as_string(), None);
     }
 
     #[test]

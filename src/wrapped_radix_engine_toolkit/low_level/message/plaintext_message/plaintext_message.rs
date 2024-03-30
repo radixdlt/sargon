@@ -7,6 +7,12 @@ pub struct PlaintextMessage {
 }
 
 impl PlaintextMessage {
+    pub fn as_string(&self) -> Option<String> {
+        self.message.as_string()
+    }
+}
+
+impl PlaintextMessage {
     pub fn new(message: impl AsRef<str>) -> Self {
         Self {
             mime_type: "text/plain".to_owned(),
@@ -45,6 +51,18 @@ impl HasSampleValues for PlaintextMessage {
     }
 }
 
+impl PlaintextMessage {
+    #[allow(unused)]
+    pub(crate) fn sample_binary() -> Self {
+        Self {
+            mime_type: "".to_owned(),
+            message: MessageContents::BinaryMessage {
+                bag_of_bytes: BagOfBytes::sample(),
+            },
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -63,6 +81,12 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn as_string() {
+        assert_eq!(SUT::sample().as_string(), Some("Hello Radix!".to_owned()));
+        assert_eq!(SUT::sample_binary().as_string(), None);
     }
 
     #[test]

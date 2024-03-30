@@ -8,11 +8,9 @@ extension NetworkID {
 	public static var allCases: [Self] {
 		networkIdsAll()
 	}
-}
-
-extension NetworkID: CustomStringConvertible {
-	public var description: String {
+	
+	public func toString() -> String {
 		networkIdToString(id: self)
+		
 	}
 }
-

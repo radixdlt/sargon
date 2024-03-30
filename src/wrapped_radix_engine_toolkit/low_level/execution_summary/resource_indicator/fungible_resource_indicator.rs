@@ -25,6 +25,17 @@ impl FungibleResourceIndicator {
     }
 }
 
+impl FungibleResourceIndicator {
+    pub fn get_amount(&self) -> Decimal192 {
+        match self {
+            FungibleResourceIndicator::Guaranteed { decimal } => *decimal,
+            FungibleResourceIndicator::Predicted { predicted_decimal } => {
+                predicted_decimal.value
+            }
+        }
+    }
+}
+
 impl From<RetFungibleResourceIndicator> for FungibleResourceIndicator {
     fn from(value: RetFungibleResourceIndicator) -> Self {
         match value {
@@ -78,6 +89,12 @@ mod tests {
     fn from_ret_guaranteed() {
         let ret = RetFungibleResourceIndicator::Guaranteed(1.into());
         assert_eq!(SUT::from(ret), SUT::sample())
+    }
+
+    #[test]
+    fn get_amount() {
+        assert_eq!(SUT::sample().get_amount(), Decimal192::from(1));
+        assert_eq!(SUT::sample_other().get_amount(), Decimal192::from(2));
     }
 
     #[test]

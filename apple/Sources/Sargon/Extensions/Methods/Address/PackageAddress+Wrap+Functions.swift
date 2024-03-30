@@ -17,13 +17,19 @@ extension PackageAddress {
 	public var networkID: NetworkId {
 		packageAddressNetworkId(address: self)
 	}
+	
+	public func embed() -> Address {
+		.package(self)
+	}
 }
 
 #if DEBUG
 extension PackageAddress {
-	public func embed() -> Address {
-		.package(self)
+	
+	public static func random(networkID: NetworkID) -> Self {
+		newPackageAddressRandom(networkId: networkID)
 	}
+	
 	public func mapTo(networkID: NetworkID) -> Self {
 		packageAddressMapToNetwork(address: self, networkId: networkID)
 	}

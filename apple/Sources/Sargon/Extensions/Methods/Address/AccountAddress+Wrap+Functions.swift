@@ -53,13 +53,19 @@ extension AccountAddress {
 	public var shortFormat: String {
         formatted(AddressFormat.default)
 	}
+	
+	public func embed() -> Address {
+		.account(self)
+	}
 }
 
 #if DEBUG
 extension AccountAddress {
-	public func embed() -> Address {
-		.account(self)
+	
+	public static func random(networkID: NetworkID) -> Self {
+		newAccountAddressRandom(networkId: networkID)
 	}
+	
 	public func mapTo(networkID: NetworkID) -> Self {
 		accountAddressMapToNetwork(address: self, networkId: networkID)
 	}

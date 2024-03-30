@@ -177,6 +177,18 @@ impl HasSampleValues for NonFungibleResourceAddress {
 }
 
 impl NonFungibleResourceAddress {
+    pub fn random(network_id: NetworkID) -> Self {
+        let entity_byte = Self::sample().node_id().as_bytes()[0];
+        let node_id = ScryptoNodeId::new(
+            entity_byte,
+            &generate_byte_array::<{ ScryptoNodeId::RID_LENGTH }>(),
+        );
+        let ret_address =
+            RetResourceAddress::new(node_id, network_id.discriminant())
+                .unwrap();
+        Self::from_str(&ret_address.to_string()).unwrap()
+    }
+
     pub fn sample_mainnet() -> Self {
         ResourceAddress::sample_mainnet_nft_gc_membership()
             .try_into()
@@ -320,5 +332,27 @@ mod tests {
     #[test]
     fn try_from_err() {
         assert_eq!(SUT::try_from(ResourceAddress::sample_mainnet_xrd()), Err(CommonError::FungibleResourceAddressNotAcceptedInNonFungibleContext));
+    }
+
+    #[test]
+    fn random_address_bech32_roundtrip() {
+        for network_id in NetworkID::all() {
+            let sut = SUT::random(network_id);
+            // Bech32 roundtrip ensures the correct [Scrypto]`EntityType`
+            // is used across, and thus correct Bech32 HRP.
+            assert_eq!(SUT::from_str(&sut.to_string()).unwrap(), sut);
+        }
+    }
+
+    #[test]
+    fn random_address_is_random() {
+        let n = 100;
+
+        for network_id in NetworkID::all() {
+            let addresses = (0..n)
+                .map(|_| SUT::random(network_id))
+                .collect::<HashSet<SUT>>();
+            assert_eq!(addresses.len(), n);
+        }
     }
 }

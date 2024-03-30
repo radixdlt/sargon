@@ -41,6 +41,22 @@ impl NonFungibleResourceIndicator {
     }
 }
 
+impl NonFungibleResourceIndicator {
+    pub fn ids(&self) -> Vec<NonFungibleLocalId> {
+        match self {
+            NonFungibleResourceIndicator::ByAll {
+                predicted_amount: _,
+                predicted_ids,
+            } => predicted_ids.value.clone(),
+            NonFungibleResourceIndicator::ByAmount {
+                amount: _,
+                predicted_ids,
+            } => predicted_ids.value.clone(),
+            NonFungibleResourceIndicator::ByIds { ids } => ids.clone(),
+        }
+    }
+}
+
 impl From<RetNonFungibleResourceIndicator> for NonFungibleResourceIndicator {
     fn from(value: RetNonFungibleResourceIndicator) -> Self {
         match value {
@@ -91,6 +107,35 @@ mod tests {
     fn equality() {
         assert_eq!(SUT::sample(), SUT::sample());
         assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn get_ids() {
+        let ids = vec![
+            NonFungibleLocalId::random(),
+            NonFungibleLocalId::random(),
+            NonFungibleLocalId::random(),
+        ];
+
+        assert_eq!(
+            SUT::by_all(
+                PredictedDecimal::sample(),
+                PredictedNonFungibleLocalIds::new(ids.clone(), 0)
+            )
+            .ids(),
+            ids.clone()
+        );
+
+        assert_eq!(
+            SUT::by_amount(
+                0,
+                PredictedNonFungibleLocalIds::new(ids.clone(), 0)
+            )
+            .ids(),
+            ids.clone()
+        );
+
+        assert_eq!(SUT::by_ids(ids.clone()).ids(), ids);
     }
 
     #[test]

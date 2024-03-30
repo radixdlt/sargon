@@ -17,16 +17,21 @@ extension AddressOfAccountOrPersona {
 	public func formatted(_ format: AddressFormat) -> String {
 		addressOfAccountOrPersonaFormatted(address: self, format: format)
 	}
-}
-
-#if DEBUG
-extension AddressOfAccountOrPersona {
+	
 	public func embed() -> Address {
 		switch self {
 		case let .account(accountAddress): Address.account(accountAddress)
 		case let .identity(identityAddress): Address.identity(identityAddress)
 		}
 	}
+}
+
+#if DEBUG
+extension AddressOfAccountOrPersona {
+	public static func random(networkID: NetworkID) -> Self {
+		.account(newAccountAddressRandom(networkId: networkID))
+	}
+	
 	public func mapTo(networkID: NetworkID) -> Self {
 		addressOfAccountOrPersonaMapToNetwork(address: self, networkId: networkID)
 	}
