@@ -1,5 +1,8 @@
 use crate::prelude::*;
 
+use radix_engine::types::MANIFEST_SBOR_V1_MAX_DEPTH;
+use radix_engine_toolkit::functions::address::decode as RET_decode_address;
+
 #[derive(Clone, Debug, PartialEq, Eq, derive_more::Display, uniffi::Record)]
 #[display("{}", self.instructions_string())]
 pub struct Instructions {
@@ -52,7 +55,45 @@ impl Instructions {
     }
 }
 
-use radix_engine_toolkit::functions::address::decode as RET_decode_address;
+#[cfg(test)]
+impl Instructions {
+    pub fn with_great_sbor_depth(depth: usize) -> Result<Self> {
+        let network_id = NetworkID::Stokenet;
+        let nested_value = manifest_value_with_sbor_depth(depth);
+        let dummy_address = ComponentAddress::sample_stokenet();
+        assert_eq!(dummy_address.network_id(), network_id);
+        let instruction = ScryptoInstruction::CallMethod {
+            address: TryInto::<ScryptoDynamicComponentAddress>::try_into(
+                &dummy_address,
+            )
+            .unwrap()
+            .into(),
+            method_name: "dummy".to_owned(),
+            args: nested_value,
+        };
+        scrypto_decompile(&[instruction], &network_id.network_definition())
+            .map_err(|_| CommonError::Unknown)
+            .and_then(|x: String| Self::new(x, network_id))
+    }
+}
+
+#[cfg(test)]
+#[test]
+fn test_max() {
+    assert!(Instructions::with_great_sbor_depth(
+        MANIFEST_SBOR_V1_MAX_DEPTH - 3
+    )
+    .is_ok());
+}
+
+#[cfg(test)]
+#[test]
+fn test_err() {
+    assert!(Instructions::with_great_sbor_depth(
+        MANIFEST_SBOR_V1_MAX_DEPTH - 2
+    )
+    .is_err());
+}
 
 fn extract_error_from_addr(
     s: String,
