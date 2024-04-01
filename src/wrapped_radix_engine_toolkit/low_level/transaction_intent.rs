@@ -17,16 +17,19 @@ impl TransactionIntent {
         header: TransactionHeader,
         manifest: TransactionManifest,
         message: Message,
-    ) -> Self {
-        Self {
+    ) -> Result<Self> {
+        // Verify that the intent has acceptable depth and is compatible
+        _ = compile_intent_with(&header, &manifest, &message)?;
+
+        Ok(Self {
             header,
             manifest,
             message,
-        }
+        })
     }
 
     pub fn intent_hash(&self) -> IntentHash {
-        let hash = ret_hash_intent(&self.clone().into())
+        let hash = ret_hash_intent(&ScryptoIntent::from(self.clone()))
           .expect("Should never fail to hash an intent. Sargon should only produce valid Intents");
 
         IntentHash::from_scrypto(
@@ -36,26 +39,52 @@ impl TransactionIntent {
     }
 
     pub fn compile(&self) -> BagOfBytes {
-        let scrypto_intent: ScryptoIntent = self.clone().into();
-        let compiled = RET_intent_compile(&scrypto_intent)
-            .expect("Should always be able to compile an Intent");
-
-        compiled.into()
+        compile_intent(ScryptoIntent::from(self.clone()))
+            .expect("Should always be able to compile an Intent")
     }
 }
 
 impl From<TransactionIntent> for ScryptoIntent {
     fn from(value: TransactionIntent) -> Self {
-        Self {
-            header: value.header.into(),
-            instructions: ScryptoInstructions(
-                value.manifest.instructions().clone(),
-            ),
-            blobs: value.manifest.blobs().clone().into(),
-            message: value.message.into(),
-        }
+        into_scrypto(&value.header, &value.manifest, &value.message)
     }
 }
+
+fn into_scrypto(
+    header: &TransactionHeader,
+    manifest: &TransactionManifest,
+    message: &Message,
+) -> ScryptoIntent {
+    ScryptoIntent {
+        header: (*header).into(),
+        instructions: ScryptoInstructions(manifest.instructions().clone()),
+        blobs: manifest.blobs().clone().into(),
+        message: message.clone().into(),
+    }
+}
+
+fn compile_intent_with(
+    header: &TransactionHeader,
+    manifest: &TransactionManifest,
+    message: &Message,
+) -> Result<BagOfBytes> {
+    let scrypto_intent = ScryptoIntent {
+        header: (*header).into(),
+        instructions: ScryptoInstructions(manifest.instructions().clone()),
+        blobs: manifest.blobs().clone().into(),
+        message: message.clone().into(),
+    };
+    compile_intent(scrypto_intent)
+}
+
+fn compile_intent(scrypto_intent: ScryptoIntent) -> Result<BagOfBytes> {
+    RET_intent_compile(&scrypto_intent)
+        .map_err(|e| CommonError::InvalidIntentFailedToEncode {
+            underlying: format!("{:?}", e),
+        })
+        .map(BagOfBytes::from)
+}
+
 impl TryFrom<ScryptoIntent> for TransactionIntent {
     type Error = crate::CommonError;
 
@@ -71,11 +100,7 @@ impl TryFrom<ScryptoIntent> for TransactionIntent {
             blobs,
         );
 
-        Ok(Self {
-            header,
-            manifest,
-            message,
-        })
+        Self::new(header, manifest, message)
     }
 }
 
@@ -86,6 +111,7 @@ impl HasSampleValues for TransactionIntent {
             TransactionManifest::sample(),
             Message::sample(),
         )
+        .unwrap()
     }
 
     // The Intent of:
@@ -96,6 +122,7 @@ impl HasSampleValues for TransactionIntent {
             TransactionManifest::empty(NetworkID::Simulator),
             Message::None,
         )
+        .unwrap()
     }
 }
 

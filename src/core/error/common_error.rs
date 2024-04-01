@@ -395,6 +395,11 @@ pub enum CommonError {
 
     #[error("Failed to parse Signature from {bad_value}")]
     FailedToParseSignatureFromBytes { bad_value: String } = 10108,
+
+    #[error(
+        "Invalid Transaction Intent, failed to encode, reason: '{underlying}'"
+    )]
+    InvalidIntentFailedToEncode { underlying: String } = 10109,
 }
 
 /*
