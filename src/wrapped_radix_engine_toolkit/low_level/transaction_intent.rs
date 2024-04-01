@@ -164,8 +164,10 @@ impl TryFrom<ScryptoIntent> for TransactionIntent {
         let message: Message = value.message.try_into()?;
         let header: TransactionHeader = value.header.try_into()?;
         let network_id = header.network_id;
-        let instructions =
-            Instructions::from_scrypto(value.instructions, network_id);
+        let instructions = Instructions::try_from((
+            value.instructions.0.as_ref(),
+            network_id,
+        ))?;
         let blobs: Blobs = value.blobs.into();
         let manifest = TransactionManifest::with_instructions_and_blobs(
             instructions,

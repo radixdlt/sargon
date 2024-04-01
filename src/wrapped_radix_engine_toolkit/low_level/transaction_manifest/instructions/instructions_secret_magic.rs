@@ -7,7 +7,16 @@ use crate::prelude::*;
 /// `private let secretMagic: InstructionsSecretMagic`
 /// And hide its initializers.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct InstructionsSecretMagic(pub(crate) Vec<ScryptoInstruction>);
+pub struct InstructionsSecretMagic(Vec<ScryptoInstruction>);
+
+impl InstructionsSecretMagic {
+    pub(crate) fn instructions(&self) -> &Vec<ScryptoInstruction> {
+        &self.0
+    }
+    pub(crate) fn new(instructions: Vec<ScryptoInstruction>) -> Self {
+        Self(instructions)
+    }
+}
 
 uniffi::custom_type!(InstructionsSecretMagic, BagOfBytes);
 
@@ -23,7 +32,7 @@ impl crate::UniffiCustomTypeConverter for InstructionsSecretMagic {
                 CommonError::FailedToUniFFIDecodeBytesToManifestInstructions
                     .into()
             })
-            .map(|i: Vec<ScryptoInstruction>| Self(i))
+            .map(Self::new)
     }
 
     fn from_custom(obj: Self) -> Self::Builtin {

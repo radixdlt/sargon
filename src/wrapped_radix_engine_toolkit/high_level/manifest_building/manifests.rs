@@ -19,7 +19,7 @@ impl TransactionManifest {
             )
             .build();
 
-        TransactionManifest::from_scrypto(
+        TransactionManifest::sargon_built(
             scrypto_manifest,
             address_of_receiving_account.network_id(),
         )
@@ -116,7 +116,7 @@ impl TransactionManifest {
 
         let scrypto_manifest = builder.build();
 
-        TransactionManifest::from_scrypto(scrypto_manifest, network_id)
+        TransactionManifest::sargon_built(scrypto_manifest, network_id)
     }
 }
 
@@ -133,7 +133,7 @@ impl TransactionManifest {
             .set_metadata(address.scrypto(), key, value)
             .build();
 
-        TransactionManifest::from_scrypto(
+        TransactionManifest::sargon_built(
             scrypto_manifest,
             address.network_id(),
         )

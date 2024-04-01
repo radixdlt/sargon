@@ -27,7 +27,7 @@ impl TransactionManifest {
             )
             .build();
 
-        TransactionManifest::from_scrypto(
+        TransactionManifest::sargon_built(
             scrypto_manifest,
             address_of_owner.network_id(),
         )
@@ -138,7 +138,7 @@ impl TransactionManifest {
             )
             .build();
 
-        TransactionManifest::from_scrypto(
+        TransactionManifest::sargon_built(
             scrypto_manifest,
             address_of_owner.network_id(),
         )
@@ -206,7 +206,7 @@ impl TransactionManifest {
             )
             .build();
 
-        TransactionManifest::from_scrypto(
+        TransactionManifest::sargon_built(
             scrypto_manifest,
             address_of_owner.network_id(),
         )

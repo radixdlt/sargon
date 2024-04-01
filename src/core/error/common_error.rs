@@ -400,6 +400,11 @@ pub enum CommonError {
         "Invalid Transaction Intent, failed to encode, reason: '{underlying}'"
     )]
     InvalidIntentFailedToEncode { underlying: String } = 10109,
+
+    #[error(
+        "Invalid Instructions, failed to decompile, reason: '{underlying}'"
+    )]
+    InvalidInstructionsFailedToDecompile { underlying: String } = 10110,
 }
 
 /*
