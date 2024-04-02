@@ -63,9 +63,7 @@ impl TransactionManifest {
             )
         }
 
-        let scrypto_manifest = builder.build();
-
-        TransactionManifest::sargon_built(scrypto_manifest, owner.network_id())
+        TransactionManifest::sargon_built(builder, owner.network_id())
     }
 }
 

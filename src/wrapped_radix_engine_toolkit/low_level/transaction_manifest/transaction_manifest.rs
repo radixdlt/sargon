@@ -93,9 +93,10 @@ impl TryFrom<(ScryptoTransactionManifest, NetworkID)> for TransactionManifest {
 
 impl TransactionManifest {
     pub fn sargon_built(
-        scrypto_manifest: ScryptoTransactionManifest,
+        builder: ScryptoManifestBuilder,
         network_id: NetworkID,
     ) -> Self {
+        let scrypto_manifest = builder.build();
         Self::try_from((scrypto_manifest, network_id)).expect(
             "Sargon should not build manifest with too nested SBOR depth.",
         )

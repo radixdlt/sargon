@@ -20,15 +20,13 @@ impl TransactionManifest {
             initial_supply,
             metadata,
         );
-        let scrypto_manifest = builder
-            .try_deposit_entire_worktop_or_abort(
-                address_of_owner.scrypto(),
-                None,
-            )
-            .build();
+        builder = builder.try_deposit_entire_worktop_or_abort(
+            address_of_owner.scrypto(),
+            None,
+        );
 
         TransactionManifest::sargon_built(
-            scrypto_manifest,
+            builder,
             address_of_owner.network_id(),
         )
     }
@@ -131,15 +129,13 @@ impl TransactionManifest {
             )
         }
 
-        let scrypto_manifest = builder
-            .try_deposit_entire_worktop_or_abort(
-                address_of_owner.scrypto(),
-                None,
-            )
-            .build();
+        builder = builder.try_deposit_entire_worktop_or_abort(
+            address_of_owner.scrypto(),
+            None,
+        );
 
         TransactionManifest::sargon_built(
-            scrypto_manifest,
+            builder,
             address_of_owner.network_id(),
         )
     }
@@ -199,15 +195,13 @@ impl TransactionManifest {
             );
         }
 
-        let scrypto_manifest = builder
-            .try_deposit_entire_worktop_or_abort(
-                address_of_owner.scrypto(),
-                None,
-            )
-            .build();
+        builder = builder.try_deposit_entire_worktop_or_abort(
+            address_of_owner.scrypto(),
+            None,
+        );
 
         TransactionManifest::sargon_built(
-            scrypto_manifest,
+            builder,
             address_of_owner.network_id(),
         )
     }
