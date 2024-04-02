@@ -1,11 +1,11 @@
 package com.radixdlt.sargon.samples
 
-import androidx.annotation.VisibleForTesting
+import com.radixdlt.sargon.annotation.UsesSampleValues
 import com.radixdlt.sargon.Mnemonic
 import com.radixdlt.sargon.newMnemonicSample
 import com.radixdlt.sargon.newMnemonicSampleOther
 
-@VisibleForTesting
+@UsesSampleValues
 val Mnemonic.Companion.sample: Sample<Mnemonic>
     get() = object : Sample<Mnemonic> {
 

@@ -39,7 +39,6 @@ import com.radixdlt.sargon.transactionManifestInvolvedPoolAddresses
 import com.radixdlt.sargon.transactionManifestInvolvedResourceAddresses
 import com.radixdlt.sargon.transactionManifestNetworkId
 import com.radixdlt.sargon.transactionManifestSummary
-import com.radixdlt.sargon.utils.KoverIgnore
 
 @Throws(SargonException::class)
 fun TransactionManifest.Companion.init(

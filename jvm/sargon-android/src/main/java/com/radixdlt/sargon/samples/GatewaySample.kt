@@ -1,11 +1,11 @@
 package com.radixdlt.sargon.samples
 
-import androidx.annotation.VisibleForTesting
+import com.radixdlt.sargon.annotation.UsesSampleValues
 import com.radixdlt.sargon.Gateway
 import com.radixdlt.sargon.gatewayMainnet
 import com.radixdlt.sargon.gatewayStokenet
 
-@VisibleForTesting
+@UsesSampleValues
 val Gateway.Companion.sampleMainnet: Sample<Gateway>
     get() = object : Sample<Gateway> {
 
@@ -14,7 +14,7 @@ val Gateway.Companion.sampleMainnet: Sample<Gateway>
         override fun other(): Gateway = invoke()
     }
 
-@VisibleForTesting
+@UsesSampleValues
 val Gateway.Companion.sampleStokenet: Sample<Gateway>
     get() = object : Sample<Gateway> {
 

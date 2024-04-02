@@ -1,6 +1,6 @@
 package com.radixdlt.sargon.samples
 
-import androidx.annotation.VisibleForTesting
+import com.radixdlt.sargon.annotation.UsesSampleValues
 import com.radixdlt.sargon.NetworkId
 import com.radixdlt.sargon.PackageAddress
 import com.radixdlt.sargon.PoolAddress
@@ -13,7 +13,7 @@ import com.radixdlt.sargon.newPoolAddressSampleStokenetMulti
 import com.radixdlt.sargon.newPoolAddressSampleStokenetSingle
 import com.radixdlt.sargon.newPoolAddressSampleStokenetTwo
 
-@VisibleForTesting
+@UsesSampleValues
 object PoolAddressSampleMainnet: SampleWithRandomValues<PoolAddress> {
     override fun invoke(): PoolAddress = single
 
@@ -31,7 +31,7 @@ object PoolAddressSampleMainnet: SampleWithRandomValues<PoolAddress> {
         get() = newPoolAddressSampleMainnetMulti()
 }
 
-@VisibleForTesting
+@UsesSampleValues
 object PoolAddressSampleStokenet: SampleWithRandomValues<PoolAddress> {
     override fun invoke(): PoolAddress = single
 
@@ -49,15 +49,15 @@ object PoolAddressSampleStokenet: SampleWithRandomValues<PoolAddress> {
         get() = newPoolAddressSampleStokenetMulti()
 }
 
-@VisibleForTesting
+@UsesSampleValues
 val PoolAddress.Companion.sampleMainnet: PoolAddressSampleMainnet
     get() = PoolAddressSampleMainnet
 
-@VisibleForTesting
+@UsesSampleValues
 val PoolAddress.Companion.sampleStokenet: PoolAddressSampleStokenet
     get() = PoolAddressSampleStokenet
 
-@VisibleForTesting
+@UsesSampleValues
 fun PoolAddress.Companion.sampleRandom(
     networkId: NetworkId
 ) = newPoolAddressRandom(networkId = networkId)

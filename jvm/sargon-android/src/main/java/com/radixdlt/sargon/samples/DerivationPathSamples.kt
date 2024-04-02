@@ -1,6 +1,6 @@
 package com.radixdlt.sargon.samples
 
-import androidx.annotation.VisibleForTesting
+import com.radixdlt.sargon.annotation.UsesSampleValues
 import com.radixdlt.sargon.AccountPath
 import com.radixdlt.sargon.Bip44LikePath
 import com.radixdlt.sargon.IdentityPath
@@ -11,7 +11,7 @@ import com.radixdlt.sargon.newBip44LikePathSampleOther
 import com.radixdlt.sargon.newIdentityPathSample
 import com.radixdlt.sargon.newIdentityPathSampleOther
 
-@VisibleForTesting
+@UsesSampleValues
 val AccountPath.Companion.sample: Sample<AccountPath>
     get() = object : Sample<AccountPath> {
         override fun invoke(): AccountPath = newAccountPathSample()
@@ -19,7 +19,7 @@ val AccountPath.Companion.sample: Sample<AccountPath>
         override fun other(): AccountPath = newAccountPathSampleOther()
     }
 
-@VisibleForTesting
+@UsesSampleValues
 val IdentityPath.Companion.sample: Sample<IdentityPath>
     get() = object : Sample<IdentityPath> {
         override fun invoke(): IdentityPath = newIdentityPathSample()
@@ -27,7 +27,7 @@ val IdentityPath.Companion.sample: Sample<IdentityPath>
         override fun other(): IdentityPath = newIdentityPathSampleOther()
     }
 
-@VisibleForTesting
+@UsesSampleValues
 val Bip44LikePath.Companion.sample: Sample<Bip44LikePath>
     get() = object : Sample<Bip44LikePath> {
         override fun invoke(): Bip44LikePath = newBip44LikePathSample()

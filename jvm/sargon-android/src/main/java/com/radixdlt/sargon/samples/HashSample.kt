@@ -1,11 +1,11 @@
 package com.radixdlt.sargon.samples
 
-import androidx.annotation.VisibleForTesting
+import com.radixdlt.sargon.annotation.UsesSampleValues
 import com.radixdlt.sargon.Hash
 import com.radixdlt.sargon.newHashSample
 import com.radixdlt.sargon.newHashSampleOther
 
-@VisibleForTesting
+@UsesSampleValues
 val Hash.Companion.sample: Sample<Hash>
     get() = object : Sample<Hash> {
 
