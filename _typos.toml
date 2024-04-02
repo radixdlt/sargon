@@ -19,9 +19,11 @@ account_tdx_2_12yf9gd53yfep7a669fv2t3wm7nz9zeezwd04n02a433ker8vza6rhe = "account
 ec4892a8ba3b86f1 = "ec4892a8ba3b86f1"
 f87611f279e0daa3 = "f87611f279e0daa3"
 imeAction = "imeAction"
+ImeAction = "ImeAction"
 
 [default.extend-words]
 inout = "inout"
 hd = "hd"
 imeAction = "imeAction"
+ImeAction = "ImeAction"
 uiu = "uiu"
