@@ -195,11 +195,11 @@ mod tests {
 
     #[test]
     fn intent_with_max_sbor_depth_is_ok() {
-        assert!(SUT::test_with_sbor_depth(
-            SUT::MAX_SBOR_DEPTH,
-            NetworkID::Stokenet
-        )
-        .is_ok());
+        let sut =
+            SUT::test_with_sbor_depth(SUT::MAX_SBOR_DEPTH, NetworkID::Stokenet)
+                .unwrap();
+            println!("{}", &sut.manifest);
+        assert_eq!(sut.intent_hash().to_string(), "txid_rdx1umjkqnmsjh77p3xqqjwmpvtxyn055v23zuyjt70w6y85g3ej3w6sq9uh52")
     }
 
     #[test]
