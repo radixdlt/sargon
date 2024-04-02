@@ -104,7 +104,8 @@ impl Instructions {
         network_id: NetworkID,
     ) -> Result<Self> {
         let nested_value = manifest_value_with_sbor_depth(depth);
-        let dummy_address = ComponentAddress::random(network_id);
+        let dummy_address =
+            ComponentAddress::with_node_id_bytes(&[0xffu8; 29], network_id);
         let instruction = ScryptoInstruction::CallMethod {
             address: TryInto::<ScryptoDynamicComponentAddress>::try_into(
                 &dummy_address,

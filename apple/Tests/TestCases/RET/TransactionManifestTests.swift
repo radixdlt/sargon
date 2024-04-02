@@ -42,7 +42,7 @@ final class TransactionManifestTests: Test<TransactionManifest> {
 	func test_from_instructions_string_with_max_sbor_depth_is_ok() throws {
 		let instructionsString = """
 CALL_METHOD
-	Address("component_tdx_2_1czk50msdtutnznlupse7z5dpd3hhdeueey8l9t2uj54azqj6etqw3u")
+	Address("component_tdx_2_1crllllllllllllllllllllllllllllllllllllllllllllllx8navn")
 	"dummy"
 	Tuple(
 		Tuple(
@@ -86,14 +86,14 @@ CALL_METHOD
 ;
 """
 		let sut = try SUT(instructionsString: instructionsString, networkID: .stokenet, blobs: []) // should be OK
-		let intent = TransactionIntent(header: .sample, manifest: sut, message: .sample))
-		XCTAssertEqual(intent.hash().description, "txid_rdx1umjkqnmsjh77p3xqqjwmpvtxyn055v23zuyjt70w6y85g3ej3w6sq9uh52")
+		let intent = TransactionIntent(header: .sample, manifest: sut, message: .sample)
+		XCTAssertEqual(intent.hash().description, "txid_rdx1uwcfczupvvrrtxwxx6p5jugaxvu3j83tj5nz9pnrr44jyxccg2cqhuvzhy")
 	}
 	
 	func test_from_instructions_string_with_exceeded_sbor_depth_throws() {
 		let instructionsString = """
 CALL_METHOD
-	Address("component_tdx_2_1czk50msdtutnznlupse7z5dpd3hhdeueey8l9t2uj54azqj6etqw3u")
+	Address("component_tdx_2_1crllllllllllllllllllllllllllllllllllllllllllllllx8navn")
 	"dummy"
 	Tuple(
 		Tuple(
