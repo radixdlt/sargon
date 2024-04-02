@@ -212,4 +212,13 @@ mod tests {
             Err(CommonError::InvalidTransactionMaxSBORDepthExceeded(20))
         );
     }
+
+    #[test]
+    fn other_reasons_for_invalid() {
+        let res = compile_intent(invalid_signed_intent().intent);
+        assert_eq!(
+            res,
+            Err(CommonError::InvalidIntentFailedToEncode { underlying: "MismatchingArrayElementValueKind { element_value_kind: 7, actual_value_kind: 8 }".to_owned() }) 
+        );
+    }
 }

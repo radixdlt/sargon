@@ -20,10 +20,6 @@ impl NotarizedTransaction {
         })
     }
 
-    pub fn signed_intent(&self) -> &SignedIntent {
-        &self.signed_intent
-    }
-
     pub fn compile(&self) -> CompiledNotarizedIntent {
         compile_notarized_intent(self.clone().into())
         .expect("Should always be able to compile a NotarizedTransaction since we should have called 'compile' in its failing constructor.")
