@@ -115,10 +115,7 @@ impl Instructions {
             method_name: "dummy".to_owned(),
             args: nested_value,
         };
-        scrypto_decompile(&[instruction], &network_id.network_definition())
-            .map_err(|e| CommonError::InvalidInstructionsFailedToDecompile {
-                underlying: format!("{:?}", e),
-            })
+        instructions_string_from(&[instruction], network_id)
             .and_then(|x: String| Self::new(x, network_id))
     }
 
@@ -167,14 +164,9 @@ fn extract_error_from_error(
                 underlying: format!("GeneratorError: {:?}", gen_err),
             },
         },
-        ScryptoCompileError::ParserError(pars_err) => match pars_err {
-            MaxDepthExceeded(max) => {
-                CommonError::InvalidTransactionMaxSBORDepthExceeded(max)
-            }
-            _ => CommonError::InvalidInstructionsString {
-                underlying: format!("ParserError {:?}", pars_err),
-            },
-        },
+        ScryptoCompileError::ParserError(MaxDepthExceeded(max)) => {
+            CommonError::InvalidTransactionMaxSBORDepthExceeded(max)
+        }
         _ => CommonError::InvalidInstructionsString {
             underlying: format!("{:?}", err),
         },
