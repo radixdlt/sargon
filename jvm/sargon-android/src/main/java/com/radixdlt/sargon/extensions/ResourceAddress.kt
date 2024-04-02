@@ -2,10 +2,8 @@ package com.radixdlt.sargon.extensions
 
 import com.radixdlt.sargon.AddressFormat
 import com.radixdlt.sargon.NetworkId
-import com.radixdlt.sargon.PoolAddress
 import com.radixdlt.sargon.ResourceAddress
 import com.radixdlt.sargon.newResourceAddress
-import com.radixdlt.sargon.poolAddressFormatted
 import com.radixdlt.sargon.resourceAddressBech32Address
 import com.radixdlt.sargon.resourceAddressFormatted
 import com.radixdlt.sargon.resourceAddressIsFungible
@@ -31,6 +29,9 @@ val ResourceAddress.isFungible: Boolean
 
 val ResourceAddress.isNonFungible: Boolean
     get() = resourceAddressIsNonFungible(address = this)
+
+val ResourceAddress.isXRD: Boolean
+    get() = this == ResourceAddress.xrd(networkId = networkId)
 
 fun ResourceAddress.formatted(
     format: AddressFormat = AddressFormat.DEFAULT
