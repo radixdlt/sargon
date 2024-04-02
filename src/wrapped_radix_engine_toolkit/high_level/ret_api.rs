@@ -143,9 +143,7 @@ pub fn xrd_address_of_network(network_id: NetworkID) -> ResourceAddress {
 pub fn debug_print_compiled_notarized_intent(
     compiled: CompiledNotarizedIntent,
 ) -> String {
-    let notarized = compiled
-        .decompile()
-        .expect("Should never failed to decompile");
+    let notarized = compiled.decompile();
     format!("{:?}", notarized)
 }
 

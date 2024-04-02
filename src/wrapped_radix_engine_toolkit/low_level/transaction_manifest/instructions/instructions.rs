@@ -96,11 +96,15 @@ impl Instructions {
 
 #[cfg(test)]
 impl Instructions {
-    pub fn with_great_sbor_depth(depth: usize) -> Result<Self> {
-        let network_id = NetworkID::Stokenet;
+    /// Utility function which uses `Instructions::new(<string>, <network_id>)`
+    /// and SHOULD return `Err` if `depth > Instructions::MAX_SBOR_DEPTH`, which
+    /// we can assert in unit tests.
+    pub(crate) fn test_with_sbor_depth(
+        depth: usize,
+        network_id: NetworkID,
+    ) -> Result<Self> {
         let nested_value = manifest_value_with_sbor_depth(depth);
-        let dummy_address = ComponentAddress::sample_stokenet();
-        assert_eq!(dummy_address.network_id(), network_id);
+        let dummy_address = ComponentAddress::random(network_id);
         let instruction = ScryptoInstruction::CallMethod {
             address: TryInto::<ScryptoDynamicComponentAddress>::try_into(
                 &dummy_address,
@@ -111,27 +115,13 @@ impl Instructions {
             args: nested_value,
         };
         scrypto_decompile(&[instruction], &network_id.network_definition())
-            .map_err(|_| CommonError::Unknown)
+            .map_err(|e| CommonError::InvalidInstructionsFailedToDecompile {
+                underlying: format!("{:?}", e),
+            })
             .and_then(|x: String| Self::new(x, network_id))
     }
-}
 
-#[cfg(test)]
-#[test]
-fn test_max() {
-    assert!(Instructions::with_great_sbor_depth(
-        MANIFEST_SBOR_V1_MAX_DEPTH - 3
-    )
-    .is_ok());
-}
-
-#[cfg(test)]
-#[test]
-fn test_err() {
-    assert!(Instructions::with_great_sbor_depth(
-        MANIFEST_SBOR_V1_MAX_DEPTH - 2
-    )
-    .is_err());
+    pub(crate) const MAX_SBOR_DEPTH: usize = MANIFEST_SBOR_V1_MAX_DEPTH - 3;
 }
 
 fn extract_error_from_addr(
@@ -142,7 +132,9 @@ fn extract_error_from_addr(
         .map(|t| t.0)
         .map(NetworkID::from_repr)
     else {
-        return CommonError::InvalidInstructionsString;
+        return CommonError::InvalidInstructionsString {
+            underlying: "Failed to get NetworkID from address".to_owned(),
+        };
     };
     if network_id != expected_network {
         CommonError::InvalidInstructionsWrongNetwork {
@@ -150,7 +142,10 @@ fn extract_error_from_addr(
             specified_to_instructions_ctor: expected_network,
         }
     } else {
-        CommonError::InvalidInstructionsString
+        CommonError::InvalidInstructionsString {
+            underlying: "Failed to determine why an address was invalid"
+                .to_owned(),
+        }
     }
 }
 
@@ -159,6 +154,7 @@ fn extract_error_from_error(
     expected_network: NetworkID,
 ) -> CommonError {
     use transaction::manifest::generator::GeneratorError::*;
+    use transaction::manifest::parser::ParserError::*;
     let n = expected_network;
     match err {
         ScryptoCompileError::GeneratorError(gen_err) => match gen_err {
@@ -166,9 +162,21 @@ fn extract_error_from_error(
             InvalidComponentAddress(a) => extract_error_from_addr(a, n),
             InvalidResourceAddress(a) => extract_error_from_addr(a, n),
             InvalidGlobalAddress(a) => extract_error_from_addr(a, n),
-            _ => CommonError::InvalidInstructionsString,
+            _ => CommonError::InvalidInstructionsString {
+                underlying: format!("GeneratorError: {:?}", gen_err),
+            },
         },
-        _ => CommonError::InvalidInstructionsString,
+        ScryptoCompileError::ParserError(pars_err) => match pars_err {
+            MaxDepthExceeded(max) => {
+                CommonError::InvalidTransactionMaxSBORDepthExceeded(max)
+            }
+            _ => CommonError::InvalidInstructionsString {
+                underlying: format!("ParserError {:?}", pars_err),
+            },
+        },
+        _ => CommonError::InvalidInstructionsString {
+            underlying: format!("{:?}", err),
+        },
     }
 }
 
@@ -297,7 +305,9 @@ mod tests {
     fn extract_error_from_addr_fallbacks_to_invalid_ins_err() {
         assert_eq!(
             extract_error_from_addr("foo".to_owned(), NetworkID::Simulator),
-            CommonError::InvalidInstructionsString
+            CommonError::InvalidInstructionsString {
+                underlying: "Failed to get NetworkID from address".to_owned()
+            }
         );
     }
     #[test]
@@ -305,7 +315,7 @@ mod tests {
     ) {
         assert_eq!(
             extract_error_from_addr("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease".to_owned(), NetworkID::Mainnet),
-            CommonError::InvalidInstructionsString
+            CommonError::InvalidInstructionsString { underlying: "Failed to determine why an address was invalid".to_owned() }
         );
     }
 
@@ -318,7 +328,9 @@ mod tests {
                 ),
                 NetworkID::Simulator
             ),
-            CommonError::InvalidInstructionsString
+            CommonError::InvalidInstructionsString {
+                underlying: "LexerError(UnexpectedEof)".to_owned()
+            }
         );
     }
 
@@ -345,7 +357,7 @@ mod tests {
                 ScryptoCompileError::GeneratorError(transaction::manifest::generator::GeneratorError::BlobNotFound("dead".to_owned())),
                 NetworkID::Simulator
             ),
-            CommonError::InvalidInstructionsString
+            CommonError::InvalidInstructionsString { underlying: "GeneratorError: BlobNotFound(\"dead\")".to_owned() }
         );
     }
 
@@ -379,6 +391,26 @@ mod tests {
                 NetworkID::Simulator
             ),
             CommonError::InvalidInstructionsWrongNetwork { found_in_instructions: NetworkID::Mainnet, specified_to_instructions_ctor: NetworkID::Simulator }
+        );
+    }
+
+    #[test]
+    fn instructions_with_max_sbor_depth_is_ok() {
+        assert!(SUT::test_with_sbor_depth(
+            SUT::MAX_SBOR_DEPTH,
+            NetworkID::Stokenet
+        )
+        .is_ok());
+    }
+
+    #[test]
+    fn instructions_with_sbor_depth_greater_than_max_is_err() {
+        assert_eq!(
+            SUT::test_with_sbor_depth(
+                SUT::MAX_SBOR_DEPTH + 1,
+                NetworkID::Stokenet
+            ),
+            Err(CommonError::InvalidTransactionMaxSBORDepthExceeded(20))
         );
     }
 }

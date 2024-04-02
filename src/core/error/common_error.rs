@@ -328,8 +328,10 @@ pub enum CommonError {
     #[error("Invalid Olympia address string: {bad_value}")]
     InvalidOlympiaAddressString { bad_value: String } = 10089,
 
-    #[error("Invalid Transaction Manifest Instructions String")]
-    InvalidInstructionsString = 10090,
+    #[error(
+        "Invalid Transaction Manifest Instructions String: '{underlying}'"
+    )]
+    InvalidInstructionsString { underlying: String } = 10090,
 
     #[error(
         "Failed to get execution summary from TransactionManifest using RET"
@@ -405,6 +407,17 @@ pub enum CommonError {
         "Invalid Instructions, failed to decompile, reason: '{underlying}'"
     )]
     InvalidInstructionsFailedToDecompile { underlying: String } = 10110,
+
+    #[error("Invalid Transaction, max SBOR depth exceeded: '{0}'")]
+    InvalidTransactionMaxSBORDepthExceeded(usize) = 10111,
+
+    #[error("Invalid Signed Intent, failed to encode, reason: '{underlying}'")]
+    InvalidSignedIntentFailedToEncode { underlying: String } = 10112,
+
+    #[error(
+        "Invalid Notarized Intent, failed to encode, reason: '{underlying}'"
+    )]
+    InvalidNotarizedIntentFailedToEncode { underlying: String } = 10113,
 }
 
 /*

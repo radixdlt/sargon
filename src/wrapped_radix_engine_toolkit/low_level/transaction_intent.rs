@@ -1,20 +1,10 @@
-use radix_engine::types::{
-    manifest_encode as Scrypto_manifest_encode, MANIFEST_SBOR_V1_MAX_DEPTH,
-    SCRYPTO_SBOR_V1_MAX_DEPTH,
-};
-use radix_engine_interface::prelude::ScryptoValue as ScryptoScryptoValue;
-use sbor::{
-    CustomValue as ScryptoCustomValue,
-    CustomValueKind as ScryptoCustomValueKind, Value as ScryptoValue,
-};
-
 use crate::prelude::*;
 
 #[derive(Clone, PartialEq, Eq, derive_more::Debug, uniffi::Record)]
 #[debug("header:\n{:?}\n\nmessage:\n{:?}\n\nmanifest:\n{}\n\n", self.header, self.message, self.manifest.instructions_string())]
 pub struct TransactionIntent {
     pub header: TransactionHeader,
-    pub manifest: TransactionManifest,
+    manifest: TransactionManifest,
     pub message: Message,
 }
 
@@ -24,7 +14,7 @@ impl TransactionIntent {
         manifest: TransactionManifest,
         message: Message,
     ) -> Result<Self> {
-        // Verify that the intent has acceptable depth and is compatible
+        // Verify that this TransactionIntent has acceptable depth and is compatible
         _ = compile_intent_with(&header, &manifest, &message)?;
 
         Ok(Self {
@@ -78,13 +68,7 @@ fn compile_intent_with(
     manifest: &TransactionManifest,
     message: &Message,
 ) -> Result<BagOfBytes> {
-    let scrypto_intent = ScryptoIntent {
-        header: (*header).into(),
-        instructions: ScryptoInstructions(manifest.instructions().clone()),
-        blobs: manifest.blobs().clone().into(),
-        message: message.clone().into(),
-    };
-    compile_intent(scrypto_intent)
+    compile_intent(into_scrypto(header, manifest, message))
 }
 
 fn compile_intent(scrypto_intent: ScryptoIntent) -> Result<BagOfBytes> {
@@ -93,68 +77,6 @@ fn compile_intent(scrypto_intent: ScryptoIntent) -> Result<BagOfBytes> {
             underlying: format!("{:?}", e),
         })
         .map(BagOfBytes::from)
-}
-
-#[cfg(test)]
-fn sbor_value_with_depth<X, Y>(depth: usize) -> ScryptoValue<X, Y>
-where
-    X: ScryptoCustomValueKind,
-    Y: ScryptoCustomValue<X>,
-{
-    let mut value = sbor::Value::Tuple { fields: vec![] };
-    for _ in 0..depth - 1 {
-        value = sbor::Value::Tuple {
-            fields: vec![value],
-        }
-    }
-    value
-}
-
-#[cfg(test)]
-pub(crate) fn scrypto_value_with_sbor_depth(
-    depth: usize,
-) -> ScryptoScryptoValue {
-    sbor_value_with_depth(depth)
-}
-
-#[cfg(test)]
-pub(crate) fn manifest_value_with_sbor_depth(
-    depth: usize,
-) -> ScryptoManifestValue {
-    sbor_value_with_depth(depth)
-}
-
-#[cfg(test)]
-mod sbor_depth_tests {
-    use super::*;
-
-    #[test]
-    fn scrypto_value_at_max_depth_is_encodable() {
-        let value = scrypto_value_with_sbor_depth(SCRYPTO_SBOR_V1_MAX_DEPTH);
-        Scrypto_scrypto_encode(&value).unwrap();
-    }
-
-    #[test]
-    #[should_panic]
-    fn scrypto_value_exceeding_max_depth_is_not_encodable() {
-        let value =
-            scrypto_value_with_sbor_depth(SCRYPTO_SBOR_V1_MAX_DEPTH + 1);
-        Scrypto_scrypto_encode(&value).unwrap();
-    }
-
-    #[test]
-    fn manifest_value_at_max_depth_is_encodable() {
-        let value = manifest_value_with_sbor_depth(MANIFEST_SBOR_V1_MAX_DEPTH);
-        Scrypto_manifest_encode(&value).unwrap();
-    }
-
-    #[test]
-    #[should_panic]
-    fn manifest_value_exceeding_max_depth_is_not_encodable() {
-        let value =
-            manifest_value_with_sbor_depth(MANIFEST_SBOR_V1_MAX_DEPTH + 1);
-        Scrypto_manifest_encode(&value).unwrap();
-    }
 }
 
 impl TryFrom<ScryptoIntent> for TransactionIntent {
@@ -201,6 +123,35 @@ impl HasSampleValues for TransactionIntent {
 }
 
 #[cfg(test)]
+impl TransactionIntent {
+    /// Utility function which uses `TransactionIntent::new(<TransactionHeader>, <TransactionManifest>, <Message>)`
+    /// and SHOULD return `Err` if `depth > TransactionIntent::MAX_SBOR_DEPTH`, which
+    /// we can assert in unit tests.
+    pub(crate) fn test_with_sbor_depth(
+        depth: usize,
+        network_id: NetworkID,
+    ) -> Result<Self> {
+        Instructions::test_with_sbor_depth(depth, network_id)
+            .and_then(|instructions| {
+                TransactionManifest::new(
+                    instructions.instructions_string(),
+                    network_id,
+                    Blobs::default(),
+                )
+            })
+            .and_then(|manifest| {
+                Self::new(
+                    TransactionHeader::sample(),
+                    manifest,
+                    Message::sample(),
+                )
+            })
+    }
+
+    pub(crate) const MAX_SBOR_DEPTH: usize = Instructions::MAX_SBOR_DEPTH;
+}
+
+#[cfg(test)]
 mod tests {
     use super::*;
 
@@ -240,5 +191,25 @@ mod tests {
     #[test]
     fn compile() {
         assert_eq!(SUT::sample().compile().to_string(), "4d220104210707010a872c0100000000000a912c01000000000009092f2400220101200720ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf010108000020220441038000d1be9c042f627d98a01383987916d43cf439631ca1d8c8076d6754ab263d0c086c6f636b5f6665652101850000fda0c42777080000000000000000000000000000000041038000d1be9c042f627d98a01383987916d43cf439631ca1d8c8076d6754ab263d0c087769746864726177210280005da66318c6318c61f5a61b4c6318c6318cf794aa8d295f14e6318c6318c6850000443945309a7a48000000000000000000000000000000000280005da66318c6318c61f5a61b4c6318c6318cf794aa8d295f14e6318c6318c6850000443945309a7a4800000000000000000000000000000041038000d1127918c16af09af521951adcf3a20ab2cc87c0e72e85814764853ce5e70c147472795f6465706f7369745f6f725f61626f72742102810000000022000020200022010121020c0a746578742f706c61696e2200010c0c48656c6c6f20526164697821");
+    }
+
+    #[test]
+    fn intent_with_max_sbor_depth_is_ok() {
+        assert!(SUT::test_with_sbor_depth(
+            SUT::MAX_SBOR_DEPTH,
+            NetworkID::Stokenet
+        )
+        .is_ok());
+    }
+
+    #[test]
+    fn intent_with_sbor_depth_greater_than_max_is_err() {
+        assert_eq!(
+            SUT::test_with_sbor_depth(
+                SUT::MAX_SBOR_DEPTH + 1,
+                NetworkID::Stokenet
+            ),
+            Err(CommonError::InvalidTransactionMaxSBORDepthExceeded(20))
+        );
     }
 }
