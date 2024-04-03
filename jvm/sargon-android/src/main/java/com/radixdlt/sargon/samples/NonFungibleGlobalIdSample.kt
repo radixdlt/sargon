@@ -1,11 +1,11 @@
 package com.radixdlt.sargon.samples
 
-import androidx.annotation.VisibleForTesting
+import com.radixdlt.sargon.annotation.UsesSampleValues
 import com.radixdlt.sargon.NonFungibleGlobalId
 import com.radixdlt.sargon.newNonFungibleGlobalIdSample
 import com.radixdlt.sargon.newNonFungibleGlobalIdSampleOther
 
-@VisibleForTesting
+@UsesSampleValues
 val NonFungibleGlobalId.Companion.sample: Sample<NonFungibleGlobalId>
     get() = object : Sample<NonFungibleGlobalId> {
 

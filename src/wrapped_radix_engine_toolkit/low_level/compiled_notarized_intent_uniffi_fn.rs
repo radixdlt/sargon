@@ -14,7 +14,7 @@ pub fn new_compiled_notarized_intent_sample_other() -> CompiledNotarizedIntent {
 pub fn compiled_notarized_intent_get_bytes(
     compiled_notarized_intent: &CompiledNotarizedIntent,
 ) -> BagOfBytes {
-    compiled_notarized_intent.secret_magic.clone()
+    compiled_notarized_intent.bytes()
 }
 
 #[cfg(test)]
@@ -42,6 +42,6 @@ mod tests {
     #[test]
     fn get_bytes() {
         let sut = SUT::sample();
-        assert_eq!(compiled_notarized_intent_get_bytes(&sut), sut.secret_magic);
+        assert_eq!(compiled_notarized_intent_get_bytes(&sut), sut.bytes());
     }
 }

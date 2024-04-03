@@ -9,7 +9,7 @@ impl TryFrom<BagOfBytes> for TransactionReceipt {
     type Error = crate::CommonError;
 
     fn try_from(encoded: BagOfBytes) -> Result<Self, Self::Error> {
-        scrypto_decode::<ScryptoVersionedTransactionReceipt>(&encoded)
+        Scrypto_scrypto_decode::<ScryptoVersionedTransactionReceipt>(&encoded)
             .map(|r| r.into_latest())
             .map_err(|e| {
                 error!("Failed to decode encoded receipt, {:?}", e);

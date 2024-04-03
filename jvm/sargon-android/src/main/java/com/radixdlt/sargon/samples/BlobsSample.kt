@@ -1,11 +1,11 @@
 package com.radixdlt.sargon.samples
 
-import androidx.annotation.VisibleForTesting
+import com.radixdlt.sargon.annotation.UsesSampleValues
 import com.radixdlt.sargon.Blobs
 import com.radixdlt.sargon.newBlobsSample
 import com.radixdlt.sargon.newBlobsSampleOther
 
-@VisibleForTesting
+@UsesSampleValues
 val Blobs.Companion.sample: Sample<Blobs>
     get() = object : Sample<Blobs> {
 

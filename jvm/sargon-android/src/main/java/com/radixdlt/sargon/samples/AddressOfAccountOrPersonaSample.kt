@@ -1,13 +1,13 @@
 package com.radixdlt.sargon.samples
 
-import androidx.annotation.VisibleForTesting
+import com.radixdlt.sargon.annotation.UsesSampleValues
 import com.radixdlt.sargon.AddressOfAccountOrPersona
 import com.radixdlt.sargon.newAddressOfAccountOrPersonaSampleMainnet
 import com.radixdlt.sargon.newAddressOfAccountOrPersonaSampleMainnetOther
 import com.radixdlt.sargon.newAddressOfAccountOrPersonaSampleStokenet
 import com.radixdlt.sargon.newAddressOfAccountOrPersonaSampleStokenetOther
 
-@VisibleForTesting
+@UsesSampleValues
 val AddressOfAccountOrPersona.Companion.sampleMainnet: Sample<AddressOfAccountOrPersona>
     get() = object : Sample<AddressOfAccountOrPersona> {
         override fun invoke(): AddressOfAccountOrPersona = newAddressOfAccountOrPersonaSampleMainnet()
@@ -15,7 +15,7 @@ val AddressOfAccountOrPersona.Companion.sampleMainnet: Sample<AddressOfAccountOr
         override fun other(): AddressOfAccountOrPersona = newAddressOfAccountOrPersonaSampleMainnetOther()
     }
 
-@VisibleForTesting
+@UsesSampleValues
 val AddressOfAccountOrPersona.Companion.sampleStokenet: Sample<AddressOfAccountOrPersona>
     get() = object : Sample<AddressOfAccountOrPersona> {
         override fun invoke(): AddressOfAccountOrPersona = newAddressOfAccountOrPersonaSampleStokenet()

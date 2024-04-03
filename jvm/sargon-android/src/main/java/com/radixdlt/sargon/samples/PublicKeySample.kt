@@ -1,6 +1,6 @@
 package com.radixdlt.sargon.samples
 
-import androidx.annotation.VisibleForTesting
+import com.radixdlt.sargon.annotation.UsesSampleValues
 import com.radixdlt.sargon.PublicKey
 import com.radixdlt.sargon.newEd25519PublicKeySample
 import com.radixdlt.sargon.newEd25519PublicKeySampleOther
@@ -9,7 +9,7 @@ import com.radixdlt.sargon.newPublicKeySampleOther
 import com.radixdlt.sargon.newSecp256k1PublicKeySample
 import com.radixdlt.sargon.newSecp256k1PublicKeySampleOther
 
-@VisibleForTesting
+@UsesSampleValues
 val PublicKey.Companion.sample: Sample<PublicKey>
     get() = object : Sample<PublicKey> {
 
@@ -18,7 +18,7 @@ val PublicKey.Companion.sample: Sample<PublicKey>
         override fun other(): PublicKey = newPublicKeySampleOther()
     }
 
-@VisibleForTesting
+@UsesSampleValues
 val PublicKey.Ed25519.Companion.sample: Sample<PublicKey.Ed25519>
     get() = object : Sample<PublicKey.Ed25519> {
 
@@ -27,7 +27,7 @@ val PublicKey.Ed25519.Companion.sample: Sample<PublicKey.Ed25519>
         override fun other(): PublicKey.Ed25519 = PublicKey.Ed25519(newEd25519PublicKeySampleOther())
     }
 
-@VisibleForTesting
+@UsesSampleValues
 val PublicKey.Secp256k1.Companion.sample: Sample<PublicKey.Secp256k1>
     get() = object : Sample<PublicKey.Secp256k1> {
 

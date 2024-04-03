@@ -3,10 +3,25 @@ use crate::prelude::*;
 #[derive(Clone, Debug, PartialEq, Eq, uniffi::Record, derive_more::Display)]
 #[display("{}", self.instructions_string())] // TODO add blobs to Display
 pub struct TransactionManifest {
-    pub(crate) secret_magic: TransactionManifestSecretMagic,
+    secret_magic: TransactionManifestSecretMagic,
 }
 
 impl TransactionManifest {
+    pub fn new(
+        instructions_string: impl AsRef<str>,
+        network_id: NetworkID,
+        blobs: Blobs,
+    ) -> Result<Self> {
+        Instructions::new(instructions_string, network_id).map(|instructions| {
+            Self {
+                secret_magic: TransactionManifestSecretMagic {
+                    instructions,
+                    blobs,
+                },
+            }
+        })
+    }
+
     pub fn with_instructions_and_blobs(
         instructions: Instructions,
         blobs: Blobs,
@@ -54,47 +69,47 @@ impl From<TransactionManifest> for ScryptoTransactionManifest {
     }
 }
 
+impl TryFrom<(ScryptoTransactionManifest, NetworkID)> for TransactionManifest {
+    type Error = CommonError;
+    fn try_from(
+        value: (ScryptoTransactionManifest, NetworkID),
+    ) -> Result<Self> {
+        let scrypto_manifest = value.0;
+        let network_id = value.1;
+        let instructions = Instructions::try_from((
+            scrypto_manifest.clone().instructions.as_ref(),
+            network_id,
+        ))?;
+        let value = Self {
+            secret_magic: TransactionManifestSecretMagic::new(
+                instructions,
+                scrypto_manifest.blobs.clone(),
+            ),
+        };
+        assert_eq!(value.scrypto_manifest(), scrypto_manifest);
+        Ok(value)
+    }
+}
+
+impl TransactionManifest {
+    pub fn sargon_built(
+        builder: ScryptoManifestBuilder,
+        network_id: NetworkID,
+    ) -> Self {
+        let scrypto_manifest = builder.build();
+        Self::try_from((scrypto_manifest, network_id)).expect(
+            "Sargon should not build manifest with too nested SBOR depth.",
+        )
+    }
+}
+
 impl TransactionManifest {
     pub(crate) fn instructions(&self) -> &Vec<ScryptoInstruction> {
-        &self.secret_magic.instructions.secret_magic.0
+        self.secret_magic.instructions()
     }
 
     pub(crate) fn blobs(&self) -> &Blobs {
         &self.secret_magic.blobs
-    }
-
-    pub(crate) fn from_scrypto(
-        scrypto_manifest: ScryptoTransactionManifest,
-        network_id: NetworkID,
-    ) -> Self {
-        let value = Self {
-            secret_magic: TransactionManifestSecretMagic {
-                instructions: Instructions {
-                    secret_magic: InstructionsSecretMagic(
-                        scrypto_manifest.instructions.clone(),
-                    ),
-                    network_id,
-                },
-                blobs: scrypto_manifest.blobs.clone().into(),
-            },
-        };
-        assert_eq!(value.scrypto_manifest(), scrypto_manifest);
-        value
-    }
-
-    pub fn new(
-        instructions_string: impl AsRef<str>,
-        network_id: NetworkID,
-        blobs: Blobs,
-    ) -> Result<Self> {
-        Instructions::new(instructions_string, network_id).map(|instructions| {
-            Self {
-                secret_magic: TransactionManifestSecretMagic {
-                    instructions,
-                    blobs,
-                },
-            }
-        })
     }
 
     pub fn instructions_string(&self) -> String {
@@ -208,15 +223,11 @@ mod tests {
             instructions: ins.clone(),
             blobs: BTreeMap::new(),
         };
-        let sut = SUT {
-            secret_magic: TransactionManifestSecretMagic::new(
-                Instructions {
-                    secret_magic: InstructionsSecretMagic(ins),
-                    network_id: NetworkID::Mainnet,
-                },
-                Blobs::default(),
-            ),
-        };
+
+        let sut = SUT::with_instructions_and_blobs(
+            Instructions::new_unchecked(ins, NetworkID::Mainnet),
+            Blobs::default(),
+        );
         assert_eq!(scrypto.clone(), sut.clone().into());
         assert_eq!(sut.scrypto_manifest(), scrypto);
     }

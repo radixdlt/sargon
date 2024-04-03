@@ -1,6 +1,6 @@
 package com.radixdlt.sargon.samples
 
-import androidx.annotation.VisibleForTesting
+import com.radixdlt.sargon.annotation.UsesSampleValues
 import com.radixdlt.sargon.BagOfBytes
 import com.radixdlt.sargon.bagOfBytesAppendCafe
 import com.radixdlt.sargon.bagOfBytesAppendDeadbeef
@@ -13,38 +13,38 @@ import com.radixdlt.sargon.newBagOfBytesSampleDead
 import com.radixdlt.sargon.newBagOfBytesSampleEcad
 import com.radixdlt.sargon.newBagOfBytesSampleFade
 
-@VisibleForTesting
+@UsesSampleValues
 val acedBagOfBytesSample: BagOfBytes
     get() = newBagOfBytesSampleAced()
 
-@VisibleForTesting
+@UsesSampleValues
 val babeBagOfBytesSample: BagOfBytes
     get() = newBagOfBytesSampleBabe()
 
-@VisibleForTesting
+@UsesSampleValues
 val cafeBagOfBytesSample: BagOfBytes
     get() = newBagOfBytesSampleCafe()
 
-@VisibleForTesting
+@UsesSampleValues
 val deadBagOfBytesSample: BagOfBytes
     get() = newBagOfBytesSampleDead()
 
-@VisibleForTesting
+@UsesSampleValues
 val ecadBagOfBytesSample: BagOfBytes
     get() = newBagOfBytesSampleEcad()
 
-@VisibleForTesting
+@UsesSampleValues
 val fadeBagOfBytesSample: BagOfBytes
     get() = newBagOfBytesSampleFade()
 
-@VisibleForTesting
+@UsesSampleValues
 fun BagOfBytes.appendingCafeSample() = bagOfBytesAppendCafe(to = this)
 
-@VisibleForTesting
+@UsesSampleValues
 fun BagOfBytes.appendingDeadbeefSample() = bagOfBytesAppendDeadbeef(to = this)
 
-@VisibleForTesting
+@UsesSampleValues
 fun BagOfBytes.prependingCafeSample() = bagOfBytesPrependCafe(inFrontOf = this)
 
-@VisibleForTesting
+@UsesSampleValues
 fun BagOfBytes.prependingDeadbeefSample() = bagOfBytesPrependDeadbeef(inFrontOf = this)

@@ -1,4 +1,4 @@
-package com.radixdlt.sargon.utils
+package com.radixdlt.sargon.annotation
 
 /**
  * Annotation used to ignore certain elements from being included

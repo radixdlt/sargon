@@ -1,17 +1,15 @@
 package com.radixdlt.sargon.samples
 
-import androidx.annotation.VisibleForTesting
-import com.radixdlt.sargon.AccessControllerAddress
 import com.radixdlt.sargon.AccountAddress
 import com.radixdlt.sargon.NetworkId
-import com.radixdlt.sargon.newAccessControllerAddressRandom
+import com.radixdlt.sargon.annotation.UsesSampleValues
+import com.radixdlt.sargon.newAccountAddressRandom
 import com.radixdlt.sargon.newAccountAddressSampleMainnet
 import com.radixdlt.sargon.newAccountAddressSampleMainnetOther
-import com.radixdlt.sargon.newAccountAddressRandom
 import com.radixdlt.sargon.newAccountAddressSampleStokenet
 import com.radixdlt.sargon.newAccountAddressSampleStokenetOther
 
-@VisibleForTesting
+@UsesSampleValues
 object AccountAddressSampleMainnet: SampleWithRandomValues<AccountAddress> {
     override fun invoke(): AccountAddress = newAccountAddressSampleMainnet()
 
@@ -20,11 +18,11 @@ object AccountAddressSampleMainnet: SampleWithRandomValues<AccountAddress> {
     override fun random(): AccountAddress = newAccountAddressRandom(networkId = NetworkId.MAINNET)
 }
 
-@VisibleForTesting
+@UsesSampleValues
 val AccountAddress.Companion.sampleMainnet: AccountAddressSampleMainnet
     get() = AccountAddressSampleMainnet
 
-@VisibleForTesting
+@UsesSampleValues
 object AccountAddressSampleStokenet: SampleWithRandomValues<AccountAddress> {
     override fun invoke(): AccountAddress = newAccountAddressSampleStokenet()
 
@@ -33,11 +31,11 @@ object AccountAddressSampleStokenet: SampleWithRandomValues<AccountAddress> {
     override fun  random(): AccountAddress = newAccountAddressRandom(networkId = NetworkId.STOKENET)
 }
 
-@VisibleForTesting
+@UsesSampleValues
 val AccountAddress.Companion.sampleStokenet: AccountAddressSampleStokenet
     get() = AccountAddressSampleStokenet
 
-@VisibleForTesting
+@UsesSampleValues
 fun AccountAddress.Companion.sampleRandom(
     networkId: NetworkId
 ) = newAccountAddressRandom(networkId = networkId)

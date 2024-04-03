@@ -1,6 +1,6 @@
 package com.radixdlt.sargon.samples
 
-import androidx.annotation.VisibleForTesting
+import com.radixdlt.sargon.annotation.UsesSampleValues
 import com.radixdlt.sargon.NetworkId
 import com.radixdlt.sargon.PoolAddress
 import com.radixdlt.sargon.ResourceAddress
@@ -14,7 +14,7 @@ import com.radixdlt.sargon.newResourceAddressSampleStokenetGcTokens
 import com.radixdlt.sargon.newResourceAddressSampleStokenetGum
 import com.radixdlt.sargon.newResourceAddressSampleStokenetXrd
 
-@VisibleForTesting
+@UsesSampleValues
 object ResourceAddressSampleMainnet: SampleWithRandomValues<ResourceAddress> {
     override val all: List<ResourceAddress>
         get() = listOf(
@@ -41,7 +41,7 @@ object ResourceAddressSampleMainnet: SampleWithRandomValues<ResourceAddress> {
         get() = newResourceAddressSampleMainnetNftGcMembership()
 }
 
-@VisibleForTesting
+@UsesSampleValues
 object ResourceAddressSampleStokenet: SampleWithRandomValues<ResourceAddress> {
     override val all: List<ResourceAddress>
         get() = listOf(
@@ -72,15 +72,15 @@ object ResourceAddressSampleStokenet: SampleWithRandomValues<ResourceAddress> {
         get() = newResourceAddressSampleStokenetCandy()
 }
 
-@VisibleForTesting
+@UsesSampleValues
 val ResourceAddress.Companion.sampleMainnet: ResourceAddressSampleMainnet
     get() = ResourceAddressSampleMainnet
 
-@VisibleForTesting
+@UsesSampleValues
 val ResourceAddress.Companion.sampleStokenet: ResourceAddressSampleStokenet
     get() = ResourceAddressSampleStokenet
 
-@VisibleForTesting
+@UsesSampleValues
 fun ResourceAddress.Companion.sampleRandom(
     networkId: NetworkId
 ) = newResourceAddressRandom(networkId = networkId)

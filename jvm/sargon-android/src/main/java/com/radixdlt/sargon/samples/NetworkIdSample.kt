@@ -1,9 +1,9 @@
 package com.radixdlt.sargon.samples
 
-import androidx.annotation.VisibleForTesting
+import com.radixdlt.sargon.annotation.UsesSampleValues
 import com.radixdlt.sargon.NetworkId
 
-@VisibleForTesting
+@UsesSampleValues
 val NetworkId.Companion.sample: Sample<NetworkId>
     get() = object : Sample<NetworkId> {
 
