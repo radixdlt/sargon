@@ -1,11 +1,11 @@
 package com.radixdlt.sargon.samples
 
-import androidx.annotation.VisibleForTesting
+import com.radixdlt.sargon.annotation.UsesSampleValues
 import com.radixdlt.sargon.SargonBuildInformation
 import com.radixdlt.sargon.newSargonBuildInformationSample
 import com.radixdlt.sargon.newSargonBuildInformationSampleOther
 
-@VisibleForTesting
+@UsesSampleValues
 val SargonBuildInformation.Companion.sample: Sample<SargonBuildInformation>
     get() = object : Sample<SargonBuildInformation> {
 

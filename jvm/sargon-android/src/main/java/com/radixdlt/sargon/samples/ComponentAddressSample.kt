@@ -1,13 +1,13 @@
 package com.radixdlt.sargon.samples
 
-import androidx.annotation.VisibleForTesting
+import com.radixdlt.sargon.annotation.UsesSampleValues
 import com.radixdlt.sargon.ComponentAddress
 import com.radixdlt.sargon.newComponentAddressSampleMainnetGlobal
 import com.radixdlt.sargon.newComponentAddressSampleMainnetInternal
 import com.radixdlt.sargon.newComponentAddressSampleStokenetGlobal
 import com.radixdlt.sargon.newComponentAddressSampleStokenetInternal
 
-@VisibleForTesting
+@UsesSampleValues
 val ComponentAddress.Companion.sampleMainnet: Sample<ComponentAddress>
     get() = object : Sample<ComponentAddress> {
 
@@ -16,7 +16,7 @@ val ComponentAddress.Companion.sampleMainnet: Sample<ComponentAddress>
         override fun other(): ComponentAddress = newComponentAddressSampleMainnetInternal()
     }
 
-@VisibleForTesting
+@UsesSampleValues
 val ComponentAddress.Companion.sampleStokenet: Sample<ComponentAddress>
     get() = object : Sample<ComponentAddress> {
 

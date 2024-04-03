@@ -4,7 +4,7 @@ import com.radixdlt.sargon.BagOfBytes
 import com.radixdlt.sargon.CompiledNotarizedIntent
 import com.radixdlt.sargon.compiledNotarizedIntentGetBytes
 import com.radixdlt.sargon.debugPrintCompiledNotarizedIntent
-import com.radixdlt.sargon.utils.KoverIgnore
+import com.radixdlt.sargon.annotation.KoverIgnore
 
 @KoverIgnore
 fun CompiledNotarizedIntent.debugPrint(): String =

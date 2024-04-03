@@ -32,7 +32,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.radixdlt.sargon.DisplayName
 import com.radixdlt.sargon.NetworkId
@@ -42,16 +41,13 @@ import com.radixdlt.sargon.SecureStorage
 import com.radixdlt.sargon.Wallet
 import com.radixdlt.sargon.WalletClientModel
 import com.radixdlt.sargon.android.ui.theme.SargonAndroidTheme
+import com.radixdlt.sargon.annotation.UsesSampleValues
 import com.radixdlt.sargon.extensions.string
-import com.radixdlt.sargon.samples.ProfilePreviewParameterProvider
+import com.radixdlt.sargon.samples.sample
 import kotlin.random.Random
 
 class MainActivity : ComponentActivity() {
 
-    init {
-        System.setProperty("jna.debug_load.jna", "true")
-        System.setProperty("jna.debug_load", "true")
-    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -186,11 +182,10 @@ fun Wallet.Companion.with(
     )
 }
 
+@OptIn(UsesSampleValues::class)
 @Preview(showBackground = true)
 @Composable
-fun NetworkPreview(
-    @PreviewParameter(provider = ProfilePreviewParameterProvider::class, limit = 1)
-    profile: Profile
-) {
+fun NetworkPreview() {
+    val profile = Profile.sample()
     Network(network = profile.networks.first(), onAccountAdd = {})
 }

@@ -1,11 +1,11 @@
 package com.radixdlt.sargon.samples
 
-import androidx.annotation.VisibleForTesting
+import com.radixdlt.sargon.annotation.UsesSampleValues
 import com.radixdlt.sargon.NotarySignature
 import com.radixdlt.sargon.newNotarySignatureSample
 import com.radixdlt.sargon.newNotarySignatureSampleOther
 
-@VisibleForTesting
+@UsesSampleValues
 val NotarySignature.Companion.sample: Sample<NotarySignature>
     get() = object : Sample<NotarySignature> {
 

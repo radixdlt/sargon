@@ -1,11 +1,11 @@
 package com.radixdlt.sargon.samples
 
-import androidx.annotation.VisibleForTesting
+import com.radixdlt.sargon.annotation.UsesSampleValues
 import com.radixdlt.sargon.NotarizedTransaction
 import com.radixdlt.sargon.newNotarizedTransactionSample
 import com.radixdlt.sargon.newNotarizedTransactionSampleOther
 
-@VisibleForTesting
+@UsesSampleValues
 val NotarizedTransaction.Companion.sample: Sample<NotarizedTransaction>
     get() = object : Sample<NotarizedTransaction> {
 

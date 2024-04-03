@@ -1,6 +1,6 @@
 package com.radixdlt.sargon.samples
 
-import androidx.annotation.VisibleForTesting
+import com.radixdlt.sargon.annotation.UsesSampleValues
 import com.radixdlt.sargon.NetworkId
 import com.radixdlt.sargon.ResourceAddress
 import com.radixdlt.sargon.ValidatorAddress
@@ -11,7 +11,7 @@ import com.radixdlt.sargon.newValidatorAddressRandom
 import com.radixdlt.sargon.newValidatorAddressSampleStokenet
 import com.radixdlt.sargon.newValidatorAddressSampleStokenetOther
 
-@VisibleForTesting
+@UsesSampleValues
 object ValidatorAddressSampleMainnet: SampleWithRandomValues<ValidatorAddress> {
     override fun invoke(): ValidatorAddress = newValidatorAddressSampleMainnet()
 
@@ -22,11 +22,11 @@ object ValidatorAddressSampleMainnet: SampleWithRandomValues<ValidatorAddress> {
     )
 }
 
-@VisibleForTesting
+@UsesSampleValues
 val ValidatorAddress.Companion.sampleMainnet: ValidatorAddressSampleMainnet
     get() = ValidatorAddressSampleMainnet
 
-@VisibleForTesting
+@UsesSampleValues
 object ValidatorAddressSampleStokenet: SampleWithRandomValues<ValidatorAddress> {
     override fun invoke(): ValidatorAddress = newValidatorAddressSampleStokenet()
 
@@ -37,11 +37,11 @@ object ValidatorAddressSampleStokenet: SampleWithRandomValues<ValidatorAddress> 
     )
 }
 
-@VisibleForTesting
+@UsesSampleValues
 val ValidatorAddress.Companion.sampleStokenet: ValidatorAddressSampleStokenet
     get() = ValidatorAddressSampleStokenet
 
-@VisibleForTesting
+@UsesSampleValues
 fun ValidatorAddress.Companion.sampleRandom(
     networkId: NetworkId
 ) = newValidatorAddressRandom(networkId = networkId)
