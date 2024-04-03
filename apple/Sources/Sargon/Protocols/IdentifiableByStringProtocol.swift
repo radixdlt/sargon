@@ -10,7 +10,9 @@ public protocol IdentifiableByStringProtocol: BaseIdentifiableByStringProtocol &
 	init(_ string: String) throws
 	
 	/// A non user facing, raw, string representation of the value.
-	func toRawString() -> String
+	func toRawString() -> String 
+	
+	func formatted(_ format: AddressFormat) -> String
 	
 }
 

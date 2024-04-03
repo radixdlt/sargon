@@ -140,6 +140,35 @@ impl TryFrom<f32> for Decimal {
     }
 }
 
+impl TryFrom<f64> for Decimal {
+    type Error = crate::CommonError;
+
+    /// Creates a new `Decimal192` from a f64 float. Will
+    /// fail if the f64 cannot be losslessly represented
+    /// by the underlying Decimal from Scrypto.
+    ///
+    /// ```
+    /// extern crate sargon;
+    /// use sargon::prelude::*;
+    ///
+    /// assert!(Decimal::try_from(208050.17).is_ok());
+    ///
+    /// assert_eq!(
+    ///     Decimal::try_from(f64::MIN_POSITIVE),
+    ///     Err(CommonError::DecimalOverflow { bad_value: f64::MIN_POSITIVE.to_string() })
+    /// );
+    /// ```
+    fn try_from(value: f64) -> Result<Self, Self::Error> {
+        let str_value = value.to_string();
+
+        str_value
+            .parse::<Self>()
+            .map_err(|_| CommonError::DecimalOverflow {
+                bad_value: str_value,
+            })
+    }
+}
+
 impl Decimal {
     pub const SCALE: u8 = ScryptoDecimal192::SCALE as u8;
     pub const MAX_PLACES_ENGINEERING_NOTATION: u8 = 4;
@@ -653,8 +682,8 @@ impl Decimal192 {
         if let Some(grouping_separator) = locale.grouping_separator {
             string = string.replace(&grouping_separator, "");
         }
-        // `num` crate defines some pretty specific grouping separators: `"\u{a0}"` and `"\u{202f}"` for
-        // for some locales, but in unit tests we might use _normal_ space (`"U+0020"`), so we remove
+        // Some locals use pretty specific grouping separators: `"\u{a0}"` and `"\u{202f}"`,
+        // but in unit tests we might use _normal_ space (`"U+0020"`), so we remove
         // those (being a bit lenient...).
         string = string.replace(' ', "");
 
@@ -1180,6 +1209,33 @@ mod test_decimal {
     #[test]
     fn neg() {
         assert_eq!(SUT::two() - SUT::three(), -SUT::one());
+    }
+
+    #[test]
+    fn from_f64_more_than_18_decimals_is_ok() {
+        let test = |f: f64, s: &str| {
+            let sut = Decimal192::try_from(f).unwrap();
+            assert_eq!(sut.to_string(), s);
+        };
+        test(0.1, "0.1");
+        test(f32::MAX as f64, "340282346638528860000000000000000000000");
+        test(123456789.87654321, "123456789.87654321");
+        test(4.01234567890123456789, "4.012345678901235"); // precision lost
+        test(4.012345678901234567895555555, "4.012345678901235"); // Over 18 decimals is OK (precision lost)
+    }
+
+    #[test]
+    fn from_f32_more_than_18_decimals_is_ok() {
+        let test = |f: f32, s: &str| {
+            let sut = Decimal192::try_from(f).unwrap();
+            assert_eq!(sut.to_string(), s);
+        };
+
+        test(0.1, "0.1");
+        test(f32::MAX, "340282350000000000000000000000000000000");
+        test(123456789.87654321, "123456790");
+        test(4.01234567890123456789, "4.012346"); // precision lost
+        test(4.012345678901234567895555555, "4.012346"); // Over 18 decimals is OK (precision lost)
     }
 
     #[test]

@@ -87,6 +87,26 @@ pub fn new_decimal_from_f32(value: f32) -> Result<Decimal192> {
     value.try_into()
 }
 
+/// Creates a new `Decimal192` from a f64 float. Will
+/// fail if the f64 cannot be losslessly represented
+/// by the underlying Decimal from Scrypto.
+///
+/// ```
+/// extern crate sargon;
+/// use sargon::prelude::*;
+///
+/// assert!(new_decimal_from_f64(208050.17).is_ok());
+///
+/// assert_eq!(
+///     new_decimal_from_f64(f64::MIN_POSITIVE),
+///     Err(CommonError::DecimalOverflow { bad_value: f64::MIN_POSITIVE.to_string() })
+/// );
+/// ```
+#[uniffi::export]
+pub fn new_decimal_from_f64(value: f64) -> Result<Decimal192> {
+    value.try_into()
+}
+
 /// The minimum possible value of `Decimal192`, being:
 /// `-3138550867693340381917894711603833208051.177722232017256448`
 #[uniffi::export]
@@ -469,6 +489,24 @@ mod uniffi_tests {
             SUT::try_from(f32::MIN_POSITIVE),
             Err(CommonError::DecimalOverflow {
                 bad_value: f32::MIN_POSITIVE.to_string()
+            })
+        );
+    }
+
+    #[test]
+    fn from_f64() {
+        let f: f64 = 208050.17;
+        assert_eq!(f.to_string(), "208050.17");
+        let sut = new_decimal_from_f64(f);
+        assert_eq!(sut.unwrap().to_string(), "208050.17");
+        assert_eq!(
+            SUT::try_from(f32::MAX as f64).unwrap().to_string(),
+            "340282346638528860000000000000000000000"
+        );
+        assert_eq!(
+            SUT::try_from(f32::MIN_POSITIVE as f64),
+            Err(CommonError::DecimalOverflow {
+                bad_value: (f32::MIN_POSITIVE as f64).to_string()
             })
         );
     }

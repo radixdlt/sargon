@@ -353,6 +353,16 @@ final class Decimal192Tests: Test<Decimal192> {
 		doTest(0.955, decimalPlaces: 1, expected: 0.9)
 		doTest(0.955, decimalPlaces: 0, expected: 0)
 	}
+    
+    func test_from_double() throws {
+        func doTest(_ double: Double, _ expected: String) throws {
+            let sut = try SUT(double)
+            XCTAssertEqual(sut.toRawString(), expected)
+        }
+        try doTest(Double(Float32.greatestFiniteMagnitude), "340282346638528860000000000000000000000") // precision lost
+        try doTest(0.1, "0.1")
+        try doTest(4.012345678901234567895555555, "4.012345678901235")
+    }
 	
 	func test_magnitude() {
 		XCTAssertEqual(SUT.min.magnitude, SUT.max)
