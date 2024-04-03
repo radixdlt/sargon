@@ -9,8 +9,6 @@ class TestCase: XCTestCase {
 	}
 }
 
-
-
 class Test<SUT_: SargonModel>: TestCase {
 	typealias SUT = SUT_
 	

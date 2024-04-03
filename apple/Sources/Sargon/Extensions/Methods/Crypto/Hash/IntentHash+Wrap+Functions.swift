@@ -6,6 +6,6 @@ extension IntentHash {
     }
 	
 	public func formatted(_ format: AddressFormat = .default) -> String {
-		fatalError()
+		intentHashFormatted(address: self, format: format)
 	}
 }

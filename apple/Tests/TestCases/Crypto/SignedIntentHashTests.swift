@@ -1,4 +1,4 @@
-final class SignedIntentHashTests: Test<SignedIntentHash> {
+final class SignedIntentHashTests: TransactionHashProtocolTest<SignedIntentHash> {
 	func test_network_id() {
 		XCTAssertEqual(SUT.sample.networkID, .mainnet)
 	}
@@ -9,6 +9,10 @@ final class SignedIntentHashTests: Test<SignedIntentHash> {
 	
 	func test_string_roundtrip() {
 		let s = "signedintent_rdx1frcm6zzyfd08z0deu9x24sh64eccxeux4j2dv3dsqeuh9qsz4y6sxsk6nl"
-		XCTAssertEqual(try SUT(string: s).description, s)
+        XCTAssertEqual(try SUT.init(s).description, s)
 	}
+    
+    func test_formatted_default() {
+        XCTAssertNoDifference(SUT.sample.formatted(), "sign...xsk6nl")
+    }
 }
