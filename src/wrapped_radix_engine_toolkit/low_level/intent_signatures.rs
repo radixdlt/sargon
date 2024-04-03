@@ -110,7 +110,7 @@ mod tests {
         let roundtrip = |si: SignedIntent| {
             let first =
                 ScryptoIntentSignatures::from(si.clone().intent_signatures);
-            let second = si.clone().intent.intent_hash().hash;
+            let second = si.clone().intent().intent_hash().hash;
             assert_eq!(
                 SUT::try_from((first, second)).unwrap(),
                 si.intent_signatures

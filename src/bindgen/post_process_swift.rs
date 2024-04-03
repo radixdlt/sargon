@@ -16,8 +16,8 @@ pub(crate) fn swift_transform(
     );
 
     // hiding constructors
-    let init_from = "public init(\n        secretMagic:";
-    let init_to = "fileprivate init(\n        secretMagic:";
+    let init_from = "public init(secretMagic:";
+    let init_to = "fileprivate init(secretMagic:";
     contents = contents.replace(init_from, init_to);
 
     println!("🔮 Post processing Swift: Hid some dangerous initializers. ✨ ");

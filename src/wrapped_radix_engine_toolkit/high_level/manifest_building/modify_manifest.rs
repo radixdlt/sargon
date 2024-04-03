@@ -149,10 +149,10 @@ impl TransactionManifest {
             }
         };
 
-        let instructions = Instructions::from_scrypto(
-            ScryptoInstructions(instructions),
+        let instructions = Instructions::try_from((
+            instructions.as_ref(),
             self.network_id(),
-        );
+        )).expect("Should not have changed depth of SBOR value, thus inserting an instruction should never fail.");
 
         TransactionManifest::with_instructions_and_blobs(
             instructions,

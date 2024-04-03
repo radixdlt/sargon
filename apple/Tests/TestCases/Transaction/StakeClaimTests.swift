@@ -1,3 +1,1 @@
-final class StakeClaimTests: Test<StakeClaim> {
-	
-}
+final class StakeClaimTests: Test<StakeClaim> {}

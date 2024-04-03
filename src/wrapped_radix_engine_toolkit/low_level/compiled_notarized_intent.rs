@@ -13,7 +13,7 @@ use crate::prelude::*;
     uniffi::Record,
 )]
 pub struct CompiledNotarizedIntent {
-    pub(crate) secret_magic: BagOfBytes,
+    secret_magic: BagOfBytes,
 }
 
 impl CompiledNotarizedIntent {
@@ -23,28 +23,34 @@ impl CompiledNotarizedIntent {
         }
     }
 
-    pub fn decompile(&self) -> Result<NotarizedTransaction> {
-        RET_decompile_notarize_tx(self.secret_magic.bytes())
-        .map_err(|e| {
-            error!("Failed to decompile bytes into Notarized Transaction, error: {:?}", e);
-            CommonError::FailedToDecompileBytesIntoNotarizedTransaction
-        })
-        .and_then(TryInto::<NotarizedTransaction>::try_into)
+    pub fn bytes(&self) -> BagOfBytes {
+        self.secret_magic.clone()
+    }
+
+    pub fn decompile(&self) -> NotarizedTransaction {
+        let err = "Should never fail to decompile a 'CompiledNotarizedIntent' since we should not have been able to construct an invalid 'CompiledNotarizedIntent.";
+
+        let notarized =
+            RET_decompile_notarize_tx(self.secret_magic.bytes()).expect(err);
+
+        notarized.try_into().expect(err)
     }
 }
 
-impl TryFrom<ScryptoNotarizedTransaction> for NotarizedTransaction {
-    type Error = crate::CommonError;
-
-    fn try_from(
-        value: ScryptoNotarizedTransaction,
-    ) -> Result<Self, Self::Error> {
-        let signed_intent: SignedIntent = value.signed_intent.try_into()?;
-        Ok(Self {
-            signed_intent,
-            notary_signature: value.notary_signature.into(),
+pub(crate) fn compile_notarized_intent(
+    scrypto_notarized_intent: ScryptoNotarizedTransaction,
+) -> Result<CompiledNotarizedIntent> {
+    RET_compile_notarized_tx(&scrypto_notarized_intent)
+        .map_err(|e| match e {
+            sbor::EncodeError::MaxDepthExceeded(max) => {
+                CommonError::InvalidTransactionMaxSBORDepthExceeded(max)
+            }
+            _ => CommonError::InvalidNotarizedIntentFailedToEncode {
+                underlying: format!("{:?}", e),
+            },
         })
-    }
+        .map(BagOfBytes::from)
+        .map(CompiledNotarizedIntent::new)
 }
 
 impl HasSampleValues for CompiledNotarizedIntent {
@@ -67,6 +73,7 @@ impl HasSampleValues for CompiledNotarizedIntent {
 
 #[cfg(test)]
 mod tests {
+
     use crate::prelude::*;
 
     #[allow(clippy::upper_case_acronyms)]
@@ -95,24 +102,71 @@ mod tests {
 
     #[test]
     fn decompile() {
-        assert_eq!(
-            SUT::sample().decompile(),
-            Ok(NotarizedTransaction::sample())
-        );
+        assert_eq!(SUT::sample().decompile(), NotarizedTransaction::sample());
         assert_eq!(
             SUT::sample_other().decompile(),
-            Ok(NotarizedTransaction::sample_other())
+            NotarizedTransaction::sample_other()
         );
     }
 
     #[test]
+    #[should_panic(
+        expected = "Should never fail to decompile a 'CompiledNotarizedIntent' since we should not have been able to construct an invalid 'CompiledNotarizedIntent."
+    )]
     fn decompile_fail() {
+        _ = SUT {
+            secret_magic: BagOfBytes::sample_aced(),
+        }
+        .decompile();
+    }
+
+    #[test]
+    fn other_reasons_for_invalid() {
+        let res = compile_notarized_intent(ScryptoNotarizedTransaction {
+            signed_intent: invalid_signed_intent(),
+            notary_signature: NotarySignature::sample().into(),
+        });
         assert_eq!(
-            SUT {
-                secret_magic: BagOfBytes::sample_aced()
-            }
-            .decompile(),
-            Err(CommonError::FailedToDecompileBytesIntoNotarizedTransaction)
+            res,
+            Err(CommonError::InvalidNotarizedIntentFailedToEncode { underlying: "MismatchingArrayElementValueKind { element_value_kind: 7, actual_value_kind: 8 }".to_owned() }) 
         );
+    }
+}
+
+use sbor::ValueKind as ScryptoValueKind;
+#[cfg(test)]
+pub(crate) fn invalid_signed_intent() -> ScryptoSignedIntent {
+    let invalid_value = ScryptoManifestValue::Tuple {
+        fields: vec![ScryptoManifestValue::Array {
+            element_value_kind: ScryptoValueKind::U8,
+            elements: vec![
+                ScryptoManifestValue::U8 { value: 1 },
+                ScryptoManifestValue::U16 { value: 2 },
+            ],
+        }],
+    };
+    let dummy_address = ComponentAddress::with_node_id_bytes(
+        &[0xffu8; 29],
+        NetworkID::Stokenet,
+    );
+    let invalid_instruction = ScryptoInstruction::CallMethod {
+        address: TryInto::<ScryptoDynamicComponentAddress>::try_into(
+            &dummy_address,
+        )
+        .unwrap()
+        .into(),
+        method_name: "dummy".to_owned(),
+        args: invalid_value,
+    };
+    ScryptoSignedIntent {
+        intent: ScryptoIntent {
+            header: TransactionHeader::sample().into(),
+            instructions: ScryptoInstructions(vec![invalid_instruction]),
+            blobs: ScryptoBlobs { blobs: Vec::new() },
+            message: ScryptoMessage::None,
+        },
+        intent_signatures: ScryptoIntentSignatures {
+            signatures: Vec::new(),
+        },
     }
 }

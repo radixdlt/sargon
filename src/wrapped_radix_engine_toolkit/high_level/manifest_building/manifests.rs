@@ -11,16 +11,15 @@ impl TransactionManifest {
             builder = builder.lock_fee_from_faucet()
         }
 
-        let scrypto_manifest = builder
+        builder = builder
             .get_free_xrd_from_faucet()
             .try_deposit_entire_worktop_or_abort(
                 address_of_receiving_account.scrypto(),
                 None,
-            )
-            .build();
+            );
 
-        TransactionManifest::from_scrypto(
-            scrypto_manifest,
+        TransactionManifest::sargon_built(
+            builder,
             address_of_receiving_account.network_id(),
         )
     }
@@ -114,9 +113,7 @@ impl TransactionManifest {
             builder = builder.deposit(account_address, xrd_bucket)
         }
 
-        let scrypto_manifest = builder.build();
-
-        TransactionManifest::from_scrypto(scrypto_manifest, network_id)
+        TransactionManifest::sargon_built(builder, network_id)
     }
 }
 
@@ -129,14 +126,13 @@ impl TransactionManifest {
     where
         A: IntoScryptoAddress,
     {
-        let scrypto_manifest = ScryptoManifestBuilder::new()
-            .set_metadata(address.scrypto(), key, value)
-            .build();
+        let builder = ScryptoManifestBuilder::new().set_metadata(
+            address.scrypto(),
+            key,
+            value,
+        );
 
-        TransactionManifest::from_scrypto(
-            scrypto_manifest,
-            address.network_id(),
-        )
+        TransactionManifest::sargon_built(builder, address.network_id())
     }
 }
 

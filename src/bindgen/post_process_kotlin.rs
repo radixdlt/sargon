@@ -9,7 +9,7 @@ pub(crate) fn kotlin_transform(
     contents: String,
 ) -> Result<String, BindgenError> {
     Regex::new(
-        r"(.*class \w+) (\(\n{0,1}.*\n{0,1}.*secretMagic.*\n{0,1}\))",
+        &format!("{}{}{}", r"(.*class \w+) (\(\n{0,1}.*\n{0,1}.*", needle, r".*\n{0,1}\))"),
     ).map(|regex| {
         println!("🔮 Post processing Kotlin: Hiding some dangerous initializers. ✨ ");
         regex.replace_all(&contents, "$1 internal constructor $2")
