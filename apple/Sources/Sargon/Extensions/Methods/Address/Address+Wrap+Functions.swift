@@ -4,10 +4,6 @@ extension Address {
 	public func formatted(_ format: AddressFormat) -> String {
 		addressFormatted(address: self, format: format)
 	}
-	
-	public func mapTo(networkID: NetworkID) -> Address {
-		addressMapToNetwork(address: self, networkId: networkID)
-	}
 
 	public init(validatingAddress bech32String: String) throws {
 		self = try newAddressFromBech32(string: bech32String)
@@ -21,3 +17,11 @@ extension Address {
 		addressToString(address: self)
 	}
 }
+
+#if DEBUG
+extension Address {
+	public func mapTo(networkID: NetworkID) -> Address {
+		addressMapToNetwork(address: self, networkId: networkID)
+	}
+}
+#endif
