@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 extension TransactionManifest: SargonModel {}
 
 // MARK: Build Manifest

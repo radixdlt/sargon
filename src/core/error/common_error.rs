@@ -395,6 +395,8 @@ pub enum CommonError {
 
     #[error("Failed to parse Signature from {bad_value}")]
     FailedToParseSignatureFromBytes { bad_value: String } = 10108,
+
+    
 }
 
 /*

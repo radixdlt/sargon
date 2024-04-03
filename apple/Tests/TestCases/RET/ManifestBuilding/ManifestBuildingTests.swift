@@ -203,6 +203,7 @@ final class ManifestBuildingTests: Test<TransactionManifest> {
 			}
 		}
 	}
+
 }
 
 extension XCTestCase {
@@ -227,7 +228,7 @@ extension XCTestCase {
     private func openFile(_ fileName: String, extension fileExtension: String) throws -> Data {
         let testsDirectory: String = URL(fileURLWithPath: "\(#file)").pathComponents.dropLast(6).joined(separator: "/")
         
-        let fileURL = try XCTUnwrap(URL(fileURLWithPath: "\(testsDirectory)/src/wrapped_radix_engine_toolkit/low_level/transaction_manifest/execution_summary/\(fileName).\(fileExtension)"))
+        let fileURL = try XCTUnwrap(URL(fileURLWithPath: "\(testsDirectory)/crates/sargon/src/wrapped_radix_engine_toolkit/low_level/transaction_manifest/execution_summary/\(fileName).\(fileExtension)"))
         
         return try Data(contentsOf: fileURL)
       

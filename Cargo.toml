@@ -74,6 +74,7 @@ paste = "1.0.14"
 clap = { version = "4", default-features = false, features = ["std", "derive"] }
 camino = "1.0.8"
 regex = "1.9.3"
+async-trait = "0.1.79"
 
 [build-dependencies]
 uniffi = { version = "0.27.0", features = ["build"] }
