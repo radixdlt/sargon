@@ -1,7 +1,11 @@
 import SargonUniFFI
 
 extension IntentHash {
-    public init(string: String) throws {
+    public init(_ string: String) throws {
         self = try newIntentHashFromString(string: string)
     }
+	
+	public func formatted(_ format: AddressFormat = .default) -> String {
+		fatalError()
+	}
 }

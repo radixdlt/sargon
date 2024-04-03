@@ -12,6 +12,8 @@ public protocol IdentifiableByStringProtocol: BaseIdentifiableByStringProtocol &
 	/// A non user facing, raw, string representation of the value.
 	func toRawString() -> String
 	
+	func formatted(_ format: AddressFormat) -> String
+	
 }
 
 extension IdentifiableByStringProtocol {
