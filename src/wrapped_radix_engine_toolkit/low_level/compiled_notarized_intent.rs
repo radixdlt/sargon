@@ -43,7 +43,9 @@ pub(crate) fn compile_notarized_intent(
     RET_compile_notarized_tx(&scrypto_notarized_intent)
         .map_err(|e| match e {
             sbor::EncodeError::MaxDepthExceeded(max) => {
-                CommonError::InvalidTransactionMaxSBORDepthExceeded(max)
+                CommonError::InvalidTransactionMaxSBORDepthExceeded {
+                    max: max as u16,
+                }
             }
             _ => CommonError::InvalidNotarizedIntentFailedToEncode {
                 underlying: format!("{:?}", e),

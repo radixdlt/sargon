@@ -60,7 +60,9 @@ fn compile_signed_intent(
     RET_signed_intent_compile(&scrypto_signed_intent)
         .map_err(|e| match e {
             sbor::EncodeError::MaxDepthExceeded(max) => {
-                CommonError::InvalidTransactionMaxSBORDepthExceeded(max)
+                CommonError::InvalidTransactionMaxSBORDepthExceeded {
+                    max: max as u16,
+                }
             }
             _ => CommonError::InvalidSignedIntentFailedToEncode {
                 underlying: format!("{:?}", e),
@@ -284,7 +286,9 @@ mod tests {
                 SUT::MAX_SBOR_DEPTH + 1,
                 NetworkID::Stokenet
             ),
-            Err(CommonError::InvalidTransactionMaxSBORDepthExceeded(24))
+            Err(CommonError::InvalidTransactionMaxSBORDepthExceeded {
+                max: 24 as u16
+            })
         );
     }
 

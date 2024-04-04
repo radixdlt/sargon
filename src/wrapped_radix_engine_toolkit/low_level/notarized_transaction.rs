@@ -177,7 +177,9 @@ mod tests {
                 SUT::MAX_SBOR_DEPTH + 1,
                 NetworkID::Stokenet
             ),
-            Err(CommonError::InvalidTransactionMaxSBORDepthExceeded(24))
+            Err(CommonError::InvalidTransactionMaxSBORDepthExceeded {
+                max: 24 as u16
+            })
         );
     }
 }
