@@ -162,8 +162,10 @@ impl TransactionManifest {
     ///
     /// # Panics
     /// Panics if `address_of_owner` is on `Mainnet`, use a testnet instead.
+    /// Panics if `count` is zero or is greater than the number of token metadata defined in `sample_resource_definition_metadata` (25)
     pub fn create_multiple_fungible_tokens(
         address_of_owner: &AccountAddress,
+        count: impl Into<Option<u8>>,
     ) -> TransactionManifest {
         if address_of_owner.network_id() == NetworkID::Mainnet {
             panic!("To be 100% sure about license of the images, we do not allow these sample fungible tokens to be created on Mainnet.");
@@ -183,7 +185,17 @@ impl TransactionManifest {
         let multiple_fungibles: MultipleFungibleTokens =
             serde_json::from_value(json).unwrap();
         info!("Generating multiple fungibles using bundled file, '\nDescription:\n'{}'", &multiple_fungibles.description);
-        let fungibles = multiple_fungibles.tokens;
+        let all_fungibles = multiple_fungibles.tokens;
+        let max_count = all_fungibles.len();
+        let count = count.into().map(|c| c as usize).unwrap_or(max_count);
+        if count > max_count || count == 0 {
+            panic!(
+                "Invalid 'count', must be: 0 < 'count' < {}",
+                all_fungibles.len()
+            )
+        }
+        let fungibles = all_fungibles.into_iter().take(count).collect_vec();
+        assert_eq!(fungibles.len(), count);
 
         let mut builder = ScryptoManifestBuilder::new();
 
@@ -382,6 +394,7 @@ CALL_METHOD
     fn create_multiple_fungible_tokens() {
         let manifest = TransactionManifest::create_multiple_fungible_tokens(
             &AccountAddress::sample_stokenet(),
+            None,
         );
         assert_eq!(manifest.instructions().len(), 26);
     }
@@ -393,6 +406,25 @@ CALL_METHOD
     fn create_multiple_fungible_tokens_panics_for_mainnet() {
         TransactionManifest::create_multiple_fungible_tokens(
             &AccountAddress::sample_mainnet(),
+            None,
+        );
+    }
+
+    #[test]
+    #[should_panic(expected = "Invalid 'count', must be: 0 < 'count' < 25")]
+    fn create_multiple_fungible_tokens_panics_when_count_is_too_large() {
+        TransactionManifest::create_multiple_fungible_tokens(
+            &AccountAddress::sample_stokenet(),
+            100,
+        );
+    }
+
+    #[test]
+    #[should_panic(expected = "Invalid 'count', must be: 0 < 'count' < 25")]
+    fn create_multiple_fungible_tokens_panics_when_count_is_zero() {
+        TransactionManifest::create_multiple_fungible_tokens(
+            &AccountAddress::sample_stokenet(),
+            0,
         );
     }
 

@@ -76,17 +76,30 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
 
     @Test
     fun testCreateNonFungibleToken() {
-        val manifest = TransactionManifest.createNonFungibleToken(
-            AccountAddress.init(
+        val nftsPerCollection = 20
+        var manifest = TransactionManifest.createNonFungibleToken(
+            addressOfOwner = AccountAddress.init(
                 "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
-            )
+            ),
+            nftsPerCollection = nftsPerCollection.toUByte()
         )
 
         with(manifest.instructionsString) {
             assertTrue(contains("CREATE_NON_FUNGIBLE_RESOURCE_WITH_INITIAL_SUPPLY"))
             assertTrue(contains("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"))
             assertEquals(1, occurrences("An amazingly innovative and rare NFT collection"))
-            assertEquals(20, occurrences("nf-number"))
+            assertEquals(nftsPerCollection, occurrences("nf-number"))
+        }
+
+        // Can also skip specifying `nftsPerCollection`
+        manifest = TransactionManifest.createNonFungibleToken(
+            AccountAddress.init(
+                "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+            )
+        )
+
+        with(manifest.instructionsString) {
+            assertTrue(contains("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"))
         }
     }
 
@@ -125,20 +138,41 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
         with(manifest.instructionsString) {
             assertTrue(contains("CREATE_FUNGIBLE_RESOURCE_WITH_INITIAL_SUPPLY"))
             assertTrue(contains("account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql"))
-            assertEquals(25, occurrences("symbol"))
+            assertEquals(10, occurrences("symbol"))
+        }
+    }
+
+    @Test
+    fun testCreateMultipleFungibleTokens_specify_count() {
+        val count: UByte = 3u
+        val manifest = TransactionManifest.createMultipleFungibleTokens(
+            addressOfOwner = AccountAddress.init(
+                "account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql"
+            ),
+            count = count
+        )
+
+        with(manifest.instructionsString) {
+            assertTrue(contains("CREATE_FUNGIBLE_RESOURCE_WITH_INITIAL_SUPPLY"))
+            assertTrue(contains("account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql"))
+            assertEquals(count.toInt(), occurrences("symbol"))
         }
     }
 
     @Test
     fun testCreateMultipleNonFungibleTokens() {
-        val manifest = TransactionManifest.createMultipleNonFungibleTokens(
-            addressOfOwner = AccountAddress.init(
-                "account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql"
-            )
-        )
-
         val collections = 15
         val nftsPerCollection = 10
+
+        var manifest = TransactionManifest.createMultipleNonFungibleTokens(
+            addressOfOwner = AccountAddress.init(
+                "account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql"
+            ),
+            collectionCount = collections.toUByte(),
+            nftsPerCollection = nftsPerCollection.toUByte()
+        )
+
+       
         with(manifest.instructionsString) {
             assertTrue(contains("CREATE_NON_FUNGIBLE_RESOURCE_WITH_INITIAL_SUPPLY"))
             assertTrue(contains("account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql"))
@@ -147,6 +181,17 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                 occurrences("An amazingly innovative and rare NFT collection")
             )
             assertEquals(collections * nftsPerCollection, occurrences("nf-number"))
+        }
+
+        // Can also skip specifying `collectionCount` / `nftsPerCollection`
+        manifest = TransactionManifest.createMultipleNonFungibleTokens(
+            addressOfOwner = AccountAddress.init(
+                "account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql"
+            )
+        )
+       
+        with(manifest.instructionsString) {
+            assertTrue(contains("account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql"))
         }
     }
 
