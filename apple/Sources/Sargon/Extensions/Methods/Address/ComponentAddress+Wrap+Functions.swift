@@ -17,8 +17,15 @@ extension ComponentAddress {
 	public var networkID: NetworkId {
 		componentAddressNetworkId(address: self)
 	}
-	public func embed() -> Address {
-		.component(self)
+
+	/// If the `EntityType == .globalGenericComponent`
+	public var isGlobal: Bool {
+		componentAddressIsGlobal(address: self)
+	}
+	
+	/// If the `EntityType == .InternalGenericComponent`
+	public var isInternal: Bool {
+		componentAddressIsInternal(address: self)
 	}
 }
 

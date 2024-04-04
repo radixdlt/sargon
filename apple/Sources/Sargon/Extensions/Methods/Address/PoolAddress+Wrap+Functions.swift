@@ -22,10 +22,7 @@ extension PoolAddress {
 	public var poolKind: PoolKind {
 		poolAddressKind(address: self)
 	}
-	
-	public func embed() -> Address {
-		.pool(self)
-	}
+
 }
 
 #if DEBUG

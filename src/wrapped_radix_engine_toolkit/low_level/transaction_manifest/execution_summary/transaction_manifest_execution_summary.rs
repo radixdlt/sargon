@@ -22,7 +22,9 @@ impl TransactionManifest {
                     "Failed to get execution summary from RET, error: {:?}",
                     e
                 );
-                CommonError::FailedToGetRetExecutionSummaryFromManifest
+                CommonError::ExecutionSummaryFail {
+                    underlying: format!("{:?}", e),
+                }
             })?;
 
         Ok(ExecutionSummary::from((
@@ -65,7 +67,9 @@ mod tests {
         assert_eq!(
             TransactionManifest::sample()
                 .execution_summary_with_receipt(wrong_receipt),
-            Err(CommonError::FailedToGetRetExecutionSummaryFromManifest)
+            Err(CommonError::ExecutionSummaryFail {
+                underlying: "InvalidReceipt".to_owned()
+            })
         );
     }
 

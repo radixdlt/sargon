@@ -6,7 +6,7 @@ extension IdentityPath {
         case let .identity(value):
             self = value
         case .account, .getId:
-            throw SargonError.WrongEntityKind(message: "Expected Identity")
+			throw SargonError.WrongEntityKind(expected: .identity, found: .account)
         }
     }
     

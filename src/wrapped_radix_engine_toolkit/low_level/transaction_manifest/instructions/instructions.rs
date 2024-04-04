@@ -165,7 +165,9 @@ fn extract_error_from_error(
             },
         },
         ScryptoCompileError::ParserError(MaxDepthExceeded(max)) => {
-            CommonError::InvalidTransactionMaxSBORDepthExceeded(max)
+            CommonError::InvalidTransactionMaxSBORDepthExceeded {
+                max: max as u16,
+            }
         }
         _ => CommonError::InvalidInstructionsString {
             underlying: format!("{:?}", err),
@@ -403,7 +405,9 @@ mod tests {
                 SUT::MAX_SBOR_DEPTH + 1,
                 NetworkID::Stokenet
             ),
-            Err(CommonError::InvalidTransactionMaxSBORDepthExceeded(20))
+            Err(CommonError::InvalidTransactionMaxSBORDepthExceeded {
+                max: 20 as u16
+            })
         );
     }
 }

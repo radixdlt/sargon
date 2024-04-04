@@ -18,9 +18,6 @@ extension ValidatorAddress {
 		validatorAddressNetworkId(address: self)
 	}
 	
-	public func embed() -> Address {
-		.validator(self)
-	}
 }
 
 #if DEBUG

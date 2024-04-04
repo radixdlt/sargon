@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 #if DEBUG
 public protocol BaseBaseAddressProtocol: SargonModel, ExpressibleByStringLiteral {}
 #else
@@ -9,6 +11,13 @@ public protocol BaseAddressProtocol: BaseBaseAddressProtocol, Codable, CustomStr
 	var networkID: NetworkID { get }
 	var address: String { get }
 }
+
+extension AddressProtocol {
+	public var isOnMainnet: Bool {
+		self.networkID == .mainnet
+	}
+}
+
 
 extension BaseAddressProtocol {
 	public var description: String {

@@ -6,7 +6,6 @@ pub type Result<T, E = CommonError> = std::result::Result<T, E>;
 
 #[repr(u32)]
 #[derive(Clone, Debug, ThisError, PartialEq, uniffi::Error)]
-#[uniffi(flat_error)]
 pub enum CommonError {
     #[error("Unknown Error")]
     Unknown = 10000,
@@ -334,9 +333,9 @@ pub enum CommonError {
     InvalidInstructionsString { underlying: String } = 10090,
 
     #[error(
-        "Failed to get execution summary from TransactionManifest using RET"
+        "Failed to get execution summary from TransactionManifest using RET {underlying}"
     )]
-    FailedToGetRetExecutionSummaryFromManifest = 10091,
+    ExecutionSummaryFail { underlying: String } = 10091,
 
     #[error("Failed to get TransactionReceipt from encoded bytes.")]
     FailedToDecodeEncodedReceipt = 10092,
@@ -408,8 +407,8 @@ pub enum CommonError {
     )]
     InvalidInstructionsFailedToDecompile { underlying: String } = 10110,
 
-    #[error("Invalid Transaction, max SBOR depth exceeded: '{0}'")]
-    InvalidTransactionMaxSBORDepthExceeded(usize) = 10111,
+    #[error("Invalid Transaction, max SBOR depth exceeded: '{max}'")]
+    InvalidTransactionMaxSBORDepthExceeded { max: u16 } = 10111,
 
     #[error("Invalid Signed Intent, failed to encode, reason: '{underlying}'")]
     InvalidSignedIntentFailedToEncode { underlying: String } = 10112,
@@ -420,12 +419,20 @@ pub enum CommonError {
     InvalidNotarizedIntentFailedToEncode { underlying: String } = 10113,
 }
 
-/*
-// FIXME: We want this! We want to be able to get the error description
-of an error, but we get some strange uniffi error!
 #[uniffi::export]
 pub fn error_message_from_error(error: &CommonError) -> String {
-    format!("{}", error)
+    error.to_string()
+}
+
+impl CommonError {
+    pub fn error_code(&self) -> u32 {
+        unsafe { *<*const _>::from(self).cast::<u32>() }
+    }
+}
+
+#[uniffi::export]
+pub fn error_code_from_error(error: &CommonError) -> u32 {
+    error.error_code()
 }
 
 #[cfg(test)]
@@ -435,7 +442,15 @@ mod tests {
     #[test]
     fn error_message() {
         let sut = CommonError::UnknownNetworkForID { bad_value: 0 };
-        // assert_eq!(error_message_from_error(&sut), "Unknown network ID '0'");
+        assert_eq!(
+            error_message_from_error(&sut),
+            "No network found with id: '0'"
+        );
+    }
+
+    #[test]
+    fn error_code() {
+        let sut = CommonError::UnknownNetworkForID { bad_value: 0 };
+        assert_eq!(error_code_from_error(&sut), 10049);
     }
 }
-*/

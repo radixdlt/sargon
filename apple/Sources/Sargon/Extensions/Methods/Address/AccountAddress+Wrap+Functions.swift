@@ -54,9 +54,7 @@ extension AccountAddress {
         formatted(AddressFormat.default)
 	}
 	
-	public func embed() -> Address {
-		.account(self)
-	}
+	
 }
 
 #if DEBUG
