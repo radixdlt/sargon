@@ -56,8 +56,12 @@ fun TransactionManifest.Companion.createFungibleToken(
 ) = manifestCreateFungibleToken(addressOfOwner = addressOfOwner)
 
 fun TransactionManifest.Companion.createNonFungibleToken(
-    addressOfOwner: AccountAddress
-) = manifestCreateNonFungibleToken(addressOfOwner = addressOfOwner)
+    addressOfOwner: AccountAddress,
+    nftsPerCollection: UByte? = null
+) = manifestCreateNonFungibleToken(
+    addressOfOwner = addressOfOwner,
+    nftsPerCollection = nftsPerCollection
+)
 
 fun TransactionManifest.Companion.createFungibleTokenWithMetadata(
     addressOfOwner: AccountAddress,
@@ -70,12 +74,22 @@ fun TransactionManifest.Companion.createFungibleTokenWithMetadata(
 )
 
 fun TransactionManifest.Companion.createMultipleFungibleTokens(
-    addressOfOwner: AccountAddress
-) = manifestCreateMultipleFungibleTokens(addressOfOwner = addressOfOwner)
+    addressOfOwner: AccountAddress,
+    count: UByte = 10u
+) = manifestCreateMultipleFungibleTokens(
+    addressOfOwner = addressOfOwner, 
+    count = count
+)
 
 fun TransactionManifest.Companion.createMultipleNonFungibleTokens(
-    addressOfOwner: AccountAddress
-) = manifestCreateMultipleNonFungibleTokens(addressOfOwner = addressOfOwner)
+    addressOfOwner: AccountAddress,
+    collectionCount: UByte? = null,
+    nftsPerCollection: UByte? = null
+) = manifestCreateMultipleNonFungibleTokens(
+    addressOfOwner = addressOfOwner, 
+    collectionCount = collectionCount, 
+    nftsPerCollection = nftsPerCollection
+)
 
 fun TransactionManifest.Companion.faucet(
     includeLockFeeInstruction: Boolean,

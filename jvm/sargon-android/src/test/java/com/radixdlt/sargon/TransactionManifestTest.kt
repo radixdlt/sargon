@@ -125,20 +125,41 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
         with(manifest.instructionsString) {
             assertTrue(contains("CREATE_FUNGIBLE_RESOURCE_WITH_INITIAL_SUPPLY"))
             assertTrue(contains("account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql"))
-            assertEquals(25, occurrences("symbol"))
+            assertEquals(10, occurrences("symbol"))
+        }
+    }
+
+    @Test
+    fun testCreateMultipleFungibleTokens_specify_count() {
+        val count: UByte = 3u
+        val manifest = TransactionManifest.createMultipleFungibleTokens(
+            addressOfOwner = AccountAddress.init(
+                "account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql"
+            ),
+            count = count
+        )
+
+        with(manifest.instructionsString) {
+            assertTrue(contains("CREATE_FUNGIBLE_RESOURCE_WITH_INITIAL_SUPPLY"))
+            assertTrue(contains("account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql"))
+            assertEquals(count.toInt(), occurrences("symbol"))
         }
     }
 
     @Test
     fun testCreateMultipleNonFungibleTokens() {
+        val collections = 15
+        val nftsPerCollection = 10
+
         val manifest = TransactionManifest.createMultipleNonFungibleTokens(
             addressOfOwner = AccountAddress.init(
                 "account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql"
-            )
+            ),
+            collectionCount = collections.toUByte(),
+            nftsPerCollection = nftsPerCollection.toUByte()
         )
 
-        val collections = 15
-        val nftsPerCollection = 10
+       
         with(manifest.instructionsString) {
             assertTrue(contains("CREATE_NON_FUNGIBLE_RESOURCE_WITH_INITIAL_SUPPLY"))
             assertTrue(contains("account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql"))
