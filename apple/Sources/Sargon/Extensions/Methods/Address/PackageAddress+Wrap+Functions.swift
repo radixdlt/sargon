@@ -17,10 +17,6 @@ extension PackageAddress {
 	public var networkID: NetworkId {
 		packageAddressNetworkId(address: self)
 	}
-	
-	public func embed() -> Address {
-		.package(self)
-	}
 }
 
 #if DEBUG

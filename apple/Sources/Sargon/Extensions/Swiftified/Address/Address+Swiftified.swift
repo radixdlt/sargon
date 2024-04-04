@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 extension Address: AddressProtocol {
 	
 	public func embed() -> Address {

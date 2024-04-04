@@ -25,9 +25,7 @@ extension IdentityAddress {
 		identityAddressNetworkId(address: self)
 	}
 	
-	public func embed() -> Address {
-		.identity(self)
-	}
+
 }
 
 #if DEBUG

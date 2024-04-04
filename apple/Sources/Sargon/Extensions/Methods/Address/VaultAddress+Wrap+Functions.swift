@@ -27,10 +27,7 @@ extension VaultAddress {
 	public var isNonFungible: Bool {
 		vaultAddressIsNonFungible(address: self)
 	}
-	
-	public func embed() -> Address {
-		.vault(self)
-	}
+
 }
 
 #if DEBUG

@@ -32,10 +32,7 @@ extension ResourceAddress {
 	public static func xrd(on networkID: NetworkID) -> Self {
 		xrdAddressOfNetwork(networkId: networkID)
 	}
-	
-	public func embed() -> Address {
-		.resource(self)
-	}
+
 }
 
 #if DEBUG

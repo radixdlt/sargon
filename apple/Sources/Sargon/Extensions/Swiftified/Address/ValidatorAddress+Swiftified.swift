@@ -1,1 +1,7 @@
-extension ValidatorAddress: AddressProtocol {}
+import SargonUniFFI
+
+extension ValidatorAddress: AddressProtocol {
+	public func embed() -> Address {
+		.validator(self)
+	}
+}

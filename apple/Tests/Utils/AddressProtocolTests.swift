@@ -87,7 +87,17 @@ class AddressTest<SUT_: AddressProtocol>: BaseAddressTest<SUT_> {
 		XCTAssertEqual(SUT.sampleStokenet.xrdOnSameNetwork, ResourceAddress.sampleStokenetXRD)
 		XCTAssertEqual(SUT.sampleStokenetOther.xrdOnSameNetwork, ResourceAddress.sampleStokenetXRD)
 	}
-
+	
+	func test_is_on_mainnet() {
+		XCTAssertTrue(SUT.sampleMainnet.isOnMainnet)
+		XCTAssertTrue(SUT.sampleMainnetOther.isOnMainnet)
+		
+		XCTAssertFalse(SUT.sampleStokenet.isOnMainnet)
+		XCTAssertFalse(SUT.sampleStokenetOther.isOnMainnet)
+		
+		let nonMainnets = Set(NetworkID.allCases).subtracting(Set([NetworkID.mainnet]))
+		nonMainnets.map(SUT.random(networkID:)).map(\.isOnMainnet).forEach { XCTAssertFalse($0) }
+	}
 
 	func test_embed() {
 		func doTest(_ address: SUT) {
