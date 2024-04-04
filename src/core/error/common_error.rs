@@ -334,9 +334,9 @@ pub enum CommonError {
     InvalidInstructionsString { underlying: String } = 10090,
 
     #[error(
-        "Failed to get execution summary from TransactionManifest using RET"
+        "Failed to get execution summary from TransactionManifest using RET {underlying}"
     )]
-    FailedToGetRetExecutionSummaryFromManifest = 10091,
+    ExecutionSummaryFail { underlying: String } = 10091,
 
     #[error("Failed to get TransactionReceipt from encoded bytes.")]
     FailedToDecodeEncodedReceipt = 10092,
