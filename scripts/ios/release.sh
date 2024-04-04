@@ -23,8 +23,8 @@ function last_tag() {
 LAST_TAG=$(last_tag)
 echo "🚢 🏷️  Last tag: $LAST_TAG"
 
-# one liner from: https://stackoverflow.com/a/8653732
-NEXT_TAG=$(echo $(last_tag) | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{if(length($NF+1)>length($NF))$(NF-1)++; $NF=sprintf("%0*d", length($NF), ($NF+1)%(10^length($NF))); print}')
+# one liner from: https://stackoverflow.com/questions/8653126/8653732#comment65908962_8653732
+NEXT_TAG=$(echo $(last_tag) | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{$NF=sprintf("%0*d", length($NF), ($NF+1)); print}')
 
 # output is: "<CHKSUM>;<$XCFRAME_ZIP_PATH>"
 OUTPUT_OF_BUILD=`sh $DIR/build-sargon.sh --release-tag $NEXT_TAG | tail -n 1` || exit $?

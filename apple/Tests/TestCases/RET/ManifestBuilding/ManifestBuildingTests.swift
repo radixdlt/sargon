@@ -97,11 +97,15 @@ final class ManifestBuildingTests: Test<TransactionManifest> {
 		}
 		AccountAddress.allCases.forEach(doTest)
 	}
-
+	
     func test_create_multiple_fungible_tokens() {
         func doTest(_ accountAddress: AccountAddress) {
-            let manifest = SUT.createMultipleFungibleTokens(addressOfOwner: accountAddress)
-            XCTAssertEqual(manifest.description.ranges(of: "symbol").count, 25)
+			let n: UInt8 = 5
+			let manifest = SUT.createMultipleFungibleTokens(
+				addressOfOwner: accountAddress,
+				count: n
+			)
+            XCTAssertEqual(manifest.description.ranges(of: "symbol").count, Int(n))
 			XCTAssert(manifest.description.contains(accountAddress.address))
         }
 		
