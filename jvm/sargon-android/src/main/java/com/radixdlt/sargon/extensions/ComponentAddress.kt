@@ -1,12 +1,12 @@
 package com.radixdlt.sargon.extensions
 
 import com.radixdlt.sargon.AddressFormat
-import com.radixdlt.sargon.AddressOfAccountOrPersona
 import com.radixdlt.sargon.ComponentAddress
 import com.radixdlt.sargon.NetworkId
-import com.radixdlt.sargon.addressOfAccountOrPersonaFormatted
 import com.radixdlt.sargon.componentAddressBech32Address
 import com.radixdlt.sargon.componentAddressFormatted
+import com.radixdlt.sargon.componentAddressIsGlobal
+import com.radixdlt.sargon.componentAddressIsInternal
 import com.radixdlt.sargon.componentAddressNetworkId
 import com.radixdlt.sargon.newComponentAddress
 
@@ -19,6 +19,18 @@ val ComponentAddress.string: String
 
 val ComponentAddress.networkId: NetworkId
     get() = componentAddressNetworkId(address = this)
+
+/**
+ * If the `EntityType == GlobalGenericComponent`
+ */
+val ComponentAddress.isGlobal: Boolean
+    get() = componentAddressIsGlobal(address = this)
+
+/**
+ * If the `EntityType == InternalGenericComponent`
+ */
+val ComponentAddress.isInternal: Boolean
+    get() = componentAddressIsInternal(address = this)
 
 fun ComponentAddress.formatted(
     format: AddressFormat = AddressFormat.DEFAULT
