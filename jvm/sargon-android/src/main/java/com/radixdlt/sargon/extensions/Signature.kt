@@ -44,24 +44,13 @@ fun Signature.Secp256k1.Companion.init(exactly65Bytes: Exactly65Bytes) = Signatu
     value = newSecp256k1SignatureFromExactly65Bytes(bytes = exactly65Bytes)
 )
 
-@Throws(SargonException::class)
-fun Ed25519Signature.Companion.init(bytes: BagOfBytes) =
-    newEd25519SignatureFromBytes(bytes = bytes)
+val Signature.Ed25519.string: String
+    get() = ed25519SignatureToString(signature = this.value)
 
-fun Ed25519Signature.Companion.init(exactly64Bytes: Exactly64Bytes) =
-    newEd25519SignatureFromExactly64Bytes(bytes = exactly64Bytes)
+val Signature.Secp256k1.string: String
+    get() = secp256k1SignatureToString(signature = this.value)
 
-val Ed25519Signature.string: String
-    get() = ed25519SignatureToString(signature = this)
-
-@Throws(SargonException::class)
-fun Secp256k1Signature.Companion.init(bytes: BagOfBytes) =
-    newSecp256k1SignatureFromBytes(bytes = bytes)
-
-fun Secp256k1Signature.Companion.init(exactly65Bytes: Exactly65Bytes) =
-    newSecp256k1SignatureFromExactly65Bytes(bytes = exactly65Bytes)
-
-val Secp256k1Signature.string: String
-    get() = secp256k1SignatureToString(signature = this)
+fun Ed25519Signature.asGeneral() = Signature.Ed25519(this)
+fun Secp256k1Signature.asGeneral() = Signature.Secp256k1(this)
 
 

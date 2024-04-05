@@ -1,5 +1,6 @@
 package com.radixdlt.sargon.extensions
 
+import com.radixdlt.sargon.Address
 import com.radixdlt.sargon.AddressFormat
 import com.radixdlt.sargon.ComponentAddress
 import com.radixdlt.sargon.NetworkId
@@ -35,3 +36,5 @@ val ComponentAddress.isInternal: Boolean
 fun ComponentAddress.formatted(
     format: AddressFormat = AddressFormat.DEFAULT
 ): String = componentAddressFormatted(address = this, format = format)
+
+fun ComponentAddress.asGeneral(): Address.Component = Address.Component(this)

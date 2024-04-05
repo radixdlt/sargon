@@ -1,5 +1,6 @@
 package com.radixdlt.sargon
 
+import com.radixdlt.sargon.extensions.asGeneral
 import com.radixdlt.sargon.extensions.formatted
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.isGlobal
@@ -54,6 +55,13 @@ class ComponentAddressTest: SampleTestable<ComponentAddress> {
     fun testIsInternal() {
         assertTrue(ComponentAddress.sampleMainnet.other().isInternal)
         assertFalse(ComponentAddress.sampleMainnet().isInternal)
+    }
+
+    @Test
+    fun testAsGeneral() {
+        val address = ComponentAddress.sampleMainnet()
+
+        assertEquals(Address.Component(address), address.asGeneral())
     }
 
 }

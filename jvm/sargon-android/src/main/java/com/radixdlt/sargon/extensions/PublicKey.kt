@@ -1,9 +1,10 @@
 package com.radixdlt.sargon.extensions
 
 import com.radixdlt.sargon.BagOfBytes
+import com.radixdlt.sargon.Ed25519PublicKey
 import com.radixdlt.sargon.PublicKey
+import com.radixdlt.sargon.Secp256k1PublicKey
 import com.radixdlt.sargon.ed25519PublicKeyToBytes
-import com.radixdlt.sargon.ed25519PublicKeyToHex
 import com.radixdlt.sargon.newEd25519PublicKeyFromBytes
 import com.radixdlt.sargon.newEd25519PublicKeyFromHex
 import com.radixdlt.sargon.newPublicKeyFromBytes
@@ -14,7 +15,6 @@ import com.radixdlt.sargon.publicKeyToBytes
 import com.radixdlt.sargon.publicKeyToHex
 import com.radixdlt.sargon.secp256k1PublicKeyToBytes
 import com.radixdlt.sargon.secp256k1PublicKeyToBytesUncompressed
-import com.radixdlt.sargon.secp256k1PublicKeyToHex
 
 @Throws(SargonException::class)
 fun PublicKey.Companion.init(hex: String): PublicKey = newPublicKeyFromHex(hex = hex)
@@ -70,3 +70,6 @@ val PublicKey.Secp256k1.bytes: BagOfBytes
  */
 val PublicKey.Secp256k1.uncompressedBytes: BagOfBytes
     get() = secp256k1PublicKeyToBytesUncompressed(publicKey = value)
+
+fun Ed25519PublicKey.asGeneral() = PublicKey.Ed25519(this)
+fun Secp256k1PublicKey.asGeneral() = PublicKey.Secp256k1(this)

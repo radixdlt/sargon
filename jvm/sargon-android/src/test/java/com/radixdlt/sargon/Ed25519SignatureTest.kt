@@ -8,31 +8,31 @@ import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class Ed25519SignatureTest: SampleTestable<Ed25519Signature> {
-    override val samples: List<Sample<Ed25519Signature>>
-        get() = listOf(Ed25519Signature.sample)
+class Ed25519SignatureTest: SampleTestable<Signature.Ed25519> {
+    override val samples: List<Sample<Signature.Ed25519>>
+        get() = listOf(Signature.Ed25519.sample)
 
     @Test
     fun testFromExactly64Bytes() {
         assertEquals(
-            Ed25519Signature.sample(),
-            Ed25519Signature.init(Ed25519Signature.sample().bytes)
+            Signature.Ed25519.sample(),
+            Signature.Ed25519.init(Signature.Ed25519.sample().value.bytes)
         )
     }
 
     @Test
     fun testFromBytes() {
         assertEquals(
-            Ed25519Signature.sample(),
-            Ed25519Signature.init(Ed25519Signature.sample().bytes.bytes)
+            Signature.Ed25519.sample(),
+            Signature.Ed25519.init(Signature.Ed25519.sample().bytes)
         )
     }
 
     @Test
     fun testString() {
         assertEquals(
-            Ed25519Signature.sample().string,
-            Ed25519Signature.init(Ed25519Signature.sample().bytes).string
+            Signature.Ed25519.sample().string,
+            Signature.Ed25519.init(Signature.Ed25519.sample().bytes).string
         )
     }
 }
