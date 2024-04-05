@@ -55,7 +55,7 @@ echo "🚢 🏷️ 📡 Pushing tag: $(NEXT_TAG), but only tag, not commit."
 # This MUST match whatever you we have declared in `$PROJECT_ROOT/Package.swift`
 SWIFT_SARGON_BINARY_ASSET_NAME="libsargon-rs.xcframework.zip" 
 
-GH_RELEASE_TITLE="Sargon $NEXT_TAG"
+GH_RELEASE_TITLE="v$NEXT_TAG"
 RELEASE_CMD="gh release create $NEXT_TAG '$XCFRAME_ZIP_PATH#$SWIFT_SARGON_BINARY_ASSET_NAME' --generate-notes --notes-start-tag $LAST_TAG --title '$GH_RELEASE_TITLE'"
 eval $RELEASE_CMD
 
