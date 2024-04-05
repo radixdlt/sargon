@@ -336,8 +336,10 @@ mod tests {
 
     #[test]
     fn involved_pool_addresses() {
-        let instructions_string =
-            include_str!("execution_summary/redeem_from_bi_pool.rtm");
+        let instructions_string = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "redeem_from_bi_pool.rtm"
+        ));
         let sut = SUT::new(
             instructions_string,
             NetworkID::Stokenet,
