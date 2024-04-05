@@ -138,7 +138,7 @@ CREATE_NON_FUNGIBLE_RESOURCE_WITH_INITIAL_SUPPLY
             ),
             "icon_url" => Tuple(
                 Enum<1u8>(
-                    Enum<0u8>(
+                    Enum<13u8>(
                         "https://image-service-test-images.s3.eu-west-2.amazonaws.com/wallet_test_images/KLHaze-medium.jpg"
                     )
                 ),
@@ -317,7 +317,7 @@ CREATE_NON_FUNGIBLE_RESOURCE_WITH_INITIAL_SUPPLY
             ),
             "icon_url" => Tuple(
                 Enum<1u8>(
-                    Enum<0u8>(
+                    Enum<13u8>(
                         "https://image-service-test-images.s3.eu-west-2.amazonaws.com/wallet_test_images/KLHaze-medium.jpg"
                     )
                 ),
