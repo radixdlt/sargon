@@ -1,7 +1,7 @@
 import SargonUniFFI
 
 extension VaultAddress: AddressProtocol {
-	public func embed() -> Address {
+	public var asGeneral: Address {
 		.vault(self)
 	}
 }

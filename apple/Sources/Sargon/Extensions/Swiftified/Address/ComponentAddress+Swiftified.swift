@@ -1,7 +1,7 @@
 import SargonUniFFI
 
 extension ComponentAddress: AddressProtocol {
-	public func embed() -> Address {
+	public var asGeneral: Address {
 		.component(self)
 	}
 }

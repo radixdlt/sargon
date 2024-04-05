@@ -19,7 +19,7 @@ extension ResourceAddress {
 	/// The ResourceAddress of XRD of mainnet
 	public static let mainnetXRD = Self.xrd(on: .mainnet)
 	
-	public func embed() -> Address {
+	public var asGeneral: Address {
 		.resource(self)
 	}
 }

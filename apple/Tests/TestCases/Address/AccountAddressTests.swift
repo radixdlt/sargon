@@ -17,7 +17,7 @@ final class AccountAddressTests: AddressTest<AccountAddress> {
     }
 	
 	func test_into_fails_for_wrong_address_type() {
-		XCTAssertThrowsError(try SUT.sample.embed().into(type: IdentityAddress.self))
+		XCTAssertThrowsError(try SUT.sample.asGeneral.asSpecific(type: IdentityAddress.self))
 	}
 	
 	func test_short() {

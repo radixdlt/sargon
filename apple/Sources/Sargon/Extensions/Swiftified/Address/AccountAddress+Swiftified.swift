@@ -1,7 +1,7 @@
 import SargonUniFFI
 
 extension AccountAddress: EntityAddressProtocol {
-	public func embed() -> Address {
+	public var asGeneral: Address {
 		.account(self)
 	}
 }

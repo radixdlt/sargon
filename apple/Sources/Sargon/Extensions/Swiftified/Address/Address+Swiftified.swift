@@ -2,11 +2,11 @@ import SargonUniFFI
 
 extension Address: AddressProtocol {
 	
-	public func embed() -> Address {
+	public var asGeneral: Address {
 		self
 	}
 	
-	public func into<A: AddressProtocol>(type: A.Type = A.self) throws -> A {
+	public func asSpecific<A: AddressProtocol>(type: A.Type = A.self) throws -> A {
 		try A(validatingAddress: self.address)
 	}
 	
@@ -16,7 +16,7 @@ extension Address: AddressProtocol {
 }
 
 public func == (lhs: Address, rhs: some AddressProtocol) -> Bool {
-	lhs == rhs.embed()
+	lhs == rhs.asGeneral
 }
 
 public func == (lhs: some AddressProtocol, rhs: Address) -> Bool {
