@@ -1,7 +1,7 @@
 import SargonUniFFI
 
 extension PoolAddress: AddressProtocol {
-	public func embed() -> Address {
+	public var asGeneral: Address {
 		.pool(self)
 	}
 }

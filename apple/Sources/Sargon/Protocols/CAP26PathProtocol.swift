@@ -1,9 +1,9 @@
 public protocol CAP26PathProtocol: HDPathProtocol {
-    func embed() -> CAP26Path
+    var asGeneral: CAP26Path { get }
 }
 
 extension CAP26PathProtocol {
     public var description: String {
-        embed().toString()
+        asGeneral.toString()
     }
 }

@@ -1,7 +1,7 @@
 import SargonUniFFI
 
 extension ValidatorAddress: AddressProtocol {
-	public func embed() -> Address {
+	public var asGeneral: Address {
 		.validator(self)
 	}
 }

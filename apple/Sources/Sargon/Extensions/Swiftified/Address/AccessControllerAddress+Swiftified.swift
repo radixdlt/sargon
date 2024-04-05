@@ -1,7 +1,7 @@
 import SargonUniFFI
 
 extension AccessControllerAddress: AddressProtocol {
-	public func embed() -> Address {
+	public var asGeneral: Address {
 		.accessController(self)
 	}
 }

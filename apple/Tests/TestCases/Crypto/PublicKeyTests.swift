@@ -18,6 +18,6 @@ final class PublicKeyTests: PublicKeyTest<PublicKey> {
 	}
 	
 	func test_embed_is_identity() {
-		XCTAssertEqual(SUT.sample, SUT.sample.embed())
+		XCTAssertEqual(SUT.sample, SUT.sample.asGeneral)
 	}
 }

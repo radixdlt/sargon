@@ -1,9 +1,9 @@
 public protocol PublicKeyProtocol: BinaryProtocol where Digest == PublicKeyHash {
-	func embed() -> PublicKey
+    var asGeneral: PublicKey { get }
 }
 
 extension PublicKeyProtocol {
 	public func hash() -> PublicKeyHash {
-		PublicKeyHash(hashing: embed())
+		PublicKeyHash(hashing: asGeneral)
 	}
 }

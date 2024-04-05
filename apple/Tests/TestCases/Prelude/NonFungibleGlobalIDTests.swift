@@ -10,6 +10,10 @@ final class NonFungibleGlobalIDTests: IdentifiableByStringProtocolTest<NonFungib
         )
     }
     
+    func test_local_id() {
+        XCTAssertEqual(SUT.sample.localID.formatted(), "Member_237")
+    }
+    
     func test_expressible_by_string_literal() {
         XCTAssertEqual(SUT.sample, "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa:<Member_237>")
     }

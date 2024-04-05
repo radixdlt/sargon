@@ -10,7 +10,7 @@ extension AccountPath {
         }
     }
     
-    public func embed() -> CAP26Path {
+    public var asGeneral: CAP26Path {
         .account(value: self)
     }
 }

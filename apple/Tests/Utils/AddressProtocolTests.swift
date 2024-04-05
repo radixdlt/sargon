@@ -56,10 +56,9 @@ class AddressTest<SUT_: AddressProtocol>: BaseAddressTest<SUT_> {
 		XCTAssertNoDifference(SUT.sampleStokenetOther.networkID, .stokenet)
 	}
 	
-	func test_into_self() throws {
+	func test_asSpecific_self() throws {
 		func doTestInto(_ sut: SUT) throws {
-			let embedded = sut.embed()
-			let extracted = try embedded.into(type: SUT.self)
+			let extracted = try sut.asGeneral.asSpecific(type: SUT.self)
 			XCTAssertEqual(extracted, sut)
 		}
 		try SUT.allCases.forEach(doTestInto)
@@ -99,15 +98,15 @@ class AddressTest<SUT_: AddressProtocol>: BaseAddressTest<SUT_> {
 		nonMainnets.map(SUT.random(networkID:)).map(\.isOnMainnet).forEach { XCTAssertFalse($0) }
 	}
 
-	func test_embed() {
+	func test_asGeneral() {
 		func doTest(_ address: SUT) {
 			XCTAssertNoDifference(
-				address.embed().address,
+				address.asGeneral.address,
 				address.address
 			)
 			
 			XCTAssertNoDifference(
-				address.embed().networkID,
+				address.asGeneral.networkID,
 				address.networkID
 			)
 		}
@@ -144,8 +143,8 @@ class AddressTest<SUT_: AddressProtocol>: BaseAddressTest<SUT_> {
 	
 	func test_asymmetric_type_equality() {
 		SUT.allCases.forEach {
-			XCTAssertTrue($0.embed() == $0)
-			XCTAssertTrue($0 == $0.embed())
+			XCTAssertTrue($0.asGeneral == $0)
+			XCTAssertTrue($0 == $0.asGeneral)
 		}
 	}
 	
