@@ -1,5 +1,4 @@
 package com.radixdlt.sargon.extensions
-
 import com.radixdlt.sargon.CommonException
 import com.radixdlt.sargon.Decimal192
 import com.radixdlt.sargon.LocaleConfig
@@ -22,6 +21,7 @@ import com.radixdlt.sargon.decimalSub
 import com.radixdlt.sargon.decimalToString
 import com.radixdlt.sargon.newDecimalExponent
 import com.radixdlt.sargon.newDecimalFromF32
+import com.radixdlt.sargon.newDecimalFromF64
 import com.radixdlt.sargon.newDecimalFromFormattedString
 import com.radixdlt.sargon.newDecimalFromI32
 import com.radixdlt.sargon.newDecimalFromI64
@@ -43,12 +43,20 @@ fun String.toDecimal192() = newDecimalFromString(string = this)
 fun Long.toDecimal192() = newDecimalFromI64(value = this)
 
 /**
- * Creates a new [Decimal192] from a f32 float. Will
- * fail if the f32 cannot be losslessly represented
+ * Creates a new [Decimal192] from a [Float]. Will
+ * fail if the [Float] cannot be losslessly represented
  * by the underlying Decimal from Scrypto.
  */
 @Throws(SargonException::class)
 fun Float.toDecimal192() = newDecimalFromF32(value = this)
+
+/**
+ * Creates a new [Decimal192] from a [Double]. Will
+ * fail if the [Double] cannot be losslessly represented
+ * by the underlying Decimal from Scrypto.
+ */
+@Throws(SargonException::class)
+fun Double.toDecimal192() = newDecimalFromF64(value = this)
 
 /**
  * Creates a new [Decimal192] from a i32 integer.
