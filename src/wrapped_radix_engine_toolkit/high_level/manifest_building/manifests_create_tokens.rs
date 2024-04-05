@@ -226,7 +226,7 @@ impl TokenDefinitionMetadata {
         let base_url = "https://image-service-test-images.s3.eu-west-2.amazonaws.com/wallet_test_images/";
 
         let test_images = [
-            "KL    Haze-medium.jpg", // we wanna test that spaces are OK
+            "scryptonaut_patch.svg",
             "Filling+Station+Breakfast-large.jpg",
             "Filling+Station+Breakfast-medium.jpg",
             "Filling+Station+Breakfast-small.jpg",
@@ -243,7 +243,6 @@ impl TokenDefinitionMetadata {
             "modern_kunst_museum_pano-2.jpg",
             "modern_kunst_museum_pano-3.jpg",
             "modern_kunst_museum_pano.jpg",
-            "scryptonaut_patch.svg",
         ];
 
         let test_image =
