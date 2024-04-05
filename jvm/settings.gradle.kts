@@ -22,7 +22,8 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Sargon JVM"
-include(":app")
+include(":android")
+project(":android").projectDir = file("../examples/android")
 include(":sargon-android")
 include(":sargon-desktop-debug")
 include(":sargon-desktop-release")
