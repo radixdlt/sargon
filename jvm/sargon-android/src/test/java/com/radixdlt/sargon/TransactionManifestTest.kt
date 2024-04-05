@@ -451,7 +451,6 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
 
     private fun openFile(name: String, extension: String) = File(
         "../../" +
-                "src/wrapped_radix_engine_toolkit/low_level/" +
-                "transaction_manifest/execution_summary/$name.$extension"
+                "fixtures/transaction/$name.$extension"
     )
 }

@@ -1,29 +1,10 @@
 use sargon::prelude::*;
 use serde::Deserialize;
-use std::{
-    env,
-    ffi::{OsStr, OsString},
-    fs,
-    path::PathBuf,
-    str::FromStr,
-};
+use std::str::FromStr;
 use thiserror::Error;
-
-fn crate_dir() -> PathBuf {
-    env::var("CARGO_MANIFEST_DIR").unwrap().into()
-}
-
-fn append_to_path(p: impl Into<OsString>, s: impl AsRef<OsStr>) -> PathBuf {
-    let mut p = p.into();
-    p.push(s);
-    p.into()
-}
 
 #[derive(Debug, Error)]
 pub enum TestingError {
-    #[error("Failed to open file at path '{0}'")]
-    FailedToOpenFile(PathBuf),
-
     #[error("File contents is not valid JSON '{0}'")]
     FailedDoesNotContainValidJSON(String),
 
@@ -34,20 +15,14 @@ pub enum TestingError {
 /// `name` is file name without extension, assuming it is json file
 #[cfg(not(tarpaulin_include))]
 fn fixture_and_json<'a, T>(
-    name: impl AsRef<OsStr>,
+    vector: &str,
 ) -> Result<(T, serde_json::Value), TestingError>
 where
     T: for<'de> Deserialize<'de>,
 {
-    let base = append_to_path(crate_dir(), "/tests/vectors/fixtures/");
-    let base_file_path = append_to_path(base, name);
-    let path = append_to_path(base_file_path, ".json");
-    let json = fs::read_to_string(path.clone())
-        .map_err(|_| TestingError::FailedToOpenFile(path))
-        .and_then(|j| {
-            serde_json::Value::from_str(j.as_str())
-                .map_err(|_| TestingError::FailedDoesNotContainValidJSON(j))
-        })?;
+    let json = serde_json::Value::from_str(vector).map_err(|_| {
+        TestingError::FailedDoesNotContainValidJSON(vector.to_owned())
+    })?;
 
     serde_json::from_value::<T>(json.clone())
         .map_err(TestingError::FailedToDeserialize)
@@ -56,11 +31,11 @@ where
 
 /// `name` is file name without extension, assuming it is json file
 #[cfg(not(tarpaulin_include))]
-fn fixture<'a, T>(name: impl AsRef<OsStr>) -> Result<T, TestingError>
+fn fixture<'a, T>(vector: &str) -> Result<T, TestingError>
 where
     T: for<'de> Deserialize<'de>,
 {
-    fixture_and_json(name).map(|t| t.0)
+    fixture_and_json(vector).map(|t| t.0)
 }
 
 #[cfg(test)]
@@ -70,10 +45,12 @@ mod profile_snapshot_tests {
 
     #[test]
     fn v100_100() {
-        let (profile, json) = fixture_and_json::<Profile>(
-            "only_plaintext_profile_snapshot_version_100",
-        )
-        .expect("V100 Profile to deserialize");
+        let (profile, json) =
+            fixture_and_json::<Profile>(include_str!(concat!(
+                env!("FIXTURES_VECTOR"),
+                "only_plaintext_profile_snapshot_version_100.json"
+            )))
+            .expect("V100 Profile to deserialize");
         assert_json_value_eq_after_roundtrip(&profile, json)
     }
 }
@@ -153,10 +130,16 @@ mod cap26_tests {
 
     #[test]
     fn test_vectors() {
-        let secp256k1 = fixture::<CAP26Group>("cap26_secp256k1")
-            .expect("CAP26 Secp256k1 vectors");
-        let curve25519 = fixture::<CAP26Group>("cap26_curve25519")
-            .expect("CAP26 Curve25519 vectors");
+        let secp256k1 = fixture::<CAP26Group>(include_str!(concat!(
+            env!("FIXTURES_VECTOR"),
+            "cap26_secp256k1.json"
+        )))
+        .expect("CAP26 Secp256k1 vectors");
+        let curve25519 = fixture::<CAP26Group>(include_str!(concat!(
+            env!("FIXTURES_VECTOR"),
+            "cap26_curve25519.json"
+        )))
+        .expect("CAP26 Curve25519 vectors");
 
         secp256k1.test::<Secp256k1PrivateKey, Secp256k1PublicKey>();
         curve25519.test::<Ed25519PrivateKey, Ed25519PublicKey>();
@@ -231,8 +214,11 @@ mod bip44_tests {
 
     #[test]
     fn test_vectors() {
-        let fixture =
-            fixture::<Fixture>("bip44_secp256k1").expect("BIP44 fixture");
+        let fixture = fixture::<Fixture>(include_str!(concat!(
+            env!("FIXTURES_VECTOR"),
+            "bip44_secp256k1.json"
+        )))
+        .expect("BIP44 fixture");
 
         fixture.test();
     }
@@ -344,10 +330,16 @@ mod slip10_tests {
 
     #[test]
     fn test_vectors() {
-        let ten =
-            fixture::<Fixture>("slip10_tests_#10").expect("SLIP10 #10 fixture");
-        let thousand = fixture::<Fixture>("slip10_tests_#1000")
-            .expect("SLIP10 #1000 fixture");
+        let ten = fixture::<Fixture>(include_str!(concat!(
+            env!("FIXTURES_VECTOR"),
+            "slip10_tests_#10.json"
+        )))
+        .expect("SLIP10 #10 fixture");
+        let thousand = fixture::<Fixture>(include_str!(concat!(
+            env!("FIXTURES_VECTOR"),
+            "slip10_tests_#1000.json"
+        )))
+        .expect("SLIP10 #1000 fixture");
 
         ten.test();
         thousand.test();

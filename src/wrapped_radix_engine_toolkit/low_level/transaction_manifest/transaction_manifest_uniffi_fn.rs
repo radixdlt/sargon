@@ -125,12 +125,15 @@ mod tests {
 
     #[test]
     fn test_execution_summary() {
-        let encoded_receipt_hex = include_str!(
-            "execution_summary/transfer_1to2_multiple_nf_and_f_tokens.dat"
-        );
-        let instructions_string = include_str!(
-            "execution_summary/transfer_1to2_multiple_nf_and_f_tokens.rtm"
-        );
+        let encoded_receipt_hex = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "transfer_1to2_multiple_nf_and_f_tokens.dat"
+        ));
+
+        let instructions_string = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "transfer_1to2_multiple_nf_and_f_tokens.rtm"
+        ));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
