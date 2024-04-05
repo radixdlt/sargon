@@ -1,9 +1,8 @@
 package com.radixdlt.sargon.extensions
 
+import com.radixdlt.sargon.Address
 import com.radixdlt.sargon.AddressFormat
 import com.radixdlt.sargon.NetworkId
-import com.radixdlt.sargon.NonFungibleResourceAddress
-import com.radixdlt.sargon.ResourceAddress
 import com.radixdlt.sargon.ValidatorAddress
 import com.radixdlt.sargon.newValidatorAddress
 import com.radixdlt.sargon.validatorAddressBech32Address
@@ -23,3 +22,5 @@ val ValidatorAddress.networkId: NetworkId
 fun ValidatorAddress.formatted(
     format: AddressFormat = AddressFormat.DEFAULT
 ): String = validatorAddressFormatted(address = this, format = format)
+
+fun ValidatorAddress.asGeneral(): Address.Validator = Address.Validator(this)

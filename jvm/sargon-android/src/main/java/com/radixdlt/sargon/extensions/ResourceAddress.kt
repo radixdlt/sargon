@@ -1,5 +1,6 @@
 package com.radixdlt.sargon.extensions
 
+import com.radixdlt.sargon.Address
 import com.radixdlt.sargon.AddressFormat
 import com.radixdlt.sargon.NetworkId
 import com.radixdlt.sargon.ResourceAddress
@@ -36,3 +37,5 @@ val ResourceAddress.isXRD: Boolean
 fun ResourceAddress.formatted(
     format: AddressFormat = AddressFormat.DEFAULT
 ): String = resourceAddressFormatted(address = this, format = format)
+
+fun ResourceAddress.asGeneral(): Address.Resource = Address.Resource(this)

@@ -1,7 +1,7 @@
 package com.radixdlt.sargon.extensions
 
-// import com.radixdlt.sargon.accountAddressFormatted
 import com.radixdlt.sargon.AccountAddress
+import com.radixdlt.sargon.Address
 import com.radixdlt.sargon.AddressFormat
 import com.radixdlt.sargon.LegacyOlympiaAccountAddress
 import com.radixdlt.sargon.NetworkId
@@ -42,3 +42,5 @@ fun AccountAddress.formatted(
 
 fun AccountAddress.wasMigratedFromLegacyOlympia(legacy: LegacyOlympiaAccountAddress) =
     legacy.isLegacyOfBabylonAddress(babylon = this)
+
+fun AccountAddress.asGeneral(): Address.Account = Address.Account(this)

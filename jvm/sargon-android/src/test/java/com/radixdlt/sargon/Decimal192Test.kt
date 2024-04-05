@@ -34,7 +34,7 @@ import java.text.DecimalFormatSymbols
 import java.util.Locale
 import kotlin.math.PI
 
-class Decimal192Test: SampleTestable<Decimal192> {
+class Decimal192Test : SampleTestable<Decimal192> {
 
     override val samples: List<Sample<Decimal192>>
         get() = listOf(Decimal192.sample)
@@ -89,7 +89,8 @@ class Decimal192Test: SampleTestable<Decimal192> {
         assertThrows<IllegalStateException> {
             Decimal192.MAX.rounded(
                 decimalPlaces = 0.toUByte(),
-                roundingMode = RoundingMode.AWAY_FROM_ZERO)
+                roundingMode = RoundingMode.AWAY_FROM_ZERO
+            )
         }
     }
 
@@ -154,16 +155,25 @@ class Decimal192Test: SampleTestable<Decimal192> {
 
         assertEquals(
             Decimal192.init(usFormat.format(PI), DecimalFormatSymbols(Locale.US)),
-            Decimal192.init(greekFormat.format(PI), DecimalFormatSymbols(Locale.forLanguageTag("el")))
+            Decimal192.init(
+                greekFormat.format(PI),
+                DecimalFormatSymbols(Locale.forLanguageTag("el"))
+            )
         )
 
         assertThrows<CommonException.DecimalException> {
             greekFormat.format(PI).toDecimal192()
         }
-        
+
         assertDoesNotThrow {
             Decimal192.init(DecimalFormat().format(PI))
         }
+    }
+
+    @Test
+    fun testFromDouble() {
+        assertEquals("0.1", 0.1.toDecimal192().string)
+        assertEquals("4.012345678901235", 4.012345678901234567895555555.toDecimal192().string)
     }
 
     @Test

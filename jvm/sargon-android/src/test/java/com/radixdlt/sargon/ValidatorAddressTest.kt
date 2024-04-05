@@ -1,5 +1,6 @@
 package com.radixdlt.sargon
 
+import com.radixdlt.sargon.extensions.asGeneral
 import com.radixdlt.sargon.extensions.formatted
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.networkId
@@ -38,5 +39,12 @@ class ValidatorAddressTest: SampleTestable<ValidatorAddress> {
             addressString,
             address.formatted(format = AddressFormat.RAW)
         )
+    }
+
+    @Test
+    fun testAsGeneral() {
+        val address = ValidatorAddress.sampleMainnet()
+
+        assertEquals(Address.Validator(address), address.asGeneral())
     }
 }
