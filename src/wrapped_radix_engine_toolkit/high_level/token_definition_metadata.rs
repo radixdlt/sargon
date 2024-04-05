@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+use radix_engine::types::UncheckedUrl as ScryptoUncheckedUrl;
+
 #[derive(
     Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
 )]
@@ -30,7 +32,7 @@ impl From<TokenDefinitionMetadata>
             ),
             (
                 MetadataKey::IconUrl.to_string(),
-                ScryptoMetadataValue::String(value.icon_url),
+                ScryptoMetadataValue::Url(ScryptoUncheckedUrl(value.icon_url)),
             ),
             (
                 MetadataKey::Tags.to_string(),

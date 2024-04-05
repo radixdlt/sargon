@@ -343,7 +343,7 @@ mod tests {
             ),
             "icon_url" => Tuple(
                 Enum<1u8>(
-                    Enum<0u8>(
+                    Enum<13u8>(
                         "https://uxwing.com/wp-content/themes/uxwing/download/arts-graphic-shapes/star-full-icon.png"
                     )
                 ),
@@ -594,7 +594,7 @@ CALL_METHOD
                 ),
                 "icon_url" => Tuple(
                     Enum<1u8>(
-                        Enum<0u8>(
+                        Enum<13u8>(
                             "https://image-service-test-images.s3.eu-west-2.amazonaws.com/wallet_test_images/KLHaze-medium.jpg"
                         )
                     ),
@@ -773,7 +773,7 @@ CALL_METHOD
                 ),
                 "icon_url" => Tuple(
                     Enum<1u8>(
-                        Enum<0u8>(
+                        Enum<13u8>(
                             "https://image-service-test-images.s3.eu-west-2.amazonaws.com/wallet_test_images/KLHaze-medium.jpg"
                         )
                     ),
