@@ -38,7 +38,15 @@ extension Locale {
 import XCTestDynamicOverlay
 extension Decimal192: CustomStringConvertible {
 	public var description: String {
+#if DEBUG
+		if !_XCTIsTesting {
+			formattedPlain()
+		} else {
+			formattedPlain(locale: .test, useGroupingSeparator: false)
+		}
+#else
 		formattedPlain()
+#endif // DEBUG
 	}
 }
 
