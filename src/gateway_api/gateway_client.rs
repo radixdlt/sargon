@@ -1,4 +1,9 @@
 use crate::prelude::*;
+use std::convert::identity;
+
+const fn res_id<T>(x: T) -> Result<T, CommonError> {
+    identity::<Result<T, CommonError>>(Ok(x))
+}
 
 #[uniffi::export(with_foreign)]
 #[async_trait::async_trait]
@@ -49,22 +54,27 @@ impl GatewayClient {
             gateway,
         }
     }
+}
 
-    pub async fn state_entity_details(
+impl GatewayClient {
+    pub(crate) async fn state_entity_details(
         &self,
         request: StateEntityDetailsRequest,
     ) -> Result<StateEntityDetailsResponse> {
-        self.post("state/entity/details", request).await
+        self.post("state/entity/details", request, res_id).await
     }
+}
 
+#[uniffi::export]
+impl GatewayClient {
     pub async fn xrd_balance_of_account(
         &self,
         address: AccountAddress,
     ) -> Result<Option<Decimal192>> {
-        let response = self
-            .state_entity_details(StateEntityDetailsRequest::single(
-                address, None, None, None,
-            ))
+        let response: StateEntityDetailsResponse = self
+            .state_entity_details(StateEntityDetailsRequest {
+                addresses: vec![address.into()],
+            })
             .await?;
 
         let Some(response_item) = response
@@ -155,7 +165,9 @@ impl GatewayClient {
                 "Failed to parse URL, error: {:?}, from string: {}",
                 e, &url_str
             );
-            CommonError::NetworkRequestInvalidUrl(url_str.to_owned())
+            CommonError::NetworkRequestInvalidUrl {
+                bad_value: url_str.to_owned(),
+            }
         })?;
 
         // Create Network request object, which will be translated by

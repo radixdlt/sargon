@@ -24,6 +24,8 @@ macro_rules! address_union {
                 Hash,
                 derive_more::Display,
                 derive_more::Debug,
+                SerializeDisplay,
+                DeserializeFromStr,
                 uniffi::Enum,
             )]
             pub enum $union_name {
@@ -308,14 +310,8 @@ macro_rules! address_union {
                 }
             )+
 
-            impl IntoScryptoAddress for  $union_name {
-                fn scrypto(&self) -> ScryptoGlobalAddress {
-                    match self {
-                        $(
-                            Self::$variant_name(address) => address.scrypto(),
-                        )+
-                    }
-                }
+            impl IsAddress for $union_name {}
+            impl IsNetworkAware for $union_name {
 
                 /// Returns the [`NetworkID`]
                 fn network_id(&self) -> NetworkID {
@@ -325,6 +321,25 @@ macro_rules! address_union {
                         )+
                     }
                 }
+            }
+
+            impl FromStr for $union_name {
+                type Err = crate::CommonError;
+
+                fn from_str(s: &str) -> Result<Self> {
+                    Self::new_from_bech32(s)
+                }
+            }
+
+            impl IntoScryptoAddress for $union_name {
+                fn scrypto(&self) -> ScryptoGlobalAddress {
+                    match self {
+                        $(
+                            Self::$variant_name(address) => address.scrypto(),
+                        )+
+                    }
+                }
+
             }
 
             impl $union_name {

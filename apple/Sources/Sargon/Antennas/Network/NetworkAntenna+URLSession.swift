@@ -6,7 +6,7 @@ extension URLRequest {
 		var request = URLRequest(url: sargon.url)
 		switch sargon.method {
 		case .post:
-			request.httpMethod = "POST"
+			request.httpMethod = "POST" // FIXME: embed in sargon
 		}
 		
 		request.httpBody = sargon.body
@@ -18,7 +18,7 @@ extension URLRequest {
 extension NetworkResponse {
 	init(response: (Data, URLResponse)) throws {
 		guard let httpURLResponse = response.1 as? HTTPURLResponse else {
-			throw SargonError.Unknown(message: "Expected HTTPURLResponse")
+			throw SargonError.Unknown // FIXME: Change to specific error
 		}
 		self.init(
 			statusCode: UInt16(httpURLResponse.statusCode),

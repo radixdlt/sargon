@@ -1,19 +1,19 @@
 #![allow(unused_imports)]
 
 mod core;
+mod gateway_api;
 mod hierarchical_deterministic;
 mod profile;
 mod wallet;
-mod gateway_api;
 mod wrapped_radix_engine_toolkit;
 
 pub mod prelude {
 
     pub use crate::core::*;
+    pub use crate::gateway_api::*;
     pub use crate::hierarchical_deterministic::*;
     pub use crate::profile::*;
     pub use crate::wallet::*;
-    pub use crate::gateway_api::*;
     pub use crate::wrapped_radix_engine_toolkit::*;
 
     pub(crate) use std::collections::{BTreeSet, HashMap, HashSet};
