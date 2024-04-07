@@ -43,14 +43,43 @@ Or install `Xcode` from App Store
 brew install kotlin
 ```
 
-#### JNA
+#### Kotlin Dependencies
 
 > [!IMPORTANT]  
-> To run tests in Kotlin you also need to download [JNA](https://mvnrepository.com/artifact/net.java.dev.jna/jna) (currently tested under version `5.13.0`)
->
-> ```sh
-> curl https://repo1.maven.org/maven2/net/java/dev/jna/jna/5.13.0/jna-5.13.0.jar --output jna-5.13.0.jar
-> ```
+> To run Kotlin you also need to download `JNA`, `kotlinx-coroutines` and `okhttp3`
+
+##### JNA
+[JNA](https://mvnrepository.com/artifact/net.java.dev.jna/jna) (currently tested under version `5.13.0`)
+```sh
+curl https://repo1.maven.org/maven2/net/java/dev/jna/jna/5.13.0/jna-5.13.0.jar --output jna-5.13.0.jar
+```
+
+##### coroutines
+###### coroutines JVM
+[Coroutines-JVM](https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-core-jvm/1.8.0)
+```sh
+curl https://repo1.maven.org/maven2/org/jetbrains/kotlinx/kotlinx-coroutines-core-jvm/1.8.0/kotlinx-coroutines-core-jvm-1.8.0.jar --output kotlinx-coroutines-core-jvm-1.8.0.jar
+```
+
+###### coroutines Android
+[Coroutines Android](https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-android/1.8.0)
+```sh
+curl https://repo1.maven.org/maven2/org/jetbrains/kotlinx/kotlinx-coroutines-core-jvm/1.8.0/kotlinx-coroutines-android-1.8.0.jar --output kotlinx-coroutines-android-1.8.0.jar
+```
+
+##### okhttp
+###### okhttp
+* [OkHttp](https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp/4.12.0) For network requests
+
+```sh
+curl https://repo1.maven.org/maven2/com/squareup/okhttp3/okhttp/4.12.0/okhttp-4.12.0.jar --output okhttp-4.12.0.jar
+```
+
+###### Okio
+[Okio](https://mvnrepository.com/artifact/com.squareup.okio/okio/3.7.0) Transitive dependency for OkHttp
+```sh
+curl https://repo1.maven.org/maven2/com/squareup/okio/okio/3.7.0/okio-3.7.0.jar --output okio-3.7.0.jar
+```
 
 ### `direnv`
 

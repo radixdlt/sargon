@@ -15,6 +15,6 @@ tarpaulin-report.html
 .build
 build_rs_cov.profraw
 cobertura.xml
-jna-*.jar
+*.jar
 .swiftpm/*
 default.profraw

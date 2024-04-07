@@ -85,6 +85,12 @@ dependencies {
     // the jna dependency cannot be resolved
     implementation("net.java.dev.jna:jna:5.13.0@aar")
 
+    // For Async support
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
+    // For Network support
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.okio:okio:3.7.0") 
+
     testImplementation(libs.junit)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testDebugRuntimeOnly(project(":sargon-desktop-debug"))
