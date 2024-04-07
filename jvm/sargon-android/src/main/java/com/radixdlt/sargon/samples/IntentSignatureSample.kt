@@ -1,11 +1,11 @@
 package com.radixdlt.sargon.samples
 
-import androidx.annotation.VisibleForTesting
+import com.radixdlt.sargon.annotation.UsesSampleValues
 import com.radixdlt.sargon.IntentSignature
 import com.radixdlt.sargon.newIntentSignatureSample
 import com.radixdlt.sargon.newIntentSignatureSampleOther
 
-@VisibleForTesting
+@UsesSampleValues
 val IntentSignature.Companion.sample: Sample<IntentSignature>
     get() = object : Sample<IntentSignature> {
 

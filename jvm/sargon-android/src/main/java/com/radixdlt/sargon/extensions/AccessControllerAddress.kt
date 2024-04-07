@@ -1,6 +1,7 @@
 package com.radixdlt.sargon.extensions
 
 import com.radixdlt.sargon.AccessControllerAddress
+import com.radixdlt.sargon.Address
 import com.radixdlt.sargon.AddressFormat
 import com.radixdlt.sargon.NetworkId
 import com.radixdlt.sargon.accessControllerAddressBech32Address
@@ -21,3 +22,6 @@ val AccessControllerAddress.networkId: NetworkId
 fun AccessControllerAddress.formatted(
     format: AddressFormat = AddressFormat.DEFAULT
 ): String = accessControllerAddressFormatted(address = this, format = format)
+
+fun AccessControllerAddress.asGeneral(): Address.AccessController
+    = Address.AccessController(this)

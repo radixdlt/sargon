@@ -159,8 +159,15 @@ macro_rules! decl_ret_wrapped_address {
             impl [< $address_type:camel Address >] {
 
                 pub fn random(network_id: NetworkID) -> Self {
+                    Self::with_node_id_bytes(&generate_byte_array::<{ ScryptoNodeId::RID_LENGTH }>(), network_id)
+                }
+
+                pub fn with_node_id_bytes(
+                    node_id_bytes: &[u8; { ScryptoNodeId::RID_LENGTH }],
+                    network_id: NetworkID
+                ) -> Self {
                     let entity_byte = Self::sample().node_id().as_bytes()[0];
-                    let node_id = ScryptoNodeId::new(entity_byte, &generate_byte_array::<{ ScryptoNodeId::RID_LENGTH }>());
+                    let node_id = ScryptoNodeId::new(entity_byte, node_id_bytes);
                     let ret_address = [<Ret $address_type:camel Address>]::new(node_id, network_id.discriminant()).unwrap();
                     Self::from(ret_address)
                 }

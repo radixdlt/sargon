@@ -22,9 +22,7 @@ extension NonFungibleResourceAddress {
         asResourceAddress.formatted(format)
     }
 	
-	public func embed() -> Address {
-		.resource(asResourceAddress)
-	}
+
 	
 }
 

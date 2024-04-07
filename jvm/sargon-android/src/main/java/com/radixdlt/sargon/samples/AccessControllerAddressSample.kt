@@ -1,6 +1,6 @@
 package com.radixdlt.sargon.samples
 
-import androidx.annotation.VisibleForTesting
+import com.radixdlt.sargon.annotation.UsesSampleValues
 import com.radixdlt.sargon.AccessControllerAddress
 import com.radixdlt.sargon.NetworkId
 import com.radixdlt.sargon.newAccessControllerAddressSampleMainnet
@@ -9,7 +9,7 @@ import com.radixdlt.sargon.newAccessControllerAddressRandom
 import com.radixdlt.sargon.newAccessControllerAddressSampleStokenet
 import com.radixdlt.sargon.newAccessControllerAddressSampleStokenetOther
 
-@VisibleForTesting
+@UsesSampleValues
 object AccessControllerAddressSampleMainnet: SampleWithRandomValues<AccessControllerAddress> {
 
     override fun invoke(): AccessControllerAddress =
@@ -24,11 +24,11 @@ object AccessControllerAddressSampleMainnet: SampleWithRandomValues<AccessContro
 
 }
 
-@VisibleForTesting
+@UsesSampleValues
 val AccessControllerAddress.Companion.sampleMainnet: AccessControllerAddressSampleMainnet
     get() = AccessControllerAddressSampleMainnet
 
-@VisibleForTesting
+@UsesSampleValues
 object AccessControllerAddressSampleStokenet: SampleWithRandomValues<AccessControllerAddress> {
 
     override fun invoke(): AccessControllerAddress =
@@ -42,11 +42,11 @@ object AccessControllerAddressSampleStokenet: SampleWithRandomValues<AccessContr
     )
 }
 
-@VisibleForTesting
+@UsesSampleValues
 val AccessControllerAddress.Companion.sampleStokenet: AccessControllerAddressSampleStokenet
     get() = AccessControllerAddressSampleStokenet
 
-@VisibleForTesting
+@UsesSampleValues
 fun AccessControllerAddress.Companion.sampleRandom(
     networkId: NetworkId
 ) = newAccessControllerAddressRandom(networkId = networkId)

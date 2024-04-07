@@ -12,7 +12,8 @@ macro_rules! decl_tx_hash {
         $struct_name: ident,
         $scrypto_struct_name: ident,
         $mod_test_name: ident,
-        $expected_sample_str: literal
+        $expected_sample_str: literal,
+        $expected_sample_str_formatted: literal
     ) => {
 
         $(
@@ -38,6 +39,11 @@ macro_rules! decl_tx_hash {
                 $struct_name::from_str(&string)
             }
 
+            #[uniffi::export]
+            pub fn [< $struct_name:snake _formatted>](address: &$struct_name, format: AddressFormat) -> String {
+                address.formatted(format)
+            }
+
             #[cfg(test)]
             mod [< uniffi_ $struct_name:snake _tests>] {
                 use super::*;
@@ -48,6 +54,14 @@ macro_rules! decl_tx_hash {
                 #[test]
                 fn from_str() {
                     assert_eq!(SUT::sample(), [< new_$struct_name:snake _from_string>]($expected_sample_str.to_owned()).unwrap());
+                }
+
+                #[test]
+                fn formatted() {
+                    let sut = SUT::sample();
+                    assert_eq!(sut.formatted(AddressFormat::Default), [< $struct_name:snake _formatted>](&sut, AddressFormat::Default));
+                    assert_eq!(sut.formatted(AddressFormat::Raw), [< $struct_name:snake _formatted>](&sut, AddressFormat::Raw));
+                    assert_eq!(sut.formatted(AddressFormat::Full), [< $struct_name:snake _formatted>](&sut, AddressFormat::Full));
                 }
             }
         }
@@ -80,6 +94,13 @@ macro_rules! decl_tx_hash {
             pub fn from_bech32(s: &str) -> Result<Self> {
                 validate_and_decode_hash::<$scrypto_struct_name>(s)
                     .map(|t| Self::from_scrypto(t.0, t.1))
+            }
+
+            pub fn formatted(&self, format: AddressFormat) -> String {
+                match format {
+                    AddressFormat::Default => format_string(self.bech32_encoded_tx_id.to_string(), 4, 6),
+                    AddressFormat::Full | AddressFormat::Raw => self.bech32_encoded_tx_id.to_string(),
+                }
             }
         }
 
@@ -123,6 +144,14 @@ macro_rules! decl_tx_hash {
             fn from_str() {
                 assert_eq!(SUT::sample(), $expected_sample_str.parse::<SUT>().unwrap());
             }
+
+            #[test]
+            fn formatted() {
+                let sut = $expected_sample_str.parse::<SUT>().unwrap();
+                assert_eq!($expected_sample_str_formatted, sut.formatted(AddressFormat::Default));
+                assert_eq!($expected_sample_str, sut.formatted(AddressFormat::Raw));
+                assert_eq!($expected_sample_str, sut.formatted(AddressFormat::Full));
+            }
         }
     };
 
@@ -131,7 +160,8 @@ macro_rules! decl_tx_hash {
             #[doc = $expr: expr]
         )*
         $hash_type: ident,
-        $expected_sample_str: literal
+        $expected_sample_str: literal,
+        $expected_sample_str_formatted: literal,
     ) => {
         paste! {
             decl_tx_hash!(
@@ -141,7 +171,8 @@ macro_rules! decl_tx_hash {
                 [< $hash_type Hash >],
                 [< Scrypto $hash_type Hash >],
                 [< tests_ $hash_type:snake >],
-                $expected_sample_str
+                $expected_sample_str,
+                $expected_sample_str_formatted
             );
         }
     };
@@ -152,11 +183,13 @@ decl_tx_hash!(
     /// Representation is bech32 encoded string starting with `txid_` e.g.:
     /// `"txid_rdx19rpveua6xuhvz0axu0mwpqk8fywr83atv8mkrugchvw6uuslgppqh9cnj4"`
     Intent,
-    "txid_rdx1frcm6zzyfd08z0deu9x24sh64eccxeux4j2dv3dsqeuh9qsz4y6szm3ltd"
+    "txid_rdx1frcm6zzyfd08z0deu9x24sh64eccxeux4j2dv3dsqeuh9qsz4y6szm3ltd",
+    "txid...zm3ltd",
 );
 
 decl_tx_hash!(
     /// A Signed Intent Hash is a bech32 encoded string starting with `"signedintent_"
     SignedIntent,
-    "signedintent_rdx1frcm6zzyfd08z0deu9x24sh64eccxeux4j2dv3dsqeuh9qsz4y6sxsk6nl"
+    "signedintent_rdx1frcm6zzyfd08z0deu9x24sh64eccxeux4j2dv3dsqeuh9qsz4y6sxsk6nl",
+    "sign...xsk6nl",
 );

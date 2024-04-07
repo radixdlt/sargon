@@ -23,8 +23,8 @@ function last_tag() {
 LAST_TAG=$(last_tag)
 echo "🚢 🏷️  Last tag: $LAST_TAG"
 
-# one liner from: https://stackoverflow.com/a/8653732
-NEXT_TAG=$(echo $(last_tag) | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{if(length($NF+1)>length($NF))$(NF-1)++; $NF=sprintf("%0*d", length($NF), ($NF+1)%(10^length($NF))); print}')
+# one liner from: https://stackoverflow.com/questions/8653126/8653732#comment65908962_8653732
+NEXT_TAG=$(echo $(last_tag) | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{$NF=sprintf("%0*d", length($NF), ($NF+1)); print}')
 
 # output is: "<CHKSUM>;<$XCFRAME_ZIP_PATH>"
 OUTPUT_OF_BUILD=`sh $DIR/build-sargon.sh --release-tag $NEXT_TAG | tail -n 1` || exit $?
@@ -55,7 +55,7 @@ echo "🚢 🏷️ 📡 Pushing tag: $(NEXT_TAG), but only tag, not commit."
 # This MUST match whatever you we have declared in `$PROJECT_ROOT/Package.swift`
 SWIFT_SARGON_BINARY_ASSET_NAME="libsargon-rs.xcframework.zip" 
 
-GH_RELEASE_TITLE="Sargon Swift Only v$NEXT_TAG"
+GH_RELEASE_TITLE="v$NEXT_TAG"
 RELEASE_CMD="gh release create $NEXT_TAG '$XCFRAME_ZIP_PATH#$SWIFT_SARGON_BINARY_ASSET_NAME' --generate-notes --notes-start-tag $LAST_TAG --title '$GH_RELEASE_TITLE'"
 eval $RELEASE_CMD
 

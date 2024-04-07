@@ -1,5 +1,6 @@
 package com.radixdlt.sargon
 
+import com.radixdlt.sargon.extensions.asGeneral
 import com.radixdlt.sargon.extensions.formatted
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.isFungible
@@ -44,5 +45,12 @@ class VaultAddressTest: SampleTestable<VaultAddress> {
             addressString,
             address.formatted(format = AddressFormat.RAW)
         )
+    }
+
+    @Test
+    fun testAsGeneral() {
+        val address = VaultAddress.sampleMainnet()
+
+        assertEquals(Address.Vault(address), address.asGeneral())
     }
 }

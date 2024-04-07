@@ -97,11 +97,15 @@ final class ManifestBuildingTests: Test<TransactionManifest> {
 		}
 		AccountAddress.allCases.forEach(doTest)
 	}
-
+	
     func test_create_multiple_fungible_tokens() {
         func doTest(_ accountAddress: AccountAddress) {
-            let manifest = SUT.createMultipleFungibleTokens(addressOfOwner: accountAddress)
-            XCTAssertEqual(manifest.description.ranges(of: "symbol").count, 25)
+			let n: UInt8 = 5
+			let manifest = SUT.createMultipleFungibleTokens(
+				addressOfOwner: accountAddress,
+				count: n
+			)
+            XCTAssertEqual(manifest.description.ranges(of: "symbol").count, Int(n))
 			XCTAssert(manifest.description.contains(accountAddress.address))
         }
 		
@@ -209,13 +213,13 @@ final class ManifestBuildingTests: Test<TransactionManifest> {
 extension XCTestCase {
     
     func encodedReceipt(_ name: String) throws -> Data {
-        let utf8 = try openFile(name, extension: "dat")
+        let utf8 = try openTransactionFile(name, extension: "dat")
         let hex = try XCTUnwrap(String(data: utf8, encoding: .utf8))
         return try Data(hex: hex)
     }
     
     func rtm(_ rtmFile: String) throws -> TransactionManifest {
-        let data = try openFile(rtmFile, extension: "rtm")
+        let data = try openTransactionFile(rtmFile, extension: "rtm")
         let instructionsString = try XCTUnwrap(String(data: data, encoding: .utf8))
         
         return try TransactionManifest(
@@ -225,12 +229,16 @@ extension XCTestCase {
         )
     }
     
-    private func openFile(_ fileName: String, extension fileExtension: String) throws -> Data {
-        let testsDirectory: String = URL(fileURLWithPath: "\(#file)").pathComponents.dropLast(6).joined(separator: "/")
-        
-        let fileURL = try XCTUnwrap(URL(fileURLWithPath: "\(testsDirectory)/crates/sargon/src/wrapped_radix_engine_toolkit/low_level/transaction_manifest/execution_summary/\(fileName).\(fileExtension)"))
-        
-        return try Data(contentsOf: fileURL)
-      
+    private func openTransactionFile(_ fileName: String, extension fileExtension: String) throws -> Data {
+		try openFile(subPath: "transaction", fileName, extension: fileExtension)
     }
+	
+	private func openFile(subPath: String, _ fileName: String, extension fileExtension: String) throws -> Data {
+		let testsDirectory: String = URL(fileURLWithPath: "\(#file)").pathComponents.dropLast(6).joined(separator: "/")
+		
+		let fileURL = try XCTUnwrap(URL(fileURLWithPath: "\(testsDirectory)/fixtures/\(subPath)/\(fileName).\(fileExtension)"))
+		
+		return try Data(contentsOf: fileURL)
+	  
+	}
 }

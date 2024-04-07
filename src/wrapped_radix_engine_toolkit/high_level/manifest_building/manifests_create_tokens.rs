@@ -20,15 +20,13 @@ impl TransactionManifest {
             initial_supply,
             metadata,
         );
-        let scrypto_manifest = builder
-            .try_deposit_entire_worktop_or_abort(
-                address_of_owner.scrypto(),
-                None,
-            )
-            .build();
+        builder = builder.try_deposit_entire_worktop_or_abort(
+            address_of_owner.scrypto(),
+            None,
+        );
 
-        TransactionManifest::from_scrypto(
-            scrypto_manifest,
+        TransactionManifest::sargon_built(
+            builder,
             address_of_owner.network_id(),
         )
     }
@@ -131,15 +129,13 @@ impl TransactionManifest {
             )
         }
 
-        let scrypto_manifest = builder
-            .try_deposit_entire_worktop_or_abort(
-                address_of_owner.scrypto(),
-                None,
-            )
-            .build();
+        builder = builder.try_deposit_entire_worktop_or_abort(
+            address_of_owner.scrypto(),
+            None,
+        );
 
-        TransactionManifest::from_scrypto(
-            scrypto_manifest,
+        TransactionManifest::sargon_built(
+            builder,
             address_of_owner.network_id(),
         )
     }
@@ -166,8 +162,10 @@ impl TransactionManifest {
     ///
     /// # Panics
     /// Panics if `address_of_owner` is on `Mainnet`, use a testnet instead.
+    /// Panics if `count` is zero or is greater than the number of token metadata defined in `sample_resource_definition_metadata` (25)
     pub fn create_multiple_fungible_tokens(
         address_of_owner: &AccountAddress,
+        count: impl Into<Option<u8>>,
     ) -> TransactionManifest {
         if address_of_owner.network_id() == NetworkID::Mainnet {
             panic!("To be 100% sure about license of the images, we do not allow these sample fungible tokens to be created on Mainnet.");
@@ -187,7 +185,17 @@ impl TransactionManifest {
         let multiple_fungibles: MultipleFungibleTokens =
             serde_json::from_value(json).unwrap();
         info!("Generating multiple fungibles using bundled file, '\nDescription:\n'{}'", &multiple_fungibles.description);
-        let fungibles = multiple_fungibles.tokens;
+        let all_fungibles = multiple_fungibles.tokens;
+        let max_count = all_fungibles.len();
+        let count = count.into().map(|c| c as usize).unwrap_or(max_count);
+        if count > max_count || count == 0 {
+            panic!(
+                "Invalid 'count', must be: 0 < 'count' < {}",
+                all_fungibles.len()
+            )
+        }
+        let fungibles = all_fungibles.into_iter().take(count).collect_vec();
+        assert_eq!(fungibles.len(), count);
 
         let mut builder = ScryptoManifestBuilder::new();
 
@@ -199,15 +207,13 @@ impl TransactionManifest {
             );
         }
 
-        let scrypto_manifest = builder
-            .try_deposit_entire_worktop_or_abort(
-                address_of_owner.scrypto(),
-                None,
-            )
-            .build();
+        builder = builder.try_deposit_entire_worktop_or_abort(
+            address_of_owner.scrypto(),
+            None,
+        );
 
-        TransactionManifest::from_scrypto(
-            scrypto_manifest,
+        TransactionManifest::sargon_built(
+            builder,
             address_of_owner.network_id(),
         )
     }
@@ -217,12 +223,46 @@ impl TokenDefinitionMetadata {
     pub(crate) fn for_nft_collection(index: U11) -> Self {
         let word = bip39_word_by_index(index).word;
         let name = capitalize(word.clone());
+        let base_url = "https://image-service-test-images.s3.eu-west-2.amazonaws.com/wallet_test_images/";
+
+        let test_images = [
+            "scryptonaut_patch.svg",
+            "Filling+Station+Breakfast-large.jpg",
+            "Filling+Station+Breakfast-medium.jpg",
+            "Filling+Station+Breakfast-small.jpg",
+            "Frame+6-large.png",
+            "Frame+6-medium.png",
+            "Frame+6-small.png",
+            "Fried+Kway+Teow-large.jpg",
+            "Fried+Kway+Teow-medium.jpg",
+            "Fried+Kway+Teow-small.jpg",
+            "ICON-transparency.png",
+            "KL+Haze-large.jpg",
+            "KL+Haze-medium.jpg",
+            "KL+Haze-small.jpg",
+            "modern_kunst_museum_pano-2.jpg",
+            "modern_kunst_museum_pano-3.jpg",
+            "modern_kunst_museum_pano.jpg",
+        ];
+
+        let test_image =
+            test_images[(index.inner as usize) % test_images.len()];
+
+        let icon_url = format!("{}{}", base_url, test_image);
+
         TokenDefinitionMetadata::new(
             name.clone(),
-            format!("{}: An amazingly innovative and rare NFT collection", name),
+            format!(
+                "{}: An amazingly innovative and rare NFT collection",
+                name
+            ),
             word.to_uppercase(),
-            "https://image-service-test-images.s3.eu-west-2.amazonaws.com/wallet_test_images/KLHaze-medium.jpg",
-            ["Unique".to_string(), "FOMO".to_string(), "Advanced".to_string()],
+            icon_url,
+            [
+                "Unique".to_string(),
+                "FOMO".to_string(),
+                "Advanced".to_string(),
+            ],
         )
     }
 }
@@ -337,7 +377,7 @@ mod tests {
             ),
             "icon_url" => Tuple(
                 Enum<1u8>(
-                    Enum<0u8>(
+                    Enum<13u8>(
                         "https://uxwing.com/wp-content/themes/uxwing/download/arts-graphic-shapes/star-full-icon.png"
                     )
                 ),
@@ -388,6 +428,7 @@ CALL_METHOD
     fn create_multiple_fungible_tokens() {
         let manifest = TransactionManifest::create_multiple_fungible_tokens(
             &AccountAddress::sample_stokenet(),
+            None,
         );
         assert_eq!(manifest.instructions().len(), 26);
     }
@@ -399,6 +440,25 @@ CALL_METHOD
     fn create_multiple_fungible_tokens_panics_for_mainnet() {
         TransactionManifest::create_multiple_fungible_tokens(
             &AccountAddress::sample_mainnet(),
+            None,
+        );
+    }
+
+    #[test]
+    #[should_panic(expected = "Invalid 'count', must be: 0 < 'count' < 25")]
+    fn create_multiple_fungible_tokens_panics_when_count_is_too_large() {
+        TransactionManifest::create_multiple_fungible_tokens(
+            &AccountAddress::sample_stokenet(),
+            100,
+        );
+    }
+
+    #[test]
+    #[should_panic(expected = "Invalid 'count', must be: 0 < 'count' < 25")]
+    fn create_multiple_fungible_tokens_panics_when_count_is_zero() {
+        TransactionManifest::create_multiple_fungible_tokens(
+            &AccountAddress::sample_stokenet(),
+            0,
         );
     }
 
@@ -424,375 +484,13 @@ CALL_METHOD
         let manifest =
             TransactionManifest::create_non_fungible_tokens_collections(
                 &AccountAddress::sample_stokenet(),
-                2,
+                3,
                 2,
             );
-        let expected_manifest = r##"
-        CREATE_NON_FUNGIBLE_RESOURCE_WITH_INITIAL_SUPPLY
-        Enum<2u8>(
-            Enum<0u8>()
-        )
-        Enum<1u8>()
-        true
-        Enum<0u8>(
-            Enum<0u8>(
-                Tuple(
-                    Array<Enum>(
-                        Enum<14u8>(
-                            Array<Enum>(
-                                Enum<0u8>(
-                                    12u8
-                                )
-                            )
-                        )
-                    ),
-                    Array<Tuple>(
-                        Tuple(
-                            Enum<1u8>(
-                                "NonFungibleTokenData"
-                            ),
-                            Enum<1u8>(
-                                Enum<0u8>(
-                                    Array<String>(
-                                        "name"
-                                    )
-                                )
-                            )
-                        )
-                    ),
-                    Array<Enum>(
-                        Enum<0u8>()
-                    )
-                )
-            ),
-            Enum<1u8>(
-                0u64
-            ),
-            Array<String>(
-                "name"
-            )
-        )
-        Map<NonFungibleLocalId, Tuple>(
-            NonFungibleLocalId("#0#") => Tuple(
-                Tuple(
-                    "nf-number-0"
-                )
-            ),
-            NonFungibleLocalId("#1#") => Tuple(
-                Tuple(
-                    "nf-number-1"
-                )
-            )
-        )
-        Tuple(
-            Enum<1u8>(
-                Tuple(
-                    Enum<1u8>(
-                        Enum<0u8>()
-                    ),
-                    Enum<1u8>(
-                        Enum<1u8>()
-                    )
-                )
-            ),
-            Enum<1u8>(
-                Tuple(
-                    Enum<1u8>(
-                        Enum<0u8>()
-                    ),
-                    Enum<1u8>(
-                        Enum<1u8>()
-                    )
-                )
-            ),
-            Enum<1u8>(
-                Tuple(
-                    Enum<1u8>(
-                        Enum<0u8>()
-                    ),
-                    Enum<1u8>(
-                        Enum<1u8>()
-                    )
-                )
-            ),
-            Enum<1u8>(
-                Tuple(
-                    Enum<1u8>(
-                        Enum<0u8>()
-                    ),
-                    Enum<1u8>(
-                        Enum<1u8>()
-                    )
-                )
-            ),
-            Enum<1u8>(
-                Tuple(
-                    Enum<1u8>(
-                        Enum<0u8>()
-                    ),
-                    Enum<1u8>(
-                        Enum<1u8>()
-                    )
-                )
-            ),
-            Enum<1u8>(
-                Tuple(
-                    Enum<1u8>(
-                        Enum<0u8>()
-                    ),
-                    Enum<1u8>(
-                        Enum<1u8>()
-                    )
-                )
-            ),
-            Enum<1u8>(
-                Tuple(
-                    Enum<1u8>(
-                        Enum<0u8>()
-                    ),
-                    Enum<1u8>(
-                        Enum<1u8>()
-                    )
-                )
-            )
-        )
-        Tuple(
-            Map<String, Tuple>(
-                "description" => Tuple(
-                    Enum<1u8>(
-                        Enum<0u8>(
-                            "Abandon: An amazingly innovative and rare NFT collection"
-                        )
-                    ),
-                    false
-                ),
-                "icon_url" => Tuple(
-                    Enum<1u8>(
-                        Enum<0u8>(
-                            "https://image-service-test-images.s3.eu-west-2.amazonaws.com/wallet_test_images/KLHaze-medium.jpg"
-                        )
-                    ),
-                    false
-                ),
-                "name" => Tuple(
-                    Enum<1u8>(
-                        Enum<0u8>(
-                            "Abandon"
-                        )
-                    ),
-                    false
-                ),
-                "symbol" => Tuple(
-                    Enum<1u8>(
-                        Enum<0u8>(
-                            "ABANDON"
-                        )
-                    ),
-                    false
-                ),
-                "tags" => Tuple(
-                    Enum<1u8>(
-                        Enum<128u8>(
-                            Array<String>(
-                                "Unique",
-                                "FOMO",
-                                "Advanced"
-                            )
-                        )
-                    ),
-                    false
-                )
-            ),
-            Map<String, Enum>()
-        )
-        Enum<0u8>()
-    ;
-    CREATE_NON_FUNGIBLE_RESOURCE_WITH_INITIAL_SUPPLY
-        Enum<2u8>(
-            Enum<0u8>()
-        )
-        Enum<1u8>()
-        true
-        Enum<0u8>(
-            Enum<0u8>(
-                Tuple(
-                    Array<Enum>(
-                        Enum<14u8>(
-                            Array<Enum>(
-                                Enum<0u8>(
-                                    12u8
-                                )
-                            )
-                        )
-                    ),
-                    Array<Tuple>(
-                        Tuple(
-                            Enum<1u8>(
-                                "NonFungibleTokenData"
-                            ),
-                            Enum<1u8>(
-                                Enum<0u8>(
-                                    Array<String>(
-                                        "name"
-                                    )
-                                )
-                            )
-                        )
-                    ),
-                    Array<Enum>(
-                        Enum<0u8>()
-                    )
-                )
-            ),
-            Enum<1u8>(
-                0u64
-            ),
-            Array<String>(
-                "name"
-            )
-        )
-        Map<NonFungibleLocalId, Tuple>(
-            NonFungibleLocalId("#0#") => Tuple(
-                Tuple(
-                    "nf-number-0"
-                )
-            ),
-            NonFungibleLocalId("#1#") => Tuple(
-                Tuple(
-                    "nf-number-1"
-                )
-            )
-        )
-        Tuple(
-            Enum<1u8>(
-                Tuple(
-                    Enum<1u8>(
-                        Enum<0u8>()
-                    ),
-                    Enum<1u8>(
-                        Enum<1u8>()
-                    )
-                )
-            ),
-            Enum<1u8>(
-                Tuple(
-                    Enum<1u8>(
-                        Enum<0u8>()
-                    ),
-                    Enum<1u8>(
-                        Enum<1u8>()
-                    )
-                )
-            ),
-            Enum<1u8>(
-                Tuple(
-                    Enum<1u8>(
-                        Enum<0u8>()
-                    ),
-                    Enum<1u8>(
-                        Enum<1u8>()
-                    )
-                )
-            ),
-            Enum<1u8>(
-                Tuple(
-                    Enum<1u8>(
-                        Enum<0u8>()
-                    ),
-                    Enum<1u8>(
-                        Enum<1u8>()
-                    )
-                )
-            ),
-            Enum<1u8>(
-                Tuple(
-                    Enum<1u8>(
-                        Enum<0u8>()
-                    ),
-                    Enum<1u8>(
-                        Enum<1u8>()
-                    )
-                )
-            ),
-            Enum<1u8>(
-                Tuple(
-                    Enum<1u8>(
-                        Enum<0u8>()
-                    ),
-                    Enum<1u8>(
-                        Enum<1u8>()
-                    )
-                )
-            ),
-            Enum<1u8>(
-                Tuple(
-                    Enum<1u8>(
-                        Enum<0u8>()
-                    ),
-                    Enum<1u8>(
-                        Enum<1u8>()
-                    )
-                )
-            )
-        )
-        Tuple(
-            Map<String, Tuple>(
-                "description" => Tuple(
-                    Enum<1u8>(
-                        Enum<0u8>(
-                            "Ability: An amazingly innovative and rare NFT collection"
-                        )
-                    ),
-                    false
-                ),
-                "icon_url" => Tuple(
-                    Enum<1u8>(
-                        Enum<0u8>(
-                            "https://image-service-test-images.s3.eu-west-2.amazonaws.com/wallet_test_images/KLHaze-medium.jpg"
-                        )
-                    ),
-                    false
-                ),
-                "name" => Tuple(
-                    Enum<1u8>(
-                        Enum<0u8>(
-                            "Ability"
-                        )
-                    ),
-                    false
-                ),
-                "symbol" => Tuple(
-                    Enum<1u8>(
-                        Enum<0u8>(
-                            "ABILITY"
-                        )
-                    ),
-                    false
-                ),
-                "tags" => Tuple(
-                    Enum<1u8>(
-                        Enum<128u8>(
-                            Array<String>(
-                                "Unique",
-                                "FOMO",
-                                "Advanced"
-                            )
-                        )
-                    ),
-                    false
-                )
-            ),
-            Map<String, Enum>()
-        )
-        Enum<0u8>()
-    ;
-    CALL_METHOD
-        Address("account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql")
-        "try_deposit_batch_or_abort"
-        Expression("ENTIRE_WORKTOP")
-        Enum<0u8>()
-    ;
-        "##;
+        let expected_manifest = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "create_3_nft_collections.rtm"
+        ));
         manifest_eq(manifest, expected_manifest);
     }
 

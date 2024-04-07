@@ -1,11 +1,10 @@
 package com.radixdlt.sargon.extensions
 
+import com.radixdlt.sargon.Address
 import com.radixdlt.sargon.AddressFormat
 import com.radixdlt.sargon.NetworkId
-import com.radixdlt.sargon.ValidatorAddress
 import com.radixdlt.sargon.VaultAddress
 import com.radixdlt.sargon.newVaultAddress
-import com.radixdlt.sargon.validatorAddressFormatted
 import com.radixdlt.sargon.vaultAddressBech32Address
 import com.radixdlt.sargon.vaultAddressFormatted
 import com.radixdlt.sargon.vaultAddressIsFungible
@@ -31,3 +30,5 @@ val VaultAddress.isNonFungible: Boolean
 fun VaultAddress.formatted(
     format: AddressFormat = AddressFormat.DEFAULT
 ): String = vaultAddressFormatted(address = this, format = format)
+
+fun VaultAddress.asGeneral(): Address.Vault = Address.Vault(this)

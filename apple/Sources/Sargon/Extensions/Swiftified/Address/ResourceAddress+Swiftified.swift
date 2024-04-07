@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 extension ResourceAddress: AddressProtocol {}
 
 extension ResourceAddress {
@@ -16,4 +18,8 @@ extension ResourceAddress {
 	
 	/// The ResourceAddress of XRD of mainnet
 	public static let mainnetXRD = Self.xrd(on: .mainnet)
+	
+	public var asGeneral: Address {
+		.resource(self)
+	}
 }

@@ -1,6 +1,6 @@
 package com.radixdlt.sargon.samples
 
-import androidx.annotation.VisibleForTesting
+import com.radixdlt.sargon.annotation.UsesSampleValues
 import com.radixdlt.sargon.PerAssetTransfers
 import com.radixdlt.sargon.TransactionManifest
 import com.radixdlt.sargon.newPerAssetTransfersSample
@@ -8,7 +8,7 @@ import com.radixdlt.sargon.newPerAssetTransfersSampleOther
 import com.radixdlt.sargon.newTransactionManifestSample
 import com.radixdlt.sargon.newTransactionManifestSampleOther
 
-@VisibleForTesting
+@UsesSampleValues
 val TransactionManifest.Companion.sample: Sample<TransactionManifest>
     get() = object : Sample<TransactionManifest> {
 
@@ -18,7 +18,7 @@ val TransactionManifest.Companion.sample: Sample<TransactionManifest>
 
     }
 
-@VisibleForTesting
+@UsesSampleValues
 val PerAssetTransfers.Companion.sample: Sample<PerAssetTransfers>
     get() = object : Sample<PerAssetTransfers> {
 

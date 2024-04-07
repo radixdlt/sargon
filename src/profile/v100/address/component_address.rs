@@ -1,6 +1,18 @@
 use crate::prelude::*;
 
 impl ComponentAddress {
+    pub fn is_global(&self) -> bool {
+        self.secret_magic.entity_type()
+            == ScryptoEntityType::GlobalGenericComponent
+    }
+
+    pub fn is_internal(&self) -> bool {
+        self.secret_magic.entity_type()
+            == ScryptoEntityType::InternalGenericComponent
+    }
+}
+
+impl ComponentAddress {
     pub(crate) fn sample_mainnet() -> Self {
         Self::sample_mainnet_global()
     }
@@ -16,6 +28,18 @@ impl ComponentAddress {
     pub(crate) fn sample_stokenet_other() -> Self {
         Self::sample_stokenet_internal()
     }
+}
+
+/// Returns `true` if the ComponentAddress is `global` (i.e. not `internal`)
+#[uniffi::export]
+pub fn component_address_is_global(address: &ComponentAddress) -> bool {
+    address.is_global()
+}
+
+/// Returns `true` if the ComponentAddress is `internal` (i.e. not `global`)
+#[uniffi::export]
+pub fn component_address_is_internal(address: &ComponentAddress) -> bool {
+    address.is_internal()
 }
 
 /// Sample to a mainnet ComponentAddress (global)
@@ -108,6 +132,22 @@ mod tests {
             SUT::sample_mainnet_internal()
         );
         assert_ne!(SUT::sample_stokenet_global(), SUT::sample_mainnet_global());
+    }
+
+    #[test]
+    fn is_internal() {
+        assert!(SUT::sample_stokenet_internal().is_internal());
+        assert!(SUT::sample_mainnet_internal().is_internal());
+        assert!(!SUT::sample_mainnet_global().is_internal());
+        assert!(!SUT::sample_stokenet_global().is_internal());
+    }
+
+    #[test]
+    fn is_global() {
+        assert!(SUT::sample_mainnet_global().is_global());
+        assert!(SUT::sample_stokenet_global().is_global());
+        assert!(!SUT::sample_stokenet_internal().is_global());
+        assert!(!SUT::sample_mainnet_internal().is_global());
     }
 
     #[test]
@@ -233,5 +273,31 @@ mod uniffi_tests {
             .len(),
             4
         );
+    }
+
+    #[test]
+    fn test_component_address_is_global() {
+        assert!(component_address_is_global(&SUT::sample_mainnet_global()));
+        assert!(component_address_is_global(&SUT::sample_stokenet_global()));
+
+        assert!(!component_address_is_global(
+            &SUT::sample_stokenet_internal()
+        ));
+        assert!(!component_address_is_global(&SUT::sample_mainnet_internal()));
+    }
+
+    #[test]
+    fn test_component_address_is_internal() {
+        assert!(component_address_is_internal(
+            &SUT::sample_stokenet_internal()
+        ));
+        assert!(component_address_is_internal(
+            &SUT::sample_mainnet_internal()
+        ));
+
+        assert!(!component_address_is_internal(&SUT::sample_mainnet_global()));
+        assert!(!component_address_is_internal(
+            &SUT::sample_stokenet_global()
+        ));
     }
 }

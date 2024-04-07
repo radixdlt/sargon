@@ -107,7 +107,8 @@ pub mod prelude {
                 RUIDNonFungibleLocalId as ScryptoRUIDNonFungibleLocalId,
                 StringNonFungibleLocalId as ScryptoStringNonFungibleLocalId,
             },
-            scrypto_decode, scrypto_encode,
+            scrypto_decode as Scrypto_scrypto_decode,
+            scrypto_encode as Scrypto_scrypto_encode,
         },
         math::{
             Decimal as ScryptoDecimal192, RoundingMode as ScryptoRoundingMode,

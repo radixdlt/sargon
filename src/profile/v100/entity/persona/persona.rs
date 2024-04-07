@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-/// A Persona is an identity a user choses to login to a dApp with, using
+/// A Persona is an identity a user chooses to login to a dApp with, using
 /// RadixConnect - Radix decentralized login solution. A persona is very
 /// similar to [`Account`]s, in the sense that they are On-Network/On-Ledger
 /// components, with a unique network dependent address ([`IdentityAddress`])

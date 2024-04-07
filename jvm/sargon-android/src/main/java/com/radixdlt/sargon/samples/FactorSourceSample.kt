@@ -1,11 +1,11 @@
 package com.radixdlt.sargon.samples
 
-import androidx.annotation.VisibleForTesting
+import com.radixdlt.sargon.annotation.UsesSampleValues
 import com.radixdlt.sargon.newFactorSourcesSample
 import com.radixdlt.sargon.newFactorSourcesSampleOther
 
-@VisibleForTesting
+@UsesSampleValues
 fun factorSourcesSample() = newFactorSourcesSample()
 
-@VisibleForTesting
+@UsesSampleValues
 fun factorSourcesSampleOther() = newFactorSourcesSampleOther()

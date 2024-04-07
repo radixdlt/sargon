@@ -1,5 +1,5 @@
 extension PublicKey: PublicKeyProtocol {
-	public func embed() -> PublicKey {
+    public var asGeneral: PublicKey {
 		self
 	}
 }

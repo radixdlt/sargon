@@ -1,11 +1,11 @@
 package com.radixdlt.sargon.samples
 
-import androidx.annotation.VisibleForTesting
+import com.radixdlt.sargon.annotation.UsesSampleValues
 import com.radixdlt.sargon.Gateways
 import com.radixdlt.sargon.newGatewaysSample
 import com.radixdlt.sargon.newGatewaysSampleOther
 
-@VisibleForTesting
+@UsesSampleValues
 val Gateways.Companion.sample: Sample<Gateways>
     get() = object : Sample<Gateways> {
 

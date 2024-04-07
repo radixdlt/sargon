@@ -1,13 +1,13 @@
 package com.radixdlt.sargon.samples
 
-import androidx.annotation.VisibleForTesting
+import com.radixdlt.sargon.annotation.UsesSampleValues
 import com.radixdlt.sargon.NonFungibleResourceAddress
 import com.radixdlt.sargon.newNonFungibleResourceAddressSampleMainnet
 import com.radixdlt.sargon.newNonFungibleResourceAddressSampleMainnetOther
 import com.radixdlt.sargon.newNonFungibleResourceAddressSampleStokenet
 import com.radixdlt.sargon.newNonFungibleResourceAddressSampleStokenetOther
 
-@VisibleForTesting
+@UsesSampleValues
 val NonFungibleResourceAddress.Companion.sampleMainnet: Sample<NonFungibleResourceAddress>
     get() = object : Sample<NonFungibleResourceAddress> {
 
@@ -19,7 +19,7 @@ val NonFungibleResourceAddress.Companion.sampleMainnet: Sample<NonFungibleResour
 
     }
 
-@VisibleForTesting
+@UsesSampleValues
 val NonFungibleResourceAddress.Companion.sampleStokenet: Sample<NonFungibleResourceAddress>
     get() = object : Sample<NonFungibleResourceAddress> {
 

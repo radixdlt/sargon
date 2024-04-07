@@ -18,12 +18,7 @@ extension AddressOfAccountOrPersona {
 		addressOfAccountOrPersonaFormatted(address: self, format: format)
 	}
 	
-	public func embed() -> Address {
-		switch self {
-		case let .account(accountAddress): Address.account(accountAddress)
-		case let .identity(identityAddress): Address.identity(identityAddress)
-		}
-	}
+
 }
 
 #if DEBUG

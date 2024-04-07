@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 #if DEBUG
 public protocol BaseBaseAddressProtocol: SargonModel, ExpressibleByStringLiteral {}
 #else
@@ -9,6 +11,13 @@ public protocol BaseAddressProtocol: BaseBaseAddressProtocol, Codable, CustomStr
 	var networkID: NetworkID { get }
 	var address: String { get }
 }
+
+extension AddressProtocol {
+	public var isOnMainnet: Bool {
+		self.networkID == .mainnet
+	}
+}
+
 
 extension BaseAddressProtocol {
 	public var description: String {
@@ -39,7 +48,7 @@ extension BaseAddressProtocol {
 
 public protocol AddressProtocol: BaseAddressProtocol & Identifiable where Self.ID == String {
     func formatted(_ format: AddressFormat) -> String
-	func embed() -> Address
+    var asGeneral: Address { get }
 #if DEBUG
 	static func random(networkID: NetworkID) -> Self
 	func mapTo(networkID: NetworkID) -> Self

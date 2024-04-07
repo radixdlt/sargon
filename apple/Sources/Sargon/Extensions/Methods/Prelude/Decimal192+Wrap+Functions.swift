@@ -9,7 +9,11 @@ extension Decimal192 {
 	public init(_ float32: Float32) throws {
 		self = try newDecimalFromF32(value: float32)
 	}
-	
+    
+    public init(_ double: Double) throws {
+        self = try newDecimalFromF64(value: double)
+    }
+    
 	public init(_ value: Int64) {
 		self = newDecimalFromI64(value: value)
 	}

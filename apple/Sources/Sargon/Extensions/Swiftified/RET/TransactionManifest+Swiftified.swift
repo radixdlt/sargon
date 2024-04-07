@@ -107,21 +107,35 @@ extension TransactionManifest {
     
     
     public static func createMultipleFungibleTokens(
-        addressOfOwner: AccountAddress
+        addressOfOwner: AccountAddress,
+		count: UInt8? = 10
     ) -> Self {
-       manifestCreateMultipleFungibleTokens(addressOfOwner: addressOfOwner)
+		manifestCreateMultipleFungibleTokens(
+			addressOfOwner: addressOfOwner,
+			count: count
+		)
     }
 
     public static func createMultipleNonFungibleTokens(
-        addressOfOwner: AccountAddress
+        addressOfOwner: AccountAddress,
+		collectionCount: UInt8? = nil,
+		nftsPerCollection: UInt8? = nil
     ) -> Self {
-       manifestCreateMultipleNonFungibleTokens(addressOfOwner: addressOfOwner)
+		manifestCreateMultipleNonFungibleTokens(
+			addressOfOwner: addressOfOwner,
+			collectionCount: collectionCount,
+			nftsPerCollection: nftsPerCollection
+		)
     }
 
     public static func createNonFungibleToken(
-        addressOfOwner: AccountAddress
+        addressOfOwner: AccountAddress,
+		nftsPerCollection: UInt8? = nil
     ) -> Self {
-        manifestCreateNonFungibleToken(addressOfOwner: addressOfOwner)
+		manifestCreateNonFungibleToken(
+			addressOfOwner: addressOfOwner,
+			nftsPerCollection: nftsPerCollection
+		)
     }
     
 }

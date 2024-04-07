@@ -1,8 +1,8 @@
 package com.radixdlt.sargon.samples
 
-import androidx.annotation.VisibleForTesting
+import com.radixdlt.sargon.annotation.UsesSampleValues
 
-@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+@UsesSampleValues
 interface Sample<T> {
 
     val all: List<T>
@@ -14,6 +14,7 @@ interface Sample<T> {
 
 }
 
+@UsesSampleValues
 interface SampleWithRandomValues<T>: Sample<T> {
 
     override val all: List<T>

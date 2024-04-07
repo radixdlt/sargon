@@ -1,9 +1,11 @@
 package com.radixdlt.sargon
 
+import com.radixdlt.sargon.extensions.asGeneral
 import com.radixdlt.sargon.extensions.formatted
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.isFungible
 import com.radixdlt.sargon.extensions.isNonFungible
+import com.radixdlt.sargon.extensions.isXRD
 import com.radixdlt.sargon.extensions.networkId
 import com.radixdlt.sargon.extensions.string
 import com.radixdlt.sargon.extensions.xrd
@@ -51,6 +53,19 @@ class ResourceAddressTest: SampleTestable<ResourceAddress> {
             addressString,
             address.formatted(format = AddressFormat.RAW)
         )
+    }
+
+    @Test
+    fun testIsXrd() {
+        assertTrue(ResourceAddress.sampleMainnet.xrd.isXRD)
+        assertFalse(ResourceAddress.sampleMainnet.candy.isXRD)
+    }
+
+    @Test
+    fun testAsGeneral() {
+        val address = ResourceAddress.sampleMainnet()
+
+        assertEquals(Address.Resource(address), address.asGeneral())
     }
 
 }

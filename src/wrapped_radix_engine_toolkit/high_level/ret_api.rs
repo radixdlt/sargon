@@ -55,28 +55,39 @@ pub fn manifest_create_fungible_token(
 ///
 /// # Panics
 /// Panics if `address_of_owner` is on `Mainnet`, use a testnet instead.
+/// Panics if `count` is zero or is greater than the number of token metadata defined in `sample_resource_definition_metadata` (25)
 #[uniffi::export]
 pub fn manifest_create_multiple_fungible_tokens(
     address_of_owner: &AccountAddress,
+    count: Option<u8>,
 ) -> TransactionManifest {
-    TransactionManifest::create_multiple_fungible_tokens(address_of_owner)
+    TransactionManifest::create_multiple_fungible_tokens(
+        address_of_owner,
+        count,
+    )
 }
 
 #[uniffi::export]
 pub fn manifest_create_non_fungible_token(
     address_of_owner: &AccountAddress,
+    nfts_per_collection: Option<u8>,
 ) -> TransactionManifest {
-    TransactionManifest::create_single_nft_collection(address_of_owner, 20)
+    TransactionManifest::create_single_nft_collection(
+        address_of_owner,
+        nfts_per_collection.map(|n| n as u64).unwrap_or(20),
+    )
 }
 
 #[uniffi::export]
 pub fn manifest_create_multiple_non_fungible_tokens(
     address_of_owner: &AccountAddress,
+    collection_count: Option<u8>,
+    nfts_per_collection: Option<u8>,
 ) -> TransactionManifest {
     TransactionManifest::create_multiple_nft_collections(
         address_of_owner,
-        15,
-        10,
+        collection_count.map(|n| n as u16).unwrap_or(15),
+        nfts_per_collection.map(|n| n as u64).unwrap_or(10),
     )
 }
 
@@ -143,9 +154,7 @@ pub fn xrd_address_of_network(network_id: NetworkID) -> ResourceAddress {
 pub fn debug_print_compiled_notarized_intent(
     compiled: CompiledNotarizedIntent,
 ) -> String {
-    let notarized = compiled
-        .decompile()
-        .expect("Should never failed to decompile");
+    let notarized = compiled.decompile();
     format!("{:?}", notarized)
 }
 
@@ -299,7 +308,7 @@ mod tests {
     #[test]
     fn test_manifest_create_multiple_fungible_tokens_owner() {
         let test = |a| {
-            let manifest = manifest_create_multiple_fungible_tokens(&a);
+            let manifest = manifest_create_multiple_fungible_tokens(&a, None);
             assert!(manifest.to_string().contains(&a.to_string()))
         };
         test(AccountAddress::sample_stokenet());
@@ -308,16 +317,26 @@ mod tests {
 
     #[test]
     fn test_manifest_create_multiple_fungible_tokens_number_of_tokens() {
-        let manifest = manifest_create_multiple_fungible_tokens(
-            &AccountAddress::sample_stokenet(),
-        );
-        assert_eq!(manifest.to_string().matches("symbol").count(), 25);
+        let test = |n: u8| {
+            let manifest = manifest_create_multiple_fungible_tokens(
+                &AccountAddress::sample_stokenet(),
+                Some(n),
+            );
+            assert_eq!(
+                manifest.to_string().matches("symbol").count(),
+                n as usize
+            );
+        };
+        test(1);
+        test(2);
+        test(24);
+        test(25);
     }
 
     #[test]
     fn test_manifest_create_non_fungible_token() {
         assert_eq!(
-            manifest_create_non_fungible_token(&AccountAddress::sample())
+            manifest_create_non_fungible_token(&AccountAddress::sample(), None)
                 .instructions()
                 .len(),
             2
@@ -326,10 +345,17 @@ mod tests {
 
     #[test]
     fn test_manifest_create_multiple_non_fungible_tokens() {
-        let manifest = manifest_create_multiple_non_fungible_tokens(
-            &AccountAddress::sample_mainnet(),
-        );
-        assert_eq!(manifest.instructions().len(), 16);
+        let test = |n: u8| {
+            let manifest = manifest_create_multiple_non_fungible_tokens(
+                &AccountAddress::sample_mainnet(),
+                Some(n),
+                None,
+            );
+            assert_eq!(manifest.instructions().len(), (n as usize) + 1);
+        };
+        test(1);
+        test(2);
+        test(15);
     }
 
     #[test]

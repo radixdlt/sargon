@@ -1,11 +1,11 @@
 package com.radixdlt.sargon.samples
 
-import androidx.annotation.VisibleForTesting
+import com.radixdlt.sargon.annotation.UsesSampleValues
 import com.radixdlt.sargon.RadixConnectPassword
 import com.radixdlt.sargon.newRadixConnectPasswordSample
 import com.radixdlt.sargon.newRadixConnectPasswordSampleOther
 
-@VisibleForTesting
+@UsesSampleValues
 val RadixConnectPassword.Companion.sample: Sample<RadixConnectPassword>
     get() = object : Sample<RadixConnectPassword> {
 

@@ -8,31 +8,31 @@ import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class Secp256k1SignatureTest: SampleTestable<Secp256k1Signature> {
-    override val samples: List<Sample<Secp256k1Signature>>
-        get() = listOf(Secp256k1Signature.sample)
+class Secp256k1SignatureTest: SampleTestable<Signature.Secp256k1> {
+    override val samples: List<Sample<Signature.Secp256k1>>
+        get() = listOf(Signature.Secp256k1.sample)
 
     @Test
     fun testFromExactly64Bytes() {
         assertEquals(
-            Secp256k1Signature.sample(),
-            Secp256k1Signature.init(Secp256k1Signature.sample().bytes)
+            Signature.Secp256k1.sample(),
+            Signature.Secp256k1.init(Signature.Secp256k1.sample().value.bytes)
         )
     }
 
     @Test
     fun testFromBytes() {
         assertEquals(
-            Secp256k1Signature.sample(),
-            Secp256k1Signature.init(Secp256k1Signature.sample().bytes.bytes)
+            Signature.Secp256k1.sample(),
+            Signature.Secp256k1.init(Signature.Secp256k1.sample().bytes)
         )
     }
 
     @Test
     fun testString() {
         assertEquals(
-            Secp256k1Signature.sample().string,
-            Secp256k1Signature.init(Secp256k1Signature.sample().bytes).string
+            Signature.Secp256k1.sample().string,
+            Signature.Secp256k1.init(Signature.Secp256k1.sample().bytes).string
         )
     }
 }

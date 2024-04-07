@@ -18,9 +18,6 @@ extension AccessControllerAddress {
 		accessControllerAddressNetworkId(address: self)
 	}
 	
-	public func embed() -> Address {
-		.accessController(self)
-	}
 }
 
 #if DEBUG

@@ -22,7 +22,9 @@ impl TransactionManifest {
                     "Failed to get execution summary from RET, error: {:?}",
                     e
                 );
-                CommonError::FailedToGetRetExecutionSummaryFromManifest
+                CommonError::ExecutionSummaryFail {
+                    underlying: format!("{:?}", e),
+                }
             })?;
 
         Ok(ExecutionSummary::from((
@@ -54,7 +56,8 @@ mod tests {
 
     #[test]
     fn failure_if_receipt_result_is_abort() {
-        let encoded_receipt_hex = include_str!("create_pool.dat");
+        let encoded_receipt_hex =
+            include_str!(concat!(env!("FIXTURES_TX"), "create_pool.dat"));
         let wrong_receipt_raw =
             BagOfBytes::from_hex(encoded_receipt_hex).unwrap();
         let mut wrong_receipt: TransactionReceipt =
@@ -65,7 +68,9 @@ mod tests {
         assert_eq!(
             TransactionManifest::sample()
                 .execution_summary_with_receipt(wrong_receipt),
-            Err(CommonError::FailedToGetRetExecutionSummaryFromManifest)
+            Err(CommonError::ExecutionSummaryFail {
+                underlying: "InvalidReceipt".to_owned()
+            })
         );
     }
 
@@ -77,10 +82,14 @@ mod tests {
 
     #[test]
     fn transfer_1to2_multiple_nf_and_f_tokens() {
-        let encoded_receipt_hex =
-            include_str!("transfer_1to2_multiple_nf_and_f_tokens.dat");
-        let instructions_string =
-            include_str!("transfer_1to2_multiple_nf_and_f_tokens.rtm");
+        let encoded_receipt_hex = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "transfer_1to2_multiple_nf_and_f_tokens.dat"
+        ));
+        let instructions_string = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "transfer_1to2_multiple_nf_and_f_tokens.rtm"
+        ));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -181,10 +190,14 @@ mod tests {
 
     #[test]
     fn third_party_deposits_update() {
-        let encoded_receipt_hex =
-            include_str!("third_party_deposits_update.dat");
-        let instructions_string =
-            include_str!("third_party_deposits_update.rtm");
+        let encoded_receipt_hex = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "third_party_deposits_update.dat"
+        ));
+        let instructions_string = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "third_party_deposits_update.rtm"
+        ));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -263,8 +276,14 @@ mod tests {
 
     #[test]
     fn create_single_fungible() {
-        let encoded_receipt_hex = include_str!("create_single_fungible.dat");
-        let instructions_string = include_str!("create_single_fungible.rtm");
+        let encoded_receipt_hex = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "create_single_fungible.dat"
+        ));
+        let instructions_string = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "create_single_fungible.rtm"
+        ));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -318,8 +337,14 @@ mod tests {
 
     #[test]
     fn create_nft_collections() {
-        let encoded_receipt_hex = include_str!("create_nft_collections.dat");
-        let instructions_string = include_str!("create_nft_collections.rtm");
+        let encoded_receipt_hex = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "create_nft_collections.dat"
+        ));
+        let instructions_string = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "create_nft_collections.rtm"
+        ));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -388,8 +413,14 @@ mod tests {
 
     #[test]
     fn mint_nft_gumball_card() {
-        let instructions_string = include_str!("mint_nft_gumball_card.rtm");
-        let encoded_receipt_hex = include_str!("mint_nft_gumball_card.dat");
+        let instructions_string = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "mint_nft_gumball_card.rtm"
+        ));
+        let encoded_receipt_hex = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "mint_nft_gumball_card.dat"
+        ));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -461,8 +492,14 @@ mod tests {
 
     #[test]
     fn present_proof_swap_candy() {
-        let instructions_string = include_str!("present_proof_swap_candy.rtm");
-        let encoded_receipt_hex = include_str!("present_proof_swap_candy.dat");
+        let instructions_string = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "present_proof_swap_candy.rtm"
+        ));
+        let encoded_receipt_hex = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "present_proof_swap_candy.dat"
+        ));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -527,8 +564,10 @@ mod tests {
 
     #[test]
     fn create_pool() {
-        let instructions_string = include_str!("create_pool.rtm");
-        let encoded_receipt_hex = include_str!("create_pool.dat");
+        let instructions_string =
+            include_str!(concat!(env!("FIXTURES_TX"), "create_pool.rtm"));
+        let encoded_receipt_hex =
+            include_str!(concat!(env!("FIXTURES_TX"), "create_pool.dat"));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -576,8 +615,14 @@ mod tests {
 
     #[test]
     fn contribute_to_bi_pool() {
-        let instructions_string = include_str!("contribute_to_bi_pool.rtm");
-        let encoded_receipt_hex = include_str!("contribute_to_bi_pool.dat");
+        let instructions_string = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "contribute_to_bi_pool.rtm"
+        ));
+        let encoded_receipt_hex = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "contribute_to_bi_pool.dat"
+        ));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -659,8 +704,14 @@ mod tests {
 
     #[test]
     fn stake_to_three_validators() {
-        let instructions_string = include_str!("stake_to_three_validators.rtm");
-        let encoded_receipt_hex = include_str!("stake_to_three_validators.dat");
+        let instructions_string = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "stake_to_three_validators.rtm"
+        ));
+        let encoded_receipt_hex = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "stake_to_three_validators.dat"
+        ));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -755,8 +806,14 @@ mod tests {
 
     #[test]
     fn redeem_from_bi_pool() {
-        let instructions_string = include_str!("redeem_from_bi_pool.rtm");
-        let encoded_receipt_hex = include_str!("redeem_from_bi_pool.dat");
+        let instructions_string = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "redeem_from_bi_pool.rtm"
+        ));
+        let encoded_receipt_hex = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "redeem_from_bi_pool.dat"
+        ));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -833,10 +890,14 @@ mod tests {
 
     #[test]
     fn unstake_partially_from_one_validator() {
-        let instructions_string =
-            include_str!("unstake_partially_from_one_validator.rtm");
-        let encoded_receipt_hex =
-            include_str!("unstake_partially_from_one_validator.dat");
+        let instructions_string = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "unstake_partially_from_one_validator.rtm"
+        ));
+        let encoded_receipt_hex = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "unstake_partially_from_one_validator.dat"
+        ));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -921,10 +982,14 @@ mod tests {
 
     #[test]
     fn claim_two_validator_stakes() {
-        let instructions_string =
-            include_str!("claim_two_validator_stakes.rtm");
-        let encoded_receipt_hex =
-            include_str!("claim_two_validator_stakes.dat");
+        let instructions_string = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "claim_two_validator_stakes.rtm"
+        ));
+        let encoded_receipt_hex = include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "claim_two_validator_stakes.dat"
+        ));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,

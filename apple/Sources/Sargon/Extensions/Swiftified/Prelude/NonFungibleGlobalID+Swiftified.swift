@@ -1,6 +1,12 @@
+import SargonUniFFI
+
 public typealias NonFungibleGlobalID = NonFungibleGlobalId
 
-extension NonFungibleGlobalID: IdentifiableByStringProtocol {}
+extension NonFungibleGlobalID: IdentifiableByStringProtocol {
+    public var localID: NonFungibleLocalID {
+        nonFungibleLocalId
+    }
+}
 
 extension NonFungibleGlobalID {
     public init(

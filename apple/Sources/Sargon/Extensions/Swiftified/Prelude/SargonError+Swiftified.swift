@@ -1,10 +1,17 @@
-//
-//  SargonError+Swiftified.swift
-//
-//
-//  Created by Alexander Cyon on 2024-02-16.
-//
-
-import Foundation
+import SargonUniFFI
 
 public typealias SargonError = CommonError
+
+extension SargonError: SargonModel {}
+
+extension SargonError: CustomDebugStringConvertible {
+	public var debugDescription: String {
+		"\(errorCode): \(errorMessage)"
+	}
+}
+
+extension SargonError: CustomStringConvertible {
+	public var description: String {
+		errorMessage
+	}
+}

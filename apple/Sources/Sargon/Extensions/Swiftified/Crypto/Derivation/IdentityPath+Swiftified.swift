@@ -6,11 +6,11 @@ extension IdentityPath {
         case let .identity(value):
             self = value
         case .account, .getId:
-            throw SargonError.WrongEntityKind(message: "Expected Identity")
+			throw SargonError.WrongEntityKind(expected: .identity, found: .account)
         }
     }
     
-    public func embed() -> CAP26Path {
+    public var asGeneral: CAP26Path {
         .identity(value: self)
     }
 }

@@ -1,9 +1,12 @@
 use crate::prelude::*;
 
+use radix_engine::types::MANIFEST_SBOR_V1_MAX_DEPTH;
+use radix_engine_toolkit::functions::address::decode as RET_decode_address;
+
 #[derive(Clone, Debug, PartialEq, Eq, derive_more::Display, uniffi::Record)]
 #[display("{}", self.instructions_string())]
 pub struct Instructions {
-    pub(crate) secret_magic: InstructionsSecretMagic, // MUST be first prop, else you break build.
+    secret_magic: InstructionsSecretMagic, // MUST be first prop, else you break build.
     pub network_id: NetworkID,
 }
 
@@ -11,26 +14,66 @@ impl Deref for Instructions {
     type Target = Vec<ScryptoInstruction>;
 
     fn deref(&self) -> &Self::Target {
-        &self.secret_magic.0
+        self.secret_magic.instructions()
     }
 }
 
+#[cfg(test)]
 impl Instructions {
-    pub(crate) fn from_scrypto(
-        instructions: ScryptoInstructions,
+    /// For tests only, does not validate the SBOR depth of the instructions.
+    pub(crate) fn new_unchecked(
+        instructions: Vec<ScryptoInstruction>,
         network_id: NetworkID,
     ) -> Self {
         Self {
-            secret_magic: instructions.into(),
+            secret_magic: InstructionsSecretMagic::new(instructions),
             network_id,
         }
     }
 }
 
 impl Instructions {
+    pub(crate) fn instructions(&self) -> &Vec<ScryptoInstruction> {
+        self.deref()
+    }
+}
+
+impl TryFrom<(&[ScryptoInstruction], NetworkID)> for Instructions {
+    type Error = CommonError;
+
+    fn try_from(
+        value: (&[ScryptoInstruction], NetworkID),
+    ) -> Result<Self, CommonError> {
+        let scrypto = value.0;
+        let network_id = value.1;
+
+        // Verify that the instructions has acceptable depth and are compatible
+        _ = instructions_string_from(scrypto, network_id)?;
+
+        Ok(Self {
+            secret_magic: InstructionsSecretMagic::from(ScryptoInstructions(
+                scrypto.to_owned(),
+            )),
+            network_id,
+        })
+    }
+}
+
+fn instructions_string_from(
+    scrypto_instructions: &[ScryptoInstruction],
+    network_id: NetworkID,
+) -> Result<String, CommonError> {
+    let network_definition = network_id.network_definition();
+    scrypto_decompile(scrypto_instructions, &network_definition).map_err(|e| {
+        CommonError::InvalidInstructionsFailedToDecompile {
+            underlying: format!("{:?}", e),
+        }
+    })
+}
+
+impl Instructions {
     pub fn instructions_string(&self) -> String {
-        let network_definition = self.network_id.network_definition();
-        scrypto_decompile(self, &network_definition).expect("Should never fail, because should never have allowed invalid instructions")
+        instructions_string_from(self.secret_magic.instructions().as_ref(), self.network_id).expect("Should never fail, because should never have allowed invalid instructions")
     }
 
     pub fn new(
@@ -45,14 +88,39 @@ impl Instructions {
             blob_provider,
         )
         .map_err(|e| extract_error_from_error(e, network_id))
-        .map(|manifest| Self {
-            secret_magic: InstructionsSecretMagic(manifest.instructions),
-            network_id,
+        .and_then(|manifest| {
+            Self::try_from((manifest.instructions.as_ref(), network_id))
         })
     }
 }
 
-use radix_engine_toolkit::functions::address::decode as RET_decode_address;
+#[cfg(test)]
+impl Instructions {
+    /// Utility function which uses `Instructions::new(<string>, <network_id>)`
+    /// and SHOULD return `Err` if `depth > Instructions::MAX_SBOR_DEPTH`, which
+    /// we can assert in unit tests.
+    pub(crate) fn test_with_sbor_depth(
+        depth: usize,
+        network_id: NetworkID,
+    ) -> Result<Self> {
+        let nested_value = manifest_value_with_sbor_depth(depth);
+        let dummy_address =
+            ComponentAddress::with_node_id_bytes(&[0xffu8; 29], network_id);
+        let instruction = ScryptoInstruction::CallMethod {
+            address: TryInto::<ScryptoDynamicComponentAddress>::try_into(
+                &dummy_address,
+            )
+            .unwrap()
+            .into(),
+            method_name: "dummy".to_owned(),
+            args: nested_value,
+        };
+        instructions_string_from(&[instruction], network_id)
+            .and_then(|x: String| Self::new(x, network_id))
+    }
+
+    pub(crate) const MAX_SBOR_DEPTH: usize = MANIFEST_SBOR_V1_MAX_DEPTH - 3;
+}
 
 fn extract_error_from_addr(
     s: String,
@@ -62,7 +130,9 @@ fn extract_error_from_addr(
         .map(|t| t.0)
         .map(NetworkID::from_repr)
     else {
-        return CommonError::InvalidInstructionsString;
+        return CommonError::InvalidInstructionsString {
+            underlying: "Failed to get NetworkID from address".to_owned(),
+        };
     };
     if network_id != expected_network {
         CommonError::InvalidInstructionsWrongNetwork {
@@ -70,7 +140,10 @@ fn extract_error_from_addr(
             specified_to_instructions_ctor: expected_network,
         }
     } else {
-        CommonError::InvalidInstructionsString
+        CommonError::InvalidInstructionsString {
+            underlying: "Failed to determine why an address was invalid"
+                .to_owned(),
+        }
     }
 }
 
@@ -79,6 +152,7 @@ fn extract_error_from_error(
     expected_network: NetworkID,
 ) -> CommonError {
     use transaction::manifest::generator::GeneratorError::*;
+    use transaction::manifest::parser::ParserError::*;
     let n = expected_network;
     match err {
         ScryptoCompileError::GeneratorError(gen_err) => match gen_err {
@@ -86,9 +160,18 @@ fn extract_error_from_error(
             InvalidComponentAddress(a) => extract_error_from_addr(a, n),
             InvalidResourceAddress(a) => extract_error_from_addr(a, n),
             InvalidGlobalAddress(a) => extract_error_from_addr(a, n),
-            _ => CommonError::InvalidInstructionsString,
+            _ => CommonError::InvalidInstructionsString {
+                underlying: format!("GeneratorError: {:?}", gen_err),
+            },
         },
-        _ => CommonError::InvalidInstructionsString,
+        ScryptoCompileError::ParserError(MaxDepthExceeded(max)) => {
+            CommonError::InvalidTransactionMaxSBORDepthExceeded {
+                max: max as u16,
+            }
+        }
+        _ => CommonError::InvalidInstructionsString {
+            underlying: format!("{:?}", err),
+        },
     }
 }
 
@@ -105,7 +188,7 @@ impl HasSampleValues for Instructions {
 impl Instructions {
     pub(crate) fn empty(network_id: NetworkID) -> Self {
         Self {
-            secret_magic: InstructionsSecretMagic(Vec::new()),
+            secret_magic: InstructionsSecretMagic::new(Vec::new()),
             network_id,
         }
     }
@@ -217,7 +300,9 @@ mod tests {
     fn extract_error_from_addr_fallbacks_to_invalid_ins_err() {
         assert_eq!(
             extract_error_from_addr("foo".to_owned(), NetworkID::Simulator),
-            CommonError::InvalidInstructionsString
+            CommonError::InvalidInstructionsString {
+                underlying: "Failed to get NetworkID from address".to_owned()
+            }
         );
     }
     #[test]
@@ -225,7 +310,7 @@ mod tests {
     ) {
         assert_eq!(
             extract_error_from_addr("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease".to_owned(), NetworkID::Mainnet),
-            CommonError::InvalidInstructionsString
+            CommonError::InvalidInstructionsString { underlying: "Failed to determine why an address was invalid".to_owned() }
         );
     }
 
@@ -238,25 +323,25 @@ mod tests {
                 ),
                 NetworkID::Simulator
             ),
-            CommonError::InvalidInstructionsString
+            CommonError::InvalidInstructionsString {
+                underlying: "LexerError(UnexpectedEof)".to_owned()
+            }
         );
     }
 
     #[test]
     fn from_scrypto() {
         let network_id = NetworkID::Mainnet;
+        let instructions: &[ScryptoInstruction] = &[
+            ScryptoInstruction::DropAuthZoneProofs,
+            ScryptoInstruction::DropAuthZoneRegularProofs,
+        ];
         assert_eq!(
             SUT {
                 secret_magic: InstructionsSecretMagic::sample(),
                 network_id
             },
-            SUT::from_scrypto(
-                ScryptoInstructions(vec![
-                    ScryptoInstruction::DropAuthZoneProofs,
-                    ScryptoInstruction::DropAuthZoneRegularProofs,
-                ]),
-                network_id
-            )
+            SUT::try_from((instructions, network_id)).unwrap()
         );
     }
 
@@ -267,7 +352,7 @@ mod tests {
                 ScryptoCompileError::GeneratorError(transaction::manifest::generator::GeneratorError::BlobNotFound("dead".to_owned())),
                 NetworkID::Simulator
             ),
-            CommonError::InvalidInstructionsString
+            CommonError::InvalidInstructionsString { underlying: "GeneratorError: BlobNotFound(\"dead\")".to_owned() }
         );
     }
 
@@ -301,6 +386,28 @@ mod tests {
                 NetworkID::Simulator
             ),
             CommonError::InvalidInstructionsWrongNetwork { found_in_instructions: NetworkID::Mainnet, specified_to_instructions_ctor: NetworkID::Simulator }
+        );
+    }
+
+    #[test]
+    fn instructions_with_max_sbor_depth_is_ok() {
+        assert!(SUT::test_with_sbor_depth(
+            SUT::MAX_SBOR_DEPTH,
+            NetworkID::Stokenet
+        )
+        .is_ok());
+    }
+
+    #[test]
+    fn instructions_with_sbor_depth_greater_than_max_is_err() {
+        assert_eq!(
+            SUT::test_with_sbor_depth(
+                SUT::MAX_SBOR_DEPTH + 1,
+                NetworkID::Stokenet
+            ),
+            Err(CommonError::InvalidTransactionMaxSBORDepthExceeded {
+                max: 20 as u16
+            })
         );
     }
 }

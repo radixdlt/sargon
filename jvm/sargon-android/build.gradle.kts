@@ -1,4 +1,5 @@
 import org.gradle.configurationcache.extensions.capitalized
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     alias(libs.plugins.android.library)
@@ -55,11 +56,17 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
+tasks.withType<KotlinCompile>().configureEach {
+    if (name.contains("Test")) {
+        kotlinOptions.freeCompilerArgs += "-Xopt-in=com.radixdlt.sargon.annotation.UsesSampleValues"
+    }
+}
+
 koverReport {
     filters {
         excludes {
             packages("com.radixdlt.sargon.samples")
-            annotatedBy("com.radixdlt.sargon.utils.KoverIgnore")
+            annotatedBy("com.radixdlt.sargon.annotation.KoverIgnore")
         }
         includes {
             packages("com.radixdlt.sargon.extensions")
@@ -77,13 +84,11 @@ dependencies {
     // Cannot use version catalogues for aar. For some reason when published to Maven,
     // the jna dependency cannot be resolved
     implementation("net.java.dev.jna:jna:5.13.0@aar")
-    implementation("androidx.annotation:annotation:1.7.1")
-    implementation("androidx.compose.ui:ui-tooling-preview-android:1.6.2")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
+    testImplementation(libs.junit)
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testDebugRuntimeOnly(project(":sargon-desktop-debug"))
     testReleaseRuntimeOnly(project(":sargon-desktop-release"))
-    testImplementation(libs.junit)
 }
 
 publishing {
