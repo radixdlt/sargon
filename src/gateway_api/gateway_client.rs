@@ -45,13 +45,40 @@ pub struct GatewayClient {
 #[uniffi::export]
 impl GatewayClient {
     #[uniffi::constructor]
-    pub fn new(
+    pub fn with_gateway(
         network_antenna: Arc<dyn NetworkAntenna>,
         gateway: Gateway,
     ) -> Self {
         Self {
             network_antenna,
             gateway,
+        }
+    }
+
+    #[uniffi::constructor]
+    pub fn new(
+        network_antenna: Arc<dyn NetworkAntenna>,
+        network_id: NetworkID,
+    ) -> Self {
+        Self::with_gateway(network_antenna, Gateway::from(network_id))
+    }
+}
+
+impl From<NetworkID> for Gateway {
+    fn from(value: NetworkID) -> Self {
+        match value {
+            NetworkID::Mainnet => Self::mainnet(),
+            NetworkID::Stokenet => Self::stokenet(),
+            NetworkID::Nebunet => Self::nebunet(),
+            NetworkID::Kisharnet => Self::kisharnet(),
+            NetworkID::Ansharnet => Self::ansharnet(),
+            NetworkID::Enkinet => Self::enkinet(),
+            NetworkID::Hammunet => Self::hammunet(),
+            NetworkID::Mardunet => Self::mardunet(),
+            NetworkID::Adapanet => todo!(),
+            NetworkID::Zabanet => todo!(),
+            NetworkID::Nergalnet => todo!(),
+            NetworkID::Simulator => panic!("No network exists for simulator"),
         }
     }
 }
@@ -159,7 +186,7 @@ impl GatewayClient {
         let body = BagOfBytes::from(serde_json::to_vec(&request).unwrap());
 
         // Append relative path to base url
-        let url_str = format!("{}/{}", self.gateway.url, path.as_ref());
+        let url_str = format!("{}{}", self.gateway.url, path.as_ref());
         let url = Url::parse(&url_str).map_err(|e| {
             error!(
                 "Failed to parse URL, error: {:?}, from string: {}",
@@ -169,17 +196,17 @@ impl GatewayClient {
                 bad_value: url_str.to_owned(),
             }
         })?;
-
-        // Create Network request object, which will be translated by
-        // Swift side into a `[Swift]URLRequest`
         let request = NetworkRequest {
             url,
             body,
             method,
-            headers: HashMap::<String, String>::from_iter([(
-                "Content-Type".to_owned(),
-                "application/json".to_owned(),
-            )]),
+            headers: HashMap::<String, String>::from_iter([
+                ("content-Type".to_owned(), "application/json".to_owned()),
+                ("accept".to_owned(), "application/json".to_owned()),
+                ("user-agent".to_owned(), "Sargon".to_owned()), // https://stackoverflow.com/a/77866494/1311272
+                ("RDX-Client-Name".to_owned(), "Sargon".to_owned()),
+                ("RDX-Client-Version".to_owned(), "1.5.1".to_owned()),
+            ]),
         };
 
         // Let Swift side make network request and await response
