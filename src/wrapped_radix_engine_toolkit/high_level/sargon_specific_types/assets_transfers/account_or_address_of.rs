@@ -2,59 +2,59 @@ use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
 #[allow(clippy::large_enum_variant)] // we cannot Box<Account>, since Box is not UniFFI compatible.
-pub enum AssetsTransfersRecipient {
-    MyOwnAccount { value: Account },
-    ForeignAccount { value: AccountAddress },
+pub enum AccountOrAddressOf {
+    ProfileAccount { value: Account },
+    AddressOfExternalAccount { value: AccountAddress },
 }
 
-impl From<Account> for AssetsTransfersRecipient {
+impl From<Account> for AccountOrAddressOf {
     fn from(value: Account) -> Self {
-        Self::MyOwnAccount { value }
+        Self::ProfileAccount { value }
     }
 }
 
-impl From<AccountAddress> for AssetsTransfersRecipient {
+impl From<AccountAddress> for AccountOrAddressOf {
     fn from(value: AccountAddress) -> Self {
-        Self::ForeignAccount { value }
+        Self::AddressOfExternalAccount { value }
     }
 }
 
-impl AssetsTransfersRecipient {
+impl AccountOrAddressOf {
     pub fn account_address(&self) -> &AccountAddress {
         match self {
-            AssetsTransfersRecipient::MyOwnAccount { value } => &value.address,
-            AssetsTransfersRecipient::ForeignAccount { value } => value,
+            AccountOrAddressOf::ProfileAccount { value } => &value.address,
+            AccountOrAddressOf::AddressOfExternalAccount { value } => value,
         }
     }
 }
 
-impl AssetsTransfersRecipient {
+impl AccountOrAddressOf {
     pub(crate) fn sample_mainnet() -> Self {
-        Self::MyOwnAccount {
+        Self::ProfileAccount {
             value: Account::sample_mainnet_bob(),
         }
     }
 
     pub(crate) fn sample_mainnet_other() -> Self {
-        Self::ForeignAccount {
+        Self::AddressOfExternalAccount {
             value: AccountAddress::sample_mainnet_other(),
         }
     }
 
     pub(crate) fn sample_stokenet() -> Self {
-        Self::MyOwnAccount {
+        Self::ProfileAccount {
             value: Account::sample_stokenet_nadia(),
         }
     }
 
     pub(crate) fn sample_stokenet_other() -> Self {
-        Self::ForeignAccount {
+        Self::AddressOfExternalAccount {
             value: AccountAddress::sample_stokenet_other(),
         }
     }
 }
 
-impl HasSampleValues for AssetsTransfersRecipient {
+impl HasSampleValues for AccountOrAddressOf {
     fn sample() -> Self {
         Self::sample_mainnet()
     }
@@ -69,7 +69,7 @@ mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = AssetsTransfersRecipient;
+    type SUT = AccountOrAddressOf;
 
     #[test]
     fn equality() {
