@@ -320,7 +320,7 @@ final class Decimal192Tests: Test<Decimal192> {
 		doTest(0.12345, decimalPlaces: 1, expected: 0.1)
 		doTest(0.12345, decimalPlaces: 0, expected: 0)
 	}
-
+	
 	
 	func test_ceil() {
 		func doTest(_ from: SUT, decimalPlaces: UInt8, expected: SUT, line: UInt = #line) {
@@ -335,7 +335,7 @@ final class Decimal192Tests: Test<Decimal192> {
 		doTest(0.12345, decimalPlaces: 1, expected: 0.2)
 		doTest(0.12345, decimalPlaces: 0, expected: 1)
 	}
-
+	
 	
 	func test_floor() {
 		func doTest(_ from: SUT, decimalPlaces: UInt8, expected: SUT, line: UInt = #line) {
@@ -347,38 +347,38 @@ final class Decimal192Tests: Test<Decimal192> {
 		doTest(0.12345, decimalPlaces: 4, expected: 0.1234)
 		doTest(0.12345, decimalPlaces: 3, expected: 0.123)
 		doTest(0.12345, decimalPlaces: 2, expected: 0.12)
-
+		
 		doTest(0.955, decimalPlaces: 3, expected: 0.955)
 		doTest(0.955, decimalPlaces: 2, expected: 0.95)
 		doTest(0.955, decimalPlaces: 1, expected: 0.9)
 		doTest(0.955, decimalPlaces: 0, expected: 0)
 	}
-    
-    func test_from_double() throws {
-        func doTest(_ double: Double, _ expected: String) throws {
-            let sut = try SUT(double)
-            XCTAssertEqual(sut.toRawString(), expected)
-        }
-        try doTest(Double(Float32.greatestFiniteMagnitude), "340282346638528860000000000000000000000") // precision lost
-        try doTest(0.1, "0.1")
-        try doTest(4.012345678901234567895555555, "4.012345678901235")
-    }
+	
+	func test_from_double() throws {
+		func doTest(_ double: Double, _ expected: String) throws {
+			let sut = try SUT(double)
+			XCTAssertEqual(sut.toRawString(), expected)
+		}
+		try doTest(Double(Float32.greatestFiniteMagnitude), "340282346638528860000000000000000000000") // precision lost
+		try doTest(0.1, "0.1")
+		try doTest(4.012345678901234567895555555, "4.012345678901235")
+	}
 	
 	func test_magnitude() {
 		XCTAssertEqual(SUT.min.magnitude, SUT.max)
 	}
-    
-    func test_standard_transaction_fee() {
-        XCTAssertEqual(SUT.temporaryStandardFee, 25)
-    }
 	
-	func test_decoding_to_Decimal192() throws {
+	func test_standard_transaction_fee() {
+		XCTAssertEqual(SUT.temporaryStandardFee, 25)
+	}
+	
+	func test_decoding_to_SUT() throws {
 		struct TestStruct: Codable, Equatable {
-			let decimal: Decimal192
-			let optional: Decimal192?
+			let decimal: SUT
+			let optional: SUT?
 		}
-
-		func doTest(_ string: String, decimal expectedDecimal: Decimal192, optionalIsNil: Bool = false) throws {
+		
+		func doTest(_ string: String, decimal expectedDecimal: SUT, optionalIsNil: Bool = false) throws {
 			if let data = string.data(using: .utf8) {
 				let actual = try JSONDecoder().decode(TestStruct.self, from: data)
 				let expected = TestStruct(decimal: expectedDecimal, optional: optionalIsNil ? nil : expectedDecimal)
@@ -387,7 +387,7 @@ final class Decimal192Tests: Test<Decimal192> {
 				XCTFail()
 			}
 		}
-
+		
 		try doTest("{\"decimal\":\"123.1234\",\"optional\":\"123.1234\"}", decimal: .init("123.1234"))
 		try doTest("{\"decimal\":\"1233434.1234\",\"optional\":\"1233434.1234\"}", decimal: .init("1233434.1234"))
 		try doTest("{\"decimal\":\"124300.1332\",\"optional\":\"124300.1332\"}", decimal: .init("124300.1332"))
@@ -400,41 +400,41 @@ final class Decimal192Tests: Test<Decimal192> {
 		try doTest("{\"decimal\":\"1234123.4\",\"optional\":\"1234123.4\"}", decimal: .init("1234123.4"))
 		try doTest("{\"decimal\":\"123456.34\",\"optional\":\"123456.34\"}", decimal: .init("123456.34"))
 		try doTest("{\"decimal\":\"12345.234\",\"optional\":\"12345.234\"}", decimal: .init("12345.234"))
-
+		
 		try doTest("{\"decimal\":\"12341234\",\"optional\":\"12341234\"}", decimal: .init("12341234"))
 		try doTest("{\"decimal\":\"1234123412341234\",\"optional\":\"1234123412341234\"}", decimal: .init("1234123412341234"))
-
+		
 		try doTest("{\"decimal\":\"00000123\",\"optional\":\"00000123\"}", decimal: .init("123"))
 		try doTest("{\"decimal\":\"00000123.1234\",\"optional\":\"00000123.1234\"}", decimal: .init("123.1234"))
 		try doTest("{\"decimal\":\"00000123.12340000\",\"optional\":\"00000123.12340000\"}", decimal: .init("123.1234"))
 		try doTest("{\"decimal\":\"123.12340000\",\"optional\":\"123.12340000\"}", decimal: .init("123.1234"))
-
+		
 		try doTest("{\"decimal\":\"123.1234\"}", decimal: .init("123.1234"), optionalIsNil: true)
 		try doTest("{\"decimal\":\"12341234\"}", decimal: .init("12341234"), optionalIsNil: true)
 	}
-
-	func test_roundtrip_coding_Decimal192() throws {
+	
+	func test_roundtrip_coding_SUT() throws {
 		struct TestStruct: Codable, Equatable {
-			let decimal: Decimal192?
+			let decimal: SUT?
 		}
-
-		func doTest(_ decimal: Decimal192?) throws {
+		
+		func doTest(_ decimal: SUT?) throws {
 			let original = TestStruct(decimal: decimal)
 			let encoded = try JSONEncoder().encode(original)
 			let decoded = try JSONDecoder().decode(TestStruct.self, from: encoded)
 			XCTAssertEqual(original, decoded)
 		}
-
+		
 		try doTest(nil)
-
+		
 		for decimalString in smallDecimalStrings {
-			let sut = try Decimal192(decimalString)
+			let sut = try SUT(decimalString)
 			try doTest(sut)
 			let fromRawString = try SUT(sut.toRawString())
 			XCTAssertNoDifference(sut, fromRawString)
 		}
 	}
-
+	
 	func test_as_double() throws {
 		typealias LargeVector = (string: String, lostPrecision: UInt8)
 		let largeDecimalsStrings: [LargeVector] = [
@@ -512,5 +512,80 @@ final class Decimal192Tests: Test<Decimal192> {
 			"1.0",
 		]
 	}
+	
+	func test_from_double_zeroPrice() throws {
+		try doTestFromDouble(0, expected: SUT.zero)
+	}
+	
+	func test_from_double_noDecimalPlaces_1() throws {
+		try doTestFromDouble(10, expected: 10)
+	}
+	
+	func test_from_double_noDecimalPlaces_2() throws {
+		try doTestFromDouble(10000, expected: 10000)
+	}
+	
+	func test_from_double_noDecimalPlaces_3() throws {
+		try doTestFromDouble(10_000_000, expected: 10_000_000)
+	}
+	
+	func test_from_double_withDecimalPlaces_1() throws {
+		try doTestFromDouble(1.99, expected: SUT("1.99"))
+	}
+	
+	func test_from_double_withDecimalPlaces_2() throws {
+		try doTestFromDouble(1.000099, expected: SUT("1.000099"))
+	}
+	
+	func test_from_double_belowOne_1() throws {
+		try doTestFromDouble(0.99, expected: 0.99)
+	}
+	
+	func test_from_double_belowOne_2() throws {
+		try doTestFromDouble(0.000099, expected: SUT("0.000099"))
+	}
+	
+	func test_from_double_closeToSUTDivisibility() throws {
+		// 17 decimal places
+		try doTestFromDouble(
+			1.12345678901234567, 
+			expected: SUT("1.1234567890123457")
+		)
+	}
+	
+	func test_from_double_maxSUTDivisibility() throws {
+		// 18 decimal places
+		try doTestFromDouble(1.123456789012345678, expected: SUT("1.1234567890123457"))
+	}
+	
+	func test_from_double_overMaxSUTDivisibility() throws {
+		// 22 decimal places
+		try doTestFromDouble(1.1234567890123456789012, expected: SUT("1.1234567890123457"))
+	}
+	
+	func test_from_double_large_value() throws {
+		try doTestFromDouble(
+			70000000000.987654,
+			expected: SUT("70000000000.98766")
+		)
+	}
+	
+	private func doTestFromDouble(
+		_ double: Double,
+		expected: SUT,
+		file: StaticString = #filePath,
+		line: UInt = #line
+	) throws {
+		let fromDouble = try SUT.init(double)
+		XCTAssertEqual(
+			fromDouble,
+			expected,
+			"expected \(expected.formattedPlain(locale: .test)), got \(fromDouble.formattedPlain(locale: .test))",
+			file: file,
+			line: line
+		)
+	}
+	
+
 }
 

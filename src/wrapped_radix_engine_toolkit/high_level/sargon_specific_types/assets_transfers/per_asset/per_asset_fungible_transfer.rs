@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 impl PerAssetFungibleTransfer {
     pub fn new(
-        recipient: impl Into<AssetsTransfersRecipient>,
+        recipient: impl Into<AccountOrAddressOf>,
         use_try_deposit_or_abort: bool,
         amount: impl Into<Decimal192>,
     ) -> Self {
@@ -21,11 +21,11 @@ impl PerAssetFungibleTransfer {
     }
 }
 
-impl From<(&AssetsTransfersRecipient, PerRecipientFungibleTransfer)>
+impl From<(&AccountOrAddressOf, PerRecipientFungibleTransfer)>
     for PerAssetFungibleTransfer
 {
     fn from(
-        value: (&AssetsTransfersRecipient, PerRecipientFungibleTransfer),
+        value: (&AccountOrAddressOf, PerRecipientFungibleTransfer),
     ) -> Self {
         let (recipient, transfer) = value;
         Self::new(
@@ -49,7 +49,7 @@ impl HasSampleValues for PerAssetFungibleTransfer {
 impl PerAssetFungibleTransfer {
     pub(crate) fn sample_mainnet() -> Self {
         Self::new(
-            AssetsTransfersRecipient::MyOwnAccount {
+            AccountOrAddressOf::ProfileAccount {
                 value: Account::sample_mainnet_carol(),
             },
             true,
@@ -58,7 +58,7 @@ impl PerAssetFungibleTransfer {
     }
 
     pub(crate) fn sample_mainnet_other() -> Self {
-        Self::new(AssetsTransfersRecipient::ForeignAccount {
+        Self::new(AccountOrAddressOf::AddressOfExternalAccount {
             value: AccountAddress::from_str("account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69").unwrap()
         },
         true,
@@ -67,7 +67,7 @@ impl PerAssetFungibleTransfer {
 
     pub(crate) fn sample_stokenet() -> Self {
         Self::new(
-            AssetsTransfersRecipient::MyOwnAccount {
+            AccountOrAddressOf::ProfileAccount {
                 value: Account::sample_stokenet_olivia(),
             },
             true,
@@ -76,7 +76,7 @@ impl PerAssetFungibleTransfer {
     }
 
     pub(crate) fn sample_stokenet_other() -> Self {
-        Self::new(AssetsTransfersRecipient::ForeignAccount {
+        Self::new(AccountOrAddressOf::AddressOfExternalAccount {
             value: AccountAddress::from_str("account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk").unwrap() 
         },
         true,

@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 impl PerAssetNonFungibleTransfer {
     pub fn new(
-        recipient: impl Into<AssetsTransfersRecipient>,
+        recipient: impl Into<AccountOrAddressOf>,
         use_try_deposit_or_abort: bool,
         non_fungible_local_ids: impl IntoIterator<Item = NonFungibleLocalId>,
     ) -> Self {
@@ -24,11 +24,11 @@ impl PerAssetNonFungibleTransfer {
     }
 }
 
-impl From<(&AssetsTransfersRecipient, PerRecipientNonFungiblesTransfer)>
+impl From<(&AccountOrAddressOf, PerRecipientNonFungiblesTransfer)>
     for PerAssetNonFungibleTransfer
 {
     fn from(
-        value: (&AssetsTransfersRecipient, PerRecipientNonFungiblesTransfer),
+        value: (&AccountOrAddressOf, PerRecipientNonFungiblesTransfer),
     ) -> Self {
         let (recipient, non_fungibles) = value;
         Self::new(
@@ -42,7 +42,7 @@ impl From<(&AssetsTransfersRecipient, PerRecipientNonFungiblesTransfer)>
 impl PerAssetNonFungibleTransfer {
     pub(crate) fn sample_mainnet() -> Self {
         Self::new(
-            AssetsTransfersRecipient::MyOwnAccount {
+            AccountOrAddressOf::ProfileAccount {
                 value: Account::sample_mainnet_carol(),
             },
             true,
@@ -55,7 +55,7 @@ impl PerAssetNonFungibleTransfer {
 
     pub(crate) fn sample_mainnet_other() -> Self {
         Self::new(
-            AssetsTransfersRecipient::ForeignAccount {
+            AccountOrAddressOf::AddressOfExternalAccount {
                 value: AccountAddress::from_str("account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69").unwrap() 
             },
         true,
@@ -65,7 +65,7 @@ impl PerAssetNonFungibleTransfer {
 
     pub(crate) fn sample_stokenet() -> Self {
         Self::new(
-            AssetsTransfersRecipient::MyOwnAccount {
+            AccountOrAddressOf::ProfileAccount {
                 value: Account::sample_stokenet_nadia(),
             },
             true,
@@ -78,7 +78,7 @@ impl PerAssetNonFungibleTransfer {
 
     pub(crate) fn sample_stokenet_other() -> Self {
         Self::new(
-            AssetsTransfersRecipient::ForeignAccount {
+            AccountOrAddressOf::AddressOfExternalAccount {
                 value: AccountAddress::from_str("account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk").unwrap() 
             },
         true,
