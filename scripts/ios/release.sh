@@ -17,7 +17,7 @@ sed -i '' 's/let useLocalFramework = true/let useLocalFramework = false/' Packag
 
 `git fetch --prune --tags`
 function last_tag() {
-    local out=`git tag --sort=taggerdate | tail -1`
+    local out=`git tag --sort=committerdate | tail -1`
     echo $out
 }
 LAST_TAG=$(last_tag)
