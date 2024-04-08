@@ -34,19 +34,22 @@ impl FromStr for HDPath {
             return Err(err);
         }
         let mut path = path;
-        if path.starts_with("m") {
-            path = &path[1..];
+        if path.starts_with("m/") {
+            path = &path[2..];
+        }
+        if path.starts_with("M/") {
+            path = &path[2..];
         }
 
-        let expected_component_count = path.matches("/").count();
-        let replaced = path.replace("/", "\n");
+        let expected_component_count = path.matches('/').count() + 1;
+        let replaced = path.replace('/', "\n");
 
         let components = replaced
             .lines()
             .filter_map(HDPathComponent::try_from_str)
             .collect_vec();
         if components.len() != expected_component_count {
-            return Err(err);
+            Err(err)
         } else {
             Ok(Self::from_components(components))
         }

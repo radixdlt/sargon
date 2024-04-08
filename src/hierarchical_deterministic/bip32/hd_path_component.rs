@@ -47,7 +47,13 @@ impl HDPathComponent {
         if is_hardened {
             component_str = component_str.remove_last()
         }
-        component_str.parse::<HDPathValue>().ok().map(|v| if is_hardened { Self::harden(v) } else { Self::non_hardened(v) })
+        component_str.parse::<HDPathValue>().ok().map(|v| {
+            if is_hardened {
+                Self::harden(v)
+            } else {
+                Self::non_hardened(v)
+            }
+        })
     }
 
     pub(crate) fn non_hardened(value: HDPathValue) -> Self {

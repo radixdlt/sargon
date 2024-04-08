@@ -178,7 +178,7 @@ mod tests {
                 NetworkID::Stokenet
             ),
             Err(CommonError::InvalidTransactionMaxSBORDepthExceeded {
-                max: 24 as u16
+                max: 24_u16
             })
         );
     }
