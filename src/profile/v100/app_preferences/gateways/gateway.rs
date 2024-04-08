@@ -40,6 +40,25 @@ impl Default for Gateway {
     }
 }
 
+impl From<NetworkID> for Gateway {
+    fn from(value: NetworkID) -> Self {
+        match value {
+            NetworkID::Mainnet => Self::mainnet(),
+            NetworkID::Stokenet => Self::stokenet(),
+            NetworkID::Nebunet => Self::nebunet(),
+            NetworkID::Kisharnet => Self::kisharnet(),
+            NetworkID::Ansharnet => Self::ansharnet(),
+            NetworkID::Enkinet => Self::enkinet(),
+            NetworkID::Hammunet => Self::hammunet(),
+            NetworkID::Mardunet => Self::mardunet(),
+            NetworkID::Adapanet => panic!("No network exists for {}", value),
+            NetworkID::Zabanet => panic!("No network exists for {}", value),
+            NetworkID::Nergalnet => panic!("No network exists for {}", value),
+            NetworkID::Simulator => panic!("No network exists for {}", value),
+        }
+    }
+}
+
 impl Gateway {
     pub fn new(
         url: String,
@@ -53,7 +72,7 @@ impl Gateway {
 }
 
 impl Gateway {
-    fn declare(url: &str, id: NetworkID) -> Self {
+    pub(crate) fn declare(url: &str, id: NetworkID) -> Self {
         Self::new(url.to_string(), id)
             .expect("Valid")
             .deref()
@@ -136,11 +155,14 @@ impl Gateway {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = Gateway;
 
     #[test]
     fn json_roundtrip_mainnet() {
-        let sut = Gateway::mainnet();
+        let sut = SUT::mainnet();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"
@@ -159,7 +181,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_stokenet() {
-        let sut = Gateway::stokenet();
+        let sut = SUT::stokenet();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"
@@ -179,7 +201,7 @@ mod tests {
     #[test]
     fn display() {
         assert_eq!(
-            format!("{}", Gateway::mainnet()),
+            format!("{}", SUT::mainnet()),
             "https://mainnet.radixdlt.com/"
         );
     }
@@ -187,82 +209,122 @@ mod tests {
     #[test]
     fn debug() {
         assert_eq!(
-            format!("{:?}", Gateway::mainnet()),
+            format!("{:?}", SUT::mainnet()),
             "Mainnet: https://mainnet.radixdlt.com/"
         );
     }
 
     #[test]
     fn identifiable() {
-        assert_eq!(Gateway::mainnet().id(), Gateway::mainnet().url);
+        assert_eq!(SUT::mainnet().id(), SUT::mainnet().url);
     }
 
     #[test]
     fn mainnet_is_default() {
-        assert_eq!(Gateway::default(), Gateway::mainnet());
+        assert_eq!(SUT::default(), SUT::mainnet());
     }
 
     #[test]
     fn mainnet_is_wellknown() {
-        assert!(Gateway::mainnet().is_wellknown());
+        assert!(SUT::mainnet().is_wellknown());
     }
 
     #[test]
     fn stokenet_is_wellknown() {
-        assert!(Gateway::stokenet().is_wellknown());
+        assert!(SUT::stokenet().is_wellknown());
     }
 
     #[test]
     fn hash() {
         assert_eq!(
             HashSet::<Gateway>::from_iter([
-                Gateway::mainnet(),
-                Gateway::stokenet(),
-                Gateway::rcnet(),
-                Gateway::nebunet(),
-                Gateway::kisharnet(),
-                Gateway::ansharnet(),
-                Gateway::hammunet(),
-                Gateway::enkinet(),
-                Gateway::mardunet(),
+                SUT::mainnet(),
+                SUT::stokenet(),
+                SUT::rcnet(),
+                SUT::nebunet(),
+                SUT::kisharnet(),
+                SUT::ansharnet(),
+                SUT::hammunet(),
+                SUT::enkinet(),
+                SUT::mardunet(),
                 // Twice
-                Gateway::mainnet(),
-                Gateway::stokenet(),
-                Gateway::rcnet(),
-                Gateway::nebunet(),
-                Gateway::kisharnet(),
-                Gateway::ansharnet(),
-                Gateway::hammunet(),
-                Gateway::enkinet(),
-                Gateway::mardunet(),
+                SUT::mainnet(),
+                SUT::stokenet(),
+                SUT::rcnet(),
+                SUT::nebunet(),
+                SUT::kisharnet(),
+                SUT::ansharnet(),
+                SUT::hammunet(),
+                SUT::enkinet(),
+                SUT::mardunet(),
             ])
             .len(),
             9
         );
+    }
+
+    #[test]
+    fn from_network_id() {
+        let ids = HashSet::<NetworkID>::from_iter(NetworkID::all());
+        let unsupported = HashSet::<NetworkID>::from_iter([
+            NetworkID::Adapanet,
+            NetworkID::Zabanet,
+            NetworkID::Nergalnet,
+            NetworkID::Simulator,
+        ]);
+        ids.difference(&unsupported).for_each(|n| {
+            let sut = SUT::from(*n);
+            assert_eq!(sut.network.id, *n);
+        })
+    }
+
+    #[test]
+    #[should_panic]
+    fn from_network_id_unsupported_adapanet() {
+        _ = SUT::from(NetworkID::Adapanet);
+    }
+
+    #[test]
+    #[should_panic]
+    fn from_network_id_unsupported_zabanet() {
+        _ = SUT::from(NetworkID::Zabanet);
+    }
+
+    #[test]
+    #[should_panic]
+    fn from_network_id_unsupported_nergalnet() {
+        _ = SUT::from(NetworkID::Nergalnet);
+    }
+
+    #[test]
+    #[should_panic]
+    fn from_network_id_unsupported_simulator() {
+        _ = SUT::from(NetworkID::Simulator);
     }
 }
 
 #[cfg(test)]
 mod tests_uniffi_api {
 
-    use crate::{gateway_mainnet, gateway_stokenet};
+    use super::*;
 
-    use super::Gateway;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = Gateway;
 
     #[test]
     fn test_gateway_mainnet() {
-        assert_eq!(gateway_mainnet(), Gateway::mainnet());
+        assert_eq!(gateway_mainnet(), SUT::mainnet());
     }
 
     #[test]
     fn test_gateway_stokenet() {
-        assert_eq!(gateway_stokenet(), Gateway::stokenet());
+        assert_eq!(gateway_stokenet(), SUT::stokenet());
     }
 
     #[test]
     fn display() {
         assert_eq!(
-            format!("{}", Gateway::mainnet()),
+            format!("{}", SUT::mainnet()),
             "https://mainnet.radixdlt.com/"
         );
     }
@@ -270,7 +332,7 @@ mod tests_uniffi_api {
     #[test]
     fn debug() {
         assert_eq!(
-            format!("{:?}", Gateway::mainnet()),
+            format!("{:?}", SUT::mainnet()),
             "Mainnet: https://mainnet.radixdlt.com/"
         );
     }

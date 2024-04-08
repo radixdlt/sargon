@@ -1,6 +1,5 @@
 package com.radixdlt.sargon
 
-import com.radixdlt.sargon.extensions.identifier
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -16,7 +15,7 @@ class WalletTest {
     fun test() {
         println("🚀 Test Wallet in Kotlin start")
 
-        val storage = EphemeralKeystore() // Cannot use Object in kotlin script
+        val storage = EphemeralKeystore
         assertTrue(storage.isEmpty())
 
         println("🔮 GENERATING NEW WALLET")
@@ -121,23 +120,4 @@ class WalletTest {
         )
     }
 
-    class EphemeralKeystore : SecureStorage {
-        private val storage: MutableMap<String, ByteArray> = mutableMapOf()
-
-        override fun loadData(key: SecureStorageKey): ByteArray? = storage[key.identifier]
-
-        override fun saveData(key: SecureStorageKey, data: ByteArray) {
-            storage[key.identifier] = data
-        }
-
-        override fun deleteDataForKey(key: SecureStorageKey) {
-            storage.remove(key = key.identifier)
-        }
-
-        fun isEmpty() = storage.isEmpty()
-
-        fun contains(value: String): Boolean {
-            return storage.any { entry -> entry.value.decodeToString().contains(value) }
-        }
-    }
 }

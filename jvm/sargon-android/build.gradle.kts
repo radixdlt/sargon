@@ -70,6 +70,7 @@ koverReport {
         }
         includes {
             packages("com.radixdlt.sargon.extensions")
+            packages("com.radixdlt.sargon.antenna")
         }
     }
 
@@ -84,6 +85,14 @@ dependencies {
     // Cannot use version catalogues for aar. For some reason when published to Maven,
     // the jna dependency cannot be resolved
     implementation("net.java.dev.jna:jna:5.13.0@aar")
+
+    // For Coroutines support
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
+
+    // For Coroutines support
+    implementation(platform("com.squareup.okhttp3:okhttp-bom:5.0.0-alpha.12"))
+    implementation("com.squareup.okhttp3:okhttp")
+    implementation("com.squareup.okhttp3:okhttp-coroutines")
 
     testImplementation(libs.junit)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")

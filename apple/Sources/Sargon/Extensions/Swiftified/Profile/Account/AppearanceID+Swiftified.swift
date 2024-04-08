@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 public typealias AppearanceID = AppearanceId
 
 extension AppearanceID: SargonModel {}

@@ -17,6 +17,7 @@ extension PackageAddress {
 	public var networkID: NetworkId {
 		packageAddressNetworkId(address: self)
 	}
+
 }
 
 #if DEBUG

@@ -7,6 +7,19 @@ pub trait AddressViaRet: Sized {
     ) -> Result<Self>;
 }
 
+pub trait IsNetworkAware {
+    fn network_id(&self) -> NetworkID;
+}
+
+pub trait IsAddress:
+    IsNetworkAware
+    + Serialize
+    + for<'a> Deserialize<'a>
+    + std::fmt::Display
+    + FromStr
+{
+}
+
 /// Helps with unit testing, so that we do not need to explicitly specify each
 /// (Sargon) Address types corresponding RET address type, but can use, e.g.
 /// `AccountAddress::RetAddress` instead of `radix_engine_toolkit::models::canonical_address_types::CanonicalAccountAddress`
@@ -25,9 +38,8 @@ pub(crate) fn format_string(
     format!("{}...{}", prefix, suffix)
 }
 
-pub trait IntoScryptoAddress {
+pub trait IntoScryptoAddress: IsNetworkAware {
     fn scrypto(&self) -> ScryptoGlobalAddress;
-    fn network_id(&self) -> NetworkID;
 }
 
 /// This macro exists since UniFFI does not support generics currently, when/if
@@ -132,6 +144,10 @@ macro_rules! decl_ret_wrapped_address {
                 fn from(value: &str) -> Self {
                     value.parse().expect(&format!("Test failed since the passed in str is not a valid address: '{}'", value))
                 }
+            }
+
+            impl IsAddress for [< $address_type:camel Address >] {
+
             }
 
             impl FromRetAddress for [< $address_type:camel Address >] {
@@ -282,14 +298,18 @@ macro_rules! decl_ret_wrapped_address {
                 }
             }
 
+
+
+            impl IsNetworkAware for [< $address_type:camel Address >] {
+                fn network_id(&self) -> NetworkID {
+                    self.secret_magic.network_id().try_into().expect("Should have known all network ids")
+                }
+            }
+
             impl IntoScryptoAddress for [< $address_type:camel Address >] {
                 fn scrypto(&self) -> ScryptoGlobalAddress {
                     ScryptoGlobalAddress::try_from(self.node_id())
                     .expect("Should always be able to convert a Sargon Address into radix engine 'GlobalAddress'.")
-                }
-
-                fn network_id(&self) -> NetworkID {
-                    self.secret_magic.network_id().try_into().expect("Should have known all network ids")
                 }
             }
 

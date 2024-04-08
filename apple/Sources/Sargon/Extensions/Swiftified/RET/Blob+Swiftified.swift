@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 extension Blob: SargonModel {}
 
 extension Blob: CustomStringConvertible {

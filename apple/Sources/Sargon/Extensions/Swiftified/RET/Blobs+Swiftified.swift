@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 extension Blobs: SargonModel {}
 
 extension Blobs: ExpressibleByArrayLiteral {

@@ -207,6 +207,7 @@ final class ManifestBuildingTests: Test<TransactionManifest> {
 			}
 		}
 	}
+
 }
 
 extension XCTestCase {

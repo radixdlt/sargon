@@ -1,9 +1,8 @@
 # Sargon
 
-| Rust | Kotlin | Swift | _Average_ |
-| :--- | :--- | :--- | :--- |
+| Rust                                                                                                                                                     | Kotlin                                                                                                                                                         | Swift                                                                                                                                                       | _Average_                                                                                                                       |
+| :------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------ |
 | [![Rust](https://codecov.io/gh/radixdlt/Sargon/graph/badge.svg?token=8QPKIUSAQD&flag=rust)](https://app.codecov.io/gh/radixdlt/sargon?flags%5B0%5D=rust) | [![Kotlin](https://codecov.io/gh/radixdlt/Sargon/graph/badge.svg?token=8QPKIUSAQD&flag=kotlin)](https://app.codecov.io/gh/radixdlt/sargon?flags%5B0%5D=kotlin) | [![Swift](https://codecov.io/gh/radixdlt/Sargon/graph/badge.svg?token=8QPKIUSAQD&flag=swift)](https://app.codecov.io/gh/radixdlt/sargon?flags%5B0%5D=swift) | [![Average](https://codecov.io/gh/radixdlt/Sargon/graph/badge.svg?token=8QPKIUSAQD)](https://codecov.io/github/radixdlt/Sargon) |
-
 
 **Sargon is library for sharing code between Radix iOS/Android wallets.**
 
@@ -42,19 +41,6 @@ Or install `Xcode` from App Store
 ```sh
 brew install kotlin
 ```
-
-#### JNA
-
-> [!IMPORTANT]  
-> To run tests in Kotlin you also need to download [JNA](https://mvnrepository.com/artifact/net.java.dev.jna/jna) (currently tested under version `5.13.0`)
->
-> ```sh
-> curl https://repo1.maven.org/maven2/net/java/dev/jna/jna/5.13.0/jna-5.13.0.jar --output jna-5.13.0.jar
-> ```
-
-### `direnv`
-
-Install [`direnv`](https://direnv.net/) in order to automatically load `CLASSPATH` and `JAVA_OPTS` in [`.envrc`](.envrc), so that you can run Kotlin bindgen tests from cli using the command in the bottom of this document - i.e. without having to export `CLASSPATH``.
 
 ### `pre-commit`
 
