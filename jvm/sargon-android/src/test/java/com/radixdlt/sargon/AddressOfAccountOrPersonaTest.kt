@@ -18,7 +18,7 @@ class AddressOfAccountOrPersonaTest: SampleTestable<AddressOfAccountOrPersona> {
 
     @Test
     fun testInit() {
-        val accountAddress = "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+        val accountAddress = "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
 
         with(AddressOfAccountOrPersona.init(validating = accountAddress)) {
             assertEquals(accountAddress, string)
@@ -32,10 +32,10 @@ class AddressOfAccountOrPersonaTest: SampleTestable<AddressOfAccountOrPersona> {
 
     @Test
     fun testFormat() {
-        val addressString = "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+        val addressString = "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
         val address = AddressOfAccountOrPersona.init(validating = addressString)
 
-        assertEquals("acco...please", address.formatted())
+        assertEquals("acco...nvjdwr", address.formatted())
         assertEquals(
             addressString,
             address.formatted(format = AddressFormat.FULL)

@@ -160,7 +160,7 @@ mod tests {
                 "free"
             ;
             CALL_METHOD
-                Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+                Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
                 "try_deposit_batch_or_abort"
                 Expression("ENTIRE_WORKTOP")
                 Enum<0u8>()
@@ -177,7 +177,7 @@ mod tests {
             ),
             r#"
             SET_METADATA
-                Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+                Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
                 "account_type"
                 Enum<0u8>(
                     "dapp definition"
@@ -199,7 +199,7 @@ mod tests {
             ),
             r#"
             SET_METADATA
-                Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+                Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
                 "owner_keys"
                 Enum<143u8>(
                     Array<Enum>(
@@ -226,7 +226,7 @@ mod tests {
             manifest,
             r#"
         CALL_METHOD
-            Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+            Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
             "withdraw_non_fungibles"
             Address("resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa")
             Array<NonFungibleLocalId>(
@@ -249,12 +249,12 @@ mod tests {
             Bucket("bucket2")
         ;
         CALL_METHOD
-            Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+            Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
             "deposit"
             Bucket("bucket2")
         ;
         CALL_METHOD
-            Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+            Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
             "withdraw_non_fungibles"
             Address("resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd")
             Array<NonFungibleLocalId>(
@@ -276,7 +276,7 @@ mod tests {
             Bucket("bucket4")
         ;
         CALL_METHOD
-            Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+            Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
             "deposit"
             Bucket("bucket4")
         ;

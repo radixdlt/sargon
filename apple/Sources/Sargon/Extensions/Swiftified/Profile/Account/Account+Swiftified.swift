@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 extension Account: EntityProtocol {}
 
 extension Account {

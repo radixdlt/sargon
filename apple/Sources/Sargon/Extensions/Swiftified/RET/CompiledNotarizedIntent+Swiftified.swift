@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 extension CompiledNotarizedIntent: SargonModel {}
 
 extension CompiledNotarizedIntent: CustomStringConvertible {

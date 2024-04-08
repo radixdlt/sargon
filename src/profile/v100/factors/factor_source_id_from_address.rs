@@ -78,7 +78,7 @@ mod tests {
     fn display() {
         assert_eq!(
             format!("{}", FactorSourceIDFromAddress::sample()),
-            "trustedContact:account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+            "trustedContact:account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
         );
     }
 
@@ -86,7 +86,7 @@ mod tests {
     fn debug() {
         assert_eq!(
             format!("{:?}", FactorSourceIDFromAddress::sample()),
-            "trustedContact:account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+            "trustedContact:account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
         );
     }
 
@@ -99,7 +99,7 @@ mod tests {
             r#"
             {
                 "kind": "trustedContact",
-                "body": "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                "body": "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
             }
             "#,
         );

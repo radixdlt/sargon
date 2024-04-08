@@ -26,11 +26,13 @@ pub struct AccountPath {
     pub index: HDPathValue,
 }
 
-impl IsEntityPath for AccountPath {
+impl IsNetworkAware for AccountPath {
     fn network_id(&self) -> NetworkID {
         self.network_id
     }
+}
 
+impl IsEntityPath for AccountPath {
     fn key_kind(&self) -> CAP26KeyKind {
         self.key_kind
     }

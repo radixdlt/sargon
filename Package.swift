@@ -7,6 +7,8 @@ var swiftSettings: [SwiftSetting] = [
 	.enableExperimentalFeature("StrictConcurrency")
 ]
 
+var strictSwiftSettings: [SwiftSetting] = swiftSettings
+
 let sargonBinaryTargetName = "SargonCoreRS"
 let binaryTarget: Target
 let useLocalFramework = true
@@ -21,7 +23,7 @@ if useLocalFramework {
 	
 	// MUST NOT be part of release, since results in compilation error:
 	// The package product 'Sargon' cannot be used as a dependency of this target because it uses unsafe build flags.
-	swiftSettings.append(
+	strictSwiftSettings.append(
 		.unsafeFlags(["-warnings-as-errors"])
 	)
 } else {
@@ -69,7 +71,7 @@ let package = Package(
 				.product(name: "CustomDump", package: "swift-custom-dump"),
 			],
 			path: "apple/Tests",
-			swiftSettings: swiftSettings
+			swiftSettings: strictSwiftSettings
 		),
 	]
 )

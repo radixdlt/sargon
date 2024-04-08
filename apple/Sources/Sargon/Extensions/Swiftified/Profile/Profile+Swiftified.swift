@@ -1,3 +1,5 @@
+import SargonUniFFI
+
 extension Profile: SargonModel {}
 
 extension Profile: Identifiable {

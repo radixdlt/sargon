@@ -186,12 +186,12 @@ mod tests {
     fn add_guarantees_divisibility_rounding() {
         let instructions_string = r#"
         CALL_METHOD
-    Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+    Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
     "lock_fee"
     Decimal("0.61")
 ;
 CALL_METHOD
-    Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+    Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
     "withdraw"
     Address("resource_rdx1t4dy69k6s0gv040xa64cyadyefwtett62ng6xfdnljyydnml7t6g3j")
     Decimal("0.12344")
@@ -202,7 +202,7 @@ TAKE_FROM_WORKTOP
     Bucket("bucket1")
 ;
 CALL_METHOD
-    Address("account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master")
+    Address("account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264")
     "try_deposit_or_abort"
     Bucket("bucket1")
     Enum<0u8>()
@@ -279,12 +279,12 @@ CALL_METHOD
 
         manifest_eq(
             manifest.modify_add_lock_fee(
-                &"account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master".parse().unwrap(),
+                &"account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264".parse().unwrap(),
             Some(42.into())
             ),
             r#"
         CALL_METHOD
-            Address("account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master")
+            Address("account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264")
             "lock_fee"
             Decimal("42")
         ;
@@ -315,12 +315,12 @@ CALL_METHOD
 
         manifest_eq(
         manifest.modify_add_lock_fee(
-            &"account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master".parse().unwrap(),
+            &"account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264".parse().unwrap(),
             None,
         ),
         r#"
         CALL_METHOD
-            Address("account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master")
+            Address("account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264")
             "lock_fee"
             Decimal("25")
         ;
@@ -395,12 +395,12 @@ CALL_METHOD
             )]),
             r#"
             CALL_METHOD
-                Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+                Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
                 "lock_fee"
                 Decimal("0.61")
             ;
             CALL_METHOD
-                Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+                Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
                 "withdraw"
                 Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
                 Decimal("1337")
@@ -415,7 +415,7 @@ CALL_METHOD
                 Bucket("bucket1")
             ;
             CALL_METHOD
-                Address("account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master")
+                Address("account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264")
                 "try_deposit_or_abort"
                 Bucket("bucket1")
                 Enum<0u8>()

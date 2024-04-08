@@ -468,8 +468,8 @@ mod tests {
 											"quantity": 2
 										},
 										"ids": [
-											"account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease",
-											"account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master"
+											"account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr",
+											"account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264"
 										]
 									},
 									"sharedPersonaData": {
@@ -505,7 +505,7 @@ mod tests {
 											"quantity": 1
 										},
 										"ids": [
-											"account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master"
+											"account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264"
 										]
 									},
 									"sharedPersonaData": {
@@ -548,7 +548,7 @@ mod tests {
 											"quantity": 1
 										},
 										"ids": [
-											"account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master"
+											"account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264"
 										]
 									},
 									"sharedPersonaData": {

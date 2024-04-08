@@ -195,7 +195,7 @@ mod tests {
 
     #[test]
     fn invalid_entity_type() {
-        let s = "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease";
+        let s = "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr";
         assert_eq!(
             SUT::try_from_bech32(s),
             Err(CommonError::FailedToDecodeAddressFromBech32 {
@@ -243,7 +243,7 @@ mod tests {
     #[test]
     fn json_roundtrip_fails_for_invalid() {
         assert_json_value_fails::<SUT>(
-            json!("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+            json!("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
         );
         assert_json_value_fails::<SUT>(
             json!("identity_rdx12tgzjrz9u0xz4l28vf04hz87eguclmfaq4d2p8f8lv7zg9ssnzkuxx")

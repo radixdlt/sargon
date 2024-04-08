@@ -108,7 +108,7 @@ mod tests {
             manifest,
             r##"
             CALL_METHOD
-            Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+            Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
             "withdraw"
             Address("resource_rdx1t4dy69k6s0gv040xa64cyadyefwtett62ng6xfdnljyydnml7t6g3j")
             Decimal("1337")
@@ -119,12 +119,12 @@ mod tests {
             Bucket("bucket1")
         ;
         CALL_METHOD
-            Address("account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master")
+            Address("account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264")
             "deposit"
             Bucket("bucket1")
         ;
         CALL_METHOD
-            Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+            Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
             "withdraw_non_fungibles"
             Address("resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd")
             Array<NonFungibleLocalId>(
@@ -139,7 +139,7 @@ mod tests {
             Bucket("bucket2")
         ;
         CALL_METHOD
-            Address("account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master")
+            Address("account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264")
             "deposit"
             Bucket("bucket2")
         ;
@@ -303,7 +303,7 @@ mod tests {
             sut,
             r##"
         CALL_METHOD
-            Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+            Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
             "withdraw"
             Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
             Decimal("987891.25712718281828")
@@ -331,7 +331,7 @@ mod tests {
             Enum<0u8>()
         ;
         CALL_METHOD
-            Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+            Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
             "withdraw"
             Address("resource_rdx1t4dy69k6s0gv040xa64cyadyefwtett62ng6xfdnljyydnml7t6g3j")
             Decimal("987654.1234")
@@ -348,7 +348,7 @@ mod tests {
             Enum<0u8>()
         ;
         CALL_METHOD
-            Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+            Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
             "withdraw_non_fungibles"
             Address("resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa")
             Array<NonFungibleLocalId>(
@@ -384,7 +384,7 @@ mod tests {
             Enum<0u8>()
         ;
         CALL_METHOD
-            Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+            Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
             "withdraw_non_fungibles"
             Address("resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd")
             Array<NonFungibleLocalId>(

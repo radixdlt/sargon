@@ -6,6 +6,12 @@ pub struct Blob {
     pub(crate) secret_magic: BagOfBytes,
 }
 
+impl Blob {
+    pub fn to_hex(&self) -> String {
+        self.secret_magic.to_hex()
+    }
+}
+
 impl From<BagOfBytes> for Blob {
     fn from(value: BagOfBytes) -> Self {
         Self {

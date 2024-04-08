@@ -417,6 +417,21 @@ pub enum CommonError {
         "Invalid Notarized Intent, failed to encode, reason: '{underlying}'"
     )]
     InvalidNotarizedIntentFailedToEncode { underlying: String } = 10113,
+
+    #[error("Networking response bad code")]
+    NetworkResponseBadCode = 10114,
+
+    #[error("Networking response body was empty")]
+    NetworkResponseEmptyBody = 10115,
+
+    #[error("Networking response fail json deserialize into {into_type}")]
+    NetworkResponseJSONDeserialize { into_type: String } = 10116,
+
+    #[error("Networking request invalid url {bad_value}")]
+    NetworkRequestInvalidUrl { bad_value: String } = 10117,
+
+    #[error("Networking request failed, reason: '{underlying}'")]
+    NetworkRequestGenericFailure { underlying: String } = 10118,
 }
 
 #[uniffi::export]
