@@ -70,6 +70,7 @@ pretty_assertions = "1.4.0"
 iota-crypto = { git = "https://github.com/iotaledger/crypto.rs", rev = "47460d64fd0514af136ea1c2c6f3aa29ed89d1b8", features = [
     "slip10",
     "ed25519",
+    "secp256k1",
 ] }
 
 memoize = "0.4.1"

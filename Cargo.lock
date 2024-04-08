@@ -1176,6 +1176,7 @@ dependencies = [
  "digest 0.10.7",
  "ed25519-zebra",
  "hmac",
+ "k256",
  "sha2 0.10.8",
  "zeroize",
 ]
