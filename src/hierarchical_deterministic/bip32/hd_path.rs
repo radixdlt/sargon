@@ -66,13 +66,6 @@ impl HasSampleValues for HDPath {
     }
 }
 
-impl From<Vec<HDPathValue>> for HDPath {
-    fn from(value: Vec<HDPathValue>) -> Self {
-        let vec = value.into_iter().rev().map(Into::into).collect_vec();
-        Self::from_components(vec)
-    }
-}
-
 impl HDPath {
     pub(crate) fn from_components<I>(components: I) -> Self
     where
@@ -213,6 +206,15 @@ mod tests {
     fn from_str() {
         assert_eq!(
             HDPath::from_str("m/44H/1022H").unwrap(),
+            HDPath::harden([44, 1022])
+        );
+    }
+
+
+    #[test]
+    fn from_str_capital_m_is_ok() {
+        assert_eq!(
+            HDPath::from_str("M/44H/1022H").unwrap(),
             HDPath::harden([44, 1022])
         );
     }
