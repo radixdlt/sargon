@@ -24,14 +24,4 @@ class NetworkAntennaTest {
         assertTrue(xrdBalance >= 1.toDecimal192())
     }
 
-    @Test
-    @Tag("IntegrationTests")
-    fun testNetworkFailure() = runBlocking {
-        val client = GatewayClient(SargonNetworkAntenna(okHttpClient), NetworkId.MAINNET)
-
-        val xrdBalance = client.xrdBalanceOfAccountOrZero(address = AccountAddress.sampleMainnet())
-
-        assertTrue(xrdBalance >= 1.toDecimal192())
-    }
-
 }
