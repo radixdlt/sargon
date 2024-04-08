@@ -1,4 +1,6 @@
-const BIP32_HARDENED: u32 = 2147483648;
+use crate::prelude::*;
+
+pub(crate) const BIP32_HARDENED: u32 = 2147483648;
 
 pub type HDPathValue = u32;
 
@@ -37,6 +39,15 @@ impl HDPathComponent {
 
     pub(crate) fn is_hardened(&self) -> bool {
         self.value >= BIP32_HARDENED
+    }
+
+    pub(crate) fn try_from_str(s: &str) -> Option<Self> {
+        let is_hardened = s.ends_with('H') || s.ends_with('\'');
+        let mut component_str = s;
+        if is_hardened {
+            component_str = component_str.remove_last()
+        }
+        component_str.parse::<HDPathValue>().ok().map(|v| if is_hardened { Self::harden(v) } else { Self::non_hardened(v) })
     }
 
     pub(crate) fn non_hardened(value: HDPathValue) -> Self {

@@ -19,15 +19,37 @@ pub struct HDPath {
     pub components: Vec<HDPathComponent>,
 }
 
+fn valid_bip32_char(c: char) -> bool {
+    "mM/H'0123456789".contains(c)
+}
+
 impl FromStr for HDPath {
     type Err = crate::CommonError;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        slip10::path::BIP32Path::from_str(s)
-            .map(|p| p.into())
-            .map_err(|_| CommonError::InvalidBIP32Path {
-                bad_value: s.to_string(),
-            })
+    fn from_str(path: &str) -> Result<Self, Self::Err> {
+        let err = CommonError::InvalidBIP32Path {
+            bad_value: path.to_owned(),
+        };
+        if !path.chars().all(valid_bip32_char) {
+            return Err(err);
+        }
+        let mut path = path;
+        if path.starts_with("m") {
+            path = &path[1..];
+        }
+
+        let expected_component_count = path.matches("/").count();
+        let replaced = path.replace("/", "\n");
+
+        let components = replaced
+            .lines()
+            .filter_map(HDPathComponent::try_from_str)
+            .collect_vec();
+        if components.len() != expected_component_count {
+            return Err(err);
+        } else {
+            Ok(Self::from_components(components))
+        }
     }
 }
 
@@ -41,23 +63,9 @@ impl HasSampleValues for HDPath {
     }
 }
 
-impl From<slip10::path::BIP32Path> for HDPath {
-    /// Upgrades a slip10::path::BIP32Path (extern crate, which is a bit limiting),
-    /// to our type HDPath, which has a better API.
-    fn from(value: slip10::path::BIP32Path) -> Self {
-        let expected_depth = value.depth() as usize;
-        let mut bip32 = value;
-        let mut vec: Vec<HDPathComponent> = Vec::new();
-        for _ in 0..expected_depth {
-            vec.push(
-                bip32
-                    .pop()
-                    .expect("Should already have asserted length of BIP32 path")
-                    .into(),
-            )
-        }
-        assert!(vec.len() == expected_depth);
-        vec.reverse();
+impl From<Vec<HDPathValue>> for HDPath {
+    fn from(value: Vec<HDPathValue>) -> Self {
+        let vec = value.into_iter().rev().map(Into::into).collect_vec();
         Self::from_components(vec)
     }
 }
@@ -203,6 +211,28 @@ mod tests {
         assert_eq!(
             HDPath::from_str("m/44H/1022H").unwrap(),
             HDPath::harden([44, 1022])
+        );
+    }
+
+    #[test]
+    fn from_str_invalid_prefix() {
+        let s = "x/44H/1022H";
+        assert_eq!(
+            HDPath::from_str(s),
+            Err(CommonError::InvalidBIP32Path {
+                bad_value: s.to_owned()
+            })
+        );
+    }
+
+    #[test]
+    fn from_str_invalid_separator() {
+        let s = "m#44H#1022H";
+        assert_eq!(
+            HDPath::from_str(s),
+            Err(CommonError::InvalidBIP32Path {
+                bad_value: s.to_owned()
+            })
         );
     }
 

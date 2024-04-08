@@ -64,7 +64,14 @@ nutype = { version = "0.4.0", features = ["serde"] }
 schemars = { version = "0.8.12", features = ["preserve_order"] }
 uniffi = { version = "0.27.0", features = ["cli"] }
 pretty_assertions = "1.4.0"
-slip10 = "0.4.3"
+
+# SLIP10 implementation
+# iota_crypto = "0.23.1"
+iota-crypto = { git = "https://github.com/iotaledger/crypto.rs", rev = "47460d64fd0514af136ea1c2c6f3aa29ed89d1b8", features = [
+    "slip10",
+    "ed25519",
+] }
+
 memoize = "0.4.1"
 bip39 = { version = "2.0.0", features = ["serde"] }
 time-util = { version = "0.3.4", features = ["chrono"] }

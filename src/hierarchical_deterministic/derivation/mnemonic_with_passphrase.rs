@@ -81,6 +81,10 @@ impl HasSampleValues for MnemonicWithPassphrase {
 
 pub type PrivateKeyBytes = [u8; 32];
 
+use crypto::{
+    keys::slip10 as IotaSlip10, signatures::ed25519 as IotaSlip10Ed25519,
+};
+
 impl MnemonicWithPassphrase {
     pub fn to_seed(&self) -> Seed {
         self.mnemonic.to_seed(&self.passphrase.0)
@@ -90,16 +94,27 @@ impl MnemonicWithPassphrase {
         seed: &Seed,
         path: &HDPath,
     ) -> Ed25519PrivateKey {
-        let chain = slip10::BIP32Path::from(
-            path.components.iter().map(|c| c.value).collect_vec(),
-        );
+        let seed = IotaSlip10::Seed::from_bytes(seed);
+        // let chain = slip10::BIP32Path::from(
+        //     path.components.iter().map(|c| c.value).collect_vec(),
+        // );
 
-        let bytes =
-            slip10::derive_key_from_path(seed, slip10::Curve::Ed25519, &chain)
-                .map(|e| e.key)
-                .expect("Should always be able to derive");
+        let low_level_chain: Vec<u32> = path
+            .components
+            .iter()
+            .cloned()
+            .map(|c| c.value)
+            .collect_vec();
 
-        Ed25519PrivateKey::from_bytes(&bytes)
+        let hardened_chain = low_level_chain
+            .iter()
+            .cloned()
+            .map(|segment| segment.try_into().unwrap());
+
+        let ck: IotaSlip10::Slip10<IotaSlip10Ed25519::SecretKey> =
+            seed.derive(hardened_chain);
+
+        Ed25519PrivateKey::from_bytes(ck.secret_key().as_slice())
             .expect("Valid Ed25519PrivateKey bytes")
     }
 
