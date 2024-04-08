@@ -3,6 +3,7 @@ import com.radixdlt.sargon.CommonException
 import com.radixdlt.sargon.Decimal192
 import com.radixdlt.sargon.LocaleConfig
 import com.radixdlt.sargon.RoundingMode
+import com.radixdlt.sargon.annotation.KoverIgnore
 import com.radixdlt.sargon.decimalAbs
 import com.radixdlt.sargon.decimalAdd
 import com.radixdlt.sargon.decimalClampedToZero
@@ -36,6 +37,7 @@ import java.text.DecimalFormatSymbols
  */
 @Throws(SargonException::class)
 fun String.toDecimal192() = newDecimalFromString(string = this)
+fun String.toDecimal192OrNull() = runCatching { toDecimal192() }.getOrNull()
 
 /**
  * Creates a new [Decimal192] from a i64 integer.
@@ -49,6 +51,7 @@ fun Long.toDecimal192() = newDecimalFromI64(value = this)
  */
 @Throws(SargonException::class)
 fun Float.toDecimal192() = newDecimalFromF32(value = this)
+fun Float.toDecimal192OrNull() = runCatching { toDecimal192() }.getOrNull()
 
 /**
  * Creates a new [Decimal192] from a [Double]. Will
@@ -57,6 +60,7 @@ fun Float.toDecimal192() = newDecimalFromF32(value = this)
  */
 @Throws(SargonException::class)
 fun Double.toDecimal192() = newDecimalFromF64(value = this)
+fun Double.toDecimal192OrNull() = runCatching { toDecimal192() }.getOrNull()
 
 /**
  * Creates a new [Decimal192] from a i32 integer.
@@ -213,13 +217,16 @@ fun Decimal192.abs(): Decimal192 = decimalAbs(decimal = this)
  */
 fun Decimal192.negative(): Decimal192 = decimalNeg(decimal = this)
 
+fun Decimal192?.orZero() = this ?: 0.toDecimal192()
+
+@KoverIgnore
 fun Decimal192.formatted(
-    locale: LocaleConfig,
-    totalPlaces: UByte,
-    useGroupingSeparator: Boolean
+    format: DecimalFormatSymbols = DecimalFormatSymbols.getInstance(),
+    totalPlaces: UByte = 8u,
+    useGroupingSeparator: Boolean = true
 ) = decimalFormatted(
     decimal = this,
-    locale = locale,
+    locale = format.toLocaleConfig(),
     totalPlaces = totalPlaces,
     useGroupingSeparator = useGroupingSeparator
 )
@@ -227,11 +234,25 @@ fun Decimal192.formatted(
 /**
  * A human readable, locale respecting string. Does not perform any rounding or truncation.
  */
+@KoverIgnore
 fun Decimal192.formattedPlain(
-    locale: LocaleConfig,
-    useGroupingSeparator: Boolean
+    format: DecimalFormatSymbols = DecimalFormatSymbols.getInstance(),
+    useGroupingSeparator: Boolean = true
 ) = decimalFormattedPlain(
     decimal = this,
-    locale = locale,
+    locale = format.toLocaleConfig(),
     useGroupingSeparator = useGroupingSeparator
+)
+
+inline fun <T> Iterable<T>.sumOf(selector: (T) -> Decimal192): Decimal192 {
+    var sum: Decimal192 = 0.toDecimal192()
+    for (element in this) {
+        sum += selector(element)
+    }
+    return sum
+}
+
+private fun DecimalFormatSymbols.toLocaleConfig() = LocaleConfig(
+    decimalSeparator = decimalSeparator.toString(),
+    groupingSeparator = groupingSeparator.toString()
 )

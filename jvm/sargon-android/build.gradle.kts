@@ -86,6 +86,7 @@ dependencies {
     implementation("net.java.dev.jna:jna:5.13.0@aar")
 
     testImplementation(libs.junit)
+    testImplementation(libs.mockk)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testDebugRuntimeOnly(project(":sargon-desktop-debug"))
     testReleaseRuntimeOnly(project(":sargon-desktop-release"))
