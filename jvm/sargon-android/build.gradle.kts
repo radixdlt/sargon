@@ -70,6 +70,7 @@ koverReport {
         }
         includes {
             packages("com.radixdlt.sargon.extensions")
+            packages("com.radixdlt.sargon.antenna")
         }
     }
 
@@ -85,11 +86,13 @@ dependencies {
     // the jna dependency cannot be resolved
     implementation("net.java.dev.jna:jna:5.13.0@aar")
 
-    // For Async support
+    // For Coroutines support
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
-    // For Network support
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    implementation("com.squareup.okio:okio:3.7.0") 
+
+    // For Coroutines support
+    implementation(platform("com.squareup.okhttp3:okhttp-bom:5.0.0-alpha.12"))
+    implementation("com.squareup.okhttp3:okhttp")
+    implementation("com.squareup.okhttp3:okhttp-coroutines")
 
     testImplementation(libs.junit)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")

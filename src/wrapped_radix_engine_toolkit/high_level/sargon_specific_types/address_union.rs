@@ -324,7 +324,7 @@ macro_rules! address_union {
             }
 
             impl FromStr for $union_name {
-                type Err = crate::CommonError;
+                type Err = CommonError;
 
                 fn from_str(s: &str) -> Result<Self> {
                     Self::new_from_bech32(s)

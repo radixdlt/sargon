@@ -429,6 +429,9 @@ pub enum CommonError {
 
     #[error("Networking request invalid url {bad_value}")]
     NetworkRequestInvalidUrl { bad_value: String } = 10117,
+
+    #[error("Networking request failed, reason: '{underlying}'")]
+    NetworkRequestGenericFailure { underlying: String } = 10118,
 }
 
 #[uniffi::export]
