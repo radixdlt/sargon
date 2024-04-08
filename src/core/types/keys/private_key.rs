@@ -137,7 +137,7 @@ mod tests {
     #[test]
     fn secp256k1_to_bytes() {
         let bytes = generate_32_bytes();
-        let key = Secp256k1PrivateKey::from(&bytes).unwrap();
+        let key = Secp256k1PrivateKey::from_bytes(&bytes).unwrap();
         let private_key: PrivateKey = key.into();
         assert_eq!(private_key.to_bytes(), bytes);
     }

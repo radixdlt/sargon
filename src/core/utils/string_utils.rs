@@ -14,6 +14,19 @@ pub fn capitalize(s: impl AsRef<str>) -> String {
     }
 }
 
+pub trait StrExt {
+    fn remove_last(&self) -> &str;
+}
+
+impl StrExt for str {
+    fn remove_last(&self) -> &str {
+        match self.char_indices().next_back() {
+            Some((i, _)) => &self[..i],
+            None => self,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -33,5 +46,16 @@ mod tests {
         assert_eq!(capitalize(""), "");
         assert_eq!(capitalize("g"), "G");
         assert_eq!(capitalize("good"), "Good");
+    }
+
+    #[test]
+    fn remove_last_char() {
+        assert_eq!("".remove_last(), "");
+        assert_eq!("x".remove_last(), "");
+        assert_eq!("X".remove_last(), "");
+        assert_eq!("1".remove_last(), "");
+        assert_eq!("a".remove_last(), "");
+        assert_eq!("fo".remove_last(), "f");
+        assert_eq!("Foobar".remove_last(), "Fooba");
     }
 }

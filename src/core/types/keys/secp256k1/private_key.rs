@@ -44,16 +44,8 @@ impl Secp256k1PrivateKey {
         hex_encode(self.to_bytes())
     }
 
-    pub fn from(slice: &[u8]) -> Result<Self> {
-        ScryptoSecp256k1PrivateKey::from_bytes(slice)
-            .map_err(|_| CommonError::InvalidSecp256k1PrivateKeyFromBytes {
-                bad_value: slice.to_owned().into(),
-            })
-            .map(Self::from_scrypto)
-    }
-
     pub fn from_vec(bytes: Vec<u8>) -> Result<Self> {
-        Self::from(bytes.as_slice())
+        Self::from_bytes(bytes.as_slice())
     }
 
     pub fn from_exactly32_bytes(bytes: Exactly32Bytes) -> Result<Self> {
@@ -77,7 +69,7 @@ impl TryFrom<&[u8]> for Secp256k1PrivateKey {
     type Error = crate::CommonError;
 
     fn try_from(slice: &[u8]) -> Result<Secp256k1PrivateKey, Self::Error> {
-        Secp256k1PrivateKey::from(slice)
+        Secp256k1PrivateKey::from_bytes(slice)
     }
 }
 
@@ -96,6 +88,14 @@ impl IsPrivateKey<Secp256k1PublicKey> for Secp256k1PrivateKey {
 
     fn sign(&self, msg_hash: &Hash) -> Self::Signature {
         self.0.sign(msg_hash).into()
+    }
+
+    fn from_bytes(slice: &[u8]) -> Result<Self> {
+        ScryptoSecp256k1PrivateKey::from_bytes(slice)
+            .map_err(|_| CommonError::InvalidSecp256k1PrivateKeyFromBytes {
+                bad_value: slice.to_owned().into(),
+            })
+            .map(Self::from_scrypto)
     }
 }
 
@@ -213,7 +213,7 @@ mod tests {
         )
         .unwrap();
         assert_eq!(
-            SUT::from(bytes.as_slice()).unwrap().to_bytes(),
+            SUT::from_bytes(bytes.as_slice()).unwrap().to_bytes(),
             bytes.as_slice()
         );
     }
@@ -248,7 +248,7 @@ mod tests {
     #[test]
     fn invalid_bytes() {
         assert_eq!(
-            SUT::from(&[0u8] as &[u8]),
+            SUT::from_bytes(&[0u8] as &[u8]),
             Err(CommonError::InvalidSecp256k1PrivateKeyFromBytes {
                 bad_value: vec![0].into()
             })
@@ -259,7 +259,7 @@ mod tests {
     fn invalid_too_large() {
         let bytes = [0xFFu8; 32];
         assert_eq!(
-            SUT::from(&bytes),
+            SUT::from_bytes(&bytes),
             Err(CommonError::InvalidSecp256k1PrivateKeyFromBytes {
                 bad_value: bytes.to_vec().into()
             })
@@ -270,7 +270,7 @@ mod tests {
     fn invalid_zero() {
         let bytes = [0u8; 32];
         assert_eq!(
-            SUT::from(&bytes),
+            SUT::from_bytes(&bytes),
             Err(CommonError::InvalidSecp256k1PrivateKeyFromBytes {
                 bad_value: bytes.to_vec().into()
             })

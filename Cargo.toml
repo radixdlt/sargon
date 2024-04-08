@@ -52,7 +52,6 @@ transaction = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "587
 radix-engine-toolkit-json = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "1cfe879c7370cfa497857ada7a8973f8a3388abc" }
 radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "1cfe879c7370cfa497857ada7a8973f8a3388abc" }
 enum-iterator = "1.4.1"
-bip32 = "0.5.1" # only need Secp256k1, to do validation of PublicKey
 ed25519-dalek = "1.0.1"
 rand = "0.8.5"
 hex = "0.4.3"
@@ -64,7 +63,18 @@ nutype = { version = "0.4.0", features = ["serde"] }
 schemars = { version = "0.8.12", features = ["preserve_order"] }
 uniffi = { version = "0.27.0", features = ["cli"] }
 pretty_assertions = "1.4.0"
-slip10 = "0.4.3"
+
+# SLIP10 implementation
+# iota_crypto = "0.23.1"
+iota-crypto = { git = "https://github.com/iotaledger/crypto.rs", rev = "47460d64fd0514af136ea1c2c6f3aa29ed89d1b8", features = [
+    "slip10",
+    "ed25519",
+    "secp256k1",
+] }
+# Transitive dependency of iota_crypto - used to construct PubKey from uncompressed bytes.
+# k256 = "0.13.3"
+k256 = { git = "https://github.com/RustCrypto/elliptic-curves", rev = "e158ce5cf0e9acee2fd76aff2a628334f5c771e5" }
+
 memoize = "0.4.1"
 bip39 = { version = "2.0.0", features = ["serde"] }
 time-util = { version = "0.3.4", features = ["chrono"] }
