@@ -210,7 +210,6 @@ mod tests {
         );
     }
 
-
     #[test]
     fn from_str_capital_m_is_ok() {
         assert_eq!(

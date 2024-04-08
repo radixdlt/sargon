@@ -1,8 +1,6 @@
 use crate::{prelude::*, UniffiCustomTypeConverter};
 
-use bip32::secp256k1::{
-    elliptic_curve::sec1::ToEncodedPoint, PublicKey as BIP32Secp256k1PublicKey,
-}; // the bip32 crate actually does validation of the PublicKey whereas `radix_engine_common` does not.
+use k256::ecdsa::VerifyingKey as K256PublicKey;
 
 /// A `secp256k1` public key used to verify cryptographic signatures (ECDSA signatures).
 #[serde_as]
@@ -77,7 +75,7 @@ impl Secp256k1PublicKey {
     }
 
     pub fn uncompressed(&self) -> Vec<u8> {
-        BIP32Secp256k1PublicKey::from_sec1_bytes(&self.to_bytes())
+        K256PublicKey::from_sec1_bytes(&self.to_bytes())
             .expect("should always be able to create a BIP32 PublicKey")
             .to_encoded_point(false)
             .as_bytes()
@@ -138,7 +136,7 @@ impl TryFrom<Secp256k1PublicKeyUncheckedBytes> for Secp256k1PublicKey {
     fn try_from(
         value: Secp256k1PublicKeyUncheckedBytes,
     ) -> Result<Self, Self::Error> {
-        BIP32Secp256k1PublicKey::from_sec1_bytes(value.as_ref())
+        K256PublicKey::from_sec1_bytes(value.as_ref())
             .map_err(|_| CommonError::InvalidSecp256k1PublicKeyPointNotOnCurve)
             .map(|key| {
                 ScryptoSecp256k1PublicKey::try_from(
