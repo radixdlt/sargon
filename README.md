@@ -1,9 +1,8 @@
 # Sargon
 
-| Rust | Kotlin | Swift | _Average_ |
-| :--- | :--- | :--- | :--- |
+| Rust                                                                                                                                                     | Kotlin                                                                                                                                                         | Swift                                                                                                                                                       | _Average_                                                                                                                       |
+| :------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------ |
 | [![Rust](https://codecov.io/gh/radixdlt/Sargon/graph/badge.svg?token=8QPKIUSAQD&flag=rust)](https://app.codecov.io/gh/radixdlt/sargon?flags%5B0%5D=rust) | [![Kotlin](https://codecov.io/gh/radixdlt/Sargon/graph/badge.svg?token=8QPKIUSAQD&flag=kotlin)](https://app.codecov.io/gh/radixdlt/sargon?flags%5B0%5D=kotlin) | [![Swift](https://codecov.io/gh/radixdlt/Sargon/graph/badge.svg?token=8QPKIUSAQD&flag=swift)](https://app.codecov.io/gh/radixdlt/sargon?flags%5B0%5D=swift) | [![Average](https://codecov.io/gh/radixdlt/Sargon/graph/badge.svg?token=8QPKIUSAQD)](https://codecov.io/github/radixdlt/Sargon) |
-
 
 **Sargon is library for sharing code between Radix iOS/Android wallets.**
 
@@ -42,48 +41,6 @@ Or install `Xcode` from App Store
 ```sh
 brew install kotlin
 ```
-
-#### Kotlin Dependencies
-
-> [!IMPORTANT]  
-> To run Kotlin you also need to download `JNA`, `kotlinx-coroutines` and `okhttp3`
-
-##### JNA
-[JNA](https://mvnrepository.com/artifact/net.java.dev.jna/jna) (currently tested under version `5.13.0`)
-```sh
-curl https://repo1.maven.org/maven2/net/java/dev/jna/jna/5.13.0/jna-5.13.0.jar --output jna-5.13.0.jar
-```
-
-##### coroutines
-###### coroutines JVM
-[Coroutines-JVM](https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-core-jvm/1.8.0)
-```sh
-curl https://repo1.maven.org/maven2/org/jetbrains/kotlinx/kotlinx-coroutines-core-jvm/1.8.0/kotlinx-coroutines-core-jvm-1.8.0.jar --output kotlinx-coroutines-core-jvm-1.8.0.jar
-```
-
-###### coroutines Android
-[Coroutines Android](https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-android/1.8.0)
-```sh
-curl https://repo1.maven.org/maven2/org/jetbrains/kotlinx/kotlinx-coroutines-core-jvm/1.8.0/kotlinx-coroutines-android-1.8.0.jar --output kotlinx-coroutines-android-1.8.0.jar
-```
-
-##### okhttp
-###### okhttp
-* [OkHttp](https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp/4.12.0) For network requests
-
-```sh
-curl https://repo1.maven.org/maven2/com/squareup/okhttp3/okhttp/4.12.0/okhttp-4.12.0.jar --output okhttp-4.12.0.jar
-```
-
-###### Okio
-[Okio](https://mvnrepository.com/artifact/com.squareup.okio/okio/3.7.0) Transitive dependency for OkHttp
-```sh
-curl https://repo1.maven.org/maven2/com/squareup/okio/okio/3.7.0/okio-3.7.0.jar --output okio-3.7.0.jar
-```
-
-### `direnv`
-
-Install [`direnv`](https://direnv.net/) in order to automatically load `CLASSPATH` and `JAVA_OPTS` in [`.envrc`](.envrc), so that you can run Kotlin bindgen tests from cli using the command in the bottom of this document - i.e. without having to export `CLASSPATH``.
 
 ### `pre-commit`
 

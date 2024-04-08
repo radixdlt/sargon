@@ -5,7 +5,6 @@ exclude-files = [
     "src/profile/v100/address/wrap_ret_address.rs",
     "src/wrapped_radix_engine_toolkit/high_level/sargon_specific_types/address_union.rs",
     # Rest
-    "tests/*",
     "src/bindgen/*",
     "example/*",
     "target/*",

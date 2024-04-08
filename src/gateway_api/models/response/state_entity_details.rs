@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use serde::de::DeserializeOwned;
 
 #[derive(Deserialize, Clone, PartialEq, Eq, Debug, uniffi::Record)]
 pub struct FungibleResourcesCollectionItemGloballyAggregated {

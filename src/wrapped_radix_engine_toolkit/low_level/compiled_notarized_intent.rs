@@ -73,6 +73,44 @@ impl HasSampleValues for CompiledNotarizedIntent {
     }
 }
 
+use sbor::ValueKind as ScryptoValueKind;
+#[cfg(test)]
+pub(crate) fn invalid_signed_intent() -> ScryptoSignedIntent {
+    let invalid_value = ScryptoManifestValue::Tuple {
+        fields: vec![ScryptoManifestValue::Array {
+            element_value_kind: ScryptoValueKind::U8,
+            elements: vec![
+                ScryptoManifestValue::U8 { value: 1 },
+                ScryptoManifestValue::U16 { value: 2 },
+            ],
+        }],
+    };
+    let dummy_address = ComponentAddress::with_node_id_bytes(
+        &[0xffu8; 29],
+        NetworkID::Stokenet,
+    );
+    let invalid_instruction = ScryptoInstruction::CallMethod {
+        address: TryInto::<ScryptoDynamicComponentAddress>::try_into(
+            &dummy_address,
+        )
+        .unwrap()
+        .into(),
+        method_name: "dummy".to_owned(),
+        args: invalid_value,
+    };
+    ScryptoSignedIntent {
+        intent: ScryptoIntent {
+            header: TransactionHeader::sample().into(),
+            instructions: ScryptoInstructions(vec![invalid_instruction]),
+            blobs: ScryptoBlobs { blobs: Vec::new() },
+            message: ScryptoMessage::None,
+        },
+        intent_signatures: ScryptoIntentSignatures {
+            signatures: Vec::new(),
+        },
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -132,43 +170,5 @@ mod tests {
             res,
             Err(CommonError::InvalidNotarizedIntentFailedToEncode { underlying: "MismatchingArrayElementValueKind { element_value_kind: 7, actual_value_kind: 8 }".to_owned() }) 
         );
-    }
-}
-
-use sbor::ValueKind as ScryptoValueKind;
-#[cfg(test)]
-pub(crate) fn invalid_signed_intent() -> ScryptoSignedIntent {
-    let invalid_value = ScryptoManifestValue::Tuple {
-        fields: vec![ScryptoManifestValue::Array {
-            element_value_kind: ScryptoValueKind::U8,
-            elements: vec![
-                ScryptoManifestValue::U8 { value: 1 },
-                ScryptoManifestValue::U16 { value: 2 },
-            ],
-        }],
-    };
-    let dummy_address = ComponentAddress::with_node_id_bytes(
-        &[0xffu8; 29],
-        NetworkID::Stokenet,
-    );
-    let invalid_instruction = ScryptoInstruction::CallMethod {
-        address: TryInto::<ScryptoDynamicComponentAddress>::try_into(
-            &dummy_address,
-        )
-        .unwrap()
-        .into(),
-        method_name: "dummy".to_owned(),
-        args: invalid_value,
-    };
-    ScryptoSignedIntent {
-        intent: ScryptoIntent {
-            header: TransactionHeader::sample().into(),
-            instructions: ScryptoInstructions(vec![invalid_instruction]),
-            blobs: ScryptoBlobs { blobs: Vec::new() },
-            message: ScryptoMessage::None,
-        },
-        intent_signatures: ScryptoIntentSignatures {
-            signatures: Vec::new(),
-        },
     }
 }

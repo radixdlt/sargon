@@ -90,6 +90,22 @@ impl GatewayClient {
     ) -> Result<StateEntityDetailsResponse> {
         self.post("state/entity/details", request, res_id).await
     }
+
+    async fn transaction_construction(&self) -> Result<LedgerState> {
+        self.post_empty(
+            "transaction/construction",
+            |response: TransactionConstructionResponse| {
+                Ok(response.ledger_state)
+            },
+        )
+        .await
+    }
+
+    pub async fn current_epoch(&self) -> Result<Epoch> {
+        self.transaction_construction()
+            .await
+            .map(|state| Epoch::from(state.epoch))
+    }
 }
 
 #[uniffi::export]
@@ -232,5 +248,19 @@ impl GatewayClient {
     {
         self.make_request(path, NetworkMethod::Post, request, map)
             .await
+    }
+
+    async fn post_empty<U, V, F>(
+        &self,
+        path: impl AsRef<str>,
+        map: F,
+    ) -> Result<V, CommonError>
+    where
+        U: for<'a> Deserialize<'a>,
+        F: Fn(U) -> Result<V, CommonError>,
+    {
+        #[derive(Serialize)]
+        struct EmptyBodyPostRequest {}
+        self.post(path, EmptyBodyPostRequest {}, map).await
     }
 }
