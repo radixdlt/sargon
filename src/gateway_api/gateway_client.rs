@@ -1,3 +1,5 @@
+use async_trait::async_trait;
+
 use crate::prelude::*;
 use std::convert::identity;
 
@@ -64,25 +66,6 @@ impl GatewayClient {
     }
 }
 
-impl From<NetworkID> for Gateway {
-    fn from(value: NetworkID) -> Self {
-        match value {
-            NetworkID::Mainnet => Self::mainnet(),
-            NetworkID::Stokenet => Self::stokenet(),
-            NetworkID::Nebunet => Self::nebunet(),
-            NetworkID::Kisharnet => Self::kisharnet(),
-            NetworkID::Ansharnet => Self::ansharnet(),
-            NetworkID::Enkinet => Self::enkinet(),
-            NetworkID::Hammunet => Self::hammunet(),
-            NetworkID::Mardunet => Self::mardunet(),
-            NetworkID::Adapanet => todo!(),
-            NetworkID::Zabanet => todo!(),
-            NetworkID::Nergalnet => todo!(),
-            NetworkID::Simulator => panic!("No network exists for simulator"),
-        }
-    }
-}
-
 impl GatewayClient {
     pub(crate) async fn state_entity_details(
         &self,
@@ -128,9 +111,9 @@ impl GatewayClient {
             return Ok(None);
         };
 
-        let Some(fungible_resources) = response_item.fungible_resources else {
-            return Ok(None);
-        };
+        let fungible_resources = response_item
+            .fungible_resources
+            .expect("Never None for Account");
 
         let xrd_address = ResourceAddress::xrd_on_network(address.network_id());
 
@@ -142,10 +125,9 @@ impl GatewayClient {
             return Ok(None);
         };
 
-        let Some(xrd_resource) = xrd_resource_collection_item.as_global()
-        else {
-            return Ok(None);
-        };
+        let xrd_resource = xrd_resource_collection_item
+            .as_global()
+            .expect("Global is default");
 
         Ok(Some(xrd_resource.amount))
     }
@@ -202,16 +184,16 @@ impl GatewayClient {
         let body = BagOfBytes::from(serde_json::to_vec(&request).unwrap());
 
         // Append relative path to base url
-        let url_str = format!("{}{}", self.gateway.url, path.as_ref());
-        let url = Url::parse(&url_str).map_err(|e| {
+        let path = path.as_ref();
+        let url = self.gateway.url.join(path).map_err(|e| {
+            let bad_value = format!("{}{}", self.gateway.url, path);
             error!(
                 "Failed to parse URL, error: {:?}, from string: {}",
-                e, &url_str
+                e, &bad_value
             );
-            CommonError::NetworkRequestInvalidUrl {
-                bad_value: url_str.to_owned(),
-            }
+            CommonError::NetworkRequestInvalidUrl { bad_value }
         })?;
+
         let request = NetworkRequest {
             url,
             body,
@@ -262,5 +244,94 @@ impl GatewayClient {
         #[derive(Serialize)]
         struct EmptyBodyPostRequest {}
         self.post(path, EmptyBodyPostRequest {}, map).await
+    }
+}
+
+#[derive(Debug)]
+struct MockAntenna {
+    hard_coded_status: u16,
+    hard_coded_body: BagOfBytes,
+}
+
+#[async_trait]
+impl NetworkAntenna for MockAntenna {
+    async fn make_request(
+        &self,
+        _request: NetworkRequest,
+    ) -> Result<NetworkResponse> {
+        Ok(NetworkResponse {
+            status_code: self.hard_coded_status,
+            body: self.hard_coded_body.clone(),
+        })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use actix_rt::time::timeout;
+    use reqwest::Response;
+    use std::time::Duration;
+
+    const MAX: Duration = Duration::from_millis(10);
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = GatewayClient;
+
+    #[actix_rt::test]
+    async fn make_request_invalid_url() {
+        let mock_antenna = MockAntenna {
+            hard_coded_status: 200,
+            hard_coded_body: BagOfBytes::new(),
+        };
+        let base = "http://example.com";
+        let sut = SUT::with_gateway(
+            Arc::new(mock_antenna),
+            Gateway::declare(base, NetworkID::Stokenet),
+        );
+        let bad_path = "https://exa%23mple.org";
+        let bad_value = format!("{}/{}", base, bad_path);
+        let req = sut.post_empty::<i8, i8, _>(bad_path, res_id);
+        let result = timeout(MAX, req).await.unwrap();
+        assert_eq!(
+            result,
+            Err(CommonError::NetworkRequestInvalidUrl { bad_value })
+        )
+    }
+
+    #[actix_rt::test]
+    async fn make_request_bad_status_code() {
+        let mock_antenna = MockAntenna {
+            hard_coded_status: 404, // bad status code
+            hard_coded_body: BagOfBytes::new(),
+        };
+        let sut = SUT::new(Arc::new(mock_antenna), NetworkID::Stokenet);
+        let req = sut.current_epoch();
+        let result = timeout(MAX, req).await.unwrap();
+        assert_eq!(result, Err(CommonError::NetworkResponseBadCode))
+    }
+
+    #[actix_rt::test]
+    async fn make_request_empty_body() {
+        let mock_antenna = MockAntenna {
+            hard_coded_status: 200,
+            hard_coded_body: BagOfBytes::new(), // empty body
+        };
+        let sut = SUT::new(Arc::new(mock_antenna), NetworkID::Stokenet);
+        let req = sut.current_epoch();
+        let result = timeout(MAX, req).await.unwrap();
+        assert_eq!(result, Err(CommonError::NetworkResponseEmptyBody))
+    }
+
+    #[actix_rt::test]
+    async fn make_request_invalid_json() {
+        let mock_antenna = MockAntenna {
+            hard_coded_status: 200,
+            hard_coded_body: "deadbeef".parse().unwrap(), // wrong JSON
+        };
+        let sut = SUT::new(Arc::new(mock_antenna), NetworkID::Stokenet);
+        let req = sut.current_epoch();
+        let result = timeout(MAX, req).await.unwrap();
+        assert_eq!(result, Err(CommonError::NetworkResponseJSONDeserialize { into_type: "sargon::gateway_api::models::response::transaction_construction::TransactionConstructionResponse".to_owned() }))
     }
 }
