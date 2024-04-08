@@ -1220,8 +1220,8 @@ mod test_decimal {
         test(0.1, "0.1");
         test(f32::MAX as f64, "340282346638528860000000000000000000000");
         test(123456789.87654321, "123456789.87654321");
-        test(4.01234567890123456789, "4.012345678901235"); // precision lost
-        test(4.012345678901234567895555555, "4.012345678901235"); // Over 18 decimals is OK (precision lost)
+        test(4.012_345_678_901_235, "4.012345678901235"); // precision lost
+        test(4.012_345_678_901_235, "4.012345678901235"); // Over 18 decimals is OK (precision lost)
     }
 
     #[test]
@@ -1234,8 +1234,8 @@ mod test_decimal {
         test(0.1, "0.1");
         test(f32::MAX, "340282350000000000000000000000000000000");
         test(123456789.87654321, "123456790");
-        test(4.01234567890123456789, "4.012346"); // precision lost
-        test(4.012345678901234567895555555, "4.012346"); // Over 18 decimals is OK (precision lost)
+        test(4.012_346, "4.012346"); // precision lost
+        test(4.012_346, "4.012346"); // Over 18 decimals is OK (precision lost)
     }
 
     #[test]
