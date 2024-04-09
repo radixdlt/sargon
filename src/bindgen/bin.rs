@@ -11,8 +11,8 @@ mod post_process_swift;
 use crate::post_process::*;
 
 fn main() {
-    println!("🔮 Running uniffi-bindgen");
+    println!("🔮 Running sargon-bindgen");
     uniffi::uniffi_bindgen_main();
     post_process();
-    println!("🔮 Finished with uniffi-bindgen ✅");
+    println!("🔮 Finished with sargon-bindgen ✅");
 }

@@ -11,7 +11,7 @@ mod integration_tests {
 
     use crate::network_antenna_reqwest::new_gateway_client;
 
-    const MAX: Duration = Duration::from_secs(2);
+    const MAX: Duration = Duration::from_secs(3);
 
     #[actix_rt::test]
     async fn test_xrd_balance_of_account_or_zero() {

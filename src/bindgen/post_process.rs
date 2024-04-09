@@ -55,7 +55,7 @@ fn kotlin_post_process(out_dir: &String) -> Result<(), BindgenError> {
 }
 
 pub(crate) fn post_process() {
-    println!("🔮 uniffi-bindgen | post processing...");
+    println!("🔮 sargon-bindgen | post processing...");
     let (out_dir, languages) = get_args();
 
     if languages.contains(&TargetLanguage::Swift) {
@@ -64,5 +64,5 @@ pub(crate) fn post_process() {
     if languages.contains(&TargetLanguage::Kotlin) {
         kotlin_post_process(&out_dir).unwrap();
     }
-    println!("🔮 uniffi-bindgen | post processing done. ✔");
+    println!("🔮 sargon-bindgen | post processing done. ✔");
 }

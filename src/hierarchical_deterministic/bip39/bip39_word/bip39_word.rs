@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-use memoize::memoize;
-
 /// A word in the BIP39 word list of `language` at known `index` (0-2047).
 #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct BIP39Word {
@@ -38,7 +36,6 @@ impl BIP39Word {
     }
 }
 
-#[memoize]
 fn index_of_word_in_bip39_wordlist_of_language(
     word: &'static str,
     language: bip39::Language,
@@ -48,7 +45,6 @@ fn index_of_word_in_bip39_wordlist_of_language(
         .map(|i| U11::new(i).expect("Less than 2048"))
 }
 
-#[memoize]
 fn word_by_index(u11: U11, language: bip39::Language) -> BIP39Word {
     let index = u11.inner as usize;
     let word = language.word_list()[index];

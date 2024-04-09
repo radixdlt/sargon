@@ -23,9 +23,7 @@ pub enum TargetLanguage {
 // https://github.com/mozilla/uniffi-rs/blob/main/uniffi/src/cli.rs#L17
 /// Scaffolding and bindings generator for Rust
 #[derive(Parser)]
-#[clap(name = "uniffi-bindgen")]
-#[clap(version = clap::crate_version!())]
-#[clap(propagate_version = true)]
+#[clap(name = "sargon-bindgen")]
 struct Cli {
     #[clap(subcommand)]
     command: Commands,
