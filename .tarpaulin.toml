@@ -15,10 +15,9 @@ exclude-files = [
     "Package.swift",
 ]
 verbose = false
-run-types = "AllTargets"
-timeout = "15m"
+timeout = "2m"
 force-clean = true
 locked = true
-all = true
+all-features = true
 jobs = 1
 out = ["Xml"]
