@@ -15,7 +15,7 @@ env:
   RUST_TOOLCHAIN: nightly-2024-01-11
   RUST_COMPONENTS: "rust-std"
   MACHINE: macos-14-xlarge
-  XCODE_VERSION: 15.3.1
+  XCODE_VERSION: 15.3.0
   SWIFT_CODE_COV_REPORT_PATH: ".build/artifacts/info.lcov" # chosen
 jobs:
   # typos
