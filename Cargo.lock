@@ -188,8 +188,7 @@ dependencies = [
 [[package]]
 name = "assert-json-diff"
 version = "2.0.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "47e4f2b81832e72834d7518d8487a0396a28cc408186a2e8854c0f98011faf12"
+source = "git+https://github.com/davidpdrsn/assert-json-diff/?rev=bca0d2c590808274298d939e0533da79cd09076d#bca0d2c590808274298d939e0533da79cd09076d"
 dependencies = [
  "serde",
  "serde_json",
@@ -277,8 +276,7 @@ dependencies = [
 [[package]]
 name = "bip39"
 version = "2.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "93f2635620bf0b9d4576eb7bb9a38a55df78bd1205d26fa994b25911a69f212f"
+source = "git+https://github.com/rust-bitcoin/rust-bip39?rev=a30760beac21d595b2bda376df4f4e6bf029bcc5#a30760beac21d595b2bda376df4f4e6bf029bcc5"
 dependencies = [
  "bitcoin_hashes",
  "serde",
@@ -1939,6 +1937,11 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "de3145af08024dea9fa9914f381a17b8fc6034dfb00f3a84013f7ff43f29ed4c"
 
 [[package]]
+name = "paste"
+version = "1.0.14"
+source = "git+https://github.com/dtolnay/paste?rev=1e0cc1025af5388397c67fa4389ad7ad24814df8#1e0cc1025af5388397c67fa4389ad7ad24814df8"
+
+[[package]]
 name = "percent-encoding"
 version = "2.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2078,7 +2081,7 @@ dependencies = [
  "moka",
  "native-sdk",
  "num-traits",
- "paste",
+ "paste 1.0.14 (registry+https://github.com/rust-lang/crates.io-index)",
  "radix-engine-common",
  "radix-engine-interface",
  "radix-engine-macros",
@@ -2110,7 +2113,7 @@ dependencies = [
  "num-bigint",
  "num-integer",
  "num-traits",
- "paste",
+ "paste 1.0.14 (registry+https://github.com/rust-lang/crates.io-index)",
  "radix-engine-derive",
  "sbor",
  "secp256k1",
@@ -2140,7 +2143,7 @@ dependencies = [
  "const-sha1",
  "hex",
  "lazy_static",
- "paste",
+ "paste 1.0.14 (registry+https://github.com/rust-lang/crates.io-index)",
  "radix-engine-common",
  "radix-engine-derive",
  "radix-engine-macros",
@@ -2158,7 +2161,7 @@ name = "radix-engine-macros"
 version = "1.0.2-dev"
 source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=587d5988cd4ca3c5193ddf37027ff4e4ecd637dc#587d5988cd4ca3c5193ddf37027ff4e4ecd637dc"
 dependencies = [
- "paste",
+ "paste 1.0.14 (registry+https://github.com/rust-lang/crates.io-index)",
  "proc-macro2",
  "quote",
  "radix-engine-common",
@@ -2180,7 +2183,7 @@ source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=587d5988cd4ca3c51
 dependencies = [
  "hex",
  "itertools 0.10.5",
- "paste",
+ "paste 1.0.14 (registry+https://github.com/rust-lang/crates.io-index)",
  "radix-engine",
  "radix-engine-interface",
  "radix-engine-store-interface",
@@ -2226,7 +2229,7 @@ dependencies = [
  "cargo_toml 0.15.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "extend",
  "lazy_static",
- "paste",
+ "paste 1.0.14 (registry+https://github.com/rust-lang/crates.io-index)",
  "radix-engine",
  "radix-engine-common",
  "radix-engine-interface",
@@ -2250,7 +2253,7 @@ dependencies = [
  "bech32",
  "indexmap 1.9.3",
  "jni",
- "paste",
+ "paste 1.0.14 (registry+https://github.com/rust-lang/crates.io-index)",
  "radix-engine",
  "radix-engine-common",
  "radix-engine-interface",
@@ -2551,7 +2554,7 @@ dependencies = [
  "log",
  "memoize",
  "nutype",
- "paste",
+ "paste 1.0.14 (git+https://github.com/dtolnay/paste?rev=1e0cc1025af5388397c67fa4389ad7ad24814df8)",
  "pretty_assertions",
  "pretty_env_logger",
  "radix-engine",
@@ -2571,7 +2574,6 @@ dependencies = [
  "serde_with",
  "strum 0.26.2",
  "thiserror",
- "time-util",
  "transaction",
  "uniffi",
  "url",
@@ -2586,7 +2588,7 @@ dependencies = [
  "const-sha1",
  "hex",
  "lazy_static",
- "paste",
+ "paste 1.0.14 (registry+https://github.com/rust-lang/crates.io-index)",
  "sbor-derive",
  "serde",
  "utils",
@@ -2707,7 +2709,7 @@ dependencies = [
  "hex",
  "num-bigint",
  "num-traits",
- "paste",
+ "paste 1.0.14 (registry+https://github.com/rust-lang/crates.io-index)",
  "radix-engine-common",
  "radix-engine-derive",
  "radix-engine-interface",
@@ -3238,15 +3240,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "time-util"
-version = "0.3.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3c2b7c79cf474a33d7399f0ef7c2c7b6f79debabb1b65482b1e85f9b73f96b9e"
-dependencies = [
- "chrono",
-]
-
-[[package]]
 name = "tinyvec"
 version = "1.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3519,7 +3512,7 @@ dependencies = [
  "goblin",
  "heck",
  "once_cell",
- "paste",
+ "paste 1.0.14 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde",
  "textwrap",
  "toml 0.5.11",
@@ -3561,7 +3554,7 @@ dependencies = [
  "log",
  "once_cell",
  "oneshot-uniffi",
- "paste",
+ "paste 1.0.14 (registry+https://github.com/rust-lang/crates.io-index)",
  "static_assertions",
 ]
 
@@ -3782,7 +3775,7 @@ version = "0.4.0"
 source = "git+https://github.com/radixdlt/wasm-instrument?branch=radix-master#fe2390722be31ace255bca1887b48f43ec1e2622"
 dependencies = [
  "anyhow",
- "paste",
+ "paste 1.0.14 (registry+https://github.com/rust-lang/crates.io-index)",
  "wasm-encoder",
  "wasmparser 0.107.0",
  "wasmprinter",
@@ -3812,7 +3805,7 @@ dependencies = [
  "downcast-rs",
  "libm",
  "num-traits",
- "paste",
+ "paste 1.0.14 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

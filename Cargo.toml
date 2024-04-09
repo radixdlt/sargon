@@ -76,11 +76,19 @@ iota-crypto = { git = "https://github.com/iotaledger/crypto.rs", rev = "47460d64
 k256 = { git = "https://github.com/RustCrypto/elliptic-curves", rev = "e158ce5cf0e9acee2fd76aff2a628334f5c771e5" }
 
 memoize = "0.4.1"
-bip39 = { version = "2.0.0", features = ["serde"] }
-time-util = { version = "0.3.4", features = ["chrono"] }
-assert-json-diff = "2.0.2"
+
+# bip39 = "2.0.0"
+bip39 = { git = "https://github.com/rust-bitcoin/rust-bip39", rev = "a30760beac21d595b2bda376df4f4e6bf029bcc5", features = ["serde"] }
+
+# assert-json-diff = "2.0.2"
+assert-json-diff = { git = "https://github.com/davidpdrsn/assert-json-diff/", rev = "bca0d2c590808274298d939e0533da79cd09076d" }
+
+# url = "2.5.0"
+# url = { git = "https://github.com/servo/rust-url", rev = "00e9e18ce6504e0e9157816c593afec8e69cb9e3", features = ["serde"] } # BROKEN compat with reqwest: the trait bound `url::Url: IntoUrl` is not satisfied --> tests/integration/network_antenna_reqwest.rs:31:50
 url = { version = "2.5.0", features = ["serde"] }
-paste = "1.0.14"
+
+# paste = "1.0.14"
+paste = { git = "https://github.com/dtolnay/paste", rev = "1e0cc1025af5388397c67fa4389ad7ad24814df8" }
 
 # clap = "4.5.1"
 clap = { git = "https://github.com/clap-rs/clap/", rev = "8a7a13a5618cfdc4ff328624a5266e7b4d88649a", default-features = false, features = ["std", "derive"] }
