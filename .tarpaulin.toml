@@ -14,8 +14,8 @@ exclude-files = [
     ".build/*",
     "Package.swift",
 ]
-verbose = true
-run-types = ["AllTargets"]
+verbose = false
+run-types = "AllTargets"
 timeout = "15m"
 force-clean = true
 locked = true

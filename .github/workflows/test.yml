@@ -14,8 +14,6 @@ env:
   CARGO_TERM_COLOR: always
   RUST_TOOLCHAIN: nightly-2024-01-11
   RUST_COMPONENTS: "rust-std"
-  MACHINE: macos-14-xlarge
-  XCODE_VERSION: 15.3.0
   SWIFT_CODE_COV_REPORT_PATH: ".build/artifacts/info.lcov" # chosen
 jobs:
   # typos
@@ -111,7 +109,7 @@ jobs:
 
       - uses: RDXWorks-actions/setup-xcode@master
         with:
-          xcode-version: ${{ env.XCODE_VERSION }}
+          xcode-version: "15.3.0"
 
       - name: Install Rust Toolchain for aarch64-apple-darwin
         uses: RDXWorks-actions/toolchain@master
@@ -190,6 +188,11 @@ jobs:
     runs-on: macos-14-xlarge
     steps:
       - uses: RDXWorks-actions/checkout@main
+
+      - uses: RDXWorks-actions/setup-xcode@master
+        with:
+          # trying to fix https://github.com/rust-lang/rust/issues/113783
+          xcode-version: "15.3.0"
 
       - name: Install Rust Toolchain
         uses: RDXWorks-actions/toolchain@master

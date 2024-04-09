@@ -11,8 +11,6 @@ permissions:
   contents: write
 env:
   CARGO_TERM_COLOR: always
-  MACHINE: macos-14-xlarge
-  XCODE_VERSION: "15.3.0"
 jobs:
   build:
     runs-on: macos-14-xlarge
@@ -24,7 +22,7 @@ jobs:
 
       - uses: RDXWorks-actions/setup-xcode@master
         with:
-          xcode-version: ${{ env.XCODE_VERSION }}
+          xcode-version: "15.3.0"
 
       - name: Install Rust Toolchain for aarch64-apple-darwin
         uses: RDXWorks-actions/toolchain@master
