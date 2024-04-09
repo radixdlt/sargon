@@ -15,20 +15,26 @@ import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.isNegative
 import com.radixdlt.sargon.extensions.isPositive
 import com.radixdlt.sargon.extensions.negative
+import com.radixdlt.sargon.extensions.orZero
 import com.radixdlt.sargon.extensions.plus
 import com.radixdlt.sargon.extensions.rounded
 import com.radixdlt.sargon.extensions.string
+import com.radixdlt.sargon.extensions.sumOf
 import com.radixdlt.sargon.extensions.times
 import com.radixdlt.sargon.extensions.toDecimal192
+import com.radixdlt.sargon.extensions.toDecimal192OrNull
 import com.radixdlt.sargon.samples.Sample
 import com.radixdlt.sargon.samples.sample
+import io.mockk.every
+import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.assertThrows
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Locale
@@ -177,26 +183,55 @@ class Decimal192Test : SampleTestable<Decimal192> {
     }
 
     @Test
+    fun testOrNull() {
+        assertNull(Double.MAX_VALUE.toDecimal192OrNull())
+        assertNotNull(10.0.toDecimal192OrNull())
+
+        assertNull(Float.MIN_VALUE.toDecimal192OrNull())
+        assertNotNull(3.14f.toDecimal192OrNull())
+
+        assertNull(Float.MIN_VALUE.toString().toDecimal192OrNull())
+        assertNotNull("3.14".toDecimal192OrNull())
+    }
+
+    @Test
+    fun testOrZero() {
+        val value: Decimal192? = null
+        assertEquals(0.toDecimal192(), value.orZero())
+        assertEquals(10.toDecimal192(), 10.toDecimal192().orZero())
+    }
+
+    @Test
     fun testFormatting() {
-        val oneMillion = Decimal192.exponent(6.toUByte()).formatted(
-            locale = LocaleConfig(decimalSeparator = ",", groupingSeparator = " "),
-            totalPlaces = 1.toUByte(),
-            useGroupingSeparator = true
+        val decimalFormatSymbols = mockk<DecimalFormatSymbols>(relaxed = true).apply {
+            every { decimalSeparator } returns ','
+            every { groupingSeparator } returns ' '
+        }
+
+        val sut = "1013.1415".toDecimal192()
+
+        assertEquals(
+            "1 013,14", sut.formatted(
+                format = decimalFormatSymbols,
+                totalPlaces = 6.toUByte(),
+                useGroupingSeparator = true
+            )
+        )
+    }
+
+    @Test
+    fun testSum() {
+        val items = listOf(
+            0.toDecimal192(),
+            10.toDecimal192(),
+            20.toDecimal192()
         )
 
-        assertEquals("1 M", oneMillion)
-
-        val formatted = "1013.1415".toDecimal192().formatted(
-            locale = LocaleConfig(decimalSeparator = ",", groupingSeparator = " "),
-            totalPlaces = 6.toUByte(),
-            useGroupingSeparator = true
-        )
-
-        assertEquals("1 013,14", formatted)
+        assertEquals(30.toDecimal192(), items.sumOf { it })
     }
 
     private fun Decimal192.plainString() = formattedPlain(
-        locale = LocaleConfig(decimalSeparator = ".", groupingSeparator = ""),
+        format = DecimalFormatSymbols.getInstance(Locale.US),
         useGroupingSeparator = false
     )
 }

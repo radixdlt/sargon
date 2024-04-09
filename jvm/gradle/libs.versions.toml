@@ -7,6 +7,7 @@ sdk-compile = "34"
 appcompat = "1.6.1"
 core-ktx = "1.12.0"
 junit = "5.10.2"
+mockk = "1.13.10"
 kotlin = "1.9.22"
 agp = "8.2.2"
 material = "1.11.0"
@@ -26,6 +27,7 @@ androidx-compose-ui-preview = { module = "androidx.compose.ui:ui-tooling-preview
 androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
 material = { module = "com.google.android.material:material", version.ref = "material" }
 junit = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
