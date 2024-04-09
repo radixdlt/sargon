@@ -38,7 +38,9 @@ derive_more = { git = "https://github.com/JelteF/derive_more", rev = "1196b2dd7a
 
 serde = { version = "1.0.193", features = ["derive", "rc", "std"] }
 serde_json = { version = "1.0.108", features = ["preserve_order"] }
-serde_with = { version = "3.4.0" }
+
+# serde_with = "3.4.0"
+serde_with = { git = "https://github.com/jonasbb/serde_with/", rev = "1e8e4e75398c6a9de29386473ae7c3157be031c2" }
 
 # serde_repr = "0.1.17"
 serde_repr = { git = "https://github.com/dtolnay/serde-repr/", rev = "94cce18a51bc169869f2cdcea6549b3ed81b3b2e" }
