@@ -1,5 +1,9 @@
 use crate::{prelude::*, UniffiCustomTypeConverter};
 
+
+use crypto::signatures::ed25519 as IotaSlip10Ed25519;
+
+
 /// An Ed25519 public key used to verify cryptographic signatures (EdDSA signatures).
 #[serde_as]
 #[derive(
@@ -114,7 +118,7 @@ impl TryFrom<ScryptoEd25519PublicKey> for Ed25519PublicKey {
     type Error = CommonError;
 
     fn try_from(value: ScryptoEd25519PublicKey) -> Result<Self, Self::Error> {
-        ed25519_dalek::PublicKey::from_bytes(value.to_vec().as_slice())
+        IotaSlip10Ed25519::PublicKey::try_from_bytes(value.0)
             .map_err(|_| CommonError::InvalidEd25519PublicKeyPointNotOnCurve)
             .map(|_| Self {
                 secret_magic: value,

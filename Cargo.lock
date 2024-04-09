@@ -577,15 +577,6 @@ version = "0.2.0"
 source = "git+https://github.com/radixdlt/const-sha1#5e9ae2a99e9c76e85aa67f42e4b62e7f7ce8dad4"
 
 [[package]]
-name = "convert_case"
-version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ec182b0ca2f35d8fc196cf3404988fd8b8c739a4d270ff118a398feb0cbec1ca"
-dependencies = [
- "unicode-segmentation",
-]
-
-[[package]]
 name = "core-foundation"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -641,7 +632,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0dc92fb57ca44df6db8059111ab3af99a63d5d0f8375d9972e319a379c6bab76"
 dependencies = [
  "generic-array 0.14.7",
- "rand_core 0.6.4",
+ "rand_core 0.6.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "subtle",
  "zeroize",
 ]
@@ -735,8 +726,7 @@ dependencies = [
 [[package]]
 name = "delegate"
 version = "0.12.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4e018fccbeeb50ff26562ece792ed06659b9c2dae79ece77c4456bb10d9bf79b"
+source = "git+https://github.com/Kobzol/rust-delegate/?rev=ac852be64f3e4b5f9b58be910d09921488d2845d#ac852be64f3e4b5f9b58be910d09921488d2845d"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -878,8 +868,8 @@ dependencies = [
  "curve25519-dalek 4.1.2",
  "ed25519 2.2.3",
  "hashbrown 0.14.3",
- "hex",
- "rand_core 0.6.4",
+ "hex 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rand_core 0.6.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "sha2 0.10.8",
  "zeroize",
 ]
@@ -903,7 +893,7 @@ dependencies = [
  "generic-array 0.14.7",
  "group",
  "pkcs8",
- "rand_core 0.6.4",
+ "rand_core 0.6.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "sec1",
  "subtle",
  "zeroize",
@@ -912,8 +902,7 @@ dependencies = [
 [[package]]
 name = "enum-as-inner"
 version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5ffccbb6966c05b32ef8fbac435df276c4ae4d3dc55a8cd0eb9745e6c12f546a"
+source = "git+https://github.com/bluejekyll/enum-as-inner/?rev=c15f6e5c4f98ec865e181ae1fff9fc13a1a2e4e2#c15f6e5c4f98ec865e181ae1fff9fc13a1a2e4e2"
 dependencies = [
  "heck",
  "proc-macro2",
@@ -1002,7 +991,7 @@ version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ded41244b729663b1e574f1b4fb731469f69f79c17667b5d776b16cda0479449"
 dependencies = [
- "rand_core 0.6.4",
+ "rand_core 0.6.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "subtle",
 ]
 
@@ -1162,7 +1151,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f0f9ef7462f7c099f518d754361858f86d8a07af53ba9af0fe635bbccb151a63"
 dependencies = [
  "ff",
- "rand_core 0.6.4",
+ "rand_core 0.6.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "subtle",
 ]
 
@@ -1208,6 +1197,11 @@ checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
 dependencies = [
  "serde",
 ]
+
+[[package]]
+name = "hex"
+version = "0.4.3"
+source = "git+https://github.com/KokaKiwi/rust-hex/?rev=b2b4370b5bf021b98ee7adc92233e8de3f2de792#b2b4370b5bf021b98ee7adc92233e8de3f2de792"
 
 [[package]]
 name = "hmac"
@@ -1351,8 +1345,7 @@ checksum = "b9e0384b61958566e926dc50660321d12159025e767c18e043daf26b70104c39"
 [[package]]
 name = "identified_vec"
 version = "0.1.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "055d24e9fd24177be81c92f956a45f96b8b8789a24c5300d32d660957712b376"
+source = "git+https://github.com/Sajjon/identified_vec/?rev=4480b418b69894ad96542bd94f80e9be63515e37#4480b418b69894ad96542bd94f80e9be63515e37"
 dependencies = [
  "serde",
  "thiserror",
@@ -1458,9 +1451,8 @@ dependencies = [
 
 [[package]]
 name = "itertools"
-version = "0.12.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba291022dbbd398a455acf126c1e341954079855bc60dfdda641363bd6922569"
+version = "0.12.0"
+source = "git+https://github.com/rust-itertools/itertools/?rev=98ecabb47d7147dae06fc3fa400ec758947194f3#98ecabb47d7147dae06fc3fa400ec758947194f3"
 dependencies = [
  "either",
 ]
@@ -1534,27 +1526,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ecc2af9a1119c51f12a14607e783cb977bde58bc069ff0c3da1095e635d70654"
 dependencies = [
  "cpufeatures",
-]
-
-[[package]]
-name = "kinded"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ce4bdbb2f423660b19f0e9f7115182214732d8dd5f840cd0a3aee3e22562f34c"
-dependencies = [
- "kinded_macros",
-]
-
-[[package]]
-name = "kinded_macros"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a13b4ddc5dcb32f45dac3d6f606da2a52fdb9964a18427e63cd5ef6c0d13288d"
-dependencies = [
- "convert_case",
- "proc-macro2",
- "quote",
- "syn 2.0.48",
 ]
 
 [[package]]
@@ -1759,28 +1730,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "nutype"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "38fd38251d275b6a3cecbf4d2f8ce83b80609f0e33e2508a8bc3a7d94401d007"
-dependencies = [
- "nutype_macros",
-]
-
-[[package]]
-name = "nutype_macros"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2b9dc33172cb6abafee47925b6a188f2d3c3726cb5df12f39132a53df98501d2"
-dependencies = [
- "cfg-if",
- "kinded",
- "proc-macro2",
- "quote",
- "syn 2.0.48",
-]
-
-[[package]]
 name = "object"
 version = "0.32.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1976,8 +1925,7 @@ checksum = "5b40af805b3121feab8a3c29f04d8ad262fa8e0561883e7653e024ae4479e6de"
 [[package]]
 name = "pretty_assertions"
 version = "1.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "af7cee1a6c8a5b9208b3cb1061f10c0cb689087b3d8ce85fb9d2dd7a29b6ba66"
+source = "git+https://github.com/rust-pretty-assertions/rust-pretty-assertions?rev=3f1ebc0cac5f88e875f036bf16636e15fa935c8d#3f1ebc0cac5f88e875f036bf16636e15fa935c8d"
 dependencies = [
  "diff",
  "yansi",
@@ -2030,7 +1978,7 @@ dependencies = [
  "bitflags 1.3.2",
  "colored",
  "const-sha1",
- "hex",
+ "hex 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "lazy_static",
  "moka",
  "native-sdk",
@@ -2062,7 +2010,7 @@ dependencies = [
  "blst",
  "bnum",
  "ed25519-dalek",
- "hex",
+ "hex 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "lazy_static",
  "num-bigint",
  "num-integer",
@@ -2095,7 +2043,7 @@ source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=587d5988cd4ca3c51
 dependencies = [
  "bitflags 1.3.2",
  "const-sha1",
- "hex",
+ "hex 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "lazy_static",
  "paste 1.0.14 (registry+https://github.com/rust-lang/crates.io-index)",
  "radix-engine-common",
@@ -2135,7 +2083,7 @@ name = "radix-engine-queries"
 version = "1.0.2-dev"
 source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=587d5988cd4ca3c5193ddf37027ff4e4ecd637dc#587d5988cd4ca3c5193ddf37027ff4e4ecd637dc"
 dependencies = [
- "hex",
+ "hex 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "itertools 0.10.5",
  "paste 1.0.14 (registry+https://github.com/rust-lang/crates.io-index)",
  "radix-engine",
@@ -2151,7 +2099,7 @@ name = "radix-engine-store-interface"
 version = "1.0.2-dev"
 source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=587d5988cd4ca3c5193ddf37027ff4e4ecd637dc#587d5988cd4ca3c5193ddf37027ff4e4ecd637dc"
 dependencies = [
- "hex",
+ "hex 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "itertools 0.10.5",
  "radix-engine-common",
  "radix-engine-derive",
@@ -2165,7 +2113,7 @@ name = "radix-engine-stores"
 version = "1.0.2-dev"
 source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=587d5988cd4ca3c5193ddf37027ff4e4ecd637dc#587d5988cd4ca3c5193ddf37027ff4e4ecd637dc"
 dependencies = [
- "hex",
+ "hex 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "itertools 0.10.5",
  "radix-engine-common",
  "radix-engine-derive",
@@ -2240,12 +2188,11 @@ dependencies = [
 [[package]]
 name = "rand"
 version = "0.8.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "34af8d1a0e25924bc5b7c43c079c942339d8f0a8b57c39049bef581b46327404"
+source = "git+https://github.com/rust-random/rand/?rev=937320cbfeebd4352a23086d9c6e68f067f74644#937320cbfeebd4352a23086d9c6e68f067f74644"
 dependencies = [
  "libc",
  "rand_chacha 0.3.1",
- "rand_core 0.6.4",
+ "rand_core 0.6.4 (git+https://github.com/rust-random/rand/?rev=937320cbfeebd4352a23086d9c6e68f067f74644)",
 ]
 
 [[package]]
@@ -2261,11 +2208,10 @@ dependencies = [
 [[package]]
 name = "rand_chacha"
 version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e6c10a63a0fa32252be49d21e7709d4d4baf8d231c2dbce1eaa8141b9b127d88"
+source = "git+https://github.com/rust-random/rand/?rev=937320cbfeebd4352a23086d9c6e68f067f74644#937320cbfeebd4352a23086d9c6e68f067f74644"
 dependencies = [
  "ppv-lite86",
- "rand_core 0.6.4",
+ "rand_core 0.6.4 (git+https://github.com/rust-random/rand/?rev=937320cbfeebd4352a23086d9c6e68f067f74644)",
 ]
 
 [[package]]
@@ -2282,6 +2228,14 @@ name = "rand_core"
 version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
+dependencies = [
+ "getrandom 0.2.12",
+]
+
+[[package]]
+name = "rand_core"
+version = "0.6.4"
+source = "git+https://github.com/rust-random/rand/?rev=937320cbfeebd4352a23086d9c6e68f067f74644#937320cbfeebd4352a23086d9c6e68f067f74644"
 dependencies = [
  "getrandom 0.2.12",
 ]
@@ -2485,7 +2439,7 @@ dependencies = [
 
 [[package]]
 name = "sargon"
-version = "0.6.16"
+version = "0.6.18"
 dependencies = [
  "actix-rt",
  "assert-json-diff",
@@ -2496,17 +2450,15 @@ dependencies = [
  "clap 4.5.1",
  "delegate",
  "derive_more",
- "ed25519-dalek",
  "enum-as-inner",
  "enum-iterator",
- "hex",
+ "hex 0.4.3 (git+https://github.com/KokaKiwi/rust-hex/?rev=b2b4370b5bf021b98ee7adc92233e8de3f2de792)",
  "identified_vec",
  "iota-crypto",
  "iso8601-timestamp",
- "itertools 0.12.1",
+ "itertools 0.12.0",
  "k256 0.13.3 (git+https://github.com/RustCrypto/elliptic-curves?rev=e158ce5cf0e9acee2fd76aff2a628334f5c771e5)",
  "log",
- "nutype",
  "paste 1.0.14 (git+https://github.com/dtolnay/paste?rev=1e0cc1025af5388397c67fa4389ad7ad24814df8)",
  "pretty_assertions",
  "pretty_env_logger",
@@ -2520,7 +2472,6 @@ dependencies = [
  "regex 1.9.3 (git+https://github.com/rust-lang/regex/?rev=72f889ef3cca59ebac6a026f3646e8d92f056d88)",
  "reqwest",
  "sbor",
- "schemars",
  "serde",
  "serde_json",
  "serde_repr",
@@ -2539,7 +2490,7 @@ version = "1.0.2-dev"
 source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=587d5988cd4ca3c5193ddf37027ff4e4ecd637dc#587d5988cd4ca3c5193ddf37027ff4e4ecd637dc"
 dependencies = [
  "const-sha1",
- "hex",
+ "hex 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "lazy_static",
  "paste 1.0.14 (registry+https://github.com/rust-lang/crates.io-index)",
  "sbor-derive",
@@ -2659,7 +2610,7 @@ source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=587d5988cd4ca3c51
 dependencies = [
  "bech32",
  "const-sha1",
- "hex",
+ "hex 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "num-bigint",
  "num-traits",
  "paste 1.0.14 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -2848,7 +2799,7 @@ checksum = "15d167997bd841ec232f5b2b8e0e26606df2e7caa4c31b95ea9ca52b200bd270"
 dependencies = [
  "base64 0.21.7",
  "chrono",
- "hex",
+ "hex 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "indexmap 1.9.3",
  "indexmap 2.2.3",
  "serde",
@@ -2926,7 +2877,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "77549399552de45a898a580c1b41d445bf730df867cc44e6c0233bbc4b8329de"
 dependencies = [
  "digest 0.10.7",
- "rand_core 0.6.4",
+ "rand_core 0.6.4 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -3331,7 +3282,7 @@ version = "1.0.2-dev"
 source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=587d5988cd4ca3c5193ddf37027ff4e4ecd637dc#587d5988cd4ca3c5193ddf37027ff4e4ecd637dc"
 dependencies = [
  "bech32",
- "hex",
+ "hex 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "lazy_static",
  "radix-engine-common",
  "radix-engine-interface",
@@ -3415,12 +3366,6 @@ checksum = "5c5713f0fc4b5db668a2ac63cdb7bb4469d8c9fed047b1d0292cc7b0ce2ba921"
 dependencies = [
  "tinyvec",
 ]
-
-[[package]]
-name = "unicode-segmentation"
-version = "1.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d4c87d22b6e3f4a18d4d40ef354e97c90fcb14dd91d7dc0aa9d8a1172ebf7202"
 
 [[package]]
 name = "unicode-width"
