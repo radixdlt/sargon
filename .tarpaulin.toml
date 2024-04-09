@@ -14,8 +14,11 @@ exclude-files = [
     ".build/*",
     "Package.swift",
 ]
-verbose = false
+verbose = true
 run-types = ["Lib"]
-timeout = "5m"
+timeout = "15m"
 skip-clean = true
+locked = true
+all = true
+jobs = 1
 out = ["Xml"]
