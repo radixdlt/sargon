@@ -102,6 +102,21 @@ impl Profile {
             networks,
         }
     }
+
+    /// Creates a new `Profile` from json in the form of `BagOfBytes`.
+    /// This is a temporarily exported method that allows wallet clients to
+    /// integrate Profile in steps.
+    ///
+    /// Should be replaced later with `WalletClientStorage`
+    pub fn new_from_json_bytes(json: BagOfBytes) -> Result<Self> {
+        let bytes = json.bytes();
+        serde_json::from_slice::<Self>(json.bytes()).map_err(|_| {
+            CommonError::FailedToDeserializeJSONToValue {
+                json_byte_count: bytes.len() as u64,
+                type_name: std::any::type_name::<Profile>().to_string(),
+            }
+        })
+    }
 }
 
 impl Profile {
@@ -141,6 +156,17 @@ impl Profile {
                     mutate(element).map(|modified| modified.into())
                 })
         })
+    }
+
+    /// Converts this `Profile` to json in the form of `BagOfBytes`
+    /// This is a temporarily exported method that allows wallet clients to
+    /// integrate Profile in steps.
+    ///
+    /// Should be replaced later with `WalletClientStorage`
+    pub fn to_json_bytes(&self) -> Result<BagOfBytes> {
+        serde_json::to_vec(self)
+            .map_err(|_| CommonError::FailedToSerializeToJSON)
+            .map(BagOfBytes::from)
     }
 }
 
@@ -388,6 +414,24 @@ mod tests {
             })
             .collect::<HashSet<_>>();
         assert_eq!(set.len(), n);
+    }
+
+    #[test]
+    fn to_json_bytes_new_from_json_bytes() {
+        let sut = SUT::sample();
+
+        let encoded = sut.to_json_bytes().unwrap();
+        let profile_result = SUT::new_from_json_bytes(encoded).unwrap();
+        assert_eq!(profile_result, sut);
+
+        let malformed_profile_snapshot = BagOfBytes::from("{}".as_bytes());
+        assert_eq!(
+            SUT::new_from_json_bytes(malformed_profile_snapshot.clone()),
+            Result::Err(CommonError::FailedToDeserializeJSONToValue {
+                json_byte_count: malformed_profile_snapshot.len() as u64,
+                type_name: std::any::type_name::<Profile>().to_string()
+            })
+        );
     }
 
     #[test]
