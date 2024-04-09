@@ -138,6 +138,6 @@ mod tests {
         let sut = SUT::new(Arc::new(mock_antenna), NetworkID::Stokenet);
         let req = sut.current_epoch();
         let result = timeout(MAX, req).await.unwrap();
-        assert_eq!(result, Err(CommonError::NetworkResponseJSONDeserialize { into_type: "sargon::gateway_api::models::response::transaction_construction::TransactionConstructionResponse".to_owned() }))
+        assert_eq!(result, Err(CommonError::NetworkResponseJSONDeserialize { into_type: "sargon::gateway_api::models::types::response::transaction::construction::transaction_construction_response::TransactionConstructionResponse".to_owned() }))
     }
 }

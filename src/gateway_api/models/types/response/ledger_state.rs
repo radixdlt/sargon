@@ -1,7 +1,15 @@
 use crate::prelude::*;
 
 /// The ledger state against which the response was generated. Can be used to detect if the Network Gateway is returning up-to-date information.
-#[derive(Deserialize, Clone, PartialEq, Eq, Debug, uniffi::Record)]
+#[derive(
+    Deserialize,
+    Serialize, /* Serialize so we can test roundtrip of JSON vectors */
+    Clone,
+    PartialEq,
+    Eq,
+    Debug,
+    uniffi::Record,
+)]
 pub struct LedgerState {
     /// The logical name of the network
     pub network: String,

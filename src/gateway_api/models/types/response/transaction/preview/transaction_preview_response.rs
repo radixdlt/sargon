@@ -1,0 +1,17 @@
+use crate::prelude::*;
+
+#[derive(
+    Deserialize,
+    Serialize, /* Serialize so we can test roundtrip of JSON vectors */
+    Clone,
+    PartialEq,
+    Eq,
+    Debug,
+    uniffi::Record,
+)]
+pub struct TransactionPreviewResponse {
+    /** Hex-encoded binary blob. */
+    pub encoded_receipt: String,
+    pub logs: Vec<TransactionPreviewResponseLogsInner>,
+}
+

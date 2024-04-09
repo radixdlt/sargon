@@ -1,5 +1,43 @@
 use crate::prelude::*;
 
+#[derive(
+    Serialize,
+    Deserialize, /* Deserialize so we can test roundtrip of JSON vectors */
+    Clone,
+    Debug,
+    PartialEq,
+    Eq,
+)]
+pub(crate) struct TransactionPreviewRequest {
+    /** A text-representation of a transaction manifest */
+    manifest: String,
+
+    /** An array of hex-encoded blob data (optional) */
+    blobs_hex: Option<Vec<String>>,
+
+    /** An integer between `0` and `10^10`, marking the epoch at which the transaction starts being valid */
+    start_epoch_inclusive: u64,
+
+    /** An integer between `0` and `10^10`, marking the epoch at which the transaction is no longer valid */
+    end_epoch_exclusive: u64,
+
+    notary_public_key: Option<GWPublicKey>,
+
+    /** Whether the notary should count as a signatory (optional, default false) */
+    notary_is_signatory: bool,
+
+    /** An integer between `0` and `65535`, giving the validator tip as a percentage amount. A value of `1` corresponds to 1% of the fee. */
+    tip_percentage: u16,
+
+    /** A decimal-string-encoded integer between `0` and `2^32 - 1`, used to ensure the transaction intent is unique. */
+    nonce: u32,
+
+    /** A list of public keys to be used as transaction signers */
+    signer_public_keys: Vec<GWPublicKey>,
+
+    flags: TransactionPreviewRequestFlags,
+}
+
 impl TransactionPreviewRequest {
     pub fn new(
         intent: TransactionIntent,
@@ -35,38 +73,14 @@ impl TransactionPreviewRequest {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
-pub(crate) struct TransactionPreviewRequest {
-    /** A text-representation of a transaction manifest */
-    manifest: String,
-
-    /** An array of hex-encoded blob data (optional) */
-    blobs_hex: Option<Vec<String>>,
-
-    /** An integer between `0` and `10^10`, marking the epoch at which the transaction starts being valid */
-    start_epoch_inclusive: u64,
-
-    /** An integer between `0` and `10^10`, marking the epoch at which the transaction is no longer valid */
-    end_epoch_exclusive: u64,
-
-    notary_public_key: Option<GWPublicKey>,
-
-    /** Whether the notary should count as a signatory (optional, default false) */
-    notary_is_signatory: bool,
-
-    /** An integer between `0` and `65535`, giving the validator tip as a percentage amount. A value of `1` corresponds to 1% of the fee. */
-    tip_percentage: u16,
-
-    /** A decimal-string-encoded integer between `0` and `2^32 - 1`, used to ensure the transaction intent is unique. */
-    nonce: u32,
-
-    /** A list of public keys to be used as transaction signers */
-    signer_public_keys: Vec<GWPublicKey>,
-
-    flags: TransactionPreviewRequestFlags,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    PartialEq,
+    Eq,
+    Serialize,
+    Deserialize, /* Deserialize so we can test roundtrip of JSON vectors */
+)]
 pub struct TransactionPreviewRequestFlags {
     use_free_credit: bool,
     assume_all_signature_proofs: bool,
@@ -82,7 +96,14 @@ impl Default for TransactionPreviewRequestFlags {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    PartialEq,
+    Eq,
+    Serialize,
+    Deserialize, /* Deserialize so we can test roundtrip of JSON vectors */
+)]
 #[serde(tag = "key_type")]
 pub(crate) enum GWPublicKey {
     Secp256k1(GWSecp256k1PublicKey),
@@ -106,7 +127,14 @@ impl From<PublicKey> for GWPublicKey {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    PartialEq,
+    Eq,
+    Serialize,
+    Deserialize, /* Deserialize so we can test roundtrip of JSON vectors */
+)]
 pub(crate) struct GWEd25519PublicKey {
     key_type: GWPublicKeyType,
 
@@ -114,7 +142,14 @@ pub(crate) struct GWEd25519PublicKey {
     key_hex: String,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    PartialEq,
+    Eq,
+    Serialize,
+    Deserialize, /* Deserialize so we can test roundtrip of JSON vectors */
+)]
 pub(crate) struct GWSecp256k1PublicKey {
     key_type: GWPublicKeyType,
 
@@ -122,7 +157,14 @@ pub(crate) struct GWSecp256k1PublicKey {
     key_hex: String,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    PartialEq,
+    Eq,
+    Serialize,
+    Deserialize, /* Deserialize so we can test roundtrip of JSON vectors */
+)]
 pub(crate) enum GWPublicKeyType {
     #[serde(rename = "EcdsaSecp256k1")]
     Secp256k1,

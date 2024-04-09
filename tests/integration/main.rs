@@ -55,7 +55,7 @@ mod integration_tests {
     }
 
     #[actix_rt::test]
-    async fn transaction_dry_run() {
+    async fn dry_run_transaction() {
         // ARRANGE
         let network_id = NetworkID::Mainnet;
         let gateway_client = new_gateway_client(network_id);
@@ -98,7 +98,7 @@ mod integration_tests {
             TransactionIntent::new(header, manifest.clone(), Message::None)
                 .unwrap();
 
-        let sut = gateway_client.transaction_dry_run(
+        let sut = gateway_client.dry_run_transaction(
             intent, vec![
                     Ed25519PublicKey::from_hex(
                         "48d24f09b43d50f3acd58cf8509a57c8f306d94b945bd9b7e6ebcf6691eed3b6".to_owned()
