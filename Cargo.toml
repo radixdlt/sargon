@@ -1,6 +1,6 @@
 [package]
 name = "sargon"
-version = "0.6.11"
+version = "0.6.16"
 edition = "2021"
 build = "build.rs"
 
@@ -85,12 +85,20 @@ clap = { version = "4", default-features = false, features = ["std", "derive"] }
 camino = "1.0.8"
 regex = "1.9.3"
 async-trait = "0.1.79"
-reqwest = { version = "0.12.3", default-features = false, features = ["native-tls-vendored"] }
+
+# reqwest = "0.12.3"
+reqwest = { git = "https://github.com/seanmonstar/reqwest", rev = "0720159f6369f54e045a1fd315e0f24b7a0b4a39", default-features = false, features = [
+    "native-tls-vendored",
+] }
 
 [build-dependencies]
 uniffi = { version = "0.27.0", features = ["build"] }
-cargo_toml = { version = "0.15.3" }
+
+# cargo_toml = "0.15.3"
+cargo_toml = { git = "https://gitlab.com/lib.rs/cargo_toml", rev = "e498c94fc42a660c1ca1a28999ce1d757cfe77fe" }
 
 [dev-dependencies]
 uniffi = { version = "0.27.0", features = ["bindgen-tests"] }
-actix-rt = "*"
+
+# actix-rt = "3.3.0"
+actix-rt = { git = "https://github.com/actix/actix-net", rev = "57fd6ea8098d1f2d281c305fc331216c4fe1992e" }

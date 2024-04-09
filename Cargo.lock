@@ -15,8 +15,7 @@ dependencies = [
 [[package]]
 name = "actix-rt"
 version = "2.9.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "28f32d40287d3f402ae0028a9d54bef51af15c8769492826a69d28f81893151d"
+source = "git+https://github.com/actix/actix-net?rev=57fd6ea8098d1f2d281c305fc331216c4fe1992e#57fd6ea8098d1f2d281c305fc331216c4fe1992e"
 dependencies = [
  "actix-macros",
  "futures-core",
@@ -428,6 +427,15 @@ name = "cargo_toml"
 version = "0.15.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "599aa35200ffff8f04c1925aa1acc92fa2e08874379ef42e210a80e527e60838"
+dependencies = [
+ "serde",
+ "toml 0.7.8",
+]
+
+[[package]]
+name = "cargo_toml"
+version = "0.15.3"
+source = "git+https://gitlab.com/lib.rs/cargo_toml?rev=e498c94fc42a660c1ca1a28999ce1d757cfe77fe#e498c94fc42a660c1ca1a28999ce1d757cfe77fe"
 dependencies = [
  "serde",
  "toml 0.7.8",
@@ -2177,7 +2185,7 @@ version = "1.0.10"
 source = "git+https://github.com/radixdlt/radix-engine-toolkit?rev=1cfe879c7370cfa497857ada7a8973f8a3388abc#1cfe879c7370cfa497857ada7a8973f8a3388abc"
 dependencies = [
  "bech32",
- "cargo_toml",
+ "cargo_toml 0.15.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "extend",
  "lazy_static",
  "paste",
@@ -2333,8 +2341,7 @@ checksum = "dbb5fb1acd8a1a18b3dd5be62d25485eb770e05afb408a9627d14d451bae12da"
 [[package]]
 name = "reqwest"
 version = "0.12.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3e6cc1e89e689536eb5aeede61520e874df5a4707df811cd5da4aa5fbb2aae19"
+source = "git+https://github.com/seanmonstar/reqwest?rev=0720159f6369f54e045a1fd315e0f24b7a0b4a39#0720159f6369f54e045a1fd315e0f24b7a0b4a39"
 dependencies = [
  "base64 0.22.0",
  "bytes",
@@ -2457,14 +2464,14 @@ dependencies = [
 
 [[package]]
 name = "sargon"
-version = "0.6.11"
+version = "0.6.16"
 dependencies = [
  "actix-rt",
  "assert-json-diff",
  "async-trait",
  "bip39",
  "camino",
- "cargo_toml",
+ "cargo_toml 0.15.3 (git+https://gitlab.com/lib.rs/cargo_toml?rev=e498c94fc42a660c1ca1a28999ce1d757cfe77fe)",
  "clap",
  "delegate",
  "derive_more",
