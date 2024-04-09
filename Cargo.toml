@@ -1,6 +1,6 @@
 [package]
 name = "sargon"
-version = "0.6.16"
+version = "0.6.18"
 edition = "2021"
 build = "build.rs"
 
@@ -22,49 +22,97 @@ path = "src/bindgen/bin.rs"
 required-features = ["build-binary"]
 
 [dependencies]
+
 log = "0.4.20"
-pretty_env_logger = "0.5.0"
-derive_more = { version = "1.0.0-beta.6", features = [
+# log = { git = "https://github.com/rust-lang/log/", rev = "4708f1484c7e6b8d4418b571c05e613b18e57673" }
+
+# pretty_env_logger = "0.5.0"
+pretty_env_logger = { git = "https://github.com/seanmonstar/pretty-env-logger/", rev = "0e238400e18649415dc710c025e99c009a1bb744" }
+
+# derive_more = "1.0.0-beta.6"
+derive_more = { git = "https://github.com/JelteF/derive_more", rev = "1196b2dd7a366c06db621093884adbc379fc0f0a", features = [
     "debug",
     "display",
     "from_str",
 ] }
+
 serde = { version = "1.0.193", features = ["derive", "rc", "std"] }
 serde_json = { version = "1.0.108", features = ["preserve_order"] }
-serde_with = { version = "3.4.0" }
-thiserror = "1.0.50"
-iso8601-timestamp = { version = "0.2.16", features = ["serde", "std"] }
-uuid = { version = "1.6.1", features = ["v4", "serde"] }
-serde_repr = "0.1.17"
-strum = { version = "0.26.0", features = ["derive"] }
+
+# serde_with = "3.4.0"
+serde_with = { git = "https://github.com/jonasbb/serde_with/", rev = "1e8e4e75398c6a9de29386473ae7c3157be031c2" }
+
+# serde_repr = "0.1.17"
+serde_repr = { git = "https://github.com/dtolnay/serde-repr/", rev = "94cce18a51bc169869f2cdcea6549b3ed81b3b2e" }
+
+# thiserror = "1.0.50"
+thiserror = { git = "https://github.com/dtolnay/thiserror/", rev = "a7d220d7915fb888413aa7978efd70f7006bda9d" }
+
+# iso8601-timestamp = "0.2.16"
+iso8601-timestamp = { git = "https://github.com/Lantern-chat/iso8601-timestamp/", rev = "e5a3f2a5911759bc6b0d8100b032a6b4dd6e12c1", features = [
+    "serde",
+    "std",
+] }
+
+# uuid = "1.6.1"
+uuid = { git = "https://github.com/uuid-rs/uuid/", rev = "c8891073248ddc7faa8c53ac9ceb629a341c7b9b", features = [
+    "v4",
+    "serde",
+] }
+
+# strum = "0.26.1"
+strum = { git = "https://github.com/Peternator7/strum/", rev = "f746c3699acf150112e26c00e6c8ca666d8d068d", features = [
+    "derive",
+] }
 
 # 587d5988cd4ca3c5193ddf37027ff4e4ecd637dc is the Scrypto commit that RET 1cfe879c7370cfa497857ada7a8973f8a3388abc uses
 radix-engine-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "587d5988cd4ca3c5193ddf37027ff4e4ecd637dc", features = [
     "serde",
 ] }
+
 radix-engine = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "587d5988cd4ca3c5193ddf37027ff4e4ecd637dc" }
+
 sbor = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "587d5988cd4ca3c5193ddf37027ff4e4ecd637dc" }
+
 radix-engine-derive = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "587d5988cd4ca3c5193ddf37027ff4e4ecd637dc" }
+
 radix-engine-interface = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "587d5988cd4ca3c5193ddf37027ff4e4ecd637dc", features = [
     "std",
 ] }
+
 transaction = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "587d5988cd4ca3c5193ddf37027ff4e4ecd637dc", features = [
     "std",
 ] }
+
 radix-engine-toolkit-json = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "1cfe879c7370cfa497857ada7a8973f8a3388abc" }
+
 radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "1cfe879c7370cfa497857ada7a8973f8a3388abc" }
-enum-iterator = "1.4.1"
-ed25519-dalek = "1.0.1"
-rand = "0.8.5"
-hex = "0.4.3"
-delegate = "0.12.0"
-itertools = { version = "0.12.0" }
-enum-as-inner = "0.6.0"
-identified_vec = { version = "0.1.11", features = ["serde", "id_prim"] }
-nutype = { version = "0.4.0", features = ["serde"] }
-schemars = { version = "0.8.12", features = ["preserve_order"] }
+
+# enum-iterator = "1.4.1"
+enum-iterator = { git = "https://github.com/stephaneyfx/enum-iterator/", rev = "9d472a1237cfd03b1c7657fdcba74c8070bfb4ea" }
+
+# rand = "0.8.5"
+rand = { git = "https://github.com/rust-random/rand/", rev = "937320cbfeebd4352a23086d9c6e68f067f74644" }
+
+# hex = "0.4.3"
+hex = { git = "https://github.com/KokaKiwi/rust-hex/", rev = "b2b4370b5bf021b98ee7adc92233e8de3f2de792" }
+
+# delegate = "0.12.0"
+delegate = { git = "https://github.com/Kobzol/rust-delegate/", rev = "ac852be64f3e4b5f9b58be910d09921488d2845d" }
+
+# itertools = "0.12.0"
+itertools = { git = "https://github.com/rust-itertools/itertools/", rev = "98ecabb47d7147dae06fc3fa400ec758947194f3" }
+
+# enum-as-inner = "0.6.0"
+enum-as-inner = { git = "https://github.com/bluejekyll/enum-as-inner/", rev = "c15f6e5c4f98ec865e181ae1fff9fc13a1a2e4e2" }
+
+# identified_vec =  "0.1.11"
+identified_vec = { git = "https://github.com/Sajjon/identified_vec/", rev = "4480b418b69894ad96542bd94f80e9be63515e37", features = [
+    "serde",
+    "id_prim",
+] }
+
 uniffi = { version = "0.27.0", features = ["cli"] }
-pretty_assertions = "1.4.0"
 
 # SLIP10 implementation
 # iota_crypto = "0.23.1"
@@ -104,15 +152,11 @@ clap = { git = "https://github.com/clap-rs/clap/", rev = "8a7a13a5618cfdc4ff3286
 # camino = "1.0.8"
 camino = { git = "https://github.com/camino-rs/camino/", rev = "afa51b1b4c684b7e6698a6717ccda3affd0abd42", optional = true }
 
-
 # async-trait = "0.1.79"
 async-trait = { git = "https://github.com/dtolnay/async-trait", rev = "1eb21ed8bd87029bf4dcbea41ff309f2b2220c43" }
 
-[build-dependencies]
-uniffi = { version = "0.27.0", features = ["build"] }
-
-# cargo_toml = "0.15.3"
-cargo_toml = { git = "https://gitlab.com/lib.rs/cargo_toml", rev = "e498c94fc42a660c1ca1a28999ce1d757cfe77fe" }
+# pretty_assertions = "1.4.0"
+pretty_assertions = { git = "https://github.com/rust-pretty-assertions/rust-pretty-assertions", rev = "3f1ebc0cac5f88e875f036bf16636e15fa935c8d" }
 
 [dev-dependencies]
 uniffi = { version = "0.27.0", features = ["bindgen-tests"] }
@@ -124,6 +168,11 @@ reqwest = { git = "https://github.com/seanmonstar/reqwest", rev = "0720159f6369f
 
 # actix-rt = "3.3.0"
 actix-rt = { git = "https://github.com/actix/actix-net", rev = "57fd6ea8098d1f2d281c305fc331216c4fe1992e" }
+
+[build-dependencies]
+uniffi = { version = "0.27.0", features = ["build"] }
+# cargo_toml = "0.15.3"
+cargo_toml = { git = "https://gitlab.com/lib.rs/cargo_toml", rev = "e498c94fc42a660c1ca1a28999ce1d757cfe77fe" }
 
 [features]
 build-binary = ["camino", "clap", "regex"]
