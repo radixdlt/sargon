@@ -76,7 +76,7 @@ impl AccountAddress {
     /// A sample used to facilitate unit tests.
     pub fn sample_mainnet() -> Self {
         let address = AccountAddress::try_from_bech32(
-            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease",
+            "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr",
         )
         .unwrap();
         assert_eq!(address.network_id(), NetworkID::Mainnet);
@@ -86,7 +86,7 @@ impl AccountAddress {
     /// A sample used to facilitate unit tests.
     pub fn sample_mainnet_other() -> Self {
         let address = AccountAddress::try_from_bech32(
-            "account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master",
+            "account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264",
         )
         .unwrap();
         assert_eq!(address.network_id(), NetworkID::Mainnet);
@@ -135,7 +135,7 @@ mod tests {
 
     #[test]
     fn is_legacy_address() {
-        assert!(SUT::sample_mainnet().is_legacy_address());
+        assert!(SUT::from_str("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease").unwrap().is_legacy_address());
         assert!(!SUT::sample_stokenet().is_legacy_address());
     }
 
@@ -168,7 +168,7 @@ mod tests {
     #[test]
     fn try_from_bech32() {
         assert!(SUT::try_from_bech32(
-            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease",
+            "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr",
         )
         .is_ok());
     }
@@ -187,24 +187,24 @@ mod tests {
     #[test]
     fn display() {
         let a = SUT::try_from_bech32(
-            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease",
+            "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr",
         )
         .unwrap();
         assert_eq!(
             format!("{}", a),
-            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+            "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
         );
     }
 
     #[test]
     fn debug() {
         let a = SUT::try_from_bech32(
-            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease",
+            "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr",
         )
         .unwrap();
         assert_eq!(
             format!("{:?}", a),
-            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+            "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
         );
     }
 
@@ -219,6 +219,22 @@ mod tests {
             SUT::from_public_key::<PublicKey>(public_key.into(), NetworkID::Mainnet)
                 .address(),
             "account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzdm"
+        )
+    }
+
+    #[test]
+    fn from_ed25519_public_key_bytes() {
+        let public_key = Ed25519PublicKey::from_str(
+            "48d24f09b43d50f3acd58cf8509a57c8f306d94b945bd9b7e6ebcf6691eed3b6",
+        )
+        .unwrap();
+
+        assert_eq!(
+            SUT::from_public_key::<PublicKey>(
+                public_key.into(),
+                NetworkID::Mainnet
+            ),
+            SUT::sample()
         )
     }
 
@@ -247,7 +263,7 @@ mod tests {
     #[test]
     fn network_id() {
         let sut = SUT::try_from_bech32(
-            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease",
+            "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr",
         )
         .unwrap();
         assert_eq!(sut.network_id(), NetworkID::Mainnet);
@@ -255,19 +271,19 @@ mod tests {
 
     #[test]
     fn formatted_full() {
-        assert_eq!(SUT::sample().formatted(AddressFormat::Full), "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease");
+        assert_eq!(SUT::sample().formatted(AddressFormat::Full), "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr");
     }
 
     #[test]
     fn formatted_raw() {
-        assert_eq!(SUT::sample().formatted(AddressFormat::Raw), "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease");
+        assert_eq!(SUT::sample().formatted(AddressFormat::Raw), "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr");
     }
 
     #[test]
     fn formatted_default() {
         assert_eq!(
             SUT::sample().formatted(AddressFormat::Default),
-            "acco...please"
+            "acco...nvjdwr"
         );
     }
 
@@ -283,7 +299,7 @@ mod tests {
 
     #[test]
     fn invalid_checksum() {
-        let s = "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3apleasx";
+        let s = "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdxx";
         assert_eq!(
             SUT::try_from_bech32(s),
             Err(CommonError::FailedToDecodeAddressFromBech32 {
@@ -294,7 +310,7 @@ mod tests {
 
     #[test]
     fn invalid_entity_type() {
-        let s = "identity_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease";
+        let s = "identity_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr";
         assert_eq!(
             SUT::try_from_bech32(s),
             Err(CommonError::FailedToDecodeAddressFromBech32 {
@@ -317,7 +333,13 @@ mod tests {
 
     #[test]
     fn into_scrypto_global_address() {
-        assert_eq!(radix_engine::types::GlobalAddress::from(SUT::sample()).into_node_id().as_bytes()[0], radix_engine_common::types::EntityType::GlobalVirtualSecp256k1Account as u8);
+        assert_eq!(
+            radix_engine::types::GlobalAddress::from(SUT::sample())
+                .into_node_id()
+                .as_bytes()[0],
+            radix_engine_common::types::EntityType::GlobalVirtualEd25519Account
+                as u8
+        );
     }
 
     #[test]
@@ -350,18 +372,18 @@ mod tests {
     #[test]
     fn json_roundtrip() {
         let a: SUT =
-            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+            "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
                 .parse()
                 .unwrap();
 
         assert_json_value_eq_after_roundtrip(
             &a,
-            json!("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"),
+            json!("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"),
         );
         assert_json_roundtrip(&a);
         assert_json_value_ne_after_roundtrip(
             &a,
-            json!("account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzdm"),
+            json!("account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264"),
         );
     }
 
@@ -387,7 +409,7 @@ mod uniffi_tests {
 
     #[test]
     fn new_from_bech32_get_network_id_and_address() {
-        let b32 = "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease";
+        let b32 = "account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264";
         let address = new_account_address(b32.to_owned()).unwrap();
         assert_eq!(account_address_network_id(&address), NetworkID::Mainnet);
         assert_eq!(account_address_bech32_address(&address), b32);
@@ -396,12 +418,12 @@ mod uniffi_tests {
     #[test]
     fn address_format_default() {
         let sut: SUT = SUT::try_from_bech32(
-            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease",
+            "account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264",
         )
         .unwrap();
         assert_eq!(
             account_address_formatted(&sut, AddressFormat::Default),
-            "acco...please"
+            "acco...aer264"
         );
     }
 
@@ -425,7 +447,7 @@ mod uniffi_tests {
 
     #[test]
     fn is_legacy_address() {
-        assert!(account_address_is_legacy(&SUT::sample_mainnet()));
+        assert!(account_address_is_legacy(&SUT::from_str("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease").unwrap()));
         assert!(!account_address_is_legacy(&SUT::sample_stokenet()));
     }
 

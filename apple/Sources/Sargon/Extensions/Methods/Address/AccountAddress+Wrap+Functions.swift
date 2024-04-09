@@ -16,10 +16,10 @@ extension AccountAddress {
 			networkId: networkID
 		)
 	}
-    
-    public func formatted(_ format: AddressFormat = .default) -> String {
-        accountAddressFormatted(address: self, format: format)
-    }
+
+	public func formatted(_ format: AddressFormat = .default) -> String {
+		accountAddressFormatted(address: self, format: format)
+	}
 
 	/// The bech32 encoded string for this address.
 	public var address: String {
@@ -44,28 +44,27 @@ extension AccountAddress {
 	///
 	/// The abbreviated form returns:
 	///
-	/// `acco...please`
+	/// `acco...nvjdwr`
 	///
 	/// For the account address:
 	///
-	/// `account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease`
+	/// `account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr`
 	///
 	public var shortFormat: String {
-        formatted(AddressFormat.default)
+		formatted(AddressFormat.default)
 	}
-	
-	
+
 }
 
 #if DEBUG
-extension AccountAddress {
-	
-	public static func random(networkID: NetworkID) -> Self {
-		newAccountAddressRandom(networkId: networkID)
+	extension AccountAddress {
+
+		public static func random(networkID: NetworkID) -> Self {
+			newAccountAddressRandom(networkId: networkID)
+		}
+
+		public func mapTo(networkID: NetworkID) -> Self {
+			accountAddressMapToNetwork(address: self, networkId: networkID)
+		}
 	}
-	
-	public func mapTo(networkID: NetworkID) -> Self {
-		accountAddressMapToNetwork(address: self, networkId: networkID)
-	}
-}
-#endif // DEBUG
+#endif  // DEBUG

@@ -18,7 +18,7 @@ extension URLRequest {
 extension NetworkResponse {
 	init(response: (Data, URLResponse)) throws {
 		guard let httpURLResponse = response.1 as? HTTPURLResponse else {
-			throw SargonError.Unknown // FIXME: Change to specific error
+			throw SargonError.NetworkRequestGenericFailure(underlying: "Failed to cast to HTTPURLResponse")
 		}
 		self.init(
 			statusCode: UInt16(httpURLResponse.statusCode),
@@ -33,7 +33,12 @@ extension URLSession: NetworkAntenna {
 		request sargonRequest: NetworkRequest
 	) async throws -> NetworkResponse {
 		let request = URLRequest(sargon: sargonRequest)
-		let response = try await data(for: request)
+		let response: (Data, URLResponse)
+		do {
+			response = try await data(for: request)
+		} catch {
+			throw SargonError.NetworkRequestGenericFailure(underlying: String(describing: error))
+		}
 		return try NetworkResponse(response: response)
 	}
 }

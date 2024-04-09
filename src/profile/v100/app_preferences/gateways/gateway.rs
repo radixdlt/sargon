@@ -279,25 +279,25 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected = "No network exists for adapanet")]
     fn from_network_id_unsupported_adapanet() {
         _ = SUT::from(NetworkID::Adapanet);
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected = "No network exists for zabanet")]
     fn from_network_id_unsupported_zabanet() {
         _ = SUT::from(NetworkID::Zabanet);
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected = "No network exists for nergalnet")]
     fn from_network_id_unsupported_nergalnet() {
         _ = SUT::from(NetworkID::Nergalnet);
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected = "No network exists for simulator")]
     fn from_network_id_unsupported_simulator() {
         _ = SUT::from(NetworkID::Simulator);
     }

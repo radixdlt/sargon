@@ -21,7 +21,7 @@ final class AccountAddressTests: AddressTest<AccountAddress> {
 	}
 	
 	func test_short() {
-		XCTAssertEqual(SUT.sample.shortFormat, "acco...please")
+		XCTAssertEqual(SUT.sample.shortFormat, "acco...nvjdwr")
 	}
     
     func test_from_bech32_on_stokenet() throws {
@@ -37,8 +37,7 @@ final class AccountAddressTests: AddressTest<AccountAddress> {
     }
 	
 	func test_is_legacy() {
-		XCTAssertTrue(SUT.sample.isLegacy)
-		XCTAssertTrue(SUT.sampleOther.isLegacy)
+		XCTAssertTrue(SUT("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease").isLegacy)
 
 		// not legacy
 		XCTAssertFalse(SUT.sampleStokenet.isLegacy)

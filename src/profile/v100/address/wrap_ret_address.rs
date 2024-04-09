@@ -364,12 +364,12 @@ decl_ret_wrapped_address!(
 decl_ret_wrapped_address!(
     /// Human readable address of an account. Always starts with `"account_"``, for example:
     ///
-    /// `account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease`
+    /// `account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr`
     ///
     /// Most commonly the user will see this address in its abbreviated
     /// form which is:
     ///
-    /// `acco...please`
+    /// `acco...nvjdwr`
     ///
     /// Addresses are checksummed, as per Bech32. **Only** *Account* addresses starts with
     /// the prefix `account_`.

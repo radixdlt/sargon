@@ -63,7 +63,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                 val manifest =
                                 TransactionManifest.createFungibleToken(
                                                 AccountAddress.init(
-                                                                "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                                                                "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
                                                 )
                                 )
 
@@ -71,7 +71,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                         assertTrue(contains("CREATE_FUNGIBLE_RESOURCE_WITH_INITIAL_SUPPLY"))
                         assertTrue(
                                         contains(
-                                                        "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                                                        "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
                                         )
                         )
                         assertEquals(1, occurrences("Stella"))
@@ -92,7 +92,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                                 TransactionManifest.createNonFungibleToken(
                                                 addressOfOwner =
                                                                 AccountAddress.init(
-                                                                                "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                                                                                "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
                                                                 ),
                                                 nftsPerCollection = nftsPerCollection.toUByte()
                                 )
@@ -101,7 +101,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                         assertTrue(contains("CREATE_NON_FUNGIBLE_RESOURCE_WITH_INITIAL_SUPPLY"))
                         assertTrue(
                                         contains(
-                                                        "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                                                        "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
                                         )
                         )
                         assertEquals(
@@ -117,14 +117,14 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                 manifest =
                                 TransactionManifest.createNonFungibleToken(
                                                 AccountAddress.init(
-                                                                "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                                                                "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
                                                 )
                                 )
 
                 with(manifest.instructionsString) {
                         assertTrue(
                                         contains(
-                                                        "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                                                        "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
                                         )
                         )
                 }
@@ -136,7 +136,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                                 TransactionManifest.createFungibleTokenWithMetadata(
                                                 addressOfOwner =
                                                                 AccountAddress.init(
-                                                                                "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                                                                                "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
                                                                 ),
                                                 initialSupply = 100.toDecimal192(),
                                                 metadata =
@@ -157,7 +157,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                 with(manifest.instructionsString) {
                         assertTrue(
                                         contains(
-                                                        "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                                                        "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
                                         )
                         )
                         assertEquals(1, occurrences("Testname"))
@@ -266,7 +266,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                                                 includeLockFeeInstruction = true,
                                                 addressOfReceivingAccount =
                                                                 AccountAddress.init(
-                                                                                "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                                                                                "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
                                                                 )
                                 )
 
@@ -274,7 +274,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                         assertTrue(contains("CALL_METHOD"))
                         assertTrue(
                                         contains(
-                                                        "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                                                        "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
                                         )
                         )
                         assertTrue(contains("lock_fee"))
@@ -288,7 +288,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                                                 includeLockFeeInstruction = false,
                                                 addressOfReceivingAccount =
                                                                 AccountAddress.init(
-                                                                                "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                                                                                "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
                                                                 )
                                 )
 
@@ -296,7 +296,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                         assertTrue(contains("CALL_METHOD"))
                         assertTrue(
                                         contains(
-                                                        "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                                                        "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
                                         )
                         )
                         assertFalse(contains("lock_fee"))
@@ -309,7 +309,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                                 TransactionManifest.markingAccountAsDAppDefinitionType(
                                                 accountAddress =
                                                                 AccountAddress.init(
-                                                                                "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                                                                                "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
                                                                 )
                                 )
 
@@ -317,7 +317,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                         assertTrue(contains("SET_METADATA"))
                         assertTrue(
                                         contains(
-                                                        "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                                                        "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
                                         )
                         )
                         assertTrue(contains("dapp definition"))
@@ -370,7 +370,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                                                                 PerRecipientAssetTransfers(
                                                                                 addressOfSender =
                                                                                                 AccountAddress.init(
-                                                                                                                "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                                                                                                                "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
                                                                                                 ),
                                                                                 transfers =
                                                                                                 listOf(
@@ -380,7 +380,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                                                                                                                                                                 .AddressOfExternalAccount(
                                                                                                                                                                                 value =
                                                                                                                                                                                                 AccountAddress(
-                                                                                                                                                                                                                "account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master"
+                                                                                                                                                                                                                "account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264"
                                                                                                                                                                                                 )
                                                                                                                                                                 ),
                                                                                                                                 fungibles =
@@ -410,7 +410,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                         assertEquals(
                                         1,
                                         occurrences(
-                                                        "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                                                        "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
                                         )
                         )
                         assertEquals(
@@ -422,7 +422,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                         assertEquals(
                                         1,
                                         occurrences(
-                                                        "account_rdx16yf8jxxpdtcf4afpj5ddeuazp2evep7quuhgtq28vjznee08master"
+                                                        "account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264"
                                         )
                         )
                 }
@@ -435,7 +435,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                                                 addressOfAccountOrPersona =
                                                                 AddressOfAccountOrPersona.Account(
                                                                                 AccountAddress.init(
-                                                                                                "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                                                                                                "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
                                                                                 )
                                                                 ),
                                                 ownerKeyHashes =
@@ -451,7 +451,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                         assertTrue(contains("SET_METADATA"))
                         assertTrue(
                                         contains(
-                                                        "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                                                        "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
                                         )
                         )
                         assertTrue(contains("owner_keys"))
@@ -462,7 +462,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
         fun testStakesClaim() {
                 val accountAddress =
                                 AccountAddress.init(
-                                                "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                                                "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
                                 )
                 val manifest =
                                 TransactionManifest.stakesClaim(
@@ -490,7 +490,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                                 TransactionManifest.thirdPartyDepositUpdate(
                                                 accountAddress =
                                                                 AccountAddress.init(
-                                                                                "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                                                                                "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
                                                                 ),
                                                 from = ThirdPartyDeposits.sample(),
                                                 to = ThirdPartyDeposits.sample.other()
@@ -498,7 +498,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                 with(manifest.instructionsString) {
                         assertTrue(
                                         contains(
-                                                        "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                                                        "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
                                         )
                         )
                         assertEquals(3, occurrences(";"))

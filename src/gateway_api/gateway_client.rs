@@ -84,10 +84,11 @@ impl GatewayClient {
         .await
     }
 
-    pub async fn current_epoch(&self) -> Result<Epoch> {
-        self.transaction_construction()
-            .await
-            .map(|state| Epoch::from(state.epoch))
+    async fn transaction_preview(
+        &self,
+        request: TransactionPreviewRequest,
+    ) -> Result<TransactionPreviewResponse> {
+        self.post("transaction/preview", request, res_id).await
     }
 }
 
@@ -139,6 +140,25 @@ impl GatewayClient {
         self.xrd_balance_of_account(address)
             .await
             .map(|x| x.unwrap_or(Decimal192::zero()))
+    }
+
+    pub async fn current_epoch(&self) -> Result<Epoch> {
+        self.transaction_construction()
+            .await
+            .map(|state| Epoch::from(state.epoch))
+    }
+
+    pub async fn transaction_dry_run(
+        &self,
+        intent: TransactionIntent,
+        signer_public_keys: Vec<PublicKey>,
+    ) -> Result<BagOfBytes> {
+        let request =
+            TransactionPreviewRequest::new(intent, signer_public_keys, None);
+        self.transaction_preview(request)
+            .await
+            .map(|r| r.encoded_receipt)
+            .and_then(|s| BagOfBytes::from_str(&s))
     }
 }
 

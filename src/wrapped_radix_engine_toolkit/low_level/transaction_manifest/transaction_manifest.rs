@@ -269,7 +269,7 @@ mod tests {
     #[test]
     fn new_from_instructions_string_wrong_network_id_main_sim() {
         let instructions_str = r#"CALL_METHOD
-        Address("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease")
+        Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
         "lock_fee"
         Decimal("500");
                 "#;

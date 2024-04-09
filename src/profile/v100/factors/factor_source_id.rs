@@ -148,7 +148,7 @@ mod tests {
             {
                 "fromAddress": {
                     "kind": "trustedContact",
-                    "body": "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+                    "body": "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
                 },
                 "discriminator" : "fromAddress"
             }

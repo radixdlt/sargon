@@ -6,11 +6,11 @@ use crate::prelude::*;
 /// Used to own and control assets on the radix network. Uniquely identified by an
 /// account address, e.g.
 ///
-/// `account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease`
+/// `account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr`
 ///
 /// But most commonly users see the address on its abbreviated form:
 ///
-/// `acco...please`
+/// `acco...nvjdwr`
 ///
 /// Accounts have a display name and an appearance id.
 ///
@@ -38,12 +38,12 @@ pub struct Account {
     /// A globally unique identifier of this account, being a human readable
     /// address of an account. Always starts with `"account_"``, for example:
     ///
-    /// `account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease`
+    /// `account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr`
     ///
     /// Most commonly the user will see this address in its abbreviated
     /// form which is:
     ///
-    /// `acco...please`
+    /// `acco...nvjdwr`
     ///
     /// No two addresses will ever be the same even for the same factor source
     /// but on different networks, since the public keys controlling the
@@ -328,7 +328,7 @@ mod tests {
     #[test]
     fn new_with_address_only() {
         let address: AccountAddress =
-            "account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease"
+            "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
                 .parse()
                 .unwrap();
         let account = SUT::sample_with_values(

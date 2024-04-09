@@ -16,97 +16,100 @@ env:
   RUST_COMPONENTS: "rust-std"
   SWIFT_CODE_COV_REPORT_PATH: ".build/artifacts/info.lcov" # chosen
 jobs:
-
-# typos
+  # typos
   check-typos:
-    runs-on: macos-13-xlarge
+    runs-on: macos-14-xlarge
     steps:
       - uses: RDXWorks-actions/checkout@main
-      
+
       - name: Install Rust Toolchain
         uses: RDXWorks-actions/toolchain@master
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
           default: true
           profile: minimal
-      
+
       - name: Install typos
         uses: RDXWorks-actions/cargo-install@main
         with:
           crate: typos-cli
           locked: true
-      
+
       - name: Check typos
         run: typos
 
-# cargo check
+  # cargo check
   check-cargo-check:
-    runs-on: macos-13-xlarge
+    runs-on: macos-14-xlarge
     steps:
       - uses: RDXWorks-actions/checkout@main
-      
+
       - name: Install Rust Toolchain
         uses: RDXWorks-actions/toolchain@master
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
           default: true
           profile: minimal
-      
+
       - name: Cargo Check
         run: cargo check --all
 
-# cargo fmt check
+  # cargo fmt check
   check-formatting:
-    runs-on: macos-13-xlarge
+    runs-on: macos-14-xlarge
     steps:
       - uses: RDXWorks-actions/checkout@main
-      
+
       - name: Install Rust Toolchain
         uses: RDXWorks-actions/toolchain@master
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
           default: true
           components: rustfmt
-      
+
       - name: Check formatting
         run: cargo fmt --check
 
-# clippy
+  # clippy
   check-clippy:
-    runs-on: macos-13-xlarge
+    runs-on: macos-14-xlarge
     steps:
       - uses: RDXWorks-actions/checkout@main
-      
+
       - name: Install Rust Toolchain
         uses: RDXWorks-actions/toolchain@master
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
           default: true
           components: clippy
-      
+
       - name: Clippy Check
         run: cargo clippy --all
- 
-# Rust unit, doc and integration
+
+  # Rust unit, doc and integration
   test-rust:
-    runs-on: macos-13-xlarge
+    runs-on: macos-14-xlarge
     steps:
       - uses: RDXWorks-actions/checkout@main
-      
+
       - name: Install Rust Toolchain
         uses: RDXWorks-actions/toolchain@master
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
           default: true
-            
+
       - name: Run tests
         run: cargo test
 
-# Swift testing on macOS (Apple Silicon)
+  # Swift testing on macOS (Apple Silicon)
   test-swift:
-    runs-on: macos-13-xlarge
+    runs-on: macos-14-xlarge
     steps:
       - uses: RDXWorks-actions/checkout@main
+
+      - uses: RDXWorks-actions/setup-xcode@master
+        with:
+          xcode-version: "15.3.0"
 
       - name: Install Rust Toolchain for aarch64-apple-darwin
         uses: RDXWorks-actions/toolchain@master
@@ -130,9 +133,9 @@ jobs:
           name: codecov-swift
           flags: swift
 
-# Kotlin test run on JVM on macOS (Apple Silicon)
+  # Kotlin test run on JVM on macOS (Apple Silicon)
   test-kotlin:
-    runs-on: macos-13-xlarge
+    runs-on: macos-14-xlarge
     steps:
       - uses: RDXWorks-actions/checkout@main
 
@@ -142,7 +145,7 @@ jobs:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
           components: ${{ env.RUST_COMPONENTS }}
           target: aarch64-linux-android
-        
+
       - name: Install Rust Toolchain for armv7-linux-androideabi
         uses: RDXWorks-actions/toolchain@master
         with:
@@ -159,15 +162,15 @@ jobs:
       - name: Set up JDK 17
         uses: RDXWorks-actions/setup-java@v3
         with:
-          distribution: 'adopt'
-          java-version: '17'
-      
+          distribution: "adopt"
+          java-version: "17"
+
       - name: Setup Android SDK
         uses: RDXWorks-actions/setup-android@v2
-      
+
       - name: Install cargo-ndk
         run: cargo install cargo-ndk
-  
+
       - name: Test JVM with coverage
         run: ./jvm/gradlew -p jvm/sargon-android koverXmlReportDebug
 
@@ -179,13 +182,18 @@ jobs:
           file: ./jvm/sargon-android/build/reports/kover/reportDebug.xml
           name: codecov-jvm
           flags: kotlin
-  
-# Code Coverage uses Tarpaulin and uploads to CodeCov.io        
-  code-coverage: 
-    runs-on: macos-13-xlarge
+
+  # Code Coverage uses Tarpaulin and uploads to CodeCov.io
+  code-coverage:
+    runs-on: macos-14-xlarge
     steps:
       - uses: RDXWorks-actions/checkout@main
-      
+
+      - uses: RDXWorks-actions/setup-xcode@master
+        with:
+          # trying to fix https://github.com/rust-lang/rust/issues/113783
+          xcode-version: "15.3.0"
+
       - name: Install Rust Toolchain
         uses: RDXWorks-actions/toolchain@master
         with:
@@ -198,10 +206,10 @@ jobs:
           crate: cargo-tarpaulin
           tag: 0.27.3
           locked: true
-     
+
       - name: Code Coverage - Generate
-        run: cargo tarpaulin --all-targets
-      
+        run: cargo tarpaulin
+
       - name: Code Coverage - Upload to CodeCov.io
         uses: RDXWorks-actions/codecov-action@main
         with:

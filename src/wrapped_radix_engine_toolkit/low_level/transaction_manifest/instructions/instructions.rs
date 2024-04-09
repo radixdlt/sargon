@@ -196,7 +196,8 @@ impl Instructions {
 
 impl Instructions {
     pub(crate) fn sample_mainnet_instructions_string() -> String {
-        include_str!("resource_transfer.rtm").to_owned()
+        include_str!(concat!(env!("FIXTURES_TX"), "resource_transfer.rtm"))
+            .to_owned()
     }
 
     pub fn sample_mainnet() -> Self {
@@ -236,7 +237,11 @@ impl Instructions {
     // https://github.com/radixdlt/radix-engine-toolkit/blob/cf2f4b4d6de56233872e11959861fbf12db8ddf6/crates/radix-engine-toolkit/tests/manifests/account/multi_account_resource_transfer.rtm
     // but modified, changed `None` -> `Enum<0u8>()`, also changed `"account_a_bucket"` -> `"bucket1"`, `"account_b_bucket"` -> `"bucket2"`, etc.
     pub(crate) fn sample_other_simulator_instructions_string() -> String {
-        include_str!("multi_account_resource_transfer.rtm").to_owned()
+        include_str!(concat!(
+            env!("FIXTURES_TX"),
+            "multi_account_resource_transfer.rtm"
+        ))
+        .to_owned()
     }
 
     pub fn sample_simulator_other() -> Self {
@@ -309,7 +314,7 @@ mod tests {
     fn extract_error_from_addr_uses_invalid_instructions_string_if_same_network(
     ) {
         assert_eq!(
-            extract_error_from_addr("account_rdx16xlfcpp0vf7e3gqnswv8j9k58n6rjccu58vvspmdva22kf3aplease".to_owned(), NetworkID::Mainnet),
+            extract_error_from_addr("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr".to_owned(), NetworkID::Mainnet),
             CommonError::InvalidInstructionsString { underlying: "Failed to determine why an address was invalid".to_owned() }
         );
     }
