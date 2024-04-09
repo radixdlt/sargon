@@ -12,4 +12,3 @@ use crate::prelude::*;
 pub struct FungibleResourcesCollection {
     pub items: Vec<FungibleResourcesCollectionItem>,
 }
-

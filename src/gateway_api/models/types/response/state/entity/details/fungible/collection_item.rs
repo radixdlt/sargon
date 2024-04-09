@@ -14,4 +14,3 @@ use crate::prelude::*;
 pub enum FungibleResourcesCollectionItem {
     Global(FungibleResourcesCollectionItemGloballyAggregated),
 }
-

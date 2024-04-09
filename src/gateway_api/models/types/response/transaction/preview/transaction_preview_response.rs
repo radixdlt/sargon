@@ -14,4 +14,3 @@ pub struct TransactionPreviewResponse {
     pub encoded_receipt: String,
     pub logs: Vec<TransactionPreviewResponseLogsInner>,
 }
-

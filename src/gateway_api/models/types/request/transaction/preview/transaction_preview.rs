@@ -73,19 +73,6 @@ impl TransactionPreviewRequest {
     }
 }
 
-#[derive(
-    Clone,
-    Debug,
-    PartialEq,
-    Eq,
-    Serialize,
-    Deserialize, /* Deserialize so we can test roundtrip of JSON vectors */
-)]
-pub struct TransactionPreviewRequestFlags {
-    use_free_credit: bool,
-    assume_all_signature_proofs: bool,
-    skip_epoch_check: bool,
-}
 impl Default for TransactionPreviewRequestFlags {
     fn default() -> Self {
         Self {
@@ -96,78 +83,11 @@ impl Default for TransactionPreviewRequestFlags {
     }
 }
 
-#[derive(
-    Clone,
-    Debug,
-    PartialEq,
-    Eq,
-    Serialize,
-    Deserialize, /* Deserialize so we can test roundtrip of JSON vectors */
-)]
-#[serde(tag = "key_type")]
-pub(crate) enum GWPublicKey {
-    Secp256k1(GWSecp256k1PublicKey),
-    Ed25519(GWEd25519PublicKey),
-}
-
 impl From<PublicKey> for GWPublicKey {
     fn from(value: PublicKey) -> Self {
         match value {
-            PublicKey::Ed25519 { value } => Self::Ed25519(GWEd25519PublicKey {
-                key_type: GWPublicKeyType::Ed25519,
-                key_hex: value.to_hex(),
-            }),
-            PublicKey::Secp256k1 { value } => {
-                Self::Secp256k1(GWSecp256k1PublicKey {
-                    key_type: GWPublicKeyType::Secp256k1,
-                    key_hex: value.to_hex(),
-                })
-            }
+            PublicKey::Ed25519 { value } => Self::Ed25519(value),
+            PublicKey::Secp256k1 { value } => Self::Secp256k1(value),
         }
     }
-}
-
-#[derive(
-    Clone,
-    Debug,
-    PartialEq,
-    Eq,
-    Serialize,
-    Deserialize, /* Deserialize so we can test roundtrip of JSON vectors */
-)]
-pub(crate) struct GWEd25519PublicKey {
-    key_type: GWPublicKeyType,
-
-    /** The hex-encoded compressed EdDSA Ed25519 public key (32 bytes) */
-    key_hex: String,
-}
-
-#[derive(
-    Clone,
-    Debug,
-    PartialEq,
-    Eq,
-    Serialize,
-    Deserialize, /* Deserialize so we can test roundtrip of JSON vectors */
-)]
-pub(crate) struct GWSecp256k1PublicKey {
-    key_type: GWPublicKeyType,
-
-    /** The hex-encoded compressed ECDSA Secp256k1 public key (33 bytes) */
-    key_hex: String,
-}
-
-#[derive(
-    Clone,
-    Debug,
-    PartialEq,
-    Eq,
-    Serialize,
-    Deserialize, /* Deserialize so we can test roundtrip of JSON vectors */
-)]
-pub(crate) enum GWPublicKeyType {
-    #[serde(rename = "EcdsaSecp256k1")]
-    Secp256k1,
-    #[serde(rename = "EddsaEd25519")]
-    Ed25519,
 }
