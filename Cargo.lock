@@ -198,8 +198,7 @@ dependencies = [
 [[package]]
 name = "async-trait"
 version = "0.1.79"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a507401cad91ec6a857ed5513a2073c82a9b9048762b885bb98655b306964681"
+source = "git+https://github.com/dtolnay/async-trait?rev=1eb21ed8bd87029bf4dcbea41ff309f2b2220c43#1eb21ed8bd87029bf4dcbea41ff309f2b2220c43"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -379,6 +378,11 @@ checksum = "a2bd12c1caf447e69cd4528f47f94d203fd2582878ecb9e9465484c4148a8223"
 
 [[package]]
 name = "camino"
+version = "1.0.8"
+source = "git+https://github.com/camino-rs/camino/?rev=afa51b1b4c684b7e6698a6717ccda3affd0abd42#afa51b1b4c684b7e6698a6717ccda3affd0abd42"
+
+[[package]]
+name = "camino"
 version = "1.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c59e92b5a388f549b863a7bea62612c09f24c8393560709a54558a9abdfb3b9c"
@@ -401,7 +405,7 @@ version = "0.14.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4acbb09d9ee8e23699b9634375c72795d095bf268439da88562cf9b501f181fa"
 dependencies = [
- "camino",
+ "camino 1.1.6",
  "cargo-platform",
  "semver",
  "serde",
@@ -414,7 +418,7 @@ version = "0.15.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "eee4243f1f26fc7a42710e7439c149e2b10b05472f88090acce52632f231a73a"
 dependencies = [
- "camino",
+ "camino 1.1.6",
  "cargo-platform",
  "semver",
  "serde",
@@ -480,8 +484,17 @@ version = "4.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "80c21025abd42669a92efc996ef13cfb2c5c627858421ea58d5c3b331a6c134f"
 dependencies = [
- "clap_builder",
- "clap_derive",
+ "clap_builder 4.5.0",
+ "clap_derive 4.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "clap"
+version = "4.5.1"
+source = "git+https://github.com/clap-rs/clap/?rev=8a7a13a5618cfdc4ff328624a5266e7b4d88649a#8a7a13a5618cfdc4ff328624a5266e7b4d88649a"
+dependencies = [
+ "clap_builder 4.5.1",
+ "clap_derive 4.5.0 (git+https://github.com/clap-rs/clap/?rev=8a7a13a5618cfdc4ff328624a5266e7b4d88649a)",
 ]
 
 [[package]]
@@ -492,8 +505,17 @@ checksum = "458bf1f341769dfcf849846f65dffdf9146daa56bcd2a47cb4e1de9915567c99"
 dependencies = [
  "anstream",
  "anstyle",
- "clap_lex",
+ "clap_lex 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "strsim 0.11.0",
+]
+
+[[package]]
+name = "clap_builder"
+version = "4.5.1"
+source = "git+https://github.com/clap-rs/clap/?rev=8a7a13a5618cfdc4ff328624a5266e7b4d88649a#8a7a13a5618cfdc4ff328624a5266e7b4d88649a"
+dependencies = [
+ "anstyle",
+ "clap_lex 0.7.0 (git+https://github.com/clap-rs/clap/?rev=8a7a13a5618cfdc4ff328624a5266e7b4d88649a)",
 ]
 
 [[package]]
@@ -509,10 +531,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "clap_derive"
+version = "4.5.0"
+source = "git+https://github.com/clap-rs/clap/?rev=8a7a13a5618cfdc4ff328624a5266e7b4d88649a#8a7a13a5618cfdc4ff328624a5266e7b4d88649a"
+dependencies = [
+ "heck",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.48",
+]
+
+[[package]]
 name = "clap_lex"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "98cc8fbded0c607b7ba9dd60cd98df59af97e84d24e49c8557331cfc26d301ce"
+
+[[package]]
+name = "clap_lex"
+version = "0.7.0"
+source = "git+https://github.com/clap-rs/clap/?rev=8a7a13a5618cfdc4ff328624a5266e7b4d88649a#8a7a13a5618cfdc4ff328624a5266e7b4d88649a"
 
 [[package]]
 name = "colorchoice"
@@ -925,7 +963,7 @@ dependencies = [
  "humantime",
  "is-terminal",
  "log",
- "regex",
+ "regex 1.9.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "termcolor",
 ]
 
@@ -2106,7 +2144,7 @@ dependencies = [
  "radix-engine-common",
  "radix-engine-derive",
  "radix-engine-macros",
- "regex",
+ "regex 1.9.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "sbor",
  "scrypto-schema",
  "serde",
@@ -2195,7 +2233,7 @@ dependencies = [
  "radix-engine-queries",
  "radix-engine-store-interface",
  "radix-engine-stores",
- "regex",
+ "regex 1.9.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "sbor",
  "sbor-json",
  "scrypto",
@@ -2317,8 +2355,29 @@ checksum = "81bc1d4caf89fac26a70747fe603c130093b53c773888797a6329091246d651a"
 dependencies = [
  "aho-corasick",
  "memchr",
- "regex-automata",
- "regex-syntax",
+ "regex-automata 0.3.9",
+ "regex-syntax 0.7.5",
+]
+
+[[package]]
+name = "regex"
+version = "1.9.3"
+source = "git+https://github.com/rust-lang/regex/?rev=72f889ef3cca59ebac6a026f3646e8d92f056d88#72f889ef3cca59ebac6a026f3646e8d92f056d88"
+dependencies = [
+ "aho-corasick",
+ "memchr",
+ "regex-automata 0.3.6",
+ "regex-syntax 0.7.4",
+]
+
+[[package]]
+name = "regex-automata"
+version = "0.3.6"
+source = "git+https://github.com/rust-lang/regex/?rev=72f889ef3cca59ebac6a026f3646e8d92f056d88#72f889ef3cca59ebac6a026f3646e8d92f056d88"
+dependencies = [
+ "aho-corasick",
+ "memchr",
+ "regex-syntax 0.7.4",
 ]
 
 [[package]]
@@ -2329,8 +2388,13 @@ checksum = "59b23e92ee4318893fa3fe3e6fb365258efbfe6ac6ab30f090cdcbb7aa37efa9"
 dependencies = [
  "aho-corasick",
  "memchr",
- "regex-syntax",
+ "regex-syntax 0.7.5",
 ]
+
+[[package]]
+name = "regex-syntax"
+version = "0.7.4"
+source = "git+https://github.com/rust-lang/regex/?rev=72f889ef3cca59ebac6a026f3646e8d92f056d88#72f889ef3cca59ebac6a026f3646e8d92f056d88"
 
 [[package]]
 name = "regex-syntax"
@@ -2470,9 +2534,9 @@ dependencies = [
  "assert-json-diff",
  "async-trait",
  "bip39",
- "camino",
+ "camino 1.0.8",
  "cargo_toml 0.15.3 (git+https://gitlab.com/lib.rs/cargo_toml?rev=e498c94fc42a660c1ca1a28999ce1d757cfe77fe)",
- "clap",
+ "clap 4.5.1",
  "delegate",
  "derive_more",
  "ed25519-dalek",
@@ -2497,7 +2561,7 @@ dependencies = [
  "radix-engine-toolkit",
  "radix-engine-toolkit-json",
  "rand 0.8.5",
- "regex",
+ "regex 1.9.3 (git+https://github.com/rust-lang/regex/?rev=72f889ef3cca59ebac6a026f3646e8d92f056d88)",
  "reqwest",
  "sbor",
  "schemars",
@@ -2557,7 +2621,7 @@ dependencies = [
  "bech32",
  "radix-engine-common",
  "radix-engine-interface",
- "regex",
+ "regex 1.9.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "sbor",
  "serde",
  "serde_json",
@@ -2663,7 +2727,7 @@ dependencies = [
  "proc-macro2",
  "quote",
  "radix-engine-common",
- "regex",
+ "regex 1.9.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "sbor",
  "scrypto-schema",
  "serde",
@@ -3431,8 +3495,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e37a4fc8954608e2d53e6ea0093ac16c3ce540f9a0cd27ab658caa0282537c54"
 dependencies = [
  "anyhow",
- "camino",
- "clap",
+ "camino 1.1.6",
+ "clap 4.5.0",
  "uniffi_bindgen",
  "uniffi_build",
  "uniffi_core",
@@ -3447,9 +3511,9 @@ checksum = "868c9efaec99e71c60bb22cbd8c89a62e68506a828898c90a6106bde0f298964"
 dependencies = [
  "anyhow",
  "askama",
- "camino",
+ "camino 1.1.6",
  "cargo_metadata 0.15.4",
- "clap",
+ "clap 4.5.0",
  "fs-err",
  "glob",
  "goblin",
@@ -3471,7 +3535,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b6bb32968ec02e5093df86e4fa8df7759a4cf64d2bde86238b0407c8ec97d80f"
 dependencies = [
  "anyhow",
- "camino",
+ "camino 1.1.6",
  "uniffi_bindgen",
 ]
 
@@ -3493,7 +3557,7 @@ checksum = "574b9665ccbf2eaf7e58ca93587d3ba0ef7ead824c4d9b825b54170d1edcd9a2"
 dependencies = [
  "anyhow",
  "bytes",
- "camino",
+ "camino 1.1.6",
  "log",
  "once_cell",
  "oneshot-uniffi",
@@ -3508,7 +3572,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "18c0cd00841fbcfaac392c1121fc59231c35a8257b68d67dba21322d10ef97d3"
 dependencies = [
  "bincode",
- "camino",
+ "camino 1.1.6",
  "fs-err",
  "once_cell",
  "proc-macro2",
@@ -3538,7 +3602,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b28ac70a40b629dec58c8519771637abbe2a1bc09fb0a3019568632917ea9182"
 dependencies = [
  "anyhow",
- "camino",
+ "camino 1.1.6",
  "cargo_metadata 0.15.4",
  "fs-err",
  "once_cell",

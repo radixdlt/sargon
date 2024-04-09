@@ -155,7 +155,7 @@ android.libraryVariants.all {
 
         workingDir = rootDir.parentFile
         commandLine(
-            "cargo", "run", "--bin", "uniffi-bindgen", "generate", "--library",
+            "cargo", "run", "--bin", "sargon-bindgen", "generate", "--library",
             "${rootDir}/${project.name}/src/main/jniLibs/arm64-v8a/libsargon.so", "--language", "kotlin",
             "--out-dir", "${buildDir}/generated/src/${buildType}/java"
         )

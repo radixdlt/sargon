@@ -16,7 +16,7 @@ name = "vectors"
 crate-type = ["staticlib", "cdylib", "lib"]
 
 [[bin]]
-name = "uniffi-bindgen"
+name = "sargon-bindgen"
 path = "src/bindgen/bin.rs"
 
 [dependencies]
@@ -81,10 +81,18 @@ time-util = { version = "0.3.4", features = ["chrono"] }
 assert-json-diff = "2.0.2"
 url = { version = "2.5.0", features = ["serde"] }
 paste = "1.0.14"
-clap = { version = "4", default-features = false, features = ["std", "derive"] }
-camino = "1.0.8"
-regex = "1.9.3"
-async-trait = "0.1.79"
+
+# clap = "4.5.1"
+clap = { git = "https://github.com/clap-rs/clap/", rev = "8a7a13a5618cfdc4ff328624a5266e7b4d88649a", default-features = false, features = ["std", "derive"] }
+
+# camino = "1.0.8"
+camino = { git = "https://github.com/camino-rs/camino/", rev = "afa51b1b4c684b7e6698a6717ccda3affd0abd42" }
+
+# regex = "1.9.3"
+regex = { git = "https://github.com/rust-lang/regex/", rev = "72f889ef3cca59ebac6a026f3646e8d92f056d88" }
+
+# async-trait = "0.1.79"
+async-trait = { git = "https://github.com/dtolnay/async-trait", rev = "1eb21ed8bd87029bf4dcbea41ff309f2b2220c43" }
 
 # reqwest = "0.12.3"
 reqwest = { git = "https://github.com/seanmonstar/reqwest", rev = "0720159f6369f54e045a1fd315e0f24b7a0b4a39", default-features = false, features = [
