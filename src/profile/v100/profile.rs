@@ -109,10 +109,9 @@ impl Profile {
     ///
     /// Should be replaced later with `WalletClientStorage`
     pub fn new_from_json_bytes(json: BagOfBytes) -> Result<Self> {
-        let bytes = json.bytes();
         serde_json::from_slice::<Self>(json.bytes()).map_err(|_| {
             CommonError::FailedToDeserializeJSONToValue {
-                json_byte_count: bytes.len() as u64,
+                json_byte_count: json.len() as u64,
                 type_name: std::any::type_name::<Profile>().to_string(),
             }
         })
