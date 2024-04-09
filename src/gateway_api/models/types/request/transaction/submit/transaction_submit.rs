@@ -10,5 +10,5 @@ use crate::prelude::*;
 )]
 pub struct TransactionSubmitRequest {
     /** Hex-encoded notarized transaction payload which can be submitted. */
-    notarized_transaction_hex: String,
+    pub(crate) notarized_transaction_hex: String,
 }

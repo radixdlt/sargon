@@ -26,14 +26,28 @@ impl GatewayClient {
             .and_then(|s| BagOfBytes::from_str(&s))
     }
 
+    /// Submits a signed transaction payload to the network.
+    ///
+    /// Returns `Ok` if the transaction was submitted and not a duplicate.
     pub async fn submit_notarized_transaction(
         &self,
         notarized_transaction: NotarizedTransaction,
-    ) -> Result<bool> {
-        // let compiled = notarized_transaction.compile();
-        // let request = TransactionSubmitRequest::new(compiled);
-        // self.transaction_submit()
-        todo!()
+    ) -> Result<()> {
+        let request =
+            TransactionSubmitRequest::new(notarized_transaction.clone());
+        self.transaction_submit(request).await.and_then(|r| {
+            if r.duplicate {
+                Err(CommonError::GatewaySubmitDuplicateTX {
+                    intent_hash: notarized_transaction
+                        .signed_intent()
+                        .intent()
+                        .intent_hash()
+                        .to_string(),
+                })
+            } else {
+                Ok(())
+            }
+        })
     }
 }
 
