@@ -15,7 +15,7 @@ struct RustAntenna {
 
 #[async_trait]
 impl NetworkAntenna for RustAntenna {
-    async fn make_request(
+    async fn execute_network_request(
         &self,
         request: NetworkRequest,
     ) -> Result<NetworkResponse> {
