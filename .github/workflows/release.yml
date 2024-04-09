@@ -12,10 +12,10 @@ permissions:
 env:
   CARGO_TERM_COLOR: always
   MACHINE: macos-14-xlarge
-  XCODE_VERSION: 15.3.0
+  XCODE_VERSION: "15.3.0"
 jobs:
   build:
-    runs-on: ${{ env.MACHINE }}
+    runs-on: macos-14-xlarge
     env:
       RUST_TOOLCHAIN: nightly-2024-01-11
       RUST_COMPONENTS: "rust-std"

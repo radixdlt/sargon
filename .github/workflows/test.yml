@@ -20,7 +20,7 @@ env:
 jobs:
   # typos
   check-typos:
-    runs-on: ${{ env.MACHINE }}
+    runs-on: macos-14-xlarge
     steps:
       - uses: RDXWorks-actions/checkout@main
 
@@ -42,7 +42,7 @@ jobs:
 
   # cargo check
   check-cargo-check:
-    runs-on: ${{ env.MACHINE }}
+    runs-on: macos-14-xlarge
     steps:
       - uses: RDXWorks-actions/checkout@main
 
@@ -58,7 +58,7 @@ jobs:
 
   # cargo fmt check
   check-formatting:
-    runs-on: ${{ env.MACHINE }}
+    runs-on: macos-14-xlarge
     steps:
       - uses: RDXWorks-actions/checkout@main
 
@@ -74,7 +74,7 @@ jobs:
 
   # clippy
   check-clippy:
-    runs-on: ${{ env.MACHINE }}
+    runs-on: macos-14-xlarge
     steps:
       - uses: RDXWorks-actions/checkout@main
 
@@ -90,7 +90,7 @@ jobs:
 
   # Rust unit, doc and integration
   test-rust:
-    runs-on: ${{ env.MACHINE }}
+    runs-on: macos-14-xlarge
     steps:
       - uses: RDXWorks-actions/checkout@main
 
@@ -105,7 +105,7 @@ jobs:
 
   # Swift testing on macOS (Apple Silicon)
   test-swift:
-    runs-on: ${{ env.MACHINE }}
+    runs-on: macos-14-xlarge
     steps:
       - uses: RDXWorks-actions/checkout@main
 
@@ -137,7 +137,7 @@ jobs:
 
   # Kotlin test run on JVM on macOS (Apple Silicon)
   test-kotlin:
-    runs-on: ${{ env.MACHINE }}
+    runs-on: macos-14-xlarge
     steps:
       - uses: RDXWorks-actions/checkout@main
 
@@ -187,7 +187,7 @@ jobs:
 
   # Code Coverage uses Tarpaulin and uploads to CodeCov.io
   code-coverage:
-    runs-on: ${{ env.MACHINE }}
+    runs-on: macos-14-xlarge
     steps:
       - uses: RDXWorks-actions/checkout@main
 
