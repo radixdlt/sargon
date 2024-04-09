@@ -44,7 +44,7 @@ generate_ffi() {
   else
     local TARGET_FOR_DYLIB_PATH="aarch64-apple-ios"
   fi 
-  cargo run --bin sargon-bindgen generate --library target/$TARGET_FOR_DYLIB_PATH/release/lib$1.dylib --language swift --out-dir target/uniffi-xcframework-staging
+  cargo run --features build-binary --bin sargon-bindgen generate --library target/$TARGET_FOR_DYLIB_PATH/release/lib$1.dylib --language swift --out-dir target/uniffi-xcframework-staging
   mkdir -p apple/Sources/UniFFI/
   mv target/uniffi-xcframework-staging/*.swift apple/Sources/UniFFI/
   mv target/uniffi-xcframework-staging/$1FFI.modulemap target/uniffi-xcframework-staging/module.modulemap  # Convention requires this have a specific name

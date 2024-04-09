@@ -4,6 +4,7 @@ version = "0.6.16"
 edition = "2021"
 build = "build.rs"
 
+
 [profile.release]
 incremental = false
 panic = 'unwind'
@@ -18,6 +19,7 @@ crate-type = ["staticlib", "cdylib", "lib"]
 [[bin]]
 name = "sargon-bindgen"
 path = "src/bindgen/bin.rs"
+required-features = ["build-binary"]
 
 [dependencies]
 log = "0.4.20"
@@ -75,10 +77,10 @@ iota-crypto = { git = "https://github.com/iotaledger/crypto.rs", rev = "47460d64
 # k256 = "0.13.3"
 k256 = { git = "https://github.com/RustCrypto/elliptic-curves", rev = "e158ce5cf0e9acee2fd76aff2a628334f5c771e5" }
 
-memoize = "0.4.1"
-
 # bip39 = "2.0.0"
-bip39 = { git = "https://github.com/rust-bitcoin/rust-bip39", rev = "a30760beac21d595b2bda376df4f4e6bf029bcc5", features = ["serde"] }
+bip39 = { git = "https://github.com/rust-bitcoin/rust-bip39", rev = "a30760beac21d595b2bda376df4f4e6bf029bcc5", features = [
+    "serde",
+] }
 
 # assert-json-diff = "2.0.2"
 assert-json-diff = { git = "https://github.com/davidpdrsn/assert-json-diff/", rev = "bca0d2c590808274298d939e0533da79cd09076d" }
@@ -90,22 +92,21 @@ url = { version = "2.5.0", features = ["serde"] }
 # paste = "1.0.14"
 paste = { git = "https://github.com/dtolnay/paste", rev = "1e0cc1025af5388397c67fa4389ad7ad24814df8" }
 
+# regex = "1.9.3"
+regex = { git = "https://github.com/rust-lang/regex/", rev = "72f889ef3cca59ebac6a026f3646e8d92f056d88", optional = true }
+
 # clap = "4.5.1"
-clap = { git = "https://github.com/clap-rs/clap/", rev = "8a7a13a5618cfdc4ff328624a5266e7b4d88649a", default-features = false, features = ["std", "derive"] }
+clap = { git = "https://github.com/clap-rs/clap/", rev = "8a7a13a5618cfdc4ff328624a5266e7b4d88649a", default-features = false, features = [
+    "std",
+    "derive",
+], optional = true }
 
 # camino = "1.0.8"
-camino = { git = "https://github.com/camino-rs/camino/", rev = "afa51b1b4c684b7e6698a6717ccda3affd0abd42" }
+camino = { git = "https://github.com/camino-rs/camino/", rev = "afa51b1b4c684b7e6698a6717ccda3affd0abd42", optional = true }
 
-# regex = "1.9.3"
-regex = { git = "https://github.com/rust-lang/regex/", rev = "72f889ef3cca59ebac6a026f3646e8d92f056d88" }
 
 # async-trait = "0.1.79"
 async-trait = { git = "https://github.com/dtolnay/async-trait", rev = "1eb21ed8bd87029bf4dcbea41ff309f2b2220c43" }
-
-# reqwest = "0.12.3"
-reqwest = { git = "https://github.com/seanmonstar/reqwest", rev = "0720159f6369f54e045a1fd315e0f24b7a0b4a39", default-features = false, features = [
-    "native-tls-vendored",
-] }
 
 [build-dependencies]
 uniffi = { version = "0.27.0", features = ["build"] }
@@ -116,5 +117,13 @@ cargo_toml = { git = "https://gitlab.com/lib.rs/cargo_toml", rev = "e498c94fc42a
 [dev-dependencies]
 uniffi = { version = "0.27.0", features = ["bindgen-tests"] }
 
+# reqwest = "0.12.3"
+reqwest = { git = "https://github.com/seanmonstar/reqwest", rev = "0720159f6369f54e045a1fd315e0f24b7a0b4a39", default-features = false, features = [
+    "native-tls-vendored",
+] }
+
 # actix-rt = "3.3.0"
 actix-rt = { git = "https://github.com/actix/actix-net", rev = "57fd6ea8098d1f2d281c305fc331216c4fe1992e" }
+
+[features]
+build-binary = ["camino", "clap", "regex"]
