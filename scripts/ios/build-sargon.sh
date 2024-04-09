@@ -102,9 +102,9 @@ cd "../../" # go to parent of parent, which is project root.
 
 cargo build --lib --release --target aarch64-apple-darwin
 if $maconly; then
-  echo "📦 Skip building iOS (test on macOS only)."
+  echo "📦 Build for macOS only (skipping iOS)"
 else
-  echo "📦 Building iOS targets (apart from macOS)."
+  echo "📦 Building iOS and macOS targets"
   cargo build --lib --release --target aarch64-apple-ios-sim
   cargo build --lib --release --target aarch64-apple-ios
 fi

@@ -22,38 +22,70 @@ path = "src/bindgen/bin.rs"
 required-features = ["build-binary"]
 
 [dependencies]
+
 log = "0.4.20"
-pretty_env_logger = "0.5.0"
-derive_more = { version = "1.0.0-beta.6", features = [
+# log = { git = "https://github.com/rust-lang/log/", rev = "4708f1484c7e6b8d4418b571c05e613b18e57673" }
+
+# pretty_env_logger = "0.5.0"
+pretty_env_logger = { git = "https://github.com/seanmonstar/pretty-env-logger/", rev = "0e238400e18649415dc710c025e99c009a1bb744" }
+
+# derive_more = "1.0.0-beta.6"
+derive_more = { git = "https://github.com/JelteF/derive_more", rev = "1196b2dd7a366c06db621093884adbc379fc0f0a", features = [
     "debug",
     "display",
     "from_str",
 ] }
+
 serde = { version = "1.0.193", features = ["derive", "rc", "std"] }
 serde_json = { version = "1.0.108", features = ["preserve_order"] }
 serde_with = { version = "3.4.0" }
-thiserror = "1.0.50"
-iso8601-timestamp = { version = "0.2.16", features = ["serde", "std"] }
-uuid = { version = "1.6.1", features = ["v4", "serde"] }
 serde_repr = "0.1.17"
-strum = { version = "0.26.0", features = ["derive"] }
+
+# thiserror = "1.0.50"
+thiserror = { git = "https://github.com/dtolnay/thiserror/", rev = "a7d220d7915fb888413aa7978efd70f7006bda9d" }
+
+# iso8601-timestamp = "0.2.16"
+iso8601-timestamp = { git = "https://github.com/Lantern-chat/iso8601-timestamp/", rev = "e5a3f2a5911759bc6b0d8100b032a6b4dd6e12c1", features = [
+    "serde",
+    "std",
+] }
+
+# uuid = "1.6.1"
+uuid = { git = "https://github.com/uuid-rs/uuid/", rev = "c8891073248ddc7faa8c53ac9ceb629a341c7b9b", features = [
+    "v4",
+    "serde",
+] }
+
+# strum = "0.26.1"
+strum = { git = "https://github.com/Peternator7/strum/", rev = "f746c3699acf150112e26c00e6c8ca666d8d068d", features = [
+    "derive",
+] }
 
 # 587d5988cd4ca3c5193ddf37027ff4e4ecd637dc is the Scrypto commit that RET 1cfe879c7370cfa497857ada7a8973f8a3388abc uses
 radix-engine-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "587d5988cd4ca3c5193ddf37027ff4e4ecd637dc", features = [
     "serde",
 ] }
+
 radix-engine = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "587d5988cd4ca3c5193ddf37027ff4e4ecd637dc" }
+
 sbor = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "587d5988cd4ca3c5193ddf37027ff4e4ecd637dc" }
+
 radix-engine-derive = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "587d5988cd4ca3c5193ddf37027ff4e4ecd637dc" }
+
 radix-engine-interface = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "587d5988cd4ca3c5193ddf37027ff4e4ecd637dc", features = [
     "std",
 ] }
+
 transaction = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "587d5988cd4ca3c5193ddf37027ff4e4ecd637dc", features = [
     "std",
 ] }
+
 radix-engine-toolkit-json = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "1cfe879c7370cfa497857ada7a8973f8a3388abc" }
+
 radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "1cfe879c7370cfa497857ada7a8973f8a3388abc" }
-enum-iterator = "1.4.1"
+
+# enum-iterator = "1.4.1"
+enum-iterator = { git = "https://github.com/stephaneyfx/enum-iterator/", rev = "9d472a1237cfd03b1c7657fdcba74c8070bfb4ea" }
 
 # rand = "0.8.5"
 rand = { git = "https://github.com/rust-random/rand/", rev = "937320cbfeebd4352a23086d9c6e68f067f74644" }
