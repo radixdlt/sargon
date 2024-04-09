@@ -39,7 +39,9 @@ derive_more = { git = "https://github.com/JelteF/derive_more", rev = "1196b2dd7a
 serde = { version = "1.0.193", features = ["derive", "rc", "std"] }
 serde_json = { version = "1.0.108", features = ["preserve_order"] }
 serde_with = { version = "3.4.0" }
-serde_repr = "0.1.17"
+
+# serde_repr = "0.1.17"
+serde_repr = { git = "https://github.com/dtolnay/serde-repr/", rev = "94cce18a51bc169869f2cdcea6549b3ed81b3b2e" }
 
 # thiserror = "1.0.50"
 thiserror = { git = "https://github.com/dtolnay/thiserror/", rev = "a7d220d7915fb888413aa7978efd70f7006bda9d" }
@@ -169,7 +171,6 @@ actix-rt = { git = "https://github.com/actix/actix-net", rev = "57fd6ea8098d1f2d
 uniffi = { version = "0.27.0", features = ["build"] }
 # cargo_toml = "0.15.3"
 cargo_toml = { git = "https://gitlab.com/lib.rs/cargo_toml", rev = "e498c94fc42a660c1ca1a28999ce1d757cfe77fe" }
-
 
 [features]
 build-binary = ["camino", "clap", "regex"]

@@ -2755,9 +2755,8 @@ dependencies = [
 
 [[package]]
 name = "serde_repr"
-version = "0.1.18"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0b2e6b945e9d3df726b65d6ee24060aff8e3533d431f677a9695db04eff9dfdb"
+version = "0.1.17"
+source = "git+https://github.com/dtolnay/serde-repr/?rev=94cce18a51bc169869f2cdcea6549b3ed81b3b2e#94cce18a51bc169869f2cdcea6549b3ed81b3b2e"
 dependencies = [
  "proc-macro2",
  "quote",
