@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     tags:
-      - '**'
+      - "**"
     branches:
       - develop
 
@@ -14,9 +14,10 @@ permissions:
   packages: write
 env:
   CARGO_TERM_COLOR: always
+  MACHINE: macos-14-xlarge
 jobs:
   build:
-    runs-on: macos-13-xlarge
+    runs-on: ${{ env.MACHINE }}
     env:
       RUST_TOOLCHAIN: nightly-2024-01-11
       RUST_COMPONENTS: "rust-std"
@@ -29,7 +30,7 @@ jobs:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
           components: ${{ env.RUST_COMPONENTS }}
           target: aarch64-linux-android
-          
+
       - name: Install Rust Toolchain for armv7-linux-androideabi
         uses: RDXWorks-actions/toolchain@master
         with:
@@ -40,12 +41,12 @@ jobs:
       - name: Set up JDK 17
         uses: RDXWorks-actions/setup-java@v3
         with:
-          distribution: 'adopt'
-          java-version: '17'
-      
+          distribution: "adopt"
+          java-version: "17"
+
       - name: Setup Android SDK
         uses: RDXWorks-actions/setup-android@v2
-      
+
       - name: Install cargo-ndk
         run: cargo install cargo-ndk
 
@@ -61,4 +62,3 @@ jobs:
           build-root-directory: jvm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      

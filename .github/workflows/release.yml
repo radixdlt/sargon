@@ -11,14 +11,20 @@ permissions:
   contents: write
 env:
   CARGO_TERM_COLOR: always
+  MACHINE: macos-14-xlarge
+  XCODE_VERSION: 15.3.1
 jobs:
   build:
-    runs-on: macos-13-xlarge
+    runs-on: ${{ env.MACHINE }}
     env:
       RUST_TOOLCHAIN: nightly-2024-01-11
       RUST_COMPONENTS: "rust-std"
     steps:
       - uses: RDXWorks-actions/checkout@main
+
+      - uses: RDXWorks-actions/setup-xcode@master
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
 
       - name: Install Rust Toolchain for aarch64-apple-darwin
         uses: RDXWorks-actions/toolchain@master
@@ -47,4 +53,3 @@ jobs:
         run: |
           rustup target add aarch64-apple-darwin aarch64-apple-ios aarch64-apple-ios-sim
           sh ./scripts/ios/release.sh
-      

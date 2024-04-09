@@ -14,11 +14,13 @@ env:
   CARGO_TERM_COLOR: always
   RUST_TOOLCHAIN: nightly-2024-01-11
   RUST_COMPONENTS: "rust-std"
+  MACHINE: macos-14-xlarge
+  XCODE_VERSION: 15.3.1
   SWIFT_CODE_COV_REPORT_PATH: ".build/artifacts/info.lcov" # chosen
 jobs:
   # typos
   check-typos:
-    runs-on: macos-13-xlarge
+    runs-on: ${{ env.MACHINE }}
     steps:
       - uses: RDXWorks-actions/checkout@main
 
@@ -40,7 +42,7 @@ jobs:
 
   # cargo check
   check-cargo-check:
-    runs-on: macos-13-xlarge
+    runs-on: ${{ env.MACHINE }}
     steps:
       - uses: RDXWorks-actions/checkout@main
 
@@ -56,7 +58,7 @@ jobs:
 
   # cargo fmt check
   check-formatting:
-    runs-on: macos-13-xlarge
+    runs-on: ${{ env.MACHINE }}
     steps:
       - uses: RDXWorks-actions/checkout@main
 
@@ -72,7 +74,7 @@ jobs:
 
   # clippy
   check-clippy:
-    runs-on: macos-13-xlarge
+    runs-on: ${{ env.MACHINE }}
     steps:
       - uses: RDXWorks-actions/checkout@main
 
@@ -88,7 +90,7 @@ jobs:
 
   # Rust unit, doc and integration
   test-rust:
-    runs-on: macos-13-xlarge
+    runs-on: ${{ env.MACHINE }}
     steps:
       - uses: RDXWorks-actions/checkout@main
 
@@ -103,9 +105,13 @@ jobs:
 
   # Swift testing on macOS (Apple Silicon)
   test-swift:
-    runs-on: macos-13-xlarge
+    runs-on: ${{ env.MACHINE }}
     steps:
       - uses: RDXWorks-actions/checkout@main
+
+      - uses: RDXWorks-actions/setup-xcode@master
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
 
       - name: Install Rust Toolchain for aarch64-apple-darwin
         uses: RDXWorks-actions/toolchain@master
@@ -131,7 +137,7 @@ jobs:
 
   # Kotlin test run on JVM on macOS (Apple Silicon)
   test-kotlin:
-    runs-on: macos-13-xlarge
+    runs-on: ${{ env.MACHINE }}
     steps:
       - uses: RDXWorks-actions/checkout@main
 
@@ -181,7 +187,7 @@ jobs:
 
   # Code Coverage uses Tarpaulin and uploads to CodeCov.io
   code-coverage:
-    runs-on: macos-13-xlarge
+    runs-on: ${{ env.MACHINE }}
     steps:
       - uses: RDXWorks-actions/checkout@main
 
