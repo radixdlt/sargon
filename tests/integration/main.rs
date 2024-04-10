@@ -137,6 +137,8 @@ mod integration_tests {
         let gateway_client = new_gateway_client(network_id);
 
         let public_key = private_key.public_key();
+
+        println!("✨ public_key: {}", &public_key);
         let address = AccountAddress::new(public_key, network_id);
         let manifest = TransactionManifest::faucet(true, &address);
 
@@ -162,8 +164,9 @@ mod integration_tests {
             TransactionIntent::new(header, manifest.clone(), Message::None)
                 .unwrap();
 
-        let intent_signature =
-            private_key.sign_intent_hash(&intent.intent_hash());
+        let intent_hash = intent.intent_hash();
+        println!("✨ intent hash: {}", &intent_hash);
+        let intent_signature = private_key.sign_intent_hash(&intent_hash);
 
         let signed_intent = SignedIntent::new(
             intent,
@@ -195,5 +198,16 @@ mod integration_tests {
         let (account_address, tx_id) =
             submit_tx_use_faucet(private_key, network_id).await.unwrap();
         println!("🔮 account_address: {}, tx_id: {}", account_address, tx_id);
+    }
+
+    #[actix_rt::test]
+    async fn submit_transaction_use_faucet_secp256k1() {
+        let network_id = NetworkID::Stokenet;
+        let private_key = Secp256k1PrivateKey::generate();
+        println!("🔮 private_key: {}", &private_key.to_hex());
+        let (account_address, tx_id) =
+            submit_tx_use_faucet(private_key, network_id).await.unwrap();
+        println!("🔮 account_address: {}, tx_id: {}", account_address, tx_id);
+        assert!(account_address.is_legacy_address())
     }
 }

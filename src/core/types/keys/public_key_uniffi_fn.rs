@@ -57,9 +57,7 @@ mod tests {
                 .unwrap();
         assert_eq!(
             new_public_key_from_bytes(bag_of_bytes).unwrap(),
-            SUT::Ed25519 {
-                value: Ed25519PublicKey::sample()
-            }
+            SUT::Ed25519(Ed25519PublicKey::sample())
         )
     }
 

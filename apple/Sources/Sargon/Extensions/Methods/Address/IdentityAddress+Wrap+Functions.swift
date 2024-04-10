@@ -5,9 +5,9 @@ extension IdentityAddress {
 		self = try newIdentityAddress(bech32: bech32String)
 	}
 
-	public init(publicKey: PublicKey, networkID: NetworkID) {
+	public init(publicKey: some PublicKeyProtocol, networkID: NetworkID) {
 		self = newIdentityAddressFrom(
-			publicKey: publicKey,
+			publicKey: publicKey.asGeneral,
 			networkId: networkID
 		)
 	}

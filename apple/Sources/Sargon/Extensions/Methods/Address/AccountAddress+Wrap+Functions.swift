@@ -8,11 +8,11 @@ extension AccountAddress {
 	}
 
 	public init(
-		publicKey: PublicKey,
+		publicKey: some PublicKeyProtocol,
 		networkID: NetworkID
 	) {
 		self = newAccountAddressFrom(
-			publicKey: publicKey,
+			publicKey: publicKey.asGeneral,
 			networkId: networkID
 		)
 	}

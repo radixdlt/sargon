@@ -19,6 +19,16 @@ pub fn main() {
         "cargo:rustc-env=FIXTURES_VECTOR={}/",
         fixtures_vector_path.display()
     );
+    let fixtures_models_path = fixtures_path.join("models");
+    println!(
+        "cargo:rustc-env=FIXTURES_MODELS={}/",
+        fixtures_models_path.display()
+    );
+    let fixtures_gw_models_path = fixtures_models_path.join("gateway");
+    println!(
+        "cargo:rustc-env=FIXTURES_MODELS_GW={}/",
+        fixtures_gw_models_path.display()
+    );
 
     let manifest = Manifest::from_path(manifest_path).expect("Can't panic");
     let dependencies = manifest.dependencies;

@@ -48,8 +48,8 @@ impl Default for TransactionPreviewRequestFlags {
 impl From<PublicKey> for GWPublicKey {
     fn from(value: PublicKey) -> Self {
         match value {
-            PublicKey::Ed25519 { value } => Self::Ed25519(value),
-            PublicKey::Secp256k1 { value } => Self::Secp256k1(value),
+            PublicKey::Ed25519(key) => Self::Ed25519(key),
+            PublicKey::Secp256k1(key) => Self::Secp256k1(key),
         }
     }
 }
