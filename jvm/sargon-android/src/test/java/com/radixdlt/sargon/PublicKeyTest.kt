@@ -73,9 +73,9 @@ class PublicKeyTest: SampleTestable<PublicKey> {
     @Test
     fun testAsGeneral() {
         val publicKeyEd25519 = PublicKey.Ed25519.sample()
-        assertEquals(publicKeyEd25519, publicKeyEd25519.value.asGeneral())
+        assertEquals(publicKeyEd25519, publicKeyEd25519.v1.asGeneral())
 
         val publicKeySecp256k1 = PublicKey.Secp256k1.sample()
-        assertEquals(publicKeySecp256k1, publicKeySecp256k1.value.asGeneral())
+        assertEquals(publicKeySecp256k1, publicKeySecp256k1.v1.asGeneral())
     }
 }

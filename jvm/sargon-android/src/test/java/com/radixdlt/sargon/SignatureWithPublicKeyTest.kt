@@ -17,7 +17,7 @@ class SignatureWithPublicKeyTest: SampleTestable<SignatureWithPublicKey> {
             SignatureWithPublicKey.sample(),
             with(SignatureWithPublicKey.sample()) {
                 SignatureWithPublicKey.Ed25519(
-                    publicKey = (publicKey as PublicKey.Ed25519).value,
+                    publicKey = (publicKey as PublicKey.Ed25519).v1,
                     signature = (signature as Signature.Ed25519).value
                 )
             }

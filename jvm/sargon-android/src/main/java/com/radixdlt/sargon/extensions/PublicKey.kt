@@ -54,13 +54,13 @@ val PublicKey.bytes: BagOfBytes
     get() = publicKeyToBytes(publicKey = this)
 
 val PublicKey.Ed25519.bytes: BagOfBytes
-    get() = ed25519PublicKeyToBytes(publicKey = value)
+    get() = ed25519PublicKeyToBytes(publicKey = v1)
 
 /**
  * Returns the key on **compressed** form (33 bytes)
  */
 val PublicKey.Secp256k1.bytes: BagOfBytes
-    get() = secp256k1PublicKeyToBytes(publicKey = value)
+    get() = secp256k1PublicKeyToBytes(publicKey = v1)
 
 
 /**
@@ -69,7 +69,7 @@ val PublicKey.Secp256k1.bytes: BagOfBytes
  * Use `compressedData` for compressed format (33 bytes)
  */
 val PublicKey.Secp256k1.uncompressedBytes: BagOfBytes
-    get() = secp256k1PublicKeyToBytesUncompressed(publicKey = value)
+    get() = secp256k1PublicKeyToBytesUncompressed(publicKey = v1)
 
 fun Ed25519PublicKey.asGeneral() = PublicKey.Ed25519(this)
 fun Secp256k1PublicKey.asGeneral() = PublicKey.Secp256k1(this)

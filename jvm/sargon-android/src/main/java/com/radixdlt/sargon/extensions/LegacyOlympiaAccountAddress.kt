@@ -19,7 +19,7 @@ fun LegacyOlympiaAccountAddress.Companion.init(validatingAddress: String) =
     newLegacyOlympiaAccountAddressFromString(string = validatingAddress)
 
 fun LegacyOlympiaAccountAddress.Companion.init(publicKey: PublicKey.Secp256k1) =
-    newLegacyOlympiaAccountAddressFromPublicKey(publicKey = publicKey.value)
+    newLegacyOlympiaAccountAddressFromPublicKey(publicKey = publicKey.v1)
 
 val LegacyOlympiaAccountAddress.string: String
     get() = legacyOlympiaAccountAddressToString(address = this)
