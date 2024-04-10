@@ -871,7 +871,7 @@ mod tests {
                 [],       // encountered_component_addresses
                 [DetailedManifestClass::PoolRedemption {
                     pool_addresses: vec![pool_address],
-                    pool_contributions: vec![TrackedPoolRedemption::new(
+                    pool_redemptions: vec![TrackedPoolRedemption::new(
                         pool_address,
                         resource_address_of_pool,
                         500,

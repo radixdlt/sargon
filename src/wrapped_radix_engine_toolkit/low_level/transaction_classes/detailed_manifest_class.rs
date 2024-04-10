@@ -84,7 +84,7 @@ pub enum DetailedManifestClass {
         pool_addresses: Vec<PoolAddress>,
 
         /// The redemptions observed in the transaction
-        pool_contributions: Vec<TrackedPoolRedemption>,
+        pool_redemptions: Vec<TrackedPoolRedemption>,
     },
 }
 
@@ -117,7 +117,7 @@ impl From<(RetDetailedManifestClass, NetworkID)> for DetailedManifestClass {
                 pool_redemptions,
             } => Self::PoolRedemption {
                 pool_addresses: to_vec_network_aware(pool_addresses, n),
-                pool_contributions: to_vec_network_aware(pool_redemptions, n),
+                pool_redemptions: to_vec_network_aware(pool_redemptions, n),
             },
 
             RetDetailedManifestClass::ValidatorStake {

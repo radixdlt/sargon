@@ -2,11 +2,11 @@ package com.radixdlt.sargon
 
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.randomBagOfBytes
-import com.radixdlt.sargon.extensions.string
+import com.radixdlt.sargon.extensions.snapshotJson
+import com.radixdlt.sargon.extensions.toBagOfBytes
 import com.radixdlt.sargon.samples.Sample
 import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 
 class ProfileTest: SampleTestable<Profile> {
@@ -28,4 +28,27 @@ class ProfileTest: SampleTestable<Profile> {
         assertEquals("Unit tests - Android", profile.header.creatingDevice.description)
     }
 
+    @Test
+    fun testRoundtrip() {
+        val sut = Profile.sample()
+
+        assertEquals(sut, Profile.init(json = sut.snapshotJson()))
+    }
+
+    @Test
+    fun testInitFromMalformedJson() {
+        val json = "{}".toByteArray().toBagOfBytes()
+
+        val result = runCatching { Profile.init(json = json) }.exceptionOrNull()
+                as? CommonException.FailedToDeserializeJsonToValue
+
+        assertEquals(
+            json.size.toULong(),
+            result?.jsonByteCount
+        )
+        assertEquals(
+            "Profile",
+            result?.typeName
+        )
+    }
 }
