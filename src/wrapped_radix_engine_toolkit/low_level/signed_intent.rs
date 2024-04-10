@@ -26,6 +26,13 @@ impl SignedIntent {
         })
     }
 
+    pub fn with_signatures(
+        intent: TransactionIntent,
+        signatures: impl IntoIterator<Item = IntentSignature>,
+    ) -> Result<Self> {
+        Self::new(intent, IntentSignatures::new(signatures))
+    }
+
     pub fn intent(&self) -> &TransactionIntent {
         &self.intent
     }

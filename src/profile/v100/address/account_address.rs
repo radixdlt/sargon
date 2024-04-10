@@ -38,8 +38,11 @@ pub fn account_address_is_legacy(address: &AccountAddress) -> bool {
 }
 
 impl AccountAddress {
-    pub fn new(public_key: PublicKey, network_id: NetworkID) -> Self {
-        <Self as EntityAddress>::from_public_key(public_key, network_id)
+    pub fn new(
+        public_key: impl Into<PublicKey>,
+        network_id: NetworkID,
+    ) -> Self {
+        <Self as EntityAddress>::from_public_key(public_key.into(), network_id)
     }
 
     /// Returns `false` for all addresses created with `Ed25519PublicKey`s, i.e.

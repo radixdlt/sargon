@@ -101,10 +101,7 @@ pub struct LegacyOlympiaAccountAddress {
 
 impl LegacyOlympiaAccountAddress {
     pub fn to_babylon_account_address(self) -> AccountAddress {
-        AccountAddress::new(
-            self.secret_magic.public_key.into(),
-            NetworkID::Mainnet,
-        )
+        AccountAddress::new(self.secret_magic.public_key, NetworkID::Mainnet)
     }
 }
 

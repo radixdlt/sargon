@@ -127,4 +127,73 @@ mod integration_tests {
             )])
         );
     }
+
+    async fn submit_tx_use_faucet(
+        private_key: impl Into<PrivateKey>,
+        network_id: NetworkID,
+    ) -> Result<(AccountAddress, IntentHash)> {
+        let private_key = private_key.into();
+        // ARRANGE
+        let gateway_client = new_gateway_client(network_id);
+
+        let public_key = private_key.public_key();
+        let address = AccountAddress::new(public_key, network_id);
+        let manifest = TransactionManifest::faucet(true, &address);
+
+        let start_epoch_inclusive =
+            timeout(MAX, gateway_client.current_epoch())
+                .await
+                .unwrap()
+                .unwrap();
+
+        let end_epoch_exclusive = Epoch::from(start_epoch_inclusive.0 + 10u64);
+
+        let header = TransactionHeader::new(
+            network_id,
+            start_epoch_inclusive,
+            end_epoch_exclusive,
+            Nonce::random(),
+            public_key,
+            false,
+            0,
+        );
+
+        let intent =
+            TransactionIntent::new(header, manifest.clone(), Message::None)
+                .unwrap();
+
+        let intent_signature =
+            private_key.sign_intent_hash(&intent.intent_hash());
+
+        let signed_intent = SignedIntent::new(
+            intent,
+            IntentSignatures::new([intent_signature]),
+        )
+        .unwrap();
+
+        let notary_signature = private_key.notarize_hash(&signed_intent.hash());
+
+        let notarized_transaction =
+            NotarizedTransaction::new(signed_intent, notary_signature).unwrap();
+
+        let tx_id = timeout(
+            MAX,
+            gateway_client.submit_notarized_transaction(notarized_transaction),
+        )
+        .await
+        .unwrap()
+        .unwrap();
+
+        Ok((address, tx_id))
+    }
+
+    #[actix_rt::test]
+    async fn submit_transaction_use_faucet() {
+        let network_id = NetworkID::Stokenet;
+        let private_key = Ed25519PrivateKey::generate();
+        println!("🔮 private_key: {}", &private_key.to_hex());
+        let (account_address, tx_id) =
+            submit_tx_use_faucet(private_key, network_id).await.unwrap();
+        println!("🔮 account_address: {}, tx_id: {}", account_address, tx_id);
+    }
 }
