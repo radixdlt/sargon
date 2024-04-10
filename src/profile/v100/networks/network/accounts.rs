@@ -8,18 +8,19 @@ macro_rules! decl_identified_array_of {
             #[doc = $expr: expr]
         )*
         $element_type: ty,
-		$struct_type: ident
+		$struct_type: ident,
+		$collection_type: ty
     ) => {
         paste! {
             $(
                 #[doc = $expr]
             )*
 			#[derive(Clone, Eq, PartialEq, Hash, derive_more::Debug, derive_more::Display, Serialize, Deserialize)]
-			pub struct $struct_type(IdentifiedVecVia<$element_type>);
+			pub struct $struct_type($collection_type);
 
 		}
 
-		uniffi::custom_newtype!($struct_type, IdentifiedVecVia<$element_type>);
+		uniffi::custom_newtype!($struct_type, $collection_type);
 	};
 	(
         $(
@@ -33,7 +34,8 @@ macro_rules! decl_identified_array_of {
                     #[doc = $expr]
                 )*
 				$element_type,
-				[< $element_type s >]
+				[< $element_type s >],
+				IdentifiedVecVia<$element_type>
 			);
 		}
 	};
