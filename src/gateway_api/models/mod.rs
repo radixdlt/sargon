@@ -1,5 +1,5 @@
-mod request;
-mod response;
+mod logic;
+mod types;
 
-pub use request::*;
-pub use response::*;
+pub use logic::*;
+pub use types::*;

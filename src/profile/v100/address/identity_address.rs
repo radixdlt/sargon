@@ -140,7 +140,7 @@ mod tests {
         .unwrap();
         assert_eq!(
             SUT::from_public_key(
-                PublicKey::Ed25519 { value: public_key },
+                PublicKey::Ed25519(public_key),
                 NetworkID::Mainnet
             )
             .address(),
@@ -275,7 +275,7 @@ mod uniffi_tests {
         )
         .unwrap();
         assert_eq!(
-            new_identity_address_from(PublicKey::Ed25519 { value: public_key }, NetworkID::Mainnet)
+            new_identity_address_from(PublicKey::Ed25519(public_key), NetworkID::Mainnet)
             .address(),
             "identity_rdx12tgzjrz9u0xz4l28vf04hz87eguclmfaq4d2p8f8lv7zg9ssnzku8j"
         )

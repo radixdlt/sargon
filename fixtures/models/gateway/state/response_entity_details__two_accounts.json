@@ -1,0 +1,1025 @@
+{
+	"ledger_state":
+	{
+		"network": "stokenet",
+		"state_version": 73659327,
+		"proposer_round_timestamp": "2024-04-10T08:49:40.926Z",
+		"epoch": 51653,
+		"round": 1594
+	},
+	"items":
+	[
+		{
+			"address": "account_tdx_2_129vd0a8epu6wa46nh8fkcjhmxwtwet6mut8rgzef2ng68zh5t04t88",
+			"fungible_resources":
+			{
+				"total_count": 1,
+				"items":
+				[
+					{
+						"vaults":
+						{
+							"total_count": 1,
+							"items":
+							[
+								{
+									"vault_address": "internal_vault_tdx_2_1tr9dv2wt2av5u9juks9x276x5qphccswqgq0g9lgpm00rzs7kzclz4",
+									"amount": "21000000",
+									"last_updated_at_state_version": 73659244
+								}
+							]
+						},
+						"aggregation_level": "Vault",
+						"resource_address": "resource_tdx_2_1tk3rduua8eyy64zcnaanvnkc8558qh5fuz797khrpx20p0a60ev86e",
+						"explicit_metadata":
+						{
+							"total_count": 5,
+							"items":
+							[
+								{
+									"key": "tags",
+									"value":
+									{
+										"raw_hex": "5c228001200c0106427269676874",
+										"programmatic_json":
+										{
+											"variant_id": 128,
+											"fields":
+											[
+												{
+													"element_kind": "String",
+													"elements":
+													[
+														{
+															"value": "Bright",
+															"kind": "String"
+														}
+													],
+													"kind": "Array"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"values":
+											[
+												"Bright"
+											],
+											"type": "StringArray"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73659101
+								},
+								{
+									"key": "description",
+									"value":
+									{
+										"raw_hex": "5c2200010c2f5468652062726967687465737420636f6d706f6e656e7420696e207468652052616469782065636f73797374656d2e",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "The brightest component in the Radix ecosystem.",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "The brightest component in the Radix ecosystem.",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73659101
+								},
+								{
+									"key": "icon_url",
+									"value":
+									{
+										"raw_hex": "5c220d010c5b68747470733a2f2f757877696e672e636f6d2f77702d636f6e74656e742f7468656d65732f757877696e672f646f776e6c6f61642f617274732d677261706869632d7368617065732f737461722d66756c6c2d69636f6e2e706e67",
+										"programmatic_json":
+										{
+											"variant_id": 13,
+											"fields":
+											[
+												{
+													"value": "https://uxwing.com/wp-content/themes/uxwing/download/arts-graphic-shapes/star-full-icon.png",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "https://uxwing.com/wp-content/themes/uxwing/download/arts-graphic-shapes/star-full-icon.png",
+											"type": "Url"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73659101
+								},
+								{
+									"key": "symbol",
+									"value":
+									{
+										"raw_hex": "5c2200010c0453544152",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "STAR",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "STAR",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73659101
+								},
+								{
+									"key": "name",
+									"value":
+									{
+										"raw_hex": "5c2200010c065374656c6c61",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "Stella",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "Stella",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73659101
+								}
+							]
+						}
+					}
+				]
+			},
+			"non_fungible_resources":
+			{
+				"total_count": 0,
+				"items":
+				[]
+			},
+			"metadata":
+			{
+				"total_count": 2,
+				"items":
+				[
+					{
+						"key": "owner_keys",
+						"value":
+						{
+							"raw_hex": "5c228f01202201010120071d58d7f4f90f34eed753b9d36c4afb3396ecaf5be2ce340b2954d1a38af4",
+							"programmatic_json":
+							{
+								"variant_id": 143,
+								"fields":
+								[
+									{
+										"element_kind": "Enum",
+										"elements":
+										[
+											{
+												"variant_id": 1,
+												"fields":
+												[
+													{
+														"element_kind": "U8",
+														"hex": "58d7f4f90f34eed753b9d36c4afb3396ecaf5be2ce340b2954d1a38af4",
+														"kind": "Bytes"
+													}
+												],
+												"kind": "Enum"
+											}
+										],
+										"kind": "Array"
+									}
+								],
+								"kind": "Enum"
+							},
+							"typed":
+							{
+								"values":
+								[
+									{
+										"hash_hex": "58d7f4f90f34eed753b9d36c4afb3396ecaf5be2ce340b2954d1a38af4",
+										"key_hash_type": "EddsaEd25519"
+									}
+								],
+								"type": "PublicKeyHashArray"
+							}
+						},
+						"is_locked": false,
+						"last_updated_at_state_version": 73659244
+					},
+					{
+						"key": "owner_badge",
+						"value":
+						{
+							"raw_hex": "5c220b01c0021e5158d7f4f90f34eed753b9d36c4afb3396ecaf5be2ce340b2954d1a38af4",
+							"programmatic_json":
+							{
+								"variant_id": 11,
+								"fields":
+								[
+									{
+										"value": "[5158d7f4f90f34eed753b9d36c4afb3396ecaf5be2ce340b2954d1a38af4]",
+										"kind": "NonFungibleLocalId"
+									}
+								],
+								"kind": "Enum"
+							},
+							"typed":
+							{
+								"value": "[5158d7f4f90f34eed753b9d36c4afb3396ecaf5be2ce340b2954d1a38af4]",
+								"type": "NonFungibleLocalId"
+							}
+						},
+						"is_locked": true,
+						"last_updated_at_state_version": 73659244
+					}
+				]
+			},
+			"explicit_metadata":
+			{
+				"total_count": 0,
+				"items":
+				[]
+			},
+			"details":
+			{
+				"package_address": "package_tdx_2_1pkgxxxxxxxxxaccntxxxxxxxxxx000929625493xxxxxxxxx9jat20",
+				"blueprint_name": "Account",
+				"blueprint_version": "1.0.0",
+				"state":
+				{
+					"default_deposit_rule": "Accept"
+				},
+				"role_assignments":
+				{
+					"owner":
+					{
+						"rule":
+						{
+							"type": "Protected",
+							"access_rule":
+							{
+								"type": "ProofRule",
+								"proof_rule":
+								{
+									"type": "Require",
+									"requirement":
+									{
+										"type": "NonFungible",
+										"non_fungible":
+										{
+											"local_id":
+											{
+												"id_type": "Bytes",
+												"sbor_hex": "5cc0021d58d7f4f90f34eed753b9d36c4afb3396ecaf5be2ce340b2954d1a38af4",
+												"simple_rep": "[58d7f4f90f34eed753b9d36c4afb3396ecaf5be2ce340b2954d1a38af4]"
+											},
+											"resource_address": "resource_tdx_2_1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxx3e2cpa"
+										}
+									}
+								}
+							}
+						},
+						"updater": "Object"
+					},
+					"entries":
+					[
+						{
+							"role_key":
+							{
+								"module": "Main",
+								"name": "securify"
+							},
+							"assignment":
+							{
+								"resolution": "Explicit",
+								"explicit_rule":
+								{
+									"type": "Protected",
+									"access_rule":
+									{
+										"type": "ProofRule",
+										"proof_rule":
+										{
+											"type": "Require",
+											"requirement":
+											{
+												"type": "NonFungible",
+												"non_fungible":
+												{
+													"local_id":
+													{
+														"id_type": "Bytes",
+														"sbor_hex": "5cc0021d58d7f4f90f34eed753b9d36c4afb3396ecaf5be2ce340b2954d1a38af4",
+														"simple_rep": "[58d7f4f90f34eed753b9d36c4afb3396ecaf5be2ce340b2954d1a38af4]"
+													},
+													"resource_address": "resource_tdx_2_1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxx3e2cpa"
+												}
+											}
+										}
+									}
+								}
+							},
+							"updater_roles":
+							[
+								{
+									"module": "Main",
+									"name": "_self_"
+								}
+							]
+						},
+						{
+							"role_key":
+							{
+								"module": "Metadata",
+								"name": "metadata_locker"
+							},
+							"assignment":
+							{
+								"resolution": "Owner"
+							},
+							"updater_roles":
+							[
+								{
+									"module": "Metadata",
+									"name": "metadata_locker_updater"
+								}
+							]
+						},
+						{
+							"role_key":
+							{
+								"module": "Metadata",
+								"name": "metadata_locker_updater"
+							},
+							"assignment":
+							{
+								"resolution": "Owner"
+							},
+							"updater_roles":
+							[
+								{
+									"module": "Metadata",
+									"name": "metadata_locker_updater"
+								}
+							]
+						},
+						{
+							"role_key":
+							{
+								"module": "Metadata",
+								"name": "metadata_setter"
+							},
+							"assignment":
+							{
+								"resolution": "Owner"
+							},
+							"updater_roles":
+							[
+								{
+									"module": "Metadata",
+									"name": "metadata_setter_updater"
+								}
+							]
+						},
+						{
+							"role_key":
+							{
+								"module": "Metadata",
+								"name": "metadata_setter_updater"
+							},
+							"assignment":
+							{
+								"resolution": "Owner"
+							},
+							"updater_roles":
+							[
+								{
+									"module": "Metadata",
+									"name": "metadata_setter_updater"
+								}
+							]
+						}
+					]
+				},
+				"type": "Component"
+			}
+		},
+		{
+			"address": "account_tdx_2_12xwjddwn7wp3tqgj353rur4c2jzjg7uvydfj7y8yaflymxnd9czd4c",
+			"fungible_resources":
+			{
+				"total_count": 2,
+				"items":
+				[
+					{
+						"vaults":
+						{
+							"total_count": 1,
+							"items":
+							[
+								{
+									"vault_address": "internal_vault_tdx_2_1tppjldluq7xd09w67hhlnpclreq7ksep5alqyf9ep7d50xc3dnrgju",
+									"amount": "0",
+									"last_updated_at_state_version": 73659244
+								}
+							]
+						},
+						"aggregation_level": "Vault",
+						"resource_address": "resource_tdx_2_1tk3rduua8eyy64zcnaanvnkc8558qh5fuz797khrpx20p0a60ev86e",
+						"explicit_metadata":
+						{
+							"total_count": 5,
+							"items":
+							[
+								{
+									"key": "tags",
+									"value":
+									{
+										"raw_hex": "5c228001200c0106427269676874",
+										"programmatic_json":
+										{
+											"variant_id": 128,
+											"fields":
+											[
+												{
+													"element_kind": "String",
+													"elements":
+													[
+														{
+															"value": "Bright",
+															"kind": "String"
+														}
+													],
+													"kind": "Array"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"values":
+											[
+												"Bright"
+											],
+											"type": "StringArray"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73659101
+								},
+								{
+									"key": "description",
+									"value":
+									{
+										"raw_hex": "5c2200010c2f5468652062726967687465737420636f6d706f6e656e7420696e207468652052616469782065636f73797374656d2e",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "The brightest component in the Radix ecosystem.",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "The brightest component in the Radix ecosystem.",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73659101
+								},
+								{
+									"key": "icon_url",
+									"value":
+									{
+										"raw_hex": "5c220d010c5b68747470733a2f2f757877696e672e636f6d2f77702d636f6e74656e742f7468656d65732f757877696e672f646f776e6c6f61642f617274732d677261706869632d7368617065732f737461722d66756c6c2d69636f6e2e706e67",
+										"programmatic_json":
+										{
+											"variant_id": 13,
+											"fields":
+											[
+												{
+													"value": "https://uxwing.com/wp-content/themes/uxwing/download/arts-graphic-shapes/star-full-icon.png",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "https://uxwing.com/wp-content/themes/uxwing/download/arts-graphic-shapes/star-full-icon.png",
+											"type": "Url"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73659101
+								},
+								{
+									"key": "symbol",
+									"value":
+									{
+										"raw_hex": "5c2200010c0453544152",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "STAR",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "STAR",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73659101
+								},
+								{
+									"key": "name",
+									"value":
+									{
+										"raw_hex": "5c2200010c065374656c6c61",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "Stella",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "Stella",
+											"type": "String"
+										}
+									},
+									"is_locked": false,
+									"last_updated_at_state_version": 73659101
+								}
+							]
+						}
+					},
+					{
+						"vaults":
+						{
+							"total_count": 1,
+							"items":
+							[
+								{
+									"vault_address": "internal_vault_tdx_2_1tze65r2ttle267qztjj2ysyqmp3mfusm87ujllqgx7ynyny5wm60z0",
+									"amount": "9998.87481552813",
+									"last_updated_at_state_version": 73659244
+								}
+							]
+						},
+						"aggregation_level": "Vault",
+						"resource_address": "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc",
+						"explicit_metadata":
+						{
+							"total_count": 5,
+							"items":
+							[
+								{
+									"key": "tags",
+									"value":
+									{
+										"raw_hex": "5c228001200c00",
+										"programmatic_json":
+										{
+											"variant_id": 128,
+											"fields":
+											[
+												{
+													"element_kind": "String",
+													"elements":
+													[],
+													"kind": "Array"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"values":
+											[],
+											"type": "StringArray"
+										}
+									},
+									"is_locked": true,
+									"last_updated_at_state_version": 2
+								},
+								{
+									"key": "description",
+									"value":
+									{
+										"raw_hex": "5c2200010c9e01546865205261646978205075626c6963204e6574776f726b2773206e617469766520746f6b656e2c207573656420746f2070617920746865206e6574776f726b2773207265717569726564207472616e73616374696f6e206665657320616e6420746f2073656375726520746865206e6574776f726b207468726f756768207374616b696e6720746f206974732076616c696461746f72206e6f6465732e",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "The Radix Public Network's native token, used to pay the network's required transaction fees and to secure the network through staking to its validator nodes.",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "The Radix Public Network's native token, used to pay the network's required transaction fees and to secure the network through staking to its validator nodes.",
+											"type": "String"
+										}
+									},
+									"is_locked": true,
+									"last_updated_at_state_version": 2
+								},
+								{
+									"key": "icon_url",
+									"value":
+									{
+										"raw_hex": "5c220d010c3468747470733a2f2f6173736574732e7261646978646c742e636f6d2f69636f6e732f69636f6e2d7872642d33327833322e706e67",
+										"programmatic_json":
+										{
+											"variant_id": 13,
+											"fields":
+											[
+												{
+													"value": "https://assets.radixdlt.com/icons/icon-xrd-32x32.png",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "https://assets.radixdlt.com/icons/icon-xrd-32x32.png",
+											"type": "Url"
+										}
+									},
+									"is_locked": true,
+									"last_updated_at_state_version": 2
+								},
+								{
+									"key": "symbol",
+									"value":
+									{
+										"raw_hex": "5c2200010c03585244",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "XRD",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "XRD",
+											"type": "String"
+										}
+									},
+									"is_locked": true,
+									"last_updated_at_state_version": 2
+								},
+								{
+									"key": "name",
+									"value":
+									{
+										"raw_hex": "5c2200010c055261646978",
+										"programmatic_json":
+										{
+											"variant_id": 0,
+											"fields":
+											[
+												{
+													"value": "Radix",
+													"kind": "String"
+												}
+											],
+											"kind": "Enum"
+										},
+										"typed":
+										{
+											"value": "Radix",
+											"type": "String"
+										}
+									},
+									"is_locked": true,
+									"last_updated_at_state_version": 2
+								}
+							]
+						}
+					}
+				]
+			},
+			"non_fungible_resources":
+			{
+				"total_count": 0,
+				"items":
+				[]
+			},
+			"metadata":
+			{
+				"total_count": 2,
+				"items":
+				[
+					{
+						"key": "owner_keys",
+						"value":
+						{
+							"raw_hex": "5c228f01202201010120071d9d26b5d3f3831581128d223e0eb85485247b8c23532f10e4ea7e4d9a6d",
+							"programmatic_json":
+							{
+								"variant_id": 143,
+								"fields":
+								[
+									{
+										"element_kind": "Enum",
+										"elements":
+										[
+											{
+												"variant_id": 1,
+												"fields":
+												[
+													{
+														"element_kind": "U8",
+														"hex": "9d26b5d3f3831581128d223e0eb85485247b8c23532f10e4ea7e4d9a6d",
+														"kind": "Bytes"
+													}
+												],
+												"kind": "Enum"
+											}
+										],
+										"kind": "Array"
+									}
+								],
+								"kind": "Enum"
+							},
+							"typed":
+							{
+								"values":
+								[
+									{
+										"hash_hex": "9d26b5d3f3831581128d223e0eb85485247b8c23532f10e4ea7e4d9a6d",
+										"key_hash_type": "EddsaEd25519"
+									}
+								],
+								"type": "PublicKeyHashArray"
+							}
+						},
+						"is_locked": false,
+						"last_updated_at_state_version": 73658898
+					},
+					{
+						"key": "owner_badge",
+						"value":
+						{
+							"raw_hex": "5c220b01c0021e519d26b5d3f3831581128d223e0eb85485247b8c23532f10e4ea7e4d9a6d",
+							"programmatic_json":
+							{
+								"variant_id": 11,
+								"fields":
+								[
+									{
+										"value": "[519d26b5d3f3831581128d223e0eb85485247b8c23532f10e4ea7e4d9a6d]",
+										"kind": "NonFungibleLocalId"
+									}
+								],
+								"kind": "Enum"
+							},
+							"typed":
+							{
+								"value": "[519d26b5d3f3831581128d223e0eb85485247b8c23532f10e4ea7e4d9a6d]",
+								"type": "NonFungibleLocalId"
+							}
+						},
+						"is_locked": true,
+						"last_updated_at_state_version": 73658898
+					}
+				]
+			},
+			"explicit_metadata":
+			{
+				"total_count": 0,
+				"items":
+				[]
+			},
+			"details":
+			{
+				"package_address": "package_tdx_2_1pkgxxxxxxxxxaccntxxxxxxxxxx000929625493xxxxxxxxx9jat20",
+				"blueprint_name": "Account",
+				"blueprint_version": "1.0.0",
+				"state":
+				{
+					"default_deposit_rule": "Accept"
+				},
+				"role_assignments":
+				{
+					"owner":
+					{
+						"rule":
+						{
+							"type": "Protected",
+							"access_rule":
+							{
+								"type": "ProofRule",
+								"proof_rule":
+								{
+									"type": "Require",
+									"requirement":
+									{
+										"type": "NonFungible",
+										"non_fungible":
+										{
+											"local_id":
+											{
+												"id_type": "Bytes",
+												"sbor_hex": "5cc0021d9d26b5d3f3831581128d223e0eb85485247b8c23532f10e4ea7e4d9a6d",
+												"simple_rep": "[9d26b5d3f3831581128d223e0eb85485247b8c23532f10e4ea7e4d9a6d]"
+											},
+											"resource_address": "resource_tdx_2_1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxx3e2cpa"
+										}
+									}
+								}
+							}
+						},
+						"updater": "Object"
+					},
+					"entries":
+					[
+						{
+							"role_key":
+							{
+								"module": "Main",
+								"name": "securify"
+							},
+							"assignment":
+							{
+								"resolution": "Explicit",
+								"explicit_rule":
+								{
+									"type": "Protected",
+									"access_rule":
+									{
+										"type": "ProofRule",
+										"proof_rule":
+										{
+											"type": "Require",
+											"requirement":
+											{
+												"type": "NonFungible",
+												"non_fungible":
+												{
+													"local_id":
+													{
+														"id_type": "Bytes",
+														"sbor_hex": "5cc0021d9d26b5d3f3831581128d223e0eb85485247b8c23532f10e4ea7e4d9a6d",
+														"simple_rep": "[9d26b5d3f3831581128d223e0eb85485247b8c23532f10e4ea7e4d9a6d]"
+													},
+													"resource_address": "resource_tdx_2_1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxx3e2cpa"
+												}
+											}
+										}
+									}
+								}
+							},
+							"updater_roles":
+							[
+								{
+									"module": "Main",
+									"name": "_self_"
+								}
+							]
+						},
+						{
+							"role_key":
+							{
+								"module": "Metadata",
+								"name": "metadata_locker"
+							},
+							"assignment":
+							{
+								"resolution": "Owner"
+							},
+							"updater_roles":
+							[
+								{
+									"module": "Metadata",
+									"name": "metadata_locker_updater"
+								}
+							]
+						},
+						{
+							"role_key":
+							{
+								"module": "Metadata",
+								"name": "metadata_locker_updater"
+							},
+							"assignment":
+							{
+								"resolution": "Owner"
+							},
+							"updater_roles":
+							[
+								{
+									"module": "Metadata",
+									"name": "metadata_locker_updater"
+								}
+							]
+						},
+						{
+							"role_key":
+							{
+								"module": "Metadata",
+								"name": "metadata_setter"
+							},
+							"assignment":
+							{
+								"resolution": "Owner"
+							},
+							"updater_roles":
+							[
+								{
+									"module": "Metadata",
+									"name": "metadata_setter_updater"
+								}
+							]
+						},
+						{
+							"role_key":
+							{
+								"module": "Metadata",
+								"name": "metadata_setter_updater"
+							},
+							"assignment":
+							{
+								"resolution": "Owner"
+							},
+							"updater_roles":
+							[
+								{
+									"module": "Metadata",
+									"name": "metadata_setter_updater"
+								}
+							]
+						}
+					]
+				},
+				"type": "Component"
+			}
+		}
+	]
+}

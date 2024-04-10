@@ -55,7 +55,7 @@ mod integration_tests {
     }
 
     #[actix_rt::test]
-    async fn transaction_dry_run() {
+    async fn dry_run_transaction() {
         // ARRANGE
         let network_id = NetworkID::Mainnet;
         let gateway_client = new_gateway_client(network_id);
@@ -98,7 +98,7 @@ mod integration_tests {
             TransactionIntent::new(header, manifest.clone(), Message::None)
                 .unwrap();
 
-        let sut = gateway_client.transaction_dry_run(
+        let sut = gateway_client.dry_run_transaction(
             intent, vec![
                     Ed25519PublicKey::from_hex(
                         "48d24f09b43d50f3acd58cf8509a57c8f306d94b945bd9b7e6ebcf6691eed3b6".to_owned()
@@ -126,5 +126,88 @@ mod integration_tests {
                 )]
             )])
         );
+    }
+
+    async fn submit_tx_use_faucet(
+        private_key: impl Into<PrivateKey>,
+        network_id: NetworkID,
+    ) -> Result<(AccountAddress, IntentHash)> {
+        let private_key = private_key.into();
+        // ARRANGE
+        let gateway_client = new_gateway_client(network_id);
+
+        let public_key = private_key.public_key();
+
+        println!("✨ public_key: {}", &public_key);
+        let address = AccountAddress::new(public_key, network_id);
+        let manifest = TransactionManifest::faucet(true, &address);
+
+        let start_epoch_inclusive =
+            timeout(MAX, gateway_client.current_epoch())
+                .await
+                .unwrap()
+                .unwrap();
+
+        let end_epoch_exclusive = Epoch::from(start_epoch_inclusive.0 + 10u64);
+
+        let header = TransactionHeader::new(
+            network_id,
+            start_epoch_inclusive,
+            end_epoch_exclusive,
+            Nonce::random(),
+            public_key,
+            false,
+            0,
+        );
+
+        let intent =
+            TransactionIntent::new(header, manifest.clone(), Message::None)
+                .unwrap();
+
+        let intent_hash = intent.intent_hash();
+        println!("✨ intent hash: {}", &intent_hash);
+        let intent_signature = private_key.sign_intent_hash(&intent_hash);
+
+        let signed_intent = SignedIntent::new(
+            intent,
+            IntentSignatures::new([intent_signature]),
+        )
+        .unwrap();
+
+        let notary_signature = private_key.notarize_hash(&signed_intent.hash());
+
+        let notarized_transaction =
+            NotarizedTransaction::new(signed_intent, notary_signature).unwrap();
+
+        let tx_id = timeout(
+            MAX,
+            gateway_client.submit_notarized_transaction(notarized_transaction),
+        )
+        .await
+        .unwrap()
+        .unwrap();
+
+        Ok((address, tx_id))
+    }
+
+    #[actix_rt::test]
+    async fn submit_transaction_use_faucet() {
+        let network_id = NetworkID::Stokenet;
+        let private_key = Ed25519PrivateKey::generate();
+        println!("🔮 private_key: {}", &private_key.to_hex());
+        let (account_address, tx_id) =
+            submit_tx_use_faucet(private_key, network_id).await.unwrap();
+        println!("🔮 account_address: {}, tx_id: {}", account_address, tx_id);
+    }
+
+    #[actix_rt::test]
+    async fn submit_transaction_use_faucet_secp256k1() {
+        let network_id = NetworkID::Stokenet;
+        let private_key = Secp256k1PrivateKey::generate();
+        println!("🔮 private_key: {}", &private_key.to_hex());
+        let (account_address, tx_id) =
+            submit_tx_use_faucet(private_key, network_id).await.unwrap();
+        println!("🔮 account_address: {}, tx_id: {}", account_address, tx_id);
+        assert!(account_address.is_legacy_address())
     }
 }

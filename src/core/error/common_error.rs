@@ -432,6 +432,9 @@ pub enum CommonError {
 
     #[error("Networking request failed, reason: '{underlying}'")]
     NetworkRequestGenericFailure { underlying: String } = 10118,
+
+    #[error("Submitted transaction was duplicate.")]
+    GatewaySubmitDuplicateTX { intent_hash: String } = 10119,
 }
 
 #[uniffi::export]

@@ -20,7 +20,7 @@ import okhttp3.executeAsync
 class SargonNetworkAntenna(
     private val client: OkHttpClient
 ) : NetworkAntenna {
-    override suspend fun makeRequest(request: NetworkRequest): NetworkResponse = runCatching {
+    override suspend fun executeNetworkRequest(request: NetworkRequest): NetworkResponse = runCatching {
         val mediaType = request.headers.extractMediaType()
 
         val requestBody = request.body.toUByteArray().toByteArray().toRequestBody(

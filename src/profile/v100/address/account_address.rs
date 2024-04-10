@@ -38,8 +38,11 @@ pub fn account_address_is_legacy(address: &AccountAddress) -> bool {
 }
 
 impl AccountAddress {
-    pub fn new(public_key: PublicKey, network_id: NetworkID) -> Self {
-        <Self as EntityAddress>::from_public_key(public_key, network_id)
+    pub fn new(
+        public_key: impl Into<PublicKey>,
+        network_id: NetworkID,
+    ) -> Self {
+        <Self as EntityAddress>::from_public_key(public_key.into(), network_id)
     }
 
     /// Returns `false` for all addresses created with `Ed25519PublicKey`s, i.e.
@@ -146,10 +149,7 @@ mod tests {
                 .parse()
                 .unwrap();
         let network_id = NetworkID::Zabanet;
-        let address = AccountAddress::new(
-            PublicKey::Ed25519 { value: public_key },
-            network_id,
-        );
+        let address = AccountAddress::new(public_key, network_id);
 
         assert_eq!(address.address(), "account_tdx_e_128vkt2fur65p4hqhulfv3h0cknrppwtjsstlttkfamj4jnnpm82gsw");
 
@@ -246,7 +246,7 @@ mod tests {
         .unwrap();
 
         assert_eq!(
-            SUT::new(public_key.into(), NetworkID::Mainnet).address(),
+            SUT::new(public_key, NetworkID::Mainnet).address(),
             "account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzdm"
         )
     }

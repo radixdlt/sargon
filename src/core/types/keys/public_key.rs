@@ -12,14 +12,15 @@ use crate::prelude::*;
     Hash,
     PartialOrd,
     Ord,
+    derive_more::Display,
     uniffi::Enum,
 )]
 pub enum PublicKey {
     /// An Ed25519 public key used to verify cryptographic signatures.
-    Ed25519 { value: Ed25519PublicKey },
+    Ed25519(Ed25519PublicKey),
 
     /// A secp256k1 public key used to verify cryptographic signatures (ECDSA signatures).
-    Secp256k1 { value: Secp256k1PublicKey },
+    Secp256k1(Secp256k1PublicKey),
 }
 
 impl TryFrom<Vec<u8>> for PublicKey {
@@ -59,7 +60,7 @@ impl PublicKey {
     ) -> bool {
         let signature = signature.into();
         match self {
-            PublicKey::Ed25519 { value: key } => match &signature {
+            PublicKey::Ed25519(key) => match &signature {
                 Signature::Secp256k1 { value: _ } => {
                     error!("Trying to validate Secp256k1 signature with Ed25519 PublicKey, that does not work.");
                     false
@@ -68,7 +69,7 @@ impl PublicKey {
                     key.is_valid(signature, for_hash)
                 }
             },
-            PublicKey::Secp256k1 { value: key } => match &signature {
+            PublicKey::Secp256k1(key) => match &signature {
                 Signature::Secp256k1 { value: signature } => {
                     key.is_valid(signature, for_hash)
                 }
@@ -91,7 +92,7 @@ impl From<Ed25519PublicKey> for PublicKey {
     /// let key: PublicKey = Ed25519PrivateKey::generate().public_key().into();
     /// ```
     fn from(value: Ed25519PublicKey) -> Self {
-        Self::Ed25519 { value }
+        Self::Ed25519(value)
     }
 }
 
@@ -105,7 +106,7 @@ impl From<Secp256k1PublicKey> for PublicKey {
     /// let key: PublicKey = Secp256k1PrivateKey::generate().public_key().into();
     /// ```
     fn from(value: Secp256k1PublicKey) -> Self {
-        Self::Secp256k1 { value }
+        Self::Secp256k1(value)
     }
 }
 
@@ -135,24 +136,24 @@ impl PublicKey {
     /// Returns a `SLIP10Curve`, being the curve of the `PublicKey`.
     pub fn curve(&self) -> SLIP10Curve {
         match self {
-            PublicKey::Ed25519 { value: _ } => SLIP10Curve::Curve25519,
-            PublicKey::Secp256k1 { value: _ } => SLIP10Curve::Secp256k1,
+            PublicKey::Ed25519(_) => SLIP10Curve::Curve25519,
+            PublicKey::Secp256k1(_) => SLIP10Curve::Secp256k1,
         }
     }
 
     /// Returns a hex encoding of the inner public key.
     pub fn to_hex(&self) -> String {
         match self {
-            PublicKey::Ed25519 { value: key } => key.to_hex(),
-            PublicKey::Secp256k1 { value: key } => key.to_hex(),
+            PublicKey::Ed25519(key) => key.to_hex(),
+            PublicKey::Secp256k1(key) => key.to_hex(),
         }
     }
 
     /// Returns a clone of the bytes of the inner public key as a `Vec`.
     pub fn to_bytes(&self) -> Vec<u8> {
         match self {
-            PublicKey::Ed25519 { value: key } => key.to_bytes(),
-            PublicKey::Secp256k1 { value: key } => key.to_bytes(),
+            PublicKey::Ed25519(key) => key.to_bytes(),
+            PublicKey::Secp256k1(key) => key.to_bytes(),
         }
     }
 }
@@ -175,16 +176,12 @@ impl PublicKey {
 
     /// A sample used to facilitate unit tests.
     pub fn sample_secp256k1_alice() -> Self {
-        Self::Secp256k1 {
-            value: Secp256k1PublicKey::sample_alice(),
-        }
+        Self::Secp256k1(Secp256k1PublicKey::sample_alice())
     }
 
     /// A sample used to facilitate unit tests.
     pub fn sample_secp256k1_bob() -> Self {
-        Self::Secp256k1 {
-            value: Secp256k1PublicKey::sample_bob(),
-        }
+        Self::Secp256k1(Secp256k1PublicKey::sample_bob())
     }
 
     /// A sample used to facilitate unit tests.
@@ -194,16 +191,12 @@ impl PublicKey {
 
     /// A sample used to facilitate unit tests.
     pub fn sample_ed25519_alice() -> Self {
-        Self::Ed25519 {
-            value: Ed25519PublicKey::sample_alice(),
-        }
+        Self::Ed25519(Ed25519PublicKey::sample_alice())
     }
 
     /// A sample used to facilitate unit tests.
     pub fn sample_ed25519_bob() -> Self {
-        Self::Ed25519 {
-            value: Ed25519PublicKey::sample_bob(),
-        }
+        Self::Ed25519(Ed25519PublicKey::sample_bob())
     }
 }
 
@@ -221,11 +214,11 @@ impl<'de> Deserialize<'de> for PublicKey {
         let wrapper = Wrapper::deserialize(deserializer)?;
         match wrapper.curve {
             SLIP10Curve::Curve25519 => Ed25519PublicKey::from_str(&wrapper.hex)
-                .map(|pk| PublicKey::Ed25519 { value: pk })
+                .map(|pk| PublicKey::Ed25519(pk))
                 .map_err(de::Error::custom),
             SLIP10Curve::Secp256k1 => {
                 Secp256k1PublicKey::from_str(&wrapper.hex)
-                    .map(|pk| PublicKey::Secp256k1 { value: pk })
+                    .map(|pk| PublicKey::Secp256k1(pk))
                     .map_err(de::Error::custom)
             }
         }
@@ -248,8 +241,8 @@ impl Serialize for PublicKey {
 impl From<PublicKey> for ScryptoPublicKey {
     fn from(value: PublicKey) -> Self {
         match value {
-            PublicKey::Ed25519 { value: key } => Self::Ed25519(key.into()),
-            PublicKey::Secp256k1 { value: key } => Self::Secp256k1(key.into()),
+            PublicKey::Ed25519(key) => Self::Ed25519(key.into()),
+            PublicKey::Secp256k1(key) => Self::Secp256k1(key.into()),
         }
     }
 }
@@ -312,6 +305,32 @@ mod tests {
             }
             ScryptoPublicKey::Secp256k1(_) => panic!("wrong kind"),
         }
+    }
+
+    #[test]
+    fn display_secp256k1() {
+        assert_eq!(format!("{}", SUT::sample_secp256k1()), "02517b88916e7f315bb682f9926b14bc67a0e4246f8a419b986269e1a7e61fffa7");
+    }
+
+    #[test]
+    fn display_ed25519() {
+        assert_eq!(
+            format!("{}", SUT::sample_ed25519()),
+            "ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf"
+        );
+    }
+
+    #[test]
+    fn debug_secp256k1() {
+        assert_eq!(format!("{:?}", SUT::sample_secp256k1()), "Secp256k1(02517b88916e7f315bb682f9926b14bc67a0e4246f8a419b986269e1a7e61fffa7)");
+    }
+
+    #[test]
+    fn debug_ed25519() {
+        assert_eq!(
+            format!("{:?}", SUT::sample_ed25519()),
+            "Ed25519(ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf)"
+        );
     }
 
     #[test]
@@ -441,12 +460,12 @@ mod tests {
 
     #[test]
     fn from_str_ed25519() {
-        assert_eq!(SUT::from_str("ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf").unwrap(), SUT::Ed25519 { value: Ed25519PublicKey::sample() })
+        assert_eq!(SUT::from_str("ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf").unwrap(), SUT::Ed25519(Ed25519PublicKey::sample()))
     }
 
     #[test]
     fn from_str_secp256k1() {
-        assert_eq!(SUT::from_str("02517b88916e7f315bb682f9926b14bc67a0e4246f8a419b986269e1a7e61fffa7").unwrap(), SUT::Secp256k1 { value: Secp256k1PublicKey::sample() })
+        assert_eq!(SUT::from_str("02517b88916e7f315bb682f9926b14bc67a0e4246f8a419b986269e1a7e61fffa7").unwrap(), SUT::Secp256k1(Secp256k1PublicKey::sample()))
     }
 
     #[test]
@@ -457,9 +476,7 @@ mod tests {
                 .unwrap();
         assert_eq!(
             SUT::try_from(bag_of_bytes).unwrap(),
-            SUT::Ed25519 {
-                value: Ed25519PublicKey::sample()
-            }
+            SUT::Ed25519(Ed25519PublicKey::sample())
         )
     }
 
@@ -468,9 +485,7 @@ mod tests {
         let bag_of_bytes: BagOfBytes = "02517b88916e7f315bb682f9926b14bc67a0e4246f8a419b986269e1a7e61fffa7".parse().unwrap();
         assert_eq!(
             SUT::try_from(bag_of_bytes).unwrap(),
-            SUT::Secp256k1 {
-                value: Secp256k1PublicKey::sample()
-            }
+            SUT::Secp256k1(Secp256k1PublicKey::sample())
         )
     }
 
@@ -523,10 +538,7 @@ mod tests {
         let hash = hash_of(message.as_bytes());
         let secp256k1_signature: Secp256k1Signature = "01aa1c4f46f8437b7f8ec9008ae10e6f33bb8be3e81e35c63f3498070dfbd6a20b2daee6073ead3c9e72d8909bc32a02e46cede3885cf8568d4c380ac97aa7fbcd".parse().unwrap();
 
-        assert!(SUT::Secp256k1 {
-            value: secp256k1_public_key
-        }
-        .is_valid(
+        assert!(SUT::Secp256k1(secp256k1_public_key).is_valid(
             Signature::Secp256k1 {
                 value: secp256k1_signature
             },
@@ -546,10 +558,7 @@ mod tests {
 
         let ed25519_signature: Ed25519Signature = "06cd3772c5c70d44819db80192a5b2521525e2529f770bff970ec4edc7c1bd76e41fcfa8e59ff93b1675c48f4af3b1697765286d999ee8b5bb8257691e3b7b09".parse().unwrap();
 
-        assert!(SUT::Ed25519 {
-            value: ed25519_public_key
-        }
-        .is_valid(
+        assert!(SUT::Ed25519(ed25519_public_key).is_valid(
             Signature::Ed25519 {
                 value: ed25519_signature
             },
@@ -569,10 +578,7 @@ mod tests {
                 .parse()
                 .unwrap();
 
-        assert!(!SUT::Ed25519 {
-            value: ed25519_public_key
-        }
-        .is_valid(
+        assert!(!SUT::Ed25519(ed25519_public_key).is_valid(
             Signature::Secp256k1 {
                 value: secp256k1_signature
             },
@@ -593,10 +599,7 @@ mod tests {
 
         let ed25519_signature: Ed25519Signature = "06cd3772c5c70d44819db80192a5b2521525e2529f770bff970ec4edc7c1bd76e41fcfa8e59ff93b1675c48f4af3b1697765286d999ee8b5bb8257691e3b7b09".parse().unwrap();
 
-        assert!(!SUT::Secp256k1 {
-            value: secp256k1_public_key
-        }
-        .is_valid(
+        assert!(!SUT::Secp256k1(secp256k1_public_key).is_valid(
             Signature::Ed25519 {
                 value: ed25519_signature
             },

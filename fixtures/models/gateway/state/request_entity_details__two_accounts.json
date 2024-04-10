@@ -1,0 +1,28 @@
+{
+	"addresses":
+	[
+			"account_tdx_2_129vd0a8epu6wa46nh8fkcjhmxwtwet6mut8rgzef2ng68zh5t04t88",
+			"account_tdx_2_12xwjddwn7wp3tqgj353rur4c2jzjg7uvydfj7y8yaflymxnd9czd4c"
+	],
+	"aggregation_level": "Vault",
+	"opt_ins":
+	{
+			"ancestor_identities": false,
+			"component_royalty_vault_balance": false,
+			"explicit_metadata":
+			[
+					"pool",
+					"tags",
+					"validator",
+					"description",
+					"account_type",
+					"icon_url",
+					"symbol",
+					"name",
+					"dapp_definition",
+					"dapp_definitions"
+			],
+			"non_fungible_include_nfids": false,
+			"package_royalty_vault_balance": false
+	}
+}

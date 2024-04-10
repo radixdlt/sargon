@@ -1,47 +1,12 @@
 use sargon::prelude::*;
+
+use core::fmt::Debug;
 use serde::Deserialize;
 use std::str::FromStr;
-use thiserror::Error;
-
-#[derive(Debug, Error)]
-pub enum TestingError {
-    #[error("File contents is not valid JSON '{0}'")]
-    FailedDoesNotContainValidJSON(String),
-
-    #[error("Failed to JSON deserialize string")]
-    FailedToDeserialize(serde_json::Error),
-}
-
-/// `name` is file name without extension, assuming it is json file
-#[cfg(not(tarpaulin_include))]
-fn fixture_and_json<'a, T>(
-    vector: &str,
-) -> Result<(T, serde_json::Value), TestingError>
-where
-    T: for<'de> Deserialize<'de>,
-{
-    let json = serde_json::Value::from_str(vector).map_err(|_| {
-        TestingError::FailedDoesNotContainValidJSON(vector.to_owned())
-    })?;
-
-    serde_json::from_value::<T>(json.clone())
-        .map_err(TestingError::FailedToDeserialize)
-        .map(|v| (v, json))
-}
-
-/// `name` is file name without extension, assuming it is json file
-#[cfg(not(tarpaulin_include))]
-fn fixture<'a, T>(vector: &str) -> Result<T, TestingError>
-where
-    T: for<'de> Deserialize<'de>,
-{
-    fixture_and_json(vector).map(|t| t.0)
-}
 
 #[cfg(test)]
 mod profile_snapshot_tests {
     use super::*;
-    use sargon::assert_json_value_eq_after_roundtrip;
 
     #[test]
     fn v100_100() {

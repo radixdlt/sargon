@@ -1,5 +1,5 @@
 extension Secp256k1PublicKey: PublicKeyProtocol {
     public var asGeneral: PublicKey {
-		PublicKey.secp256k1(value: self)
+		PublicKey.secp256k1(self)
 	}
 }

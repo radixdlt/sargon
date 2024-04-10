@@ -1,8 +1,47 @@
+use crate::prelude::*;
+
 use assert_json_diff::assert_json_include;
 use core::fmt::Debug;
 use pretty_assertions::{assert_eq, assert_ne};
-use serde::{de::DeserializeOwned, ser::Serialize};
+use serde::de::DeserializeOwned;
 use serde_json::Value;
+use thiserror::Error as ThisError;
+
+#[derive(Debug, ThisError)]
+pub enum TestingError {
+    #[error("File contents is not valid JSON '{0}'")]
+    FailedDoesNotContainValidJSON(String),
+
+    #[error("Failed to JSON deserialize string")]
+    FailedToDeserialize(serde_json::Error),
+}
+
+/// `name` is file name without extension, assuming it is json file
+#[cfg(not(tarpaulin_include))]
+pub fn fixture_and_json<'a, T>(
+    vector: &str,
+) -> Result<(T, serde_json::Value), TestingError>
+where
+    T: for<'de> Deserialize<'de>,
+{
+    let json = serde_json::Value::from_str(vector).map_err(|_| {
+        TestingError::FailedDoesNotContainValidJSON(vector.to_owned())
+    })?;
+
+    serde_json::from_value::<T>(json.clone())
+        .map_err(TestingError::FailedToDeserialize)
+        .map(|v| (v, json))
+}
+
+/// `name` is file name without extension, assuming it is json file
+#[cfg(not(tarpaulin_include))]
+#[allow(unused)]
+pub fn fixture<'a, T>(vector: &str) -> Result<T, TestingError>
+where
+    T: for<'de> Deserialize<'de>,
+{
+    fixture_and_json(vector).map(|t| t.0)
+}
 
 #[cfg(not(tarpaulin_include))]
 fn base_assert_equality_after_json_roundtrip<T>(
