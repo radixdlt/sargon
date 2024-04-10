@@ -28,6 +28,16 @@ pub fn profile_to_debug_string(profile: &Profile) -> String {
     format!("{:?}", profile)
 }
 
+#[uniffi::export]
+pub fn profile_to_json_bytes(profile: &Profile) -> Result<BagOfBytes> {
+    profile.to_json_bytes()
+}
+
+#[uniffi::export]
+pub fn new_profile_from_json_bytes(json: BagOfBytes) -> Result<Profile> {
+    Profile::new_from_json_bytes(json)
+}
+
 #[cfg(test)]
 mod uniffi_tests {
 
@@ -59,6 +69,29 @@ mod uniffi_tests {
         assert_ne!(
             profile_to_debug_string(&SUT::sample()),
             profile_to_debug_string(&SUT::sample_other())
+        );
+    }
+
+    #[test]
+    fn serialize_deserialize() {
+        let sut = SUT::sample();
+
+        assert_eq!(
+            new_profile_from_json_bytes(profile_to_json_bytes(&sut).unwrap())
+                .unwrap(),
+            sut
+        )
+    }
+
+    #[test]
+    fn deserialize_malformed() {
+        let malformed_profile_snapshot = BagOfBytes::from("{}".as_bytes());
+        assert_eq!(
+            new_profile_from_json_bytes(malformed_profile_snapshot.clone()),
+            Result::Err(CommonError::FailedToDeserializeJSONToValue {
+                json_byte_count: malformed_profile_snapshot.len() as u64,
+                type_name: String::from("Profile")
+            })
         );
     }
 }
