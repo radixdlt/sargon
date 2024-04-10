@@ -6,6 +6,7 @@ uniffi::custom_newtype!(BIP39Passphrase, String);
 /// A BIP39 passphrase, which required but when not used by user, the Default value will be use (empty string),
 /// as per BIP39 standard.
 #[derive(
+    Zeroize,
     Serialize,
     Deserialize,
     Clone,

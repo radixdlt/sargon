@@ -1,6 +1,7 @@
 use crate::prelude::*;
 
 #[derive(
+    Zeroize,
     Clone,
     Debug,
     PartialEq,
@@ -17,10 +18,13 @@ use crate::prelude::*;
 pub struct AccountPath {
     pub path: HDPath,
 
+    #[zeroize(skip)]
     pub network_id: NetworkID,
 
+    #[zeroize(skip)]
     pub entity_kind: CAP26EntityKind,
 
+    #[zeroize(skip)]
     pub key_kind: CAP26KeyKind,
 
     pub index: HDPathValue,

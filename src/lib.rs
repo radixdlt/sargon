@@ -25,6 +25,7 @@ pub mod prelude {
 
     pub(crate) use ::hex::decode as hex_decode;
     pub(crate) use ::hex::encode as hex_encode;
+    pub(crate) use zeroize::{Zeroize, ZeroizeOnDrop};
     pub(crate) use iso8601_timestamp::Timestamp;
     pub(crate) use itertools::Itertools;
     pub(crate) use log::{debug, error, info, trace, warn};

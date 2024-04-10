@@ -326,7 +326,7 @@ dependencies = [
  "cc",
  "glob",
  "threadpool",
- "zeroize",
+ "zeroize 1.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -634,7 +634,7 @@ dependencies = [
  "generic-array 0.14.7",
  "rand_core 0.6.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "subtle",
- "zeroize",
+ "zeroize 1.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -657,7 +657,7 @@ dependencies = [
  "digest 0.9.0",
  "rand_core 0.5.1",
  "subtle",
- "zeroize",
+ "zeroize 1.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -674,7 +674,7 @@ dependencies = [
  "platforms",
  "rustc_version",
  "subtle",
- "zeroize",
+ "zeroize 1.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -740,7 +740,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fffa369a668c8af7dbf8b5e56c9f744fbd399949ed171606040001947de40b1c"
 dependencies = [
  "const-oid",
- "zeroize",
+ "zeroize 1.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -854,7 +854,7 @@ dependencies = [
  "rand 0.7.3",
  "serde",
  "sha2 0.9.9",
- "zeroize",
+ "zeroize 1.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -869,7 +869,7 @@ dependencies = [
  "hex 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand_core 0.6.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "sha2 0.10.8",
- "zeroize",
+ "zeroize 1.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -894,7 +894,7 @@ dependencies = [
  "rand_core 0.6.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "sec1",
  "subtle",
- "zeroize",
+ "zeroize 1.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -1083,7 +1083,7 @@ checksum = "85649ca51fd72272d7821adaf274ad91c288277713d9c18820d8499a7ff69e9a"
 dependencies = [
  "typenum",
  "version_check",
- "zeroize",
+ "zeroize 1.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -1405,7 +1405,7 @@ dependencies = [
  "hmac",
  "k256 0.13.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "sha2 0.10.8",
- "zeroize",
+ "zeroize 1.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -2476,6 +2476,7 @@ dependencies = [
  "uniffi",
  "url",
  "uuid 1.6.1",
+ "zeroize 1.7.0 (git+https://github.com/RustCrypto/utils?rev=df6d2f48a5e8afe8eef04ba32e2af55bacb41375)",
 ]
 
 [[package]]
@@ -2657,7 +2658,7 @@ dependencies = [
  "generic-array 0.14.7",
  "pkcs8",
  "subtle",
- "zeroize",
+ "zeroize 1.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -4099,7 +4100,15 @@ version = "1.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "525b4ec142c6b68a2d10f01f7bbf6755599ca3f81ea53b8431b7dd348f5fdb2d"
 dependencies = [
- "zeroize_derive",
+ "zeroize_derive 1.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "zeroize"
+version = "1.7.0"
+source = "git+https://github.com/RustCrypto/utils?rev=df6d2f48a5e8afe8eef04ba32e2af55bacb41375#df6d2f48a5e8afe8eef04ba32e2af55bacb41375"
+dependencies = [
+ "zeroize_derive 1.4.2 (git+https://github.com/RustCrypto/utils?rev=df6d2f48a5e8afe8eef04ba32e2af55bacb41375)",
 ]
 
 [[package]]
@@ -4107,6 +4116,16 @@ name = "zeroize_derive"
 version = "1.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ce36e65b0d2999d2aafac989fb249189a141aee1f53c612c1f37d72631959f69"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.48",
+]
+
+[[package]]
+name = "zeroize_derive"
+version = "1.4.2"
+source = "git+https://github.com/RustCrypto/utils?rev=df6d2f48a5e8afe8eef04ba32e2af55bacb41375#df6d2f48a5e8afe8eef04ba32e2af55bacb41375"
 dependencies = [
  "proc-macro2",
  "quote",

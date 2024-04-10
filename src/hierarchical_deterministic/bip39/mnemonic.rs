@@ -1,6 +1,7 @@
 use crate::prelude::*;
 
 #[derive(
+    Zeroize,
     Clone,
     /* NEVER COPY! We wanna require explicit copying */
     PartialEq,
@@ -15,7 +16,9 @@ use crate::prelude::*;
 #[debug("{:?}", self.partially_obfuscated_string())]
 pub struct Mnemonic {
     pub words: Vec<BIP39Word>,
+    #[zeroize(skip)]
     pub word_count: BIP39WordCount,
+    #[zeroize(skip)]
     pub language: BIP39Language,
 }
 

@@ -3,6 +3,7 @@ use crate::prelude::*;
 /// A BIP39 Mnemonic and BIP39 passphrase - aka "25th word" tuple,
 /// from which we can derive a HD Root used for derivation.
 #[derive(
+    Zeroize,
     Serialize,
     Deserialize,
     Clone,

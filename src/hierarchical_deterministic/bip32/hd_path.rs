@@ -1,6 +1,7 @@
 use crate::prelude::*;
 
 #[derive(
+    Zeroize,
     Clone,
     PartialEq,
     Eq,
