@@ -422,7 +422,10 @@ mod tests {
         let encoded = sut.to_json_bytes().unwrap();
         let profile_result = SUT::new_from_json_bytes(encoded).unwrap();
         assert_eq!(profile_result, sut);
+    }
 
+    #[test]
+    fn new_from_json_bytes_error() {
         let malformed_profile_snapshot = BagOfBytes::from("{}".as_bytes());
         assert_eq!(
             SUT::new_from_json_bytes(malformed_profile_snapshot.clone()),
