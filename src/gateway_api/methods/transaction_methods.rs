@@ -47,11 +47,3 @@ impl GatewayClient {
         })
     }
 }
-
-impl FungibleResourcesCollectionItem {
-    pub fn resource_address(&self) -> ResourceAddress {
-        match self {
-            Self::Global(item) => item.resource_address,
-        }
-    }
-}

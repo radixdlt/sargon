@@ -243,10 +243,8 @@ mod tests {
 
         signatures.push(IntentSignature::sample());
 
-        let intent_signatures = IntentSignatures::new(signatures);
-
         assert_eq!(
-            SUT::new(intent, intent_signatures.clone()),
+            SUT::with_signatures(intent, signatures),
             Err(CommonError::InvalidSignaturesForIntentSomeDidNotValidateIntentHash)
         );
     }
@@ -266,12 +264,10 @@ mod tests {
             signatures.push(intent_signature)
         }
 
-        let intent_signatures = IntentSignatures::new(signatures);
-
         assert_eq!(
-            SUT::new(
+            SUT::with_signatures(
                 TransactionIntent::sample(), // <-- WRONG Intent, not was signed.
-                intent_signatures.clone()
+                signatures
             ),
             Err(CommonError::InvalidSignaturesForIntentSomeDidNotValidateIntentHash)
         );

@@ -59,12 +59,11 @@ impl GatewayClient {
             return Err(CommonError::NetworkResponseBadCode);
         }
 
-        let body = response.body;
-        if body.is_empty() {
+        if response.body.is_empty() {
             return Err(CommonError::NetworkResponseEmptyBody);
         }
 
-        serde_json::from_slice::<U>(&body).map_err(|_| {
+        serde_json::from_slice::<U>(&response.body).map_err(|_| {
             CommonError::NetworkResponseJSONDeserialize {
                 into_type: std::any::type_name::<U>().to_owned(),
             }
@@ -97,17 +96,19 @@ impl GatewayClient {
             CommonError::NetworkRequestInvalidUrl { bad_value }
         })?;
 
+        let headers = HashMap::<String, String>::from_iter([
+            ("content-Type".to_owned(), "application/json".to_owned()),
+            ("accept".to_owned(), "application/json".to_owned()),
+            ("user-agent".to_owned(), "Sargon".to_owned()), // https://stackoverflow.com/a/77866494/1311272
+            ("RDX-Client-Name".to_owned(), "Sargon".to_owned()),
+            ("RDX-Client-Version".to_owned(), "1.5.1".to_owned()),
+        ]);
+
         let request = NetworkRequest {
             url,
             body,
             method,
-            headers: HashMap::<String, String>::from_iter([
-                ("content-Type".to_owned(), "application/json".to_owned()),
-                ("accept".to_owned(), "application/json".to_owned()),
-                ("user-agent".to_owned(), "Sargon".to_owned()), // https://stackoverflow.com/a/77866494/1311272
-                ("RDX-Client-Name".to_owned(), "Sargon".to_owned()),
-                ("RDX-Client-Version".to_owned(), "1.5.1".to_owned()),
-            ]),
+            headers,
         };
 
         // Let Swift side make network request and await response

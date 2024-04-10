@@ -95,6 +95,30 @@ mod tests {
     }
 
     #[test]
+    fn invalid_json_secp256k1() {
+        assert_json_fails::<SUT>(
+            r#"
+        {
+			"key_hex": "not even hex string, super fail!",
+			"key_type": "EcdsaSecp256k1"
+		}
+        "#,
+        )
+    }
+
+    #[test]
+    fn invalid_json_ed25519() {
+        assert_json_fails::<SUT>(
+            r#"
+        {
+			"key_hex": "not even hex string, super fail!",
+			"key_type": "EddsaEd25519"
+		}
+        "#,
+        )
+    }
+
+    #[test]
     fn from_secp256k1() {
         let secp256k1_key = Secp256k1PublicKey::sample_alice();
         let public_key = PublicKey::from(secp256k1_key);

@@ -57,18 +57,54 @@ impl GatewayClient {
 struct MockAntenna {
     hard_coded_status: u16,
     hard_coded_body: BagOfBytes,
+    spy: fn(NetworkRequest) -> (),
+}
+
+#[allow(unused)]
+impl MockAntenna {
+    fn with_spy(
+        status: u16,
+        body: impl Into<BagOfBytes>,
+        spy: fn(NetworkRequest) -> (),
+    ) -> Self {
+        Self {
+            hard_coded_status: status,
+            hard_coded_body: body.into(),
+            spy,
+        }
+    }
+
+    fn new(status: u16, body: impl Into<BagOfBytes>) -> Self {
+        Self::with_spy(status, body, |_| {})
+    }
+
+    fn with_response<T>(response: T) -> Self
+    where
+        T: Serialize,
+    {
+        let body = serde_json::to_vec(&response).unwrap();
+        Self::new(200, body)
+    }
 }
 
 #[async_trait::async_trait]
 impl NetworkAntenna for MockAntenna {
     async fn execute_network_request(
         &self,
-        _request: NetworkRequest,
+        request: NetworkRequest,
     ) -> Result<NetworkResponse> {
+        (self.spy)(request);
         Ok(NetworkResponse {
             status_code: self.hard_coded_status,
             body: self.hard_coded_body.clone(),
         })
+    }
+}
+
+#[cfg(test)]
+impl From<()> for BagOfBytes {
+    fn from(_value: ()) -> Self {
+        Self::new()
     }
 }
 
@@ -86,10 +122,7 @@ mod tests {
 
     #[actix_rt::test]
     async fn execute_network_request_invalid_url() {
-        let mock_antenna = MockAntenna {
-            hard_coded_status: 200,
-            hard_coded_body: BagOfBytes::new(),
-        };
+        let mock_antenna = MockAntenna::new(200, ());
         let base = "http://example.com";
         let sut = SUT::with_gateway(
             Arc::new(mock_antenna),
@@ -107,10 +140,10 @@ mod tests {
 
     #[actix_rt::test]
     async fn execute_network_request_bad_status_code() {
-        let mock_antenna = MockAntenna {
-            hard_coded_status: 404, // bad status code
-            hard_coded_body: BagOfBytes::new(),
-        };
+        let mock_antenna = MockAntenna::new(
+            404, // bad code
+            (),
+        );
         let sut = SUT::new(Arc::new(mock_antenna), NetworkID::Stokenet);
         let req = sut.current_epoch();
         let result = timeout(MAX, req).await.unwrap();
@@ -119,10 +152,10 @@ mod tests {
 
     #[actix_rt::test]
     async fn execute_network_request_empty_body() {
-        let mock_antenna = MockAntenna {
-            hard_coded_status: 200,
-            hard_coded_body: BagOfBytes::new(), // empty body
-        };
+        let mock_antenna = MockAntenna::new(
+            200,
+            (), // empty body
+        );
         let sut = SUT::new(Arc::new(mock_antenna), NetworkID::Stokenet);
         let req = sut.current_epoch();
         let result = timeout(MAX, req).await.unwrap();
@@ -131,13 +164,53 @@ mod tests {
 
     #[actix_rt::test]
     async fn execute_network_request_invalid_json() {
-        let mock_antenna = MockAntenna {
-            hard_coded_status: 200,
-            hard_coded_body: "deadbeef".parse().unwrap(), // wrong JSON
-        };
+        let mock_antenna = MockAntenna::new(
+            200,
+            BagOfBytes::sample_aced(), // wrong JSON
+        );
         let sut = SUT::new(Arc::new(mock_antenna), NetworkID::Stokenet);
         let req = sut.current_epoch();
         let result = timeout(MAX, req).await.unwrap();
         assert_eq!(result, Err(CommonError::NetworkResponseJSONDeserialize { into_type: "sargon::gateway_api::models::types::response::transaction::construction::transaction_construction_response::TransactionConstructionResponse".to_owned() }))
+    }
+
+    #[actix_rt::test]
+    async fn spy_headers() {
+        let mock_antenna = MockAntenna::with_spy(200, (), |request| {
+            assert_eq!(
+                request
+                    .headers
+                    .keys()
+                    .into_iter()
+                    .map(|v| v.to_string())
+                    .collect::<BTreeSet<String>>(),
+                [
+                    "RDX-Client-Version",
+                    "RDX-Client-Name",
+                    "accept",
+                    "content-Type",
+                    "user-agent"
+                ]
+                .into_iter()
+                .map(|s| s.to_owned())
+                .collect::<BTreeSet<String>>()
+            )
+        });
+        let sut = SUT::new(Arc::new(mock_antenna), NetworkID::Stokenet);
+        let req = sut.current_epoch();
+        drop(timeout(MAX, req).await.unwrap());
+    }
+
+    #[actix_rt::test]
+    async fn test_submit_notarized_transaction_mock_duplicate() {
+        let mock_antenna =
+            MockAntenna::with_response(TransactionSubmitResponse {
+                duplicate: true,
+            });
+        let sut = SUT::new(Arc::new(mock_antenna), NetworkID::Stokenet);
+        let req =
+            sut.submit_notarized_transaction(NotarizedTransaction::sample());
+        let result = timeout(MAX, req).await.unwrap();
+        assert_eq!(result, Err(CommonError::GatewaySubmitDuplicateTX { intent_hash: "txid_rdx198k527d5wt4ms5tvrdcu8089v4hptp7ztv388k539uzzvmw25ltsj7u4zz".to_owned() }));
     }
 }
