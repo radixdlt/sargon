@@ -1,11 +1,61 @@
+use std::ops::DerefMut;
+
 use crate::prelude::*;
 
-/// An ordered set of [`Account`]s on a specific network, most commonly
-/// the set is non-empty, since wallets guide user to create a first
-/// Account.
-pub type Accounts = IdentifiedVecVia<Account>;
+macro_rules! decl_identified_array_of {
+	(
+        $(
+            #[doc = $expr: expr]
+        )*
+        $element_type: ty,
+		$struct_type: ident
+    ) => {
+        paste! {
+            $(
+                #[doc = $expr]
+            )*
+			#[derive(Clone, Eq, PartialEq, Hash, derive_more::Debug, derive_more::Display, Serialize, Deserialize)]
+			pub struct $struct_type(IdentifiedVecVia<$element_type>);
+
+		}
+
+		uniffi::custom_newtype!($struct_type, IdentifiedVecVia<$element_type>);
+	};
+	(
+        $(
+            #[doc = $expr: expr]
+        )*
+        $element_type: ty
+    ) => {
+        paste! {
+			decl_identified_array_of!(
+				$(
+                    #[doc = $expr]
+                )*
+				$element_type,
+				[< $element_type s >]
+			);
+		}
+	};
+}
+
+decl_identified_array_of!(
+    /// An ordered set of [`Account`]s on a specific network, most commonly
+    /// the set is non-empty, since wallets guide user to create a first
+    /// Account.
+    Account
+);
 
 impl Accounts {
+    /// Instantiates a new collection of accounts from
+    /// and iterator of accounts.
+    pub fn from_iter<I>(accounts: I) -> Self
+    where
+        I: IntoIterator<Item = Account>,
+    {
+        Self(IdentifiedVecVia::<Account>::from_iter(accounts))
+    }
+
     /// Instantiates a new collection of accounts from
     /// and iterator of accounts.
     pub fn with_accounts<I>(accounts: I) -> Self
@@ -26,7 +76,21 @@ impl Accounts {
 impl Default for Accounts {
     /// Instantiates a new empty collection.
     fn default() -> Self {
-        Self::new()
+        Self::with_accounts([])
+    }
+}
+
+impl Deref for Accounts {
+    type Target = IdentifiedVecVia<Account>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for Accounts {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
     }
 }
 
@@ -36,7 +100,7 @@ impl Accounts {
         &self,
         address: &AccountAddress,
     ) -> Option<&Account> {
-        self.get(address)
+        (*self).get(address)
     }
 
     /// Returns references to **all** accounts, including hidden ones.
@@ -79,26 +143,29 @@ impl Accounts {
 mod tests {
     use crate::prelude::*;
 
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = Accounts;
+
     #[test]
     fn default_is_empty() {
-        assert_eq!(Accounts::default().len(), 0);
+        assert_eq!(SUT::default().len(), 0);
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(Accounts::sample(), Accounts::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn equality() {
-        assert_eq!(Accounts::sample(), Accounts::sample());
-        assert_eq!(Accounts::sample_other(), Accounts::sample_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn duplicates_are_prevented() {
         assert_eq!(
-            Accounts::with_accounts(
+            SUT::with_accounts(
                 [Account::sample(), Account::sample()].into_iter()
             )
             .len(),
@@ -108,12 +175,12 @@ mod tests {
 
     #[test]
     fn with_one() {
-        assert_eq!(Accounts::with_account(Account::sample()).len(), 1)
+        assert_eq!(SUT::with_account(Account::sample()).len(), 1)
     }
 
     #[test]
     fn get_all() {
-        assert_eq!(Accounts::sample().get_all().len(), 2);
+        assert_eq!(SUT::sample().get_all().len(), 2);
     }
 
     #[test]
@@ -124,13 +191,13 @@ mod tests {
             DisplayName::default(),
             AppearanceID::default(),
         );
-        let accounts = Accounts::with_account(account.clone());
+        let accounts = SUT::with_account(account.clone());
         assert_eq!(accounts.get_account_by_address(&address), Some(&account));
     }
 
     #[test]
     fn json_roundtrip_stokenet() {
-        let sut = Accounts::sample_stokenet();
+        let sut = SUT::sample_stokenet();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"
