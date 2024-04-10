@@ -112,7 +112,7 @@ impl Profile {
         serde_json::from_slice::<Self>(json.bytes()).map_err(|_| {
             CommonError::FailedToDeserializeJSONToValue {
                 json_byte_count: json.len() as u64,
-                type_name: std::any::type_name::<Profile>().to_string(),
+                type_name: String::from("Profile"),
             }
         })
     }
@@ -428,7 +428,7 @@ mod tests {
             SUT::new_from_json_bytes(malformed_profile_snapshot.clone()),
             Result::Err(CommonError::FailedToDeserializeJSONToValue {
                 json_byte_count: malformed_profile_snapshot.len() as u64,
-                type_name: std::any::type_name::<Profile>().to_string()
+                type_name: String::from("Profile")
             })
         );
     }

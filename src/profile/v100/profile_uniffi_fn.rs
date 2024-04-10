@@ -82,4 +82,16 @@ mod uniffi_tests {
             sut
         )
     }
+
+    #[test]
+    fn deserialize_malformed() {
+        let malformed_profile_snapshot = BagOfBytes::from("{}".as_bytes());
+        assert_eq!(
+            new_profile_from_json_bytes(malformed_profile_snapshot.clone()),
+            Result::Err(CommonError::FailedToDeserializeJSONToValue {
+                json_byte_count: malformed_profile_snapshot.len() as u64,
+                type_name: String::from("Profile")
+            })
+        );
+    }
 }
