@@ -15,7 +15,7 @@ mod tests {
             "state/response_entity_details__two_accounts.json"
         )))
         .unwrap();
-        // assert_json_value_eq_after_roundtrip(&sut, json) // FIXME: Onces fully implemented
+        // assert_json_value_eq_after_roundtrip(&sut, json) // FIXME: Once fully implemented
     }
 
     #[test]
@@ -26,7 +26,7 @@ mod tests {
             "state/response_entity_details__single_account_many_nfts_and_fungibles.json"
         )))
         .unwrap();
-        // assert_json_value_eq_after_roundtrip(&sut, json) // FIXME: Onces fully implemented
+        // assert_json_value_eq_after_roundtrip(&sut, json) // FIXME: Once fully implemented
     }
 
     #[test]
@@ -36,7 +36,7 @@ mod tests {
             "state/response_entity_details__single_account_no_assets.json"
         )))
         .unwrap();
-        // assert_json_value_eq_after_roundtrip(&sut, json) // FIXME: Onces fully implemented
+        // assert_json_value_eq_after_roundtrip(&sut, json) // FIXME: Once fully implemented
     }
 
     #[test]
@@ -46,6 +46,6 @@ mod tests {
             "state/response_entity_details__single_resource.json"
         )))
         .unwrap();
-        // assert_json_value_eq_after_roundtrip(&sut, json) // FIXME: Onces fully implemented
+        // assert_json_value_eq_after_roundtrip(&sut, json) // FIXME: Once fully implemented
     }
 }
