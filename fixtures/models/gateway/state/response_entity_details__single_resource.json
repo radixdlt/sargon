@@ -1,0 +1,690 @@
+{
+	"ledger_state":
+	{
+		"network": "stokenet",
+		"state_version": 73657313,
+		"proposer_round_timestamp": "2024-04-10T08:44:37.403Z",
+		"epoch": 51652,
+		"round": 1559
+	},
+	"items":
+	[
+		{
+			"address": "resource_tdx_2_1thkcveg0p2l35kvwlxasltvw0wjgsrpch6yfjct9qahze3wce8ukj8",
+			"fungible_resources":
+			{
+				"total_count": 0,
+				"items":
+				[]
+			},
+			"non_fungible_resources":
+			{
+				"total_count": 0,
+				"items":
+				[]
+			},
+			"metadata":
+			{
+				"total_count": 5,
+				"items":
+				[
+					{
+						"key": "tags",
+						"value":
+						{
+							"raw_hex": "5c228001200c0206536172676f6e055275737479",
+							"programmatic_json":
+							{
+								"variant_id": 128,
+								"fields":
+								[
+									{
+										"element_kind": "String",
+										"elements":
+										[
+											{
+												"value": "Sargon",
+												"kind": "String"
+											},
+											{
+												"value": "Rusty",
+												"kind": "String"
+											}
+										],
+										"kind": "Array"
+									}
+								],
+								"kind": "Enum"
+							},
+							"typed":
+							{
+								"values":
+								[
+									"Sargon",
+									"Rusty"
+								],
+								"type": "StringArray"
+							}
+						},
+						"is_locked": false,
+						"last_updated_at_state_version": 73654060
+					},
+					{
+						"key": "icon_url",
+						"value":
+						{
+							"raw_hex": "5c220d010c5b68747470733a2f2f757877696e672e636f6d2f77702d636f6e74656e742f7468656d65732f757877696e672f646f776e6c6f61642f656d6f6a692d656d6f7469636f6e2f6c61756768696e672d626c61636b2d69636f6e2e706e67",
+							"programmatic_json":
+							{
+								"variant_id": 13,
+								"fields":
+								[
+									{
+										"value": "https://uxwing.com/wp-content/themes/uxwing/download/emoji-emoticon/laughing-black-icon.png",
+										"kind": "String"
+									}
+								],
+								"kind": "Enum"
+							},
+							"typed":
+							{
+								"value": "https://uxwing.com/wp-content/themes/uxwing/download/emoji-emoticon/laughing-black-icon.png",
+								"type": "Url"
+							}
+						},
+						"is_locked": false,
+						"last_updated_at_state_version": 73654060
+					},
+					{
+						"key": "symbol",
+						"value":
+						{
+							"raw_hex": "5c2200010c05424c495353",
+							"programmatic_json":
+							{
+								"variant_id": 0,
+								"fields":
+								[
+									{
+										"value": "BLISS",
+										"kind": "String"
+									}
+								],
+								"kind": "Enum"
+							},
+							"typed":
+							{
+								"value": "BLISS",
+								"type": "String"
+							}
+						},
+						"is_locked": false,
+						"last_updated_at_state_version": 73654060
+					},
+					{
+						"key": "description",
+						"value":
+						{
+							"raw_hex": "5c2200010c70426c697373636f696e202d20657870657269656e6365207075726520626c6973732077697468206576657279207472616e73616374696f6e212048617070696e6573732067756172616e7465656420696e2074686520776f726c64206f66206469676974616c2063757272656e63792e",
+							"programmatic_json":
+							{
+								"variant_id": 0,
+								"fields":
+								[
+									{
+										"value": "Blisscoin - experience pure bliss with every transaction! Happiness guaranteed in the world of digital currency.",
+										"kind": "String"
+									}
+								],
+								"kind": "Enum"
+							},
+							"typed":
+							{
+								"value": "Blisscoin - experience pure bliss with every transaction! Happiness guaranteed in the world of digital currency.",
+								"type": "String"
+							}
+						},
+						"is_locked": false,
+						"last_updated_at_state_version": 73654060
+					},
+					{
+						"key": "name",
+						"value":
+						{
+							"raw_hex": "5c2200010c09426c697373636f696e",
+							"programmatic_json":
+							{
+								"variant_id": 0,
+								"fields":
+								[
+									{
+										"value": "Blisscoin",
+										"kind": "String"
+									}
+								],
+								"kind": "Enum"
+							},
+							"typed":
+							{
+								"value": "Blisscoin",
+								"type": "String"
+							}
+						},
+						"is_locked": false,
+						"last_updated_at_state_version": 73654060
+					}
+				]
+			},
+			"explicit_metadata":
+			{
+				"total_count": 5,
+				"items":
+				[
+					{
+						"key": "symbol",
+						"value":
+						{
+							"raw_hex": "5c2200010c05424c495353",
+							"programmatic_json":
+							{
+								"variant_id": 0,
+								"fields":
+								[
+									{
+										"value": "BLISS",
+										"kind": "String"
+									}
+								],
+								"kind": "Enum"
+							},
+							"typed":
+							{
+								"value": "BLISS",
+								"type": "String"
+							}
+						},
+						"is_locked": false,
+						"last_updated_at_state_version": 73654060
+					},
+					{
+						"key": "name",
+						"value":
+						{
+							"raw_hex": "5c2200010c09426c697373636f696e",
+							"programmatic_json":
+							{
+								"variant_id": 0,
+								"fields":
+								[
+									{
+										"value": "Blisscoin",
+										"kind": "String"
+									}
+								],
+								"kind": "Enum"
+							},
+							"typed":
+							{
+								"value": "Blisscoin",
+								"type": "String"
+							}
+						},
+						"is_locked": false,
+						"last_updated_at_state_version": 73654060
+					},
+					{
+						"key": "icon_url",
+						"value":
+						{
+							"raw_hex": "5c220d010c5b68747470733a2f2f757877696e672e636f6d2f77702d636f6e74656e742f7468656d65732f757877696e672f646f776e6c6f61642f656d6f6a692d656d6f7469636f6e2f6c61756768696e672d626c61636b2d69636f6e2e706e67",
+							"programmatic_json":
+							{
+								"variant_id": 13,
+								"fields":
+								[
+									{
+										"value": "https://uxwing.com/wp-content/themes/uxwing/download/emoji-emoticon/laughing-black-icon.png",
+										"kind": "String"
+									}
+								],
+								"kind": "Enum"
+							},
+							"typed":
+							{
+								"value": "https://uxwing.com/wp-content/themes/uxwing/download/emoji-emoticon/laughing-black-icon.png",
+								"type": "Url"
+							}
+						},
+						"is_locked": false,
+						"last_updated_at_state_version": 73654060
+					},
+					{
+						"key": "tags",
+						"value":
+						{
+							"raw_hex": "5c228001200c0206536172676f6e055275737479",
+							"programmatic_json":
+							{
+								"variant_id": 128,
+								"fields":
+								[
+									{
+										"element_kind": "String",
+										"elements":
+										[
+											{
+												"value": "Sargon",
+												"kind": "String"
+											},
+											{
+												"value": "Rusty",
+												"kind": "String"
+											}
+										],
+										"kind": "Array"
+									}
+								],
+								"kind": "Enum"
+							},
+							"typed":
+							{
+								"values":
+								[
+									"Sargon",
+									"Rusty"
+								],
+								"type": "StringArray"
+							}
+						},
+						"is_locked": false,
+						"last_updated_at_state_version": 73654060
+					},
+					{
+						"key": "description",
+						"value":
+						{
+							"raw_hex": "5c2200010c70426c697373636f696e202d20657870657269656e6365207075726520626c6973732077697468206576657279207472616e73616374696f6e212048617070696e6573732067756172616e7465656420696e2074686520776f726c64206f66206469676974616c2063757272656e63792e",
+							"programmatic_json":
+							{
+								"variant_id": 0,
+								"fields":
+								[
+									{
+										"value": "Blisscoin - experience pure bliss with every transaction! Happiness guaranteed in the world of digital currency.",
+										"kind": "String"
+									}
+								],
+								"kind": "Enum"
+							},
+							"typed":
+							{
+								"value": "Blisscoin - experience pure bliss with every transaction! Happiness guaranteed in the world of digital currency.",
+								"type": "String"
+							}
+						},
+						"is_locked": false,
+						"last_updated_at_state_version": 73654060
+					}
+				]
+			},
+			"details":
+			{
+				"role_assignments":
+				{
+					"owner":
+					{
+						"rule":
+						{
+							"type": "AllowAll"
+						},
+						"updater": "Owner"
+					},
+					"entries":
+					[
+						{
+							"role_key":
+							{
+								"module": "Main",
+								"name": "burner"
+							},
+							"assignment":
+							{
+								"resolution": "Explicit",
+								"explicit_rule":
+								{
+									"type": "AllowAll"
+								}
+							},
+							"updater_roles":
+							[
+								{
+									"module": "Main",
+									"name": "burner_updater"
+								}
+							]
+						},
+						{
+							"role_key":
+							{
+								"module": "Main",
+								"name": "minter"
+							},
+							"assignment":
+							{
+								"resolution": "Explicit",
+								"explicit_rule":
+								{
+									"type": "AllowAll"
+								}
+							},
+							"updater_roles":
+							[
+								{
+									"module": "Main",
+									"name": "minter_updater"
+								}
+							]
+						},
+						{
+							"role_key":
+							{
+								"module": "Main",
+								"name": "freezer"
+							},
+							"assignment":
+							{
+								"resolution": "Explicit",
+								"explicit_rule":
+								{
+									"type": "AllowAll"
+								}
+							},
+							"updater_roles":
+							[
+								{
+									"module": "Main",
+									"name": "freezer_updater"
+								}
+							]
+						},
+						{
+							"role_key":
+							{
+								"module": "Main",
+								"name": "recaller"
+							},
+							"assignment":
+							{
+								"resolution": "Explicit",
+								"explicit_rule":
+								{
+									"type": "AllowAll"
+								}
+							},
+							"updater_roles":
+							[
+								{
+									"module": "Main",
+									"name": "recaller_updater"
+								}
+							]
+						},
+						{
+							"role_key":
+							{
+								"module": "Main",
+								"name": "depositor"
+							},
+							"assignment":
+							{
+								"resolution": "Explicit",
+								"explicit_rule":
+								{
+									"type": "AllowAll"
+								}
+							},
+							"updater_roles":
+							[
+								{
+									"module": "Main",
+									"name": "depositor_updater"
+								}
+							]
+						},
+						{
+							"role_key":
+							{
+								"module": "Main",
+								"name": "withdrawer"
+							},
+							"assignment":
+							{
+								"resolution": "Explicit",
+								"explicit_rule":
+								{
+									"type": "AllowAll"
+								}
+							},
+							"updater_roles":
+							[
+								{
+									"module": "Main",
+									"name": "withdrawer_updater"
+								}
+							]
+						},
+						{
+							"role_key":
+							{
+								"module": "Main",
+								"name": "burner_updater"
+							},
+							"assignment":
+							{
+								"resolution": "Explicit",
+								"explicit_rule":
+								{
+									"type": "DenyAll"
+								}
+							},
+							"updater_roles":
+							[
+								{
+									"module": "Main",
+									"name": "burner_updater"
+								}
+							]
+						},
+						{
+							"role_key":
+							{
+								"module": "Main",
+								"name": "minter_updater"
+							},
+							"assignment":
+							{
+								"resolution": "Explicit",
+								"explicit_rule":
+								{
+									"type": "DenyAll"
+								}
+							},
+							"updater_roles":
+							[
+								{
+									"module": "Main",
+									"name": "minter_updater"
+								}
+							]
+						},
+						{
+							"role_key":
+							{
+								"module": "Main",
+								"name": "freezer_updater"
+							},
+							"assignment":
+							{
+								"resolution": "Explicit",
+								"explicit_rule":
+								{
+									"type": "DenyAll"
+								}
+							},
+							"updater_roles":
+							[
+								{
+									"module": "Main",
+									"name": "freezer_updater"
+								}
+							]
+						},
+						{
+							"role_key":
+							{
+								"module": "Main",
+								"name": "recaller_updater"
+							},
+							"assignment":
+							{
+								"resolution": "Explicit",
+								"explicit_rule":
+								{
+									"type": "DenyAll"
+								}
+							},
+							"updater_roles":
+							[
+								{
+									"module": "Main",
+									"name": "recaller_updater"
+								}
+							]
+						},
+						{
+							"role_key":
+							{
+								"module": "Main",
+								"name": "depositor_updater"
+							},
+							"assignment":
+							{
+								"resolution": "Explicit",
+								"explicit_rule":
+								{
+									"type": "DenyAll"
+								}
+							},
+							"updater_roles":
+							[
+								{
+									"module": "Main",
+									"name": "depositor_updater"
+								}
+							]
+						},
+						{
+							"role_key":
+							{
+								"module": "Main",
+								"name": "withdrawer_updater"
+							},
+							"assignment":
+							{
+								"resolution": "Explicit",
+								"explicit_rule":
+								{
+									"type": "DenyAll"
+								}
+							},
+							"updater_roles":
+							[
+								{
+									"module": "Main",
+									"name": "withdrawer_updater"
+								}
+							]
+						},
+						{
+							"role_key":
+							{
+								"module": "Metadata",
+								"name": "metadata_locker"
+							},
+							"assignment":
+							{
+								"resolution": "Owner"
+							},
+							"updater_roles":
+							[
+								{
+									"module": "Metadata",
+									"name": "metadata_locker_updater"
+								}
+							]
+						},
+						{
+							"role_key":
+							{
+								"module": "Metadata",
+								"name": "metadata_locker_updater"
+							},
+							"assignment":
+							{
+								"resolution": "Owner"
+							},
+							"updater_roles":
+							[
+								{
+									"module": "Metadata",
+									"name": "metadata_locker_updater"
+								}
+							]
+						},
+						{
+							"role_key":
+							{
+								"module": "Metadata",
+								"name": "metadata_setter"
+							},
+							"assignment":
+							{
+								"resolution": "Owner"
+							},
+							"updater_roles":
+							[
+								{
+									"module": "Metadata",
+									"name": "metadata_setter_updater"
+								}
+							]
+						},
+						{
+							"role_key":
+							{
+								"module": "Metadata",
+								"name": "metadata_setter_updater"
+							},
+							"assignment":
+							{
+								"resolution": "Owner"
+							},
+							"updater_roles":
+							[
+								{
+									"module": "Metadata",
+									"name": "metadata_setter_updater"
+								}
+							]
+						}
+					]
+				},
+				"divisibility": 10,
+				"total_supply": "21000000",
+				"total_minted": "21000000",
+				"total_burned": "0",
+				"type": "FungibleResource"
+			}
+		}
+	]
+}

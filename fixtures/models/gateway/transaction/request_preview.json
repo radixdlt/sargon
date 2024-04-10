@@ -1,0 +1,28 @@
+{
+	"blobs_hex":
+	[],
+	"end_epoch_exclusive": 51662,
+	"flags":
+	{
+		"assume_all_signature_proofs": false,
+		"skip_epoch_check": false,
+		"use_free_credit": true
+	},
+	"manifest": "CALL_METHOD\n    Address(\"account_tdx_2_12ylv4l9tj9vx0myyge2s7mzmgnzjmk9fgu3h72dn62s8d9lcafxzds\")\n    \"withdraw\"\n    Address(\"resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc\")\n    Decimal(\"1234\")\n;\nTAKE_FROM_WORKTOP\n    Address(\"resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc\")\n    Decimal(\"1234\")\n    Bucket(\"bucket1\")\n;\nCALL_METHOD\n    Address(\"account_tdx_2_129cur5adacgnqd3dgq9x3v76meq7g5fthf7g3fk0xndudecfjtuyme\")\n    \"try_deposit_or_abort\"\n    Bucket(\"bucket1\")\n    Enum<0u8>()\n;\n",
+	"nonce": 1631817560,
+	"notary_is_signatory": false,
+	"notary_public_key":
+	{
+		"key_hex": "3659d649ded46af7a6db47e84f372a8f3e57f0a3cfe6bc357675814cf17a682d",
+		"key_type": "EddsaEd25519"
+	},
+	"signer_public_keys":
+	[
+		{
+			"key_hex": "d1b96e7cce2a5267a4a638c4b77fa7c33d220fa27a42c6f38136067d667353d0",
+			"key_type": "EddsaEd25519"
+		}
+	],
+	"start_epoch_inclusive": 51652,
+	"tip_percentage": 0
+}
