@@ -1,11 +1,17 @@
 use crate::prelude::*;
 
 #[derive(Zeroize, ZeroizeOnDrop)]
-pub struct BIP39Seed([u8; 64]);
+pub struct BIP39Seed([u8; Self::LENGTH]);
 
 impl BIP39Seed {
-    pub(crate) fn new(bytes: [u8; 64]) -> Self {
+    pub const LENGTH: usize = 64;
+    pub(crate) fn new(bytes: [u8; Self::LENGTH]) -> Self {
         Self(bytes)
+    }
+}
+impl BIP39Seed {
+    pub fn is_zeroized(&self) -> bool {
+        self.0 == [0; Self::LENGTH]
     }
 }
 
@@ -82,5 +88,36 @@ impl BIP39Seed {
                 )
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::mem;
+    use std::ops::Range;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = BIP39Seed;
+
+    #[test]
+    fn zeroize() {
+        let mut sut: SUT = MnemonicWithPassphrase::sample().to_seed();
+
+        let view = &sut as *const _ as *const u8;
+        let end = mem::size_of::<SUT>() as isize;
+        let range = Range { start: 0, end };
+        let mut all_zero = true;
+        for i in range.clone() {
+            let byte_zero = unsafe { *view.offset(i) } == 0x00;
+            all_zero &= byte_zero;
+        }
+        assert!(!all_zero);
+
+        sut.zeroize();
+        for i in range.clone() {
+            assert_eq!(unsafe { *view.offset(i) }, 0x00);
+        }
+        assert!(sut.is_zeroized());
     }
 }
