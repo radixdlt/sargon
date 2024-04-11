@@ -1,20 +1,5 @@
 use crate::prelude::*;
 
-impl Personas {
-    /// Returns a reference to the persona identified by `address`, if it exists.
-    pub fn get_persona_by_address(
-        &self,
-        address: &IdentityAddress,
-    ) -> Option<&Persona> {
-        self.get(address)
-    }
-
-    /// Returns references to **all** personas, including hidden ones.
-    pub fn get_all(&self) -> Vec<&Persona> {
-        self.elements()
-    }
-}
-
 impl HasSampleValues for Personas {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {
@@ -91,7 +76,7 @@ mod tests {
         let persona = Persona::sample();
         let address = persona.address;
         let personas = Personas::with_persona(persona.clone());
-        assert_eq!(personas.get_persona_by_address(&address), Some(&persona));
+        assert_eq!(personas.get_persona_by_id(&address), Some(&persona));
     }
 
     #[test]

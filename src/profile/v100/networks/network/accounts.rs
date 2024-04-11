@@ -2,21 +2,6 @@ use std::ops::DerefMut;
 
 use crate::prelude::*;
 
-impl Accounts {
-    /// Returns a reference to the account identified by `address`, if it exists.
-    pub fn get_account_by_address(
-        &self,
-        address: &AccountAddress,
-    ) -> Option<&Account> {
-        (*self).get(address)
-    }
-
-    /// Returns references to **all** accounts, including hidden ones.
-    pub fn get_all(&self) -> Vec<&Account> {
-        self.elements()
-    }
-}
-
 impl HasSampleValues for Accounts {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {
@@ -100,7 +85,7 @@ mod tests {
             AppearanceID::default(),
         );
         let accounts = SUT::with_account(account.clone());
-        assert_eq!(accounts.get_account_by_address(&address), Some(&account));
+        assert_eq!(accounts.get_account_by_id(&address), Some(&account));
     }
 
     #[test]

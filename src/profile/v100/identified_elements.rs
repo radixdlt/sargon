@@ -39,6 +39,21 @@ macro_rules! decl_identified_array_of {
                 }
             }
 
+            impl [< $element_type s >] {
+                /// Returns a reference to the element identified by `id`, if it exists.
+                pub fn [< get_ $element_type:snake _by_id>](
+                    &self,
+                    id: &<[< $element_type >] as Identifiable>::ID,
+                ) -> Option<&[< $element_type >]> {
+                    self.get(id)
+                }
+
+                /// Returns references to **all** $struct_type, including hidden ones.
+                pub fn get_all(&self) -> Vec<&[< $element_type >]> {
+                    self.elements()
+                }
+            }
+
 			impl Deref for $struct_type {
 				type Target = $collection_type;
 
@@ -52,6 +67,31 @@ macro_rules! decl_identified_array_of {
 					&mut self.secret_magic.0
 				}
 			}
+
+            #[cfg(test)]
+            mod [<tests_ $struct_type:snake >] {
+                use super::*;
+
+                type SUT = $struct_type;
+                type SUTSecretMagic = [< $struct_type SecretMagic >];
+
+                #[test]
+                fn manual_perform_uniffi_conversion() {
+                    let sut = SUT::sample();
+                    let identified_array = (*sut).clone();
+                    let secret_magic = sut.secret_magic;
+
+                    let ffi_side =
+                        <SUTSecretMagic as crate::UniffiCustomTypeConverter>::from_custom(secret_magic.clone());
+                    assert_eq!(ffi_side, identified_array);
+                    let from_ffi_side =
+                        <SUTSecretMagic as crate::UniffiCustomTypeConverter>::into_custom(ffi_side)
+                        .unwrap();
+                    assert_eq!(secret_magic, from_ffi_side);
+                }
+
+
+            }
 
             #[uniffi::export]
             pub fn [<get_ $struct_type:snake >](
