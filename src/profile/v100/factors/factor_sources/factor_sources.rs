@@ -14,7 +14,7 @@ impl FactorSources {
     /// AND marked "main".
     pub fn with_bdfs(device_factor_source: DeviceFactorSource) -> Self {
         assert!(device_factor_source.is_main_bdfs());
-        Self::with_factorsource(device_factor_source.into())
+        Self::with_factor_source(device_factor_source.into())
     }
 }
 

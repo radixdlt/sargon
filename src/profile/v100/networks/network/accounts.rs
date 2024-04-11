@@ -2,14 +2,6 @@ use std::ops::DerefMut;
 
 use crate::prelude::*;
 
-// Trait: Default
-impl Default for Accounts {
-    /// Instantiates a new empty collection.
-    fn default() -> Self {
-        Self::with_accounts([])
-    }
-}
-
 impl Accounts {
     /// Returns a reference to the account identified by `address`, if it exists.
     pub fn get_account_by_address(

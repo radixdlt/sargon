@@ -2,18 +2,18 @@ package com.radixdlt.sargon.extensions
 
 import com.radixdlt.sargon.FactorSource
 import com.radixdlt.sargon.FactorSources
-import com.radixdlt.sargon.getFactorsources
-import com.radixdlt.sargon.newFactorsources
+import com.radixdlt.sargon.getFactorSources
+import com.radixdlt.sargon.newFactorSources
 
 @Throws(SargonException::class)
 fun FactorSources.Companion.init(vararg factorSource: FactorSource): FactorSources =
-    newFactorsources(factorsources = factorSource.asList())
+    newFactorSources(factorSources = factorSource.asList())
 
 @Throws(SargonException::class)
 fun FactorSources.Companion.init(factorSources: List<FactorSource>): FactorSources =
-    newFactorsources(factorsources = factorSources)
+    newFactorSources(factorSources = factorSources)
 
-operator fun FactorSources.invoke() = getFactorsources(factorsources = this)
+operator fun FactorSources.invoke() = getFactorSources(factorSources = this)
 
 operator fun FactorSources.get(index: Int) = invoke().get(index = index)
 

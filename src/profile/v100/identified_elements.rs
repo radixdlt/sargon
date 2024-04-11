@@ -54,10 +54,10 @@ macro_rules! decl_identified_array_of {
 			}
 
             #[uniffi::export]
-            pub fn [<get_ $struct_type:lower >](
-                [< $struct_type:lower >]: $struct_type,
+            pub fn [<get_ $struct_type:snake >](
+                [< $struct_type:snake >]: $struct_type,
             ) -> IdentifiedVecVia<$element_type> {
-                (*[< $struct_type:lower >]).clone()
+                (*[< $struct_type:snake >]).clone()
             }
 
             #[cfg(test)]
@@ -74,7 +74,7 @@ macro_rules! decl_identified_array_of {
 
                     assert_eq!(
                         elements,
-                        [<get_ $struct_type:lower >](sut)
+                        [<get_ $struct_type:snake >](sut)
                     );
                 }
             }
@@ -102,32 +102,40 @@ macro_rules! dec_can_be_empty_impl {
                     }
                 }
 
-                pub fn [< with_ $struct_type:lower >]<I>([< $struct_type:lower >]: I) -> Self
+                pub fn [< with_ $struct_type:snake >]<I>([< $struct_type:snake >]: I) -> Self
                 where
                     I: IntoIterator<Item = $element_type>,
                 {
-                    Self::from_iter([< $struct_type:lower >])
+                    Self::from_iter([< $struct_type:snake >])
                 }
 
-                pub fn [< with_ $element_type:lower >]([< $element_type:lower >]: $element_type) -> Self {
-                    Self::[< with_ $struct_type:lower >]([[< $element_type:lower >]])
+                pub fn [< with_ $element_type:snake >]([< $element_type:snake >]: $element_type) -> Self {
+                    Self::[< with_ $struct_type:snake >]([[< $element_type:snake >]])
+                }
+            }
+
+            // Trait: Default
+            impl Default for $struct_type {
+                /// Instantiates a new empty collection.
+                fn default() -> Self {
+                    Self::[< with_ $struct_type:snake >]([])
                 }
             }
 
             #[uniffi::export]
-            pub fn [<new_ $struct_type:lower>](
-                [< $struct_type:lower >]: IdentifiedVecVia<$element_type>,
+            pub fn [<new_ $struct_type:snake>](
+                [< $struct_type:snake >]: IdentifiedVecVia<$element_type>,
             ) -> $struct_type {
-                $struct_type::from_iter([< $struct_type:lower >])
+                $struct_type::from_iter([< $struct_type:snake >])
             }
 
             #[cfg(test)]
-            mod [<uniffi_impl_tests_ $struct_type:lower>] {
+            mod [<uniffi_impl_tests_ $struct_type:snake>] {
                 use super::*;
 
                 #[test]
                 fn new_from_empty() {
-                    let sut = [<new_ $struct_type:lower>](IdentifiedVecVia::from_iter([]));
+                    let sut = [<new_ $struct_type:snake>](IdentifiedVecVia::from_iter([]));
                     assert_eq!(
                         0,
                         sut.len()
@@ -136,7 +144,7 @@ macro_rules! dec_can_be_empty_impl {
 
                 #[test]
                 fn new_from_value() {
-                    let sut = [<new_ $struct_type:lower>]( IdentifiedVecVia::from_iter([[< $element_type >]::sample()]) );
+                    let sut = [<new_ $struct_type:snake>]( IdentifiedVecVia::from_iter([[< $element_type >]::sample()]) );
                     assert_eq!(
                         1,
                         sut.len()
@@ -158,11 +166,11 @@ macro_rules! dec_never_empty_impl {
             impl [< $element_type s >] {
 
                 #[allow(clippy::should_implement_trait)]
-                pub fn from_iter<I>([<  $struct_type:lower >]: I) -> Result<Self>
+                pub fn from_iter<I>([<  $struct_type:snake >]: I) -> Result<Self>
                 where
                     I: IntoIterator<Item = $element_type>,
                 {
-                    let vector = IdentifiedVecVia::from_iter([< $struct_type:lower >]);
+                    let vector = IdentifiedVecVia::from_iter([< $struct_type:snake >]);
                     if vector.is_empty() {
                         Err(CommonError::[< $struct_type MustNotBeEmpty >])
                     } else {
@@ -172,38 +180,38 @@ macro_rules! dec_never_empty_impl {
                     }
                 }
 
-                pub fn [< with_ $struct_type:lower >]<I>([< $struct_type:lower >]: I) -> Result<Self>
+                pub fn [< with_ $struct_type:snake >]<I>([< $struct_type:snake >]: I) -> Result<Self>
                 where
                     I: IntoIterator<Item = $element_type>,
                 {
-                    Self::from_iter([< $struct_type:lower >])
+                    Self::from_iter([< $struct_type:snake >])
                 }
 
-                pub fn [< with_ $element_type:lower >]([< $element_type:lower >]: $element_type) -> Self {
-                    Self::[< with_ $struct_type:lower >]([[< $element_type:lower >]]).unwrap()
+                pub fn [< with_ $element_type:snake >]([< $element_type:snake >]: $element_type) -> Self {
+                    Self::[< with_ $struct_type:snake >]([[< $element_type:snake >]]).unwrap()
                 }
             }
 
             #[uniffi::export]
-            pub fn [<new_ $struct_type:lower>](
-                [< $struct_type:lower >]: IdentifiedVecVia<$element_type>,
+            pub fn [<new_ $struct_type:snake>](
+                [< $struct_type:snake >]: IdentifiedVecVia<$element_type>,
             ) -> Result<$struct_type> {
-                $struct_type::from_iter([< $struct_type:lower >])
+                $struct_type::from_iter([< $struct_type:snake >])
             }
 
             #[cfg(test)]
-            mod [<uniffi_impl_tests_ $struct_type:lower>] {
+            mod [<uniffi_impl_tests_ $struct_type:snake>] {
                 use super::*;
 
                 #[test]
                 #[should_panic]
                 fn new_from_empty_error() {
-                    [<new_ $struct_type:lower>](IdentifiedVecVia::from_iter([])).unwrap();
+                    [<new_ $struct_type:snake>](IdentifiedVecVia::from_iter([])).unwrap();
                 }
 
                 #[test]
                 fn new_from_value() {
-                    let sut = [<new_ $struct_type:lower>]( IdentifiedVecVia::from_iter([[< $element_type >]::sample()]) ).unwrap();
+                    let sut = [<new_ $struct_type:snake>]( IdentifiedVecVia::from_iter([[< $element_type >]::sample()]) ).unwrap();
                     assert_eq!(
                         1,
                         sut.len()
@@ -276,6 +284,11 @@ decl_can_be_empty_identified_array_of!(
 decl_can_be_empty_identified_array_of!(
     /// An ordered set of [`Persona`]s on a specific network.
     Persona
+);
+
+decl_can_be_empty_identified_array_of!(
+    /// An ordered set of ['AuthorizedDapp`]s on a specific network.
+    AuthorizedDapp
 );
 
 decl_never_empty_identified_array_of!(

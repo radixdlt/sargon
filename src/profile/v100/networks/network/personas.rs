@@ -1,13 +1,5 @@
 use crate::prelude::*;
 
-// Trait: Default
-impl Default for Personas {
-    /// Instantiates a new empty collection.
-    fn default() -> Self {
-        Self::with_personas([])
-    }
-}
-
 impl Personas {
     /// Returns a reference to the persona identified by `address`, if it exists.
     pub fn get_persona_by_address(
