@@ -14,16 +14,7 @@ impl FactorSources {
     /// AND marked "main".
     pub fn with_bdfs(device_factor_source: DeviceFactorSource) -> Self {
         assert!(device_factor_source.is_main_bdfs());
-        Self::from_iter([device_factor_source.into()])
-    }
-
-    /// Panics if this `FactorSources` is empty.
-    pub fn assert_not_empty(&self) {
-        assert_ne!(
-            self.len(),
-            0,
-            "FactorSources empty, which must never happen."
-        )
+        Self::with_factorsource(device_factor_source.into())
     }
 }
 
@@ -33,6 +24,7 @@ impl HasSampleValues for FactorSources {
             FactorSource::sample_device(),
             FactorSource::sample_ledger(),
         ])
+        .unwrap()
     }
 
     fn sample_other() -> Self {
@@ -40,6 +32,7 @@ impl HasSampleValues for FactorSources {
             FactorSource::sample_device_olympia(),
             FactorSource::sample_device_babylon(),
         ])
+        .unwrap()
     }
 }
 
@@ -66,6 +59,7 @@ mod tests {
             FactorSources::from_iter(
                 [FactorSource::sample(), FactorSource::sample()].into_iter()
             )
+            .unwrap()
             .len(),
             1
         )

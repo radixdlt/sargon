@@ -2,13 +2,13 @@ use std::ops::DerefMut;
 
 use crate::prelude::*;
 
+/// General rules for identified_array_of implementations
 macro_rules! decl_identified_array_of {
 	(
         $(
             #[doc = $expr: expr]
         )*
         $element_type: ty,
-		$assert_not_empty: literal,
 		$struct_type: ident,
 		$collection_type: ty
     ) => {
@@ -16,63 +16,210 @@ macro_rules! decl_identified_array_of {
             $(
                 #[doc = $expr]
             )*
-			#[derive(Clone, Eq, PartialEq, Hash, derive_more::Debug, derive_more::Display, Serialize, Deserialize)]
-			pub struct $struct_type($collection_type);
+			#[derive(Clone, Eq, PartialEq, Hash, derive_more::Debug, derive_more::Display, Serialize, Deserialize, uniffi::Record)]
+            #[serde(transparent)]
+			pub struct $struct_type {
+                secret_magic: [< $struct_type SecretMagic >]
+            }
 
-			impl [< $struct_type >] {
+            #[derive(Clone, Eq, PartialEq, Hash, derive_more::Debug, derive_more::Display, Serialize, Deserialize)]
+			pub struct [< $struct_type SecretMagic>]($collection_type);
 
-                #[allow(clippy::should_implement_trait)]
-				pub fn from_iter<I>([<  $struct_type:lower >]: I) -> Self
-				where
-					I: IntoIterator<Item = $element_type>,
-				{
-					let vector = IdentifiedVecVia::from_iter([< $struct_type:lower >]);
-					if $assert_not_empty {
-						assert_ne!(
-							vector.len(),
-							0,
-							"Collection empty, which must never happen."
-						)
-					}
+            uniffi::custom_type!([< $struct_type SecretMagic >], $collection_type);
 
-					Self(vector)
-				}
+            impl crate::UniffiCustomTypeConverter for [< $struct_type SecretMagic >] {
+                type Builtin = $collection_type;
 
-				pub fn [< with_ $struct_type:lower >]<I>([< $struct_type:lower >]: I) -> Self
-				where
-					I: IntoIterator<Item = $element_type>,
-				{
-					Self::from_iter([< $struct_type:lower >])
-				}
+                fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
+                    Ok(Self(val))
+                }
 
-				pub fn [< with_ $element_type:lower >]([< $element_type:lower >]: $element_type) -> Self {
-					Self::[< with_ $struct_type:lower >]([[< $element_type:lower >]])
-				}
-			}
+                fn from_custom(obj: Self) -> Self::Builtin {
+                    obj.0
+                }
+            }
 
 			impl Deref for $struct_type {
 				type Target = $collection_type;
 
 				fn deref(&self) -> &Self::Target {
-					&self.0
+					&self.secret_magic.0
 				}
 			}
 
 			impl DerefMut for $struct_type {
 				fn deref_mut(&mut self) -> &mut Self::Target {
-					&mut self.0
+					&mut self.secret_magic.0
 				}
 			}
-		}
 
-		uniffi::custom_newtype!($struct_type, $collection_type);
+            #[uniffi::export]
+            pub fn [<get_ $struct_type:lower >](
+                [< $struct_type:lower >]: $struct_type,
+            ) -> IdentifiedVecVia<$element_type> {
+                (*[< $struct_type:lower >]).clone()
+            }
+
+            #[cfg(test)]
+            mod [<uniffi_tests_ $struct_type:lower>] {
+                use super::*;
+
+                #[allow(clippy::upper_case_acronyms)]
+                type SUT = $struct_type;
+
+                #[test]
+                fn get_elements() {
+                    let sut = SUT::sample();
+                    let elements = (*sut).clone();
+
+                    assert_eq!(
+                        elements,
+                        [<get_ $struct_type:lower >](sut)
+                    );
+                }
+            }
+        }
 	};
-	(
+}
+
+/// Impl rules for identified_array_of implementations which can be empty
+macro_rules! dec_can_be_empty_impl {
+    (
+        $element_type: ty,
+        $struct_type: ty,
+        $secret_magic: ty
+    ) => {
+        paste! {
+            impl [< $element_type s >] {
+
+                #[allow(clippy::should_implement_trait)]
+                pub fn from_iter<I>([<  $struct_type:lower >]: I) -> Self
+                where
+                    I: IntoIterator<Item = $element_type>,
+                {
+                    Self {
+                        secret_magic: $secret_magic(IdentifiedVecVia::from_iter([< $struct_type:lower >]))
+                    }
+                }
+
+                pub fn [< with_ $struct_type:lower >]<I>([< $struct_type:lower >]: I) -> Self
+                where
+                    I: IntoIterator<Item = $element_type>,
+                {
+                    Self::from_iter([< $struct_type:lower >])
+                }
+
+                pub fn [< with_ $element_type:lower >]([< $element_type:lower >]: $element_type) -> Self {
+                    Self::[< with_ $struct_type:lower >]([[< $element_type:lower >]])
+                }
+            }
+
+            #[uniffi::export]
+            pub fn [<new_ $struct_type:lower>](
+                [< $struct_type:lower >]: IdentifiedVecVia<$element_type>,
+            ) -> $struct_type {
+                $struct_type::from_iter([< $struct_type:lower >])
+            }
+
+            #[cfg(test)]
+            mod [<uniffi_impl_tests_ $struct_type:lower>] {
+                use super::*;
+
+                #[test]
+                fn new_from_empty() {
+                    let sut = [<new_ $struct_type:lower>](IdentifiedVecVia::from_iter([]));
+                    assert_eq!(
+                        0,
+                        sut.len()
+                    );
+                }
+
+                #[test]
+                fn new_from_value() {
+                    let sut = [<new_ $struct_type:lower>]( IdentifiedVecVia::from_iter([[< $element_type >]::sample()]) );
+                    assert_eq!(
+                        1,
+                        sut.len()
+                    );
+                }
+            }
+        }
+    }
+}
+
+/// Impl rules for identified_array_of implementations which must not be empty
+macro_rules! dec_never_empty_impl {
+    (
+        $element_type: ty,
+        $struct_type: ty,
+        $secret_magic: ty
+    ) => {
+        paste! {
+            impl [< $element_type s >] {
+
+                #[allow(clippy::should_implement_trait)]
+                pub fn from_iter<I>([<  $struct_type:lower >]: I) -> Result<Self>
+                where
+                    I: IntoIterator<Item = $element_type>,
+                {
+                    let vector = IdentifiedVecVia::from_iter([< $struct_type:lower >]);
+                    if vector.is_empty() {
+                        Err(CommonError::[< $struct_type MustNotBeEmpty >])
+                    } else {
+                        Ok(Self {
+                            secret_magic: $secret_magic(vector)
+                        })
+                    }
+                }
+
+                pub fn [< with_ $struct_type:lower >]<I>([< $struct_type:lower >]: I) -> Result<Self>
+                where
+                    I: IntoIterator<Item = $element_type>,
+                {
+                    Self::from_iter([< $struct_type:lower >])
+                }
+
+                pub fn [< with_ $element_type:lower >]([< $element_type:lower >]: $element_type) -> Self {
+                    Self::[< with_ $struct_type:lower >]([[< $element_type:lower >]]).unwrap()
+                }
+            }
+
+            #[uniffi::export]
+            pub fn [<new_ $struct_type:lower>](
+                [< $struct_type:lower >]: IdentifiedVecVia<$element_type>,
+            ) -> Result<$struct_type> {
+                $struct_type::from_iter([< $struct_type:lower >])
+            }
+
+            #[cfg(test)]
+            mod [<uniffi_impl_tests_ $struct_type:lower>] {
+                use super::*;
+
+                #[test]
+                #[should_panic]
+                fn new_from_empty_error() {
+                    [<new_ $struct_type:lower>](IdentifiedVecVia::from_iter([])).unwrap();
+                }
+
+                #[test]
+                fn new_from_value() {
+                    let sut = [<new_ $struct_type:lower>]( IdentifiedVecVia::from_iter([[< $element_type >]::sample()]) ).unwrap();
+                    assert_eq!(
+                        1,
+                        sut.len()
+                    );
+                }
+            }
+        }
+    }
+}
+
+macro_rules! decl_can_be_empty_identified_array_of {
+    (
         $(
             #[doc = $expr: expr]
         )*
-        $element_type: ty,
-		$assert_not_empty: literal
+        $element_type: ty
     ) => {
         paste! {
 			decl_identified_array_of!(
@@ -80,31 +227,59 @@ macro_rules! decl_identified_array_of {
                     #[doc = $expr]
                 )*
 				$element_type,
-				$assert_not_empty,
 				[< $element_type s >],
 				IdentifiedVecVia<$element_type>
 			);
+
+            dec_can_be_empty_impl!(
+                $element_type,
+                [< $element_type s >],
+                [< $element_type s SecretMagic >]
+            );
 		}
 	};
 }
 
-decl_identified_array_of!(
+macro_rules! decl_never_empty_identified_array_of {
+    (
+        $(
+            #[doc = $expr: expr]
+        )*
+        $element_type: ty
+    ) => {
+        paste! {
+			decl_identified_array_of!(
+				$(
+                    #[doc = $expr]
+                )*
+				$element_type,
+				[< $element_type s >],
+				IdentifiedVecVia<$element_type>
+			);
+
+            dec_never_empty_impl!(
+                $element_type,
+                [< $element_type s >],
+                [< $element_type s SecretMagic >]
+            );
+		}
+	};
+}
+
+decl_can_be_empty_identified_array_of!(
     /// An ordered set of [`Account`]s on a specific network, most commonly
     /// the set is non-empty, since wallets guide user to create a first
     /// Account.
-    Account,
-    false
+    Account
 );
 
-decl_identified_array_of!(
+decl_can_be_empty_identified_array_of!(
     /// An ordered set of [`Persona`]s on a specific network.
-    Persona,
-    false
+    Persona
 );
 
-decl_identified_array_of!(
+decl_never_empty_identified_array_of!(
     /// A collection of [`FactorSource`]s generated by a wallet or manually added by user.
     /// MUST never be empty.
-    FactorSource,
-    true
+    FactorSource
 );
