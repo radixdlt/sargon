@@ -35,8 +35,8 @@ impl FactorSourceIDFromHash {
         factor_source_kind: FactorSourceKind,
         mnemonic_with_passphrase: MnemonicWithPassphrase,
     ) -> Self {
-        let private_key =
-            mnemonic_with_passphrase.derive_private_key(GetIDPath::default());
+        let seed = mnemonic_with_passphrase.to_seed();
+        let private_key = seed.derive_private_key(&GetIDPath::default());
         let public_key_bytes = private_key.public_key().to_bytes();
         let hash = hash_of(public_key_bytes);
         let body = Exactly32Bytes::from(hash);

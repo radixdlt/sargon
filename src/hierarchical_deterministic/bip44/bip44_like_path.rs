@@ -1,5 +1,31 @@
 use crate::prelude::*;
 
+/// Either a canonical BIP44 derivation path like so:
+///
+/// `m / purpose' / coin_type' / account' / change / address_index`
+///
+/// Or an Radix Olympia BIP44 "like" path, where the `address_index` accidentally
+/// was made hardened, i.e.:
+///
+/// `m / purpose' / coin_type' / account' / change / address_index'`
+///
+/// This was a mistake made during implementation of Radix Olympia.
+///
+/// ```
+/// extern crate sargon;
+/// use sargon::prelude::*;
+///
+/// fn parse(s: &str) -> Result<BIP44LikePath> {
+///    s.parse::<BIP44LikePath>()
+/// }
+///
+/// assert!(parse("m/44'/1022'/0'/0/0").is_ok()); // Canonical BIP44
+/// assert!(parse("m/44'/1022'/0'/0/0'").is_ok()); // BIP44 like
+///
+/// assert_eq!(parse("m/44'/1022'/0'/0'/0"), Err(CommonError::InvalidBIP44LikePathChangeWasUnexpectedlyHardened));
+/// assert_eq!(parse("m/44'/1022'/0'/0'/0'"), Err(CommonError::InvalidBIP44LikePathChangeWasUnexpectedlyHardened));
+/// assert_eq!(parse("m/44'/0'/0'/0/0'"), Err(CommonError::CoinTypeNotFound { bad_value: 0 }));
+/// ```
 #[derive(
     Clone,
     Debug,
@@ -34,6 +60,12 @@ impl BIP44LikePath {
         }
         Ok(())
     }
+
+    /// Returns true if this is a canonical BIP44 path, with the last path component
+    /// - the `address_index` component - being NOT hardened.
+    pub fn is_canonical(&self) -> bool {
+        !self.path.components.last().unwrap().is_hardened()
+    }
 }
 
 impl TryFrom<&HDPath> for BIP44LikePath {
@@ -59,10 +91,6 @@ impl TryFrom<&HDPath> for BIP44LikePath {
             );
         }
 
-        let index = &components[4];
-        if !index.is_hardened() {
-            return Err(CommonError::InvalidBIP44LikePathIndexWasNotHardened);
-        }
         Ok(Self::from(path))
     }
 }
@@ -88,6 +116,12 @@ impl BIP44LikePath {
 }
 
 impl Derivation for BIP44LikePath {
+
+
+    fn curve(&self) -> SLIP10Curve {
+        self.scheme().curve()
+    }
+    
     fn derivation_path(&self) -> DerivationPath {
         DerivationPath::BIP44Like {
             value: self.clone(),
@@ -96,10 +130,13 @@ impl Derivation for BIP44LikePath {
     fn hd_path(&self) -> &HDPath {
         &self.path
     }
+}
 
+impl BIP44LikePath {
     fn scheme(&self) -> DerivationPathScheme {
         DerivationPathScheme::Bip44Olympia
     }
+ 
 }
 
 impl FromStr for BIP44LikePath {
@@ -210,11 +247,8 @@ mod tests {
     }
 
     #[test]
-    fn invalid_index_not_hardened() {
-        assert_eq!(
-            BIP44LikePath::from_str("m/44H/1022H/0H/0/0"),
-            Err(CommonError::InvalidBIP44LikePathIndexWasNotHardened)
-        );
+    fn invalid_index_not_hardened_is_ok() {
+        assert!(BIP44LikePath::from_str("m/44H/1022H/0H/0/0").is_ok());
     }
 
     #[test]

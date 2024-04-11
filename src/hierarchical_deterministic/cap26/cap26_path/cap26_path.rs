@@ -56,18 +56,22 @@ impl Derivation for CAP26Path {
         }
     }
 
+    fn curve(&self) -> SLIP10Curve {
+        self.scheme().curve()
+    }
+
     fn derivation_path(&self) -> DerivationPath {
         DerivationPath::CAP26 {
             value: self.clone(),
         }
     }
 
-    fn scheme(&self) -> DerivationPathScheme {
-        match self {
-            CAP26Path::Account { value } => value.scheme(),
-            CAP26Path::Identity { value } => value.scheme(),
-            CAP26Path::GetID { value } => value.scheme(),
-        }
+}
+
+impl CAP26Path {
+  
+    pub fn scheme(&self) -> DerivationPathScheme {
+        DerivationPathScheme::Cap26
     }
 }
 

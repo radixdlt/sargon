@@ -68,11 +68,6 @@ pub enum CommonError {
     )]
     InvalidBIP44LikePathChangeWasUnexpectedlyHardened = 10016,
 
-    /// Radix Olympia did follow BIP44, we accidentally hardened the last component `"index"`,
-    /// and for backwards compatibility we require it to be hardened in Babylon too.
-    #[error("Invalid BIP44Like Path, 'index' component was not hardened")]
-    InvalidBIP44LikePathIndexWasNotHardened = 10017,
-
     #[error(
         "Invalid depth of CAP26 Path, (expected {expected}, found {found})"
     )]

@@ -85,8 +85,8 @@ impl HasSampleValues for DerivationPath {
 }
 
 impl Derivation for DerivationPath {
-    fn derivation_path(&self) -> DerivationPath {
-        self.clone()
+    fn curve(&self) -> SLIP10Curve {
+        self.scheme().curve()
     }
 
     fn hd_path(&self) -> &HDPath {
@@ -96,12 +96,22 @@ impl Derivation for DerivationPath {
         }
     }
 
-    fn scheme(&self) -> DerivationPathScheme {
+    fn derivation_path(&self) -> DerivationPath {
+        self.clone()
+    }
+}
+
+impl DerivationPath {
+   pub fn scheme(&self) -> DerivationPathScheme {
         match self {
-            DerivationPath::CAP26 { value } => value.scheme(),
-            DerivationPath::BIP44Like { value } => value.scheme(),
+            DerivationPath::CAP26 { value: _ } => DerivationPathScheme::Cap26,
+            DerivationPath::BIP44Like { value: _ } => {
+                DerivationPathScheme::Bip44Olympia
+            }
         }
     }
+
+  
 }
 
 impl DerivationPath {

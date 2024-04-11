@@ -22,15 +22,26 @@ pub struct GetIDPath {
 }
 
 impl Derivation for GetIDPath {
+
     fn derivation_path(&self) -> DerivationPath {
         DerivationPath::CAP26 {
             value: self.clone().into(),
         }
     }
+    
     fn hd_path(&self) -> &HDPath {
         &self.path
     }
-    fn scheme(&self) -> DerivationPathScheme {
+
+    fn curve(&self) -> SLIP10Curve {
+        self.scheme().curve()
+    }
+ 
+}
+
+impl GetIDPath {
+
+    pub fn scheme(&self) -> DerivationPathScheme {
         DerivationPathScheme::Cap26
     }
 }

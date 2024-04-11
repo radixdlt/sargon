@@ -106,12 +106,10 @@ impl Mnemonic {
             .map(Self::from_internal)
     }
 
-    pub fn to_seed(&self, passphrase: &str) -> Seed {
-        self.internal().to_seed(passphrase)
+    pub fn to_seed(&self, passphrase: &str) -> BIP39Seed {
+        BIP39Seed::new(self.internal().to_seed(passphrase))
     }
 }
-
-pub type Seed = [u8; 64];
 
 impl FromStr for Mnemonic {
     type Err = CommonError;

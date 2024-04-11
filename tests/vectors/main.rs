@@ -28,7 +28,7 @@ mod cap26_tests {
     #[allow(dead_code)]
     #[derive(Deserialize, Debug)]
     struct CAP26Vector {
-        path: HDPath,
+        path: CAP26Path,
 
         #[serde(rename = "publicKey")]
         public_key_hex: String,
@@ -60,16 +60,18 @@ mod cap26_tests {
                 + PartialEq,
             S: IsPrivateKey<P> + FromStr<Err = CommonError> + std::fmt::Debug,
         {
+           
+
             let seed = self.mnemonic.to_seed("");
             self.tests
                 .iter()
                 .map(|v| {
                     let private_key = v.private_key::<S, P>()?;
-                    let derived: sargon::PrivateKey = match S::curve() {
-                        sargon::SLIP10Curve::Curve25519 => MnemonicWithPassphrase::derive_ed25519_private_key(&seed, &v.path).into(),
-                        sargon::SLIP10Curve::Secp256k1 => MnemonicWithPassphrase::derive_secp256k1_private_key(&seed, &v.path).into()
-                    };
-                    assert_eq!(derived.to_hex(), format!("{:?}", private_key));
+                    let derived = seed.derive_private_key(&v.path);
+                    assert_eq!(
+                        derived.to_hex(),
+                        format!("{:?}", private_key)
+                    );
                     Ok::<(), CommonError>(())
                 })
                 .collect::<Result<Vec<()>, CommonError>>()
@@ -117,7 +119,7 @@ mod bip44_tests {
 
     #[derive(Debug, Deserialize)]
     struct Vector {
-        path: HDPath,
+        path: BIP44LikePath,
 
         #[serde(rename = "publicKeyCompressed")]
         public_key: Secp256k1PublicKey,
@@ -142,23 +144,15 @@ mod bip44_tests {
                 .map(|v| {
                     let expected_private_key: Secp256k1PrivateKey =
                         v.private_key_hex.parse()?;
-                    let derived_private_key: Secp256k1PrivateKey =
-                        MnemonicWithPassphrase::derive_secp256k1_private_key(
-                            &seed, &v.path,
-                        );
-                    assert_eq!(derived_private_key, expected_private_key);
+                    let derived_private_key =
+                        seed.derive_private_key(&v.path);
+                    assert_eq!(derived_private_key.private_key, PrivateKey::from(expected_private_key));
                     assert_eq!(
-                        &derived_private_key.public_key(),
-                        &v.public_key
+                        derived_private_key.public_key().public_key,
+                        PublicKey::from(v.public_key)
                     );
-                    if !v.is_strict_bip44 {
-                        assert!(
-                            TryInto::<BIP44LikePath>::try_into(&v.path).is_ok()
-                        );
-                    } else {
-                        assert!(TryInto::<BIP44LikePath>::try_into(&v.path)
-                            .is_err());
-                    }
+                    assert_eq!(v.path.is_canonical(), v.is_strict_bip44);
+                  
                     Ok::<(), CommonError>(())
                 })
                 .collect::<Result<Vec<()>, CommonError>>()
@@ -212,11 +206,21 @@ mod slip10_tests {
         xprv: String,
     }
     impl KeyVector {
-        fn test(&self, seed: &[u8; 64], path: &HDPath) {
+        fn test(&self, seed: &BIP39Seed, path: &HDPath) {
+            struct TestDerivation {
+                let curve: 
+            }
+            impl Derivation for TestDerivation {
+                /*
+                    fn derivation_path(&self) -> DerivationPath;
+    fn hd_path(&self) -> &HDPath;
+    fn scheme(&self) -> DerivationPathScheme;
+                */
+            }
             let maybe_derived: Option<sargon::PrivateKey> =
                 match self.curve.as_str() {
                     "ed25519" => Some(
-                        MnemonicWithPassphrase::derive_ed25519_private_key(
+                        seed::derive_private_key(
                             seed, path,
                         )
                         .into(),
@@ -247,7 +251,7 @@ mod slip10_tests {
         child_keys: Vec<KeyVector>,
     }
     impl TestCase {
-        fn test(&self, seed: &[u8; 64]) {
+        fn test(&self, seed: &BIP39Seed) {
             self.child_keys
                 .iter()
                 .for_each(|k| k.test(seed, &self.path));
@@ -277,7 +281,7 @@ mod slip10_tests {
             let seed = self.mnemonic.to_seed(&self.passphrase.0);
             let entropy = ::hex::decode(&self.entropy).unwrap();
             assert_eq!(self.mnemonic, Mnemonic::from_entropy(&entropy));
-            assert_eq!(::hex::encode(seed), self.seed);
+            assert_eq!(::hex::encode(*seed), self.seed);
             self.test_cases.iter().for_each(|c| c.test(&seed));
         }
     }

@@ -147,9 +147,10 @@ impl HierarchicalDeterministicFactorInstance {
         key_kind: CAP26KeyKind,
         index: HDPathValue,
     ) -> Self {
-        let mwp = MnemonicWithPassphrase::sample();
         let path = AccountPath::new(NetworkID::Mainnet, key_kind, index);
-        let private_key = mwp.derive_private_key(path.clone());
+        let mwp = MnemonicWithPassphrase::sample();
+        let seed = mwp.to_seed();
+        let private_key = seed.derive_private_key(&path);
         let public_key = private_key.public_key();
         let id = FactorSourceIDFromHash::from_mnemonic_with_passphrase(
             FactorSourceKind::Device,

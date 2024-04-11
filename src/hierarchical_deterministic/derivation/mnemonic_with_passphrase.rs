@@ -67,6 +67,10 @@ impl MnemonicWithPassphrase {
     pub fn from_phrase(phrase: &str) -> Result<Self> {
         Mnemonic::from_phrase(phrase).map(Self::new)
     }
+
+    pub(crate) fn to_seed(&self) -> BIP39Seed {
+        self.mnemonic.to_seed(&self.passphrase.0)
+    }
 }
 
 impl HasSampleValues for MnemonicWithPassphrase {
@@ -77,99 +81,6 @@ impl HasSampleValues for MnemonicWithPassphrase {
 
     fn sample_other() -> Self {
         Self::new(Mnemonic::sample_other())
-    }
-}
-
-pub type PrivateKeyBytes = [u8; 32];
-
-use crypto::{
-    keys::slip10::{self as IotaSlip10, Hardened as IotaSlip10PathComponent},
-    signatures::ed25519 as IotaSlip10Ed25519,
-    signatures::secp256k1_ecdsa as IotaSlip10Secp256k1,
-};
-
-impl HDPath {
-    fn hardened_chain(&self) -> Vec<IotaSlip10PathComponent> {
-        self.components
-            .iter()
-            .map(|c| c.value)
-            .map(|v| IotaSlip10PathComponent::try_from(v).expect("Should work"))
-            .collect_vec()
-    }
-}
-
-impl MnemonicWithPassphrase {
-    pub fn to_seed(&self) -> Seed {
-        self.mnemonic.to_seed(&self.passphrase.0)
-    }
-
-    fn derive_slip10_private_key<K, I>(
-        seed: &Seed,
-        chain: I,
-    ) -> IotaSlip10::Slip10<K>
-    where
-        K: IotaSlip10::IsSecretKey
-            + IotaSlip10::WithSegment<<I as Iterator>::Item>,
-        I: Iterator,
-        <I as Iterator>::Item: IotaSlip10::Segment,
-    {
-        let seed = IotaSlip10::Seed::from_bytes(seed);
-        seed.derive(chain)
-    }
-
-    pub fn derive_ed25519_private_key(
-        seed: &Seed,
-        path: &HDPath,
-    ) -> Ed25519PrivateKey {
-        let ck = Self::derive_slip10_private_key::<
-            IotaSlip10Ed25519::SecretKey,
-            _,
-        >(seed, path.hardened_chain().into_iter());
-        Ed25519PrivateKey::from_bytes(ck.secret_key().as_slice())
-            .expect("Valid Ed25519PrivateKey bytes")
-    }
-
-    pub fn derive_secp256k1_private_key(
-        seed: &Seed,
-        path: &HDPath,
-    ) -> Secp256k1PrivateKey {
-        let ck = Self::derive_slip10_private_key::<
-            IotaSlip10Secp256k1::SecretKey,
-            _,
-        >(
-            seed, path.components.iter().cloned().map(|c| c.value)
-        );
-        Secp256k1PrivateKey::from_bytes(&*ck.secret_key().to_bytes())
-            .expect("Valid Secp256k1PrivateKey bytes")
-    }
-
-    #[cfg(not(tarpaulin_include))] // false negative
-    pub fn derive_private_key<D>(
-        &self,
-        derivation: D,
-    ) -> HierarchicalDeterministicPrivateKey
-    where
-        D: Derivation,
-    {
-        let seed = self.to_seed();
-        let path = derivation.derivation_path();
-        match derivation.scheme() {
-            DerivationPathScheme::Cap26 => {
-                assert_eq!(
-                    derivation.scheme().curve(),
-                    SLIP10Curve::Curve25519
-                );
-                let key =
-                    Self::derive_ed25519_private_key(&seed, path.hd_path());
-                HierarchicalDeterministicPrivateKey::new(key.into(), path)
-            }
-            DerivationPathScheme::Bip44Olympia => {
-                assert_eq!(derivation.scheme().curve(), SLIP10Curve::Secp256k1);
-                let key =
-                    Self::derive_secp256k1_private_key(&seed, path.hd_path());
-                HierarchicalDeterministicPrivateKey::new(key.into(), path)
-            }
-        }
     }
 }
 
@@ -264,9 +175,9 @@ mod tests {
             .unwrap(),
             BIP39Passphrase::default(),
         );
-
-        let private_key = mwp.derive_private_key(
-            AccountPath::from_str("m/44H/1022H/12H/525H/1460H/0H").unwrap(),
+        let seed = mwp.to_seed();
+        let private_key = seed.derive_private_key(
+            &AccountPath::from_str("m/44H/1022H/12H/525H/1460H/0H").unwrap(),
         );
 
         assert_eq!(
@@ -289,9 +200,9 @@ mod tests {
             .unwrap(),
             BIP39Passphrase::default(),
         );
-
-        let private_key = mwp.derive_private_key(
-            BIP44LikePath::from_str("m/44H/1022H/0H/0/5H").unwrap(),
+        let seed = mwp.to_seed();
+        let private_key = seed.derive_private_key(
+            &BIP44LikePath::from_str("m/44H/1022H/0H/0/5H").unwrap(),
         );
 
         assert_eq!(
@@ -334,7 +245,8 @@ mod tests {
             CAP26KeyKind::TransactionSigning,
             0,
         );
-        let private_key = mwp.derive_private_key(path.clone());
+        let seed = mwp.to_seed();
+        let private_key = seed.derive_private_key(&path);
 
         assert_eq!(path.to_string(), "m/44H/1022H/1H/525H/1460H/0H");
 

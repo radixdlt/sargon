@@ -1,8 +1,8 @@
 use crate::prelude::*;
 pub trait Derivation: Sized {
+    fn curve(&self) -> SLIP10Curve;
     fn derivation_path(&self) -> DerivationPath;
     fn hd_path(&self) -> &HDPath;
-    fn scheme(&self) -> DerivationPathScheme;
 
     fn bip32_string(&self) -> String {
         self.hd_path().to_string()
