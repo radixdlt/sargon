@@ -2,97 +2,11 @@ use std::ops::DerefMut;
 
 use crate::prelude::*;
 
-macro_rules! decl_identified_array_of {
-	(
-        $(
-            #[doc = $expr: expr]
-        )*
-        $element_type: ty,
-		$struct_type: ident,
-		$collection_type: ty
-    ) => {
-        paste! {
-            $(
-                #[doc = $expr]
-            )*
-			#[derive(Clone, Eq, PartialEq, Hash, derive_more::Debug, derive_more::Display, Serialize, Deserialize)]
-			pub struct $struct_type($collection_type);
-
-		}
-
-		uniffi::custom_newtype!($struct_type, $collection_type);
-	};
-	(
-        $(
-            #[doc = $expr: expr]
-        )*
-        $element_type: ty
-    ) => {
-        paste! {
-			decl_identified_array_of!(
-				$(
-                    #[doc = $expr]
-                )*
-				$element_type,
-				[< $element_type s >],
-				IdentifiedVecVia<$element_type>
-			);
-		}
-	};
-}
-
-decl_identified_array_of!(
-    /// An ordered set of [`Account`]s on a specific network, most commonly
-    /// the set is non-empty, since wallets guide user to create a first
-    /// Account.
-    Account
-);
-
-impl Accounts {
-    /// Instantiates a new collection of accounts from
-    /// and iterator of accounts.
-    pub fn from_iter<I>(accounts: I) -> Self
-    where
-        I: IntoIterator<Item = Account>,
-    {
-        Self(IdentifiedVecVia::<Account>::from_iter(accounts))
-    }
-
-    /// Instantiates a new collection of accounts from
-    /// and iterator of accounts.
-    pub fn with_accounts<I>(accounts: I) -> Self
-    where
-        I: IntoIterator<Item = Account>,
-    {
-        Self::from_iter(accounts)
-    }
-
-    /// Instantiates a new collection of accounts from a
-    /// single account.
-    pub fn with_account(account: Account) -> Self {
-        Self::with_accounts([account])
-    }
-}
-
 // Trait: Default
 impl Default for Accounts {
     /// Instantiates a new empty collection.
     fn default() -> Self {
         Self::with_accounts([])
-    }
-}
-
-impl Deref for Accounts {
-    type Target = IdentifiedVecVia<Account>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl DerefMut for Accounts {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
     }
 }
 

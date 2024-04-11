@@ -1,30 +1,10 @@
 use crate::prelude::*;
 
-/// An ordered set of Personas on a specific network.
-pub type Personas = IdentifiedVecVia<Persona>;
-
-impl Personas {
-    /// Instantiates a new collection of personas from
-    /// and iterator of personas.
-    pub fn with_personas<I>(personas: I) -> Self
-    where
-        I: IntoIterator<Item = Persona>,
-    {
-        Self::from_iter(personas)
-    }
-
-    /// Instantiates a new collection of personas from a
-    /// single persona.
-    pub fn with_persona(persona: Persona) -> Self {
-        Self::with_personas([persona])
-    }
-}
-
 // Trait: Default
 impl Default for Personas {
     /// Instantiates a new empty collection.
     fn default() -> Self {
-        Self::new()
+        Self::with_personas([])
     }
 }
 

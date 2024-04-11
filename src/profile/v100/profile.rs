@@ -388,12 +388,12 @@ mod tests {
         );
     }
 
-    #[should_panic(expected = "FactorSources empty, which must never happen.")]
+    #[should_panic(expected = "Collection empty, which must never happen.")]
     #[test]
     fn panic_when_factor_sources_empty_in_profile_constructor() {
         SUT::with(
             Header::sample(),
-            FactorSources::new(),
+            FactorSources::from_iter([]),
             AppPreferences::sample(),
             ProfileNetworks::sample(),
         );

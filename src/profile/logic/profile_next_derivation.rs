@@ -35,8 +35,8 @@ impl Profile {
     pub fn bdfs(&self) -> DeviceFactorSource {
         let device_factor_source = self
             .factor_sources
-            .clone()
-            .into_iter()
+            .iter()
+            .cloned()
             .filter_map(|f| f.as_device().cloned())
             .collect_vec();
 
