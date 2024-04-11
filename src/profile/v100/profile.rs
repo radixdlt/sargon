@@ -87,14 +87,12 @@ impl Profile {
         )
     }
 
-    /// Panics if `factor_sources` is empty, since FactorSources MUST not be empty.
     pub fn with(
         header: Header,
         factor_sources: FactorSources,
         app_preferences: AppPreferences,
         networks: ProfileNetworks,
     ) -> Self {
-        factor_sources.assert_not_empty();
         Self {
             header,
             factor_sources,
@@ -385,17 +383,6 @@ mod tests {
                 .display_name
                 .value,
             "Satoshi"
-        );
-    }
-
-    #[should_panic(expected = "FactorSources empty, which must never happen.")]
-    #[test]
-    fn panic_when_factor_sources_empty_in_profile_constructor() {
-        SUT::with(
-            Header::sample(),
-            FactorSources::new(),
-            AppPreferences::sample(),
-            ProfileNetworks::sample(),
         );
     }
 

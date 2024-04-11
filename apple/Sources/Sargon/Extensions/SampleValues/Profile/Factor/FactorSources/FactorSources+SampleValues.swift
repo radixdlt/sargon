@@ -1,7 +1,7 @@
 import SargonUniFFI
 
 #if DEBUG
-extension [FactorSource] {
+extension FactorSources {
 	public static let sample: Self = newFactorSourcesSample()
 	public static let sampleOther: Self = newFactorSourcesSampleOther()
 }

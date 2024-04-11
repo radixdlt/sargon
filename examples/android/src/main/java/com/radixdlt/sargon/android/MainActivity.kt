@@ -132,19 +132,19 @@ fun Network(
         Spacer(modifier = Modifier.height(16.dp))
         Text(modifier = Modifier.padding(horizontal = 16.dp), text = "${network.id}")
 
-        network.accounts.forEach { account ->
-            Text(
-                    modifier = Modifier.padding(horizontal = 32.dp),
-                    text = account.displayName.value,
-                    style = MaterialTheme.typography.labelLarge
-            )
-            Text(
-                    modifier = Modifier.padding(horizontal = 32.dp),
-                    text = account.address.string,
-                    style = MaterialTheme.typography.labelSmall
-            )
-            HorizontalDivider(modifier = Modifier.padding(horizontal = 32.dp))
-        }
+//        network.accounts.forEach { account ->
+//            Text(
+//                    modifier = Modifier.padding(horizontal = 32.dp),
+//                    text = account.displayName.value,
+//                    style = MaterialTheme.typography.labelLarge
+//            )
+//            Text(
+//                    modifier = Modifier.padding(horizontal = 32.dp),
+//                    text = account.address.string,
+//                    style = MaterialTheme.typography.labelSmall
+//            )
+//            HorizontalDivider(modifier = Modifier.padding(horizontal = 32.dp))
+//        }
 
         Column(modifier = Modifier.padding(16.dp)) {
             var newAccountName by remember { mutableStateOf("") }

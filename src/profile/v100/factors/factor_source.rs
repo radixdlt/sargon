@@ -43,6 +43,14 @@ impl BaseIsFactorSource for FactorSource {
     }
 }
 
+impl Identifiable for FactorSource {
+    type ID = FactorSourceID;
+
+    fn id(&self) -> Self::ID {
+        self.factor_source_id()
+    }
+}
+
 impl From<DeviceFactorSource> for FactorSource {
     fn from(value: DeviceFactorSource) -> Self {
         FactorSource::Device { value }
