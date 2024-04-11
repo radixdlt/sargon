@@ -68,7 +68,7 @@ impl MnemonicWithPassphrase {
         Mnemonic::from_phrase(phrase).map(Self::new)
     }
 
-    pub(crate) fn to_seed(&self) -> BIP39Seed {
+    pub fn to_seed(&self) -> BIP39Seed {
         self.mnemonic.to_seed(&self.passphrase.0)
     }
 }

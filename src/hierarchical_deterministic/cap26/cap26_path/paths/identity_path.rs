@@ -105,7 +105,7 @@ impl Derivation for IdentityPath {
     fn hd_path(&self) -> &HDPath {
         &self.path
     }
-    
+
     fn derivation_path(&self) -> DerivationPath {
         DerivationPath::CAP26 {
             value: CAP26Path::Identity {
@@ -120,8 +120,6 @@ impl Derivation for IdentityPath {
 }
 
 impl IdentityPath {
-  
-
     pub fn scheme(&self) -> DerivationPathScheme {
         DerivationPathScheme::Cap26
     }

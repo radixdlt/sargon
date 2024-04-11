@@ -25,7 +25,6 @@ pub mod prelude {
 
     pub(crate) use ::hex::decode as hex_decode;
     pub(crate) use ::hex::encode as hex_encode;
-    pub(crate) use zeroize::{Zeroize, ZeroizeOnDrop};
     pub(crate) use iso8601_timestamp::Timestamp;
     pub(crate) use itertools::Itertools;
     pub(crate) use log::{debug, error, info, trace, warn};
@@ -36,6 +35,7 @@ pub mod prelude {
     pub(crate) use serde_json::json;
     pub(crate) use serde_repr::{Deserialize_repr, Serialize_repr};
     pub(crate) use serde_with::*;
+    pub(crate) use zeroize::{Zeroize, ZeroizeOnDrop};
 
     pub use radix_engine_common::math::traits::CheckedMul as ScryptoCheckedMul;
     pub(crate) use std::cmp::Ordering;

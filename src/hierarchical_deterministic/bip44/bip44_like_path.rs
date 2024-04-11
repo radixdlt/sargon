@@ -116,12 +116,10 @@ impl BIP44LikePath {
 }
 
 impl Derivation for BIP44LikePath {
-
-
     fn curve(&self) -> SLIP10Curve {
         self.scheme().curve()
     }
-    
+
     fn derivation_path(&self) -> DerivationPath {
         DerivationPath::BIP44Like {
             value: self.clone(),
@@ -136,7 +134,6 @@ impl BIP44LikePath {
     fn scheme(&self) -> DerivationPathScheme {
         DerivationPathScheme::Bip44Olympia
     }
- 
 }
 
 impl FromStr for BIP44LikePath {

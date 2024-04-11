@@ -120,7 +120,6 @@ impl Derivation for AccountPath {
 }
 
 impl AccountPath {
-
     pub fn scheme(&self) -> DerivationPathScheme {
         DerivationPathScheme::Cap26
     }

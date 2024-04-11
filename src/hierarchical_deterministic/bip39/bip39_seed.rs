@@ -46,7 +46,7 @@ impl BIP39Seed {
             .expect("Valid Ed25519PrivateKey bytes")
     }
 
-    pub(crate) /* tested */ fn derive_secp256k1_private_key(
+    pub(crate) fn derive_secp256k1_private_key(
         &self,
         path: &HDPath,
     ) -> Secp256k1PrivateKey {
@@ -65,15 +65,21 @@ impl BIP39Seed {
     where
         D: Derivation,
     {
-        let path = derivation.derivation_path();
         match derivation.curve() {
             SLIP10Curve::Curve25519 => {
-                let key = self.derive_ed25519_private_key(path.hd_path());
-                HierarchicalDeterministicPrivateKey::new(key.into(), path)
+                let key = self.derive_ed25519_private_key(derivation.hd_path());
+                HierarchicalDeterministicPrivateKey::new(
+                    key.into(),
+                    derivation.derivation_path(),
+                )
             }
             SLIP10Curve::Secp256k1 => {
-                let key = self.derive_secp256k1_private_key(path.hd_path());
-                HierarchicalDeterministicPrivateKey::new(key.into(), path)
+                let key =
+                    self.derive_secp256k1_private_key(derivation.hd_path());
+                HierarchicalDeterministicPrivateKey::new(
+                    key.into(),
+                    derivation.derivation_path(),
+                )
             }
         }
     }

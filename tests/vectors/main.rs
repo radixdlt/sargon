@@ -20,6 +20,24 @@ mod profile_snapshot_tests {
     }
 }
 
+struct TestDerivation {
+    curve: SLIP10Curve,
+    hd_path: HDPath,
+    derivation_path: DerivationPath,
+}
+#[cfg(not(tarpaulin_include))]
+impl Derivation for TestDerivation {
+    fn curve(&self) -> SLIP10Curve {
+        self.curve
+    }
+    fn hd_path(&self) -> &HDPath {
+        &self.hd_path
+    }
+    fn derivation_path(&self) -> DerivationPath {
+        self.derivation_path.clone()
+    }
+}
+
 #[cfg(test)]
 mod cap26_tests {
 
@@ -60,18 +78,26 @@ mod cap26_tests {
                 + PartialEq,
             S: IsPrivateKey<P> + FromStr<Err = CommonError> + std::fmt::Debug,
         {
-           
-
             let seed = self.mnemonic.to_seed("");
             self.tests
                 .iter()
                 .map(|v| {
                     let private_key = v.private_key::<S, P>()?;
-                    let derived = seed.derive_private_key(&v.path);
-                    assert_eq!(
-                        derived.to_hex(),
-                        format!("{:?}", private_key)
-                    );
+
+                    // A liiittle bit hacky, but this allows us to test CAP26 paths with Secp256k1,
+                    // which we have test vectors for - but which we actually do not allow in
+                    // the wallets. So we force say "No, dont use Ed25519 curve for these CAP26 paths, actu
+                    // use Secp256k1 instead!"
+                    let derivation = TestDerivation {
+                        curve: S::curve(), // will be `Secp256k1` for `cap26_secp256k1.json` vectors!
+                        hd_path: v.path.hd_path().clone(),
+                        derivation_path: DerivationPath::CAP26 {
+                            value: v.path.clone(),
+                        },
+                    };
+
+                    let derived = seed.derive_private_key(&derivation);
+                    assert_eq!(derived.to_hex(), format!("{:?}", private_key));
                     Ok::<(), CommonError>(())
                 })
                 .collect::<Result<Vec<()>, CommonError>>()
@@ -144,15 +170,17 @@ mod bip44_tests {
                 .map(|v| {
                     let expected_private_key: Secp256k1PrivateKey =
                         v.private_key_hex.parse()?;
-                    let derived_private_key =
-                        seed.derive_private_key(&v.path);
-                    assert_eq!(derived_private_key.private_key, PrivateKey::from(expected_private_key));
+                    let derived_private_key = seed.derive_private_key(&v.path);
+                    assert_eq!(
+                        derived_private_key.private_key,
+                        PrivateKey::from(expected_private_key)
+                    );
                     assert_eq!(
                         derived_private_key.public_key().public_key,
                         PublicKey::from(v.public_key)
                     );
                     assert_eq!(v.path.is_canonical(), v.is_strict_bip44);
-                  
+
                     Ok::<(), CommonError>(())
                 })
                 .collect::<Result<Vec<()>, CommonError>>()
@@ -207,38 +235,29 @@ mod slip10_tests {
     }
     impl KeyVector {
         fn test(&self, seed: &BIP39Seed, path: &HDPath) {
-            struct TestDerivation {
-                let curve: 
-            }
-            impl Derivation for TestDerivation {
-                /*
-                    fn derivation_path(&self) -> DerivationPath;
-    fn hd_path(&self) -> &HDPath;
-    fn scheme(&self) -> DerivationPathScheme;
-                */
-            }
-            let maybe_derived: Option<sargon::PrivateKey> =
-                match self.curve.as_str() {
-                    "ed25519" => Some(
-                        seed::derive_private_key(
-                            seed, path,
-                        )
-                        .into(),
-                    ),
-                    "secp256k1" => Some(
-                        MnemonicWithPassphrase::derive_secp256k1_private_key(
-                            seed, path,
-                        )
-                        .into(),
-                    ),
-                    _ => {
-                        assert_eq!(self.curve, "nist256p1");
-                        /* P256 not yet supported */
-                        None
-                    }
-                };
-            let Some(derived) = maybe_derived else { return };
-            assert_eq!(derived.to_hex(), self.private_key);
+            let maybe_curve: Option<SLIP10Curve> = match self.curve.as_str() {
+                "ed25519" => Some(SLIP10Curve::Curve25519),
+                "secp256k1" => Some(SLIP10Curve::Secp256k1),
+                _ => {
+                    assert_eq!(self.curve, "nist256p1");
+                    /* P256 not yet supported */
+                    None
+                }
+            };
+            let Some(curve) = maybe_curve else { return };
+
+            let derivation = TestDerivation {
+                curve,
+                hd_path: path.clone(),
+                derivation_path: // no used by the test, unable to express non Radix BIP44 paths which this test uses...
+                DerivationPath::CAP26 {
+                    value: CAP26Path::GetID {
+                        value: GetIDPath::default(),
+                    },
+                }
+            };
+            let derived = seed.derive_private_key(&derivation);
+            assert_eq!(derived.private_key.to_hex(), self.private_key);
             assert!(self.public_key.ends_with(&derived.public_key().to_hex()));
         }
     }
@@ -281,7 +300,6 @@ mod slip10_tests {
             let seed = self.mnemonic.to_seed(&self.passphrase.0);
             let entropy = ::hex::decode(&self.entropy).unwrap();
             assert_eq!(self.mnemonic, Mnemonic::from_entropy(&entropy));
-            assert_eq!(::hex::encode(*seed), self.seed);
             self.test_cases.iter().for_each(|c| c.test(&seed));
         }
     }

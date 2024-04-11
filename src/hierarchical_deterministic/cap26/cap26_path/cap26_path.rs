@@ -65,11 +65,9 @@ impl Derivation for CAP26Path {
             value: self.clone(),
         }
     }
-
 }
 
 impl CAP26Path {
-  
     pub fn scheme(&self) -> DerivationPathScheme {
         DerivationPathScheme::Cap26
     }

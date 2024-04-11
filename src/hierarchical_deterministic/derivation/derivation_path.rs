@@ -102,7 +102,7 @@ impl Derivation for DerivationPath {
 }
 
 impl DerivationPath {
-   pub fn scheme(&self) -> DerivationPathScheme {
+    pub fn scheme(&self) -> DerivationPathScheme {
         match self {
             DerivationPath::CAP26 { value: _ } => DerivationPathScheme::Cap26,
             DerivationPath::BIP44Like { value: _ } => {
@@ -110,8 +110,6 @@ impl DerivationPath {
             }
         }
     }
-
-  
 }
 
 impl DerivationPath {

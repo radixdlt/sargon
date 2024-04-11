@@ -71,7 +71,8 @@ impl HasSampleValues for Ed25519Signature {
     ///
     /// let mwp = MnemonicWithPassphrase::with_passphrase(mnemonic, BIP39Passphrase::new("radix"));
     ///
-    /// let hd_private_key = mwp.derive_private_key(path);
+    /// let seed = mwp.to_seed();
+    /// let hd_private_key = seed.derive_private_key(&path);
     ///
     /// assert_eq!(&hd_private_key.private_key.to_hex(), "cf52dbc7bb2663223e99fb31799281b813b939440a372d0aa92eb5f5b8516003");
     ///
@@ -112,8 +113,8 @@ impl HasSampleValues for Ed25519Signature {
     /// let path: AccountPath = "m/44H/1022H/1H/525H/1460H/1H".parse().unwrap();
     ///
     /// let mwp = MnemonicWithPassphrase::with_passphrase(mnemonic, BIP39Passphrase::new("radix"));
-    ///
-    /// let hd_private_key = mwp.derive_private_key(path);
+    /// let seed = mwp.to_seed();
+    /// let hd_private_key = seed.derive_private_key(&path);
     ///
     /// assert_eq!(&hd_private_key.private_key.to_hex(), "6b736e59d41c5ba47dc427ebee9990426441e01db4abee5c44192492c269d8e0");
     ///

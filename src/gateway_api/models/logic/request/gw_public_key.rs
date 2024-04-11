@@ -28,9 +28,11 @@ impl<'de> Deserialize<'de> for GWPublicKey {
                 .map(Self::Ed25519)
                 .map_err(de::Error::custom)
         } else {
-            Err(de::Error::custom(CommonError::InvalidEd25519PublicKeyFromString {
-                bad_value: wrapper.key_hex,
-            }))
+            Err(de::Error::custom(
+                CommonError::InvalidEd25519PublicKeyFromString {
+                    bad_value: wrapper.key_hex,
+                },
+            ))
         }
     }
 }
