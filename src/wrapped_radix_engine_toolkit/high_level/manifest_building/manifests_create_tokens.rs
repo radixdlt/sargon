@@ -246,7 +246,7 @@ impl TokenDefinitionMetadata {
         ];
 
         let test_image =
-            test_images[(index.inner.clone() as usize) % test_images.len()];
+            test_images[(index.inner as usize) % test_images.len()];
 
         let icon_url = format!("{}{}", base_url, test_image);
 

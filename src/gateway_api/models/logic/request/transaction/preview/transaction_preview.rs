@@ -45,7 +45,7 @@ mod tests {
     #[test]
     fn test_new() {
         let do_test = |intent: TransactionIntent| {
-            let header = intent.header.clone();
+            let header = intent.header;
             let keys = vec![PublicKey::sample(), PublicKey::sample_other()];
             let flags = TransactionPreviewRequestFlags::new(false, true, true);
             let sut = SUT::new(intent.clone(), keys.clone(), flags);

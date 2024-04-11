@@ -181,7 +181,6 @@ mod tests {
                 request
                     .headers
                     .keys()
-                    .into_iter()
                     .map(|v| v.to_string())
                     .collect::<BTreeSet<String>>(),
                 [

@@ -5,9 +5,8 @@ pub(crate) const BIP32_HARDENED: u32 = 2147483648;
 pub type HDPathValue = u32;
 
 #[derive(
-    Zeroize,
-    ZeroizeOnDrop,
     Clone,
+    Copy,
     PartialEq,
     Eq,
     Hash,
