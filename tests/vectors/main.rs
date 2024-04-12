@@ -299,7 +299,7 @@ mod slip10_tests {
         fn test(&self) {
             let seed = self.mnemonic.to_seed(&self.passphrase.0);
             let bytes = NonEmptyMax32Bytes::from_str(&self.entropy).unwrap();
-            let mut entropy = BIP39Entropy::try_from(bytes).unwrap();
+            let entropy = BIP39Entropy::try_from(bytes).unwrap();
             assert_eq!(self.mnemonic, Mnemonic::from_entropy(entropy));
             self.test_cases.iter().for_each(|c| c.test(&seed));
         }
