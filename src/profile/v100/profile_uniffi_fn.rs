@@ -2,10 +2,10 @@ use crate::prelude::*;
 
 #[uniffi::export]
 pub fn new_profile(
-    private_hd_factor_source: PrivateHierarchicalDeterministicFactorSource,
+    device_factor_source: DeviceFactorSource,
     creating_device_name: String,
 ) -> Profile {
-    Profile::new(private_hd_factor_source, creating_device_name.as_str())
+    Profile::new(device_factor_source, creating_device_name.as_str())
 }
 
 #[uniffi::export]
@@ -55,7 +55,10 @@ mod uniffi_tests {
     #[test]
     fn new_private_hd() {
         let private = PrivateHierarchicalDeterministicFactorSource::sample();
-        let lhs = super::new_profile(private.clone(), "iPhone".to_string());
+        let lhs = super::new_profile(
+            private.factor_source.clone(),
+            "iPhone".to_string(),
+        );
         assert_eq!(
             lhs.bdfs().factor_source_id(),
             private.factor_source.factor_source_id()

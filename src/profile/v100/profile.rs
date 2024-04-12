@@ -68,33 +68,34 @@ impl Profile {
 }
 
 impl Profile {
-    /// Creates a new Profile from the `PrivateHierarchicalDeterministicFactorSource`, without any
+    /// Creates a new Profile from the `DeviceFactorSource`, without any
     /// networks (thus no accounts), with creating device info as "unknown".
     pub fn new(
-        private_device_factor_source: PrivateHierarchicalDeterministicFactorSource,
+        device_factor_source: DeviceFactorSource,
         creating_device_name: &str,
     ) -> Self {
-        let bdfs = private_device_factor_source.factor_source;
         let creating_device = DeviceInfo::with_description(
-            format!("{} - {}", creating_device_name, bdfs.hint.model).as_str(),
+            format!(
+                "{} - {}",
+                creating_device_name, device_factor_source.hint.model
+            )
+            .as_str(),
         );
         let header = Header::new(creating_device);
         Self::with(
             header,
-            FactorSources::with_bdfs(bdfs),
+            FactorSources::with_bdfs(device_factor_source),
             AppPreferences::default(),
             ProfileNetworks::new(),
         )
     }
 
-    /// Panics if `factor_sources` is empty, since FactorSources MUST not be empty.
     pub fn with(
         header: Header,
         factor_sources: FactorSources,
         app_preferences: AppPreferences,
         networks: ProfileNetworks,
     ) -> Self {
-        factor_sources.assert_not_empty();
         Self {
             header,
             factor_sources,
@@ -388,17 +389,6 @@ mod tests {
         );
     }
 
-    #[should_panic(expected = "FactorSources empty, which must never happen.")]
-    #[test]
-    fn panic_when_factor_sources_empty_in_profile_constructor() {
-        SUT::with(
-            Header::sample(),
-            FactorSources::new(),
-            AppPreferences::sample(),
-            ProfileNetworks::sample(),
-        );
-    }
-
     #[test]
     fn hash() {
         let n = 100;
@@ -407,7 +397,8 @@ mod tests {
                 SUT::new(
                     PrivateHierarchicalDeterministicFactorSource::generate_new(
                         WalletClientModel::Unknown,
-                    ),
+                    )
+                    .factor_source,
                     "Foo",
                 )
             })

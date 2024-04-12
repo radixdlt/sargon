@@ -1,6 +1,9 @@
 package com.radixdlt.sargon
 
+import com.radixdlt.sargon.extensions.get
 import com.radixdlt.sargon.extensions.init
+import com.radixdlt.sargon.extensions.invoke
+import com.radixdlt.sargon.extensions.size
 import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -86,7 +89,7 @@ class WalletTest {
         assertNotEquals(main0.address, main1.address)
         assertEquals(main0.networkId, main1.networkId)
         assertEquals(1, wallet.profile().networks.size)
-        assertEquals(listOf(main0, main1), wallet.profile().networks[0].accounts)
+        assertEquals(listOf(main0, main1), wallet.profile().networks[0].accounts())
 
         println("🔮 Creating first testnet account")
         val testnetAccountName = "Hello Radix Account!"
@@ -95,7 +98,7 @@ class WalletTest {
             name = DisplayName.init(validating = testnetAccountName)
         )
         assertEquals(2, wallet.profile().networks.size)
-        assertEquals(listOf(test0), wallet.profile().networks[1].accounts)
+        assertEquals(listOf(test0), wallet.profile().networks[1].accounts())
         assertEquals(testnetAccountName, wallet.profile().networks[1].accounts[0].displayName.value)
         assertEquals(NetworkId.STOKENET, wallet.profile().networks[1].accounts[0].networkId)
         assertTrue(storage.contains(value = testnetAccountName))

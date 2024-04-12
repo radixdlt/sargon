@@ -1,31 +1,42 @@
 package com.radixdlt.sargon
 
-import com.radixdlt.sargon.samples.factorSourcesSample
-import com.radixdlt.sargon.samples.factorSourcesSampleOther
+import com.radixdlt.sargon.extensions.contains
+import com.radixdlt.sargon.extensions.get
+import com.radixdlt.sargon.extensions.init
+import com.radixdlt.sargon.extensions.size
+import com.radixdlt.sargon.samples.Sample
+import com.radixdlt.sargon.samples.sample
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
-class FactorSourcesTest {
+class FactorSourcesTest: SampleTestable<FactorSources> {
+
+    override val samples: List<Sample<FactorSources>>
+        get() = listOf(FactorSources.sample)
 
     @Test
-    fun testEquals() {
-        val a = factorSourcesSample()
-        val b = factorSourcesSampleOther()
+    fun testListMethods() {
+        val first = FactorSource.sample()
+        val samples = FactorSources.init(first)
 
-        assertEquals(a, a)
-        assertEquals(b, b)
-        assertNotEquals(b, a)
-        assertNotEquals(b, a)
+        Assertions.assertTrue(first in samples)
+        assertEquals(
+            1,
+            samples.size
+        )
+        assertEquals(
+            first,
+            samples[0]
+        )
     }
 
     @Test
-    fun testHashCode() {
-        val a = factorSourcesSample()
-        val b = factorSourcesSampleOther()
-        assertEquals(1, setOf(a, a).size)
-        assertEquals(1, setOf(b, b).size)
-        assertEquals(2, setOf(a, b, b, a).size)
+    fun testEmptyFactorSourcesFails() {
+        assertThrows<CommonException.FactorSourcesMustNotBeEmpty> {
+            FactorSources.init()
+        }
     }
 
 }

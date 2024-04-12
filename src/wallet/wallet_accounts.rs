@@ -127,7 +127,7 @@ impl Wallet {
             if networks.contains_id(&network_id) {
                 networks
                     .try_update_with(&network_id, |network| {
-                        if network.accounts.append(account.clone()).0 {
+                        if (*network.accounts).append(account.clone()).0 {
                             Ok(network.clone())
                         } else {
                             Err(err_exists.clone())
@@ -448,7 +448,8 @@ mod tests {
     {
         test_new_account(
             Profile::new(
-                PrivateHierarchicalDeterministicFactorSource::sample(),
+                PrivateHierarchicalDeterministicFactorSource::sample()
+                    .factor_source,
                 "Test",
             ),
             also_save,

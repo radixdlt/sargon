@@ -1,48 +1,5 @@
 use crate::prelude::*;
 
-/// An ordered set of Authorized Dapps on a specific network.
-pub type AuthorizedDapps = IdentifiedVecVia<AuthorizedDapp>;
-
-impl AuthorizedDapps {
-    /// Instantiates a new collection of [`AuthorizedDapp`]s from
-    /// and iterator.
-    pub fn with_authorized_dapps<I>(authorized_dapps: I) -> Self
-    where
-        I: IntoIterator<Item = AuthorizedDapp>,
-    {
-        Self::from_iter(authorized_dapps)
-    }
-
-    /// Instantiates a new collection of [`AuthorizedDapp`]s from a
-    /// single value.
-    pub fn with_authorized_dapp(authorized_dapp: AuthorizedDapp) -> Self {
-        Self::with_authorized_dapps([authorized_dapp])
-    }
-}
-
-// Trait: Default
-impl Default for AuthorizedDapps {
-    /// Instantiates a new empty collection.
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl AuthorizedDapps {
-    /// Returns a reference to the AuthorizedDapp identified by `address`, if it exists.
-    pub fn get_authorized_dapp_by_address(
-        &self,
-        address: &DappDefinitionAddress,
-    ) -> Option<&AuthorizedDapp> {
-        self.get(address)
-    }
-
-    /// Returns references to **all** AuthorizedDapps, including hidden ones.
-    pub fn get_all(&self) -> Vec<&AuthorizedDapp> {
-        self.elements()
-    }
-}
-
 impl HasSampleValues for AuthorizedDapps {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {
@@ -129,7 +86,7 @@ mod tests {
         let authorized_dapps =
             AuthorizedDapps::with_authorized_dapp(authorized_dapp.clone());
         assert_eq!(
-            authorized_dapps.get_authorized_dapp_by_address(&address),
+            authorized_dapps.get_authorized_dapp_by_id(&address),
             Some(&authorized_dapp)
         );
     }

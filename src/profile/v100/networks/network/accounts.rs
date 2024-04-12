@@ -1,49 +1,6 @@
+use std::ops::DerefMut;
+
 use crate::prelude::*;
-
-/// An ordered set of [`Account`]s on a specific network, most commonly
-/// the set is non-empty, since wallets guide user to create a first
-/// Account.
-pub type Accounts = IdentifiedVecVia<Account>;
-
-impl Accounts {
-    /// Instantiates a new collection of accounts from
-    /// and iterator of accounts.
-    pub fn with_accounts<I>(accounts: I) -> Self
-    where
-        I: IntoIterator<Item = Account>,
-    {
-        Self::from_iter(accounts)
-    }
-
-    /// Instantiates a new collection of accounts from a
-    /// single account.
-    pub fn with_account(account: Account) -> Self {
-        Self::with_accounts([account])
-    }
-}
-
-// Trait: Default
-impl Default for Accounts {
-    /// Instantiates a new empty collection.
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Accounts {
-    /// Returns a reference to the account identified by `address`, if it exists.
-    pub fn get_account_by_address(
-        &self,
-        address: &AccountAddress,
-    ) -> Option<&Account> {
-        self.get(address)
-    }
-
-    /// Returns references to **all** accounts, including hidden ones.
-    pub fn get_all(&self) -> Vec<&Account> {
-        self.elements()
-    }
-}
 
 impl HasSampleValues for Accounts {
     /// A sample used to facilitate unit tests.
@@ -79,26 +36,29 @@ impl Accounts {
 mod tests {
     use crate::prelude::*;
 
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = Accounts;
+
     #[test]
     fn default_is_empty() {
-        assert_eq!(Accounts::default().len(), 0);
+        assert_eq!(SUT::default().len(), 0);
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(Accounts::sample(), Accounts::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn equality() {
-        assert_eq!(Accounts::sample(), Accounts::sample());
-        assert_eq!(Accounts::sample_other(), Accounts::sample_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn duplicates_are_prevented() {
         assert_eq!(
-            Accounts::with_accounts(
+            SUT::with_accounts(
                 [Account::sample(), Account::sample()].into_iter()
             )
             .len(),
@@ -108,12 +68,12 @@ mod tests {
 
     #[test]
     fn with_one() {
-        assert_eq!(Accounts::with_account(Account::sample()).len(), 1)
+        assert_eq!(SUT::with_account(Account::sample()).len(), 1)
     }
 
     #[test]
     fn get_all() {
-        assert_eq!(Accounts::sample().get_all().len(), 2);
+        assert_eq!(SUT::sample().get_all().len(), 2);
     }
 
     #[test]
@@ -124,13 +84,13 @@ mod tests {
             DisplayName::default(),
             AppearanceID::default(),
         );
-        let accounts = Accounts::with_account(account.clone());
-        assert_eq!(accounts.get_account_by_address(&address), Some(&account));
+        let accounts = SUT::with_account(account.clone());
+        assert_eq!(accounts.get_account_by_id(&address), Some(&account));
     }
 
     #[test]
     fn json_roundtrip_stokenet() {
-        let sut = Accounts::sample_stokenet();
+        let sut = SUT::sample_stokenet();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"

@@ -1,48 +1,5 @@
 use crate::prelude::*;
 
-/// An ordered set of Personas on a specific network.
-pub type Personas = IdentifiedVecVia<Persona>;
-
-impl Personas {
-    /// Instantiates a new collection of personas from
-    /// and iterator of personas.
-    pub fn with_personas<I>(personas: I) -> Self
-    where
-        I: IntoIterator<Item = Persona>,
-    {
-        Self::from_iter(personas)
-    }
-
-    /// Instantiates a new collection of personas from a
-    /// single persona.
-    pub fn with_persona(persona: Persona) -> Self {
-        Self::with_personas([persona])
-    }
-}
-
-// Trait: Default
-impl Default for Personas {
-    /// Instantiates a new empty collection.
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Personas {
-    /// Returns a reference to the persona identified by `address`, if it exists.
-    pub fn get_persona_by_address(
-        &self,
-        address: &IdentityAddress,
-    ) -> Option<&Persona> {
-        self.get(address)
-    }
-
-    /// Returns references to **all** personas, including hidden ones.
-    pub fn get_all(&self) -> Vec<&Persona> {
-        self.elements()
-    }
-}
-
 impl HasSampleValues for Personas {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {
@@ -119,7 +76,7 @@ mod tests {
         let persona = Persona::sample();
         let address = persona.address;
         let personas = Personas::with_persona(persona.clone());
-        assert_eq!(personas.get_persona_by_address(&address), Some(&persona));
+        assert_eq!(personas.get_persona_by_id(&address), Some(&persona));
     }
 
     #[test]

@@ -95,7 +95,7 @@ impl Wallet {
             );
 
         let profile = Profile::new(
-            private_hd_factor_source.clone(),
+            private_hd_factor_source.factor_source.clone(),
             wallet_client_name.as_str(),
         );
         let wallet = Self::with_imported_profile(profile, secure_storage);
