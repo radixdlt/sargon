@@ -63,51 +63,52 @@ pub(crate) fn bip39_word_by_index(u11: U11) -> BIP39Word {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = BIP39Word;
 
     #[test]
     fn equality() {
-        assert_eq!(
-            BIP39Word::english("zoo").unwrap(),
-            BIP39Word::english("zoo").unwrap()
-        );
+        assert_eq!(SUT::english("zoo").unwrap(), SUT::english("zoo").unwrap());
     }
 
     #[test]
     fn word() {
-        assert_eq!(BIP39Word::english("zoo").unwrap().word, "zoo");
+        assert_eq!(SUT::english("zoo").unwrap().word, "zoo");
     }
 
     #[test]
     fn language_of_zoo_is_english() {
         assert_eq!(
-            BIP39Word::english("zoo").unwrap().language,
+            SUT::english("zoo").unwrap().language,
             BIP39Language::English
         );
     }
 
     #[test]
     fn invalid_word() {
-        assert_eq!(
-            BIP39Word::english("foobar"),
-            Err(CommonError::UnknownBIP39Word)
-        );
+        assert_eq!(SUT::english("foobar"), Err(CommonError::UnknownBIP39Word));
     }
 
     #[test]
     fn index_of_zoo_is_2047() {
-        assert_eq!(BIP39Word::english("zoo").unwrap().index.inner, 2047);
+        assert_eq!(SUT::english("zoo").unwrap().index.inner, 2047);
     }
 
     #[test]
     fn ord() {
         assert!(
-            BIP39Word::english("abandon").unwrap()
-                < BIP39Word::english("ability").unwrap()
+            SUT::english("abandon").unwrap() < SUT::english("ability").unwrap()
         );
-        assert!(
-            BIP39Word::english("zoo").unwrap()
-                > BIP39Word::english("zone").unwrap()
-        );
+        assert!(SUT::english("zoo").unwrap() > SUT::english("zone").unwrap());
+    }
+
+    #[test]
+    fn zeroize() {
+        let mut sut = SUT::english("zoo").unwrap();
+        let copy = sut.clone();
+        sut.zeroize();
+        assert_ne!(sut, copy);
     }
 }

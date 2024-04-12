@@ -77,6 +77,15 @@ macro_rules! entropy_with_byte_counts {
                         )+
                     }
                 }
+
+                #[allow(unused)]
+                pub(crate) fn is_zeroized(&self) -> bool {
+                    match self {
+                        $(
+                            Self::[< EntropyOf $byte_count Bytes >](bytes) => bytes.is_zeroized(),
+                        )+
+                    }
+                }
             }
 
             impl From<$enum_name> for NonEmptyMax32Bytes {
@@ -89,7 +98,7 @@ macro_rules! entropy_with_byte_counts {
 }
 
 entropy_with_byte_counts!(
-    /// A BIP39 entropy
+    /// BIP39 entropy, ranging from 16-32 bytes with descrete values being multiples of in betwen the range.
     BIP39Entropy: 16, 20, 24, 28, 32,
 );
 
@@ -106,5 +115,71 @@ impl Mnemonic {
         Self::from_entropy(BIP39Entropy::from(Entropy32Bytes::new(
             generate_byte_array::<32>(),
         )))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = BIP39Entropy;
+
+    #[test]
+    fn zeroize() {
+        let mut sut = SUT::from(Entropy16Bytes::new([0xff; 16]));
+        assert!(!sut.is_zeroized());
+        sut.zeroize();
+        assert!(sut.is_zeroized());
+    }
+
+    #[test]
+    fn mnemonic_from_entropy_of_16_bytes() {
+        let sut = SUT::from(Entropy16Bytes::new([0xff; 16]));
+        let mnemonic = Mnemonic::from_entropy(sut);
+        assert_eq!(
+            mnemonic.phrase(),
+            "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"
+        )
+    }
+
+    #[test]
+    fn mnemonic_from_entropy_of_20_bytes() {
+        let sut = SUT::from(Entropy20Bytes::new([0xff; 20]));
+        let mnemonic = Mnemonic::from_entropy(sut);
+        assert_eq!(
+            mnemonic.phrase(),
+            "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrist"
+        )
+    }
+
+    #[test]
+    fn mnemonic_from_entropy_of_24_bytes() {
+        let sut = SUT::from(Entropy24Bytes::new([0xff; 24]));
+        let mnemonic = Mnemonic::from_entropy(sut);
+        assert_eq!(
+            mnemonic.phrase(),
+            "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo when"
+        )
+    }
+
+    #[test]
+    fn mnemonic_from_entropy_of_28_bytes() {
+        let sut = SUT::from(Entropy28Bytes::new([0xff; 28]));
+        let mnemonic = Mnemonic::from_entropy(sut);
+        assert_eq!(
+            mnemonic.phrase(),
+            "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo veteran"
+        );
+    }
+
+    #[test]
+    fn mnemonic_from_entropy_of_32_bytes() {
+        let sut = SUT::from(Entropy32Bytes::new([0xff; 32]));
+        let mnemonic = Mnemonic::from_entropy(sut);
+        assert_eq!(
+            mnemonic.phrase(),
+            "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo vote"
+        )
     }
 }

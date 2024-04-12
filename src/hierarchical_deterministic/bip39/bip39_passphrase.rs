@@ -72,25 +72,25 @@ impl Default for BIP39Passphrase {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = BIP39Passphrase;
 
     #[test]
     fn equality() {
-        assert_eq!(BIP39Passphrase::sample(), BIP39Passphrase::sample());
-        assert_eq!(
-            BIP39Passphrase::sample_other(),
-            BIP39Passphrase::sample_other()
-        );
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(BIP39Passphrase::sample(), BIP39Passphrase::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn json_roundtrip() {
-        let sut: BIP39Passphrase = "25th word".into();
+        let sut: SUT = "25th word".into();
 
         assert_json_value_eq_after_roundtrip(&sut, json!("25th word"));
         assert_json_roundtrip(&sut);
@@ -100,32 +100,26 @@ mod tests {
     #[test]
     fn debug() {
         assert_eq!(
-            format!("{:?}", BIP39Passphrase::new("so secret")),
+            format!("{:?}", SUT::new("so secret")),
             format!("{:?}", "<NOT EMPTY>")
         );
-        assert_eq!(
-            format!("{:?}", BIP39Passphrase::default()),
-            format!("{:?}", "<EMPTY>")
-        );
+        assert_eq!(format!("{:?}", SUT::default()), format!("{:?}", "<EMPTY>"));
     }
 
     #[test]
     fn display() {
-        assert_eq!(
-            format!("{}", BIP39Passphrase::new("so secret")),
-            "<OBFUSCATED>"
-        );
-        assert_eq!(format!("{}", BIP39Passphrase::default()), "<OBFUSCATED>");
+        assert_eq!(format!("{}", SUT::new("so secret")), "<OBFUSCATED>");
+        assert_eq!(format!("{}", SUT::default()), "<OBFUSCATED>");
     }
 
     #[test]
     fn non_sensitive() {
         assert_eq!(
-            format!("{:?}", BIP39Passphrase::new("so secret").non_sensitive()),
+            format!("{:?}", SUT::new("so secret").non_sensitive()),
             format!("{:?}", "<NOT EMPTY>")
         );
         assert_eq!(
-            format!("{:?}", BIP39Passphrase::default().non_sensitive()),
+            format!("{:?}", SUT::default().non_sensitive()),
             format!("{:?}", "<EMPTY>")
         );
     }
@@ -134,7 +128,14 @@ mod tests {
     fn uniffi_record() {
         #[derive(uniffi::Record)]
         struct UniffiRecordAssertCompilesBIP39Passphrase {
-            inner: BIP39Passphrase,
+            inner: SUT,
         }
+    }
+
+    #[test]
+    fn zeroize() {
+        let mut sut = SUT::sample();
+        sut.zeroize();
+        assert_eq!(sut.0, "");
     }
 }

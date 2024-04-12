@@ -131,29 +131,38 @@ impl SafeToLog for PrivateHierarchicalDeterministicFactorSource {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = PrivateHierarchicalDeterministicFactorSource;
 
     #[test]
     fn hash() {
         let n = 100;
         let set = (0..n)
-            .map(|_| {
-                PrivateHierarchicalDeterministicFactorSource::generate_new(
-                    WalletClientModel::Unknown,
-                )
-            })
+            .map(|_| SUT::generate_new(WalletClientModel::Unknown))
             .collect::<HashSet<_>>();
         assert_eq!(set.len(), n);
+    }
+
+    #[test]
+    fn zeroize() {
+        let mut sut = SUT::sample();
+        sut.zeroize();
+        assert_ne!(sut, SUT::sample());
     }
 }
 
 #[cfg(test)]
 mod uniffi_tests {
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = PrivateHierarchicalDeterministicFactorSource;
 
     #[test]
     fn new_uses_empty_bip39_passphrase() {
-        let private = new_private_hd_factor_source(
+        let private: SUT = new_private_hd_factor_source(
             Entropy32Bytes::new([0xff; 32]).into(),
             WalletClientModel::Unknown,
         )

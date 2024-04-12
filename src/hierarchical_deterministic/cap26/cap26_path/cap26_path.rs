@@ -118,39 +118,44 @@ impl CAP26Path {
 #[cfg(test)]
 mod tests {
 
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = CAP26Path;
 
     #[test]
     fn equality() {
-        assert_eq!(CAP26Path::sample(), CAP26Path::sample());
-        assert_eq!(CAP26Path::sample_other(), CAP26Path::sample_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(CAP26Path::sample(), CAP26Path::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn scheme_account_path() {
-        assert_eq!(
-            CAP26Path::sample_account().scheme(),
-            DerivationPathScheme::Cap26
-        );
+        assert_eq!(SUT::sample_account().scheme(), DerivationPathScheme::Cap26);
     }
 
     #[test]
     fn scheme_identity_path() {
         assert_eq!(
-            CAP26Path::sample_identity().scheme(),
+            SUT::sample_identity().scheme(),
             DerivationPathScheme::Cap26
         );
     }
 
     #[test]
+    fn curve() {
+        assert_eq!(SUT::sample().curve(), SLIP10Curve::Curve25519)
+    }
+
+    #[test]
     fn scheme_getid_path() {
         assert_eq!(
-            CAP26Path::GetID {
+            SUT::GetID {
                 value: GetIDPath::default()
             }
             .scheme(),
@@ -161,7 +166,7 @@ mod tests {
     #[test]
     fn hdpath_account_path() {
         assert_eq!(
-            CAP26Path::sample_account().hd_path(),
+            SUT::sample_account().hd_path(),
             AccountPath::sample().hd_path()
         );
     }
@@ -169,7 +174,7 @@ mod tests {
     #[test]
     fn hdpath_getid_path() {
         assert_eq!(
-            CAP26Path::GetID {
+            SUT::GetID {
                 value: GetIDPath::default()
             }
             .hd_path(),
@@ -180,7 +185,7 @@ mod tests {
     #[test]
     fn into_from_account_path() {
         assert_eq!(
-            CAP26Path::Account {
+            SUT::Account {
                 value: AccountPath::sample()
             },
             AccountPath::sample().into()
@@ -190,7 +195,7 @@ mod tests {
     #[test]
     fn into_from_getid_path() {
         assert_eq!(
-            CAP26Path::GetID {
+            SUT::GetID {
                 value: GetIDPath::default()
             },
             GetIDPath::default().into()
@@ -199,13 +204,13 @@ mod tests {
 
     #[test]
     fn json_roundtrip_getid() {
-        let model: CAP26Path = GetIDPath::default().into();
+        let model: SUT = GetIDPath::default().into();
         assert_json_value_eq_after_roundtrip(&model, json!("m/44H/1022H/365H"));
     }
 
     #[test]
     fn json_roundtrip_account() {
-        let model: CAP26Path = AccountPath::sample().into();
+        let model: SUT = AccountPath::sample().into();
         assert_json_value_eq_after_roundtrip(
             &model,
             json!("m/44H/1022H/1H/525H/1460H/0H"),

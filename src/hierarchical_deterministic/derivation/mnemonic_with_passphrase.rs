@@ -87,44 +87,35 @@ impl HasSampleValues for MnemonicWithPassphrase {
 #[cfg(test)]
 mod tests {
 
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = MnemonicWithPassphrase;
 
     #[test]
     fn equality() {
-        assert_eq!(
-            MnemonicWithPassphrase::sample(),
-            MnemonicWithPassphrase::sample()
-        );
-        assert_eq!(
-            MnemonicWithPassphrase::sample_other(),
-            MnemonicWithPassphrase::sample_other()
-        );
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(
-            MnemonicWithPassphrase::sample(),
-            MnemonicWithPassphrase::sample_other()
-        );
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn display() {
-        assert_eq!(
-            format!("{}", MnemonicWithPassphrase::sample()),
-            "<OBFUSCATED>"
-        );
+        assert_eq!(format!("{}", SUT::sample()), "<OBFUSCATED>");
     }
 
     #[test]
     fn debug() {
         assert_eq!(
-            format!("{:?}", MnemonicWithPassphrase::sample()),
+            format!("{:?}", SUT::sample()),
             format!("{:?}", "24 words (bright...mandate) + <NOT EMPTY>")
         );
         assert_eq!(
-            format!("{:?}", MnemonicWithPassphrase::sample_other()),
+            format!("{:?}", SUT::sample_other()),
             format!("{:?}", "12 words (zoo...wrong) + <EMPTY>")
         );
     }
@@ -132,14 +123,11 @@ mod tests {
     #[test]
     fn non_sensitive() {
         assert_eq!(
-            format!("{:?}", MnemonicWithPassphrase::sample().non_sensitive()),
+            format!("{:?}", SUT::sample().non_sensitive()),
             format!("{:?}", "24 words (bright...mandate) + <NOT EMPTY>")
         );
         assert_eq!(
-            format!(
-                "{:?}",
-                MnemonicWithPassphrase::sample_other().non_sensitive()
-            ),
+            format!("{:?}", SUT::sample_other().non_sensitive()),
             format!("{:?}", "12 words (zoo...wrong) + <EMPTY>")
         );
     }
@@ -148,7 +136,7 @@ mod tests {
     fn with_passphrase() {
         let phrase = "equip will roof matter pink blind book anxiety banner elbow sun young";
         let passphrase = "25th";
-        let mwp = MnemonicWithPassphrase::with_passphrase(
+        let mwp = SUT::with_passphrase(
             Mnemonic::from_phrase(phrase).unwrap(),
             BIP39Passphrase::new(passphrase),
         );
@@ -160,15 +148,15 @@ mod tests {
     fn new_eq_from_phrase() {
         let phrase = "equip will roof matter pink blind book anxiety banner elbow sun young";
         assert_eq!(
-            MnemonicWithPassphrase::new(Mnemonic::from_phrase(phrase).unwrap()),
-            MnemonicWithPassphrase::from_phrase(phrase).unwrap()
+            SUT::new(Mnemonic::from_phrase(phrase).unwrap()),
+            SUT::from_phrase(phrase).unwrap()
         );
     }
 
     /// Test vector: https://github.com/radixdlt/babylon-wallet-ios/blob/99161cbbb11a78f36db6991e5d5c5f092678d5fa/RadixWalletTests/CryptographyTests/SLIP10Tests/TestVectors/cap26_curve25519.json#L8
     #[test]
     fn derive_a_curve25519_key_with_cap26() {
-        let mwp = MnemonicWithPassphrase::with_passphrase(
+        let mwp = SUT::with_passphrase(
             Mnemonic::from_phrase(
                 "equip will roof matter pink blind book anxiety banner elbow sun young",
             )
@@ -193,7 +181,7 @@ mod tests {
     /// Test vector: https://github.com/radixdlt/babylon-wallet-ios/blob/99161cbbb11a78f36db6991e5d5c5f092678d5fa/RadixWalletTests/CryptographyTests/SLIP10Tests/TestVectors/bip44_secp256k1.json#L288
     #[test]
     fn derive_a_secp256k1_key_with_bip44_olympia() {
-        let mwp = MnemonicWithPassphrase::with_passphrase(
+        let mwp = SUT::with_passphrase(
             Mnemonic::from_phrase(
      "habit special recipe upon giraffe manual evil badge dwarf welcome inspire shrug post arrive van",
             )
@@ -218,7 +206,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip() {
-        let model = MnemonicWithPassphrase::with_passphrase(
+        let model = SUT::with_passphrase(
             Mnemonic::from_phrase(
      "habit special recipe upon giraffe manual evil badge dwarf welcome inspire shrug post arrive van",
             )
@@ -239,7 +227,7 @@ mod tests {
 
     #[test]
     fn keys_for_sample() {
-        let mwp = MnemonicWithPassphrase::sample();
+        let mwp = SUT::sample();
         let path = AccountPath::new(
             NetworkID::Mainnet,
             CAP26KeyKind::TransactionSigning,
@@ -263,9 +251,14 @@ mod tests {
     #[test]
     fn hash() {
         let n = 100;
-        let set = (0..n)
-            .map(|_| MnemonicWithPassphrase::generate_new())
-            .collect::<HashSet<_>>();
+        let set = (0..n).map(|_| SUT::generate_new()).collect::<HashSet<_>>();
         assert_eq!(set.len(), n);
+    }
+
+    #[test]
+    fn zeroize() {
+        let mut sut = SUT::sample();
+        sut.zeroize();
+        assert_ne!(sut, SUT::sample());
     }
 }

@@ -288,6 +288,13 @@ mod tests {
     }
 
     #[test]
+    fn zeroize() {
+        let mut sut = SUT::sample();
+        sut.zeroize();
+        assert_ne!(sut, SUT::sample());
+    }
+
+    #[test]
     fn len() {
         assert_eq!(SUT::sample().len(), 32);
     }

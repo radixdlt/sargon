@@ -159,34 +159,36 @@ impl From<CAP26Path> for DerivationPath {
 #[cfg(test)]
 mod tests {
 
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = DerivationPath;
 
     #[test]
     fn equality() {
-        assert_eq!(DerivationPath::sample(), DerivationPath::sample());
-        assert_eq!(
-            DerivationPath::sample_other(),
-            DerivationPath::sample_other()
-        );
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(DerivationPath::sample(), DerivationPath::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn curve() {
+        assert_eq!(SUT::sample().curve(), SLIP10Curve::Curve25519)
     }
 
     #[test]
     fn cap26_scheme() {
-        assert_eq!(
-            DerivationPath::sample_cap26().scheme(),
-            DerivationPathScheme::Cap26
-        );
+        assert_eq!(SUT::sample_cap26().scheme(), DerivationPathScheme::Cap26);
     }
 
     #[test]
     fn cap26_hdpath() {
         assert_eq!(
-            DerivationPath::sample_cap26().hd_path(),
+            SUT::sample_cap26().hd_path(),
             AccountPath::sample().hd_path()
         );
     }
@@ -194,7 +196,7 @@ mod tests {
     #[test]
     fn bip44like_scheme() {
         assert_eq!(
-            DerivationPath::BIP44Like {
+            SUT::BIP44Like {
                 value: BIP44LikePath::new(0)
             }
             .scheme(),
@@ -205,7 +207,7 @@ mod tests {
     #[test]
     fn bip44like_hdpath() {
         assert_eq!(
-            DerivationPath::BIP44Like {
+            SUT::BIP44Like {
                 value: BIP44LikePath::new(0)
             }
             .hd_path(),
@@ -216,7 +218,7 @@ mod tests {
     #[test]
     fn into_from_account_bip44_path() {
         assert_eq!(
-            DerivationPath::BIP44Like {
+            SUT::BIP44Like {
                 value: BIP44LikePath::sample()
             },
             BIP44LikePath::sample().into()
@@ -225,14 +227,14 @@ mod tests {
 
     #[test]
     fn as_bip44_path() {
-        let path: DerivationPath = BIP44LikePath::sample().into();
+        let path: SUT = BIP44LikePath::sample().into();
         assert_eq!(path.as_bip44_like().unwrap(), &BIP44LikePath::sample());
     }
 
     #[test]
     fn into_from_account_cap26_path() {
         assert_eq!(
-            DerivationPath::CAP26 {
+            SUT::CAP26 {
                 value: AccountPath::sample().into()
             },
             AccountPath::sample().into()
@@ -242,7 +244,7 @@ mod tests {
     #[test]
     fn into_from_identity_cap26_path() {
         assert_eq!(
-            DerivationPath::CAP26 {
+            SUT::CAP26 {
                 value: IdentityPath::sample().into()
             },
             IdentityPath::sample().into()
@@ -251,41 +253,41 @@ mod tests {
 
     #[test]
     fn derivation_path_identity() {
-        let derivation_path: DerivationPath = IdentityPath::sample().into();
+        let derivation_path: SUT = IdentityPath::sample().into();
         assert_eq!(derivation_path, derivation_path.derivation_path());
     }
 
     #[test]
     fn try_from_hdpath_account() {
-        let derivation_path: DerivationPath = AccountPath::sample().into();
+        let derivation_path: SUT = AccountPath::sample().into();
         let hd_path = derivation_path.hd_path();
-        assert_eq!(DerivationPath::try_from(hd_path), Ok(derivation_path));
+        assert_eq!(SUT::try_from(hd_path), Ok(derivation_path));
     }
 
     #[test]
     fn try_from_hdpath_identity() {
-        let derivation_path: DerivationPath = IdentityPath::sample().into();
+        let derivation_path: SUT = IdentityPath::sample().into();
         let hd_path = derivation_path.hd_path();
-        assert_eq!(DerivationPath::try_from(hd_path), Ok(derivation_path));
+        assert_eq!(SUT::try_from(hd_path), Ok(derivation_path));
     }
 
     #[test]
     fn try_from_hdpath_bip44() {
-        let derivation_path: DerivationPath = BIP44LikePath::sample().into();
+        let derivation_path: SUT = BIP44LikePath::sample().into();
         let hd_path = derivation_path.hd_path();
-        assert_eq!(DerivationPath::try_from(hd_path), Ok(derivation_path));
+        assert_eq!(SUT::try_from(hd_path), Ok(derivation_path));
     }
 
     #[test]
     fn try_from_hdpath_getid() {
-        let derivation_path: DerivationPath = GetIDPath::default().into();
+        let derivation_path: SUT = GetIDPath::default().into();
         let hd_path = derivation_path.hd_path();
-        assert_eq!(DerivationPath::try_from(hd_path), Ok(derivation_path));
+        assert_eq!(SUT::try_from(hd_path), Ok(derivation_path));
     }
 
     #[test]
     fn from_cap26() {
-        let derivation_path: DerivationPath = CAP26Path::Account {
+        let derivation_path: SUT = CAP26Path::Account {
             value: AccountPath::sample(),
         }
         .into();
@@ -297,7 +299,7 @@ mod tests {
 
     #[test]
     fn as_cap26_path() {
-        let path: DerivationPath = AccountPath::sample().into();
+        let path: SUT = AccountPath::sample().into();
         assert_eq!(
             path.as_cap26().unwrap(),
             &CAP26Path::Account {
@@ -309,7 +311,7 @@ mod tests {
     #[test]
     fn into_from_getid_path() {
         assert_eq!(
-            DerivationPath::CAP26 {
+            SUT::CAP26 {
                 value: GetIDPath::default().into()
             },
             GetIDPath::default().into()
@@ -318,7 +320,7 @@ mod tests {
 
     #[test]
     fn json_cap26_account() {
-        let model = DerivationPath::sample();
+        let model = SUT::sample();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -332,20 +334,20 @@ mod tests {
 
     #[test]
     fn display() {
-        let model = DerivationPath::sample();
+        let model = SUT::sample();
         assert_eq!(format!("{}", model), "m/44H/1022H/1H/525H/1460H/0H")
     }
 
     #[test]
     fn debug() {
-        let model = DerivationPath::sample();
+        let model = SUT::sample();
         assert_eq!(format!("{:?}", model), "m/44H/1022H/1H/525H/1460H/0H")
     }
 
     #[test]
     fn json_cap26_getid() {
         let path = GetIDPath::default();
-        let model: DerivationPath = path.into();
+        let model: SUT = path.into();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -360,7 +362,7 @@ mod tests {
     #[test]
     fn json_bip44like_account() {
         let path = BIP44LikePath::sample();
-        let model: DerivationPath = path.into();
+        let model: SUT = path.into();
         assert_eq_after_json_roundtrip(
             &model,
             r#"

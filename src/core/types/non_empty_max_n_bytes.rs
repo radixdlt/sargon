@@ -252,6 +252,13 @@ mod tests_non_empty_max_64_bytes {
     }
 
     #[test]
+    fn zeroize() {
+        let mut sut = SUT::sample();
+        sut.zeroize();
+        assert_ne!(sut, SUT::sample());
+    }
+
+    #[test]
     fn hash() {
         assert_eq!(
             HashSet::<SUT>::from_iter([
