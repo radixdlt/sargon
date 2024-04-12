@@ -16,10 +16,10 @@ use crate::prelude::*;
 #[debug("{:?}", self.partially_obfuscated_string())]
 pub struct Mnemonic {
     pub words: Vec<BIP39Word>,
-   
+
     #[zeroize(skip)]
     pub word_count: BIP39WordCount,
-   
+
     #[zeroize(skip)]
     pub language: BIP39Language,
 }
@@ -84,7 +84,6 @@ impl Mnemonic {
             language: language.into(),
         }
     }
-
 
     fn internal(&self) -> bip39::Mnemonic {
         bip39::Mnemonic::from_str(&self.phrase()).unwrap()

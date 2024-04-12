@@ -8,7 +8,7 @@ use crate::prelude::*;
 /// A bytes collection that does NOT convert into `ByteArray` in Kotlin, but
 /// instead `List<Byte>`, which has a working `==`.
 #[derive(
-    Zeroize,
+    Zeroize, // Not `ZeroizeOnDrop`: we dont wanna zeroize all byte types: use `decl_secret_bytes!` for secrets.
     Clone,
     PartialEq,
     Eq,
@@ -98,7 +98,9 @@ impl From<Hash> for BagOfBytes {
 
 impl From<Vec<u8>> for BagOfBytes {
     fn from(value: Vec<u8>) -> Self {
-        Self { bytes: Box::new(value) }
+        Self {
+            bytes: Box::new(value),
+        }
     }
 }
 

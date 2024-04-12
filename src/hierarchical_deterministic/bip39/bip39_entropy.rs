@@ -1,4 +1,4 @@
-use crate::{prelude::*, secret_bytes, UniffiCustomTypeConverter};
+use crate::{decl_secret_bytes, prelude::*, UniffiCustomTypeConverter};
 
 macro_rules! entropy_with_byte_counts {
     (
@@ -12,7 +12,7 @@ macro_rules! entropy_with_byte_counts {
     ) => {
         paste! {
             $(
-                secret_bytes!(
+                decl_secret_bytes!(
                     [< Entropy $byte_count Bytes >],
                     $byte_count
                 );
@@ -116,10 +116,8 @@ impl Mnemonic {
     }
 
     pub fn generate_new() -> Self {
-        Self::from_entropy(
-            BIP39Entropy::from(
-                Entropy32Bytes::new(generate_byte_array::<32>())
-            )
-        )
+        Self::from_entropy(BIP39Entropy::from(Entropy32Bytes::new(
+            generate_byte_array::<32>(),
+        )))
     }
 }

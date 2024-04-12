@@ -13,7 +13,7 @@ macro_rules! decl_exactly_n_bytes {
         paste! {
 
             #[derive(
-                Zeroize,
+                Zeroize, // Not `ZeroizeOnDrop`: we dont wanna zeroize all byte types: use `decl_secret_bytes!` for secrets.
                 Clone,
                 Copy,
                 Debug,

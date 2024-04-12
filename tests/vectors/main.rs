@@ -298,11 +298,8 @@ mod slip10_tests {
     impl Group {
         fn test(&self) {
             let seed = self.mnemonic.to_seed(&self.passphrase.0);
-            println!("🔮 {}", &self.entropy);
-            let mut entropy_bytes = [0u8; 32];
-            hex::decode_to_slice(&self.entropy, &mut entropy_bytes as &mut [u8]).unwrap();
-
-            let entropy: BIP39Entropy = Entropy32Bytes::new(entropy_bytes).into();
+            let bytes = NonEmptyMax32Bytes::from_str(&self.entropy).unwrap();
+            let mut entropy = BIP39Entropy::try_from(bytes).unwrap();
             assert_eq!(self.mnemonic, Mnemonic::from_entropy(entropy));
             self.test_cases.iter().for_each(|c| c.test(&seed));
         }

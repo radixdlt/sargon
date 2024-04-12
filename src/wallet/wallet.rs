@@ -74,7 +74,6 @@ impl Wallet {
 //========
 #[uniffi::export]
 impl Wallet {
-
     /// Creates a new Mnemonic from `entropy` (without BIP39 passphrase) and creates a new Profile,
     /// saving both the Mnemonic and Profile into secure storage and returns a new Wallet.
     #[uniffi::constructor]

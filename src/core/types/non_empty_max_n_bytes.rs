@@ -17,7 +17,7 @@ macro_rules! decl_non_empty_max_n_bytes {
                 #[doc = $expr]
             )*
             #[derive(
-                Zeroize,
+                Zeroize, // Not `ZeroizeOnDrop`: we dont wanna zeroize all byte types: use `decl_secret_bytes!` for secrets.
                 Clone,
                 PartialEq,
                 Eq,
