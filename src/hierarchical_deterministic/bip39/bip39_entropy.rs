@@ -98,7 +98,7 @@ macro_rules! entropy_with_byte_counts {
 }
 
 entropy_with_byte_counts!(
-    /// BIP39 entropy, ranging from 16-32 bytes with descrete values being multiples of in betwen the range.
+    /// BIP39 entropy, ranging from 16-32 bytes with discrete values being multiples of in between the range.
     BIP39Entropy: 16, 20, 24, 28, 32,
 );
 
