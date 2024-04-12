@@ -17,7 +17,6 @@ macro_rules! decl_secret_bytes {
             #[derive(Zeroize, ZeroizeOnDrop, derive_more::Debug, derive_more::Display)]
             #[debug("OBFUSCATED")]
             #[display("OBFUSCATED")]
-            #[repr(C)]
             pub struct $struct_name(Box<[u8; Self::LENGTH]>);
 
 
