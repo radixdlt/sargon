@@ -22,7 +22,8 @@ class ProfileTest: SampleTestable<Profile> {
         )
 
         val profile = Profile.init(
-            privateHdFactorSource = hdFactorSource, creatingDeviceName = "Unit tests"
+            deviceFactorSource = hdFactorSource.factorSource,
+            creatingDeviceName = "Unit tests"
         )
 
         assertEquals("Unit tests - Android", profile.header.creatingDevice.description)

@@ -446,7 +446,8 @@ mod tests {
     {
         test_new_account(
             Profile::new(
-                PrivateHierarchicalDeterministicFactorSource::sample(),
+                PrivateHierarchicalDeterministicFactorSource::sample()
+                    .factor_source,
                 "Test",
             ),
             also_save,
