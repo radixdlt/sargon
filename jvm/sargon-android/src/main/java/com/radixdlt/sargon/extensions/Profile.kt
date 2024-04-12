@@ -1,17 +1,17 @@
 package com.radixdlt.sargon.extensions
 
 import com.radixdlt.sargon.BagOfBytes
-import com.radixdlt.sargon.PrivateHierarchicalDeterministicFactorSource
+import com.radixdlt.sargon.DeviceFactorSource
 import com.radixdlt.sargon.Profile
 import com.radixdlt.sargon.newProfile
 import com.radixdlt.sargon.newProfileFromJsonBytes
 import com.radixdlt.sargon.profileToJsonBytes
 
 fun Profile.Companion.init(
-    privateHdFactorSource: PrivateHierarchicalDeterministicFactorSource,
+    deviceFactorSource: DeviceFactorSource,
     creatingDeviceName: String
 ) = newProfile(
-    privateHdFactorSource = privateHdFactorSource,
+    deviceFactorSource = deviceFactorSource,
     creatingDeviceName = creatingDeviceName
 )
 

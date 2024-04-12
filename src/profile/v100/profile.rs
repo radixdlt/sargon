@@ -68,20 +68,23 @@ impl Profile {
 }
 
 impl Profile {
-    /// Creates a new Profile from the `PrivateHierarchicalDeterministicFactorSource`, without any
+    /// Creates a new Profile from the `DeviceFactorSource`, without any
     /// networks (thus no accounts), with creating device info as "unknown".
     pub fn new(
-        private_device_factor_source: PrivateHierarchicalDeterministicFactorSource,
+        device_factor_source: DeviceFactorSource,
         creating_device_name: &str,
     ) -> Self {
-        let bdfs = private_device_factor_source.factor_source;
         let creating_device = DeviceInfo::with_description(
-            format!("{} - {}", creating_device_name, bdfs.hint.model).as_str(),
+            format!(
+                "{} - {}",
+                creating_device_name, device_factor_source.hint.model
+            )
+            .as_str(),
         );
         let header = Header::new(creating_device);
         Self::with(
             header,
-            FactorSources::with_bdfs(bdfs),
+            FactorSources::with_bdfs(device_factor_source),
             AppPreferences::default(),
             ProfileNetworks::new(),
         )
@@ -394,7 +397,8 @@ mod tests {
                 SUT::new(
                     PrivateHierarchicalDeterministicFactorSource::generate_new(
                         WalletClientModel::Unknown,
-                    ),
+                    )
+                    .factor_source,
                     "Foo",
                 )
             })
