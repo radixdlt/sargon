@@ -9,16 +9,14 @@ pub struct PrivateHierarchicalDeterministicFactorSource {
 
 #[uniffi::export]
 pub fn new_private_hd_factor_source(
-    entropy: BagOfBytes,
+    entropy: BIP39Entropy,
     wallet_client_model: WalletClientModel,
-) -> Result<PrivateHierarchicalDeterministicFactorSource> {
-    entropy.try_into().map(|e| {
-        PrivateHierarchicalDeterministicFactorSource::new_with_entropy(
-            e,
-            BIP39Passphrase::default(),
-            wallet_client_model,
-        )
-    })
+) -> PrivateHierarchicalDeterministicFactorSource {
+    PrivateHierarchicalDeterministicFactorSource::new_with_entropy(
+        entropy,
+        BIP39Passphrase::default(),
+        wallet_client_model,
+    )
 }
 
 impl PrivateHierarchicalDeterministicFactorSource {
@@ -53,11 +51,11 @@ impl PrivateHierarchicalDeterministicFactorSource {
     }
 
     pub fn new_with_entropy(
-        entropy: Exactly32Bytes,
+        entropy: BIP39Entropy,
         passphrase: BIP39Passphrase,
         wallet_client_model: WalletClientModel,
     ) -> Self {
-        let mnemonic = Mnemonic::from_exactly32(entropy);
+        let mnemonic = Mnemonic::from_entropy(entropy);
         let mnemonic_with_passphrase =
             MnemonicWithPassphrase::with_passphrase(mnemonic, passphrase);
         Self::new_with_mnemonic_with_passphrase(
@@ -67,9 +65,10 @@ impl PrivateHierarchicalDeterministicFactorSource {
     }
 
     pub fn generate_new(wallet_client_model: WalletClientModel) -> Self {
-        Self::new_with_entropy(
-            Exactly32Bytes::generate(),
-            BIP39Passphrase::default(),
+        let mnemonic = Mnemonic::generate_new();
+        let mnemonic_with_passphrase = MnemonicWithPassphrase::new(mnemonic);
+        Self::new_with_mnemonic_with_passphrase(
+            mnemonic_with_passphrase,
             wallet_client_model,
         )
     }
@@ -152,10 +151,9 @@ mod uniffi_tests {
     #[test]
     fn new_uses_empty_bip39_passphrase() {
         let private = new_private_hd_factor_source(
-            BagOfBytes::from(Vec::from_iter([0xff; 32])),
+            Entropy32Bytes::new([0xff; 32]).into(),
             WalletClientModel::Unknown,
-        )
-        .unwrap();
+        );
         assert_eq!(private.mnemonic_with_passphrase.passphrase.0, "");
     }
 }

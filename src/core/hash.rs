@@ -21,7 +21,7 @@ impl crate::UniffiCustomTypeConverter for HashSecretMagic {
     type Builtin = BagOfBytes;
 
     fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
-        Exactly32Bytes::try_from(val.bytes)
+        Exactly32Bytes::try_from(*val.bytes)
             .map(|e| HashSecretMagic(ScryptoHash::from_bytes(*e.bytes())))
             .map_err(|e| e.into())
     }

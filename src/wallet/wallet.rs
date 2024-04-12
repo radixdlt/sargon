@@ -74,11 +74,12 @@ impl Wallet {
 //========
 #[uniffi::export]
 impl Wallet {
+
     /// Creates a new Mnemonic from `entropy` (without BIP39 passphrase) and creates a new Profile,
     /// saving both the Mnemonic and Profile into secure storage and returns a new Wallet.
     #[uniffi::constructor]
     pub fn by_creating_new_profile_and_secrets_with_entropy(
-        entropy: Vec<u8>,
+        entropy: BIP39Entropy,
         wallet_client_model: WalletClientModel,
         wallet_client_name: String,
         secure_storage: Arc<dyn SecureStorage>,
@@ -87,10 +88,9 @@ impl Wallet {
 
         log::info!("Instantiating Wallet by creating a new Profile from entropy (provided), for client: {}", wallet_client_model);
 
-        let entropy_32bytes: Exactly32Bytes = entropy.try_into()?;
         let private_hd_factor_source =
             PrivateHierarchicalDeterministicFactorSource::new_with_entropy(
-                entropy_32bytes,
+                entropy,
                 BIP39Passphrase::default(),
                 wallet_client_model,
             );
@@ -341,7 +341,7 @@ mod uniffi_tests {
     fn by_creating_new_profile_and_secrets_with_entropy() {
         let secure_storage = EphemeralSecureStorage::new();
         let wallet = Wallet::by_creating_new_profile_and_secrets_with_entropy(
-            Vec::from_iter([0xff; 32]),
+            Entropy32Bytes::new([0xff; 32]).into(),
             WalletClientModel::Unknown,
             "Test".to_string(),
             secure_storage.clone(),

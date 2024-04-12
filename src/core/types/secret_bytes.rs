@@ -19,11 +19,12 @@ macro_rules! secret_bytes {
             #[debug("OBFUSCATED")]
             #[display("OBFUSCATED")]
             pub struct $struct_name(Box<[u8; Self::LENGTH]>);
+
            
             impl $struct_name {
                 pub const LENGTH: usize = $byte_count;
             
-                pub(crate) fn new(bytes: [u8; Self::LENGTH]) -> Self {
+                pub fn new(bytes: [u8; Self::LENGTH]) -> Self {
                     Self(Box::new(bytes))
                 }
          
@@ -83,5 +84,73 @@ macro_rules! secret_bytes {
             }
             
         }
-    }
+    };
+    (
+        $(
+            #[doc = $expr: expr]
+        )*
+        $struct_name: ident, 
+        $byte_count: literal,
+        true // uniffi_export
+    ) => {
+        secret_bytes!(
+            $(
+                #[doc = $expr]
+            )*
+            $struct_name,
+            $byte_count
+        );
+
+        paste! {
+
+            impl TryFrom<&[u8]> for $struct_name {
+                type Error = CommonError;
+                fn try_from(value: &[u8]) -> Result<$struct_name> {
+                    [< Exactly $byte_count Bytes >]::try_from(value).map(Self::from)
+                }
+            }
+
+            impl From<[< Exactly $byte_count Bytes >]> for $struct_name {
+                fn from(value: [< Exactly $byte_count Bytes >]) -> $struct_name {
+                    $struct_name::new(*val.bytes())
+                }
+            }
+
+            impl From<$struct_name> for [< Exactly $byte_count Bytes >] {
+                fn from(value: $struct_name) -> [< Exactly $byte_count Bytes >] {
+                    [< Exactly $byte_count Bytes >]::from(*value.0)
+                }
+            }
+
+			uniffi::custom_type!($struct_name, [< Exactly $byte_count Bytes >]);
+
+			impl UniffiCustomTypeConverter for $struct_name {
+				type Builtin = [< Exactly $byte_count Bytes >];
+
+				fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
+					Ok($struct_name::from(val))
+				}
+
+				fn from_custom(obj: Self) -> Self::Builtin {
+					[< Exactly $byte_count Bytes >]::from(obj)
+				}
+			}
+        }
+    };
+    (
+        $(
+            #[doc = $expr: expr]
+        )*
+        $struct_name: ident, 
+        $byte_count: literal,
+        false // SKIP uniffi_export
+    ) => {
+        secret_bytes!(
+            $(
+                #[doc = $expr]
+            )*
+            $struct_name,
+            $byte_count
+        );
+    };
 }
