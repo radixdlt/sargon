@@ -65,7 +65,7 @@ mod uniffi_tests {
     #[test]
     fn new_ok() {
         let bytes = generate_bytes::<5>();
-        assert_eq!(*new_bag_of_bytes_from(bytes.clone()).bytes, bytes);
+        assert_eq!(new_bag_of_bytes_from(bytes.clone()).bytes, bytes);
     }
 
     #[test]
