@@ -5,6 +5,7 @@ use crate::prelude::*;
 pub struct BIP39Word {
     pub word: String,
     pub index: U11,
+    
     #[zeroize(skip)]
     pub language: BIP39Language,
 }

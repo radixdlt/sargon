@@ -1,25 +1,14 @@
-use crate::prelude::*;
+use crate::{prelude::*, secret_bytes};
 
-#[derive(Zeroize, ZeroizeOnDrop)]
-pub struct BIP39Seed([u8; Self::LENGTH]);
-
-impl BIP39Seed {
-    pub const LENGTH: usize = 64;
-    pub(crate) fn new(bytes: [u8; Self::LENGTH]) -> Self {
-        Self(bytes)
-    }
-}
-impl BIP39Seed {
-    pub fn is_zeroized(&self) -> bool {
-        self.0 == [0; Self::LENGTH]
-    }
-}
-
-use crypto::{
-    keys::slip10::{self as IotaSlip10, Hardened as IotaSlip10PathComponent},
-    signatures::ed25519 as IotaSlip10Ed25519,
-    signatures::secp256k1_ecdsa as IotaSlip10Secp256k1,
-};
+secret_bytes!(
+    /// A BIP39 seed for hierarchal deterministic wallets, as per the [BIP39 standard][doc].
+    /// 
+    /// We typically obtain this by calling [`to_seed` on `MnemonicWithPassphrase`][MnemonicWithPassphrase::to_seed].
+    /// 
+    /// [doc]: https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki#user-content-From_mnemonic_to_seed
+    BIP39Seed,
+    64
+);
 
 impl HDPath {
     fn hardened_chain(&self) -> Vec<IotaSlip10PathComponent> {
@@ -31,6 +20,12 @@ impl HDPath {
     }
 }
 
+use crypto::{
+    keys::slip10::{self as IotaSlip10, Hardened as IotaSlip10PathComponent},
+    signatures::ed25519 as IotaSlip10Ed25519,
+    signatures::secp256k1_ecdsa as IotaSlip10Secp256k1,
+};
+
 impl BIP39Seed {
     fn derive_slip10_private_key<K, I>(&self, chain: I) -> IotaSlip10::Slip10<K>
     where
@@ -39,7 +34,7 @@ impl BIP39Seed {
         I: Iterator,
         <I as Iterator>::Item: IotaSlip10::Segment,
     {
-        let iota_seed = IotaSlip10::Seed::from_bytes(&self.0);
+        let iota_seed = IotaSlip10::Seed::from_bytes(&*self.0);
         iota_seed.derive(chain)
     }
 
@@ -94,8 +89,6 @@ impl BIP39Seed {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::mem;
-    use std::ops::Range;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = BIP39Seed;
@@ -103,21 +96,8 @@ mod tests {
     #[test]
     fn zeroize() {
         let mut sut: SUT = MnemonicWithPassphrase::sample().to_seed();
-
-        let view = &sut as *const _ as *const u8;
-        let end = mem::size_of::<SUT>() as isize;
-        let range = Range { start: 0, end };
-        let mut all_zero = true;
-        for i in range.clone() {
-            let byte_zero = unsafe { *view.offset(i) } == 0x00;
-            all_zero &= byte_zero;
-        }
-        assert!(!all_zero);
-
+        assert!(!sut.is_zeroized());
         sut.zeroize();
-        for i in range.clone() {
-            assert_eq!(unsafe { *view.offset(i) }, 0x00);
-        }
         assert!(sut.is_zeroized());
     }
 }

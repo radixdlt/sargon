@@ -1,8 +1,9 @@
 use crate::prelude::*;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(Zeroize, Debug, Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct PrivateHierarchicalDeterministicFactorSource {
     pub mnemonic_with_passphrase: MnemonicWithPassphrase,
+    #[zeroize(skip)]
     pub factor_source: DeviceFactorSource,
 }
 
@@ -84,12 +85,13 @@ impl PrivateHierarchicalDeterministicFactorSource {
         T: IsEntityPath + Clone,
     {
         let path = T::new(network_id, CAP26KeyKind::TransactionSigning, index);
-        let seed = self.mnemonic_with_passphrase.to_seed();
+        let mut seed = self.mnemonic_with_passphrase.to_seed();
         let hd_private_key = seed.derive_private_key(&path);
         let hd_factor_instance = HierarchicalDeterministicFactorInstance::new(
             self.factor_source.id,
             hd_private_key.public_key(),
         );
+        seed.zeroize();
         HDFactorInstanceTransactionSigning::new(hd_factor_instance).unwrap()
     }
 }

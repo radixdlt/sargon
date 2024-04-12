@@ -16,8 +16,10 @@ use crate::prelude::*;
 #[debug("{:?}", self.partially_obfuscated_string())]
 pub struct Mnemonic {
     pub words: Vec<BIP39Word>,
+   
     #[zeroize(skip)]
     pub word_count: BIP39WordCount,
+   
     #[zeroize(skip)]
     pub language: BIP39Language,
 }
@@ -58,7 +60,9 @@ impl Mnemonic {
         format!("Mnemonic in {} obfuscated.", self.language)
     }
 
-    fn from_internal(internal: bip39::Mnemonic) -> Self {
+    pub(crate) fn from_internal(internal: bip39::Mnemonic) -> Self {
+        use k256::elliptic_curve::zeroize::Zeroize;
+
         let language = internal.language();
 
         let words = internal
@@ -72,6 +76,8 @@ impl Mnemonic {
             "Crate bip39 generated a BIP39 standard incompatible word count.",
         );
 
+        drop(internal);
+
         Self {
             words,
             word_count,
@@ -79,18 +85,6 @@ impl Mnemonic {
         }
     }
 
-    pub fn from_entropy(entropy: &[u8]) -> Self {
-        let internal = bip39::Mnemonic::from_entropy(entropy).unwrap();
-        Self::from_internal(internal)
-    }
-
-    pub fn from_exactly32(bytes: Exactly32Bytes) -> Self {
-        Self::from_entropy(&bytes.to_vec())
-    }
-
-    pub fn generate_new() -> Self {
-        Self::from_exactly32(Exactly32Bytes::generate())
-    }
 
     fn internal(&self) -> bip39::Mnemonic {
         bip39::Mnemonic::from_str(&self.phrase()).unwrap()

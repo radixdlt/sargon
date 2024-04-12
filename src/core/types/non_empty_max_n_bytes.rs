@@ -17,6 +17,7 @@ macro_rules! decl_non_empty_max_n_bytes {
                 #[doc = $expr]
             )*
             #[derive(
+                Zeroize,
                 Clone,
                 PartialEq,
                 Eq,
@@ -80,7 +81,7 @@ macro_rules! decl_non_empty_max_n_bytes {
                 }
 
                 /// Instantiates a new `[< NonEmptyMax $byte_count Bytes  >]` from the $byte_count bytes, by cloning them.
-                pub fn from(bytes: &[u8; $byte_count]) -> Self {
+                pub fn from_bytes(bytes: &[u8; $byte_count]) -> Self {
                     let bytes: &[u8] = bytes.as_slice().into();
                     let bag_of_bytes: BagOfBytes = bytes.into();
                     Self { bag_of_bytes }
@@ -143,6 +144,11 @@ macro_rules! decl_non_empty_max_n_bytes {
 decl_non_empty_max_n_bytes!(
     /// 64 bytes, typically used by NonFungibleLocalId::Bytes
     64
+);
+
+decl_non_empty_max_n_bytes!(
+    /// 32 bytes, typically used as the Bultin for `BIP39Entropy`.
+    32
 );
 
 /// This macro exists since UniFFI does not support generics currently, when/if
@@ -317,7 +323,7 @@ mod tests_non_empty_max_64_bytes {
     #[test]
     fn from_bytes_roundtrip() {
         let bytes = [0u8; 64];
-        assert_eq!(SUT::from(&bytes).bytes(), bytes);
+        assert_eq!(SUT::from_bytes(&bytes).bytes(), bytes);
     }
 
     #[test]

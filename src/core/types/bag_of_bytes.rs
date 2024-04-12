@@ -8,6 +8,7 @@ use crate::prelude::*;
 /// A bytes collection that does NOT convert into `ByteArray` in Kotlin, but
 /// instead `List<Byte>`, which has a working `==`.
 #[derive(
+    Zeroize,
     Clone,
     PartialEq,
     Eq,
@@ -23,7 +24,7 @@ use crate::prelude::*;
 #[display("{}", self.to_hex())]
 #[debug("{}", self.to_hex())]
 pub struct BagOfBytes {
-    pub(crate) bytes: Vec<u8>,
+    pub(crate) bytes: Box<Vec<u8>>,
 }
 
 impl AsRef<[u8]> for BagOfBytes {
@@ -97,7 +98,7 @@ impl From<Hash> for BagOfBytes {
 
 impl From<Vec<u8>> for BagOfBytes {
     fn from(value: Vec<u8>) -> Self {
-        Self { bytes: value }
+        Self { bytes: Box::new(value) }
     }
 }
 
@@ -105,7 +106,7 @@ impl From<&[u8]> for BagOfBytes {
     /// Instantiates a new `BagOfBytes` from the bytes.
     fn from(value: &[u8]) -> Self {
         Self {
-            bytes: value.to_vec(),
+            bytes: Box::new(value.to_vec()),
         }
     }
 }
