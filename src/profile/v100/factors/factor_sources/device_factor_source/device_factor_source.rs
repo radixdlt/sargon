@@ -70,12 +70,12 @@ impl DeviceFactorSource {
 
     pub fn babylon(
         is_main: bool,
-        mnemonic_with_passphrase: MnemonicWithPassphrase,
+        mnemonic_with_passphrase: &MnemonicWithPassphrase,
         wallet_client_model: WalletClientModel,
     ) -> Self {
         let id = FactorSourceIDFromHash::from_mnemonic_with_passphrase(
             FactorSourceKind::Device,
-            mnemonic_with_passphrase.clone(),
+            mnemonic_with_passphrase,
         );
 
         Self::new(
@@ -151,7 +151,7 @@ mod tests {
     fn main_babylon() {
         assert!(DeviceFactorSource::babylon(
             true,
-            MnemonicWithPassphrase::sample(),
+            &MnemonicWithPassphrase::sample(),
             WalletClientModel::sample()
         )
         .is_main_bdfs());

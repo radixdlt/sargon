@@ -106,6 +106,10 @@ impl Derivation for AccountPath {
     fn hd_path(&self) -> &HDPath {
         &self.path
     }
+    fn curve(&self) -> SLIP10Curve {
+        self.scheme().curve()
+    }
+
     fn derivation_path(&self) -> DerivationPath {
         DerivationPath::CAP26 {
             value: CAP26Path::Account {
@@ -113,7 +117,10 @@ impl Derivation for AccountPath {
             },
         }
     }
-    fn scheme(&self) -> DerivationPathScheme {
+}
+
+impl AccountPath {
+    pub fn scheme(&self) -> DerivationPathScheme {
         DerivationPathScheme::Cap26
     }
 }

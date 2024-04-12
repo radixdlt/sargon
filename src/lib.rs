@@ -35,6 +35,7 @@ pub mod prelude {
     pub(crate) use serde_json::json;
     pub(crate) use serde_repr::{Deserialize_repr, Serialize_repr};
     pub(crate) use serde_with::*;
+    pub(crate) use zeroize::{Zeroize, ZeroizeOnDrop};
 
     pub use radix_engine_common::math::traits::CheckedMul as ScryptoCheckedMul;
     pub(crate) use std::cmp::Ordering;

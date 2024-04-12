@@ -13,6 +13,7 @@ macro_rules! decl_exactly_n_bytes {
         paste! {
 
             #[derive(
+                Zeroize, // Not `ZeroizeOnDrop`: we dont wanna zeroize all byte types: use `decl_secret_bytes!` for secrets.
                 Clone,
                 Copy,
                 Debug,
@@ -82,6 +83,7 @@ macro_rules! decl_exactly_n_bytes {
                 #[doc = $expr]
             )*
             #[derive(
+                Zeroize,
                 Clone,
                 Copy,
                 PartialEq,

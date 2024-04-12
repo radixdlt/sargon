@@ -114,7 +114,13 @@ impl Derivation for IdentityPath {
         }
     }
 
-    fn scheme(&self) -> DerivationPathScheme {
+    fn curve(&self) -> SLIP10Curve {
+        self.scheme().curve()
+    }
+}
+
+impl IdentityPath {
+    pub fn scheme(&self) -> DerivationPathScheme {
         DerivationPathScheme::Cap26
     }
 }

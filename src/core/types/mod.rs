@@ -16,6 +16,9 @@ mod rounding_mode;
 mod safe_to_log;
 mod signatures;
 
+#[macro_use]
+mod secret_bytes;
+
 pub use bag_of_bytes::*;
 pub use bag_of_bytes_uniffi_fn::*;
 pub use decimal192::*;
@@ -32,4 +35,5 @@ pub use nonce::*;
 pub use nonce_uniffi_fn::*;
 pub use rounding_mode::*;
 pub use safe_to_log::*;
+pub use secret_bytes::*;
 pub use signatures::*;

@@ -27,10 +27,18 @@ impl Derivation for GetIDPath {
             value: self.clone().into(),
         }
     }
+
     fn hd_path(&self) -> &HDPath {
         &self.path
     }
-    fn scheme(&self) -> DerivationPathScheme {
+
+    fn curve(&self) -> SLIP10Curve {
+        self.scheme().curve()
+    }
+}
+
+impl GetIDPath {
+    pub fn scheme(&self) -> DerivationPathScheme {
         DerivationPathScheme::Cap26
     }
 }

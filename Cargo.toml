@@ -23,6 +23,12 @@ required-features = ["build-binary"]
 
 [dependencies]
 
+# zeroize = "1.7.0"
+zeroize = { git = "https://github.com/RustCrypto/utils", rev = "df6d2f48a5e8afe8eef04ba32e2af55bacb41375", features = [
+    "zeroize_derive",
+    "derive",
+] }
+
 log = "0.4.20"
 # log = { git = "https://github.com/rust-lang/log/", rev = "4708f1484c7e6b8d4418b571c05e613b18e57673" }
 
@@ -37,7 +43,11 @@ derive_more = { git = "https://github.com/JelteF/derive_more", rev = "1196b2dd7a
 ] }
 
 serde = { version = "1.0.193", features = ["derive", "rc", "std"] }
-serde_json = { version = "1.0.108", features = ["preserve_order"] }
+
+# serde_json = "1.0.108"
+serde_json = { git = "https://github.com/serde-rs/json/", rev = "4bc1eaa03a6160593575bc9bc60c94dba4cab1e3", features = [
+    "preserve_order",
+] }
 
 # serde_with = "3.4.0"
 serde_with = { git = "https://github.com/jonasbb/serde_with/", rev = "1e8e4e75398c6a9de29386473ae7c3157be031c2" }
@@ -112,7 +122,10 @@ identified_vec = { git = "https://github.com/Sajjon/identified_vec/", rev = "448
     "id_prim",
 ] }
 
-uniffi = { version = "0.27.0", features = ["cli"] }
+# uniffi = "0.27.0"
+uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "d52c5460ae42ecad1e73a5b394ac96d48f4769de", features = [
+    "cli",
+] }
 
 # SLIP10 implementation
 # iota_crypto = "0.23.1"
@@ -128,6 +141,7 @@ k256 = { git = "https://github.com/RustCrypto/elliptic-curves", rev = "e158ce5cf
 # bip39 = "2.0.0"
 bip39 = { git = "https://github.com/rust-bitcoin/rust-bip39", rev = "a30760beac21d595b2bda376df4f4e6bf029bcc5", features = [
     "serde",
+    "zeroize"
 ] }
 
 # assert-json-diff = "2.0.2"
@@ -159,7 +173,10 @@ async-trait = { git = "https://github.com/dtolnay/async-trait", rev = "1eb21ed8b
 pretty_assertions = { git = "https://github.com/rust-pretty-assertions/rust-pretty-assertions", rev = "3f1ebc0cac5f88e875f036bf16636e15fa935c8d" }
 
 [dev-dependencies]
-uniffi = { version = "0.27.0", features = ["bindgen-tests"] }
+# uniffi = "0.27.0"
+uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "d52c5460ae42ecad1e73a5b394ac96d48f4769de", features = [
+    "bindgen-tests",
+] }
 
 # reqwest = "0.12.3"
 reqwest = { git = "https://github.com/seanmonstar/reqwest", rev = "0720159f6369f54e045a1fd315e0f24b7a0b4a39", default-features = false, features = [
@@ -170,7 +187,11 @@ reqwest = { git = "https://github.com/seanmonstar/reqwest", rev = "0720159f6369f
 actix-rt = { git = "https://github.com/actix/actix-net", rev = "57fd6ea8098d1f2d281c305fc331216c4fe1992e" }
 
 [build-dependencies]
-uniffi = { version = "0.27.0", features = ["build"] }
+# uniffi = "0.27.0"
+uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "d52c5460ae42ecad1e73a5b394ac96d48f4769de", features = [
+    "build",
+] }
+
 # cargo_toml = "0.15.3"
 cargo_toml = { git = "https://gitlab.com/lib.rs/cargo_toml", rev = "e498c94fc42a660c1ca1a28999ce1d757cfe77fe" }
 

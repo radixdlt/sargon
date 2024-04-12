@@ -8,6 +8,7 @@ use crate::prelude::*;
 /// A bytes collection that does NOT convert into `ByteArray` in Kotlin, but
 /// instead `List<Byte>`, which has a working `==`.
 #[derive(
+    Zeroize, // Not `ZeroizeOnDrop`: we dont wanna zeroize all byte types: use `decl_secret_bytes!` for secrets.
     Clone,
     PartialEq,
     Eq,
@@ -284,6 +285,13 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn zeroize() {
+        let mut sut = SUT::sample();
+        sut.zeroize();
+        assert_ne!(sut, SUT::sample());
     }
 
     #[test]
