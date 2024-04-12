@@ -105,11 +105,8 @@ impl Persona {
         E: IntoIterator<Item = String>,
     {
         let mwp = MnemonicWithPassphrase::sample();
-        let bdfs = DeviceFactorSource::babylon(
-            true,
-            mwp.clone(),
-            WalletClientModel::Iphone,
-        );
+        let bdfs =
+            DeviceFactorSource::babylon(true, &mwp, WalletClientModel::Iphone);
 
         let private_hd_factor_source =
             PrivateHierarchicalDeterministicFactorSource::new(mwp, bdfs);

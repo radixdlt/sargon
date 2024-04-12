@@ -9,14 +9,16 @@ pub struct PrivateHierarchicalDeterministicFactorSource {
 
 #[uniffi::export]
 pub fn new_private_hd_factor_source(
-    entropy: BIP39Entropy,
+    entropy: NonEmptyMax32Bytes,
     wallet_client_model: WalletClientModel,
-) -> PrivateHierarchicalDeterministicFactorSource {
-    PrivateHierarchicalDeterministicFactorSource::new_with_entropy(
-        entropy,
-        BIP39Passphrase::default(),
-        wallet_client_model,
-    )
+) -> Result<PrivateHierarchicalDeterministicFactorSource> {
+    BIP39Entropy::try_from(entropy).map(|entropy| {
+        PrivateHierarchicalDeterministicFactorSource::new_with_entropy(
+            entropy,
+            BIP39Passphrase::default(),
+            wallet_client_model,
+        )
+    })
 }
 
 impl PrivateHierarchicalDeterministicFactorSource {
@@ -28,7 +30,7 @@ impl PrivateHierarchicalDeterministicFactorSource {
             factor_source.factor_source_id(),
             FactorSourceIDFromHash::from_mnemonic_with_passphrase(
                 factor_source.factor_source_kind(),
-                mnemonic_with_passphrase.clone()
+                &mnemonic_with_passphrase
             )
             .into()
         );
@@ -44,7 +46,7 @@ impl PrivateHierarchicalDeterministicFactorSource {
     ) -> Self {
         let bdfs = DeviceFactorSource::babylon(
             true,
-            mnemonic_with_passphrase.clone(),
+            &mnemonic_with_passphrase,
             wallet_client_model,
         );
         Self::new(mnemonic_with_passphrase, bdfs)
@@ -91,6 +93,7 @@ impl PrivateHierarchicalDeterministicFactorSource {
             hd_private_key.public_key(),
         );
         seed.zeroize();
+        // TODO: zeroize `hd_private_key` when `HierarchicalDeterministicPrivateKey` implement Zeroize...
         HDFactorInstanceTransactionSigning::new(hd_factor_instance).unwrap()
     }
 }
@@ -108,7 +111,7 @@ impl HasSampleValues for PrivateHierarchicalDeterministicFactorSource {
         Self::new(
             mwp.clone(),
             DeviceFactorSource::new(
-                FactorSourceIDFromHash::new_for_device(mwp),
+                FactorSourceIDFromHash::new_for_device(&mwp),
                 FactorSourceCommon::sample_olympia(),
                 DeviceFactorSourceHint::sample_other(),
             ),
@@ -153,7 +156,8 @@ mod uniffi_tests {
         let private = new_private_hd_factor_source(
             Entropy32Bytes::new([0xff; 32]).into(),
             WalletClientModel::Unknown,
-        );
+        )
+        .unwrap();
         assert_eq!(private.mnemonic_with_passphrase.passphrase.0, "");
     }
 }

@@ -33,18 +33,20 @@ impl FactorSourceIDFromHash {
 
     pub fn from_mnemonic_with_passphrase(
         factor_source_kind: FactorSourceKind,
-        mnemonic_with_passphrase: MnemonicWithPassphrase,
+        mnemonic_with_passphrase: &MnemonicWithPassphrase,
     ) -> Self {
         let seed = mnemonic_with_passphrase.to_seed();
         let private_key = seed.derive_private_key(&GetIDPath::default());
         let public_key_bytes = private_key.public_key().to_bytes();
+        // TODO: Impl Zeroize for `PrivateKey`!
         let hash = hash_of(public_key_bytes);
         let body = Exactly32Bytes::from(hash);
         Self::new(factor_source_kind, body)
+        // `BIP39Seed` implements `ZeroizeOnDrop` so `seed` should now be zeroized
     }
 
     pub fn new_for_device(
-        mnemonic_with_passphrase: MnemonicWithPassphrase,
+        mnemonic_with_passphrase: &MnemonicWithPassphrase,
     ) -> Self {
         Self::from_mnemonic_with_passphrase(
             FactorSourceKind::Device,
@@ -74,14 +76,14 @@ impl HasSampleValues for FactorSourceIDFromHash {
 impl FactorSourceIDFromHash {
     /// A sample used to facilitate unit tests.
     pub fn sample_device() -> Self {
-        Self::new_for_device(MnemonicWithPassphrase::sample())
+        Self::new_for_device(&MnemonicWithPassphrase::sample())
     }
 
     /// A sample used to facilitate unit tests.
     pub fn sample_ledger() -> Self {
         Self::from_mnemonic_with_passphrase(
             FactorSourceKind::LedgerHQHardwareWallet,
-            MnemonicWithPassphrase::sample(),
+            &MnemonicWithPassphrase::sample(),
         )
     }
 
@@ -89,7 +91,7 @@ impl FactorSourceIDFromHash {
     pub fn sample_ledger_other() -> Self {
         Self::from_mnemonic_with_passphrase(
             FactorSourceKind::LedgerHQHardwareWallet,
-            MnemonicWithPassphrase::sample_other(),
+            &MnemonicWithPassphrase::sample_other(),
         )
     }
 }
@@ -152,7 +154,7 @@ mod tests {
     #[test]
     fn json_from_sample_mnemonic() {
         let mwp = MnemonicWithPassphrase::sample();
-        let model = FactorSourceIDFromHash::new_for_device(mwp);
+        let model = FactorSourceIDFromHash::new_for_device(&mwp);
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -190,7 +192,7 @@ mod tests {
             Mnemonic::from_phrase(&vector.phrase).unwrap(),
             BIP39Passphrase::new(vector.pass),
         );
-        let id = FactorSourceIDFromHash::new_for_device(mwp);
+        let id = FactorSourceIDFromHash::new_for_device(&mwp);
         assert_eq!(id.to_string(), vector.expected_id);
     }
 

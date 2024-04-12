@@ -21,7 +21,7 @@ macro_rules! entropy_with_byte_counts {
             $(
                 #[doc = $expr]
             )*
-            #[derive(Zeroize)]
+            #[derive(Zeroize, ZeroizeOnDrop)]
             pub enum $enum_name {
                 $(
                     [< EntropyOf $byte_count Bytes >]([< Entropy $byte_count Bytes >]),
@@ -58,8 +58,6 @@ macro_rules! entropy_with_byte_counts {
                 }
             )+
 
-            uniffi::custom_type!(BIP39Entropy, NonEmptyMax32Bytes);
-
             impl TryFrom<NonEmptyMax32Bytes> for $enum_name {
                 type Error = CommonError;
                 fn try_from(value: NonEmptyMax32Bytes) -> Result<$enum_name> {
@@ -71,7 +69,8 @@ macro_rules! entropy_with_byte_counts {
             }
 
             impl $enum_name {
-                fn into_bytes(self) -> Vec<u8> {
+                #[allow(clippy::wrong_self_convention)] // cannot be `(self)` since we impl drop.
+                fn into_bytes(&self) -> Vec<u8> {
                     match self {
                         $(
                             Self::[< EntropyOf $byte_count Bytes >](bytes) => Vec::from_iter(*bytes.0),
@@ -83,18 +82,6 @@ macro_rules! entropy_with_byte_counts {
             impl From<$enum_name> for NonEmptyMax32Bytes {
                 fn from(value: $enum_name) -> NonEmptyMax32Bytes {
                     NonEmptyMax32Bytes::try_from(value.into_bytes()).expect("Never more than 32 bytes, and never empty.")
-                }
-            }
-
-            impl UniffiCustomTypeConverter for $enum_name {
-                type Builtin = NonEmptyMax32Bytes;
-
-                fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
-                    Self::try_from(val).map_err(|e| e.into())
-                }
-
-                fn from_custom(obj: Self) -> Self::Builtin {
-                    NonEmptyMax32Bytes::from(obj)
                 }
             }
         }

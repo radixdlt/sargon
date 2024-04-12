@@ -231,7 +231,7 @@ mod tests {
         let profile = Profile::sample();
 
         let id = FactorSourceIDFromHash::new_for_device(
-            MnemonicWithPassphrase::sample_other(),
+            &MnemonicWithPassphrase::sample_other(),
         );
 
         assert_eq!(

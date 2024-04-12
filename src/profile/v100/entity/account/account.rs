@@ -165,11 +165,8 @@ impl Account {
         is_hidden: bool,
     ) -> Self {
         let mwp = MnemonicWithPassphrase::sample();
-        let bdfs = DeviceFactorSource::babylon(
-            true,
-            mwp.clone(),
-            WalletClientModel::Iphone,
-        );
+        let bdfs =
+            DeviceFactorSource::babylon(true, &mwp, WalletClientModel::Iphone);
         let private_hd_factor_source =
             PrivateHierarchicalDeterministicFactorSource::new(mwp, bdfs);
         let account_creating_factor_instance = private_hd_factor_source

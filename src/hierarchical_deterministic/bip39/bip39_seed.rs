@@ -36,6 +36,7 @@ impl BIP39Seed {
     {
         let iota_seed = IotaSlip10::Seed::from_bytes(&*self.0);
         iota_seed.derive(chain)
+        // `IotaSlip10::Seed` implements `ZeroizeOnDrop` so should now be zeroized.
     }
 
     fn derive_ed25519_private_key(&self, path: &HDPath) -> Ed25519PrivateKey {
@@ -45,6 +46,7 @@ impl BIP39Seed {
             );
         Ed25519PrivateKey::from_bytes(ck.secret_key().as_slice())
             .expect("Valid Ed25519PrivateKey bytes")
+        // `IotaSlip10Ed25519::SecretKey` implements `ZeroizeOnDrop` so should now be zeroized.
     }
 
     pub(crate) fn derive_secp256k1_private_key(
@@ -57,6 +59,7 @@ impl BIP39Seed {
             );
         Secp256k1PrivateKey::from_bytes(&*ck.secret_key().to_bytes())
             .expect("Valid Secp256k1PrivateKey bytes")
+        // `IotaSlip10Ed25519::SecretKey` implements `ZeroizeOnDrop` so should now be zeroized.
     }
 
     pub fn derive_private_key<D>(

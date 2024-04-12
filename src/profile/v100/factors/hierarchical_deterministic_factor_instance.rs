@@ -154,7 +154,7 @@ impl HierarchicalDeterministicFactorInstance {
         let public_key = private_key.public_key();
         let id = FactorSourceIDFromHash::from_mnemonic_with_passphrase(
             FactorSourceKind::Device,
-            mwp,
+            &mwp,
         );
         Self::new(id, public_key)
     }
