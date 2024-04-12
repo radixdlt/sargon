@@ -147,7 +147,7 @@ decl_non_empty_max_n_bytes!(
 );
 
 decl_non_empty_max_n_bytes!(
-    /// 32 bytes, typically used as the Bultin for `BIP39Entropy`.
+    /// 32 bytes, typically used as entropy for Mnemonics.
     32
 );
 
