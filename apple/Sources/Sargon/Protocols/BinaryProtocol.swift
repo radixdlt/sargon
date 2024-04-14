@@ -1,3 +1,6 @@
+import Foundation
+import SargonUniFFI
+
 #if DEBUG
 public protocol BaseBinaryProtocol: SargonModel, ExpressibleByStringLiteral, ExpressibleByArrayLiteral {}
 #else

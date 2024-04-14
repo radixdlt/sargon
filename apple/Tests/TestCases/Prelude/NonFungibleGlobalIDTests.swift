@@ -1,3 +1,9 @@
+import CustomDump
+import Foundation
+import Sargon
+import SargonUniFFI
+import XCTest
+
 final class NonFungibleGlobalIDTests: IdentifiableByStringProtocolTest<NonFungibleGlobalID> {
     
     func test_from_parts() {

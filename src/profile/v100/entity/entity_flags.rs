@@ -1,38 +1,10 @@
 use crate::prelude::*;
 
-/// An order set of `EntityFlag`s used to describe certain Off-ledger
-/// user state about Accounts or Personas, such as if an entity is
-/// marked as hidden or not.
-pub type EntityFlags = IdentifiedVecVia<EntityFlag>;
-
 impl Identifiable for EntityFlag {
     type ID = Self;
 
     fn id(&self) -> Self::ID {
         *self
-    }
-}
-
-impl EntityFlags {
-    /// Instantiates a flag collection with the provided Vec<Flag>,
-    /// removing any duplicates from `flags` if any.
-    pub fn with_flags<I>(flags: I) -> Self
-    where
-        I: IntoIterator<Item = EntityFlag>,
-    {
-        Self::from_iter(flags)
-    }
-
-    /// Instantiates a flag collection with the provided single flag
-    pub fn with_flag(flag: EntityFlag) -> Self {
-        Self::with_flags(vec![flag])
-    }
-}
-
-impl Default for EntityFlags {
-    /// Instantiates an empty collection of entity flags.
-    fn default() -> Self {
-        Self::new()
     }
 }
 
@@ -50,15 +22,21 @@ impl EntityFlags {
     pub fn remove_flag(&mut self, flag: &EntityFlag) -> Option<EntityFlag> {
         self.remove(flag)
     }
+
+    pub fn sample() -> Self {
+        Self::with_entity_flag(EntityFlag::sample())
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
+
     #[test]
     fn empty_by_default() {
         assert_eq!(EntityFlags::default(), EntityFlags::new())
     }
+
     #[test]
     fn default_does_not_contain_deleted_by_user() {
         assert!(!EntityFlags::default().contains(&EntityFlag::DeletedByUser));
@@ -66,13 +44,13 @@ mod tests {
 
     #[test]
     fn new_with_f_contains_f() {
-        assert!(EntityFlags::with_flag(EntityFlag::DeletedByUser)
+        assert!(EntityFlags::with_entity_flag(EntityFlag::DeletedByUser)
             .contains(&EntityFlag::DeletedByUser));
     }
 
     #[test]
     fn remove_existing_flag() {
-        assert!(EntityFlags::with_flag(EntityFlag::DeletedByUser)
+        assert!(EntityFlags::with_entity_flag(EntityFlag::DeletedByUser)
             .remove_flag(&EntityFlag::DeletedByUser)
             .is_some());
     }
@@ -89,7 +67,7 @@ mod tests {
     #[test]
     fn new_with_duplicates_of_f_contains_only_f() {
         assert_eq!(
-            EntityFlags::with_flags(vec![
+            EntityFlags::with_entity_flags(vec![
                 EntityFlag::DeletedByUser,
                 EntityFlag::DeletedByUser
             ])
@@ -107,7 +85,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_non_empty() {
-        let model = EntityFlags::with_flag(EntityFlag::DeletedByUser);
+        let model = EntityFlags::with_entity_flag(EntityFlag::DeletedByUser);
 
         assert_json_value_eq_after_roundtrip(
             &model,

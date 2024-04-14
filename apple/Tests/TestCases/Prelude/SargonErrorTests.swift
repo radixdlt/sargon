@@ -1,3 +1,9 @@
+import CustomDump
+import Foundation
+import Sargon
+import SargonUniFFI
+import XCTest
+
 final class SargonErrorTests: Test<SargonError> {
 	
 	func test_error_code() {

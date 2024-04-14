@@ -1,3 +1,9 @@
+import CustomDump
+import Foundation
+import Sargon
+import SargonUniFFI
+import XCTest
+
 final class ProfileTests: Test<Profile> {
 
 	func test_description_and_debug() {

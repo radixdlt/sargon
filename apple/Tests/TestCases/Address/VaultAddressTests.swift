@@ -1,3 +1,9 @@
+import CustomDump
+import Foundation
+import Sargon
+import SargonUniFFI
+import XCTest
+
 final class VaultAddressTests: AddressTest<VaultAddress> {
 	func test_is_fungible() {
 		XCTAssertTrue(SUT.sampleMainnetFungible.isFungible)

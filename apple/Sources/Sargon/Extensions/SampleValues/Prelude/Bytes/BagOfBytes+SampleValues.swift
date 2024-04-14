@@ -1,4 +1,5 @@
 import SargonUniFFI
+import Foundation
 
 #if DEBUG
 extension BagOfBytes {

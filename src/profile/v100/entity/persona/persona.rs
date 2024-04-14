@@ -178,7 +178,7 @@ impl Persona {
 
     pub fn sample_mainnet_satoshi() -> Self {
         let name = PersonaDataEntryName::new(
-            Variant::Eastern,
+            PersonaDataNameVariant::Eastern,
             "Nakamoto",
             "Satoshi",
             "Satoshi",
@@ -202,7 +202,7 @@ impl Persona {
 
     pub fn sample_mainnet_batman() -> Self {
         let name = PersonaDataEntryName::new(
-            Variant::Western,
+            PersonaDataNameVariant::Western,
             "Wayne",
             "Bruce",
             "Batman",
@@ -231,7 +231,7 @@ impl Persona {
             "Skywalker",
             false,
             PersonaDataEntryName::new(
-                Variant::Eastern,
+                PersonaDataNameVariant::Eastern,
                 "Skywalker",
                 "Leia",
                 "Princess Leia",
@@ -255,7 +255,7 @@ impl Persona {
             "Granger",
             true,
             PersonaDataEntryName::new(
-                Variant::Western,
+                PersonaDataNameVariant::Western,
                 "Granger",
                 "Hermione",
                 "Hermy",

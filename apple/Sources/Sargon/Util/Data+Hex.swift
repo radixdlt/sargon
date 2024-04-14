@@ -1,3 +1,5 @@
+import Foundation
+import SargonUniFFI
 
 enum ByteHexEncodingErrors: Error {
 	case incorrectHexValue

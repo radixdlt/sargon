@@ -92,7 +92,7 @@ impl Wallet {
         let bdfs = profile.bdfs();
 
         let index = profile
-            .next_derivation_index_for_entity(EntityKind::Accounts, network_id);
+            .next_derivation_index_for_entity(EntityKind::Account, network_id);
 
         let number_of_accounts_on_network = profile
             .networks

@@ -56,6 +56,12 @@ extension Array {
 	}
 }
 
+import CustomDump
+import Foundation
+import Sargon
+import SargonUniFFI
+import XCTest
+
 final class Decimal192Tests: Test<Decimal192> {
 	
 	func test_init_from_string() throws {

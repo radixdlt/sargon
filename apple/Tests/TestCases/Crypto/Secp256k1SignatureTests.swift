@@ -1,3 +1,9 @@
+import CustomDump
+import Foundation
+import Sargon
+import SargonUniFFI
+import XCTest
+
 final class Secp256k1SignatureTests: SignatureTest<Secp256k1Signature> {
 	
 	func test_from_exactly_65_bytes() {

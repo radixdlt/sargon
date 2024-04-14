@@ -24,7 +24,7 @@ use crate::prelude::*;
 #[debug("{}", self.full())]
 #[serde(rename_all = "camelCase")]
 pub struct PersonaDataEntryName {
-    pub variant: Variant,
+    pub variant: PersonaDataNameVariant,
     pub family_name: String,
     pub given_names: String,
     pub nickname: String,
@@ -32,7 +32,7 @@ pub struct PersonaDataEntryName {
 
 impl PersonaDataEntryName {
     pub fn new(
-        variant: Variant,
+        variant: PersonaDataNameVariant,
         family_name: impl AsRef<str>,
         given_names: impl AsRef<str>,
         nickname: impl AsRef<str>,
@@ -56,11 +56,11 @@ impl PersonaDataEntryName {
 
     fn full(&self) -> String {
         match self.variant {
-            Variant::Western => format!(
+            PersonaDataNameVariant::Western => format!(
                 "{} {} {}",
                 self.given_names, self.nickname, self.family_name
             ),
-            Variant::Eastern => format!(
+            PersonaDataNameVariant::Eastern => format!(
                 "{} {} {}",
                 self.family_name, self.nickname, self.given_names
             ),
@@ -70,13 +70,23 @@ impl PersonaDataEntryName {
 
 impl HasSampleValues for PersonaDataEntryName {
     fn sample() -> Self {
-        PersonaDataEntryName::new(Variant::Western, "Wayne", "Bruce", "Batman")
-            .expect("Should have a valid Name sample")
+        PersonaDataEntryName::new(
+            PersonaDataNameVariant::Western,
+            "Wayne",
+            "Bruce",
+            "Batman",
+        )
+        .expect("Should have a valid Name sample")
     }
 
     fn sample_other() -> Self {
-        PersonaDataEntryName::new(Variant::Eastern, "Jun-fan", "Lee", "Bruce")
-            .expect("Should have a valid Name sample")
+        PersonaDataEntryName::new(
+            PersonaDataNameVariant::Eastern,
+            "Jun-fan",
+            "Lee",
+            "Bruce",
+        )
+        .expect("Should have a valid Name sample")
     }
 }
 
@@ -84,19 +94,22 @@ impl HasSampleValues for PersonaDataEntryName {
     Serialize, Deserialize, Clone, Debug, PartialEq, Hash, Eq, uniffi::Enum,
 )]
 #[serde(rename_all = "lowercase")]
-pub enum Variant {
+pub enum PersonaDataNameVariant {
     Western,
     Eastern,
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = PersonaDataEntryName;
 
     #[test]
     fn new_name() {
-        let name = PersonaDataEntryName::new(
-            Variant::Western,
+        let name = SUT::new(
+            PersonaDataNameVariant::Western,
             "\n Wayne\n ",
             "  Bruce  ",
             "Batman ",
@@ -109,8 +122,8 @@ mod tests {
 
     #[test]
     fn new_from_string_multiple_given_names() {
-        let name = PersonaDataEntryName::new(
-            Variant::Western,
+        let name = SUT::new(
+            PersonaDataNameVariant::Western,
             "Långstrump",
             "Pippilotta Viktualia Rullgardina Krusmynta Efraimsdotter",
             "Pippi",
@@ -124,7 +137,7 @@ mod tests {
 
     #[test]
     fn sample() {
-        let sample = PersonaDataEntryName::sample();
+        let sample = SUT::sample();
         assert_eq!(sample.family_name, "Wayne");
         assert_eq!(sample.given_names, "Bruce");
         assert_eq!(sample.nickname, "Batman");
@@ -132,7 +145,7 @@ mod tests {
 
     #[test]
     fn sample_other() {
-        let sample = PersonaDataEntryName::sample_other();
+        let sample = SUT::sample_other();
         assert_eq!(sample.family_name, "Jun-fan");
         assert_eq!(sample.given_names, "Lee");
         assert_eq!(sample.nickname, "Bruce");
@@ -141,12 +154,7 @@ mod tests {
     #[test]
     fn empty_family_name_is_err() {
         assert_eq!(
-            PersonaDataEntryName::new(
-                Variant::Western,
-                "",
-                "Clark",
-                "Superman"
-            ),
+            SUT::new(PersonaDataNameVariant::Western, "", "Clark", "Superman"),
             Err(CommonError::PersonaDataInvalidNameFamilyNameEmpty)
         );
     }
@@ -154,8 +162,8 @@ mod tests {
     #[test]
     fn spaces_trimmed_empty_family_name_is_err() {
         assert_eq!(
-            PersonaDataEntryName::new(
-                Variant::Western,
+            SUT::new(
+                PersonaDataNameVariant::Western,
                 "  ",
                 "Clark",
                 "Superman"
@@ -167,7 +175,7 @@ mod tests {
     #[test]
     fn empty_given_names_is_err() {
         assert_eq!(
-            PersonaDataEntryName::new(Variant::Western, "Kent", "", "Superman"),
+            SUT::new(PersonaDataNameVariant::Western, "Kent", "", "Superman"),
             Err(CommonError::PersonaDataInvalidNameGivenNamesEmpty)
         );
     }
@@ -175,12 +183,7 @@ mod tests {
     #[test]
     fn spaces_trimmed_empty_given_names_is_err() {
         assert_eq!(
-            PersonaDataEntryName::new(
-                Variant::Western,
-                "Kent",
-                " ",
-                "Superman"
-            ),
+            SUT::new(PersonaDataNameVariant::Western, "Kent", " ", "Superman"),
             Err(CommonError::PersonaDataInvalidNameGivenNamesEmpty)
         );
     }
@@ -188,7 +191,7 @@ mod tests {
     #[test]
     fn empty_nickname_is_ok() {
         assert_eq!(
-            PersonaDataEntryName::new(Variant::Western, "Kent", "Clark", "")
+            SUT::new(PersonaDataNameVariant::Western, "Kent", "Clark", "")
                 .unwrap()
                 .nickname,
             ""
@@ -197,19 +200,19 @@ mod tests {
 
     #[test]
     fn display_western() {
-        let sample = PersonaDataEntryName::sample();
+        let sample = SUT::sample();
         assert_eq!(format!("{sample}"), "Bruce Batman Wayne")
     }
 
     #[test]
     fn display_eastern() {
-        let sample = PersonaDataEntryName::sample_other();
+        let sample = SUT::sample_other();
         assert_eq!(format!("{sample}"), "Jun-fan Bruce Lee")
     }
 
     #[test]
     fn json_roundtrip_sample() {
-        let model = PersonaDataEntryName::sample();
+        let model = SUT::sample();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -225,7 +228,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_sample_other() {
-        let model = PersonaDataEntryName::sample_other();
+        let model = SUT::sample_other();
         assert_eq_after_json_roundtrip(
             &model,
             r#"

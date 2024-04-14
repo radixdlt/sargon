@@ -1,3 +1,9 @@
+import CustomDump
+import Foundation
+import Sargon
+import SargonUniFFI
+import XCTest
+
 final class AppearanceIDTests: Test<AppearanceID> {
 	func test_id() {
 		XCTAssertEqual(SUT.sample.id, 0)

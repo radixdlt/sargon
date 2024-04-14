@@ -97,6 +97,19 @@ impl ProfileNetwork {
             authorized_dapps,
         }
     }
+
+    /// Instantiates a new `Network` from `network_id` and `accounts`.
+    ///
+    /// Panics if not any account in `accounts` is on another
+    /// network than `network_id`
+    pub fn empty(network_id: NetworkID) -> Self {
+        Self::new(
+            network_id,
+            Accounts::default(),
+            Personas::default(),
+            AuthorizedDapps::default(),
+        )
+    }
 }
 
 impl ProfileNetwork {

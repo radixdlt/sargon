@@ -1,16 +1,5 @@
 use crate::prelude::*;
 
-/// Collection of clients user have connected P2P with, typically these
-/// are WebRTC connections with DApps, but might be Android or iPhone
-/// clients as well.
-pub type P2PLinks = IdentifiedVecVia<P2PLink>;
-
-impl Default for P2PLinks {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl HasSampleValues for P2PLinks {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {

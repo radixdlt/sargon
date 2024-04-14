@@ -1,4 +1,5 @@
 import SargonUniFFI
 
-extension [FactorSource]: BaseSargonModel {}
-extension FactorSources: SargonModel {}
+extension FactorSources: NeverEmptyIdentifiedCollection {
+	public typealias Element = FactorSource
+}

@@ -24,6 +24,13 @@ pub enum EntityFlag {
     DeletedByUser,
 }
 
+impl EntityFlag {
+    #[allow(unused)]
+    pub fn sample() -> Self {
+        Self::DeletedByUser
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;

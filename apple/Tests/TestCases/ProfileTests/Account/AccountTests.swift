@@ -1,3 +1,9 @@
+import CustomDump
+import Foundation
+import Sargon
+import SargonUniFFI
+import XCTest
+
 final class AccountTests: EntityTest<Account> {
 	func test_display_names() {
 		XCTAssertNoDifference(SUT.allCases.map(\.displayName), ["Alice", "Bob", "Carol", "Nadia", "Olivia", "Paige"])
@@ -8,7 +14,9 @@ final class AccountTests: EntityTest<Account> {
 	}
 	
 	func test_hidden() {
-		XCTAssertEqual(SUT.sampleStokenetOlivia.flags, [.deletedByUser])
+		let sut = SUT.sampleStokenetOlivia.flags
+		XCTAssertEqual(sut.elements, [.deletedByUser])
+		XCTAssertEqual(sut, [.deletedByUser])
 	}
 	
 	func test_appearance_id() {
