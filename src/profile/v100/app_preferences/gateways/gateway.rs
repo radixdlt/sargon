@@ -80,6 +80,16 @@ impl Gateway {
     }
 }
 
+impl HasSampleValues for Gateway {
+    fn sample() -> Self {
+        Gateway::mainnet()
+    }
+
+    fn sample_other() -> Self {
+        Gateway::stokenet()
+    }
+}
+
 #[uniffi::export]
 pub fn gateway_mainnet() -> Gateway {
     Gateway::mainnet()

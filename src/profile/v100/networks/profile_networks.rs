@@ -211,7 +211,7 @@ mod tests {
     fn with_network() {
         let network = ProfileNetwork::new(
             NetworkID::Mainnet,
-            Accounts::with_account(Account::sample_mainnet()),
+            Accounts::just(Account::sample_mainnet()),
             Personas::default(),
             AuthorizedDapps::default(),
         );

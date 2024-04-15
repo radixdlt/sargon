@@ -176,7 +176,7 @@ mod tests {
         assert_eq!(
             ProfileNetwork::new(
                 NetworkID::Mainnet,
-                Accounts::with_accounts(
+                Accounts::from_iter(
                     [Account::sample(), Account::sample()].into_iter()
                 ),
                 Personas::default(),
@@ -195,7 +195,7 @@ mod tests {
     fn panic_when_network_id_mismatch_between_accounts_and_value() {
         ProfileNetwork::new(
             NetworkID::Mainnet,
-            Accounts::with_account(Account::sample_stokenet()),
+            Accounts::just(Account::sample_stokenet()),
             Personas::default(),
             AuthorizedDapps::default(),
         );
@@ -209,7 +209,7 @@ mod tests {
         ProfileNetwork::new(
             NetworkID::Mainnet,
             Accounts::sample_mainnet(),
-            Personas::with_persona(Persona::sample_stokenet()),
+            Personas::just(Persona::sample_stokenet()),
             AuthorizedDapps::default(),
         );
     }
@@ -223,9 +223,7 @@ mod tests {
             NetworkID::Mainnet,
             Accounts::sample_mainnet(),
             Personas::sample_mainnet(),
-            AuthorizedDapps::with_authorized_dapp(
-                AuthorizedDapp::sample_stokenet(),
-            ),
+            AuthorizedDapps::just(AuthorizedDapp::sample_stokenet()),
         );
     }
 

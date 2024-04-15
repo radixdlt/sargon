@@ -18,6 +18,7 @@ use crate::prelude::*;
     PartialOrd,
     Ord,
     uniffi::Enum,
+    derive_more::Display,
 )]
 #[serde(rename_all = "camelCase")]
 pub enum SLIP10Curve {
@@ -37,6 +38,16 @@ impl Identifiable for SLIP10Curve {
             Self::Curve25519 => "curve25519".to_string(),
             Self::Secp256k1 => "secp256k1".to_string(),
         }
+    }
+}
+
+impl HasSampleValues for SLIP10Curve {
+    fn sample() -> Self {
+        Self::Curve25519
+    }
+
+    fn sample_other() -> Self {
+        Self::Secp256k1
     }
 }
 
