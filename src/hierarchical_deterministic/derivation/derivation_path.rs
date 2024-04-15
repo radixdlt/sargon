@@ -46,14 +46,19 @@ impl<'de> serde::Deserialize<'de> for DerivationPath {
         let inner = Inner::deserialize(d)?;
 
         let derivation_path = match inner.scheme {
-            DerivationPathScheme::Cap26 => DerivationPath::CAP26 {
-                value: CAP26Path::deserialize(inner.path)
-                    .map_err(serde::de::Error::custom)?,
-            },
             DerivationPathScheme::Bip44Olympia => DerivationPath::BIP44Like {
                 value: BIP44LikePath::deserialize(inner.path)
                     .map_err(serde::de::Error::custom)?,
             },
+            DerivationPathScheme::Cap26 => {
+                match CAP26Path::deserialize(inner.path.clone()) {
+                    Ok(value) => DerivationPath::CAP26 { value },
+                    Err(_) => match BIP44LikePath::deserialize(inner.path) {
+                        Ok(value) => DerivationPath::BIP44Like { value },
+                        Err(e) => Err(e).map_err(serde::de::Error::custom)?,
+                    },
+                }
+            }
         };
         Ok(derivation_path)
     }
@@ -371,6 +376,24 @@ mod tests {
 			"path": "m/44H/1022H/0H/0/0H"
 		}
         "#,
+        );
+    }
+
+    #[test]
+    fn json_android_bug_bip44like_incorrectly_marked_as_cap26_is_indeed_deserialized_as_bip44(
+    ) {
+        let json = r#"
+        {
+            "scheme": "cap26",
+			"path": "m/44H/1022H/0H/0/0H"
+		}
+        "#;
+        let sut = serde_json::from_str::<SUT>(json).unwrap();
+        assert_eq!(
+            sut,
+            SUT::BIP44Like {
+                value: BIP44LikePath::sample()
+            }
         );
     }
 }
