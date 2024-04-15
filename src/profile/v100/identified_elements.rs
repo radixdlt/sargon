@@ -8,8 +8,8 @@ macro_rules! decl_identified_array_of {
         $(
             #[doc = $expr: expr]
         )*
-        $element_type: ty,
 		$struct_type: ident,
+        $element_type: ty,
 		$collection_type: ty
     ) => {
         paste! {
@@ -39,7 +39,7 @@ macro_rules! decl_identified_array_of {
                 }
             }
 
-            impl [< $element_type s >] {
+            impl $struct_type {
                 /// Returns a reference to the element identified by `id`, if it exists.
                 pub fn [< get_ $element_type:snake _by_id>](
                     &self,
@@ -123,14 +123,14 @@ macro_rules! decl_identified_array_of {
 }
 
 /// Impl rules for identified_array_of implementations which can be empty
-macro_rules! dec_can_be_empty_impl {
+macro_rules! decl_can_be_empty_impl {
     (
-        $element_type: ty,
         $struct_type: ty,
+        $element_type: ty,
         $secret_magic: ty
     ) => {
         paste! {
-            impl [< $element_type s >] {
+            impl $struct_type {
 
                 #[allow(clippy::should_implement_trait)]
                 pub fn from_iter<I>([<  $struct_type:lower >]: I) -> Self
@@ -142,15 +142,8 @@ macro_rules! dec_can_be_empty_impl {
                     }
                 }
 
-                pub fn [< with_ $struct_type:snake >]<I>([< $struct_type:snake >]: I) -> Self
-                where
-                    I: IntoIterator<Item = $element_type>,
-                {
-                    Self::from_iter([< $struct_type:snake >])
-                }
-
-                pub fn [< with_ $element_type:snake >]([< $element_type:snake >]: $element_type) -> Self {
-                    Self::[< with_ $struct_type:snake >]([[< $element_type:snake >]])
+                pub fn just([< $element_type:snake >]: $element_type) -> Self {
+                    Self::from_iter([[< $element_type:snake >]])
                 }
             }
 
@@ -158,7 +151,7 @@ macro_rules! dec_can_be_empty_impl {
             impl Default for $struct_type {
                 /// Instantiates a new empty collection.
                 fn default() -> Self {
-                    Self::[< with_ $struct_type:snake >]([])
+                    Self::from_iter([])
                 }
             }
 
@@ -196,14 +189,14 @@ macro_rules! dec_can_be_empty_impl {
 }
 
 /// Impl rules for identified_array_of implementations which must not be empty
-macro_rules! dec_never_empty_impl {
+macro_rules! decl_never_empty_impl {
     (
-        $element_type: ty,
         $struct_type: ty,
+        $element_type: ty,
         $secret_magic: ty
     ) => {
         paste! {
-            impl [< $element_type s >] {
+            impl $struct_type {
 
                 #[allow(clippy::should_implement_trait)]
                 pub fn from_iter<I>([<  $struct_type:snake >]: I) -> Result<Self>
@@ -220,15 +213,8 @@ macro_rules! dec_never_empty_impl {
                     }
                 }
 
-                pub fn [< with_ $struct_type:snake >]<I>([< $struct_type:snake >]: I) -> Result<Self>
-                where
-                    I: IntoIterator<Item = $element_type>,
-                {
-                    Self::from_iter([< $struct_type:snake >])
-                }
-
-                pub fn [< with_ $element_type:snake >]([< $element_type:snake >]: $element_type) -> Self {
-                    Self::[< with_ $struct_type:snake >]([[< $element_type:snake >]]).unwrap()
+                pub fn just([< $element_type:snake >]: $element_type) -> Self {
+                    Self::from_iter([[< $element_type:snake >]]).unwrap()
                 }
             }
 
@@ -267,6 +253,7 @@ macro_rules! decl_can_be_empty_identified_array_of {
         $(
             #[doc = $expr: expr]
         )*
+        $struct_type: ty,
         $element_type: ty
     ) => {
         paste! {
@@ -274,15 +261,15 @@ macro_rules! decl_can_be_empty_identified_array_of {
 				$(
                     #[doc = $expr]
                 )*
+				$struct_type,
 				$element_type,
-				[< $element_type s >],
 				IdentifiedVecVia<$element_type>
 			);
 
-            dec_can_be_empty_impl!(
+            decl_can_be_empty_impl!(
+                $struct_type,
                 $element_type,
-                [< $element_type s >],
-                [< $element_type s SecretMagic >]
+                [< $struct_type SecretMagic >]
             );
 		}
 	};
@@ -293,6 +280,7 @@ macro_rules! decl_never_empty_identified_array_of {
         $(
             #[doc = $expr: expr]
         )*
+        $struct_type: ty,
         $element_type: ty
     ) => {
         paste! {
@@ -300,15 +288,15 @@ macro_rules! decl_never_empty_identified_array_of {
 				$(
                     #[doc = $expr]
                 )*
+				$struct_type,
 				$element_type,
-				[< $element_type s >],
 				IdentifiedVecVia<$element_type>
 			);
 
-            dec_never_empty_impl!(
+            decl_never_empty_impl!(
+                $struct_type,
                 $element_type,
-                [< $element_type s >],
-                [< $element_type s SecretMagic >]
+                [< $struct_type SecretMagic >]
             );
 		}
 	};
@@ -318,21 +306,40 @@ decl_can_be_empty_identified_array_of!(
     /// An ordered set of [`Account`]s on a specific network, most commonly
     /// the set is non-empty, since wallets guide user to create a first
     /// Account.
+    Accounts,
     Account
 );
 
 decl_can_be_empty_identified_array_of!(
     /// An ordered set of [`Persona`]s on a specific network.
+    Personas,
     Persona
 );
 
 decl_can_be_empty_identified_array_of!(
     /// An ordered set of ['AuthorizedDapp`]s on a specific network.
+    AuthorizedDapps,
     AuthorizedDapp
 );
 
 decl_never_empty_identified_array_of!(
     /// A collection of [`FactorSource`]s generated by a wallet or manually added by user.
     /// MUST never be empty.
+    FactorSources,
     FactorSource
+);
+
+decl_can_be_empty_identified_array_of!(
+    /// Other by user added or predefined Gateways the user can switch to.
+    /// It might be Gateways with different URLs on the SAME network, or
+    /// other networks, the identifier of a Gateway is the URL.
+    OtherGateways,
+    Gateway
+);
+
+decl_never_empty_identified_array_of!(
+    /// A collection of [`SLIP10Curve`]s that a factor source supports.
+    /// MUST never be empty.
+    SupportedCurves,
+    SLIP10Curve
 );

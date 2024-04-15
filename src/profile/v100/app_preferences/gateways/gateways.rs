@@ -14,7 +14,7 @@ pub struct Gateways {
     /// Other by user added or predefined Gateways the user can switch to.
     /// It might be Gateways with different URLs on the SAME network, or
     /// other networks, the identifier of a Gateway is the URL.
-    pub other: IdentifiedVecVia<Gateway>,
+    pub other: OtherGateways,
 }
 
 /// Constructs `Gateways` with `current` set as active Gateway.
@@ -103,7 +103,7 @@ impl Gateways {
     pub fn new(current: Gateway) -> Self {
         Self {
             current,
-            other: IdentifiedVecVia::new(),
+            other: OtherGateways::default(),
         }
     }
 
@@ -111,7 +111,7 @@ impl Gateways {
     where
         I: IntoIterator<Item = Gateway>,
     {
-        let other = IdentifiedVecVia::from_iter(other);
+        let other = OtherGateways::from_iter(other);
         if other.contains(&current) {
             return Err(
                 CommonError::GatewaysDiscrepancyOtherShouldNotContainCurrent,
@@ -175,6 +175,16 @@ impl HasSampleValues for Gateways {
     }
 }
 
+impl HasSampleValues for OtherGateways {
+    fn sample() -> Self {
+        OtherGateways::from_iter([Gateway::stokenet()])
+    }
+
+    fn sample_other() -> Self {
+        OtherGateways::from_iter([Gateway::stokenet(), Gateway::hammunet()])
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
@@ -212,7 +222,7 @@ mod tests {
     fn change_throw_gateways_discrepancy_other_should_not_contain_current() {
         let mut impossible = Gateways {
             current: Gateway::mainnet(),
-            other: IdentifiedVecVia::from_iter([Gateway::mainnet()]),
+            other: OtherGateways::from_iter([Gateway::mainnet()]),
         };
         assert_eq!(
             impossible.change_current(Gateway::stokenet()),
