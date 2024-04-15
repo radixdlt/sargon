@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by Alexander Cyon on 2024-04-14.
 //
@@ -8,12 +8,12 @@
 import Foundation
 import SargonUniFFI
 
-extension DeviceFactorSource: SargonModel {}
+extension LedgerHardwareWalletFactorSource: SargonModel {}
 
-extension DeviceFactorSource: FactorSourceProtocol {
+extension LedgerHardwareWalletFactorSource: FactorSourceProtocol {
 	
 	public var asGeneral: FactorSource {
-		.device(value: self)
+		.ledger(value: self)
 	}
 	
 	public var factorSourceID: FactorSourceID {
@@ -21,6 +21,6 @@ extension DeviceFactorSource: FactorSourceProtocol {
 	}
 	
 	public var factorSourceKind: FactorSourceKind {
-		.device
+		.ledgerHqHardwareWallet
 	}
 }

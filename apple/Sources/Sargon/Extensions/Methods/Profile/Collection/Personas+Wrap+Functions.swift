@@ -25,15 +25,15 @@ extension Personas {
 		newPersonasByAppending(persona: persona, to: self)
 	}
 	
-	public func removingPersona(id: Persona.ID) -> Self {
+	public func removingElementByID(_ id: Persona.ID) -> Self {
 		newPersonasRemovedById(idOfPersona: id, from: self)
 	}
 	
-	public func removing(persona: Persona) -> Self {
+	public func removing(element persona: Persona) -> Self {
 		newPersonasRemovedElement(persona: persona, from: self)
 	}
 	
-	public func personaByID(_ id: Persona.ID) -> Persona? {
+	public func get(id: Persona.ID) -> Persona? {
 		personasGetPersonaById(personas: self, id: id)
 	}
 	

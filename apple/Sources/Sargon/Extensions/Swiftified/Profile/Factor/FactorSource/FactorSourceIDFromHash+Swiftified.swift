@@ -10,8 +10,16 @@ import SargonUniFFI
 
 public typealias FactorSourceIDFromHash = FactorSourceIdFromHash
 
+extension FactorSourceIDFromHash: SargonModel {}
+
 extension FactorSourceIDFromHash {
 	public var asGeneral: FactorSourceID {
 		.hash(value: self)
+	}
+}
+
+extension FactorSourceIDFromHash: CustomStringConvertible {
+	public var description: String {
+		toString()
 	}
 }

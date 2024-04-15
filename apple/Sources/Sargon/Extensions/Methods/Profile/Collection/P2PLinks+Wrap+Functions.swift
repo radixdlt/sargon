@@ -25,15 +25,15 @@ extension P2pLinks {
 		newP2PLinksByAppending(p2PLink: link, to: self)
 	}
 	
-	public func removingP2PLink(id: P2PLink.ID) -> Self {
+	public func removingElementByID(_ id: P2PLink.ID) -> Self {
 		newP2PLinksRemovedById(idOfP2PLink: id, from: self)
 	}
 	
-	public func removing(link: P2pLink) -> Self {
+	public func removing(element link: P2pLink) -> Self {
 		newP2PLinksRemovedElement(p2PLink: link, from: self)
 	}
 	
-	public func linkByID(_ id: P2pLink.ID) -> P2pLink? {
+	public func get(id: P2pLink.ID) -> P2pLink? {
 		p2PLinksGetP2PLinkById(p2PLinks: self, id: id)
 	}
 	

@@ -38,4 +38,8 @@ extension BaseIdentifiedCollection {
 		elements[position]
 	}
 	
+	public mutating func append(_ element: Element) {
+		self = appending(element)
+	}
+	
 }

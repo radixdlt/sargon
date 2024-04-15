@@ -31,6 +31,26 @@ class BaseCollectionTest<SUT_: BaseIdentifiedCollection>: Test<SUT_> {
 		)
 	}
 	
+	func test_append_new()  {
+		let sample = SUTElement.sample
+		let sampleOther = SUTElement.sampleOther
+		var sut = SUT(element: sample)
+		sut.append(sampleOther)
+		XCTAssertEqual(
+			sut.elements,
+			[sample, sampleOther]
+		)
+	}
+	
+	func test_count()  {
+		let sample = SUTElement.sample
+		let sampleOther = SUTElement.sampleOther
+		var sut = SUT(element: sample)
+		XCTAssertEqual(sut.count, 1)
+		sut.append(sampleOther)
+		XCTAssertEqual(sut.count, 2)
+	}
+	
 	func test_appending_new_duplicate_disallowd()  {
 		let sample = SUTElement.sample
 		let sut = SUT(element: sample)
@@ -45,33 +65,6 @@ class BaseCollectionTest<SUT_: BaseIdentifiedCollection>: Test<SUT_> {
 		XCTAssertEqual(
 			sut.filter({ $0.id == SUTElement.sample.id }),
 			[SUTElement.sample]
-		)
-	}
-}
-
-
-class CanBeEmptyCollectionTest<SUT_: CanBeEmptyIdentifiedCollection>: BaseCollectionTest<SUT_> {
-	func test_can_be_empty() {
-		XCTAssertEqual(SUT([]).count, 0)
-	}
-	
-	func test_expressible_by_array_literal() {
-		XCTAssertEqual(SUT(element: SUTElement.sample), [SUTElement.sample])
-	}
-	
-	func test_removing_element_by_id() {
-		let sut: SUT = [.sample, .sampleOther]
-		XCTAssertEqual(
-			sut.removingElementByID(SUTElement.sample.id),
-			[.sampleOther]
-		)
-	}
-	
-	func test_removing_by_element() {
-		let sut: SUT = [.sample, .sampleOther]
-		XCTAssertEqual(
-			sut.removing(element: SUTElement.sample),
-			[.sampleOther]
 		)
 	}
 }

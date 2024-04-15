@@ -10,6 +10,8 @@ import SargonUniFFI
 
 public typealias P2PLink = P2pLink
 
+extension P2PLink: SargonModel {}
+
 extension P2PLink: Identifiable {
 	public typealias ID = Hash
 	public var id: ID {

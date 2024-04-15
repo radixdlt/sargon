@@ -11,4 +11,5 @@ import SargonUniFFI
 public protocol FactorSourceProtocol {
 	var factorSourceID: FactorSourceID { get }
 	var factorSourceKind: FactorSourceKind { get }
+	var asGeneral: FactorSource { get }
 }
