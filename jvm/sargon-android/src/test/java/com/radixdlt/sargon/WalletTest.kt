@@ -38,7 +38,7 @@ class WalletTest {
         val initialNameOfFirstAccount = "Alice"
         // Not created any account yet...
         assertFalse(storage.contains(value = initialNameOfFirstAccount))
-        assertTrue(wallet.profile().networks.isEmpty())
+        assertFalse(wallet.profile().networks().isEmpty())
         var main0 = wallet.createAndSaveNewAccount(
             networkId = NetworkId.MAINNET,
             name = DisplayName.init(validating = initialNameOfFirstAccount)

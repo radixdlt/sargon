@@ -35,6 +35,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.radixdlt.sargon.DisplayName
 import com.radixdlt.sargon.NetworkId
+import com.radixdlt.sargon.NonEmptyMax32Bytes
 import com.radixdlt.sargon.Profile
 import com.radixdlt.sargon.ProfileNetwork
 import com.radixdlt.sargon.SecureStorage
@@ -42,7 +43,9 @@ import com.radixdlt.sargon.Wallet
 import com.radixdlt.sargon.WalletClientModel
 import com.radixdlt.sargon.android.ui.theme.SargonAndroidTheme
 import com.radixdlt.sargon.annotation.UsesSampleValues
+import com.radixdlt.sargon.extensions.invoke
 import com.radixdlt.sargon.extensions.string
+import com.radixdlt.sargon.extensions.toBagOfBytes
 import com.radixdlt.sargon.samples.sample
 import kotlin.random.Random
 
@@ -78,7 +81,7 @@ fun WalletContent(modifier: Modifier = Modifier, storage: SecureStorage) {
                                 profile = walletState?.profile()
                             }
                     ) { Text(text = "Generate new Wallet") }
-                } else if (profile?.networks?.isEmpty() == true) {
+                } else if (profile?.networks()?.isEmpty() == true) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         var accountName by remember { mutableStateOf("") }
                         TextField(
@@ -105,7 +108,7 @@ fun WalletContent(modifier: Modifier = Modifier, storage: SecureStorage) {
             }
     ) { padding ->
         LazyColumn(modifier = Modifier.padding(padding), contentPadding = PaddingValues(16.dp)) {
-            items(profile?.networks.orEmpty()) {
+            items(profile?.networks().orEmpty()) {
                 Network(
                         network = it,
                         onAccountAdd = { newName ->
@@ -175,7 +178,7 @@ fun Wallet.Companion.with(
         secureStorage: SecureStorage
 ): Wallet {
     return Wallet.byCreatingNewProfileAndSecretsWithEntropy(
-            entropy = entropy,
+            entropy = NonEmptyMax32Bytes(entropy.toBagOfBytes()),
             walletClientModel = WalletClientModel.ANDROID,
             walletClientName = phoneName,
             secureStorage = secureStorage
@@ -187,5 +190,5 @@ fun Wallet.Companion.with(
 @Composable
 fun NetworkPreview() {
     val profile = Profile.sample()
-    Network(network = profile.networks.first(), onAccountAdd = {})
+    Network(network = profile.networks().first(), onAccountAdd = {})
 }
