@@ -2,7 +2,7 @@ package com.radixdlt.sargon.extensions
 
 import com.radixdlt.sargon.Account
 import com.radixdlt.sargon.Accounts
-import com.radixdlt.sargon.getAccounts
+import com.radixdlt.sargon.accountsGetElements
 import com.radixdlt.sargon.newAccounts
 
 fun Accounts.Companion.init(vararg account: Account): Accounts =
@@ -10,7 +10,7 @@ fun Accounts.Companion.init(vararg account: Account): Accounts =
 
 fun Accounts.Companion.init(accounts: List<Account>): Accounts = newAccounts(accounts = accounts)
 
-operator fun Accounts.invoke() = getAccounts(accounts = this)
+operator fun Accounts.invoke() = accountsGetElements(accounts = this)
 
 operator fun Accounts.get(index: Int) = invoke().get(index = index)
 
