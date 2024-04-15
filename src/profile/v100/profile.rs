@@ -86,9 +86,7 @@ impl Profile {
             header,
             FactorSources::with_bdfs(device_factor_source),
             AppPreferences::default(),
-            ProfileNetworks::with_profile_network(ProfileNetwork::empty(
-                NetworkID::Mainnet,
-            )),
+            ProfileNetworks::just(ProfileNetwork::empty(NetworkID::Mainnet)),
         )
     }
 

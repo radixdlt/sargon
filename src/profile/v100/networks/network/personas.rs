@@ -15,7 +15,7 @@ impl HasSampleValues for Personas {
 impl Personas {
     /// A sample used to facilitate unit tests.
     pub fn sample_mainnet() -> Self {
-        Self::with_personas([
+        Self::from_iter([
             Persona::sample_mainnet_satoshi(),
             Persona::sample_mainnet_batman(),
         ])
@@ -23,7 +23,7 @@ impl Personas {
 
     /// A sample used to facilitate unit tests.
     pub fn sample_stokenet() -> Self {
-        Self::with_personas([
+        Self::from_iter([
             Persona::sample_stokenet_leia_skywalker(),
             Persona::sample_stokenet_hermione(),
         ])
@@ -53,7 +53,7 @@ mod tests {
     #[test]
     fn duplicates_are_prevented() {
         assert_eq!(
-            Personas::with_personas(
+            Personas::from_iter(
                 [Persona::sample(), Persona::sample()].into_iter()
             )
             .len(),
@@ -63,7 +63,7 @@ mod tests {
 
     #[test]
     fn with_one() {
-        assert_eq!(Personas::with_persona(Persona::sample()).len(), 1)
+        assert_eq!(Personas::just(Persona::sample()).len(), 1)
     }
 
     #[test]
@@ -75,7 +75,7 @@ mod tests {
     fn get_by_address() {
         let persona = Persona::sample();
         let address = persona.address;
-        let personas = Personas::with_persona(persona.clone());
+        let personas = Personas::just(persona.clone());
         assert_eq!(personas.get_persona_by_id(&address), Some(&persona));
     }
 

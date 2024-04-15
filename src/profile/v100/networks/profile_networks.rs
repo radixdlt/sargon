@@ -34,7 +34,7 @@ impl ProfileNetworks {
 impl HasSampleValues for ProfileNetworks {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {
-        Self::with_profile_networks([
+        Self::from_iter([
             ProfileNetwork::sample_mainnet(),
             ProfileNetwork::sample_stokenet(),
         ])
@@ -43,7 +43,7 @@ impl HasSampleValues for ProfileNetworks {
 
     /// A sample used to facilitate unit tests.
     fn sample_other() -> Self {
-        Self::with_profile_network(ProfileNetwork::sample_other())
+        Self::just(ProfileNetwork::sample_other())
     }
 }
 
@@ -179,11 +179,11 @@ mod tests {
     fn with_network() {
         let network = ProfileNetwork::new(
             NetworkID::Mainnet,
-            Accounts::with_account(Account::sample_mainnet()),
+            Accounts::just(Account::sample_mainnet()),
             Personas::default(),
             AuthorizedDapps::default(),
         );
-        assert_eq!(ProfileNetworks::with_profile_network(network).len(), 1);
+        assert_eq!(ProfileNetworks::just(network).len(), 1);
     }
 
     #[test]

@@ -29,7 +29,9 @@ impl<Element: Identifiable + Debug + Clone> std::iter::FromIterator<Element>
     }
 }
 
-impl<Element: Identifiable + Debug + Clone> Default for IdentifiedVecVia<Element> {
+impl<Element: Identifiable + Debug + Clone> Default
+    for IdentifiedVecVia<Element>
+{
     fn default() -> Self {
         Self::new()
     }

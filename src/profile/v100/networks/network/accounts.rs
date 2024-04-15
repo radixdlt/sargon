@@ -15,7 +15,7 @@ impl HasSampleValues for Accounts {
 impl Accounts {
     /// A sample used to facilitate unit tests.
     pub fn sample_mainnet() -> Self {
-        Self::with_accounts([
+        Self::from_iter([
             Account::sample_mainnet(),
             Account::sample_mainnet_other(),
         ])
@@ -23,7 +23,7 @@ impl Accounts {
 
     /// A sample used to facilitate unit tests.
     pub fn sample_stokenet() -> Self {
-        Self::with_accounts([
+        Self::from_iter([
             Account::sample_stokenet_nadia(),
             Account::sample_stokenet_olivia(),
         ])
@@ -56,17 +56,15 @@ mod tests {
     #[test]
     fn duplicates_are_prevented() {
         assert_eq!(
-            SUT::with_accounts(
-                [Account::sample(), Account::sample()].into_iter()
-            )
-            .len(),
+            SUT::from_iter([Account::sample(), Account::sample()].into_iter())
+                .len(),
             1
         )
     }
 
     #[test]
     fn with_one() {
-        assert_eq!(SUT::with_account(Account::sample()).len(), 1)
+        assert_eq!(SUT::just(Account::sample()).len(), 1)
     }
 
     #[test]
@@ -82,7 +80,7 @@ mod tests {
             DisplayName::default(),
             AppearanceID::default(),
         );
-        let accounts = SUT::with_account(account.clone());
+        let accounts = SUT::just(account.clone());
         assert_eq!(accounts.get_account_by_id(&address), Some(&account));
     }
 

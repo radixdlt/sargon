@@ -24,7 +24,7 @@ impl EntityFlags {
     }
 
     pub fn sample() -> Self {
-        Self::with_entity_flag(EntityFlag::sample())
+        Self::just(EntityFlag::sample())
     }
 }
 
@@ -32,25 +32,28 @@ impl EntityFlags {
 mod tests {
     use super::*;
 
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = EntityFlags;
+
     #[test]
     fn empty_by_default() {
-        assert_eq!(EntityFlags::default(), EntityFlags::new())
+        assert_eq!(SUT::default(), SUT::new())
     }
 
     #[test]
     fn default_does_not_contain_deleted_by_user() {
-        assert!(!EntityFlags::default().contains(&EntityFlag::DeletedByUser));
+        assert!(!SUT::default().contains(&EntityFlag::DeletedByUser));
     }
 
     #[test]
     fn new_with_f_contains_f() {
-        assert!(EntityFlags::with_entity_flag(EntityFlag::DeletedByUser)
+        assert!(SUT::just(EntityFlag::DeletedByUser)
             .contains(&EntityFlag::DeletedByUser));
     }
 
     #[test]
     fn remove_existing_flag() {
-        assert!(EntityFlags::with_entity_flag(EntityFlag::DeletedByUser)
+        assert!(SUT::just(EntityFlag::DeletedByUser)
             .remove_flag(&EntityFlag::DeletedByUser)
             .is_some());
     }
@@ -58,7 +61,7 @@ mod tests {
     #[test]
     fn remove_non_existing_flag() {
         assert_eq!(
-            EntityFlags::default().remove_flag(&EntityFlag::DeletedByUser),
+            SUT::default().remove_flag(&EntityFlag::DeletedByUser),
             None
         );
         // does not exist
@@ -67,7 +70,7 @@ mod tests {
     #[test]
     fn new_with_duplicates_of_f_contains_only_f() {
         assert_eq!(
-            EntityFlags::with_entity_flags(vec![
+            SUT::with_entity_flags(vec![
                 EntityFlag::DeletedByUser,
                 EntityFlag::DeletedByUser
             ])
@@ -78,14 +81,14 @@ mod tests {
 
     #[test]
     fn new_empty_insert_f_contains_f() {
-        let mut sut = EntityFlags::default();
+        let mut sut = SUT::default();
         sut.insert_flag(EntityFlag::DeletedByUser);
         assert!(sut.contains(&EntityFlag::DeletedByUser));
     }
 
     #[test]
     fn json_roundtrip_non_empty() {
-        let model = EntityFlags::with_entity_flag(EntityFlag::DeletedByUser);
+        let model = SUT::just(EntityFlag::DeletedByUser);
 
         assert_json_value_eq_after_roundtrip(
             &model,
@@ -101,7 +104,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_empty() {
-        let model = EntityFlags::default();
+        let model = SUT::default();
 
         let json = json!(Vec::<String>::new());
         assert_json_value_eq_after_roundtrip(&model, json);

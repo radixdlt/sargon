@@ -431,8 +431,11 @@ pub enum CommonError {
     #[error("Submitted transaction was duplicate.")]
     GatewaySubmitDuplicateTX { intent_hash: String } = 10119,
 
+    #[error("SupportedCurves must not be empty.")]
+    SupportedCurvesMustNotBeEmpty = 10120,
+
     #[error("Networks must not be empty")]
-    ProfileNetworksMustNotBeEmpty = 10120,
+    ProfileNetworksMustNotBeEmpty = 10121,
 }
 
 #[uniffi::export]
