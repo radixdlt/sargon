@@ -65,7 +65,18 @@ mod tests {
         let fs = FactorSource::sample();
         let sut = SUT::from_iter([fs.clone()]).unwrap();
         assert_eq!(sut.len(), 1);
-        assert!(new_factor_sources_removed_by_id(&fs.id(), &sut).is_err());
+        assert_eq!(
+            new_factor_sources_removed_by_id(&fs.id(), &sut),
+            Err(CommonError::FactorSourcesMustNotBeEmpty)
+        );
+    }
+
+    #[test]
+    fn json_deserialize_of_empty_factor_sources_is_err() {
+        assert!(serde_json::from_value::<SUT>(serde_json::Value::Array(
+            Vec::new()
+        ))
+        .is_err());
     }
 
     #[test]

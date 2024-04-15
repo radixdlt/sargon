@@ -16,8 +16,7 @@ macro_rules! decl_identified_array_of {
             $(
                 #[doc = $expr]
             )*
-			#[derive(Clone, Eq, PartialEq, Hash, derive_more::Debug, derive_more::Display, Serialize, Deserialize, uniffi::Record)]
-            #[serde(transparent)]
+			#[derive(Clone, Eq, PartialEq, Hash, derive_more::Debug, derive_more::Display, uniffi::Record)]
 			pub struct $struct_type {
                 secret_magic: [< $struct_type SecretMagic >]
             }
@@ -125,8 +124,6 @@ macro_rules! decl_identified_array_of {
                 $struct_type::sample_other()
             }
 
-
-
             #[cfg(test)]
             mod [<tests_ $struct_type:snake >] {
                 use super::*;
@@ -184,6 +181,31 @@ macro_rules! decl_can_be_empty_impl {
         $secret_magic: ty
     ) => {
         paste! {
+
+            impl Serialize for $struct_type {
+                fn serialize<S>(
+                    &self,
+                    serializer: S,
+                ) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
+                where
+                    S: Serializer,
+                {
+                    self.secret_magic.serialize(serializer)
+                }
+            }
+
+            impl<'de> serde::Deserialize<'de> for $struct_type {
+                fn deserialize<D: Deserializer<'de>>(
+                    d: D,
+                ) -> Result<$struct_type, D::Error> {
+                    $secret_magic::deserialize(d).map(|secret_magic| {
+                        $struct_type {
+                            secret_magic
+                        }
+                    })
+                    .map_err(de::Error::custom)
+                }
+            }
 
             #[uniffi::export]
             pub fn [<new_ $struct_type:snake _removed_by_id>](
@@ -284,6 +306,31 @@ macro_rules! decl_never_empty_impl {
     ) => {
         paste! {
 
+            impl Serialize for $struct_type {
+                fn serialize<S>(
+                    &self,
+                    serializer: S,
+                ) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
+                where
+                    S: Serializer,
+                {
+                    self.secret_magic.serialize(serializer)
+                }
+            }
+
+            impl<'de> serde::Deserialize<'de> for $struct_type {
+                fn deserialize<D: Deserializer<'de>>(
+                    d: D,
+                ) -> Result<$struct_type, D::Error> {
+                    Vec::<$element_type>::deserialize(d)
+                    .and_then(|vec| {
+                        Self::from_iter(vec.into_iter())
+                        .map_err(de::Error::custom)
+                    })
+                    .map_err(de::Error::custom)
+                }
+            }
+
             #[uniffi::export]
             pub fn [<new_ $struct_type:snake _removed_by_id>](
                 [< id_of_ $element_type:snake >]: &<[< $element_type >] as Identifiable>::ID,
@@ -292,7 +339,7 @@ macro_rules! decl_never_empty_impl {
                 let mut copy = from.clone();
                 let _ = (*copy).remove_by_id([< id_of_ $element_type:snake >]);
                 if copy.is_empty() {
-                    Err(CommonError::Unknown)
+                    Err(CommonError::[< $struct_type MustNotBeEmpty >])
                 } else {
                     Ok(copy)
                 }
@@ -306,7 +353,7 @@ macro_rules! decl_never_empty_impl {
                 let mut copy = from.clone();
                 let _ = (*copy).remove([< $element_type:snake >]);
                 if copy.is_empty() {
-                    Err(CommonError::Unknown)
+                    Err(CommonError::[< $struct_type MustNotBeEmpty >])
                 } else {
                     Ok(copy)
                 }
