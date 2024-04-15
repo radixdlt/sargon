@@ -21,6 +21,11 @@ pub fn new_persona_sample_mainnet_satoshi() -> Persona {
 }
 
 #[uniffi::export]
+pub fn new_persona_sample_mainnet_ripley() -> Persona {
+    Persona::sample_mainnet_ripley()
+}
+
+#[uniffi::export]
 pub fn new_persona_sample_stokenet_leia_skywalker() -> Persona {
     Persona::sample_stokenet_leia_skywalker()
 }
@@ -28,6 +33,11 @@ pub fn new_persona_sample_stokenet_leia_skywalker() -> Persona {
 #[uniffi::export]
 pub fn new_persona_sample_stokenet_hermione() -> Persona {
     Persona::sample_stokenet_hermione()
+}
+
+#[uniffi::export]
+pub fn new_persona_sample_stokenet_connor() -> Persona {
+    Persona::sample_stokenet_connor()
 }
 
 #[cfg(test)]
@@ -62,5 +72,28 @@ mod uniffi_tests {
             new_persona_sample_stokenet_hermione(),
             SUT::sample_stokenet_hermione()
         );
+    }
+
+    #[test]
+    fn hash_of_sample_values() {
+        assert_eq!(
+            HashSet::<SUT>::from_iter([
+                new_persona_sample_mainnet_batman(),
+                new_persona_sample_mainnet_satoshi(),
+                new_persona_sample_mainnet_ripley(),
+                new_persona_sample_stokenet_hermione(),
+                new_persona_sample_stokenet_leia_skywalker(),
+                new_persona_sample_stokenet_connor(),
+                // duplicates should be removed
+                new_persona_sample_mainnet_batman(),
+                new_persona_sample_mainnet_satoshi(),
+                new_persona_sample_mainnet_ripley(),
+                new_persona_sample_stokenet_hermione(),
+                new_persona_sample_stokenet_leia_skywalker(),
+                new_persona_sample_stokenet_connor(),
+            ])
+            .len(),
+            6
+        )
     }
 }

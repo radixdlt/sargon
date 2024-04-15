@@ -7,8 +7,15 @@
 
 import Foundation
 
-public protocol BaseIdentifiedCollection: RandomAccessCollection where Index == Array<Element>.Index, Element: Identifiable {
+public protocol BaseIdentifiedCollection:
+	RandomAccessCollection
+where 
+	Index == Array<Element>.Index,
+	Element: Identifiable
+{
 	var elements: [Element] { get }
+	func appending(_ element: Element) -> Self
+	func get(id: Element.ID) -> Element?
 }
 
 extension BaseIdentifiedCollection {

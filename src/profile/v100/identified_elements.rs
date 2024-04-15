@@ -78,11 +78,45 @@ macro_rules! decl_identified_array_of {
 				}
 			}
 
+            #[uniffi::export]
+            pub fn [<$struct_type:snake _get_elements>](
+                [< $struct_type:snake >]: $struct_type,
+            ) -> IdentifiedVecVia<$element_type> {
+                (*[< $struct_type:snake >]).clone()
+            }
+
+            #[uniffi::export]
+            pub fn [< $struct_type:snake _get_ $element_type:snake _by_id>](
+                [< $struct_type:snake >]: $struct_type,
+                id: &<[< $element_type >] as Identifiable>::ID,
+            ) -> Option<[< $element_type >]> {
+                [< $struct_type:snake >].[< get_ $element_type:snake _by_id>](id).cloned()
+            }
+
+            #[uniffi::export]
+            pub fn [<$struct_type:snake _element_count>](
+                [< $struct_type:snake >]: $struct_type,
+            ) -> u64 {
+                (*[< $struct_type:snake >]).len() as u64
+            }
+
+            #[uniffi::export]
+            pub fn [<new_ $struct_type:snake _by_appending>](
+                [< $element_type:snake >]: $element_type,
+                to: &$struct_type,
+            ) -> $struct_type {
+                let mut copy = to.clone();
+                let _ = (*copy).append([< $element_type:snake >]);
+                copy
+            }
+
             #[cfg(test)]
             mod [<tests_ $struct_type:snake >] {
                 use super::*;
 
+                #[allow(clippy::upper_case_acronyms)]
                 type SUT = $struct_type;
+                
                 type SUTSecretMagic = [< $struct_type SecretMagic >];
 
                 #[test]
@@ -103,13 +137,6 @@ macro_rules! decl_identified_array_of {
 
             }
 
-            #[uniffi::export]
-            pub fn [<get_ $struct_type:snake >](
-                [< $struct_type:snake >]: $struct_type,
-            ) -> IdentifiedVecVia<$element_type> {
-                (*[< $struct_type:snake >]).clone()
-            }
-
             #[cfg(test)]
             mod [<uniffi_tests_ $struct_type:lower>] {
                 use super::*;
@@ -124,7 +151,7 @@ macro_rules! decl_identified_array_of {
 
                     assert_eq!(
                         elements,
-                        [<get_ $struct_type:snake >](sut)
+                        [<$struct_type:snake _get_elements>](sut)
                     );
                 }
             }
@@ -140,6 +167,27 @@ macro_rules! dec_can_be_empty_impl {
         $secret_magic: ty
     ) => {
         paste! {
+
+            #[uniffi::export]
+            pub fn [<new_ $struct_type:snake _removed_by_id>](
+                [< id_of_ $element_type:snake >]: &<[< $element_type >] as Identifiable>::ID,
+                from: &$struct_type,
+            ) -> $struct_type {
+                let mut copy = from.clone();
+                let _ = (*copy).remove_by_id([< id_of_ $element_type:snake >]);
+                copy
+            }
+
+            #[uniffi::export]
+            pub fn [<new_ $struct_type:snake _removed_element>](
+                [< $element_type:snake >]: &$element_type,
+                from: &$struct_type,
+            ) -> $struct_type {
+                let mut copy = from.clone();
+                let _ = (*copy).remove([< $element_type:snake >]);
+                copy
+            }
+
             impl [< $element_type s >] {
 
                 #[allow(clippy::should_implement_trait)]
@@ -218,6 +266,35 @@ macro_rules! dec_never_empty_impl {
         $secret_magic: ty
     ) => {
         paste! {
+
+            #[uniffi::export]
+            pub fn [<new_ $struct_type:snake _removed_by_id>](
+                [< id_of_ $element_type:snake >]: &<[< $element_type >] as Identifiable>::ID,
+                from: &$struct_type,
+            ) -> Result<$struct_type> {
+                let mut copy = from.clone();
+                let _ = (*copy).remove_by_id([< id_of_ $element_type:snake >]);
+                if copy.is_empty() {
+                    Err(CommonError::Unknown)
+                } else {
+                    Ok(copy)
+                }
+            }
+
+            #[uniffi::export]
+            pub fn [<new_ $struct_type:snake _removed_element>](
+                [< $element_type:snake >]: &$element_type,
+                from: &$struct_type,
+            ) -> Result<$struct_type> {
+                let mut copy = from.clone();
+                let _ = (*copy).remove([< $element_type:snake >]);
+                if copy.is_empty() {
+                    Err(CommonError::Unknown)
+                } else {
+                    Ok(copy)
+                }
+            }
+
             impl [< $element_type s >] {
 
                 #[allow(clippy::should_implement_trait)]

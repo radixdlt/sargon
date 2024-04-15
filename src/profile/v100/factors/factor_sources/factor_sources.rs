@@ -38,7 +38,11 @@ impl HasSampleValues for FactorSources {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = FactorSources;
 
     #[test]
     fn identifiable_id_uses_factor_source_id() {
@@ -50,13 +54,13 @@ mod tests {
 
     #[test]
     fn inequality() {
-        assert_ne!(FactorSources::sample(), FactorSources::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn duplicates_are_prevented() {
         assert_eq!(
-            FactorSources::from_iter(
+            SUT::from_iter(
                 [FactorSource::sample(), FactorSource::sample()].into_iter()
             )
             .unwrap()
@@ -66,8 +70,16 @@ mod tests {
     }
 
     #[test]
+    fn remove_returns_err_if_empty() {
+        let fs = FactorSource::sample();
+        let sut = SUT::from_iter([fs.clone()]).unwrap();
+        assert_eq!(sut.len(), 1);
+        assert!(new_factor_sources_removed_by_id(&fs.id(), &sut).is_err());
+    }
+
+    #[test]
     fn json_roundtrip_sample() {
-        let sut = FactorSources::sample();
+        let sut = SUT::sample();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"
@@ -125,19 +137,14 @@ mod tests {
 
 #[cfg(test)]
 mod uniffi_tests {
-    use crate::{
-        new_factor_sources_sample, new_factor_sources_sample_other,
-        HasSampleValues,
-    };
+    use super::*;
 
-    use super::FactorSources;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = FactorSources;
 
     #[test]
     fn equality_samples() {
-        assert_eq!(FactorSources::sample(), new_factor_sources_sample());
-        assert_eq!(
-            FactorSources::sample_other(),
-            new_factor_sources_sample_other()
-        );
+        assert_eq!(SUT::sample(), new_factor_sources_sample());
+        assert_eq!(SUT::sample_other(), new_factor_sources_sample_other());
     }
 }

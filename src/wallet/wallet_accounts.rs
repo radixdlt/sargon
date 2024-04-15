@@ -454,7 +454,7 @@ mod tests {
             ),
             also_save,
             |p| {
-                assert_eq!(p.networks.len(), 0); // no accounts yet, no networks even
+                assert_eq!(p.networks.len(), 1); // Mainnet Network created by default
             },
             |a, q| {
                 assert_eq!(
@@ -471,12 +471,10 @@ mod tests {
     #[test]
     fn create_new_account_first_success() {
         test_create_new_account_first_success(false, |_, q| {
-            // Account SHOULD NOT yet have been saved into Profile, so number of accounts should still be 2
-            assert_eq!(q.networks.len(), 0);
+            assert_eq!(q.networks.len(), 1); // Mainnet network created by default for new Profiles.
         });
 
         test_create_new_account_first_success(true, |a, q| {
-            // Account SHOULD NOT yet have been saved into Profile, so number of accounts should still be 2
             assert_eq!(q.networks.len(), 1);
             assert_eq!(q.networks[0].accounts[0], a);
         })

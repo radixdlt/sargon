@@ -176,6 +176,10 @@ impl Persona {
         Self::sample_mainnet_batman()
     }
 
+    pub fn sample_mainnet_third() -> Self {
+        Self::sample_mainnet_ripley()
+    }
+
     pub fn sample_mainnet_satoshi() -> Self {
         let name = PersonaDataEntryName::new(
             PersonaDataNameVariant::Eastern,
@@ -218,6 +222,30 @@ impl Persona {
                 .map(|s| s.to_string())
                 .collect_vec(),
             ["bat@m.an"]
+                .into_iter()
+                .map(|s| s.to_string())
+                .collect_vec(),
+        )
+    }
+
+    pub fn sample_mainnet_ripley() -> Self {
+        let name = PersonaDataEntryName::new(
+            PersonaDataNameVariant::Western,
+            "Ripley",
+            "Ellen",
+            "",
+        )
+        .expect("Failure to construct sample Name should not be possible");
+        Self::sample_at_index_name(
+            2,
+            "Ellen Ripley",
+            false,
+            name,
+            ["+1-210-456-9876"]
+                .into_iter()
+                .map(|s| s.to_string())
+                .collect_vec(),
+            ["ellen.riplay@weylandyutani.corp"]
                 .into_iter()
                 .map(|s| s.to_string())
                 .collect_vec(),
@@ -272,11 +300,40 @@ impl Persona {
         )
     }
 
+    pub fn sample_stokenet_connor() -> Self {
+        Self::sample_at_index_name_network(
+            NetworkID::Stokenet,
+            2,
+            "Sarah Connor",
+            false,
+            PersonaDataEntryName::new(
+                PersonaDataNameVariant::Western,
+                "Connor",
+                "Sarah",
+                "",
+            )
+            .expect("Failure to construct sample Name should not be possible"),
+            ["+1-210-456-7890"]
+                .into_iter()
+                .map(|s| s.to_string())
+                .collect_vec(),
+            ["sarah.connor@resistance.now"]
+                .into_iter()
+                .map(|s| s.to_string())
+                .collect_vec(),
+        )
+    }
+
     pub fn sample_stokenet() -> Self {
         Self::sample_stokenet_leia_skywalker()
     }
+
     pub fn sample_stokenet_other() -> Self {
         Self::sample_stokenet_hermione()
+    }
+
+    pub fn sample_stokenet_third() -> Self {
+        Self::sample_stokenet_connor()
     }
 }
 
