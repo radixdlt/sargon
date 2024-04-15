@@ -9,7 +9,6 @@ import Foundation
 
 public protocol NeverEmptyIdentifiedCollection: BaseIdentifiedCollection {
 	init(_ elements: [Element]) throws
-	init(element: Element)
 	
 	func removingElementByID(_ id: Element.ID) throws -> Self
 	func removing(element: Element) throws -> Self

@@ -8,12 +8,15 @@
 import Foundation
 
 public protocol BaseIdentifiedCollection:
+	SargonModel,
 	RandomAccessCollection
 where 
 	Index == Array<Element>.Index,
-	Element: Identifiable
+	Element: Identifiable,
+	Element: SargonModel
 {
 	var elements: [Element] { get }
+	init(element: Element)
 	func appending(_ element: Element) -> Self
 	func get(id: Element.ID) -> Element?
 }

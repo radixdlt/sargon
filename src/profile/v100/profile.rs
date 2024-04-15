@@ -68,8 +68,8 @@ impl Profile {
 }
 
 impl Profile {
-    /// Creates a new Profile from the `DeviceFactorSource`, without an "empty"
-    /// Network on Mainnet (no Accounts), with creating device info as "unknown".
+    /// Creates a new Profile from the `DeviceFactorSource`, without any
+    /// networks (thus no accounts), with creating device info as "unknown".
     pub fn new(
         device_factor_source: DeviceFactorSource,
         creating_device_name: &str,
@@ -86,7 +86,7 @@ impl Profile {
             header,
             FactorSources::with_bdfs(device_factor_source),
             AppPreferences::default(),
-            ProfileNetworks::just(ProfileNetwork::empty(NetworkID::Mainnet)),
+            ProfileNetworks::new(),
         )
     }
 

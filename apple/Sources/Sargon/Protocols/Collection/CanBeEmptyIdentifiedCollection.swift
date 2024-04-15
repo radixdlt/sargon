@@ -10,8 +10,11 @@ import Foundation
 public protocol CanBeEmptyIdentifiedCollection: 
 	BaseIdentifiedCollection,
 	ExpressibleByArrayLiteral
+where
+	ArrayLiteralElement == Self.Element
 {
 	init(_ elements: [Element])
+	
 	func removingElementByID(_ id: Element.ID) -> Self
 	func removing(element: Element) -> Self
 }

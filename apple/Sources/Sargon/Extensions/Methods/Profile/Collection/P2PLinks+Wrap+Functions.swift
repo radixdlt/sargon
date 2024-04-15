@@ -13,6 +13,10 @@ extension P2pLinks {
 		self = newP2PLinks(p2PLinks: elements)
 	}
 	
+	public init(element: P2pLink) {
+		self = newP2PLinksWithP2PLink(p2PLink: element)
+	}
+	
 	public var elements: [P2pLink] {
 		p2PLinksGetElements(p2PLinks: self)
 	}

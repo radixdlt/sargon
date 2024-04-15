@@ -22,9 +22,15 @@ impl EntityFlags {
     pub fn remove_flag(&mut self, flag: &EntityFlag) -> Option<EntityFlag> {
         self.remove(flag)
     }
+}
 
-    pub fn sample() -> Self {
-        Self::just(EntityFlag::sample())
+impl HasSampleValues for EntityFlags {
+    fn sample() -> Self {
+        Self::from_iter([EntityFlag::sample()])
+    }
+
+    fn sample_other() -> Self {
+        Self::new()
     }
 }
 

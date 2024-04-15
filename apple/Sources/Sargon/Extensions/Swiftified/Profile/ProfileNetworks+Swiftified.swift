@@ -8,6 +8,6 @@
 import Foundation
 import SargonUniFFI
 
-extension ProfileNetworks: NeverEmptyIdentifiedCollection {	
+extension ProfileNetworks: CanBeEmptyIdentifiedCollection {	
 	public typealias Element = ProfileNetwork
 }

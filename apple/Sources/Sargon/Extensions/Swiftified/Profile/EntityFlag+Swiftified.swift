@@ -8,7 +8,7 @@
 import Foundation
 import SargonUniFFI
 
-extension EntityFlag: BaseSargonModel & Identifiable {
+extension EntityFlag: SargonModel & Identifiable {
 	public typealias ID = Self
 	public var id: ID {
 		self

@@ -38,7 +38,6 @@ impl HasSampleValues for ProfileNetworks {
             ProfileNetwork::sample_mainnet(),
             ProfileNetwork::sample_stokenet(),
         ])
-        .unwrap()
     }
 
     /// A sample used to facilitate unit tests.
@@ -72,7 +71,6 @@ mod tests {
                 [ProfileNetwork::sample(), ProfileNetwork::sample()]
                     .into_iter()
             )
-            .unwrap()
             .len(),
             1
         )
@@ -88,8 +86,7 @@ mod tests {
             ]),
             Personas::default(),
             AuthorizedDapps::default(),
-        )])
-        .unwrap();
+        )]);
         assert!(
             !sut.append(ProfileNetwork::new(
                 NetworkID::Mainnet,

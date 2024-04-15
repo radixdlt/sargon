@@ -13,6 +13,10 @@ extension Accounts {
 		self = newAccounts(accounts: elements)
 	}
 	
+	public init(element: Account) {
+		self = newAccountsWithAccount(account: element)
+	}
+	
 	public var elements: [Account] {
 		accountsGetElements(accounts: self)
 	}

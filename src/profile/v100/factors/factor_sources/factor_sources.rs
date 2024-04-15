@@ -1,14 +1,5 @@
 use crate::prelude::*;
 
-#[uniffi::export]
-pub fn new_factor_sources_sample() -> FactorSources {
-    FactorSources::sample()
-}
-#[uniffi::export]
-pub fn new_factor_sources_sample_other() -> FactorSources {
-    FactorSources::sample_other()
-}
-
 impl FactorSources {
     /// Panics if `device_factor_source` is not using Babylon crypto parameters
     /// AND marked "main".

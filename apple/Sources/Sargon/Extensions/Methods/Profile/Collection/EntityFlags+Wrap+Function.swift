@@ -13,6 +13,10 @@ extension EntityFlags {
 		self = newEntityFlags(entityFlags: elements)
 	}
 	
+	public init(element: EntityFlag) {
+		self = newEntityFlagsWithEntityFlag(entityFlag: element)
+	}
+	
 	public var elements: [EntityFlag] {
 		entityFlagsGetElements(entityFlags: self)
 	}

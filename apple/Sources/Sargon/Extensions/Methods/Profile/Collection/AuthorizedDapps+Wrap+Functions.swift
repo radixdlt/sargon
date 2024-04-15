@@ -13,6 +13,10 @@ extension AuthorizedDapps {
 		self = newAuthorizedDapps(authorizedDapps: elements)
 	}
 	
+	public init(element: AuthorizedDapp) {
+		self = newAuthorizedDappsWithAuthorizedDapp(authorizedDapp: element)
+	}
+	
 	public var elements: [AuthorizedDapp] {
 		authorizedDappsGetElements(authorizedDapps: self)
 	}

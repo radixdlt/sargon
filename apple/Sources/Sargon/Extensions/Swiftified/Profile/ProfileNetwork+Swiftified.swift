@@ -8,6 +8,7 @@
 import Foundation
 import SargonUniFFI
 
+extension ProfileNetwork: SargonModel {}
 extension ProfileNetwork: Identifiable {
 	public typealias ID = NetworkID
 }

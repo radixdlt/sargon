@@ -13,6 +13,10 @@ extension Personas {
 		self = newPersonas(personas: elements)
 	}
 	
+	public init(element: Persona) {
+		self = newPersonasWithPersona(persona: element)
+	}
+	
 	public var elements: [Persona] {
 		personasGetElements(personas: self)
 	}
