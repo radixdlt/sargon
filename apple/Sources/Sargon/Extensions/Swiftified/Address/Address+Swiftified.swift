@@ -10,9 +10,11 @@ extension Address: AddressProtocol {
 		try A(validatingAddress: self.address)
 	}
 	
+	#if DEBUG
 	public static func random(networkID: NetworkID) -> Self {
 		Self.account(.random(networkID: networkID))
 	}
+	#endif // DEBUG
 }
 
 public func == (lhs: Address, rhs: some AddressProtocol) -> Bool {

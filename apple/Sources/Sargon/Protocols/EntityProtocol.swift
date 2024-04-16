@@ -1,6 +1,12 @@
 import SargonUniFFI
 
-public protocol EntityProtocol: SargonModel, CustomStringConvertible, Identifiable, CaseIterable where Self.AllCases == [Self], ID == Address {
+#if DEBUG
+public protocol BaseEntityProtocol: SargonModel, CaseIterable where Self.AllCases == [Self] {}
+#else
+public protocol BaseEntityProtocol: SargonModel {}
+#endif // DEBUG
+
+public protocol EntityProtocol: BaseEntityProtocol, CustomStringConvertible, Identifiable where ID == Address {
 	associatedtype Address: EntityAddressProtocol
 	var networkId: NetworkID { get }
 	var displayName: DisplayName { get }
