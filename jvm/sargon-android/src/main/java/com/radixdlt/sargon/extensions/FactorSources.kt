@@ -1,8 +1,10 @@
 package com.radixdlt.sargon.extensions
 
+import com.radixdlt.sargon.DeviceFactorSource
 import com.radixdlt.sargon.FactorSource
 import com.radixdlt.sargon.FactorSourceId
 import com.radixdlt.sargon.FactorSources
+import com.radixdlt.sargon.LedgerHardwareWalletFactorSource
 import com.radixdlt.sargon.factorSourcesElementCount
 import com.radixdlt.sargon.factorSourcesGetElements
 import com.radixdlt.sargon.factorSourcesGetFactorSourceById
@@ -49,4 +51,7 @@ fun FactorSources.removeById(id: FactorSourceId): FactorSources =
 
 fun FactorSources.get(id: FactorSourceId): FactorSource? =
     factorSourcesGetFactorSourceById(factorSources = this, id = id)
+
+fun DeviceFactorSource.asGeneral() = FactorSource.Device(this)
+fun LedgerHardwareWalletFactorSource.asGeneral() = FactorSource.Ledger(this)
 
