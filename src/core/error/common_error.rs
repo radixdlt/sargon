@@ -436,6 +436,9 @@ pub enum CommonError {
 
     #[error("Networks must not be empty")]
     ProfileNetworksMustNotBeEmpty = 10121,
+
+    #[error("Unknown SLIP10 Curve '{bad_value}'")]
+    UnknownSLIP10Curve { bad_value: String } = 10122,
 }
 
 #[uniffi::export]

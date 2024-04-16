@@ -1,5 +1,6 @@
 package com.radixdlt.sargon
 
+import com.radixdlt.sargon.extensions.asGeneral
 import com.radixdlt.sargon.extensions.default
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.string
@@ -43,16 +44,23 @@ class DerivationPathTest {
     }
 
     @Test
+    fun testBip44LikePathFromIndex() {
+        assertEquals(
+            "m/44H/1022H/0H/0/0H",
+            DerivationPath.Bip44Like.init(index = HdPathComponent(0u)).string
+        )
+    }
+
+    @Test
     fun testDerivationPathString() {
         val derivationPathCap26: DerivationPath =
-            DerivationPath.Cap26(Cap26Path.Account(AccountPath.sample()))
+            Cap26Path.Account(AccountPath.sample()).asGeneral()
         assertEquals(
             derivationPathCap26.string,
             DerivationPath.Cap26(Cap26Path.Account(AccountPath.sample())).string
         )
 
-        val derivationPathBip44: DerivationPath =
-            DerivationPath.Bip44Like(Bip44LikePath.sample())
+        val derivationPathBip44: DerivationPath = Bip44LikePath.sample().asGeneral()
         assertEquals(
             derivationPathBip44.string,
             DerivationPath.Bip44Like(Bip44LikePath.sample()).string

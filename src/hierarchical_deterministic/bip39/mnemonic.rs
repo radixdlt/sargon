@@ -49,12 +49,6 @@ impl SafeToLog for Mnemonic {
     }
 }
 
-/// Returns the words of a mnemonic as a String joined by spaces, e.g. "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"
-#[uniffi::export]
-pub fn mnemonic_phrase(from: &Mnemonic) -> String {
-    from.phrase()
-}
-
 impl Mnemonic {
     pub fn to_obfuscated_string(&self) -> String {
         format!("Mnemonic in {} obfuscated.", self.language)
@@ -91,6 +85,27 @@ impl Mnemonic {
 
     pub fn phrase(&self) -> String {
         self.words.iter().map(|w| w.word.to_string()).join(" ")
+    }
+
+    pub fn from(phrase: &str, language: BIP39Language) -> Result<Self> {
+        bip39::Mnemonic::parse_in(language.into(), phrase)
+            .map_err(|_| CommonError::InvalidMnemonicPhrase)
+            .map(Self::from_internal)
+    }
+
+    pub fn from_words(words: Vec<BIP39Word>) -> Result<Self> {
+        if words.is_empty() {
+            return Err(CommonError::InvalidMnemonicPhrase);
+        }
+
+        let language = words.first().unwrap().language;
+
+        if words.iter().any(|w| w.language != language) {
+            return Err(CommonError::InvalidMnemonicPhrase);
+        }
+
+        let phrase = words.iter().map(|w| w.word.to_string()).join(" ");
+        Self::from_phrase(&phrase)
     }
 
     pub fn from_phrase(phrase: &str) -> Result<Self> {
@@ -241,6 +256,79 @@ mod tests {
     }
 
     #[test]
+    fn from_phrase_language() {
+        assert_eq!(
+            SUT::from(
+                "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong",
+                BIP39Language::English
+            ),
+            SUT::from_phrase(
+                "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"
+            )
+        );
+    }
+
+    #[test]
+    fn from_wrong_phrase_language() {
+        assert_eq!(
+            SUT::from(
+                "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo abandon",
+                BIP39Language::English
+            ),
+            Err(CommonError::InvalidMnemonicPhrase)
+        );
+    }
+
+    #[test]
+    fn from_words() {
+        assert_eq!(
+            SUT::from_words(
+                "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"
+                    .split(' ')
+                    .map(|w| BIP39Word::new(w, BIP39Language::English).unwrap())
+                    .collect_vec()
+            ),
+            SUT::from_phrase(
+                "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"
+            )
+        );
+    }
+
+    #[test]
+    fn from_words_empty_phrase() {
+        assert_eq!(
+            SUT::from_words(vec![]),
+            Err(CommonError::InvalidMnemonicPhrase)
+        );
+    }
+
+    #[test]
+    fn from_words_wrong_phrase() {
+        assert_eq!(
+            SUT::from_words(
+                "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo abandon"
+                    .split(' ')
+                    .map(|w| BIP39Word::new(w, BIP39Language::English).unwrap())
+                    .collect_vec()
+            ),
+            Err(CommonError::InvalidMnemonicPhrase)
+        );
+    }
+
+    #[test]
+    fn from_words_wrong_words_count() {
+        assert_eq!(
+            SUT::from_words(
+                "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo"
+                    .split(' ')
+                    .map(|w| BIP39Word::new(w, BIP39Language::English).unwrap())
+                    .collect_vec()
+            ),
+            Err(CommonError::InvalidMnemonicPhrase)
+        );
+    }
+
+    #[test]
     fn json_roundtrip_success() {
         let a: SUT = "bright club bacon dinner achieve pull grid save ramp cereal blush woman humble limb repeat video sudden possible story mask neutral prize goose mandate"
             .parse()
@@ -275,20 +363,5 @@ mod tests {
         sut.zeroize();
 
         assert_eq!(sut.words.len(), 0);
-    }
-}
-
-#[cfg(test)]
-mod uniffi_tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = Mnemonic;
-
-    #[test]
-    fn name() {
-        let str = "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong";
-        let sut: SUT = str.parse().unwrap();
-        assert_eq!(mnemonic_phrase(&sut), str);
     }
 }

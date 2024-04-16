@@ -147,7 +147,7 @@ impl HasSampleValues for PersonaData {
         Self::new(
             PersonaDataIdentifiedName::sample_other(),
             CollectionOfPhoneNumbers::sample_other(),
-            CollectionOfEmailAddresses::sample(),
+            CollectionOfEmailAddresses::sample_other(),
         )
     }
 }
