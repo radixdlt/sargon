@@ -1265,6 +1265,14 @@ version = "0.4.3"
 source = "git+https://github.com/KokaKiwi/rust-hex/?rev=b2b4370b5bf021b98ee7adc92233e8de3f2de792#b2b4370b5bf021b98ee7adc92233e8de3f2de792"
 
 [[package]]
+name = "hkdf"
+version = "0.12.4"
+source = "git+https://github.com/RustCrypto/KDFs/?rev=1ac16e8b9d4ee7a67613c9396c6cc1327652eaba#1ac16e8b9d4ee7a67613c9396c6cc1327652eaba"
+dependencies = [
+ "hmac",
+]
+
+[[package]]
 name = "hmac"
 version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2534,6 +2542,7 @@ dependencies = [
  "enum-as-inner",
  "enum-iterator",
  "hex 0.4.3 (git+https://github.com/KokaKiwi/rust-hex/?rev=b2b4370b5bf021b98ee7adc92233e8de3f2de792)",
+ "hkdf",
  "identified_vec",
  "iota-crypto",
  "iso8601-timestamp",
