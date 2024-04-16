@@ -6,6 +6,7 @@ mod public_key;
 mod public_key_uniffi_fn;
 mod secp256k1;
 mod slip10_curve;
+mod slip10_curve_uniffi_fn;
 
 pub use ed25519::*;
 pub use is_private_key::*;
@@ -15,3 +16,4 @@ pub use public_key::*;
 pub use public_key_uniffi_fn::*;
 pub use secp256k1::*;
 pub use slip10_curve::*;
+pub use slip10_curve_uniffi_fn::*;

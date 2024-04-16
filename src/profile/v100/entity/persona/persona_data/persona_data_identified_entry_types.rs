@@ -84,6 +84,43 @@ macro_rules! declare_identified_entry {
                 )
             }
         }
+
+        paste! {
+            #[uniffi::export]
+            pub fn [< $struct_name:snake _sample >]() -> $struct_name {
+                $struct_name::sample()
+            }
+
+            #[uniffi::export]
+            pub fn [< $struct_name:snake _sample_other >]() -> $struct_name {
+                $struct_name::sample_other()
+            }
+
+            #[cfg(test)]
+            mod [< uniffi_ $mod_test_name >] {
+                use super::*;
+
+                #[allow(clippy::upper_case_acronyms)]
+                type SUT = $struct_name;
+
+                #[test]
+                fn test_roundtrip() {
+                    assert_eq!(
+                        HashSet::<SUT>::from_iter([
+                            [< $struct_name:snake _sample >](),
+                            [< $struct_name:snake _sample_other >](),
+                            // duplicates should get removed
+                            [< $struct_name:snake _sample >](),
+                            [< $struct_name:snake _sample_other >](),
+                        ])
+                        .len(),
+                        2
+                    );
+                }
+            }
+        }
+
+
         #[cfg(test)]
         mod $mod_test_name {
             use super::*;

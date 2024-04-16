@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use crate::prelude::*;
 
 /// Elliptic Curves which the SLIP10 derivation algorithm supports.
@@ -18,7 +20,6 @@ use crate::prelude::*;
     PartialOrd,
     Ord,
     uniffi::Enum,
-    derive_more::Display,
 )]
 #[serde(rename_all = "camelCase")]
 pub enum SLIP10Curve {
@@ -37,6 +38,29 @@ impl Identifiable for SLIP10Curve {
         match self {
             Self::Curve25519 => "curve25519".to_string(),
             Self::Secp256k1 => "secp256k1".to_string(),
+        }
+    }
+}
+
+impl Display for SLIP10Curve {
+    #[cfg(not(tarpaulin_include))] // false negative
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.id())
+    }
+}
+
+impl FromStr for SLIP10Curve {
+    type Err = CommonError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s == Self::Curve25519.id() {
+            Ok(Self::Curve25519)
+        } else if s == Self::Secp256k1.id() {
+            Ok(Self::Secp256k1)
+        } else {
+            Err(CommonError::UnknownSLIP10Curve {
+                bad_value: s.to_string(),
+            })
         }
     }
 }
@@ -89,5 +113,21 @@ mod tests {
     fn id() {
         assert_eq!(SUT::Curve25519.id(), "curve25519");
         assert_eq!(SUT::Secp256k1.id(), "secp256k1");
+    }
+
+    #[test]
+    fn test_from_str() {
+        assert_eq!(SUT::Curve25519, SUT::from_str("curve25519").unwrap());
+        assert_eq!(SUT::Secp256k1, SUT::from_str("secp256k1").unwrap());
+    }
+
+    #[test]
+    fn test_from_str_bad_value() {
+        assert_eq!(
+            Err(CommonError::UnknownSLIP10Curve {
+                bad_value: "bad value".to_string()
+            }),
+            SUT::from_str("bad value")
+        );
     }
 }
