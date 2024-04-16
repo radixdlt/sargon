@@ -3,7 +3,7 @@ use crate::prelude::*;
 /// Returns new mnemonic from a string of words
 #[uniffi::export]
 pub fn new_mnemonic_from_phrase(phrase: String) -> Result<Mnemonic> {
-    Mnemonic::from_phrase(&phrase.to_owned())
+    Mnemonic::from_phrase(&phrase)
 }
 
 #[uniffi::export]
@@ -11,7 +11,7 @@ pub fn new_mnemonic_from_phrase_language(
     phrase: String,
     language: BIP39Language,
 ) -> Result<Mnemonic> {
-    Mnemonic::from(&phrase.to_owned(), language)
+    Mnemonic::from(&phrase, language)
 }
 
 #[uniffi::export]
@@ -58,7 +58,7 @@ mod uniffi_tests {
     }
 
     #[test]
-    fn name() {
+    fn test_mnemonic_phrase() {
         let str = "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong";
         let sut: SUT = str.parse().unwrap();
         assert_eq!(mnemonic_phrase(&sut), str);

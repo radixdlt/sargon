@@ -104,9 +104,18 @@ macro_rules! declare_identified_entry {
                 type SUT = $struct_name;
 
                 #[test]
-                fn test_sample_roundtrip() {
-                    assert_eq!(SUT::sample(), [< $struct_name:snake _sample >]());
-                    assert_eq!(SUT::sample_other(), [< $struct_name:snake _sample_other >]());
+                fn test_roundtrip() {
+                    assert_eq!(
+                        HashSet::<SUT>::from_iter([
+                            [< $struct_name:snake _sample >](),
+                            [< $struct_name:snake _sample_other >](),
+                            // duplicates should get removed
+                            [< $struct_name:snake _sample >](),
+                            [< $struct_name:snake _sample_other >](),
+                        ])
+                        .len(),
+                        2
+                    );
                 }
             }
         }

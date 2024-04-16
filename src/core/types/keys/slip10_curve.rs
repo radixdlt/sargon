@@ -119,6 +119,10 @@ mod tests {
     fn test_from_str() {
         assert_eq!(SUT::Curve25519, SUT::from_str("curve25519").unwrap());
         assert_eq!(SUT::Secp256k1, SUT::from_str("secp256k1").unwrap());
+    }
+
+    #[test]
+    fn test_from_str_bad_value() {
         assert_eq!(
             Err(CommonError::UnknownSLIP10Curve {
                 bad_value: "bad value".to_string()

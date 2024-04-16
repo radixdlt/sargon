@@ -14,13 +14,21 @@ pub fn new_persona_data_sample_other() -> PersonaData {
 mod tests {
     use super::*;
 
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = PersonaData;
+
     #[test]
     fn test_samples() {
-        assert_eq!(new_persona_data_sample(), PersonaData::sample());
-
         assert_eq!(
-            new_persona_data_sample_other(),
-            PersonaData::sample_other()
+            HashSet::<SUT>::from_iter([
+                new_persona_data_sample(),
+                new_persona_data_sample_other(),
+                // duplicates should get removed
+                new_persona_data_sample(),
+                new_persona_data_sample_other(),
+            ])
+            .len(),
+            2
         );
     }
 }
