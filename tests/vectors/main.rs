@@ -338,9 +338,11 @@ mod slip10_tests {
 mod encrypted_profile_tests {
     use std::collections::HashSet;
 
+    use serde::Serialize;
+
     use super::*;
 
-    #[derive(Debug, Clone, Deserialize)]
+    #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
     struct IdentifiableMnemonic {
         #[serde(rename = "factorSourceID")]
         factor_source_id: FactorSourceID,
@@ -348,18 +350,18 @@ mod encrypted_profile_tests {
         mnemonic_with_passphrase: MnemonicWithPassphrase,
     }
 
-    #[derive(Debug, Clone, Deserialize)]
+    #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
     struct EncryptedSnapshotWithPassword {
         password: String,
         snapshot: EncryptedProfileSnapshot,
     }
     impl EncryptedSnapshotWithPassword {
         fn decrypted(&self) -> Result<Profile> {
-            todo!()
+            self.snapshot.decrypt(self.password.clone())
         }
     }
 
-    #[derive(Debug, Deserialize)]
+    #[derive(Debug, Deserialize, Serialize, PartialEq, Eq)]
     struct Fixture {
         #[serde(rename = "_snapshotVersion")]
         snapshot_version: ProfileSnapshotVersion,
@@ -370,9 +372,70 @@ mod encrypted_profile_tests {
     }
 
     impl Fixture {
-
         fn validate_all_entities_with_mnemonics(&self) -> Result<()> {
-            todo!()
+            self.plaintext
+                .networks
+                .clone()
+                .into_iter()
+                .try_for_each(|n| {
+                    let test = |security_state: EntitySecurityState| {
+                        let control = security_state.as_unsecured().unwrap();
+
+                        let tx_signing_instance =
+                            control.transaction_signing.clone();
+
+                        let factor_source_id_from_hash =
+                            tx_signing_instance.factor_source_id;
+
+                        if factor_source_id_from_hash.kind
+                            != FactorSourceKind::Device
+                        {
+                            return;
+                        }
+
+                        let factor_source_id: FactorSourceID =
+                            factor_source_id_from_hash.into();
+
+                        let factor_source = self
+                            .plaintext
+                            .factor_sources
+                            .clone()
+                            .into_iter()
+                            .find(|x| x.factor_source_id() == factor_source_id);
+
+                        assert!(factor_source.is_some());
+
+                        let mnemonic = self
+                            .mnemonics
+                            .clone()
+                            .into_iter()
+                            .find(|x| x.factor_source_id == factor_source_id)
+                            .unwrap();
+
+                        let public_key = mnemonic
+                            .mnemonic_with_passphrase
+                            .to_seed()
+                            .derive_private_key(
+                                &tx_signing_instance.derivation_path(),
+                            )
+                            .public_key();
+
+                        assert_eq!(public_key, tx_signing_instance.public_key);
+                    };
+
+                    n.accounts
+                        .into_iter()
+                        .map(|x| x.security_state)
+                        .for_each(test);
+
+                    n.personas
+                        .into_iter()
+                        .map(|x| x.security_state)
+                        .for_each(test);
+
+                    Ok(())
+                })?;
+            Ok(())
         }
 
         fn validate(&self) -> Result<Vec<Profile>> {
@@ -385,6 +448,7 @@ mod encrypted_profile_tests {
                 .unwrap();
 
             decryptions
+                .clone()
                 .into_iter()
                 .for_each(|x| assert_eq!(x, self.plaintext));
 
@@ -413,6 +477,13 @@ mod encrypted_profile_tests {
 
         fn test(&self) {
             let decrypted_profiles = self.validate().unwrap();
+            decrypted_profiles.clone().into_iter().for_each(|x| {
+                assert_eq!(
+                    x.header.snapshot_version,
+                    self.plaintext.header.snapshot_version
+                )
+            });
+            assert_json_roundtrip(self);
         }
     }
 

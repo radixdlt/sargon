@@ -17,9 +17,49 @@ use aes_gcm::{
     derive_more::Display,
     derive_more::Debug,
 )]
+#[serde(untagged)]
 pub enum EncryptionScheme {
     Version1(EncryptionSchemeVersion1),
 }
+
+impl Default for EncryptionScheme {
+    fn default() -> Self {
+        Self::Version1(EncryptionSchemeVersion1::default())
+    }
+}
+
+impl VersionedEncryption for EncryptionScheme {
+    fn version(&self) -> EncryptionSchemeVersion {
+        match self {
+            EncryptionScheme::Version1(scheme) => scheme.version(),
+        }
+    }
+
+    fn encrypt(
+        &self,
+        data: Vec<u8>,
+        encryption_key: &Exactly32Bytes,
+    ) -> Result<Vec<u8>> {
+        match self {
+            EncryptionScheme::Version1(scheme) => {
+                scheme.encrypt(data, encryption_key)
+            }
+        }
+    }
+
+    fn decrypt(
+        &self,
+        data: Vec<u8>,
+        decryption_key: &Exactly32Bytes,
+    ) -> Result<Vec<u8>> {
+        match self {
+            EncryptionScheme::Version1(scheme) => {
+                scheme.decrypt(data, decryption_key)
+            }
+        }
+    }
+}
+
 impl From<EncryptionSchemeVersion> for EncryptionScheme {
     fn from(value: EncryptionSchemeVersion) -> Self {
         match value {
@@ -133,10 +173,7 @@ impl EncryptionSchemeVersion1 {
         let cipher = Aes256Gcm::new(decryption_key);
         let cipher_text = sealed_box.cipher_text;
         cipher
-            .decrypt(
-                sealed_box.nonce.as_ref().try_into().unwrap(),
-                cipher_text.as_ref(),
-            )
+            .decrypt(sealed_box.nonce.as_ref().into(), cipher_text.as_ref())
             .map_err(|e| {
                 error!("Failed to AES decrypt data - error: {:?}", e);
                 CommonError::AESDecryptionFailed
@@ -150,25 +187,27 @@ impl VersionedEncryption for EncryptionSchemeVersion1 {
     }
 
     fn encrypt(
+        &self,
         data: Vec<u8>,
         encryption_key: &Exactly32Bytes,
     ) -> Result<Vec<u8>> {
-        Self::seal(data, &Key::<Aes256Gcm>::from(encryption_key.clone()))
+        Self::seal(data, &Key::<Aes256Gcm>::from(*encryption_key))
             .map(|sb| sb.combined())
     }
 
     fn decrypt(
+        &self,
         data: Vec<u8>,
         decryption_key: &Exactly32Bytes,
     ) -> Result<Vec<u8>> {
         let sealed_box = AESSealedBox::try_from(data)?;
-        Self::open(sealed_box, &Key::<Aes256Gcm>::from(decryption_key.clone()))
+        Self::open(sealed_box, &Key::<Aes256Gcm>::from(*decryption_key))
     }
 }
 
 impl From<Exactly32Bytes> for Key<Aes256Gcm> {
     fn from(value: Exactly32Bytes) -> Self {
-        Self::try_from(*value.bytes()).unwrap()
+        Self::from(*value.bytes())
     }
 }
 
@@ -240,23 +279,25 @@ mod tests {
 
     #[test]
     fn encryption_roundtrip() {
+        let sut = SUT::default();
         let key = Exactly32Bytes::generate();
         let msg = "Hello Radix";
         let msg_bytes = msg.bytes().collect();
-        let encrypted = SUT::encrypt(msg_bytes, &key).unwrap();
-        let decrypted_bytes = SUT::decrypt(encrypted, &key).unwrap();
+        let encrypted = sut.encrypt(msg_bytes, &key).unwrap();
+        let decrypted_bytes = sut.decrypt(encrypted, &key).unwrap();
         let decrypted = String::from_utf8(decrypted_bytes).unwrap();
         assert_eq!(msg, decrypted);
     }
 
     #[test]
     fn decrypt_known() {
+        let sut = SUT::default();
         let test = |encrypted_hex: &str,
                     key_hex: &str,
                     expected_plaintext: &str| {
             let decryption_key = Exactly32Bytes::from_str(key_hex).unwrap();
             let encrypted = hex_decode(encrypted_hex).unwrap();
-            let decrypted = SUT::decrypt(encrypted, &decryption_key).unwrap();
+            let decrypted = sut.decrypt(encrypted, &decryption_key).unwrap();
             assert_eq!(hex::encode(decrypted), expected_plaintext);
         };
 

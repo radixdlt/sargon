@@ -31,6 +31,58 @@ pub struct EncryptedProfileSnapshot {
     pub encryption_scheme: EncryptionScheme,
 }
 
+impl EncryptedProfileSnapshot {
+    pub fn decrypt(&self, password: String) -> Result<Profile> {
+        let decryption_key = self.key_derivation_scheme.kdf(password);
+        let decrypted = self
+            .encryption_scheme
+            .decrypt(self.encrypted_snapshot.to_vec(), &decryption_key)?;
+        Profile::new_from_json_bytes(decrypted.into())
+    }
+
+    pub fn encrypting(
+        profile: &Profile,
+        password: String,
+        kdf_scheme: impl Into<Option<PasswordBasedKeyDerivationScheme>>,
+        encryption_scheme: impl Into<Option<EncryptionScheme>>,
+    ) -> Result<Self> {
+        let key_derivation_scheme = kdf_scheme.into().unwrap_or_default();
+        let encryption_scheme = encryption_scheme.into().unwrap_or_default();
+
+        let json = profile.to_json_bytes()?;
+        let encryption_key = key_derivation_scheme.kdf(password);
+        let encrypted_payload =
+            encryption_scheme.encrypt(json.to_vec(), &encryption_key)?;
+
+        Ok(Self {
+            version: ProfileEncryptionVersion::default(),
+            encrypted_snapshot: BagOfBytes::from(encrypted_payload),
+            key_derivation_scheme,
+            encryption_scheme,
+        })
+    }
+}
+
+impl HasSampleValues for EncryptedProfileSnapshot {
+    /// Password is: `"babylon"` - encryption of SAME profile as `Self::sample_other()`
+    fn sample() -> Self {
+        let json_str = include_str!(concat!(
+            env!("FIXTURES_VECTOR"),
+            "profile_encrypted_by_password_of_babylon.json"
+        ));
+        serde_json::from_str::<EncryptedProfileSnapshot>(json_str).unwrap()
+    }
+
+    /// Password is: `""` (empty) - encryption of SAME profile as `Self::sample()`
+    fn sample_other() -> Self {
+        let json_str = include_str!(concat!(
+            env!("FIXTURES_VECTOR"),
+            "profile_encrypted_by_password_empty.json"
+        ));
+        serde_json::from_str::<EncryptedProfileSnapshot>(json_str).unwrap()
+    }
+}
+
 #[derive(
     Copy,
     Clone,
@@ -47,4 +99,83 @@ pub struct EncryptedProfileSnapshot {
 #[serde(transparent)]
 pub struct ProfileEncryptionVersion(u32);
 
-uniffi::custom_newtype!(ProfileEncryptionVersion, u32);
+impl Default for ProfileEncryptionVersion {
+    fn default() -> Self {
+        Self(1)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = EncryptedProfileSnapshot;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn json_roundtrip() {
+        let sut = SUT::sample();
+        assert_json_roundtrip(&sut);
+    }
+
+    #[test]
+    fn decrypt_sample() {
+        let sut = SUT::sample();
+        let decrypted = sut.decrypt("babylon".to_owned()).unwrap();
+        assert_eq!(
+            decrypted.header.id,
+            ProfileID::from_str("e5e4477b-e47b-4b64-bbc8-f8f40e8beb74")
+                .unwrap()
+        );
+    }
+
+    #[test]
+    fn decrypt_sample_other() {
+        let sut = SUT::sample_other();
+        let decrypted = sut.decrypt("".to_owned()).unwrap();
+        assert_eq!(
+            decrypted.header.id,
+            ProfileID::from_str("e5e4477b-e47b-4b64-bbc8-f8f40e8beb74")
+                .unwrap()
+        );
+    }
+
+    #[test]
+    fn decrypt_samples() {
+        let decrypted_sample =
+            SUT::sample().decrypt("babylon".to_owned()).unwrap();
+        let decrypted_sample_other =
+            SUT::sample_other().decrypt("".to_owned()).unwrap();
+        assert_eq!(decrypted_sample, decrypted_sample_other);
+    }
+
+    #[test]
+    fn encryption_roundtrip() {
+        let test = |profile: Profile, password: &str| {
+            let encrypted =
+                SUT::encrypting(&profile, password.to_owned(), None, None)
+                    .unwrap();
+            let decrypted = encrypted.decrypt(password.to_owned()).unwrap();
+            assert_eq!(decrypted, profile);
+        };
+
+        let password = "so secure";
+        test(Profile::sample(), password);
+        test(Profile::sample_other(), password);
+
+        let password = "even more secure";
+        test(Profile::sample(), password);
+        test(Profile::sample_other(), password);
+    }
+}
