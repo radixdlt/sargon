@@ -333,3 +333,49 @@ mod slip10_tests {
         thousand.test();
     }
 }
+
+#[cfg(test)]
+mod encrypted_profile_tests {
+    use super::*;
+
+    #[derive(Debug, Deserialize)]
+    struct IdentifiableMnemonic {
+        #[serde(rename = "factorSourceID")]
+        factor_source_id: FactorSourceID,
+        #[serde(rename = "mnemonicWithPassphrase")]
+        mnemonic_with_passphrase: MnemonicWithPassphrase,
+    }
+
+    #[derive(Debug, Deserialize)]
+    struct EncryptedSnapshotWithPassword {
+        password: String,
+        snapshot: EncryptedProfileSnapshot,
+    }
+
+    #[derive(Debug, Deserialize)]
+    struct Fixture {
+        #[serde(rename = "_snapshotVersion")]
+        snapshot_version: ProfileSnapshotVersion,
+        mnemonics: Vec<IdentifiableMnemonic>,
+        #[serde(rename = "encryptedSnapshots")]
+        encrypted_snapshots: Vec<EncryptedSnapshotWithPassword>,
+        plaintext: Profile,
+    }
+
+    impl Fixture {
+        fn test(&self) {
+            // self.groups.iter().for_each(|g| g.test())
+        }
+    }
+
+    #[test]
+    fn test_vectors() {
+        let fixture = fixture::<Fixture>(include_str!(concat!(
+            env!("FIXTURES_VECTOR"),
+            "multi_profile_snapshots_test_version_100_patch_after_app_version_120.json"
+        )))
+        .expect("Encrypted Profile tests");
+
+        fixture.test();
+    }
+}

@@ -540,3 +540,10 @@ decl_exactly_n_bytes!(
     65,
     "65deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead", // expected sample value for tests
 );
+
+decl_exactly_n_bytes!(
+    /// 12 bytes, used by AES encryption, implementation wise those bytes are
+    /// stored inside a `BagOfBytes` (wrapper of `Vec<u8>`) for UniFFI compat.
+    12,
+    "deadbeefdeadbeefdeadbeef", // expected sample value for tests
+);
