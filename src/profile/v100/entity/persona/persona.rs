@@ -413,6 +413,16 @@ mod tests {
             Persona::sample_stokenet_other(),
             Persona::sample_mainnet_other()
         );
+
+        assert_ne!(
+            Persona::sample_mainnet_other(),
+            Persona::sample_mainnet_third()
+        );
+
+        assert_ne!(
+            Persona::sample_stokenet_other(),
+            Persona::sample_stokenet_third()
+        );
     }
 
     #[test]

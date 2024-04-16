@@ -261,6 +261,11 @@ mod tests {
     }
 
     #[test]
+    fn default_is_new() {
+        assert_eq!(SUT::new(), SUT::default());
+    }
+
+    #[test]
     fn len() {
         let sut = SUT::from_iter([1337, 42, 237]);
         assert_eq!(sut.len(), 3);

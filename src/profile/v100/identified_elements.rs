@@ -137,6 +137,17 @@ macro_rules! decl_identified_array_of {
                 type SUTElement = $element_type;
 
                 #[test]
+                fn equality() {
+                    assert_eq!(SUT::sample(), SUT::sample());
+                    assert_eq!(SUT::sample_other(), SUT::sample_other());
+                }
+            
+                #[test]
+                fn inequality() {
+                    assert_ne!(SUT::sample(), SUT::sample_other());
+                }
+
+                #[test]
                 fn manual_perform_uniffi_conversion() {
                     let sut = SUT::sample();
                     let identified_array = (*sut).clone();
