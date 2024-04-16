@@ -92,7 +92,7 @@ impl Wallet {
         let bdfs = profile.bdfs();
 
         let index = profile
-            .next_derivation_index_for_entity(EntityKind::Accounts, network_id);
+            .next_derivation_index_for_entity(EntityKind::Account, network_id);
 
         let number_of_accounts_on_network = profile
             .networks
@@ -471,12 +471,10 @@ mod tests {
     #[test]
     fn create_new_account_first_success() {
         test_create_new_account_first_success(false, |_, q| {
-            // Account SHOULD NOT yet have been saved into Profile, so number of accounts should still be 2
             assert_eq!(q.networks.len(), 0);
         });
 
         test_create_new_account_first_success(true, |a, q| {
-            // Account SHOULD NOT yet have been saved into Profile, so number of accounts should still be 2
             assert_eq!(q.networks.len(), 1);
             assert_eq!(q.networks[0].accounts[0], a);
         })

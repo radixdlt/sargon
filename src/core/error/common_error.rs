@@ -433,6 +433,9 @@ pub enum CommonError {
 
     #[error("SupportedCurves must not be empty.")]
     SupportedCurvesMustNotBeEmpty = 10120,
+
+    #[error("Networks must not be empty")]
+    ProfileNetworksMustNotBeEmpty = 10121,
 }
 
 #[uniffi::export]

@@ -1,3 +1,9 @@
+import CustomDump
+import Foundation
+import Sargon
+import SargonUniFFI
+import XCTest
+
 final class HashTests: Test<Hash> {
 	func test_blake2b() {
 		func doTest(_ msg: String, expected: Exactly32Bytes) {

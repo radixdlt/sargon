@@ -1,5 +1,11 @@
 @testable import Sargon
 
+import CustomDump
+import Foundation
+import Sargon
+import SargonUniFFI
+import XCTest
+
 final class BagOfBytesTests: XCTestCase {
 	
 	func test_equality() {

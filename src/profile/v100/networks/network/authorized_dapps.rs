@@ -1,5 +1,11 @@
 use crate::prelude::*;
 
+decl_can_be_empty_identified_array_of!(
+    /// An ordered set of ['AuthorizedDapp`]s on a specific network.
+    AuthorizedDapps,
+    AuthorizedDapp
+);
+
 impl HasSampleValues for AuthorizedDapps {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {

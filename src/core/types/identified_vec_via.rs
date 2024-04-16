@@ -29,6 +29,14 @@ impl<Element: Identifiable + Debug + Clone> std::iter::FromIterator<Element>
     }
 }
 
+impl<Element: Identifiable + Debug + Clone> Default
+    for IdentifiedVecVia<Element>
+{
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<Element: Identifiable + Debug + Clone> IdentifiedVecVia<Element> {
     pub fn new() -> Self {
         Self::from_identified_vec_of(IdentifiedVecOf::new())
@@ -229,7 +237,9 @@ unsafe impl<UT, T: Identifiable + Debug + Clone + Lift<UT>> Lift<UT>
 
 #[cfg(test)]
 mod tests {
-    use identified_vec::{IsIdentifiableVecOfVia, IsIdentifiedVec};
+    use identified_vec::{
+        IsIdentifiableVecOfVia, IsIdentifiedVec, ItemsCloned,
+    };
     use itertools::Itertools;
 
     use super::IdentifiedVecVia;
@@ -248,6 +258,11 @@ mod tests {
         let sut = SUT::from_iter([1337, 42, 237]);
         assert!(!sut.is_empty());
         assert!(SUT::new().is_empty());
+    }
+
+    #[test]
+    fn default_is_new() {
+        assert_eq!(SUT::new(), SUT::default());
     }
 
     #[test]
@@ -291,6 +306,8 @@ mod tests {
     fn via_mut_write() {
         let mut sut = SUT::from_iter([1337, 42]);
         sut.via_mut().append(237);
-        assert_eq!(sut.into_iter().collect_vec(), [1337, 42, 237]);
+        assert_eq!(sut.items(), [1337, 42, 237]);
+        sut.via_mut().remove_by_id(&42);
+        assert_eq!(sut.items(), [1337, 237]);
     }
 }

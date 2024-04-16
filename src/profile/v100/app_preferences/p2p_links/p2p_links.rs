@@ -1,15 +1,12 @@
 use crate::prelude::*;
 
-/// Collection of clients user have connected P2P with, typically these
-/// are WebRTC connections with DApps, but might be Android or iPhone
-/// clients as well.
-pub type P2PLinks = IdentifiedVecVia<P2PLink>;
-
-impl Default for P2PLinks {
-    fn default() -> Self {
-        Self::new()
-    }
-}
+decl_can_be_empty_identified_array_of!(
+    /// Collection of clients user have connected P2P with, typically these
+    /// are WebRTC connections with DApps, but might be Android or iPhone
+    /// clients as well.
+    P2PLinks,
+    P2PLink
+);
 
 impl HasSampleValues for P2PLinks {
     /// A sample used to facilitate unit tests.
@@ -51,7 +48,7 @@ mod tests {
     fn debug() {
         let mut sut = P2PLinks::new();
         sut.append(P2PLink::sample_duckduckgo());
-        assert_eq!(format!("{:?}", sut), "[P2PLink { display_name: 'DuckDuckGo on Mac Pro', connection_password: 'deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead' }]");
+        assert_eq!(format!("{:?}", sut), "P2PLinks { secret_magic: P2PLinksSecretMagic([P2PLink { display_name: 'DuckDuckGo on Mac Pro', connection_password: 'deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead' }]) }");
     }
 
     #[test]

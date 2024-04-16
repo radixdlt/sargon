@@ -1,3 +1,9 @@
+import CustomDump
+import Foundation
+import Sargon
+import SargonUniFFI
+import XCTest
+
 final class IntentHashTests: TransactionHashProtocolTest<IntentHash> {
 	func test_network_id() {
 		XCTAssertEqual(SUT.sample.networkID, .mainnet)

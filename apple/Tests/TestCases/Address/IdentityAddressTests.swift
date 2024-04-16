@@ -1,3 +1,9 @@
+import CustomDump
+import Foundation
+import Sargon
+import SargonUniFFI
+import XCTest
+
 final class IdentityAddressTests: AddressTest<IdentityAddress> {
 	func test_from_public_key() {
 		let publicKey: Ed25519PublicKey = "6c28952be5cdade99c7dd5d003b6b692714b6b74c5fdb5fdc9a8e4ee1d297838"

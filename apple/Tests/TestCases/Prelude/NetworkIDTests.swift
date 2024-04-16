@@ -1,3 +1,9 @@
+import CustomDump
+import Foundation
+import Sargon
+import SargonUniFFI
+import XCTest
+
 final class NetworkIDTests: Test<NetworkID> {
 	func test_non_existing_throws() {
 		XCTAssertThrowsError(try SUT(discriminant: 237))

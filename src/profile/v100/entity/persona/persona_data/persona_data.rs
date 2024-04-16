@@ -170,7 +170,7 @@ mod tests {
     #[test]
     fn new_persona_data() {
         let name = PersonaDataEntryName::new(
-            Variant::Western,
+            PersonaDataNameVariant::Western,
             "Skywalker",
             "Anakin",
             "Darth Vader",

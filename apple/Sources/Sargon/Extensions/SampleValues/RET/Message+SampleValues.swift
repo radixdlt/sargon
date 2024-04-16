@@ -1,3 +1,6 @@
+import Foundation
+import SargonUniFFI
+
 #if DEBUG
 extension Message {
 	public static let sample: Self = newMessagePlaintextSample()

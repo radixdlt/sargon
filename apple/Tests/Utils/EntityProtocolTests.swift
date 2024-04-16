@@ -1,3 +1,9 @@
+import CustomDump
+import Foundation
+import Sargon
+import SargonUniFFI
+import XCTest
+
 class EntityTest<SUT_: EntityProtocol>: Test<SUT_> {
 	
 	func test_network_id_of_mainnet_entities() {

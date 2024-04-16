@@ -1,22 +1,22 @@
 use crate::prelude::*;
 
 #[uniffi::export]
-pub fn new_sample_authorised_dapp_mainnet_dashboard() -> AuthorizedDapp {
+pub fn new_authorized_dapp_sample_mainnet_dashboard() -> AuthorizedDapp {
     AuthorizedDapp::sample_mainnet_dashboard()
 }
 
 #[uniffi::export]
-pub fn new_sample_authorised_dapp_mainnet_gumballclub() -> AuthorizedDapp {
+pub fn new_authorized_dapp_sample_mainnet_gumballclub() -> AuthorizedDapp {
     AuthorizedDapp::sample_mainnet_gumballclub()
 }
 
 #[uniffi::export]
-pub fn new_sample_authorised_dapp_stokenet_devconsole() -> AuthorizedDapp {
+pub fn new_authorized_dapp_sample_stokenet_devconsole() -> AuthorizedDapp {
     AuthorizedDapp::sample_stokenet_devconsole()
 }
 
 #[uniffi::export]
-pub fn new_sample_authorised_dapp_stokenet_sandbox() -> AuthorizedDapp {
+pub fn new_authorized_dapp_sample_stokenet_sandbox() -> AuthorizedDapp {
     AuthorizedDapp::sample_stokenet_sandbox()
 }
 
@@ -30,22 +30,22 @@ mod uniffi_tests {
     #[test]
     fn samples() {
         assert_eq!(
-            new_sample_authorised_dapp_mainnet_dashboard(),
+            new_authorized_dapp_sample_mainnet_dashboard(),
             SUT::sample_mainnet_dashboard()
         );
 
         assert_eq!(
-            new_sample_authorised_dapp_mainnet_gumballclub(),
+            new_authorized_dapp_sample_mainnet_gumballclub(),
             SUT::sample_mainnet_gumballclub()
         );
 
         assert_eq!(
-            new_sample_authorised_dapp_stokenet_devconsole(),
+            new_authorized_dapp_sample_stokenet_devconsole(),
             SUT::sample_stokenet_devconsole()
         );
 
         assert_eq!(
-            new_sample_authorised_dapp_stokenet_sandbox(),
+            new_authorized_dapp_sample_stokenet_sandbox(),
             SUT::sample_stokenet_sandbox()
         );
     }

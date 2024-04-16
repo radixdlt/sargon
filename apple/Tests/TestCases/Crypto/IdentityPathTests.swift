@@ -1,3 +1,9 @@
+import CustomDump
+import Foundation
+import Sargon
+import SargonUniFFI
+import XCTest
+
 final class IdentityPathTests: HDPathProtocolTests<IdentityPath> {
     func test_sample_description() {
         XCTAssertNoDifference(SUT.sample.description, "m/44H/1022H/1H/618H/1460H/0H")

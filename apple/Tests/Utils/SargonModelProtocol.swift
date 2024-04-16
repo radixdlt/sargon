@@ -1,7 +1,8 @@
-@_exported import Foundation
-@_exported import Sargon
-@_exported import XCTest
-@_exported import CustomDump
+import CustomDump
+import Foundation
+import Sargon
+import SargonUniFFI
+import XCTest
 
 class TestCase: XCTestCase {
 	override func setUp() {

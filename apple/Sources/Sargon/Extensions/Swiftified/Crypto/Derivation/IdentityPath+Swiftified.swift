@@ -1,3 +1,6 @@
+import Foundation
+import SargonUniFFI
+
 extension IdentityPath: SargonModel, CAP26PathProtocol {}
 
 extension IdentityPath {

@@ -1,3 +1,9 @@
+import CustomDump
+import Foundation
+import Sargon
+import SargonUniFFI
+import XCTest
+
 final class PublicKeyHashTests: Test<PublicKeyHash> {
 	
 	func test_hash_public_key_ed25519() {

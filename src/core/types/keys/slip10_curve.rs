@@ -53,11 +53,25 @@ impl HasSampleValues for SLIP10Curve {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = SLIP10Curve;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
 
     #[test]
     fn json_roundtrip_secp256k1() {
-        let model = SLIP10Curve::Secp256k1;
+        let model = SUT::Secp256k1;
         assert_json_value_eq_after_roundtrip(&model, json!("secp256k1"));
         assert_json_value_ne_after_roundtrip(&model, json!("curve25519"));
         assert_json_roundtrip(&model);
@@ -65,7 +79,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_curve25519() {
-        let model = SLIP10Curve::Curve25519;
+        let model = SUT::Curve25519;
         assert_json_value_eq_after_roundtrip(&model, json!("curve25519"));
         assert_json_value_ne_after_roundtrip(&model, json!("secp256k1"));
         assert_json_roundtrip(&model);
@@ -73,7 +87,7 @@ mod tests {
 
     #[test]
     fn id() {
-        assert_eq!(SLIP10Curve::Curve25519.id(), "curve25519");
-        assert_eq!(SLIP10Curve::Secp256k1.id(), "secp256k1");
+        assert_eq!(SUT::Curve25519.id(), "curve25519");
+        assert_eq!(SUT::Secp256k1.id(), "secp256k1");
     }
 }

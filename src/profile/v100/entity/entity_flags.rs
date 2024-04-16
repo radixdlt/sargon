@@ -1,38 +1,18 @@
 use crate::prelude::*;
 
-/// An order set of `EntityFlag`s used to describe certain Off-ledger
-/// user state about Accounts or Personas, such as if an entity is
-/// marked as hidden or not.
-pub type EntityFlags = IdentifiedVecVia<EntityFlag>;
+decl_can_be_empty_identified_array_of!(
+    /// An order set of `EntityFlag`s used to describe certain Off-ledger
+    /// user state about Accounts or Personas, such as if an entity is
+    /// marked as hidden or not.
+    EntityFlags,
+    EntityFlag
+);
 
 impl Identifiable for EntityFlag {
     type ID = Self;
 
     fn id(&self) -> Self::ID {
         *self
-    }
-}
-
-impl EntityFlags {
-    /// Instantiates a flag collection with the provided Vec<Flag>,
-    /// removing any duplicates from `flags` if any.
-    pub fn with_flags<I>(flags: I) -> Self
-    where
-        I: IntoIterator<Item = EntityFlag>,
-    {
-        Self::from_iter(flags)
-    }
-
-    /// Instantiates a flag collection with the provided single flag
-    pub fn with_flag(flag: EntityFlag) -> Self {
-        Self::with_flags(vec![flag])
-    }
-}
-
-impl Default for EntityFlags {
-    /// Instantiates an empty collection of entity flags.
-    fn default() -> Self {
-        Self::new()
     }
 }
 
@@ -52,27 +32,42 @@ impl EntityFlags {
     }
 }
 
+impl HasSampleValues for EntityFlags {
+    fn sample() -> Self {
+        Self::from_iter([EntityFlag::sample()])
+    }
+
+    fn sample_other() -> Self {
+        Self::new()
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = EntityFlags;
+
     #[test]
     fn empty_by_default() {
-        assert_eq!(EntityFlags::default(), EntityFlags::new())
+        assert_eq!(SUT::default(), SUT::new())
     }
+
     #[test]
     fn default_does_not_contain_deleted_by_user() {
-        assert!(!EntityFlags::default().contains(&EntityFlag::DeletedByUser));
+        assert!(!SUT::default().contains(&EntityFlag::DeletedByUser));
     }
 
     #[test]
     fn new_with_f_contains_f() {
-        assert!(EntityFlags::with_flag(EntityFlag::DeletedByUser)
+        assert!(SUT::just(EntityFlag::DeletedByUser)
             .contains(&EntityFlag::DeletedByUser));
     }
 
     #[test]
     fn remove_existing_flag() {
-        assert!(EntityFlags::with_flag(EntityFlag::DeletedByUser)
+        assert!(SUT::just(EntityFlag::DeletedByUser)
             .remove_flag(&EntityFlag::DeletedByUser)
             .is_some());
     }
@@ -80,7 +75,7 @@ mod tests {
     #[test]
     fn remove_non_existing_flag() {
         assert_eq!(
-            EntityFlags::default().remove_flag(&EntityFlag::DeletedByUser),
+            SUT::default().remove_flag(&EntityFlag::DeletedByUser),
             None
         );
         // does not exist
@@ -89,7 +84,7 @@ mod tests {
     #[test]
     fn new_with_duplicates_of_f_contains_only_f() {
         assert_eq!(
-            EntityFlags::with_flags(vec![
+            SUT::with_entity_flags(vec![
                 EntityFlag::DeletedByUser,
                 EntityFlag::DeletedByUser
             ])
@@ -100,14 +95,14 @@ mod tests {
 
     #[test]
     fn new_empty_insert_f_contains_f() {
-        let mut sut = EntityFlags::default();
+        let mut sut = SUT::default();
         sut.insert_flag(EntityFlag::DeletedByUser);
         assert!(sut.contains(&EntityFlag::DeletedByUser));
     }
 
     #[test]
     fn json_roundtrip_non_empty() {
-        let model = EntityFlags::with_flag(EntityFlag::DeletedByUser);
+        let model = SUT::just(EntityFlag::DeletedByUser);
 
         assert_json_value_eq_after_roundtrip(
             &model,
@@ -123,7 +118,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_empty() {
-        let model = EntityFlags::default();
+        let model = SUT::default();
 
         let json = json!(Vec::<String>::new());
         assert_json_value_eq_after_roundtrip(&model, json);

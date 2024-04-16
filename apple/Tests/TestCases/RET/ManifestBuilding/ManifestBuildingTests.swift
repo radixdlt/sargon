@@ -1,6 +1,12 @@
 @testable import Sargon
 import RegexBuilder
 
+import CustomDump
+import Foundation
+import Sargon
+import SargonUniFFI
+import XCTest
+
 final class ManifestBuildingTests: Test<TransactionManifest> {
 	
 	func test_manifest_for_faucet_with_lock_fee() {

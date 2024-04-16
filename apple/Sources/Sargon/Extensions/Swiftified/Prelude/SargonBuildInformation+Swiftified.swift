@@ -1,3 +1,6 @@
+import Foundation
+import SargonUniFFI
+
 extension SargonBuildInformation: SargonModel {}
 
 extension SargonBuildInformation {

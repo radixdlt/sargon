@@ -1,3 +1,6 @@
+import Foundation
+import SargonUniFFI
+
 extension Secp256k1Signature: SignatureProtocol {
 	public var data: Data {
 		bytes.data

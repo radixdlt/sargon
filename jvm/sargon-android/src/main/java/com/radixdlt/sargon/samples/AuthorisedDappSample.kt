@@ -2,10 +2,10 @@ package com.radixdlt.sargon.samples
 
 import com.radixdlt.sargon.AuthorizedDapp
 import com.radixdlt.sargon.annotation.UsesSampleValues
-import com.radixdlt.sargon.newSampleAuthorisedDappMainnetDashboard
-import com.radixdlt.sargon.newSampleAuthorisedDappMainnetGumballclub
-import com.radixdlt.sargon.newSampleAuthorisedDappStokenetDevconsole
-import com.radixdlt.sargon.newSampleAuthorisedDappStokenetSandbox
+import com.radixdlt.sargon.newAuthorizedDappSampleMainnetDashboard
+import com.radixdlt.sargon.newAuthorizedDappSampleMainnetGumballclub
+import com.radixdlt.sargon.newAuthorizedDappSampleStokenetDevconsole
+import com.radixdlt.sargon.newAuthorizedDappSampleStokenetSandbox
 
 @UsesSampleValues
 object AuthorisedDappSampleMainnet: Sample<AuthorizedDapp> {
@@ -14,10 +14,10 @@ object AuthorisedDappSampleMainnet: Sample<AuthorizedDapp> {
     override fun other(): AuthorizedDapp = gumballClub
 
     val dashboard: AuthorizedDapp
-        get() = newSampleAuthorisedDappMainnetDashboard()
+        get() = newAuthorizedDappSampleMainnetDashboard()
 
     val gumballClub: AuthorizedDapp
-        get() = newSampleAuthorisedDappMainnetGumballclub()
+        get() = newAuthorizedDappSampleMainnetGumballclub()
 }
 
 @UsesSampleValues
@@ -31,10 +31,10 @@ object AuthorisedDappSampleStokenet: Sample<AuthorizedDapp> {
     override fun other(): AuthorizedDapp = sandbox
 
     val devConsole: AuthorizedDapp
-        get() = newSampleAuthorisedDappStokenetDevconsole()
+        get() = newAuthorizedDappSampleStokenetDevconsole()
 
     val sandbox: AuthorizedDapp
-        get() = newSampleAuthorisedDappStokenetSandbox()
+        get() = newAuthorizedDappSampleStokenetSandbox()
 }
 
 @UsesSampleValues

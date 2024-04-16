@@ -1,5 +1,6 @@
 [all]
 exclude-files = [
+    "src/lib.rs",
     # Too many false negatives (macro usage)
     "src/profile/v100/address/non_fungible_resource_address.rs",
     "src/profile/v100/address/wrap_ret_address.rs",

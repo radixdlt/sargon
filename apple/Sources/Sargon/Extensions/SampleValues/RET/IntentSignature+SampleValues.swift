@@ -1,3 +1,6 @@
+import Foundation
+import SargonUniFFI
+
 #if DEBUG
 extension IntentSignature {
     public static let sample: Self = newIntentSignatureSample()

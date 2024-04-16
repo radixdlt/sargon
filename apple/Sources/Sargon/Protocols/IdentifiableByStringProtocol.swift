@@ -1,3 +1,5 @@
+import Foundation
+import SargonUniFFI
 
 #if DEBUG
 public protocol BaseIdentifiableByStringProtocol: SargonModel & ExpressibleByStringLiteral {}

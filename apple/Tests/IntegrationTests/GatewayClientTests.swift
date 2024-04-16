@@ -1,3 +1,9 @@
+import CustomDump
+import Foundation
+import Sargon
+import SargonUniFFI
+import XCTest
+
 final class GatewayClientTests: TestCase {
 	
 	func test_xrd_balance_of_account() async throws {

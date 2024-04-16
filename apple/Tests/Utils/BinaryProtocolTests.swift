@@ -1,3 +1,9 @@
+import CustomDump
+import Foundation
+import Sargon
+import SargonUniFFI
+import XCTest
+
 class BinaryProtocolTest<SUT_: BinaryProtocol>: Test<SUT_> {
 	func test_init_from_hex() throws {
 		try XCTAssertNoDifference(SUT(hex: SUT.sample.hex), SUT.sample)

@@ -1,5 +1,13 @@
 use crate::prelude::*;
 
+decl_can_be_empty_identified_array_of!(
+    /// Other by user added or predefined Gateways the user can switch to.
+    /// It might be Gateways with different URLs on the SAME network, or
+    /// other networks, the identifier of a Gateway is the URL.
+    OtherGateways,
+    Gateway
+);
+
 /// The currently used Gateway and a collection of other by user added
 /// or predefined Gateways the user can switch to.
 #[derive(

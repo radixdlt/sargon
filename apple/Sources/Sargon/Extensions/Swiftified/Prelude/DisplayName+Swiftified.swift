@@ -1,3 +1,6 @@
+import Foundation
+import SargonUniFFI
+
 extension DisplayName: SargonModel {}
 
 extension DisplayName: CustomStringConvertible {

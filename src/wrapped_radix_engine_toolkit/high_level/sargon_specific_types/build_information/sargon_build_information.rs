@@ -35,13 +35,12 @@ impl HasSampleValues for SargonBuildInformation {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SargonBuildInformation;
 
     #[test]
-    #[ignore]
     fn equality() {
         assert_eq!(SUT::sample(), SUT::sample());
         assert_eq!(SUT::sample_other(), SUT::sample_other());
