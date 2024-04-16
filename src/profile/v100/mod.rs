@@ -4,7 +4,10 @@ mod entity;
 mod entity_security_state;
 mod factors;
 mod header;
+
+#[macro_use]
 mod identified_elements;
+
 mod networks;
 mod profile;
 mod profile_uniffi_fn;

@@ -1,5 +1,13 @@
 use crate::prelude::*;
 
+decl_can_be_empty_identified_array_of!(
+    /// An ordered set of [`Account`]s on a specific network, most commonly
+    /// the set is non-empty, since wallets guide user to create a first
+    /// Account.
+    Accounts,
+    Account
+);
+
 impl HasSampleValues for Accounts {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {

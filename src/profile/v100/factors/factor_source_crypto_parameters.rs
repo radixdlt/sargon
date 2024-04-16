@@ -1,4 +1,13 @@
-use crate::prelude::*;
+use crate::decl_identified_array_of;
+use crate::decl_never_empty_impl;
+use crate::{decl_never_empty_identified_array_of, prelude::*};
+
+decl_never_empty_identified_array_of!(
+    /// A collection of [`SLIP10Curve`]s that a factor source supports.
+    /// MUST never be empty.
+    SupportedCurves,
+    SLIP10Curve
+);
 
 /// Cryptographic parameters a certain FactorSource supports, e.g. which Elliptic Curves
 /// it supports and which Hierarchical Deterministic (HD) derivations schemes it supports,
@@ -15,7 +24,7 @@ pub struct FactorSourceCryptoParameters {
     /// Either `[curve25519]` or `[secp256k1, curve25519]`
     ///
     /// Must not be empty.
-    pub supported_curves: IdentifiedVecVia<SLIP10Curve>,
+    pub supported_curves: SupportedCurves,
 
     /// If not empty: Describes which kind of Hierarchical Deterministic (HD)
     /// derivations a FactorSource is capable of doing - if empty: the
@@ -33,7 +42,7 @@ impl FactorSourceCryptoParameters {
         I: IntoIterator<Item = SLIP10Curve>,
         J: IntoIterator<Item = DerivationPathScheme>,
     {
-        let supported_curves = IdentifiedVecVia::from_iter(curves);
+        let supported_curves = SupportedCurves::from_iter(curves)?;
         if supported_curves.is_empty() {
             return Err(CommonError::FactorSourceCryptoParametersSupportedCurvesInvalidSize);
         }
@@ -118,6 +127,11 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SupportedCurves::sample(), SupportedCurves::sample_other());
+    }
+
+    #[test]
+    fn new_with_empty_curves_is_err() {
+        assert!(SUT::new([], []).is_err())
     }
 
     #[test]

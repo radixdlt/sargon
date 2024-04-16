@@ -1,5 +1,11 @@
 use crate::prelude::*;
 
+decl_can_be_empty_identified_array_of!(
+    /// An ordered set of [`Persona`]s on a specific network.
+    Personas,
+    Persona
+);
+
 impl HasSampleValues for Personas {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {

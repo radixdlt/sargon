@@ -55,7 +55,7 @@ impl<'de> serde::Deserialize<'de> for DerivationPath {
                     Ok(value) => DerivationPath::CAP26 { value },
                     Err(_) => match BIP44LikePath::deserialize(inner.path) {
                         Ok(value) => DerivationPath::BIP44Like { value },
-                        Err(e) => Err(e).map_err(serde::de::Error::custom)?,
+                        Err(e) => Err(serde::de::Error::custom(e))?,
                     },
                 }
             }

@@ -1,4 +1,14 @@
-use crate::prelude::*;
+use crate::decl_can_be_empty_impl;
+use crate::decl_identified_array_of;
+use crate::{decl_can_be_empty_identified_array_of, prelude::*};
+
+decl_can_be_empty_identified_array_of!(
+    /// Collection of clients user have connected P2P with, typically these
+    /// are WebRTC connections with DApps, but might be Android or iPhone
+    /// clients as well.
+    P2PLinks,
+    P2PLink
+);
 
 impl HasSampleValues for P2PLinks {
     /// A sample used to facilitate unit tests.

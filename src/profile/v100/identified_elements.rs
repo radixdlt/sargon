@@ -1,8 +1,5 @@
-use std::ops::DerefMut;
-
-use crate::prelude::*;
-
 /// General rules for identified_array_of implementations
+#[macro_export]
 macro_rules! decl_identified_array_of {
 	(
         $(
@@ -12,6 +9,9 @@ macro_rules! decl_identified_array_of {
         $element_type: ty,
 		$collection_type: ty
     ) => {
+        use std::ops::DerefMut;
+        use $crate::prelude::*;
+
         paste! {
             $(
                 #[doc = $expr]
@@ -26,7 +26,7 @@ macro_rules! decl_identified_array_of {
 
             uniffi::custom_type!([< $struct_type SecretMagic >], $collection_type);
 
-            impl crate::UniffiCustomTypeConverter for [< $struct_type SecretMagic >] {
+            impl $crate::UniffiCustomTypeConverter for [< $struct_type SecretMagic >] {
                 type Builtin = $collection_type;
 
                 fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
@@ -91,7 +91,7 @@ macro_rules! decl_identified_array_of {
 
             #[uniffi::export]
             pub fn [< $struct_type:snake _get_ $element_type:snake _by_id>](
-                [< $struct_type:snake >]: $struct_type,
+                [< $struct_type:snake >]: &$struct_type,
                 id: &<[< $element_type >] as Identifiable>::ID,
             ) -> Option<[< $element_type >]> {
                 [< $struct_type:snake >].[< get_ $element_type:snake _by_id>](id).cloned()
@@ -99,7 +99,7 @@ macro_rules! decl_identified_array_of {
 
             #[uniffi::export]
             pub fn [<$struct_type:snake _element_count>](
-                [< $struct_type:snake >]: $struct_type,
+                [< $struct_type:snake >]: &$struct_type,
             ) -> u64 {
                 (*[< $struct_type:snake >]).len() as u64
             }
@@ -131,7 +131,11 @@ macro_rules! decl_identified_array_of {
                 #[allow(clippy::upper_case_acronyms)]
                 type SUT = $struct_type;
 
+                #[allow(clippy::upper_case_acronyms)]
                 type SUTSecretMagic = [< $struct_type SecretMagic >];
+
+                #[allow(clippy::upper_case_acronyms)]
+                type SUTElement = $element_type;
 
                 #[test]
                 fn manual_perform_uniffi_conversion() {
@@ -148,6 +152,37 @@ macro_rules! decl_identified_array_of {
                     assert_eq!(secret_magic, from_ffi_side);
                 }
 
+                #[test]
+                fn test_new_with_single_element() {
+                    let sut_element = SUTElement::sample();
+                    let sut = $struct_type::just(sut_element.clone());
+                    assert_eq!(sut.items(), vec![sut_element]);
+                }
+
+                #[test]
+                fn test_get_element_by_id() {
+                    let sut_element = SUTElement::sample();
+                    let sut = $struct_type::just(sut_element.clone());
+                    assert_eq!(
+                        sut.[< get_ $element_type:snake _by_id>](&sut_element.id()),
+                        Some(&sut_element)
+                    );
+                }
+
+                #[test]
+                fn test_length() {
+                    let sut_element = SUTElement::sample();
+                    let mut sut = $struct_type::just(sut_element.clone());
+                    assert_eq!(
+                      sut.len(),
+                        1
+                    );
+                    _  = (*sut).append(SUTElement::sample_other());
+                    assert_eq!(
+                        sut.len(),
+                        2
+                    );
+                }
 
             }
 
@@ -157,6 +192,9 @@ macro_rules! decl_identified_array_of {
 
                 #[allow(clippy::upper_case_acronyms)]
                 type SUT = $struct_type;
+
+                #[allow(clippy::upper_case_acronyms)]
+                type SUTElement = $element_type;
 
                 #[test]
                 fn get_elements() {
@@ -168,12 +206,48 @@ macro_rules! decl_identified_array_of {
                         [<$struct_type:snake _get_elements>](sut)
                     );
                 }
+
+                #[test]
+                fn test_new_with_single_element() {
+                    let sut_element = SUTElement::sample();
+                    let sut = [< new_ $struct_type:snake _with_ $element_type:snake >](sut_element.clone());
+                    assert_eq!(
+                        sut,
+                        $struct_type::just(sut_element.clone())
+                    )
+                }
+
+                #[test]
+                fn test_get_element_by_id() {
+                    let sut_element = SUTElement::sample();
+                    let sut = $struct_type::just(sut_element.clone());
+                    assert_eq!(
+                        [< $struct_type:snake _get_ $element_type:snake _by_id>](&sut, &sut_element.id()),
+                        Some(sut_element)
+                    );
+                }
+
+                #[test]
+                fn test_new_appending_and_length() {
+                    let sut_element = SUTElement::sample();
+                    let sut = $struct_type::just(sut_element.clone());
+                    assert_eq!(
+                        [<$struct_type:snake _element_count>](&sut),
+                        1
+                    );
+                    let sut = [<new_ $struct_type:snake _by_appending>](SUTElement::sample_other(), &sut);
+                    assert_eq!(
+                        [<$struct_type:snake _element_count>](&sut),
+                        2
+                    );
+                }
             }
         }
 	};
 }
 
 /// Impl rules for identified_array_of implementations which can be empty
+#[macro_export]
 macro_rules! decl_can_be_empty_impl {
     (
         $struct_type: ty,
@@ -275,6 +349,12 @@ macro_rules! decl_can_be_empty_impl {
             mod [<uniffi_impl_tests_ $struct_type:snake>] {
                 use super::*;
 
+                #[allow(clippy::upper_case_acronyms)]
+                type SUT = $struct_type;
+
+                #[allow(clippy::upper_case_acronyms)]
+                type SUTElement = $element_type;
+
                 #[test]
                 fn new_from_empty() {
                     let sut = [<new_ $struct_type:snake>](IdentifiedVecVia::from_iter([]));
@@ -286,11 +366,29 @@ macro_rules! decl_can_be_empty_impl {
 
                 #[test]
                 fn new_from_value() {
-                    let sut = [<new_ $struct_type:snake>]( IdentifiedVecVia::from_iter([[< $element_type >]::sample()]) );
+                    let sut = [<new_ $struct_type:snake>]( IdentifiedVecVia::from_iter([SUTElement::sample()]) );
                     assert_eq!(
                         1,
                         sut.len()
                     );
+                }
+
+                #[test]
+                fn remove_by_id_to_empty() {
+                    let sut_element = SUTElement::sample();
+                    let old = SUT::just(sut_element.clone());
+                    let new = [<new_ $struct_type:snake _removed_by_id>](&sut_element.id(), &old);
+                    assert_eq!(old.len(), 1);
+                    assert_eq!(new.len(), 0);
+                }
+
+                #[test]
+                fn remove_by_element() {
+                    let sut_element = SUTElement::sample();
+                    let old = SUT::just(sut_element.clone());
+                    let new = [<new_ $struct_type:snake _removed_element>](&sut_element, &old);
+                    assert_eq!(old.len(), 1);
+                    assert_eq!(new.len(), 0);
                 }
             }
         }
@@ -298,6 +396,7 @@ macro_rules! decl_can_be_empty_impl {
 }
 
 /// Impl rules for identified_array_of implementations which must not be empty
+#[macro_export]
 macro_rules! decl_never_empty_impl {
     (
         $struct_type: ty,
@@ -392,6 +491,14 @@ macro_rules! decl_never_empty_impl {
             mod [<uniffi_impl_tests_ $struct_type:snake>] {
                 use super::*;
 
+
+                #[allow(clippy::upper_case_acronyms)]
+                type SUT = $struct_type;
+
+                #[allow(clippy::upper_case_acronyms)]
+                type SUTElement = $element_type;
+
+
                 #[test]
                 #[should_panic]
                 fn new_from_empty_error() {
@@ -406,11 +513,48 @@ macro_rules! decl_never_empty_impl {
                         sut.len()
                     );
                 }
+
+                #[test]
+                fn remove_by_id_to_empty_throws() {
+                    let sut_element = SUTElement::sample();
+                    let sut = SUT::just(sut_element.clone());
+                    assert!(
+                        [<new_ $struct_type:snake _removed_by_id>](&sut_element.id(), &sut).is_err()
+                    );
+                }
+
+                #[test]
+                fn remove_by_element_empty_throws() {
+                    let sut_element = SUTElement::sample();
+                    let sut = SUT::just(sut_element.clone());
+                    assert!(
+                        [<new_ $struct_type:snake _removed_element>](&sut_element, &sut).is_err()
+                    );
+                }
+
+                #[test]
+                fn remove_by_id_from_two_elements_to_one_is_ok() {
+                    let sut_element = SUTElement::sample();
+                    let old = SUT::from_iter([sut_element.clone(), SUTElement::sample_other()]).unwrap();
+                    let new = [<new_ $struct_type:snake _removed_by_id>](&sut_element.id(), &old).unwrap();
+                    assert_eq!(old.len(), 2);
+                    assert_eq!(new.len(), 1);
+                }
+
+                #[test]
+                fn remove_by_element_from_two_elements_to_one_is_ok() {
+                    let sut_element = SUTElement::sample();
+                    let old = SUT::from_iter([sut_element.clone(), SUTElement::sample_other()]).unwrap();
+                    let new = [<new_ $struct_type:snake _removed_element>](&sut_element, &old).unwrap();
+                    assert_eq!(old.len(), 2);
+                    assert_eq!(new.len(), 1);
+                }
             }
         }
     }
 }
 
+#[macro_export]
 macro_rules! decl_can_be_empty_identified_array_of {
     (
         $(
@@ -438,6 +582,7 @@ macro_rules! decl_can_be_empty_identified_array_of {
 	};
 }
 
+#[macro_export]
 macro_rules! decl_never_empty_identified_array_of {
     (
         $(
@@ -464,73 +609,3 @@ macro_rules! decl_never_empty_identified_array_of {
 		}
 	};
 }
-
-decl_can_be_empty_identified_array_of!(
-    /// An ordered set of [`Account`]s on a specific network, most commonly
-    /// the set is non-empty, since wallets guide user to create a first
-    /// Account.
-    Accounts,
-    Account
-);
-
-decl_can_be_empty_identified_array_of!(
-    /// An order set of `EntityFlag`s used to describe certain Off-ledger
-    /// user state about Accounts or Personas, such as if an entity is
-    /// marked as hidden or not.
-    EntityFlags,
-    EntityFlag
-);
-
-decl_can_be_empty_identified_array_of!(
-    /// An ordered set of [`Persona`]s on a specific network.
-    Personas,
-    Persona
-);
-
-decl_can_be_empty_identified_array_of!(
-    /// An ordered set of ['AuthorizedDapp`]s on a specific network.
-    AuthorizedDapps,
-    AuthorizedDapp
-);
-
-decl_can_be_empty_identified_array_of!(
-    /// Collection of clients user have connected P2P with, typically these
-    /// are WebRTC connections with DApps, but might be Android or iPhone
-    /// clients as well.
-    P2PLinks,
-    P2PLink
-);
-
-decl_can_be_empty_identified_array_of!(
-    /// An ordered mapping of NetworkID -> `Profile.Network`, containing
-    /// all the users Accounts, Personas and AuthorizedDapps the user
-    /// has created and interacted with on this network.
-    ProfileNetworks,
-    ProfileNetwork
-);
-
-decl_can_be_empty_identified_array_of!(
-    /// Other by user added or predefined Gateways the user can switch to.
-    /// It might be Gateways with different URLs on the SAME network, or
-    /// other networks, the identifier of a Gateway is the URL.
-    OtherGateways,
-    Gateway
-);
-
-// =================
-//  Never Empty
-// =================
-
-decl_never_empty_identified_array_of!(
-    /// A collection of [`FactorSource`]s generated by a wallet or manually added by user.
-    /// MUST never be empty.
-    FactorSources,
-    FactorSource
-);
-
-decl_never_empty_identified_array_of!(
-    /// A collection of [`SLIP10Curve`]s that a factor source supports.
-    /// MUST never be empty.
-    SupportedCurves,
-    SLIP10Curve
-);
