@@ -1,6 +1,11 @@
 use crate::prelude::*;
 
 #[uniffi::export]
+pub fn new_bip44_like_path_from_index(index: HDPathValue) -> BIP44LikePath {
+    BIP44LikePath::new(index)
+}
+
+#[uniffi::export]
 pub fn new_bip44_like_path_from_string(
     string: String,
 ) -> Result<BIP44LikePath, CommonError> {
@@ -25,6 +30,11 @@ pub fn new_bip44_like_path_sample_other() -> BIP44LikePath {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_new_bip44_like_path_from_index() {
+        assert_eq!(new_bip44_like_path_from_index(0), BIP44LikePath::new(0))
+    }
 
     #[test]
     fn test_new_bip44_like_path_from_string() {
