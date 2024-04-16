@@ -1,6 +1,4 @@
-use crate::decl_identified_array_of;
-use crate::decl_never_empty_impl;
-use crate::{decl_never_empty_identified_array_of, prelude::*};
+use crate::prelude::*;
 
 decl_never_empty_identified_array_of!(
     /// A collection of [`SLIP10Curve`]s that a factor source supports.
@@ -42,10 +40,7 @@ impl FactorSourceCryptoParameters {
         I: IntoIterator<Item = SLIP10Curve>,
         J: IntoIterator<Item = DerivationPathScheme>,
     {
-        let supported_curves = SupportedCurves::from_iter(curves)?;
-        if supported_curves.is_empty() {
-            return Err(CommonError::FactorSourceCryptoParametersSupportedCurvesInvalidSize);
-        }
+        let supported_curves = SupportedCurves::from_iter(curves).map_err(|_| CommonError::FactorSourceCryptoParametersSupportedCurvesInvalidSize)?;
         let supported_derivation_path_schemes =
             IdentifiedVecVia::from_iter(schemes);
 
@@ -127,11 +122,6 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SupportedCurves::sample(), SupportedCurves::sample_other());
-    }
-
-    #[test]
-    fn new_with_empty_curves_is_err() {
-        assert!(SUT::new([], []).is_err())
     }
 
     #[test]

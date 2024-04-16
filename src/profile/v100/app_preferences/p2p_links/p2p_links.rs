@@ -1,6 +1,4 @@
-use crate::decl_can_be_empty_impl;
-use crate::decl_identified_array_of;
-use crate::{decl_can_be_empty_identified_array_of, prelude::*};
+use crate::prelude::*;
 
 decl_can_be_empty_identified_array_of!(
     /// Collection of clients user have connected P2P with, typically these

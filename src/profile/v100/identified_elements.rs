@@ -1,5 +1,4 @@
 /// General rules for identified_array_of implementations
-#[macro_export]
 macro_rules! decl_identified_array_of {
 	(
         $(
@@ -247,7 +246,6 @@ macro_rules! decl_identified_array_of {
 }
 
 /// Impl rules for identified_array_of implementations which can be empty
-#[macro_export]
 macro_rules! decl_can_be_empty_impl {
     (
         $struct_type: ty,
@@ -396,7 +394,6 @@ macro_rules! decl_can_be_empty_impl {
 }
 
 /// Impl rules for identified_array_of implementations which must not be empty
-#[macro_export]
 macro_rules! decl_never_empty_impl {
     (
         $struct_type: ty,
@@ -554,7 +551,6 @@ macro_rules! decl_never_empty_impl {
     }
 }
 
-#[macro_export]
 macro_rules! decl_can_be_empty_identified_array_of {
     (
         $(
@@ -582,7 +578,6 @@ macro_rules! decl_can_be_empty_identified_array_of {
 	};
 }
 
-#[macro_export]
 macro_rules! decl_never_empty_identified_array_of {
     (
         $(
@@ -609,3 +604,9 @@ macro_rules! decl_never_empty_identified_array_of {
 		}
 	};
 }
+
+pub(crate) use decl_identified_array_of; 
+pub(crate) use decl_never_empty_impl; 
+pub(crate) use decl_can_be_empty_impl; 
+pub(crate) use decl_never_empty_identified_array_of; 
+pub(crate) use decl_can_be_empty_identified_array_of; 
