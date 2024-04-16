@@ -336,9 +336,11 @@ mod slip10_tests {
 
 #[cfg(test)]
 mod encrypted_profile_tests {
+    use std::collections::HashSet;
+
     use super::*;
 
-    #[derive(Debug, Deserialize)]
+    #[derive(Debug, Clone, Deserialize)]
     struct IdentifiableMnemonic {
         #[serde(rename = "factorSourceID")]
         factor_source_id: FactorSourceID,
@@ -346,10 +348,15 @@ mod encrypted_profile_tests {
         mnemonic_with_passphrase: MnemonicWithPassphrase,
     }
 
-    #[derive(Debug, Deserialize)]
+    #[derive(Debug, Clone, Deserialize)]
     struct EncryptedSnapshotWithPassword {
         password: String,
         snapshot: EncryptedProfileSnapshot,
+    }
+    impl EncryptedSnapshotWithPassword {
+        fn decrypted(&self) -> Result<Profile> {
+            todo!()
+        }
     }
 
     #[derive(Debug, Deserialize)]
@@ -363,8 +370,49 @@ mod encrypted_profile_tests {
     }
 
     impl Fixture {
+
+        fn validate_all_entities_with_mnemonics(&self) -> Result<()> {
+            todo!()
+        }
+
+        fn validate(&self) -> Result<Vec<Profile>> {
+            let decryptions: Vec<Profile> = self
+                .encrypted_snapshots
+                .clone()
+                .into_iter()
+                .map(|x| x.decrypted())
+                .collect::<Result<Vec<Profile>>>()
+                .unwrap();
+
+            decryptions
+                .into_iter()
+                .for_each(|x| assert_eq!(x, self.plaintext));
+
+            let ids = self
+                .plaintext
+                .factor_sources
+                .clone()
+                .into_iter()
+                .filter(|x| x.factor_source_kind() == FactorSourceKind::Device)
+                .map(|x| x.factor_source_id())
+                .collect::<HashSet<FactorSourceID>>();
+
+            assert_eq!(
+                ids,
+                self.mnemonics
+                    .clone()
+                    .into_iter()
+                    .map(|x| x.factor_source_id)
+                    .collect::<HashSet<FactorSourceID>>()
+            );
+
+            self.validate_all_entities_with_mnemonics()?;
+
+            Ok(decryptions)
+        }
+
         fn test(&self) {
-            // self.groups.iter().for_each(|g| g.test())
+            let decrypted_profiles = self.validate().unwrap();
         }
     }
 
