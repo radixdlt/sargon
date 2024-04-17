@@ -104,4 +104,13 @@ mod uniffi_tests {
             })
         );
     }
+
+    #[test]
+    fn test_new_profile_from_encryption_bytes() {
+        assert!(new_profile_from_encryption_bytes(
+            BagOfBytes::sample(),
+            "invalid".to_string()
+        )
+        .is_err());
+    }
 }

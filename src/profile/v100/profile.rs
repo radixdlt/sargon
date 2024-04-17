@@ -445,7 +445,7 @@ mod tests {
     }
 
     #[test]
-    fn from_encryption_bytes() {
+    fn from_encryption_bytes_valid() {
         let json =
             serde_json::to_vec(&EncryptedProfileSnapshot::sample()).unwrap();
         let sut = SUT::new_from_encryption_bytes(json, "babylon").unwrap();
@@ -453,6 +453,20 @@ mod tests {
             sut.header.id,
             ProfileID::from_str("e5e4477b-e47b-4b64-bbc8-f8f40e8beb74")
                 .unwrap()
+        );
+    }
+
+    #[test]
+    fn from_encryption_bytes_invalid_is_err() {
+        assert_eq!(
+            SUT::new_from_encryption_bytes(
+                Vec::from_iter([0xde, 0xad, 0xbe, 0xef]),
+                "invalid"
+            ),
+            Err(CommonError::FailedToDeserializeJSONToValue {
+                json_byte_count: 4,
+                type_name: "EncryptedProfileSnapshot".to_owned()
+            })
         );
     }
 
