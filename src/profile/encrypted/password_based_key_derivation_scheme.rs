@@ -6,6 +6,7 @@ pub enum PasswordBasedKeyDerivationScheme {
     Version1(PasswordBasedKeyDerivationSchemeVersion1),
 }
 
+#[cfg(not(tarpaulin_include))] // false negative
 impl Serialize for PasswordBasedKeyDerivationScheme {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -19,6 +20,7 @@ impl Serialize for PasswordBasedKeyDerivationScheme {
     }
 }
 
+#[cfg(not(tarpaulin_include))] // false negative
 impl<'de> Deserialize<'de> for PasswordBasedKeyDerivationScheme {
     fn deserialize<D: Deserializer<'de>>(
         deserializer: D,
@@ -27,12 +29,8 @@ impl<'de> Deserialize<'de> for PasswordBasedKeyDerivationScheme {
         struct Wrapper {
             version: PasswordBasedKeyDerivationSchemeVersion,
         }
-        let version = Wrapper::deserialize(deserializer).map(|w| w.version)?;
-        match version {
-            PasswordBasedKeyDerivationSchemeVersion::Version1 => {
-                Ok(Self::version1())
-            }
-        }
+        Wrapper::deserialize(deserializer)
+            .and_then(|w| Self::try_from(w.version).map_err(de::Error::custom))
     }
 }
 
@@ -59,7 +57,12 @@ impl VersionedPasswordBasedKeyDerivation for PasswordBasedKeyDerivationScheme {
 
 impl std::fmt::Display for PasswordBasedKeyDerivationScheme {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.description())
+        write!(
+            f,
+            "PasswordBasedKeyDerivationScheme: {} ({})",
+            self.version(),
+            self.description()
+        )
     }
 }
 
@@ -113,36 +116,6 @@ pub trait VersionedPasswordBasedKeyDerivation: VersionOfAlgorithm {
 )]
 pub enum PasswordBasedKeyDerivationSchemeVersion {
     Version1 = 1,
-}
-
-impl Serialize for PasswordBasedKeyDerivationSchemeVersion1 {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut state = serializer
-            .serialize_struct("PasswordBasedKeyDerivationSchemeVersion1", 2)?;
-        state.serialize_field("description", &self.description())?;
-        state.serialize_field("version", &self.version())?;
-        state.end()
-    }
-}
-
-impl<'de> Deserialize<'de> for PasswordBasedKeyDerivationSchemeVersion1 {
-    fn deserialize<D: Deserializer<'de>>(
-        deserializer: D,
-    ) -> Result<Self, D::Error> {
-        #[derive(Deserialize, Serialize)]
-        struct Wrapper {
-            version: PasswordBasedKeyDerivationSchemeVersion,
-        }
-        let version = Wrapper::deserialize(deserializer).map(|w| w.version)?;
-        match version {
-            PasswordBasedKeyDerivationSchemeVersion::Version1 => {
-                Ok(PasswordBasedKeyDerivationSchemeVersion1::default())
-            }
-        }
-    }
 }
 
 /// A simple `HKDF` based scheme using UTF8 encoding of the password as input.
@@ -212,6 +185,11 @@ mod tests {
 		}
         "#,
         );
+    }
+
+    #[test]
+    fn display() {
+        assert_eq!(format!("{}", SUT::default()), "PasswordBasedKeyDerivationScheme: Version1 (HKDFSHA256-with-UTF8-encoding-of-password-no-salt-no-info)");
     }
 
     #[test]

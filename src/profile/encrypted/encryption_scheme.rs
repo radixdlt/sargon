@@ -12,6 +12,7 @@ pub enum EncryptionScheme {
     Version1(EncryptionSchemeVersion1),
 }
 
+#[cfg(not(tarpaulin_include))] // false negative
 impl Serialize for EncryptionScheme {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -24,6 +25,7 @@ impl Serialize for EncryptionScheme {
     }
 }
 
+#[cfg(not(tarpaulin_include))] // false negative
 impl<'de> Deserialize<'de> for EncryptionScheme {
     fn deserialize<D: Deserializer<'de>>(
         deserializer: D,
@@ -32,10 +34,8 @@ impl<'de> Deserialize<'de> for EncryptionScheme {
         struct Wrapper {
             version: EncryptionSchemeVersion,
         }
-        let version = Wrapper::deserialize(deserializer).map(|w| w.version)?;
-        match version {
-            EncryptionSchemeVersion::Version1 => Ok(Self::version1()),
-        }
+        Wrapper::deserialize(deserializer)
+            .and_then(|w| Self::try_from(w.version).map_err(de::Error::custom))
     }
 }
 
