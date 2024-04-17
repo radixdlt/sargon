@@ -437,17 +437,14 @@ pub enum CommonError {
     #[error("Networks must not be empty")]
     ProfileNetworksMustNotBeEmpty = 10121,
 
-    #[error("AES Encryption failed")]
-    AESEncryptionFailed = 10122,
+    #[error("Unknown SLIP10 Curve '{bad_value}'")]
+    UnknownSLIP10Curve { bad_value: String } = 10122,
 
     #[error("AES Decryption failed")]
     AESDecryptionFailed = 10123,
 
     #[error("Invalid AES Sealedbox, too few bytes expected at least: {expected_at_least}, found: {found}.")]
     InvalidAESBytesTooShort { expected_at_least: u64, found: u64 } = 10124,
-
-    #[error("Unknown SLIP10 Curve '{bad_value}'")]
-    UnknownSLIP10Curve { bad_value: String } = 10125,
 }
 
 #[uniffi::export]

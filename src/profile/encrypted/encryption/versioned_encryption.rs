@@ -4,7 +4,7 @@ pub trait VersionedEncryption: VersionOfAlgorithm {
         &self,
         data: Vec<u8>,
         encryption_key: &Exactly32Bytes,
-    ) -> Result<Vec<u8>>;
+    ) -> Vec<u8>;
 
     fn decrypt(
         &self,

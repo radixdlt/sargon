@@ -32,12 +32,17 @@ pub struct EncryptedProfileSnapshot {
 }
 
 impl EncryptedProfileSnapshot {
-    pub fn decrypt(&self, password: String) -> Result<Profile> {
+    pub fn decrypt(&self, password: impl AsRef<str>) -> Result<Profile> {
+        // Derive encryption key based on password
         let decryption_key = self.key_derivation_scheme.kdf(password);
+
+        // decrypt Profile JSON bytes
         let decrypted = self
             .encryption_scheme
             .decrypt(self.encrypted_snapshot.to_vec(), &decryption_key)?;
-        Profile::new_from_json_bytes(decrypted.into())
+
+        // JSON decode bytes into Profile
+        Profile::new_from_json_bytes(decrypted)
     }
 
     pub fn encrypting(
@@ -45,26 +50,26 @@ impl EncryptedProfileSnapshot {
         password: String,
         kdf_scheme: impl Into<Option<PasswordBasedKeyDerivationScheme>>,
         encryption_scheme: impl Into<Option<EncryptionScheme>>,
-    ) -> Result<Self> {
+    ) -> Self {
         let key_derivation_scheme = kdf_scheme.into().unwrap_or_default();
         let encryption_scheme = encryption_scheme.into().unwrap_or_default();
 
         // JSON encode profile
-        let json = profile.to_json_bytes()?;
+        let json = profile.to_json_bytes();
 
         // derive symmetric encryption key
         let encryption_key = key_derivation_scheme.kdf(password);
 
         // encrypt profile with encryption key
         let encrypted_payload =
-            encryption_scheme.encrypt(json.to_vec(), &encryption_key)?;
+            encryption_scheme.encrypt(json.to_vec(), &encryption_key);
 
-        Ok(Self {
+        Self {
             version: ProfileEncryptionVersion::default(),
             encrypted_snapshot: BagOfBytes::from(encrypted_payload),
             key_derivation_scheme,
             encryption_scheme,
-        })
+        }
     }
 }
 
@@ -137,7 +142,7 @@ mod tests {
     #[test]
     fn decrypt_sample() {
         let sut = SUT::sample();
-        let decrypted = sut.decrypt("babylon".to_owned()).unwrap();
+        let decrypted = sut.decrypt("babylon").unwrap();
         assert_eq!(
             decrypted.header.id,
             ProfileID::from_str("e5e4477b-e47b-4b64-bbc8-f8f40e8beb74")
@@ -148,7 +153,7 @@ mod tests {
     #[test]
     fn decrypt_sample_other() {
         let sut = SUT::sample_other();
-        let decrypted = sut.decrypt("".to_owned()).unwrap();
+        let decrypted = sut.decrypt("").unwrap();
         assert_eq!(
             decrypted.header.id,
             ProfileID::from_str("e5e4477b-e47b-4b64-bbc8-f8f40e8beb74")
@@ -158,10 +163,8 @@ mod tests {
 
     #[test]
     fn decrypt_samples() {
-        let decrypted_sample =
-            SUT::sample().decrypt("babylon".to_owned()).unwrap();
-        let decrypted_sample_other =
-            SUT::sample_other().decrypt("".to_owned()).unwrap();
+        let decrypted_sample = SUT::sample().decrypt("babylon").unwrap();
+        let decrypted_sample_other = SUT::sample_other().decrypt("").unwrap();
         assert_eq!(decrypted_sample, decrypted_sample_other);
     }
 
@@ -169,9 +172,8 @@ mod tests {
     fn encryption_roundtrip() {
         let test = |profile: Profile, password: &str| {
             let encrypted =
-                SUT::encrypting(&profile, password.to_owned(), None, None)
-                    .unwrap();
-            let decrypted = encrypted.decrypt(password.to_owned()).unwrap();
+                SUT::encrypting(&profile, password.to_owned(), None, None);
+            let decrypted = encrypted.decrypt(password).unwrap();
             assert_eq!(decrypted, profile);
         };
 

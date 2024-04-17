@@ -1,7 +1,6 @@
 use crate::prelude::*;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-
 pub enum PasswordBasedKeyDerivationScheme {
     Version1(PasswordBasedKeyDerivationSchemeVersion1),
 }
@@ -46,7 +45,7 @@ impl Default for PasswordBasedKeyDerivationScheme {
 }
 
 impl VersionedPasswordBasedKeyDerivation for PasswordBasedKeyDerivationScheme {
-    fn kdf(&self, password: String) -> Exactly32Bytes {
+    fn kdf(&self, password: impl AsRef<str>) -> Exactly32Bytes {
         match self {
             PasswordBasedKeyDerivationScheme::Version1(scheme) => {
                 scheme.kdf(password)
@@ -98,74 +97,6 @@ impl VersionOfAlgorithm for PasswordBasedKeyDerivationScheme {
     }
 }
 
-pub trait VersionedPasswordBasedKeyDerivation: VersionOfAlgorithm {
-    fn kdf(&self, password: String) -> Exactly32Bytes;
-}
-
-/// The KDF algorithm used to derive the decryption key from a user provided password.
-#[repr(u32)]
-#[derive(
-    Serialize_repr,
-    Deserialize_repr,
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    derive_more::Display,
-    derive_more::Debug,
-)]
-pub enum PasswordBasedKeyDerivationSchemeVersion {
-    Version1 = 1,
-}
-
-/// A simple `HKDF` based scheme using UTF8 encoding of the password as input.
-#[derive(
-    Clone,
-    Default,
-    PartialEq,
-    Eq,
-    Hash,
-    derive_more::Display,
-    derive_more::Debug,
-)]
-#[debug("{}", self.description())]
-#[display("{}", self.description())]
-pub struct PasswordBasedKeyDerivationSchemeVersion1 {}
-
-impl VersionOfAlgorithm for PasswordBasedKeyDerivationSchemeVersion1 {
-    type Version = PasswordBasedKeyDerivationSchemeVersion;
-
-    fn description(&self) -> String {
-        Self::DESCRIPTION.to_owned()
-    }
-
-    fn version(&self) -> Self::Version {
-        Self::Version::Version1
-    }
-}
-
-impl VersionedPasswordBasedKeyDerivation
-    for PasswordBasedKeyDerivationSchemeVersion1
-{
-    fn kdf(&self, password: String) -> Exactly32Bytes {
-        use hkdf::Hkdf;
-        use k256::sha2::Sha256;
-
-        // Input Key Material
-        let ikm = password.bytes().collect::<Vec<u8>>();
-        let hk = Hkdf::<Sha256>::new(None, &ikm);
-
-        let mut okm = [0u8; 32];
-        hk.expand(&[], &mut okm).unwrap();
-        Exactly32Bytes::from(&okm)
-    }
-}
-
-impl PasswordBasedKeyDerivationSchemeVersion1 {
-    pub const DESCRIPTION: &'static str =
-        "HKDFSHA256-with-UTF8-encoding-of-password-no-salt-no-info";
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -196,7 +127,7 @@ mod tests {
     fn kdf() {
         let sut = SUT::default();
         let test = |pwd: &str, exp: &str| {
-            let key = sut.kdf(pwd.to_owned());
+            let key = sut.kdf(pwd);
             assert_eq!(key.to_hex(), exp);
         };
         test(

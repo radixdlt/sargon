@@ -29,13 +29,21 @@ pub fn profile_to_debug_string(profile: &Profile) -> String {
 }
 
 #[uniffi::export]
-pub fn profile_to_json_bytes(profile: &Profile) -> Result<BagOfBytes> {
+pub fn profile_to_json_bytes(profile: &Profile) -> BagOfBytes {
     profile.to_json_bytes()
 }
 
 #[uniffi::export]
 pub fn new_profile_from_json_bytes(json: BagOfBytes) -> Result<Profile> {
     Profile::new_from_json_bytes(json)
+}
+
+#[uniffi::export]
+pub fn new_profile_from_encryption_bytes(
+    json: BagOfBytes,
+    encryption_password: String,
+) -> Result<Profile> {
+    Profile::new_from_encryption_bytes(json.to_vec(), encryption_password)
 }
 
 #[cfg(test)]
@@ -80,8 +88,7 @@ mod uniffi_tests {
         let sut = SUT::sample();
 
         assert_eq!(
-            new_profile_from_json_bytes(profile_to_json_bytes(&sut).unwrap())
-                .unwrap(),
+            new_profile_from_json_bytes(profile_to_json_bytes(&sut)).unwrap(),
             sut
         )
     }
