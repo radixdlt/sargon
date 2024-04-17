@@ -102,20 +102,17 @@ jobs:
         run: cargo test
 
   rust-coverage-of-doc:
-    runs-on: macos-14-xlarge
+    runs-on: ubuntu-latest
     steps:
       - uses: RDXWorks-actions/checkout@main
 
-      - name: Install Rust Toolchain
-        uses: RDXWorks-actions/toolchain@master
+      - uses: RDXWorks-actions/toolchain@master
         with:
-          toolchain: "nightly"
+          toolchain: nightly
 
-      - name: Run rust coverage for documentation
+      - id: doccoverage
         uses: RDXWorks-actions/rustdoc-coverage-action@main
-      - run: |
-          echo ${{ steps.coverage.outputs.documented }}
-          echo ${{ steps.coverage.outputs.diff-documented }}
+      - run: echo ${{ steps.coverage.outputs.documented }}
 
   # Swift testing on macOS (Apple Silicon)
   test-swift:
