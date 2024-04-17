@@ -13,7 +13,9 @@ impl HasSampleValues for DappToWalletInteractionPersonaDataRequestItem {
     fn sample() -> Self {
         Self {
             is_requesting_name: Some(true),
-            number_of_requested_email_addresses: Some(RequestedQuantity::sample()),
+            number_of_requested_email_addresses: Some(
+                RequestedQuantity::sample(),
+            ),
             number_of_requested_phone_numbers: Some(RequestedQuantity::sample()),
         }
     }
@@ -21,8 +23,12 @@ impl HasSampleValues for DappToWalletInteractionPersonaDataRequestItem {
     fn sample_other() -> Self {
         Self {
             is_requesting_name: Some(false),
-            number_of_requested_email_addresses: Some(RequestedQuantity::sample_other()),
-            number_of_requested_phone_numbers: Some(RequestedQuantity::sample_other()),
+            number_of_requested_email_addresses: Some(
+                RequestedQuantity::sample_other(),
+            ),
+            number_of_requested_phone_numbers: Some(
+                RequestedQuantity::sample_other(),
+            ),
         }
     }
 }

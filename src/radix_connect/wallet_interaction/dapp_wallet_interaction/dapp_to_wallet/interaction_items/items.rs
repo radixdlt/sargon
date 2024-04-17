@@ -1,9 +1,8 @@
-
+use super::authorized_request::DappToWalletInteractionAuthorizedRequestItems;
+use super::transaction::DappToWalletInteractionTransactionItems;
+use super::unauthorized_request::DappToWalletInteractionUnauthorizedRequestItems;
 use crate::prelude::*;
 use serde::Deserialize;
-use super::authorized_request::DappToWalletInteractionAuthorizedRequestItems;
-use super::unauthorized_request::DappToWalletInteractionUnauthorizedRequestItems;
-use super::transaction::DappToWalletInteractionTransactionItems;
 
 #[derive(Debug, Deserialize, PartialEq, uniffi::Enum)]
 #[serde(tag = "discriminator")]
@@ -18,7 +17,9 @@ pub enum DappToWalletInteractionItems {
 
 impl HasSampleValues for DappToWalletInteractionItems {
     fn sample() -> Self {
-        Self::UnauthorizedRequest(DappToWalletInteractionUnauthorizedRequestItems::sample())
+        Self::UnauthorizedRequest(
+            DappToWalletInteractionUnauthorizedRequestItems::sample(),
+        )
     }
 
     fn sample_other() -> Self {

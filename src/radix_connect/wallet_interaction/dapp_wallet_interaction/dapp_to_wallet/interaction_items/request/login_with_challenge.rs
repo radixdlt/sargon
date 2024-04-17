@@ -6,7 +6,9 @@ pub struct DappToWalletInteractionAuthLoginWithChallengeRequestItem {
     pub challenge: Exactly32Bytes,
 }
 
-impl HasSampleValues for DappToWalletInteractionAuthLoginWithChallengeRequestItem {
+impl HasSampleValues
+    for DappToWalletInteractionAuthLoginWithChallengeRequestItem
+{
     fn sample() -> Self {
         Self {
             challenge: Exactly32Bytes::sample(),

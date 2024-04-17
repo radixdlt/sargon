@@ -330,14 +330,14 @@ mod wallet_interaction_tests {
         )))
         .expect("BIP44 fixture");
 
-    let metadata = DappToWalletInteractionMetadata {
+        let metadata = DappToWalletInteractionMetadata {
         network_id: NetworkID::Stokenet,
         dapp_definition_address: DappDefinitionAddress::from_str("account_tdx_2_12xd46c22d6m696lv565t9afn088htudtq275px3qs925ywwty8axze").unwrap(),
         origin: Url::from_str("https://dev-sandbox.rdx-works-main.extratools.works").unwrap(),
         version: 2.into(),
     };
 
-    let authorized_request_with_challenge = DappToWalletInteraction {
+        let authorized_request_with_challenge = DappToWalletInteraction {
         items: DappToWalletInteractionItems::AuthorizedRequest(DappToWalletInteractionAuthorizedRequestItems {
             ongoing_persona_data: Some(DappToWalletInteractionPersonaDataRequestItem {
                 is_requesting_name: Some(true),
@@ -371,7 +371,7 @@ mod wallet_interaction_tests {
         metadata: metadata.clone(),
     };
 
-    let authorized_request_without_challenge = DappToWalletInteraction {
+        let authorized_request_without_challenge = DappToWalletInteraction {
         items: DappToWalletInteractionItems::AuthorizedRequest(DappToWalletInteractionAuthorizedRequestItems {
             ongoing_persona_data: Some(DappToWalletInteractionPersonaDataRequestItem {
                 is_requesting_name: Some(true),
@@ -403,7 +403,7 @@ mod wallet_interaction_tests {
         metadata: metadata.clone(),
     };
 
-    let transaction = DappToWalletInteraction {
+        let transaction = DappToWalletInteraction {
         items: DappToWalletInteractionItems::Transaction(DappToWalletInteractionTransactionItems {
             send: DappToWalletInteractionSendTransactionItem {
                 version: 1.into(),
@@ -416,7 +416,7 @@ mod wallet_interaction_tests {
         metadata: metadata.clone(),
     };
 
-    let unauthorized_request_1 = DappToWalletInteraction {
+        let unauthorized_request_1 = DappToWalletInteraction {
         items: DappToWalletInteractionItems::UnauthorizedRequest(DappToWalletInteractionUnauthorizedRequestItems {
             one_time_accounts: Some(DappToWalletInteractionAccountsRequestItem {
                 challenge: Some(Exactly32Bytes::from_hex("84a5234f14a50dee062dc7a6a51f4bdab7cab5faadea05542af2040688d8fb6c").unwrap()),
@@ -441,7 +441,7 @@ mod wallet_interaction_tests {
         metadata: metadata.clone(),
     };
 
-    let unauthorized_request_2 = DappToWalletInteraction {
+        let unauthorized_request_2 = DappToWalletInteraction {
         items: DappToWalletInteractionItems::UnauthorizedRequest(DappToWalletInteractionUnauthorizedRequestItems {
             one_time_accounts: Some(DappToWalletInteractionAccountsRequestItem {
                 challenge: Some(Exactly32Bytes::from_hex("84a5234f14a50dee062dc7a6a51f4bdab7cab5faadea05542af2040688d8fb6c").unwrap()),
@@ -474,7 +474,9 @@ mod wallet_interaction_tests {
             unauthorized_request_2,
         ];
 
-        for (fixture, expected) in fixture.tests.iter().zip(expected_after_decoding.iter()) {
+        for (fixture, expected) in
+            fixture.tests.iter().zip(expected_after_decoding.iter())
+        {
             pretty_assertions::assert_eq!(fixture, expected);
         }
     }

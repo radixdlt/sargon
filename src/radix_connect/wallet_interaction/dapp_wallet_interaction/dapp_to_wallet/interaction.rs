@@ -1,8 +1,8 @@
+use super::interaction_items::DappToWalletInteractionItems;
+use super::interaction_metadata::DappToWalletInteractionMetadata;
 use crate::prelude::*;
 use serde::Serialize;
 use std::collections::HashMap;
-use super::interaction_items::DappToWalletInteractionItems;
-use super::interaction_metadata::DappToWalletInteractionMetadata;
 
 #[derive(Debug, Deserialize, PartialEq, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
