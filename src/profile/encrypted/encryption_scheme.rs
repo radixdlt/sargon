@@ -2,39 +2,55 @@ use crate::prelude::*;
 
 use aes_gcm::{
     aead::{generic_array::sequence::Concat, Aead, AeadCore, KeyInit, OsRng},
-    Aes256Gcm,
-    Key,
-    Nonce, // Or `Aes128Gcm`
+    Aes256Gcm, Key, Nonce,
 };
 
 #[derive(
-    Serialize,
-    Deserialize,
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    derive_more::Display,
-    derive_more::Debug,
+    Clone, PartialEq, Eq, Hash, derive_more::Display, derive_more::Debug,
 )]
-#[serde(untagged)]
 pub enum EncryptionScheme {
     Version1(EncryptionSchemeVersion1),
 }
 
+impl Serialize for EncryptionScheme {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("EncryptionScheme", 2)?;
+        state.serialize_field("description", &self.description())?;
+        state.serialize_field("version", &self.version())?;
+        state.end()
+    }
+}
+
+impl<'de> Deserialize<'de> for EncryptionScheme {
+    fn deserialize<D: Deserializer<'de>>(
+        deserializer: D,
+    ) -> Result<Self, D::Error> {
+        #[derive(Deserialize, Serialize)]
+        struct Wrapper {
+            version: EncryptionSchemeVersion,
+        }
+        let version = Wrapper::deserialize(deserializer).map(|w| w.version)?;
+        match version {
+            EncryptionSchemeVersion::Version1 => Ok(Self::version1()),
+        }
+    }
+}
+
+impl EncryptionScheme {
+    pub fn version1() -> Self {
+        Self::Version1(EncryptionSchemeVersion1::default())
+    }
+}
 impl Default for EncryptionScheme {
     fn default() -> Self {
-        Self::Version1(EncryptionSchemeVersion1::default())
+        Self::version1()
     }
 }
 
 impl VersionedEncryption for EncryptionScheme {
-    fn version(&self) -> EncryptionSchemeVersion {
-        match self {
-            EncryptionScheme::Version1(scheme) => scheme.version(),
-        }
-    }
-
     fn encrypt(
         &self,
         data: Vec<u8>,
@@ -60,21 +76,22 @@ impl VersionedEncryption for EncryptionScheme {
     }
 }
 
-impl From<EncryptionSchemeVersion> for EncryptionScheme {
-    fn from(value: EncryptionSchemeVersion) -> Self {
+impl TryFrom<EncryptionSchemeVersion> for EncryptionScheme {
+    type Error = CommonError;
+    fn try_from(value: EncryptionSchemeVersion) -> Result<Self> {
         match value {
             EncryptionSchemeVersion::Version1 => {
-                Self::Version1(EncryptionSchemeVersion1::default())
+                Ok(Self::Version1(EncryptionSchemeVersion1::default()))
             }
         }
     }
 }
-impl VersionedAlgorithm for EncryptionScheme {
+impl VersionOfAlgorithm for EncryptionScheme {
     type Version = EncryptionSchemeVersion;
 
     fn version(&self) -> Self::Version {
         match self {
-            EncryptionScheme::Version1(scheme) => scheme.version(),
+            Self::Version1(scheme) => scheme.version(),
         }
     }
 
@@ -112,41 +129,6 @@ pub enum EncryptionSchemeVersion {
 pub struct EncryptionSchemeVersion1 {}
 impl EncryptionSchemeVersion1 {
     pub const DESCRIPTION: &'static str = "AESGCM-256";
-
-    fn description(&self) -> String {
-        Self::DESCRIPTION.to_owned()
-    }
-}
-
-impl Serialize for EncryptionSchemeVersion1 {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut state =
-            serializer.serialize_struct("EncryptionSchemeVersion1", 2)?;
-        state.serialize_field("description", &self.description())?;
-        state.serialize_field("version", &self.version())?;
-        state.end()
-    }
-}
-
-impl<'de> Deserialize<'de> for EncryptionSchemeVersion1 {
-    fn deserialize<D: Deserializer<'de>>(
-        deserializer: D,
-    ) -> Result<Self, D::Error> {
-        // https://github.com/serde-rs/serde/issues/1343#issuecomment-409698470
-        #[derive(Deserialize, Serialize)]
-        struct Wrapper {
-            version: EncryptionSchemeVersion,
-        }
-        let version = Wrapper::deserialize(deserializer).map(|w| w.version)?;
-        match version {
-            EncryptionSchemeVersion::Version1 => {
-                Ok(EncryptionSchemeVersion1::default())
-            }
-        }
-    }
 }
 
 impl EncryptionSchemeVersion1 {
@@ -181,11 +163,19 @@ impl EncryptionSchemeVersion1 {
     }
 }
 
-impl VersionedEncryption for EncryptionSchemeVersion1 {
-    fn version(&self) -> EncryptionSchemeVersion {
-        EncryptionSchemeVersion::Version1
+impl VersionOfAlgorithm for EncryptionSchemeVersion1 {
+    type Version = EncryptionSchemeVersion;
+
+    fn version(&self) -> Self::Version {
+        Self::Version::Version1
     }
 
+    fn description(&self) -> String {
+        Self::DESCRIPTION.to_owned()
+    }
+}
+
+impl VersionedEncryption for EncryptionSchemeVersion1 {
     fn encrypt(
         &self,
         data: Vec<u8>,
@@ -261,7 +251,7 @@ mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = EncryptionSchemeVersion1;
+    type SUT = EncryptionScheme;
 
     #[test]
     fn json_() {

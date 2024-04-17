@@ -1,22 +1,53 @@
 use crate::prelude::*;
 
-#[derive(Serialize, Debug, Deserialize, Clone, PartialEq, Eq, Hash)]
-#[serde(untagged)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 
 pub enum PasswordBasedKeyDerivationScheme {
     Version1(PasswordBasedKeyDerivationSchemeVersion1),
 }
 
-impl Default for PasswordBasedKeyDerivationScheme {
-    fn default() -> Self {
-        Self::Version1(PasswordBasedKeyDerivationSchemeVersion1::default())
+impl Serialize for PasswordBasedKeyDerivationScheme {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer
+            .serialize_struct("PasswordBasedKeyDerivationScheme", 2)?;
+        state.serialize_field("description", &self.description())?;
+        state.serialize_field("version", &self.version())?;
+        state.end()
     }
 }
 
-impl
-    VersionedPasswordBasedKeyDerivation<PasswordBasedKeyDerivationSchemeVersion>
-    for PasswordBasedKeyDerivationScheme
-{
+impl<'de> Deserialize<'de> for PasswordBasedKeyDerivationScheme {
+    fn deserialize<D: Deserializer<'de>>(
+        deserializer: D,
+    ) -> Result<Self, D::Error> {
+        #[derive(Deserialize, Serialize)]
+        struct Wrapper {
+            version: PasswordBasedKeyDerivationSchemeVersion,
+        }
+        let version = Wrapper::deserialize(deserializer).map(|w| w.version)?;
+        match version {
+            PasswordBasedKeyDerivationSchemeVersion::Version1 => {
+                Ok(Self::version1())
+            }
+        }
+    }
+}
+
+impl PasswordBasedKeyDerivationScheme {
+    pub fn version1() -> Self {
+        Self::Version1(PasswordBasedKeyDerivationSchemeVersion1::default())
+    }
+}
+impl Default for PasswordBasedKeyDerivationScheme {
+    fn default() -> Self {
+        Self::version1()
+    }
+}
+
+impl VersionedPasswordBasedKeyDerivation for PasswordBasedKeyDerivationScheme {
     fn kdf(&self, password: String) -> Exactly32Bytes {
         match self {
             PasswordBasedKeyDerivationScheme::Version1(scheme) => {
@@ -32,27 +63,27 @@ impl std::fmt::Display for PasswordBasedKeyDerivationScheme {
     }
 }
 
-impl From<PasswordBasedKeyDerivationSchemeVersion>
+impl TryFrom<PasswordBasedKeyDerivationSchemeVersion>
     for PasswordBasedKeyDerivationScheme
 {
-    fn from(value: PasswordBasedKeyDerivationSchemeVersion) -> Self {
+    type Error = CommonError;
+    fn try_from(
+        value: PasswordBasedKeyDerivationSchemeVersion,
+    ) -> Result<Self> {
         match value {
             PasswordBasedKeyDerivationSchemeVersion::Version1 => {
-                Self::Version1(
+                Ok(Self::Version1(
                     PasswordBasedKeyDerivationSchemeVersion1::default(),
-                )
+                ))
             }
         }
     }
 }
-impl VersionedKeyDerivation<PasswordBasedKeyDerivationSchemeVersion>
-    for PasswordBasedKeyDerivationScheme
-{
-    fn version(&self) -> PasswordBasedKeyDerivationSchemeVersion {
+impl VersionOfAlgorithm for PasswordBasedKeyDerivationScheme {
+    type Version = PasswordBasedKeyDerivationSchemeVersion;
+    fn version(&self) -> Self::Version {
         match self {
-            PasswordBasedKeyDerivationScheme::Version1(scheme) => {
-                scheme.version()
-            }
+            Self::Version1(scheme) => scheme.version(),
         }
     }
     fn description(&self) -> String {
@@ -64,15 +95,7 @@ impl VersionedKeyDerivation<PasswordBasedKeyDerivationSchemeVersion>
     }
 }
 
-pub trait VersionedKeyDerivation<V> {
-    fn version(&self) -> V;
-    fn description(&self) -> String;
-}
-
-pub trait VersionedPasswordBasedKeyDerivation<
-    V = PasswordBasedKeyDerivationSchemeVersion,
->: VersionedKeyDerivation<V>
-{
+pub trait VersionedPasswordBasedKeyDerivation: VersionOfAlgorithm {
     fn kdf(&self, password: String) -> Exactly32Bytes;
 }
 
@@ -136,20 +159,19 @@ impl<'de> Deserialize<'de> for PasswordBasedKeyDerivationSchemeVersion1 {
 #[display("{}", self.description())]
 pub struct PasswordBasedKeyDerivationSchemeVersion1 {}
 
-impl VersionedKeyDerivation<PasswordBasedKeyDerivationSchemeVersion>
-    for PasswordBasedKeyDerivationSchemeVersion1
-{
+impl VersionOfAlgorithm for PasswordBasedKeyDerivationSchemeVersion1 {
+    type Version = PasswordBasedKeyDerivationSchemeVersion;
+
     fn description(&self) -> String {
         Self::DESCRIPTION.to_owned()
     }
 
-    fn version(&self) -> PasswordBasedKeyDerivationSchemeVersion {
-        PasswordBasedKeyDerivationSchemeVersion::Version1
+    fn version(&self) -> Self::Version {
+        Self::Version::Version1
     }
 }
 
-impl
-    VersionedPasswordBasedKeyDerivation<PasswordBasedKeyDerivationSchemeVersion>
+impl VersionedPasswordBasedKeyDerivation
     for PasswordBasedKeyDerivationSchemeVersion1
 {
     fn kdf(&self, password: String) -> Exactly32Bytes {
@@ -176,7 +198,7 @@ mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = PasswordBasedKeyDerivationSchemeVersion1;
+    type SUT = PasswordBasedKeyDerivationScheme;
 
     #[test]
     fn json_() {

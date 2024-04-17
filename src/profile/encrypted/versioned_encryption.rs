@@ -1,7 +1,5 @@
 use crate::prelude::*;
-pub trait VersionedEncryption {
-    fn version(&self) -> EncryptionSchemeVersion;
-
+pub trait VersionedEncryption: VersionOfAlgorithm {
     fn encrypt(
         &self,
         data: Vec<u8>,
