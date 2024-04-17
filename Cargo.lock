@@ -69,6 +69,7 @@ dependencies = [
  "ctr",
  "ghash",
  "subtle",
+ "zeroize 1.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

@@ -177,6 +177,7 @@ aes-gcm = { git = "https://github.com/RustCrypto/AEADs", rev = "7e82b01cd4901f6a
     "aes",
     "alloc",
     "getrandom",
+    "zeroize",
 ] }
 
 # hkdf = "0.12.4"

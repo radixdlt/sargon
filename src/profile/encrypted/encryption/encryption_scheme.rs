@@ -1,11 +1,20 @@
 use crate::prelude::*;
 
-#[derive(
-    Clone, PartialEq, Eq, Hash, derive_more::Display, derive_more::Debug,
-)]
+#[derive(Clone, PartialEq, Eq, Hash, derive_more::Debug)]
 pub enum EncryptionScheme {
     /// AES GCM 256 encryption
     Version1(AesGcm256),
+}
+
+impl std::fmt::Display for EncryptionScheme {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "EncryptionScheme: {} ({})",
+            self.version(),
+            self.description()
+        )
+    }
 }
 
 #[cfg(not(tarpaulin_include))] // false negative
@@ -53,7 +62,7 @@ impl VersionedEncryption for EncryptionScheme {
     fn encrypt(
         &self,
         plaintext: Vec<u8>,
-        encryption_key: &Exactly32Bytes,
+        encryption_key: &mut Exactly32Bytes,
     ) -> Vec<u8> {
         match self {
             EncryptionScheme::Version1(scheme) => {
@@ -68,7 +77,7 @@ impl VersionedEncryption for EncryptionScheme {
     fn decrypt(
         &self,
         cipher_text: Vec<u8>,
-        decryption_key: &Exactly32Bytes,
+        decryption_key: &mut Exactly32Bytes,
     ) -> Result<Vec<u8>> {
         match self {
             EncryptionScheme::Version1(scheme) => {
@@ -110,6 +119,14 @@ mod tests {
     type SUT = EncryptionScheme;
 
     #[test]
+    fn display() {
+        assert_eq!(
+            format!("{}", SUT::default()),
+            "EncryptionScheme: Version1 (AESGCM-256)"
+        );
+    }
+
+    #[test]
     fn json_() {
         let model = SUT::default();
         assert_eq_after_json_roundtrip(
@@ -126,11 +143,18 @@ mod tests {
     #[test]
     fn encryption_roundtrip() {
         let sut = SUT::default();
-        let key = Exactly32Bytes::generate();
+        let mut encryption_key = Exactly32Bytes::generate();
+        let mut decryption_key = encryption_key.clone();
         let msg = "Hello Radix";
         let msg_bytes = msg.bytes().collect();
-        let encrypted = sut.encrypt(msg_bytes, &key);
-        let decrypted_bytes = sut.decrypt(encrypted, &key).unwrap();
+
+        let encrypted = sut.encrypt(msg_bytes, &mut encryption_key);
+        assert_eq!(encryption_key, Exactly32Bytes::from(&[0; 32])); // assert zeroed out
+
+        let decrypted_bytes =
+            sut.decrypt(encrypted, &mut decryption_key).unwrap();
+        assert_eq!(decryption_key, Exactly32Bytes::from(&[0; 32])); // assert zeroed out
+
         let decrypted = String::from_utf8(decrypted_bytes).unwrap();
         assert_eq!(msg, decrypted);
     }
@@ -141,9 +165,10 @@ mod tests {
         let test = |encrypted_hex: &str,
                     key_hex: &str,
                     expected_plaintext: &str| {
-            let decryption_key = Exactly32Bytes::from_str(key_hex).unwrap();
+            let mut decryption_key = Exactly32Bytes::from_str(key_hex).unwrap();
             let encrypted = hex_decode(encrypted_hex).unwrap();
-            let decrypted = sut.decrypt(encrypted, &decryption_key).unwrap();
+            let decrypted =
+                sut.decrypt(encrypted, &mut decryption_key).unwrap();
             assert_eq!(hex::encode(decrypted), expected_plaintext);
         };
 
@@ -158,7 +183,7 @@ mod tests {
     fn decrypt_invalid_sealed_box_is_err() {
         let sut = SUT::default();
         assert_eq!(
-            sut.decrypt(Vec::new(), &Exactly32Bytes::sample()),
+            sut.decrypt(Vec::new(), &mut Exactly32Bytes::sample()),
             Err(CommonError::InvalidAESBytesTooShort {
                 expected_at_least: AesGcmSealedBox::LOWER_BOUND_LEN as u64,
                 found: 0

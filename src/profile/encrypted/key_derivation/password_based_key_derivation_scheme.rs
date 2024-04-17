@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum PasswordBasedKeyDerivationScheme {
-    Version1(PasswordBasedKeyDerivationSchemeVersion1),
+    Version1(PbHkdfSha256),
 }
 
 #[cfg(not(tarpaulin_include))] // false negative
@@ -35,7 +35,7 @@ impl<'de> Deserialize<'de> for PasswordBasedKeyDerivationScheme {
 
 impl PasswordBasedKeyDerivationScheme {
     pub fn version1() -> Self {
-        Self::Version1(PasswordBasedKeyDerivationSchemeVersion1::default())
+        Self::Version1(PbHkdfSha256::default())
     }
 }
 impl Default for PasswordBasedKeyDerivationScheme {

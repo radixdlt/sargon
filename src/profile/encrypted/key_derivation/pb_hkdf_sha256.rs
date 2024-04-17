@@ -15,9 +15,9 @@ use k256::sha2::Sha256;
 )]
 #[debug("{}", self.description())]
 #[display("{}", self.description())]
-pub struct PasswordBasedKeyDerivationSchemeVersion1 {}
+pub struct PbHkdfSha256 {}
 
-impl VersionOfAlgorithm for PasswordBasedKeyDerivationSchemeVersion1 {
+impl VersionOfAlgorithm for PbHkdfSha256 {
     type Version = PasswordBasedKeyDerivationSchemeVersion;
 
     fn description(&self) -> String {
@@ -29,9 +29,7 @@ impl VersionOfAlgorithm for PasswordBasedKeyDerivationSchemeVersion1 {
     }
 }
 
-impl VersionedPasswordBasedKeyDerivation
-    for PasswordBasedKeyDerivationSchemeVersion1
-{
+impl VersionedPasswordBasedKeyDerivation for PbHkdfSha256 {
     fn kdf(&self, password: impl AsRef<str>) -> Exactly32Bytes {
         // Input Key Material
         let ikm = password.as_ref().bytes().collect::<Vec<u8>>();
@@ -43,7 +41,7 @@ impl VersionedPasswordBasedKeyDerivation
     }
 }
 
-impl PasswordBasedKeyDerivationSchemeVersion1 {
+impl PbHkdfSha256 {
     pub const DESCRIPTION: &'static str =
         "HKDFSHA256-with-UTF8-encoding-of-password-no-salt-no-info";
 }

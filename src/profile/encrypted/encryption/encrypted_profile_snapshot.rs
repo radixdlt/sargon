@@ -34,12 +34,12 @@ pub struct EncryptedProfileSnapshot {
 impl EncryptedProfileSnapshot {
     pub fn decrypt(&self, password: impl AsRef<str>) -> Result<Profile> {
         // Derive encryption key based on password
-        let decryption_key = self.key_derivation_scheme.kdf(password);
+        let mut decryption_key = self.key_derivation_scheme.kdf(password);
 
         // decrypt Profile JSON bytes
         let decrypted = self
             .encryption_scheme
-            .decrypt(self.encrypted_snapshot.to_vec(), &decryption_key)?;
+            .decrypt(self.encrypted_snapshot.to_vec(), &mut decryption_key)?;
 
         // JSON decode bytes into Profile
         Profile::new_from_json_bytes(decrypted)
@@ -58,11 +58,11 @@ impl EncryptedProfileSnapshot {
         let json = profile.to_json_bytes();
 
         // derive symmetric encryption key
-        let encryption_key = key_derivation_scheme.kdf(password);
+        let mut encryption_key = key_derivation_scheme.kdf(password);
 
         // encrypt profile with encryption key
         let encrypted_payload =
-            encryption_scheme.encrypt(json.to_vec(), &encryption_key);
+            encryption_scheme.encrypt(json.to_vec(), &mut encryption_key);
 
         Self {
             version: ProfileEncryptionVersion::default(),
