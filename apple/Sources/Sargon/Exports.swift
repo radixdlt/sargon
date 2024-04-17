@@ -1,6 +1,6 @@
 // ADVANTAGE:
 // This makes it possible to write `Sargon.AppearanceId` in iOS Wallet App, instead of having to write `SargonUniFFI.AppearanceId`,
-// wihch is kind of important since `SargonUniFFI.AppearanceID` will not compile, since it is a typealias defined by `Sargon`.
+// which is kind of important since `SargonUniFFI.AppearanceID` will not compile, since it is a typealias defined by `Sargon`.
 // So we would like iOS Wallet App to not have to be aware of where the types are defined, either `SargonUniFFI` or `Sargon`.
 //
 // DISADVANTAGE:
