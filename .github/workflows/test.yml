@@ -112,6 +112,12 @@ jobs:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
           target: nightly-aarch64-apple-darwin
 
+      - name: Install nightly target
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          rustup target add nightly-aarch64-apple-darwin
+
       - name: Run rust coverage for documentation
         uses: RDXWorks-actions/rustdoc-coverage-action@main
       - run: |
