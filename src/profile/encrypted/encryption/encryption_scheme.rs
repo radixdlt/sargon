@@ -4,7 +4,8 @@ use crate::prelude::*;
     Clone, PartialEq, Eq, Hash, derive_more::Display, derive_more::Debug,
 )]
 pub enum EncryptionScheme {
-    Version1(EncryptionSchemeVersion1),
+    /// AES GCM 256 encryption
+    Version1(AesGcm256),
 }
 
 #[cfg(not(tarpaulin_include))] // false negative
@@ -36,7 +37,7 @@ impl<'de> Deserialize<'de> for EncryptionScheme {
 
 impl EncryptionScheme {
     pub fn version1() -> Self {
-        Self::Version1(EncryptionSchemeVersion1::default())
+        Self::Version1(AesGcm256::default())
     }
 }
 
@@ -47,26 +48,31 @@ impl Default for EncryptionScheme {
 }
 
 impl VersionedEncryption for EncryptionScheme {
+    /// Encrypts `plaintext` using `encryption_key` using
+    /// the `self` `EncryptionScheme`, returning the cipher text as Vec<u8>.
     fn encrypt(
         &self,
-        data: Vec<u8>,
+        plaintext: Vec<u8>,
         encryption_key: &Exactly32Bytes,
     ) -> Vec<u8> {
         match self {
             EncryptionScheme::Version1(scheme) => {
-                scheme.encrypt(data, encryption_key)
+                scheme.encrypt(plaintext, encryption_key)
             }
         }
     }
 
+    /// Tries to decrypt the `cipher_text` using the `decryption_key` according
+    /// to the `self` `EncryptionScheme`, returning the plaintext if operation
+    /// was successful.
     fn decrypt(
         &self,
-        data: Vec<u8>,
+        cipher_text: Vec<u8>,
         decryption_key: &Exactly32Bytes,
     ) -> Result<Vec<u8>> {
         match self {
             EncryptionScheme::Version1(scheme) => {
-                scheme.decrypt(data, decryption_key)
+                scheme.decrypt(cipher_text, decryption_key)
             }
         }
     }
@@ -76,9 +82,7 @@ impl TryFrom<EncryptionSchemeVersion> for EncryptionScheme {
     type Error = CommonError;
     fn try_from(value: EncryptionSchemeVersion) -> Result<Self> {
         match value {
-            EncryptionSchemeVersion::Version1 => {
-                Ok(Self::Version1(EncryptionSchemeVersion1::default()))
-            }
+            EncryptionSchemeVersion::Version1 => Ok(Self::version1()),
         }
     }
 }
@@ -156,7 +160,7 @@ mod tests {
         assert_eq!(
             sut.decrypt(Vec::new(), &Exactly32Bytes::sample()),
             Err(CommonError::InvalidAESBytesTooShort {
-                expected_at_least: AESGCMSealedBox::LOWER_BOUND_LEN as u64,
+                expected_at_least: AesGcmSealedBox::LOWER_BOUND_LEN as u64,
                 found: 0
             })
         );

@@ -1,5 +1,6 @@
 use crate::prelude::*;
 
+/// Versioned Encryption scheme
 #[repr(u32)]
 #[derive(
     Serialize_repr,
@@ -12,5 +13,6 @@ use crate::prelude::*;
     derive_more::Debug,
 )]
 pub enum EncryptionSchemeVersion {
+    /// AES GCM 256 encryption
     Version1 = 1,
 }

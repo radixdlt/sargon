@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash)]
-pub struct AESGCMSealedBox {
+pub struct AesGcmSealedBox {
     /// Nonce is 12 bytes
     pub(super) nonce: Exactly12Bytes,
 
@@ -9,7 +9,7 @@ pub struct AESGCMSealedBox {
     pub(super) cipher_text: Vec<u8>,
 }
 
-impl AESGCMSealedBox {
+impl AesGcmSealedBox {
     pub const AUTH_TAG_LEN: usize = 16;
     pub const NONCE_LEN: usize = 12;
     pub const LOWER_BOUND_LEN: usize = Self::AUTH_TAG_LEN + Self::NONCE_LEN + 1; // at least 1 byte cipher. VERY much LOWER bound
@@ -25,7 +25,7 @@ impl AESGCMSealedBox {
     }
 }
 
-impl TryFrom<Vec<u8>> for AESGCMSealedBox {
+impl TryFrom<Vec<u8>> for AesGcmSealedBox {
     type Error = CommonError;
 
     fn try_from(value: Vec<u8>) -> Result<Self, Self::Error> {

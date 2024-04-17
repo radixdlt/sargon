@@ -74,9 +74,7 @@ impl TryFrom<PasswordBasedKeyDerivationSchemeVersion>
     ) -> Result<Self> {
         match value {
             PasswordBasedKeyDerivationSchemeVersion::Version1 => {
-                Ok(Self::Version1(
-                    PasswordBasedKeyDerivationSchemeVersion1::default(),
-                ))
+                Ok(Self::version1())
             }
         }
     }
