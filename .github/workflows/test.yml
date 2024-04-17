@@ -106,11 +106,11 @@ jobs:
     steps:
       - uses: RDXWorks-actions/checkout@main
 
-      - name: Install Rust Toolchain
+      - name: Install Rust Toolchain for aarch64-apple-darwin
         uses: RDXWorks-actions/toolchain@master
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
-          default: true
+          target: aarch64-apple-darwin
 
       - name: Run rust coverage for documentation
         uses: RDXWorks-actions/rustdoc-coverage-action@main
