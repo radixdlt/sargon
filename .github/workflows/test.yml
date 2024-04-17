@@ -111,12 +111,12 @@ jobs:
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
           default: true
-
-    - name: Run rust coverage for documentation
-      uses: RDXWorks-actions/rustdoc-coverage-action@v1
-    - run: |
-        echo ${{ steps.coverage.outputs.documented }}
-        echo ${{ steps.coverage.outputs.diff-documented }}
+          
+      - name: Run rust coverage for documentation
+        uses: RDXWorks-actions/rustdoc-coverage-action@v1
+      - run: |
+          echo ${{ steps.coverage.outputs.documented }}
+          echo ${{ steps.coverage.outputs.diff-documented }}
 
   # Swift testing on macOS (Apple Silicon)
   test-swift:
