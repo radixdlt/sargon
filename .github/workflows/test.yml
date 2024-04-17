@@ -98,8 +98,25 @@ jobs:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
           default: true
 
-      - name: Run tests
+      - name: Run rust tests
         run: cargo test
+
+  rust-coverage-of-doc:
+    runs-on: macos-14-xlarge
+    steps:
+      - uses: RDXWorks-actions/checkout@main
+
+      - name: Install Rust Toolchain
+        uses: RDXWorks-actions/toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          default: true
+
+    - name: Run rust coverage for documentation
+      uses: RDXWorks-actions/rustdoc-coverage-action@v1
+    - run: |
+        echo ${{ steps.coverage.outputs.documented }}
+        echo ${{ steps.coverage.outputs.diff-documented }}
 
   # Swift testing on macOS (Apple Silicon)
   test-swift:
