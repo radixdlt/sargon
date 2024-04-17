@@ -310,3 +310,172 @@ mod slip10_tests {
         thousand.test();
     }
 }
+
+#[cfg(test)]
+mod wallet_interaction_tests {
+    use url::Url;
+
+    use super::*;
+
+    #[derive(Deserialize, Debug)]
+    struct Fixture {
+        tests: Vec<DappToWalletInteraction>,
+    }
+
+    #[test]
+    fn test_vector() {
+        let fixture = fixture::<Fixture>(include_str!(concat!(
+            env!("FIXTURES_VECTOR"),
+            "wallet_interactions.json"
+        )))
+        .expect("BIP44 fixture");
+
+    let metadata = DappToWalletInteractionMetadata {
+        network_id: NetworkID::Stokenet,
+        dapp_definition_address: DappDefinitionAddress::from_str("account_tdx_2_12xd46c22d6m696lv565t9afn088htudtq275px3qs925ywwty8axze").unwrap(),
+        origin: Url::from_str("https://dev-sandbox.rdx-works-main.extratools.works").unwrap(),
+        version: 2.into(),
+    };
+
+    let authorized_request_with_challenge = DappToWalletInteraction {
+        items: DappToWalletInteractionItems::AuthorizedRequest(DappToWalletInteractionAuthorizedRequestItems {
+            ongoing_persona_data: Some(DappToWalletInteractionPersonaDataRequestItem {
+                is_requesting_name: Some(true),
+                number_of_requested_email_addresses: Some(RequestedQuantity {
+                    quantifier: RequestedNumberQuantifier::Exactly,
+                    quantity: 1,
+                }),
+                number_of_requested_phone_numbers: Some(RequestedQuantity {
+                    quantifier: RequestedNumberQuantifier::Exactly,
+                    quantity: 1,
+                }),
+            }),
+            reset: Some(DappToWalletInteractionResetRequestItem {
+                accounts: true,
+                persona_data: true,
+            }),
+            auth: DappToWalletInteractionAuthRequestItem::LoginWithChallenge(DappToWalletInteractionAuthLoginWithChallengeRequestItem {
+                challenge: Exactly32Bytes::from_hex("e280cfa39e1499f2862e59759cc2fc990cce28b70a7989324fe91c47814d0630").unwrap(),
+            }),
+            ongoing_accounts: Some(DappToWalletInteractionAccountsRequestItem {
+                challenge: Some(Exactly32Bytes::from_hex("e280cfa39e1499f2862e59759cc2fc990cce28b70a7989324fe91c47814d0630").unwrap()),
+                number_of_accounts: RequestedQuantity {
+                    quantifier: RequestedNumberQuantifier::AtLeast,
+                    quantity: 4,
+                },
+            }),
+            one_time_accounts: None,
+            one_time_persona_data: None,
+        }),
+        interaction_id: "d59590ea-d50b-4e8d-a5e1-da3a2574ae5c".into(),
+        metadata: metadata.clone(),
+    };
+
+    let authorized_request_without_challenge = DappToWalletInteraction {
+        items: DappToWalletInteractionItems::AuthorizedRequest(DappToWalletInteractionAuthorizedRequestItems {
+            ongoing_persona_data: Some(DappToWalletInteractionPersonaDataRequestItem {
+                is_requesting_name: Some(true),
+                number_of_requested_email_addresses: Some(RequestedQuantity {
+                    quantifier: RequestedNumberQuantifier::AtLeast,
+                    quantity: 1,
+                }),
+                number_of_requested_phone_numbers: Some(RequestedQuantity {
+                    quantifier: RequestedNumberQuantifier::AtLeast,
+                    quantity: 1,
+                }),
+            }),
+            reset: Some(DappToWalletInteractionResetRequestItem {
+                accounts: true,
+                persona_data: true,
+            }),
+            auth: DappToWalletInteractionAuthRequestItem::LoginWithoutChallenge,
+            ongoing_accounts: Some(DappToWalletInteractionAccountsRequestItem {
+                challenge: Some(Exactly32Bytes::from_hex("e280cfa39e1499f2862e59759cc2fc990cce28b70a7989324fe91c47814d0630").unwrap()),
+                number_of_accounts: RequestedQuantity {
+                    quantifier: RequestedNumberQuantifier::Exactly,
+                    quantity: 4,
+                },
+            }),
+            one_time_accounts: None,
+            one_time_persona_data: None,
+        }),
+        interaction_id: "d59590ea-d50b-4e8d-a5e1-da3a2574ae5c".into(),
+        metadata: metadata.clone(),
+    };
+
+    let transaction = DappToWalletInteraction {
+        items: DappToWalletInteractionItems::Transaction(DappToWalletInteractionTransactionItems {
+            send: DappToWalletInteractionSendTransactionItem {
+                version: 1.into(),
+                message: Some("test message".into()),
+                blobs: Some(vec!["0061736d0100000001c8011c60037f7f7f0060027f7f0060027f7f017f60017f0060037f7f7f017f60017f017f60047f7f7f7f0060017f017e60037f7f7f017e60057f7f7f7f7f0060057f7f7f7f7f017f60027f7e017f60037f7f7e0".into()]),
+                transaction_manifest: "CALL_FUNCTION Address(\"package_tdx_2_1pkgxxxxxxxxxplxxxxxxxxxxxxx020379220524xxxxxxxxxe4r780\") \n    \"OneResourcePool\"\n    \"instantiate\"\n    Enum<OwnerRole::Fixed>(Enum<AccessRule::AllowAll>())\n    Enum<AccessRule::AllowAll>() \n    Address(\"resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc\")\n    None;".into(),
+            },
+        }),
+        interaction_id: "4051ff20-03b0-4a48-8205-0e8e8c673289".into(),
+        metadata: metadata.clone(),
+    };
+
+    let unauthorized_request_1 = DappToWalletInteraction {
+        items: DappToWalletInteractionItems::UnauthorizedRequest(DappToWalletInteractionUnauthorizedRequestItems {
+            one_time_accounts: Some(DappToWalletInteractionAccountsRequestItem {
+                challenge: Some(Exactly32Bytes::from_hex("84a5234f14a50dee062dc7a6a51f4bdab7cab5faadea05542af2040688d8fb6c").unwrap()),
+                number_of_accounts: RequestedQuantity {
+                    quantifier: RequestedNumberQuantifier::AtLeast,
+                    quantity: 1,
+                },
+            }),
+            one_time_persona_data: Some(DappToWalletInteractionPersonaDataRequestItem {
+                is_requesting_name: Some(true),
+                number_of_requested_email_addresses: Some(RequestedQuantity {
+                    quantifier: RequestedNumberQuantifier::Exactly,
+                    quantity: 1,
+                }),
+                number_of_requested_phone_numbers: Some(RequestedQuantity {
+                    quantifier: RequestedNumberQuantifier::Exactly,
+                    quantity: 1,
+                }),
+            }),
+        }),
+        interaction_id: "51a720a5-9f80-4d0f-8264-704d1645f0af".into(),
+        metadata: metadata.clone(),
+    };
+
+    let unauthorized_request_2 = DappToWalletInteraction {
+        items: DappToWalletInteractionItems::UnauthorizedRequest(DappToWalletInteractionUnauthorizedRequestItems {
+            one_time_accounts: Some(DappToWalletInteractionAccountsRequestItem {
+                challenge: Some(Exactly32Bytes::from_hex("84a5234f14a50dee062dc7a6a51f4bdab7cab5faadea05542af2040688d8fb6c").unwrap()),
+                number_of_accounts: RequestedQuantity {
+                    quantifier: RequestedNumberQuantifier::Exactly,
+                    quantity: 1,
+                },
+            }),
+            one_time_persona_data: Some(DappToWalletInteractionPersonaDataRequestItem {
+                is_requesting_name: Some(true),
+                number_of_requested_email_addresses: Some(RequestedQuantity {
+                    quantifier: RequestedNumberQuantifier::AtLeast,
+                    quantity: 1,
+                }),
+                number_of_requested_phone_numbers: Some(RequestedQuantity {
+                    quantifier: RequestedNumberQuantifier::AtLeast,
+                    quantity: 1,
+                }),
+            }),
+        }),
+        interaction_id: "51a720a5-9f80-4d0f-8264-704d1645f0af".into(),
+        metadata: metadata.clone(),
+    };
+
+        let expected_after_decoding = vec![
+            authorized_request_with_challenge,
+            authorized_request_without_challenge,
+            transaction,
+            unauthorized_request_1,
+            unauthorized_request_2,
+        ];
+
+        for (fixture, expected) in fixture.tests.iter().zip(expected_after_decoding.iter()) {
+            pretty_assertions::assert_eq!(fixture, expected);
+        }
+    }
+}

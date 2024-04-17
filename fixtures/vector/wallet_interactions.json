@@ -1,0 +1,157 @@
+{ 
+    "tests": [
+        {
+    "items" : {
+      "ongoingPersonaData" : {
+        "isRequestingName" : true,
+        "numberOfRequestedEmailAddresses" : {
+          "quantifier" : "exactly",
+          "quantity" : 1
+        },
+        "numberOfRequestedPhoneNumbers" : {
+          "quantifier" : "exactly",
+          "quantity" : 1
+        }
+      },
+      "reset" : {
+        "accounts" : true,
+        "personaData" : true
+      },
+      "discriminator" : "authorizedRequest",
+      "auth" : {
+        "challenge" : "e280cfa39e1499f2862e59759cc2fc990cce28b70a7989324fe91c47814d0630",
+        "discriminator" : "loginWithChallenge"
+      },
+      "ongoingAccounts" : {
+        "challenge" : "e280cfa39e1499f2862e59759cc2fc990cce28b70a7989324fe91c47814d0630",
+        "numberOfAccounts" : {
+          "quantifier" : "atLeast",
+          "quantity" : 4
+        }
+      }
+    },
+    "interactionId" : "d59590ea-d50b-4e8d-a5e1-da3a2574ae5c",
+    "metadata" : {
+      "networkId" : 2,
+      "dAppDefinitionAddress" : "account_tdx_2_12xd46c22d6m696lv565t9afn088htudtq275px3qs925ywwty8axze",
+      "origin" : "https://dev-sandbox.rdx-works-main.extratools.works",
+      "version" : 2
+    }
+  },
+  {
+    "items" : {
+      "ongoingPersonaData" : {
+        "isRequestingName" : true,
+        "numberOfRequestedEmailAddresses" : {
+          "quantifier" : "atLeast",
+          "quantity" : 1
+        },
+        "numberOfRequestedPhoneNumbers" : {
+          "quantifier" : "atLeast",
+          "quantity" : 1
+        }
+      },
+      "reset" : {
+        "accounts" : true,
+        "personaData" : true
+      },
+      "discriminator" : "authorizedRequest",
+      "auth" : {
+        "discriminator" : "loginWithoutChallenge"
+      },
+      "ongoingAccounts" : {
+        "challenge" : "e280cfa39e1499f2862e59759cc2fc990cce28b70a7989324fe91c47814d0630",
+        "numberOfAccounts" : {
+          "quantifier" : "exactly",
+          "quantity" : 4
+        }
+      }
+    },
+    "interactionId" : "d59590ea-d50b-4e8d-a5e1-da3a2574ae5c",
+    "metadata" : {
+      "networkId" : 2,
+      "dAppDefinitionAddress" : "account_tdx_2_12xd46c22d6m696lv565t9afn088htudtq275px3qs925ywwty8axze",
+      "origin" : "https://dev-sandbox.rdx-works-main.extratools.works",
+      "version" : 2
+    }
+  },
+  {
+    "items" : {
+      "send" : {
+        "version" : 1,
+        "message" : "test message",
+        "blobs": ["0061736d0100000001c8011c60037f7f7f0060027f7f0060027f7f017f60017f0060037f7f7f017f60017f017f60047f7f7f7f0060017f017e60037f7f7f017e60057f7f7f7f7f0060057f7f7f7f7f017f60027f7e017f60037f7f7e0"],
+        "transactionManifest" : "CALL_FUNCTION Address(\"package_tdx_2_1pkgxxxxxxxxxplxxxxxxxxxxxxx020379220524xxxxxxxxxe4r780\") \n    \"OneResourcePool\"\n    \"instantiate\"\n    Enum<OwnerRole::Fixed>(Enum<AccessRule::AllowAll>())\n    Enum<AccessRule::AllowAll>() \n    Address(\"resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc\")\n    None;"
+      },
+      "discriminator" : "transaction"
+    },
+    "interactionId" : "4051ff20-03b0-4a48-8205-0e8e8c673289",
+    "metadata" : {
+      "networkId" : 2,
+      "dAppDefinitionAddress" : "account_tdx_2_12xd46c22d6m696lv565t9afn088htudtq275px3qs925ywwty8axze",
+      "origin" : "https://dev-sandbox.rdx-works-main.extratools.works",
+      "version" : 2
+    }
+  },
+  {
+    "items" : {
+      "oneTimeAccounts" : {
+        "challenge" : "84a5234f14a50dee062dc7a6a51f4bdab7cab5faadea05542af2040688d8fb6c",
+        "numberOfAccounts" : {
+          "quantifier" : "atLeast",
+          "quantity" : 1
+        }
+      },
+      "oneTimePersonaData" : {
+        "isRequestingName" : true,
+        "numberOfRequestedEmailAddresses" : {
+          "quantifier" : "exactly",
+          "quantity" : 1
+        },
+        "numberOfRequestedPhoneNumbers" : {
+          "quantifier" : "exactly",
+          "quantity" : 1
+        }
+      },
+      "discriminator" : "unauthorizedRequest"
+    },
+    "interactionId" : "51a720a5-9f80-4d0f-8264-704d1645f0af",
+    "metadata" : {
+      "networkId" : 2,
+      "dAppDefinitionAddress" : "account_tdx_2_12xd46c22d6m696lv565t9afn088htudtq275px3qs925ywwty8axze",
+      "origin" : "https://dev-sandbox.rdx-works-main.extratools.works",
+      "version" : 2
+    }
+  },
+  {
+    "items" : {
+      "oneTimeAccounts" : {
+        "challenge" : "84a5234f14a50dee062dc7a6a51f4bdab7cab5faadea05542af2040688d8fb6c",
+        "numberOfAccounts" : {
+          "quantifier" : "exactly",
+          "quantity" : 1
+        }
+      },
+      "oneTimePersonaData" : {
+        "isRequestingName" : true,
+        "numberOfRequestedEmailAddresses" : {
+          "quantifier" : "atLeast",
+          "quantity" : 1
+        },
+        "numberOfRequestedPhoneNumbers" : {
+          "quantifier" : "atLeast",
+          "quantity" : 1
+        }
+      },
+      "discriminator" : "unauthorizedRequest"
+    },
+    "interactionId" : "51a720a5-9f80-4d0f-8264-704d1645f0af",
+    "metadata" : {
+      "networkId" : 2,
+      "dAppDefinitionAddress" : "account_tdx_2_12xd46c22d6m696lv565t9afn088htudtq275px3qs925ywwty8axze",
+      "origin" : "https://dev-sandbox.rdx-works-main.extratools.works",
+      "version" : 2
+    }
+  }
+]
+}
