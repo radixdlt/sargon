@@ -49,8 +49,13 @@ impl EncryptedProfileSnapshot {
         let key_derivation_scheme = kdf_scheme.into().unwrap_or_default();
         let encryption_scheme = encryption_scheme.into().unwrap_or_default();
 
+        // JSON encode profile
         let json = profile.to_json_bytes()?;
+
+        // derive symmetric encryption key
         let encryption_key = key_derivation_scheme.kdf(password);
+
+        // encrypt profile with encryption key
         let encrypted_payload =
             encryption_scheme.encrypt(json.to_vec(), &encryption_key)?;
 
