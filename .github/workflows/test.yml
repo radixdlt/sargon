@@ -106,17 +106,10 @@ jobs:
     steps:
       - uses: RDXWorks-actions/checkout@main
 
-      - name: Install Rust Toolchain for aarch64-apple-darwin
+      - name: Install Rust Toolchain
         uses: RDXWorks-actions/toolchain@master
         with:
-          toolchain: ${{ env.RUST_TOOLCHAIN }}
-          target: nightly-aarch64-apple-darwin
-
-      - name: Install nightly target
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          rustup target add nightly-aarch64-apple-darwin
+          toolchain: "nightly"
 
       - name: Run rust coverage for documentation
         uses: RDXWorks-actions/rustdoc-coverage-action@main
