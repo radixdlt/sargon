@@ -12,9 +12,6 @@ cd "../../" # go to parent of parent, which is project root.
 echo "🚢 Start of '$me' (see: '$DIR/$me')"
 echo "🚢 PWD: $PWD"
 
-echo "🚢 Switch 'useLocalFramework' to 'false' in Package.swift for release"
-sed -i '' 's/let useLocalFramework = true/let useLocalFramework = false/' Package.swift
-
 `git fetch --prune --tags`
 function last_tag() {
     local out=`git tag --sort=committerdate | tail -1`
@@ -37,6 +34,17 @@ XCFRAME_ZIP_PATH=`echo "$OUTPUT_OF_BUILD" | cut -d ";" -f 2` || exit $?
 
 echo "🚢  CHECKSUM: $CHECKSUM"
 echo "🚢  XCFRAME_ZIP_PATH: $XCFRAME_ZIP_PATH"
+
+echo "🚢 ensuring Swift Sargon build for release"
+echo "🚢 Switch 'useLocalFramework' to 'true' in Package.swift"
+# make script stateless
+sed -i '' 's/let useLocalFramework = false/let useLocalFramework = true/' Package.swift
+
+swift build -c release || exit $?
+echo "🚢 Swift Sargon builds for release ✅"
+
+echo "🚢 Switch 'useLocalFramework' to 'false' in Package.swift for release"
+sed -i '' 's/let useLocalFramework = true/let useLocalFramework = false/' Package.swift
 
 # We have .gitigored Sargon.swift because we dont need it in git history, but we
 # need it for this release, so we must FORCE add it (since it is ignored).
