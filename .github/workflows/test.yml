@@ -108,7 +108,8 @@ jobs:
 
       - uses: RDXWorks-actions/toolchain@master
         with:
-          toolchain: nightly
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          default: true
 
       - id: doccoverage
         uses: RDXWorks-actions/rustdoc-coverage-action@main
