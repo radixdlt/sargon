@@ -1,6 +1,24 @@
 use crate::prelude::*;
 
 #[uniffi::export]
+pub fn new_account_path(
+    network_id: NetworkID,
+    key_kind: CAP26KeyKind,
+    index: HDPathValue,
+) -> AccountPath {
+    AccountPath::new(network_id, key_kind, index)
+}
+
+#[uniffi::export]
+pub fn new_identity_path(
+    network_id: NetworkID,
+    key_kind: CAP26KeyKind,
+    index: HDPathValue,
+) -> IdentityPath {
+    IdentityPath::new(network_id, key_kind, index)
+}
+
+#[uniffi::export]
 pub fn new_cap26_path_from_string(
     string: String,
 ) -> Result<CAP26Path, CommonError> {
@@ -67,6 +85,26 @@ mod tests {
             new_cap26_path_from_string(String::from("m/44H/1022H/365H"))
                 .unwrap()
         );
+    }
+
+    #[test]
+    fn test_new_account_path() {
+        let path = new_account_path(
+            NetworkID::Mainnet,
+            CAP26KeyKind::TransactionSigning,
+            0,
+        );
+        assert_eq!(path.to_string(), "m/44H/1022H/1H/525H/1460H/0H")
+    }
+
+    #[test]
+    fn test_new_identity_path() {
+        let path = new_identity_path(
+            NetworkID::Mainnet,
+            CAP26KeyKind::TransactionSigning,
+            0,
+        );
+        assert_eq!(path.to_string(), "m/44H/1022H/1H/618H/1460H/0H")
     }
 
     #[test]
