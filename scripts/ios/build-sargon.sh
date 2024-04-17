@@ -45,18 +45,6 @@ generate_ffi() {
     local TARGET_FOR_DYLIB_PATH="aarch64-apple-ios"
   fi 
   cargo run --features build-binary --bin sargon-bindgen generate --library target/$TARGET_FOR_DYLIB_PATH/release/lib$1.dylib --language swift --out-dir target/uniffi-xcframework-staging
-
-  if $release; then
-    echo "🚢 Ensuring Sargon build for release - that it will work for e.g. iOS wallet to archive."
-    sed -i '' 's/let useLocalFramework = false/let useLocalFramework = true/' Package.swift
-    swift build -c release || exit $?
-    echo "🚢 Swift Sargon builds for release ✅"
-
-    # Prepare for release
-    sed -i '' 's/let useLocalFramework = true/let useLocalFramework = false/' Package.swift
-  fi
-
-
   mkdir -p apple/Sources/UniFFI/
   mv target/uniffi-xcframework-staging/*.swift apple/Sources/UniFFI/
   mv target/uniffi-xcframework-staging/$1FFI.modulemap target/uniffi-xcframework-staging/module.modulemap  # Convention requires this have a specific name
@@ -83,7 +71,6 @@ build_xcframework() {
   fi
 
   if $release; then
-
     local CHKSUM="RELEASE_WAS_FALSE_THUS_NO_CHECKSUM"
     echo "📦 ('release' is true) Building xcframework archive"
     zip -r $XCFRAME_ZIP_PATH $XCFRAME_PATH
