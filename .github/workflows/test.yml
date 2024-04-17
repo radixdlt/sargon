@@ -109,7 +109,11 @@ jobs:
       - uses: RDXWorks-actions/toolchain@master
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
+          target: x86_64-unknown-linux-gnu
           default: true
+
+      - name: manual install target
+        run: rustup target add x86_64-unknown-linux-gnu
 
       - id: doccoverage
         uses: RDXWorks-actions/rustdoc-coverage-action@main
