@@ -1,6 +1,10 @@
 import Foundation
 import SargonUniFFI
 
+#if DEBUG
+import XCTestDynamicOverlay
+#endif // DEBUG
+
 extension Decimal192 {
 	
 	public init(_ string: String) throws {
@@ -36,7 +40,6 @@ extension Locale {
 }
 #endif // DEBUG
 
-import XCTestDynamicOverlay
 extension Decimal192: CustomStringConvertible {
 	public var description: String {
 #if DEBUG
