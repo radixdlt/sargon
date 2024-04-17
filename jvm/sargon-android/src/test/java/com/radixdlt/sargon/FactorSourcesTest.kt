@@ -1,10 +1,12 @@
 package com.radixdlt.sargon
 
 import com.radixdlt.sargon.extensions.append
+import com.radixdlt.sargon.extensions.asGeneral
 import com.radixdlt.sargon.extensions.contains
 import com.radixdlt.sargon.extensions.get
 import com.radixdlt.sargon.extensions.id
 import com.radixdlt.sargon.extensions.init
+import com.radixdlt.sargon.extensions.randomBagOfBytes
 import com.radixdlt.sargon.extensions.remove
 import com.radixdlt.sargon.extensions.removeById
 import com.radixdlt.sargon.extensions.size
@@ -14,8 +16,9 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.sql.Time
 
-class FactorSourcesTest: SampleTestable<FactorSources> {
+class FactorSourcesTest : SampleTestable<FactorSources> {
 
     override val samples: List<Sample<FactorSources>>
         get() = listOf(FactorSources.sample)
@@ -51,6 +54,63 @@ class FactorSourcesTest: SampleTestable<FactorSources> {
         assertThrows<CommonException.FactorSourcesMustNotBeEmpty> {
             FactorSources.init()
         }
+    }
+
+    @Test
+    fun testDeviceFactorSourceAsGeneral() {
+        val factorSource = DeviceFactorSource(
+            id = FactorSourceIdFromHash(
+                kind = FactorSourceKind.DEVICE,
+                body = Exactly32Bytes.init(randomBagOfBytes(32))
+            ),
+            common = FactorSourceCommon(
+                cryptoParameters = FactorSourceCryptoParameters(
+                    supportedCurves = SupportedCurves.init(Slip10Curve.CURVE25519),
+                    supportedDerivationPathSchemes = listOf(DerivationPathScheme.CAP26)
+                ),
+                addedOn = Timestamp.now(),
+                lastUsedOn = Timestamp.now(),
+                flags = emptyList()
+            ),
+            hint = DeviceFactorSourceHint(
+                name = "Unit",
+                model = "Test",
+                mnemonicWordCount = Bip39WordCount.TWENTY_FOUR
+            )
+        )
+
+        assertEquals(
+            FactorSource.Device(factorSource),
+            factorSource.asGeneral()
+        )
+    }
+
+    @Test
+    fun testLedgerFactorSourceAsGeneral() {
+        val factorSource = LedgerHardwareWalletFactorSource(
+            id = FactorSourceIdFromHash(
+                kind = FactorSourceKind.DEVICE,
+                body = Exactly32Bytes.init(randomBagOfBytes(32))
+            ),
+            common = FactorSourceCommon(
+                cryptoParameters = FactorSourceCryptoParameters(
+                    supportedCurves = SupportedCurves.init(Slip10Curve.CURVE25519),
+                    supportedDerivationPathSchemes = listOf(DerivationPathScheme.CAP26)
+                ),
+                addedOn = Timestamp.now(),
+                lastUsedOn = Timestamp.now(),
+                flags = emptyList()
+            ),
+            hint = LedgerHardwareWalletHint(
+                name = "Unit",
+                model = LedgerHardwareWalletModel.NANO_S
+            )
+        )
+
+        assertEquals(
+            FactorSource.Ledger(factorSource),
+            factorSource.asGeneral()
+        )
     }
 
 }
