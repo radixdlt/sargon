@@ -110,7 +110,7 @@ jobs:
         uses: RDXWorks-actions/toolchain@master
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
-          target: aarch64-apple-darwin
+          target: nightly-aarch64-apple-darwin
 
       - name: Run rust coverage for documentation
         uses: RDXWorks-actions/rustdoc-coverage-action@main
