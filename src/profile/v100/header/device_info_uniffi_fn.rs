@@ -17,8 +17,6 @@ pub fn new_device_info_iphone() -> DeviceInfo {
     DeviceInfo::new_iphone()
 }
 
-/// Instantiates a new `DeviceInfo` with "iPhone" as description, and
-/// generates a new `id` and will use the current `date` for creation date.
 #[uniffi::export]
 pub fn new_device_info_from_json_string(
     json_string: String,
