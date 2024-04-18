@@ -47,7 +47,7 @@ impl EncryptedProfileSnapshot {
 
     pub fn encrypting(
         profile: &Profile,
-        password: String,
+        password: impl AsRef<str>,
         kdf_scheme: impl Into<Option<PasswordBasedKeyDerivationScheme>>,
         encryption_scheme: impl Into<Option<EncryptionScheme>>,
     ) -> Self {

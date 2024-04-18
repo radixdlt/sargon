@@ -21,3 +21,4 @@ extension Profile: CustomDebugStringConvertible {
 		profileToDebugString(profile: self)
 	}
 }
+

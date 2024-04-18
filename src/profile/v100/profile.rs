@@ -134,6 +134,14 @@ impl Profile {
             }})
 		    .and_then(|encrypted| encrypted.decrypt(password))
     }
+
+    pub fn to_encryption_bytes(&self, password: impl AsRef<str>) -> Vec<u8> {
+        let encrypted =
+            EncryptedProfileSnapshot::encrypting(self, password, None, None);
+        serde_json::to_vec(&encrypted).expect(
+            "JSON serialization of EncryptedProfileSnapshot should never fail.",
+        )
+    }
 }
 
 impl Profile {
@@ -180,10 +188,9 @@ impl Profile {
     /// integrate Profile in steps.
     ///
     /// Should be replaced later with `WalletClientStorage`
-    pub fn to_json_bytes(&self) -> BagOfBytes {
+    pub fn to_json_bytes(&self) -> Vec<u8> {
         serde_json::to_vec(self)
-            .map(BagOfBytes::from)
-            .expect("JSON serialization of Profile should neve fail.")
+            .expect("JSON serialization of Profile should never fail.")
     }
 }
 
@@ -467,6 +474,17 @@ mod tests {
                 json_byte_count: 4,
                 type_name: "EncryptedProfileSnapshot".to_owned()
             })
+        );
+    }
+
+    #[test]
+    fn encryption_roundtrip() {
+        let sut = SUT::sample();
+        let password = "super secret";
+        let encryption_bytes = sut.to_encryption_bytes(password);
+        assert_eq!(
+            SUT::new_from_encryption_bytes(encryption_bytes, password).unwrap(),
+            sut
         );
     }
 
