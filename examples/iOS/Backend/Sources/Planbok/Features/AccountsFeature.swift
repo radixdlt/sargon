@@ -1,3 +1,6 @@
+import Sargon
+import SargonUniFFI
+
 @Reducer
 public struct AccountsFeature {
 	public init() {}
@@ -38,7 +41,7 @@ public struct AccountsFeature {
 			profile.networks.first(where: { $0.id == currentNetworkID })!
 		}
 		
-		public var accounts: [Account] {
+		public var accounts: Accounts {
 			network.accounts
 		}
 		
