@@ -18,6 +18,11 @@ pub fn bip44_like_path_to_string(path: &BIP44LikePath) -> String {
 }
 
 #[uniffi::export]
+pub fn bip44_like_path_get_address_index(path: &BIP44LikePath) -> HDPathValue {
+    path.last_component().index()
+}
+
+#[uniffi::export]
 pub fn new_bip44_like_path_sample() -> BIP44LikePath {
     BIP44LikePath::sample()
 }
@@ -31,9 +36,12 @@ pub fn new_bip44_like_path_sample_other() -> BIP44LikePath {
 mod tests {
     use super::*;
 
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = BIP44LikePath;
+
     #[test]
     fn test_new_bip44_like_path_from_index() {
-        assert_eq!(new_bip44_like_path_from_index(0), BIP44LikePath::new(0))
+        assert_eq!(new_bip44_like_path_from_index(0), SUT::new(0))
     }
 
     #[test]
@@ -68,5 +76,10 @@ mod tests {
                 .unwrap()
                 .to_string()
         );
+    }
+
+    #[test]
+    fn test_bip44_like_path_get_address_index() {
+        assert_eq!(bip44_like_path_get_address_index(&SUT::sample_other()), 1)
     }
 }
