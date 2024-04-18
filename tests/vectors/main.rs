@@ -481,3 +481,90 @@ mod wallet_interaction_tests {
         }
     }
 }
+
+#[cfg(test)]
+mod wallet_to_dapp_interaction_tests {
+    use serde::de::IntoDeserializer;
+    use serde_json::Value;
+    use url::Url;
+
+    use super::*;
+
+    #[test]
+    fn test_vector() {
+        let response = DappWalletInteractionResponse::Success(DappWalletInteractionSuccessResponse {
+        interaction_id: "06f00fbc-67ed-4a22-a122-1da719b25b6f".into(),
+        items: DappWalletInteractionResponseItems::AuthorizedRequest(DappWalletInteractionAuthorizedRequestResponseItems {
+            auth: DappWalletInteractionAuthRequestResponseItem::LoginWithChallenge(DappWalletInteractionAuthLoginWithChallengeRequestResponseItem {
+                proof: DappWalletInteractionAuthProof {
+                    curve: SLIP10Curve::Curve25519,
+                    public_key: "ff8aee4c625738e35d837edb11e33b8abe0d6f40849ca1451edaba84d04d0699".to_string(),
+                    signature: "10177ac7d486691777133ffe59d46d55529d86cb1c4ce66aa82f432372f33e24d803d8498f42e26fe113c030fce68c526aeacff94334ba5a7f7ef84c2936eb05".to_string(),
+                },
+                challenge: Exactly32Bytes::from_hex("069ef236486d4cd5706b5e5b168e19f750ffd1b4876529a0a9de966d50a15ab7").unwrap(),
+                persona: DappWalletInteractionPersona {
+                    label: "Usdudh".into(),
+                    identity_address: IdentityAddress::from_str("identity_tdx_2_12twas58v4sthsmuky5653dup0drez3vcfwsfm6kp40qu9qyt8fgts6").unwrap(),
+                },
+            }),
+            ongoing_accounts: Some(DappWalletInteractionAccountsRequestResponseItem {
+                challenge: Some(Exactly32Bytes::from_hex("069ef236486d4cd5706b5e5b168e19f750ffd1b4876529a0a9de966d50a15ab7").unwrap()),
+                accounts: vec![
+                    WalletInteractionWalletAccount {
+                        label: "Dff".into(),
+                        address: AccountAddress::from_str("account_tdx_2_129qeystv8tufmkmjrry2g6kadhhfh4f7rd0x3t9yagcvfhspt62paz").unwrap(),
+                        appearance_id: AppearanceID::gradient0(),
+                    },
+                    WalletInteractionWalletAccount {
+                        label: "Ghhvgfvf".into(),
+                        address: AccountAddress::from_str("account_tdx_2_128928hvf6pjr3rx2xvdw6ulf7pc8g88ya8ma3j8dtjmntckz09fr3n").unwrap(),
+                        appearance_id: AppearanceID::gradient1(),
+                    },
+                ],
+                proofs: Some(vec![
+                    DappWalletInteractionAccountProof {
+                        account_address: AccountAddress::from_str("account_tdx_2_129qeystv8tufmkmjrry2g6kadhhfh4f7rd0x3t9yagcvfhspt62paz").unwrap(),
+                        proof: DappWalletInteractionAuthProof {
+                            curve: SLIP10Curve::Curve25519,
+                            public_key: "11b162e3343ce770b6e9ed8a29d125b5580d1272b0dc4e2bd0fcae33320d9566".to_string(),
+                            signature: "e18617b527d4d33607a8adb6a040c26ca97642ec89dd8a6fe7a41fa724473e4cc69b0729c1df57aba77455801f2eef6f28848a5d206e3739de29ca2288957502".to_string(),
+                        },
+                    },
+                    DappWalletInteractionAccountProof {
+                        account_address: AccountAddress::from_str("account_tdx_2_128928hvf6pjr3rx2xvdw6ulf7pc8g88ya8ma3j8dtjmntckz09fr3n").unwrap(),
+                        proof: DappWalletInteractionAuthProof {
+                            curve: SLIP10Curve::Curve25519,
+                            public_key: "5386353e4cc27e3d27d064d777d811e242a16ba7aefd425062ed46631739619d".to_string(),
+                            signature: "0143fd941d51f531c8265b0f6b24f4cfcdfd24b40aac47dee6fb3386ce0d400563c892e3894a33840d1c7af2dd43ecd0729fd209171003765d109a04d7485605".to_string(),
+                        },
+                    },
+                ]),
+            }),
+            ongoing_persona_data: Some(
+                DappWalletInteractionPersonaDataRequestResponseItem {
+                    name: Some(PersonaDataEntryName {
+                        nickname: "Nick".into(),
+                        given_names: "Given".into(),
+                        family_name: "Family".into(),
+                        variant: Variant::Western,
+                    }),
+                    email_addresses: Some(vec![PersonaDataEntryEmailAddress::new("some@gmail.com").unwrap()]),
+                    phone_numbers: Some(vec![PersonaDataEntryPhoneNumber::new("071234579").unwrap()])
+                }
+            ),
+            one_time_accounts: None,
+            one_time_persona_data: None,
+        }),
+    });
+
+        let encoded = serde_json::to_string(&response).unwrap();
+        let serde_value: Value = serde_json::from_str(&encoded).unwrap();
+        let fixture = fixture::<Value>(include_str!(concat!(
+            env!("FIXTURES_VECTOR"),
+            "wallet_interactions_wallet_to_dapp.json"
+        )))
+        .expect("BIP44 fixture");
+
+        pretty_assertions::assert_eq!(serde_value, fixture);
+    }
+}
