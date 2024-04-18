@@ -27,4 +27,12 @@ final class ProfileTests: Test<Profile> {
 		let sut = SUT.sample
 		XCTAssertNoDifference(sut, try Profile(json: sut.profileSnapshot()))
 	}
+	
+	func test_encryption_roundtrip() throws {
+		let password = "ultra secret"
+		let sut = SUT.sample
+		let encrypted = sut.encrypt(password: password)
+		let decrypted = try Profile(encrypted: encrypted, decryptionPassword: password)
+		XCTAssertNoDifference(decrypted, sut)
+	}
 }

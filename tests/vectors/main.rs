@@ -333,3 +333,168 @@ mod slip10_tests {
         thousand.test();
     }
 }
+
+#[cfg(test)]
+mod encrypted_profile_tests {
+    use std::collections::HashSet;
+
+    use serde::Serialize;
+
+    use super::*;
+
+    #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
+    struct IdentifiableMnemonic {
+        #[serde(rename = "factorSourceID")]
+        factor_source_id: FactorSourceID,
+        #[serde(rename = "mnemonicWithPassphrase")]
+        mnemonic_with_passphrase: MnemonicWithPassphrase,
+    }
+
+    #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
+    struct EncryptedSnapshotWithPassword {
+        password: String,
+        snapshot: EncryptedProfileSnapshot,
+    }
+    impl EncryptedSnapshotWithPassword {
+        fn decrypted(&self) -> Result<Profile> {
+            self.snapshot.decrypt(self.password.clone())
+        }
+    }
+
+    #[derive(Debug, Deserialize, Serialize, PartialEq, Eq)]
+    struct Fixture {
+        #[serde(rename = "_snapshotVersion")]
+        snapshot_version: ProfileSnapshotVersion,
+        mnemonics: Vec<IdentifiableMnemonic>,
+        #[serde(rename = "encryptedSnapshots")]
+        encrypted_snapshots: Vec<EncryptedSnapshotWithPassword>,
+        plaintext: Profile,
+    }
+
+    impl Fixture {
+        fn validate_all_entities_with_mnemonics(&self) -> Result<()> {
+            self.plaintext
+                .networks
+                .clone()
+                .into_iter()
+                .try_for_each(|n| {
+                    let test = |security_state: EntitySecurityState| {
+                        let control = security_state.as_unsecured().unwrap();
+
+                        let tx_signing_instance =
+                            control.transaction_signing.clone();
+
+                        let factor_source_id_from_hash =
+                            tx_signing_instance.factor_source_id;
+
+                        if factor_source_id_from_hash.kind
+                            != FactorSourceKind::Device
+                        {
+                            return;
+                        }
+
+                        let factor_source_id: FactorSourceID =
+                            factor_source_id_from_hash.into();
+
+                        let factor_source = self
+                            .plaintext
+                            .factor_sources
+                            .clone()
+                            .into_iter()
+                            .find(|x| x.factor_source_id() == factor_source_id);
+
+                        assert!(factor_source.is_some());
+
+                        let mnemonic = self
+                            .mnemonics
+                            .clone()
+                            .into_iter()
+                            .find(|x| x.factor_source_id == factor_source_id)
+                            .unwrap();
+
+                        let public_key = mnemonic
+                            .mnemonic_with_passphrase
+                            .to_seed()
+                            .derive_private_key(
+                                &tx_signing_instance.derivation_path(),
+                            )
+                            .public_key();
+
+                        assert_eq!(public_key, tx_signing_instance.public_key);
+                    };
+
+                    n.accounts
+                        .into_iter()
+                        .map(|x| x.security_state)
+                        .for_each(test);
+
+                    n.personas
+                        .into_iter()
+                        .map(|x| x.security_state)
+                        .for_each(test);
+
+                    Ok(())
+                })?;
+            Ok(())
+        }
+
+        fn validate(&self) -> Result<Vec<Profile>> {
+            let decryptions: Vec<Profile> = self
+                .encrypted_snapshots
+                .clone()
+                .into_iter()
+                .map(|x| x.decrypted())
+                .collect::<Result<Vec<Profile>>>()
+                .unwrap();
+
+            decryptions
+                .clone()
+                .into_iter()
+                .for_each(|x| assert_eq!(x, self.plaintext));
+
+            let ids = self
+                .plaintext
+                .factor_sources
+                .clone()
+                .into_iter()
+                .filter(|x| x.factor_source_kind() == FactorSourceKind::Device)
+                .map(|x| x.factor_source_id())
+                .collect::<HashSet<FactorSourceID>>();
+
+            assert_eq!(
+                ids,
+                self.mnemonics
+                    .clone()
+                    .into_iter()
+                    .map(|x| x.factor_source_id)
+                    .collect::<HashSet<FactorSourceID>>()
+            );
+
+            self.validate_all_entities_with_mnemonics()?;
+
+            Ok(decryptions)
+        }
+
+        fn test(&self) {
+            let decrypted_profiles = self.validate().unwrap();
+            decrypted_profiles.clone().into_iter().for_each(|x| {
+                assert_eq!(
+                    x.header.snapshot_version,
+                    self.plaintext.header.snapshot_version
+                )
+            });
+            assert_json_roundtrip(self);
+        }
+    }
+
+    #[test]
+    fn test_vectors() {
+        let fixture = fixture::<Fixture>(include_str!(concat!(
+            env!("FIXTURES_VECTOR"),
+            "multi_profile_snapshots_test_version_100_patch_after_app_version_120.json"
+        )))
+        .expect("Encrypted Profile tests");
+
+        fixture.test();
+    }
+}

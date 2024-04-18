@@ -72,8 +72,9 @@ impl Profile {
     /// networks (thus no accounts), with creating device info as "unknown".
     pub fn new(
         device_factor_source: DeviceFactorSource,
-        creating_device_name: &str,
+        creating_device_name: impl AsRef<str>,
     ) -> Self {
+        let creating_device_name = creating_device_name.as_ref();
         let creating_device = DeviceInfo::with_description(
             format!(
                 "{} - {}",
@@ -109,13 +110,37 @@ impl Profile {
     /// integrate Profile in steps.
     ///
     /// Should be replaced later with `WalletClientStorage`
-    pub fn new_from_json_bytes(json: BagOfBytes) -> Result<Self> {
-        serde_json::from_slice::<Self>(json.bytes()).map_err(|_| {
+    pub fn new_from_json_bytes(json: impl AsRef<[u8]>) -> Result<Self> {
+        let json = json.as_ref();
+        serde_json::from_slice::<Self>(json).map_err(|_| {
             CommonError::FailedToDeserializeJSONToValue {
                 json_byte_count: json.len() as u64,
-                type_name: String::from("Profile"),
+                type_name: "Profile".to_owned(),
             }
         })
+    }
+
+    pub fn new_from_encryption_bytes(
+        json: impl AsRef<[u8]>,
+        password: impl AsRef<str>,
+    ) -> Result<Self> {
+        let json = json.as_ref();
+        serde_json::from_slice::<EncryptedProfileSnapshot>(json)
+		.map_err(|e| {
+			error!("Failed to deserialize JSON as EncryptedProfileSnapshot, error: {:?}", e);
+            CommonError::FailedToDeserializeJSONToValue {
+                json_byte_count: json.len() as u64,
+                type_name: "EncryptedProfileSnapshot".to_owned(),
+            }})
+		    .and_then(|encrypted| encrypted.decrypt(password))
+    }
+
+    pub fn to_encryption_bytes(&self, password: impl AsRef<str>) -> Vec<u8> {
+        let encrypted =
+            EncryptedProfileSnapshot::encrypting(self, password, None, None);
+        serde_json::to_vec(&encrypted).expect(
+            "JSON serialization of EncryptedProfileSnapshot should never fail.",
+        )
     }
 }
 
@@ -163,10 +188,9 @@ impl Profile {
     /// integrate Profile in steps.
     ///
     /// Should be replaced later with `WalletClientStorage`
-    pub fn to_json_bytes(&self) -> Result<BagOfBytes> {
+    pub fn to_json_bytes(&self) -> Vec<u8> {
         serde_json::to_vec(self)
-            .map_err(|_| CommonError::FailedToSerializeToJSON)
-            .map(BagOfBytes::from)
+            .expect("JSON serialization of Profile should never fail.")
     }
 }
 
@@ -410,7 +434,7 @@ mod tests {
     fn to_json_bytes_new_from_json_bytes() {
         let sut = SUT::sample();
 
-        let encoded = sut.to_json_bytes().unwrap();
+        let encoded = sut.to_json_bytes();
         let profile_result = SUT::new_from_json_bytes(encoded).unwrap();
         assert_eq!(profile_result, sut);
     }
@@ -424,6 +448,43 @@ mod tests {
                 json_byte_count: malformed_profile_snapshot.len() as u64,
                 type_name: String::from("Profile")
             })
+        );
+    }
+
+    #[test]
+    fn from_encryption_bytes_valid() {
+        let json =
+            serde_json::to_vec(&EncryptedProfileSnapshot::sample()).unwrap();
+        let sut = SUT::new_from_encryption_bytes(json, "babylon").unwrap();
+        assert_eq!(
+            sut.header.id,
+            ProfileID::from_str("e5e4477b-e47b-4b64-bbc8-f8f40e8beb74")
+                .unwrap()
+        );
+    }
+
+    #[test]
+    fn from_encryption_bytes_invalid_is_err() {
+        assert_eq!(
+            SUT::new_from_encryption_bytes(
+                Vec::from_iter([0xde, 0xad, 0xbe, 0xef]),
+                "invalid"
+            ),
+            Err(CommonError::FailedToDeserializeJSONToValue {
+                json_byte_count: 4,
+                type_name: "EncryptedProfileSnapshot".to_owned()
+            })
+        );
+    }
+
+    #[test]
+    fn encryption_roundtrip() {
+        let sut = SUT::sample();
+        let password = "super secret";
+        let encryption_bytes = sut.to_encryption_bytes(password);
+        assert_eq!(
+            SUT::new_from_encryption_bytes(encryption_bytes, password).unwrap(),
+            sut
         );
     }
 

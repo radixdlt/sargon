@@ -134,6 +134,19 @@ where
     assert_eq!(model, &deserialized);
 }
 
+/// Creates JSON from `json_str` and tries to decode it, then encode the decoded,
+/// value and compare it to the JSON value of the json_str.
+#[cfg(not(tarpaulin_include))]
+pub fn assert_json_str_roundtrip<T>(json_str: &str)
+where
+    T: Serialize + DeserializeOwned + PartialEq + Debug,
+{
+    let value = serde_json::Value::from_str(json_str).unwrap();
+    let deserialized: T = serde_json::from_value(value.clone()).unwrap();
+    let serialized = serde_json::to_value(&deserialized).unwrap();
+    assert_eq!(value, serialized);
+}
+
 #[cfg(not(tarpaulin_include))]
 pub fn assert_json_value_fails<T>(json: Value)
 where
