@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use serde::Serialize;
 
-#[derive(Debug, Serialize, PartialEq)]
+#[derive(Debug, Serialize, PartialEq, uniffi::Enum)]
 #[serde(tag = "discriminator")]
 pub enum DappWalletInteractionResponseItems {
     #[serde(rename = "authorizedRequest")]

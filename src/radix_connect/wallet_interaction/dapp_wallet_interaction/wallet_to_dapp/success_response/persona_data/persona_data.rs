@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use serde::Serialize;
 
-#[derive(Debug, Serialize, PartialEq)]
+#[derive(Debug, Serialize, PartialEq, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct DappWalletInteractionPersonaDataRequestResponseItem {
     #[serde(skip_serializing_if = "Option::is_none")]

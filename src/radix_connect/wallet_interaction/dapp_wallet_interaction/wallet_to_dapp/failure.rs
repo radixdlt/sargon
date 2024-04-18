@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use serde::Serialize;
 
-#[derive(Debug, Serialize, PartialEq)]
+#[derive(Debug, Serialize, PartialEq, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct DappWalletInteractionFailureResponse {
     pub interaction_id: WalletInteractionId,
@@ -9,7 +9,7 @@ pub struct DappWalletInteractionFailureResponse {
     pub message: Option<String>,
 }
 
-#[derive(Debug, Serialize, PartialEq)]
+#[derive(Debug, Serialize, PartialEq, uniffi::Enum)]
 pub enum DappWalletInteractionErrorType {
     RejectedByUser,
     WrongNetwork,
