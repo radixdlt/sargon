@@ -123,19 +123,11 @@ extension Decimal192 {
 extension Decimal192 {
 
 	private func rounded(decimalPlaces: UInt8, roundingMode: RoundingMode) -> Self {
-		precondition(
-			decimalPlaces <= Decimal192.maxDivisibility,
-			"Decimal places MUST be 0...18, was: \(decimalPlaces)"
+		try! decimalRound(
+			decimal: self,
+			decimalPlaces: decimalPlaces,
+			roundingMode: roundingMode
 		)
-		do {
-			return try decimalRound(
-				decimal: self,
-				decimalPlaces: decimalPlaces,
-				roundingMode: roundingMode
-			)
-		} catch {
-			fatalError("Failed to round, error: \(error)")
-		}
 	}
 
 	/// Rounds to `decimalPlaces` decimals

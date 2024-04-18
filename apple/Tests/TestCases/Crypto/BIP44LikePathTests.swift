@@ -19,4 +19,17 @@ final class BIP44LikePathTests: HDPathProtocolTests<BIP44LikePath> {
 	func test_invalid_got_cap26_account() {
 		XCTAssertThrowsError(try SUT(string: "m/44H/1022H/1H/525H/1460H/0H"))
 	}
+	
+	func test_index_roundtrip() {
+		func doTest(_ sut: SUT) {
+			let index = sut.addressIndex
+			XCTAssertEqual(SUT(index: index), sut)
+		}
+		SUT.allCases.forEach(doTest)
+	}
+	
+	func test_index() throws {
+		let sut = try SUT(string: "m/44H/1022H/0H/0/42H")
+		XCTAssertEqual(sut.addressIndex, 42)
+	}
 }

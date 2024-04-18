@@ -3,20 +3,6 @@ import SargonUniFFI
 
 extension Decimal192: SargonModel {}
 
-#if DEBUG
-extension Decimal192: ExpressibleByStringLiteral {
-	public init(stringLiteral string: String) {
-		try! self.init(string)
-	}
-}
-
-extension Decimal192: ExpressibleByFloatLiteral {
-	public init(floatLiteral float: Float32) {
-		try! self.init(float)
-	}
-}
-#endif
-
 extension Decimal192: ExpressibleByIntegerLiteral {
 	public init(integerLiteral i64: Int64) {
 		self = Self(i64)

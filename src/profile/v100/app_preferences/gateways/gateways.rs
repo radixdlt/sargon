@@ -25,24 +25,6 @@ pub struct Gateways {
     pub other: OtherGateways,
 }
 
-/// Constructs `Gateways` with `current` set as active Gateway.
-#[uniffi::export]
-pub fn new_gateways(current: Gateway) -> Gateways {
-    Gateways::new(current)
-}
-
-/// A sample value useful for tests and previews.
-#[uniffi::export]
-pub fn new_gateways_sample() -> Gateways {
-    Gateways::sample()
-}
-
-/// A sample value useful for tests and previews.
-#[uniffi::export]
-pub fn new_gateways_sample_other() -> Gateways {
-    Gateways::sample_other()
-}
-
 impl Gateways {
     pub fn len(&self) -> usize {
         self.other.len() + 1
@@ -310,29 +292,5 @@ mod tests {
             }
             "#,
         )
-    }
-}
-
-#[cfg(test)]
-mod uniffi_tests {
-    use crate::{
-        new_gateways, new_gateways_sample, new_gateways_sample_other, Gateway,
-        HasSampleValues,
-    };
-
-    use super::Gateways;
-
-    #[test]
-    fn equality_samples() {
-        assert_eq!(Gateways::sample(), new_gateways_sample());
-        assert_eq!(Gateways::sample_other(), new_gateways_sample_other());
-    }
-
-    #[test]
-    fn new_with_current() {
-        assert_eq!(
-            new_gateways(Gateway::mardunet()).all(),
-            [Gateway::mardunet()]
-        );
     }
 }

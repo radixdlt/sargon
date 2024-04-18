@@ -3,7 +3,7 @@ import SargonUniFFI
 
 #if DEBUG
 extension Gateway {
-	public static let sample: Self = .mainnet
-	public static let sampleOther: Self = .stokenet
+	public static let sample: Self = newGatewaySample()
+	public static let sampleOther: Self = newGatewaySampleOther()
 }
 #endif
