@@ -144,7 +144,7 @@ mod tests {
     fn encryption_roundtrip() {
         let sut = SUT::default();
         let mut encryption_key = Exactly32Bytes::generate();
-        let mut decryption_key = encryption_key.clone();
+        let mut decryption_key = encryption_key;
         let msg = "Hello Radix";
         let msg_bytes = msg.bytes().collect();
 

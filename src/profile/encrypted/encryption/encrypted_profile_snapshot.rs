@@ -171,8 +171,7 @@ mod tests {
     #[test]
     fn encryption_roundtrip() {
         let test = |profile: Profile, password: &str| {
-            let encrypted =
-                SUT::encrypting(&profile, password.to_owned(), None, None);
+            let encrypted = SUT::encrypting(&profile, password, None, None);
             let decrypted = encrypted.decrypt(password).unwrap();
             assert_eq!(decrypted, profile);
         };

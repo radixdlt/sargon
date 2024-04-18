@@ -49,7 +49,8 @@ let package = Package(
 		)
 	],
 	dependencies: [
-		.package(url: "https://github.com/pointfreeco/swift-custom-dump", from: "1.3.0"),
+		.package(url: "https://github.com/pointfreeco/swift-custom-dump", revision: "f01efb26f3a192a0e88dcdb7c3c391ec2fc25d9c"), // 1.3.0
+		.package(url: "https://github.com/rnapier/RNAJSON", revision: "bca46d077b7e54d42f803bacf779d6854156bbba"),
 	],
 	targets: [
 		binaryTarget,
@@ -60,7 +61,10 @@ let package = Package(
 		),
 		.target(
 			name: "Sargon",
-			dependencies: [.target(name: "SargonUniFFI")],
+			dependencies: [
+				.target(name: "SargonUniFFI"),
+				.product(name: "JSONValue", package: "RNAJSON"),
+			],
 			path: "apple/Sources/Sargon",
 			swiftSettings: swiftSettings
 		),

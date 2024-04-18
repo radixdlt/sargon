@@ -1,12 +1,19 @@
 {
   "pins" : [
     {
+      "identity" : "rnajson",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/rnapier/RNAJSON",
+      "state" : {
+        "revision" : "bca46d077b7e54d42f803bacf779d6854156bbba"
+      }
+    },
+    {
       "identity" : "swift-custom-dump",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/swift-custom-dump",
       "state" : {
-        "revision" : "f01efb26f3a192a0e88dcdb7c3c391ec2fc25d9c",
-        "version" : "1.3.0"
+        "revision" : "f01efb26f3a192a0e88dcdb7c3c391ec2fc25d9c"
       }
     },
     {
