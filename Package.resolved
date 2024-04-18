@@ -9,14 +9,6 @@
       }
     },
     {
-      "identity" : "rnajson",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/rnapier/RNAJSON",
-      "state" : {
-        "revision" : "bca46d077b7e54d42f803bacf779d6854156bbba"
-      }
-    },
-    {
       "identity" : "swift-custom-dump",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/swift-custom-dump",

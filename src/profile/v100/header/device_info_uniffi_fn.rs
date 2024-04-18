@@ -18,18 +18,6 @@ pub fn new_device_info_iphone() -> DeviceInfo {
 }
 
 #[uniffi::export]
-pub fn new_device_info_from_json_string(
-    json_string: String,
-) -> Result<DeviceInfo> {
-    DeviceInfo::new_from_json_string(json_string)
-}
-
-#[uniffi::export]
-pub fn device_info_to_json_string(device_info: &DeviceInfo) -> String {
-    device_info.to_json_string()
-}
-
-#[uniffi::export]
 pub fn new_device_info_from_json_bytes(
     json_bytes: BagOfBytes,
 ) -> Result<DeviceInfo> {
@@ -47,13 +35,6 @@ mod tests {
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = DeviceInfo;
-
-    #[test]
-    fn json_string_roundtrip() {
-        let sut = SUT::sample();
-        let json_str = device_info_to_json_string(&sut);
-        assert_eq!(sut, new_device_info_from_json_string(json_str).unwrap());
-    }
 
     #[test]
     fn json_bytes_roundtrip() {

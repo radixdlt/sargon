@@ -13,14 +13,6 @@ extension DeviceInfo {
 		newDeviceInfoIphone()
 	}
 	
-	public init(jsonString: String) throws {
-		self = try newDeviceInfoFromJsonString(jsonString: jsonString)
-	}
-	
-	public func jsonString() -> String {
-		deviceInfoToJsonString(deviceInfo: self)
-	}
-	
 	public init(jsonData: some DataProtocol) throws {
 		self = try newDeviceInfoFromJsonBytes(jsonBytes: Data(jsonData))
 	}

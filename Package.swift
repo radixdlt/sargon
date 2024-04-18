@@ -50,7 +50,6 @@ let package = Package(
 	],
 	dependencies: [
 		.package(url: "https://github.com/pointfreeco/swift-custom-dump", revision: "f01efb26f3a192a0e88dcdb7c3c391ec2fc25d9c"), // 1.3.0
-		.package(url: "https://github.com/rnapier/RNAJSON", revision: "bca46d077b7e54d42f803bacf779d6854156bbba"),
 		.package(url: "https://github.com/Flight-School/AnyCodable", revision: "862808b2070cd908cb04f9aafe7de83d35f81b05"), // 0.6.7
 	],
 	targets: [
@@ -64,7 +63,6 @@ let package = Package(
 			name: "Sargon",
 			dependencies: [
 				.target(name: "SargonUniFFI"),
-				.product(name: "JSONValue", package: "RNAJSON"),
 				"AnyCodable",
 			],
 			path: "apple/Sources/Sargon",

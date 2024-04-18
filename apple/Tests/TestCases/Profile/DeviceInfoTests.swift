@@ -10,11 +10,11 @@ final class DeviceInfoTests: Test<DeviceInfo> {
 		XCTAssertNotEqual(SUT.sample, SUT.iPhone())
 	}
 	
-	func test_not_codable_but_lower_level_json_methods_json_string_roundtrip() throws{
+	func test_not_codable_but_lower_level_json_methods_json_data_roundtrip() throws{
 		let sut = SUT.sample
-		let json = sut.jsonString()
+		let json = sut.jsonData()
 		try XCTAssertEqual(
-			SUT(jsonString: json),
+			SUT(jsonData: json),
 			sut
 		)
 	}
@@ -28,10 +28,12 @@ final class DeviceInfoTests: Test<DeviceInfo> {
 		}
 		""".data(using: .utf8)!
 		
+		// test decoding
 		let sut = try JSONDecoder().decode(SUT.self, from: raw)
 		XCTAssertEqual(sut, SUT.sample)
+		
+		// test encoding
 		let encoded = try JSONEncoder().encode(sut)
-		print(String(data: encoded, encoding: .utf8)!)
 		try XCTAssertEqual(JSONDecoder().decode(SUT.self, from: encoded), sut)
 	}
 }
