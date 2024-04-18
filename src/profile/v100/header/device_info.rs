@@ -192,6 +192,17 @@ mod tests {
     }
 
     #[test]
+    fn from_json_bytes_fail() {
+        assert_eq!(
+            SUT::new_from_json_bytes(BagOfBytes::sample()),
+            Err(CommonError::FailedToDeserializeJSONToValue {
+                json_byte_count: 32,
+                type_name: "DeviceInfo".to_owned()
+            })
+        );
+    }
+
+    #[test]
     fn can_parse_iso8601_json_without_milliseconds_precision() {
         let str = r#"
             {
