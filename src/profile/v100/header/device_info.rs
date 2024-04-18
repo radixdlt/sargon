@@ -95,12 +95,12 @@ impl HasSampleValues for DeviceInfo {
 }
 
 impl DeviceInfo {
-    /// Creates a new `DeviceInfo` from json in the form of `BagOfBytes`.
+    /// Creates a new `DeviceInfo` from json in the form of `String`.
     /// This is a temporarily exported method that allows wallet clients to
     /// integrate Profile in steps.
     ///
     /// Should be replaced later with `Wallet`
-    pub fn new_from_json_bytes(json: impl AsRef<str>) -> Result<Self> {
+    pub fn new_from_json_string(json: impl AsRef<str>) -> Result<Self> {
         let json = json.as_ref();
         serde_json::from_str::<Self>(json).map_err(|_| {
             CommonError::FailedToDeserializeJSONToValue {
@@ -110,13 +110,38 @@ impl DeviceInfo {
         })
     }
 
-    /// Converts this `DeviceInfo` to json in the form of `BagOfBytes`
+    /// Creates a new `DeviceInfo` from json in the form of Vec<u8>.
+    /// This is a temporarily exported method that allows wallet clients to
+    /// integrate Profile in steps.
+    ///
+    /// Should be replaced later with `Wallet`
+    pub fn new_from_json_bytes(json: impl AsRef<[u8]>) -> Result<Self> {
+        let json = json.as_ref();
+        serde_json::from_slice::<Self>(json).map_err(|_| {
+            CommonError::FailedToDeserializeJSONToValue {
+                json_byte_count: json.len() as u64,
+                type_name: "DeviceInfo".to_owned(),
+            }
+        })
+    }
+
+    /// Converts this `DeviceInfo` to json in the form of `String`
     /// This is a temporarily exported method that allows wallet clients to
     /// integrate Profile in steps.
     ///
     /// Should be replaced later with `Wallet`
     pub fn to_json_string(&self) -> String {
         serde_json::to_string(self)
+            .expect("JSON serialization of DeviceInfo should never fail.")
+    }
+
+    /// Converts this `DeviceInfo` to json in the form of `Vec<u8>`
+    /// This is a temporarily exported method that allows wallet clients to
+    /// integrate Profile in steps.
+    ///
+    /// Should be replaced later with `Wallet`
+    pub fn to_json_bytes(&self) -> Vec<u8> {
+        serde_json::to_vec(self)
             .expect("JSON serialization of DeviceInfo should never fail.")
     }
 }
@@ -188,7 +213,14 @@ mod tests {
     fn json_string_roundtrip() {
         let sut = SUT::sample();
         let json_str = sut.to_json_string();
-        assert_eq!(sut, SUT::new_from_json_bytes(json_str).unwrap());
+        assert_eq!(sut, SUT::new_from_json_string(json_str).unwrap());
+    }
+
+    #[test]
+    fn json_bytes_roundtrip() {
+        let sut = SUT::sample();
+        let json_bytes = sut.to_json_bytes();
+        assert_eq!(sut, SUT::new_from_json_bytes(json_bytes).unwrap());
     }
 
     #[test]

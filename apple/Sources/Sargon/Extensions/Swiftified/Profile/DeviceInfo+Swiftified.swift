@@ -1,9 +1,13 @@
 import Foundation
 import JSONValue
+import AnyCodable
 
-extension DeviceInfo: SargonModel {}
+public protocol SargonCodable: Codable {
+	init(jsonString: String) throws
+	func jsonString() -> String
+}
 
-extension DeviceInfo: Codable {
+extension SargonCodable {
 	public func encode(to encoder: any Encoder) throws {
 		let jsonString = self.jsonString()
 		let jsonData = jsonString.data(using: .utf8)!
@@ -19,5 +23,9 @@ extension DeviceInfo: Codable {
 		let jsonString = String(data: jsonData, encoding: .utf8)!
 		try self.init(jsonString: jsonString)
 	}
-	
 }
+
+
+extension DeviceInfo: SargonModel {}
+
+extension DeviceInfo: SargonCodable {}

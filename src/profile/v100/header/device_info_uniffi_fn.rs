@@ -21,12 +21,24 @@ pub fn new_device_info_iphone() -> DeviceInfo {
 pub fn new_device_info_from_json_string(
     json_string: String,
 ) -> Result<DeviceInfo> {
-    DeviceInfo::new_from_json_bytes(json_string)
+    DeviceInfo::new_from_json_string(json_string)
 }
 
 #[uniffi::export]
 pub fn device_info_to_json_string(device_info: &DeviceInfo) -> String {
     device_info.to_json_string()
+}
+
+#[uniffi::export]
+pub fn new_device_info_from_json_bytes(
+    json_bytes: BagOfBytes,
+) -> Result<DeviceInfo> {
+    DeviceInfo::new_from_json_bytes(json_bytes)
+}
+
+#[uniffi::export]
+pub fn device_info_to_json_bytes(device_info: &DeviceInfo) -> BagOfBytes {
+    device_info.to_json_bytes().into()
 }
 
 #[cfg(test)]
@@ -41,6 +53,13 @@ mod tests {
         let sut = SUT::sample();
         let json_str = device_info_to_json_string(&sut);
         assert_eq!(sut, new_device_info_from_json_string(json_str).unwrap());
+    }
+
+    #[test]
+    fn json_bytes_roundtrip() {
+        let sut = SUT::sample();
+        let json_bytes = device_info_to_json_bytes(&sut);
+        assert_eq!(sut, new_device_info_from_json_bytes(json_bytes).unwrap());
     }
 
     #[test]
