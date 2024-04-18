@@ -49,7 +49,8 @@ let package = Package(
 		)
 	],
 	dependencies: [
-		.package(url: "https://github.com/pointfreeco/swift-custom-dump", from: "1.3.0"),
+		.package(url: "https://github.com/pointfreeco/swift-custom-dump", revision: "f01efb26f3a192a0e88dcdb7c3c391ec2fc25d9c"), // 1.3.0
+		.package(url: "https://github.com/Flight-School/AnyCodable", revision: "862808b2070cd908cb04f9aafe7de83d35f81b05"), // 0.6.7
 	],
 	targets: [
 		binaryTarget,
@@ -60,7 +61,10 @@ let package = Package(
 		),
 		.target(
 			name: "Sargon",
-			dependencies: [.target(name: "SargonUniFFI")],
+			dependencies: [
+				.target(name: "SargonUniFFI"),
+				"AnyCodable",
+			],
 			path: "apple/Sources/Sargon",
 			swiftSettings: swiftSettings
 		),

@@ -39,18 +39,22 @@ pub struct DeviceInfo {
 
 impl DeviceInfo {
     /// Instantiates a new `DeviceInfo` with `id`, `date` and `description`.
-    pub fn new(id: Uuid, date: Timestamp, description: String) -> Self {
+    pub fn new(
+        id: Uuid,
+        date: Timestamp,
+        description: impl AsRef<str>,
+    ) -> Self {
         Self {
             id,
             date,
-            description,
+            description: description.as_ref().to_owned(),
         }
     }
 
     /// Instantiates a new `DeviceInfo` with `description`, and generates a new `id`
     /// and will use the current `date` for creation date.
-    pub fn with_description(description: &str) -> Self {
-        Self::new(id(), now(), description.to_string())
+    pub fn with_description(description: impl AsRef<str>) -> Self {
+        Self::new(id(), now(), description)
     }
 
     /// Instantiates a new `DeviceInfo` with "iPhone" as description, and
@@ -72,36 +76,92 @@ impl Default for DeviceInfo {
     }
 }
 
+impl HasSampleValues for DeviceInfo {
+    fn sample() -> Self {
+        Self::new(
+            Uuid::from_str("66f07ca2-a9d9-49e5-8152-77aca3d1dd74").unwrap(),
+            Timestamp::parse("2023-09-11T16:05:56.000Z").unwrap(),
+            "iPhone",
+        )
+    }
+
+    fn sample_other() -> Self {
+        Self::new(
+            Uuid::from_str("f07ca662-d9a9-9e45-1582-aca773d174dd").unwrap(),
+            Timestamp::parse("2023-12-24T17:13:56.123Z").unwrap(),
+            "Android",
+        )
+    }
+}
+
+impl DeviceInfo {
+    /// Creates a new `DeviceInfo` from json in the form of Vec<u8>.
+    /// This is a temporarily exported method that allows wallet clients to
+    /// integrate Profile in steps.
+    ///
+    /// Should be replaced later with `Wallet`
+    pub fn new_from_json_bytes(json: impl AsRef<[u8]>) -> Result<Self> {
+        let json = json.as_ref();
+        serde_json::from_slice::<Self>(json).map_err(|_| {
+            CommonError::FailedToDeserializeJSONToValue {
+                json_byte_count: json.len() as u64,
+                type_name: "DeviceInfo".to_owned(),
+            }
+        })
+    }
+
+    /// Converts this `DeviceInfo` to json in the form of `Vec<u8>`
+    /// This is a temporarily exported method that allows wallet clients to
+    /// integrate Profile in steps.
+    ///
+    /// Should be replaced later with `Wallet`
+    pub fn to_json_bytes(&self) -> Vec<u8> {
+        serde_json::to_vec(self)
+            .expect("JSON serialization of DeviceInfo should never fail.")
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = DeviceInfo;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
 
     #[test]
     fn new_iphone() {
-        assert_eq!(DeviceInfo::new_iphone().description, "iPhone");
+        assert_eq!(SUT::new_iphone().description, "iPhone");
     }
 
     #[test]
     fn with_description() {
-        assert_eq!(DeviceInfo::with_description("Nokia").description, "Nokia");
+        assert_eq!(SUT::with_description("Nokia").description, "Nokia");
     }
 
     #[test]
     fn new_has_description_unknown_device() {
-        assert_eq!(
-            DeviceInfo::new_unknown_device().description,
-            "Unknown device"
-        );
+        assert_eq!(SUT::new_unknown_device().description, "Unknown device");
     }
 
     #[test]
     fn display() {
         let id_str = "12345678-bbbb-cccc-dddd-abcd12345678";
         let id = Uuid::from_str(id_str).unwrap();
-        let sut = DeviceInfo::new(
+        let sut = SUT::new(
             id,
             Timestamp::parse("2023-09-11T16:05:56Z").unwrap(),
-            "Foo".to_string(),
+            "Foo",
         );
         assert_eq!(
             format!("{sut}"),
@@ -113,7 +173,7 @@ mod tests {
     fn id_is_unique() {
         let n = 1000;
         let ids = (0..n)
-            .map(|_| DeviceInfo::new_iphone())
+            .map(|_| SUT::new_iphone())
             .map(|d| d.id)
             .collect::<HashSet<Uuid>>();
         assert_eq!(ids.len(), n);
@@ -121,7 +181,25 @@ mod tests {
 
     #[test]
     fn date_is_now() {
-        assert!(DeviceInfo::new_iphone().date.year() >= 2023);
+        assert!(SUT::new_iphone().date.year() >= 2023);
+    }
+
+    #[test]
+    fn json_bytes_roundtrip() {
+        let sut = SUT::sample();
+        let json_bytes = sut.to_json_bytes();
+        assert_eq!(sut, SUT::new_from_json_bytes(json_bytes).unwrap());
+    }
+
+    #[test]
+    fn from_json_bytes_fail() {
+        assert_eq!(
+            SUT::new_from_json_bytes(BagOfBytes::sample()),
+            Err(CommonError::FailedToDeserializeJSONToValue {
+                json_byte_count: 32,
+                type_name: "DeviceInfo".to_owned()
+            })
+        );
     }
 
     #[test]
@@ -133,7 +211,7 @@ mod tests {
                 "description": "iPhone"
             }
             "#;
-        let model = serde_json::from_str::<DeviceInfo>(str).unwrap();
+        let model = serde_json::from_str::<SUT>(str).unwrap();
         assert_eq!(model.date.day(), 11);
         let json = serde_json::to_string(&model).unwrap();
         assert!(json.contains("56.000Z"));
@@ -141,11 +219,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip() {
-        let model = DeviceInfo::new(
-            Uuid::from_str("66f07ca2-a9d9-49e5-8152-77aca3d1dd74").unwrap(),
-            Timestamp::parse("2023-09-11T16:05:56.000Z").unwrap(),
-            "iPhone".to_string(),
-        );
+        let model = SUT::sample();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -171,7 +245,7 @@ mod tests {
 
     #[test]
     fn invalid_json() {
-        assert_json_fails::<DeviceInfo>(
+        assert_json_fails::<SUT>(
             r#"
             {
                 "id": "invalid-uuid",
@@ -181,7 +255,7 @@ mod tests {
             "#,
         );
 
-        assert_json_fails::<DeviceInfo>(
+        assert_json_fails::<SUT>(
             r#"
             {
                 "id": "00000000-0000-0000-0000-000000000000",
@@ -191,7 +265,7 @@ mod tests {
             "#,
         );
 
-        assert_json_fails::<DeviceInfo>(
+        assert_json_fails::<SUT>(
             r#"
             {
                 "missing_key": "id",
@@ -201,7 +275,7 @@ mod tests {
             "#,
         );
 
-        assert_json_fails::<DeviceInfo>(
+        assert_json_fails::<SUT>(
             r#"
             {
                 "id": "00000000-0000-0000-0000-000000000000",
@@ -211,7 +285,7 @@ mod tests {
             "#,
         );
 
-        assert_json_fails::<DeviceInfo>(
+        assert_json_fails::<SUT>(
             r#"
             {
                 "id": "00000000-0000-0000-0000-000000000000",
