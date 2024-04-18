@@ -11,7 +11,7 @@ var strictSwiftSettings: [SwiftSetting] = swiftSettings
 
 let sargonBinaryTargetName = "SargonCoreRS"
 let binaryTarget: Target
-let useLocalFramework = true
+let useLocalFramework = false
 
 if useLocalFramework {
 	binaryTarget = .binaryTarget(
@@ -27,8 +27,8 @@ if useLocalFramework {
 		.unsafeFlags(["-warnings-as-errors"])
 	)
 } else {
-	let releaseTag = "0.1.0"
-	let releaseChecksum = "befef7d56108305ff6ff69d67483471395c3e603e299b3b15f5a826328de272b"
+	let releaseTag = "0.6.35"
+	let releaseChecksum = "4f0052e287c28eaa664a2902e1a42b4f279cc832421578ca50e7da4c4baf359d"
 	binaryTarget = .binaryTarget(
 		name: sargonBinaryTargetName,
 		url:
