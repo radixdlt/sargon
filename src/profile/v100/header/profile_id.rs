@@ -64,4 +64,9 @@ mod tests {
             })
         );
     }
+
+    #[test]
+    fn from_upper_case_is_ok() {
+        assert!(SUT::from_str("66F07CA2-A9D9-49E5-8152-77ACA3D1DD74").is_ok())
+    }
 }

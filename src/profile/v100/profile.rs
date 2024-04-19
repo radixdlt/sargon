@@ -105,21 +105,6 @@ impl Profile {
         }
     }
 
-    /// Creates a new `Profile` from json in the form of `BagOfBytes`.
-    /// This is a temporarily exported method that allows wallet clients to
-    /// integrate Profile in steps.
-    ///
-    /// Should be replaced later with `WalletClientStorage`
-    pub fn new_from_json_bytes(json: impl AsRef<[u8]>) -> Result<Self> {
-        let json = json.as_ref();
-        serde_json::from_slice::<Self>(json).map_err(|_| {
-            CommonError::FailedToDeserializeJSONToValue {
-                json_byte_count: json.len() as u64,
-                type_name: "Profile".to_owned(),
-            }
-        })
-    }
-
     pub fn new_from_encryption_bytes(
         json: impl AsRef<[u8]>,
         password: impl AsRef<str>,
@@ -181,16 +166,6 @@ impl Profile {
                     mutate(element).map(|modified| modified.into())
                 })
         })
-    }
-
-    /// Converts this `Profile` to json in the form of `BagOfBytes`
-    /// This is a temporarily exported method that allows wallet clients to
-    /// integrate Profile in steps.
-    ///
-    /// Should be replaced later with `WalletClientStorage`
-    pub fn to_json_bytes(&self) -> Vec<u8> {
-        serde_json::to_vec(self)
-            .expect("JSON serialization of Profile should never fail.")
     }
 }
 

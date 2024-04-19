@@ -206,20 +206,14 @@ mod tests {
 
     #[test]
     fn json_roundtrip() {
-        let model = SUT::with_passphrase(
-            Mnemonic::from_phrase(
-     "habit special recipe upon giraffe manual evil badge dwarf welcome inspire shrug post arrive van",
-            )
-            .unwrap(),
-            "25th".into(),
-        );
+        let model = SUT::sample();
 
         assert_eq_after_json_roundtrip(
             &model,
             r#"
             {
-                "mnemonic": "habit special recipe upon giraffe manual evil badge dwarf welcome inspire shrug post arrive van",
-                "passphrase": "25th"
+                "mnemonic": "bright club bacon dinner achieve pull grid save ramp cereal blush woman humble limb repeat video sudden possible story mask neutral prize goose mandate",
+                "passphrase": "radix"
             }
             "#,
         );

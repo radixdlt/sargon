@@ -38,16 +38,6 @@ pub struct Header {
     pub content_hint: ContentHint,
 }
 
-#[uniffi::export]
-pub fn new_header_sample() -> Header {
-    Header::sample()
-}
-
-#[uniffi::export]
-pub fn new_header_sample_other() -> Header {
-    Header::sample_other()
-}
-
 impl Header {
     /// Instantiates a new `Header` using the default snapshot version and
     /// the specified values, most prominently a creating device (`DeviceInfo`).
