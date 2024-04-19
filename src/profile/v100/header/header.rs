@@ -119,33 +119,6 @@ impl HasSampleValues for Header {
     }
 }
 
-impl Header {
-    /// Creates a new `Header` from json in the form of Vec<u8>.
-    /// This is a temporarily exported method that allows wallet clients to
-    /// integrate Profile in steps.
-    ///
-    /// Should be replaced later with `Wallet`
-    pub fn new_from_json_bytes(json: impl AsRef<[u8]>) -> Result<Self> {
-        let json = json.as_ref();
-        serde_json::from_slice::<Self>(json).map_err(|_| {
-            CommonError::FailedToDeserializeJSONToValue {
-                json_byte_count: json.len() as u64,
-                type_name: "Header".to_owned(),
-            }
-        })
-    }
-
-    /// Converts this `Header` to json in the form of `Vec<u8>`
-    /// This is a temporarily exported method that allows wallet clients to
-    /// integrate Profile in steps.
-    ///
-    /// Should be replaced later with `Wallet`
-    pub fn to_json_bytes(&self) -> Vec<u8> {
-        serde_json::to_vec(self)
-            .expect("JSON serialization of Header should never fail.")
-    }
-}
-
 #[cfg(test)]
 pub mod tests {
     use super::*;

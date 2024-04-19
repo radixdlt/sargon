@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+json_data_convertible!(Header);
+
 #[uniffi::export]
 pub fn new_header_sample() -> Header {
     Header::sample()
@@ -17,16 +19,6 @@ pub fn new_header_with_creating_device(creating_device: DeviceInfo) -> Header {
     Header::new(creating_device)
 }
 
-#[uniffi::export]
-pub fn new_header_from_json_bytes(json_bytes: BagOfBytes) -> Result<Header> {
-    Header::new_from_json_bytes(json_bytes)
-}
-
-#[uniffi::export]
-pub fn header_to_json_bytes(header: &Header) -> BagOfBytes {
-    header.to_json_bytes().into()
-}
-
 #[cfg(test)]
 mod uniffi_test {
 
@@ -34,13 +26,6 @@ mod uniffi_test {
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = Header;
-
-    #[test]
-    fn json_bytes_roundtrip() {
-        let sut = SUT::sample();
-        let json_bytes = header_to_json_bytes(&sut);
-        assert_eq!(sut, new_header_from_json_bytes(json_bytes).unwrap());
-    }
 
     #[test]
     fn test_new_with_device() {
