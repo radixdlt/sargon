@@ -15,7 +15,7 @@ pub trait JsonDataDeserializing: for<'a> Deserialize<'a> {
 pub trait JsonDataSerializing: Sized + Serialize {
     fn to_json_bytes(&self) -> Vec<u8> {
         serde_json::to_vec(self).unwrap_or_else(|_| {
-            panic!(
+            unreachable!(
                 "JSON serialization of {} should never fail.",
                 type_name::<Self>()
             )
