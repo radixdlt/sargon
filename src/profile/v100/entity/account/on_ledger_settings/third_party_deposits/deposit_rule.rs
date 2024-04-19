@@ -27,9 +27,45 @@ pub enum DepositRule {
     DenyAll,
 }
 
+impl DepositRule {
+    pub fn from_json_string(json: impl AsRef<str>) -> Result<Self> {
+        let json_string = json.as_ref().to_owned();
+        let json_value = serde_json::Value::String(json_string.clone());
+        serde_json::from_value(json_value).map_err(|_| {
+            CommonError::FailedToDeserializeJSONToValue {
+                json_byte_count: json_string.len() as u64,
+                type_name: type_name::<Self>(),
+            }
+        })
+    }
+
+    pub fn to_json_string(&self) -> String {
+        let value = serde_json::to_value(self).unwrap_or_else(|_| {
+            unreachable!(
+                "JSON serialization of {} should never fail.",
+                type_name::<Self>()
+            )
+        });
+        match value {
+            serde_json::Value::String(str) => str.to_owned(),
+            _ => unreachable!("never happen"),
+        }
+    }
+}
+
 impl Default for DepositRule {
     /// By default an account accepts all.
     fn default() -> Self {
+        Self::AcceptAll
+    }
+}
+
+impl HasSampleValues for DepositRule {
+    fn sample() -> Self {
+        Self::AcceptKnown
+    }
+
+    fn sample_other() -> Self {
         Self::AcceptAll
     }
 }
@@ -64,6 +100,17 @@ mod tests {
     type SUT = DepositRule;
 
     #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
     fn json_roundtrip_accept_all() {
         assert_json_value_eq_after_roundtrip(
             &SUT::AcceptAll,
@@ -73,10 +120,21 @@ mod tests {
     }
 
     #[test]
-    fn inequality() {
-        assert_ne!(SUT::AcceptAll, SUT::DenyAll);
-        assert_ne!(SUT::DenyAll, SUT::AcceptKnown);
-        assert_ne!(SUT::AcceptAll, SUT::AcceptKnown);
+    fn json_string_roundtrip() {
+        let sut = SUT::sample();
+        let json_str = sut.to_json_string();
+        println!("json verbatim: '{}'", &json_str);
+        assert_eq!(SUT::from_json_string(json_str).unwrap(), sut)
+    }
+
+    #[test]
+    fn from_json_str() {
+        assert_eq!(SUT::from_json_string("acceptAll").unwrap(), SUT::AcceptAll);
+        assert_eq!(SUT::from_json_string("denyAll").unwrap(), SUT::DenyAll);
+        assert_eq!(
+            SUT::from_json_string("acceptKnown").unwrap(),
+            SUT::AcceptKnown
+        )
     }
 
     #[test]
