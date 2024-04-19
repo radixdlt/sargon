@@ -38,16 +38,6 @@ pub struct Header {
     pub content_hint: ContentHint,
 }
 
-#[uniffi::export]
-pub fn new_header_sample() -> Header {
-    Header::sample()
-}
-
-#[uniffi::export]
-pub fn new_header_sample_other() -> Header {
-    Header::sample_other()
-}
-
 impl Header {
     /// Instantiates a new `Header` using the default snapshot version and
     /// the specified values, most prominently a creating device (`DeviceInfo`).
@@ -126,6 +116,33 @@ impl HasSampleValues for Header {
             ContentHint::new(),
             date,
         )
+    }
+}
+
+impl Header {
+    /// Creates a new `Header` from json in the form of Vec<u8>.
+    /// This is a temporarily exported method that allows wallet clients to
+    /// integrate Profile in steps.
+    ///
+    /// Should be replaced later with `Wallet`
+    pub fn new_from_json_bytes(json: impl AsRef<[u8]>) -> Result<Self> {
+        let json = json.as_ref();
+        serde_json::from_slice::<Self>(json).map_err(|_| {
+            CommonError::FailedToDeserializeJSONToValue {
+                json_byte_count: json.len() as u64,
+                type_name: "Header".to_owned(),
+            }
+        })
+    }
+
+    /// Converts this `Header` to json in the form of `Vec<u8>`
+    /// This is a temporarily exported method that allows wallet clients to
+    /// integrate Profile in steps.
+    ///
+    /// Should be replaced later with `Wallet`
+    pub fn to_json_bytes(&self) -> Vec<u8> {
+        serde_json::to_vec(self)
+            .expect("JSON serialization of Header should never fail.")
     }
 }
 
