@@ -1,5 +1,5 @@
 import Foundation
-import AnyCodable
+import SwiftyJSON
 
 public protocol SargonObjectCodable: Codable {
 	init(jsonData: some DataProtocol) throws
@@ -8,16 +8,14 @@ public protocol SargonObjectCodable: Codable {
 
 extension SargonObjectCodable {
 	public func encode(to encoder: any Encoder) throws {
-		let dict = try JSONSerialization.jsonObject(with: self.jsonData(), options: []) as! NSDictionary
-		let anyEncodable = AnyEncodable(dict)
 		var container = encoder.singleValueContainer()
-		try container.encode(anyEncodable)
+		let json = try JSON(data: jsonData())
+		try container.encode(json)
 	}
 	
 	public init(from decoder: any Decoder) throws {
 		let container = try decoder.singleValueContainer()
-		let anyDecodable = try container.decode(AnyDecodable.self)
-		let jsonData = try JSONSerialization.data(withJSONObject: anyDecodable.value)
-		try self.init(jsonData: jsonData)
+		let json = try container.decode(JSON.self)
+		try self.init(jsonData: json.rawData())
 	}
 }

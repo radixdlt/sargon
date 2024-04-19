@@ -50,7 +50,7 @@ let package = Package(
 	],
 	dependencies: [
 		.package(url: "https://github.com/pointfreeco/swift-custom-dump", from: "1.3.0"),
-		.package(url: "https://github.com/Flight-School/AnyCodable", from: "0.6.7"),
+		.package(url: "https://github.com/SwiftyJSON/SwiftyJSON", from: "5.0.2"),
 	],
 	targets: [
 		binaryTarget,
@@ -63,7 +63,7 @@ let package = Package(
 			name: "Sargon",
 			dependencies: [
 				.target(name: "SargonUniFFI"),
-				"AnyCodable",
+				"SwiftyJSON",
 			],
 			path: "apple/Sources/Sargon",
 			swiftSettings: swiftSettings
