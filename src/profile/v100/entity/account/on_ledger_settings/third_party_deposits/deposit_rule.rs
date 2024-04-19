@@ -27,32 +27,6 @@ pub enum DepositRule {
     DenyAll,
 }
 
-impl DepositRule {
-    pub fn from_json_string(json: impl AsRef<str>) -> Result<Self> {
-        let json_string = json.as_ref().to_owned();
-        let json_value = serde_json::Value::String(json_string.clone());
-        serde_json::from_value(json_value).map_err(|_| {
-            CommonError::FailedToDeserializeJSONToValue {
-                json_byte_count: json_string.len() as u64,
-                type_name: type_name::<Self>(),
-            }
-        })
-    }
-
-    pub fn to_json_string(&self) -> String {
-        let value = serde_json::to_value(self).unwrap_or_else(|_| {
-            unreachable!(
-                "JSON serialization of {} should never fail.",
-                type_name::<Self>()
-            )
-        });
-        match value {
-            serde_json::Value::String(str) => str.to_owned(),
-            _ => unreachable!("never happen"),
-        }
-    }
-}
-
 impl Default for DepositRule {
     /// By default an account accepts all.
     fn default() -> Self {
@@ -120,32 +94,15 @@ mod tests {
     }
 
     #[test]
-    fn json_string_roundtrip() {
-        let sut = SUT::sample();
-        let json_str = sut.to_json_string();
-        println!("json verbatim: '{}'", &json_str);
-        assert_eq!(SUT::from_json_string(json_str).unwrap(), sut)
-    }
-
-    #[test]
     fn from_json_str() {
-        assert_eq!(SUT::from_json_string("acceptAll").unwrap(), SUT::AcceptAll);
-        assert_eq!(SUT::from_json_string("denyAll").unwrap(), SUT::DenyAll);
         assert_eq!(
-            SUT::from_json_string("acceptKnown").unwrap(),
+            SUT::new_from_json_string("acceptAll").unwrap(),
+            SUT::AcceptAll
+        );
+        assert_eq!(SUT::new_from_json_string("denyAll").unwrap(), SUT::DenyAll);
+        assert_eq!(
+            SUT::new_from_json_string("acceptKnown").unwrap(),
             SUT::AcceptKnown
-        )
-    }
-
-    #[test]
-    fn from_json_str_fail() {
-        let json_str = "mega invalid string";
-        assert_eq!(
-            SUT::from_json_string(json_str),
-            Err(CommonError::FailedToDeserializeJSONToValue {
-                json_byte_count: json_str.len() as u64,
-                type_name: "DepositRule".to_string(),
-            })
         )
     }
 

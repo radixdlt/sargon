@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+json_data_convertible!(AuthorizedDapp);
+
 #[uniffi::export]
 pub fn new_authorized_dapp_sample_mainnet_dashboard() -> AuthorizedDapp {
     AuthorizedDapp::sample_mainnet_dashboard()

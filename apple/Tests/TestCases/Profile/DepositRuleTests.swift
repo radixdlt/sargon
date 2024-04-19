@@ -6,14 +6,11 @@ import XCTest
 
 final class DepositRuleTests: Test<DepositRule> {
     
-    
     func test_low_level_to_json_string() {
         let sut = SUT.sample
-        let jsonString = depositRuleToJsonString(rule: sut)
+        let jsonString = depositRuleToJsonString(depositRule: sut)
         XCTAssertEqual(jsonString, "acceptKnown")
     }
-    
-    
 
     func test_codable() throws {
         let raw = "\"denyAll\"".data(using: .utf8)!
@@ -42,4 +39,8 @@ final class DepositRuleTests: Test<DepositRule> {
         let decoded = try JSONDecoder().decode(Wrapper.self, from: json)
         XCTAssertEqual(decoded, Wrapper.init(myString: "Foo", rule: .acceptAll))
     }
+	
+	func test_codable_roundtrip() throws {
+		try SUT.allCases.forEach(doTestCodableRoundtrip)
+	}
 }

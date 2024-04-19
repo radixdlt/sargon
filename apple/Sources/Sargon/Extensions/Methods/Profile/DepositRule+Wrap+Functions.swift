@@ -15,6 +15,6 @@ extension DepositRule {
     }
     
     public func jsonStringLiteral() -> String {
-        depositRuleToJsonString(rule: self)
+		depositRuleToJsonString(depositRule: self)
     }
 }

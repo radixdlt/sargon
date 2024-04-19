@@ -1,5 +1,33 @@
 use crate::prelude::*;
 
+pub trait JsonStringDeserializing: for<'a> Deserialize<'a> {
+    fn new_from_json_string(json: impl AsRef<str>) -> Result<Self> {
+        let json_string = json.as_ref().to_owned();
+        let json_value = serde_json::Value::String(json_string.clone());
+        serde_json::from_value(json_value).map_err(|_| {
+            CommonError::FailedToDeserializeJSONToValue {
+                json_byte_count: json_string.len() as u64,
+                type_name: type_name::<Self>(),
+            }
+        })
+    }
+}
+
+pub trait JsonStringSerializing: Sized + Serialize {
+    fn to_json_string(&self) -> String {
+        let value = serde_json::to_value(self).unwrap_or_else(|_| {
+            unreachable!(
+                "JSON serialization of {} should never fail.",
+                type_name::<Self>()
+            )
+        });
+        match value {
+            serde_json::Value::String(str) => str.to_owned(),
+            _ => unreachable!("never happen"),
+        }
+    }
+}
+
 pub trait JsonDataDeserializing: for<'a> Deserialize<'a> {
     fn new_from_json_bytes(json: impl AsRef<[u8]>) -> Result<Self> {
         let json = json.as_ref();
@@ -90,3 +118,71 @@ macro_rules! json_data_convertible {
 }
 
 pub(crate) use json_data_convertible;
+
+macro_rules! json_string_convertible {
+    ($type: ty) => {
+        paste! {
+
+            impl JsonStringDeserializing for $type {}
+            impl JsonStringSerializing for $type {}
+
+            #[uniffi::export]
+            pub fn [< new_ $type:snake _from_json_string >](
+                json_string: String,
+            ) -> Result<$type> {
+                $type::new_from_json_string(json_string)
+            }
+
+            #[uniffi::export]
+            pub fn [< $type:snake _to_json_string >]([< $type:snake >]: &$type) -> String {
+                [< $type:snake >].to_json_string()
+            }
+
+            #[cfg(test)]
+            mod [< uniffi_test_ $type:snake >] {
+                use super::*;
+
+                #[allow(clippy::upper_case_acronyms)]
+                type SUT = $type;
+
+                #[test]
+                fn json_string_roundtrip() {
+                    let sut = SUT::sample();
+                    let json = [< $type:snake _to_json_string >](&sut);
+                    assert_eq!(sut, [< new_ $type:snake _from_json_string >](json).unwrap())
+                }
+            }
+
+            #[cfg(test)]
+            mod [< test_ $type:snake >] {
+                use super::*;
+
+                #[allow(clippy::upper_case_acronyms)]
+                type SUT = $type;
+
+                #[test]
+                fn json_string_roundtrip() {
+                    let sut = SUT::sample();
+                    let json_str = sut.to_json_string();
+                    assert_eq!(SUT::new_from_json_string(json_str).unwrap(), sut)
+                }
+
+                #[test]
+                fn from_json_string_fail() {
+                    assert_eq!(
+                        SUT::new_from_json_string("super invalid json string"),
+                        Err(CommonError::FailedToDeserializeJSONToValue {
+                            json_byte_count: 25,
+                            type_name: {{
+                                const STRINGIFIED: &'static str = stringify!($type);
+                                STRINGIFIED
+                            }}.to_owned()
+                        })
+                    );
+                }
+            }
+        }
+    };
+}
+
+pub(crate) use json_string_convertible;

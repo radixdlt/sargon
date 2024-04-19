@@ -11,6 +11,7 @@ import SargonUniFFI
 public typealias DappDefinitionAddress = AccountAddress
 
 extension AuthorizedDapp: SargonModel {}
+extension AuthorizedDapp: SargonObjectCodable {}
 
 #if DEBUG
 extension AuthorizedDapp {
