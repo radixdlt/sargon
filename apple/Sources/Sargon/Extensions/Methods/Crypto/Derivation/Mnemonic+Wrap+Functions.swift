@@ -16,4 +16,5 @@ extension Mnemonic {
 	public init(words: some Collection<BIP39Word>) throws {
 		self = try newMnemonicFromWords(words: Array(words))
 	}
+
 }

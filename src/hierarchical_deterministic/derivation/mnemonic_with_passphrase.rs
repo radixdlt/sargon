@@ -71,6 +71,24 @@ impl MnemonicWithPassphrase {
     pub fn to_seed(&self) -> BIP39Seed {
         self.mnemonic.to_seed(&self.passphrase.0)
     }
+
+    /// Returns `true` if this MnemonicWithPassphrase successfully validates all `hd_keys`, that is to say,
+    /// that all the HierarchicalDeterministicPublicKey were indeed crated by this MnemonicWithPassphrase.
+    pub fn validate_public_keys(
+        &self,
+        hd_keys: Vec<HierarchicalDeterministicPublicKey>,
+    ) -> bool {
+        let bip39_seed = self.to_seed();
+        for hd_key in hd_keys.iter() {
+            let private_key =
+                bip39_seed.derive_private_key(&hd_key.derivation_path);
+            let public_key = private_key.public_key();
+            if &public_key != hd_key {
+                return false;
+            }
+        }
+        true
+    }
 }
 
 impl HasSampleValues for MnemonicWithPassphrase {
@@ -142,6 +160,65 @@ mod tests {
         );
         assert_eq!(mwp.mnemonic.phrase(), phrase);
         assert_eq!(mwp.passphrase.0, passphrase);
+    }
+
+    #[test]
+    fn validation_cap26_account_paths() {
+        let sut = SUT::sample();
+        let hd_keys = (0..10u32)
+            .map(|i| {
+                let account_path =
+                    AccountPath::new_mainnet_transaction_signing(i);
+                let seed = sut.to_seed();
+                seed.derive_private_key(&account_path).public_key()
+            })
+            .collect::<Vec<HierarchicalDeterministicPublicKey>>();
+
+        assert!(sut.validate_public_keys(hd_keys))
+    }
+
+    #[test]
+    fn validation_cap26_account_paths_fail_wrong_mnemonic() {
+        let sut = SUT::sample();
+        let hd_keys = (0..10u32)
+            .map(|i| {
+                let account_path =
+                    AccountPath::new_mainnet_transaction_signing(i);
+                let seed = sut.to_seed();
+                seed.derive_private_key(&account_path).public_key()
+            })
+            .collect::<Vec<HierarchicalDeterministicPublicKey>>();
+
+        assert!(!SUT::sample_other().validate_public_keys(hd_keys)) // wrong mnemonic
+    }
+
+    #[test]
+    fn validation_cap26_identity_paths() {
+        let sut = SUT::sample();
+        let hd_keys = (0..10u32)
+            .map(|i| {
+                let identity_path =
+                    IdentityPath::new_mainnet_transaction_signing(i);
+                let seed = sut.to_seed();
+                seed.derive_private_key(&identity_path).public_key()
+            })
+            .collect::<Vec<HierarchicalDeterministicPublicKey>>();
+
+        assert!(sut.validate_public_keys(hd_keys))
+    }
+
+    #[test]
+    fn validation_bip44_account_paths() {
+        let sut = SUT::sample();
+        let hd_keys = (0..10u32)
+            .map(|i| {
+                let account_path = BIP44LikePath::new(i);
+                let seed = sut.to_seed();
+                seed.derive_private_key(&account_path).public_key()
+            })
+            .collect::<Vec<HierarchicalDeterministicPublicKey>>();
+
+        assert!(sut.validate_public_keys(hd_keys))
     }
 
     #[test]

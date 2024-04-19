@@ -16,4 +16,11 @@ extension MnemonicWithPassphrase {
 	public func jsonData() -> Data {
 		mnemonicWithPassphraseToJsonBytes(mnemonicWithPassphrase: self)
 	}
+    
+    
+    public func validate(
+        publicKeys: some Collection<HierarchicalDeterministicPublicKey>
+    ) -> Bool {
+        mnemonicWithPassphraseValidatePublicKeys(mnemonicWithPassphrase: self, hdKeys: Array(publicKeys))
+    }
 }
