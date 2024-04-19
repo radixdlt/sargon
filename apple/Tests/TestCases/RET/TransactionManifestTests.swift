@@ -1,5 +1,11 @@
 @testable import Sargon
 
+import CustomDump
+import Foundation
+import Sargon
+import SargonUniFFI
+import XCTest
+
 final class TransactionManifestTests: Test<TransactionManifest> {
 
     func test_manifest_instructions_string() {

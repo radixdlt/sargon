@@ -1,23 +1,21 @@
-use std::ops::DerefMut;
-
-use crate::prelude::*;
-
 /// General rules for identified_array_of implementations
 macro_rules! decl_identified_array_of {
 	(
         $(
             #[doc = $expr: expr]
         )*
-        $element_type: ty,
 		$struct_type: ident,
+        $element_type: ty,
 		$collection_type: ty
     ) => {
+        use std::ops::DerefMut;
+        use $crate::prelude::*;
+
         paste! {
             $(
                 #[doc = $expr]
             )*
-			#[derive(Clone, Eq, PartialEq, Hash, derive_more::Debug, derive_more::Display, Serialize, Deserialize, uniffi::Record)]
-            #[serde(transparent)]
+			#[derive(Clone, Eq, PartialEq, Hash, derive_more::Debug, derive_more::Display, uniffi::Record)]
 			pub struct $struct_type {
                 secret_magic: [< $struct_type SecretMagic >]
             }
@@ -27,7 +25,7 @@ macro_rules! decl_identified_array_of {
 
             uniffi::custom_type!([< $struct_type SecretMagic >], $collection_type);
 
-            impl crate::UniffiCustomTypeConverter for [< $struct_type SecretMagic >] {
+            impl $crate::UniffiCustomTypeConverter for [< $struct_type SecretMagic >] {
                 type Builtin = $collection_type;
 
                 fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
@@ -39,7 +37,7 @@ macro_rules! decl_identified_array_of {
                 }
             }
 
-            impl [< $element_type s >] {
+            impl $struct_type {
                 /// Returns a reference to the element identified by `id`, if it exists.
                 pub fn [< get_ $element_type:snake _by_id>](
                     &self,
@@ -51,6 +49,21 @@ macro_rules! decl_identified_array_of {
                 /// Returns references to **all** $struct_type, including hidden ones.
                 pub fn get_all(&self) -> Vec<&[< $element_type >]> {
                     self.elements()
+                }
+            }
+
+            #[uniffi::export]
+            pub fn [< new_ $struct_type:snake _with_ $element_type:snake >]([< $element_type:snake >]: $element_type) -> $struct_type {
+                $struct_type::just([< $element_type:snake >])
+            }
+
+            impl IntoIterator for $struct_type {
+                type Item = $element_type;
+                type IntoIter =
+                identified_vec::identified_vec_into_iterator::IdentifiedVecIntoIterator<<$element_type as Identifiable>::ID,    $element_type>;
+
+                fn into_iter(self) -> Self::IntoIter {
+                    self.secret_magic.0.into_iter()
                 }
             }
 
@@ -68,12 +81,71 @@ macro_rules! decl_identified_array_of {
 				}
 			}
 
+            #[uniffi::export]
+            pub fn [<$struct_type:snake _get_elements>](
+                [< $struct_type:snake >]: $struct_type,
+            ) -> IdentifiedVecVia<$element_type> {
+                (*[< $struct_type:snake >]).clone()
+            }
+
+            #[uniffi::export]
+            pub fn [< $struct_type:snake _get_ $element_type:snake _by_id>](
+                [< $struct_type:snake >]: &$struct_type,
+                id: &<[< $element_type >] as Identifiable>::ID,
+            ) -> Option<[< $element_type >]> {
+                [< $struct_type:snake >].[< get_ $element_type:snake _by_id>](id).cloned()
+            }
+
+            #[uniffi::export]
+            pub fn [<$struct_type:snake _element_count>](
+                [< $struct_type:snake >]: &$struct_type,
+            ) -> u64 {
+                (*[< $struct_type:snake >]).len() as u64
+            }
+
+            #[uniffi::export]
+            pub fn [<new_ $struct_type:snake _by_appending>](
+                [< $element_type:snake >]: $element_type,
+                to: &$struct_type,
+            ) -> $struct_type {
+                let mut copy = to.clone();
+                let _ = (*copy).append([< $element_type:snake >]);
+                copy
+            }
+
+            #[uniffi::export]
+            pub fn [< new_ $struct_type:snake _sample >]() -> $struct_type {
+                $struct_type::sample()
+            }
+
+            #[uniffi::export]
+            pub fn [< new_ $struct_type:snake _sample_other >]() -> $struct_type {
+                $struct_type::sample_other()
+            }
+
             #[cfg(test)]
             mod [<tests_ $struct_type:snake >] {
                 use super::*;
 
+                #[allow(clippy::upper_case_acronyms)]
                 type SUT = $struct_type;
+
+                #[allow(clippy::upper_case_acronyms)]
                 type SUTSecretMagic = [< $struct_type SecretMagic >];
+
+                #[allow(clippy::upper_case_acronyms)]
+                type SUTElement = $element_type;
+
+                #[test]
+                fn equality() {
+                    assert_eq!(SUT::sample(), SUT::sample());
+                    assert_eq!(SUT::sample_other(), SUT::sample_other());
+                }
+
+                #[test]
+                fn inequality() {
+                    assert_ne!(SUT::sample(), SUT::sample_other());
+                }
 
                 #[test]
                 fn manual_perform_uniffi_conversion() {
@@ -90,14 +162,38 @@ macro_rules! decl_identified_array_of {
                     assert_eq!(secret_magic, from_ffi_side);
                 }
 
+                #[test]
+                fn test_new_with_single_element() {
+                    let sut_element = SUTElement::sample();
+                    let sut = $struct_type::just(sut_element.clone());
+                    assert_eq!(sut.items(), vec![sut_element]);
+                }
 
-            }
+                #[test]
+                fn test_get_element_by_id() {
+                    let sut_element = SUTElement::sample();
+                    let sut = $struct_type::just(sut_element.clone());
+                    assert_eq!(
+                        sut.[< get_ $element_type:snake _by_id>](&sut_element.id()),
+                        Some(&sut_element)
+                    );
+                }
 
-            #[uniffi::export]
-            pub fn [<get_ $struct_type:snake >](
-                [< $struct_type:snake >]: $struct_type,
-            ) -> IdentifiedVecVia<$element_type> {
-                (*[< $struct_type:snake >]).clone()
+                #[test]
+                fn test_length() {
+                    let sut_element = SUTElement::sample();
+                    let mut sut = $struct_type::just(sut_element.clone());
+                    assert_eq!(
+                      sut.len(),
+                        1
+                    );
+                    _  = (*sut).append(SUTElement::sample_other());
+                    assert_eq!(
+                        sut.len(),
+                        2
+                    );
+                }
+
             }
 
             #[cfg(test)]
@@ -107,6 +203,9 @@ macro_rules! decl_identified_array_of {
                 #[allow(clippy::upper_case_acronyms)]
                 type SUT = $struct_type;
 
+                #[allow(clippy::upper_case_acronyms)]
+                type SUTElement = $element_type;
+
                 #[test]
                 fn get_elements() {
                     let sut = SUT::sample();
@@ -114,7 +213,42 @@ macro_rules! decl_identified_array_of {
 
                     assert_eq!(
                         elements,
-                        [<get_ $struct_type:snake >](sut)
+                        [<$struct_type:snake _get_elements>](sut)
+                    );
+                }
+
+                #[test]
+                fn test_new_with_single_element() {
+                    let sut_element = SUTElement::sample();
+                    let sut = [< new_ $struct_type:snake _with_ $element_type:snake >](sut_element.clone());
+                    assert_eq!(
+                        sut,
+                        $struct_type::just(sut_element.clone())
+                    )
+                }
+
+                #[test]
+                fn test_get_element_by_id() {
+                    let sut_element = SUTElement::sample();
+                    let sut = $struct_type::just(sut_element.clone());
+                    assert_eq!(
+                        [< $struct_type:snake _get_ $element_type:snake _by_id>](&sut, &sut_element.id()),
+                        Some(sut_element)
+                    );
+                }
+
+                #[test]
+                fn test_new_appending_and_length() {
+                    let sut_element = SUTElement::sample();
+                    let sut = $struct_type::just(sut_element.clone());
+                    assert_eq!(
+                        [<$struct_type:snake _element_count>](&sut),
+                        1
+                    );
+                    let sut = [<new_ $struct_type:snake _by_appending>](SUTElement::sample_other(), &sut);
+                    assert_eq!(
+                        [<$struct_type:snake _element_count>](&sut),
+                        2
                     );
                 }
             }
@@ -123,14 +257,60 @@ macro_rules! decl_identified_array_of {
 }
 
 /// Impl rules for identified_array_of implementations which can be empty
-macro_rules! dec_can_be_empty_impl {
+macro_rules! decl_can_be_empty_impl {
     (
-        $element_type: ty,
         $struct_type: ty,
+        $element_type: ty,
         $secret_magic: ty
     ) => {
         paste! {
-            impl [< $element_type s >] {
+
+            impl Serialize for $struct_type {
+                fn serialize<S>(
+                    &self,
+                    serializer: S,
+                ) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
+                where
+                    S: Serializer,
+                {
+                    self.secret_magic.serialize(serializer)
+                }
+            }
+
+            impl<'de> serde::Deserialize<'de> for $struct_type {
+                fn deserialize<D: Deserializer<'de>>(
+                    d: D,
+                ) -> Result<$struct_type, D::Error> {
+                    $secret_magic::deserialize(d).map(|secret_magic| {
+                        $struct_type {
+                            secret_magic
+                        }
+                    })
+                    .map_err(de::Error::custom)
+                }
+            }
+
+            #[uniffi::export]
+            pub fn [<new_ $struct_type:snake _removed_by_id>](
+                [< id_of_ $element_type:snake >]: &<[< $element_type >] as Identifiable>::ID,
+                from: &$struct_type,
+            ) -> $struct_type {
+                let mut copy = from.clone();
+                let _ = (*copy).remove_by_id([< id_of_ $element_type:snake >]);
+                copy
+            }
+
+            #[uniffi::export]
+            pub fn [<new_ $struct_type:snake _removed_element>](
+                [< $element_type:snake >]: &$element_type,
+                from: &$struct_type,
+            ) -> $struct_type {
+                let mut copy = from.clone();
+                let _ = (*copy).remove([< $element_type:snake >]);
+                copy
+            }
+
+            impl $struct_type {
 
                 #[allow(clippy::should_implement_trait)]
                 pub fn from_iter<I>([<  $struct_type:lower >]: I) -> Self
@@ -142,6 +322,11 @@ macro_rules! dec_can_be_empty_impl {
                     }
                 }
 
+                /// Creates a new empty collection.
+                pub fn new() -> Self {
+                    Self::from_iter([])
+                }
+
                 pub fn [< with_ $struct_type:snake >]<I>([< $struct_type:snake >]: I) -> Self
                 where
                     I: IntoIterator<Item = $element_type>,
@@ -149,8 +334,8 @@ macro_rules! dec_can_be_empty_impl {
                     Self::from_iter([< $struct_type:snake >])
                 }
 
-                pub fn [< with_ $element_type:snake >]([< $element_type:snake >]: $element_type) -> Self {
-                    Self::[< with_ $struct_type:snake >]([[< $element_type:snake >]])
+                pub fn just([< $element_type:snake >]: $element_type) -> Self {
+                    Self::from_iter([[< $element_type:snake >]])
                 }
             }
 
@@ -158,7 +343,7 @@ macro_rules! dec_can_be_empty_impl {
             impl Default for $struct_type {
                 /// Instantiates a new empty collection.
                 fn default() -> Self {
-                    Self::[< with_ $struct_type:snake >]([])
+                    Self::from_iter([])
                 }
             }
 
@@ -173,6 +358,12 @@ macro_rules! dec_can_be_empty_impl {
             mod [<uniffi_impl_tests_ $struct_type:snake>] {
                 use super::*;
 
+                #[allow(clippy::upper_case_acronyms)]
+                type SUT = $struct_type;
+
+                #[allow(clippy::upper_case_acronyms)]
+                type SUTElement = $element_type;
+
                 #[test]
                 fn new_from_empty() {
                     let sut = [<new_ $struct_type:snake>](IdentifiedVecVia::from_iter([]));
@@ -184,11 +375,29 @@ macro_rules! dec_can_be_empty_impl {
 
                 #[test]
                 fn new_from_value() {
-                    let sut = [<new_ $struct_type:snake>]( IdentifiedVecVia::from_iter([[< $element_type >]::sample()]) );
+                    let sut = [<new_ $struct_type:snake>]( IdentifiedVecVia::from_iter([SUTElement::sample()]) );
                     assert_eq!(
                         1,
                         sut.len()
                     );
+                }
+
+                #[test]
+                fn remove_by_id_to_empty() {
+                    let sut_element = SUTElement::sample();
+                    let old = SUT::just(sut_element.clone());
+                    let new = [<new_ $struct_type:snake _removed_by_id>](&sut_element.id(), &old);
+                    assert_eq!(old.len(), 1);
+                    assert_eq!(new.len(), 0);
+                }
+
+                #[test]
+                fn remove_by_element() {
+                    let sut_element = SUTElement::sample();
+                    let old = SUT::just(sut_element.clone());
+                    let new = [<new_ $struct_type:snake _removed_element>](&sut_element, &old);
+                    assert_eq!(old.len(), 1);
+                    assert_eq!(new.len(), 0);
                 }
             }
         }
@@ -196,14 +405,68 @@ macro_rules! dec_can_be_empty_impl {
 }
 
 /// Impl rules for identified_array_of implementations which must not be empty
-macro_rules! dec_never_empty_impl {
+macro_rules! decl_never_empty_impl {
     (
-        $element_type: ty,
         $struct_type: ty,
+        $element_type: ty,
         $secret_magic: ty
     ) => {
         paste! {
-            impl [< $element_type s >] {
+
+            impl Serialize for $struct_type {
+                fn serialize<S>(
+                    &self,
+                    serializer: S,
+                ) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
+                where
+                    S: Serializer,
+                {
+                    self.secret_magic.serialize(serializer)
+                }
+            }
+
+            impl<'de> serde::Deserialize<'de> for $struct_type {
+                fn deserialize<D: Deserializer<'de>>(
+                    d: D,
+                ) -> Result<$struct_type, D::Error> {
+                    Vec::<$element_type>::deserialize(d)
+                    .and_then(|vec| {
+                        Self::from_iter(vec.into_iter())
+                        .map_err(de::Error::custom)
+                    })
+                    .map_err(de::Error::custom)
+                }
+            }
+
+            #[uniffi::export]
+            pub fn [<new_ $struct_type:snake _removed_by_id>](
+                [< id_of_ $element_type:snake >]: &<[< $element_type >] as Identifiable>::ID,
+                from: &$struct_type,
+            ) -> Result<$struct_type> {
+                let mut copy = from.clone();
+                let _ = (*copy).remove_by_id([< id_of_ $element_type:snake >]);
+                if copy.is_empty() {
+                    Err(CommonError::[< $struct_type MustNotBeEmpty >])
+                } else {
+                    Ok(copy)
+                }
+            }
+
+            #[uniffi::export]
+            pub fn [<new_ $struct_type:snake _removed_element>](
+                [< $element_type:snake >]: &$element_type,
+                from: &$struct_type,
+            ) -> Result<$struct_type> {
+                let mut copy = from.clone();
+                let _ = (*copy).remove([< $element_type:snake >]);
+                if copy.is_empty() {
+                    Err(CommonError::[< $struct_type MustNotBeEmpty >])
+                } else {
+                    Ok(copy)
+                }
+            }
+
+            impl $struct_type {
 
                 #[allow(clippy::should_implement_trait)]
                 pub fn from_iter<I>([<  $struct_type:snake >]: I) -> Result<Self>
@@ -220,15 +483,8 @@ macro_rules! dec_never_empty_impl {
                     }
                 }
 
-                pub fn [< with_ $struct_type:snake >]<I>([< $struct_type:snake >]: I) -> Result<Self>
-                where
-                    I: IntoIterator<Item = $element_type>,
-                {
-                    Self::from_iter([< $struct_type:snake >])
-                }
-
-                pub fn [< with_ $element_type:snake >]([< $element_type:snake >]: $element_type) -> Self {
-                    Self::[< with_ $struct_type:snake >]([[< $element_type:snake >]]).unwrap()
+                pub fn just([< $element_type:snake >]: $element_type) -> Self {
+                    Self::from_iter([[< $element_type:snake >]]).unwrap()
                 }
             }
 
@@ -242,6 +498,14 @@ macro_rules! dec_never_empty_impl {
             #[cfg(test)]
             mod [<uniffi_impl_tests_ $struct_type:snake>] {
                 use super::*;
+
+
+                #[allow(clippy::upper_case_acronyms)]
+                type SUT = $struct_type;
+
+                #[allow(clippy::upper_case_acronyms)]
+                type SUTElement = $element_type;
+
 
                 #[test]
                 #[should_panic]
@@ -257,6 +521,42 @@ macro_rules! dec_never_empty_impl {
                         sut.len()
                     );
                 }
+
+                #[test]
+                fn remove_by_id_to_empty_throws() {
+                    let sut_element = SUTElement::sample();
+                    let sut = SUT::just(sut_element.clone());
+                    assert!(
+                        [<new_ $struct_type:snake _removed_by_id>](&sut_element.id(), &sut).is_err()
+                    );
+                }
+
+                #[test]
+                fn remove_by_element_empty_throws() {
+                    let sut_element = SUTElement::sample();
+                    let sut = SUT::just(sut_element.clone());
+                    assert!(
+                        [<new_ $struct_type:snake _removed_element>](&sut_element, &sut).is_err()
+                    );
+                }
+
+                #[test]
+                fn remove_by_id_from_two_elements_to_one_is_ok() {
+                    let sut_element = SUTElement::sample();
+                    let old = SUT::from_iter([sut_element.clone(), SUTElement::sample_other()]).unwrap();
+                    let new = [<new_ $struct_type:snake _removed_by_id>](&sut_element.id(), &old).unwrap();
+                    assert_eq!(old.len(), 2);
+                    assert_eq!(new.len(), 1);
+                }
+
+                #[test]
+                fn remove_by_element_from_two_elements_to_one_is_ok() {
+                    let sut_element = SUTElement::sample();
+                    let old = SUT::from_iter([sut_element.clone(), SUTElement::sample_other()]).unwrap();
+                    let new = [<new_ $struct_type:snake _removed_element>](&sut_element, &old).unwrap();
+                    assert_eq!(old.len(), 2);
+                    assert_eq!(new.len(), 1);
+                }
             }
         }
     }
@@ -267,6 +567,7 @@ macro_rules! decl_can_be_empty_identified_array_of {
         $(
             #[doc = $expr: expr]
         )*
+        $struct_type: ty,
         $element_type: ty
     ) => {
         paste! {
@@ -274,15 +575,15 @@ macro_rules! decl_can_be_empty_identified_array_of {
 				$(
                     #[doc = $expr]
                 )*
+				$struct_type,
 				$element_type,
-				[< $element_type s >],
 				IdentifiedVecVia<$element_type>
 			);
 
-            dec_can_be_empty_impl!(
+            decl_can_be_empty_impl!(
+                $struct_type,
                 $element_type,
-                [< $element_type s >],
-                [< $element_type s SecretMagic >]
+                [< $struct_type SecretMagic >]
             );
 		}
 	};
@@ -293,6 +594,7 @@ macro_rules! decl_never_empty_identified_array_of {
         $(
             #[doc = $expr: expr]
         )*
+        $struct_type: ty,
         $element_type: ty
     ) => {
         paste! {
@@ -300,39 +602,22 @@ macro_rules! decl_never_empty_identified_array_of {
 				$(
                     #[doc = $expr]
                 )*
+				$struct_type,
 				$element_type,
-				[< $element_type s >],
 				IdentifiedVecVia<$element_type>
 			);
 
-            dec_never_empty_impl!(
+            decl_never_empty_impl!(
+                $struct_type,
                 $element_type,
-                [< $element_type s >],
-                [< $element_type s SecretMagic >]
+                [< $struct_type SecretMagic >]
             );
 		}
 	};
 }
 
-decl_can_be_empty_identified_array_of!(
-    /// An ordered set of [`Account`]s on a specific network, most commonly
-    /// the set is non-empty, since wallets guide user to create a first
-    /// Account.
-    Account
-);
-
-decl_can_be_empty_identified_array_of!(
-    /// An ordered set of [`Persona`]s on a specific network.
-    Persona
-);
-
-decl_can_be_empty_identified_array_of!(
-    /// An ordered set of ['AuthorizedDapp`]s on a specific network.
-    AuthorizedDapp
-);
-
-decl_never_empty_identified_array_of!(
-    /// A collection of [`FactorSource`]s generated by a wallet or manually added by user.
-    /// MUST never be empty.
-    FactorSource
-);
+pub(crate) use decl_can_be_empty_identified_array_of;
+pub(crate) use decl_can_be_empty_impl;
+pub(crate) use decl_identified_array_of;
+pub(crate) use decl_never_empty_identified_array_of;
+pub(crate) use decl_never_empty_impl;

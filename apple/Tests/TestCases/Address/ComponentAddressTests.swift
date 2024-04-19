@@ -1,3 +1,9 @@
+import CustomDump
+import Foundation
+import Sargon
+import SargonUniFFI
+import XCTest
+
 final class ComponentAddressTests: AddressTest<ComponentAddress> {
 	
 	func test_is_global() {

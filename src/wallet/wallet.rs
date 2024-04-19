@@ -78,7 +78,7 @@ impl Wallet {
     /// saving both the Mnemonic and Profile into secure storage and returns a new Wallet.
     #[uniffi::constructor]
     pub fn by_creating_new_profile_and_secrets_with_entropy(
-        entropy: Vec<u8>,
+        entropy: NonEmptyMax32Bytes, // yes would be more correct to pass `BIP39Entropy` here, but I wanna avoid UniFFI exporting it.
         wallet_client_model: WalletClientModel,
         wallet_client_name: String,
         secure_storage: Arc<dyn SecureStorage>,
@@ -86,11 +86,11 @@ impl Wallet {
         Wallet::init_logging();
 
         log::info!("Instantiating Wallet by creating a new Profile from entropy (provided), for client: {}", wallet_client_model);
+        let entropy = BIP39Entropy::try_from(entropy)?;
 
-        let entropy_32bytes: Exactly32Bytes = entropy.try_into()?;
         let private_hd_factor_source =
             PrivateHierarchicalDeterministicFactorSource::new_with_entropy(
-                entropy_32bytes,
+                entropy,
                 BIP39Passphrase::default(),
                 wallet_client_model,
             );
@@ -99,13 +99,16 @@ impl Wallet {
             private_hd_factor_source.factor_source.clone(),
             wallet_client_name.as_str(),
         );
+
         let wallet = Self::with_imported_profile(profile, secure_storage);
+
         wallet.wallet_client_storage.save(
             SecureStorageKey::DeviceFactorSourceMnemonic {
                 factor_source_id: private_hd_factor_source.factor_source.id,
             },
             &private_hd_factor_source.mnemonic_with_passphrase,
         )?;
+
         Ok(wallet)
     }
 
@@ -341,7 +344,7 @@ mod uniffi_tests {
     fn by_creating_new_profile_and_secrets_with_entropy() {
         let secure_storage = EphemeralSecureStorage::new();
         let wallet = Wallet::by_creating_new_profile_and_secrets_with_entropy(
-            Vec::from_iter([0xff; 32]),
+            Entropy32Bytes::new([0xff; 32]).into(),
             WalletClientModel::Unknown,
             "Test".to_string(),
             secure_storage.clone(),

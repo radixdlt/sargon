@@ -17,26 +17,6 @@ pub fn cap26_path_to_string(path: &CAP26Path) -> String {
     path.to_string()
 }
 
-#[uniffi::export]
-pub fn new_account_path_sample() -> AccountPath {
-    AccountPath::sample()
-}
-
-#[uniffi::export]
-pub fn new_account_path_sample_other() -> AccountPath {
-    AccountPath::sample_other()
-}
-
-#[uniffi::export]
-pub fn new_identity_path_sample() -> IdentityPath {
-    IdentityPath::sample()
-}
-
-#[uniffi::export]
-pub fn new_identity_path_sample_other() -> IdentityPath {
-    IdentityPath::sample_other()
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -70,19 +50,22 @@ mod tests {
     }
 
     #[test]
-    fn test_samples() {
-        assert_eq!(IdentityPath::sample(), new_identity_path_sample());
-
-        assert_eq!(
-            IdentityPath::sample_other(),
-            new_identity_path_sample_other()
+    fn test_new_account_path() {
+        let path = new_account_path(
+            NetworkID::Mainnet,
+            CAP26KeyKind::TransactionSigning,
+            0,
         );
+        assert_eq!(path.to_string(), "m/44H/1022H/1H/525H/1460H/0H")
+    }
 
-        assert_eq!(AccountPath::sample(), new_account_path_sample());
-
-        assert_eq!(
-            AccountPath::sample_other(),
-            new_account_path_sample_other()
+    #[test]
+    fn test_new_identity_path() {
+        let path = new_identity_path(
+            NetworkID::Mainnet,
+            CAP26KeyKind::TransactionSigning,
+            0,
         );
+        assert_eq!(path.to_string(), "m/44H/1022H/1H/618H/1460H/0H")
     }
 }

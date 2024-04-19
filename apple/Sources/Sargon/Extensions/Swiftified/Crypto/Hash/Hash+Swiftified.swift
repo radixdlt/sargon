@@ -1,3 +1,6 @@
+import Foundation
+import SargonUniFFI
+
 extension Hash: SargonModel {}
 
 extension Hash {

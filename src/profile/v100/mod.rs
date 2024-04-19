@@ -4,7 +4,10 @@ mod entity;
 mod entity_security_state;
 mod factors;
 mod header;
+
 mod identified_elements;
+mod json_data_convertible;
+
 mod networks;
 mod profile;
 mod profile_uniffi_fn;
@@ -16,6 +19,7 @@ pub use entity_security_state::*;
 pub use factors::*;
 pub use header::*;
 pub use identified_elements::*;
+pub use json_data_convertible::*;
 pub use networks::*;
 pub use profile::*;
 pub use profile_uniffi_fn::*;

@@ -1,5 +1,11 @@
 import Sargon
 
+import CustomDump
+import Foundation
+import Sargon
+import SargonUniFFI
+import XCTest
+
 final class NonFungibleLocalIDTests: IdentifiableByStringProtocolTest<NonFungibleLocalID> {
 	
     // MARK: LocalID String

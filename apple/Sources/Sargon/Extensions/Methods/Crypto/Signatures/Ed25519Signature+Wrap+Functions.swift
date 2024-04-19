@@ -1,3 +1,4 @@
+import Foundation
 import SargonUniFFI
 
 extension Ed25519Signature {

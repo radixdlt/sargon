@@ -1,3 +1,6 @@
+import Sargon
+import SargonUniFFI
+
 @Reducer
 public struct SplashFeature {
 
@@ -69,7 +72,7 @@ extension Wallet {
 	static func generateNewBDFSAndEmptyProfile(secureStorage: SecureStorage = Keychain.shared) -> Wallet {
 		do {
 			return try Wallet.byCreatingNewProfileAndSecretsWithEntropy(
-				entropy: BagOfBytes.random(byteCount: 32),
+				entropy: .init(bagOfBytes: BagOfBytes.random(byteCount: 32)),
 				walletClientModel: .iphone,
 				walletClientName: "Unknown iPhone",
 				secureStorage: secureStorage

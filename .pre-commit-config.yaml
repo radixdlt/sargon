@@ -34,31 +34,3 @@ repos:
         types: [file, rust]
         entry: cargo test --lib
         pass_filenames: false
-
-      - id: doc tests
-        name: doc tests
-        language: system
-        types: [file, rust]
-        entry: cargo test --doc
-        pass_filenames: false
-
-      - id: vectors integration tests
-        name: vectors integration tests
-        language: system
-        types: [file, rust]
-        entry: cargo test --package sargon --test vectors
-        pass_filenames: false
-
-      - id: swift tests
-        name: swift tests
-        language: system
-        types_or: [rust, swift]
-        entry: ./scripts/ios/test.sh --testonly # no code coverage
-        pass_filenames: false
-
-      - id: kotlin tests
-        name: kotlin (jvm) tests
-        language: system
-        types_or: [rust, kotlin]
-        entry: ./jvm/gradlew -p jvm/sargon-android koverVerifyDebug
-        pass_filenames: false

@@ -20,6 +20,24 @@ mod profile_snapshot_tests {
     }
 }
 
+struct TestDerivation {
+    curve: SLIP10Curve,
+    hd_path: HDPath,
+    derivation_path: DerivationPath,
+}
+#[cfg(not(tarpaulin_include))]
+impl Derivation for TestDerivation {
+    fn curve(&self) -> SLIP10Curve {
+        self.curve
+    }
+    fn hd_path(&self) -> &HDPath {
+        &self.hd_path
+    }
+    fn derivation_path(&self) -> DerivationPath {
+        self.derivation_path.clone()
+    }
+}
+
 #[cfg(test)]
 mod cap26_tests {
 
@@ -28,7 +46,7 @@ mod cap26_tests {
     #[allow(dead_code)]
     #[derive(Deserialize, Debug)]
     struct CAP26Vector {
-        path: HDPath,
+        path: CAP26Path,
 
         #[serde(rename = "publicKey")]
         public_key_hex: String,
@@ -65,10 +83,20 @@ mod cap26_tests {
                 .iter()
                 .map(|v| {
                     let private_key = v.private_key::<S, P>()?;
-                    let derived: sargon::PrivateKey = match S::curve() {
-                        sargon::SLIP10Curve::Curve25519 => MnemonicWithPassphrase::derive_ed25519_private_key(&seed, &v.path).into(),
-                        sargon::SLIP10Curve::Secp256k1 => MnemonicWithPassphrase::derive_secp256k1_private_key(&seed, &v.path).into()
+
+                    // A liiittle bit hacky, but this allows us to test CAP26 paths with Secp256k1,
+                    // which we have test vectors for - but which we actually do not allow in
+                    // the wallets. So we force say "No, dont use Ed25519 curve for these CAP26 paths, actu
+                    // use Secp256k1 instead!"
+                    let derivation = TestDerivation {
+                        curve: S::curve(), // will be `Secp256k1` for `cap26_secp256k1.json` vectors!
+                        hd_path: v.path.hd_path().clone(),
+                        derivation_path: DerivationPath::CAP26 {
+                            value: v.path.clone(),
+                        },
                     };
+
+                    let derived = seed.derive_private_key(&derivation);
                     assert_eq!(derived.to_hex(), format!("{:?}", private_key));
                     Ok::<(), CommonError>(())
                 })
@@ -117,7 +145,7 @@ mod bip44_tests {
 
     #[derive(Debug, Deserialize)]
     struct Vector {
-        path: HDPath,
+        path: BIP44LikePath,
 
         #[serde(rename = "publicKeyCompressed")]
         public_key: Secp256k1PublicKey,
@@ -142,23 +170,17 @@ mod bip44_tests {
                 .map(|v| {
                     let expected_private_key: Secp256k1PrivateKey =
                         v.private_key_hex.parse()?;
-                    let derived_private_key: Secp256k1PrivateKey =
-                        MnemonicWithPassphrase::derive_secp256k1_private_key(
-                            &seed, &v.path,
-                        );
-                    assert_eq!(derived_private_key, expected_private_key);
+                    let derived_private_key = seed.derive_private_key(&v.path);
                     assert_eq!(
-                        &derived_private_key.public_key(),
-                        &v.public_key
+                        derived_private_key.private_key,
+                        PrivateKey::from(expected_private_key)
                     );
-                    if !v.is_strict_bip44 {
-                        assert!(
-                            TryInto::<BIP44LikePath>::try_into(&v.path).is_ok()
-                        );
-                    } else {
-                        assert!(TryInto::<BIP44LikePath>::try_into(&v.path)
-                            .is_err());
-                    }
+                    assert_eq!(
+                        derived_private_key.public_key().public_key,
+                        PublicKey::from(v.public_key)
+                    );
+                    assert_eq!(v.path.is_canonical(), v.is_strict_bip44);
+
                     Ok::<(), CommonError>(())
                 })
                 .collect::<Result<Vec<()>, CommonError>>()
@@ -212,29 +234,30 @@ mod slip10_tests {
         xprv: String,
     }
     impl KeyVector {
-        fn test(&self, seed: &[u8; 64], path: &HDPath) {
-            let maybe_derived: Option<sargon::PrivateKey> =
-                match self.curve.as_str() {
-                    "ed25519" => Some(
-                        MnemonicWithPassphrase::derive_ed25519_private_key(
-                            seed, path,
-                        )
-                        .into(),
-                    ),
-                    "secp256k1" => Some(
-                        MnemonicWithPassphrase::derive_secp256k1_private_key(
-                            seed, path,
-                        )
-                        .into(),
-                    ),
-                    _ => {
-                        assert_eq!(self.curve, "nist256p1");
-                        /* P256 not yet supported */
-                        None
-                    }
-                };
-            let Some(derived) = maybe_derived else { return };
-            assert_eq!(derived.to_hex(), self.private_key);
+        fn test(&self, seed: &BIP39Seed, path: &HDPath) {
+            let maybe_curve: Option<SLIP10Curve> = match self.curve.as_str() {
+                "ed25519" => Some(SLIP10Curve::Curve25519),
+                "secp256k1" => Some(SLIP10Curve::Secp256k1),
+                _ => {
+                    assert_eq!(self.curve, "nist256p1");
+                    /* P256 not yet supported */
+                    None
+                }
+            };
+            let Some(curve) = maybe_curve else { return };
+
+            let derivation = TestDerivation {
+                curve,
+                hd_path: path.clone(),
+                derivation_path: // no used by the test, unable to express non Radix BIP44 paths which this test uses...
+                DerivationPath::CAP26 {
+                    value: CAP26Path::GetID {
+                        value: GetIDPath::default(),
+                    },
+                }
+            };
+            let derived = seed.derive_private_key(&derivation);
+            assert_eq!(derived.private_key.to_hex(), self.private_key);
             assert!(self.public_key.ends_with(&derived.public_key().to_hex()));
         }
     }
@@ -247,7 +270,7 @@ mod slip10_tests {
         child_keys: Vec<KeyVector>,
     }
     impl TestCase {
-        fn test(&self, seed: &[u8; 64]) {
+        fn test(&self, seed: &BIP39Seed) {
             self.child_keys
                 .iter()
                 .for_each(|k| k.test(seed, &self.path));
@@ -275,9 +298,9 @@ mod slip10_tests {
     impl Group {
         fn test(&self) {
             let seed = self.mnemonic.to_seed(&self.passphrase.0);
-            let entropy = ::hex::decode(&self.entropy).unwrap();
-            assert_eq!(self.mnemonic, Mnemonic::from_entropy(&entropy));
-            assert_eq!(::hex::encode(seed), self.seed);
+            let bytes = NonEmptyMax32Bytes::from_str(&self.entropy).unwrap();
+            let entropy = BIP39Entropy::try_from(bytes).unwrap();
+            assert_eq!(self.mnemonic, Mnemonic::from_entropy(entropy));
             self.test_cases.iter().for_each(|c| c.test(&seed));
         }
     }
@@ -566,5 +589,169 @@ mod wallet_to_dapp_interaction_tests {
         .expect("BIP44 fixture");
 
         pretty_assertions::assert_eq!(serde_value, fixture);
+            }
+}
+
+mod encrypted_profile_tests {
+    use std::collections::HashSet;
+
+    use serde::Serialize;
+
+    use super::*;
+
+    #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
+    struct IdentifiableMnemonic {
+        #[serde(rename = "factorSourceID")]
+        factor_source_id: FactorSourceID,
+        #[serde(rename = "mnemonicWithPassphrase")]
+        mnemonic_with_passphrase: MnemonicWithPassphrase,
+    }
+
+    #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
+    struct EncryptedSnapshotWithPassword {
+        password: String,
+        snapshot: EncryptedProfileSnapshot,
+    }
+    impl EncryptedSnapshotWithPassword {
+        fn decrypted(&self) -> Result<Profile> {
+            self.snapshot.decrypt(self.password.clone())
+        }
+    }
+
+    #[derive(Debug, Deserialize, Serialize, PartialEq, Eq)]
+    struct Fixture {
+        #[serde(rename = "_snapshotVersion")]
+        snapshot_version: ProfileSnapshotVersion,
+        mnemonics: Vec<IdentifiableMnemonic>,
+        #[serde(rename = "encryptedSnapshots")]
+        encrypted_snapshots: Vec<EncryptedSnapshotWithPassword>,
+        plaintext: Profile,
+    }
+
+    impl Fixture {
+        fn validate_all_entities_with_mnemonics(&self) -> Result<()> {
+            self.plaintext
+                .networks
+                .clone()
+                .into_iter()
+                .try_for_each(|n| {
+                    let test = |security_state: EntitySecurityState| {
+                        let control = security_state.as_unsecured().unwrap();
+
+                        let tx_signing_instance =
+                            control.transaction_signing.clone();
+
+                        let factor_source_id_from_hash =
+                            tx_signing_instance.factor_source_id;
+
+                        if factor_source_id_from_hash.kind
+                            != FactorSourceKind::Device
+                        {
+                            return;
+                        }
+
+                        let factor_source_id: FactorSourceID =
+                            factor_source_id_from_hash.into();
+
+                        let factor_source = self
+                            .plaintext
+                            .factor_sources
+                            .clone()
+                            .into_iter()
+                            .find(|x| x.factor_source_id() == factor_source_id);
+
+                        assert!(factor_source.is_some());
+
+                        let mnemonic = self
+                            .mnemonics
+                            .clone()
+                            .into_iter()
+                            .find(|x| x.factor_source_id == factor_source_id)
+                            .unwrap();
+
+                        let public_key = mnemonic
+                            .mnemonic_with_passphrase
+                            .to_seed()
+                            .derive_private_key(
+                                &tx_signing_instance.derivation_path(),
+                            )
+                            .public_key();
+
+                        assert_eq!(public_key, tx_signing_instance.public_key);
+                    };
+
+                    n.accounts
+                        .into_iter()
+                        .map(|x| x.security_state)
+                        .for_each(test);
+
+                    n.personas
+                        .into_iter()
+                        .map(|x| x.security_state)
+                        .for_each(test);
+
+                    Ok(())
+                })?;
+            Ok(())
+        }
+
+        fn validate(&self) -> Result<Vec<Profile>> {
+            let decryptions: Vec<Profile> = self
+                .encrypted_snapshots
+                .clone()
+                .into_iter()
+                .map(|x| x.decrypted())
+                .collect::<Result<Vec<Profile>>>()
+                .unwrap();
+
+            decryptions
+                .clone()
+                .into_iter()
+                .for_each(|x| assert_eq!(x, self.plaintext));
+
+            let ids = self
+                .plaintext
+                .factor_sources
+                .clone()
+                .into_iter()
+                .filter(|x| x.factor_source_kind() == FactorSourceKind::Device)
+                .map(|x| x.factor_source_id())
+                .collect::<HashSet<FactorSourceID>>();
+
+            assert_eq!(
+                ids,
+                self.mnemonics
+                    .clone()
+                    .into_iter()
+                    .map(|x| x.factor_source_id)
+                    .collect::<HashSet<FactorSourceID>>()
+            );
+
+            self.validate_all_entities_with_mnemonics()?;
+
+            Ok(decryptions)
+        }
+
+        fn test(&self) {
+            let decrypted_profiles = self.validate().unwrap();
+            decrypted_profiles.clone().into_iter().for_each(|x| {
+                assert_eq!(
+                    x.header.snapshot_version,
+                    self.plaintext.header.snapshot_version
+                )
+            });
+            assert_json_roundtrip(self);
+        }
+    }
+
+    #[test]
+    fn test_vectors() {
+        let fixture = fixture::<Fixture>(include_str!(concat!(
+            env!("FIXTURES_VECTOR"),
+            "multi_profile_snapshots_test_version_100_patch_after_app_version_120.json"
+        )))
+        .expect("Encrypted Profile tests");
+
+        fixture.test();
     }
 }

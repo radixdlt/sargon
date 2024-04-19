@@ -13,6 +13,7 @@ macro_rules! decl_exactly_n_bytes {
         paste! {
 
             #[derive(
+                Zeroize, // Not `ZeroizeOnDrop`: we dont wanna zeroize all byte types: use `decl_secret_bytes!` for secrets.
                 Clone,
                 Copy,
                 Debug,
@@ -82,6 +83,7 @@ macro_rules! decl_exactly_n_bytes {
                 #[doc = $expr]
             )*
             #[derive(
+                Zeroize,
                 Clone,
                 Copy,
                 PartialEq,
@@ -537,4 +539,11 @@ decl_exactly_n_bytes!(
     /// stored inside a `BagOfBytes` (wrapper of `Vec<u8>`) for UniFFI compat.
     65,
     "65deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead", // expected sample value for tests
+);
+
+decl_exactly_n_bytes!(
+    /// 12 bytes, used by AES encryption, implementation wise those bytes are
+    /// stored inside a `BagOfBytes` (wrapper of `Vec<u8>`) for UniFFI compat.
+    12,
+    "deaddeaddeaddeaddeaddead", // expected sample value for tests
 );

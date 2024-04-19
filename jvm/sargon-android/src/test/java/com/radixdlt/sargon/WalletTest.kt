@@ -3,7 +3,9 @@ package com.radixdlt.sargon
 import com.radixdlt.sargon.extensions.get
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.invoke
+import com.radixdlt.sargon.extensions.randomBagOfBytes
 import com.radixdlt.sargon.extensions.size
+import com.radixdlt.sargon.extensions.toBagOfBytes
 import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -36,7 +38,7 @@ class WalletTest {
         val initialNameOfFirstAccount = "Alice"
         // Not created any account yet...
         assertFalse(storage.contains(value = initialNameOfFirstAccount))
-        assertTrue(wallet.profile().networks.isEmpty())
+        assertTrue(wallet.profile().networks().isEmpty())
         var main0 = wallet.createAndSaveNewAccount(
             networkId = NetworkId.MAINNET,
             name = DisplayName.init(validating = initialNameOfFirstAccount)
@@ -116,7 +118,7 @@ class WalletTest {
         secureStorage: SecureStorage
     ): Wallet {
         return Wallet.byCreatingNewProfileAndSecretsWithEntropy(
-            entropy = entropy,
+            entropy = NonEmptyMax32Bytes(bagOfBytes = entropy.toBagOfBytes()),
             walletClientModel = WalletClientModel.ANDROID,
             walletClientName = phoneName,
             secureStorage = secureStorage

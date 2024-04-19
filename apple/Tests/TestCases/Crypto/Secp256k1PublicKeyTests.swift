@@ -1,6 +1,12 @@
 @testable import Sargon
 import XCTest
 
+import CustomDump
+import Foundation
+import Sargon
+import SargonUniFFI
+import XCTest
+
 final class Secp256k1PublicKeyTests: PublicKeyTest<Secp256k1PublicKey> {
 	
 	func test_from_compressed() throws {

@@ -16,7 +16,7 @@ fun Profile.Companion.init(
 )
 
 @Throws(SargonException::class)
-fun Profile.Companion.init(json: BagOfBytes) = newProfileFromJsonBytes(json = json)
+fun Profile.Companion.init(json: BagOfBytes) = newProfileFromJsonBytes(jsonBytes = json)
 
 @Throws(SargonException::class)
 fun Profile.snapshotJson() = profileToJsonBytes(profile = this)

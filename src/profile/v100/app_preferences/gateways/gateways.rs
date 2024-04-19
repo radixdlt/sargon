@@ -1,5 +1,13 @@
 use crate::prelude::*;
 
+decl_can_be_empty_identified_array_of!(
+    /// Other by user added or predefined Gateways the user can switch to.
+    /// It might be Gateways with different URLs on the SAME network, or
+    /// other networks, the identifier of a Gateway is the URL.
+    OtherGateways,
+    Gateway
+);
+
 /// The currently used Gateway and a collection of other by user added
 /// or predefined Gateways the user can switch to.
 #[derive(
@@ -14,25 +22,7 @@ pub struct Gateways {
     /// Other by user added or predefined Gateways the user can switch to.
     /// It might be Gateways with different URLs on the SAME network, or
     /// other networks, the identifier of a Gateway is the URL.
-    pub other: IdentifiedVecVia<Gateway>,
-}
-
-/// Constructs `Gateways` with `current` set as active Gateway.
-#[uniffi::export]
-pub fn new_gateways(current: Gateway) -> Gateways {
-    Gateways::new(current)
-}
-
-/// A sample value useful for tests and previews.
-#[uniffi::export]
-pub fn new_gateways_sample() -> Gateways {
-    Gateways::sample()
-}
-
-/// A sample value useful for tests and previews.
-#[uniffi::export]
-pub fn new_gateways_sample_other() -> Gateways {
-    Gateways::sample_other()
+    pub other: OtherGateways,
 }
 
 impl Gateways {
@@ -103,7 +93,7 @@ impl Gateways {
     pub fn new(current: Gateway) -> Self {
         Self {
             current,
-            other: IdentifiedVecVia::new(),
+            other: OtherGateways::default(),
         }
     }
 
@@ -111,7 +101,7 @@ impl Gateways {
     where
         I: IntoIterator<Item = Gateway>,
     {
-        let other = IdentifiedVecVia::from_iter(other);
+        let other = OtherGateways::from_iter(other);
         if other.contains(&current) {
             return Err(
                 CommonError::GatewaysDiscrepancyOtherShouldNotContainCurrent,
@@ -175,6 +165,16 @@ impl HasSampleValues for Gateways {
     }
 }
 
+impl HasSampleValues for OtherGateways {
+    fn sample() -> Self {
+        OtherGateways::from_iter([Gateway::stokenet()])
+    }
+
+    fn sample_other() -> Self {
+        OtherGateways::from_iter([Gateway::stokenet(), Gateway::hammunet()])
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
@@ -212,7 +212,7 @@ mod tests {
     fn change_throw_gateways_discrepancy_other_should_not_contain_current() {
         let mut impossible = Gateways {
             current: Gateway::mainnet(),
-            other: IdentifiedVecVia::from_iter([Gateway::mainnet()]),
+            other: OtherGateways::from_iter([Gateway::mainnet()]),
         };
         assert_eq!(
             impossible.change_current(Gateway::stokenet()),
@@ -292,29 +292,5 @@ mod tests {
             }
             "#,
         )
-    }
-}
-
-#[cfg(test)]
-mod uniffi_tests {
-    use crate::{
-        new_gateways, new_gateways_sample, new_gateways_sample_other, Gateway,
-        HasSampleValues,
-    };
-
-    use super::Gateways;
-
-    #[test]
-    fn equality_samples() {
-        assert_eq!(Gateways::sample(), new_gateways_sample());
-        assert_eq!(Gateways::sample_other(), new_gateways_sample_other());
-    }
-
-    #[test]
-    fn new_with_current() {
-        assert_eq!(
-            new_gateways(Gateway::mardunet()).all(),
-            [Gateway::mardunet()]
-        );
     }
 }

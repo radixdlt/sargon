@@ -71,8 +71,8 @@ impl HasSampleValues for Secp256k1Signature {
     /// let path: BIP44LikePath = "m/44H/1022H/0H/0/5H".parse().unwrap();
     ///
     /// let mwp = MnemonicWithPassphrase::with_passphrase(mnemonic, BIP39Passphrase::default());
-    ///
-    /// let hd_private_key = mwp.derive_private_key(path);
+    /// let seed = mwp.to_seed();
+    /// let hd_private_key = seed.derive_private_key(&path);
     ///
     /// assert_eq!(&hd_private_key.private_key.to_hex(), "111323d507d9d690836798e3ef2e5292cfd31092b75b9b59fa584ff593a3d7e4");
     ///
@@ -113,8 +113,8 @@ impl HasSampleValues for Secp256k1Signature {
     /// let path: BIP44LikePath = "m/44H/1022H/0H/0/1H".parse().unwrap();
     ///
     /// let mwp = MnemonicWithPassphrase::with_passphrase(mnemonic, BIP39Passphrase::default());
-    ///
-    /// let hd_private_key = mwp.derive_private_key(path);
+    /// let seed = mwp.to_seed();
+    /// let hd_private_key = seed.derive_private_key(&path);
     ///
     /// assert_eq!(&hd_private_key.private_key.to_hex(), "84d8a5991e8f2885fe49d77da0ee6ee9f3f03ef419ac9c19a48cd32e10244ecd");
     ///

@@ -17,7 +17,7 @@ class ProfileTest: SampleTestable<Profile> {
     @Test
     fun testInit() {
         val hdFactorSource = PrivateHierarchicalDeterministicFactorSource.init(
-            entropy = randomBagOfBytes(byteCount = 32),
+            entropy = NonEmptyMax32Bytes(bagOfBytes = randomBagOfBytes(byteCount = 32)),
             walletClientModel = WalletClientModel.ANDROID
         )
 

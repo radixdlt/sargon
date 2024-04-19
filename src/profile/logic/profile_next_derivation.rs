@@ -71,7 +71,7 @@ impl Profile {
             EntityKind::Persona => {
                 unreachable!("Personas are not supported yet")
             }
-            EntityKind::Accounts => {}
+            EntityKind::Account => {}
         };
         let index = self
             .networks
@@ -231,7 +231,7 @@ mod tests {
         let profile = Profile::sample();
 
         let id = FactorSourceIDFromHash::new_for_device(
-            MnemonicWithPassphrase::sample_other(),
+            &MnemonicWithPassphrase::sample_other(),
         );
 
         assert_eq!(
@@ -278,7 +278,7 @@ mod tests {
         let profile = Profile::sample();
         assert_eq!(
             profile.next_derivation_index_for_entity(
-                EntityKind::Accounts,
+                EntityKind::Account,
                 NetworkID::Mainnet
             ),
             2
@@ -290,7 +290,7 @@ mod tests {
         let profile = Profile::sample();
         assert_eq!(
             profile.next_derivation_index_for_entity(
-                EntityKind::Accounts,
+                EntityKind::Account,
                 NetworkID::Stokenet
             ),
             2
@@ -302,7 +302,7 @@ mod tests {
         let profile = Profile::sample();
         assert_eq!(
             profile.next_derivation_index_for_entity_for_factor_source(
-                EntityKind::Accounts,
+                EntityKind::Account,
                 NetworkID::Mainnet,
                 DeviceFactorSource::sample_olympia().id
             ),

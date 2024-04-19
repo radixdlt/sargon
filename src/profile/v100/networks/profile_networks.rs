@@ -1,27 +1,12 @@
 use crate::prelude::*;
 
-/// An ordered mapping of NetworkID -> `Profile.Network`, containing
-/// all the users Accounts, Personas and AuthorizedDapps the user
-/// has created and interacted with on this network.
-pub type ProfileNetworks = IdentifiedVecVia<ProfileNetwork>;
-
-// Constructors
-impl ProfileNetworks {
-    /// Instantiates a new collection of networks from
-    /// and iterator.
-    pub fn with_networks<I>(networks: I) -> Self
-    where
-        I: IntoIterator<Item = ProfileNetwork>,
-    {
-        Self::from_iter(networks)
-    }
-
-    /// Instantiates a new network collection with the provided
-    /// `network`.
-    pub fn with_network(network: ProfileNetwork) -> Self {
-        Self::with_networks([network])
-    }
-}
+decl_can_be_empty_identified_array_of!(
+    /// An ordered mapping of NetworkID -> `Profile.Network`, containing
+    /// all the users Accounts, Personas and AuthorizedDapps the user
+    /// has created and interacted with on this network.
+    ProfileNetworks,
+    ProfileNetwork
+);
 
 impl ProfileNetworks {
     pub fn get_account(&self, address: &AccountAddress) -> Option<Account> {
@@ -54,17 +39,10 @@ impl ProfileNetworks {
     }
 }
 
-impl Default for ProfileNetworks {
-    /// Instantiates a new empty networks collection.
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl HasSampleValues for ProfileNetworks {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {
-        Self::with_networks([
+        Self::from_iter([
             ProfileNetwork::sample_mainnet(),
             ProfileNetwork::sample_stokenet(),
         ])
@@ -72,18 +50,13 @@ impl HasSampleValues for ProfileNetworks {
 
     /// A sample used to facilitate unit tests.
     fn sample_other() -> Self {
-        Self::with_network(ProfileNetwork::sample_other())
+        Self::just(ProfileNetwork::sample_other())
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
-
-    #[test]
-    fn default_is_empty() {
-        assert_eq!(ProfileNetworks::default().len(), 0)
-    }
+    use super::*;
 
     #[test]
     fn inequality() {
@@ -211,11 +184,11 @@ mod tests {
     fn with_network() {
         let network = ProfileNetwork::new(
             NetworkID::Mainnet,
-            Accounts::with_account(Account::sample_mainnet()),
+            Accounts::just(Account::sample_mainnet()),
             Personas::default(),
             AuthorizedDapps::default(),
         );
-        assert_eq!(ProfileNetworks::with_network(network).len(), 1);
+        assert_eq!(ProfileNetworks::just(network).len(), 1);
     }
 
     #[test]

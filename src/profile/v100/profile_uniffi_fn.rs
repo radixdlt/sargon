@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+json_data_convertible!(Profile);
+
 #[uniffi::export]
 pub fn new_profile(
     device_factor_source: DeviceFactorSource,
@@ -29,13 +31,19 @@ pub fn profile_to_debug_string(profile: &Profile) -> String {
 }
 
 #[uniffi::export]
-pub fn profile_to_json_bytes(profile: &Profile) -> Result<BagOfBytes> {
-    profile.to_json_bytes()
+pub fn new_profile_from_encryption_bytes(
+    json: BagOfBytes,
+    decryption_password: String,
+) -> Result<Profile> {
+    Profile::new_from_encryption_bytes(json.to_vec(), decryption_password)
 }
 
 #[uniffi::export]
-pub fn new_profile_from_json_bytes(json: BagOfBytes) -> Result<Profile> {
-    Profile::new_from_json_bytes(json)
+pub fn profile_encrypt_with_password(
+    profile: &Profile,
+    encryption_password: String,
+) -> BagOfBytes {
+    profile.to_encryption_bytes(encryption_password).into()
 }
 
 #[cfg(test)]
@@ -80,8 +88,7 @@ mod uniffi_tests {
         let sut = SUT::sample();
 
         assert_eq!(
-            new_profile_from_json_bytes(profile_to_json_bytes(&sut).unwrap())
-                .unwrap(),
+            new_profile_from_json_bytes(profile_to_json_bytes(&sut)).unwrap(),
             sut
         )
     }
@@ -95,6 +102,28 @@ mod uniffi_tests {
                 json_byte_count: malformed_profile_snapshot.len() as u64,
                 type_name: String::from("Profile")
             })
+        );
+    }
+
+    #[test]
+    fn test_new_profile_from_encryption_bytes() {
+        assert!(new_profile_from_encryption_bytes(
+            BagOfBytes::sample(),
+            "invalid".to_string()
+        )
+        .is_err());
+    }
+
+    #[test]
+    fn encryption_roundtrip() {
+        let sut = SUT::sample();
+        let password = "super secret".to_owned();
+        let encryption_bytes =
+            profile_encrypt_with_password(&sut, password.clone());
+        assert_eq!(
+            new_profile_from_encryption_bytes(encryption_bytes, password)
+                .unwrap(),
+            sut
         );
     }
 }

@@ -60,34 +60,28 @@ impl From<NetworkID> for Gateway {
 }
 
 impl Gateway {
-    pub fn new(
-        url: String,
-        id: NetworkID,
-    ) -> Result<Arc<Self>, crate::CommonError> {
+    pub fn new(url: String, id: NetworkID) -> Result<Self> {
         let url = Url::try_from(url.as_str())
             .map_err(|_| CommonError::InvalidURL { bad_value: url })?;
         let network = NetworkDefinition::lookup_by_id(id)?;
-        Ok(Self { url, network }.into())
+        Ok(Self { url, network })
     }
 }
 
 impl Gateway {
     pub(crate) fn declare(url: &str, id: NetworkID) -> Self {
-        Self::new(url.to_string(), id)
-            .expect("Valid")
-            .deref()
-            .clone()
+        Self::new(url.to_string(), id).expect("Valid").clone()
     }
 }
 
-#[uniffi::export]
-pub fn gateway_mainnet() -> Gateway {
-    Gateway::mainnet()
-}
+impl HasSampleValues for Gateway {
+    fn sample() -> Self {
+        Gateway::mainnet()
+    }
 
-#[uniffi::export]
-pub fn gateway_stokenet() -> Gateway {
-    Gateway::stokenet()
+    fn sample_other() -> Self {
+        Gateway::stokenet()
+    }
 }
 
 impl Gateway {
@@ -144,7 +138,7 @@ impl Gateway {
 }
 
 impl Gateway {
-    fn wellknown() -> Vec<Self> {
+    pub fn wellknown() -> Vec<Self> {
         vec![Self::mainnet(), Self::stokenet()]
     }
 
@@ -300,40 +294,5 @@ mod tests {
     #[should_panic(expected = "No network exists for simulator")]
     fn from_network_id_unsupported_simulator() {
         _ = SUT::from(NetworkID::Simulator);
-    }
-}
-
-#[cfg(test)]
-mod tests_uniffi_api {
-
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = Gateway;
-
-    #[test]
-    fn test_gateway_mainnet() {
-        assert_eq!(gateway_mainnet(), SUT::mainnet());
-    }
-
-    #[test]
-    fn test_gateway_stokenet() {
-        assert_eq!(gateway_stokenet(), SUT::stokenet());
-    }
-
-    #[test]
-    fn display() {
-        assert_eq!(
-            format!("{}", SUT::mainnet()),
-            "https://mainnet.radixdlt.com/"
-        );
-    }
-
-    #[test]
-    fn debug() {
-        assert_eq!(
-            format!("{:?}", SUT::mainnet()),
-            "Mainnet: https://mainnet.radixdlt.com/"
-        );
     }
 }

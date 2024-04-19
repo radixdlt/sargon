@@ -1,6 +1,7 @@
 use crate::prelude::*;
 
 #[derive(
+    Zeroize,
     Clone,
     /* NEVER COPY! We wanna require explicit copying */
     PartialEq,
@@ -15,7 +16,11 @@ use crate::prelude::*;
 #[debug("{:?}", self.partially_obfuscated_string())]
 pub struct Mnemonic {
     pub words: Vec<BIP39Word>,
+
+    #[zeroize(skip)]
     pub word_count: BIP39WordCount,
+
+    #[zeroize(skip)]
     pub language: BIP39Language,
 }
 
@@ -44,18 +49,14 @@ impl SafeToLog for Mnemonic {
     }
 }
 
-/// Returns the words of a mnemonic as a String joined by spaces, e.g. "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"
-#[uniffi::export]
-pub fn mnemonic_phrase(from: &Mnemonic) -> String {
-    from.phrase()
-}
-
 impl Mnemonic {
     pub fn to_obfuscated_string(&self) -> String {
         format!("Mnemonic in {} obfuscated.", self.language)
     }
 
-    fn from_internal(internal: bip39::Mnemonic) -> Self {
+    pub(crate) fn from_internal(internal: bip39::Mnemonic) -> Self {
+        use k256::elliptic_curve::zeroize::Zeroize;
+
         let language = internal.language();
 
         let words = internal
@@ -69,24 +70,13 @@ impl Mnemonic {
             "Crate bip39 generated a BIP39 standard incompatible word count.",
         );
 
+        drop(internal);
+
         Self {
             words,
             word_count,
             language: language.into(),
         }
-    }
-
-    pub fn from_entropy(entropy: &[u8]) -> Self {
-        let internal = bip39::Mnemonic::from_entropy(entropy).unwrap();
-        Self::from_internal(internal)
-    }
-
-    pub fn from_exactly32(bytes: Exactly32Bytes) -> Self {
-        Self::from_entropy(&bytes.to_vec())
-    }
-
-    pub fn generate_new() -> Self {
-        Self::from_exactly32(Exactly32Bytes::generate())
     }
 
     fn internal(&self) -> bip39::Mnemonic {
@@ -97,18 +87,37 @@ impl Mnemonic {
         self.words.iter().map(|w| w.word.to_string()).join(" ")
     }
 
+    pub fn from(phrase: &str, language: BIP39Language) -> Result<Self> {
+        bip39::Mnemonic::parse_in(language.into(), phrase)
+            .map_err(|_| CommonError::InvalidMnemonicPhrase)
+            .map(Self::from_internal)
+    }
+
+    pub fn from_words(words: Vec<BIP39Word>) -> Result<Self> {
+        if words.is_empty() {
+            return Err(CommonError::InvalidMnemonicPhrase);
+        }
+
+        let language = words.first().unwrap().language;
+
+        if words.iter().any(|w| w.language != language) {
+            return Err(CommonError::InvalidMnemonicPhrase);
+        }
+
+        let phrase = words.iter().map(|w| w.word.to_string()).join(" ");
+        Self::from_phrase(&phrase)
+    }
+
     pub fn from_phrase(phrase: &str) -> Result<Self> {
         bip39::Mnemonic::from_str(phrase)
             .map_err(|_| CommonError::InvalidMnemonicPhrase)
             .map(Self::from_internal)
     }
 
-    pub fn to_seed(&self, passphrase: &str) -> Seed {
-        self.internal().to_seed(passphrase)
+    pub fn to_seed(&self, passphrase: &str) -> BIP39Seed {
+        BIP39Seed::new(self.internal().to_seed(passphrase))
     }
 }
-
-pub type Seed = [u8; 64];
 
 impl FromStr for Mnemonic {
     type Err = CommonError;
@@ -133,22 +142,25 @@ impl HasSampleValues for Mnemonic {
 #[cfg(test)]
 mod tests {
 
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = Mnemonic;
 
     #[test]
     fn equality() {
-        assert_eq!(Mnemonic::sample(), Mnemonic::sample());
-        assert_eq!(Mnemonic::sample_other(), Mnemonic::sample_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(Mnemonic::sample(), Mnemonic::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn debug() {
-        let mnemonic = Mnemonic::sample();
+        let mnemonic = SUT::sample();
         assert_eq!(
             format!("{:?}", mnemonic),
             format!("{:?}", "24 words (bright...mandate)")
@@ -157,13 +169,13 @@ mod tests {
 
     #[test]
     fn display() {
-        let mnemonic = Mnemonic::sample();
+        let mnemonic = SUT::sample();
         assert_eq!(format!("{}", mnemonic), "Mnemonic in English obfuscated.")
     }
 
     #[test]
     fn non_sensitive() {
-        let mnemonic = Mnemonic::sample();
+        let mnemonic = SUT::sample();
         assert_eq!(
             format!("{:?}", mnemonic.non_sensitive()),
             format!("{:?}", "24 words (bright...mandate)")
@@ -172,7 +184,7 @@ mod tests {
 
     #[test]
     fn language() {
-        let mnemonic: Mnemonic =
+        let mnemonic: SUT =
             "bright club bacon dinner achieve pull grid save ramp cereal blush woman humble limb repeat video sudden possible story mask neutral prize goose mandate"
                 .parse()
                 .unwrap();
@@ -185,9 +197,9 @@ mod tests {
 
     #[test]
     fn word_count() {
-        assert_eq!( Mnemonic::from_phrase("bright club bacon dinner achieve pull grid save ramp cereal blush woman humble limb repeat video sudden possible story mask neutral prize goose mandate").unwrap().word_count, BIP39WordCount::TwentyFour);
+        assert_eq!( SUT::from_phrase("bright club bacon dinner achieve pull grid save ramp cereal blush woman humble limb repeat video sudden possible story mask neutral prize goose mandate").unwrap().word_count, BIP39WordCount::TwentyFour);
         assert_eq!(
-            Mnemonic::from_phrase(
+            SUT::from_phrase(
                 "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"
             )
             .unwrap()
@@ -198,7 +210,7 @@ mod tests {
 
     #[test]
     fn words() {
-        let mnemonic = Mnemonic::sample();
+        let mnemonic = SUT::sample();
         assert_eq!(mnemonic.words[0].word, "bright");
         assert_eq!(mnemonic.words[1].word, "club");
         assert_eq!(mnemonic.words[2].word, "bacon");
@@ -209,7 +221,7 @@ mod tests {
 
     #[test]
     fn words_index() {
-        let zoo: Mnemonic = "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"
+        let zoo: SUT = "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"
             .parse()
             .unwrap();
         assert_eq!(zoo.words[0].index.inner, 2047);
@@ -217,7 +229,7 @@ mod tests {
         assert_eq!(zoo.words[10].index.inner, 2047);
         assert_eq!(zoo.words[11].index.inner, 2037);
 
-        let abandon: Mnemonic = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+        let abandon: SUT = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
             .parse()
             .unwrap();
         assert_eq!(abandon.words[0].index.inner, 0);
@@ -229,14 +241,14 @@ mod tests {
     #[test]
     fn phrase_str_roundtrip() {
         let phrase = "bright club bacon dinner achieve pull grid save ramp cereal blush woman humble limb repeat video sudden possible story mask neutral prize goose mandate";
-        let mnemonic = Mnemonic::from_phrase(phrase).unwrap();
+        let mnemonic = SUT::from_phrase(phrase).unwrap();
         assert_eq!(mnemonic.phrase(), phrase);
     }
 
     #[test]
     fn from_phrase_invalid() {
         assert_eq!(
-            Mnemonic::from_phrase(
+            SUT::from_phrase(
                 "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo abandon"
             ),
             Err(CommonError::InvalidMnemonicPhrase)
@@ -244,8 +256,81 @@ mod tests {
     }
 
     #[test]
+    fn from_phrase_language() {
+        assert_eq!(
+            SUT::from(
+                "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong",
+                BIP39Language::English
+            ),
+            SUT::from_phrase(
+                "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"
+            )
+        );
+    }
+
+    #[test]
+    fn from_wrong_phrase_language() {
+        assert_eq!(
+            SUT::from(
+                "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo abandon",
+                BIP39Language::English
+            ),
+            Err(CommonError::InvalidMnemonicPhrase)
+        );
+    }
+
+    #[test]
+    fn from_words() {
+        assert_eq!(
+            SUT::from_words(
+                "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"
+                    .split(' ')
+                    .map(|w| BIP39Word::new(w, BIP39Language::English).unwrap())
+                    .collect_vec()
+            ),
+            SUT::from_phrase(
+                "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"
+            )
+        );
+    }
+
+    #[test]
+    fn from_words_empty_phrase() {
+        assert_eq!(
+            SUT::from_words(vec![]),
+            Err(CommonError::InvalidMnemonicPhrase)
+        );
+    }
+
+    #[test]
+    fn from_words_wrong_phrase() {
+        assert_eq!(
+            SUT::from_words(
+                "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo abandon"
+                    .split(' ')
+                    .map(|w| BIP39Word::new(w, BIP39Language::English).unwrap())
+                    .collect_vec()
+            ),
+            Err(CommonError::InvalidMnemonicPhrase)
+        );
+    }
+
+    #[test]
+    fn from_words_wrong_words_count() {
+        assert_eq!(
+            SUT::from_words(
+                "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo"
+                    .split(' ')
+                    .map(|w| BIP39Word::new(w, BIP39Language::English).unwrap())
+                    .collect_vec()
+            ),
+            Err(CommonError::InvalidMnemonicPhrase)
+        );
+    }
+
+    #[test]
     fn json_roundtrip_success() {
-        let a: Mnemonic = "bright club bacon dinner achieve pull grid save ramp cereal blush woman humble limb repeat video sudden possible story mask neutral prize goose mandate"
+        let a: SUT = "bright club bacon dinner achieve pull grid save ramp cereal blush woman humble limb repeat video sudden possible story mask neutral prize goose mandate"
             .parse()
             .unwrap();
 
@@ -262,24 +347,21 @@ mod tests {
 
     #[test]
     fn json_fails() {
-        assert_json_value_fails::<Mnemonic>(json!("invalid"));
-        assert_json_value_fails::<Mnemonic>(json!(
+        assert_json_value_fails::<SUT>(json!("invalid"));
+        assert_json_value_fails::<SUT>(json!(
             "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo abandon"
         )); // not checksummed
-        assert_json_value_fails::<Mnemonic>(json!(
+        assert_json_value_fails::<SUT>(json!(
             "hej jag zoo zoo zoo zoo zoo zoo zoo zoo zoo abandon"
         )); // invalid words
     }
-}
-
-#[cfg(test)]
-mod uniffi_tests {
-    use crate::prelude::*;
 
     #[test]
-    fn name() {
-        let str = "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong";
-        let sut: Mnemonic = str.parse().unwrap();
-        assert_eq!(mnemonic_phrase(&sut), str);
+    fn zeroize() {
+        let mut sut = SUT::sample_other();
+
+        sut.zeroize();
+
+        assert_eq!(sut.words.len(), 0);
     }
 }

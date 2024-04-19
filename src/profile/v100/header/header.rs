@@ -38,15 +38,6 @@ pub struct Header {
     pub content_hint: ContentHint,
 }
 
-#[uniffi::export]
-pub fn new_header_sample() -> Header {
-    Header::sample()
-}
-#[uniffi::export]
-pub fn new_header_sample_other() -> Header {
-    Header::sample_other()
-}
-
 impl Header {
     /// Instantiates a new `Header` using the default snapshot version and
     /// the specified values, most prominently a creating device (`DeviceInfo`).
@@ -99,7 +90,7 @@ impl HasSampleValues for Header {
         let device = DeviceInfo::new(
             Uuid::from_str("66f07ca2-a9d9-49e5-8152-77aca3d1dd74").unwrap(),
             date,
-            "iPhone".to_string(),
+            "iPhone",
         );
         Header::with_values(
             ProfileID::from_str("12345678-bbbb-cccc-dddd-abcd12345678")
@@ -116,7 +107,7 @@ impl HasSampleValues for Header {
         let device = DeviceInfo::new(
             Uuid::from_str("aabbccdd-a9d9-49e5-8152-beefbeefbeef").unwrap(),
             date,
-            "iPhone".to_string(),
+            "iPhone",
         );
         Header::with_values(
             ProfileID::from_str("87654321-bbbb-cccc-dddd-87654321dcba")
@@ -189,7 +180,7 @@ pub mod tests {
         let device = DeviceInfo::new(
             Uuid::from_str("66f07ca2-a9d9-49e5-8152-77aca3d1dd74").unwrap(),
             date,
-            "iPhone".to_string(),
+            "iPhone",
         );
         let sut = SUT::with_values(
             ProfileID::from_str("12345678-bbbb-cccc-dddd-abcd12345678")

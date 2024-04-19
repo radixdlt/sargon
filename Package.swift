@@ -49,7 +49,8 @@ let package = Package(
 		)
 	],
 	dependencies: [
-		.package(url: "https://github.com/pointfreeco/swift-custom-dump", from: "1.0.0"),
+		.package(url: "https://github.com/pointfreeco/swift-custom-dump", from: "1.3.0"),
+		.package(url: "https://github.com/SwiftyJSON/SwiftyJSON", from: "5.0.2"),
 	],
 	targets: [
 		binaryTarget,
@@ -60,7 +61,10 @@ let package = Package(
 		),
 		.target(
 			name: "Sargon",
-			dependencies: [.target(name: "SargonUniFFI")],
+			dependencies: [
+				.target(name: "SargonUniFFI"),
+				"SwiftyJSON",
+			],
 			path: "apple/Sources/Sargon",
 			swiftSettings: swiftSettings
 		),

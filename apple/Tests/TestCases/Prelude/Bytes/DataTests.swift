@@ -1,5 +1,11 @@
 @testable import Sargon
 
+import CustomDump
+import Foundation
+import Sargon
+import SargonUniFFI
+import XCTest
+
 final class RandomBytesTests: XCTestCase {
 	func test_hash_of_generated() {
 		var set = Set<Data>()

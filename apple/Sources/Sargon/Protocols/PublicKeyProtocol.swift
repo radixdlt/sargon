@@ -1,3 +1,6 @@
+import Foundation
+import SargonUniFFI
+
 public protocol PublicKeyProtocol: BinaryProtocol where Digest == PublicKeyHash {
     var asGeneral: PublicKey { get }
 }

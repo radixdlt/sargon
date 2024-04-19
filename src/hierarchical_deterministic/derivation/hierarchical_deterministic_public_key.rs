@@ -45,7 +45,8 @@ impl HasSampleValues for HierarchicalDeterministicPublicKey {
             CAP26KeyKind::TransactionSigning,
             0,
         );
-        let private_key = mwp.derive_private_key(path.clone());
+        let seed = mwp.to_seed();
+        let private_key = seed.derive_private_key(&path);
 
         assert_eq!(path.to_string(), "m/44H/1022H/1H/525H/1460H/0H");
 
@@ -70,9 +71,9 @@ impl HasSampleValues for HierarchicalDeterministicPublicKey {
             .unwrap(),
             "".into(),
         );
-
-        let private_key = mwp.derive_private_key(
-            BIP44LikePath::from_str("m/44H/1022H/0H/0/5H").unwrap(),
+        let seed = mwp.to_seed();
+        let private_key = seed.derive_private_key(
+            &BIP44LikePath::from_str("m/44H/1022H/0H/0/5H").unwrap(),
         );
 
         assert_eq!(

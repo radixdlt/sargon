@@ -1,4 +1,10 @@
 @testable import Sargon
+import CustomDump
+import Foundation
+import Sargon
+import SargonUniFFI
+import XCTest
+
 final class BlobTests: Test<Blob> {
 	func test_blob() {
 		let data = Data.random(byteCount: 16)

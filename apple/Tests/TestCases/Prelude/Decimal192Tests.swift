@@ -1,3 +1,17 @@
+#if DEBUG
+extension Decimal192: ExpressibleByStringLiteral {
+	public init(stringLiteral string: String) {
+		try! self.init(string)
+	}
+}
+
+extension Decimal192: ExpressibleByFloatLiteral {
+	public init(floatLiteral float: Float32) {
+		try! self.init(float)
+	}
+}
+#endif
+
 extension Decimal192 {
 	public static let pi: Self 	= "3.141592653589793238"
 	public static let e: Self 		= "2.718281828459045235"
@@ -55,6 +69,12 @@ extension Array {
 		}
 	}
 }
+
+import CustomDump
+import Foundation
+import Sargon
+import SargonUniFFI
+import XCTest
 
 final class Decimal192Tests: Test<Decimal192> {
 	

@@ -1,5 +1,11 @@
 use crate::prelude::*;
 
+decl_can_be_empty_identified_array_of!(
+    /// An ordered set of ['AuthorizedDapp`]s on a specific network.
+    AuthorizedDapps,
+    AuthorizedDapp
+);
+
 impl HasSampleValues for AuthorizedDapps {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {
@@ -15,7 +21,7 @@ impl HasSampleValues for AuthorizedDapps {
 impl AuthorizedDapps {
     /// A sample used to facilitate unit tests.
     pub fn sample_mainnet() -> Self {
-        Self::with_authorized_dapps([
+        Self::from_iter([
             AuthorizedDapp::sample_mainnet_dashboard(),
             AuthorizedDapp::sample_mainnet_gumballclub(),
         ])
@@ -23,7 +29,7 @@ impl AuthorizedDapps {
 
     /// A sample used to facilitate unit tests.
     pub fn sample_stokenet() -> Self {
-        Self::with_authorized_dapps([
+        Self::from_iter([
             AuthorizedDapp::sample_stokenet_devconsole(),
             AuthorizedDapp::sample_stokenet_sandbox(),
         ])
@@ -56,7 +62,7 @@ mod tests {
     #[test]
     fn duplicates_are_prevented() {
         assert_eq!(
-            AuthorizedDapps::with_authorized_dapps(
+            AuthorizedDapps::from_iter(
                 [AuthorizedDapp::sample(), AuthorizedDapp::sample()]
                     .into_iter()
             )
@@ -67,11 +73,7 @@ mod tests {
 
     #[test]
     fn with_one() {
-        assert_eq!(
-            AuthorizedDapps::with_authorized_dapp(AuthorizedDapp::sample())
-                .len(),
-            1
-        )
+        assert_eq!(AuthorizedDapps::just(AuthorizedDapp::sample()).len(), 1)
     }
 
     #[test]
@@ -83,8 +85,7 @@ mod tests {
     fn get_by_address() {
         let authorized_dapp = AuthorizedDapp::sample();
         let address = authorized_dapp.dapp_definition_address;
-        let authorized_dapps =
-            AuthorizedDapps::with_authorized_dapp(authorized_dapp.clone());
+        let authorized_dapps = AuthorizedDapps::just(authorized_dapp.clone());
         assert_eq!(
             authorized_dapps.get_authorized_dapp_by_id(&address),
             Some(&authorized_dapp)

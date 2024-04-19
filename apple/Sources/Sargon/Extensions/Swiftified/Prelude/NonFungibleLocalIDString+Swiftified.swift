@@ -1,3 +1,6 @@
+import Foundation
+import SargonUniFFI
+
 public typealias NonFungibleLocalIDString = NonFungibleLocalIdString
 extension NonFungibleLocalIDString: SargonModel {}
 

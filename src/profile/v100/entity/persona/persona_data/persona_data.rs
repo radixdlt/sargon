@@ -147,7 +147,7 @@ impl HasSampleValues for PersonaData {
         Self::new(
             PersonaDataIdentifiedName::sample_other(),
             CollectionOfPhoneNumbers::sample_other(),
-            CollectionOfEmailAddresses::sample(),
+            CollectionOfEmailAddresses::sample_other(),
         )
     }
 }
@@ -170,7 +170,7 @@ mod tests {
     #[test]
     fn new_persona_data() {
         let name = PersonaDataEntryName::new(
-            Variant::Western,
+            PersonaDataNameVariant::Western,
             "Skywalker",
             "Anakin",
             "Darth Vader",

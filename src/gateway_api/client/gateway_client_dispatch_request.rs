@@ -65,7 +65,7 @@ impl GatewayClient {
 
         serde_json::from_slice::<U>(&response.body).map_err(|_| {
             CommonError::NetworkResponseJSONDeserialize {
-                into_type: std::any::type_name::<U>().to_owned(),
+                into_type: type_name::<U>(),
             }
         })
     }

@@ -1,12 +1,12 @@
 import SargonUniFFI
 
 #if DEBUG
-public protocol BaseBaseAddressProtocol: SargonModel, ExpressibleByStringLiteral {}
+public protocol BaseBaseAddressProtocol: SargonModel, ExpressibleByStringLiteral, CaseIterable where Self.AllCases == [Self]  {}
 #else
 public protocol BaseBaseAddressProtocol: SargonModel {}
 #endif // DEBUG
 
-public protocol BaseAddressProtocol: BaseBaseAddressProtocol, Codable, CustomStringConvertible, CaseIterable where Self.AllCases == [Self] {
+public protocol BaseAddressProtocol: BaseBaseAddressProtocol, Codable, CustomStringConvertible {
 	init(validatingAddress bech32String: String) throws
 	var networkID: NetworkID { get }
 	var address: String { get }

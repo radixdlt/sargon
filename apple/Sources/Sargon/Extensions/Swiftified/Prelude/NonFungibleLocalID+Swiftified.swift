@@ -1,3 +1,6 @@
+import Foundation
+import SargonUniFFI
+
 public typealias NonFungibleLocalID = NonFungibleLocalId
 
 extension NonFungibleLocalID: IdentifiableByStringProtocol {}

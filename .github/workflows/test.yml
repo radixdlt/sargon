@@ -98,7 +98,7 @@ jobs:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
           default: true
 
-      - name: Run tests
+      - name: Run rust tests
         run: cargo test
 
   # Swift testing on macOS (Apple Silicon)

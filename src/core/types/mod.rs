@@ -22,6 +22,9 @@ mod signatures;
 
 pub use appearance_id::*;
 pub use appearance_id_uniffi_fn::*;
+#[macro_use]
+mod secret_bytes;
+
 pub use bag_of_bytes::*;
 pub use bag_of_bytes_uniffi_fn::*;
 pub use decimal192::*;
@@ -40,4 +43,5 @@ pub use requested_number_quantifier::*;
 pub use requested_quantity::*;
 pub use rounding_mode::*;
 pub use safe_to_log::*;
+pub use secret_bytes::*;
 pub use signatures::*;

@@ -1,3 +1,9 @@
+import CustomDump
+import Foundation
+import Sargon
+import SargonUniFFI
+import XCTest
+
 final class ResourceIndicatorTests: Test<ResourceIndicator> {
 	func test_resource_address() {
 		let sut = SUT.sample

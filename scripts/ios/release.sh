@@ -38,6 +38,13 @@ XCFRAME_ZIP_PATH=`echo "$OUTPUT_OF_BUILD" | cut -d ";" -f 2` || exit $?
 echo "🚢  CHECKSUM: $CHECKSUM"
 echo "🚢  XCFRAME_ZIP_PATH: $XCFRAME_ZIP_PATH"
 
+echo "🚢 Ensuring Sargon build for release - that it will work for e.g. iOS wallet to archive."
+sed -i '' 's/let useLocalFramework = false/let useLocalFramework = true/' Package.swift
+swift build -c release || exit $?
+echo "🚢 Swift Sargon builds for release ✅"
+# Prepare for release
+sed -i '' 's/let useLocalFramework = true/let useLocalFramework = false/' Package.swift
+
 # We have .gitigored Sargon.swift because we dont need it in git history, but we
 # need it for this release, so we must FORCE add it (since it is ignored).
 GIT_ADD_CMD="git add --force Package.swift apple/Sources/UniFFI/Sargon.swift"
@@ -48,9 +55,9 @@ GIT_COMMIT_CMD="git commit -m \"Release of '$NEXT_TAG' (updated Package.swift wi
 echo "🚢  Git commiting changes to Package.swift (and maybe Sargon.swift)"
 eval $GIT_COMMIT_CMD
 
-`git tag $NEXT_TAG`
-echo "🚢 🏷️ 📡 Pushing tag: $(NEXT_TAG), but only tag, not commit."
-`git push origin $NEXT_TAG`
+git tag $NEXT_TAG
+echo "🚢 🏷️ 📡 Pushing tag: $NEXT_TAG, but only tag, not commit."
+git push origin $NEXT_TAG
 
 # This MUST match whatever you we have declared in `$PROJECT_ROOT/Package.swift`
 SWIFT_SARGON_BINARY_ASSET_NAME="libsargon-rs.xcframework.zip" 
