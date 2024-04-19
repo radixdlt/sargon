@@ -31,4 +31,9 @@ final class MnemonicWithPassphraseTests: Test<MnemonicWithPassphrase> {
 		let encoded = try JSONEncoder().encode(sut)
 		try XCTAssertEqual(JSONDecoder().decode(SUT.self, from: encoded), sut)
 	}
+    
+    func test_validate() {
+        XCTAssertTrue(SUT.sample.validate(publicKeys: [HierarchicalDeterministicPublicKey.sample]))
+        XCTAssertFalse(SUT.sampleOther.validate(publicKeys: [HierarchicalDeterministicPublicKey.sample]))
+    }
 }

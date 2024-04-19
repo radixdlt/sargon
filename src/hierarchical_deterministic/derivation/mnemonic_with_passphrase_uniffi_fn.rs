@@ -12,6 +12,16 @@ pub fn new_mnemonic_with_passphrase_sample_other() -> MnemonicWithPassphrase {
     MnemonicWithPassphrase::sample_other()
 }
 
+/// Returns `true` if this MnemonicWithPassphrase successfully validates all `hd_keys`, that is to say,
+/// that all the HierarchicalDeterministicPublicKey were indeed crated by this MnemonicWithPassphrase.
+#[uniffi::export]
+pub fn mnemonic_with_passphrase_validate_public_keys(
+    mnemonic_with_passphrase: &MnemonicWithPassphrase,
+    hd_keys: Vec<HierarchicalDeterministicPublicKey>,
+) -> bool {
+    mnemonic_with_passphrase.validate_public_keys(hd_keys)
+}
+
 #[cfg(test)]
 mod uniffi_test {
 
@@ -33,5 +43,13 @@ mod uniffi_test {
             .len(),
             2
         );
+    }
+
+    #[test]
+    fn validate() {
+        assert!(!mnemonic_with_passphrase_validate_public_keys(
+            &SUT::sample_other(),
+            vec![HierarchicalDeterministicPublicKey::sample()]
+        ));
     }
 }
