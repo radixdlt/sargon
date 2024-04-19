@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+json_data_convertible!(Profile);
+
 #[uniffi::export]
 pub fn new_profile(
     device_factor_source: DeviceFactorSource,
@@ -26,16 +28,6 @@ pub fn profile_to_string(profile: &Profile) -> String {
 #[uniffi::export]
 pub fn profile_to_debug_string(profile: &Profile) -> String {
     format!("{:?}", profile)
-}
-
-#[uniffi::export]
-pub fn profile_to_json_bytes(profile: &Profile) -> BagOfBytes {
-    profile.to_json_bytes().into()
-}
-
-#[uniffi::export]
-pub fn new_profile_from_json_bytes(json: BagOfBytes) -> Result<Profile> {
-    Profile::new_from_json_bytes(json)
 }
 
 #[uniffi::export]

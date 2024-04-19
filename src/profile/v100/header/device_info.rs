@@ -94,33 +94,6 @@ impl HasSampleValues for DeviceInfo {
     }
 }
 
-impl DeviceInfo {
-    /// Creates a new `DeviceInfo` from json in the form of Vec<u8>.
-    /// This is a temporarily exported method that allows wallet clients to
-    /// integrate Profile in steps.
-    ///
-    /// Should be replaced later with `Wallet`
-    pub fn new_from_json_bytes(json: impl AsRef<[u8]>) -> Result<Self> {
-        let json = json.as_ref();
-        serde_json::from_slice::<Self>(json).map_err(|_| {
-            CommonError::FailedToDeserializeJSONToValue {
-                json_byte_count: json.len() as u64,
-                type_name: "DeviceInfo".to_owned(),
-            }
-        })
-    }
-
-    /// Converts this `DeviceInfo` to json in the form of `Vec<u8>`
-    /// This is a temporarily exported method that allows wallet clients to
-    /// integrate Profile in steps.
-    ///
-    /// Should be replaced later with `Wallet`
-    pub fn to_json_bytes(&self) -> Vec<u8> {
-        serde_json::to_vec(self)
-            .expect("JSON serialization of DeviceInfo should never fail.")
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -182,24 +155,6 @@ mod tests {
     #[test]
     fn date_is_now() {
         assert!(SUT::new_iphone().date.year() >= 2023);
-    }
-
-    #[test]
-    fn json_bytes_roundtrip() {
-        let sut = SUT::sample();
-        let json_bytes = sut.to_json_bytes();
-        assert_eq!(sut, SUT::new_from_json_bytes(json_bytes).unwrap());
-    }
-
-    #[test]
-    fn from_json_bytes_fail() {
-        assert_eq!(
-            SUT::new_from_json_bytes(BagOfBytes::sample()),
-            Err(CommonError::FailedToDeserializeJSONToValue {
-                json_byte_count: 32,
-                type_name: "DeviceInfo".to_owned()
-            })
-        );
     }
 
     #[test]

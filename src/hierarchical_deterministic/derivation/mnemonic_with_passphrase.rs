@@ -84,34 +84,6 @@ impl HasSampleValues for MnemonicWithPassphrase {
     }
 }
 
-impl MnemonicWithPassphrase {
-    /// Creates a new `MnemonicWithPassphrase` from json in the form of Vec<u8>.
-    /// This is a temporarily exported method that allows wallet clients to
-    /// integrate Profile in steps.
-    ///
-    /// Should be replaced later with `Wallet`
-    pub fn new_from_json_bytes(json: impl AsRef<[u8]>) -> Result<Self> {
-        let json = json.as_ref();
-        serde_json::from_slice::<Self>(json).map_err(|_| {
-            CommonError::FailedToDeserializeJSONToValue {
-                json_byte_count: json.len() as u64,
-                type_name: "MnemonicWithPassphrase".to_owned(),
-            }
-        })
-    }
-
-    /// Converts this `MnemonicWithPassphrase` to json in the form of `Vec<u8>`
-    /// This is a temporarily exported method that allows wallet clients to
-    /// integrate Profile in steps.
-    ///
-    /// Should be replaced later with `Wallet`
-    pub fn to_json_bytes(&self) -> Vec<u8> {
-        serde_json::to_vec(self).expect(
-            "JSON serialization of MnemonicWithPassphrase should never fail.",
-        )
-    }
-}
-
 #[cfg(test)]
 mod tests {
 
@@ -129,13 +101,6 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn json_bytes_roundtrip() {
-        let sut = SUT::sample();
-        let json_bytes = sut.to_json_bytes();
-        assert_eq!(sut, SUT::new_from_json_bytes(json_bytes).unwrap());
     }
 
     #[test]
