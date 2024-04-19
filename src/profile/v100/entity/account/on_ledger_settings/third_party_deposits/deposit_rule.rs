@@ -138,6 +138,18 @@ mod tests {
     }
 
     #[test]
+    fn from_json_str_fail() {
+        let json_str = "mega invalid string";
+        assert_eq!(
+            SUT::from_json_string(json_str),
+            Err(CommonError::FailedToDeserializeJSONToValue {
+                json_byte_count: json_str.len() as u64,
+                type_name: "DepositRule".to_string(),
+            })
+        )
+    }
+
+    #[test]
     fn display() {
         assert_eq!(format!("{}", SUT::AcceptAll), "AcceptAll");
         assert_eq!(format!("{}", SUT::AcceptKnown), "AcceptKnown");
