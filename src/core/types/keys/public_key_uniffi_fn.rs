@@ -34,6 +34,16 @@ pub fn new_public_key_sample_other() -> PublicKey {
     PublicKey::sample_other()
 }
 
+/// Verifies an Elliptic Curve signature over either Curve25519 or Secp256k1
+#[uniffi::export]
+pub fn public_key_is_valid(
+    public_key: &PublicKey,
+    signature: Signature,
+    for_hash: Hash,
+) -> bool {
+    public_key.is_valid(signature, &for_hash)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -90,5 +100,14 @@ mod tests {
             .len(),
             2
         );
+    }
+
+    #[test]
+    fn invalid_signature_does_not_validate() {
+        assert!(!public_key_is_valid(
+            &SUT::sample(),
+            Signature::sample(),
+            Hash::sample()
+        ));
     }
 }

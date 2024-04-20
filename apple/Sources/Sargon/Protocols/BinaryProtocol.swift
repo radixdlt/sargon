@@ -29,8 +29,8 @@ extension BinaryProtocol {
 	}
 }
 
-extension BinaryProtocol where Digest == Exactly32Bytes {
-	public func hash() -> Exactly32Bytes {
+extension BinaryProtocol where Digest == Hash {
+	public func hash() -> Hash {
 		data.hash()
 	}
 }

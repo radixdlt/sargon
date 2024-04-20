@@ -140,9 +140,8 @@ pub fn build_information() -> SargonBuildInformation {
 }
 
 #[uniffi::export]
-pub fn hash(data: BagOfBytes) -> Exactly32Bytes {
-    let h = hash_of::<Vec<u8>>(data.to_vec());
-    h.into()
+pub fn hash(data: BagOfBytes) -> Hash {
+    hash_of::<Vec<u8>>(data.to_vec())
 }
 
 #[uniffi::export]
@@ -434,7 +433,7 @@ mod tests {
     #[test]
     fn test_hash() {
         assert_eq!(
-            hash("Hello Radix".as_bytes().into()).to_hex(),
+            hash("Hello Radix".as_bytes().into()).to_string(),
             "48f1bd08444b5e713db9e14caac2faae71836786ac94d645b00679728202a935"
         );
     }

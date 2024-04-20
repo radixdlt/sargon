@@ -52,7 +52,7 @@ impl FromStr for PublicKey {
 }
 
 impl PublicKey {
-    /// Verifies an EdDSA signature over Curve25519.
+    /// Verifies an Elliptic Curve signature over either Curve25519 or Secp256k1
     pub fn is_valid(
         &self,
         signature: impl Into<Signature>,

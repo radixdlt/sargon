@@ -10,3 +10,11 @@ import SargonUniFFI
 
 extension MnemonicWithPassphrase: SargonModel {}
 extension MnemonicWithPassphrase: SargonObjectCodable {}
+
+extension MnemonicWithPassphrase {
+	public func derivePublicKey(
+		path: some DerivationPathProtocol
+	) -> HierarchicalDeterministicPublicKey {
+		derivePublicKeys(paths: [path]).first!
+	}
+}

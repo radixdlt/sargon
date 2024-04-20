@@ -72,22 +72,50 @@ impl MnemonicWithPassphrase {
         self.mnemonic.to_seed(&self.passphrase.0)
     }
 
+    pub fn derive_public_keys(
+        &self,
+        derivation_paths: impl IntoIterator<Item = DerivationPath>,
+    ) -> Vec<HierarchicalDeterministicPublicKey> {
+        let mut bip39_seed = self.to_seed();
+        let keys = derivation_paths
+            .into_iter()
+            .map(|derivation_path| {
+                let private_key =
+                    bip39_seed.derive_private_key(&derivation_path);
+                private_key.public_key()
+            })
+            .collect_vec();
+        bip39_seed.zeroize();
+        keys
+    }
+
+    pub fn sign(
+        &self,
+        hash_to_sign: &Hash,
+        derivation_path: &DerivationPath,
+    ) -> Signature {
+        let mut bip39_seed = self.to_seed();
+        let private_key = bip39_seed.derive_private_key(derivation_path);
+        let signature = private_key.private_key.sign(hash_to_sign);
+        bip39_seed.zeroize();
+        // private_key.zeroize(); // FIXME: make `private_key` `mut` and then Zeroize, when RET exposes Zeroize
+        signature
+    }
+
     /// Returns `true` if this MnemonicWithPassphrase successfully validates all `hd_keys`, that is to say,
     /// that all the HierarchicalDeterministicPublicKey were indeed crated by this MnemonicWithPassphrase.
     pub fn validate_public_keys(
         &self,
-        hd_keys: Vec<HierarchicalDeterministicPublicKey>,
+        hd_keys: impl IntoIterator<Item = HierarchicalDeterministicPublicKey>,
     ) -> bool {
-        let bip39_seed = self.to_seed();
-        for hd_key in hd_keys.iter() {
-            let private_key =
-                bip39_seed.derive_private_key(&hd_key.derivation_path);
-            let public_key = private_key.public_key();
-            if &public_key != hd_key {
-                return false;
-            }
-        }
-        true
+        let keys = hd_keys
+            .into_iter()
+            .collect::<HashSet<HierarchicalDeterministicPublicKey>>();
+        HashSet::<HierarchicalDeterministicPublicKey>::from_iter(
+            self.derive_public_keys(
+                keys.clone().into_iter().map(|k| k.derivation_path),
+            ),
+        ) == keys
     }
 }
 
@@ -175,6 +203,20 @@ mod tests {
             .collect::<Vec<HierarchicalDeterministicPublicKey>>();
 
         assert!(sut.validate_public_keys(hd_keys))
+    }
+
+    #[test]
+    fn sign() {
+        let sut = SUT::sample();
+        let path = DerivationPath::sample();
+        let key = sut
+            .derive_public_keys([path.clone()])
+            .into_iter()
+            .last()
+            .unwrap();
+        let msg = Hash::sample();
+        let signature = sut.sign(&msg, &path);
+        assert!(key.public_key.is_valid(signature, &msg));
     }
 
     #[test]
@@ -320,7 +362,7 @@ mod tests {
     }
 
     #[test]
-    fn hash() {
+    fn test_hash() {
         let n = 100;
         let set = (0..n).map(|_| SUT::generate_new()).collect::<HashSet<_>>();
         assert_eq!(set.len(), n);
