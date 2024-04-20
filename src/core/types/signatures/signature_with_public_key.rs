@@ -54,6 +54,18 @@ impl From<SignatureWithPublicKey> for ScryptoSignatureWithPublicKey {
     }
 }
 
+impl From<SignatureWithPublicKey> for Signature {
+    fn from(value: SignatureWithPublicKey) -> Self {
+        value.signature()
+    }
+}
+
+impl SignatureWithPublicKey {
+    pub fn is_valid(&self, for_hash: &impl ScryptoIsHash) -> bool {
+        self.public_key().is_valid(self.signature(), for_hash)
+    }
+}
+
 impl TryFrom<(ScryptoSignatureWithPublicKey, Hash)> for SignatureWithPublicKey {
     type Error = crate::CommonError;
 

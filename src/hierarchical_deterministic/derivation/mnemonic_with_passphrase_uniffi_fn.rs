@@ -35,7 +35,7 @@ pub fn mnemonic_with_passphrase_sign(
     mnemonic_with_passphrase: &MnemonicWithPassphrase,
     derivation_path: &DerivationPath,
     hash_to_sign: &Hash,
-) -> Signature {
+) -> SignatureWithPublicKey {
     mnemonic_with_passphrase.sign(hash_to_sign, derivation_path)
 }
 

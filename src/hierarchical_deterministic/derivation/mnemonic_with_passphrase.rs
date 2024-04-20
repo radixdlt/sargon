@@ -93,10 +93,10 @@ impl MnemonicWithPassphrase {
         &self,
         hash_to_sign: &Hash,
         derivation_path: &DerivationPath,
-    ) -> Signature {
+    ) -> SignatureWithPublicKey {
         let mut bip39_seed = self.to_seed();
         let private_key = bip39_seed.derive_private_key(derivation_path);
-        let signature = private_key.private_key.sign(hash_to_sign);
+        let signature = private_key.sign(hash_to_sign);
         bip39_seed.zeroize();
         // private_key.zeroize(); // FIXME: make `private_key` `mut` and then Zeroize, when RET exposes Zeroize
         signature
@@ -209,14 +209,9 @@ mod tests {
     fn sign() {
         let sut = SUT::sample();
         let path = DerivationPath::sample();
-        let key = sut
-            .derive_public_keys([path.clone()])
-            .into_iter()
-            .last()
-            .unwrap();
         let msg = Hash::sample();
         let signature = sut.sign(&msg, &path);
-        assert!(key.public_key.is_valid(signature, &msg));
+        assert!(signature.is_valid(&msg));
     }
 
     #[test]

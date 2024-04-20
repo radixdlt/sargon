@@ -9,11 +9,4 @@ import Foundation
 import SargonUniFFI
 
 extension HierarchicalDeterministicPublicKey: SargonModel {}
-extension HierarchicalDeterministicPublicKey {
-	public func isValidSignature(
-		_ signature: Signature,
-		for hashedMessage: Hash
-	) -> Bool {
-		publicKey.isValidSignature(signature, for: hashedMessage)
-	}
-}
+

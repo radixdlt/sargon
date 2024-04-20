@@ -26,4 +26,8 @@ final class PublicKeyTests: PublicKeyTest<PublicKey> {
 	func test_embed_is_identity() {
 		XCTAssertEqual(SUT.sample, SUT.sample.asGeneral)
 	}
+	
+	func test_is_valid() {
+		XCTAssertFalse(SUT.sample.isValidSignature(Signature.sample, for: .sample))
+	}
 }

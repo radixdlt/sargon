@@ -26,6 +26,30 @@ impl HierarchicalDeterministicPrivateKey {
 }
 
 impl HierarchicalDeterministicPrivateKey {
+    pub fn sign(&self, hash_to_sign: &Hash) -> SignatureWithPublicKey {
+        let signature = self.private_key.sign(hash_to_sign);
+        match signature {
+            Signature::Ed25519 { value } => SignatureWithPublicKey::Ed25519 {
+                public_key: *self
+                    .private_key
+                    .public_key()
+                    .as_ed25519()
+                    .unwrap(),
+                signature: value,
+            },
+            Signature::Secp256k1 { value } => {
+                SignatureWithPublicKey::Secp256k1 {
+                    public_key: *self
+                        .private_key
+                        .public_key()
+                        .as_secp256k1()
+                        .unwrap(),
+                    signature: value,
+                }
+            }
+        }
+    }
+
     /// Returns the public key of the private key with the derivation path intact.
     pub fn public_key(&self) -> HierarchicalDeterministicPublicKey {
         HierarchicalDeterministicPublicKey::new(

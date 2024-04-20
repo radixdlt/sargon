@@ -19,12 +19,12 @@ extension PublicKey {
 	}
 	
 	public func isValidSignature(
-		_ signature: Signature,
+		_ intoSignature: IntoSignatureProtocol,
 		for hashedMessage: Hash
 	) -> Bool {
 		publicKeyIsValid(
 			publicKey: self,
-			signature: signature,
+			signature: intoSignature.signature,
 			forHash: hashedMessage
 		)
 	}

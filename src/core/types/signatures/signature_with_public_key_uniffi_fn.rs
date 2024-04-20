@@ -24,6 +24,14 @@ pub fn signature_with_public_key_get_signature(
     signature_with_public_key.signature()
 }
 
+#[uniffi::export]
+pub fn signature_with_public_key_is_valid(
+    signature_with_public_key: &SignatureWithPublicKey,
+    for_message: &Hash,
+) -> bool {
+    signature_with_public_key.is_valid(for_message)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -60,5 +68,13 @@ mod tests {
             signature_with_public_key_get_signature(&SUT::sample()),
             SUT::sample().signature()
         )
+    }
+
+    #[test]
+    fn is_valid() {
+        let private_key = HierarchicalDeterministicPrivateKey::sample();
+        let msg = Hash::sample();
+        let sut = private_key.sign(&msg);
+        assert!(signature_with_public_key_is_valid(&sut, &msg));
     }
 }

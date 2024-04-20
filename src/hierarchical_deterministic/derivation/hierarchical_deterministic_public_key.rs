@@ -34,6 +34,14 @@ impl HierarchicalDeterministicPublicKey {
     pub fn to_bytes(&self) -> Vec<u8> {
         self.public_key.to_bytes()
     }
+
+    pub fn is_valid(
+        &self,
+        signature: impl Into<Signature>,
+        for_hash: &impl ScryptoIsHash,
+    ) -> bool {
+        self.public_key.is_valid(signature, for_hash)
+    }
 }
 
 impl HasSampleValues for HierarchicalDeterministicPublicKey {

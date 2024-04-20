@@ -42,7 +42,7 @@ extension MnemonicWithPassphrase {
 	public func sign(
 		hash: Hash,
 		path: some DerivationPathProtocol
-	) -> Signature {
+	) -> SignatureWithPublicKey {
 		mnemonicWithPassphraseSign(
 			mnemonicWithPassphrase: self,
 			derivationPath: path.asDerivationPath,
