@@ -26,6 +26,10 @@ extension SupportedCurves {
 		newSupportedCurvesByAppending(sLIP10Curve: element, to: self)
 	}
 	
+	public func updatingOrAppending(_ element: Element) -> Self {
+		newSupportedCurvesByUpdatingOrAppending(sLIP10Curve: element, to: self)
+	}
+	
 	public func removingElementByID(_ id: Element.ID) throws -> Self {
 		try newSupportedCurvesRemovedById(idOfSLIP10Curve: id, from: self)
 	}

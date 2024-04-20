@@ -25,6 +25,10 @@ extension EntityFlags {
 		newEntityFlagsByAppending(entityFlag: entityFlag, to: self)
 	}
 	
+	public func updatingOrAppending(_ entityFlag: EntityFlag) -> Self {
+		newEntityFlagsByUpdatingOrAppending(entityFlag: entityFlag, to: self)
+	}
+	
 	public func removingElementByID(_ id: EntityFlag) -> Self {
 		newEntityFlagsRemovedById(idOfEntityFlag: id, from: self)
 	}

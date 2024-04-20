@@ -19,6 +19,10 @@ extension OtherGateways {
 		newOtherGatewaysByAppending(gateway: element, to: self)
 	}
 	
+	public func updatingOrAppending(_ element: Element) -> Self {
+		newOtherGatewaysByUpdatingOrAppending(gateway: element, to: self)
+	}
+	
 	public func removingElementByID(_ id: Element.ID) -> Self {
 		newOtherGatewaysRemovedById(idOfGateway: id, from: self)
 	}

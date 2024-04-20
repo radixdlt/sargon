@@ -31,6 +31,16 @@ class BaseCollectionTest<SUT_: BaseIdentifiedCollection>: Test<SUT_> {
 		)
 	}
 	
+	func test_updating_or_appending_new_append() {
+		let sample = SUTElement.sample
+		let sampleOther = SUTElement.sampleOther
+		let sut = SUT(element: sample)
+		XCTAssertEqual(
+			sut.updatingOrAppending(sampleOther).elements,
+			[sample, sampleOther]
+		)
+	}
+	
 	func test_append_new()  {
 		let sample = SUTElement.sample
 		let sampleOther = SUTElement.sampleOther

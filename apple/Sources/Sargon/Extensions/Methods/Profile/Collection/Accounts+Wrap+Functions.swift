@@ -29,6 +29,10 @@ extension Accounts {
 		newAccountsRemovedById(idOfAccount: id, from: self)
 	}
 	
+	public func updatingOrAppending(_ account: Account) -> Self {
+		newAccountsByUpdatingOrAppending(account: account, to: self)
+	}
+	
 	public func removing(element account: Account) -> Self {
 		newAccountsRemovedElement(account: account, from: self)
 	}

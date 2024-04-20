@@ -25,6 +25,10 @@ extension AuthorizedDapps {
 		newAuthorizedDappsByAppending(authorizedDapp: authorizedDapp, to: self)
 	}
 	
+	public func updatingOrAppending(_ authorizedDapp: AuthorizedDapp) -> Self {
+		newAuthorizedDappsByUpdatingOrAppending(authorizedDapp: authorizedDapp, to: self)
+	}
+	
 	public func removingElementByID(_ id: AuthorizedDapp.ID) -> Self {
 		newAuthorizedDappsRemovedById(idOfAuthorizedDapp: id, from: self)
 	}

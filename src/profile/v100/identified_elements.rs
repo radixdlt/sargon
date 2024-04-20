@@ -114,6 +114,16 @@ macro_rules! decl_identified_array_of {
             }
 
             #[uniffi::export]
+            pub fn [<new_ $struct_type:snake _by_updating_or_appending>](
+                [< $element_type:snake >]: $element_type,
+                to: &$struct_type,
+            ) -> $struct_type {
+                let mut copy = to.clone();
+                let _ = (*copy).update_or_append([< $element_type:snake >]);
+                copy
+            }
+
+            #[uniffi::export]
             pub fn [< new_ $struct_type:snake _sample >]() -> $struct_type {
                 $struct_type::sample()
             }
@@ -246,6 +256,21 @@ macro_rules! decl_identified_array_of {
                         1
                     );
                     let sut = [<new_ $struct_type:snake _by_appending>](SUTElement::sample_other(), &sut);
+                    assert_eq!(
+                        [<$struct_type:snake _element_count>](&sut),
+                        2
+                    );
+                }
+
+                #[test]
+                fn test_new_update_or_appending() {
+                    let sut_element = SUTElement::sample();
+                    let sut = $struct_type::just(sut_element.clone());
+                    assert_eq!(
+                        [<$struct_type:snake _element_count>](&sut),
+                        1
+                    );
+                    let sut = [<new_ $struct_type:snake _by_updating_or_appending>](SUTElement::sample_other(), &sut);
                     assert_eq!(
                         [<$struct_type:snake _element_count>](&sut),
                         2
