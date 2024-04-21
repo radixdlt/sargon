@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-json_string_convertible!(FiatCurrency);
+json_string_convertible!(FiatCurrency, "super invalid json string");
 
 #[uniffi::export]
 pub fn new_fiat_currency_sample() -> FiatCurrency {

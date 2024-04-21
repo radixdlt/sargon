@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-json_string_convertible!(DepositRule);
+json_string_convertible!(DepositRule, "super invalid json string");
 
 #[uniffi::export]
 pub fn new_deposit_rule_sample() -> DepositRule {

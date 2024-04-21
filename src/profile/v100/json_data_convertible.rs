@@ -166,11 +166,23 @@ macro_rules! json_string_convertible {
                     let json_str = sut.to_json_string();
                     assert_eq!(SUT::new_from_json_string(json_str).unwrap(), sut)
                 }
+            }
+        }
+    };
+    ($type: ty, $invalid_json_string: literal) => {
+        json_string_convertible!($type);
+        paste! {
+            #[cfg(test)]
+            mod [< invalid_json_test_ $type:snake >] {
+                use super::*;
+
+                #[allow(clippy::upper_case_acronyms)]
+                type SUT = $type;
 
                 #[test]
                 fn from_json_string_fail() {
                     assert_eq!(
-                        SUT::new_from_json_string("super invalid json string"),
+                        SUT::new_from_json_string($invalid_json_string),
                         Err(CommonError::FailedToDeserializeJSONToValue {
                             json_byte_count: 25,
                             type_name: {{
@@ -182,6 +194,7 @@ macro_rules! json_string_convertible {
                 }
             }
         }
+
     };
 }
 

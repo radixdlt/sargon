@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+json_string_convertible!(SLIP10Curve, "super invalid json string");
+
 #[uniffi::export]
 pub fn new_slip10_curve_from_string(curve: String) -> Result<SLIP10Curve> {
     SLIP10Curve::from_str(&curve)
