@@ -34,8 +34,7 @@ pub struct AuthorizedDapp {
     /// "references to", since the Personas are not stored in full, that would be
     /// bad duplication of data (which might go stale), instead we refer to the
     /// necessary data by IDs.
-    pub references_to_authorized_personas:
-        IdentifiedVecVia<AuthorizedPersonaSimple>,
+    pub references_to_authorized_personas: ReferencesToAuthorizedPersonas,
 }
 
 impl AuthorizedDapp {
@@ -58,9 +57,7 @@ impl AuthorizedDapp {
         network_id: NetworkID,
         dapp_definition_address: DappDefinitionAddress,
         display_name: impl Into<Option<String>>,
-        references_to_authorized_personas: IdentifiedVecVia<
-            AuthorizedPersonaSimple,
-        >,
+        references_to_authorized_personas: ReferencesToAuthorizedPersonas,
     ) -> Self {
         assert_eq!(dapp_definition_address.network_id(), network_id,  "Discrepancy, found an DappDefinitionAddress on other network than {network_id}");
         assert!(references_to_authorized_personas.ids().iter().all(|i| i.network_id() == network_id), "Discrepancy, found an (Authorized)Persona(Simple) on other network than {network_id}");
@@ -99,7 +96,7 @@ impl AuthorizedDapp {
              .parse()
              .expect("Valid Dapp Def Address"),
               "Radix Dashboard".to_owned(), 
-             IdentifiedVecVia::from_iter([
+			  ReferencesToAuthorizedPersonas::from_iter([
                     AuthorizedPersonaSimple::sample_mainnet(),
                     AuthorizedPersonaSimple::sample_mainnet_other()
                 ])
@@ -112,7 +109,7 @@ impl AuthorizedDapp {
              .parse()
              .expect("Valid Dapp Def Address"),
               "Gumball Club".to_owned(), 
-             IdentifiedVecVia::from_iter([
+			  ReferencesToAuthorizedPersonas::from_iter([
                     AuthorizedPersonaSimple::sample_mainnet_other()
                 ])
             )
@@ -124,7 +121,7 @@ impl AuthorizedDapp {
              .parse()
              .expect("Valid Dapp Def Address"),
               "Dev Console".to_owned(), 
-             IdentifiedVecVia::from_iter([
+			  ReferencesToAuthorizedPersonas::from_iter([
                     AuthorizedPersonaSimple::sample_stokenet(),
                     AuthorizedPersonaSimple::sample_stokenet_other()
                 ])
@@ -137,7 +134,7 @@ impl AuthorizedDapp {
              .parse()
              .expect("Valid Dapp Def Address"),
               "Sandbox".to_owned(), 
-             IdentifiedVecVia::from_iter([
+			  ReferencesToAuthorizedPersonas::from_iter([
                     AuthorizedPersonaSimple::sample_stokenet_other()
                 ])
             )
