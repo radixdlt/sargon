@@ -25,6 +25,10 @@ extension Personas {
 		newPersonasByAppending(persona: persona, to: self)
 	}
 	
+	public func updatingOrInserting(element persona: Element, at index: Int) -> Self {
+		newPersonasByUpdatingOrInsertingAtIndex(persona: persona, to: self, index: UInt64(index))
+	}
+	
 	public func updatingOrAppending(_ persona: Persona) -> Self {
 		newPersonasByUpdatingOrAppending(persona: persona, to: self)
 	}

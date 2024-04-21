@@ -25,6 +25,10 @@ extension FactorSources {
 		newFactorSourcesByAppending(factorSource: factorSource, to: self)
 	}
 	
+	public func updatingOrInserting(element factorSource: Element, at index: Int) -> Self {
+		newFactorSourcesByUpdatingOrInsertingAtIndex(factorSource: factorSource, to: self, index: UInt64(index))
+	}
+	
 	public func updatingOrAppending(_ factorSource: FactorSource) -> Self {
 		newFactorSourcesByUpdatingOrAppending(factorSource: factorSource, to: self)
 	}

@@ -46,6 +46,14 @@ macro_rules! decl_identified_array_of {
                     self.get(id)
                 }
 
+                /// Returns a reference to the element by `index`, if it exists.
+                   pub fn [< get_ $element_type:snake _at_index>](
+                    &self,
+                    index: usize,
+                ) -> Option<&[< $element_type >]> {
+                    self.get_at_index(index)
+                }
+
                 /// Returns references to **all** $struct_type, including hidden ones.
                 pub fn get_all(&self) -> Vec<&[< $element_type >]> {
                     self.elements()
@@ -97,6 +105,14 @@ macro_rules! decl_identified_array_of {
             }
 
             #[uniffi::export]
+            pub fn [< $struct_type:snake _get_ $element_type:snake _at_index>](
+                [< $struct_type:snake >]: &$struct_type,
+                index: u64,
+            ) -> Option<[< $element_type >]> {
+                [< $struct_type:snake >].[< get_ $element_type:snake _at_index>](index as usize).cloned()
+            }
+
+            #[uniffi::export]
             pub fn [<$struct_type:snake _element_count>](
                 [< $struct_type:snake >]: &$struct_type,
             ) -> u64 {
@@ -120,6 +136,17 @@ macro_rules! decl_identified_array_of {
             ) -> $struct_type {
                 let mut copy = to.clone();
                 let _ = (*copy).update_or_append([< $element_type:snake >]);
+                copy
+            }
+
+            #[uniffi::export]
+            pub fn [<new_ $struct_type:snake _by_updating_or_inserting_at_index>](
+                [< $element_type:snake >]: $element_type,
+                to: &$struct_type,
+                index: u64,
+            ) -> $struct_type {
+                let mut copy = to.clone();
+                let _ = (*copy).update_or_insert([< $element_type:snake >], index as usize);
                 copy
             }
 
@@ -228,6 +255,27 @@ macro_rules! decl_identified_array_of {
                 }
 
                 #[test]
+                fn test_get_at_index() {
+                    let a = SUTElement::sample();
+                    let b = SUTElement::sample_other();
+                    let mut sut = SUT::just(a.clone());
+                    sut.append(b.clone());
+
+                    assert_eq!(
+                        [< $struct_type:snake _get_ $element_type:snake _at_index>](&sut, 0),
+                        Some(a)
+                    );
+                    assert_eq!(
+                        [< $struct_type:snake _get_ $element_type:snake _at_index>](&sut, 1),
+                        Some(b)
+                    );
+                    assert_eq!(
+                        [< $struct_type:snake _get_ $element_type:snake _at_index>](&sut, 2),
+                        None
+                    );
+                }
+
+                #[test]
                 fn test_new_with_single_element() {
                     let sut_element = SUTElement::sample();
                     let sut = [< new_ $struct_type:snake _with_ $element_type:snake >](sut_element.clone());
@@ -263,7 +311,7 @@ macro_rules! decl_identified_array_of {
                 }
 
                 #[test]
-                fn test_new_update_or_appending() {
+                fn test_new_updating_or_appending() {
                     let sut_element = SUTElement::sample();
                     let sut = $struct_type::just(sut_element.clone());
                     assert_eq!(
@@ -274,6 +322,22 @@ macro_rules! decl_identified_array_of {
                     assert_eq!(
                         [<$struct_type:snake _element_count>](&sut),
                         2
+                    );
+                }
+
+                #[test]
+                fn test_new_updating_or_inserting_at() {
+                    let sut_element = SUTElement::sample();
+                    let sut = $struct_type::just(sut_element.clone());
+                    assert_eq!(
+                        [<$struct_type:snake _element_count>](&sut),
+                        1
+                    );
+                    let sut = [<new_ $struct_type:snake _by_updating_or_inserting_at_index>](SUTElement::sample_other(), &sut, 0);
+
+                    assert_eq!(
+                        vec![SUTElement::sample_other(), SUTElement::sample()],
+                        [<$struct_type:snake _get_elements>](sut).items()
                     );
                 }
             }

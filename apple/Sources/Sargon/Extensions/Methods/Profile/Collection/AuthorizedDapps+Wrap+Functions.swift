@@ -25,6 +25,10 @@ extension AuthorizedDapps {
 		newAuthorizedDappsByAppending(authorizedDapp: authorizedDapp, to: self)
 	}
 	
+	public func updatingOrInserting(element authorizedDapp: Element, at index: Int) -> Self {
+		newAuthorizedDappsByUpdatingOrInsertingAtIndex(authorizedDapp: authorizedDapp, to: self, index: UInt64(index))
+	}
+	
 	public func updatingOrAppending(_ authorizedDapp: AuthorizedDapp) -> Self {
 		newAuthorizedDappsByUpdatingOrAppending(authorizedDapp: authorizedDapp, to: self)
 	}

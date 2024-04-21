@@ -9,8 +9,9 @@ import Foundation
 
 public protocol BaseIdentifiedCollection:
 	SargonModel,
-	RandomAccessCollection
-where 
+	RandomAccessCollection,
+	MutableCollection
+where
 	Index == Array<Element>.Index,
 	Element: Identifiable,
 	Element: SargonModel
@@ -19,7 +20,30 @@ where
 	init(element: Element)
 	func appending(_ element: Element) -> Self
 	func get(id: Element.ID) -> Element?
-	func updatingOrAppending(_ item: Element) -> Self
+	func updatingOrAppending(_ element: Element) -> Self
+	func updatingOrInserting(element: Element, at index: Int) -> Self
+}
+
+extension BaseIdentifiedCollection {
+	public func contains(id: Element.ID) -> Bool {
+		get(id: id) != nil
+	}
+}
+
+
+// MARK: MutableCollection
+extension BaseIdentifiedCollection {
+	
+	@inlinable
+	@inline(__always)
+	public subscript(position: Int) -> Element {
+		get {
+			elements[position]
+		}
+		set {
+			updateOrInsert(element: newValue, at: position)
+		}
+	}
 }
 
 extension BaseIdentifiedCollection {
@@ -34,13 +58,17 @@ extension BaseIdentifiedCollection {
 	public func index(after index: Index) -> Index {
 		elements.index(after: index)
 	}
-	
-	public subscript(position: Index) -> Element {
-		elements[position]
-	}
-	
+
 	public mutating func append(_ element: Element) {
 		self = appending(element)
+	}
+	
+	@discardableResult
+	public mutating func updateOrInsert(element: Element, at index: Int) -> (originalMember: Element?, index: Int) {
+		let originalMember = get(id: element.id)
+		self = updatingOrInserting(element: element, at: index)
+		let deFactoIndex = self.firstIndex(where: { $0.id == element.id })!
+		return (originalMember, index: deFactoIndex)
 	}
 	
 	/// Adds the given element to the array unconditionally, either appending it to the array, or
@@ -53,7 +81,7 @@ extension BaseIdentifiedCollection {
 	///   operations on the `ID` type, if it implements high-quality hashing.
 	@inlinable
 	@discardableResult
-	mutating func updateOrAppend(_ item: Element) -> Element? {
+	public mutating func updateOrAppend(_ item: Element) -> Element? {
 		let originalElement = get(id: item.id)
 
 		let countBefore = count

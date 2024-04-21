@@ -26,6 +26,10 @@ extension SupportedCurves {
 		newSupportedCurvesByAppending(sLIP10Curve: element, to: self)
 	}
 	
+	public func updatingOrInserting(element sLIP10Curve: Element, at index: Int) -> Self {
+		newSupportedCurvesByUpdatingOrInsertingAtIndex(sLIP10Curve: sLIP10Curve, to: self, index: UInt64(index))
+	}
+	
 	public func updatingOrAppending(_ element: Element) -> Self {
 		newSupportedCurvesByUpdatingOrAppending(sLIP10Curve: element, to: self)
 	}

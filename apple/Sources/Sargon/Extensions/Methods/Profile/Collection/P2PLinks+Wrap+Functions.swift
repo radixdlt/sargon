@@ -25,6 +25,10 @@ extension P2pLinks {
 		newP2PLinksByAppending(p2PLink: link, to: self)
 	}
 	
+	public func updatingOrInserting(element p2PLink: Element, at index: Int) -> Self {
+		newP2PLinksByUpdatingOrInsertingAtIndex(p2PLink: p2PLink, to: self, index: UInt64(index))
+	}
+	
 	public func updatingOrAppending(_ link: P2pLink) -> Self {
 		newP2PLinksByUpdatingOrAppending(p2PLink: link, to: self)
 	}

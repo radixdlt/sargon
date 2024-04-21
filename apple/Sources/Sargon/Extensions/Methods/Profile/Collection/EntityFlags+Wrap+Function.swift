@@ -25,6 +25,10 @@ extension EntityFlags {
 		newEntityFlagsByAppending(entityFlag: entityFlag, to: self)
 	}
 	
+	public func updatingOrInserting(element entityFlag: Element, at index: Int) -> Self {
+		newEntityFlagsByUpdatingOrInsertingAtIndex(entityFlag: entityFlag, to: self, index: UInt64(index))
+	}
+	
 	public func updatingOrAppending(_ entityFlag: EntityFlag) -> Self {
 		newEntityFlagsByUpdatingOrAppending(entityFlag: entityFlag, to: self)
 	}

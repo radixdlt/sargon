@@ -19,6 +19,10 @@ extension OtherGateways {
 		newOtherGatewaysByAppending(gateway: element, to: self)
 	}
 	
+	public func updatingOrInserting(element gateway: Element, at index: Int) -> Self {
+		newOtherGatewaysByUpdatingOrInsertingAtIndex(gateway: gateway, to: self, index: UInt64(index))
+	}
+	
 	public func updatingOrAppending(_ element: Element) -> Self {
 		newOtherGatewaysByUpdatingOrAppending(gateway: element, to: self)
 	}
