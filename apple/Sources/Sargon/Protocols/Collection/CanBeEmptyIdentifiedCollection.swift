@@ -37,7 +37,7 @@ extension CanBeEmptyIdentifiedCollection {
 
 extension CanBeEmptyIdentifiedCollection {
 	public subscript(
-		id: Element.ID
+		id id: Element.ID
 	) -> Element? {
 		get { self.get(id: id) }
 		set {

@@ -49,12 +49,12 @@ class CanBeEmptyCollectionTest<SUT_: CanBeEmptyIdentifiedCollection>: BaseCollec
 	
 	func test_subscript_id_get() {
 		let sut: SUT = [.sample, .sampleOther]
-		XCTAssertEqual(sut[SUTElement.sample.id], SUTElement.sample)
+		XCTAssertEqual(sut[id: SUTElement.sample.id], SUTElement.sample)
 	}
 	
 	func test_remove_by_id_subscript() {
 		var sut: SUT = [.sample, .sampleOther]
-		sut[SUTElement.sample.id] = nil
+		sut[id: SUTElement.sample.id] = nil
 		XCTAssertEqual(
 			sut,
 			[.sampleOther]
@@ -63,7 +63,7 @@ class CanBeEmptyCollectionTest<SUT_: CanBeEmptyIdentifiedCollection>: BaseCollec
 	
 	func test_add_by_id_subscript() {
 		var sut: SUT = [.sample]
-		sut[SUTElement.sampleOther.id] = SUTElement.sampleOther
+		sut[id: SUTElement.sampleOther.id] = SUTElement.sampleOther
 		XCTAssertEqual(
 			sut,
 			[.sample, .sampleOther]
