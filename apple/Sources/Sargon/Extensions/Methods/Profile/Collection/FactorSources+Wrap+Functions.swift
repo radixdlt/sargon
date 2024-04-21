@@ -35,7 +35,7 @@ extension FactorSources {
 	
 	/// FactorSources is NonEmpty, so this throws if the resulting collection would be empty when removing
 	/// the element by ID would result in an empty copy.
-	public func removingElementByID(_ id: FactorSource.ID) throws -> Self {
+	public func removing(_ id: FactorSource.ID) throws -> Self {
 		try newFactorSourcesRemovedById(idOfFactorSource: id, from: self)
 	}
 	

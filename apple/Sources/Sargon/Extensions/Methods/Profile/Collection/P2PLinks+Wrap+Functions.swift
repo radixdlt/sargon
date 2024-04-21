@@ -33,7 +33,7 @@ extension P2pLinks {
 		newP2PLinksByUpdatingOrAppending(p2PLink: link, to: self)
 	}
 	
-	public func removingElementByID(_ id: P2PLink.ID) -> Self {
+	public func removing(_ id: P2PLink.ID) -> Self {
 		newP2PLinksRemovedById(idOfP2PLink: id, from: self)
 	}
 	

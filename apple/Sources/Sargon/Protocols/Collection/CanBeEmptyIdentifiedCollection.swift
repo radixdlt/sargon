@@ -15,7 +15,7 @@ where
 {
 	init(_ elements: [Element])
 	
-	func removingElementByID(_ id: Element.ID) -> Self
+	func removing(_ id: Element.ID) -> Self
 	func removing(element: Element) -> Self
 }
 
@@ -26,8 +26,8 @@ extension CanBeEmptyIdentifiedCollection {
 }
 
 extension CanBeEmptyIdentifiedCollection {
-	public mutating func removeElementByID(_ id: Element.ID) {
-		self = removingElementByID(id)
+	public mutating func remove(_ id: Element.ID) {
+		self = removing(id)
 	}
 	
 	public mutating func remove(element: Element) {
@@ -46,7 +46,7 @@ extension CanBeEmptyIdentifiedCollection {
 				self.updateOrAppend(newValue)
 				assert(contains(id: id))
 			} else {
-				self.removeElementByID(id)
+				self.remove(id)
 				assert(!contains(id: id))
 			}
 		}

@@ -33,7 +33,7 @@ extension AuthorizedDapps {
 		newAuthorizedDappsByUpdatingOrAppending(authorizedDapp: authorizedDapp, to: self)
 	}
 	
-	public func removingElementByID(_ id: AuthorizedDapp.ID) -> Self {
+	public func removing(_ id: AuthorizedDapp.ID) -> Self {
 		newAuthorizedDappsRemovedById(idOfAuthorizedDapp: id, from: self)
 	}
 	

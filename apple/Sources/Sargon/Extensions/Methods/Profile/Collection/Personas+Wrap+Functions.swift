@@ -33,7 +33,7 @@ extension Personas {
 		newPersonasByUpdatingOrAppending(persona: persona, to: self)
 	}
 	
-	public func removingElementByID(_ id: Persona.ID) -> Self {
+	public func removing(_ id: Persona.ID) -> Self {
 		newPersonasRemovedById(idOfPersona: id, from: self)
 	}
 	

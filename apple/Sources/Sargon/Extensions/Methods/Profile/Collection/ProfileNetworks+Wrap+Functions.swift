@@ -34,7 +34,7 @@ extension ProfileNetworks {
 		newProfileNetworksByUpdatingOrAppending(profileNetwork: network, to: self)
 	}
 	
-	public func removingElementByID(_ id: ProfileNetwork.ID) -> Self {
+	public func removing(_ id: ProfileNetwork.ID) -> Self {
 		newProfileNetworksRemovedById(idOfProfileNetwork: id, from: self)
 	}
 	

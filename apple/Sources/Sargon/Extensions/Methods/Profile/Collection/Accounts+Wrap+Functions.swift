@@ -29,7 +29,7 @@ extension Accounts {
 		newAccountsByUpdatingOrInsertingAtIndex(account: account, to: self, index: UInt64(index))
 	}
 	
-	public func removingElementByID(_ id: Account.ID) -> Self {
+	public func removing(_ id: Account.ID) -> Self {
 		newAccountsRemovedById(idOfAccount: id, from: self)
 	}
 	
