@@ -32,4 +32,10 @@ class ExactlyNBytesTest<SUT_: ExactlyNBytesProtocol>: BinaryProtocolTest<SUT_> {
 			XCTAssertEqual($0.data.count, SUT.length)
 		}
 	}
+	
+	func test_hash_inequality() {
+		SUT.allCases.forEach {
+			XCTAssertNotEqual($0.hash().data, $0.hash().data.hash().data)
+		}
+	}
 }

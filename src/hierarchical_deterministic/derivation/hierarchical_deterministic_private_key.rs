@@ -96,34 +96,36 @@ impl HasSampleValues for HierarchicalDeterministicPrivateKey {
 #[cfg(test)]
 mod tests {
 
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = HierarchicalDeterministicPrivateKey;
 
     #[test]
     fn equality() {
-        assert_eq!(
-            HierarchicalDeterministicPrivateKey::sample(),
-            HierarchicalDeterministicPrivateKey::sample()
-        );
-        assert_eq!(
-            HierarchicalDeterministicPrivateKey::sample_other(),
-            HierarchicalDeterministicPrivateKey::sample_other()
-        );
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(
-            HierarchicalDeterministicPrivateKey::sample(),
-            HierarchicalDeterministicPrivateKey::sample_other()
-        );
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
-    fn publickey_of_sample() {
-        let sut = HierarchicalDeterministicPrivateKey::sample();
+    fn public_key_of_sample() {
+        let sut = SUT::sample();
         assert_eq!(
             sut.public_key().to_hex(),
             "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b"
         );
+    }
+
+    #[test]
+    fn test_sign_secp256k1() {
+        let sut = SUT::sample_other();
+        let hash = Hash::sample();
+        let signature = sut.sign(&hash);
+        assert!(signature.is_valid(&hash));
     }
 }

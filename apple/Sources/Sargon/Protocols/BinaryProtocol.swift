@@ -7,12 +7,16 @@ public protocol BaseBinaryProtocol: SargonModel, ExpressibleByStringLiteral, Exp
 public protocol BaseBinaryProtocol: SargonModel {}
 #endif
 
-public protocol BinaryProtocol: BaseBinaryProtocol, CustomStringConvertible {
-	associatedtype Digest
+public protocol ToDataProtocol {
+	var data: Data { get }
+}
+extension Hash: ToDataProtocol {}
+
+public protocol BinaryProtocol: BaseBinaryProtocol, ToDataProtocol, CustomStringConvertible {
+	associatedtype Digest: Equatable & ToDataProtocol
 	init(hex: String) throws
 	init(bytes: some DataProtocol) throws
 	
-	var data: Data { get }
 	var hex: String { get }
 	
 	func hash() -> Digest
