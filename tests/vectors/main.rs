@@ -549,7 +549,7 @@ mod wallet_interaction_tests {
             one_time_accounts: None,
             one_time_persona_data: None,
         }),
-        interaction_id: "d59590ea-d50b-4e8d-a5e1-da3a2574ae5c".into(),
+        interaction_id: WalletInteractionId::new("d59590ea-d50b-4e8d-a5e1-da3a2574ae5c"),
         metadata: metadata.clone(),
     };
 
@@ -581,7 +581,7 @@ mod wallet_interaction_tests {
             one_time_accounts: None,
             one_time_persona_data: None,
         }),
-        interaction_id: "d59590ea-d50b-4e8d-a5e1-da3a2574ae5c".into(),
+        interaction_id: WalletInteractionId::new("d59590ea-d50b-4e8d-a5e1-da3a2574ae5c"),
         metadata: metadata.clone(),
     };
 
@@ -594,7 +594,7 @@ mod wallet_interaction_tests {
                 transaction_manifest: "CALL_FUNCTION Address(\"package_tdx_2_1pkgxxxxxxxxxplxxxxxxxxxxxxx020379220524xxxxxxxxxe4r780\") \n    \"OneResourcePool\"\n    \"instantiate\"\n    Enum<OwnerRole::Fixed>(Enum<AccessRule::AllowAll>())\n    Enum<AccessRule::AllowAll>() \n    Address(\"resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc\")\n    None;".into(),
             },
         }),
-        interaction_id: "4051ff20-03b0-4a48-8205-0e8e8c673289".into(),
+        interaction_id: WalletInteractionId::new("4051ff20-03b0-4a48-8205-0e8e8c673289"),
         metadata: metadata.clone(),
     };
 
@@ -619,7 +619,7 @@ mod wallet_interaction_tests {
                 }),
             }),
         }),
-        interaction_id: "51a720a5-9f80-4d0f-8264-704d1645f0af".into(),
+        interaction_id: WalletInteractionId::new("51a720a5-9f80-4d0f-8264-704d1645f0af"),
         metadata: metadata.clone(),
     };
 
@@ -644,7 +644,7 @@ mod wallet_interaction_tests {
                 }),
             }),
         }),
-        interaction_id: "51a720a5-9f80-4d0f-8264-704d1645f0af".into(),
+        interaction_id: WalletInteractionId::new("51a720a5-9f80-4d0f-8264-704d1645f0af"),
         metadata: metadata.clone(),
     };
 
@@ -702,7 +702,7 @@ mod wallet_to_dapp_interaction_tests {
         };
 
         let response = WalletToDappInteractionResponse::Success(WalletToDappInteractionSuccessResponse {
-        interaction_id: "06f00fbc-67ed-4a22-a122-1da719b25b6f".into(),
+        interaction_id:  WalletInteractionId::new("06f00fbc-67ed-4a22-a122-1da719b25b6f"),
         items: WalletToDappInteractionResponseItems::AuthorizedRequest(WalletToDappInteractionAuthorizedRequestResponseItems {
             auth: WalletToDappInteractionAuthRequestResponseItem::LoginWithChallenge(WalletToDappInteractionAuthLoginWithChallengeRequestResponseItem {
                 proof: WalletToDappInteractionAuthProof {
@@ -721,7 +721,7 @@ mod wallet_to_dapp_interaction_tests {
                 accounts: vec![account_1.clone(), account_2.clone()],
                 proofs: Some(vec![
                     WalletToDappInteractionAccountProof {
-                        account_address: account_1.address.clone(),
+                        account_address: account_1.address,
                         proof: WalletToDappInteractionAuthProof {
                             curve: SLIP10Curve::Curve25519,
                             public_key: "11b162e3343ce770b6e9ed8a29d125b5580d1272b0dc4e2bd0fcae33320d9566".to_string(),
@@ -729,7 +729,7 @@ mod wallet_to_dapp_interaction_tests {
                         },
                     },
                     WalletToDappInteractionAccountProof {
-                        account_address: account_2.address.clone(),
+                        account_address: account_2.address,
                         proof: WalletToDappInteractionAuthProof {
                             curve: SLIP10Curve::Curve25519,
                             public_key: "5386353e4cc27e3d27d064d777d811e242a16ba7aefd425062ed46631739619d".to_string(),
@@ -745,7 +745,7 @@ mod wallet_to_dapp_interaction_tests {
     });
 
         let unauthorized_request_response = WalletToDappInteractionResponse::Success(WalletToDappInteractionSuccessResponse {
-        interaction_id: "278608e0-e5ca-416e-8339-f2d2695651c4".into(),
+        interaction_id:  WalletInteractionId::new("278608e0-e5ca-416e-8339-f2d2695651c4"),
         items: WalletToDappInteractionResponseItems::UnauthorizedRequest(WalletToDappInteractionUnauthorizedRequestResponseItems {
             one_time_accounts: Some(WalletToDappInteractionAccountsRequestResponseItem {
                 accounts: vec![account_1.clone()],
@@ -758,14 +758,14 @@ mod wallet_to_dapp_interaction_tests {
 
         let failure_response = WalletToDappInteractionResponse::Failure(
             WalletToDappInteractionFailureResponse {
-                interaction_id: "278608e0-e5ca-416e-8339-f2d2695651c4".into(),
+                interaction_id:  WalletInteractionId::new("278608e0-e5ca-416e-8339-f2d2695651c4"),
                 error: DappWalletInteractionErrorType::RejectedByUser,
                 message: Some("User rejected the request".to_string()),
             },
         );
 
         let transaction_response = WalletToDappInteractionResponse::Success(WalletToDappInteractionSuccessResponse {
-        interaction_id: "c42f8825-4bbb-4ce2-a646-776b529e2f51".into(),
+        interaction_id:  WalletInteractionId::new("c42f8825-4bbb-4ce2-a646-776b529e2f51"),
         items: WalletToDappInteractionResponseItems::Transaction(WalletToDappInteractionTransactionResponseItems {
             send: WalletToDappInteractionSendTransactionResponseItem {
                 transaction_intent_hash: "txid_tdx_2_1mwuvufnewv6qkxdaesx0gcwap7n79knhkn0crsc8dg9g9k7qknjs6vkd3n".to_string(),
