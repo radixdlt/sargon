@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+json_data_convertible!(FactorSourceIDFromAddress);
+
 #[uniffi::export]
 pub fn factor_source_id_from_address_to_string(
     factor_source_id: &FactorSourceIDFromAddress,

@@ -11,6 +11,7 @@ import SargonUniFFI
 public typealias FactorSourceIDFromHash = FactorSourceIdFromHash
 
 extension FactorSourceIDFromHash: SargonModel {}
+extension FactorSourceIDFromHash: SargonObjectCodable {}
 
 extension FactorSourceIDFromHash {
 	public var asGeneral: FactorSourceID {
