@@ -1,6 +1,5 @@
 package com.radixdlt.sargon
 
-import com.radixdlt.sargon.extensions.bagOfBytesOf
 import com.radixdlt.sargon.extensions.hash
 import com.radixdlt.sargon.extensions.hex
 import com.radixdlt.sargon.extensions.hexToBagOfBytes

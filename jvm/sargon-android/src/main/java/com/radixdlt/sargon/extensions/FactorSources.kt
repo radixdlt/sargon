@@ -1,6 +1,8 @@
 package com.radixdlt.sargon.extensions
 
 import com.radixdlt.sargon.DeviceFactorSource
+import com.radixdlt.sargon.EntityFlag
+import com.radixdlt.sargon.EntityFlags
 import com.radixdlt.sargon.FactorSource
 import com.radixdlt.sargon.FactorSourceId
 import com.radixdlt.sargon.FactorSources
@@ -8,8 +10,12 @@ import com.radixdlt.sargon.LedgerHardwareWalletFactorSource
 import com.radixdlt.sargon.factorSourcesElementCount
 import com.radixdlt.sargon.factorSourcesGetElements
 import com.radixdlt.sargon.factorSourcesGetFactorSourceById
+import com.radixdlt.sargon.newEntityFlagsByUpdatingOrAppending
+import com.radixdlt.sargon.newEntityFlagsByUpdatingOrInsertingAtIndex
 import com.radixdlt.sargon.newFactorSources
 import com.radixdlt.sargon.newFactorSourcesByAppending
+import com.radixdlt.sargon.newFactorSourcesByUpdatingOrAppending
+import com.radixdlt.sargon.newFactorSourcesByUpdatingOrInsertingAtIndex
 import com.radixdlt.sargon.newFactorSourcesRemovedById
 import com.radixdlt.sargon.newFactorSourcesRemovedElement
 
@@ -32,6 +38,16 @@ val FactorSources.size: Int
 
 fun FactorSources.append(factorSource: FactorSource): FactorSources =
     newFactorSourcesByAppending(factorSource = factorSource, to = this)
+
+fun FactorSources.updateOrInsert(factorSource: FactorSource, index: Int): FactorSources =
+    newFactorSourcesByUpdatingOrInsertingAtIndex(
+        factorSource = factorSource,
+        to = this,
+        index = index.toULong()
+    )
+
+fun FactorSources.updateOrAppend(factorSource: FactorSource): FactorSources =
+    newFactorSourcesByUpdatingOrAppending(factorSource = factorSource, to = this)
 
 /**
  * FactorSources is NonEmpty, so this throws if the resulting collection would be empty when

@@ -1,10 +1,16 @@
 package com.radixdlt.sargon.extensions
 
 import com.radixdlt.sargon.NetworkId
+import com.radixdlt.sargon.Persona
+import com.radixdlt.sargon.Personas
 import com.radixdlt.sargon.ProfileNetwork
 import com.radixdlt.sargon.ProfileNetworks
+import com.radixdlt.sargon.newPersonasByUpdatingOrAppending
+import com.radixdlt.sargon.newPersonasByUpdatingOrInsertingAtIndex
 import com.radixdlt.sargon.newProfileNetworks
 import com.radixdlt.sargon.newProfileNetworksByAppending
+import com.radixdlt.sargon.newProfileNetworksByUpdatingOrAppending
+import com.radixdlt.sargon.newProfileNetworksByUpdatingOrInsertingAtIndex
 import com.radixdlt.sargon.newProfileNetworksRemovedById
 import com.radixdlt.sargon.newProfileNetworksRemovedElement
 import com.radixdlt.sargon.profileNetworksElementCount
@@ -21,13 +27,24 @@ operator fun ProfileNetworks.invoke() = profileNetworksGetElements(profileNetwor
 
 operator fun ProfileNetworks.get(index: Int) = invoke().get(index = index)
 
-operator fun ProfileNetworks.contains(element: ProfileNetwork) = invoke().contains(element = element)
+operator fun ProfileNetworks.contains(element: ProfileNetwork) =
+    invoke().contains(element = element)
 
 val ProfileNetworks.size: Int
     get() = profileNetworksElementCount(profileNetworks = this).toInt()
 
 fun ProfileNetworks.append(network: ProfileNetwork): ProfileNetworks =
     newProfileNetworksByAppending(profileNetwork = network, to = this)
+
+fun ProfileNetworks.updateOrInsert(network: ProfileNetwork, index: Int): ProfileNetworks =
+    newProfileNetworksByUpdatingOrInsertingAtIndex(
+        profileNetwork = network,
+        to = this,
+        index = index.toULong()
+    )
+
+fun ProfileNetworks.updateOrAppend(network: ProfileNetwork): ProfileNetworks =
+    newProfileNetworksByUpdatingOrAppending(profileNetwork = network, to = this)
 
 @Throws(SargonException::class)
 fun ProfileNetworks.removeByNetworkId(networkId: NetworkId): ProfileNetworks =

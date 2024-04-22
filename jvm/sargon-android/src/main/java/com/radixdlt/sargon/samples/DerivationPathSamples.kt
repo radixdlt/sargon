@@ -3,13 +3,24 @@ package com.radixdlt.sargon.samples
 import com.radixdlt.sargon.annotation.UsesSampleValues
 import com.radixdlt.sargon.AccountPath
 import com.radixdlt.sargon.Bip44LikePath
+import com.radixdlt.sargon.DerivationPath
 import com.radixdlt.sargon.IdentityPath
 import com.radixdlt.sargon.newAccountPathSample
 import com.radixdlt.sargon.newAccountPathSampleOther
 import com.radixdlt.sargon.newBip44LikePathSample
 import com.radixdlt.sargon.newBip44LikePathSampleOther
+import com.radixdlt.sargon.newDerivationPathSample
+import com.radixdlt.sargon.newDerivationPathSampleOther
 import com.radixdlt.sargon.newIdentityPathSample
 import com.radixdlt.sargon.newIdentityPathSampleOther
+
+@UsesSampleValues
+val DerivationPath.Companion.sample: Sample<DerivationPath>
+    get() = object : Sample<DerivationPath> {
+        override fun invoke(): DerivationPath = newDerivationPathSample()
+
+        override fun other(): DerivationPath = newDerivationPathSampleOther()
+    }
 
 @UsesSampleValues
 val AccountPath.Companion.sample: Sample<AccountPath>
