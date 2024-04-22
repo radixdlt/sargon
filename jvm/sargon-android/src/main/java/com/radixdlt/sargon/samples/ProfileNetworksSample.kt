@@ -1,9 +1,5 @@
 package com.radixdlt.sargon.samples
 
-import com.radixdlt.sargon.Accounts
-import com.radixdlt.sargon.AuthorizedDapps
-import com.radixdlt.sargon.NetworkId
-import com.radixdlt.sargon.Personas
 import com.radixdlt.sargon.ProfileNetwork
 import com.radixdlt.sargon.ProfileNetworks
 import com.radixdlt.sargon.annotation.UsesSampleValues

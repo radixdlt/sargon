@@ -4,8 +4,11 @@ import com.radixdlt.sargon.extensions.append
 import com.radixdlt.sargon.extensions.contains
 import com.radixdlt.sargon.extensions.get
 import com.radixdlt.sargon.extensions.init
+import com.radixdlt.sargon.extensions.invoke
 import com.radixdlt.sargon.extensions.remove
 import com.radixdlt.sargon.extensions.size
+import com.radixdlt.sargon.extensions.updateOrAppend
+import com.radixdlt.sargon.extensions.updateOrInsert
 import com.radixdlt.sargon.samples.Sample
 import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -32,6 +35,13 @@ class EntityFlagsTest: SampleTestable<EntityFlags> {
         assertTrue(sampleOther in list)
         assertEquals(2, list.size)
         assertEquals(sampleOther, list.get(sampleOther))
+
+        list = list.updateOrInsert(sampleOther, 0)
+        assertEquals(sampleOther, list()[1])
+        assertTrue(list.size == 2)
+        list = list.updateOrAppend(sampleOther)
+        assertTrue(list.size == 2)
+        list = list.remove(sampleOther)
 
         list = list.remove(sampleOther)
         assertFalse(sampleOther in list)

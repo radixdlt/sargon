@@ -6,17 +6,19 @@ import com.radixdlt.sargon.extensions.contains
 import com.radixdlt.sargon.extensions.get
 import com.radixdlt.sargon.extensions.id
 import com.radixdlt.sargon.extensions.init
+import com.radixdlt.sargon.extensions.invoke
 import com.radixdlt.sargon.extensions.randomBagOfBytes
 import com.radixdlt.sargon.extensions.remove
 import com.radixdlt.sargon.extensions.removeById
 import com.radixdlt.sargon.extensions.size
+import com.radixdlt.sargon.extensions.updateOrAppend
+import com.radixdlt.sargon.extensions.updateOrInsert
 import com.radixdlt.sargon.samples.Sample
 import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.sql.Time
 
 class FactorSourcesTest : SampleTestable<FactorSources> {
 
@@ -46,7 +48,14 @@ class FactorSourcesTest : SampleTestable<FactorSources> {
 
         list = list.append(sampleOther)
         assertEquals(sampleOther, list.get(sampleOther.id))
-        Assertions.assertTrue(list.removeById(sampleOther.id).size == 1)
+        list = list.removeById(sampleOther.id)
+        Assertions.assertTrue(list.size == 1)
+
+        list = list.updateOrInsert(sampleOther, 0)
+        assertEquals(sampleOther, list()[0])
+        Assertions.assertTrue(list.size == 2)
+        list = list.updateOrAppend(sampleOther)
+        Assertions.assertTrue(list.size == 2)
     }
 
     @Test

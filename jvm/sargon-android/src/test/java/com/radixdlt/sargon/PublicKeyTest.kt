@@ -5,10 +5,12 @@ import com.radixdlt.sargon.extensions.bytes
 import com.radixdlt.sargon.extensions.hex
 import com.radixdlt.sargon.extensions.hexToBagOfBytes
 import com.radixdlt.sargon.extensions.init
+import com.radixdlt.sargon.extensions.isValidSignature
 import com.radixdlt.sargon.extensions.uncompressedBytes
 import com.radixdlt.sargon.samples.Sample
 import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 
 class PublicKeyTest: SampleTestable<PublicKey> {
@@ -77,5 +79,13 @@ class PublicKeyTest: SampleTestable<PublicKey> {
 
         val publicKeySecp256k1 = PublicKey.Secp256k1.sample()
         assertEquals(publicKeySecp256k1, publicKeySecp256k1.v1.asGeneral())
+    }
+
+    @Test
+    fun testIsValid() {
+        assertFalse(PublicKey.sample().isValidSignature(
+            signature = Signature.sample(),
+            hashedMessage = Hash.sample()
+        ))
     }
 }

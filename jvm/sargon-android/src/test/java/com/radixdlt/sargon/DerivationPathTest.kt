@@ -1,8 +1,14 @@
 package com.radixdlt.sargon
 
+import com.radixdlt.sargon.extensions.account
+import com.radixdlt.sargon.extensions.addressIndex
 import com.radixdlt.sargon.extensions.asGeneral
 import com.radixdlt.sargon.extensions.default
+import com.radixdlt.sargon.extensions.hdPath
+import com.radixdlt.sargon.extensions.identity
 import com.radixdlt.sargon.extensions.init
+import com.radixdlt.sargon.extensions.nonHardenedIndex
+import com.radixdlt.sargon.extensions.nonHardenedValue
 import com.radixdlt.sargon.extensions.string
 import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -45,9 +51,34 @@ class DerivationPathTest {
 
     @Test
     fun testBip44LikePathFromIndex() {
+        val sut = DerivationPath.Bip44Like.init(index = 0u)
         assertEquals(
-            "m/44H/1022H/0H/0/0H",
-            DerivationPath.Bip44Like.init(index = HdPathComponent(0u)).string
+            0u,
+            sut.addressIndex
+        )
+    }
+
+    @Test
+    fun testNewAccountPathFromElements() {
+        assertEquals(
+            "m/44H/1022H/1H/525H/1460H/0H",
+            DerivationPath.Cap26.account(
+                networkId = NetworkId.MAINNET,
+                keyKind = Cap26KeyKind.TRANSACTION_SIGNING,
+                index = 0u
+            ).string
+        )
+    }
+
+    @Test
+    fun testNewIdentityPathFromElements() {
+        assertEquals(
+            "m/44H/1022H/1H/618H/1460H/0H",
+            DerivationPath.Cap26.identity(
+                networkId = NetworkId.MAINNET,
+                keyKind = Cap26KeyKind.TRANSACTION_SIGNING,
+                index = 0u
+            ).string
         )
     }
 
@@ -64,6 +95,16 @@ class DerivationPathTest {
         assertEquals(
             derivationPathBip44.string,
             DerivationPath.Bip44Like(Bip44LikePath.sample()).string
+        )
+    }
+
+    @Test
+    fun testDerivationPathHdPath() {
+        val derivationPath = DerivationPath.sample()
+        val index = derivationPath.nonHardenedIndex
+        assertEquals(
+            derivationPath.hdPath.components.last().nonHardenedValue,
+            index
         )
     }
 

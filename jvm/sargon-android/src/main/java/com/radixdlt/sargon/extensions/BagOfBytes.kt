@@ -9,6 +9,13 @@ import com.radixdlt.sargon.hash
 import com.radixdlt.sargon.newBagOfBytesFrom
 import kotlin.random.Random
 
+internal fun bagOfBytes(fromString: String) = fromString
+    .toByteArray(charset = Charsets.UTF_8)
+    .toBagOfBytes()
+
+internal val BagOfBytes.string: String
+    get() = toUByteArray().toByteArray().toString(charset = Charsets.UTF_8)
+
 fun bagOfBytesOf(byteArray: ByteArray) = newBagOfBytesFrom(bytes = byteArray)
 
 fun String.hexToBagOfBytes(): BagOfBytes {

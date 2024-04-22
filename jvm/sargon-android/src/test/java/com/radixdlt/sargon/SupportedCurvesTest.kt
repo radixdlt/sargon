@@ -4,8 +4,11 @@ import com.radixdlt.sargon.extensions.append
 import com.radixdlt.sargon.extensions.contains
 import com.radixdlt.sargon.extensions.get
 import com.radixdlt.sargon.extensions.init
+import com.radixdlt.sargon.extensions.invoke
 import com.radixdlt.sargon.extensions.remove
 import com.radixdlt.sargon.extensions.size
+import com.radixdlt.sargon.extensions.updateOrAppend
+import com.radixdlt.sargon.extensions.updateOrInsert
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -26,6 +29,13 @@ class SupportedCurvesTest {
         Assertions.assertTrue(sampleOther in list)
         Assertions.assertEquals(2, list.size)
         Assertions.assertEquals(sampleOther, list[1])
+
+        list = list.updateOrInsert(sampleOther, 0)
+        Assertions.assertEquals(sampleOther, list()[1])
+        Assertions.assertTrue(list.size == 2)
+        list = list.updateOrAppend(sampleOther)
+        Assertions.assertTrue(list.size == 2)
+        list = list.remove(sampleOther)
 
         list = list.remove(sampleOther)
         Assertions.assertFalse(sampleOther in list)

@@ -8,6 +8,8 @@ import com.radixdlt.sargon.accountsGetAccountById
 import com.radixdlt.sargon.accountsGetElements
 import com.radixdlt.sargon.newAccounts
 import com.radixdlt.sargon.newAccountsByAppending
+import com.radixdlt.sargon.newAccountsByUpdatingOrAppending
+import com.radixdlt.sargon.newAccountsByUpdatingOrInsertingAtIndex
 import com.radixdlt.sargon.newAccountsRemovedById
 import com.radixdlt.sargon.newAccountsRemovedElement
 
@@ -27,6 +29,12 @@ val Accounts.size: Int
 
 fun Accounts.append(account: Account): Accounts =
     newAccountsByAppending(account = account, to = this)
+
+fun Accounts.updateOrInsert(account: Account, index: Int): Accounts =
+    newAccountsByUpdatingOrInsertingAtIndex(account = account, to = this, index = index.toULong())
+
+fun Accounts.updateOrAppend(account: Account): Accounts =
+    newAccountsByUpdatingOrAppending(account = account, to = this)
 
 fun Accounts.removeByAddress(address: AccountAddress): Accounts =
     newAccountsRemovedById(idOfAccount = address, from = this)
