@@ -448,6 +448,9 @@ pub enum CommonError {
 
     #[error("Invalid Factor Source kind, bad value: {bad_value}")]
     InvalidFactorSourceKind { bad_value: String } = 10125,
+
+    #[error("Invalid LedgerHardwareWalletModel, bad value: {bad_value}")]
+    InvalidLedgerHardwareWalletModel { bad_value: String } = 10126,
 }
 
 #[uniffi::export]

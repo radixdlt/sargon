@@ -43,17 +43,15 @@ extension BIP39WordCount: Comparable {
 
 extension BIP39WordCount {
 	public mutating func increaseBy3() {
-		guard self != .twentyFour else {
-			assertionFailure("Invalid, cannot increase to than 24 words")
-			return
+		guard self < .twentyFour else {
+            return assertionFailure("At max word count (24)")
 		}
 		self = .init(rawValue: rawValue + 3)!
 	}
 
 	public mutating func decreaseBy3() {
-		guard self != .twelve else {
-			assertionFailure("Invalid, cannot decrease to less than 12 words")
-			return
+        guard self > .twelve else {
+            return assertionFailure("At min word count (12)")
 		}
 		self = .init(rawValue: rawValue - 3)!
 	}
