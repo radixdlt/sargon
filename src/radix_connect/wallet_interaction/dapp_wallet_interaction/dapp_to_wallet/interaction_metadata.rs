@@ -39,3 +39,25 @@ impl HasSampleValues for DappToWalletInteractionMetadata {
         }
     }
 }
+
+impl HasSampleValues for DappToWalletInteractionMetadataUnvalidated {
+    fn sample() -> Self {
+        Self {
+            version: WalletInteractionVersion::sample(),
+            network_id: NetworkID::Stokenet,
+            origin: Url::from_str("https://example.com").unwrap(),
+            dapp_definition_address: DappDefinitionAddress::sample()
+                .to_string(),
+        }
+    }
+
+    fn sample_other() -> Self {
+        Self {
+            version: WalletInteractionVersion::sample_other(),
+            network_id: NetworkID::Stokenet,
+            origin: Url::from_str("https://example.org").unwrap(),
+            dapp_definition_address: DappDefinitionAddress::sample_other()
+                .to_string(),
+        }
+    }
+}
