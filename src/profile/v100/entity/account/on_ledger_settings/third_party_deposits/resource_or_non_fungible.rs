@@ -13,6 +13,23 @@ pub enum ResourceOrNonFungible {
     NonFungible { value: NonFungibleGlobalId },
 }
 
+impl std::fmt::Display for ResourceOrNonFungible {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Resource { value } => write!(f, "Resource: {}", value),
+            Self::NonFungible { value } => write!(f, "NonFungible: {}", value),
+        }
+    }
+}
+
+impl Identifiable for ResourceOrNonFungible {
+    type ID = Self;
+
+    fn id(&self) -> Self::ID {
+        self.clone()
+    }
+}
+
 impl From<(ScryptoResourceOrNonFungible, NetworkID)> for ResourceOrNonFungible {
     fn from(value: (ScryptoResourceOrNonFungible, NetworkID)) -> Self {
         let (resource_or_non_fungible, network_id) = value;

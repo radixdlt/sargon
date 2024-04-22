@@ -11,9 +11,11 @@ use crate::prelude::*;
     PartialEq,
     Eq,
     Hash,
+    derive_more::Display,
     uniffi::Record,
 )]
 #[serde(rename_all = "camelCase")]
+#[display("rule: {}, address: {}", self.exception_rule, self.address)]
 pub struct AssetException {
     /// Address of an asset to either deny or allow, as an exception overriding the `ThirdPartyDeposits`'s general `deposit_rule`.
     pub address: ResourceAddress,

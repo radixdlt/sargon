@@ -5,6 +5,7 @@ mod authorized_persona_simple_uniffi_fn;
 mod references_to_authorized_personas;
 mod requested_number_quantifier;
 mod requested_quantity;
+mod requested_quantity_uniffi_fn;
 mod shared_persona_data;
 mod shared_with_dapp;
 
@@ -15,5 +16,6 @@ pub use authorized_persona_simple_uniffi_fn::*;
 pub use references_to_authorized_personas::*;
 pub use requested_number_quantifier::*;
 pub use requested_quantity::*;
+pub use requested_quantity_uniffi_fn::*;
 pub use shared_persona_data::*;
 pub use shared_with_dapp::*;
