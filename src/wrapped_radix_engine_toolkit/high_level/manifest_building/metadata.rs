@@ -60,6 +60,7 @@ mod tests {
         use MetadataKey::*;
         let eq = |v: MetadataKey, e| {
             assert_eq!(v.to_string(), e);
+            assert_eq!(MetadataKey::from_str(e).unwrap(), v);
         };
 
         eq(AccountType, "account_type");

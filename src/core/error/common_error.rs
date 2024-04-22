@@ -445,6 +445,9 @@ pub enum CommonError {
 
     #[error("Invalid AES Sealedbox, too few bytes expected at least: {expected_at_least}, found: {found}.")]
     InvalidAESBytesTooShort { expected_at_least: u64, found: u64 } = 10124,
+
+    #[error("Invalid Factor Source kind, bad value: {bad_value}")]
+    InvalidFactorSourceKind { bad_value: String } = 10125,
 }
 
 #[uniffi::export]

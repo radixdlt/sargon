@@ -167,6 +167,11 @@ mod tests {
         assert_eq!(
             SUT::sample().common_properties(),
             DeviceFactorSource::sample_babylon().common
+        );
+
+        assert_eq!(
+            SUT::sample_other().common_properties(),
+            LedgerHardwareWalletFactorSource::sample().common
         )
     }
 
