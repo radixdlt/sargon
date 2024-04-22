@@ -1,8 +1,12 @@
 package com.radixdlt.sargon
 
+import com.radixdlt.sargon.extensions.bagOfBytes
 import com.radixdlt.sargon.extensions.init
+import com.radixdlt.sargon.extensions.deserializeFromBytes
+import com.radixdlt.sargon.extensions.deserializeFromString
 import com.radixdlt.sargon.extensions.randomBagOfBytes
-import com.radixdlt.sargon.extensions.snapshotJson
+import com.radixdlt.sargon.extensions.serializedBytes
+import com.radixdlt.sargon.extensions.serializedString
 import com.radixdlt.sargon.extensions.toBagOfBytes
 import com.radixdlt.sargon.samples.Sample
 import com.radixdlt.sargon.samples.sample
@@ -33,18 +37,18 @@ class ProfileTest: SampleTestable<Profile> {
     fun testRoundtrip() {
         val sut = Profile.sample()
 
-        assertEquals(sut, Profile.init(json = sut.snapshotJson()))
+        assertEquals(sut, Profile.deserializeFromString(jsonString = sut.serializedString()))
     }
 
     @Test
     fun testInitFromMalformedJson() {
-        val json = "{}".toByteArray().toBagOfBytes()
+        val json = "{}"
 
-        val result = runCatching { Profile.init(json = json) }.exceptionOrNull()
+        val result = runCatching { Profile.deserializeFromString(jsonString = json) }.exceptionOrNull()
                 as? CommonException.FailedToDeserializeJsonToValue
 
         assertEquals(
-            json.size.toULong(),
+            bagOfBytes(json).size.toULong(),
             result?.jsonByteCount
         )
         assertEquals(

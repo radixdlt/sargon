@@ -3,7 +3,6 @@ package com.radixdlt.sargon
 import com.radixdlt.sargon.extensions.get
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.invoke
-import com.radixdlt.sargon.extensions.randomBagOfBytes
 import com.radixdlt.sargon.extensions.size
 import com.radixdlt.sargon.extensions.toBagOfBytes
 import com.radixdlt.sargon.samples.sample

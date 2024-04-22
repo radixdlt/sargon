@@ -1,7 +1,10 @@
 package com.radixdlt.sargon
 
+import com.radixdlt.sargon.extensions.account
+import com.radixdlt.sargon.extensions.addressIndex
 import com.radixdlt.sargon.extensions.asGeneral
 import com.radixdlt.sargon.extensions.default
+import com.radixdlt.sargon.extensions.identity
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.string
 import com.radixdlt.sargon.samples.sample
@@ -45,9 +48,34 @@ class DerivationPathTest {
 
     @Test
     fun testBip44LikePathFromIndex() {
+        val sut = DerivationPath.Bip44Like.init(index = 0u)
         assertEquals(
-            "m/44H/1022H/0H/0/0H",
-            DerivationPath.Bip44Like.init(index = HdPathComponent(0u)).string
+            0u,
+            sut.addressIndex
+        )
+    }
+
+    @Test
+    fun testNewAccountPathFromElements() {
+        assertEquals(
+            "m/44H/1022H/1H/525H/1460H/0H",
+            DerivationPath.Cap26.account(
+                networkId = NetworkId.MAINNET,
+                keyKind = Cap26KeyKind.TRANSACTION_SIGNING,
+                index = 0u
+            ).string
+        )
+    }
+
+    @Test
+    fun testNewIdentityPathFromElements() {
+        assertEquals(
+            "m/44H/1022H/1H/618H/1460H/0H",
+            DerivationPath.Cap26.identity(
+                networkId = NetworkId.MAINNET,
+                keyKind = Cap26KeyKind.TRANSACTION_SIGNING,
+                index = 0u
+            ).string
         )
     }
 

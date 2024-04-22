@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.sql.Time
 
 class FactorSourcesTest : SampleTestable<FactorSources> {
 
