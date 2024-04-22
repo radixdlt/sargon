@@ -28,7 +28,7 @@ extension DerivationPath {
 		return component.nonHardenedValue
 	}
   
-    public var curveForScheme: SLIP10Curve {
+    public var curve: SLIP10Curve {
         switch self {
         case .bip44Like: .secp256k1
         case .cap26: .curve25519
@@ -39,7 +39,7 @@ extension DerivationPath {
         kind: EntityKind,
         networkID: NetworkID,
         index: HDPathValue
-    ) throws -> Self {
+    ) -> Self {
         switch kind {
         case .account:
             AccountPath(

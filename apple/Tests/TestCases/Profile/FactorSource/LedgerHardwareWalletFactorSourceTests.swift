@@ -31,4 +31,18 @@ final class LedgerHardwareWalletFactorSourceTests: FactorSourceTest<LedgerHardwa
 	func test_as_general() {
 		XCTAssertEqual(SUT.sample.asGeneral, FactorSource.ledger(value: SUT.sample))
 	}
+    
+    func test_source_that_supports_babylon() {
+        let sut = SUT.sample
+        XCTAssertTrue(sut.supportsBabylon)
+        XCTAssertFalse(sut.supportsOlympia)
+    }
+    
+    func test_source_that_supports_olympia() {
+        let sut = SUT.sampleOther
+        XCTAssertTrue(sut.supportsOlympia)
+        XCTAssertFalse(sut.supportsBabylon)
+    }
+    
+  
 }
