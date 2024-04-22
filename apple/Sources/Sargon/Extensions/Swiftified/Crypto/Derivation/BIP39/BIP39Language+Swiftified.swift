@@ -9,3 +9,4 @@ import Foundation
 import SargonUniFFI
 
 public typealias BIP39Language = Bip39Language
+extension BIP39Language: SargonModel {}
