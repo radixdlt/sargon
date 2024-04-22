@@ -11,7 +11,7 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class LedgerHardwareWalletFactorSourceTests: Test<LedgerHardwareWalletFactorSource> {
+final class LedgerHardwareWalletFactorSourceTests: FactorSourceTest<LedgerHardwareWalletFactorSource> {
 	func test_id_of_ledger() {
 		XCTAssertEqual(SUT.sample.id.description, FactorSourceID.hash(value: SUT.sample.id).description)
 	}

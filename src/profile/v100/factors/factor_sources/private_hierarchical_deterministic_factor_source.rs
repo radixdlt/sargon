@@ -7,20 +7,6 @@ pub struct PrivateHierarchicalDeterministicFactorSource {
     pub factor_source: DeviceFactorSource,
 }
 
-#[uniffi::export]
-pub fn new_private_hd_factor_source(
-    entropy: NonEmptyMax32Bytes,
-    wallet_client_model: WalletClientModel,
-) -> Result<PrivateHierarchicalDeterministicFactorSource> {
-    BIP39Entropy::try_from(entropy).map(|entropy| {
-        PrivateHierarchicalDeterministicFactorSource::new_with_entropy(
-            entropy,
-            BIP39Passphrase::default(),
-            wallet_client_model,
-        )
-    })
-}
-
 impl PrivateHierarchicalDeterministicFactorSource {
     pub fn new(
         mnemonic_with_passphrase: MnemonicWithPassphrase,
@@ -40,19 +26,32 @@ impl PrivateHierarchicalDeterministicFactorSource {
         }
     }
 
-    fn new_with_mnemonic_with_passphrase(
+    pub fn new_olympia_with_mnemonic_with_passphrase(
+        mnemonic_with_passphrase: MnemonicWithPassphrase,
+        wallet_client_model: WalletClientModel,
+    ) -> Self {
+        let device_factor_source = DeviceFactorSource::olympia(
+            &mnemonic_with_passphrase,
+            wallet_client_model,
+        );
+        Self::new(mnemonic_with_passphrase, device_factor_source)
+    }
+
+    pub fn new_babylon_with_mnemonic_with_passphrase(
+        is_main: bool,
         mnemonic_with_passphrase: MnemonicWithPassphrase,
         wallet_client_model: WalletClientModel,
     ) -> Self {
         let bdfs = DeviceFactorSource::babylon(
-            true,
+            is_main,
             &mnemonic_with_passphrase,
             wallet_client_model,
         );
         Self::new(mnemonic_with_passphrase, bdfs)
     }
 
-    pub fn new_with_entropy(
+    pub fn new_babylon_with_entropy(
+        is_main: bool,
         entropy: BIP39Entropy,
         passphrase: BIP39Passphrase,
         wallet_client_model: WalletClientModel,
@@ -60,16 +59,21 @@ impl PrivateHierarchicalDeterministicFactorSource {
         let mnemonic = Mnemonic::from_entropy(entropy);
         let mnemonic_with_passphrase =
             MnemonicWithPassphrase::with_passphrase(mnemonic, passphrase);
-        Self::new_with_mnemonic_with_passphrase(
+        Self::new_babylon_with_mnemonic_with_passphrase(
+            is_main,
             mnemonic_with_passphrase,
             wallet_client_model,
         )
     }
 
-    pub fn generate_new(wallet_client_model: WalletClientModel) -> Self {
+    pub fn generate_new_babylon(
+        is_main: bool,
+        wallet_client_model: WalletClientModel,
+    ) -> Self {
         let mnemonic = Mnemonic::generate_new();
         let mnemonic_with_passphrase = MnemonicWithPassphrase::new(mnemonic);
-        Self::new_with_mnemonic_with_passphrase(
+        Self::new_babylon_with_mnemonic_with_passphrase(
+            is_main,
             mnemonic_with_passphrase,
             wallet_client_model,
         )
@@ -140,7 +144,9 @@ mod tests {
     fn hash() {
         let n = 100;
         let set = (0..n)
-            .map(|_| SUT::generate_new(WalletClientModel::Unknown))
+            .map(|_| {
+                SUT::generate_new_babylon(true, WalletClientModel::Unknown)
+            })
             .collect::<HashSet<_>>();
         assert_eq!(set.len(), n);
     }
@@ -150,23 +156,5 @@ mod tests {
         let mut sut = SUT::sample();
         sut.zeroize();
         assert_ne!(sut, SUT::sample());
-    }
-}
-
-#[cfg(test)]
-mod uniffi_tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = PrivateHierarchicalDeterministicFactorSource;
-
-    #[test]
-    fn new_uses_empty_bip39_passphrase() {
-        let private: SUT = new_private_hd_factor_source(
-            Entropy32Bytes::new([0xff; 32]).into(),
-            WalletClientModel::Unknown,
-        )
-        .unwrap();
-        assert_eq!(private.mnemonic_with_passphrase.passphrase.0, "");
     }
 }

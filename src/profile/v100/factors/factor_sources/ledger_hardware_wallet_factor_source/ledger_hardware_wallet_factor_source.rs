@@ -77,6 +77,10 @@ impl IsFactorSource for LedgerHardwareWalletFactorSource {
     }
 }
 impl BaseIsFactorSource for LedgerHardwareWalletFactorSource {
+    fn common_properties(&self) -> FactorSourceCommon {
+        self.common.clone()
+    }
+
     fn factor_source_kind(&self) -> FactorSourceKind {
         self.id.kind
     }

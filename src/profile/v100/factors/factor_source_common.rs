@@ -69,6 +69,10 @@ impl FactorSourceCommon {
         Self::with_values(crypto_parameters, date, date, flags)
     }
 
+    pub fn new_olympia() -> Self {
+        Self::new(FactorSourceCryptoParameters::olympia(), Vec::new())
+    }
+
     pub fn new_bdfs(is_main: bool) -> Self {
         Self::new(
             FactorSourceCryptoParameters::babylon(),
@@ -86,6 +90,10 @@ impl FactorSourceCommon {
 
     pub fn supports_babylon(&self) -> bool {
         self.crypto_parameters.supports_babylon()
+    }
+
+    pub fn supports_olympia(&self) -> bool {
+        self.crypto_parameters.supports_olympia()
     }
 
     /// Checks if its Main Babylon Device Factor Source (BDFS).
