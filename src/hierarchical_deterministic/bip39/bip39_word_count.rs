@@ -14,6 +14,7 @@ use crate::prelude::*;
     Eq,
     Hash,
     PartialOrd,
+    enum_iterator::Sequence,
     Ord,
     uniffi::Enum,
 )]
@@ -42,6 +43,11 @@ impl std::fmt::Display for BIP39WordCount {
 }
 
 impl BIP39WordCount {
+    /// Returns collection of all word counts
+    pub fn all() -> Vec<Self> {
+        all::<Self>().collect()
+    }
+
     /// The raw representation of the word count as a number.
     pub fn discriminant(&self) -> u8 {
         *self as u8
@@ -71,46 +77,60 @@ impl Default for BIP39WordCount {
 #[cfg(test)]
 mod tests {
 
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = BIP39WordCount;
 
     #[test]
     fn default_is_24() {
-        assert_eq!(BIP39WordCount::default(), BIP39WordCount::TwentyFour);
+        assert_eq!(SUT::default(), SUT::TwentyFour);
+    }
+
+    #[test]
+    fn test_all() {
+        assert_eq!(
+            SUT::all(),
+            vec![
+                SUT::TwentyFour,
+                SUT::TwentyOne,
+                SUT::Eighteen,
+                SUT::Fifteen,
+                SUT::Twelve,
+            ]
+        )
     }
 
     #[test]
     fn discriminant() {
-        assert_eq!(BIP39WordCount::TwentyFour.discriminant(), 24);
-        assert_eq!(BIP39WordCount::TwentyOne.discriminant(), 21);
-        assert_eq!(BIP39WordCount::Eighteen.discriminant(), 18);
-        assert_eq!(BIP39WordCount::Fifteen.discriminant(), 15);
-        assert_eq!(BIP39WordCount::Twelve.discriminant(), 12);
+        assert_eq!(SUT::TwentyFour.discriminant(), 24);
+        assert_eq!(SUT::TwentyOne.discriminant(), 21);
+        assert_eq!(SUT::Eighteen.discriminant(), 18);
+        assert_eq!(SUT::Fifteen.discriminant(), 15);
+        assert_eq!(SUT::Twelve.discriminant(), 12);
     }
 
     #[test]
     fn format() {
-        assert_eq!(format!("{}", BIP39WordCount::TwentyFour), "24 words");
-        assert_eq!(format!("{}", BIP39WordCount::Twelve), "12 words");
+        assert_eq!(format!("{}", SUT::TwentyFour), "24 words");
+        assert_eq!(format!("{}", SUT::Twelve), "12 words");
     }
 
     #[test]
     fn equality() {
-        assert_eq!(BIP39WordCount::TwentyFour, BIP39WordCount::TwentyFour);
-        assert_eq!(BIP39WordCount::Twelve, BIP39WordCount::Twelve);
+        assert_eq!(SUT::TwentyFour, SUT::TwentyFour);
+        assert_eq!(SUT::Twelve, SUT::Twelve);
     }
     #[test]
     fn inequality() {
-        assert_ne!(BIP39WordCount::TwentyFour, BIP39WordCount::Twelve);
+        assert_ne!(SUT::TwentyFour, SUT::Twelve);
     }
 
     #[test]
     fn hash() {
         assert_eq!(
-            BTreeSet::from_iter(
-                [BIP39WordCount::TwentyFour, BIP39WordCount::TwentyFour]
-                    .into_iter()
-            )
-            .len(),
+            BTreeSet::from_iter([SUT::TwentyFour, SUT::TwentyFour].into_iter())
+                .len(),
             1
         );
     }
@@ -118,26 +138,20 @@ mod tests {
     #[test]
     fn invalid_word_count_error() {
         assert_eq!(
-            BIP39WordCount::from_count(23),
+            SUT::from_count(23),
             Err(CommonError::InvalidBIP39WordCount { bad_value: 23 })
         )
     }
 
     #[test]
     fn ord() {
-        assert!(BIP39WordCount::Twelve < BIP39WordCount::TwentyFour);
+        assert!(SUT::Twelve < SUT::TwentyFour);
     }
 
     #[test]
     fn json_roundtrip() {
-        assert_json_value_eq_after_roundtrip(
-            &BIP39WordCount::TwentyFour,
-            json!(24),
-        );
-        assert_json_value_ne_after_roundtrip(
-            &BIP39WordCount::TwentyFour,
-            json!(12),
-        );
-        assert_json_roundtrip(&BIP39WordCount::TwentyFour);
+        assert_json_value_eq_after_roundtrip(&SUT::TwentyFour, json!(24));
+        assert_json_value_ne_after_roundtrip(&SUT::TwentyFour, json!(12));
+        assert_json_roundtrip(&SUT::TwentyFour);
     }
 }

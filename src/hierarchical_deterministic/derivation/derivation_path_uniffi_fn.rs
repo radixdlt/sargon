@@ -16,6 +16,11 @@ pub fn derivation_path_to_string(path: &DerivationPath) -> String {
 }
 
 #[uniffi::export]
+pub fn derivation_path_from_string(string: String) -> Result<DerivationPath> {
+    DerivationPath::from_str(&string)
+}
+
+#[uniffi::export]
 pub fn derivation_path_to_hd_path(path: &DerivationPath) -> HDPath {
     path.hd_path().clone()
 }
@@ -26,6 +31,15 @@ mod tests {
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = DerivationPath;
+
+    #[test]
+    fn test_from_str_cap26_account_path() {
+        let s = "m/44H/1022H/1H/525H/1460H/0H";
+        assert_eq!(
+            derivation_path_from_string(s.to_owned()).unwrap(),
+            SUT::from(AccountPath::sample())
+        )
+    }
 
     #[test]
     fn hash_of_samples() {

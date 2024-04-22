@@ -57,16 +57,6 @@ impl AppPreferences {
     }
 }
 
-#[uniffi::export]
-pub fn new_app_preferences_sample() -> AppPreferences {
-    AppPreferences::sample()
-}
-
-#[uniffi::export]
-pub fn new_app_preferences_sample_other() -> AppPreferences {
-    AppPreferences::sample_other()
-}
-
 impl AppPreferences {
     pub fn new(
         display: AppDisplay,
@@ -111,53 +101,50 @@ impl HasSampleValues for AppPreferences {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = AppPreferences;
 
     #[test]
     fn equality() {
-        assert_eq!(AppPreferences::sample(), AppPreferences::sample());
-        assert_eq!(
-            AppPreferences::sample_other(),
-            AppPreferences::sample_other()
-        );
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(AppPreferences::sample(), AppPreferences::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn get_display() {
-        assert_eq!(AppPreferences::sample().display, AppDisplay::sample())
+        assert_eq!(SUT::sample().display, AppDisplay::sample())
     }
 
     #[test]
     fn get_gateways() {
-        assert_eq!(AppPreferences::sample().gateways, Gateways::sample())
+        assert_eq!(SUT::sample().gateways, Gateways::sample())
     }
 
     #[test]
     fn get_p2p_links() {
-        assert_eq!(AppPreferences::sample().p2p_links, P2PLinks::sample())
+        assert_eq!(SUT::sample().p2p_links, P2PLinks::sample())
     }
 
     #[test]
     fn get_security() {
-        assert_eq!(AppPreferences::sample().security, Security::sample())
+        assert_eq!(SUT::sample().security, Security::sample())
     }
 
     #[test]
     fn get_transaction() {
-        assert_eq!(
-            AppPreferences::sample().transaction,
-            TransactionPreferences::sample()
-        )
+        assert_eq!(SUT::sample().transaction, TransactionPreferences::sample())
     }
 
     #[test]
     fn json_roundtrip() {
-        let sut = AppPreferences::sample();
+        let sut = SUT::sample();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"
@@ -216,24 +203,5 @@ mod tests {
             }
             "#,
         )
-    }
-}
-
-#[cfg(test)]
-mod uniffi_tests {
-    use crate::{
-        new_app_preferences_sample, new_app_preferences_sample_other,
-        HasSampleValues,
-    };
-
-    use super::AppPreferences;
-
-    #[test]
-    fn equality_samples() {
-        assert_eq!(AppPreferences::sample(), new_app_preferences_sample());
-        assert_eq!(
-            AppPreferences::sample_other(),
-            new_app_preferences_sample_other()
-        );
     }
 }
