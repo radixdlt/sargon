@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Debug, Deserialize, PartialEq, uniffi::Record)]
+#[derive(Debug, Deserialize, Serialize, PartialEq, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct DappToWalletInteractionUnauthorizedRequestItems {
     pub one_time_accounts: Option<DappToWalletInteractionAccountsRequestItem>,
@@ -29,5 +29,24 @@ impl HasSampleValues for DappToWalletInteractionUnauthorizedRequestItems {
                 DappToWalletInteractionPersonaDataRequestItem::sample_other(),
             ),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = DappToWalletInteractionUnauthorizedRequestItems;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 }

@@ -1,11 +1,11 @@
 use crate::prelude::*;
 
-#[derive(Debug, Deserialize, PartialEq, uniffi::Record)]
+#[derive(Debug, Deserialize, Serialize, PartialEq, uniffi::Record)]
 pub struct DappToWalletInteractionTransactionItems {
     pub send: DappToWalletInteractionSendTransactionItem,
 }
 
-#[derive(Debug, Deserialize, PartialEq, uniffi::Record)]
+#[derive(Debug, Deserialize, Serialize, PartialEq, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct DappToWalletInteractionSendTransactionItem {
     pub transaction_manifest: String,
@@ -45,5 +45,24 @@ impl HasSampleValues for DappToWalletInteractionSendTransactionItem {
             blobs: Some(vec!["blob_other".to_string()]),
             message: Some("message_other".to_string()),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = DappToWalletInteractionTransactionItems;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 }
