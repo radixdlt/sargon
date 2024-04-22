@@ -7,6 +7,8 @@ public protocol BaseHDPathProtocol: BaseSargonModel, CustomStringConvertible {}
 
 public protocol HDPathProtocol: BaseHDPathProtocol {
     init(string: String) throws
+    var path: HdPath { get }
+    func toString() -> String
 }
 
 #if DEBUG

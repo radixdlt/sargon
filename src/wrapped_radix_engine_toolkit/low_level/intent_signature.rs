@@ -18,7 +18,7 @@ impl IntentSignature {
 
     pub fn validate(&self, hash: impl Into<Hash>) -> bool {
         let hash = hash.into();
-        self.public_key().is_valid(self.signature(), &hash)
+        self.secret_magic.is_valid_for_hash(&hash)
     }
 }
 

@@ -26,7 +26,15 @@ extension ProfileNetworks {
 		newProfileNetworksByAppending(profileNetwork: network, to: self)
 	}
 	
-	public func removingElementByID(_ id: ProfileNetwork.ID) -> Self {
+	public func updatingOrInserting(element profileNetwork: Element, at index: Int) -> Self {
+		newProfileNetworksByUpdatingOrInsertingAtIndex(profileNetwork: profileNetwork, to: self, index: UInt64(index))
+	}
+	
+	public func updatingOrAppending(_ network: ProfileNetwork) -> Self {
+		newProfileNetworksByUpdatingOrAppending(profileNetwork: network, to: self)
+	}
+	
+	public func removing(_ id: ProfileNetwork.ID) -> Self {
 		newProfileNetworksRemovedById(idOfProfileNetwork: id, from: self)
 	}
 	

@@ -25,8 +25,16 @@ extension Accounts {
 		newAccountsByAppending(account: account, to: self)
 	}
 	
-	public func removingElementByID(_ id: Account.ID) -> Self {
+	public func updatingOrInserting(element account: Element, at index: Int) -> Self {
+		newAccountsByUpdatingOrInsertingAtIndex(account: account, to: self, index: UInt64(index))
+	}
+	
+	public func removing(_ id: Account.ID) -> Self {
 		newAccountsRemovedById(idOfAccount: id, from: self)
+	}
+	
+	public func updatingOrAppending(_ account: Account) -> Self {
+		newAccountsByUpdatingOrAppending(account: account, to: self)
 	}
 	
 	public func removing(element account: Account) -> Self {

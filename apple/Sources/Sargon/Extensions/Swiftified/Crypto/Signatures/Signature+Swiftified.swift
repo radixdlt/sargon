@@ -9,4 +9,9 @@ extension Signature: SignatureProtocol {
 	public var hex: String {
 		toString()
 	}
+	
+	public var signature: Signature {
+		self
+	}
 }
+

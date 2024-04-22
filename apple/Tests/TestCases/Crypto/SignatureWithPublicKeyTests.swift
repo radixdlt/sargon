@@ -4,4 +4,8 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class SignatureWithPublicKeyTests: Test<SignatureWithPublicKey> {}
+final class SignatureWithPublicKeyTests: Test<SignatureWithPublicKey> {
+	func test_is_valid() {
+		XCTAssertFalse(SUT.sample.isValid(Hash.sample))
+	}
+}

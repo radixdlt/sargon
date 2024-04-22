@@ -4,6 +4,7 @@ package com.radixdlt.sargon.extensions
 
 import com.radixdlt.sargon.BagOfBytes
 import com.radixdlt.sargon.Exactly32Bytes
+import com.radixdlt.sargon.Hash
 import com.radixdlt.sargon.hash
 import com.radixdlt.sargon.newBagOfBytesFrom
 import kotlin.random.Random
@@ -21,6 +22,6 @@ fun ByteArray.toBagOfBytes() = bagOfBytesOf(byteArray = this)
 val BagOfBytes.hex: String
     get() = toUByteArray().toHexString()
 
-fun BagOfBytes.hash(): Exactly32Bytes = hash(data = this)
+fun BagOfBytes.hash(): Hash = hash(data = this)
 
 internal fun randomBagOfBytes(byteCount: Int) = Random.nextBytes(size = byteCount).toBagOfBytes()

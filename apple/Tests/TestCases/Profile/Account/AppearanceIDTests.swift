@@ -13,4 +13,9 @@ final class AppearanceIDTests: Test<AppearanceID> {
 	func test_all_cases_returns_actual_values_not_samples() {
 		XCTAssertEqual(SUT.allCases.count, 12)
 	}
+	
+	
+	func test_codable_roundtrip() throws {
+		try SUT.allCases.forEach(doTestCodableRoundtrip)
+	}
 }

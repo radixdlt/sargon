@@ -14,3 +14,16 @@ extension AppearanceID: CustomStringConvertible {
 		value.description
 	}
 }
+
+extension AppearanceID: Codable {
+	public func encode(to encoder: Encoder) throws {
+		var container = encoder.singleValueContainer()
+		try container.encode(self.value)
+	}
+
+	public init(from decoder: Decoder) throws {
+		let container = try decoder.singleValueContainer()
+		let rawValue = try container.decode(UInt8.self)
+		self.init(value: rawValue)
+	}
+}

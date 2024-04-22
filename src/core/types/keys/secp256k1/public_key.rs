@@ -48,13 +48,13 @@ impl UniffiCustomTypeConverter for ScryptoSecp256k1PublicKey {
 
 impl IsPublicKey<Secp256k1Signature> for Secp256k1PublicKey {
     /// Verifies an ECDSA signature over Secp256k1.
-    fn is_valid(
+    fn is_valid_signature_for_hash(
         &self,
         signature: &Secp256k1Signature,
-        for_hash: &impl ScryptoIsHash,
+        hash: &impl ScryptoIsHash,
     ) -> bool {
         scrypto_verify_secp256k1(
-            for_hash.as_hash(),
+            hash.as_hash(),
             &self.scrypto(),
             &(*signature).into(),
         )
@@ -408,26 +408,38 @@ mod tests {
 
     #[test]
     fn is_valid_is_false_for_mismatch() {
-        assert!(!SUT::sample()
-            .is_valid(&Secp256k1Signature::sample(), &Hash::sample()));
-        assert!(!SUT::sample()
-            .is_valid(&Secp256k1Signature::sample(), &Hash::sample_other()));
+        assert!(!SUT::sample().is_valid_signature_for_hash(
+            &Secp256k1Signature::sample(),
+            &Hash::sample()
+        ));
+        assert!(!SUT::sample().is_valid_signature_for_hash(
+            &Secp256k1Signature::sample(),
+            &Hash::sample_other()
+        ));
 
-        assert!(!SUT::sample()
-            .is_valid(&Secp256k1Signature::sample_other(), &Hash::sample()));
-        assert!(!SUT::sample().is_valid(
+        assert!(!SUT::sample().is_valid_signature_for_hash(
+            &Secp256k1Signature::sample_other(),
+            &Hash::sample()
+        ));
+        assert!(!SUT::sample().is_valid_signature_for_hash(
             &Secp256k1Signature::sample_other(),
             &Hash::sample_other()
         ));
 
-        assert!(!SUT::sample_other()
-            .is_valid(&Secp256k1Signature::sample(), &Hash::sample()));
-        assert!(!SUT::sample_other()
-            .is_valid(&Secp256k1Signature::sample(), &Hash::sample_other()));
+        assert!(!SUT::sample_other().is_valid_signature_for_hash(
+            &Secp256k1Signature::sample(),
+            &Hash::sample()
+        ));
+        assert!(!SUT::sample_other().is_valid_signature_for_hash(
+            &Secp256k1Signature::sample(),
+            &Hash::sample_other()
+        ));
 
-        assert!(!SUT::sample_other()
-            .is_valid(&Secp256k1Signature::sample_other(), &Hash::sample()));
-        assert!(!SUT::sample_other().is_valid(
+        assert!(!SUT::sample_other().is_valid_signature_for_hash(
+            &Secp256k1Signature::sample_other(),
+            &Hash::sample()
+        ));
+        assert!(!SUT::sample_other().is_valid_signature_for_hash(
             &Secp256k1Signature::sample_other(),
             &Hash::sample_other()
         ));
@@ -439,6 +451,6 @@ mod tests {
         let message = "All those moments will be lost in time, like tears in rain. Time to die...";
         let hash = hash_of(message.as_bytes());
         let signature: Secp256k1Signature = "01aa1c4f46f8437b7f8ec9008ae10e6f33bb8be3e81e35c63f3498070dfbd6a20b2daee6073ead3c9e72d8909bc32a02e46cede3885cf8568d4c380ac97aa7fbcd".parse().unwrap();
-        assert!(sut.is_valid(&signature, &hash));
+        assert!(sut.is_valid_signature_for_hash(&signature, &hash));
     }
 }

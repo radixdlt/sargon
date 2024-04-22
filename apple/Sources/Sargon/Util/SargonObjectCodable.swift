@@ -19,3 +19,4 @@ extension SargonObjectCodable {
 		try self.init(jsonData: json.rawData())
 	}
 }
+

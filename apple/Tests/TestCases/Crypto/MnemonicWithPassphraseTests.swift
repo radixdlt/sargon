@@ -31,9 +31,22 @@ final class MnemonicWithPassphraseTests: Test<MnemonicWithPassphrase> {
 		let encoded = try JSONEncoder().encode(sut)
 		try XCTAssertEqual(JSONDecoder().decode(SUT.self, from: encoded), sut)
 	}
+	
+	func test_derive_public_keys() {
+		XCTAssertEqual(SUT.sample.derivePublicKeys(paths: [DerivationPath.sample]), [HierarchicalDeterministicPublicKey.sample])
+	}
     
     func test_validate() {
         XCTAssertTrue(SUT.sample.validate(publicKeys: [HierarchicalDeterministicPublicKey.sample]))
         XCTAssertFalse(SUT.sampleOther.validate(publicKeys: [HierarchicalDeterministicPublicKey.sample]))
     }
+	
+	func test_sign_is_valid() {
+		let sut = SUT.sample
+		let path = DerivationPath.sample
+		let publicKey = sut.derivePublicKey(path: path)
+		let msg = Hash.sample
+		let signature = sut.sign(hash: msg, path: path)
+		XCTAssertTrue(publicKey.isValidSignature(signature, for: msg))
+	}
 }

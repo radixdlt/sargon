@@ -28,4 +28,62 @@ final class AccountsTests: CanBeEmptyCollectionTest<Accounts> {
 
 	}
 	
+	func test_updating_or_appending_new_update() {
+		var sample = SUTElement.sample
+		let sut = SUT(element: sample)
+		sample.displayName = try! DisplayName(validating: "Changed")
+		XCTAssertEqual(
+			sut.updatingOrAppending(sample).elements,
+			[sample]
+		)
+	}
+	
+	func test_update_or_append_update() {
+		var sample = SUTElement.sample
+		var sut = SUT(element: sample)
+		sample.displayName = "New Name"
+		let elem = sut.updateOrAppend(sample)
+		XCTAssertEqual(sut.elements, [sample])
+		XCTAssertEqual(elem, SUTElement.sample)
+	}
+	
+	func test_update_or_append_append() {
+		let sample = SUTElement.sample
+		var sut = SUT(element: sample)
+		sut.updateOrAppend(SUTElement.sampleOther)
+		XCTAssertEqual(sut.elements, [sample, .sampleOther])
+	}
+	
+	
+	func test_updateOrInsert_exists_wrong_index() {
+		var sut: SUT = [.sample, .sampleOther]
+
+		let sampleChanged: SUTElement = {
+			var a = SUTElement.sample
+			a.displayName = "SampleChanged"
+			return a
+		}()
+		let wrongIndex = 1
+		let (originalMember, deFactoIndex) = sut.updateOrInsert(element: sampleChanged, at: wrongIndex) // wrong index
+		XCTAssertEqual(originalMember, .sample)
+		XCTAssertNotEqual(deFactoIndex, wrongIndex)
+		XCTAssertEqual(deFactoIndex, 0)
+		XCTAssertEqual(sut.elements, [sampleChanged, .sampleOther])
+	}
+	
+	
+	func test_updateOrInsert_exists_correct_index() {
+		var sut: SUT = [.sample, .sampleOther]
+
+		let sampleChanged: SUTElement = {
+			var a = SUTElement.sample
+			a.displayName = "SampleChanged"
+			return a
+		}()
+		let correctIndex = 0
+		let (originalMember, deFactoIndex) = sut.updateOrInsert(element: sampleChanged, at: correctIndex) // correct index
+		XCTAssertEqual(originalMember, .sample)
+		XCTAssertEqual(deFactoIndex, correctIndex)
+		XCTAssertEqual(sut.elements, [sampleChanged, .sampleOther])
+	}
 }

@@ -16,7 +16,7 @@ class CanBeEmptyCollectionTest<SUT_: CanBeEmptyIdentifiedCollection>: BaseCollec
 	func test_removing_element_by_id() {
 		let sut: SUT = [.sample, .sampleOther]
 		XCTAssertEqual(
-			sut.removingElementByID(SUTElement.sample.id),
+			sut.removing(SUTElement.sample.id),
 			[.sampleOther]
 		)
 	}
@@ -31,7 +31,7 @@ class CanBeEmptyCollectionTest<SUT_: CanBeEmptyIdentifiedCollection>: BaseCollec
 	
 	func test_remove_element_by_id() {
 		var sut: SUT = [.sample, .sampleOther]
-		sut.removeElementByID(SUTElement.sample.id)
+		sut.remove(SUTElement.sample.id)
 		XCTAssertEqual(
 			sut,
 			[.sampleOther]
@@ -44,6 +44,29 @@ class CanBeEmptyCollectionTest<SUT_: CanBeEmptyIdentifiedCollection>: BaseCollec
 		XCTAssertEqual(
 			sut,
 			[.sampleOther]
+		)
+	}
+	
+	func test_subscript_id_get() {
+		let sut: SUT = [.sample, .sampleOther]
+		XCTAssertEqual(sut[id: SUTElement.sample.id], SUTElement.sample)
+	}
+	
+	func test_remove_by_id_subscript() {
+		var sut: SUT = [.sample, .sampleOther]
+		sut[id: SUTElement.sample.id] = nil
+		XCTAssertEqual(
+			sut,
+			[.sampleOther]
+		)
+	}
+	
+	func test_add_by_id_subscript() {
+		var sut: SUT = [.sample]
+		sut[id: SUTElement.sampleOther.id] = SUTElement.sampleOther
+		XCTAssertEqual(
+			sut,
+			[.sample, .sampleOther]
 		)
 	}
 }

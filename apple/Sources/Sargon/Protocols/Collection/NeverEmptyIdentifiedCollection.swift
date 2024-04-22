@@ -10,14 +10,14 @@ import Foundation
 public protocol NeverEmptyIdentifiedCollection: BaseIdentifiedCollection {
 	init(_ elements: [Element]) throws
 	
-	func removingElementByID(_ id: Element.ID) throws -> Self
+	func removing(_ id: Element.ID) throws -> Self
 	func removing(element: Element) throws -> Self
 }
 
 extension NeverEmptyIdentifiedCollection {
 	
-	public mutating func removeElementByID(_ id: Element.ID) throws {
-		self = try removingElementByID(id)
+	public mutating func remove(_ id: Element.ID) throws {
+		self = try removing(id)
 	}
 	
 	public mutating func remove(element: Element) throws {

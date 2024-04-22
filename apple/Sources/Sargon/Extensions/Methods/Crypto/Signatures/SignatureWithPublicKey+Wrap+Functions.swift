@@ -8,4 +8,8 @@ extension SignatureWithPublicKey {
 	public var publicKey: PublicKey {
 		signatureWithPublicKeyGetPublicKey(signatureWithPublicKey: self)
 	}
+	
+	public func isValid(_ hash: Hash) -> Bool {
+        signatureWithPublicKeyIsValid(signatureWithPublicKey: self, forHash: hash)
+	}
 }

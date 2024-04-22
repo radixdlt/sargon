@@ -202,7 +202,7 @@ mod tests {
         let sig = Secp256k1Signature::from_str(sig_hex).unwrap();
 
         assert_eq!(sk.sign(&msg), sig);
-        assert!(pk.is_valid(&sig, &msg));
+        assert!(pk.is_valid_signature_for_hash(&sig, &msg));
         assert_eq!(sig.to_hex(), sig_hex);
     }
 

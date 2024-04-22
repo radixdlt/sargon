@@ -17,7 +17,6 @@ extension Profile {
         profileToJsonBytes(profile: self)
 	}
 	
-	
 	public func encrypt(password: String) -> Data {
 		profileEncryptWithPassword(profile: self, encryptionPassword: password)
 	}
