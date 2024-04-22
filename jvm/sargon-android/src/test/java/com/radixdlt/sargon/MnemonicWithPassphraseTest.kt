@@ -20,7 +20,7 @@ class MnemonicWithPassphraseTest {
     fun testJsonRoundtrip() {
         val mnemonicWithPassphrase = MnemonicWithPassphrase(
             mnemonic = Mnemonic.init("zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"),
-            passphrase = "passphrase"
+            passphrase = "super secret"
         )
 
         assertEquals(
