@@ -9,4 +9,8 @@ extension Ed25519Signature: SignatureProtocol {
 	public var hex: String {
 		toString()
 	}
+	
+	public var signature: Signature {
+		.ed25519(value: self)
+	}
 }

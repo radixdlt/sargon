@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
 #[uniffi::export]
-pub fn hash_get_bytes(hash: &Hash) -> BagOfBytes {
-    BagOfBytes::from(hash.bytes())
+pub fn hash_get_bytes(hash: &Hash) -> Exactly32Bytes {
+    Exactly32Bytes::from(*hash)
 }
 
 #[uniffi::export]

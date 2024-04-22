@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+json_data_convertible!(FactorSourceIDFromHash);
+
 #[uniffi::export]
 pub fn factor_source_id_from_hash_to_string(
     factor_source_id: &FactorSourceIDFromHash,

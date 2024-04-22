@@ -40,7 +40,7 @@ impl Accounts {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = Accounts;
@@ -290,5 +290,32 @@ mod tests {
 			]
             "#,
         );
+    }
+}
+
+#[cfg(test)]
+mod uniffi_tests {
+
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = Accounts;
+
+    #[test]
+    fn test_updating_or_appending() {
+        let mut sut = SUT::new();
+        let first = Account::sample();
+        let mut second = Account::sample_other();
+        sut.append(first.clone());
+        sut.append(second.clone());
+        assert_eq!(sut.len(), 2);
+        assert_eq!(
+            new_accounts_by_updating_or_appending(second.clone(), &sut),
+            sut
+        );
+        second.display_name = DisplayName::new("Changed").unwrap();
+        let updated = new_accounts_by_updating_or_appending(second, &sut);
+        assert_eq!(updated.len(), 2);
+        assert_ne!(updated, sut);
     }
 }

@@ -17,5 +17,16 @@ extension PublicKey {
 	public var hex: String {
 		publicKeyToHex(publicKey: self)
 	}
+	
+	public func isValidSignature(
+		_ intoSignature: IntoSignatureProtocol,
+		for hashedMessage: Hash
+	) -> Bool {
+		publicKeyIsValidSignatureForHash(
+			publicKey: self,
+			signature: intoSignature.signature,
+			hash: hashedMessage
+		)
+	}
 }
 

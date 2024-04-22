@@ -31,6 +31,66 @@ class BaseCollectionTest<SUT_: BaseIdentifiedCollection>: Test<SUT_> {
 		)
 	}
 	
+	func test_updating_or_appending_new_append() {
+		let sample = SUTElement.sample
+		let sampleOther = SUTElement.sampleOther
+		let sut = SUT(element: sample)
+		XCTAssertEqual(
+			sut.updatingOrAppending(sampleOther).elements,
+			[sample, sampleOther]
+		)
+	}
+	
+	
+	func test_updating_or_inserting_new_append_last() {
+		let sample = SUTElement.sample
+		let sampleOther = SUTElement.sampleOther
+		let sut = SUT(element: sample)
+		XCTAssertEqual(
+			sut.updatingOrInserting(element: sampleOther, at: 1).elements,
+			[sample, sampleOther]
+		)
+	}
+	
+	func test_updating_or_inserting_new_append_first() {
+		let sample = SUTElement.sample
+		let sampleOther = SUTElement.sampleOther
+		let sut = SUT(element: sample)
+		XCTAssertEqual(
+			sut.updatingOrInserting(element: sampleOther, at: 0).elements,
+			[sampleOther, sample]
+		)
+	}
+	
+	func test_mutable_subscript_set_first() {
+		let sample = SUTElement.sample
+		let sampleOther = SUTElement.sampleOther
+		var sut = SUT(element: sample)
+		sut[0] = .sampleOther
+		XCTAssertEqual(
+			sut.elements,
+			[sampleOther, sample]
+		)
+	}
+	
+	func test_mutable_subscript_set_last() {
+		let sample = SUTElement.sample
+		let sampleOther = SUTElement.sampleOther
+		var sut = SUT(element: sample)
+		sut[1] = .sampleOther
+		XCTAssertEqual(
+			sut.elements,
+			[sample, sampleOther]
+		)
+	}
+		
+	func test_contains() {
+		let sample = SUTElement.sample
+		let sut = SUT(element: sample)
+		XCTAssertTrue(sut.contains(id: sample.id))
+		XCTAssertFalse(sut.contains(id: SUTElement.sampleOther.id))
+	}
+	
 	func test_append_new()  {
 		let sample = SUTElement.sample
 		let sampleOther = SUTElement.sampleOther

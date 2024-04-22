@@ -12,5 +12,10 @@ final class FactorSourceIDFromHashTests: Test<FactorSourceIDFromHash> {
 	func test_as_general() {
 		XCTAssertEqual(SUT.sample.asGeneral, FactorSourceID.hash(value: SUT.sample))
 	}
+	
+	func test_codable_roundtrip() throws {
+		try SUT.allCases.forEach(doTestCodableRoundtrip)
+	}
+	
 }
 

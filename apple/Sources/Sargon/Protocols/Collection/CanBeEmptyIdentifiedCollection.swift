@@ -7,7 +7,7 @@
 
 import Foundation
 
-public protocol CanBeEmptyIdentifiedCollection: 
+public protocol CanBeEmptyIdentifiedCollection:
 	BaseIdentifiedCollection,
 	ExpressibleByArrayLiteral
 where
@@ -15,7 +15,7 @@ where
 {
 	init(_ elements: [Element])
 	
-	func removingElementByID(_ id: Element.ID) -> Self
+	func removing(_ id: Element.ID) -> Self
 	func removing(element: Element) -> Self
 }
 
@@ -26,11 +26,29 @@ extension CanBeEmptyIdentifiedCollection {
 }
 
 extension CanBeEmptyIdentifiedCollection {
-	public mutating func removeElementByID(_ id: Element.ID) {
-		self = removingElementByID(id)
+	public mutating func remove(_ id: Element.ID) {
+		self = removing(id)
 	}
 	
 	public mutating func remove(element: Element) {
 		self = removing(element: element)
+	}
+}
+
+extension CanBeEmptyIdentifiedCollection {
+	public subscript(
+		id id: Element.ID
+	) -> Element? {
+		get { self.get(id: id) }
+		set {
+			if let newValue {
+				precondition(newValue.id == id)
+				self.updateOrAppend(newValue)
+				assert(contains(id: id))
+			} else {
+				self.remove(id)
+				assert(!contains(id: id))
+			}
+		}
 	}
 }

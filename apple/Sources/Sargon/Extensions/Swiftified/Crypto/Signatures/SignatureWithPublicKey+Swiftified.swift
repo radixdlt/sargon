@@ -11,3 +11,5 @@ extension SignatureWithPublicKey: CustomStringConvertible {
 		"""
 	}
 }
+
+extension SignatureWithPublicKey: IntoSignatureProtocol {}

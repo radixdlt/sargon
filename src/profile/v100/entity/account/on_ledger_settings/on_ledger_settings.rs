@@ -35,6 +35,16 @@ impl OnLedgerSettings {
     }
 }
 
+impl HasSampleValues for OnLedgerSettings {
+    fn sample() -> Self {
+        Self::new(ThirdPartyDeposits::sample())
+    }
+
+    fn sample_other() -> Self {
+        Self::new(ThirdPartyDeposits::sample_other())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;

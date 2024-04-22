@@ -13,7 +13,7 @@ class NeverEmptyIdentifiedCollectionTest<SUT_: NeverEmptyIdentifiedCollection>: 
 	func test_removing_element_by_id() throws {
 		let sut = try SUT([.sample, .sampleOther])
 		XCTAssertEqual(
-			try sut.removingElementByID(SUTElement.sample.id),
+			try sut.removing(SUTElement.sample.id),
 			try SUT([.sampleOther])
 		)
 	}
@@ -28,7 +28,7 @@ class NeverEmptyIdentifiedCollectionTest<SUT_: NeverEmptyIdentifiedCollection>: 
 
 	func test_removing_element_by_id_throws_if_single_element() throws {
 		let sut = try SUT([.sample])
-		XCTAssertThrowsError(try sut.removingElementByID(SUTElement.sample.id))
+		XCTAssertThrowsError(try sut.removing(SUTElement.sample.id))
 	}
 	
 	func test_removing_by_element_throws_if_single_element() throws {
@@ -38,7 +38,7 @@ class NeverEmptyIdentifiedCollectionTest<SUT_: NeverEmptyIdentifiedCollection>: 
 	
 	func test_remove_element_by_id() throws {
 		var sut = try SUT([.sample, .sampleOther])
-		try sut.removeElementByID(SUTElement.sample.id)
+		try sut.remove(SUTElement.sample.id)
 		XCTAssertEqual(
 			sut,
 			try SUT([.sampleOther])

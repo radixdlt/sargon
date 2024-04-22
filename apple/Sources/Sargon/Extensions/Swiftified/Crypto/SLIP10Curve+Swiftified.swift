@@ -15,3 +15,11 @@ extension SLIP10Curve: CustomStringConvertible {
 		toString()
 	}
 }
+
+extension SLIP10Curve {
+	public init?(rawValue: String) {
+		try? self.init(rawValue)
+	}
+}
+
+extension SLIP10Curve: SargonStringCodable {}

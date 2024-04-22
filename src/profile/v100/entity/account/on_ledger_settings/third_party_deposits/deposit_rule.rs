@@ -34,6 +34,16 @@ impl Default for DepositRule {
     }
 }
 
+impl HasSampleValues for DepositRule {
+    fn sample() -> Self {
+        Self::AcceptKnown
+    }
+
+    fn sample_other() -> Self {
+        Self::AcceptAll
+    }
+}
+
 impl From<DepositRule> for ScryptoDefaultDepositRule {
     fn from(value: DepositRule) -> Self {
         match value {
@@ -64,6 +74,17 @@ mod tests {
     type SUT = DepositRule;
 
     #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
     fn json_roundtrip_accept_all() {
         assert_json_value_eq_after_roundtrip(
             &SUT::AcceptAll,
@@ -73,10 +94,16 @@ mod tests {
     }
 
     #[test]
-    fn inequality() {
-        assert_ne!(SUT::AcceptAll, SUT::DenyAll);
-        assert_ne!(SUT::DenyAll, SUT::AcceptKnown);
-        assert_ne!(SUT::AcceptAll, SUT::AcceptKnown);
+    fn from_json_str() {
+        assert_eq!(
+            SUT::new_from_json_string("acceptAll").unwrap(),
+            SUT::AcceptAll
+        );
+        assert_eq!(SUT::new_from_json_string("denyAll").unwrap(), SUT::DenyAll);
+        assert_eq!(
+            SUT::new_from_json_string("acceptKnown").unwrap(),
+            SUT::AcceptKnown
+        )
     }
 
     #[test]

@@ -25,9 +25,17 @@ extension FactorSources {
 		newFactorSourcesByAppending(factorSource: factorSource, to: self)
 	}
 	
+	public func updatingOrInserting(element factorSource: Element, at index: Int) -> Self {
+		newFactorSourcesByUpdatingOrInsertingAtIndex(factorSource: factorSource, to: self, index: UInt64(index))
+	}
+	
+	public func updatingOrAppending(_ factorSource: FactorSource) -> Self {
+		newFactorSourcesByUpdatingOrAppending(factorSource: factorSource, to: self)
+	}
+	
 	/// FactorSources is NonEmpty, so this throws if the resulting collection would be empty when removing
 	/// the element by ID would result in an empty copy.
-	public func removingElementByID(_ id: FactorSource.ID) throws -> Self {
+	public func removing(_ id: FactorSource.ID) throws -> Self {
 		try newFactorSourcesRemovedById(idOfFactorSource: id, from: self)
 	}
 	

@@ -1,7 +1,7 @@
 pub trait IsPublicKey<S>: Sized {
-    fn is_valid(
+    fn is_valid_signature_for_hash(
         &self,
         signature: &S,
-        for_hash: &impl radix_engine_common::crypto::IsHash,
+        hash: &impl radix_engine_common::crypto::IsHash,
     ) -> bool;
 }

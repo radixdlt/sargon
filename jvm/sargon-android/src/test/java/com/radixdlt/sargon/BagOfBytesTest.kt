@@ -86,10 +86,8 @@ class BagOfBytesTest {
         assertEquals(size, set.size)
 
         assertEquals(
-            Exactly32Bytes.init(
-                "6d489e03addfb79d72a06af90ecfe3c13fe4026effa0f8940cd1232e825e6792".hexToBagOfBytes()
-            ),
-            acedBagOfBytesSample.hash()
+            "6d489e03addfb79d72a06af90ecfe3c13fe4026effa0f8940cd1232e825e6792",
+            acedBagOfBytesSample.hash().hex
         )
 
         assertThrows<IllegalStateException>("Should throw exception due to not even character length") {
