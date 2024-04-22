@@ -1,8 +1,4 @@
-use super::authorized_request::DappToWalletInteractionAuthorizedRequestItems;
-use super::transaction::DappToWalletInteractionTransactionItems;
-use super::unauthorized_request::DappToWalletInteractionUnauthorizedRequestItems;
 use crate::prelude::*;
-use serde::Deserialize;
 
 #[derive(Debug, Deserialize, PartialEq, uniffi::Enum)]
 #[serde(tag = "discriminator")]

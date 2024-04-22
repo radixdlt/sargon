@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use serde::Deserialize;
 
 #[derive(Debug, Deserialize, PartialEq, uniffi::Record, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -9,6 +8,16 @@ pub struct DappToWalletInteractionMetadata {
     pub origin: Url,
     #[serde(rename = "dAppDefinitionAddress")]
     pub dapp_definition_address: DappDefinitionAddress,
+}
+
+#[derive(Debug, Deserialize, PartialEq, uniffi::Record, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct DappToWalletInteractionMetadataUnvalidated {
+    pub version: WalletInteractionVersion,
+    pub network_id: NetworkID,
+    pub origin: Url,
+    #[serde(rename = "dAppDefinitionAddress")]
+    pub dapp_definition_address: String,
 }
 
 impl HasSampleValues for DappToWalletInteractionMetadata {

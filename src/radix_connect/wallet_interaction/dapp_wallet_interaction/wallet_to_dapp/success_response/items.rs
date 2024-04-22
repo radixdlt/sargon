@@ -11,3 +11,16 @@ pub enum DappWalletInteractionResponseItems {
     #[serde(rename = "transaction")]
     Transaction(DappWalletInteractionTransactionResponseItems),
 }
+
+impl HasSampleValues for DappWalletInteractionResponseItems {
+    fn sample() -> Self {
+        DappWalletInteractionResponseItems::AuthorizedRequest(
+            DappWalletInteractionAuthorizedRequestResponseItems::sample(),
+        )
+    }
+    fn sample_other() -> Self {
+        DappWalletInteractionResponseItems::Transaction(
+            DappWalletInteractionTransactionResponseItems::sample_other(),
+        )
+    }
+}

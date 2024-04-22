@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use serde::Deserialize;
 
 #[derive(Debug, Deserialize, PartialEq, uniffi::Record)]
 pub struct DappToWalletInteractionAuthLoginWithChallengeRequestItem {

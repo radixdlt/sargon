@@ -1,7 +1,4 @@
-use super::auth_use_persona::DappToWalletInteractionAuthUsePersonaRequestItem;
-use super::login_with_challenge::DappToWalletInteractionAuthLoginWithChallengeRequestItem;
 use crate::prelude::*;
-use serde::Deserialize;
 
 #[derive(Debug, Deserialize, PartialEq, uniffi::Enum)]
 #[serde(tag = "discriminator")]

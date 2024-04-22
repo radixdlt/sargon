@@ -9,6 +9,24 @@ pub struct DappWalletInteractionFailureResponse {
     pub message: Option<String>,
 }
 
+impl HasSampleValues for DappWalletInteractionFailureResponse {
+    fn sample() -> Self {
+        Self {
+            interaction_id: WalletInteractionId::sample(),
+            error: DappWalletInteractionErrorType::sample(),
+            message: Some("sample1".to_string()),
+        }
+    }
+
+    fn sample_other() -> Self {
+        Self {
+            interaction_id: WalletInteractionId::sample_other(),
+            error: DappWalletInteractionErrorType::sample_other(),
+            message: Some("sample2".to_string()),
+        }
+    }
+}
+
 #[derive(Debug, Serialize, PartialEq, uniffi::Enum)]
 pub enum DappWalletInteractionErrorType {
     RejectedByUser,
@@ -32,4 +50,14 @@ pub enum DappWalletInteractionErrorType {
     InvalidRequest,
     IncompatibleVersion,
     FailedToSignAuthChallenge,
+}
+
+impl HasSampleValues for DappWalletInteractionErrorType {
+    fn sample() -> Self {
+        DappWalletInteractionErrorType::FailedToPrepareTransaction
+    }
+
+    fn sample_other() -> Self {
+        DappWalletInteractionErrorType::FailedToCompileTransaction
+    }
 }

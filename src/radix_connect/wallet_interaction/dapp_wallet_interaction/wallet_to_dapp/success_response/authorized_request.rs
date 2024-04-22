@@ -18,3 +18,41 @@ pub struct DappWalletInteractionAuthorizedRequestResponseItems {
     pub one_time_persona_data:
         Option<DappWalletInteractionPersonaDataRequestResponseItem>,
 }
+
+impl HasSampleValues for DappWalletInteractionAuthorizedRequestResponseItems {
+    fn sample() -> Self {
+        Self {
+            auth: DappWalletInteractionAuthRequestResponseItem::sample(),
+            ongoing_accounts: Some(
+                DappWalletInteractionAccountsRequestResponseItem::sample(),
+            ),
+            ongoing_persona_data: Some(
+                DappWalletInteractionPersonaDataRequestResponseItem::sample(),
+            ),
+            one_time_accounts: Some(
+                DappWalletInteractionAccountsRequestResponseItem::sample(),
+            ),
+            one_time_persona_data: Some(
+                DappWalletInteractionPersonaDataRequestResponseItem::sample(),
+            ),
+        }
+    }
+
+    fn sample_other() -> Self {
+        Self {
+            auth: DappWalletInteractionAuthRequestResponseItem::sample_other(),
+            ongoing_accounts: Some(
+                DappWalletInteractionAccountsRequestResponseItem::sample_other(),
+            ),
+            ongoing_persona_data: Some(
+                DappWalletInteractionPersonaDataRequestResponseItem::sample_other(),
+            ),
+            one_time_accounts: Some(
+                DappWalletInteractionAccountsRequestResponseItem::sample_other(),
+            ),
+            one_time_persona_data: Some(
+                DappWalletInteractionPersonaDataRequestResponseItem::sample_other(),
+            ),
+        }
+    }
+}

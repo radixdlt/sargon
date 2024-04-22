@@ -1,8 +1,6 @@
 use super::interaction_items::DappToWalletInteractionItems;
 use super::interaction_metadata::DappToWalletInteractionMetadata;
 use crate::prelude::*;
-use serde::Serialize;
-use std::collections::HashMap;
 
 #[derive(Debug, Deserialize, PartialEq, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
@@ -10,6 +8,28 @@ pub struct DappToWalletInteraction {
     pub interaction_id: WalletInteractionId,
     pub items: DappToWalletInteractionItems,
     pub metadata: DappToWalletInteractionMetadata,
+}
+
+
+#[derive(Debug, Deserialize, PartialEq, uniffi::Record)]
+#[serde(rename_all = "camelCase")]
+pub struct DappToWalletInteractionUnvalidated {
+    pub interaction_id: WalletInteractionId,
+    pub items: DappToWalletInteractionItems,
+    pub metadata: DappToWalletInteractionMetadataUnvalidated,
+}
+
+impl DappToWalletInteraction {
+  pub fn from_json_bag_of_bytes(json: impl AsRef<[u8]>) -> Result<Self> {
+    let json = json.as_ref();
+    serde_json::from_slice::<DappToWalletInteraction>(json)
+.map_err(|e| {
+  error!("Failed to deserialize JSON as EncryptedProfileSnapshot, error: {:?}", e);
+        CommonError::FailedToDeserializeJSONToValue {
+            json_byte_count: json.len() as u64,
+            type_name: "EncryptedProfileSnapshot".to_owned(),
+        }})
+  }
 }
 
 impl HasSampleValues for DappToWalletInteraction {

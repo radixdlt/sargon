@@ -1,6 +1,4 @@
 use crate::prelude::*;
-use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 
 uniffi::custom_newtype!(WalletInteractionId, String);
 
