@@ -515,6 +515,29 @@ mod wallet_to_dapp_interaction_tests {
 
     #[test]
     fn test_vector() {
+        let persona_data = DappWalletInteractionPersonaDataRequestResponseItem {
+            name: Some(PersonaDataEntryName {
+                nickname: "Nick".into(),
+                given_names: "Given".into(),
+                family_name: "Family".into(),
+                variant: PersonaDataNameVariant::Western,
+            }),
+            email_addresses: Some(vec![PersonaDataEntryEmailAddress::new("some@gmail.com").unwrap()]),
+            phone_numbers: Some(vec![PersonaDataEntryPhoneNumber::new("071234579").unwrap()])
+        };
+
+        let account_1 = WalletInteractionWalletAccount {
+            label: "Dff".into(),
+            address: AccountAddress::from_str("account_tdx_2_129qeystv8tufmkmjrry2g6kadhhfh4f7rd0x3t9yagcvfhspt62paz").unwrap(),
+            appearance_id: AppearanceID::gradient0(),
+        };
+
+        let account_2 = WalletInteractionWalletAccount {
+            label: "Ghhvgfvf".into(),
+            address: AccountAddress::from_str("account_tdx_2_128928hvf6pjr3rx2xvdw6ulf7pc8g88ya8ma3j8dtjmntckz09fr3n").unwrap(),
+            appearance_id: AppearanceID::gradient1(),
+        };
+
         let response = DappWalletInteractionResponse::Success(DappWalletInteractionSuccessResponse {
         interaction_id: "06f00fbc-67ed-4a22-a122-1da719b25b6f".into(),
         items: DappWalletInteractionResponseItems::AuthorizedRequest(DappWalletInteractionAuthorizedRequestResponseItems {
@@ -532,21 +555,10 @@ mod wallet_to_dapp_interaction_tests {
             }),
             ongoing_accounts: Some(DappWalletInteractionAccountsRequestResponseItem {
                 challenge: Some(Exactly32Bytes::from_hex("069ef236486d4cd5706b5e5b168e19f750ffd1b4876529a0a9de966d50a15ab7").unwrap()),
-                accounts: vec![
-                    WalletInteractionWalletAccount {
-                        label: "Dff".into(),
-                        address: AccountAddress::from_str("account_tdx_2_129qeystv8tufmkmjrry2g6kadhhfh4f7rd0x3t9yagcvfhspt62paz").unwrap(),
-                        appearance_id: AppearanceID::gradient0(),
-                    },
-                    WalletInteractionWalletAccount {
-                        label: "Ghhvgfvf".into(),
-                        address: AccountAddress::from_str("account_tdx_2_128928hvf6pjr3rx2xvdw6ulf7pc8g88ya8ma3j8dtjmntckz09fr3n").unwrap(),
-                        appearance_id: AppearanceID::gradient1(),
-                    },
-                ],
+                accounts: vec![account_1.clone(), account_2.clone()],
                 proofs: Some(vec![
                     DappWalletInteractionAccountProof {
-                        account_address: AccountAddress::from_str("account_tdx_2_129qeystv8tufmkmjrry2g6kadhhfh4f7rd0x3t9yagcvfhspt62paz").unwrap(),
+                        account_address: account_1.address.clone(),
                         proof: DappWalletInteractionAuthProof {
                             curve: SLIP10Curve::Curve25519,
                             public_key: "11b162e3343ce770b6e9ed8a29d125b5580d1272b0dc4e2bd0fcae33320d9566".to_string(),
@@ -554,7 +566,7 @@ mod wallet_to_dapp_interaction_tests {
                         },
                     },
                     DappWalletInteractionAccountProof {
-                        account_address: AccountAddress::from_str("account_tdx_2_128928hvf6pjr3rx2xvdw6ulf7pc8g88ya8ma3j8dtjmntckz09fr3n").unwrap(),
+                        account_address: account_2.address.clone(),
                         proof: DappWalletInteractionAuthProof {
                             curve: SLIP10Curve::Curve25519,
                             public_key: "5386353e4cc27e3d27d064d777d811e242a16ba7aefd425062ed46631739619d".to_string(),
@@ -563,33 +575,53 @@ mod wallet_to_dapp_interaction_tests {
                     },
                 ]),
             }),
-            ongoing_persona_data: Some(
-                DappWalletInteractionPersonaDataRequestResponseItem {
-                    name: Some(PersonaDataEntryName {
-                        nickname: "Nick".into(),
-                        given_names: "Given".into(),
-                        family_name: "Family".into(),
-                        variant: Variant::Western,
-                    }),
-                    email_addresses: Some(vec![PersonaDataEntryEmailAddress::new("some@gmail.com").unwrap()]),
-                    phone_numbers: Some(vec![PersonaDataEntryPhoneNumber::new("071234579").unwrap()])
-                }
-            ),
+            ongoing_persona_data: Some(persona_data.clone()),
             one_time_accounts: None,
             one_time_persona_data: None,
         }),
     });
 
-        let encoded = serde_json::to_string(&response).unwrap();
-        let serde_value: Value = serde_json::from_str(&encoded).unwrap();
-        let fixture = fixture::<Value>(include_str!(concat!(
+    let unauthorized_request_response = DappWalletInteractionResponse::Success(DappWalletInteractionSuccessResponse {
+        interaction_id: "278608e0-e5ca-416e-8339-f2d2695651c4".into(),
+        items: DappWalletInteractionResponseItems::UnauthorizedRequest(DappWalletInteractionUnauthorizedRequestResponseItems {
+            one_time_accounts: Some(DappWalletInteractionAccountsRequestResponseItem {
+                accounts: vec![account_1.clone()],
+                challenge: None,
+                proofs: None,
+            }),
+            one_time_persona_data: Some(persona_data.clone()),
+        }),
+        });
+
+    let failure_response = DappWalletInteractionResponse::Failure(DappWalletInteractionFailureResponse {
+        interaction_id: "278608e0-e5ca-416e-8339-f2d2695651c4".into(),
+        error: DappWalletInteractionErrorType::RejectedByUser,
+        message: Some("User rejected the request".to_string()),
+    });
+
+    let transaction_response = DappWalletInteractionResponse::Success(DappWalletInteractionSuccessResponse {
+        interaction_id: "c42f8825-4bbb-4ce2-a646-776b529e2f51".into(),
+        items: DappWalletInteractionResponseItems::Transaction(DappWalletInteractionTransactionResponseItems {
+            send: DappWalletInteractionSendTransactionResponseItem {
+                transaction_intent_hash: "txid_tdx_2_1mwuvufnewv6qkxdaesx0gcwap7n79knhkn0crsc8dg9g9k7qknjs6vkd3n".to_string(),
+            },
+        }),
+    });
+
+        let responses = vec![response, unauthorized_request_response, failure_response, transaction_response];
+
+        let encoded = serde_json::to_string(&responses).unwrap();
+        let serde_value: Vec<Value> = serde_json::from_str(&encoded).unwrap();
+        let fixture = fixture::<Vec<Value>>(include_str!(concat!(
             env!("FIXTURES_VECTOR"),
             "wallet_interactions_wallet_to_dapp.json"
         )))
         .expect("BIP44 fixture");
 
-        pretty_assertions::assert_eq!(serde_value, fixture);
-            }
+        for (serde_value, fixture) in serde_value.iter().zip(fixture.iter()) {
+            pretty_assertions::assert_eq!(serde_value, fixture);
+        }
+    }
 }
 
 mod encrypted_profile_tests {

@@ -6,6 +6,7 @@ use serde::Serialize;
 pub struct DappWalletInteractionFailureResponse {
     pub interaction_id: WalletInteractionId,
     pub error: DappWalletInteractionErrorType,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
 
@@ -28,6 +29,7 @@ impl HasSampleValues for DappWalletInteractionFailureResponse {
 }
 
 #[derive(Debug, Serialize, PartialEq, uniffi::Enum)]
+#[serde(rename_all = "camelCase")]
 pub enum DappWalletInteractionErrorType {
     RejectedByUser,
     WrongNetwork,

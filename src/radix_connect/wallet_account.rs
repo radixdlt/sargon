@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Debug, Serialize, PartialEq, uniffi::Record)]
+#[derive(Debug, Serialize, PartialEq, Clone, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct WalletInteractionWalletAccount {
     pub address: AccountAddress,
