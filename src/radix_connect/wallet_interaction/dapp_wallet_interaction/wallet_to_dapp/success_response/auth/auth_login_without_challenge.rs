@@ -1,11 +1,11 @@
 use crate::prelude::*;
 
 #[derive(Debug, Serialize, PartialEq, uniffi::Record)]
-pub struct DappWalletInteractionAuthLoginWithoutChallengeRequestResponseItem {
+pub struct WalletToDappInteractionAuthLoginWithoutChallengeRequestResponseItem {
     pub persona: DappWalletInteractionPersona,
 }
 
-impl HasSampleValues for DappWalletInteractionAuthLoginWithoutChallengeRequestResponseItem {
+impl HasSampleValues for WalletToDappInteractionAuthLoginWithoutChallengeRequestResponseItem {
     fn sample() -> Self {
         Self {
             persona: DappWalletInteractionPersona::sample(),

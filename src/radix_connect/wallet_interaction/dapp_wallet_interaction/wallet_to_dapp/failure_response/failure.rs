@@ -2,14 +2,14 @@ use crate::prelude::*;
 
 #[derive(Debug, Serialize, PartialEq, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
-pub struct DappWalletInteractionFailureResponse {
+pub struct WalletToDappInteractionFailureResponse {
     pub interaction_id: WalletInteractionId,
     pub error: DappWalletInteractionErrorType,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
 
-impl HasSampleValues for DappWalletInteractionFailureResponse {
+impl HasSampleValues for WalletToDappInteractionFailureResponse {
     fn sample() -> Self {
         Self {
             interaction_id: WalletInteractionId::sample(),

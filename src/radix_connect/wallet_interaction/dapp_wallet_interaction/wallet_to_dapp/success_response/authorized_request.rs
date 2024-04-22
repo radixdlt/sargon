@@ -2,55 +2,55 @@ use crate::prelude::*;
 
 #[derive(Debug, Serialize, PartialEq, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
-pub struct DappWalletInteractionAuthorizedRequestResponseItems {
-    pub auth: DappWalletInteractionAuthRequestResponseItem,
+pub struct WalletToDappInteractionAuthorizedRequestResponseItems {
+    pub auth: WalletToDappInteractionAuthRequestResponseItem,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ongoing_accounts:
-        Option<DappWalletInteractionAccountsRequestResponseItem>,
+        Option<WalletToDappInteractionAccountsRequestResponseItem>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ongoing_persona_data:
-        Option<DappWalletInteractionPersonaDataRequestResponseItem>,
+        Option<WalletToDappInteractionPersonaDataRequestResponseItem>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub one_time_accounts:
-        Option<DappWalletInteractionAccountsRequestResponseItem>,
+        Option<WalletToDappInteractionAccountsRequestResponseItem>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub one_time_persona_data:
-        Option<DappWalletInteractionPersonaDataRequestResponseItem>,
+        Option<WalletToDappInteractionPersonaDataRequestResponseItem>,
 }
 
-impl HasSampleValues for DappWalletInteractionAuthorizedRequestResponseItems {
+impl HasSampleValues for WalletToDappInteractionAuthorizedRequestResponseItems {
     fn sample() -> Self {
         Self {
-            auth: DappWalletInteractionAuthRequestResponseItem::sample(),
+            auth: WalletToDappInteractionAuthRequestResponseItem::sample(),
             ongoing_accounts: Some(
-                DappWalletInteractionAccountsRequestResponseItem::sample(),
+                WalletToDappInteractionAccountsRequestResponseItem::sample(),
             ),
             ongoing_persona_data: Some(
-                DappWalletInteractionPersonaDataRequestResponseItem::sample(),
+                WalletToDappInteractionPersonaDataRequestResponseItem::sample(),
             ),
             one_time_accounts: Some(
-                DappWalletInteractionAccountsRequestResponseItem::sample(),
+                WalletToDappInteractionAccountsRequestResponseItem::sample(),
             ),
             one_time_persona_data: Some(
-                DappWalletInteractionPersonaDataRequestResponseItem::sample(),
+                WalletToDappInteractionPersonaDataRequestResponseItem::sample(),
             ),
         }
     }
 
     fn sample_other() -> Self {
         Self {
-            auth: DappWalletInteractionAuthRequestResponseItem::sample_other(),
+            auth: WalletToDappInteractionAuthRequestResponseItem::sample_other(),
             ongoing_accounts: Some(
-                DappWalletInteractionAccountsRequestResponseItem::sample_other(),
+                WalletToDappInteractionAccountsRequestResponseItem::sample_other(),
             ),
             ongoing_persona_data: Some(
-                DappWalletInteractionPersonaDataRequestResponseItem::sample_other(),
+                WalletToDappInteractionPersonaDataRequestResponseItem::sample_other(),
             ),
             one_time_accounts: Some(
-                DappWalletInteractionAccountsRequestResponseItem::sample_other(),
+                WalletToDappInteractionAccountsRequestResponseItem::sample_other(),
             ),
             one_time_persona_data: Some(
-                DappWalletInteractionPersonaDataRequestResponseItem::sample_other(),
+                WalletToDappInteractionPersonaDataRequestResponseItem::sample_other(),
             ),
         }
     }

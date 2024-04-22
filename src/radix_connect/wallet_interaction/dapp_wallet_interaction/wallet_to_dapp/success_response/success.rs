@@ -2,23 +2,23 @@ use crate::prelude::*;
 
 #[derive(Debug, Serialize, PartialEq, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
-pub struct DappWalletInteractionSuccessResponse {
+pub struct WalletToDappInteractionSuccessResponse {
     pub interaction_id: WalletInteractionId,
-    pub items: DappWalletInteractionResponseItems,
+    pub items: WalletToDappInteractionResponseItems,
 }
 
-impl HasSampleValues for DappWalletInteractionSuccessResponse {
+impl HasSampleValues for WalletToDappInteractionSuccessResponse {
     fn sample() -> Self {
         Self {
             interaction_id: WalletInteractionId::sample(),
-            items: DappWalletInteractionResponseItems::sample(),
+            items: WalletToDappInteractionResponseItems::sample(),
         }
     }
 
     fn sample_other() -> Self {
         Self {
             interaction_id: WalletInteractionId::sample_other(),
-            items: DappWalletInteractionResponseItems::sample_other(),
+            items: WalletToDappInteractionResponseItems::sample_other(),
         }
     }
 }

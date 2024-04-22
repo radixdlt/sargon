@@ -2,24 +2,24 @@ use crate::prelude::*;
 
 #[derive(Debug, Serialize, PartialEq, uniffi::Enum)]
 #[serde(tag = "discriminator")]
-pub enum DappWalletInteractionResponseItems {
+pub enum WalletToDappInteractionResponseItems {
     #[serde(rename = "authorizedRequest")]
-    AuthorizedRequest(DappWalletInteractionAuthorizedRequestResponseItems),
+    AuthorizedRequest(WalletToDappInteractionAuthorizedRequestResponseItems),
     #[serde(rename = "unauthorizedRequest")]
-    UnauthorizedRequest(DappWalletInteractionUnauthorizedRequestResponseItems),
+    UnauthorizedRequest(WalletToDappInteractionUnauthorizedRequestResponseItems),
     #[serde(rename = "transaction")]
-    Transaction(DappWalletInteractionTransactionResponseItems),
+    Transaction(WalletToDappInteractionTransactionResponseItems),
 }
 
-impl HasSampleValues for DappWalletInteractionResponseItems {
+impl HasSampleValues for WalletToDappInteractionResponseItems {
     fn sample() -> Self {
-        DappWalletInteractionResponseItems::AuthorizedRequest(
-            DappWalletInteractionAuthorizedRequestResponseItems::sample(),
+        WalletToDappInteractionResponseItems::AuthorizedRequest(
+            WalletToDappInteractionAuthorizedRequestResponseItems::sample(),
         )
     }
     fn sample_other() -> Self {
-        DappWalletInteractionResponseItems::Transaction(
-            DappWalletInteractionTransactionResponseItems::sample_other(),
+        WalletToDappInteractionResponseItems::Transaction(
+            WalletToDappInteractionTransactionResponseItems::sample_other(),
         )
     }
 }

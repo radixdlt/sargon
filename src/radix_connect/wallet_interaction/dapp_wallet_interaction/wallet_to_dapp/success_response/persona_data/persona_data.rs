@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 #[derive(Debug, Serialize, PartialEq, Clone, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
-pub struct DappWalletInteractionPersonaDataRequestResponseItem {
+pub struct WalletToDappInteractionPersonaDataRequestResponseItem {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<PersonaDataEntryName>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -11,7 +11,7 @@ pub struct DappWalletInteractionPersonaDataRequestResponseItem {
     pub phone_numbers: Option<Vec<PersonaDataEntryPhoneNumber>>,
 }
 
-impl HasSampleValues for DappWalletInteractionPersonaDataRequestResponseItem {
+impl HasSampleValues for WalletToDappInteractionPersonaDataRequestResponseItem {
     fn sample() -> Self {
         Self {
             name: Some(PersonaDataEntryName::sample()),

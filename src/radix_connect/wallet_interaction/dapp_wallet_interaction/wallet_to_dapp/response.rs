@@ -2,18 +2,18 @@ use crate::prelude::*;
 
 #[derive(Debug, Serialize, PartialEq, uniffi::Enum)]
 #[serde(tag = "discriminator")]
-pub enum DappWalletInteractionResponse {
+pub enum WalletToDappInteractionResponse {
     #[serde(rename = "success")]
-    Success(DappWalletInteractionSuccessResponse),
+    Success(WalletToDappInteractionSuccessResponse),
     #[serde(rename = "failure")]
-    Failure(DappWalletInteractionFailureResponse),
+    Failure(WalletToDappInteractionFailureResponse),
 }
 
-impl HasSampleValues for DappWalletInteractionResponse {
+impl HasSampleValues for WalletToDappInteractionResponse {
     fn sample() -> Self {
-        DappWalletInteractionResponse::Success(DappWalletInteractionSuccessResponse::sample())
+        WalletToDappInteractionResponse::Success(WalletToDappInteractionSuccessResponse::sample())
     }
     fn sample_other() -> Self {
-        DappWalletInteractionResponse::Failure(DappWalletInteractionFailureResponse::sample())
+        WalletToDappInteractionResponse::Failure(WalletToDappInteractionFailureResponse::sample())
     }
 }

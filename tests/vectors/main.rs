@@ -515,7 +515,7 @@ mod wallet_to_dapp_interaction_tests {
 
     #[test]
     fn test_vector() {
-        let persona_data = DappWalletInteractionPersonaDataRequestResponseItem {
+        let persona_data = WalletToDappInteractionPersonaDataRequestResponseItem {
             name: Some(PersonaDataEntryName {
                 nickname: "Nick".into(),
                 given_names: "Given".into(),
@@ -538,11 +538,11 @@ mod wallet_to_dapp_interaction_tests {
             appearance_id: AppearanceID::gradient1(),
         };
 
-        let response = DappWalletInteractionResponse::Success(DappWalletInteractionSuccessResponse {
+        let response = WalletToDappInteractionResponse::Success(WalletToDappInteractionSuccessResponse {
         interaction_id: "06f00fbc-67ed-4a22-a122-1da719b25b6f".into(),
-        items: DappWalletInteractionResponseItems::AuthorizedRequest(DappWalletInteractionAuthorizedRequestResponseItems {
-            auth: DappWalletInteractionAuthRequestResponseItem::LoginWithChallenge(DappWalletInteractionAuthLoginWithChallengeRequestResponseItem {
-                proof: DappWalletInteractionAuthProof {
+        items: WalletToDappInteractionResponseItems::AuthorizedRequest(WalletToDappInteractionAuthorizedRequestResponseItems {
+            auth: WalletToDappInteractionAuthRequestResponseItem::LoginWithChallenge(WalletToDappInteractionAuthLoginWithChallengeRequestResponseItem {
+                proof: WalletToDappInteractionAuthProof {
                     curve: SLIP10Curve::Curve25519,
                     public_key: "ff8aee4c625738e35d837edb11e33b8abe0d6f40849ca1451edaba84d04d0699".to_string(),
                     signature: "10177ac7d486691777133ffe59d46d55529d86cb1c4ce66aa82f432372f33e24d803d8498f42e26fe113c030fce68c526aeacff94334ba5a7f7ef84c2936eb05".to_string(),
@@ -553,21 +553,21 @@ mod wallet_to_dapp_interaction_tests {
                     identity_address: IdentityAddress::from_str("identity_tdx_2_12twas58v4sthsmuky5653dup0drez3vcfwsfm6kp40qu9qyt8fgts6").unwrap(),
                 },
             }),
-            ongoing_accounts: Some(DappWalletInteractionAccountsRequestResponseItem {
+            ongoing_accounts: Some(WalletToDappInteractionAccountsRequestResponseItem {
                 challenge: Some(Exactly32Bytes::from_hex("069ef236486d4cd5706b5e5b168e19f750ffd1b4876529a0a9de966d50a15ab7").unwrap()),
                 accounts: vec![account_1.clone(), account_2.clone()],
                 proofs: Some(vec![
-                    DappWalletInteractionAccountProof {
+                    WalletToDappInteractionAccountProof {
                         account_address: account_1.address.clone(),
-                        proof: DappWalletInteractionAuthProof {
+                        proof: WalletToDappInteractionAuthProof {
                             curve: SLIP10Curve::Curve25519,
                             public_key: "11b162e3343ce770b6e9ed8a29d125b5580d1272b0dc4e2bd0fcae33320d9566".to_string(),
                             signature: "e18617b527d4d33607a8adb6a040c26ca97642ec89dd8a6fe7a41fa724473e4cc69b0729c1df57aba77455801f2eef6f28848a5d206e3739de29ca2288957502".to_string(),
                         },
                     },
-                    DappWalletInteractionAccountProof {
+                    WalletToDappInteractionAccountProof {
                         account_address: account_2.address.clone(),
-                        proof: DappWalletInteractionAuthProof {
+                        proof: WalletToDappInteractionAuthProof {
                             curve: SLIP10Curve::Curve25519,
                             public_key: "5386353e4cc27e3d27d064d777d811e242a16ba7aefd425062ed46631739619d".to_string(),
                             signature: "0143fd941d51f531c8265b0f6b24f4cfcdfd24b40aac47dee6fb3386ce0d400563c892e3894a33840d1c7af2dd43ecd0729fd209171003765d109a04d7485605".to_string(),
@@ -581,10 +581,10 @@ mod wallet_to_dapp_interaction_tests {
         }),
     });
 
-    let unauthorized_request_response = DappWalletInteractionResponse::Success(DappWalletInteractionSuccessResponse {
+    let unauthorized_request_response = WalletToDappInteractionResponse::Success(WalletToDappInteractionSuccessResponse {
         interaction_id: "278608e0-e5ca-416e-8339-f2d2695651c4".into(),
-        items: DappWalletInteractionResponseItems::UnauthorizedRequest(DappWalletInteractionUnauthorizedRequestResponseItems {
-            one_time_accounts: Some(DappWalletInteractionAccountsRequestResponseItem {
+        items: WalletToDappInteractionResponseItems::UnauthorizedRequest(WalletToDappInteractionUnauthorizedRequestResponseItems {
+            one_time_accounts: Some(WalletToDappInteractionAccountsRequestResponseItem {
                 accounts: vec![account_1.clone()],
                 challenge: None,
                 proofs: None,
@@ -593,16 +593,16 @@ mod wallet_to_dapp_interaction_tests {
         }),
         });
 
-    let failure_response = DappWalletInteractionResponse::Failure(DappWalletInteractionFailureResponse {
+    let failure_response = WalletToDappInteractionResponse::Failure(WalletToDappInteractionFailureResponse {
         interaction_id: "278608e0-e5ca-416e-8339-f2d2695651c4".into(),
         error: DappWalletInteractionErrorType::RejectedByUser,
         message: Some("User rejected the request".to_string()),
     });
 
-    let transaction_response = DappWalletInteractionResponse::Success(DappWalletInteractionSuccessResponse {
+    let transaction_response = WalletToDappInteractionResponse::Success(WalletToDappInteractionSuccessResponse {
         interaction_id: "c42f8825-4bbb-4ce2-a646-776b529e2f51".into(),
-        items: DappWalletInteractionResponseItems::Transaction(DappWalletInteractionTransactionResponseItems {
-            send: DappWalletInteractionSendTransactionResponseItem {
+        items: WalletToDappInteractionResponseItems::Transaction(WalletToDappInteractionTransactionResponseItems {
+            send: WalletToDappInteractionSendTransactionResponseItem {
                 transaction_intent_hash: "txid_tdx_2_1mwuvufnewv6qkxdaesx0gcwap7n79knhkn0crsc8dg9g9k7qknjs6vkd3n".to_string(),
             },
         }),

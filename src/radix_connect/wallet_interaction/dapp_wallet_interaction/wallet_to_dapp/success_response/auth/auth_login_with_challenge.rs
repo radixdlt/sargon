@@ -1,18 +1,18 @@
 use crate::prelude::*;
 
 #[derive(Debug, Serialize, PartialEq, uniffi::Record)]
-pub struct DappWalletInteractionAuthLoginWithChallengeRequestResponseItem {
+pub struct WalletToDappInteractionAuthLoginWithChallengeRequestResponseItem {
     pub persona: DappWalletInteractionPersona,
     pub challenge: Exactly32Bytes,
-    pub proof: DappWalletInteractionAuthProof,
+    pub proof: WalletToDappInteractionAuthProof,
 }
 
-impl HasSampleValues for DappWalletInteractionAuthLoginWithChallengeRequestResponseItem {
+impl HasSampleValues for WalletToDappInteractionAuthLoginWithChallengeRequestResponseItem {
     fn sample() -> Self {
         Self {
             persona: DappWalletInteractionPersona::sample(),
             challenge: Exactly32Bytes::sample(),
-            proof: DappWalletInteractionAuthProof::sample(),
+            proof: WalletToDappInteractionAuthProof::sample(),
         }
     }
 
@@ -20,7 +20,7 @@ impl HasSampleValues for DappWalletInteractionAuthLoginWithChallengeRequestRespo
         Self {
             persona: DappWalletInteractionPersona::sample_other(),
             challenge: Exactly32Bytes::sample_other(),
-            proof: DappWalletInteractionAuthProof::sample_other(),
+            proof: WalletToDappInteractionAuthProof::sample_other(),
         }
     }
 }

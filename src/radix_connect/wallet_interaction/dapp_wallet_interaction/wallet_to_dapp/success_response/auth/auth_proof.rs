@@ -2,13 +2,13 @@ use crate::prelude::*;
 
 #[derive(Debug, Serialize, PartialEq, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
-pub struct DappWalletInteractionAuthProof {
+pub struct WalletToDappInteractionAuthProof {
     pub public_key: String,
     pub curve: SLIP10Curve,
     pub signature: String,
 }
 
-impl HasSampleValues for DappWalletInteractionAuthProof {
+impl HasSampleValues for WalletToDappInteractionAuthProof {
     fn sample() -> Self {
         Self {
             public_key: "sample1".to_string(),

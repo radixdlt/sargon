@@ -2,29 +2,29 @@ use crate::prelude::*;
 
 #[derive(Debug, Serialize, PartialEq, uniffi::Enum)]
 #[serde(tag = "discriminator")]
-pub enum DappWalletInteractionAuthRequestResponseItem {
+pub enum WalletToDappInteractionAuthRequestResponseItem {
     #[serde(rename = "usePersona")]
-    UsePersona(DappWalletInteractionAuthUsePersonaRequestResponseItem),
+    UsePersona(WalletToDappInteractionAuthUsePersonaRequestResponseItem),
     #[serde(rename = "loginWithoutChallenge")]
     LoginWithoutChallenge(
-        DappWalletInteractionAuthLoginWithoutChallengeRequestResponseItem,
+        WalletToDappInteractionAuthLoginWithoutChallengeRequestResponseItem,
     ),
     #[serde(rename = "loginWithChallenge")]
     LoginWithChallenge(
-        DappWalletInteractionAuthLoginWithChallengeRequestResponseItem,
+        WalletToDappInteractionAuthLoginWithChallengeRequestResponseItem,
     ),
 }
 
-impl HasSampleValues for DappWalletInteractionAuthRequestResponseItem {
+impl HasSampleValues for WalletToDappInteractionAuthRequestResponseItem {
     fn sample() -> Self {
-        DappWalletInteractionAuthRequestResponseItem::UsePersona(
-            DappWalletInteractionAuthUsePersonaRequestResponseItem::sample(),
+        WalletToDappInteractionAuthRequestResponseItem::UsePersona(
+            WalletToDappInteractionAuthUsePersonaRequestResponseItem::sample(),
         )
     }
 
     fn sample_other() -> Self {
-        DappWalletInteractionAuthRequestResponseItem::LoginWithChallenge(
-            DappWalletInteractionAuthLoginWithChallengeRequestResponseItem::sample_other(),
+        WalletToDappInteractionAuthRequestResponseItem::LoginWithChallenge(
+            WalletToDappInteractionAuthLoginWithChallengeRequestResponseItem::sample_other(),
         )
     }
 }

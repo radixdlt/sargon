@@ -1,30 +1,30 @@
 use crate::prelude::*;
 
 #[derive(Debug, Serialize, PartialEq, uniffi::Record)]
-pub struct DappWalletInteractionTransactionResponseItems {
-    pub send: DappWalletInteractionSendTransactionResponseItem,
+pub struct WalletToDappInteractionTransactionResponseItems {
+    pub send: WalletToDappInteractionSendTransactionResponseItem,
 }
 
 #[derive(Debug, Serialize, PartialEq, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
-pub struct DappWalletInteractionSendTransactionResponseItem {
+pub struct WalletToDappInteractionSendTransactionResponseItem {
     pub transaction_intent_hash: String,
 }
 
-impl HasSampleValues for DappWalletInteractionTransactionResponseItems {
+impl HasSampleValues for WalletToDappInteractionTransactionResponseItems {
     fn sample() -> Self {
         Self {
-            send: DappWalletInteractionSendTransactionResponseItem::sample(),
+            send: WalletToDappInteractionSendTransactionResponseItem::sample(),
         }
     }
     fn sample_other() -> Self {
         Self {
-            send: DappWalletInteractionSendTransactionResponseItem::sample_other(),
+            send: WalletToDappInteractionSendTransactionResponseItem::sample_other(),
         }
     }
 }
 
-impl HasSampleValues for DappWalletInteractionSendTransactionResponseItem {
+impl HasSampleValues for WalletToDappInteractionSendTransactionResponseItem {
     fn sample() -> Self {
         Self {
             transaction_intent_hash: IntentHash::sample().to_string(),
