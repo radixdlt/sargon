@@ -5,11 +5,13 @@ import com.radixdlt.sargon.Cap26KeyKind
 import com.radixdlt.sargon.Cap26Path
 import com.radixdlt.sargon.DerivationPath
 import com.radixdlt.sargon.GetIdPath
+import com.radixdlt.sargon.HdPath
 import com.radixdlt.sargon.NetworkId
 import com.radixdlt.sargon.bip44LikePathGetAddressIndex
 import com.radixdlt.sargon.bip44LikePathToString
 import com.radixdlt.sargon.cap26PathToString
 import com.radixdlt.sargon.defaultGetIdPath
+import com.radixdlt.sargon.derivationPathToHdPath
 import com.radixdlt.sargon.newAccountPath
 import com.radixdlt.sargon.newBip44LikePathFromIndex
 import com.radixdlt.sargon.newBip44LikePathFromString
@@ -65,6 +67,13 @@ val DerivationPath.string: String
         is DerivationPath.Bip44Like -> string
         is DerivationPath.Cap26 -> string
     }
+
+val DerivationPath.hdPath: HdPath
+    get() = derivationPathToHdPath(path = this)
+
+val DerivationPath.nonHardenedIndex: HDPathValue
+    get() = hdPath.components.last() // safe, we disallow empty paths.
+        .nonHardenedValue
 
 fun Bip44LikePath.asGeneral() = DerivationPath.Bip44Like(this)
 fun Cap26Path.asGeneral() = DerivationPath.Cap26(this)

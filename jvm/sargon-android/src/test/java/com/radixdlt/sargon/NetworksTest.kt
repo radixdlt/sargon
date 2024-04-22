@@ -5,9 +5,12 @@ import com.radixdlt.sargon.extensions.contains
 import com.radixdlt.sargon.extensions.get
 import com.radixdlt.sargon.extensions.getBy
 import com.radixdlt.sargon.extensions.init
+import com.radixdlt.sargon.extensions.invoke
 import com.radixdlt.sargon.extensions.remove
 import com.radixdlt.sargon.extensions.removeByNetworkId
 import com.radixdlt.sargon.extensions.size
+import com.radixdlt.sargon.extensions.updateOrAppend
+import com.radixdlt.sargon.extensions.updateOrInsert
 import com.radixdlt.sargon.samples.sampleMainnet
 import com.radixdlt.sargon.samples.sampleStokenet
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -36,6 +39,13 @@ class NetworksTest  {
         list = list.remove(list.getBy(sampleOther.id)!!)
         assertFalse(sampleOther in list)
         assertEquals(1, list.size)
+
+        list = list.updateOrInsert(sampleOther, 0)
+        assertEquals(sampleOther, list()[0])
+        assertTrue(list.size == 2)
+        list = list.updateOrAppend(sampleOther)
+        assertTrue(list.size == 2)
+        list = list.remove(sampleOther)
 
         list = list.append(sampleOther)
         list = list.removeByNetworkId(sampleOther.id)

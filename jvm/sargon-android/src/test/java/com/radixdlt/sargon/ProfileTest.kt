@@ -2,12 +2,9 @@ package com.radixdlt.sargon
 
 import com.radixdlt.sargon.extensions.bagOfBytes
 import com.radixdlt.sargon.extensions.init
-import com.radixdlt.sargon.extensions.deserializeFromBytes
-import com.radixdlt.sargon.extensions.deserializeFromString
+import com.radixdlt.sargon.extensions.deserializeFromJsonString
 import com.radixdlt.sargon.extensions.randomBagOfBytes
-import com.radixdlt.sargon.extensions.serializedBytes
-import com.radixdlt.sargon.extensions.serializedString
-import com.radixdlt.sargon.extensions.toBagOfBytes
+import com.radixdlt.sargon.extensions.serializedJsonString
 import com.radixdlt.sargon.samples.Sample
 import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -37,14 +34,14 @@ class ProfileTest: SampleTestable<Profile> {
     fun testRoundtrip() {
         val sut = Profile.sample()
 
-        assertEquals(sut, Profile.deserializeFromString(jsonString = sut.serializedString()))
+        assertEquals(sut, Profile.deserializeFromJsonString(jsonString = sut.serializedJsonString()))
     }
 
     @Test
     fun testInitFromMalformedJson() {
         val json = "{}"
 
-        val result = runCatching { Profile.deserializeFromString(jsonString = json) }.exceptionOrNull()
+        val result = runCatching { Profile.deserializeFromJsonString(jsonString = json) }.exceptionOrNull()
                 as? CommonException.FailedToDeserializeJsonToValue
 
         assertEquals(

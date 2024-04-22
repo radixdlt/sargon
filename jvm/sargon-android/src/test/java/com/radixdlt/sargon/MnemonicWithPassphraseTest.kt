@@ -1,8 +1,12 @@
 package com.radixdlt.sargon
 
-import com.radixdlt.sargon.extensions.deserializeFromString
+import com.radixdlt.sargon.extensions.derivePublicKey
+import com.radixdlt.sargon.extensions.deserializeFromJsonString
 import com.radixdlt.sargon.extensions.init
-import com.radixdlt.sargon.extensions.serializedString
+import com.radixdlt.sargon.extensions.isValidSignature
+import com.radixdlt.sargon.extensions.serializedJsonString
+import com.radixdlt.sargon.extensions.sign
+import com.radixdlt.sargon.extensions.signature
 import com.radixdlt.sargon.extensions.validate
 import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -21,7 +25,7 @@ class MnemonicWithPassphraseTest {
 
         assertEquals(
             mnemonicWithPassphrase,
-            MnemonicWithPassphrase.deserializeFromString(mnemonicWithPassphrase.serializedString())
+            MnemonicWithPassphrase.deserializeFromJsonString(mnemonicWithPassphrase.serializedJsonString())
         )
     }
 
@@ -34,6 +38,27 @@ class MnemonicWithPassphraseTest {
         assertFalse(
             MnemonicWithPassphrase.sample.other()
                 .validate(listOf(HierarchicalDeterministicPublicKey.sample())),
+        )
+    }
+
+    @Test
+    fun testSignIsValid() {
+        val sut = MnemonicWithPassphrase.sample()
+        val derivationPath = DerivationPath.sample()
+        val message = Hash.sample()
+
+        val publicKey = sut.derivePublicKey(path = derivationPath)
+        val signatureWithPublicKey = sut.sign(message, derivationPath)
+        assertTrue(
+            publicKey.isValidSignature(signatureWithPublicKey.signature, message)
+        )
+    }
+
+    @Test
+    fun testDerivePublicKeys() {
+        assertEquals(
+            HierarchicalDeterministicPublicKey.sample(),
+            MnemonicWithPassphrase.sample().derivePublicKey(DerivationPath.sample())
         )
     }
 

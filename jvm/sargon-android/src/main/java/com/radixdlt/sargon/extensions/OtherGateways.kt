@@ -1,10 +1,16 @@
 package com.radixdlt.sargon.extensions
 
+import com.radixdlt.sargon.FactorSource
+import com.radixdlt.sargon.FactorSources
 import com.radixdlt.sargon.Gateway
 import com.radixdlt.sargon.OtherGateways
 import com.radixdlt.sargon.Url
+import com.radixdlt.sargon.newFactorSourcesByUpdatingOrAppending
+import com.radixdlt.sargon.newFactorSourcesByUpdatingOrInsertingAtIndex
 import com.radixdlt.sargon.newOtherGateways
 import com.radixdlt.sargon.newOtherGatewaysByAppending
+import com.radixdlt.sargon.newOtherGatewaysByUpdatingOrAppending
+import com.radixdlt.sargon.newOtherGatewaysByUpdatingOrInsertingAtIndex
 import com.radixdlt.sargon.newOtherGatewaysRemovedById
 import com.radixdlt.sargon.newOtherGatewaysRemovedElement
 import com.radixdlt.sargon.otherGatewaysElementCount
@@ -28,6 +34,16 @@ val OtherGateways.size: Int
 
 fun OtherGateways.append(gateway: Gateway): OtherGateways =
     newOtherGatewaysByAppending(gateway = gateway, to = this)
+
+fun OtherGateways.updateOrInsert(gateway: Gateway, index: Int): OtherGateways =
+    newOtherGatewaysByUpdatingOrInsertingAtIndex(
+        gateway = gateway,
+        to = this,
+        index = index.toULong()
+    )
+
+fun OtherGateways.updateOrAppend(gateway: Gateway): OtherGateways =
+    newOtherGatewaysByUpdatingOrAppending(gateway = gateway, to = this)
 
 fun OtherGateways.removeByUrl(url: Url): OtherGateways =
     newOtherGatewaysRemovedById(idOfGateway = url, from = this)

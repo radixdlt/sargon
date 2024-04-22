@@ -1,12 +1,18 @@
 package com.radixdlt.sargon.extensions
 
+import com.radixdlt.sargon.AuthorizedDapp
+import com.radixdlt.sargon.AuthorizedDapps
 import com.radixdlt.sargon.EntityFlag
 import com.radixdlt.sargon.EntityFlags
 import com.radixdlt.sargon.entityFlagsElementCount
 import com.radixdlt.sargon.entityFlagsGetElements
 import com.radixdlt.sargon.entityFlagsGetEntityFlagById
+import com.radixdlt.sargon.newAuthorizedDappsByUpdatingOrAppending
+import com.radixdlt.sargon.newAuthorizedDappsByUpdatingOrInsertingAtIndex
 import com.radixdlt.sargon.newEntityFlags
 import com.radixdlt.sargon.newEntityFlagsByAppending
+import com.radixdlt.sargon.newEntityFlagsByUpdatingOrAppending
+import com.radixdlt.sargon.newEntityFlagsByUpdatingOrInsertingAtIndex
 import com.radixdlt.sargon.newEntityFlagsRemovedElement
 
 @Throws(SargonException::class)
@@ -28,6 +34,16 @@ val EntityFlags.size: Int
 
 fun EntityFlags.append(entityFlag: EntityFlag): EntityFlags =
     newEntityFlagsByAppending(entityFlag = entityFlag, to = this)
+
+fun EntityFlags.updateOrInsert(entityFlag: EntityFlag, index: Int): EntityFlags =
+    newEntityFlagsByUpdatingOrInsertingAtIndex(
+        entityFlag = entityFlag,
+        to = this,
+        index = index.toULong()
+    )
+
+fun EntityFlags.updateOrAppend(entityFlag: EntityFlag): EntityFlags =
+    newEntityFlagsByUpdatingOrAppending(entityFlag = entityFlag, to = this)
 
 fun EntityFlags.remove(entityFlag: EntityFlag): EntityFlags =
     newEntityFlagsRemovedElement(entityFlag = entityFlag, from = this)

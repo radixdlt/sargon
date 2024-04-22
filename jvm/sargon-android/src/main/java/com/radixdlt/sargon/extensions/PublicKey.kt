@@ -2,8 +2,10 @@ package com.radixdlt.sargon.extensions
 
 import com.radixdlt.sargon.BagOfBytes
 import com.radixdlt.sargon.Ed25519PublicKey
+import com.radixdlt.sargon.Hash
 import com.radixdlt.sargon.PublicKey
 import com.radixdlt.sargon.Secp256k1PublicKey
+import com.radixdlt.sargon.Signature
 import com.radixdlt.sargon.ed25519PublicKeyToBytes
 import com.radixdlt.sargon.newEd25519PublicKeyFromBytes
 import com.radixdlt.sargon.newEd25519PublicKeyFromHex
@@ -11,6 +13,7 @@ import com.radixdlt.sargon.newPublicKeyFromBytes
 import com.radixdlt.sargon.newPublicKeyFromHex
 import com.radixdlt.sargon.newSecp256k1PublicKeyFromBytes
 import com.radixdlt.sargon.newSecp256k1PublicKeyFromHex
+import com.radixdlt.sargon.publicKeyIsValidSignatureForHash
 import com.radixdlt.sargon.publicKeyToBytes
 import com.radixdlt.sargon.publicKeyToHex
 import com.radixdlt.sargon.secp256k1PublicKeyToBytes
@@ -43,7 +46,7 @@ fun PublicKey.Secp256k1.Companion.init(bytes: BagOfBytes): PublicKey.Secp256k1 =
  * Encodes the [PublicKey.Ed25519] to a hexadecimal string, lowercased, without any `0x` prefix,
  * e.g. `"b7a3c12dc0c8c748ab07525b701122b88bd78f600c76342d27f25e5f92444cde"`
  *
- * Encodes the compressed form (33 bytes) of a [PublicKey.Secp256k1] to a hexadecimal string, 
+ * Encodes the compressed form (33 bytes) of a [PublicKey.Secp256k1] to a hexadecimal string,
  * lowercased, without any `0x` prefix, e.g.
  * `"033083620d1596d3f8988ff3270e42970dd2a031e2b9b6488052a4170ff999f3e8"`
  */
@@ -73,3 +76,12 @@ val PublicKey.Secp256k1.uncompressedBytes: BagOfBytes
 
 fun Ed25519PublicKey.asGeneral() = PublicKey.Ed25519(this)
 fun Secp256k1PublicKey.asGeneral() = PublicKey.Secp256k1(this)
+
+fun PublicKey.isValidSignature(
+    signature: Signature,
+    hashedMessage: Hash
+): Boolean = publicKeyIsValidSignatureForHash(
+    publicKey = this,
+    signature = signature,
+    hash = hashedMessage
+)

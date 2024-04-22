@@ -16,13 +16,13 @@ fun Profile.Companion.init(
 )
 
 @Throws(SargonException::class)
-fun Profile.Companion.deserializeFromBytes(jsonBytes: BagOfBytes)
+fun Profile.Companion.deserializeFromJsonBytes(jsonBytes: BagOfBytes)
     = newProfileFromJsonBytes(jsonBytes = jsonBytes)
 
 @Throws(SargonException::class)
-fun Profile.Companion.deserializeFromString(jsonString: String)
-        = deserializeFromBytes(jsonBytes = bagOfBytes(fromString = jsonString))
+fun Profile.Companion.deserializeFromJsonString(jsonString: String)
+        = deserializeFromJsonBytes(jsonBytes = bagOfBytes(fromString = jsonString))
 
-fun Profile.serializedBytes() = profileToJsonBytes(profile = this)
+fun Profile.serializedJsonBytes() = profileToJsonBytes(profile = this)
 
-fun Profile.serializedString() = serializedBytes().string
+fun Profile.serializedJsonString() = serializedJsonBytes().string

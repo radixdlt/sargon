@@ -11,13 +11,13 @@ fun Header.Companion.init(creatingDevice: DeviceInfo): Header =
     newHeaderWithCreatingDevice(creatingDevice = creatingDevice)
 
 @Throws(SargonException::class)
-fun Header.Companion.deserializeFromBytes(jsonBytes: BagOfBytes) =
+fun Header.Companion.deserializeFromJsonBytes(jsonBytes: BagOfBytes) =
     newHeaderFromJsonBytes(jsonBytes = jsonBytes)
 
 @Throws(SargonException::class)
-fun Header.Companion.deserializeFromString(jsonString: String) =
-    deserializeFromBytes(jsonBytes = bagOfBytes(fromString = jsonString))
+fun Header.Companion.deserializeFromJsonString(jsonString: String) =
+    deserializeFromJsonBytes(jsonBytes = bagOfBytes(fromString = jsonString))
 
-fun Header.serializedBytes(): BagOfBytes = headerToJsonBytes(header = this)
+fun Header.serializedJsonBytes(): BagOfBytes = headerToJsonBytes(header = this)
 
-fun Header.serializedString(): String = serializedBytes().string
+fun Header.serializedJsonString(): String = serializedJsonBytes().string

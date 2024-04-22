@@ -1,8 +1,8 @@
 package com.radixdlt.sargon
 
-import com.radixdlt.sargon.extensions.deserializeFromString
+import com.radixdlt.sargon.extensions.deserializeFromJsonString
 import com.radixdlt.sargon.extensions.init
-import com.radixdlt.sargon.extensions.serializedString
+import com.radixdlt.sargon.extensions.serializedJsonString
 import com.radixdlt.sargon.samples.Sample
 import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -25,7 +25,7 @@ class HeaderTest: SampleTestable<Header> {
 
         assertEquals(
             header,
-            Header.deserializeFromString(jsonString = header.serializedString())
+            Header.deserializeFromJsonString(jsonString = header.serializedJsonString())
         )
     }
 

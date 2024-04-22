@@ -4,8 +4,11 @@ import com.radixdlt.sargon.extensions.account
 import com.radixdlt.sargon.extensions.addressIndex
 import com.radixdlt.sargon.extensions.asGeneral
 import com.radixdlt.sargon.extensions.default
+import com.radixdlt.sargon.extensions.hdPath
 import com.radixdlt.sargon.extensions.identity
 import com.radixdlt.sargon.extensions.init
+import com.radixdlt.sargon.extensions.nonHardenedIndex
+import com.radixdlt.sargon.extensions.nonHardenedValue
 import com.radixdlt.sargon.extensions.string
 import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -92,6 +95,16 @@ class DerivationPathTest {
         assertEquals(
             derivationPathBip44.string,
             DerivationPath.Bip44Like(Bip44LikePath.sample()).string
+        )
+    }
+
+    @Test
+    fun testDerivationPathHdPath() {
+        val derivationPath = DerivationPath.sample()
+        val index = derivationPath.nonHardenedIndex
+        assertEquals(
+            derivationPath.hdPath.components.last().nonHardenedValue,
+            index
         )
     }
 
