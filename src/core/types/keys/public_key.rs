@@ -53,10 +53,10 @@ impl FromStr for PublicKey {
 
 impl PublicKey {
     /// Verifies an Elliptic Curve signature over either Curve25519 or Secp256k1
-    pub fn is_valid(
+    pub fn is_valid_signature_for_hash(
         &self,
         signature: impl Into<Signature>,
-        for_hash: &impl ScryptoIsHash,
+        hash: &impl ScryptoIsHash,
     ) -> bool {
         let signature = signature.into();
         match self {
@@ -66,12 +66,12 @@ impl PublicKey {
                     false
                 }
                 Signature::Ed25519 { value: signature } => {
-                    key.is_valid(signature, for_hash)
+                    key.is_valid_signature_for_hash(signature, hash)
                 }
             },
             PublicKey::Secp256k1(key) => match &signature {
                 Signature::Secp256k1 { value: signature } => {
-                    key.is_valid(signature, for_hash)
+                    key.is_valid_signature_for_hash(signature, hash)
                 }
                 Signature::Ed25519 { value: _ } => {
                     error!("Trying to validate Ed25519 signature with Secp256k1 PublicKey, that does not work.");
@@ -538,12 +538,13 @@ mod tests {
         let hash = hash_of(message.as_bytes());
         let secp256k1_signature: Secp256k1Signature = "01aa1c4f46f8437b7f8ec9008ae10e6f33bb8be3e81e35c63f3498070dfbd6a20b2daee6073ead3c9e72d8909bc32a02e46cede3885cf8568d4c380ac97aa7fbcd".parse().unwrap();
 
-        assert!(SUT::Secp256k1(secp256k1_public_key).is_valid(
-            Signature::Secp256k1 {
-                value: secp256k1_signature
-            },
-            &hash
-        ));
+        assert!(SUT::Secp256k1(secp256k1_public_key)
+            .is_valid_signature_for_hash(
+                Signature::Secp256k1 {
+                    value: secp256k1_signature
+                },
+                &hash
+            ));
     }
 
     #[test]
@@ -558,12 +559,14 @@ mod tests {
 
         let ed25519_signature: Ed25519Signature = "06cd3772c5c70d44819db80192a5b2521525e2529f770bff970ec4edc7c1bd76e41fcfa8e59ff93b1675c48f4af3b1697765286d999ee8b5bb8257691e3b7b09".parse().unwrap();
 
-        assert!(SUT::Ed25519(ed25519_public_key).is_valid(
-            Signature::Ed25519 {
-                value: ed25519_signature
-            },
-            &hash
-        ));
+        assert!(
+            SUT::Ed25519(ed25519_public_key).is_valid_signature_for_hash(
+                Signature::Ed25519 {
+                    value: ed25519_signature
+                },
+                &hash
+            )
+        );
     }
 
     #[test]
@@ -578,12 +581,14 @@ mod tests {
                 .parse()
                 .unwrap();
 
-        assert!(!SUT::Ed25519(ed25519_public_key).is_valid(
-            Signature::Secp256k1 {
-                value: secp256k1_signature
-            },
-            &hash
-        ));
+        assert!(
+            !SUT::Ed25519(ed25519_public_key).is_valid_signature_for_hash(
+                Signature::Secp256k1 {
+                    value: secp256k1_signature
+                },
+                &hash
+            )
+        );
     }
 
     #[test]
@@ -599,11 +604,12 @@ mod tests {
 
         let ed25519_signature: Ed25519Signature = "06cd3772c5c70d44819db80192a5b2521525e2529f770bff970ec4edc7c1bd76e41fcfa8e59ff93b1675c48f4af3b1697765286d999ee8b5bb8257691e3b7b09".parse().unwrap();
 
-        assert!(!SUT::Secp256k1(secp256k1_public_key).is_valid(
-            Signature::Ed25519 {
-                value: ed25519_signature
-            },
-            &hash
-        ));
+        assert!(!SUT::Secp256k1(secp256k1_public_key)
+            .is_valid_signature_for_hash(
+                Signature::Ed25519 {
+                    value: ed25519_signature
+                },
+                &hash
+            ));
     }
 }

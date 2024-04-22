@@ -90,7 +90,7 @@ impl HasSampleValues for Secp256k1Signature {
     ///     .public_key()
     ///     .into_secp256k1()
     ///     .unwrap()
-    ///     .is_valid(&signature, &hash),
+    ///     .is_valid_signature_for_hash(&signature, &hash),
     ///     &true
     /// );
     /// ```
@@ -132,7 +132,7 @@ impl HasSampleValues for Secp256k1Signature {
     ///     .public_key()
     ///     .into_secp256k1()
     ///     .unwrap()
-    ///     .is_valid(&signature, &hash),
+    ///     .is_valid_signature_for_hash(&signature, &hash),
     ///     &true
     /// );
     /// ```

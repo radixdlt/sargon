@@ -13,10 +13,10 @@ extension HierarchicalDeterministicPublicKey {
 		_ intoSignature: IntoSignatureProtocol,
 		for hashedMessage: Hash
 	) -> Bool {
-		hierarchicalDeterministicPublicKeyIsValidSignature(
+		hierarchicalDeterministicPublicKeyIsValidSignatureForHash(
 			key: self,
 			signature: intoSignature.signature,
-			forHash: hashedMessage
+			hash: hashedMessage
 		)
 	}
 }

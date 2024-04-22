@@ -211,7 +211,7 @@ mod tests {
         let path = DerivationPath::sample();
         let msg = Hash::sample();
         let signature = sut.sign(&msg, &path);
-        assert!(signature.is_valid(&msg));
+        assert!(signature.is_valid_for_hash(&msg));
     }
 
     #[test]

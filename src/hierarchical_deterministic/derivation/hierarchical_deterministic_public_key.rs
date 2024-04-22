@@ -35,12 +35,12 @@ impl HierarchicalDeterministicPublicKey {
         self.public_key.to_bytes()
     }
 
-    pub fn is_valid(
+    pub fn is_valid_signature_for_hash(
         &self,
         signature: impl Into<Signature>,
-        for_hash: &impl ScryptoIsHash,
+        hash: &impl ScryptoIsHash,
     ) -> bool {
-        self.public_key.is_valid(signature, for_hash)
+        self.public_key.is_valid_signature_for_hash(signature, hash)
     }
 }
 

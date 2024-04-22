@@ -22,10 +22,10 @@ extension PublicKey {
 		_ intoSignature: IntoSignatureProtocol,
 		for hashedMessage: Hash
 	) -> Bool {
-		publicKeyIsValid(
+		publicKeyIsValidSignatureForHash(
 			publicKey: self,
 			signature: intoSignature.signature,
-			forHash: hashedMessage
+			hash: hashedMessage
 		)
 	}
 }

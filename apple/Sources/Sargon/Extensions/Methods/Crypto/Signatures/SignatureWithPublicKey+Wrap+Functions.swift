@@ -10,6 +10,6 @@ extension SignatureWithPublicKey {
 	}
 	
 	public func isValid(_ hash: Hash) -> Bool {
-		signatureWithPublicKeyIsValid(signatureWithPublicKey: self, forMessage: hash)
+        signatureWithPublicKeyIsValid(signatureWithPublicKey: self, forHash: hash)
 	}
 }

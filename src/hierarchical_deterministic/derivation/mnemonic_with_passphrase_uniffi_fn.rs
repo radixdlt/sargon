@@ -92,6 +92,6 @@ mod uniffi_test {
             .unwrap();
         let msg = Hash::sample();
         let signature = mnemonic_with_passphrase_sign(&sut, &path, &msg);
-        assert!(key.public_key.is_valid(signature, &msg));
+        assert!(key.public_key.is_valid_signature_for_hash(signature, &msg));
     }
 }

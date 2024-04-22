@@ -12,12 +12,12 @@ pub fn new_hierarchical_deterministic_public_key_sample_other(
     HierarchicalDeterministicPublicKey::sample_other()
 }
 #[uniffi::export]
-pub fn hierarchical_deterministic_public_key_is_valid_signature(
+pub fn hierarchical_deterministic_public_key_is_valid_signature_for_hash(
     key: &HierarchicalDeterministicPublicKey,
     signature: Signature,
-    for_hash: &Hash,
+    hash: &Hash,
 ) -> bool {
-    key.is_valid(signature, for_hash)
+    key.is_valid_signature_for_hash(signature, hash)
 }
 
 #[cfg(test)]
@@ -48,10 +48,12 @@ mod tests {
         let msg = Hash::sample();
         let sut = private_key.sign(&msg);
         let public_key = private_key.public_key();
-        assert!(hierarchical_deterministic_public_key_is_valid_signature(
-            &public_key,
-            sut.signature(),
-            &msg
-        ));
+        assert!(
+            hierarchical_deterministic_public_key_is_valid_signature_for_hash(
+                &public_key,
+                sut.signature(),
+                &msg
+            )
+        );
     }
 }

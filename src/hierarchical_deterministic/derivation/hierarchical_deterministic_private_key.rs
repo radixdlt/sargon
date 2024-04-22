@@ -126,6 +126,6 @@ mod tests {
         let sut = SUT::sample_other();
         let hash = Hash::sample();
         let signature = sut.sign(&hash);
-        assert!(signature.is_valid(&hash));
+        assert!(signature.is_valid_for_hash(&hash));
     }
 }

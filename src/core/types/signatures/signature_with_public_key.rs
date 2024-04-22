@@ -61,8 +61,9 @@ impl From<SignatureWithPublicKey> for Signature {
 }
 
 impl SignatureWithPublicKey {
-    pub fn is_valid(&self, for_hash: &impl ScryptoIsHash) -> bool {
-        self.public_key().is_valid(self.signature(), for_hash)
+    pub fn is_valid_for_hash(&self, hash: &impl ScryptoIsHash) -> bool {
+        self.public_key()
+            .is_valid_signature_for_hash(self.signature(), hash)
     }
 }
 
@@ -160,7 +161,8 @@ impl HasSampleValues for SignatureWithPublicKey {
             "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b"
         );
         let signature: Ed25519Signature = "2150c2f6b6c496d197ae03afb23f6adf23b275c675394f23786250abd006d5a2c7543566403cb414f70d0e229b0a9b55b4c74f42fc38cdf1aba2307f97686f0b".parse().unwrap();
-        public_key.is_valid(&signature, &Self::sample_hash());
+        public_key
+            .is_valid_signature_for_hash(&signature, &Self::sample_hash());
 
         (public_key, signature).into()
     }
@@ -174,7 +176,8 @@ impl HasSampleValues for SignatureWithPublicKey {
         assert_eq!(&public_key.to_hex(), "03e78cdb2e0b7ea6e55e121a58560ccf841a913d3a4a9b8349e0ef00c2102f48d8");
 
         let signature: Secp256k1Signature = "018ad795353658a0cd1b513c4414cbafd0f990d329522977f8885a27876976a7d41ed8a81c1ac34551819627689cf940c4e27cacab217f00a0a899123c021ff6ef".parse().unwrap();
-        public_key.is_valid(&signature, &Self::sample_hash());
+        public_key
+            .is_valid_signature_for_hash(&signature, &Self::sample_hash());
 
         (public_key, signature).into()
     }
@@ -205,7 +208,7 @@ mod tests {
             "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b"
                 .parse()
                 .unwrap();
-        assert!(pubkey.is_valid(
+        assert!(pubkey.is_valid_signature_for_hash(
             &SUT::sample().signature().into_ed25519().unwrap(),
             &SUT::sample_hash(),
         ));

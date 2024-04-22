@@ -85,13 +85,13 @@ pub fn ed25519_public_key_to_bytes(
 
 impl IsPublicKey<Ed25519Signature> for Ed25519PublicKey {
     /// Verifies an EdDSA signature over Curve25519.
-    fn is_valid(
+    fn is_valid_signature_for_hash(
         &self,
         signature: &Ed25519Signature,
-        for_hash: &impl ScryptoIsHash,
+        hash: &impl ScryptoIsHash,
     ) -> bool {
         scrypto_verify_ed25519(
-            for_hash.as_hash(),
+            hash.as_hash(),
             &self.scrypto(),
             &(*signature).into(),
         )

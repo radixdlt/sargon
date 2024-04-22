@@ -27,9 +27,9 @@ pub fn signature_with_public_key_get_signature(
 #[uniffi::export]
 pub fn signature_with_public_key_is_valid(
     signature_with_public_key: &SignatureWithPublicKey,
-    for_message: &Hash,
+    for_hash: &Hash,
 ) -> bool {
-    signature_with_public_key.is_valid(for_message)
+    signature_with_public_key.is_valid_for_hash(for_hash)
 }
 
 #[cfg(test)]
