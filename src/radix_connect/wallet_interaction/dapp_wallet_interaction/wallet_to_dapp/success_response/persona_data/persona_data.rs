@@ -23,8 +23,12 @@ impl HasSampleValues for WalletToDappInteractionPersonaDataRequestResponseItem {
     fn sample_other() -> Self {
         Self {
             name: Some(PersonaDataEntryName::sample_other()),
-            email_addresses: Some(vec![PersonaDataEntryEmailAddress::sample_other()]),
-            phone_numbers: Some(vec![PersonaDataEntryPhoneNumber::sample_other()]),
+            email_addresses: Some(vec![
+                PersonaDataEntryEmailAddress::sample_other(),
+            ]),
+            phone_numbers: Some(vec![
+                PersonaDataEntryPhoneNumber::sample_other(),
+            ]),
         }
     }
 }

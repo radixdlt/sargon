@@ -22,7 +22,9 @@ impl HasSampleValues for WalletToDappInteractionAccountsRequestResponseItem {
         Self {
             accounts: vec![WalletInteractionWalletAccount::sample_other()],
             challenge: Some(Exactly32Bytes::sample_other()),
-            proofs: Some(vec![WalletToDappInteractionAccountProof::sample_other()]),
+            proofs: Some(vec![
+                WalletToDappInteractionAccountProof::sample_other(),
+            ]),
         }
     }
 }

@@ -6,7 +6,9 @@ pub enum WalletToDappInteractionResponseItems {
     #[serde(rename = "authorizedRequest")]
     AuthorizedRequest(WalletToDappInteractionAuthorizedRequestResponseItems),
     #[serde(rename = "unauthorizedRequest")]
-    UnauthorizedRequest(WalletToDappInteractionUnauthorizedRequestResponseItems),
+    UnauthorizedRequest(
+        WalletToDappInteractionUnauthorizedRequestResponseItems,
+    ),
     #[serde(rename = "transaction")]
     Transaction(WalletToDappInteractionTransactionResponseItems),
 }

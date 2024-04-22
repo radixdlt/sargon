@@ -515,16 +515,23 @@ mod wallet_to_dapp_interaction_tests {
 
     #[test]
     fn test_vector() {
-        let persona_data = WalletToDappInteractionPersonaDataRequestResponseItem {
-            name: Some(PersonaDataEntryName {
-                nickname: "Nick".into(),
-                given_names: "Given".into(),
-                family_name: "Family".into(),
-                variant: PersonaDataNameVariant::Western,
-            }),
-            email_addresses: Some(vec![PersonaDataEntryEmailAddress::new("some@gmail.com").unwrap()]),
-            phone_numbers: Some(vec![PersonaDataEntryPhoneNumber::new("071234579").unwrap()])
-        };
+        let persona_data =
+            WalletToDappInteractionPersonaDataRequestResponseItem {
+                name: Some(PersonaDataEntryName {
+                    nickname: "Nick".into(),
+                    given_names: "Given".into(),
+                    family_name: "Family".into(),
+                    variant: PersonaDataNameVariant::Western,
+                }),
+                email_addresses: Some(vec![PersonaDataEntryEmailAddress::new(
+                    "some@gmail.com",
+                )
+                .unwrap()]),
+                phone_numbers: Some(vec![PersonaDataEntryPhoneNumber::new(
+                    "071234579",
+                )
+                .unwrap()]),
+            };
 
         let account_1 = WalletInteractionWalletAccount {
             label: "Dff".into(),
@@ -581,7 +588,7 @@ mod wallet_to_dapp_interaction_tests {
         }),
     });
 
-    let unauthorized_request_response = WalletToDappInteractionResponse::Success(WalletToDappInteractionSuccessResponse {
+        let unauthorized_request_response = WalletToDappInteractionResponse::Success(WalletToDappInteractionSuccessResponse {
         interaction_id: "278608e0-e5ca-416e-8339-f2d2695651c4".into(),
         items: WalletToDappInteractionResponseItems::UnauthorizedRequest(WalletToDappInteractionUnauthorizedRequestResponseItems {
             one_time_accounts: Some(WalletToDappInteractionAccountsRequestResponseItem {
@@ -593,13 +600,15 @@ mod wallet_to_dapp_interaction_tests {
         }),
         });
 
-    let failure_response = WalletToDappInteractionResponse::Failure(WalletToDappInteractionFailureResponse {
-        interaction_id: "278608e0-e5ca-416e-8339-f2d2695651c4".into(),
-        error: DappWalletInteractionErrorType::RejectedByUser,
-        message: Some("User rejected the request".to_string()),
-    });
+        let failure_response = WalletToDappInteractionResponse::Failure(
+            WalletToDappInteractionFailureResponse {
+                interaction_id: "278608e0-e5ca-416e-8339-f2d2695651c4".into(),
+                error: DappWalletInteractionErrorType::RejectedByUser,
+                message: Some("User rejected the request".to_string()),
+            },
+        );
 
-    let transaction_response = WalletToDappInteractionResponse::Success(WalletToDappInteractionSuccessResponse {
+        let transaction_response = WalletToDappInteractionResponse::Success(WalletToDappInteractionSuccessResponse {
         interaction_id: "c42f8825-4bbb-4ce2-a646-776b529e2f51".into(),
         items: WalletToDappInteractionResponseItems::Transaction(WalletToDappInteractionTransactionResponseItems {
             send: WalletToDappInteractionSendTransactionResponseItem {
@@ -608,7 +617,12 @@ mod wallet_to_dapp_interaction_tests {
         }),
     });
 
-        let responses = vec![response, unauthorized_request_response, failure_response, transaction_response];
+        let responses = vec![
+            response,
+            unauthorized_request_response,
+            failure_response,
+            transaction_response,
+        ];
 
         let encoded = serde_json::to_string(&responses).unwrap();
         let serde_value: Vec<Value> = serde_json::from_str(&encoded).unwrap();

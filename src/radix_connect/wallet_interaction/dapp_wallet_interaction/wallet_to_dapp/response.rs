@@ -11,9 +11,13 @@ pub enum WalletToDappInteractionResponse {
 
 impl HasSampleValues for WalletToDappInteractionResponse {
     fn sample() -> Self {
-        WalletToDappInteractionResponse::Success(WalletToDappInteractionSuccessResponse::sample())
+        WalletToDappInteractionResponse::Success(
+            WalletToDappInteractionSuccessResponse::sample(),
+        )
     }
     fn sample_other() -> Self {
-        WalletToDappInteractionResponse::Failure(WalletToDappInteractionFailureResponse::sample())
+        WalletToDappInteractionResponse::Failure(
+            WalletToDappInteractionFailureResponse::sample(),
+        )
     }
 }

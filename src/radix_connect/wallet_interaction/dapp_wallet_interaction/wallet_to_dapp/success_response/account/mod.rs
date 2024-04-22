@@ -1,5 +1,5 @@
-mod accounts;
 mod account_proof;
+mod accounts;
 
-pub use accounts::*;
 pub use account_proof::*;
+pub use accounts::*;

@@ -5,7 +5,9 @@ pub struct WalletToDappInteractionAuthUsePersonaRequestResponseItem {
     pub persona: DappWalletInteractionPersona,
 }
 
-impl HasSampleValues for WalletToDappInteractionAuthUsePersonaRequestResponseItem {
+impl HasSampleValues
+    for WalletToDappInteractionAuthUsePersonaRequestResponseItem
+{
     fn sample() -> Self {
         Self {
             persona: DappWalletInteractionPersona::sample(),

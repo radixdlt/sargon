@@ -7,7 +7,9 @@ pub struct WalletToDappInteractionAuthLoginWithChallengeRequestResponseItem {
     pub proof: WalletToDappInteractionAuthProof,
 }
 
-impl HasSampleValues for WalletToDappInteractionAuthLoginWithChallengeRequestResponseItem {
+impl HasSampleValues
+    for WalletToDappInteractionAuthLoginWithChallengeRequestResponseItem
+{
     fn sample() -> Self {
         Self {
             persona: DappWalletInteractionPersona::sample(),
