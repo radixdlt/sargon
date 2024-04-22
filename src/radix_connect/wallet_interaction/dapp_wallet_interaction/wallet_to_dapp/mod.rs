@@ -1,9 +1,7 @@
-mod failure;
+mod failure_response;
 mod response;
-mod success;
 mod success_response;
 
-pub use failure::*;
+pub use failure_response::*;
 pub use response::*;
-pub use success::*;
 pub use success_response::*;

@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use serde::Serialize;
 
 #[derive(Debug, Serialize, PartialEq, Clone, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
