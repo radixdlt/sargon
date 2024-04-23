@@ -18,7 +18,6 @@ where
 {
 	var elements: [Element] { get }
 	init(element: Element)
-	mutating func append(_ newElement: Self.Element)
 	func appending(_ element: Element) -> Self
 	func get(id: Element.ID) -> Element?
 	func updatingOrAppending(_ element: Element) -> Self
