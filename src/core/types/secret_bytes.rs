@@ -19,6 +19,21 @@ macro_rules! decl_secret_bytes {
             #[display("OBFUSCATED")]
             pub struct $struct_name(Box<[u8; Self::LENGTH]>);
 
+            uniffi::custom_type!($struct_name, BagOfBytes);
+
+
+            impl $crate::UniffiCustomTypeConverter for $struct_name {
+                type Builtin = BagOfBytes;
+
+                fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
+                    let fixed_size: &[u8; Self::LENGTH] =  val.as_ref().try_into()?;//.map_err(|e| e.into())?;
+                   Ok(Self::new(*fixed_size))
+                }
+
+                fn from_custom(obj: Self) -> Self::Builtin {
+                    BagOfBytes::from(obj.0.as_slice())
+                }
+            }
 
             impl $struct_name {
                 pub const LENGTH: usize = $byte_count;
