@@ -14,9 +14,9 @@ impl WalletToDappInteractionAuthLoginWithChallengeRequestResponseItem {
         proof: WalletToDappInteractionAuthProof,
     ) -> Self {
         Self {
-            persona: persona,
+            persona,
             challenge: challenge.into(),
-            proof: proof,
+            proof,
         }
     }
 }

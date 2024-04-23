@@ -14,7 +14,7 @@ impl DappToWalletInteractionAccountsRequestItem {
         challenge: impl Into<Option<Exactly32Bytes>>,
     ) -> Self {
         Self {
-            number_of_accounts: number_of_accounts,
+            number_of_accounts,
             challenge: challenge.into(),
         }
     }

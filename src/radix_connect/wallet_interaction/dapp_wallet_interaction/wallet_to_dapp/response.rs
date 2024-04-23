@@ -2,6 +2,7 @@ use crate::prelude::*;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, uniffi::Enum)]
 #[serde(tag = "discriminator")]
+#[allow(clippy::large_enum_variant)]
 pub enum WalletToDappInteractionResponse {
     #[serde(rename = "success")]
     Success(WalletToDappInteractionSuccessResponse),
