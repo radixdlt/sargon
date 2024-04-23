@@ -19,7 +19,7 @@ final class PersonaDataEntryEmailAddressTests: PersonaDataEntryTest<PersonaDataE
 		func doTest(_ sut: SUT) {
 			XCTAssertEqual(sut.kind, .emailAddress)
 		}
-		SUT.allCases.forEach(doTest)
+		SUT.sampleValues.forEach(doTest)
 	}
 	
 	func test_extract_wrong_is_nil() {

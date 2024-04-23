@@ -22,6 +22,6 @@ final class NetworkIDTests: Test<NetworkID> {
 	}
 	
 	func test_codable() throws {
-		try SUT.allCases.forEach(doTestCodableRoundtrip)
+		try SUT.sampleValues.forEach(doTestCodableRoundtrip)
 	}
 }

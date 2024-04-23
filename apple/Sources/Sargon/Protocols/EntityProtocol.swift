@@ -1,7 +1,9 @@
 import SargonUniFFI
 
 #if DEBUG
-public protocol BaseEntityProtocol: SargonModel, CaseIterable where Self.AllCases == [Self] {}
+public protocol BaseEntityProtocol: SargonModel {
+	static var sampleValues: [Self] { get }
+}
 #else
 public protocol BaseEntityProtocol: SargonModel {}
 #endif // DEBUG
@@ -58,9 +60,8 @@ extension EntityProtocol {
 			Self.sampleStokenetThird,
 		]
 	}
-}
-extension EntityProtocol where Self: CaseIterable, AllCases == [Self] {
-	public static var allCases: AllCases {
+
+	public static var sampleValues: [Self] {
 		Self.sampleValuesMainnet + Self.sampleValuesStokenet
 	}
 }

@@ -4,7 +4,7 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class DerivationPathTests: HDPathProtocolTests<DerivationPath> {
+final class DerivationPathTests: HDPathProtocolTest<DerivationPath> {
     func test_sample_description() {
         XCTAssertNoDifference(SUT.sample.description, "m/44H/1022H/1H/525H/1460H/0H")
     }
@@ -18,8 +18,16 @@ final class DerivationPathTests: HDPathProtocolTests<DerivationPath> {
         )
     }
     
+ 
+    func test_get_hd_path() {
+        func doTest(_ sut: SUT) {
+            XCTAssertEqual(sut.path.components.count, sut.toString().matches(of: "/").count)
+        }
+        SUT.sampleValues.forEach(doTest)
+    }
     
     func test_cap26_account_hd_path() {
+        
         let accountPath = AccountPath.sample
         
         XCTAssertEqual(
@@ -74,5 +82,15 @@ final class DerivationPathTests: HDPathProtocolTests<DerivationPath> {
     
     func test_as_general_is_identity() {
         XCTAssertEqual(SUT.sample.asDerivationPath, SUT.sample)
+    }
+    
+    func test_curve() {
+        XCTAssertEqual(SUT.sample.curve, .curve25519)
+        XCTAssertEqual(SUT.bip44Like(value: .sample).curve, .secp256k1)
+    }
+    
+    func test_for_entity() {
+        XCTAssertEqual(SUT.forEntity(kind: .account, networkID: .mainnet, index: 9).toString(), "m/44H/1022H/1H/525H/1460H/9H")
+        XCTAssertEqual(SUT.forEntity(kind: .persona, networkID: .stokenet, index: 42).toString(), "m/44H/1022H/2H/618H/1460H/42H")
     }
 }

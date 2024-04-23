@@ -16,10 +16,10 @@ final class SLIP10CurveTests: Test<SLIP10Curve> {
 			let fromString = try XCTUnwrap(SUT.init(rawValue: string))
 			XCTAssertEqual(fromString, sut)
 		}
-		try SUT.allCases.forEach(doTest)
+		try SUT.sampleValues.forEach(doTest)
 	}
 	
 	func test_codable_roundtrip() throws {
-		try SUT.allCases.forEach(doTestCodableRoundtrip)
+		try SUT.sampleValues.forEach(doTestCodableRoundtrip)
 	}
 }

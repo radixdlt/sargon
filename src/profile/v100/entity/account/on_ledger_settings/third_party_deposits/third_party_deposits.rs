@@ -11,11 +11,15 @@ pub struct ThirdPartyDeposits {
     pub deposit_rule: DepositRule,
 
     /// Denies or allows third-party deposits of specific assets by ignoring the `depositMode`
-    pub assets_exception_list: IdentifiedVecVia<AssetException>,
+    /// `nil` means that the account was "recovered" using "Account Recovery Scan" features,
+    /// thus the value is unknown.
+    pub assets_exception_list: Option<AssetsExceptionList>,
 
     /// Allows certain third-party depositors to deposit assets freely.
     /// Note: There is no `deny` counterpart for this.
-    pub depositors_allow_list: IdentifiedVecVia<ResourceOrNonFungible>,
+    /// `nil` means that the account was "recovered" using "Account Recovery Scan" features,
+    /// thus the value is unknown.
+    pub depositors_allow_list: Option<DepositorsAllowList>,
 }
 
 impl HasSampleValues for ThirdPartyDeposits {
@@ -45,14 +49,6 @@ impl Default for ThirdPartyDeposits {
     }
 }
 
-impl Identifiable for ResourceOrNonFungible {
-    type ID = Self;
-
-    fn id(&self) -> Self::ID {
-        self.clone()
-    }
-}
-
 impl ThirdPartyDeposits {
     /// Instantiates a new `ThirdPartyDeposits` with the specified
     /// `DepositRule` and empty `assets_exception` and
@@ -60,8 +56,8 @@ impl ThirdPartyDeposits {
     pub fn new(deposit_rule: DepositRule) -> Self {
         Self {
             deposit_rule,
-            assets_exception_list: IdentifiedVecVia::new(),
-            depositors_allow_list: IdentifiedVecVia::new(),
+            assets_exception_list: Some(AssetsExceptionList::new()),
+            depositors_allow_list: Some(DepositorsAllowList::new()),
         }
     }
 
@@ -78,12 +74,12 @@ impl ThirdPartyDeposits {
     {
         Self {
             deposit_rule,
-            assets_exception_list: IdentifiedVecVia::from_iter(
+            assets_exception_list: Some(AssetsExceptionList::from_iter(
                 assets_exception_list,
-            ),
-            depositors_allow_list: IdentifiedVecVia::from_iter(
+            )),
+            depositors_allow_list: Some(DepositorsAllowList::from_iter(
                 depositors_allow_list,
-            ),
+            )),
         }
     }
 
@@ -94,7 +90,15 @@ impl ThirdPartyDeposits {
     /// If the set did not previously contain an equal value, true is returned.
     /// If the set already contained an equal value, false is returned, and the entry is not updated.
     pub fn add_asset_exception(&mut self, exception: AssetException) -> bool {
-        self.assets_exception_list.append(exception).0
+        if let Some(mut list) = self.assets_exception_list.clone() {
+            let added = list.append(exception).0;
+            self.assets_exception_list = Some(list);
+            added
+        } else {
+            self.assets_exception_list =
+                Some(AssetsExceptionList::just(exception));
+            true
+        }
     }
 
     // If the set contains an element equal to `exception`, removes it from the set and drops it. Returns whether such an element was present.
@@ -102,7 +106,13 @@ impl ThirdPartyDeposits {
         &mut self,
         exception: &AssetException,
     ) -> bool {
-        self.assets_exception_list.remove(exception).is_some()
+        if let Some(mut list) = self.assets_exception_list.clone() {
+            let was_present = list.remove(exception).is_some();
+            self.assets_exception_list = Some(list);
+            was_present
+        } else {
+            false
+        }
     }
 
     /// Adds a `DepositorAddress` to the `depositors_allow_list` (set).
@@ -115,7 +125,15 @@ impl ThirdPartyDeposits {
         &mut self,
         depositor: ResourceOrNonFungible,
     ) -> bool {
-        self.depositors_allow_list.append(depositor).0
+        if let Some(mut list) = self.depositors_allow_list.clone() {
+            let added = list.append(depositor).0;
+            self.depositors_allow_list = Some(list);
+            added
+        } else {
+            self.depositors_allow_list =
+                Some(DepositorsAllowList::just(depositor));
+            true
+        }
     }
 
     // If the set contains an element equal to `DepositorAddress`, removes it from the set and drops it. Returns whether such an element was present.
@@ -123,7 +141,13 @@ impl ThirdPartyDeposits {
         &mut self,
         depositor: &ResourceOrNonFungible,
     ) -> bool {
-        self.depositors_allow_list.remove(depositor).is_some()
+        if let Some(mut list) = self.depositors_allow_list.clone() {
+            let was_present = list.remove(depositor).is_some();
+            self.depositors_allow_list = Some(list);
+            was_present
+        } else {
+            false
+        }
     }
 }
 
@@ -207,12 +231,11 @@ mod tests {
             DepositAddressExceptionRule::Deny,
         );
         assert!(settings.add_asset_exception(exception));
-        assert_eq!(settings.assets_exception_list.len(), 2);
+        assert_eq!(settings.assets_exception_list.clone().unwrap().len(), 2);
         assert!(settings.remove_asset_exception(&exception));
-        assert_eq!(settings.assets_exception_list.len(), 1);
-        // settings.set_assets_exception_list(BTreeSet::from_iter([exception.clone()]));
+        assert_eq!(settings.assets_exception_list.clone().unwrap().len(), 1);
         settings.assets_exception_list =
-            IdentifiedVecVia::from_iter([exception]);
+            Some(AssetsExceptionList::from_iter([exception]));
 
         assert!(
             !settings.add_asset_exception(exception),
@@ -244,12 +267,12 @@ mod tests {
                 .unwrap(),
         };
         assert!(settings.allow_depositor(depositor.clone()));
-        assert_eq!(settings.depositors_allow_list.len(), 1);
+        assert_eq!(settings.depositors_allow_list.clone().unwrap().len(), 1);
         assert!(settings.remove_allowed_depositor(&depositor));
-        assert_eq!(settings.depositors_allow_list.len(), 0);
+        assert_eq!(settings.depositors_allow_list.clone().unwrap().len(), 0);
 
         settings.depositors_allow_list =
-            IdentifiedVecVia::from_iter([depositor.clone()]);
+            Some(DepositorsAllowList::from_iter([depositor.clone()]));
         assert!(
             !settings.allow_depositor(depositor.clone()),
             "Expected `false` since already present."
@@ -266,16 +289,18 @@ mod tests {
 
     #[test]
     fn empty_assets_exception_list_is_default() {
-        assert!(ThirdPartyDeposits::default()
-            .assets_exception_list
-            .is_empty(),);
+        assert_eq!(
+            ThirdPartyDeposits::default().assets_exception_list,
+            Some(AssetsExceptionList::new())
+        );
     }
 
     #[test]
     fn empty_depositors_allow_list_is_default() {
-        assert!(ThirdPartyDeposits::default()
-            .depositors_allow_list
-            .is_empty(),);
+        assert_eq!(
+            ThirdPartyDeposits::default().depositors_allow_list,
+            Some(DepositorsAllowList::new())
+        );
     }
 
     #[test]
@@ -284,5 +309,41 @@ mod tests {
         assert_eq!(settings.deposit_rule, DepositRule::AcceptAll);
         settings.deposit_rule = DepositRule::DenyAll;
         assert_eq!(settings.deposit_rule, DepositRule::DenyAll);
+    }
+
+    #[test]
+    fn test_add_to_asset_exception_list_when_nil() {
+        let mut sut = SUT {
+            deposit_rule: DepositRule::AcceptAll,
+            assets_exception_list: None,
+            depositors_allow_list: None,
+        };
+        assert!(sut.add_asset_exception(AssetException::sample()));
+        assert!((*sut.assets_exception_list.unwrap())
+            .contains(&AssetException::sample()));
+    }
+
+    #[test]
+    fn test_add_to_depositors_list_when_nil() {
+        let mut sut = SUT {
+            deposit_rule: DepositRule::AcceptAll,
+            assets_exception_list: None,
+            depositors_allow_list: None,
+        };
+        assert!(sut.allow_depositor(ResourceOrNonFungible::sample()));
+        assert!((*sut.depositors_allow_list.unwrap())
+            .contains(&ResourceOrNonFungible::sample()));
+    }
+
+    #[test]
+    fn test_remove_non_existing_asset_exception() {
+        let mut sut = SUT::default();
+        assert!(!sut.remove_asset_exception(&AssetException::sample()))
+    }
+
+    #[test]
+    fn test_remove_non_existing_depositor() {
+        let mut sut = SUT::default();
+        assert!(!sut.remove_allowed_depositor(&ResourceOrNonFungible::sample()));
     }
 }

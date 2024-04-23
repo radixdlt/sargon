@@ -82,6 +82,16 @@ impl FactorSourceKind {
     }
 }
 
+impl HasSampleValues for FactorSourceKind {
+    fn sample() -> Self {
+        Self::Device
+    }
+
+    fn sample_other() -> Self {
+        Self::LedgerHQHardwareWallet
+    }
+}
+
 impl std::fmt::Display for FactorSourceKind {
     #[cfg(not(tarpaulin_include))] // false negative
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -89,88 +99,105 @@ impl std::fmt::Display for FactorSourceKind {
     }
 }
 
+impl FromStr for FactorSourceKind {
+    type Err = CommonError;
+    fn from_str(s: &str) -> Result<Self> {
+        let value = serde_json::Value::String(s.to_owned());
+        serde_json::from_value(value).map_err(|_| {
+            CommonError::InvalidFactorSourceKind {
+                bad_value: s.to_owned(),
+            }
+        })
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = FactorSourceKind;
+
+    #[test]
+    fn string_roundtrip() {
+        use FactorSourceKind::*;
+        let eq = |f: SUT, s| {
+            assert_eq!(f.to_string(), s);
+            assert_eq!(SUT::from_str(s).unwrap(), f);
+        };
+
+        eq(Device, "device");
+        eq(LedgerHQHardwareWallet, "ledgerHQHardwareWallet");
+        eq(OffDeviceMnemonic, "offDeviceMnemonic");
+        eq(TrustedContact, "trustedContact");
+        eq(SecurityQuestions, "securityQuestions");
+    }
+
+    #[test]
+    fn from_str_err() {
+        let s = "invalid factor source kind!";
+        assert_eq!(
+            SUT::from_str(s),
+            Err(CommonError::InvalidFactorSourceKind {
+                bad_value: s.to_owned(),
+            })
+        );
+    }
 
     #[test]
     fn equality() {
-        assert_eq!(FactorSourceKind::Device, FactorSourceKind::Device);
-        assert_eq!(
-            FactorSourceKind::LedgerHQHardwareWallet,
-            FactorSourceKind::LedgerHQHardwareWallet
-        );
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
+
     #[test]
     fn inequality() {
-        assert_ne!(
-            FactorSourceKind::Device,
-            FactorSourceKind::LedgerHQHardwareWallet
-        );
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn hash() {
         assert_eq!(
-            BTreeSet::from_iter(
-                [FactorSourceKind::Device, FactorSourceKind::Device]
-                    .into_iter()
-            )
-            .len(),
+            BTreeSet::from_iter([SUT::Device, SUT::Device].into_iter()).len(),
             1
         );
     }
 
     #[test]
     fn ord() {
-        assert!(FactorSourceKind::Device < FactorSourceKind::TrustedContact);
+        assert!(SUT::Device < SUT::TrustedContact);
     }
 
     #[test]
     fn discriminant() {
-        assert_eq!(FactorSourceKind::Device.discriminant(), "device");
+        assert_eq!(SUT::Device.discriminant(), "device");
+        assert_eq!(SUT::SecurityQuestions.discriminant(), "securityQuestions");
         assert_eq!(
-            FactorSourceKind::SecurityQuestions.discriminant(),
-            "securityQuestions"
-        );
-        assert_eq!(
-            FactorSourceKind::LedgerHQHardwareWallet.discriminant(),
+            SUT::LedgerHQHardwareWallet.discriminant(),
             "ledgerHQHardwareWallet"
         );
-        assert_eq!(
-            FactorSourceKind::OffDeviceMnemonic.discriminant(),
-            "offDeviceMnemonic"
-        );
+        assert_eq!(SUT::OffDeviceMnemonic.discriminant(), "offDeviceMnemonic");
 
-        assert_eq!(
-            FactorSourceKind::TrustedContact.discriminant(),
-            "trustedContact"
-        );
+        assert_eq!(SUT::TrustedContact.discriminant(), "trustedContact");
     }
 
     #[test]
     fn display() {
+        assert_eq!(format!("{}", SUT::Device.discriminant()), "device");
         assert_eq!(
-            format!("{}", FactorSourceKind::Device.discriminant()),
-            "device"
-        );
-        assert_eq!(
-            format!(
-                "{}",
-                FactorSourceKind::LedgerHQHardwareWallet.discriminant()
-            ),
+            format!("{}", SUT::LedgerHQHardwareWallet.discriminant()),
             "ledgerHQHardwareWallet"
         );
         assert_eq!(
-            format!("{}", FactorSourceKind::SecurityQuestions.discriminant()),
+            format!("{}", SUT::SecurityQuestions.discriminant()),
             "securityQuestions"
         );
         assert_eq!(
-            format!("{}", FactorSourceKind::OffDeviceMnemonic.discriminant()),
+            format!("{}", SUT::OffDeviceMnemonic.discriminant()),
             "offDeviceMnemonic"
         );
         assert_eq!(
-            format!("{}", FactorSourceKind::TrustedContact.discriminant()),
+            format!("{}", SUT::TrustedContact.discriminant()),
             "trustedContact"
         );
     }
@@ -178,25 +205,22 @@ mod tests {
     #[test]
     fn json_roundtrip() {
         assert_json_value_eq_after_roundtrip(
-            &FactorSourceKind::TrustedContact,
+            &SUT::TrustedContact,
             json!("trustedContact"),
         );
+        assert_json_value_eq_after_roundtrip(&SUT::Device, json!("device"));
         assert_json_value_eq_after_roundtrip(
-            &FactorSourceKind::Device,
-            json!("device"),
-        );
-        assert_json_value_eq_after_roundtrip(
-            &FactorSourceKind::SecurityQuestions,
+            &SUT::SecurityQuestions,
             json!("securityQuestions"),
         );
         assert_json_value_eq_after_roundtrip(
-            &FactorSourceKind::LedgerHQHardwareWallet,
+            &SUT::LedgerHQHardwareWallet,
             json!("ledgerHQHardwareWallet"),
         );
         assert_json_value_eq_after_roundtrip(
-            &FactorSourceKind::OffDeviceMnemonic,
+            &SUT::OffDeviceMnemonic,
             json!("offDeviceMnemonic"),
         );
-        assert_json_roundtrip(&FactorSourceKind::Device);
+        assert_json_roundtrip(&SUT::Device);
     }
 }

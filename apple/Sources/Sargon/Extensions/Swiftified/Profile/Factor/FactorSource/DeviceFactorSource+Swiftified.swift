@@ -10,6 +10,10 @@ import SargonUniFFI
 
 extension DeviceFactorSource: SargonModel {}
 
+extension DeviceFactorSource: Identifiable {
+	public typealias ID = FactorSourceIDFromHash
+}
+
 extension DeviceFactorSource: FactorSourceProtocol {
 	
 	public var asGeneral: FactorSource {
@@ -23,4 +27,7 @@ extension DeviceFactorSource: FactorSourceProtocol {
 	public var factorSourceKind: FactorSourceKind {
 		.device
 	}
+	
+	public var supportsOlympia: Bool { asGeneral.supportsOlympia }
+	public var supportsBabylon: Bool { asGeneral.supportsBabylon }
 }

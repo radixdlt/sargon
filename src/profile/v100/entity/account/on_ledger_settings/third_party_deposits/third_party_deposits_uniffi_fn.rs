@@ -10,6 +10,11 @@ pub fn new_third_party_deposits_sample_other() -> ThirdPartyDeposits {
     ThirdPartyDeposits::sample_other()
 }
 
+#[uniffi::export]
+pub fn new_third_party_deposits_default() -> ThirdPartyDeposits {
+    ThirdPartyDeposits::default()
+}
+
 #[cfg(test)]
 mod uniffi_tests {
     use super::*;
@@ -30,5 +35,10 @@ mod uniffi_tests {
             .len(),
             2
         );
+    }
+
+    #[test]
+    fn test_default() {
+        assert_eq!(new_third_party_deposits_default(), SUT::default())
     }
 }

@@ -6,9 +6,12 @@ import com.radixdlt.sargon.extensions.get
 import com.radixdlt.sargon.extensions.getBy
 import com.radixdlt.sargon.extensions.id
 import com.radixdlt.sargon.extensions.init
+import com.radixdlt.sargon.extensions.invoke
 import com.radixdlt.sargon.extensions.remove
 import com.radixdlt.sargon.extensions.removeById
 import com.radixdlt.sargon.extensions.size
+import com.radixdlt.sargon.extensions.updateOrAppend
+import com.radixdlt.sargon.extensions.updateOrInsert
 import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -36,6 +39,13 @@ class P2PLinksTest {
         list = list.remove(sampleOther)
         assertFalse(sampleOther in list)
         assertEquals(1, list.size)
+
+        list = list.updateOrInsert(sampleOther, 0)
+        assertEquals(sampleOther, list()[0])
+        assertTrue(list.size == 2)
+        list = list.updateOrAppend(sampleOther)
+        assertTrue(list.size == 2)
+        list = list.remove(sampleOther)
 
         assertEquals(sample, list.getBy(sample.id))
         assertTrue(list.removeById(sample.id).size == 0)

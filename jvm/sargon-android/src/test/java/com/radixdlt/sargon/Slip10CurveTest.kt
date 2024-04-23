@@ -1,7 +1,10 @@
 package com.radixdlt.sargon
 
+import com.radixdlt.sargon.extensions.deserializeFromJsonString
 import com.radixdlt.sargon.extensions.init
+import com.radixdlt.sargon.extensions.serializedJsonString
 import com.radixdlt.sargon.extensions.string
+import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -17,6 +20,15 @@ class Slip10CurveTest {
         val secp256k1 = Slip10Curve.SECP256K1
 
         assertEquals(secp256k1, Slip10Curve.init(secp256k1.string))
+    }
+
+    @Test
+    fun testJsonRoundtrip() {
+        val sut = Slip10Curve.sample()
+        assertEquals(
+            sut,
+            Slip10Curve.deserializeFromJsonString(sut.serializedJsonString())
+        )
     }
 
 }

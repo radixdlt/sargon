@@ -13,6 +13,23 @@ pub enum ResourceOrNonFungible {
     NonFungible { value: NonFungibleGlobalId },
 }
 
+impl std::fmt::Display for ResourceOrNonFungible {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Resource { value } => write!(f, "Resource: {}", value),
+            Self::NonFungible { value } => write!(f, "NonFungible: {}", value),
+        }
+    }
+}
+
+impl Identifiable for ResourceOrNonFungible {
+    type ID = Self;
+
+    fn id(&self) -> Self::ID {
+        self.clone()
+    }
+}
+
 impl From<(ScryptoResourceOrNonFungible, NetworkID)> for ResourceOrNonFungible {
     fn from(value: (ScryptoResourceOrNonFungible, NetworkID)) -> Self {
         let (resource_or_non_fungible, network_id) = value;
@@ -61,6 +78,15 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn test_display() {
+        assert_eq!(format!("{}", SUT::sample()), "Resource: resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd");
+        assert_eq!(
+            format!("{}", SUT::sample_other()),
+            "NonFungible: resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa:<Member_237>"
+        );
     }
 
     #[test]

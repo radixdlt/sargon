@@ -41,7 +41,7 @@ final class ManifestBuildingTests: Test<TransactionManifest> {
 			XCTAssert(manifest.description.contains("SET_METADATA"))
 			XCTAssert(manifest.description.contains("dapp definition"))
 		}
-		AccountAddress.allCases.forEach(doTest)
+		AccountAddress.sampleValues.forEach(doTest)
 	}
 	
 	
@@ -53,7 +53,7 @@ final class ManifestBuildingTests: Test<TransactionManifest> {
             XCTAssert(manifest.description.contains("owner_keys"))
         }
         
-        AddressOfAccountOrPersona.allCases.forEach {
+        AddressOfAccountOrPersona.sampleValues.forEach {
             doTest($0, keyHashes: [.sample])
             doTest($0, keyHashes: [.sample, .sampleOther])
             doTest($0, keyHashes: [.sampleOther])
@@ -88,7 +88,7 @@ final class ManifestBuildingTests: Test<TransactionManifest> {
             oneOf(initialSupply.formattedPlain(locale: .test))
             oneOf(accountAddress.address)
         }
-        AccountAddress.allCases.forEach(doTest)
+        AccountAddress.sampleValues.forEach(doTest)
     }
 	
 	func test_create_single_fungible_token() {
@@ -101,7 +101,7 @@ final class ManifestBuildingTests: Test<TransactionManifest> {
 			XCTAssertEqual(manifest.description.ranges(of: "The brightest component in the Radix ecosystem.").count, 1)
 			XCTAssert(manifest.description.contains(accountAddress.address))
 		}
-		AccountAddress.allCases.forEach(doTest)
+		AccountAddress.sampleValues.forEach(doTest)
 	}
 	
     func test_create_multiple_fungible_tokens() {
@@ -128,7 +128,7 @@ final class ManifestBuildingTests: Test<TransactionManifest> {
 			XCTAssertEqual(manifest.description.ranges(of: "nf-number").count, 20)
 			XCTAssert(manifest.description.contains(accountAddress.address))
 		}
-		AccountAddress.allCases.forEach(doTest)
+		AccountAddress.sampleValues.forEach(doTest)
 	}
 
 	func test_create_multiple_nft_collection() {
@@ -140,18 +140,18 @@ final class ManifestBuildingTests: Test<TransactionManifest> {
 			XCTAssertEqual(manifest.description.ranges(of: "nf-number").count, collections * nftsPerCollection)
 			XCTAssert(manifest.description.contains(accountAddress.address))
 		}
-		AccountAddress.allCases.forEach(doTest)
+		AccountAddress.sampleValues.forEach(doTest)
 	}
 	
 	func test_stakes_claim() {
 		func doTest(_ accountAddress: AccountAddress) {
-            let manifest = SUT.stakesClaim(accountAddress: accountAddress, stakeClaims: StakeClaim.allCases)
+            let manifest = SUT.stakesClaim(accountAddress: accountAddress, stakeClaims: StakeClaim.sampleValues)
 			XCTAssertEqual(manifest.description.ranges(of: StakeClaim.sample.validatorAddress.mapTo(networkID: accountAddress.networkID).address).count, 1)
 			XCTAssertEqual(manifest.description.ranges(of: accountAddress.xrdOnSameNetwork.address).count, 2)
 			XCTAssert(manifest.description.contains(accountAddress.address))
 		}
 		
-		AccountAddress.allCases.forEach(doTest)
+		AccountAddress.sampleValues.forEach(doTest)
 	}
     
     func test_update_third_party_deposits() {
@@ -164,7 +164,7 @@ final class ManifestBuildingTests: Test<TransactionManifest> {
             XCTAssert(manifest.description.contains(accountAddress.address))
             XCTAssertEqual(manifest.description.ranges(of: ";").count, 3) // 3 instructions
         }
-        AccountAddress.allCases.forEach(doTest)
+        AccountAddress.sampleValues.forEach(doTest)
     }
     
     func test_modify_manifest_add_lock_fee() throws {

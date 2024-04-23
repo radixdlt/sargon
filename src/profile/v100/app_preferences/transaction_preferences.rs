@@ -32,10 +32,10 @@ impl TransactionPreferences {
 }
 
 impl Default for TransactionPreferences {
-    /// By default `1.0` is used.
+    /// By default `0.99` is used.
     fn default() -> Self {
         Self {
-            default_deposit_guarantee: Decimal192::one(),
+            default_deposit_guarantee: Decimal192::try_from(0.99).unwrap(),
         }
     }
 }
@@ -96,12 +96,12 @@ mod tests {
     }
 
     #[test]
-    fn default_is_1() {
+    fn default_is_99_percent() {
         assert_eq!(
             TransactionPreferences::default()
                 .default_deposit_guarantee
                 .to_string(),
-            "1"
+            "0.99"
         );
     }
 }

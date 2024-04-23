@@ -17,4 +17,14 @@ final class HashTests: Test<Hash> {
 	func test_hash_of_hash() {
 		XCTAssertEqual(Data("Hello Radix".utf8).hash().hash().bytes, "0c18fa9b3e94d9b879d631e791ee0699ad2f98d914f16a35a70f6312abe4474a")
 	}
+    
+    func test_from_bytes32() {
+        let bytes32: Exactly32Bytes = "48f1bd08444b5e713db9e14caac2faae71836786ac94d645b00679728202a935"
+        XCTAssertEqual(SUT(bytes32: bytes32).bytes, bytes32)
+    }
+    
+    func test_from_string() throws {
+        let hex = "48f1bd08444b5e713db9e14caac2faae71836786ac94d645b00679728202a935"
+        try XCTAssertEqual(SUT(string: hex).hex, hex)
+    }
 }

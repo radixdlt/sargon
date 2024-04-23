@@ -31,6 +31,13 @@ impl TryFrom<&HDPath> for DerivationPath {
     }
 }
 
+impl FromStr for DerivationPath {
+    type Err = CommonError;
+    fn from_str(s: &str) -> Result<Self> {
+        HDPath::from_str(s).and_then(|p| Self::try_from(&p))
+    }
+}
+
 impl<'de> serde::Deserialize<'de> for DerivationPath {
     /// Tries to deserializes a JSON string as a bech32 address into an `AccountAddress`.
     #[cfg(not(tarpaulin_include))] // false negative
@@ -335,6 +342,18 @@ mod tests {
 		}
         "#,
         );
+    }
+
+    #[test]
+    fn test_from_str_bip44() {
+        let s = "m/44H/1022H/0H/0/0H";
+        assert_eq!(SUT::from_str(s).unwrap(), BIP44LikePath::sample().into())
+    }
+
+    #[test]
+    fn test_from_str_cap26_account_path() {
+        let s = "m/44H/1022H/1H/525H/1460H/0H";
+        assert_eq!(SUT::from_str(s).unwrap(), AccountPath::sample().into())
     }
 
     #[test]

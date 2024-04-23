@@ -24,8 +24,8 @@ extension ResourceAddress {
 
 #if DEBUG
 extension ResourceAddress {
-	public typealias AllCases = [Self]
-	public static var allCases: AllCases {
+	
+	public static var sampleValues: [Self] {
 		return [
 			Self.sampleMainnetXRD,
 			.sampleMainnetCandy,

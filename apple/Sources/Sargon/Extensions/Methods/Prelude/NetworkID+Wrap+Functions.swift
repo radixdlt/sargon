@@ -1,6 +1,6 @@
 import SargonUniFFI
 
-extension NetworkID {
+extension NetworkID: CaseIterable {
 	public init(discriminant: UInt8) throws {
 		self = try newNetworkIdFromDiscriminant(discriminant: discriminant)
 	}

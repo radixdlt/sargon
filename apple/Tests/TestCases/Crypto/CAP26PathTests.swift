@@ -4,7 +4,7 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class CAP26PathTests: HDPathProtocolTests<CAP26Path> {
+final class CAP26PathTests: HDPathProtocolTest<CAP26Path> {
     func test_sample_description() {
         XCTAssertNoDifference(SUT.sample.description, "m/44H/1022H/1H/525H/1460H/0H")
     }

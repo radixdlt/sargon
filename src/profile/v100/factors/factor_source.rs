@@ -28,6 +28,13 @@ pub enum FactorSource {
 }
 
 impl BaseIsFactorSource for FactorSource {
+    fn common_properties(&self) -> FactorSourceCommon {
+        match self {
+            FactorSource::Device { value } => value.common_properties(),
+            FactorSource::Ledger { value } => value.common_properties(),
+        }
+    }
+
     fn factor_source_kind(&self) -> FactorSourceKind {
         match self {
             FactorSource::Device { value } => value.factor_source_kind(),
@@ -139,23 +146,39 @@ impl FactorSource {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = FactorSource;
 
     #[test]
     fn equality() {
-        assert_eq!(FactorSource::sample(), FactorSource::sample());
-        assert_eq!(FactorSource::sample_other(), FactorSource::sample_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(FactorSource::sample(), FactorSource::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn device_common_properties() {
+        assert_eq!(
+            SUT::sample().common_properties(),
+            DeviceFactorSource::sample_babylon().common
+        );
+
+        assert_eq!(
+            SUT::sample_other().common_properties(),
+            LedgerHardwareWalletFactorSource::sample().common
+        )
     }
 
     #[test]
     fn factor_source_id_device() {
         assert_eq!(
-            FactorSource::sample_device().factor_source_id(),
+            SUT::sample_device().factor_source_id(),
             DeviceFactorSource::sample().factor_source_id()
         );
     }
@@ -163,7 +186,7 @@ mod tests {
     #[test]
     fn factor_source_id_ledger() {
         assert_eq!(
-            FactorSource::sample_ledger().factor_source_id(),
+            SUT::sample_ledger().factor_source_id(),
             LedgerHardwareWalletFactorSource::sample().factor_source_id()
         );
     }
@@ -171,7 +194,7 @@ mod tests {
     #[test]
     fn factor_source_kind_device() {
         assert_eq!(
-            FactorSource::sample_device().factor_source_kind(),
+            SUT::sample_device().factor_source_kind(),
             FactorSourceKind::Device
         );
     }
@@ -179,17 +202,17 @@ mod tests {
     #[test]
     fn factor_source_kind_ledger() {
         assert_eq!(
-            FactorSource::sample_ledger().factor_source_kind(),
+            SUT::sample_ledger().factor_source_kind(),
             FactorSourceKind::LedgerHQHardwareWallet
         );
     }
 
     #[test]
     fn into_from_device() {
-        let factor_source: FactorSource = DeviceFactorSource::sample().into();
+        let factor_source: SUT = DeviceFactorSource::sample().into();
         assert_eq!(
             factor_source,
-            FactorSource::Device {
+            SUT::Device {
                 value: DeviceFactorSource::sample()
             }
         );
@@ -197,11 +220,11 @@ mod tests {
 
     #[test]
     fn into_from_ledger() {
-        let factor_source: FactorSource =
+        let factor_source: SUT =
             LedgerHardwareWalletFactorSource::sample().into();
         assert_eq!(
             factor_source,
-            FactorSource::Ledger {
+            SUT::Ledger {
                 value: LedgerHardwareWalletFactorSource::sample()
             }
         );
@@ -209,7 +232,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_device() {
-        let model = FactorSource::sample_device();
+        let model = SUT::sample_device();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -242,7 +265,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_ledger() {
-        let model = FactorSource::sample_ledger();
+        let model = SUT::sample_ledger();
         assert_eq_after_json_roundtrip(
             &model,
             r#"

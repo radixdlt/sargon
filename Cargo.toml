@@ -1,6 +1,6 @@
 [package]
 name = "sargon"
-version = "0.6.41"
+version = "0.6.44"
 edition = "2021"
 build = "build.rs"
 
@@ -141,6 +141,7 @@ k256 = { git = "https://github.com/RustCrypto/elliptic-curves", rev = "e158ce5cf
 bip39 = { git = "https://github.com/rust-bitcoin/rust-bip39", rev = "a30760beac21d595b2bda376df4f4e6bf029bcc5", features = [
     "serde",
     "zeroize",
+    "french",
 ] }
 
 # assert-json-diff = "2.0.2"

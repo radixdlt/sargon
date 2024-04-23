@@ -5,7 +5,7 @@ import SargonUniFFI
 public struct SampleAddressesView: SwiftUI.View {
 	public var body: some SwiftUI.View {
 		VStack(alignment: .leading, spacing: .large2) {
-			ForEach(Address.allCases, id: \.self) { address in
+			ForEach(Address.sampleValues, id: \.self) { address in
 				Text("`\(address.address)`")
 					.font(.footnote)
 					.lineLimit(3)

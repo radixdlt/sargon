@@ -4,10 +4,15 @@ import com.radixdlt.sargon.extensions.append
 import com.radixdlt.sargon.extensions.contains
 import com.radixdlt.sargon.extensions.get
 import com.radixdlt.sargon.extensions.getBy
+import com.radixdlt.sargon.extensions.id
 import com.radixdlt.sargon.extensions.init
+import com.radixdlt.sargon.extensions.invoke
 import com.radixdlt.sargon.extensions.remove
 import com.radixdlt.sargon.extensions.removeByAddress
+import com.radixdlt.sargon.extensions.removeById
 import com.radixdlt.sargon.extensions.size
+import com.radixdlt.sargon.extensions.updateOrAppend
+import com.radixdlt.sargon.extensions.updateOrInsert
 import com.radixdlt.sargon.samples.Sample
 import com.radixdlt.sargon.samples.sampleMainnet
 import com.radixdlt.sargon.samples.sampleStokenet
@@ -39,6 +44,13 @@ class PersonasTest: SampleTestable<Personas> {
         list = list.remove(sampleOther)
         Assertions.assertFalse(sampleOther in list)
         assertEquals(1, list.size)
+
+        list = list.updateOrInsert(sampleOther, 0)
+        assertEquals(sampleOther, list()[0])
+        assertTrue(list.size == 2)
+        list = list.updateOrAppend(sampleOther)
+        assertTrue(list.size == 2)
+        list = list.remove(sampleOther)
 
         assertEquals(sample, list.getBy(sample.address))
         assertTrue(list.removeByAddress(sample.address).size == 0)

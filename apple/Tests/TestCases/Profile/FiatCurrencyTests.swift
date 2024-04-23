@@ -41,13 +41,13 @@ final class FiatCurrencyTests: Test<FiatCurrency> {
 	}
 	
 	func test_codable_roundtrip() throws {
-		try SUT.allCases.forEach(doTestCodableRoundtrip)
+		try SUT.sampleValues.forEach(doTestCodableRoundtrip)
 	}
 	
 	func test_raw_value_roundtrip() {
 		func doTest(_ sut: SUT) {
 			XCTAssertEqual(sut.rawValue, sut.jsonStringLiteral())
 		}
-		SUT.allCases.forEach(doTest)
+		SUT.sampleValues.forEach(doTest)
 	}
 }

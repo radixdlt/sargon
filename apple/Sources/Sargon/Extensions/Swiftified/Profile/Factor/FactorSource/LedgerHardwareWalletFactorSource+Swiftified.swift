@@ -10,6 +10,10 @@ import SargonUniFFI
 
 extension LedgerHardwareWalletFactorSource: SargonModel {}
 
+extension LedgerHardwareWalletFactorSource: Identifiable {
+	public typealias ID = FactorSourceIDFromHash
+}
+
 extension LedgerHardwareWalletFactorSource: FactorSourceProtocol {
 	
 	public var asGeneral: FactorSource {
@@ -23,4 +27,7 @@ extension LedgerHardwareWalletFactorSource: FactorSourceProtocol {
 	public var factorSourceKind: FactorSourceKind {
 		.ledgerHqHardwareWallet
 	}
+	
+	public var supportsOlympia: Bool { asGeneral.supportsOlympia }
+	public var supportsBabylon: Bool { asGeneral.supportsBabylon }
 }

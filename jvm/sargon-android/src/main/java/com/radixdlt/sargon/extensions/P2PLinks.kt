@@ -5,6 +5,8 @@ import com.radixdlt.sargon.P2pLink
 import com.radixdlt.sargon.P2pLinks
 import com.radixdlt.sargon.newP2PLinks
 import com.radixdlt.sargon.newP2PLinksByAppending
+import com.radixdlt.sargon.newP2PLinksByUpdatingOrAppending
+import com.radixdlt.sargon.newP2PLinksByUpdatingOrInsertingAtIndex
 import com.radixdlt.sargon.newP2PLinksRemovedById
 import com.radixdlt.sargon.newP2PLinksRemovedElement
 import com.radixdlt.sargon.p2PLinksElementCount
@@ -27,6 +29,16 @@ val P2pLinks.size: Int
 
 fun P2pLinks.append(p2pLink: P2pLink): P2pLinks =
     newP2PLinksByAppending(p2PLink = p2pLink, to = this)
+
+fun P2pLinks.updateOrInsert(p2pLink: P2pLink, index: Int): P2pLinks =
+    newP2PLinksByUpdatingOrInsertingAtIndex(
+        p2PLink = p2pLink,
+        to = this,
+        index = index.toULong()
+    )
+
+fun P2pLinks.updateOrAppend(p2pLink: P2pLink): P2pLinks =
+    newP2PLinksByUpdatingOrAppending(p2PLink = p2pLink, to = this)
 
 fun P2pLinks.removeById(hash: Hash): P2pLinks =
     newP2PLinksRemovedById(idOfP2PLink = hash, from = this)
