@@ -796,7 +796,7 @@ mod wallet_to_dapp_interaction_tests {
                     "278608e0-e5ca-416e-8339-f2d2695651c4",
                 ),
                 DappWalletInteractionErrorType::RejectedByUser,
-                "User rejected the request".into(),
+                "User rejected the request".to_owned(),
             ),
         );
 

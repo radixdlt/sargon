@@ -9,11 +9,11 @@ pub struct WalletToDappInteractionSuccessResponse {
 
 impl WalletToDappInteractionSuccessResponse {
     pub fn new(
-        interaction_id: impl Into<WalletInteractionId>,
+        interaction_id: WalletInteractionId,
         items: WalletToDappInteractionResponseItems,
     ) -> Self {
         Self {
-            interaction_id: interaction_id.into(),
+            interaction_id,
             items,
         }
     }

@@ -7,7 +7,7 @@ pub struct DappToWalletInteractionTransactionItems {
 
 impl DappToWalletInteractionTransactionItems {
     pub fn new(send: DappToWalletInteractionSendTransactionItem) -> Self {
-        Self { send: send }
+        Self { send }
     }
 }
 

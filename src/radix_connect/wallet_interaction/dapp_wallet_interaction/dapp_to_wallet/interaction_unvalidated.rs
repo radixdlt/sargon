@@ -10,14 +10,14 @@ pub struct DappToWalletInteractionUnvalidated {
 
 impl DappToWalletInteractionUnvalidated {
     pub fn new(
-        interaction_id: impl Into<WalletInteractionId>,
-        items: impl Into<DappToWalletInteractionItems>,
-        metadata: impl Into<DappToWalletInteractionMetadataUnvalidated>,
+        interaction_id: WalletInteractionId,
+        items: DappToWalletInteractionItems,
+        metadata: DappToWalletInteractionMetadataUnvalidated,
     ) -> Self {
         Self {
-            interaction_id: interaction_id.into(),
-            items: items.into(),
-            metadata: metadata.into(),
+            interaction_id,
+            items,
+            metadata,
         }
     }
 }

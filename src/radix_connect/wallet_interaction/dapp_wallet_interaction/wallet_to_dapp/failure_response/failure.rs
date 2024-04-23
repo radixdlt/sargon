@@ -13,7 +13,7 @@ impl WalletToDappInteractionFailureResponse {
     pub fn new(
         interaction_id: WalletInteractionId,
         error: DappWalletInteractionErrorType,
-        message: String,
+        message: impl Into<Option<String>>,
     ) -> Self {
         Self {
             interaction_id,
