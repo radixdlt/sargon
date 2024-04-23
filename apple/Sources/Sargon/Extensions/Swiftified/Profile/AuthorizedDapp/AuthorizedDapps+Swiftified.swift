@@ -10,4 +10,7 @@ import SargonUniFFI
 
 extension AuthorizedDapps: CanBeEmptyIdentifiedCollection {
 	public typealias Element = AuthorizedDapp
+	public mutating func append(_ newElement: Self.Element) {
+		self = appending(newElement)
+	}
 }

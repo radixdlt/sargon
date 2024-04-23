@@ -9,6 +9,7 @@ import Foundation
 
 public protocol CanBeEmptyIdentifiedCollection:
 	BaseIdentifiedCollection,
+	RangeReplaceableCollection,
 	ExpressibleByArrayLiteral
 where
 	ArrayLiteralElement == Self.Element
@@ -17,6 +18,25 @@ where
 	
 	func removing(_ id: Element.ID) -> Self
 	func removing(element: Element) -> Self
+}
+
+extension CanBeEmptyIdentifiedCollection {
+	public init() {
+		self.init([])
+	}
+	
+	public mutating func replaceSubrange<C>(
+		_ subrange: Range<Self.Index>,
+		with newElements: C
+	) where C : Collection, Self.Element == C.Element {
+		var elements = self.elements
+		elements.removeSubrange(subrange)
+		elements.reserveCapacity(self.count + newElements.count)
+		for element in newElements.reversed() {
+			elements.insert(element, at: subrange.startIndex)
+		}
+		self = Self(elements)
+	}
 }
 
 extension CanBeEmptyIdentifiedCollection {

@@ -10,4 +10,7 @@ import SargonUniFFI
 
 extension ReferencesToAuthorizedPersonas: CanBeEmptyIdentifiedCollection {
 	public typealias Element = AuthorizedPersonaSimple
+	public mutating func append(_ newElement: Self.Element) {
+		self = appending(newElement)
+	}
 }

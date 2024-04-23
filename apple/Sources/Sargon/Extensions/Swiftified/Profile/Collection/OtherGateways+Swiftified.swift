@@ -10,4 +10,7 @@ import SargonUniFFI
 
 extension OtherGateways: CanBeEmptyIdentifiedCollection {
 	public typealias Element = Gateway
+	public mutating func append(_ newElement: Self.Element) {
+		self = appending(newElement)
+	}
 }

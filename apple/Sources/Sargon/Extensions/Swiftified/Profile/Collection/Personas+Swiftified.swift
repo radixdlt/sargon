@@ -10,4 +10,7 @@ import SargonUniFFI
 
 extension Personas: CanBeEmptyIdentifiedCollection {
 	public typealias Element = Persona
+	public mutating func append(_ newElement: Self.Element) {
+		self = appending(newElement)
+	}
 }

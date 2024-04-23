@@ -11,4 +11,7 @@ import SargonUniFFI
 extension AssetsExceptionList: SargonModel {}
 extension AssetsExceptionList: CanBeEmptyIdentifiedCollection {
 	public typealias Element = AssetException
+	public mutating func append(_ newElement: Self.Element) {
+		self = appending(newElement)
+	}
 }
