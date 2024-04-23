@@ -5,19 +5,21 @@ pub struct WalletToDappInteractionAuthLoginWithoutChallengeRequestResponseItem {
     pub persona: DappWalletInteractionPersona,
 }
 
+impl WalletToDappInteractionAuthLoginWithoutChallengeRequestResponseItem {
+    pub fn new(persona: DappWalletInteractionPersona) -> Self {
+        Self { persona }
+    }
+}
+
 impl HasSampleValues
     for WalletToDappInteractionAuthLoginWithoutChallengeRequestResponseItem
 {
     fn sample() -> Self {
-        Self {
-            persona: DappWalletInteractionPersona::sample(),
-        }
+        Self::new(DappWalletInteractionPersona::sample())
     }
 
     fn sample_other() -> Self {
-        Self {
-            persona: DappWalletInteractionPersona::sample_other(),
-        }
+        Self::new(DappWalletInteractionPersona::sample_other())
     }
 }
 

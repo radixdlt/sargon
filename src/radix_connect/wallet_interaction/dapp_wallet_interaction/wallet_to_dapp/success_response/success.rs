@@ -21,7 +21,10 @@ impl WalletToDappInteractionSuccessResponse {
 
 impl HasSampleValues for WalletToDappInteractionSuccessResponse {
     fn sample() -> Self {
-        Self::new(WalletInteractionId::sample(), WalletToDappInteractionResponseItems::sample())
+        Self::new(
+            WalletInteractionId::sample(),
+            WalletToDappInteractionResponseItems::sample(),
+        )
     }
 
     fn sample_other() -> Self {

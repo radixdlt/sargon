@@ -10,25 +10,41 @@ pub struct DappToWalletInteractionMetadataUnvalidated {
     pub dapp_definition_address: String,
 }
 
+impl DappToWalletInteractionMetadataUnvalidated {
+    pub fn new(
+        version: impl Into<WalletInteractionVersion>,
+        network_id: impl Into<NetworkID>,
+        origin: impl Into<Url>,
+        dapp_definition_address: impl AsRef<str>,
+    ) -> Self {
+        Self {
+            version: version.into(),
+            network_id: network_id.into(),
+            origin: origin.into(),
+            dapp_definition_address: dapp_definition_address
+                .as_ref()
+                .to_owned(),
+        }
+    }
+}
+
 impl HasSampleValues for DappToWalletInteractionMetadataUnvalidated {
     fn sample() -> Self {
-        Self {
-            version: WalletInteractionVersion::sample(),
-            network_id: NetworkID::Stokenet,
-            origin: Url::from_str("https://example.com").unwrap(),
-            dapp_definition_address: DappDefinitionAddress::sample()
-                .to_string(),
-        }
+        Self::new(
+            WalletInteractionVersion::sample(),
+            NetworkID::Stokenet,
+            Url::from_str("https://example.com").unwrap(),
+            DappDefinitionAddress::sample().to_string(),
+        )
     }
 
     fn sample_other() -> Self {
-        Self {
-            version: WalletInteractionVersion::sample_other(),
-            network_id: NetworkID::Stokenet,
-            origin: Url::from_str("https://example.org").unwrap(),
-            dapp_definition_address: DappDefinitionAddress::sample_other()
-                .to_string(),
-        }
+        Self::new(
+            WalletInteractionVersion::sample_other(),
+            NetworkID::Stokenet,
+            Url::from_str("https://example.org").unwrap(),
+            DappDefinitionAddress::sample_other().to_string(),
+        )
     }
 }
 

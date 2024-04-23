@@ -21,7 +21,10 @@ impl WalletToDappInteractionAccountProof {
 
 impl HasSampleValues for WalletToDappInteractionAccountProof {
     fn sample() -> Self {
-        Self::new(AccountAddress::sample(), WalletToDappInteractionAuthProof::sample())
+        Self::new(
+            AccountAddress::sample(),
+            WalletToDappInteractionAuthProof::sample(),
+        )
     }
 
     fn sample_other() -> Self {

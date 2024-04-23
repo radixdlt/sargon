@@ -8,22 +8,35 @@ pub struct DappToWalletInteractionUnvalidated {
     pub metadata: DappToWalletInteractionMetadataUnvalidated,
 }
 
+impl DappToWalletInteractionUnvalidated {
+    pub fn new(
+        interaction_id: impl Into<WalletInteractionId>,
+        items: impl Into<DappToWalletInteractionItems>,
+        metadata: impl Into<DappToWalletInteractionMetadataUnvalidated>,
+    ) -> Self {
+        Self {
+            interaction_id: interaction_id.into(),
+            items: items.into(),
+            metadata: metadata.into(),
+        }
+    }
+}
+
 impl HasSampleValues for DappToWalletInteractionUnvalidated {
     fn sample() -> Self {
-        Self {
-            interaction_id: WalletInteractionId::sample(),
-            items: DappToWalletInteractionItems::sample(),
-            metadata: DappToWalletInteractionMetadataUnvalidated::sample(),
-        }
+        Self::new(
+            WalletInteractionId::sample(),
+            DappToWalletInteractionItems::sample(),
+            DappToWalletInteractionMetadataUnvalidated::sample(),
+        )
     }
 
     fn sample_other() -> Self {
-        Self {
-            interaction_id: WalletInteractionId::sample_other(),
-            items: DappToWalletInteractionItems::sample_other(),
-            metadata: DappToWalletInteractionMetadataUnvalidated::sample_other(
-            ),
-        }
+        Self::new(
+            WalletInteractionId::sample_other(),
+            DappToWalletInteractionItems::sample_other(),
+            DappToWalletInteractionMetadataUnvalidated::sample_other(),
+        )
     }
 }
 

@@ -7,19 +7,22 @@ pub struct DappToWalletInteractionResetRequestItem {
     pub persona_data: bool,
 }
 
+impl DappToWalletInteractionResetRequestItem {
+    pub fn new(accounts: bool, persona_data: bool) -> Self {
+        Self {
+            accounts,
+            persona_data,
+        }
+    }
+}
+
 impl HasSampleValues for DappToWalletInteractionResetRequestItem {
     fn sample() -> Self {
-        Self {
-            accounts: true,
-            persona_data: true,
-        }
+        Self::new(true, true)
     }
 
     fn sample_other() -> Self {
-        Self {
-            accounts: false,
-            persona_data: false,
-        }
+        Self::new(false, false)
     }
 }
 

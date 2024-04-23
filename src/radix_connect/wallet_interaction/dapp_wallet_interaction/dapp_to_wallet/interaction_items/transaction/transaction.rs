@@ -5,6 +5,12 @@ pub struct DappToWalletInteractionTransactionItems {
     pub send: DappToWalletInteractionSendTransactionItem,
 }
 
+impl DappToWalletInteractionTransactionItems {
+    pub fn new(send: DappToWalletInteractionSendTransactionItem) -> Self {
+        Self { send: send }
+    }
+}
+
 #[derive(Debug, Deserialize, Serialize, PartialEq, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct DappToWalletInteractionSendTransactionItem {
@@ -30,40 +36,35 @@ impl DappToWalletInteractionSendTransactionItem {
             message: message.into(),
         }
     }
-
 }
 
 impl HasSampleValues for DappToWalletInteractionTransactionItems {
     fn sample() -> Self {
-        Self {
-            send: DappToWalletInteractionSendTransactionItem::sample(),
-        }
+        Self::new(DappToWalletInteractionSendTransactionItem::sample())
     }
 
     fn sample_other() -> Self {
-        Self {
-            send: DappToWalletInteractionSendTransactionItem::sample_other(),
-        }
+        Self::new(DappToWalletInteractionSendTransactionItem::sample_other())
     }
 }
 
 impl HasSampleValues for DappToWalletInteractionSendTransactionItem {
     fn sample() -> Self {
-        Self {
-            transaction_manifest: "transaction_manifest".to_string(),
-            version: TXVersion::sample(),
-            blobs: Some(vec!["blob".to_string()]),
-            message: Some("message".to_string()),
-        }
+        Self::new(
+            "transaction_manifest",
+            TXVersion::sample(),
+            vec!["blob".to_owned()],
+            "message".to_owned(),
+        )
     }
 
     fn sample_other() -> Self {
-        Self {
-            transaction_manifest: "transaction_manifest_other".to_string(),
-            version: TXVersion::sample_other(),
-            blobs: Some(vec!["blob_other".to_string()]),
-            message: Some("message_other".to_string()),
-        }
+        Self::new(
+            "transaction_manifest_other",
+            TXVersion::sample_other(),
+            vec!["blob_other".to_owned()],
+            "message_other".to_owned(),
+        )
     }
 }
 

@@ -6,17 +6,21 @@ pub struct DappToWalletInteractionAuthUsePersonaRequestItem {
     pub identity_address: IdentityAddress,
 }
 
+impl DappToWalletInteractionAuthUsePersonaRequestItem {
+    pub fn new(identity_address: impl Into<IdentityAddress>) -> Self {
+        Self {
+            identity_address: identity_address.into(),
+        }
+    }
+}
+
 impl HasSampleValues for DappToWalletInteractionAuthUsePersonaRequestItem {
     fn sample() -> Self {
-        Self {
-            identity_address: IdentityAddress::sample(),
-        }
+        Self::new(IdentityAddress::sample())
     }
 
     fn sample_other() -> Self {
-        Self {
-            identity_address: IdentityAddress::sample_other(),
-        }
+        Self::new(IdentityAddress::sample_other())
     }
 }
 

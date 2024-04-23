@@ -24,19 +24,19 @@ impl DappToWalletInteraction {
 
 impl HasSampleValues for DappToWalletInteraction {
     fn sample() -> Self {
-      Self::new(
-        WalletInteractionId::sample(),
-        DappToWalletInteractionItems::sample(),
-        DappToWalletInteractionMetadata::sample(),
-      )
+        Self::new(
+            WalletInteractionId::sample(),
+            DappToWalletInteractionItems::sample(),
+            DappToWalletInteractionMetadata::sample(),
+        )
     }
 
     fn sample_other() -> Self {
-      Self::new(
-        WalletInteractionId::sample_other(),
-        DappToWalletInteractionItems::sample_other(),
-        DappToWalletInteractionMetadata::sample_other(),
-      )
+        Self::new(
+            WalletInteractionId::sample_other(),
+            DappToWalletInteractionItems::sample_other(),
+            DappToWalletInteractionMetadata::sample_other(),
+        )
     }
 }
 

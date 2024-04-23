@@ -12,8 +12,12 @@ pub struct DappToWalletInteractionUnauthorizedRequestItems {
 
 impl DappToWalletInteractionUnauthorizedRequestItems {
     pub fn new(
-        one_time_accounts: impl Into<Option<DappToWalletInteractionAccountsRequestItem>>,
-        one_time_persona_data: impl Into<Option<DappToWalletInteractionPersonaDataRequestItem>>,
+        one_time_accounts: impl Into<
+            Option<DappToWalletInteractionAccountsRequestItem>,
+        >,
+        one_time_persona_data: impl Into<
+            Option<DappToWalletInteractionPersonaDataRequestItem>,
+        >,
     ) -> Self {
         Self {
             one_time_accounts: one_time_accounts.into(),
