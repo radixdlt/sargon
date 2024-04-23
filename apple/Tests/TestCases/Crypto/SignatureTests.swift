@@ -9,6 +9,6 @@ final class SignatureTests: SignatureTest<Signature> {
 		func doTest(_ sut: SUT) {
 			XCTAssertEqual(sut, sut.signature)
 		}
-		SUT.allCases.forEach(doTest)
+		SUT.sampleValues.forEach(doTest)
 	}
 }

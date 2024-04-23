@@ -10,7 +10,7 @@ final class FactorSourceKindTests: Test<FactorSourceKind> {
         func doTest(_ sut: SUT) {
             XCTAssertEqual(sut.description, sut.toString())
         }
-        SUT.allCases.forEach(doTest)
+        SUT.sampleValues.forEach(doTest)
     }
     
     
@@ -18,7 +18,7 @@ final class FactorSourceKindTests: Test<FactorSourceKind> {
         func doTest(_ sut: SUT) {
             XCTAssertEqual(sut.rawValue, sut.toString())
         }
-        SUT.allCases.forEach(doTest)
+        SUT.sampleValues.forEach(doTest)
     }
     
     
@@ -29,6 +29,6 @@ final class FactorSourceKindTests: Test<FactorSourceKind> {
                 sut
             )
         }
-        SUT.allCases.forEach(doTest)
+        SUT.sampleValues.forEach(doTest)
     }
 }

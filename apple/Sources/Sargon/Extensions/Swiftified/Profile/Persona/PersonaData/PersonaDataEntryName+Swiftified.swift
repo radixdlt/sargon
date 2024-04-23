@@ -10,6 +10,16 @@ extension PersonaDataEntryName: CustomStringConvertible {
 }
 
 extension PersonaDataEntryName {
+	public typealias Variant = Sargon.PersonaDataNameVariant
+}
+
+extension PersonaDataEntryName.Variant: CaseIterable {
+	public static var allCases: [Self] {
+		[.eastern, .western]
+	}
+}
+
+extension PersonaDataEntryName {
 	public var formatted: String {
 		let names = { () -> [String] in
 			switch variant {

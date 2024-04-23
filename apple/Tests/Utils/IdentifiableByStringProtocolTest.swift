@@ -11,18 +11,18 @@ class IdentifiableByStringProtocolTest<SUT_: IdentifiableByStringProtocol>: Test
             let roundtripped = try SUT(sut.toRawString())
             XCTAssertEqual(sut, roundtripped)
         }
-        try SUT.allCases.forEach(doTest)
+        try SUT.sampleValues.forEach(doTest)
     }
     
     func test_codable_roundtrip() throws {
-        try SUT.allCases.forEach(doTestCodableRoundtrip)
+        try SUT.sampleValues.forEach(doTestCodableRoundtrip)
     }
     
     func test_formatted_raw_is_raw() {
         func doTest(_ sut: SUT) {
             XCTAssertEqual(sut.toRawString(), sut.formatted(.raw))
         }
-        SUT.allCases.forEach(doTest)
+        SUT.sampleValues.forEach(doTest)
     }
 }
 

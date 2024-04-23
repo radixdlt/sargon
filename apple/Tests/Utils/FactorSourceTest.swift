@@ -10,13 +10,13 @@ class FactorSourceTest<SUT_: FactorSourceProtocol>: Test<SUT_> {
 		func doTest(_ sut: SUT) {
 			XCTAssertEqual(sut.asGeneral.factorSourceID, sut.factorSourceID)
 		}
-		SUT.allCases.forEach(doTest)
+		SUT.sampleValues.forEach(doTest)
 	}
 	
 	func test_as_general_factorSourceKind() {
 		func doTest(_ sut: SUT) {
 			XCTAssertEqual(sut.asGeneral.factorSourceKind, sut.factorSourceKind)
 		}
-		SUT.allCases.forEach(doTest)
+		SUT.sampleValues.forEach(doTest)
 	}
 }

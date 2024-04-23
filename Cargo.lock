@@ -2528,7 +2528,7 @@ dependencies = [
 
 [[package]]
 name = "sargon"
-version = "0.6.42"
+version = "0.6.44"
 dependencies = [
  "actix-rt",
  "aes-gcm",

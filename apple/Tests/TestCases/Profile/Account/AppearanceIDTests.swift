@@ -16,6 +16,6 @@ final class AppearanceIDTests: Test<AppearanceID> {
 	
 	
 	func test_codable_roundtrip() throws {
-		try SUT.allCases.forEach(doTestCodableRoundtrip)
+		try SUT.sampleValues.forEach(doTestCodableRoundtrip)
 	}
 }

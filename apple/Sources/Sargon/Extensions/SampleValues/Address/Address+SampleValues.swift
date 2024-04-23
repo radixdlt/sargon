@@ -8,8 +8,7 @@ extension Address {
 	public static let sampleStokenet: Self = newAddressSampleStokenet()
 	public static let sampleStokenetOther: Self = newAddressSampleStokenetOther()
 	
-	public typealias AllCases = [Self]
-	public static var allCases: AllCases {
+	public static var sampleValues: [Self] {
 		addressSampleValuesAll()
 	}
 }

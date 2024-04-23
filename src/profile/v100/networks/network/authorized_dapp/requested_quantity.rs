@@ -21,13 +21,27 @@ pub struct RequestedQuantity {
     pub quantity: u16,
 }
 
+impl HasSampleValues for RequestedQuantity {
+    fn sample() -> Self {
+        Self::exactly(1)
+    }
+
+    fn sample_other() -> Self {
+        Self::at_least(1)
+    }
+}
+
 impl RequestedQuantity {
     pub fn assert_is_valid(&self) {
+        if !self.is_valid() {
+            panic!("Invalid quantity {self}")
+        }
+    }
+
+    pub fn is_valid(&self) -> bool {
         match self.quantifier {
-            RequestedNumberQuantifier::Exactly => {
-                assert_ne!(self.quantity, 0, "Invalid quantity {self}")
-            }
-            _ => { /* valid */ }
+            RequestedNumberQuantifier::Exactly => self.quantity != 0,
+            _ => true,
         }
     }
 

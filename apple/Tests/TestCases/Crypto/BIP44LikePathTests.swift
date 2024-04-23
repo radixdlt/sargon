@@ -25,7 +25,7 @@ final class BIP44LikePathTests: HDPathProtocolTest<BIP44LikePath> {
 			let index = sut.addressIndex
 			XCTAssertEqual(SUT(index: index), sut)
 		}
-		SUT.allCases.forEach(doTest)
+		SUT.sampleValues.forEach(doTest)
 	}
 	
 	func test_index() throws {

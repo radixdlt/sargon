@@ -13,21 +13,21 @@ final class BIP39WordCountTests: Test<BIP39WordCount> {
 		func doTest(_ sut: SUT) {
 			XCTAssertEqual(sut.id, sut.rawValue)
 		}
-		SUT.allCases.forEach(doTest)
+		SUT.sampleValues.forEach(doTest)
 	}
 	
 	func test_init_raw_value() {
 		func doTest(_ sut: SUT) {
 			XCTAssertEqual(SUT.init(rawValue: sut.rawValue), sut)
 		}
-		SUT.allCases.forEach(doTest)
+		SUT.sampleValues.forEach(doTest)
 	}
 	
 	func test_init_wordCount() {
 		func doTest(_ sut: SUT) {
 			XCTAssertEqual(SUT.init(wordCount: Int(sut.rawValue)), sut)
 		}
-		SUT.allCases.forEach(doTest)
+		SUT.sampleValues.forEach(doTest)
 	}
 	
 	func test_comparable_less_than() {

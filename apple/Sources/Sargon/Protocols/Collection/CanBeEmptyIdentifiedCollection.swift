@@ -26,12 +26,18 @@ extension CanBeEmptyIdentifiedCollection {
 }
 
 extension CanBeEmptyIdentifiedCollection {
-	public mutating func remove(_ id: Element.ID) {
+	@discardableResult
+	public mutating func remove(_ id: Element.ID) -> Element? {
+		let removed = get(id: id)
 		self = removing(id)
+		return removed
 	}
 	
-	public mutating func remove(element: Element) {
+	@discardableResult
+	public mutating func remove(element: Element) -> Element? {
+		let removed = get(id: element.id)
 		self = removing(element: element)
+		return removed
 	}
 }
 

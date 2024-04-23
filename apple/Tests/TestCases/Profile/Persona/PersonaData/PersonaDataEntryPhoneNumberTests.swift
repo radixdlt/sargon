@@ -19,7 +19,7 @@ final class PersonaDataEntryPhoneNumberTests: PersonaDataEntryTest<PersonaDataEn
 		func doTest(_ sut: SUT) {
 			XCTAssertEqual(sut.kind, .phoneNumber)
 		}
-		SUT.allCases.forEach(doTest)
+		SUT.sampleValues.forEach(doTest)
 	}
 	
 	func test_extract_wrong_is_nil() {

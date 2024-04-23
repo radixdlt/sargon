@@ -10,6 +10,10 @@ import SargonUniFFI
 
 extension DeviceFactorSource: SargonModel {}
 
+extension DeviceFactorSource: Identifiable {
+	public typealias ID = FactorSourceIDFromHash
+}
+
 extension DeviceFactorSource: FactorSourceProtocol {
 	
 	public var asGeneral: FactorSource {

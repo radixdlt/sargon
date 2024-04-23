@@ -32,18 +32,26 @@ impl ThirdPartyDepositsDelta {
             asset_exceptions_to_be_removed: from
                 .assets_exception_list
                 .clone()
+                .unwrap_or_default()
                 .into_iter()
-                .filter(|x| !to.assets_exception_list.contains(x))
+                .filter(|x| {
+                    !to.assets_exception_list
+                        .clone()
+                        .unwrap_or_default()
+                        .contains(x)
+                })
                 .map(ScryptoManifestValue::from)
                 .collect(),
             asset_exceptions_to_add_or_update: to
                 .assets_exception_list
                 .clone()
+                .unwrap_or_default()
                 .into_iter()
                 .filter(|x| {
                     !from
                         .assets_exception_list
                         .clone()
+                        .unwrap_or_default()
                         .into_iter()
                         .any(|w| w.exception_rule == x.exception_rule)
                 })
@@ -52,18 +60,29 @@ impl ThirdPartyDepositsDelta {
             depositor_addresses_to_remove: from
                 .depositors_allow_list
                 .clone()
+                .unwrap_or_default()
                 .into_iter()
                 .filter(|x| {
-                    !to.depositors_allow_list.clone().into_iter().contains(x)
+                    !to.depositors_allow_list
+                        .clone()
+                        .unwrap_or_default()
+                        .into_iter()
+                        .contains(x)
                 })
                 .map(ScryptoAccountRemoveResourcePreferenceInput::from)
                 .collect(),
             depositor_addresses_to_add: to
                 .depositors_allow_list
                 .clone()
+                .unwrap_or_default()
                 .into_iter()
                 .filter(|x| {
-                    !from.depositors_allow_list.clone().into_iter().contains(x)
+                    !from
+                        .depositors_allow_list
+                        .clone()
+                        .unwrap_or_default()
+                        .into_iter()
+                        .contains(x)
                 })
                 .map(ScryptoAccountAddAuthorizedDepositorInput::from)
                 .collect(),

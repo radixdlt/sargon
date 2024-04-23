@@ -26,8 +26,8 @@ class Test<SUT_: SargonModel>: TestCase {
 		XCTAssertNoDifference(Set([SUT.sampleOther, SUT.sampleOther]).count, 1)
 		
 		var set = Set<SUT>()
-		SUT.allCases.forEach { set.insert($0) }
-		SUT.allCases.forEach { set.insert($0) } // duplicates removed.
+		SUT.sampleValues.forEach { set.insert($0) }
+		SUT.sampleValues.forEach { set.insert($0) } // duplicates removed.
 		XCTAssertGreaterThanOrEqual(set.count, 2)
 	}
 

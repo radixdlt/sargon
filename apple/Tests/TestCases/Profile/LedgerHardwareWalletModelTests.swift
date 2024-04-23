@@ -17,7 +17,7 @@ final class LedgerHardwareWalletModelTests: Test<LedgerHardwareWalletModel> {
         func doTest(_ sut: SUT) {
             XCTAssertEqual(sut.description, sut.toString())
         }
-        SUT.allCases.forEach(doTest)
+        SUT.sampleValues.forEach(doTest)
     }
     
     
@@ -25,7 +25,7 @@ final class LedgerHardwareWalletModelTests: Test<LedgerHardwareWalletModel> {
         func doTest(_ sut: SUT) {
             XCTAssertEqual(sut.rawValue, sut.toString())
         }
-        SUT.allCases.forEach(doTest)
+        SUT.sampleValues.forEach(doTest)
     }
     
     
@@ -36,6 +36,6 @@ final class LedgerHardwareWalletModelTests: Test<LedgerHardwareWalletModel> {
                 sut
             )
         }
-        try SUT.allCases.forEach(doTest)
+        try SUT.sampleValues.forEach(doTest)
     }
 }

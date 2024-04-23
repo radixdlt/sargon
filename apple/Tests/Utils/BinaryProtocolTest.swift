@@ -28,13 +28,13 @@ class SignatureTest<SUT_: SignatureProtocol>: BinaryProtocolTest<SUT_> {}
 
 class ExactlyNBytesTest<SUT_: ExactlyNBytesProtocol>: BinaryProtocolTest<SUT_> {
 	func test_length() throws {
-		SUT.allCases.forEach {
+		SUT.sampleValues.forEach {
 			XCTAssertEqual($0.data.count, SUT.length)
 		}
 	}
 	
 	func test_hash_inequality() {
-		SUT.allCases.forEach {
+		SUT.sampleValues.forEach {
 			XCTAssertNotEqual($0.hash().data, $0.hash().data.hash().data)
 		}
 	}

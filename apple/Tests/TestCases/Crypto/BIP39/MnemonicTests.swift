@@ -11,7 +11,7 @@ final class MnemonicTests: Test<Mnemonic> {
 			try XCTAssertEqual(SUT(phrase: string), sut)
 			try XCTAssertEqual(SUT(phrase: string, language: .english), sut)
 		}
-		try SUT.allCases.forEach(doTest)
+		try SUT.sampleValues.forEach(doTest)
 	}
 	
 	func test_words_roundtrip() throws {
@@ -19,6 +19,6 @@ final class MnemonicTests: Test<Mnemonic> {
 			let words = sut.words
 			try XCTAssertEqual(SUT(words: words), sut)
 		}
-		try SUT.allCases.forEach(doTest)
+		try SUT.sampleValues.forEach(doTest)
 	}
 }

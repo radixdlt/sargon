@@ -7,7 +7,7 @@ import XCTest
 final class PersonaTests: EntityTest<Persona> {
 	func test_display_names() {
 		XCTAssertEqual(
-			SUT.allCases.map(\.displayName),
+			SUT.sampleValues.map(\.displayName),
 			["Satoshi", "Batman", "Ellen Ripley", "Skywalker", "Granger", "Sarah Connor"]
 		)
 	}

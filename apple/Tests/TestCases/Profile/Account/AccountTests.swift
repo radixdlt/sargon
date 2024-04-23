@@ -6,7 +6,7 @@ import XCTest
 
 final class AccountTests: EntityTest<Account> {
 	func test_display_names() {
-		XCTAssertNoDifference(SUT.allCases.map(\.displayName), ["Alice", "Bob", "Carol", "Nadia", "Olivia", "Paige"])
+		XCTAssertEqual(SUT.sampleValues.map(\.displayName), ["Alice", "Bob", "Carol", "Nadia", "Olivia", "Paige"])
 	}
 	
 	func test_not_hidden() {
