@@ -74,6 +74,13 @@ impl FactorSourceCryptoParameters {
         .expect("Valid Babylon and Olympia parameters")
     }
 
+    pub fn supports_olympia(&self) -> bool {
+        self.supported_curves.contains(&SLIP10Curve::Secp256k1)
+            && self
+                .supported_derivation_path_schemes
+                .contains(&DerivationPathScheme::Bip44Olympia)
+    }
+
     pub fn supports_babylon(&self) -> bool {
         self.supported_curves.contains(&SLIP10Curve::Curve25519)
             && self
@@ -155,6 +162,24 @@ mod tests {
                 .unwrap(),
             SLIP10Curve::Curve25519
         );
+    }
+
+    #[test]
+    fn babylon_olympia_compat_supports_olympia_and_babylon() {
+        assert!(SUT::babylon_olympia_compatible().supports_babylon());
+        assert!(SUT::babylon_olympia_compatible().supports_olympia());
+    }
+
+    #[test]
+    fn olympia_supports_olympia_but_not_babylon() {
+        assert!(SUT::olympia().supports_olympia());
+        assert!(!SUT::olympia().supports_babylon());
+    }
+
+    #[test]
+    fn babylon_supports_babylon_but_not_olympia() {
+        assert!(SUT::babylon().supports_babylon());
+        assert!(!SUT::babylon().supports_olympia());
     }
 
     #[test]

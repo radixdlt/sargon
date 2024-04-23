@@ -394,7 +394,8 @@ mod tests {
         let set = (0..n)
             .map(|_| {
                 SUT::new(
-                    PrivateHierarchicalDeterministicFactorSource::generate_new(
+                    PrivateHierarchicalDeterministicFactorSource::generate_new_babylon(
+						true,
                         WalletClientModel::Unknown,
                     )
                     .factor_source,

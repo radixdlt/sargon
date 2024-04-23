@@ -49,6 +49,10 @@ impl IsFactorSource for DeviceFactorSource {
     }
 }
 impl BaseIsFactorSource for DeviceFactorSource {
+    fn common_properties(&self) -> FactorSourceCommon {
+        self.common.clone()
+    }
+
     fn factor_source_kind(&self) -> FactorSourceKind {
         self.id.kind
     }
@@ -81,6 +85,25 @@ impl DeviceFactorSource {
         Self::new(
             id,
             FactorSourceCommon::new_bdfs(is_main),
+            DeviceFactorSourceHint::unknown_model_of_client(
+                mnemonic_with_passphrase.mnemonic.word_count,
+                wallet_client_model,
+            ),
+        )
+    }
+
+    pub fn olympia(
+        mnemonic_with_passphrase: &MnemonicWithPassphrase,
+        wallet_client_model: WalletClientModel,
+    ) -> Self {
+        let id = FactorSourceIDFromHash::from_mnemonic_with_passphrase(
+            FactorSourceKind::Device,
+            mnemonic_with_passphrase,
+        );
+
+        Self::new(
+            id,
+            FactorSourceCommon::new_olympia(),
             DeviceFactorSourceHint::unknown_model_of_client(
                 mnemonic_with_passphrase.mnemonic.word_count,
                 wallet_client_model,

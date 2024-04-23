@@ -89,7 +89,8 @@ impl Wallet {
         let entropy = BIP39Entropy::try_from(entropy)?;
 
         let private_hd_factor_source =
-            PrivateHierarchicalDeterministicFactorSource::new_with_entropy(
+            PrivateHierarchicalDeterministicFactorSource::new_babylon_with_entropy(
+                true,
                 entropy,
                 BIP39Passphrase::default(),
                 wallet_client_model,

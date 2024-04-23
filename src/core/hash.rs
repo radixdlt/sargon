@@ -62,8 +62,17 @@ impl AsRef<[u8]> for Hash {
         self.secret_magic.0.as_ref()
     }
 }
+
+impl From<Exactly32Bytes> for Hash {
+    /// Instantiates a new `Hash` from the `Exactly32Bytes`
+    fn from(value: Exactly32Bytes) -> Self {
+        let scrypto = ScryptoHash(*value.bytes());
+        Self::from(scrypto)
+    }
+}
+
 impl From<Hash> for Exactly32Bytes {
-    /// Instantiates a new `ExactlyNBytes<N>` from the `Hash` (N bytes).
+    /// Instantiates a new `Exactly32Bytes` from the `Hash`
     fn from(value: Hash) -> Self {
         Self::from(&value.into_bytes())
     }
@@ -123,6 +132,12 @@ mod tests {
     fn equality() {
         assert_eq!(SUT::sample(), SUT::sample());
         assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn test_from_exactly32() {
+        let bytes = Exactly32Bytes::sample();
+        assert_eq!(SUT::from(bytes.clone()).bytes(), bytes.to_vec())
     }
 
     #[test]

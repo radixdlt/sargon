@@ -268,9 +268,11 @@ mod tests {
     #[test]
     pub fn add_private_device_factor_source_successful() {
         let profile = Profile::sample();
-        let new = PrivateHierarchicalDeterministicFactorSource::generate_new(
-            WalletClientModel::Unknown,
-        );
+        let new =
+            PrivateHierarchicalDeterministicFactorSource::generate_new_babylon(
+                true,
+                WalletClientModel::Unknown,
+            );
         let (wallet, storage) = Wallet::ephemeral(profile.clone());
         assert_eq!(
             profile
@@ -297,9 +299,11 @@ mod tests {
     pub fn add_private_device_factor_source_ok_storage_when_save_to_profile_fails_then_deleted_from_storage(
     ) {
         let profile = Profile::sample();
-        let new = PrivateHierarchicalDeterministicFactorSource::generate_new(
-            WalletClientModel::Unknown,
-        );
+        let new =
+            PrivateHierarchicalDeterministicFactorSource::generate_new_babylon(
+                true,
+                WalletClientModel::Unknown,
+            );
 
         assert_eq!(
             profile

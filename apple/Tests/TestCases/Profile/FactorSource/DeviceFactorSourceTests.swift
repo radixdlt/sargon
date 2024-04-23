@@ -4,7 +4,7 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class DeviceFactorSourceTests: Test<DeviceFactorSource> {
+final class DeviceFactorSourceTests: FactorSourceTest<DeviceFactorSource> {
 	func test_id_of_device() {
 		XCTAssertEqual(SUT.sample.id.description, FactorSourceID.hash(value: SUT.sample.id).description)
 	}
@@ -23,5 +23,27 @@ final class DeviceFactorSourceTests: Test<DeviceFactorSource> {
 	
 	func test_as_general() {
 		XCTAssertEqual(SUT.sample.asGeneral, FactorSource.device(value: SUT.sample))
+	}
+	
+	func test_new_babylon_is_main_true() {
+		let sut = SUT.babylon(mnemonicWithPassphrase: .sample, isMain: true)
+		XCTAssertTrue(sut.isMainBDFS)
+	}
+	
+	func test_new_babylon_is_main_false() {
+		let sut = SUT.babylon(mnemonicWithPassphrase: .sample, isMain: false)
+		XCTAssertFalse(sut.isMainBDFS)
+	}
+	
+	func test_new_babylon() {
+		let sut = SUT.babylon(mnemonicWithPassphrase: .sample, isMain: true)
+		XCTAssertTrue(sut.supportsBabylon)
+		XCTAssertFalse(sut.supportsOlympia)
+	}
+	
+	func test_new_olympia() {
+		let sut = SUT.olympia(mnemonicWithPassphrase: .sample)
+		XCTAssertTrue(sut.supportsOlympia)
+		XCTAssertFalse(sut.supportsBabylon)
 	}
 }

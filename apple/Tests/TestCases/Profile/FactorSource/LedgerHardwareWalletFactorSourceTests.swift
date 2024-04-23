@@ -11,7 +11,7 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class LedgerHardwareWalletFactorSourceTests: Test<LedgerHardwareWalletFactorSource> {
+final class LedgerHardwareWalletFactorSourceTests: FactorSourceTest<LedgerHardwareWalletFactorSource> {
 	func test_id_of_ledger() {
 		XCTAssertEqual(SUT.sample.id.description, FactorSourceID.hash(value: SUT.sample.id).description)
 	}
@@ -31,4 +31,18 @@ final class LedgerHardwareWalletFactorSourceTests: Test<LedgerHardwareWalletFact
 	func test_as_general() {
 		XCTAssertEqual(SUT.sample.asGeneral, FactorSource.ledger(value: SUT.sample))
 	}
+    
+    func test_source_that_supports_babylon() {
+        let sut = SUT.sample
+        XCTAssertTrue(sut.supportsBabylon)
+        XCTAssertFalse(sut.supportsOlympia)
+    }
+    
+    func test_source_that_supports_olympia() {
+        let sut = SUT.sampleOther
+        XCTAssertTrue(sut.supportsOlympia)
+        XCTAssertFalse(sut.supportsBabylon)
+    }
+    
+  
 }

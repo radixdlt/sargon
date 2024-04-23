@@ -6,6 +6,16 @@ pub fn factor_source_to_string(factor_source: &FactorSource) -> String {
 }
 
 #[uniffi::export]
+pub fn factor_source_supports_olympia(factor_source: &FactorSource) -> bool {
+    factor_source.supports_olympia()
+}
+
+#[uniffi::export]
+pub fn factor_source_supports_babylon(factor_source: &FactorSource) -> bool {
+    factor_source.supports_babylon()
+}
+
+#[uniffi::export]
 pub fn new_factor_source_sample() -> FactorSource {
     FactorSource::sample()
 }
