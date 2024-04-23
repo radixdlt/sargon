@@ -310,4 +310,40 @@ mod tests {
         settings.deposit_rule = DepositRule::DenyAll;
         assert_eq!(settings.deposit_rule, DepositRule::DenyAll);
     }
+
+    #[test]
+    fn test_add_to_asset_exception_list_when_nil() {
+        let mut sut = SUT {
+            deposit_rule: DepositRule::AcceptAll,
+            assets_exception_list: None,
+            depositors_allow_list: None,
+        };
+        assert!(sut.add_asset_exception(AssetException::sample()));
+        assert!((*sut.assets_exception_list.unwrap())
+            .contains(&AssetException::sample()));
+    }
+
+    #[test]
+    fn test_add_to_depositors_list_when_nil() {
+        let mut sut = SUT {
+            deposit_rule: DepositRule::AcceptAll,
+            assets_exception_list: None,
+            depositors_allow_list: None,
+        };
+        assert!(sut.allow_depositor(ResourceOrNonFungible::sample()));
+        assert!((*sut.depositors_allow_list.unwrap())
+            .contains(&ResourceOrNonFungible::sample()));
+    }
+
+    #[test]
+    fn test_remove_non_existing_asset_exception() {
+        let mut sut = SUT::default();
+        assert!(!sut.remove_asset_exception(&AssetException::sample()))
+    }
+
+    #[test]
+    fn test_remove_non_existing_depositor() {
+        let mut sut = SUT::default();
+        assert!(!sut.remove_allowed_depositor(&ResourceOrNonFungible::sample()));
+    }
 }

@@ -81,6 +81,15 @@ mod tests {
     }
 
     #[test]
+    fn test_display() {
+        assert_eq!(format!("{}", SUT::sample()), "Resource: resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd");
+        assert_eq!(
+            format!("{}", SUT::sample_other()),
+            "NonFungible: resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa:<Member_237>"
+        );
+    }
+
+    #[test]
     fn json_roundtrip_sample() {
         let sut = SUT::sample();
         assert_eq_after_json_roundtrip(

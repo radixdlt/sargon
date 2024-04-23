@@ -31,20 +31,34 @@ class CanBeEmptyCollectionTest<SUT_: CanBeEmptyIdentifiedCollection>: BaseCollec
 	
 	func test_remove_element_by_id() {
 		var sut: SUT = [.sample, .sampleOther]
-		sut.remove(SUTElement.sample.id)
+		let removed = sut.remove(SUTElement.sample.id)
+		XCTAssertEqual(removed, SUTElement.sample)
 		XCTAssertEqual(
 			sut,
 			[.sampleOther]
 		)
 	}
 	
+	func test_remove_element_by_id_not_present_returns_nil() {
+		var sut: SUT = [.sampleOther]
+		XCTAssertNil(sut.remove(SUTElement.sample.id))
+		XCTAssertEqual(sut, [.sampleOther])
+	}
+	
 	func test_remove_by_element() {
 		var sut: SUT = [.sample, .sampleOther]
-		sut.remove(element: .sample)
+		let removed = sut.remove(element: .sample)
+		XCTAssertEqual(removed, SUTElement.sample)
 		XCTAssertEqual(
 			sut,
 			[.sampleOther]
 		)
+	}
+	
+	func test_remove_element_by_element_not_present_returns_nil() {
+		var sut: SUT = [.sampleOther]
+		XCTAssertNil(sut.remove(element: SUTElement.sample))
+		XCTAssertEqual(sut, [.sampleOther])
 	}
 	
 	func test_subscript_id_get() {
