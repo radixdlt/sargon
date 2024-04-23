@@ -89,6 +89,16 @@ impl FactorSourceCryptoParameters {
     }
 }
 
+impl HasSampleValues for FactorSourceCryptoParameters {
+    fn sample() -> Self {
+        FactorSourceCryptoParameters::babylon()
+    }
+
+    fn sample_other() -> Self {
+        FactorSourceCryptoParameters::olympia()
+    }
+}
+
 impl Default for FactorSourceCryptoParameters {
     fn default() -> Self {
         Self::babylon()
