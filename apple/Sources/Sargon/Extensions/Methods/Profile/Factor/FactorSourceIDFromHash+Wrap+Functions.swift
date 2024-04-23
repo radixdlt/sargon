@@ -9,8 +9,12 @@ import Foundation
 import SargonUniFFI
 
 extension FactorSourceIDFromHash {
-	public func toString() -> String {
-		factorSourceIdFromHashToString(factorSourceId: self)
+	
+	public init(kind: FactorSourceKind, mnemonicWithPassphrase: MnemonicWithPassphrase) {
+		self = newFactorSourceIdFromHashFromMnemonicWithPassphrase(
+			factorSourceKind: kind,
+			mnemonicWithPassphrase: mnemonicWithPassphrase
+		)
 	}
 	
 	public init(jsonData: some DataProtocol) throws {
@@ -19,5 +23,9 @@ extension FactorSourceIDFromHash {
 	
 	public func jsonData() -> Data {
 		factorSourceIDFromHashToJsonBytes(factorSourceIDFromHash: self)
+	}
+	
+	public func toString() -> String {
+		factorSourceIdFromHashToString(factorSourceId: self)
 	}
 }
