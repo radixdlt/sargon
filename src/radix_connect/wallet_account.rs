@@ -8,21 +8,31 @@ pub struct WalletInteractionWalletAccount {
     pub appearance_id: AppearanceID,
 }
 
+impl WalletInteractionWalletAccount {
+    pub fn new(
+        address: impl Into<AccountAddress>,
+        label: impl AsRef<str>,
+        appearance_id: impl Into<AppearanceID>,
+    ) -> Self {
+        Self {
+            address: address.into(),
+            label: label.as_ref().to_owned(),
+            appearance_id: appearance_id.into(),
+        }
+    }
+}
+
 impl HasSampleValues for WalletInteractionWalletAccount {
     fn sample() -> Self {
-        Self {
-            address: AccountAddress::sample(),
-            label: "sample1".to_string(),
-            appearance_id: AppearanceID::sample(),
-        }
+        Self::new(AccountAddress::sample(), "sample1", AppearanceID::sample())
     }
 
     fn sample_other() -> Self {
-        Self {
-            address: AccountAddress::sample_other(),
-            label: "sample2".to_string(),
-            appearance_id: AppearanceID::sample_other(),
-        }
+        Self::new(
+            AccountAddress::sample_other(),
+            "sample2",
+            AppearanceID::sample_other(),
+        )
     }
 }
 

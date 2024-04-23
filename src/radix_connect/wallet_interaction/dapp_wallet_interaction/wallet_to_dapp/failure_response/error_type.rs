@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Debug, Serialize, PartialEq, uniffi::Enum)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, uniffi::Enum)]
 #[serde(rename_all = "camelCase")]
 pub enum DappWalletInteractionErrorType {
     RejectedByUser,
@@ -33,5 +33,24 @@ impl HasSampleValues for DappWalletInteractionErrorType {
 
     fn sample_other() -> Self {
         DappWalletInteractionErrorType::FailedToCompileTransaction
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = DappWalletInteractionErrorType;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 }

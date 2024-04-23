@@ -21,7 +21,8 @@ impl HasSampleValues for DappToWalletInteractionUnvalidated {
         Self {
             interaction_id: WalletInteractionId::sample_other(),
             items: DappToWalletInteractionItems::sample_other(),
-            metadata: DappToWalletInteractionMetadataUnvalidated::sample_other(),
+            metadata: DappToWalletInteractionMetadataUnvalidated::sample_other(
+            ),
         }
     }
 }
@@ -43,5 +44,4 @@ mod tests {
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
     }
-
 }

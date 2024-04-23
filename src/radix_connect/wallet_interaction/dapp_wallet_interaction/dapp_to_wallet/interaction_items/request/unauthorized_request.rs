@@ -3,32 +3,38 @@ use crate::prelude::*;
 #[derive(Debug, Deserialize, Serialize, PartialEq, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct DappToWalletInteractionUnauthorizedRequestItems {
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub one_time_accounts: Option<DappToWalletInteractionAccountsRequestItem>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub one_time_persona_data:
         Option<DappToWalletInteractionPersonaDataRequestItem>,
 }
 
+impl DappToWalletInteractionUnauthorizedRequestItems {
+    pub fn new(
+        one_time_accounts: impl Into<Option<DappToWalletInteractionAccountsRequestItem>>,
+        one_time_persona_data: impl Into<Option<DappToWalletInteractionPersonaDataRequestItem>>,
+    ) -> Self {
+        Self {
+            one_time_accounts: one_time_accounts.into(),
+            one_time_persona_data: one_time_persona_data.into(),
+        }
+    }
+}
+
 impl HasSampleValues for DappToWalletInteractionUnauthorizedRequestItems {
     fn sample() -> Self {
-        Self {
-            one_time_accounts: Some(
-                DappToWalletInteractionAccountsRequestItem::sample(),
-            ),
-            one_time_persona_data: Some(
-                DappToWalletInteractionPersonaDataRequestItem::sample(),
-            ),
-        }
+        Self::new(
+            DappToWalletInteractionAccountsRequestItem::sample(),
+            DappToWalletInteractionPersonaDataRequestItem::sample(),
+        )
     }
 
     fn sample_other() -> Self {
-        Self {
-            one_time_accounts: Some(
-                DappToWalletInteractionAccountsRequestItem::sample_other(),
-            ),
-            one_time_persona_data: Some(
-                DappToWalletInteractionPersonaDataRequestItem::sample_other(),
-            ),
-        }
+        Self::new(
+            DappToWalletInteractionAccountsRequestItem::sample_other(),
+            DappToWalletInteractionPersonaDataRequestItem::sample_other(),
+        )
     }
 }
 

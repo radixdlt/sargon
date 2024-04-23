@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Debug, Serialize, PartialEq, uniffi::Enum)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, uniffi::Enum)]
 #[serde(tag = "discriminator")]
 pub enum WalletToDappInteractionResponseItems {
     #[serde(rename = "authorizedRequest")]
@@ -23,5 +23,24 @@ impl HasSampleValues for WalletToDappInteractionResponseItems {
         WalletToDappInteractionResponseItems::Transaction(
             WalletToDappInteractionTransactionResponseItems::sample_other(),
         )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = WalletToDappInteractionResponseItems;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 }

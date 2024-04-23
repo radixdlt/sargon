@@ -7,19 +7,25 @@ pub struct DappWalletInteractionPersona {
     pub label: String,
 }
 
+impl DappWalletInteractionPersona {
+    pub fn new(
+        identity_address: impl Into<IdentityAddress>,
+        label: impl AsRef<str>,
+    ) -> Self {
+        Self {
+            identity_address: identity_address.into(),
+            label: label.as_ref().to_owned(),
+        }
+    }
+}
+
 impl HasSampleValues for DappWalletInteractionPersona {
     fn sample() -> Self {
-        Self {
-            identity_address: IdentityAddress::sample(),
-            label: "sample1".to_string(),
-        }
+        Self::new(IdentityAddress::sample(), "sample1")
     }
 
     fn sample_other() -> Self {
-        Self {
-            identity_address: IdentityAddress::sample_other(),
-            label: "sample2".to_string(),
-        }
+        Self::new(IdentityAddress::sample_other(), "sample2")
     }
 }
 

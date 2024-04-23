@@ -5,19 +5,23 @@ pub struct DappToWalletInteractionAuthLoginWithChallengeRequestItem {
     pub challenge: Exactly32Bytes,
 }
 
+impl DappToWalletInteractionAuthLoginWithChallengeRequestItem {
+    pub fn new(challenge: impl Into<Exactly32Bytes>) -> Self {
+        Self {
+            challenge: challenge.into(),
+        }
+    }
+}
+
 impl HasSampleValues
     for DappToWalletInteractionAuthLoginWithChallengeRequestItem
 {
     fn sample() -> Self {
-        Self {
-            challenge: Exactly32Bytes::sample(),
-        }
+        Self::new(Exactly32Bytes::sample())
     }
 
     fn sample_other() -> Self {
-        Self {
-            challenge: Exactly32Bytes::sample_other(),
-        }
+        Self::new(Exactly32Bytes::sample_other())
     }
 }
 

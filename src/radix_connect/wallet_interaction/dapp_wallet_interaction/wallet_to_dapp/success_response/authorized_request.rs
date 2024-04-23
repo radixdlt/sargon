@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Debug, Serialize, PartialEq, uniffi::Record)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct WalletToDappInteractionAuthorizedRequestResponseItems {
     pub auth: WalletToDappInteractionAuthRequestResponseItem,
@@ -18,40 +18,71 @@ pub struct WalletToDappInteractionAuthorizedRequestResponseItems {
         Option<WalletToDappInteractionPersonaDataRequestResponseItem>,
 }
 
+impl WalletToDappInteractionAuthorizedRequestResponseItems {
+    pub fn new(
+        auth: WalletToDappInteractionAuthRequestResponseItem,
+        ongoing_accounts: impl Into<
+            Option<WalletToDappInteractionAccountsRequestResponseItem>,
+        >,
+        ongoing_persona_data: impl Into<
+            Option<WalletToDappInteractionPersonaDataRequestResponseItem>,
+        >,
+        one_time_accounts: impl Into<
+            Option<WalletToDappInteractionAccountsRequestResponseItem>,
+        >,
+        one_time_persona_data: impl Into<
+            Option<WalletToDappInteractionPersonaDataRequestResponseItem>,
+        >,
+    ) -> Self {
+        Self {
+            auth,
+            ongoing_accounts: ongoing_accounts.into(),
+            ongoing_persona_data: ongoing_persona_data.into(),
+            one_time_accounts: one_time_accounts.into(),
+            one_time_persona_data: one_time_persona_data.into(),
+        }
+    }
+}
+
 impl HasSampleValues for WalletToDappInteractionAuthorizedRequestResponseItems {
     fn sample() -> Self {
-        Self {
-            auth: WalletToDappInteractionAuthRequestResponseItem::sample(),
-            ongoing_accounts: Some(
-                WalletToDappInteractionAccountsRequestResponseItem::sample(),
-            ),
-            ongoing_persona_data: Some(
-                WalletToDappInteractionPersonaDataRequestResponseItem::sample(),
-            ),
-            one_time_accounts: Some(
-                WalletToDappInteractionAccountsRequestResponseItem::sample(),
-            ),
-            one_time_persona_data: Some(
-                WalletToDappInteractionPersonaDataRequestResponseItem::sample(),
-            ),
-        }
+        Self::new(
+            WalletToDappInteractionAuthRequestResponseItem::sample(),
+            WalletToDappInteractionAccountsRequestResponseItem::sample(),
+            WalletToDappInteractionPersonaDataRequestResponseItem::sample(),
+            WalletToDappInteractionAccountsRequestResponseItem::sample(),
+            WalletToDappInteractionPersonaDataRequestResponseItem::sample(),
+        )
     }
 
     fn sample_other() -> Self {
-        Self {
-            auth: WalletToDappInteractionAuthRequestResponseItem::sample_other(),
-            ongoing_accounts: Some(
-                WalletToDappInteractionAccountsRequestResponseItem::sample_other(),
+        Self::new(
+            WalletToDappInteractionAuthRequestResponseItem::sample_other(),
+            WalletToDappInteractionAccountsRequestResponseItem::sample_other(),
+            WalletToDappInteractionPersonaDataRequestResponseItem::sample_other(
             ),
-            ongoing_persona_data: Some(
-                WalletToDappInteractionPersonaDataRequestResponseItem::sample_other(),
+            WalletToDappInteractionAccountsRequestResponseItem::sample_other(),
+            WalletToDappInteractionPersonaDataRequestResponseItem::sample_other(
             ),
-            one_time_accounts: Some(
-                WalletToDappInteractionAccountsRequestResponseItem::sample_other(),
-            ),
-            one_time_persona_data: Some(
-                WalletToDappInteractionPersonaDataRequestResponseItem::sample_other(),
-            ),
-        }
+        )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = WalletToDappInteractionAuthorizedRequestResponseItems;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 }

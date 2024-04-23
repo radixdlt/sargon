@@ -8,39 +8,53 @@ pub struct DappToWalletInteraction {
     pub metadata: DappToWalletInteractionMetadata,
 }
 
+impl DappToWalletInteraction {
+    pub fn new(
+        interaction_id: impl Into<WalletInteractionId>,
+        items: impl Into<DappToWalletInteractionItems>,
+        metadata: impl Into<DappToWalletInteractionMetadata>,
+    ) -> Self {
+        Self {
+            interaction_id: interaction_id.into(),
+            items: items.into(),
+            metadata: metadata.into(),
+        }
+    }
+}
+
 impl HasSampleValues for DappToWalletInteraction {
     fn sample() -> Self {
-        Self {
-            interaction_id: WalletInteractionId::sample(),
-            items: DappToWalletInteractionItems::sample(),
-            metadata: DappToWalletInteractionMetadata::sample(),
-        }
+      Self::new(
+        WalletInteractionId::sample(),
+        DappToWalletInteractionItems::sample(),
+        DappToWalletInteractionMetadata::sample(),
+      )
     }
 
     fn sample_other() -> Self {
-        Self {
-            interaction_id: WalletInteractionId::sample_other(),
-            items: DappToWalletInteractionItems::sample_other(),
-            metadata: DappToWalletInteractionMetadata::sample_other(),
-        }
+      Self::new(
+        WalletInteractionId::sample_other(),
+        DappToWalletInteractionItems::sample_other(),
+        DappToWalletInteractionMetadata::sample_other(),
+      )
     }
 }
 
 #[cfg(test)]
 mod tests {
-  use super::*;
+    use super::*;
 
-  #[allow(clippy::upper_case_acronyms)]
-  type SUT = DappToWalletInteraction;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = DappToWalletInteraction;
 
-  #[test]
-  fn equality() {
-      assert_eq!(SUT::sample(), SUT::sample());
-      assert_eq!(SUT::sample_other(), SUT::sample_other());
-  }
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
 
-  #[test]
-  fn inequality() {
-      assert_ne!(SUT::sample(), SUT::sample_other());
-  }
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
 }
