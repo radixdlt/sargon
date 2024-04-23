@@ -535,22 +535,13 @@ mod dapp_to_wallet_interaction_tests {
                 true,
             ),
             DappToWalletInteractionAccountsRequestItem::new(
-                RequestedQuantity {
-                    quantifier: RequestedNumberQuantifier::AtLeast,
-                    quantity: 4,
-                },
+                RequestedQuantity::at_least(4),
                 Exactly32Bytes::from_hex("e280cfa39e1499f2862e59759cc2fc990cce28b70a7989324fe91c47814d0630").unwrap(),
             ),
             DappToWalletInteractionPersonaDataRequestItem::new(
                 true,
-                RequestedQuantity {
-                    quantifier: RequestedNumberQuantifier::Exactly,
-                    quantity: 1,
-                },
-                RequestedQuantity {
-                    quantifier: RequestedNumberQuantifier::Exactly,
-                    quantity: 1,
-                }
+                RequestedQuantity::exactly(1),
+                RequestedQuantity::exactly(1),
             ),
             None,
             None,
@@ -571,22 +562,13 @@ mod dapp_to_wallet_interaction_tests {
                     true,
                 ),
                 DappToWalletInteractionAccountsRequestItem::new(
-                    RequestedQuantity {
-                        quantifier: RequestedNumberQuantifier::Exactly,
-                        quantity: 4,
-                    },
+                    RequestedQuantity::exactly(4),
                     Exactly32Bytes::from_hex("e280cfa39e1499f2862e59759cc2fc990cce28b70a7989324fe91c47814d0630").unwrap(),
                 ),
                 DappToWalletInteractionPersonaDataRequestItem::new(
                     true,
-                    RequestedQuantity {
-                        quantifier: RequestedNumberQuantifier::AtLeast,
-                        quantity: 1,
-                    },
-                    RequestedQuantity {
-                        quantifier: RequestedNumberQuantifier::AtLeast,
-                        quantity: 1,
-                    }
+                    RequestedQuantity::at_least(1),
+                    RequestedQuantity::at_least(1),
                 ),
                 None,
                 None,
@@ -617,22 +599,13 @@ mod dapp_to_wallet_interaction_tests {
         let unauthorized_request_1_items =  DappToWalletInteractionItems::UnauthorizedRequest(
             DappToWalletInteractionUnauthorizedRequestItems::new(
                 DappToWalletInteractionAccountsRequestItem::new(
-                    RequestedQuantity {
-                        quantifier: RequestedNumberQuantifier::AtLeast,
-                        quantity: 1,
-                    },
+                    RequestedQuantity::at_least(1),
                     Exactly32Bytes::from_hex("84a5234f14a50dee062dc7a6a51f4bdab7cab5faadea05542af2040688d8fb6c").unwrap()
                 ),
                 DappToWalletInteractionPersonaDataRequestItem::new(
                     true,
-                    RequestedQuantity {
-                        quantifier: RequestedNumberQuantifier::Exactly,
-                        quantity: 1,
-                    },
-                    RequestedQuantity {
-                        quantifier: RequestedNumberQuantifier::Exactly,
-                        quantity: 1,
-                    }
+                    RequestedQuantity::exactly(1),
+                    RequestedQuantity::exactly(1),
                 )
             )
         );
@@ -646,22 +619,13 @@ mod dapp_to_wallet_interaction_tests {
         let unauthorized_request_2_items =  DappToWalletInteractionItems::UnauthorizedRequest(
             DappToWalletInteractionUnauthorizedRequestItems::new(
                 DappToWalletInteractionAccountsRequestItem::new(
-                    RequestedQuantity {
-                        quantifier: RequestedNumberQuantifier::Exactly,
-                        quantity: 1,
-                    },
+                    RequestedQuantity::exactly(1),
                     Exactly32Bytes::from_hex("84a5234f14a50dee062dc7a6a51f4bdab7cab5faadea05542af2040688d8fb6c").unwrap()
                 ),
                 DappToWalletInteractionPersonaDataRequestItem::new(
                     true,
-                    RequestedQuantity {
-                        quantifier: RequestedNumberQuantifier::AtLeast,
-                        quantity: 1,
-                    },
-                    RequestedQuantity {
-                        quantifier: RequestedNumberQuantifier::AtLeast,
-                        quantity: 1,
-                    }
+                    RequestedQuantity::at_least(1),
+                    RequestedQuantity::at_least(1),
                 )
             )
         );
@@ -728,13 +692,15 @@ mod wallet_to_dapp_interaction_tests {
             );
 
         let account_1 = WalletInteractionWalletAccount::new(
-            AccountAddress::from_str("account_tdx_2_129qeystv8tufmkmjrry2g6kadhhfh4f7rd0x3t9yagcvfhspt62paz").unwrap(),
+            AccountAddress::from_str("account_tdx_2_129qeystv8tufmkmjrry2g6kadhhfh4f7rd0x3t9yagcvfhspt62paz")
+            .unwrap(),
             "Dff",
             AppearanceID::gradient0(),
         );
 
         let account_2 = WalletInteractionWalletAccount::new(
-            AccountAddress::from_str("account_tdx_2_128928hvf6pjr3rx2xvdw6ulf7pc8g88ya8ma3j8dtjmntckz09fr3n").unwrap(),
+            AccountAddress::from_str("account_tdx_2_128928hvf6pjr3rx2xvdw6ulf7pc8g88ya8ma3j8dtjmntckz09fr3n")
+            .unwrap(),
             "Ghhvgfvf",
             AppearanceID::gradient1(),
         );
@@ -744,35 +710,44 @@ mod wallet_to_dapp_interaction_tests {
                 WalletToDappInteractionAuthRequestResponseItem::LoginWithChallenge(
                     WalletToDappInteractionAuthLoginWithChallengeRequestResponseItem::new(
                         DappWalletInteractionPersona::new(
-                            IdentityAddress::from_str("identity_tdx_2_12twas58v4sthsmuky5653dup0drez3vcfwsfm6kp40qu9qyt8fgts6").unwrap(),
+                            IdentityAddress::from_str("identity_tdx_2_12twas58v4sthsmuky5653dup0drez3vcfwsfm6kp40qu9qyt8fgts6")
+                            .unwrap(),
                             "Usdudh",
                         ),
-                        Exactly32Bytes::from_hex("069ef236486d4cd5706b5e5b168e19f750ffd1b4876529a0a9de966d50a15ab7").unwrap(),
+                        Exactly32Bytes::from_hex("069ef236486d4cd5706b5e5b168e19f750ffd1b4876529a0a9de966d50a15ab7")
+                        .unwrap(),
                         WalletToDappInteractionAuthProof::new(
-                            PublicKey::from_str("ff8aee4c625738e35d837edb11e33b8abe0d6f40849ca1451edaba84d04d0699").unwrap(),
+                            PublicKey::from_str("ff8aee4c625738e35d837edb11e33b8abe0d6f40849ca1451edaba84d04d0699")
+                            .unwrap(),
                             SLIP10Curve::Curve25519,
-                            Signature::from_str("10177ac7d486691777133ffe59d46d55529d86cb1c4ce66aa82f432372f33e24d803d8498f42e26fe113c030fce68c526aeacff94334ba5a7f7ef84c2936eb05").unwrap()
+                            Signature::from_str("10177ac7d486691777133ffe59d46d55529d86cb1c4ce66aa82f432372f33e24d803d8498f42e26fe113c030fce68c526aeacff94334ba5a7f7ef84c2936eb05")
+                            .unwrap()
                         ),
                     )
                 ),
                 WalletToDappInteractionAccountsRequestResponseItem::new(
                     vec![account_1.clone(), account_2.clone()],
-                    Exactly32Bytes::from_hex("069ef236486d4cd5706b5e5b168e19f750ffd1b4876529a0a9de966d50a15ab7").unwrap(),
+                    Exactly32Bytes::from_hex("069ef236486d4cd5706b5e5b168e19f750ffd1b4876529a0a9de966d50a15ab7")
+                    .unwrap(),
                     vec![
                         WalletToDappInteractionAccountProof::new(
                             account_1.address,
                             WalletToDappInteractionAuthProof::new(
-                                PublicKey::from_str("11b162e3343ce770b6e9ed8a29d125b5580d1272b0dc4e2bd0fcae33320d9566").unwrap(),
+                                PublicKey::from_str("11b162e3343ce770b6e9ed8a29d125b5580d1272b0dc4e2bd0fcae33320d9566")
+                                .unwrap(),
                                 SLIP10Curve::Curve25519,
-                                Signature::from_str("e18617b527d4d33607a8adb6a040c26ca97642ec89dd8a6fe7a41fa724473e4cc69b0729c1df57aba77455801f2eef6f28848a5d206e3739de29ca2288957502").unwrap(),
+                                Signature::from_str("e18617b527d4d33607a8adb6a040c26ca97642ec89dd8a6fe7a41fa724473e4cc69b0729c1df57aba77455801f2eef6f28848a5d206e3739de29ca2288957502")
+                                .unwrap(),
                             ),
                         ),
                         WalletToDappInteractionAccountProof::new(
                             account_2.address,
                             WalletToDappInteractionAuthProof::new(
-                                PublicKey::from_str("5386353e4cc27e3d27d064d777d811e242a16ba7aefd425062ed46631739619d").unwrap(),
+                                PublicKey::from_str("5386353e4cc27e3d27d064d777d811e242a16ba7aefd425062ed46631739619d")
+                                .unwrap(),
                                 SLIP10Curve::Curve25519,
-                                Signature::from_str("0143fd941d51f531c8265b0f6b24f4cfcdfd24b40aac47dee6fb3386ce0d400563c892e3894a33840d1c7af2dd43ecd0729fd209171003765d109a04d7485605").unwrap(),
+                                Signature::from_str("0143fd941d51f531c8265b0f6b24f4cfcdfd24b40aac47dee6fb3386ce0d400563c892e3894a33840d1c7af2dd43ecd0729fd209171003765d109a04d7485605")
+                                .unwrap(),
                             ),
                         ),
                     ],
@@ -830,7 +805,8 @@ mod wallet_to_dapp_interaction_tests {
                 WalletInteractionId::new("c42f8825-4bbb-4ce2-a646-776b529e2f51"),
                 WalletToDappInteractionResponseItems::Transaction(
                     WalletToDappInteractionTransactionResponseItems::new(
-                    IntentHash::from_str("txid_tdx_2_1mwuvufnewv6qkxdaesx0gcwap7n79knhkn0crsc8dg9g9k7qknjs6vkd3n").unwrap(),
+                    IntentHash::from_str("txid_tdx_2_1mwuvufnewv6qkxdaesx0gcwap7n79knhkn0crsc8dg9g9k7qknjs6vkd3n")
+                    .unwrap(),
                 ),
             )
         ));

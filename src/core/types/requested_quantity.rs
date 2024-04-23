@@ -77,16 +77,6 @@ impl RequestedQuantity {
     }
 }
 
-impl HasSampleValues for RequestedQuantity {
-    fn sample() -> Self {
-        Self::exactly(1)
-    }
-
-    fn sample_other() -> Self {
-        Self::at_least(1)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
