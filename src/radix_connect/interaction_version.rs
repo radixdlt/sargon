@@ -44,4 +44,9 @@ mod tests {
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
     }
+
+    #[test]
+    fn current() {
+        assert_eq!(SUT::current(), 1.into());
+    }
 }
