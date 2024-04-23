@@ -34,7 +34,7 @@ impl BIP39Seed {
         I: Iterator,
         <I as Iterator>::Item: IotaSlip10::Segment,
     {
-        let iota_seed = IotaSlip10::Seed::from_bytes(&*self.0);
+        let iota_seed = IotaSlip10::Seed::from_bytes(&*self.secret_magic.0);
         iota_seed.derive(chain)
         // `IotaSlip10::Seed` implements `ZeroizeOnDrop` so should now be zeroized.
     }
