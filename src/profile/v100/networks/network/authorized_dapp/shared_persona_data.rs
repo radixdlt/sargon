@@ -105,7 +105,7 @@ impl HasSampleValues for SharedPersonaData {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SharedPersonaData;

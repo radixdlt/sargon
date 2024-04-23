@@ -41,6 +41,6 @@ final class DepositRuleTests: Test<DepositRule> {
     }
 	
 	func test_codable_roundtrip() throws {
-		try SUT.allCases.forEach(doTestCodableRoundtrip)
+		try SUT.sampleValues.forEach(doTestCodableRoundtrip)
 	}
 }

@@ -1,5 +1,5 @@
 import SargonUniFFI
 
 extension ThirdPartyDeposits {
-    // No methods to expose yet
+	public static let `default`: Self = newThirdPartyDepositsDefault()
 }

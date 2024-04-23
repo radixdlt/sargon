@@ -19,7 +19,7 @@ class PersonaDataEntryTest<SUT_: PersonaDataEntryProtocol>: Test<SUT_> {
 			let extracted = try XCTUnwrap(SUT.extract(from: embedded))
 			XCTAssertEqual(extracted, sut)
 		}
-		try SUT.allCases.forEach(doTest)
+		try SUT.sampleValues.forEach(doTest)
 	}
 	
 	func test_embed_identity()  {
@@ -27,11 +27,11 @@ class PersonaDataEntryTest<SUT_: PersonaDataEntryProtocol>: Test<SUT_> {
 			let embedded = sut.embed()
 			XCTAssertEqual(embedded.embed(), embedded)
 		}
-		SUT.allCases.forEach(doTest)
+		SUT.sampleValues.forEach(doTest)
 	}
 	
 	func test_codable_roundtrip() throws {
-		try SUT.allCases.forEach(doTestCodableRoundtrip)
+		try SUT.sampleValues.forEach(doTestCodableRoundtrip)
 	}
 	
 	func test_formatted_entry() {

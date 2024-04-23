@@ -20,8 +20,7 @@ extension PoolAddress {
 
 #if DEBUG
 extension PoolAddress {
-	public typealias AllCases = [Self]
-	public static var allCases: AllCases {
+	public static var sampleValues: [Self] {
 		[
 			Self.sampleMainnetSingle,
 			.sampleMainnetTwo,

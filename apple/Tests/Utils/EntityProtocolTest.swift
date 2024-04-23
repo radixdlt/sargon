@@ -19,13 +19,13 @@ class EntityTest<SUT_: EntityProtocol>: Test<SUT_> {
 	}
 	
 	func test_id_is_address() {
-		SUT.allCases.forEach {
+		SUT.sampleValues.forEach {
 			XCTAssertNoDifference($0.id, $0.address)
 		}
 	}
 
 	func test_controlled_by_ed25519_factor() {
-		SUT.allCases.forEach {
+		SUT.sampleValues.forEach {
 			switch $0.securityState {
 			case .unsecured(let unsecuredEntityControl):
 				switch 	unsecuredEntityControl.transactionSigning.publicKey.publicKey {
@@ -38,6 +38,6 @@ class EntityTest<SUT_: EntityProtocol>: Test<SUT_> {
 
 	
 	func test_all_address_different() {
-		XCTAssertGreaterThanOrEqual(Set(SUT.allCases).count, 6)
+		XCTAssertGreaterThanOrEqual(Set(SUT.sampleValues).count, 6)
 	}
 }

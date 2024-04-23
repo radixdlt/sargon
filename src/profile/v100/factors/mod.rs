@@ -15,6 +15,7 @@ mod factor_source_uniffi_fn;
 mod factor_sources;
 mod hd_transaction_signing_factor_instance;
 mod hierarchical_deterministic_factor_instance;
+mod hierarchical_deterministic_factor_instance_uniffi_fn;
 mod is_factor_source;
 
 pub use factor_instance::*;
@@ -34,4 +35,5 @@ pub use factor_source_uniffi_fn::*;
 pub use factor_sources::*;
 pub use hd_transaction_signing_factor_instance::*;
 pub use hierarchical_deterministic_factor_instance::*;
+pub use hierarchical_deterministic_factor_instance_uniffi_fn::*;
 pub use is_factor_source::*;

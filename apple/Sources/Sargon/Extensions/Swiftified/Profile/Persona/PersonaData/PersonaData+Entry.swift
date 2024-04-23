@@ -6,20 +6,28 @@
 //
 
 import Foundation
-
+import SargonUniFFI
 
 // MARK: - PersonaData.Entry
 extension PersonaData {
-	public enum Entry: Sendable, Hashable, Codable, BasePersonaDataEntryProtocol, CustomStringConvertible {
-		
-		
-		
+	public enum Entry: 
+		SargonModel,
+		Codable,
+		BasePersonaDataEntryProtocol,
+		CustomStringConvertible
+	{
 		case name(PersonaDataEntryName)
 		case emailAddress(PersonaDataEntryEmailAddress)
 		case phoneNumber(PersonaDataEntryPhoneNumber)
 	}
 }
 
+#if DEBUG
+extension PersonaData.Entry {
+	public static let sample: Self = .name(.sample)
+	public static let sampleOther: Self = .emailAddress(.sample)
+}
+#endif // DEBUG
 
 extension PersonaData.Entry {
 	

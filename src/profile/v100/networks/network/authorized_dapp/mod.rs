@@ -7,6 +7,7 @@ mod requested_number_quantifier;
 mod requested_quantity;
 mod requested_quantity_uniffi_fn;
 mod shared_persona_data;
+mod shared_persona_data_uniffi_fn;
 mod shared_with_dapp;
 
 pub use authorized_dapp::*;
@@ -18,4 +19,5 @@ pub use requested_number_quantifier::*;
 pub use requested_quantity::*;
 pub use requested_quantity_uniffi_fn::*;
 pub use shared_persona_data::*;
+pub use shared_persona_data_uniffi_fn::*;
 pub use shared_with_dapp::*;

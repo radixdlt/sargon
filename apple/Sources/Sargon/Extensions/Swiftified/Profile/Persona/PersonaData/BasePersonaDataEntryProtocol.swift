@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SargonUniFFI
 
 // MARK: - BasePersonaDataEntryProtocol
 public protocol BasePersonaDataEntryProtocol {

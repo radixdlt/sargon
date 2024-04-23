@@ -10,6 +10,6 @@ class TransactionHashProtocolTest<SUT_: TransactionHashProtocol>: IdentifiableBy
         func doTest(_ sut: SUT) {
             XCTAssertEqual(sut.bech32EncodedTxId, sut.toRawString())
         }
-        SUT.allCases.forEach(doTest)
+        SUT.sampleValues.forEach(doTest)
     }
 }

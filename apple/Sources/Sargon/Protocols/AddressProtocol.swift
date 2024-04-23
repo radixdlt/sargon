@@ -1,7 +1,9 @@
 import SargonUniFFI
 
 #if DEBUG
-public protocol BaseBaseAddressProtocol: SargonModel, ExpressibleByStringLiteral, CaseIterable where Self.AllCases == [Self]  {}
+public protocol BaseBaseAddressProtocol: SargonModel, ExpressibleByStringLiteral {
+	static var sampleValues: [Self] { get }
+}
 #else
 public protocol BaseBaseAddressProtocol: SargonModel {}
 #endif // DEBUG
@@ -67,15 +69,14 @@ extension AddressProtocol {
 #endif // DEBUG
 
 #if DEBUG
-extension AddressProtocol where Self: CaseIterable, AllCases == [Self] {
-	public static var allCases: AllCases {
+extension AddressProtocol {
+	public static var sampleValues: [Self] {
 		[
 			Self.sampleMainnet,
 			Self.sampleMainnetOther,
 			Self.sampleStokenet,
 			Self.sampleStokenetOther
 		]
-		
 	}
 }
 #endif // DEBUG

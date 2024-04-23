@@ -19,11 +19,15 @@ final class PersonaDataEntryNameTests: PersonaDataEntryTest<PersonaDataEntryName
 		func doTest(_ sut: SUT) {
 			XCTAssertEqual(sut.kind, .fullName)
 		}
-		SUT.allCases.forEach(doTest)
+		SUT.sampleValues.forEach(doTest)
 	}
 	
 	func test_extract_wrong_is_nil() {
 		XCTAssertNil(SUT.extract(from: PersonaDataEntryEmailAddress.sample.embed()))
+	}
+	
+	func test_variants() {
+		XCTAssertEqual(SUT.Variant.allCases, [.eastern, .western])
 	}
 	
 	func test_formatted_eastern() {

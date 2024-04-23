@@ -15,7 +15,7 @@ class BaseAddressTest<SUT_: BaseAddressProtocol>: Test<SUT_> {
 	}
 	
 	func test_all_address_different() {
-		XCTAssertEqual(Set(SUT.allCases).count, SUT.allCases.count)
+		XCTAssertEqual(Set(SUT.sampleValues).count, SUT.sampleValues.count)
 	}
 	
 	
@@ -27,7 +27,7 @@ class BaseAddressTest<SUT_: BaseAddressProtocol>: Test<SUT_> {
 			)
 		}
 		
-		try SUT.allCases.forEach(doTest)
+		try SUT.sampleValues.forEach(doTest)
 	}
 	
 	func test_description_is_bech32() {
@@ -38,7 +38,7 @@ class BaseAddressTest<SUT_: BaseAddressProtocol>: Test<SUT_> {
 			)
 		}
 		
-		SUT.allCases.forEach(doTest)
+		SUT.sampleValues.forEach(doTest)
 	}
 	
 	
@@ -67,21 +67,21 @@ class AddressTest<SUT_: AddressProtocol>: BaseAddressTest<SUT_> {
 			let extracted = try sut.asGeneral.asSpecific(type: SUT.self)
 			XCTAssertEqual(extracted, sut)
 		}
-		try SUT.allCases.forEach(doTestInto)
+		try SUT.sampleValues.forEach(doTestInto)
 	}
 	
 	func test_codable_roundtrip() throws {
-		try SUT.allCases.forEach(doTestCodableRoundtrip)
+		try SUT.sampleValues.forEach(doTestCodableRoundtrip)
 	}
     
     func test_identifiable() {
-        SUT.allCases.forEach {
+        SUT.sampleValues.forEach {
             XCTAssertEqual($0.id, $0.address)
         }
     }
 	
 	func test_formatted_full_is_address() {
-		SUT.allCases.forEach {
+		SUT.sampleValues.forEach {
 			XCTAssertEqual($0.formatted(.full), $0.address)
 		}
 	}
@@ -100,7 +100,7 @@ class AddressTest<SUT_: AddressProtocol>: BaseAddressTest<SUT_> {
 		XCTAssertFalse(SUT.sampleStokenet.isOnMainnet)
 		XCTAssertFalse(SUT.sampleStokenetOther.isOnMainnet)
 		
-		let nonMainnets = Set(NetworkID.allCases).subtracting(Set([NetworkID.mainnet]))
+		let nonMainnets = Set(NetworkID.sampleValues).subtracting(Set([NetworkID.mainnet]))
 		nonMainnets.map(SUT.random(networkID:)).map(\.isOnMainnet).forEach { XCTAssertFalse($0) }
 	}
 
@@ -117,7 +117,7 @@ class AddressTest<SUT_: AddressProtocol>: BaseAddressTest<SUT_> {
 			)
 		}
 		
-		SUT.allCases.forEach(doTest)
+		SUT.sampleValues.forEach(doTest)
 	}
 	
 	func test_map_to_same_network_does_not_change() {
@@ -128,13 +128,13 @@ class AddressTest<SUT_: AddressProtocol>: BaseAddressTest<SUT_> {
 			)
 		}
 		
-		SUT.allCases.forEach(doTest)
+		SUT.sampleValues.forEach(doTest)
 	}
 	
 	
 	func test_map_to_other_networks() {
 		func doTest(_ address: SUT) {
-			NetworkID.allCases.forEach {
+			NetworkID.sampleValues.forEach {
 				let addressMapped = address.mapTo(networkID: $0)
 				XCTAssertEqual(addressMapped.networkID, $0)
 				if address.networkID != $0 {
@@ -143,12 +143,12 @@ class AddressTest<SUT_: AddressProtocol>: BaseAddressTest<SUT_> {
 			}
 		}
 		
-		SUT.allCases.forEach(doTest)
+		SUT.sampleValues.forEach(doTest)
 	}
 	
 	
 	func test_asymmetric_type_equality() {
-		SUT.allCases.forEach {
+		SUT.sampleValues.forEach {
 			XCTAssertTrue($0.asGeneral == $0)
 			XCTAssertTrue($0 == $0.asGeneral)
 		}
@@ -157,7 +157,7 @@ class AddressTest<SUT_: AddressProtocol>: BaseAddressTest<SUT_> {
 	func test_random() {
 		let n = 10
 		var set = Set<SUT>()
-		let networks = NetworkID.allCases
+		let networks = NetworkID.sampleValues
 		networks.forEach { networkID in
 			(0..<n).forEach { _ in
 				set.insert(SUT.random(networkID: networkID))
