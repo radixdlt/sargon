@@ -11,7 +11,4 @@ import SargonUniFFI
 extension DepositorsAllowList: SargonModel {}
 extension DepositorsAllowList: CanBeEmptyIdentifiedCollection {
 	public typealias Element = ResourceOrNonFungible
-	public mutating func append(_ newElement: Self.Element) {
-		self = appending(newElement)
-	}
 }

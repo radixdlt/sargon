@@ -12,7 +12,4 @@ public typealias P2PLinks = P2pLinks
 
 extension P2PLinks: CanBeEmptyIdentifiedCollection {
 	public typealias Element = P2PLink
-	public mutating func append(_ newElement: Self.Element) {
-		self = appending(newElement)
-	}
 }

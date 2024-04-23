@@ -10,7 +10,4 @@ import SargonUniFFI
 
 extension EntityFlags: CanBeEmptyIdentifiedCollection {
 	public typealias Element = EntityFlag
-	public mutating func append(_ newElement: Self.Element) {
-		self = appending(newElement)
-	}
 }

@@ -37,6 +37,14 @@ extension CanBeEmptyIdentifiedCollection {
 		}
 		self = Self(elements)
 	}
+	
+	// This is already implemented on `BaseIdentifiedCollection`,
+	// but due to a Swift compiler bug in Xcode 15.3 we MUST implement
+	// it here to 🤷‍♂️
+	public mutating func append(_ newElement: Self.Element) {
+		self = appending(newElement)
+	}
+	
 }
 
 extension CanBeEmptyIdentifiedCollection {

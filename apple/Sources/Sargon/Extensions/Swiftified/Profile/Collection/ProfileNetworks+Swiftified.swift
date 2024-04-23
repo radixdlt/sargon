@@ -10,7 +10,4 @@ import SargonUniFFI
 
 extension ProfileNetworks: CanBeEmptyIdentifiedCollection {	
 	public typealias Element = ProfileNetwork
-	public mutating func append(_ newElement: Self.Element) {
-		self = appending(newElement)
-	}
 }

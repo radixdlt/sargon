@@ -10,7 +10,4 @@ import SargonUniFFI
 
 extension SupportedCurves: NeverEmptyIdentifiedCollection {
 	public typealias Element = SLIP10Curve
-	public mutating func append(_ newElement: Self.Element) {
-		self = appending(newElement)
-	}
 }
