@@ -15,6 +15,12 @@ extension LedgerHardwareWalletFactorSource: Identifiable {
 }
 
 extension LedgerHardwareWalletFactorSource: FactorSourceProtocol {
+	public static let kind: FactorSourceKind = .ledgerHqHardwareWallet
+	
+	public static func extract(from someFactorSource: some BaseFactorSourceProtocol) -> Self? {
+		guard case let .ledger(factorSource) = someFactorSource.asGeneral else { return nil }
+		return factorSource
+	}
 	
 	public var asGeneral: FactorSource {
 		.ledger(value: self)

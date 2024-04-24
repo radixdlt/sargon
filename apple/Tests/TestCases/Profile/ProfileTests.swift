@@ -35,4 +35,14 @@ final class ProfileTests: Test<Profile> {
 		let decrypted = try Profile(encrypted: encrypted, decryptionPassword: password)
 		XCTAssertNoDifference(decrypted, sut)
 	}
+	
+	func test_init_with_header_and_dfs() {
+		let header = Header.sampleOther
+		let dfs = DeviceFactorSource.sampleOther
+		let sut = SUT(header: header, deviceFactorSource: dfs)
+		XCTAssertEqual(sut.header, header)
+		XCTAssertEqual(sut.appPreferences, .default)
+		XCTAssertEqual(sut.networks, [])
+		XCTAssertEqual(sut.factorSources.elements, [dfs.asGeneral])
+	}
 }

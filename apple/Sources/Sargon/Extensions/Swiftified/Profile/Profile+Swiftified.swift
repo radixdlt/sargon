@@ -2,6 +2,21 @@ import SargonUniFFI
 
 extension Profile: SargonModel {}
 
+extension Profile {
+	
+	public init(
+		header: Header,
+		deviceFactorSource: DeviceFactorSource
+	) {
+		self.init(
+			header: header,
+			factorSources: FactorSources(element: deviceFactorSource.asGeneral),
+			appPreferences: .default,
+			networks: []
+		)
+	}
+}
+
 extension Profile: Identifiable {
 	public typealias ID = ProfileID
 	public var id: ID {

@@ -11,7 +11,7 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class LedgerHardwareWalletFactorSourceTests: FactorSourceTest<LedgerHardwareWalletFactorSource> {
+final class LedgerHardwareWalletFactorSourceTests: SpecificFactorSourceTest<LedgerHardwareWalletFactorSource> {
 	func test_id_of_ledger() {
 		XCTAssertEqual(SUT.sample.id.description, FactorSourceID.hash(value: SUT.sample.id).description)
 	}
@@ -44,5 +44,10 @@ final class LedgerHardwareWalletFactorSourceTests: FactorSourceTest<LedgerHardwa
         XCTAssertFalse(sut.supportsBabylon)
     }
     
-  
+	func test_extract_wrong_throws() {
+		func doTest(_ sut: SUT) {
+			XCTAssertThrowsError(try sut.asGeneral.extract(as: DeviceFactorSource.self))
+		}
+		SUT.sampleValues.forEach(doTest)
+	}
 }
