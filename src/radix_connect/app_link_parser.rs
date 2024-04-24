@@ -120,7 +120,7 @@ mod tests {
 
     #[test]
     fn url_invalid() {
-        let url = String::from("invalid_url");
+        let url = String::from("http/invalid_url");
         let err = parse_mobile_connect_request(url.clone()).err().unwrap();
         assert_eq!(
             err,
