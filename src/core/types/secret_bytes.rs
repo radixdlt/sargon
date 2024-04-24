@@ -70,6 +70,18 @@ macro_rules! decl_secret_bytes {
             }
 
             #[cfg(test)]
+            mod [< uniffi_ $struct_name:snake tests >] {
+                use super::*;
+
+                #[test]
+                fn test_from_bytes() {
+                    let too_few_bytes = BagOfBytes::from_str("dead").unwrap();
+                    assert!([< new_ $struct_name:snake _from_bytes >](too_few_bytes).is_err());
+                }
+
+            }
+
+            #[cfg(test)]
             mod [< $struct_name:snake tests >] {
                 use super::*;
                 use std::mem;
