@@ -1,3 +1,6 @@
+use crate::CommonError;
+use url::Url;
+
 /// Returns the last `n` chars of the &str `s`. If `s` is shorter than `n`
 /// we panic.
 pub fn suffix_str(n: usize, s: impl AsRef<str>) -> String {
