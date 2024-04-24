@@ -10,14 +10,14 @@ impl HasSampleValues for LinkRequest {
     fn sample() -> Self {
         Self {
             origin: Url::parse("radix://app").unwrap(),
-            session_id: SessionID("123".to_owned()),
+            session_id: SessionID::sample(),
         }
     }
 
     fn sample_other() -> Self {
         Self {
             origin: Url::parse("radix://app").unwrap(),
-            session_id: SessionID("456".to_owned()),
+            session_id: SessionID::sample_other(),
         }
     }
 }

@@ -1,25 +1,30 @@
 use crate::prelude::*;
 
-uniffi::custom_newtype!(SessionID, String);
+uniffi::custom_newtype!(SessionID, Uuid);
 
 #[derive(
     Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Ord, PartialOrd, Hash,
 )]
-pub struct SessionID(pub String);
+pub struct SessionID(pub(crate) Uuid);
 
-impl SessionID {
-    pub fn new(id: impl AsRef<str>) -> Self {
-        Self(id.as_ref().to_owned())
+impl FromStr for SessionID {
+    type Err = CommonError;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Uuid::from_str(s).map(SessionID).map_err(|_| {
+            CommonError::RadixConnectInvalidSessionID {
+                bad_value: s.to_owned(),
+            }
+        })
     }
 }
 
 impl HasSampleValues for SessionID {
     fn sample() -> Self {
-        Self::new("session_id1")
+        SessionID(Uuid::from_bytes([0xff; 16]))
     }
 
     fn sample_other() -> Self {
-        Self::new("session_id2")
+        SessionID(Uuid::from_bytes([0xde; 16]))
     }
 }
 
@@ -37,12 +42,12 @@ mod tests {
     }
 
     #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn test_new() {
-        assert_eq!(SUT::new("session_id1"), SUT::sample());
+    fn inequafrom_invalid_str() {
+        assert_eq!(
+            "bad".parse::<SUT>(),
+            Err(CommonError::RadixConnectInvalidSessionID {
+                bad_value: "bad".to_owned()
+            })
+        );
     }
 }

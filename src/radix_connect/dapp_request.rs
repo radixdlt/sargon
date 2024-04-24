@@ -9,15 +9,15 @@ pub struct DappRequest {
 impl HasSampleValues for DappRequest {
     fn sample() -> Self {
         Self {
-            interaction_id: WalletInteractionId("123".to_owned()),
-            session_id: SessionID("123".to_owned()),
+            interaction_id: WalletInteractionId::sample(),
+            session_id: SessionID::sample(),
         }
     }
 
     fn sample_other() -> Self {
         Self {
-            interaction_id: WalletInteractionId("456".to_owned()),
-            session_id: SessionID("456".to_owned()),
+            interaction_id: WalletInteractionId::sample_other(),
+            session_id: SessionID::sample_other(),
         }
     }
 }

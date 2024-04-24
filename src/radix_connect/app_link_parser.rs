@@ -28,11 +28,16 @@ pub fn parse_mobile_connect_request(
         .query_pairs()
         .into_owned()
         .collect::<HashMap<String, String>>();
-    let session_id = query_parameters.get(CONNECT_URL_PARAM_SESSION_ID).ok_or(
+    let session_id_string = query_parameters
+        .get(CONNECT_URL_PARAM_SESSION_ID)
+        .ok_or(CommonError::RadixConnectMobileInvalidRequestUrl {
+            bad_value: url.clone(),
+        })?;
+    let session_id = SessionID::from_str(session_id_string).map_err(|_| {
         CommonError::RadixConnectMobileInvalidRequestUrl {
             bad_value: url.clone(),
-        },
-    )?;
+        }
+    })?;
 
     match query_parameters.get(CONNECT_URL_PARAM_ORIGIN) {
         Some(origin) => Url::parse(origin)
@@ -42,7 +47,7 @@ pub fn parse_mobile_connect_request(
             .map(|url| {
                 MobileConnectRequest::Link(LinkRequest {
                     origin: url,
-                    session_id: SessionID(session_id.to_owned()),
+                    session_id,
                 })
             }),
         None => {
@@ -52,8 +57,8 @@ pub fn parse_mobile_connect_request(
                     bad_value: url.clone(),
                 })?;
             Ok(MobileConnectRequest::DappInteraction(DappRequest {
-                session_id: SessionID(session_id.to_owned()),
                 interaction_id: WalletInteractionId(interaction_id.to_owned()),
+                session_id,
             }))
         }
     }
@@ -65,16 +70,15 @@ mod tests {
 
     #[test]
     fn parse_url_into_link_request_origin() {
-        let connect_url =
-            CONNECT_URL.to_owned() + "/?sessionId=123&origin=radix%3A%2F%2Fapp";
+        let session_id = Uuid::new_v4().to_string();
+        let connect_url = CONNECT_URL.to_owned()
+            + format!("/?sessionId={}&origin=radix%3A%2F%2Fapp", session_id)
+                .as_str();
         let result = parse_mobile_connect_request(connect_url);
         assert!(result.is_ok());
         match result.unwrap() {
             MobileConnectRequest::Link(link_request) => {
-                assert_eq!(
-                    link_request.session_id,
-                    SessionID("123".to_owned())
-                );
+                assert_eq!(link_request.session_id.0.to_string(), session_id);
                 assert_eq!(
                     link_request.origin,
                     Url::parse("radix://app").unwrap()
@@ -87,16 +91,30 @@ mod tests {
     }
 
     #[test]
+    fn parse_url_wrong_session_id() {
+        let connect_url =
+            CONNECT_URL.to_owned() + "/?sessionId=123&origin=radix%3A%2F%2Fapp";
+        let err = parse_mobile_connect_request(connect_url.clone())
+            .err()
+            .unwrap();
+        assert_eq!(
+            err,
+            CommonError::RadixConnectMobileInvalidRequestUrl {
+                bad_value: connect_url
+            }
+        );
+    }
+
+    #[test]
     fn parse_url_into_dapp_interaction() {
-        let url = CONNECT_URL.to_owned() + "/?sessionId=123&interactionId=456";
+        let session_id = Uuid::new_v4().to_string();
+        let url = CONNECT_URL.to_owned()
+            + format!("/?sessionId={}&interactionId=456", session_id).as_str();
         let result = parse_mobile_connect_request(url);
         assert!(result.is_ok());
         match result.unwrap() {
             MobileConnectRequest::DappInteraction(dapp_request) => {
-                assert_eq!(
-                    dapp_request.session_id,
-                    SessionID("123".to_owned())
-                );
+                assert_eq!(dapp_request.session_id.0.to_string(), session_id);
                 assert_eq!(
                     dapp_request.interaction_id,
                     WalletInteractionId("456".to_owned())
@@ -130,8 +148,9 @@ mod tests {
 
     #[test]
     fn url_with_invalid_origin() {
-        let connect_url =
-            CONNECT_URL.to_owned() + "/?sessionId=123&origin=invalid";
+        let session_id = Uuid::new_v4().to_string();
+        let connect_url = CONNECT_URL.to_owned()
+            + format!("/?sessionId={}&origin=invalid", session_id).as_str();
         let err = parse_mobile_connect_request(connect_url).err().unwrap();
         assert_eq!(
             err,

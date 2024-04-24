@@ -49,7 +49,8 @@ mod tests {
 
     #[test]
     fn test_new_mobile_connect_request() {
-        let connect_url = "https://d1rxdfxrfmemlj.cloudfront.net/?sessionId=123&origin=radix%3A%2F%2Fapp";
-        assert!(new_mobile_connect_request(connect_url.to_owned()).is_ok());
+        let uuid = Uuid::new_v4().to_string();
+        let connect_url = format!("https://d1rxdfxrfmemlj.cloudfront.net/?sessionId={}&origin=radix%3A%2F%2Fapp", uuid);
+        assert!(new_mobile_connect_request(connect_url).is_ok());
     }
 }
