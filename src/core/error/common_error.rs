@@ -451,6 +451,12 @@ pub enum CommonError {
 
     #[error("Invalid LedgerHardwareWalletModel, bad value: {bad_value}")]
     InvalidLedgerHardwareWalletModel { bad_value: String } = 10126,
+
+    #[error("RadixConnectMobile invalid URL")]
+    RadixConnectMobileInvalidRequestUrl = 10127,
+
+    #[error("RadixConnectMobile invalid URL")]
+    RadixConnectMobileInvalidOrigin = 10128,
 }
 
 #[uniffi::export]
