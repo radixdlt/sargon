@@ -16,6 +16,16 @@ public protocol FactorSourceProtocol: SargonModel {
 	var supportsBabylon: Bool { get }
 }
 
+public extension FactorSourceProtocol {
+	var kind: FactorSourceKind { factorSourceKind }
+	var common: FactorSourceCommon {
+		asGeneral.common
+	}
+	var cryptoParameters: FactorSourceCryptoParameters {
+		common.cryptoParameters
+	}
+}
+
 public protocol FactorSourceSpecificProtocol: FactorSourceProtocol {
 	static var kind: FactorSourceKind { get }
 	static func extract(from: some FactorSourceProtocol) -> Self?

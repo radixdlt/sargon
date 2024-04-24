@@ -31,6 +31,13 @@ extension FactorSource: FactorSourceProtocol {
 		}
 	}
 	
+	public var common: FactorSourceCommon {
+		switch self {
+		case let .device(value): value.common
+		case let .ledger(value): value.common
+		}
+	}
+	
 	public var asGeneral: FactorSource { self }
 	
 	public func extract<F>(_ type: F.Type = F.self) -> F? where F: FactorSourceSpecificProtocol {

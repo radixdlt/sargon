@@ -4,17 +4,10 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class FactorSourceIDFromHashTests: Test<FactorSourceIDFromHash> {
-	func test_description() {
-		XCTAssertEqual(SUT.sample.description, SUT.sample.toString())
-	}
+final class FactorSourceIDFromHashTests: SpecificFactorSourceIDTest<FactorSourceIDFromHash> {
 	
 	func test_as_general() {
 		XCTAssertEqual(SUT.sample.asGeneral, FactorSourceID.hash(value: SUT.sample))
-	}
-	
-	func test_codable_roundtrip() throws {
-		try SUT.sampleValues.forEach(doTestCodableRoundtrip)
 	}
 	
 	func test_from_mnemonic_with_passphrase() {
@@ -25,5 +18,11 @@ final class FactorSourceIDFromHashTests: Test<FactorSourceIDFromHash> {
 		XCTAssertEqual(sut.toString(), "device:3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240")
 	}
 	
+	func test_extract_wrong_throws() {
+		func doTest(_ sut: SUT) {
+			XCTAssertThrowsError(try sut.asGeneral.extract(as: FactorSourceIDFromAddress.self))
+		}
+		SUT.sampleValues.forEach(doTest)
+	}
 }
 

@@ -27,7 +27,7 @@ class FactorSourceTest<SUT_: FactorSourceProtocol>: Test<SUT_> {
 	
 	func test_as_general_factorSourceKind() {
 		func doTest(_ sut: SUT) {
-			XCTAssertEqual(sut.asGeneral.factorSourceKind, sut.factorSourceKind)
+			XCTAssertEqual(sut.asGeneral.kind, sut.kind)
 		}
 		SUT.sampleValues.forEach(doTest)
 	}

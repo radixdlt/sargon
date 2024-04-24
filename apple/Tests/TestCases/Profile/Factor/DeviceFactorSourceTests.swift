@@ -53,4 +53,24 @@ final class DeviceFactorSourceTests: SpecificFactorSourceTest<DeviceFactorSource
 		}
 		SUT.sampleValues.forEach(doTest)
 	}
+	
+	func test_known_factor_source_id() async throws {
+		let mnemonic = try Mnemonic(
+			phrase: "equip will roof matter pink blind book anxiety banner elbow sun young"
+		)
+		
+		let factorSourceID = FactorSourceIDFromHash(
+			kind: .device,
+			mnemonicWithPassphrase: .init(
+				mnemonic: mnemonic,
+				passphrase: "Radix... just imagine!"
+			)
+		)
+		
+		XCTAssertEqual(
+			factorSourceID.description,
+			"device:4af22ea955d53263a712d897a797df8388e13b8e7b3f30d7d7da88028b724d60"
+		)
+	}
+
 }
