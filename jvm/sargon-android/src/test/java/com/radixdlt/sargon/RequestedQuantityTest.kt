@@ -1,11 +1,11 @@
 package com.radixdlt.sargon
 
 import com.radixdlt.sargon.extensions.atLeast
-import com.radixdlt.sargon.extensions.deserializeFromJsonString
+import com.radixdlt.sargon.extensions.fromJson
 import com.radixdlt.sargon.extensions.exactly
 import com.radixdlt.sargon.extensions.isFulfilled
 import com.radixdlt.sargon.extensions.isValid
-import com.radixdlt.sargon.extensions.serializedJsonString
+import com.radixdlt.sargon.extensions.toJson
 import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -49,8 +49,8 @@ class RequestedQuantityTest {
     fun testJsonRoundtrip() {
         assertEquals(
             RequestedQuantity.sample(),
-            RequestedQuantity.deserializeFromJsonString(
-                RequestedQuantity.sample().serializedJsonString()
+            RequestedQuantity.fromJson(
+                RequestedQuantity.sample().toJson()
             )
         )
     }

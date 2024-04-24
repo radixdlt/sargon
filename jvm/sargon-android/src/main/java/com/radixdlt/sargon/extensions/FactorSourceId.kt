@@ -1,6 +1,5 @@
 package com.radixdlt.sargon.extensions
 
-import com.radixdlt.sargon.BagOfBytes
 import com.radixdlt.sargon.FactorSourceId
 import com.radixdlt.sargon.FactorSourceIdFromAddress
 import com.radixdlt.sargon.FactorSourceIdFromHash
@@ -16,30 +15,21 @@ fun FactorSourceIdFromAddress.asGeneral() = FactorSourceId.Address(
 )
 
 @Throws(SargonException::class)
-fun FactorSourceId.Address.Companion.deserializeFromJsonBytes(
-    jsonBytes: BagOfBytes
-): FactorSourceId.Address =
-    newFactorSourceIDFromAddressFromJsonBytes(jsonBytes = jsonBytes).asGeneral()
+fun FactorSourceId.Address.Companion.fromJson(
+    jsonString: String
+): FactorSourceId.Address = newFactorSourceIDFromAddressFromJsonBytes(
+    jsonBytes = bagOfBytes(fromString = jsonString)
+).asGeneral()
+
+fun FactorSourceId.Address.toJson(): String =
+    factorSourceIDFromAddressToJsonBytes(factorSourceIDFromAddress = value).string
 
 @Throws(SargonException::class)
-fun FactorSourceId.Address.Companion.deserializeFromJsonString(jsonString: String): FactorSourceId.Address =
-    deserializeFromJsonBytes(jsonBytes = bagOfBytes(fromString = jsonString))
+fun FactorSourceId.Hash.Companion.fromJson(
+    jsonString: String
+): FactorSourceId.Hash = newFactorSourceIDFromHashFromJsonBytes(
+    jsonBytes = bagOfBytes(fromString = jsonString)
+).asGeneral()
 
-fun FactorSourceId.Address.serializedJsonBytes(): BagOfBytes =
-    factorSourceIDFromAddressToJsonBytes(factorSourceIDFromAddress = value)
-
-fun FactorSourceId.Address.serializedJsonString(): String = serializedJsonBytes().string
-
-@Throws(SargonException::class)
-fun FactorSourceId.Hash.Companion.deserializeFromJsonBytes(
-    jsonBytes: BagOfBytes
-): FactorSourceId.Hash = newFactorSourceIDFromHashFromJsonBytes(jsonBytes = jsonBytes).asGeneral()
-
-@Throws(SargonException::class)
-fun FactorSourceId.Hash.Companion.deserializeFromJsonString(jsonString: String): FactorSourceId.Hash =
-    deserializeFromJsonBytes(jsonBytes = bagOfBytes(fromString = jsonString))
-
-fun FactorSourceId.Hash.serializedJsonBytes(): BagOfBytes =
-    factorSourceIDFromHashToJsonBytes(factorSourceIDFromHash = value)
-
-fun FactorSourceId.Hash.serializedJsonString(): String = serializedJsonBytes().string
+fun FactorSourceId.Hash.toJson(): String =
+    factorSourceIDFromHashToJsonBytes(factorSourceIDFromHash = value).string

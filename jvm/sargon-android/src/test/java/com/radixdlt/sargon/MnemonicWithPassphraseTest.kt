@@ -1,10 +1,10 @@
 package com.radixdlt.sargon
 
 import com.radixdlt.sargon.extensions.derivePublicKey
-import com.radixdlt.sargon.extensions.deserializeFromJsonString
+import com.radixdlt.sargon.extensions.fromJson
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.isValidSignature
-import com.radixdlt.sargon.extensions.serializedJsonString
+import com.radixdlt.sargon.extensions.toJson
 import com.radixdlt.sargon.extensions.sign
 import com.radixdlt.sargon.extensions.signature
 import com.radixdlt.sargon.extensions.validate
@@ -25,7 +25,7 @@ class MnemonicWithPassphraseTest {
 
         assertEquals(
             mnemonicWithPassphrase,
-            MnemonicWithPassphrase.deserializeFromJsonString(mnemonicWithPassphrase.serializedJsonString())
+            MnemonicWithPassphrase.fromJson(mnemonicWithPassphrase.toJson())
         )
     }
 

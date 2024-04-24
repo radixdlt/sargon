@@ -1,17 +1,11 @@
 package com.radixdlt.sargon.extensions
 
 import com.radixdlt.sargon.AuthorizedDapp
-import com.radixdlt.sargon.BagOfBytes
 import com.radixdlt.sargon.authorizedDappToJsonBytes
 import com.radixdlt.sargon.newAuthorizedDappFromJsonBytes
 
 @Throws(SargonException::class)
-fun AuthorizedDapp.Companion.deserializeFromJsonBytes(jsonBytes: BagOfBytes) =
-    newAuthorizedDappFromJsonBytes(jsonBytes = jsonBytes)
+fun AuthorizedDapp.Companion.fromJson(jsonString: String) =
+    newAuthorizedDappFromJsonBytes(jsonBytes = bagOfBytes(fromString = jsonString))
 
-@Throws(SargonException::class)
-fun AuthorizedDapp.Companion.deserializeFromJsonString(jsonString: String) =
-    deserializeFromJsonBytes(jsonBytes = bagOfBytes(fromString = jsonString))
-
-fun AuthorizedDapp.serializedJsonBytes(): BagOfBytes = authorizedDappToJsonBytes(authorizedDapp = this)
-fun AuthorizedDapp.serializedJsonString(): String = serializedJsonBytes().string
+fun AuthorizedDapp.toJson(): String = authorizedDappToJsonBytes(authorizedDapp = this).string

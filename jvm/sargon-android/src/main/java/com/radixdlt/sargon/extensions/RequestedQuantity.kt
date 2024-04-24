@@ -27,9 +27,9 @@ fun RequestedQuantity.Companion.atLeast(quantity: Int): RequestedQuantity =
         quantity = quantity.toUShort()
     )
 
-fun RequestedQuantity.Companion.deserializeFromJsonString(json: String) =
+fun RequestedQuantity.Companion.fromJson(json: String) =
     newRequestedQuantityFromJsonBytes(jsonBytes = bagOfBytes(fromString = json))
 
-fun RequestedQuantity.serializedJsonString() =
+fun RequestedQuantity.toJson() =
     requestedQuantityToJsonBytes(requestedQuantity = this).string
 

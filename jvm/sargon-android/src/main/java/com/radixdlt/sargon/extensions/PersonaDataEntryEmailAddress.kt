@@ -5,10 +5,10 @@ import com.radixdlt.sargon.newPersonaDataEntryEmailAddressFromJsonString
 import com.radixdlt.sargon.personaDataEntryEmailAddressToJsonString
 
 @Throws(SargonException::class)
-fun PersonaDataEntryEmailAddress.Companion.deserializeFromJsonString(
+fun PersonaDataEntryEmailAddress.Companion.fromJson(
     jsonString: String
 ): PersonaDataEntryEmailAddress =
     newPersonaDataEntryEmailAddressFromJsonString(jsonString = jsonString)
 
-fun PersonaDataEntryEmailAddress.serializedJsonString(): String =
+fun PersonaDataEntryEmailAddress.toJson(): String =
     personaDataEntryEmailAddressToJsonString(personaDataEntryEmailAddress = this)

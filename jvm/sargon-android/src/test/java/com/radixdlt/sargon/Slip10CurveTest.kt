@@ -1,8 +1,8 @@
 package com.radixdlt.sargon
 
-import com.radixdlt.sargon.extensions.deserializeFromJsonString
+import com.radixdlt.sargon.extensions.fromJson
 import com.radixdlt.sargon.extensions.init
-import com.radixdlt.sargon.extensions.serializedJsonString
+import com.radixdlt.sargon.extensions.toJson
 import com.radixdlt.sargon.extensions.string
 import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -27,7 +27,7 @@ class Slip10CurveTest {
         val sut = Slip10Curve.sample()
         assertEquals(
             sut,
-            Slip10Curve.deserializeFromJsonString(sut.serializedJsonString())
+            Slip10Curve.fromJson(sut.toJson())
         )
     }
 
