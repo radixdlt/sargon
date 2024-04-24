@@ -21,7 +21,6 @@ final class FactorSourceKindTests: Test<FactorSourceKind> {
         SUT.sampleValues.forEach(doTest)
     }
     
-    
     func test_string_roundtrip() {
         func doTest(_ sut: SUT) {
             XCTAssertEqual(

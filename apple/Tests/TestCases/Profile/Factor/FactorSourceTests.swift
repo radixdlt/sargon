@@ -4,7 +4,7 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class FactorSourceTests: Test<FactorSource> {
+final class FactorSourceTests: FactorSourceTest<FactorSource> {
 	
 	func test_factor_source_id() {
 		XCTAssertEqual(SUT.sample.factorSourceID, SUT.sample.id)

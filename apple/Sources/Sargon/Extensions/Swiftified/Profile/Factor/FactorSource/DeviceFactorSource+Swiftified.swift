@@ -14,7 +14,13 @@ extension DeviceFactorSource: Identifiable {
 	public typealias ID = FactorSourceIDFromHash
 }
 
-extension DeviceFactorSource: FactorSourceProtocol {
+extension DeviceFactorSource: FactorSourceSpecificProtocol {
+	public static let kind: FactorSourceKind = .device
+	
+	public static func extract(from someFactorSource: some FactorSourceProtocol) -> Self? {
+		guard case let .device(factorSource) = someFactorSource.asGeneral else { return nil }
+		return factorSource
+	}
 	
 	public var asGeneral: FactorSource {
 		.device(value: self)

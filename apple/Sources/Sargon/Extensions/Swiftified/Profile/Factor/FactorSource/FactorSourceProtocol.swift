@@ -15,3 +15,8 @@ public protocol FactorSourceProtocol: SargonModel {
 	var supportsOlympia: Bool { get }
 	var supportsBabylon: Bool { get }
 }
+
+public protocol FactorSourceSpecificProtocol: FactorSourceProtocol {
+	static var kind: FactorSourceKind { get }
+	static func extract(from: some FactorSourceProtocol) -> Self?
+}

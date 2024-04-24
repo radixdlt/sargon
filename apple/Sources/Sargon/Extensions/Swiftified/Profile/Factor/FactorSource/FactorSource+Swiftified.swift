@@ -33,5 +33,23 @@ extension FactorSource: FactorSourceProtocol {
 	
 	public var asGeneral: FactorSource { self }
 	
-
+	public func extract<F>(_ type: F.Type = F.self) -> F? where F: FactorSourceSpecificProtocol {
+		F.extract(from: self)
+	}
+	
+	public func extract<F>(as _: F.Type = F.self) throws -> F where F: FactorSourceSpecificProtocol {
+		guard let extracted = extract(F.self) else {
+			throw IncorrectFactorSourceType(
+				expectedKind: F.kind,
+				actualKind: factorSourceKind
+			)
+		}
+		return extracted
+	}
+	
+	public struct IncorrectFactorSourceType: Swift.Error {
+		public let expectedKind: FactorSourceKind
+		public let actualKind: FactorSourceKind
+	}
+	
 }

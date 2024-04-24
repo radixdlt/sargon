@@ -4,7 +4,7 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class DeviceFactorSourceTests: FactorSourceTest<DeviceFactorSource> {
+final class DeviceFactorSourceTests: SpecificFactorSourceTest<DeviceFactorSource> {
 	func test_id_of_device() {
 		XCTAssertEqual(SUT.sample.id.description, FactorSourceID.hash(value: SUT.sample.id).description)
 	}
@@ -45,5 +45,12 @@ final class DeviceFactorSourceTests: FactorSourceTest<DeviceFactorSource> {
 		let sut = SUT.olympia(mnemonicWithPassphrase: .sample)
 		XCTAssertTrue(sut.supportsOlympia)
 		XCTAssertFalse(sut.supportsBabylon)
+	}
+	
+	func test_extract_wrong_throws() {
+		func doTest(_ sut: SUT) {
+			XCTAssertThrowsError(try sut.asGeneral.extract(as: LedgerHardwareWalletFactorSource.self))
+		}
+		SUT.sampleValues.forEach(doTest)
 	}
 }
