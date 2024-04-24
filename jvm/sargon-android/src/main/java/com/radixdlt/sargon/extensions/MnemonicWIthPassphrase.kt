@@ -1,6 +1,5 @@
 package com.radixdlt.sargon.extensions
 
-import com.radixdlt.sargon.BagOfBytes
 import com.radixdlt.sargon.DerivationPath
 import com.radixdlt.sargon.Hash
 import com.radixdlt.sargon.HierarchicalDeterministicPublicKey
@@ -13,17 +12,11 @@ import com.radixdlt.sargon.mnemonicWithPassphraseValidatePublicKeys
 import com.radixdlt.sargon.newMnemonicWithPassphraseFromJsonBytes
 
 @Throws(SargonException::class)
-fun MnemonicWithPassphrase.Companion.deserializeFromJsonBytes(jsonBytes: BagOfBytes) =
-    newMnemonicWithPassphraseFromJsonBytes(jsonBytes = jsonBytes)
+fun MnemonicWithPassphrase.Companion.fromJson(fromJson: String) =
+    newMnemonicWithPassphraseFromJsonBytes(bagOfBytes(fromString = fromJson))
 
-@Throws(SargonException::class)
-fun MnemonicWithPassphrase.Companion.deserializeFromJsonString(fromJson: String) =
-    deserializeFromJsonBytes(bagOfBytes(fromString = fromJson))
-
-fun MnemonicWithPassphrase.serializedJsonBytes(): BagOfBytes =
-    mnemonicWithPassphraseToJsonBytes(mnemonicWithPassphrase = this)
-
-fun MnemonicWithPassphrase.serializedJsonString(): String = serializedJsonBytes().string
+fun MnemonicWithPassphrase.toJson(): String =
+    mnemonicWithPassphraseToJsonBytes(mnemonicWithPassphrase = this).string
 
 fun MnemonicWithPassphrase.validate(hdPublicKeys: List<HierarchicalDeterministicPublicKey>): Boolean =
     mnemonicWithPassphraseValidatePublicKeys(mnemonicWithPassphrase = this, hdKeys = hdPublicKeys)

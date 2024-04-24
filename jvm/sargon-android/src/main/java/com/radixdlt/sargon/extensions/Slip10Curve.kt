@@ -13,8 +13,8 @@ val Slip10Curve.string: String
     get() = slip10CurveToString(curve = this)
 
 @Throws(SargonException::class)
-fun Slip10Curve.Companion.deserializeFromJsonString(jsonString: String) =
+fun Slip10Curve.Companion.fromJson(jsonString: String) =
     newSLIP10CurveFromJsonString(jsonString = jsonString)
 
-fun Slip10Curve.serializedJsonString() = sLIP10CurveToJsonString(sLIP10Curve = this)
+fun Slip10Curve.toJson() = sLIP10CurveToJsonString(sLIP10Curve = this)
 

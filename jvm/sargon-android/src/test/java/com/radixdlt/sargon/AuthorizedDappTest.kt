@@ -1,7 +1,7 @@
 package com.radixdlt.sargon
 
-import com.radixdlt.sargon.extensions.deserializeFromJsonString
-import com.radixdlt.sargon.extensions.serializedJsonString
+import com.radixdlt.sargon.extensions.fromJson
+import com.radixdlt.sargon.extensions.toJson
 import com.radixdlt.sargon.samples.Sample
 import com.radixdlt.sargon.samples.sampleMainnet
 import com.radixdlt.sargon.samples.sampleStokenet
@@ -17,7 +17,7 @@ class AuthorizedDappTest: SampleTestable<AuthorizedDapp> {
         val sut = AuthorizedDapp.sampleMainnet()
         Assertions.assertEquals(
             sut,
-            AuthorizedDapp.deserializeFromJsonString(sut.serializedJsonString())
+            AuthorizedDapp.fromJson(sut.toJson())
         )
     }
 }

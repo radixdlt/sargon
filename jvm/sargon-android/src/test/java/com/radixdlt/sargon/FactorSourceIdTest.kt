@@ -1,10 +1,10 @@
 package com.radixdlt.sargon
 
 import com.radixdlt.sargon.extensions.asGeneral
-import com.radixdlt.sargon.extensions.deserializeFromJsonString
+import com.radixdlt.sargon.extensions.fromJson
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.randomBagOfBytes
-import com.radixdlt.sargon.extensions.serializedJsonString
+import com.radixdlt.sargon.extensions.toJson
 import com.radixdlt.sargon.samples.sampleMainnet
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -41,7 +41,7 @@ class FactorSourceIdTest {
 
         assertEquals(
             sutHash,
-            FactorSourceId.Hash.deserializeFromJsonString(sutHash.serializedJsonString())
+            FactorSourceId.Hash.fromJson(sutHash.toJson())
         )
 
         val sutAddress = FactorSourceIdFromAddress(
@@ -51,7 +51,7 @@ class FactorSourceIdTest {
 
         assertEquals(
             sutAddress,
-            FactorSourceId.Address.deserializeFromJsonString(sutAddress.serializedJsonString())
+            FactorSourceId.Address.fromJson(sutAddress.toJson())
         )
     }
 }
