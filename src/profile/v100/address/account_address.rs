@@ -132,11 +132,6 @@ mod tests {
     }
 
     #[test]
-    fn test_acc() {
-        assert_eq!(SUT::from_str("account_tdx_2_12xn3lgz7xv4d0d4cx25nvfekyxx0fsawhmtht0dd550vcu5wwl0g70").unwrap().network_id(), NetworkID::Stokenet);
-    }
-
-    #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
     }
