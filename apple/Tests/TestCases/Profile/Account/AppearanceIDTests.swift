@@ -18,4 +18,14 @@ final class AppearanceIDTests: Test<AppearanceID> {
 	func test_codable_roundtrip() throws {
 		try SUT.sampleValues.forEach(doTestCodableRoundtrip)
 	}
+	
+	func test_from_number_of_accounts() {
+		func doTest(_ count: Int, expected: SUT) {
+			XCTAssertEqual(SUT.fromNumberOfAccounts(count), expected)
+		}
+		doTest(0, expected: SUT.sample)
+		doTest(11, expected: SUT.sampleOther)
+		doTest(12, expected: SUT.sample)
+		doTest(23, expected: SUT.sampleOther)
+	}
 }
