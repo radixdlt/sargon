@@ -19,7 +19,7 @@ extension FactorSource: Identifiable {
 	}
 }
 
-extension FactorSource: FactorSourceProtocol {
+extension FactorSource: BaseFactorSourceProtocol {
 	public var factorSourceID: FactorSourceID {
 		id
 	}
@@ -32,19 +32,31 @@ extension FactorSource: FactorSourceProtocol {
 	}
 	
 	public var common: FactorSourceCommon {
-		switch self {
-		case let .device(value): value.common
-		case let .ledger(value): value.common
+		get {
+			switch self {
+			case let .device(value): value.common
+			case let .ledger(value): value.common
+			}
+		}
+		set {
+			switch self {
+			case var .device(source):
+				source.common = newValue
+				self = .device(value: source)
+			case var .ledger(source):
+				source.common = newValue
+				self = .ledger(value: source)
+			}
 		}
 	}
 	
 	public var asGeneral: FactorSource { self }
 	
-	public func extract<F>(_ type: F.Type = F.self) -> F? where F: FactorSourceSpecificProtocol {
+	public func extract<F>(_ type: F.Type = F.self) -> F? where F: FactorSourceProtocol {
 		F.extract(from: self)
 	}
 	
-	public func extract<F>(as _: F.Type = F.self) throws -> F where F: FactorSourceSpecificProtocol {
+	public func extract<F>(as _: F.Type = F.self) throws -> F where F: FactorSourceProtocol {
 		guard let extracted = extract(F.self) else {
 			throw IncorrectFactorSourceType(
 				expectedKind: F.kind,

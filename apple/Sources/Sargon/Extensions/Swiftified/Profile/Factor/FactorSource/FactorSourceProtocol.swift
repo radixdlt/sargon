@@ -8,25 +8,44 @@
 import Foundation
 import SargonUniFFI
 
-public protocol FactorSourceProtocol: SargonModel {
+public protocol BaseFactorSourceProtocol: SargonModel {
 	var factorSourceID: FactorSourceID { get }
 	var factorSourceKind: FactorSourceKind { get }
 	var asGeneral: FactorSource { get }
 	var supportsOlympia: Bool { get }
 	var supportsBabylon: Bool { get }
+	var common: FactorSourceCommon { get set }
 }
 
-public extension FactorSourceProtocol {
-	var kind: FactorSourceKind { factorSourceKind }
-	var common: FactorSourceCommon {
-		asGeneral.common
+extension BaseFactorSourceProtocol {
+	
+	public var kind: FactorSourceKind {
+		factorSourceKind
 	}
-	var cryptoParameters: FactorSourceCryptoParameters {
+	
+	public var cryptoParameters: FactorSourceCryptoParameters {
 		common.cryptoParameters
 	}
+	
+	public var addedOn: Date {
+		common.addedOn
+	}
+
+	public var lastUsedOn: Date {
+		common.lastUsedOn
+	}
+	
+	public mutating func flag(_ flag: FactorSourceFlag) {
+		common.flags.append(flag)
+	}
+	
+	public var isFlaggedForDeletion: Bool {
+		common.flags.contains(.deletedByUser)
+	}
+
 }
 
-public protocol FactorSourceSpecificProtocol: FactorSourceProtocol {
+public protocol FactorSourceProtocol: BaseFactorSourceProtocol {
 	static var kind: FactorSourceKind { get }
-	static func extract(from: some FactorSourceProtocol) -> Self?
+	static func extract(from: some BaseFactorSourceProtocol) -> Self?
 }

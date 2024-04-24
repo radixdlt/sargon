@@ -4,7 +4,7 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-class SpecificFactorSourceTest<SUT_: FactorSourceSpecificProtocol>: FactorSourceTest<SUT_> {
+class SpecificFactorSourceTest<SUT_: FactorSourceProtocol>: FactorSourceTest<SUT_> {
 	
 	func test_extract() throws {
 		func doTest(_ sut: SUT) throws {
@@ -16,7 +16,7 @@ class SpecificFactorSourceTest<SUT_: FactorSourceSpecificProtocol>: FactorSource
 	}
 }
 
-class FactorSourceTest<SUT_: FactorSourceProtocol>: Test<SUT_> {
+class FactorSourceTest<SUT_: BaseFactorSourceProtocol>: Test<SUT_> {
 	
 	func test_as_general_factorSourceID() {
 		func doTest(_ sut: SUT) {

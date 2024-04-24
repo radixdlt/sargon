@@ -14,10 +14,10 @@ extension LedgerHardwareWalletFactorSource: Identifiable {
 	public typealias ID = FactorSourceIDFromHash
 }
 
-extension LedgerHardwareWalletFactorSource: FactorSourceSpecificProtocol {
+extension LedgerHardwareWalletFactorSource: FactorSourceProtocol {
 	public static let kind: FactorSourceKind = .ledgerHqHardwareWallet
 	
-	public static func extract(from someFactorSource: some FactorSourceProtocol) -> Self? {
+	public static func extract(from someFactorSource: some BaseFactorSourceProtocol) -> Self? {
 		guard case let .ledger(factorSource) = someFactorSource.asGeneral else { return nil }
 		return factorSource
 	}
