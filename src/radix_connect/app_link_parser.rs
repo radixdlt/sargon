@@ -119,6 +119,16 @@ mod tests {
     }
 
     #[test]
+    fn url_invalid() {
+        let url = String::from("invalid_url");
+        let err = parse_mobile_connect_request(url.clone()).err().unwrap();
+        assert_eq!(
+            err,
+            CommonError::RadixConnectMobileInvalidRequestUrl { bad_value: url }
+        );
+    }
+
+    #[test]
     fn url_with_invalid_origin() {
         let connect_url =
             CONNECT_URL.to_owned() + "/?sessionId=123&origin=invalid";

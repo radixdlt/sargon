@@ -40,4 +40,9 @@ mod tests {
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
     }
+
+    #[test]
+    fn test_new() {
+        assert_eq!(SUT::new("session_id1"), SUT::sample());
+    }
 }
