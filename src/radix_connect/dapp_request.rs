@@ -85,6 +85,36 @@ mod tests {
     }
 
     #[test]
+    fn try_with_invalid_interaction_id() {
+        let session_id = Uuid::new_v4().to_string();
+        let interaction_id = "bad";
+        assert_eq!(
+            SUT::try_with_interaction_id_and_session_id(
+                interaction_id,
+                session_id.clone()
+            ),
+            Err(CommonError::RadixMobileInvalidInteractionID {
+                bad_value: interaction_id.to_owned()
+            })
+        );
+    }
+
+    #[test]
+    fn try_with_invalid_session_id() {
+        let session_id = "bad";
+        let interaction_id = Uuid::new_v4().to_string();
+        assert_eq!(
+            SUT::try_with_interaction_id_and_session_id(
+                interaction_id.clone(),
+                session_id
+            ),
+            Err(CommonError::RadixConnectMobileInvalidSessionID {
+                bad_value: session_id.to_owned()
+            })
+        );
+    }
+
+    #[test]
     fn test_new() {
         let session_id = SessionID::sample();
         let interaction_id = WalletInteractionId::sample();
