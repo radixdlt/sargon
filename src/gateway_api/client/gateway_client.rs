@@ -15,7 +15,7 @@ pub struct GatewayClient {
     /// An object implementing the `NetworkAntenna` traits, which iOS/Android
     /// clients pass into the constructor of this GatewayClient, so that it can
     /// execute network requests.
-    pub network_antenna: Arc<dyn NetworkAntenna>,
+    pub http_client: HttpClient,
 
     /// The gateway this GatewayClient talks to, which is a (URL, NetworkID) tuple
     /// essentially.
@@ -32,7 +32,7 @@ impl GatewayClient {
         gateway: Gateway,
     ) -> Self {
         Self {
-            network_antenna,
+            http_client: HttpClient { network_antenna },
             gateway,
         }
     }
@@ -49,55 +49,6 @@ impl GatewayClient {
         network_id: NetworkID,
     ) -> Self {
         Self::with_gateway(network_antenna, Gateway::from(network_id))
-    }
-}
-
-/// A mocked network antenna, useful for testing.
-#[derive(Debug)]
-struct MockAntenna {
-    hard_coded_status: u16,
-    hard_coded_body: BagOfBytes,
-    spy: fn(NetworkRequest) -> (),
-}
-
-#[allow(unused)]
-impl MockAntenna {
-    fn with_spy(
-        status: u16,
-        body: impl Into<BagOfBytes>,
-        spy: fn(NetworkRequest) -> (),
-    ) -> Self {
-        Self {
-            hard_coded_status: status,
-            hard_coded_body: body.into(),
-            spy,
-        }
-    }
-
-    fn new(status: u16, body: impl Into<BagOfBytes>) -> Self {
-        Self::with_spy(status, body, |_| {})
-    }
-
-    fn with_response<T>(response: T) -> Self
-    where
-        T: Serialize,
-    {
-        let body = serde_json::to_vec(&response).unwrap();
-        Self::new(200, body)
-    }
-}
-
-#[async_trait::async_trait]
-impl NetworkAntenna for MockAntenna {
-    async fn execute_network_request(
-        &self,
-        request: NetworkRequest,
-    ) -> Result<NetworkResponse> {
-        (self.spy)(request);
-        Ok(NetworkResponse {
-            status_code: self.hard_coded_status,
-            body: self.hard_coded_body.clone(),
-        })
     }
 }
 
@@ -119,91 +70,6 @@ mod tests {
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = GatewayClient;
-
-    #[actix_rt::test]
-    async fn execute_network_request_invalid_url() {
-        let mock_antenna = MockAntenna::new(200, ());
-        let base = "http://example.com";
-        let sut = SUT::with_gateway(
-            Arc::new(mock_antenna),
-            Gateway::declare(base, NetworkID::Stokenet),
-        );
-        let bad_path = "https://exa%23mple.org";
-        let bad_value = format!("{}/{}", base, bad_path);
-        let req = sut.post_empty::<i8, i8, _>(bad_path, res_id);
-        let result = timeout(MAX, req).await.unwrap();
-        assert_eq!(
-            result,
-            Err(CommonError::NetworkRequestInvalidUrl { bad_value })
-        )
-    }
-
-    #[actix_rt::test]
-    async fn execute_network_request_bad_status_code() {
-        let mock_antenna = MockAntenna::new(
-            404, // bad code
-            (),
-        );
-        let sut = SUT::new(Arc::new(mock_antenna), NetworkID::Stokenet);
-        let req = sut.current_epoch();
-        let result = timeout(MAX, req).await.unwrap();
-        assert_eq!(result, Err(CommonError::NetworkResponseBadCode))
-    }
-
-    #[actix_rt::test]
-    async fn execute_network_request_empty_body() {
-        let mock_antenna = MockAntenna::new(
-            200,
-            (), // empty body
-        );
-        let sut = SUT::new(Arc::new(mock_antenna), NetworkID::Stokenet);
-        let req = sut.current_epoch();
-        let result = timeout(MAX, req).await.unwrap();
-        assert_eq!(result, Err(CommonError::NetworkResponseEmptyBody))
-    }
-
-    #[actix_rt::test]
-    async fn execute_network_request_invalid_json() {
-        let mock_antenna = MockAntenna::new(
-            200,
-            BagOfBytes::sample_aced(), // wrong JSON
-        );
-        let sut = SUT::new(Arc::new(mock_antenna), NetworkID::Stokenet);
-        let req = sut.current_epoch();
-        let result = timeout(MAX, req).await.unwrap();
-        assert_eq!(
-            result,
-            Err(CommonError::NetworkResponseJSONDeserialize {
-                into_type: "TransactionConstructionResponse".to_owned()
-            })
-        )
-    }
-
-    #[actix_rt::test]
-    async fn spy_headers() {
-        let mock_antenna = MockAntenna::with_spy(200, (), |request| {
-            assert_eq!(
-                request
-                    .headers
-                    .keys()
-                    .map(|v| v.to_string())
-                    .collect::<BTreeSet<String>>(),
-                [
-                    "RDX-Client-Version",
-                    "RDX-Client-Name",
-                    "accept",
-                    "content-Type",
-                    "user-agent"
-                ]
-                .into_iter()
-                .map(|s| s.to_owned())
-                .collect::<BTreeSet<String>>()
-            )
-        });
-        let sut = SUT::new(Arc::new(mock_antenna), NetworkID::Stokenet);
-        let req = sut.current_epoch();
-        drop(timeout(MAX, req).await.unwrap());
-    }
 
     #[actix_rt::test]
     async fn test_submit_notarized_transaction_mock_duplicate() {
