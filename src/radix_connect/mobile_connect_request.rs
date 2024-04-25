@@ -10,7 +10,7 @@ impl FromStr for MobileConnectRequest {
     type Err = CommonError;
 
     fn from_str(s: &str) -> Result<Self> {
-        parse_mobile_connect_request(s.to_owned())
+        parse_mobile_connect_request(s)
     }
 }
 

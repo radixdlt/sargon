@@ -6,6 +6,20 @@ pub struct LinkRequest {
     pub session_id: SessionID,
 }
 
+impl LinkRequest {
+    pub(crate) fn try_with_origin_and_session_id(
+        origin: impl AsRef<str>,
+        session_id: SessionID,
+    ) -> Result<Self> {
+        let origin = Url::parse(origin.as_ref()).map_err(|_| {
+            CommonError::RadixConnectMobileInvalidOrigin {
+                bad_value: origin.as_ref().to_owned(),
+            }
+        })?;
+        Ok(Self { origin, session_id })
+    }
+}
+
 impl HasSampleValues for LinkRequest {
     fn sample() -> Self {
         Self {

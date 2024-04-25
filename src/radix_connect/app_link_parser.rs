@@ -8,19 +8,20 @@ const CONNECT_URL_PARAM_INTERACTION_ID: &str = "interactionId";
 const CONNECT_URL: &str = "https://d1rxdfxrfmemlj.cloudfront.net";
 
 pub fn parse_mobile_connect_request(
-    url: String,
+    url: impl AsRef<str>,
 ) -> Result<MobileConnectRequest> {
+    let url = url.as_ref();
     let connect_url = Url::parse(CONNECT_URL).unwrap();
-    let parsed_url = Url::parse(url.as_str()).map_err(|_| {
+    let parsed_url = Url::parse(url).map_err(|_| {
         CommonError::RadixConnectMobileInvalidRequestUrl {
-            bad_value: url.clone(),
+            bad_value: url.to_owned(),
         }
     })?;
     if parsed_url.host_str() != connect_url.host_str()
         || parsed_url.scheme() != connect_url.scheme()
     {
         return Err(CommonError::RadixConnectMobileInvalidRequestUrl {
-            bad_value: url.clone(),
+            bad_value: url.to_owned(),
         });
     }
 
@@ -31,37 +32,31 @@ pub fn parse_mobile_connect_request(
     let session_id_string = query_parameters
         .get(CONNECT_URL_PARAM_SESSION_ID)
         .ok_or(CommonError::RadixConnectMobileInvalidRequestUrl {
-            bad_value: url.clone(),
+            bad_value: url.to_owned(),
         })?;
     let session_id = SessionID::from_str(session_id_string).map_err(|_| {
         CommonError::RadixConnectMobileInvalidRequestUrl {
-            bad_value: url.clone(),
+            bad_value: url.to_owned(),
         }
     })?;
 
-    match query_parameters.get(CONNECT_URL_PARAM_ORIGIN) {
-        Some(origin) => Url::parse(origin)
-            .map_err(|_| CommonError::RadixConnectMobileInvalidOrigin {
-                bad_value: origin.to_owned(),
+    let Some(origin) = query_parameters.get(CONNECT_URL_PARAM_ORIGIN) else {
+        return query_parameters
+            .get(CONNECT_URL_PARAM_INTERACTION_ID)
+            .ok_or(CommonError::RadixConnectMobileInvalidRequestUrl {
+                bad_value: url.to_owned(),
             })
-            .map(|url| {
-                MobileConnectRequest::Link(LinkRequest {
-                    origin: url,
+            .and_then(|interaction_id| {
+                DappRequest::try_with_interaction_id_and_session_id(
+                    interaction_id,
                     session_id,
-                })
-            }),
-        None => {
-            let interaction_id = query_parameters
-                .get(CONNECT_URL_PARAM_INTERACTION_ID)
-                .ok_or(CommonError::RadixConnectMobileInvalidRequestUrl {
-                    bad_value: url.clone(),
-                })?;
-            Ok(MobileConnectRequest::DappInteraction(DappRequest {
-                interaction_id: WalletInteractionId(interaction_id.to_owned()),
-                session_id,
-            }))
-        }
-    }
+                )
+            })
+            .map(MobileConnectRequest::DappInteraction);
+    };
+
+    LinkRequest::try_with_origin_and_session_id(origin, session_id)
+        .map(MobileConnectRequest::Link)
 }
 
 #[cfg(test)]
@@ -128,21 +123,25 @@ mod tests {
 
     #[test]
     fn url_does_not_match_expected() {
-        let url = String::from("https://example.com");
-        let err = parse_mobile_connect_request(url.clone()).err().unwrap();
+        let url = "https://example.com";
+        let err = parse_mobile_connect_request(url).err().unwrap();
         assert_eq!(
             err,
-            CommonError::RadixConnectMobileInvalidRequestUrl { bad_value: url }
+            CommonError::RadixConnectMobileInvalidRequestUrl {
+                bad_value: url.to_owned()
+            }
         );
     }
 
     #[test]
     fn url_invalid() {
-        let url = String::from("http/invalid_url");
-        let err = parse_mobile_connect_request(url.clone()).err().unwrap();
+        let url = "http/invalid_url";
+        let err = parse_mobile_connect_request(url).err().unwrap();
         assert_eq!(
             err,
-            CommonError::RadixConnectMobileInvalidRequestUrl { bad_value: url }
+            CommonError::RadixConnectMobileInvalidRequestUrl {
+                bad_value: url.to_owned()
+            }
         );
     }
 
@@ -162,12 +161,13 @@ mod tests {
 
     #[test]
     fn url_does_not_match_any_request() {
-        let url =
-            String::from("https://d1rxdfxrfmemlj.cloudfront.net/?invalid=1");
-        let err = parse_mobile_connect_request(url.clone()).err().unwrap();
+        let url = "https://d1rxdfxrfmemlj.cloudfront.net/?invalid=1";
+        let err = parse_mobile_connect_request(url).err().unwrap();
         assert_eq!(
             err,
-            CommonError::RadixConnectMobileInvalidRequestUrl { bad_value: url }
+            CommonError::RadixConnectMobileInvalidRequestUrl {
+                bad_value: url.to_owned()
+            }
         );
     }
 }
