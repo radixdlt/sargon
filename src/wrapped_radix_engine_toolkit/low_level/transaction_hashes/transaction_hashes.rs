@@ -62,6 +62,7 @@ macro_rules! decl_tx_hash {
                     assert_eq!(sut.formatted(AddressFormat::Default), [< $struct_name:snake _formatted>](&sut, AddressFormat::Default));
                     assert_eq!(sut.formatted(AddressFormat::Raw), [< $struct_name:snake _formatted>](&sut, AddressFormat::Raw));
                     assert_eq!(sut.formatted(AddressFormat::Full), [< $struct_name:snake _formatted>](&sut, AddressFormat::Full));
+                    assert_eq!(sut.formatted(AddressFormat::Middle), [< $struct_name:snake _formatted>](&sut, AddressFormat::Middle));
                 }
             }
         }
@@ -100,6 +101,7 @@ macro_rules! decl_tx_hash {
                 match format {
                     AddressFormat::Default => format_string(self.bech32_encoded_tx_id.to_string(), 4, 6),
                     AddressFormat::Full | AddressFormat::Raw => self.bech32_encoded_tx_id.to_string(),
+                    AddressFormat::Middle => trim_string(self.bech32_encoded_tx_id.to_string(), 4, 6),
                 }
             }
         }

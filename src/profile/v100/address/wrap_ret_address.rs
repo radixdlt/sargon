@@ -38,6 +38,17 @@ pub(crate) fn format_string(
     format!("{}...{}", prefix, suffix)
 }
 
+pub(crate) fn trim_string(
+    s: impl AsRef<str>,
+    prefix: usize,
+    suffix: usize,
+) -> String {
+    let s = s.as_ref();
+    let start = prefix;
+    let end = s.len() - suffix;
+    s[start..end].to_string()
+}
+
 pub trait IntoScryptoAddress: IsNetworkAware {
     fn scrypto(&self) -> ScryptoGlobalAddress;
 }
@@ -172,6 +183,8 @@ macro_rules! decl_ret_wrapped_address {
                 }
             }
 
+
+
             impl [< $address_type:camel Address >] {
 
                 pub fn random(network_id: NetworkID) -> Self {
@@ -192,9 +205,9 @@ macro_rules! decl_ret_wrapped_address {
                     match format {
                         AddressFormat::Default => format_string(self.address(), 4, 6),
                         AddressFormat::Full | AddressFormat::Raw => self.address(),
+                        AddressFormat::Middle => trim_string(self.address(), 4, 6),
                     }
                 }
-
 
                 pub(crate) fn scrypto(&self) -> ScryptoGlobalAddress {
                     ScryptoGlobalAddress::try_from(self.node_id())
