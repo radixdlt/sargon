@@ -4,6 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.android.cargo.ndk)
     alias(libs.plugins.kotlin.kover)
     id("maven-publish")
@@ -89,7 +90,10 @@ dependencies {
     // For Coroutines support
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
 
-    // For Coroutines support
+    // For Serialization extensions
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+
+    // For Network support
     implementation(platform("com.squareup.okhttp3:okhttp-bom:5.0.0-alpha.12"))
     implementation("com.squareup.okhttp3:okhttp")
     implementation("com.squareup.okhttp3:okhttp-coroutines")

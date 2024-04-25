@@ -7,12 +7,14 @@ import com.radixdlt.sargon.extensions.isValidSignature
 import com.radixdlt.sargon.extensions.toJson
 import com.radixdlt.sargon.extensions.sign
 import com.radixdlt.sargon.extensions.signature
+import com.radixdlt.sargon.extensions.string
 import com.radixdlt.sargon.extensions.validate
 import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class MnemonicWithPassphraseTest {
 
@@ -27,6 +29,61 @@ class MnemonicWithPassphraseTest {
             mnemonicWithPassphrase,
             MnemonicWithPassphrase.fromJson(mnemonicWithPassphrase.toJson())
         )
+    }
+
+    @Test
+    fun testFromAndroidJson() {
+        val androidJsonWithoutPassphrase =
+            """{"mnemonic":"remind index lift gun sleep inner double leopard exist sugar item whisper coast duty leopard law radar neutral odor tape finger position capital track","bip39Passphrase":""}""".trimIndent()
+        assertEquals(
+            MnemonicWithPassphrase(
+                mnemonic = Mnemonic.init(phrase = "remind index lift gun sleep inner double leopard exist sugar item whisper coast duty leopard law radar neutral odor tape finger position capital track"),
+                passphrase = ""
+            ),
+            MnemonicWithPassphrase.fromJson(androidJsonWithoutPassphrase)
+        )
+
+        val androidJsonWithoutPassphrasePrettyPrinted = """{
+              "mnemonic": "remind index lift gun sleep inner double leopard exist sugar item whisper coast duty leopard law radar neutral odor tape finger position capital track",
+              "bip39Passphrase": ""
+            }""".trimIndent()
+        assertEquals(
+            MnemonicWithPassphrase(
+                mnemonic = Mnemonic.init(phrase = "remind index lift gun sleep inner double leopard exist sugar item whisper coast duty leopard law radar neutral odor tape finger position capital track"),
+                passphrase = ""
+            ),
+            MnemonicWithPassphrase.fromJson(androidJsonWithoutPassphrasePrettyPrinted)
+        )
+
+        val androidJsonWithPassphrase =
+            """{"mnemonic":"remind index lift gun sleep inner double leopard exist sugar item whisper coast duty leopard law radar neutral odor tape finger position capital track","bip39Passphrase":"super secret"}""".trimIndent()
+        assertEquals(
+            MnemonicWithPassphrase(
+                mnemonic = Mnemonic.init(phrase = "remind index lift gun sleep inner double leopard exist sugar item whisper coast duty leopard law radar neutral odor tape finger position capital track"),
+                passphrase = "super secret"
+            ),
+            MnemonicWithPassphrase.fromJson(androidJsonWithPassphrase)
+        )
+    }
+
+    @Test
+    fun testFromInvalidJson() {
+        val invalidJson = "{}"
+        assertThrows<CommonException.FailedToDeserializeJsonToValue> {
+            MnemonicWithPassphrase.fromJson(invalidJson)
+        }
+
+
+        val iOSJsonLike = mnemonicWithPassphraseToJsonBytes(
+            MnemonicWithPassphrase(
+                mnemonic = Mnemonic.init("remind index lift gun sleep inner double leopard exist sugar item whisper coast duty leopard law radar neutral odor tape finger position capital track"),
+                passphrase = "super secret"
+            )
+        ).string
+
+        assertThrows<CommonException.FailedToDeserializeJsonToValue> {
+            MnemonicWithPassphrase.fromJson(iOSJsonLike)
+        }
     }
 
     @Test
@@ -61,5 +118,4 @@ class MnemonicWithPassphraseTest {
             MnemonicWithPassphrase.sample().derivePublicKey(DerivationPath.sample())
         )
     }
-
 }
