@@ -34,17 +34,17 @@ impl LinkRequest {
 
 impl HasSampleValues for LinkRequest {
     fn sample() -> Self {
-        Self {
-            origin: parse_url("radix://app1").unwrap(),
-            session_id: SessionID::sample(),
-        }
+        LinkRequest::new(
+            parse_url("radix://app1").unwrap(),
+            SessionID::sample(),
+        )
     }
 
     fn sample_other() -> Self {
-        Self {
-            origin: parse_url("radix://app2").unwrap(),
-            session_id: SessionID::sample_other(),
-        }
+        LinkRequest::new(
+            parse_url("radix://app2").unwrap(),
+            SessionID::sample_other(),
+        )
     }
 }
 
