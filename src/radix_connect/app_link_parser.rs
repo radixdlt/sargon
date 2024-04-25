@@ -2,6 +2,8 @@ use crate::prelude::*;
 use url::form_urlencoded;
 use url::Url;
 
+use super::interaction_id;
+
 const CONNECT_URL_PARAM_SESSION_ID: &str = "sessionId";
 const CONNECT_URL_PARAM_ORIGIN: &str = "origin";
 const CONNECT_URL_PARAM_INTERACTION_ID: &str = "interactionId";
@@ -34,12 +36,6 @@ pub fn parse_mobile_connect_request(
         .ok_or(CommonError::RadixConnectMobileInvalidRequestUrl {
             bad_value: url.to_owned(),
         })?;
-    let session_id = SessionID::from_str(session_id_string).map_err(|_| {
-        CommonError::RadixConnectMobileInvalidRequestUrl {
-            bad_value: url.to_owned(),
-        }
-    })?;
-
     let Some(origin) = query_parameters.get(CONNECT_URL_PARAM_ORIGIN) else {
         return query_parameters
             .get(CONNECT_URL_PARAM_INTERACTION_ID)
@@ -49,13 +45,13 @@ pub fn parse_mobile_connect_request(
             .and_then(|interaction_id| {
                 DappRequest::try_with_interaction_id_and_session_id(
                     interaction_id,
-                    session_id,
+                    session_id_string,
                 )
             })
             .map(MobileConnectRequest::DappInteraction);
     };
 
-    LinkRequest::try_with_origin_and_session_id(origin, session_id)
+    LinkRequest::try_with_origin_and_session_id(origin, session_id_string)
         .map(MobileConnectRequest::Link)
 }
 
@@ -80,7 +76,7 @@ mod tests {
                 );
             }
             _ => {
-                assert!(false);
+                panic!("Expected LinkRequest");
             }
         }
     }
@@ -94,8 +90,8 @@ mod tests {
             .unwrap();
         assert_eq!(
             err,
-            CommonError::RadixConnectMobileInvalidRequestUrl {
-                bad_value: connect_url
+            CommonError::RadixConnectMobileInvalidSessionID {
+                bad_value: "123".to_owned()
             }
         );
     }
@@ -103,20 +99,25 @@ mod tests {
     #[test]
     fn parse_url_into_dapp_interaction() {
         let session_id = Uuid::new_v4().to_string();
+        let interaction_id = Uuid::new_v4().to_string();
         let url = CONNECT_URL.to_owned()
-            + format!("/?sessionId={}&interactionId=456", session_id).as_str();
+            + format!(
+                "/?sessionId={}&interactionId={}",
+                session_id, interaction_id
+            )
+            .as_str();
         let result = parse_mobile_connect_request(url);
         assert!(result.is_ok());
         match result.unwrap() {
             MobileConnectRequest::DappInteraction(dapp_request) => {
                 assert_eq!(dapp_request.session_id.0.to_string(), session_id);
                 assert_eq!(
-                    dapp_request.interaction_id,
-                    WalletInteractionId("456".to_owned())
+                    dapp_request.interaction_id.0.to_string(),
+                    interaction_id
                 );
             }
             _ => {
-                assert!(false);
+                panic!("Expected DappRequest");
             }
         }
     }

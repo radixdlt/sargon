@@ -1,23 +1,30 @@
 use crate::prelude::*;
 
-uniffi::custom_newtype!(WalletInteractionId, String);
+uniffi::custom_newtype!(WalletInteractionId, Uuid);
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-pub struct WalletInteractionId(pub String);
+#[derive(
+    Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Ord, PartialOrd, Hash,
+)]
+pub struct WalletInteractionId(pub(crate) Uuid);
 
-impl WalletInteractionId {
-    pub fn new(id: impl AsRef<str>) -> Self {
-        Self(id.as_ref().to_owned())
+impl FromStr for WalletInteractionId {
+    type Err = CommonError;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Uuid::from_str(s).map(WalletInteractionId).map_err(|_| {
+            CommonError::RadixMobileInvalidInteractionID {
+                bad_value: s.to_owned(),
+            }
+        })
     }
 }
 
 impl HasSampleValues for WalletInteractionId {
     fn sample() -> Self {
-        Self::new("sample")
+        WalletInteractionId(Uuid::from_bytes([0xff; 16]))
     }
 
     fn sample_other() -> Self {
-        Self::new("sample_other")
+        WalletInteractionId(Uuid::from_bytes([0xde; 16]))
     }
 }
 
@@ -35,7 +42,12 @@ mod tests {
     }
 
     #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
+    fn inequafrom_invalid_str() {
+        assert_eq!(
+            "bad".parse::<SUT>(),
+            Err(CommonError::RadixMobileInvalidInteractionID {
+                bad_value: "bad".to_owned()
+            })
+        );
     }
 }

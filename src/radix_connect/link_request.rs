@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+use super::session_id;
+
 #[derive(Debug, Serialize, Deserialize, PartialEq, uniffi::Record)]
 pub struct LinkRequest {
     pub origin: Url,
@@ -7,30 +9,40 @@ pub struct LinkRequest {
 }
 
 impl LinkRequest {
+    pub fn new(origin: Url, session_id: SessionID) -> Self {
+        Self { origin, session_id }
+    }
+
     pub(crate) fn try_with_origin_and_session_id(
         origin: impl AsRef<str>,
-        session_id: SessionID,
+        session_id: impl AsRef<str>,
     ) -> Result<Self> {
         let origin = Url::parse(origin.as_ref()).map_err(|_| {
             CommonError::RadixConnectMobileInvalidOrigin {
                 bad_value: origin.as_ref().to_owned(),
             }
         })?;
-        Ok(Self { origin, session_id })
+        let session_id =
+            SessionID::from_str(session_id.as_ref()).map_err(|_| {
+                CommonError::RadixConnectMobileInvalidSessionID {
+                    bad_value: session_id.as_ref().to_owned(),
+                }
+            })?;
+        Ok(LinkRequest::new(origin, session_id))
     }
 }
 
 impl HasSampleValues for LinkRequest {
     fn sample() -> Self {
         Self {
-            origin: Url::parse("radix://app").unwrap(),
+            origin: Url::parse("radix://app1").unwrap(),
             session_id: SessionID::sample(),
         }
     }
 
     fn sample_other() -> Self {
         Self {
-            origin: Url::parse("radix://app").unwrap(),
+            origin: Url::parse("radix://app2").unwrap(),
             session_id: SessionID::sample_other(),
         }
     }
@@ -52,5 +64,14 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn test_new() {
+        let origin = Url::parse("radix://app").unwrap();
+        let session_id = SessionID::sample();
+        let sut = SUT::new(origin.clone(), session_id.clone());
+        assert_eq!(sut.origin, origin);
+        assert_eq!(sut.session_id, session_id);
     }
 }

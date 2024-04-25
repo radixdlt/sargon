@@ -11,7 +11,7 @@ impl FromStr for SessionID {
     type Err = CommonError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Uuid::from_str(s).map(SessionID).map_err(|_| {
-            CommonError::RadixConnectInvalidSessionID {
+            CommonError::RadixConnectMobileInvalidSessionID {
                 bad_value: s.to_owned(),
             }
         })
@@ -45,7 +45,7 @@ mod tests {
     fn inequafrom_invalid_str() {
         assert_eq!(
             "bad".parse::<SUT>(),
-            Err(CommonError::RadixConnectInvalidSessionID {
+            Err(CommonError::RadixConnectMobileInvalidSessionID {
                 bad_value: "bad".to_owned()
             })
         );

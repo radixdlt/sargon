@@ -7,15 +7,33 @@ pub struct DappRequest {
 }
 
 impl DappRequest {
-    pub(crate) fn try_with_interaction_id_and_session_id(
-        interaction_id: impl AsRef<str>,
+    pub fn new(
+        interaction_id: WalletInteractionId,
         session_id: SessionID,
-    ) -> Result<Self> {
-        let interaction_id = WalletInteractionId::new(interaction_id);
-        Ok(Self {
+    ) -> Self {
+        Self {
             interaction_id,
             session_id,
-        })
+        }
+    }
+
+    pub(crate) fn try_with_interaction_id_and_session_id(
+        interaction_id: impl AsRef<str>,
+        session_id: impl AsRef<str>,
+    ) -> Result<Self> {
+        let interaction_id = WalletInteractionId::from_str(
+            interaction_id.as_ref(),
+        )
+        .map_err(|_| CommonError::RadixMobileInvalidInteractionID {
+            bad_value: interaction_id.as_ref().to_owned(),
+        })?;
+        let session_id =
+            SessionID::from_str(session_id.as_ref()).map_err(|_| {
+                CommonError::RadixConnectMobileInvalidSessionID {
+                    bad_value: session_id.as_ref().to_owned(),
+                }
+            })?;
+        Ok(DappRequest::new(interaction_id, session_id))
     }
 }
 
@@ -55,17 +73,23 @@ mod tests {
 
     #[test]
     fn try_with_interaction_id_and_session_id() {
-        let session_id = SessionID::sample();
-        let interaction_id = "interaction_id";
+        let session_id = Uuid::new_v4().to_string();
+        let interaction_id = Uuid::new_v4().to_string();
         let sut = SUT::try_with_interaction_id_and_session_id(
-            interaction_id,
+            interaction_id.clone(),
             session_id.clone(),
         )
         .unwrap();
-        assert_eq!(
-            sut.interaction_id,
-            WalletInteractionId::new(interaction_id)
-        );
+        assert_eq!(sut.interaction_id.0.to_string(), interaction_id);
+        assert_eq!(sut.session_id.0.to_string(), session_id);
+    }
+
+    #[test]
+    fn test_new() {
+        let session_id = SessionID::sample();
+        let interaction_id = WalletInteractionId::sample();
+        let sut = SUT::new(interaction_id.clone(), session_id.clone());
+        assert_eq!(sut.interaction_id, interaction_id);
         assert_eq!(sut.session_id, session_id);
     }
 }

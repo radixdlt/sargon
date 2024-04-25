@@ -459,7 +459,10 @@ pub enum CommonError {
     RadixConnectMobileInvalidOrigin { bad_value: String } = 10128,
 
     #[error("Failed to create Session (UUID) from string: {bad_value}")]
-    RadixConnectInvalidSessionID { bad_value: String } = 10129,
+    RadixConnectMobileInvalidSessionID { bad_value: String } = 10129,
+
+    #[error("Failed to create InteractionID (UUID) from string: {bad_value}")]
+    RadixMobileInvalidInteractionID { bad_value: String } = 10130,
 }
 
 #[uniffi::export]
