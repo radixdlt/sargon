@@ -22,17 +22,21 @@ final class ProfileTests: Test<Profile> {
 	func test_id_is_header_id() {
 		XCTAssertNoDifference(SUT.sample.id, SUT.sample.header.id)
 	}
-
-	func test_serialize_deserialize() throws {
-		let sut = SUT.sample
-		XCTAssertNoDifference(sut, try Profile(json: sut.profileSnapshot()))
-	}
+    
+    func test_codable_roundtrip() throws {
+        try SUT.sampleValues.forEach(doTestCodableRoundtrip)
+    }
 	
 	func test_encryption_roundtrip() throws {
 		let password = "ultra secret"
 		let sut = SUT.sample
-		let encrypted = sut.encrypt(password: password)
-		let decrypted = try Profile(encrypted: encrypted, decryptionPassword: password)
+        let encrypted = sut.encrypt(
+            password: password
+        )
+        let decrypted = try Profile(
+            encrypted: encrypted,
+            decryptionPassword: password
+        )
 		XCTAssertNoDifference(decrypted, sut)
 	}
 	

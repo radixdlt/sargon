@@ -2,7 +2,8 @@ import Foundation
 import SargonUniFFI
 
 extension Profile {
-    public init(json bytes: some DataProtocol) throws {
+	
+    public init(jsonData bytes: some DataProtocol) throws {
 		self = try newProfileFromJsonBytes(jsonBytes: Data(bytes))
 	}
 	
@@ -15,6 +16,9 @@ extension Profile {
 	
 	public func profileSnapshot() -> Data {
         profileToJsonBytes(profile: self)
+	}
+	public func jsonData() -> Data {
+		profileSnapshot()
 	}
 	
 	public func encrypt(password: String) -> Data {

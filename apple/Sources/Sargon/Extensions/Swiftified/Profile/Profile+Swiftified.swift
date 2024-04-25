@@ -1,7 +1,7 @@
 import SargonUniFFI
 
 extension Profile: SargonModel {}
-
+extension Profile: SargonObjectCodable {}
 extension Profile {
 	
 	public init(

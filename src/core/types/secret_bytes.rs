@@ -54,6 +54,31 @@ macro_rules! decl_secret_bytes {
                     .map(|secret_magic| $struct_name { secret_magic })
             }
 
+            impl HasSampleValues for $struct_name {
+                fn sample() -> Self {
+                    Self { secret_magic: [< $struct_name SecretMagic >](Box::new([0xab; $byte_count])) }
+                }
+
+                fn sample_other() -> Self {
+                    Self { secret_magic: [< $struct_name SecretMagic >](Box::new([0xde; $byte_count])) }
+                }
+            }
+
+            #[uniffi::export]
+            pub fn [< new_ $struct_name:snake _sample >]() -> $struct_name {
+                $struct_name::sample()
+            }
+
+            #[uniffi::export]
+            pub fn [< new_ $struct_name:snake _sample_other >]() -> $struct_name {
+                $struct_name::sample_other()
+            }
+
+            #[uniffi::export]
+            pub fn [< $struct_name:snake _to_bytes >](bytes: &$struct_name) -> BagOfBytes {
+                BagOfBytes::from(bytes.secret_magic.0.as_slice())
+            }
+
             impl $struct_name {
                 pub const LENGTH: usize = $byte_count;
 
@@ -73,26 +98,49 @@ macro_rules! decl_secret_bytes {
             mod [< uniffi_ $struct_name:snake tests >] {
                 use super::*;
 
+                #[allow(clippy::upper_case_acronyms)]
+                type SUT = $struct_name;
+
                 #[test]
                 fn test_from_bytes() {
                     let too_few_bytes = BagOfBytes::from_str("dead").unwrap();
                     assert!([< new_ $struct_name:snake _from_bytes >](too_few_bytes).is_err());
                 }
 
+                #[test]
+                fn get_bytes() {
+                    let sut = SUT::sample();
+                    let bytes = [< $struct_name:snake _to_bytes >](&sut);
+                    assert_eq!(bytes.as_ref(), [0xab; $byte_count]);
+                }
+
+                #[test]
+                fn zeroize_sample() {
+                    let mut sut = [< new_ $struct_name:snake _sample >]();
+                    assert!(!sut.is_zeroized());
+                    sut.zeroize();
+                    assert!(sut.is_zeroized());
+                }
+
+                #[test]
+                fn zeroize_sample_other() {
+                    let mut sut = [< new_ $struct_name:snake _sample_other >]();
+                    assert!(!sut.is_zeroized());
+                    sut.zeroize();
+                    assert!(sut.is_zeroized());
+                }
             }
 
             #[cfg(test)]
             mod [< $struct_name:snake tests >] {
                 use super::*;
-                use std::mem;
-                use std::ops::Range;
 
                 #[allow(clippy::upper_case_acronyms)]
                 type SUT = $struct_name;
 
                 #[test]
                 fn zeroize() {
-                    let mut sut = SUT::new([0xff; SUT::LENGTH]);
+                    let mut sut = SUT::sample();
                     assert!(!sut.is_zeroized());
                     sut.zeroize();
                     assert!(sut.is_zeroized());
@@ -100,13 +148,13 @@ macro_rules! decl_secret_bytes {
 
                 #[test]
                 fn debug_obfuscates_secret() {
-                    let sut = SUT::new([0xff; SUT::LENGTH]);
+                    let sut = SUT::sample_other();
                     assert_eq!(format!("{:?}", sut), "OBFUSCATED");
                 }
 
                 #[test]
                 fn display_obfuscates_secret() {
-                    let sut = SUT::new([0xff; SUT::LENGTH]);
+                    let sut = SUT::sample_other();
                     assert_eq!(format!("{}", sut), "OBFUSCATED");
                 }
             }
