@@ -451,6 +451,18 @@ pub enum CommonError {
 
     #[error("Invalid LedgerHardwareWalletModel, bad value: {bad_value}")]
     InvalidLedgerHardwareWalletModel { bad_value: String } = 10126,
+
+    #[error("RadixConnectMobile invalid URL, bad value: {bad_value}")]
+    RadixConnectMobileInvalidRequestUrl { bad_value: String } = 10127,
+
+    #[error("RadixConnectMobile invalid origin, bad value: {bad_value}")]
+    RadixConnectMobileInvalidOrigin { bad_value: String } = 10128,
+
+    #[error("Failed to create Session (UUID) from string: {bad_value}")]
+    RadixConnectMobileInvalidSessionID { bad_value: String } = 10129,
+
+    #[error("Failed to create InteractionID (UUID) from string: {bad_value}")]
+    RadixMobileInvalidInteractionID { bad_value: String } = 10130,
 }
 
 #[uniffi::export]

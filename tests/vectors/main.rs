@@ -549,7 +549,10 @@ mod dapp_to_wallet_interaction_tests {
     );
 
         let authorized_request_with_challenge = DappToWalletInteraction::new(
-            WalletInteractionId::new("d59590ea-d50b-4e8d-a5e1-da3a2574ae5c"),
+            WalletInteractionId::from_str(
+                "d59590ea-d50b-4e8d-a5e1-da3a2574ae5c",
+            )
+            .unwrap(),
             authorized_request_with_challenge_items,
             metadata.clone(),
         );
@@ -576,13 +579,16 @@ mod dapp_to_wallet_interaction_tests {
         );
 
         let authorized_request_without_challenge = DappToWalletInteraction::new(
-            WalletInteractionId::new("d59590ea-d50b-4e8d-a5e1-da3a2574ae5c"),
+            WalletInteractionId::from_str(
+                "d59590ea-d50b-4e8d-a5e1-da3a2574ae5c",
+            )
+            .unwrap(),
             authorized_request_without_challenge_items,
             metadata.clone(),
         );
 
         let transaction = DappToWalletInteraction::new(
-        WalletInteractionId::new("4051ff20-03b0-4a48-8205-0e8e8c673289"),
+        WalletInteractionId::from_str("4051ff20-03b0-4a48-8205-0e8e8c673289").unwrap(),
         DappToWalletInteractionItems::Transaction(
             DappToWalletInteractionTransactionItems::new(
                 DappToWalletInteractionSendTransactionItem::new(
@@ -611,7 +617,10 @@ mod dapp_to_wallet_interaction_tests {
         );
 
         let unauthorized_request_1 = DappToWalletInteraction::new(
-            WalletInteractionId::new("51a720a5-9f80-4d0f-8264-704d1645f0af"),
+            WalletInteractionId::from_str(
+                "51a720a5-9f80-4d0f-8264-704d1645f0af",
+            )
+            .unwrap(),
             unauthorized_request_1_items,
             metadata.clone(),
         );
@@ -631,7 +640,10 @@ mod dapp_to_wallet_interaction_tests {
         );
 
         let unauthorized_request_2 = DappToWalletInteraction::new(
-            WalletInteractionId::new("51a720a5-9f80-4d0f-8264-704d1645f0af"),
+            WalletInteractionId::from_str(
+                "51a720a5-9f80-4d0f-8264-704d1645f0af",
+            )
+            .unwrap(),
             unauthorized_request_2_items,
             metadata.clone(),
         );
@@ -761,9 +773,10 @@ mod wallet_to_dapp_interaction_tests {
         let authorized_request_response =
             WalletToDappInteractionResponse::Success(
                 WalletToDappInteractionSuccessResponse::new(
-                    WalletInteractionId::new(
+                    WalletInteractionId::from_str(
                         "06f00fbc-67ed-4a22-a122-1da719b25b6f",
-                    ),
+                    )
+                    .unwrap(),
                     authorized_request_response_items,
                 ),
             );
@@ -783,18 +796,20 @@ mod wallet_to_dapp_interaction_tests {
         let unauthorized_request_response =
             WalletToDappInteractionResponse::Success(
                 WalletToDappInteractionSuccessResponse::new(
-                    WalletInteractionId::new(
+                    WalletInteractionId::from_str(
                         "278608e0-e5ca-416e-8339-f2d2695651c4",
-                    ),
+                    )
+                    .unwrap(),
                     unauthorized_request_response_items,
                 ),
             );
 
         let failure_response = WalletToDappInteractionResponse::Failure(
             WalletToDappInteractionFailureResponse::new(
-                WalletInteractionId::new(
+                WalletInteractionId::from_str(
                     "278608e0-e5ca-416e-8339-f2d2695651c4",
-                ),
+                )
+                .unwrap(),
                 DappWalletInteractionErrorType::RejectedByUser,
                 "User rejected the request".to_owned(),
             ),
@@ -802,7 +817,7 @@ mod wallet_to_dapp_interaction_tests {
 
         let transaction_response = WalletToDappInteractionResponse::Success(
             WalletToDappInteractionSuccessResponse::new(
-                WalletInteractionId::new("c42f8825-4bbb-4ce2-a646-776b529e2f51"),
+                WalletInteractionId::from_str("c42f8825-4bbb-4ce2-a646-776b529e2f51").unwrap(),
                 WalletToDappInteractionResponseItems::Transaction(
                     WalletToDappInteractionTransactionResponseItems::new(
                     IntentHash::from_str("txid_tdx_2_1mwuvufnewv6qkxdaesx0gcwap7n79knhkn0crsc8dg9g9k7qknjs6vkd3n")

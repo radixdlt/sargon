@@ -1,30 +1,30 @@
 use crate::prelude::*;
 
-uniffi::custom_newtype!(WalletInteractionId, Uuid);
+uniffi::custom_newtype!(SessionID, Uuid);
 
 #[derive(
     Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Ord, PartialOrd, Hash,
 )]
-pub struct WalletInteractionId(pub(crate) Uuid);
+pub struct SessionID(pub(crate) Uuid);
 
-impl FromStr for WalletInteractionId {
+impl FromStr for SessionID {
     type Err = CommonError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Uuid::from_str(s).map(WalletInteractionId).map_err(|_| {
-            CommonError::RadixMobileInvalidInteractionID {
+        Uuid::from_str(s).map(SessionID).map_err(|_| {
+            CommonError::RadixConnectMobileInvalidSessionID {
                 bad_value: s.to_owned(),
             }
         })
     }
 }
 
-impl HasSampleValues for WalletInteractionId {
+impl HasSampleValues for SessionID {
     fn sample() -> Self {
-        WalletInteractionId(Uuid::from_bytes([0xff; 16]))
+        SessionID(Uuid::from_bytes([0xff; 16]))
     }
 
     fn sample_other() -> Self {
-        WalletInteractionId(Uuid::from_bytes([0xde; 16]))
+        SessionID(Uuid::from_bytes([0xde; 16]))
     }
 }
 
@@ -33,7 +33,7 @@ mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = WalletInteractionId;
+    type SUT = SessionID;
 
     #[test]
     fn equality() {
@@ -45,7 +45,7 @@ mod tests {
     fn inequafrom_invalid_str() {
         assert_eq!(
             "bad".parse::<SUT>(),
-            Err(CommonError::RadixMobileInvalidInteractionID {
+            Err(CommonError::RadixConnectMobileInvalidSessionID {
                 bad_value: "bad".to_owned()
             })
         );

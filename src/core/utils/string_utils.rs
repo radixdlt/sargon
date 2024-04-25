@@ -1,3 +1,6 @@
+use crate::CommonError;
+use url::Url;
+
 /// Returns the last `n` chars of the &str `s`. If `s` is shorter than `n`
 /// we panic.
 pub fn suffix_str(n: usize, s: impl AsRef<str>) -> String {
@@ -25,6 +28,12 @@ impl StrExt for str {
             None => self,
         }
     }
+}
+
+pub fn parse_url(s: impl AsRef<str>) -> Result<Url, CommonError> {
+    Url::try_from(s.as_ref()).map_err(|_| CommonError::InvalidURL {
+        bad_value: s.as_ref().to_owned(),
+    })
 }
 
 #[cfg(test)]
@@ -57,5 +66,15 @@ mod tests {
         assert_eq!("a".remove_last(), "");
         assert_eq!("fo".remove_last(), "f");
         assert_eq!("Foobar".remove_last(), "Fooba");
+    }
+
+    #[test]
+    fn test_parse_url() {
+        assert!(parse_url("https://radixdlt.com").is_ok());
+    }
+
+    #[test]
+    fn test_parse_url_invalid() {
+        assert!(parse_url("https/radixdlt").is_err());
     }
 }
