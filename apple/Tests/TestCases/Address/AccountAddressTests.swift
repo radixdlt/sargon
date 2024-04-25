@@ -29,6 +29,10 @@ final class AccountAddressTests: AddressTest<AccountAddress> {
 	func test_short() {
 		XCTAssertEqual(SUT.sample.shortFormat, "acco...nvjdwr")
 	}
+	
+	func test_middle() {
+		XCTAssertEqual(SUT.sample.formatted(.middle), "unt_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvy")
+	}
     
     func test_from_bech32_on_stokenet() throws {
         let address = try SUT(
