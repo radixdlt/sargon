@@ -11,6 +11,22 @@ final class Exactly32BytesTests: ExactlyNBytesTest<Exactly32Bytes> {
 		let sut: SUT = [0xde, 0xad, 0xde, 0xad, 0xde, 0xad, 0xde, 0xad, 0xde, 0xad, 0xde, 0xad, 0xde, 0xad, 0xde, 0xad, 0xde, 0xad, 0xde, 0xad, 0xde, 0xad, 0xde, 0xad, 0xde, 0xad, 0xde, 0xad, 0xde, 0xad, 0xde, 0xad]
 		XCTAssertNoDifference(sut, SUT.sample)
 	}
+	
+	func test_codable_roundtrip() throws {
+		try SUT.sampleValues.forEach(doTestCodableRoundtrip)
+	}
+	
+	func test_codable() throws {
+		let raw = "\"deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead\"".data(using: .utf8)!
+		
+		// test decoding
+		let sut = try JSONDecoder().decode(SUT.self, from: raw)
+		XCTAssertEqual(sut, SUT.sample)
+		
+		// test encoding
+		let encoded = try JSONEncoder().encode(sut)
+		try XCTAssertEqual(JSONDecoder().decode(SUT.self, from: encoded), sut)
+	}
 }
 
 final class Exactly33BytesTests: ExactlyNBytesTest<Exactly33Bytes> {}

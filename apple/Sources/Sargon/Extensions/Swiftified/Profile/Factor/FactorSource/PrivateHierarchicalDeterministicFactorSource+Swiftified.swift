@@ -9,7 +9,15 @@ import Foundation
 import SargonUniFFI
 
 extension PrivateHierarchicalDeterministicFactorSource: SargonModel {}
-extension PrivateHierarchicalDeterministicFactorSource: FactorSourceProtocol {
+extension PrivateHierarchicalDeterministicFactorSource: BaseFactorSourceProtocol {
+	
+	public var common: FactorSourceCommon {
+		get { factorSource.common }
+		set {
+			factorSource.common = newValue
+		}
+	}
+	
 	public var factorSourceID: FactorSourceID {
 		factorSource.factorSourceID
 	}

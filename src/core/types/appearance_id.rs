@@ -32,9 +32,7 @@ impl AppearanceID {
     }
 
     pub fn from_number_of_accounts_on_network(n: usize) -> Self {
-        Self {
-            value: (n % (Self::MAX as usize)) as u8,
-        }
+        Self::new((n % ((Self::MAX + 1) as usize)) as u8).unwrap()
     }
 
     // Probably want this as a macro... but it is just not worth it, why I boilerplate it.
@@ -110,38 +108,50 @@ impl From<AppearanceID> for u8 {
 #[cfg(test)]
 mod tests {
 
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = AppearanceID;
 
     #[test]
     fn equality() {
-        assert_eq!(AppearanceID::sample(), AppearanceID::sample());
-        assert_eq!(AppearanceID::sample_other(), AppearanceID::sample_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(AppearanceID::sample(), AppearanceID::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn test_from_number_of_accounts() {
+        assert_eq!(SUT::from_number_of_accounts_on_network(12), SUT::sample());
+        assert_eq!(
+            SUT::from_number_of_accounts_on_network(23),
+            SUT::sample_other()
+        );
     }
 
     #[test]
     fn lowest() {
-        assert!(AppearanceID::new(0).is_ok());
+        assert!(SUT::new(0).is_ok());
     }
 
     #[test]
     fn highest() {
-        assert!(AppearanceID::new(11).is_ok());
+        assert!(SUT::new(11).is_ok());
     }
 
     #[test]
     fn display() {
-        assert_eq!(format!("{}", AppearanceID::new(11).unwrap()), "11");
+        assert_eq!(format!("{}", SUT::new(11).unwrap()), "11");
     }
 
     #[test]
     fn err_too_big() {
         assert_eq!(
-            AppearanceID::new(12),
+            SUT::new(12),
             Err(CommonError::InvalidAppearanceID { bad_value: 12 })
         );
     }
@@ -149,20 +159,17 @@ mod tests {
     #[test]
     fn try_from() {
         assert_eq!(
-            AppearanceID::try_from(250),
+            SUT::try_from(250),
             Err(CommonError::InvalidAppearanceID { bad_value: 250 })
         );
-        assert_eq!(AppearanceID::try_from(1), AppearanceID::new(1));
+        assert_eq!(SUT::try_from(1), SUT::new(1));
     }
 
     #[test]
     fn json() {
-        assert_json_value_eq_after_roundtrip(
-            &AppearanceID::new(3).unwrap(),
-            json!(3),
-        );
-        assert_json_value_fails::<AppearanceID>(json!("3"));
-        assert_json_value_fails::<AppearanceID>(json!(99));
+        assert_json_value_eq_after_roundtrip(&SUT::new(3).unwrap(), json!(3));
+        assert_json_value_fails::<SUT>(json!("3"));
+        assert_json_value_fails::<SUT>(json!(99));
     }
 
     #[test]
@@ -171,6 +178,6 @@ mod tests {
             .into_iter()
             .map(|a| a.value)
             .collect::<HashSet<_>>();
-        assert_eq!(set.len(), (AppearanceID::MAX as usize) + 1);
+        assert_eq!(set.len(), (SUT::MAX as usize) + 1);
     }
 }

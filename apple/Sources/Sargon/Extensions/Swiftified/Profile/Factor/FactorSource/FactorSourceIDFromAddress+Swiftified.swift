@@ -13,15 +13,12 @@ public typealias FactorSourceIDFromAddress = FactorSourceIdFromAddress
 extension FactorSourceIDFromAddress: SargonModel {}
 extension FactorSourceIDFromAddress: SargonObjectCodable {}
 
-extension FactorSourceIDFromAddress {
+extension FactorSourceIDFromAddress: FactorSourceIDSpecificProtocol {
 	public var asGeneral: FactorSourceID {
 		.address(value: self)
 	}
-}
-
-
-extension FactorSourceIDFromAddress: CustomStringConvertible {
-	public var description: String {
-		toString()
+	public static func extract(from someFactorSourceID: some FactorSourceIDProtocol) -> Self? {
+		guard case let .address(id) = someFactorSourceID.asGeneral else { return nil }
+		return id
 	}
 }

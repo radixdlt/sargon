@@ -160,7 +160,9 @@ impl NonFungibleGlobalId {
 
     pub fn formatted(&self, format: AddressFormat) -> String {
         match format {
-            AddressFormat::Default | AddressFormat::Full => format!(
+            AddressFormat::Default
+            | AddressFormat::Full
+            | AddressFormat::Middle => format!(
                 "{}:{}",
                 self.resource_address.formatted(format),
                 self.non_fungible_local_id.formatted(format)
@@ -299,6 +301,14 @@ mod tests {
         assert_eq!(
             SUT::sample_ruid().formatted(AddressFormat::Full),
             "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa:deadbeef12345678-babecafe87654321-fadedeaf01234567-ecadabba76543210"
+        );
+    }
+
+    #[test]
+    fn formatted_middle() {
+        assert_eq!(
+            SUT::sample_ruid().formatted(AddressFormat::Middle),
+            "urce_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtej:beef12345678-babecafe87654321-fadedeaf01234567-ecadabba7654"
         );
     }
 

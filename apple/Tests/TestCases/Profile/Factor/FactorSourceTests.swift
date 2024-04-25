@@ -4,7 +4,7 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class FactorSourceTests: Test<FactorSource> {
+final class FactorSourceTests: FactorSourceTest<FactorSource> {
 	
 	func test_factor_source_id() {
 		XCTAssertEqual(SUT.sample.factorSourceID, SUT.sample.id)
@@ -21,7 +21,6 @@ final class FactorSourceTests: Test<FactorSource> {
 	func test_description() {
 		XCTAssertEqual(SUT.sample.toString(), SUT.sample.description)
 	}
-	
 	
 	func test_factor_source_kind() {
 		XCTAssertEqual(SUT.sample.factorSourceKind, .device)

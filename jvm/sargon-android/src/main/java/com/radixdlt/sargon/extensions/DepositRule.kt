@@ -5,8 +5,8 @@ import com.radixdlt.sargon.depositRuleToJsonString
 import com.radixdlt.sargon.newDepositRuleFromJsonString
 
 @Throws(SargonException::class)
-fun DepositRule.Companion.deserializeFromJsonString(jsonString: String): DepositRule =
+fun DepositRule.Companion.fromJson(jsonString: String): DepositRule =
     newDepositRuleFromJsonString(jsonString = jsonString)
 
-fun DepositRule.serializedJsonString(): String = depositRuleToJsonString(depositRule = this)
+fun DepositRule.toJson(): String = depositRuleToJsonString(depositRule = this)
 

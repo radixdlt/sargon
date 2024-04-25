@@ -1,11 +1,14 @@
 use crate::prelude::*;
 
+#[serde_as]
 #[derive(Debug, Serialize, Deserialize, PartialEq, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct WalletToDappInteractionAuthProof {
-    public_key: String,
+    #[serde_as(as = "DisplayFromStr")]
+    pub public_key: PublicKey,
     pub curve: SLIP10Curve,
-    signature: String,
+    #[serde_as(as = "DisplayFromStr")]
+    pub signature: Signature,
 }
 
 impl WalletToDappInteractionAuthProof {
@@ -15,9 +18,9 @@ impl WalletToDappInteractionAuthProof {
         signature: impl Into<Signature>,
     ) -> Self {
         Self {
-            public_key: public_key.into().to_hex(),
+            public_key: public_key.into(),
             curve,
-            signature: signature.into().to_string(),
+            signature: signature.into(),
         }
     }
 }
