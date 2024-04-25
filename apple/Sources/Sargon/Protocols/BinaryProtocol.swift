@@ -24,6 +24,14 @@ public protocol BinaryProtocol: BaseBinaryProtocol, ToDataProtocol, CustomString
 
 extension BinaryProtocol {
 	
+	public var count: Int {
+		data.count
+	}
+	
+	public var hex: String {
+		data.hex
+	}
+	
 	public init(hex: String) throws {
 		try self.init(bytes: Data(hex: hex))
 	}
