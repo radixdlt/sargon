@@ -3,12 +3,12 @@ use crate::prelude::*;
 #[serde_as]
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
-pub struct HandshakeRequest {
+pub struct SessionHandshakeResponse {
     #[serde_as(as = "DisplayFromStr")]
     pub public_key: PublicKey,
 }
 
-impl HandshakeRequest {
+impl SessionHandshakeResponse {
     pub fn new(public_key: impl Into<PublicKey>) -> Self {
         Self {
             public_key: public_key.into(),
@@ -16,7 +16,7 @@ impl HandshakeRequest {
     }
 }
 
-impl HasSampleValues for HandshakeRequest {
+impl HasSampleValues for SessionHandshakeResponse {
     fn sample() -> Self {
         Self::new(PublicKey::sample())
     }
@@ -31,7 +31,7 @@ mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = HandshakeRequest;
+    type SUT = SessionHandshakeResponse;
 
     #[test]
     fn equality() {

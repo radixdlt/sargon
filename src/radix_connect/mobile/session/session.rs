@@ -7,6 +7,7 @@ pub struct Session {
     pub id: SessionID,
     pub origin: SessionOrigin,
     pub encryption_key: Exactly32Bytes,
+    // TBA: possibly will contain also the callback path
 }
 
 impl Session {

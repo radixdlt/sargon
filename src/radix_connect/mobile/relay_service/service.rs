@@ -1,6 +1,4 @@
-use super::super::session::Session;
-use super::super::session_id::SessionID;
-use super::super::session_origin::SessionOrigin;
+use super::super::session::*;
 use super::models::*;
 use crate::prelude::*;
 
@@ -16,13 +14,15 @@ impl Service {
             encryption_scheme: EncryptionScheme::default(),
         }
     }
+}
 
-    async fn get_requests(
+impl Service {
+    async fn get_wallet_interaction_requests(
         &self,
         session: Session,
     ) -> Result<Vec<DappToWalletInteractionUnvalidated>> {
         let request = NetworkRequest::radix_connect_relay_request(
-            Request::get_requests(session.id),
+            Request::new_get_requests(session.id),
         )?;
         let response: Vec<Vec<u8>> = self
             .http_client
@@ -48,7 +48,7 @@ impl Service {
             .collect()
     }
 
-    async fn send_response(
+    async fn send_wallet_interaction_response(
         &self,
         session: Session,
         response: WalletToDappInteractionResponse,
@@ -59,32 +59,32 @@ impl Service {
             .encryption_scheme
             .encrypt(body.to_vec(), &mut encryption_key);
         let request = NetworkRequest::radix_connect_relay_request(
-            Request::send_response(session.id, encrypted),
+            Request::new_send_response(session.id, encrypted),
         )?;
         self.http_client.execute_network_request(request).await?;
         Ok(())
     }
 
-    async fn get_handshake_request(
+    async fn get_session_handshake_request(
         &self,
         session_id: SessionID,
-    ) -> Result<HandshakeRequest> {
+    ) -> Result<SessionHandshakeRequest> {
         let request = NetworkRequest::radix_connect_relay_request(
-            Request::get_handshake_request(session_id),
+            Request::new_get_handshake_request(session_id),
         )?;
         self.http_client
             .execute_request_with_decoding(request)
             .await
     }
 
-    async fn send_handshake_response(
+    async fn send_session_handshake_response(
         &self,
         session_id: SessionID,
         public_key: impl Into<PublicKey>,
     ) -> Result<()> {
         let body = BagOfBytes::from_hex(public_key.into().to_hex().as_str())?;
         let request = NetworkRequest::radix_connect_relay_request(
-            Request::send_handshake_response(session_id, body),
+            Request::new_send_handshake_response(session_id, body),
         )?;
         self.http_client.execute_network_request(request).await?;
         Ok(())
@@ -138,7 +138,7 @@ mod tests {
             encryption_key: decryption_key,
         };
 
-        let req = service.get_requests(session);
+        let req = service.get_wallet_interaction_requests(session);
         let result = timeout(MAX, req).await.unwrap();
         pretty_assertions::assert_eq!(
             result,
@@ -160,8 +160,10 @@ mod tests {
 
             let encrypted = EncryptionScheme::default()
                 .encrypt(body.to_vec(), &mut encryption_key);
-            let relay_request =
-                Request::send_response(SessionID::sample(), encrypted.clone());
+            let relay_request = Request::new_send_response(
+                SessionID::sample(),
+                encrypted.clone(),
+            );
             let encoded = serde_json::to_vec(&relay_request).unwrap();
 
             let expected_request = NetworkRequest {
@@ -217,14 +219,16 @@ mod tests {
             encryption_key: Exactly32Bytes::sample(),
         };
 
-        let req = service
-            .send_response(session, WalletToDappInteractionResponse::sample());
+        let req = service.send_wallet_interaction_response(
+            session,
+            WalletToDappInteractionResponse::sample(),
+        );
         let _ = timeout(MAX, req).await.unwrap();
     }
 
     #[actix_rt::test]
     async fn test_get_handshake_request() {
-        let request = HandshakeRequest::sample();
+        let request = SessionHandshakeRequest::sample();
         let mock_antenna =
             MockAntenna::new(200, serde_json::to_vec(&request).unwrap());
 
@@ -236,7 +240,7 @@ mod tests {
 
         let session_id = SessionID::sample();
 
-        let req = service.get_handshake_request(session_id);
+        let req = service.get_session_handshake_request(session_id);
         let result = timeout(MAX, req).await.unwrap();
         pretty_assertions::assert_eq!(result, Ok(request));
     }
@@ -275,8 +279,8 @@ mod tests {
         let service = Service::new(http_client);
         let session_id = SessionID::sample();
 
-        let req =
-            service.send_handshake_response(session_id, PublicKey::sample());
+        let req = service
+            .send_session_handshake_response(session_id, PublicKey::sample());
         let _ = timeout(MAX, req).await.unwrap();
     }
 }

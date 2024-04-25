@@ -1,15 +1,15 @@
 use crate::prelude::*;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-struct Requests(Vec<BagOfBytes>);
+struct WalletInteractionRequests(Vec<BagOfBytes>);
 
-impl Requests {
+impl WalletInteractionRequests {
     pub fn new(requests: impl Into<Vec<BagOfBytes>>) -> Self {
         Self(requests.into())
     }
 }
 
-impl HasSampleValues for Requests {
+impl HasSampleValues for WalletInteractionRequests {
     fn sample() -> Self {
         Self::new(vec![BagOfBytes::sample()])
     }
@@ -24,7 +24,7 @@ mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = Requests;
+    type SUT = WalletInteractionRequests;
 
     #[test]
     fn equality() {
