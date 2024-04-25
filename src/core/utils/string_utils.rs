@@ -30,6 +30,12 @@ impl StrExt for str {
     }
 }
 
+pub fn parse_url(s: impl AsRef<str>) -> Result<Url, CommonError> {
+    Url::try_from(s.as_ref()).map_err(|_| CommonError::InvalidURL {
+        bad_value: s.as_ref().to_owned(),
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -60,5 +66,10 @@ mod tests {
         assert_eq!("a".remove_last(), "");
         assert_eq!("fo".remove_last(), "f");
         assert_eq!("Foobar".remove_last(), "Fooba");
+    }
+
+    #[test]
+    fn test_parse_url() {
+        assert!(parse_url("https://radixdlt.com").is_ok());
     }
 }

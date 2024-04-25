@@ -17,7 +17,7 @@ impl LinkRequest {
         origin: impl AsRef<str>,
         session_id: impl AsRef<str>,
     ) -> Result<Self> {
-        let origin = Url::parse(origin.as_ref()).map_err(|_| {
+        let origin = parse_url(origin.as_ref()).map_err(|_| {
             CommonError::RadixConnectMobileInvalidOrigin {
                 bad_value: origin.as_ref().to_owned(),
             }
@@ -35,14 +35,14 @@ impl LinkRequest {
 impl HasSampleValues for LinkRequest {
     fn sample() -> Self {
         Self {
-            origin: Url::parse("radix://app1").unwrap(),
+            origin: parse_url("radix://app1").unwrap(),
             session_id: SessionID::sample(),
         }
     }
 
     fn sample_other() -> Self {
         Self {
-            origin: Url::parse("radix://app2").unwrap(),
+            origin: parse_url("radix://app2").unwrap(),
             session_id: SessionID::sample_other(),
         }
     }
@@ -68,7 +68,7 @@ mod tests {
 
     #[test]
     fn test_new() {
-        let origin = Url::parse("radix://app").unwrap();
+        let origin = parse_url("radix://app").unwrap();
         let session_id = SessionID::sample();
         let sut = SUT::new(origin.clone(), session_id.clone());
         assert_eq!(sut.origin, origin);

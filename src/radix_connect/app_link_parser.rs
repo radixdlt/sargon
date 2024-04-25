@@ -13,8 +13,8 @@ pub fn parse_mobile_connect_request(
     url: impl AsRef<str>,
 ) -> Result<MobileConnectRequest> {
     let url = url.as_ref();
-    let connect_url = Url::parse(CONNECT_URL).unwrap();
-    let parsed_url = Url::parse(url).map_err(|_| {
+    let connect_url = parse_url(CONNECT_URL).unwrap();
+    let parsed_url = parse_url(url).map_err(|_| {
         CommonError::RadixConnectMobileInvalidRequestUrl {
             bad_value: url.to_owned(),
         }
@@ -72,7 +72,7 @@ mod tests {
                 assert_eq!(link_request.session_id.0.to_string(), session_id);
                 assert_eq!(
                     link_request.origin,
-                    Url::parse("radix://app").unwrap()
+                    parse_url("radix://app").unwrap()
                 );
             }
             _ => {
