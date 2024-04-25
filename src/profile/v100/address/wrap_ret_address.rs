@@ -205,7 +205,7 @@ macro_rules! decl_ret_wrapped_address {
                     match format {
                         AddressFormat::Default => format_string(self.address(), 4, 6),
                         AddressFormat::Full | AddressFormat::Raw => self.address(),
-                        AddressFormat::Hidden => trim_string(self.address(), 4, 6),
+                        AddressFormat::Middle => trim_string(self.address(), 4, 6),
                     }
                 }
 

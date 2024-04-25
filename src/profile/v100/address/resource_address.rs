@@ -332,9 +332,9 @@ mod tests {
     }
 
     #[test]
-    fn formatted_hidden() {
+    fn formatted_middle() {
         assert_eq!(
-            SUT::sample().formatted(AddressFormat::Hidden),
+            SUT::sample().formatted(AddressFormat::Middle),
             "urce_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxx"
         );
     }

@@ -162,7 +162,7 @@ impl NonFungibleGlobalId {
         match format {
             AddressFormat::Default
             | AddressFormat::Full
-            | AddressFormat::Hidden => format!(
+            | AddressFormat::Middle => format!(
                 "{}:{}",
                 self.resource_address.formatted(format),
                 self.non_fungible_local_id.formatted(format)
@@ -305,9 +305,9 @@ mod tests {
     }
 
     #[test]
-    fn formatted_hidden() {
+    fn formatted_middle() {
         assert_eq!(
-            SUT::sample_ruid().formatted(AddressFormat::Hidden),
+            SUT::sample_ruid().formatted(AddressFormat::Middle),
             "urce_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtej:beef12345678-babecafe87654321-fadedeaf01234567-ecadabba7654"
         );
     }

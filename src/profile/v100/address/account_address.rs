@@ -288,9 +288,9 @@ mod tests {
     }
 
     #[test]
-    fn formatted_hidden() {
+    fn formatted_middle() {
         assert_eq!(
-            SUT::sample().formatted(AddressFormat::Hidden),
+            SUT::sample().formatted(AddressFormat::Middle),
             "unt_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvy"
         );
     }
