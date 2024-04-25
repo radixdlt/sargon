@@ -72,4 +72,9 @@ mod tests {
     fn test_parse_url() {
         assert!(parse_url("https://radixdlt.com").is_ok());
     }
+
+    #[test]
+    fn test_parse_url_invalid() {
+        assert!(parse_url("https/radixdlt").is_err());
+    }
 }
