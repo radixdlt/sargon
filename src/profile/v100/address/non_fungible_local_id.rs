@@ -64,6 +64,12 @@ impl NonFungibleLocalId {
             },
             AddressFormat::Full => self.to_user_facing_string(),
             AddressFormat::Raw => self.to_string(),
+            AddressFormat::Hidden => match self {
+                NonFungibleLocalId::Ruid { value: _ } => {
+                    trim_string(self.to_user_facing_string(), 4, 4)
+                }
+                _ => self.to_user_facing_string(),
+            },
         }
     }
     pub fn to_user_facing_string(&self) -> String {
@@ -335,6 +341,36 @@ mod tests {
         assert_eq!( SUT::ruid(
             hex_decode("deadbeef12345678babecafe87654321fadedeaf01234567ecadabba76543210").unwrap()
         ).unwrap().formatted(AddressFormat::Full), "deadbeef12345678-babecafe87654321-fadedeaf01234567-ecadabba76543210");
+    }
+
+    #[test]
+    fn formatted_hidden_variant_string() {
+        assert_eq!(
+            SUT::string("foo").unwrap().formatted(AddressFormat::Hidden),
+            "foo"
+        );
+    }
+
+    #[test]
+    fn formatted_hidden_variant_integer() {
+        assert_eq!(SUT::integer(1234).formatted(AddressFormat::Hidden), "1234");
+    }
+
+    #[test]
+    fn formatted_hidden_variant_bytes() {
+        assert_eq!(
+            SUT::bytes([0xde, 0xad])
+                .unwrap()
+                .formatted(AddressFormat::Hidden),
+            "dead"
+        );
+    }
+
+    #[test]
+    fn formatted_hidden_variant_ruid() {
+        assert_eq!( SUT::ruid(
+            hex_decode("deadbeef12345678babecafe87654321fadedeaf01234567ecadabba76543210").unwrap()
+        ).unwrap().formatted(AddressFormat::Hidden), "beef12345678-babecafe87654321-fadedeaf01234567-ecadabba7654");
     }
 
     #[test]

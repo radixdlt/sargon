@@ -332,6 +332,14 @@ mod tests {
     }
 
     #[test]
+    fn formatted_hidden() {
+        assert_eq!(
+            SUT::sample().formatted(AddressFormat::Hidden),
+            "urce_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxx"
+        );
+    }
+
+    #[test]
     fn display() {
         let s = "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd";
         let a = SUT::try_from_bech32(s).unwrap();
