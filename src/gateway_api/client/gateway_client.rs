@@ -2,19 +2,13 @@ use crate::prelude::*;
 
 /// An HTTP client for consuming the Radix ⛩️ Gateway API ([docs]).
 ///
-/// A `GatewayClient` needs a "network antenna" to be able to execute the
-/// network requests - which is a trait that clients implement on the FFI side
-/// (iOS/Android) an "installs" when initiating an instance of the `GatewayClient`.
-///
 /// The implementing FFI clients can then consume the Radix Gateway API to e.g.
 /// fetch the XRD balance of an account address or submit a signed transaction.
 ///
 /// [docs]: https://radix-babylon-gateway-api.redoc.ly/
 #[derive(uniffi::Object)]
 pub struct GatewayClient {
-    /// An object implementing the `NetworkAntenna` traits, which iOS/Android
-    /// clients pass into the constructor of this GatewayClient, so that it can
-    /// execute network requests.
+    /// The HTTP client that actually executes the network requests.
     pub http_client: HttpClient,
 
     /// The gateway this GatewayClient talks to, which is a (URL, NetworkID) tuple
