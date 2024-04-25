@@ -5,6 +5,13 @@ import com.radixdlt.sargon.FactorSource
 import com.radixdlt.sargon.FactorSourceId
 import com.radixdlt.sargon.FactorSourceKind
 import com.radixdlt.sargon.LedgerHardwareWalletFactorSource
+import com.radixdlt.sargon.MnemonicWithPassphrase
+import com.radixdlt.sargon.WalletClientModel
+import com.radixdlt.sargon.deviceFactorSourceIsMainBdfs
+import com.radixdlt.sargon.factorSourceSupportsBabylon
+import com.radixdlt.sargon.factorSourceSupportsOlympia
+import com.radixdlt.sargon.newDeviceFactorSourceBabylon
+import com.radixdlt.sargon.newDeviceFactorSourceOlympia
 
 val FactorSource.id: FactorSourceId
     get() = when (this) {
@@ -17,6 +24,31 @@ val FactorSource.kind: FactorSourceKind
         is FactorSource.Device -> value.kind
         is FactorSource.Ledger -> value.kind
     }
+
+fun FactorSource.Device.Companion.olympia(
+    mnemonicWithPassphrase: MnemonicWithPassphrase
+) = newDeviceFactorSourceOlympia(
+    mnemonicWithPassphrase = mnemonicWithPassphrase,
+    walletClientModel = WalletClientModel.ANDROID
+).asGeneral()
+
+fun FactorSource.Device.Companion.babylon(
+    isMain: Boolean,
+    mnemonicWithPassphrase: MnemonicWithPassphrase
+) = newDeviceFactorSourceBabylon(
+    isMain = isMain,
+    mnemonicWithPassphrase = mnemonicWithPassphrase,
+    walletClientModel = WalletClientModel.ANDROID
+).asGeneral()
+
+val FactorSource.Device.isMain: Boolean
+    get() = deviceFactorSourceIsMainBdfs(deviceFactorSource = value)
+
+val FactorSource.supportsOlympia: Boolean
+    get() = factorSourceSupportsOlympia(factorSource = this)
+
+val FactorSource.supportsBabylon: Boolean
+    get() = factorSourceSupportsBabylon(factorSource = this)
 
 val DeviceFactorSource.kind: FactorSourceKind
     get() = FactorSourceKind.DEVICE

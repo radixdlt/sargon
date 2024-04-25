@@ -103,6 +103,9 @@ macro_rules! decl_exactly_n_bytes {
                 secret_magic: [<Exactly $byte_count Bytes SecretMagic>],
             }
 
+            // Make it JSON String convertible in Swift/Kotlin
+            json_string_convertible!([<Exactly $byte_count Bytes>]);
+
             impl From<[<Exactly $byte_count Bytes SecretMagic>]> for [<Exactly $byte_count Bytes>] {
                 fn from(value: [<Exactly $byte_count Bytes SecretMagic>]) -> Self {
                     Self { secret_magic: value }

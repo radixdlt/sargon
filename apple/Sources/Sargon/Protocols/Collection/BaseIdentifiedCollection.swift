@@ -34,6 +34,10 @@ extension BaseIdentifiedCollection {
 // MARK: MutableCollection
 extension BaseIdentifiedCollection {
 	
+	public mutating func append(_ newElement: Self.Element) {
+		self = appending(newElement)
+	}
+	
 	@inlinable
 	@inline(__always)
 	public subscript(position: Int) -> Element {
@@ -57,10 +61,6 @@ extension BaseIdentifiedCollection {
 	
 	public func index(after index: Index) -> Index {
 		elements.index(after: index)
-	}
-
-	public mutating func append(_ element: Element) {
-		self = appending(element)
 	}
 	
 	@discardableResult

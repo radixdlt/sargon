@@ -21,7 +21,7 @@ macro_rules! entropy_with_byte_counts {
             $(
                 #[doc = $expr]
             )*
-            #[derive(Zeroize, ZeroizeOnDrop)]
+            #[derive(Zeroize, uniffi::Enum)]
             pub enum $enum_name {
                 $(
                     [< EntropyOf $byte_count Bytes >]([< Entropy $byte_count Bytes >]),
@@ -43,7 +43,7 @@ macro_rules! entropy_with_byte_counts {
 
                 impl From<[< Entropy $byte_count Bytes >]> for NonEmptyMax32Bytes {
                     fn from(value: [< Entropy $byte_count Bytes >]) -> Self {
-                        let bytes: &[u8] = value.0.as_ref();
+                        let bytes: &[u8] = value.secret_magic.0.as_ref();
                         assert!(bytes.len() <= 32);
                         NonEmptyMax32Bytes::try_from(bytes).unwrap()
                     }
@@ -73,7 +73,7 @@ macro_rules! entropy_with_byte_counts {
                 fn into_bytes(&self) -> Vec<u8> {
                     match self {
                         $(
-                            Self::[< EntropyOf $byte_count Bytes >](bytes) => Vec::from_iter(*bytes.0),
+                            Self::[< EntropyOf $byte_count Bytes >](bytes) => Vec::from_iter(*bytes.secret_magic.0),
                         )+
                     }
                 }
@@ -103,12 +103,20 @@ entropy_with_byte_counts!(
 );
 
 impl Mnemonic {
-    pub fn from_entropy(entropy: BIP39Entropy) -> Self {
-        let internal = bip39::Mnemonic::from_entropy(
+    pub fn from_entropy_in(
+        entropy: BIP39Entropy,
+        language: BIP39Language,
+    ) -> Self {
+        let internal = bip39::Mnemonic::from_entropy_in(
+            language.into(),
             NonEmptyMax32Bytes::from(entropy).as_ref(),
         )
         .unwrap();
         Self::from_internal(internal)
+    }
+
+    pub fn from_entropy(entropy: BIP39Entropy) -> Self {
+        Self::from_entropy_in(entropy, BIP39Language::English)
     }
 
     pub fn generate_new() -> Self {

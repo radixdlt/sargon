@@ -1,7 +1,7 @@
 package com.radixdlt.sargon
 
-import com.radixdlt.sargon.extensions.deserializeFromJsonString
-import com.radixdlt.sargon.extensions.serializedJsonString
+import com.radixdlt.sargon.extensions.fromJson
+import com.radixdlt.sargon.extensions.toJson
 import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -14,7 +14,7 @@ class PersonaDataEntryTest {
 
         assertEquals(
             sut,
-            PersonaDataEntryEmailAddress.deserializeFromJsonString(sut.serializedJsonString())
+            PersonaDataEntryEmailAddress.fromJson(sut.toJson())
         )
     }
 
@@ -24,7 +24,7 @@ class PersonaDataEntryTest {
 
         assertEquals(
             sut,
-            PersonaDataEntryPhoneNumber.deserializeFromJsonString(sut.serializedJsonString())
+            PersonaDataEntryPhoneNumber.fromJson(sut.toJson())
         )
     }
 
@@ -34,7 +34,7 @@ class PersonaDataEntryTest {
 
         assertEquals(
             sut,
-            PersonaDataEntryName.deserializeFromJsonString(sut.serializedJsonString())
+            PersonaDataEntryName.fromJson(sut.toJson())
         )
     }
 }

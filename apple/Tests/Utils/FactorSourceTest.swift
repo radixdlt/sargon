@@ -4,7 +4,19 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-class FactorSourceTest<SUT_: FactorSourceProtocol>: Test<SUT_> {
+class SpecificFactorSourceTest<SUT_: FactorSourceProtocol>: FactorSourceTest<SUT_> {
+	
+	func test_extract() throws {
+		func doTest(_ sut: SUT) throws {
+			let embedded = sut.asGeneral
+			let extracted: SUT = try embedded.extract()
+			XCTAssertEqual(extracted, sut)
+		}
+		try SUT.sampleValues.forEach(doTest)
+	}
+}
+
+class FactorSourceTest<SUT_: BaseFactorSourceProtocol>: Test<SUT_> {
 	
 	func test_as_general_factorSourceID() {
 		func doTest(_ sut: SUT) {
@@ -15,7 +27,39 @@ class FactorSourceTest<SUT_: FactorSourceProtocol>: Test<SUT_> {
 	
 	func test_as_general_factorSourceKind() {
 		func doTest(_ sut: SUT) {
-			XCTAssertEqual(sut.asGeneral.factorSourceKind, sut.factorSourceKind)
+			XCTAssertEqual(sut.asGeneral.kind, sut.kind)
+		}
+		SUT.sampleValues.forEach(doTest)
+	}
+	
+	func test_common_update() {
+		func doTest(_ sut: SUT) {
+			let newDate = Date.now
+			var sut = sut
+			XCTAssertNotEqual(sut.lastUsedOn, newDate)
+			XCTAssertNotEqual(sut.addedOn, newDate)
+			sut.common.lastUsedOn = newDate
+			XCTAssertEqual(sut.lastUsedOn, newDate)
+		}
+		SUT.sampleValues.forEach(doTest)
+	}
+	
+	
+	func test_crypto_params() {
+		func doTest(_ sut: SUT) {
+			XCTAssertEqual(sut.cryptoParameters, sut.common.cryptoParameters)
+			XCTAssertEqual(sut.cryptoParameters.supportsBabylon, sut.supportsBabylon)
+			XCTAssertEqual(sut.cryptoParameters.supportsOlympia, sut.supportsOlympia)
+		}
+		SUT.sampleValues.forEach(doTest)
+	}
+	
+	func test_flag_for_deletion() {
+		func doTest(_ sut: SUT) {
+			var sut = sut
+			XCTAssertFalse(sut.isFlaggedForDeletion)
+			sut.flag(.deletedByUser)
+			XCTAssertTrue(sut.isFlaggedForDeletion)
 		}
 		SUT.sampleValues.forEach(doTest)
 	}

@@ -10,6 +10,17 @@ pub fn factor_source_id_from_hash_to_string(
 }
 
 #[uniffi::export]
+pub fn new_factor_source_id_from_hash_from_mnemonic_with_passphrase(
+    factor_source_kind: FactorSourceKind,
+    mnemonic_with_passphrase: &MnemonicWithPassphrase,
+) -> FactorSourceIDFromHash {
+    FactorSourceIDFromHash::from_mnemonic_with_passphrase(
+        factor_source_kind,
+        mnemonic_with_passphrase,
+    )
+}
+
+#[uniffi::export]
 pub fn new_factor_source_id_from_hash_sample() -> FactorSourceIDFromHash {
     FactorSourceIDFromHash::sample()
 }
@@ -47,5 +58,15 @@ mod tests {
             .len(),
             2
         );
+    }
+
+    #[test]
+    fn test_new_factor_source_id_from_hash_from_mnemonic_with_passphrase() {
+        let kind = FactorSourceKind::sample();
+        let sut = new_factor_source_id_from_hash_from_mnemonic_with_passphrase(
+            kind,
+            &MnemonicWithPassphrase::sample(),
+        );
+        assert_eq!(sut.kind, kind)
     }
 }

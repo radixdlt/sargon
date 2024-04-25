@@ -39,6 +39,17 @@ class CanBeEmptyCollectionTest<SUT_: CanBeEmptyIdentifiedCollection>: BaseCollec
 		)
 	}
 	
+	func test_init() {
+		XCTAssertEqual(SUT.init(), SUT.init([]))
+		XCTAssertEqual(SUT.init().count, 0)
+	}
+	
+	func test_replaceSubrange() {
+		var sut = [SUTElement.sample]
+		sut.replaceSubrange(0..<1, with: [SUTElement.sampleOther])
+		XCTAssertEqual(sut, [SUTElement.sampleOther])
+	}
+	
 	func test_remove_element_by_id_not_present_returns_nil() {
 		var sut: SUT = [.sampleOther]
 		XCTAssertNil(sut.remove(SUTElement.sample.id))

@@ -10,6 +10,16 @@ pub struct BIP39Word {
     pub language: BIP39Language,
 }
 
+impl HasSampleValues for BIP39Word {
+    fn sample() -> Self {
+        Self::english("abandon").unwrap()
+    }
+
+    fn sample_other() -> Self {
+        Self::english("zoo").unwrap()
+    }
+}
+
 impl Ord for BIP39Word {
     fn cmp(&self, other: &Self) -> Ordering {
         self.index.cmp(&other.index)
@@ -70,12 +80,13 @@ mod tests {
 
     #[test]
     fn equality() {
-        assert_eq!(SUT::english("zoo").unwrap(), SUT::english("zoo").unwrap());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
-    fn word() {
-        assert_eq!(SUT::english("zoo").unwrap().word, "zoo");
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]

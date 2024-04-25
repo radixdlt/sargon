@@ -15,6 +15,12 @@ extension DeviceFactorSource: Identifiable {
 }
 
 extension DeviceFactorSource: FactorSourceProtocol {
+	public static let kind: FactorSourceKind = .device
+	
+	public static func extract(from someFactorSource: some BaseFactorSourceProtocol) -> Self? {
+		guard case let .device(factorSource) = someFactorSource.asGeneral else { return nil }
+		return factorSource
+	}
 	
 	public var asGeneral: FactorSource {
 		.device(value: self)

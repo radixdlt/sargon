@@ -27,6 +27,7 @@ class PublicKeyTest<SUT_: PublicKeyProtocol>: BinaryProtocolTest<SUT_> {
 class SignatureTest<SUT_: SignatureProtocol>: BinaryProtocolTest<SUT_> {}
 
 class ExactlyNBytesTest<SUT_: ExactlyNBytesProtocol>: BinaryProtocolTest<SUT_> {
+	
 	func test_length() throws {
 		SUT.sampleValues.forEach {
 			XCTAssertEqual($0.data.count, SUT.length)
@@ -37,5 +38,19 @@ class ExactlyNBytesTest<SUT_: ExactlyNBytesProtocol>: BinaryProtocolTest<SUT_> {
 		SUT.sampleValues.forEach {
 			XCTAssertNotEqual($0.hash().data, $0.hash().data.hash().data)
 		}
+	}
+	
+	func test_generate_is_indeed_random() {
+		let n = 10
+		func doTest(_ sut: SUT) {
+			let randomCollections: [SUT] = (0..<n).map { _ in
+				let generated = SUT.generate()
+				XCTAssertEqual(generated.count, SUT.length)
+				XCTAssertNotEqual(sut, generated)
+				return generated
+			}
+			XCTAssertEqual(Set(randomCollections).count, n)
+		}
+		SUT.sampleValues.forEach(doTest)
 	}
 }

@@ -4,18 +4,17 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class FactorSourceIDFromAddressTests: Test<FactorSourceIDFromAddress> {
-	func test_description() {
-		XCTAssertEqual(SUT.sample.description, SUT.sample.toString())
-	}
-	
+final class FactorSourceIDFromAddressTests: SpecificFactorSourceIDTest<FactorSourceIDFromAddress> {
+
 	func test_as_general() {
 		XCTAssertEqual(SUT.sample.asGeneral, FactorSourceID.address(value: SUT.sample))
 	}
 	
-	func test_codable_roundtrip() throws {
-		try SUT.sampleValues.forEach(doTestCodableRoundtrip)
+	func test_extract_wrong_throws() {
+		func doTest(_ sut: SUT) {
+			XCTAssertThrowsError(try sut.asGeneral.extract(as: FactorSourceIDFromHash.self))
+		}
+		SUT.sampleValues.forEach(doTest)
 	}
-	
 }
 

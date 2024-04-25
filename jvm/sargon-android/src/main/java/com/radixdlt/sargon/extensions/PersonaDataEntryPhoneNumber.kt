@@ -5,10 +5,10 @@ import com.radixdlt.sargon.newPersonaDataEntryPhoneNumberFromJsonString
 import com.radixdlt.sargon.personaDataEntryPhoneNumberToJsonString
 
 @Throws(SargonException::class)
-fun PersonaDataEntryPhoneNumber.Companion.deserializeFromJsonString(
+fun PersonaDataEntryPhoneNumber.Companion.fromJson(
     jsonString: String
 ): PersonaDataEntryPhoneNumber =
     newPersonaDataEntryPhoneNumberFromJsonString(jsonString = jsonString)
 
-fun PersonaDataEntryPhoneNumber.serializedJsonString(): String =
+fun PersonaDataEntryPhoneNumber.toJson(): String =
     personaDataEntryPhoneNumberToJsonString(personaDataEntryPhoneNumber = this)

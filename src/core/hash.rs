@@ -137,7 +137,7 @@ mod tests {
     #[test]
     fn test_from_exactly32() {
         let bytes = Exactly32Bytes::sample();
-        assert_eq!(SUT::from(bytes.clone()).bytes(), bytes.to_vec())
+        assert_eq!(SUT::from(bytes).bytes(), bytes.to_vec())
     }
 
     #[test]
