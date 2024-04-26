@@ -7,6 +7,8 @@ extension URLRequest {
 		switch sargon.method {
 		case .post:
 			request.httpMethod = "POST"  // FIXME: embed in sargon
+		case .get:
+			request.httpMethod = "GET"
 		}
 
 		request.httpBody = sargon.body
