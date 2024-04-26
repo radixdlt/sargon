@@ -141,6 +141,44 @@ mod tests {
     const SERVICE_PATH: &str = "https://radix-connect-relay-dev.rdx-works-main.extratools.works/api/v1";
 
     #[actix_rt::test]
+    async fn test_get_wallet_interaction_requests_correct_request_is_made() {
+        let mock_antenna_with_spy =
+            MockAntenna::with_spy(200, vec![], |request| {
+                let relay_request =
+                    Request::new_get_requests(Session::sample().id);
+                let encoded_request =
+                    serde_json::to_vec(&relay_request).unwrap();
+
+                let expected_request = NetworkRequest {
+                    url: Url::from_str(SERVICE_PATH).unwrap(),
+                    method: NetworkMethod::Post,
+                    body: encoded_request.into(),
+                    headers: HashMap::new(),
+                };
+
+                pretty_assertions::assert_eq!(
+                    request.url,
+                    expected_request.url
+                );
+                pretty_assertions::assert_eq!(
+                    request.method,
+                    expected_request.method
+                );
+                pretty_assertions::assert_eq!(
+                    request.body,
+                    expected_request.body
+                );
+            });
+
+        let service =
+            Service::new_with_network_antenna(Arc::new(mock_antenna_with_spy));
+        let session = Session::sample();
+
+        let req = service.get_wallet_interaction_requests(session);
+        let _ = timeout(MAX, req).await.unwrap();
+    }
+
+    #[actix_rt::test]
     async fn test_get_wallet_interaction_requests_failure() {
         let service = Service::new_always_failing();
         let session = Session::sample();
@@ -271,7 +309,46 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn test_get_session_handshake_request_failure() {
+    async fn get_session_handshake_request_correct_request_is_made() {
+        let mock_antenna_with_spy =
+            MockAntenna::with_spy(200, vec![], |request| {
+                let session_id = SessionID::sample();
+                let relay_request =
+                    Request::new_get_handshake_request(session_id);
+                let encoded_request =
+                    serde_json::to_vec(&relay_request).unwrap();
+
+                let expected_request = NetworkRequest {
+                    url: Url::from_str(SERVICE_PATH).unwrap(),
+                    method: NetworkMethod::Post,
+                    body: encoded_request.into(),
+                    headers: HashMap::new(),
+                };
+
+                pretty_assertions::assert_eq!(
+                    request.url,
+                    expected_request.url
+                );
+                pretty_assertions::assert_eq!(
+                    request.method,
+                    expected_request.method
+                );
+                pretty_assertions::assert_eq!(
+                    request.body,
+                    expected_request.body
+                );
+            });
+
+        let service =
+            Service::new_with_network_antenna(Arc::new(mock_antenna_with_spy));
+        let session_id = SessionID::sample();
+
+        let req = service.get_session_handshake_request(session_id);
+        let _ = timeout(MAX, req).await.unwrap();
+    }
+
+    #[actix_rt::test]
+    async fn get_session_handshake_request_failure() {
         let service = Service::new_always_failing();
         let session_id = SessionID::sample();
 
