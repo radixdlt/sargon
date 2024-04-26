@@ -1,8 +1,9 @@
-use super::relay_service::Service as RelayService;
+// use super::relay_service::Service as RelayService;
+use super::deep_link_parsing::RadixConnectMobileConnectRequest;
 use crate::prelude::*;
 
-// The Radix Connect Mobile client.
-// This is the object that will be used by the mobile app to handle interactions sent over Radix Connect Relay.
+// /// The Radix Connect Mobile client.
+// /// This is the object that will be used by the mobile app to handle interactions sent over Radix Connect Relay.
 // #[derive(uniffi::Object)]
 // pub struct RadixConnectMobile {
 //     relay_service: RelayService,
@@ -17,6 +18,21 @@ use crate::prelude::*;
 //     }
 // }
 
-// impl RadixConnectMobile {
-//     // TBA public API that will be used by the Wallet to handle deep link interactions.
-// }
+#[uniffi::export]
+pub fn new_mobile_connect_request(
+    url: String,
+) -> Result<RadixConnectMobileConnectRequest> {
+    RadixConnectMobileConnectRequest::from_str(url.as_str())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_new_mobile_connect_request() {
+        let uuid = Uuid::new_v4().to_string();
+        let connect_url = format!("https://d1rxdfxrfmemlj.cloudfront.net/?sessionId={}&origin=radix%3A%2F%2Fapp", uuid);
+        assert!(new_mobile_connect_request(connect_url).is_ok());
+    }
+}
