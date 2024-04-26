@@ -60,6 +60,13 @@ pub fn profile_analyze_contents_of_file(
     Profile::analyze_contents_of_file(bytes)
 }
 
+#[uniffi::export]
+pub fn check_if_profile_json_contains_legacy_p2p_links(
+    json: BagOfBytes,
+) -> bool {
+    Profile::check_if_profile_json_contains_legacy_p2p_links(json.to_vec())
+}
+
 #[cfg(test)]
 mod uniffi_tests {
 

@@ -186,6 +186,20 @@ impl Profile {
     }
 }
 
+impl Profile {
+    pub fn check_if_profile_json_contains_legacy_p2p_links(
+        json: impl AsRef<[u8]>
+    ) -> bool {
+        let json = json.as_ref();
+        let result = serde_json::from_slice::<ProtoProfileMaybeWithLegacyP2PLinks>(json);
+
+        return match result {
+            Ok(snapshot) => !snapshot.app_preferences.p2p_links.is_empty(),
+            Err(_) => false,
+        }
+    }
+}
+
 impl HasSampleValues for Profile {
     fn sample() -> Self {
         let networks = ProfileNetworks::sample();
@@ -501,6 +515,46 @@ mod tests {
             SUT::new_from_encryption_bytes(encryption_bytes, password).unwrap(),
             sut
         );
+    }
+
+	#[test]
+    fn check_if_profile_json_contains_legacy_p2p_links_test() {
+        let value = r#"
+        {
+            "appPreferences": {
+              "p2pLinks": [
+                {
+                  "connectionPassword": "babebabebabebabebabebabebabebabebabebabebabebabebabebabebabebabe",
+                  "displayName": "Brave on PC"
+                }
+              ]
+            }
+          }
+        "#;
+        assert_eq!(true, SUT::check_if_profile_json_contains_legacy_p2p_links(value.as_bytes()));
+    }
+
+    #[test]
+    fn check_if_profile_json_contains_legacy_p2p_links_test2() {
+        let value = r#"
+        {
+            
+          }
+        "#;
+        assert_eq!(false, SUT::check_if_profile_json_contains_legacy_p2p_links(value.as_bytes()));
+    }
+
+    #[test]
+    fn check_if_profile_json_contains_legacy_p2p_links_test3() {
+        let value = r#"
+        {
+            "appPreferences": {
+                "p2pLinks": []
+              }
+            }
+          }
+        "#;
+        assert_eq!(false, SUT::check_if_profile_json_contains_legacy_p2p_links(value.as_bytes()));
     }
 
     #[test]
