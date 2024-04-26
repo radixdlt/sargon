@@ -46,6 +46,13 @@ pub fn profile_encrypt_with_password(
     profile.to_encryption_bytes(encryption_password).into()
 }
 
+#[uniffi::export]
+pub fn profile_analyze_contents_of_file(
+    bytes: BagOfBytes,
+) -> ProfileFileContents {
+    Profile::analyze_contents_of_file(bytes)
+}
+
 #[cfg(test)]
 mod uniffi_tests {
 
@@ -58,6 +65,14 @@ mod uniffi_tests {
     fn equality_samples() {
         assert_eq!(SUT::sample(), new_profile_sample());
         assert_eq!(SUT::sample_other(), new_profile_sample_other());
+    }
+
+    #[test]
+    fn test_profile_analyze_contents_of_file() {
+        assert_eq!(
+            profile_analyze_contents_of_file(BagOfBytes::sample()),
+            ProfileFileContents::NotProfile
+        )
     }
 
     #[test]
