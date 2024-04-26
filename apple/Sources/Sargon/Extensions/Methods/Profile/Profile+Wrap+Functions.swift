@@ -3,6 +3,10 @@ import SargonUniFFI
 
 extension Profile {
 	
+	public static func analyzeFile(contents: some DataProtocol) -> ProfileFileContents {
+		profileAnalyzeContentsOfFile(bytes: Data(contents))
+	}
+	
     public init(jsonData bytes: some DataProtocol) throws {
 		self = try newProfileFromJsonBytes(jsonBytes: Data(bytes))
 	}
@@ -17,6 +21,7 @@ extension Profile {
 	public func profileSnapshot() -> Data {
         profileToJsonBytes(profile: self)
 	}
+	
 	public func jsonData() -> Data {
 		profileSnapshot()
 	}

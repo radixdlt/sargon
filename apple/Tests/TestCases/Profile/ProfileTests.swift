@@ -49,4 +49,38 @@ final class ProfileTests: Test<Profile> {
 		XCTAssertEqual(sut.networks, [])
 		XCTAssertEqual(sut.factorSources.elements, [dfs.asGeneral])
 	}
+	
+	func test_analyze_file_not_profile() {
+		XCTAssertEqual(SUT.analyzeFile(contents: Data()), .notProfile)
+	}
+	
+	func test_analyze_file_profile() {
+		func doTest(_ sut: SUT) {
+			XCTAssertEqual(
+				SUT.analyzeFile(contents: sut.jsonData()),
+				.plaintextProfile(sut)
+			)
+		}
+		SUT.sampleValues.forEach(doTest)
+	}
+	
+	func test_analyze_file_encrypted_profile() {
+		func doTest(_ sut: SUT) {
+			let encrypted = sut.encrypt(password: "melon")
+			XCTAssertEqual(
+				SUT.analyzeFile(contents: encrypted),
+				.encryptedProfile
+			)
+		}
+		SUT.sampleValues.forEach(doTest)
+	}
+	
+	func test_encrypted_profile_contents() throws {
+		let encrypted = SUT.sample.encrypt(password: "open sesame")
+		let jsonString = try XCTUnwrap(String(data: encrypted, encoding: .utf8))
+		XCTAssertTrue(jsonString.contains("encryptionScheme"))
+		XCTAssertTrue(jsonString.contains("keyDerivationScheme"))
+		XCTAssertTrue(jsonString.contains("encryptedSnapshot"))
+		XCTAssertTrue(jsonString.contains("version"))
+	}
 }
