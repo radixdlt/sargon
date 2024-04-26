@@ -61,13 +61,11 @@ impl Request {
     pub fn new_send_handshake_response_with_public_key(
         session_id: impl Into<SessionID>,
         public_key: impl Into<PublicKey>,
-    ) -> Result<Self> {
-        let public_key_bytes =
-            BagOfBytes::from_hex(public_key.into().to_hex().as_str())?;
-        Ok(Self::new_send_handshake_response(
+    ) -> Self {
+        Self::new_send_handshake_response(
             session_id.into(),
-            public_key_bytes,
-        ))
+            public_key.into().to_bytes(),
+        )
     }
 }
 
@@ -164,8 +162,8 @@ mod tests {
         let request = SUT::new_send_handshake_response_with_public_key(
             session_id.clone(),
             public_key.clone(),
-        )
-        .unwrap();
+        );
+
         assert_eq!(request.method, Method::SendHandshakeResponse);
         assert_eq!(request.session_id, session_id);
         assert_eq!(
@@ -290,8 +288,7 @@ mod tests {
         let request = SUT::new_send_handshake_response_with_public_key(
             session_id.clone(),
             public_key.clone(),
-        )
-        .unwrap();
+        );
 
         let expected_json = format!(
             r#"

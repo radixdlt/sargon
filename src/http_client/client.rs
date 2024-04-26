@@ -11,6 +11,12 @@ pub struct HttpClient {
 }
 
 impl HttpClient {
+    pub fn new(network_antenna: Arc<dyn NetworkAntenna>) -> Self {
+        Self { network_antenna }
+    }
+}
+
+impl HttpClient {
     pub async fn execute_network_request(
         &self,
         request: NetworkRequest,

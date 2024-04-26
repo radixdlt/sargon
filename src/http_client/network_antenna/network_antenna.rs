@@ -42,6 +42,10 @@ impl MockAntenna {
         Self::with_spy(status, body, |_| {})
     }
 
+    pub fn new_always_failling() -> Self {
+        Self::new(500, BagOfBytes::new())
+    }
+
     pub fn with_response<T>(response: T) -> Self
     where
         T: Serialize,
