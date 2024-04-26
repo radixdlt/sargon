@@ -1,5 +1,6 @@
 use crate::prelude::*;
 
+// Ref API docs at https://github.com/radixdlt/radix-connect-relay?tab=readme-ov-file#api-v1
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub enum Method {
