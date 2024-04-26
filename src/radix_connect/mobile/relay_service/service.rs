@@ -2,6 +2,8 @@ use super::super::session::*;
 use super::models::*;
 use crate::prelude::*;
 
+/// The service that interacts with the Radix Connect Relay.
+/// API docs at https://github.com/radixdlt/radix-connect-relay?tab=readme-ov-file#api-v1
 pub struct Service {
     pub http_client: HttpClient,
     pub encryption_scheme: EncryptionScheme,
