@@ -4,6 +4,7 @@ mod core;
 mod gateway_api;
 mod hierarchical_deterministic;
 mod profile;
+mod radix_connect;
 mod wallet;
 mod wrapped_radix_engine_toolkit;
 
@@ -13,6 +14,7 @@ pub mod prelude {
     pub use crate::gateway_api::*;
     pub use crate::hierarchical_deterministic::*;
     pub use crate::profile::*;
+    pub use crate::radix_connect::*;
     pub use crate::wallet::*;
     pub use crate::wrapped_radix_engine_toolkit::*;
 

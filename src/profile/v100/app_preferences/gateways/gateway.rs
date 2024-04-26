@@ -61,8 +61,7 @@ impl From<NetworkID> for Gateway {
 
 impl Gateway {
     pub fn new(url: String, id: NetworkID) -> Result<Self> {
-        let url = Url::try_from(url.as_str())
-            .map_err(|_| CommonError::InvalidURL { bad_value: url })?;
+        let url = parse_url(url)?;
         let network = NetworkDefinition::lookup_by_id(id)?;
         Ok(Self { url, network })
     }
