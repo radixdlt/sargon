@@ -1,11 +1,13 @@
 package com.radixdlt.sargon
 
+import com.radixdlt.sargon.extensions.analyzeContentsOfFile
 import com.radixdlt.sargon.extensions.asGeneral
 import com.radixdlt.sargon.extensions.bagOfBytes
 import com.radixdlt.sargon.extensions.fromEncryptedJson
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.fromJson
 import com.radixdlt.sargon.extensions.randomBagOfBytes
+import com.radixdlt.sargon.extensions.string
 import com.radixdlt.sargon.extensions.toJson
 import com.radixdlt.sargon.extensions.toEncryptedJson
 import com.radixdlt.sargon.samples.Sample
@@ -74,5 +76,35 @@ class ProfileTest : SampleTestable<Profile> {
         )
 
         assertEquals(sut, decrypted)
+    }
+
+    @Test
+    fun testAnalyzeContentsOfPlaintextProfile() {
+        val sut = Profile.sample()
+
+        val plaintext = sut.toJson()
+        assertEquals(
+            ProfileFileContents.PlaintextProfile(sut),
+            Profile.analyzeContentsOfFile(plaintext)
+        )
+    }
+
+    @Test
+    fun testAnalyzeContentsOfEncryptedProfile() {
+        val sut = Profile.sample()
+
+        val encrypted = sut.toEncryptedJson(encryptionPassword = "Super Secret")
+        assertEquals(
+            ProfileFileContents.EncryptedProfile,
+            Profile.analyzeContentsOfFile(encrypted)
+        )
+    }
+
+    @Test
+    fun testAnalyzeContentsOfRandomFile() {
+        assertEquals(
+            ProfileFileContents.NotProfile,
+            Profile.analyzeContentsOfFile(randomBagOfBytes(32).string)
+        )
     }
 }
