@@ -1,10 +1,11 @@
 mod interaction_id;
 mod interaction_version;
-#[allow(dead_code)]
-mod mobile;
 mod wallet_account;
 mod wallet_interaction;
 mod wallet_persona;
+
+#[allow(dead_code)]
+mod mobile;
 
 pub use interaction_id::*;
 pub use interaction_version::*;
