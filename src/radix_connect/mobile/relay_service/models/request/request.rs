@@ -178,16 +178,13 @@ mod tests {
         let data = BagOfBytes::sample();
         let request = SUT::new_send_request(session_id.clone(), data.clone());
 
-        let expected_json = format!(
-            r#"
-            {{
-                    "method":"sendRequest",
-                    "sessionId":"{}",
-                    "data":"{}"
-            }}
-            "#,
-            session_id, data
-        );
+        let expected_json = r#"
+        {
+            "method": "sendRequest",
+            "sessionId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+            "data": "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"
+        }
+        "#;
         assert_eq_after_json_roundtrip(&request, &expected_json);
     }
 
@@ -196,15 +193,12 @@ mod tests {
         let session_id = SessionID::sample();
         let request = SUT::new_get_requests(session_id.clone());
 
-        let expected_json = format!(
-            r#"
-            {{
-                    "method":"getRequests",
-                    "sessionId":"{}"
-            }}
-            "#,
-            session_id
-        );
+        let expected_json = r#"
+        {
+            "method": "getRequests",
+            "sessionId": "ffffffff-ffff-ffff-ffff-ffffffffffff"
+        }
+        "#;
         assert_eq_after_json_roundtrip(&request, &expected_json);
     }
 
@@ -214,16 +208,13 @@ mod tests {
         let data = BagOfBytes::sample();
         let request = SUT::new_send_response(session_id.clone(), data.clone());
 
-        let expected_json = format!(
-            r#"
-            {{
-                    "method":"sendResponse",
-                    "sessionId":"{}",
-                    "data":"{}"
-            }}
-            "#,
-            session_id, data
-        );
+        let expected_json = r#"
+        {
+            "method": "sendResponse",
+            "sessionId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+            "data": "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"
+        }
+        "#;
         assert_eq_after_json_roundtrip(&request, &expected_json);
     }
 
@@ -232,15 +223,12 @@ mod tests {
         let session_id = SessionID::sample();
         let request = SUT::new_get_responses(session_id.clone());
 
-        let expected_json = format!(
-            r#"
-            {{
-                    "method":"getResponses",
-                    "sessionId":"{}"
-            }}
-            "#,
-            session_id
-        );
+        let expected_json = r#"
+        {
+            "method": "getResponses",
+            "sessionId": "ffffffff-ffff-ffff-ffff-ffffffffffff"
+        }
+        "#;
         assert_eq_after_json_roundtrip(&request, &expected_json);
     }
 
@@ -249,15 +237,12 @@ mod tests {
         let session_id = SessionID::sample();
         let request = SUT::new_get_handshake_request(session_id.clone());
 
-        let expected_json = format!(
-            r#"
-            {{
-                    "method":"getHandshakeRequest",
-                    "sessionId":"{}"
-            }}
-            "#,
-            session_id
-        );
+        let expected_json = r#"
+        {
+            "method": "getHandshakeRequest",
+            "sessionId": "ffffffff-ffff-ffff-ffff-ffffffffffff"
+        }
+        "#;
         assert_eq_after_json_roundtrip(&request, &expected_json);
     }
 
@@ -268,16 +253,13 @@ mod tests {
         let request =
             SUT::new_send_handshake_response(session_id.clone(), data.clone());
 
-        let expected_json = format!(
-            r#"
-            {{
-                    "method":"sendHandshakeResponse",
-                    "sessionId":"{}",
-                    "data":"{}"
-            }}
-            "#,
-            session_id, data
-        );
+        let expected_json = r#"
+        {
+            "method": "sendHandshakeResponse",
+            "sessionId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+            "data": "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"
+        }
+        "#;
         assert_eq_after_json_roundtrip(&request, &expected_json);
     }
 
@@ -290,17 +272,13 @@ mod tests {
             public_key.clone(),
         );
 
-        let expected_json = format!(
-            r#"
-            {{
-                    "method":"sendHandshakeResponse",
-                    "sessionId":"{}",
-                    "data":"{}"
-            }}
-            "#,
-            session_id,
-            BagOfBytes::from_hex(public_key.to_hex().as_str()).unwrap()
-        );
+        let expected_json = r#"
+        {
+            "method": "sendHandshakeResponse",
+            "sessionId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+            "data": "ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf"
+        }
+        "#;
         assert_eq_after_json_roundtrip(&request, &expected_json);
     }
 }

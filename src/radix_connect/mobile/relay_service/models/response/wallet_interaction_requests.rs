@@ -40,17 +40,7 @@ mod tests {
     #[test]
     fn json_roundtrip() {
         let original = SUT::sample();
-        let json = format!(
-            r#"
-                [{}]
-            "#,
-            original
-                .0
-                .iter()
-                .map(|bag_of_bytes| format!("\"{}\"", bag_of_bytes.to_hex()))
-                .collect::<Vec<_>>()
-                .join(",")
-        );
+        let json = r#"["deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"]"#;
 
         assert_eq_after_json_roundtrip(&original, &json);
     }
