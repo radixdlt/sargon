@@ -52,4 +52,11 @@ final class AccountTests: SpecificEntityTest<Account> {
 		sut.securityState = .unsecured(value: .init(transactionSigning: .sample, authenticationSigning: .sampleOther))
 		XCTAssertEqual(sut.virtualHierarchicalDeterministicFactorInstances.count, 2)
 	}
+	
+	func test_new() {
+		let fi: HierarchicalDeterministicFactorInstance = .sample
+		let sut = SUT.init(networkID: .sample, factorInstance: fi, displayName: .sample, extraProperties: .sample)
+		XCTAssertEqual(sut.virtualHierarchicalDeterministicFactorInstances, [fi])
+	}
+	
 }

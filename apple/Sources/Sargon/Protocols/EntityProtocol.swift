@@ -106,6 +106,22 @@ extension EntityProtocol {
 
 
 public protocol EntitySpecificProtocol: EntityProtocol {
+	
+	associatedtype ExtraProperties: SargonModel
+	
+	static func deriveVirtualAddress(
+		networkID: NetworkID,
+		factorInstance: HierarchicalDeterministicFactorInstance
+	) -> EntityAddress
+	
+	init(
+		networkID: NetworkID,
+		address: EntityAddress,
+		securityState: EntitySecurityState,
+		displayName: DisplayName,
+		extraProperties: ExtraProperties
+	)
+	
 	static var kind: EntityKind { get }
 	static func extract(from someEntityProtocol: some EntityProtocol) -> Self?
 }
@@ -113,5 +129,37 @@ public protocol EntitySpecificProtocol: EntityProtocol {
 extension EntitySpecificProtocol {
 	public var entityKind: EntityKind {
 		Self.kind
+	}
+
+	public init(
+		networkID: NetworkID,
+		address: EntityAddress,
+		factorInstance: HierarchicalDeterministicFactorInstance,
+		displayName: DisplayName,
+		extraProperties: ExtraProperties
+	) {
+		self.init(
+			networkID: networkID,
+			address: address,
+			securityState: .unsecured(value: .init(transactionSigning: factorInstance, authenticationSigning: nil)),
+			displayName: displayName,
+			extraProperties: extraProperties
+		)
+	}
+
+	public init(
+		networkID: NetworkID,
+		factorInstance: HierarchicalDeterministicFactorInstance,
+		displayName: DisplayName,
+		extraProperties: ExtraProperties
+	) {
+		let address = Self.deriveVirtualAddress(networkID: networkID, factorInstance: factorInstance)
+		self.init(
+			networkID: networkID,
+			address: address,
+			factorInstance: factorInstance,
+			displayName: displayName,
+			extraProperties: extraProperties
+		)
 	}
 }

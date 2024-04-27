@@ -36,4 +36,10 @@ final class PersonaTests: SpecificEntityTest<Persona> {
 		XCTAssertEqual(sut.elements, [.deletedByUser])
 		XCTAssertEqual(sut, [.deletedByUser])
 	}
+	
+	func test_new() {
+		let fi: HierarchicalDeterministicFactorInstance = .sample
+		let sut = SUT.init(networkID: .sample, factorInstance: fi, displayName: .sample, extraProperties: .sample)
+		XCTAssertEqual(sut.virtualHierarchicalDeterministicFactorInstances, [fi])
+	}
 }
