@@ -110,6 +110,7 @@ mod tests {
     #[test]
     fn test_is_network_aware() {
         assert_eq!(SUT::sample().network_id(), NetworkID::Mainnet);
+        assert_eq!(SUT::sample_other().network_id(), NetworkID::Mainnet);
     }
 
     #[test]

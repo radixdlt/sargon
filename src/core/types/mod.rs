@@ -19,13 +19,11 @@ mod requested_quantity;
 mod requested_quantity_uniffi_fn;
 mod rounding_mode;
 mod safe_to_log;
+mod secret_bytes;
 mod signatures;
 
 pub use appearance_id::*;
 pub use appearance_id_uniffi_fn::*;
-#[macro_use]
-mod secret_bytes;
-
 pub use bag_of_bytes::*;
 pub use bag_of_bytes_uniffi_fn::*;
 pub use decimal192::*;
