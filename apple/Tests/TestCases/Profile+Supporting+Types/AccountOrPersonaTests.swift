@@ -4,7 +4,7 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class AccountOrPersonaTests: EntityTest<AccountOrPersona> {
+final class AccountOrPersonaTests: EntityBaseTest<AccountOrPersona> {
 	func test_display_names() {
 		XCTAssertEqual(SUT.sampleValues.map(\.displayName), ["Alice", "Batman", "Carol", "Nadia", "Granger", "Paige"])
 	}

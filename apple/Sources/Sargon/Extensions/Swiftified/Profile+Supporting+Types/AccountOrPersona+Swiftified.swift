@@ -10,7 +10,7 @@ import SargonUniFFI
 
 extension AddressOfAccountOrPersona: BaseEntityAddressProtocol {}
 
-extension AccountOrPersona: EntityProtocol {
+extension AccountOrPersona: EntityBaseProtocol {
 	public var address: EntityAddress {
 		id
 	}
@@ -55,11 +55,11 @@ extension AccountOrPersona: EntityProtocol {
 		try extract()
 	}
 	
-	public func extract<F>(_ type: F.Type = F.self) -> F? where F: EntitySpecificProtocol {
+	public func extract<F>(_ type: F.Type = F.self) -> F? where F: EntityProtocol {
 		F.extract(from: self)
 	}
 	
-	public func extract<F>(as _: F.Type = F.self) throws -> F where F: EntitySpecificProtocol {
+	public func extract<F>(as _: F.Type = F.self) throws -> F where F: EntityProtocol {
 		guard let extracted = extract(F.self) else {
 			throw IncorrectEntityType(
 				expectedKind: F.kind,
@@ -83,7 +83,7 @@ extension AccountOrPersona: EntityProtocol {
 }
 
 extension AccountOrPersona {
-	private func property<Property>(_ keyPath: KeyPath<any EntityProtocol, Property>) -> Property {
+	private func property<Property>(_ keyPath: KeyPath<any EntityBaseProtocol, Property>) -> Property {
 		switch self {
 		case let .account(entity): entity[keyPath: keyPath]
 		case let .persona(entity): entity[keyPath: keyPath]

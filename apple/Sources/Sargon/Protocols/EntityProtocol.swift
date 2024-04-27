@@ -1,14 +1,14 @@
 import SargonUniFFI
 
 #if DEBUG
-public protocol BaseEntityProtocol: SargonModel {
+public protocol BaseBaseEntityProtocol: SargonModel {
 	static var sampleValues: [Self] { get }
 }
 #else
-public protocol BaseEntityProtocol: SargonModel {}
+public protocol BaseBaseEntityProtocol: SargonModel {}
 #endif // DEBUG
 
-public protocol EntityProtocol: BaseEntityProtocol, CustomStringConvertible, Identifiable where ID == EntityAddress {
+public protocol EntityBaseProtocol: BaseBaseEntityProtocol, CustomStringConvertible, Identifiable where ID == EntityAddress {
 	associatedtype EntityAddress: BaseEntityAddressProtocol
 	var networkId: NetworkID { get }
 	var displayName: DisplayName { get }
@@ -28,7 +28,7 @@ public protocol EntityProtocol: BaseEntityProtocol, CustomStringConvertible, Ide
 #endif // DEBUG
 }
 
-extension EntityProtocol {
+extension EntityBaseProtocol {
 	public var id: ID { address }
 	public var networkID: NetworkID { networkId }
 	
@@ -68,21 +68,21 @@ extension EntityProtocol {
 	}
 }
 
-extension EntityProtocol {
+extension EntityBaseProtocol {
 	public var description: String {
 		"\(displayName): \(address) @\(networkID)"
 	}
 }
 
 #if DEBUG
-extension EntityProtocol {
+extension EntityBaseProtocol {
 	public static var sample: Self { Self.sampleMainnet }
 	public static var sampleOther: Self { Self.sampleMainnetOther }
 }
 #endif // DEBUG
 
 #if DEBUG
-extension EntityProtocol {
+extension EntityBaseProtocol {
 	public static var sampleValuesMainnet: [Self] {
 		[
 			Self.sampleMainnet,
@@ -105,7 +105,7 @@ extension EntityProtocol {
 #endif // DEBUG
 
 
-public protocol EntitySpecificProtocol: EntityProtocol {
+public protocol EntityProtocol: EntityBaseProtocol {
 	
 	associatedtype ExtraProperties: SargonModel
 	
@@ -123,10 +123,10 @@ public protocol EntitySpecificProtocol: EntityProtocol {
 	)
 	
 	static var kind: EntityKind { get }
-	static func extract(from someEntityProtocol: some EntityProtocol) -> Self?
+	static func extract(from someEntityProtocol: some EntityBaseProtocol) -> Self?
 }
 
-extension EntitySpecificProtocol {
+extension EntityProtocol {
 	public var entityKind: EntityKind {
 		Self.kind
 	}

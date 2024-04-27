@@ -4,7 +4,7 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-class SpecificEntityTest<SUT_: EntitySpecificProtocol>: EntityTest<SUT_> {
+class EntityProtocolTest<SUT_: EntityProtocol>: EntityBaseTest<SUT_> {
 	
 	func test_extract() throws {
 		func doTest(_ sut: SUT) throws {
@@ -17,7 +17,7 @@ class SpecificEntityTest<SUT_: EntitySpecificProtocol>: EntityTest<SUT_> {
 }
 
 
-class EntityTest<SUT_: EntityProtocol>: Test<SUT_> {
+class EntityBaseTest<SUT_: EntityBaseProtocol>: Test<SUT_> {
 	
 	func test_network_id_of_mainnet_entities() {
 		SUT.sampleValuesMainnet.forEach {

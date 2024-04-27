@@ -4,7 +4,7 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class AccountTests: SpecificEntityTest<Account> {
+final class AccountTests: EntityProtocolTest<Account> {
 	
 	func test_extract_wrong_throws() {
 		func doTest(_ sut: SUT) {

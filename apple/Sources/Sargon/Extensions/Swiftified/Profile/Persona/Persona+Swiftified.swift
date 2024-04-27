@@ -8,16 +8,16 @@
 import Foundation
 import SargonUniFFI
 
-extension Persona: EntityProtocol {
+extension Persona: EntityBaseProtocol {
 	public typealias EntityAddress = IdentityAddress
 	
 	public var asGeneral: AccountOrPersona {
 		.persona(self)
 	}
 }
-extension Persona: EntitySpecificProtocol {
+extension Persona: EntityProtocol {
 	public static let kind: EntityKind = .persona
-	public static func extract(from someEntity: some EntityProtocol) -> Self? {
+	public static func extract(from someEntity: some EntityBaseProtocol) -> Self? {
 		guard case let .persona(persona) = someEntity.asGeneral else { return nil }
 		return persona
 	}
