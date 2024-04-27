@@ -35,6 +35,12 @@ pub struct ProfileNetwork {
     pub authorized_dapps: AuthorizedDapps,
 }
 
+impl IsNetworkAware for ProfileNetwork {
+    fn network_id(&self) -> NetworkID {
+        self.id
+    }
+}
+
 impl ProfileNetwork {
     pub fn description(&self) -> String {
         format!(
@@ -153,28 +159,36 @@ impl ProfileNetwork {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = ProfileNetwork;
 
     #[test]
     fn inequality() {
-        assert_ne!(ProfileNetwork::sample(), ProfileNetwork::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn get_id() {
-        assert_eq!(ProfileNetwork::sample().id(), NetworkID::Mainnet);
+        assert_eq!(SUT::sample().id(), NetworkID::Mainnet);
+    }
+
+    #[test]
+    fn test_is_network_aware() {
+        assert_eq!(SUT::sample().network_id(), NetworkID::Mainnet);
     }
 
     #[test]
     fn get_accounts() {
-        let sut = ProfileNetwork::sample();
+        let sut = SUT::sample();
         assert_eq!(sut.accounts, Accounts::sample());
     }
 
     #[test]
     fn duplicate_accounts_are_filtered_out() {
         assert_eq!(
-            ProfileNetwork::new(
+            SUT::new(
                 NetworkID::Mainnet,
                 Accounts::from_iter(
                     [Account::sample(), Account::sample()].into_iter()
@@ -193,7 +207,7 @@ mod tests {
         expected = "Discrepancy, found an Account on other network than mainnet"
     )]
     fn panic_when_network_id_mismatch_between_accounts_and_value() {
-        ProfileNetwork::new(
+        SUT::new(
             NetworkID::Mainnet,
             Accounts::just(Account::sample_stokenet()),
             Personas::default(),
@@ -206,7 +220,7 @@ mod tests {
         expected = "Discrepancy, found a Persona on other network than mainnet"
     )]
     fn panic_when_network_id_mismatch_between_persona_and_value() {
-        ProfileNetwork::new(
+        SUT::new(
             NetworkID::Mainnet,
             Accounts::sample_mainnet(),
             Personas::just(Persona::sample_stokenet()),
@@ -219,7 +233,7 @@ mod tests {
         expected = "Discrepancy, found an AuthorizedDapp on other network than mainnet"
     )]
     fn panic_when_network_id_mismatch_between_authorized_dapp_and_value() {
-        ProfileNetwork::new(
+        SUT::new(
             NetworkID::Mainnet,
             Accounts::sample_mainnet(),
             Personas::sample_mainnet(),
@@ -229,7 +243,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_sample_mainnet() {
-        let sut = ProfileNetwork::sample_mainnet();
+        let sut = SUT::sample_mainnet();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"
@@ -585,7 +599,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_sample_stokenet() {
-        let sut = ProfileNetwork::sample_stokenet();
+        let sut = SUT::sample_stokenet();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"

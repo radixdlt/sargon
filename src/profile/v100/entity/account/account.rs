@@ -73,6 +73,12 @@ pub struct Account {
     pub on_ledger_settings: OnLedgerSettings,
 }
 
+impl IsNetworkAware for Account {
+    fn network_id(&self) -> NetworkID {
+        self.network_id
+    }
+}
+
 impl Account {
     pub fn new(
         account_creating_factor_instance: HDFactorInstanceAccountCreation,
@@ -236,6 +242,10 @@ impl Account {
         Self::sample_mainnet_bob()
     }
 
+    pub fn sample_mainnet_third() -> Self {
+        Self::sample_mainnet_carol()
+    }
+
     /// A sample used to facilitate unit tests.
     pub fn sample_stokenet_nadia() -> Self {
         Self::sample_at_index_name_network(
@@ -268,6 +278,14 @@ impl Account {
 
     pub fn sample_stokenet() -> Self {
         Self::sample_stokenet_nadia()
+    }
+
+    pub fn sample_stokenet_other() -> Self {
+        Self::sample_stokenet_olivia()
+    }
+
+    pub fn sample_stokenet_third() -> Self {
+        Self::sample_stokenet_paige()
     }
 
     /// A sample used to facilitate unit tests.
@@ -320,6 +338,11 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn test_is_network_aware() {
+        assert_eq!(SUT::sample().network_id(), NetworkID::Mainnet);
     }
 
     #[test]

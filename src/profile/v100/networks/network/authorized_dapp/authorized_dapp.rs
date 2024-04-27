@@ -37,6 +37,12 @@ pub struct AuthorizedDapp {
     pub references_to_authorized_personas: ReferencesToAuthorizedPersonas,
 }
 
+impl IsNetworkAware for AuthorizedDapp {
+    fn network_id(&self) -> NetworkID {
+        self.network_id
+    }
+}
+
 impl AuthorizedDapp {
     pub fn description(&self) -> String {
         format!(
@@ -184,8 +190,13 @@ mod tests {
     }
 
     #[test]
+    fn test_is_network_aware() {
+        assert_eq!(SUT::sample().network_id(), NetworkID::Mainnet);
+    }
+
+    #[test]
     fn json_mainnet_roundtrip() {
-        let model = AuthorizedDapp::sample_mainnet();
+        let model = SUT::sample_mainnet();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -275,7 +286,7 @@ mod tests {
 
     #[test]
     fn json_mainnet_other_roundtrip() {
-        let model = AuthorizedDapp::sample_mainnet_other();
+        let model = SUT::sample_mainnet_other();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -328,7 +339,7 @@ mod tests {
 
     #[test]
     fn json_stokenet_roundtrip() {
-        let model = AuthorizedDapp::sample_stokenet();
+        let model = SUT::sample_stokenet();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -418,7 +429,7 @@ mod tests {
 
     #[test]
     fn json_stokenet_other_roundtrip() {
-        let model = AuthorizedDapp::sample_stokenet_other();
+        let model = SUT::sample_stokenet_other();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
