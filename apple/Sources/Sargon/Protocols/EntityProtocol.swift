@@ -8,11 +8,11 @@ public protocol BaseEntityProtocol: SargonModel {
 public protocol BaseEntityProtocol: SargonModel {}
 #endif // DEBUG
 
-public protocol EntityProtocol: BaseEntityProtocol, CustomStringConvertible, Identifiable where ID == Address {
-	associatedtype Address: EntityAddressProtocol
+public protocol EntityProtocol: BaseEntityProtocol, CustomStringConvertible, Identifiable where ID == EntityAddress {
+	associatedtype EntityAddress: BaseEntityAddressProtocol
 	var networkId: NetworkID { get }
 	var displayName: DisplayName { get }
-	var address: Address { get }
+	var address: EntityAddress { get }
 	var flags: EntityFlags { get }
 	var securityState: EntitySecurityState { get }
 	

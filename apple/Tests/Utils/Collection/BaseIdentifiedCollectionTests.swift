@@ -41,7 +41,6 @@ class BaseCollectionTest<SUT_: BaseIdentifiedCollection>: Test<SUT_> {
 		)
 	}
 	
-	
 	func test_updating_or_inserting_new_append_last() {
 		let sample = SUTElement.sample
 		let sampleOther = SUTElement.sampleOther
@@ -89,6 +88,13 @@ class BaseCollectionTest<SUT_: BaseIdentifiedCollection>: Test<SUT_> {
 		let sut = SUT(element: sample)
 		XCTAssertTrue(sut.contains(id: sample.id))
 		XCTAssertFalse(sut.contains(id: SUTElement.sampleOther.id))
+	}
+	
+	func test_ids() {
+		func doTest(_ sut: SUT) {
+			XCTAssertEqual(sut.ids, sut.elements.map(\.id))
+		}
+		SUT.sampleValues.forEach(doTest)
 	}
 	
 	func test_append_new()  {

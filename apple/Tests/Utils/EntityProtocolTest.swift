@@ -35,9 +35,16 @@ class EntityTest<SUT_: EntityProtocol>: Test<SUT_> {
 			}
 		}
 	}
-
 	
 	func test_all_address_different() {
 		XCTAssertGreaterThanOrEqual(Set(SUT.sampleValues).count, 6)
+	}
+	
+	func test_flags() {
+		XCTAssertTrue(
+			SUT.sampleValues.flatMap(
+				\.flags
+			).contains(.deletedByUser)
+		)
 	}
 }

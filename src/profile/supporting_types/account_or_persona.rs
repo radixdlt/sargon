@@ -55,11 +55,37 @@ impl Identifiable for AccountOrPersona {
 
 impl HasSampleValues for AccountOrPersona {
     fn sample() -> Self {
-        Self::from(Account::sample())
+        Self::sample_mainnet()
     }
 
     fn sample_other() -> Self {
-        Self::from(Persona::sample())
+        Self::sample_mainnet_other()
+    }
+}
+
+impl AccountOrPersona {
+    pub(crate) fn sample_mainnet() -> Self {
+        Self::from(Account::sample_mainnet())
+    }
+
+    pub(crate) fn sample_mainnet_other() -> Self {
+        Self::from(Persona::sample_mainnet_other())
+    }
+
+    pub(crate) fn sample_mainnet_third() -> Self {
+        Self::from(Account::sample_mainnet_third())
+    }
+
+    pub(crate) fn sample_stokenet() -> Self {
+        Self::from(Account::sample_stokenet())
+    }
+
+    pub(crate) fn sample_stokenet_other() -> Self {
+        Self::from(Persona::sample_stokenet_other())
+    }
+
+    pub(crate) fn sample_stokenet_third() -> Self {
+        Self::from(Account::sample_stokenet_third())
     }
 }
 
@@ -89,7 +115,10 @@ mod tests {
     #[test]
     fn test_id() {
         assert_eq!(SUT::sample().id(), Account::sample().address.into());
-        assert_eq!(SUT::sample_other().id(), Persona::sample().address.into());
+        assert_eq!(
+            SUT::sample_other().id(),
+            Persona::sample_mainnet_other().address.into()
+        );
     }
 
     #[test]
@@ -97,7 +126,7 @@ mod tests {
         assert_eq!(format!("{}", SUT::sample()), "Alice | account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8");
         assert_eq!(
             format!("{}", SUT::sample_other()),
-            "Satoshi | identity_rdx122kttqch0eehzj6f9nkkxcw7msfeg9udurq5u0ysa0e92c59w0mg6x"
+            "Batman | identity_rdx12gcd4r799jpvztlffgw483pqcen98pjnay988n8rmscdswd872xy62"
         );
     }
 }

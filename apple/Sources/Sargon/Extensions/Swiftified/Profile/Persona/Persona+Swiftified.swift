@@ -8,4 +8,6 @@
 import Foundation
 import SargonUniFFI
 
-extension Persona: EntityProtocol {}
+extension Persona: EntityProtocol {
+	public typealias EntityAddress = IdentityAddress
+}
