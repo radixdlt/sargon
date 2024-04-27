@@ -4,6 +4,19 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
+class SpecificEntityTest<SUT_: EntitySpecificProtocol>: EntityTest<SUT_> {
+	
+	func test_extract() throws {
+		func doTest(_ sut: SUT) throws {
+			let embedded = sut.asGeneral
+			let extracted: SUT = try embedded.extract()
+			XCTAssertEqual(extracted, sut)
+		}
+		try SUT.sampleValues.forEach(doTest)
+	}
+}
+
+
 class EntityTest<SUT_: EntityProtocol>: Test<SUT_> {
 	
 	func test_network_id_of_mainnet_entities() {
@@ -22,6 +35,33 @@ class EntityTest<SUT_: EntityProtocol>: Test<SUT_> {
 		SUT.sampleValues.forEach {
 			XCTAssertNoDifference($0.id, $0.address)
 		}
+	}
+	
+	func test_is_hidden() {
+		XCTAssertFalse(SUT.sample.isHidden)
+	}
+	
+	func test_hasAuthenticationSigningKey() {
+		func doTest(_ sut: SUT) {
+			XCTAssertFalse(sut.hasAuthenticationSigningKey)
+		}
+		SUT.sampleValues.forEach(doTest)
+	}
+	
+	func test_deviceFactorSourceID() {
+		func doTest(_ sut: SUT) {
+			XCTAssertTrue(
+				sut.virtualHierarchicalDeterministicFactorInstances
+					.map(\.factorSourceID)
+					.contains(sut.deviceFactorSourceID!)
+			)
+			XCTAssertTrue(
+				sut.asGeneral.virtualHierarchicalDeterministicFactorInstances
+					.map(\.factorSourceID)
+					.contains(sut.deviceFactorSourceID!)
+			)
+		}
+		SUT.sampleValues.forEach(doTest)
 	}
 
 	func test_controlled_by_ed25519_factor() {

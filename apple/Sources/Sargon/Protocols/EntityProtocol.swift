@@ -15,6 +15,8 @@ public protocol EntityProtocol: BaseEntityProtocol, CustomStringConvertible, Ide
 	var address: EntityAddress { get }
 	var flags: EntityFlags { get }
 	var securityState: EntitySecurityState { get }
+	var entityKind: EntityKind { get }
+	var asGeneral: AccountOrPersona { get }
 	
 #if DEBUG
 	static var sampleMainnet: Self { get }
@@ -29,6 +31,41 @@ public protocol EntityProtocol: BaseEntityProtocol, CustomStringConvertible, Ide
 extension EntityProtocol {
 	public var id: ID { address }
 	public var networkID: NetworkID { networkId }
+	
+	public var isHidden: Bool {
+		flags.contains(.deletedByUser)
+	}
+	
+	public var virtualHierarchicalDeterministicFactorInstances: Set<HierarchicalDeterministicFactorInstance> {
+		var factorInstances = Set<HierarchicalDeterministicFactorInstance>()
+		switch securityState {
+		case let .unsecured(unsecuredEntityControl):
+			factorInstances.insert(unsecuredEntityControl.transactionSigning)
+			if let authSigning = unsecuredEntityControl.authenticationSigning {
+				factorInstances.insert(authSigning)
+			}
+			return factorInstances
+		}
+	}
+	
+	public var hasAuthenticationSigningKey: Bool {
+		switch securityState {
+		case let .unsecured(unsecuredEntityControl):
+			unsecuredEntityControl.authenticationSigning != nil
+		}
+	}
+	
+	public var deviceFactorSourceID: FactorSourceIDFromHash? {
+		switch self.securityState {
+		case let .unsecured(control):
+			let factorSourceID = control.transactionSigning.factorSourceID
+			guard factorSourceID.kind == .device else {
+				return nil
+			}
+			
+			return factorSourceID
+		}
+	}
 }
 
 extension EntityProtocol {
@@ -60,10 +97,21 @@ extension EntityProtocol {
 			Self.sampleStokenetThird,
 		]
 	}
-
+	
 	public static var sampleValues: [Self] {
 		Self.sampleValuesMainnet + Self.sampleValuesStokenet
 	}
 }
 #endif // DEBUG
 
+
+public protocol EntitySpecificProtocol: EntityProtocol {
+	static var kind: EntityKind { get }
+	static func extract(from someEntityProtocol: some EntityProtocol) -> Self?
+}
+
+extension EntitySpecificProtocol {
+	public var entityKind: EntityKind {
+		Self.kind
+	}
+}

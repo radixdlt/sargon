@@ -90,26 +90,20 @@ impl HasSampleValues for UnsecuredEntityControl {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = UnsecuredEntityControl;
 
     #[test]
     fn equality() {
-        assert_eq!(
-            UnsecuredEntityControl::sample(),
-            UnsecuredEntityControl::sample()
-        );
-        assert_eq!(
-            UnsecuredEntityControl::sample_other(),
-            UnsecuredEntityControl::sample_other()
-        );
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(
-            UnsecuredEntityControl::sample(),
-            UnsecuredEntityControl::sample_other()
-        );
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
@@ -117,15 +111,13 @@ mod tests {
         let tx_sign = HierarchicalDeterministicFactorInstance::sample();
         let auth_sign =
             HierarchicalDeterministicFactorInstance::sample_auth_signing();
-        let control =
-            UnsecuredEntityControl::new(tx_sign, Some(auth_sign.clone()))
-                .unwrap();
+        let control = SUT::new(tx_sign, Some(auth_sign.clone())).unwrap();
         assert_eq!(control.authentication_signing, Some(auth_sign));
     }
 
     #[test]
     fn json_roundtrip() {
-        let model = UnsecuredEntityControl::sample();
+        let model = SUT::sample();
         assert_eq_after_json_roundtrip(
             &model,
             r#"

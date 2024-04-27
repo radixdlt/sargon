@@ -4,7 +4,22 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class PersonaTests: EntityTest<Persona> {
+final class PersonaTests: SpecificEntityTest<Persona> {
+	
+	func test_extract_wrong_throws() {
+		func doTest(_ sut: SUT) {
+			XCTAssertThrowsError(try sut.asGeneral.extract(as: Account.self))
+		}
+		SUT.sampleValues.forEach(doTest)
+	}
+	
+	func test_as_general_as_account() throws {
+		func doTest(_ sut: SUT) throws {
+			XCTAssertEqual(try sut.asGeneral.asPersona(), sut)
+		}
+		try SUT.sampleValues.forEach(doTest)
+	}
+	
 	func test_display_names() {
 		XCTAssertEqual(
 			SUT.sampleValues.map(\.displayName),

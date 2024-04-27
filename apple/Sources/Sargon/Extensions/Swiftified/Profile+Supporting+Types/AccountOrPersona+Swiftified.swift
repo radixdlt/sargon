@@ -15,6 +15,8 @@ extension AccountOrPersona: EntityProtocol {
 		id
 	}
 	
+	public var asGeneral: AccountOrPersona { self }
+	
 	public typealias ID = AddressOfAccountOrPersona
 	public typealias EntityAddress = AddressOfAccountOrPersona
 	
@@ -37,6 +39,47 @@ extension AccountOrPersona: EntityProtocol {
 		property(\.flags)
 	}
 	
+	public var entityKind: EntityKind {
+		switch self {
+		case let .account(value): value.entityKind
+		case let .persona(value): value.entityKind
+		}
+	}
+	
+	
+	public func asAccount() throws -> Account {
+		try extract()
+	}
+
+	public func asPersona() throws -> Persona {
+		try extract()
+	}
+	
+	public func extract<F>(_ type: F.Type = F.self) -> F? where F: EntitySpecificProtocol {
+		F.extract(from: self)
+	}
+	
+	public func extract<F>(as _: F.Type = F.self) throws -> F where F: EntitySpecificProtocol {
+		guard let extracted = extract(F.self) else {
+			throw IncorrectEntityType(
+				expectedKind: F.kind,
+				actualKind: entityKind
+			)
+		}
+		return extracted
+	}
+	
+	public struct IncorrectEntityType: Swift.Error {
+		public let expectedKind: EntityKind
+		public let actualKind: EntityKind
+	}
+
+	public var virtualHierarchicalDeterministicFactorInstances: Set<HierarchicalDeterministicFactorInstance> {
+		property(
+			\.virtualHierarchicalDeterministicFactorInstances
+		)
+	}
+
 }
 
 extension AccountOrPersona {
