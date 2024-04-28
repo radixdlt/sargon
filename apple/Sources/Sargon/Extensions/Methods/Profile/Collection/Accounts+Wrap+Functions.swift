@@ -45,11 +45,7 @@ extension Accounts {
 		accountsGetAccountById(accounts: self, id: id)
 	}
 	
-	internal var elementCount: Int {
-		Int(accountsElementCount(accounts: self))
-	}
-	
 	public var count: Int {
-		elementCount
+		Int(accountsElementCount(accounts: self))
 	}
 }

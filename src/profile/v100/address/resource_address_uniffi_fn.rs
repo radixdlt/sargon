@@ -1,6 +1,5 @@
 use crate::prelude::*;
 
-
 #[uniffi::export]
 pub fn resource_address_is_fungible(address: &ResourceAddress) -> bool {
     address.is_fungible()
@@ -46,7 +45,6 @@ pub fn new_resource_address_sample_stokenet_gc_tokens() -> ResourceAddress {
 pub fn new_resource_address_sample_stokenet_candy() -> ResourceAddress {
     ResourceAddress::sample_stokenet_candy()
 }
-
 
 #[cfg(test)]
 mod uniffi_tests {

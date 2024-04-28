@@ -1,12 +1,6 @@
 impl ProfileNetwork {
     /*
-    	public func detailsForAuthorizedDapp(_ dapp: AuthorizedDapp) throws -> AuthorizedDappDetailed {
-		guard
-			dapp.networkID == self.id
-		else {
-			/// this is a sign that Profile is in a bad state somehow...
-			throw NetworkDiscrepancyError()
-		}
+ 
 		let detailedAuthorizedPersonas = try IdentifiedArrayOf<ProfileNetwork.AuthorizedPersonaDetailed>(uniqueElements: dapp.referencesToAuthorizedPersonas.map {
 			simple in
 

@@ -13,6 +13,12 @@ class TestCase: XCTestCase {
 class Test<SUT_: SargonModel>: TestCase {
 	typealias SUT = SUT_
 	
+	func eachSample(
+		_ test: (SUT) throws -> Void
+	) rethrows {
+		try SUT.sampleValues.forEach(test)
+	}
+	
 	func test_equality() throws {
 		XCTAssertNoDifference(SUT.sample, SUT.sample)
 	}
