@@ -120,7 +120,7 @@ impl Persona {
         let id = IDStepper::<PersonaDataEntryID>::new();
         let name =
             PersonaDataIdentifiedName::with_id(unsafe { id.next() }, name);
-        let phone_numbers = CollectionOfPhoneNumbers::entries(
+        let phone_numbers = CollectionOfPhoneNumbers::from_iter(
             phone_numbers
                 .into_iter()
                 .map(|s| s.parse::<PersonaDataEntryPhoneNumber>().unwrap())
@@ -129,7 +129,7 @@ impl Persona {
                 }),
         );
 
-        let email_addresses = CollectionOfEmailAddresses::entries(
+        let email_addresses = CollectionOfEmailAddresses::from_iter(
             email_addresses
                 .into_iter()
                 .map(|s| s.parse::<PersonaDataEntryEmailAddress>().unwrap())

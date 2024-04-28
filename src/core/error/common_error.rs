@@ -463,6 +463,25 @@ pub enum CommonError {
 
     #[error("Failed to create InteractionID (UUID) from string: {bad_value}")]
     RadixMobileInvalidInteractionID { bad_value: String } = 10130,
+
+    #[error("Network discrepancy, expected : {expected}, actual: {actual}")]
+    NetworkDiscrepancy {
+        expected: NetworkID,
+        actual: NetworkID,
+    } = 10131,
+
+    #[error("Discrepancy, Authorized Dapp references Persona which does not exist {address}")]
+    DiscrepancyAuthorizedDappReferencedPersonaWhichDoesNotExist {
+        address: IdentityAddress,
+    } = 10132,
+
+    #[error("Discrepancy, Authorized Dapp references Account which does not exist {address}")]
+    DiscrepancyAuthorizedDappReferencedAccountWhichDoesNotExist {
+        address: AccountAddress,
+    } = 10133,
+
+    #[error("AuthorizedDapp references field id that does not exist")]
+    AuthorizedDappReferencesFieldIDThatDoesNotExist = 10134,
 }
 
 #[uniffi::export]

@@ -79,6 +79,12 @@ impl Identifiable for AuthorizedPersonaSimple {
     }
 }
 
+impl IsNetworkAware for AuthorizedPersonaSimple {
+    fn network_id(&self) -> NetworkID {
+        self.identity_address.network_id()
+    }
+}
+
 impl AuthorizedPersonaSimple {
     pub fn sample_mainnet() -> Self {
         Self::new(
@@ -143,6 +149,11 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn test_is_network_aware() {
+        assert_eq!(SUT::sample().network_id(), NetworkID::Mainnet);
     }
 
     #[test]

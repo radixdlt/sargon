@@ -354,6 +354,18 @@ macro_rules! decl_can_be_empty_impl {
     ) => {
         paste! {
 
+            impl FromIterator<$element_type> for $struct_type {
+                fn from_iter<I>([<  $struct_type:lower >]: I) -> Self
+                where
+                    I: IntoIterator<Item = $element_type>,
+                {
+                    Self {
+                        secret_magic: $secret_magic(IdentifiedVecVia::from_iter([< $struct_type:lower >]))
+                    }
+                }
+
+            }
+
             impl Serialize for $struct_type {
                 fn serialize<S>(
                     &self,
@@ -400,16 +412,6 @@ macro_rules! decl_can_be_empty_impl {
             }
 
             impl $struct_type {
-
-                #[allow(clippy::should_implement_trait)]
-                pub fn from_iter<I>([<  $struct_type:lower >]: I) -> Self
-                where
-                    I: IntoIterator<Item = $element_type>,
-                {
-                    Self {
-                        secret_magic: $secret_magic(IdentifiedVecVia::from_iter([< $struct_type:lower >]))
-                    }
-                }
 
                 /// Creates a new empty collection.
                 pub fn new() -> Self {

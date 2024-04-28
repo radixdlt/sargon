@@ -36,19 +36,23 @@ macro_rules! declare_collection_of_identified_entry {
         pub struct $struct_name {
             pub collection: IdentifiedVecVia<$id_ent_type>,
         }
+
         impl Default for $struct_name {
             fn default() -> Self {
-                Self::entries([])
+                Self::from_iter([])
             }
         }
+
         impl std::ops::Deref for $struct_name {
             type Target = IdentifiedVecVia<$id_ent_type>;
             fn deref(&self) -> &Self::Target {
                 &self.collection
             }
         }
-        impl $struct_name {
-            pub fn entries<I>(values: I) -> Self
+
+        impl FromIterator<$id_ent_type> for $struct_name {
+
+            fn from_iter<I>(values: I) -> Self
             where
                 I: IntoIterator<Item = $id_ent_type>,
             {
@@ -56,9 +60,14 @@ macro_rules! declare_collection_of_identified_entry {
                     collection: IdentifiedVecVia::from_iter(values),
                 }
             }
+        }
+
+        impl $struct_name {
+
             pub fn new(value: $id_ent_type) -> Self {
-                Self::entries([value])
+                Self::from_iter([value])
             }
+
             /// Creates a new CollectionOf PersonaDataEntries using just the *value*, which will be given a
             /// generated ID and put in an identified entry.
             pub fn single_value(
@@ -66,13 +75,14 @@ macro_rules! declare_collection_of_identified_entry {
             ) -> Self {
                 Self::new(value.into())
             }
+
             pub fn values<I>(values: I) -> Self
             where
                 I: IntoIterator<
                     Item = <$id_ent_type as PersonaDataEntryValue>::Value,
                 >,
             {
-                Self::entries(values.into_iter().map(|v| v.into()))
+                Self::from_iter(values.into_iter().map(|v| v.into()))
             }
         }
         impl $struct_name {
@@ -84,12 +94,14 @@ macro_rules! declare_collection_of_identified_entry {
         }
 
         impl HasSampleValues for $struct_name {
+
             fn sample() -> Self {
-                $struct_name::entries([
+                $struct_name::from_iter([
                     <$id_ent_type>::sample(),
                     <$id_ent_type>::sample_other(),
                 ])
             }
+
             fn sample_other() -> Self {
                 $struct_name::new(<$id_ent_type>::sample_other())
             }
@@ -212,46 +224,4 @@ macro_rules! declare_collection_of_identified_entry {
     };
 }
 
-declare_collection_of_identified_entry!(
-    /// A collection of [`PersonaDataIdentifiedPhoneNumber`]s, which is essentially a tuple of
-    /// `(Uuid, PersonaDataEntryPhoneNumber)`, each element is identifiable by its ID. Can be empty, can
-    /// contain elements with the same value, but under different IDs.
-    phone_number,  // singular form
-    phone_numbers, // plural form
-    "[+46123456789, +44987654321]",
-    "[+46123456789 - 00000000-0000-0000-0000-000000000001, +44987654321 - 00000000-0000-0000-0000-000000000002]",
-    r#"
-    [
-        {
-            "id": "00000000-0000-0000-0000-000000000001",
-            "value": "+46123456789"
-        },
-        {
-            "id": "00000000-0000-0000-0000-000000000002",
-            "value": "+44987654321"
-        }
-    ]
-    "#
-);
-
-declare_collection_of_identified_entry!(
-    /// A collection of [`PersonaDataEntryEmailAddress`]s, which is essentially a tuple of
-    /// `(Uuid, PersonaDataIdentifiedEmailAddress)`, each element is identifiable by its ID. Can be empty, can
-    /// contain elements with the same value, but under different IDs.
-    email_address,   // singular form
-    email_addresses, // plural form
-    "[alan@turing.hero, satoshi@nakamoto.btc]",
-    "[alan@turing.hero - 00000000-0000-0000-0000-000000000001, satoshi@nakamoto.btc - 00000000-0000-0000-0000-000000000002]",
-    r#"
-    [
-        {
-            "id": "00000000-0000-0000-0000-000000000001",
-            "value": "alan@turing.hero"
-        },
-        {
-            "id": "00000000-0000-0000-0000-000000000002",
-            "value": "satoshi@nakamoto.btc"
-        }
-    ]
-    "#
-);
+pub(crate) use declare_collection_of_identified_entry;
