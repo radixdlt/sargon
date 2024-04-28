@@ -1,18 +1,5 @@
 use crate::prelude::*;
 
-trait Flatten<T> {
-    fn flatten(self) -> Option<T>;
-}
-
-impl<T> Flatten<T> for Option<Option<T>> {
-    fn flatten(self) -> Option<T> {
-        match self {
-            None => None,
-            Some(v) => v,
-        }
-    }
-}
-
 impl PersonaData {
     pub fn ids_of_entries(&self) -> IndexSet<PersonaDataEntryID> {
         let mut full_ids = IndexSet::<PersonaDataEntryID>::new();

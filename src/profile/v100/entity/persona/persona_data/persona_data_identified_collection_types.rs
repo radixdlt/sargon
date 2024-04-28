@@ -160,7 +160,7 @@ macro_rules! declare_collection_of_identified_entry {
                 let value1 = E::sample_other();
                 let sut = SUT::values([value0.clone(), value1.clone()]);
                 assert_eq!(
-                    sut.collection.into_iter().map(|e| e.value).collect_vec(),
+                    sut.into_iter().map(|e| e.value).collect_vec(),
                     vec![value0, value1]
                 );
             }
