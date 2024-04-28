@@ -92,4 +92,14 @@ mod tests {
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
     }
+
+    #[test]
+    fn test_is_network_aware() {
+        assert_eq!(SUT::sample().network_id(), NetworkID::Mainnet);
+    }
+
+    #[test]
+    fn test_id() {
+        assert_eq!(SUT::sample().id(), SUT::sample().dapp_definition_address);
+    }
 }
