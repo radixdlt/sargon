@@ -35,7 +35,7 @@ impl NetworkRequest {
 }
 
 impl Service {
-    async fn get_wallet_interaction_requests(
+    pub async fn get_wallet_interaction_requests(
         &self,
         session: Session,
     ) -> Result<Vec<DappToWalletInteractionUnvalidated>> {
@@ -70,7 +70,7 @@ impl Service {
         deserialized_wallet_interactions_result
     }
 
-    async fn send_wallet_interaction_response(
+    pub async fn send_wallet_interaction_response(
         &self,
         session: Session,
         response: WalletToDappInteractionResponse,
@@ -90,7 +90,7 @@ impl Service {
         Ok(())
     }
 
-    async fn get_session_handshake_request(
+    pub async fn get_session_handshake_request(
         &self,
         session_id: SessionID,
     ) -> Result<SessionHandshakeRequest> {
@@ -102,7 +102,7 @@ impl Service {
             .await
     }
 
-    async fn send_session_handshake_response(
+    pub async fn send_session_handshake_response(
         &self,
         session_id: SessionID,
         public_key: impl Into<PublicKey>,

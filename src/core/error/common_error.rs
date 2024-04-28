@@ -482,6 +482,22 @@ pub enum CommonError {
 
     #[error("AuthorizedDapp references field id that does not exist")]
     AuthorizedDappReferencesFieldIDThatDoesNotExist = 10134,
+
+    #[error("Failed to create DiffieHellmanPublicKey from hex: {bad_value}")]
+    InvalidDiffieHellmanPublicKeyFromHex { bad_value: String } = 10135,
+
+    #[error(
+        "Failed to create DiffieHellmanPublicKey from bytes: {bad_value:?}"
+    )]
+    InvalidDiffieHellmanPublicKeyFromBytes { bad_value: BagOfBytes } = 10136,
+
+    #[error(
+        "Failed to create DiffieHellmanPrivateKey from bytes: {bad_value:?}"
+    )]
+    InvalidDiffieHellmanPrivateKeyFromBytes { bad_value: BagOfBytes } = 10137,
+
+    #[error("Failed to expand HKDF, reason: '{underlying}'")]
+    HkdfExpandFailed { underlying: String } = 10138,
 }
 
 #[uniffi::export]

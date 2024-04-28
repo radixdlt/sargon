@@ -1483,11 +1483,13 @@ version = "0.23.1"
 source = "git+https://github.com/iotaledger/crypto.rs?rev=47460d64fd0514af136ea1c2c6f3aa29ed89d1b8#47460d64fd0514af136ea1c2c6f3aa29ed89d1b8"
 dependencies = [
  "autocfg",
+ "curve25519-dalek 3.2.0",
  "digest 0.10.7",
  "ed25519-zebra",
  "hmac",
  "k256 0.13.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "sha2 0.10.8",
+ "x25519-dalek",
  "zeroize 1.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -2528,7 +2530,7 @@ dependencies = [
 
 [[package]]
 name = "sargon"
-version = "0.6.55"
+version = "0.6.56"
 dependencies = [
  "actix-rt",
  "aes-gcm",
@@ -4173,6 +4175,17 @@ checksum = "a277a57398d4bfa075df44f501a17cfdf8542d224f0d36095a2adc7aee4ef0a5"
 dependencies = [
  "cfg-if",
  "windows-sys 0.48.0",
+]
+
+[[package]]
+name = "x25519-dalek"
+version = "1.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5a0c105152107e3b96f6a00a65e86ce82d9b125230e1c4302940eca58ff71f4f"
+dependencies = [
+ "curve25519-dalek 3.2.0",
+ "rand_core 0.5.1",
+ "zeroize 1.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
