@@ -193,7 +193,7 @@ mod tests {
 							}
 						}
 					},
-					"flags": ["deletedByUser"],
+					"flags": [],
 					"personaData": {
 						"name": {
 							"id": "00000000-0000-0000-0000-000000000000",

@@ -221,7 +221,7 @@ impl Persona {
         Self::sample_at_index_name(
             1,
             "Batman",
-            true,
+            false,
             name,
             ["+1 13 371 337"]
                 .into_iter()
@@ -252,6 +252,30 @@ impl Persona {
                 .map(|s| s.to_string())
                 .collect_vec(),
             ["ellen.riplay@weylandyutani.corp"]
+                .into_iter()
+                .map(|s| s.to_string())
+                .collect_vec(),
+        )
+    }
+
+    pub fn sample_mainnet_turing() -> Self {
+        let name = PersonaDataEntryName::new(
+            PersonaDataNameVariant::Western,
+            "Alan",
+            "Turing",
+            "",
+        )
+        .expect("Failure to construct sample Name should not be possible");
+        Self::sample_at_index_name(
+            2,
+            "Turing",
+            true,
+            name,
+            ["+1-211-564-7698"]
+                .into_iter()
+                .map(|s| s.to_string())
+                .collect_vec(),
+            ["alan@turing.hero"]
                 .into_iter()
                 .map(|s| s.to_string())
                 .collect_vec(),
@@ -572,7 +596,7 @@ mod tests {
 						}
 					}
 				},
-				"flags": ["deletedByUser"],
+				"flags": [],
 				"personaData": {
 					"name": {
 						"id": "00000000-0000-0000-0000-000000000000",

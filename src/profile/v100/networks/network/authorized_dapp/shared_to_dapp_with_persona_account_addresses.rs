@@ -6,7 +6,7 @@ declare_shared_with_dapp!(
     SharedToDappWithPersonaAccountAddresses,
     AccountAddress,
     "Exactly: 2 - #2 ids shared",
-    "Exactly: 2 - shared ids: [account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr, account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264]",
+    "Exactly: 2 - shared ids: [account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8, account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69]",
     r#"
     {
         "request": {
@@ -14,8 +14,8 @@ declare_shared_with_dapp!(
             "quantity": 2
         },
         "ids": [
-            "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr",
-            "account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264"
+            "account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8",
+            "account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69"
         ]
     }
     "#
@@ -35,8 +35,8 @@ impl SharedToDappWithPersonaAccountAddresses {
         Self::new(
             RequestedQuantity::exactly(2),
             IdentifiedVecVia::from_iter([
-                AccountAddress::sample_mainnet(),
-                AccountAddress::sample_mainnet_other(),
+                Account::sample_mainnet().address,
+                Account::sample_mainnet_other().address,
             ]),
         )
     }
@@ -44,7 +44,7 @@ impl SharedToDappWithPersonaAccountAddresses {
         Self::new(
             RequestedQuantity::at_least(1),
             IdentifiedVecVia::from_iter([
-                AccountAddress::sample_mainnet_other(),
+                Account::sample_mainnet_other().address
             ]),
         )
     }

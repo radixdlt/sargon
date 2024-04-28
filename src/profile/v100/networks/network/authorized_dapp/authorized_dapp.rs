@@ -214,8 +214,8 @@ mod tests {
 								"quantity": 2
 							},
 							"ids": [
-								"account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr",
-								"account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264"
+								"account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8",
+								"account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69"
 							]
 						},
 						"sharedPersonaData": {
@@ -226,18 +226,18 @@ mod tests {
 									"quantity": 2
 								},
 								"ids": [
-									"00000000-0000-0000-0000-000000000001",
-									"00000000-0000-0000-0000-000000000002"
+									"00000000-0000-0000-0000-000000000003",
+									"00000000-0000-0000-0000-000000000004"
 								]
 							},
 							"phoneNumbers": {
 								"request": {
-									"quantifier": "atLeast",
-									"quantity": 1
+									"quantifier": "exactly",
+									"quantity": 2
 								},
 								"ids": [
-									"00000000-0000-0000-0000-000000000003",
-									"00000000-0000-0000-0000-000000000004"
+									"00000000-0000-0000-0000-000000000001",
+									"00000000-0000-0000-0000-000000000002"
 								]
 							}
 						}
@@ -251,29 +251,27 @@ mod tests {
 								"quantity": 1
 							},
 							"ids": [
-								"account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264"
+								"account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69"
 							]
 						},
 						"sharedPersonaData": {
-							"name": "00000000-0000-0000-0000-0000000000f0",
+							"name": "00000000-0000-0000-0000-000000000000",
 							"emailAddresses": {
 								"request": {
 									"quantifier": "exactly",
-									"quantity": 2
+									"quantity": 1
 								},
 								"ids": [
-									"00000000-0000-0000-0000-0000000000f1",
-									"00000000-0000-0000-0000-0000000000f2"
+									"00000000-0000-0000-0000-000000000002"
 								]
 							},
 							"phoneNumbers": {
 								"request": {
-									"quantifier": "atLeast",
+									"quantifier": "exactly",
 									"quantity": 1
 								},
 								"ids": [
-									"00000000-0000-0000-0000-0000000000f3",
-									"00000000-0000-0000-0000-0000000000f4"
+									"00000000-0000-0000-0000-000000000001"
 								]
 							}
 						}
@@ -290,7 +288,7 @@ mod tests {
         assert_eq_after_json_roundtrip(
             &model,
             r#"
- 			{
+			{
 				"networkID": 1,
 				"dAppDefinitionAddress": "account_rdx12xuhw6v30chdkhcu7qznz9vu926vxefr4h4tdvc0mdckg9rq4afx9t",
 				"displayName": "Gumball Club",
@@ -304,29 +302,27 @@ mod tests {
 								"quantity": 1
 							},
 							"ids": [
-								"account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264"
+								"account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69"
 							]
 						},
 						"sharedPersonaData": {
-							"name": "00000000-0000-0000-0000-0000000000f0",
+							"name": "00000000-0000-0000-0000-000000000000",
 							"emailAddresses": {
 								"request": {
 									"quantifier": "exactly",
-									"quantity": 2
+									"quantity": 1
 								},
 								"ids": [
-									"00000000-0000-0000-0000-0000000000f1",
-									"00000000-0000-0000-0000-0000000000f2"
+									"00000000-0000-0000-0000-000000000002"
 								]
 							},
 							"phoneNumbers": {
 								"request": {
-									"quantifier": "atLeast",
+									"quantifier": "exactly",
 									"quantity": 1
 								},
 								"ids": [
-									"00000000-0000-0000-0000-0000000000f3",
-									"00000000-0000-0000-0000-0000000000f4"
+									"00000000-0000-0000-0000-000000000001"
 								]
 							}
 						}
@@ -340,6 +336,7 @@ mod tests {
     #[test]
     fn json_stokenet_roundtrip() {
         let model = SUT::sample_stokenet();
+        print_json(&model);
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -366,21 +363,19 @@ mod tests {
 							"emailAddresses": {
 								"request": {
 									"quantifier": "exactly",
-									"quantity": 2
+									"quantity": 1
 								},
 								"ids": [
-									"00000000-0000-0000-0000-000000000001",
 									"00000000-0000-0000-0000-000000000002"
 								]
 							},
 							"phoneNumbers": {
 								"request": {
-									"quantifier": "atLeast",
+									"quantifier": "exactly",
 									"quantity": 1
 								},
 								"ids": [
-									"00000000-0000-0000-0000-000000000003",
-									"00000000-0000-0000-0000-000000000004"
+									"00000000-0000-0000-0000-000000000001"
 								]
 							}
 						}
@@ -398,25 +393,23 @@ mod tests {
 							]
 						},
 						"sharedPersonaData": {
-							"name": "00000000-0000-0000-0000-0000000000f0",
+							"name": "00000000-0000-0000-0000-000000000000",
 							"emailAddresses": {
 								"request": {
 									"quantifier": "exactly",
-									"quantity": 2
+									"quantity": 1
 								},
 								"ids": [
-									"00000000-0000-0000-0000-0000000000f1",
-									"00000000-0000-0000-0000-0000000000f2"
+									"00000000-0000-0000-0000-000000000002"
 								]
 							},
 							"phoneNumbers": {
 								"request": {
-									"quantifier": "atLeast",
+									"quantifier": "exactly",
 									"quantity": 1
 								},
 								"ids": [
-									"00000000-0000-0000-0000-0000000000f3",
-									"00000000-0000-0000-0000-0000000000f4"
+									"00000000-0000-0000-0000-000000000001"
 								]
 							}
 						}
@@ -451,25 +444,23 @@ mod tests {
 							]
 						},
 						"sharedPersonaData": {
-							"name": "00000000-0000-0000-0000-0000000000f0",
+							"name": "00000000-0000-0000-0000-000000000000",
 							"emailAddresses": {
 								"request": {
 									"quantifier": "exactly",
-									"quantity": 2
+									"quantity": 1
 								},
 								"ids": [
-									"00000000-0000-0000-0000-0000000000f1",
-									"00000000-0000-0000-0000-0000000000f2"
+									"00000000-0000-0000-0000-000000000002"
 								]
 							},
 							"phoneNumbers": {
 								"request": {
-									"quantifier": "atLeast",
+									"quantifier": "exactly",
 									"quantity": 1
 								},
 								"ids": [
-									"00000000-0000-0000-0000-0000000000f3",
-									"00000000-0000-0000-0000-0000000000f4"
+									"00000000-0000-0000-0000-000000000001"
 								]
 							}
 						}

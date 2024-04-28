@@ -276,7 +276,7 @@ mod tests {
 					},
 					"networkID": 1,
 					"appearanceID": 1,
-					"flags": ["deletedByUser"],
+					"flags": [],
 					"displayName": "Bob",
 					"onLedgerSettings": {
 						"thirdPartyDeposits": {

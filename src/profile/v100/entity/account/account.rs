@@ -236,13 +236,19 @@ impl Account {
     /// A `Mainnet` account named "Bob", a sample used to facilitate unit tests, with
     /// derivation index 1.
     pub fn sample_mainnet_bob() -> Self {
-        Self::sample_at_index_name(1, "Bob", true)
+        Self::sample_at_index_name(1, "Bob", false)
     }
 
     /// A `Mainnet` account named "Carol", a sample used to facilitate unit tests, with
     /// derivation index 2.
     pub fn sample_mainnet_carol() -> Self {
         Self::sample_at_index_name(2, "Carol", false)
+    }
+
+    /// A HIDDEN `Mainnet` account named "Diana", a sample used to facilitate unit tests, with
+    /// derivation index 3.
+    pub fn sample_mainnet_diana() -> Self {
+        Self::sample_at_index_name(3, "Diana", true)
     }
 
     /// A `Mainnet` account named "Alice", a sample used to facilitate unit tests, with
@@ -368,6 +374,12 @@ mod tests {
     #[test]
     fn test_is_network_aware() {
         assert_eq!(SUT::sample().network_id(), NetworkID::Mainnet);
+    }
+
+    #[test]
+    fn test_is_hidden() {
+        assert!(!SUT::sample_mainnet_alice().is_hidden());
+        assert!(SUT::sample_mainnet_diana().is_hidden());
     }
 
     #[test]
@@ -545,7 +557,7 @@ mod tests {
 				},
 				"networkID": 1,
 				"appearanceID": 1,
-				"flags": ["deletedByUser"],
+				"flags": [],
 				"displayName": "Bob",
 				"onLedgerSettings": {
 					"thirdPartyDeposits": {

@@ -48,9 +48,9 @@ macro_rules! declare_shared_with_dapp {
             /// see [`RequestedQuantity::is_fulfilled_by_ids`]
             pub fn new(
                 request: RequestedQuantity,
-                ids: impl Into<IdentifiedVecVia<$id>>,
+                ids: impl IntoIterator<Item = $id>,
             ) -> Self {
-                let ids = ids.into();
+                let ids = IdentifiedVecVia::from_iter(ids.into_iter());
                 let len = ids.len();
                 assert!(
                     request.is_fulfilled_by_ids(len),
@@ -62,9 +62,9 @@ macro_rules! declare_shared_with_dapp {
             }
 
             pub fn exactly(
-                ids: impl Into<IdentifiedVecVia<$id>>,
+                ids: impl IntoIterator<Item = $id>,
             ) -> Self {
-                let ids = ids.into();
+                let ids = IdentifiedVecVia::from_iter(ids.into_iter());
                 Self::new(RequestedQuantity::exactly(ids.len() as u16), ids)
             }
 

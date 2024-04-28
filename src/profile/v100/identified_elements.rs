@@ -68,7 +68,7 @@ macro_rules! decl_identified_array_of {
             impl IntoIterator for $struct_type {
                 type Item = $element_type;
                 type IntoIter =
-                identified_vec::identified_vec_into_iterator::IdentifiedVecIntoIterator<<$element_type as Identifiable>::ID,    $element_type>;
+                identified_vec::identified_vec_into_iterator::IdentifiedVecIntoIterator<<$element_type as Identifiable>::ID, $element_type>;
 
                 fn into_iter(self) -> Self::IntoIter {
                     self.secret_magic.0.into_iter()

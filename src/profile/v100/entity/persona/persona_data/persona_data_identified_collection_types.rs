@@ -62,6 +62,16 @@ macro_rules! declare_collection_of_identified_entry {
             }
         }
 
+        impl IntoIterator for $struct_name {
+            type Item = $id_ent_type;
+            type IntoIter =
+            identified_vec::identified_vec_into_iterator::IdentifiedVecIntoIterator<<$id_ent_type as Identifiable>::ID, $id_ent_type>;
+
+            fn into_iter(self) -> Self::IntoIter {
+                self.collection.into_iter()
+            }
+        }
+
         impl $struct_name {
 
             pub fn new(value: $id_ent_type) -> Self {

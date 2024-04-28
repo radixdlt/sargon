@@ -26,6 +26,11 @@ pub fn new_persona_sample_mainnet_ripley() -> Persona {
 }
 
 #[uniffi::export]
+pub fn new_persona_sample_mainnet_turing() -> Persona {
+    Persona::sample_mainnet_turing()
+}
+
+#[uniffi::export]
 pub fn new_persona_sample_stokenet_leia_skywalker() -> Persona {
     Persona::sample_stokenet_leia_skywalker()
 }
@@ -81,6 +86,7 @@ mod uniffi_tests {
                 new_persona_sample_mainnet_batman(),
                 new_persona_sample_mainnet_satoshi(),
                 new_persona_sample_mainnet_ripley(),
+                new_persona_sample_mainnet_turing(),
                 new_persona_sample_stokenet_hermione(),
                 new_persona_sample_stokenet_leia_skywalker(),
                 new_persona_sample_stokenet_connor(),
@@ -88,12 +94,13 @@ mod uniffi_tests {
                 new_persona_sample_mainnet_batman(),
                 new_persona_sample_mainnet_satoshi(),
                 new_persona_sample_mainnet_ripley(),
+                new_persona_sample_mainnet_turing(),
                 new_persona_sample_stokenet_hermione(),
                 new_persona_sample_stokenet_leia_skywalker(),
                 new_persona_sample_stokenet_connor(),
             ])
             .len(),
-            6
+            7
         )
     }
 }

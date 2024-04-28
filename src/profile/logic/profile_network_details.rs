@@ -270,14 +270,41 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
     fn details_ok() {
         let sut = SUT::sample();
         let dapp = sut.authorized_dapps.first().clone().unwrap();
+
         let details = sut.details_for_authorized_dapp(&dapp).unwrap();
         assert_eq!(
             &details.dapp_definition_address,
             &dapp.dapp_definition_address
+        );
+        assert_eq!(&details.network_id, &dapp.network_id);
+
+        assert_eq!(&details.display_name.map(|x| x.value), &dapp.display_name);
+
+        assert_eq!(
+            &details
+                .detailed_authorized_personas
+                .clone()
+                .into_iter()
+                .find(|d| d.identity_address
+                    == Persona::sample_mainnet_satoshi().address)
+                .unwrap()
+                .shared_persona_data,
+            &Persona::sample_mainnet_satoshi().persona_data
+        );
+
+        assert_eq!(
+            &details
+                .detailed_authorized_personas
+                .clone()
+                .into_iter()
+                .find(|d| d.identity_address
+                    == Persona::sample_mainnet_batman().address)
+                .unwrap()
+                .shared_persona_data,
+            &Persona::sample_mainnet_batman().persona_data
         );
     }
 }
