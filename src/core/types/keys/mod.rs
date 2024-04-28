@@ -1,3 +1,4 @@
+mod diffie_hellman;
 mod ed25519;
 mod is_private_key;
 mod is_public_key;
@@ -8,6 +9,7 @@ mod secp256k1;
 mod slip10_curve;
 mod slip10_curve_uniffi_fn;
 
+pub use diffie_hellman::*;
 pub use ed25519::*;
 pub use is_private_key::*;
 pub use is_public_key::*;

@@ -60,7 +60,7 @@ impl Request {
 
     pub fn new_send_handshake_response_with_public_key(
         session_id: impl Into<SessionID>,
-        public_key: impl Into<PublicKey>,
+        public_key: impl Into<DiffieHellmanPublicKey>,
     ) -> Self {
         Self::new_send_handshake_response(
             session_id.into(),
@@ -158,7 +158,7 @@ mod tests {
     #[test]
     fn send_handshake_response_with_public_key() {
         let session_id = SessionID::sample();
-        let public_key = PublicKey::sample();
+        let public_key = DiffieHellmanPublicKey::sample();
         let request = SUT::new_send_handshake_response_with_public_key(
             session_id.clone(),
             public_key,
@@ -266,7 +266,7 @@ mod tests {
     #[test]
     fn send_handshake_response_with_public_key_json_roundtrip() {
         let session_id = SessionID::sample();
-        let public_key = PublicKey::sample();
+        let public_key = DiffieHellmanPublicKey::sample();
         let request = SUT::new_send_handshake_response_with_public_key(
             session_id.clone(),
             public_key,
@@ -276,7 +276,7 @@ mod tests {
         {
             "method": "sendHandshakeResponse",
             "sessionId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
-            "data": "ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf"
+            "data": "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42"
         }
         "#;
         assert_eq_after_json_roundtrip(&request, expected_json);
