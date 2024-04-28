@@ -24,22 +24,7 @@ impl PersonaData {
         full_ids
     }
 }
-/*
-pub struct SharedPersonaData {
-    /// ID of a `PersonaDataEntryName` the user has shared with some dApp on some network,
-    /// can be `None`.
-    pub name: Option<PersonaDataEntryID>,
 
-    /// IDs of a `PersonaDataEntryEmailAddress`es the user has shared with some dApp on some network
-    /// can be `None`, or can be `Some(<EMPTY>)`.
-    pub email_addresses: Option<SharedToDappWithPersonaIDsOfPersonaDataEntries>,
-
-    /// IDs of a `PersonaDataEntryPhoneNumber`s the user has shared with some dApp on some network
-    /// can be `None`, or can be `Some(<EMPTY>)`.
-    pub phone_numbers: Option<SharedToDappWithPersonaIDsOfPersonaDataEntries>,
-}
-
-*/
 impl SharedPersonaData {
     pub fn ids_of_entries(&self) -> IndexSet<PersonaDataEntryID> {
         let mut full_ids = IndexSet::<PersonaDataEntryID>::new();
