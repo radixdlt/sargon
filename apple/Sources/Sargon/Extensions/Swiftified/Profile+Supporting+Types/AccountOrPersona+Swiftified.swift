@@ -10,6 +10,16 @@ import SargonUniFFI
 
 extension AddressOfAccountOrPersona: BaseEntityAddressProtocol {}
 
+extension AccountOrPersona {
+	public static func account(_ account: Account) -> Self {
+		.accountEntity(account)
+	}
+	
+	public static func persona(_ persona: Persona) -> Self {
+		.personaEntity(persona)
+	}
+}
+
 extension AccountOrPersona: EntityBaseProtocol {
 	public var address: EntityAddress {
 		id
@@ -41,8 +51,8 @@ extension AccountOrPersona: EntityBaseProtocol {
 	
 	public var entityKind: EntityKind {
 		switch self {
-		case let .account(value): value.entityKind
-		case let .persona(value): value.entityKind
+		case let .accountEntity(value): value.entityKind
+		case let .personaEntity(value): value.entityKind
 		}
 	}
 	
@@ -85,8 +95,8 @@ extension AccountOrPersona: EntityBaseProtocol {
 extension AccountOrPersona {
 	private func property<Property>(_ keyPath: KeyPath<any EntityBaseProtocol, Property>) -> Property {
 		switch self {
-		case let .account(entity): entity[keyPath: keyPath]
-		case let .persona(entity): entity[keyPath: keyPath]
+		case let .accountEntity(entity): entity[keyPath: keyPath]
+		case let .personaEntity(entity): entity[keyPath: keyPath]
 		}
 	}
 	

@@ -18,7 +18,7 @@ extension Persona: EntityBaseProtocol {
 extension Persona: EntityProtocol {
 	public static let kind: EntityKind = .persona
 	public static func extract(from someEntity: some EntityBaseProtocol) -> Self? {
-		guard case let .persona(persona) = someEntity.asGeneral else { return nil }
+		guard case let .personaEntity(persona) = someEntity.asGeneral else { return nil }
 		return persona
 	}
 	

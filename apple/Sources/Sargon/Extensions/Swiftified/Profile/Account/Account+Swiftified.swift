@@ -18,7 +18,7 @@ extension Account: EntityProtocol {
 	public static let kind: EntityKind = .account
 	
 	public static func extract(from someEntity: some EntityBaseProtocol) -> Self? {
-		guard case let .account(account) = someEntity.asGeneral else { return nil }
+		guard case let .accountEntity(account) = someEntity.asGeneral else { return nil }
 		return account
 	}
 	

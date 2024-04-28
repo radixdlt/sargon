@@ -1,39 +1,52 @@
 use crate::prelude::*;
 
+/// Either an `Account` or a `Persona`.
 #[derive(
     Serialize, Deserialize, Clone, Debug, PartialEq, Hash, Eq, uniffi::Enum,
 )]
 pub enum AccountOrPersona {
-    Account(Account),
-    Persona(Persona),
+    /// An `Account`
+    ///
+    /// Note:
+    /// This case/variant can not be named `account`/ `Account` due
+    /// to Kotlin UniFFI limitation.
+    AccountEntity(Account),
+
+    /// A `Persona`
+    ///
+    /// Note:
+    /// This is named `personaEntity` / `PersonaEntity` to match
+    /// `accountEntity` / `AccountEntity` which can not be named
+    /// `account`/ `Account` due to Kotlin UniFFI limitation.
+    PersonaEntity(Persona),
 }
 
 impl IsNetworkAware for AccountOrPersona {
     fn network_id(&self) -> NetworkID {
         match self {
-            Self::Account(account) => account.network_id,
-            Self::Persona(persona) => persona.network_id,
+            Self::AccountEntity(account) => account.network_id,
+            Self::PersonaEntity(persona) => persona.network_id,
         }
     }
 }
 
 impl From<Account> for AccountOrPersona {
     fn from(value: Account) -> Self {
-        Self::Account(value)
+        Self::AccountEntity(value)
     }
 }
 
 impl From<Persona> for AccountOrPersona {
     fn from(value: Persona) -> Self {
-        Self::Persona(value)
+        Self::PersonaEntity(value)
     }
 }
 
 impl std::fmt::Display for AccountOrPersona {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Account(value) => write!(f, "{}", value),
-            Self::Persona(value) => write!(f, "{}", value),
+            Self::AccountEntity(value) => write!(f, "{}", value),
+            Self::PersonaEntity(value) => write!(f, "{}", value),
         }
     }
 }
@@ -43,10 +56,10 @@ impl Identifiable for AccountOrPersona {
 
     fn id(&self) -> Self::ID {
         match self {
-            Self::Account(account) => {
+            Self::AccountEntity(account) => {
                 AddressOfAccountOrPersona::Account(account.address)
             }
-            Self::Persona(persona) => {
+            Self::PersonaEntity(persona) => {
                 AddressOfAccountOrPersona::Identity(persona.address)
             }
         }
