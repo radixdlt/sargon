@@ -1,9 +1,8 @@
 package com.radixdlt.sargon.extensions
 
-import com.radixdlt.sargon.MobileConnectRequest
+import com.radixdlt.sargon.RadixConnectMobileConnectRequest
 import com.radixdlt.sargon.newMobileConnectRequest
 
-@Throws(SargonException::class)
-fun MobileConnectRequest.Companion.parseFrom(url: String) = runCatching {
+fun RadixConnectMobileConnectRequest.Companion.parseFrom(url: String) = runCatching {
     newMobileConnectRequest(url = url)
 }
