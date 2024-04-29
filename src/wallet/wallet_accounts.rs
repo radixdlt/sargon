@@ -424,7 +424,7 @@ mod tests {
 
         let network_id = NetworkID::Mainnet;
 
-        let n = 1000;
+        let n = 100;
         (0..n).into_iter().for_each(|index| {
             let account_name =
                 DisplayName::new(format!("Account {index}")).unwrap();
@@ -438,7 +438,7 @@ mod tests {
         let profile_json = profile.to_json_bytes();
 
         fs::write(
-            concat!(env!("FIXTURES_VECTOR"), "huge_profile_1000_accounts.json"),
+            concat!(env!("FIXTURES_VECTOR"), "big_profile_100_accounts.json"),
             profile_json,
         )
         .expect("Unable to write file");

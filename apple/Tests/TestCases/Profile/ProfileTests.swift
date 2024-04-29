@@ -5,7 +5,7 @@ import SargonUniFFI
 import XCTest
 
 final class ProfileTests: Test<Profile> {
-
+	
 	func test_description_and_debug() {
 		XCTAssertGreaterThan(SUT.sample.debugDescription, SUT.sample.description)
 	}
@@ -82,5 +82,13 @@ final class ProfileTests: Test<Profile> {
 		XCTAssertTrue(jsonString.contains("keyDerivationScheme"))
 		XCTAssertTrue(jsonString.contains("encryptedSnapshot"))
 		XCTAssertTrue(jsonString.contains("version"))
+	}
+	
+	func test_json_performance() throws {
+//		let sut: SUT = try jsonFixture("huge_profile_1000_accounts")
+		let sut: SUT = try jsonFixture("big_profile_100_accounts")
+		measure {
+			try! self.doTestCodableRoundtrip(sut)
+		}
 	}
 }
