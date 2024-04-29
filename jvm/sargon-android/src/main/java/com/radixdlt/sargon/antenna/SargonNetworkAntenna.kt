@@ -28,7 +28,7 @@ class SargonNetworkAntenna(
         )
 
         val okHttpRequest = Request.Builder()
-            .url(url = request.url)
+            .url(url = request.url.toURL())
             .headers(request.headers.toHeaders())
             .method(method = request.method.toHttpMethod(), body = requestBody)
             .build()

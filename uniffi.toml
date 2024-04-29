@@ -36,9 +36,9 @@ into_custom = "URL(string: {})!"
 from_custom = "String(describing: {})"
 
 [bindings.kotlin.custom_types.Url]
-type_name = "URL"
-imports = ["java.net.URI", "java.net.URL"]
-into_custom = "URI({}).toURL()"
+type_name = "URI"
+imports = ["java.net.URI"]
+into_custom = "URI({})"
 from_custom = "{}.toString()"
 
 [bindings.swift.custom_types.Timestamp]

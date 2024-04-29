@@ -12,7 +12,7 @@ import com.radixdlt.sargon.samples.sampleMainnet
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class GatewaysTest: SampleTestable<Gateways> {
+class GatewaysTest : SampleTestable<Gateways> {
 
     override val samples: List<Sample<Gateways>>
         get() = listOf(Gateways.sample)

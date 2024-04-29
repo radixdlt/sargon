@@ -1,12 +1,8 @@
 package com.radixdlt.sargon.extensions
 
-import com.radixdlt.sargon.FactorSource
-import com.radixdlt.sargon.FactorSources
 import com.radixdlt.sargon.Gateway
 import com.radixdlt.sargon.OtherGateways
 import com.radixdlt.sargon.Url
-import com.radixdlt.sargon.newFactorSourcesByUpdatingOrAppending
-import com.radixdlt.sargon.newFactorSourcesByUpdatingOrInsertingAtIndex
 import com.radixdlt.sargon.newOtherGateways
 import com.radixdlt.sargon.newOtherGatewaysByAppending
 import com.radixdlt.sargon.newOtherGatewaysByUpdatingOrAppending
