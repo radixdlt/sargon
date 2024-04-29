@@ -10,6 +10,9 @@ pub enum SecureStorageKey {
     ProfileSnapshot {
         profile_id: ProfileID,
     },
+    RadixConnectMobileSession {
+        session_id: SessionID,
+    },
 }
 impl SecureStorageKey {
     #[cfg(not(tarpaulin_include))] // false negative
@@ -25,6 +28,8 @@ impl SecureStorageKey {
                 } => format!("device_factor_source_{}", factor_source_id),
                 SecureStorageKey::ProfileSnapshot { profile_id } =>
                     format!("profile_snapshot_{}", profile_id),
+                SecureStorageKey::RadixConnectMobileSession { session_id } =>
+                    format!("radix_connect_mobile_session_{}", session_id),
             }
         )
     }
@@ -62,6 +67,14 @@ mod tests {
             }
             .identifier(),
             "secure_storage_key_profile_snapshot_ffffffff-ffff-ffff-ffff-ffffffffffff"
+        );
+
+        assert_eq!(
+            SecureStorageKey::RadixConnectMobileSession {
+                session_id: SessionID::sample()
+            }
+            .identifier(),
+            "secure_storage_key_radix_connect_mobile_session_ffffffff-ffff-ffff-ffff-ffffffffffff"
         );
     }
 }

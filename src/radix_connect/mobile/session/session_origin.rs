@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Serialize, Deserialize)]
 pub enum SessionOrigin {
     WebDapp(Url),
 }

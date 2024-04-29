@@ -498,6 +498,12 @@ pub enum CommonError {
 
     #[error("Failed to expand HKDF, reason: '{underlying}'")]
     HkdfExpandFailed { underlying: String } = 10138,
+
+    #[error("RadixConnectMobileSession not found, session id: {session_id}")]
+    RadixConnectMobileSessionNotFound { session_id: String } = 10139,
+
+    #[error("RadixConnectMobileDappRequest not found, interaction id: {interaction_id}")]
+    RadixConnectMobileDappRequestNotFound { interaction_id: String } = 10140,
 }
 
 #[uniffi::export]
