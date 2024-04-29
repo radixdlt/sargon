@@ -1,23 +1,10 @@
 use crate::prelude::*;
 
 impl AuthorizedPersonaSimple {
-    fn detailed(
+    fn accounts_for_display(
         &self,
-        non_hidden_personas: &Personas,
         non_hidden_accounts: &Accounts,
-    ) -> Result<AuthorizedPersonaDetailed> {
-        let Some(persona) = non_hidden_personas
-            .iter()
-            .find(|x| x.address == self.identity_address)
-        else {
-            // This is a sign that Profile is in a bad state somehow...
-            warn!("Discrepancy! AuthorizedDapp references persona which does not exist {}", self.identity_address);
-            return Err(CommonError::DiscrepancyAuthorizedDappReferencedPersonaWhichDoesNotExist {
-                address: self.identity_address
-            });
-        };
-
-        let display_name = persona.display_name.clone();
+    ) -> Result<Option<AccountsForDisplay>> {
         let shared_accounts = self
             .shared_accounts
             .as_ref().map(|s| s.ids.clone())
@@ -39,14 +26,19 @@ impl AuthorizedPersonaSimple {
                     account.appearance_id
                 ))
             }).collect::<Result<AccountsForDisplay>>()?;
-        let shared_accounts = if shared_accounts.is_empty() {
-            None
-        } else {
-            Some(shared_accounts)
-        };
 
-        let full = persona.persona_data.clone();
-        let full_ids = full.ids_of_entries();
+        if shared_accounts.is_empty() {
+            Ok(None)
+        } else {
+            Ok(Some(shared_accounts))
+        }
+    }
+
+    fn pick_persona_data_from_full(
+        &self,
+        full: &PersonaData,
+    ) -> Result<PersonaData> {
+        let full_ids = &full.ids_of_entries();
         let shared = self.shared_persona_data.clone();
         let shared_ids = shared.ids_of_entries();
 
@@ -58,7 +50,7 @@ impl AuthorizedPersonaSimple {
         };
 
         let mut name: Option<PersonaDataIdentifiedName> = None;
-        if let Some(saved_name) = full.name {
+        if let Some(saved_name) = &full.name {
             if let Some(shared) = shared.name {
                 if shared.id() == saved_name.id {
                     name = Some(saved_name.clone());
@@ -98,8 +90,33 @@ impl AuthorizedPersonaSimple {
             })
             .collect::<CollectionOfEmailAddresses>();
 
+        Ok(PersonaData::new(name, phone_numbers, email_addresses))
+    }
+
+    fn persona_from(&self, non_hidden_personas: &Personas) -> Result<Persona> {
+        let Some(persona) = non_hidden_personas
+            .iter()
+            .find(|x| x.address == self.identity_address)
+        else {
+            // This is a sign that Profile is in a bad state somehow...
+            warn!("Discrepancy! AuthorizedDapp references persona which does not exist {}", self.identity_address);
+            return Err(CommonError::DiscrepancyAuthorizedDappReferencedPersonaWhichDoesNotExist {
+            address: self.identity_address
+        });
+        };
+        Ok(persona.clone())
+    }
+
+    fn detailed(
+        &self,
+        non_hidden_personas: &Personas,
+        non_hidden_accounts: &Accounts,
+    ) -> Result<AuthorizedPersonaDetailed> {
+        let persona = self.persona_from(non_hidden_personas)?;
         let persona_data =
-            PersonaData::new(name, phone_numbers, email_addresses);
+            self.pick_persona_data_from_full(&persona.persona_data)?;
+
+        let shared_accounts = self.accounts_for_display(non_hidden_accounts)?;
 
         let has_auth_signing_key = match &persona.security_state {
             EntitySecurityState::Unsecured { value: uec } => {
@@ -108,7 +125,7 @@ impl AuthorizedPersonaSimple {
         };
         Ok(AuthorizedPersonaDetailed::new(
             persona.address,
-            display_name,
+            persona.display_name.clone(),
             shared_accounts.clone(),
             persona_data,
             has_auth_signing_key,
