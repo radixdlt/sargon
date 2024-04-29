@@ -73,6 +73,18 @@ pub struct Account {
     pub on_ledger_settings: OnLedgerSettings,
 }
 
+impl IsEntity for Account {
+    fn flags(&self) -> EntityFlags {
+        self.flags.clone()
+    }
+}
+
+impl IsNetworkAware for Account {
+    fn network_id(&self) -> NetworkID {
+        self.network_id
+    }
+}
+
 impl Account {
     pub fn new(
         account_creating_factor_instance: HDFactorInstanceAccountCreation,
@@ -205,13 +217,19 @@ impl Account {
     /// A `Mainnet` account named "Bob", a sample used to facilitate unit tests, with
     /// derivation index 1.
     pub fn sample_mainnet_bob() -> Self {
-        Self::sample_at_index_name(1, "Bob", true)
+        Self::sample_at_index_name(1, "Bob", false)
     }
 
     /// A `Mainnet` account named "Carol", a sample used to facilitate unit tests, with
     /// derivation index 2.
     pub fn sample_mainnet_carol() -> Self {
         Self::sample_at_index_name(2, "Carol", false)
+    }
+
+    /// A HIDDEN `Mainnet` account named "Diana", a sample used to facilitate unit tests, with
+    /// derivation index 3.
+    pub fn sample_mainnet_diana() -> Self {
+        Self::sample_at_index_name(3, "Diana", true)
     }
 
     /// A `Mainnet` account named "Alice", a sample used to facilitate unit tests, with
@@ -234,6 +252,10 @@ impl Account {
     /// A sample used to facilitate unit tests.
     pub fn sample_mainnet_other() -> Self {
         Self::sample_mainnet_bob()
+    }
+
+    pub fn sample_mainnet_third() -> Self {
+        Self::sample_mainnet_carol()
     }
 
     /// A sample used to facilitate unit tests.
@@ -268,6 +290,14 @@ impl Account {
 
     pub fn sample_stokenet() -> Self {
         Self::sample_stokenet_nadia()
+    }
+
+    pub fn sample_stokenet_other() -> Self {
+        Self::sample_stokenet_olivia()
+    }
+
+    pub fn sample_stokenet_third() -> Self {
+        Self::sample_stokenet_paige()
     }
 
     /// A sample used to facilitate unit tests.
@@ -320,6 +350,17 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn test_is_network_aware() {
+        assert_eq!(SUT::sample().network_id(), NetworkID::Mainnet);
+    }
+
+    #[test]
+    fn test_is_hidden() {
+        assert!(!SUT::sample_mainnet_alice().is_hidden());
+        assert!(SUT::sample_mainnet_diana().is_hidden());
     }
 
     #[test]
@@ -497,7 +538,7 @@ mod tests {
 				},
 				"networkID": 1,
 				"appearanceID": 1,
-				"flags": ["deletedByUser"],
+				"flags": [],
 				"displayName": "Bob",
 				"onLedgerSettings": {
 					"thirdPartyDeposits": {

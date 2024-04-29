@@ -34,8 +34,8 @@ pub struct DisplayName {
 impl DisplayName {
     pub const MAX_LEN: usize = 30;
 
-    pub fn new(value: &str) -> Result<Self> {
-        let value = value.trim().to_string();
+    pub fn new(value: impl AsRef<str>) -> Result<Self> {
+        let value = value.as_ref().trim().to_string();
         if value.is_empty() {
             return Err(CommonError::InvalidDisplayNameEmpty);
         }

@@ -24,7 +24,7 @@ extension FactorSource: BaseFactorSourceProtocol {
 		id
 	}
 	
-	public var factorSourceKind: SargonUniFFI.FactorSourceKind {
+	public var factorSourceKind: FactorSourceKind {
 		switch self {
 		case let .device(value): value.factorSourceKind
 		case let .ledger(value): value.factorSourceKind

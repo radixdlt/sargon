@@ -16,6 +16,11 @@ pub fn new_account_sample_mainnet_carol() -> Account {
 }
 
 #[uniffi::export]
+pub fn new_account_sample_mainnet_diana() -> Account {
+    Account::sample_mainnet_diana()
+}
+
+#[uniffi::export]
 pub fn new_account_sample_stokenet_nadia() -> Account {
     Account::sample_stokenet_nadia()
 }
@@ -44,6 +49,7 @@ mod tests {
                 new_account_sample_mainnet_alice(),
                 new_account_sample_mainnet_bob(),
                 new_account_sample_mainnet_carol(),
+                new_account_sample_mainnet_diana(),
                 new_account_sample_stokenet_nadia(),
                 new_account_sample_stokenet_olivia(),
                 new_account_sample_stokenet_paige(),
@@ -51,12 +57,13 @@ mod tests {
                 new_account_sample_mainnet_alice(),
                 new_account_sample_mainnet_bob(),
                 new_account_sample_mainnet_carol(),
+                new_account_sample_mainnet_diana(),
                 new_account_sample_stokenet_nadia(),
                 new_account_sample_stokenet_olivia(),
                 new_account_sample_stokenet_paige(),
             ])
             .len(),
-            6
+            7
         )
     }
 }

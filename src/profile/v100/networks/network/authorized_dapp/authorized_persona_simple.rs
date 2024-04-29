@@ -79,41 +79,65 @@ impl Identifiable for AuthorizedPersonaSimple {
     }
 }
 
+impl IsNetworkAware for AuthorizedPersonaSimple {
+    fn network_id(&self) -> NetworkID {
+        self.identity_address.network_id()
+    }
+}
+
+impl PersonaData {
+    pub(crate) fn shared_everything(&self) -> SharedPersonaData {
+        SharedPersonaData::new(
+            self.name.clone().map(|x| x.id),
+            SharedToDappWithPersonaIDsOfPersonaDataEntries::exactly(
+                self.email_addresses.clone().ids(),
+            ),
+            SharedToDappWithPersonaIDsOfPersonaDataEntries::exactly(
+                self.phone_numbers.clone().ids(),
+            ),
+        )
+    }
+}
+
 impl AuthorizedPersonaSimple {
     pub fn sample_mainnet() -> Self {
+        let persona = Persona::sample_mainnet();
         Self::new(
-            IdentityAddress::sample_mainnet(),
+            persona.address,
             Timestamp::parse("2024-01-31T14:23:45Z").unwrap(),
             Some(SharedToDappWithPersonaAccountAddresses::sample_mainnet()),
-            SharedPersonaData::sample(),
+            persona.persona_data.shared_everything(),
         )
     }
     pub fn sample_mainnet_other() -> Self {
+        let persona = Persona::sample_mainnet_other();
         Self::new(
-            IdentityAddress::sample_mainnet_other(),
+            persona.address,
             Timestamp::parse("2024-01-31T14:23:45Z").unwrap(),
             Some(SharedToDappWithPersonaAccountAddresses::sample_other()),
-            SharedPersonaData::sample_other(),
+            persona.persona_data.shared_everything(),
         )
     }
 
     pub fn sample_stokenet() -> Self {
+        let persona = Persona::sample_stokenet();
         Self::new(
-            IdentityAddress::sample_stokenet(),
+            persona.address,
             Timestamp::parse("2024-01-31T14:23:45Z").unwrap(),
             Some(SharedToDappWithPersonaAccountAddresses::sample_stokenet()),
-            SharedPersonaData::sample(),
+            persona.persona_data.shared_everything(),
         )
     }
     pub fn sample_stokenet_other() -> Self {
+        let persona = Persona::sample_stokenet_other();
         Self::new(
-            IdentityAddress::sample_stokenet_other(),
+            persona.address,
             Timestamp::parse("2024-01-31T14:23:45Z").unwrap(),
             Some(
                 SharedToDappWithPersonaAccountAddresses::sample_stokenet_other(
                 ),
             ),
-            SharedPersonaData::sample_other(),
+            persona.persona_data.shared_everything(),
         )
     }
 }
@@ -146,48 +170,53 @@ mod tests {
     }
 
     #[test]
+    fn test_is_network_aware() {
+        assert_eq!(SUT::sample().network_id(), NetworkID::Mainnet);
+    }
+
+    #[test]
     fn json_roundtrip_sample() {
         let model = AuthorizedPersonaSimple::sample();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
 			{
-				"identityAddress": "identity_rdx122kttqch0eehzj6f9nkkxcw7msfeg9udurq5u0ysa0e92c59w0mg6x",
-				"lastLogin": "2024-01-31T14:23:45.000Z",
-				"sharedAccounts": {
-					"request": {
-						"quantifier": "exactly",
-						"quantity": 2
-					},
-					"ids": [
-						"account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr",
-						"account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264"
-					]
-				},
-				"sharedPersonaData": {
-					"name": "00000000-0000-0000-0000-000000000000",
-					"emailAddresses": {
-						"request": {
-							"quantifier": "exactly",
-							"quantity": 2
-						},
-						"ids": [
-							"00000000-0000-0000-0000-000000000001",
-							"00000000-0000-0000-0000-000000000002"
-						]
-					},
-					"phoneNumbers": {
-						"request": {
-							"quantifier": "atLeast",
-							"quantity": 1
-						},
-						"ids": [
-							"00000000-0000-0000-0000-000000000003",
-							"00000000-0000-0000-0000-000000000004"
-						]
-					}
-				}
-			}
+                "identityAddress": "identity_rdx122kttqch0eehzj6f9nkkxcw7msfeg9udurq5u0ysa0e92c59w0mg6x",
+                "lastLogin": "2024-01-31T14:23:45.000Z",
+                "sharedAccounts": {
+                    "request": {
+                        "quantifier": "exactly",
+                        "quantity": 2
+                    },
+                    "ids": [
+                        "account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8",
+                        "account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69"
+                    ]
+                },
+                "sharedPersonaData": {
+                    "name": "00000000-0000-0000-0000-000000000000",
+                    "emailAddresses": {
+                        "request": {
+                            "quantifier": "exactly",
+                            "quantity": 2
+                        },
+                        "ids": [
+                            "00000000-0000-0000-0000-000000000003",
+                            "00000000-0000-0000-0000-000000000004"
+                        ]
+                    },
+                    "phoneNumbers": {
+                        "request": {
+                            "quantifier": "exactly",
+                            "quantity": 2
+                        },
+                        "ids": [
+                            "00000000-0000-0000-0000-000000000001",
+                            "00000000-0000-0000-0000-000000000002"
+                        ]
+                    }
+                }
+            }
             "#,
         );
     }
@@ -198,42 +227,40 @@ mod tests {
         assert_eq_after_json_roundtrip(
             &model,
             r#"
-            			{
-				"identityAddress": "identity_rdx12gcd4r799jpvztlffgw483pqcen98pjnay988n8rmscdswd872xy62",
-				"lastLogin": "2024-01-31T14:23:45.000Z",
-				"sharedAccounts": {
-					"request": {
-						"quantifier": "atLeast",
-						"quantity": 1
-					},
-					"ids": [
-						"account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264"
-					]
-				},
-				"sharedPersonaData": {
-					"name": "00000000-0000-0000-0000-0000000000f0",
-					"emailAddresses": {
-						"request": {
-							"quantifier": "exactly",
-							"quantity": 2
-						},
-						"ids": [
-							"00000000-0000-0000-0000-0000000000f1",
-							"00000000-0000-0000-0000-0000000000f2"
-						]
-					},
-					"phoneNumbers": {
-						"request": {
-							"quantifier": "atLeast",
-							"quantity": 1
-						},
-						"ids": [
-							"00000000-0000-0000-0000-0000000000f3",
-							"00000000-0000-0000-0000-0000000000f4"
-						]
-					}
-				}
-			}
+            {
+                "identityAddress": "identity_rdx12gcd4r799jpvztlffgw483pqcen98pjnay988n8rmscdswd872xy62",
+                "lastLogin": "2024-01-31T14:23:45.000Z",
+                "sharedAccounts": {
+                    "request": {
+                        "quantifier": "atLeast",
+                        "quantity": 1
+                    },
+                    "ids": [
+                        "account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69"
+                    ]
+                },
+                "sharedPersonaData": {
+                    "name": "00000000-0000-0000-0000-000000000000",
+                    "emailAddresses": {
+                        "request": {
+                            "quantifier": "exactly",
+                            "quantity": 1
+                        },
+                        "ids": [
+                            "00000000-0000-0000-0000-000000000002"
+                        ]
+                    },
+                    "phoneNumbers": {
+                        "request": {
+                            "quantifier": "exactly",
+                            "quantity": 1
+                        },
+                        "ids": [
+                            "00000000-0000-0000-0000-000000000001"
+                        ]
+                    }
+                }
+            }
             "#,
         );
     }

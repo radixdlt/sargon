@@ -9,6 +9,19 @@ pub trait AddressViaRet: Sized {
 
 pub trait IsNetworkAware {
     fn network_id(&self) -> NetworkID;
+
+    fn is_on_same_network_as(&self, other: &impl IsNetworkAware) -> Result<()> {
+        let this = self.network_id();
+        let other = other.network_id();
+        if this != other {
+            Err(CommonError::NetworkDiscrepancy {
+                expected: this,
+                actual: other,
+            })
+        } else {
+            Ok(())
+        }
+    }
 }
 
 pub trait IsAddress:
@@ -356,175 +369,7 @@ macro_rules! decl_ret_wrapped_address {
     };
 }
 
-decl_ret_wrapped_address!(
-    /// Address to an AccessController that controls an Account or Identity (Persona),
-    /// it said entity has been "securified", e.g.:
-    /// `"accesscontroller_rdx1c0duj4lq0dc3cpl8qd420fpn5eckh8ljeysvjm894lyl5ja5yq6y5a"`
-    ///
-    /// When a user applies a SecurityStructureConfiguration for the first time on a
-    /// non-securified entity (and signs and submit the resulting TX) said entity is
-    /// "assigned" an AccessControllerAddress by the network.
-    ///
-    /// An `AccessControllerAddress` has the [Scrypto's `EntityType`][entt] `GlobalAccessController`.
-    ///
-    /// Implementation wise we wrap [Radix Engine Toolkit's `CanonicalAccessControllerAddress`][ret], and
-    /// give it UniFFI support, as a `uniffi::Record` (we also own Serde).
-    ///
-    /// [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
-    /// [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L247-L248
-    accessController
-);
-decl_ret_wrapped_address!(
-    /// Human readable address of an account. Always starts with `"account_"``, for example:
-    ///
-    /// `account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr`
-    ///
-    /// Most commonly the user will see this address in its abbreviated
-    /// form which is:
-    ///
-    /// `acco...nvjdwr`
-    ///
-    /// Addresses are checksummed, as per Bech32. **Only** *Account* addresses starts with
-    /// the prefix `account_`.
-    ///
-    /// There are fundamentally three different sub-types ([Scrypto's `EntityType`][entt]) of AccountAddresses:
-    /// * GlobalAccount
-    /// * GlobalVirtualSecp256k1Account
-    /// * GlobalVirtualEd25519Account
-    ///
-    /// Implementation wise we wrap [Radix Engine Toolkit's `CanonicalAccountAddress`][ret], and
-    /// give it UniFFI support, as a `uniffi::Record` (we also own Serde).
-    ///
-    /// [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
-    /// [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L224-L228
-    account
-);
-decl_ret_wrapped_address!(
-    /// An address to some On-Ledger (OnNetwork) component, e.g. a Dapp, being an instantiation
-    /// of some Scrypto blueprint, e.g:
-    /// `"component_rdx1cptxxxxxxxxxfaucetxxxxxxxxx000527798379xxxxxxxxxfaucet"`
-    ///
-    /// There are fundamentally two different sub-types ([Scrypto's `EntityType`][entt]) of ComponentAddress:
-    /// * GlobalGenericComponent
-    /// * InternalGenericComponent
-    ///
-    /// Implementation wise we wrap [Radix Engine Toolkit's `CanonicalComponentAddress`][ret], and
-    /// give it UniFFI support, as a `uniffi::Record` (we also own Serde).
-    ///
-    /// [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
-    /// [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L243-L246
-    component
-);
-decl_ret_wrapped_address!(
-    /// Human readable address of an identity, which are used by Personas. Always starts with
-    /// the prefix `"identity_"`, for example:
-    ///
-    /// `identity_rdx12tgzjrz9u0xz4l28vf04hz87eguclmfaq4d2p8f8lv7zg9ssnzku8j`
-    ///
-    /// Addresses are checksummed, as per Bech32. **Only** *Identity* addresses starts with
-    /// the prefix `"identity_"`.
-    ///
-    /// There are fundamentally three different sub-types ([Scrypto's `EntityType`][entt]) of IdentityAddresses:
-    /// * GlobalIdentity,
-    /// * GlobalVirtualSecp256k1Identity,
-    /// * GlobalVirtualEd25519Identity
-    ///
-    /// ```
-    /// extern crate sargon;
-    /// use sargon::prelude::*;
-    ///
-    /// assert_eq!(
-    ///     "identity_rdx12tgzjrz9u0xz4l28vf04hz87eguclmfaq4d2p8f8lv7zg9ssnzku8j".parse::<IdentityAddress>().unwrap().network_id(),
-    ///     NetworkID::Mainnet
-    /// );
-    /// ```
-    ///
-    /// Implementation wise we wrap [Radix Engine Toolkit's `CanonicalIdentityAddress`][ret], and
-    /// give it UniFFI support, as a `uniffi::Record` (we also own Serde).
-    ///
-    /// [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
-    /// [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L229-L234
-    identity
-);
-decl_ret_wrapped_address!(
-    /// Addresses identifying an OnLedger (OnNetwork) Liquidity Pool (LP) of tokens that users can contribute
-    /// Liquidity too, e.g.:
-    /// `"pool_rdx1c325zs6dz3un8ykkjavy9fkvvyzarkaehgsl408qup6f95aup3le3w"`
-    ///
-    /// Typically users contribute to Liquidity Pools by using a Dapp and the Radix Wallet.
-    ///
-    /// There are fundamentally three different sub-types ([Scrypto's `EntityType`][entt]) of PoolAddresses:
-    /// * GlobalOneResourcePool
-    /// * GlobalTwoResourcePool
-    /// * GlobalMultiResourcePool
-    ///
-    /// Implementation wise we wrap [Radix Engine Toolkit's `CanonicalPoolAddress`][ret], and
-    /// give it UniFFI support, as a `uniffi::Record` (we also own Serde).
-    ///
-    /// [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
-    /// [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L256-L261
-    pool
-);
-decl_ret_wrapped_address!(
-    /// The unique address identifying a package - which is a collection of blueprints on Ledger, e.g.:
-    /// `"package_rdx1pkgxxxxxxxxxfaucetxxxxxxxxx000034355863xxxxxxxxxfaucet"`
-    ///
-    /// PackageAddress has [Scrypto's `EntityType`][entt] type `GlobalPackage`.
-    ///
-    /// Implementation wise we wrap [Radix Engine Toolkit's `CanonicalPackageAddress`][ret], and
-    /// give it UniFFI support, as a `uniffi::Record` (we also own Serde).
-    ///
-    /// [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
-    /// [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L241C29-L241C42
-    package
-);
-decl_ret_wrapped_address!(
-    /// Addresses identifying an asset, either fungible (Token) or non-fungible (NFT), on the Radix network, e.g.
-    /// `"resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"`
-    /// Being the unique identifier of the Radix Token, the Rad, on mainnet.
-    ///
-    /// There are fundamentally two different sub-types ([Scrypto's `EntityType`][entt]) of ResourceAddresses:
-    /// * GlobalFungibleResourceManager
-    /// * GlobalNonFungibleResourceManager
-    ///
-    /// Implementation wise we wrap [Radix Engine Toolkit's `CanonicalResourceAddress`][ret], and
-    /// give it UniFFI support, as a `uniffi::Record` (we also own Serde).
-    ///
-    /// [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
-    /// [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L236-L239
-    resource
-);
-decl_ret_wrapped_address!(
-    /// Address to a Validator that secures the network by validating transactions, users can stake to these
-    /// validators (Delegated Proof of Stake) by using the Dashboard and sending a TX to the Radix Wallet to sign;
-    /// e.g.:
-    /// `"validator_rdx1sd5368vqdmjk0y2w7ymdts02cz9c52858gpyny56xdvzuheepdeyy0"`
-    ///
-    /// A `ValidatorAddress` has the [Scrypto's `EntityType`][entt] `GlobalValidator`.
-    ///
-    /// Implementation wise we wrap [Radix Engine Toolkit's `CanonicalValidatorAddress`][ret], and
-    /// give it UniFFI support, as a `uniffi::Record` (we also own Serde).
-    ///
-    /// [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
-    /// [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L249-L250
-    validator
-);
-decl_ret_wrapped_address!(
-    /// Addresses to a specific vault, owned by a user, holding asset of one kind, either fungible or non-fungible.
-    /// Identities cannot own assets so they do not have vaults, but Accounts do, e.g.:
-    /// `"internal_vault_rdx1tz474x29nxxd4k2p2reete9xyz4apawv63dphxkr00qt23vyju49fq"`
-    ///
-    /// There are fundamentally two different sub-types ([Scrypto's `EntityType`][entt]) of VaultAddresses:
-    /// * InternalFungibleVault
-    /// * InternalNonFungibleVault
-    ///
-    /// Implementation wise we wrap [Radix Engine Toolkit's `CanonicalVaultAddress`][ret], and
-    /// give it UniFFI support, as a `uniffi::Record` (we also own Serde).
-    ///
-    /// [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
-    /// [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L251-L255
-    vault
-);
+pub(crate) use decl_ret_wrapped_address;
 
 #[cfg(test)]
 mod tests {

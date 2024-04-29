@@ -54,8 +54,6 @@ impl<'de> Deserialize<'de> for FactorSourceID {
         // https://github.com/serde-rs/serde/issues/1343#issuecomment-409698470
         #[derive(Deserialize, Serialize)]
         struct Wrapper {
-            #[serde(rename = "discriminator")]
-            _ignore: String,
             #[serde(flatten, with = "FactorSourceID")]
             value: FactorSourceID,
         }

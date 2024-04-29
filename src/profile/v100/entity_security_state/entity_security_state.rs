@@ -31,8 +31,6 @@ impl<'de> Deserialize<'de> for EntitySecurityState {
         // https://github.com/serde-rs/serde/issues/1343#issuecomment-409698470
         #[derive(Deserialize, Serialize)]
         struct Wrapper {
-            #[serde(rename = "discriminator")]
-            _ignore: String,
             #[serde(flatten, with = "EntitySecurityState")]
             value: EntitySecurityState,
         }
@@ -82,64 +80,58 @@ impl HasSampleValues for EntitySecurityState {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = EntitySecurityState;
 
     #[test]
     fn equality() {
-        assert_eq!(
-            EntitySecurityState::sample(),
-            EntitySecurityState::sample()
-        );
-        assert_eq!(
-            EntitySecurityState::sample_other(),
-            EntitySecurityState::sample_other()
-        );
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(
-            EntitySecurityState::sample(),
-            EntitySecurityState::sample_other()
-        );
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn json_roundtrip() {
-        let model = EntitySecurityState::sample();
+        let model = SUT::sample();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
-			{
-				"unsecuredEntityControl": {
-					"transactionSigning": {
-						"badge": {
-							"virtualSource": {
-								"hierarchicalDeterministicPublicKey": {
-									"publicKey": {
-										"curve": "curve25519",
-										"compressedData": "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b"
-									},
-									"derivationPath": {
-										"scheme": "cap26",
-										"path": "m/44H/1022H/1H/525H/1460H/0H"
-									}
-								},
-								"discriminator": "hierarchicalDeterministicPublicKey"
-							},
-							"discriminator": "virtualSource"
-						},
-						"factorSourceID": {
-							"fromHash": {
-								"kind": "device",
-								"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
-							},
-							"discriminator": "fromHash"
-						}
-					}
-				},
-				"discriminator": "unsecured"
-			}
+            {
+                "unsecuredEntityControl": {
+                    "transactionSigning": {
+                        "badge": {
+                            "virtualSource": {
+                                "hierarchicalDeterministicPublicKey": {
+                                    "publicKey": {
+                                        "curve": "curve25519",
+                                        "compressedData": "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b"
+                                    },
+                                    "derivationPath": {
+                                        "scheme": "cap26",
+                                        "path": "m/44H/1022H/1H/525H/1460H/0H"
+                                    }
+                                },
+                                "discriminator": "hierarchicalDeterministicPublicKey"
+                            },
+                            "discriminator": "virtualSource"
+                        },
+                        "factorSourceID": {
+                            "fromHash": {
+                                "kind": "device",
+                                "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+                            },
+                            "discriminator": "fromHash"
+                        }
+                    }
+                },
+                "discriminator": "unsecured"
+            }
             "#,
         );
     }

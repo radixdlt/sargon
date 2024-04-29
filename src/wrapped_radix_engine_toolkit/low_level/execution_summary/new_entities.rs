@@ -26,12 +26,12 @@ impl From<(RetNewEntities, NetworkID)> for NewEntities {
         Self::new(
             // We map from `IndexMap<GlobalAddress, IndexMap<String, Option<MetadataValue>>>`
             // into: `HashMap<ResourceAddress, NewlyCreatedResource>`,
-            // and "filter out" (ignore) any GlobalAddress that is not a ResourceAddress,
+            // and "filter out" (skip) any GlobalAddress that is not a ResourceAddress,
             // why? Since Radix Wallets actually only use the ResourceAddress...
             ret.metadata
                 .into_iter()
                 .filter_map(|(k, v)| {
-                    // We only care about `ResourceAddress`, and ignore other address types.
+                    // We only care about `ResourceAddress`, and skip other address types.
                     TryInto::<ResourceAddress>::try_into((k, network_id))
                         .map(|a| (a, v))
                         .ok()

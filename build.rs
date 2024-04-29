@@ -62,5 +62,5 @@ pub fn main() {
     set_dep_env("radix-engine-toolkit");
 
     uniffi::generate_scaffolding("src/sargon.udl")
-        .expect("Build script panics can be ignored");
+        .expect("Should be able to build.");
 }
