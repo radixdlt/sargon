@@ -1,50 +1,6 @@
 use crate::prelude::*;
 
-impl PersonaData {
-    pub fn ids_of_entries(&self) -> IndexSet<PersonaDataEntryID> {
-        let mut full_ids = IndexSet::<PersonaDataEntryID>::new();
-        if let Some(name) = &self.name {
-            let _ = full_ids.insert(name.id);
-        };
-        full_ids.extend(self.email_addresses.ids());
-        full_ids.extend(self.phone_numbers.ids());
-        full_ids
-    }
-}
-
-impl SharedPersonaData {
-    pub fn ids_of_entries(&self) -> IndexSet<PersonaDataEntryID> {
-        let mut full_ids = IndexSet::<PersonaDataEntryID>::new();
-        if let Some(name) = &self.name {
-            let _ = full_ids.insert(*name);
-        };
-        if let Some(email_addresses) = &self.email_addresses {
-            full_ids.extend(email_addresses.clone().ids);
-        }
-        if let Some(phone_numbers) = &self.phone_numbers {
-            full_ids.extend(phone_numbers.clone().ids);
-        }
-        full_ids
-    }
-}
-
 impl ProfileNetwork {
-    pub fn personas_non_hidden(&self) -> Personas {
-        self.personas
-            .clone()
-            .into_iter()
-            .filter(|p| !p.is_hidden())
-            .collect()
-    }
-
-    pub fn accounts_non_hidden(&self) -> Accounts {
-        self.accounts
-            .clone()
-            .into_iter()
-            .filter(|p| !p.is_hidden())
-            .collect()
-    }
-
     pub fn details_for_authorized_dapp(
         &self,
         dapp: &AuthorizedDapp,

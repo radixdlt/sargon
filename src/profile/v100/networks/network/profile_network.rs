@@ -70,11 +70,15 @@ impl ProfileNetwork {
     /// Panics if not any account in `accounts` is on another
     /// network than `network_id`
     pub fn new(
-        network_id: NetworkID,
-        accounts: Accounts,
-        personas: Personas,
-        authorized_dapps: AuthorizedDapps,
+        network_id: impl Into<NetworkID>,
+        accounts: impl Into<Accounts>,
+        personas: impl Into<Personas>,
+        authorized_dapps: impl Into<AuthorizedDapps>,
     ) -> Self {
+        let network_id = network_id.into();
+        let accounts = accounts.into();
+        let personas = personas.into();
+        let authorized_dapps = authorized_dapps.into();
         assert!(
             accounts
                 .get_all()

@@ -63,6 +63,12 @@ pub struct Persona {
     pub persona_data: PersonaData,
 }
 
+impl IsEntity for Persona {
+    fn flags(&self) -> EntityFlags {
+        self.flags.clone()
+    }
+}
+
 impl IsNetworkAware for Persona {
     fn network_id(&self) -> NetworkID {
         self.network_id
