@@ -21,6 +21,13 @@ repos:
         entry: cargo fmt -- --check
         pass_filenames: false
 
+      - id: SwiftFormat
+        name: SwiftFormat
+        language: system
+        types: [file, swift]
+        entry: swiftformat .
+        pass_filenames: false
+
       - id: clippy
         name: clippy
         language: system
