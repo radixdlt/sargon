@@ -2,7 +2,7 @@ use super::session_id::SessionID;
 use super::session_origin::SessionOrigin;
 use crate::prelude::*;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct Session {
     pub id: SessionID,
     pub origin: SessionOrigin,

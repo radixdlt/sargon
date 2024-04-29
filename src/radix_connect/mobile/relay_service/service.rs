@@ -97,12 +97,12 @@ impl Service {
     pub async fn send_session_handshake_response(
         &self,
         session_id: SessionID,
-        public_key: impl Into<PublicKey>,
+        public_key: DiffieHellmanPublicKey,
     ) -> Result<()> {
         let request = NetworkRequest::radix_connect_relay_request(
             Request::new_send_handshake_response(
                 session_id,
-                public_key.into().to_bytes(),
+                public_key.to_bytes(),
             ),
         )?;
         self.http_client.execute_network_request(request).await?;
@@ -369,8 +369,10 @@ mod tests {
         let service = Service::new_always_failing();
         let session_id = SessionID::sample();
 
-        let req = service
-            .send_session_handshake_response(session_id, PublicKey::sample());
+        let req = service.send_session_handshake_response(
+            session_id,
+            DiffieHellmanPublicKey::sample(),
+        );
         let result = timeout(MAX, req).await.unwrap();
         assert!(result.is_err());
     }
@@ -378,7 +380,7 @@ mod tests {
     #[actix_rt::test]
     async fn test_send_session_handshake_response() {
         let mock_antenna = MockAntenna::with_spy(200, (), |request| {
-            let public_key = PublicKey::sample();
+            let public_key = DiffieHellmanPublicKey::sample();
             let body = Request::new(
                 Method::SendHandshakeResponse,
                 SessionID::sample(),
@@ -405,8 +407,10 @@ mod tests {
         let service = Service::new_with_network_antenna(Arc::new(mock_antenna));
         let session_id = SessionID::sample();
 
-        let req = service
-            .send_session_handshake_response(session_id, PublicKey::sample());
+        let req = service.send_session_handshake_response(
+            session_id,
+            DiffieHellmanPublicKey::sample(),
+        );
         let _ = timeout(MAX, req).await.unwrap();
     }
 }
