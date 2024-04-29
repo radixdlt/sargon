@@ -192,7 +192,7 @@ mod tests {
     async fn test_get_wallet_interaction_requests() {
         let session = Session::sample();
         // Prepare encryption keys
-        let mut encryption_key = session.encryption_key.clone();
+        let mut encryption_key = session.encryption_key;
 
         // Serialize the request
         let dapp_to_wallet_interaction_unvalidated =
@@ -239,7 +239,7 @@ mod tests {
     async fn test_send_wallet_interaction_response() {
         let mock_antenna = MockAntenna::with_spy(200, (), |request| {
             // Prepare encryption keys
-            let mut encryption_key = Session::sample().encryption_key.clone();
+            let mut encryption_key = Session::sample().encryption_key;
             let mut decryption_key = encryption_key;
 
             // Serialize the response

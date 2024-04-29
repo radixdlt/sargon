@@ -42,6 +42,6 @@ mod tests {
         let original = SUT::sample();
         let json = r#"["deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"]"#;
 
-        assert_eq_after_json_roundtrip(&original, &json);
+        assert_eq_after_json_roundtrip(&original, json);
     }
 }

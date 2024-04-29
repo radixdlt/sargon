@@ -101,8 +101,8 @@ impl AuthorizedPersonaSimple {
             // This is a sign that Profile is in a bad state somehow...
             warn!("Discrepancy! AuthorizedDapp references persona which does not exist {}", self.identity_address);
             return Err(CommonError::DiscrepancyAuthorizedDappReferencedPersonaWhichDoesNotExist {
-            address: self.identity_address
-        });
+                address: self.identity_address
+            });
         };
         Ok(persona.clone())
     }
