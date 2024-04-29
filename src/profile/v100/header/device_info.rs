@@ -79,8 +79,8 @@ impl Default for DeviceInfo {
 impl HasSampleValues for DeviceInfo {
     fn sample() -> Self {
         Self::new(
-            Uuid::from_str("66f07ca2-a9d9-49e5-8152-77aca3d1dd74").unwrap(),
-            Timestamp::parse("2023-09-11T16:05:56.000Z").unwrap(),
+            Uuid::from_str("66F07CA2-A9D9-49E5-8152-77ACA3D1DD74").unwrap(),
+            Timestamp::parse("2023-09-11T16:05:56Z").unwrap(),
             "iPhone",
         )
     }
@@ -177,6 +177,8 @@ mod tests {
         let model = SUT::sample();
         assert_eq_after_json_roundtrip(
             &model,
+            // The JSON string literal below contains `.000` ISO8601
+            // milliseconds which is not set on the sample
             r#"
             {
                 "id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
@@ -191,7 +193,7 @@ mod tests {
             r#"
             {
                 "id": "00000000-0000-0000-0000-000000000000",
-                "date": "1970-01-01T12:34:56.000Z",
+                "date": "1970-01-01T12:34:56Z",
                 "description": "Nokia"
             }
             "#,
