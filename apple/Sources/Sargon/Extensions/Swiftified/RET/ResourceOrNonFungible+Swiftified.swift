@@ -1,16 +1,10 @@
-//
-//  File.swift
-//  
-//
-//  Created by Alexander Cyon on 2024-04-22.
-//
-
 import Foundation
 import SargonUniFFI
 
-
+// MARK: - ResourceOrNonFungible + SargonModel
 extension ResourceOrNonFungible: SargonModel {}
 
+// MARK: - ResourceOrNonFungible + Identifiable
 extension ResourceOrNonFungible: Identifiable {
 	public typealias ID = Self
 	public var id: ID {
@@ -20,7 +14,6 @@ extension ResourceOrNonFungible: Identifiable {
 
 extension ResourceOrNonFungible {
 	public var resourceAddress: ResourceAddress {
-
 		switch self {
 		case let .nonFungible(value): value.resourceAddress
 		case let .resource(value): value

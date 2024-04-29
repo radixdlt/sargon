@@ -1,10 +1,3 @@
-//
-//  File.swift
-//  
-//
-//  Created by Alexander Cyon on 2024-04-23.
-//
-
 import CustomDump
 import Foundation
 import Sargon
@@ -18,11 +11,11 @@ final class SharedPersonaDataTests: Test<SharedPersonaData> {
 			[0, 1, 2, 3, 4]
 		)
 	}
-	
+
 	func test_entryIDs_empty() {
 		XCTAssertEqual(SUT.default.entryIDs, [])
 	}
-	
+
 	func test_default_is_empty() {
 		XCTAssertEqual(
 			SUT.default,
@@ -34,4 +27,3 @@ final class SharedPersonaDataTests: Test<SharedPersonaData> {
 		)
 	}
 }
-	

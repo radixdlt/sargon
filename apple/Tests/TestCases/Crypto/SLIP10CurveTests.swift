@@ -9,16 +9,16 @@ final class SLIP10CurveTests: Test<SLIP10Curve> {
 		XCTAssertNoDifference(SUT.sample.toString(), SUT.sample.description)
 		XCTAssertNoDifference(SUT.sampleOther.toString(), SUT.sampleOther.description)
 	}
-	
+
 	func test_string_roundtrip() throws {
 		func doTest(_ sut: SUT) throws {
 			let string = sut.toString()
-			let fromString = try XCTUnwrap(SUT.init(rawValue: string))
+			let fromString = try XCTUnwrap(SUT(rawValue: string))
 			XCTAssertEqual(fromString, sut)
 		}
 		try SUT.sampleValues.forEach(doTest)
 	}
-	
+
 	func test_codable_roundtrip() throws {
 		try SUT.sampleValues.forEach(doTestCodableRoundtrip)
 	}

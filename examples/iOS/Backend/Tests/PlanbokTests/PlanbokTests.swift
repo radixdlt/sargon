@@ -1,7 +1,6 @@
-import XCTest
 @testable import Planbok
+import XCTest
 
 final class PlanbokTests: XCTestCase {
-	func testExample() throws {
-	}
+	func testExample() throws {}
 }

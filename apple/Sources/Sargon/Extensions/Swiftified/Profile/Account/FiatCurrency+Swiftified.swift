@@ -1,14 +1,10 @@
-//
-//  File.swift
-//
-//
-//  Created by Alexander Cyon on 2024-04-19.
-//
-
 import Foundation
 import SargonUniFFI
 
+// MARK: - FiatCurrency + SargonModel
 extension FiatCurrency: SargonModel {}
+
+// MARK: - FiatCurrency + SargonStringCodable
 extension FiatCurrency: SargonStringCodable {}
 
 extension FiatCurrency {
@@ -17,6 +13,7 @@ extension FiatCurrency {
 	}
 }
 
+// MARK: - FiatCurrency + CustomStringConvertible
 extension FiatCurrency: CustomStringConvertible {
 	public var description: String {
 		jsonStringLiteral()

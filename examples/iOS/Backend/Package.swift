@@ -3,7 +3,7 @@
 import PackageDescription
 
 let swiftSettings: [SwiftSetting] = [
-	.enableExperimentalFeature("StrictConcurrency")
+	.enableExperimentalFeature("StrictConcurrency"),
 ]
 
 let package = Package(
@@ -12,16 +12,19 @@ let package = Package(
 	products: [
 		.library(
 			name: "Planbok",
-			targets: ["Planbok"])
+			targets: ["Planbok"]
+		),
 	],
 	dependencies: [
 		.package(name: "Sargon", path: "../../.."),
 		.package(
 			url: "https://github.com/pointfreeco/swift-composable-architecture",
-			from: "1.8.0"),
+			from: "1.8.0"
+		),
 		.package(
 			url: "https://github.com/tgrapperon/swift-dependencies-additions",
-			from: "1.0.1"),
+			from: "1.0.1"
+		),
 		.package(url: "https://github.com/kishikawakatsumi/KeychainAccess", from: "4.2.2"),
 	],
 	targets: [
@@ -31,10 +34,12 @@ let package = Package(
 				.product(name: "Sargon", package: "Sargon"),
 				.product(
 					name: "ComposableArchitecture",
-					package: "swift-composable-architecture"),
+					package: "swift-composable-architecture"
+				),
 				.product(
 					name: "DependenciesAdditions",
-					package: "swift-dependencies-additions"),
+					package: "swift-dependencies-additions"
+				),
 				"KeychainAccess",
 			],
 			resources: [.process("Assets")],

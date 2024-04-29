@@ -1,11 +1,3 @@
-//
-//  File.swift
-//  
-//
-//  Created by Alexander Cyon on 2024-04-23.
-//
-
-
 import CustomDump
 import Foundation
 import Sargon
@@ -13,7 +5,6 @@ import SargonUniFFI
 import XCTest
 
 final class PersonaDataTests: Test<PersonaData> {
-	
 	func test_entries() {
 		XCTAssertEqual(
 			SUT.sample.entries,
@@ -26,9 +17,8 @@ final class PersonaDataTests: Test<PersonaData> {
 			]
 		)
 	}
-	
-	func test_default_is_empty() {
-		XCTAssertEqual(SUT.default, SUT.init())
-	}
 
+	func test_default_is_empty() {
+		XCTAssertEqual(SUT.default, SUT())
+	}
 }

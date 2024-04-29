@@ -4,14 +4,13 @@ import SargonUniFFI
 #if DEBUG
 @Reducer
 public struct SampleValuesFeature {
-	
 	@ObservableState
 	public struct State: Equatable {}
-	
+
 	public enum Action {}
-	
+
 	public init() {}
-	
+
 	public struct View: SwiftUI.View {
 		public let store: StoreOf<SampleValuesFeature>
 		public var body: some SwiftUI.View {
@@ -20,7 +19,7 @@ public struct SampleValuesFeature {
 					Text("`\(TransactionManifest.sample.description)`")
 				}
 				.font(.footnote)
-				
+
 				Section("Addresses") {
 					SampleAddressesView()
 				}

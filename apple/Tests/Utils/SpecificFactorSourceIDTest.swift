@@ -13,8 +13,7 @@ class SpecificFactorSourceIDTest<SUT_: FactorSourceIDSpecificProtocol>: FactorSo
 		}
 		try SUT.sampleValues.forEach(doTest)
 	}
-	
-	
+
 	func test_codable_roundtrip() throws {
 		try SUT.sampleValues.forEach(doTestCodableRoundtrip)
 	}

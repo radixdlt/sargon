@@ -1,14 +1,10 @@
-//
-//  File.swift
-//
-//
-//  Created by Alexander Cyon on 2024-04-14.
-//
-
 import Foundation
 import SargonUniFFI
 
+// MARK: - AuthorizedPersonaSimple + SargonModel
 extension AuthorizedPersonaSimple: SargonModel {}
+
+// MARK: - AuthorizedPersonaSimple + Identifiable
 extension AuthorizedPersonaSimple: Identifiable {
 	public typealias ID = IdentityAddress
 	public var id: ID {

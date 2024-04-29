@@ -4,5 +4,4 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class ValidatorAddressTests: AddressTest<ValidatorAddress> {
-}
+final class ValidatorAddressTests: AddressTest<ValidatorAddress> {}

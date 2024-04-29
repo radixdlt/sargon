@@ -4,8 +4,8 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
+// MARK: - EntityProtocolTest
 class EntityProtocolTest<SUT_: EntityProtocol>: EntityBaseTest<SUT_> {
-	
 	func test_extract() throws {
 		func doTest(_ sut: SUT) throws {
 			let embedded = sut.asGeneral
@@ -16,38 +16,37 @@ class EntityProtocolTest<SUT_: EntityProtocol>: EntityBaseTest<SUT_> {
 	}
 }
 
-
+// MARK: - EntityBaseTest
 class EntityBaseTest<SUT_: EntityBaseProtocol>: Test<SUT_> {
-	
 	func test_network_id_of_mainnet_entities() {
-		SUT.sampleValuesMainnet.forEach {
-			XCTAssertNoDifference($0.networkID, .mainnet)
+		for item in SUT.sampleValuesMainnet {
+			XCTAssertNoDifference(item.networkID, .mainnet)
 		}
 	}
-	
+
 	func test_network_id_of_stokenet_entities() {
-		SUT.sampleValuesStokenet.forEach {
-			XCTAssertNoDifference($0.networkID, .stokenet)
+		for item in SUT.sampleValuesStokenet {
+			XCTAssertNoDifference(item.networkID, .stokenet)
 		}
 	}
-	
+
 	func test_id_is_address() {
-		SUT.sampleValues.forEach {
-			XCTAssertNoDifference($0.id, $0.address)
+		for sampleValue in SUT.sampleValues {
+			XCTAssertNoDifference(sampleValue.id, sampleValue.address)
 		}
 	}
-	
+
 	func test_is_hidden() {
 		XCTAssertFalse(SUT.sample.isHidden)
 	}
-	
+
 	func test_hasAuthenticationSigningKey() {
 		func doTest(_ sut: SUT) {
 			XCTAssertFalse(sut.hasAuthenticationSigningKey)
 		}
 		SUT.sampleValues.forEach(doTest)
 	}
-	
+
 	func test_deviceFactorSourceID() {
 		func doTest(_ sut: SUT) {
 			XCTAssertTrue(
@@ -65,21 +64,21 @@ class EntityBaseTest<SUT_: EntityBaseProtocol>: Test<SUT_> {
 	}
 
 	func test_controlled_by_ed25519_factor() {
-		SUT.sampleValues.forEach {
-			switch $0.securityState {
-			case .unsecured(let unsecuredEntityControl):
-				switch 	unsecuredEntityControl.transactionSigning.publicKey.publicKey {
+		for sampleValue in SUT.sampleValues {
+			switch sampleValue.securityState {
+			case let .unsecured(unsecuredEntityControl):
+				switch unsecuredEntityControl.transactionSigning.publicKey.publicKey {
 				case .ed25519: break // good
 				case .secp256k1: XCTFail("Wrong key kind")
 				}
 			}
 		}
 	}
-	
+
 	func test_all_address_different() {
 		XCTAssertGreaterThanOrEqual(Set(SUT.sampleValues).count, 6)
 	}
-	
+
 	func test_flags() {
 		XCTAssertTrue(
 			SUT.sampleValues.flatMap(

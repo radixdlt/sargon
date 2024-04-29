@@ -7,15 +7,14 @@ public protocol BaseIdentifiableByStringProtocol: SargonModel & ExpressibleByStr
 public protocol BaseIdentifiableByStringProtocol: SargonModel {}
 #endif // DEBUG
 
-
+// MARK: - IdentifiableByStringProtocol
 public protocol IdentifiableByStringProtocol: BaseIdentifiableByStringProtocol & Codable & CustomStringConvertible & Identifiable where Self.ID == String {
 	init(_ string: String) throws
-	
+
 	/// A non user facing, raw, string representation of the value.
-	func toRawString() -> String 
-	
+	func toRawString() -> String
+
 	func formatted(_ format: AddressFormat) -> String
-	
 }
 
 extension IdentifiableByStringProtocol {
@@ -43,7 +42,6 @@ extension IdentifiableByStringProtocol where Self: Codable {
 	}
 }
 
-
 #if DEBUG
 extension IdentifiableByStringProtocol {
 	public init(stringLiteral value: String) {
@@ -51,4 +49,3 @@ extension IdentifiableByStringProtocol {
 	}
 }
 #endif // DEBUG
-

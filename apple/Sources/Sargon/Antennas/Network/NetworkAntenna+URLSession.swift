@@ -6,7 +6,7 @@ extension URLRequest {
 		var request = URLRequest(url: sargon.url)
 		switch sargon.method {
 		case .post:
-			request.httpMethod = "POST"  // FIXME: embed in sargon
+			request.httpMethod = "POST" // FIXME: embed in sargon
 		case .get:
 			request.httpMethod = "GET"
 		}
@@ -30,8 +30,8 @@ extension NetworkResponse {
 	}
 }
 
+// MARK: - URLSession + NetworkAntenna
 extension URLSession: NetworkAntenna {
-
 	public func executeNetworkRequest(
 		request sargonRequest: NetworkRequest
 	) async throws -> NetworkResponse {

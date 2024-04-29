@@ -5,8 +5,7 @@ import SargonUniFFI
 import XCTest
 
 final class MnemonicWithPassphraseTests: Test<MnemonicWithPassphrase> {
-	
-	func test_not_codable_but_lower_level_json_methods_json_data_roundtrip() throws{
+	func test_not_codable_but_lower_level_json_methods_json_data_roundtrip() throws {
 		let sut = SUT.sample
 		let json = sut.jsonData()
 		try XCTAssertEqual(
@@ -14,7 +13,7 @@ final class MnemonicWithPassphraseTests: Test<MnemonicWithPassphrase> {
 			sut
 		)
 	}
-	
+
 	func test_codable() throws {
 		let raw = """
 		{
@@ -22,25 +21,25 @@ final class MnemonicWithPassphraseTests: Test<MnemonicWithPassphrase> {
 			"passphrase": "radix"
 		}
 		""".data(using: .utf8)!
-		
+
 		// test decoding
 		let sut = try JSONDecoder().decode(SUT.self, from: raw)
 		XCTAssertEqual(sut, SUT.sample)
-		
+
 		// test encoding
 		let encoded = try JSONEncoder().encode(sut)
 		try XCTAssertEqual(JSONDecoder().decode(SUT.self, from: encoded), sut)
 	}
-	
+
 	func test_derive_public_keys() {
 		XCTAssertEqual(SUT.sample.derivePublicKeys(paths: [DerivationPath.sample]), [HierarchicalDeterministicPublicKey.sample])
 	}
-    
-    func test_validate() {
-        XCTAssertTrue(SUT.sample.validate(publicKeys: [HierarchicalDeterministicPublicKey.sample]))
-        XCTAssertFalse(SUT.sampleOther.validate(publicKeys: [HierarchicalDeterministicPublicKey.sample]))
-    }
-	
+
+	func test_validate() {
+		XCTAssertTrue(SUT.sample.validate(publicKeys: [HierarchicalDeterministicPublicKey.sample]))
+		XCTAssertFalse(SUT.sampleOther.validate(publicKeys: [HierarchicalDeterministicPublicKey.sample]))
+	}
+
 	func test_sign_is_valid() {
 		let sut = SUT.sample
 		let path = DerivationPath.sample

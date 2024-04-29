@@ -13,8 +13,8 @@ extension Decimal192: ExpressibleByFloatLiteral {
 #endif
 
 extension Decimal192 {
-	public static let pi: Self 	= "3.141592653589793238"
-	public static let e: Self 		= "2.718281828459045235"
+	public static let pi: Self = "3.141592653589793238"
+	public static let e: Self = "2.718281828459045235"
 }
 
 extension Decimal192 {
@@ -33,18 +33,16 @@ extension Decimal192 {
 			Self.eight,
 			Self.nine,
 			Self.ten,
-			Self(21_000_000)
+			Self(21_000_000),
 		]
 		assert(values.sorted() == values)
 		assert(Set(values).count == values.count) // assert no duplicates
 		return values
 	}()
-	
+
 	// Sorted in increasing order: [-10, -9, .. -2, -1]
-	public static let negative: [Self] = {
-		positive.map { $0.negate() }.sorted()
-	}()
-	
+	public static let negative: [Self] = positive.map { $0.negate() }.sorted()
+
 	public static let nonZero: [Self] = {
 		var nonZero: [Self] = []
 		nonZero.append(contentsOf: Self.negative)
@@ -52,14 +50,15 @@ extension Decimal192 {
 		return nonZero.sorted()
 	}()
 }
+
 extension Array {
 	var identityPairs: [(Element, Element)] {
 		zip(self, self).map { ($0, $1) }
 	}
-	
+
 	/// [2, 5, 7, 13].slidingWindowPairs == [(2, 5), (5, 7), (7, 13)]
 	var slidingWindowPairs: [(Element, Element)] {
-		enumerated().compactMap { (offset, element) in
+		enumerated().compactMap { offset, element in
 			let nextIndex = offset + 1
 			if nextIndex >= count {
 				return nil
@@ -76,35 +75,35 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
+// MARK: - Decimal192Tests
 final class Decimal192Tests: Test<Decimal192> {
-	
 	func test_init_from_string() throws {
 		let s = "3.1415"
 		try XCTAssertNoDifference(SUT(s).debugDescription, s)
 	}
-	
+
 	func test_init_from_i64() {
 		let value: Int64 = -1337
 		XCTAssertNoDifference(SUT(value).debugDescription, value.description)
 	}
-	
+
 	func test_init_from_u64() {
 		let value: UInt64 = 237
 		XCTAssertNoDifference(SUT(value).debugDescription, value.description)
 	}
-	
+
 	func test_max_divisibility() {
 		XCTAssertEqual(SUT.maxDivisibility, 18)
 	}
-	
+
 	func test_equal() {
-		SUT.positive.identityPairs.forEach { lhs, rhs in
+		for (lhs, rhs) in SUT.positive.identityPairs {
 			XCTAssertEqual(lhs, rhs)
 		}
-		SUT.negative.identityPairs.forEach { lhs, rhs in
+		for (lhs, rhs) in SUT.negative.identityPairs {
 			XCTAssertEqual(lhs, rhs)
 		}
-		
+
 		XCTAssertEqual(SUT.zero, SUT.zero)
 		XCTAssertEqual(SUT.max, SUT.max)
 		XCTAssertEqual(SUT.min, SUT.min)
@@ -113,7 +112,7 @@ final class Decimal192Tests: Test<Decimal192> {
 		XCTAssertEqual(SUT.pi, SUT.pi)
 		XCTAssertEqual(SUT.e, SUT.e)
 	}
-	
+
 	func test_not_equal() {
 		XCTAssertNotEqual(SUT.zero, SUT.max)
 		XCTAssertNotEqual(SUT.zero, SUT.min)
@@ -121,7 +120,7 @@ final class Decimal192Tests: Test<Decimal192> {
 		XCTAssertNotEqual(SUT.one, SUT.one.negate())
 		XCTAssertNotEqual(SUT.pi, SUT.e)
 	}
-	
+
 	func test_greater_than() {
 		XCTAssertGreaterThan(SUT.one, SUT.zero)
 		XCTAssertGreaterThan(SUT.max, SUT.ten)
@@ -129,21 +128,21 @@ final class Decimal192Tests: Test<Decimal192> {
 		XCTAssertGreaterThan(SUT.zero, SUT.min)
 		XCTAssertGreaterThan(SUT.pi, SUT.e)
 	}
-	
+
 	func test_greater_than_or_equal() {
-		SUT.nonZero.identityPairs.forEach { lhs, rhs in
+		for (lhs, rhs) in SUT.nonZero.identityPairs {
 			XCTAssertGreaterThanOrEqual(lhs, rhs)
 		}
-		SUT.nonZero.slidingWindowPairs.forEach { lhs, rhs in
+		for (lhs, rhs) in SUT.nonZero.slidingWindowPairs {
 			XCTAssertGreaterThanOrEqual(rhs, lhs)
 		}
 		XCTAssertGreaterThanOrEqual(SUT.four, SUT.three)
 		XCTAssertGreaterThanOrEqual(SUT.five, SUT.five)
 		XCTAssertGreaterThanOrEqual(SUT.pi, SUT.e)
 	}
-	
+
 	func test_less_than() {
-		SUT.nonZero.slidingWindowPairs.forEach { lhs, rhs in
+		for (lhs, rhs) in SUT.nonZero.slidingWindowPairs {
 			XCTAssertLessThan(lhs, rhs)
 		}
 		XCTAssertLessThan(SUT.nine, SUT.ten)
@@ -151,29 +150,29 @@ final class Decimal192Tests: Test<Decimal192> {
 		XCTAssertLessThan(SUT.zero, SUT.max)
 		XCTAssertLessThan(SUT.e, SUT.pi)
 	}
-	
+
 	func test_less_than_or_equal() {
-		SUT.nonZero.identityPairs.forEach { lhs, rhs in
+		for (lhs, rhs) in SUT.nonZero.identityPairs {
 			XCTAssertLessThanOrEqual(lhs, rhs)
 		}
 		XCTAssertLessThanOrEqual(SUT.seven, SUT.eight)
 		XCTAssertLessThanOrEqual(SUT.six, SUT.six)
 		XCTAssertLessThanOrEqual(SUT.e, SUT.pi)
 	}
-	
+
 	func test_addition() {
-		SUT.nonZero.slidingWindowPairs.forEach { lhs, rhs in
+		for (lhs, rhs) in SUT.nonZero.slidingWindowPairs {
 			XCTAssertEqual(lhs + rhs, rhs + lhs) // commutative
 		}
-		SUT.negative.forEach {
-			XCTAssertEqual($0 + $0, 2 * $0)
+		for item in SUT.negative {
+			XCTAssertEqual(item + item, 2 * item)
 		}
-		
-		SUT.nonZero.forEach {
+
+		for item in SUT.nonZero {
 			// zero is identity under addition
-			XCTAssertEqual($0 + SUT.zero, $0)
+			XCTAssertEqual(item + SUT.zero, item)
 		}
-		
+
 		XCTAssertEqual(SUT.zero + 0, 0)
 		XCTAssertEqual(SUT.zero + 1, 1)
 		XCTAssertEqual(SUT.one + 1, 2)
@@ -184,20 +183,20 @@ final class Decimal192Tests: Test<Decimal192> {
 		XCTAssertEqual(SUT.pi + SUT.e, "5.859874482048838473")
 		XCTAssertEqual(SUT.pi + SUT.e, SUT.e + SUT.pi) // commutative
 	}
-	
+
 	func test_subtraction() {
-		SUT.positive.forEach {
-			XCTAssertEqual($0 - $0, SUT.zero) // 3 - 3 => 0
+		for item in SUT.positive {
+			XCTAssertEqual(item - item, SUT.zero) // 3 - 3 => 0
 		}
-		SUT.negative.forEach {
-			XCTAssertEqual($0 - $0, SUT.zero) // (-3) - (-3) => (-3) + 3 => 0
+		for item in SUT.negative {
+			XCTAssertEqual(item - item, SUT.zero) // (-3) - (-3) => (-3) + 3 => 0
 		}
-		
-		SUT.nonZero.forEach {
+
+		for item in SUT.nonZero {
 			// zero is identity under subtraction
-			XCTAssertEqual($0 - SUT.zero, $0)
+			XCTAssertEqual(item - SUT.zero, item)
 		}
-		
+
 		XCTAssertEqual(SUT.zero - 0, 0)
 		XCTAssertEqual(SUT.zero - 1, -1)
 		XCTAssertEqual(SUT.one - 1, 0)
@@ -209,81 +208,80 @@ final class Decimal192Tests: Test<Decimal192> {
 		XCTAssertEqual(SUT.max - SUT.max, 0)
 		XCTAssertEqual(SUT.min - SUT.min, 0)
 	}
-	
+
 	func test_multiplication() {
-		
-		SUT.nonZero.forEach {
+		for item in SUT.nonZero {
 			// `1` is identity under multiplication
-			XCTAssertEqual($0 * SUT.one, $0)
+			XCTAssertEqual(item * SUT.one, item)
 		}
-		
-		SUT.nonZero.slidingWindowPairs.forEach { lhs, rhs in
+
+		for (lhs, rhs) in SUT.nonZero.slidingWindowPairs {
 			XCTAssertEqual(lhs * rhs, rhs * lhs) // commutative
 		}
-		
-		SUT.nonZero.forEach {
+
+		for item in SUT.nonZero {
 			// Every number multiplied by zero, is zero...
-			XCTAssertEqual($0 * SUT.zero, SUT.zero)
+			XCTAssertEqual(item * SUT.zero, SUT.zero)
 		}
 		// ... incliding `max` and `min`
 		XCTAssertEqual(SUT.max * 0, 0)
 		XCTAssertEqual(SUT.min * 0, 0)
-		
+
 		var sut: SUT = .ten
 		sut *= SUT.five
 		XCTAssertEqual(sut, 50)
 	}
-	
+
 	func test_division() {
 		XCTAssertEqual(SUT.nine / SUT.three, SUT.three)
-		
-		SUT.nonZero.forEach {
+
+		for item in SUT.nonZero {
 			// All numbers divided by themselves equals `one`...
-			XCTAssertEqual($0 / $0, SUT.one)
+			XCTAssertEqual(item / item, SUT.one)
 		}
 		// ... incliding `max` and `min`
 		XCTAssertEqual(SUT.max / SUT.max, SUT.one)
 		XCTAssertEqual(SUT.min / SUT.min, SUT.one)
 	}
-	
+
 	func test_is_negative() {
-		SUT.negative.forEach {
-			XCTAssertTrue($0.isNegative)
+		for item in SUT.negative {
+			XCTAssertTrue(item.isNegative)
 		}
-		SUT.positive.forEach {
-			XCTAssertFalse($0.isNegative)
+		for item in SUT.positive {
+			XCTAssertFalse(item.isNegative)
 		}
 	}
-	
+
 	func test_is_positive() {
-		SUT.negative.forEach {
-			XCTAssertFalse($0.isPositive)
+		for item in SUT.negative {
+			XCTAssertFalse(item.isPositive)
 		}
-		SUT.positive.forEach {
-			XCTAssertTrue($0.isPositive)
+		for item in SUT.positive {
+			XCTAssertTrue(item.isPositive)
 		}
 	}
-	
+
 	func test_is_zero() {
-		SUT.negative.forEach {
-			XCTAssertFalse($0.isZero)
+		for item in SUT.negative {
+			XCTAssertFalse(item.isZero)
 		}
-		SUT.positive.forEach {
-			XCTAssertFalse($0.isZero)
+		for item in SUT.positive {
+			XCTAssertFalse(item.isZero)
 		}
-		
+
 		XCTAssert(SUT.zero.isZero)
 	}
-	
+
 	func test_clamped() {
-		SUT.negative.forEach {
-			XCTAssertEqual($0.clamped, SUT.zero)
+		for item in SUT.negative {
+			XCTAssertEqual(item.clamped, SUT.zero)
 		}
-		SUT.positive.forEach {
-			XCTAssertEqual($0.clamped, $0)
+		for item in SUT.positive {
+			XCTAssertEqual(item.clamped, item)
 		}
 	}
-	
+
 	func test_exponent() {
 		func doTest(exponent: UInt8, expected: SUT) {
 			XCTAssertEqual(SUT(exponent: exponent), expected)
@@ -294,18 +292,18 @@ final class Decimal192Tests: Test<Decimal192> {
 		doTest(exponent: 3, expected: 1000)
 		doTest(exponent: 4, expected: 10000)
 	}
-	
+
 	func test_negation() {
 		XCTAssertEqual(-SUT.five, SUT.zero - 5)
 	}
-	
+
 	func test_init_source_exactly() {
-		XCTAssertEqual(SUT(exactly: UInt64(12345678912345678)), 12345678912345678)
-		XCTAssertEqual(SUT(exactly: Int64(-12345678912345678)), SUT("12345678912345678").negate())
+		XCTAssertEqual(SUT(exactly: UInt64(12_345_678_912_345_678)), 12_345_678_912_345_678)
+		XCTAssertEqual(SUT(exactly: Int64(-12_345_678_912_345_678)), SUT("12345678912345678").negate())
 	}
-	
+
 	func test_from_and_from_formatted() {
-		func doTest(_ decimalString: String , line: UInt = #line) {
+		func doTest(_ decimalString: String, line: UInt = #line) {
 			XCTAssertNoThrow(
 				try SUT(
 					formattedString: decimalString,
@@ -326,13 +324,13 @@ final class Decimal192Tests: Test<Decimal192> {
 		doTest("0.1234")
 		doTest("1,234.9876")
 	}
-	
+
 	func test_rounded() {
 		func doTest(_ from: SUT, decimalPlaces: UInt8, expected: SUT, line: UInt = #line) {
 			let sut = from.rounded(decimalPlaces: decimalPlaces)
 			XCTAssertEqual(sut, expected, line: line)
 		}
-		
+
 		doTest(0.12345, decimalPlaces: 5, expected: 0.12345) // unchanged
 		doTest(0.12345, decimalPlaces: 4, expected: 0.1235)
 		doTest(0.12345, decimalPlaces: 3, expected: 0.123)
@@ -340,14 +338,13 @@ final class Decimal192Tests: Test<Decimal192> {
 		doTest(0.12345, decimalPlaces: 1, expected: 0.1)
 		doTest(0.12345, decimalPlaces: 0, expected: 0)
 	}
-	
-	
+
 	func test_ceil() {
 		func doTest(_ from: SUT, decimalPlaces: UInt8, expected: SUT, line: UInt = #line) {
 			let sut = from.ceil(decimalPlaces: decimalPlaces)
 			XCTAssertEqual(sut, expected, line: line)
 		}
-		
+
 		doTest(0.12345, decimalPlaces: 5, expected: 0.12345) // unchanged
 		doTest(0.12345, decimalPlaces: 4, expected: 0.1235)
 		doTest(0.12345, decimalPlaces: 3, expected: 0.124)
@@ -355,25 +352,24 @@ final class Decimal192Tests: Test<Decimal192> {
 		doTest(0.12345, decimalPlaces: 1, expected: 0.2)
 		doTest(0.12345, decimalPlaces: 0, expected: 1)
 	}
-	
-	
+
 	func test_floor() {
 		func doTest(_ from: SUT, decimalPlaces: UInt8, expected: SUT, line: UInt = #line) {
 			let sut = from.floor(decimalPlaces: decimalPlaces)
 			XCTAssertEqual(sut, expected, line: line)
 		}
-		
+
 		doTest(0.12345, decimalPlaces: 5, expected: 0.12345) // unchanged
 		doTest(0.12345, decimalPlaces: 4, expected: 0.1234)
 		doTest(0.12345, decimalPlaces: 3, expected: 0.123)
 		doTest(0.12345, decimalPlaces: 2, expected: 0.12)
-		
+
 		doTest(0.955, decimalPlaces: 3, expected: 0.955)
 		doTest(0.955, decimalPlaces: 2, expected: 0.95)
 		doTest(0.955, decimalPlaces: 1, expected: 0.9)
 		doTest(0.955, decimalPlaces: 0, expected: 0)
 	}
-	
+
 	func test_from_double() throws {
 		func doTest(_ double: Double, _ expected: String) throws {
 			let sut = try SUT(double)
@@ -383,21 +379,21 @@ final class Decimal192Tests: Test<Decimal192> {
 		try doTest(0.1, "0.1")
 		try doTest(4.012345678901234567895555555, "4.012345678901235")
 	}
-	
+
 	func test_magnitude() {
 		XCTAssertEqual(SUT.min.magnitude, SUT.max)
 	}
-	
+
 	func test_standard_transaction_fee() {
 		XCTAssertEqual(SUT.temporaryStandardFee, 25)
 	}
-	
+
 	func test_decoding_to_SUT() throws {
 		struct TestStruct: Codable, Equatable {
 			let decimal: SUT
 			let optional: SUT?
 		}
-		
+
 		func doTest(_ string: String, decimal expectedDecimal: SUT, optionalIsNil: Bool = false) throws {
 			if let data = string.data(using: .utf8) {
 				let actual = try JSONDecoder().decode(TestStruct.self, from: data)
@@ -407,7 +403,7 @@ final class Decimal192Tests: Test<Decimal192> {
 				XCTFail()
 			}
 		}
-		
+
 		try doTest("{\"decimal\":\"123.1234\",\"optional\":\"123.1234\"}", decimal: .init("123.1234"))
 		try doTest("{\"decimal\":\"1233434.1234\",\"optional\":\"1233434.1234\"}", decimal: .init("1233434.1234"))
 		try doTest("{\"decimal\":\"124300.1332\",\"optional\":\"124300.1332\"}", decimal: .init("124300.1332"))
@@ -420,33 +416,33 @@ final class Decimal192Tests: Test<Decimal192> {
 		try doTest("{\"decimal\":\"1234123.4\",\"optional\":\"1234123.4\"}", decimal: .init("1234123.4"))
 		try doTest("{\"decimal\":\"123456.34\",\"optional\":\"123456.34\"}", decimal: .init("123456.34"))
 		try doTest("{\"decimal\":\"12345.234\",\"optional\":\"12345.234\"}", decimal: .init("12345.234"))
-		
+
 		try doTest("{\"decimal\":\"12341234\",\"optional\":\"12341234\"}", decimal: .init("12341234"))
 		try doTest("{\"decimal\":\"1234123412341234\",\"optional\":\"1234123412341234\"}", decimal: .init("1234123412341234"))
-		
+
 		try doTest("{\"decimal\":\"00000123\",\"optional\":\"00000123\"}", decimal: .init("123"))
 		try doTest("{\"decimal\":\"00000123.1234\",\"optional\":\"00000123.1234\"}", decimal: .init("123.1234"))
 		try doTest("{\"decimal\":\"00000123.12340000\",\"optional\":\"00000123.12340000\"}", decimal: .init("123.1234"))
 		try doTest("{\"decimal\":\"123.12340000\",\"optional\":\"123.12340000\"}", decimal: .init("123.1234"))
-		
+
 		try doTest("{\"decimal\":\"123.1234\"}", decimal: .init("123.1234"), optionalIsNil: true)
 		try doTest("{\"decimal\":\"12341234\"}", decimal: .init("12341234"), optionalIsNil: true)
 	}
-	
+
 	func test_roundtrip_coding_SUT() throws {
 		struct TestStruct: Codable, Equatable {
 			let decimal: SUT?
 		}
-		
+
 		func doTest(_ decimal: SUT?) throws {
 			let original = TestStruct(decimal: decimal)
 			let encoded = try JSONEncoder().encode(original)
 			let decoded = try JSONDecoder().decode(TestStruct.self, from: encoded)
 			XCTAssertEqual(original, decoded)
 		}
-		
+
 		try doTest(nil)
-		
+
 		for decimalString in smallDecimalStrings {
 			let sut = try SUT(decimalString)
 			try doTest(sut)
@@ -454,7 +450,7 @@ final class Decimal192Tests: Test<Decimal192> {
 			XCTAssertNoDifference(sut, fromRawString)
 		}
 	}
-	
+
 	func test_as_double() throws {
 		typealias LargeVector = (string: String, lostPrecision: UInt8)
 		let largeDecimalsStrings: [LargeVector] = [
@@ -464,14 +460,14 @@ final class Decimal192Tests: Test<Decimal192> {
 		let numberFormatter = NumberFormatter()
 		numberFormatter.maximumFractionDigits = 18
 		numberFormatter.locale = .test
-		
+
 		func testSmall(_ string: String) throws {
 			let sut = try SUT(string)
 			let double = sut.asDouble
 			let doubleFormatted = try XCTUnwrap(numberFormatter.string(for: double))
 			XCTAssertEqual(sut.toRawString(), doubleFormatted)
 		}
-		
+
 		func testLarge(_ vector: LargeVector) throws {
 			let sut = try SUT(vector.string)
 			let double = sut.asDouble
@@ -480,15 +476,14 @@ final class Decimal192Tests: Test<Decimal192> {
 			let rounded = (sut / scale).rounded(decimalPlaces: 0) * scale
 			XCTAssertEqual(rounded.toRawString(), doubleFormatted)
 		}
-		
-		
+
 		try smallDecimalStrings.forEach(testSmall)
 		try largeDecimalsStrings.forEach(testLarge)
-		
+
 		XCTAssertLessThan(SUT.min.asDouble, SUT.max.asDouble)
-		XCTAssertNoThrow(try SUT.init("12345678987654321.000000000000000001").asDouble)
+		XCTAssertNoThrow(try SUT("12345678987654321.000000000000000001").asDouble)
 	}
-	
+
 	private var smallDecimalStrings: [String] {
 		[
 			"0.000000000000000001",
@@ -532,71 +527,71 @@ final class Decimal192Tests: Test<Decimal192> {
 			"1.0",
 		]
 	}
-	
+
 	func test_from_double_zeroPrice() throws {
 		try doTestFromDouble(0, expected: SUT.zero)
 	}
-	
+
 	func test_from_double_noDecimalPlaces_1() throws {
 		try doTestFromDouble(10, expected: 10)
 	}
-	
+
 	func test_from_double_noDecimalPlaces_2() throws {
 		try doTestFromDouble(10000, expected: 10000)
 	}
-	
+
 	func test_from_double_noDecimalPlaces_3() throws {
 		try doTestFromDouble(10_000_000, expected: 10_000_000)
 	}
-	
+
 	func test_from_double_withDecimalPlaces_1() throws {
 		try doTestFromDouble(1.99, expected: SUT("1.99"))
 	}
-	
+
 	func test_from_double_withDecimalPlaces_2() throws {
 		try doTestFromDouble(1.000099, expected: SUT("1.000099"))
 	}
-	
+
 	func test_from_double_belowOne_1() throws {
 		try doTestFromDouble(0.99, expected: 0.99)
 	}
-	
+
 	func test_from_double_belowOne_2() throws {
 		try doTestFromDouble(0.000099, expected: SUT("0.000099"))
 	}
-	
+
 	func test_from_double_closeToSUTDivisibility() throws {
 		// 17 decimal places
 		try doTestFromDouble(
-			1.12345678901234567, 
+			1.12345678901234567,
 			expected: SUT("1.1234567890123457")
 		)
 	}
-	
+
 	func test_from_double_maxSUTDivisibility() throws {
 		// 18 decimal places
 		try doTestFromDouble(1.123456789012345678, expected: SUT("1.1234567890123457"))
 	}
-	
+
 	func test_from_double_overMaxSUTDivisibility() throws {
 		// 22 decimal places
 		try doTestFromDouble(1.1234567890123456789012, expected: SUT("1.1234567890123457"))
 	}
-	
+
 	func test_from_double_large_value() throws {
 		try doTestFromDouble(
-			70000000000.987654,
+			70_000_000_000.987654,
 			expected: SUT("70000000000.98766")
 		)
 	}
-	
+
 	private func doTestFromDouble(
 		_ double: Double,
 		expected: SUT,
 		file: StaticString = #filePath,
 		line: UInt = #line
 	) throws {
-		let fromDouble = try SUT.init(double)
+		let fromDouble = try SUT(double)
 		XCTAssertEqual(
 			fromDouble,
 			expected,
@@ -605,7 +600,4 @@ final class Decimal192Tests: Test<Decimal192> {
 			line: line
 		)
 	}
-	
-
 }
-

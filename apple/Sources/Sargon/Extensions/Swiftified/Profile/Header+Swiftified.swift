@@ -1,12 +1,8 @@
-//
-//  File.swift
-//  
-//
-//  Created by Alexander Cyon on 2024-04-19.
-//
-
 import Foundation
 import SargonUniFFI
 
+// MARK: - Header + SargonModel
 extension Header: SargonModel {}
+
+// MARK: - Header + SargonObjectCodable
 extension Header: SargonObjectCodable {}

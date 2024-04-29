@@ -10,12 +10,14 @@ final class ResourceOrNonFungibleTests: Test<ResourceOrNonFungible> {
 		let sut = SUT.resource(value: resourceAddress)
 		XCTAssertEqual(sut.resourceAddress, resourceAddress)
 	}
+
 	func test_resource_address_non_fungible() {
 		let resourceAddress = NonFungibleResourceAddress.sample.asResourceAddress
 		let globalID = NonFungibleGlobalID(resourceAddress: resourceAddress, nonFungibleLocalId: 1)
 		let sut = SUT.nonFungible(value: globalID)
 		XCTAssertEqual(sut.resourceAddress, resourceAddress)
 	}
+
 	func test_id_is_self() {
 		func doTest(_ sut: SUT) {
 			XCTAssertEqual(sut.id, sut)

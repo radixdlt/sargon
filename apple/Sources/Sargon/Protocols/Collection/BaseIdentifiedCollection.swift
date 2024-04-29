@@ -1,17 +1,11 @@
-//
-//  File.swift
-//  
-//
-//  Created by Alexander Cyon on 2024-04-14.
-//
-
 import Foundation
 
+// MARK: - BaseIdentifiedCollection
 public protocol BaseIdentifiedCollection:
 	SargonModel,
 	RandomAccessCollection,
 	MutableCollection
-where
+	where
 	Index == Array<Element>.Index,
 	Element: Identifiable,
 	Element: SargonModel
@@ -28,21 +22,18 @@ extension BaseIdentifiedCollection {
 	public func contains(id: Element.ID) -> Bool {
 		get(id: id) != nil
 	}
-	
+
 	public var ids: [Element.ID] {
 		map(\.id)
 	}
-	
 }
-
 
 // MARK: MutableCollection
 extension BaseIdentifiedCollection {
-	
 	public mutating func append(_ newElement: Self.Element) {
 		self = appending(newElement)
 	}
-	
+
 	@inlinable
 	@inline(__always)
 	public subscript(position: Int) -> Element {
@@ -59,15 +50,15 @@ extension BaseIdentifiedCollection {
 	public var startIndex: Index {
 		elements.startIndex
 	}
-	
+
 	public var endIndex: Index {
 		elements.endIndex
 	}
-	
+
 	public func index(after index: Index) -> Index {
 		elements.index(after: index)
 	}
-	
+
 	@discardableResult
 	public mutating func updateOrInsert(element: Element, at index: Int) -> (originalMember: Element?, index: Int) {
 		let originalMember = get(id: element.id)
@@ -75,7 +66,7 @@ extension BaseIdentifiedCollection {
 		let deFactoIndex = self.firstIndex(where: { $0.id == element.id })!
 		return (originalMember, index: deFactoIndex)
 	}
-	
+
 	/// Adds the given element to the array unconditionally, either appending it to the array, or
 	/// replacing an existing value if it's already present.
 	///
@@ -92,8 +83,7 @@ extension BaseIdentifiedCollection {
 		let countBefore = count
 		self = updatingOrAppending(item)
 		let countAfter = count
-		
-		
+
 		if countAfter != countBefore {
 			// appended
 			return nil

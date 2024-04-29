@@ -12,4 +12,3 @@ final class FactorSourceIDTests: FactorSourceIDTest<FactorSourceID> {
 		SUT.sampleValues.forEach(doTest)
 	}
 }
-	

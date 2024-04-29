@@ -1,10 +1,3 @@
-//
-//  File.swift
-//  
-//
-//  Created by Alexander Cyon on 2024-04-19.
-//
-
 import Foundation
 import SargonUniFFI
 
@@ -14,22 +7,22 @@ extension MnemonicWithPassphrase {
 			jsonBytes: Data(jsonData)
 		)
 	}
-	
+
 	public func jsonData() -> Data {
 		mnemonicWithPassphraseToJsonBytes(
 			mnemonicWithPassphrase: self
 		)
 	}
-    
-    public func validate(
-        publicKeys: some Collection<HierarchicalDeterministicPublicKey>
-    ) -> Bool {
+
+	public func validate(
+		publicKeys: some Collection<HierarchicalDeterministicPublicKey>
+	) -> Bool {
 		mnemonicWithPassphraseValidatePublicKeys(
 			mnemonicWithPassphrase: self,
 			hdKeys: Array(publicKeys)
 		)
-    }
-	
+	}
+
 	public func derivePublicKeys(
 		paths: some Collection<some DerivationPathProtocol>
 	) -> [HierarchicalDeterministicPublicKey] {
@@ -38,7 +31,7 @@ extension MnemonicWithPassphrase {
 			derivationPaths: paths.map(\.asDerivationPath)
 		)
 	}
-	
+
 	public func sign(
 		hash: Hash,
 		path: some DerivationPathProtocol

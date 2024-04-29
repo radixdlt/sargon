@@ -1,9 +1,11 @@
 import SargonUniFFI
 
+// MARK: - Profile + SargonModel
 extension Profile: SargonModel {}
+
+// MARK: - Profile + SargonObjectCodable
 extension Profile: SargonObjectCodable {}
 extension Profile {
-	
 	public init(
 		header: Header,
 		deviceFactorSource: DeviceFactorSource
@@ -17,6 +19,7 @@ extension Profile {
 	}
 }
 
+// MARK: - Profile + Identifiable
 extension Profile: Identifiable {
 	public typealias ID = ProfileID
 	public var id: ID {
@@ -24,16 +27,16 @@ extension Profile: Identifiable {
 	}
 }
 
+// MARK: - Profile + CustomStringConvertible
 extension Profile: CustomStringConvertible {
 	public var description: String {
 		profileToString(profile: self)
 	}
 }
 
-
+// MARK: - Profile + CustomDebugStringConvertible
 extension Profile: CustomDebugStringConvertible {
 	public var debugDescription: String {
 		profileToDebugString(profile: self)
 	}
 }
-

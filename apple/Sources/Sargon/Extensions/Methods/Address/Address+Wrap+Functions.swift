@@ -8,11 +8,11 @@ extension Address {
 	public init(validatingAddress bech32String: String) throws {
 		self = try newAddressFromBech32(string: bech32String)
 	}
-	
+
 	public var networkID: NetworkID {
 		addressNetworkId(address: self)
 	}
-	
+
 	public var address: String {
 		addressToString(address: self)
 	}

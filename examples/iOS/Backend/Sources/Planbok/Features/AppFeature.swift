@@ -3,7 +3,6 @@ import SargonUniFFI
 
 @Reducer
 public struct AppFeature {
-	
 	@ObservableState
 	public enum State {
 		case splash(SplashFeature.State)
@@ -13,18 +12,19 @@ public struct AppFeature {
 			self = .splash(.init())
 		}
 	}
-	
+
 	public enum Action {
 		case splash(SplashFeature.Action)
 		case onboarding(OnboardingFeature.Action)
 		case main(MainFeature.Action)
 	}
-	
+
 	public struct View: SwiftUI.View {
 		public let store: StoreOf<AppFeature>
 		public init(store: StoreOf<AppFeature>) {
 			self.store = store
 		}
+
 		public var body: some SwiftUI.View {
 			switch store.state {
 			case .splash:
@@ -42,14 +42,12 @@ public struct AppFeature {
 			}
 		}
 	}
-	
-	
+
 	public init() {}
-	
+
 	public var body: some ReducerOf<Self> {
 		Reduce { state, action in
 			switch action {
-			
 			case let .splash(.delegate(.walletInitialized(wallet, hasAccount))):
 				if hasAccount {
 					state = .main(MainFeature.State(wallet: wallet))
@@ -57,15 +55,15 @@ public struct AppFeature {
 					state = .onboarding(OnboardingFeature.State(wallet: wallet))
 				}
 				return .none
-			
+
 			case let .onboarding(.delegate(.createdAccount(with: walletHolder))):
 				state = .main(MainFeature.State(walletHolder: walletHolder))
 				return .none
-				
+
 			case .main(.delegate(.deletedWallet)):
 				state = .onboarding(OnboardingFeature.State(wallet: Wallet.generateNewBDFSAndEmptyProfile()))
 				return .none
-			
+
 			default:
 				return .none
 			}
@@ -81,4 +79,3 @@ public struct AppFeature {
 		}
 	}
 }
-

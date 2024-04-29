@@ -3,35 +3,34 @@ import SargonUniFFI
 
 @Reducer
 public struct OnboardingFeature {
-	
 	@Reducer(state: .equatable)
 	public enum Path {
 		case writeDownMnemonic(WriteDownMnemonicFeature)
 	}
-	
+
 	@Reducer(state: .equatable)
 	public enum Destination {
 		case createAccount(CreateAccountFlowFeature)
 	}
-	
+
 	@ObservableState
 	public struct State: Equatable {
 		public let walletHolder: WalletHolder
 		public var path = StackState<Path.State>()
 		public var welcome: WelcomeFeature.State
-		
+
 		@Presents var destination: Destination.State?
-		
+
 		public init(walletHolder: WalletHolder) {
 			self.walletHolder = walletHolder
 			self.welcome = WelcomeFeature.State()
 		}
-		
+
 		public init(wallet: Wallet) {
 			self.init(walletHolder: .init(wallet: wallet))
 		}
 	}
-	
+
 	@CasePathable
 	public enum Action {
 		@CasePathable
@@ -44,17 +43,16 @@ public struct OnboardingFeature {
 		case welcome(WelcomeFeature.Action)
 		case delegate(DelegateAction)
 	}
-	
+
 	public init() {}
-	
+
 	public var body: some ReducerOf<Self> {
 		Scope(state: \.welcome, action: \.welcome) {
 			WelcomeFeature()
 		}
 		Reduce { state, action in
 			switch action {
-				
-			case .path(let pathAction):
+			case let .path(pathAction):
 				switch pathAction {
 				case .element(id: _, action: .writeDownMnemonic(.delegate(.done))):
 					return .send(.delegate(.createdAccount(with: state.walletHolder)))
@@ -87,11 +85,11 @@ public struct OnboardingFeature {
 
 	public struct View: SwiftUI.View {
 		@Bindable var store: StoreOf<OnboardingFeature>
-		
+
 		public init(store: StoreOf<OnboardingFeature>) {
 			self.store = store
 		}
-		
+
 		public var body: some SwiftUI.View {
 			NavigationStack(path: $store.scope(state: \.path, action: \.path)) {
 				WelcomeFeature.View(
@@ -113,10 +111,6 @@ public struct OnboardingFeature {
 			) { store in
 				CreateAccountFlowFeature.View(store: store)
 			}
-			
 		}
-		
 	}
-	
-	
 }

@@ -5,21 +5,20 @@ import SargonUniFFI
 import XCTest
 
 final class HierarchicalDeterministicFactorInstanceTests: Test<HierarchicalDeterministicFactorInstance> {
-	
 	func test_factorSourceID() {
 		func doTest(_ sut: SUT) {
 			XCTAssertEqual(sut.factorSourceID, sut.factorSourceId)
 		}
 		SUT.sampleValues.forEach(doTest)
 	}
-	
+
 	func test_derivationPath() {
 		func doTest(_ sut: SUT) {
 			XCTAssertEqual(sut.derivationPath, sut.publicKey.derivationPath)
 		}
 		SUT.sampleValues.forEach(doTest)
 	}
-	
+
 	func test_factor_instance() {
 		func doTest(_ sut: SUT) {
 			let factor = sut.factorInstance

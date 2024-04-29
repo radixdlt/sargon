@@ -1,13 +1,7 @@
-//
-//  File.swift
-//  
-//
-//  Created by Alexander Cyon on 2024-04-23.
-//
-
 import Foundation
 import SargonUniFFI
 
+// MARK: - PersonaData + SargonModel
 extension PersonaData: SargonModel {}
 
 public typealias AnyIdentifiedPersonaEntry = PersonaData.IdentifiedEntry<PersonaData.Entry>
@@ -31,16 +25,15 @@ extension AnyIdentifiedPersonaEntry: SargonModel {
 
 // MARK: - PersonaData.IdentifiedEntry
 extension PersonaData {
-	
 	public struct IdentifiedEntry<Value>:
 		BaseSargonModel,
 		Codable,
 		Identifiable,
 		CustomStringConvertible
-	where
-	Value:
-	SargonModel &
-	Codable & BasePersonaDataEntryProtocol
+		where
+		Value:
+		SargonModel &
+		Codable & BasePersonaDataEntryProtocol
 	{
 		public typealias ID = PersonaDataEntryID
 		public let id: ID
@@ -63,9 +56,7 @@ extension PersonaData {
 	}
 }
 
-
 extension PersonaData {
-	
 	public init() {
 		self.init(
 			name: nil,
@@ -81,7 +72,7 @@ extension PersonaData {
 	public static var `default`: Self {
 		self.init()
 	}
-	
+
 	public var entries: [AnyIdentifiedPersonaEntry] {
 		var sequence: [AnyIdentifiedPersonaEntry?] = []
 		sequence.append(name?.embed())
@@ -89,5 +80,4 @@ extension PersonaData {
 		sequence.append(contentsOf: phoneNumbers.collection.map { $0.embed() })
 		return sequence.compactMap { $0 }
 	}
-
 }

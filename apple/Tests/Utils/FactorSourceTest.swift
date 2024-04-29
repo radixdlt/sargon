@@ -4,8 +4,8 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
+// MARK: - SpecificFactorSourceTest
 class SpecificFactorSourceTest<SUT_: FactorSourceProtocol>: FactorSourceTest<SUT_> {
-	
 	func test_extract() throws {
 		func doTest(_ sut: SUT) throws {
 			let embedded = sut.asGeneral
@@ -16,22 +16,22 @@ class SpecificFactorSourceTest<SUT_: FactorSourceProtocol>: FactorSourceTest<SUT
 	}
 }
 
+// MARK: - FactorSourceTest
 class FactorSourceTest<SUT_: BaseFactorSourceProtocol>: Test<SUT_> {
-	
 	func test_as_general_factorSourceID() {
 		func doTest(_ sut: SUT) {
 			XCTAssertEqual(sut.asGeneral.factorSourceID, sut.factorSourceID)
 		}
 		SUT.sampleValues.forEach(doTest)
 	}
-	
+
 	func test_as_general_factorSourceKind() {
 		func doTest(_ sut: SUT) {
 			XCTAssertEqual(sut.asGeneral.kind, sut.kind)
 		}
 		SUT.sampleValues.forEach(doTest)
 	}
-	
+
 	func test_common_update() {
 		func doTest(_ sut: SUT) {
 			let newDate = Date.now
@@ -43,8 +43,7 @@ class FactorSourceTest<SUT_: BaseFactorSourceProtocol>: Test<SUT_> {
 		}
 		SUT.sampleValues.forEach(doTest)
 	}
-	
-	
+
 	func test_crypto_params() {
 		func doTest(_ sut: SUT) {
 			XCTAssertEqual(sut.cryptoParameters, sut.common.cryptoParameters)
@@ -53,7 +52,7 @@ class FactorSourceTest<SUT_: BaseFactorSourceProtocol>: Test<SUT_> {
 		}
 		SUT.sampleValues.forEach(doTest)
 	}
-	
+
 	func test_flag_for_deletion() {
 		func doTest(_ sut: SUT) {
 			var sut = sut

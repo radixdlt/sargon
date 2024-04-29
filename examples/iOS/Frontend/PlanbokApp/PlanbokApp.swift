@@ -1,13 +1,6 @@
-//
-//  PlanbokApp.swift
-//  Planbok
-//
-//  Created by Alexander Cyon on 2024-02-14.
-//
-
-import SwiftUI
-import Planbok
 import ComposableArchitecture
+import Planbok
+import SwiftUI
 
 @main
 struct PlanbokApp: App {
@@ -23,5 +16,5 @@ struct PlanbokApp: App {
 			.textFieldStyle(.roundedBorder)
 			.buttonStyle(.borderedProminent)
 		}
-    }
+	}
 }

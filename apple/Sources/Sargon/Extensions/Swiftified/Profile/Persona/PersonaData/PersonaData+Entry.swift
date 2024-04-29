@@ -1,16 +1,9 @@
-//
-//  File.swift
-//  
-//
-//  Created by Alexander Cyon on 2024-04-21.
-//
-
 import Foundation
 import SargonUniFFI
 
 // MARK: - PersonaData.Entry
 extension PersonaData {
-	public enum Entry: 
+	public enum Entry:
 		SargonModel,
 		Codable,
 		BasePersonaDataEntryProtocol,
@@ -30,11 +23,10 @@ extension PersonaData.Entry {
 #endif // DEBUG
 
 extension PersonaData.Entry {
-	
 	public func embed() -> PersonaData.Entry {
 		self
 	}
-	
+
 	public var description: String {
 		switch self {
 		case let .name(name):
@@ -47,6 +39,7 @@ extension PersonaData.Entry {
 	}
 }
 
+// MARK: - PersonaData.Entry.Kind
 extension PersonaData.Entry {
 	public enum Kind: String, Sendable, Hashable, Codable {
 		case fullName

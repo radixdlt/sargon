@@ -9,16 +9,15 @@ final class AppearanceIDTests: Test<AppearanceID> {
 		XCTAssertEqual(SUT.sample.id, 0)
 		XCTAssertEqual(SUT.sampleOther.id, 11)
 	}
-	
+
 	func test_all_cases_returns_actual_values_not_samples() {
 		XCTAssertEqual(SUT.allCases.count, 12)
 	}
-	
-	
+
 	func test_codable_roundtrip() throws {
 		try SUT.sampleValues.forEach(doTestCodableRoundtrip)
 	}
-	
+
 	func test_from_number_of_accounts() {
 		func doTest(_ count: Int, expected: SUT) {
 			XCTAssertEqual(SUT.fromNumberOfAccounts(count), expected)

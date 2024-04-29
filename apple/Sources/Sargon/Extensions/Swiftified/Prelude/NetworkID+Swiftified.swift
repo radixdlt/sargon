@@ -3,14 +3,17 @@ import SargonUniFFI
 
 public typealias NetworkID = NetworkId
 
+// MARK: SargonModel
 extension NetworkID: SargonModel {}
 
+// MARK: CustomStringConvertible
 extension NetworkID: CustomStringConvertible {
 	public var description: String {
 		toString()
 	}
 }
 
+// MARK: Codable
 extension NetworkID: Codable {
 	public func encode(to encoder: Encoder) throws {
 		var container = encoder.singleValueContainer()

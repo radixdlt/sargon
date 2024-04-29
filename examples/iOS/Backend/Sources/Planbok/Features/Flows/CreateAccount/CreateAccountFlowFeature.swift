@@ -3,42 +3,43 @@ import SargonUniFFI
 
 @Reducer
 public struct CreateAccountFlowFeature {
-	
 	@Reducer(state: .equatable)
 	public enum Path {
 		case selectGradient(SelectGradientFeature)
 	}
-	
+
 	@ObservableState
 	public struct State: Equatable {
 		public let walletHolder: WalletHolder
 		public var path = StackState<Path.State>()
 		public var nameAccount: NameNewAccountFeature.State
-		
+
 		public init(walletHolder: WalletHolder) {
 			self.walletHolder = walletHolder
 			self.nameAccount = NameNewAccountFeature.State(walletHolder: walletHolder)
 		}
-		
+
 		public init(wallet: Wallet) {
 			self.init(walletHolder: .init(wallet: wallet))
 		}
 	}
-	
+
 	public enum Action {
 		public enum DelegateAction {
 			case createdAccount
 		}
+
 		case path(StackAction<Path.State, Path.Action>)
 		case nameAccount(NameNewAccountFeature.Action)
 		case delegate(DelegateAction)
 	}
-	
+
 	public struct View: SwiftUI.View {
 		@Bindable var store: StoreOf<CreateAccountFlowFeature>
 		public init(store: StoreOf<CreateAccountFlowFeature>) {
 			self.store = store
 		}
+
 		public var body: some SwiftUI.View {
 			NavigationStack(path: $store.scope(state: \.path, action: \.path)) {
 				NameNewAccountFeature.View(
@@ -54,24 +55,22 @@ public struct CreateAccountFlowFeature {
 			}
 		}
 	}
-	
+
 	public init() {}
-	
+
 	public var body: some ReducerOf<Self> {
 		Scope(state: \.nameAccount, action: \.nameAccount) {
 			NameNewAccountFeature()
 		}
-		
+
 		Reduce { state, action in
 			switch action {
-
 			case let .nameAccount(.delegate(.named(name))):
 				state.path.append(.selectGradient(.init(name: name)))
 				return .none
 
-			case .path(let pathAction):
+			case let .path(pathAction):
 				switch pathAction {
-					
 				case let .element(
 					id: _,
 					action: .selectGradient(.delegate(.selected(appearanceID, displayName)))
@@ -83,15 +82,15 @@ public struct CreateAccountFlowFeature {
 							name: displayName
 						)
 						account.appearanceId = appearanceID
-						
+
 						try wallet.addAccount(account: account)
-						
+
 						return .send(.delegate(.createdAccount))
-						
+
 					} catch {
 						fatalError("TODO error handling: \(error)")
 					}
-					
+
 				case .element(id: _, action: _):
 					return .none
 				case .popFrom(id: _):
@@ -103,7 +102,7 @@ public struct CreateAccountFlowFeature {
 
 			case .nameAccount(.view):
 				return .none
-				
+
 			case .delegate:
 				return .none
 			}

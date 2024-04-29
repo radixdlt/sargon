@@ -8,6 +8,7 @@ public protocol BaseBaseEntityProtocol: SargonModel {
 public protocol BaseBaseEntityProtocol: SargonModel {}
 #endif // DEBUG
 
+// MARK: - EntityBaseProtocol
 public protocol EntityBaseProtocol: BaseBaseEntityProtocol, CustomStringConvertible, Identifiable where ID == EntityAddress {
 	associatedtype EntityAddress: BaseEntityAddressProtocol
 	var networkId: NetworkID { get }
@@ -17,25 +18,25 @@ public protocol EntityBaseProtocol: BaseBaseEntityProtocol, CustomStringConverti
 	var securityState: EntitySecurityState { get }
 	var entityKind: EntityKind { get }
 	var asGeneral: AccountOrPersona { get }
-	
-#if DEBUG
+
+	#if DEBUG
 	static var sampleMainnet: Self { get }
 	static var sampleMainnetOther: Self { get }
 	static var sampleMainnetThird: Self { get }
 	static var sampleStokenet: Self { get }
 	static var sampleStokenetOther: Self { get }
 	static var sampleStokenetThird: Self { get }
-#endif // DEBUG
+	#endif // DEBUG
 }
 
 extension EntityBaseProtocol {
 	public var id: ID { address }
 	public var networkID: NetworkID { networkId }
-	
+
 	public var isHidden: Bool {
 		flags.contains(.deletedByUser)
 	}
-	
+
 	public var virtualHierarchicalDeterministicFactorInstances: Set<HierarchicalDeterministicFactorInstance> {
 		var factorInstances = Set<HierarchicalDeterministicFactorInstance>()
 		switch securityState {
@@ -47,14 +48,14 @@ extension EntityBaseProtocol {
 			return factorInstances
 		}
 	}
-	
+
 	public var hasAuthenticationSigningKey: Bool {
 		switch securityState {
 		case let .unsecured(unsecuredEntityControl):
 			unsecuredEntityControl.authenticationSigning != nil
 		}
 	}
-	
+
 	public var deviceFactorSourceID: FactorSourceIDFromHash? {
 		switch self.securityState {
 		case let .unsecured(control):
@@ -62,7 +63,7 @@ extension EntityBaseProtocol {
 			guard factorSourceID.kind == .device else {
 				return nil
 			}
-			
+
 			return factorSourceID
 		}
 	}
@@ -76,8 +77,8 @@ extension EntityBaseProtocol {
 
 #if DEBUG
 extension EntityBaseProtocol {
-	public static var sample: Self { Self.sampleMainnet }
-	public static var sampleOther: Self { Self.sampleMainnetOther }
+	public static var sample: Self { sampleMainnet }
+	public static var sampleOther: Self { sampleMainnetOther }
 }
 #endif // DEBUG
 
@@ -85,35 +86,35 @@ extension EntityBaseProtocol {
 extension EntityBaseProtocol {
 	public static var sampleValuesMainnet: [Self] {
 		[
-			Self.sampleMainnet,
-			Self.sampleMainnetOther,
-			Self.sampleMainnetThird,
+			sampleMainnet,
+			sampleMainnetOther,
+			sampleMainnetThird,
 		]
 	}
+
 	public static var sampleValuesStokenet: [Self] {
 		[
-			Self.sampleStokenet,
-			Self.sampleStokenetOther,
-			Self.sampleStokenetThird,
+			sampleStokenet,
+			sampleStokenetOther,
+			sampleStokenetThird,
 		]
 	}
-	
+
 	public static var sampleValues: [Self] {
-		Self.sampleValuesMainnet + Self.sampleValuesStokenet
+		sampleValuesMainnet + sampleValuesStokenet
 	}
 }
 #endif // DEBUG
 
-
+// MARK: - EntityProtocol
 public protocol EntityProtocol: EntityBaseProtocol {
-	
 	associatedtype ExtraProperties: SargonModel
-	
+
 	static func deriveVirtualAddress(
 		networkID: NetworkID,
 		factorInstance: HierarchicalDeterministicFactorInstance
 	) -> EntityAddress
-	
+
 	init(
 		networkID: NetworkID,
 		address: EntityAddress,
@@ -121,7 +122,7 @@ public protocol EntityProtocol: EntityBaseProtocol {
 		displayName: DisplayName,
 		extraProperties: ExtraProperties
 	)
-	
+
 	static var kind: EntityKind { get }
 	static func extract(from someEntityProtocol: some EntityBaseProtocol) -> Self?
 }

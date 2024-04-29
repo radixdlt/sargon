@@ -5,12 +5,11 @@ import SargonUniFFI
 import XCTest
 
 final class DeviceInfoTests: Test<DeviceInfo> {
-	
 	func test_new_iphone() {
 		XCTAssertNotEqual(SUT.sample, SUT.iPhone())
 	}
-	
-	func test_not_codable_but_lower_level_json_methods_json_data_roundtrip() throws{
+
+	func test_not_codable_but_lower_level_json_methods_json_data_roundtrip() throws {
 		let sut = SUT.sample
 		let json = sut.jsonData()
 		try XCTAssertEqual(
@@ -18,53 +17,52 @@ final class DeviceInfoTests: Test<DeviceInfo> {
 			sut
 		)
 	}
-	
-	func test_codable_lowercase_rust_styled_uuid() throws {
-        func doTest(_ jsonString: String, expected: SUT? = .sample) throws {
-            let raw = Data(jsonString.utf8)
-            
-            // test decoding
-            let sut = try JSONDecoder().decode(SUT.self, from: raw)
-            
-            if let expected {
-                XCTAssertEqual(sut, expected)
-            }
-            
-            // test encoding
-            let encoded = try JSONEncoder().encode(sut)
-            try XCTAssertEqual(JSONDecoder().decode(SUT.self, from: encoded), sut)
-        }
-        
-        // Rust style:
-        // * lower UUID
-        // * date with milliseconds
-        try doTest("""
-        {
-            "id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
-            "date": "2023-09-11T16:05:56.000Z",
-            "description": "iPhone"
-        }
-        """)
 
-        // Swift style:
-        // * uppercase UUID
-        // * date without milliseconds
-        try doTest("""
-        {
-            "id": "66F07CA2-A9D9-49E5-8152-77ACA3D1DD74",
-            "date": "2023-09-11T16:05:56Z",
-            "description": "iPhone"
-        }
-        """)
-        
-        // Swift style - new.
-        try doTest("""
-        {
-            "id": "\(UUID().uuidString)",
-            "date": "\(Date.now.ISO8601Format())",
-            "description": "iPhone"
-        }
-        """, expected: nil)
+	func test_codable_lowercase_rust_styled_uuid() throws {
+		func doTest(_ jsonString: String, expected: SUT? = .sample) throws {
+			let raw = Data(jsonString.utf8)
+
+			// test decoding
+			let sut = try JSONDecoder().decode(SUT.self, from: raw)
+
+			if let expected {
+				XCTAssertEqual(sut, expected)
+			}
+
+			// test encoding
+			let encoded = try JSONEncoder().encode(sut)
+			try XCTAssertEqual(JSONDecoder().decode(SUT.self, from: encoded), sut)
+		}
+
+		// Rust style:
+		// * lower UUID
+		// * date with milliseconds
+		try doTest("""
+		{
+		    "id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
+		    "date": "2023-09-11T16:05:56.000Z",
+		    "description": "iPhone"
+		}
+		""")
+
+		// Swift style:
+		// * uppercase UUID
+		// * date without milliseconds
+		try doTest("""
+		{
+		    "id": "66F07CA2-A9D9-49E5-8152-77ACA3D1DD74",
+		    "date": "2023-09-11T16:05:56Z",
+		    "description": "iPhone"
+		}
+		""")
+
+		// Swift style - new.
+		try doTest("""
+		{
+		    "id": "\(UUID().uuidString)",
+		    "date": "\(Date.now.ISO8601Format())",
+		    "description": "iPhone"
+		}
+		""", expected: nil)
 	}
-    
 }

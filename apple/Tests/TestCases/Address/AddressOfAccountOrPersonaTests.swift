@@ -4,6 +4,4 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class AddressOfAccountOrPersonaTests: AddressTest<AddressOfAccountOrPersona> {
-	
-}
+final class AddressOfAccountOrPersonaTests: AddressTest<AddressOfAccountOrPersona> {}

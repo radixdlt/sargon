@@ -1,5 +1,5 @@
-@testable import Sargon
 import CryptoKit
+@testable import Sargon
 
 import CustomDump
 import Foundation

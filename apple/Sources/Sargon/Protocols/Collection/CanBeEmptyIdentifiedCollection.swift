@@ -1,21 +1,15 @@
-//
-//  File.swift
-//  
-//
-//  Created by Alexander Cyon on 2024-04-14.
-//
-
 import Foundation
 
+// MARK: - CanBeEmptyIdentifiedCollection
 public protocol CanBeEmptyIdentifiedCollection:
 	BaseIdentifiedCollection,
 	RangeReplaceableCollection,
 	ExpressibleByArrayLiteral
-where
+	where
 	ArrayLiteralElement == Self.Element
 {
 	init(_ elements: [Element])
-	
+
 	func removing(_ id: Element.ID) -> Self
 	func removing(element: Element) -> Self
 }
@@ -24,11 +18,11 @@ extension CanBeEmptyIdentifiedCollection {
 	public init() {
 		self.init([])
 	}
-	
+
 	public mutating func replaceSubrange<C>(
 		_ subrange: Range<Self.Index>,
 		with newElements: C
-	) where C : Collection, Self.Element == C.Element {
+	) where C: Collection, Self.Element == C.Element {
 		var elements = self.elements
 		elements.removeSubrange(subrange)
 		elements.reserveCapacity(self.count + newElements.count)
@@ -37,14 +31,13 @@ extension CanBeEmptyIdentifiedCollection {
 		}
 		self = Self(elements)
 	}
-	
+
 	// This is already implemented on `BaseIdentifiedCollection`,
 	// but due to a Swift compiler bug in Xcode 15.3 we MUST implement
-	// it here too 🤷‍♂️. 
+	// it here too 🤷‍♂️.
 	public mutating func append(_ newElement: Self.Element) {
 		self = appending(newElement)
 	}
-	
 }
 
 extension CanBeEmptyIdentifiedCollection {
@@ -60,7 +53,7 @@ extension CanBeEmptyIdentifiedCollection {
 		self = removing(id)
 		return removed
 	}
-	
+
 	@discardableResult
 	public mutating func remove(element: Element) -> Element? {
 		let removed = get(id: element.id)

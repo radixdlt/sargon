@@ -4,7 +4,7 @@
 import PackageDescription
 
 var swiftSettings: [SwiftSetting] = [
-	.enableExperimentalFeature("StrictConcurrency")
+	.enableExperimentalFeature("StrictConcurrency"),
 ]
 
 var strictSwiftSettings: [SwiftSetting] = swiftSettings
@@ -20,7 +20,7 @@ if useLocalFramework {
 		// import SargonCore unless you specify this as a relative path!
 		path: "./target/swift/libsargon-rs.xcframework"
 	)
-	
+
 	// MUST NOT be part of release, since results in compilation error:
 	// The package product 'Sargon' cannot be used as a dependency of this target because it uses unsafe build flags.
 	strictSwiftSettings.append(
@@ -32,7 +32,7 @@ if useLocalFramework {
 	binaryTarget = .binaryTarget(
 		name: sargonBinaryTargetName,
 		url:
-			"https://github.com/radixdlt/sargon/releases/download/\(releaseTag)/libsargon-rs.xcframework.zip",
+		"https://github.com/radixdlt/sargon/releases/download/\(releaseTag)/libsargon-rs.xcframework.zip",
 		checksum: releaseChecksum
 	)
 }
@@ -46,7 +46,7 @@ let package = Package(
 		.library(
 			name: "Sargon",
 			targets: ["Sargon"]
-		)
+		),
 	],
 	dependencies: [
 		.package(url: "https://github.com/pointfreeco/swift-custom-dump", from: "1.3.0"),
