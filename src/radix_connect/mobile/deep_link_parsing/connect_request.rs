@@ -1,12 +1,13 @@
+use super::*;
 use crate::prelude::*;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, uniffi::Enum)]
-pub enum MobileConnectRequest {
-    Link(LinkRequest),
-    DappInteraction(DappRequest),
+pub enum RadixConnectMobileConnectRequest {
+    Link(RadixConnectMobileLinkRequest),
+    DappInteraction(RadixConnectMobileDappRequest),
 }
 
-impl FromStr for MobileConnectRequest {
+impl FromStr for RadixConnectMobileConnectRequest {
     type Err = CommonError;
 
     fn from_str(s: &str) -> Result<Self> {
@@ -14,18 +15,17 @@ impl FromStr for MobileConnectRequest {
     }
 }
 
-#[uniffi::export]
-pub fn new_mobile_connect_request(url: String) -> Result<MobileConnectRequest> {
-    MobileConnectRequest::from_str(url.as_str())
-}
-
-impl HasSampleValues for MobileConnectRequest {
+impl HasSampleValues for RadixConnectMobileConnectRequest {
     fn sample() -> Self {
-        MobileConnectRequest::Link(LinkRequest::sample())
+        RadixConnectMobileConnectRequest::Link(
+            RadixConnectMobileLinkRequest::sample(),
+        )
     }
 
     fn sample_other() -> Self {
-        MobileConnectRequest::DappInteraction(DappRequest::sample())
+        RadixConnectMobileConnectRequest::DappInteraction(
+            RadixConnectMobileDappRequest::sample(),
+        )
     }
 }
 
@@ -34,7 +34,7 @@ mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = MobileConnectRequest;
+    type SUT = RadixConnectMobileConnectRequest;
 
     #[test]
     fn equality() {
@@ -51,6 +51,9 @@ mod tests {
     fn test_new_mobile_connect_request() {
         let uuid = Uuid::new_v4().to_string();
         let connect_url = format!("https://d1rxdfxrfmemlj.cloudfront.net/?sessionId={}&origin=radix%3A%2F%2Fapp", uuid);
-        assert!(new_mobile_connect_request(connect_url).is_ok());
+        assert!(RadixConnectMobileConnectRequest::from_str(
+            connect_url.as_str()
+        )
+        .is_ok());
     }
 }

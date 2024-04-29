@@ -1,12 +1,13 @@
+use super::super::session::session_id::SessionID;
 use crate::prelude::*;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, uniffi::Record)]
-pub struct DappRequest {
+pub struct RadixConnectMobileDappRequest {
     pub interaction_id: WalletInteractionId,
     pub session_id: SessionID,
 }
 
-impl DappRequest {
+impl RadixConnectMobileDappRequest {
     pub fn new(
         interaction_id: WalletInteractionId,
         session_id: SessionID,
@@ -33,11 +34,14 @@ impl DappRequest {
                     bad_value: session_id.as_ref().to_owned(),
                 }
             })?;
-        Ok(DappRequest::new(interaction_id, session_id))
+        Ok(RadixConnectMobileDappRequest::new(
+            interaction_id,
+            session_id,
+        ))
     }
 }
 
-impl HasSampleValues for DappRequest {
+impl HasSampleValues for RadixConnectMobileDappRequest {
     fn sample() -> Self {
         Self {
             interaction_id: WalletInteractionId::sample(),
@@ -58,7 +62,7 @@ mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = DappRequest;
+    type SUT = RadixConnectMobileDappRequest;
 
     #[test]
     fn equality() {

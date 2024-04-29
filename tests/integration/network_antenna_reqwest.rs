@@ -6,6 +6,7 @@ use std::sync::Arc;
 fn map_method(method: NetworkMethod) -> reqwest::Method {
     match method {
         NetworkMethod::Post => reqwest::Method::POST,
+        NetworkMethod::Get => reqwest::Method::GET,
     }
 }
 
