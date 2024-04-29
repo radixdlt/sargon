@@ -188,12 +188,13 @@ impl Profile {
 
 impl Profile {
     pub fn check_if_profile_json_contains_legacy_p2p_links(
-        json: impl AsRef<[u8]>
+        json: impl AsRef<[u8]>,
     ) -> bool {
         let json = json.as_ref();
-        let result = serde_json::from_slice::<ProtoProfileMaybeWithLegacyP2PLinks>(json);
+        let result =
+            serde_json::from_slice::<ProtoProfileMaybeWithLegacyP2PLinks>(json);
 
-        return match result {
+        match result {
             Ok(snapshot) => !snapshot.app_preferences.p2p_links.is_empty(),
             Err(_) => false,
         }
@@ -517,7 +518,7 @@ mod tests {
         );
     }
 
-	#[test]
+    #[test]
     fn check_if_profile_json_contains_legacy_p2p_links_test() {
         let value = r#"
         {
@@ -531,7 +532,12 @@ mod tests {
             }
           }
         "#;
-        assert_eq!(true, SUT::check_if_profile_json_contains_legacy_p2p_links(value.as_bytes()));
+        assert_eq!(
+            true,
+            SUT::check_if_profile_json_contains_legacy_p2p_links(
+                value.as_bytes()
+            )
+        );
     }
 
     #[test]
@@ -541,7 +547,12 @@ mod tests {
             
           }
         "#;
-        assert_eq!(false, SUT::check_if_profile_json_contains_legacy_p2p_links(value.as_bytes()));
+        assert_eq!(
+            false,
+            SUT::check_if_profile_json_contains_legacy_p2p_links(
+                value.as_bytes()
+            )
+        );
     }
 
     #[test]
@@ -554,7 +565,12 @@ mod tests {
             }
           }
         "#;
-        assert_eq!(false, SUT::check_if_profile_json_contains_legacy_p2p_links(value.as_bytes()));
+        assert_eq!(
+            false,
+            SUT::check_if_profile_json_contains_legacy_p2p_links(
+                value.as_bytes()
+            )
+        );
     }
 
     #[test]
@@ -677,16 +693,6 @@ mod tests {
 							}
 						]
 					},
-					"p2pLinks": [
-						{
-							"connectionPassword": "babebabebabebabebabebabebabebabebabebabebabebabebabebabebabebabe",
-							"displayName": "Brave on PC"
-						},
-						{
-							"connectionPassword": "cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe",
-							"displayName": "Chrome on Macbook"
-						}
-					],
 					"security": {
 						"isCloudProfileSyncEnabled": true,
 						"isDeveloperModeEnabled": true,
