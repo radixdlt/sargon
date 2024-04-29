@@ -35,6 +35,12 @@ pub struct ProfileNetwork {
     pub authorized_dapps: AuthorizedDapps,
 }
 
+impl IsNetworkAware for ProfileNetwork {
+    fn network_id(&self) -> NetworkID {
+        self.id
+    }
+}
+
 impl ProfileNetwork {
     pub fn description(&self) -> String {
         format!(
@@ -64,11 +70,15 @@ impl ProfileNetwork {
     /// Panics if not any account in `accounts` is on another
     /// network than `network_id`
     pub fn new(
-        network_id: NetworkID,
-        accounts: Accounts,
-        personas: Personas,
-        authorized_dapps: AuthorizedDapps,
+        network_id: impl Into<NetworkID>,
+        accounts: impl Into<Accounts>,
+        personas: impl Into<Personas>,
+        authorized_dapps: impl Into<AuthorizedDapps>,
     ) -> Self {
+        let network_id = network_id.into();
+        let accounts = accounts.into();
+        let personas = personas.into();
+        let authorized_dapps = authorized_dapps.into();
         assert!(
             accounts
                 .get_all()
@@ -153,28 +163,36 @@ impl ProfileNetwork {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = ProfileNetwork;
 
     #[test]
     fn inequality() {
-        assert_ne!(ProfileNetwork::sample(), ProfileNetwork::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn get_id() {
-        assert_eq!(ProfileNetwork::sample().id(), NetworkID::Mainnet);
+        assert_eq!(SUT::sample().id(), NetworkID::Mainnet);
+    }
+
+    #[test]
+    fn test_is_network_aware() {
+        assert_eq!(SUT::sample().network_id(), NetworkID::Mainnet);
     }
 
     #[test]
     fn get_accounts() {
-        let sut = ProfileNetwork::sample();
+        let sut = SUT::sample();
         assert_eq!(sut.accounts, Accounts::sample());
     }
 
     #[test]
     fn duplicate_accounts_are_filtered_out() {
         assert_eq!(
-            ProfileNetwork::new(
+            SUT::new(
                 NetworkID::Mainnet,
                 Accounts::from_iter(
                     [Account::sample(), Account::sample()].into_iter()
@@ -193,7 +211,7 @@ mod tests {
         expected = "Discrepancy, found an Account on other network than mainnet"
     )]
     fn panic_when_network_id_mismatch_between_accounts_and_value() {
-        ProfileNetwork::new(
+        SUT::new(
             NetworkID::Mainnet,
             Accounts::just(Account::sample_stokenet()),
             Personas::default(),
@@ -206,7 +224,7 @@ mod tests {
         expected = "Discrepancy, found a Persona on other network than mainnet"
     )]
     fn panic_when_network_id_mismatch_between_persona_and_value() {
-        ProfileNetwork::new(
+        SUT::new(
             NetworkID::Mainnet,
             Accounts::sample_mainnet(),
             Personas::just(Persona::sample_stokenet()),
@@ -219,7 +237,7 @@ mod tests {
         expected = "Discrepancy, found an AuthorizedDapp on other network than mainnet"
     )]
     fn panic_when_network_id_mismatch_between_authorized_dapp_and_value() {
-        ProfileNetwork::new(
+        SUT::new(
             NetworkID::Mainnet,
             Accounts::sample_mainnet(),
             Personas::sample_mainnet(),
@@ -229,7 +247,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_sample_mainnet() {
-        let sut = ProfileNetwork::sample_mainnet();
+        let sut = SUT::sample_mainnet();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"
@@ -237,11 +255,24 @@ mod tests {
 				"networkID": 1,
 				"accounts": [
 					{
+						"networkID": 1,
+						"address": "account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8",
+						"displayName": "Alice",
 						"securityState": {
+							"discriminator": "unsecured",
 							"unsecuredEntityControl": {
 								"transactionSigning": {
+									"factorSourceID": {
+										"discriminator": "fromHash",
+										"fromHash": {
+											"kind": "device",
+											"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+										}
+									},
 									"badge": {
+										"discriminator": "virtualSource",
 										"virtualSource": {
+											"discriminator": "hierarchicalDeterministicPublicKey",
 											"hierarchicalDeterministicPublicKey": {
 												"publicKey": {
 													"curve": "curve25519",
@@ -251,41 +282,41 @@ mod tests {
 													"scheme": "cap26",
 													"path": "m/44H/1022H/1H/525H/1460H/0H"
 												}
-											},
-											"discriminator": "hierarchicalDeterministicPublicKey"
-										},
-										"discriminator": "virtualSource"
-									},
-									"factorSourceID": {
-										"fromHash": {
-											"kind": "device",
-											"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
-										},
-										"discriminator": "fromHash"
+											}
+										}
 									}
 								}
-							},
-							"discriminator": "unsecured"
+							}
 						},
-						"networkID": 1,
 						"appearanceID": 0,
 						"flags": [],
-						"displayName": "Alice",
 						"onLedgerSettings": {
 							"thirdPartyDeposits": {
 								"depositRule": "acceptAll",
 								"assetsExceptionList": [],
 								"depositorsAllowList": []
 							}
-						},
-						"address": "account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8"
+						}
 					},
 					{
+						"networkID": 1,
+						"address": "account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69",
+						"displayName": "Bob",
 						"securityState": {
+							"discriminator": "unsecured",
 							"unsecuredEntityControl": {
 								"transactionSigning": {
+									"factorSourceID": {
+										"discriminator": "fromHash",
+										"fromHash": {
+											"kind": "device",
+											"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+										}
+									},
 									"badge": {
+										"discriminator": "virtualSource",
 										"virtualSource": {
+											"discriminator": "hierarchicalDeterministicPublicKey",
 											"hierarchicalDeterministicPublicKey": {
 												"publicKey": {
 													"curve": "curve25519",
@@ -295,34 +326,21 @@ mod tests {
 													"scheme": "cap26",
 													"path": "m/44H/1022H/1H/525H/1460H/1H"
 												}
-											},
-											"discriminator": "hierarchicalDeterministicPublicKey"
-										},
-										"discriminator": "virtualSource"
-									},
-									"factorSourceID": {
-										"fromHash": {
-											"kind": "device",
-											"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
-										},
-										"discriminator": "fromHash"
+											}
+										}
 									}
 								}
-							},
-							"discriminator": "unsecured"
+							}
 						},
-						"networkID": 1,
 						"appearanceID": 1,
-						"flags": ["deletedByUser"],
-						"displayName": "Bob",
+						"flags": [],
 						"onLedgerSettings": {
 							"thirdPartyDeposits": {
 								"depositRule": "acceptAll",
 								"assetsExceptionList": [],
 								"depositorsAllowList": []
 							}
-						},
-						"address": "account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69"
+						}
 					}
 				],
 				"personas": [
@@ -427,7 +445,7 @@ mod tests {
 								}
 							}
 						},
-						"flags": ["deletedByUser"],
+						"flags": [],
 						"personaData": {
 							"name": {
 								"id": "00000000-0000-0000-0000-000000000000",
@@ -453,7 +471,7 @@ mod tests {
 						}
 					}
 				],
-				"authorizedDapps":	[
+				"authorizedDapps": [
 					{
 						"networkID": 1,
 						"dAppDefinitionAddress": "account_rdx12x0xfz2yumu2qsh6yt0v8xjfc7et04vpsz775kc3yd3xvle4w5d5k5",
@@ -468,8 +486,8 @@ mod tests {
 										"quantity": 2
 									},
 									"ids": [
-										"account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr",
-										"account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264"
+										"account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8",
+										"account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69"
 									]
 								},
 								"sharedPersonaData": {
@@ -480,18 +498,18 @@ mod tests {
 											"quantity": 2
 										},
 										"ids": [
-											"00000000-0000-0000-0000-000000000001",
-											"00000000-0000-0000-0000-000000000002"
+											"00000000-0000-0000-0000-000000000003",
+											"00000000-0000-0000-0000-000000000004"
 										]
 									},
 									"phoneNumbers": {
 										"request": {
-											"quantifier": "atLeast",
-											"quantity": 1
+											"quantifier": "exactly",
+											"quantity": 2
 										},
 										"ids": [
-											"00000000-0000-0000-0000-000000000003",
-											"00000000-0000-0000-0000-000000000004"
+											"00000000-0000-0000-0000-000000000001",
+											"00000000-0000-0000-0000-000000000002"
 										]
 									}
 								}
@@ -505,29 +523,27 @@ mod tests {
 										"quantity": 1
 									},
 									"ids": [
-										"account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264"
+										"account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69"
 									]
 								},
 								"sharedPersonaData": {
-									"name": "00000000-0000-0000-0000-0000000000f0",
+									"name": "00000000-0000-0000-0000-000000000000",
 									"emailAddresses": {
 										"request": {
 											"quantifier": "exactly",
-											"quantity": 2
+											"quantity": 1
 										},
 										"ids": [
-											"00000000-0000-0000-0000-0000000000f1",
-											"00000000-0000-0000-0000-0000000000f2"
+											"00000000-0000-0000-0000-000000000002"
 										]
 									},
 									"phoneNumbers": {
 										"request": {
-											"quantifier": "atLeast",
+											"quantifier": "exactly",
 											"quantity": 1
 										},
 										"ids": [
-											"00000000-0000-0000-0000-0000000000f3",
-											"00000000-0000-0000-0000-0000000000f4"
+											"00000000-0000-0000-0000-000000000001"
 										]
 									}
 								}
@@ -548,29 +564,27 @@ mod tests {
 										"quantity": 1
 									},
 									"ids": [
-										"account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264"
+										"account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69"
 									]
 								},
 								"sharedPersonaData": {
-									"name": "00000000-0000-0000-0000-0000000000f0",
+									"name": "00000000-0000-0000-0000-000000000000",
 									"emailAddresses": {
 										"request": {
 											"quantifier": "exactly",
-											"quantity": 2
+											"quantity": 1
 										},
 										"ids": [
-											"00000000-0000-0000-0000-0000000000f1",
-											"00000000-0000-0000-0000-0000000000f2"
+											"00000000-0000-0000-0000-000000000002"
 										]
 									},
 									"phoneNumbers": {
 										"request": {
-											"quantifier": "atLeast",
+											"quantifier": "exactly",
 											"quantity": 1
 										},
 										"ids": [
-											"00000000-0000-0000-0000-0000000000f3",
-											"00000000-0000-0000-0000-0000000000f4"
+											"00000000-0000-0000-0000-000000000001"
 										]
 									}
 								}
@@ -585,7 +599,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_sample_stokenet() {
-        let sut = ProfileNetwork::sample_stokenet();
+        let sut = SUT::sample_stokenet();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"
@@ -593,11 +607,24 @@ mod tests {
 				"networkID": 2,
 				"accounts": [
 					{
+						"networkID": 2,
+						"address": "account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql",
+						"displayName": "Nadia",
 						"securityState": {
+							"discriminator": "unsecured",
 							"unsecuredEntityControl": {
 								"transactionSigning": {
+									"factorSourceID": {
+										"discriminator": "fromHash",
+										"fromHash": {
+											"kind": "device",
+											"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+										}
+									},
 									"badge": {
+										"discriminator": "virtualSource",
 										"virtualSource": {
+											"discriminator": "hierarchicalDeterministicPublicKey",
 											"hierarchicalDeterministicPublicKey": {
 												"publicKey": {
 													"curve": "curve25519",
@@ -607,41 +634,41 @@ mod tests {
 													"scheme": "cap26",
 													"path": "m/44H/1022H/2H/525H/1460H/0H"
 												}
-											},
-											"discriminator": "hierarchicalDeterministicPublicKey"
-										},
-										"discriminator": "virtualSource"
-									},
-									"factorSourceID": {
-										"fromHash": {
-											"kind": "device",
-											"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
-										},
-										"discriminator": "fromHash"
+											}
+										}
 									}
 								}
-							},
-							"discriminator": "unsecured"
+							}
 						},
-						"networkID": 2,
 						"appearanceID": 0,
 						"flags": [],
-						"displayName": "Nadia",
 						"onLedgerSettings": {
 							"thirdPartyDeposits": {
 								"depositRule": "acceptAll",
 								"assetsExceptionList": [],
 								"depositorsAllowList": []
 							}
-						},
-						"address": "account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql"
+						}
 					},
 					{
+						"networkID": 2,
+						"address": "account_tdx_2_129663ef7fj8azge3y6sl73lf9vyqt53ewzlf7ul2l76mg5wyqlqlpr",
+						"displayName": "Olivia",
 						"securityState": {
+							"discriminator": "unsecured",
 							"unsecuredEntityControl": {
 								"transactionSigning": {
+									"factorSourceID": {
+										"discriminator": "fromHash",
+										"fromHash": {
+											"kind": "device",
+											"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+										}
+									},
 									"badge": {
+										"discriminator": "virtualSource",
 										"virtualSource": {
+											"discriminator": "hierarchicalDeterministicPublicKey",
 											"hierarchicalDeterministicPublicKey": {
 												"publicKey": {
 													"curve": "curve25519",
@@ -651,34 +678,23 @@ mod tests {
 													"scheme": "cap26",
 													"path": "m/44H/1022H/2H/525H/1460H/1H"
 												}
-											},
-											"discriminator": "hierarchicalDeterministicPublicKey"
-										},
-										"discriminator": "virtualSource"
-									},
-									"factorSourceID": {
-										"fromHash": {
-											"kind": "device",
-											"body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
-										},
-										"discriminator": "fromHash"
+											}
+										}
 									}
 								}
-							},
-							"discriminator": "unsecured"
+							}
 						},
-						"networkID": 2,
 						"appearanceID": 1,
-						"flags": ["deletedByUser"],
-						"displayName": "Olivia",
+						"flags": [
+							"deletedByUser"
+						],
 						"onLedgerSettings": {
 							"thirdPartyDeposits": {
 								"depositRule": "acceptAll",
 								"assetsExceptionList": [],
 								"depositorsAllowList": []
 							}
-						},
-						"address": "account_tdx_2_129663ef7fj8azge3y6sl73lf9vyqt53ewzlf7ul2l76mg5wyqlqlpr"
+						}
 					}
 				],
 				"personas": [
@@ -775,7 +791,9 @@ mod tests {
 								}
 							}
 						},
-						"flags": ["deletedByUser"],
+						"flags": [
+							"deletedByUser"
+						],
 						"personaData": {
 							"name": {
 								"id": "00000000-0000-0000-0000-000000000000",
@@ -801,8 +819,8 @@ mod tests {
 						}
 					}
 				],
-				"authorizedDapps": 	[
-						{
+				"authorizedDapps": [
+					{
 						"networkID": 2,
 						"dAppDefinitionAddress": "account_tdx_2_128evrrwfp8gj9240qq0m06ukhwaj2cmejluxxreanzjwq62vmlf8r4",
 						"displayName": "Dev Console",
@@ -825,21 +843,19 @@ mod tests {
 									"emailAddresses": {
 										"request": {
 											"quantifier": "exactly",
-											"quantity": 2
+											"quantity": 1
 										},
 										"ids": [
-											"00000000-0000-0000-0000-000000000001",
 											"00000000-0000-0000-0000-000000000002"
 										]
 									},
 									"phoneNumbers": {
 										"request": {
-											"quantifier": "atLeast",
+											"quantifier": "exactly",
 											"quantity": 1
 										},
 										"ids": [
-											"00000000-0000-0000-0000-000000000003",
-											"00000000-0000-0000-0000-000000000004"
+											"00000000-0000-0000-0000-000000000001"
 										]
 									}
 								}
@@ -857,25 +873,23 @@ mod tests {
 									]
 								},
 								"sharedPersonaData": {
-									"name": "00000000-0000-0000-0000-0000000000f0",
+									"name": "00000000-0000-0000-0000-000000000000",
 									"emailAddresses": {
 										"request": {
 											"quantifier": "exactly",
-											"quantity": 2
+											"quantity": 1
 										},
 										"ids": [
-											"00000000-0000-0000-0000-0000000000f1",
-											"00000000-0000-0000-0000-0000000000f2"
+											"00000000-0000-0000-0000-000000000002"
 										]
 									},
 									"phoneNumbers": {
 										"request": {
-											"quantifier": "atLeast",
+											"quantifier": "exactly",
 											"quantity": 1
 										},
 										"ids": [
-											"00000000-0000-0000-0000-0000000000f3",
-											"00000000-0000-0000-0000-0000000000f4"
+											"00000000-0000-0000-0000-000000000001"
 										]
 									}
 								}
@@ -900,25 +914,23 @@ mod tests {
 									]
 								},
 								"sharedPersonaData": {
-									"name": "00000000-0000-0000-0000-0000000000f0",
+									"name": "00000000-0000-0000-0000-000000000000",
 									"emailAddresses": {
 										"request": {
 											"quantifier": "exactly",
-											"quantity": 2
+											"quantity": 1
 										},
 										"ids": [
-											"00000000-0000-0000-0000-0000000000f1",
-											"00000000-0000-0000-0000-0000000000f2"
+											"00000000-0000-0000-0000-000000000002"
 										]
 									},
 									"phoneNumbers": {
 										"request": {
-											"quantifier": "atLeast",
+											"quantifier": "exactly",
 											"quantity": 1
 										},
 										"ids": [
-											"00000000-0000-0000-0000-0000000000f3",
-											"00000000-0000-0000-0000-0000000000f4"
+											"00000000-0000-0000-0000-000000000001"
 										]
 									}
 								}

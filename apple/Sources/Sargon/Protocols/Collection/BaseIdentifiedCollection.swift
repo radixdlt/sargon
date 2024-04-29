@@ -28,6 +28,11 @@ extension BaseIdentifiedCollection {
 	public func contains(id: Element.ID) -> Bool {
 		get(id: id) != nil
 	}
+	
+	public var ids: [Element.ID] {
+		map(\.id)
+	}
+	
 }
 
 

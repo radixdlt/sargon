@@ -63,6 +63,18 @@ pub struct Persona {
     pub persona_data: PersonaData,
 }
 
+impl IsEntity for Persona {
+    fn flags(&self) -> EntityFlags {
+        self.flags.clone()
+    }
+}
+
+impl IsNetworkAware for Persona {
+    fn network_id(&self) -> NetworkID {
+        self.network_id
+    }
+}
+
 impl Persona {
     /// Creates a new `Persona`, if `persona_data` is `None`, an empty object will be created.
     pub fn new(
@@ -114,7 +126,7 @@ impl Persona {
         let id = IDStepper::<PersonaDataEntryID>::new();
         let name =
             PersonaDataIdentifiedName::with_id(unsafe { id.next() }, name);
-        let phone_numbers = CollectionOfPhoneNumbers::entries(
+        let phone_numbers = CollectionOfPhoneNumbers::from_iter(
             phone_numbers
                 .into_iter()
                 .map(|s| s.parse::<PersonaDataEntryPhoneNumber>().unwrap())
@@ -123,7 +135,7 @@ impl Persona {
                 }),
         );
 
-        let email_addresses = CollectionOfEmailAddresses::entries(
+        let email_addresses = CollectionOfEmailAddresses::from_iter(
             email_addresses
                 .into_iter()
                 .map(|s| s.parse::<PersonaDataEntryEmailAddress>().unwrap())
@@ -215,7 +227,7 @@ impl Persona {
         Self::sample_at_index_name(
             1,
             "Batman",
-            true,
+            false,
             name,
             ["+1 13 371 337"]
                 .into_iter()
@@ -246,6 +258,30 @@ impl Persona {
                 .map(|s| s.to_string())
                 .collect_vec(),
             ["ellen.riplay@weylandyutani.corp"]
+                .into_iter()
+                .map(|s| s.to_string())
+                .collect_vec(),
+        )
+    }
+
+    pub fn sample_mainnet_turing() -> Self {
+        let name = PersonaDataEntryName::new(
+            PersonaDataNameVariant::Western,
+            "Alan",
+            "Turing",
+            "",
+        )
+        .expect("Failure to construct sample Name should not be possible");
+        Self::sample_at_index_name(
+            2,
+            "Turing",
+            true,
+            name,
+            ["+1-211-564-7698"]
+                .into_iter()
+                .map(|s| s.to_string())
+                .collect_vec(),
+            ["alan@turing.hero"]
                 .into_iter()
                 .map(|s| s.to_string())
                 .collect_vec(),
@@ -380,54 +416,44 @@ impl HasSampleValues for Persona {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = Persona;
 
     #[test]
     fn equality() {
-        assert_eq!(Persona::sample(), Persona::sample());
-        assert_eq!(Persona::sample_other(), Persona::sample_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
 
-        assert_eq!(Persona::sample_mainnet(), Persona::sample_mainnet());
-        assert_eq!(
-            Persona::sample_mainnet_other(),
-            Persona::sample_mainnet_other()
-        );
+        assert_eq!(SUT::sample_mainnet(), SUT::sample_mainnet());
+        assert_eq!(SUT::sample_mainnet_other(), SUT::sample_mainnet_other());
 
-        assert_eq!(Persona::sample_stokenet(), Persona::sample_stokenet());
-        assert_eq!(
-            Persona::sample_stokenet_other(),
-            Persona::sample_stokenet_other()
-        );
+        assert_eq!(SUT::sample_stokenet(), SUT::sample_stokenet());
+        assert_eq!(SUT::sample_stokenet_other(), SUT::sample_stokenet_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(Persona::sample(), Persona::sample_other());
-        assert_ne!(Persona::sample_mainnet(), Persona::sample_mainnet_other());
-        assert_ne!(
-            Persona::sample_stokenet(),
-            Persona::sample_stokenet_other()
-        );
-        assert_ne!(Persona::sample_stokenet(), Persona::sample_mainnet());
-        assert_ne!(
-            Persona::sample_stokenet_other(),
-            Persona::sample_mainnet_other()
-        );
+        assert_ne!(SUT::sample(), SUT::sample_other());
+        assert_ne!(SUT::sample_mainnet(), SUT::sample_mainnet_other());
+        assert_ne!(SUT::sample_stokenet(), SUT::sample_stokenet_other());
+        assert_ne!(SUT::sample_stokenet(), SUT::sample_mainnet());
+        assert_ne!(SUT::sample_stokenet_other(), SUT::sample_mainnet_other());
 
-        assert_ne!(
-            Persona::sample_mainnet_other(),
-            Persona::sample_mainnet_third()
-        );
+        assert_ne!(SUT::sample_mainnet_other(), SUT::sample_mainnet_third());
 
-        assert_ne!(
-            Persona::sample_stokenet_other(),
-            Persona::sample_stokenet_third()
-        );
+        assert_ne!(SUT::sample_stokenet_other(), SUT::sample_stokenet_third());
+    }
+
+    #[test]
+    fn test_is_network_aware() {
+        assert_eq!(SUT::sample().network_id(), NetworkID::Mainnet);
     }
 
     #[test]
     fn compare() {
-        assert!(Persona::sample_mainnet_other() > Persona::sample_mainnet());
+        assert!(SUT::sample_mainnet_other() > SUT::sample_mainnet());
     }
 
     #[test]
@@ -436,13 +462,13 @@ mod tests {
 			"identity_rdx12gcd4r799jpvztlffgw483pqcen98pjnay988n8rmscdswd872xy62"
 				.parse()
 				.unwrap();
-        let persona = Persona::sample_mainnet_other();
+        let persona = SUT::sample_mainnet_other();
         assert_eq!(persona.address, identity_address);
     }
 
     #[test]
     fn display() {
-        let account = Persona::sample_mainnet_other();
+        let account = SUT::sample_mainnet_other();
         assert_eq!(
 			format!("{account}"),
 			"Batman | identity_rdx12gcd4r799jpvztlffgw483pqcen98pjnay988n8rmscdswd872xy62"
@@ -451,7 +477,7 @@ mod tests {
 
     #[test]
     fn identifiable() {
-        let persona = Persona::sample_mainnet_other();
+        let persona = SUT::sample_mainnet_other();
         let identity_address: IdentityAddress =
 			"identity_rdx12gcd4r799jpvztlffgw483pqcen98pjnay988n8rmscdswd872xy62"
 				.parse()
@@ -461,7 +487,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_mainnet_satoshi() {
-        let model = Persona::sample_mainnet();
+        let model = SUT::sample_mainnet();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -538,7 +564,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_mainnet_batman() {
-        let model = Persona::sample_mainnet_other();
+        let model = SUT::sample_mainnet_other();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -576,7 +602,7 @@ mod tests {
 						}
 					}
 				},
-				"flags": ["deletedByUser"],
+				"flags": [],
 				"personaData": {
 					"name": {
 						"id": "00000000-0000-0000-0000-000000000000",
@@ -607,7 +633,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_stokenet_leia() {
-        let model = Persona::sample_stokenet_leia_skywalker();
+        let model = SUT::sample_stokenet_leia_skywalker();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -676,7 +702,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip_stokenet_hermione() {
-        let model = Persona::sample_stokenet_hermione();
+        let model = SUT::sample_stokenet_hermione();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -788,7 +814,7 @@ mod tests {
 			}
 			"#,
 		).unwrap();
-        let persona = serde_json::from_value::<Persona>(json).unwrap();
+        let persona = serde_json::from_value::<SUT>(json).unwrap();
         assert_eq!(persona.flags.len(), 0); // assert Default value is empty flags.
     }
 }

@@ -9,8 +9,6 @@ final class AccountsTests: CanBeEmptyCollectionTest<Accounts> {
 		var sut: SUT = []
 		func doTest(expected: Int) {
 			XCTAssertEqual(expected, sut.count)
-			XCTAssertEqual(sut.elementCount, sut.elements.count)
-			XCTAssertEqual(sut.elementCount, sut.count)
 		}
 		doTest(expected: 0)
 		

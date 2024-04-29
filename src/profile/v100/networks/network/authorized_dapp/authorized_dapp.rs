@@ -37,6 +37,12 @@ pub struct AuthorizedDapp {
     pub references_to_authorized_personas: ReferencesToAuthorizedPersonas,
 }
 
+impl IsNetworkAware for AuthorizedDapp {
+    fn network_id(&self) -> NetworkID {
+        self.network_id
+    }
+}
+
 impl AuthorizedDapp {
     pub fn description(&self) -> String {
         format!(
@@ -184,8 +190,13 @@ mod tests {
     }
 
     #[test]
+    fn test_is_network_aware() {
+        assert_eq!(SUT::sample().network_id(), NetworkID::Mainnet);
+    }
+
+    #[test]
     fn json_mainnet_roundtrip() {
-        let model = AuthorizedDapp::sample_mainnet();
+        let model = SUT::sample_mainnet();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -203,8 +214,8 @@ mod tests {
 								"quantity": 2
 							},
 							"ids": [
-								"account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr",
-								"account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264"
+								"account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8",
+								"account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69"
 							]
 						},
 						"sharedPersonaData": {
@@ -215,18 +226,18 @@ mod tests {
 									"quantity": 2
 								},
 								"ids": [
-									"00000000-0000-0000-0000-000000000001",
-									"00000000-0000-0000-0000-000000000002"
+									"00000000-0000-0000-0000-000000000003",
+									"00000000-0000-0000-0000-000000000004"
 								]
 							},
 							"phoneNumbers": {
 								"request": {
-									"quantifier": "atLeast",
-									"quantity": 1
+									"quantifier": "exactly",
+									"quantity": 2
 								},
 								"ids": [
-									"00000000-0000-0000-0000-000000000003",
-									"00000000-0000-0000-0000-000000000004"
+									"00000000-0000-0000-0000-000000000001",
+									"00000000-0000-0000-0000-000000000002"
 								]
 							}
 						}
@@ -240,29 +251,27 @@ mod tests {
 								"quantity": 1
 							},
 							"ids": [
-								"account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264"
+								"account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69"
 							]
 						},
 						"sharedPersonaData": {
-							"name": "00000000-0000-0000-0000-0000000000f0",
+							"name": "00000000-0000-0000-0000-000000000000",
 							"emailAddresses": {
 								"request": {
 									"quantifier": "exactly",
-									"quantity": 2
+									"quantity": 1
 								},
 								"ids": [
-									"00000000-0000-0000-0000-0000000000f1",
-									"00000000-0000-0000-0000-0000000000f2"
+									"00000000-0000-0000-0000-000000000002"
 								]
 							},
 							"phoneNumbers": {
 								"request": {
-									"quantifier": "atLeast",
+									"quantifier": "exactly",
 									"quantity": 1
 								},
 								"ids": [
-									"00000000-0000-0000-0000-0000000000f3",
-									"00000000-0000-0000-0000-0000000000f4"
+									"00000000-0000-0000-0000-000000000001"
 								]
 							}
 						}
@@ -275,11 +284,11 @@ mod tests {
 
     #[test]
     fn json_mainnet_other_roundtrip() {
-        let model = AuthorizedDapp::sample_mainnet_other();
+        let model = SUT::sample_mainnet_other();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
- 			{
+			{
 				"networkID": 1,
 				"dAppDefinitionAddress": "account_rdx12xuhw6v30chdkhcu7qznz9vu926vxefr4h4tdvc0mdckg9rq4afx9t",
 				"displayName": "Gumball Club",
@@ -293,29 +302,27 @@ mod tests {
 								"quantity": 1
 							},
 							"ids": [
-								"account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264"
+								"account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69"
 							]
 						},
 						"sharedPersonaData": {
-							"name": "00000000-0000-0000-0000-0000000000f0",
+							"name": "00000000-0000-0000-0000-000000000000",
 							"emailAddresses": {
 								"request": {
 									"quantifier": "exactly",
-									"quantity": 2
+									"quantity": 1
 								},
 								"ids": [
-									"00000000-0000-0000-0000-0000000000f1",
-									"00000000-0000-0000-0000-0000000000f2"
+									"00000000-0000-0000-0000-000000000002"
 								]
 							},
 							"phoneNumbers": {
 								"request": {
-									"quantifier": "atLeast",
+									"quantifier": "exactly",
 									"quantity": 1
 								},
 								"ids": [
-									"00000000-0000-0000-0000-0000000000f3",
-									"00000000-0000-0000-0000-0000000000f4"
+									"00000000-0000-0000-0000-000000000001"
 								]
 							}
 						}
@@ -328,7 +335,8 @@ mod tests {
 
     #[test]
     fn json_stokenet_roundtrip() {
-        let model = AuthorizedDapp::sample_stokenet();
+        let model = SUT::sample_stokenet();
+        print_json(&model);
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -355,21 +363,19 @@ mod tests {
 							"emailAddresses": {
 								"request": {
 									"quantifier": "exactly",
-									"quantity": 2
+									"quantity": 1
 								},
 								"ids": [
-									"00000000-0000-0000-0000-000000000001",
 									"00000000-0000-0000-0000-000000000002"
 								]
 							},
 							"phoneNumbers": {
 								"request": {
-									"quantifier": "atLeast",
+									"quantifier": "exactly",
 									"quantity": 1
 								},
 								"ids": [
-									"00000000-0000-0000-0000-000000000003",
-									"00000000-0000-0000-0000-000000000004"
+									"00000000-0000-0000-0000-000000000001"
 								]
 							}
 						}
@@ -387,25 +393,23 @@ mod tests {
 							]
 						},
 						"sharedPersonaData": {
-							"name": "00000000-0000-0000-0000-0000000000f0",
+							"name": "00000000-0000-0000-0000-000000000000",
 							"emailAddresses": {
 								"request": {
 									"quantifier": "exactly",
-									"quantity": 2
+									"quantity": 1
 								},
 								"ids": [
-									"00000000-0000-0000-0000-0000000000f1",
-									"00000000-0000-0000-0000-0000000000f2"
+									"00000000-0000-0000-0000-000000000002"
 								]
 							},
 							"phoneNumbers": {
 								"request": {
-									"quantifier": "atLeast",
+									"quantifier": "exactly",
 									"quantity": 1
 								},
 								"ids": [
-									"00000000-0000-0000-0000-0000000000f3",
-									"00000000-0000-0000-0000-0000000000f4"
+									"00000000-0000-0000-0000-000000000001"
 								]
 							}
 						}
@@ -418,7 +422,7 @@ mod tests {
 
     #[test]
     fn json_stokenet_other_roundtrip() {
-        let model = AuthorizedDapp::sample_stokenet_other();
+        let model = SUT::sample_stokenet_other();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -440,25 +444,23 @@ mod tests {
 							]
 						},
 						"sharedPersonaData": {
-							"name": "00000000-0000-0000-0000-0000000000f0",
+							"name": "00000000-0000-0000-0000-000000000000",
 							"emailAddresses": {
 								"request": {
 									"quantifier": "exactly",
-									"quantity": 2
+									"quantity": 1
 								},
 								"ids": [
-									"00000000-0000-0000-0000-0000000000f1",
-									"00000000-0000-0000-0000-0000000000f2"
+									"00000000-0000-0000-0000-000000000002"
 								]
 							},
 							"phoneNumbers": {
 								"request": {
-									"quantifier": "atLeast",
+									"quantifier": "exactly",
 									"quantity": 1
 								},
 								"ids": [
-									"00000000-0000-0000-0000-0000000000f3",
-									"00000000-0000-0000-0000-0000000000f4"
+									"00000000-0000-0000-0000-000000000001"
 								]
 							}
 						}
