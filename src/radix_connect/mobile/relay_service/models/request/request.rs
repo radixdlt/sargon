@@ -161,7 +161,7 @@ mod tests {
         let public_key = PublicKey::sample();
         let request = SUT::new_send_handshake_response_with_public_key(
             session_id.clone(),
-            public_key.clone(),
+            public_key,
         );
 
         assert_eq!(request.method, Method::SendHandshakeResponse);
@@ -185,7 +185,7 @@ mod tests {
             "data": "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"
         }
         "#;
-        assert_eq_after_json_roundtrip(&request, &expected_json);
+        assert_eq_after_json_roundtrip(&request, expected_json);
     }
 
     #[test]
@@ -199,7 +199,7 @@ mod tests {
             "sessionId": "ffffffff-ffff-ffff-ffff-ffffffffffff"
         }
         "#;
-        assert_eq_after_json_roundtrip(&request, &expected_json);
+        assert_eq_after_json_roundtrip(&request, expected_json);
     }
 
     #[test]
@@ -215,7 +215,7 @@ mod tests {
             "data": "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"
         }
         "#;
-        assert_eq_after_json_roundtrip(&request, &expected_json);
+        assert_eq_after_json_roundtrip(&request, expected_json);
     }
 
     #[test]
@@ -229,7 +229,7 @@ mod tests {
             "sessionId": "ffffffff-ffff-ffff-ffff-ffffffffffff"
         }
         "#;
-        assert_eq_after_json_roundtrip(&request, &expected_json);
+        assert_eq_after_json_roundtrip(&request, expected_json);
     }
 
     #[test]
@@ -243,7 +243,7 @@ mod tests {
             "sessionId": "ffffffff-ffff-ffff-ffff-ffffffffffff"
         }
         "#;
-        assert_eq_after_json_roundtrip(&request, &expected_json);
+        assert_eq_after_json_roundtrip(&request, expected_json);
     }
 
     #[test]
@@ -260,7 +260,7 @@ mod tests {
             "data": "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"
         }
         "#;
-        assert_eq_after_json_roundtrip(&request, &expected_json);
+        assert_eq_after_json_roundtrip(&request, expected_json);
     }
 
     #[test]
@@ -269,7 +269,7 @@ mod tests {
         let public_key = PublicKey::sample();
         let request = SUT::new_send_handshake_response_with_public_key(
             session_id.clone(),
-            public_key.clone(),
+            public_key,
         );
 
         let expected_json = r#"
@@ -279,6 +279,6 @@ mod tests {
             "data": "ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf"
         }
         "#;
-        assert_eq_after_json_roundtrip(&request, &expected_json);
+        assert_eq_after_json_roundtrip(&request, expected_json);
     }
 }

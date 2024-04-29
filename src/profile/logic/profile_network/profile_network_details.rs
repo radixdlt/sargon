@@ -1,5 +1,138 @@
 use crate::prelude::*;
 
+impl AuthorizedPersonaSimple {
+    fn accounts_for_display(
+        &self,
+        non_hidden_accounts: &Accounts,
+    ) -> Result<Option<AccountsForDisplay>> {
+        let shared_accounts = self
+            .shared_accounts
+            .as_ref().map(|s| s.ids.clone())
+            .unwrap_or_default()
+            .iter()
+            .map(|account_address| {
+                let Some(account) = non_hidden_accounts
+                    .iter().find(|x| x.address == *account_address)
+                else {
+                        // This is a sign that Profile is in a bad state somehow...
+                        warn!("Discrepancy! AuthorizedDapp references account which does not exist {}", account_address);
+                        return Err(CommonError::DiscrepancyAuthorizedDappReferencedAccountWhichDoesNotExist {
+                            address: account_address.to_owned()
+                        })
+                };
+                Ok(AccountForDisplay::new(
+                    account.address,
+                    account.display_name.clone(),
+                    account.appearance_id
+                ))
+            }).collect::<Result<AccountsForDisplay>>()?;
+
+        if shared_accounts.is_empty() {
+            Ok(None)
+        } else {
+            Ok(Some(shared_accounts))
+        }
+    }
+
+    fn pick_persona_data_from_full(
+        &self,
+        full: &PersonaData,
+    ) -> Result<PersonaData> {
+        let full_ids = &full.ids_of_entries();
+        let shared = self.shared_persona_data.clone();
+        let shared_ids = shared.ids_of_entries();
+
+        if !full_ids.is_superset(&shared_ids) {
+            error!("Profile discrepancy - most likely caused by incorrect implementation of DappInteractionFlow and updating of shared persona data. \n\nDetails [persona.personaData.ids] {:?} != {:?} [simple.sharedPersonaData]\n\npersona.personaData: {full}\n\nsimple.sharedPersonaData: {shared}", full_ids, shared_ids);
+            return Err(
+                CommonError::AuthorizedDappReferencesFieldIDThatDoesNotExist,
+            );
+        };
+
+        let mut name: Option<PersonaDataIdentifiedName> = None;
+        if let Some(saved_name) = &full.name {
+            if let Some(shared) = shared.name {
+                if shared.id() == saved_name.id {
+                    name = Some(saved_name.clone());
+                }
+            };
+        };
+
+        let phone_numbers = full
+            .phone_numbers
+            .collection
+            .clone()
+            .into_iter()
+            .filter(|x| {
+                shared
+                    .phone_numbers
+                    .clone()
+                    .map(|s| s.ids.clone())
+                    .unwrap_or_default()
+                    .into_iter()
+                    .contains(&x.id)
+            })
+            .collect::<CollectionOfPhoneNumbers>();
+
+        let email_addresses = full
+            .email_addresses
+            .collection
+            .clone()
+            .into_iter()
+            .filter(|x| {
+                shared
+                    .email_addresses
+                    .clone()
+                    .map(|s| s.ids.clone())
+                    .unwrap_or_default()
+                    .into_iter()
+                    .contains(&x.id)
+            })
+            .collect::<CollectionOfEmailAddresses>();
+
+        Ok(PersonaData::new(name, phone_numbers, email_addresses))
+    }
+
+    fn persona_from(&self, non_hidden_personas: &Personas) -> Result<Persona> {
+        let Some(persona) = non_hidden_personas
+            .iter()
+            .find(|x| x.address == self.identity_address)
+        else {
+            // This is a sign that Profile is in a bad state somehow...
+            warn!("Discrepancy! AuthorizedDapp references persona which does not exist {}", self.identity_address);
+            return Err(CommonError::DiscrepancyAuthorizedDappReferencedPersonaWhichDoesNotExist {
+                address: self.identity_address
+            });
+        };
+        Ok(persona.clone())
+    }
+
+    fn detailed(
+        &self,
+        non_hidden_personas: &Personas,
+        non_hidden_accounts: &Accounts,
+    ) -> Result<AuthorizedPersonaDetailed> {
+        let persona = self.persona_from(non_hidden_personas)?;
+        let persona_data =
+            self.pick_persona_data_from_full(&persona.persona_data)?;
+
+        let shared_accounts = self.accounts_for_display(non_hidden_accounts)?;
+
+        let has_auth_signing_key = match &persona.security_state {
+            EntitySecurityState::Unsecured { value: uec } => {
+                uec.authentication_signing.is_some()
+            }
+        };
+        Ok(AuthorizedPersonaDetailed::new(
+            persona.address,
+            persona.display_name.clone(),
+            shared_accounts.clone(),
+            persona_data,
+            has_auth_signing_key,
+        ))
+    }
+}
+
 impl ProfileNetwork {
     pub fn details_for_authorized_dapp(
         &self,
@@ -7,88 +140,15 @@ impl ProfileNetwork {
     ) -> Result<AuthorizedDappDetailed> {
         self.is_on_same_network_as(dapp)?;
 
+        let non_hidden_personas = &self.personas_non_hidden();
+        let non_hidden_accounts = &self.accounts_non_hidden();
+
         let detailed_authorized_personas = dapp
             .references_to_authorized_personas
-			.clone()
+            .clone()
             .into_iter()
             .map(|simple| {
-                let Some(persona) = self
-                    .personas_non_hidden()
-                    .into_iter().find(|x| x.address == simple.identity_address)
-                else {
-					// This is a sign that Profile is in a bad state somehow...
-					warn!("Discrepancy! AuthorizedDapp references persona which does not exist {}", simple.identity_address);
-                    return Err(CommonError::DiscrepancyAuthorizedDappReferencedPersonaWhichDoesNotExist {
-						address: simple.identity_address
-					})
-                };
-
-				let display_name = persona.display_name.clone();
-				let shared_accounts = simple
-					.shared_accounts
-					.map(|s| s.ids.clone())
-					.unwrap_or_default()
-					.into_iter()
-					.map(|account_address| {
-					    let Some(account) = self
-							.accounts_non_hidden()
-							.into_iter().find(|x| x.address == account_address)
-						else {
-								// This is a sign that Profile is in a bad state somehow...
-								warn!("Discrepancy! AuthorizedDapp references account which does not exist {}", account_address);
-								return Err(CommonError::DiscrepancyAuthorizedDappReferencedAccountWhichDoesNotExist {
-									address: account_address
-								})
-						};
-						Ok(AccountForDisplay::new(
-							account.address,
-							account.display_name,
-							account.appearance_id
-						))
-					}).collect::<Result<AccountsForDisplay>>()?;
-				let shared_accounts = if shared_accounts.is_empty() { None } else { Some(shared_accounts) };
-
-				let full = persona.persona_data.clone();
-				let full_ids = full.ids_of_entries();
-				let shared = simple.shared_persona_data.clone();
-				let shared_ids = shared.ids_of_entries();
-
-				if !full_ids.is_superset(&shared_ids) {
-					error!("Profile discrepancy - most likely caused by incorrect implementation of DappInteractionFlow and updating of shared persona data. \n\nDetails [persona.personaData.ids] {:?} != {:?} [simple.sharedPersonaData]\n\npersona.personaData: {full}\n\nsimple.sharedPersonaData: {shared}", full_ids, shared_ids);
-					return Err(CommonError::AuthorizedDappReferencesFieldIDThatDoesNotExist)
-				};
-
-				let mut name: Option<PersonaDataIdentifiedName> = None;
-				if let Some(saved_name) = full.name {
-					if let Some(shared) = shared.name {
-						if shared.id() == saved_name.id {
-							name = Some(saved_name.clone());
-						}
-					};
-				};
-
-				let phone_numbers = full.phone_numbers.collection.clone().into_iter().filter(|x| {
-					shared.phone_numbers.clone().map(|s| s.ids.clone()).unwrap_or_default().into_iter().contains(&x.id)
-				}).collect::<CollectionOfPhoneNumbers>();
-
-				let email_addresses = full.email_addresses.collection.clone().into_iter().filter(|x| {
-					shared.email_addresses.clone().map(|s| s.ids.clone()).unwrap_or_default().into_iter().contains(&x.id)
-				}).collect::<CollectionOfEmailAddresses>();
-
-				let persona_data = PersonaData::new(name, phone_numbers, email_addresses);
-
-				let has_auth_signing_key = match &persona.security_state {
-					EntitySecurityState::Unsecured { value: uec } => uec.authentication_signing.is_some()
-				};
-				Ok(
-					AuthorizedPersonaDetailed::new(
-						persona.address,
-						display_name,
-						shared_accounts,
-						persona_data,
-						has_auth_signing_key
-					)
-				)
+                simple.detailed(non_hidden_personas, non_hidden_accounts)
             })
             .collect::<Result<DetailedAuthorizedPersonas>>()?;
 
