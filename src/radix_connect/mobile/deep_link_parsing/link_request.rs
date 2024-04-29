@@ -1,14 +1,14 @@
 use crate::prelude::*;
 
-use super::session_id;
+use super::super::session::session_id::SessionID;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, uniffi::Record)]
-pub struct LinkRequest {
+pub struct RadixConnectMobileLinkRequest {
     pub origin: Url,
     pub session_id: SessionID,
 }
 
-impl LinkRequest {
+impl RadixConnectMobileLinkRequest {
     pub fn new(origin: Url, session_id: SessionID) -> Self {
         Self { origin, session_id }
     }
@@ -28,20 +28,20 @@ impl LinkRequest {
                     bad_value: session_id.as_ref().to_owned(),
                 }
             })?;
-        Ok(LinkRequest::new(origin, session_id))
+        Ok(RadixConnectMobileLinkRequest::new(origin, session_id))
     }
 }
 
-impl HasSampleValues for LinkRequest {
+impl HasSampleValues for RadixConnectMobileLinkRequest {
     fn sample() -> Self {
-        LinkRequest::new(
+        RadixConnectMobileLinkRequest::new(
             parse_url("radix://app1").unwrap(),
             SessionID::sample(),
         )
     }
 
     fn sample_other() -> Self {
-        LinkRequest::new(
+        RadixConnectMobileLinkRequest::new(
             parse_url("radix://app2").unwrap(),
             SessionID::sample_other(),
         )
@@ -53,7 +53,7 @@ mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = LinkRequest;
+    type SUT = RadixConnectMobileLinkRequest;
 
     #[test]
     fn equality() {

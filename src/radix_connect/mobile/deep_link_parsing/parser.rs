@@ -2,7 +2,7 @@ use crate::prelude::*;
 use url::form_urlencoded;
 use url::Url;
 
-use super::interaction_id;
+use super::*;
 
 const CONNECT_URL_PARAM_SESSION_ID: &str = "sessionId";
 const CONNECT_URL_PARAM_ORIGIN: &str = "origin";
@@ -11,7 +11,7 @@ const CONNECT_URL: &str = "https://d1rxdfxrfmemlj.cloudfront.net";
 
 pub fn parse_mobile_connect_request(
     url: impl AsRef<str>,
-) -> Result<MobileConnectRequest> {
+) -> Result<RadixConnectMobileConnectRequest> {
     let url = url.as_ref();
     let connect_url = parse_url(CONNECT_URL).unwrap();
     let parsed_url = parse_url(url).map_err(|_| {
@@ -43,16 +43,19 @@ pub fn parse_mobile_connect_request(
                 bad_value: url.to_owned(),
             })
             .and_then(|interaction_id| {
-                DappRequest::try_with_interaction_id_and_session_id(
+                RadixConnectMobileDappRequest::try_with_interaction_id_and_session_id(
                     interaction_id,
                     session_id_string,
                 )
             })
-            .map(MobileConnectRequest::DappInteraction);
+            .map(RadixConnectMobileConnectRequest::DappInteraction);
     };
 
-    LinkRequest::try_with_origin_and_session_id(origin, session_id_string)
-        .map(MobileConnectRequest::Link)
+    RadixConnectMobileLinkRequest::try_with_origin_and_session_id(
+        origin,
+        session_id_string,
+    )
+    .map(RadixConnectMobileConnectRequest::Link)
 }
 
 #[cfg(test)]
@@ -68,7 +71,7 @@ mod tests {
         let result = parse_mobile_connect_request(connect_url);
         assert!(result.is_ok());
         match result.unwrap() {
-            MobileConnectRequest::Link(link_request) => {
+            RadixConnectMobileConnectRequest::Link(link_request) => {
                 assert_eq!(link_request.session_id.0.to_string(), session_id);
                 assert_eq!(
                     link_request.origin,
@@ -109,7 +112,7 @@ mod tests {
         let result = parse_mobile_connect_request(url);
         assert!(result.is_ok());
         match result.unwrap() {
-            MobileConnectRequest::DappInteraction(dapp_request) => {
+            RadixConnectMobileConnectRequest::DappInteraction(dapp_request) => {
                 assert_eq!(dapp_request.session_id.0.to_string(), session_id);
                 assert_eq!(
                     dapp_request.interaction_id.0.to_string(),

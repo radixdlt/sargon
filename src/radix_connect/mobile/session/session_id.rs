@@ -3,7 +3,16 @@ use crate::prelude::*;
 uniffi::custom_newtype!(SessionID, Uuid);
 
 #[derive(
-    Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Ord, PartialOrd, Hash,
+    Debug,
+    Serialize,
+    Deserialize,
+    Clone,
+    PartialEq,
+    Eq,
+    Ord,
+    PartialOrd,
+    Hash,
+    derive_more::Display,
 )]
 pub struct SessionID(pub(crate) Uuid);
 
