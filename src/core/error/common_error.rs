@@ -509,10 +509,10 @@ pub enum CommonError {
     HkdfExpandFailed { underlying: String } = 10141,
 
     #[error("RadixConnectMobileSession not found, session id: {session_id}")]
-    RadixConnectMobileSessionNotFound { session_id: String } = 10142,
+    RadixConnectMobileSessionNotFound { session_id: SessionID } = 10142,
 
     #[error("RadixConnectMobileDappRequest not found, interaction id: {interaction_id}")]
-    RadixConnectMobileDappRequestNotFound { interaction_id: String } = 10143,
+    RadixConnectMobileDappRequestNotFound { interaction_id: WalletInteractionId } = 10143,
 }
 
 #[uniffi::export]
