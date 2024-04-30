@@ -48,6 +48,9 @@ serde_json = { git = "https://github.com/serde-rs/json/", rev = "4bc1eaa03a61605
     "preserve_order",
 ] }
 
+# simd-json = "0.13.10"
+simd-json = { git = "https://github.com/simd-lite/simd-json", rev = "83a806f82155ed177807fa0af3e597737cd71a2d", features = ["serde_json"]}
+
 # serde_with = "3.4.0"
 serde_with = { git = "https://github.com/jonasbb/serde_with/", rev = "1e8e4e75398c6a9de29386473ae7c3157be031c2" }
 

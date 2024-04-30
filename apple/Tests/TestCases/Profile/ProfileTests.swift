@@ -84,11 +84,59 @@ final class ProfileTests: Test<Profile> {
 		XCTAssertTrue(jsonString.contains("version"))
 	}
 	
-	func test_json_performance() throws {
-//		let sut: SUT = try jsonFixture("huge_profile_1000_accounts")
-		let sut: SUT = try jsonFixture("big_profile_100_accounts")
+	// M2 Max: Average 2.6 seconds
+	func test_json_performance_codable() throws {
+		let sut: SUT = try jsonFixture("huge_profile_1000_accounts")
 		measure {
-			try! self.doTestCodableRoundtrip(sut)
+			let jsonEncoder = JSONEncoder()
+			let jsonDecoder = JSONDecoder()
+			let data = try! jsonEncoder.encode(sut)
+			let decoded = try! jsonDecoder.decode(SUT.self, from: data)
+			XCTAssertEqual(decoded, sut)
+		}
+	}
+	
+	// M2 Max: Average 0.91 seconds
+	func test_json_performance_low_serde() throws {
+		let sut: SUT = try jsonFixture("huge_profile_1000_accounts")
+		measure {
+			let data = profileToJsonBytes(profile: sut)
+			let decoded =  try! newProfileFromJsonBytes(jsonBytes: data)
+			XCTAssertEqual(decoded, sut)
+		}
+	}
+	
+	// M2 Max: Average 0.1
+	func test_json_performance_low_arc_serde() throws {
+		let sut: SUT = try jsonFixture("huge_profile_1000_accounts")
+		let profile = ProfileObj.init(profile: sut)
+		measure {
+			let data = profileToJsonBytesArc(profile: profile)
+			let decoded = try! newProfileFromJsonBytesArc(json: data)
+			XCTAssertEqual(decoded.profile(), sut)
+		}
+	}
+	
+	// M2 Max: Average 0.889 seconds
+	func test_json_performance_low_simd() throws {
+		let sut: SUT = try jsonFixture("huge_profile_1000_accounts")
+		measure {
+			let data = profileToJsonBytesSimd(profile: sut)
+			let decoded = try! newProfileFromJsonBytesSimd(bytes: data)
+			XCTAssertEqual(decoded, sut)
+		}
+	}
+	
+	// M2 Max: Average 0.128 seconds
+	func test_json_performance_low_arc_simd() throws {
+		let sut: SUT = try jsonFixture("huge_profile_1000_accounts")
+		let profile = ProfileObj(profile: sut)
+		measure {
+			let data = profileToJsonBytesSimdArc(profile: profile)
+			let decoded = try! newProfileFromJsonBytesSimdArc(bytes: data)
+			XCTAssertEqual(decoded.profile(), sut)
 		}
 	}
 }
+
+

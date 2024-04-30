@@ -23,7 +23,7 @@ impl AesGcm256 {
 
 impl AesGcm256 {
     fn seal(
-        plaintext: Vec<u8>,
+        plaintext: impl AsRef<[u8]>,
         encryption_key: Key<aes_gcm::Aes256Gcm>,
     ) -> AesGcmSealedBox {
         let cipher = aes_gcm::Aes256Gcm::new(&encryption_key);
@@ -67,7 +67,7 @@ impl VersionedEncryption for AesGcm256 {
     /// Zeroizes `encryption_key` after usage.
     fn encrypt(
         &self,
-        plaintext: Vec<u8>,
+        plaintext: impl AsRef<[u8]>,
         encryption_key: &mut Exactly32Bytes,
     ) -> Vec<u8> {
         let sealed_box = Self::seal(
@@ -81,10 +81,10 @@ impl VersionedEncryption for AesGcm256 {
     /// Zeroizes `decryption_key` after usage.
     fn decrypt(
         &self,
-        cipher_text: Vec<u8>,
+        cipher_text: impl AsRef<[u8]>,
         decryption_key: &mut Exactly32Bytes,
     ) -> Result<Vec<u8>> {
-        let sealed_box = AesGcmSealedBox::try_from(cipher_text)?;
+        let sealed_box = AesGcmSealedBox::try_from(cipher_text.as_ref())?;
         let result = Self::open(
             sealed_box,
             Key::<aes_gcm::Aes256Gcm>::from(*decryption_key),

@@ -425,7 +425,7 @@ mod tests {
         let network_id = NetworkID::Mainnet;
 
         let n = 100;
-        (0..n).into_iter().for_each(|index| {
+        (0..n).for_each(|index| {
             let account_name =
                 DisplayName::new(format!("Account {index}")).unwrap();
             let _ = wallet

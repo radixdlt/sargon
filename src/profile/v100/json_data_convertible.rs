@@ -60,7 +60,7 @@ macro_rules! json_data_convertible {
 
             #[uniffi::export]
             pub fn [< new_ $type:snake _from_json_bytes >](
-                json_bytes: BagOfBytes,
+                json_bytes: &BagOfBytes,
             ) -> Result<$type> {
                 $type::new_from_json_bytes(json_bytes)
             }
@@ -81,7 +81,7 @@ macro_rules! json_data_convertible {
                 fn json_bytes_roundtrip() {
                     let sut = SUT::sample();
                     let json_bytes = [< $type:snake _to_json_bytes >](&sut);
-                    assert_eq!(sut, [< new_ $type:snake _from_json_bytes >](json_bytes).unwrap());
+                    assert_eq!(sut, [< new_ $type:snake _from_json_bytes >](&json_bytes).unwrap());
                 }
             }
 

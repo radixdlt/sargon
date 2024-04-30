@@ -42,7 +42,7 @@ impl MockAntenna {
         Self::with_spy(status, body, |_| {})
     }
 
-    pub fn new_always_failling() -> Self {
+    pub fn new_always_failing() -> Self {
         Self::new(500, BagOfBytes::new())
     }
 
