@@ -212,16 +212,24 @@ impl<'de> Deserialize<'de> for PublicKey {
             curve: SLIP10Curve,
         }
         let wrapper = Wrapper::deserialize(deserializer)?;
-        match wrapper.curve {
-            SLIP10Curve::Curve25519 => Ed25519PublicKey::from_str(&wrapper.hex)
-                .map(PublicKey::Ed25519)
-                .map_err(de::Error::custom),
-            SLIP10Curve::Secp256k1 => {
-                Secp256k1PublicKey::from_str(&wrapper.hex)
-                    .map(PublicKey::Secp256k1)
-                    .map_err(de::Error::custom)
+        let public_key = match wrapper.curve {
+            SLIP10Curve::Curve25519 => {
+                match Ed25519PublicKey::from_str(&wrapper.hex) {
+                    Ok(value) => PublicKey::Ed25519(value),
+                    Err(_) => {
+                        match Secp256k1PublicKey::from_str(&wrapper.hex) {
+                            Ok(value) => PublicKey::Secp256k1(value),
+                            Err(e) => Err(serde::de::Error::custom(e))?,
+                        }
+                    }
+                }
             }
-        }
+            SLIP10Curve::Secp256k1 => PublicKey::Secp256k1(
+                Secp256k1PublicKey::from_str(&wrapper.hex)
+                    .map_err(de::Error::custom)?,
+            ),
+        };
+        Ok(public_key)
     }
 }
 
@@ -385,6 +393,22 @@ mod tests {
 			}
             "#,
         );
+    }
+
+    #[test]
+    fn json_android_bug_secp256k1_incorrectly_marked_as_25519_is_indeed_deserialized_as_secp256k1(
+    ) {
+        let expected_secp256k1 = SUT::sample_secp256k1_alice();
+        let json_with_wrong_curve = r#"
+        {
+            "curve": "curve25519",
+            "compressedData": "02517b88916e7f315bb682f9926b14bc67a0e4246f8a419b986269e1a7e61fffa7"
+        }
+        "#;
+
+        let result =
+            serde_json::from_str::<PublicKey>(&json_with_wrong_curve).unwrap();
+        assert_eq!(expected_secp256k1, result);
     }
 
     #[test]
