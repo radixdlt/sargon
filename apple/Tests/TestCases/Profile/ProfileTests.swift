@@ -22,11 +22,7 @@ final class ProfileTests: Test<Profile> {
 	func test_id_is_header_id() {
 		XCTAssertNoDifference(SUT.sample.id, SUT.sample.header.id)
 	}
-    
-    func test_codable_roundtrip() throws {
-        try SUT.sampleValues.forEach(doTestCodableRoundtrip)
-    }
-	
+    	
 	func test_encryption_roundtrip() throws {
 		let password = "ultra secret"
 		let sut = SUT.sample
@@ -83,60 +79,115 @@ final class ProfileTests: Test<Profile> {
 		XCTAssertTrue(jsonString.contains("encryptedSnapshot"))
 		XCTAssertTrue(jsonString.contains("version"))
 	}
-	
-	// M2 Max: Average 2.6 seconds
-	func test_json_performance_codable() throws {
-		let sut: SUT = try jsonFixture("huge_profile_1000_accounts")
+
+	// M2 Max: Average 0.87 seconds
+	func test_json_roundtrip_no_arc() throws {
+		let (sut, _) = vector
+		var decoded: SUT?
+		var encoded: Data?
 		measure {
-			let jsonEncoder = JSONEncoder()
-			let jsonDecoder = JSONDecoder()
-			let data = try! jsonEncoder.encode(sut)
-			let decoded = try! jsonDecoder.decode(SUT.self, from: data)
-			XCTAssertEqual(decoded, sut)
+			encoded = profileToJsonBytes(profile: sut)
+			decoded =  try! newProfileFromJsonBytes(jsonBytes: encoded!)
+		}
+		XCTAssertEqual(decoded, sut)
+	}
+	
+	// M2 Max: Average 0.049
+	func test_json_roundtrip_arc_in_arc_out__arc_in_arc_out() throws {
+		let (sut, json) = vector
+		let profileInContainer = JsonContainerProfile(profile: sut)
+		var decoded: JsonContainerProfile?
+		var encoded: JsonContainerBytes?
+		measure {
+			encoded = profileToJsonBytesArcInArcOut(profile: profileInContainer)
+			decoded = try? newProfileFromJsonBytesArcInArcOut(json: encoded!)
+		}
+		XCTAssertEqual(encoded?.bytes(), json)
+		XCTAssertEqual(decoded?.profile(), sut)
+	}
+	
+	// M2 Max: Average 0.247
+	func test_json_roundtrip_not_arc_in_arc_out__not_arc_in_arc_out() throws {
+		let (sut, json) = vector
+		var decoded: JsonContainerProfile?
+		var encoded: JsonContainerBytes?
+		measure {
+			encoded = profileToJsonBytesNotArcInArcOut(profile: sut)
+			decoded = try? newProfileFromJsonBytesNotArcInArcOut(json: json)
+		}
+		XCTAssertEqual(encoded?.bytes(), json)
+		XCTAssertEqual(decoded?.profile(), sut)
+	}
+	
+	// M2 Max: Average 0.88
+	func test_json_roundtrip_not_arc_in_not_arc_out__not_arc_in_not_arc_out() throws {
+		let (sut, json) = vector
+		var encoded: Data?
+		var decoded: SUT?
+		measure {
+			encoded = profileToJsonBytes(profile: sut)
+			decoded = try? newProfileFromJsonBytes(jsonBytes: json)
+		}
+		XCTAssertEqual(encoded, json)
+		XCTAssertEqual(decoded, sut)
+	}
+	
+	// M2 Max: Average 0.058
+	func test__TO_json_only__arc_in_arc_out() throws {
+		let sut = vector.model
+		measure {
+			let _ = profileToJsonBytesArcInArcOut(profile: .init(profile: sut))
 		}
 	}
 	
-	// M2 Max: Average 0.91 seconds
-	func test_json_performance_low_serde() throws {
-		let sut: SUT = try jsonFixture("huge_profile_1000_accounts")
+	// M2 Max: Average 0.63
+	func test__TO_json_only__arc_in_not_arc_out() throws {
+		let sut = vector.model
 		measure {
-			let data = profileToJsonBytes(profile: sut)
-			let decoded =  try! newProfileFromJsonBytes(jsonBytes: data)
-			XCTAssertEqual(decoded, sut)
+			let _ = profileToJsonBytesArcInNotArcOut(profile: .init(profile: sut))
 		}
 	}
 	
-	// M2 Max: Average 0.1
-	func test_json_performance_low_arc_serde() throws {
-		let sut: SUT = try jsonFixture("huge_profile_1000_accounts")
-		let profile = ProfileObj.init(profile: sut)
+	// M2 Max: Average 0.057
+	// 💡 CONCLUSION: The performance gain is to use Arc on result FROM Rust
+	func test__TO_json_only__not_arc_in_arc_out() throws {
+		let sut = vector.model
 		measure {
-			let data = profileToJsonBytesArc(profile: profile)
-			let decoded = try! newProfileFromJsonBytesArc(json: data)
-			XCTAssertEqual(decoded.profile(), sut)
+			let _ = profileToJsonBytesNotArcInArcOut(profile: sut)
 		}
 	}
 	
-	// M2 Max: Average 0.889 seconds
-	func test_json_performance_low_simd() throws {
-		let sut: SUT = try jsonFixture("huge_profile_1000_accounts")
+	
+	// M2 Max: Average 0.195
+	func test__FROM_json_only__arc_in_arc_out() throws {
+		let json = vector.json
 		measure {
-			let data = profileToJsonBytesSimd(profile: sut)
-			let decoded = try! newProfileFromJsonBytesSimd(bytes: data)
-			XCTAssertEqual(decoded, sut)
+			let _ = try! newProfileFromJsonBytesArcInArcOut(json: .init(bytes: json))
 		}
 	}
 	
-	// M2 Max: Average 0.128 seconds
-	func test_json_performance_low_arc_simd() throws {
-		let sut: SUT = try jsonFixture("huge_profile_1000_accounts")
-		let profile = ProfileObj(profile: sut)
+	// M2 Max: Average 0.259
+	func test__FROM_json_only__arc_in_not_arc_out() throws {
+		let json = vector.json
 		measure {
-			let data = profileToJsonBytesSimdArc(profile: profile)
-			let decoded = try! newProfileFromJsonBytesSimdArc(bytes: data)
-			XCTAssertEqual(decoded.profile(), sut)
+			let _ = try! newProfileFromJsonBytesArcInNotArcOut(json: .init(bytes: json))
 		}
 	}
+	
+	// M2 Max: Average 0.199
+	// 💡 CONCLUSION: The performance gain is to use Arc on result FROM Rust
+	func test__FROM_json_only__not_arc_in_arc_out() throws {
+		let json = vector.json
+		measure {
+			let _ = try! newProfileFromJsonBytesNotArcInArcOut(json: json)
+		}
+	}
+	
+	lazy var vector: (model: Profile, json: Data) = {
+		try! jsonFixture(
+			as: SUT.self,
+			file: "huge_profile_1000_accounts",
+			decode: { try Profile(jsonData: $0) }
+		)
+	}()
 }
-
-

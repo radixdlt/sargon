@@ -16,11 +16,7 @@ extension Profile {
 	public init(
 		jsonData bytes: some DataProtocol
 	) throws {
-		self = try newProfileFromJsonBytes(
-			jsonBytes: Data(
-				bytes
-			)
-		)
+		self = try newProfileFromJsonBytesArcInArcOut(json: .init(bytes: Data(bytes))).profile()
 	}
 	
 	public init(
@@ -34,7 +30,7 @@ extension Profile {
 	}
 	
 	public func profileSnapshot() -> Data {
-        profileToJsonBytes(profile: self)
+        profileToJsonBytesArcInArcOut(profile: JsonContainerProfile(profile: self)).bytes()
 	}
 	
 	public func jsonData() -> Data {

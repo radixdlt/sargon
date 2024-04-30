@@ -23,11 +23,23 @@ class TestCase: XCTestCase {
 	}
 	
 	func jsonFixture<T: Decodable>(
-		_ fileName: String,
+		as: T.Type = T.self,
+		file fileName: String,
 		decode: (Data) throws -> T = { try JSONDecoder().decode(T.self, from: $0) }
-	) throws -> T {
+	) throws -> (model: T, json: Data) {
 		let json = try openFile(subPath: "vector", fileName, extension: "json")
-		return try decode(json)
+		let model: T = try decode(json)
+		return (model, json)
+	}
+	
+	func jsonFixture<T>(
+		as: T.Type = T.self,
+		file fileName: String,
+		decode: (any DataProtocol) throws -> T
+	) throws -> (model: T, json: Data) {
+		let json = try openFile(subPath: "vector", fileName, extension: "json")
+		let model: T = try decode(json)
+		return (model, json)
 	}
 	
 }

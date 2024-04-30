@@ -2,8 +2,6 @@ use std::ops::DerefMut;
 
 use crate::prelude::*;
 
-json_data_convertible!(Profile);
-
 #[uniffi::export]
 pub fn new_profile(
     device_factor_source: DeviceFactorSource,
@@ -32,71 +30,31 @@ pub fn profile_to_debug_string(profile: &Profile) -> String {
     format!("{:?}", profile)
 }
 
-#[uniffi::export]
-pub fn new_profile_from_json_bytes_simd(bytes: BagOfBytes) -> Result<Profile> {
-    let json_byte_count = bytes.len() as u64;
-    let mut bytes = bytes;
-    simd_json::serde::from_slice(bytes.as_mut()).map_err(|_| {
-        CommonError::FailedToDeserializeJSONToValue {
-            json_byte_count,
-            type_name: type_name::<Profile>(),
-        }
-    })
-}
-
-#[uniffi::export]
-pub fn profile_to_json_bytes_simd(profile: &Profile) -> BagOfBytes {
-    simd_json::serde::to_vec(profile)
-        .map(BagOfBytes::from)
-        .unwrap_or_else(|_| {
-            unreachable!(
-                "JSON serialization of {} should never fail.",
-                type_name::<Profile>()
-            )
-        })
-}
-
-#[uniffi::export]
-pub fn new_profile_from_json_bytes_simd_arc(
-    bytes: Arc<BagOfBytesObj>,
-) -> Result<Arc<ProfileObj>> {
-    let json_byte_count = bytes.bytes.len() as u64;
-    let mut bytes = bytes.bytes(); //clones
-    simd_json::serde::from_slice::<Profile>(bytes.as_mut())
-        // .map(|profile| ProfileObj { profile })
-        // .map(Arc::new)
-        .map(ProfileObj::new)
-        .map_err(|_| CommonError::FailedToDeserializeJSONToValue {
-            json_byte_count,
-            type_name: type_name::<Profile>(),
-        })
-}
-
-#[uniffi::export]
-pub fn profile_to_json_bytes_simd_arc(
-    profile: Arc<ProfileObj>,
-) -> Arc<BagOfBytesObj> {
-    let profile = &profile.profile;
-    simd_json::serde::to_vec(profile)
-        .map(BagOfBytes::from)
-        // .map(|bytes| BagOfBytesObj { bytes })
-        // .map(Arc::new)
-        .map(BagOfBytesObj::new)
-        .unwrap_or_else(|_| {
-            unreachable!(
-                "JSON serialization of {} should never fail.",
-                type_name::<Profile>()
-            )
-        })
-}
-
-#[derive(uniffi::Object)]
-pub struct BagOfBytesObj {
+#[derive(Clone, PartialEq, Eq, Debug, uniffi::Object)]
+pub struct JsonContainerBytes {
     pub bytes: BagOfBytes,
 }
 
+impl From<BagOfBytes> for JsonContainerBytes {
+    fn from(value: BagOfBytes) -> Self {
+        Self { bytes: value }
+    }
+}
+
+impl From<JsonContainerBytes> for BagOfBytes {
+    fn from(value: JsonContainerBytes) -> BagOfBytes {
+        value.bytes
+    }
+}
+
+impl JsonContainerBytes {
+    fn with_bytes(bytes: Vec<u8>) -> Arc<Self> {
+        Self::new(BagOfBytes::from(bytes))
+    }
+}
+
 #[uniffi::export]
-impl BagOfBytesObj {
+impl JsonContainerBytes {
     #[uniffi::constructor]
     pub fn new(bytes: BagOfBytes) -> Arc<Self> {
         Arc::new(Self { bytes })
@@ -107,13 +65,25 @@ impl BagOfBytesObj {
     }
 }
 
-#[derive(uniffi::Object)]
-pub struct ProfileObj {
+#[derive(Clone, PartialEq, Eq, Debug, uniffi::Object)]
+pub struct JsonContainerProfile {
     pub profile: Profile,
 }
 
+impl From<Profile> for JsonContainerProfile {
+    fn from(value: Profile) -> Self {
+        Self { profile: value }
+    }
+}
+
+impl From<JsonContainerProfile> for Profile {
+    fn from(value: JsonContainerProfile) -> Self {
+        value.profile
+    }
+}
+
 #[uniffi::export]
-impl ProfileObj {
+impl JsonContainerProfile {
     #[uniffi::constructor]
     pub fn new(profile: Profile) -> Arc<Self> {
         Arc::new(Self { profile })
@@ -123,39 +93,62 @@ impl ProfileObj {
     }
 }
 
+// impl JsonDataDeserializing for Profile {}
+// impl JsonDataSerializing for Profile {}
+json_data_convertible!(Profile);
+
+// ################
+// FROM BYTES
+// ################
 #[uniffi::export]
-pub fn new_profile_from_json_bytes_arc(
-    json: Arc<BagOfBytesObj>,
-) -> Result<Arc<ProfileObj>> {
-    let json = json.bytes.as_ref();
-    serde_json::from_slice::<Profile>(json)
-        // .map(|profile| ProfileObj { profile })
-        // .map(Arc::new)
-        .map(ProfileObj::new)
-        .map_err(|_| CommonError::FailedToDeserializeJSONToValue {
-            json_byte_count: json.len() as u64,
-            type_name: type_name::<Profile>(),
-        })
+pub fn new_profile_from_json_bytes_arc_in_arc_out(
+    json: Arc<JsonContainerBytes>,
+) -> Result<Arc<JsonContainerProfile>> {
+    Profile::new_from_json_bytes(json.bytes.as_ref())
+        .map(JsonContainerProfile::new)
 }
 
 #[uniffi::export]
-pub fn profile_to_json_bytes_arc(
-    profile: Arc<ProfileObj>,
-) -> Arc<BagOfBytesObj> {
-    let profile = &profile.profile;
-    serde_json::to_vec(profile)
-        .map(BagOfBytes::from)
-        // .map(|bytes| BagOfBytesObj { bytes })
-        // .map(Arc::new)
-        .map(BagOfBytesObj::new)
-        .unwrap_or_else(|_| {
-            unreachable!(
-                "JSON serialization of {} should never fail.",
-                type_name::<Profile>()
-            )
-        })
+pub fn new_profile_from_json_bytes_not_arc_in_arc_out(
+    json: &BagOfBytes,
+) -> Result<Arc<JsonContainerProfile>> {
+    Profile::new_from_json_bytes(json).map(JsonContainerProfile::new)
 }
 
+#[uniffi::export]
+pub fn new_profile_from_json_bytes_arc_in_not_arc_out(
+    json: Arc<JsonContainerBytes>,
+) -> Result<Profile> {
+    Profile::new_from_json_bytes(json.bytes.as_ref())
+}
+
+// ################
+// TO BYTES
+// ################
+#[uniffi::export]
+pub fn profile_to_json_bytes_arc_in_not_arc_out(
+    profile: Arc<JsonContainerProfile>,
+) -> BagOfBytes {
+    BagOfBytes::from(profile.profile.to_json_bytes())
+}
+
+#[uniffi::export]
+pub fn profile_to_json_bytes_arc_in_arc_out(
+    profile: Arc<JsonContainerProfile>,
+) -> Arc<JsonContainerBytes> {
+    JsonContainerBytes::with_bytes(profile.profile.to_json_bytes())
+}
+
+#[uniffi::export]
+pub fn profile_to_json_bytes_not_arc_in_arc_out(
+    profile: &Profile,
+) -> Arc<JsonContainerBytes> {
+    JsonContainerBytes::with_bytes(profile.to_json_bytes())
+}
+
+// ################
+// ENCRYPTION
+// ################
 #[uniffi::export]
 pub fn new_profile_from_encryption_bytes(
     json: BagOfBytes,
@@ -229,7 +222,13 @@ mod uniffi_tests {
         let sut = SUT::sample();
 
         assert_eq!(
-            new_profile_from_json_bytes(&profile_to_json_bytes(&sut)).unwrap(),
+            new_profile_from_json_bytes_arc_in_arc_out(
+                profile_to_json_bytes_arc_in_arc_out(
+                    JsonContainerProfile::new(sut.clone())
+                )
+            )
+            .unwrap()
+            .profile,
             sut
         )
     }
@@ -238,8 +237,10 @@ mod uniffi_tests {
     fn deserialize_malformed() {
         let malformed_profile_snapshot = BagOfBytes::from("{}".as_bytes());
         assert_eq!(
-            new_profile_from_json_bytes(&malformed_profile_snapshot),
-            Result::Err(CommonError::FailedToDeserializeJSONToValue {
+            new_profile_from_json_bytes_arc_in_arc_out(
+                JsonContainerBytes::new(malformed_profile_snapshot.clone())
+            ),
+            Err(CommonError::FailedToDeserializeJSONToValue {
                 json_byte_count: malformed_profile_snapshot.len() as u64,
                 type_name: String::from("Profile")
             })
@@ -266,13 +267,5 @@ mod uniffi_tests {
                 .unwrap(),
             sut
         );
-    }
-
-    #[test]
-    fn simd_json_roundtrip() {
-        let sut = SUT::sample();
-        let bytes = profile_to_json_bytes_simd(&sut);
-        let deserialized = new_profile_from_json_bytes_simd(bytes).unwrap();
-        assert_eq!(deserialized, sut);
     }
 }
