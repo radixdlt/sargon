@@ -503,7 +503,10 @@ pub enum CommonError {
     RadixConnectMobileSessionNotFound { session_id: String } = 10139,
 
     #[error("RadixConnectMobileDappRequest not found, interaction id: {interaction_id}")]
-    RadixConnectMobileDappRequestNotFound { interaction_id: String } = 10140,
+    RadixConnectMobileSessionNotFound { session_id: SessionID } = 10140,
+
+    #[error("RadixConnectMobileDappRequest not found, interaction id: {interaction_id}")]
+    RadixConnectMobileDappRequestNotFound { interaction_id: WalletInteractionId } = 10141,
 }
 
 #[uniffi::export]

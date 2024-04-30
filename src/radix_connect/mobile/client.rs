@@ -1,81 +1,174 @@
+use std::borrow::BorrowMut;
+
 use super::deep_link_parsing::*;
-use super::linking_handler::LinkingHandler;
 use super::relay_service::Service as RelayService;
-use super::request_handler::RequestHandler;
 use crate::prelude::*;
+use std::sync::RwLock;
 
 /// The Radix Connect Mobile client.
 /// This is the object that will be used by the mobile app to handle interactions sent over Radix Connect Relay.
-// #[derive(uniffi::Object)]
-// pub struct RadixConnectMobile {
-//     linking_handler: LinkingHandler,
-//     request_handler: RequestHandler,
-// }
+#[derive(uniffi::Object)]
+pub struct RadixConnectMobile {
+    /// The Radix Connect Relay service to be used to communicate with dApps.
+    relay_service: RelayService,
+    /// The secure storage to be used to store session data.
+    secure_storage: WalletClientStorage,
+    /// The new sessions that have been created and are waiting to be validated on dApp side.
+    /// Once the session is validated, it will be moved to the secure storage.
+    /// Validation consists in verifying the origin of the session.
+    new_sessions: RwLock<HashMap<SessionID, Session>>,
+}
 
-// // Provisional API
-// #[uniffi::export]
-// impl RadixConnectMobile {
-//     // RadixConnectMobile should require a NetworkAntenna and a SecureStorage from the Wallet.
-//     // The internal components, such as RadixConnectRelayService will be created by the RadixConnectMobile.
-//     #[uniffi::constructor]
-//     pub fn new(
-//         network_antenna: Arc<dyn NetworkAntenna>,
-//         secure_storage: Arc<dyn SecureStorage>,
-//     ) -> Self {
-//         let relay_service = RelayService::new(HttpClient { network_antenna });
-//         let linking_handler = LinkingHandler::new(relay_service.clone(), secure_storage.clone());
-//         let request_handler = RequestHandler::new(relay_service, secure_storage);
+// Provisional API
+#[uniffi::export]
+impl RadixConnectMobile {
+    // RadixConnectMobile should require a NetworkAntenna and a SecureStorage from the Wallet.
+    // The internal components, such as RadixConnectRelayService will be created by the RadixConnectMobile.
+    #[uniffi::constructor]
+    pub fn new(
+        network_antenna: Arc<dyn NetworkAntenna>,
+        secure_storage: Arc<dyn SecureStorage>,
+    ) -> Self {
+        Self {
+            relay_service: RelayService::new_with_network_antenna(
+                network_antenna,
+            ),
+            secure_storage: WalletClientStorage::new(secure_storage),
+            new_sessions: RwLock::new(HashMap::new()),
+        }
+    }
 
-//         Self {
-//             linking_handler,
-//             request_handler,
-//         }
-//     }
+    #[uniffi::method]
+    pub async fn handle_linking_request(
+        &self,
+        request: RadixConnectMobileLinkRequest,
+    ) -> Result<Url> {
+        // 1. Get the handshake request from the relay service
+        let handshake_request = self
+            .relay_service
+            .get_session_handshake_request(request.session_id)
+            .await?;
 
-//     // #[uniffi::method]
-//     // pub async fn handle_linking_request(
-//     //     &self,
-//     //     request: RadixConnectMobileLinkRequest,
-//     // ) -> Result<Url> {
-//     //     // Steps
-//     //     // 1. Fetch the handshake request from relay service for the session id
-//     //     // 2. Generate a Curve25519 key for Diffie-Hellman agreement
-//     //     // 3. Generate a Curve25519 key agreement public key
-//     //     // 4. Generate a Curve25519 shared secret by using the private key and the public key from the handshake request
-//     //     // 5. Derive the encryption key with HKDF using the shared secret and the constant salt
-//     //     // 6. Upload the public key to the relay service using the handshake response
-//     //     // 7. Create the Session
-//     //     // 8. Store the session in the secure storage
-//     //     // 9. Return the URL to the mobile app
+        // 2. Generate a new Diffie-Hellman key pair
+        let wallet_private_key = DiffieHellmanPrivateKey::generate()?;
 
-//     //     // 1. Fetch the handshake request from relay service for the session id
-//     //     let handshake_request = self.relay_service.get_session_handshake_request(request.session_id).await?;
+        // 3. Compute the shared secret
+        // random salt
+        let salt = hex_decode("000102030405060708090a0b0c0d0e0f").unwrap();
+        let info = hex_decode("f0f1f2f3f4f5f6f7f8f9").unwrap();
+        let encryption_key = wallet_private_key.hkdf_key_agreement(
+            &handshake_request.public_key,
+            &salt,
+            &info,
+        )?;
 
-//     //     // 2. Generate a Curve25519 key for Diffie-Hellman agreement
-//     //     let wallet_secret = EphemeralSecret::random();
-//     //     let public_key = PublicKey::from(&wallet_secret);
+        // 4. Create a new session
+        let session = Session::new(
+            request.session_id,
+            SessionOrigin::WebDapp(request.origin),
+            encryption_key,
+        );
 
-//     //     let shared_secret = wallet_secret.diffie_hellman(&handshake_request.public_key);
+        {
+            self.new_sessions
+                .try_write()
+                .map(|mut new_sessions| {
+                    new_sessions.insert(request.session_id, session);
+                })
+                .unwrap();
+        }
 
-//     //     Ok(Url::parse("https://example.com").unwrap())
-//     // }
+        // 5. TODO: use the actual dapp callback path
+        Ok(Url::from_str("https://example.com").unwrap())
+    }
 
-//     #[uniffi::method]
-//     pub fn handle_dapp_interaction_request(
-//         &self,
-//         _request: RadixConnectMobileDappRequest,
-//     ) -> Result<DappToWalletInteraction> {
-//         todo!()
-//     }
+    #[uniffi::method]
+    pub async fn handle_dapp_interaction_request(
+        &self,
+        dapp_request: RadixConnectMobileDappRequest,
+    ) -> Result<RadixConnectMobileSessionRequest> {
+        let session;
+        {
+            let new_sessions = self.new_sessions.try_read().unwrap();
 
-//     #[uniffi::method]
-//     pub fn send_dapp_interaction_response(
-//         &self,
-//         _response: WalletToDappInteractionResponse,
-//     ) -> Result<Url> {
-//         todo!()
-//     }
-// }
+            session = match new_sessions.get(&dapp_request.session_id) {
+                Some(session) => {
+                    // Save the session to the secure storage
+                    self.secure_storage.save_session(session.clone())?;
+                    let session_id = session.id;
+
+                    self.new_sessions
+                        .try_write()
+                        .map(|mut new_sessions| {
+                            new_sessions.remove(&session_id);
+                        })
+                        .unwrap();
+
+                    session.to_owned()
+                }
+                None => {
+                    self.session_from_secure_storage(dapp_request.session_id)?
+                }
+            };
+        }
+
+        self.relay_service
+            .get_wallet_interaction_requests(session)
+            .await?
+            .into_iter()
+            .find(|intraction| {
+                intraction.interaction_id == dapp_request.interaction_id
+            })
+            .map(|interaction| RadixConnectMobileSessionRequest {
+                session_id: dapp_request.session_id,
+                interaction,
+            })
+            .ok_or(CommonError::RadixConnectMobileDappRequestNotFound {
+                interaction_id: dapp_request.interaction_id,
+            })
+    }
+
+    #[uniffi::method]
+    pub async fn send_dapp_interaction_response(
+        &self,
+        wallet_response: RadixConnectMobileWalletResponse,
+    ) -> Result<Url> {
+        let session =
+            self.session_from_secure_storage(wallet_response.session_id)?;
+
+        self.relay_service
+            .send_wallet_interaction_response(session, wallet_response.response)
+            .await?;
+
+        Ok(Url::from_str("https://example.com").unwrap())
+    }
+}
+
+impl RadixConnectMobile {
+    fn session_from_secure_storage(
+        &self,
+        session_id: SessionID,
+    ) -> Result<Session> {
+        self.secure_storage.load_session(session_id)?.ok_or(
+            CommonError::RadixConnectMobileSessionNotFound { session_id },
+        )
+    }
+}
+
+impl WalletClientStorage {
+    fn save_session(&self, session: Session) -> Result<()> {
+        self.save(
+            SecureStorageKey::RadixConnectMobileSession {
+                session_id: session.id,
+            },
+            &session,
+        )
+    }
+
+    fn load_session(&self, session_id: SessionID) -> Result<Option<Session>> {
+        self.load(SecureStorageKey::RadixConnectMobileSession { session_id })
+    }
+}
 
 #[uniffi::export]
 pub fn new_mobile_connect_request(
