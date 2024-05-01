@@ -7,7 +7,7 @@ use crate::prelude::*;
 /// `private let secretMagic: InstructionsSecretMagic`
 /// And hide its initializers.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct InstructionsSecretMagic(Vec<ScryptoInstruction>);
+pub struct InstructionsSecretMagic(pub Vec<ScryptoInstruction>);
 
 impl InstructionsSecretMagic {
     pub(crate) fn instructions(&self) -> &Vec<ScryptoInstruction> {
