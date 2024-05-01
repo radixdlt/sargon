@@ -160,14 +160,22 @@ impl NonFungibleGlobalId {
 
     pub fn formatted(&self, format: AddressFormat) -> String {
         match format {
-            AddressFormat::Default
-            | AddressFormat::Full
-            | AddressFormat::Middle => format!(
+            AddressFormat::Default | AddressFormat::Full => format!(
                 "{}:{}",
                 self.resource_address.formatted(format),
                 self.non_fungible_local_id.formatted(format)
             ),
             AddressFormat::Raw => self.to_canonical_string(),
+            AddressFormat::Middle => match self.non_fungible_local_id {
+                NonFungibleLocalId::Ruid { value: _ } => {
+                    format!(
+                        "{}:{}",
+                        self.resource_address.formatted(format),
+                        self.non_fungible_local_id.formatted(format)
+                    )
+                }
+                _ => self.resource_address.formatted(format),
+            },
         }
     }
 }
@@ -305,11 +313,53 @@ mod tests {
     }
 
     #[test]
-    fn formatted_middle() {
+    fn formatted_default_vs_middle() {
+        let resource_address = NonFungibleResourceAddress::sample();
+
+        // local_id: integer
+        let mut local_id = NonFungibleLocalId::integer(12345678);
+        let mut item = SUT::new(resource_address, local_id);
         assert_eq!(
-            SUT::sample_ruid().formatted(AddressFormat::Middle),
-            "urce_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtej:beef12345678-babecafe87654321-fadedeaf01234567-ecadabba7654"
+            item.formatted(AddressFormat::Default),
+            "reso...c9wlxa:12345678"
         );
+        assert_eq!(
+            item.formatted(AddressFormat::Middle),
+            "urce_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtej"
+        );
+
+        // local_id: string
+        local_id = NonFungibleLocalId::string("foobar").unwrap();
+        item = SUT::new(resource_address, local_id);
+        assert_eq!(
+            item.formatted(AddressFormat::Default),
+            "reso...c9wlxa:foobar"
+        );
+        assert_eq!(
+            item.formatted(AddressFormat::Middle),
+            "urce_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtej"
+        );
+
+        // local_id: bytes
+        local_id = NonFungibleLocalId::bytes([0xde, 0xad]).unwrap();
+        item = SUT::new(resource_address, local_id);
+        assert_eq!(
+            item.formatted(AddressFormat::Default),
+            "reso...c9wlxa:dead"
+        );
+        assert_eq!(
+            item.formatted(AddressFormat::Middle),
+            "urce_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtej"
+        );
+
+        // local_id: ruid
+        local_id = NonFungibleLocalId::ruid(hex_decode("deadbeef12345678babecafe87654321fadedeaf01234567ecadabba76543210").unwrap()).unwrap();
+        item = SUT::new(resource_address, local_id);
+        assert_eq!(
+            item.formatted(AddressFormat::Default),
+            "reso...c9wlxa:dead...3210"
+        );
+        assert_eq!(item.formatted(AddressFormat::Middle), "urce_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtej:beef12345678-babecafe87654321-fadedeaf01234567-ecadabba7654");
     }
 
     #[test]

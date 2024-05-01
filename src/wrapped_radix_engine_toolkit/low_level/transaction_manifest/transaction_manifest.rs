@@ -126,7 +126,9 @@ impl TransactionManifest {
     }
 
     pub fn involved_resource_addresses(&self) -> Vec<ResourceAddress> {
-        let (addresses, _) = RET_ins_extract_addresses(self.instructions());
+        let (addresses, _) = RET_ins_extract_addresses(
+            self.secret_magic.instructions.secret_magic.0.as_slice(),
+        );
         addresses
             .into_iter()
             .filter_map(|a| {
