@@ -81,7 +81,7 @@ macro_rules! decl_secret_bytes {
 
             #[uniffi::export]
             pub fn [< $struct_name:snake _to_bytes >](bytes: &$struct_name) -> BagOfBytes {
-                BagOfBytes::from(bytes.secret_magic.0.as_slice())
+                BagOfBytes::from(bytes.to_bytes())
             }
 
             impl $struct_name {
