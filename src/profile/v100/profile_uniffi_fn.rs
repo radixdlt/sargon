@@ -30,7 +30,8 @@ pub fn profile_to_debug_string(profile: &Profile) -> String {
     format!("{:?}", profile)
 }
 
-#[derive(Clone, PartialEq, Eq, Debug, uniffi::Object)]
+#[derive(Clone, PartialEq, Eq, Debug, Hash, uniffi::Object)]
+#[uniffi::export(Debug, Eq, Hash)]
 pub struct RefBytes {
     pub bytes: BagOfBytes,
 }
@@ -67,6 +68,7 @@ impl RefBytes {
 use std::sync::RwLock;
 
 #[derive(Debug, uniffi::Object)]
+#[uniffi::export(Debug, Eq, Hash)]
 pub struct RefProfile {
     pub profile: RwLock<Option<Profile>>,
 }
@@ -194,9 +196,9 @@ pub fn profile_encrypt_with_password(
 
 #[uniffi::export]
 pub fn profile_analyze_contents_of_file(
-    bytes: BagOfBytes,
+    reference: Arc<RefBytes>,
 ) -> ProfileFileContents {
-    Profile::analyze_contents_of_file(bytes)
+    Profile::analyze_contents_of_file(reference.bytes.as_ref())
 }
 
 #[cfg(test)]
@@ -228,7 +230,9 @@ mod uniffi_tests {
     #[test]
     fn test_profile_analyze_contents_of_file() {
         assert_eq!(
-            profile_analyze_contents_of_file(BagOfBytes::sample()),
+            profile_analyze_contents_of_file(RefBytes::new(
+                BagOfBytes::sample()
+            )),
             ProfileFileContents::NotProfile
         )
     }

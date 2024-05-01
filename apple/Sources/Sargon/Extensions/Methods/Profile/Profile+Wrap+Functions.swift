@@ -1,60 +1,35 @@
 import Foundation
 import SargonUniFFI
 
-extension RefProfile: @unchecked Sendable, Hashable, Equatable {
-	public static func == (lhs: RefProfile, rhs: RefProfile) -> Bool {
-		lhs.profile() == rhs.profile()
-	}
-	public func hash(into hasher: inout Hasher) {
-		hasher.combine(profile())
-	}
-}
+extension RefProfile: @unchecked Sendable {}
+extension RefBytes: @unchecked Sendable {}
 
 extension ProfileFileContents: @unchecked Sendable, Hashable, Equatable {
 	public func hash(into hasher: inout Hasher) {
-		switch self {
-		case .encryptedProfile:
-			hasher.combine("encryptedProfile")
-		case .notProfile:
-			hasher.combine("notProfile")
-		case let .plaintextProfile(ref):
-			hasher.combine(ref)
-		}
+		hasher.combine(profileFileContentsHashValue(contents: self))
 	}
 	
-	public static func == (lhs: ProfileFileContents, rhs: ProfileFileContents) -> Bool {
-		switch (lhs, rhs) {
-		case let (.plaintextProfile(lhsRef), .plaintextProfile(rhsRef)):
-			return lhsRef == rhsRef
-		case (.encryptedProfile, .encryptedProfile):
-			return true
-		case (.notProfile, .notProfile):
-			return true
-		default:
-			return false
-		}
+	public static func == (lhs: Self, rhs: Self) -> Bool {
+		profileFileContentsEquals(lhs: rhs, rhs: rhs)
 	}
 }
 
 extension Profile {
 
+
 	public static func analyzeFile(
-		contents: some DataProtocol
+		reference: RefBytes
 	) -> ProfileFileContents {
-		profileAnalyzeContentsOfFile(
-			bytes: Data(
-				contents
-			)
-		)
+		profileAnalyzeContentsOfFile(reference: reference)
 	}
 
 	
-	public static func reference(
+	public init(
 		jsonBytesReference: RefBytes
-	) throws -> RefProfile {
-		try newProfileFromJsonBytes(
+	) throws {
+		self = try newProfileFromJsonBytes(
 			reference: jsonBytesReference
-		)
+		).takeProfile()
 	}
 
 	public init(
@@ -64,11 +39,11 @@ extension Profile {
 		self = try newProfileFromEncryptionBytes(
 			reference: RefBytes(bytes: Data(bytes)),
 			decryptionPassword: decryptionPassword
-		).profile()
+		).takeProfile()
 	}
 
-	public func profileSnapshot() -> Data {
-		profileToJsonBytes(reference: RefProfile(profile: self)).bytes()
+	public func profileSnapshot() -> RefBytes {
+		profileToJsonBytes(reference: RefProfile(profile: self))
 	}
 
 	public func encrypt(

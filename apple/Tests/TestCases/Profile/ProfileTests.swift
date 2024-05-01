@@ -54,7 +54,7 @@ final class ProfileTests: Test<Profile> {
 	func test_analyze_file_profile() {
 		func doTest(_ sut: SUT) {
 			XCTAssertEqual(
-				SUT.analyzeFile(contents: sut.jsonData()),
+				SUT.analyzeFile(reference: sut.profileSnapshot()),
 				.plaintextProfile(RefProfile(profile: sut))
 			)
 		}
@@ -81,16 +81,14 @@ final class ProfileTests: Test<Profile> {
 		XCTAssertTrue(jsonString.contains("version"))
 	}
 
-	// M2 Max: Average 0.049
+	// M2 Max: Average 0.16
 	func test_json_roundtrip_arc_in_arc_out__arc_in_arc_out() throws {
 		let (sut, json) = vector
-//		var decoded: SUT?
-//		var encoded: Data?
 		measure {
-//			encoded = profileToJsonBytes(reference: profileInContainer)
-//			decoded = try? newProfileFromJsonBytes(reference: encoded!)
-			let _ = sut.profileSnapshot()
-			let _ = try! SUT.init(jsonData: json)
+			let refBytes = sut.profileSnapshot()
+			let profile = try! SUT.init(jsonBytesReference: refBytes)
+			XCTAssertEqual(profile, sut)
+			XCTAssertEqual(refBytes.bytes(), json) // M2 Max: Average 0.756 BEFORE `bytes()` "takes", gonna change in rust to `take`
 		}
 //		XCTAssertEqual(encoded, json)
 //		XCTAssertEqual(decoded, sut)
@@ -139,7 +137,16 @@ final class ProfileTests: Test<Profile> {
 		try! jsonFixture(
 			as: SUT.self,
 			file: "huge_profile_1000_accounts",
-			decode: { try Profile(jsonData: $0) }
+			decodeWithoutDecoder: { try Profile.init(jsonBytesReference: .init(bytes: $0)) }
 		)
 	}()
+}
+
+extension Profile {
+	public static func analyzeFile(
+		contents: some DataProtocol
+	) -> ProfileFileContents {
+		Self.analyzeFile(reference: .init(bytes: Data(contents)))
+	}
+	
 }

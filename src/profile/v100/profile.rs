@@ -72,6 +72,21 @@ pub enum ProfileFileContents {
     NotProfile,
 }
 
+#[uniffi::export]
+pub fn profile_file_contents_equals(
+    lhs: &ProfileFileContents,
+    rhs: &ProfileFileContents,
+) -> bool {
+    lhs == rhs
+}
+use std::hash::{DefaultHasher, Hash, Hasher};
+#[uniffi::export]
+pub fn profile_file_contents_hash_value(contents: &ProfileFileContents) -> u64 {
+    let mut hasher = DefaultHasher::new();
+    contents.hash(&mut hasher);
+    hasher.finish()
+}
+
 impl std::hash::Hash for ProfileFileContents {
     fn hash<H>(&self, state: &mut H)
     where
