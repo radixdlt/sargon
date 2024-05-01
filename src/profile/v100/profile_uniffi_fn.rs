@@ -30,123 +30,8 @@ pub fn profile_to_debug_string(profile: &Profile) -> String {
     format!("{:?}", profile)
 }
 
-#[derive(Clone, PartialEq, Eq, Debug, Hash, uniffi::Object)]
-#[uniffi::export(Debug, Eq, Hash)]
-pub struct RefBytes {
-    pub bytes: BagOfBytes,
-}
-
-impl From<BagOfBytes> for RefBytes {
-    fn from(value: BagOfBytes) -> Self {
-        Self { bytes: value }
-    }
-}
-
-impl From<RefBytes> for BagOfBytes {
-    fn from(value: RefBytes) -> BagOfBytes {
-        value.bytes
-    }
-}
-
-impl RefBytes {
-    fn with_bytes(bytes: Vec<u8>) -> Arc<Self> {
-        Self::new(BagOfBytes::from(bytes))
-    }
-}
-
-#[uniffi::export]
-impl RefBytes {
-    #[uniffi::constructor]
-    pub fn new(bytes: BagOfBytes) -> Arc<Self> {
-        Arc::new(Self { bytes })
-    }
-
-    pub fn bytes(self: Arc<Self>) -> BagOfBytes {
-        self.bytes.clone()
-    }
-}
-use std::sync::RwLock;
-
-#[derive(Debug, uniffi::Object)]
-#[uniffi::export(Debug, Eq, Hash)]
-pub struct RefProfile {
-    pub profile: RwLock<Option<Profile>>,
-}
-impl RefProfile {
-    fn with_profile(profile: Profile) -> Self {
-        Self {
-            profile: RwLock::new(Some(profile)),
-        }
-    }
-}
-impl std::hash::Hash for RefProfile {
-    fn hash<H>(&self, state: &mut H)
-    where
-        H: std::hash::Hasher,
-    {
-        match self.profile.read() {
-            Ok(ref guard) => {
-                state.write_u8(1);
-                match guard.as_ref() {
-                    Some(prof) => {
-                        prof.hash(state);
-                        state.write_u8(100);
-                    }
-                    None => state.write_u8(200),
-                }
-            }
-            _ => {
-                state.write_u8(255);
-            }
-        }
-    }
-}
-
-impl Eq for RefProfile {}
-impl PartialEq for RefProfile {
-    fn eq(&self, other: &Self) -> bool {
-        {
-            match self.profile.read() {
-                Ok(ref rhs) => match other.profile.read() {
-                    Ok(ref lhs) => match rhs.as_ref() {
-                        Some(r) => match lhs.as_ref() {
-                            Some(l) => r == l,
-                            None => false,
-                        },
-                        None => lhs.as_ref().is_none(),
-                    },
-                    _ => false,
-                },
-                _ => false,
-            }
-        }
-    }
-}
-
-impl From<Profile> for RefProfile {
-    fn from(value: Profile) -> Self {
-        Self::with_profile(value)
-    }
-}
-
 impl JsonDataSerializing for Profile {}
 impl JsonDataDeserializing for Profile {}
-
-#[uniffi::export]
-impl RefProfile {
-    #[uniffi::constructor]
-    pub fn new(profile: Profile) -> Arc<Self> {
-        Arc::new(Self::from(profile))
-    }
-
-    pub fn take_profile(self: Arc<Self>) -> Result<Profile> {
-        self.profile
-            .try_write()
-            .unwrap()
-            .take()
-            .ok_or(CommonError::ProfileAlreadyTakenFromContainer)
-    }
-}
 
 // ################
 // FROM BYTES
@@ -155,7 +40,8 @@ impl RefProfile {
 pub fn new_profile_from_json_bytes(
     reference: Arc<RefBytes>,
 ) -> Result<Arc<RefProfile>> {
-    Profile::new_from_json_bytes(reference.bytes.as_ref()).map(RefProfile::new)
+    Profile::new_from_json_bytes(reference.take().unwrap().as_ref())
+        .map(RefProfile::new)
 }
 
 // ################
@@ -163,7 +49,7 @@ pub fn new_profile_from_json_bytes(
 // ################
 #[uniffi::export]
 pub fn profile_to_json_bytes(reference: Arc<RefProfile>) -> Arc<RefBytes> {
-    RefBytes::with_bytes(reference.take_profile().unwrap().to_json_bytes())
+    RefBytes::new(BagOfBytes::from(reference.take().unwrap().to_json_bytes()))
 }
 
 // ################
@@ -175,7 +61,7 @@ pub fn new_profile_from_encryption_bytes(
     decryption_password: String,
 ) -> Result<Arc<RefProfile>> {
     Profile::new_from_encryption_bytes(
-        reference.bytes.as_ref(),
+        reference.take().unwrap().as_ref(),
         decryption_password,
     )
     .map(RefProfile::new)
@@ -186,19 +72,19 @@ pub fn profile_encrypt_with_password(
     reference: Arc<RefProfile>,
     encryption_password: String,
 ) -> Arc<RefBytes> {
-    RefBytes::with_bytes(
+    RefBytes::new(BagOfBytes::from(
         reference
-            .take_profile()
+            .take()
             .unwrap()
             .to_encryption_bytes(encryption_password),
-    )
+    ))
 }
 
 #[uniffi::export]
 pub fn profile_analyze_contents_of_file(
     reference: Arc<RefBytes>,
 ) -> ProfileFileContents {
-    Profile::analyze_contents_of_file(reference.bytes.as_ref())
+    Profile::analyze_contents_of_file(reference.take().unwrap().as_ref())
 }
 
 #[cfg(test)]
@@ -208,18 +94,6 @@ mod uniffi_tests {
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = Profile;
-
-    impl RefProfile {
-        fn clone_inner(&self) -> Result<Self> {
-            self.profile
-                .try_read()
-                .map_err(|_| CommonError::ProfileAlreadyTakenFromContainer)
-                .and_then(|lock| match lock.as_ref() {
-                    Some(p) => Ok(Self::with_profile(p.clone())),
-                    None => Err(CommonError::ProfileAlreadyTakenFromContainer),
-                })
-        }
-    }
 
     #[test]
     fn equality_samples() {
@@ -269,7 +143,7 @@ mod uniffi_tests {
                 RefProfile::new(sut.clone())
             ))
             .unwrap()
-            .take_profile()
+            .take()
             .unwrap(),
             sut
         )
@@ -303,17 +177,16 @@ mod uniffi_tests {
     #[test]
     fn encryption_roundtrip() {
         let sut = SUT::sample();
-        let ref_profile = RefProfile::new(sut.clone());
 
         let password = "super secret".to_owned();
         let encryption_bytes = profile_encrypt_with_password(
-            Arc::new(ref_profile.clone_inner().unwrap()),
+            RefProfile::new(sut.clone()),
             password.clone(),
         );
         assert_eq!(
             new_profile_from_encryption_bytes(encryption_bytes, password)
                 .unwrap(),
-            ref_profile
+            RefProfile::new(sut.clone())
         );
     }
 }
