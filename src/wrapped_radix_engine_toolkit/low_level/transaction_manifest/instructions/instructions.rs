@@ -6,7 +6,7 @@ use radix_engine_toolkit::functions::address::decode as RET_decode_address;
 #[derive(Clone, Debug, PartialEq, Eq, derive_more::Display, uniffi::Record)]
 #[display("{}", self.instructions_string())]
 pub struct Instructions {
-    secret_magic: InstructionsSecretMagic, // MUST be first prop, else you break build.
+    pub secret_magic: InstructionsSecretMagic, // MUST be first prop, else you break build.
     pub network_id: NetworkID,
 }
 

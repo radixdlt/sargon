@@ -407,7 +407,7 @@ mod tests {
         "#;
 
         let result =
-            serde_json::from_str::<PublicKey>(&json_with_wrong_curve).unwrap();
+            serde_json::from_str::<PublicKey>(json_with_wrong_curve).unwrap();
         assert_eq!(expected_secp256k1, result);
     }
 
