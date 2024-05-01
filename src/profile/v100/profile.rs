@@ -46,69 +46,6 @@ pub struct Profile {
     pub networks: ProfileNetworks,
 }
 
-/// Result of analyzing a file (bytes), containing either a Profile
-/// which we were able to successfully JSON deserialize from the bytes,
-/// or EncryptedProfile for which wallets will continue prompting the
-/// user for an encryption password and then call JSON deserialize
-/// of `EncryptedProfileSnapshot` using [`Profile::new_from_encryption_bytes`](Profile::new_from_encryption_bytes)
-/// or if we failed to parse as Profile and `EncryptedProfileSnapshot`
-/// then `NotProfile` is used, indicating that the bytes is not at all
-/// a Profile.
-#[derive(Debug, PartialEq, Eq, uniffi::Enum)]
-#[allow(clippy::large_enum_variant)]
-pub enum ProfileFileContents {
-    /// The JSON deserialized Profile from some bytes.
-    PlaintextProfile(Arc<RefProfile>),
-
-    /// We successfully JSON deserialized the bytes into
-    /// `EncryptedProfileSnapshot`, the wallets should proceed
-    /// with asking the user for the decryption password.
-    EncryptedProfile,
-
-    /// The bytes is neither a valid `Profile` nor `EncryptedProfile`,
-    /// it is either a corrupt file or it is not at all a Profile file,
-    /// contrary to the users beliefs (or the user accidentally selected
-    /// a random file...)
-    NotProfile,
-}
-
-#[uniffi::export]
-pub fn profile_file_contents_equals(
-    lhs: &ProfileFileContents,
-    rhs: &ProfileFileContents,
-) -> bool {
-    lhs == rhs
-}
-use std::hash::{DefaultHasher, Hash, Hasher};
-#[uniffi::export]
-pub fn profile_file_contents_hash_value(contents: &ProfileFileContents) -> u64 {
-    let mut hasher = DefaultHasher::new();
-    contents.hash(&mut hasher);
-    hasher.finish()
-}
-
-impl std::hash::Hash for ProfileFileContents {
-    fn hash<H>(&self, state: &mut H)
-    where
-        H: std::hash::Hasher,
-    {
-        match self {
-            Self::PlaintextProfile(v) => {
-                state.write_u8(1);
-                (*v).hash(state);
-            }
-
-            Self::EncryptedProfile => {
-                state.write_u8(2);
-            }
-
-            Self::NotProfile => {
-                state.write_u8(3);
-            }
-        }
-    }
-}
-
 impl Profile {
     pub fn analyze_contents_of_file(
         bytes: impl AsRef<[u8]>,
