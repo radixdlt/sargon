@@ -16,6 +16,6 @@ extension ProfileFileContents {
 
 extension ProfileFileContents {
 	public static func == (lhs: Self, rhs: Self) -> Bool {
-		profileFileContentsEquals(lhs: rhs, rhs: rhs)
+		profileFileContentsEquals(lhs: lhs, rhs: rhs)
 	}
 }
