@@ -53,6 +53,12 @@ macro_rules! decl_secret_bytes {
                     .map(|secret_magic| $struct_name { secret_magic })
             }
 
+           impl $struct_name {
+                pub fn to_bytes(&self) -> &[u8] {
+                    &self.secret_magic.0.as_slice()
+                }
+           }
+
             impl HasSampleValues for $struct_name {
                 fn sample() -> Self {
                     Self { secret_magic: [< $struct_name SecretMagic >](Box::new([0xab; $byte_count])) }
@@ -127,6 +133,15 @@ macro_rules! decl_secret_bytes {
                     assert!(!sut.is_zeroized());
                     sut.zeroize();
                     assert!(sut.is_zeroized());
+                }
+
+                #[test]
+                fn test_to_bytes() {
+                    let sut = [< new_ $struct_name:snake _sample >]();
+                    assert_eq!(
+                        sut.secret_magic.0.as_slice(),
+                        sut.to_bytes()
+                    )
                 }
             }
 
