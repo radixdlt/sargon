@@ -482,6 +482,9 @@ pub enum CommonError {
 
     #[error("AuthorizedDapp references field id that does not exist")]
     AuthorizedDappReferencesFieldIDThatDoesNotExist = 10134,
+
+    #[error("Profile Already taken from RefProfile")]
+    ProfileAlreadyTakenFromContainer = 10135,
 }
 
 #[uniffi::export]

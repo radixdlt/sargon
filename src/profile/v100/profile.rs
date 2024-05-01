@@ -54,11 +54,11 @@ pub struct Profile {
 /// or if we failed to parse as Profile and `EncryptedProfileSnapshot`
 /// then `NotProfile` is used, indicating that the bytes is not at all
 /// a Profile.
-#[derive(Clone, PartialEq, Eq, Debug, Hash, uniffi::Enum)]
+#[derive(Debug, PartialEq, Eq, uniffi::Enum)]
 #[allow(clippy::large_enum_variant)]
 pub enum ProfileFileContents {
     /// The JSON deserialized Profile from some bytes.
-    PlaintextProfile(Profile),
+    PlaintextProfile(Arc<RefProfile>),
 
     /// We successfully JSON deserialized the bytes into
     /// `EncryptedProfileSnapshot`, the wallets should proceed
@@ -72,13 +72,37 @@ pub enum ProfileFileContents {
     NotProfile,
 }
 
+impl std::hash::Hash for ProfileFileContents {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: std::hash::Hasher,
+    {
+        match self {
+            Self::PlaintextProfile(v) => {
+                state.write_u8(1);
+                (*v).hash(state);
+            }
+
+            Self::EncryptedProfile => {
+                state.write_u8(2);
+            }
+
+            Self::NotProfile => {
+                state.write_u8(3);
+            }
+        }
+    }
+}
+
 impl Profile {
     pub fn analyze_contents_of_file(
         bytes: impl AsRef<[u8]>,
     ) -> ProfileFileContents {
         let json = bytes.as_ref();
         if let Ok(profile) = Profile::new_from_json_bytes(json) {
-            return ProfileFileContents::PlaintextProfile(profile);
+            return ProfileFileContents::PlaintextProfile(RefProfile::new(
+                profile,
+            ));
         };
 
         if serde_json::from_slice::<EncryptedProfileSnapshot>(json).is_ok() {
@@ -405,7 +429,10 @@ mod tests {
         let sut = SUT::sample();
         let bytes = sut.to_json_bytes();
         let contents = SUT::analyze_contents_of_file(bytes);
-        assert_eq!(contents, ProfileFileContents::PlaintextProfile(sut));
+        assert_eq!(
+            contents,
+            ProfileFileContents::PlaintextProfile(RefProfile::new(sut))
+        );
     }
 
     #[test]

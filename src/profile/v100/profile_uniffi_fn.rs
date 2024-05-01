@@ -31,30 +31,30 @@ pub fn profile_to_debug_string(profile: &Profile) -> String {
 }
 
 #[derive(Clone, PartialEq, Eq, Debug, uniffi::Object)]
-pub struct JsonContainerBytes {
+pub struct RefBytes {
     pub bytes: BagOfBytes,
 }
 
-impl From<BagOfBytes> for JsonContainerBytes {
+impl From<BagOfBytes> for RefBytes {
     fn from(value: BagOfBytes) -> Self {
         Self { bytes: value }
     }
 }
 
-impl From<JsonContainerBytes> for BagOfBytes {
-    fn from(value: JsonContainerBytes) -> BagOfBytes {
+impl From<RefBytes> for BagOfBytes {
+    fn from(value: RefBytes) -> BagOfBytes {
         value.bytes
     }
 }
 
-impl JsonContainerBytes {
+impl RefBytes {
     fn with_bytes(bytes: Vec<u8>) -> Arc<Self> {
         Self::new(BagOfBytes::from(bytes))
     }
 }
 
 #[uniffi::export]
-impl JsonContainerBytes {
+impl RefBytes {
     #[uniffi::constructor]
     pub fn new(bytes: BagOfBytes) -> Arc<Self> {
         Arc::new(Self { bytes })
@@ -64,86 +64,104 @@ impl JsonContainerBytes {
         self.bytes.clone()
     }
 }
+use std::sync::RwLock;
 
-#[derive(Clone, PartialEq, Eq, Debug, uniffi::Object)]
-pub struct JsonContainerProfile {
-    pub profile: Profile,
+#[derive(Debug, uniffi::Object)]
+pub struct RefProfile {
+    pub profile: RwLock<Option<Profile>>,
+}
+impl RefProfile {
+    fn with_profile(profile: Profile) -> Self {
+        Self {
+            profile: RwLock::new(Some(profile)),
+        }
+    }
+}
+impl std::hash::Hash for RefProfile {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: std::hash::Hasher,
+    {
+        match self.profile.read() {
+            Ok(ref guard) => {
+                state.write_u8(1);
+                match guard.as_ref() {
+                    Some(prof) => {
+                        prof.hash(state);
+                        state.write_u8(100);
+                    }
+                    None => state.write_u8(200),
+                }
+            }
+            _ => {
+                state.write_u8(255);
+            }
+        }
+    }
 }
 
-impl From<Profile> for JsonContainerProfile {
+impl Eq for RefProfile {}
+impl PartialEq for RefProfile {
+    fn eq(&self, other: &Self) -> bool {
+        {
+            match self.profile.read() {
+                Ok(ref rhs) => match other.profile.read() {
+                    Ok(ref lhs) => match rhs.as_ref() {
+                        Some(r) => match lhs.as_ref() {
+                            Some(l) => r == l,
+                            None => false,
+                        },
+                        None => lhs.as_ref().is_none(),
+                    },
+                    _ => false,
+                },
+                _ => false,
+            }
+        }
+    }
+}
+
+impl From<Profile> for RefProfile {
     fn from(value: Profile) -> Self {
-        Self { profile: value }
+        Self::with_profile(value)
     }
 }
 
-impl From<JsonContainerProfile> for Profile {
-    fn from(value: JsonContainerProfile) -> Self {
-        value.profile
-    }
-}
+impl JsonDataSerializing for Profile {}
+impl JsonDataDeserializing for Profile {}
 
 #[uniffi::export]
-impl JsonContainerProfile {
+impl RefProfile {
     #[uniffi::constructor]
     pub fn new(profile: Profile) -> Arc<Self> {
-        Arc::new(Self { profile })
+        Arc::new(Self::from(profile))
     }
-    pub fn profile(self: Arc<Self>) -> Profile {
-        self.profile.clone()
+
+    pub fn take_profile(self: Arc<Self>) -> Result<Profile> {
+        self.profile
+            .try_write()
+            .unwrap()
+            .take()
+            .ok_or(CommonError::ProfileAlreadyTakenFromContainer)
     }
 }
-
-// impl JsonDataDeserializing for Profile {}
-// impl JsonDataSerializing for Profile {}
-json_data_convertible!(Profile);
 
 // ################
 // FROM BYTES
 // ################
 #[uniffi::export]
-pub fn new_profile_from_json_bytes_arc_in_arc_out(
-    json: Arc<JsonContainerBytes>,
-) -> Result<Arc<JsonContainerProfile>> {
-    Profile::new_from_json_bytes(json.bytes.as_ref())
-        .map(JsonContainerProfile::new)
-}
-
-#[uniffi::export]
-pub fn new_profile_from_json_bytes_not_arc_in_arc_out(
-    json: &BagOfBytes,
-) -> Result<Arc<JsonContainerProfile>> {
-    Profile::new_from_json_bytes(json).map(JsonContainerProfile::new)
-}
-
-#[uniffi::export]
-pub fn new_profile_from_json_bytes_arc_in_not_arc_out(
-    json: Arc<JsonContainerBytes>,
-) -> Result<Profile> {
-    Profile::new_from_json_bytes(json.bytes.as_ref())
+pub fn new_profile_from_json_bytes(
+    reference: Arc<RefBytes>,
+) -> Result<Arc<RefProfile>> {
+    Profile::new_from_json_bytes(reference.bytes.as_ref()).map(RefProfile::new)
 }
 
 // ################
 // TO BYTES
 // ################
 #[uniffi::export]
-pub fn profile_to_json_bytes_arc_in_not_arc_out(
-    profile: Arc<JsonContainerProfile>,
-) -> BagOfBytes {
-    BagOfBytes::from(profile.profile.to_json_bytes())
-}
-
-#[uniffi::export]
-pub fn profile_to_json_bytes_arc_in_arc_out(
-    profile: Arc<JsonContainerProfile>,
-) -> Arc<JsonContainerBytes> {
-    JsonContainerBytes::with_bytes(profile.profile.to_json_bytes())
-}
-
-#[uniffi::export]
-pub fn profile_to_json_bytes_not_arc_in_arc_out(
-    profile: &Profile,
-) -> Arc<JsonContainerBytes> {
-    JsonContainerBytes::with_bytes(profile.to_json_bytes())
+pub fn profile_to_json_bytes(reference: Arc<RefProfile>) -> Arc<RefBytes> {
+    RefBytes::with_bytes(reference.take_profile().unwrap().to_json_bytes())
 }
 
 // ################
@@ -151,18 +169,27 @@ pub fn profile_to_json_bytes_not_arc_in_arc_out(
 // ################
 #[uniffi::export]
 pub fn new_profile_from_encryption_bytes(
-    json: BagOfBytes,
+    reference: Arc<RefBytes>,
     decryption_password: String,
-) -> Result<Profile> {
-    Profile::new_from_encryption_bytes(json.to_vec(), decryption_password)
+) -> Result<Arc<RefProfile>> {
+    Profile::new_from_encryption_bytes(
+        reference.bytes.as_ref(),
+        decryption_password,
+    )
+    .map(RefProfile::new)
 }
 
 #[uniffi::export]
 pub fn profile_encrypt_with_password(
-    profile: &Profile,
+    reference: Arc<RefProfile>,
     encryption_password: String,
-) -> BagOfBytes {
-    profile.to_encryption_bytes(encryption_password).into()
+) -> Arc<RefBytes> {
+    RefBytes::with_bytes(
+        reference
+            .take_profile()
+            .unwrap()
+            .to_encryption_bytes(encryption_password),
+    )
 }
 
 #[uniffi::export]
@@ -179,6 +206,18 @@ mod uniffi_tests {
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = Profile;
+
+    impl RefProfile {
+        fn clone_inner(&self) -> Result<Self> {
+            self.profile
+                .try_read()
+                .map_err(|_| CommonError::ProfileAlreadyTakenFromContainer)
+                .and_then(|lock| match lock.as_ref() {
+                    Some(p) => Ok(Self::with_profile(p.clone())),
+                    None => Err(CommonError::ProfileAlreadyTakenFromContainer),
+                })
+        }
+    }
 
     #[test]
     fn equality_samples() {
@@ -222,13 +261,12 @@ mod uniffi_tests {
         let sut = SUT::sample();
 
         assert_eq!(
-            new_profile_from_json_bytes_arc_in_arc_out(
-                profile_to_json_bytes_arc_in_arc_out(
-                    JsonContainerProfile::new(sut.clone())
-                )
-            )
+            new_profile_from_json_bytes(profile_to_json_bytes(
+                RefProfile::new(sut.clone())
+            ))
             .unwrap()
-            .profile,
+            .take_profile()
+            .unwrap(),
             sut
         )
     }
@@ -237,20 +275,22 @@ mod uniffi_tests {
     fn deserialize_malformed() {
         let malformed_profile_snapshot = BagOfBytes::from("{}".as_bytes());
         assert_eq!(
-            new_profile_from_json_bytes_arc_in_arc_out(
-                JsonContainerBytes::new(malformed_profile_snapshot.clone())
-            ),
-            Err(CommonError::FailedToDeserializeJSONToValue {
+            new_profile_from_json_bytes(RefBytes::new(
+                malformed_profile_snapshot.clone()
+            ))
+            .err()
+            .unwrap(),
+            CommonError::FailedToDeserializeJSONToValue {
                 json_byte_count: malformed_profile_snapshot.len() as u64,
                 type_name: String::from("Profile")
-            })
+            }
         );
     }
 
     #[test]
     fn test_new_profile_from_encryption_bytes() {
         assert!(new_profile_from_encryption_bytes(
-            BagOfBytes::sample(),
+            RefBytes::new(BagOfBytes::sample()),
             "invalid".to_string()
         )
         .is_err());
@@ -259,13 +299,17 @@ mod uniffi_tests {
     #[test]
     fn encryption_roundtrip() {
         let sut = SUT::sample();
+        let ref_profile = RefProfile::new(sut.clone());
+
         let password = "super secret".to_owned();
-        let encryption_bytes =
-            profile_encrypt_with_password(&sut, password.clone());
+        let encryption_bytes = profile_encrypt_with_password(
+            Arc::new(ref_profile.clone_inner().unwrap()),
+            password.clone(),
+        );
         assert_eq!(
             new_profile_from_encryption_bytes(encryption_bytes, password)
                 .unwrap(),
-            sut
+            ref_profile
         );
     }
 }
