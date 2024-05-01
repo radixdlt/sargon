@@ -36,7 +36,7 @@ json_data_convertible!(Profile);
 // FROM BYTES
 // ################
 #[uniffi::export]
-pub fn new_profile_from_json_bytes_fast_by_ref(
+pub(crate) fn new_profile_from_json_bytes_fast_by_ref(
     reference: Arc<RefBytes>,
 ) -> Result<Arc<RefProfile>> {
     Profile::new_from_json_bytes(reference.take().unwrap().as_ref())
@@ -47,7 +47,7 @@ pub fn new_profile_from_json_bytes_fast_by_ref(
 // TO BYTES
 // ################
 #[uniffi::export]
-pub fn profile_to_json_bytes_fast_by_ref(
+pub(crate) fn profile_to_json_bytes_fast_by_ref(
     reference: Arc<RefProfile>,
 ) -> Arc<RefBytes> {
     RefBytes::new(BagOfBytes::from(reference.take().unwrap().to_json_bytes()))
@@ -57,7 +57,7 @@ pub fn profile_to_json_bytes_fast_by_ref(
 // ENCRYPTION
 // ################
 #[uniffi::export]
-pub fn new_profile_from_encryption_bytes_fast_by_ref(
+pub(crate) fn new_profile_from_encryption_bytes_fast_by_ref(
     reference: Arc<RefBytes>,
     decryption_password: String,
 ) -> Result<Arc<RefProfile>> {
@@ -69,7 +69,7 @@ pub fn new_profile_from_encryption_bytes_fast_by_ref(
 }
 
 #[uniffi::export]
-pub fn profile_encrypt_with_password_fast_by_ref(
+pub(crate) fn profile_encrypt_with_password_fast_by_ref(
     reference: Arc<RefProfile>,
     encryption_password: String,
 ) -> Arc<RefBytes> {
@@ -82,7 +82,7 @@ pub fn profile_encrypt_with_password_fast_by_ref(
 }
 
 #[uniffi::export]
-pub fn profile_analyze_contents_of_file_fast_by_ref(
+pub(crate) fn profile_analyze_contents_of_file_fast_by_ref(
     reference: Arc<RefBytes>,
 ) -> ProfileFileContents {
     Profile::analyze_contents_of_file(reference.take().unwrap().as_ref())
@@ -109,7 +109,7 @@ pub fn profile_encrypt_with_password(
 }
 
 #[uniffi::export]
-pub fn profile_analyze_contents_of_file(
+pub(crate) fn profile_analyze_contents_of_file(
     bytes: BagOfBytes,
 ) -> ProfileFileContents {
     Profile::analyze_contents_of_file(bytes)

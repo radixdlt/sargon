@@ -47,7 +47,7 @@ pub struct Profile {
 }
 
 impl Profile {
-    pub fn analyze_contents_of_file(
+    pub(crate) fn analyze_contents_of_file(
         bytes: impl AsRef<[u8]>,
     ) -> ProfileFileContents {
         let json = bytes.as_ref();

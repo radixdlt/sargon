@@ -9,8 +9,8 @@ use crate::prelude::*;
 /// then `NotProfile` is used, indicating that the bytes is not at all
 /// a Profile.
 #[derive(Debug, PartialEq, Eq, uniffi::Enum)]
-#[allow(clippy::large_enum_variant)]
-pub enum ProfileFileContents {
+#[allow(clippy::enum_variant_names)]
+pub(crate) enum ProfileFileContents {
     /// The JSON deserialized Profile from some bytes.
     PlaintextProfile(Arc<RefProfile>),
 

@@ -2,7 +2,7 @@ use crate::prelude::*;
 use std::hash::{DefaultHasher, Hash, Hasher};
 
 #[uniffi::export]
-pub fn profile_file_contents_equals(
+pub(crate) fn profile_file_contents_equals(
     lhs: &ProfileFileContents,
     rhs: &ProfileFileContents,
 ) -> bool {
@@ -10,7 +10,9 @@ pub fn profile_file_contents_equals(
 }
 
 #[uniffi::export]
-pub fn profile_file_contents_hash_value(contents: &ProfileFileContents) -> u64 {
+pub(crate) fn profile_file_contents_hash_value(
+    contents: &ProfileFileContents,
+) -> u64 {
     let mut hasher = DefaultHasher::new();
     contents.hash(&mut hasher);
     hasher.finish()

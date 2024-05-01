@@ -13,12 +13,12 @@ macro_rules! decl_ref_named {
 
             #[derive(Debug, uniffi::Object)]
             #[uniffi::export(Debug, Eq, Hash)]
-            pub struct $struct_name {
-                pub inner: RwLock<Option<$inner>>,
+            pub(crate) struct $struct_name {
+                inner: RwLock<Option<$inner>>,
             }
 
             impl $struct_name {
-                pub fn with_inner(inner: $inner) -> Self {
+                pub(crate) fn with_inner(inner: $inner) -> Self {
                     Self {
                         inner: RwLock::new(Some(inner)),
                     }
@@ -51,20 +51,12 @@ macro_rules! decl_ref_named {
             impl Eq for $struct_name {}
             impl PartialEq for $struct_name {
                 fn eq(&self, other: &Self) -> bool {
-                    {
-                        match self.inner.read() {
-                            Ok(ref rhs) => match other.inner.read() {
-                                Ok(ref lhs) => match rhs.as_ref() {
-                                    Some(r) => match lhs.as_ref() {
-                                        Some(l) => r == l,
-                                        None => false,
-                                    },
-                                    None => lhs.as_ref().is_none(),
-                                },
-                                _ => false,
-                            },
-                            _ => false,
-                        }
+                    match (self.inner.try_read(), other.inner.try_read()) {
+                        (Ok(ref lhs), Ok(ref rhs)) => match(lhs.as_ref(), rhs.as_ref()) {
+                            (Some(l), Some(r)) => l == r,
+                            _ => false
+                        },
+                        _ => false,
                     }
                 }
             }
@@ -78,16 +70,65 @@ macro_rules! decl_ref_named {
             #[uniffi::export]
             impl $struct_name {
                 #[uniffi::constructor]
-                pub fn new(inner: $inner) -> Arc<Self> {
+                pub(crate) fn new(inner: $inner) -> Arc<Self> {
                     Arc::new(Self::from(inner))
                 }
 
-                pub fn take(self: Arc<Self>) -> Result<$inner> {
+                pub(crate) fn take(self: Arc<Self>) -> Result<$inner> {
                     self.inner
                         .try_write()
-                        .unwrap()
+                        .expect("Should only acquire write lock once.")
                         .take()
                         .ok_or(CommonError::InnerValueAlreadyTakenFromReferenceContainer { type_name: type_name::<$inner>() })
+                }
+            }
+
+            impl HasSampleValues for $struct_name {
+                fn sample() -> Self {
+                    Self::with_inner($inner::sample())
+                }
+                fn sample_other() -> Self {
+                    Self::with_inner($inner::sample_other())
+                }
+            }
+
+            #[cfg(test)]
+            mod [< test_ $struct_name:snake >] {
+                use super::*;
+
+                #[allow(clippy::upper_case_acronyms)]
+                type SUT = $struct_name;
+
+                #[test]
+                fn equality() {
+                    assert_eq!(SUT::sample(), SUT::sample());
+                    assert_eq!(SUT::sample_other(), SUT::sample_other());
+                }
+
+                #[test]
+                fn inequality() {
+                    assert_ne!(SUT::sample(), SUT::sample_other());
+                }
+
+                #[test]
+                fn hash_of_samples() {
+                    assert_eq!(
+                        HashSet::<SUT>::from_iter([
+                            SUT::sample(),
+                            SUT::sample_other(),
+                            // duplicates should get removed
+                            SUT::sample(),
+                            SUT::sample_other(),
+                        ])
+                        .len(),
+                        2
+                    );
+                }
+
+                #[test]
+                fn new_then_take() {
+                    let arced = SUT::new($inner::sample());
+                    assert_eq!(arced.take().unwrap(), $inner::sample());
                 }
             }
         }
