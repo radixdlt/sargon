@@ -2,6 +2,7 @@ package com.radixdlt.sargon
 
 import com.radixdlt.sargon.extensions.asGeneral
 import com.radixdlt.sargon.extensions.fromJson
+import com.radixdlt.sargon.extensions.hex
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.randomBagOfBytes
 import com.radixdlt.sargon.extensions.toJson
@@ -52,6 +53,27 @@ class FactorSourceIdTest {
         assertEquals(
             sutAddress,
             FactorSourceId.Address.fromJson(sutAddress.toJson())
+        )
+    }
+
+    @Test
+    fun testKnownFactorSourceId() {
+        val mnemonic = Mnemonic.init("equip will roof matter pink blind book anxiety banner elbow sun young")
+        val factorSourceId = FactorSourceId.Hash.init(
+            kind = FactorSourceKind.DEVICE,
+            mnemonicWithPassphrase = MnemonicWithPassphrase(
+                mnemonic = mnemonic,
+                passphrase = "Radix... just imagine!"
+            )
+        )
+
+        assertEquals(
+            "4af22ea955d53263a712d897a797df8388e13b8e7b3f30d7d7da88028b724d60",
+            factorSourceId.value.body.hex
+        )
+        assertEquals(
+            FactorSourceKind.DEVICE,
+            factorSourceId.value.kind
         )
     }
 }

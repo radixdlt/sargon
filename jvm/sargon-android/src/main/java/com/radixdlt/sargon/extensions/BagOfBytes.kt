@@ -3,11 +3,10 @@
 package com.radixdlt.sargon.extensions
 
 import com.radixdlt.sargon.BagOfBytes
-import com.radixdlt.sargon.Exactly32Bytes
 import com.radixdlt.sargon.Hash
 import com.radixdlt.sargon.hash
 import com.radixdlt.sargon.newBagOfBytesFrom
-import kotlin.random.Random
+import java.security.SecureRandom
 
 internal fun bagOfBytes(fromString: String) = fromString
     .toByteArray(charset = Charsets.UTF_8)
@@ -31,4 +30,8 @@ val BagOfBytes.hex: String
 
 fun BagOfBytes.hash(): Hash = hash(data = this)
 
-internal fun randomBagOfBytes(byteCount: Int) = Random.nextBytes(size = byteCount).toBagOfBytes()
+internal fun randomBagOfBytes(byteCount: Int): BagOfBytes = with(SecureRandom()) {
+    val bytes = ByteArray(byteCount)
+    nextBytes(bytes)
+    bytes.toBagOfBytes()
+}

@@ -4,6 +4,7 @@ import com.radixdlt.sargon.extensions.derivePublicKey
 import com.radixdlt.sargon.extensions.fromJson
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.isValidSignature
+import com.radixdlt.sargon.extensions.phrase
 import com.radixdlt.sargon.extensions.toJson
 import com.radixdlt.sargon.extensions.sign
 import com.radixdlt.sargon.extensions.signature
@@ -29,6 +30,12 @@ class MnemonicWithPassphraseTest {
             mnemonicWithPassphrase,
             MnemonicWithPassphrase.fromJson(mnemonicWithPassphrase.toJson())
         )
+    }
+
+    @Test
+    fun testInitFromJustPhrase() {
+        val phrase = "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"
+        assertEquals(phrase, MnemonicWithPassphrase.init(phrase = phrase).mnemonic.phrase)
     }
 
     @Test
