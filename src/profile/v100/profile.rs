@@ -52,13 +52,13 @@ impl Profile {
     ) -> ProfileFileContents {
         let json = bytes.as_ref();
         if let Ok(profile) = Profile::new_from_json_bytes(json) {
-            return ProfileFileContents::PlaintextProfile(RefProfile::new(
-                profile,
-            ));
+            return ProfileFileContents::Plaintext {
+                reference: RefProfile::new(profile),
+            };
         };
 
         if serde_json::from_slice::<EncryptedProfileSnapshot>(json).is_ok() {
-            return ProfileFileContents::EncryptedProfile;
+            return ProfileFileContents::Encrypted;
         };
 
         ProfileFileContents::NotProfile
@@ -383,7 +383,9 @@ mod tests {
         let contents = SUT::analyze_contents_of_file(bytes);
         assert_eq!(
             contents,
-            ProfileFileContents::PlaintextProfile(RefProfile::new(sut))
+            ProfileFileContents::Plaintext {
+                reference: RefProfile::new(sut)
+            }
         );
     }
 
@@ -392,7 +394,7 @@ mod tests {
         let sut = SUT::sample();
         let bytes = sut.to_encryption_bytes("super secret");
         let contents = SUT::analyze_contents_of_file(bytes);
-        assert_eq!(contents, ProfileFileContents::EncryptedProfile);
+        assert_eq!(contents, ProfileFileContents::Encrypted);
     }
 
     #[test]

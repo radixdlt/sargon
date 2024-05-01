@@ -12,12 +12,12 @@ use crate::prelude::*;
 #[allow(clippy::enum_variant_names)]
 pub(crate) enum ProfileFileContents {
     /// The JSON deserialized Profile from some bytes.
-    PlaintextProfile(Arc<RefProfile>),
+    Plaintext { reference: Arc<RefProfile> },
 
     /// We successfully JSON deserialized the bytes into
     /// `EncryptedProfileSnapshot`, the wallets should proceed
     /// with asking the user for the decryption password.
-    EncryptedProfile,
+    Encrypted,
 
     /// The bytes is neither a valid `Profile` nor `EncryptedProfile`,
     /// it is either a corrupt file or it is not at all a Profile file,
@@ -32,12 +32,12 @@ impl std::hash::Hash for ProfileFileContents {
         H: std::hash::Hasher,
     {
         match self {
-            Self::PlaintextProfile(v) => {
+            Self::Plaintext { reference } => {
                 state.write_u8(1);
-                (*v).hash(state);
+                (*reference).hash(state);
             }
 
-            Self::EncryptedProfile => {
+            Self::Encrypted => {
                 state.write_u8(2);
             }
 
@@ -50,11 +50,13 @@ impl std::hash::Hash for ProfileFileContents {
 
 impl HasSampleValues for ProfileFileContents {
     fn sample() -> Self {
-        Self::PlaintextProfile(RefProfile::new(Profile::sample()))
+        Self::Plaintext {
+            reference: RefProfile::new(Profile::sample()),
+        }
     }
 
     fn sample_other() -> Self {
-        Self::EncryptedProfile
+        Self::Encrypted
     }
 }
 
