@@ -92,6 +92,16 @@ macro_rules! decl_ref_named {
                 }
             }
 
+            #[uniffi::export]
+            pub(crate) fn [< new_ $struct_name:snake _sample >]() -> $struct_name {
+                $struct_name::sample()
+            }
+
+            #[uniffi::export]
+            pub(crate) fn [< new_ $struct_name:snake _sample_other >]() -> $struct_name {
+                $struct_name::sample_other()
+            }
+
             #[cfg(test)]
             mod [< test_ $struct_name:snake >] {
                 use super::*;
@@ -129,6 +139,19 @@ macro_rules! decl_ref_named {
                 fn new_then_take() {
                     let arced = SUT::new($inner::sample());
                     assert_eq!(arced.take().unwrap(), $inner::sample());
+                }
+            }
+
+            #[cfg(test)]
+            mod [< uniffi_ test_ $struct_name:snake >] {
+                use super::*;
+
+                #[test]
+                fn inequality() {
+                    assert_ne!(
+                        [< new_ $struct_name:snake _sample >](),
+                        [< new_ $struct_name:snake _sample_other >]()
+                    );
                 }
             }
         }

@@ -89,7 +89,7 @@ pub(crate) fn profile_analyze_contents_of_file_fast_by_ref(
 }
 
 // #########
-// SLOWer not by ref
+// Slower than using fast_by_ref
 // #########
 
 #[uniffi::export]
@@ -218,6 +218,28 @@ mod uniffi_tests {
             )
             .unwrap(),
             RefProfile::new(sut.clone())
+        );
+    }
+
+    #[test]
+    fn test_new_profile_from_encryption_bytes_by_value() {
+        assert!(new_profile_from_encryption_bytes(
+            BagOfBytes::sample(),
+            "invalid".to_string()
+        )
+        .is_err());
+    }
+
+    #[test]
+    fn encryption_roundtrip_by_value() {
+        let sut = SUT::sample();
+        let password = "super secret".to_owned();
+        let encryption_bytes =
+            profile_encrypt_with_password(&sut, password.clone());
+        assert_eq!(
+            new_profile_from_encryption_bytes(encryption_bytes, password)
+                .unwrap(),
+            sut
         );
     }
 

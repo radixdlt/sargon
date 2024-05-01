@@ -1,6 +1,6 @@
 import CustomDump
 import Foundation
-import Sargon
+@testable import Sargon
 import SargonUniFFI
 import XCTest
 
@@ -54,8 +54,8 @@ final class ProfileTests: Test<Profile> {
 	func test_analyze_file_profile() {
 		func doTest(_ sut: SUT) {
 			XCTAssertEqual(
-				SUT.analyzeFile(reference: sut.profileSnapshot()),
-				.plaintextProfile(RefProfile(profile: sut))
+				SUT.analyzeFile(reference: sut.profileSnapshotRef()),
+				.plaintextProfile(RefProfile(inner: sut))
 			)
 		}
 		SUT.sampleValues.forEach(doTest)
@@ -80,64 +80,112 @@ final class ProfileTests: Test<Profile> {
 		XCTAssertTrue(jsonString.contains("encryptedSnapshot"))
 		XCTAssertTrue(jsonString.contains("version"))
 	}
-
-	// M2 Max: Average 0.16
-	func test_json_roundtrip_arc_in_arc_out__arc_in_arc_out() throws {
+	
+	func test_json_slow_correctness() throws {
 		let (sut, json) = vector
-		measure {
-			let refBytes = sut.profileSnapshot()
-			let profile = try! SUT.init(jsonBytesReference: refBytes)
-			XCTAssertEqual(profile, sut)
-			XCTAssertEqual(refBytes.bytes(), json) // M2 Max: Average 0.756 BEFORE `bytes()` "takes", gonna change in rust to `take`
-		}
-//		XCTAssertEqual(encoded, json)
-//		XCTAssertEqual(decoded, sut)
+		let encoded = sut.profileSnapshot()
+		let decoded = try SUT(jsonBytes: json)
+		XCTAssertEqual(encoded, json)
+		XCTAssertEqual(decoded, sut)
 	}
-/*
-	// M2 Max: Average 0.247
-	func test_json_roundtrip_not_arc_in_arc_out__not_arc_in_arc_out() throws {
+	
+	func test_json_fast_correctness() throws {
 		let (sut, json) = vector
-		var decoded: RefProfile?
-		var encoded: RefBytes?
-		measure {
-			encoded = profileToJsonBytesNotArcInArcOut(profile: sut)
-			decoded = try? newProfileFromJsonBytesNotArcInArcOut(json: json)
-		}
-		XCTAssertEqual(encoded?.bytes(), json)
-		XCTAssertEqual(decoded?.profile(), sut)
+		let refBytes = sut.profileSnapshotRef()
+		try XCTAssertEqual(refBytes.take(), json)
+		let decoded = try SUT(jsonBytesReference: .init(inner: json))
+		XCTAssertEqual(decoded, sut)
 	}
-
-	// M2 Max: Average 0.057
-	// 💡: The performance gain is to use Arc on result FROM Rust
-	func test__TO_json_only__not_arc_in_arc_out() throws {
-		let sut = vector.model
+	
+	// M2 Max: Average 0.6
+	// OMITTED - too slow (6 seconds)
+	func json_encoding_slow_performance() throws {
+		let (sut, _) = vector
 		measure {
 			let _ = profileToJsonBytes(profile: sut)
 		}
 	}
-
-	// M2 Max: Average 0.195
-	func test__FROM_json_only__arc_in_arc_out() throws {
-		let json = vector.json
+	
+	// M2 Max: Average 0.003 (200x as fast)
+	func test_json_encoding_fast_performance() throws {
+		let (sut, _) = vector
+		measureMetrics([.wallClockTime], automaticallyStartMeasuring: false) {
+			let reference = RefProfile(inner: sut)
+			startMeasuring()
+			let _ = profileToJsonBytesFastByRef(reference: reference)
+		}
+	}
+	
+	// M2 Max: Average 0.26
+	// OMITTED - too slow (4 seconds)
+	func json_decoding_slow_performance() throws {
+		let (_, json) = vector
 		measure {
-			let _ = try! newProfileFromJsonBytes(reference: .init(bytes: json))
+			let _ = try! newProfileFromJsonBytes(jsonBytes: json)
+		}
+	}
+	
+	// M2 Max: Average 0.042 (6x as fast)
+	func test_json_decoding_fast_performance() throws {
+		let (_, json) = vector
+		measureMetrics([.wallClockTime], automaticallyStartMeasuring: false) {
+			let reference = RefBytes(inner: json)
+			startMeasuring()
+			let _ = try! newProfileFromJsonBytesFastByRef(reference: reference)
 		}
 	}
 
-	// M2 Max: Average 0.199
-	// 💡: The performance gain is to use Arc on result FROM Rust
-	func test__FROM_json_only__not_arc_in_arc_out() throws {
-		let json = vector.json
-		measure {
-			let _ = try! newProfileFromJsonBytesNotArcInArcOut(json: json)
+	func test_json_encoding_performance_compare_slow_vs_fast() throws {
+		let (sut, _) = vector
+		
+		func measure<T>(_ operation: (RefProfile) throws -> T) rethrows -> Double {
+			let profileRef = RefProfile(inner: sut)
+			let beginTime = mach_absolute_time()
+			let _ = try operation(profileRef)
+			return Double(mach_absolute_time()) - Double(beginTime)
 		}
+		
+		let slow = measure { _ in
+			profileToJsonBytes(profile: sut)
+		}
+		
+		let fast = measure {
+			profileToJsonBytesFastByRef(reference: $0)
+		}
+		
+		let speedUpFactor = slow / fast
+		print("🐢 speedup \(speedUpFactor) 🐰")
+		XCTAssertGreaterThan(speedUpFactor, 150) // fast by ref is more than 150 times as fast
 	}
- */
+	
+	func test_json_decoding_performance_compare_slow_vs_fast() throws {
+		let (_, json) = vector
+		
+		func measure<T>(_ operation: (RefBytes) throws -> T) rethrows -> Double {
+			let bytesRef = RefBytes(inner: json)
+			let beginTime = mach_absolute_time()
+			let _ = try operation(bytesRef)
+			return Double(mach_absolute_time()) - Double(beginTime)
+		}
+		
+		let slow = try measure { _ in
+			try newProfileFromJsonBytes(jsonBytes: json)
+		}
+		
+		let fast = try measure {
+			try newProfileFromJsonBytesFastByRef(reference: $0)
+		}
+		
+		let speedUpFactor = slow / fast
+		print("🐢 speedup \(speedUpFactor) 🐰")
+		XCTAssertGreaterThan(speedUpFactor, 5) // fast by ref is more than 5 times as fast
+	}
+	
 	lazy var vector: (model: Profile, json: Data) = {
 		try! jsonFixture(
 			as: SUT.self,
 			file: "huge_profile_1000_accounts",
-			decodeWithoutDecoder: { try Profile.init(jsonBytesReference: .init(bytes: $0)) }
+			decodeWithoutDecoder: { try Profile(jsonBytesReference: .init(inner: $0)) }
 		)
 	}()
 }
@@ -146,7 +194,7 @@ extension Profile {
 	public static func analyzeFile(
 		contents: some DataProtocol
 	) -> ProfileFileContents {
-		Self.analyzeFile(reference: .init(bytes: Data(contents)))
+		Self.analyzeFile(reference: .init(inner: Data(contents)))
 	}
 	
 }

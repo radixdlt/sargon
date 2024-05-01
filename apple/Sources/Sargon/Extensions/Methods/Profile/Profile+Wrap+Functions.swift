@@ -4,54 +4,53 @@ import SargonUniFFI
 extension RefProfile: @unchecked Sendable {}
 extension RefBytes: @unchecked Sendable {}
 
-extension ProfileFileContents: @unchecked Sendable, Hashable, Equatable {
-	public func hash(into hasher: inout Hasher) {
-		hasher.combine(profileFileContentsHashValue(contents: self))
-	}
-	
-	public static func == (lhs: Self, rhs: Self) -> Bool {
-		profileFileContentsEquals(lhs: rhs, rhs: rhs)
-	}
-}
-
 extension Profile {
-
 
 	public static func analyzeFile(
 		reference: RefBytes
 	) -> ProfileFileContents {
-		profileAnalyzeContentsOfFile(reference: reference)
+		profileAnalyzeContentsOfFileFastByRef(reference: reference)
 	}
-
 	
 	public init(
 		jsonBytesReference: RefBytes
 	) throws {
-		self = try newProfileFromJsonBytes(
+		self = try newProfileFromJsonBytesFastByRef(
 			reference: jsonBytesReference
-		).takeProfile()
+		).take()
+	}
+	
+	internal init(
+		jsonBytes: some DataProtocol
+	) throws {
+		self = try newProfileFromJsonBytes(jsonBytes: Data(jsonBytes))
 	}
 
 	public init(
 		encrypted bytes: some DataProtocol,
 		decryptionPassword: String
 	) throws {
-		self = try newProfileFromEncryptionBytes(
-			reference: RefBytes(bytes: Data(bytes)),
+		self = try newProfileFromEncryptionBytesFastByRef(
+			reference: RefBytes(inner: Data(bytes)),
 			decryptionPassword: decryptionPassword
-		).takeProfile()
+		).take()
 	}
 
-	public func profileSnapshot() -> RefBytes {
-		profileToJsonBytes(reference: RefProfile(profile: self))
+	public func profileSnapshot() -> Data {
+		try! profileSnapshotRef().take()
+	}
+	
+	/// Call `try take()` on `RefBytes` to get the Profile bytes, **can only be called once.**, will throw next time called.
+	public func profileSnapshotRef() -> RefBytes {
+		profileToJsonBytesFastByRef(reference: RefProfile(inner: self))
 	}
 
 	public func encrypt(
 		password: String
 	) -> Data {
-		profileEncryptWithPassword(
-			reference: RefProfile(profile: self),
+		try! profileEncryptWithPasswordFastByRef(
+			reference: RefProfile(inner: self),
 			encryptionPassword: password
-		).bytes()
+		).take()
 	}
 }
