@@ -1,8 +1,12 @@
 package com.radixdlt.sargon.extensions
 
 import com.radixdlt.sargon.IdentityAddress
+import com.radixdlt.sargon.P2pLink
+import com.radixdlt.sargon.P2pLinks
 import com.radixdlt.sargon.Persona
 import com.radixdlt.sargon.Personas
+import com.radixdlt.sargon.newP2PLinksByUpdatingOrAppending
+import com.radixdlt.sargon.newP2PLinksByUpdatingOrInsertingAtIndex
 import com.radixdlt.sargon.newPersonas
 import com.radixdlt.sargon.newPersonasByAppending
 import com.radixdlt.sargon.newPersonasByUpdatingOrAppending
