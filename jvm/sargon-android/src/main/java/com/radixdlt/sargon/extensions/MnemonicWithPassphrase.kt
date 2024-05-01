@@ -1,5 +1,6 @@
 package com.radixdlt.sargon.extensions
 
+import com.radixdlt.sargon.BIP39Passphrase
 import com.radixdlt.sargon.CommonException
 import com.radixdlt.sargon.DerivationPath
 import com.radixdlt.sargon.Hash
@@ -7,6 +8,7 @@ import com.radixdlt.sargon.HierarchicalDeterministicPublicKey
 import com.radixdlt.sargon.Mnemonic
 import com.radixdlt.sargon.MnemonicWithPassphrase
 import com.radixdlt.sargon.SignatureWithPublicKey
+import com.radixdlt.sargon.annotation.KoverIgnore
 import com.radixdlt.sargon.extensions.AndroidMnemonicWithPassphrase.Companion.toAndroid
 import com.radixdlt.sargon.mnemonicWithPassphraseDerivePublicKeys
 import com.radixdlt.sargon.mnemonicWithPassphraseSign
@@ -15,6 +17,12 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+
+@Throws(SargonException::class)
+fun MnemonicWithPassphrase.Companion.init(phrase: String) = MnemonicWithPassphrase(
+    mnemonic = Mnemonic.init(phrase = phrase),
+    passphrase = BIP39Passphrase()
+)
 
 @Throws(SargonException::class)
 fun MnemonicWithPassphrase.Companion.fromJson(
@@ -64,6 +72,7 @@ fun MnemonicWithPassphrase.sign(
  * Android and iOS use different schema and since Sargon Rust follows the iOS schema, the android
  * counterpart hides Sargon's implementation until the wallets migrate to version 2.*.
  */
+@KoverIgnore
 @Serializable
 private data class AndroidMnemonicWithPassphrase(
     @SerialName("mnemonic")
