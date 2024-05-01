@@ -4,6 +4,9 @@
 /// expensive clone operations.
 macro_rules! decl_ref_named {
     (
+        $(
+            #[doc = $expr: expr]
+        )*
         $struct_name: ty,
         $inner: ty
     ) => {
@@ -11,6 +14,9 @@ macro_rules! decl_ref_named {
             use crate::prelude::*;
             use std::sync::{Arc, RwLock};
 
+            $(
+                #[doc = $expr]
+            )*
             #[derive(Debug, uniffi::Object)]
             #[uniffi::export(Debug, Eq, Hash)]
             pub(crate) struct $struct_name {
@@ -26,6 +32,8 @@ macro_rules! decl_ref_named {
             }
 
             impl std::hash::Hash for $struct_name {
+                /// Manual hash impl since Ref type holds `RwLock` which is
+                /// not Hash.
                 fn hash<H>(&self, state: &mut H)
                 where
                     H: std::hash::Hasher,
@@ -50,6 +58,8 @@ macro_rules! decl_ref_named {
 
             impl Eq for $struct_name {}
             impl PartialEq for $struct_name {
+                /// Manual Eq impl since Ref type holds `RwLock` which is
+                /// not Eq.
                 fn eq(&self, other: &Self) -> bool {
                     match (self.inner.try_read(), other.inner.try_read()) {
                         (Ok(ref lhs), Ok(ref rhs)) => match(lhs.as_ref(), rhs.as_ref()) {
@@ -69,11 +79,35 @@ macro_rules! decl_ref_named {
 
             #[uniffi::export]
             impl $struct_name {
+
+                /// Constructor for the reference type passing the inner value.
+                /// You can read out the inner value using `take`. Typically you
+                /// would not construct `RefFoo` on the FFI side and call `take`
+                /// on it to read out the inner. The typical pattern is that you
+                /// on the FFI side call a UniFFI exported Rust function that
+                /// takes `RefFoo`, which you construct on the FFI side and pass
+                /// to the function, which then returns `RefBar` and you read out
+                /// the "bar" value using `take()`.
+                ///
+                /// Two examples are:
+                ///
+                /// 1. Profile JSON decoding:
+                /// `[FFI] RefBytes <~ Rust Sargon ~> RefProfile [FFI]`
+                /// then FFI calls `take()` on `RefProfile` to get the Profile.
+                ///
+                /// 2. Profile JSON encoding:
+                /// `[FFI] RefProfile <~ Rust Sargon ~> RefBytes [FFI]`
+                /// then FFI calls `take()` on `RefBytes` to get the JSON bytes.
+                ///
                 #[uniffi::constructor]
                 pub(crate) fn new(inner: $inner) -> Arc<Self> {
                     Arc::new(Self::from(inner))
                 }
 
+                /// Reads out the `inner` value and **consumes** this reference
+                /// type, meaning if you on the FFI side call `take` again, an
+                /// error is thrown, since the value is no longer there. This
+                /// enables us to on the Rust side avoid using expensive `clone()`.
                 pub(crate) fn take(self: Arc<Self>) -> Result<$inner> {
                     self.inner
                         .try_write()
@@ -159,9 +193,17 @@ macro_rules! decl_ref_named {
 }
 
 macro_rules! decl_ref {
-    ($inner: ty) => {
+    (
+        $(
+            #[doc = $expr: expr]
+        )*
+        $inner: ty
+    ) => {
         paste! {
             decl_ref_named!(
+                $(
+                    #[doc = $expr]
+                )*
                 [< Ref $inner:camel >],
                 $inner
             );
