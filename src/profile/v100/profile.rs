@@ -693,16 +693,6 @@ mod tests {
 							}
 						]
 					},
-					"p2pLinks": [
-						{
-							"connectionPassword": "babebabebabebabebabebabebabebabebabebabebabebabebabebabebabebabe",
-							"displayName": "Brave on PC"
-						},
-						{
-							"connectionPassword": "cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe",
-							"displayName": "Chrome on Macbook"
-						}
-					],
 					"security": {
 						"isCloudProfileSyncEnabled": true,
 						"isDeveloperModeEnabled": true,
