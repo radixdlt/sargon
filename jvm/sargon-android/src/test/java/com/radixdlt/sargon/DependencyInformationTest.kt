@@ -12,6 +12,6 @@ class DependencyInformationTest: SampleTestable<DependencyInformation> {
 
     @Test
     fun testString() {
-        assertEquals("develop", DependencyInformation.sample().string)
+        assertEquals("main", DependencyInformation.sample().string)
     }
 }

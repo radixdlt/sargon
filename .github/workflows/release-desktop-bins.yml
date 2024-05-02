@@ -6,7 +6,7 @@ on:
     tags:
       - "**"
     branches:
-      - develop
+      - main
 
 permissions:
   id-token: write
