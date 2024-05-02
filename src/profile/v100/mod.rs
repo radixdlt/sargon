@@ -4,12 +4,12 @@ mod entity;
 mod entity_security_state;
 mod factors;
 mod header;
-
 mod identified_elements;
 mod json_data_convertible;
-
 mod networks;
 mod profile;
+mod profile_file_contents;
+mod profile_file_contents_uniffi_fn;
 mod profile_uniffi_fn;
 
 pub use address::*;
@@ -22,4 +22,6 @@ pub use identified_elements::*;
 pub use json_data_convertible::*;
 pub use networks::*;
 pub use profile::*;
+pub use profile_file_contents::*;
+pub use profile_file_contents_uniffi_fn::*;
 pub use profile_uniffi_fn::*;

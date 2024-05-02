@@ -216,7 +216,7 @@ final class ManifestBuildingTests: Test<TransactionManifest> {
 
 }
 
-extension XCTestCase {
+extension TestCase {
     
     func encodedReceipt(_ name: String) throws -> Data {
         let utf8 = try openTransactionFile(name, extension: "dat")
@@ -238,13 +238,4 @@ extension XCTestCase {
     private func openTransactionFile(_ fileName: String, extension fileExtension: String) throws -> Data {
 		try openFile(subPath: "transaction", fileName, extension: fileExtension)
     }
-	
-	private func openFile(subPath: String, _ fileName: String, extension fileExtension: String) throws -> Data {
-		let testsDirectory: String = URL(fileURLWithPath: "\(#file)").pathComponents.dropLast(6).joined(separator: "/")
-		
-		let fileURL = try XCTUnwrap(URL(fileURLWithPath: "\(testsDirectory)/fixtures/\(subPath)/\(fileName).\(fileExtension)"))
-		
-		return try Data(contentsOf: fileURL)
-	  
-	}
 }

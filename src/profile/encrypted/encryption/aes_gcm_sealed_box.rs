@@ -25,23 +25,23 @@ impl AesGcmSealedBox {
     }
 }
 
-impl TryFrom<Vec<u8>> for AesGcmSealedBox {
+impl TryFrom<&[u8]> for AesGcmSealedBox {
     type Error = CommonError;
 
-    fn try_from(value: Vec<u8>) -> Result<Self, Self::Error> {
-        if value.len() < Self::LOWER_BOUND_LEN {
+    fn try_from(bytes: &[u8]) -> Result<Self, Self::Error> {
+        if bytes.len() < Self::LOWER_BOUND_LEN {
             return Err(CommonError::InvalidAESBytesTooShort {
                 expected_at_least: Self::LOWER_BOUND_LEN as u64,
-                found: value.len() as u64,
+                found: bytes.len() as u64,
             });
         }
 
-        let mut bytes = value;
-        let nonce_bytes = bytes.drain(..Self::NONCE_LEN).collect_vec();
+        let nonce_bytes = &bytes[..Self::NONCE_LEN];
         let nonce = Exactly12Bytes::try_from(nonce_bytes).unwrap();
+        let cipher_text = &bytes[Self::NONCE_LEN..];
         Ok(Self {
             nonce,
-            cipher_text: bytes,
+            cipher_text: cipher_text.to_owned(),
         })
     }
 }

@@ -61,7 +61,7 @@ impl VersionedEncryption for EncryptionScheme {
     /// the `self` `EncryptionScheme`, returning the cipher text as Vec<u8>.
     fn encrypt(
         &self,
-        plaintext: Vec<u8>,
+        plaintext: impl AsRef<[u8]>,
         encryption_key: &mut Exactly32Bytes,
     ) -> Vec<u8> {
         match self {
@@ -76,7 +76,7 @@ impl VersionedEncryption for EncryptionScheme {
     /// was successful.
     fn decrypt(
         &self,
-        cipher_text: Vec<u8>,
+        cipher_text: impl AsRef<[u8]>,
         decryption_key: &mut Exactly32Bytes,
     ) -> Result<Vec<u8>> {
         match self {
@@ -146,9 +146,9 @@ mod tests {
         let mut encryption_key = Exactly32Bytes::generate();
         let mut decryption_key = encryption_key;
         let msg = "Hello Radix";
-        let msg_bytes = msg.bytes().collect();
+        let msg_bytes: Vec<u8> = msg.bytes().collect();
 
-        let encrypted = sut.encrypt(msg_bytes, &mut encryption_key);
+        let encrypted = sut.encrypt(&msg_bytes, &mut encryption_key);
         assert_eq!(encryption_key, Exactly32Bytes::from(&[0; 32])); // assert zeroed out
 
         let decrypted_bytes =

@@ -1,4 +1,4 @@
-use std::ops::{Deref, Neg};
+use std::ops::{Deref, DerefMut, Neg};
 
 use crate::prelude::*;
 
@@ -33,11 +33,22 @@ impl AsRef<[u8]> for BagOfBytes {
     }
 }
 
+impl AsMut<[u8]> for BagOfBytes {
+    fn as_mut(&mut self) -> &mut [u8] {
+        self.bytes.as_mut()
+    }
+}
+
 impl Deref for BagOfBytes {
     type Target = Vec<u8>;
 
     fn deref(&self) -> &Self::Target {
         &self.bytes
+    }
+}
+impl DerefMut for BagOfBytes {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.bytes
     }
 }
 
@@ -303,6 +314,22 @@ mod tests {
     fn as_ref() {
         let b: &[u8] = &[0xde, 0xad, 0xbe, 0xef];
         assert_eq!(SUT::from(b).as_ref(), b);
+    }
+
+    #[test]
+    fn deref_mut() {
+        let x: &[u8] = &[0xde, 0xad, 0xbe, 0xef];
+        let mut sut = SUT::sample();
+        *sut = x.to_vec();
+        assert_eq!(*sut, x);
+    }
+
+    #[test]
+    fn as_mut() {
+        let x: &[u8] = &[0xde, 0xad, 0xbe, 0xef];
+        let mut sut = SUT::from(x);
+        sut.as_mut()[0] = 0xff;
+        assert_eq!(sut.to_hex(), "ffadbeef");
     }
 
     #[test]

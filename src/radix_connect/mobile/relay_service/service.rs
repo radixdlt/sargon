@@ -52,22 +52,14 @@ impl Service {
         let decrypted_wallet_interactions = encrypted_wallet_interactions
             .iter()
             .map(|bytes| {
-                self.encryption_scheme
-                    .decrypt(bytes.to_vec(), &mut encryption_key)
+                self.encryption_scheme.decrypt(bytes, &mut encryption_key)
             })
             .collect::<Result<Vec<_>>>()?;
 
-        let deserialized_wallet_interactions_result =
-            decrypted_wallet_interactions
-                .iter()
-                .map(|bytes| {
-                    new_dapp_to_wallet_interaction_unvalidated_from_json_bytes(
-                        bytes.clone().into(),
-                    )
-                })
-                .collect();
-
-        deserialized_wallet_interactions_result
+        decrypted_wallet_interactions
+            .iter()
+            .map(DappToWalletInteractionUnvalidated::new_from_json_bytes)
+            .collect()
     }
 
     async fn send_wallet_interaction_response(
@@ -122,7 +114,7 @@ impl Service {
 impl Service {
     fn new_always_failing() -> Self {
         Self::new_with_network_antenna(Arc::new(
-            MockAntenna::new_always_failling(),
+            MockAntenna::new_always_failing(),
         ))
     }
 
