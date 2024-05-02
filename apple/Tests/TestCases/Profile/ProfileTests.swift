@@ -1,11 +1,11 @@
 import CustomDump
 import Foundation
-@testable import Sargon
+import Sargon
 import SargonUniFFI
 import XCTest
 
 final class ProfileTests: Test<Profile> {
-
+	
 	func test_description_and_debug() {
 		XCTAssertGreaterThan(SUT.sample.debugDescription, SUT.sample.description)
 	}
