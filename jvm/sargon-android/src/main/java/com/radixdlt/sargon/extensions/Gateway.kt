@@ -1,6 +1,7 @@
 package com.radixdlt.sargon.extensions
 
 import com.radixdlt.sargon.Gateway
+import com.radixdlt.sargon.Gateways
 import com.radixdlt.sargon.NetworkId
 import com.radixdlt.sargon.gatewayIsWellknown
 import com.radixdlt.sargon.gatewayMainnet
@@ -16,7 +17,7 @@ val Gateway.Companion.mainnet: Gateway
 val Gateway.Companion.stokenet: Gateway
     get() = gatewayStokenet()
 
-val Gateway.Companion.wellKnown: List<Gateway>
+val Gateway.Companion.wellKnown: Gateways
     get() = gatewayWellknownGateways()
 
 @Throws(SargonException::class)
