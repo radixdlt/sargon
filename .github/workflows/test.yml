@@ -5,7 +5,7 @@ on:
   pull_request:
   push:
     branches:
-      - develop
+      - main
 
 permissions:
   id-token: write

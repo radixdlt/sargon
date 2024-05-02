@@ -40,7 +40,7 @@ impl DependencyInformation {
 
 impl HasSampleValues for DependencyInformation {
     fn sample() -> Self {
-        Self::Branch("develop".to_owned())
+        Self::Branch("main".to_owned())
     }
 
     fn sample_other() -> Self {
@@ -68,7 +68,7 @@ mod tests {
 
     #[test]
     fn display() {
-        assert_eq!(format!("{}", SUT::sample()), "develop");
+        assert_eq!(format!("{}", SUT::sample()), "main");
     }
 
     #[test]
