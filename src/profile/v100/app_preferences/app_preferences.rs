@@ -24,7 +24,7 @@ pub struct AppPreferences {
     pub display: AppDisplay,
 
     /// The gateway of the active network and collection of other saved gateways.
-    pub gateways: Gateways,
+    pub gateways: SavedGateways,
 
     /// Collection of clients user have connected P2P with, typically these
     /// are WebRTC connections with DApps, but might be Android or iPhone
@@ -60,7 +60,7 @@ impl AppPreferences {
 impl AppPreferences {
     pub fn new(
         display: AppDisplay,
-        gateways: Gateways,
+        gateways: SavedGateways,
         p2p_links: P2PLinks,
         security: Security,
         transaction: TransactionPreferences,
@@ -80,7 +80,7 @@ impl HasSampleValues for AppPreferences {
     fn sample() -> Self {
         Self::new(
             AppDisplay::sample(),
-            Gateways::sample(),
+            SavedGateways::sample(),
             P2PLinks::sample(),
             Security::sample(),
             TransactionPreferences::sample(),
@@ -91,7 +91,7 @@ impl HasSampleValues for AppPreferences {
     fn sample_other() -> Self {
         Self::new(
             AppDisplay::sample_other(),
-            Gateways::sample_other(),
+            SavedGateways::sample_other(),
             P2PLinks::sample(),
             Security::sample_other(),
             TransactionPreferences::sample_other(),
@@ -124,7 +124,7 @@ mod tests {
 
     #[test]
     fn get_gateways() {
-        assert_eq!(SUT::sample().gateways, Gateways::sample())
+        assert_eq!(SUT::sample().gateways, SavedGateways::sample())
     }
 
     #[test]

@@ -1,60 +1,57 @@
 package com.radixdlt.sargon
 
-import com.radixdlt.sargon.extensions.all
-import com.radixdlt.sargon.extensions.changeCurrent
-import com.radixdlt.sargon.extensions.default
+import com.radixdlt.sargon.extensions.append
+import com.radixdlt.sargon.extensions.contains
+import com.radixdlt.sargon.extensions.get
+import com.radixdlt.sargon.extensions.getBy
 import com.radixdlt.sargon.extensions.init
+import com.radixdlt.sargon.extensions.invoke
 import com.radixdlt.sargon.extensions.mainnet
+import com.radixdlt.sargon.extensions.remove
+import com.radixdlt.sargon.extensions.removeByUrl
+import com.radixdlt.sargon.extensions.size
 import com.radixdlt.sargon.extensions.stokenet
+import com.radixdlt.sargon.extensions.updateOrAppend
+import com.radixdlt.sargon.extensions.updateOrInsert
 import com.radixdlt.sargon.samples.Sample
 import com.radixdlt.sargon.samples.sample
-import com.radixdlt.sargon.samples.sampleMainnet
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class GatewaysTest: SampleTestable<Gateways> {
-
     override val samples: List<Sample<Gateways>>
         get() = listOf(Gateways.sample)
 
     @Test
-    fun testNew() {
-        val mainnet = Gateway.sampleMainnet()
-        assertEquals(Gateway.sampleMainnet(), mainnet)
-        val gateways = Gateways.init(current = mainnet)
-        assertEquals(NetworkId.MAINNET, gateways.current.network.id)
-    }
+    fun testListMethods() {
+        val sample = Gateway.mainnet
+        val sampleOther = Gateway.stokenet
 
-    @Test
-    fun testDefault() {
-        assertEquals(
-            Gateways(
-                current = Gateway.mainnet,
-                other = OtherGateways.init(Gateway.stokenet)
-            ),
-            Gateways.default
-        )
-    }
+        var list = Gateways.init(sample)
 
-    @Test
-    fun testChangeCurrent() {
-        val newGateway = Gateway.init(
-            url = "https://hammunet-gateway.radixdlt.com",
-            networkId = NetworkId.HAMMUNET
-        )
-        val gateways = Gateways.default.changeCurrent(newCurrent = newGateway)
+        assertTrue(sample in list)
+        assertEquals(1, list.size)
+        assertEquals(sample, list[0])
 
-        assertEquals(
-            Gateways(
-                current = newGateway,
-                other = OtherGateways.init(Gateway.stokenet, Gateway.mainnet)
-            ),
-            gateways
-        )
+        list = list.append(sampleOther)
+        assertTrue(sampleOther in list)
+        assertEquals(2, list.size)
+        assertEquals(sampleOther, list[1])
 
-        assertEquals(
-            listOf(newGateway, Gateway.stokenet, Gateway.mainnet),
-            gateways.all
-        )
+        list = list.remove(sampleOther)
+        assertFalse(sampleOther in list)
+        assertEquals(1, list.size)
+
+        list = list.updateOrInsert(sampleOther, 0)
+        assertEquals(sampleOther, list()[0])
+        assertTrue(list.size == 2)
+        list = list.updateOrAppend(sampleOther)
+        assertTrue(list.size == 2)
+        list = list.remove(sampleOther)
+
+        assertEquals(sample, list.getBy(sample.url))
+        assertTrue(list.removeByUrl(sample.url).size == 0)
     }
 }
