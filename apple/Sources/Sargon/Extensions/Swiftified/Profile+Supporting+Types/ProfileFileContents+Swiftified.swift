@@ -8,5 +8,4 @@
 import Foundation
 import SargonUniFFI
 
-extension ProfileFileContents: @unchecked Sendable {}
 extension ProfileFileContents: SargonModel {}

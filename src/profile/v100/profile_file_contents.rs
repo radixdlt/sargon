@@ -60,12 +60,14 @@ mod tests {
             HashSet::<SUT>::from_iter([
                 SUT::sample(),
                 SUT::sample_other(),
+                SUT::NotProfile,
                 // duplicates should get removed
                 SUT::sample(),
-                SUT::sample_other()
+                SUT::sample_other(),
+                SUT::NotProfile,
             ])
             .len(),
-            2
+            3
         );
     }
 }
