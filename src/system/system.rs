@@ -10,3 +10,11 @@ pub struct SargonOS {
     pub(crate) profile_holder: ProfileHolder,
     pub(crate) drivers: Drivers,
 }
+
+#[uniffi::export]
+impl SargonOS {
+    #[uniffi::constructor]
+    pub async fn with_drivers(drivers: Drivers) -> Arc<Self> {
+        // let app_secure_storage = AppSecureStorageClient::new(drivers.secure_storage_driver);
+    }
+}

@@ -1,5 +1,6 @@
 import Sargon
 import SargonUniFFI
+import ComposableArchitecture
 
 @Reducer
 public struct SplashFeature {
@@ -49,20 +50,19 @@ public struct SplashFeature {
 				.run { send in
 					let secureStorage = Keychain.shared
 					try await clock.sleep(for: .milliseconds(1200))
-					if try keychain.loadData(SecureStorageKey.activeProfileId)
-						!= nil
-					{
+					if try keychain.loadData(SecureStorageKey.activeProfileId) != nil {
 						let wallet = try Wallet.byLoadingProfile(
 							secureStorage: secureStorage)
 						let profile = wallet.profile()
 						let hasAccount =
 							profile.networks.first?.accounts.isEmpty
 							== false
-						await send(
-							.delegate(
+						await send(.delegate(
 								.walletInitialized(
 									wallet,
-									hasAccount: hasAccount)))
+									hasAccount: hasAccount
+								)
+							))
 					} else {
 						await send(
 							.delegate(
@@ -72,7 +72,8 @@ public struct SplashFeature {
 											secureStorage:
 												secureStorage
 										),
-									hasAccount: false)
+									hasAccount: false
+								)
 							))
 					}
 				}
@@ -85,7 +86,7 @@ public struct SplashFeature {
 
 extension Wallet {
 	static func generateNewBDFSAndEmptyProfile(
-		secureStorage: SecureStorageDriver = Keychain.shared
+		secureStorage: SecureStorage = Keychain.shared
 	) -> Wallet {
 		do {
 			return try Wallet.byCreatingNewProfileAndSecretsWithEntropy(
