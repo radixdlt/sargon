@@ -123,12 +123,6 @@
           }
         ]
       },
-      "p2pLinks" : [
-        {
-          "connectionPassword" : "0a54ab49f7c1dac68666945f8cffa17c596e65daa551d739ef6529edcf39d34f",
-          "displayName" : "Chrome"
-        }
-      ],
       "security" : {
         "isCloudProfileSyncEnabled" : true,
         "isDeveloperModeEnabled" : true,
