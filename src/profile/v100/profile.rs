@@ -47,18 +47,16 @@ pub struct Profile {
 }
 
 impl Profile {
-    pub(crate) fn analyze_contents_of_file(
+    pub fn analyze_contents_of_file(
         bytes: impl AsRef<[u8]>,
     ) -> ProfileFileContents {
         let json = bytes.as_ref();
         if let Ok(profile) = Profile::new_from_json_bytes(json) {
-            return ProfileFileContents::Plaintext {
-                reference: RefProfile::new(profile),
-            };
+            return ProfileFileContents::PlaintextProfile(profile);
         };
 
         if serde_json::from_slice::<EncryptedProfileSnapshot>(json).is_ok() {
-            return ProfileFileContents::Encrypted;
+            return ProfileFileContents::EncryptedProfile;
         };
 
         ProfileFileContents::NotProfile
@@ -381,12 +379,7 @@ mod tests {
         let sut = SUT::sample();
         let bytes = sut.to_json_bytes();
         let contents = SUT::analyze_contents_of_file(bytes);
-        assert_eq!(
-            contents,
-            ProfileFileContents::Plaintext {
-                reference: RefProfile::new(sut)
-            }
-        );
+        assert_eq!(contents, ProfileFileContents::PlaintextProfile(sut));
     }
 
     #[test]
@@ -394,7 +387,7 @@ mod tests {
         let sut = SUT::sample();
         let bytes = sut.to_encryption_bytes("super secret");
         let contents = SUT::analyze_contents_of_file(bytes);
-        assert_eq!(contents, ProfileFileContents::Encrypted);
+        assert_eq!(contents, ProfileFileContents::EncryptedProfile);
     }
 
     #[test]

@@ -3,14 +3,12 @@ package com.radixdlt.sargon.extensions
 import com.radixdlt.sargon.FactorSource
 import com.radixdlt.sargon.Profile
 import com.radixdlt.sargon.ProfileFileContents
-import com.radixdlt.sargon.RefBytes
-import com.radixdlt.sargon.RefProfile
 import com.radixdlt.sargon.newProfile
-import com.radixdlt.sargon.newProfileFromEncryptionBytesFastByRef
-import com.radixdlt.sargon.newProfileFromJsonBytesFastByRef
-import com.radixdlt.sargon.profileAnalyzeContentsOfFileFastByRef
-import com.radixdlt.sargon.profileEncryptWithPasswordFastByRef
-import com.radixdlt.sargon.profileToJsonBytesFastByRef
+import com.radixdlt.sargon.newProfileFromEncryptionBytes
+import com.radixdlt.sargon.newProfileFromJsonBytes
+import com.radixdlt.sargon.profileAnalyzeContentsOfFile
+import com.radixdlt.sargon.profileEncryptWithPassword
+import com.radixdlt.sargon.profileToJsonBytes
 
 fun Profile.Companion.init(
     deviceFactorSource: FactorSource.Device,
@@ -21,21 +19,21 @@ fun Profile.Companion.init(
 )
 
 fun Profile.Companion.analyzeContentsOfFile(contents: String): ProfileFileContents =
-    profileAnalyzeContentsOfFileFastByRef(reference = RefBytes(inner = bagOfBytes(fromString = contents)))
+    profileAnalyzeContentsOfFile(bytes = bagOfBytes(fromString = contents))
 
 @Throws(SargonException::class)
 fun Profile.Companion.fromJson(jsonString: String) =
-    newProfileFromJsonBytesFastByRef(reference = RefBytes(inner = bagOfBytes(fromString = jsonString))).take()
+    newProfileFromJsonBytes(jsonBytes = bagOfBytes(fromString = jsonString))
 
 @Throws(SargonException::class)
 fun Profile.Companion.fromEncryptedJson(
     jsonString: String,
     decryptionPassword: String
-) = newProfileFromEncryptionBytesFastByRef(
-    reference = RefBytes(inner = bagOfBytes(fromString = jsonString)),
+) = newProfileFromEncryptionBytes(
+    json = bagOfBytes(fromString = jsonString),
     decryptionPassword = decryptionPassword
-).take()
+)
 
-fun Profile.toJson() = profileToJsonBytesFastByRef(reference = RefProfile(inner = this)).take().string
+fun Profile.toJson() = profileToJsonBytes(profile = this).string
 fun Profile.toEncryptedJson(encryptionPassword: String) =
-    profileEncryptWithPasswordFastByRef(reference = RefProfile(inner = this), encryptionPassword = encryptionPassword).take().string
+    profileEncryptWithPassword(profile = this, encryptionPassword = encryptionPassword).string

@@ -1,6 +1,13 @@
 import SargonUniFFI
 
 extension Profile: SargonModel {}
+
+@available(*, unavailable, message: "Profile should not use Swift `Codable`, since it is too slow.")
+extension Profile: Codable {
+	public func encode(to encoder: any Encoder) throws { fatalError("Unreachable") }
+	public init(from decoder: any Decoder) throws { fatalError("Unreachable") }
+}
+
 extension Profile {
 	
 	public init(

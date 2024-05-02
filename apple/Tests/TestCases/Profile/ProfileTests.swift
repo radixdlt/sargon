@@ -52,24 +52,34 @@ final class ProfileTests: Test<Profile> {
 	}
 
 	func test_analyze_file_profile() {
-		func doTest(_ sut: SUT) {
+		func doTest(_ sut: SUT, _ json: Data) {
 			XCTAssertEqual(
-				SUT.analyzeFile(reference: sut.profileSnapshotRef()),
-				.plaintext(reference: RefProfile(inner: sut))
+				SUT.analyzeFile(contents: json),
+				.plaintextProfile(sut)
 			)
 		}
-		SUT.sampleValues.forEach(doTest)
+		var vectors = Array(zip(SUT.sampleValues, SUT.sampleValues.map { $0.jsonData() }))
+		vectors.append(vector)
+		
+		vectors.forEach(doTest)
 	}
 
 	func test_analyze_file_encrypted_profile() {
-		func doTest(_ sut: SUT) {
-			let encrypted = sut.encrypt(password: "melon")
+	
+		var vectors = SUT.sampleValues
+		vectors.append(vector.model)
+		
+		let passwords = ["Mellon", "open sesame", "REINDEER FLOTILLA", "swordfish"]
+		func doTest(_ index: Int, _ sut: SUT) {
+			let password = passwords[index % passwords.count]
+			let encrypted = sut.encrypt(password: password)
 			XCTAssertEqual(
 				SUT.analyzeFile(contents: encrypted),
-				.encrypted
+				.encryptedProfile
 			)
 		}
-		SUT.sampleValues.forEach(doTest)
+		
+		vectors.enumerated().forEach(doTest)
 	}
 
 	func test_encrypted_profile_contents() throws {
@@ -81,120 +91,23 @@ final class ProfileTests: Test<Profile> {
 		XCTAssertTrue(jsonString.contains("version"))
 	}
 	
-	func test_json_slow_correctness() throws {
-		let (sut, json) = vector
-		let encoded = sut.profileSnapshot()
-		let decoded = try SUT(jsonBytes: json)
-		XCTAssertEqual(encoded, json)
-		XCTAssertEqual(decoded, sut)
-	}
-	
-	func test_json_fast_correctness() throws {
-		let (sut, json) = vector
-		let refBytes = sut.profileSnapshotRef()
-		try XCTAssertEqual(refBytes.take(), json)
-		let decoded = try SUT(jsonBytesReference: .init(inner: json))
-		XCTAssertEqual(decoded, sut)
-	}
-	
-	// M2 Max: Average 0.6
-	// OMITTED - too slow (6 seconds)
-	func json_encoding_slow_performance() throws {
-		let (sut, _) = vector
-		measure {
-			let _ = profileToJsonBytes(profile: sut)
+	func test_json_roundtrip() throws {
+		func doTest(_ sut: SUT, _ json: Data) throws {
+			let encoded = sut.profileSnapshot()
+			XCTAssertEqual(encoded, json)
+			let decoded = try SUT(jsonData: json)
+			XCTAssertEqual(decoded, sut)
 		}
-	}
-	
-	// M2 Max: Average 0.003 (200x as fast)
-	func test_json_encoding_fast_performance() throws {
-		let (sut, _) = vector
-		measureMetrics([.wallClockTime], automaticallyStartMeasuring: false) {
-			let reference = RefProfile(inner: sut)
-			startMeasuring()
-			let _ = profileToJsonBytesFastByRef(reference: reference)
-		}
-	}
-	
-	// M2 Max: Average 0.26
-	// OMITTED - too slow (4 seconds)
-	func json_decoding_slow_performance() throws {
-		let (_, json) = vector
-		measure {
-			let _ = try! newProfileFromJsonBytes(jsonBytes: json)
-		}
-	}
-	
-	// M2 Max: Average 0.042 (6x as fast)
-	func test_json_decoding_fast_performance() throws {
-		let (_, json) = vector
-		measureMetrics([.wallClockTime], automaticallyStartMeasuring: false) {
-			let reference = RefBytes(inner: json)
-			startMeasuring()
-			let _ = try! newProfileFromJsonBytesFastByRef(reference: reference)
-		}
-	}
-
-	func test_json_encoding_performance_compare_slow_vs_fast() throws {
-		let (sut, _) = vector
-		
-		func measure<T>(_ operation: (RefProfile) throws -> T) rethrows -> Double {
-			let profileRef = RefProfile(inner: sut)
-			let beginTime = mach_absolute_time()
-			let _ = try operation(profileRef)
-			return Double(mach_absolute_time()) - Double(beginTime)
-		}
-		
-		let slow = measure { _ in
-			profileToJsonBytes(profile: sut)
-		}
-		
-		let fast = measure {
-			profileToJsonBytesFastByRef(reference: $0)
-		}
-		
-		let speedUpFactor = slow / fast
-		print("🐢 speedup \(speedUpFactor) 🐰")
-		XCTAssertGreaterThan(speedUpFactor, 150) // fast by ref is more than 150 times as fast
-	}
-	
-	func test_json_decoding_performance_compare_slow_vs_fast() throws {
-		let (_, json) = vector
-		
-		func measure<T>(_ operation: (RefBytes) throws -> T) rethrows -> Double {
-			let bytesRef = RefBytes(inner: json)
-			let beginTime = mach_absolute_time()
-			let _ = try operation(bytesRef)
-			return Double(mach_absolute_time()) - Double(beginTime)
-		}
-		
-		let slow = try measure { _ in
-			try newProfileFromJsonBytes(jsonBytes: json)
-		}
-		
-		let fast = try measure {
-			try newProfileFromJsonBytesFastByRef(reference: $0)
-		}
-		
-		let speedUpFactor = slow / fast
-		print("🐢 speedup \(speedUpFactor) 🐰")
-		XCTAssertGreaterThan(speedUpFactor, 5) // fast by ref is more than 5 times as fast
+		var vectors = Array(zip(SUT.sampleValues, SUT.sampleValues.map { $0.jsonData() }))
+		vectors.append(vector)
+		try vectors.forEach(doTest)
 	}
 	
 	lazy var vector: (model: Profile, json: Data) = {
 		try! jsonFixture(
 			as: SUT.self,
 			file: "huge_profile_1000_accounts",
-			decodeWithoutDecoder: { try Profile(jsonBytesReference: .init(inner: $0)) }
+			decode: { try Profile(jsonData: $0) }
 		)
 	}()
-}
-
-extension Profile {
-	public static func analyzeFile(
-		contents: some DataProtocol
-	) -> ProfileFileContents {
-		Self.analyzeFile(reference: .init(inner: Data(contents)))
-	}
-	
 }

@@ -482,9 +482,6 @@ pub enum CommonError {
 
     #[error("AuthorizedDapp references field id that does not exist")]
     AuthorizedDappReferencesFieldIDThatDoesNotExist = 10134,
-
-    #[error("Value already taken from container - inner type: {type_name}")]
-    InnerValueAlreadyTakenFromReferenceContainer { type_name: String } = 10135,
 }
 
 #[uniffi::export]

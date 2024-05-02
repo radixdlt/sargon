@@ -8,16 +8,16 @@ use crate::prelude::*;
 /// or if we failed to parse as Profile and `EncryptedProfileSnapshot`
 /// then `NotProfile` is used, indicating that the bytes is not at all
 /// a Profile.
-#[derive(Debug, PartialEq, Eq, uniffi::Enum)]
-#[allow(clippy::enum_variant_names)]
-pub(crate) enum ProfileFileContents {
+#[derive(Clone, PartialEq, Eq, Debug, Hash, uniffi::Enum)]
+#[allow(clippy::large_enum_variant)]
+pub enum ProfileFileContents {
     /// The JSON deserialized Profile from some bytes.
-    Plaintext { reference: Arc<RefProfile> },
+    PlaintextProfile(Profile),
 
     /// We successfully JSON deserialized the bytes into
     /// `EncryptedProfileSnapshot`, the wallets should proceed
     /// with asking the user for the decryption password.
-    Encrypted,
+    EncryptedProfile,
 
     /// The bytes is neither a valid `Profile` nor `EncryptedProfile`,
     /// it is either a corrupt file or it is not at all a Profile file,
@@ -26,37 +26,13 @@ pub(crate) enum ProfileFileContents {
     NotProfile,
 }
 
-impl std::hash::Hash for ProfileFileContents {
-    fn hash<H>(&self, state: &mut H)
-    where
-        H: std::hash::Hasher,
-    {
-        match self {
-            Self::Plaintext { reference } => {
-                state.write_u8(1);
-                (*reference).hash(state);
-            }
-
-            Self::Encrypted => {
-                state.write_u8(2);
-            }
-
-            Self::NotProfile => {
-                state.write_u8(3);
-            }
-        }
-    }
-}
-
 impl HasSampleValues for ProfileFileContents {
     fn sample() -> Self {
-        Self::Plaintext {
-            reference: RefProfile::new(Profile::sample()),
-        }
+        Self::PlaintextProfile(Profile::sample())
     }
 
     fn sample_other() -> Self {
-        Self::Encrypted
+        Self::EncryptedProfile
     }
 }
 

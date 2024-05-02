@@ -33,64 +33,8 @@ pub fn profile_to_debug_string(profile: &Profile) -> String {
 json_data_convertible!(Profile);
 
 // ################
-// FROM BYTES
+// Encryption
 // ################
-#[uniffi::export]
-pub(crate) fn new_profile_from_json_bytes_fast_by_ref(
-    reference: Arc<RefBytes>,
-) -> Result<Arc<RefProfile>> {
-    Profile::new_from_json_bytes(reference.take().unwrap().as_ref())
-        .map(RefProfile::new)
-}
-
-// ################
-// TO BYTES
-// ################
-#[uniffi::export]
-pub(crate) fn profile_to_json_bytes_fast_by_ref(
-    reference: Arc<RefProfile>,
-) -> Arc<RefBytes> {
-    RefBytes::new(BagOfBytes::from(reference.take().unwrap().to_json_bytes()))
-}
-
-// ################
-// ENCRYPTION
-// ################
-#[uniffi::export]
-pub(crate) fn new_profile_from_encryption_bytes_fast_by_ref(
-    reference: Arc<RefBytes>,
-    decryption_password: String,
-) -> Result<Arc<RefProfile>> {
-    Profile::new_from_encryption_bytes(
-        reference.take().unwrap().as_ref(),
-        decryption_password,
-    )
-    .map(RefProfile::new)
-}
-
-#[uniffi::export]
-pub(crate) fn profile_encrypt_with_password_fast_by_ref(
-    reference: Arc<RefProfile>,
-    encryption_password: String,
-) -> Arc<RefBytes> {
-    RefBytes::new(BagOfBytes::from(
-        reference
-            .take()
-            .unwrap()
-            .to_encryption_bytes(encryption_password),
-    ))
-}
-
-#[uniffi::export]
-pub(crate) fn profile_analyze_contents_of_file_fast_by_ref(
-    reference: Arc<RefBytes>,
-) -> ProfileFileContents {
-    Profile::analyze_contents_of_file(reference.take().unwrap().as_ref())
-}
-
-// #########
-// Slower than using fast_by_ref
-// #########
 
 #[uniffi::export]
 pub fn new_profile_from_encryption_bytes(
@@ -108,6 +52,9 @@ pub fn profile_encrypt_with_password(
     profile.to_encryption_bytes(encryption_password).into()
 }
 
+// ################
+// Analyze
+// ################
 #[uniffi::export]
 pub(crate) fn profile_analyze_contents_of_file(
     bytes: BagOfBytes,
@@ -132,9 +79,7 @@ mod uniffi_tests {
     #[test]
     fn test_profile_analyze_contents_of_file() {
         assert_eq!(
-            profile_analyze_contents_of_file_fast_by_ref(RefBytes::new(
-                BagOfBytes::sample()
-            )),
+            profile_analyze_contents_of_file(BagOfBytes::sample()),
             ProfileFileContents::NotProfile
         )
     }
@@ -167,12 +112,7 @@ mod uniffi_tests {
         let sut = SUT::sample();
 
         assert_eq!(
-            new_profile_from_json_bytes_fast_by_ref(
-                profile_to_json_bytes_fast_by_ref(RefProfile::new(sut.clone()))
-            )
-            .unwrap()
-            .take()
-            .unwrap(),
+            new_profile_from_json_bytes(&profile_to_json_bytes(&sut)).unwrap(),
             sut
         )
     }
@@ -181,48 +121,16 @@ mod uniffi_tests {
     fn deserialize_malformed() {
         let malformed_profile_snapshot = BagOfBytes::from("{}".as_bytes());
         assert_eq!(
-            new_profile_from_json_bytes_fast_by_ref(RefBytes::new(
-                malformed_profile_snapshot.clone()
-            ))
-            .err()
-            .unwrap(),
-            CommonError::FailedToDeserializeJSONToValue {
+            new_profile_from_json_bytes(&malformed_profile_snapshot),
+            Result::Err(CommonError::FailedToDeserializeJSONToValue {
                 json_byte_count: malformed_profile_snapshot.len() as u64,
                 type_name: String::from("Profile")
-            }
+            })
         );
     }
 
     #[test]
     fn test_new_profile_from_encryption_bytes() {
-        assert!(new_profile_from_encryption_bytes_fast_by_ref(
-            RefBytes::new(BagOfBytes::sample()),
-            "invalid".to_string()
-        )
-        .is_err());
-    }
-
-    #[test]
-    fn encryption_roundtrip() {
-        let sut = SUT::sample();
-
-        let password = "super secret".to_owned();
-        let encryption_bytes = profile_encrypt_with_password_fast_by_ref(
-            RefProfile::new(sut.clone()),
-            password.clone(),
-        );
-        assert_eq!(
-            new_profile_from_encryption_bytes_fast_by_ref(
-                encryption_bytes,
-                password
-            )
-            .unwrap(),
-            RefProfile::new(sut.clone())
-        );
-    }
-
-    #[test]
-    fn test_new_profile_from_encryption_bytes_by_value() {
         assert!(new_profile_from_encryption_bytes(
             BagOfBytes::sample(),
             "invalid".to_string()
@@ -231,7 +139,7 @@ mod uniffi_tests {
     }
 
     #[test]
-    fn encryption_roundtrip_by_value() {
+    fn encryption_roundtrip() {
         let sut = SUT::sample();
         let password = "super secret".to_owned();
         let encryption_bytes =
@@ -241,23 +149,5 @@ mod uniffi_tests {
                 .unwrap(),
             sut
         );
-    }
-
-    #[test]
-    fn test_profile_analyze_contents_of_file_by_value() {
-        assert_eq!(
-            profile_analyze_contents_of_file(BagOfBytes::sample()),
-            ProfileFileContents::NotProfile
-        )
-    }
-
-    #[test]
-    fn serialize_deserialize_by_value() {
-        let sut = SUT::sample();
-
-        assert_eq!(
-            new_profile_from_json_bytes(&profile_to_json_bytes(&sut)).unwrap(),
-            sut
-        )
     }
 }

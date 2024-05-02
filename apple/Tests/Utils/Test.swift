@@ -35,10 +35,10 @@ class TestCase: XCTestCase {
 	func jsonFixture<T>(
 		as: T.Type = T.self,
 		file fileName: String,
-		decodeWithoutDecoder: (Data) throws -> T
+		decode: (Data) throws -> T
 	) throws -> (model: T, json: Data) {
 		let json = try openFile(subPath: "vector", fileName, extension: "json")
-		let model: T = try decodeWithoutDecoder(json)
+		let model: T = try decode(json)
 		return (model, json)
 	}
 	
