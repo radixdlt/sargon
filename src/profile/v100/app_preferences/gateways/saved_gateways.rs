@@ -154,10 +154,10 @@ impl Default for SavedGateways {
 
 impl HasSampleValues for SavedGateways {
     fn sample() -> Self {
-        let mut sut = SavedGateways::new(Gateway::rcnet());
-        sut.append(Gateway::mainnet());
-        sut.append(Gateway::stokenet());
-        sut
+        let mut gateways = Self::new(Gateway::rcnet());
+        gateways.append(Gateway::mainnet());
+        gateways.append(Gateway::stokenet());
+        gateways
     }
 
     fn sample_other() -> Self {
@@ -167,11 +167,11 @@ impl HasSampleValues for SavedGateways {
 
 impl HasSampleValues for Gateways {
     fn sample() -> Self {
-        Gateways::from_iter([Gateway::stokenet()])
+        Self::from_iter([Gateway::stokenet()])
     }
 
     fn sample_other() -> Self {
-        Gateways::from_iter([Gateway::stokenet(), Gateway::hammunet()])
+        Self::from_iter([Gateway::stokenet(), Gateway::hammunet()])
     }
 }
 
@@ -296,7 +296,7 @@ mod tests {
     }
 
     #[test]
-    fn deserialize_from_json_with_different_description_marks_both_gateways_as_wellknown(
+    fn deserialize_from_json_with_different_description_treats_both_gateways_as_wellknown(
     ) {
         let json = r#"
         {
@@ -339,27 +339,33 @@ mod tests {
             NetworkID::Mainnet,
         )
         .unwrap();
+
         let mainnet_no_slash = Gateway::new(
             String::from("https://mainnet.radixdlt.com"),
             NetworkID::Mainnet,
         )
         .unwrap();
+
         let other_mainnet = Gateway::new(
             String::from("https://other-mainnet.radixdlt.com"),
             NetworkID::Mainnet,
         )
         .unwrap();
+
         let other_mainnet_http = Gateway::new(
             String::from("http://other-mainnet.radixdlt.com"),
             NetworkID::Mainnet,
         )
         .unwrap();
+
         let gateways_vec =
             vec![mainnet, mainnet_no_slash, other_mainnet, other_mainnet_http];
 
         let identified_gateways =
             Gateways::from_iter(gateways_vec.iter().cloned());
 
-        assert_ne!(gateways_vec.len(), identified_gateways.len())
+        // Expecting only 3 unique Gateways, since the two mainnet ones differ in only a slash which is
+        // considered as the same URL
+        assert_eq!(3, identified_gateways.len())
     }
 }
