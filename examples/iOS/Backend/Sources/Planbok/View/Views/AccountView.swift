@@ -1,5 +1,5 @@
 import Sargon
-import SargonUniFFI
+import ComposableArchitecture
 
 public struct AccountView: SwiftUI.View {
 	public let account: Account

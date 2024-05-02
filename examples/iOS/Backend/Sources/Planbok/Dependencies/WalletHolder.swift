@@ -7,7 +7,7 @@
 
 import Foundation
 import Sargon
-import SargonUniFFI
+import ComposableArchitecture
 
 public struct WalletHolder: Equatable, Sendable {
 	public static func == (lhs: Self, rhs: Self) -> Bool {

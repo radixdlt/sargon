@@ -18,7 +18,7 @@ impl Service {
     }
 
     pub fn new_with_network_antenna(
-        network_antenna: Arc<dyn NetworkAntenna>,
+        network_antenna: Arc<dyn NetworkingDriver>,
     ) -> Self {
         Self::new(HttpClient::new(network_antenna))
     }

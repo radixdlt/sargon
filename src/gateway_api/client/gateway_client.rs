@@ -18,20 +18,22 @@ pub struct GatewayClient {
 
 #[uniffi::export]
 impl GatewayClient {
-    /// Constructs a new `GatewayClient` with a NetworkAntenna for a specified
+    /// Constructs a new `GatewayClient` with a NetworkingDriver for a specified
     /// `Gateway`.
     #[uniffi::constructor]
     pub fn with_gateway(
-        network_antenna: Arc<dyn NetworkAntenna>,
+        networking_driver: Arc<dyn NetworkingDriver>,
         gateway: Gateway,
     ) -> Self {
         Self {
-            http_client: HttpClient { network_antenna },
+            http_client: HttpClient {
+                driver: networking_driver,
+            },
             gateway,
         }
     }
 
-    /// Constructs a new `GatewayClient` with a NetworkAntenna for a specified
+    /// Constructs a new `GatewayClient` with a NetworkingDriver for a specified
     /// network, by looking up an Radix DLT provided Gateway on that network.
     ///
     /// # Panics
@@ -39,10 +41,10 @@ impl GatewayClient {
     /// `network_id` - e.g. will panic if you specify `NetworkID::Simulator` (duh).
     #[uniffi::constructor]
     pub fn new(
-        network_antenna: Arc<dyn NetworkAntenna>,
+        networking_driver: Arc<dyn NetworkingDriver>,
         network_id: NetworkID,
     ) -> Self {
-        Self::with_gateway(network_antenna, Gateway::from(network_id))
+        Self::with_gateway(networking_driver, Gateway::from(network_id))
     }
 }
 

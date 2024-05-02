@@ -1,12 +1,10 @@
 import Sargon
-import SargonUniFFI
 import ComposableArchitecture
 
 @Reducer
 public struct SplashFeature {
 
 	@Dependency(\.continuousClock) var clock
-	@Dependency(\.keychain) var keychain
 
 	@ObservableState
 	public struct State {
@@ -48,7 +46,6 @@ public struct SplashFeature {
 			switch action {
 			case .view(.appear):
 				.run { send in
-					let secureStorage = Keychain.shared
 					try await clock.sleep(for: .milliseconds(1200))
 					if try keychain.loadData(SecureStorageKey.activeProfileId) != nil {
 						let wallet = try Wallet.byLoadingProfile(

@@ -14,7 +14,8 @@ pub struct SargonOS {
 #[uniffi::export]
 impl SargonOS {
     #[uniffi::constructor]
-    pub async fn with_drivers(drivers: Drivers) -> Arc<Self> {
+    pub async fn with_drivers(drivers: Arc<Drivers>) -> Arc<Self> {
         // let app_secure_storage = AppSecureStorageClient::new(drivers.secure_storage_driver);
+        todo!()
     }
 }

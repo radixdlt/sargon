@@ -1,4 +1,4 @@
-mod network_antenna_reqwest;
+mod networking_driver_reqwest;
 
 #[cfg(test)]
 mod integration_tests {
@@ -9,7 +9,7 @@ mod integration_tests {
     use sargon::prelude::*;
     use std::collections::HashMap;
 
-    use crate::network_antenna_reqwest::new_gateway_client;
+    use crate::networking_driver_reqwest::new_gateway_client;
 
     const MAX: Duration = Duration::from_secs(5);
 

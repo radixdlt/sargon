@@ -7,7 +7,7 @@
 
 import Foundation
 import Sargon
-import SargonUniFFI
+import ComposableArchitecture
 
 @Reducer
 public struct SelectGradientFeature {

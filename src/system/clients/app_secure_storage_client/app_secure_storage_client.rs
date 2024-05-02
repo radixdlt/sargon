@@ -24,34 +24,32 @@ impl AppSecureStorageClient {
     }
 }
 
-//======
-// Save T
-//======
 impl AppSecureStorageClient {
-    pub fn save<T>(&self, key: SecureStorageKey, value: &T) -> Result<()>
+    //======
+    // Save T
+    //======
+    pub async fn save<T>(&self, key: SecureStorageKey, value: &T) -> Result<()>
     where
         T: serde::Serialize,
     {
-        serde_json::to_vec(value)
-            .map_err(|_| CommonError::FailedToSerializeToJSON)
-            .and_then(|j| self.driver.save_data(key, j))
+        let json = serde_json::to_vec(value)
+            .map_err(|_| CommonError::FailedToSerializeToJSON)?;
+        self.driver.save_data(key, json).await
     }
-}
 
-//======
-// Load T
-//======
-impl AppSecureStorageClient {
+    //======
+    // Load T
+    //======
     /// Loads bytes from SecureStorageDriver and deserializes them into `T`.
     ///
     /// Returns `Ok(None)` if no bytes were found, returns Err if failed
     /// to load bytes or failed to deserialize the JSON into a `T`.
     #[cfg(not(tarpaulin_include))] // false negative
-    pub fn load<T>(&self, key: SecureStorageKey) -> Result<Option<T>>
+    pub async fn load<T>(&self, key: SecureStorageKey) -> Result<Option<T>>
     where
         T: for<'a> serde::Deserialize<'a>,
     {
-        self.driver.load_data(key).and_then(|o| match o {
+        self.driver.load_data(key).await.and_then(|o| match o {
             None => Ok(None),
             Some(j) => serde_json::from_slice(j.as_slice()).map_err(|_| {
                 let type_name = std::any::type_name::<T>().to_string();
@@ -72,7 +70,7 @@ impl AppSecureStorageClient {
     ///
     /// Returns Err if failed to load bytes or failed to deserialize the JSON into a `T`,
     /// unlike `load` this method returns an error if `None` bytes were found.
-    pub fn load_or<T>(
+    pub async fn load_or<T>(
         &self,
         key: SecureStorageKey,
         err: CommonError,
@@ -80,29 +78,33 @@ impl AppSecureStorageClient {
     where
         T: for<'a> serde::Deserialize<'a>,
     {
-        self.load(key).and_then(|o| o.ok_or(err))
+        self.load(key).await.and_then(|o| o.ok_or(err))
     }
 
     /// Loads bytes from SecureStorageDriver and deserializes them into `T`.
     ///
     /// Returns Err if failed to load bytes or failed to deserialize the JSON into a `T`,
     /// unlike `load` this method returns `default` if `None` bytes were found.
-    pub fn load_unwrap_or<T>(&self, key: SecureStorageKey, default: T) -> T
+    pub async fn load_unwrap_or<T>(
+        &self,
+        key: SecureStorageKey,
+        default: T,
+    ) -> T
     where
         T: for<'a> serde::Deserialize<'a> + Clone,
     {
         self.load(key)
+            .await
             .map(|o| o.unwrap_or(default.clone()))
             .unwrap_or(default)
     }
-}
 
-//======
-// Mnemonic CR(U)D
-//======
-impl AppSecureStorageClient {
+    //======
+    // Mnemonic CR(U)D
+    //======
+
     /// Saves a MnemonicWithPassphrase under a given `FactorSourceIDFromHash`
-    pub fn save_mnemonic_with_passphrase(
+    pub async fn save_mnemonic_with_passphrase(
         &self,
         mnemonic_with_passphrase: &MnemonicWithPassphrase,
         id: &FactorSourceIDFromHash,
@@ -113,13 +115,14 @@ impl AppSecureStorageClient {
             },
             mnemonic_with_passphrase,
         )
+        .await
         .map_err(|_| {
             CommonError::UnableToSaveMnemonicToSecureStorage { bad_value: *id }
         })
     }
 
     /// Loads a MnemonicWithPassphrase with a `FactorSourceIDFromHash`
-    pub fn load_mnemonic_with_passphrase(
+    pub async fn load_mnemonic_with_passphrase(
         &self,
         id: &FactorSourceIDFromHash,
     ) -> Result<MnemonicWithPassphrase> {
@@ -131,15 +134,19 @@ impl AppSecureStorageClient {
                 bad_value: *id,
             },
         )
+        .await
     }
 
     /// Deletes a MnemonicWithPassphrase with a `FactorSourceIDFromHash`
-    pub fn delete_mnemonic(&self, id: &FactorSourceIDFromHash) -> Result<()> {
-        self.driver.delete_data_for_key(
-            SecureStorageKey::DeviceFactorSourceMnemonic {
+    pub async fn delete_mnemonic(
+        &self,
+        id: &FactorSourceIDFromHash,
+    ) -> Result<()> {
+        self.driver
+            .delete_data_for_key(SecureStorageKey::DeviceFactorSourceMnemonic {
                 factor_source_id: *id,
-            },
-        )
+            })
+            .await
     }
 }
 
@@ -158,26 +165,23 @@ impl AppSecureStorageClient {
 
 #[cfg(test)]
 mod tests {
-    use ::hex::FromHex;
-
-    use crate::{prelude::*, system::secure_storage::ephemeral_secure_storage};
-    use std::{fmt::Write, sync::RwLock};
+    use super::*;
 
     fn make_sut() -> AppSecureStorageClient {
         AppSecureStorageClient::ephemeral().0
     }
 
-    #[test]
-    fn load_ok_when_none() {
+    #[actix_rt::test]
+    async fn load_ok_when_none() {
         let sut = make_sut();
         assert_eq!(
-            sut.load::<Profile>(SecureStorageKey::ActiveProfileID),
+            sut.load::<Profile>(SecureStorageKey::ActiveProfileID).await,
             Ok(None)
         );
     }
 
-    #[test]
-    fn load_fail_to_deserialize_json() {
+    #[actix_rt::test]
+    async fn load_fail_to_deserialize_json() {
         let sut = make_sut();
 
         assert!(sut
@@ -185,9 +189,10 @@ mod tests {
                 SecureStorageKey::ActiveProfileID,
                 &0u8, // obviously a u8 is not a Profile
             )
+            .await
             .is_ok());
         assert_eq!(
-            sut.load::<Profile>(SecureStorageKey::ActiveProfileID),
+            sut.load::<Profile>(SecureStorageKey::ActiveProfileID).await,
             Err(CommonError::FailedToDeserializeJSONToValue {
                 json_byte_count: 1,
                 type_name: "sargon::profile::v100::profile::Profile"
@@ -196,89 +201,96 @@ mod tests {
         );
     }
 
-    #[test]
-    fn load_successful() {
+    #[actix_rt::test]
+    async fn load_successful() {
         let sut = make_sut();
 
         assert!(sut
             .save(SecureStorageKey::ActiveProfileID, &Profile::sample())
+            .await
             .is_ok());
         assert_eq!(
-            sut.load::<Profile>(SecureStorageKey::ActiveProfileID),
+            sut.load::<Profile>(SecureStorageKey::ActiveProfileID).await,
             Ok(Some(Profile::sample()))
         );
     }
 
-    #[test]
-    fn load_unwrap_or_some_default_not_used() {
+    #[actix_rt::test]
+    async fn load_unwrap_or_some_default_not_used() {
         let sut = make_sut();
 
         assert!(sut
             .save(SecureStorageKey::ActiveProfileID, &Profile::sample())
+            .await
             .is_ok());
         assert_eq!(
             sut.load_unwrap_or::<Profile>(
                 SecureStorageKey::ActiveProfileID,
                 Profile::sample_other()
-            ),
+            )
+            .await,
             Profile::sample()
         );
     }
 
-    #[test]
-    fn load_unwrap_or_none_default_is_used() {
+    #[actix_rt::test]
+    async fn load_unwrap_or_none_default_is_used() {
         let sut = make_sut();
 
         assert_eq!(
             sut.load_unwrap_or::<Profile>(
                 SecureStorageKey::ActiveProfileID,
                 Profile::sample_other()
-            ),
+            )
+            .await,
             Profile::sample_other()
         );
     }
 
-    #[test]
-    fn save_mnemonic_with_passphrase() {
+    #[actix_rt::test]
+    async fn save_mnemonic_with_passphrase() {
         let private =
             PrivateHierarchicalDeterministicFactorSource::sample_other();
         let factor_source_id = private.factor_source.id;
         let (sut, storage) = AppSecureStorageClient::ephemeral();
         let key =
             SecureStorageKey::DeviceFactorSourceMnemonic { factor_source_id };
-        assert_eq!(storage.load_data(key.clone()), Ok(None)); // not yet saved
+        assert_eq!(storage.load_data(key.clone()).await, Ok(None)); // not yet saved
         assert!(sut
             .save_mnemonic_with_passphrase(
                 &private.mnemonic_with_passphrase,
                 &factor_source_id.clone()
             )
+            .await
             .is_ok());
 
         // Assert indeed was saved.
         assert!(storage
             .load_data(key)
+            .await
             .map(|b| String::from_utf8(b.unwrap()).unwrap())
             .unwrap()
             .contains("zoo"));
     }
 
-    #[test]
-    fn save_mnemonic_with_passphrase_failure() {
+    #[actix_rt::test]
+    async fn save_mnemonic_with_passphrase_failure() {
         let sut = AppSecureStorageClient::always_fail();
         let id = FactorSourceIDFromHash::sample();
         assert_eq!(
             sut.save_mnemonic_with_passphrase(
                 &MnemonicWithPassphrase::sample(),
                 &id
-            ),
+            )
+            .await,
             Err(CommonError::UnableToSaveMnemonicToSecureStorage {
                 bad_value: id
             })
         );
     }
 
-    #[test]
-    fn delete_mnemonic() {
+    #[actix_rt::test]
+    async fn delete_mnemonic() {
         // ARRANGE
         let private =
             PrivateHierarchicalDeterministicFactorSource::sample_other();
@@ -286,18 +298,24 @@ mod tests {
         let (sut, storage) = AppSecureStorageClient::ephemeral();
         let key =
             SecureStorageKey::DeviceFactorSourceMnemonic { factor_source_id };
-        assert!(storage.save_data(key.clone(), vec![0xde, 0xad]).is_ok());
-        assert_eq!(storage.load_data(key.clone()), Ok(Some(vec![0xde, 0xad]))); // assert save worked
+        assert!(storage
+            .save_data(key.clone(), vec![0xde, 0xad])
+            .await
+            .is_ok());
+        assert_eq!(
+            storage.load_data(key.clone()).await,
+            Ok(Some(vec![0xde, 0xad]))
+        ); // assert save worked
 
         // ACT
-        assert!(sut.delete_mnemonic(&factor_source_id).is_ok());
+        assert!(sut.delete_mnemonic(&factor_source_id).await.is_ok());
 
         // ASSERT
-        assert_eq!(storage.load_data(key), Ok(None));
+        assert_eq!(storage.load_data(key).await, Ok(None));
     }
 
-    #[test]
-    fn save_fail_to_serialize() {
+    #[actix_rt::test]
+    async fn save_fail_to_serialize() {
         use serde::Serialize;
         struct AlwaysFailSerialize {}
         impl Serialize for AlwaysFailSerialize {
@@ -317,7 +335,8 @@ mod tests {
             sut.save(
                 SecureStorageKey::ActiveProfileID,
                 &AlwaysFailSerialize {}
-            ),
+            )
+            .await,
             Err(CommonError::FailedToSerializeToJSON)
         );
     }

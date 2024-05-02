@@ -10,11 +10,11 @@ use crate::prelude::*;
 // // Provisional API
 // #[uniffi::export]
 // impl RadixConnectMobile {
-//     // RadixConnectMobile should require a NetworkAntenna and a SecureStorageDriver from the Wallet.
+//     // RadixConnectMobile should require a NetworkingDriver and a SecureStorageDriver from the Wallet.
 //     // The internal components, such as RadixConnectRelayService will be created by the RadixConnectMobile.
 //     #[uniffi::constructor]
 //     pub fn new(
-//         _network_antenna: Arc<dyn NetworkAntenna>,
+//         _network_antenna: Arc<dyn NetworkingDriver>,
 //         _secure_storage: Arc<dyn SecureStorageDriver>,
 //     ) -> Self {
 //         todo!()

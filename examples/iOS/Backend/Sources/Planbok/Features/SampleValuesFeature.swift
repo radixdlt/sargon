@@ -1,5 +1,5 @@
 import Sargon
-import SargonUniFFI
+import ComposableArchitecture
 
 #if DEBUG
 @Reducer

@@ -7,7 +7,7 @@
 
 @_exported import KeychainAccess
 import Sargon
-import SargonUniFFI
+import ComposableArchitecture
 
 extension DependencyValues {
 	/// A dependency that exposes an ``Keychain.Dependency`` value that you can use to read and

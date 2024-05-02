@@ -1,3 +1,3 @@
-mod profile_client;
+mod profile_holder;
 
-pub use profile_client::*;
+pub use profile_holder::*;

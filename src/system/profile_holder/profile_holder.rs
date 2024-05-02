@@ -9,7 +9,7 @@ pub struct ProfileHolder {
 
 impl ProfileHolder {
     pub async fn with_driver(
-        app_secure_storage_driver: Arc<dyn AppSecureStorageDriver>,
+        app_secure_storage_driver: Arc<dyn SecureStorageDriver>,
     ) -> Arc<Self> {
         todo!()
     }
