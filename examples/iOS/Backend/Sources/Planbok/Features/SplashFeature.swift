@@ -6,12 +6,12 @@ public struct SplashFeature {
 
 	@Dependency(\.continuousClock) var clock
 	@Dependency(\.keychain) var keychain
-	
+
 	@ObservableState
 	public struct State {
 		public init() {}
 	}
-	
+
 	public enum Action: ViewAction {
 		public enum DelegateAction {
 			case walletInitialized(Wallet, hasAccount: Bool)
@@ -23,7 +23,7 @@ public struct SplashFeature {
 		case view(ViewAction)
 
 	}
-	
+
 	@ViewAction(for: SplashFeature.self)
 	public struct View: SwiftUI.View {
 		public let store: StoreOf<SplashFeature>
@@ -31,7 +31,7 @@ public struct SplashFeature {
 			self.store = store
 		}
 		public var body: some SwiftUI.View {
-				Image("Splash", bundle: Bundle.module)
+			Image("Splash", bundle: Bundle.module)
 				.resizable()
 				.ignoresSafeArea(edges: [.top, .bottom])
 				.onAppear {
@@ -39,37 +39,54 @@ public struct SplashFeature {
 				}
 		}
 	}
-	
+
 	public init() {}
-	
+
 	public var body: some ReducerOf<Self> {
 		Reduce { state, action in
 			switch action {
 			case .view(.appear):
-					.run { send in
-						let secureStorage = Keychain.shared
-						try await clock.sleep(for: .milliseconds(1200))
-						if try keychain.loadData(SecureStorageKey.activeProfileId) != nil {
-							let wallet = try Wallet.byLoadingProfile(secureStorage: secureStorage)
-							let profile = wallet.profile()
-							let hasAccount = profile.networks.first?.accounts.isEmpty == false
-							await send(.delegate(.walletInitialized(wallet, hasAccount: hasAccount)))
-						} else {
-							await send(.delegate(.walletInitialized(
-								Wallet.generateNewBDFSAndEmptyProfile(secureStorage: secureStorage),
-								hasAccount: false)
+				.run { send in
+					let secureStorage = Keychain.shared
+					try await clock.sleep(for: .milliseconds(1200))
+					if try keychain.loadData(SecureStorageKey.activeProfileId)
+						!= nil
+					{
+						let wallet = try Wallet.byLoadingProfile(
+							secureStorage: secureStorage)
+						let profile = wallet.profile()
+						let hasAccount =
+							profile.networks.first?.accounts.isEmpty
+							== false
+						await send(
+							.delegate(
+								.walletInitialized(
+									wallet,
+									hasAccount: hasAccount)))
+					} else {
+						await send(
+							.delegate(
+								.walletInitialized(
+									Wallet
+										.generateNewBDFSAndEmptyProfile(
+											secureStorage:
+												secureStorage
+										),
+									hasAccount: false)
 							))
-						}
 					}
+				}
 			case .delegate:
-					.none
+				.none
 			}
 		}
 	}
 }
 
 extension Wallet {
-	static func generateNewBDFSAndEmptyProfile(secureStorage: SecureStorage = Keychain.shared) -> Wallet {
+	static func generateNewBDFSAndEmptyProfile(
+		secureStorage: SecureStorageDriver = Keychain.shared
+	) -> Wallet {
 		do {
 			return try Wallet.byCreatingNewProfileAndSecretsWithEntropy(
 				entropy: .init(bagOfBytes: BagOfBytes.random(byteCount: 32)),

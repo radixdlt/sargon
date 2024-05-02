@@ -114,7 +114,7 @@ class WalletTest {
     fun Wallet.Companion.with(
         entropy: ByteArray = ByteArray(32).apply { Random.nextBytes(this) },
         phoneName: String = Wallet.Companion.defaultPhoneName,
-        secureStorage: SecureStorage
+        secureStorage: SecureStorageDriver
     ): Wallet {
         return Wallet.byCreatingNewProfileAndSecretsWithEntropy(
             entropy = NonEmptyMax32Bytes(bagOfBytes = entropy.toBagOfBytes()),

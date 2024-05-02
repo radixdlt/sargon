@@ -3,46 +3,46 @@ use crate::prelude::*;
 /// An abstraction of an implementing WalletClients's secure storage, used by `Wallet` to
 /// save and load models, most prominently `Profile` and `MnemonicWithPassphrase`.
 ///
-/// It uses the lower level CRUD trait `SecureStorage` which works on bytes (Vec<u8>),
+/// It uses the lower level CRUD trait `SecureStorageDriver` which works on bytes (Vec<u8>),
 /// by instead working with JSON.
 ///
 /// The typical usage is that `Wallet` uses this to build even higher level API's that work
 /// with application level types such as `PrivateHierarchicalDeterministicFactorSource`, which
-/// apart from `MnemonicWithPassphrase` read from SecureStorage using this `WalletClientStorage`,
+/// apart from `MnemonicWithPassphrase` read from SecureStorageDriver using this `AppSecureStorageClient`,
 /// also has to load the DeviceFactorSource from Profile, given a FactorSourceID only.
 #[derive(Debug)]
-pub struct WalletClientStorage {
+pub struct AppSecureStorageClient {
     /// Low level CRUD traits injected from implementing Wallet Client, that works on bytes.
-    interface: Arc<dyn SecureStorage>,
+    driver: Arc<dyn SecureStorageDriver>,
 }
 
-impl WalletClientStorage {
-    /// Creates a new WalletClientStorage using an implementation of
-    /// `SecureStorage`.
-    pub(crate) fn new(interface: Arc<dyn SecureStorage>) -> Self {
-        Self { interface }
+impl AppSecureStorageClient {
+    /// Creates a new AppSecureStorageClient using an implementation of
+    /// `SecureStorageDriver`.
+    pub(crate) fn new(driver: Arc<dyn SecureStorageDriver>) -> Self {
+        Self { driver }
     }
 }
 
 //======
 // Save T
 //======
-impl WalletClientStorage {
+impl AppSecureStorageClient {
     pub fn save<T>(&self, key: SecureStorageKey, value: &T) -> Result<()>
     where
         T: serde::Serialize,
     {
         serde_json::to_vec(value)
             .map_err(|_| CommonError::FailedToSerializeToJSON)
-            .and_then(|j| self.interface.save_data(key, j))
+            .and_then(|j| self.driver.save_data(key, j))
     }
 }
 
 //======
 // Load T
 //======
-impl WalletClientStorage {
-    /// Loads bytes from SecureStorage and deserializes them into `T`.
+impl AppSecureStorageClient {
+    /// Loads bytes from SecureStorageDriver and deserializes them into `T`.
     ///
     /// Returns `Ok(None)` if no bytes were found, returns Err if failed
     /// to load bytes or failed to deserialize the JSON into a `T`.
@@ -51,7 +51,7 @@ impl WalletClientStorage {
     where
         T: for<'a> serde::Deserialize<'a>,
     {
-        self.interface.load_data(key).and_then(|o| match o {
+        self.driver.load_data(key).and_then(|o| match o {
             None => Ok(None),
             Some(j) => serde_json::from_slice(j.as_slice()).map_err(|_| {
                 let type_name = std::any::type_name::<T>().to_string();
@@ -68,7 +68,7 @@ impl WalletClientStorage {
         })
     }
 
-    /// Loads bytes from SecureStorage and deserializes them into `T`.
+    /// Loads bytes from SecureStorageDriver and deserializes them into `T`.
     ///
     /// Returns Err if failed to load bytes or failed to deserialize the JSON into a `T`,
     /// unlike `load` this method returns an error if `None` bytes were found.
@@ -83,7 +83,7 @@ impl WalletClientStorage {
         self.load(key).and_then(|o| o.ok_or(err))
     }
 
-    /// Loads bytes from SecureStorage and deserializes them into `T`.
+    /// Loads bytes from SecureStorageDriver and deserializes them into `T`.
     ///
     /// Returns Err if failed to load bytes or failed to deserialize the JSON into a `T`,
     /// unlike `load` this method returns `default` if `None` bytes were found.
@@ -100,7 +100,7 @@ impl WalletClientStorage {
 //======
 // Mnemonic CR(U)D
 //======
-impl WalletClientStorage {
+impl AppSecureStorageClient {
     /// Saves a MnemonicWithPassphrase under a given `FactorSourceIDFromHash`
     pub fn save_mnemonic_with_passphrase(
         &self,
@@ -135,7 +135,7 @@ impl WalletClientStorage {
 
     /// Deletes a MnemonicWithPassphrase with a `FactorSourceIDFromHash`
     pub fn delete_mnemonic(&self, id: &FactorSourceIDFromHash) -> Result<()> {
-        self.interface.delete_data_for_key(
+        self.driver.delete_data_for_key(
             SecureStorageKey::DeviceFactorSourceMnemonic {
                 factor_source_id: *id,
             },
@@ -144,15 +144,15 @@ impl WalletClientStorage {
 }
 
 #[cfg(test)]
-impl WalletClientStorage {
+impl AppSecureStorageClient {
     pub(crate) fn ephemeral(
-    ) -> (WalletClientStorage, Arc<EphemeralSecureStorage>) {
+    ) -> (AppSecureStorageClient, Arc<EphemeralSecureStorage>) {
         let storage = EphemeralSecureStorage::new();
-        (WalletClientStorage::new(storage.clone()), storage)
+        (AppSecureStorageClient::new(storage.clone()), storage)
     }
 
     pub(crate) fn always_fail() -> Self {
-        WalletClientStorage::new(Arc::new(AlwaysFailStorage {}))
+        AppSecureStorageClient::new(Arc::new(AlwaysFailStorage {}))
     }
 }
 
@@ -160,11 +160,11 @@ impl WalletClientStorage {
 mod tests {
     use ::hex::FromHex;
 
-    use crate::{prelude::*, wallet::secure_storage::ephemeral_secure_storage};
+    use crate::{prelude::*, system::secure_storage::ephemeral_secure_storage};
     use std::{fmt::Write, sync::RwLock};
 
-    fn make_sut() -> WalletClientStorage {
-        WalletClientStorage::ephemeral().0
+    fn make_sut() -> AppSecureStorageClient {
+        AppSecureStorageClient::ephemeral().0
     }
 
     #[test]
@@ -243,7 +243,7 @@ mod tests {
         let private =
             PrivateHierarchicalDeterministicFactorSource::sample_other();
         let factor_source_id = private.factor_source.id;
-        let (sut, storage) = WalletClientStorage::ephemeral();
+        let (sut, storage) = AppSecureStorageClient::ephemeral();
         let key =
             SecureStorageKey::DeviceFactorSourceMnemonic { factor_source_id };
         assert_eq!(storage.load_data(key.clone()), Ok(None)); // not yet saved
@@ -264,7 +264,7 @@ mod tests {
 
     #[test]
     fn save_mnemonic_with_passphrase_failure() {
-        let sut = WalletClientStorage::always_fail();
+        let sut = AppSecureStorageClient::always_fail();
         let id = FactorSourceIDFromHash::sample();
         assert_eq!(
             sut.save_mnemonic_with_passphrase(
@@ -283,7 +283,7 @@ mod tests {
         let private =
             PrivateHierarchicalDeterministicFactorSource::sample_other();
         let factor_source_id = private.factor_source.id;
-        let (sut, storage) = WalletClientStorage::ephemeral();
+        let (sut, storage) = AppSecureStorageClient::ephemeral();
         let key =
             SecureStorageKey::DeviceFactorSourceMnemonic { factor_source_id };
         assert!(storage.save_data(key.clone(), vec![0xde, 0xad]).is_ok());
@@ -312,7 +312,7 @@ mod tests {
             }
         }
 
-        let (sut, _) = WalletClientStorage::ephemeral();
+        let (sut, _) = AppSecureStorageClient::ephemeral();
         assert_eq!(
             sut.save(
                 SecureStorageKey::ActiveProfileID,

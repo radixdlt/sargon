@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by Alexander Cyon on 2024-02-15.
 //
@@ -10,23 +10,23 @@ import Sargon
 import SargonUniFFI
 
 extension DependencyValues {
-  /// A dependency that exposes an ``Keychain.Dependency`` value that you can use to read and
-  /// write to `Keychain`.
-  public var keychain: Keychain.Dependency {
-	get { self[Keychain.Dependency.self] }
-	set { self[Keychain.Dependency.self] = newValue }
-  }
+	/// A dependency that exposes an ``Keychain.Dependency`` value that you can use to read and
+	/// write to `Keychain`.
+	public var keychain: Keychain.Dependency {
+		get { self[Keychain.Dependency.self] }
+		set { self[Keychain.Dependency.self] = newValue }
+	}
 }
 
 extension Keychain: @unchecked Sendable {}
-extension Keychain: SecureStorage {
+extension Keychain: SecureStorageDriver {
 	@DependencyClient
 	public struct Dependency: DependencyKey {
-		
+
 		public let loadData: @Sendable (SecureStorageKey) throws -> Data?
 		public let saveData: @Sendable (SecureStorageKey, Data) throws -> Void
 		public let deleteDataForKey: @Sendable (SecureStorageKey) throws -> Void
-		
+
 		public static func with(keychain: Keychain) -> Self {
 			Self.init(
 				loadData: keychain.loadData(key:),
@@ -37,7 +37,7 @@ extension Keychain: SecureStorage {
 		public static let liveValue = Self.with(keychain: .shared)
 		public static var testValue: Self {
 			final class Ephemeral {
-				var dict = Dictionary<SecureStorageKey, Data>()
+				var dict = [SecureStorageKey: Data]()
 				init() {}
 			}
 			let ephemeral = Ephemeral()
@@ -48,9 +48,9 @@ extension Keychain: SecureStorage {
 			)
 		}
 	}
-	
+
 	public static let shared = Keychain(service: "works.rdx.planbok")
-	
+
 	@Sendable
 	public func loadData(key: SecureStorageKey) throws -> Data? {
 		try getData(key.identifier)

@@ -38,7 +38,7 @@ import com.radixdlt.sargon.NetworkId
 import com.radixdlt.sargon.NonEmptyMax32Bytes
 import com.radixdlt.sargon.Profile
 import com.radixdlt.sargon.ProfileNetwork
-import com.radixdlt.sargon.SecureStorage
+import com.radixdlt.sargon.SecureStorageDriver
 import com.radixdlt.sargon.Wallet
 import com.radixdlt.sargon.WalletClientModel
 import com.radixdlt.sargon.android.ui.theme.SargonAndroidTheme
@@ -61,7 +61,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun WalletContent(modifier: Modifier = Modifier, storage: SecureStorage) {
+fun WalletContent(modifier: Modifier = Modifier, storage: SecureStorageDriver) {
     var walletState: Wallet? by remember { mutableStateOf(null) }
     var profile: Profile? by remember { mutableStateOf(null) }
 
@@ -175,7 +175,7 @@ val Wallet.Companion.defaultPhoneName: String
 fun Wallet.Companion.with(
         entropy: ByteArray = ByteArray(32).apply { Random.nextBytes(this) },
         phoneName: String = Wallet.Companion.defaultPhoneName,
-        secureStorage: SecureStorage
+        secureStorage: SecureStorageDriver
 ): Wallet {
     return Wallet.byCreatingNewProfileAndSecretsWithEntropy(
             entropy = NonEmptyMax32Bytes(entropy.toBagOfBytes()),

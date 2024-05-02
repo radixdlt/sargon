@@ -2,7 +2,7 @@ package com.radixdlt.sargon
 
 import com.radixdlt.sargon.extensions.identifier
 
-internal object EphemeralKeystore : SecureStorage {
+internal object EphemeralKeystore : SecureStorageDriver {
     private val storage: MutableMap<String, ByteArray> = mutableMapOf()
 
     override fun loadData(key: SecureStorageKey): ByteArray? = storage[key.identifier]

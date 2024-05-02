@@ -1,10 +1,10 @@
 package com.radixdlt.sargon.android
 
-import com.radixdlt.sargon.SecureStorage
+import com.radixdlt.sargon.SecureStorageDriver
 import com.radixdlt.sargon.SecureStorageKey
 import com.radixdlt.sargon.extensions.identifier
 
-class EphemeralKeystore: SecureStorage {
+class EphemeralKeystore: SecureStorageDriver {
     private val storage: MutableMap<String, ByteArray> = mutableMapOf()
 
     override fun loadData(key: SecureStorageKey): ByteArray? = storage[key.identifier]

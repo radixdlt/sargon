@@ -6,7 +6,7 @@ mod hierarchical_deterministic;
 mod http_client;
 mod profile;
 mod radix_connect;
-mod wallet;
+mod system;
 mod wrapped_radix_engine_toolkit;
 
 pub mod prelude {
@@ -17,7 +17,7 @@ pub mod prelude {
     pub use crate::http_client::*;
     pub use crate::profile::*;
     pub use crate::radix_connect::*;
-    pub use crate::wallet::*;
+    pub use crate::system::*;
     pub use crate::wrapped_radix_engine_toolkit::*;
 
     pub(crate) use std::collections::{BTreeSet, HashMap, HashSet};

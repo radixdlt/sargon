@@ -11,6 +11,7 @@ pub enum SecureStorageKey {
         profile_id: ProfileID,
     },
 }
+
 impl SecureStorageKey {
     #[cfg(not(tarpaulin_include))] // false negative
     pub fn identifier(&self) -> String {

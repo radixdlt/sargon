@@ -7,12 +7,12 @@ pub struct HttpClient {
     /// An object implementing the `NetworkAntenna` traits, which iOS/Android
     /// clients pass into the constructor of this GatewayClient, so that it can
     /// execute network requests.
-    pub network_antenna: Arc<dyn NetworkAntenna>,
+    pub driver: Arc<dyn NetworkingDriver>,
 }
 
 impl HttpClient {
-    pub fn new(network_antenna: Arc<dyn NetworkAntenna>) -> Self {
-        Self { network_antenna }
+    pub fn new(driver: Arc<dyn NetworkingDriver>) -> Self {
+        Self { driver }
     }
 }
 
@@ -21,10 +21,7 @@ impl HttpClient {
         &self,
         request: NetworkRequest,
     ) -> Result<BagOfBytes, CommonError> {
-        let response = self
-            .network_antenna
-            .execute_network_request(request)
-            .await?;
+        let response = self.driver.execute_network_request(request).await?;
 
         // Check for valid status code
         if !(200..=299).contains(&response.status_code) {
