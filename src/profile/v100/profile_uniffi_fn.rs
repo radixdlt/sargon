@@ -1,6 +1,6 @@
-use std::ops::DerefMut;
-
 use crate::prelude::*;
+
+json_data_convertible!(Profile);
 
 #[uniffi::export]
 pub fn new_profile(
@@ -30,8 +30,6 @@ pub fn profile_to_debug_string(profile: &Profile) -> String {
     format!("{:?}", profile)
 }
 
-json_data_convertible!(Profile);
-
 // ################
 // Encryption
 // ################
@@ -56,7 +54,7 @@ pub fn profile_encrypt_with_password(
 // Analyze
 // ################
 #[uniffi::export]
-pub(crate) fn profile_analyze_contents_of_file(
+pub fn profile_analyze_contents_of_file(
     bytes: BagOfBytes,
 ) -> ProfileFileContents {
     Profile::analyze_contents_of_file(bytes)
