@@ -48,7 +48,7 @@ mod tests {
     fn debug() {
         let mut sut = P2PLinks::new();
         sut.append(P2PLink::sample_duckduckgo());
-        assert_eq!(format!("{:?}", sut), "P2PLinks { secret_magic: P2PLinksSecretMagic([P2PLink { display_name: 'DuckDuckGo on Mac Pro', connection_password: 'deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead' }]) }");
+        assert_eq!(format!("{:?}", sut), "P2PLinks { secret_magic: P2PLinksSecretMagic([P2PLink { display_name: 'DuckDuckGo on Mac Pro', connection_password: 'deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead', connection_purpose: 'unknown', public_key: 'b7a3c12dc0c8c748ab07525b701122b88bd78f600c76342d27f25e5f92444cde' }]) }");
     }
 
     #[test]
@@ -73,10 +73,14 @@ mod tests {
             [
                 {
                     "connectionPassword": "babebabebabebabebabebabebabebabebabebabebabebabebabebabebabebabe",
+                    "connectionPurpose": "unknown",
+                    "publicKey": "b7a3c12dc0c8c748ab07525b701122b88bd78f600c76342d27f25e5f92444cde",
                     "displayName": "Brave on PC"
                 },
                 {
                     "connectionPassword": "cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe",
+                    "connectionPurpose": "general",
+                    "publicKey": "b7a3c12dc0c8c748ab07525b701122b88bd78f600c76342d27f25e5f92444cde",
                     "displayName": "Chrome on Macbook"
                 }
             ]

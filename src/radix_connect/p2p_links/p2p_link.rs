@@ -16,7 +16,7 @@ use crate::prelude::*;
 )]
 #[serde(rename_all = "camelCase")]
 #[debug(
-    "P2PLink {{ display_name: '{display_name}', connection_password: '{connection_password}' }}"
+    "P2PLink {{ display_name: '{display_name}', connection_password: '{connection_password}', connection_purpose: '{connection_purpose}', public_key: '{public_key}' }}"
 )]
 #[display("{}", self.to_obfuscated_string())]
 pub struct P2PLink {
@@ -24,6 +24,10 @@ pub struct P2PLink {
     /// is used to be able to re-establish the P2P connection and also acts as the seed
     /// for the `ID`.
     pub connection_password: RadixConnectPassword,
+
+    pub connection_purpose: RadixConnectPurpose,
+
+    pub public_key: Ed25519PublicKey,
 
     /// Client name, e.g. "Chrome on Macbook" or "My work Android" or "My wifes iPhone SE".
     pub display_name: String,
@@ -38,10 +42,14 @@ impl SafeToLog for P2PLink {
 impl P2PLink {
     pub fn new(
         connection_password: RadixConnectPassword,
+        connection_purpose: RadixConnectPurpose,
+        public_key: Ed25519PublicKey,
         display_name: String,
     ) -> Self {
         Self {
             connection_password,
+            connection_purpose,
+            public_key,
             display_name,
         }
     }
@@ -98,26 +106,46 @@ impl HasSampleValues for P2PLink {
 }
 
 impl P2PLink {
-    fn declare(password: RadixConnectPassword, display: &str) -> Self {
-        Self::new(password, display.to_string())
+    fn declare(
+        password: RadixConnectPassword,
+        purpose: RadixConnectPurpose,
+        public_key: Ed25519PublicKey,
+        display: &str,
+    ) -> Self {
+        Self::new(password, purpose, public_key, display.to_string())
     }
 
     /// `aced`... "Arc on MacStudio"
     /// A sample used to facilitate unit tests.
     pub fn sample_arc() -> Self {
-        Self::declare(RadixConnectPassword::sample_aced(), "Arc on MacStudio")
+        Self::declare(
+            RadixConnectPassword::sample_aced(),
+            RadixConnectPurpose::sample(),
+            Ed25519PublicKey::sample(),
+            "Arc on MacStudio",
+        )
     }
 
     /// `babe`... "Brave on PC"
     /// A sample used to facilitate unit tests.
     pub fn sample_brave() -> Self {
-        Self::declare(RadixConnectPassword::sample_babe(), "Brave on PC")
+        Self::declare(
+            RadixConnectPassword::sample_babe(),
+            RadixConnectPurpose::sample_other(),
+            Ed25519PublicKey::sample_other(),
+            "Brave on PC",
+        )
     }
 
     /// `cafe`... "Chrome on Macbook"
     /// A sample used to facilitate unit tests.
     pub fn sample_chrome() -> Self {
-        Self::declare(RadixConnectPassword::sample_cafe(), "Chrome on Macbook")
+        Self::declare(
+            RadixConnectPassword::sample_cafe(),
+            RadixConnectPurpose::sample(),
+            Ed25519PublicKey::sample_other(),
+            "Chrome on Macbook",
+        )
     }
 
     /// `dead`... "DuckDuckGo on Mac Pro"
@@ -125,6 +153,8 @@ impl P2PLink {
     pub fn sample_duckduckgo() -> Self {
         Self::declare(
             RadixConnectPassword::sample_dead(),
+            RadixConnectPurpose::sample_other(),
+            Ed25519PublicKey::sample_other(),
             "DuckDuckGo on Mac Pro",
         )
     }
@@ -153,6 +183,8 @@ mod tests {
             r#"
             {
                 "connectionPassword": "cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe",
+                "connectionPurpose": "general",
+                "publicKey": "b7a3c12dc0c8c748ab07525b701122b88bd78f600c76342d27f25e5f92444cde",
                 "displayName": "Chrome on Macbook"
             }
             "#,
@@ -174,7 +206,7 @@ mod tests {
 
     #[test]
     fn debug() {
-        assert_eq!(format!("{:?}", P2PLink::sample()), "P2PLink { display_name: 'Chrome on Macbook', connection_password: 'cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe' }");
+        assert_eq!(format!("{:?}", P2PLink::sample()), "P2PLink { display_name: 'Chrome on Macbook', connection_password: 'cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe', connection_purpose: 'general', public_key: 'b7a3c12dc0c8c748ab07525b701122b88bd78f600c76342d27f25e5f92444cde' }");
     }
 
     #[test]
