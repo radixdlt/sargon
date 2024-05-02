@@ -211,4 +211,14 @@ final class ProfileTests: Test<Profile> {
 			decode: { try Profile(jsonData: $0) }
 		)
 	}()
+
+        func test_check_if_profile_json_contains_legacy_p2p_links() {
+            func doTest(_ sut: SUT) {
+                XCTAssertEqual(
+                    SUT.checkIfProfileJsonContainsLegacyP2PLinks(contents: sut.jsonData()),
+                    false
+                )
+            }
+            SUT.sampleValues.forEach(doTest)
+        }
 }
