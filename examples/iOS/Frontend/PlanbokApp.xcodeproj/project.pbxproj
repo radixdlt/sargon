@@ -7,13 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		48601C3D2BB869270032792E /* Planbok in Frameworks */ = {isa = PBXBuildFile; productRef = 48601C3C2BB869270032792E /* Planbok */; };
-		48C8EF4C2B7DEA0300EF7F97 /* Planbok in Frameworks */ = {isa = PBXBuildFile; productRef = 48C8EF4B2B7DEA0300EF7F97 /* Planbok */; };
+		484ED3C72BE407DA00E5EF13 /* Planbok in Frameworks */ = {isa = PBXBuildFile; productRef = 484ED3C62BE407DA00E5EF13 /* Planbok */; };
 		48F0A6CD2B7D42D400929DC2 /* PlanbokApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48F0A6CC2B7D42D400929DC2 /* PlanbokApp.swift */; };
 		48F0A6D12B7D42D500929DC2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 48F0A6D02B7D42D500929DC2 /* Assets.xcassets */; };
 		48F0A6D52B7D42D500929DC2 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 48F0A6D42B7D42D500929DC2 /* Preview Assets.xcassets */; };
-		E6EF0F482B7FA6CC00889B69 /* Sargon in Frameworks */ = {isa = PBXBuildFile; productRef = E6EF0F472B7FA6CC00889B69 /* Sargon */; };
-		E6EF0F4B2B7FA6E500889B69 /* Planbok in Frameworks */ = {isa = PBXBuildFile; productRef = E6EF0F4A2B7FA6E500889B69 /* Planbok */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -29,21 +26,26 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E6EF0F4B2B7FA6E500889B69 /* Planbok in Frameworks */,
-				E6EF0F482B7FA6CC00889B69 /* Sargon in Frameworks */,
-				48601C3D2BB869270032792E /* Planbok in Frameworks */,
-				48C8EF4C2B7DEA0300EF7F97 /* Planbok in Frameworks */,
+				484ED3C72BE407DA00E5EF13 /* Planbok in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		484ED3C52BE407DA00E5EF13 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		48F0A6C02B7D42D400929DC2 = {
 			isa = PBXGroup;
 			children = (
 				48F0A6CB2B7D42D400929DC2 /* PlanbokApp */,
 				48F0A6CA2B7D42D400929DC2 /* Products */,
+				484ED3C52BE407DA00E5EF13 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -91,10 +93,7 @@
 			);
 			name = PlanbokApp;
 			packageProductDependencies = (
-				48C8EF4B2B7DEA0300EF7F97 /* Planbok */,
-				E6EF0F472B7FA6CC00889B69 /* Sargon */,
-				E6EF0F4A2B7FA6E500889B69 /* Planbok */,
-				48601C3C2BB869270032792E /* Planbok */,
+				484ED3C62BE407DA00E5EF13 /* Planbok */,
 			);
 			productName = Planbok;
 			productReference = 48F0A6C92B7D42D400929DC2 /* PlanbokApp.app */;
@@ -394,19 +393,7 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		48601C3C2BB869270032792E /* Planbok */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = Planbok;
-		};
-		48C8EF4B2B7DEA0300EF7F97 /* Planbok */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = Planbok;
-		};
-		E6EF0F472B7FA6CC00889B69 /* Sargon */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = Sargon;
-		};
-		E6EF0F4A2B7FA6E500889B69 /* Planbok */ = {
+		484ED3C62BE407DA00E5EF13 /* Planbok */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Planbok;
 		};
