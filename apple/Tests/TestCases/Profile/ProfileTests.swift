@@ -55,7 +55,7 @@ final class ProfileTests: Test<Profile> {
 		func doTest(_ sut: SUT) {
 			XCTAssertEqual(
 				SUT.analyzeFile(reference: sut.profileSnapshotRef()),
-				.plaintextProfile(RefProfile(inner: sut))
+				.plaintext(reference: RefProfile(inner: sut))
 			)
 		}
 		SUT.sampleValues.forEach(doTest)
@@ -66,7 +66,7 @@ final class ProfileTests: Test<Profile> {
 			let encrypted = sut.encrypt(password: "melon")
 			XCTAssertEqual(
 				SUT.analyzeFile(contents: encrypted),
-				.encryptedProfile
+				.encrypted
 			)
 		}
 		SUT.sampleValues.forEach(doTest)

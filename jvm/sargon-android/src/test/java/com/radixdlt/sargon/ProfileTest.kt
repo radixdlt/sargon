@@ -84,7 +84,7 @@ class ProfileTest : SampleTestable<Profile> {
 
         val plaintext = sut.toJson()
         assertEquals(
-            ProfileFileContents.PlaintextProfile(sut),
+            ProfileFileContents.Plaintext(reference = RefProfile(inner = sut)),
             Profile.analyzeContentsOfFile(plaintext)
         )
     }
@@ -95,7 +95,7 @@ class ProfileTest : SampleTestable<Profile> {
 
         val encrypted = sut.toEncryptedJson(encryptionPassword = "Super Secret")
         assertEquals(
-            ProfileFileContents.EncryptedProfile,
+            ProfileFileContents.Encrypted,
             Profile.analyzeContentsOfFile(encrypted)
         )
     }
