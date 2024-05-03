@@ -53,6 +53,9 @@ public struct Profile {
 	init(id: Int) {
 		self.id = id
 	}
+	var hasAnyNetworks: Bool {
+		false
+	}
 	init?(json: JSON) {
 		self.init(id: json)
 	}
@@ -66,33 +69,31 @@ public struct Mnemonic {
 }
 
 public class OS {
-	enum ProfileState {
-		case ephemeral(Profile, mnemonic: Mnemonic)
-		case persisted(Profile)
-		func get() -> Profile {
-			switch self {
-			case let .ephemeral(profile, mnemonic: _):
-				return profile
-			case let .persisted(profile):
-				return profile
-			}
-		}
-		func mainBDFS(secureStorageDriver: SecureStorageDriver) async throws -> Mnemonic {
-			switch self {
-			case let .ephemeral(_, mnemonic):
-				mnemonic
-			case .persisted:
-				try await secureStorageDriver.loadMainBDFSMnemonic()
-			}
-		}
-		static func makeEphemeral() -> Self {
-			.ephemeral(Profile(id: -1), mnemonic: .generate())
-		}
-	}
-	private var profileState: ProfileState = .makeEphemeral()
+	
+	fileprivate let profile: Profile
 	private let drivers: Drivers
-	init(drivers: Drivers) {
+	
+	init(drivers: Drivers) async throws {
 		self.drivers = drivers
+		
+		func generateNew() async throws -> Profile {
+			let newProfile = Profile(id: .random(in: 0...Int.max))
+			let newBDFS = Mnemonic.generate()
+			
+			try await drivers.secureStorage.saveProfile(newProfile)
+			try await drivers.secureStorage.saveMnemonic(newBDFS)
+			return newProfile
+		}
+		
+		if
+			let json = try await drivers.secureStorage.loadProfile(),
+			let loadedProfile = Profile(json: json)
+		{
+			self.profile = loadedProfile
+		} else {
+			self.profile = try await generateNew()
+		}
+		
 	}
 	
 	enum Status {
@@ -106,47 +107,7 @@ public class OS {
 		case bootstrapFailed(BootstrapFailed)
 	}
 	
-	func bootstrap() async -> Status {
-		switch self.profileState {
-		
-		case .persisted:
-			fatalError("should not call bootstrap when loaded.")
-		
-		case let .ephemeral(ephemeralProfile, unsavedMnemonic):
-			func saveEphemeral() async -> Status {
-			
-				do {
-					try await drivers.secureStorage.saveProfile(ephemeralProfile)
-				} catch {
-					return .bootstrapFailed(.failedToSaveEphemeralProfile)
-				}
-				
-				do {
-					try await drivers.secureStorage.saveMnemonic(unsavedMnemonic)
-				} catch {
-					return .bootstrapFailed(.failedToSaveEphemeralMnemonic)
-				}
-				
-				self.profileState = .persisted(ephemeralProfile)
-				return .savedEphemeral
-			}
-			do {
-				if
-					let json = try await drivers.secureStorage.loadProfile(),
-					let profile = Profile(json: json)
-				{
-					self.profileState = .persisted(profile)
-					return .loadedFromStorage
-				} else {
-					return await saveEphemeral()
-				}
-			} catch {
-				return .bootstrapFailed(.failedToLoad)
-			}
-			
-		}
-		
-	}
+	
 	
 }
 
@@ -157,9 +118,6 @@ extension Drivers {
 	)
 }
 
-extension OS {
-	public static let shared = OS(drivers: .shared)
-}
 
 
 struct SplashReducer {
@@ -168,10 +126,10 @@ struct SplashReducer {
 		case delegate(DelegateAction)
 		enum DelegateAction {
 			enum Outcome {
-				case failure(OS.Status.BootstrapFailed)
 				case success(isProfileNew: Bool)
+				case failure
 			}
-			case bootstraped(Outcome)
+			case done(outcome: Outcome)
 		}
 	}
 	struct State {}
@@ -179,16 +137,18 @@ struct SplashReducer {
 	func reduce(action: Action, state: State) async -> Action? {
 		switch action {
 		case .appear:
-			switch await OS.shared.bootstrap() {
-			case let .bootstrapFailed(failure):
-				.delegate(.bootstraped(.failure(failure)))
-			case .loadedFromStorage:
-				.delegate(.bootstraped(.success(isProfileNew: false)))
-		    case .savedEphemeral:
-				.delegate(.bootstraped(.success(isProfileNew: true)))
+			do {
+				let os = try  await OS(drivers: .shared)
+				return .delegate(.done(outcome: .success(isProfileNew: os.profile.hasAnyNetworks)))
+			} catch {
+				return .delegate(.done(outcome: .failure))
 			}
 		case .delegate:
-			nil
+			return nil
 		}
 	}
+}
+
+struct MainReducer {
+	
 }

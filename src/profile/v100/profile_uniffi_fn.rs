@@ -5,9 +5,9 @@ json_data_convertible!(Profile);
 #[uniffi::export]
 pub fn new_profile(
     device_factor_source: DeviceFactorSource,
-    creating_device_name: String,
+    device_info: DeviceInfo,
 ) -> Profile {
-    Profile::new(device_factor_source, creating_device_name.as_str())
+    Profile::new(device_factor_source, device_info)
 }
 
 #[uniffi::export]
@@ -85,10 +85,8 @@ mod uniffi_tests {
     #[test]
     fn new_private_hd() {
         let private = PrivateHierarchicalDeterministicFactorSource::sample();
-        let lhs = super::new_profile(
-            private.factor_source.clone(),
-            "iPhone".to_string(),
-        );
+        let lhs =
+            new_profile(private.factor_source.clone(), DeviceInfo::sample());
         assert_eq!(
             lhs.bdfs().factor_source_id(),
             private.factor_source.factor_source_id()

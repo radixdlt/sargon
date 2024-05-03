@@ -2,6 +2,8 @@ use crate::prelude::*;
 
 #[derive(Debug, uniffi::Object)]
 pub struct Drivers {
-    pub networking_driver: Arc<dyn NetworkingDriver>,
-    pub secure_storage_driver: Arc<dyn SecureStorageDriver>,
+    pub networking: Arc<dyn NetworkingDriver>,
+    pub secure_storage: Arc<dyn SecureStorageDriver>,
+    pub entropy_provider: Arc<dyn EntropyProviderDriver>,
+    pub host_info: Arc<dyn HostInfoDriver>,
 }

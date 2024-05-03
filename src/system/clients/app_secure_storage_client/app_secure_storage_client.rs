@@ -44,7 +44,6 @@ impl AppSecureStorageClient {
     ///
     /// Returns `Ok(None)` if no bytes were found, returns Err if failed
     /// to load bytes or failed to deserialize the JSON into a `T`.
-    #[cfg(not(tarpaulin_include))] // false negative
     pub async fn load<T>(&self, key: SecureStorageKey) -> Result<Option<T>>
     where
         T: for<'a> serde::Deserialize<'a>,
@@ -100,8 +99,88 @@ impl AppSecureStorageClient {
     }
 
     //======
+    // Profile CR(U)D
+    //======
+
+    /// Loads the active Profile if any, by first loading the active
+    /// profile id.
+    pub async fn load_active_profile(&self) -> Result<Option<Profile>> {
+        let Some(id) = self.load_active_profile_id().await? else {
+            return Ok(None);
+        };
+        self.load_or(
+            SecureStorageKey::ProfileSnapshot { profile_id: id },
+            CommonError::UnableToLoadProfileFromSecureStorage {
+                profile_id: id,
+            },
+        )
+        .await
+    }
+
+    /// Loads the active ProfileID if any
+    pub async fn load_active_profile_id(&self) -> Result<Option<ProfileID>> {
+        self.load(SecureStorageKey::ActiveProfileID).await
+    }
+
+    /// Save `profile` and saves its id as active profile id
+    pub async fn save_profile_and_active_profile_id(
+        &self,
+        profile: &Profile,
+    ) -> Result<()> {
+        self.save_profile(profile).await?;
+        self.save_active_profile_id(profile.id()).await
+    }
+
+    /// Save `profile`
+    pub async fn save_profile(&self, profile: &Profile) -> Result<()> {
+        let profile_id = profile.id();
+        self.save(SecureStorageKey::ProfileSnapshot { profile_id }, profile)
+            .await
+    }
+
+    /// Save `profile_id` as the active profile id
+    pub async fn save_active_profile_id(
+        &self,
+        profile_id: ProfileID,
+    ) -> Result<()> {
+        self.save(SecureStorageKey::ActiveProfileID, &profile_id)
+            .await
+    }
+
+    //======
+    // DeviceInfo CR(U)D
+    //======
+
+    /// Loads the  DeviceInfo if any
+    pub async fn load_device_info(&self) -> Result<Option<DeviceInfo>> {
+        self.load(SecureStorageKey::DeviceInfo).await
+    }
+
+    /// Saves [`DeviceInfo`]
+    pub async fn save_device_info(
+        &self,
+        device_info: &DeviceInfo,
+    ) -> Result<()> {
+        self.save(SecureStorageKey::DeviceInfo, device_info)
+            .await
+            .map_err(|_| CommonError::UnableToSaveDeviceInfoToSecureStorage)
+    }
+
+    //======
     // Mnemonic CR(U)D
     //======
+
+    /// Saves the MnemonicWithPassphrase of the private hd factor source
+    pub async fn save_private_hd_factor_source(
+        &self,
+        private_hd_factor_source: &PrivateHierarchicalDeterministicFactorSource,
+    ) -> Result<()> {
+        self.save_mnemonic_with_passphrase(
+            &private_hd_factor_source.mnemonic_with_passphrase,
+            &private_hd_factor_source.factor_source.id,
+        )
+        .await
+    }
 
     /// Saves a MnemonicWithPassphrase under a given `FactorSourceIDFromHash`
     pub async fn save_mnemonic_with_passphrase(

@@ -86,19 +86,11 @@ impl Profile {
 
 impl Profile {
     /// Creates a new Profile from the `DeviceFactorSource`, without any
-    /// networks (thus no accounts), with creating device info as "unknown".
+    /// networks (thus no accounts).
     pub fn new(
         device_factor_source: DeviceFactorSource,
-        creating_device_name: impl AsRef<str>,
+        creating_device: DeviceInfo,
     ) -> Self {
-        let creating_device_name = creating_device_name.as_ref();
-        let creating_device = DeviceInfo::with_description(
-            format!(
-                "{} - {}",
-                creating_device_name, device_factor_source.hint.model
-            )
-            .as_str(),
-        );
         let header = Header::new(creating_device);
         Self::with(
             header,
@@ -435,10 +427,10 @@ mod tests {
                 SUT::new(
                     PrivateHierarchicalDeterministicFactorSource::generate_new_babylon(
 						true,
-                        WalletClientModel::Unknown,
+                        &DeviceInfo::sample(),
                     )
                     .factor_source,
-                    "Foo",
+                    DeviceInfo::sample()
                 )
             })
             .collect::<HashSet<_>>();

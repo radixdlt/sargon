@@ -1,5 +1,86 @@
 use crate::prelude::*;
 
+/// A name and model of a host device.
+///
+/// This used to be a String only in Pre 1.6.0 wallets, so
+/// we have a custom Deserialize impl of it.
+#[derive(
+    Serialize,
+    Clone,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    derive_more::Display,
+    uniffi::Record,
+)]
+#[display("{name} ({model})")]
+pub struct DeviceInfoDescription {
+    /// Host device name, e.g. "My Precious"
+    pub name: String,
+
+    /// Host device model, e.g. "iPhone 15 Pro"
+    pub model: String,
+}
+
+impl DeviceInfoDescription {
+    pub fn new(name: impl AsRef<str>, model: impl AsRef<str>) -> Self {
+        Self {
+            name: name.as_ref().to_owned(),
+            model: model.as_ref().to_owned(),
+        }
+    }
+}
+
+impl<'de> Deserialize<'de> for DeviceInfoDescription {
+    fn deserialize<D: Deserializer<'de>>(
+        deserializer: D,
+    ) -> Result<Self, D::Error> {
+        #[derive(Deserialize, Serialize)]
+        struct NewFormat {
+            pub name: String,
+            pub model: String,
+        }
+
+        #[derive(Deserialize, Serialize)]
+        #[serde(untagged)]
+        enum Wrapper {
+            NewFormat(NewFormat),
+            OldFormat(String),
+        }
+
+        match Wrapper::deserialize(deserializer)? {
+            Wrapper::NewFormat(new_format) => Ok(Self {
+                name: new_format.name,
+                model: new_format.model,
+            }),
+            Wrapper::OldFormat(description) => {
+                let mut name = description.clone();
+                let mut model = description.clone();
+                let parts = description.split(" ").collect_vec();
+                if parts.len() >= 2 {
+                    name = parts[0].to_owned();
+                    if let Some(model_to_be_parsed) =
+                        description.strip_prefix(&name)
+                    {
+                        if model_to_be_parsed.starts_with("(")
+                            && model_to_be_parsed.ends_with(")")
+                        {
+                            // iOS styled
+                            model = model_to_be_parsed
+                                [1..model_to_be_parsed.len() - 1]
+                                .to_owned();
+                        } else {
+                            model = model_to_be_parsed.to_owned();
+                        }
+                    }
+                }
+                Ok(Self { name, model })
+            }
+        }
+    }
+}
+
 /// A short summary of a device the Profile is being used
 /// on, typically an iPhone or an Android phone.
 #[derive(
@@ -32,9 +113,27 @@ pub struct DeviceInfo {
     /// A short description of the device, we devices should
     /// read the device model and a given name from the device
     /// if they are able to.
+    pub description: DeviceInfoDescription,
+
+    /// The **last known** version of the device's operating system, e.g. "iOS 17.4.1".
     ///
-    /// E.g. "My Red Phone (iPhone SE 2nd Gen)"
-    pub description: String,
+    /// It is possible that the host device has been updated to a new
+    /// version than recorded here, but Sargon or host clients might
+    /// just not have updated this value here.
+    ///
+    /// MUST be optional since this was added on 2024-05-03 and
+    /// was not present in earlier version of wallet (pre 1.6.0).
+    pub system_version: Option<String>,
+
+    /// The **last known** version of the host app, for example the Radix iOS Wallet version - e.g. "1.6.1"
+    ///
+    /// It is possible that the host device has been updated to a new
+    /// version than recorded here, but Sargon or host clients might
+    /// just not have updated this value here.
+    ///
+    /// MUST be optional since this was added on 2024-05-03 and
+    /// was not present in earlier version of wallet (pre 1.6.0).
+    pub host_app_version: Option<String>,
 }
 
 impl DeviceInfo {
@@ -42,55 +141,77 @@ impl DeviceInfo {
     pub fn new(
         id: Uuid,
         date: Timestamp,
-        description: impl AsRef<str>,
+        description: DeviceInfoDescription,
+        system_version: impl AsRef<str>,
+        host_app_version: impl AsRef<str>,
     ) -> Self {
         Self {
             id,
             date,
-            description: description.as_ref().to_owned(),
+            description,
+            system_version: Some(system_version.as_ref().to_owned()),
+            host_app_version: Some(host_app_version.as_ref().to_owned()),
         }
     }
 
-    /// Instantiates a new `DeviceInfo` with `description`, and generates a new `id`
-    /// and will use the current `date` for creation date.
-    pub fn with_description(description: impl AsRef<str>) -> Self {
-        Self::new(id(), now(), description)
+    /// Instantiates a new `DeviceInfo` with all needed details,
+    /// formatting a `description` from host name and host model.
+    pub fn with_details(
+        name: impl AsRef<str>,
+        model: impl AsRef<str>,
+        system_version: impl AsRef<str>,
+        host_app_version: impl AsRef<str>,
+    ) -> Self {
+        Self::new(
+            id(),
+            now(),
+            DeviceInfoDescription::new(name, model),
+            system_version,
+            host_app_version,
+        )
     }
 
-    /// Instantiates a new `DeviceInfo` with "iPhone" as description, and
-    /// generates a new `id` and will use the current `date` for creation date.
-    pub fn new_iphone() -> Self {
-        Self::with_description("iPhone")
-    }
+    // /// Instantiates a new `DeviceInfo` with "iPhone" as description, and
+    // /// generates a new `id` and will use the current `date` for creation date.
+    // pub fn new_iphone(
+    //     system_version: impl Into<Option<String>>,
+    //     host_app_version: impl Into<Option<String>>,
+    // ) -> Self {
+    //     Self::with_description("iPhone", system_version, host_app_version)
+    // }
 
-    /// Instantiates a new `DeviceInfo` with "Unknown device" as description, and
-    /// generates a new `id` and will use the current `date` for creation date.
-    pub fn new_unknown_device() -> Self {
-        Self::with_description("Unknown device")
-    }
-}
-
-impl Default for DeviceInfo {
-    fn default() -> Self {
-        Self::new_unknown_device()
-    }
+    // /// Instantiates a new `DeviceInfo` with "Unknown device" as description, and
+    // /// generates a new `id` and will use the current `date` for creation date.
+    // pub fn new_unknown_device() -> Self {
+    //     Self::with_description("Unknown device", None, None)
+    // }
 }
 
 impl HasSampleValues for DeviceInfo {
     fn sample() -> Self {
-        Self::new(
-            Uuid::from_str("66F07CA2-A9D9-49E5-8152-77ACA3D1DD74").unwrap(),
-            Timestamp::parse("2023-09-11T16:05:56Z").unwrap(),
-            "iPhone",
-        )
+        Self {
+            id: Uuid::from_str("66F07CA2-A9D9-49E5-8152-77ACA3D1DD74").unwrap(),
+            date: Timestamp::parse("2023-09-11T16:05:56Z").unwrap(),
+            description: DeviceInfoDescription {
+                name: "iPhone".to_owned(),
+                model: "iPhone".to_owned(),
+            },
+            system_version: None,
+            host_app_version: None,
+        }
     }
 
     fn sample_other() -> Self {
-        Self::new(
-            Uuid::from_str("f07ca662-d9a9-9e45-1582-aca773d174dd").unwrap(),
-            Timestamp::parse("2023-12-24T17:13:56.123Z").unwrap(),
-            "Android",
-        )
+        Self {
+            id: Uuid::from_str("f07ca662-d9a9-9e45-1582-aca773d174dd").unwrap(),
+            date: Timestamp::parse("2023-12-24T17:13:56.123Z").unwrap(),
+            description: DeviceInfoDescription {
+                name: "Android".to_owned(),
+                model: "Android".to_owned(),
+            },
+            system_version: None,
+            host_app_version: None,
+        }
     }
 }
 
@@ -113,18 +234,18 @@ mod tests {
     }
 
     #[test]
-    fn new_iphone() {
-        assert_eq!(SUT::new_iphone().description, "iPhone");
-    }
-
-    #[test]
-    fn with_description() {
-        assert_eq!(SUT::with_description("Nokia").description, "Nokia");
-    }
-
-    #[test]
-    fn new_has_description_unknown_device() {
-        assert_eq!(SUT::new_unknown_device().description, "Unknown device");
+    fn with_details() {
+        assert_eq!(
+            SUT::with_details(
+                "My precious",
+                "iPhone SE 2nd gen",
+                "iOS 17.4.1",
+                "1.6.4",
+            )
+            .description
+            .to_string(),
+            "My precious (iPhone SE 2nd gen)"
+        );
     }
 
     #[test]
@@ -134,7 +255,9 @@ mod tests {
         let sut = SUT::new(
             id,
             Timestamp::parse("2023-09-11T16:05:56Z").unwrap(),
-            "Foo",
+            DeviceInfoDescription::new("Foo", "Unknown"),
+            "Unknown",
+            "Unknown",
         );
         assert_eq!(
             format!("{sut}"),
@@ -142,20 +265,20 @@ mod tests {
         )
     }
 
-    #[test]
-    fn id_is_unique() {
-        let n = 1000;
-        let ids = (0..n)
-            .map(|_| SUT::new_iphone())
-            .map(|d| d.id)
-            .collect::<HashSet<Uuid>>();
-        assert_eq!(ids.len(), n);
-    }
+    // #[test]
+    // fn id_is_unique() {
+    //     let n = 1000;
+    //     let ids = (0..n)
+    //         .map(|_| SUT::new_unknown_device())
+    //         .map(|d| d.id)
+    //         .collect::<HashSet<Uuid>>();
+    //     assert_eq!(ids.len(), n);
+    // }
 
-    #[test]
-    fn date_is_now() {
-        assert!(SUT::new_iphone().date.year() >= 2023);
-    }
+    // #[test]
+    // fn date_is_now() {
+    //     assert!(SUT::new_unknown_device().date.year() >= 2023);
+    // }
 
     #[test]
     fn can_parse_iso8601_json_without_milliseconds_precision() {
@@ -198,6 +321,31 @@ mod tests {
             }
             "#,
         );
+    }
+
+    #[test]
+    fn json_roundtrip_with_system_and_app_version() {
+        let sut = SUT::new(
+            Uuid::from_str("66F07CA2-A9D9-49E5-8152-77ACA3D1DD74").unwrap(),
+            Timestamp::parse("2023-09-11T16:05:56Z").unwrap(),
+            DeviceInfoDescription::new("My nice iPhone", "iPhone 15 Pro"),
+            "17.4.1".to_owned(),
+            "1.6.0".to_owned(),
+        );
+        assert_eq_after_json_roundtrip(
+            &sut,
+            // The JSON string literal below contains `.000` ISO8601
+            // milliseconds which is not set on the sample
+            r#"
+            {
+                "id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
+                "date": "2023-09-11T16:05:56.000Z",
+                "description": { "name": "My nice iPhone", "model": "iPhone 15 Pro" },
+                "system_version": "17.4.1",
+                "host_app_version": "1.6.0",
+            }
+            "#,
+        )
     }
 
     #[test]

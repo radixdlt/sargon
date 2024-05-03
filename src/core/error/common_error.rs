@@ -482,6 +482,14 @@ pub enum CommonError {
 
     #[error("AuthorizedDapp references field id that does not exist")]
     AuthorizedDappReferencesFieldIDThatDoesNotExist = 10134,
+
+    #[error(
+        "Failed to load Profile from secure storage, profile id: {profile_id}"
+    )]
+    UnableToLoadProfileFromSecureStorage { profile_id: ProfileID } = 10135,
+
+    #[error("Failed to save DeviceInfo to secure storage")]
+    UnableToSaveDeviceInfoToSecureStorage = 10136,
 }
 
 #[uniffi::export]

@@ -8,9 +8,15 @@ pub struct ProfileHolder {
 }
 
 impl ProfileHolder {
-    pub async fn with_driver(
-        app_secure_storage_driver: Arc<dyn SecureStorageDriver>,
-    ) -> Arc<Self> {
-        todo!()
+    pub fn new(profile: Profile) -> Self {
+        Self {
+            profile: RwLock::new(profile),
+        }
+    }
+}
+
+impl From<Profile> for ProfileHolder {
+    fn from(value: Profile) -> Self {
+        Self::new(value)
     }
 }

@@ -28,24 +28,22 @@ impl PrivateHierarchicalDeterministicFactorSource {
 
     pub fn new_olympia_with_mnemonic_with_passphrase(
         mnemonic_with_passphrase: MnemonicWithPassphrase,
-        wallet_client_model: WalletClientModel,
+        device_info: &DeviceInfo,
     ) -> Self {
-        let device_factor_source = DeviceFactorSource::olympia(
-            &mnemonic_with_passphrase,
-            wallet_client_model,
-        );
+        let device_factor_source =
+            DeviceFactorSource::olympia(&mnemonic_with_passphrase, device_info);
         Self::new(mnemonic_with_passphrase, device_factor_source)
     }
 
     pub fn new_babylon_with_mnemonic_with_passphrase(
         is_main: bool,
         mnemonic_with_passphrase: MnemonicWithPassphrase,
-        wallet_client_model: WalletClientModel,
+        device_info: &DeviceInfo,
     ) -> Self {
         let bdfs = DeviceFactorSource::babylon(
             is_main,
             &mnemonic_with_passphrase,
-            wallet_client_model,
+            device_info,
         );
         Self::new(mnemonic_with_passphrase, bdfs)
     }
@@ -54,7 +52,7 @@ impl PrivateHierarchicalDeterministicFactorSource {
         is_main: bool,
         entropy: BIP39Entropy,
         passphrase: BIP39Passphrase,
-        wallet_client_model: WalletClientModel,
+        device_info: &DeviceInfo,
     ) -> Self {
         let mnemonic = Mnemonic::from_entropy(entropy);
         let mnemonic_with_passphrase =
@@ -62,20 +60,20 @@ impl PrivateHierarchicalDeterministicFactorSource {
         Self::new_babylon_with_mnemonic_with_passphrase(
             is_main,
             mnemonic_with_passphrase,
-            wallet_client_model,
+            device_info,
         )
     }
 
     pub fn generate_new_babylon(
         is_main: bool,
-        wallet_client_model: WalletClientModel,
+        device_info: &DeviceInfo,
     ) -> Self {
         let mnemonic = Mnemonic::generate_new();
         let mnemonic_with_passphrase = MnemonicWithPassphrase::new(mnemonic);
         Self::new_babylon_with_mnemonic_with_passphrase(
             is_main,
             mnemonic_with_passphrase,
-            wallet_client_model,
+            device_info,
         )
     }
 }
@@ -144,9 +142,7 @@ mod tests {
     fn hash() {
         let n = 100;
         let set = (0..n)
-            .map(|_| {
-                SUT::generate_new_babylon(true, WalletClientModel::Unknown)
-            })
+            .map(|_| SUT::generate_new_babylon(true, &DeviceInfo::sample()))
             .collect::<HashSet<_>>();
         assert_eq!(set.len(), n);
     }

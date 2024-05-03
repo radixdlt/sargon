@@ -75,40 +75,32 @@ impl DeviceFactorSource {
     pub fn babylon(
         is_main: bool,
         mnemonic_with_passphrase: &MnemonicWithPassphrase,
-        wallet_client_model: WalletClientModel,
+        device_info: &DeviceInfo,
     ) -> Self {
         let id = FactorSourceIDFromHash::from_mnemonic_with_passphrase(
             FactorSourceKind::Device,
             mnemonic_with_passphrase,
         );
-
-        Self::new(
-            id,
-            FactorSourceCommon::new_bdfs(is_main),
-            DeviceFactorSourceHint::unknown_model_of_client(
-                mnemonic_with_passphrase.mnemonic.word_count,
-                wallet_client_model,
-            ),
-        )
+        let hint = DeviceFactorSourceHint::with_info(
+            device_info,
+            mnemonic_with_passphrase.mnemonic.word_count,
+        );
+        Self::new(id, FactorSourceCommon::new_bdfs(is_main), hint)
     }
 
     pub fn olympia(
         mnemonic_with_passphrase: &MnemonicWithPassphrase,
-        wallet_client_model: WalletClientModel,
+        device_info: &DeviceInfo,
     ) -> Self {
         let id = FactorSourceIDFromHash::from_mnemonic_with_passphrase(
             FactorSourceKind::Device,
             mnemonic_with_passphrase,
         );
-
-        Self::new(
-            id,
-            FactorSourceCommon::new_olympia(),
-            DeviceFactorSourceHint::unknown_model_of_client(
-                mnemonic_with_passphrase.mnemonic.word_count,
-                wallet_client_model,
-            ),
-        )
+        let hint = DeviceFactorSourceHint::with_info(
+            device_info,
+            mnemonic_with_passphrase.mnemonic.word_count,
+        );
+        Self::new(id, FactorSourceCommon::new_olympia(), hint)
     }
 
     /// Checks if its Main Babylon Device Factor Source (BDFS).
@@ -175,7 +167,7 @@ mod tests {
         assert!(DeviceFactorSource::babylon(
             true,
             &MnemonicWithPassphrase::sample(),
-            WalletClientModel::sample()
+            &DeviceInfo::sample()
         )
         .is_main_bdfs());
     }
