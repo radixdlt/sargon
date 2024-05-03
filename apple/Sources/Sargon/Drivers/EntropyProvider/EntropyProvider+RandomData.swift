@@ -8,10 +8,15 @@
 import Foundation
 import SargonUniFFI
 
+extension EntropyProviderDriver where Self == EntropyProvider {
+	public static var shared: Self { Self.shared }
+}
+
 public final actor EntropyProvider {
 	private init() {}
 	public static let shared = EntropyProvider()
 }
+
 extension EntropyProvider: EntropyProviderDriver {
 	nonisolated public func generateSecureRandomBytes() -> Entropy32Bytes {
 		Entropy32Bytes.generate()

@@ -8,23 +8,23 @@
 import Foundation
 import SargonUniFFI
 
-public final actor HostInfo {
-	fileprivate var appVersion: String?
-	private init() {
-		appVersion = nil
+extension HostInfoDriver where Self == HostInfo {
+	public init(appVersion: String) {
+		self.init(appVersion: appVersion)
 	}
-	public static let shared = HostInfo()
+}
+
+public final actor HostInfo {
+	fileprivate var appVersion: String
+	public init(appVersion: String) {
+		self.appVersion = appVersion
+	}
 }
 
 extension HostInfo {
-	public func setAppVersion(appVersion: String) {
-		self.appVersion = appVersion
-	}
-	
 	nonisolated public func hostAppVersion() async -> String {
-		await self.appVersion ?? "NOT SET"
+		await self.appVersion
 	}
-	
 }
 
 #if canImport(UIKit)

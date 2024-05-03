@@ -7,40 +7,59 @@
 
 import Foundation
 import SargonUniFFI
-import Logging
+import os
 
-public final actor Log {
-	fileprivate let logger: Logging.Logger
-	private init(label: String = "Sargon") {
-		self.logger = Logger(label: label)
-	}
-	public static let shared = Log()
+extension LoggingDriver where Self == Log {
+	public static var shared: Self { Self.shared }
 }
 
-public var log: Log {
-	Log.shared
+public final actor Log {
+	nonisolated fileprivate let logger: Logger
+
+	private init(
+		subsystem: String = "Sargon",
+		category: String = ""
+	) {
+		self.logger = Logger(
+			subsystem: subsystem,
+			category: category
+		)
+	}
+	
+	public static let shared = Log()
+
 }
 
 extension Log: LoggingDriver {
-	nonisolated public func trace(msg: String) {
-		logger.trace(.init(stringLiteral: msg))
+	
+	nonisolated public func log(level: LogLevel, msg: String) {
+		logger.log(
+			level: .init(sargonLogLevel: level),
+			"\(msg)"
+		)
 	}
-	
-	nonisolated public func debug(msg: String) {
-		logger.debug(.init(stringLiteral: msg))
+}
+
+/// Makes it possible for iOS Wallet to later change the log level in Rust land
+/// (remember, the Rust logger **uses the Swift logger**
+/// but might suppress logging invocation if its logging facade's log level is too low.)
+public func setLogLevel(_ level: Sargon.LogLevel) {
+	rustLoggerSetLevel(level: level)
+}
+
+public var log: Logger {
+	Log.shared.logger
+}
+
+extension Logger: @unchecked Sendable {}
+
+extension OSLogType {
+	init(sargonLogLevel sargon: Sargon.LogLevel) {
+		switch sargon {
+		case .trace, .debug: self = .debug
+		case .info: self = .info
+		case .warn: self = .debug
+		case .error: self = .error
+		}
 	}
-	
-	nonisolated public func info(msg: String) {
-		logger.info(.init(stringLiteral: msg))
-	}
-	
-	nonisolated public func warning(msg: String) {
-		logger.warning(.init(stringLiteral: msg))
-	}
-	
-	nonisolated public func error(msg: String) {
-		logger.error(.init(stringLiteral: msg))
-	}
-	
-	
 }

@@ -8,11 +8,16 @@
 import Foundation
 import SargonUniFFI
 
+extension SecureStorageDriver where Self == UnsafeMockSecureStorage {
+	public init(keychainService: String) {
+		self.init(keychainService: keychainService)
+	}
+}
+
 public final actor UnsafeMockSecureStorage {
 	public typealias Key = SecureStorageKey
 	fileprivate var dictionary: [Key: Data] = [:]
-	public init() {}
-	public static let shared = UnsafeMockSecureStorage()
+	public init(keychainService _: String) {}
 }
 
 extension UnsafeMockSecureStorage: SecureStorageDriver {

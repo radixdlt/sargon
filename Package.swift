@@ -61,9 +61,6 @@ let package = Package(
         // In the future hopefully no JSON coding happens in wallets,
         // i.e. Sargon does ALL JSON coding, then we can remove this.
 		.package(url: "https://github.com/SwiftyJSON/SwiftyJSON", from: "5.0.2"),
-
-        // Logging driver, installed into Sargon
-        .package(url: "https://github.com/apple/swift-log", from: "1.5.4")
 	],
 	targets: [
 		binaryTarget,
@@ -77,7 +74,6 @@ let package = Package(
 			dependencies: [
 				.target(name: "SargonUniFFI"),
 				"SwiftyJSON",
-				.product(name: "Logging", package: "swift-log"),
 				.product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
 			],
 			path: "apple/Sources/Sargon",

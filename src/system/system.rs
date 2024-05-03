@@ -17,15 +17,8 @@ pub struct SargonOS {
 #[uniffi::export]
 impl SargonOS {
     #[uniffi::constructor]
-    pub async fn with_drivers(drivers: Arc<Drivers>) -> Result<Arc<Self>> {
-        install_logger(drivers.logging_driver.clone());
-
-        error!("Error: Hello world!");
-        warn!("Warning: Hello world!");
-        info!("Info: Hello world!");
-        debug!("Debug: Hello world!");
-        trace!("Trace: Hello world!");
-
+    pub async fn boot(bios: Arc<Bios>) -> Result<Arc<Self>> {
+        let drivers = bios.drivers.clone();
         let app_secure_storage =
             AppSecureStorageClient::new(drivers.secure_storage.clone());
 
@@ -96,44 +89,4 @@ impl SargonOS {
 
         Ok(device_info)
     }
-}
-
-// Logger struct that implements the `log::Log` trait.
-struct RustLogger(RwLock<Option<Arc<dyn LoggingDriver>>>);
-
-static RUST_LOGGER: RustLogger = RustLogger(RwLock::new(None));
-
-impl log::Log for RustLogger {
-    fn enabled(&self, _: &log::Metadata<'_>) -> bool {
-        true
-    }
-
-    fn log(&self, record: &log::Record<'_>) {
-        if let Some(driver) = &*self.0.read().unwrap() {
-            let msg = record.args().to_string();
-            match record.level() {
-                log::Level::Error => driver.error(msg),
-                log::Level::Warn => driver.warning(msg),
-                log::Level::Info => driver.info(msg),
-                log::Level::Debug => driver.debug(msg),
-                log::Level::Trace => driver.trace(msg),
-            }
-        }
-    }
-
-    fn flush(&self) {}
-}
-
-fn init() {
-    static ONCE: Once = Once::new();
-    ONCE.call_once(|| {
-        log::set_logger(&RUST_LOGGER)
-            .expect("Should always be able to install a logger.");
-        log::set_max_level(log::LevelFilter::Debug);
-    });
-}
-
-pub fn install_logger(logging_driver: Arc<dyn LoggingDriver>) {
-    init();
-    *RUST_LOGGER.0.write().unwrap() = Some(logging_driver);
 }
