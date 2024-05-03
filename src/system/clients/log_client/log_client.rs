@@ -23,19 +23,11 @@ impl LogClient {
         self.driver.info(msg.as_ref().to_owned())
     }
 
-    pub fn notice(&self, msg: impl AsRef<str>) {
-        self.driver.notice(msg.as_ref().to_owned())
-    }
-
     pub fn warning(&self, msg: impl AsRef<str>) {
         self.driver.warning(msg.as_ref().to_owned())
     }
 
     pub fn error(&self, msg: impl AsRef<str>) {
         self.driver.error(msg.as_ref().to_owned())
-    }
-
-    pub fn critical(&self, msg: impl AsRef<str>) {
-        self.driver.critical(msg.as_ref().to_owned())
     }
 }

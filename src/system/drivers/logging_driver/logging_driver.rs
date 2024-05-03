@@ -3,10 +3,8 @@ use crate::prelude::*;
 /// * Trace
 /// * Debug
 /// * Info
-/// * Notice (Swift only, others => `Info`)
 /// * Warning
 /// * Error
-/// * Critical (Swift only, others => `Error`)
 #[uniffi::export(with_foreign)]
 #[async_trait::async_trait]
 pub trait LoggingDriver: Send + Sync + std::fmt::Debug {
@@ -25,11 +23,6 @@ pub trait LoggingDriver: Send + Sync + std::fmt::Debug {
     /// Kotlin (Android Timber): `info`
     fn info(&self, msg: String);
 
-    /// Swift (apple/swift-log): `notice`
-    /// Rust (log::LevelFilter): `info`
-    /// Kotlin (Android Timber): `info`
-    fn notice(&self, msg: String);
-
     /// Swift (apple/swift-log): `warning`
     /// Rust (log::LevelFilter): `warn`
     /// Kotlin (Android Timber): `warn`
@@ -39,9 +32,4 @@ pub trait LoggingDriver: Send + Sync + std::fmt::Debug {
     /// Rust (log::LevelFilter): `error`
     /// Kotlin (Android Timber): `error`
     fn error(&self, msg: String);
-
-    /// Swift (apple/swift-log): `critical`
-    /// Rust (log::LevelFilter): `error`
-    /// Kotlin (Android Timber): `error`
-    fn critical(&self, msg: String);
 }

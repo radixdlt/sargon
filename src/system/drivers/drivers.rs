@@ -6,4 +6,5 @@ pub struct Drivers {
     pub secure_storage: Arc<dyn SecureStorageDriver>,
     pub entropy_provider: Arc<dyn EntropyProviderDriver>,
     pub host_info: Arc<dyn HostInfoDriver>,
+    pub logging_driver: Arc<dyn LoggingDriver>,
 }
