@@ -30,7 +30,7 @@ extension NetworkResponse {
 	}
 }
 
-extension URLSession: NetworkAntenna {
+extension URLSession: NetworkingDriver {
 
 	public func executeNetworkRequest(
 		request sargonRequest: NetworkRequest
