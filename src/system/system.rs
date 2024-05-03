@@ -18,41 +18,18 @@ impl SargonOS {
     pub async fn with_drivers(drivers: Arc<Drivers>) -> Result<Arc<Self>> {
         let app_secure_storage =
             AppSecureStorageClient::new(drivers.secure_storage.clone());
+
         if let Some(loaded) = app_secure_storage.load_active_profile().await? {
             Ok(Arc::new(Self {
                 drivers,
                 profile_holder: ProfileHolder::new(loaded),
             }))
         } else {
-            let device_info =
-                match app_secure_storage.load_device_info().await? {
-                    Some(loaded_device_info) => loaded_device_info,
-                    None => {
-                        let host_info_client =
-                            HostInfoClient::new(drivers.host_info.clone());
-                        let new_device_info =
-                            host_info_client.create_device_info().await;
-                        app_secure_storage
-                            .save_device_info(&new_device_info)
-                            .await?;
-                        new_device_info
-                    }
-                };
-            let entropy_client =
-                EntropyClient::new(drivers.entropy_provider.clone());
-            let entropy: BIP39Entropy = entropy_client.bip39_entropy();
-            let private_bdfs = PrivateHierarchicalDeterministicFactorSource::new_babylon_with_entropy(
-                true,
-                entropy,
-                BIP39Passphrase::default(),
-                 &device_info
-            );
+            let (profile, bdfs) = Self::new_profile_and_bdfs(&drivers).await?;
 
             app_secure_storage
-                .save_private_hd_factor_source(&private_bdfs)
+                .save_private_hd_factor_source(&bdfs)
                 .await?;
-
-            let profile = Profile::new(private_bdfs.factor_source, device_info);
 
             app_secure_storage
                 .save_profile_and_active_profile_id(&profile)
@@ -63,5 +40,50 @@ impl SargonOS {
                 drivers,
             }))
         }
+    }
+}
+
+impl SargonOS {
+    async fn new_profile_and_bdfs(
+        drivers: &Arc<Drivers>,
+    ) -> Result<(Profile, PrivateHierarchicalDeterministicFactorSource)> {
+        let device_info = Self::get_device_info(drivers).await?;
+
+        let entropy_client =
+            EntropyClient::new(drivers.entropy_provider.clone());
+        let entropy: BIP39Entropy = entropy_client.bip39_entropy();
+
+        let private_bdfs = PrivateHierarchicalDeterministicFactorSource::new_babylon_with_entropy(
+            true,
+            entropy,
+            BIP39Passphrase::default(),
+            &device_info
+        );
+
+        let profile =
+            Profile::new(private_bdfs.factor_source.clone(), device_info);
+
+        Ok((profile, private_bdfs))
+    }
+
+    async fn get_device_info(drivers: &Arc<Drivers>) -> Result<DeviceInfo> {
+        let app_secure_storage =
+            AppSecureStorageClient::new(drivers.secure_storage.clone());
+
+        let device_info = match app_secure_storage.load_device_info().await? {
+            Some(loaded_device_info) => loaded_device_info,
+            None => {
+                let host_info_client =
+                    HostInfoClient::new(drivers.host_info.clone());
+                let new_device_info =
+                    host_info_client.create_device_info().await;
+                app_secure_storage
+                    .save_device_info(&new_device_info)
+                    .await?;
+                new_device_info
+            }
+        };
+
+        Ok(device_info)
     }
 }
