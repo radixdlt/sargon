@@ -57,28 +57,75 @@ impl<'de> Deserialize<'de> for DeviceInfoDescription {
             Wrapper::OldFormat(description) => {
                 let mut name = description.clone();
                 let mut model = description.clone();
-                let parts = description.split(" ").collect_vec();
-                if parts.len() >= 2 {
-                    name = parts[0].to_owned();
-                    if let Some(model_to_be_parsed) =
-                        description.strip_prefix(&name)
-                    {
-                        if model_to_be_parsed.starts_with("(")
-                            && model_to_be_parsed.ends_with(")")
-                        {
-                            // iOS styled
-                            model = model_to_be_parsed
-                                [1..model_to_be_parsed.len() - 1]
-                                .to_owned();
-                        } else {
-                            model = model_to_be_parsed.to_owned();
-                        }
-                    }
-                }
+
+                // let re = Regex::new(r"(?<name>[alphanum]+)((?<model>\d{4})\)").unwrap();
+
+                // let parts = description.split("(").collect_vec();
+                // if parts.len() >= 2 {
+                //     name = parts[0].to_owned();
+                //     if let Some(model_to_be_parsed) =
+                //         description.strip_prefix(&name)
+                //     {
+                //         if model_to_be_parsed.starts_with("(")
+                //             && model_to_be_parsed.ends_with(")")
+                //         {
+                //             // iOS styled
+                //             model = model_to_be_parsed
+                //                 [1..model_to_be_parsed.len() - 1]
+                //                 .to_owned();
+                //         } else {
+                //             model = model_to_be_parsed.to_owned();
+                //         }
+                //     }
+                // }
                 Ok(Self { name, model })
             }
         }
     }
+}
+
+impl HasSampleValues for DeviceInfoDescription {
+    fn sample() -> Self {
+        Self::new("My precious", "iPhone 15 Pro")
+    }
+
+    fn sample_other() -> Self {
+        Self::new("R2", "OnePlus Open")
+    }
+}
+
+#[cfg(test)]
+mod test_device_info_description {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = DeviceInfoDescription;
+
+    #[test]
+    fn json_new_format() {
+        let sut = SUT::sample();
+        assert_eq_after_json_roundtrip(
+            &sut,
+            r#"
+            {
+                "name": "My precious",
+                "model": "iPhone 15 Pro"
+            }
+            "#,
+        )
+    }
+
+    // #[test]
+    // fn json_old_format_iphone() {
+    //     let sut = SUT::sample();
+    //     assert_eq_after_json_roundtrip(&sut, "\"My precious (iPhone 15 Pro)\"")
+    // }
+
+    // #[test]
+    // fn json_old_format_android() {
+    //     let sut = SUT::sample_other();
+    //     assert_eq_after_json_roundtrip(&sut, "R2 OnePlus Open")
+    // }
 }
 
 /// A short summary of a device the Profile is being used
