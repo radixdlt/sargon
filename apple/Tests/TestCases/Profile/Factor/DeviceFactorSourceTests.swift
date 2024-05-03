@@ -26,23 +26,23 @@ final class DeviceFactorSourceTests: SpecificFactorSourceTest<DeviceFactorSource
 	}
 	
 	func test_new_babylon_is_main_true() {
-		let sut = SUT.babylon(mnemonicWithPassphrase: .sample, isMain: true)
+		let sut = SUT.babylon(mnemonicWithPassphrase: .sample, isMain: true, deviceInfo: .sample)
 		XCTAssertTrue(sut.isMainBDFS)
 	}
 	
 	func test_new_babylon_is_main_false() {
-		let sut = SUT.babylon(mnemonicWithPassphrase: .sample, isMain: false)
+		let sut = SUT.babylon(mnemonicWithPassphrase: .sample, isMain: false, deviceInfo: .sample)
 		XCTAssertFalse(sut.isMainBDFS)
 	}
 	
 	func test_new_babylon() {
-		let sut = SUT.babylon(mnemonicWithPassphrase: .sample, isMain: true)
+		let sut = SUT.babylon(mnemonicWithPassphrase: .sample, isMain: true, deviceInfo: .sample)
 		XCTAssertTrue(sut.supportsBabylon)
 		XCTAssertFalse(sut.supportsOlympia)
 	}
 	
 	func test_new_olympia() {
-		let sut = SUT.olympia(mnemonicWithPassphrase: .sample)
+		let sut = SUT.olympia(mnemonicWithPassphrase: .sample, deviceInfo: .sample)
 		XCTAssertTrue(sut.supportsOlympia)
 		XCTAssertFalse(sut.supportsBabylon)
 	}

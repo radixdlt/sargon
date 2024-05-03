@@ -49,7 +49,11 @@ let package = Package(
 		)
 	],
 	dependencies: [
-        // We use XCTestDynamicOverlay and XCTAssertNoDifference
+        // We use XCTestDynamicOverlay to have different `description` of e.g. Decimal192
+		// for tests vs not tests (we use a .test `Locale`)
+		.package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "1.1.2"),
+		
+		// `XCTAssertNoDifference` used in test
 		.package(url: "https://github.com/pointfreeco/swift-custom-dump", from: "1.3.0"),
 
         // Hopefully only temporary! We use `SwiftJSON` to be able to mark some Sargon models
@@ -73,7 +77,8 @@ let package = Package(
 			dependencies: [
 				.target(name: "SargonUniFFI"),
 				"SwiftyJSON",
-                "swift-log"
+				.product(name: "Logging", package: "swift-log"),
+				.product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
 			],
 			path: "apple/Sources/Sargon",
 			swiftSettings: swiftSettings

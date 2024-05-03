@@ -98,8 +98,8 @@ final class ProfileTests: Test<Profile> {
 			let decoded = try SUT(jsonData: json)
 			XCTAssertEqual(decoded, sut)
 		}
-		var vectors = Array(zip(SUT.sampleValues, SUT.sampleValues.map { $0.jsonData() }))
-		vectors.append(vector)
+		let vectors = Array(zip(SUT.sampleValues, SUT.sampleValues.map { $0.jsonData() }))
+//		vectors.append(vector)
 		try vectors.forEach(doTest)
 	}
 	

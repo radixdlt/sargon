@@ -61,12 +61,12 @@ final class HeaderTests: Test<Header> {
                 "creatingDevice": {
                     "id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
                     "date": "2023-09-11T16:05:56.000Z",
-                    "description": "iPhone"
+                    "description": { "name": "iPhone", "model": "iPhone" }
                 },
                 "lastUsedOnDevice": {
                     "id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
                     "date": "2023-09-11T16:05:56.000Z",
-                    "description": "iPhone"
+                    "description": { "name": "iPhone", "model": "iPhone" }
                 },
                 "lastModified": "2023-09-11T16:05:56.000Z",
                 "contentHint": {
@@ -78,7 +78,7 @@ final class HeaderTests: Test<Header> {
             {
                 "lastUsedOnDevice" : {
                     "date" : "2023-12-20T16:05:56.000Z",
-                    "description" : "iPhone",
+                    "description" : { "name": "iPhone", "model": "iPhone" },
                     "id" : "aabbccdd-a9d9-49e5-8152-beefbeefbeef"
                 },
                 "id" : "87654321-bbbb-cccc-dddd-87654321dcba",
@@ -88,7 +88,7 @@ final class HeaderTests: Test<Header> {
                     "numberOfPersonasOnAllNetworksInTotal" : 0
                 },
                 "creatingDevice" : {
-                    "description" : "iPhone",
+                    "description" : { "name": "iPhone", "model": "iPhone" },
                     "id" : "aabbccdd-a9d9-49e5-8152-beefbeefbeef",
                     "date" : "2023-12-20T16:05:56.000Z"
                 },
@@ -100,7 +100,7 @@ final class HeaderTests: Test<Header> {
         
         // test decoding
         let headerList = try JSONDecoder().decode([SUT].self, from: raw)
-        XCTAssertEqual(headerList, [SUT.sample, SUT.sampleOther])
+        XCTAssertNoDifference(headerList, [SUT.sample, SUT.sampleOther])
         
         // test encoding
         let encoded = try JSONEncoder().encode(headerList)

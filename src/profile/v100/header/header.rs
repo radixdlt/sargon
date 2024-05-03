@@ -92,7 +92,7 @@ impl HasSampleValues for Header {
 
     /// A sample used to facilitate unit tests.
     fn sample_other() -> Self {
-        let device_info = DeviceInfo::sample();
+        let device_info = DeviceInfo::sample_other();
         Header::with_values(
             ProfileID::from_str("87654321-bbbb-cccc-dddd-87654321dcba")
                 .unwrap(),
