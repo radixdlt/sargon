@@ -133,12 +133,12 @@ pub mod tests {
                 "creatingDevice": {
                     "id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
                     "date": "2023-09-11T16:05:56.000Z",
-                    "description": "iPhone"
+                    "description": { "name": "iPhone", "model": "iPhone" }
                 },
                 "lastUsedOnDevice": {
                     "id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
                     "date": "2023-09-11T16:05:56.000Z",
-                    "description": "iPhone"
+                    "description": { "name": "iPhone", "model": "iPhone" }
                 },
                 "lastModified": "2023-09-11T16:05:56.000Z",
                 "contentHint": {
@@ -154,7 +154,7 @@ pub mod tests {
     #[test]
     fn display() {
         let sut = SUT::sample();
-        assert_eq!(format!("{sut}"), "#12345678-bbbb-cccc-dddd-abcd12345678 v=100, content: #networks: 0, #accounts: 0, #personas: 0");
+        pretty_assertions::assert_eq!(format!("{sut}"), "#12345678-bbbb-cccc-dddd-abcd12345678 v=100, content: #networks: 2, #accounts: 4, #personas: 0");
     }
 
     #[test]

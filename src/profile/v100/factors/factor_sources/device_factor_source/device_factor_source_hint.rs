@@ -83,7 +83,13 @@ impl DeviceFactorSourceHint {
 impl HasSampleValues for DeviceFactorSourceHint {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {
-        Self::new("Unknown Name", "iPhone", None, None, BIP39WordCount::Twelve)
+        Self::new(
+            "Unknown Name",
+            "iPhone",
+            None,
+            None,
+            BIP39WordCount::TwentyFour,
+        )
     }
 
     fn sample_other() -> Self {

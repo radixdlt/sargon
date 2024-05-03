@@ -55,8 +55,8 @@ impl<'de> Deserialize<'de> for DeviceInfoDescription {
                 model: new_format.model,
             }),
             Wrapper::OldFormat(description) => {
-                let mut name = description.clone();
-                let mut model = description.clone();
+                let name = description.clone();
+                let model = description.clone();
 
                 // let re = Regex::new(r"(?<name>[alphanum]+)((?<model>\d{4})\)").unwrap();
 
@@ -306,9 +306,9 @@ mod tests {
             "Unknown",
             "Unknown",
         );
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             format!("{sut}"),
-            format!("Foo | created: 2023-09-11 | #{}", id_str)
+            format!("Foo (Unknown) | created: 2023-09-11 | #{}", id_str)
         )
     }
 
@@ -353,7 +353,7 @@ mod tests {
             {
                 "id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
                 "date": "2023-09-11T16:05:56.000Z",
-                "description": "iPhone"
+                "description": { "name": "iPhone", "model": "iPhone" }
             }
             "#,
         );
@@ -364,7 +364,7 @@ mod tests {
             {
                 "id": "00000000-0000-0000-0000-000000000000",
                 "date": "1970-01-01T12:34:56Z",
-                "description": "Nokia"
+                "description": { "name": "Nokia", "model": "3310" }
             }
             "#,
         );
@@ -376,8 +376,8 @@ mod tests {
             Uuid::from_str("66F07CA2-A9D9-49E5-8152-77ACA3D1DD74").unwrap(),
             Timestamp::parse("2023-09-11T16:05:56Z").unwrap(),
             DeviceInfoDescription::new("My nice iPhone", "iPhone 15 Pro"),
-            "17.4.1".to_owned(),
-            "1.6.0".to_owned(),
+            "17.4.1",
+            "1.6.0",
         );
         assert_eq_after_json_roundtrip(
             &sut,
@@ -387,9 +387,12 @@ mod tests {
             {
                 "id": "66f07ca2-a9d9-49e5-8152-77aca3d1dd74",
                 "date": "2023-09-11T16:05:56.000Z",
-                "description": { "name": "My nice iPhone", "model": "iPhone 15 Pro" },
+                "description": { 
+                    "name": "My nice iPhone", 
+                    "model": "iPhone 15 Pro" 
+                },
                 "system_version": "17.4.1",
-                "host_app_version": "1.6.0",
+                "host_app_version": "1.6.0"
             }
             "#,
         )
