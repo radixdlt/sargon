@@ -14,15 +14,21 @@ extension LoggingDriver where Self == Log {
 }
 
 public final actor Log {
-	nonisolated fileprivate let logger: Logger
+	nonisolated fileprivate let rustLogger: Logger
+	nonisolated fileprivate let swiftLogger: Logger
 
 	private init(
 		subsystem: String = "Sargon",
-		category: String = ""
+		rustCategory: String = "Rust",
+		swiftCategory: String = "Swift"
 	) {
-		self.logger = Logger(
+		self.rustLogger = Logger(
 			subsystem: subsystem,
-			category: category
+			category: rustCategory
+		)
+		self.swiftLogger = Logger(
+			subsystem: subsystem,
+			category: swiftCategory
 		)
 	}
 	
@@ -33,7 +39,7 @@ public final actor Log {
 extension Log: LoggingDriver {
 	
 	nonisolated public func log(level: LogLevel, msg: String) {
-		logger.log(
+		rustLogger.log(
 			level: .init(sargonLogLevel: level),
 			"\(msg)"
 		)
@@ -48,7 +54,7 @@ public func setLogLevel(_ level: Sargon.LogLevel) {
 }
 
 public var log: Logger {
-	Log.shared.logger
+	Log.shared.swiftLogger
 }
 
 extension Logger: @unchecked Sendable {}

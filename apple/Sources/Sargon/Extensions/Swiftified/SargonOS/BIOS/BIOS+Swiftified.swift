@@ -22,9 +22,10 @@ extension BIOS {
 			keychainService: keychainService
 		)
 		
+		// https://en.wikipedia.org/wiki/Power-on_self-test
+		log.info("📬 BIOS POST (Power-On Self Test)")
+		
 		self.init(drivers: drivers)
-			
-		log.notice("📬 BIOS posted.")
 		
 	}
 }

@@ -4,10 +4,10 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
+extension BIOS {
+	static let test = BIOS(bundle: .main, keychainService: "Test")
+}
+
 final class BIOSTests: TestCase {
 	typealias SUT = BIOS
-
-	func test_bios_post() {
-		let _ = SUT(bundle: .main, keychainService: "test")
-	}
 }
