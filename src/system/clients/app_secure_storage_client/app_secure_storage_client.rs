@@ -105,7 +105,9 @@ impl AppSecureStorageClient {
     /// Loads the active Profile if any, by first loading the active
     /// profile id.
     pub async fn load_active_profile(&self) -> Result<Option<Profile>> {
+        debug!("Loading active profile");
         let Some(id) = self.load_active_profile_id().await? else {
+            trace!("Found no active profile id");
             return Ok(None);
         };
         self.load_or(
@@ -115,10 +117,13 @@ impl AppSecureStorageClient {
             },
         )
         .await
+        .inspect(|_| debug!("Loaded profile"))
+        .inspect_err(|e| error!("Failed to load profile, error {e}"))
     }
 
     /// Loads the active ProfileID if any
     pub async fn load_active_profile_id(&self) -> Result<Option<ProfileID>> {
+        trace!("Loading active profile id");
         self.load(SecureStorageKey::ActiveProfileID).await
     }
 
@@ -134,8 +139,11 @@ impl AppSecureStorageClient {
     /// Save `profile`
     pub async fn save_profile(&self, profile: &Profile) -> Result<()> {
         let profile_id = profile.id();
+        debug!("Saving profile with id: {}", profile_id);
         self.save(SecureStorageKey::ProfileSnapshot { profile_id }, profile)
             .await
+            .inspect(|_| debug!("Saved profile with id {}", profile_id))
+            .inspect_err(|e| error!("Failed to save profile, error {e}"))
     }
 
     /// Save `profile_id` as the active profile id
@@ -143,8 +151,13 @@ impl AppSecureStorageClient {
         &self,
         profile_id: ProfileID,
     ) -> Result<()> {
+        debug!("Saving active profile id: {}", profile_id);
         self.save(SecureStorageKey::ActiveProfileID, &profile_id)
             .await
+            .inspect(|_| debug!("Saved active profile id"))
+            .inspect_err(|e| {
+                error!("Failed to save active profile id, error {e}")
+            })
     }
 
     //======
@@ -153,6 +166,7 @@ impl AppSecureStorageClient {
 
     /// Loads the  DeviceInfo if any
     pub async fn load_device_info(&self) -> Result<Option<DeviceInfo>> {
+        trace!("Loading device info");
         self.load(SecureStorageKey::DeviceInfo).await
     }
 
@@ -161,9 +175,16 @@ impl AppSecureStorageClient {
         &self,
         device_info: &DeviceInfo,
     ) -> Result<()> {
+        debug!("Saving new device info: {}", device_info);
         self.save(SecureStorageKey::DeviceInfo, device_info)
             .await
-            .map_err(|_| CommonError::UnableToSaveDeviceInfoToSecureStorage)
+            .inspect(|_| debug!("Saved new device info."))
+            .map_err(|e| {
+                error!(
+                    "Failed to save device info to secure storage - error {e}",
+                );
+                CommonError::UnableToSaveDeviceInfoToSecureStorage
+            })
     }
 
     //======

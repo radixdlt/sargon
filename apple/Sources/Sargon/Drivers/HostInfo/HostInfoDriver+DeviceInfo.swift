@@ -46,15 +46,35 @@ extension HostInfo: HostInfoDriver {
 #else
 extension HostInfo: HostInfoDriver {
 	nonisolated public func hostDeviceSystemVersion() async -> String {
-		"HARDCODED macOS unknown version"
+		let info = ProcessInfo.processInfo.operatingSystemVersion
+		return "\(info.majorVersion).\(info.minorVersion).\(info.patchVersion)"
 	}
 	
 	nonisolated public func hostDeviceModel() async -> String {
-		"HARDCODED macOS unknown computer model"
+	
+		let service = IOServiceGetMatchingService(
+			kIOMainPortDefault,
+			IOServiceMatching("IOPlatformExpertDevice")
+		)
+		
+		guard
+			let modelData = IORegistryEntryCreateCFProperty(
+				service,
+				"model" as CFString,
+				kCFAllocatorDefault,
+				0
+			)
+			.takeUnretainedValue() as? Data,
+			let modelString = String(data: modelData, encoding: .utf8)
+		else {
+			return "Unknown Model"
+		}
+		
+		return modelString.trimmingCharacters(in: .controlCharacters.union(.whitespaces))
 	}
 	
 	nonisolated public func hostDeviceName() async -> String {
-		"HARDCODED macOS unknown computer name"
+		"Unknown Name"
 	}
 }
 #endif // canImport(UIKit)
