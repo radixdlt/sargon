@@ -490,6 +490,9 @@ pub enum CommonError {
 
     #[error("Failed to save DeviceInfo to secure storage")]
     UnableToSaveDeviceInfoToSecureStorage = 10136,
+
+    #[error("Unable to acquire read lock for profile")]
+    UnableToAcquireReadLockForProfile = 10137,
 }
 
 #[uniffi::export]

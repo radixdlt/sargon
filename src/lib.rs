@@ -1,3 +1,4 @@
+#![feature(async_closure)]
 #![allow(unused_imports)]
 
 mod core;
