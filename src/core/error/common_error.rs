@@ -493,6 +493,12 @@ pub enum CommonError {
 
     #[error("Unable to acquire read lock for profile")]
     UnableToAcquireReadLockForProfile = 10137,
+
+    #[error("Failed to read from unsafe storage.")]
+    UnsafeStorageReadError = 10138,
+
+    #[error("Failed to write to unsafe storage.")]
+    UnsafeStorageWriteError = 10139,
 }
 
 #[uniffi::export]

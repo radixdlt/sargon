@@ -6,7 +6,10 @@ pub struct Drivers {
     pub secure_storage: Arc<dyn SecureStorageDriver>,
     pub entropy_provider: Arc<dyn EntropyProviderDriver>,
     pub host_info: Arc<dyn HostInfoDriver>,
-    pub logging_driver: Arc<dyn LoggingDriver>,
+    pub logging: Arc<dyn LoggingDriver>,
+    pub event_bus: Arc<dyn EventBusDriver>,
+    pub file_system: Arc<dyn FileSystemDriver>,
+    pub unsafe_storage: Arc<dyn UnsafeStorageDriver>,
 }
 
 #[uniffi::export]
@@ -17,14 +20,20 @@ impl Drivers {
         secure_storage: Arc<dyn SecureStorageDriver>,
         entropy_provider: Arc<dyn EntropyProviderDriver>,
         host_info: Arc<dyn HostInfoDriver>,
-        logging_driver: Arc<dyn LoggingDriver>,
+        logging: Arc<dyn LoggingDriver>,
+        event_bus: Arc<dyn EventBusDriver>,
+        file_system: Arc<dyn FileSystemDriver>,
+        unsafe_storage: Arc<dyn UnsafeStorageDriver>,
     ) -> Arc<Self> {
         Arc::new(Self {
             networking,
             secure_storage,
             entropy_provider,
             host_info,
-            logging_driver,
+            logging,
+            event_bus,
+            file_system,
+            unsafe_storage,
         })
     }
 }

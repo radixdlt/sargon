@@ -8,23 +8,23 @@ use crate::prelude::*;
 ///
 /// The typical usage is that `Wallet` uses this to build even higher level API's that work
 /// with application level types such as `PrivateHierarchicalDeterministicFactorSource`, which
-/// apart from `MnemonicWithPassphrase` read from SecureStorageDriver using this `AppSecureStorageClient`,
+/// apart from `MnemonicWithPassphrase` read from SecureStorageDriver using this `SecureStorageClient`,
 /// also has to load the DeviceFactorSource from Profile, given a FactorSourceID only.
 #[derive(Debug)]
-pub struct AppSecureStorageClient {
+pub struct SecureStorageClient {
     /// Low level CRUD traits injected from implementing Wallet Client, that works on bytes.
     driver: Arc<dyn SecureStorageDriver>,
 }
 
-impl AppSecureStorageClient {
-    /// Creates a new AppSecureStorageClient using an implementation of
+impl SecureStorageClient {
+    /// Creates a new SecureStorageClient using an implementation of
     /// `SecureStorageDriver`.
     pub(crate) fn new(driver: Arc<dyn SecureStorageDriver>) -> Self {
         Self { driver }
     }
 }
 
-impl AppSecureStorageClient {
+impl SecureStorageClient {
     //======
     // Save T
     //======
@@ -34,7 +34,7 @@ impl AppSecureStorageClient {
     {
         let json = serde_json::to_vec(value)
             .map_err(|_| CommonError::FailedToSerializeToJSON)?;
-        self.driver.save_data(key, json).await
+        self.driver.save_data(key, BagOfBytes::from(json)).await
     }
 
     //======
@@ -51,11 +51,11 @@ impl AppSecureStorageClient {
         self.driver.load_data(key).await.and_then(|o| match o {
             None => Ok(None),
             Some(j) => serde_json::from_slice(j.as_slice()).map_err(|_| {
-                let type_name = std::any::type_name::<T>().to_string();
+                let type_name = type_name::<T>();
                 error!(
                     "Deserialize json to type: {}\nJSON (utf8):\n{:?}",
                     &type_name,
-                    String::from_utf8(j.clone())
+                    String::from_utf8(j.to_vec())
                 );
                 CommonError::FailedToDeserializeJSONToValue {
                     json_byte_count: j.len() as u64,
@@ -251,15 +251,15 @@ impl AppSecureStorageClient {
 }
 
 #[cfg(test)]
-impl AppSecureStorageClient {
+impl SecureStorageClient {
     pub(crate) fn ephemeral(
-    ) -> (AppSecureStorageClient, Arc<EphemeralSecureStorage>) {
+    ) -> (SecureStorageClient, Arc<EphemeralSecureStorage>) {
         let storage = EphemeralSecureStorage::new();
-        (AppSecureStorageClient::new(storage.clone()), storage)
+        (SecureStorageClient::new(storage.clone()), storage)
     }
 
     pub(crate) fn always_fail() -> Self {
-        AppSecureStorageClient::new(Arc::new(AlwaysFailStorage {}))
+        SecureStorageClient::new(Arc::new(AlwaysFailStorage {}))
     }
 }
 
@@ -267,8 +267,8 @@ impl AppSecureStorageClient {
 mod tests {
     use super::*;
 
-    fn make_sut() -> AppSecureStorageClient {
-        AppSecureStorageClient::ephemeral().0
+    fn make_sut() -> SecureStorageClient {
+        SecureStorageClient::ephemeral().0
     }
 
     #[actix_rt::test]
@@ -352,7 +352,7 @@ mod tests {
         let private =
             PrivateHierarchicalDeterministicFactorSource::sample_other();
         let factor_source_id = private.factor_source.id;
-        let (sut, storage) = AppSecureStorageClient::ephemeral();
+        let (sut, storage) = SecureStorageClient::ephemeral();
         let key =
             SecureStorageKey::DeviceFactorSourceMnemonic { factor_source_id };
         assert_eq!(storage.load_data(key.clone()).await, Ok(None)); // not yet saved
@@ -368,14 +368,14 @@ mod tests {
         assert!(storage
             .load_data(key)
             .await
-            .map(|b| String::from_utf8(b.unwrap()).unwrap())
+            .map(|b| String::from_utf8(b.unwrap().to_vec()).unwrap())
             .unwrap()
             .contains("zoo"));
     }
 
     #[actix_rt::test]
     async fn save_mnemonic_with_passphrase_failure() {
-        let sut = AppSecureStorageClient::always_fail();
+        let sut = SecureStorageClient::always_fail();
         let id = FactorSourceIDFromHash::sample();
         assert_eq!(
             sut.save_mnemonic_with_passphrase(
@@ -395,16 +395,16 @@ mod tests {
         let private =
             PrivateHierarchicalDeterministicFactorSource::sample_other();
         let factor_source_id = private.factor_source.id;
-        let (sut, storage) = AppSecureStorageClient::ephemeral();
+        let (sut, storage) = SecureStorageClient::ephemeral();
         let key =
             SecureStorageKey::DeviceFactorSourceMnemonic { factor_source_id };
         assert!(storage
-            .save_data(key.clone(), vec![0xde, 0xad])
+            .save_data(key.clone(), BagOfBytes::from(vec![0xde, 0xad]))
             .await
             .is_ok());
         assert_eq!(
             storage.load_data(key.clone()).await,
-            Ok(Some(vec![0xde, 0xad]))
+            Ok(Some(BagOfBytes::from(vec![0xde, 0xad])))
         ); // assert save worked
 
         // ACT
@@ -430,7 +430,7 @@ mod tests {
             }
         }
 
-        let (sut, _) = AppSecureStorageClient::ephemeral();
+        let (sut, _) = SecureStorageClient::ephemeral();
         assert_eq!(
             sut.save(
                 SecureStorageKey::ActiveProfileID,

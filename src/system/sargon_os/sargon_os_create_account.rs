@@ -34,31 +34,40 @@ impl SargonOS {
         let err_exists = CommonError::AccountAlreadyPresent {
             bad_value: account.id(),
         };
-        self.update_profile_with(|mut p| {
-            let networks = &mut p.networks;
-            if networks.contains_id(&network_id) {
-                networks
-                    .try_update_with(&network_id, |network| {
-                        if (*network.accounts).append(account.clone()).0 {
-                            Ok(network.clone())
-                        } else {
-                            Err(err_exists.clone())
-                        }
-                    })
-                    .and_then(
-                        |r| if r { Ok(()) } else { Err(err_exists.clone()) },
-                    )
-            } else {
-                let network = ProfileNetwork::new(
-                    network_id,
-                    Accounts::from_iter([account.to_owned()]),
-                    Personas::default(),
-                    AuthorizedDapps::default(),
-                );
-                networks.append(network);
-                Ok(())
-            }
-        })
+        self.update_profile_with(
+            ProfileChange::AddedAccount {
+                address: account.address,
+            },
+            |mut p| {
+                let networks = &mut p.networks;
+                if networks.contains_id(&network_id) {
+                    networks
+                        .try_update_with(&network_id, |network| {
+                            if (*network.accounts).append(account.clone()).0 {
+                                Ok(network.clone())
+                            } else {
+                                Err(err_exists.clone())
+                            }
+                        })
+                        .and_then(|r| {
+                            if r {
+                                Ok(())
+                            } else {
+                                Err(err_exists.clone())
+                            }
+                        })
+                } else {
+                    let network = ProfileNetwork::new(
+                        network_id,
+                        Accounts::from_iter([account.to_owned()]),
+                        Personas::default(),
+                        AuthorizedDapps::default(),
+                    );
+                    networks.append(network);
+                    Ok(())
+                }
+            },
+        )
         .await
     }
 
@@ -83,12 +92,20 @@ impl SargonOS {
     //     .ok_or(CommonError::UnknownAccount)
     // }
 
-    pub(crate) async fn update_profile_with<F, R>(&self, mutate: F) -> Result<R>
+    pub(crate) async fn update_profile_with<F, R>(
+        &self,
+        event: ProfileChange,
+        mutate: F,
+    ) -> Result<R>
     where
         F: Fn(RwLockWriteGuard<'_, Profile>) -> Result<R>,
     {
         let res = self.profile_holder.update_profile_with(mutate)?;
         self.save_existing_profile().await?;
+        self.clients
+            .event_bus
+            .emit(Event::ProfileChanged { change: event })
+            .await;
         Ok(res)
     }
 

@@ -6,7 +6,7 @@ use std::sync::RwLock;
 /// Used for testing - a type which saves into memory.
 #[derive(Debug)]
 pub struct EphemeralSecureStorage {
-    pub storage: RwLock<HashMap<SecureStorageKey, Vec<u8>>>,
+    pub storage: RwLock<HashMap<SecureStorageKey, BagOfBytes>>,
 }
 
 impl EphemeralSecureStorage {
@@ -22,7 +22,7 @@ impl SecureStorageDriver for EphemeralSecureStorage {
     async fn load_data(
         &self,
         key: SecureStorageKey,
-    ) -> Result<Option<Vec<u8>>> {
+    ) -> Result<Option<BagOfBytes>> {
         self.storage
             .try_read()
             .map_err(|_| CommonError::SecureStorageReadError)
@@ -32,7 +32,7 @@ impl SecureStorageDriver for EphemeralSecureStorage {
     async fn save_data(
         &self,
         key: SecureStorageKey,
-        value: Vec<u8>,
+        value: BagOfBytes,
     ) -> Result<()> {
         let mut storage = self
             .storage

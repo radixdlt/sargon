@@ -9,7 +9,7 @@ pub struct Bios {
 impl Bios {
     #[uniffi::constructor]
     pub fn new(drivers: Arc<Drivers>) -> Arc<Self> {
-        install_logger(drivers.logging_driver.clone());
+        install_logger(drivers.logging.clone());
         Arc::new(Bios { drivers })
     }
 }
