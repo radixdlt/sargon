@@ -26,6 +26,11 @@ impl From<Profile> for ProfileHolder {
 }
 
 impl ProfileHolder {
+    /// Clone the profile and return it.
+    pub(super) fn profile(&self) -> Profile {
+        self.access_profile_with(|p| p.clone())
+    }
+
     pub(super) fn access_profile_with<T, F>(&self, access: F) -> T
     where
         F: Fn(RwLockReadGuard<'_, Profile>) -> T,

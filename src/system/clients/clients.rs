@@ -10,16 +10,20 @@ pub struct Clients {
 
 impl Clients {
     pub fn with_drivers(drivers: Arc<Drivers>) -> Self {
-        // let host = HostInfoClient::new(drivers.host_info);
-        // let secure_storage =
-        //     AppSecureStorageClient::new(drivers.secure_storage);
-        todo!();
+        let host = HostInfoClient::new(drivers.host_info.clone());
+        let secure_storage =
+            AppSecureStorageClient::new(drivers.secure_storage.clone());
+        let entropy = EntropyClient::new(drivers.entropy_provider.clone());
+        let http_client = HttpClient::new(drivers.networking.clone());
+        Self {
+            host,
+            secure_storage,
+            entropy,
+            http_client,
+        }
     }
 
     pub fn new(bios: Arc<Bios>) -> Self {
-        // let bios_ptr = unsafe { Arc::into_raw(bios) };
-        // let bios = unsafe { *bios_ptr };
-        // Self::with_drivers(bios.drivers)
-        todo!()
+        Self::with_drivers(bios.drivers.clone())
     }
 }

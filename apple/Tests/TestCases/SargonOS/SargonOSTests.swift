@@ -19,10 +19,30 @@ final class SargonOSTests: TestCase {
 	}
 }
 
-extension SargonOS {
-	func createAccount(named accountName: DisplayName, save: Bool) async throws -> Account {
-		
+extension Profile {
+	public var currentNetworkID: NetworkID {
+		appPreferences.gateways.current.networkID
 	}
+	
+	public func accounts(on network: NetworkID? = nil) -> Accounts {
+		networks[id: network ?? currentNetworkID]?.accounts ?? []
+	}
+	
+}
+
+extension SargonOS {
+	var currentNetworkID: NetworkID {
+		profile().currentNetworkID
+	}
+	
+	func createAccount(named accountName: DisplayName) async throws -> Account {
+		try await createAndSaveNewAccount(networkId: currentNetworkID, name: accountName)
+	}
+	
+	public func accounts(on network: NetworkID? = nil) -> Accounts {
+		profile().accounts(on: network)
+	}
+	
 }
 
 public final class TestOS {
@@ -38,28 +58,26 @@ public final class TestOS {
 // MARK: Private
 extension TestOS {
 	private func nextAccountName() -> DisplayName {
-		// FIXME use index
-		"Unnamed"
+		let index = accounts().count
+		return DisplayName(value: "Unnamed \(index)")
 	}
 	
 	private var profile: Profile {
-//		os.profile()
-		.sample
+		os.profile()
 	}
 }
 
 // MARK: Public
 extension TestOS {
 	
-	
-	public func accounts(on network: NetworkID = .mainnet) -> Accounts {
-		profile.networks[id: network]?.accounts ?? []
+	public func accounts(on network: NetworkID? = nil) -> Accounts {
+		os.accounts(on: network)
 	}
 	
 	@discardableResult
-	public func createAccount(name: String? = nil, save: Bool = true) async throws -> Self {
+	public func createAccount(name: String? = nil) async throws -> Self {
 		let accountName = try name.map { try DisplayName(validating: $0) } ?? nextAccountName()
-		let _ = try await os.createAccount(named: accountName, save: save)
+		let _ = try await os.createAccount(named: accountName)
 		return self
 	}
 }
@@ -73,6 +91,6 @@ final class TestOSTests: TestCase {
 			.createAccount()
 			.createAccount()
 		
-		XCTAssertEqual(sut.accounts().count, 3)
+		XCTAssertEqual(sut.accounts().map(\.displayName), ["Unnamed 0", "Unnamed 1", "Unnamed 2"])
 	}
 }
