@@ -137,8 +137,8 @@ impl Gateway {
 }
 
 impl Gateway {
-    pub fn wellknown() -> Vec<Self> {
-        vec![Self::mainnet(), Self::stokenet()]
+    pub fn wellknown() -> Gateways {
+        Gateways::from_iter([Self::mainnet(), Self::stokenet()])
     }
 
     pub fn is_wellknown(&self) -> bool {

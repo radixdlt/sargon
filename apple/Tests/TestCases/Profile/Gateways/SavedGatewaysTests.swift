@@ -4,7 +4,7 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class GatewaysTests: Test<Gateways> {
+final class SavedGatewaysTests: Test<SavedGateways> {
 	func test_preset_is_default() {
 		XCTAssertEqual(SUT.preset, SUT.default)
 	}

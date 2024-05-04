@@ -14,7 +14,7 @@ extension Gateway {
 		gatewayIsWellknown(gateway: self)
 	}
 	
-	public static let wellknown: [Self] = gatewayWellknownGateways()
+	public static let wellknown: Gateways = gatewayWellknownGateways()
 	
 	public init(url: String, networkID: NetworkID) throws {
 		self = try newGatewayWithUrlOnNetwork(url: url, networkId: networkID)

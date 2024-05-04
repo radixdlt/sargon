@@ -4,4 +4,4 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class OtherGatewaysTests: CanBeEmptyCollectionTest<OtherGateways> {}
+final class GatewaysTests: CanBeEmptyCollectionTest<Gateways> {}

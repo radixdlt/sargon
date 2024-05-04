@@ -8,17 +8,17 @@
 import Foundation
 import SargonUniFFI
 
-extension Gateways {
+extension SavedGateways {
 	
 	public init(current: Gateway) {
-		self = newGateways(current: current)
+		self = newSavedGateways(current: current)
 	}
 	
 	public var all: [Gateway] {
-		gatewaysGetAllElements(gateways: self)
+		savedGatewaysGetAllElements(gateways: self)
 	}
 	
-	public static let `default`: Self = newGatewaysDefault()
+	public static let `default`: Self = newSavedGatewaysDefault()
 	
 	/// Swaps current and other gateways:
 	///
@@ -28,7 +28,7 @@ extension Gateways {
 	public mutating func changeCurrent(
 		to newCurrent: Gateway
 	) throws {
-		self = try newGatewaysChangingCurrent(
+		self = try newSavedGatewaysChangingCurrent(
 			to: newCurrent,
 			gateways: self
 		)
