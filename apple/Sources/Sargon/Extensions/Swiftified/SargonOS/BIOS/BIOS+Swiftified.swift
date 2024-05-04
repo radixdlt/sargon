@@ -21,11 +21,9 @@ extension BIOS {
 			bundle: bundle,
 			keychainService: keychainService
 		)
-		
 		// https://en.wikipedia.org/wiki/Power-on_self-test
 		log.info("📬 BIOS POST (Power-On Self Test)")
 		
 		self.init(drivers: drivers)
-		
 	}
 }

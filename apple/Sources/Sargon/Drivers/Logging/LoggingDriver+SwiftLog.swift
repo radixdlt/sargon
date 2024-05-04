@@ -38,7 +38,10 @@ public final actor Log {
 
 extension Log: LoggingDriver {
 	
-	nonisolated public func log(level: LogLevel, msg: String) {
+	nonisolated public func log(
+		level: LogLevel,
+		msg: String
+	) {
 		rustLogger.log(
 			level: .init(sargonLogLevel: level),
 			"\(msg)"
@@ -60,12 +63,28 @@ public var log: Logger {
 extension Logger: @unchecked Sendable {}
 
 extension OSLogType {
+	
+	/// Rust has 5 log levels, so does Swift.
+	///
+	/// The mapping might look a bit strange since we do NOT map `error` -> `error`,
+	/// neither do we map `debug` -> `debug`, instead we map the most serious Rust
+	/// log level to the most serious Swift log level, and the least serious Rust to least
+	/// serious to Swift.
 	init(sargonLogLevel sargon: Sargon.LogLevel) {
 		switch sargon {
-		case .trace, .debug: self = .debug
+		case .error: 
+			// yes this is correct we dont map `error` -> `error`.
+			self = .fault
+		case .warn:
+			// Swift does not have warn, we use error, and we use Swifts fault for Rust error.
+			self = .error
 		case .info: self = .info
-		case .warn: self = .debug
-		case .error: self = .error
+		case .debug: 
+			// yes this is correct we dont map `debug` -> `debug`.
+			self = .default
+		case .trace:
+			// debug is Swifts least serious, and `trace` is Rust least serious.
+			self = .debug
 		}
 	}
 }

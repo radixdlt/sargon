@@ -22,11 +22,13 @@ impl SargonOS {
 
         let host_info_client = HostInfoClient::new(drivers.host_info.clone());
 
+        let sargon_info = SargonBuildInformation::get();
         let host_info = host_info_client.summary().await;
 
         info!(
-            "Booting SargonOS {:?}\nHost: {}",
-            SargonBuildInformation::get(),
+            "Booting SargonOS {} (RET: {})\nHost: {}",
+            &sargon_info.sargon_version,
+            &sargon_info.dependencies.radix_engine_toolkit,
             host_info
         );
 
