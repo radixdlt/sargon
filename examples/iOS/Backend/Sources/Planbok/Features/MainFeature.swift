@@ -148,8 +148,10 @@ public struct MainFeature {
 				.alert($store.scope(state: \.destination?.alert, action: \.destination.alert))
 				.toolbar {
 					ToolbarItem(placement: .primaryAction) {
-						Button("Settings") {
-							send(.settingsButtonTapped)
+						NavigationStack {
+							Button("Settings") {
+								send(.settingsButtonTapped)
+							}
 						}
 					}
 				}

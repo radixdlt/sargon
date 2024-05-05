@@ -6,14 +6,13 @@
 //
 
 import Foundation
-
-public typealias Result<T> = Swift.Result<T, CommonError>
+import ComposableArchitecture
+import Sargon
 
 @Reducer
 public struct WriteDownMnemonicFeature {
 
 	@Dependency(MnemonicClient.self) var mnemonicClient
-	
 	
 	public init() {}
 	
@@ -39,6 +38,32 @@ public struct WriteDownMnemonicFeature {
 		case view(ViewAction)
 		case `internal`(InternalAction)
 	}
+
+	public var body: some ReducerOf<Self> {
+		Reduce { state, action in
+			switch action {
+			case let .internal(.loadedPrivateHDFactor(privateHDFactor)):
+				state.mnemonic = privateHDFactor.mnemonicWithPassphrase.mnemonic.phrase
+				return .none
+				
+			case .view(.revealMnemonicButtonTapped):
+				return .run { send in
+					let id = try SargonOS.shared.profile().factorSources.first!.id.extract(as: FactorSourceIdFromHash.self)
+					let privateHDFactor = try await mnemonicClient.loadMnemonic(id)
+					await send(.internal(.loadedPrivateHDFactor(privateHDFactor)))
+				} catch: { error, send in
+					fatalError("error \(error)")
+				}
+			case .view(.continueButtonTapped):
+				return .send(.delegate(.done))
+			case .delegate:
+				return .none
+			}
+		}
+	}
+}
+
+extension WriteDownMnemonicFeature {
 	
 	@ViewAction(for: WriteDownMnemonicFeature.self)
 	public struct View: SwiftUI.View {
@@ -66,98 +91,4 @@ public struct WriteDownMnemonicFeature {
 		}
 	}
 	
-
-	public var body: some ReducerOf<Self> {
-		Reduce { state, action in
-			switch action {
-			case let .internal(.loadedPrivateHDFactor(privateHDFactor)):
-				state.mnemonic = privateHDFactor.mnemonicWithPassphrase.mnemonic.phrase
-				return .none
-				
-			case .view(.revealMnemonicButtonTapped):
-				return .run { send in
-					let id = try SargonOS.shared.profile().factorSources.first!.id.extract(as: FactorSourceIdFromHash.self)
-					let privateHDFactor = try await mnemonicClient.loadMnemonic(id)
-					await send(.internal(.loadedPrivateHDFactor(privateHDFactor)))
-				} catch: { error, send in
-					fatalError("error \(error)")
-				}
-			case .view(.continueButtonTapped):
-				return .send(.delegate(.done))
-			case .delegate:
-				return .none
-			}
-		}
-	}
-}
-
-import Sargon
-import DependenciesMacros
-
-@DependencyClient
-public struct MnemonicClient: Sendable {
-	public typealias LoadMnemonic = @Sendable (FactorSourceIDFromHash) async throws -> PrivateHierarchicalDeterministicFactorSource
-	public var loadMnemonic: LoadMnemonic
-}
-extension MnemonicClient: DependencyKey {
-	public static let liveValue = Self.live(os: SargonOS.shared)
-	public static func live(os: SargonOS) -> Self {
-		Self(
-			loadMnemonic: { id in
-				try await os.loadPrivateDeviceFactorSourceById(id: id)
-			}
-		)
-	}
-}
-
-@DependencyClient
-public struct AccountsClient: Sendable {
-	public typealias GetAccounts = @Sendable () -> Accounts
-	public typealias AccountsStream = @Sendable () -> AsyncStream<Accounts>
-	public typealias CreateAndSaveAccount = @Sendable (NetworkID, DisplayName) async throws -> Account
-
-	public var getAccounts: GetAccounts
-	public var accountsStream: AccountsStream
-	public var createAndSaveAccount: CreateAndSaveAccount
-}
-
-extension AccountsClient: DependencyKey {
-	public static let liveValue = Self.live(os: SargonOS.shared)
-	public static func live(os: SargonOS) -> Self {
-		let getAccounts: GetAccounts = {
-			os.accounts()
-		}
-		return Self(
-			getAccounts: getAccounts,
-			accountsStream: {
-				AsyncStream<Accounts> { continuation in
-					Task {
-						for await _ in await EventBus.shared.notifications() {
-							continuation.yield(getAccounts())
-						}
-					}
-				}
-			},
-			createAndSaveAccount: {
-				try await os.createAndSaveNewAccount(networkId: $0, name: $1)
-			}
-		)
-	}
-}
-
-@DependencyClient
-public struct ProfileClient: Sendable {
-	public typealias DeleteProfileAndMnemonicsThenCreateNew = @Sendable () async throws -> Void
-	public var deleteProfileAndMnemonicsThenCreateNew: DeleteProfileAndMnemonicsThenCreateNew
-}
-
-extension ProfileClient: DependencyKey {
-	public static let liveValue = Self.live(os: SargonOS.shared)
-	public static func live(os: SargonOS) -> Self {
-		return Self(
-			deleteProfileAndMnemonicsThenCreateNew: {
-				try await os.deleteProfileThenCreateNewWithBdfs()
-			}
-		)
-	}
 }

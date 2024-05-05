@@ -39,6 +39,29 @@ public struct SelectGradientFeature {
 		case delegate(Delegate)
 	}
 	
+	public init() {}
+	
+	public var body: some ReducerOf<Self> {
+		Reduce { state, action in
+			switch action {
+			
+			case let .view(.selectedGradient(gradient)):
+				state.gradient = gradient
+				return .none
+			
+			case .view(.confirmedGradientButtonTapped):
+				return .send(.delegate(.selected(state.gradient, state.name)))
+				
+			default:
+				return .none
+				
+			}
+		}
+	}
+}
+
+extension SelectGradientFeature {
+	
 	@ViewAction(for: SelectGradientFeature.self)
 	public struct View: SwiftUI.View {
 		public let store: StoreOf<SelectGradientFeature>
@@ -82,26 +105,6 @@ public struct SelectGradientFeature {
 				.buttonStyle(.borderedProminent)
 			}
 			.padding()
-		}
-	}
-	
-	public init() {}
-	
-	public var body: some ReducerOf<Self> {
-		Reduce { state, action in
-			switch action {
-			
-			case let .view(.selectedGradient(gradient)):
-				state.gradient = gradient
-				return .none
-			
-			case .view(.confirmedGradientButtonTapped):
-				return .send(.delegate(.selected(state.gradient, state.name)))
-				
-			default:
-				return .none
-				
-			}
 		}
 	}
 }

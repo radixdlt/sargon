@@ -1,3 +1,4 @@
+import SwiftUI
 import Sargon
 import ComposableArchitecture
 
@@ -24,8 +25,6 @@ public struct OnboardingFeature {
 		public init() {
 			self.welcome = WelcomeFeature.State()
 		}
-		
-	
 	}
 	
 	@CasePathable
@@ -34,7 +33,7 @@ public struct OnboardingFeature {
 		public enum DelegateAction {
 			case createdAccount
 		}
-
+		
 		case destination(PresentationAction<Destination.Action>)
 		case path(StackAction<Path.State, Path.Action>)
 		case welcome(WelcomeFeature.Action)
@@ -72,7 +71,7 @@ public struct OnboardingFeature {
 				state.destination = nil
 				state.path.append(.writeDownMnemonic(.init()))
 				return .none
-
+				
 			default:
 				return .none
 			}
@@ -80,7 +79,9 @@ public struct OnboardingFeature {
 		.forEach(\.path, action: \.path)
 		.ifLet(\.$destination, action: \.destination)
 	}
+}
 
+extension OnboardingFeature {
 	public struct View: SwiftUI.View {
 		@Bindable var store: StoreOf<OnboardingFeature>
 		
@@ -109,10 +110,6 @@ public struct OnboardingFeature {
 			) { store in
 				CreateAccountFlowFeature.View(store: store)
 			}
-			
 		}
-		
 	}
-	
-	
 }
