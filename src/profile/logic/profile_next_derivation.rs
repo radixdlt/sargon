@@ -32,15 +32,17 @@ impl Profile {
         self.factor_source_by_id(*id)
     }
 
-    pub fn bdfs(&self) -> DeviceFactorSource {
-        let device_factor_source = self
-            .factor_sources
+    pub fn device_factor_sources(&self) -> Vec<DeviceFactorSource> {
+        self.factor_sources
             .iter()
             .cloned()
             .filter_map(|f| f.as_device().cloned())
-            .collect_vec();
+            .collect_vec()
+    }
 
-        let explicit_main = device_factor_source
+    pub fn bdfs(&self) -> DeviceFactorSource {
+        let device_factor_sources = self.device_factor_sources();
+        let explicit_main = device_factor_sources
             .clone()
             .into_iter()
             .filter(|x| x.is_main_bdfs())
@@ -48,7 +50,7 @@ impl Profile {
             .first()
             .cloned();
 
-        let implicit_main = device_factor_source
+        let implicit_main = device_factor_sources
             .into_iter()
             .filter(|x| x.common.supports_babylon())
             .collect_vec()

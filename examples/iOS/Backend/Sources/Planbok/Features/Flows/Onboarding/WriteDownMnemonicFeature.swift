@@ -11,9 +11,10 @@ public typealias Result<T> = Swift.Result<T, CommonError>
 
 @Reducer
 public struct WriteDownMnemonicFeature {
-	
-	@Dependency(\.keychain) var keychain
 
+	@Dependency(MnemonicClient.self) var mnemonicClient
+	
+	
 	public init() {}
 	
 	@ObservableState
@@ -65,8 +66,7 @@ public struct WriteDownMnemonicFeature {
 		}
 	}
 	
-	@Dependency(MnemonicClient.self) var mnemonicClient
-	
+
 	public var body: some ReducerOf<Self> {
 		Reduce { state, action in
 			switch action {
@@ -120,6 +120,7 @@ public struct AccountsClient: Sendable {
 	public var accountsStream: AccountsStream
 	public var createAndSaveAccount: CreateAndSaveAccount
 }
+
 extension AccountsClient: DependencyKey {
 	public static let liveValue = Self.live(os: SargonOS.shared)
 	public static func live(os: SargonOS) -> Self {
@@ -139,6 +140,23 @@ extension AccountsClient: DependencyKey {
 			},
 			createAndSaveAccount: {
 				try await os.createAndSaveNewAccount(networkId: $0, name: $1)
+			}
+		)
+	}
+}
+
+@DependencyClient
+public struct ProfileClient: Sendable {
+	public typealias DeleteProfileAndMnemonicsThenCreateNew = @Sendable () async throws -> Void
+	public var deleteProfileAndMnemonicsThenCreateNew: DeleteProfileAndMnemonicsThenCreateNew
+}
+
+extension ProfileClient: DependencyKey {
+	public static let liveValue = Self.live(os: SargonOS.shared)
+	public static func live(os: SargonOS) -> Self {
+		return Self(
+			deleteProfileAndMnemonicsThenCreateNew: {
+				try await os.deleteProfileThenCreateNewWithBdfs()
 			}
 		)
 	}

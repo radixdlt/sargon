@@ -25,8 +25,21 @@ extension BIOS {
 		keychainService: String,
 		userDefaultsSuite: String
 	) -> BIOS {
+		Self.settingShared(
+			shared: BIOS(
+				bundle: bundle,
+				keychainService: keychainService,
+				userDefaultsSuite: userDefaultsSuite
+			)
+		)
+	}
+	
+	/// Can be access later with `OS.shared`
+	@discardableResult
+	public static func settingShared(
+		shared: BIOS
+	) -> BIOS {
 		assert(_shared == nil, "Should not be created twice")
-		let shared = BIOS(bundle: bundle, keychainService: keychainService, userDefaultsSuite: userDefaultsSuite)
 		Self._shared = shared
 		return shared
 	}

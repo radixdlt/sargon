@@ -16,11 +16,26 @@ struct PlanbokApp: App {
 	
 
 	init() {
-		BIOS.createdShared(
-			bundle: .main,
-			keychainService: "works.rdx.planbok",
-			userDefaultsSuite: "works.rdx.planbok"
+		let bios = BIOS.init(
+			drivers: .init(
+				networking: URLSession.shared,
+				secureStorage: Keychain(service: "rdx.works.planbok"),
+				entropyProvider: EntropyProvider.shared,
+				hostInfo: HostInfo(
+					appVersion: "0.0.01"
+				),
+				logging: Log.shared,
+				eventBus: EventBus.shared,
+				fileSystem: FileSystem.shared,
+				unsafeStorage: UnsafeStorage.init(
+					userDefaults: .init(
+						suiteName: "rdx.works"
+					)!
+				)
+			)
 		)
+		
+		BIOS.settingShared(shared: bios)
 	}
 	
 	var body: some Scene {

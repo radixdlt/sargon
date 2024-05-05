@@ -248,6 +248,22 @@ impl SecureStorageClient {
             })
             .await
     }
+
+    pub async fn delete_profile(&self, id: ProfileID) -> Result<()> {
+        warn!("Deleting profile with id: {}", id);
+        self.driver
+            .delete_data_for_key(SecureStorageKey::ProfileSnapshot {
+                profile_id: id,
+            })
+            .await
+    }
+
+    pub async fn delete_active_profile_id(&self) -> Result<()> {
+        info!("Deleting active profile id");
+        self.driver
+            .delete_data_for_key(SecureStorageKey::ActiveProfileID)
+            .await
+    }
 }
 
 #[cfg(test)]

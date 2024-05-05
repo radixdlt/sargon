@@ -13,7 +13,6 @@ extension EventBusDriver where Self == EventBus {
 }
 
 
-
 extension Event {
 	public var addressOfNewAccount: AccountAddress {
 		switch self {

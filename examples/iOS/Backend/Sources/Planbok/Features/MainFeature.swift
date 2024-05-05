@@ -4,10 +4,14 @@ import ComposableArchitecture
 @Reducer
 public struct MainFeature {
 	
+	@Dependency(ProfileClient.self) var profileClient
+
 	@Reducer(state: .equatable)
 	public enum Destination {
 		case createAccount(CreateAccountFlowFeature)
-		case sampleValues(SampleValuesFeature)
+		
+		case settings(SettingsFeature)
+		
 		case alert(AlertState<Alert>)
 		
 		public enum Alert {
@@ -30,14 +34,17 @@ public struct MainFeature {
 	
 	@CasePathable
 	public enum Action: ViewAction {
+		
 		@CasePathable
 		public enum ViewAction {
-			case sampleValuesButtonTapped
+			case settingsButtonTapped
 		}
+		
 		@CasePathable
 		public enum DelegateAction {
 			case deletedWallet
 		}
+		
 		case view(ViewAction)
 		case destination(PresentationAction<Destination.Action>)
 		case accounts(AccountsFeature.Action)
@@ -46,7 +53,6 @@ public struct MainFeature {
 		
 	}
 	
-	@Dependency(\.keychain) var keychain
 	public init() {}
 	
 	public var body: some ReducerOf<Self> {
@@ -56,8 +62,8 @@ public struct MainFeature {
 		Reduce { state, action in
 			switch action {
 				
-			case .view(.sampleValuesButtonTapped):
-				state.destination = .sampleValues(SampleValuesFeature.State())
+			case .view(.settingsButtonTapped):
+				state.destination = .settings(SettingsFeature.State())
 				return .none
 			
 			case .accounts(.delegate(.deleteWallet)):
@@ -81,15 +87,11 @@ public struct MainFeature {
 				return .none
 				
 			case .destination(.presented(.alert(.confirmedDeleteWallet))):
-				print("⚠️ Confirmed deletion of wallet")
+				log.notice("Confirmed deletion of wallet")
 				state.destination = nil
-				let profileID = SargonOS.shared.profile.id
-				do {
-					try keychain.deleteDataForKey(SecureStorageKey.profileSnapshot(profileId: profileID))
-					try keychain.deleteDataForKey(SecureStorageKey.activeProfileId)
-					return .send(.delegate(.deletedWallet))
-				} catch {
-					fatalError("Fix error handling, error: \(error)")
+				return .run { send in
+					try await profileClient.deleteProfileAndMnemonicsThenCreateNew()
+					await send(.delegate(.deletedWallet))
 				}
 			
 			case .destination(.presented(.createAccount(.delegate(.createdAccount)))):
@@ -127,12 +129,12 @@ public struct MainFeature {
 				}
 				.sheet(
 					item: $store.scope(
-						state: \.destination?.sampleValues,
-						action: \.destination.sampleValues
+						state: \.destination?.settings,
+						action: \.destination.settings
 					)
 				) { store in
 					NavigationView {
-						SampleValuesFeature.View(store: store)
+						SettingsFeature.View(store: store)
 					}
 				}
 				.sheet(
@@ -146,8 +148,8 @@ public struct MainFeature {
 				.alert($store.scope(state: \.destination?.alert, action: \.destination.alert))
 				.toolbar {
 					ToolbarItem(placement: .primaryAction) {
-						Button("Samples") {
-							send(.sampleValuesButtonTapped)
+						Button("Settings") {
+							send(.settingsButtonTapped)
 						}
 					}
 				}

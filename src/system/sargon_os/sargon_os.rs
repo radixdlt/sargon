@@ -59,7 +59,7 @@ impl SargonOS {
 }
 
 impl SargonOS {
-    async fn new_profile_and_bdfs(
+    pub(crate) async fn new_profile_and_bdfs(
         clients: &Clients,
     ) -> Result<(Profile, PrivateHierarchicalDeterministicFactorSource)> {
         debug!("Creating new Profile and BDFS");

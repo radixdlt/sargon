@@ -5,7 +5,6 @@ import ComposableArchitecture
 public struct SplashFeature {
 
 	@Dependency(\.continuousClock) var clock
-
 	@ObservableState
 	public struct State {
 		public init() {}

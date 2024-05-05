@@ -64,31 +64,40 @@ public struct CreateAccountFlowFeature {
 			switch action {
 
 			case let .nameAccount(.delegate(.named(name))):
-				state.path.append(.selectGradient(.init(name: name)))
+//				state.path.append(.selectGradient(.init(name: name)))
+//				return .none
+				return .run { send in
+					try await accountsClient.createAndSaveAccount(.mainnet, name)
+					await send(.delegate(.createdAccount))
+				} catch: { _, error in
+					fatalError("TODO error handling: \(error)")
+				}
+				
+			case .path:
 				return .none
 
-			case .path(let pathAction):
-				switch pathAction {
-					
-				case let .element(
-					id: _,
-					action: .selectGradient(.delegate(.selected(_, displayName)))
-				):
-					
-					return .run { send in
-						try await accountsClient.createAndSaveAccount(.mainnet, displayName)
-						await send(.delegate(.createdAccount))
-					} catch: { _, error in
-						fatalError("TODO error handling: \(error)")
-					}
-						
-				case .element(id: _, action: _):
-					return .none
-				case .popFrom(id: _):
-					return .none
-				case .push(id: _, state: _):
-					return .none
-				}
+//			case .path(let pathAction):
+//				switch pathAction {
+//					
+//				case let .element(
+//					id: _,
+//					action: .selectGradient(.delegate(.selected(_, displayName)))
+//				):
+//					
+//					return .run { send in
+//						try await accountsClient.createAndSaveAccount(.mainnet, displayName)
+//						await send(.delegate(.createdAccount))
+//					} catch: { _, error in
+//						fatalError("TODO error handling: \(error)")
+//					}
+//						
+//				case .element(id: _, action: _):
+//					return .none
+//				case .popFrom(id: _):
+//					return .none
+//				case .push(id: _, state: _):
+//					return .none
+//				}
 
 			case .nameAccount(.view):
 				return .none
