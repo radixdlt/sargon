@@ -50,6 +50,9 @@ public struct CreateAccountFlowFeature {
 		}
 	}
 	
+	
+	@Dependency(AccountsClient.self) var accountsClient
+	
 	public init() {}
 	
 	public var body: some ReducerOf<Self> {
@@ -73,7 +76,7 @@ public struct CreateAccountFlowFeature {
 				):
 					
 					return .run { send in
-						try await SargonOS.shared.createAccount(named: displayName)
+						try await accountsClient.createAndSaveAccount(.mainnet, displayName)
 						await send(.delegate(.createdAccount))
 					} catch: { _, error in
 						fatalError("TODO error handling: \(error)")

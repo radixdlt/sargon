@@ -3,6 +3,7 @@ import ComposableArchitecture
 
 @Reducer
 public struct AccountsFeature {
+	
 	public init() {}
 	
 	public var body: some ReducerOf<Self> {
@@ -22,7 +23,6 @@ public struct AccountsFeature {
 
 	@ObservableState
 	public struct State: Equatable {
-		
 	
 		public var accounts: Accounts
 		

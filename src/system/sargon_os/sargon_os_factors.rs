@@ -1,5 +1,28 @@
 use crate::prelude::*;
 
+#[uniffi::export]
+impl SargonOS {
+    /// Loads a `MnemonicWithPassphrase` with the `id` of `device_factor_source`,
+    /// from SecureStorage, and returns a `PrivateHierarchicalDeterministicFactorSource`
+    /// built from both.
+    ///
+    /// Useful for when you will want to sign transactions or derive public keys for
+    /// creation of new entities.
+    ///
+    /// Returns `Err` if loading or decoding of `MnemonicWithPassphrase` from
+    /// SecureStorage fails.
+    pub async fn load_private_device_factor_source_by_id(
+        &self,
+        id: &FactorSourceIDFromHash,
+    ) -> Result<PrivateHierarchicalDeterministicFactorSource> {
+        let device_factor_source = self
+            .profile_holder
+            .access_profile_with(|p| p.device_factor_source_by_id(id))?;
+        self.load_private_device_factor_source(&device_factor_source)
+            .await
+    }
+}
+
 impl SargonOS {
     /// Tries to load a `MnemonicWithPassphrase` from secure storage
     /// by `id` of type `FactorSourceIDFromHash`.
@@ -43,26 +66,6 @@ impl SargonOS {
         .log_info(
             "Successfully loaded Private DeviceFactorSource from SecureStorage",
         )
-    }
-
-    /// Loads a `MnemonicWithPassphrase` with the `id` of `device_factor_source`,
-    /// from SecureStorage, and returns a `PrivateHierarchicalDeterministicFactorSource`
-    /// built from both.
-    ///
-    /// Useful for when you will want to sign transactions or derive public keys for
-    /// creation of new entities.
-    ///
-    /// Returns `Err` if loading or decoding of `MnemonicWithPassphrase` from
-    /// SecureStorage fails.
-    pub async fn load_private_device_factor_source_by_id(
-        &self,
-        id: &FactorSourceIDFromHash,
-    ) -> Result<PrivateHierarchicalDeterministicFactorSource> {
-        let device_factor_source = self
-            .profile_holder
-            .access_profile_with(|p| p.device_factor_source_by_id(id))?;
-        self.load_private_device_factor_source(&device_factor_source)
-            .await
     }
 
     /// Tries to load a `MnemonicWithPassphrase` from secure storage
