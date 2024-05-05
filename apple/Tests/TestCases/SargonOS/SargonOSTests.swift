@@ -5,7 +5,7 @@ import SargonUniFFI
 import XCTest
 
 final class SargonOSTests: TestCase {
-	typealias SUT = OS
+	typealias SUT = SargonOS
 	
 	func test() async throws {
 		let _ = try await SUT.boot(
@@ -16,52 +16,8 @@ final class SargonOSTests: TestCase {
 	}
 }
 
-@dynamicMemberLookup
-public final class TestOS {
-	private let os: OS
-	public init(bios: BIOS) async throws {
-		self.os = try await OS.boot(bios: bios)
-	}
-	public convenience init() async throws {
-		try await self.init(bios: .test)
-	}
-}
-
-
-extension TestOS {
-	public nonisolated subscript<T>(dynamicMember keypath: KeyPath<OS, T>) -> T {
-		os[keyPath: keypath]
-	}
-}
-
-// MARK: Private
-extension TestOS {
-	private func nextAccountName() -> DisplayName {
-		let index = accounts().count
-		return DisplayName(value: "Unnamed \(index)")
-	}
-	
-	private var profile: Profile {
-		get async { await os.booted.profile }
-	}
-}
-
-// MARK: Public
-extension TestOS {
-	
-	public func accounts(on network: NetworkID? = nil) async -> Accounts {
-		await profile.accounts(on: network)
-	}
-	
-	@discardableResult
-	public func createAccount(name: String? = nil) async throws -> Self {
-		let accountName = try name.map { try DisplayName(validating: $0) } ?? nextAccountName()
-		let _ = try await os.createAccount(named: accountName)
-		return self
-	}
-}
-
 final class TestOSTests: TestCase {
+
 	func test_create_accounts() async throws {
 		let sut = try await TestOS()
 		let n = 3
