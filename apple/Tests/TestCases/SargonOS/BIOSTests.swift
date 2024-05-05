@@ -5,7 +5,11 @@ import SargonUniFFI
 import XCTest
 
 extension BIOS {
-	static let test = BIOS(bundle: .main, keychainService: "Test")
+	static let test = BIOS(
+		bundle: .main,
+		keychainService: "Test",
+		userDefaultsSuite: "works.rdx"
+	)
 }
 
 final class BIOSTests: TestCase {

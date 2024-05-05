@@ -499,6 +499,9 @@ pub enum CommonError {
 
     #[error("Failed to write to unsafe storage.")]
     UnsafeStorageWriteError = 10139,
+
+    #[error("Failed to create file path from string: '{bad_value}'")]
+    FailedToCreateFilePathFromString { bad_value: String } = 10140,
 }
 
 #[uniffi::export]

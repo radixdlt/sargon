@@ -5,7 +5,11 @@ import SargonUniFFI
 import XCTest
 
 extension Drivers {
-	public static let test = Drivers(appVersion: "0.0.1", keychainService: "Test")
+	public static let test = Drivers(
+		appVersion: "0.0.1",
+		keychainService: "Test",
+		userDefaultsSuite: "works.rdx"
+	)
 }
 
 final class DriversTests: TestCase {

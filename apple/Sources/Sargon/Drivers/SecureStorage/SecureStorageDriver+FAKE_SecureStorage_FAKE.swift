@@ -8,19 +8,19 @@
 import Foundation
 import SargonUniFFI
 
-extension SecureStorageDriver where Self == UnsafeMockSecureStorage {
+extension SecureStorageDriver where Self == FAKE_SecureStorage_FAKE {
 	public init(keychainService: String) {
 		self.init(keychainService: keychainService)
 	}
 }
 
-public final actor UnsafeMockSecureStorage {
+public final actor FAKE_SecureStorage_FAKE {
 	public typealias Key = SecureStorageKey
 	fileprivate var dictionary: [Key: Data] = [:]
 	public init(keychainService _: String) {}
 }
 
-extension UnsafeMockSecureStorage: SecureStorageDriver {
+extension FAKE_SecureStorage_FAKE: SecureStorageDriver {
 	public func loadData(key: SecureStorageKey) async throws -> Data? {
 		dictionary[key]
 	}

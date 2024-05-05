@@ -15,11 +15,13 @@ extension BIOS {
 	
 	public convenience init(
 		bundle: Bundle,
-		keychainService: String
+		keychainService: String,
+		userDefaultsSuite: String
 	) {
 		let drivers = Drivers(
 			bundle: bundle,
-			keychainService: keychainService
+			keychainService: keychainService,
+			userDefaultsSuite: userDefaultsSuite
 		)
 		// https://en.wikipedia.org/wiki/Power-on_self-test
 		log.info("📬 BIOS POST (Power-On Self Test)")

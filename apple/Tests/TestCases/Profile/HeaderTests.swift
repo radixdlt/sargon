@@ -77,9 +77,9 @@ final class HeaderTests: Test<Header> {
             },
             {
                 "lastUsedOnDevice" : {
-                    "date" : "2023-12-20T16:05:56.000Z",
-                    "description" : { "name": "iPhone", "model": "iPhone" },
-                    "id" : "aabbccdd-a9d9-49e5-8152-beefbeefbeef"
+                    "date" : "2023-12-24T17:13:56.123Z",
+                    "description" : { "name": "Android", "model": "Android" },
+                    "id" : "F07CA662-D9A9-9E45-1582-ACA773D174DD"
                 },
                 "id" : "87654321-bbbb-cccc-dddd-87654321dcba",
                 "contentHint" : {
@@ -88,12 +88,12 @@ final class HeaderTests: Test<Header> {
                     "numberOfPersonasOnAllNetworksInTotal" : 0
                 },
                 "creatingDevice" : {
-                    "description" : { "name": "iPhone", "model": "iPhone" },
-                    "id" : "aabbccdd-a9d9-49e5-8152-beefbeefbeef",
-                    "date" : "2023-12-20T16:05:56.000Z"
+                    "description" : { "name": "Android", "model": "Android" },
+                    "id" : "F07CA662-D9A9-9E45-1582-ACA773D174DD",
+                    "date" : "2023-12-24T17:13:56.123Z"
                 },
                 "snapshotVersion" : 100,
-                "lastModified" : "2023-12-20T16:05:56.000Z"
+                "lastModified" : "2023-12-24T17:13:56.123Z"
             }
         ]
         """.data(using: .utf8)!

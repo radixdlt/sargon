@@ -10,10 +10,7 @@ final class SargonOSTests: TestCase {
 	func test() async throws {
 		let _ = try await SUT.boot(
 			bios: .init(
-				drivers: .init(
-					appVersion: "0.0.1",
-					keychainService: "Test"
-				)
+				drivers: .test
 			)
 		)
 	}

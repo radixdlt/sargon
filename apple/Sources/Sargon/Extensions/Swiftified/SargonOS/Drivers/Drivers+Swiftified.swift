@@ -14,34 +14,42 @@ extension Drivers {
 	
 	public convenience init(
 		secureStorage: SecureStorageDriver,
-		hostInfo: HostInfoDriver
+		hostInfo: HostInfoDriver,
+		unsafeStorage: UnsafeStorage
 	) {
 		self.init(
 			networking: .shared,
 			secureStorage: secureStorage,
 			entropyProvider: .shared,
 			hostInfo: hostInfo,
-			loggingDriver: .shared
+			logging: .shared,
+			eventBus: .shared,
+			fileSystem: .shared,
+			unsafeStorage: unsafeStorage
 		)
 	}
 
 	public convenience init(
 		appVersion: String,
-		keychainService: String
+		keychainService: String,
+		userDefaultsSuite: String
 	) {
 		self.init(
-			secureStorage: UnsafeMockSecureStorage(keychainService: keychainService),
-			hostInfo: HostInfo(appVersion: appVersion)
+			secureStorage: FAKE_SecureStorage_FAKE(keychainService: keychainService),
+			hostInfo: HostInfo(appVersion: appVersion),
+			unsafeStorage: UnsafeStorage.init(userDefaults: .init(suiteName: userDefaultsSuite)!)
 		)
 	}
 	
 	public convenience init(
 		bundle: Bundle,
-		keychainService: String
+		keychainService: String,
+		userDefaultsSuite: String
 	) {
 		self.init(
 			appVersion: (bundle.infoDictionary?["CFBundleShortVersionString"] as? String) ?? "Unknown",
-			keychainService: keychainService
+			keychainService: keychainService,
+			userDefaultsSuite: userDefaultsSuite
 		)
 	}
 }
