@@ -25,6 +25,7 @@ public struct AppFeature {
 		public init(store: StoreOf<AppFeature>) {
 			self.store = store
 		}
+		
 		public var body: some SwiftUI.View {
 			switch store.state {
 			case .splash:
@@ -58,7 +59,7 @@ public struct AppFeature {
 				}
 				return .none
 			
-			case .onboarding(.delegate(.createdAccount)):
+			case .onboarding(.delegate(.done)):
 				state = .main(MainFeature.State())
 				return .none
 				

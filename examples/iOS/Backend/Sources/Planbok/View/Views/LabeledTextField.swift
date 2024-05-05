@@ -8,6 +8,8 @@ public struct LabeledTextField: SwiftUI.View {
 		VStack(alignment: .leading) {
 			Text(label).padding(.leading, 5)
 			TextField(label, text: $text)
+				.autocorrectionDisabled()
+				.textInputAutocapitalization(.never)
 		}
 		.textFieldStyle(.roundedBorder)
 	}

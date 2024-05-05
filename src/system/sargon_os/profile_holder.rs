@@ -41,6 +41,17 @@ impl ProfileHolder {
             .expect("Implementing Wallet clients should not read and write Profile from Wallet from multiple threads.")
     }
 
+    /// Sets the profile held by this ProfileHolder to `profile`.
+    pub(super) fn replace_profile_with(&self, profile: Profile) -> Result<()> {
+        let mut lock = self
+            .profile
+            .try_write()
+            .map_err(|_| CommonError::UnableToAcquireWriteLockForProfile)?;
+
+        *lock = profile;
+        Ok(())
+    }
+
     pub(super) fn update_profile_with<F, R>(&self, mutate: F) -> Result<R>
     where
         F: Fn(RwLockWriteGuard<'_, Profile>) -> Result<R>,

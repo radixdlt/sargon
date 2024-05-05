@@ -57,9 +57,11 @@ public struct AccountsFeature {
 			VStack {
 				Text("Accounts").font(.largeTitle)
 				
-				ForEach(store.state.accounts) { account in
-					VStack {
-						AccountView(account: account)
+				ScrollView {
+					ForEach(store.state.accounts) { account in
+						VStack {
+							AccountView(account: account)
+						}
 					}
 				}
 				

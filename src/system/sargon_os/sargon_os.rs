@@ -3,10 +3,11 @@ use std::sync::Once;
 use crate::prelude::*;
 
 /// The Sargon "Operating System" is the root "manager" of the Sargon library
-/// which holds an in-memory Profile and a collection of "drivers" which the
-/// client hosts (iOS/Android wallets) "installs" during app launch, enabling the
-/// Sargon "Operating System" to e.g read/write to secure storage and make use
-/// of the network connection of the iPhone/Android phone.
+/// which holds an in-memory Profile and a collection of "clients" which are
+/// created from "drivers" which the hosts (iOS/Android wallets) "installs"
+/// during app launch, enabling the  Sargon "Operating System" to e.g read/write
+/// to secure storage and make use of the network connection of the iPhone/Android
+/// phone.
 #[derive(Debug, uniffi::Object)]
 #[allow(dead_code)]
 pub struct SargonOS {
@@ -40,7 +41,8 @@ impl SargonOS {
             }))
         } else {
             info!("No saved profile found, creating a new one...");
-            let (profile, bdfs) = Self::new_profile_and_bdfs(&clients).await?;
+            let (profile, bdfs) =
+                Self::create_new_profile_and_bdfs(&clients).await?;
 
             secure_storage.save_private_hd_factor_source(&bdfs).await?;
 
@@ -60,6 +62,12 @@ impl SargonOS {
 
 impl SargonOS {
     pub(crate) async fn new_profile_and_bdfs(
+        &self,
+    ) -> Result<(Profile, PrivateHierarchicalDeterministicFactorSource)> {
+        Self::create_new_profile_and_bdfs(&self.clients).await
+    }
+
+    async fn create_new_profile_and_bdfs(
         clients: &Clients,
     ) -> Result<(Profile, PrivateHierarchicalDeterministicFactorSource)> {
         debug!("Creating new Profile and BDFS");
@@ -83,6 +91,10 @@ impl SargonOS {
             Profile::new(private_bdfs.factor_source.clone(), device_info);
         info!("Created new (unsaved) Profile with ID {}", profile.id());
         Ok((profile, private_bdfs))
+    }
+
+    pub(crate) async fn device_info(&self) -> Result<DeviceInfo> {
+        Self::get_device_info(&self.clients).await
     }
 
     async fn get_device_info(clients: &Clients) -> Result<DeviceInfo> {

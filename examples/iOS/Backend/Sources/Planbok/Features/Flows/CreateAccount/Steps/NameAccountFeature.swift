@@ -25,33 +25,6 @@ public struct NameNewAccountFeature {
 		case view(ViewAction)
 	}
 	
-	@ViewAction(for: NameNewAccountFeature.self)
-	public struct View: SwiftUI.View {
-		@Bindable public var store: StoreOf<NameNewAccountFeature>
-		public init(store: StoreOf<NameNewAccountFeature>) {
-			self.store = store
-		}
-		public var body: some SwiftUI.View {
-			VStack {
-				Text("Name Account").font(.largeTitle)
-				Spacer()
-				LabeledTextField(label: "Account Name", text: $store.accountName.sending(\.view.accountNameChanged))
-				if let error = store.state.errorMessage {
-					Text("\(error)")
-						.foregroundStyle(Color.red)
-						.font(.footnote)
-						.fontWeight(.bold)
-				}
-				Spacer()
-				Button("Continue") {
-					send(.continueButtonTapped)
-				}
-				.buttonStyle(.borderedProminent)
-			}
-			.padding()
-		}
-	}
-	
 	public init() {}
 	
 	public var body: some ReducerOf<Self> {
@@ -76,6 +49,35 @@ public struct NameNewAccountFeature {
 				return .none
 		
 			}
+		}
+	}
+}
+
+extension NameNewAccountFeature {
+	@ViewAction(for: NameNewAccountFeature.self)
+	public struct View: SwiftUI.View {
+		@Bindable public var store: StoreOf<NameNewAccountFeature>
+		public init(store: StoreOf<NameNewAccountFeature>) {
+			self.store = store
+		}
+		public var body: some SwiftUI.View {
+			VStack {
+				Text("Name Account").font(.largeTitle)
+				Spacer()
+				LabeledTextField(label: "Account Name", text: $store.accountName.sending(\.view.accountNameChanged))
+				if let error = store.state.errorMessage {
+					Text("\(error)")
+						.foregroundStyle(Color.red)
+						.font(.footnote)
+						.fontWeight(.bold)
+				}
+				Spacer()
+				Button("Continue") {
+					send(.continueButtonTapped)
+				}
+				.buttonStyle(.borderedProminent)
+			}
+			.padding()
 		}
 	}
 }

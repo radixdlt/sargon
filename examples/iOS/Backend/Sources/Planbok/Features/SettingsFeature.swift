@@ -8,8 +8,8 @@
 import Foundation
 import Sargon
 import ComposableArchitecture
+import SwiftUI
 
-#if DEBUG
 @Reducer
 public struct SettingsFeature {
 	
@@ -30,4 +30,3 @@ public struct SettingsFeature {
 	}
 }
 
-#endif

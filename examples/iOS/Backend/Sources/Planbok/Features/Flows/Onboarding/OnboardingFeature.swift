@@ -7,12 +7,14 @@ public struct OnboardingFeature {
 	
 	@Reducer(state: .equatable)
 	public enum Path {
+		case newOrImportProfile(NewOrImportProfileFeature)
 		case writeDownMnemonic(WriteDownMnemonicFeature)
 	}
 	
 	@Reducer(state: .equatable)
 	public enum Destination {
 		case createAccount(CreateAccountFlowFeature)
+		case importProfile(ImportProfileFlowFeature)
 	}
 	
 	@ObservableState
@@ -31,7 +33,7 @@ public struct OnboardingFeature {
 	public enum Action {
 		@CasePathable
 		public enum DelegateAction {
-			case createdAccount
+			case done
 		}
 		
 		case destination(PresentationAction<Destination.Action>)
@@ -51,8 +53,18 @@ public struct OnboardingFeature {
 				
 			case .path(let pathAction):
 				switch pathAction {
+
 				case .element(id: _, action: .writeDownMnemonic(.delegate(.done))):
-					return .send(.delegate(.createdAccount))
+					return .send(.delegate(.done))
+
+				case .element(id: _, action: .newOrImportProfile(.delegate(.importProfile))):
+					state.destination = .importProfile(.init())
+					return .none
+					
+				case .element(id: _, action: .newOrImportProfile(.delegate(.newProfile))):
+					state.destination = .createAccount(CreateAccountFlowFeature.State())
+					return .none
+					
 				case .popFrom(id: _):
 					return .none
 				case .push(id: _, state: _):
@@ -60,13 +72,23 @@ public struct OnboardingFeature {
 				default:
 					return .none
 				}
+				
 			case .welcome(.delegate(.done)):
-				state.destination = .createAccount(CreateAccountFlowFeature.State())
+
+				state.path.append(.newOrImportProfile(.init()))
 				return .none
-			case .welcome(.view):
+				
+			
+			case .welcome(_):
 				return .none
+		
 			case .delegate:
 				return .none
+				
+			case .destination(.presented(.importProfile(.delegate(.imported)))):
+				state.destination = nil
+				return .send(.delegate(.done))
+				
 			case .destination(.presented(.createAccount(.delegate(.createdAccount)))):
 				state.destination = nil
 				state.path.append(.writeDownMnemonic(.init()))
@@ -96,19 +118,21 @@ extension OnboardingFeature {
 				)
 			} destination: { store in
 				switch store.case {
-				case .writeDownMnemonic:
-					if let store = store.scope(state: \.writeDownMnemonic, action: \.writeDownMnemonic) {
-						WriteDownMnemonicFeature.View(store: store)
-					}
+				case let .newOrImportProfile(store):
+					NewOrImportProfileFeature.View(store: store)
+				case let .writeDownMnemonic(store):
+					WriteDownMnemonicFeature.View(store: store)
 				}
 			}
 			.sheet(
-				item: $store.scope(
-					state: \.destination?.createAccount,
-					action: \.destination.createAccount
-				)
+				item: $store.scope(state: \.destination?.createAccount, action: \.destination.createAccount)
 			) { store in
 				CreateAccountFlowFeature.View(store: store)
+			}
+			.sheet(
+				item: $store.scope(state: \.destination?.importProfile, action: \.destination.importProfile)
+			) { importProfileStore in
+				ImportProfileFlowFeature.View(store: importProfileStore)
 			}
 		}
 	}

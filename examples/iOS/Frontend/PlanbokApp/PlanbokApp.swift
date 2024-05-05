@@ -44,7 +44,7 @@ struct PlanbokApp: App {
 				store: Store(
 					initialState: AppFeature.State()
 				) {
-					AppFeature()
+					AppFeature()._printChanges()
 				}
 			)
 			.textFieldStyle(.roundedBorder)

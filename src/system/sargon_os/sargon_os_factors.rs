@@ -27,30 +27,6 @@ impl SargonOS {
     }
 
     /// Deletes the profile and the active profile id and all references Device
-    /// factor sources from secure storage, and creates a new empty profile
-    /// and a new bdfs, and saves those into secure storage, returns the ID of
-    /// the new profile.
-    pub async fn delete_profile_then_create_new_with_bdfs(
-        &self,
-    ) -> Result<ProfileID> {
-        self.delete_profile_and_mnemonics().await?;
-
-        let (profile, bdfs) = Self::new_profile_and_bdfs(&self.clients).await?;
-
-        self.clients
-            .secure_storage
-            .save_private_hd_factor_source(&bdfs)
-            .await?;
-
-        self.clients
-            .secure_storage
-            .save_profile_and_active_profile_id(&profile)
-            .await?;
-
-        Ok(profile.id())
-    }
-
-    /// Deletes the profile and the active profile id and all references Device
     /// factor sources from secure storage.
     pub async fn delete_profile_and_mnemonics(&self) -> Result<()> {
         let secure_storage = &self.clients.secure_storage;
