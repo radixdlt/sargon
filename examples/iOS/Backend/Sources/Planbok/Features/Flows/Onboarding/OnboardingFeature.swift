@@ -16,27 +16,23 @@ public struct OnboardingFeature {
 	
 	@ObservableState
 	public struct State: Equatable {
-		public let walletHolder: WalletHolder
 		public var path = StackState<Path.State>()
 		public var welcome: WelcomeFeature.State
 		
 		@Presents var destination: Destination.State?
 		
-		public init(walletHolder: WalletHolder) {
-			self.walletHolder = walletHolder
+		public init() {
 			self.welcome = WelcomeFeature.State()
 		}
 		
-		public init(wallet: Wallet) {
-			self.init(walletHolder: .init(wallet: wallet))
-		}
+	
 	}
 	
 	@CasePathable
 	public enum Action {
 		@CasePathable
 		public enum DelegateAction {
-			case createdAccount(with: WalletHolder)
+			case createdAccount
 		}
 
 		case destination(PresentationAction<Destination.Action>)
@@ -57,7 +53,7 @@ public struct OnboardingFeature {
 			case .path(let pathAction):
 				switch pathAction {
 				case .element(id: _, action: .writeDownMnemonic(.delegate(.done))):
-					return .send(.delegate(.createdAccount(with: state.walletHolder)))
+					return .send(.delegate(.createdAccount))
 				case .popFrom(id: _):
 					return .none
 				case .push(id: _, state: _):
@@ -66,7 +62,7 @@ public struct OnboardingFeature {
 					return .none
 				}
 			case .welcome(.delegate(.done)):
-				state.destination = .createAccount(CreateAccountFlowFeature.State(walletHolder: state.walletHolder))
+				state.destination = .createAccount(CreateAccountFlowFeature.State())
 				return .none
 			case .welcome(.view):
 				return .none
@@ -74,7 +70,7 @@ public struct OnboardingFeature {
 				return .none
 			case .destination(.presented(.createAccount(.delegate(.createdAccount)))):
 				state.destination = nil
-				state.path.append(.writeDownMnemonic(.init(walletHolder: state.walletHolder)))
+				state.path.append(.writeDownMnemonic(.init()))
 				return .none
 
 			default:

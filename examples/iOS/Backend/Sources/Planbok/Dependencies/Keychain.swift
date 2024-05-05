@@ -19,7 +19,7 @@ extension DependencyValues {
 }
 
 extension Keychain: @unchecked Sendable {}
-extension Keychain: SecureStorage {
+extension Keychain: SecureStorageDriver {
 	@DependencyClient
 	public struct Dependency: DependencyKey {
 

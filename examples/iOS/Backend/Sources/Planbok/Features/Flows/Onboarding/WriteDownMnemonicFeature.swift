@@ -16,10 +16,8 @@ public struct WriteDownMnemonicFeature {
 	
 	@ObservableState
 	public struct State: Equatable {
-		public let walletHolder: WalletHolder
 		public var mnemonic: String?
-		public init(walletHolder: WalletHolder) {
-			self.walletHolder = walletHolder
+		public init() {
 		}
 	}
 	
@@ -65,14 +63,14 @@ public struct WriteDownMnemonicFeature {
 		Reduce { state, action in
 			switch action {
 			case .view(.revealMnemonicButtonTapped):
-				let wallet = state.walletHolder.wallet
-			
-				do {
-					let bdfsMnemonic = try wallet.mainBdfsMnemonicWithPassphrase()
-					state.mnemonic = bdfsMnemonic.mnemonic.phrase
-				} catch {
-					fatalError("handle error: \(error)")
-				}
+//				let wallet = state.walletHolder.wallet
+//			
+//				do {
+//					let bdfsMnemonic = try wallet.mainBdfsMnemonicWithPassphrase()
+//					state.mnemonic = bdfsMnemonic.mnemonic.phrase
+//				} catch {
+//					fatalError("handle error: \(error)")
+//				}
 				return .none
 			case .view(.continueButtonTapped):
 				return .send(.delegate(.done))

@@ -11,18 +11,13 @@ public struct CreateAccountFlowFeature {
 	
 	@ObservableState
 	public struct State: Equatable {
-		public let walletHolder: WalletHolder
 		public var path = StackState<Path.State>()
 		public var nameAccount: NameNewAccountFeature.State
 		
-		public init(walletHolder: WalletHolder) {
-			self.walletHolder = walletHolder
-			self.nameAccount = NameNewAccountFeature.State(walletHolder: walletHolder)
+		public init() {
+			self.nameAccount = NameNewAccountFeature.State()
 		}
 		
-		public init(wallet: Wallet) {
-			self.init(walletHolder: .init(wallet: wallet))
-		}
 	}
 	
 	public enum Action {
@@ -74,24 +69,16 @@ public struct CreateAccountFlowFeature {
 					
 				case let .element(
 					id: _,
-					action: .selectGradient(.delegate(.selected(appearanceID, displayName)))
+					action: .selectGradient(.delegate(.selected(_, displayName)))
 				):
-					do {
-						let wallet = state.walletHolder.wallet
-						var account = try wallet.createNewAccount(
-							networkId: .mainnet,
-							name: displayName
-						)
-						account.appearanceId = appearanceID
-						
-						try wallet.addAccount(account: account)
-						
-						return .send(.delegate(.createdAccount))
-						
-					} catch {
+					
+					return .run { send in
+						try await SargonOS.shared.createAccount(named: displayName)
+						await send(.delegate(.createdAccount))
+					} catch: { _, error in
 						fatalError("TODO error handling: \(error)")
 					}
-					
+						
 				case .element(id: _, action: _):
 					return .none
 				case .popFrom(id: _):
@@ -99,7 +86,6 @@ public struct CreateAccountFlowFeature {
 				case .push(id: _, state: _):
 					return .none
 				}
-				return .none
 
 			case .nameAccount(.view):
 				return .none

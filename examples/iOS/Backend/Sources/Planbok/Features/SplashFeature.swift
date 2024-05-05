@@ -11,11 +11,11 @@ public struct SplashFeature {
 		public init() {}
 	}
 
-	public enum Action: ViewAction {
-		public enum DelegateAction {
+	public enum Action: ViewAction, Sendable {
+		public enum DelegateAction: Sendable {
 			case booted(hasAnyNetwork: Bool)
 		}
-		public enum ViewAction {
+		public enum ViewAction: Sendable {
 			case appear
 		}
 		case delegate(DelegateAction)
@@ -39,20 +39,27 @@ public struct SplashFeature {
 		}
 	}
 
+	@Dependency(\.mainQueue) var mainQueue
 	public init() {}
 
 	public var body: some ReducerOf<Self> {
-		Reduce { state, action in
+		Reduce {
+			state,
+			action in
 			switch action {
+				
 			case .view(.appear):
-					.run { send in
-						let os = try await SargonOS.boot(bios: .shared)
-						await send(.delegate(.booted(os: os, hasAnyNetwork: os.hasAnyNetwork())))
-							.debounce(for: 0.8, scheduler: self.mainQueue, options: nil)
-
+				struct SplashID: Hashable { }
+				return .run { send in
+					let os = try await SargonOS.createdSharedBootingWith(bios: BIOS.shared)
+					await send(
+						.delegate(.booted(hasAnyNetwork: os.hasAnyNetwork()))
+					)
 				}
+				.debounce(id: SplashID(), for: 0.8, scheduler: mainQueue)
+			
 			case .delegate:
-				.none
+				return .none
 			}
 		}
 	}

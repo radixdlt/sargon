@@ -14,6 +14,7 @@ extension SargonOS: SargonOSProtocol {
 // MARK: SargonOSProtocol Conformance
 extension SargonOS {
 	
+	@discardableResult
 	public func createAccount(
 		named accountName: DisplayName
 	) async throws -> Account {

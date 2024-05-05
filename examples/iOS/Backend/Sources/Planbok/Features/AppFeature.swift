@@ -50,20 +50,20 @@ public struct AppFeature {
 		Reduce { state, action in
 			switch action {
 			
-			case let .splash(.delegate(.walletInitialized(wallet, hasAccount))):
-				if hasAccount {
-					state = .main(MainFeature.State(wallet: wallet))
+			case let .splash(.delegate(.booted(hasAnyNetwork))):
+				if hasAnyNetwork {
+					state = .main(MainFeature.State())
 				} else {
-					state = .onboarding(OnboardingFeature.State(wallet: wallet))
+					state = .onboarding(OnboardingFeature.State())
 				}
 				return .none
 			
-			case let .onboarding(.delegate(.createdAccount(with: walletHolder))):
-				state = .main(MainFeature.State(walletHolder: walletHolder))
+			case .onboarding(.delegate(.createdAccount)):
+				state = .main(MainFeature.State())
 				return .none
 				
 			case .main(.delegate(.deletedWallet)):
-				state = .onboarding(OnboardingFeature.State(wallet: Wallet.generateNewBDFSAndEmptyProfile()))
+				state = .onboarding(OnboardingFeature.State())
 				return .none
 			
 			default:

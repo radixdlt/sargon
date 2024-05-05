@@ -21,16 +21,11 @@ public struct MainFeature {
 		@Presents var destination: Destination.State?
 		
 		public var accounts: AccountsFeature.State
-		public let walletHolder: WalletHolder
 	
-		public init(walletHolder: WalletHolder) {
-			self.walletHolder = walletHolder
-			self.accounts = AccountsFeature.State(walletHolder: walletHolder)
+		public init() {
+			self.accounts = AccountsFeature.State(accounts: SargonOS.shared.accounts())
 		}
 		
-		public init(wallet: Wallet) {
-			self.init(walletHolder: .init(wallet: wallet))
-		}
 	}
 	
 	@CasePathable
@@ -81,16 +76,14 @@ public struct MainFeature {
 				
 			case .accounts(.delegate(.createNewAccount)):
 				state.destination = .createAccount(
-					CreateAccountFlowFeature.State(
-						walletHolder: state.walletHolder
-					)
+					CreateAccountFlowFeature.State()
 				)
 				return .none
 				
 			case .destination(.presented(.alert(.confirmedDeleteWallet))):
 				print("⚠️ Confirmed deletion of wallet")
 				state.destination = nil
-				let profileID = state.walletHolder.wallet.profile().id
+				let profileID = SargonOS.shared.profile.id
 				do {
 					try keychain.deleteDataForKey(SecureStorageKey.profileSnapshot(profileId: profileID))
 					try keychain.deleteDataForKey(SecureStorageKey.activeProfileId)
@@ -101,7 +94,7 @@ public struct MainFeature {
 			
 			case .destination(.presented(.createAccount(.delegate(.createdAccount)))):
 				state.destination = nil
-				state.accounts.refresh() // FIXME: we really do not want this.
+				state.accounts.accounts = SargonOS.shared.accounts()
 				return .none
 			
 			default:
@@ -125,7 +118,7 @@ public struct MainFeature {
 				VStack {
 					VStack {
 						Text("ProfileID:")
-						Text("\(store.state.walletHolder.wallet.profile().id)")
+						Text("\(SargonOS.shared.profile.id)")
 					}
 					
 					AccountsFeature.View(

@@ -6,15 +6,10 @@ public struct NameNewAccountFeature {
 	
 	@ObservableState
 	public struct State: Equatable {
-		public let walletHolder: WalletHolder
 		public var accountName = ""
 		public var errorMessage: String?
-		public init(walletHolder: WalletHolder) {
-			self.walletHolder = walletHolder
-		}
-		public init(wallet: Wallet) {
-			self.init(walletHolder: .init(wallet: wallet))
-		}
+		public init() {}
+		
 	}
 	
 	public enum Action: ViewAction {

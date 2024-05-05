@@ -22,35 +22,12 @@ public struct AccountsFeature {
 
 	@ObservableState
 	public struct State: Equatable {
-		public var walletHolder: WalletHolder
 		
-		// FIXME: We really do not want this
-		mutating func refresh() {
-			walletHolder.refresh()
-		}
+	
+		public var accounts: Accounts
 		
-		public var profile: Profile {
-			walletHolder.wallet.profile()
-		}
-		
-		public var currentNetworkID: NetworkId {
-			profile.appPreferences.gateways.current.network.id
-		}
-		
-		public var network: ProfileNetwork {
-			profile.networks.first(where: { $0.id == currentNetworkID })!
-		}
-		
-		public var accounts: Accounts {
-			network.accounts
-		}
-		
-		public init(walletHolder: WalletHolder) {
-			self.walletHolder = walletHolder
-		}
-		
-		public init(wallet: Wallet) {
-			self.init(walletHolder: .init(wallet: wallet))
+		public init(accounts: Accounts) {
+			self.accounts = accounts
 		}
 	}
 	

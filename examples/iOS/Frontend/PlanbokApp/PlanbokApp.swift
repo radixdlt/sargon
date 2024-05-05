@@ -14,17 +14,20 @@ extension BIOS: ObservableObject {}
 @main
 struct PlanbokApp: App {
 	
-	let bios = BIOS(
-		bundle: .main,
-		keychainService: "works.rdx.planbok",
-		userDefaultsSuite: "works.rdx.planbok"
-	)
+
+	init() {
+		BIOS.createdShared(
+			bundle: .main,
+			keychainService: "works.rdx.planbok",
+			userDefaultsSuite: "works.rdx.planbok"
+		)
+	}
 	
 	var body: some Scene {
 		WindowGroup {
 			AppFeature.View(
 				store: Store(
-					initialState: AppFeature.State(bios: bios)
+					initialState: AppFeature.State()
 				) {
 					AppFeature()
 				}
