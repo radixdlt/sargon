@@ -13,7 +13,7 @@ public struct SplashFeature {
 
 	public enum Action: ViewAction {
 		public enum DelegateAction {
-			case walletInitialized(Wallet, hasAccount: Bool)
+			case booted(hasAnyNetwork: Bool)
 		}
 		public enum ViewAction {
 			case appear
@@ -45,34 +45,11 @@ public struct SplashFeature {
 		Reduce { state, action in
 			switch action {
 			case .view(.appear):
-				.run { send in
-					try await clock.sleep(for: .milliseconds(1200))
-					if try keychain.loadData(SecureStorageKey.activeProfileId) != nil {
-						let wallet = try Wallet.byLoadingProfile(
-							secureStorage: secureStorage)
-						let profile = wallet.profile()
-						let hasAccount =
-							profile.networks.first?.accounts.isEmpty
-							== false
-						await send(.delegate(
-								.walletInitialized(
-									wallet,
-									hasAccount: hasAccount
-								)
-							))
-					} else {
-						await send(
-							.delegate(
-								.walletInitialized(
-									Wallet
-										.generateNewBDFSAndEmptyProfile(
-											secureStorage:
-												secureStorage
-										),
-									hasAccount: false
-								)
-							))
-					}
+					.run { send in
+						let os = try await SargonOS.boot(bios: .shared)
+						await send(.delegate(.booted(os: os, hasAnyNetwork: os.hasAnyNetwork())))
+							.debounce(for: 0.8, scheduler: self.mainQueue, options: nil)
+
 				}
 			case .delegate:
 				.none
@@ -81,19 +58,3 @@ public struct SplashFeature {
 	}
 }
 
-extension Wallet {
-	static func generateNewBDFSAndEmptyProfile(
-		secureStorage: SecureStorage = Keychain.shared
-	) -> Wallet {
-		do {
-			return try Wallet.byCreatingNewProfileAndSecretsWithEntropy(
-				entropy: .init(bagOfBytes: BagOfBytes.random(byteCount: 32)),
-				walletClientModel: .iphone,
-				walletClientName: "Unknown iPhone",
-				secureStorage: secureStorage
-			)
-		} catch {
-			fatalError("TODO Handle errors: error \(error)")
-		}
-	}
-}

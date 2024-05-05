@@ -5,7 +5,7 @@ import SargonUniFFI
 import XCTest
 
 final class SargonOSTests: TestCase {
-	typealias SUT = SargonOS
+	typealias SUT = OS
 	
 	func test() async throws {
 		let _ = try await SUT.boot(
@@ -16,39 +16,21 @@ final class SargonOSTests: TestCase {
 	}
 }
 
-extension Profile {
-	public var currentNetworkID: NetworkID {
-		appPreferences.gateways.current.networkID
-	}
-	
-	public func accounts(on network: NetworkID? = nil) -> Accounts {
-		networks[id: network ?? currentNetworkID]?.accounts ?? []
-	}
-	
-}
-
-extension SargonOS {
-	var currentNetworkID: NetworkID {
-		profile().currentNetworkID
-	}
-	
-	func createAccount(named accountName: DisplayName) async throws -> Account {
-		try await createAndSaveNewAccount(networkId: currentNetworkID, name: accountName)
-	}
-	
-	public func accounts(on network: NetworkID? = nil) -> Accounts {
-		profile().accounts(on: network)
-	}
-	
-}
-
+@dynamicMemberLookup
 public final class TestOS {
-	private let os: SargonOS
+	private let os: OS
 	public init(bios: BIOS) async throws {
-		self.os = try await SargonOS.boot(bios: bios)
+		self.os = try await OS.boot(bios: bios)
 	}
 	public convenience init() async throws {
 		try await self.init(bios: .test)
+	}
+}
+
+
+extension TestOS {
+	public nonisolated subscript<T>(dynamicMember keypath: KeyPath<OS, T>) -> T {
+		os[keyPath: keypath]
 	}
 }
 
@@ -60,15 +42,15 @@ extension TestOS {
 	}
 	
 	private var profile: Profile {
-		os.profile()
+		get async { await os.booted.profile }
 	}
 }
 
 // MARK: Public
 extension TestOS {
 	
-	public func accounts(on network: NetworkID? = nil) -> Accounts {
-		os.accounts(on: network)
+	public func accounts(on network: NetworkID? = nil) async -> Accounts {
+		await profile.accounts(on: network)
 	}
 	
 	@discardableResult

@@ -4,6 +4,11 @@ use crate::prelude::*;
 
 #[uniffi::export]
 impl SargonOS {
+    pub fn has_any_network(&self) -> bool {
+        self.profile_holder
+            .access_profile_with(|p| !p.networks.is_empty())
+    }
+
     pub fn profile(&self) -> Profile {
         self.profile_holder.profile()
     }

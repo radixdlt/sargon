@@ -9,13 +9,22 @@ import SwiftUI
 import Planbok
 import ComposableArchitecture
 
+extension BIOS: ObservableObject {}
+
 @main
 struct PlanbokApp: App {
+	
+	let bios = BIOS(
+		bundle: .main,
+		keychainService: "works.rdx.planbok",
+		userDefaultsSuite: "works.rdx.planbok"
+	)
+	
 	var body: some Scene {
 		WindowGroup {
 			AppFeature.View(
 				store: Store(
-					initialState: AppFeature.State()
+					initialState: AppFeature.State(bios: bios)
 				) {
 					AppFeature()
 				}

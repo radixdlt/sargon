@@ -49,3 +49,14 @@ extension Profile: CustomDebugStringConvertible {
 	}
 }
 
+
+extension Profile {
+	public var currentNetworkID: NetworkID {
+		appPreferences.gateways.current.networkID
+	}
+	
+	public func accounts(on network: NetworkID? = nil) -> Accounts {
+		networks[id: network ?? currentNetworkID]?.accounts ?? []
+	}
+	
+}
