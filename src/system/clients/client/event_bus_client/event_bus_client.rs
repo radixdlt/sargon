@@ -12,7 +12,9 @@ impl EventBusClient {
 }
 
 impl EventBusClient {
-    pub async fn emit(&self, event: Event) {
-        self.driver.handle_event(event).await
+    pub async fn emit(&self, event_notification: EventNotification) {
+        self.driver
+            .handle_event_notification(event_notification)
+            .await
     }
 }

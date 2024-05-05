@@ -12,8 +12,25 @@ extension EventBusDriver where Self == EventBus {
 	public static var shared: Self { Self.shared }
 }
 
+
+
+extension Event {
+	public var addressOfNewAccount: AccountAddress {
+		switch self {
+		case let .profileChanged(change: .addedAccount(address)): return address
+		}
+	}
+}
+
+extension EventNotification: Comparable {
+	public static func < (lhs: Self, rhs: Self) -> Bool {
+		lhs.timestamp < rhs.timestamp
+	}
+}
+
+
 public final actor EventBus {
-	public typealias Element = Event
+	public typealias Element = EventNotification
 	public typealias Stream = AsyncStream<Element>
 	
 	private let continuation: Stream.Continuation
@@ -27,13 +44,14 @@ public final actor EventBus {
 }
 
 extension EventBus {
-	public func events() -> Stream {
+	public func notifications() -> Stream {
 		stream
 	}
 }
 
 extension EventBus: EventBusDriver {
-	public func handleEvent(event: Event) async {
-		continuation.yield(event)
+	public func handleEventNotification(eventNotification: EventNotification) async {
+		log.debug("Handle event: \(String(describing: eventNotification.event))")
+		continuation.yield(eventNotification)
 	}
 }

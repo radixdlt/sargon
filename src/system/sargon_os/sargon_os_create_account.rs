@@ -104,7 +104,9 @@ impl SargonOS {
         self.save_existing_profile().await?;
         self.clients
             .event_bus
-            .emit(Event::ProfileChanged { change: event })
+            .emit(EventNotification::new(Event::ProfileChanged {
+                change: event,
+            }))
             .await;
         Ok(res)
     }

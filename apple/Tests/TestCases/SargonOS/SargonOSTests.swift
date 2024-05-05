@@ -82,12 +82,24 @@ extension TestOS {
 final class TestOSTests: TestCase {
 	func test_create_accounts() async throws {
 		let sut = try await TestOS()
+		let n = 3
+		
+		let task = Task {
+			var values = Set<EventNotification>()
+			for await eventNotification in await EventBus.shared.notifications().prefix(n) {
+				values.insert(eventNotification)
+			}
+			return Array(values).sorted().map(\.event)
+		}
 		
 		try await sut
 			.createAccount()
 			.createAccount()
 			.createAccount()
 		
+		let events = await task.value
+		
 		XCTAssertEqual(sut.accounts().map(\.displayName), ["Unnamed 0", "Unnamed 1", "Unnamed 2"])
+		XCTAssertEqual(sut.accounts().map(\.address), events.map(\.addressOfNewAccount))
 	}
 }

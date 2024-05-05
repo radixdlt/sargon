@@ -9,3 +9,18 @@ pub enum ProfileChange {
 pub enum Event {
     ProfileChanged { change: ProfileChange },
 }
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Record)]
+pub struct EventNotification {
+    pub event: Event,
+    pub timestamp: Timestamp,
+}
+
+impl EventNotification {
+    pub fn new(event: Event) -> Self {
+        Self {
+            event,
+            timestamp: now(),
+        }
+    }
+}
