@@ -9,28 +9,38 @@ import Foundation
 
 public protocol BaseIdentifiedCollection:
 	SargonModel,
-	RandomAccessCollection,
-	MutableCollection
+	Collection
 where
 	Index == Array<Element>.Index,
 	Element: Identifiable,
 	Element: SargonModel
 {
-	var elements: [Element] { get }
+	/// This is an EXPENSIVE operation,
+	/// prefer using `self.ids()` and then just read out a subset of
+	/// the elements with `get:id`, to only read a few instead of all.
+	func allElements() -> [Element]
+	
 	init(element: Element)
+	var count: Int { get }
 	func appending(_ element: Element) -> Self
 	func get(id: Element.ID) -> Element?
+	func get(at position: Int) -> Element
 	func updatingOrAppending(_ element: Element) -> Self
 	func updatingOrInserting(element: Element, at index: Int) -> Self
 }
 
 extension BaseIdentifiedCollection {
+	
+	public func get(at position: Int) -> Element {
+		fatalError("impl me")
+	}
+	
 	public func contains(id: Element.ID) -> Bool {
 		get(id: id) != nil
 	}
 	
 	public var ids: [Element.ID] {
-		map(\.id)
+		fatalError("impl me")
 	}
 	
 }
@@ -47,7 +57,7 @@ extension BaseIdentifiedCollection {
 	@inline(__always)
 	public subscript(position: Int) -> Element {
 		get {
-			elements[position]
+			get(at: position)
 		}
 		set {
 			updateOrInsert(element: newValue, at: position)
@@ -57,15 +67,15 @@ extension BaseIdentifiedCollection {
 
 extension BaseIdentifiedCollection {
 	public var startIndex: Index {
-		elements.startIndex
+		0
 	}
 	
 	public var endIndex: Index {
-		elements.endIndex
+		count - 1
 	}
 	
-	public func index(after index: Index) -> Index {
-		elements.index(after: index)
+	public func index(after i: Index) -> Index {
+		i + 1
 	}
 	
 	@discardableResult

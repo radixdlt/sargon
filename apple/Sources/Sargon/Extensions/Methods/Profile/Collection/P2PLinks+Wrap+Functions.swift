@@ -17,7 +17,7 @@ extension P2pLinks {
 		self = newP2PLinksWithP2PLink(p2PLink: element)
 	}
 	
-	public var elements: [P2pLink] {
+	public func allElements() -> [P2pLink] {
 		p2PLinksGetElements(p2PLinks: self)
 	}
 	

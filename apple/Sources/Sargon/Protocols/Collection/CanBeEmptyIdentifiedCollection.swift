@@ -9,7 +9,6 @@ import Foundation
 
 public protocol CanBeEmptyIdentifiedCollection:
 	BaseIdentifiedCollection,
-	RangeReplaceableCollection,
 	ExpressibleByArrayLiteral
 where
 	ArrayLiteralElement == Self.Element
@@ -24,19 +23,7 @@ extension CanBeEmptyIdentifiedCollection {
 	public init() {
 		self.init([])
 	}
-	
-	public mutating func replaceSubrange<C>(
-		_ subrange: Range<Self.Index>,
-		with newElements: C
-	) where C : Collection, Self.Element == C.Element {
-		var elements = self.elements
-		elements.removeSubrange(subrange)
-		elements.reserveCapacity(self.count + newElements.count)
-		for element in newElements.reversed() {
-			elements.insert(element, at: subrange.startIndex)
-		}
-		self = Self(elements)
-	}
+
 	
 	// This is already implemented on `BaseIdentifiedCollection`,
 	// but due to a Swift compiler bug in Xcode 15.3 we MUST implement

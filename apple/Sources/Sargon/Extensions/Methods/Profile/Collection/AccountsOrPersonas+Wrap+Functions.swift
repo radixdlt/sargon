@@ -17,7 +17,7 @@ extension AccountsOrPersonas {
 		self = newAccountsOrPersonasWithAccountOrPersona(accountOrPersona: element)
 	}
 	
-	public var elements: [Element] {
+	public func allElements() -> [Element] {
 		accountsOrPersonasGetElements(accountsOrPersonas: self)
 	}
 	

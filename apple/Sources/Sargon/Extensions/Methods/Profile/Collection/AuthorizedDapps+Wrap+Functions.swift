@@ -9,19 +9,19 @@ import Foundation
 import SargonUniFFI
 
 extension AuthorizedDapps {
-	public init(_ elements: [AuthorizedDapp]) {
+	public init(_ elements: [Element]) {
 		self = newAuthorizedDapps(authorizedDapps: elements)
 	}
 	
-	public init(element: AuthorizedDapp) {
+	public init(element: Element) {
 		self = newAuthorizedDappsWithAuthorizedDapp(authorizedDapp: element)
 	}
 	
-	public var elements: [AuthorizedDapp] {
+	public func allElements() -> [Element] {
 		authorizedDappsGetElements(authorizedDapps: self)
 	}
 	
-	public func appending(_ authorizedDapp: AuthorizedDapp) -> Self {
+	public func appending(_ authorizedDapp: Element) -> Self {
 		newAuthorizedDappsByAppending(authorizedDapp: authorizedDapp, to: self)
 	}
 	
@@ -29,19 +29,19 @@ extension AuthorizedDapps {
 		newAuthorizedDappsByUpdatingOrInsertingAtIndex(authorizedDapp: authorizedDapp, to: self, index: UInt64(index))
 	}
 	
-	public func updatingOrAppending(_ authorizedDapp: AuthorizedDapp) -> Self {
+	public func updatingOrAppending(_ authorizedDapp: Element) -> Self {
 		newAuthorizedDappsByUpdatingOrAppending(authorizedDapp: authorizedDapp, to: self)
 	}
 	
-	public func removing(_ id: AuthorizedDapp.ID) -> Self {
+	public func removing(_ id: Element.ID) -> Self {
 		newAuthorizedDappsRemovedById(idOfAuthorizedDapp: id, from: self)
 	}
 	
-	public func removing(element dapp: AuthorizedDapp) -> Self {
+	public func removing(element dapp: Element) -> Self {
 		newAuthorizedDappsRemovedElement(authorizedDapp: dapp, from: self)
 	}
 	
-	public func get(id: AuthorizedDapp.ID) -> AuthorizedDapp? {
+	public func get(id: Element.ID) -> Element? {
 		authorizedDappsGetAuthorizedDappById(authorizedDapps: self, id: id)
 	}
 	

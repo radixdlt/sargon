@@ -31,7 +31,7 @@ final class AccountsTests: CanBeEmptyCollectionTest<Accounts> {
 		let sut = SUT(element: sample)
 		sample.displayName = try! DisplayName(validating: "Changed")
 		XCTAssertEqual(
-			sut.updatingOrAppending(sample).elements,
+			sut.updatingOrAppending(sample).allElements(),
 			[sample]
 		)
 	}
@@ -41,7 +41,7 @@ final class AccountsTests: CanBeEmptyCollectionTest<Accounts> {
 		var sut = SUT(element: sample)
 		sample.displayName = "New Name"
 		let elem = sut.updateOrAppend(sample)
-		XCTAssertEqual(sut.elements, [sample])
+		XCTAssertEqual(sut.allElements(), [sample])
 		XCTAssertEqual(elem, SUTElement.sample)
 	}
 	
@@ -49,7 +49,7 @@ final class AccountsTests: CanBeEmptyCollectionTest<Accounts> {
 		let sample = SUTElement.sample
 		var sut = SUT(element: sample)
 		sut.updateOrAppend(SUTElement.sampleOther)
-		XCTAssertEqual(sut.elements, [sample, .sampleOther])
+		XCTAssertEqual(sut.allElements(), [sample, .sampleOther])
 	}
 	
 	
@@ -66,43 +66,7 @@ final class AccountsTests: CanBeEmptyCollectionTest<Accounts> {
 		XCTAssertEqual(originalMember, .sample)
 		XCTAssertNotEqual(deFactoIndex, wrongIndex)
 		XCTAssertEqual(deFactoIndex, 0)
-		XCTAssertEqual(sut.elements, [sampleChanged, .sampleOther])
-	}
-	
-	func test_replaceSubrange_first() {
-		var sut: SUT = [.sampleMainnetAlice, .sampleMainnetBob, .sampleMainnetCarol, .sampleStokenetNadia]
-		sut.replaceSubrange(0..<1, with: [.sampleStokenetOlivia])
-		XCTAssertEqual(sut, [.sampleStokenetOlivia, .sampleMainnetBob, .sampleMainnetCarol, .sampleStokenetNadia])
-	}
-	
-	func test_replaceSubrange_many_leading() {
-		var sut: SUT = [.sampleMainnetAlice, .sampleMainnetBob, .sampleMainnetCarol, .sampleStokenetNadia]
-		sut.replaceSubrange(0...1, with: [.sampleStokenetPaige, .sampleStokenetOlivia])
-		XCTAssertEqual(sut, [.sampleStokenetPaige, .sampleStokenetOlivia, .sampleMainnetCarol, .sampleStokenetNadia])
-	}
-	
-	func test_replaceSubrange_many_middle() {
-		var sut: SUT = [.sampleMainnetAlice, .sampleMainnetBob, .sampleMainnetCarol, .sampleStokenetNadia]
-		sut.replaceSubrange(1...2, with: [.sampleStokenetPaige, .sampleStokenetOlivia])
-		XCTAssertEqual(sut, [.sampleMainnetAlice, .sampleStokenetPaige, .sampleStokenetOlivia, .sampleStokenetNadia])
-	}
-	
-	func test_replaceSubrange_many_trailing() {
-		var sut: SUT = [.sampleMainnetAlice, .sampleMainnetBob, .sampleMainnetCarol, .sampleStokenetNadia]
-		sut.replaceSubrange(2...3, with: [.sampleStokenetPaige, .sampleStokenetOlivia])
-		XCTAssertEqual(sut, [.sampleMainnetAlice, .sampleMainnetBob, .sampleStokenetPaige, .sampleStokenetOlivia])
-	}
-	
-	func test_replaceSubrange_last() {
-		var sut: SUT = [.sampleMainnetAlice, .sampleMainnetBob, .sampleMainnetCarol, .sampleStokenetNadia]
-		sut.replaceSubrange(3..<4, with: [.sampleStokenetOlivia])
-		XCTAssertEqual(sut, [.sampleMainnetAlice, .sampleMainnetBob, .sampleMainnetCarol, .sampleStokenetOlivia])
-	}
-	
-	func test_replaceSubrange_last_many() {
-		var sut: SUT = [.sampleMainnetAlice, .sampleMainnetBob, .sampleMainnetCarol, .sampleStokenetNadia]
-		sut.replaceSubrange(3..<4, with: [.sampleStokenetOlivia, .sampleStokenetPaige])
-		XCTAssertEqual(sut, [.sampleMainnetAlice, .sampleMainnetBob, .sampleMainnetCarol, .sampleStokenetOlivia, .sampleStokenetPaige])
+		XCTAssertEqual(sut.allElements(), [sampleChanged, .sampleOther])
 	}
 	
 	func test_updateOrInsert_exists_correct_index() {
@@ -117,6 +81,6 @@ final class AccountsTests: CanBeEmptyCollectionTest<Accounts> {
 		let (originalMember, deFactoIndex) = sut.updateOrInsert(element: sampleChanged, at: correctIndex) // correct index
 		XCTAssertEqual(originalMember, .sample)
 		XCTAssertEqual(deFactoIndex, correctIndex)
-		XCTAssertEqual(sut.elements, [sampleChanged, .sampleOther])
+		XCTAssertEqual(sut.allElements(), [sampleChanged, .sampleOther])
 	}
 }
