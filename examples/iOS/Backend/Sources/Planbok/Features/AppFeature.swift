@@ -20,31 +20,6 @@ public struct AppFeature {
 		case main(MainFeature.Action)
 	}
 	
-	public struct View: SwiftUI.View {
-		public let store: StoreOf<AppFeature>
-		public init(store: StoreOf<AppFeature>) {
-			self.store = store
-		}
-		
-		public var body: some SwiftUI.View {
-			switch store.state {
-			case .splash:
-				if let store = store.scope(state: \.splash, action: \.splash) {
-					SplashFeature.View(store: store)
-				}
-			case .onboarding:
-				if let store = store.scope(state: \.onboarding, action: \.onboarding) {
-					OnboardingFeature.View(store: store)
-				}
-			case .main:
-				if let store = store.scope(state: \.main, action: \.main) {
-					MainFeature.View(store: store)
-				}
-			}
-		}
-	}
-	
-	
 	public init() {}
 	
 	public var body: some ReducerOf<Self> {
@@ -83,3 +58,28 @@ public struct AppFeature {
 	}
 }
 
+extension AppFeature {
+	public struct View: SwiftUI.View {
+		public let store: StoreOf<AppFeature>
+		public init(store: StoreOf<AppFeature>) {
+			self.store = store
+		}
+		
+		public var body: some SwiftUI.View {
+			switch store.state {
+			case .splash:
+				if let store = store.scope(state: \.splash, action: \.splash) {
+					SplashFeature.View(store: store)
+				}
+			case .onboarding:
+				if let store = store.scope(state: \.onboarding, action: \.onboarding) {
+					OnboardingFeature.View(store: store)
+				}
+			case .main:
+				if let store = store.scope(state: \.main, action: \.main) {
+					MainFeature.View(store: store)
+				}
+			}
+		}
+	}
+}

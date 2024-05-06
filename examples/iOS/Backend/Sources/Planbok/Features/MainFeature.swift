@@ -5,12 +5,16 @@ import ComposableArchitecture
 public struct MainFeature {
 	
 	@Dependency(ProfileClient.self) var profileClient
-
+	
+	
+	@Reducer(state: .equatable)
+	public enum Path {
+		case settings(SettingsFeature)
+	}
+	
 	@Reducer(state: .equatable)
 	public enum Destination {
 		case createAccount(CreateAccountFlowFeature)
-		
-		case settings(SettingsFeature)
 		
 		case alert(AlertState<Alert>)
 		
@@ -23,9 +27,9 @@ public struct MainFeature {
 	public struct State: Equatable {
 		
 		@Presents var destination: Destination.State?
-		
+		public var path = StackState<Path.State>()
 		public var accounts: AccountsFeature.State
-	
+		
 		public init() {
 			self.accounts = AccountsFeature.State(accounts: SargonOS.shared.accounts())
 		}
@@ -47,6 +51,8 @@ public struct MainFeature {
 		
 		case view(ViewAction)
 		case destination(PresentationAction<Destination.Action>)
+		case path(StackAction<Path.State, Path.Action>)
+	
 		case accounts(AccountsFeature.Action)
 		
 		case delegate(DelegateAction)
@@ -62,10 +68,26 @@ public struct MainFeature {
 		Reduce { state, action in
 			switch action {
 				
+			case .path(let pathAction):
+				switch pathAction {
+
+				case let .element(id: _, action: .settings(settingsAction)):
+					return .none
+		
+				case .popFrom(id: _):
+					return .none
+				case .push(id: _, state: _):
+					return .none
+				case .element(id: let id, action: let action):
+					switch action {
+					
+					}
+				}
+				
 			case .view(.settingsButtonTapped):
-				state.destination = .settings(SettingsFeature.State())
+				state.path.append(.settings(SettingsFeature.State()))
 				return .none
-			
+				
 			case .accounts(.delegate(.deleteWallet)):
 				state.destination = .alert(.init(
 					title: TextState("Delete wallet?"),
@@ -93,19 +115,22 @@ public struct MainFeature {
 					try await profileClient.deleteProfileAndMnemonicsThenCreateNew()
 					await send(.delegate(.deletedWallet))
 				}
-			
+				
 			case .destination(.presented(.createAccount(.delegate(.createdAccount)))):
 				state.destination = nil
 				state.accounts.accounts = SargonOS.shared.accounts()
 				return .none
-			
+				
 			default:
 				return .none
 			}
 		}
+		.forEach(\.path, action: \.path)
 		.ifLet(\.$destination, action: \.destination)
 	}
-	
+}
+
+extension MainFeature {
 	@ViewAction(for: MainFeature.self)
 	public struct View: SwiftUI.View {
 		
@@ -116,46 +141,41 @@ public struct MainFeature {
 		}
 		
 		public var body: some SwiftUI.View {
-			NavigationStack {
+			NavigationStack(path: $store.scope(state: \.path, action: \.path)) {
 				VStack {
 					VStack {
 						Text("ProfileID:")
 						Text("\(SargonOS.shared.profile.id)")
 					}
-					
 					AccountsFeature.View(
 						store: store.scope(state: \.accounts, action: \.accounts)
 					)
 				}
-				.sheet(
-					item: $store.scope(
-						state: \.destination?.settings,
-						action: \.destination.settings
-					)
-				) { store in
-					NavigationView {
-						SettingsFeature.View(store: store)
-					}
-				}
-				.sheet(
-					item: $store.scope(
-						state: \.destination?.createAccount,
-						action: \.destination.createAccount
-					)
-				) { store in
-					CreateAccountFlowFeature.View(store: store)
-				}
-				.alert($store.scope(state: \.destination?.alert, action: \.destination.alert))
 				.toolbar {
 					ToolbarItem(placement: .primaryAction) {
-						NavigationStack {
-							Button("Settings") {
-								send(.settingsButtonTapped)
-							}
+						Button("Settings") {
+							send(.settingsButtonTapped)
 						}
 					}
 				}
+			} destination: { store in
+				switch store.case {
+				case let .settings(store):
+					SettingsFeature.View(store: store)
+				}
 			}
+			.sheet(
+				item: $store.scope(
+					state: \.destination?.createAccount,
+					action: \.destination.createAccount
+				)
+			) { store in
+				CreateAccountFlowFeature.View(store: store)
+			}
+			.alert($store.scope(state: \.destination?.alert, action: \.destination.alert))
+			
 		}
+		
+	
 	}
 }
