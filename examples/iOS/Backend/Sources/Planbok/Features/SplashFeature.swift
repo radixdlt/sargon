@@ -7,7 +7,10 @@ public struct SplashFeature {
 	@Dependency(\.continuousClock) var clock
 	@ObservableState
 	public struct State {
-		public init() {}
+		let isEmulatingFreshInstall: Bool
+		public init(isEmulatingFreshInstall: Bool = false) {
+			self.isEmulatingFreshInstall = isEmulatingFreshInstall
+		}
 	}
 
 	public enum Action: ViewAction, Sendable {
@@ -49,8 +52,12 @@ public struct SplashFeature {
 				
 			case .view(.appear):
 				struct SplashID: Hashable { }
-				return .run { send in
-					let os = try await SargonOS.createdSharedBootingWith(bios: BIOS.shared)
+				return .run { [isEmulatingFreshInstall = state.isEmulatingFreshInstall] send in
+					
+					let os = try await SargonOS.createdSharedBootingWith(
+						bios: BIOS.shared,
+						isEmulatingFreshInstall: isEmulatingFreshInstall
+					)
 					await send(
 						.delegate(.booted(hasAnyNetwork: os.hasAnyNetwork()))
 					)

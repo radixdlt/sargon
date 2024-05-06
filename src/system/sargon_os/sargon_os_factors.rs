@@ -25,23 +25,6 @@ impl SargonOS {
     pub fn bdfs(&self) -> DeviceFactorSource {
         self.profile_holder.access_profile_with(|p| p.bdfs())
     }
-
-    /// Deletes the profile and the active profile id and all references Device
-    /// factor sources from secure storage.
-    pub async fn delete_profile_and_mnemonics(&self) -> Result<()> {
-        let secure_storage = &self.clients.secure_storage;
-        let device_factor_sources = self
-            .profile_holder
-            .access_profile_with(|p| p.device_factor_sources());
-
-        for dfs in device_factor_sources.iter() {
-            secure_storage.delete_mnemonic(&dfs.id).await?
-        }
-
-        secure_storage.delete_profile(self.profile().id()).await?;
-        secure_storage.delete_active_profile_id().await?;
-        Ok(())
-    }
 }
 
 impl SargonOS {

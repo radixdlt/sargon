@@ -6,10 +6,11 @@ public struct NameNewAccountFeature {
 	
 	@ObservableState
 	public struct State: Equatable {
-		public var accountName = ""
+		public var accountName: String
 		public var errorMessage: String?
-		public init() {}
-		
+		public init(index: Int = 0) {
+			self.accountName = "Unnamed \(index)"
+		}
 	}
 	
 	public enum Action: ViewAction {

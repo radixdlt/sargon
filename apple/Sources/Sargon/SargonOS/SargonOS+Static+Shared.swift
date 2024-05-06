@@ -20,8 +20,13 @@ extension SargonOS {
 	
 	/// Can be access later with `OS.shared`
 	@discardableResult
-	public static func createdSharedBootingWith(bios: BIOS) async throws -> SargonOS {
-		assert(_shared == nil, "Should not be created twice")
+	public static func createdSharedBootingWith(
+		bios: BIOS,
+		isEmulatingFreshInstall: Bool = false
+	) async throws -> SargonOS {
+		if !isEmulatingFreshInstall {
+			assert(_shared == nil, "Should not be created twice")
+		}
 		let shared = try await SargonOS.boot(bios: bios)
 		Self._shared = shared
 		return shared

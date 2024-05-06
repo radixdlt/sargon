@@ -37,9 +37,12 @@ extension BIOS {
 	/// Can be access later with `OS.shared`
 	@discardableResult
 	public static func settingShared(
-		shared: BIOS
+		shared: BIOS,
+		isEmulatingFreshInstall: Bool = false
 	) -> BIOS {
-		assert(_shared == nil, "Should not be created twice")
+		if !isEmulatingFreshInstall {
+			assert(_shared == nil, "Should not be created twice")
+		}
 		Self._shared = shared
 		return shared
 	}

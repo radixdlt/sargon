@@ -5,6 +5,7 @@ import ComposableArchitecture
 public struct MainFeature {
 	
 	@Dependency(ProfileClient.self) var profileClient
+	@Dependency(AccountsClient.self) var accountsClient
 	
 	@Reducer(state: .equatable)
 	public enum Path {
@@ -16,10 +17,23 @@ public struct MainFeature {
 	public enum Destination {
 		case createAccount(CreateAccountFlowFeature)
 		
-		case alert(AlertState<Alert>)
+		case deleteProfileAlert(AlertState<DeleteProfileAlert>)
 		
-		public enum Alert {
-			case confirmedDeleteWallet
+		public enum DeleteProfileAlert {
+			case confirmedDeleteProfileBDFSThenOnboard
+			case confirmedEmulateFreshInstallThenTerminate
+		}
+		
+		case createManyAccountsAlert(AlertState<CreateManyAccountsAlert>)
+		
+		public enum CreateManyAccountsAlert: Int {
+			case create10 = 10
+			case create20 = 20
+			case create50 = 50
+			case create100 = 100
+			case create200 = 200
+			case create500 = 500
+			case create1000 = 1000
 		}
 	}
 	
@@ -31,7 +45,7 @@ public struct MainFeature {
 		public var accounts: AccountsFeature.State
 		
 		public init() {
-			self.accounts = AccountsFeature.State(accounts: SargonOS.shared.accounts())
+			self.accounts = AccountsFeature.State()
 		}
 		
 	}
@@ -42,13 +56,20 @@ public struct MainFeature {
 		@CasePathable
 		public enum ViewAction {
 			case settingsButtonTapped
+			case deleteWalletButtonTapped
 		}
 		
 		@CasePathable
 		public enum DelegateAction {
 			case deletedWallet
+			case emulateFreshInstall
 		}
 		
+		public enum InternalAction {
+			case createdManyAccounts
+		}
+		
+		case `internal`(InternalAction)
 		case view(ViewAction)
 		case destination(PresentationAction<Destination.Action>)
 		case path(StackAction<Path.State, Path.Action>)
@@ -71,17 +92,36 @@ public struct MainFeature {
 			case .path(let pathAction):
 				switch pathAction {
 
-				case .element(id: let id, action: let action):
+				case let .element(id: _, action: action):
 					switch action {
-						
+					case .accountDetails(_):
+						return .none
 					}
 		
 				case .popFrom(id: _):
 					return .none
 				case .push(id: _, state: _):
 					return .none
-				
 				}
+				
+			case .view(.deleteWalletButtonTapped):
+				state.destination = .deleteProfileAlert(.init(
+					title: TextState("Delete wallet?"),
+					message: TextState("Warning"),
+					buttons: [
+						.cancel(TextState("Cancel")),
+						.destructive(
+							TextState("Delete Profile & BDFS -> Onboard"),
+							action: .send(.confirmedDeleteProfileBDFSThenOnboard)
+						),
+						.destructive(
+							TextState("Emulate Fresh Install -> Restart"),
+							action: .send(.confirmedEmulateFreshInstallThenTerminate)
+						)
+					]
+				))
+				return .none
+			
 				
 			case .view(.settingsButtonTapped):
 				state.path.append(.settings(SettingsFeature.State()))
@@ -91,38 +131,56 @@ public struct MainFeature {
 				state.path.append(.accountDetails(AccountDetailsFeature.State(account: account)))
 				return .none
 				
-			case .accounts(.delegate(.deleteWallet)):
-				state.destination = .alert(.init(
-					title: TextState("Delete wallet?"),
-					message: TextState("Warning"),
+				
+			case let .accounts(.delegate(.createNewAccount(index))):
+				state.destination = .createAccount(
+					CreateAccountFlowFeature.State(index: index)
+				)
+				return .none
+				
+			case .accounts(.delegate(.createManyAccounts)):
+				state.destination = .createManyAccountsAlert(.init(
+					title: TextState("How many?"),
+					message: TextState("Will batch create many accounts and then perform one single save action."),
 					buttons: [
 						.cancel(TextState("Cancel")),
-						.destructive(
-							TextState("Delete Wallet and mnemonic"),
-							action: .send(.confirmedDeleteWallet)
-						)
+						ButtonState<Destination.CreateManyAccountsAlert>.init(action: .create10, label: {
+							TextState("Create 10")
+						})
 					]
 				))
 				return .none
 				
-			case .accounts(.delegate(.createNewAccount)):
-				state.destination = .createAccount(
-					CreateAccountFlowFeature.State()
-				)
-				return .none
+			case .destination(.presented(.deleteProfileAlert(.confirmedEmulateFreshInstallThenTerminate))):
+				log.notice("Confirmed deletion of Profile & BDFS")
+				state.destination = nil
+				return .run { send in
+					try await profileClient.emulateFreshInstallOfAppThenRestart()
+					await send(.delegate(.emulateFreshInstall))
+				}
 				
-			case .destination(.presented(.alert(.confirmedDeleteWallet))):
-				log.notice("Confirmed deletion of wallet")
+			case .destination(.presented(.deleteProfileAlert(.confirmedDeleteProfileBDFSThenOnboard))):
+				log.notice("Confirmed deletion of Profile & BDFS (will then onboard)")
 				state.destination = nil
 				return .run { send in
 					try await profileClient.deleteProfileAndMnemonicsThenCreateNew()
 					await send(.delegate(.deletedWallet))
 				}
 				
-			case .destination(.presented(.createAccount(.delegate(.createdAccount)))):
+			case let .destination(.presented(.createManyAccountsAlert(action))):
 				state.destination = nil
-				state.accounts.accounts = SargonOS.shared.accounts()
-				return .none
+				let count = UInt16(action.rawValue)
+				return .run { send in
+					try await accountsClient.batchCreateManySavedAccounts(count, NetworkID.mainnet)
+					await send(.internal(.createdManyAccounts))
+				}
+				
+				
+			case .destination(.presented(.createAccount(.delegate(.createdAccount)))):
+				return refreshAccounts(&state)
+				
+			case .internal(.createdManyAccounts):
+				return refreshAccounts(&state)
 				
 			default:
 				return .none
@@ -130,6 +188,12 @@ public struct MainFeature {
 		}
 		.forEach(\.path, action: \.path)
 		.ifLet(\.$destination, action: \.destination)
+	}
+	
+	func refreshAccounts(_ state: inout State) -> Effect<Action> {
+		state.destination = nil
+		state.accounts.accounts = accountsClient.getAccounts()
+		return .none
 	}
 }
 
@@ -150,9 +214,14 @@ extension MainFeature {
 						Text("ProfileID:")
 						Text("\(SargonOS.shared.profile.id)")
 					}
+					
 					AccountsFeature.View(
 						store: store.scope(state: \.accounts, action: \.accounts)
 					)
+					
+					Button("Delete Wallet", role: .destructive) {
+						send(.deleteWalletButtonTapped)
+					}
 				}
 				.toolbar {
 					ToolbarItem(placement: .primaryAction) {
@@ -177,7 +246,8 @@ extension MainFeature {
 			) { store in
 				CreateAccountFlowFeature.View(store: store)
 			}
-			.alert($store.scope(state: \.destination?.alert, action: \.destination.alert))
+			.alert($store.scope(state: \.destination?.deleteProfileAlert, action: \.destination.deleteProfileAlert))
+			.alert($store.scope(state: \.destination?.createManyAccountsAlert, action: \.destination.createManyAccountsAlert))
 			
 		}
 		

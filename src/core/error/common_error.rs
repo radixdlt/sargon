@@ -502,6 +502,12 @@ pub enum CommonError {
 
     #[error("Failed to create file path from string: '{bad_value}'")]
     FailedToCreateFilePathFromString { bad_value: String } = 10140,
+
+    #[error("Expected collection to not be empty")]
+    ExpectedNonEmptyCollection = 10141,
+
+    #[error("Failed to add all accounts, found duplicated account.")]
+    UnableToAddAllAccountsDuplicatesFound = 10142,
 }
 
 #[uniffi::export]

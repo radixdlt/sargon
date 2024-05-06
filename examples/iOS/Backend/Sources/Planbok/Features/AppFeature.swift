@@ -9,8 +9,34 @@ public struct AppFeature {
 		case splash(SplashFeature.State)
 		case onboarding(OnboardingFeature.State)
 		case main(MainFeature.State)
-		public init() {
-			self = .splash(.init())
+		
+		public init(isEmulatingFreshInstall: Bool = false) {
+			
+			let bios = BIOS.init(
+				drivers: .init(
+					networking: URLSession.shared,
+					secureStorage: Keychain(service: "rdx.works.planbok"),
+					entropyProvider: EntropyProvider.shared,
+					hostInfo: HostInfo(
+						appVersion: "0.0.01"
+					),
+					logging: Log.shared,
+					eventBus: EventBus.shared,
+					fileSystem: FileSystem.shared,
+					unsafeStorage: UnsafeStorage.init(
+						userDefaults: .init(
+							suiteName: "rdx.works"
+						)!
+					)
+				)
+			)
+			
+			BIOS.settingShared(
+				shared: bios,
+				isEmulatingFreshInstall: isEmulatingFreshInstall
+			)
+			
+			self = .splash(.init(isEmulatingFreshInstall: true))
 		}
 	}
 	
@@ -40,6 +66,10 @@ public struct AppFeature {
 				
 			case .main(.delegate(.deletedWallet)):
 				state = .onboarding(OnboardingFeature.State())
+				return .none
+				
+			case .main(.delegate(.emulateFreshInstall)):
+				state = AppFeature.State(isEmulatingFreshInstall: true)
 				return .none
 			
 			default:

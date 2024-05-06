@@ -14,13 +14,10 @@ public struct SelectGradientFeature {
 	
 	@ObservableState
 	public struct State: Equatable {
-		public let name: DisplayName
 		public var gradient: AppearanceID
 		public init(
-			name: DisplayName,
-			gradient: AppearanceID = AppearanceID.allCases.first!
+			gradient: AppearanceID
 		) {
-			self.name = name
 			self.gradient = gradient
 		}
 	}
@@ -28,7 +25,7 @@ public struct SelectGradientFeature {
 	@CasePathable
 	public enum Action: ViewAction {
 		public enum Delegate {
-			case selected(AppearanceID, DisplayName)
+			case selected(AppearanceID)
 		}
 		@CasePathable
 		public enum ViewAction {
@@ -50,7 +47,7 @@ public struct SelectGradientFeature {
 				return .none
 			
 			case .view(.confirmedGradientButtonTapped):
-				return .send(.delegate(.selected(state.gradient, state.name)))
+				return .send(.delegate(.selected(state.gradient)))
 				
 			default:
 				return .none

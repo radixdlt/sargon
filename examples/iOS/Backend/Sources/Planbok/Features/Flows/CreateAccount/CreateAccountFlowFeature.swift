@@ -8,8 +8,8 @@ public struct CreateAccountFlowFeature {
 	public struct State: Equatable {
 		public var nameAccount: NameNewAccountFeature.State
 		
-		public init() {
-			self.nameAccount = NameNewAccountFeature.State()
+		public init(index: Int = 0) {
+			self.nameAccount = NameNewAccountFeature.State(index: index)
 		}
 	}
 	

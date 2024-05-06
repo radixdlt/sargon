@@ -14,10 +14,13 @@ public struct ProfileClient: Sendable {
 	public typealias DeleteProfileAndMnemonicsThenCreateNew = @Sendable () async throws -> Void
 	public typealias ImportProfile = @Sendable (Profile) async throws -> Void
 	public typealias DecryptEncryptedProfile = @Sendable (_ encrypted: Data, _ password: String) throws -> Profile
+	
+	public typealias EmulateFreshInstallOfAppThenRestart = @Sendable () async throws -> Void
 
 	public var deleteProfileAndMnemonicsThenCreateNew: DeleteProfileAndMnemonicsThenCreateNew
 	public var importProfile: ImportProfile
 	public var decryptEncryptedProfile: DecryptEncryptedProfile
+	public var emulateFreshInstallOfAppThenRestart: EmulateFreshInstallOfAppThenRestart
 }
 
 extension ProfileClient: DependencyKey {
@@ -31,7 +34,10 @@ extension ProfileClient: DependencyKey {
 				try await os.importProfile(profile: $0)
 			},
 			decryptEncryptedProfile: {
-				try Profile.init(encrypted: $0, decryptionPassword: $1)
+				try Profile(encrypted: $0, decryptionPassword: $1)
+			},
+			emulateFreshInstallOfAppThenRestart: {
+				try await os.emulateFreshInstall()
 			}
 		)
 	}

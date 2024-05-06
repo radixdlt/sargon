@@ -52,6 +52,9 @@ impl ProfileHolder {
         Ok(())
     }
 
+    /// Updates the in-memory profile held by this `ProfileHolder`, you might
+    /// wanna also persist the change in the `SargonOS` by saving it to secure
+    /// storage.
     pub(super) fn update_profile_with<F, R>(&self, mutate: F) -> Result<R>
     where
         F: Fn(RwLockWriteGuard<'_, Profile>) -> Result<R>,

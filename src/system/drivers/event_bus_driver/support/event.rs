@@ -2,7 +2,9 @@ use crate::prelude::*;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Enum)]
 pub enum ProfileChange {
+    UnspecifiedChange,
     AddedAccount { address: AccountAddress },
+    AddedAccounts { addresses: Vec<AccountAddress> },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Enum)]

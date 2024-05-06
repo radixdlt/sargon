@@ -87,16 +87,41 @@ impl PrivateHierarchicalDeterministicFactorSource {
     where
         T: IsEntityPath + Clone,
     {
-        let path = T::new(network_id, CAP26KeyKind::TransactionSigning, index);
+        self.derive_entity_creation_factor_instances(network_id, [index])
+            .into_iter()
+            .last()
+            .expect("Should have created one factor instance")
+    }
+
+    pub fn derive_entity_creation_factor_instances<T>(
+        &self,
+        network_id: NetworkID,
+        indices: impl IntoIterator<Item = HDPathValue>,
+    ) -> Vec<HDFactorInstanceTransactionSigning<T>>
+    where
+        T: IsEntityPath + Clone,
+    {
+        let paths = indices
+            .into_iter()
+            .map(|i| T::new(network_id, CAP26KeyKind::TransactionSigning, i));
+
         let mut seed = self.mnemonic_with_passphrase.to_seed();
-        let hd_private_key = seed.derive_private_key(&path);
-        let hd_factor_instance = HierarchicalDeterministicFactorInstance::new(
-            self.factor_source.id,
-            hd_private_key.public_key(),
-        );
+        let instances = paths
+            .map(|p| {
+                let hd_private_key = seed.derive_private_key(&p);
+                let hd_factor_instance =
+                    HierarchicalDeterministicFactorInstance::new(
+                        self.factor_source.id,
+                        hd_private_key.public_key(),
+                    );
+                // TODO: zeroize `hd_private_key` when `HierarchicalDeterministicPrivateKey` implement Zeroize...
+                HDFactorInstanceTransactionSigning::new(hd_factor_instance)
+                    .unwrap()
+            })
+            .collect_vec();
+
         seed.zeroize();
-        // TODO: zeroize `hd_private_key` when `HierarchicalDeterministicPrivateKey` implement Zeroize...
-        HDFactorInstanceTransactionSigning::new(hd_factor_instance).unwrap()
+        instances
     }
 }
 

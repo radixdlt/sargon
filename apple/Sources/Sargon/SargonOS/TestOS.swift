@@ -66,6 +66,15 @@ extension TestOS {
 		)
 		return self
 	}
+	
+	@discardableResult
+	public func batchCreateAccounts(
+		count: UInt16,
+		namePrefix: DisplayName
+	) async throws -> Self {
+		let _ = try await os.batchCreateManyAccountsThenSaveOnce(count: count, networkId: currentNetworkID, namePrefix: namePrefix.value)
+		return self
+	}
 }
 
 

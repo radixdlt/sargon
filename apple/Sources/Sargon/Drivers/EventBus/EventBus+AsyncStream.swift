@@ -12,12 +12,21 @@ extension EventBusDriver where Self == EventBus {
 	public static var shared: Self { Self.shared }
 }
 
+extension ProfileChange {
+	public var addedAccount: AccountAddress? {
+		guard case let .addedAccount(address) = self else { return nil }
+		return address
+	}
+}
 
 extension Event {
-	public var addressOfNewAccount: AccountAddress {
+	public var profileChanged: ProfileChange {
 		switch self {
-		case let .profileChanged(change: .addedAccount(address)): return address
+		case let .profileChanged(change): return change
 		}
+	}
+	public var addressOfNewAccount: AccountAddress? {
+		profileChanged.addedAccount
 	}
 }
 
