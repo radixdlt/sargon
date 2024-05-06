@@ -70,7 +70,7 @@ extension AccountDetailsFeature {
 	public struct View: SwiftUI.View {
 		@Bindable public var store: StoreOf<AccountDetailsFeature>
 		public var body: some SwiftUI.View {
-			NavigationStack {
+			NavigationView {
 				VStack {
 					AccountView(account: store.account)
 					
