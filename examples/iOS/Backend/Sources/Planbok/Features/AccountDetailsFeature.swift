@@ -50,6 +50,7 @@ public struct AccountDetailsFeature {
 				return .none
 
 			case let .destination(.presented(.changeGradient(.delegate(.selected(newGradient))))):
+				state.destination = nil
 				state.account.appearanceId = newGradient
 				
 				return .run { [updatedAccount = state.account] send in
@@ -72,7 +73,7 @@ extension AccountDetailsFeature {
 		public var body: some SwiftUI.View {
 			NavigationView {
 				VStack {
-					AccountView(account: store.account)
+					AccountView(account: store.account, format: .full)
 					
 					Button("Change Gradient") {
 						send(.changeGradientButtonTapped)
