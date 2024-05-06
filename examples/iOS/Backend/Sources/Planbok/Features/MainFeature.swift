@@ -6,10 +6,10 @@ public struct MainFeature {
 	
 	@Dependency(ProfileClient.self) var profileClient
 	
-	
 	@Reducer(state: .equatable)
 	public enum Path {
 		case settings(SettingsFeature)
+		case accountDetails(AccountDetailsFeature)
 	}
 	
 	@Reducer(state: .equatable)
@@ -71,21 +71,24 @@ public struct MainFeature {
 			case .path(let pathAction):
 				switch pathAction {
 
-				case let .element(id: _, action: .settings(settingsAction)):
-					return .none
+				case .element(id: let id, action: let action):
+					switch action {
+						
+					}
 		
 				case .popFrom(id: _):
 					return .none
 				case .push(id: _, state: _):
 					return .none
-				case .element(id: let id, action: let action):
-					switch action {
-					
-					}
+				
 				}
 				
 			case .view(.settingsButtonTapped):
 				state.path.append(.settings(SettingsFeature.State()))
+				return .none
+
+			case let .accounts(.delegate(.showDetailsFor(account))):
+				state.path.append(.accountDetails(AccountDetailsFeature.State(account: account)))
 				return .none
 				
 			case .accounts(.delegate(.deleteWallet)):
@@ -162,6 +165,8 @@ extension MainFeature {
 				switch store.case {
 				case let .settings(store):
 					SettingsFeature.View(store: store)
+				case let .accountDetails(store):
+					AccountDetailsFeature.View(store: store)
 				}
 			}
 			.sheet(

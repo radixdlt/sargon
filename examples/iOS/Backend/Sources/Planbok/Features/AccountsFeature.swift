@@ -6,24 +6,9 @@ public struct AccountsFeature {
 	
 	public init() {}
 	
-	public var body: some ReducerOf<Self> {
-		Reduce { state, action in
-			switch action {
-			
-			case .view(.createNewAccountButtonTapped):
-				return .send(.delegate(.createNewAccount))
-			
-			case .view(.deleteWalletButtonTapped):
-				return .send(.delegate(.deleteWallet))
-			
-			default: return .none
-			}
-		}
-	}
-
 	@ObservableState
 	public struct State: Equatable {
-	
+		
 		public var accounts: Accounts
 		
 		public init(accounts: Accounts) {
@@ -33,17 +18,40 @@ public struct AccountsFeature {
 	
 	public enum Action: ViewAction {
 		public enum ViewAction {
+			case accountCardTapped(Account)
 			case createNewAccountButtonTapped
 			case deleteWalletButtonTapped
 		}
 		public enum DelegateAction {
 			case createNewAccount
 			case deleteWallet
+			case showDetailsFor(Account)
 		}
 		case view(ViewAction)
 		case delegate(DelegateAction)
 	}
 	
+	
+	public var body: some ReducerOf<Self> {
+		Reduce { state, action in
+			switch action {
+				
+			case .view(.createNewAccountButtonTapped):
+				return .send(.delegate(.createNewAccount))
+				
+			case .view(.deleteWalletButtonTapped):
+				return .send(.delegate(.deleteWallet))
+				
+			case let .view(.accountCardTapped(account)):
+				return .send(.delegate(.showDetailsFor(account)))
+				
+			default: return .none
+			}
+		}
+	}
+}
+
+extension AccountsFeature {
 	@ViewAction(for: AccountsFeature.self)
 	public struct View: SwiftUI.View {
 		
@@ -60,7 +68,9 @@ public struct AccountsFeature {
 				ScrollView {
 					ForEach(store.state.accounts) { account in
 						VStack {
-							AccountView(account: account)
+							AccountView(account: account) {
+								send(.accountCardTapped(account))
+							}
 						}
 					}
 				}
