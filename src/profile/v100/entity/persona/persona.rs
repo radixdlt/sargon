@@ -151,7 +151,7 @@ impl Persona {
             PersonaData::new(name, phone_numbers, email_addresses),
         );
         if is_hidden {
-            persona.flags.insert_flag(EntityFlag::DeletedByUser);
+            persona.flags.insert(EntityFlag::DeletedByUser);
         }
         persona
     }
