@@ -17,7 +17,7 @@ extension EntityFlags {
 		self = newEntityFlagsWithEntityFlag(entityFlag: element)
 	}
 	
-	public func allElements() -> [EntityFlag] {
+	public var elements: [EntityFlag] {
 		entityFlagsGetElements(entityFlags: self)
 	}
 	

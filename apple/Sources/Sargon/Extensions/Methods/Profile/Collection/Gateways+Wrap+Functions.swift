@@ -11,7 +11,7 @@ extension Gateways {
 		self = newGatewaysWithGateway(gateway: element)
 	}
 	
-	public func allElements() -> [Element] {
+	public var elements: [Element] {
 		gatewaysGetElements(gateways: self)
 	}
 	

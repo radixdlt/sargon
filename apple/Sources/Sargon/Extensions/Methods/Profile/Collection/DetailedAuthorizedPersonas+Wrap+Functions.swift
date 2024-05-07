@@ -10,7 +10,7 @@ extension DetailedAuthorizedPersonas {
 		self = newDetailedAuthorizedPersonasWithAuthorizedPersonaDetailed(authorizedPersonaDetailed: element)
 	}
 	
-	public func allElements() -> [Element] {
+	public var elements: [Element] {
 		detailedAuthorizedPersonasGetElements(detailedAuthorizedPersonas: self)
 	}
 	

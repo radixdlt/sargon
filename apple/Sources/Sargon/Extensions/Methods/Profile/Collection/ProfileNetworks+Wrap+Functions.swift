@@ -10,19 +10,19 @@ import SargonUniFFI
 
 extension ProfileNetworks {
 	
-	public init(_ elements: [Element]) {
+	public init(_ elements: [ProfileNetwork]) {
 		self = newProfileNetworks(profileNetworks: elements)
 	}
 	
-	public init(element: Element) {
+	public init(element: ProfileNetwork) {
 		self = newProfileNetworksWithProfileNetwork(profileNetwork: element)
 	}
 	
-	public func allElements() -> [Element] {
+	public var elements: [ProfileNetwork] {
 		profileNetworksGetElements(profileNetworks: self)
 	}
 	
-	public func appending(_ network: Element) -> Self {
+	public func appending(_ network: ProfileNetwork) -> Self {
 		newProfileNetworksByAppending(profileNetwork: network, to: self)
 	}
 	
@@ -30,19 +30,19 @@ extension ProfileNetworks {
 		newProfileNetworksByUpdatingOrInsertingAtIndex(profileNetwork: profileNetwork, to: self, index: UInt64(index))
 	}
 	
-	public func updatingOrAppending(_ network: Element) -> Self {
+	public func updatingOrAppending(_ network: ProfileNetwork) -> Self {
 		newProfileNetworksByUpdatingOrAppending(profileNetwork: network, to: self)
 	}
 	
-	public func removing(_ id: Element.ID) -> Self {
+	public func removing(_ id: ProfileNetwork.ID) -> Self {
 		newProfileNetworksRemovedById(idOfProfileNetwork: id, from: self)
 	}
 	
-	public func removing(element network: Element) -> Self {
+	public func removing(element network: ProfileNetwork) -> Self {
 		newProfileNetworksRemovedElement(profileNetwork: network, from: self)
 	}
 	
-	public func get(id: Element.ID) -> Element? {
+	public func get(id: ProfileNetwork.ID) -> ProfileNetwork? {
 		profileNetworksGetProfileNetworkById(profileNetworks: self, id: id)
 	}
 	

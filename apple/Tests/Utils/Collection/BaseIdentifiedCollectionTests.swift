@@ -10,7 +10,7 @@ class BaseCollectionTest<SUT_: BaseIdentifiedCollection>: Test<SUT_> {
 	func test_element_roundtrip() throws {
 		let element = SUTElement.sample
 		XCTAssertEqual(
-			SUT(element: element).allElements(),
+			SUT(element: element).elements,
 			[element]
 		)
 	}
@@ -26,7 +26,7 @@ class BaseCollectionTest<SUT_: BaseIdentifiedCollection>: Test<SUT_> {
 		let sampleOther = SUTElement.sampleOther
 		let sut = SUT(element: sample)
 		XCTAssertEqual(
-			sut.appending(sampleOther).allElements(),
+			sut.appending(sampleOther).elements,
 			[sample, sampleOther]
 		)
 	}
@@ -36,7 +36,7 @@ class BaseCollectionTest<SUT_: BaseIdentifiedCollection>: Test<SUT_> {
 		let sampleOther = SUTElement.sampleOther
 		let sut = SUT(element: sample)
 		XCTAssertEqual(
-			sut.updatingOrAppending(sampleOther).allElements(),
+			sut.updatingOrAppending(sampleOther).elements,
 			[sample, sampleOther]
 		)
 	}
@@ -46,7 +46,7 @@ class BaseCollectionTest<SUT_: BaseIdentifiedCollection>: Test<SUT_> {
 		let sampleOther = SUTElement.sampleOther
 		let sut = SUT(element: sample)
 		XCTAssertEqual(
-			sut.updatingOrInserting(element: sampleOther, at: 1).allElements(),
+			sut.updatingOrInserting(element: sampleOther, at: 1).elements,
 			[sample, sampleOther]
 		)
 	}
@@ -56,7 +56,7 @@ class BaseCollectionTest<SUT_: BaseIdentifiedCollection>: Test<SUT_> {
 		let sampleOther = SUTElement.sampleOther
 		let sut = SUT(element: sample)
 		XCTAssertEqual(
-			sut.updatingOrInserting(element: sampleOther, at: 0).allElements(),
+			sut.updatingOrInserting(element: sampleOther, at: 0).elements,
 			[sampleOther, sample]
 		)
 	}
@@ -67,7 +67,7 @@ class BaseCollectionTest<SUT_: BaseIdentifiedCollection>: Test<SUT_> {
 		var sut = SUT(element: sample)
 		sut[0] = .sampleOther
 		XCTAssertEqual(
-			sut.allElements(),
+			sut.elements,
 			[sampleOther, sample]
 		)
 	}
@@ -78,7 +78,7 @@ class BaseCollectionTest<SUT_: BaseIdentifiedCollection>: Test<SUT_> {
 		var sut = SUT(element: sample)
 		sut[1] = .sampleOther
 		XCTAssertEqual(
-			sut.allElements(),
+			sut.elements,
 			[sample, sampleOther]
 		)
 	}
@@ -92,7 +92,7 @@ class BaseCollectionTest<SUT_: BaseIdentifiedCollection>: Test<SUT_> {
 	
 	func test_ids() {
 		func doTest(_ sut: SUT) {
-			XCTAssertEqual(sut.ids, sut.allElements().map(\.id))
+			XCTAssertEqual(sut.ids, sut.elements.map(\.id))
 		}
 		SUT.sampleValues.forEach(doTest)
 	}
@@ -103,7 +103,7 @@ class BaseCollectionTest<SUT_: BaseIdentifiedCollection>: Test<SUT_> {
 		var sut = SUT(element: sample)
 		sut.append(sampleOther)
 		XCTAssertEqual(
-			sut.allElements(),
+			sut.elements,
 			[sample, sampleOther]
 		)
 	}
@@ -121,7 +121,7 @@ class BaseCollectionTest<SUT_: BaseIdentifiedCollection>: Test<SUT_> {
 		let sample = SUTElement.sample
 		let sut = SUT(element: sample)
 		XCTAssertEqual(
-			sut.appending(sample).allElements(), // unchanged
+			sut.appending(sample).elements, // unchanged
 			[sample]
 		)
 	}

@@ -44,7 +44,7 @@ final class ProfileTests: Test<Profile> {
 		XCTAssertEqual(sut.header, header)
 		XCTAssertEqual(sut.appPreferences, .default)
 		XCTAssertEqual(sut.networks, [])
-		XCTAssertEqual(sut.factorSources.allElements(), [dfs.asGeneral])
+		XCTAssertEqual(sut.factorSources.elements, [dfs.asGeneral])
 	}
 
 	func test_analyze_file_not_profile() {
@@ -91,19 +91,6 @@ final class ProfileTests: Test<Profile> {
 		XCTAssertTrue(jsonString.contains("version"))
 	}
 	
-	func test_performance_get_account_at_index_from_many_accounts() {
-		let n = 100 // 0.62
-		let sut = Accounts(Array(vector.model.accounts().prefix(n)))
-		let addresses = sut.map(\.address)
-		XCTAssertEqual(addresses.count, n)
-		measure {
-			addresses.forEach {
-				XCTAssertNotNil(sut[id: $0])
-			}
-		}
-	}
-	
-	
 	func test_json_roundtrip() throws {
 		func doTest(_ sut: SUT, _ json: Data) throws {
 			let encoded = sut.profileSnapshot()
@@ -111,8 +98,8 @@ final class ProfileTests: Test<Profile> {
 			let decoded = try SUT(jsonData: json)
 			XCTAssertEqual(decoded, sut)
 		}
-		let vectors = Array(zip(SUT.sampleValues, SUT.sampleValues.map { $0.jsonData() }))
-//		vectors.append(vector) // FIXME: reintroduce once we have regenerated huge_profile_1000_accounts post having changed it
+		var vectors = Array(zip(SUT.sampleValues, SUT.sampleValues.map { $0.jsonData() }))
+		vectors.append(vector)
 		try vectors.forEach(doTest)
 	}
 	

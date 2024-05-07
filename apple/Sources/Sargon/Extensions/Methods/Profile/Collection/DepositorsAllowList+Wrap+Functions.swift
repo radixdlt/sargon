@@ -19,7 +19,7 @@ extension DepositorsAllowList {
 		self = newDepositorsAllowListWithResourceOrNonFungible(resourceOrNonFungible: element)
 	}
 	
-	public func allElements() -> [Element] {
+	public var elements: [Element] {
 		depositorsAllowListGetElements(depositorsAllowList: self)
 	}
 	

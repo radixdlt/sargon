@@ -9,19 +9,19 @@ import Foundation
 import SargonUniFFI
 
 extension Personas {
-	public init(_ elements: [Element]) {
+	public init(_ elements: [Persona]) {
 		self = newPersonas(personas: elements)
 	}
 	
-	public init(element: Element) {
+	public init(element: Persona) {
 		self = newPersonasWithPersona(persona: element)
 	}
 	
-	public func allElements() -> [Element] {
+	public var elements: [Persona] {
 		personasGetElements(personas: self)
 	}
 	
-	public func appending(_ persona: Element) -> Self {
+	public func appending(_ persona: Persona) -> Self {
 		newPersonasByAppending(persona: persona, to: self)
 	}
 	
@@ -29,19 +29,19 @@ extension Personas {
 		newPersonasByUpdatingOrInsertingAtIndex(persona: persona, to: self, index: UInt64(index))
 	}
 	
-	public func updatingOrAppending(_ persona: Element) -> Self {
+	public func updatingOrAppending(_ persona: Persona) -> Self {
 		newPersonasByUpdatingOrAppending(persona: persona, to: self)
 	}
 	
-	public func removing(_ id: Element.ID) -> Self {
+	public func removing(_ id: Persona.ID) -> Self {
 		newPersonasRemovedById(idOfPersona: id, from: self)
 	}
 	
-	public func removing(element persona: Element) -> Self {
+	public func removing(element persona: Persona) -> Self {
 		newPersonasRemovedElement(persona: persona, from: self)
 	}
 	
-	public func get(id: Element.ID) -> Element? {
+	public func get(id: Persona.ID) -> Persona? {
 		personasGetPersonaById(personas: self, id: id)
 	}
 	

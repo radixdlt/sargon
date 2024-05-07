@@ -18,7 +18,7 @@ extension SupportedCurves {
 		self = newSupportedCurvesWithSLIP10Curve(sLIP10Curve: element)
 	}
 	
-	public func allElements() -> [Element] {
+	public var elements: [Element] {
 		supportedCurvesGetElements(supportedCurves: self)
 	}
 	

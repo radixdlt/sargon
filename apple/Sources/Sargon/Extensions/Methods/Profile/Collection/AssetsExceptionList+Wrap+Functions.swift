@@ -17,7 +17,7 @@ extension AssetsExceptionList {
 		self = newAssetsExceptionListWithAssetException(assetException: element)
 	}
 	
-	public func allElements() -> [Element] {
+	public var elements: [Element] {
 		assetsExceptionListGetElements(assetsExceptionList: self)
 	}
 	

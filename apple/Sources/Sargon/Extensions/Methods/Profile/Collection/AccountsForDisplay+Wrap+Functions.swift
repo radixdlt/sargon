@@ -17,7 +17,7 @@ extension AccountsForDisplay {
 		self = newAccountsForDisplayWithAccountForDisplay(accountForDisplay: element)
 	}
 	
-	public func allElements() -> [Element] {
+	public var elements: [Element] {
 		accountsForDisplayGetElements(accountsForDisplay: self)
 	}
 	

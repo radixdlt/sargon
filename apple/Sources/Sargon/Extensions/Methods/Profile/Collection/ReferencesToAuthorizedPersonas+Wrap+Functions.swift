@@ -17,7 +17,7 @@ extension ReferencesToAuthorizedPersonas {
 		self = newReferencesToAuthorizedPersonasWithAuthorizedPersonaSimple(authorizedPersonaSimple: element)
 	}
 	
-	public func allElements() -> [Element] {
+	public var elements: [Element] {
 		referencesToAuthorizedPersonasGetElements(referencesToAuthorizedPersonas: self)
 	}
 	
