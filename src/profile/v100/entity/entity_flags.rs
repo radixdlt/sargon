@@ -5,6 +5,14 @@ use crate::prelude::*;
 /// marked as hidden or not.
 pub type EntityFlags = OrderedMap<EntityFlag>;
 
+pub fn new_entity_flags_sample() -> EntityFlags {
+    EntityFlags::sample()
+}
+
+pub fn new_entity_flags_sample_other() -> EntityFlags {
+    EntityFlags::sample_other()
+}
+
 impl Identifiable for EntityFlag {
     type ID = Self;
 

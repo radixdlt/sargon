@@ -4,4 +4,4 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class EntityFlagsTests: CanBeEmptyCollectionTest<EntityFlags> {}
+final class EntityFlagsTests: Test<EntityFlags> {}

@@ -5,6 +5,14 @@ use crate::prelude::*;
 /// Account.
 pub type Accounts = OrderedMap<Account>;
 
+pub fn new_accounts_sample() -> Accounts {
+    Accounts::sample()
+}
+
+pub fn new_accounts_sample_other() -> Accounts {
+    Accounts::sample_other()
+}
+
 impl HasSampleValues for Accounts {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {

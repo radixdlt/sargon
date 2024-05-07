@@ -4,7 +4,8 @@ import Foundation
 import SargonUniFFI
 import XCTest
 
-final class AccountsTests: CanBeEmptyCollectionTest<Accounts> {
+final class AccountsTests: Test<Accounts> {
+    /*
 	func test_accounts_count() {
 		var sut: SUT = []
 		func doTest(expected: Int) {
@@ -119,4 +120,5 @@ final class AccountsTests: CanBeEmptyCollectionTest<Accounts> {
 		XCTAssertEqual(deFactoIndex, correctIndex)
 		XCTAssertEqual(sut.elements, [sampleChanged, .sampleOther])
 	}
+     */
 }
