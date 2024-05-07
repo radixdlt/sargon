@@ -11,7 +11,7 @@ decl_can_be_empty_identified_array_of!(
 impl ProfileNetworks {
     pub fn get_account(&self, address: &AccountAddress) -> Option<Account> {
         self.get(&address.network_id())
-            .and_then(|n| n.accounts.get_account_by_id(address))
+            .and_then(|n| n.accounts.get_id(address))
             .cloned()
     }
 

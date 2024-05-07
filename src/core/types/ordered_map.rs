@@ -7,7 +7,10 @@ use uniffi::{
 
 use crate::prelude::*;
 
-use std::{fmt::Debug, hash::Hasher};
+use std::{
+    fmt::{Debug, Display, Formatter},
+    hash::Hasher,
+};
 use std::{hash::Hash, ops::DerefMut};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -54,6 +57,75 @@ impl<V: Debug + PartialEq + Eq + Clone + Identifiable> OrderedMap<V> {
 
     pub fn contains_id(&self, id: &V::ID) -> bool {
         (*self).contains_key(id)
+    }
+
+    pub fn get_at_index(&self, index: usize) -> Option<&V> {
+        (*self).get_index(index).map(|pair| pair.1)
+    }
+
+    pub fn get_id(&self, id: &V::ID) -> Option<&V> {
+        (*self).get(id)
+    }
+
+    pub fn get_all(&self) -> Vec<&V> {
+        (*self).values().collect_vec()
+    }
+
+    pub fn items(&self) -> Vec<V> {
+        self.into_iter().collect_vec()
+    }
+
+    /// Returns `false` if no element of `id` was found, otherwise if found, this
+    /// existing element gets updated by `mutate` closure and this function returns
+    /// `true`.
+    #[inline]
+    pub fn update_with<F>(&mut self, id: &V::ID, mut mutate: F) -> bool
+    where
+        F: FnMut(&mut V),
+    {
+        let Some(existing) = (*self).get_mut(id) else {
+            return false;
+        };
+        mutate(existing);
+        true
+    }
+
+    #[inline]
+    pub fn iter(&self) -> OrderedMapIterator<V> {
+        OrderedMapIterator {
+            ordered_map: self,
+            index: 0,
+        }
+    }
+}
+
+// ===============
+// where V: Display
+// ===============
+impl<V> Display for OrderedMap<V>
+where
+    V: Debug + PartialEq + Eq + Clone + Identifiable + Display,
+{
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.description())?;
+        Ok(())
+    }
+}
+
+impl<V> OrderedMap<V>
+where
+    V: Debug + PartialEq + Eq + Clone + Identifiable + Display,
+{
+    fn description(&self) -> String {
+        [
+            "[".to_owned(),
+            self.clone()
+                .into_iter()
+                .map(|e| format!("{}", e))
+                .join(", "),
+            "]".to_owned(),
+        ]
+        .join("")
     }
 }
 

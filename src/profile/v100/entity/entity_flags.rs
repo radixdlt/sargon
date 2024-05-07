@@ -1,14 +1,9 @@
 use crate::prelude::*;
 
+/// An order set of `EntityFlag`s used to describe certain Off-ledger
+/// user state about Accounts or Personas, such as if an entity is
+/// marked as hidden or not.
 pub type EntityFlags = OrderedMap<EntityFlag>;
-
-// decl_can_be_empty_identified_array_of!(
-//     /// An order set of `EntityFlag`s used to describe certain Off-ledger
-//     /// user state about Accounts or Personas, such as if an entity is
-//     /// marked as hidden or not.
-//     EntityFlags,
-//     EntityFlag
-// );
 
 impl Identifiable for EntityFlag {
     type ID = Self;
