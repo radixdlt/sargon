@@ -394,7 +394,7 @@ impl PartialOrd for Persona {
     }
 }
 
-/// Add conformance to Identifiable in order to use `identified_vec`
+/// Add conformance to Identifiable in order to use `OrderedMap`
 impl Identifiable for Persona {
     type ID = IdentityAddress;
 

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 /// Flags which describe a certain state a FactorSource might be in, e.g. `Main` (BDFS).
-pub type FactorSourceFlags = IdentifiedVecVia<FactorSourceFlag>;
+pub type FactorSourceFlags = OrderedMap<FactorSourceFlag>;
 impl Identifiable for FactorSourceFlag {
     type ID = Self;
 

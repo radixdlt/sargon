@@ -36,7 +36,6 @@ impl Profile {
         let device_factor_source = self
             .factor_sources
             .iter()
-            .cloned()
             .filter_map(|f| f.as_device().cloned())
             .collect_vec();
 
@@ -114,7 +113,7 @@ impl Profile {
         header.content_hint = networks.content_hint();
         Self::with(
             header,
-            FactorSources::from_iter([FactorSource::sample_ledger()]).unwrap(),
+            FactorSources::from_iter([FactorSource::sample_ledger()]), //.unwrap(),
             AppPreferences::sample(),
             networks,
         )
@@ -128,8 +127,8 @@ impl Profile {
             header,
             FactorSources::from_iter([
                 DeviceFactorSource::sample_olympia().into()
-            ])
-            .unwrap(),
+            ]),
+            // .unwrap(),
             AppPreferences::sample(),
             networks,
         )

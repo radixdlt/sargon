@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-decl_can_be_empty_identified_array_of!(
+decl_ordered_map!(
     /// An ordered set of entities of mixed type, either [`Account`] or [`Persona`].
     AccountsOrPersonas,
     AccountOrPersona

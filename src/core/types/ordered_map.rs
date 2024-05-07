@@ -1,4 +1,4 @@
-use radix_engine::types::indexmap::map::Values;
+use indexmap::{IndexMap, IndexSet};
 use uniffi::{
     check_remaining,
     deps::bytes::{Buf, BufMut},
@@ -13,7 +13,23 @@ use std::{
 };
 use std::{hash::Hash, ops::DerefMut};
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+/// The `Identifiable` trait allows you to use the
+/// `IdentifiedVecOf<User> instead of the more verbose
+/// `IdentifiedVec<SomeUserID, User>` but also allows you to
+/// skip the `id_of_element: fn(&Element) -> ID` closure when
+/// initializing a new identified vec.
+pub trait Identifiable {
+    /// The type that your `Element` will use as its globally unique and stable ID,
+    /// must impl `Hash` since it is used as a key in `IdentifiedVecOf`'s internal
+    /// `HashMap`. Must impl `Clone` since we need to be able to clone it as a key
+    type ID: Eq + Hash + Clone + Debug;
+
+    /// Return `Element`'s globally unique and stable ID, used to uniquely identify
+    /// the `Element` in the `IdentifiedVecOf` collection of elements.
+    fn id(&self) -> Self::ID;
+}
+
+#[derive(Clone, PartialEq, Eq)]
 pub struct OrderedMap<V: Debug + PartialEq + Eq + Clone + Identifiable>(
     IndexMap<<V as Identifiable>::ID, V>,
 );
@@ -40,12 +56,16 @@ impl<V: Debug + PartialEq + Eq + Clone + Identifiable> OrderedMap<V> {
         self.0.insert(item.id(), item)
     }
 
-    /// Append a new member to the end of the `identified_vec`, if the `identified_vec` doesn't already contain it.
+    pub fn insert_at(&mut self, item: V, index: usize) -> Option<V> {
+        self.0.shift_insert(index, item.id(), item)
+    }
+
+    /// Append a new member to the end of the `OrderedMap`, if the `OrderedMap` doesn't already contain it.
     ///
-    /// - Parameter item: The element to add to the `identified_vec`.
+    /// - Parameter item: The element to add to the `OrderedMap`.
     /// - Returns: A pair `(inserted, index)`, where `inserted` is a Boolean value indicating whether
     ///   the operation added a new element, and `index` is the index of `item` in the resulting
-    ///   `identified_vec`.
+    ///   `OrderedMap`.
     /// - Complexity: The operation is expected to perform O(1) copy, hash, and compare operations on
     ///   the `ID` type, if it implements high-quality hashing.
     pub fn append(&mut self, item: V) -> (bool, usize) {
@@ -95,6 +115,14 @@ impl<V: Debug + PartialEq + Eq + Clone + Identifiable> OrderedMap<V> {
         self.into_iter().collect_vec()
     }
 
+    pub fn remove_id(&mut self, id: &V::ID) -> Option<V> {
+        (*self).shift_remove_entry(id).map(|pair| pair.1)
+    }
+
+    pub fn remove(&mut self, value: &V) -> Option<V> {
+        (*self).remove_id(&value.id())
+    }
+
     /// Returns `false` if no element of `id` was found, otherwise if found, this
     /// existing element gets updated by `mutate` closure and this function returns
     /// `true`.
@@ -114,20 +142,42 @@ impl<V: Debug + PartialEq + Eq + Clone + Identifiable> OrderedMap<V> {
     /// an error is returned, the mutation is failable, if your return an `Err`
     /// in `mutate`, this method propagates that error.
     #[inline]
-    pub fn try_update_with<F, R>(
+    pub fn try_update_with<F>(
         &mut self,
         id: &V::ID,
         mut mutate: F,
-    ) -> Result<R>
+    ) -> Result<()>
     where
-        F: FnMut(&mut V) -> Result<R>,
+        F: FnMut(&mut V) -> Result<V>,
     {
         let Some(existing) = (*self).get_mut(id) else {
             return Err(CommonError::ElementDoesNotExist {
                 id: format!("{:?}", id),
             });
         };
-        mutate(existing)
+        let mutated = mutate(existing)?;
+        *existing = mutated;
+        Ok(())
+    }
+
+    /// Tries to mutate the value identified by `id`, if no such value exists
+    /// then `Ok(false)` is returned, false meaning "no, not found", the mutation
+    /// is failable, if your return an `Err` in `mutate`, this method propagates that error.
+    #[inline]
+    pub fn maybe_update_with<F>(
+        &mut self,
+        id: &V::ID,
+        mut mutate: F,
+    ) -> Result<bool>
+    where
+        F: FnMut(&mut V) -> Result<V>,
+    {
+        let Some(existing) = (*self).get_mut(id) else {
+            return Ok(false);
+        };
+        let mutated = mutate(existing)?;
+        *existing = mutated;
+        Ok(true)
     }
 
     #[inline]
@@ -162,6 +212,36 @@ where
             self.clone()
                 .into_iter()
                 .map(|e| format!("{}", e))
+                .join(", "),
+            "]".to_owned(),
+        ]
+        .join("")
+    }
+}
+
+// ===============
+// where V: Debug
+// ===============
+impl<V> Debug for OrderedMap<V>
+where
+    V: Debug + PartialEq + Eq + Clone + Identifiable,
+{
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.debug_description())?;
+        Ok(())
+    }
+}
+
+impl<V> OrderedMap<V>
+where
+    V: Debug + PartialEq + Eq + Clone + Identifiable,
+{
+    fn debug_description(&self) -> String {
+        [
+            "[".to_owned(),
+            self.clone()
+                .into_iter()
+                .map(|e| format!("{:?}", e))
                 .join(", "),
             "]".to_owned(),
         ]

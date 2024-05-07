@@ -1,10 +1,9 @@
 use crate::prelude::*;
 
-decl_can_be_empty_identified_array_of!(
-    /// Other by user added or predefined Gateways the user can switch to.
+decl_ordered_map!(
+    /// An ordered collection of unique [`Gateway`]s.
     /// It might be Gateways with different URLs on the SAME network, or
     /// other networks, the identifier of a Gateway is the URL.
-    Gateways,
     Gateway
 );
 
@@ -67,14 +66,14 @@ impl<'de> Deserialize<'de> for SavedGateways {
         struct Wrapper {
             #[serde(rename = "current")]
             url: Url,
-            saved: IdentifiedVecOf<Gateway>,
+            saved: OrderedMap<Gateway>,
         }
         let wrapped = Wrapper::deserialize(deserializer)?;
         let current = wrapped
             .saved
             .iter()
             .find(|g| g.id() == wrapped.url)
-            .cloned()
+            .clone()
             .ok_or({
                 CommonError::InvalidGatewaysJSONCurrentNotFoundAmongstSaved
             })
@@ -126,7 +125,7 @@ impl SavedGateways {
                 CommonError::GatewaysDiscrepancyOtherShouldNotContainCurrent,
             );
         }
-        self.other.remove_by_id(&to.id());
+        self.other.remove_id(&to.id());
         self.current = to;
         Ok(true)
     }

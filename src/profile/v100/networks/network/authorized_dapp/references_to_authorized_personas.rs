@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-decl_can_be_empty_identified_array_of!(
+decl_ordered_map!(
     /// An order set of `AuthorizedPersonaSimple`s, which is a collection of all
     /// the Personas the user has used to interact with this Dapp, it is called
     /// "references to", since the Personas are not stored in full, that would be

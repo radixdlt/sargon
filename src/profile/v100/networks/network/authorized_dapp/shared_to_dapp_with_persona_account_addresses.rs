@@ -34,35 +34,31 @@ impl SharedToDappWithPersonaAccountAddresses {
     pub fn sample_mainnet() -> Self {
         Self::new(
             RequestedQuantity::exactly(2),
-            IdentifiedVecVia::from_iter([
+            [
                 Account::sample_mainnet().address,
                 Account::sample_mainnet_other().address,
-            ]),
+            ],
         )
     }
     pub fn sample_mainnet_other() -> Self {
         Self::new(
             RequestedQuantity::at_least(1),
-            IdentifiedVecVia::from_iter([
-                Account::sample_mainnet_other().address
-            ]),
+            [Account::sample_mainnet_other().address],
         )
     }
     pub fn sample_stokenet() -> Self {
         Self::new(
             RequestedQuantity::exactly(2),
-            IdentifiedVecVia::from_iter([
+            [
                 AccountAddress::sample_stokenet(),
                 AccountAddress::sample_stokenet_other(),
-            ]),
+            ],
         )
     }
     pub fn sample_stokenet_other() -> Self {
         Self::new(
             RequestedQuantity::at_least(1),
-            IdentifiedVecVia::from_iter([
-                AccountAddress::sample_stokenet_other(),
-            ]),
+            [AccountAddress::sample_stokenet_other()],
         )
     }
 }

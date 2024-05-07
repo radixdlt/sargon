@@ -6,7 +6,7 @@ macro_rules! decl_ordered_map {
             #[doc = $expr: expr]
         )*
         $collection_type: ident,
-        $element_type: ident,
+        $element_type: ident
     ) => {
         paste! {
             $(
@@ -26,7 +26,26 @@ macro_rules! decl_ordered_map {
 		}
 	};
 
-	(
+	// (
+    //     $(
+    //         #[doc = $expr: expr]
+    //     )*
+    //     $collection_type: ident,
+    //     $element_type: ident
+    // ) => {
+	// 	paste! {
+	// 		decl_ordered_map!(
+	// 			$(
+    //                 #[doc = $expr]
+    //             )*
+	// 			[< $element_type s>],
+	// 			$element_type,
+    //             true
+	// 		);
+	// 	}
+	// };
+
+    (
         $(
             #[doc = $expr: expr]
         )*
@@ -38,10 +57,49 @@ macro_rules! decl_ordered_map {
                     #[doc = $expr]
                 )*
 				[< $element_type s>],
-				$element_type,
+				$element_type
 			);
 		}
 	};
 }
+
+// macro_rules! decl_never_empty_ordered_map {
+
+// 	(
+//         $(
+//             #[doc = $expr: expr]
+//         )*
+//         $collection_type: ident,
+//         $element_type: ident
+//     ) => {
+// 		paste! {
+// 			decl_ordered_map!(
+// 				$(
+//                     #[doc = $expr]
+//                 )*
+// 				[< $element_type s>],
+// 				$element_type,
+//                 false
+// 			);
+// 		}
+// 	};
+//     (
+//         $(
+//             #[doc = $expr: expr]
+//         )*
+//         $element_type: ident
+//     ) => {
+// 		paste! {
+// 			decl_ordered_map!(
+// 				$(
+//                     #[doc = $expr]
+//                 )*
+// 				[< $element_type s>],
+// 				$element_type,
+//                 false
+// 			);
+// 		}
+// 	};
+// }
 
 pub(crate) use decl_ordered_map;

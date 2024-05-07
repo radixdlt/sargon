@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use std::sync::{Once, RwLock, RwLockReadGuard, RwLockWriteGuard};
 
-pub type HeadersList = IdentifiedVecVia<Header>;
+pub type HeadersList = OrderedMap<Header>;
 
 #[derive(Debug, uniffi::Object)]
 pub struct Wallet {

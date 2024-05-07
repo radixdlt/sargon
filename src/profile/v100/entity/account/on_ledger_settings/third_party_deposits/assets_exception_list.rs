@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-decl_can_be_empty_identified_array_of!(
+decl_ordered_map!(
     /// Denies or allows third-party deposits of specific assets by ignoring the `depositMode`
     AssetsExceptionList,
     AssetException

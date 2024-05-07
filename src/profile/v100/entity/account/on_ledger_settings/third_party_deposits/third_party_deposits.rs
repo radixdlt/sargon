@@ -319,7 +319,9 @@ mod tests {
             depositors_allow_list: None,
         };
         assert!(sut.add_asset_exception(AssetException::sample()));
-        assert!((*sut.assets_exception_list.unwrap())
+        assert!(sut
+            .assets_exception_list
+            .unwrap()
             .contains(&AssetException::sample()));
     }
 
@@ -331,7 +333,9 @@ mod tests {
             depositors_allow_list: None,
         };
         assert!(sut.allow_depositor(ResourceOrNonFungible::sample()));
-        assert!((*sut.depositors_allow_list.unwrap())
+        assert!(sut
+            .depositors_allow_list
+            .unwrap()
             .contains(&ResourceOrNonFungible::sample()));
     }
 

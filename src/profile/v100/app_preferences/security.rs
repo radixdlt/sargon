@@ -3,7 +3,26 @@ use crate::prelude::*;
 // FIXME: MFA this is in fact not used, so ok to be a `bool` for now. The AppPreferences Security type has
 // a field `structure_configuration_references` but no client can populate it yet, so the list will always
 // be empty, thus save to used a serializable trivial type such as `bool` as a sample for now.
-pub type SecurityStructureConfigurationReference = bool;
+#[derive(
+    Clone,
+    Debug,
+    Hash,
+    Serialize,
+    Deserialize,
+    PartialEq,
+    Eq,
+    derive_more::Display,
+    uniffi::Record,
+)]
+#[display("empty")]
+pub struct SecurityStructureConfigurationReference;
+impl Identifiable for SecurityStructureConfigurationReference {
+    type ID = Self;
+
+    fn id(&self) -> Self::ID {
+        self.clone()
+    }
+}
 
 /// Controls e.g. if Profile Snapshot gets synced to iCloud or not, and whether
 /// developer mode is enabled or not. In future (MFA) we will also save a list of
@@ -29,7 +48,7 @@ pub struct Security {
     pub is_cloud_profile_sync_enabled: bool,
     pub is_developer_mode_enabled: bool,
     pub structure_configuration_references:
-        IdentifiedVecVia<SecurityStructureConfigurationReference>,
+        OrderedMap<SecurityStructureConfigurationReference>,
 }
 
 impl Security {
@@ -37,7 +56,7 @@ impl Security {
     pub fn new(
         is_cloud_profile_sync_enabled: bool,
         is_developer_mode_enabled: bool,
-        structure_configuration_references: IdentifiedVecVia<
+        structure_configuration_references: OrderedMap<
             SecurityStructureConfigurationReference,
         >,
     ) -> Self {
@@ -52,19 +71,19 @@ impl Security {
 impl Default for Security {
     /// By default we cloud profile sync is enabled and developer mode is disabled, with an empty `structure_configuration_references` list.
     fn default() -> Self {
-        Self::new(true, false, IdentifiedVecVia::new())
+        Self::new(true, false, OrderedMap::new())
     }
 }
 
 impl HasSampleValues for Security {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {
-        Self::new(true, true, IdentifiedVecVia::new())
+        Self::new(true, true, OrderedMap::new())
     }
 
     /// A sample used to facilitate unit tests.
     fn sample_other() -> Self {
-        Self::new(false, false, IdentifiedVecVia::new())
+        Self::new(false, false, OrderedMap::new())
     }
 }
 
