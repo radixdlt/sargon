@@ -8,4 +8,4 @@
 import Foundation
 import SargonUniFFI
 
-extension EntityFlags: SargonModel {}
+//extension [EntityFlag]: SargonModel {}

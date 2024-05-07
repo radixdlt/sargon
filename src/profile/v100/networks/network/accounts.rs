@@ -5,10 +5,12 @@ use crate::prelude::*;
 /// Account.
 pub type Accounts = OrderedMap<Account>;
 
+#[uniffi::export]
 pub fn new_accounts_sample() -> Accounts {
     Accounts::sample()
 }
 
+#[uniffi::export]
 pub fn new_accounts_sample_other() -> Accounts {
     Accounts::sample_other()
 }

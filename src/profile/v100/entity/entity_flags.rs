@@ -5,10 +5,12 @@ use crate::prelude::*;
 /// marked as hidden or not.
 pub type EntityFlags = OrderedMap<EntityFlag>;
 
+#[uniffi::export]
 pub fn new_entity_flags_sample() -> EntityFlags {
     EntityFlags::sample()
 }
 
+#[uniffi::export]
 pub fn new_entity_flags_sample_other() -> EntityFlags {
     EntityFlags::sample_other()
 }

@@ -8,4 +8,4 @@
 import Foundation
 import SargonUniFFI
 
-extension Accounts: SargonModel {}
+//extension Accounts: SargonModel {}

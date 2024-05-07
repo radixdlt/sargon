@@ -4,7 +4,7 @@ import Foundation
 import SargonUniFFI
 import XCTest
 
-final class AccountsTests: Test<Accounts> {
+//final class AccountsTests: Test<Accounts> {
     /*
 	func test_accounts_count() {
 		var sut: SUT = []
@@ -121,4 +121,4 @@ final class AccountsTests: Test<Accounts> {
 		XCTAssertEqual(sut.elements, [sampleChanged, .sampleOther])
 	}
      */
-}
+//}

@@ -13,7 +13,7 @@ public protocol EntityBaseProtocol: BaseBaseEntityProtocol, CustomStringConverti
 	var networkId: NetworkID { get }
 	var displayName: DisplayName { get }
 	var address: EntityAddress { get }
-	var flags: EntityFlags { get }
+	var flags: [EntityFlag] { get }
 	var securityState: EntitySecurityState { get }
 	var entityKind: EntityKind { get }
 	var asGeneral: AccountOrPersona { get }

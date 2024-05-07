@@ -9,7 +9,7 @@ import Foundation
 import SargonUniFFI
 
 #if DEBUG
-extension EntityFlags {
+extension [EntityFlag] {
 	public static let sample: Self = newEntityFlagsSample()
 	public static let sampleOther: Self = newEntityFlagsSampleOther()
 }
