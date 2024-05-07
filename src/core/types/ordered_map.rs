@@ -17,7 +17,7 @@ pub struct OrderedMap<V: Debug + PartialEq + Eq + Clone + Identifiable>(
 
 impl<V: Debug + PartialEq + Eq + Clone + Identifiable> OrderedMap<V> {
     pub fn ids(&self) -> IndexSet<&<V as Identifiable>::ID> {
-        IndexSet::from_iter(self.keys().into_iter())
+        IndexSet::from_iter(self.keys())
     }
 
     /// Insert an item in the map, using `id()` on item as key.
@@ -36,13 +36,32 @@ impl<V: Debug + PartialEq + Eq + Clone + Identifiable> OrderedMap<V> {
     pub fn insert(&mut self, item: V) -> Option<V> {
         self.0.insert(item.id(), item)
     }
+
+    pub fn new() -> Self {
+        Self::from(IndexMap::new())
+    }
+
+    pub fn just(item: V) -> Self {
+        Self::from_iter([item])
+    }
+
+    /// Check if the `item` exists in this map by calculating
+    /// the ID of the item and checking if any other item with
+    /// the same ID exists.
+    pub fn contains(&self, item: &V) -> bool {
+        self.contains_id(&item.id())
+    }
+
+    pub fn contains_id(&self, id: &V::ID) -> bool {
+        (*self).contains_key(id)
+    }
 }
 
 impl<V: Debug + PartialEq + Eq + Clone + Identifiable> Default
     for OrderedMap<V>
 {
     fn default() -> Self {
-        Self::from(IndexMap::new())
+        Self::new()
     }
 }
 
