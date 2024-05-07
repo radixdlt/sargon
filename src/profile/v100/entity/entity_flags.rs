@@ -31,7 +31,7 @@ impl EntityFlags {
     /// If the set did not previously contain an equal flag, true is returned.
     /// If the set already contained an equal flag, false is returned, and the entry is not updated.
     pub fn insert_flag(&mut self, flag: EntityFlag) -> bool {
-        self.insert(flag).is_none()
+        self.append(flag).0
     }
 
     pub fn remove_flag(&mut self, flag: &EntityFlag) -> Option<EntityFlag> {

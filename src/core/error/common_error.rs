@@ -482,6 +482,9 @@ pub enum CommonError {
 
     #[error("AuthorizedDapp references field id that does not exist")]
     AuthorizedDappReferencesFieldIDThatDoesNotExist = 10134,
+
+    #[error("Item identified by ID {id} does not exist")]
+    ElementDoesNotExist { id: String } = 10135,
 }
 
 #[uniffi::export]

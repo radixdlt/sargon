@@ -23,7 +23,7 @@ impl<V: Debug + PartialEq + Eq + Clone + Identifiable> OrderedMap<V> {
         IndexSet::from_iter(self.keys())
     }
 
-    /// Insert an item in the map, using `id()` on item as key.
+    /// Insert an item in the map **unconditionally**, using `id()` on item as key.
     ///
     /// If an equivalent key already exists in the map: the key remains and
     /// retains in its place in the order, its corresponding value is updated
@@ -40,8 +40,28 @@ impl<V: Debug + PartialEq + Eq + Clone + Identifiable> OrderedMap<V> {
         self.0.insert(item.id(), item)
     }
 
+    /// Append a new member to the end of the `identified_vec`, if the `identified_vec` doesn't already contain it.
+    ///
+    /// - Parameter item: The element to add to the `identified_vec`.
+    /// - Returns: A pair `(inserted, index)`, where `inserted` is a Boolean value indicating whether
+    ///   the operation added a new element, and `index` is the index of `item` in the resulting
+    ///   `identified_vec`.
+    /// - Complexity: The operation is expected to perform O(1) copy, hash, and compare operations on
+    ///   the `ID` type, if it implements high-quality hashing.
+    pub fn append(&mut self, item: V) -> (bool, usize) {
+        if let Some(existing) = self.0.get_full(&item.id()) {
+            return (false, existing.0);
+        }
+        assert!(self.insert(item).is_none());
+        (true, self.len())
+    }
+
     pub fn new() -> Self {
         Self::from(IndexMap::new())
+    }
+
+    pub fn first(&self) -> Option<&V> {
+        self.0.first().map(|pair| pair.1)
     }
 
     pub fn just(item: V) -> Self {
@@ -88,6 +108,26 @@ impl<V: Debug + PartialEq + Eq + Clone + Identifiable> OrderedMap<V> {
         };
         mutate(existing);
         true
+    }
+
+    /// Tries to mutate the value identified by `id`, if no such value exists
+    /// an error is returned, the mutation is failable, if your return an `Err`
+    /// in `mutate`, this method propagates that error.
+    #[inline]
+    pub fn try_update_with<F, R>(
+        &mut self,
+        id: &V::ID,
+        mut mutate: F,
+    ) -> Result<R>
+    where
+        F: FnMut(&mut V) -> Result<R>,
+    {
+        let Some(existing) = (*self).get_mut(id) else {
+            return Err(CommonError::ElementDoesNotExist {
+                id: format!("{:?}", id),
+            });
+        };
+        mutate(existing)
     }
 
     #[inline]

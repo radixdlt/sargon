@@ -125,17 +125,14 @@ impl Wallet {
         self.try_update_profile_with(|mut p| {
             let networks = &mut p.networks;
             if networks.contains_id(&network_id) {
-                networks
-                    .try_update_with(&network_id, |network| {
-                        if network.accounts.insert(account.clone()).is_none() {
-                            Ok(network.clone())
-                        } else {
-                            Err(err_exists.clone())
-                        }
-                    })
-                    .and_then(
-                        |r| if r { Ok(()) } else { Err(err_exists.clone()) },
-                    )
+                networks.try_update_with(&network_id, |network| {
+                    if network.accounts.append(account.clone()).0 {
+                        Ok(network.clone())
+                    } else {
+                        Err(err_exists.clone())
+                    }
+                })?;
+                Ok(())
             } else {
                 let network = ProfileNetwork::new(
                     network_id,
