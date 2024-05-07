@@ -1,19 +1,11 @@
 use crate::prelude::*;
 
-/// An order set of `EntityFlag`s used to describe certain Off-ledger
-/// user state about Accounts or Personas, such as if an entity is
-/// marked as hidden or not.
-pub type EntityFlags = OrderedMap<EntityFlag>;
-
-#[uniffi::export]
-pub fn new_entity_flags_sample() -> EntityFlags {
-    EntityFlags::sample()
-}
-
-#[uniffi::export]
-pub fn new_entity_flags_sample_other() -> EntityFlags {
-    EntityFlags::sample_other()
-}
+decl_ordered_map!(
+    /// An order set of `EntityFlag`s used to describe certain Off-ledger
+    /// user state about Accounts or Personas, such as if an entity is
+    /// marked as hidden or not.
+    EntityFlag
+);
 
 impl Identifiable for EntityFlag {
     type ID = Self;

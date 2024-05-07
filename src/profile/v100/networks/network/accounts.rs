@@ -1,19 +1,11 @@
 use crate::prelude::*;
 
-/// An ordered set of [`Account`]s on a specific network, most commonly
-/// the set is non-empty, since wallets guide user to create a first
-/// Account.
-pub type Accounts = OrderedMap<Account>;
-
-#[uniffi::export]
-pub fn new_accounts_sample() -> Accounts {
-    Accounts::sample()
-}
-
-#[uniffi::export]
-pub fn new_accounts_sample_other() -> Accounts {
-    Accounts::sample_other()
-}
+decl_ordered_map!(
+    /// An ordered set of [`Account`]s on a specific network, most commonly
+    /// the set is non-empty, since wallets guide user to create a first
+    /// Account.
+    Account
+);
 
 impl HasSampleValues for Accounts {
     /// A sample used to facilitate unit tests.

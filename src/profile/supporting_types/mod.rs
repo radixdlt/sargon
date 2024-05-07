@@ -8,6 +8,7 @@ mod authorized_dapp_detailed;
 mod authorized_dapp_detailed_uniffi_fn;
 mod authorized_persona_detailed;
 mod authorized_persona_detailed_uniffi_fn;
+mod decl_ordered_map_with_samples;
 mod detailed_authorized_personas;
 
 pub use account_for_display::*;
@@ -20,4 +21,5 @@ pub use authorized_dapp_detailed::*;
 pub use authorized_dapp_detailed_uniffi_fn::*;
 pub use authorized_persona_detailed::*;
 pub use authorized_persona_detailed_uniffi_fn::*;
+pub use decl_ordered_map_with_samples::*;
 pub use detailed_authorized_personas::*;

@@ -1,7 +1,9 @@
 use crate::prelude::*;
 
-/// An ordered set of [`Persona`]s on a specific network.
-pub type Personas = OrderedMap<Persona>;
+decl_ordered_map!(
+    /// An ordered set of [`Persona`]s on a specific network.
+    Persona
+);
 
 impl HasSampleValues for Personas {
     /// A sample used to facilitate unit tests.

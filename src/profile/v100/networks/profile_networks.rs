@@ -1,9 +1,11 @@
 use crate::prelude::*;
 
-/// An ordered mapping of NetworkID -> `Profile.Network`, containing
-/// all the users Accounts, Personas and AuthorizedDapps the user
-/// has created and interacted with on this network.
-pub type ProfileNetworks = OrderedMap<ProfileNetwork>;
+decl_ordered_map!(
+    /// An ordered mapping of NetworkID -> `Profile.Network`, containing
+    /// all the users Accounts, Personas and AuthorizedDapps the user
+    /// has created and interacted with on this network.
+    ProfileNetwork
+);
 
 impl ProfileNetworks {
     pub fn get_account(&self, address: &AccountAddress) -> Option<Account> {
