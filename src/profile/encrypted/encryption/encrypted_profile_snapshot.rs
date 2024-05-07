@@ -62,7 +62,7 @@ impl EncryptedProfileSnapshot {
 
         // encrypt profile with encryption key
         let encrypted_payload =
-            encryption_scheme.encrypt(json.to_vec(), &mut encryption_key);
+            encryption_scheme.encrypt(&json, &mut encryption_key);
 
         Self {
             version: ProfileEncryptionVersion::default(),

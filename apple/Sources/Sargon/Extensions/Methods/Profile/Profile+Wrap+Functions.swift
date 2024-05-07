@@ -7,7 +7,7 @@ extension Profile {
 		profileAnalyzeContentsOfFile(bytes: Data(contents))
 	}
 	
-    public init(jsonData bytes: some DataProtocol) throws {
+	public init(jsonData bytes: some DataProtocol) throws {
 		self = try newProfileFromJsonBytes(jsonBytes: Data(bytes))
 	}
 	
@@ -19,7 +19,7 @@ extension Profile {
 	}
 	
 	public func profileSnapshot() -> Data {
-        profileToJsonBytes(profile: self)
+		profileToJsonBytes(profile: self)
 	}
 	
 	public func jsonData() -> Data {

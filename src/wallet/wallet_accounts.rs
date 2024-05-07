@@ -405,6 +405,45 @@ mod tests {
         assert_eq!(loaded, private);
     }
 
+    #[test]
+    #[ignore]
+    fn generate_huge_profile_with_super_many_accounts() {
+        let private = PrivateHierarchicalDeterministicFactorSource::sample();
+
+        let (wallet, storage) = Wallet::ephemeral(Profile::new(
+            private.clone().factor_source,
+            "Test",
+        ));
+
+        let data =
+            serde_json::to_vec(&private.mnemonic_with_passphrase).unwrap();
+        let key = SecureStorageKey::DeviceFactorSourceMnemonic {
+            factor_source_id: private.clone().factor_source.id,
+        };
+        assert!(storage.save_data(key.clone(), data).is_ok());
+
+        let network_id = NetworkID::Mainnet;
+
+        let n = 100;
+        (0..n).for_each(|index| {
+            let account_name =
+                DisplayName::new(format!("Account {index}")).unwrap();
+            let _ = wallet
+                .create_and_save_new_account(network_id, account_name.clone())
+                .unwrap();
+        });
+
+        let profile = wallet.profile();
+        assert_eq!(profile.networks.first().unwrap().accounts.len(), n);
+        let profile_json = profile.to_json_bytes();
+
+        fs::write(
+            concat!(env!("FIXTURES_VECTOR"), "big_profile_100_accounts.json"),
+            profile_json,
+        )
+        .expect("Unable to write file");
+    }
+
     // Profile `init_profile`'s BDFS MUST eq `PrivateHierarchicalDeterministicFactorSource::sample()`
     fn test_new_account<F, G>(
         init_profile: Profile,

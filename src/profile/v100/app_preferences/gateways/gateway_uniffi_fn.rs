@@ -34,7 +34,7 @@ pub fn new_gateway_with_url_on_network(
 }
 
 #[uniffi::export]
-pub fn gateway_wellknown_gateways() -> Vec<Gateway> {
+pub fn gateway_wellknown_gateways() -> Gateways {
     Gateway::wellknown()
 }
 

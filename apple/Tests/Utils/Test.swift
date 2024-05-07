@@ -8,6 +8,40 @@ class TestCase: XCTestCase {
 	override func setUp() {
 		self.continueAfterFailure = false
 	}
+	
+	func openFile(
+		subPath: String,
+		_ fileName: String,
+		extension fileExtension: String
+	) throws -> Data {
+		let testsDirectory: String = URL(fileURLWithPath: "\(#file)").pathComponents.dropLast(4).joined(separator: "/")
+		
+		let fileURL = try XCTUnwrap(URL(fileURLWithPath: "\(testsDirectory)/fixtures/\(subPath)/\(fileName).\(fileExtension)"))
+		
+		return try Data(contentsOf: fileURL)
+	  
+	}
+	
+	func jsonFixture<T: Decodable>(
+		as: T.Type = T.self,
+		file fileName: String,
+		decode: (Data) throws -> T = { try JSONDecoder().decode(T.self, from: $0) }
+	) throws -> (model: T, json: Data) {
+		let json = try openFile(subPath: "vector", fileName, extension: "json")
+		let model: T = try decode(json)
+		return (model, json)
+	}
+	
+	func jsonFixture<T>(
+		as: T.Type = T.self,
+		file fileName: String,
+		decode: (Data) throws -> T
+	) throws -> (model: T, json: Data) {
+		let json = try openFile(subPath: "vector", fileName, extension: "json")
+		let model: T = try decode(json)
+		return (model, json)
+	}
+	
 }
 
 class Test<SUT_: SargonModel>: TestCase {
@@ -47,7 +81,6 @@ class Test<SUT_: SargonModel>: TestCase {
 		XCTAssertNoDifference(sample.description, sample.description)
 		XCTAssertNoDifference(sampleOther.description, sampleOther.description)
 	}
-	
 }
 
 extension Test where SUT: Codable {

@@ -30,6 +30,10 @@ pub fn profile_to_debug_string(profile: &Profile) -> String {
     format!("{:?}", profile)
 }
 
+// ################
+// Encryption
+// ################
+
 #[uniffi::export]
 pub fn new_profile_from_encryption_bytes(
     json: BagOfBytes,
@@ -46,6 +50,9 @@ pub fn profile_encrypt_with_password(
     profile.to_encryption_bytes(encryption_password).into()
 }
 
+// ################
+// Analyze
+// ################
 #[uniffi::export]
 pub fn profile_analyze_contents_of_file(
     bytes: BagOfBytes,
@@ -103,7 +110,7 @@ mod uniffi_tests {
         let sut = SUT::sample();
 
         assert_eq!(
-            new_profile_from_json_bytes(profile_to_json_bytes(&sut)).unwrap(),
+            new_profile_from_json_bytes(&profile_to_json_bytes(&sut)).unwrap(),
             sut
         )
     }
@@ -112,7 +119,7 @@ mod uniffi_tests {
     fn deserialize_malformed() {
         let malformed_profile_snapshot = BagOfBytes::from("{}".as_bytes());
         assert_eq!(
-            new_profile_from_json_bytes(malformed_profile_snapshot.clone()),
+            new_profile_from_json_bytes(&malformed_profile_snapshot),
             Result::Err(CommonError::FailedToDeserializeJSONToValue {
                 json_byte_count: malformed_profile_snapshot.len() as u64,
                 type_name: String::from("Profile")

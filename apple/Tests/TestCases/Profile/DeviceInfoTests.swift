@@ -21,18 +21,28 @@ final class DeviceInfoTests: Test<DeviceInfo> {
 	
 	func test_codable_lowercase_rust_styled_uuid() throws {
         func doTest(_ jsonString: String, expected: SUT? = .sample) throws {
-            let raw = Data(jsonString.utf8)
             
-            // test decoding
-            let sut = try JSONDecoder().decode(SUT.self, from: raw)
-            
-            if let expected {
-                XCTAssertEqual(sut, expected)
+            // No matter which encoding strategy is set on encoder/decoder
+            // the Date coding should work since it should happen inside of
+            // sargon
+            func doDoTest(encoder: JSONEncoder, decoder: JSONDecoder) throws {
+                let raw = Data(jsonString.utf8)
+                // test decoding
+                let sut = try decoder.decode(SUT.self, from: raw)
+                
+                if let expected {
+                    XCTAssertEqual(sut, expected)
+                }
+                
+                // test encoding
+                let encoded = try encoder.encode(sut)
+                try XCTAssertEqual(decoder.decode(SUT.self, from: encoded), sut)
             }
             
-            // test encoding
-            let encoded = try JSONEncoder().encode(sut)
-            try XCTAssertEqual(JSONDecoder().decode(SUT.self, from: encoded), sut)
+            try doDoTest(encoder: .init(), decoder: .init())
+            try doDoTest(encoder: .iso8601, decoder: .iso8601)
+            try doDoTest(encoder: .init(), decoder: .iso8601)
+            try doDoTest(encoder: .iso8601, decoder: .init())
         }
         
         // Rust style:
@@ -67,4 +77,20 @@ final class DeviceInfoTests: Test<DeviceInfo> {
         """, expected: nil)
 	}
     
+}
+
+extension JSONEncoder {
+    static var iso8601: JSONEncoder {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        return encoder
+    }
+}
+
+extension JSONDecoder {
+    static var iso8601: JSONDecoder {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return decoder
+    }
 }

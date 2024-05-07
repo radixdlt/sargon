@@ -8,6 +8,6 @@
 import Foundation
 import SargonUniFFI
 
-extension OtherGateways: CanBeEmptyIdentifiedCollection {
+extension Gateways: CanBeEmptyIdentifiedCollection {
 	public typealias Element = Gateway
 }
