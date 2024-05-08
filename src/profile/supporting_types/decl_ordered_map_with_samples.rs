@@ -23,28 +23,31 @@ macro_rules! decl_ordered_map {
             pub fn [< new_ $collection_type:snake _sample_other >]() -> $collection_type {
                 $collection_type::sample_other()
             }
+
+            #[cfg(test)]
+            mod [< $collection_type:snake _uniffi_test >] {
+                use super::*;
+
+                #[allow(clippy::upper_case_acronyms)]
+                type SUT = $collection_type;
+
+                #[test]
+                fn hash_of_samples() {
+                    assert_eq!(
+                        HashSet::<SUT>::from_iter([
+                            [< new_ $collection_type:snake _sample >](),
+                            [< new_ $collection_type:snake _sample_other >](),
+                            // duplicates should get removed
+                            [< new_ $collection_type:snake _sample >](),
+                            [< new_ $collection_type:snake _sample_other >]()
+                        ])
+                        .len(),
+                        2
+                    );
+                }
+            }
 		}
 	};
-
-	// (
-    //     $(
-    //         #[doc = $expr: expr]
-    //     )*
-    //     $collection_type: ident,
-    //     $element_type: ident
-    // ) => {
-	// 	paste! {
-	// 		decl_ordered_map!(
-	// 			$(
-    //                 #[doc = $expr]
-    //             )*
-	// 			[< $element_type s>],
-	// 			$element_type,
-    //             true
-	// 		);
-	// 	}
-	// };
-
     (
         $(
             #[doc = $expr: expr]
@@ -62,44 +65,5 @@ macro_rules! decl_ordered_map {
 		}
 	};
 }
-
-// macro_rules! decl_never_empty_ordered_map {
-
-// 	(
-//         $(
-//             #[doc = $expr: expr]
-//         )*
-//         $collection_type: ident,
-//         $element_type: ident
-//     ) => {
-// 		paste! {
-// 			decl_ordered_map!(
-// 				$(
-//                     #[doc = $expr]
-//                 )*
-// 				[< $element_type s>],
-// 				$element_type,
-//                 false
-// 			);
-// 		}
-// 	};
-//     (
-//         $(
-//             #[doc = $expr: expr]
-//         )*
-//         $element_type: ident
-//     ) => {
-// 		paste! {
-// 			decl_ordered_map!(
-// 				$(
-//                     #[doc = $expr]
-//                 )*
-// 				[< $element_type s>],
-// 				$element_type,
-//                 false
-// 			);
-// 		}
-// 	};
-// }
 
 pub(crate) use decl_ordered_map;
