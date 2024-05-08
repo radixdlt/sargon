@@ -113,7 +113,7 @@ impl Profile {
         header.content_hint = networks.content_hint();
         Self::with(
             header,
-            FactorSources::from_iter([FactorSource::sample_ledger()]), //.unwrap(),
+            FactorSources::from_iter([FactorSource::sample_ledger()]),
             AppPreferences::sample(),
             networks,
         )
@@ -128,7 +128,6 @@ impl Profile {
             FactorSources::from_iter([
                 DeviceFactorSource::sample_olympia().into()
             ]),
-            // .unwrap(),
             AppPreferences::sample(),
             networks,
         )

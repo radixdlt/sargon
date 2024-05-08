@@ -40,7 +40,9 @@ impl FactorSourceCryptoParameters {
         J: IntoIterator<Item = DerivationPathScheme>,
     {
         let supported_curves = SupportedCurves::from_iter(curves);
-        // .map_err(|_| CommonError::FactorSourceCryptoParametersSupportedCurvesInvalidSize)?;
+        if supported_curves.is_empty() {
+            return Err(CommonError::FactorSourceCryptoParametersSupportedCurvesInvalidSize);
+        }
         let supported_derivation_path_schemes = OrderedMap::from_iter(schemes);
 
         Ok(Self {
@@ -114,13 +116,16 @@ impl HasSampleValues for SupportedCurves {
             SLIP10Curve::Curve25519,
             SLIP10Curve::Secp256k1,
         ])
-        // .unwrap()
     }
 }
 #[cfg(test)]
 mod tests {
-
     use super::*;
+    use uniffi::{
+        check_remaining,
+        deps::bytes::{Buf, BufMut},
+        metadata, Lift, Lower, LowerReturn, MetadataBuffer, RustBuffer,
+    };
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = FactorSourceCryptoParameters;
@@ -132,6 +137,18 @@ mod tests {
             SupportedCurves::sample_other(),
             SupportedCurves::sample_other()
         );
+    }
+
+    #[test]
+    fn manual_perform_uniffi_if_factor_sources_empty() {
+        // This is some advanced techniques...
+        let mut bad_value_from_ffi_vec = Vec::new();
+        bad_value_from_ffi_vec.put_i32(0); // empty, not allowed
+        let bad_value_from_ffi = RustBuffer::from_vec(bad_value_from_ffi_vec);
+        let res = <OrderedMap<SLIP10Curve> as Lift<crate::UniFfiTag>>::try_lift(
+            bad_value_from_ffi,
+        );
+        assert!(res.is_err());
     }
 
     #[test]
@@ -243,13 +260,25 @@ mod tests {
             .contains(&DerivationPathScheme::Cap26));
     }
 
-    // #[test]
-    // fn curves_must_not_be_empty() {
-    //     assert_eq!(
-    //         SUT::new([], []),
-    //         Err(CommonError::FactorSourceCryptoParametersSupportedCurvesInvalidSize)
-    //     );
-    // }
+    #[test]
+    fn json_serialize_supported_curves_empty_is_err() {
+        assert!(serde_json::to_value(SupportedCurves::new()).is_err());
+    }
+
+    #[test]
+    fn json_serialize_parameters_with_empty_curves_empty_is_err() {
+        let mut sut = SUT::sample();
+        sut.supported_curves = SupportedCurves::new();
+        assert!(serde_json::to_value(sut).is_err());
+    }
+
+    #[test]
+    fn json_deserialize_of_empty_supported_curves_is_err() {
+        assert!(serde_json::from_value::<SupportedCurves>(
+            serde_json::Value::Array(Vec::new())
+        )
+        .is_err());
+    }
 
     #[test]
     fn duplicate_curves_are_removed() {

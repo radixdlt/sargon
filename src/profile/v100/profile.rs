@@ -114,6 +114,9 @@ impl Profile {
         app_preferences: AppPreferences,
         networks: ProfileNetworks,
     ) -> Self {
+        if factor_sources.is_empty() {
+            panic!("FactorSources MUST NOT be empty.")
+        }
         Self {
             header,
             factor_sources,
@@ -229,6 +232,24 @@ mod tests {
     fn equality() {
         assert_eq!(SUT::sample(), SUT::sample());
         assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[should_panic(expected = "FactorSources MUST NOT be empty.")]
+    #[test]
+    fn not_allowed_to_create_profile_with_empty_factor_source() {
+        let _ = SUT::with(
+            Header::sample(),
+            OrderedMap::new(),
+            AppPreferences::sample(),
+            ProfileNetworks::sample(),
+        );
+    }
+
+    #[test]
+    fn serialize_empty_factor_sources_is_err() {
+        let mut sut = SUT::sample();
+        sut.factor_sources = FactorSources::new();
+        assert!(serde_json::to_value(sut).is_err());
     }
 
     #[test]

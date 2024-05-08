@@ -21,7 +21,6 @@ impl HasSampleValues for FactorSources {
             FactorSource::sample_device(),
             FactorSource::sample_ledger(),
         ])
-        // .unwrap()
     }
 
     fn sample_other() -> Self {
@@ -29,14 +28,17 @@ impl HasSampleValues for FactorSources {
             FactorSource::sample_device_olympia(),
             FactorSource::sample_device_babylon(),
         ])
-        // .unwrap()
     }
 }
-/*
 #[cfg(test)]
 mod tests {
 
     use super::*;
+    use uniffi::{
+        check_remaining,
+        deps::bytes::{Buf, BufMut},
+        metadata, Lift, Lower, LowerReturn, MetadataBuffer, RustBuffer,
+    };
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = FactorSources;
@@ -50,8 +52,29 @@ mod tests {
     }
 
     #[test]
+    fn factor_sources_sample_is_not_empty() {
+        assert_eq!(SUT::sample().len(), 2);
+        assert_eq!(SUT::sample().get_all().len(), 2);
+        assert_eq!(SUT::sample().ids().len(), 2);
+        assert!(!SUT::sample().is_empty());
+    }
+
+    #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn manual_perform_uniffi_if_factor_sources_empty() {
+        // This is some advanced techniques...
+        let mut bad_value_from_ffi_vec = Vec::new();
+        bad_value_from_ffi_vec.put_i32(0); // empty, not allowed
+        let bad_value_from_ffi = RustBuffer::from_vec(bad_value_from_ffi_vec);
+        let res =
+            <OrderedMap<FactorSource> as Lift<crate::UniFfiTag>>::try_lift(
+                bad_value_from_ffi,
+            );
+        assert!(res.is_err());
     }
 
     #[test]
@@ -60,23 +83,15 @@ mod tests {
             SUT::from_iter(
                 [FactorSource::sample(), FactorSource::sample()].into_iter()
             )
-            .unwrap()
             .len(),
             1
         )
     }
 
-    // #[test]
-    // fn remove_returns_err_if_empty() {
-    //     let fs = FactorSource::sample();
-    //     let sut = SUT::from_iter([fs.clone()]).unwrap();
-    //     assert_eq!(sut.len(), 1);
-    //     assert_eq!(
-    //         new_factor_sources_removed_by_id(&fs.id(), &sut),
-    //         Err(CommonError::FactorSourcesMustNotBeEmpty)
-    //     );
-    // }
-
+    #[test]
+    fn json_serialize_of_empty_factor_sources_is_err() {
+        assert!(serde_json::to_value(SUT::new()).is_err());
+    }
     #[test]
     fn json_deserialize_of_empty_factor_sources_is_err() {
         assert!(serde_json::from_value::<SUT>(serde_json::Value::Array(
@@ -156,4 +171,3 @@ mod uniffi_tests {
         assert_eq!(SUT::sample_other(), new_factor_sources_sample_other());
     }
 }
-*/

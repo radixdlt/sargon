@@ -299,7 +299,7 @@ where
     }
 }
 
-impl<V: Debug + PartialEq + Eq + Clone + Identifiable> Serialize
+impl<V: Debug + PartialEq + Eq + Clone + Identifiable + 'static> Serialize
     for OrderedMap<V>
 where
     V: Serialize,
@@ -309,12 +309,23 @@ where
     where
         S: Serializer,
     {
+        if TypeId::of::<V>() == TypeId::of::<FactorSource>() && self.is_empty()
+        {
+            return Err(serde::ser::Error::custom(
+                CommonError::FactorSourcesMustNotBeEmpty,
+            ));
+        }
+        if TypeId::of::<V>() == TypeId::of::<SLIP10Curve>() && self.is_empty() {
+            return Err(serde::ser::Error::custom(
+                CommonError::SupportedCurvesMustNotBeEmpty,
+            ));
+        }
         serializer.collect_seq(self)
     }
 }
 
-impl<'de, V: Debug + PartialEq + Eq + Clone + Identifiable> Deserialize<'de>
-    for OrderedMap<V>
+impl<'de, V: Debug + PartialEq + Eq + Clone + Identifiable + 'static>
+    Deserialize<'de> for OrderedMap<V>
 where
     V: Deserialize<'de>,
 {
@@ -327,6 +338,18 @@ where
         for item in items {
             map.try_insert_unique(item).map_err(de::Error::custom)?;
         }
+
+        if TypeId::of::<V>() == TypeId::of::<FactorSource>() && map.is_empty() {
+            return Err(de::Error::custom(
+                CommonError::FactorSourcesMustNotBeEmpty,
+            ));
+        }
+        if TypeId::of::<V>() == TypeId::of::<SLIP10Curve>() && map.is_empty() {
+            return Err(de::Error::custom(
+                CommonError::SupportedCurvesMustNotBeEmpty,
+            ));
+        }
+
         Ok(map)
     }
 }
@@ -451,6 +474,10 @@ unsafe impl<UT, V: Debug + Hash + Eq + Clone + Identifiable + Lift<UT> + 'static
         // This is some advances technique... but hey, it works!
         if TypeId::of::<V>() == TypeId::of::<FactorSource>() && len == 0 {
             return Err(CommonError::FactorSourcesMustNotBeEmpty)
+                .map_err(|e| e.into());
+        }
+        if TypeId::of::<V>() == TypeId::of::<SLIP10Curve>() && len == 0 {
+            return Err(CommonError::SupportedCurvesMustNotBeEmpty)
                 .map_err(|e| e.into());
         }
 
@@ -602,7 +629,7 @@ mod tests {
     #[test]
     fn update_with_not_exists() {
         let mut sut = SUT::sample();
-        assert_eq!(sut.update_with(&1, |u| { *u = User::bob() }), false);
+        assert!(!sut.update_with(&1, |u| { *u = User::bob() }));
     }
 
     #[test]
@@ -739,20 +766,6 @@ mod tests {
             <SUT as Lift<crate::UniFfiTag>>::try_lift(bad_value_from_ffi)
                 .is_err()
         );
-    }
-
-    #[test]
-    fn manual_perform_uniffi_if_factor_sources_empty() {
-        // This is some advanced techniques...
-        let mut bad_value_from_ffi_vec = Vec::new();
-        bad_value_from_ffi_vec.put_i32(0); // empty, not allowed
-        let bad_value_from_ffi = RustBuffer::from_vec(bad_value_from_ffi_vec);
-        let res =
-            <OrderedMap<FactorSource> as Lift<crate::UniFfiTag>>::try_lift(
-                bad_value_from_ffi,
-            );
-        println!("{:?}", res);
-        assert!(res.is_err());
     }
 
     #[test]
