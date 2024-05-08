@@ -23,7 +23,7 @@ final class RadixConnectPurposeTests: Test<RadixConnectPurpose> {
     func test_string_roundtrip() {
         func doTest(_ sut: SUT) {
             XCTAssertEqual(
-                SUT(rawValue: sut.rawValue)!,
+                SUT(rawValue: sut.rawValue),
                 sut
             )
         }

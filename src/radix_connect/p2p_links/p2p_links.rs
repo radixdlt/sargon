@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+json_data_convertible!(P2PLinks);
+
 decl_can_be_empty_identified_array_of!(
     /// Collection of clients user have connected P2P with, typically these
     /// are WebRTC connections with DApps, but might be Android or iPhone

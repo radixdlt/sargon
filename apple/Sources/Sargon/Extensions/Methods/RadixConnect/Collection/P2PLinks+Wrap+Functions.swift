@@ -48,4 +48,12 @@ extension P2pLinks {
 	public var count: Int {
 		Int(p2PLinksElementCount(p2PLinks: self))
 	}
+    
+    public init(jsonData: some DataProtocol) throws {
+        self = try newP2PLinksFromJsonBytes(jsonBytes: Data(jsonData))
+    }
+    
+    public func jsonData() -> Data {
+        p2PLinksToJsonBytes(p2PLinks: self)
+    }
 }

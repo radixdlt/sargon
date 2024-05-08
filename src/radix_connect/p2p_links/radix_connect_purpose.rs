@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+json_data_convertible!(RadixConnectPurpose);
+
 #[derive(
     Serialize,
     Deserialize,

@@ -2,6 +2,7 @@ import Foundation
 import SargonUniFFI
 
 extension RadixConnectPurpose: SargonModel {}
+extension RadixConnectPurpose: SargonObjectCodable {}
 extension RadixConnectPurpose: CustomStringConvertible {
     public var description: String {
         toString()
@@ -14,8 +15,8 @@ extension RadixConnectPurpose {
         toString()
     }
 
-    public init?(rawValue: String) {
-        try? self.init(string: rawValue)
+    public init(rawValue: String) {
+        self.init(string: rawValue)
     }
 }
 

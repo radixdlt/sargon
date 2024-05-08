@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+json_data_convertible!(DisplayName);
+
 /// A max 30 chars long string used for display purposes, e.g.
 /// the name of an Account or Persona.
 ///
