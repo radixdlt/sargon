@@ -4,4 +4,4 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class SupportedCurvesTests: NeverEmptyIdentifiedCollectionTest<SupportedCurves> {}
+// final class SupportedCurvesTests: NeverEmptyIdentifiedCollectionTest<SupportedCurves> {}

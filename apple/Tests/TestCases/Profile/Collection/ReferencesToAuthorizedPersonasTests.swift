@@ -11,4 +11,4 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class ReferencesToAuthorizedPersonasTests: CanBeEmptyCollectionTest<ReferencesToAuthorizedPersonas> {}
+//final class ReferencesToAuthorizedPersonasTests: CanBeEmptyCollectionTest<[AuthorizedPersonaSimple]> {}

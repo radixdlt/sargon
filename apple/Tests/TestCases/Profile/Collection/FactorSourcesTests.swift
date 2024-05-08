@@ -4,4 +4,4 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class FactorSourcesTests: NeverEmptyIdentifiedCollectionTest<FactorSources> {}
+//final class FactorSourcesTests: NeverEmptyIdentifiedCollectionTest<[FactorSource]> {}

@@ -22,7 +22,7 @@ extension Profile {
 	) {
 		self.init(
 			header: header,
-			factorSources: FactorSources(element: deviceFactorSource.asGeneral),
+			factorSources: [deviceFactorSource.asGeneral],
 			appPreferences: .default,
 			networks: []
 		)

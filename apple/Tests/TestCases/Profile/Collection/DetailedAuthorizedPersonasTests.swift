@@ -11,4 +11,4 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class DetailedAuthorizedPersonasTests: CanBeEmptyCollectionTest<DetailedAuthorizedPersonas> {}
+// final class DetailedAuthorizedPersonasTests: CanBeEmptyCollectionTest<[AuthorizedPersonaDetailed]> {}

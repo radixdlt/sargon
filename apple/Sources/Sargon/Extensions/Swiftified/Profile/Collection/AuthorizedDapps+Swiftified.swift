@@ -8,6 +8,6 @@
 import Foundation
 import SargonUniFFI
 
-extension AuthorizedDapps: CanBeEmptyIdentifiedCollection {
-	public typealias Element = AuthorizedDapp
-}
+//extension [AuthorizedDapp]: CanBeEmptyIdentifiedCollection {
+//	public typealias Element = AuthorizedDapp
+//}

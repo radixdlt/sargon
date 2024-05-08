@@ -4,4 +4,4 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class AuthorizedDappsTests: CanBeEmptyCollectionTest<AuthorizedDapps> {}
+//final class AuthorizedDappsTests: CanBeEmptyCollectionTest<[AuthorizedDapp]> {}

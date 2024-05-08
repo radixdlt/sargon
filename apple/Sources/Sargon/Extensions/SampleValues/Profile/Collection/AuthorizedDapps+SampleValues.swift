@@ -9,7 +9,7 @@ import Foundation
 import SargonUniFFI
 
 #if DEBUG
-extension AuthorizedDapps {
+extension [AuthorizedDapp] {
 	public static let sample: Self = newAuthorizedDappsSample()
 	public static let sampleOther: Self = newAuthorizedDappsSampleOther()
 }

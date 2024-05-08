@@ -8,7 +8,7 @@
 import Foundation
 import SargonUniFFI
 
-extension AssetsExceptionList: SargonModel {}
-extension AssetsExceptionList: CanBeEmptyIdentifiedCollection {
-	public typealias Element = AssetException
-}
+//extension [AssetException]: SargonModel {}
+//extension [AssetException]: CanBeEmptyIdentifiedCollection {
+//	public typealias Element = AssetException
+//}

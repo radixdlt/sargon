@@ -44,7 +44,7 @@ final class ProfileTests: Test<Profile> {
 		XCTAssertEqual(sut.header, header)
 		XCTAssertEqual(sut.appPreferences, .default)
 		XCTAssertEqual(sut.networks, [])
-		XCTAssertEqual(sut.factorSources.elements, [dfs.asGeneral])
+		XCTAssertEqual(sut.factorSources, [dfs.asGeneral])
 	}
 
 	func test_analyze_file_not_profile() {

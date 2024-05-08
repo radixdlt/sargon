@@ -8,6 +8,6 @@
 import Foundation
 import SargonUniFFI
 
-extension DetailedAuthorizedPersonas: CanBeEmptyIdentifiedCollection {
-	public typealias Element = AuthorizedPersonaDetailed
-}
+//extension [AuthorizedPersonaDetailed]: CanBeEmptyIdentifiedCollection {
+//	public typealias Element = AuthorizedPersonaDetailed
+//}

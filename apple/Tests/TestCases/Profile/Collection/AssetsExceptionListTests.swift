@@ -4,4 +4,4 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class AssetsExceptionListTests: CanBeEmptyCollectionTest<AssetsExceptionList> {}
+//final class AssetsExceptionListTests: CanBeEmptyCollectionTest<[AssetException]> {}

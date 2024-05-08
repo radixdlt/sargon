@@ -8,6 +8,6 @@
 import Foundation
 import SargonUniFFI
 
-extension AccountsForDisplay: CanBeEmptyIdentifiedCollection {
-	public typealias Element = AccountForDisplay
-}
+//extension [AccountForDisplay]: CanBeEmptyIdentifiedCollection {
+//	public typealias Element = AccountForDisplay
+//}

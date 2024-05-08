@@ -9,7 +9,7 @@ import Foundation
 import SargonUniFFI
 
 #if DEBUG
-extension Gateways {
+extension [Gateway] {
 	public static let sample: Self = newGatewaysSample()
 	public static let sampleOther: Self = newGatewaysSampleOther()
 }

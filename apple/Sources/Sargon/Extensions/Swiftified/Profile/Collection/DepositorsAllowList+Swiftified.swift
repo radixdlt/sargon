@@ -8,7 +8,7 @@
 import Foundation
 import SargonUniFFI
 
-extension DepositorsAllowList: SargonModel {}
-extension DepositorsAllowList: CanBeEmptyIdentifiedCollection {
-	public typealias Element = ResourceOrNonFungible
-}
+//extension [ResourceOrNonFungible]: SargonModel {}
+//extension [ResourceOrNonFungible]: CanBeEmptyIdentifiedCollection {
+//	public typealias Element = ResourceOrNonFungible
+//}

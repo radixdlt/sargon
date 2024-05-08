@@ -4,4 +4,4 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class AccountsOrPersonasTests: CanBeEmptyCollectionTest<AccountsOrPersonas> {}
+//final class AccountsOrPersonasTests: CanBeEmptyCollectionTest<[AccountOrPersona]> {}

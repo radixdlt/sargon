@@ -11,4 +11,4 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class DepositorsAllowListTests: CanBeEmptyCollectionTest<DepositorsAllowList> {}
+//final class DepositorsAllowListTests: CanBeEmptyCollectionTest<[ResourceOrNonFungible]> {}

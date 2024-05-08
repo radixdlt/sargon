@@ -1,5 +1,5 @@
 import SargonUniFFI
 
-extension FactorSources: NeverEmptyIdentifiedCollection {
-	public typealias Element = FactorSource
-}
+//extension [FactorSource]: NeverEmptyIdentifiedCollection {
+//	public typealias Element = FactorSource
+//}
