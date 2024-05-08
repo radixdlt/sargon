@@ -73,10 +73,8 @@ pub fn new_ed25519_public_key_sample_other() -> Ed25519PublicKey {
 pub fn android_secret_key_get_public_key_from_private_key_bytes(
     private_key_bytes: Exactly32Bytes,
 ) -> Result<Ed25519PublicKey> {
-    let private_key = Ed25519PrivateKey::try_from(private_key_bytes.as_ref())?;
-    let public_key = private_key.public_key();
-
-    Ok(public_key)
+    Ed25519PrivateKey::try_from(private_key_bytes.as_ref())
+        .map(|k| k.public_key())
 }
 
 /// Encodes the `Ed25519PublicKey` to a hexadecimal string, lowercased, without any `0x` prefix, e.g.

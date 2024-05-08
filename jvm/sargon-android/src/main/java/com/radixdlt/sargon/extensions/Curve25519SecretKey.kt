@@ -1,10 +1,10 @@
 package com.radixdlt.sargon.extensions
 
+import com.radixdlt.sargon.Ed25519Signature
 import com.radixdlt.sargon.Exactly32Bytes
 import com.radixdlt.sargon.Hash
 import com.radixdlt.sargon.NotarySignature
 import com.radixdlt.sargon.PublicKey
-import com.radixdlt.sargon.Signature
 import com.radixdlt.sargon.SignedIntentHash
 import com.radixdlt.sargon.androidNotarizeHashWithPrivateKeyBytes
 import com.radixdlt.sargon.androidSecretKeyGetPublicKeyFromPrivateKeyBytes
@@ -27,7 +27,7 @@ class Curve25519SecretKey(
             signedIntentHash = signedIntentHash
         )
 
-    fun sign(hash: Hash): Signature =
+    fun sign(hash: Hash): Ed25519Signature =
         androidSignHashWithPrivateKeyBytes(
             privateKeyBytes = exactly32Bytes,
             hash = hash
