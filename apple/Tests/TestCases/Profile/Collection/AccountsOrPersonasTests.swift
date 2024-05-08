@@ -4,4 +4,14 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-//final class AccountsOrPersonasTests: CanBeEmptyCollectionTest<[AccountOrPersona]> {}
+
+final class AccountsOrPersonasTests: CollectionTest<AccountOrPersona> {
+
+	override class func sample() -> SUT {
+		SUT.sample
+	}
+	
+	override class func sampleOther() -> SUT {
+		SUT.sampleOther
+	}
+}

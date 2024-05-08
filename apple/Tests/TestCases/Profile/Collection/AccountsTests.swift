@@ -4,8 +4,13 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class AccountsTests: TestCase {
-	typealias SUT = [Account]
+final class AccountsTests: CollectionTest<Account> {
+	override class func sample() -> SUT {
+		SUT.sample
+	}
+	override class func sampleOther() -> SUT {
+		SUT.sampleOther
+	}
 	
 	/// Have to omit this test... obviously... since it crashes.
 	/// We can have this test implemented when swift-testing is stable to be used,
