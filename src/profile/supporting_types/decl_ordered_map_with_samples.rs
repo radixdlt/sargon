@@ -25,7 +25,20 @@ macro_rules! decl_ordered_map {
             }
 
             #[cfg(test)]
-            mod [< $collection_type:snake _uniffi_test >] {
+            mod [< $collection_type:snake _tests >] {
+                use super::*;
+
+                #[allow(clippy::upper_case_acronyms)]
+                type SUT = $collection_type;
+
+                #[test]
+                fn test_ids() {
+                    assert_eq!(SUT::sample().ids().into_iter().cloned().collect_vec(), SUT::sample().get_all().into_iter().map(|i| i.id()).collect_vec());
+                }
+            }
+
+            #[cfg(test)]
+            mod [< $collection_type:snake _uniffi_tests >] {
                 use super::*;
 
                 #[allow(clippy::upper_case_acronyms)]
@@ -44,6 +57,19 @@ macro_rules! decl_ordered_map {
                         .len(),
                         2
                     );
+                }
+
+                #[test]
+                fn manual_perform_uniffi_conversion_successful() {
+                    let test = |sut: SUT| {
+                        let ffi_side = <SUT as uniffi::Lower<crate::UniFfiTag>>::lower(sut.clone());
+                        let from_ffi =
+                            <SUT as uniffi::Lift<crate::UniFfiTag>>::try_lift(ffi_side).unwrap();
+                        assert_eq!(from_ffi, sut);
+                    };
+
+                    test(SUT::sample());
+                    test(SUT::sample_other());
                 }
             }
 		}
