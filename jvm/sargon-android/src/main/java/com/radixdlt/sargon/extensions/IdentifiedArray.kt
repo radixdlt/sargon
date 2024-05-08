@@ -24,11 +24,14 @@ internal interface IdentifiedArray<Identifier, Element> {
 internal class IdentifiedArrayImpl<Identifier, Element>(
     elements: List<Element>,
     private val identifier: (Element) -> Identifier
-): IdentifiedArray<Identifier, Element> {
+) : IdentifiedArray<Identifier, Element> {
 
-    private val inner: LinkedHashMap<Identifier, Element> = LinkedHashMap(
-        LinkedHashMap<Identifier, Element>().apply { elements.forEach { this[identifier(it)] = it } }
-    )
+    private val inner: LinkedHashMap<Identifier, Element> =
+        LinkedHashMap<Identifier, Element>().apply {
+            elements.forEach {
+                this[identifier(it)] = it
+            }
+        }
 
     override val size: Int
         get() = inner.size
@@ -50,7 +53,10 @@ internal class IdentifiedArrayImpl<Identifier, Element>(
         inner[identifier(element)] = element
     }
 
-    override fun updateOrInsert(element: Element, index: Int): IdentifiedArray<Identifier, Element> {
+    override fun updateOrInsert(
+        element: Element,
+        index: Int
+    ): IdentifiedArray<Identifier, Element> {
         val id = identifier(element)
 
         return if (inner.contains(id)) {
