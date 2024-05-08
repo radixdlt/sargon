@@ -1,8 +1,6 @@
 package com.radixdlt.sargon.extensions
 
 import com.radixdlt.sargon.Hash
-import com.radixdlt.sargon.IdentifiedArray
-import com.radixdlt.sargon.IdentifiedArrayImpl
 import com.radixdlt.sargon.P2pLink
 
 class P2pLinks private constructor(

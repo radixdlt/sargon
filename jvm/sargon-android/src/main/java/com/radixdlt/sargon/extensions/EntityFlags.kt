@@ -1,8 +1,6 @@
 package com.radixdlt.sargon.extensions
 
 import com.radixdlt.sargon.EntityFlag
-import com.radixdlt.sargon.IdentifiedArray
-import com.radixdlt.sargon.IdentifiedArrayImpl
 
 class EntityFlags private constructor(
     array: IdentifiedArray<EntityFlag, EntityFlag>

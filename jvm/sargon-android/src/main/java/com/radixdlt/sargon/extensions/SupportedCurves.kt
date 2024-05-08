@@ -1,7 +1,5 @@
 package com.radixdlt.sargon.extensions
 
-import com.radixdlt.sargon.IdentifiedArray
-import com.radixdlt.sargon.IdentifiedArrayImpl
 import com.radixdlt.sargon.Slip10Curve
 
 class SupportedCurves private constructor(

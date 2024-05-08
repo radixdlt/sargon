@@ -2,8 +2,6 @@ package com.radixdlt.sargon.extensions
 
 import com.radixdlt.sargon.AccountAddress
 import com.radixdlt.sargon.AuthorizedDapp
-import com.radixdlt.sargon.IdentifiedArray
-import com.radixdlt.sargon.IdentifiedArrayImpl
 
 class AuthorizedDapps private constructor(
     array: IdentifiedArray<AccountAddress, AuthorizedDapp>

@@ -1,8 +1,6 @@
 package com.radixdlt.sargon.extensions
 
 import com.radixdlt.sargon.AssetException
-import com.radixdlt.sargon.IdentifiedArray
-import com.radixdlt.sargon.IdentifiedArrayImpl
 import com.radixdlt.sargon.ResourceAddress
 
 class AssetsExceptionList private constructor(

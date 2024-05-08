@@ -1,4 +1,4 @@
-package com.radixdlt.sargon
+package com.radixdlt.sargon.extensions
 
 internal interface IdentifiedArray<Identifier, Element> {
     val size: Int
@@ -18,8 +18,6 @@ internal interface IdentifiedArray<Identifier, Element> {
     operator fun get(index: Int): Element
 
     fun removeBy(identifier: Identifier): IdentifiedArray<Identifier, Element>
-
-    companion object
 }
 
 
