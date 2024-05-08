@@ -3,6 +3,7 @@ package com.radixdlt.sargon
 import com.radixdlt.sargon.extensions.Gateways
 import com.radixdlt.sargon.samples.sampleMainnet
 import com.radixdlt.sargon.samples.sampleStokenet
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -23,15 +24,15 @@ internal class GatewaysTest: IdentifiedArrayTest<Gateways, Url, Gateway>() {
                 id = NetworkId.MAINNET,
                 displayDescription = "mainnet"
             ),
-            url = Url("https://mainnet.radixdlt.com")
+            url = "https://mainnet.radixdlt.com".toHttpUrl()
         )
 
         val mainnetWithSlash = mainnet.copy(
-            url = Url("https://mainnet.radixdlt.com/")
+            url = "https://mainnet.radixdlt.com/".toHttpUrl()
         )
 
         val otherMainnet = mainnet.copy(
-            url = Url("https://mainnet-other.radixdlt.com/")
+            url = "https://mainnet-other.radixdlt.com/".toHttpUrl()
         )
 
         assertEquals(
