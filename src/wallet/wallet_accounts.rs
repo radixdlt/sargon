@@ -127,7 +127,7 @@ impl Wallet {
             if networks.contains_id(&network_id) {
                 networks.try_try_update_with(&network_id, |network| {
                     if network.accounts.append(account.clone()).0 {
-                        Ok(network.clone())
+                        Ok(())
                     } else {
                         Err(err_exists.clone())
                     }

@@ -159,15 +159,14 @@ impl<V: Debug + PartialEq + Eq + Clone + Identifiable> OrderedMap<V> {
         mut mutate: F,
     ) -> Result<()>
     where
-        F: FnMut(&mut V) -> Result<V>,
+        F: FnMut(&mut V) -> Result<()>,
     {
         let Some(existing) = (*self).get_mut(id) else {
             return Err(CommonError::ElementDoesNotExist {
                 id: format!("{:?}", id),
             });
         };
-        let mutated = mutate(existing)?;
-        *existing = mutated;
+        mutate(existing)?;
         Ok(())
     }
 
@@ -511,30 +510,37 @@ mod tests {
     }
 
     impl User {
+        /// id 0
         fn alice() -> Self {
             Self::new(0, "Alice")
         }
 
+        /// id 1
         fn bob() -> Self {
             Self::new(1, "Bob")
         }
 
+        /// id 2
         fn carol() -> Self {
             Self::new(2, "Carol")
         }
 
+        /// id 3
         fn david() -> Self {
             Self::new(3, "David")
         }
 
+        /// id 4
         fn erin() -> Self {
             Self::new(4, "Erin")
         }
 
+        /// id 5
         fn frank() -> Self {
             Self::new(5, "Frank")
         }
 
+        /// id 6
         fn grace() -> Self {
             Self::new(6, "Grace")
         }
@@ -590,6 +596,47 @@ mod tests {
         let mut sut = SUT::sample();
         assert_eq!(sut.get_id(&0), Some(&User::alice()));
         assert!(sut.update_with(&0, |u| { *u = foobar.clone() }));
+        assert_eq!(sut.get_id(&0), Some(&foobar));
+    }
+
+    #[test]
+    fn update_with_not_exists() {
+        let mut sut = SUT::sample();
+        assert_eq!(sut.update_with(&1, |u| { *u = User::bob() }), false);
+    }
+
+    #[test]
+    fn test_try_try_update_with_succeeds() {
+        let foobar = User::new(0, "Foobar");
+        let mut sut = SUT::sample();
+        assert_eq!(sut.get_id(&0), Some(&User::alice()));
+        assert!(sut
+            .try_try_update_with(&0, |u| {
+                *u = foobar.clone();
+                Ok(())
+            })
+            .is_ok());
+        assert_eq!(sut.get_id(&0), Some(&foobar));
+    }
+
+    #[test]
+    fn test_try_try_update_with_not_exists() {
+        let mut sut = SUT::sample();
+        assert_eq!(
+            sut.try_try_update_with(&1, |u| {
+                *u = User::bob();
+                Ok(())
+            }),
+            Err(CommonError::ElementDoesNotExist { id: "1".to_owned() })
+        );
+    }
+
+    #[test]
+    fn test_try_update_with_success() {
+        let foobar = User::new(0, "Foobar");
+        let mut sut = SUT::sample();
+        assert_eq!(sut.get_id(&0), Some(&User::alice()));
+        assert!(sut.try_update_with(&0, |u| { *u = foobar.clone() }).is_ok());
         assert_eq!(sut.get_id(&0), Some(&foobar));
     }
 
