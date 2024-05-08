@@ -8,10 +8,10 @@ impl SharedPersonaData {
             let _ = full_ids.insert(*name);
         };
         if let Some(email_addresses) = &self.email_addresses {
-            full_ids.extend(email_addresses.ids.into_iter());
+            full_ids.extend(&email_addresses.ids);
         }
         if let Some(phone_numbers) = &self.phone_numbers {
-            full_ids.extend(phone_numbers.ids.into_iter());
+            full_ids.extend(&phone_numbers.ids);
         }
         full_ids
     }

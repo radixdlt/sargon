@@ -260,9 +260,9 @@ mod tests {
     #[test]
     fn details_ok() {
         let sut = SUT::sample();
-        let dapp = sut.authorized_dapps.first().clone().unwrap();
+        let dapp = sut.authorized_dapps.first().unwrap();
 
-        let details = sut.details_for_authorized_dapp(&dapp).unwrap();
+        let details = sut.details_for_authorized_dapp(dapp).unwrap();
         assert_eq!(
             &details.dapp_definition_address,
             &dapp.dapp_definition_address
