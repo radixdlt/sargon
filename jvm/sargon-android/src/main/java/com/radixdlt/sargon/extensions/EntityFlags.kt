@@ -1,52 +1,23 @@
 package com.radixdlt.sargon.extensions
 
-import com.radixdlt.sargon.AuthorizedDapp
-import com.radixdlt.sargon.AuthorizedDapps
 import com.radixdlt.sargon.EntityFlag
-import com.radixdlt.sargon.EntityFlags
-import com.radixdlt.sargon.entityFlagsElementCount
-import com.radixdlt.sargon.entityFlagsGetElements
-import com.radixdlt.sargon.entityFlagsGetEntityFlagById
-import com.radixdlt.sargon.newAuthorizedDappsByUpdatingOrAppending
-import com.radixdlt.sargon.newAuthorizedDappsByUpdatingOrInsertingAtIndex
-import com.radixdlt.sargon.newEntityFlags
-import com.radixdlt.sargon.newEntityFlagsByAppending
-import com.radixdlt.sargon.newEntityFlagsByUpdatingOrAppending
-import com.radixdlt.sargon.newEntityFlagsByUpdatingOrInsertingAtIndex
-import com.radixdlt.sargon.newEntityFlagsRemovedElement
+import com.radixdlt.sargon.IdentifiedArray
+import com.radixdlt.sargon.IdentifiedArrayImpl
 
-@Throws(SargonException::class)
-fun EntityFlags.Companion.init(vararg entityFlag: EntityFlag): EntityFlags =
-    init(entityFlags = entityFlag.asList())
+class EntityFlags private constructor(
+    array: IdentifiedArray<EntityFlag, EntityFlag>
+) : IdentifiedArray<EntityFlag, EntityFlag> by array {
 
-@Throws(SargonException::class)
-fun EntityFlags.Companion.init(entityFlags: List<EntityFlag>): EntityFlags =
-    newEntityFlags(entityFlags = entityFlags)
-
-operator fun EntityFlags.invoke() = entityFlagsGetElements(entityFlags = this)
-
-operator fun EntityFlags.get(index: Int) = invoke().get(index = index)
-
-operator fun EntityFlags.contains(element: EntityFlag) = invoke().contains(element = element)
-
-val EntityFlags.size: Int
-    get() = entityFlagsElementCount(entityFlags = this).toInt()
-
-fun EntityFlags.append(entityFlag: EntityFlag): EntityFlags =
-    newEntityFlagsByAppending(entityFlag = entityFlag, to = this)
-
-fun EntityFlags.updateOrInsert(entityFlag: EntityFlag, index: Int): EntityFlags =
-    newEntityFlagsByUpdatingOrInsertingAtIndex(
-        entityFlag = entityFlag,
-        to = this,
-        index = index.toULong()
+    constructor(entityFlags: List<EntityFlag>) : this(
+        IdentifiedArrayImpl(
+            elements = entityFlags,
+            identifier = { it }
+        )
     )
 
-fun EntityFlags.updateOrAppend(entityFlag: EntityFlag): EntityFlags =
-    newEntityFlagsByUpdatingOrAppending(entityFlag = entityFlag, to = this)
+    constructor(vararg entityFlag: EntityFlag) : this(
+        IdentifiedArrayImpl(element = entityFlag, identifier = { it })
+    )
 
-fun EntityFlags.remove(entityFlag: EntityFlag): EntityFlags =
-    newEntityFlagsRemovedElement(entityFlag = entityFlag, from = this)
-
-fun EntityFlags.get(entityFlag: EntityFlag): EntityFlag? =
-    entityFlagsGetEntityFlagById(entityFlags = this, id = entityFlag)
+    companion object
+}

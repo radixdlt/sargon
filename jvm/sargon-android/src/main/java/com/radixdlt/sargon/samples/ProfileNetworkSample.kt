@@ -1,27 +1,42 @@
 package com.radixdlt.sargon.samples
 
-import com.radixdlt.sargon.Accounts
-import com.radixdlt.sargon.AuthorizedDapps
+import com.radixdlt.sargon.Account
+import com.radixdlt.sargon.AuthorizedDapp
 import com.radixdlt.sargon.NetworkId
-import com.radixdlt.sargon.Personas
+import com.radixdlt.sargon.Persona
 import com.radixdlt.sargon.ProfileNetwork
 import com.radixdlt.sargon.annotation.UsesSampleValues
+import com.radixdlt.sargon.extensions.Accounts
+import com.radixdlt.sargon.extensions.AuthorizedDapps
+import com.radixdlt.sargon.extensions.Personas
 
 @UsesSampleValues
 val ProfileNetwork.Companion.sampleMainnet: Sample<ProfileNetwork>
     get() = object : Sample<ProfileNetwork> {
         override fun invoke(): ProfileNetwork = ProfileNetwork(
             id = NetworkId.MAINNET,
-            accounts = Accounts.sampleMainnet(),
-            personas = Personas.sampleMainnet(),
-            authorizedDapps = AuthorizedDapps.sampleMainnet()
+            accounts = Accounts(
+                Account.sampleMainnet(),
+            ).asList(),
+            personas = Personas(
+                Persona.sampleMainnet()
+            ).asList(),
+            authorizedDapps = AuthorizedDapps(
+                AuthorizedDapp.sampleMainnet()
+            ).asList()
         )
 
         override fun other(): ProfileNetwork = ProfileNetwork(
             id = NetworkId.MAINNET,
-            accounts = Accounts.sampleMainnet.other(),
-            personas = Personas.sampleMainnet.other(),
-            authorizedDapps = AuthorizedDapps.sampleMainnet.other()
+            accounts = Accounts(
+                Account.sampleMainnet.other(),
+            ).asList(),
+            personas = Personas(
+                Persona.sampleMainnet.other()
+            ).asList(),
+            authorizedDapps = AuthorizedDapps(
+                AuthorizedDapp.sampleMainnet.other()
+            ).asList()
         )
     }
 
@@ -30,15 +45,27 @@ val ProfileNetwork.Companion.sampleStokenet: Sample<ProfileNetwork>
     get() = object : Sample<ProfileNetwork> {
         override fun invoke(): ProfileNetwork = ProfileNetwork(
             id = NetworkId.STOKENET,
-            accounts = Accounts.sampleStokenet(),
-            personas = Personas.sampleStokenet(),
-            authorizedDapps = AuthorizedDapps.sampleStokenet()
+            accounts = Accounts(
+                Account.sampleStokenet(),
+            ).asList(),
+            personas = Personas(
+                Persona.sampleStokenet()
+            ).asList(),
+            authorizedDapps = AuthorizedDapps(
+                AuthorizedDapp.sampleStokenet()
+            ).asList()
         )
 
         override fun other(): ProfileNetwork = ProfileNetwork(
             id = NetworkId.STOKENET,
-            accounts = Accounts.sampleStokenet.other(),
-            personas = Personas.sampleStokenet.other(),
-            authorizedDapps = AuthorizedDapps.sampleStokenet.other()
+            accounts = Accounts(
+                Account.sampleStokenet.other(),
+            ).asList(),
+            personas = Personas(
+                Persona.sampleStokenet.other()
+            ).asList(),
+            authorizedDapps = AuthorizedDapps(
+                AuthorizedDapp.sampleStokenet.other()
+            ).asList()
         )
     }
