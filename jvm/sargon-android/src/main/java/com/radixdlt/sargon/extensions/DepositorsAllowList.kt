@@ -16,6 +16,6 @@ class DepositorsAllowList private constructor(
     )
 
     constructor(vararg resourceOrNonFungible: ResourceOrNonFungible) : this(
-        IdentifiedArrayImpl(element = resourceOrNonFungible, identifier = { it })
+        resourcesOrNonFungibles = resourceOrNonFungible.asList()
     )
 }

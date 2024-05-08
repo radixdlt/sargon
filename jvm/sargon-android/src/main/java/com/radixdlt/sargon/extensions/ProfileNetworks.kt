@@ -16,7 +16,5 @@ class ProfileNetworks private constructor(
         )
     )
 
-    constructor(vararg network: ProfileNetwork) : this(
-        IdentifiedArrayImpl(element = network, identifier = { it.id })
-    )
+    constructor(vararg network: ProfileNetwork) : this(networks = network.asList())
 }

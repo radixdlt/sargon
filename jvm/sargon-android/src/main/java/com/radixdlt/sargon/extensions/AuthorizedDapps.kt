@@ -16,7 +16,7 @@ class AuthorizedDapps private constructor(
         )
     )
 
-    constructor(vararg authorizedDapp: AuthorizedDapp) : this(
-        IdentifiedArrayImpl(element = authorizedDapp, identifier = { it.dappDefinitionAddress })
-    )
+    constructor(
+        vararg authorizedDapp: AuthorizedDapp
+    ) : this(authorizedDapps = authorizedDapp.asList())
 }

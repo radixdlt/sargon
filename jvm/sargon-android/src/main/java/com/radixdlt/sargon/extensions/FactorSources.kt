@@ -17,7 +17,7 @@ class FactorSources private constructor(
     )
 
     constructor(vararg factorSource: FactorSource) : this(
-        IdentifiedArrayImpl(element = factorSource, identifier = { it.id })
+        factorSources = factorSource.asList()
     )
 }
 

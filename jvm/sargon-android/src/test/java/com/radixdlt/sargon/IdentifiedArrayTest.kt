@@ -41,5 +41,4 @@ internal abstract class IdentifiedArrayTest<A, Identifier, Element> where A : Id
         assertEquals(element, collection.getBy(identifier(element)))
         assertTrue(collection.removeBy(identifier(element)).size == 0)
     }
-
 }

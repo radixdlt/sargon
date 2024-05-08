@@ -17,6 +17,6 @@ class ReferencesToAuthorizedPersonas private constructor(
     )
 
     constructor(vararg authorizedPersonaSimple: AuthorizedPersonaSimple) : this(
-        IdentifiedArrayImpl(element = authorizedPersonaSimple, identifier = { it.identityAddress })
+        authorizedPersonasSimple = authorizedPersonaSimple.asList()
     )
 }

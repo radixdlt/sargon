@@ -16,7 +16,5 @@ class Personas private constructor(
         )
     )
 
-    constructor(vararg persona: Persona) : this(
-        IdentifiedArrayImpl(element = persona, identifier = { it.address })
-    )
+    constructor(vararg persona: Persona) : this(personas = persona.asList())
 }

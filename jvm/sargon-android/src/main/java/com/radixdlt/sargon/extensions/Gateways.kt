@@ -16,7 +16,5 @@ class Gateways private constructor(
         )
     )
 
-    constructor(vararg account: Gateway) : this(
-        IdentifiedArrayImpl(element = account, identifier = { it.url })
-    )
+    constructor(vararg gateway: Gateway) : this(gateways = gateway.asList())
 }

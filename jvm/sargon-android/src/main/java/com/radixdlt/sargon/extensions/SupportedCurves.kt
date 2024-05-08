@@ -15,7 +15,5 @@ class SupportedCurves private constructor(
         )
     )
 
-    constructor(vararg curve: Slip10Curve) : this(
-        IdentifiedArrayImpl(element = curve, identifier = { it })
-    )
+    constructor(vararg curve: Slip10Curve) : this(curves = curve.asList())
 }

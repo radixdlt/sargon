@@ -16,7 +16,5 @@ class P2pLinks private constructor(
         )
     )
 
-    constructor(vararg p2pLink: P2pLink) : this(
-        IdentifiedArrayImpl(element = p2pLink, identifier = { it.id })
-    )
+    constructor(vararg p2pLink: P2pLink) : this(p2pLinks = p2pLink.asList())
 }

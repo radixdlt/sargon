@@ -15,9 +15,7 @@ class EntityFlags private constructor(
         )
     )
 
-    constructor(vararg entityFlag: EntityFlag) : this(
-        IdentifiedArrayImpl(element = entityFlag, identifier = { it })
-    )
+    constructor(vararg entityFlag: EntityFlag) : this(entityFlags = entityFlag.asList())
 
     companion object
 }

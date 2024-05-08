@@ -28,11 +28,6 @@ internal class IdentifiedArrayImpl<Identifier, Element>(
     private val identifier: (Element) -> Identifier
 ): IdentifiedArray<Identifier, Element> {
 
-    constructor(vararg element: Element, identifier: (Element) -> Identifier) : this(
-        elements = element.asList(),
-        identifier = identifier
-    )
-
     private val inner: LinkedHashMap<Identifier, Element> = LinkedHashMap(
         LinkedHashMap<Identifier, Element>().apply { elements.forEach { this[identifier(it)] = it } }
     )

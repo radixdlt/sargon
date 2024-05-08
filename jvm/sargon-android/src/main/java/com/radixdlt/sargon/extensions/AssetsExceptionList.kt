@@ -16,7 +16,7 @@ class AssetsExceptionList private constructor(
         )
     )
 
-    constructor(vararg assetException: AssetException) : this(
-        IdentifiedArrayImpl(element = assetException, identifier = { it.address })
-    )
+    constructor(
+        vararg assetException: AssetException
+    ) : this(assetExceptions = assetException.asList())
 }

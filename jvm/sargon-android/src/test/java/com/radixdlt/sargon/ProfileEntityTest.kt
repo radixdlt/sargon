@@ -31,10 +31,10 @@ class ProfileEntityTest {
             sut.securityState
         )
 
-        /*assertEquals(
+        assertEquals(
             Account.sampleMainnet().flags,
-            sut.flags
-        )*/
+            sut.flags.asList()
+        )
     }
 
     @Test
@@ -61,9 +61,9 @@ class ProfileEntityTest {
             sut.securityState
         )
 
-        /*assertEquals(
+        assertEquals(
             Persona.sampleMainnet().flags,
-            sut.flags
-        )*/
+            sut.flags.asList()
+        )
     }
 }
