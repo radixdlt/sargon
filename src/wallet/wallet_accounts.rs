@@ -125,7 +125,7 @@ impl Wallet {
         self.try_update_profile_with(|mut p| {
             let networks = &mut p.networks;
             if networks.contains_id(&network_id) {
-                networks.try_update_with(&network_id, |network| {
+                networks.try_try_update_with(&network_id, |network| {
                     if network.accounts.append(account.clone()).0 {
                         Ok(network.clone())
                     } else {

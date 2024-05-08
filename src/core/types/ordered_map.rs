@@ -8,6 +8,7 @@ use uniffi::{
 use crate::prelude::*;
 
 use std::{
+    any::TypeId,
     fmt::{Debug, Display, Formatter},
     hash::Hasher,
 };
@@ -54,6 +55,16 @@ impl<V: Debug + PartialEq + Eq + Clone + Identifiable> OrderedMap<V> {
     /// or if you need to get the index of the corresponding key-value pair.
     pub fn insert(&mut self, item: V) -> Option<V> {
         self.0.insert(item.id(), item)
+    }
+
+    pub fn try_insert_unique(&mut self, item: V) -> Result<()> {
+        if self.contains(&item) {
+            return Err(CommonError::ElementAlreadyExist {
+                id: format!("{:?}", item.id()),
+            });
+        }
+        assert!(self.insert(item).is_none());
+        Ok(())
     }
 
     pub fn insert_at(&mut self, item: V, index: usize) -> Option<V> {
@@ -142,7 +153,7 @@ impl<V: Debug + PartialEq + Eq + Clone + Identifiable> OrderedMap<V> {
     /// an error is returned, the mutation is failable, if your return an `Err`
     /// in `mutate`, this method propagates that error.
     #[inline]
-    pub fn try_update_with<F>(
+    pub fn try_try_update_with<F>(
         &mut self,
         id: &V::ID,
         mut mutate: F,
@@ -157,6 +168,27 @@ impl<V: Debug + PartialEq + Eq + Clone + Identifiable> OrderedMap<V> {
         };
         let mutated = mutate(existing)?;
         *existing = mutated;
+        Ok(())
+    }
+
+    /// Tries to mutate the value identified by `id`, if no such value exists
+    /// an error is returned, the mutation is failable, if your return an `Err`
+    /// in `mutate`, this method propagates that error.
+    #[inline]
+    pub fn try_update_with<F>(
+        &mut self,
+        id: &V::ID,
+        mut mutate: F,
+    ) -> Result<()>
+    where
+        F: FnMut(&mut V),
+    {
+        let Some(existing) = (*self).get_mut(id) else {
+            return Err(CommonError::ElementDoesNotExist {
+                id: format!("{:?}", id),
+            });
+        };
+        mutate(existing);
         Ok(())
     }
 
@@ -292,7 +324,11 @@ where
         deserializer: D,
     ) -> Result<Self, D::Error> {
         let items = Vec::<V>::deserialize(deserializer)?;
-        Ok(Self::from_iter(items))
+        let mut map = Self::new();
+        for item in items {
+            map.try_insert_unique(item).map_err(de::Error::custom)?;
+        }
+        Ok(map)
     }
 }
 
@@ -404,19 +440,30 @@ unsafe impl<UT, V: Debug + Hash + Eq + Clone + Identifiable + Lower<UT>>
 
     const TYPE_ID_META: MetadataBuffer = <Self as Lower<UT>>::TYPE_ID_META;
 }
-unsafe impl<UT, V: Debug + Hash + Eq + Clone + Identifiable + Lift<UT>> Lift<UT>
-    for OrderedMap<V>
+unsafe impl<UT, V: Debug + Hash + Eq + Clone + Identifiable + Lift<UT> + 'static>
+    Lift<UT> for OrderedMap<V>
 {
     type FfiType = RustBuffer;
 
     fn try_read(buf: &mut &[u8]) -> uniffi::Result<Self> {
         check_remaining(buf, 4)?;
         let len = usize::try_from(buf.get_i32())?;
+
+        // This is some advances technique... but hey, it works!
+        if TypeId::of::<V>() == TypeId::of::<FactorSource>() && len == 0 {
+            return Err(CommonError::FactorSourcesMustNotBeEmpty)
+                .map_err(|e| e.into());
+        }
+
         let mut vec = Vec::with_capacity(len);
         for _ in 0..len {
             vec.push(<V as Lift<UT>>::try_read(buf)?)
         }
-        Ok(<Self as FromIterator<V>>::from_iter(vec))
+        let mut map = Self::new();
+        for item in vec {
+            map.try_insert_unique(item)?;
+        }
+        Ok(map)
     }
 
     fn try_lift(buf: RustBuffer) -> uniffi::Result<Self> {
@@ -426,4 +473,244 @@ unsafe impl<UT, V: Debug + Hash + Eq + Clone + Identifiable + Lift<UT>> Lift<UT>
     const TYPE_ID_META: MetadataBuffer =
         MetadataBuffer::from_code(metadata::codes::TYPE_VEC)
             .concat(V::TYPE_ID_META);
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    #[derive(
+        Clone,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+        Serialize,
+        Deserialize,
+        uniffi::Record,
+    )]
+    struct User {
+        id: u8,
+        name: String,
+    }
+    impl User {
+        fn new(id: u8, name: impl AsRef<str>) -> Self {
+            Self {
+                id,
+                name: name.as_ref().to_owned(),
+            }
+        }
+    }
+
+    impl Identifiable for User {
+        type ID = u8;
+        fn id(&self) -> Self::ID {
+            self.id
+        }
+    }
+
+    impl User {
+        fn alice() -> Self {
+            Self::new(0, "Alice")
+        }
+
+        fn bob() -> Self {
+            Self::new(1, "Bob")
+        }
+
+        fn carol() -> Self {
+            Self::new(2, "Carol")
+        }
+
+        fn david() -> Self {
+            Self::new(3, "David")
+        }
+
+        fn erin() -> Self {
+            Self::new(4, "Erin")
+        }
+
+        fn frank() -> Self {
+            Self::new(5, "Frank")
+        }
+
+        fn grace() -> Self {
+            Self::new(6, "Grace")
+        }
+    }
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = OrderedMap<User>;
+
+    impl HasSampleValues for SUT {
+        fn sample() -> SUT {
+            SUT::from_iter([
+                User::alice(),
+                User::carol(),
+                User::erin(),
+                User::grace(),
+            ])
+        }
+
+        fn sample_other() -> SUT {
+            SUT::from_iter([User::bob(), User::david(), User::frank()])
+        }
+    }
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn append_existing_is_noop() {
+        let mut sut = SUT::sample();
+        assert_eq!(sut.append(User::grace()), (false, 3))
+    }
+
+    #[test]
+    fn try_inserting_unique_duplicate() {
+        let mut sut = SUT::sample();
+        assert_eq!(
+            sut.try_insert_unique(User::grace()),
+            Err(CommonError::ElementAlreadyExist { id: "6".to_owned() })
+        );
+    }
+
+    #[test]
+    fn update_with_for_existing() {
+        let foobar = User::new(0, "Foobar");
+        let mut sut = SUT::sample();
+        assert_eq!(sut.get_id(&0), Some(&User::alice()));
+        assert!(sut.update_with(&0, |u| { *u = foobar.clone() }));
+        assert_eq!(sut.get_id(&0), Some(&foobar));
+    }
+
+    #[test]
+    fn test_try_update_with_not_exists() {
+        let mut sut = SUT::sample();
+        assert_eq!(
+            sut.try_update_with(&1, |u| { *u = User::bob() }),
+            Err(CommonError::ElementDoesNotExist { id: "1".to_owned() })
+        );
+    }
+
+    #[test]
+    fn json_roundtrip_sample() {
+        let sut = SUT::sample();
+        assert_eq_after_json_roundtrip(
+            &sut,
+            r#"
+            [
+                {
+                    "id": 0,
+                    "name": "Alice"
+                },
+                {
+                    "id": 2,
+                    "name": "Carol"
+                },
+                {
+                    "id": 4,
+                    "name": "Erin"
+                },
+                {
+                    "id": 6,
+                    "name": "Grace"
+                }
+            ]
+            "#,
+        );
+    }
+
+    #[test]
+    fn duplicates_in_json_throws() {
+        let json = r#"
+        [
+            {
+                "id": 0,
+                "name": "Alice"
+            },
+            {
+                "id": 0,
+                "name": "Alice"
+            },
+            {
+                "id": 2,
+                "name": "Carol"
+            },
+            {
+                "id": 4,
+                "name": "Erin"
+            },
+            {
+                "id": 6,
+                "name": "Grace"
+            }
+        ]
+        "#;
+        assert!(serde_json::from_str::<SUT>(json).is_err());
+    }
+
+    #[test]
+    fn manual_perform_uniffi_conversion_successful() {
+        let test_expected = |from: SUT, to: SUT| {
+            let ffi_side = <SUT as Lower<crate::UniFfiTag>>::lower(from);
+            let from_ffi =
+                <SUT as Lift<crate::UniFfiTag>>::try_lift(ffi_side).unwrap();
+            assert_eq!(from_ffi, to);
+        };
+        let test = |sut: SUT| test_expected(sut.clone(), sut);
+
+        test(SUT::new());
+        test(SUT::sample());
+        test(SUT::sample_other());
+    }
+
+    #[test]
+    fn manual_perform_uniffi_if_duplicates_throw() {
+        // This is some advanced techniques...
+        let mut bad_value_from_ffi_vec = Vec::new();
+        bad_value_from_ffi_vec.put_i32(2); // duplicates
+        <User as Lower<crate::UniFfiTag>>::write(
+            User::alice(),
+            &mut bad_value_from_ffi_vec,
+        );
+        <User as Lower<crate::UniFfiTag>>::write(
+            User::alice(),
+            &mut bad_value_from_ffi_vec,
+        ); // duplicate!
+        let bad_value_from_ffi = RustBuffer::from_vec(bad_value_from_ffi_vec);
+        assert!(
+            <SUT as Lift<crate::UniFfiTag>>::try_lift(bad_value_from_ffi)
+                .is_err()
+        );
+    }
+
+    #[test]
+    fn manual_perform_uniffi_if_factor_sources_empty() {
+        // This is some advanced techniques...
+        let mut bad_value_from_ffi_vec = Vec::new();
+        bad_value_from_ffi_vec.put_i32(0); // empty, not allowed
+        let bad_value_from_ffi = RustBuffer::from_vec(bad_value_from_ffi_vec);
+        let res =
+            <OrderedMap<FactorSource> as Lift<crate::UniFfiTag>>::try_lift(
+                bad_value_from_ffi,
+            );
+        println!("{:?}", res);
+        assert!(res.is_err());
+    }
+
+    #[test]
+    fn manual_perform_uniffi_conversion_fail() {
+        assert!(<SUT as Lift<crate::UniFfiTag>>::try_lift(RustBuffer::new())
+            .is_err());
+    }
 }
