@@ -1,23 +1,22 @@
 package com.radixdlt.sargon
 
-import com.radixdlt.sargon.extensions.NotaryPrivateKey
+import com.radixdlt.sargon.extensions.Curve25519SecretKey
 import com.radixdlt.sargon.extensions.hex
 import com.radixdlt.sargon.extensions.signature
 import com.radixdlt.sargon.extensions.string
 import com.radixdlt.sargon.samples.sample
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 
-class NotaryPrivateKeyTest {
+class Curve25519SecretKeyTest {
 
     @Test
     fun testRandomness() {
         val privateKeysCount = 100
 
         val privateKeys = List(privateKeysCount) {
-            NotaryPrivateKey.secureRandom()
+            Curve25519SecretKey.secureRandom()
         }
 
         assertEquals(
@@ -28,8 +27,8 @@ class NotaryPrivateKeyTest {
 
     @Test
     fun testEquality() {
-        val thisNotary = NotaryPrivateKey(Entropy32Bytes.sample())
-        val otherNotary = NotaryPrivateKey(Entropy32Bytes.sample())
+        val thisNotary = Curve25519SecretKey(Exactly32Bytes.sample())
+        val otherNotary = Curve25519SecretKey(Exactly32Bytes.sample())
 
         assertEquals(thisNotary, otherNotary)
         assertEquals(thisNotary, thisNotary)
@@ -38,21 +37,21 @@ class NotaryPrivateKeyTest {
 
     @Test
     fun testNotarize() {
-        val sut = NotaryPrivateKey(Entropy32Bytes.sample())
+        val sut = Curve25519SecretKey(Exactly32Bytes.sample())
         val result = sut.notarize(SignedIntentHash.sample())
 
         assertEquals(
-            "08c6129fa6938a31e38dfe94effdce8f1a4021e22cf62344830d83dc45f32de0e3d112794c369450e62d245a17b18835f40c639033fbb4b1f975ad0ad71dbf0a",
+            "1a30347a04bc5d746b35a568330ba69c9b6ac60ef72d0a28cb63e25680e64908557d85a0e864c423ce782b5f43da3002c301045c6385b40cb013374045392404",
             result.signature.string
         )
     }
 
     @Test
     fun testGetPublicKey() {
-        val sut = NotaryPrivateKey(Entropy32Bytes.sample())
+        val sut = Curve25519SecretKey(Exactly32Bytes.sample())
 
-        Assertions.assertEquals(
-            "248acbdbaf9e050196de704bea2d68770e519150d103b587dae2d9cad53dd930",
+        assertEquals(
+            "3b321b74bdcb169f7260c60592bbb63d9b4d629424a0c58aff4640a75f0a2b06",
             sut.toPublicKey().hex
         )
     }
