@@ -27,6 +27,7 @@ class Curve25519SecretKey(
             signedIntentHash = signedIntentHash
         )
 
+    @Throws(SargonException::class)
     fun sign(hash: Hash): Ed25519Signature =
         androidSignHashWithPrivateKeyBytes(
             privateKeyBytes = exactly32Bytes,
