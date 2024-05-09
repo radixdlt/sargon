@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use indexmap::IndexMap;
-use std::any::TypeId;
+use std::any::TypeId as StdTypeId;
+use uniffi::TypeId as UFTypeId;
 use uniffi::{
     check_remaining,
     deps::bytes::{Buf, BufMut},
@@ -27,10 +28,6 @@ unsafe impl<UT, V: Debug + Eq + Clone + Identifiable + Lower<UT>> Lower<UT>
     fn lower(obj: Self) -> RustBuffer {
         Self::lower_into_rust_buffer(obj)
     }
-
-    const TYPE_ID_META: MetadataBuffer =
-        MetadataBuffer::from_code(metadata::codes::TYPE_VEC)
-            .concat(V::TYPE_ID_META);
 }
 
 unsafe impl<UT, V: Debug + Eq + Clone + Identifiable + Lower<UT>>
@@ -41,8 +38,6 @@ unsafe impl<UT, V: Debug + Eq + Clone + Identifiable + Lower<UT>>
     fn lower_return(obj: Self) -> uniffi::Result<Self::ReturnType, RustBuffer> {
         Ok(<Self as Lower<UT>>::lower(obj))
     }
-
-    const TYPE_ID_META: MetadataBuffer = <Self as Lower<UT>>::TYPE_ID_META;
 }
 unsafe impl<UT, V: Debug + Eq + Clone + Identifiable + Lift<UT> + 'static>
     Lift<UT> for IdentifiedVecOf<V>
@@ -62,7 +57,11 @@ unsafe impl<UT, V: Debug + Eq + Clone + Identifiable + Lift<UT> + 'static>
     fn try_lift(buf: RustBuffer) -> uniffi::Result<Self> {
         Self::try_lift_from_rust_buffer(buf)
     }
+}
 
+impl<UT, V: Debug + Eq + Clone + Identifiable + UFTypeId<UT>> UFTypeId<UT>
+    for IdentifiedVecOf<V>
+{
     const TYPE_ID_META: MetadataBuffer =
         MetadataBuffer::from_code(metadata::codes::TYPE_VEC)
             .concat(V::TYPE_ID_META);
