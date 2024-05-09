@@ -56,6 +56,10 @@ This repo contains a [`.pre-commit-config.yaml`](./.pre-commit-config.yaml) whic
 pre-commit install
 ```
 
+## `direnv`
+
+Install [`direnv`](https://direnv.net) to automatically load env variables when you change directory to Sargon dir. This repo contains an `.envrc` which exports `RUST_LOG=info` so that logs are shown when running unit tests. When you run `cargo test` those logs will show up. Prefer using `nextest` below if you dont wanna see logs, and want prettier test result output.
+
 ### `nextest`
 
 [Nextest](https://nexte.st/index.html) is a nice test runner for Rust!

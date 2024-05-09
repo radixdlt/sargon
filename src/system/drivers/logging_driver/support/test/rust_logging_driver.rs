@@ -9,9 +9,11 @@ impl RustLoggingDriver {
     }
 }
 
-#[async_trait::async_trait]
 impl LoggingDriver for RustLoggingDriver {
-    fn log(&self, level: LogLevel, msg: String) {
-        log::log!(level.into(), "{}", msg)
+    fn is_rust_log(&self) -> bool {
+        true
+    }
+    fn log(&self, _level: LogLevel, _msg: String) {
+        /* special */
     }
 }

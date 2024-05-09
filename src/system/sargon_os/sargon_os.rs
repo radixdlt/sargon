@@ -22,14 +22,11 @@ impl SargonOS {
         let clients = Clients::new(bios);
 
         let sargon_info = SargonBuildInformation::get();
+        let version = sargon_info.sargon_version;
+        let ret_version = sargon_info.dependencies.radix_engine_toolkit;
+        info!("Booting SargonOS {} (RET: {})", &version, &ret_version);
         let host_info = clients.host.summary().await;
-
-        info!(
-            "Booting SargonOS {} (RET: {})\nHost: {}",
-            &sargon_info.sargon_version,
-            &sargon_info.dependencies.radix_engine_toolkit,
-            host_info
-        );
+        info!("Host: {}", host_info);
 
         let secure_storage = &clients.secure_storage;
 

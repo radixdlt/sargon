@@ -335,7 +335,7 @@ mod tests {
     use actix_rt::time::timeout;
     use std::time::Duration;
 
-    const MAX: Duration = Duration::from_millis(100);
+    const MAX: Duration = Duration::from_millis(50);
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SargonOS;
@@ -346,5 +346,17 @@ mod tests {
         let req = sut.add_account(Account::sample());
         let result = timeout(MAX, req).await.unwrap();
         assert!(result.is_ok());
+        let profile = sut.profile();
+        let active_profile_id = sut
+            .clients
+            .secure_storage
+            .load_active_profile_id()
+            .await
+            .unwrap()
+            .unwrap();
+
+        assert_eq!(active_profile_id, profile.id());
+        assert_eq!(&profile.networks.len(), &1);
+        assert_eq!(&profile.networks[0].accounts.len(), &1);
     }
 }
