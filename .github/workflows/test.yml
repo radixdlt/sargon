@@ -99,7 +99,7 @@ jobs:
           default: true
 
       - name: Run rust tests
-        run: cargo test
+        run: cargo test --features rust-clients
 
   # Swift testing on macOS (Apple Silicon)
   test-swift:

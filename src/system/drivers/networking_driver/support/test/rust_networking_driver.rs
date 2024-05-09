@@ -1,6 +1,7 @@
+use crate::prelude::*;
+
 use async_trait::async_trait;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
-use sargon::prelude::*;
 use std::sync::Arc;
 
 fn map_method(method: NetworkMethod) -> reqwest::Method {
@@ -10,9 +11,19 @@ fn map_method(method: NetworkMethod) -> reqwest::Method {
     }
 }
 
+/// A **Rust** networking driver using `reqwest`.
 #[derive(Debug)]
-struct RustNetworkingDriver {
+pub struct RustNetworkingDriver {
     client: reqwest::Client,
+}
+
+impl RustNetworkingDriver {
+    pub fn new() -> Arc<Self> {
+        let reqwest_client = reqwest::Client::new();
+        Arc::new(Self {
+            client: reqwest_client,
+        })
+    }
 }
 
 #[async_trait]
@@ -49,12 +60,4 @@ impl NetworkingDriver for RustNetworkingDriver {
 
         Ok(NetworkResponse { status_code, body })
     }
-}
-
-pub(crate) fn new_gateway_client(network_id: NetworkID) -> GatewayClient {
-    let reqwest_client = reqwest::Client::new();
-    let network_antenna = RustNetworkingDriver {
-        client: reqwest_client,
-    };
-    GatewayClient::new(Arc::new(network_antenna), network_id)
 }

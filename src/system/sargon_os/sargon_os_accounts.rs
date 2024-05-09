@@ -305,6 +305,32 @@ impl SargonOS {
 }
 
 // #[cfg(test)]
+// impl Drivers {
+//     pub fn test() -> Arc<Self> {
+//         /*
+//             networking: Arc<dyn NetworkingDriver>,
+//             secure_storage: Arc<dyn SecureStorageDriver>,
+//             entropy_provider: Arc<dyn EntropyProviderDriver>,
+//             host_info: Arc<dyn HostInfoDriver>,
+//             logging: Arc<dyn LoggingDriver>,
+//             event_bus: Arc<dyn EventBusDriver>,
+//             file_system: Arc<dyn FileSystemDriver>,
+//             unsafe_storage: Arc<dyn UnsafeStorageDriver>,
+//         ) -> Arc<Self> {
+//             */
+//         Drivers::new(RustNetworkingDriver::new())
+//     }
+// }
+
+// #[cfg(test)]
+// impl SargonOS {
+//     pub async fn boot_test() -> Result<Arc<Self>> {
+//         let test_drivers = Drivers::test();
+//         Self::boot(test_drivers).await
+//     }
+// }
+
+// #[cfg(test)]
 // mod tests {
 //     use super::*;
 //     use actix_rt::time::timeout;
@@ -317,7 +343,7 @@ impl SargonOS {
 
 //     #[actix_rt::test]
 //     async fn test_add_account() {
-//         let sut = SargonOS::sample();
+//         let sut = SUT::boot_test().await;
 //         let req = sut.add_account(Account::sample());
 //         let result = timeout(MAX, req).await.unwrap();
 //     }
