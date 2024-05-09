@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-decl_ordered_map!(DetailedAuthorizedPersonas, AuthorizedPersonaDetailed);
+decl_identified_vec_of!(DetailedAuthorizedPersonas, AuthorizedPersonaDetailed);
 
 impl HasSampleValues for DetailedAuthorizedPersonas {
     fn sample() -> Self {

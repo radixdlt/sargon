@@ -7,6 +7,8 @@ use uniffi::{
     metadata, Lift, Lower, LowerReturn, MetadataBuffer, RustBuffer,
 };
 
+use super::import_identified_vec_of_from;
+
 // We turn an `[Rust] IndexMap -> Array/List [FFI]``
 
 unsafe impl<UT, V: Debug + Eq + Clone + Identifiable + Lower<UT>> Lower<UT>
@@ -15,7 +17,7 @@ unsafe impl<UT, V: Debug + Eq + Clone + Identifiable + Lower<UT>> Lower<UT>
     type FfiType = RustBuffer;
 
     fn write(obj: Self, buf: &mut Vec<u8>) {
-        let len = i32::try_from(obj.0.len()).unwrap();
+        let len = i32::try_from(obj.len()).unwrap();
         buf.put_i32(len); // We limit arrays to i32::MAX items
         for value in &obj {
             <V as Lower<UT>>::write(value, buf);
@@ -50,25 +52,11 @@ unsafe impl<UT, V: Debug + Eq + Clone + Identifiable + Lift<UT> + 'static>
     fn try_read(buf: &mut &[u8]) -> uniffi::Result<Self> {
         check_remaining(buf, 4)?;
         let len = usize::try_from(buf.get_i32())?;
-
-        if TypeId::of::<V>() == TypeId::of::<FactorSource>() && len == 0 {
-            return Err(CommonError::FactorSourcesMustNotBeEmpty)
-                .map_err(|e| e.into());
-        }
-        if TypeId::of::<V>() == TypeId::of::<SLIP10Curve>() && len == 0 {
-            return Err(CommonError::SupportedCurvesMustNotBeEmpty)
-                .map_err(|e| e.into());
-        }
-
         let mut vec = Vec::with_capacity(len);
         for _ in 0..len {
             vec.push(<V as Lift<UT>>::try_read(buf)?)
         }
-        let mut map = Self::new();
-        for item in vec {
-            map.try_insert_unique(item)?;
-        }
-        Ok(map)
+        import_identified_vec_of_from(vec).map_err(|e| e.into())
     }
 
     fn try_lift(buf: RustBuffer) -> uniffi::Result<Self> {
@@ -92,10 +80,21 @@ mod tests {
     #[test]
     fn manual_perform_uniffi_conversion_successful() {
         let test_expected = |from: SUT, to: SUT| {
-            let ffi_side = <SUT as Lower<crate::UniFfiTag>>::lower(from);
+            let ffi_side =
+                <SUT as Lower<crate::UniFfiTag>>::lower(from.clone());
             let from_ffi =
                 <SUT as Lift<crate::UniFfiTag>>::try_lift(ffi_side).unwrap();
-            assert_eq!(from_ffi, to);
+            assert_eq!(from_ffi, to.clone());
+
+            let ffi_side_lower_return =
+                <SUT as LowerReturn<crate::UniFfiTag>>::lower_return(from)
+                    .unwrap();
+            let from_ffi_lower_return =
+                <SUT as Lift<crate::UniFfiTag>>::try_lift(
+                    ffi_side_lower_return,
+                )
+                .unwrap();
+            assert_eq!(from_ffi_lower_return, to);
         };
         let test = |sut: SUT| test_expected(sut.clone(), sut);
 

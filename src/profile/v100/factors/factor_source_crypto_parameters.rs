@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-decl_ordered_map!(
+decl_identified_vec_of!(
     /// A collection of [`SLIP10Curve`]s that a factor source supports.
     /// MUST never be empty.
     SupportedCurves,
@@ -144,7 +144,7 @@ mod tests {
     }
 
     #[test]
-    fn manual_perform_uniffi_if_factor_sources_empty() {
+    fn manual_uniffi_conversion_fails_if_supported_curves_empty() {
         // This is some advanced techniques...
         let mut bad_value_from_ffi_vec = Vec::new();
         bad_value_from_ffi_vec.put_i32(0); // empty, not allowed

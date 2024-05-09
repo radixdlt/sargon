@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-macro_rules! decl_ordered_map {
+macro_rules! decl_identified_vec_of {
     (
         $(
             #[doc = $expr: expr]
@@ -14,7 +14,7 @@ macro_rules! decl_ordered_map {
             )*
 			pub type $collection_type = IdentifiedVecOf<$element_type>;
 
-			#[uniffi::export]
+            #[uniffi::export]
             pub fn [< new_ $collection_type:snake _sample >]() -> $collection_type {
                 $collection_type::sample()
             }
@@ -81,7 +81,7 @@ macro_rules! decl_ordered_map {
         $element_type: ident
     ) => {
 		paste! {
-			decl_ordered_map!(
+			decl_identified_vec_of!(
 				$(
                     #[doc = $expr]
                 )*
@@ -92,4 +92,4 @@ macro_rules! decl_ordered_map {
 	};
 }
 
-pub(crate) use decl_ordered_map;
+pub(crate) use decl_identified_vec_of;

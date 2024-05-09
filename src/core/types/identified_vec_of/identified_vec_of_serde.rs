@@ -2,6 +2,8 @@ use std::any::TypeId;
 
 use crate::prelude::*;
 
+use super::{export_identified_vec_of, import_identified_vec_of_from};
+
 impl<V: Debug + PartialEq + Eq + Clone + Identifiable + 'static> Serialize
     for IdentifiedVecOf<V>
 where
@@ -12,20 +14,9 @@ where
     where
         S: Serializer,
     {
-        if TypeId::of::<V>() == TypeId::of::<FactorSource>()
-            && self.0.is_empty()
-        {
-            return Err(serde::ser::Error::custom(
-                CommonError::FactorSourcesMustNotBeEmpty,
-            ));
-        }
-        if TypeId::of::<V>() == TypeId::of::<SLIP10Curve>() && self.0.is_empty()
-        {
-            return Err(serde::ser::Error::custom(
-                CommonError::SupportedCurvesMustNotBeEmpty,
-            ));
-        }
-        serializer.collect_seq(self)
+        export_identified_vec_of(self)
+            .map_err(serde::ser::Error::custom)
+            .and_then(|v| serializer.collect_seq(v))
     }
 }
 
@@ -39,25 +30,7 @@ where
         deserializer: D,
     ) -> Result<Self, D::Error> {
         let items = Vec::<V>::deserialize(deserializer)?;
-        let mut map = Self::new();
-        for item in items {
-            map.try_insert_unique(item).map_err(de::Error::custom)?;
-        }
-
-        if TypeId::of::<V>() == TypeId::of::<FactorSource>() && map.0.is_empty()
-        {
-            return Err(de::Error::custom(
-                CommonError::FactorSourcesMustNotBeEmpty,
-            ));
-        }
-        if TypeId::of::<V>() == TypeId::of::<SLIP10Curve>() && map.0.is_empty()
-        {
-            return Err(de::Error::custom(
-                CommonError::SupportedCurvesMustNotBeEmpty,
-            ));
-        }
-
-        Ok(map)
+        import_identified_vec_of_from(items).map_err(de::Error::custom)
     }
 }
 

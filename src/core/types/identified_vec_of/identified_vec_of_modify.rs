@@ -51,6 +51,7 @@ impl<V: Debug + PartialEq + Eq + Clone + Identifiable> IdentifiedVecOf<V> {
     ///   `IdentifiedVecOf`.
     /// - Complexity: The operation is expected to perform O(1) copy, hash, and compare operations on
     ///   the `ID` type, if it implements high-quality hashing.
+    #[cfg(not(tarpaulin_include))] // false negative
     pub fn append(&mut self, item: V) -> (bool, usize) {
         if let Some(existing) = self.0.get_full(&item.id()) {
             return (false, existing.0);
@@ -75,6 +76,7 @@ impl<V: Debug + PartialEq + Eq + Clone + Identifiable> IdentifiedVecOf<V> {
     /// Returns `false` if no element of `id` was found, otherwise if found, this
     /// existing element gets updated by `mutate` closure and this function returns
     /// `true`.
+    #[cfg(not(tarpaulin_include))] // false negative
     #[inline]
     pub fn update_with<F>(&mut self, id: &V::ID, mut mutate: F) -> bool
     where
@@ -90,6 +92,7 @@ impl<V: Debug + PartialEq + Eq + Clone + Identifiable> IdentifiedVecOf<V> {
     /// Tries to mutate the value identified by `id`, if no such value exists
     /// an error is returned, the mutation is failable, if your return an `Err`
     /// in `mutate`, this method propagates that error.
+    #[cfg(not(tarpaulin_include))] // false negative
     #[inline]
     pub fn try_try_update_with<F>(
         &mut self,
@@ -111,6 +114,7 @@ impl<V: Debug + PartialEq + Eq + Clone + Identifiable> IdentifiedVecOf<V> {
     /// Tries to mutate the value identified by `id`, if no such value exists
     /// an error is returned, the mutation is failable, if your return an `Err`
     /// in `mutate`, this method propagates that error.
+    #[cfg(not(tarpaulin_include))] // false negative
     #[inline]
     pub fn try_update_with<F>(
         &mut self,

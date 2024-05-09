@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-decl_ordered_map!(
+decl_identified_vec_of!(
     /// An ordered set of [`Account`]s on a specific network, most commonly
     /// the set is non-empty, since wallets guide user to create a first
     /// Account.
@@ -311,6 +311,6 @@ mod test_uniffi_tests {
             assert_eq!(from_ffi, sut);
         };
 
-        test(SUT::new()); // test can be empty (`FactorSources` cannot be empty, enforced by our `try_lift` impl of `IdentifiedVecOf`, so this test cannot be put in macro declaring the `decl_ordered_map` macro)
+        test(SUT::new()); // test can be empty (`FactorSources` cannot be empty, enforced by our `try_lift` impl of `IdentifiedVecOf`, so this test cannot be put in macro declaring the `decl_identified_vec_of` macro)
     }
 }

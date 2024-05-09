@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-decl_ordered_map!(
+decl_identified_vec_of!(
     /// Collection of clients user have connected P2P with, typically these
     /// are WebRTC connections with DApps, but might be Android or iPhone
     /// clients as well.

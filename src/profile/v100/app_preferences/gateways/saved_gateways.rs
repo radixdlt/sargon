@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-decl_ordered_map!(
+decl_identified_vec_of!(
     /// An ordered collection of unique [`Gateway`]s.
     /// It might be Gateways with different URLs on the SAME network, or
     /// other networks, the identifier of a Gateway is the URL.
