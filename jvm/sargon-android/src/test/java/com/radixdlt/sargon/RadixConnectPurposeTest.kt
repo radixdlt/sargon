@@ -10,7 +10,7 @@ class RadixConnectPurposeTest {
     fun testStringRoundtrip() {
         assertEquals(
             RadixConnectPurpose.GENERAL,
-            RadixConnectPurpose.init(RadixConnectPurpose.GENERAL.string)
+            RadixConnectPurpose.init("general")
         )
     }
 }
