@@ -70,19 +70,11 @@ pub fn new_ed25519_public_key_sample_other() -> Ed25519PublicKey {
 }
 
 #[uniffi::export]
-pub fn android_notary_key_get_public_key_from_private_key_bytes(
-    private_key_bytes: Entropy32Bytes,
+pub fn android_secret_key_get_public_key_from_private_key_bytes(
+    private_key_bytes: Exactly32Bytes,
 ) -> Result<Ed25519PublicKey> {
-    let mut private_key_bytes = private_key_bytes;
-
-    let private_key =
-        Ed25519PrivateKey::from_bytes(private_key_bytes.to_bytes())?;
-    let public_key = private_key.public_key();
-
-    private_key_bytes.zeroize();
-    // private_key.zeroize() // FIXME: Zeroize once RET has added Zeroize to PrivateKeys
-
-    Ok(public_key)
+    Ed25519PrivateKey::try_from(private_key_bytes.as_ref())
+        .map(|k| k.public_key())
 }
 
 /// Encodes the `Ed25519PublicKey` to a hexadecimal string, lowercased, without any `0x` prefix, e.g.
@@ -410,15 +402,15 @@ mod uniffi_tests {
     }
 
     #[test]
-    fn test_android_notary_key_get_public_key_from_private_key_bytes() {
-        let entropy = Entropy32Bytes::sample();
+    fn test_android_secret_key_get_public_key_from_private_key_bytes() {
+        let entropy = Exactly32Bytes::sample();
 
         let sut =
-            android_notary_key_get_public_key_from_private_key_bytes(entropy)
+            android_secret_key_get_public_key_from_private_key_bytes(entropy)
                 .unwrap();
 
         assert_eq!(
-            "248acbdbaf9e050196de704bea2d68770e519150d103b587dae2d9cad53dd930",
+            "3b321b74bdcb169f7260c60592bbb63d9b4d629424a0c58aff4640a75f0a2b06",
             sut.to_hex()
         )
     }
