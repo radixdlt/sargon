@@ -27,7 +27,7 @@ impl EntityFlags {
     }
 
     pub fn remove_flag(&mut self, flag: &EntityFlag) -> Option<EntityFlag> {
-        self.remove(flag)
+        self.remove_id(&flag.id())
     }
 }
 
@@ -55,13 +55,13 @@ mod tests {
 
     #[test]
     fn default_does_not_contain_deleted_by_user() {
-        assert!(!SUT::default().contains(&EntityFlag::DeletedByUser));
+        assert!(!SUT::default().contains_by_id(&EntityFlag::DeletedByUser));
     }
 
     #[test]
     fn new_with_f_contains_f() {
         assert!(SUT::just(EntityFlag::DeletedByUser)
-            .contains(&EntityFlag::DeletedByUser));
+            .contains_by_id(&EntityFlag::DeletedByUser));
     }
 
     #[test]
@@ -96,7 +96,7 @@ mod tests {
     fn new_empty_insert_f_contains_f() {
         let mut sut = SUT::default();
         sut.insert_flag(EntityFlag::DeletedByUser);
-        assert!(sut.contains(&EntityFlag::DeletedByUser));
+        assert!(sut.contains_by_id(&EntityFlag::DeletedByUser));
     }
 
     #[test]

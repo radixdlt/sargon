@@ -9,7 +9,7 @@ decl_ordered_map!(
 
 impl ProfileNetworks {
     pub fn get_account(&self, address: &AccountAddress) -> Option<Account> {
-        self.get(&address.network_id())
+        self.get_id(&address.network_id())
             .and_then(|n| n.accounts.get_id(address))
             .cloned()
     }
@@ -105,7 +105,7 @@ mod tests {
         );
 
         assert_eq!(
-            sut.get(&NetworkID::Mainnet).unwrap().accounts.items(),
+            sut.get_id(&NetworkID::Mainnet).unwrap().accounts.items(),
             [
                 Account::sample_mainnet_alice(),
                 Account::sample_mainnet_bob()
@@ -119,10 +119,10 @@ mod tests {
         let id = &NetworkID::Mainnet;
         let account_address = Account::sample().address;
         assert_eq!(
-            sut.get(id)
+            sut.get_id(id)
                 .unwrap()
                 .accounts
-                .get(&account_address)
+                .get_id(&account_address)
                 .unwrap()
                 .display_name
                 .value,
@@ -134,10 +134,10 @@ mod tests {
         });
 
         assert_eq!(
-            sut.get(id)
+            sut.get_id(id)
                 .unwrap()
                 .accounts
-                .get(&account_address)
+                .get_id(&account_address)
                 .unwrap()
                 .display_name
                 .value,
@@ -150,7 +150,10 @@ mod tests {
         let mut sut = ProfileNetworks::sample();
         let id = &NetworkID::Mainnet;
         let account_address = Account::sample_nebunet().address;
-        assert_eq!(sut.get(id).unwrap().accounts.get(&account_address), None);
+        assert_eq!(
+            sut.get_id(id).unwrap().accounts.get_id(&account_address),
+            None
+        );
 
         assert!(sut
             .update_account(&account_address, |a| {
@@ -167,7 +170,10 @@ mod tests {
         let mut sut = ProfileNetworks::sample();
         let id = &NetworkID::Mainnet;
         let account_address = Account::sample_mainnet_carol().address;
-        assert_eq!(sut.get(id).unwrap().accounts.get(&account_address), None);
+        assert_eq!(
+            sut.get_id(id).unwrap().accounts.get_id(&account_address),
+            None
+        );
 
         assert!(sut
             .update_account(&account_address, |a| {

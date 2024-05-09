@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 /// Flags which describe a certain state a FactorSource might be in, e.g. `Main` (BDFS).
-pub type FactorSourceFlags = OrderedMap<FactorSourceFlag>;
+pub type FactorSourceFlags = IdentifiedVecOf<FactorSourceFlag>;
 impl Identifiable for FactorSourceFlag {
     type ID = Self;
 
@@ -98,7 +98,8 @@ impl FactorSourceCommon {
 
     /// Checks if its Main Babylon Device Factor Source (BDFS).
     pub fn is_main_bdfs(&self) -> bool {
-        self.supports_babylon() && self.flags.contains(&FactorSourceFlag::Main)
+        self.supports_babylon()
+            && self.flags.contains_by_id(&FactorSourceFlag::Main)
     }
 }
 
@@ -228,7 +229,7 @@ mod tests {
     fn main_flag_present_if_main() {
         assert!(FactorSourceCommon::new_bdfs(true)
             .flags
-            .contains(&FactorSourceFlag::Main));
+            .contains_by_id(&FactorSourceFlag::Main));
     }
 
     #[test]

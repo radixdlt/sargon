@@ -29,7 +29,8 @@ pub struct FactorSourceCryptoParameters {
     /// FactorSource does not support HD derivation.
     ///
     /// Either BIP44 or CAP26 (SLIP10)
-    pub supported_derivation_path_schemes: OrderedMap<DerivationPathScheme>,
+    pub supported_derivation_path_schemes:
+        IdentifiedVecOf<DerivationPathScheme>,
 }
 
 impl FactorSourceCryptoParameters {
@@ -43,7 +44,8 @@ impl FactorSourceCryptoParameters {
         if supported_curves.is_empty() {
             return Err(CommonError::FactorSourceCryptoParametersSupportedCurvesInvalidSize);
         }
-        let supported_derivation_path_schemes = OrderedMap::from_iter(schemes);
+        let supported_derivation_path_schemes =
+            IdentifiedVecOf::from_iter(schemes);
 
         Ok(Self {
             supported_curves,
@@ -76,17 +78,19 @@ impl FactorSourceCryptoParameters {
     }
 
     pub fn supports_olympia(&self) -> bool {
-        self.supported_curves.contains(&SLIP10Curve::Secp256k1)
+        self.supported_curves
+            .contains_by_id(&SLIP10Curve::Secp256k1)
             && self
                 .supported_derivation_path_schemes
-                .contains(&DerivationPathScheme::Bip44Olympia)
+                .contains_by_id(&DerivationPathScheme::Bip44Olympia)
     }
 
     pub fn supports_babylon(&self) -> bool {
-        self.supported_curves.contains(&SLIP10Curve::Curve25519)
+        self.supported_curves
+            .contains_by_id(&SLIP10Curve::Curve25519)
             && self
                 .supported_derivation_path_schemes
-                .contains(&DerivationPathScheme::Cap26)
+                .contains_by_id(&DerivationPathScheme::Cap26)
     }
 }
 
@@ -145,9 +149,10 @@ mod tests {
         let mut bad_value_from_ffi_vec = Vec::new();
         bad_value_from_ffi_vec.put_i32(0); // empty, not allowed
         let bad_value_from_ffi = RustBuffer::from_vec(bad_value_from_ffi_vec);
-        let res = <OrderedMap<SLIP10Curve> as Lift<crate::UniFfiTag>>::try_lift(
-            bad_value_from_ffi,
-        );
+        let res =
+            <IdentifiedVecOf<SLIP10Curve> as Lift<crate::UniFfiTag>>::try_lift(
+                bad_value_from_ffi,
+            );
         assert!(res.is_err());
     }
 
@@ -222,42 +227,42 @@ mod tests {
     fn babylon_does_not_support_secp256k1() {
         assert!(!SUT::babylon()
             .supported_curves
-            .contains(&SLIP10Curve::Secp256k1));
+            .contains_by_id(&SLIP10Curve::Secp256k1));
     }
 
     #[test]
     fn babylon_does_not_support_bip44() {
         assert!(!SUT::babylon()
             .supported_derivation_path_schemes
-            .contains(&DerivationPathScheme::Bip44Olympia));
+            .contains_by_id(&DerivationPathScheme::Bip44Olympia));
     }
 
     #[test]
     fn olympia_does_not_support_curve25519() {
         assert!(!SUT::olympia()
             .supported_curves
-            .contains(&SLIP10Curve::Curve25519));
+            .contains_by_id(&SLIP10Curve::Curve25519));
     }
 
     #[test]
     fn olympia_does_not_support_cap26() {
         assert!(!SUT::olympia()
             .supported_derivation_path_schemes
-            .contains(&DerivationPathScheme::Cap26));
+            .contains_by_id(&DerivationPathScheme::Cap26));
     }
 
     #[test]
     fn babylon_olympia_compat_has_supports_curve25519() {
         assert!(SUT::babylon_olympia_compatible()
             .supported_curves
-            .contains(&SLIP10Curve::Curve25519));
+            .contains_by_id(&SLIP10Curve::Curve25519));
     }
 
     #[test]
     fn babylon_olympia_compat_supports_cap26() {
         assert!(SUT::babylon_olympia_compatible()
             .supported_derivation_path_schemes
-            .contains(&DerivationPathScheme::Cap26));
+            .contains_by_id(&DerivationPathScheme::Cap26));
     }
 
     #[test]

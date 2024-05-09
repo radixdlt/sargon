@@ -66,7 +66,7 @@ impl<'de> Deserialize<'de> for SavedGateways {
         struct Wrapper {
             #[serde(rename = "current")]
             url: Url,
-            saved: OrderedMap<Gateway>,
+            saved: IdentifiedVecOf<Gateway>,
         }
         let wrapped = Wrapper::deserialize(deserializer)?;
         let current = wrapped
@@ -81,7 +81,7 @@ impl<'de> Deserialize<'de> for SavedGateways {
 
         let mut other = wrapped.saved.clone();
 
-        other.remove(&current);
+        other.remove_id(&current.id());
 
         SavedGateways::new_with_other(current, other.items())
             .map_err(de::Error::custom)
@@ -101,7 +101,7 @@ impl SavedGateways {
         I: IntoIterator<Item = Gateway>,
     {
         let other = Gateways::from_iter(other);
-        if other.contains(&current) {
+        if other.contains_by_id(&current) {
             return Err(
                 CommonError::GatewaysDiscrepancyOtherShouldNotContainCurrent,
             );
@@ -136,11 +136,7 @@ impl SavedGateways {
     ///
     /// - Returns: `true` if it was added, `false` if it was already present (noop)
     pub fn append(&mut self, gateway: Gateway) -> bool {
-        if self.other.contains(&gateway) {
-            return false;
-        }
-        self.other.append(gateway);
-        true
+        self.other.append(gateway).0
     }
 }
 
@@ -198,6 +194,15 @@ mod tests {
         assert_eq!(sut.current.network.id, NetworkID::Mainnet);
         assert_eq!(sut.change_current(Gateway::stokenet()), Ok(true));
         assert_eq!(sut.current.network.id, NetworkID::Stokenet);
+    }
+
+    #[test]
+    fn append() {
+        let mut sut = SUT::sample();
+        assert!(!sut.append(Gateway::mainnet()));
+        assert_eq!(sut, SUT::sample());
+        assert!(sut.append(Gateway::kisharnet()));
+        assert_ne!(sut, SUT::sample());
     }
 
     #[test]

@@ -38,7 +38,7 @@ impl ThirdPartyDepositsDelta {
                     !to.assets_exception_list
                         .clone()
                         .unwrap_or_default()
-                        .contains(x)
+                        .contains_by_id(x)
                 })
                 .map(ScryptoManifestValue::from)
                 .collect(),

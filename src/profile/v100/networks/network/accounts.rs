@@ -311,6 +311,6 @@ mod test_uniffi_tests {
             assert_eq!(from_ffi, sut);
         };
 
-        test(SUT::new()); // test can be empty (`FactorSources` cannot be empty, enforced by our `try_lift` impl of `OrderedMap`, so this test cannot be put in macro declaring the `decl_ordered_map` macro)
+        test(SUT::new()); // test can be empty (`FactorSources` cannot be empty, enforced by our `try_lift` impl of `IdentifiedVecOf`, so this test cannot be put in macro declaring the `decl_ordered_map` macro)
     }
 }

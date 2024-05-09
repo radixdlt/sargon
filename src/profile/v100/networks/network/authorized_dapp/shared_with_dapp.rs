@@ -37,7 +37,7 @@ macro_rules! declare_shared_with_dapp {
 
             /// The by user shared IDs of data identifiable data shared with the
             /// Dapp.
-            pub ids: OrderedMap<$id>,
+            pub ids: IdentifiedVecOf<$id>,
         }
 
         impl $struct_name {
@@ -50,7 +50,7 @@ macro_rules! declare_shared_with_dapp {
                 request: RequestedQuantity,
                 ids: impl IntoIterator<Item = $id>,
             ) -> Self {
-                let ids = OrderedMap::from_iter(ids.into_iter());
+                let ids = IdentifiedVecOf::from_iter(ids.into_iter());
                 let len = ids.len();
                 assert!(
                     request.is_fulfilled_by_ids(len),

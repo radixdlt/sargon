@@ -239,7 +239,7 @@ mod tests {
     fn not_allowed_to_create_profile_with_empty_factor_source() {
         let _ = SUT::with(
             Header::sample(),
-            OrderedMap::new(),
+            IdentifiedVecOf::new(),
             AppPreferences::sample(),
             ProfileNetworks::sample(),
         );
@@ -301,7 +301,7 @@ mod tests {
 
         assert_eq!(
             sut.factor_sources
-                .get(id)
+                .get_id(id)
                 .unwrap()
                 .as_device()
                 .unwrap()
@@ -331,7 +331,7 @@ mod tests {
 
         assert_eq!(
             sut.factor_sources
-                .get(id)
+                .get_id(id)
                 .unwrap()
                 .as_device()
                 .unwrap()
@@ -355,7 +355,7 @@ mod tests {
 
         assert_eq!(
             sut.factor_sources
-                .get(id)
+                .get_id(id)
                 .unwrap()
                 .as_device()
                 .unwrap()
@@ -384,7 +384,7 @@ mod tests {
         // Remains unchanged
         assert_eq!(
             sut.factor_sources
-                .get(id)
+                .get_id(id)
                 .unwrap()
                 .as_device()
                 .unwrap()
@@ -423,7 +423,7 @@ mod tests {
         let mut sut = SUT::sample();
         let account = sut
             .networks
-            .get(&NetworkID::Mainnet)
+            .get_id(&NetworkID::Mainnet)
             .unwrap()
             .accounts
             .get_at_index(0)
@@ -438,7 +438,7 @@ mod tests {
 
         assert_eq!(
             sut.networks
-                .get(&NetworkID::Mainnet)
+                .get_id(&NetworkID::Mainnet)
                 .unwrap()
                 .accounts
                 .get_at_index(0)

@@ -12,7 +12,7 @@ macro_rules! decl_ordered_map {
             $(
                 #[doc = $expr]
             )*
-			pub type $collection_type = OrderedMap<$element_type>;
+			pub type $collection_type = IdentifiedVecOf<$element_type>;
 
 			#[uniffi::export]
             pub fn [< new_ $collection_type:snake _sample >]() -> $collection_type {

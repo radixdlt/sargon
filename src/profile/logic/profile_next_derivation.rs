@@ -11,7 +11,7 @@ impl Profile {
     {
         let id = id.into();
         self.factor_sources
-            .get(&id)
+            .get_id(&id)
             .ok_or(CommonError::ProfileDoesNotContainFactorSourceWithID {
                 bad_value: id.clone(),
             })
@@ -74,7 +74,7 @@ impl Profile {
         };
         let index = self
             .networks
-            .get(&network_id)
+            .get_id(&network_id)
             .map(|n| {
                 n.accounts
                     .items()
@@ -140,7 +140,7 @@ impl Profile {
             .factor_sources
             .iter()
             .filter_map(|f| f.as_device().cloned())
-            .filter(|df| df.common.flags.contains(&FactorSourceFlag::Main))
+            .filter(|df| df.common.flags.contains_id(&FactorSourceFlag::Main))
             .map(|f| f.factor_source_id())
             .collect_vec();
 
@@ -151,7 +151,7 @@ impl Profile {
                     .unwrap()
                     .common
                     .flags
-                    .remove(&FactorSourceFlag::Main)
+                    .remove_id(&FactorSourceFlag::Main)
             })
         });
 

@@ -107,7 +107,7 @@ impl ThirdPartyDeposits {
         exception: &AssetException,
     ) -> bool {
         if let Some(mut list) = self.assets_exception_list.clone() {
-            let was_present = list.remove(exception).is_some();
+            let was_present = list.remove_id(&exception.id()).is_some();
             self.assets_exception_list = Some(list);
             was_present
         } else {
@@ -142,7 +142,7 @@ impl ThirdPartyDeposits {
         depositor: &ResourceOrNonFungible,
     ) -> bool {
         if let Some(mut list) = self.depositors_allow_list.clone() {
-            let was_present = list.remove(depositor).is_some();
+            let was_present = list.remove_id(&depositor.id()).is_some();
             self.depositors_allow_list = Some(list);
             was_present
         } else {
@@ -322,7 +322,7 @@ mod tests {
         assert!(sut
             .assets_exception_list
             .unwrap()
-            .contains(&AssetException::sample()));
+            .contains_by_id(&AssetException::sample()));
     }
 
     #[test]
@@ -336,7 +336,7 @@ mod tests {
         assert!(sut
             .depositors_allow_list
             .unwrap()
-            .contains(&ResourceOrNonFungible::sample()));
+            .contains_by_id(&ResourceOrNonFungible::sample()));
     }
 
     #[test]

@@ -96,7 +96,7 @@ impl Wallet {
 
         let number_of_accounts_on_network = profile
             .networks
-            .get(&network_id)
+            .get_id(&network_id)
             .map(|n| n.accounts.len())
             .unwrap_or(0);
 

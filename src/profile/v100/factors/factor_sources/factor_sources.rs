@@ -71,7 +71,7 @@ mod tests {
         bad_value_from_ffi_vec.put_i32(0); // empty, not allowed
         let bad_value_from_ffi = RustBuffer::from_vec(bad_value_from_ffi_vec);
         let res =
-            <OrderedMap<FactorSource> as Lift<crate::UniFfiTag>>::try_lift(
+            <IdentifiedVecOf<FactorSource> as Lift<crate::UniFfiTag>>::try_lift(
                 bad_value_from_ffi,
             );
         assert!(res.is_err());
