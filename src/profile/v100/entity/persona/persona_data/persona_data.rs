@@ -103,7 +103,6 @@ impl PersonaData {
         let phones = self
             .phone_numbers
             .iter()
-            .cloned()
             .map(|v| {
                 if include_id {
                     v.dbg_string()
@@ -117,7 +116,6 @@ impl PersonaData {
         let emails = self
             .email_addresses
             .iter()
-            .cloned()
             .map(|v| {
                 if include_id {
                     v.dbg_string()

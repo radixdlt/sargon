@@ -11,7 +11,7 @@ impl Profile {
     {
         let id = id.into();
         self.factor_sources
-            .get(&id)
+            .get_id(&id)
             .ok_or(CommonError::ProfileDoesNotContainFactorSourceWithID {
                 bad_value: id.clone(),
             })
@@ -36,7 +36,6 @@ impl Profile {
         let device_factor_source = self
             .factor_sources
             .iter()
-            .cloned()
             .filter_map(|f| f.as_device().cloned())
             .collect_vec();
 
@@ -75,7 +74,7 @@ impl Profile {
         };
         let index = self
             .networks
-            .get(&network_id)
+            .get_id(&network_id)
             .map(|n| {
                 n.accounts
                     .items()
@@ -114,7 +113,7 @@ impl Profile {
         header.content_hint = networks.content_hint();
         Self::with(
             header,
-            FactorSources::from_iter([FactorSource::sample_ledger()]).unwrap(),
+            FactorSources::from_iter([FactorSource::sample_ledger()]),
             AppPreferences::sample(),
             networks,
         )
@@ -128,8 +127,7 @@ impl Profile {
             header,
             FactorSources::from_iter([
                 DeviceFactorSource::sample_olympia().into()
-            ])
-            .unwrap(),
+            ]),
             AppPreferences::sample(),
             networks,
         )
@@ -142,7 +140,7 @@ impl Profile {
             .factor_sources
             .iter()
             .filter_map(|f| f.as_device().cloned())
-            .filter(|df| df.common.flags.contains(&FactorSourceFlag::Main))
+            .filter(|df| df.common.flags.contains_id(&FactorSourceFlag::Main))
             .map(|f| f.factor_source_id())
             .collect_vec();
 
@@ -153,7 +151,7 @@ impl Profile {
                     .unwrap()
                     .common
                     .flags
-                    .remove(&FactorSourceFlag::Main)
+                    .remove_id(&FactorSourceFlag::Main)
             })
         });
 

@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-decl_never_empty_identified_array_of!(
+decl_identified_vec_of!(
     /// A collection of [`SLIP10Curve`]s that a factor source supports.
     /// MUST never be empty.
     SupportedCurves,
@@ -30,7 +30,7 @@ pub struct FactorSourceCryptoParameters {
     ///
     /// Either BIP44 or CAP26 (SLIP10)
     pub supported_derivation_path_schemes:
-        IdentifiedVecVia<DerivationPathScheme>,
+        IdentifiedVecOf<DerivationPathScheme>,
 }
 
 impl FactorSourceCryptoParameters {
@@ -40,9 +40,12 @@ impl FactorSourceCryptoParameters {
         I: IntoIterator<Item = SLIP10Curve>,
         J: IntoIterator<Item = DerivationPathScheme>,
     {
-        let supported_curves = SupportedCurves::from_iter(curves).map_err(|_| CommonError::FactorSourceCryptoParametersSupportedCurvesInvalidSize)?;
+        let supported_curves = SupportedCurves::from_iter(curves);
+        if supported_curves.is_empty() {
+            return Err(CommonError::FactorSourceCryptoParametersSupportedCurvesInvalidSize);
+        }
         let supported_derivation_path_schemes =
-            IdentifiedVecVia::from_iter(schemes);
+            IdentifiedVecOf::from_iter(schemes);
 
         Ok(Self {
             supported_curves,
@@ -75,17 +78,19 @@ impl FactorSourceCryptoParameters {
     }
 
     pub fn supports_olympia(&self) -> bool {
-        self.supported_curves.contains(&SLIP10Curve::Secp256k1)
+        self.supported_curves
+            .contains_by_id(&SLIP10Curve::Secp256k1)
             && self
                 .supported_derivation_path_schemes
-                .contains(&DerivationPathScheme::Bip44Olympia)
+                .contains_by_id(&DerivationPathScheme::Bip44Olympia)
     }
 
     pub fn supports_babylon(&self) -> bool {
-        self.supported_curves.contains(&SLIP10Curve::Curve25519)
+        self.supported_curves
+            .contains_by_id(&SLIP10Curve::Curve25519)
             && self
                 .supported_derivation_path_schemes
-                .contains(&DerivationPathScheme::Cap26)
+                .contains_by_id(&DerivationPathScheme::Cap26)
     }
 }
 
@@ -115,14 +120,16 @@ impl HasSampleValues for SupportedCurves {
             SLIP10Curve::Curve25519,
             SLIP10Curve::Secp256k1,
         ])
-        .unwrap()
     }
 }
-
 #[cfg(test)]
 mod tests {
-
     use super::*;
+    use uniffi::{
+        check_remaining,
+        deps::bytes::{Buf, BufMut},
+        metadata, Lift, Lower, LowerReturn, MetadataBuffer, RustBuffer,
+    };
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = FactorSourceCryptoParameters;
@@ -134,6 +141,19 @@ mod tests {
             SupportedCurves::sample_other(),
             SupportedCurves::sample_other()
         );
+    }
+
+    #[test]
+    fn manual_uniffi_conversion_fails_if_supported_curves_empty() {
+        // This is some advanced techniques...
+        let mut bad_value_from_ffi_vec = Vec::new();
+        bad_value_from_ffi_vec.put_i32(0); // empty, not allowed
+        let bad_value_from_ffi = RustBuffer::from_vec(bad_value_from_ffi_vec);
+        let res =
+            <IdentifiedVecOf<SLIP10Curve> as Lift<crate::UniFfiTag>>::try_lift(
+                bad_value_from_ffi,
+            );
+        assert!(res.is_err());
     }
 
     #[test]
@@ -159,7 +179,7 @@ mod tests {
                 .supported_derivation_path_schemes
                 .first()
                 .unwrap(),
-            DerivationPathScheme::Cap26
+            &DerivationPathScheme::Cap26
         );
     }
 
@@ -170,7 +190,7 @@ mod tests {
                 .supported_curves
                 .first()
                 .unwrap(),
-            SLIP10Curve::Curve25519
+            &SLIP10Curve::Curve25519
         );
     }
 
@@ -199,7 +219,7 @@ mod tests {
                 .supported_derivation_path_schemes
                 .first()
                 .unwrap(),
-            DerivationPathScheme::Cap26
+            &DerivationPathScheme::Cap26
         );
     }
 
@@ -207,50 +227,62 @@ mod tests {
     fn babylon_does_not_support_secp256k1() {
         assert!(!SUT::babylon()
             .supported_curves
-            .contains(&SLIP10Curve::Secp256k1));
+            .contains_by_id(&SLIP10Curve::Secp256k1));
     }
 
     #[test]
     fn babylon_does_not_support_bip44() {
         assert!(!SUT::babylon()
             .supported_derivation_path_schemes
-            .contains(&DerivationPathScheme::Bip44Olympia));
+            .contains_by_id(&DerivationPathScheme::Bip44Olympia));
     }
 
     #[test]
     fn olympia_does_not_support_curve25519() {
         assert!(!SUT::olympia()
             .supported_curves
-            .contains(&SLIP10Curve::Curve25519));
+            .contains_by_id(&SLIP10Curve::Curve25519));
     }
 
     #[test]
     fn olympia_does_not_support_cap26() {
         assert!(!SUT::olympia()
             .supported_derivation_path_schemes
-            .contains(&DerivationPathScheme::Cap26));
+            .contains_by_id(&DerivationPathScheme::Cap26));
     }
 
     #[test]
     fn babylon_olympia_compat_has_supports_curve25519() {
         assert!(SUT::babylon_olympia_compatible()
             .supported_curves
-            .contains(&SLIP10Curve::Curve25519));
+            .contains_by_id(&SLIP10Curve::Curve25519));
     }
 
     #[test]
     fn babylon_olympia_compat_supports_cap26() {
         assert!(SUT::babylon_olympia_compatible()
             .supported_derivation_path_schemes
-            .contains(&DerivationPathScheme::Cap26));
+            .contains_by_id(&DerivationPathScheme::Cap26));
     }
 
     #[test]
-    fn curves_must_not_be_empty() {
-        assert_eq!(
-            SUT::new([], []),
-            Err(CommonError::FactorSourceCryptoParametersSupportedCurvesInvalidSize)
-        );
+    fn json_serialize_supported_curves_empty_is_err() {
+        assert!(serde_json::to_value(SupportedCurves::new()).is_err());
+    }
+
+    #[test]
+    fn json_serialize_parameters_with_empty_curves_empty_is_err() {
+        let mut sut = SUT::sample();
+        sut.supported_curves = SupportedCurves::new();
+        assert!(serde_json::to_value(sut).is_err());
+    }
+
+    #[test]
+    fn json_deserialize_of_empty_supported_curves_is_err() {
+        assert!(serde_json::from_value::<SupportedCurves>(
+            serde_json::Value::Array(Vec::new())
+        )
+        .is_err());
     }
 
     #[test]

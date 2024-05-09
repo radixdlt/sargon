@@ -1,7 +1,6 @@
 package com.radixdlt.sargon.extensions
 
 import com.radixdlt.sargon.Gateway
-import com.radixdlt.sargon.Gateways
 import com.radixdlt.sargon.SavedGateways
 import com.radixdlt.sargon.newSavedGateways
 import com.radixdlt.sargon.newSavedGatewaysChangingCurrent

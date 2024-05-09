@@ -96,7 +96,7 @@ impl Wallet {
 
         let number_of_accounts_on_network = profile
             .networks
-            .get(&network_id)
+            .get_id(&network_id)
             .map(|n| n.accounts.len())
             .unwrap_or(0);
 
@@ -125,17 +125,14 @@ impl Wallet {
         self.try_update_profile_with(|mut p| {
             let networks = &mut p.networks;
             if networks.contains_id(&network_id) {
-                networks
-                    .try_update_with(&network_id, |network| {
-                        if (*network.accounts).append(account.clone()).0 {
-                            Ok(network.clone())
-                        } else {
-                            Err(err_exists.clone())
-                        }
-                    })
-                    .and_then(
-                        |r| if r { Ok(()) } else { Err(err_exists.clone()) },
-                    )
+                networks.try_try_update_with(&network_id, |network| {
+                    if network.accounts.append(account.clone()).0 {
+                        Ok(())
+                    } else {
+                        Err(err_exists.clone())
+                    }
+                })?;
+                Ok(())
             } else {
                 let network = ProfileNetwork::new(
                     network_id,

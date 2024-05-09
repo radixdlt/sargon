@@ -1,3 +1,5 @@
+use radix_engine::types::{IndexMap, IndexSet};
+
 use crate::prelude::*;
 
 /// This macro exists since UniFFI does not support generics currently, when/if

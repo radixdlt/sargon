@@ -1,3 +1,5 @@
+use radix_engine::types::IndexMap;
+
 use crate::prelude::*;
 
 /// Metadata about a newly created Resource

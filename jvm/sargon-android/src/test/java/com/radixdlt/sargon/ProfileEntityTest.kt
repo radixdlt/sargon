@@ -33,7 +33,7 @@ class ProfileEntityTest {
 
         assertEquals(
             Account.sampleMainnet().flags,
-            sut.flags
+            sut.flags.asList()
         )
     }
 
@@ -63,7 +63,7 @@ class ProfileEntityTest {
 
         assertEquals(
             Persona.sampleMainnet().flags,
-            sut.flags
+            sut.flags.asList()
         )
     }
 }

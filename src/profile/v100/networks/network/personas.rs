@@ -1,8 +1,7 @@
 use crate::prelude::*;
 
-decl_can_be_empty_identified_array_of!(
+decl_identified_vec_of!(
     /// An ordered set of [`Persona`]s on a specific network.
-    Personas,
     Persona
 );
 
@@ -82,7 +81,7 @@ mod tests {
         let persona = Persona::sample();
         let address = persona.address;
         let personas = Personas::just(persona.clone());
-        assert_eq!(personas.get_persona_by_id(&address), Some(&persona));
+        assert_eq!(personas.get_id(&address), Some(&persona));
     }
 
     #[test]

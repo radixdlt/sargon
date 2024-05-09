@@ -4,4 +4,13 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class AssetsExceptionListTests: CanBeEmptyCollectionTest<AssetsExceptionList> {}
+final class AssetsExceptionListTests: CollectionTest<AssetException> {
+
+	override class func sample() -> SUT {
+		SUT.sample
+	}
+	
+	override class func sampleOther() -> SUT {
+		SUT.sampleOther
+	}
+}
