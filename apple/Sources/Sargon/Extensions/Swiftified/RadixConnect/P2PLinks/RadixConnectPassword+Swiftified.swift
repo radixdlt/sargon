@@ -2,4 +2,4 @@ import Foundation
 import SargonUniFFI
 
 extension RadixConnectPassword: SargonModel {}
-extension RadixConnectPassword: SargonObjectCodable {}
+extension RadixConnectPassword: SargonStringCodable {}

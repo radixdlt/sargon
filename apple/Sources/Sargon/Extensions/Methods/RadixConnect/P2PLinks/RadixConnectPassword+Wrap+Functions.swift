@@ -2,11 +2,11 @@ import Foundation
 import SargonUniFFI
 
 extension RadixConnectPassword {
-    public init(jsonData: some DataProtocol) throws {
-        self = try newRadixConnectPasswordFromJsonBytes(jsonBytes: Data(jsonData))
+    public init(jsonStringLiteral: String) throws {
+        self = try newRadixConnectPasswordFromJsonString(jsonString: jsonStringLiteral)
     }
     
-    public func jsonData() -> Data {
-        radixConnectPasswordToJsonBytes(radixConnectPassword: self)
+    public func jsonStringLiteral() -> String {
+		radixConnectPasswordToJsonString(radixConnectPassword: self)
     }
 }
