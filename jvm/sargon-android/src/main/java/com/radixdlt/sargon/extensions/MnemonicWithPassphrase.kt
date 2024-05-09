@@ -1,6 +1,6 @@
 package com.radixdlt.sargon.extensions
 
-import com.radixdlt.sargon.BIP39Passphrase
+import com.radixdlt.sargon.Bip39Passphrase
 import com.radixdlt.sargon.CommonException
 import com.radixdlt.sargon.DerivationPath
 import com.radixdlt.sargon.Hash
@@ -21,7 +21,7 @@ import kotlinx.serialization.json.Json
 @Throws(SargonException::class)
 fun MnemonicWithPassphrase.Companion.init(phrase: String) = MnemonicWithPassphrase(
     mnemonic = Mnemonic.init(phrase = phrase),
-    passphrase = BIP39Passphrase()
+    passphrase = Bip39Passphrase()
 )
 
 @Throws(SargonException::class)
@@ -77,7 +77,7 @@ fun MnemonicWithPassphrase.sign(
 private data class AndroidMnemonicWithPassphrase(
     @SerialName("mnemonic")
     val phrase: String,
-    @SerialName("bip39Passphrase")
+    @SerialName("Bip39Passphrase")
     val passphrase: String
 ) {
 
