@@ -209,45 +209,17 @@ android.libraryVariants.all {
 
 tasks.register("cargoClean") {
     group = BasePlugin.BUILD_GROUP
-
-    fun command(command: String): String {
-        val out = ByteArrayOutputStream()
-        exec {
-            commandLine(command.split(" "))
-            standardOutput = out
-        }.assertNormalExitValue()
-        return String(out.toByteArray(), Charsets.UTF_8).trim()
-    }
-
     doLast {
-        val toml = File(projectDir.parentFile.parentFile, "Cargo.toml").readText()
-        val matchResult: MatchResult? = "version\\s*=\\s*\"(.+)\"".toRegex().find(toml)
-        val mavenVersion = if (matchResult != null) {
-            val (version) = matchResult.destructured
-
-            version
-        } else {
-            command("git tag --sort=committerdate").split("\n").last()
-        }.let { version ->
-            val commitHash = command("git rev-parse --short @")
-
-            if (commitHash.isNotBlank()) {
-                "$version-$commitHash"
-            } else {
-                version
-            }
+        exec {
+            workingDir = rootDir.parentFile
+            println("Cleaning for aarch64-linux-android")
+            commandLine("cargo", "clean", "--target", "aarch64-linux-android")
         }
-        println("=============> $mavenVersion")
-//        exec {
-//            workingDir = rootDir.parentFile
-//            println("Cleaning for aarch64-linux-android")
-//            commandLine("cargo", "clean", "--target", "aarch64-linux-android")
-//        }
-//        exec {
-//            workingDir = rootDir.parentFile
-//            println("Cleaning for armv7-linux-androideabi")
-//            commandLine("cargo", "clean", "--target", "armv7-linux-androideabi")
-//        }
+        exec {
+            workingDir = rootDir.parentFile
+            println("Cleaning for armv7-linux-androideabi")
+            commandLine("cargo", "clean", "--target", "armv7-linux-androideabi")
+        }
     }
 }
 
