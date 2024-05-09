@@ -1,5 +1,6 @@
 import org.gradle.configurationcache.extensions.capitalized
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.io.ByteArrayOutputStream
 
 plugins {
     alias(libs.plugins.android.library)
@@ -107,10 +108,36 @@ dependencies {
 
 publishing {
     publications {
+        fun command(command: String): String {
+            val out = ByteArrayOutputStream()
+            exec {
+                commandLine(command.split(" "))
+                standardOutput = out
+            }.assertNormalExitValue()
+            return String(out.toByteArray(), Charsets.UTF_8).trim()
+        }
+
         register<MavenPublication>("release") {
             groupId = "com.radixdlt.sargon"
             artifactId = "sargon-android"
-            version = System.getenv("SARGON_VERSION")
+
+            val toml = File(projectDir.parentFile.parentFile, "Cargo.toml").readText()
+            val matchResult: MatchResult? = "version\\s*=\\s*\"(.+)\"".toRegex().find(toml)
+            version = matchResult?.let {
+                val (version) = matchResult.destructured
+
+                version
+            } ?: run {
+                command("git tag --sort=committerdate").split("\n").last()
+            }.let { version ->
+                val commitHash = command("git rev-parse --short @")
+
+                if (commitHash.isNotBlank()) {
+                    "$version-$commitHash"
+                } else {
+                    version
+                }
+            }
 
             afterEvaluate {
                 from(components["release"])
@@ -182,17 +209,45 @@ android.libraryVariants.all {
 
 tasks.register("cargoClean") {
     group = BasePlugin.BUILD_GROUP
+
+    fun command(command: String): String {
+        val out = ByteArrayOutputStream()
+        exec {
+            commandLine(command.split(" "))
+            standardOutput = out
+        }.assertNormalExitValue()
+        return String(out.toByteArray(), Charsets.UTF_8).trim()
+    }
+
     doLast {
-        exec {
-            workingDir = rootDir.parentFile
-            println("Cleaning for aarch64-linux-android")
-            commandLine("cargo", "clean", "--target", "aarch64-linux-android")
+        val toml = File(projectDir.parentFile.parentFile, "Cargo.toml").readText()
+        val matchResult: MatchResult? = "version\\s*=\\s*\"(.+)\"".toRegex().find(toml)
+        val mavenVersion = if (matchResult != null) {
+            val (version) = matchResult.destructured
+
+            version
+        } else {
+            command("git tag --sort=committerdate").split("\n").last()
+        }.let { version ->
+            val commitHash = command("git rev-parse --short @")
+
+            if (commitHash.isNotBlank()) {
+                "$version-$commitHash"
+            } else {
+                version
+            }
         }
-        exec {
-            workingDir = rootDir.parentFile
-            println("Cleaning for armv7-linux-androideabi")
-            commandLine("cargo", "clean", "--target", "armv7-linux-androideabi")
-        }
+        println("=============> $mavenVersion")
+//        exec {
+//            workingDir = rootDir.parentFile
+//            println("Cleaning for aarch64-linux-android")
+//            commandLine("cargo", "clean", "--target", "aarch64-linux-android")
+//        }
+//        exec {
+//            workingDir = rootDir.parentFile
+//            println("Cleaning for armv7-linux-androideabi")
+//            commandLine("cargo", "clean", "--target", "armv7-linux-androideabi")
+//        }
     }
 }
 

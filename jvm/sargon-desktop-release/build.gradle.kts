@@ -1,4 +1,5 @@
 import com.radixdlt.cargo.desktop.BuildType
+import java.io.ByteArrayOutputStream
 
 plugins {
     id("java-library")
@@ -23,10 +24,37 @@ dependencies {
 
 publishing {
     publications {
+
+        fun command(command: String): String {
+            val out = ByteArrayOutputStream()
+            exec {
+                commandLine(command.split(" "))
+                standardOutput = out
+            }.assertNormalExitValue()
+            return String(out.toByteArray(), Charsets.UTF_8).trim()
+        }
+
         register<MavenPublication>("release") {
             groupId = "com.radixdlt.sargon"
             artifactId = "sargon-desktop-bins"
-            version = System.getenv("SARGON_VERSION")
+
+            val toml = File(projectDir.parentFile.parentFile, "Cargo.toml").readText()
+            val matchResult: MatchResult? = "version\\s*=\\s*\"(.+)\"".toRegex().find(toml)
+            version = matchResult?.let {
+                val (version) = matchResult.destructured
+
+                version
+            } ?: run {
+                command("git tag --sort=committerdate").split("\n").last()
+            }.let { version ->
+                val commitHash = command("git rev-parse --short @")
+
+                if (commitHash.isNotBlank()) {
+                    "$version-$commitHash"
+                } else {
+                    version
+                }
+            }
 
             from(components["java"])
         }
