@@ -16,7 +16,7 @@ public protocol SargonOSProtocol {
 		named accountName: DisplayName
 	) async throws -> Account
 	
-	func accounts(on network: NetworkID?) -> Accounts
+	func accounts(on network: NetworkID?) -> [Account]
 }
 
 // MARK: Forward calls to `os`
@@ -30,7 +30,7 @@ extension SargonOSProtocol {
 	
 	public func accounts(
 		on network: NetworkID? = nil
-	) -> Accounts {
+	) -> [Account] {
 		os.accounts(on: network)
 	}
 }
@@ -46,7 +46,7 @@ extension SargonOSProtocol {
 		profile.currentNetworkID
 	}
 	
-	public var accountsOnCurrentNetwork: Accounts {
+	public var accountsOnCurrentNetwork: [Account] {
 		accounts(on: currentNetworkID)
 	}
 }

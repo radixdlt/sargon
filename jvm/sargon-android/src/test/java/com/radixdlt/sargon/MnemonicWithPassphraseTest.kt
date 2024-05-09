@@ -41,7 +41,7 @@ class MnemonicWithPassphraseTest {
     @Test
     fun testFromAndroidJson() {
         val androidJsonWithoutPassphrase =
-            """{"mnemonic":"remind index lift gun sleep inner double leopard exist sugar item whisper coast duty leopard law radar neutral odor tape finger position capital track","bip39Passphrase":""}""".trimIndent()
+            """{"mnemonic":"remind index lift gun sleep inner double leopard exist sugar item whisper coast duty leopard law radar neutral odor tape finger position capital track","Bip39Passphrase":""}""".trimIndent()
         assertEquals(
             MnemonicWithPassphrase(
                 mnemonic = Mnemonic.init(phrase = "remind index lift gun sleep inner double leopard exist sugar item whisper coast duty leopard law radar neutral odor tape finger position capital track"),
@@ -52,7 +52,7 @@ class MnemonicWithPassphraseTest {
 
         val androidJsonWithoutPassphrasePrettyPrinted = """{
               "mnemonic": "remind index lift gun sleep inner double leopard exist sugar item whisper coast duty leopard law radar neutral odor tape finger position capital track",
-              "bip39Passphrase": ""
+              "Bip39Passphrase": ""
             }""".trimIndent()
         assertEquals(
             MnemonicWithPassphrase(
@@ -63,7 +63,7 @@ class MnemonicWithPassphraseTest {
         )
 
         val androidJsonWithPassphrase =
-            """{"mnemonic":"remind index lift gun sleep inner double leopard exist sugar item whisper coast duty leopard law radar neutral odor tape finger position capital track","bip39Passphrase":"super secret"}""".trimIndent()
+            """{"mnemonic":"remind index lift gun sleep inner double leopard exist sugar item whisper coast duty leopard law radar neutral odor tape finger position capital track","Bip39Passphrase":"super secret"}""".trimIndent()
         assertEquals(
             MnemonicWithPassphrase(
                 mnemonic = Mnemonic.init(phrase = "remind index lift gun sleep inner double leopard exist sugar item whisper coast duty leopard law radar neutral odor tape finger position capital track"),

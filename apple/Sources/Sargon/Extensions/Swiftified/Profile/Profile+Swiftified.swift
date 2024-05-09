@@ -29,6 +29,7 @@ extension Profile {
 	}
 }
 
+public typealias ProfileID = ProfileId
 extension Profile: Identifiable {
 	public typealias ID = ProfileID
 	public var id: ID {
@@ -55,8 +56,9 @@ extension Profile {
 		appPreferences.gateways.current.networkID
 	}
 	
-	public func accounts(on network: NetworkID? = nil) -> Accounts {
-		networks[id: network ?? currentNetworkID]?.accounts ?? []
+	public func accounts(on network: NetworkID? = nil) -> [Account] {
+		let id = network ?? currentNetworkID
+		return networks.first(where: { $0.id == id })?.accounts ?? []
 	}
 	
 }

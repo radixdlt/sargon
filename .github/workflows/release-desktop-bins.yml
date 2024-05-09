@@ -37,10 +37,8 @@ jobs:
           distribution: "adopt"
           java-version: "17"
 
-      - name: Setup Env Variables
-        run: |
-          git fetch --prune --tags
-          echo "SARGON_VERSION=`git tag --sort=committerdate | tail -1`-`git rev-parse --short @`" >> $GITHUB_ENV
+      - name: Prune Tags
+        run: git fetch --prune --tags
 
       - name: Build and publish Desktop binaries
         uses: RDXWorks-actions/gradle-build-action@main

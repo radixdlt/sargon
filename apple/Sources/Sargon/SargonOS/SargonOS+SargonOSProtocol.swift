@@ -23,7 +23,7 @@ extension SargonOS {
 	
 	public func accounts(
 		on network: NetworkID? = nil
-	) -> Accounts {
+	) -> [Account] {
 		profile().accounts(on: network)
 	}
 	

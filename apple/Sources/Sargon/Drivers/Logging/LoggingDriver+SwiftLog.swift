@@ -37,6 +37,9 @@ public final actor Log {
 }
 
 extension Log: LoggingDriver {
+	nonisolated public func isRustLog() -> Bool {
+		false
+	}
 	
 	nonisolated public func log(
 		level: LogLevel,
