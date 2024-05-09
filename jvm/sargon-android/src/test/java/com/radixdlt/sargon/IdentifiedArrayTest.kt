@@ -2,6 +2,7 @@ package com.radixdlt.sargon
 
 import com.radixdlt.sargon.extensions.IdentifiedArray
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -27,14 +28,19 @@ internal abstract class IdentifiedArrayTest<A, Identifier, Element> where A : Id
 
         collection = collection.append(elementWithDifferentId)
         assertEquals(2, collection.size)
+        collection = collection.append(elementWithDifferentId) // Append again does nothing
+        assertEquals(2, collection.size)
         assertEquals(elementWithDifferentId, collection[1])
+        assertTrue(elementWithDifferentId in collection)
 
         collection = collection.remove(elementWithDifferentId)
         assertEquals(1, collection.size)
+        assertFalse(elementWithDifferentId in collection)
 
         collection = collection.updateOrInsert(elementWithDifferentId, 1)
         assertEquals(elementWithDifferentId, collection[1])
         assertTrue(collection.size == 2)
+        assertTrue(elementWithDifferentId in collection)
 
         collection = collection.updateOrInsert(elementWithDifferentId, 0)
         assertEquals(elementWithDifferentId, collection[1]) // The item remains in previous position

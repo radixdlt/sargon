@@ -1,6 +1,8 @@
 package com.radixdlt.sargon.extensions
 
-internal interface IdentifiedArray<Identifier, Element> {
+import com.radixdlt.sargon.annotation.KoverIgnore
+
+interface IdentifiedArray<Identifier, Element> {
     val size: Int
 
     fun asList(): List<Element>
@@ -17,7 +19,15 @@ internal interface IdentifiedArray<Identifier, Element> {
 
     operator fun get(index: Int): Element
 
+    operator fun contains(element: Element): Boolean
+
     fun removeBy(identifier: Identifier): IdentifiedArray<Identifier, Element>
+
+    override fun equals(other: Any?): Boolean
+
+    override fun hashCode(): Int
+
+    override fun toString(): String
 }
 
 
@@ -41,6 +51,8 @@ internal class IdentifiedArrayImpl<Identifier, Element>(
         .toList()
 
     override fun get(index: Int): Element = inner.values.elementAt(index)
+
+    override fun contains(element: Element): Boolean = inner.contains(identifier(element))
 
     override fun append(element: Element) = apply {
         val identifier = identifier(element)
@@ -82,4 +94,23 @@ internal class IdentifiedArrayImpl<Identifier, Element>(
     override fun removeBy(identifier: Identifier) = apply {
         inner.remove(identifier)
     }
+
+    @KoverIgnore
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+
+        return inner == (other as? IdentifiedArrayImpl<*, *>)?.inner
+    }
+
+    @KoverIgnore
+    override fun hashCode(): Int {
+        return inner.hashCode()
+    }
+
+    @KoverIgnore
+    override fun toString(): String {
+        return "IdentifiedArrayImpl(inner=$inner)"
+    }
+
+
 }
