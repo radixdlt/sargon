@@ -9,7 +9,7 @@ import Foundation
 import SargonUniFFI
 
 #if DEBUG
-extension ProfileNetworks {
+extension [ProfileNetwork] {
 	public static let sample: Self = newProfileNetworksSample()
 	public static let sampleOther: Self = newProfileNetworksSampleOther()
 }

@@ -1,69 +1,24 @@
 package com.radixdlt.sargon
 
-import com.radixdlt.sargon.extensions.append
+import com.radixdlt.sargon.extensions.FactorSources
+import com.radixdlt.sargon.extensions.SupportedCurves
 import com.radixdlt.sargon.extensions.asGeneral
-import com.radixdlt.sargon.extensions.contains
-import com.radixdlt.sargon.extensions.get
 import com.radixdlt.sargon.extensions.id
 import com.radixdlt.sargon.extensions.init
-import com.radixdlt.sargon.extensions.invoke
 import com.radixdlt.sargon.extensions.randomBagOfBytes
-import com.radixdlt.sargon.extensions.remove
-import com.radixdlt.sargon.extensions.removeById
-import com.radixdlt.sargon.extensions.size
-import com.radixdlt.sargon.extensions.updateOrAppend
-import com.radixdlt.sargon.extensions.updateOrInsert
-import com.radixdlt.sargon.samples.Sample
 import com.radixdlt.sargon.samples.sample
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
-class FactorSourcesTest : SampleTestable<FactorSources> {
+internal class FactorSourcesTest : IdentifiedArrayTest<FactorSources, FactorSourceId, FactorSource>() {
 
-    override val samples: List<Sample<FactorSources>>
-        get() = listOf(FactorSources.sample)
+    override fun element(): FactorSource = FactorSource.sample()
 
-    @Test
-    fun testListMethods() {
-        val sample = FactorSource.sample()
-        assertEquals(sample.id, FactorSource.sample().id)
-        val sampleOther = FactorSource.sample.other()
+    override fun elementWithDifferentId(): FactorSource = FactorSource.sample.other()
 
-        var list = FactorSources.init(sample)
+    override fun identifier(element: FactorSource): FactorSourceId = element.id
 
-        Assertions.assertTrue(sample in list)
-        assertEquals(1, list.size)
-        assertEquals(sample, list[0])
-
-        list = list.append(sampleOther)
-        Assertions.assertTrue(sampleOther in list)
-        assertEquals(2, list.size)
-        assertEquals(sampleOther, list[1])
-
-        list = list.remove(sampleOther)
-        Assertions.assertFalse(sampleOther in list)
-        assertEquals(1, list.size)
-
-        list = list.append(sampleOther)
-        assertEquals(sampleOther, list.get(sampleOther.id))
-        list = list.removeById(sampleOther.id)
-        Assertions.assertTrue(list.size == 1)
-
-        list = list.updateOrInsert(sampleOther, 0)
-        assertEquals(sampleOther, list()[0])
-        Assertions.assertTrue(list.size == 2)
-        list = list.updateOrAppend(sampleOther)
-        Assertions.assertTrue(list.size == 2)
-    }
-
-    @Test
-    fun testEmptyFactorSourcesFails() {
-        assertThrows<CommonException.FactorSourcesMustNotBeEmpty> {
-            FactorSources.init()
-        }
-    }
+    override fun init(element: FactorSource): FactorSources = FactorSources(element)
 
     @Test
     fun testDeviceFactorSourceAsGeneral() {
@@ -74,7 +29,7 @@ class FactorSourcesTest : SampleTestable<FactorSources> {
             ),
             common = FactorSourceCommon(
                 cryptoParameters = FactorSourceCryptoParameters(
-                    supportedCurves = SupportedCurves.init(Slip10Curve.CURVE25519),
+                    supportedCurves = SupportedCurves(Slip10Curve.CURVE25519).asList(),
                     supportedDerivationPathSchemes = listOf(DerivationPathScheme.CAP26)
                 ),
                 addedOn = Timestamp.now(),
@@ -103,7 +58,7 @@ class FactorSourcesTest : SampleTestable<FactorSources> {
             ),
             common = FactorSourceCommon(
                 cryptoParameters = FactorSourceCryptoParameters(
-                    supportedCurves = SupportedCurves.init(Slip10Curve.CURVE25519),
+                    supportedCurves = SupportedCurves(Slip10Curve.CURVE25519).asList(),
                     supportedDerivationPathSchemes = listOf(DerivationPathScheme.CAP26)
                 ),
                 addedOn = Timestamp.now(),

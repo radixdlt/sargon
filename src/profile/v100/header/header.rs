@@ -181,7 +181,6 @@ mod uniffi_tests {
 
     #[test]
     fn header_identifiable() {
-        use identified_vec::Identifiable;
         let sut = SUT::sample();
         assert_eq!(&sut.id(), &sut.id);
     }

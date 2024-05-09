@@ -275,7 +275,7 @@ impl SecureStorageClient {
     }
 
     pub(crate) fn always_fail() -> Self {
-        SecureStorageClient::new(Arc::new(AlwaysFailStorage {}))
+        SecureStorageClient::new(Arc::new(AlwaysFailSecureStorage {}))
     }
 }
 
@@ -311,8 +311,7 @@ mod tests {
             sut.load::<Profile>(SecureStorageKey::ActiveProfileID).await,
             Err(CommonError::FailedToDeserializeJSONToValue {
                 json_byte_count: 1,
-                type_name: "sargon::profile::v100::profile::Profile"
-                    .to_string()
+                type_name: "Profile".to_string()
             })
         );
     }

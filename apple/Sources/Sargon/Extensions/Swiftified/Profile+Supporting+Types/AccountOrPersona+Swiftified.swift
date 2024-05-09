@@ -45,7 +45,7 @@ extension AccountOrPersona: EntityBaseProtocol {
 	}
 	
 	/// Flags that are currently set on entity.
-	public var flags: EntityFlags {
+	public var flags: [EntityFlag] {
 		property(\.flags)
 	}
 	

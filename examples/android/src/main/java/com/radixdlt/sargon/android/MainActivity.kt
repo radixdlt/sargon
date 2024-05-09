@@ -18,8 +18,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -43,8 +41,6 @@ import com.radixdlt.sargon.Wallet
 import com.radixdlt.sargon.WalletClientModel
 import com.radixdlt.sargon.android.ui.theme.SargonAndroidTheme
 import com.radixdlt.sargon.annotation.UsesSampleValues
-import com.radixdlt.sargon.extensions.invoke
-import com.radixdlt.sargon.extensions.string
 import com.radixdlt.sargon.extensions.toBagOfBytes
 import com.radixdlt.sargon.samples.sample
 import kotlin.random.Random
@@ -71,7 +67,9 @@ fun WalletContent(modifier: Modifier = Modifier, storage: SecureStorageDriver) {
             bottomBar = {
                 if (walletState == null) {
                     Button(
-                            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .fillMaxWidth(),
                             onClick = {
                                 walletState =
                                         Wallet.with(
@@ -81,7 +79,7 @@ fun WalletContent(modifier: Modifier = Modifier, storage: SecureStorageDriver) {
                                 profile = walletState?.profile()
                             }
                     ) { Text(text = "Generate new Wallet") }
-                } else if (profile?.networks()?.isEmpty() == true) {
+                } else if (profile?.networks?.isEmpty() == true) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         var accountName by remember { mutableStateOf("") }
                         TextField(
@@ -108,7 +106,7 @@ fun WalletContent(modifier: Modifier = Modifier, storage: SecureStorageDriver) {
             }
     ) { padding ->
         LazyColumn(modifier = Modifier.padding(padding), contentPadding = PaddingValues(16.dp)) {
-            items(profile?.networks().orEmpty()) {
+            items(profile?.networks.orEmpty()) {
                 Network(
                         network = it,
                         onAccountAdd = { newName ->
@@ -127,9 +125,9 @@ fun WalletContent(modifier: Modifier = Modifier, storage: SecureStorageDriver) {
 
 @Composable
 fun Network(
-        modifier: Modifier = Modifier,
-        network: ProfileNetwork,
-        onAccountAdd: (String) -> Unit
+    modifier: Modifier = Modifier,
+    network: ProfileNetwork,
+    onAccountAdd: (String) -> Unit
 ) {
     ElevatedCard(modifier = modifier.fillMaxWidth()) {
         Spacer(modifier = Modifier.height(16.dp))
@@ -190,5 +188,5 @@ fun Wallet.Companion.with(
 @Composable
 fun NetworkPreview() {
     val profile = Profile.sample()
-    Network(network = profile.networks().first(), onAccountAdd = {})
+    Network(network = profile.networks.first(), onAccountAdd = {})
 }

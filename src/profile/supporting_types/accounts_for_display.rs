@@ -1,6 +1,10 @@
 use crate::prelude::*;
 
-decl_can_be_empty_identified_array_of!(AccountsForDisplay, AccountForDisplay);
+decl_identified_vec_of!(
+    /// An ordered collection of unique [`AccountForDisplay`]s.
+    AccountsForDisplay,
+    AccountForDisplay
+);
 
 impl HasSampleValues for AccountsForDisplay {
     fn sample() -> Self {

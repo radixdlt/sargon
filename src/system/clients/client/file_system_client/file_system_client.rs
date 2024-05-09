@@ -3,6 +3,7 @@ use std::path::Path;
 
 #[derive(Debug)]
 pub struct FileSystemClient {
+    #[allow(dead_code)]
     driver: Arc<dyn FileSystemDriver>,
 }
 
@@ -12,12 +13,14 @@ impl FileSystemClient {
     }
 }
 
+#[allow(dead_code)]
 pub(crate) fn path_to_string(path: &Path) -> Result<String> {
     path.to_str()
         .ok_or(CommonError::Unknown)
         .map(|s| s.to_owned())
 }
 
+#[allow(dead_code)]
 impl FileSystemClient {
     async fn load_from_file(&self, path: &Path) -> Result<Option<BagOfBytes>> {
         let path = path_to_string(path)?;

@@ -19,19 +19,16 @@ trait OnSameNetworkValidating: Clone + IntoIterator<Item = Self::Element> {
             return Ok(None);
         }
         let network_id = self.clone().into_iter().last().unwrap().network_id();
-        self.clone()
-            .into_iter()
-            .map(|e| {
-                if e.network_id() == network_id {
-                    Ok(())
-                } else {
-                    Err(CommonError::NetworkDiscrepancy {
-                        expected: network_id,
-                        actual: e.network_id(),
-                    })
-                }
-            })
-            .collect::<Result<()>>()?;
+        self.clone().into_iter().try_for_each(|e| {
+            if e.network_id() == network_id {
+                Ok(())
+            } else {
+                Err(CommonError::NetworkDiscrepancy {
+                    expected: network_id,
+                    actual: e.network_id(),
+                })
+            }
+        })?;
 
         Ok(Some(network_id))
     }
@@ -88,7 +85,7 @@ impl SargonOS {
         self.profile_holder.access_profile_with(|p| {
             let accounts_on_network = p
                 .networks
-                .get(&address.network_id())
+                .get_id(&address.network_id())
                 .unwrap()
                 .accounts
                 .len();
@@ -265,7 +262,7 @@ impl SargonOS {
             return Ok(());
         }
 
-        let number_of_accounts_to_add = (&accounts).len();
+        let number_of_accounts_to_add = accounts.len();
 
         let network_id = accounts
             .assert_elements_on_same_network()?
@@ -279,28 +276,18 @@ impl SargonOS {
             if networks.contains_id(&network_id) {
                 debug!("Profile already contained network to add #{} account(s) to, network_id: {}", number_of_accounts_to_add, network_id);
                 networks
-                // TODO: clean this up, BAD code. messy, mostly because of (my) bad IdentifiedVec API.
-                    .try_update_with(&network_id, |network| {
+                    .try_try_update_with(&network_id, |network| {
                         let count_before = network.accounts.len();
                         debug!("Profile Network to add #{} account(s) to contains #{} accounts (before adding).", number_of_accounts_to_add, count_before);
-                        (*network.accounts).append_other(accounts.clone());
+                        network.accounts.extend(accounts.clone());
                         let count_after = network.accounts.len();
                         debug!("Profile Network now contains: #{} accounts", count_after);
                         if network.accounts.len() == count_before + number_of_accounts_to_add {
-                            Ok(network.clone())
-                        } else {
-                            Err(CommonError::UnableToAddAllAccountsDuplicatesFound)
-                        }
-                    })
-                .and_then(
-                    |r| {
-                        if r {
                             Ok(())
                         } else {
                             Err(CommonError::UnableToAddAllAccountsDuplicatesFound)
                         }
-                    },
-                )
+                    })
             } else {
                 debug!("No Profile Network exists with ID {}, creating it...", network_id);
                 let network = ProfileNetwork::new(

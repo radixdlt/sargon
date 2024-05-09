@@ -3,10 +3,10 @@
 use crate::prelude::*;
 
 #[derive(Debug)]
-pub(crate) struct AlwaysFailStorage {}
+pub(crate) struct AlwaysFailSecureStorage {}
 
 #[async_trait::async_trait]
-impl SecureStorageDriver for AlwaysFailStorage {
+impl SecureStorageDriver for AlwaysFailSecureStorage {
     async fn load_data(
         &self,
         _key: SecureStorageKey,

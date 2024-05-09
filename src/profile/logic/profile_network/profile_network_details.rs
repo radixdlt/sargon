@@ -12,7 +12,7 @@ impl AuthorizedPersonaSimple {
             .iter()
             .map(|account_address| {
                 let Some(account) = non_hidden_accounts
-                    .iter().find(|x| x.address == *account_address)
+                    .iter().find(|x| x.address == account_address)
                 else {
                         // This is a sign that Profile is in a bad state somehow...
                         warn!("Discrepancy! AuthorizedDapp references account which does not exist {}", account_address);
@@ -260,9 +260,9 @@ mod tests {
     #[test]
     fn details_ok() {
         let sut = SUT::sample();
-        let dapp = sut.authorized_dapps.first().clone().unwrap();
+        let dapp = sut.authorized_dapps.first().unwrap();
 
-        let details = sut.details_for_authorized_dapp(&dapp).unwrap();
+        let details = sut.details_for_authorized_dapp(dapp).unwrap();
         assert_eq!(
             &details.dapp_definition_address,
             &dapp.dapp_definition_address

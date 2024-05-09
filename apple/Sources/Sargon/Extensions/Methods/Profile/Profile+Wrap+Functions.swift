@@ -18,6 +18,15 @@ extension Profile {
 		)
 	}
 	
+	public func toString() -> String {
+		profileToString(profile: self)
+	}
+	
+	
+	public func toDebugString() -> String {
+		profileToDebugString(profile: self)
+	}
+	
 	public func profileSnapshot() -> Data {
 		profileToJsonBytes(profile: self)
 	}

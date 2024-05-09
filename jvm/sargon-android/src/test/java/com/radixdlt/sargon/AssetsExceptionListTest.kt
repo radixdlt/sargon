@@ -1,53 +1,16 @@
 package com.radixdlt.sargon
 
-import com.radixdlt.sargon.extensions.append
-import com.radixdlt.sargon.extensions.contains
-import com.radixdlt.sargon.extensions.get
-import com.radixdlt.sargon.extensions.getBy
-import com.radixdlt.sargon.extensions.init
-import com.radixdlt.sargon.extensions.invoke
-import com.radixdlt.sargon.extensions.remove
-import com.radixdlt.sargon.extensions.removeByAddress
-import com.radixdlt.sargon.extensions.size
-import com.radixdlt.sargon.extensions.updateOrAppend
-import com.radixdlt.sargon.extensions.updateOrInsert
-import com.radixdlt.sargon.samples.Sample
+import com.radixdlt.sargon.extensions.AssetsExceptionList
 import com.radixdlt.sargon.samples.sample
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Test
 
-class AssetsExceptionListTest : SampleTestable<AssetsExceptionList> {
-    override val samples: List<Sample<AssetsExceptionList>>
-        get() = listOf(AssetsExceptionList.sample)
+internal class AssetsExceptionListTest :
+    IdentifiedArrayTest<AssetsExceptionList, ResourceAddress, AssetException>() {
+    override fun element(): AssetException = AssetException.sample()
 
-    @Test
-    fun testListMethods() {
-        val sample = AssetException.sample()
-        val sampleOther = AssetException.sample.other()
+    override fun elementWithDifferentId(): AssetException = AssetException.sample.other()
 
-        var list = AssetsExceptionList.init(sample)
+    override fun identifier(element: AssetException): ResourceAddress = element.address
 
-        Assertions.assertTrue(sample in list)
-        Assertions.assertEquals(1, list.size)
-        Assertions.assertEquals(sample, list[0])
+    override fun init(element: AssetException): AssetsExceptionList = AssetsExceptionList(element)
 
-        list = list.append(sampleOther)
-        Assertions.assertTrue(sampleOther in list)
-        Assertions.assertEquals(2, list.size)
-        Assertions.assertEquals(sampleOther, list[1])
-
-        list = list.remove(sampleOther)
-        Assertions.assertFalse(sampleOther in list)
-        Assertions.assertEquals(1, list.size)
-
-        list = list.updateOrInsert(sampleOther, 0)
-        Assertions.assertEquals(sampleOther, list()[0])
-        Assertions.assertTrue(list.size == 2)
-        list = list.updateOrAppend(sampleOther)
-        Assertions.assertTrue(list.size == 2)
-        list = list.remove(sampleOther)
-
-        Assertions.assertEquals(sample, list.getBy(sample.address))
-        Assertions.assertTrue(list.removeByAddress(sample.address).size == 0)
-    }
 }

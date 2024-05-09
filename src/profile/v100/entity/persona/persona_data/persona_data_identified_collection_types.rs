@@ -34,7 +34,7 @@ macro_rules! declare_collection_of_identified_entry {
         #[display("{}", self.display_string())]
         #[serde(transparent)]
         pub struct $struct_name {
-            pub collection: IdentifiedVecVia<$id_ent_type>,
+            pub collection: IdentifiedVecOf<$id_ent_type>,
         }
 
         impl Default for $struct_name {
@@ -44,7 +44,7 @@ macro_rules! declare_collection_of_identified_entry {
         }
 
         impl std::ops::Deref for $struct_name {
-            type Target = IdentifiedVecVia<$id_ent_type>;
+            type Target = IdentifiedVecOf<$id_ent_type>;
             fn deref(&self) -> &Self::Target {
                 &self.collection
             }
@@ -57,7 +57,7 @@ macro_rules! declare_collection_of_identified_entry {
                 I: IntoIterator<Item = $id_ent_type>,
             {
                 Self {
-                    collection: IdentifiedVecVia::from_iter(values),
+                    collection: IdentifiedVecOf::from_iter(values),
                 }
             }
         }
@@ -65,7 +65,7 @@ macro_rules! declare_collection_of_identified_entry {
         impl IntoIterator for $struct_name {
             type Item = $id_ent_type;
             type IntoIter =
-            identified_vec::identified_vec_into_iterator::IdentifiedVecIntoIterator<<$id_ent_type as Identifiable>::ID, $id_ent_type>;
+           OwnedIdentifiedVecOfIterator<$id_ent_type>;
 
             fn into_iter(self) -> Self::IntoIter {
                 self.collection.into_iter()

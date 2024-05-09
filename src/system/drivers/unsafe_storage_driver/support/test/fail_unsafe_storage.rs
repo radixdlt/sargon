@@ -3,9 +3,9 @@
 use crate::prelude::*;
 
 #[derive(Debug)]
-pub(crate) struct AlwaysFailStorage {}
+pub(crate) struct AlwaysFailUnsafeStorage {}
 
-impl UnsafeStorageDriver for AlwaysFailStorage {
+impl UnsafeStorageDriver for AlwaysFailUnsafeStorage {
     fn load_data(&self, _key: UnsafeStorageKey) -> Result<Option<BagOfBytes>> {
         panic!("AlwaysFailStorage does not implement `load_data");
     }

@@ -30,7 +30,6 @@ final class AccountTests: EntityProtocolTest<Account> {
 	
 	func test_hidden() {
 		let sut = SUT.sampleStokenetOlivia.flags
-		XCTAssertEqual(sut.elements, [.deletedByUser])
 		XCTAssertEqual(sut, [.deletedByUser])
 	}
 	

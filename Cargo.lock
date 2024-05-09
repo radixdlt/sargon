@@ -1413,15 +1413,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b9e0384b61958566e926dc50660321d12159025e767c18e043daf26b70104c39"
 
 [[package]]
-name = "identified_vec"
-version = "0.1.11"
-source = "git+https://github.com/Sajjon/identified_vec/?rev=4480b418b69894ad96542bd94f80e9be63515e37#4480b418b69894ad96542bd94f80e9be63515e37"
-dependencies = [
- "serde",
- "thiserror 1.0.57",
-]
-
-[[package]]
 name = "idna"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1456,6 +1447,16 @@ name = "indexmap"
 version = "2.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "233cf39063f058ea2caae4091bf4a3ef70a653afbc026f5c4a4135d114e3c177"
+dependencies = [
+ "equivalent",
+ "hashbrown 0.14.3",
+ "serde",
+]
+
+[[package]]
+name = "indexmap"
+version = "2.2.6"
+source = "git+https://github.com/indexmap-rs/indexmap?rev=3f0fffb85b99a2a37bbee363703f8509dd03e2d7#3f0fffb85b99a2a37bbee363703f8509dd03e2d7"
 dependencies = [
  "equivalent",
  "hashbrown 0.14.3",
@@ -2544,7 +2545,7 @@ dependencies = [
  "enum-iterator",
  "hex 0.4.3 (git+https://github.com/KokaKiwi/rust-hex/?rev=b2b4370b5bf021b98ee7adc92233e8de3f2de792)",
  "hkdf",
- "identified_vec",
+ "indexmap 2.2.6",
  "iota-crypto",
  "iso8601-timestamp",
  "itertools 0.12.0",

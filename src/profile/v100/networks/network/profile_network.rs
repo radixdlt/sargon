@@ -120,7 +120,7 @@ impl ProfileNetwork {
         F: FnMut(&mut Account),
     {
         if self.accounts.update_with(address, mutate) {
-            self.accounts.get(address).cloned()
+            self.accounts.get_id(address).cloned()
         } else {
             None
         }

@@ -483,31 +483,37 @@ pub enum CommonError {
     #[error("AuthorizedDapp references field id that does not exist")]
     AuthorizedDappReferencesFieldIDThatDoesNotExist = 10134,
 
+    #[error("Item identified by ID {id} does not exist")]
+    ElementDoesNotExist { id: String } = 10135,
+
+    #[error("Item identified by ID {id} already exist")]
+    ElementAlreadyExist { id: String } = 10136,
+
     #[error(
         "Failed to load Profile from secure storage, profile id: {profile_id}"
     )]
-    UnableToLoadProfileFromSecureStorage { profile_id: ProfileID } = 10135,
+    UnableToLoadProfileFromSecureStorage { profile_id: ProfileID } = 10137,
 
     #[error("Failed to save DeviceInfo to secure storage")]
-    UnableToSaveDeviceInfoToSecureStorage = 10136,
+    UnableToSaveDeviceInfoToSecureStorage = 10138,
 
     #[error("Unable to acquire read lock for profile")]
-    UnableToAcquireReadLockForProfile = 10137,
+    UnableToAcquireReadLockForProfile = 10139,
 
     #[error("Failed to read from unsafe storage.")]
-    UnsafeStorageReadError = 10138,
+    UnsafeStorageReadError = 10140,
 
     #[error("Failed to write to unsafe storage.")]
-    UnsafeStorageWriteError = 10139,
+    UnsafeStorageWriteError = 10141,
 
     #[error("Failed to create file path from string: '{bad_value}'")]
-    FailedToCreateFilePathFromString { bad_value: String } = 10140,
+    FailedToCreateFilePathFromString { bad_value: String } = 10142,
 
     #[error("Expected collection to not be empty")]
-    ExpectedNonEmptyCollection = 10141,
+    ExpectedNonEmptyCollection = 10143,
 
     #[error("Failed to add all accounts, found duplicated account.")]
-    UnableToAddAllAccountsDuplicatesFound = 10142,
+    UnableToAddAllAccountsDuplicatesFound = 10144,
 }
 
 #[uniffi::export]

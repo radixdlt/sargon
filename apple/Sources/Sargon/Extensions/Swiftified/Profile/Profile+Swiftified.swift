@@ -22,7 +22,7 @@ extension Profile {
 	) {
 		self.init(
 			header: header,
-			factorSources: FactorSources(element: deviceFactorSource.asGeneral),
+			factorSources: [deviceFactorSource.asGeneral],
 			appPreferences: .default,
 			networks: []
 		)
@@ -38,14 +38,14 @@ extension Profile: Identifiable {
 
 extension Profile: CustomStringConvertible {
 	public var description: String {
-		profileToString(profile: self)
+		toString()
 	}
 }
 
 
 extension Profile: CustomDebugStringConvertible {
 	public var debugDescription: String {
-		profileToDebugString(profile: self)
+		toDebugString()
 	}
 }
 

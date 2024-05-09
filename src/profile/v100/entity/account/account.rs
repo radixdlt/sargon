@@ -190,7 +190,7 @@ impl Account {
             AppearanceID::try_from(index as u8).unwrap(),
         );
         if is_hidden {
-            account.flags.insert_flag(EntityFlag::DeletedByUser);
+            account.flags.insert(EntityFlag::DeletedByUser);
         }
         account
     }

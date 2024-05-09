@@ -15,6 +15,7 @@ pub struct Drivers {
 #[uniffi::export]
 impl Drivers {
     #[uniffi::constructor]
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         networking: Arc<dyn NetworkingDriver>,
         secure_storage: Arc<dyn SecureStorageDriver>,

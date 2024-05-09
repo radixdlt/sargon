@@ -106,6 +106,9 @@ impl Profile {
         app_preferences: AppPreferences,
         networks: ProfileNetworks,
     ) -> Self {
+        if factor_sources.is_empty() {
+            panic!("FactorSources MUST NOT be empty.")
+        }
         Self {
             header,
             factor_sources,
@@ -165,16 +168,17 @@ impl Profile {
         S: IsFactorSource,
         M: FnMut(S) -> Result<S>,
     {
-        self.factor_sources.try_update_with(factor_source_id, |f| {
-            S::try_from(f.clone())
-                .map_err(|_| CommonError::CastFactorSourceWrongKind {
-                    expected: S::kind(),
-                    found: f.factor_source_kind(),
-                })
-                .and_then(|element| {
-                    mutate(element).map(|modified| modified.into())
-                })
-        })
+        self.factor_sources
+            .maybe_update_with(factor_source_id, |f| {
+                S::try_from(f.clone())
+                    .map_err(|_| CommonError::CastFactorSourceWrongKind {
+                        expected: S::kind(),
+                        found: f.factor_source_kind(),
+                    })
+                    .and_then(|element| {
+                        mutate(element).map(|modified| modified.into())
+                    })
+            })
     }
 }
 
@@ -220,6 +224,24 @@ mod tests {
     fn equality() {
         assert_eq!(SUT::sample(), SUT::sample());
         assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[should_panic(expected = "FactorSources MUST NOT be empty.")]
+    #[test]
+    fn not_allowed_to_create_profile_with_empty_factor_source() {
+        let _ = SUT::with(
+            Header::sample(),
+            IdentifiedVecOf::new(),
+            AppPreferences::sample(),
+            ProfileNetworks::sample(),
+        );
+    }
+
+    #[test]
+    fn serialize_empty_factor_sources_is_err() {
+        let mut sut = SUT::sample();
+        sut.factor_sources = FactorSources::new();
+        assert!(serde_json::to_value(sut).is_err());
     }
 
     #[test]
@@ -271,7 +293,7 @@ mod tests {
 
         assert_eq!(
             sut.factor_sources
-                .get(id)
+                .get_id(id)
                 .unwrap()
                 .as_device()
                 .unwrap()
@@ -301,7 +323,7 @@ mod tests {
 
         assert_eq!(
             sut.factor_sources
-                .get(id)
+                .get_id(id)
                 .unwrap()
                 .as_device()
                 .unwrap()
@@ -325,7 +347,7 @@ mod tests {
 
         assert_eq!(
             sut.factor_sources
-                .get(id)
+                .get_id(id)
                 .unwrap()
                 .as_device()
                 .unwrap()
@@ -354,7 +376,7 @@ mod tests {
         // Remains unchanged
         assert_eq!(
             sut.factor_sources
-                .get(id)
+                .get_id(id)
                 .unwrap()
                 .as_device()
                 .unwrap()
@@ -393,7 +415,7 @@ mod tests {
         let mut sut = SUT::sample();
         let account = sut
             .networks
-            .get(&NetworkID::Mainnet)
+            .get_id(&NetworkID::Mainnet)
             .unwrap()
             .accounts
             .get_at_index(0)
@@ -408,7 +430,7 @@ mod tests {
 
         assert_eq!(
             sut.networks
-                .get(&NetworkID::Mainnet)
+                .get_id(&NetworkID::Mainnet)
                 .unwrap()
                 .accounts
                 .get_at_index(0)

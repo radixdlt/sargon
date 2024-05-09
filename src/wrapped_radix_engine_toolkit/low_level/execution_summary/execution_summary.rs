@@ -1,3 +1,5 @@
+use radix_engine::types::IndexMap;
+
 use crate::prelude::*;
 
 /// A summary of the execution of the manifest and the information that helps

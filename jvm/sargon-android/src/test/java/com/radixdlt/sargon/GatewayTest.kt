@@ -2,7 +2,6 @@ package com.radixdlt.sargon
 
 import com.radixdlt.sargon.extensions.forNetwork
 import com.radixdlt.sargon.extensions.init
-import com.radixdlt.sargon.extensions.invoke
 import com.radixdlt.sargon.extensions.isWellKnown
 import com.radixdlt.sargon.extensions.mainnet
 import com.radixdlt.sargon.extensions.stokenet
@@ -23,7 +22,7 @@ class GatewayTest {
 
         assertEquals(
             listOf(Gateway.mainnet, Gateway.stokenet),
-            Gateway.wellKnown()
+            Gateway.wellKnown.asList()
         )
 
     }

@@ -11,4 +11,13 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class DepositorsAllowListTests: CanBeEmptyCollectionTest<DepositorsAllowList> {}
+final class DepositorsAllowListTests: CollectionTest<ResourceOrNonFungible> {
+
+	override class func sample() -> SUT {
+		SUT.sample
+	}
+	
+	override class func sampleOther() -> SUT {
+		SUT.sampleOther
+	}
+}

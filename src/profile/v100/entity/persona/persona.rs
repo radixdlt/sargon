@@ -151,7 +151,7 @@ impl Persona {
             PersonaData::new(name, phone_numbers, email_addresses),
         );
         if is_hidden {
-            persona.flags.insert_flag(EntityFlag::DeletedByUser);
+            persona.flags.insert(EntityFlag::DeletedByUser);
         }
         persona
     }
@@ -394,7 +394,7 @@ impl PartialOrd for Persona {
     }
 }
 
-/// Add conformance to Identifiable in order to use `identified_vec`
+/// Add conformance to Identifiable in order to use `IdentifiedVecOf`
 impl Identifiable for Persona {
     type ID = IdentityAddress;
 

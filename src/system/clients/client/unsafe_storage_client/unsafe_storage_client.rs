@@ -2,6 +2,7 @@ use crate::prelude::*;
 
 #[derive(Debug)]
 pub struct UnsafeStorageClient {
+    #[allow(dead_code)]
     driver: Arc<dyn UnsafeStorageDriver>,
 }
 

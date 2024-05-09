@@ -1,10 +1,9 @@
 use crate::prelude::*;
 
-decl_can_be_empty_identified_array_of!(
-    /// Other by user added or predefined Gateways the user can switch to.
+decl_identified_vec_of!(
+    /// An ordered collection of unique [`Gateway`]s.
     /// It might be Gateways with different URLs on the SAME network, or
     /// other networks, the identifier of a Gateway is the URL.
-    Gateways,
     Gateway
 );
 
@@ -74,7 +73,7 @@ impl<'de> Deserialize<'de> for SavedGateways {
             .saved
             .iter()
             .find(|g| g.id() == wrapped.url)
-            .cloned()
+            .clone()
             .ok_or({
                 CommonError::InvalidGatewaysJSONCurrentNotFoundAmongstSaved
             })
@@ -82,7 +81,7 @@ impl<'de> Deserialize<'de> for SavedGateways {
 
         let mut other = wrapped.saved.clone();
 
-        other.remove(&current);
+        other.remove_id(&current.id());
 
         SavedGateways::new_with_other(current, other.items())
             .map_err(de::Error::custom)
@@ -102,7 +101,7 @@ impl SavedGateways {
         I: IntoIterator<Item = Gateway>,
     {
         let other = Gateways::from_iter(other);
-        if other.contains(&current) {
+        if other.contains_by_id(&current) {
             return Err(
                 CommonError::GatewaysDiscrepancyOtherShouldNotContainCurrent,
             );
@@ -126,7 +125,7 @@ impl SavedGateways {
                 CommonError::GatewaysDiscrepancyOtherShouldNotContainCurrent,
             );
         }
-        self.other.remove_by_id(&to.id());
+        self.other.remove_id(&to.id());
         self.current = to;
         Ok(true)
     }
@@ -137,11 +136,7 @@ impl SavedGateways {
     ///
     /// - Returns: `true` if it was added, `false` if it was already present (noop)
     pub fn append(&mut self, gateway: Gateway) -> bool {
-        if self.other.contains(&gateway) {
-            return false;
-        }
-        self.other.append(gateway);
-        true
+        self.other.append(gateway).0
     }
 }
 
@@ -199,6 +194,15 @@ mod tests {
         assert_eq!(sut.current.network.id, NetworkID::Mainnet);
         assert_eq!(sut.change_current(Gateway::stokenet()), Ok(true));
         assert_eq!(sut.current.network.id, NetworkID::Stokenet);
+    }
+
+    #[test]
+    fn append() {
+        let mut sut = SUT::sample();
+        assert!(!sut.append(Gateway::mainnet()));
+        assert_eq!(sut, SUT::sample());
+        assert!(sut.append(Gateway::kisharnet()));
+        assert_ne!(sut, SUT::sample());
     }
 
     #[test]

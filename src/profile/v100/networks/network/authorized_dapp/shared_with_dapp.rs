@@ -37,7 +37,7 @@ macro_rules! declare_shared_with_dapp {
 
             /// The by user shared IDs of data identifiable data shared with the
             /// Dapp.
-            pub ids: IdentifiedVecVia<$id>,
+            pub ids: IdentifiedVecOf<$id>,
         }
 
         impl $struct_name {
@@ -50,7 +50,7 @@ macro_rules! declare_shared_with_dapp {
                 request: RequestedQuantity,
                 ids: impl IntoIterator<Item = $id>,
             ) -> Self {
-                let ids = IdentifiedVecVia::from_iter(ids.into_iter());
+                let ids = IdentifiedVecOf::from_iter(ids.into_iter());
                 let len = ids.len();
                 assert!(
                     request.is_fulfilled_by_ids(len),
@@ -64,14 +64,14 @@ macro_rules! declare_shared_with_dapp {
             pub fn exactly(
                 ids: impl IntoIterator<Item = $id>,
             ) -> Self {
-                let ids = IdentifiedVecVia::from_iter(ids.into_iter());
+                let ids = ids.into_iter().collect_vec();
                 Self::new(RequestedQuantity::exactly(ids.len() as u16), ids)
             }
 
             pub fn just(
                 id: $id,
             ) -> Self {
-               Self::exactly(IdentifiedVecVia::from_iter([id]))
+               Self::exactly([id])
             }
 
             /// String representation of the request and shared ids.
@@ -110,19 +110,19 @@ macro_rules! declare_shared_with_dapp {
             #[test]
             #[should_panic = "ids does not fulfill request, got: #0, but requested: AtLeast: 1"]
             fn panics_when_at_least_is_not_fulfilled() {
-                _ = SUT::new(RequestedQuantity::at_least(1), IdentifiedVecVia::new())
+                _ = SUT::new(RequestedQuantity::at_least(1), [])
             }
 
             #[test]
             #[should_panic = "ids does not fulfill request, got: #0, but requested: Exactly: 1"]
             fn panics_when_exactly_is_not_fulfilled() {
-                _ = SUT::new(RequestedQuantity::exactly(1), IdentifiedVecVia::new())
+                _ = SUT::new(RequestedQuantity::exactly(1), [])
             }
 
             #[test]
             #[should_panic = "Invalid quantity Exactly: 0"]
             fn panics_when_exactly_0() {
-                _ = SUT::new(RequestedQuantity::exactly(0), IdentifiedVecVia::new())
+                _ = SUT::new(RequestedQuantity::exactly(0), [])
             }
 
             #[test]

@@ -3,6 +3,7 @@ import Foundation
 import Sargon
 import SargonUniFFI
 import XCTest
+import SwiftyJSON
 
 final class DeviceFactorSourceTests: SpecificFactorSourceTest<DeviceFactorSource> {
 	func test_id_of_device() {
@@ -72,5 +73,10 @@ final class DeviceFactorSourceTests: SpecificFactorSourceTest<DeviceFactorSource
 			"device:4af22ea955d53263a712d897a797df8388e13b8e7b3f30d7d7da88028b724d60"
 		)
 	}
-
+	
+	func test_json_decoding_of_profile_fails_if_factorSource_supported_curves_is_empty() throws {
+		var json = JSON(Profile.sample)
+		json["factorSources"][0]["device.common.cryptoParameters.supportedCurves"] = []
+		XCTAssertThrowsError(try Profile(jsonData: json.rawData()))
+	}
 }

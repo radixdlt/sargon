@@ -1,10 +1,9 @@
 use crate::prelude::*;
 
-decl_can_be_empty_identified_array_of!(
+decl_identified_vec_of!(
     /// Collection of clients user have connected P2P with, typically these
     /// are WebRTC connections with DApps, but might be Android or iPhone
     /// clients as well.
-    P2PLinks,
     P2PLink
 );
 
@@ -32,23 +31,6 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(P2PLinks::sample(), P2PLinks::sample_other());
-    }
-
-    #[test]
-    fn display() {
-        let mut sut = P2PLinks::new();
-        sut.append(P2PLink::sample_duckduckgo());
-        assert_eq!(
-            format!("{}", sut),
-            "[P2PLink( name: 'DuckDuckGo on Mac Pro', password: <OMITTED>)]"
-        );
-    }
-
-    #[test]
-    fn debug() {
-        let mut sut = P2PLinks::new();
-        sut.append(P2PLink::sample_duckduckgo());
-        assert_eq!(format!("{:?}", sut), "P2PLinks { secret_magic: P2PLinksSecretMagic([P2PLink { display_name: 'DuckDuckGo on Mac Pro', connection_password: 'deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead' }]) }");
     }
 
     #[test]
@@ -101,8 +83,8 @@ mod tests {
         let c = P2PLink::sample_chrome();
         let d = P2PLink::sample_duckduckgo();
         let mut sut = P2PLinks::from_iter([&a, &b, &c].into_iter().cloned());
-        assert_eq!(sut.elements(), [&a, &b, &c]);
-        sut.insert(d.clone(), 1);
-        assert_eq!(sut.elements(), [&a, &d, &b, &c]);
+        assert_eq!(sut.get_all(), [&a, &b, &c]);
+        sut.insert_at(d.clone(), 1);
+        assert_eq!(sut.get_all(), [&a, &d, &b, &c]);
     }
 }
