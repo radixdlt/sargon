@@ -1,17 +1,22 @@
 package com.radixdlt.sargon.extensions
 
 import com.radixdlt.sargon.Hash
+import com.radixdlt.sargon.Header
 import com.radixdlt.sargon.P2pLink
 import com.radixdlt.sargon.P2pLinks
+import com.radixdlt.sargon.headerToJsonBytes
+import com.radixdlt.sargon.newHeaderFromJsonBytes
 import com.radixdlt.sargon.newP2PLinks
 import com.radixdlt.sargon.newP2PLinksByAppending
 import com.radixdlt.sargon.newP2PLinksByUpdatingOrAppending
 import com.radixdlt.sargon.newP2PLinksByUpdatingOrInsertingAtIndex
+import com.radixdlt.sargon.newP2PLinksFromJsonBytes
 import com.radixdlt.sargon.newP2PLinksRemovedById
 import com.radixdlt.sargon.newP2PLinksRemovedElement
 import com.radixdlt.sargon.p2PLinksElementCount
 import com.radixdlt.sargon.p2PLinksGetElements
 import com.radixdlt.sargon.p2PLinksGetP2PLinkById
+import com.radixdlt.sargon.p2PLinksToJsonBytes
 
 fun P2pLinks.Companion.init(vararg p2pLink: P2pLink): P2pLinks =
     init(p2pLinks = p2pLink.asList())
@@ -48,3 +53,9 @@ fun P2pLinks.remove(p2pLink: P2pLink): P2pLinks =
 
 fun P2pLinks.getBy(hash: Hash): P2pLink? =
     p2PLinksGetP2PLinkById(p2PLinks = this, id = hash)
+
+@Throws(SargonException::class)
+fun P2pLinks.Companion.fromJson(jsonString: String) =
+    newP2PLinksFromJsonBytes(jsonBytes = bagOfBytes(fromString = jsonString))
+
+fun P2pLinks.toJson(): String = p2PLinksToJsonBytes(p2PLinks = this).string

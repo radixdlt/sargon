@@ -3,6 +3,7 @@ package com.radixdlt.sargon
 import com.radixdlt.sargon.extensions.analyzeContentsOfFile
 import com.radixdlt.sargon.extensions.asGeneral
 import com.radixdlt.sargon.extensions.bagOfBytes
+import com.radixdlt.sargon.extensions.checkIfProfileJsonContainsLegacyP2PLinks
 import com.radixdlt.sargon.extensions.fromEncryptedJson
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.fromJson
@@ -52,7 +53,7 @@ class ProfileTest : SampleTestable<Profile> {
 
         val result =
             runCatching { Profile.fromJson(jsonString = json) }.exceptionOrNull()
-                    as? CommonException.FailedToDeserializeJsonToValue
+                as? CommonException.FailedToDeserializeJsonToValue
 
         assertEquals(
             bagOfBytes(json).size.toULong(),
@@ -105,6 +106,37 @@ class ProfileTest : SampleTestable<Profile> {
         assertEquals(
             ProfileFileContents.NotProfile,
             Profile.analyzeContentsOfFile(randomBagOfBytes(32).string)
+        )
+    }
+
+    @Test
+    fun testCheckIfProfileJsonContainsLegacyP2PLinksWhenP2PLinksAreNotPresent() {
+        Profile.sample.all.forEach { sut ->
+            assertEquals(
+                false,
+                Profile.checkIfProfileJsonContainsLegacyP2PLinks(sut.toJson())
+            )
+        }
+    }
+
+    @Test
+    fun testCheckIfProfileJsonContainsLegacyP2PLinksWhenP2PLinksArePresent() {
+        assertEquals(
+            true,
+            Profile.checkIfProfileJsonContainsLegacyP2PLinks(
+                """
+            {
+                "appPreferences": {
+                "p2pLinks": [
+                {
+                    "connectionPassword": "babebabebabebabebabebabebabebabebabebabebabebabebabebabebabebabe",
+                    "displayName": "Brave on PC"
+                }
+                ]
+            }
+            }
+            """
+            )
         )
     }
 }
