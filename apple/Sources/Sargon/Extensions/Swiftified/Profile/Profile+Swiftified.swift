@@ -29,6 +29,7 @@ extension Profile {
 	}
 }
 
+public typealias ProfileID = ProfileId
 extension Profile: Identifiable {
 	public typealias ID = ProfileID
 	public var id: ID {
