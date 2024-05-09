@@ -11,11 +11,13 @@ import SargonUniFFI
 #if DEBUG
 
 extension BIOS {
-	public static let test = BIOS(
-		bundle: .main,
-		keychainService: "Test",
-		userDefaultsSuite: "works.rdx"
-	)
+	public static func test() -> BIOS {
+		BIOS(
+			bundle: .main,
+			keychainService: "Test",
+			userDefaultsSuite: "works.rdx"
+		)
+	}
 }
 
 @dynamicMemberLookup
@@ -25,7 +27,7 @@ public final class TestOS {
 		self.os = try await SargonOS.boot(bios: bios)
 	}
 	public convenience init() async throws {
-		try await self.init(bios: .test)
+		try await self.init(bios: .test())
 	}
 }
 extension TestOS: SargonOSProtocol {}
