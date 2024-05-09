@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-json_data_convertible!(RadixConnectPurpose);
+json_string_convertible!(RadixConnectPurpose);
 
 #[derive(
     Serialize,
@@ -46,9 +46,6 @@ impl std::fmt::Display for RadixConnectPurpose {
         write!(f, "{}", self.to_json_string())
     }
 }
-
-impl JsonStringSerializing for RadixConnectPurpose {} // to raw String
-impl JsonStringDeserializing for RadixConnectPurpose {} // from raw String
 
 #[uniffi::export]
 pub fn new_radix_connect_purpose_from_string(

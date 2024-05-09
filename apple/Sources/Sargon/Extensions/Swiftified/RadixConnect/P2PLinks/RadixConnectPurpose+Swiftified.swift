@@ -2,7 +2,7 @@ import Foundation
 import SargonUniFFI
 
 extension RadixConnectPurpose: SargonModel {}
-extension RadixConnectPurpose: SargonObjectCodable {}
+extension RadixConnectPurpose: SargonStringCodable {}
 
 extension RadixConnectPurpose {
 

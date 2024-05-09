@@ -7,11 +7,11 @@ extension RadixConnectPurpose {
         self = newRadixConnectPurposeFromString(string: string)
     }
 
-    public init(jsonData: some DataProtocol) throws {
-		self = try newRadixConnectPurposeFromJsonBytes(jsonBytes: Data(jsonData))
-	}
-	
-	public func jsonData() -> Data {
-        radixConnectPurposeToJsonBytes(radixConnectPurpose: self)
-	}
+    public init(jsonStringLiteral: String) throws {
+        self = try newRadixConnectPurposeFromJsonString(jsonString: jsonStringLiteral)
+    }
+    
+    public func jsonStringLiteral() -> String {
+		radixConnectPurposeToJsonString(radixConnectPurpose: self)
+    }
 }
