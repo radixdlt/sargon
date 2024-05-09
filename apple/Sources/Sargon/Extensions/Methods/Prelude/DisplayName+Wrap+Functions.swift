@@ -5,12 +5,12 @@ extension DisplayName {
 	public init(validating name: String) throws {
 		self = try newDisplayName(name: name)
 	}
-    
-    public init(jsonData: some DataProtocol) throws {
-        self = try newDisplayNameFromJsonBytes(jsonBytes: Data(jsonData))
+
+    public init(jsonStringLiteral: String) throws {
+        self = try newDisplayNameFromJsonString(jsonString: jsonStringLiteral)
     }
     
-    public func jsonData() -> Data {
-        displayNameToJsonBytes(displayName: self)
+    public func jsonStringLiteral() -> String {
+		displayNameToJsonString(displayName: self)
     }
 }

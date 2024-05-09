@@ -2,7 +2,7 @@ import Foundation
 import SargonUniFFI
 
 extension DisplayName: SargonModel {}
-extension DisplayName: SargonObjectCodable {}
+extension DisplayName: SargonStringCodable {}
 
 extension DisplayName: CustomStringConvertible {
 	public var description: String {
