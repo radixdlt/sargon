@@ -111,13 +111,23 @@ final class ProfileTests: Test<Profile> {
 		)
 	}()
 
-        func test_check_if_profile_json_contains_legacy_p2p_links() {
-            func doTest(_ sut: SUT) {
-                XCTAssertEqual(
-                    SUT.checkIfProfileJsonContainsLegacyP2PLinks(contents: sut.jsonData()),
-                    false
-                )
-            }
-            SUT.sampleValues.forEach(doTest)
+    func test_check_if_profile_json_contains_legacy_p2p_links_when_p2p_links_are_not_present() {
+        func doTest(_ sut: SUT) {
+            XCTAssertEqual(
+                SUT.checkIfProfileJsonContainsLegacyP2PLinks(contents: sut.jsonData()),
+                false
+            )
         }
+        SUT.sampleValues.forEach(doTest)
+    }
+
+	func test_check_if_profile_json_contains_legacy_p2p_links_when_p2p_links_are_present() {
+        XCTAssertEqual(
+            SUT.checkIfProfileJsonContainsLegacyP2PLinks(contents: 
+			"""
+			{"appPreferences": {"p2pLinks": [{"connectionPassword": "babebabebabebabebabebabebabebabebabebabebabebabebabebabebabebabe","displayName": "Brave on PC"}]}}
+			""".data(using: .utf8)!),
+            true
+        )
+    }
 }

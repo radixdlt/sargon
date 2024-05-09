@@ -574,6 +574,21 @@ mod tests {
     }
 
     #[test]
+    fn check_if_profile_json_contains_legacy_p2p_links_in_profile_snapshot_version_100(
+    ) {
+        let value = include_str!(concat!(
+            env!("FIXTURES_VECTOR"),
+            "only_plaintext_profile_snapshot_version_100.json"
+        ));
+        assert_eq!(
+            true,
+            SUT::check_if_profile_json_contains_legacy_p2p_links(
+                value.as_bytes()
+            )
+        );
+    }
+
+    #[test]
     fn json_roundtrip() {
         let sut = SUT::sample();
         assert_eq_after_json_roundtrip(

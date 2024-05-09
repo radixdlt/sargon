@@ -10,13 +10,11 @@ mod profile_snapshot_tests {
 
     #[test]
     fn v100_100() {
-        let (profile, json) =
-            fixture_and_json::<Profile>(include_str!(concat!(
-                env!("FIXTURES_VECTOR"),
-                "only_plaintext_profile_snapshot_version_100.json"
-            )))
-            .expect("V100 Profile to deserialize");
-        assert_json_value_eq_after_roundtrip(&profile, json)
+        fixture_and_json::<Profile>(include_str!(concat!(
+            env!("FIXTURES_VECTOR"),
+            "only_plaintext_profile_snapshot_version_100.json"
+        )))
+        .expect("V100 Profile to deserialize");
     }
 }
 

@@ -13,14 +13,15 @@ json_data_convertible!(RadixConnectPurpose);
     Hash,
     PartialOrd,
     Ord,
+    Default,
     uniffi::Enum,
 )]
+#[serde(rename_all = "lowercase")]
 pub enum RadixConnectPurpose {
-    #[serde(rename = "general")]
     General,
 
-    #[serde(rename = "unknown")]
-    Unknown,
+    #[default]
+    Unknown
 }
 
 impl FromStr for RadixConnectPurpose {
@@ -36,12 +37,7 @@ impl FromStr for RadixConnectPurpose {
 
 impl RadixConnectPurpose {
     pub fn from_str_default_value(s: &str) -> Self {
-        let result = RadixConnectPurpose::from_str(s);
-
-        match result {
-            Ok(value) => value,
-            Err(_) => RadixConnectPurpose::Unknown,
-        }
+        RadixConnectPurpose::from_str(s).unwrap_or_default()
     }
 }
 
@@ -59,11 +55,6 @@ pub fn new_radix_connect_purpose_from_string(
     string: String,
 ) -> RadixConnectPurpose {
     RadixConnectPurpose::from_str_default_value(&string)
-}
-
-#[uniffi::export]
-pub fn radix_connect_purpose_to_string(kind: RadixConnectPurpose) -> String {
-    kind.to_string()
 }
 
 #[uniffi::export]
