@@ -1,4 +1,4 @@
-use crate::{prelude::*, UniffiCustomTypeConverter};
+use crate::prelude::*;
 
 #[uniffi::export(with_foreign)]
 #[async_trait::async_trait]

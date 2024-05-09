@@ -11,7 +11,7 @@ impl EventBusDriver for RustEventBusDriver {
         &self,
         event_notification: EventNotification,
     ) {
-        self.spy(event_notification)
+        (self.spy)(event_notification)
     }
 }
 
