@@ -4,7 +4,7 @@ decl_can_be_empty_identified_array_of!(
     /// Other by user added or predefined Gateways the user can switch to.
     /// It might be Gateways with different URLs on the SAME network, or
     /// other networks, the identifier of a Gateway is the URL.
-    OtherGateways,
+    Gateways,
     Gateway
 );
 
@@ -14,7 +14,7 @@ decl_can_be_empty_identified_array_of!(
     Debug, Clone, PartialEq, Eq, Hash, derive_more::Display, uniffi::Record,
 )]
 #[display("current: {}, other: {}", current, other)]
-pub struct Gateways {
+pub struct SavedGateways {
     /// The currently used Gateway, when a user query's asset balances of
     /// accounts or submits transactions, this Gateway will be used.
     pub current: Gateway,
@@ -22,10 +22,10 @@ pub struct Gateways {
     /// Other by user added or predefined Gateways the user can switch to.
     /// It might be Gateways with different URLs on the SAME network, or
     /// other networks, the identifier of a Gateway is the URL.
-    pub other: OtherGateways,
+    pub other: Gateways,
 }
 
-impl Gateways {
+impl SavedGateways {
     pub fn len(&self) -> usize {
         self.other.len() + 1
     }
@@ -42,7 +42,7 @@ impl Gateways {
     }
 }
 
-impl Serialize for Gateways {
+impl Serialize for SavedGateways {
     #[cfg(not(tarpaulin_include))] // false negative
     fn serialize<S>(
         &self,
@@ -58,11 +58,11 @@ impl Serialize for Gateways {
     }
 }
 
-impl<'de> Deserialize<'de> for Gateways {
+impl<'de> Deserialize<'de> for SavedGateways {
     #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(
         deserializer: D,
-    ) -> Result<Gateways, D::Error> {
+    ) -> Result<SavedGateways, D::Error> {
         #[derive(Deserialize, Serialize)]
         struct Wrapper {
             #[serde(rename = "current")]
@@ -84,16 +84,16 @@ impl<'de> Deserialize<'de> for Gateways {
 
         other.remove(&current);
 
-        Gateways::new_with_other(current, other.items())
+        SavedGateways::new_with_other(current, other.items())
             .map_err(de::Error::custom)
     }
 }
 
-impl Gateways {
+impl SavedGateways {
     pub fn new(current: Gateway) -> Self {
         Self {
             current,
-            other: OtherGateways::default(),
+            other: Gateways::default(),
         }
     }
 
@@ -101,7 +101,7 @@ impl Gateways {
     where
         I: IntoIterator<Item = Gateway>,
     {
-        let other = OtherGateways::from_iter(other);
+        let other = Gateways::from_iter(other);
         if other.contains(&current) {
             return Err(
                 CommonError::GatewaysDiscrepancyOtherShouldNotContainCurrent,
@@ -111,7 +111,7 @@ impl Gateways {
     }
 }
 
-impl Gateways {
+impl SavedGateways {
     /// Changes the current Gateway to `to`, if it is not already the current. If `to` is
     /// not a new Gateway, it will be removed from. Returns `Ok(false)` if `to` was already
     /// the `current`, returns `Ok(true)` if `to` was not already `current`.
@@ -145,53 +145,57 @@ impl Gateways {
     }
 }
 
-impl Default for Gateways {
+impl Default for SavedGateways {
     fn default() -> Self {
         Self::new_with_other(Gateway::mainnet(), vec![Gateway::stokenet()])
             .expect("Stokenet and Mainnet should have different NetworkIDs.")
     }
 }
 
-impl HasSampleValues for Gateways {
+impl HasSampleValues for SavedGateways {
     fn sample() -> Self {
-        let mut sut = Gateways::new(Gateway::rcnet());
-        sut.append(Gateway::mainnet());
-        sut.append(Gateway::stokenet());
-        sut
+        let mut gateways = Self::new(Gateway::rcnet());
+        gateways.append(Gateway::mainnet());
+        gateways.append(Gateway::stokenet());
+        gateways
     }
 
     fn sample_other() -> Self {
-        Gateways::default()
+        SavedGateways::default()
     }
 }
 
-impl HasSampleValues for OtherGateways {
+impl HasSampleValues for Gateways {
     fn sample() -> Self {
-        OtherGateways::from_iter([Gateway::stokenet()])
+        Self::from_iter([Gateway::stokenet()])
     }
 
     fn sample_other() -> Self {
-        OtherGateways::from_iter([Gateway::stokenet(), Gateway::hammunet()])
+        Self::from_iter([Gateway::stokenet(), Gateway::hammunet()])
     }
 }
 
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = SavedGateways;
+
     #[test]
     fn equality() {
-        assert_eq!(Gateways::sample(), Gateways::sample());
-        assert_eq!(Gateways::sample_other(), Gateways::sample_other());
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(Gateways::sample(), Gateways::sample_other());
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn change_current_to_existing() {
-        let mut sut = Gateways::default();
+        let mut sut = SUT::default();
         assert_eq!(sut.current.network.id, NetworkID::Mainnet);
         assert_eq!(sut.change_current(Gateway::stokenet()), Ok(true));
         assert_eq!(sut.current.network.id, NetworkID::Stokenet);
@@ -200,19 +204,16 @@ mod tests {
     #[test]
     fn new_throw_gateways_discrepancy_other_should_not_contain_current() {
         assert_eq!(
-            Gateways::new_with_other(
-                Gateway::mainnet(),
-                vec![Gateway::mainnet()]
-            ),
+            SUT::new_with_other(Gateway::mainnet(), vec![Gateway::mainnet()]),
             Err(CommonError::GatewaysDiscrepancyOtherShouldNotContainCurrent)
         );
     }
 
     #[test]
     fn change_throw_gateways_discrepancy_other_should_not_contain_current() {
-        let mut impossible = Gateways {
+        let mut impossible = SUT {
             current: Gateway::mainnet(),
-            other: OtherGateways::from_iter([Gateway::mainnet()]),
+            other: Gateways::from_iter([Gateway::mainnet()]),
         };
         assert_eq!(
             impossible.change_current(Gateway::stokenet()),
@@ -222,7 +223,7 @@ mod tests {
 
     #[test]
     fn change_current_to_current() {
-        let mut sut = Gateways::default();
+        let mut sut = SUT::default();
         assert_eq!(sut.current.network.id, NetworkID::Mainnet);
         assert_eq!(sut.change_current(Gateway::mainnet()), Ok(false));
         assert_eq!(sut.current.network.id, NetworkID::Mainnet);
@@ -230,7 +231,7 @@ mod tests {
 
     #[test]
     fn len() {
-        let sut = Gateways::new_with_other(
+        let sut = SUT::new_with_other(
             Gateway::mainnet(),                         // 1
             [Gateway::stokenet(), Gateway::mardunet()], // + 2
         )
@@ -241,7 +242,7 @@ mod tests {
 
     #[test]
     fn change_current_to_new() {
-        let mut sut = Gateways::default();
+        let mut sut = SUT::default();
         assert_eq!(sut.current.network.id, NetworkID::Mainnet);
         assert_eq!(sut.change_current(Gateway::nebunet()), Ok(true));
         assert_eq!(sut.current.network.id, NetworkID::Nebunet);
@@ -253,7 +254,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip() {
-        let sut = Gateways::sample();
+        let sut = SUT::sample();
 
         assert_eq_after_json_roundtrip(
             &sut,
@@ -292,5 +293,79 @@ mod tests {
             }
             "#,
         )
+    }
+
+    #[test]
+    fn deserialize_from_json_with_different_description_treats_both_gateways_as_wellknown(
+    ) {
+        let json = r#"
+        {
+            "current": "https://mainnet.radixdlt.com/",
+            "saved": [
+                {
+                    "network": {
+                        "name": "mainnet",
+                        "id": 1,
+                        "displayDescription": "Mainnet Gateway"
+                    },
+                    "url": "https://mainnet.radixdlt.com/"
+                },
+                {
+                    "network": {
+                        "name": "stokenet",
+                        "id": 2,
+                        "displayDescription": "Stokenet (testnet) Gateway"
+                    },
+                    "url": "https://babylon-stokenet-gateway.radixdlt.com/"
+                }
+            ]
+        }
+        "#;
+
+        let sut = serde_json::from_str::<SUT>(json).unwrap();
+        let is_wellknown_vec = sut
+            .all()
+            .iter()
+            .map(|gateway| gateway.is_wellknown())
+            .collect_vec();
+
+        assert_eq!(vec![true, true], is_wellknown_vec)
+    }
+
+    #[test]
+    fn test_gateways_identification() {
+        let mainnet = Gateway::new(
+            String::from("https://mainnet.radixdlt.com/"),
+            NetworkID::Mainnet,
+        )
+        .unwrap();
+
+        let mainnet_no_slash = Gateway::new(
+            String::from("https://mainnet.radixdlt.com"),
+            NetworkID::Mainnet,
+        )
+        .unwrap();
+
+        let other_mainnet = Gateway::new(
+            String::from("https://other-mainnet.radixdlt.com"),
+            NetworkID::Mainnet,
+        )
+        .unwrap();
+
+        let other_mainnet_http = Gateway::new(
+            String::from("http://other-mainnet.radixdlt.com"),
+            NetworkID::Mainnet,
+        )
+        .unwrap();
+
+        let gateways_vec =
+            vec![mainnet, mainnet_no_slash, other_mainnet, other_mainnet_http];
+
+        let identified_gateways =
+            Gateways::from_iter(gateways_vec.iter().cloned());
+
+        // Expecting only 3 unique Gateways, since the two mainnet ones differ in only a slash which is
+        // considered as the same URL
+        assert_eq!(3, identified_gateways.len())
     }
 }

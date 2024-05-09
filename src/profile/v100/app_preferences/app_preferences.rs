@@ -24,7 +24,7 @@ pub struct AppPreferences {
     pub display: AppDisplay,
 
     /// The gateway of the active network and collection of other saved gateways.
-    pub gateways: Gateways,
+    pub gateways: SavedGateways,
 
     /// Controls e.g. if Profile Snapshot gets synced to iCloud/Google backup or not.
     pub security: Security,
@@ -50,7 +50,7 @@ impl AppPreferences {
 impl AppPreferences {
     pub fn new(
         display: AppDisplay,
-        gateways: Gateways,
+        gateways: SavedGateways,
         security: Security,
         transaction: TransactionPreferences,
     ) -> Self {
@@ -68,7 +68,7 @@ impl HasSampleValues for AppPreferences {
     fn sample() -> Self {
         Self::new(
             AppDisplay::sample(),
-            Gateways::sample(),
+            SavedGateways::sample(),
             Security::sample(),
             TransactionPreferences::sample(),
         )
@@ -78,7 +78,7 @@ impl HasSampleValues for AppPreferences {
     fn sample_other() -> Self {
         Self::new(
             AppDisplay::sample_other(),
-            Gateways::sample_other(),
+            SavedGateways::sample_other(),
             Security::sample_other(),
             TransactionPreferences::sample_other(),
         )
@@ -110,7 +110,7 @@ mod tests {
 
     #[test]
     fn get_gateways() {
-        assert_eq!(SUT::sample().gateways, Gateways::sample())
+        assert_eq!(SUT::sample().gateways, SavedGateways::sample())
     }
 
     #[test]

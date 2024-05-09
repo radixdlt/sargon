@@ -41,6 +41,6 @@ mod tests {
 
     #[test]
     fn to_string() {
-        assert_eq!(dependency_information_to_string(&SUT::sample()), "develop");
+        assert_eq!(dependency_information_to_string(&SUT::sample()), "main");
     }
 }

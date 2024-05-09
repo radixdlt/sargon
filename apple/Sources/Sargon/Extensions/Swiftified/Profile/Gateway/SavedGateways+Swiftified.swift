@@ -7,7 +7,7 @@
 
 import SargonUniFFI
 
-extension Gateways: SargonModel {}
-extension Gateways {
+extension SavedGateways: SargonModel {}
+extension SavedGateways {
 	public static let preset: Self = .default
 }
