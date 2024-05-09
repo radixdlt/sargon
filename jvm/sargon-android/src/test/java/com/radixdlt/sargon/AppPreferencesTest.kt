@@ -22,7 +22,7 @@ class AppPreferencesTest: SampleTestable<AppPreferences> {
                     fiatCurrencyPriceTarget = FiatCurrency.USD
                 ),
                 gateways = SavedGateways.default,
-                p2pLinks = P2pLinks.init(),
+                p2pLinks = listOf(),
                 security = Security(
                     isCloudProfileSyncEnabled = true,
                     isDeveloperModeEnabled = false,

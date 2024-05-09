@@ -1,5 +1,6 @@
 package com.radixdlt.sargon
 
+import com.radixdlt.sargon.extensions.Gateways
 import com.radixdlt.sargon.extensions.all
 import com.radixdlt.sargon.extensions.changeCurrent
 import com.radixdlt.sargon.extensions.default
@@ -30,7 +31,7 @@ class SavedGatewaysTest: SampleTestable<SavedGateways> {
         assertEquals(
             SavedGateways(
                 current = Gateway.mainnet,
-                other = Gateways.init(Gateway.stokenet)
+                other = Gateways(Gateway.stokenet).asList()
             ),
             SavedGateways.default
         )
@@ -47,7 +48,7 @@ class SavedGatewaysTest: SampleTestable<SavedGateways> {
         assertEquals(
             SavedGateways(
                 current = newGateway,
-                other = Gateways.init(Gateway.stokenet, Gateway.mainnet)
+                other = Gateways(Gateway.stokenet, Gateway.mainnet).asList()
             ),
             gateways
         )

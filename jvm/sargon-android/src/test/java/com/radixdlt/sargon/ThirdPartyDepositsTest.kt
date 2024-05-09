@@ -1,8 +1,9 @@
 package com.radixdlt.sargon
 
+import com.radixdlt.sargon.extensions.AssetsExceptionList
+import com.radixdlt.sargon.extensions.DepositorsAllowList
 import com.radixdlt.sargon.extensions.accountRecoveryScanned
 import com.radixdlt.sargon.extensions.default
-import com.radixdlt.sargon.extensions.init
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -13,8 +14,8 @@ class ThirdPartyDepositsTest {
         assertEquals(
             ThirdPartyDeposits(
                 depositRule = DepositRule.ACCEPT_ALL,
-                assetsExceptionList = AssetsExceptionList.init(),
-                depositorsAllowList = DepositorsAllowList.init()
+                assetsExceptionList = AssetsExceptionList().asList(),
+                depositorsAllowList = DepositorsAllowList().asList()
             ),
             ThirdPartyDeposits.default()
         )
