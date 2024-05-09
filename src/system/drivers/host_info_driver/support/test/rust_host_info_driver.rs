@@ -5,6 +5,12 @@ use crate::prelude::*;
 #[derive(Debug)]
 pub struct RustHostInfoDriver;
 
+impl RustHostInfoDriver {
+    pub fn new() -> Arc<Self> {
+        Arc::new(RustHostInfoDriver)
+    }
+}
+
 #[async_trait::async_trait]
 impl HostInfoDriver for RustHostInfoDriver {
     /// The name of the host device (iPhone/Android), e.g. "My Red iPhone"

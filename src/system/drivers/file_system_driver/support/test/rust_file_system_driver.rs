@@ -5,6 +5,12 @@ use crate::prelude::*;
 #[derive(Debug)]
 pub struct RustFileSystemDriver;
 
+impl RustFileSystemDriver {
+    pub fn new() -> Arc<Self> {
+        Arc::new(RustFileSystemDriver)
+    }
+}
+
 #[allow(dead_code)]
 pub(crate) fn path_from_str(str: String, require: bool) -> Result<PathBuf> {
     let path = PathBuf::from_str(&str).map_err(|_| CommonError::Unknown)?;

@@ -41,6 +41,18 @@ impl From<log::Level> for LogLevel {
     }
 }
 
+impl From<LogLevel> for log::Level {
+    fn from(value: LogLevel) -> Self {
+        match value {
+            LogLevel::Error => Self::Error,
+            LogLevel::Warn => Self::Warn,
+            LogLevel::Info => Self::Info,
+            LogLevel::Debug => Self::Debug,
+            LogLevel::Trace => Self::Trace,
+        }
+    }
+}
+
 impl From<LogLevel> for log::LevelFilter {
     fn from(value: LogLevel) -> Self {
         match value {

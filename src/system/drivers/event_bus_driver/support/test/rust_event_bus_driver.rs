@@ -16,7 +16,10 @@ impl EventBusDriver for RustEventBusDriver {
 }
 
 impl RustEventBusDriver {
-    pub fn new(spy: fn(EventNotification) -> ()) -> Arc<Self> {
+    pub fn new() -> Arc<Self> {
+        Self::with_spy(|_| {})
+    }
+    pub fn with_spy(spy: fn(EventNotification) -> ()) -> Arc<Self> {
         Arc::new(Self { spy })
     }
 }
