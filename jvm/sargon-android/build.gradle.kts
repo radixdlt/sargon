@@ -1,6 +1,6 @@
+import com.radixdlt.cargo.toml.sargonVersion
 import org.gradle.configurationcache.extensions.capitalized
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.io.ByteArrayOutputStream
 
 plugins {
     alias(libs.plugins.android.library)
@@ -108,36 +108,10 @@ dependencies {
 
 publishing {
     publications {
-        fun command(command: String): String {
-            val out = ByteArrayOutputStream()
-            exec {
-                commandLine(command.split(" "))
-                standardOutput = out
-            }.assertNormalExitValue()
-            return String(out.toByteArray(), Charsets.UTF_8).trim()
-        }
-
         register<MavenPublication>("release") {
             groupId = "com.radixdlt.sargon"
             artifactId = "sargon-android"
-
-            val toml = File(projectDir.parentFile.parentFile, "Cargo.toml").readText()
-            val matchResult: MatchResult? = "version\\s*=\\s*\"(.+)\"".toRegex().find(toml)
-            version = matchResult?.let {
-                val (version) = matchResult.destructured
-
-                version
-            } ?: run {
-                command("git tag --sort=committerdate").split("\n").last()
-            }.let { version ->
-                val commitHash = command("git rev-parse --short @")
-
-                if (commitHash.isNotBlank()) {
-                    "$version-$commitHash"
-                } else {
-                    version
-                }
-            }
+            version = project.sargonVersion()
 
             afterEvaluate {
                 from(components["release"])
