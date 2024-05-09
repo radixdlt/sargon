@@ -3,6 +3,7 @@ import Foundation
 import Sargon
 import SargonUniFFI
 import XCTest
+import SwiftyJSON
 
 final class FactorSourcesTests: CollectionTest<FactorSource> {
 
@@ -23,4 +24,26 @@ final class FactorSourcesTests: CollectionTest<FactorSource> {
 		profile.factorSources = [] // empty FactorSources is not allowed
 		let _ = profile.jsonData() // should crash
 	}
+
+	func test_json_decoding_of_profile_fails_if_factorSources_is_empty() throws {
+		var json = JSON(Profile.sample)
+		json["factorSources"] = []
+		XCTAssertThrowsError(try Profile(jsonData: json.rawData()))
+	}
+	
+	func test_json_decoding_of_profile_fails_if_factorSources_contains_duplicates() throws {
+		var json = JSON(Profile.sample)
+		json["factorSources"] = [FactorSource.sample, FactorSource.sample]
+		XCTAssertThrowsError(try Profile(jsonData: json.rawData()))
+	}
+	
+	func test_json_decoding_of_profile_fails_if_factorSources_contains_duplicated_ids() throws {
+		var json = JSON(Profile.sample)
+		let a = FactorSource.sample
+		var b = a
+		b.common.addedOn = .now
+		json["factorSources"] = [a, b]
+		XCTAssertThrowsError(try Profile(jsonData: json.rawData()))
+	}
 }
+
