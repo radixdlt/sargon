@@ -155,4 +155,42 @@ mod uniffi_tests {
             sut
         );
     }
+
+    #[test]
+    fn check_if_profile_json_contains_legacy_p2p_links_when_p2p_links_are_present(
+    ) {
+        let value = r#"
+        {
+            "appPreferences": {
+              "p2pLinks": [
+                {
+                  "connectionPassword": "babebabebabebabebabebabebabebabebabebabebabebabebabebabebabebabe",
+                  "displayName": "Brave on PC"
+                }
+              ]
+            }
+          }
+        "#;
+        assert_eq!(
+            true,
+            check_if_profile_json_contains_legacy_p2p_links(BagOfBytes::from(
+                value.as_bytes()
+            ))
+        );
+    }
+
+    #[test]
+    fn check_if_profile_json_contains_legacy_p2p_links_when_empty_json() {
+        let value = r#"
+        {
+            
+          }
+        "#;
+        assert_eq!(
+            false,
+            check_if_profile_json_contains_legacy_p2p_links(BagOfBytes::from(
+                value.as_bytes()
+            ))
+        );
+    }
 }

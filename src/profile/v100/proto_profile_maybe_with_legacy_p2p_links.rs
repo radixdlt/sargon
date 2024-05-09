@@ -14,6 +14,7 @@ pub struct ProtoAppPreferencesMaybeWithLegacyP2PLinks {
 
 #[derive(Deserialize, Serialize, Eq, PartialEq, Debug)]
 pub struct ProtoDummyLinkMaybeWithLegacyP2PLinks {
+    #[serde(rename = "displayName")]
     pub display_name: String,
 }
 

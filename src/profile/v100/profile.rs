@@ -519,7 +519,8 @@ mod tests {
     }
 
     #[test]
-    fn check_if_profile_json_contains_legacy_p2p_links_test() {
+    fn check_if_profile_json_contains_legacy_p2p_links_when_p2p_links_are_present(
+    ) {
         let value = r#"
         {
             "appPreferences": {
@@ -541,7 +542,7 @@ mod tests {
     }
 
     #[test]
-    fn check_if_profile_json_contains_legacy_p2p_links_test2() {
+    fn check_if_profile_json_contains_legacy_p2p_links_when_empty_json() {
         let value = r#"
         {
             
@@ -556,7 +557,7 @@ mod tests {
     }
 
     #[test]
-    fn check_if_profile_json_contains_legacy_p2p_links_test3() {
+    fn check_if_profile_json_contains_legacy_p2p_links_when_empty_p2p_links() {
         let value = r#"
         {
             "appPreferences": {

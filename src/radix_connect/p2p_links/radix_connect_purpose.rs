@@ -21,7 +21,7 @@ pub enum RadixConnectPurpose {
     General,
 
     #[default]
-    Unknown
+    Unknown,
 }
 
 impl FromStr for RadixConnectPurpose {
@@ -125,5 +125,30 @@ mod tests {
     fn json_roundtrip() {
         assert_json_value_eq_after_roundtrip(&SUT::General, json!("general"));
         assert_json_value_eq_after_roundtrip(&SUT::Unknown, json!("unknown"));
+    }
+}
+
+#[cfg(test)]
+mod uniffi_tests {
+    use crate::prelude::*;
+
+    #[test]
+    fn new() {
+        assert_eq!(
+            new_radix_connect_purpose_from_string(String::from("general")),
+            RadixConnectPurpose::General
+        );
+    }
+
+    #[test]
+    fn sample_values() {
+        assert_eq!(
+            new_radix_connect_purpose_sample(),
+            RadixConnectPurpose::General
+        );
+        assert_eq!(
+            new_radix_connect_purpose_sample_other(),
+            RadixConnectPurpose::Unknown
+        );
     }
 }
