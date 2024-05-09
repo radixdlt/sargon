@@ -126,14 +126,14 @@ final class ProfileTests: Test<Profile> {
 			SUT.checkIfProfileJsonContainsLegacyP2PLinks(contents: 
 			"""
 			{
-  				"appPreferences": {
-    				"p2pLinks": [
-      					{
-        					"connectionPassword": "babebabebabebabebabebabebabebabebabebabebabebabebabebabebabebabe",
-        					"displayName": "Brave on PC"
-      					}
-    				]
-  				}
+				"appPreferences": {
+					"p2pLinks": [
+						{
+							"connectionPassword": "babebabebabebabebabebabebabebabebabebabebabebabebabebabebabebabe",
+							"displayName": "Brave on PC"
+						}
+					]
+				}
 			}
 			""".data(using: .utf8)!),
 			true
