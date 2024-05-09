@@ -483,8 +483,14 @@ pub enum CommonError {
     #[error("AuthorizedDapp references field id that does not exist")]
     AuthorizedDappReferencesFieldIDThatDoesNotExist = 10134,
 
+    #[error("Item identified by ID {id} does not exist")]
+    ElementDoesNotExist { id: String } = 10135,
+
+    #[error("Item identified by ID {id} already exist")]
+    ElementAlreadyExist { id: String } = 10136,
+
     #[error("Invalid RadixConnectPurpose, bad value: {bad_value}")]
-    InvalidRadixConnectPurpose { bad_value: String } = 10135,
+    InvalidRadixConnectPurpose { bad_value: String } = 10137,
 }
 
 #[uniffi::export]

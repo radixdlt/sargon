@@ -1,9 +1,6 @@
 use crate::prelude::*;
 
-decl_can_be_empty_identified_array_of!(
-    DetailedAuthorizedPersonas,
-    AuthorizedPersonaDetailed
-);
+decl_identified_vec_of!(DetailedAuthorizedPersonas, AuthorizedPersonaDetailed);
 
 impl HasSampleValues for DetailedAuthorizedPersonas {
     fn sample() -> Self {

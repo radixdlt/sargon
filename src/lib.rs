@@ -22,11 +22,6 @@ pub mod prelude {
 
     pub(crate) use std::collections::{BTreeSet, HashMap, HashSet};
 
-    pub(crate) use ::identified_vec::{
-        Identifiable, IdentifiedVec, IdentifiedVecOf, IsIdentifiedVec,
-        ItemsCloned,
-    };
-
     pub(crate) use ::hex::decode as hex_decode;
     pub(crate) use ::hex::encode as hex_encode;
     pub(crate) use iso8601_timestamp::Timestamp;
@@ -44,7 +39,9 @@ pub mod prelude {
     pub use radix_engine_common::math::traits::CheckedMul as ScryptoCheckedMul;
     pub(crate) use std::cmp::Ordering;
     pub(crate) use std::collections::BTreeMap;
+    pub(crate) use std::fmt::{Debug, Display, Formatter};
     pub(crate) use std::fs;
+    pub(crate) use std::hash::Hash as StdHash;
     pub use std::ops::{Add, AddAssign, Deref, Div, Mul, Neg, Sub};
     pub(crate) use std::str::FromStr;
     pub(crate) use std::sync::Arc;
@@ -64,7 +61,6 @@ pub mod prelude {
             VersionedTransactionReceipt as ScryptoVersionedTransactionReceipt,
         },
         types::{
-            indexmap::{IndexMap, IndexSet},
             node_modules::{
                 metadata::ToMetadataEntry as ScryptoToMetadataEntry,
                 ModuleConfig as ScryptoModuleConfig,

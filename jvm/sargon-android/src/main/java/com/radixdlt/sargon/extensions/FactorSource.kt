@@ -25,6 +25,9 @@ val FactorSource.kind: FactorSourceKind
         is FactorSource.Ledger -> value.kind
     }
 
+fun DeviceFactorSource.asGeneral() = FactorSource.Device(value = this)
+fun LedgerHardwareWalletFactorSource.asGeneral() = FactorSource.Ledger(value = this)
+
 fun FactorSource.Device.Companion.olympia(
     mnemonicWithPassphrase: MnemonicWithPassphrase
 ) = newDeviceFactorSourceOlympia(

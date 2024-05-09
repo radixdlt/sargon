@@ -22,18 +22,18 @@ impl HasSampleValues for SharedToDappWithPersonaIDsOfPersonaDataEntries {
     fn sample() -> Self {
         Self::new(
             RequestedQuantity::at_least(2),
-            IdentifiedVecVia::from_iter([
+            [
                 PersonaDataEntryID::sample_one(),
                 PersonaDataEntryID::sample_two(),
                 PersonaDataEntryID::sample_four(),
-            ]),
+            ],
         )
     }
 
     fn sample_other() -> Self {
         Self::new(
             RequestedQuantity::exactly(1),
-            IdentifiedVecVia::from_iter([PersonaDataEntryID::sample_one()]),
+            [PersonaDataEntryID::sample_one()],
         )
     }
 }

@@ -1,8 +1,7 @@
 use crate::prelude::*;
 
-decl_can_be_empty_identified_array_of!(
+decl_identified_vec_of!(
     /// An ordered set of ['AuthorizedDapp`]s on a specific network.
-    AuthorizedDapps,
     AuthorizedDapp
 );
 
@@ -86,10 +85,7 @@ mod tests {
         let authorized_dapp = AuthorizedDapp::sample();
         let address = authorized_dapp.dapp_definition_address;
         let authorized_dapps = AuthorizedDapps::just(authorized_dapp.clone());
-        assert_eq!(
-            authorized_dapps.get_authorized_dapp_by_id(&address),
-            Some(&authorized_dapp)
-        );
+        assert_eq!(authorized_dapps.get_id(&address), Some(&authorized_dapp));
     }
 
     #[test]

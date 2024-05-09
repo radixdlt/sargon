@@ -14,8 +14,4 @@ extension RadixConnectPurpose {
 	public func jsonData() -> Data {
         radixConnectPurposeToJsonBytes(radixConnectPurpose: self)
 	}
-    
-    public func toString() -> String {
-        radixConnectPurposeToString(kind: self)
-    }
 }

@@ -76,11 +76,11 @@ impl HasSampleValues for SharedPersonaData {
                 id.next(),
                 SharedToDappWithPersonaIDsOfPersonaDataEntries::new(
                     RequestedQuantity::exactly(2),
-                    IdentifiedVecVia::from_iter([id.next(), id.next()]),
+                    [id.next(), id.next()],
                 ),
                 SharedToDappWithPersonaIDsOfPersonaDataEntries::new(
                     RequestedQuantity::at_least(1),
-                    IdentifiedVecVia::from_iter([id.next(), id.next()]),
+                    [id.next(), id.next()],
                 ),
             )
         }
@@ -93,11 +93,11 @@ impl HasSampleValues for SharedPersonaData {
                 id.next(),
                 SharedToDappWithPersonaIDsOfPersonaDataEntries::new(
                     RequestedQuantity::exactly(2),
-                    IdentifiedVecVia::from_iter([id.next(), id.next()]),
+                    [id.next(), id.next()],
                 ),
                 SharedToDappWithPersonaIDsOfPersonaDataEntries::new(
                     RequestedQuantity::at_least(1),
-                    IdentifiedVecVia::from_iter([id.next(), id.next()]),
+                    [id.next(), id.next()],
                 ),
             )
         }

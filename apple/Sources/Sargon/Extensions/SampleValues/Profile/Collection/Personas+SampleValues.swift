@@ -9,7 +9,7 @@ import Foundation
 import SargonUniFFI
 
 #if DEBUG
-extension Personas {
+extension [Persona] {
 	public static let sample: Self = newPersonasSample()
 	public static let sampleOther: Self = newPersonasSampleOther()
 }

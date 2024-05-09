@@ -1,56 +1,15 @@
 package com.radixdlt.sargon
 
-import com.radixdlt.sargon.extensions.append
-import com.radixdlt.sargon.extensions.contains
-import com.radixdlt.sargon.extensions.get
-import com.radixdlt.sargon.extensions.getBy
-import com.radixdlt.sargon.extensions.init
-import com.radixdlt.sargon.extensions.invoke
-import com.radixdlt.sargon.extensions.remove
-import com.radixdlt.sargon.extensions.removeByAddress
-import com.radixdlt.sargon.extensions.size
-import com.radixdlt.sargon.extensions.updateOrAppend
-import com.radixdlt.sargon.extensions.updateOrInsert
-import com.radixdlt.sargon.samples.Sample
+import com.radixdlt.sargon.extensions.AuthorizedDapps
 import com.radixdlt.sargon.samples.sampleMainnet
-import com.radixdlt.sargon.samples.sampleStokenet
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Test
 
-class AuthorizedDappsTest: SampleTestable<AuthorizedDapps> {
-    override val samples: List<Sample<AuthorizedDapps>>
-        get() = listOf(AuthorizedDapps.sampleMainnet, AuthorizedDapps.sampleStokenet)
+internal class AuthorizedDappsTest: IdentifiedArrayTest<AuthorizedDapps, AccountAddress, AuthorizedDapp>() {
+    override fun element(): AuthorizedDapp = AuthorizedDapp.sampleMainnet()
 
-    @Test
-    fun testListMethods() {
-        val sample = AuthorizedDapp.sampleMainnet()
-        val sampleOther = AuthorizedDapp.sampleMainnet.other()
+    override fun elementWithDifferentId(): AuthorizedDapp = AuthorizedDapp.sampleMainnet.other()
 
-        var list = AuthorizedDapps.init(sample)
+    override fun identifier(element: AuthorizedDapp): AccountAddress = element.dappDefinitionAddress
 
-        assertTrue(sample in list)
-        assertEquals(1, list.size)
-        assertEquals(sample, list[0])
+    override fun init(element: AuthorizedDapp): AuthorizedDapps = AuthorizedDapps(element)
 
-        list = list.append(sampleOther)
-        assertTrue(sampleOther in list)
-        assertEquals(2, list.size)
-        assertEquals(sampleOther, list[1])
-
-        list = list.remove(sampleOther)
-        Assertions.assertFalse(sampleOther in list)
-        assertEquals(1, list.size)
-
-        list = list.updateOrInsert(sampleOther, 0)
-        assertEquals(sampleOther, list()[0])
-        assertTrue(list.size == 2)
-        list = list.updateOrAppend(sampleOther)
-        assertTrue(list.size == 2)
-        list = list.remove(sampleOther)
-
-        assertEquals(sample, list.getBy(sample.dappDefinitionAddress))
-        assertTrue(list.removeByAddress(sample.dappDefinitionAddress).size == 0)
-    }
 }

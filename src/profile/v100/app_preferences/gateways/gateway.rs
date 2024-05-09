@@ -142,7 +142,7 @@ impl Gateway {
     }
 
     pub fn is_wellknown(&self) -> bool {
-        Self::wellknown().contains(self)
+        Self::wellknown().contains_by_id(self)
     }
 }
 

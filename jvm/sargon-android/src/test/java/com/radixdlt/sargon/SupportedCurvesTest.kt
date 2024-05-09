@@ -1,44 +1,15 @@
 package com.radixdlt.sargon
 
-import com.radixdlt.sargon.extensions.append
-import com.radixdlt.sargon.extensions.contains
-import com.radixdlt.sargon.extensions.get
-import com.radixdlt.sargon.extensions.init
-import com.radixdlt.sargon.extensions.invoke
-import com.radixdlt.sargon.extensions.remove
-import com.radixdlt.sargon.extensions.size
-import com.radixdlt.sargon.extensions.updateOrAppend
-import com.radixdlt.sargon.extensions.updateOrInsert
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Test
+import com.radixdlt.sargon.extensions.SupportedCurves
+import com.radixdlt.sargon.samples.sample
 
-class SupportedCurvesTest {
+internal class SupportedCurvesTest: IdentifiedArrayTest<SupportedCurves, Slip10Curve, Slip10Curve>() {
 
-    @Test
-    fun testListMethods() {
-        val sample = Slip10Curve.CURVE25519
-        val sampleOther = Slip10Curve.SECP256K1
+    override fun element(): Slip10Curve = Slip10Curve.sample()
 
-        var list = SupportedCurves.init(sample)
+    override fun elementWithDifferentId(): Slip10Curve = Slip10Curve.sample.other()
 
-        Assertions.assertTrue(sample in list)
-        Assertions.assertEquals(1, list.size)
-        Assertions.assertEquals(sample, list[0])
+    override fun identifier(element: Slip10Curve): Slip10Curve = element
 
-        list = list.append(sampleOther)
-        Assertions.assertTrue(sampleOther in list)
-        Assertions.assertEquals(2, list.size)
-        Assertions.assertEquals(sampleOther, list[1])
-
-        list = list.updateOrInsert(sampleOther, 0)
-        Assertions.assertEquals(sampleOther, list()[1])
-        Assertions.assertTrue(list.size == 2)
-        list = list.updateOrAppend(sampleOther)
-        Assertions.assertTrue(list.size == 2)
-        list = list.remove(sampleOther)
-
-        list = list.remove(sampleOther)
-        Assertions.assertFalse(sampleOther in list)
-        Assertions.assertEquals(1, list.size)
-    }
+    override fun init(element: Slip10Curve): SupportedCurves = SupportedCurves(element)
 }

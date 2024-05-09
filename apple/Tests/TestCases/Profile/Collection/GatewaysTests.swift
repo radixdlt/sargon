@@ -4,4 +4,13 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class GatewaysTests: CanBeEmptyCollectionTest<Gateways> {}
+final class GatewaysTests: CollectionTest<Gateway> {
+	
+	override class func sample() -> SUT {
+		SUT.sample
+	}
+	
+	override class func sampleOther() -> SUT {
+		SUT.sampleOther
+	}
+}

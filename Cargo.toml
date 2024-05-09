@@ -109,15 +109,13 @@ itertools = { git = "https://github.com/rust-itertools/itertools/", rev = "98eca
 # enum-as-inner = "0.6.0"
 enum-as-inner = { git = "https://github.com/bluejekyll/enum-as-inner/", rev = "c15f6e5c4f98ec865e181ae1fff9fc13a1a2e4e2" }
 
-# identified_vec =  "0.1.11"
-identified_vec = { git = "https://github.com/Sajjon/identified_vec/", rev = "4480b418b69894ad96542bd94f80e9be63515e37", features = [
-    "serde",
-    "id_prim",
-] }
-
 # uniffi = "0.27.0"
 uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "d52c5460ae42ecad1e73a5b394ac96d48f4769de", features = [
     "cli",
+] }
+
+indexmap = { git = "https://github.com/indexmap-rs/indexmap", rev = "3f0fffb85b99a2a37bbee363703f8509dd03e2d7", features = [
+    "serde",
 ] }
 
 # SLIP10 implementation
