@@ -195,13 +195,8 @@ impl Profile {
         json: impl AsRef<[u8]>,
     ) -> bool {
         let json = json.as_ref();
-        let result =
-            serde_json::from_slice::<ProtoProfileMaybeWithLegacyP2PLinks>(json);
-
-        match result {
-            Ok(snapshot) => !snapshot.app_preferences.p2p_links.is_empty(),
-            Err(_) => false,
-        }
+        serde_json::from_slice::<ProtoProfileMaybeWithLegacyP2PLinks>(json)
+            .map_or_else(|_| false, |s| !s.app_preferences.p2p_links.is_empty())
     }
 }
 
