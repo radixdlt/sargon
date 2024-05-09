@@ -1,3 +1,4 @@
+import com.radixdlt.cargo.toml.sargonVersion
 import org.gradle.configurationcache.extensions.capitalized
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -110,7 +111,7 @@ publishing {
         register<MavenPublication>("release") {
             groupId = "com.radixdlt.sargon"
             artifactId = "sargon-android"
-            version = System.getenv("SARGON_VERSION")
+            version = project.sargonVersion()
 
             afterEvaluate {
                 from(components["release"])

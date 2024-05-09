@@ -1,4 +1,5 @@
 import com.radixdlt.cargo.desktop.BuildType
+import com.radixdlt.cargo.toml.sargonVersion
 
 plugins {
     id("java-library")
@@ -26,7 +27,7 @@ publishing {
         register<MavenPublication>("release") {
             groupId = "com.radixdlt.sargon"
             artifactId = "sargon-desktop-bins"
-            version = System.getenv("SARGON_VERSION")
+            version = project.sargonVersion()
 
             from(components["java"])
         }
