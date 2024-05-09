@@ -3,7 +3,6 @@ package com.radixdlt.sargon.extensions
 import com.radixdlt.sargon.Account
 import com.radixdlt.sargon.AccountAddress
 import com.radixdlt.sargon.AddressOfAccountOrPersona
-//import com.radixdlt.sargon.EntityFlags
 import com.radixdlt.sargon.EntitySecurityState
 import com.radixdlt.sargon.IdentityAddress
 import com.radixdlt.sargon.NetworkId
