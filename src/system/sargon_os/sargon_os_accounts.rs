@@ -256,7 +256,7 @@ mod tests {
     type SUT = SargonOS;
 
     #[actix_rt::test]
-    async fn test_add_account() {
+    async fn test_first_add_account() {
         // ARRANGE
         let os = SUT::fast_boot().await;
 
@@ -267,5 +267,26 @@ mod tests {
 
         // ASSERT
         assert_eq!(os.profile().networks[0].accounts.len(), 1);
+    }
+
+    #[actix_rt::test]
+    async fn test_first_create_unsaved_account() {
+        // ARRANGE
+        let os = SUT::fast_boot_bdfs(MnemonicWithPassphrase::sample()).await;
+
+        // ACT
+        let unsaved_account = os
+            .with_timeout(|x| {
+                x.create_unsaved_account(
+                    NetworkID::Mainnet,
+                    DisplayName::new("Alice").unwrap(),
+                )
+            })
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert_eq!(unsaved_account, Account::sample());
+        assert_eq!(os.profile().networks.len(), 0); // not added
     }
 }

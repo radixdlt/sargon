@@ -29,6 +29,15 @@ impl Deref for SargonOS {
 impl SargonOS {
     #[uniffi::constructor]
     pub async fn boot(bios: Arc<Bios>) -> Result<Arc<Self>> {
+        Self::boot_with_bdfs(bios, None).await
+    }
+}
+
+impl SargonOS {
+    pub async fn boot_with_bdfs(
+        bios: Arc<Bios>,
+        bdfs_mnemonic: Option<MnemonicWithPassphrase>,
+    ) -> Result<Arc<Self>> {
         let clients = Clients::new(bios);
 
         let sargon_info = SargonBuildInformation::get();
@@ -49,7 +58,8 @@ impl SargonOS {
         } else {
             info!("No saved profile found, creating a new one...");
             let (profile, bdfs) =
-                Self::create_new_profile_and_bdfs(&clients).await?;
+                Self::create_new_profile_with_bdfs(&clients, bdfs_mnemonic)
+                    .await?;
 
             secure_storage.save_private_hd_factor_source(&bdfs).await?;
 
@@ -77,20 +87,37 @@ impl SargonOS {
     async fn create_new_profile_and_bdfs(
         clients: &Clients,
     ) -> Result<(Profile, PrivateHierarchicalDeterministicFactorSource)> {
+        Self::create_new_profile_with_bdfs(clients, None).await
+    }
+
+    async fn create_new_profile_with_bdfs(
+        clients: &Clients,
+        mnemonic_with_passphrase: Option<MnemonicWithPassphrase>,
+    ) -> Result<(Profile, PrivateHierarchicalDeterministicFactorSource)> {
         debug!("Creating new Profile and BDFS");
 
         let device_info = Self::get_device_info(clients).await?;
 
-        debug!("Generating mnemonic (using Host provided entropy) for a new 'Babylon' `DeviceFactorSource` ('BDFS')");
+        let is_main = true;
+        let private_bdfs = match mnemonic_with_passphrase {
+            Some(mwp) => {
+                debug!("Using specified MnemonicWithPassphrase, perhaps we are running in at test...");
 
-        let entropy: BIP39Entropy = clients.entropy.bip39_entropy();
+                PrivateHierarchicalDeterministicFactorSource::new_babylon_with_mnemonic_with_passphrase(is_main, mwp, &device_info)
+            }
+            None => {
+                debug!("Generating mnemonic (using Host provided entropy) for a new 'Babylon' `DeviceFactorSource` ('BDFS')");
 
-        let private_bdfs = PrivateHierarchicalDeterministicFactorSource::new_babylon_with_entropy(
-            true,
-            entropy,
-            BIP39Passphrase::default(),
-            &device_info
-        );
+                let entropy: BIP39Entropy = clients.entropy.bip39_entropy();
+
+                PrivateHierarchicalDeterministicFactorSource::new_babylon_with_entropy(
+                    is_main,
+                    entropy,
+                    BIP39Passphrase::default(),
+                    &device_info
+                )
+            }
+        };
         debug!("Created BDFS (unsaved)");
 
         debug!("Creating new Profile...");
@@ -145,13 +172,23 @@ impl SargonOS {
     }
 
     pub async fn boot_test() -> Result<Arc<Self>> {
+        Self::boot_test_with_bdfs_mnemonic(None).await
+    }
+    pub async fn boot_test_with_bdfs_mnemonic(
+        bdfs_mnemonic: impl Into<Option<MnemonicWithPassphrase>>,
+    ) -> Result<Arc<Self>> {
         let test_drivers = Drivers::test();
         let bios = Bios::new(test_drivers);
-        Self::boot(bios).await
+        Self::boot_with_bdfs(bios, bdfs_mnemonic.into()).await
     }
 
     pub async fn fast_boot() -> Arc<Self> {
-        let req = Self::boot_test();
+        Self::fast_boot_bdfs(None).await
+    }
+    pub async fn fast_boot_bdfs(
+        bdfs_mnemonic: impl Into<Option<MnemonicWithPassphrase>>,
+    ) -> Arc<Self> {
+        let req = Self::boot_test_with_bdfs_mnemonic(bdfs_mnemonic);
 
         actix_rt::time::timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, req)
             .await
