@@ -256,6 +256,9 @@ class Decimal192Test : SampleTestable<Decimal192> {
             of("1234.999999999", '.', ',', "1234.999999999"),
             of(".9", '.', ',', "0.9"),
 
+            of("0-9", '-', ' ', "0-9"), // Decimal separator that needs to be escaped in regex
+            of("0^9", '^', ' ', "0^9"), // Decimal separator that needs to be escaped in regex
+
             of(" ", ',', ' ', "0"), // Blank resolves to 0
             of(" ", ' ', ',', "0"), // Blank with space as decimal separator resolves to 0
         )

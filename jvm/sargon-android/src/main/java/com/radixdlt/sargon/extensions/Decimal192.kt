@@ -98,7 +98,7 @@ fun Decimal192.Companion.parseFromTextField(
         groupingSeparator = null // We do not allow grouping separator characters in input
     )
 
-    val charactersToReplace = "[^0-9${config.decimalSeparator}]".toRegex()
+    val charactersToReplace = "[^0-9\\\\${config.decimalSeparator}]".toRegex()
     val sanitizedString = textFieldString.replace(charactersToReplace, "")
 
     return Decimal192.init(
