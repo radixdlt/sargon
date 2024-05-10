@@ -2,56 +2,11 @@ use std::sync::RwLockWriteGuard;
 
 use crate::prelude::*;
 
-trait OnSameNetworkValidating: Clone + IntoIterator<Item = Self::Element> {
-    type Element: IsNetworkAware;
-
-    fn is_empty(&self) -> bool;
-
-    fn assert_elements_not_empty_and_on_same_network(
-        &self,
-    ) -> Result<NetworkID> {
-        self.assert_elements_on_same_network()
-            .and_then(|x| x.ok_or(CommonError::ExpectedNonEmptyCollection))
-    }
-
-    fn assert_elements_on_same_network(&self) -> Result<Option<NetworkID>> {
-        if self.is_empty() {
-            return Ok(None);
-        }
-        let network_id = self.clone().into_iter().last().unwrap().network_id();
-        self.clone().into_iter().try_for_each(|e| {
-            if e.network_id() == network_id {
-                Ok(())
-            } else {
-                Err(CommonError::NetworkDiscrepancy {
-                    expected: network_id,
-                    actual: e.network_id(),
-                })
-            }
-        })?;
-
-        Ok(Some(network_id))
-    }
-}
-impl OnSameNetworkValidating for Accounts {
-    type Element = Account;
-
-    fn is_empty(&self) -> bool {
-        self.len() == 0
-    }
-}
-
+// ==================
+// Create Unsaved Account(s)
+// ==================
 #[uniffi::export]
 impl SargonOS {
-    pub fn has_any_network(&self) -> bool {
-        self.profile_holder
-            .access_profile_with(|p| !p.networks.is_empty())
-    }
-
-    pub fn profile(&self) -> Profile {
-        self.profile_holder.profile()
-    }
-
     /// Creates a new non securified account **WITHOUT** add it to Profile, using the *main* "Babylon"
     /// `DeviceFactorSource` and the "next" index for this FactorSource as derivation path.
     ///
@@ -67,67 +22,6 @@ impl SargonOS {
                 self.load_private_device_factor_source(&fs).await
             })
             .await
-    }
-
-    /// Add the `account` to active profile and **saves** the updated profile to
-    /// secure storage.
-    ///
-    /// Returns `Ok(())` if the `account` was new and successfully added. If
-    /// saving failed or if the account was already present in Profile, an
-    /// error is returned.
-    pub async fn add_account(&self, account: Account) -> Result<()> {
-        let address = account.address;
-
-        debug!("Adding account address: {} to profile", address);
-        self.add_accounts_without_emitting_event(Accounts::just(account))
-            .await?;
-
-        self.profile_holder.access_profile_with(|p| {
-            let accounts_on_network = p
-                .networks
-                .get_id(&address.network_id())
-                .unwrap()
-                .accounts
-                .len();
-            debug!(
-                "Added account address: {} to profile, contains: #{}",
-                address, accounts_on_network
-            );
-        });
-
-        self.clients
-            .event_bus
-            .emit(EventNotification::new(Event::ProfileChanged {
-                change: ProfileChange::AddedAccount { address },
-            }))
-            .await;
-
-        Ok(())
-    }
-
-    /// Adds the `accounts` to active profile and **saves** the updated profile to
-    /// secure storage.
-    ///
-    /// Returns `Ok(())` if the `accounts` were new and successfully added. If
-    /// saving failed or if the accounts were already present in Profile, an
-    /// error is returned.
-    pub async fn add_accounts(&self, accounts: Accounts) -> Result<()> {
-        let addresses = accounts
-            .clone()
-            .into_iter()
-            .map(|a| a.address)
-            .collect_vec();
-
-        self.add_accounts_without_emitting_event(accounts).await?;
-
-        self.clients
-            .event_bus
-            .emit(EventNotification::new(Event::ProfileChanged {
-                change: ProfileChange::AddedAccounts { addresses },
-            }))
-            .await;
-
-        Ok(())
     }
 
     /// Create a new Account and adds it to the active Profile.
@@ -192,7 +86,80 @@ impl SargonOS {
             )
             .await
     }
+}
 
+// ==================
+// Add (Save) Account(s)
+// ==================
+#[uniffi::export]
+impl SargonOS {
+    /// Add the `account` to active profile and **saves** the updated profile to
+    /// secure storage.
+    ///
+    /// Returns `Ok(())` if the `account` was new and successfully added. If
+    /// saving failed or if the account was already present in Profile, an
+    /// error is returned.
+    pub async fn add_account(&self, account: Account) -> Result<()> {
+        let address = account.address;
+
+        debug!("Adding account address: {} to profile", address);
+        self.add_accounts_without_emitting_event(Accounts::just(account))
+            .await?;
+
+        self.profile_holder.access_profile_with(|p| {
+            let accounts_on_network = p
+                .networks
+                .get_id(&address.network_id())
+                .unwrap()
+                .accounts
+                .len();
+            debug!(
+                "Added account address: {} to profile, contains: #{}",
+                address, accounts_on_network
+            );
+        });
+
+        self.clients
+            .event_bus
+            .emit(EventNotification::new(Event::ProfileChanged {
+                change: ProfileChange::AddedAccount { address },
+            }))
+            .await;
+
+        Ok(())
+    }
+
+    /// Adds the `accounts` to active profile and **saves** the updated profile to
+    /// secure storage.
+    ///
+    /// Returns `Ok(())` if the `accounts` were new and successfully added. If
+    /// saving failed or if the accounts were already present in Profile, an
+    /// error is returned.
+    pub async fn add_accounts(&self, accounts: Accounts) -> Result<()> {
+        let addresses = accounts
+            .clone()
+            .into_iter()
+            .map(|a| a.address)
+            .collect_vec();
+
+        self.add_accounts_without_emitting_event(accounts).await?;
+
+        self.clients
+            .event_bus
+            .emit(EventNotification::new(Event::ProfileChanged {
+                change: ProfileChange::AddedAccounts { addresses },
+            }))
+            .await;
+
+        Ok(())
+    }
+}
+
+// ==================
+// Update Account(s)
+// ==================
+#[uniffi::export]
+impl SargonOS {
     pub async fn update_account(&self, updated: Account) -> Result<()> {
         self.update_profile_with(|mut p| {
             if p.update_account(&updated.address, |old| *old = updated.clone())
@@ -204,45 +171,6 @@ impl SargonOS {
             }
         })
         .await
-    }
-}
-
-impl SargonOS {
-    /// Updates and **saves** profile to secure storage, after
-    /// mutating it with `mutate`.
-    pub(crate) async fn update_profile_with<F, R>(&self, mutate: F) -> Result<R>
-    where
-        F: Fn(RwLockWriteGuard<'_, Profile>) -> Result<R>,
-    {
-        let res = self.profile_holder.update_profile_with(mutate)?;
-        self.save_existing_profile().await?;
-        Ok(res)
-    }
-
-    pub(crate) async fn save_existing_profile(&self) -> Result<()> {
-        self.save_profile(&self.profile()).await
-    }
-
-    pub(crate) async fn save_profile(&self, profile: &Profile) -> Result<()> {
-        let secure_storage = &self.clients.secure_storage;
-
-        secure_storage
-            .save(
-                SecureStorageKey::ProfileSnapshot {
-                    profile_id: profile.header.id,
-                },
-                profile,
-            )
-            .await?;
-
-        self.clients
-            .event_bus
-            .emit(EventNotification::new(Event::ProfileChanged {
-                change: ProfileChange::UnspecifiedChange,
-            }))
-            .await;
-
-        Ok(())
     }
 }
 

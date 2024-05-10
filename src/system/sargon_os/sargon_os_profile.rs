@@ -1,7 +1,18 @@
+use std::sync::RwLockWriteGuard;
+
 use crate::prelude::*;
 
 #[uniffi::export]
 impl SargonOS {
+    pub fn has_any_network(&self) -> bool {
+        self.profile_holder
+            .access_profile_with(|p| !p.networks.is_empty())
+    }
+
+    pub fn profile(&self) -> Profile {
+        self.profile_holder.profile()
+    }
+
     pub async fn import_profile(&self, profile: Profile) -> Result<()> {
         let device_info = self.device_info().await?;
 
@@ -53,6 +64,43 @@ impl SargonOS {
 }
 
 impl SargonOS {
+    /// Updates and **saves** profile to secure storage, after
+    /// mutating it with `mutate`.
+    pub(crate) async fn update_profile_with<F, R>(&self, mutate: F) -> Result<R>
+    where
+        F: Fn(RwLockWriteGuard<'_, Profile>) -> Result<R>,
+    {
+        let res = self.profile_holder.update_profile_with(mutate)?;
+        self.save_existing_profile().await?;
+        Ok(res)
+    }
+
+    pub(crate) async fn save_existing_profile(&self) -> Result<()> {
+        self.save_profile(&self.profile()).await
+    }
+
+    pub(crate) async fn save_profile(&self, profile: &Profile) -> Result<()> {
+        let secure_storage = &self.clients.secure_storage;
+
+        secure_storage
+            .save(
+                SecureStorageKey::ProfileSnapshot {
+                    profile_id: profile.header.id,
+                },
+                profile,
+            )
+            .await?;
+
+        self.clients
+            .event_bus
+            .emit(EventNotification::new(Event::ProfileChanged {
+                change: ProfileChange::UnspecifiedChange,
+            }))
+            .await;
+
+        Ok(())
+    }
+
     /// Deletes the profile and the active profile id and all references Device
     /// factor sources from secure storage, does **NOT** change the in-memory
     /// profile in `profile_holder`.
