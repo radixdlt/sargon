@@ -20,7 +20,7 @@ val P2pLink.Companion.sample: Sample<P2pLink>
         override fun other(): P2pLink = P2pLink(
             connectionPassword = RadixConnectPassword.sample.other(),
             connectionPurpose = RadixConnectPurpose.sample.other(),
-            publicKey = Ed25519PublicKey.sample(),
+            publicKey = Ed25519PublicKey.sample.other(),
             displayName = "Sample Other"
         )
     }
