@@ -120,20 +120,8 @@ final class ProfileTests: Test<Profile> {
 		}
     }
 
-	func test_check_if_profile_json_contains_legacy_p2p_links_when_p2p_links_are_present() {	
-		let json = """
-		{
-			"appPreferences": {
-				"p2pLinks": [
-					{
-					"connectionPassword": "babebabebabebabebabebabebabebabebabebabebabebabebabebabebabebabe",
-						"displayName": "Brave on PC"
-					}
-				]
-			}
-		}
-		""".data(using: .utf8)!
-
+	func test_check_if_profile_json_contains_legacy_p2p_links_when_p2p_links_are_present() throws {
+		let json = try openFile(subPath: "vector", "only_plaintext_profile_snapshot_version_100", extension: "json")
 		XCTAssertEqual(
 			SUT.checkIfProfileJsonContainsLegacyP2PLinks(contents: json),
 			true
