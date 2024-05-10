@@ -1,3 +1,5 @@
+use std::sync::Once;
+
 use crate::prelude::*;
 
 #[uniffi::export]
@@ -8,6 +10,24 @@ pub fn new_sargon_build_information_sample() -> SargonBuildInformation {
 #[uniffi::export]
 pub fn new_sargon_build_information_sample_other() -> SargonBuildInformation {
     SargonBuildInformation::sample_other()
+}
+
+#[uniffi::export]
+pub fn enable_logging_from_rust() {
+    init_logging()
+}
+
+/// Initializes logging
+pub fn init_logging() {
+    static ONCE: Once = Once::new();
+    ONCE.call_once(|| {
+        let level = log::LevelFilter::Trace;
+        pretty_env_logger::formatted_builder()
+            .filter_level(level)
+            .try_init()
+            .expect("Should be able to setup a logger.");
+        info!("Rust: Logger initialized, log level: {:?}", level);
+    });
 }
 
 #[cfg(test)]
