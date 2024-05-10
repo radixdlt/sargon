@@ -261,6 +261,9 @@ class Decimal192Test : SampleTestable<Decimal192> {
 
             of(" ", ',', ' ', "0"), // Blank resolves to 0
             of(" ", ' ', ',', "0"), // Blank with space as decimal separator resolves to 0
+
+            of("1,000,000.10", '.', ',', "1000000.1"),
+            of("1.000.000,10", ',', '.', "1000000,1")
         )
     }
 }
