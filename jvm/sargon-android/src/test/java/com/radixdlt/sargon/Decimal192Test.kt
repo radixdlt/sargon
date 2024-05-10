@@ -11,11 +11,12 @@ import com.radixdlt.sargon.extensions.exponent
 import com.radixdlt.sargon.extensions.floor
 import com.radixdlt.sargon.extensions.formatted
 import com.radixdlt.sargon.extensions.formattedPlain
-import com.radixdlt.sargon.extensions.init
+import com.radixdlt.sargon.extensions.formattedTextField
 import com.radixdlt.sargon.extensions.isNegative
 import com.radixdlt.sargon.extensions.isPositive
 import com.radixdlt.sargon.extensions.negative
 import com.radixdlt.sargon.extensions.orZero
+import com.radixdlt.sargon.extensions.parseFromTextField
 import com.radixdlt.sargon.extensions.plus
 import com.radixdlt.sargon.extensions.rounded
 import com.radixdlt.sargon.extensions.string
@@ -32,13 +33,14 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
-import java.text.DecimalFormat
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments.of
+import org.junit.jupiter.params.provider.MethodSource
 import java.text.DecimalFormatSymbols
 import java.util.Locale
-import kotlin.math.PI
 
 class Decimal192Test : SampleTestable<Decimal192> {
 
@@ -151,32 +153,6 @@ class Decimal192Test : SampleTestable<Decimal192> {
     }
 
     @Test
-    fun testStringParsing() {
-        val usFormat = DecimalFormat().apply {
-            decimalFormatSymbols = DecimalFormatSymbols(Locale.US)
-        }
-        val greekFormat = DecimalFormat().apply {
-            decimalFormatSymbols = DecimalFormatSymbols(Locale.forLanguageTag("el"))
-        }
-
-        assertEquals(
-            Decimal192.init(usFormat.format(PI), DecimalFormatSymbols(Locale.US)),
-            Decimal192.init(
-                greekFormat.format(PI),
-                DecimalFormatSymbols(Locale.forLanguageTag("el"))
-            )
-        )
-
-        assertThrows<CommonException.DecimalException> {
-            greekFormat.format(PI).toDecimal192()
-        }
-
-        assertDoesNotThrow {
-            Decimal192.init(DecimalFormat().format(PI))
-        }
-    }
-
-    @Test
     fun testFromDouble() {
         assertEquals("0.1", 0.1.toDecimal192().string)
         assertEquals("4.012345678901235", 4.012345678901234567895555555.toDecimal192().string)
@@ -234,4 +210,63 @@ class Decimal192Test : SampleTestable<Decimal192> {
         format = DecimalFormatSymbols.getInstance(Locale.US),
         useGroupingSeparator = false
     )
+
+    @Nested
+    inner class UserInputTest {
+
+        @ParameterizedTest
+        @MethodSource("com.radixdlt.sargon.Decimal192Test#input")
+        fun test(
+            input: String,
+            decimal: Char,
+            grouping: Char,
+            formattedTextField: String,
+            sanitizedInput: String
+        ) {
+            val decimalFormatSymbols = mockk<DecimalFormatSymbols>(relaxed = true).apply {
+                every { decimalSeparator } returns decimal
+                every { groupingSeparator } returns grouping
+            }
+
+            val result = Decimal192.parseFromTextField(
+                textFieldString = input,
+                decimalFormat = decimalFormatSymbols
+            )
+
+            assertEquals(formattedTextField, result.decimal.formattedTextField(
+                format = decimalFormatSymbols
+            ))
+
+            assertEquals(sanitizedInput, result.input)
+        }
+
+    }
+
+    companion object {
+        @JvmStatic
+        fun input() = listOf(
+            // of(input, "<decimal>", "<grouping>, "formattedTextField", "sanitizedInput")
+            of("1234.9", ',', ' ', "12349", "12349"), // Wrong decimal separator is ignored
+            of("1 234,9", ',', ' ', "1234,9", "1234,9"), // Grouping separator is ignored
+            of("1234,9", ',', ' ', "1234,9", "1234,9"), // Correct format returns the same result
+            of("1234,999999999", ',', ' ', "1234,999999999", "1234,999999999"), // Correct format with many digits
+            of(",9", ',', ' ', "0,9", ",9"), // Without 0 at the beginning, adds zero in output
+
+            // Same with dot as separator
+            of("1234,9", '.', ',', "12349", "12349"),
+            of("1 234.9", '.', ',', "1234.9", "1234.9"),
+            of("1234.9", '.', ',', "1234.9", "1234.9"),
+            of("1234.999999999", '.', ',', "1234.999999999", "1234.999999999"),
+            of(".9", '.', ',', "0.9", ".9"),
+
+            of("0-9", '-', ' ', "0-9", "0-9"), // Decimal separator that needs to be escaped in regex
+            of("0^9", '^', ' ', "0^9", "0^9"), // Decimal separator that needs to be escaped in regex
+
+            of(" ", ',', ' ', "0", ""), // Blank resolves to 0 prints empty
+            of(" ", ' ', ',', "0", " "), // Blank with space as decimal separator resolves to 0 prints space
+
+            of("1,000,000.10", '.', ',', "1000000.1", "1000000.10"), // Large number resolves to decimal without trailing zero, prints the same number with 0
+            of("1.000.000,10", ',', '.', "1000000,1", "1000000,10")
+        )
+    }
 }
