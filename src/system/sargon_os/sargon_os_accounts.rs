@@ -119,8 +119,7 @@ impl SargonOS {
             );
         });
 
-        self.clients
-            .event_bus
+        self.event_bus
             .emit(EventNotification::new(Event::ProfileChanged {
                 change: ProfileChange::AddedAccount { address },
             }))
@@ -144,8 +143,7 @@ impl SargonOS {
 
         self.add_accounts_without_emitting_event(accounts).await?;
 
-        self.clients
-            .event_bus
+        self.event_bus
             .emit(EventNotification::new(Event::ProfileChanged {
                 change: ProfileChange::AddedAccounts { addresses },
             }))
@@ -249,42 +247,25 @@ impl Drivers {
 }
 
 #[cfg(test)]
-impl SargonOS {
-    pub async fn boot_test() -> Result<Arc<Self>> {
-        let test_drivers = Drivers::test();
-        let bios = Bios::new(test_drivers);
-        Self::boot(bios).await
-    }
-}
-
-#[cfg(test)]
 mod tests {
     use super::*;
     use actix_rt::time::timeout;
-    use std::time::Duration;
-
-    const MAX: Duration = Duration::from_millis(50);
+    use std::{future::Future, time::Duration};
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SargonOS;
 
     #[actix_rt::test]
     async fn test_add_account() {
-        let sut = SUT::boot_test().await.unwrap();
-        let req = sut.add_account(Account::sample());
-        let result = timeout(MAX, req).await.unwrap();
-        assert!(result.is_ok());
-        let profile = sut.profile();
-        let active_profile_id = sut
-            .clients
-            .secure_storage
-            .load_active_profile_id()
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        os.with_timeout(|x| x.add_account(Account::sample()))
             .await
-            .unwrap()
             .unwrap();
 
-        assert_eq!(active_profile_id, profile.id());
-        assert_eq!(&profile.networks.len(), &1);
-        assert_eq!(&profile.networks[0].accounts.len(), &1);
+        // ASSERT
+        assert_eq!(os.profile().networks[0].accounts.len(), 1);
     }
 }

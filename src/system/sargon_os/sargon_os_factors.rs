@@ -34,10 +34,7 @@ impl SargonOS {
         &self,
         id: &FactorSourceIDFromHash,
     ) -> Result<MnemonicWithPassphrase> {
-        self.clients
-            .secure_storage
-            .load_mnemonic_with_passphrase(id)
-            .await
+        self.secure_storage.load_mnemonic_with_passphrase(id).await
     }
 
     /// Loads a `MnemonicWithPassphrase` with the `id` of `device_factor_source`,

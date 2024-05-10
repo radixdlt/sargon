@@ -47,7 +47,10 @@ pub(crate) fn install_logger(logging_driver: Arc<dyn LoggingDriver>) {
         init();
         *LOG.0.write().unwrap() = Some(logging_driver);
     } else {
-        pretty_env_logger::init();
+        static ONCE: Once = Once::new();
+        ONCE.call_once(|| {
+            pretty_env_logger::init();
+        });
     }
     rust_logger_set_level(LogLevel::Trace); // can be called from FFI later
     info!("Finished installing logger");

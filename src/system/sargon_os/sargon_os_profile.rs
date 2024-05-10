@@ -20,8 +20,7 @@ impl SargonOS {
 
         profile.header.last_used_on_device = device_info;
 
-        self.clients
-            .secure_storage
+        self.secure_storage
             .save_profile_and_active_profile_id(&profile)
             .await?;
 
@@ -39,13 +38,11 @@ impl SargonOS {
             .delete_profile_and_mnemonics_replace_in_memory_without_persisting()
             .await?;
         let profile_id = profile.id();
-        self.clients
-            .secure_storage
+        self.secure_storage
             .save_private_hd_factor_source(&bdfs)
             .await?;
 
-        self.clients
-            .secure_storage
+        self.secure_storage
             .save_profile_and_active_profile_id(&profile)
             .await?;
 
@@ -80,7 +77,7 @@ impl SargonOS {
     }
 
     pub(crate) async fn save_profile(&self, profile: &Profile) -> Result<()> {
-        let secure_storage = &self.clients.secure_storage;
+        let secure_storage = &self.secure_storage;
 
         secure_storage
             .save(
@@ -91,8 +88,7 @@ impl SargonOS {
             )
             .await?;
 
-        self.clients
-            .event_bus
+        self.event_bus
             .emit(EventNotification::new(Event::ProfileChanged {
                 change: ProfileChange::UnspecifiedChange,
             }))
@@ -105,7 +101,7 @@ impl SargonOS {
     /// factor sources from secure storage, does **NOT** change the in-memory
     /// profile in `profile_holder`.
     async fn delete_profile_and_mnemonics(&self) -> Result<()> {
-        let secure_storage = &self.clients.secure_storage;
+        let secure_storage = &self.secure_storage;
         let device_factor_sources = self
             .profile_holder
             .access_profile_with(|p| p.device_factor_sources());

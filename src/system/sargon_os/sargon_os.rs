@@ -15,6 +15,16 @@ pub struct SargonOS {
     pub(crate) clients: Clients,
 }
 
+/// So that we do not have to go through `self.clients`,
+/// but can use e.g. `self.secure_storage` directly.
+impl Deref for SargonOS {
+    type Target = Clients;
+
+    fn deref(&self) -> &Self::Target {
+        &self.clients
+    }
+}
+
 #[uniffi::export]
 impl SargonOS {
     #[uniffi::constructor]
@@ -114,5 +124,63 @@ impl SargonOS {
         };
 
         Ok(device_info)
+    }
+}
+
+#[cfg(test)]
+pub(crate) const SARGON_OS_TEST_MAX_ASYNC_DURATION: std::time::Duration =
+    std::time::Duration::from_millis(50);
+
+#[cfg(test)]
+impl SargonOS {
+    pub async fn with_timeout<'a, F, Fut, T>(&'a self, func: F) -> T
+    where
+        F: Fn(&'a SargonOS) -> Fut,
+        Fut: std::future::Future<Output = T>,
+    {
+        let sut = func(self);
+        actix_rt::time::timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, sut)
+            .await
+            .unwrap()
+    }
+
+    pub async fn boot_test() -> Result<Arc<Self>> {
+        let test_drivers = Drivers::test();
+        let bios = Bios::new(test_drivers);
+        Self::boot(bios).await
+    }
+
+    pub async fn fast_boot() -> Arc<Self> {
+        let req = Self::boot_test();
+
+        actix_rt::time::timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, req)
+            .await
+            .unwrap()
+            .unwrap()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use actix_rt::time::timeout;
+    use std::time::Duration;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = SargonOS;
+
+    #[actix_rt::test]
+    async fn test_new_profile_is_active_profile() {
+        // ARRANGE (and ACT)
+        let os = SUT::fast_boot().await;
+
+        // ASSERT
+        let active_profile_id = os
+            .with_timeout(|x| x.secure_storage.load_active_profile_id())
+            .await
+            .unwrap()
+            .unwrap();
+
+        assert_eq!(active_profile_id, os.profile().id());
     }
 }
