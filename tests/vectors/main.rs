@@ -8,6 +8,11 @@ use std::str::FromStr;
 mod profile_snapshot_tests {
     use super::*;
 
+    /// We cannot do a roundtrip test here because
+    /// `only_plaintext_profile_snapshot_version_100.json` does contain `p2pLinks`
+    /// and with the [CAP-36][doc] feature `p2pLinks` are no longer stored in `Profile`.
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3251863610/CAP-36+WebRTC+Clients+Protocol
     #[test]
     fn v100_100() {
         fixture_and_json::<Profile>(include_str!(concat!(
