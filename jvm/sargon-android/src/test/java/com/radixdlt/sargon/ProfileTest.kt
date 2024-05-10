@@ -15,6 +15,7 @@ import com.radixdlt.sargon.samples.Sample
 import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.io.File
 
 class ProfileTest : SampleTestable<Profile> {
 
@@ -121,22 +122,10 @@ class ProfileTest : SampleTestable<Profile> {
 
     @Test
     fun testCheckIfProfileJsonContainsLegacyP2PLinksWhenP2PLinksArePresent() {
+        val json = File("../../" + "fixtures/vector/only_plaintext_profile_snapshot_version_100.json").readText()
         assertEquals(
             true,
-            Profile.checkIfProfileJsonContainsLegacyP2PLinks(
-                """
-            {
-                "appPreferences": {
-                "p2pLinks": [
-                {
-                    "connectionPassword": "babebabebabebabebabebabebabebabebabebabebabebabebabebabebabebabe",
-                    "displayName": "Brave on PC"
-                }
-                ]
-            }
-            }
-            """
-            )
+            Profile.checkIfProfileJsonContainsLegacyP2PLinks(json)
         )
     }
 }
