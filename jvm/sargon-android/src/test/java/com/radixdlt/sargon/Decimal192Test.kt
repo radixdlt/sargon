@@ -220,7 +220,8 @@ class Decimal192Test : SampleTestable<Decimal192> {
             input: String,
             decimal: Char,
             grouping: Char,
-            output: String
+            formattedTextField: String,
+            sanitizedInput: String
         ) {
             val decimalFormatSymbols = mockk<DecimalFormatSymbols>(relaxed = true).apply {
                 every { decimalSeparator } returns decimal
@@ -232,9 +233,11 @@ class Decimal192Test : SampleTestable<Decimal192> {
                 decimalFormat = decimalFormatSymbols
             )
 
-            assertEquals(output, result.formattedTextField(
+            assertEquals(formattedTextField, result.decimal.formattedTextField(
                 format = decimalFormatSymbols
             ))
+
+            assertEquals(sanitizedInput, result.input)
         }
 
     }
@@ -242,28 +245,28 @@ class Decimal192Test : SampleTestable<Decimal192> {
     companion object {
         @JvmStatic
         fun input() = listOf(
-            // of(input, "<decimal>", "<grouping>, "output")
-            of("1234.9", ',', ' ', "12349"), // Wrong decimal separator is ignored
-            of("1 234,9", ',', ' ', "1234,9"), // Grouping separator is ignored
-            of("1234,9", ',', ' ', "1234,9"), // Correct format returns the same result
-            of("1234,999999999", ',', ' ', "1234,999999999"), // Correct format with many digits
-            of(",9", ',', ' ', "0,9"), // Without 0 at the beginning, adds zero in output
+            // of(input, "<decimal>", "<grouping>, "formattedTextField", "sanitizedInput")
+            of("1234.9", ',', ' ', "12349", "12349"), // Wrong decimal separator is ignored
+            of("1 234,9", ',', ' ', "1234,9", "1234,9"), // Grouping separator is ignored
+            of("1234,9", ',', ' ', "1234,9", "1234,9"), // Correct format returns the same result
+            of("1234,999999999", ',', ' ', "1234,999999999", "1234,999999999"), // Correct format with many digits
+            of(",9", ',', ' ', "0,9", ",9"), // Without 0 at the beginning, adds zero in output
 
             // Same with dot as separator
-            of("1234,9", '.', ',', "12349"),
-            of("1 234.9", '.', ',', "1234.9"),
-            of("1234.9", '.', ',', "1234.9"),
-            of("1234.999999999", '.', ',', "1234.999999999"),
-            of(".9", '.', ',', "0.9"),
+            of("1234,9", '.', ',', "12349", "12349"),
+            of("1 234.9", '.', ',', "1234.9", "1234.9"),
+            of("1234.9", '.', ',', "1234.9", "1234.9"),
+            of("1234.999999999", '.', ',', "1234.999999999", "1234.999999999"),
+            of(".9", '.', ',', "0.9", ".9"),
 
-            of("0-9", '-', ' ', "0-9"), // Decimal separator that needs to be escaped in regex
-            of("0^9", '^', ' ', "0^9"), // Decimal separator that needs to be escaped in regex
+            of("0-9", '-', ' ', "0-9", "0-9"), // Decimal separator that needs to be escaped in regex
+            of("0^9", '^', ' ', "0^9", "0^9"), // Decimal separator that needs to be escaped in regex
 
-            of(" ", ',', ' ', "0"), // Blank resolves to 0
-            of(" ", ' ', ',', "0"), // Blank with space as decimal separator resolves to 0
+            of(" ", ',', ' ', "0", ""), // Blank resolves to 0 prints empty
+            of(" ", ' ', ',', "0", " "), // Blank with space as decimal separator resolves to 0 prints space
 
-            of("1,000,000.10", '.', ',', "1000000.1"),
-            of("1.000.000,10", ',', '.', "1000000,1")
+            of("1,000,000.10", '.', ',', "1000000.1", "1000000.10"), // Large number resolves to decimal without trailing zero, prints the same number with 0
+            of("1.000.000,10", ',', '.', "1000000,1", "1000000,10")
         )
     }
 }

@@ -92,18 +92,29 @@ val Decimal192.Companion.MAX_DIVISIBILITY: UByte
 fun Decimal192.Companion.parseFromTextField(
     textFieldString: String,
     decimalFormat: DecimalFormatSymbols = DecimalFormatSymbols.getInstance()
-): Decimal192 {
-    val config = LocaleConfig(
-        decimalSeparator = decimalFormat.decimalSeparator.toString(),
-        groupingSeparator = null // We do not allow grouping separator characters in input
-    )
-
-    val charactersToReplace = "[^0-9\\\\${config.decimalSeparator}]".toRegex()
+): TextInputDecimal {
+    val charactersToReplace = "[^0-9\\\\${decimalFormat.decimalSeparator}]".toRegex()
     val sanitizedString = textFieldString.replace(charactersToReplace, "")
 
-    return Decimal192.init(
-        formattedString = sanitizedString,
-        config = config
+    return TextInputDecimal(
+        input = sanitizedString,
+        decimalSeparator = decimalFormat.decimalSeparator
+    )
+}
+
+/**
+ * A pair of an input represented with a decimal
+ */
+class TextInputDecimal(
+    val input: String,
+    decimalSeparator: Char
+) {
+    val decimal: Decimal192 = Decimal192.init(
+        formattedString = input,
+        config = LocaleConfig(
+            decimalSeparator = decimalSeparator.toString(),
+            groupingSeparator = null // We do not allow grouping separator characters in input
+        )
     )
 }
 
