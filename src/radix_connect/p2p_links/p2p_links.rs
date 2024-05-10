@@ -2,8 +2,7 @@ use crate::prelude::*;
 
 decl_identified_vec_of!(
     /// Collection of clients user have connected P2P with, typically these
-    /// are WebRTC connections with DApps, but might be Android or iPhone
-    /// clients as well.
+    /// are WebRTC connections with the dApp or Connector Extension
     P2PLink
 );
 
@@ -22,6 +21,7 @@ impl HasSampleValues for P2PLinks {
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
+
     #[test]
     fn equality() {
         assert_eq!(P2PLinks::sample(), P2PLinks::sample());
@@ -33,6 +33,7 @@ mod tests {
         assert_ne!(P2PLinks::sample(), P2PLinks::sample_other());
     }
 
+    #[test]
     fn into_iter() {
         let mut sut = P2PLinks::new();
         sut.append(P2PLink::sample_duckduckgo());
@@ -61,7 +62,7 @@ mod tests {
                 {
                     "connectionPassword": "cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe",
                     "connectionPurpose": "general",
-                    "publicKey": "b7a3c12dc0c8c748ab07525b701122b88bd78f600c76342d27f25e5f92444cde",
+                    "publicKey": "37842830eca0d08dd684adcb9705b3a473c0c070a322322b53c35e09a1bff298",
                     "displayName": "Chrome on Macbook"
                 }
             ]

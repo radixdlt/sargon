@@ -185,12 +185,24 @@ impl FromStr for Ed25519PublicKey {
 }
 
 impl Ed25519PublicKey {
+    /// A sample used to facilitate unit tests.
     pub fn sample_alice() -> Self {
         Ed25519PrivateKey::sample_alice().public_key()
     }
 
+    /// A sample used to facilitate unit tests.
     pub fn sample_bob() -> Self {
         Ed25519PrivateKey::sample_bob().public_key()
+    }
+
+    /// A sample used to facilitate unit tests.
+    pub fn sample_fade() -> Self {
+        Ed25519PrivateKey::sample_fade().public_key()
+    }
+
+    /// A sample used to facilitate unit tests.
+    pub fn sample_aced() -> Self {
+        Ed25519PrivateKey::sample_aced().public_key()
     }
 }
 

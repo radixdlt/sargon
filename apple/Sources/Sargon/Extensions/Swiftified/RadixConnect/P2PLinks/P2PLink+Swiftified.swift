@@ -14,8 +14,5 @@ extension P2PLink: SargonModel {}
 extension P2PLink: SargonObjectCodable {}
 
 extension P2PLink: Identifiable {
-	public typealias ID = Hash
-	public var id: ID {
-		p2pLinkId(link: self)
-	}
+	public typealias ID = PublicKeyHash
 }

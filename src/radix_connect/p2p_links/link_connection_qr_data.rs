@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-json_data_convertible!(LinkConnectionQRData);
-
 /// The hash of the connection password is used to connect to the Radix Connect Signaling Server,
 /// over web sockets. The actual `ConnectionPassword` is used to encrypt all messages sent via
 /// the Signaling Server.
@@ -45,16 +43,6 @@ impl LinkConnectionQRData {
     }
 }
 
-#[uniffi::export]
-pub fn new_link_connection_qr_data_sample() -> LinkConnectionQRData {
-    LinkConnectionQRData::sample()
-}
-
-#[uniffi::export]
-pub fn new_link_connection_qr_data_sample_other() -> LinkConnectionQRData {
-    LinkConnectionQRData::sample_other()
-}
-
 impl LinkConnectionQRData {
     pub fn to_obfuscated_string(&self) -> String {
         format!("LinkConnectionQRData with purpose: '{}'", self.purpose)
@@ -84,32 +72,26 @@ impl HasSampleValues for LinkConnectionQRData {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = LinkConnectionQRData;
 
     #[test]
     fn equality() {
-        assert_eq!(
-            LinkConnectionQRData::sample(),
-            LinkConnectionQRData::sample()
-        );
-        assert_eq!(
-            LinkConnectionQRData::sample_other(),
-            LinkConnectionQRData::sample_other()
-        );
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(
-            LinkConnectionQRData::sample(),
-            LinkConnectionQRData::sample_other()
-        );
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn debug() {
         assert_eq!(
-            format!("{:?}", LinkConnectionQRData::sample()),
+            format!("{:?}", SUT::sample()),
             "LinkConnectionQRData { purpose: 'general', password: 'deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead', public_key: 'ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf', signature: 'deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead' }"
         );
     }
@@ -117,14 +99,14 @@ mod tests {
     #[test]
     fn display() {
         assert_eq!(
-            format!("{}", LinkConnectionQRData::sample()),
+            format!("{}", SUT::sample()),
             "LinkConnectionQRData with purpose: 'general'"
         );
     }
 
     #[test]
     fn json_roundtrip() {
-        let sut = LinkConnectionQRData::sample();
+        let sut = SUT::sample();
         assert_eq_after_json_roundtrip(
             &sut,
             r#"
@@ -140,34 +122,14 @@ mod tests {
 
     #[test]
     fn purpose() {
-        assert_eq!(
-            LinkConnectionQRData::sample().purpose,
-            RadixConnectPurpose::General
-        );
+        assert_eq!(SUT::sample().purpose, RadixConnectPurpose::General);
     }
 
     #[test]
     fn password() {
         assert_eq!(
-            LinkConnectionQRData::sample().password.hash().to_string(),
+            SUT::sample().password.hash().to_string(),
             "9059d2ac799749e2f9f18541015197051ff9f803741d566744fe34ea004a5908"
-        );
-    }
-}
-
-#[cfg(test)]
-mod uniffi_tests {
-    use crate::prelude::*;
-
-    #[test]
-    fn sample_values() {
-        assert_eq!(
-            new_link_connection_qr_data_sample(),
-            LinkConnectionQRData::sample()
-        );
-        assert_eq!(
-            new_link_connection_qr_data_sample_other(),
-            LinkConnectionQRData::sample_other()
         );
     }
 }

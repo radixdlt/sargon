@@ -9,4 +9,8 @@ extension P2pLink {
     public func jsonData() -> Data {
         p2PLinkToJsonBytes(p2PLink: self)
     }
+
+    public var id: ID {
+       p2pLinkId(link: self)
+    }
 }

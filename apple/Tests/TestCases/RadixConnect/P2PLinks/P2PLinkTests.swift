@@ -10,7 +10,7 @@ final class P2PLinkTests: Test<P2PLink> {
 		{
 			"connectionPassword": "cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe",
 			"connectionPurpose": "general",
-			"publicKey": "b7a3c12dc0c8c748ab07525b701122b88bd78f600c76342d27f25e5f92444cde",
+			"publicKey": "37842830eca0d08dd684adcb9705b3a473c0c070a322322b53c35e09a1bff298",
 			"displayName": "Chrome on Macbook"
 		}
 		""".data(using: .utf8)!
