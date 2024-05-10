@@ -1,4 +1,5 @@
 package com.radixdlt.sargon.extensions
+
 import com.radixdlt.sargon.CommonException
 import com.radixdlt.sargon.Decimal192
 import com.radixdlt.sargon.LocaleConfig
@@ -80,20 +81,39 @@ fun UInt.toDecimal192() = newDecimalFromU32(value = this)
 val Decimal192.Companion.MAX_DIVISIBILITY: UByte
     get() = 18u.toUByte()
 
-fun Decimal192.Companion.init(
-    formattedString: String,
+/**
+ * Parses a string as decimal value
+ * - only digits allowed
+ * - and decimal separator character
+ *
+ * Useful when converting a string from a text field to decimal 192
+ */
+@KoverIgnore
+fun Decimal192.Companion.parseFromTextField(
+    textFieldString: String,
     decimalFormat: DecimalFormatSymbols = DecimalFormatSymbols.getInstance()
 ): Decimal192 {
     val config = LocaleConfig(
         decimalSeparator = decimalFormat.decimalSeparator.toString(),
-        groupingSeparator = decimalFormat.groupingSeparator.toString()
+        groupingSeparator = null // We do not allow grouping separator characters in input
     )
 
-    return newDecimalFromFormattedString(
-        formattedString = formattedString,
-        locale = config
+    val charactersToReplace = "[^0-9${config.decimalSeparator}]".toRegex()
+    val sanitizedString = textFieldString.replace(charactersToReplace, "")
+
+    return Decimal192.init(
+        formattedString = sanitizedString,
+        config = config
     )
 }
+
+fun Decimal192.Companion.init(
+    formattedString: String,
+    config: LocaleConfig
+): Decimal192 = newDecimalFromFormattedString(
+    formattedString = formattedString,
+    locale = config
+)
 
 /**
  * The maximum possible value of [Decimal192], being:
@@ -242,6 +262,22 @@ fun Decimal192.formattedPlain(
     decimal = this,
     locale = format.toLocaleConfig(),
     useGroupingSeparator = useGroupingSeparator
+)
+
+/**
+ * A human readable version of the decimal value
+ * - stripped from grouping separator
+ * - no truncation
+ * - with only decimal separator available
+ *
+ * Useful when converting a decimal to string for text fields.
+ */
+@KoverIgnore
+fun Decimal192.formattedTextField(
+    format: DecimalFormatSymbols = DecimalFormatSymbols.getInstance()
+) = formattedPlain(
+    format = format,
+    useGroupingSeparator = false
 )
 
 inline fun <T> Iterable<T>.sumOf(selector: (T) -> Decimal192): Decimal192 {
