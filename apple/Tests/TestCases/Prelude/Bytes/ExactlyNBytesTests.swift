@@ -12,10 +12,6 @@ final class Exactly32BytesTests: ExactlyNBytesTest<Exactly32Bytes> {
 		XCTAssertNoDifference(sut, SUT.sample)
 	}
 	
-	func test_codable_roundtrip() throws {
-		try SUT.sampleValues.forEach(doTestCodableRoundtrip)
-	}
-	
 	func test_codable() throws {
 		let raw = "\"deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead\"".data(using: .utf8)!
 		
@@ -26,6 +22,13 @@ final class Exactly32BytesTests: ExactlyNBytesTest<Exactly32Bytes> {
 		// test encoding
 		let encoded = try JSONEncoder().encode(sut)
 		try XCTAssertEqual(JSONDecoder().decode(SUT.self, from: encoded), sut)
+	}
+
+	/// Cyon: We might be able remove this function once we have converted to `swift-testing` which has much more 
+	/// powerful discovery than XCTest, and maybe `eachSampleCodableRoundtripTest` will be picked up as
+	/// a test directly.
+	func testJSONRoundtripAllSamples() throws {
+		try eachSampleCodableRoundtripTest()
 	}
 }
 

@@ -20,25 +20,21 @@ class BaseAddressTest<SUT_: BaseAddressProtocol>: Test<SUT_> {
 	
 	
 	func test_bech32_roundtrip() throws {
-		func doTest(_ address: SUT) throws {
+		try eachSample { address in
 			try XCTAssertNoDifference(
 				SUT(validatingAddress: address.address).address,
 				address.address
 			)
 		}
-		
-		try SUT.sampleValues.forEach(doTest)
 	}
 	
 	func test_description_is_bech32() {
-		func doTest(_ address: SUT) {
+		eachSample { address in
 			XCTAssertNoDifference(
 				address.description,
 				address.address
 			)
 		}
-		
-		SUT.sampleValues.forEach(doTest)
 	}
 	
 	
@@ -70,8 +66,11 @@ class AddressTest<SUT_: AddressProtocol>: BaseAddressTest<SUT_> {
 		try SUT.sampleValues.forEach(doTestInto)
 	}
 	
-	func test_codable_roundtrip() throws {
-		try SUT.sampleValues.forEach(doTestCodableRoundtrip)
+	/// Cyon: We might be able remove this function once we have converted to `swift-testing` which has much more 
+	/// powerful discovery than XCTest, and maybe `eachSampleCodableRoundtripTest` will be picked up as
+	/// a test directly.
+	func testJSONRoundtripAllSamples() throws {
+		try eachSampleCodableRoundtripTest()
 	}
     
     func test_identifiable() {
@@ -105,7 +104,7 @@ class AddressTest<SUT_: AddressProtocol>: BaseAddressTest<SUT_> {
 	}
 
 	func test_asGeneral() {
-		func doTest(_ address: SUT) {
+		eachSample { address in
 			XCTAssertNoDifference(
 				address.asGeneral.address,
 				address.address
@@ -116,24 +115,20 @@ class AddressTest<SUT_: AddressProtocol>: BaseAddressTest<SUT_> {
 				address.networkID
 			)
 		}
-		
-		SUT.sampleValues.forEach(doTest)
 	}
 	
 	func test_map_to_same_network_does_not_change() {
-		func doTest(_ address: SUT) {
+		eachSample { address in
 			XCTAssertNoDifference(
 				address.mapTo(networkID: address.networkID),
 				address
 			)
 		}
-		
-		SUT.sampleValues.forEach(doTest)
 	}
 	
 	
 	func test_map_to_other_networks() {
-		func doTest(_ address: SUT) {
+		eachSample { address in
 			NetworkID.sampleValues.forEach {
 				let addressMapped = address.mapTo(networkID: $0)
 				XCTAssertEqual(addressMapped.networkID, $0)
@@ -142,8 +137,6 @@ class AddressTest<SUT_: AddressProtocol>: BaseAddressTest<SUT_> {
 				}
 			}
 		}
-		
-		SUT.sampleValues.forEach(doTest)
 	}
 	
 	

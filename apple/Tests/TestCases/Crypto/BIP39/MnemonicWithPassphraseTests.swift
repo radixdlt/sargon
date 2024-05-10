@@ -49,4 +49,11 @@ final class MnemonicWithPassphraseTests: Test<MnemonicWithPassphrase> {
 		let signature = sut.sign(hash: msg, path: path)
 		XCTAssertTrue(publicKey.isValidSignature(signature, for: msg))
 	}
+
+	/// Cyon: We might be able remove this function once we have converted to `swift-testing` which has much more 
+	/// powerful discovery than XCTest, and maybe `eachSampleCodableRoundtripTest` will be picked up as
+	/// a test directly.
+	func testJSONRoundtripAllSamples() throws {
+		try eachSampleCodableRoundtripTest()
+	}
 }

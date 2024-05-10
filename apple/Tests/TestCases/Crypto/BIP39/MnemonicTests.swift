@@ -6,21 +6,19 @@ import XCTest
 
 final class MnemonicTests: Test<Mnemonic> {
 	func test_phrase_roundtrip() throws {
-		func doTest(_ sut: SUT) throws {
+		try eachSample { sut in
 			let string = sut.description
 			try XCTAssertEqual(SUT(phrase: string), sut)
 			try XCTAssertEqual(SUT(phrase: string, language: .english), sut)
 			try XCTAssertEqual(SUT(phrase: string, language: nil), sut) // ok to skip language
 		}
-		try SUT.sampleValues.forEach(doTest)
 	}
 	
 	func test_words_roundtrip() throws {
-		func doTest(_ sut: SUT) throws {
+		try eachSample { sut in
 			let words = sut.words
 			try XCTAssertEqual(SUT(words: words), sut)
 		}
-		try SUT.sampleValues.forEach(doTest)
 	}
 	
 	func test_new_from_generated_entropy() throws {

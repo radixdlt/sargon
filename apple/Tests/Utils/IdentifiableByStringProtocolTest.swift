@@ -7,22 +7,23 @@ import XCTest
 class IdentifiableByStringProtocolTest<SUT_: IdentifiableByStringProtocol>: Test<SUT_> {
     
     func test_string_roundtrip_symmetric_with_raw() throws {
-        func doTest(_ sut: SUT) throws {
+        try eachSample { sut in
             let roundtripped = try SUT(sut.toRawString())
             XCTAssertEqual(sut, roundtripped)
         }
-        try SUT.sampleValues.forEach(doTest)
     }
     
-    func test_codable_roundtrip() throws {
-        try SUT.sampleValues.forEach(doTestCodableRoundtrip)
-    }
+	/// Cyon: We might be able remove this function once we have converted to `swift-testing` which has much more 
+	/// powerful discovery than XCTest, and maybe `eachSampleCodableRoundtripTest` will be picked up as
+	/// a test directly.
+	func testJSONRoundtripAllSamples() throws {
+		try eachSampleCodableRoundtripTest()
+	}
     
     func test_formatted_raw_is_raw() {
-        func doTest(_ sut: SUT) {
+        eachSample { sut in
             XCTAssertEqual(sut.toRawString(), sut.formatted(.raw))
         }
-        SUT.sampleValues.forEach(doTest)
     }
 }
 

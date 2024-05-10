@@ -20,10 +20,9 @@ final class DerivationPathTests: HDPathProtocolTest<DerivationPath> {
     
  
     func test_get_hd_path() {
-        func doTest(_ sut: SUT) {
+        eachSample { sut in
             XCTAssertEqual(sut.path.components.count, sut.toString().matches(of: "/").count)
         }
-        SUT.sampleValues.forEach(doTest)
     }
     
     func test_cap26_account_hd_path() {

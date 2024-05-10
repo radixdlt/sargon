@@ -11,15 +11,17 @@ final class SLIP10CurveTests: Test<SLIP10Curve> {
 	}
 	
 	func test_string_roundtrip() throws {
-		func doTest(_ sut: SUT) throws {
+		try eachSample { sut in
 			let string = sut.toString()
 			let fromString = try XCTUnwrap(SUT.init(rawValue: string))
 			XCTAssertEqual(fromString, sut)
 		}
-		try SUT.sampleValues.forEach(doTest)
 	}
 	
-	func test_codable_roundtrip() throws {
-		try SUT.sampleValues.forEach(doTestCodableRoundtrip)
+	/// Cyon: We might be able remove this function once we have converted to `swift-testing` which has much more 
+	/// powerful discovery than XCTest, and maybe `eachSampleCodableRoundtripTest` will be picked up as
+	/// a test directly.
+	func testJSONRoundtripAllSamples() throws {
+		try eachSampleCodableRoundtripTest()
 	}
 }
