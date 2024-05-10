@@ -9,13 +9,13 @@ extension Ed25519Signature {
 	public init(exactly exactly64Bytes: Exactly64Bytes) {
 		self = newEd25519SignatureFromExactly64Bytes(bytes: exactly64Bytes)
 	}
-    
-    public init(jsonData: some DataProtocol) throws {
-        self = try newEd25519SignatureFromBytes(bytes: Data(jsonData))
+
+	public init(jsonStringLiteral: String) throws {
+        self = try newEd25519SignatureFromJsonString(jsonString: jsonStringLiteral)
     }
     
-    public func jsonData() -> Data {
-        ed25519SignatureToJsonBytes(ed25519Signature: self)
+    public func jsonStringLiteral() -> String {
+		ed25519SignatureToJsonString(ed25519Signature: self)
     }
 	
 	public func toString() -> String {

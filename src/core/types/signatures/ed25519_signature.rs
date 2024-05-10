@@ -1,18 +1,18 @@
 use crate::prelude::*;
 
-json_data_convertible!(Ed25519Signature);
+json_string_convertible!(Ed25519Signature);
 
 /// Represents an ED25519 signature.
 #[derive(
     Clone,
     Copy,
-    Serialize,
-    Deserialize,
     PartialEq,
     Eq,
     Hash,
     PartialOrd,
     Ord,
+    SerializeDisplay,
+    DeserializeFromStr,
     derive_more::Display,
     derive_more::Debug,
     derive_more::FromStr,

@@ -13,12 +13,12 @@ extension Ed25519PublicKey {
         self = try newEd25519PublicKeyFromBytes(bytes: Data(bytes))
     }
     
-    public init(jsonData: some DataProtocol) throws {
-        self = try newEd25519PublicKeyFromJsonBytes(jsonBytes: Data(jsonData))
+    public init(jsonStringLiteral: String) throws {
+        self = try newEd25519PublicKeyFromJsonString(jsonString: jsonStringLiteral)
     }
     
-    public func jsonData() -> Data {
-        ed25519PublicKeyToJsonBytes(ed25519PublicKey: self)
+    public func jsonStringLiteral() -> String {
+		ed25519PublicKeyToJsonString(ed25519PublicKey: self)
     }
 }
 

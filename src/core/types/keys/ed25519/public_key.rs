@@ -2,7 +2,7 @@ use crate::{prelude::*, UniffiCustomTypeConverter};
 
 use crypto::signatures::ed25519 as IotaSlip10Ed25519;
 
-json_data_convertible!(Ed25519PublicKey);
+json_string_convertible!(Ed25519PublicKey);
 
 /// An Ed25519 public key used to verify cryptographic signatures (EdDSA signatures).
 #[serde_as]
