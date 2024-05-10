@@ -1,8 +1,6 @@
 use crate::prelude::*;
 
-/// The hash of the connection password is used to connect to the Radix Connect Signaling Server,
-/// over web sockets. The actual `ConnectionPassword` is used to encrypt all messages sent via
-/// the Signaling Server.
+/// The QR code data scanned from the Connector Extension
 #[derive(
     Clone,
     Copy,
@@ -21,9 +19,21 @@ use crate::prelude::*;
 )]
 #[display("{}", self.to_obfuscated_string())]
 pub struct LinkConnectionQRData {
+    /// The purpose of the connection, set by the other client, typically Connector Extension or dApp.
+    /// As part of the initial linking flow, user will be prompted about kind of link they're trying to make.
+    /// The user needs to make a conscious decision about general purpose links (because it comes with security risk).
     pub purpose: RadixConnectPurpose,
+
+    /// Used to be able to re-establish the P2P connection
     pub password: RadixConnectPassword,
+
+    /// Each client generates a curve25119 keypair. The public key will be used as an identifier for the client.
+    /// Each client keeps a record of linked clients' public keys to prevent duplicate links.
+    /// This is the public key of the other client and it also serves as the seed for the link `ID`.
     pub public_key: Ed25519PublicKey,
+
+    /// Represents a signature produced by Connector Extension by signing the hash of the `password`
+    /// with the private key of the `public_key`.
     pub signature: Exactly64Bytes,
 }
 

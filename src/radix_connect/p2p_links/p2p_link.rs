@@ -24,7 +24,7 @@ use crate::prelude::*;
 )]
 #[display("{}", self.to_obfuscated_string())]
 pub struct P2PLink {
-    /// The most important property of this struct, the `ConnectionPassword`,
+    /// The most important property of this struct, the `RadixConnectPassword`,
     /// is used to be able to re-establish the P2P connection
     pub connection_password: RadixConnectPassword,
 
