@@ -18,6 +18,7 @@ pub fn enable_logging_from_rust() {
 }
 
 /// Initializes logging
+#[cfg(not(tarpaulin_include))] // actually tricky, since we init logging from other unit tests -> crash.
 pub fn init_logging() {
     static ONCE: Once = Once::new();
     ONCE.call_once(|| {
