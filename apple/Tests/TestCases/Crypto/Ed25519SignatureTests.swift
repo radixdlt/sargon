@@ -41,5 +41,12 @@ final class Ed25519SignatureTests: SignatureTest<Ed25519Signature> {
         let decoded = try JSONDecoder().decode(Wrapper.self, from: json)
         XCTAssertEqual(decoded, try Wrapper.init(myString: "Foo", signature: .init(hex: "2150c2f6b6c496d197ae03afb23f6adf23b275c675394f23786250abd006d5a2c7543566403cb414f70d0e229b0a9b55b4c74f42fc38cdf1aba2307f97686f0b")))
     }
+
+	/// Cyon: We might be able remove this function once we have converted to `swift-testing` which has much more 
+	/// powerful discovery than XCTest, and maybe `eachSampleCodableRoundtripTest` will be picked up as
+	/// a test directly.
+	func testJSONRoundtripAllSamples() throws {
+		try eachSampleCodableRoundtripTest()
+	}
 }
 

@@ -538,7 +538,7 @@ mod tests {
     #[test]
     fn check_if_profile_json_contains_legacy_p2p_links_when_p2p_links_are_present(
     ) {
-        let value = r#"
+        let json = r#"
         {
             "appPreferences": {
               "p2pLinks": [
@@ -551,31 +551,26 @@ mod tests {
           }
         "#;
         assert_eq!(
-            true,
             SUT::check_if_profile_json_contains_legacy_p2p_links(
-                value.as_bytes()
-            )
+                json.as_bytes()
+            ),
+            true
         );
     }
 
     #[test]
     fn check_if_profile_json_contains_legacy_p2p_links_when_empty_json() {
-        let value = r#"
-        {
-            
-          }
-        "#;
         assert_eq!(
-            false,
             SUT::check_if_profile_json_contains_legacy_p2p_links(
-                value.as_bytes()
-            )
+                BagOfBytes::new()
+            ),
+            false
         );
     }
 
     #[test]
     fn check_if_profile_json_contains_legacy_p2p_links_when_empty_p2p_links() {
-        let value = r#"
+        let json = r#"
         {
             "appPreferences": {
                 "p2pLinks": []
@@ -584,25 +579,25 @@ mod tests {
           }
         "#;
         assert_eq!(
-            false,
             SUT::check_if_profile_json_contains_legacy_p2p_links(
-                value.as_bytes()
-            )
+                json.as_bytes()
+            ),
+            false
         );
     }
 
     #[test]
     fn check_if_profile_json_contains_legacy_p2p_links_in_profile_snapshot_version_100(
     ) {
-        let value = include_str!(concat!(
+        let json = include_str!(concat!(
             env!("FIXTURES_VECTOR"),
             "only_plaintext_profile_snapshot_version_100.json"
         ));
         assert_eq!(
-            true,
             SUT::check_if_profile_json_contains_legacy_p2p_links(
-                value.as_bytes()
-            )
+                json.as_bytes()
+            ),
+            true
         );
     }
 
