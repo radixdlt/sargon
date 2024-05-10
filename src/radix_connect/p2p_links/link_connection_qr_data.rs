@@ -13,9 +13,9 @@ use crate::prelude::*;
     derive_more::Debug,
     uniffi::Record,
 )]
-#[serde(rename_all = "camelCase")]
+#[serde_as]
 #[debug(
-    "LinkConnectionQRData {{ purpose: '{purpose}', password: '{password}', public_key: '{public_key}', signature: '{signature}' }}"
+    "LinkConnectionQRData {{ purpose: '{purpose}', password: '{password}', public_key_of_other_party: '{public_key_of_other_party}', signature: '{signature}' }}"
 )]
 #[display("{}", self.to_obfuscated_string())]
 pub struct LinkConnectionQRData {
@@ -30,24 +30,27 @@ pub struct LinkConnectionQRData {
     /// Each client generates a curve25119 keypair. The public key will be used as an identifier for the client.
     /// Each client keeps a record of linked clients' public keys to prevent duplicate links.
     /// This is the public key of the other client and it also serves as the seed for the link `ID`.
-    pub public_key: Ed25519PublicKey,
+    #[serde_as(as = "DisplayFromStr")]
+    #[serde(rename = "publicKey")]
+    pub public_key_of_other_party: Ed25519PublicKey,
 
     /// Represents a signature produced by Connector Extension by signing the hash of the `password`
-    /// with the private key of the `public_key`.
-    pub signature: Exactly64Bytes,
+    /// with the private key of the `public_key_of_other_party`.
+    #[serde_as(as = "DisplayFromStr")]
+    pub signature: Ed25519Signature,
 }
 
 impl LinkConnectionQRData {
     pub fn new(
         purpose: RadixConnectPurpose,
         password: RadixConnectPassword,
-        public_key: Ed25519PublicKey,
-        signature: Exactly64Bytes,
+        public_key_of_other_party: Ed25519PublicKey,
+        signature: Ed25519Signature,
     ) -> Self {
         Self {
             purpose,
             password,
-            public_key,
+            public_key_of_other_party,
             signature,
         }
     }
@@ -66,7 +69,7 @@ impl HasSampleValues for LinkConnectionQRData {
             RadixConnectPurpose::sample(),
             RadixConnectPassword::sample(),
             Ed25519PublicKey::sample(),
-            Exactly64Bytes::sample(),
+            Ed25519Signature::sample(),
         )
     }
 
@@ -75,7 +78,7 @@ impl HasSampleValues for LinkConnectionQRData {
             RadixConnectPurpose::sample_other(),
             RadixConnectPassword::sample_other(),
             Ed25519PublicKey::sample_other(),
-            Exactly64Bytes::sample_other(),
+            Ed25519Signature::sample_other(),
         )
     }
 }
@@ -102,7 +105,7 @@ mod tests {
     fn debug() {
         assert_eq!(
             format!("{:?}", SUT::sample()),
-            "LinkConnectionQRData { purpose: 'general', password: 'deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead', public_key: 'ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf', signature: 'deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead' }"
+            "LinkConnectionQRData { purpose: 'general', password: 'deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead', public_key_of_other_party: 'ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf', signature: '2150c2f6b6c496d197ae03afb23f6adf23b275c675394f23786250abd006d5a2c7543566403cb414f70d0e229b0a9b55b4c74f42fc38cdf1aba2307f97686f0b' }"
         );
     }
 
@@ -124,7 +127,7 @@ mod tests {
                 "purpose": "general",
                 "password": "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead",
                 "publicKey": "ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf",
-                "signature": "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead"
+                "signature": "2150c2f6b6c496d197ae03afb23f6adf23b275c675394f23786250abd006d5a2c7543566403cb414f70d0e229b0a9b55b4c74f42fc38cdf1aba2307f97686f0b"
             }
             "#,
         );
