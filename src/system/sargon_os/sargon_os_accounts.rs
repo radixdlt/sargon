@@ -7,6 +7,30 @@ use crate::prelude::*;
 // ==================
 #[uniffi::export]
 impl SargonOS {
+    /// Creates a new unsaved mainnet account named "Unnamed {N}", where `N` is the
+    /// index of the next account for the BDFS.
+    pub async fn create_unsaved_unnamed_mainnet_account(
+        &self,
+    ) -> Result<Account> {
+        let accounts = self
+            .batch_create_unsaved_accounts(
+                NetworkID::Mainnet,
+                1,
+                "Unnamed".to_owned(),
+            )
+            .await?;
+
+        Ok(accounts.first().unwrap().clone())
+    }
+
+    /// Uses `create_unsaved_account` specifying `NetworkID::Mainnet`.
+    pub async fn create_unsaved_mainnet_account(
+        &self,
+        name: DisplayName,
+    ) -> Result<Account> {
+        self.create_unsaved_account(NetworkID::Mainnet, name).await
+    }
+
     /// Creates a new non securified account **WITHOUT** add it to Profile, using the *main* "Babylon"
     /// `DeviceFactorSource` and the "next" index for this FactorSource as derivation path.
     ///
@@ -277,8 +301,7 @@ mod tests {
         // ACT
         let unsaved_account = os
             .with_timeout(|x| {
-                x.create_unsaved_account(
-                    NetworkID::Mainnet,
+                x.create_unsaved_mainnet_account(
                     DisplayName::new("Alice").unwrap(),
                 )
             })
@@ -288,5 +311,25 @@ mod tests {
         // ASSERT
         assert_eq!(unsaved_account, Account::sample());
         assert_eq!(os.profile().networks.len(), 0); // not added
+    }
+
+    #[actix_rt::test]
+    async fn test_create_unsaved_account_twice_yield_same_accounts() {
+        // ARRANGE
+        let os = SUT::fast_boot_bdfs(MnemonicWithPassphrase::sample()).await;
+
+        // ACT
+        let first = os
+            .with_timeout(|x| x.create_unsaved_unnamed_mainnet_account())
+            .await
+            .unwrap();
+
+        let second = os
+            .with_timeout(|x| x.create_unsaved_unnamed_mainnet_account())
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert_eq!(first, second);
     }
 }
