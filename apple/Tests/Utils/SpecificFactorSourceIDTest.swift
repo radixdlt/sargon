@@ -6,16 +6,17 @@ import XCTest
 
 class SpecificFactorSourceIDTest<SUT_: FactorSourceIDSpecificProtocol>: FactorSourceIDTest<SUT_> {
 	func test_extract() throws {
-		func doTest(_ sut: SUT) throws {
+		try eachSample { sut in
 			let embedded = sut.asGeneral
 			let extracted: SUT = try embedded.extract()
 			XCTAssertEqual(extracted, sut)
 		}
-		try SUT.sampleValues.forEach(doTest)
 	}
 	
-	
-	func test_codable_roundtrip() throws {
-		try SUT.sampleValues.forEach(doTestCodableRoundtrip)
+	/// Cyon: We might be able remove this function once we have converted to `swift-testing` which has much more 
+	/// powerful discovery than XCTest, and maybe `eachSampleCodableRoundtripTest` will be picked up as
+	/// a test directly.
+	func testJSONRoundtripAllSamples() throws {
+		try eachSampleCodableRoundtripTest()
 	}
 }

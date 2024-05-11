@@ -6,18 +6,16 @@ import XCTest
 
 final class PersonaTests: EntityProtocolTest<Persona> {
 	
-	func test_extract_wrong_throws() {
-		func doTest(_ sut: SUT) {
+	func test_extract_wrong_throws() throws {
+		try eachSample { sut in
 			XCTAssertThrowsError(try sut.asGeneral.extract(as: Account.self))
 		}
-		SUT.sampleValues.forEach(doTest)
 	}
 	
 	func test_as_general_as_account() throws {
-		func doTest(_ sut: SUT) throws {
+		try eachSample { sut in
 			XCTAssertEqual(try sut.asGeneral.asPersona(), sut)
 		}
-		try SUT.sampleValues.forEach(doTest)
 	}
 	
 	func test_display_names() {

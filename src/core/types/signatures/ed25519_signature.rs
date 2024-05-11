@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+json_string_convertible!(Ed25519Signature);
+
 /// Represents an ED25519 signature.
 #[derive(
     Clone,
@@ -9,6 +11,8 @@ use crate::prelude::*;
     Hash,
     PartialOrd,
     Ord,
+    SerializeDisplay,
+    DeserializeFromStr,
     derive_more::Display,
     derive_more::Debug,
     derive_more::FromStr,

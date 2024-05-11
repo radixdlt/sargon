@@ -1,12 +1,12 @@
 package com.radixdlt.sargon.extensions
 
-import com.radixdlt.sargon.Hash
+import com.radixdlt.sargon.PublicKeyHash
 import com.radixdlt.sargon.P2pLink
 import com.radixdlt.sargon.annotation.KoverIgnore
 
 class P2pLinks private constructor(
-    private val array: IdentifiedArray<Hash, P2pLink>
-) : IdentifiedArray<Hash, P2pLink> by array {
+    private val array: IdentifiedArray<PublicKeyHash, P2pLink>
+) : IdentifiedArray<PublicKeyHash, P2pLink> by array {
 
     constructor(p2pLinks: List<P2pLink>) : this(
         IdentifiedArrayImpl(

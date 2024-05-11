@@ -12,6 +12,14 @@ extension Ed25519PublicKey {
         // Rust: `new_ed25519_public_key_from_bytes`
         self = try newEd25519PublicKeyFromBytes(bytes: Data(bytes))
     }
+    
+    public init(jsonStringLiteral: String) throws {
+        self = try newEd25519PublicKeyFromJsonString(jsonString: jsonStringLiteral)
+    }
+    
+    public func jsonStringLiteral() -> String {
+		ed25519PublicKeyToJsonString(ed25519PublicKey: self)
+    }
 }
 
 // MARK: Func -> Method / Computed Prop

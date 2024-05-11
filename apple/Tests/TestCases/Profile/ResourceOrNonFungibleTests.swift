@@ -17,9 +17,8 @@ final class ResourceOrNonFungibleTests: Test<ResourceOrNonFungible> {
 		XCTAssertEqual(sut.resourceAddress, resourceAddress)
 	}
 	func test_id_is_self() {
-		func doTest(_ sut: SUT) {
+		eachSample { sut in
 			XCTAssertEqual(sut.id, sut)
 		}
-		SUT.sampleValues.forEach(doTest)
 	}
 }

@@ -488,6 +488,9 @@ pub enum CommonError {
 
     #[error("Item identified by ID {id} already exist")]
     ElementAlreadyExist { id: String } = 10136,
+
+    #[error("Invalid RadixConnectPurpose, bad value: {bad_value}")]
+    InvalidRadixConnectPurpose { bad_value: String } = 10137,
 }
 
 #[uniffi::export]

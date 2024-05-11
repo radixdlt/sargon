@@ -14,24 +14,25 @@ import XCTest
 class PersonaDataEntryTest<SUT_: PersonaDataEntryProtocol>: Test<SUT_> {
 	
 	func test_embed_then_extract() throws {
-		func doTest(_ sut: SUT) throws {
+		try eachSample { sut in
 			let embedded = sut.embed()
 			let extracted = try XCTUnwrap(SUT.extract(from: embedded))
 			XCTAssertEqual(extracted, sut)
 		}
-		try SUT.sampleValues.forEach(doTest)
 	}
 	
 	func test_embed_identity()  {
-		func doTest(_ sut: SUT)  {
+		eachSample { sut in
 			let embedded = sut.embed()
 			XCTAssertEqual(embedded.embed(), embedded)
 		}
-		SUT.sampleValues.forEach(doTest)
 	}
 	
-	func test_codable_roundtrip() throws {
-		try SUT.sampleValues.forEach(doTestCodableRoundtrip)
+	/// Cyon: We might be able remove this function once we have converted to `swift-testing` which has much more 
+	/// powerful discovery than XCTest, and maybe `eachSampleCodableRoundtripTest` will be picked up as
+	/// a test directly.
+	func testJSONRoundtripAllSamples() throws {
+		try eachSampleCodableRoundtripTest()
 	}
 	
 	func test_formatted_entry() {

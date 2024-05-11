@@ -10,9 +10,8 @@ final class AccountOrPersonaTests: EntityBaseTest<AccountOrPersona> {
 	}
 	
 	func test_as_general_is_self() {
-		func doTest(_ sut: SUT) {
+		eachSample { sut in
 			XCTAssertEqual(sut, sut.asGeneral)
 		}
-		SUT.sampleValues.forEach(doTest)
 	}
 }

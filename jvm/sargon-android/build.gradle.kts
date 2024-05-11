@@ -100,6 +100,7 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp-coroutines")
 
     testImplementation(libs.junit)
+    testImplementation(libs.junit.params)
     testImplementation(libs.mockk)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testDebugRuntimeOnly(project(":sargon-desktop-debug"))
