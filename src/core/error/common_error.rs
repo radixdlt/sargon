@@ -489,31 +489,34 @@ pub enum CommonError {
     #[error("Item identified by ID {id} already exist")]
     ElementAlreadyExist { id: String } = 10136,
 
+    #[error("Invalid RadixConnectPurpose, bad value: {bad_value}")]
+    InvalidRadixConnectPurpose { bad_value: String } = 10137,
+
     #[error(
         "Failed to load Profile from secure storage, profile id: {profile_id}"
     )]
-    UnableToLoadProfileFromSecureStorage { profile_id: ProfileID } = 10137,
+    UnableToLoadProfileFromSecureStorage { profile_id: ProfileID } = 10138,
 
     #[error("Failed to save DeviceInfo to secure storage")]
-    UnableToSaveDeviceInfoToSecureStorage = 10138,
+    UnableToSaveDeviceInfoToSecureStorage = 10139,
 
     #[error("Unable to acquire read lock for profile")]
-    UnableToAcquireReadLockForProfile = 10139,
+    UnableToAcquireReadLockForProfile = 10140,
 
     #[error("Failed to read from unsafe storage.")]
-    UnsafeStorageReadError = 10140,
+    UnsafeStorageReadError = 10141,
 
     #[error("Failed to write to unsafe storage.")]
-    UnsafeStorageWriteError = 10141,
+    UnsafeStorageWriteError = 10142,
 
     #[error("Failed to create file path from string: '{bad_value}'")]
-    FailedToCreateFilePathFromString { bad_value: String } = 10142,
+    FailedToCreateFilePathFromString { bad_value: String } = 10143,
 
     #[error("Expected collection to not be empty")]
-    ExpectedNonEmptyCollection = 10143,
+    ExpectedNonEmptyCollection = 10144,
 
     #[error("Failed to add all accounts, found duplicated account.")]
-    UnableToAddAllAccountsDuplicatesFound = 10144,
+    UnableToAddAllAccountsDuplicatesFound = 10145,
 }
 
 #[uniffi::export]

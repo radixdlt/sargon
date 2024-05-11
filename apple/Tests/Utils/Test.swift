@@ -91,4 +91,8 @@ extension Test where SUT: Codable {
 		let decoded = try jsonDecoder.decode(SUT.self, from: data)
 		XCTAssertEqual(decoded, sut)
 	}
+
+	func eachSampleCodableRoundtripTest() throws {
+		try eachSample { try doTestCodableRoundtrip($0) }
+	}
 }

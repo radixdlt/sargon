@@ -182,6 +182,16 @@ impl Profile {
     }
 }
 
+impl Profile {
+    pub fn check_if_profile_json_contains_legacy_p2p_links(
+        json: impl AsRef<[u8]>,
+    ) -> bool {
+        let json = json.as_ref();
+        serde_json::from_slice::<ProtoProfileMaybeWithLegacyP2PLinks>(json)
+            .map_or_else(|_| false, |s| !s.app_preferences.p2p_links.is_empty())
+    }
+}
+
 impl HasSampleValues for Profile {
     fn sample() -> Self {
         let networks = ProfileNetworks::sample();
@@ -518,6 +528,72 @@ mod tests {
     }
 
     #[test]
+    fn check_if_profile_json_contains_legacy_p2p_links_when_p2p_links_are_present(
+    ) {
+        let json = r#"
+        {
+            "appPreferences": {
+              "p2pLinks": [
+                {
+                  "connectionPassword": "babebabebabebabebabebabebabebabebabebabebabebabebabebabebabebabe",
+                  "displayName": "Brave on PC"
+                }
+              ]
+            }
+          }
+        "#;
+        assert_eq!(
+            SUT::check_if_profile_json_contains_legacy_p2p_links(
+                json.as_bytes()
+            ),
+            true
+        );
+    }
+
+    #[test]
+    fn check_if_profile_json_contains_legacy_p2p_links_when_empty_json() {
+        assert_eq!(
+            SUT::check_if_profile_json_contains_legacy_p2p_links(
+                BagOfBytes::new()
+            ),
+            false
+        );
+    }
+
+    #[test]
+    fn check_if_profile_json_contains_legacy_p2p_links_when_empty_p2p_links() {
+        let json = r#"
+        {
+            "appPreferences": {
+                "p2pLinks": []
+              }
+            }
+          }
+        "#;
+        assert_eq!(
+            SUT::check_if_profile_json_contains_legacy_p2p_links(
+                json.as_bytes()
+            ),
+            false
+        );
+    }
+
+    #[test]
+    fn check_if_profile_json_contains_legacy_p2p_links_in_profile_snapshot_version_100(
+    ) {
+        let json = include_str!(concat!(
+            env!("FIXTURES_VECTOR"),
+            "only_plaintext_profile_snapshot_version_100.json"
+        ));
+        assert_eq!(
+            SUT::check_if_profile_json_contains_legacy_p2p_links(
+                json.as_bytes()
+            ),
+            true
+        );
+    }
+
+    #[test]
     fn json_roundtrip() {
         let sut = SUT::sample();
         assert_eq_after_json_roundtrip(
@@ -637,16 +713,6 @@ mod tests {
 							}
 						]
 					},
-					"p2pLinks": [
-						{
-							"connectionPassword": "babebabebabebabebabebabebabebabebabebabebabebabebabebabebabebabe",
-							"displayName": "Brave on PC"
-						},
-						{
-							"connectionPassword": "cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe",
-							"displayName": "Chrome on Macbook"
-						}
-					],
 					"security": {
 						"isCloudProfileSyncEnabled": true,
 						"isDeveloperModeEnabled": true,

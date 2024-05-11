@@ -3,6 +3,7 @@ package com.radixdlt.sargon.extensions
 import com.radixdlt.sargon.FactorSource
 import com.radixdlt.sargon.Profile
 import com.radixdlt.sargon.ProfileFileContents
+import com.radixdlt.sargon.checkIfProfileJsonContainsLegacyP2pLinks
 import com.radixdlt.sargon.newProfile
 import com.radixdlt.sargon.newProfileFromEncryptionBytes
 import com.radixdlt.sargon.newProfileFromJsonBytes
@@ -37,3 +38,6 @@ fun Profile.Companion.fromEncryptedJson(
 fun Profile.toJson() = profileToJsonBytes(profile = this).string
 fun Profile.toEncryptedJson(encryptionPassword: String) =
     profileEncryptWithPassword(profile = this, encryptionPassword = encryptionPassword).string
+
+fun Profile.Companion.checkIfProfileJsonContainsLegacyP2PLinks(jsonString: String) =
+    checkIfProfileJsonContainsLegacyP2pLinks(json = bagOfBytes(fromString = jsonString))

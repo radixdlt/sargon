@@ -7,12 +7,11 @@ import XCTest
 class EntityProtocolTest<SUT_: EntityProtocol>: EntityBaseTest<SUT_> {
 	
 	func test_extract() throws {
-		func doTest(_ sut: SUT) throws {
+		try eachSample { sut in
 			let embedded = sut.asGeneral
 			let extracted: SUT = try embedded.extract()
 			XCTAssertEqual(extracted, sut)
 		}
-		try SUT.sampleValues.forEach(doTest)
 	}
 }
 
@@ -42,14 +41,13 @@ class EntityBaseTest<SUT_: EntityBaseProtocol>: Test<SUT_> {
 	}
 	
 	func test_hasAuthenticationSigningKey() {
-		func doTest(_ sut: SUT) {
+		eachSample { sut in
 			XCTAssertFalse(sut.hasAuthenticationSigningKey)
 		}
-		SUT.sampleValues.forEach(doTest)
 	}
 	
 	func test_deviceFactorSourceID() {
-		func doTest(_ sut: SUT) {
+		eachSample { sut in
 			XCTAssertTrue(
 				sut.virtualHierarchicalDeterministicFactorInstances
 					.map(\.factorSourceID)
@@ -61,7 +59,6 @@ class EntityBaseTest<SUT_: EntityBaseProtocol>: Test<SUT_> {
 					.contains(sut.deviceFactorSourceID!)
 			)
 		}
-		SUT.sampleValues.forEach(doTest)
 	}
 
 	func test_controlled_by_ed25519_factor() {

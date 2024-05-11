@@ -14,28 +14,25 @@ import XCTest
 final class LedgerHardwareWalletModelTests: Test<LedgerHardwareWalletModel> {
 
     func test_description_is_to_string() {
-        func doTest(_ sut: SUT) {
+        eachSample { sut in
             XCTAssertEqual(sut.description, sut.toString())
         }
-        SUT.sampleValues.forEach(doTest)
     }
     
     
     func test_rawValue_is_to_string() {
-        func doTest(_ sut: SUT) {
+        eachSample { sut in
             XCTAssertEqual(sut.rawValue, sut.toString())
         }
-        SUT.sampleValues.forEach(doTest)
     }
     
     
     func test_string_roundtrip() throws {
-        func doTest(_ sut: SUT) throws {
+        try eachSample { sut in
             XCTAssertEqual(
                 try SUT(string: sut.rawValue),
                 sut
             )
         }
-        try SUT.sampleValues.forEach(doTest)
     }
 }

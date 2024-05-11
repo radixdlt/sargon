@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+json_string_convertible!(DisplayName);
+
 #[uniffi::export]
 pub fn new_display_name(name: String) -> Result<DisplayName> {
     DisplayName::new(name.as_str())

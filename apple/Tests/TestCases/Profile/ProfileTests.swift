@@ -5,10 +5,10 @@ import SargonUniFFI
 import XCTest
 
 final class ProfileTests: Test<Profile> {
-	
-	func test_description_and_debug() {
-		XCTAssertGreaterThan(SUT.sample.debugDescription, SUT.sample.description)
-	}
+    
+        func test_description_and_debug() {
+            XCTAssertGreaterThan(SUT.sample.debugDescription, SUT.sample.description)
+        }
 
 	func test_profile_description_equals() throws {
 		XCTAssertNoDifference(SUT.sample.description, SUT.sample.description)
@@ -110,4 +110,21 @@ final class ProfileTests: Test<Profile> {
 			decode: { try Profile(jsonData: $0) }
 		)
 	}()
+
+    func test_check_if_profile_json_contains_legacy_p2p_links_when_p2p_links_are_not_present() {
+		eachSample { sut in
+			XCTAssertEqual(
+				SUT.checkIfProfileJsonContainsLegacyP2PLinks(contents: sut.jsonData()),
+				false
+			)
+		}
+    }
+
+	func test_check_if_profile_json_contains_legacy_p2p_links_when_p2p_links_are_present() throws {
+		let json = try openFile(subPath: "vector", "only_plaintext_profile_snapshot_version_100", extension: "json")
+		XCTAssertEqual(
+			SUT.checkIfProfileJsonContainsLegacyP2PLinks(contents: json),
+			true
+		)
+	}
 }

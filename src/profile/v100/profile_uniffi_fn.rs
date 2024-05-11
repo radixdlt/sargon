@@ -60,6 +60,13 @@ pub fn profile_analyze_contents_of_file(
     Profile::analyze_contents_of_file(bytes)
 }
 
+#[uniffi::export]
+pub fn check_if_profile_json_contains_legacy_p2p_links(
+    json: BagOfBytes,
+) -> bool {
+    Profile::check_if_profile_json_contains_legacy_p2p_links(json.to_vec())
+}
+
 #[cfg(test)]
 mod uniffi_tests {
 
@@ -95,8 +102,8 @@ mod uniffi_tests {
 
     #[test]
     fn to_string_and_debug_string() {
-        assert_eq!(profile_to_string(&SUT::sample()).len(), 4444);
-        assert_eq!(profile_to_debug_string(&SUT::sample()).len(), 27707);
+        assert_eq!(profile_to_string(&SUT::sample()).len(), 4314);
+        assert_eq!(profile_to_debug_string(&SUT::sample()).len(), 27373);
         assert_ne!(
             profile_to_debug_string(&SUT::sample()),
             profile_to_debug_string(&SUT::sample_other())
@@ -144,6 +151,37 @@ mod uniffi_tests {
             new_profile_from_encryption_bytes(encryption_bytes, password)
                 .unwrap(),
             sut
+        );
+    }
+
+    #[test]
+    fn check_if_profile_json_contains_legacy_p2p_links_when_p2p_links_are_present(
+    ) {
+        let json = r#"
+        {
+            "appPreferences": {
+              "p2pLinks": [
+                {
+                  "connectionPassword": "babebabebabebabebabebabebabebabebabebabebabebabebabebabebabebabe",
+                  "displayName": "Brave on PC"
+                }
+              ]
+            }
+          }
+        "#;
+        assert_eq!(
+            check_if_profile_json_contains_legacy_p2p_links(BagOfBytes::from(
+                json.as_bytes()
+            )),
+            true
+        );
+    }
+
+    #[test]
+    fn check_if_profile_json_contains_legacy_p2p_links_when_empty_json() {
+        assert_eq!(
+            check_if_profile_json_contains_legacy_p2p_links(BagOfBytes::new()),
+            false
         );
     }
 }

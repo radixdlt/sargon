@@ -42,7 +42,7 @@ class ExactlyNBytesTest<SUT_: ExactlyNBytesProtocol>: BinaryProtocolTest<SUT_> {
 	
 	func test_generate_is_indeed_random() {
 		let n = 10
-		func doTest(_ sut: SUT) {
+		eachSample { sut in
 			let randomCollections: [SUT] = (0..<n).map { _ in
 				let generated = SUT.generate()
 				XCTAssertEqual(generated.count, SUT.length)
@@ -51,6 +51,5 @@ class ExactlyNBytesTest<SUT_: ExactlyNBytesProtocol>: BinaryProtocolTest<SUT_> {
 			}
 			XCTAssertEqual(Set(randomCollections).count, n)
 		}
-		SUT.sampleValues.forEach(doTest)
 	}
 }

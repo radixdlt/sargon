@@ -48,11 +48,10 @@ final class DeviceFactorSourceTests: SpecificFactorSourceTest<DeviceFactorSource
 		XCTAssertFalse(sut.supportsBabylon)
 	}
 	
-	func test_extract_wrong_throws() {
-		func doTest(_ sut: SUT) {
+	func test_extract_wrong_throws() throws {
+		try eachSample { sut in
 			XCTAssertThrowsError(try sut.asGeneral.extract(as: LedgerHardwareWalletFactorSource.self))
 		}
-		SUT.sampleValues.forEach(doTest)
 	}
 	
 	func test_known_factor_source_id() async throws {

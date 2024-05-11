@@ -38,4 +38,8 @@ extension Profile {
 	public func encrypt(password: String) -> Data {
 		profileEncryptWithPassword(profile: self, encryptionPassword: password)
 	}
+
+	public static func checkIfProfileJsonContainsLegacyP2PLinks(contents: some DataProtocol) -> Bool {
+	    checkIfProfileJsonContainsLegacyP2pLinks(json: Data(contents))
+    }
 }
