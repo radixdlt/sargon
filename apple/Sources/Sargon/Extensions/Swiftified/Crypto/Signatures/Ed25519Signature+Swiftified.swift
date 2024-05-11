@@ -1,6 +1,8 @@
 import Foundation
 import SargonUniFFI
 
+extension Ed25519Signature: SargonStringCodable {}
+
 extension Ed25519Signature: SignatureProtocol {
 	public var data: Data {
 		bytes.data

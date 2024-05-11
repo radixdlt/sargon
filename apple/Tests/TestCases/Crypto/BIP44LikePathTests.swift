@@ -21,11 +21,10 @@ final class BIP44LikePathTests: HDPathProtocolTest<BIP44LikePath> {
 	}
 	
 	func test_index_roundtrip() {
-		func doTest(_ sut: SUT) {
+		eachSample { sut in
 			let index = sut.addressIndex
 			XCTAssertEqual(SUT(index: index), sut)
 		}
-		SUT.sampleValues.forEach(doTest)
 	}
 	
 	func test_index() throws {

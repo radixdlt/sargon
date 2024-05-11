@@ -15,10 +15,9 @@ final class AuthorizedDappTests: Test<AuthorizedDapp> {
 	}
 	
 	func test_id_is_dapp_definition() {
-		func doTest(_ sut: SUT) {
+		eachSample { sut in
 			XCTAssertEqual(sut.id, sut.dAppDefinitionAddress)
 		}
-		SUT.sampleValues.forEach(doTest)
 	}
 	
 	func test_codable() throws {
@@ -75,7 +74,10 @@ final class AuthorizedDappTests: Test<AuthorizedDapp> {
 		try XCTAssertEqual(JSONDecoder().decode(SUT.self, from: encoded), sut)
 	}
 	
-	func test_codable_roundtrip() throws {
-		try SUT.sampleValues.forEach(doTestCodableRoundtrip)
+	/// Cyon: We might be able remove this function once we have converted to `swift-testing` which has much more 
+	/// powerful discovery than XCTest, and maybe `eachSampleCodableRoundtripTest` will be picked up as
+	/// a test directly.
+	func testJSONRoundtripAllSamples() throws {
+		try eachSampleCodableRoundtripTest()
 	}
 }

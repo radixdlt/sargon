@@ -8,15 +8,18 @@ use std::str::FromStr;
 mod profile_snapshot_tests {
     use super::*;
 
+    /// We cannot do a roundtrip test here because
+    /// `only_plaintext_profile_snapshot_version_100.json` does contain `p2pLinks`
+    /// and with the [CAP-36][doc] feature `p2pLinks` are no longer stored in `Profile`.
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3251863610/CAP-36+WebRTC+Clients+Protocol
     #[test]
     fn v100_100() {
-        let (profile, json) =
-            fixture_and_json::<Profile>(include_str!(concat!(
-                env!("FIXTURES_VECTOR"),
-                "only_plaintext_profile_snapshot_version_100.json"
-            )))
-            .expect("V100 Profile to deserialize");
-        assert_json_value_eq_after_roundtrip(&profile, json)
+        fixture_and_json::<Profile>(include_str!(concat!(
+            env!("FIXTURES_VECTOR"),
+            "only_plaintext_profile_snapshot_version_100.json"
+        )))
+        .expect("V100 Profile to deserialize");
     }
 }
 

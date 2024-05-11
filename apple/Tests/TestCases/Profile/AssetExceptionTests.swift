@@ -13,9 +13,8 @@ import XCTest
 
 final class AssetExceptionTests: Test<AssetException> {
 	func test_id_is_address() {
-		func doTest(_ sut: SUT) {
+		eachSample { sut in
 			XCTAssertEqual(sut.id, sut.address)
 		}
-		SUT.sampleValues.forEach(doTest)
 	}
 }

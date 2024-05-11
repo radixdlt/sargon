@@ -7,21 +7,19 @@ import XCTest
 final class HierarchicalDeterministicFactorInstanceTests: Test<HierarchicalDeterministicFactorInstance> {
 	
 	func test_factorSourceID() {
-		func doTest(_ sut: SUT) {
+		eachSample { sut in
 			XCTAssertEqual(sut.factorSourceID, sut.factorSourceId)
 		}
-		SUT.sampleValues.forEach(doTest)
 	}
 	
 	func test_derivationPath() {
-		func doTest(_ sut: SUT) {
+		eachSample { sut in
 			XCTAssertEqual(sut.derivationPath, sut.publicKey.derivationPath)
 		}
-		SUT.sampleValues.forEach(doTest)
 	}
 	
 	func test_factor_instance() {
-		func doTest(_ sut: SUT) {
+		eachSample { sut in
 			let factor = sut.factorInstance
 			XCTAssertEqual(factor.factorSourceId, sut.factorSourceId.asGeneral)
 			switch factor.badge {
@@ -30,6 +28,5 @@ final class HierarchicalDeterministicFactorInstanceTests: Test<HierarchicalDeter
 				XCTAssertEqual(hdKey.publicKey, sut.publicKey.publicKey)
 			}
 		}
-		SUT.sampleValues.forEach(doTest)
 	}
 }

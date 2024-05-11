@@ -6,10 +6,9 @@ import XCTest
 
 final class FactorSourceIDTests: FactorSourceIDTest<FactorSourceID> {
 	func test_as_general_is_self() {
-		func doTest(_ sut: SUT) {
+		eachSample { sut in
 			XCTAssertEqual(sut.asGeneral, sut)
 		}
-		SUT.sampleValues.forEach(doTest)
 	}
 }
 	

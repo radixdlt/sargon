@@ -1,8 +1,12 @@
 use crate::prelude::*;
 
-/// A client the user have connected P2P with, typically a
-/// WebRTC connections with a DApp, but might be Android or iPhone
-/// client as well.
+/// A client the user have connected P2P with, typically a WebRTC connection with the dApp or Connector Extension.
+/// Each client generates a curve25119 keypair. The public key is used as an identifier for the client.
+/// The hash of the connection password is used to establish the P2P connection.
+/// There can be multiple types of links (trusted vs untrusted) differentiated by `RadixConnectPurpose`.
+/// Here are the [CAP-36][doc] requirements.
+///
+/// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3251863610/CAP-36+WebRTC+Clients+Protocol
 #[derive(
     Serialize,
     Deserialize,
@@ -16,14 +20,23 @@ use crate::prelude::*;
 )]
 #[serde(rename_all = "camelCase")]
 #[debug(
-    "P2PLink {{ display_name: '{display_name}', connection_password: '{connection_password}' }}"
+    "P2PLink {{ display_name: '{display_name}', connection_password: '{connection_password}', connection_purpose: '{connection_purpose}', public_key: '{public_key}' }}"
 )]
 #[display("{}", self.to_obfuscated_string())]
 pub struct P2PLink {
-    /// The most important property of this struct, the `ConnectionPassword`,
-    /// is used to be able to re-establish the P2P connection and also acts as the seed
-    /// for the `ID`.
+    /// The most important property of this struct, the `RadixConnectPassword`,
+    /// is used to be able to re-establish the P2P connection
     pub connection_password: RadixConnectPassword,
+
+    /// The purpose of the connection, set by the other client, typically Connector Extension or dApp.
+    /// As part of the initial linking flow, user will be prompted about kind of link they're trying to make.
+    /// The user needs to make a conscious decision about general purpose links (because it comes with security risk).
+    pub connection_purpose: RadixConnectPurpose,
+
+    /// Each client generates a curve25119 keypair. The public key will be used as an identifier for the client.
+    /// Each client keeps a record of linked clients' public keys to prevent duplicate links.
+    /// This is the public key of the other client and it also serves as the seed for the link `ID`.
+    pub public_key: Ed25519PublicKey,
 
     /// Client name, e.g. "Chrome on Macbook" or "My work Android" or "My wifes iPhone SE".
     pub display_name: String,
@@ -38,10 +51,14 @@ impl SafeToLog for P2PLink {
 impl P2PLink {
     pub fn new(
         connection_password: RadixConnectPassword,
+        connection_purpose: RadixConnectPurpose,
+        public_key: Ed25519PublicKey,
         display_name: String,
     ) -> Self {
         Self {
             connection_password,
+            connection_purpose,
+            public_key,
             display_name,
         }
     }
@@ -57,26 +74,11 @@ impl P2PLink {
 }
 
 impl Identifiable for P2PLink {
-    type ID = Hash;
+    type ID = PublicKeyHash;
 
-    fn id(&self) -> Self::ID {
-        self.connection_password.hash()
+    fn id(&self) -> PublicKeyHash {
+        PublicKeyHash::hash(self.public_key)
     }
-}
-
-#[uniffi::export]
-pub fn p2p_link_id(link: &P2PLink) -> <P2PLink as Identifiable>::ID {
-    link.id()
-}
-
-#[uniffi::export]
-pub fn new_p2p_link_sample() -> P2PLink {
-    P2PLink::sample()
-}
-
-#[uniffi::export]
-pub fn new_p2p_link_sample_other() -> P2PLink {
-    P2PLink::sample_other()
 }
 
 impl P2PLink {
@@ -98,26 +100,46 @@ impl HasSampleValues for P2PLink {
 }
 
 impl P2PLink {
-    fn declare(password: RadixConnectPassword, display: &str) -> Self {
-        Self::new(password, display.to_string())
+    fn declare(
+        password: RadixConnectPassword,
+        purpose: RadixConnectPurpose,
+        public_key: Ed25519PublicKey,
+        display: &str,
+    ) -> Self {
+        Self::new(password, purpose, public_key, display.to_string())
     }
 
     /// `aced`... "Arc on MacStudio"
     /// A sample used to facilitate unit tests.
     pub fn sample_arc() -> Self {
-        Self::declare(RadixConnectPassword::sample_aced(), "Arc on MacStudio")
+        Self::declare(
+            RadixConnectPassword::sample_aced(),
+            RadixConnectPurpose::sample(),
+            Ed25519PublicKey::sample(),
+            "Arc on MacStudio",
+        )
     }
 
     /// `babe`... "Brave on PC"
     /// A sample used to facilitate unit tests.
     pub fn sample_brave() -> Self {
-        Self::declare(RadixConnectPassword::sample_babe(), "Brave on PC")
+        Self::declare(
+            RadixConnectPassword::sample_babe(),
+            RadixConnectPurpose::sample_other(),
+            Ed25519PublicKey::sample_other(),
+            "Brave on PC",
+        )
     }
 
     /// `cafe`... "Chrome on Macbook"
     /// A sample used to facilitate unit tests.
     pub fn sample_chrome() -> Self {
-        Self::declare(RadixConnectPassword::sample_cafe(), "Chrome on Macbook")
+        Self::declare(
+            RadixConnectPassword::sample_cafe(),
+            RadixConnectPurpose::sample(),
+            Ed25519PublicKey::sample_fade(),
+            "Chrome on Macbook",
+        )
     }
 
     /// `dead`... "DuckDuckGo on Mac Pro"
@@ -125,6 +147,8 @@ impl P2PLink {
     pub fn sample_duckduckgo() -> Self {
         Self::declare(
             RadixConnectPassword::sample_dead(),
+            RadixConnectPurpose::sample_other(),
+            Ed25519PublicKey::sample_aced(),
             "DuckDuckGo on Mac Pro",
         )
     }
@@ -153,6 +177,8 @@ mod tests {
             r#"
             {
                 "connectionPassword": "cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe",
+                "connectionPurpose": "general",
+                "publicKey": "37842830eca0d08dd684adcb9705b3a473c0c070a322322b53c35e09a1bff298",
                 "displayName": "Chrome on Macbook"
             }
             "#,
@@ -174,7 +200,7 @@ mod tests {
 
     #[test]
     fn debug() {
-        assert_eq!(format!("{:?}", P2PLink::sample()), "P2PLink { display_name: 'Chrome on Macbook', connection_password: 'cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe' }");
+        assert_eq!(format!("{:?}", P2PLink::sample()), "P2PLink { display_name: 'Chrome on Macbook', connection_password: 'cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe', connection_purpose: 'general', public_key: '37842830eca0d08dd684adcb9705b3a473c0c070a322322b53c35e09a1bff298' }");
     }
 
     #[test]
@@ -191,35 +217,6 @@ mod tests {
         assert_eq!(
             format!("{:?}", sut.to_string()),
             format!("{:?}", sut.non_sensitive())
-        );
-    }
-}
-
-#[cfg(test)]
-mod uniffi_tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = P2PLink;
-
-    #[test]
-    fn id_of_link() {
-        let sut = SUT::sample();
-        assert_eq!(p2p_link_id(&sut), sut.id())
-    }
-
-    #[test]
-    fn hash_of_samples() {
-        assert_eq!(
-            HashSet::<SUT>::from_iter([
-                new_p2p_link_sample(),
-                new_p2p_link_sample_other(),
-                // duplicates should get removed
-                new_p2p_link_sample(),
-                new_p2p_link_sample_other(),
-            ])
-            .len(),
-            2
         );
     }
 }

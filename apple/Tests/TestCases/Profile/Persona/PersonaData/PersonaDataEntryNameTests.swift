@@ -16,10 +16,9 @@ final class PersonaDataEntryNameTests: PersonaDataEntryTest<PersonaDataEntryName
 	
 	func test_kind() {
 		XCTAssertEqual(SUT.kind, .fullName)
-		func doTest(_ sut: SUT) {
+		eachSample { sut in
 			XCTAssertEqual(sut.kind, .fullName)
 		}
-		SUT.sampleValues.forEach(doTest)
 	}
 	
 	func test_extract_wrong_is_nil() {

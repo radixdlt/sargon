@@ -135,6 +135,36 @@ impl Ed25519PrivateKey {
         )
         .unwrap()
     }
+
+    /// A sample used to facilitate unit tests.
+    ///
+    /// `8228aa5b978e3d3c1fac2606e36f746602ccff6288ee0777a7d2917aa8e6cbe8``
+    ///
+    /// expected public key:
+    /// `37842830eca0d08dd684adcb9705b3a473c0c070a322322b53c35e09a1bff298`
+    ///
+    /// https://cryptobook.nakov.com/digital-signatures/eddsa-sign-verify-examples
+    pub fn sample_fade() -> Self {
+        Self::from_str(
+            "8228aa5b978e3d3c1fac2606e36f746602ccff6288ee0777a7d2917aa8e6cbe8",
+        )
+        .unwrap()
+    }
+
+    /// A sample used to facilitate unit tests.
+    ///
+    /// `c67e54737780627f85746e3f1becf633f189e7061672a6f6737ba6319a754cbd``
+    ///
+    /// expected public key:
+    /// `49f9cb3e59b6938b434436240690af6c952523c41d831122bb1c2600bf3e0c87`
+    ///
+    /// https://cryptobook.nakov.com/digital-signatures/eddsa-sign-verify-examples
+    pub fn sample_aced() -> Self {
+        Self::from_str(
+            "c67e54737780627f85746e3f1becf633f189e7061672a6f6737ba6319a754cbd",
+        )
+        .unwrap()
+    }
 }
 
 #[cfg(test)]

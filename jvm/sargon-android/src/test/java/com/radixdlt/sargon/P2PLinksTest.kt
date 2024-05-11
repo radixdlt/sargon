@@ -8,12 +8,12 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 
-internal class P2PLinksTest : IdentifiedArrayTest<P2pLinks, Hash, P2pLink>() {
+internal class P2PLinksTest : IdentifiedArrayTest<P2pLinks, PublicKeyHash, P2pLink>() {
     override fun element(): P2pLink = P2pLink.sample()
 
     override fun elementWithDifferentId(): P2pLink = P2pLink.sample.other()
 
-    override fun identifier(element: P2pLink): Hash = element.id
+    override fun identifier(element: P2pLink): PublicKeyHash = element.id
 
     override fun init(element: P2pLink): P2pLinks = P2pLinks(element)
 

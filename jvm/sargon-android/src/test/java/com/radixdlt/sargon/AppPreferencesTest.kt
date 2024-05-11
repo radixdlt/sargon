@@ -1,7 +1,6 @@
 package com.radixdlt.sargon
 
 import com.radixdlt.sargon.extensions.default
-import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.toDecimal192
 import com.radixdlt.sargon.samples.Sample
 import com.radixdlt.sargon.samples.sample
@@ -22,7 +21,6 @@ class AppPreferencesTest: SampleTestable<AppPreferences> {
                     fiatCurrencyPriceTarget = FiatCurrency.USD
                 ),
                 gateways = SavedGateways.default,
-                p2pLinks = listOf(),
                 security = Security(
                     isCloudProfileSyncEnabled = true,
                     isDeveloperModeEnabled = false,
