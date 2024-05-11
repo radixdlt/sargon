@@ -254,4 +254,111 @@ mod tests {
 
         assert_eq!(active_profile_id, os.profile().id());
     }
+
+    #[actix_rt::test]
+    async fn test_delete_profile_then_create_new_with_bdfs_old_bdfs_is_deleted()
+    {
+        // ARRANGE
+        let bdfs = MnemonicWithPassphrase::sample();
+        let os = SUT::fast_boot_bdfs(bdfs.clone()).await;
+
+        // ACT
+        os.with_timeout(|x| x.delete_profile_then_create_new_with_bdfs())
+            .await
+            .unwrap();
+
+        // ASSERT
+        let id = FactorSourceIDFromHash::new_for_device(&bdfs);
+        let old_bdfs = os
+            .with_timeout(|x| {
+                x.secure_storage.load_mnemonic_with_passphrase(&id)
+            })
+            .await;
+
+        assert!(old_bdfs.is_err());
+    }
+
+    #[actix_rt::test]
+    async fn test_delete_profile_then_create_new_with_bdfs_old_profile_is_deleted(
+    ) {
+        // ARRANGE
+        let bdfs = MnemonicWithPassphrase::sample();
+        let os = SUT::fast_boot_bdfs(bdfs.clone()).await;
+        let profile_id = os.profile().id();
+
+        // ACT
+        os.with_timeout(|x| x.delete_profile_then_create_new_with_bdfs())
+            .await
+            .unwrap();
+
+        // ASSERT
+        let load_old_profile_result = os
+            .with_timeout(|x| x.secure_storage.load_profile_with_id(profile_id))
+            .await;
+
+        assert!(load_old_profile_result.is_err());
+    }
+
+    #[actix_rt::test]
+    async fn test_delete_profile_then_create_new_with_bdfs_new_bdfs_is_saved() {
+        // ARRANGE
+        let bdfs = MnemonicWithPassphrase::sample();
+        let os = SUT::fast_boot_bdfs(bdfs.clone()).await;
+
+        // ACT
+        os.with_timeout(|x| x.delete_profile_then_create_new_with_bdfs())
+            .await
+            .unwrap();
+
+        // ASSERT
+        let saved_bdfs = os
+            .with_timeout(|x| x.main_bdfs_mnemonic_with_passphrase())
+            .await
+            .unwrap();
+
+        assert_ne!(saved_bdfs, bdfs);
+    }
+
+    #[actix_rt::test]
+    async fn test_delete_profile_then_create_new_with_bdfs_new_profile_is_saved(
+    ) {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+        let profile = Profile::sample();
+        os.with_timeout(|x| x.import_profile(profile.clone()))
+            .await
+            .unwrap();
+
+        // ACT
+        os.with_timeout(|x| x.delete_profile_then_create_new_with_bdfs())
+            .await
+            .unwrap();
+
+        // ASSERT
+        let active_profile = os
+            .with_timeout(|x| x.secure_storage.load_active_profile())
+            .await
+            .unwrap()
+            .unwrap();
+
+        assert_ne!(active_profile.id(), profile.id());
+    }
+
+    // #[actix_rt::test]
+    // async fn test_delete_profile_then_create_new_with_bdfs_device_info_is_unchanged(
+    // ) {
+    //     // ARRANGE
+    //     let os = SUT::fast_boot().await;
+    //     let device_info = os.with_timeout(|x| x.device_info()).await.unwrap();
+    //     assert_eq!(&os.profile().header.creating_device, &device_info); // WHY fails? diff timestamp. strange!
+
+    //     // ACT
+    //     os.with_timeout(|x| x.delete_profile_then_create_new_with_bdfs())
+    //         .await
+    //         .unwrap();
+
+    //     // ASSERT
+    //     let device_info = os.with_timeout(|x| x.device_info()).await.unwrap();
+    //     assert_eq!(&os.profile().header.creating_device, &device_info);
+    // }
 }

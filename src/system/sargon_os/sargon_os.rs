@@ -174,6 +174,7 @@ impl SargonOS {
     pub async fn boot_test() -> Result<Arc<Self>> {
         Self::boot_test_with_bdfs_mnemonic(None).await
     }
+
     pub async fn boot_test_with_bdfs_mnemonic(
         bdfs_mnemonic: impl Into<Option<MnemonicWithPassphrase>>,
     ) -> Result<Arc<Self>> {
@@ -185,6 +186,7 @@ impl SargonOS {
     pub async fn fast_boot() -> Arc<Self> {
         Self::fast_boot_bdfs(None).await
     }
+
     pub async fn fast_boot_bdfs(
         bdfs_mnemonic: impl Into<Option<MnemonicWithPassphrase>>,
     ) -> Arc<Self> {
