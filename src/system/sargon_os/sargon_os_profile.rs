@@ -19,6 +19,7 @@ impl SargonOS {
         let mut profile = profile;
 
         profile.header.last_used_on_device = device_info;
+        profile.header.last_modified = now(); // FIXME: find a reusable home for updating `last_modified`
 
         self.secure_storage
             .save_profile_and_active_profile_id(&profile)
@@ -131,5 +132,126 @@ impl SargonOS {
         let (profile, bdfs) = self.new_profile_and_bdfs().await?;
         self.profile_holder.replace_profile_with(profile.clone())?;
         Ok((profile, bdfs))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use actix_rt::time::timeout;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = SargonOS;
+
+    #[actix_rt::test]
+    async fn no_networks_has_any_network_false() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT - nothing done.
+
+        // ASSERT
+        assert!(!os.has_any_network());
+    }
+
+    #[actix_rt::test]
+    async fn create_first_account_has_networks_is_true() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        os.with_timeout(|x| x.create_and_save_new_unnamed_mainnet_account())
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert!(os.has_any_network());
+    }
+
+    #[actix_rt::test]
+    async fn test_import_profile_is_current_by_id() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+        let p = Profile::sample();
+
+        // ACT
+        os.with_timeout(|x| x.import_profile(p.clone()))
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert_eq!(os.profile().id(), p.id());
+    }
+
+    #[actix_rt::test]
+    async fn test_import_profile_is_saved_into_storage() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+        let p = Profile::sample();
+
+        // ACT
+        os.with_timeout(|x| x.import_profile(p.clone()))
+            .await
+            .unwrap();
+
+        // ASSERT
+        let saved = os
+            .with_timeout(|x| x.secure_storage.load_active_profile())
+            .await
+            .unwrap()
+            .unwrap();
+
+        assert_eq!(saved.id(), p.id());
+    }
+
+    #[actix_rt::test]
+    async fn test_import_profile_last_used_on_device_is_set() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        os.with_timeout(|x| x.import_profile(Profile::sample()))
+            .await
+            .unwrap();
+
+        // ASSERT
+        let device_info = os.device_info().await.unwrap();
+        assert_eq!(os.profile().header.last_used_on_device, device_info);
+    }
+
+    #[actix_rt::test]
+    async fn test_import_profile_last_modified_is_set() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+        let profile = Profile::sample();
+        let last_modified = &profile.header.last_modified;
+
+        // ACT
+        os.with_timeout(|x| x.import_profile(profile.clone()))
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert_ne!(&os.profile().header.last_modified, last_modified);
+    }
+
+    #[actix_rt::test]
+    async fn test_import_profile_active_profile_id_is_set() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        os.with_timeout(|x| x.import_profile(Profile::sample()))
+            .await
+            .unwrap();
+
+        // ASSERT
+        let active_profile_id = os
+            .with_timeout(|x| x.secure_storage.load_active_profile_id())
+            .await
+            .unwrap()
+            .unwrap();
+
+        assert_eq!(active_profile_id, os.profile().id());
     }
 }
