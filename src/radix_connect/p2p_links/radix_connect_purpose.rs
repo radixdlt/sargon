@@ -104,13 +104,13 @@ mod tests {
     #[test]
     fn from_str_default_value_general() {
         let s = "general";
-        assert_eq!(SUT::from_str_default_value(&s), SUT::General);
+        assert_eq!(SUT::from_str_default_value(s), SUT::General);
     }
 
     #[test]
     fn from_str_default_value_unknown() {
         let s = "unknown radix connect purpose kind!";
-        assert_eq!(SUT::from_str_default_value(&s), SUT::Unknown);
+        assert_eq!(SUT::from_str_default_value(s), SUT::Unknown);
     }
 
     #[test]

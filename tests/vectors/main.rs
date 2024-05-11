@@ -710,14 +710,14 @@ mod wallet_to_dapp_interaction_tests {
             AccountAddress::from_str("account_tdx_2_129qeystv8tufmkmjrry2g6kadhhfh4f7rd0x3t9yagcvfhspt62paz")
             .unwrap(),
             "Dff",
-            AppearanceID::gradient0(),
+            AppearanceID::new(0).unwrap(),
         );
 
         let account_2 = WalletInteractionWalletAccount::new(
             AccountAddress::from_str("account_tdx_2_128928hvf6pjr3rx2xvdw6ulf7pc8g88ya8ma3j8dtjmntckz09fr3n")
             .unwrap(),
             "Ghhvgfvf",
-            AppearanceID::gradient1(),
+            AppearanceID::new(1).unwrap(),
         );
 
         let authorized_request_response_items = WalletToDappInteractionResponseItems::AuthorizedRequest(

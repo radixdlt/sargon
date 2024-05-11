@@ -39,50 +39,18 @@ impl AppearanceID {
     fn declare(value: u8) -> Self {
         Self::new(value).expect("Should have declared valid value.")
     }
-    pub fn gradient0() -> Self {
-        Self::declare(0)
-    }
-    pub fn gradient1() -> Self {
-        Self::declare(1)
-    }
-    pub fn gradient2() -> Self {
-        Self::declare(2)
-    }
-    pub fn gradient3() -> Self {
-        Self::declare(3)
-    }
-    pub fn gradient4() -> Self {
-        Self::declare(4)
-    }
-    pub fn gradient5() -> Self {
-        Self::declare(5)
-    }
-    pub fn gradient6() -> Self {
-        Self::declare(6)
-    }
-    pub fn gradient7() -> Self {
-        Self::declare(7)
-    }
-    pub fn gradient8() -> Self {
-        Self::declare(8)
-    }
-    pub fn gradient9() -> Self {
-        Self::declare(9)
-    }
-    pub fn gradient10() -> Self {
-        Self::declare(10)
-    }
-    pub fn gradient11() -> Self {
-        Self::declare(11)
+
+    pub fn all() -> Vec<Self> {
+        (0..=Self::MAX).map(Self::declare).collect_vec()
     }
 }
 
 impl HasSampleValues for AppearanceID {
     fn sample() -> Self {
-        Self::gradient0()
+        *Self::all().first().unwrap()
     }
     fn sample_other() -> Self {
-        Self::gradient11()
+        *Self::all().iter().last().unwrap()
     }
 }
 
@@ -122,6 +90,11 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn len_of_all_is_max_plus_one() {
+        assert_eq!(SUT::all().len(), SUT::MAX as usize + 1);
     }
 
     #[test]

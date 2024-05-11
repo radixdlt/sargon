@@ -24,20 +24,7 @@ pub fn new_appearance_id_sample_other() -> AppearanceID {
 
 #[uniffi::export]
 pub fn appearance_ids_all() -> Vec<AppearanceID> {
-    vec![
-        AppearanceID::gradient0(),
-        AppearanceID::gradient1(),
-        AppearanceID::gradient2(),
-        AppearanceID::gradient3(),
-        AppearanceID::gradient4(),
-        AppearanceID::gradient5(),
-        AppearanceID::gradient6(),
-        AppearanceID::gradient7(),
-        AppearanceID::gradient8(),
-        AppearanceID::gradient9(),
-        AppearanceID::gradient10(),
-        AppearanceID::gradient11(),
-    ]
+    AppearanceID::all()
 }
 
 #[cfg(test)]
@@ -49,7 +36,7 @@ mod uniffi_tests {
 
     #[test]
     fn new() {
-        assert_eq!(new_appearance_id(5).unwrap(), SUT::gradient5());
+        assert_eq!(new_appearance_id(5).unwrap(), SUT::new(5).unwrap());
     }
 
     #[test]

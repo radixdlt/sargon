@@ -48,6 +48,25 @@ impl SargonOS {
             .await
     }
 
+    /// Create a new mainnet Account named "Unnamed" and adds it to the active Profile.
+    pub async fn create_and_save_new_unnamed_mainnet_account(
+        &self,
+    ) -> Result<Account> {
+        self.create_and_save_new_mainnet_account(
+            DisplayName::new("Unnamed").unwrap(),
+        )
+        .await
+    }
+
+    /// Create a new mainnet Account and adds it to the active Profile.
+    pub async fn create_and_save_new_mainnet_account(
+        &self,
+        name: DisplayName,
+    ) -> Result<Account> {
+        self.create_and_save_new_account(NetworkID::Mainnet, name)
+            .await
+    }
+
     /// Create a new Account and adds it to the active Profile.
     pub async fn create_and_save_new_account(
         &self,
@@ -331,5 +350,184 @@ mod tests {
 
         // ASSERT
         assert_eq!(first, second);
+    }
+
+    #[actix_rt::test]
+    async fn test_first_create_and_add_account_is_added() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        let account = os
+            .with_timeout(|x| x.create_and_save_new_unnamed_mainnet_account())
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert_eq!(os.profile().networks[0].accounts, Accounts::just(account));
+    }
+
+    #[actix_rt::test]
+    async fn test_first_create_and_add_account_has_index_0() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        let account = os
+            .with_timeout(|x| x.create_and_save_new_unnamed_mainnet_account())
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert_eq!(
+            account
+                .security_state
+                .into_unsecured()
+                .unwrap()
+                .transaction_signing
+                .derivation_path()
+                .hd_path()
+                .components
+                .last()
+                .unwrap()
+                .index(),
+            0
+        );
+    }
+
+    #[actix_rt::test]
+    async fn test_second_create_and_add_account_has_index_1() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        let _ = os
+            .with_timeout(|x| x.create_and_save_new_unnamed_mainnet_account())
+            .await
+            .unwrap();
+
+        let second = os
+            .with_timeout(|x| x.create_and_save_new_unnamed_mainnet_account())
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert_eq!(
+            second
+                .security_state
+                .into_unsecured()
+                .unwrap()
+                .transaction_signing
+                .derivation_path()
+                .hd_path()
+                .components
+                .last()
+                .unwrap()
+                .index(),
+            1
+        );
+    }
+
+    #[actix_rt::test]
+    async fn batch_create_account_then_n_accounts_are_saved_and_have_indices_0_through_n(
+    ) {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        let n: u32 = 3;
+        os.with_timeout(|x| {
+            x.batch_create_many_accounts_then_save_once(
+                n as u16,
+                NetworkID::Mainnet,
+                "test".to_owned(),
+            )
+        })
+        .await
+        .unwrap();
+
+        // ASSERT
+        let indices = os.profile().networks[0]
+            .accounts
+            .iter()
+            .map(|x| {
+                x.security_state
+                    .into_unsecured()
+                    .unwrap()
+                    .transaction_signing
+                    .derivation_path()
+                    .hd_path()
+                    .components
+                    .last()
+                    .unwrap()
+                    .index()
+            })
+            .collect_vec();
+        assert_eq!(indices, (0u32..n).collect_vec());
+    }
+
+    #[actix_rt::test]
+    async fn test_batch_create_and_add_account_n_has_names_with_index_appended_to_prefix(
+    ) {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        let n: u32 = 3;
+        os.with_timeout(|x| {
+            x.batch_create_many_accounts_then_save_once(
+                n as u16,
+                NetworkID::Mainnet,
+                "test".to_owned(),
+            )
+        })
+        .await
+        .unwrap();
+
+        // ASSERT
+        let names = os.profile().networks[0]
+            .accounts
+            .iter()
+            .map(|x| x.display_name.value.clone())
+            .collect_vec();
+
+        assert_eq!(
+            names,
+            ["test 0", "test 1", "test 2"]
+                .into_iter()
+                .map(|x| x.to_owned())
+                .collect_vec()
+        );
+    }
+
+    #[actix_rt::test]
+    async fn batch_create_account_then_n_accounts_are_saved_and_have_appearance_id_0_through_max(
+    ) {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        let n = AppearanceID::all().len() as u32 * 2;
+        os.with_timeout(|x| {
+            x.batch_create_many_accounts_then_save_once(
+                n as u16,
+                NetworkID::Mainnet,
+                "test".to_owned(),
+            )
+        })
+        .await
+        .unwrap();
+
+        // ASSERT
+        let appearance_ids = os.profile().networks[0]
+            .accounts
+            .iter()
+            .map(|x| x.appearance_id)
+            .collect_vec();
+
+        assert_eq!(
+            appearance_ids,
+            [AppearanceID::all(), AppearanceID::all()].concat()
+        );
     }
 }

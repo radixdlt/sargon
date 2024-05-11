@@ -169,19 +169,15 @@ mod uniffi_tests {
             }
           }
         "#;
-        assert_eq!(
-            check_if_profile_json_contains_legacy_p2p_links(BagOfBytes::from(
-                json.as_bytes()
-            )),
-            true
-        );
+        assert!(check_if_profile_json_contains_legacy_p2p_links(
+            BagOfBytes::from(json.as_bytes())
+        ));
     }
 
     #[test]
     fn check_if_profile_json_contains_legacy_p2p_links_when_empty_json() {
-        assert_eq!(
-            check_if_profile_json_contains_legacy_p2p_links(BagOfBytes::new()),
-            false
-        );
+        assert!(!check_if_profile_json_contains_legacy_p2p_links(
+            BagOfBytes::new()
+        ));
     }
 }
