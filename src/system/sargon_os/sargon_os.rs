@@ -222,4 +222,20 @@ mod tests {
 
         assert_eq!(active_profile_id, os.profile().id());
     }
+
+    #[actix_rt::test]
+    async fn test_change_log_level() {
+        // ARRANGE (and ACT)
+        let _ = SUT::fast_boot().await;
+
+        rust_logger_get_all_filters().into_iter().for_each(|l| {
+            rust_logger_set_level(l);
+            assert_eq!(rust_logger_get_level(), l);
+            println!(
+                "Testing logging at every level with log level set to: {:?}",
+                l
+            );
+            rust_logger_log_at_every_level()
+        });
+    }
 }

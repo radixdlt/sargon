@@ -1,4 +1,4 @@
-use std::sync::Once;
+use std::{ffi::OsStr, sync::Once};
 
 use crate::prelude::*;
 
@@ -15,18 +15,8 @@ impl log::Log for LogSystem {
     fn log(&self, record: &log::Record<'_>) {
         let msg = record.args().to_string();
         let level = record.level();
-        if let Some(driver) = &*self.0.read().unwrap()
-            && !driver.is_rust_log()
-        {
+        if let Some(driver) = &*self.0.read().unwrap() {
             driver.log(LogLevel::from(level), msg)
-        } else {
-            match record.level() {
-                log::Level::Error => error!("{}", msg),
-                log::Level::Warn => warn!("{}", msg),
-                log::Level::Info => info!("{}", msg),
-                log::Level::Debug => debug!("{}", msg),
-                log::Level::Trace => trace!("{}", msg),
-            }
         }
     }
 
@@ -43,21 +33,52 @@ fn init() {
 }
 
 pub(crate) fn install_logger(logging_driver: Arc<dyn LoggingDriver>) {
-    if !logging_driver.is_rust_log() {
-        init();
-        *LOG.0.write().unwrap() = Some(logging_driver);
-    } else {
-        static ONCE: Once = Once::new();
-        ONCE.call_once(|| {
-            pretty_env_logger::init();
-        });
-    }
-    rust_logger_set_level(LogLevel::Trace); // can be called from FFI later
+    init();
+    *LOG.0.write().unwrap() = Some(logging_driver);
+    rust_logger_set_level(LogFilter::Trace); // can be called from FFI later
     info!("Finished installing logger");
 }
 
 #[uniffi::export]
-pub fn rust_logger_set_level(level: LogLevel) {
+pub fn rust_logger_set_level(level: LogFilter) {
     let log_level = log::LevelFilter::from(level);
     log::set_max_level(log_level);
+    std::env::set_var(
+        "RUST_LOG",
+        std::ffi::OsStr::new(&format!("{:?}", log_level)),
+    );
+}
+
+/// Returns every supported LogFilter
+#[uniffi::export]
+pub fn rust_logger_get_all_filters() -> Vec<LogFilter> {
+    all::<LogFilter>().collect()
+}
+
+#[uniffi::export]
+pub fn rust_logger_get_level() -> LogFilter {
+    LogFilter::from(log::max_level())
+}
+
+#[uniffi::export]
+pub fn rust_logger_log_at_every_level() {
+    error!("Rust test: 'error'");
+    warn!("Rust test: 'warn'");
+    info!("Rust test: 'info'");
+    debug!("Rust test: 'debug'");
+    trace!("Rust test: 'trace'");
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    #[test]
+    fn install_rust_logger_change_level() {
+        install_logger(RustLoggingDriver::new());
+        let new = LogFilter::Warn;
+        rust_logger_set_level(new);
+        assert_eq!(rust_logger_get_level(), new)
+    }
 }

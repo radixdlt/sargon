@@ -29,6 +29,47 @@ pub enum LogLevel {
     Trace,
 }
 
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    enum_iterator::Sequence,
+    uniffi::Enum,
+)]
+#[repr(u8)]
+pub enum LogFilter {
+    /// Logging is turned off
+    Off = 0,
+
+    /// The "error" level.
+    ///
+    /// Designates very serious errors.
+    Error,
+
+    /// The "warn" level.
+    ///
+    /// Designates hazardous situations.
+    Warn,
+
+    /// The "info" level.
+    ///
+    /// Designates useful information.
+    Info,
+
+    /// The "debug" level.
+    ///
+    /// Designates lower priority information.
+    Debug,
+
+    /// The "trace" level.
+    ///
+    /// Designates very low priority, often extremely verbose, information.
+    Trace,
+}
+
 impl From<log::Level> for LogLevel {
     fn from(value: log::Level) -> Self {
         match value {
@@ -53,14 +94,28 @@ impl From<LogLevel> for log::Level {
     }
 }
 
-impl From<LogLevel> for log::LevelFilter {
-    fn from(value: LogLevel) -> Self {
+impl From<LogFilter> for log::LevelFilter {
+    fn from(value: LogFilter) -> Self {
         match value {
-            LogLevel::Error => Self::Error,
-            LogLevel::Warn => Self::Warn,
-            LogLevel::Info => Self::Info,
-            LogLevel::Debug => Self::Debug,
-            LogLevel::Trace => Self::Trace,
+            LogFilter::Off => Self::Off,
+            LogFilter::Error => Self::Error,
+            LogFilter::Warn => Self::Warn,
+            LogFilter::Info => Self::Info,
+            LogFilter::Debug => Self::Debug,
+            LogFilter::Trace => Self::Trace,
+        }
+    }
+}
+
+impl From<log::LevelFilter> for LogFilter {
+    fn from(value: log::LevelFilter) -> Self {
+        match value {
+            log::LevelFilter::Off => Self::Off,
+            log::LevelFilter::Error => Self::Error,
+            log::LevelFilter::Warn => Self::Warn,
+            log::LevelFilter::Info => Self::Info,
+            log::LevelFilter::Debug => Self::Debug,
+            log::LevelFilter::Trace => Self::Trace,
         }
     }
 }

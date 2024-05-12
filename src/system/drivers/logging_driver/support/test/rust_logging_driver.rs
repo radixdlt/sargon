@@ -1,19 +1,29 @@
+use log::Log;
+
 use crate::prelude::*;
 
 #[derive(Debug)]
-pub struct RustLoggingDriver;
+pub struct RustLoggingDriver {
+    logger: pretty_env_logger::env_logger::Logger,
+}
 
 impl RustLoggingDriver {
     pub fn new() -> Arc<Self> {
-        Arc::new(RustLoggingDriver)
+        Arc::new(Self {
+            logger: pretty_env_logger::env_logger::builder()
+                .parse_default_env()
+                .build(),
+        })
     }
 }
 
 impl LoggingDriver for RustLoggingDriver {
-    fn is_rust_log(&self) -> bool {
-        true
-    }
-    fn log(&self, _level: LogLevel, _msg: String) {
-        /* special */
+    fn log(&self, level: LogLevel, msg: String) {
+        self.logger.log(
+            &log::Record::builder()
+                .level(level.into())
+                .args(format_args!("{}", msg))
+                .build(),
+        );
     }
 }
