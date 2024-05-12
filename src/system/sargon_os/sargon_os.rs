@@ -137,13 +137,13 @@ impl SargonOS {
 
         let device_info = match secure_storage.load_device_info().await? {
             Some(loaded_device_info) => {
-                info!("Found saved device info: {}", &loaded_device_info);
+                info!("Found saved device info: {:?}", &loaded_device_info);
                 loaded_device_info
             }
             None => {
                 info!("Found no saved device info, creating new.");
                 let new_device_info = clients.host.create_device_info().await;
-                info!("Created new device info: {}", &new_device_info);
+                info!("Created new device info: {:?}", &new_device_info);
                 secure_storage.save_device_info(&new_device_info).await?;
                 info!("Saved new device info");
                 new_device_info

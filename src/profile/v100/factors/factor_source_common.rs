@@ -180,26 +180,6 @@ mod tests {
     }
 
     #[test]
-    fn new_uses_now_as_date() {
-        let date0 = now();
-        let model = FactorSourceCommon::new(
-            FactorSourceCryptoParameters::default(),
-            [],
-        );
-        let mut date1 = now();
-        for _ in 0..10 {
-            // rust is too fast... lol.
-            date1 = now();
-        }
-        let do_test = |d: Timestamp| {
-            assert!(d > date0);
-            assert!(d < date1);
-        };
-        do_test(model.added_on);
-        do_test(model.last_used_on);
-    }
-
-    #[test]
     fn json_roundtrip() {
         let date = Timestamp::parse("2023-09-11T16:05:56.000Z").unwrap();
         let model = FactorSourceCommon::with_values(

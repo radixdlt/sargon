@@ -114,18 +114,6 @@ mod test_device_info_description {
             "#,
         )
     }
-
-    // #[test]
-    // fn json_old_format_iphone() {
-    //     let sut = SUT::sample();
-    //     assert_eq_after_json_roundtrip(&sut, "\"My precious (iPhone 15 Pro)\"")
-    // }
-
-    // #[test]
-    // fn json_old_format_android() {
-    //     let sut = SUT::sample_other();
-    //     assert_eq_after_json_roundtrip(&sut, "R2 OnePlus Open")
-    // }
 }
 
 /// A short summary of a device the Profile is being used
@@ -217,21 +205,13 @@ impl DeviceInfo {
             host_app_version,
         )
     }
+}
 
-    // /// Instantiates a new `DeviceInfo` with "iPhone" as description, and
-    // /// generates a new `id` and will use the current `date` for creation date.
-    // pub fn new_iphone(
-    //     system_version: impl Into<Option<String>>,
-    //     host_app_version: impl Into<Option<String>>,
-    // ) -> Self {
-    //     Self::with_description("iPhone", system_version, host_app_version)
-    // }
-
-    // /// Instantiates a new `DeviceInfo` with "Unknown device" as description, and
-    // /// generates a new `id` and will use the current `date` for creation date.
-    // pub fn new_unknown_device() -> Self {
-    //     Self::with_description("Unknown device", None, None)
-    // }
+#[cfg(test)]
+impl DeviceInfo {
+    pub fn new_unknown() -> Self {
+        Self::with_details("Unknown", "Unknown", "Unknown", "Unknown")
+    }
 }
 
 impl HasSampleValues for DeviceInfo {
@@ -312,20 +292,20 @@ mod tests {
         )
     }
 
-    // #[test]
-    // fn id_is_unique() {
-    //     let n = 1000;
-    //     let ids = (0..n)
-    //         .map(|_| SUT::new_unknown_device())
-    //         .map(|d| d.id)
-    //         .collect::<HashSet<Uuid>>();
-    //     assert_eq!(ids.len(), n);
-    // }
+    #[test]
+    fn id_is_unique() {
+        let n = 20;
+        let ids = (0..n)
+            .map(|_| SUT::new_unknown())
+            .map(|d| d.id)
+            .collect::<HashSet<Uuid>>();
+        assert_eq!(ids.len(), n);
+    }
 
-    // #[test]
-    // fn date_is_now() {
-    //     assert!(SUT::new_unknown_device().date.year() >= 2023);
-    // }
+    #[test]
+    fn date_is_now() {
+        assert!(SUT::new_unknown().date.year() >= 2023);
+    }
 
     #[test]
     fn can_parse_iso8601_json_without_milliseconds_precision() {
@@ -340,6 +320,11 @@ mod tests {
         assert_eq!(model.date.day(), 11);
         let json = serde_json::to_string(&model).unwrap();
         assert!(json.contains("56.000Z"));
+    }
+
+    #[test]
+    fn json_nanoseconds_precision() {
+        assert_json_roundtrip(&SUT::new_unknown());
     }
 
     #[test]

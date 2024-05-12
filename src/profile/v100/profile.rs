@@ -109,6 +109,7 @@ impl Profile {
         if factor_sources.is_empty() {
             panic!("FactorSources MUST NOT be empty.")
         }
+        debug!("Creating new Profile, header: {:?}", &header);
         Self {
             header,
             factor_sources,

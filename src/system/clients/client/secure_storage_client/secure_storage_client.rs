@@ -183,7 +183,7 @@ impl SecureStorageClient {
         &self,
         device_info: &DeviceInfo,
     ) -> Result<()> {
-        debug!("Saving new device info: {}", device_info);
+        debug!("Saving new device info: {:?}", device_info);
         self.save(SecureStorageKey::DeviceInfo, device_info)
             .await
             .inspect(|_| debug!("Saved new device info."))

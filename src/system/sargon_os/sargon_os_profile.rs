@@ -344,21 +344,21 @@ mod tests {
         assert_ne!(active_profile.id(), profile.id());
     }
 
-    // #[actix_rt::test]
-    // async fn test_delete_profile_then_create_new_with_bdfs_device_info_is_unchanged(
-    // ) {
-    //     // ARRANGE
-    //     let os = SUT::fast_boot().await;
-    //     let device_info = os.with_timeout(|x| x.device_info()).await.unwrap();
-    //     assert_eq!(&os.profile().header.creating_device, &device_info); // WHY fails? diff timestamp. strange!
+    #[actix_rt::test]
+    async fn test_delete_profile_then_create_new_with_bdfs_device_info_is_unchanged(
+    ) {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+        let device_info = os.with_timeout(|x| x.device_info()).await.unwrap();
+        assert_eq!(&os.profile().header.creating_device, &device_info);
 
-    //     // ACT
-    //     os.with_timeout(|x| x.delete_profile_then_create_new_with_bdfs())
-    //         .await
-    //         .unwrap();
+        // ACT
+        os.with_timeout(|x| x.delete_profile_then_create_new_with_bdfs())
+            .await
+            .unwrap();
 
-    //     // ASSERT
-    //     let device_info = os.with_timeout(|x| x.device_info()).await.unwrap();
-    //     assert_eq!(&os.profile().header.creating_device, &device_info);
-    // }
+        // ASSERT
+        let device_info = os.with_timeout(|x| x.device_info()).await.unwrap();
+        assert_eq!(&os.profile().header.creating_device, &device_info);
+    }
 }
