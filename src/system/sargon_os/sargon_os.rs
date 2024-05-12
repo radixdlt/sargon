@@ -69,10 +69,14 @@ impl SargonOS {
 
             info!("Saved new Profile and BDFS, finish booting SargonOS");
 
-            Ok(Arc::new(Self {
+            let os = Arc::new(Self {
                 clients,
                 profile_holder: ProfileHolder::new(profile),
-            }))
+            });
+            os.event_bus
+                .emit(EventNotification::new(Event::Booted))
+                .await;
+            Ok(os)
         }
     }
 }

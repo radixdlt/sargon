@@ -13,7 +13,7 @@ extension EntropyProviderDriver where Self == EntropyProvider {
 }
 
 public final actor EntropyProvider {
-	private init() {}
+	internal init() {}
 	public static let shared = EntropyProvider()
 }
 

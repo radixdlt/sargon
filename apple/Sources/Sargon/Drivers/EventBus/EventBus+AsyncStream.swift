@@ -20,19 +20,26 @@ extension ProfileChange {
 }
 
 extension Event {
-	public var profileChanged: ProfileChange {
+	public var profileChanged: ProfileChange? {
 		switch self {
 		case let .profileChanged(change): return change
+		default: return nil
 		}
 	}
 	public var addressOfNewAccount: AccountAddress? {
-		profileChanged.addedAccount
+		profileChanged?.addedAccount
 	}
 }
 
 extension EventNotification: Comparable {
 	public static func < (lhs: Self, rhs: Self) -> Bool {
 		lhs.timestamp < rhs.timestamp
+	}
+}
+
+extension Event {
+	public var kind: EventKind {
+		eventKind(event: self)
 	}
 }
 

@@ -90,9 +90,7 @@ impl SargonOS {
             .await?;
 
         self.event_bus
-            .emit(EventNotification::new(Event::ProfileChanged {
-                change: ProfileChange::UnspecifiedChange,
-            }))
+            .emit(EventNotification::new(Event::ProfileSaved))
             .await;
 
         Ok(())
