@@ -530,4 +530,128 @@ mod tests {
             [AppearanceID::all(), AppearanceID::all()].concat()
         );
     }
+
+    #[actix_rt::test]
+    async fn batch_create_account_unsaved_are_not_saved() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        os.with_timeout(|x| {
+            x.batch_create_unsaved_accounts(
+                NetworkID::Mainnet,
+                3,
+                "test".to_owned(),
+            )
+        })
+        .await
+        .unwrap();
+
+        // ASSERT
+        assert!(os.profile().networks.is_empty())
+    }
+
+    impl DisplayName {
+        fn random() -> Self {
+            Self::new(format!(
+                "random-{}",
+                id().to_string().drain(0..20).collect::<String>()
+            ))
+            .unwrap()
+        }
+    }
+
+    #[actix_rt::test]
+    async fn update_account_updates_in_memory_profile() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        let mut account = Account::sample();
+        os.with_timeout(|x| x.add_account(account.clone()))
+            .await
+            .unwrap();
+
+        // ACT
+        account.display_name = DisplayName::random();
+        os.with_timeout(|x| x.update_account(account.clone()))
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert_eq!(os.profile().networks[0].accounts[0], account.clone())
+    }
+
+    #[actix_rt::test]
+    async fn update_account_updates_saved_profile() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        let mut account = Account::sample();
+        os.with_timeout(|x| x.add_account(account.clone()))
+            .await
+            .unwrap();
+
+        // ACT
+        account.display_name = DisplayName::random();
+        os.with_timeout(|x| x.update_account(account.clone()))
+            .await
+            .unwrap();
+
+        // ASSERT
+        let saved_profile = os
+            .with_timeout(|x| x.secure_storage.load_active_profile())
+            .await
+            .unwrap()
+            .unwrap();
+
+        assert_eq!(saved_profile.networks[0].accounts[0], account.clone())
+    }
+
+    #[actix_rt::test]
+    async fn update_account_unknown_accounts_throws() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        let result = os
+            .with_timeout(|x| x.update_account(Account::sample()))
+            .await;
+
+        // ASSERT
+        assert_eq!(result, Err(CommonError::UnknownAccount))
+    }
+
+    #[actix_rt::test]
+    async fn add_accounts_empty_is_ok() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        let result = os.with_timeout(|x| x.add_accounts(Accounts::new())).await;
+
+        // ASSERT
+        assert!(result.is_ok())
+    }
+
+    #[actix_rt::test]
+    async fn add_accounts_duplicates_throws() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        let account = Account::sample();
+        os.with_timeout(|x| x.add_account(account.clone()))
+            .await
+            .unwrap();
+
+        // ACT
+        let result = os
+            .with_timeout(|x| x.add_accounts(Accounts::just(account.clone())))
+            .await;
+
+        // ASSERT
+        assert_eq!(
+            result,
+            Err(CommonError::UnableToAddAllAccountsDuplicatesFound)
+        )
+    }
 }
