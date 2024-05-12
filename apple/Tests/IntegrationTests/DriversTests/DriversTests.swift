@@ -15,6 +15,10 @@ extension Drivers {
 final class DriversTests: TestCase {
 	typealias SUT = Drivers
 
+	func test_log_at_each_level() {
+		rustLoggerLogAtEveryLevel()
+	}
+	
 	func test_HostInfoDriver_model() async {
 		let sut = HostInfo(appVersion: "0.0.0")
 		let model = await sut.hostDeviceModel()

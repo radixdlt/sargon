@@ -37,10 +37,6 @@ public final actor Log {
 }
 
 extension Log: LoggingDriver {
-	nonisolated public func isRustLog() -> Bool {
-		false
-	}
-	
 	nonisolated public func log(
 		level: LogLevel,
 		msg: String
@@ -55,12 +51,37 @@ extension Log: LoggingDriver {
 /// Makes it possible for iOS Wallet to later change the log level in Rust land
 /// (remember, the Rust logger **uses the Swift logger**
 /// but might suppress logging invocation if its logging facade's log level is too low.)
-public func setLogLevel(_ level: Sargon.LogLevel) {
+public func setRustLogLevel(_ level: Sargon.LogFilter) {
 	rustLoggerSetLevel(level: level)
+}
+
+/// Makes it possible for iOS Wallet to later change the log level in Rust land
+/// (remember, the Rust logger **uses the Swift logger**
+/// but might suppress logging invocation if its logging facade's log level is too low.)
+public func getRustLogLevel() -> Sargon.LogFilter {
+	rustLoggerGetLevel()
+}
+
+public func logSystemDiagnosis() {
+	let levels = LogLevel.allCases
+	print("logSystemDiagnosis - RUST")
+	rustLoggerLogAtEveryLevel()
+	print("logSystemDiagnosis - Swift")
+	levels.forEach { level in
+		log.log(level: .init(sargonLogLevel: level), "Swift test: '\(String(describing: level))'")
+	}
 }
 
 public var log: Logger {
 	Log.shared.swiftLogger
+}
+
+extension LogFilter: CaseIterable {
+	public static let allCases: [Self] = rustLoggerGetAllFilters()
+}
+
+extension LogLevel: CaseIterable {
+	public static let allCases: [Self] = rustLoggerGetAllLevels()
 }
 
 extension Logger: @unchecked Sendable {}
@@ -91,3 +112,16 @@ extension OSLogType {
 		}
 	}
 }
+
+
+extension OSLogType {
+	
+	init(sargonFilterLevel sargon: Sargon.LogFilter) {
+		if let level = LogLevel(rawValue: sargon.rawValue) {
+			self.init(sargonLogLevel: level)
+		} else {
+			self = .fault
+		}
+	}
+}
+

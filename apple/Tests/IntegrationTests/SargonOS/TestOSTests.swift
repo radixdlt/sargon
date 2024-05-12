@@ -4,7 +4,7 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class TestOSTests: TestCase {
+final class TestOSTests: OSTest {
 
 	func test_create_single_account_many_times() async throws {
 		let sut = try await TestOS()
@@ -34,5 +34,10 @@ final class TestOSTests: TestCase {
 		let n: UInt16 = 4
 		try await sut.batchCreateAccounts(count: n, namePrefix: "Unnamed")
 		XCTAssertEqual(sut.accounts().map(\.displayName.value), (0..<n).map { "Unnamed \($0)" })
+	}
+	
+	func test_log_at_each_level() async throws {
+		let _ = try await TestOS()
+		logSystemDiagnosis()
 	}
 }

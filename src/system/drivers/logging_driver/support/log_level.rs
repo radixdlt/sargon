@@ -1,6 +1,15 @@
 use crate::prelude::*;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    enum_iterator::Sequence,
+    uniffi::Enum,
+)]
 #[repr(u8)]
 pub enum LogLevel {
     /// The "error" level.

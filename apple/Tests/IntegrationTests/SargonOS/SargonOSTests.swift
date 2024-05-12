@@ -4,7 +4,7 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class SargonOSTests: TestCase {
+final class SargonOSTests: OSTest {
 	typealias SUT = SargonOS
 	
 	func test() async throws {
