@@ -12,7 +12,7 @@ extension EventBusDriver where Self == EventBus {
 	public static var shared: Self { Self.shared }
 }
 
-extension ProfileChange {
+extension EventProfileChange {
 	public var addedAccount: AccountAddress? {
 		guard case let .addedAccount(address) = self else { return nil }
 		return address
@@ -20,7 +20,7 @@ extension ProfileChange {
 }
 
 extension Event {
-	public var profileChanged: ProfileChange? {
+	public var profileChanged: EventProfileChange? {
 		switch self {
 		case let .profileChanged(change): return change
 		default: return nil
