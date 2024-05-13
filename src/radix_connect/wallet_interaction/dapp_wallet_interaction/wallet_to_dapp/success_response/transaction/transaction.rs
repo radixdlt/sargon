@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, uniffi::Record)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, uniffi::Record)]
 pub struct WalletToDappInteractionTransactionResponseItems {
     pub send: WalletToDappInteractionSendTransactionResponseItem,
 }
@@ -16,6 +16,7 @@ impl WalletToDappInteractionTransactionResponseItems {
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, uniffi::Record)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, uniffi::Record)]
 pub struct WalletToDappInteractionSendTransactionResponseItem {
     #[serde(rename = "transactionIntentHash")]
     bech32_encoded_tx_id: String,

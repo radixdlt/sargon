@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, uniffi::Record)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, uniffi::Record)]
 pub struct WalletToDappInteractionAuthUsePersonaRequestResponseItem {
     pub persona: DappWalletInteractionPersona,
 }
