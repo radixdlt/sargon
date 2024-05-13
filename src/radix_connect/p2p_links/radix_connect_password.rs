@@ -186,6 +186,19 @@ mod tests {
             6
         );
     }
+
+    #[test]
+    fn message_hash() {
+        assert_eq!(
+            RadixConnectPassword::sample().message_hash(),
+            RadixConnectPassword::sample().message_hash()
+        );
+
+        assert_ne!(
+            RadixConnectPassword::sample().message_hash(),
+            RadixConnectPassword::sample_other().message_hash()
+        )
+    }
 }
 
 #[cfg(test)]
@@ -207,6 +220,15 @@ mod uniffi_tests {
         assert_eq!(
             new_radix_connect_password_sample_other(),
             RadixConnectPassword::sample_other()
+        );
+    }
+
+    #[test]
+    fn message_hash() {
+        let sut = RadixConnectPassword::sample();
+        assert_eq!(
+            radix_connect_password_message_hash(&sut),
+            sut.message_hash()
         );
     }
 }
