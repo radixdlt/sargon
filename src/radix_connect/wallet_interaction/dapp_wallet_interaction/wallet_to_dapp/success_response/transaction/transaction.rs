@@ -15,7 +15,6 @@ impl WalletToDappInteractionTransactionResponseItems {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, uniffi::Record)]
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, uniffi::Record)]
 pub struct WalletToDappInteractionSendTransactionResponseItem {
     #[serde(rename = "transactionIntentHash")]

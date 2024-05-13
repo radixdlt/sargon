@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Debug, Deserialize, Serialize, PartialEq, uniffi::Record)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, uniffi::Record)]
 pub struct DappToWalletInteractionTransactionItems {
     pub send: DappToWalletInteractionSendTransactionItem,
 }
@@ -11,13 +11,16 @@ impl DappToWalletInteractionTransactionItems {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize, PartialEq, uniffi::Record)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct DappToWalletInteractionSendTransactionItem {
     pub transaction_manifest: String,
+
     pub version: TXVersion,
+
     #[serde(skip_serializing_if = "Option::is_none")]
     pub blobs: Option<Vec<String>>,
+
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
