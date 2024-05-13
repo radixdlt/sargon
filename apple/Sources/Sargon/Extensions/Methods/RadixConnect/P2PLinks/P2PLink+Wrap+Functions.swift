@@ -15,6 +15,6 @@ extension P2pLink {
     }
 
     public var clientID: Hash {
-        connectionPassword.hash()
+        connectionPassword.value.hash()
     }
 }
