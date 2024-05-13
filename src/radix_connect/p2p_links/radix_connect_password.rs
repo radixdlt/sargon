@@ -191,13 +191,8 @@ mod tests {
     fn message_hash() {
         assert_eq!(
             RadixConnectPassword::sample().message_hash(),
-            RadixConnectPassword::sample().message_hash()
+            Exactly32Bytes::from_str("479ae13d3983de8ab520e519cfba01a25fafbbc1e7438ba52e5ed4a40cd2f56a").map(Hash::from).unwrap()
         );
-
-        assert_ne!(
-            RadixConnectPassword::sample().message_hash(),
-            RadixConnectPassword::sample_other().message_hash()
-        )
     }
 }
 
