@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, uniffi::Record)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct WalletToDappInteractionFailureResponse {
     pub interaction_id: WalletInteractionId,

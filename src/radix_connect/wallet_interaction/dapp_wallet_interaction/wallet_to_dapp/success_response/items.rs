@@ -1,15 +1,17 @@
 use crate::prelude::*;
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, uniffi::Enum)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, uniffi::Enum)]
 #[serde(tag = "discriminator")]
 #[allow(clippy::large_enum_variant)]
 pub enum WalletToDappInteractionResponseItems {
     #[serde(rename = "authorizedRequest")]
     AuthorizedRequest(WalletToDappInteractionAuthorizedRequestResponseItems),
+
     #[serde(rename = "unauthorizedRequest")]
     UnauthorizedRequest(
         WalletToDappInteractionUnauthorizedRequestResponseItems,
     ),
+
     #[serde(rename = "transaction")]
     Transaction(WalletToDappInteractionTransactionResponseItems),
 }

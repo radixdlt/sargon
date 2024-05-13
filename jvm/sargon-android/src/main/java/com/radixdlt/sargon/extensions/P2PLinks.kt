@@ -3,6 +3,10 @@ package com.radixdlt.sargon.extensions
 import com.radixdlt.sargon.PublicKeyHash
 import com.radixdlt.sargon.P2pLink
 import com.radixdlt.sargon.annotation.KoverIgnore
+import com.radixdlt.sargon.newP2PLinkFromJsonBytes
+import com.radixdlt.sargon.newP2pLinksFromJsonBytes
+import com.radixdlt.sargon.p2PLinkToJsonBytes
+import com.radixdlt.sargon.p2pLinksToJsonBytes
 
 class P2pLinks private constructor(
     private val array: IdentifiedArray<PublicKeyHash, P2pLink>
@@ -36,6 +40,15 @@ class P2pLinks private constructor(
         return "P2pLinks(array=$array)"
     }
 
+    companion object
+
 }
 
 fun List<P2pLink>.asIdentifiable() = P2pLinks(p2pLinks = this)
+
+@Throws(SargonException::class)
+fun P2pLinks.Companion.fromJson(json: String) =
+    newP2pLinksFromJsonBytes(jsonBytes = bagOfBytes(json))
+
+fun P2pLinks.toJson(): String =
+    p2pLinksToJsonBytes(asList()).string

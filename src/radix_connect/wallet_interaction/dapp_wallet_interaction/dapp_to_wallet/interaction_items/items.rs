@@ -1,12 +1,14 @@
 use crate::prelude::*;
 
-#[derive(Debug, Deserialize, Serialize, PartialEq, uniffi::Enum)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, uniffi::Enum)]
 #[serde(tag = "discriminator")]
 pub enum DappToWalletInteractionItems {
     #[serde(rename = "unauthorizedRequest")]
     UnauthorizedRequest(DappToWalletInteractionUnauthorizedRequestItems),
+
     #[serde(rename = "authorizedRequest")]
     AuthorizedRequest(DappToWalletInteractionAuthorizedRequestItems),
+
     #[serde(rename = "transaction")]
     Transaction(DappToWalletInteractionTransactionItems),
 }
