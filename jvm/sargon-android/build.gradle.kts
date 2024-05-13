@@ -157,8 +157,8 @@ android.libraryVariants.all {
         "generate${buildTypeUpper}UniFFIBindings",
         Exec::class
     ) {
-        val rebuild = properties["rebuild"] ?: true
-        
+        val rebuild = properties["regenerate"] ?: true
+
         onlyIf {
             rebuild == true || !File("${buildDir}/generated/src/${buildType}/java").exists()
         }
