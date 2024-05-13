@@ -11,13 +11,7 @@ import SargonUniFFI
 extension URLRequest {
 	init(sargon: NetworkRequest) {
 		var request = URLRequest(url: sargon.url)
-		switch sargon.method {
-		case .post:
-			request.httpMethod = "POST"  // FIXME: embed in sargon
-		case .get:
-			request.httpMethod = "GET"
-		}
-
+		request.httpMethod = sargon.method.toString()
 		request.httpBody = sargon.body
 		request.allHTTPHeaderFields = sargon.headers
 		self = request

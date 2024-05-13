@@ -41,7 +41,6 @@ extension HostInfo: HostInfoDriver {
 	nonisolated public func hostDeviceModel() async -> String {
 		await UIDevice.current.model
 	}
-	
 }
 #else
 extension HostInfo: HostInfoDriver {

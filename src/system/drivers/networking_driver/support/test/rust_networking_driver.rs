@@ -4,10 +4,13 @@ use async_trait::async_trait;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use std::sync::Arc;
 
-fn map_method(method: NetworkMethod) -> reqwest::Method {
-    match method {
-        NetworkMethod::Post => reqwest::Method::POST,
-        NetworkMethod::Get => reqwest::Method::GET,
+impl From<NetworkMethod> for reqwest::Method {
+    fn from(value: NetworkMethod) -> Self {
+        match value {
+            NetworkMethod::Post => reqwest::Method::POST,
+            NetworkMethod::Get => reqwest::Method::GET,
+            NetworkMethod::Head => reqwest::Method::HEAD,
+        }
     }
 }
 
@@ -41,7 +44,7 @@ impl NetworkingDriver for RustNetworkingDriver {
         }
         let request = self
             .client
-            .request(map_method(request.method), request.url)
+            .request(reqwest::Method::from(request.method), request.url)
             .body(request.body.to_vec())
             .headers(headers)
             .build()
@@ -59,5 +62,21 @@ impl NetworkingDriver for RustNetworkingDriver {
         let body = BagOfBytes::from(body_bytes.to_vec());
 
         Ok(NetworkResponse { status_code, body })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    #[test]
+    fn test_map_method() {
+        let test = |m: NetworkMethod, exp: reqwest::Method| {
+            assert_eq!(reqwest::Method::from(m), exp);
+        };
+        test(NetworkMethod::Post, reqwest::Method::POST);
+        test(NetworkMethod::Get, reqwest::Method::GET);
+        test(NetworkMethod::Head, reqwest::Method::HEAD);
     }
 }

@@ -15,7 +15,9 @@ extension LoggingDriver where Self == Log {
 
 public final actor Log {
 	nonisolated fileprivate let rustLogger: Logger
-	nonisolated fileprivate let swiftLogger: Logger
+	
+	// internal for testing purposes
+	nonisolated internal let swiftLogger: Logger
 
 	private init(
 		subsystem: String = "Sargon",
