@@ -1,5 +1,5 @@
 import Foundation
-import Sargon
+import SargonUniFFI
 
 extension NetworkMethod: SargonModel {}
 extension NetworkMethod: CustomStringConvertible {

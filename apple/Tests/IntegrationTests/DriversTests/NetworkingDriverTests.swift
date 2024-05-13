@@ -10,12 +10,8 @@ class NetworkingDriverTests: DriverTest<URLSession> {
 		let sut = SUT.shared as NetworkingDriver
 		let response = try await sut.executeNetworkRequest(
 			request: .init(
-				url: URL(
-					string: "https://radixdlt.com"
-				)!,
-				method: .head,
-				headers: [:],
-				body: .init()
+				validating: "https://radixdlt.com",
+				method: .head
 			)
 		)
 		XCTAssertEqual(response.statusCode, 200)
