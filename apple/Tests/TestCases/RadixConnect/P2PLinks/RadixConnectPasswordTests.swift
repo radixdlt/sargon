@@ -23,4 +23,12 @@ final class RadixConnectPasswordTests: Test<RadixConnectPassword> {
 	func testJSONRoundtripAllSamples() throws {
 		try eachSampleCodableRoundtripTest()
 	}
+
+    func testMessageHash() throws {
+        let hex = "479ae13d3983de8ab520e519cfba01a25fafbbc1e7438ba52e5ed4a40cd2f56a"
+        try XCTAssertEqual(
+            SUT.sample.messageHash,
+            Hash(string: hex)
+        )
+    }
 }

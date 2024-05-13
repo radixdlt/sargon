@@ -9,4 +9,8 @@ extension RadixConnectPassword {
     public func jsonStringLiteral() -> String {
 		radixConnectPasswordToJsonString(radixConnectPassword: self)
     }
+
+    public var messageHash: Hash {
+        radixConnectPasswordMessageHash(password: self)    
+    }
 }
