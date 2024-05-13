@@ -5,10 +5,10 @@ use crate::prelude::*;
 pub enum DappToWalletInteractionItems {
     #[serde(rename = "unauthorizedRequest")]
     UnauthorizedRequest(DappToWalletInteractionUnauthorizedRequestItems),
-   
+
     #[serde(rename = "authorizedRequest")]
     AuthorizedRequest(DappToWalletInteractionAuthorizedRequestItems),
-    
+
     #[serde(rename = "transaction")]
     Transaction(DappToWalletInteractionTransactionItems),
 }

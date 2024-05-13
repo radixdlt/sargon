@@ -6,6 +6,9 @@ decl_identified_vec_of!(
     P2PLink
 );
 
+impl JsonDataDeserializing for P2PLinks {}
+impl JsonDataSerializing for P2PLinks {}
+
 impl HasSampleValues for P2PLinks {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {
