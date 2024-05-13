@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Debug, Deserialize, Serialize, PartialEq, uniffi::Enum)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, uniffi::Enum)]
 #[serde(tag = "discriminator")]
 pub enum DappToWalletInteractionAuthRequestItem {
     #[serde(rename = "loginWithChallenge")]

@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, uniffi::Enum)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, uniffi::Enum)]
 #[serde(tag = "discriminator")]
 #[allow(clippy::large_enum_variant)]
 pub enum WalletToDappInteractionResponse {

@@ -2,7 +2,9 @@ package com.radixdlt.sargon
 
 import com.radixdlt.sargon.extensions.P2pLinks
 import com.radixdlt.sargon.extensions.asIdentifiable
+import com.radixdlt.sargon.extensions.fromJson
 import com.radixdlt.sargon.extensions.id
+import com.radixdlt.sargon.extensions.toJson
 import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -58,6 +60,16 @@ internal class P2PLinksTest : IdentifiedArrayTest<P2pLinks, PublicKeyHash, P2pLi
                 listOf(elementOther).asIdentifiable(),
                 listOf(element).asIdentifiable()
             ).size
+        )
+    }
+
+    @Test
+    fun testJsonRoundtrip() {
+        val sut = listOf(element(), elementWithDifferentId())
+
+        assertEquals(
+            sut,
+            P2pLinks.fromJson(json = sut.asIdentifiable().toJson())
         )
     }
 }
