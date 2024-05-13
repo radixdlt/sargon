@@ -30,4 +30,11 @@ final class P2PLinkTests: Test<P2PLink> {
 	func testJSONRoundtripAllSamples() throws {
 		try eachSampleCodableRoundtripTest()
 	}
+
+    func testClientID() throws {
+        try XCTAssertEqual(
+            SUT.sample.clientID,
+            Hash(string: "98e140d9c01c069aa927797627b1bca4d25971a76549ca59df8ef9d8397afa97")
+        )
+    }
 }

@@ -13,4 +13,8 @@ extension P2pLink {
     public var id: ID {
        p2pLinkId(link: self)
     }
+
+    public var clientID: Hash {
+        connectionPassword.value.hash()
+    }
 }

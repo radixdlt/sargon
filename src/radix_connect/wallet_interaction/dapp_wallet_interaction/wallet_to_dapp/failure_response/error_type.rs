@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, uniffi::Enum)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, uniffi::Enum)]
 #[serde(rename_all = "camelCase")]
 pub enum DappWalletInteractionErrorType {
     RejectedByUser,

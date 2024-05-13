@@ -40,6 +40,13 @@ pub fn new_radix_connect_password_sample_other() -> RadixConnectPassword {
     RadixConnectPassword::sample_other()
 }
 
+#[uniffi::export]
+pub fn radix_connect_password_message_hash(
+    password: &RadixConnectPassword,
+) -> Hash {
+    password.message_hash()
+}
+
 impl RadixConnectPassword {
     pub fn new(hex_32bytes: Exactly32Bytes) -> Self {
         Self { value: hex_32bytes }
@@ -47,6 +54,13 @@ impl RadixConnectPassword {
 
     pub fn hash(&self) -> Hash {
         hash_of(self.value.bytes())
+    }
+
+    /// Represents the message to be signed and sent to Connector Extension.
+    /// Connector Extension uses the same logic to compute its own message.
+    pub fn message_hash(&self) -> Hash {
+        let message = ["L".as_bytes(), self.value.bytes()].concat();
+        hash_of(message)
     }
 }
 
@@ -172,6 +186,14 @@ mod tests {
             6
         );
     }
+
+    #[test]
+    fn message_hash() {
+        assert_eq!(
+            RadixConnectPassword::sample().message_hash(),
+            Exactly32Bytes::from_str("479ae13d3983de8ab520e519cfba01a25fafbbc1e7438ba52e5ed4a40cd2f56a").map(Hash::from).unwrap()
+        );
+    }
 }
 
 #[cfg(test)]
@@ -193,6 +215,15 @@ mod uniffi_tests {
         assert_eq!(
             new_radix_connect_password_sample_other(),
             RadixConnectPassword::sample_other()
+        );
+    }
+
+    #[test]
+    fn message_hash() {
+        let sut = RadixConnectPassword::sample();
+        assert_eq!(
+            radix_connect_password_message_hash(&sut),
+            sut.message_hash()
         );
     }
 }

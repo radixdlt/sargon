@@ -1,14 +1,16 @@
 use crate::prelude::*;
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, uniffi::Enum)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, uniffi::Enum)]
 #[serde(tag = "discriminator")]
 pub enum WalletToDappInteractionAuthRequestResponseItem {
     #[serde(rename = "usePersona")]
     UsePersona(WalletToDappInteractionAuthUsePersonaRequestResponseItem),
+
     #[serde(rename = "loginWithoutChallenge")]
     LoginWithoutChallenge(
         WalletToDappInteractionAuthLoginWithoutChallengeRequestResponseItem,
     ),
+
     #[serde(rename = "loginWithChallenge")]
     LoginWithChallenge(
         WalletToDappInteractionAuthLoginWithChallengeRequestResponseItem,

@@ -1,6 +1,6 @@
 [package]
 name = "sargon"
-version = "1.1.0"
+version = "0.7.16"
 edition = "2021"
 build = "build.rs"
 
@@ -11,9 +11,6 @@ codegen-units = 1
 
 [[test]]
 name = "vectors"
-
-[[test]]
-name = "integration"
 
 [lib]
 crate-type = ["staticlib", "cdylib", "lib"]
@@ -179,16 +176,15 @@ aes-gcm = { git = "https://github.com/RustCrypto/AEADs", rev = "7e82b01cd4901f6a
 # hkdf = "0.12.4"
 hkdf = { git = "https://github.com/RustCrypto/KDFs/", rev = "1ac16e8b9d4ee7a67613c9396c6cc1327652eaba" }
 
-# reqwest = "0.12.3"
-reqwest = { git = "https://github.com/seanmonstar/reqwest", rev = "0720159f6369f54e045a1fd315e0f24b7a0b4a39", default-features = false, features = [
-    "native-tls-vendored",
-] }
-
-
 [dev-dependencies]
 # uniffi = "0.27.1"
 uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "6f33088e8100a2ea9586c8c3ecf98ab51d5aba62", features = [
     "bindgen-tests",
+] }
+
+# reqwest = "0.12.3"
+reqwest = { git = "https://github.com/seanmonstar/reqwest", rev = "0720159f6369f54e045a1fd315e0f24b7a0b4a39", default-features = false, features = [
+    "native-tls-vendored",
 ] }
 
 # actix-rt = "3.3.0"

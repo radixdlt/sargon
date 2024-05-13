@@ -1,5 +1,6 @@
 package com.radixdlt.sargon.extensions
 
+import com.radixdlt.sargon.Hash
 import com.radixdlt.sargon.P2pLink
 import com.radixdlt.sargon.PublicKeyHash
 import com.radixdlt.sargon.newP2PLinkFromJsonBytes
@@ -15,3 +16,6 @@ fun P2pLink.Companion.fromJson(json: String) =
 
 fun P2pLink.toJson(): String =
     p2PLinkToJsonBytes(this).string
+
+fun P2pLink.clientID(): Hash =
+    connectionPassword.value.bytes.hash()
