@@ -4,6 +4,15 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
+extension TestOS {
+	
+	public convenience init() async throws {
+		try await self.init(
+			secureStorageDriver: Insecure︕！TestOnly︕！Ephemeral︕！SecureStorage.init(keychainService: "test")
+		)
+	}
+}
+
 final class TestOSTests: OSTest {
 
 	func test_create_single_account_many_times() async throws {

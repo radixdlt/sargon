@@ -8,19 +8,20 @@
 import Foundation
 import SargonUniFFI
 
-extension SecureStorageDriver where Self == FAKE_SecureStorage_FAKE {
+#if DEBUG
+extension SecureStorageDriver where Self == Insecure︕！TestOnly︕！Ephemeral︕！SecureStorage {
 	public init(keychainService: String) {
 		self.init(keychainService: keychainService)
 	}
 }
 
-public final actor FAKE_SecureStorage_FAKE {
+public final actor Insecure︕！TestOnly︕！Ephemeral︕！SecureStorage {
 	public typealias Key = SecureStorageKey
 	fileprivate var dictionary: [Key: Data] = [:]
 	public init(keychainService _: String) {}
 }
 
-extension FAKE_SecureStorage_FAKE: SecureStorageDriver {
+extension Insecure︕！TestOnly︕！Ephemeral︕！SecureStorage: SecureStorageDriver {
 	public func loadData(key: SecureStorageKey) async throws -> Data? {
 		dictionary[key]
 	}
@@ -34,3 +35,4 @@ extension FAKE_SecureStorage_FAKE: SecureStorageDriver {
 	}
 	
 }
+#endif

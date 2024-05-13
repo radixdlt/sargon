@@ -28,28 +28,4 @@ extension Drivers {
 			unsafeStorage: unsafeStorage
 		)
 	}
-
-	public convenience init(
-		appVersion: String,
-		keychainService: String,
-		userDefaultsSuite: String
-	) {
-		self.init(
-			secureStorage: FAKE_SecureStorage_FAKE(keychainService: keychainService),
-			hostInfo: HostInfo(appVersion: appVersion),
-			unsafeStorage: UnsafeStorage.init(userDefaults: .init(suiteName: userDefaultsSuite)!)
-		)
-	}
-	
-	public convenience init(
-		bundle: Bundle,
-		keychainService: String,
-		userDefaultsSuite: String
-	) {
-		self.init(
-			appVersion: (bundle.infoDictionary?["CFBundleShortVersionString"] as? String) ?? "Unknown",
-			keychainService: keychainService,
-			userDefaultsSuite: userDefaultsSuite
-		)
-	}
 }

@@ -27,18 +27,21 @@ class EventBusDriverTests: DriverTest<EventBus> {
 	
 }
 
-
-extension SecureStorageDriver where Self == FAKE_SecureStorage_FAKE {
-	static var shared: Self {
-		FAKE_SecureStorage_FAKE(keychainService: "test")
-	}
-}
-
 extension HostInfoDriver where Self == HostInfo {
 	static var shared: Self {
 		HostInfo(appVersion: "0.0.0")
 	}
 }
+
+#if DEBUG
+extension SecureStorageDriver where Self == Insecure︕！TestOnly︕！Ephemeral︕！SecureStorage {
+	static var shared: Self {
+		Self(keychainService: "test")
+	}
+}
+
+
+
 
 extension Drivers {
 	
@@ -147,3 +150,4 @@ extension Drivers {
 		)
 	}
 }
+#endif

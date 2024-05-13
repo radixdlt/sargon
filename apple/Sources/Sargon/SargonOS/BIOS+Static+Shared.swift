@@ -22,14 +22,14 @@ extension BIOS {
 	@discardableResult
 	public static func createdShared(
 		bundle: Bundle,
-		keychainService: String,
-		userDefaultsSuite: String
+		userDefaultsSuite: String,
+		secureStorageDriver: SecureStorageDriver
 	) -> BIOS {
 		Self.settingShared(
 			shared: BIOS(
 				bundle: bundle,
-				keychainService: keychainService,
-				userDefaultsSuite: userDefaultsSuite
+				userDefaultsSuite: userDefaultsSuite,
+				secureStorageDriver: secureStorageDriver
 			)
 		)
 	}

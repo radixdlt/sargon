@@ -11,11 +11,15 @@ import SargonUniFFI
 #if DEBUG
 
 extension BIOS {
-	public static func test() -> BIOS {
+	public static func test(
+		bundle: Bundle = .main,
+		userDefaultsSuite: String = "Test",
+		secureStorageDriver: SecureStorageDriver
+	) -> BIOS {
 		BIOS(
-			bundle: .main,
-			keychainService: "Test",
-			userDefaultsSuite: "works.rdx"
+			bundle: bundle,
+			userDefaultsSuite: userDefaultsSuite,
+			secureStorageDriver: secureStorageDriver
 		)
 	}
 }
@@ -26,8 +30,18 @@ public final class TestOS {
 	public init(bios: BIOS) async throws {
 		self.os = try await SargonOS.boot(bios: bios)
 	}
-	public convenience init() async throws {
-		try await self.init(bios: .test())
+	public convenience init(
+		bundle: Bundle = .main,
+		userDefaultsSuite: String = "Test",
+		secureStorageDriver: SecureStorageDriver
+	) async throws {
+		try await self.init(
+			bios: .test(
+				bundle: bundle,
+				userDefaultsSuite: userDefaultsSuite,
+				secureStorageDriver: secureStorageDriver
+			)
+		)
 	}
 }
 extension TestOS: SargonOSProtocol {}
