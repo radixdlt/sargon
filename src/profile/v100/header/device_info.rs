@@ -218,7 +218,7 @@ impl HasSampleValues for DeviceInfo {
     fn sample() -> Self {
         Self {
             id: Uuid::from_str("66F07CA2-A9D9-49E5-8152-77ACA3D1DD74").unwrap(),
-            date: Timestamp::parse("2023-09-11T16:05:56Z").unwrap(),
+            date: Timestamp::sample(),
             description: DeviceInfoDescription {
                 name: "iPhone".to_owned(),
                 model: "iPhone".to_owned(),
@@ -231,7 +231,7 @@ impl HasSampleValues for DeviceInfo {
     fn sample_other() -> Self {
         Self {
             id: Uuid::from_str("f07ca662-d9a9-9e45-1582-aca773d174dd").unwrap(),
-            date: Timestamp::parse("2023-12-24T17:13:56.123Z").unwrap(),
+            date: Timestamp::sample_other(),
             description: DeviceInfoDescription {
                 name: "Android".to_owned(),
                 model: "Android".to_owned(),

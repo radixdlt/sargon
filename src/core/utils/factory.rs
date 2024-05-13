@@ -28,6 +28,25 @@ pub fn date(dt: &Timestamp) -> String {
     dt.date().to_string()
 }
 
+impl HasSampleValues for Uuid {
+    fn sample() -> Self {
+        Self::from_bytes([0xff; 16])
+    }
+
+    fn sample_other() -> Self {
+        Self::from_bytes([0xde; 16])
+    }
+}
+impl HasSampleValues for Timestamp {
+    fn sample() -> Self {
+        Self::parse("2023-09-11T16:05:56Z").unwrap()
+    }
+
+    fn sample_other() -> Self {
+        Self::parse("2023-12-24T17:13:56.123Z").unwrap()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
