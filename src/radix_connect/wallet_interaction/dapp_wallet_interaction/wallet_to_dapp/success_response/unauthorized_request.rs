@@ -1,11 +1,12 @@
 use crate::prelude::*;
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, uniffi::Record)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, uniffi::Record)]
 #[serde(rename_all = "camelCase")]
 pub struct WalletToDappInteractionUnauthorizedRequestResponseItems {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub one_time_accounts:
         Option<WalletToDappInteractionAccountsRequestResponseItem>,
+
     #[serde(skip_serializing_if = "Option::is_none")]
     pub one_time_persona_data:
         Option<WalletToDappInteractionPersonaDataRequestResponseItem>,
