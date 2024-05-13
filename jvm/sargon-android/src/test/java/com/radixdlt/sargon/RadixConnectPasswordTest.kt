@@ -1,6 +1,7 @@
 package com.radixdlt.sargon
 
 import com.radixdlt.sargon.extensions.init
+import com.radixdlt.sargon.extensions.messageHash
 import com.radixdlt.sargon.extensions.randomBagOfBytes
 import com.radixdlt.sargon.samples.Sample
 import com.radixdlt.sargon.samples.sample
@@ -8,7 +9,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 
-class RadixConnectPasswordTest: SampleTestable<RadixConnectPassword> {
+class RadixConnectPasswordTest : SampleTestable<RadixConnectPassword> {
 
     override val samples: List<Sample<RadixConnectPassword>>
         get() = listOf(RadixConnectPassword.sample)
@@ -29,4 +30,11 @@ class RadixConnectPasswordTest: SampleTestable<RadixConnectPassword> {
         assertNotEquals(RadixConnectPassword.sample(), RadixConnectPassword.sample.other())
     }
 
+    @Test
+    fun testMessageHash() {
+        assertEquals(
+            Hash.init("479ae13d3983de8ab520e519cfba01a25fafbbc1e7438ba52e5ed4a40cd2f56a"),
+            RadixConnectPassword.sample.invoke().messageHash()
+        )
+    }
 }
