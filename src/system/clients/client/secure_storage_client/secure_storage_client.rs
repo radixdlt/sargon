@@ -463,4 +463,13 @@ mod tests {
             Err(CommonError::FailedToSerializeToJSON)
         );
     }
+
+    #[actix_rt::test]
+    async fn save_fail_save_device_info() {
+        let sut = SecureStorageClient::always_fail();
+        assert_eq!(
+            sut.save_device_info(&DeviceInfo::sample()).await,
+            Err(CommonError::UnableToSaveDeviceInfoToSecureStorage)
+        );
+    }
 }

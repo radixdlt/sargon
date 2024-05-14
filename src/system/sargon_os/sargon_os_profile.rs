@@ -359,4 +359,30 @@ mod tests {
         let device_info = os.with_timeout(|x| x.device_info()).await.unwrap();
         assert_eq!(&os.profile().header.creating_device, &device_info);
     }
+
+    #[actix_rt::test]
+    async fn test_emulate_fresh_install_does_not_save_new() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+        let first = os.profile().id();
+
+        // ACT
+        os.with_timeout(|x| x.emulate_fresh_install())
+            .await
+            .unwrap();
+
+        // ASSERT
+        let second = os.profile().id();
+        assert_ne!(second, first);
+        let load_profile_res = os
+            .with_timeout(|x| x.secure_storage.load_profile_with_id(second))
+            .await;
+
+        assert_eq!(
+            load_profile_res,
+            Err(CommonError::UnableToLoadProfileFromSecureStorage {
+                profile_id: second
+            })
+        );
+    }
 }
