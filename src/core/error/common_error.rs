@@ -525,7 +525,7 @@ pub enum CommonError {
     } = 10146,
 
     #[error("Failed To create DeviceID (UUID) from string: {bad_value}")]
-    InvalidDeviceID { bad_value: String },
+    InvalidDeviceID { bad_value: String } = 10147,
 }
 
 #[uniffi::export]
