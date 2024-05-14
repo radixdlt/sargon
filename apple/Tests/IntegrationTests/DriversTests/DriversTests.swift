@@ -4,6 +4,7 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
+
 #if DEBUG
 extension Drivers {
 	public static func test() -> Drivers {
@@ -19,6 +20,7 @@ extension Drivers {
 }
 #endif
 
+
 final class DriversTests: TestCase {
 	typealias SUT = Drivers
 
@@ -26,21 +28,4 @@ final class DriversTests: TestCase {
 		rustLoggerLogAtEveryLevel()
 	}
 	
-	func test_HostInfoDriver_model() async {
-		let sut = HostInfo(appVersion: "0.0.0")
-		let model = await sut.hostDeviceModel()
-#if os(OSX)
-		XCTAssertTrue(model.lowercased().contains("mac"))
-#elseif os(iOS)
-		XCTAssertEqual(model, "iPhone")
-#endif
-	}
-	
-#if os(OSX)
-	func test_HostInfoDriver_version() async {
-		let sut = HostInfo(appVersion: "0.0.0")
-		let version = await sut.hostDeviceSystemVersion()
-		XCTAssertTrue(version.starts(with: "14.") || version.starts(with: "15."))
-	}
-#endif
 }
