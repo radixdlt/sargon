@@ -9,7 +9,7 @@ decl_identified_vec_of!(
 
 impl ProfileNetworks {
     pub fn get_account(&self, address: &AccountAddress) -> Option<Account> {
-        self.get_id(&address.network_id())
+        self.get_id(address.network_id())
             .and_then(|n| n.accounts.get_id(address))
             .cloned()
     }
@@ -105,7 +105,7 @@ mod tests {
         );
 
         assert_eq!(
-            sut.get_id(&NetworkID::Mainnet).unwrap().accounts.items(),
+            sut.get_id(NetworkID::Mainnet).unwrap().accounts.items(),
             [
                 Account::sample_mainnet_alice(),
                 Account::sample_mainnet_bob()
@@ -122,7 +122,7 @@ mod tests {
             sut.get_id(id)
                 .unwrap()
                 .accounts
-                .get_id(&account_address)
+                .get_id(account_address)
                 .unwrap()
                 .display_name
                 .value,
@@ -137,7 +137,7 @@ mod tests {
             sut.get_id(id)
                 .unwrap()
                 .accounts
-                .get_id(&account_address)
+                .get_id(account_address)
                 .unwrap()
                 .display_name
                 .value,
@@ -151,7 +151,7 @@ mod tests {
         let id = &NetworkID::Mainnet;
         let account_address = Account::sample_nebunet().address;
         assert_eq!(
-            sut.get_id(id).unwrap().accounts.get_id(&account_address),
+            sut.get_id(id).unwrap().accounts.get_id(account_address),
             None
         );
 
@@ -171,7 +171,7 @@ mod tests {
         let id = &NetworkID::Mainnet;
         let account_address = Account::sample_mainnet_carol().address;
         assert_eq!(
-            sut.get_id(id).unwrap().accounts.get_id(&account_address),
+            sut.get_id(id).unwrap().accounts.get_id(account_address),
             None
         );
 

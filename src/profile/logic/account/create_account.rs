@@ -62,7 +62,7 @@ impl Profile {
 
         let number_of_accounts_on_network = self
             .networks
-            .get_id(&network_id)
+            .get_id(network_id)
             .map(|n| n.accounts.len())
             .unwrap_or(0);
 

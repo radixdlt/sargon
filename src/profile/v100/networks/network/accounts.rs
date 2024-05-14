@@ -159,7 +159,7 @@ mod tests {
             AppearanceID::default(),
         );
         let accounts = SUT::just(account.clone());
-        assert_eq!(accounts.get_id(&address), Some(&account));
+        assert_eq!(accounts.get_id(address), Some(&account));
     }
 
     #[test]

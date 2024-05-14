@@ -8,8 +8,14 @@
 import Foundation
 import SargonUniFFI
 
+struct SargonOSAlreadyBooted: LocalizedError {
+	var errorDescription: String? {
+		"Radix Wallet core already initialized, should not have been initialized twice. This is a Radix developer error."
+	}
+}
+
 extension SargonOS {
-	private nonisolated(unsafe) static var _shared: SargonOS!
+	internal nonisolated(unsafe) static var _shared: SargonOS!
 	
 	public nonisolated(unsafe) static var shared: SargonOS {
 		guard let shared = Self._shared else {
@@ -24,8 +30,8 @@ extension SargonOS {
 		bios: BIOS,
 		isEmulatingFreshInstall: Bool = false
 	) async throws -> SargonOS {
-		if !isEmulatingFreshInstall {
-			assert(_shared == nil, "Should not be created twice")
+		if !isEmulatingFreshInstall, _shared != nil {
+			throw SargonOSAlreadyBooted()
 		}
 		let shared = try await SargonOS.boot(bios: bios)
 		Self._shared = shared

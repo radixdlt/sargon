@@ -2,6 +2,26 @@ use std::sync::RwLockWriteGuard;
 
 use crate::prelude::*;
 
+impl SargonOS {
+    /// Returns `true` if claim was needed, i.e. if `profile.header.last_used_on_device` was
+    /// different than `device_info` before claim occurred.
+    fn claim_provided_profile(
+        profile: &mut Profile,
+        device_info: DeviceInfo,
+    ) -> bool {
+        let was_needed = profile.header.last_used_on_device != device_info;
+        profile.header.last_used_on_device = device_info;
+        profile.header.last_modified = now(); // FIXME: find a reusable home for updating `last_modified`
+        was_needed
+    }
+
+    pub async fn claim_profile(&self, profile: &mut Profile) -> Result<()> {
+        let device_info = self.device_info().await?;
+        Self::claim_provided_profile(profile, device_info);
+        Ok(())
+    }
+}
+
 #[uniffi::export]
 impl SargonOS {
     pub fn has_any_network(&self) -> bool {
@@ -14,18 +34,23 @@ impl SargonOS {
     }
 
     pub async fn import_profile(&self, profile: Profile) -> Result<()> {
-        let device_info = self.device_info().await?;
-
         let mut profile = profile;
-
-        profile.header.last_used_on_device = device_info;
-        profile.header.last_modified = now(); // FIXME: find a reusable home for updating `last_modified`
-
+        self.claim_profile(&mut profile).await?;
         self.secure_storage
             .save_profile_and_active_profile_id(&profile)
             .await?;
 
         self.profile_holder.replace_profile_with(profile)
+    }
+
+    /// Returns `true` if the profile was changed (i.e. if claim was indeed needed),
+    /// `false`` otherwise.
+    pub async fn claim_active_profile(&self) -> Result<bool> {
+        let device_info = self.device_info().await?;
+        self.maybe_validate_ownership_update_profile_with(false, |mut p| {
+            Ok(Self::claim_provided_profile(&mut p, device_info.clone()))
+        })
+        .await
     }
 
     /// Deletes the profile and the active profile id and all references Device
@@ -62,12 +87,84 @@ impl SargonOS {
 }
 
 impl SargonOS {
-    /// Updates and **saves** profile to secure storage, after
-    /// mutating it with `mutate`.
+    pub(crate) async fn validate_is_allowed_to_active_profile(
+        &self,
+    ) -> Result<()> {
+        Self::validate_is_allowed_to_update_provided_profile(
+            &self.clients,
+            &self.profile(),
+        )
+        .await
+    }
+
+    pub(crate) async fn validate_is_allowed_to_update_provided_profile(
+        clients: &Clients,
+        profile: &Profile,
+    ) -> Result<()> {
+        Self::check_is_allowed_to_update_provided_profile(
+            clients, profile, true,
+        )
+        .await?;
+        Ok(())
+    }
+
+    pub(crate) async fn check_is_allowed_to_update_provided_profile(
+        clients: &Clients,
+        profile: &Profile,
+        err_on_lack_of_ownership: bool,
+    ) -> Result<bool> {
+        debug!("Checking if profile.header.last_used_on_device == self.device_info");
+        let device_info = Self::get_device_info(clients).await?;
+        let last_used = profile.header.last_used_on_device.clone();
+        if last_used == device_info {
+            Ok(true)
+        } else {
+            info!("Profile was last used on another device, will not be able to update it until it has been claimed.");
+            clients
+                .event_bus
+                .emit(EventNotification::profile_used_on_other_device(
+                    last_used.clone(),
+                ))
+                .await;
+            if err_on_lack_of_ownership {
+                Err(CommonError::ProfileLastUsedOnOtherDevice {
+                    other_device_id: last_used.id,
+                    this_device_id: device_info.id,
+                })
+            } else {
+                // used by SargonOS::boot
+                Ok(false)
+            }
+        }
+    }
+
+    /// Validates ownership of Profile, then updates and **saves** it to
+    /// secure storage, after mutating it with `mutate`.
     pub(crate) async fn update_profile_with<F, R>(&self, mutate: F) -> Result<R>
     where
         F: Fn(RwLockWriteGuard<'_, Profile>) -> Result<R>,
     {
+        self.maybe_validate_ownership_update_profile_with(true, mutate)
+            .await
+    }
+
+    /// Updates and **saves** profile to secure storage, after
+    /// mutating it with `mutate`, optionally validating ownership of Profile
+    /// first.
+    ///
+    /// The only function to pass `false` to the `validate_ownership` parameter
+    /// is the `SargonOS::claim_active_profile` method.
+    pub(crate) async fn maybe_validate_ownership_update_profile_with<F, R>(
+        &self,
+        validate_ownership: bool, // should only ever pass `false` from `claim`
+        mutate: F,
+    ) -> Result<R>
+    where
+        F: Fn(RwLockWriteGuard<'_, Profile>) -> Result<R>,
+    {
+        if validate_ownership {
+            self.validate_is_allowed_to_active_profile().await?;
+        }
         let res = self.profile_holder.update_profile_with(mutate)?;
         self.save_existing_profile().await?;
         Ok(res)
@@ -231,6 +328,44 @@ mod tests {
 
         // ASSERT
         assert_ne!(&os.profile().header.last_modified, last_modified);
+    }
+
+    #[actix_rt::test]
+    async fn test_import_profile_is_claimed_and_can_be_edited() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+        let profile = Profile::sample();
+
+        // ACT
+        os.with_timeout(|x| x.import_profile(profile.clone()))
+            .await
+            .unwrap();
+
+        let new_account = Account::sample_stokenet_paige();
+        os.with_timeout(|x| x.add_account(new_account.clone()))
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert!(os
+            .profile()
+            .networks
+            .get_id(NetworkID::Stokenet)
+            .unwrap()
+            .accounts
+            .contains_id(new_account.id()));
+
+        let loaded = os
+            .with_timeout(|x| x.secure_storage.load_active_profile())
+            .await
+            .unwrap()
+            .unwrap();
+        assert!(loaded
+            .networks
+            .get_id(NetworkID::Stokenet)
+            .unwrap()
+            .accounts
+            .contains_id(new_account.id()));
     }
 
     #[actix_rt::test]

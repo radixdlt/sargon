@@ -517,6 +517,15 @@ pub enum CommonError {
 
     #[error("Failed to add all accounts, found duplicated account.")]
     UnableToAddAllAccountsDuplicatesFound = 10145,
+
+    #[error("Profile last used on other device {other_device_id} (this device: {this_device_id})")]
+    ProfileLastUsedOnOtherDevice {
+        other_device_id: DeviceID,
+        this_device_id: DeviceID,
+    } = 10146,
+
+    #[error("Failed To create DeviceID (UUID) from string: {bad_value}")]
+    InvalidDeviceID { bad_value: String },
 }
 
 #[uniffi::export]

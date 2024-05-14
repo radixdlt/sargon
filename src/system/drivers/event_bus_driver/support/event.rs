@@ -12,6 +12,9 @@ pub enum Event {
     /// changed Profile got persisted into secure storage.
     ProfileSaved,
 
+    /// The Profile was last used on another device, user ought to claim it.
+    ProfileLastUsedOnOtherDevice(DeviceInfo),
+
     /// The profile has change (might not have been saved yet).
     ProfileChanged { change: EventProfileChange },
 }
@@ -20,6 +23,10 @@ impl Event {
     pub fn profile_changed(change: EventProfileChange) -> Self {
         Self::ProfileChanged { change }
     }
+
+    pub fn profile_last_used_on_other_device(device: DeviceInfo) -> Self {
+        Self::ProfileLastUsedOnOtherDevice(device)
+    }
 }
 
 impl HasEventKind for Event {
@@ -27,6 +34,9 @@ impl HasEventKind for Event {
         match self {
             Self::Booted => EventKind::Booted,
             Self::ProfileSaved => EventKind::ProfileSaved,
+            Self::ProfileLastUsedOnOtherDevice(_) => {
+                EventKind::ProfileLastUsedOnOtherDevice
+            }
             Self::ProfileChanged { change } => change.kind(),
         }
     }
@@ -60,5 +70,12 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn last_used_on_other_device() {
+        let device = DeviceInfo::sample();
+        let sut = SUT::profile_last_used_on_other_device(device.clone());
+        assert_eq!(sut, SUT::ProfileLastUsedOnOtherDevice(device))
     }
 }

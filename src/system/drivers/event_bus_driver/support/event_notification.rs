@@ -21,6 +21,10 @@ impl EventNotification {
     pub fn profile_changed(change: EventProfileChange) -> Self {
         Self::new(Event::profile_changed(change))
     }
+
+    pub fn profile_used_on_other_device(other_device: DeviceInfo) -> Self {
+        Self::new(Event::profile_last_used_on_other_device(other_device))
+    }
 }
 
 impl HasSampleValues for EventNotification {

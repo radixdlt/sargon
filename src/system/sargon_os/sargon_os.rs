@@ -51,6 +51,15 @@ impl SargonOS {
 
         if let Some(loaded) = secure_storage.load_active_profile().await? {
             info!("Loaded saved profile {}", &loaded.header);
+            let is_owner = Self::check_is_allowed_to_update_provided_profile(
+                &clients, &loaded, false,
+            )
+            .await?;
+
+            if !is_owner {
+                warn!("Loaded saved profile was last used on another device, will continue booting OS, but will unable to update Profile.");
+            }
+
             Ok(Arc::new(Self {
                 clients,
                 profile_holder: ProfileHolder::new(loaded),
@@ -135,7 +144,9 @@ impl SargonOS {
         Self::get_device_info(&self.clients).await
     }
 
-    async fn get_device_info(clients: &Clients) -> Result<DeviceInfo> {
+    pub(crate) async fn get_device_info(
+        clients: &Clients,
+    ) -> Result<DeviceInfo> {
         debug!("Get device info");
         let secure_storage = &clients.secure_storage;
 
@@ -225,6 +236,238 @@ mod tests {
             .unwrap();
 
         assert_eq!(active_profile_id, os.profile().id());
+    }
+
+    #[actix_rt::test]
+    async fn test_boot_with_existing_profile_is_profile_held() {
+        // ARRANGE (and ACT)
+        let secure_storage_driver = EphemeralSecureStorage::new();
+        let profile = Profile::sample();
+        let secure_storage_client =
+            SecureStorageClient::new(secure_storage_driver.clone());
+        secure_storage_client.save_profile(&profile).await.unwrap();
+        secure_storage_client
+            .save_active_profile_id(profile.id())
+            .await
+            .unwrap();
+        let drivers = Drivers::with_secure_storage(secure_storage_driver);
+        let bios = Bios::new(drivers);
+
+        // ACT
+        let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
+            .await
+            .unwrap()
+            .unwrap();
+
+        // ASSERT
+        let active_profile = os.profile();
+        assert_eq!(active_profile.id(), profile.id());
+    }
+
+    #[actix_rt::test]
+    async fn test_boot_with_existing_unowned_profile_cannot_be_mutated() {
+        // ARRANGE (and ACT)
+        let secure_storage_driver = EphemeralSecureStorage::new();
+        let profile = Profile::sample();
+        let secure_storage_client =
+            SecureStorageClient::new(secure_storage_driver.clone());
+        secure_storage_client.save_profile(&profile).await.unwrap();
+        secure_storage_client
+            .save_active_profile_id(profile.id())
+            .await
+            .unwrap();
+        let drivers = Drivers::with_secure_storage(secure_storage_driver);
+        let bios = Bios::new(drivers);
+
+        let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
+            .await
+            .unwrap()
+            .unwrap();
+
+        let device_info = os.with_timeout(|x| x.device_info()).await.unwrap();
+
+        // ACT
+        let add_res =
+            os.with_timeout(|x| x.add_account(Account::sample())).await;
+
+        // ASSERT
+        assert_eq!(
+            add_res,
+            Err(CommonError::ProfileLastUsedOnOtherDevice {
+                other_device_id: profile.header.last_used_on_device.id,
+                this_device_id: device_info.id
+            })
+        );
+    }
+
+    #[actix_rt::test]
+    async fn test_boot_with_existing_unowned_profile_is_not_mutated_if_tried_to(
+    ) {
+        // ARRANGE (and ACT)
+        let secure_storage_driver = EphemeralSecureStorage::new();
+        let profile =
+            Profile::new(DeviceFactorSource::sample(), DeviceInfo::sample());
+        let secure_storage_client =
+            SecureStorageClient::new(secure_storage_driver.clone());
+        secure_storage_client.save_profile(&profile).await.unwrap();
+        secure_storage_client
+            .save_active_profile_id(profile.id())
+            .await
+            .unwrap();
+        let drivers = Drivers::with_secure_storage(secure_storage_driver);
+        let bios = Bios::new(drivers);
+
+        let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
+            .await
+            .unwrap()
+            .unwrap();
+
+        let new_account = Account::sample_stokenet();
+        // ACT
+        let _ = os
+            .with_timeout(|x| x.add_account(new_account.clone()))
+            .await;
+
+        // ASSERT
+        assert_eq!(os.profile(), profile.clone()); // not changed in memory
+
+        let loaded_profile = os
+            .with_timeout(|x| x.secure_storage.load_active_profile())
+            .await
+            .unwrap()
+            .unwrap();
+        assert_eq!(loaded_profile, profile); // not changed in secure storage
+    }
+
+    #[actix_rt::test]
+    async fn test_boot_with_existing_unowned_profile_when_claimed_can_be_changed(
+    ) {
+        // ARRANGE (and ACT)
+        let secure_storage_driver = EphemeralSecureStorage::new();
+        let profile =
+            Profile::new(DeviceFactorSource::sample(), DeviceInfo::sample());
+        let secure_storage_client =
+            SecureStorageClient::new(secure_storage_driver.clone());
+        secure_storage_client.save_profile(&profile).await.unwrap();
+        secure_storage_client
+            .save_active_profile_id(profile.id())
+            .await
+            .unwrap();
+        let drivers = Drivers::with_secure_storage(secure_storage_driver);
+        let bios = Bios::new(drivers);
+
+        let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
+            .await
+            .unwrap()
+            .unwrap();
+
+        let new_account = Account::sample_stokenet();
+        // ACT
+        let claim_was_needed =
+            os.with_timeout(|x| x.claim_active_profile()).await.unwrap();
+        let _ = os
+            .with_timeout(|x| x.add_account(new_account.clone()))
+            .await;
+
+        // ASSERT
+        assert!(claim_was_needed);
+        assert_ne!(os.profile(), profile.clone()); // was changed in memory
+        assert_eq!(
+            os.profile()
+                .networks
+                .get_id(NetworkID::Stokenet)
+                .unwrap()
+                .accounts[0],
+            new_account.clone()
+        );
+
+        let loaded_profile = os
+            .with_timeout(|x| x.secure_storage.load_active_profile())
+            .await
+            .unwrap()
+            .unwrap();
+        assert_ne!(loaded_profile.clone(), profile); // was changed in secure storage
+
+        assert_eq!(
+            loaded_profile
+                .networks
+                .get_id(NetworkID::Stokenet)
+                .unwrap()
+                .accounts[0],
+            new_account.clone()
+        );
+    }
+
+    #[actix_rt::test]
+    async fn test_boot_not_owned_emits_event() {
+        // ARRANGE (and ACT)
+        let secure_storage_driver = EphemeralSecureStorage::new();
+        let event_bus_driver = RustEventBusDriver::new();
+        let profile = Profile::sample();
+        let secure_storage_client =
+            SecureStorageClient::new(secure_storage_driver.clone());
+        secure_storage_client.save_profile(&profile).await.unwrap();
+        secure_storage_client
+            .save_active_profile_id(profile.id())
+            .await
+            .unwrap();
+        let drivers = Drivers::new(
+            RustNetworkingDriver::new(),
+            secure_storage_driver.clone(),
+            RustEntropyDriver::new(),
+            RustHostInfoDriver::new(),
+            RustLoggingDriver::new(),
+            event_bus_driver.clone(),
+            RustFileSystemDriver::new(),
+            EphemeralUnsafeStorage::new(),
+        );
+        let bios = Bios::new(drivers);
+
+        // ACT
+        let _ = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
+            .await
+            .unwrap()
+            .unwrap();
+
+        // ASSERT
+        assert!(
+            event_bus_driver
+                .recorded()
+                .iter()
+                .any(|e| e.event.kind()
+                    == EventKind::ProfileLastUsedOnOtherDevice)
+        );
+    }
+
+    #[actix_rt::test]
+    async fn test_boot_with_existing_profile_active_profile_id() {
+        // ARRANGE (and ACT)
+        let secure_storage_driver = EphemeralSecureStorage::new();
+        let profile = Profile::sample();
+        let secure_storage_client =
+            SecureStorageClient::new(secure_storage_driver.clone());
+        secure_storage_client.save_profile(&profile).await.unwrap();
+        secure_storage_client
+            .save_active_profile_id(profile.id())
+            .await
+            .unwrap();
+        let drivers = Drivers::with_secure_storage(secure_storage_driver);
+        let bios = Bios::new(drivers);
+
+        // ACT
+        let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
+            .await
+            .unwrap()
+            .unwrap();
+
+        // ASSERT
+        let active_profile_id = os
+            .with_timeout(|x| x.secure_storage.load_active_profile_id())
+            .await
+            .unwrap()
+            .unwrap();
+
+        assert_eq!(active_profile_id, profile.id());
     }
 
     #[actix_rt::test]

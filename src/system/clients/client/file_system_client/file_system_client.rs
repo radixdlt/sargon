@@ -68,7 +68,7 @@ mod tests {
 
     fn file_in_tmp() -> PathBuf {
         let dir_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("target/tmp");
-        file_in_dir(&dir_path)
+        file_in_dir(dir_path)
     }
 
     fn contents() -> BagOfBytes {

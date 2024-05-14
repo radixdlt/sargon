@@ -298,9 +298,9 @@ mod tests {
     fn change_supported_curve_of_factor_source() {
         let mut sut = SUT::sample();
         let id: &FactorSourceID = &DeviceFactorSource::sample().id.into();
-        assert!(sut
-            .factor_sources
-            .contains_id(&DeviceFactorSource::sample().id.into()));
+        assert!(sut.factor_sources.contains_id(FactorSourceID::from(
+            DeviceFactorSource::sample().id
+        )));
 
         assert_eq!(
             sut.factor_sources
@@ -352,9 +352,9 @@ mod tests {
         let mut sut = SUT::sample();
         let id: &FactorSourceID = &DeviceFactorSource::sample().id.into();
 
-        assert!(sut
-            .factor_sources
-            .contains_id(&DeviceFactorSource::sample().id.into()));
+        assert!(sut.factor_sources.contains_id(FactorSourceID::from(
+            DeviceFactorSource::sample().id
+        )));
 
         assert_eq!(
             sut.factor_sources
@@ -426,7 +426,7 @@ mod tests {
         let mut sut = SUT::sample();
         let account = sut
             .networks
-            .get_id(&NetworkID::Mainnet)
+            .get_id(NetworkID::Mainnet)
             .unwrap()
             .accounts
             .get_at_index(0)
@@ -441,7 +441,7 @@ mod tests {
 
         assert_eq!(
             sut.networks
-                .get_id(&NetworkID::Mainnet)
+                .get_id(NetworkID::Mainnet)
                 .unwrap()
                 .accounts
                 .get_at_index(0)

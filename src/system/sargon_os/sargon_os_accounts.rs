@@ -152,7 +152,7 @@ impl SargonOS {
         self.profile_holder.access_profile_with(|p| {
             let accounts_on_network = p
                 .networks
-                .get_id(&address.network_id())
+                .get_id(address.network_id())
                 .unwrap()
                 .accounts
                 .len();
@@ -242,7 +242,7 @@ impl SargonOS {
         self.update_profile_with(|mut p| {
             let networks = &mut p.networks;
 
-            if networks.contains_id(&network_id) {
+            if networks.contains_id(network_id) {
                 debug!("Profile already contained network to add #{} account(s) to, network_id: {}", number_of_accounts_to_add, network_id);
                 networks
                     .try_try_update_with(&network_id, |network| {
@@ -270,22 +270,6 @@ impl SargonOS {
             }
         })
         .await
-    }
-}
-
-#[cfg(test)]
-impl Drivers {
-    pub fn test() -> Arc<Self> {
-        Drivers::new(
-            RustNetworkingDriver::new(),
-            EphemeralSecureStorage::new(),
-            RustEntropyDriver::new(),
-            RustHostInfoDriver::new(),
-            RustLoggingDriver::new(),
-            RustEventBusDriver::new(),
-            RustFileSystemDriver::new(),
-            EphemeralUnsafeStorage::new(),
-        )
     }
 }
 

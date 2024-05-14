@@ -76,7 +76,7 @@ impl Profile {
         };
         let index = self
             .networks
-            .get_id(&network_id)
+            .get_id(network_id)
             .map(|n| {
                 n.accounts
                     .items()
