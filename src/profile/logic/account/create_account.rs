@@ -68,8 +68,10 @@ impl Profile {
 
         let indices = index..index + count;
 
-        let factor_instances =
-            load_private_device_factor_source(bdfs).await.map(|p| {
+        let factor_instances = load_private_device_factor_source(bdfs.clone())
+            .await
+            .map(|p| {
+                assert_eq!(p.factor_source, bdfs);
                 p.derive_entity_creation_factor_instances(network_id, indices)
             })?;
 
@@ -88,5 +90,46 @@ impl Profile {
             .collect::<Accounts>();
 
         Ok(accounts)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[actix_rt::test]
+    async fn test_create_unsaved_accounts() {
+        let sut =
+            Profile::new(DeviceFactorSource::sample(), DeviceInfo::sample());
+
+        let accounts = sut
+            .create_unsaved_accounts(
+                NetworkID::Mainnet,
+                3,
+                |i| {
+                    DisplayName::new(if i == 0 {
+                        "Alice"
+                    } else if i == 1 {
+                        "Bob"
+                    } else {
+                        "Carol"
+                    })
+                    .unwrap()
+                },
+                async move |_| {
+                    Ok(PrivateHierarchicalDeterministicFactorSource::sample())
+                },
+            )
+            .await
+            .unwrap();
+
+        pretty_assertions::assert_eq!(
+            accounts,
+            Accounts::from_iter([
+                Account::sample_mainnet_alice(),
+                Account::sample_mainnet_bob(),
+                Account::sample_mainnet_carol()
+            ])
+        )
     }
 }
