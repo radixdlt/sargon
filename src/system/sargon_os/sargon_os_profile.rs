@@ -166,7 +166,9 @@ impl SargonOS {
             self.validate_is_allowed_to_active_profile().await?;
         }
         let res = self.profile_holder.update_profile_with(mutate)?;
-        self.save_existing_profile().await?;
+        self.save_existing_profile()
+            // tarpaulin will incorrectly flag next line is missed
+            .await?;
         Ok(res)
     }
 

@@ -28,7 +28,10 @@ impl FileSystemClient {
         path: impl AsRef<Path>,
     ) -> Result<Option<BagOfBytes>> {
         let path = path_to_string(path.as_ref())?;
-        self.driver.load_from_file(path).await
+        self.driver
+            .load_from_file(path)
+            // tarpaulin will incorrectly flag next line is missed
+            .await
     }
 
     async fn save_to_file(
@@ -39,12 +42,16 @@ impl FileSystemClient {
         let path = path_to_string(path.as_ref())?;
         self.driver
             .save_to_file(path, BagOfBytes::from(data.as_ref()))
+            // tarpaulin will incorrectly flag next line is missed
             .await
     }
 
     async fn delete_file(&self, path: impl AsRef<Path>) -> Result<()> {
         let path = path_to_string(path.as_ref())?;
-        self.driver.delete_file(path).await
+        self.driver
+            .delete_file(path)
+            // tarpaulin will incorrectly flag next line is missed
+            .await
     }
 }
 

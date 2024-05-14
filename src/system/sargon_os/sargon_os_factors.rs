@@ -80,6 +80,7 @@ impl SargonOS {
             .into_hash()
             .map_err(|_| CommonError::FactorSourceIDNotFromHash)?;
         self.mnemonic_with_passphrase_of_device_factor_source_by_id(&id)
+            // tarpaulin will incorrectly flag next line is missed
             .await
     }
 
@@ -90,6 +91,7 @@ impl SargonOS {
     ) -> Result<MnemonicWithPassphrase> {
         let bdfs = self.profile_holder.access_profile_with(|p| p.bdfs());
         self.mnemonic_with_passphrase_of_device_factor_source_by_id(&bdfs.id)
+            // tarpaulin will incorrectly flag next line is missed
             .await
     }
 }

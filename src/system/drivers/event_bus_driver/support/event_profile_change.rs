@@ -53,4 +53,23 @@ mod tests {
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
     }
+
+    #[test]
+    fn test_kind() {
+        let test = |s: SUT, exp: EventKind| {
+            assert_eq!(s.kind(), exp);
+        };
+        test(
+            SUT::AddedAccount {
+                address: AccountAddress::sample(),
+            },
+            EventKind::AddedAccount,
+        );
+        test(
+            SUT::AddedAccounts {
+                addresses: vec![AccountAddress::sample()],
+            },
+            EventKind::AddedAccounts,
+        );
+    }
 }

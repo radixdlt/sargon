@@ -34,7 +34,10 @@ impl SecureStorageClient {
     {
         let json = serde_json::to_vec(value)
             .map_err(|_| CommonError::FailedToSerializeToJSON)?;
-        self.driver.save_data(key, BagOfBytes::from(json)).await
+        self.driver
+            .save_data(key, BagOfBytes::from(json))
+            // tarpaulin will incorrectly flag next line is missed
+            .await
     }
 
     //======

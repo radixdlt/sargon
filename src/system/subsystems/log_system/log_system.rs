@@ -13,6 +13,9 @@ impl log::Log for LogSystem {
     }
 
     fn log(&self, record: &log::Record<'_>) {
+        if !self.enabled(record.metadata()) {
+            return;
+        }
         let msg = record.args().to_string();
         let level = record.level();
         if let Some(driver) = &*self.0.read().unwrap() {
@@ -86,6 +89,8 @@ pub fn rust_logger_log_at_every_level() {
 #[cfg(test)]
 mod tests {
 
+    use log::Log;
+
     use super::*;
 
     #[test]
@@ -94,5 +99,25 @@ mod tests {
         let new = LogFilter::Warn;
         rust_logger_set_level(new);
         assert_eq!(rust_logger_get_level(), new)
+    }
+
+    #[test]
+    fn test_flush() {
+        let driver = RustLoggingDriver::new();
+        install_logger(driver);
+        LOG.flush();
+    }
+
+    #[test]
+    fn test_rust_logger_init() {
+        rust_logger_init()
+    }
+
+    #[test]
+    fn test_rust_logger_get_all_levels() {
+        assert_eq!(
+            rust_logger_get_all_levels(),
+            all::<LogLevel>().collect_vec()
+        );
     }
 }

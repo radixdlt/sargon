@@ -8,12 +8,6 @@
 import Foundation
 import SargonUniFFI
 
-extension HostInfoDriver where Self == HostInfo {
-	public init(appVersion: String) {
-		self.init(appVersion: appVersion)
-	}
-}
-
 public final actor HostInfo {
 	fileprivate var appVersion: String
 	public init(appVersion: String) {
