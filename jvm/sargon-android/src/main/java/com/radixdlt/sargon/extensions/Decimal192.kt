@@ -109,13 +109,15 @@ class TextInputDecimal(
     val input: String,
     decimalSeparator: Char
 ) {
-    val decimal: Decimal192 = Decimal192.init(
-        formattedString = input,
-        config = LocaleConfig(
-            decimalSeparator = decimalSeparator.toString(),
-            groupingSeparator = null // We do not allow grouping separator characters in input
+    val decimal: Decimal192? = runCatching {
+        Decimal192.init(
+            formattedString = input,
+            config = LocaleConfig(
+                decimalSeparator = decimalSeparator.toString(),
+                groupingSeparator = null // We do not allow grouping separator characters in input
+            )
         )
-    )
+    }.getOrNull()
 }
 
 fun Decimal192.Companion.init(
@@ -188,7 +190,7 @@ fun Decimal192.rounded(decimalPlaces: UByte, roundingMode: RoundingMode): Decima
     return try {
         decimalRound(
             decimal = this,
-            decimalPlaces = decimalPlaces.toUByte(),
+            decimalPlaces = decimalPlaces,
             roundingMode = roundingMode
         )
     } catch (exception: Exception) {

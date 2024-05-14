@@ -220,7 +220,7 @@ class Decimal192Test : SampleTestable<Decimal192> {
             input: String,
             decimal: Char,
             grouping: Char,
-            formattedTextField: String,
+            formattedTextField: String?,
             sanitizedInput: String
         ) {
             val decimalFormatSymbols = mockk<DecimalFormatSymbols>(relaxed = true).apply {
@@ -233,7 +233,7 @@ class Decimal192Test : SampleTestable<Decimal192> {
                 decimalFormat = decimalFormatSymbols
             )
 
-            assertEquals(formattedTextField, result.decimal.formattedTextField(
+            assertEquals(formattedTextField, result.decimal?.formattedTextField(
                 format = decimalFormatSymbols
             ))
 
@@ -266,7 +266,9 @@ class Decimal192Test : SampleTestable<Decimal192> {
             of(" ", ' ', ',', "0", " "), // Blank with space as decimal separator resolves to 0 prints space
 
             of("1,000,000.10", '.', ',', "1000000.1", "1000000.10"), // Large number resolves to decimal without trailing zero, prints the same number with 0
-            of("1.000.000,10", ',', '.', "1000000,1", "1000000,10")
+            of("1.000.000,10", ',', '.', "1000000,1", "1000000,10"),
+            of("2,", ',', '.', null, "2,"),
+            of("2.", '.', ',', null, "2.")
         )
     }
 }
