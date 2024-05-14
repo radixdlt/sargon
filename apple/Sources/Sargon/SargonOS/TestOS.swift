@@ -24,36 +24,15 @@ extension BIOS {
 	}
 }
 
-@dynamicMemberLookup
 public final class TestOS {
 	public let os: SargonOS
+	
 	public init(bios: BIOS) async throws {
 		self.os = try await SargonOS.boot(bios: bios)
 	}
-	public convenience init(
-		bundle: Bundle = .main,
-		userDefaultsSuite: String = "Test",
-		secureStorageDriver: SecureStorageDriver
-	) async throws {
-		try await self.init(
-			bios: .test(
-				bundle: bundle,
-				userDefaultsSuite: userDefaultsSuite,
-				secureStorageDriver: secureStorageDriver
-			)
-		)
-	}
+	
 }
 extension TestOS: SargonOSProtocol {}
-
-// MARK: DynamaicMemberLookup
-// Enables us to access properties on `os` as if those
-// were properties on this `TestOS` type (does not work for methods, for that we rely on SargonOSProtocol).
-extension TestOS {
-	public nonisolated subscript<T>(dynamicMember keypath: KeyPath<SargonOS, T>) -> T {
-		os[keyPath: keypath]
-	}
-}
 
 // MARK: Private
 extension TestOS {
@@ -68,7 +47,7 @@ extension TestOS {
 	
 	@discardableResult
 	public func createAccount(
-		name: String? = nil
+		named name: String? = nil
 	) async throws -> Self {
 		
 		let accountName = try name.map {

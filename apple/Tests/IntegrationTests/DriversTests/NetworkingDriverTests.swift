@@ -16,4 +16,8 @@ class NetworkingDriverTests: DriverTest<URLSession> {
 		)
 		XCTAssertEqual(response.statusCode, 200)
 	}
+	
+	func test_bad_url() {
+		XCTAssertThrowsError(try URL(validating: ""))
+	}
 }

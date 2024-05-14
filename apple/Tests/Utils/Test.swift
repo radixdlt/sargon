@@ -7,7 +7,7 @@ import XCTest
 class TestCase: XCTestCase {
 	
 	class func shouldEnableRustLog() -> Bool {
-		true
+		false
 	}
 	
 	class override func setUp() {

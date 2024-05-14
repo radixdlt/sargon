@@ -76,13 +76,14 @@ impl DeviceInfo {
     /// Instantiates a new `DeviceInfo` with all needed details,
     /// formatting a `description` from host name and host model.
     pub fn with_details(
+        id: impl Into<Option<DeviceID>>,
         name: impl AsRef<str>,
         model: impl AsRef<str>,
         system_version: impl AsRef<str>,
         host_app_version: impl AsRef<str>,
     ) -> Self {
         Self::new(
-            DeviceID(id()),
+            id.into().unwrap_or(DeviceID::generate_new()),
             now(),
             DeviceInfoDescription::new(name, model),
             system_version,
@@ -94,7 +95,7 @@ impl DeviceInfo {
 #[cfg(test)]
 impl DeviceInfo {
     pub fn new_unknown() -> Self {
-        Self::with_details("Unknown", "Unknown", "Unknown", "Unknown")
+        Self::with_details(None, "Unknown", "Unknown", "Unknown", "Unknown")
     }
 }
 
@@ -150,6 +151,7 @@ mod tests {
     fn with_details() {
         assert_eq!(
             SUT::with_details(
+                None,
                 "My precious",
                 "iPhone SE 2nd gen",
                 "iOS 17.4.1",

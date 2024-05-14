@@ -41,7 +41,9 @@ final class SargonOSTests: OSTest {
 		do {
 			let _ = try await SUT.createdSharedBootingWith(bios: bios, isEmulatingFreshInstall: false)
 			XCTFail("Should have thrown")
-		} catch { /* All good, expected throw. */ }
+		} catch let err as SargonOSAlreadyBooted {
+			XCTAssertEqual(err.errorDescription, "Radix Wallet core already initialized, should not have been initialized twice. This is a Radix developer error.")
+		} catch { XCTFail("Wrong error type, expected: \(SargonOSAlreadyBooted.self)") }
 	}
 	
 	func test_boot_twice_does_not_throws_when_emulating_fresh_install() async throws {

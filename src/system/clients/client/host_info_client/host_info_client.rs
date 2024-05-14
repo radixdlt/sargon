@@ -26,7 +26,10 @@ impl HostInfoClient {
         let host_os_version = self.driver.host_device_system_version().await;
         let host_app_version = self.driver.host_app_version().await;
 
+        let maybe_device_id = self.driver.host_device_id().await;
+
         DeviceInfo::with_details(
+            maybe_device_id,
             host_name,
             host_model,
             host_os_version,

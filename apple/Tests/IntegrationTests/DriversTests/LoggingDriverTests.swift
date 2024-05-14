@@ -17,6 +17,13 @@ class LoggingDriverTests: DriverTest<Log> {
 		}
 	}
 	
+	func test_setRustLogLevel() {
+		LogFilter.allCases.forEach { level in
+			setRustLogLevel(level)
+			XCTAssertEqual(getRustLogLevel(), level)
+		}
+	}
+	
 	func test_os_log_type_from_loglevel() {
 		func doTest(_ from: Sargon.LogLevel, _ expected: OSLogType) {
 			XCTAssertEqual(OSLogType(sargonLogLevel: from), expected)

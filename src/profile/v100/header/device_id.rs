@@ -17,6 +17,12 @@ use crate::prelude::*;
 pub struct DeviceID(pub(crate) Uuid);
 uniffi::custom_newtype!(DeviceID, Uuid);
 
+impl DeviceID {
+    pub fn generate_new() -> Self {
+        Self(id())
+    }
+}
+
 impl FromStr for DeviceID {
     type Err = CommonError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -69,5 +75,10 @@ mod tests {
     #[test]
     fn from_upper_case_is_ok() {
         assert!(SUT::from_str("66F07CA2-A9D9-49E5-8152-77ACA3D1DD74").is_ok())
+    }
+
+    #[test]
+    fn generate_new_is_unique() {
+        assert_ne!(SUT::generate_new(), SUT::generate_new());
     }
 }
