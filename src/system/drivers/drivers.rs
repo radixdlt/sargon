@@ -14,6 +14,34 @@ pub struct Drivers {
 
 #[uniffi::export]
 impl Drivers {
+    pub fn networking(&self) -> Arc<dyn NetworkingDriver> {
+        self.networking.clone()
+    }
+    pub fn secure_storage(&self) -> Arc<dyn SecureStorageDriver> {
+        self.secure_storage.clone()
+    }
+    pub fn entropy_provider(&self) -> Arc<dyn EntropyProviderDriver> {
+        self.entropy_provider.clone()
+    }
+    pub fn host_info(&self) -> Arc<dyn HostInfoDriver> {
+        self.host_info.clone()
+    }
+    pub fn logging(&self) -> Arc<dyn LoggingDriver> {
+        self.logging.clone()
+    }
+    pub fn event_bus(&self) -> Arc<dyn EventBusDriver> {
+        self.event_bus.clone()
+    }
+    pub fn file_system(&self) -> Arc<dyn FileSystemDriver> {
+        self.file_system.clone()
+    }
+    pub fn unsafe_storage(&self) -> Arc<dyn UnsafeStorageDriver> {
+        self.unsafe_storage.clone()
+    }
+}
+
+#[uniffi::export]
+impl Drivers {
     #[uniffi::constructor]
     #[allow(clippy::too_many_arguments)]
     pub fn new(
@@ -164,5 +192,69 @@ impl Drivers {
             RustFileSystemDriver::new(),
             unsafe_storage,
         )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = Drivers;
+
+    #[test]
+    fn get_networking() {
+        let d = RustNetworkingDriver::new();
+        let sut = SUT::with_networking(d.clone());
+        assert_eq!(Arc::as_ptr(&sut.networking()), Arc::as_ptr(&d));
+    }
+
+    #[test]
+    fn get_secure_storage() {
+        let d = EphemeralSecureStorage::new();
+        let sut = SUT::with_secure_storage(d.clone());
+        assert_eq!(Arc::as_ptr(&sut.secure_storage()), Arc::as_ptr(&d));
+    }
+
+    #[test]
+    fn get_entropy_provider() {
+        let d = RustEntropyDriver::new();
+        let sut = SUT::with_entropy_provider(d.clone());
+        assert_eq!(Arc::as_ptr(&sut.entropy_provider()), Arc::as_ptr(&d));
+    }
+
+    #[test]
+    fn get_host_info() {
+        let d = RustHostInfoDriver::new();
+        let sut = SUT::with_host_info(d.clone());
+        assert_eq!(Arc::as_ptr(&sut.host_info()), Arc::as_ptr(&d));
+    }
+
+    #[test]
+    fn get_logging() {
+        let d = RustLoggingDriver::new();
+        let sut = SUT::with_logging(d.clone());
+        assert_eq!(Arc::as_ptr(&sut.logging()), Arc::as_ptr(&d));
+    }
+
+    #[test]
+    fn get_event_bus() {
+        let d = RustEventBusDriver::new();
+        let sut = SUT::with_event_bus(d.clone());
+        assert_eq!(Arc::as_ptr(&sut.event_bus()), Arc::as_ptr(&d));
+    }
+
+    #[test]
+    fn get_file_system() {
+        let d = RustFileSystemDriver::new();
+        let sut = SUT::with_file_system(d.clone());
+        assert_eq!(Arc::as_ptr(&sut.file_system()), Arc::as_ptr(&d));
+    }
+
+    #[test]
+    fn get_unsafe_storage() {
+        let d = EphemeralUnsafeStorage::new();
+        let sut = SUT::with_unsafe_storage(d.clone());
+        assert_eq!(Arc::as_ptr(&sut.unsafe_storage()), Arc::as_ptr(&d));
     }
 }
