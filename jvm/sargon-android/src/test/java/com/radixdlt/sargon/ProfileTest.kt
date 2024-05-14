@@ -27,15 +27,15 @@ class ProfileTest : SampleTestable<Profile> {
         val hdFactorSource = PrivateHierarchicalDeterministicFactorSource.init(
             isMainBDFS = true,
             entropy = NonEmptyMax32Bytes(bagOfBytes = randomBagOfBytes(byteCount = 32)),
-            walletClientModel = WalletClientModel.ANDROID
+            deviceInfo = DeviceInfo.sample.other()
         )
 
         val profile = Profile.init(
             deviceFactorSource = hdFactorSource.factorSource.asGeneral(),
-            creatingDeviceName = "Unit tests"
+            deviceInfo = DeviceInfo.sample.other()
         )
 
-        assertEquals("Unit tests - Android", profile.header.creatingDevice.description)
+        assertEquals("Android", profile.header.creatingDevice.description.name)
     }
 
     @Test

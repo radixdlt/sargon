@@ -3,9 +3,9 @@
 package com.radixdlt.sargon.antenna
 
 import com.radixdlt.sargon.CommonException
-import com.radixdlt.sargon.NetworkAntenna
 import com.radixdlt.sargon.NetworkRequest
 import com.radixdlt.sargon.NetworkResponse
+import com.radixdlt.sargon.NetworkingDriver
 import com.radixdlt.sargon.annotation.KoverIgnore
 import com.radixdlt.sargon.extensions.toBagOfBytes
 import com.radixdlt.sargon.extensions.toHttpMethod
@@ -19,7 +19,7 @@ import okhttp3.executeAsync
 
 class SargonNetworkAntenna(
     private val client: OkHttpClient
-) : NetworkAntenna {
+) : NetworkingDriver {
     override suspend fun executeNetworkRequest(request: NetworkRequest): NetworkResponse = runCatching {
         val mediaType = request.headers.extractMediaType()
 

@@ -1,5 +1,6 @@
 package com.radixdlt.sargon.extensions
 
+import com.radixdlt.sargon.DeviceInfo
 import com.radixdlt.sargon.FactorSource
 import com.radixdlt.sargon.Profile
 import com.radixdlt.sargon.ProfileFileContents
@@ -13,10 +14,10 @@ import com.radixdlt.sargon.profileToJsonBytes
 
 fun Profile.Companion.init(
     deviceFactorSource: FactorSource.Device,
-    creatingDeviceName: String
+    deviceInfo: DeviceInfo
 ) = newProfile(
     deviceFactorSource = deviceFactorSource.value,
-    creatingDeviceName = creatingDeviceName
+    deviceInfo = deviceInfo
 )
 
 fun Profile.Companion.analyzeContentsOfFile(contents: String): ProfileFileContents =

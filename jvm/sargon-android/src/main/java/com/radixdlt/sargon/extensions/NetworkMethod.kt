@@ -1,8 +1,6 @@
 package com.radixdlt.sargon.extensions
 
 import com.radixdlt.sargon.NetworkMethod
+import com.radixdlt.sargon.networkMethodToString
 
-fun NetworkMethod.toHttpMethod(): String = when (this) {
-    NetworkMethod.POST -> "POST"
-    NetworkMethod.GET -> "GET"
-}
+fun NetworkMethod.toHttpMethod(): String = networkMethodToString(method = this)
