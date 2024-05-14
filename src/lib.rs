@@ -1,6 +1,8 @@
 #![feature(async_closure)]
 #![feature(let_chains)]
+#![feature(core_intrinsics)]
 #![allow(unused_imports)]
+#![allow(internal_features)]
 
 mod core;
 mod gateway_api;

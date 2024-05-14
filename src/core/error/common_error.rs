@@ -535,7 +535,7 @@ pub fn error_message_from_error(error: &CommonError) -> String {
 
 impl CommonError {
     pub fn error_code(&self) -> u32 {
-        unsafe { *<*const _>::from(self).cast::<u32>() }
+        core::intrinsics::discriminant_value(self)
     }
 }
 
