@@ -66,26 +66,7 @@ internal class FactorSourcesTest : IdentifiedArrayTest<FactorSources, FactorSour
 
     @Test
     fun testDeviceFactorSourceAsGeneral() {
-        val factorSource = DeviceFactorSource(
-            id = FactorSourceIdFromHash(
-                kind = FactorSourceKind.DEVICE,
-                body = Exactly32Bytes.init(randomBagOfBytes(32))
-            ),
-            common = FactorSourceCommon(
-                cryptoParameters = FactorSourceCryptoParameters(
-                    supportedCurves = SupportedCurves(Slip10Curve.CURVE25519).asList(),
-                    supportedDerivationPathSchemes = listOf(DerivationPathScheme.CAP26)
-                ),
-                addedOn = Timestamp.now(),
-                lastUsedOn = Timestamp.now(),
-                flags = emptyList()
-            ),
-            hint = DeviceFactorSourceHint(
-                name = "Unit",
-                model = "Test",
-                mnemonicWordCount = Bip39WordCount.TWENTY_FOUR
-            )
-        )
+        val factorSource = DeviceFactorSource.sample.other()
 
         assertEquals(
             FactorSource.Device(factorSource),
@@ -95,25 +76,7 @@ internal class FactorSourcesTest : IdentifiedArrayTest<FactorSources, FactorSour
 
     @Test
     fun testLedgerFactorSourceAsGeneral() {
-        val factorSource = LedgerHardwareWalletFactorSource(
-            id = FactorSourceIdFromHash(
-                kind = FactorSourceKind.DEVICE,
-                body = Exactly32Bytes.init(randomBagOfBytes(32))
-            ),
-            common = FactorSourceCommon(
-                cryptoParameters = FactorSourceCryptoParameters(
-                    supportedCurves = SupportedCurves(Slip10Curve.CURVE25519).asList(),
-                    supportedDerivationPathSchemes = listOf(DerivationPathScheme.CAP26)
-                ),
-                addedOn = Timestamp.now(),
-                lastUsedOn = Timestamp.now(),
-                flags = emptyList()
-            ),
-            hint = LedgerHardwareWalletHint(
-                name = "Unit",
-                model = LedgerHardwareWalletModel.NANO_S
-            )
-        )
+        val factorSource = LedgerHardwareWalletFactorSource.sample.other()
 
         assertEquals(
             FactorSource.Ledger(factorSource),
