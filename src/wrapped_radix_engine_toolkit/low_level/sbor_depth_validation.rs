@@ -1,10 +1,10 @@
 use crate::prelude::*;
 
-use radix_engine::types::{
-    manifest_encode as Scrypto_manifest_encode, MANIFEST_SBOR_V1_MAX_DEPTH,
+use radix_common::prelude::{
+    manifest_encode as Scrypto_manifest_encode,
+    ScryptoValue as ScryptoScryptoValue, MANIFEST_SBOR_V1_MAX_DEPTH,
     SCRYPTO_SBOR_V1_MAX_DEPTH,
 };
-use radix_engine_interface::prelude::ScryptoValue as ScryptoScryptoValue;
 use sbor::{
     CustomValue as ScryptoCustomValue,
     CustomValueKind as ScryptoCustomValueKind, Value as ScryptoValue,

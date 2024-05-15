@@ -74,22 +74,21 @@ strum = { git = "https://github.com/Peternator7/strum/", rev = "f746c3699acf1501
     "derive",
 ] }
 
-radix-engine-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "v1.1.2", features = [
+sbor = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "397a1bc0bb67429f1c82fbe0a62b3ac2f89a6fad" }
+radix-rust = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "397a1bc0bb67429f1c82fbe0a62b3ac2f89a6fad", features = [
     "serde",
 ] }
-radix-engine = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "v1.1.2" }
-sbor = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "v1.1.2" }
-radix-engine-derive = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "v1.1.2" }
-radix-engine-interface = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "v1.1.2", features = [
-    "std",
+radix-engine = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "397a1bc0bb67429f1c82fbe0a62b3ac2f89a6fad" }
+radix-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "397a1bc0bb67429f1c82fbe0a62b3ac2f89a6fad", features = [
+    "serde", "secp256k1_sign_and_validate"
 ] }
+radix-common-derive = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "397a1bc0bb67429f1c82fbe0a62b3ac2f89a6fad" }
+radix-engine-interface = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "397a1bc0bb67429f1c82fbe0a62b3ac2f89a6fad" }
 
-transaction = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "v1.1.2", features = [
-    "std",
-] }
+radix-transactions = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "397a1bc0bb67429f1c82fbe0a62b3ac2f89a6fad" }
 
-radix-engine-toolkit-json = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "v2.0.1" }
-radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "v2.0.1" }
+radix-engine-toolkit-json = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "d4325484305275d647491c521c2e3938f5296029" }
+radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "d4325484305275d647491c521c2e3938f5296029" }
 
 # enum-iterator = "1.4.1"
 enum-iterator = { git = "https://github.com/stephaneyfx/enum-iterator/", rev = "9d472a1237cfd03b1c7657fdcba74c8070bfb4ea" }
@@ -112,10 +111,6 @@ enum-as-inner = { git = "https://github.com/bluejekyll/enum-as-inner/", rev = "c
 # uniffi = "0.27.1"
 uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "6f33088e8100a2ea9586c8c3ecf98ab51d5aba62", features = [
     "cli",
-] }
-
-indexmap = { git = "https://github.com/indexmap-rs/indexmap", rev = "3f0fffb85b99a2a37bbee363703f8509dd03e2d7", features = [
-    "serde",
 ] }
 
 # SLIP10 implementation

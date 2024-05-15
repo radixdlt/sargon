@@ -20,7 +20,9 @@ pub mod prelude {
     pub use crate::wallet::*;
     pub use crate::wrapped_radix_engine_toolkit::*;
 
-    pub(crate) use std::collections::{BTreeSet, HashMap, HashSet};
+    pub(crate) use radix_rust::prelude::{
+        BTreeSet, HashMap, HashSet, IndexMap, IndexSet,
+    };
 
     pub(crate) use ::hex::decode as hex_decode;
     pub(crate) use ::hex::encode as hex_encode;
@@ -36,7 +38,7 @@ pub mod prelude {
     pub(crate) use serde_with::*;
     pub(crate) use zeroize::{Zeroize, ZeroizeOnDrop};
 
-    pub use radix_engine_common::math::traits::CheckedMul as ScryptoCheckedMul;
+    pub use radix_common::math::traits::CheckedMul as ScryptoCheckedMul;
     pub(crate) use std::cmp::Ordering;
     pub(crate) use std::collections::BTreeMap;
     pub(crate) use std::fmt::{Debug, Display, Formatter};
@@ -60,31 +62,10 @@ pub mod prelude {
             TransactionReceiptV1 as ScryptoTransactionReceipt,
             VersionedTransactionReceipt as ScryptoVersionedTransactionReceipt,
         },
-        types::{
-            node_modules::{
-                metadata::ToMetadataEntry as ScryptoToMetadataEntry,
-                ModuleConfig as ScryptoModuleConfig,
-            },
-            recover_secp256k1 as Scrypto_recover_secp256k1,
-            AccessRule as ScryptoAccessRule, Epoch as ScryptoEpoch,
-            FungibleResourceRoles as ScryptoFungibleResourceRoles,
-            ManifestAddress as ScryptoManifestAddress,
-            ManifestBucket as ScryptoManifestBucket,
-            ManifestCustomValue as ScryptoManifestCustomValue,
-            ManifestCustomValueKind as ScryptoManifestCustomValueKind,
-            ManifestEncode as ScryptoManifestEncode,
-            MetadataInit as ScryptoMetadataInit,
-            NonFungibleData as ScryptoNonFungibleData,
-            NonFungibleGlobalId as ScryptoNonFungibleGlobalId,
-            NonFungibleIdType as ScryptoNonFungibleIdType,
-            NonFungibleResourceRoles as ScryptoNonFungibleResourceRoles,
-            OwnerRole as ScryptoOwnerRole,
-            RoleAssignmentInit as ScryptoRoleAssignmentInit,
-        },
     };
-    pub(crate) use sbor::HasLatestVersion;
+    pub(crate) use sbor::Versioned;
 
-    pub(crate) use radix_engine_common::{
+    pub(crate) use radix_common::{
         address::AddressBech32Encoder as ScryptoAddressBech32Encoder,
         crypto::{
             blake2b_256_hash, verify_ed25519 as scrypto_verify_ed25519,
@@ -115,12 +96,25 @@ pub mod prelude {
             Decimal as ScryptoDecimal192, RoundingMode as ScryptoRoundingMode,
         },
         network::NetworkDefinition as ScryptoNetworkDefinition,
+        prelude::{
+            recover_secp256k1 as Scrypto_recover_secp256k1,
+            ManifestAddress as ScryptoManifestAddress,
+            ManifestBucket as ScryptoManifestBucket,
+            ManifestCustomValue as ScryptoManifestCustomValue,
+            ManifestCustomValueKind as ScryptoManifestCustomValueKind,
+            ManifestEncode as ScryptoManifestEncode,
+            ManifestValue as ScryptoManifestValue,
+            NonFungibleData as ScryptoNonFungibleData,
+            NonFungibleGlobalId as ScryptoNonFungibleGlobalId,
+            NonFungibleIdType as ScryptoNonFungibleIdType, XRD,
+        },
         types::{
             ComponentAddress as ScryptoComponentAddress,
             EntityType as ScryptoEntityType,
             GlobalAddress as ScryptoGlobalAddress, NodeId as ScryptoNodeId,
             ResourceAddress as ScryptoResourceAddress,
         },
+        ManifestSbor as ScryptoManifestSbor, ScryptoSbor,
     };
     pub(crate) use radix_engine_interface::blueprints::{
         account::{
@@ -129,10 +123,22 @@ pub mod prelude {
         },
         resource::ResourceOrNonFungible as ScryptoResourceOrNonFungible,
     };
+    pub(crate) use radix_engine_interface::prelude::{
+        AccessRule as ScryptoAccessRule, Epoch as ScryptoEpoch,
+        FungibleResourceRoles as ScryptoFungibleResourceRoles,
+        MetadataInit as ScryptoMetadataInit,
+        MetadataValue as ScryptoMetadataValue,
+        ModuleConfig as ScryptoModuleConfig,
+        NonFungibleResourceRoles as ScryptoNonFungibleResourceRoles,
+        OwnerRole as ScryptoOwnerRole,
+        RoleAssignmentInit as ScryptoRoleAssignmentInit,
+        ToMetadataEntry as ScryptoToMetadataEntry,
+        UncheckedUrl as ScryptoUncheckedUrl,
+    };
 
     pub(crate) use enum_iterator::all;
 
-    pub(crate) use transaction::{
+    pub(crate) use radix_transactions::{
         builder::{
             ExistingManifestBucket as ScryptoExistingManifestBucket,
             ManifestNameRegistrar as ScryptoManifestNameRegistrar,
@@ -142,6 +148,8 @@ pub mod prelude {
         },
         manifest::{
             compile as scrypto_compile, decompile as scrypto_decompile,
+            generator::{GeneratorError, GeneratorErrorKind},
+            token::{Position, Span},
             CompileError as ScryptoCompileError,
             MockBlobProvider as ScryptoMockBlobProvider,
         },
@@ -172,14 +180,8 @@ pub mod prelude {
         },
         prelude::{
             ManifestBuilder as ScryptoManifestBuilder,
-            ManifestValue as ScryptoManifestValue,
-            MetadataValue as ScryptoMetadataValue,
             TransactionManifestV1 as ScryptoTransactionManifest,
         },
-    };
-
-    pub(crate) use radix_engine_derive::{
-        ManifestSbor as ScryptoManifestSbor, ScryptoSbor,
     };
 
     pub(crate) use radix_engine_toolkit_json::models::{

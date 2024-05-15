@@ -103,9 +103,7 @@ impl HasSampleValues for TransactionHeader {
     // https://github.com/radixdlt/radixdlt-scrypto/blob/ff21f24952318387803ae720105eec079afe33f3/transaction/src/model/hash/encoder.rs#L115
     fn sample_other() -> Self {
         let private_key: Secp256k1PrivateKey =
-            radix_engine::types::Secp256k1PrivateKey::from_u64(1)
-                .unwrap()
-                .into();
+            ScryptoSecp256k1PrivateKey::from_u64(1).unwrap().into();
         let public_key: Secp256k1PublicKey = private_key.public_key();
         let network_id = NetworkID::Simulator;
         Self::new(network_id, 0, 10, 10, public_key, true, 0)

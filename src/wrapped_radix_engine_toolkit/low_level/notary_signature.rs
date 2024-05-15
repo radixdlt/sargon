@@ -110,9 +110,9 @@ mod tests {
 
     #[test]
     fn from_scrypto_notary() {
-        let sig: radix_engine_common::crypto::Ed25519Signature = "2150c2f6b6c496d197ae03afb23f6adf23b275c675394f23786250abd006d5a2c7543566403cb414f70d0e229b0a9b55b4c74f42fc38cdf1aba2307f97686f0b".parse().unwrap();
+        let sig: radix_common::crypto::Ed25519Signature = "2150c2f6b6c496d197ae03afb23f6adf23b275c675394f23786250abd006d5a2c7543566403cb414f70d0e229b0a9b55b4c74f42fc38cdf1aba2307f97686f0b".parse().unwrap();
         let scrypto_notary = ScryptoNotarySignature(
-            transaction::model::SignatureV1::Ed25519(sig),
+            radix_transactions::model::SignatureV1::Ed25519(sig),
         );
         assert_eq!(SUT::from(scrypto_notary), SUT::sample());
     }

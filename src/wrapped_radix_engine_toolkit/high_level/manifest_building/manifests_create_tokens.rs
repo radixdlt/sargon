@@ -114,11 +114,9 @@ impl TransactionManifest {
                 ScryptoNonFungibleResourceRoles::single_locked_rule(
                     ScryptoAccessRule::AllowAll,
                 ),
-                Into::<
-                    radix_engine::types::node_modules::ModuleConfig<
-                        radix_engine::types::MetadataInit,
-                    >,
-                >::into(metadata.clone()),
+                Into::<ScryptoModuleConfig<ScryptoMetadataInit>>::into(
+                    metadata.clone(),
+                ),
                 Some(
                     initial_supply
                         .clone()

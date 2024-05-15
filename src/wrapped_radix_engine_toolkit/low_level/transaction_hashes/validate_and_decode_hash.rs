@@ -34,7 +34,7 @@ mod tests {
         // valid bech32 encoded string, unknown network (id: 0xfa, hrp: "fake")
         let s = "txid_fake_1frcm6zzyfd08z0deu9x24sh64eccxeux4j2dv3dsqeuh9qsz4y6sfken4s";
         assert_eq!(
-            validate_and_decode_hash::<transaction::model::IntentHash>(s),
+            validate_and_decode_hash::<radix_transactions::model::IntentHash>(s),
             Err(CommonError::FailedToBech32DecodeTransactionHashAfterHavingTestedAllNetworkID { bad_value: s.to_owned() })
         );
     }
@@ -43,9 +43,11 @@ mod tests {
     fn decode_sim_success() {
         let s = "txid_sim1vrjkzlt8pekg5s46tum5na8lzpulvc3p72p92nkdm2dd8p0vkx2svr7ejr";
         assert_eq!(
-            validate_and_decode_hash::<transaction::model::IntentHash>(s)
-                .unwrap()
-                .1,
+            validate_and_decode_hash::<radix_transactions::model::IntentHash>(
+                s
+            )
+            .unwrap()
+            .1,
             NetworkID::Simulator
         );
     }

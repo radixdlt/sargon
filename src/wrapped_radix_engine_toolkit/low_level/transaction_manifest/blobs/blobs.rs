@@ -60,10 +60,7 @@ impl From<Blobs> for ScryptoBlobsMap {
             .into_iter()
             .map(|b| {
                 let bytes = b.secret_magic.to_vec();
-                (
-                    radix_engine::types::Hash::from(hash_of(bytes.clone())),
-                    bytes,
-                )
+                (ScryptoHash::from(hash_of(bytes.clone())), bytes)
             })
             .collect()
     }

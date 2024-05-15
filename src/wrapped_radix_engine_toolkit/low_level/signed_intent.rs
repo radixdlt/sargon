@@ -115,9 +115,7 @@ impl HasSampleValues for SignedIntent {
         let mut signatures = Vec::<IntentSignature>::new();
         for n in 1..4 {
             let private_key: Secp256k1PrivateKey =
-                radix_engine::types::Secp256k1PrivateKey::from_u64(n)
-                    .unwrap()
-                    .into();
+                ScryptoSecp256k1PrivateKey::from_u64(n).unwrap().into();
 
             let intent_signature =
                 private_key.sign_intent_hash(&intent.intent_hash());
@@ -149,9 +147,7 @@ impl SignedIntent {
                 let mut signatures = Vec::<IntentSignature>::new();
                 for n in 1..4 {
                     let private_key: Secp256k1PrivateKey =
-                        radix_engine::types::Secp256k1PrivateKey::from_u64(n)
-                            .unwrap()
-                            .into();
+                        ScryptoSecp256k1PrivateKey::from_u64(n).unwrap().into();
 
                     let intent_signature =
                         private_key.sign_intent_hash(&intent.intent_hash());
@@ -205,9 +201,7 @@ mod tests {
         let mut signatures = Vec::<IntentSignature>::new();
         for n in 1..4 {
             let private_key: Secp256k1PrivateKey =
-                radix_engine::types::Secp256k1PrivateKey::from_u64(n)
-                    .unwrap()
-                    .into();
+                ScryptoSecp256k1PrivateKey::from_u64(n).unwrap().into();
 
             let intent_signature =
                 private_key.sign_intent_hash(&intent.intent_hash());
@@ -232,9 +226,7 @@ mod tests {
         let mut signatures = Vec::<IntentSignature>::new();
         for n in 1..4 {
             let private_key: Secp256k1PrivateKey =
-                radix_engine::types::Secp256k1PrivateKey::from_u64(n)
-                    .unwrap()
-                    .into();
+                ScryptoSecp256k1PrivateKey::from_u64(n).unwrap().into();
 
             let intent_signature =
                 private_key.sign_intent_hash(&intent.intent_hash());
@@ -256,9 +248,7 @@ mod tests {
         let mut signatures = Vec::<IntentSignature>::new();
         for n in 1..4 {
             let private_key: Secp256k1PrivateKey =
-                radix_engine::types::Secp256k1PrivateKey::from_u64(n)
-                    .unwrap()
-                    .into();
+                ScryptoSecp256k1PrivateKey::from_u64(n).unwrap().into();
             let hash = intent.intent_hash();
             let intent_signature = private_key.sign_intent_hash(&hash);
             signatures.push(intent_signature)
