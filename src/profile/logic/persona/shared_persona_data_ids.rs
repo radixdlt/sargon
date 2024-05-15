@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use indexmap::IndexSet;
+use radix_rust::prelude::IndexSet;
 
 impl SharedPersonaData {
     pub fn ids_of_entries(&self) -> IndexSet<PersonaDataEntryID> {

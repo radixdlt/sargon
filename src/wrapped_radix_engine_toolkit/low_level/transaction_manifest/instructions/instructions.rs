@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-use radix_engine::types::MANIFEST_SBOR_V1_MAX_DEPTH;
+use radix_common::prelude::MANIFEST_SBOR_V1_MAX_DEPTH;
 use radix_engine_toolkit::functions::address::decode as RET_decode_address;
 
 #[derive(Clone, Debug, PartialEq, Eq, derive_more::Display, uniffi::Record)]
@@ -151,24 +151,29 @@ fn extract_error_from_error(
     err: ScryptoCompileError,
     expected_network: NetworkID,
 ) -> CommonError {
-    use transaction::manifest::generator::GeneratorError::*;
-    use transaction::manifest::parser::ParserError::*;
+    use radix_transactions::manifest::parser::ParserError;
+    use radix_transactions::manifest::parser::ParserErrorKind::*;
+    use GeneratorError;
+    use GeneratorErrorKind::*;
     let n = expected_network;
     match err {
-        ScryptoCompileError::GeneratorError(gen_err) => match gen_err {
+        ScryptoCompileError::GeneratorError(GeneratorError {
+            error_kind: gen_err,
+            ..
+        }) => match gen_err {
             InvalidPackageAddress(a) => extract_error_from_addr(a, n),
-            InvalidComponentAddress(a) => extract_error_from_addr(a, n),
             InvalidResourceAddress(a) => extract_error_from_addr(a, n),
             InvalidGlobalAddress(a) => extract_error_from_addr(a, n),
             _ => CommonError::InvalidInstructionsString {
                 underlying: format!("GeneratorError: {:?}", gen_err),
             },
         },
-        ScryptoCompileError::ParserError(MaxDepthExceeded(max)) => {
-            CommonError::InvalidTransactionMaxSBORDepthExceeded {
-                max: max as u16,
-            }
-        }
+        ScryptoCompileError::ParserError(ParserError {
+            error_kind: MaxDepthExceeded { max, .. },
+            ..
+        }) => CommonError::InvalidTransactionMaxSBORDepthExceeded {
+            max: max as u16,
+        },
         _ => CommonError::InvalidInstructionsString {
             underlying: format!("{:?}", err),
         },
@@ -323,13 +328,25 @@ mod tests {
     fn extract_error_from_error_non_gen_err() {
         assert_eq!(
             extract_error_from_error(
-                ScryptoCompileError::LexerError(
-                    transaction::manifest::lexer::LexerError::UnexpectedEof
-                ),
+                ScryptoCompileError::LexerError(LexerError {
+                    error_kind: LexerErrorKind::UnexpectedEof,
+                    span: Span {
+                        start: Position {
+                            full_index: 0,
+                            line_idx: 0,
+                            line_char_index: 0
+                        },
+                        end: Position {
+                            full_index: 0,
+                            line_idx: 0,
+                            line_char_index: 0
+                        }
+                    }
+                }),
                 NetworkID::Simulator
             ),
             CommonError::InvalidInstructionsString {
-                underlying: "LexerError(UnexpectedEof)".to_owned()
+                underlying: "LexerError(LexerError { error_kind: UnexpectedEof, span: Span { start: Position { full_index: 0, line_idx: 0, line_char_index: 0 }, end: Position { full_index: 0, line_idx: 0, line_char_index: 0 } } })".to_owned()
             }
         );
     }
@@ -354,10 +371,28 @@ mod tests {
     fn extract_error_from_error_gen_non_addr_err() {
         assert_eq!(
             extract_error_from_error(
-                ScryptoCompileError::GeneratorError(transaction::manifest::generator::GeneratorError::BlobNotFound("dead".to_owned())),
+                ScryptoCompileError::GeneratorError(GeneratorError {
+                    error_kind: GeneratorErrorKind::BlobNotFound(
+                        "dead".to_owned()
+                    ),
+                    span: Span {
+                        start: Position {
+                            full_index: 0,
+                            line_idx: 0,
+                            line_char_index: 0
+                        },
+                        end: Position {
+                            full_index: 0,
+                            line_idx: 0,
+                            line_char_index: 0
+                        }
+                    }
+                }),
                 NetworkID::Simulator
             ),
-            CommonError::InvalidInstructionsString { underlying: "GeneratorError: BlobNotFound(\"dead\")".to_owned() }
+            CommonError::InvalidInstructionsString {
+                underlying: "GeneratorError: BlobNotFound(\"dead\")".to_owned()
+            }
         );
     }
 
@@ -365,21 +400,29 @@ mod tests {
     fn extract_error_from_error_gen_err_package_addr() {
         assert_eq!(
             extract_error_from_error(
-                ScryptoCompileError::GeneratorError(transaction::manifest::generator::GeneratorError::InvalidPackageAddress(PackageAddress::sample().to_string())),
+                ScryptoCompileError::GeneratorError(GeneratorError {
+                    error_kind: GeneratorErrorKind::InvalidPackageAddress(
+                        PackageAddress::sample().to_string()
+                    ),
+                    span: Span {
+                        start: Position {
+                            full_index: 0,
+                            line_idx: 0,
+                            line_char_index: 0
+                        },
+                        end: Position {
+                            full_index: 0,
+                            line_idx: 0,
+                            line_char_index: 0
+                        }
+                    }
+                }),
                 NetworkID::Simulator
             ),
-            CommonError::InvalidInstructionsWrongNetwork { found_in_instructions: NetworkID::Mainnet, specified_to_instructions_ctor: NetworkID::Simulator }
-        );
-    }
-
-    #[test]
-    fn extract_error_from_error_gen_err_component_addr() {
-        assert_eq!(
-            extract_error_from_error(
-                ScryptoCompileError::GeneratorError(transaction::manifest::generator::GeneratorError::InvalidComponentAddress(ComponentAddress::sample().to_string())),
-                NetworkID::Simulator
-            ),
-            CommonError::InvalidInstructionsWrongNetwork { found_in_instructions: NetworkID::Mainnet, specified_to_instructions_ctor: NetworkID::Simulator }
+            CommonError::InvalidInstructionsWrongNetwork {
+                found_in_instructions: NetworkID::Mainnet,
+                specified_to_instructions_ctor: NetworkID::Simulator
+            }
         );
     }
 
@@ -387,10 +430,29 @@ mod tests {
     fn extract_error_from_error_gen_err_resource_addr() {
         assert_eq!(
             extract_error_from_error(
-                ScryptoCompileError::GeneratorError(transaction::manifest::generator::GeneratorError::InvalidResourceAddress(ResourceAddress::sample().to_string())),
+                ScryptoCompileError::GeneratorError(GeneratorError {
+                    error_kind: GeneratorErrorKind::InvalidResourceAddress(
+                        ResourceAddress::sample().to_string()
+                    ),
+                    span: Span {
+                        start: Position {
+                            full_index: 0,
+                            line_idx: 0,
+                            line_char_index: 0
+                        },
+                        end: Position {
+                            full_index: 0,
+                            line_idx: 0,
+                            line_char_index: 0
+                        }
+                    }
+                }),
                 NetworkID::Simulator
             ),
-            CommonError::InvalidInstructionsWrongNetwork { found_in_instructions: NetworkID::Mainnet, specified_to_instructions_ctor: NetworkID::Simulator }
+            CommonError::InvalidInstructionsWrongNetwork {
+                found_in_instructions: NetworkID::Mainnet,
+                specified_to_instructions_ctor: NetworkID::Simulator
+            }
         );
     }
 

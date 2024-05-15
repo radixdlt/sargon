@@ -14,7 +14,7 @@ use crate::prelude::*;
     uniffi::Enum,
 )]
 pub enum SignatureWithPublicKey {
-    // N.B. `transaction::model::SignatureWithPublicKeyV1::Secp256k1` does
+    // N.B. `radix_transactions::model::SignatureWithPublicKeyV1::Secp256k1` does
     // NOT include the public key, it relies on ECDSA Signature supporting
     // recovery, but it is not reliable since passing the wrong hash to
     // a signature will return the WRONG public key. In other words one might
@@ -75,7 +75,7 @@ impl TryFrom<(ScryptoSignatureWithPublicKey, Hash)> for SignatureWithPublicKey {
     ) -> Result<Self, Self::Error> {
         match value.0 {
             ScryptoSignatureWithPublicKey::Secp256k1 { signature } => {
-                let hash: radix_engine_common::crypto::Hash = value.1.into();
+                let hash: radix_common::crypto::Hash = value.1.into();
                 let scrypto_public_key = Scrypto_recover_secp256k1(
                     &hash, &signature,
                 )

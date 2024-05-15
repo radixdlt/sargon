@@ -1,6 +1,5 @@
+use radix_rust::prelude::IndexSet;
 use std::borrow::Borrow;
-
-use indexmap::IndexSet;
 
 use crate::prelude::*;
 

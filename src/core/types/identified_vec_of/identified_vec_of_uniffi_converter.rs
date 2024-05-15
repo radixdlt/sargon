@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use indexmap::IndexMap;
+use radix_rust::prelude::IndexMap;
 use std::any::TypeId as StdTypeId;
 use uniffi::TypeId as UFTypeId;
 use uniffi::{

@@ -222,7 +222,7 @@ mod tests {
                 [acc_g2], // addresses_of_accounts_requiring_auth
                 [],               // addresses_of_identities_requiring_auth
                 [],               // newly_created_non_fungibles
-                [],               // reserved_instructions
+                [ReservedInstruction::AccountUpdateSettings],
                 [],               // presented_proofs
                 [],               // encountered_component_addresses
                 [

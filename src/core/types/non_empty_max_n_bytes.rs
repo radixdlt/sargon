@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use delegate::delegate;
 use paste::*;
-use radix_engine_common::crypto::{Hash, IsHash};
+use radix_common::crypto::{Hash, IsHash};
 
 /// This macro exists since UniFFI does not support generics currently, when/if
 /// UniFFI does, we SHOULD remove this macro and use generics.
