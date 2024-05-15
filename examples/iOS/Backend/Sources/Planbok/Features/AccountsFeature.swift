@@ -10,24 +10,16 @@ public struct AccountsFeature {
 	
 	@ObservableState
 	public struct State: Equatable {
-		
 		@SharedReader(.accounts) var accounts
-		
-//		public init(accounts: Accounts = []) {
-//			self.accounts = accounts
-//		}
 	}
 	
 	public enum Action: ViewAction {
 		public enum ViewAction {
-			case onAppear
 			case accountCardTapped(Account)
 			case createNewAccountButtonTapped
-			case createManyAccountsButtonTapped
 		}
 		public enum DelegateAction {
 			case createNewAccount(index: Int)
-			case createManyAccounts
 			case showDetailsFor(Account)
 		}
 		case view(ViewAction)
@@ -38,17 +30,10 @@ public struct AccountsFeature {
 	public var body: some ReducerOf<Self> {
 		Reduce { state, action in
 			switch action {
-			case .view(.onAppear):
-//				log.debug("On Appear => get accounts")
-//				state.accounts = accountsClient.getAccounts()
-				return .none
-				
+
 			case .view(.createNewAccountButtonTapped):
 				return .send(.delegate(.createNewAccount(index: state.accounts.count)))
 				
-			case .view(.createManyAccountsButtonTapped):
-				return .send(.delegate(.createManyAccounts))
-			
 			case let .view(.accountCardTapped(account)):
 				return .send(.delegate(.showDetailsFor(account)))
 				
@@ -87,12 +72,7 @@ extension AccountsFeature {
 				Button("Create New Account") {
 					send(.createNewAccountButtonTapped)
 				}
-				Button("Create Many Accounts") {
-					send(.createManyAccountsButtonTapped)
-				}
-			}
-			.onAppear {
-				send(.onAppear)
+				
 			}
 			.padding()
 		}

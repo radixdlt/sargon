@@ -1,42 +1,6 @@
 import Sargon
 import ComposableArchitecture
 
-//extension PersistenceReaderKey {
-
-import Dependencies
-import Foundation
-
-extension PersistenceReaderKey where Self == PersistenceKeyDefault<SargonKey<Accounts>> {
-	public static var accounts: Self {
-		fatalError()
-	}
-}
-
-extension PersistenceReaderKey where Self == PersistenceKeyDefault<SargonKey<Profile>> {
-	public static var profile: Self {
-		fatalError()
-	}
-}
-
-extension PersistenceReaderKey {
-	public static func sargon<Value>(keyPath: KeyPath<Profile, Value>) -> Self
-	where Self == SargonKey<Value> {
-		SargonKey(keyPath: keyPath)
-	}
-}
-
-public struct SargonKey<Value>: Equatable, PersistenceReaderKey {
-	public func load(initialValue: Value?) -> Value? {
-		fatalError()
-	}
-	
-	public init(keyPath: KeyPath<Profile, Value>) {
-		fatalError()
-	}
-}
-
-
-
 @Reducer
 public struct MainFeature {
 	
@@ -59,23 +23,10 @@ public struct MainFeature {
 			case confirmedDeleteProfileBDFSThenOnboard
 			case confirmedEmulateFreshInstallThenTerminate
 		}
-		
-		case createManyAccountsAlert(AlertState<CreateManyAccountsAlert>)
-		
-		public enum CreateManyAccountsAlert: Int {
-			case create10 = 10
-			case create20 = 20
-			case create50 = 50
-			case create100 = 100
-			case create200 = 200
-			case create500 = 500
-			case create1000 = 1000
-		}
 	}
 	
 	@ObservableState
 	public struct State: Equatable {
-		@SharedReader(.profile) var profile
 		@Presents var destination: Destination.State?
 		public var path = StackState<Path.State>()
 		public var accounts: AccountsFeature.State
@@ -101,11 +52,7 @@ public struct MainFeature {
 			case emulateFreshInstall
 		}
 		
-		public enum InternalAction {
-			case createdManyAccounts
-		}
 		
-		case `internal`(InternalAction)
 		case view(ViewAction)
 		case destination(PresentationAction<Destination.Action>)
 		case path(StackAction<Path.State, Path.Action>)
@@ -131,6 +78,8 @@ public struct MainFeature {
 				case let .element(id: _, action: action):
 					switch action {
 					case .accountDetails(_):
+						return .none
+					case .settings(_):
 						return .none
 					}
 					
@@ -174,19 +123,6 @@ public struct MainFeature {
 				)
 				return .none
 				
-			case .accounts(.delegate(.createManyAccounts)):
-				state.destination = .createManyAccountsAlert(.init(
-					title: TextState("How many?"),
-					message: TextState("Will batch create many accounts and then perform one single save action."),
-					buttons: [
-						.cancel(TextState("Cancel")),
-						ButtonState<Destination.CreateManyAccountsAlert>.init(action: .create10, label: {
-							TextState("Create 10")
-						})
-					]
-				))
-				return .none
-				
 			case .destination(.presented(.deleteProfileAlert(.confirmedEmulateFreshInstallThenTerminate))):
 				log.notice("Confirmed deletion of Profile & BDFS")
 				state.destination = nil
@@ -203,20 +139,10 @@ public struct MainFeature {
 					await send(.delegate(.deletedWallet))
 				}
 				
-			case let .destination(.presented(.createManyAccountsAlert(action))):
-				state.destination = nil
-				let count = UInt16(action.rawValue)
-				return .run { send in
-					try await accountsClient.batchCreateManySavedAccounts(count, NetworkID.mainnet)
-					await send(.internal(.createdManyAccounts))
-				}
-				
-				
+
 			case .destination(.presented(.createAccount(.delegate(.createdAccount)))):
-				return refreshAccounts(&state)
-				
-			case .internal(.createdManyAccounts):
-				return refreshAccounts(&state)
+				state.destination = nil
+				return .none
 				
 			default:
 				return .none
@@ -225,12 +151,7 @@ public struct MainFeature {
 		.forEach(\.path, action: \.path)
 		.ifLet(\.$destination, action: \.destination)
 	}
-	
-	func refreshAccounts(_ state: inout State) -> Effect<Action> {
-		state.destination = nil
-//		state.accounts.accounts = accountsClient.getAccounts()
-		return .none
-	}
+
 }
 
 extension MainFeature {
@@ -283,7 +204,6 @@ extension MainFeature {
 				CreateAccountFlowFeature.View(store: store)
 			}
 			.alert($store.scope(state: \.destination?.deleteProfileAlert, action: \.destination.deleteProfileAlert))
-			.alert($store.scope(state: \.destination?.createManyAccountsAlert, action: \.destination.createManyAccountsAlert))
 			
 		}
 		
