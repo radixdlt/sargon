@@ -19,11 +19,18 @@ extension HostInfo {
 	nonisolated public func hostAppVersion() async -> String {
 		await self.appVersion
 	}
+	/// We cannot read a stable device if on iOS. We return `nil` so that Rust Sargon can generate
+	/// and save a device identifier for us.
+	public func hostDeviceId() async -> DeviceId? {
+		nil
+	}
 }
 
 #if canImport(UIKit)
 import UIKit
 extension HostInfo: HostInfoDriver {
+	
+	
 	nonisolated public func hostDeviceName() async -> String {
 		await UIDevice.current.name
 	}
@@ -39,13 +46,7 @@ extension HostInfo: HostInfoDriver {
 #else
 
 extension HostInfo: HostInfoDriver {
-	
-	/// We cannot read a stable device if on iOS. We return `nil` so that Rust Sargon can generate
-	/// and save a device identifier for us.
-	public func hostDeviceId() async -> DeviceId? {
-		nil
-	}
-	
+
 	nonisolated public func hostDeviceSystemVersion() async -> String {
 		let info = ProcessInfo.processInfo.operatingSystemVersion
 		return "\(info.majorVersion).\(info.minorVersion).\(info.patchVersion)"
