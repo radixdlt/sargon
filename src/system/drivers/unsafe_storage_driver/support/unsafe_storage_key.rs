@@ -29,7 +29,9 @@ mod tests {
     #[test]
     fn identifier() {
         assert_eq!(
-            UnsafeStorageKey::FactorSourceUserHasWrittenDown.identifier(),
+            unsafe_storage_key_identifier(
+                &UnsafeStorageKey::FactorSourceUserHasWrittenDown
+            ),
             "unsafe_storage_key_factor_source_user_has_written_down"
         );
     }

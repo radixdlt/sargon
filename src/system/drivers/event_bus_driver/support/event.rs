@@ -78,4 +78,21 @@ mod tests {
         let sut = SUT::profile_last_used_on_other_device(device.clone());
         assert_eq!(sut, SUT::ProfileLastUsedOnOtherDevice(device))
     }
+
+    #[test]
+    fn test_kind() {
+        let test = |s: SUT, exp: EventKind| {
+            assert_eq!(s.kind(), exp);
+        };
+        test(SUT::ProfileSaved, EventKind::ProfileSaved);
+        let change = EventProfileChange::AddedAccount {
+            address: AccountAddress::sample(),
+        };
+        test(
+            SUT::ProfileChanged {
+                change: change.clone(),
+            },
+            change.kind(),
+        );
+    }
 }

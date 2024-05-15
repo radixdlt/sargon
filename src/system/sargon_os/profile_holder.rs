@@ -19,12 +19,6 @@ impl ProfileHolder {
     }
 }
 
-impl From<Profile> for ProfileHolder {
-    fn from(value: Profile) -> Self {
-        Self::new(value)
-    }
-}
-
 impl ProfileHolder {
     /// Clone the profile and return it.
     pub(super) fn profile(&self) -> Profile {
