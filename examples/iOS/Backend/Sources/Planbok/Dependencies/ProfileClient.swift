@@ -11,12 +11,14 @@ import DependenciesMacros
 
 @DependencyClient
 public struct ProfileClient: Sendable {
+	public typealias ActiveProfile = @Sendable () -> Profile
 	public typealias DeleteProfileAndMnemonicsThenCreateNew = @Sendable () async throws -> Void
 	public typealias ImportProfile = @Sendable (Profile) async throws -> Void
 	public typealias DecryptEncryptedProfile = @Sendable (_ encrypted: Data, _ password: String) throws -> Profile
 	
 	public typealias EmulateFreshInstallOfAppThenRestart = @Sendable () async throws -> Void
 
+	public var activeProfile: ActiveProfile
 	public var deleteProfileAndMnemonicsThenCreateNew: DeleteProfileAndMnemonicsThenCreateNew
 	public var importProfile: ImportProfile
 	public var decryptEncryptedProfile: DecryptEncryptedProfile
@@ -27,6 +29,9 @@ extension ProfileClient: DependencyKey {
 	public static let liveValue = Self.live(os: SargonOS.shared)
 	public static func live(os: SargonOS) -> Self {
 		return Self(
+			activeProfile: {
+				os.profile()
+			},
 			deleteProfileAndMnemonicsThenCreateNew: {
 				let _ = try await os.deleteProfileThenCreateNewWithBdfs()
 			},

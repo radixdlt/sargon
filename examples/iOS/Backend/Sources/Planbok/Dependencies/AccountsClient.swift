@@ -8,6 +8,14 @@
 import Foundation
 import Sargon
 import DependenciesMacros
+import IdentifiedCollections
+
+public typealias Accounts = IdentifiedArrayOf<Account>
+extension Array where Element: Identifiable {
+	func asIdentified() -> IdentifiedArrayOf<Element> {
+		IdentifiedArrayOf.init(uncheckedUniqueElements: self)
+	}
+}
 
 @DependencyClient
 public struct AccountsClient: Sendable {
@@ -29,7 +37,7 @@ extension AccountsClient: DependencyKey {
 	public static func live(os: SargonOS) -> Self {
 		
 		let getAccounts: GetAccounts = {
-			os.accounts()
+			os.accounts().asIdentified()
 		}
 		
 		return Self(

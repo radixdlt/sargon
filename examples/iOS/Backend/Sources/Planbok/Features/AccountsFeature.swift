@@ -1,6 +1,7 @@
 import Sargon
 import ComposableArchitecture
 
+
 @Reducer
 public struct AccountsFeature {
 	@Dependency(AccountsClient.self) var accountsClient
@@ -10,11 +11,11 @@ public struct AccountsFeature {
 	@ObservableState
 	public struct State: Equatable {
 		
-		public var accounts: Accounts
+		@SharedReader(.accounts) var accounts
 		
-		public init(accounts: Accounts = []) {
-			self.accounts = accounts
-		}
+//		public init(accounts: Accounts = []) {
+//			self.accounts = accounts
+//		}
 	}
 	
 	public enum Action: ViewAction {
@@ -38,8 +39,8 @@ public struct AccountsFeature {
 		Reduce { state, action in
 			switch action {
 			case .view(.onAppear):
-				log.debug("On Appear => get accounts")
-				state.accounts = accountsClient.getAccounts()
+//				log.debug("On Appear => get accounts")
+//				state.accounts = accountsClient.getAccounts()
 				return .none
 				
 			case .view(.createNewAccountButtonTapped):

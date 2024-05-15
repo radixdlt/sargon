@@ -1,6 +1,42 @@
 import Sargon
 import ComposableArchitecture
 
+//extension PersistenceReaderKey {
+
+import Dependencies
+import Foundation
+
+extension PersistenceReaderKey where Self == PersistenceKeyDefault<SargonKey<Accounts>> {
+	public static var accounts: Self {
+		fatalError()
+	}
+}
+
+extension PersistenceReaderKey where Self == PersistenceKeyDefault<SargonKey<Profile>> {
+	public static var profile: Self {
+		fatalError()
+	}
+}
+
+extension PersistenceReaderKey {
+	public static func sargon<Value>(keyPath: KeyPath<Profile, Value>) -> Self
+	where Self == SargonKey<Value> {
+		SargonKey(keyPath: keyPath)
+	}
+}
+
+public struct SargonKey<Value>: Equatable, PersistenceReaderKey {
+	public func load(initialValue: Value?) -> Value? {
+		fatalError()
+	}
+	
+	public init(keyPath: KeyPath<Profile, Value>) {
+		fatalError()
+	}
+}
+
+
+
 @Reducer
 public struct MainFeature {
 	
@@ -39,7 +75,7 @@ public struct MainFeature {
 	
 	@ObservableState
 	public struct State: Equatable {
-		
+		@SharedReader(.profile) var profile
 		@Presents var destination: Destination.State?
 		public var path = StackState<Path.State>()
 		public var accounts: AccountsFeature.State
@@ -73,7 +109,7 @@ public struct MainFeature {
 		case view(ViewAction)
 		case destination(PresentationAction<Destination.Action>)
 		case path(StackAction<Path.State, Path.Action>)
-	
+		
 		case accounts(AccountsFeature.Action)
 		
 		case delegate(DelegateAction)
@@ -91,13 +127,13 @@ public struct MainFeature {
 				
 			case .path(let pathAction):
 				switch pathAction {
-
+					
 				case let .element(id: _, action: action):
 					switch action {
 					case .accountDetails(_):
 						return .none
 					}
-		
+					
 				case .popFrom(id: _):
 					return .none
 				case .push(id: _, state: _):
@@ -121,12 +157,12 @@ public struct MainFeature {
 					]
 				))
 				return .none
-			
+				
 				
 			case .view(.settingsButtonTapped):
 				state.path.append(.settings(SettingsFeature.State()))
 				return .none
-
+				
 			case let .accounts(.delegate(.showDetailsFor(account))):
 				state.path.append(.accountDetails(AccountDetailsFeature.State(account: account)))
 				return .none
@@ -192,7 +228,7 @@ public struct MainFeature {
 	
 	func refreshAccounts(_ state: inout State) -> Effect<Action> {
 		state.destination = nil
-		state.accounts.accounts = accountsClient.getAccounts()
+//		state.accounts.accounts = accountsClient.getAccounts()
 		return .none
 	}
 }
@@ -251,6 +287,6 @@ extension MainFeature {
 			
 		}
 		
-	
+		
 	}
 }
