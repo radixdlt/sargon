@@ -18,7 +18,7 @@ public struct AppFeature {
 					secureStorage: Keychain(service: "rdx.works.planbok"),
 					entropyProvider: EntropyProvider.shared,
 					hostInfo: HostInfo(
-						appVersion: "0.0.01"
+						appVersion: "0.0.1"
 					),
 					logging: Log.shared,
 					eventBus: EventBus.shared,

@@ -526,6 +526,9 @@ pub enum CommonError {
 
     #[error("Failed To create DeviceID (UUID) from string: {bad_value}")]
     InvalidDeviceID { bad_value: String } = 10147,
+
+    #[error("Tried to replace profile with one with a different ProfileID than the current one. Use `import_profile` instead.")]
+    TriedToUpdateProfileWithOneWithDifferentID = 10148,
 }
 
 #[uniffi::export]

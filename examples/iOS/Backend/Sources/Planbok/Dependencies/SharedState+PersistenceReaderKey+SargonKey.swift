@@ -10,7 +10,19 @@ extension Profile {
 
 extension PersistenceReaderKey where Self == PersistenceKeyDefault<SargonKey<Accounts>> {
 	public static var accounts: Self {
-		.init(SargonKey.init(keyPath: \.identifiedAccountsOnCurrentNetwork), [])
+		PersistenceKeyDefault(
+			SargonKey(keyPath: \.identifiedAccountsOnCurrentNetwork),
+			[]
+		)
+	}
+}
+
+extension PersistenceReaderKey where Self == PersistenceKeyDefault<SargonKey<SavedGateways>> {
+	public static var savedGateways: Self {
+		PersistenceKeyDefault(
+			SargonKey(keyPath: \.appPreferences.gateways),
+			SavedGateways.preset
+		)
 	}
 }
 
@@ -52,7 +64,7 @@ public struct SargonKey<Value>: Equatable, PersistenceReaderKey, Sendable {
 			// FIXME: Multicast eventBus!
 			for await _ in await EventBus.shared.notifications().filter({
 				switch $0.event {
-				case .profileChanged:
+				case .profileChanged, .profileSaved:
 					true
 				default:
 					false

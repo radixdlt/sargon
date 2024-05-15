@@ -13,3 +13,10 @@ public typealias SargonOS = SargonOs
 
 extension SargonOS: @unchecked Sendable {}
 
+extension SargonOS {
+	
+	@available(*, deprecated, message: "SHOULD migrate to use more specialized methods on SargonOS instead, e.g. `createAndSaveNewAccount` - SargonOS should be the SOLE object to perform the mutation and persisting.")
+	public func saveChangedProfile(_ profile: Profile) async throws {
+		try await deprecatedSaveFfiChangedProfile(profile: profile)
+	}
+}

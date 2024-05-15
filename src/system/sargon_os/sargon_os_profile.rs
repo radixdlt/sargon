@@ -1,3 +1,5 @@
+#![allow(deprecated)]
+
 use std::sync::RwLockWriteGuard;
 
 use crate::prelude::*;
@@ -31,6 +33,27 @@ impl SargonOS {
 
     pub fn profile(&self) -> Profile {
         self.profile_holder.profile()
+    }
+
+    #[allow(non_snake_case)]
+    #[deprecated(
+        since = "0.0.1",
+        note = "Wallet Clients SHOULD migrate to use more specialized methods on SargonOS instead, e.g. `createAndSaveNewAccount`. And SargonOS should be the SOLE object to perform the mutation and persisting."
+    )]
+    pub async fn DEPRECATED_save_ffi_changed_profile(
+        &self,
+        profile: Profile,
+    ) -> Result<()> {
+        if profile.id() != self.profile().id() {
+            return Err(
+                CommonError::TriedToUpdateProfileWithOneWithDifferentID,
+            );
+        }
+        self.update_profile_with(|mut p| {
+            *p = profile.clone();
+            Ok(())
+        })
+        .await
     }
 
     pub async fn import_profile(&self, profile: Profile) -> Result<()> {
@@ -520,6 +543,53 @@ mod tests {
             Err(CommonError::UnableToLoadProfileFromSecureStorage {
                 profile_id: second
             })
+        );
+    }
+
+    #[actix_rt::test]
+    async fn test_deprecated_save_ffi_changed_profile() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        let mut profile = os.profile();
+        let new_network = ProfileNetwork::new(
+            NetworkID::Stokenet,
+            Accounts::just(Account::sample_stokenet()),
+            Personas::new(),
+            AuthorizedDapps::new(),
+        );
+
+        profile.networks.append(new_network.clone());
+
+        // ACT
+        os.with_timeout(|x| {
+            x.DEPRECATED_save_ffi_changed_profile(profile.clone())
+        })
+        .await
+        .unwrap();
+
+        // ASSERT
+        assert_eq!(os.profile(), profile);
+        assert_eq!(os.profile().networks, ProfileNetworks::just(new_network));
+    }
+
+    #[actix_rt::test]
+    async fn test_deprecated_save_ffi_changed_profile_is_err_when_different_profile_id(
+    ) {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        let res = os
+            .with_timeout(|x| {
+                x.DEPRECATED_save_ffi_changed_profile(Profile::sample())
+            })
+            .await;
+
+        // ASSERT
+        assert_eq!(
+            res,
+            Err(CommonError::TriedToUpdateProfileWithOneWithDifferentID)
         );
     }
 }
