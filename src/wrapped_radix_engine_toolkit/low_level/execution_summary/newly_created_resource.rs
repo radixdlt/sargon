@@ -1,4 +1,4 @@
-use radix_engine::types::IndexMap;
+use radix_rust::prelude::IndexMap;
 
 use crate::prelude::*;
 

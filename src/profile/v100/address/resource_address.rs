@@ -27,8 +27,7 @@ impl ResourceAddress {
     }
 
     pub fn xrd_on_network(id: NetworkID) -> Self {
-        Self::new(radix_engine::types::XRD, id)
-            .expect("Should never fail to get XRD on network.")
+        Self::new(XRD, id).expect("Should never fail to get XRD on network.")
     }
 
     pub fn is_xrd_on_network(&self, id: NetworkID) -> bool {

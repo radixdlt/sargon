@@ -114,9 +114,7 @@ impl HasSampleValues for NotarizedTransaction {
     // bech32 encoded (simulator): `"txid_sim1vrjkzlt8pekg5s46tum5na8lzpulvc3p72p92nkdm2dd8p0vkx2svr7ejr"`
     fn sample_other() -> Self {
         let private_key: Secp256k1PrivateKey =
-            radix_engine::types::Secp256k1PrivateKey::from_u64(1)
-                .unwrap()
-                .into();
+            ScryptoSecp256k1PrivateKey::from_u64(1).unwrap().into();
 
         let intent = TransactionIntent::sample_other();
         assert_eq!(intent.intent_hash().to_string(), "txid_sim1vrjkzlt8pekg5s46tum5na8lzpulvc3p72p92nkdm2dd8p0vkx2svr7ejr");

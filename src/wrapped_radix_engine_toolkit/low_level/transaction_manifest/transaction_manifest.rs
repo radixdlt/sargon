@@ -223,7 +223,7 @@ mod tests {
         ];
         let scrypto = ScryptoTransactionManifest {
             instructions: ins.clone(),
-            blobs: BTreeMap::new(),
+            blobs: Default::default(),
         };
 
         let sut = SUT::with_instructions_and_blobs(

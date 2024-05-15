@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-use radix_engine::types::UncheckedUrl as ScryptoUncheckedUrl;
-
 #[derive(
     Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Record,
 )]
