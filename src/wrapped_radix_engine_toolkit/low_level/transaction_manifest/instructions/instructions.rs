@@ -328,13 +328,25 @@ mod tests {
     fn extract_error_from_error_non_gen_err() {
         assert_eq!(
             extract_error_from_error(
-                ScryptoCompileError::LexerError(
-                    radix_transactions::manifest::lexer::LexerError { error_kind: radix_transactions::manifest::lexer::LexerErrorKind::UnexpectedEof, span: Span { start: Position { full_index: 0, line_idx: 0, line_char_index: 0 }, end: Position { full_index: 0, line_idx: 0, line_char_index: 0 } } }
-                ),
+                ScryptoCompileError::LexerError(LexerError {
+                    error_kind: LexerErrorKind::UnexpectedEof,
+                    span: Span {
+                        start: Position {
+                            full_index: 0,
+                            line_idx: 0,
+                            line_char_index: 0
+                        },
+                        end: Position {
+                            full_index: 0,
+                            line_idx: 0,
+                            line_char_index: 0
+                        }
+                    }
+                }),
                 NetworkID::Simulator
             ),
             CommonError::InvalidInstructionsString {
-                underlying: "LexerError(UnexpectedEof)".to_owned()
+                underlying: "LexerError(LexerError { error_kind: UnexpectedEof, span: Span { start: Position { full_index: 0, line_idx: 0, line_char_index: 0 }, end: Position { full_index: 0, line_idx: 0, line_char_index: 0 } } })".to_owned()
             }
         );
     }

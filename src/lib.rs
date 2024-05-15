@@ -149,6 +149,7 @@ pub mod prelude {
         manifest::{
             compile as scrypto_compile, decompile as scrypto_decompile,
             generator::{GeneratorError, GeneratorErrorKind},
+            lexer::{LexerError, LexerErrorKind},
             token::{Position, Span},
             CompileError as ScryptoCompileError,
             MockBlobProvider as ScryptoMockBlobProvider,
