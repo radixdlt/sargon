@@ -33,16 +33,23 @@ pub struct EncryptedProfileSnapshot {
 
 impl EncryptedProfileSnapshot {
     pub fn decrypt(&self, password: impl AsRef<str>) -> Result<Profile> {
+        // decrypt Profile JSON bytes
+        let decrypted = self.decrypt_to_bytes(password)?;
+
+        // JSON decode bytes into Profile
+        Profile::new_from_json_bytes(decrypted)
+    }
+
+    pub fn decrypt_to_bytes(
+        &self,
+        password: impl AsRef<str>,
+    ) -> Result<Vec<u8>> {
         // Derive encryption key based on password
         let mut decryption_key = self.key_derivation_scheme.kdf(password);
 
         // decrypt Profile JSON bytes
-        let decrypted = self
-            .encryption_scheme
-            .decrypt(self.encrypted_snapshot.to_vec(), &mut decryption_key)?;
-
-        // JSON decode bytes into Profile
-        Profile::new_from_json_bytes(decrypted)
+        self.encryption_scheme
+            .decrypt(self.encrypted_snapshot.to_vec(), &mut decryption_key)
     }
 
     pub fn encrypting(

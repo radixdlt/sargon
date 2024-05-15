@@ -135,7 +135,7 @@ impl Profile {
 			error!("Failed to deserialize JSON as EncryptedProfileSnapshot, error: {:?}", e);
             CommonError::FailedToDeserializeJSONToValue {
                 json_byte_count: json.len() as u64,
-                type_name: "EncryptedProfileSnapshot".to_owned(),
+                type_name: type_name::<EncryptedProfileSnapshot>(),
             }})
 		    .and_then(|encrypted| encrypted.decrypt(password))
     }
@@ -197,6 +197,22 @@ impl Profile {
         let json = json.as_ref();
         serde_json::from_slice::<ProtoProfileMaybeWithLegacyP2PLinks>(json)
             .map_or_else(|_| false, |s| !s.app_preferences.p2p_links.is_empty())
+    }
+
+    pub fn check_if_encrypted_profile_json_contains_legacy_p2p_links(
+        json: impl AsRef<[u8]>,
+        password: impl AsRef<str>,
+    ) -> bool {
+        let json = json.as_ref();
+        serde_json::from_slice::<EncryptedProfileSnapshot>(json)
+		.map_err(|e| {
+			error!("Failed to deserialize JSON as EncryptedProfileSnapshot, error: {:?}", e);
+            CommonError::FailedToDeserializeJSONToValue {
+                json_byte_count: json.len() as u64,
+                type_name: type_name::<EncryptedProfileSnapshot>(),
+            }})
+		    .and_then(|encrypted| encrypted.decrypt_to_bytes(password))
+			.map_or_else(|_| false, Profile::check_if_profile_json_contains_legacy_p2p_links)
     }
 }
 
@@ -519,7 +535,7 @@ mod tests {
             ),
             Err(CommonError::FailedToDeserializeJSONToValue {
                 json_byte_count: 4,
-                type_name: "EncryptedProfileSnapshot".to_owned()
+                type_name: type_name::<EncryptedProfileSnapshot>()
             })
         );
     }
@@ -598,6 +614,33 @@ mod tests {
                 json.as_bytes()
             ),
             true
+        );
+    }
+
+    #[test]
+    fn check_if_encrypted_profile_json_contains_legacy_p2p_links_when_p2p_links_are_present(
+    ) {
+        let json =
+            serde_json::to_vec(&EncryptedProfileSnapshot::sample()).unwrap();
+        let password = "babylon";
+        assert_eq!(
+            SUT::check_if_encrypted_profile_json_contains_legacy_p2p_links(
+                json, password
+            ),
+            true
+        );
+    }
+
+    #[test]
+    fn check_if_encrypted_profile_json_contains_legacy_p2p_links_when_empty_json(
+    ) {
+        let password = "babylon";
+        assert_eq!(
+            SUT::check_if_encrypted_profile_json_contains_legacy_p2p_links(
+                BagOfBytes::new(),
+                password
+            ),
+            false
         );
     }
 
