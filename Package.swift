@@ -61,6 +61,9 @@ let package = Package(
         // In the future hopefully no JSON coding happens in wallets,
         // i.e. Sargon does ALL JSON coding, then we can remove this.
 		.package(url: "https://github.com/SwiftyJSON/SwiftyJSON", from: "5.0.2"),
+		
+		// Multicast / Share of notifications in EventBus
+		.package(url: "https://github.com/sideeffect-io/AsyncExtensions", exact: "0.5.2"),
 	],
 	targets: [
 		binaryTarget,
@@ -75,6 +78,7 @@ let package = Package(
 				.target(name: "SargonUniFFI"),
 				"SwiftyJSON",
 				.product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
+				"AsyncExtensions"
 			],
 			path: "apple/Sources/Sargon",
 			swiftSettings: swiftSettings
