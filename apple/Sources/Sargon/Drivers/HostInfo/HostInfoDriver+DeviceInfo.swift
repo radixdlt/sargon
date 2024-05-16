@@ -24,6 +24,10 @@ extension HostInfo {
 	public func hostDeviceId() async -> DeviceId? {
 		nil
 	}
+	
+	public func hostDeviceVendor() async -> String {
+		"Apple"
+	}
 }
 
 #if canImport(UIKit)

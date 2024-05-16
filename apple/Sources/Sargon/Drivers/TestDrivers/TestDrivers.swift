@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Sargon
+import SargonUniFFI
 
 #if DEBUG
 

@@ -661,4 +661,45 @@ mod tests {
             Err(CommonError::UnableToAddAllAccountsDuplicatesFound)
         )
     }
+
+    #[actix_rt::test]
+    async fn test_accounts_on_current_network_empty() {
+        let os = SUT::fast_boot().await;
+        assert_eq!(os.accounts_on_current_network(), Accounts::new());
+    }
+
+    #[actix_rt::test]
+    async fn test_accounts_on_current_network_non_empty() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        let account = os
+            .with_timeout(|x| x.create_and_save_new_unnamed_mainnet_account())
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert_eq!(os.accounts_on_current_network(), Accounts::just(account));
+    }
+
+    #[actix_rt::test]
+    async fn test_accounts_on_current_network_empty_when_switched_network() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        let _ = os
+            .with_timeout(|x| x.create_and_save_new_unnamed_mainnet_account())
+            .await
+            .unwrap();
+
+        // ACT
+        let _ = os
+            .with_timeout(|x| x.change_current_gateway(Gateway::stokenet()))
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert_eq!(os.accounts_on_current_network(), Accounts::new());
+    }
 }

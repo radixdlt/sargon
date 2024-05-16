@@ -31,3 +31,51 @@ impl Profile {
         Err(CommonError::UnknownAccount)
     }
 }
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = Profile;
+
+    #[test]
+    fn test_accounts_on_current_network() {
+        let sut = SUT::sample();
+        assert_eq!(
+            sut.accounts_on_current_network(),
+            Accounts::sample_mainnet()
+        );
+    }
+
+    #[test]
+    fn test_accounts_on_current_network_stokenet() {
+        let sut = SUT::sample_other();
+        assert_eq!(
+            sut.accounts_on_current_network(),
+            Accounts::just(Account::sample_stokenet_nadia()) // olivia is hidden
+        );
+    }
+
+    #[test]
+    fn test_accounts_for_display_on_current_network() {
+        let sut = SUT::sample();
+        assert_eq!(
+            sut.accounts_for_display_on_current_network(),
+            Accounts::sample_mainnet()
+                .iter()
+                .map(AccountForDisplay::from)
+                .collect::<AccountsForDisplay>()
+        );
+    }
+
+    #[test]
+    fn test_account_by_address() {
+        let sut = SUT::sample();
+        assert_eq!(
+            sut.account_by_address(Account::sample_mainnet().address),
+            Ok(Account::sample_mainnet())
+        );
+    }
+}

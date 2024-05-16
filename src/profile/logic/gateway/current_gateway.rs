@@ -36,7 +36,7 @@ impl SavedGateways {
             return ChangeGatewayOutcome::NoChange;
         }
         let old_current = &self.current;
-        let was_inserted = self.append(old_current.clone());
+        let was_inserted = self.append_to_other(old_current.clone(), true);
         if !was_inserted {
             let msg = "Discrepancy! 'other' already contained 'current'";
             error!("{}", msg);
@@ -47,12 +47,30 @@ impl SavedGateways {
         ChangeGatewayOutcome::DidChange { is_new }
     }
 
-    /// Appends `gateway` to the `other` list, without changing the `current` Gateway.
+    /// Appends `gateway` to the `other` list if `gateway` not equals `current`,
+    ///  without changing the `current` Gateway.
+    /// If `other` already contains `gateway` then `(false, other.len())` is returned.
+    /// If `other` was new then `(true, index_of_new)` is returned.
+    ///
+    /// - Returns: `true` if it was added, `false` if it was already present (noop)
+    /// Appends `gateway` to the `other` list if `gateway` not equals `current`,
+    ///  without changing the `current` Gateway.
     /// If `other` already contains `gateway` then `(false, other.len())` is returned.
     /// If `other` was new then `(true, index_of_new)` is returned.
     ///
     /// - Returns: `true` if it was added, `false` if it was already present (noop)
     pub fn append(&mut self, gateway: Gateway) -> bool {
+        self.append_to_other(gateway, false)
+    }
+
+    fn append_to_other(
+        &mut self,
+        gateway: Gateway,
+        is_switching: bool,
+    ) -> bool {
+        if !is_switching && self.current == gateway {
+            return false;
+        }
         self.other.append(gateway).0
     }
 }

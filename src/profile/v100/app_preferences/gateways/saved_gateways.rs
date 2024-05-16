@@ -112,21 +112,19 @@ impl SavedGateways {
 
 impl Default for SavedGateways {
     fn default() -> Self {
-        Self::new_with_other(Gateway::mainnet(), vec![Gateway::stokenet()])
+        Self::new_with_other(Gateway::mainnet(), [Gateway::stokenet()])
             .expect("Stokenet and Mainnet should have different NetworkIDs.")
     }
 }
 
 impl HasSampleValues for SavedGateways {
     fn sample() -> Self {
-        let mut gateways = Self::new(Gateway::rcnet());
-        gateways.append(Gateway::mainnet());
-        gateways.append(Gateway::stokenet());
-        gateways
+        SavedGateways::default()
     }
 
     fn sample_other() -> Self {
-        SavedGateways::default()
+        Self::new_with_other(Gateway::stokenet(), [Gateway::mainnet()])
+            .expect("Stokenet and Mainnet should have different NetworkIDs.")
     }
 }
 
@@ -162,9 +160,17 @@ mod tests {
     fn append() {
         let mut sut = SUT::sample();
         assert!(!sut.append(Gateway::mainnet()));
+        assert!(!sut.append(Gateway::stokenet()));
         assert_eq!(sut, SUT::sample());
         assert!(sut.append(Gateway::kisharnet()));
-        assert_ne!(sut, SUT::sample());
+        assert_eq!(
+            sut,
+            SUT::new_with_other(
+                Gateway::mainnet(),
+                [Gateway::stokenet(), Gateway::kisharnet()]
+            )
+            .unwrap()
+        );
     }
 
     #[test]
@@ -205,17 +211,8 @@ mod tests {
             &sut,
             r#"
             {
-                "current": "https://rcnet-v3.radixdlt.com/",
+                "current": "https://mainnet.radixdlt.com/",
                 "saved": [
-                    {
-                        "network":
-                        {
-                            "name": "zabanet",
-                            "id": 14,
-                            "displayDescription": "RCnet-V3 (Test Network)"
-                        },
-                        "url": "https://rcnet-v3.radixdlt.com/"
-                    },
                     {
                         "network":
                         {

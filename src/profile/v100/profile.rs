@@ -728,16 +728,8 @@ mod tests {
 						"fiatCurrencyPriceTarget": "usd"
 					},
 					"gateways": {
-						"current": "https://rcnet-v3.radixdlt.com/",
+						"current": "https://mainnet.radixdlt.com/",
 						"saved": [
-							{
-								"network": {
-									"name": "zabanet",
-									"id": 14,
-									"displayDescription": "RCnet-V3 (Test Network)"
-								},
-								"url": "https://rcnet-v3.radixdlt.com/"
-							},
 							{
 								"network": {
 									"name": "mainnet",

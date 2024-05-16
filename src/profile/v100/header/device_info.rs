@@ -284,7 +284,7 @@ mod tests {
                 },
                 "system_version": "17.4.1",
                 "host_app_version": "1.6.0",
-                "host_vendor": "Apple",
+                "host_vendor": "Apple"
             }
             "#,
         )
