@@ -25,6 +25,42 @@ impl ProfileHolder {
         self.access_profile_with(|p| p.clone())
     }
 
+    pub fn current_network_id(&self) -> NetworkID {
+        self.access_profile_with(|p| p.current_network_id())
+    }
+
+    pub fn current_gateway(&self) -> Gateway {
+        self.access_profile_with(|p| p.current_gateway().clone())
+    }
+
+    pub fn current_network(&self) -> ProfileNetwork {
+        self.access_profile_with(|p| p.current_network().clone())
+    }
+
+    /// Returns the non-hidden accounts on the current network, empty if no accounts
+    /// on the network
+    pub fn accounts_on_current_network(&self) -> Accounts {
+        self.access_profile_with(|p| p.accounts_on_current_network())
+    }
+
+    /// Returns the non-hidden accounts on the current network as `AccountForDisplay`
+    pub fn accounts_for_display_on_current_network(
+        &self,
+    ) -> AccountsForDisplay {
+        self.access_profile_with(|p| {
+            p.accounts_for_display_on_current_network()
+        })
+    }
+
+    /// Looks up the account by account address, returns Err if the account is
+    /// unknown, will return a hidden account if queried for.
+    pub fn account_by_address(
+        &self,
+        address: AccountAddress,
+    ) -> Result<Account> {
+        self.access_profile_with(|p| p.account_by_address(address))
+    }
+
     pub(super) fn access_profile_with<T, F>(&self, access: F) -> T
     where
         F: Fn(RwLockReadGuard<'_, Profile>) -> T,

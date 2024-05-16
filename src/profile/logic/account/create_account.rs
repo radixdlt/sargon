@@ -2,6 +2,50 @@ use crate::prelude::*;
 use std::future::Future;
 
 impl Profile {
+    pub fn current_gateway(&self) -> Gateway {
+        self.app_preferences.gateways.current.clone()
+    }
+
+    pub fn current_network_id(&self) -> NetworkID {
+        self.current_gateway().network.id
+    }
+
+    pub fn current_network(&self) -> &ProfileNetwork {
+        self.networks
+            .get_id(self.current_network_id())
+            .expect("Should have current network")
+    }
+
+    /// Returns the non-hidden accounts on the current network, empty if no accounts
+    /// on the network
+    pub fn accounts_on_current_network(&self) -> Accounts {
+        self.current_network().accounts.non_hidden()
+    }
+
+    /// Returns the non-hidden accounts on the current network as `AccountForDisplay`
+    pub fn accounts_for_display_on_current_network(
+        &self,
+    ) -> AccountsForDisplay {
+        self.accounts_on_current_network()
+            .iter()
+            .map(AccountForDisplay::from)
+            .collect::<AccountsForDisplay>()
+    }
+
+    /// Looks up the account by account address, returns Err if the account is
+    /// unknown, will return a hidden account if queried for.
+    pub fn account_by_address(
+        &self,
+        address: AccountAddress,
+    ) -> Result<Account> {
+        for network in self.networks.iter() {
+            if let Some(account) = network.accounts.get_id(address) {
+                return Ok(account.clone());
+            }
+        }
+        Err(CommonError::UnknownAccount)
+    }
+
     /// Creates a new non securified account **WITHOUT** add it to Profile, using the *main* "Babylon"
     /// `DeviceFactorSource` and the "next" index for this FactorSource as derivation path.
     ///

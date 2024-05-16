@@ -7,6 +7,29 @@ use crate::prelude::*;
 // ==================
 #[uniffi::export]
 impl SargonOS {
+    /// Returns the non-hidden accounts on the current network, empty if no accounts
+    /// on the network
+    pub fn accounts_on_current_network(&self) -> Accounts {
+        self.profile_holder.accounts_on_current_network().clone()
+    }
+
+    /// Returns the non-hidden accounts on the current network as `AccountForDisplay`
+    pub fn accounts_for_display_on_current_network(
+        &self,
+    ) -> AccountsForDisplay {
+        self.profile_holder
+            .accounts_for_display_on_current_network()
+    }
+
+    /// Looks up the account by account address, returns Err if the account is
+    /// unknown, will return a hidden account if queried for.
+    pub fn account_by_address(
+        &self,
+        address: AccountAddress,
+    ) -> Result<Account> {
+        self.profile_holder.account_by_address(address)
+    }
+
     /// Creates a new unsaved mainnet account named "Unnamed {N}", where `N` is the
     /// index of the next account for the BDFS.
     pub async fn create_unsaved_unnamed_mainnet_account(
