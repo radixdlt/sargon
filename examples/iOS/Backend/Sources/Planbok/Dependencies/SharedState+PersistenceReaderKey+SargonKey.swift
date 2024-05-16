@@ -21,36 +21,36 @@ extension SargonOS {
 
 extension PersistenceReaderKey where Self == PersistenceKeyDefault<SargonKey<AccountsForDisplay>> {
 	public static var accountsForDisplay: Self {
-		Self(
+		Self.init(
 			SargonKey(
 				on: .currentAccounts,
 				accessing: \.accountsForDisplayOnCurrentNetworkIdentified
 			),
-			AccountsForDisplay.default
+			.default
 		)
 	}
 }
 
 extension PersistenceReaderKey where Self == PersistenceKeyDefault<SargonKey<NetworkID>> {
 	public static var network: Self {
-		Self(
+		Self.init(
 			SargonKey(
 				on: .currentGateway,
 				accessing: \.currentNetworkID
 			),
-			NetworkID.default
+			.default
 		)
 	}
 }
 
 extension PersistenceReaderKey where Self == PersistenceKeyDefault<SargonKey<SavedGateways>> {
 	public static var savedGateways: Self {
-		Self(
+		Self.init(
 			SargonKey(
 				on: .currentGateway,
 				accessing: \.gateways
-			),
-			SavedGateways.default
+			), 
+			.default
 		)
 	}
 }
@@ -60,7 +60,7 @@ extension Set<EventKind> {
 	public static let currentAccounts: Self = [.booted, .addedAccount, .addedAccounts, .gatewayChangedCurrent]
 }
 
-public struct SargonKey<Value>: Equatable, PersistenceReaderKey, Sendable {
+public struct SargonKey<Value>: Hashable, PersistenceReaderKey, Sendable {
 	public typealias LastValue = @Sendable () -> Value?
 
 	private let lastValue: LastValue

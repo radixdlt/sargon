@@ -27,7 +27,7 @@ public struct AccountView: SwiftUI.View {
 	public var body: some SwiftUI.View {
 		
 			VStack(alignment: .leading, spacing: .zero) {
-				Text(accountForDisplay.label.value)
+				Text(accountForDisplay.displayName.value)
 					.lineLimit(1)
 					.foregroundColor(.white)
 					.frame(maxWidth: .infinity, alignment: .leading)

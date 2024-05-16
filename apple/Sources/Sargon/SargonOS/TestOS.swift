@@ -27,9 +27,15 @@ extension BIOS {
 public final class TestOS {
 	public let os: SargonOS
 	
-	public init(bios: BIOS) async throws {
-		self.os = try await SargonOS.boot(bios: bios)
+	public init(os: SargonOS) {
+		self.os = os
 	}
+	
+	public convenience init(bios: BIOS) async throws {
+		let os = try await SargonOS.boot(bios: bios)
+		self.init(os: os)
+	}
+	
 	
 }
 extension TestOS: SargonOSProtocol {}

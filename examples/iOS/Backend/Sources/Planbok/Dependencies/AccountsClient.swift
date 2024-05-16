@@ -39,7 +39,7 @@ extension AccountsClient: DependencyKey {
 	public static func live(os: SargonOS) -> Self {
 		
 		let getAccounts: GetAccounts = {
-			os.accounts().asIdentified()
+			os.accountsOnCurrentNetwork().asIdentified()
 		}
 		
 		return Self(

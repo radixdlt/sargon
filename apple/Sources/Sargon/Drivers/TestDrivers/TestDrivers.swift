@@ -13,11 +13,11 @@ import Sargon
 
 extension BIOS {
 	
-	public convenience init(
+	public static func insecure(
 		bundle: Bundle = .main,
 		userDefaultsSuite: String = "test"
-	) {
-		self.init(
+	) -> BIOS {
+		BIOS(
 			bundle: bundle,
 			userDefaultsSuite: userDefaultsSuite,
 			secureStorageDriver: Insecure︕！TestOnly︕！Ephemeral︕！SecureStorage.init(

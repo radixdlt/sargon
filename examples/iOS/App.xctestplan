@@ -1,0 +1,29 @@
+{
+  "configurations" : [
+    {
+      "id" : "61024E3D-4D07-4C71-9C15-82BE0C20962B",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : false,
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:PlanbokApp.xcodeproj",
+      "identifier" : "48F0A6C82B7D42D400929DC2",
+      "name" : "PlanbokApp"
+    }
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:..\/Backend",
+        "identifier" : "PlanbokTests",
+        "name" : "PlanbokTests"
+      }
+    }
+  ],
+  "version" : 1
+}
