@@ -15,7 +15,7 @@ public struct SplashFeature {
 
 	public enum Action: ViewAction, Sendable {
 		public enum DelegateAction: Sendable {
-			case booted(hasAnyNetwork: Bool)
+			case booted(hasAnyAccount: Bool)
 		}
 		public enum ViewAction: Sendable {
 			case appear
@@ -59,7 +59,7 @@ public struct SplashFeature {
 						isEmulatingFreshInstall: isEmulatingFreshInstall
 					)
 					await send(
-						.delegate(.booted(hasAnyNetwork: os.hasAnyNetwork()))
+						.delegate(.booted(hasAnyAccount: !os.accountsForDisplayOnCurrentNetwork().isEmpty))
 					)
 				}
 				.debounce(id: SplashID(), for: 0.8, scheduler: mainQueue)

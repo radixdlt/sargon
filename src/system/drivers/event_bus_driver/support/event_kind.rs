@@ -22,6 +22,9 @@ pub enum EventKind {
 
     /// Profile was last used on another device.
     ProfileLastUsedOnOtherDevice,
+
+    /// An existing account has been updated
+    UpdatedAccount,
 }
 
 impl HasSampleValues for EventKind {

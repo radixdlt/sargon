@@ -57,7 +57,7 @@ extension PersistenceReaderKey where Self == PersistenceKeyDefault<SargonKey<Sav
 
 extension Set<EventKind> {
 	public static let currentGateway: Self = [.booted, .gatewayChangedCurrent]
-	public static let currentAccounts: Self = [.booted, .addedAccount, .addedAccounts, .gatewayChangedCurrent]
+	public static let currentAccounts: Self = [.booted, .addedAccount, .addedAccounts, .updatedAccount, .gatewayChangedCurrent]
 }
 
 public struct SargonKey<Value>: Hashable, PersistenceReaderKey, Sendable {

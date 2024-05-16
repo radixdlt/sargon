@@ -8,11 +8,15 @@ pub enum EventProfileChange {
 
     /// New accounts with `addresses` were inserted into the active profile
     AddedAccounts { addresses: Vec<AccountAddress> },
+
+    /// An existing account has been updated
+    UpdatedAccount { address: AccountAddress },
 }
 
 impl HasEventKind for EventProfileChange {
     fn kind(&self) -> EventKind {
         match self {
+            Self::UpdatedAccount { address: _ } => EventKind::UpdatedAccount,
             Self::AddedAccount { address: _ } => EventKind::AddedAccount,
             Self::AddedAccounts { addresses: _ } => EventKind::AddedAccounts,
         }
@@ -64,6 +68,12 @@ mod tests {
                 address: AccountAddress::sample(),
             },
             EventKind::AddedAccount,
+        );
+        test(
+            SUT::UpdatedAccount {
+                address: AccountAddress::sample(),
+            },
+            EventKind::UpdatedAccount,
         );
         test(
             SUT::AddedAccounts {

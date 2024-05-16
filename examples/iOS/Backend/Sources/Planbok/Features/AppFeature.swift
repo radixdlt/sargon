@@ -52,8 +52,8 @@ public struct AppFeature {
 		Reduce { state, action in
 			switch action {
 			
-			case let .splash(.delegate(.booted(hasAnyNetwork))):
-				if hasAnyNetwork {
+			case let .splash(.delegate(.booted(hasAnyAccount))):
+				if hasAnyAccount {
 					state = .main(MainFeature.State())
 				} else {
 					state = .onboarding(OnboardingFeature.State())

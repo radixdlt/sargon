@@ -234,7 +234,17 @@ impl SargonOS {
                 Ok(())
             }
         })
-        .await
+        .await?;
+
+        self.event_bus
+            .emit(EventNotification::profile_changed(
+                EventProfileChange::UpdatedAccount {
+                    address: updated.address,
+                },
+            ))
+            .await;
+
+        Ok(())
     }
 }
 
@@ -612,6 +622,36 @@ mod tests {
             .unwrap();
 
         assert_eq!(saved_profile.networks[0].accounts[0], account.clone())
+    }
+
+    #[actix_rt::test]
+    async fn test_update_account_emits() {
+        // ARRANGE (and ACT)
+        let event_bus_driver = RustEventBusDriver::new();
+        let drivers = Drivers::with_event_bus(event_bus_driver.clone());
+        let bios = Bios::new(drivers);
+
+        let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
+            .await
+            .unwrap()
+            .unwrap();
+
+        let mut account = Account::sample();
+        os.with_timeout(|x| x.add_account(account.clone()))
+            .await
+            .unwrap();
+
+        // ACT
+        account.display_name = DisplayName::random();
+        os.with_timeout(|x| x.update_account(account.clone()))
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert!(event_bus_driver
+            .recorded()
+            .iter()
+            .any(|e| e.event.kind() == EventKind::UpdatedAccount));
     }
 
     #[actix_rt::test]

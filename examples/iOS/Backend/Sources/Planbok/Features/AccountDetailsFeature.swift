@@ -52,8 +52,8 @@ public struct AccountDetailsFeature {
 				return .none
 
 			case let .destination(.presented(.changeGradient(.delegate(.selected(newGradient))))):
+				state.accountForDisplay.appearanceId = newGradient
 				state.destination = nil
-				
 				return .run { [address = state.accountForDisplay.address] send in
 					var account = try accountsClient.accountByAddress(address)
 					account.appearanceId = newGradient
