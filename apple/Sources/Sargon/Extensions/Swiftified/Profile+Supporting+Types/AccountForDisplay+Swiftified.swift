@@ -15,4 +15,5 @@ extension AccountForDisplay: Identifiable {
 	public var id: ID {
 		address
 	}
+	
 }

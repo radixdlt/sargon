@@ -61,7 +61,26 @@ final class TestOSTests: OSTest {
 		let displayName: DisplayName = "New"
 		let account = try await sut.createAccount(named: displayName)
 		XCTAssertEqual(account.displayName, displayName)
-        XCTAssertEqual(sut.accountsForDisplayOnCurrentNetwork.map(\.id), [account.id])
+        XCTAssertEqual(sut.accountsForDisplayOnCurrentNetwork, [AccountForDisplay(account)])
+	}
+	
+	func test_create_account_returned_can_be_looked_up() async throws {
+		let sut = try await TestOS()
+		let displayName: DisplayName = "New"
+		let account = try await sut.createAccount(named: displayName)
+		let lookedUp = try sut.accountByAddress(account.address)
+		XCTAssertEqual(lookedUp, account)
+	}
+	
+	func test_lookup_throws_for_unknown_accounts() async throws {
+		let sut = try await TestOS()
+		XCTAssertThrowsError(try sut.accountByAddress(.sample))
+	}
+	
+	func test_new_profile_has_preset_gateways() async throws {
+		let sut = try await TestOS()
+		let gateways = sut.gateways
+		XCTAssertEqual(gateways, .preset)
 	}
 	
 	func test_batch_create_many_accounts() async throws {
