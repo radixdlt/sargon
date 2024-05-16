@@ -336,7 +336,7 @@ mod tests {
 
         // ASSERT
         assert_eq!(unsaved_account, Account::sample());
-        assert_eq!(os.profile().networks.len(), 0); // not added
+        assert_eq!(os.profile().networks[0].accounts.len(), 0); // not added
     }
 
     #[actix_rt::test]
@@ -555,7 +555,7 @@ mod tests {
         .unwrap();
 
         // ASSERT
-        assert!(os.profile().networks.is_empty())
+        assert!(os.profile().networks[0].accounts.is_empty())
     }
 
     impl DisplayName {

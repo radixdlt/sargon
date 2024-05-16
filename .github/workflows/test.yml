@@ -122,7 +122,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           rustup target add aarch64-apple-darwin
-          sh ./scripts/ios/test.sh --codecov ${{ env.SWIFT_CODE_COV_REPORT_PATH }}
+          sh ./scripts/ios/test.sh --build --codecov ${{ env.SWIFT_CODE_COV_REPORT_PATH }}
 
       - name: Upload to CodeCov.io
         uses: RDXWorks-actions/codecov-action@main

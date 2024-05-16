@@ -5,6 +5,7 @@ set -u
 
 # By default we test with code coverage and display details (lines missed)
 
+should_build=false
 export_code_cov=false
 testonly=false # if true, no code coverage will happen
 summary=false # if true, code coverage will only show summary, no details
@@ -13,6 +14,10 @@ code_cov_report_file_path=""
 for arg in "$@"
 do
     case $arg in
+        --build)
+            should_build=true
+            shift # Remove --build from processing
+            ;;
         --codecov)
             export_code_cov=true
             code_cov_report_file_path="$2"
@@ -44,9 +49,13 @@ echo "✨ PWD: $PWD"
 echo "✨ Ensure 'useLocalFramework' is set to 'true' in Package.swift"
 sh ./scripts/ios/ensure-is-local.sh || exit $?
 
-echo "✨ Building Sargon..."
-sh ./scripts/ios/build-sargon.sh --maconly || exit $?
-echo "✨ Sargon built"
+if $should_build; then
+    echo "✨ Building Sargon..."
+    sh ./scripts/ios/build-sargon.sh --maconly || exit $?
+    echo "✨ Sargon built"
+else
+    echo "🙅‍♀️ Skip building, test (and coverage?) only"
+fi
 
 echo "✨ Calling 'swift test'"
 if $testonly; then

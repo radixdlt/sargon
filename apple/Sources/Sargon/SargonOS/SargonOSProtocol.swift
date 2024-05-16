@@ -15,8 +15,6 @@ public protocol SargonOSProtocol {
 	func createAccount(
 		named accountName: DisplayName
 	) async throws -> Account
-	
-	func accounts(on network: NetworkID?) -> [Account]
 }
 
 // MARK: Forward calls to `os`
@@ -26,12 +24,6 @@ extension SargonOSProtocol {
 		named accountName: DisplayName
 	) async throws -> Account {
 		try await os.createAccount(named: accountName)
-	}
-	
-	public func accounts(
-		on network: NetworkID? = nil
-	) -> [Account] {
-		os.accounts(on: network)
 	}
 }
 

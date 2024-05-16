@@ -13,10 +13,12 @@ use crate::prelude::*;
     derive_more::Display,
     uniffi::Record,
 )]
-#[display("{label} | {address}")]
+#[display("{display_name} | {address}")]
 pub struct AccountForDisplay {
     pub address: AccountAddress,
-    pub label: DisplayName,
+
+    #[serde(rename = "label")]
+    pub display_name: DisplayName,
 
     #[serde(rename = "appearanceID")]
     pub appearance_id: AppearanceID,
@@ -25,12 +27,12 @@ pub struct AccountForDisplay {
 impl AccountForDisplay {
     pub fn new(
         address: impl Into<AccountAddress>,
-        label: impl Into<DisplayName>,
+        display_name: impl Into<DisplayName>,
         appearance_id: impl Into<AppearanceID>,
     ) -> Self {
         Self {
             address: address.into(),
-            label: label.into(),
+            display_name: display_name.into(),
             appearance_id: appearance_id.into(),
         }
     }

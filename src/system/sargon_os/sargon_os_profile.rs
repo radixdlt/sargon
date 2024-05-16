@@ -264,14 +264,17 @@ mod tests {
     type SUT = SargonOS;
 
     #[actix_rt::test]
-    async fn no_networks_has_any_network_false() {
+    async fn new_profile_has_a_mainnet_network_which_is_empty() {
         // ARRANGE
         let os = SUT::fast_boot().await;
 
         // ACT - nothing done.
 
         // ASSERT
-        assert!(!os.has_any_network());
+        assert_eq!(
+            os.current_network(),
+            ProfileNetwork::new_empty_on(NetworkID::Mainnet)
+        );
     }
 
     #[actix_rt::test]
@@ -570,7 +573,7 @@ mod tests {
 
         // ASSERT
         assert_eq!(os.profile(), profile);
-        assert_eq!(os.profile().networks, ProfileNetworks::just(new_network));
+        assert!(os.profile().networks.items().contains(&new_network));
     }
 
     #[actix_rt::test]

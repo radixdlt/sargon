@@ -52,8 +52,8 @@ final class TestOSTests: OSTest {
 			.createAccount()
 		
 		let events = await task.value
-		XCTAssertEqual(sut.accounts().map(\.displayName), ["Unnamed 0", "Foo", "Unnamed 2"])
-		XCTAssertEqual(sut.accounts().map(\.address), events.compactMap(\.addressOfNewAccount))
+		XCTAssertEqual(sut.accountsForDisplayOnCurrentNetwork.map(\.displayName), ["Unnamed 0", "Foo", "Unnamed 2"])
+		XCTAssertEqual(sut.accountsForDisplayOnCurrentNetwork.map(\.address), events.compactMap(\.addressOfNewAccount))
 	}
 	
 	func test_create_account_returned() async throws {
@@ -61,14 +61,14 @@ final class TestOSTests: OSTest {
 		let displayName: DisplayName = "New"
 		let account = try await sut.createAccount(named: displayName)
 		XCTAssertEqual(account.displayName, displayName)
-		XCTAssertEqual(sut.accountsOnCurrentNetwork, [account])
+        XCTAssertEqual(sut.accountsForDisplayOnCurrentNetwork.map(\.id), [account.id])
 	}
 	
 	func test_batch_create_many_accounts() async throws {
 		let sut = try await TestOS()
 		let n: UInt16 = 4
 		try await sut.batchCreateAccounts(count: n, namePrefix: "Unnamed")
-		XCTAssertEqual(sut.accountsOnCurrentNetwork.map(\.displayName.value), (0..<n).map { "Unnamed \($0)" })
+		XCTAssertEqual(sut.accountsForDisplayOnCurrentNetwork.map(\.displayName.value), (0..<n).map { "Unnamed \($0)" })
 	}
 	
 	func test_log_at_each_level() async throws {

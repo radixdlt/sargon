@@ -85,8 +85,8 @@ impl Profile {
 }
 
 impl Profile {
-    /// Creates a new Profile from the `DeviceFactorSource`, without any
-    /// networks (thus no accounts).
+    /// Creates a new Profile from the `DeviceFactorSource` with a Mainnet ProfileNetwork,
+    /// which is "empty" (no Accounts, Personas etc).
     pub fn new(
         device_factor_source: DeviceFactorSource,
         creating_device: DeviceInfo,
@@ -96,7 +96,9 @@ impl Profile {
             header,
             FactorSources::with_bdfs(device_factor_source),
             AppPreferences::default(),
-            ProfileNetworks::new(),
+            ProfileNetworks::just(ProfileNetwork::new_empty_on(
+                NetworkID::Mainnet,
+            )),
         )
     }
 
@@ -251,6 +253,17 @@ mod tests {
     fn equality() {
         assert_eq!(SUT::sample(), SUT::sample());
         assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn new_creates_empty_mainnet_network() {
+        let sut = SUT::new(DeviceFactorSource::sample(), DeviceInfo::sample());
+        assert_eq!(
+            sut.networks,
+            ProfileNetworks::just(ProfileNetwork::new_empty_on(
+                NetworkID::Mainnet
+            ))
+        );
     }
 
     #[should_panic(expected = "FactorSources MUST NOT be empty.")]

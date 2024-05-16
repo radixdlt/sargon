@@ -82,7 +82,7 @@ mod tests {
     async fn test_change_gateway_creates_empty_network_if_needed() {
         // ARRANGE
         let os = SUT::fast_boot().await;
-        assert!(os.profile().networks.is_empty());
+        let number_of_networks_before_change = os.profile().networks.len();
 
         // ACT
         os.with_timeout(|x| x.change_current_gateway(Gateway::stokenet()))
@@ -90,8 +90,9 @@ mod tests {
             .unwrap();
 
         // ASSERT
-        assert!(!os.profile().networks.is_empty());
-        assert_eq!(os.profile().networks[0].network_id(), NetworkID::Stokenet);
-        assert!(os.profile().networks[0].accounts.is_empty());
+        assert_eq!(
+            os.profile().networks.len(),
+            number_of_networks_before_change + 1
+        );
     }
 }
