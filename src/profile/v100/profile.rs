@@ -566,22 +566,16 @@ mod tests {
             }
           }
         "#;
-        assert_eq!(
-            SUT::check_if_profile_json_contains_legacy_p2p_links(
-                json.as_bytes()
-            ),
-            true
-        );
+        assert!(SUT::check_if_profile_json_contains_legacy_p2p_links(
+            json.as_bytes()
+        ));
     }
 
     #[test]
     fn check_if_profile_json_contains_legacy_p2p_links_when_empty_json() {
-        assert_eq!(
-            SUT::check_if_profile_json_contains_legacy_p2p_links(
-                BagOfBytes::new()
-            ),
-            false
-        );
+        assert!(!SUT::check_if_profile_json_contains_legacy_p2p_links(
+            BagOfBytes::new()
+        ));
     }
 
     #[test]
@@ -594,12 +588,9 @@ mod tests {
             }
           }
         "#;
-        assert_eq!(
-            SUT::check_if_profile_json_contains_legacy_p2p_links(
-                json.as_bytes()
-            ),
-            false
-        );
+        assert!(!SUT::check_if_profile_json_contains_legacy_p2p_links(
+            json.as_bytes()
+        ));
     }
 
     #[test]
@@ -609,12 +600,9 @@ mod tests {
             env!("FIXTURES_VECTOR"),
             "only_plaintext_profile_snapshot_version_100.json"
         ));
-        assert_eq!(
-            SUT::check_if_profile_json_contains_legacy_p2p_links(
-                json.as_bytes()
-            ),
-            true
-        );
+        assert!(SUT::check_if_profile_json_contains_legacy_p2p_links(
+            json.as_bytes()
+        ));
     }
 
     #[test]
@@ -623,11 +611,10 @@ mod tests {
         let json =
             serde_json::to_vec(&EncryptedProfileSnapshot::sample()).unwrap();
         let password = "babylon";
-        assert_eq!(
+        assert!(
             SUT::check_if_encrypted_profile_json_contains_legacy_p2p_links(
                 json, password
-            ),
-            true
+            )
         );
     }
 
@@ -635,12 +622,11 @@ mod tests {
     fn check_if_encrypted_profile_json_contains_legacy_p2p_links_when_empty_json(
     ) {
         let password = "babylon";
-        assert_eq!(
-            SUT::check_if_encrypted_profile_json_contains_legacy_p2p_links(
+        assert!(
+            !SUT::check_if_encrypted_profile_json_contains_legacy_p2p_links(
                 BagOfBytes::new(),
                 password
-            ),
-            false
+            )
         );
     }
 
