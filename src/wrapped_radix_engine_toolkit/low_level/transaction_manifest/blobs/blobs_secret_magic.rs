@@ -40,7 +40,7 @@ impl From<ScryptoBlobs> for BlobsSecretMagic {
     }
 }
 
-pub(crate) type ScryptoBlobsMap = BTreeMap<radix_engine::types::Hash, Vec<u8>>;
+pub(crate) type ScryptoBlobsMap = IndexMap<ScryptoHash, Vec<u8>>;
 
 impl From<ScryptoBlobsMap> for BlobsSecretMagic {
     fn from(value: ScryptoBlobsMap) -> Self {

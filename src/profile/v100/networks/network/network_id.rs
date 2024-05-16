@@ -126,7 +126,7 @@ impl std::fmt::Display for NetworkID {
 
 impl NetworkID {
     /// Looks up a `ScryptoNetworkDefinition` in lookup table,
-    /// this is used internally for radix_engine_common::address::AddressBech32Decoder,
+    /// this is used internally for radix_common::address::AddressBech32Decoder,
     /// and to read out the canonical name (logical name) for a network.
     pub(crate) fn network_definition(&self) -> ScryptoNetworkDefinition {
         use NetworkID::*;

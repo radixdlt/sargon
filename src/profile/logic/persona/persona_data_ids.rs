@@ -1,4 +1,4 @@
-use indexmap::IndexSet;
+use radix_rust::prelude::IndexSet;
 
 use crate::prelude::*;
 

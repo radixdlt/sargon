@@ -331,11 +331,10 @@ mod tests {
     #[test]
     fn into_scrypto_global_address() {
         assert_eq!(
-            radix_engine::types::GlobalAddress::from(SUT::sample())
+            ScryptoGlobalAddress::from(SUT::sample())
                 .into_node_id()
                 .as_bytes()[0],
-            radix_engine_common::types::EntityType::GlobalVirtualEd25519Account
-                as u8
+            ScryptoEntityType::GlobalVirtualEd25519Account as u8
         );
     }
 

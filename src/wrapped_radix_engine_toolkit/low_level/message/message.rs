@@ -64,7 +64,7 @@ impl HasSampleValues for Message {
 mod tests {
     use super::*;
 
-    use transaction::model::EncryptedMessageV1;
+    use radix_transactions::model::EncryptedMessageV1;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = Message;
@@ -120,7 +120,7 @@ mod tests {
     #[test]
     fn encrypted_msg_are_not_yet_supported() {
         let dummy = EncryptedMessageV1 {
-            encrypted: transaction::prelude::AesGcmPayload(vec![]),
+            encrypted: radix_transactions::prelude::AesGcmPayload(vec![]),
             decryptors_by_curve: [].into(),
         };
         assert_eq!(

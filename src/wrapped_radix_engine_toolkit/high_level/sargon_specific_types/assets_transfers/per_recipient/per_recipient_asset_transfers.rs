@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use indexmap::IndexMap;
+use radix_rust::prelude::IndexMap;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct PerRecipientAssetTransfers {
