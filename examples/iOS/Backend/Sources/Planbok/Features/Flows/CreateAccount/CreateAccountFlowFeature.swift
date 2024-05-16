@@ -35,7 +35,7 @@ public struct CreateAccountFlowFeature {
 
 			case let .nameAccount(.delegate(.named(name))):
 				return .run { send in
-					try await accountsClient.createAndSaveAccount(.mainnet, name)
+					try await accountsClient.createAndSaveAccount(name)
 					await send(.delegate(.createdAccount))
 				} catch: { _, error in
 					fatalError("TODO error handling: \(error)")

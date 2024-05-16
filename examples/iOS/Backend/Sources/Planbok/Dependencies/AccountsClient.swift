@@ -21,9 +21,9 @@ extension Array where Element: Identifiable {
 public struct AccountsClient: Sendable {
 	public typealias GetAccounts = @Sendable () -> Accounts
 	public typealias AccountsStream = @Sendable () -> AsyncStream<Accounts>
-	public typealias CreateAndSaveAccount = @Sendable (NetworkID, DisplayName) async throws -> Account
+	public typealias CreateAndSaveAccount = @Sendable (DisplayName) async throws -> Account
 	public typealias UpdateAccount = @Sendable (Account) async throws -> Void
-	public typealias BatchCreateManySavedAccounts = @Sendable (_ count: UInt16, _ networkID: NetworkID) async throws -> Void
+	public typealias BatchCreateManySavedAccounts = @Sendable (_ count: UInt16) async throws -> Void
 	
 	public var getAccounts: GetAccounts
 	public var accountsStream: AccountsStream
@@ -52,18 +52,16 @@ extension AccountsClient: DependencyKey {
 				}
 			},
 			createAndSaveAccount: {
-				try await os.createAndSaveNewAccount(networkId: $0, name: $1)
+				try await os.createAndSaveNewAccount(networkId: os.currentNetworkID, name: $0)
 			},
 			updateAccount: { account in
 				log.debug("Updating account")
 				try await os.updateAccount(updated: account)
 			},
-			batchCreateManySavedAccounts: {
-				count,
-				networkID in
+			batchCreateManySavedAccounts: { count in
 				try await os.batchCreateManyAccountsThenSaveOnce(
 					count: count,
-					networkId: networkID,
+					networkId: os.currentNetworkID,
 					namePrefix: "Unnamed"
 				)
 			}

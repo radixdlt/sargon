@@ -70,7 +70,7 @@ public struct SettingsFeature {
 				state.destination = nil
 				let count = UInt16(action.rawValue)
 				return .run { send in
-					try await accountsClient.batchCreateManySavedAccounts(count, NetworkID.mainnet)
+					try await accountsClient.batchCreateManySavedAccounts(count)
 				}
 				
 			default:
