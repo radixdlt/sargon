@@ -67,6 +67,17 @@ pub fn check_if_profile_json_contains_legacy_p2p_links(
     Profile::check_if_profile_json_contains_legacy_p2p_links(json.to_vec())
 }
 
+#[uniffi::export]
+pub fn check_if_encrypted_profile_json_contains_legacy_p2p_links(
+    json: BagOfBytes,
+    password: String,
+) -> bool {
+    Profile::check_if_encrypted_profile_json_contains_legacy_p2p_links(
+        json.to_vec(),
+        password,
+    )
+}
+
 #[cfg(test)]
 mod uniffi_tests {
 
@@ -171,19 +182,37 @@ mod uniffi_tests {
             }
           }
         "#;
-        assert_eq!(
-            check_if_profile_json_contains_legacy_p2p_links(BagOfBytes::from(
-                json.as_bytes()
-            )),
-            true
-        );
+        assert!(check_if_profile_json_contains_legacy_p2p_links(
+            BagOfBytes::from(json.as_bytes())
+        ));
     }
 
     #[test]
     fn check_if_profile_json_contains_legacy_p2p_links_when_empty_json() {
-        assert_eq!(
-            check_if_profile_json_contains_legacy_p2p_links(BagOfBytes::new()),
-            false
-        );
+        assert!(!check_if_profile_json_contains_legacy_p2p_links(
+            BagOfBytes::new()
+        ));
+    }
+
+    #[test]
+    fn check_if_encrypted_profile_json_contains_legacy_p2p_links_when_p2p_links_are_present(
+    ) {
+        let json =
+            serde_json::to_vec(&EncryptedProfileSnapshot::sample()).unwrap();
+        let password = "babylon";
+        assert!(check_if_encrypted_profile_json_contains_legacy_p2p_links(
+            BagOfBytes::from(json),
+            password.to_owned()
+        ));
+    }
+
+    #[test]
+    fn check_if_encrypted_profile_json_contains_legacy_p2p_links_when_empty_json(
+    ) {
+        let password = "babylon";
+        assert!(!check_if_encrypted_profile_json_contains_legacy_p2p_links(
+            BagOfBytes::new(),
+            password.to_owned()
+        ));
     }
 }

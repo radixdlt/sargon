@@ -41,5 +41,9 @@ extension Profile {
 
 	public static func checkIfProfileJsonContainsLegacyP2PLinks(contents: some DataProtocol) -> Bool {
 	    checkIfProfileJsonContainsLegacyP2pLinks(json: Data(contents))
-    }
+	}
+
+	public static func checkIfEncryptedProfileJsonContainsLegacyP2PLinks(contents: some DataProtocol, password: String) -> Bool {
+		checkIfEncryptedProfileJsonContainsLegacyP2pLinks(json: Data(contents), password: password)
+	}
 }
