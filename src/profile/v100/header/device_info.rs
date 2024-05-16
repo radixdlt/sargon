@@ -53,6 +53,13 @@ pub struct DeviceInfo {
     /// MUST be optional since this was added on 2024-05-03 and
     /// was not present in earlier version of wallet (pre 1.6.0).
     pub host_app_version: Option<String>,
+
+    /// The vendor of the host client, e.g. "Apple" for iPhone clients,
+    /// or "Samsung" for Android clients.
+    ///
+    /// MUST be optional since this was added on 2024-05-16 and
+    /// was not present in earlier version of wallet (pre 1.6.0).
+    pub host_vendor: Option<String>,
 }
 
 impl DeviceInfo {
@@ -63,6 +70,7 @@ impl DeviceInfo {
         description: DeviceInfoDescription,
         system_version: impl AsRef<str>,
         host_app_version: impl AsRef<str>,
+        host_vendor: impl AsRef<str>,
     ) -> Self {
         Self {
             id,
@@ -70,6 +78,7 @@ impl DeviceInfo {
             description,
             system_version: Some(system_version.as_ref().to_owned()),
             host_app_version: Some(host_app_version.as_ref().to_owned()),
+            host_vendor: Some(host_vendor.as_ref().to_owned()),
         }
     }
 
@@ -81,6 +90,7 @@ impl DeviceInfo {
         model: impl AsRef<str>,
         system_version: impl AsRef<str>,
         host_app_version: impl AsRef<str>,
+        host_vendor: impl AsRef<str>,
     ) -> Self {
         Self::new(
             id.into().unwrap_or(DeviceID::generate_new()),
@@ -88,6 +98,7 @@ impl DeviceInfo {
             DeviceInfoDescription::new(name, model),
             system_version,
             host_app_version,
+            host_vendor,
         )
     }
 }
@@ -95,7 +106,9 @@ impl DeviceInfo {
 #[cfg(test)]
 impl DeviceInfo {
     pub fn new_unknown() -> Self {
-        Self::with_details(None, "Unknown", "Unknown", "Unknown", "Unknown")
+        Self::with_details(
+            None, "Unknown", "Unknown", "Unknown", "Unknown", "Unknown",
+        )
     }
 }
 
@@ -111,6 +124,7 @@ impl HasSampleValues for DeviceInfo {
             },
             system_version: None,
             host_app_version: None,
+            host_vendor: None,
         }
     }
 
@@ -125,6 +139,7 @@ impl HasSampleValues for DeviceInfo {
             },
             system_version: None,
             host_app_version: None,
+            host_vendor: None,
         }
     }
 }
@@ -156,6 +171,7 @@ mod tests {
                 "iPhone SE 2nd gen",
                 "iOS 17.4.1",
                 "1.6.4",
+                "Apple"
             )
             .description
             .to_string(),
@@ -171,6 +187,7 @@ mod tests {
             id,
             Timestamp::parse("2023-09-11T16:05:56Z").unwrap(),
             DeviceInfoDescription::new("Foo", "Unknown"),
+            "Unknown",
             "Unknown",
             "Unknown",
         );
@@ -251,6 +268,7 @@ mod tests {
             DeviceInfoDescription::new("My nice iPhone", "iPhone 15 Pro"),
             "17.4.1",
             "1.6.0",
+            "Apple",
         );
         assert_eq_after_json_roundtrip(
             &sut,
@@ -265,7 +283,8 @@ mod tests {
                     "model": "iPhone 15 Pro" 
                 },
                 "system_version": "17.4.1",
-                "host_app_version": "1.6.0"
+                "host_app_version": "1.6.0",
+                "host_vendor": "Apple",
             }
             "#,
         )

@@ -57,5 +57,6 @@ final class SargonOSTests: OSTest {
 		XCTAssertFalse(first === second)
 		XCTAssertTrue(SUT.shared === second)
 	}
+	
 }
 

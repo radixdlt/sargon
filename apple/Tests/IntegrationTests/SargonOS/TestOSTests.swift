@@ -83,11 +83,34 @@ final class TestOSTests: OSTest {
 		XCTAssertEqual(gateways, .preset)
 	}
 	
+	func test_if_replace_profile_throws() async throws {
+		let sut = try await TestOS()
+		var profile = sut.profile
+		profile.header.id = ProfileID() // mutate profile
+		do {
+			try await sut.os.saveChangedProfile(profile)
+			XCTFail("We expected to throw")
+		} catch {
+			/* We expected to throw */
+		}
+	}
+	
+	func test_we_can_mutate_profile_in_swift_and_save_then_profile_is_updated() async throws {
+		let sut = try await TestOS()
+		var profile = sut.profile
+		let creatingDevice = profile.header.creatingDevice
+		let newCreatingDevice = DeviceInfo.sampleOther
+		XCTAssertNotEqual(newCreatingDevice, creatingDevice)
+		profile.header.creatingDevice = newCreatingDevice // mutate profile
+		try await sut.os.saveChangedProfile(profile)
+		XCTAssertEqual(sut.profile.header.creatingDevice, newCreatingDevice) // assert change worked
+	}
+	
 	func test_batch_create_many_accounts() async throws {
 		let sut = try await TestOS()
 		let n: UInt16 = 4
 		try await sut.batchCreateAccounts(count: n, namePrefix: "Unnamed")
-		XCTAssertEqual(sut.accountsForDisplayOnCurrentNetwork.map(\.displayName.value), (0..<n).map { "Unnamed \($0)" })
+		XCTAssertEqual(sut.accountsOnCurrentNetwork.map(\.displayName.value), (0..<n).map { "Unnamed \($0)" })
 	}
 	
 	func test_log_at_each_level() async throws {

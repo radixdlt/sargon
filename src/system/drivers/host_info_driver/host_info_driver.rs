@@ -22,4 +22,8 @@ pub trait HostInfoDriver: Send + Sync + std::fmt::Debug {
     /// Android seems to support it if `READ_PRIVILEGED_PHONE_STATE` permission is
     /// obtained https://source.android.com/docs/core/connect/device-identifiers
     async fn host_device_id(&self) -> Option<DeviceID>;
+
+    /// The vendor of the host device, e.g. "Apple" for iPhone, or "Samsung",
+    /// for Android host clients.
+    async fn host_device_vendor(&self) -> String;
 }
