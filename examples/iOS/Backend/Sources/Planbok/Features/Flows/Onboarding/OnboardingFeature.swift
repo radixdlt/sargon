@@ -62,7 +62,7 @@ public struct OnboardingFeature {
 					return .none
 					
 				case .element(id: _, action: .newOrImportProfile(.delegate(.newProfile))):
-					state.destination = .createAccount(CreateAccountFlowFeature.State())
+					state.destination = .createAccount(CreateAccountFlowFeature.State(index: 0))
 					return .none
 					
 				case .popFrom(id: _):

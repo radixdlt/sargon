@@ -22,12 +22,12 @@ public struct AccountDetailsFeature {
 	
 	@ObservableState
 	public struct State: Equatable {
-		public var account: Account
+		public var accountForDisplay: AccountForDisplay
 		
 		@Presents var destination: Destination.State?
 	
-		public init(account: Account) {
-			self.account = account
+		public init(accountForDisplay: AccountForDisplay) {
+			self.accountForDisplay = accountForDisplay
 		}
 	}
 	
@@ -46,15 +46,18 @@ public struct AccountDetailsFeature {
 		Reduce { state, action in
 			switch action {
 			case .view(.changeGradientButtonTapped):
-				state.destination = .changeGradient(SelectGradientFeature.State.init(gradient: state.account.appearanceID))
+				state.destination = .changeGradient(
+					SelectGradientFeature.State(gradient: state.accountForDisplay.appearanceId)
+				)
 				return .none
 
 			case let .destination(.presented(.changeGradient(.delegate(.selected(newGradient))))):
 				state.destination = nil
-				state.account.appearanceId = newGradient
 				
-				return .run { [updatedAccount = state.account] send in
-					try await accountsClient.updateAccount(updatedAccount)
+				return .run { [address = state.accountForDisplay.address] send in
+					var account = try accountsClient.accountByAddress(address)
+					account.appearanceId = newGradient
+					try await accountsClient.updateAccount(account)
 				}
 				
 			default:
@@ -73,7 +76,7 @@ extension AccountDetailsFeature {
 		public var body: some SwiftUI.View {
 			NavigationView {
 				VStack {
-					AccountView(account: store.account, format: .full)
+					AccountView(accountForDisplay: store.accountForDisplay, format: .full)
 					
 					Button("Change Gradient") {
 						send(.changeGradientButtonTapped)

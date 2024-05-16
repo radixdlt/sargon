@@ -33,6 +33,10 @@ impl ProfileHolder {
         self.access_profile_with(|p| p.current_gateway().clone())
     }
 
+    pub fn gateways(&self) -> SavedGateways {
+        self.access_profile_with(|p| p.app_preferences.gateways.clone())
+    }
+
     pub fn current_network(&self) -> ProfileNetwork {
         self.access_profile_with(|p| p.current_network().clone())
     }

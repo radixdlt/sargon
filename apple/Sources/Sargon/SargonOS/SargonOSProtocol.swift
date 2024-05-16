@@ -38,15 +38,30 @@ extension SargonOSProtocol {
 // MARK: Extensions
 extension SargonOSProtocol {
 	
+	@available(*, deprecated, message: "SHOULD migrate to use more specialized access methods on SargonOS instead, e.g. `accountsOnCurrentNetwork`.")
 	public var profile: Profile {
 		os.profile()
 	}
 	
 	public var currentNetworkID: NetworkID {
-		profile.currentNetworkID
+		os.currentNetworkId()
 	}
 	
-	public var accountsOnCurrentNetwork: [Account] {
-		accounts(on: currentNetworkID)
+	public var gateways: SavedGateways {
+		os.gateways()
 	}
+	
+	@available(*, deprecated, message: "Consider using faster `accountsForDisplayOnCurrentNetwork` and follow up with ")
+	public var accountsOnCurrentNetwork: [Account] {
+		os.accountsOnCurrentNetwork()
+	}
+	
+	public var accountsForDisplayOnCurrentNetwork: [AccountForDisplay] {
+		os.accountsForDisplayOnCurrentNetwork()
+	}
+	
+	public func accountByAddress(_ address: AccountAddress) throws -> Account {
+		try os.accountByAddress(address: address)
+	}
+
 }

@@ -65,10 +65,12 @@ impl Identifiable for ProfileNetwork {
 }
 
 impl ProfileNetwork {
-    /// Instantiates a new `Network` from `network_id` and `accounts`.
+    /// Instantiates a new `ProfileNetwork` from `network_id`, `accounts`, `personas`
+    /// and `authorized_dapps`.
     ///
-    /// Panics if not any account in `accounts` is on another
-    /// network than `network_id`
+    /// # Panic
+    /// Panics if not all account in `accounts` are on network with id `network_id`,
+    /// and same for `personas` and `authorized_dapps`.
     pub fn new(
         network_id: impl Into<NetworkID>,
         accounts: impl Into<Accounts>,
@@ -106,6 +108,17 @@ impl ProfileNetwork {
             personas,
             authorized_dapps,
         }
+    }
+
+    /// Instantiates a new empty `ProfileNetwork` from `network_id`, i.e.
+    /// Accounts, Personas, AuthorizedDapps all being empty.
+    pub fn new_empty_on(network_id: impl Into<NetworkID>) -> Self {
+        Self::new(
+            network_id,
+            Accounts::new(),
+            Personas::new(),
+            AuthorizedDapps::new(),
+        )
     }
 }
 

@@ -113,8 +113,8 @@ public struct MainFeature {
 				state.path.append(.settings(SettingsFeature.State()))
 				return .none
 				
-			case let .accounts(.delegate(.showDetailsFor(account))):
-				state.path.append(.accountDetails(AccountDetailsFeature.State(account: account)))
+			case let .accounts(.delegate(.showDetailsFor(accountForDisplay))):
+				state.path.append(.accountDetails(AccountDetailsFeature.State(accountForDisplay: accountForDisplay)))
 				return .none
 				
 				

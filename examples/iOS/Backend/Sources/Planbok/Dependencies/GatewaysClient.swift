@@ -19,10 +19,8 @@ extension GatewaysClient: DependencyKey {
 	public static let liveValue = Self.live(os: SargonOS.shared)
 	public static func live(os: SargonOS) -> Self {
 		Self(
-			switchGatewayTo: { new in
-				var profile = os.profile()
-				try profile.appPreferences.gateways.changeCurrent(to: new)
-				try await os.saveChangedProfile(profile)
+			switchGatewayTo: { to in
+				let _ = try await os.changeCurrentGateway(to: to)
 			}
 		)
 	}

@@ -10,17 +10,17 @@ public struct AccountsFeature {
 	
 	@ObservableState
 	public struct State: Equatable {
-		@SharedReader(.accounts) var accounts
+		@SharedReader(.accountsForDisplay) var accountsForDisplay
 	}
 	
 	public enum Action: ViewAction {
 		public enum ViewAction {
-			case accountCardTapped(Account)
+			case accountCardTapped(AccountForDisplay)
 			case createNewAccountButtonTapped
 		}
 		public enum DelegateAction {
 			case createNewAccount(index: Int)
-			case showDetailsFor(Account)
+			case showDetailsFor(AccountForDisplay)
 		}
 		case view(ViewAction)
 		case delegate(DelegateAction)
@@ -32,7 +32,7 @@ public struct AccountsFeature {
 			switch action {
 
 			case .view(.createNewAccountButtonTapped):
-				return .send(.delegate(.createNewAccount(index: state.accounts.count)))
+				return .send(.delegate(.createNewAccount(index: state.accountsForDisplay.count)))
 				
 			case let .view(.accountCardTapped(account)):
 				return .send(.delegate(.showDetailsFor(account)))
@@ -58,10 +58,10 @@ extension AccountsFeature {
 				Text("Accounts").font(.largeTitle)
 				
 				ScrollView {
-					ForEach(store.state.accounts) { account in
+					ForEach(store.state.accountsForDisplay) { accountForDisplay in
 						VStack {
-							AccountCardView(account: account) {
-								send(.accountCardTapped(account))
+							AccountCardView(accountForDisplay: accountForDisplay) {
+								send(.accountCardTapped(accountForDisplay))
 							}
 						}
 					}

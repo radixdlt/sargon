@@ -21,10 +21,4 @@ extension SargonOS {
 		try await createAndSaveNewAccount(networkId: currentNetworkID, name: accountName)
 	}
 	
-	public func accounts(
-		on network: NetworkID? = nil
-	) -> [Account] {
-		profile().accounts(on: network)
-	}
-	
 }

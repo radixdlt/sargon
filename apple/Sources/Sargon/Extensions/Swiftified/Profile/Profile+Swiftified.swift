@@ -50,15 +50,3 @@ extension Profile: CustomDebugStringConvertible {
 	}
 }
 
-
-extension Profile {
-	public var currentNetworkID: NetworkID {
-		appPreferences.gateways.current.networkID
-	}
-	
-	public func accounts(on network: NetworkID? = nil) -> [Account] {
-		let id = network ?? currentNetworkID
-		return networks.first(where: { $0.id == id })?.accounts ?? []
-	}
-	
-}
