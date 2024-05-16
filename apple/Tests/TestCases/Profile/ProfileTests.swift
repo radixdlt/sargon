@@ -127,4 +127,19 @@ final class ProfileTests: Test<Profile> {
 			true
 		)
 	}
+
+	func test_check_if_encrypted_profile_json_contains_legacy_p2p_links_when_empty_json() {
+		XCTAssertEqual(
+			SUT.checkIfEncryptedProfileJsonContainsLegacyP2PLinks(contents: Data(), password: "babylon"),
+			false
+		)
+	}
+
+	func test_check_if_encrypted_profile_json_contains_legacy_p2p_links_when_p2p_links_are_present() throws {
+		let json = try openFile(subPath: "vector", "profile_encrypted_by_password_of_babylon", extension: "json")
+		XCTAssertEqual(
+			SUT.checkIfEncryptedProfileJsonContainsLegacyP2PLinks(contents: json, password: "babylon"),
+			true
+		)
+	}
 }
