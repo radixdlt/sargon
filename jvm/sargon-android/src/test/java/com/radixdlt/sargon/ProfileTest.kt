@@ -3,6 +3,7 @@ package com.radixdlt.sargon
 import com.radixdlt.sargon.extensions.analyzeContentsOfFile
 import com.radixdlt.sargon.extensions.asGeneral
 import com.radixdlt.sargon.extensions.bagOfBytes
+import com.radixdlt.sargon.extensions.checkIfEncryptedProfileJsonContainsLegacyP2PLinks
 import com.radixdlt.sargon.extensions.checkIfProfileJsonContainsLegacyP2PLinks
 import com.radixdlt.sargon.extensions.fromEncryptedJson
 import com.radixdlt.sargon.extensions.init
@@ -126,6 +127,23 @@ class ProfileTest : SampleTestable<Profile> {
         assertEquals(
             true,
             Profile.checkIfProfileJsonContainsLegacyP2PLinks(json)
+        )
+    }
+
+    @Test
+    fun testCheckIfEncryptedProfileJsonContainsLegacyP2PLinksWhenEmptyJson() {
+        assertEquals(
+            false,
+            Profile.checkIfEncryptedProfileJsonContainsLegacyP2PLinks("{}", "babylon"),
+        )
+    }
+
+    @Test
+    fun testCheckIfEncryptedProfileJsonContainsLegacyP2PLinksWhenP2PLinksArePresent() {
+        val json = File("../../" + "fixtures/vector/profile_encrypted_by_password_of_babylon.json").readText()
+        assertEquals(
+            true,
+            Profile.checkIfEncryptedProfileJsonContainsLegacyP2PLinks(json, "babylon")
         )
     }
 }
