@@ -38,7 +38,7 @@ pub fn new_saved_gateways_changing_current(
     gateways: &SavedGateways,
 ) -> Result<SavedGateways> {
     let mut gateways = gateways.clone();
-    gateways.change_current(to)?;
+    let _ = gateways.change_current(to);
     Ok(gateways)
 }
 

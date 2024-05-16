@@ -12,11 +12,14 @@ pub enum Event {
     /// changed Profile got persisted into secure storage.
     ProfileSaved,
 
-    /// The Profile was last used on another device, user ought to claim it.
-    ProfileLastUsedOnOtherDevice(DeviceInfo),
+    /// Current Gateway changed
+    GatewayChangedCurrent { to: Gateway, is_new: bool },
 
     /// The profile has change (might not have been saved yet).
     ProfileChanged { change: EventProfileChange },
+
+    /// The Profile was last used on another device, user ought to claim it.
+    ProfileLastUsedOnOtherDevice(DeviceInfo),
 }
 
 impl Event {
@@ -33,11 +36,14 @@ impl HasEventKind for Event {
     fn kind(&self) -> EventKind {
         match self {
             Self::Booted => EventKind::Booted,
-            Self::ProfileSaved => EventKind::ProfileSaved,
+            Self::GatewayChangedCurrent { to: _, is_new: _ } => {
+                EventKind::GatewayChangedCurrent
+            }
+            Self::ProfileChanged { change } => change.kind(),
             Self::ProfileLastUsedOnOtherDevice(_) => {
                 EventKind::ProfileLastUsedOnOtherDevice
             }
-            Self::ProfileChanged { change } => change.kind(),
+            Self::ProfileSaved => EventKind::ProfileSaved,
         }
     }
 }
@@ -85,6 +91,13 @@ mod tests {
             assert_eq!(s.kind(), exp);
         };
         test(SUT::ProfileSaved, EventKind::ProfileSaved);
+        test(
+            SUT::GatewayChangedCurrent {
+                to: Gateway::sample(),
+                is_new: false,
+            },
+            EventKind::GatewayChangedCurrent,
+        );
         let change = EventProfileChange::AddedAccount {
             address: AccountAddress::sample(),
         };

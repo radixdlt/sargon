@@ -4,20 +4,24 @@ use crate::prelude::*;
 /// values and flattens the otherwise nested `Event` enum.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Enum)]
 pub enum EventKind {
+    /* Sort lexicographically */
+    /// Profile updated with a new account.
+    AddedAccount,
+
+    /// Profile updated with new accounts.
+    AddedAccounts,
+
     /// SargonOS did boot.
     Booted,
+
+    /// Current Gateway changed
+    GatewayChangedCurrent,
 
     /// Profile was saved.
     ProfileSaved,
 
     /// Profile was last used on another device.
     ProfileLastUsedOnOtherDevice,
-
-    /// Profile updated with a new account.
-    AddedAccount,
-
-    /// Profile updated with new accounts.
-    AddedAccounts,
 }
 
 impl HasSampleValues for EventKind {
