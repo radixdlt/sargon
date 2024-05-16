@@ -17,6 +17,15 @@ extension PersistenceReaderKey where Self == PersistenceKeyDefault<SargonKey<Acc
 	}
 }
 
+extension PersistenceReaderKey where Self == PersistenceKeyDefault<SargonKey<NetworkID>> {
+	public static var network: Self {
+		PersistenceKeyDefault(
+			SargonKey(keyPath: \.currentNetworkID),
+			NetworkID.mainnet
+		)
+	}
+}
+
 extension PersistenceReaderKey where Self == PersistenceKeyDefault<SargonKey<SavedGateways>> {
 	public static var savedGateways: Self {
 		PersistenceKeyDefault(

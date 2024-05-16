@@ -27,6 +27,7 @@ public struct MainFeature {
 	
 	@ObservableState
 	public struct State: Equatable {
+		@SharedReader(.network) var network
 		@Presents var destination: Destination.State?
 		public var path = StackState<Path.State>()
 		public var accounts: AccountsFeature.State
@@ -154,6 +155,19 @@ public struct MainFeature {
 
 }
 
+public struct DeveloperDisclaimerBanner: View {
+	public var body: some View {
+		Text("Connected to a test network, not Radix main network")
+			.frame(maxWidth: .infinity, alignment: .center)
+			.padding(4)
+			.background(Color.app.orange2)
+			.font(.system(size: 12))
+	}
+
+	public init() {}
+}
+
+
 extension MainFeature {
 	@ViewAction(for: MainFeature.self)
 	public struct View: SwiftUI.View {
@@ -165,6 +179,9 @@ extension MainFeature {
 		}
 		
 		public var body: some SwiftUI.View {
+			if store.network != .mainnet {
+				DeveloperDisclaimerBanner()
+			}
 			NavigationStack(path: $store.scope(state: \.path, action: \.path)) {
 				VStack {
 					VStack {
