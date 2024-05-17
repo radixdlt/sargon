@@ -182,7 +182,7 @@ impl TransactionManifest {
 
         let multiple_fungibles: MultipleFungibleTokens =
             serde_json::from_value(json).unwrap();
-        info!("Generating multiple fungibles using bundled file, '\nDescription:\n'{}'", &multiple_fungibles.description);
+        debug!("Generating multiple fungibles using bundled file, '\nDescription:\n'{}'", &multiple_fungibles.description);
         let all_fungibles = multiple_fungibles.tokens;
         let max_count = all_fungibles.len();
         let count = count.into().map(|c| c as usize).unwrap_or(max_count);

@@ -17,7 +17,7 @@ impl SargonOS {
     }
 
     pub async fn claim_profile(&self, profile: &mut Profile) -> Result<()> {
-        info!("Claiming profile, id: {}", &profile.id());
+        debug!("Claiming profile, id: {}", &profile.id());
         let device_info = self.device_info().await?;
         Self::claim_provided_profile(profile, device_info.clone());
         info!(
@@ -69,7 +69,7 @@ impl SargonOS {
 
     pub async fn import_profile(&self, profile: Profile) -> Result<()> {
         let imported_id = profile.id();
-        info!("Importing profile, id: {}", imported_id);
+        debug!("Importing profile, id: {}", imported_id);
         let mut profile = profile;
         self.claim_profile(&mut profile).await?;
 
@@ -173,10 +173,10 @@ impl SargonOS {
         let device_info = Self::get_device_info(clients).await?;
         let last_used = profile.header.last_used_on_device.clone();
         if last_used == device_info {
-            info!("Ownership check passed (profile.header.last_used_on_device == self.device_info)");
+            debug!("Ownership check passed (profile.header.last_used_on_device == self.device_info)");
             Ok(true)
         } else {
-            info!("Profile was last used on another device, will not be able to update it until it has been claimed.");
+            warn!("Profile was last used on another device, will not be able to update it until it has been claimed.");
             clients
                 .event_bus
                 .emit(EventNotification::profile_used_on_other_device(

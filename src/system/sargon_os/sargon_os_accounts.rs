@@ -96,9 +96,9 @@ impl SargonOS {
         network_id: NetworkID,
         name: DisplayName,
     ) -> Result<Account> {
-        info!("Creating account.");
+        debug!("Creating account.");
         let account = self.create_unsaved_account(network_id, name).await?;
-        info!("Created account, now saving it to profile.");
+        debug!("Created account, now saving it to profile.");
         self.add_account(account.clone()).await?;
         info!(
             "Created account and saved new account into profile, address: {}",
@@ -114,11 +114,11 @@ impl SargonOS {
         network_id: NetworkID,
         name_prefix: String,
     ) -> Result<()> {
-        info!("Batch creating #{} accounts.", count);
+        debug!("Batch creating #{} accounts.", count);
         let accounts = self
             .batch_create_unsaved_accounts(network_id, count, name_prefix)
             .await?;
-        info!("Created #{} accounts, now saving them to profile.", count);
+        debug!("Created #{} accounts, now saving them to profile.", count);
         self.add_accounts(accounts).await?;
         info!(
             "Created account and saved #{} new accounts into profile",

@@ -20,7 +20,9 @@ extension GatewaysClient: DependencyKey {
 	public static func live(os: SargonOS) -> Self {
 		Self(
 			switchGatewayTo: { to in
+				log.notice("Changing current gateway to: \(to)")
 				let _ = try await os.changeCurrentGateway(to: to)
+				log.info("Finished changing current gateway.")
 			}
 		)
 	}

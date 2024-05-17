@@ -9,7 +9,6 @@ use crate::prelude::*;
 /// to secure storage and make use of the network connection of the iPhone/Android
 /// phone.
 #[derive(Debug, uniffi::Object)]
-#[allow(dead_code)]
 pub struct SargonOS {
     pub(crate) profile_holder: ProfileHolder,
     pub(crate) clients: Clients,
@@ -159,15 +158,15 @@ impl SargonOS {
 
         let device_info = match secure_storage.load_device_info().await? {
             Some(loaded_device_info) => {
-                info!("Found saved device info: {:?}", &loaded_device_info);
+                debug!("Found saved device info: {:?}", &loaded_device_info);
                 loaded_device_info
             }
             None => {
-                info!("Found no saved device info, creating new.");
+                debug!("Found no saved device info, creating new.");
                 let new_device_info = clients.host.create_device_info().await;
-                info!("Created new device info: {:?}", &new_device_info);
+                debug!("Created new device info: {:?}", &new_device_info);
                 secure_storage.save_device_info(&new_device_info).await?;
-                info!("Saved new device info");
+                debug!("Saved new device info");
                 new_device_info
             }
         };

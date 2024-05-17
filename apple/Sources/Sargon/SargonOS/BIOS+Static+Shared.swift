@@ -44,6 +44,7 @@ extension BIOS {
 			assert(_shared == nil, "Should not be created twice")
 		}
 		Self._shared = shared
+		setRustLogLevel(.debug)
 		return shared
 	}
 }

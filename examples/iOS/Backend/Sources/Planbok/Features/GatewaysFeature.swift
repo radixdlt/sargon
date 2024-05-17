@@ -28,7 +28,6 @@ public struct GatewaysFeature {
                     log.debug("Tapped \(gateway), but not switching since it is already current.")
                     return .none
                 } else {
-                    log.info("Switching network to \(gateway)")
                     return .run { _ in
                         try await gatewaysClient.switchGatewayTo(gateway)
                     }

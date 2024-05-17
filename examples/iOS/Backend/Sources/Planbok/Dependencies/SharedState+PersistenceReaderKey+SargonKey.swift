@@ -21,38 +21,52 @@ extension SargonOS {
 
 extension PersistenceReaderKey where Self == PersistenceKeyDefault<SargonKey<AccountsForDisplay>> {
 	public static var accountsForDisplay: Self {
-		Self.init(
-			SargonKey(
-				on: .currentAccounts,
-				accessing: \.accountsForDisplayOnCurrentNetworkIdentified
-			),
-			.default
-		)
+		Self.sharedAccountsForDisplay
 	}
+}
+
+extension PersistenceKeyDefault<SargonKey<AccountsForDisplay>> {
+	public static let sharedAccountsForDisplay = Self(
+		SargonKey(
+			on: .currentAccounts,
+			accessing: \.accountsForDisplayOnCurrentNetworkIdentified
+		),
+		.default
+	)
 }
 
 extension PersistenceReaderKey where Self == PersistenceKeyDefault<SargonKey<NetworkID>> {
 	public static var network: Self {
-		Self.init(
-			SargonKey(
-				on: .currentGateway,
-				accessing: \.currentNetworkID
-			),
-			.default
-		)
+		Self.sharedNetwork
 	}
+}
+
+extension PersistenceKeyDefault: @unchecked Sendable {}
+extension PersistenceKeyDefault<SargonKey<NetworkID>> {
+	public static let sharedNetwork = Self(
+		SargonKey(
+			on: .currentGateway,
+			accessing: \.currentNetworkID
+		),
+		.default
+	)
 }
 
 extension PersistenceReaderKey where Self == PersistenceKeyDefault<SargonKey<SavedGateways>> {
 	public static var savedGateways: Self {
-		Self.init(
-			SargonKey(
-				on: .currentGateway,
-				accessing: \.gateways
-			), 
-			.default
-		)
+		Self.sharedSavedGateways
 	}
+}
+
+extension PersistenceKeyDefault<SargonKey<SavedGateways>> {
+	public static let sharedSavedGateways = Self(
+		SargonKey(
+			on: .currentGateway,
+			accessing: \.gateways
+		),
+			.default
+	)
+	
 }
 
 extension Set<EventKind> {
@@ -83,6 +97,8 @@ extension SargonKey {
 		accessing keyPath: KeyPath<SargonOS, Value>
 	) {
 		self.init(on: fetchOnEvents, lastValueWithOS: { $0[keyPath: keyPath] })
+
+		log.warning("SharedState for \(String(describing: Value.self)), hopefully just one per value kind")
 	}
 }
 

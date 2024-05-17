@@ -36,6 +36,7 @@ impl SargonOS {
         &self,
         to: Gateway,
     ) -> Result<ChangeGatewayOutcome> {
+        info!("Changing current gateway to: {}", &to);
         let network_id = to.network.id;
         let outcome = self
             .update_profile_with(|mut p| {
@@ -65,6 +66,9 @@ impl SargonOS {
             }
             ChangeGatewayOutcome::NoChange => {}
         };
+
+        debug!("Change current gateway outcome: {:?}", &outcome);
+
         Ok(outcome)
     }
 }

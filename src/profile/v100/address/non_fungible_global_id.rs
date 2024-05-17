@@ -39,7 +39,7 @@ impl NonFungibleGlobalId {
     ) -> Self {
         let resource_address = resource_address.into();
         if resource_address.is_fungible() {
-            info!("Notice: Fungible resource address used with NonFungible Global ID.")
+            debug!("Notice: Fungible resource address used with NonFungible Global ID.")
         }
         Self {
             resource_address,

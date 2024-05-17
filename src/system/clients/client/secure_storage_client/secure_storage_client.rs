@@ -154,10 +154,10 @@ impl SecureStorageClient {
     /// Save `profile`
     pub async fn save_profile(&self, profile: &Profile) -> Result<()> {
         let profile_id = profile.id();
-        info!("Saving profile with id: {}", profile_id);
+        debug!("Saving profile with id: {}", profile_id);
         self.save(SecureStorageKey::ProfileSnapshot { profile_id }, profile)
             .await
-            .inspect(|_| info!("Saved profile with id {}", profile_id))
+            .inspect(|_| debug!("Saved profile with id {}", profile_id))
             .inspect_err(|e| error!("Failed to save profile, error {e}"))
     }
 
@@ -274,7 +274,7 @@ impl SecureStorageClient {
     }
 
     pub async fn delete_active_profile_id(&self) -> Result<()> {
-        info!("Deleting active profile id");
+        warn!("Deleting active profile id");
         self.driver
             .delete_data_for_key(SecureStorageKey::ActiveProfileID)
             .await
