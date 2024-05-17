@@ -45,6 +45,12 @@ pub struct DeviceFactorSourceHint {
     /// MUST be optional since this was added on 2024-05-03 and
     /// was not present in earlier version of wallet (pre 1.6.0).
     pub host_app_version: Option<String>,
+
+    /// The vendor of the device host, e.g. "Apple" or "Samsung".
+    ///
+    /// MUST be optional since this was added on 2024-05-03 and
+    /// was not present in earlier version of wallet (pre 1.6.0).
+    pub host_vendor: Option<String>,
 }
 
 impl DeviceFactorSourceHint {
@@ -55,6 +61,7 @@ impl DeviceFactorSourceHint {
         model: impl AsRef<str>,
         system_version: impl Into<Option<String>>,
         host_app_version: impl Into<Option<String>>,
+        host_vendor: impl Into<Option<String>>,
         word_count: BIP39WordCount,
     ) -> Self {
         Self {
@@ -62,6 +69,7 @@ impl DeviceFactorSourceHint {
             model: model.as_ref().to_owned(),
             system_version: system_version.into(),
             host_app_version: host_app_version.into(),
+            host_vendor: host_vendor.into(),
             mnemonic_word_count: word_count,
         }
     }
@@ -75,6 +83,7 @@ impl DeviceFactorSourceHint {
             device_info.description.model.clone(),
             device_info.system_version.clone(),
             device_info.host_app_version.clone(),
+            device_info.host_vendor.clone(),
             word_count,
         )
     }
@@ -88,6 +97,7 @@ impl HasSampleValues for DeviceFactorSourceHint {
             "iPhone",
             None,
             None,
+            None,
             BIP39WordCount::TwentyFour,
         )
     }
@@ -96,6 +106,7 @@ impl HasSampleValues for DeviceFactorSourceHint {
         Self::new(
             "Android",
             "Samsung Galaxy S23 Ultra",
+            None,
             None,
             None,
             BIP39WordCount::Twelve,
@@ -109,6 +120,7 @@ impl DeviceFactorSourceHint {
         Self::new(
             "Unknown Name",
             "iPhone",
+            None,
             None,
             None,
             BIP39WordCount::TwentyFour,
@@ -165,6 +177,7 @@ mod tests {
             "iPhone 15 Pro",
             "17.4.1".to_owned(),
             "1.6.0".to_owned(),
+            "Apple".to_owned(),
             BIP39WordCount::TwentyFour,
         );
         assert_eq_after_json_roundtrip(
@@ -175,6 +188,7 @@ mod tests {
             "model": "iPhone 15 Pro",
             "systemVersion": "17.4.1",
             "hostAppVersion": "1.6.0",
+            "hostVendor": "Apple",
             "mnemonicWordCount": 24
         }
         "#,
