@@ -8,7 +8,7 @@
 import Foundation
 import SargonUniFFI
 
-extension EventProfileChange {
+extension EventProfileModified {
 	public var addedAccount: AccountAddress? {
 		guard case let .addedAccount(address) = self else { return nil }
 		return address
@@ -16,14 +16,14 @@ extension EventProfileChange {
 }
 
 extension Event {
-	public var profileChanged: EventProfileChange? {
+	public var profileModified: EventProfileModified? {
 		switch self {
-		case let .profileChanged(change): return change
+		case let .modifiedProfile(change): return change
 		default: return nil
 		}
 	}
 	public var addressOfNewAccount: AccountAddress? {
-		profileChanged?.addedAccount
+		profileModified?.addedAccount
 	}
 }
 

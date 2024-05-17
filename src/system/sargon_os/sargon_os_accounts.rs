@@ -187,7 +187,7 @@ impl SargonOS {
 
         self.event_bus
             .emit(EventNotification::profile_changed(
-                EventProfileChange::AddedAccount { address },
+                EventProfileModified::AddedAccount { address },
             ))
             .await;
 
@@ -211,7 +211,7 @@ impl SargonOS {
 
         self.event_bus
             .emit(EventNotification::profile_changed(
-                EventProfileChange::AddedAccounts { addresses },
+                EventProfileModified::AddedAccounts { addresses },
             ))
             .await;
 
@@ -238,7 +238,7 @@ impl SargonOS {
 
         self.event_bus
             .emit(EventNotification::profile_changed(
-                EventProfileChange::UpdatedAccount {
+                EventProfileModified::UpdatedAccount {
                     address: updated.address,
                 },
             ))
@@ -327,6 +327,27 @@ mod tests {
 
         // ASSERT
         assert_eq!(os.profile().networks[0].accounts.len(), 1);
+    }
+
+    #[actix_rt::test]
+    async fn test_content_hint_is_updated_when_accounts_are_added() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        os.with_timeout(|x| x.add_account(Account::sample()))
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert_eq!(
+            os.profile()
+                .header
+                .content_hint
+                .number_of_accounts_on_all_networks_in_total,
+            1
+        );
+        assert_eq!(os.profile().header.content_hint.number_of_networks, 1);
     }
 
     #[actix_rt::test]

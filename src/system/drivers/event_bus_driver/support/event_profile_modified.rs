@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
-/// The event of having changed profile.
+/// The active profile has been modified (might not have been saved yet).
 #[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Enum)]
-pub enum EventProfileChange {
+pub enum EventProfileModified {
     /// A new account with `address` was inserted into the active profile
     AddedAccount { address: AccountAddress },
 
@@ -13,7 +13,7 @@ pub enum EventProfileChange {
     UpdatedAccount { address: AccountAddress },
 }
 
-impl HasEventKind for EventProfileChange {
+impl HasEventKind for EventProfileModified {
     fn kind(&self) -> EventKind {
         match self {
             Self::UpdatedAccount { address: _ } => EventKind::UpdatedAccount,
@@ -23,7 +23,7 @@ impl HasEventKind for EventProfileChange {
     }
 }
 
-impl HasSampleValues for EventProfileChange {
+impl HasSampleValues for EventProfileModified {
     fn sample() -> Self {
         Self::AddedAccount {
             address: AccountAddress::sample(),
@@ -45,7 +45,7 @@ mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = EventProfileChange;
+    type SUT = EventProfileModified;
 
     #[test]
     fn equality() {

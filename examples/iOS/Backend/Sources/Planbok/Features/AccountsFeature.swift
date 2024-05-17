@@ -10,6 +10,7 @@ public struct AccountsFeature {
 	
 	@ObservableState
 	public struct State: Equatable {
+		@SharedReader(.network) var network
 		@SharedReader(.accountsForDisplay) var accountsForDisplay
 	}
 	
@@ -57,11 +58,15 @@ extension AccountsFeature {
 			VStack {
 				Text("Accounts").font(.largeTitle)
 				
-				ScrollView {
-					ForEach(store.state.accountsForDisplay) { accountForDisplay in
-						VStack {
-							AccountCardView(accountForDisplay: accountForDisplay) {
-								send(.accountCardTapped(accountForDisplay))
+				if store.state.accountsForDisplay.isEmpty {
+					Text("You dont have any accounts on \(store.state.network.description)")
+				} else {
+					ScrollView {
+						ForEach(store.state.accountsForDisplay) { accountForDisplay in
+							VStack {
+								AccountCardView(accountForDisplay: accountForDisplay) {
+									send(.accountCardTapped(accountForDisplay))
+								}
 							}
 						}
 					}

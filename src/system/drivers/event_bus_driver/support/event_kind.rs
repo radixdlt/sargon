@@ -20,6 +20,10 @@ pub enum EventKind {
     /// Profile was saved.
     ProfileSaved,
 
+    /// A profile has been imported and has been set to active profile,
+    /// and saved into secure storage.
+    ImportedProfile,
+
     /// Profile was last used on another device.
     ProfileLastUsedOnOtherDevice,
 

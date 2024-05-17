@@ -8,23 +8,27 @@ pub enum Event {
     /// The SargonOS just booted.
     Booted,
 
+    /// Current Gateway changed
+    GatewayChangedCurrent { to: Gateway, is_new: bool },
+
     /// Profile has been saved, typically it has been modified and the new
     /// changed Profile got persisted into secure storage.
     ProfileSaved,
 
-    /// Current Gateway changed
-    GatewayChangedCurrent { to: Gateway, is_new: bool },
+    /// A profile has been imported and has been set to active profile,
+    /// and saved into secure storage.
+    ImportedProfile { id: ProfileID },
 
-    /// The profile has change (might not have been saved yet).
-    ProfileChanged { change: EventProfileChange },
+    /// The active profile has been modified (might not have been saved yet).
+    ModifiedProfile { change: EventProfileModified },
 
     /// The Profile was last used on another device, user ought to claim it.
     ProfileLastUsedOnOtherDevice(DeviceInfo),
 }
 
 impl Event {
-    pub fn profile_changed(change: EventProfileChange) -> Self {
-        Self::ProfileChanged { change }
+    pub fn profile_modified(change: EventProfileModified) -> Self {
+        Self::ModifiedProfile { change }
     }
 
     pub fn profile_last_used_on_other_device(device: DeviceInfo) -> Self {
@@ -39,10 +43,11 @@ impl HasEventKind for Event {
             Self::GatewayChangedCurrent { to: _, is_new: _ } => {
                 EventKind::GatewayChangedCurrent
             }
-            Self::ProfileChanged { change } => change.kind(),
+            Self::ModifiedProfile { change } => change.kind(),
             Self::ProfileLastUsedOnOtherDevice(_) => {
                 EventKind::ProfileLastUsedOnOtherDevice
             }
+            Self::ImportedProfile { id: _ } => EventKind::ImportedProfile,
             Self::ProfileSaved => EventKind::ProfileSaved,
         }
     }
@@ -54,8 +59,8 @@ impl HasSampleValues for Event {
     }
 
     fn sample_other() -> Self {
-        Self::ProfileChanged {
-            change: EventProfileChange::sample_other(),
+        Self::ModifiedProfile {
+            change: EventProfileModified::sample_other(),
         }
     }
 }
@@ -90,6 +95,12 @@ mod tests {
         let test = |s: SUT, exp: EventKind| {
             assert_eq!(s.kind(), exp);
         };
+        test(
+            SUT::ImportedProfile {
+                id: ProfileID::sample(),
+            },
+            EventKind::ImportedProfile,
+        );
         test(SUT::ProfileSaved, EventKind::ProfileSaved);
         test(
             SUT::GatewayChangedCurrent {
@@ -98,11 +109,11 @@ mod tests {
             },
             EventKind::GatewayChangedCurrent,
         );
-        let change = EventProfileChange::AddedAccount {
+        let change = EventProfileModified::AddedAccount {
             address: AccountAddress::sample(),
         };
         test(
-            SUT::ProfileChanged {
+            SUT::ModifiedProfile {
                 change: change.clone(),
             },
             change.kind(),

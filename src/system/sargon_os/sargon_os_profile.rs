@@ -12,14 +12,19 @@ impl SargonOS {
         device_info: DeviceInfo,
     ) -> bool {
         let was_needed = profile.header.last_used_on_device != device_info;
-        profile.header.last_used_on_device = device_info;
-        profile.header.last_modified = now(); // FIXME: find a reusable home for updating `last_modified`
+        profile.update_header(device_info);
         was_needed
     }
 
     pub async fn claim_profile(&self, profile: &mut Profile) -> Result<()> {
+        info!("Claiming profile, id: {}", &profile.id());
         let device_info = self.device_info().await?;
-        Self::claim_provided_profile(profile, device_info);
+        Self::claim_provided_profile(profile, device_info.clone());
+        info!(
+            "Claimed profile, id: {}, with device info: {}",
+            &profile.id(),
+            device_info
+        );
         Ok(())
     }
 }
@@ -29,6 +34,12 @@ impl SargonOS {
     pub fn has_any_network(&self) -> bool {
         self.profile_holder
             .access_profile_with(|p| !p.networks.is_empty())
+    }
+
+    /// Has **any** account, at all, including hidden, on any network.
+    pub fn has_any_account_on_any_network(&self) -> bool {
+        self.profile_holder
+            .access_profile_with(|p| p.has_any_account_on_any_network())
     }
 
     pub fn profile(&self) -> Profile {
@@ -57,13 +68,35 @@ impl SargonOS {
     }
 
     pub async fn import_profile(&self, profile: Profile) -> Result<()> {
+        let imported_id = profile.id();
+        info!("Importing profile, id: {}", imported_id);
         let mut profile = profile;
         self.claim_profile(&mut profile).await?;
+
         self.secure_storage
             .save_profile_and_active_profile_id(&profile)
             .await?;
 
-        self.profile_holder.replace_profile_with(profile)
+        debug!(
+            "Saved imported profile into secure storage, id: {}",
+            imported_id
+        );
+
+        self.profile_holder.replace_profile_with(profile)?;
+        debug!(
+            "Replaced held profile with imported one, id: {}",
+            imported_id
+        );
+
+        self.event_bus
+            .emit(EventNotification::new(Event::ImportedProfile {
+                id: imported_id,
+            }))
+            .await;
+
+        info!("Successfully imported profile, id: {}", imported_id);
+
+        Ok(())
     }
 
     /// Returns `true` if the profile was changed (i.e. if claim was indeed needed),
@@ -136,10 +169,11 @@ impl SargonOS {
         profile: &Profile,
         err_on_lack_of_ownership: bool,
     ) -> Result<bool> {
-        debug!("Checking if profile.header.last_used_on_device == self.device_info");
+        debug!("Checking if profile.header.last_used_on_device is self.device_info");
         let device_info = Self::get_device_info(clients).await?;
         let last_used = profile.header.last_used_on_device.clone();
         if last_used == device_info {
+            info!("Ownership check passed (profile.header.last_used_on_device == self.device_info)");
             Ok(true)
         } else {
             info!("Profile was last used on another device, will not be able to update it until it has been claimed.");
@@ -189,6 +223,10 @@ impl SargonOS {
             self.validate_is_allowed_to_active_profile().await?;
         }
         let res = self.profile_holder.update_profile_with(mutate)?;
+        self.profile_holder.update_profile_with(|mut p| {
+            p.update_header(None);
+            Ok(())
+        })?;
         self.save_existing_profile()
             // tarpaulin will incorrectly flag next line is missed
             .await?;
@@ -200,6 +238,8 @@ impl SargonOS {
     }
 
     pub(crate) async fn save_profile(&self, profile: &Profile) -> Result<()> {
+        self.validate_is_allowed_to_active_profile().await?;
+
         let secure_storage = &self.secure_storage;
 
         secure_storage
@@ -292,6 +332,20 @@ mod tests {
     }
 
     #[actix_rt::test]
+    async fn create_first_account_has_accounts_on_any_network() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        os.with_timeout(|x| x.create_and_save_new_unnamed_mainnet_account())
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert!(os.has_any_account_on_any_network());
+    }
+
+    #[actix_rt::test]
     async fn test_import_profile_is_current_by_id() {
         // ARRANGE
         let os = SUT::fast_boot().await;
@@ -304,6 +358,32 @@ mod tests {
 
         // ASSERT
         assert_eq!(os.profile().id(), p.id());
+    }
+
+    #[actix_rt::test]
+    async fn test_import_profile_emits_event() {
+        // ARRANGE (and ACT)
+        let event_bus_driver = RustEventBusDriver::new();
+        let drivers = Drivers::with_event_bus(event_bus_driver.clone());
+        let bios = Bios::new(drivers);
+
+        let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
+            .await
+            .unwrap()
+            .unwrap();
+
+        let p = Profile::sample();
+
+        // ACT
+        os.with_timeout(|x| x.import_profile(p.clone()))
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert!(event_bus_driver
+            .recorded()
+            .iter()
+            .any(|e| e.event.kind() == EventKind::ImportedProfile));
     }
 
     #[actix_rt::test]
@@ -572,8 +652,7 @@ mod tests {
         .unwrap();
 
         // ASSERT
-        assert_eq!(os.profile(), profile);
-        assert!(os.profile().networks.items().contains(&new_network));
+        assert_eq!(os.profile().networks, profile.networks); // header has been updated so cannot do full profile comparison.
     }
 
     #[actix_rt::test]

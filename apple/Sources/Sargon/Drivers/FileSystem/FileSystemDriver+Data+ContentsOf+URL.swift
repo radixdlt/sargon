@@ -32,7 +32,12 @@ extension FileSystem: FileSystemDriver {
 	
 	public func loadFromFile(path: String) async throws -> BagOfBytes? {
 		let url = URL(file: path)
+		guard url.startAccessingSecurityScopedResource() else {
+			// FIXME CYON change to specific error
+			throw CommonError.Unknown
+		}
 		return try Data(contentsOf: url)
+		defer { url.stopAccessingSecurityScopedResource() }
 	}
 	
 	public func saveToFile(path: String, data: BagOfBytes) async throws {
