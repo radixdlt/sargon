@@ -28,4 +28,7 @@ final class DriversTests: TestCase {
 		rustLoggerLogAtEveryLevel()
 	}
 	
+    func test_bios_insecure() async throws {
+        let _ = try await SargonOS.boot(bios: BIOS.insecure())
+    }
 }

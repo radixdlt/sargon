@@ -763,4 +763,56 @@ mod tests {
         // ASSERT
         assert_eq!(os.accounts_on_current_network(), Accounts::new());
     }
+
+    #[actix_rt::test]
+    async fn test_accounts_for_display_on_current_network() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        let account = os
+            .with_timeout(|x| x.create_and_save_new_unnamed_mainnet_account())
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert_eq!(
+            os.accounts_for_display_on_current_network(),
+            AccountsForDisplay::just(AccountForDisplay::from(account))
+        );
+    }
+
+    #[actix_rt::test]
+    async fn test_account_by_address_exists() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        let account = os
+            .with_timeout(|x| x.create_and_save_new_unnamed_mainnet_account())
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert_eq!(os.account_by_address(account.address), Ok(account));
+    }
+
+    #[actix_rt::test]
+    async fn test_account_by_address_not_exists() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        // so that we have at least one network (with one account)
+        let _ = os
+            .with_timeout(|x| x.create_and_save_new_unnamed_mainnet_account())
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert_eq!(
+            os.account_by_address(AccountAddress::sample_mainnet()),
+            Err(CommonError::UnknownAccount)
+        );
+    }
 }
