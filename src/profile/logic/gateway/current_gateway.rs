@@ -1,14 +1,21 @@
 use crate::prelude::*;
 
 impl Profile {
+    /// Returns the `current` gateway in AppPreferences, used by host clients to
+    /// know the NetworkID currently being used.
     pub fn current_gateway(&self) -> Gateway {
         self.app_preferences.gateways.current.clone()
     }
 
+    /// The NetworkID currently being used, dependent on `current` gateway in
+    /// AppPreferences
     pub fn current_network_id(&self) -> NetworkID {
         self.current_gateway().network.id
     }
 
+    /// The ProfileNetwork of the currently used Network dependent on the `current`
+    /// Gateway set in AppPreferences. This affects which Accounts users see in
+    /// "Home screen" in wallet apps.
     pub fn current_network(&self) -> &ProfileNetwork {
         self.networks
             .get_id(self.current_network_id())
@@ -16,12 +23,21 @@ impl Profile {
     }
 }
 
+/// When user changes `current` Gateway in AppPreferences host clients should
+/// make it so that they can only change to non current gateway, this small type
+/// represents the outcome of switching, e.g. if they just switched to a "new"
+/// network, i.e. if the gateway was in `other` list in saved gateways, or if
+/// we just added it.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
 pub enum ChangeGatewayOutcome {
     /// If the we did in fact change the gateway, and if the gateway was unknown
     /// or known before it was added, i.e. `is_new` will be true iff the gateway
     /// was unknown before changing to it.
-    DidChange { is_new: bool },
+    DidChange {
+        /// If the Gateway we just switched to already was in the `other` list of
+        /// saved gateways in AppPreferences, or if it was entirely new.
+        is_new: bool,
+    },
 
     /// We tried to change to the current gateway.
     NoChange,

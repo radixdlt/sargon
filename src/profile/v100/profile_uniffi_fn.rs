@@ -3,11 +3,21 @@ use crate::prelude::*;
 json_data_convertible!(Profile);
 
 #[uniffi::export]
+pub fn new_profile_with_mnemonic(
+    mnemonic: Mnemonic,
+    device_info: DeviceInfo,
+) -> Profile {
+    Profile::new(mnemonic, device_info)
+}
+
+/// # Panics
+/// Panics if `device_factor_source` is not a main BDFS.
+#[uniffi::export]
 pub fn new_profile(
     device_factor_source: DeviceFactorSource,
     device_info: DeviceInfo,
 ) -> Profile {
-    Profile::new(device_factor_source, device_info)
+    Profile::from_device_factor_source(device_factor_source, device_info)
 }
 
 #[uniffi::export]
@@ -98,6 +108,18 @@ mod uniffi_tests {
             profile_analyze_contents_of_file(BagOfBytes::sample()),
             ProfileFileContents::NotProfile
         )
+    }
+
+    #[test]
+    fn test_new_with_mnemonic() {
+        assert_eq!(
+            new_profile_with_mnemonic(Mnemonic::sample(), DeviceInfo::sample())
+                .bdfs()
+                .id,
+            Profile::new(Mnemonic::sample(), DeviceInfo::sample())
+                .bdfs()
+                .id,
+        );
     }
 
     #[test]

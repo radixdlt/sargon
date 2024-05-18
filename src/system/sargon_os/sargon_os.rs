@@ -140,8 +140,10 @@ impl SargonOS {
         debug!("Created BDFS (unsaved)");
 
         debug!("Creating new Profile...");
-        let profile =
-            Profile::new(private_bdfs.factor_source.clone(), device_info);
+        let profile = Profile::from_device_factor_source(
+            private_bdfs.factor_source.clone(),
+            device_info,
+        );
         info!("Created new (unsaved) Profile with ID {}", profile.id());
         Ok((profile, private_bdfs))
     }
@@ -311,8 +313,7 @@ mod tests {
     ) {
         // ARRANGE (and ACT)
         let secure_storage_driver = EphemeralSecureStorage::new();
-        let profile =
-            Profile::new(DeviceFactorSource::sample(), DeviceInfo::sample());
+        let profile = Profile::new(Mnemonic::sample(), DeviceInfo::sample());
         let secure_storage_client =
             SecureStorageClient::new(secure_storage_driver.clone());
         secure_storage_client.save_profile(&profile).await.unwrap();
@@ -350,8 +351,7 @@ mod tests {
     ) {
         // ARRANGE (and ACT)
         let secure_storage_driver = EphemeralSecureStorage::new();
-        let profile =
-            Profile::new(DeviceFactorSource::sample(), DeviceInfo::sample());
+        let profile = Profile::new(Mnemonic::sample(), DeviceInfo::sample());
         let secure_storage_client =
             SecureStorageClient::new(secure_storage_driver.clone());
         secure_storage_client.save_profile(&profile).await.unwrap();

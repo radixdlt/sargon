@@ -143,7 +143,7 @@ impl SargonOS {
 }
 
 impl SargonOS {
-    pub(crate) async fn validate_is_allowed_to_active_profile(
+    pub(crate) async fn validate_is_allowed_to_mutate_active_profile(
         &self,
     ) -> Result<()> {
         Self::validate_is_allowed_to_update_provided_profile(
@@ -220,7 +220,7 @@ impl SargonOS {
         F: Fn(RwLockWriteGuard<'_, Profile>) -> Result<R>,
     {
         if validate_ownership {
-            self.validate_is_allowed_to_active_profile().await?;
+            self.validate_is_allowed_to_mutate_active_profile().await?;
         }
         let res = self.profile_holder.update_profile_with(mutate)?;
         self.profile_holder.update_profile_with(|mut p| {
@@ -238,7 +238,7 @@ impl SargonOS {
     }
 
     pub(crate) async fn save_profile(&self, profile: &Profile) -> Result<()> {
-        self.validate_is_allowed_to_active_profile().await?;
+        self.validate_is_allowed_to_mutate_active_profile().await?;
 
         let secure_storage = &self.secure_storage;
 

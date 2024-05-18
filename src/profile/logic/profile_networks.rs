@@ -1,6 +1,13 @@
 use crate::prelude::*;
 
 impl Profile {
+    /// If the user has **any** accounts on any network at all, including hidden
+    /// accounts. This can be used by host devices to prompt user to create their
+    /// first account or not, e.g. if user starts app after fresh install, the
+    /// SargonOS will create an "empty" Profile and BDFS and save it, before user
+    /// has had the chance to create their first account. If the user force quits
+    /// the app and then restart it, the app can still prompt user to create their
+    /// first account - as if no force-restart happened.
     pub fn has_any_account_on_any_network(&self) -> bool {
         self.networks.iter().any(|n| !n.accounts.is_empty())
     }
@@ -15,7 +22,7 @@ mod tests {
 
     #[test]
     fn test_empty_profile_has_any_account_on_any_network_is_false() {
-        let sut = SUT::new(DeviceFactorSource::sample(), DeviceInfo::sample());
+        let sut = SUT::new(Mnemonic::sample(), DeviceInfo::sample());
         assert!(!sut.has_any_account_on_any_network());
     }
 

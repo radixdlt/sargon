@@ -1,6 +1,8 @@
 use crate::prelude::*;
 
 impl Header {
+    /// Updates `last_modified`, `content_hint` and also `last_used_on_device` if
+    /// it was specified.
     pub fn update(
         &mut self,
         content_hint: ContentHint,
@@ -15,6 +17,8 @@ impl Header {
 }
 
 impl Profile {
+    /// Updates the header's fields: `last_modified`, `content_hint` and also
+    /// `last_used_on_device` if it was specified.
     pub fn update_header(
         &mut self,
         maybe_device_info: impl Into<Option<DeviceInfo>>,

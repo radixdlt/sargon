@@ -85,20 +85,60 @@ impl Profile {
 }
 
 impl Profile {
-    /// Creates a new Profile from the `DeviceFactorSource` with a Mainnet ProfileNetwork,
-    /// which is "empty" (no Accounts, Personas etc).
-    pub fn new(
+    /// Creates a new Profile from the `DeviceFactorSource` and `DeviceInfo`.
+    ///
+    /// The Profile is initialized with a Mainnet ProfileNetwork, which is
+    /// "empty" (no Accounts, Personas etc).
+    ///
+    /// # Panics
+    /// Panics if the `device_factor_source` is not a BDFS and not marked "main".
+    pub fn from_device_factor_source(
         device_factor_source: DeviceFactorSource,
         creating_device: DeviceInfo,
     ) -> Self {
+        if !device_factor_source.is_main_bdfs() {
+            panic!("DeviceFactorSource is not main BDFS");
+        }
+        let bdfs = device_factor_source;
         let header = Header::new(creating_device);
         Self::with(
             header,
-            FactorSources::with_bdfs(device_factor_source),
+            FactorSources::with_bdfs(bdfs),
             AppPreferences::default(),
             ProfileNetworks::just(ProfileNetwork::new_empty_on(
                 NetworkID::Mainnet,
             )),
+        )
+    }
+
+    /// Creates a new Profile from the `MnemonicWithPassphrase` and `DeviceInfo`,
+    /// by initializing a `DeviceFactorInstance` using `DeviceInfo` as source for
+    /// `DeviceFactorSourceHint` which will be the BDFS of the Profile.
+    ///
+    /// The Profile is initialized with a Mainnet ProfileNetwork, which is
+    /// "empty" (no Accounts, Personas etc).
+    pub fn from_mnemonic_with_passphrase(
+        mnemonic_with_passphrase: MnemonicWithPassphrase,
+        creating_device: DeviceInfo,
+    ) -> Self {
+        let bdfs = DeviceFactorSource::babylon(
+            true,
+            &mnemonic_with_passphrase,
+            &creating_device,
+        );
+        Self::from_device_factor_source(bdfs, creating_device)
+    }
+
+    /// Creates a new Profile from the `Mnemonic` (no passphrase) and `DeviceInfo`,
+    /// by initializing a `DeviceFactorInstance` using `DeviceInfo` as source for
+    /// `DeviceFactorSourceHint` which will be the BDFS of the Profile.
+    ///
+    /// The Profile is initialized with a Mainnet ProfileNetwork, which is
+    /// "empty" (no Accounts, Personas etc).
+    pub fn new(mnemonic: Mnemonic, creating_device: DeviceInfo) -> Self {
+        Self::from_mnemonic_with_passphrase(
+            MnemonicWithPassphrase::new(mnemonic),
+            creating_device,
         )
     }
 
@@ -257,7 +297,7 @@ mod tests {
 
     #[test]
     fn new_creates_empty_mainnet_network() {
-        let sut = SUT::new(DeviceFactorSource::sample(), DeviceInfo::sample());
+        let sut = SUT::new(Mnemonic::sample(), DeviceInfo::sample());
         assert_eq!(
             sut.networks,
             ProfileNetworks::just(ProfileNetwork::new_empty_on(
@@ -305,6 +345,15 @@ mod tests {
         pretty_assertions::assert_eq!(
             format!("{:?}", SUT::sample()),
             format!("{:?}", SUT::sample())
+        );
+    }
+
+    #[test]
+    #[should_panic(expected = "DeviceFactorSource is not main BDFS")]
+    fn new_from_non_main_bdfs_panics() {
+        let _ = SUT::from_device_factor_source(
+            DeviceFactorSource::sample_other(),
+            DeviceInfo::sample(),
         );
     }
 
@@ -485,16 +534,7 @@ mod tests {
     fn hash() {
         let n = 100;
         let set = (0..n)
-            .map(|_| {
-                SUT::new(
-                    PrivateHierarchicalDeterministicFactorSource::generate_new_babylon(
-						true,
-                        &DeviceInfo::sample(),
-                    )
-                    .factor_source,
-                    DeviceInfo::sample()
-                )
-            })
+            .map(|_| SUT::new(Mnemonic::generate_new(), DeviceInfo::sample()))
             .collect::<HashSet<_>>();
         assert_eq!(set.len(), n);
     }

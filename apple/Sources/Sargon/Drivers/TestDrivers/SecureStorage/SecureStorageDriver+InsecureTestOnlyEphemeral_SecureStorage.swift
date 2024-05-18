@@ -15,12 +15,16 @@ extension SecureStorageDriver where Self == Insecure︕！TestOnly︕！Ephemera
 	}
 }
 
+/// ‼️ NEVER USE IN PRODUCTION ‼️
+/// An INSECURE ephemeral storage conforming to `SecureStorageDriver` meant
+/// for testing purposes only.
 public final actor Insecure︕！TestOnly︕！Ephemeral︕！SecureStorage {
 	public typealias Key = SecureStorageKey
 	fileprivate var dictionary: [Key: Data] = [:]
 	public init(keychainService _: String) {}
 }
 
+// MARK: `SecureStorageDriver` conformance
 extension Insecure︕！TestOnly︕！Ephemeral︕！SecureStorage: SecureStorageDriver {
 	public func loadData(key: SecureStorageKey) async throws -> Data? {
 		dictionary[key]

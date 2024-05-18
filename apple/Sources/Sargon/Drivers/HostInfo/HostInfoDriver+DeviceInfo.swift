@@ -8,6 +8,8 @@
 import Foundation
 import SargonUniFFI
 
+/// An `HostInfoDriver` actor being able to read host info, i.e
+/// details about the iPhone the app is running on.
 public final actor HostInfo {
 	fileprivate var appVersion: String
 	public init(appVersion: String) {
