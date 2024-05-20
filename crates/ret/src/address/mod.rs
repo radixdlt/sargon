@@ -4,6 +4,7 @@ mod account_address;
 mod account_address_uniffi_fn;
 mod address;
 mod address_format;
+mod address_of_account_or_persona;
 mod is_network_aware;
 
 #[macro_use]
@@ -41,6 +42,7 @@ pub use account_address::*;
 pub use account_address_uniffi_fn::*;
 pub use address::*;
 pub use address_format::*;
+pub use address_of_account_or_persona::*;
 pub use address_union::*;
 pub use component_address::*;
 pub use component_address_uniffi_fn::*;

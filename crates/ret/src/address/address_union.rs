@@ -462,3 +462,5 @@ macro_rules! address_union {
         }
     };
 }
+
+pub(crate) use address_union;

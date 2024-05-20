@@ -372,7 +372,7 @@ mod tests {
     }
 
     #[test]
-    fn zeroize() {
+    fn test_zeroize() {
         let mut sut = SUT::sample();
         sut.zeroize();
         assert_ne!(sut, SUT::sample());

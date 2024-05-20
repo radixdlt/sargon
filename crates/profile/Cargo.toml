@@ -11,6 +11,8 @@ enum-iterator = { workspace = true }
 strum = { workspace = true }
 serde = { workspace = true }
 hkdf = { workspace = true }
+zeroize = { workspace = true }
+paste = { workspace = true }
 k256 = { workspace = true }
 radix-common = { workspace = true }               # Hash
 pretty_assertions = { workspace = true }

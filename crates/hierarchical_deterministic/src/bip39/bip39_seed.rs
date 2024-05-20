@@ -57,7 +57,10 @@ impl BIP39Seed {
         // `IotaSlip10::Seed` implements `ZeroizeOnDrop` so should now be zeroized.
     }
 
-    fn derive_ed25519_private_key(&self, path: &HDPath) -> Ed25519PrivateKey {
+    pub fn derive_ed25519_private_key(
+        &self,
+        path: &HDPath,
+    ) -> Ed25519PrivateKey {
         let ck = self
             .derive_slip10_private_key::<IotaSlip10Ed25519::SecretKey, _>(
                 path.hardened_chain().into_iter(),

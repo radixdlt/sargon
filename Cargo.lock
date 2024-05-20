@@ -2136,6 +2136,7 @@ dependencies = [
  "hd",
  "hkdf",
  "k256 0.13.3 (git+https://github.com/RustCrypto/elliptic-curves?rev=e158ce5cf0e9acee2fd76aff2a628334f5c771e5)",
+ "paste 1.0.14",
  "pretty_assertions",
  "radix-common",
  "radix-rust",
@@ -2146,6 +2147,7 @@ dependencies = [
  "serde_with 3.4.0",
  "strum 0.26.1",
  "uniffi",
+ "zeroize 1.7.0 (git+https://github.com/RustCrypto/utils?rev=df6d2f48a5e8afe8eef04ba32e2af55bacb41375)",
 ]
 
 [[package]]
@@ -2463,6 +2465,7 @@ name = "radix_connect"
 version = "1.1.0"
 dependencies = [
  "common",
+ "paste 1.0.14",
  "profile",
  "uniffi",
 ]
