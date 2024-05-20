@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-fn validate_and_decode_hash_try_network<T: ScryptoHashHasHrp>(
+pub fn validate_and_decode_hash_try_network<T: ScryptoHashHasHrp>(
     bech32_encoded_hash: &str,
     network_id: NetworkID,
 ) -> Result<T, ()> {
@@ -9,7 +9,7 @@ fn validate_and_decode_hash_try_network<T: ScryptoHashHasHrp>(
         .map_err(|_| ())
 }
 
-pub(crate) fn validate_and_decode_hash<T: ScryptoHashHasHrp>(
+pub fn validate_and_decode_hash<T: ScryptoHashHasHrp>(
     bech32_encoded_hash: &str,
 ) -> Result<(T, NetworkID)> {
     if let Some(t) = enum_iterator::all::<NetworkID>()

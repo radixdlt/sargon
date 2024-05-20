@@ -1,4 +1,4 @@
-use crate::{prelude::*, UniffiCustomTypeConverter};
+use crate::prelude::*;
 
 use k256::ecdsa::VerifyingKey as K256PublicKey;
 
@@ -30,21 +30,11 @@ impl From<Secp256k1PublicKey> for ScryptoSecp256k1PublicKey {
     }
 }
 
-uniffi::custom_type!(ScryptoSecp256k1PublicKey, BagOfBytes);
-
-impl UniffiCustomTypeConverter for ScryptoSecp256k1PublicKey {
-    type Builtin = BagOfBytes;
-
-    #[cfg(not(tarpaulin_include))] // false negative | tested in bindgen tests
-    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
-        Self::try_from(val.as_slice()).map_err(|e| e.into())
-    }
-
-    #[cfg(not(tarpaulin_include))] // false negative | tested in bindgen tests
-    fn from_custom(obj: Self) -> Self::Builtin {
-        obj.to_vec().into()
-    }
-}
+uniffi::custom_type!(ScryptoSecp256k1PublicKey, BagOfBytes, {
+    remote,
+    from_custom: |key|  BagOfBytes::from(key.to_vec()),
+    try_into_custom: |b| ScryptoSecp256k1PublicKey::try_from(b.as_slice()).map_err(|e| e.into())
+});
 
 impl IsPublicKey<Secp256k1Signature> for Secp256k1PublicKey {
     /// Verifies an ECDSA signature over Secp256k1.
@@ -62,7 +52,7 @@ impl IsPublicKey<Secp256k1Signature> for Secp256k1PublicKey {
 }
 
 impl Secp256k1PublicKey {
-    pub(crate) fn scrypto(&self) -> ScryptoSecp256k1PublicKey {
+    pub fn scrypto(&self) -> ScryptoSecp256k1PublicKey {
         self.secret_magic
     }
 

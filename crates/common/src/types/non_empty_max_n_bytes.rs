@@ -217,6 +217,12 @@ macro_rules! decl_samples_for_max_n_bytes {
 // The impl of sample values require an max number of bytes
 decl_samples_for_max_n_bytes!(NonEmptyMax64Bytes, 64);
 
+impl From<ScryptoBytesNonFungibleLocalId> for NonEmptyMax64Bytes {
+    fn from(value: ScryptoBytesNonFungibleLocalId) -> Self {
+        Self::try_from(value.value()).expect("Should not be possible, since ScryptoBytesNonFungibleLocalId have validated length")
+    }
+}
+
 #[cfg(test)]
 mod tests_non_empty_max_64_bytes {
 

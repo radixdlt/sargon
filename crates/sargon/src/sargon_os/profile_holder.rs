@@ -7,8 +7,8 @@ use std::{
 #[derive(Debug, uniffi::Object)]
 #[allow(dead_code)]
 pub struct ProfileHolder {
-    // This is pub(crate) for testing purposes only, i.e. causing the RwLock to be poisoned.
-    pub(crate) profile: RwLock<Profile>,
+    // This is pub for testing purposes only, i.e. causing the RwLock to be poisoned.
+    pub profile: RwLock<Profile>,
 }
 
 impl ProfileHolder {

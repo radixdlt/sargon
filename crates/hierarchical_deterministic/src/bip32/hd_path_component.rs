@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-pub(crate) const BIP32_HARDENED: u32 = 2147483648;
+pub const BIP32_HARDENED: u32 = 2147483648;
 
 pub type HDPathValue = u32;
 
@@ -29,7 +29,7 @@ impl From<HDPathValue> for HDPathComponent {
 }
 
 impl HDPathComponent {
-    pub(crate) fn index(&self) -> HDPathValue {
+    pub fn index(&self) -> HDPathValue {
         if self.is_hardened() {
             self.value - BIP32_HARDENED
         } else {
@@ -37,11 +37,11 @@ impl HDPathComponent {
         }
     }
 
-    pub(crate) fn is_hardened(&self) -> bool {
+    pub fn is_hardened(&self) -> bool {
         self.value >= BIP32_HARDENED
     }
 
-    pub(crate) fn try_from_str(s: &str) -> Option<Self> {
+    pub fn try_from_str(s: &str) -> Option<Self> {
         let is_hardened = s.ends_with('H') || s.ends_with('\'');
         let mut component_str = s;
         if is_hardened {
@@ -56,7 +56,7 @@ impl HDPathComponent {
         })
     }
 
-    pub(crate) fn non_hardened(value: HDPathValue) -> Self {
+    pub fn non_hardened(value: HDPathValue) -> Self {
         assert!(
             value < BIP32_HARDENED,
             "Passed value was hardened, expected it to not be."
@@ -64,7 +64,7 @@ impl HDPathComponent {
         Self { value }
     }
 
-    pub(crate) fn harden(value: HDPathValue) -> Self {
+    pub fn harden(value: HDPathValue) -> Self {
         assert!(
             value < BIP32_HARDENED,
             "Passed value was already hardened, expected it to not be."

@@ -2,12 +2,12 @@ use crate::prelude::*;
 use std::hash::{DefaultHasher, Hash, Hasher};
 
 #[uniffi::export]
-pub(crate) fn new_profile_file_contents_sample() -> ProfileFileContents {
+pub fn new_profile_file_contents_sample() -> ProfileFileContents {
     ProfileFileContents::sample()
 }
 
 #[uniffi::export]
-pub(crate) fn new_profile_file_contents_sample_other() -> ProfileFileContents {
+pub fn new_profile_file_contents_sample_other() -> ProfileFileContents {
     ProfileFileContents::sample_other()
 }
 

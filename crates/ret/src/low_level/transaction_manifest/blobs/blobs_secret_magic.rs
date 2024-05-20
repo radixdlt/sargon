@@ -3,7 +3,7 @@ use crate::prelude::*;
 /// Vec of Blobs
 #[derive(Clone, PartialEq, Eq, Debug, uniffi::Record)]
 pub struct BlobsSecretMagic {
-    pub(crate) secret_magic: Vec<Blob>,
+    pub secret_magic: Vec<Blob>,
 }
 
 impl BlobsSecretMagic {
@@ -20,7 +20,7 @@ impl BlobsSecretMagic {
         }
     }
 
-    pub(crate) fn from_bags<I>(bags: I) -> Self
+    pub fn from_bags<I>(bags: I) -> Self
     where
         I: IntoIterator<Item = BagOfBytes>,
     {
@@ -40,7 +40,7 @@ impl From<ScryptoBlobs> for BlobsSecretMagic {
     }
 }
 
-pub(crate) type ScryptoBlobsMap = IndexMap<ScryptoHash, Vec<u8>>;
+pub type ScryptoBlobsMap = IndexMap<ScryptoHash, Vec<u8>>;
 
 impl From<ScryptoBlobsMap> for BlobsSecretMagic {
     fn from(value: ScryptoBlobsMap) -> Self {

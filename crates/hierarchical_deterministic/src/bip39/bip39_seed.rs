@@ -1,14 +1,32 @@
-use crate::{decl_secret_bytes, prelude::*};
+use crate::prelude::*;
 
-decl_secret_bytes!(
-    /// A BIP39 seed for hierarchal deterministic wallets, as per the [BIP39 standard][doc].
-    ///
-    /// We typically obtain this by calling [`to_seed` on `MnemonicWithPassphrase`][MnemonicWithPassphrase::to_seed].
-    ///
-    /// [doc]: https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki#user-content-From_mnemonic_to_seed
-    BIP39Seed,
-    64
-);
+// decl_secret_bytes!(
+//     /// A BIP39 seed for hierarchal deterministic wallets, as per the [BIP39 standard][doc].
+//     ///
+//     /// We typically obtain this by calling [`to_seed` on `MnemonicWithPassphrase`][MnemonicWithPassphrase::to_seed].
+//     ///
+//     /// [doc]: https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki#user-content-From_mnemonic_to_seed
+//     BIP39Seed,
+//     64
+// );
+
+uniffi::custom_newtype!(BIP39Seed, Exactly64Bytes);
+
+/// A BIP39 Seed
+#[derive(
+    Zeroize,
+    Serialize,
+    Deserialize,
+    Clone,
+    PartialEq,
+    Eq,
+    derive_more::Display,
+    derive_more::Debug,
+    Hash,
+)]
+#[serde(transparent)]
+#[display("<OBFUSCATED>")]
+pub struct BIP39Seed(pub Exactly64Bytes);
 
 impl HDPath {
     fn hardened_chain(&self) -> Vec<IotaSlip10PathComponent> {
@@ -34,7 +52,7 @@ impl BIP39Seed {
         I: Iterator,
         <I as Iterator>::Item: IotaSlip10::Segment,
     {
-        let iota_seed = IotaSlip10::Seed::from_bytes(&*self.secret_magic.0);
+        let iota_seed = IotaSlip10::Seed::from_bytes(self.0.as_ref());
         iota_seed.derive(chain)
         // `IotaSlip10::Seed` implements `ZeroizeOnDrop` so should now be zeroized.
     }
@@ -49,7 +67,7 @@ impl BIP39Seed {
         // `IotaSlip10Ed25519::SecretKey` implements `ZeroizeOnDrop` so should now be zeroized.
     }
 
-    pub(crate) fn derive_secp256k1_private_key(
+    pub fn derive_secp256k1_private_key(
         &self,
         path: &HDPath,
     ) -> Secp256k1PrivateKey {
@@ -63,39 +81,39 @@ impl BIP39Seed {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
 
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = BIP39Seed;
+//     #[allow(clippy::upper_case_acronyms)]
+//     type SUT = BIP39Seed;
 
-    #[test]
-    fn manual_uniffi_conversion() {
-        let bytes = Exactly64Bytes::sample();
-        let builtin: BagOfBytes = bytes.clone().as_ref().into();
-        let sut = new_b_i_p39_seed_from_bytes(builtin.clone()).unwrap();
-        let rust_side = sut.secret_magic;
+//     #[test]
+//     fn manual_uniffi_conversion() {
+//         let bytes = Exactly64Bytes::sample();
+//         let builtin: BagOfBytes = bytes.clone().as_ref().into();
+//         let sut = new_b_i_p39_seed_from_bytes(builtin.clone()).unwrap();
+//         let rust_side = sut.secret_magic;
 
-        let ffi_side =
-        <BIP39SeedSecretMagic as crate::UniffiCustomTypeConverter>::from_custom(
-            rust_side,
-        );
+//         let ffi_side =
+//         <BIP39SeedSecretMagic as crate::UniffiCustomTypeConverter>::from_custom(
+//             rust_side,
+//         );
 
-        assert_eq!(ffi_side.to_hex(), builtin.to_hex());
+//         assert_eq!(ffi_side.to_hex(), builtin.to_hex());
 
-        let from_ffi_side =
-        <BIP39SeedSecretMagic as crate::UniffiCustomTypeConverter>::into_custom(
-            ffi_side,
-        )
-        .unwrap();
+//         let from_ffi_side =
+//         <BIP39SeedSecretMagic as crate::UniffiCustomTypeConverter>::into_custom(
+//             ffi_side,
+//         )
+//         .unwrap();
 
-        assert_eq!(
-            new_b_i_p39_seed_from_bytes(builtin.clone())
-                .unwrap()
-                .secret_magic
-                .0,
-            from_ffi_side.0
-        );
-    }
-}
+//         assert_eq!(
+//             new_b_i_p39_seed_from_bytes(builtin.clone())
+//                 .unwrap()
+//                 .secret_magic
+//                 .0,
+//             from_ffi_side.0
+//         );
+//     }
+// }

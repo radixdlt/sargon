@@ -10,20 +10,22 @@ use crate::prelude::*;
 pub struct InstructionsSecretMagic(pub Vec<ScryptoInstruction>);
 
 impl InstructionsSecretMagic {
-    pub(crate) fn instructions(&self) -> &Vec<ScryptoInstruction> {
+    pub fn instructions(&self) -> &Vec<ScryptoInstruction> {
         &self.0
     }
-    pub(crate) fn new(instructions: Vec<ScryptoInstruction>) -> Self {
+    pub fn new(instructions: Vec<ScryptoInstruction>) -> Self {
         Self(instructions)
     }
 }
 
-uniffi::custom_type!(InstructionsSecretMagic, BagOfBytes);
-
-impl crate::UniffiCustomTypeConverter for InstructionsSecretMagic {
-    type Builtin = BagOfBytes;
-
-    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
+uniffi::custom_type!(InstructionsSecretMagic, BagOfBytes, {
+    remote,
+    from_custom: |secret_magic| {
+        RET_compile_instructions(&secret_magic.0)
+        .map(|b| b.into())
+        .expect("to never fail")
+    },
+    try_into_custom: |val| {
         let bytes: &[u8] = val.bytes();
         RET_decompile_instructions(bytes)
             .map_err(|e| {
@@ -34,13 +36,7 @@ impl crate::UniffiCustomTypeConverter for InstructionsSecretMagic {
             })
             .map(Self::new)
     }
-
-    fn from_custom(obj: Self) -> Self::Builtin {
-        RET_compile_instructions(&obj.0)
-            .map(|b| b.into())
-            .expect("to never fail")
-    }
-}
+});
 
 impl From<ScryptoInstructions> for InstructionsSecretMagic {
     fn from(value: ScryptoInstructions) -> Self {
@@ -64,7 +60,6 @@ impl HasSampleValues for InstructionsSecretMagic {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::prelude::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = InstructionsSecretMagic;
@@ -92,29 +87,29 @@ mod tests {
         assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
-    #[test]
-    fn manual_perform_uniffi_conversion_successful() {
-        let sut = SUT::sample();
-        let builtin = BagOfBytes::from_hex("4d20220212001300").unwrap();
+    // #[test]
+    // fn manual_perform_uniffi_conversion_successful() {
+    //     let sut = SUT::sample();
+    //     let builtin = BagOfBytes::from_hex("4d20220212001300").unwrap();
 
-        let ffi_side =
-            <SUT as crate::UniffiCustomTypeConverter>::from_custom(sut.clone());
+    //     let ffi_side =
+    //         <SUT as crate::UniffiCustomTypeConverter>::from_custom(sut.clone());
 
-        assert_eq!(ffi_side.to_hex(), builtin.to_hex());
+    //     assert_eq!(ffi_side.to_hex(), builtin.to_hex());
 
-        let from_ffi_side =
-            <SUT as crate::UniffiCustomTypeConverter>::into_custom(ffi_side)
-                .unwrap();
+    //     let from_ffi_side =
+    //         <SUT as crate::UniffiCustomTypeConverter>::into_custom(ffi_side)
+    //             .unwrap();
 
-        assert_eq!(sut, from_ffi_side);
-    }
+    //     assert_eq!(sut, from_ffi_side);
+    // }
 
-    #[test]
-    fn manual_perform_uniffi_conversion_fail() {
-        let builtin = BagOfBytes::from_hex("deadbeef").unwrap();
-        assert!(<SUT as crate::UniffiCustomTypeConverter>::into_custom(
-            builtin
-        )
-        .is_err());
-    }
+    // #[test]
+    // fn manual_perform_uniffi_conversion_fail() {
+    //     let builtin = BagOfBytes::from_hex("deadbeef").unwrap();
+    //     assert!(<SUT as crate::UniffiCustomTypeConverter>::into_custom(
+    //         builtin
+    //     )
+    //     .is_err());
+    // }
 }

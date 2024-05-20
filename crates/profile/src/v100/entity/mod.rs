@@ -1,4 +1,3 @@
-mod abstract_entity_type;
 mod account;
 mod display_name;
 mod display_name_uniffi_fn;
@@ -8,7 +7,6 @@ mod entity_flags;
 mod is_entity;
 mod persona;
 
-pub use abstract_entity_type::*;
 pub use account::*;
 pub use display_name::*;
 pub use display_name_uniffi_fn::*;

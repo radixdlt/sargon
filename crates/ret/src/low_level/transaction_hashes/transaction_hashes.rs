@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-use crate::wrapped_radix_engine_toolkit::low_level::transaction_hashes::validate_and_decode_hash::validate_and_decode_hash;
-
 /// This macro exists since UniFFI does not support generics currently, when/if
 /// UniFFI does, we SHOULD remove this macro and use generics.
 macro_rules! decl_tx_hash {
@@ -68,7 +66,7 @@ macro_rules! decl_tx_hash {
         }
 
         impl $struct_name {
-            pub(crate) fn from_scrypto(
+            pub fn from_scrypto(
                 scrypto: $scrypto_struct_name,
                 network_id: NetworkID,
             ) -> Self {

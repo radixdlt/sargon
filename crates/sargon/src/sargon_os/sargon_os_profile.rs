@@ -143,7 +143,7 @@ impl SargonOS {
 }
 
 impl SargonOS {
-    pub(crate) async fn validate_is_allowed_to_mutate_active_profile(
+    pub async fn validate_is_allowed_to_mutate_active_profile(
         &self,
     ) -> Result<()> {
         Self::validate_is_allowed_to_update_provided_profile(
@@ -153,7 +153,7 @@ impl SargonOS {
         .await
     }
 
-    pub(crate) async fn validate_is_allowed_to_update_provided_profile(
+    pub async fn validate_is_allowed_to_update_provided_profile(
         clients: &Clients,
         profile: &Profile,
     ) -> Result<()> {
@@ -164,7 +164,7 @@ impl SargonOS {
         Ok(())
     }
 
-    pub(crate) async fn check_is_allowed_to_update_provided_profile(
+    pub async fn check_is_allowed_to_update_provided_profile(
         clients: &Clients,
         profile: &Profile,
         err_on_lack_of_ownership: bool,
@@ -197,7 +197,7 @@ impl SargonOS {
 
     /// Validates ownership of Profile, then updates and **saves** it to
     /// secure storage, after mutating it with `mutate`.
-    pub(crate) async fn update_profile_with<F, R>(&self, mutate: F) -> Result<R>
+    pub async fn update_profile_with<F, R>(&self, mutate: F) -> Result<R>
     where
         F: Fn(RwLockWriteGuard<'_, Profile>) -> Result<R>,
     {
@@ -211,7 +211,7 @@ impl SargonOS {
     ///
     /// The only function to pass `false` to the `validate_ownership` parameter
     /// is the `SargonOS::claim_active_profile` method.
-    pub(crate) async fn maybe_validate_ownership_update_profile_with<F, R>(
+    pub async fn maybe_validate_ownership_update_profile_with<F, R>(
         &self,
         validate_ownership: bool, // should only ever pass `false` from `claim`
         mutate: F,
@@ -233,11 +233,11 @@ impl SargonOS {
         Ok(res)
     }
 
-    pub(crate) async fn save_existing_profile(&self) -> Result<()> {
+    pub async fn save_existing_profile(&self) -> Result<()> {
         self.save_profile(&self.profile()).await
     }
 
-    pub(crate) async fn save_profile(&self, profile: &Profile) -> Result<()> {
+    pub async fn save_profile(&self, profile: &Profile) -> Result<()> {
         self.validate_is_allowed_to_mutate_active_profile().await?;
 
         let secure_storage = &self.secure_storage;

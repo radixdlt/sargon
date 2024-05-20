@@ -6,6 +6,9 @@ build = "build.rs"
 
 [dependencies]
 uniffi = { workspace = true, features = ["cli"] }
+serde = { workspace = true }
+serde_with = { workspace = true }
+serde_json = { workspace = true }
 common = { path = "../common" }
 ret = { path = "../ret" }
 hd = { path = "../hierarchical_deterministic" }

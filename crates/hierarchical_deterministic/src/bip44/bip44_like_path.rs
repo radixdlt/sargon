@@ -39,7 +39,7 @@ use crate::prelude::*;
     derive_more::Display,
     uniffi::Record,
 )]
-#[display("{}", self.bip32_string())]
+#[display("{}", self.path.to_string())]
 pub struct BIP44LikePath {
     pub path: HDPath,
 }

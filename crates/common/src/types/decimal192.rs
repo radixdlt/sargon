@@ -2,22 +2,26 @@ use crate::prelude::*;
 use delegate::delegate;
 use enum_iterator::reverse_all;
 
-uniffi::custom_type!(ScryptoDecimal192, String);
+uniffi::custom_type!(ScryptoDecimal192, String, {
+    remote,
+    from_custom: |decimal| decimal.to_string(),
+    try_into_custom: |val| val.parse::<Self>().map_err(|e| e.into())
+});
 
-/// UniFFI conversion for InnerDecimal using String as builtin.
-impl crate::UniffiCustomTypeConverter for ScryptoDecimal192 {
-    type Builtin = String;
+// /// UniFFI conversion for InnerDecimal using String as builtin.
+// impl crate::UniffiCustomTypeConverter for ScryptoDecimal192 {
+//     type Builtin = String;
 
-    #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
-    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
-        val.parse::<Self>().map_err(|e| e.into())
-    }
+//     #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
+//     fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
+//
+//     }
 
-    #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
-    fn from_custom(obj: Self) -> Self::Builtin {
-        obj.to_string()
-    }
-}
+//     #[cfg(not(tarpaulin_include))] // false negative, tested in bindgen tests
+//     fn from_custom(obj: Self) -> Self::Builtin {
+//         obj.to_string()
+//     }
+// }
 
 /// `Decimal192` represents a 192 bit representation of a fixed-scale decimal number.
 ///
@@ -499,7 +503,7 @@ impl Decimal {
 impl Decimal {
     /// Creates the Decimal `10^exponent`, returns `None` if overflows.
     #[inline]
-    pub(crate) fn checked_powi(&self, exp: i64) -> Option<Self> {
+    pub fn checked_powi(&self, exp: i64) -> Option<Self> {
         self.native().checked_powi(exp).map(|n| n.into())
     }
 
@@ -658,7 +662,7 @@ impl Decimal {
     }
 }
 
-#[cfg(test)]
+// We want `#[cfg(test)]` but that seems to not work across crates :/
 impl From<&str> for Decimal192 {
     /// TEST ONLY
     fn from(value: &str) -> Self {
@@ -728,7 +732,7 @@ impl Decimal192 {
     uniffi::Enum,
 )]
 #[repr(u8)]
-pub(crate) enum Multiplier {
+pub enum Multiplier {
     Million = 6,
     Billion = 9,
     Trillion = 12,
@@ -741,12 +745,12 @@ impl Multiplier {
     }
 
     /// The exponent of a `Multiplier`, i.e. `6` for `Million`.
-    pub(crate) fn value(&self) -> Decimal192 {
+    pub fn value(&self) -> Decimal192 {
         Decimal192::pow(self.discriminant())
     }
 
     /// Symbol of a `Multiplier`, i.e. 'M' for `Million`.
-    pub(crate) fn suffix(&self) -> char {
+    pub fn suffix(&self) -> char {
         match self {
             Self::Million => 'M',
             Self::Billion => 'B',
@@ -796,7 +800,7 @@ fn split_str(s: impl AsRef<str>, after: i8) -> (String, String) {
 
 // Helper for formatting
 impl Decimal192 {
-    pub(crate) fn multiplier(&self) -> Option<Multiplier> {
+    pub fn multiplier(&self) -> Option<Multiplier> {
         let abs = self.abs();
         reverse_all::<Multiplier>().find(|x| x.value() <= abs)
     }
@@ -808,7 +812,7 @@ impl Decimal192 {
 
     /// Rounds `self`` to `n` places, counting both the integer and decimal parts,
     /// as well as any leading zeros.
-    pub(crate) fn rounded_to_total_places(&self, n: u8) -> Self {
+    pub fn rounded_to_total_places(&self, n: u8) -> Self {
         let total_places = n;
         let digits = self.digits();
         // If we only have decimals, we will still count the 0 before the separator as an integer

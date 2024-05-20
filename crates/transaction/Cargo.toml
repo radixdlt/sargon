@@ -1,0 +1,21 @@
+[package]
+name = "transaction"
+version = "1.1.0"
+edition = "2021"
+build = "build.rs"
+
+[dependencies]
+uniffi = { workspace = true, features = ["cli"] }
+serde = { workspace = true }
+common = { path = "../common" }
+ret = { path = "../ret" }
+profile = { path = "../profile" }
+
+[build-dependencies]
+uniffi = { workspace = true, features = ["build"] }
+
+[dev-dependencies]
+uniffi = { workspace = true, features = ["bindgen-tests"] }
+
+[lib]
+crate-type = ["staticlib", "cdylib", "lib"]

@@ -249,52 +249,64 @@ pub mod prelude {
 pub use prelude::*;
 
 // Use `Url` as a custom type, with `String` as the Builtin
-uniffi::custom_type!(Url, String);
+uniffi::custom_type!(Url, String, {
+    remote,
+    from_custom: |url| url.to_string(),
+    try_into_custom: |val|  Ok(Url::parse(&val)?)
+});
 
-// Use `url::Url` as a custom type, with `String` as the Builtin
-#[cfg(not(tarpaulin_include))] // Tested in binding tests (e.g. test*.swift files)
-impl UniffiCustomTypeConverter for Url {
-    type Builtin = String;
+// // Use `url::Url` as a custom type, with `String` as the Builtin
+// #[cfg(not(tarpaulin_include))] // Tested in binding tests (e.g. test*.swift files)
+// impl UniffiCustomTypeConverter for Url {
+//     type Builtin = String;
 
-    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
-        Ok(Url::parse(&val)?)
-    }
+//     fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
+//
+//     }
 
-    fn from_custom(obj: Self) -> Self::Builtin {
-        obj.into()
-    }
-}
+//     fn from_custom(obj: Self) -> Self::Builtin {
+//         obj.into()
+//     }
+// }
 
 // Use `Timestamp` as a custom type, with `String` as the Builtin
-uniffi::custom_type!(Timestamp, String);
+uniffi::custom_type!(Timestamp, String, {
+    remote,
+    from_custom: |time| time.to_string(),
+    try_into_custom: |val| Timestamp::parse(val.as_str())
+    .ok_or(CommonError::InvalidISO8601String { bad_value: val })
+    .map_err(|e| e.into())
+});
 
-#[cfg(not(tarpaulin_include))] // Tested in binding tests (e.g. test*.swift files)
-impl UniffiCustomTypeConverter for Timestamp {
-    type Builtin = String;
+// #[cfg(not(tarpaulin_include))] // Tested in binding tests (e.g. test*.swift files)
+// impl UniffiCustomTypeConverter for Timestamp {
+//     type Builtin = String;
 
-    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
-        Timestamp::parse(val.as_str())
-            .ok_or(CommonError::InvalidISO8601String { bad_value: val })
-            .map_err(|e| e.into())
-    }
+//     fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
 
-    fn from_custom(obj: Self) -> Self::Builtin {
-        obj.to_string()
-    }
-}
+//     }
+
+//     fn from_custom(obj: Self) -> Self::Builtin {
+//         obj.to_string()
+//     }
+// }
 
 // Use `Uuid` as a custom type, with `String` as the Builtin
-uniffi::custom_type!(Uuid, String);
+uniffi::custom_type!(Uuid, String, {
+    remote,
+    from_custom: |id| id.to_string(),
+    try_into_custom: |val| Uuid::try_parse(val.as_str()).map_err(|e| e.into())
+});
 
-#[cfg(not(tarpaulin_include))] // Tested in binding tests (e.g. test*.swift files)
-impl UniffiCustomTypeConverter for Uuid {
-    type Builtin = String;
-    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
-        Uuid::try_parse(val.as_str()).map_err(|e| e.into())
-    }
-    fn from_custom(obj: Self) -> Self::Builtin {
-        obj.to_string()
-    }
-}
+// #[cfg(not(tarpaulin_include))] // Tested in binding tests (e.g. test*.swift files)
+// impl UniffiCustomTypeConverter for Uuid {
+//     type Builtin = String;
+//     fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
+//
+//     }
+//     fn from_custom(obj: Self) -> Self::Builtin {
+//         obj.to_string()
+//     }
+// }
 
 uniffi::include_scaffolding!("common");

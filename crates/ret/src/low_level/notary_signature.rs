@@ -14,7 +14,7 @@ use crate::prelude::*;
     uniffi::Record,
 )]
 pub struct NotarySignature {
-    pub(crate) secret_magic: Signature,
+    pub secret_magic: Signature,
 }
 
 impl From<ScryptoNotarySignature> for NotarySignature {

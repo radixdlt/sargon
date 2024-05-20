@@ -10,8 +10,8 @@ use crate::prelude::*;
 /// phone.
 #[derive(Debug, uniffi::Object)]
 pub struct SargonOS {
-    pub(crate) profile_holder: ProfileHolder,
-    pub(crate) clients: Clients,
+    pub profile_holder: ProfileHolder,
+    pub clients: Clients,
 }
 
 #[uniffi::export]
@@ -97,7 +97,7 @@ impl SargonOS {
 }
 
 impl SargonOS {
-    pub(crate) async fn new_profile_and_bdfs(
+    pub async fn new_profile_and_bdfs(
         &self,
     ) -> Result<(Profile, PrivateHierarchicalDeterministicFactorSource)> {
         Self::create_new_profile_and_bdfs(&self.clients).await
@@ -148,11 +148,11 @@ impl SargonOS {
         Ok((profile, private_bdfs))
     }
 
-    pub(crate) async fn device_info(&self) -> Result<DeviceInfo> {
+    pub async fn device_info(&self) -> Result<DeviceInfo> {
         Self::get_device_info(&self.clients).await
     }
 
-    pub(crate) async fn get_device_info(
+    pub async fn get_device_info(
         clients: &Clients,
     ) -> Result<DeviceInfo> {
         debug!("Get device info");
@@ -178,7 +178,7 @@ impl SargonOS {
 }
 
 #[cfg(test)]
-pub(crate) const SARGON_OS_TEST_MAX_ASYNC_DURATION: std::time::Duration =
+pub const SARGON_OS_TEST_MAX_ASYNC_DURATION: std::time::Duration =
     std::time::Duration::from_millis(50);
 
 #[cfg(test)]

@@ -1892,6 +1892,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3fdb12b2476b595f9358c5161aa467c2438859caa136dec86c26fdd2efe17b92"
 
 [[package]]
+name = "oneshot-uniffi"
+version = "0.1.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6c548d5c78976f6955d72d0ced18c48ca07030f7a1d4024529fedd7c1c01b29c"
+
+[[package]]
 name = "opaque-debug"
 version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2109,6 +2115,9 @@ dependencies = [
  "common",
  "hd",
  "ret",
+ "serde",
+ "serde_json 1.0.108",
+ "serde_with 3.4.0",
  "uniffi",
 ]
 
@@ -2616,6 +2625,8 @@ version = "1.1.0"
 dependencies = [
  "cargo_toml 0.15.3 (git+https://gitlab.com/lib.rs/cargo_toml?rev=e498c94fc42a660c1ca1a28999ce1d757cfe77fe)",
  "common",
+ "derive_more",
+ "enum-iterator",
  "pretty_assertions",
  "radix-common",
  "radix-common-derive",
@@ -2628,6 +2639,8 @@ dependencies = [
  "rand 0.8.5",
  "sbor",
  "serde",
+ "serde_json 1.0.108",
+ "serde_with 3.4.0",
  "strum 0.26.1",
  "uniffi",
 ]
@@ -3533,6 +3546,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "transaction"
+version = "1.1.0"
+dependencies = [
+ "common",
+ "profile",
+ "ret",
+ "serde",
+ "uniffi",
+]
+
+[[package]]
 name = "triomphe"
 version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3617,7 +3641,7 @@ checksum = "f962df74c8c05a667b5ee8bcf162993134c104e96440b663c8daa176dc772d8c"
 [[package]]
 name = "uniffi"
 version = "0.27.1"
-source = "git+https://github.com/mozilla/uniffi-rs/?rev=6f33088e8100a2ea9586c8c3ecf98ab51d5aba62#6f33088e8100a2ea9586c8c3ecf98ab51d5aba62"
+source = "git+https://github.com/bendk/uniffi-rs/?rev=4b65c3796bc3743404e1ee2a7b4ab51e24589aa6#4b65c3796bc3743404e1ee2a7b4ab51e24589aa6"
 dependencies = [
  "anyhow",
  "camino 1.1.7",
@@ -3631,7 +3655,7 @@ dependencies = [
 [[package]]
 name = "uniffi_bindgen"
 version = "0.27.1"
-source = "git+https://github.com/mozilla/uniffi-rs/?rev=6f33088e8100a2ea9586c8c3ecf98ab51d5aba62#6f33088e8100a2ea9586c8c3ecf98ab51d5aba62"
+source = "git+https://github.com/bendk/uniffi-rs/?rev=4b65c3796bc3743404e1ee2a7b4ab51e24589aa6#4b65c3796bc3743404e1ee2a7b4ab51e24589aa6"
 dependencies = [
  "anyhow",
  "askama",
@@ -3655,7 +3679,7 @@ dependencies = [
 [[package]]
 name = "uniffi_build"
 version = "0.27.1"
-source = "git+https://github.com/mozilla/uniffi-rs/?rev=6f33088e8100a2ea9586c8c3ecf98ab51d5aba62#6f33088e8100a2ea9586c8c3ecf98ab51d5aba62"
+source = "git+https://github.com/bendk/uniffi-rs/?rev=4b65c3796bc3743404e1ee2a7b4ab51e24589aa6#4b65c3796bc3743404e1ee2a7b4ab51e24589aa6"
 dependencies = [
  "anyhow",
  "camino 1.1.7",
@@ -3665,7 +3689,7 @@ dependencies = [
 [[package]]
 name = "uniffi_checksum_derive"
 version = "0.27.1"
-source = "git+https://github.com/mozilla/uniffi-rs/?rev=6f33088e8100a2ea9586c8c3ecf98ab51d5aba62#6f33088e8100a2ea9586c8c3ecf98ab51d5aba62"
+source = "git+https://github.com/bendk/uniffi-rs/?rev=4b65c3796bc3743404e1ee2a7b4ab51e24589aa6#4b65c3796bc3743404e1ee2a7b4ab51e24589aa6"
 dependencies = [
  "quote",
  "syn 2.0.63",
@@ -3674,13 +3698,14 @@ dependencies = [
 [[package]]
 name = "uniffi_core"
 version = "0.27.1"
-source = "git+https://github.com/mozilla/uniffi-rs/?rev=6f33088e8100a2ea9586c8c3ecf98ab51d5aba62#6f33088e8100a2ea9586c8c3ecf98ab51d5aba62"
+source = "git+https://github.com/bendk/uniffi-rs/?rev=4b65c3796bc3743404e1ee2a7b4ab51e24589aa6#4b65c3796bc3743404e1ee2a7b4ab51e24589aa6"
 dependencies = [
  "anyhow",
  "bytes",
  "camino 1.1.7",
  "log",
  "once_cell",
+ "oneshot-uniffi",
  "paste 1.0.15",
  "static_assertions",
 ]
@@ -3688,7 +3713,7 @@ dependencies = [
 [[package]]
 name = "uniffi_macros"
 version = "0.27.1"
-source = "git+https://github.com/mozilla/uniffi-rs/?rev=6f33088e8100a2ea9586c8c3ecf98ab51d5aba62#6f33088e8100a2ea9586c8c3ecf98ab51d5aba62"
+source = "git+https://github.com/bendk/uniffi-rs/?rev=4b65c3796bc3743404e1ee2a7b4ab51e24589aa6#4b65c3796bc3743404e1ee2a7b4ab51e24589aa6"
 dependencies = [
  "bincode",
  "camino 1.1.7",
@@ -3705,7 +3730,7 @@ dependencies = [
 [[package]]
 name = "uniffi_meta"
 version = "0.27.1"
-source = "git+https://github.com/mozilla/uniffi-rs/?rev=6f33088e8100a2ea9586c8c3ecf98ab51d5aba62#6f33088e8100a2ea9586c8c3ecf98ab51d5aba62"
+source = "git+https://github.com/bendk/uniffi-rs/?rev=4b65c3796bc3743404e1ee2a7b4ab51e24589aa6#4b65c3796bc3743404e1ee2a7b4ab51e24589aa6"
 dependencies = [
  "anyhow",
  "bytes",
@@ -3716,7 +3741,7 @@ dependencies = [
 [[package]]
 name = "uniffi_testing"
 version = "0.27.1"
-source = "git+https://github.com/mozilla/uniffi-rs/?rev=6f33088e8100a2ea9586c8c3ecf98ab51d5aba62#6f33088e8100a2ea9586c8c3ecf98ab51d5aba62"
+source = "git+https://github.com/bendk/uniffi-rs/?rev=4b65c3796bc3743404e1ee2a7b4ab51e24589aa6#4b65c3796bc3743404e1ee2a7b4ab51e24589aa6"
 dependencies = [
  "anyhow",
  "camino 1.1.7",
@@ -3728,7 +3753,7 @@ dependencies = [
 [[package]]
 name = "uniffi_udl"
 version = "0.27.1"
-source = "git+https://github.com/mozilla/uniffi-rs/?rev=6f33088e8100a2ea9586c8c3ecf98ab51d5aba62#6f33088e8100a2ea9586c8c3ecf98ab51d5aba62"
+source = "git+https://github.com/bendk/uniffi-rs/?rev=4b65c3796bc3743404e1ee2a7b4ab51e24589aa6#4b65c3796bc3743404e1ee2a7b4ab51e24589aa6"
 dependencies = [
  "anyhow",
  "textwrap",
@@ -3966,7 +3991,7 @@ dependencies = [
 [[package]]
 name = "weedle2"
 version = "5.0.0"
-source = "git+https://github.com/mozilla/uniffi-rs/?rev=6f33088e8100a2ea9586c8c3ecf98ab51d5aba62#6f33088e8100a2ea9586c8c3ecf98ab51d5aba62"
+source = "git+https://github.com/bendk/uniffi-rs/?rev=4b65c3796bc3743404e1ee2a7b4ab51e24589aa6#4b65c3796bc3743404e1ee2a7b4ab51e24589aa6"
 dependencies = [
  "nom",
 ]

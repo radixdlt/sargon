@@ -13,7 +13,7 @@ use crate::prelude::*;
     Hash,
 )]
 #[serde(transparent)]
-pub struct ProfileID(pub(crate) Uuid);
+pub struct ProfileID(pub Uuid);
 uniffi::custom_newtype!(ProfileID, Uuid);
 
 impl FromStr for ProfileID {

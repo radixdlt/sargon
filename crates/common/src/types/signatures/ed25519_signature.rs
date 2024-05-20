@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{json_string_convertible, prelude::*};
 
 json_string_convertible!(Ed25519Signature);
 

@@ -1,4 +1,4 @@
-use crate::{prelude::*, UniffiCustomTypeConverter};
+use crate::{json_string_convertible, prelude::*};
 
 use crypto::signatures::ed25519 as IotaSlip10Ed25519;
 
@@ -32,20 +32,11 @@ impl From<Ed25519PublicKey> for ScryptoEd25519PublicKey {
     }
 }
 
-uniffi::custom_type!(ScryptoEd25519PublicKey, BagOfBytes);
-impl UniffiCustomTypeConverter for ScryptoEd25519PublicKey {
-    type Builtin = BagOfBytes;
-
-    #[cfg(not(tarpaulin_include))] // false negative | tested in bindgen tests
-    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
-        Self::try_from(val.as_slice()).map_err(|e| e.into())
-    }
-
-    #[cfg(not(tarpaulin_include))] // false negative | tested in bindgen tests
-    fn from_custom(obj: Self) -> Self::Builtin {
-        obj.to_vec().into()
-    }
-}
+uniffi::custom_type!(ScryptoEd25519PublicKey, BagOfBytes, {
+    remote,
+    from_custom: |key|  BagOfBytes::from(key.to_vec()),
+    try_into_custom: |b| Ok(ScryptoEd25519PublicKey::try_from(b.as_slice()).unwrap())
+});
 
 #[uniffi::export]
 pub fn new_ed25519_public_key_from_hex(
@@ -109,7 +100,7 @@ impl IsPublicKey<Ed25519Signature> for Ed25519PublicKey {
 }
 
 impl Ed25519PublicKey {
-    pub(crate) fn scrypto(&self) -> ScryptoEd25519PublicKey {
+    pub fn scrypto(&self) -> ScryptoEd25519PublicKey {
         self.secret_magic
     }
 

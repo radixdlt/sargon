@@ -54,7 +54,7 @@ impl Mnemonic {
         format!("Mnemonic in {} obfuscated.", self.language)
     }
 
-    pub(crate) fn from_internal(internal: bip39::Mnemonic) -> Self {
+    pub fn from_internal(internal: bip39::Mnemonic) -> Self {
         use k256::elliptic_curve::zeroize::Zeroize;
 
         let language = internal.language();
@@ -115,7 +115,8 @@ impl Mnemonic {
     }
 
     pub fn to_seed(&self, passphrase: &str) -> BIP39Seed {
-        BIP39Seed::new(self.internal().to_seed(passphrase))
+        // BIP39Seed::new(self.internal().to_seed(passphrase))
+        BIP39Seed(Exactly64Bytes::from(&self.internal().to_seed(passphrase)))
     }
 }
 

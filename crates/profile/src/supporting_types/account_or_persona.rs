@@ -77,27 +77,27 @@ impl HasSampleValues for AccountOrPersona {
 }
 
 impl AccountOrPersona {
-    pub(crate) fn sample_mainnet() -> Self {
+    pub fn sample_mainnet() -> Self {
         Self::from(Account::sample_mainnet())
     }
 
-    pub(crate) fn sample_mainnet_other() -> Self {
+    pub fn sample_mainnet_other() -> Self {
         Self::from(Persona::sample_mainnet_other())
     }
 
-    pub(crate) fn sample_mainnet_third() -> Self {
+    pub fn sample_mainnet_third() -> Self {
         Self::from(Account::sample_mainnet_third())
     }
 
-    pub(crate) fn sample_stokenet() -> Self {
+    pub fn sample_stokenet() -> Self {
         Self::from(Account::sample_stokenet())
     }
 
-    pub(crate) fn sample_stokenet_other() -> Self {
+    pub fn sample_stokenet_other() -> Self {
         Self::from(Persona::sample_stokenet_other())
     }
 
-    pub(crate) fn sample_stokenet_third() -> Self {
+    pub fn sample_stokenet_third() -> Self {
         Self::from(Account::sample_stokenet_third())
     }
 }

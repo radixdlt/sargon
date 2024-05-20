@@ -3,7 +3,7 @@ use crate::prelude::*;
 /// Blob is a wrapper a bag of bytes
 #[derive(Clone, PartialEq, Eq, Debug, derive_more::Display, uniffi::Record)]
 pub struct Blob {
-    pub(crate) secret_magic: BagOfBytes,
+    pub secret_magic: BagOfBytes,
 }
 
 impl Blob {

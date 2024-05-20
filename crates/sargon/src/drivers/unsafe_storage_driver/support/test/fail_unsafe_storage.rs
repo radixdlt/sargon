@@ -3,7 +3,7 @@
 use crate::prelude::*;
 
 #[derive(Debug)]
-pub(crate) struct AlwaysFailUnsafeStorage {}
+pub struct AlwaysFailUnsafeStorage {}
 
 impl UnsafeStorageDriver for AlwaysFailUnsafeStorage {
     fn load_data(&self, _key: UnsafeStorageKey) -> Result<Option<BagOfBytes>> {

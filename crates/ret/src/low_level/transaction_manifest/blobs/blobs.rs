@@ -3,7 +3,7 @@ use crate::prelude::*;
 /// Vec of Blobs
 #[derive(Clone, PartialEq, Eq, Debug, uniffi::Record)]
 pub struct Blobs {
-    pub(crate) secret_magic: BlobsSecretMagic,
+    pub secret_magic: BlobsSecretMagic,
 }
 
 impl From<BlobsSecretMagic> for Blobs {

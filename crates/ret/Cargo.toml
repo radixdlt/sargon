@@ -9,7 +9,11 @@ uniffi = { workspace = true, features = ["cli"] }
 common = { path = "../common" }
 pretty_assertions = { workspace = true }
 serde = { workspace = true }
+serde_with = { workspace = true }
+serde_json = { workspace = true }
 strum = { workspace = true }
+derive_more = { workspace = true }
+enum-iterator = { workspace = true }
 rand = { workspace = true }
 
 sbor = { workspace = true }

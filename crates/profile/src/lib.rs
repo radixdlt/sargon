@@ -12,7 +12,7 @@ pub mod prelude {
     pub use crate::supporting_types::*;
     pub use crate::v100::*;
 
-    pub(crate) use common::prelude::*;
+    pub use common::prelude::*;
 }
 
 pub use prelude::*;

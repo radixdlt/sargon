@@ -5,7 +5,7 @@ uniffi::custom_newtype!(WalletInteractionId, Uuid);
 #[derive(
     Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Ord, PartialOrd, Hash,
 )]
-pub struct WalletInteractionId(pub(crate) Uuid);
+pub struct WalletInteractionId(pub Uuid);
 
 impl FromStr for WalletInteractionId {
     type Err = CommonError;

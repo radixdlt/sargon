@@ -18,7 +18,7 @@ impl RadixConnectMobileDappRequest {
         }
     }
 
-    pub(crate) fn try_with_interaction_id_and_session_id(
+    pub fn try_with_interaction_id_and_session_id(
         interaction_id: impl AsRef<str>,
         session_id: impl AsRef<str>,
     ) -> Result<Self> {

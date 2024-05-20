@@ -4,7 +4,7 @@ use crate::prelude::*;
     Clone, Copy, PartialOrd, Ord, Debug, PartialEq, Eq, Hash, uniffi::Record,
 )]
 pub struct IntentSignature {
-    pub(crate) secret_magic: SignatureWithPublicKey,
+    pub secret_magic: SignatureWithPublicKey,
 }
 
 impl IntentSignature {

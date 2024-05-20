@@ -76,32 +76,6 @@ impl IsNetworkAware for Persona {
 }
 
 impl Persona {
-    /// Creates a new `Persona`, if `persona_data` is `None`, an empty object will be created.
-    pub fn new(
-        persona_creating_factor_instance: HDFactorInstanceIdentityCreation,
-        display_name: DisplayName,
-        persona_data: impl Into<Option<PersonaData>>,
-    ) -> Self {
-        let address =
-            IdentityAddress::from_hd_factor_instance_virtual_entity_creation(
-                persona_creating_factor_instance.clone(),
-            );
-        Self {
-            network_id: persona_creating_factor_instance.network_id(),
-            address,
-            display_name,
-            security_state:
-                UnsecuredEntityControl::with_entity_creating_factor_instance(
-                    persona_creating_factor_instance,
-                )
-                .into(),
-            flags: EntityFlags::default(),
-            persona_data: persona_data.into().unwrap_or_default(),
-        }
-    }
-}
-
-impl Persona {
     #[cfg(not(tarpaulin_include))] // false negative
     fn sample_at_index_name_network<P, E>(
         network_id: NetworkID,

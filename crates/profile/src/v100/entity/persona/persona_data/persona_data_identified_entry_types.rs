@@ -54,7 +54,7 @@ macro_rules! declare_identified_entry {
             }
         }
         impl $struct_name {
-            pub(crate) fn with_id(
+            pub fn with_id(
                 id: PersonaDataEntryID,
                 value: $value_type,
             ) -> Self {

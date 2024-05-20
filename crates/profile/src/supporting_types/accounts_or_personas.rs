@@ -19,7 +19,7 @@ impl HasSampleValues for AccountsOrPersonas {
 }
 
 impl AccountsOrPersonas {
-    pub(crate) fn sample_mainnet() -> Self {
+    pub fn sample_mainnet() -> Self {
         Self::from_iter([
             Account::sample_mainnet().into(),
             Persona::sample_mainnet().into(),
@@ -30,7 +30,7 @@ impl AccountsOrPersonas {
         ])
     }
 
-    pub(crate) fn sample_stokenet() -> Self {
+    pub fn sample_stokenet() -> Self {
         Self::from_iter([
             Persona::sample_stokenet().into(),
             Account::sample_stokenet().into(),

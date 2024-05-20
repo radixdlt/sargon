@@ -7,7 +7,7 @@ pub struct UnsafeStorageClient {
 }
 
 impl UnsafeStorageClient {
-    pub(crate) fn new(driver: Arc<dyn UnsafeStorageDriver>) -> Self {
+    pub fn new(driver: Arc<dyn UnsafeStorageDriver>) -> Self {
         Self { driver }
     }
 }

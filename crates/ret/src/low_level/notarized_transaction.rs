@@ -73,22 +73,23 @@ impl NotarizedTransaction {
     /// Utility function which uses `NotarizedTransaction::new(<SignedIntent>, <NotarySignature>)`
     /// and SHOULD return `Err` if `depth > NotarizedTransaction::MAX_SBOR_DEPTH`, which
     /// we can assert in unit tests.
-    pub(crate) fn test_with_sbor_depth(
+    pub fn test_with_sbor_depth(
         depth: usize,
         network_id: NetworkID,
     ) -> Result<Self> {
-        SignedIntent::test_with_sbor_depth(depth, network_id).and_then(
-            |signed_intent| {
-                Self::new(
-                    signed_intent.clone(),
-                    Ed25519PrivateKey::sample_alice()
-                        .notarize_hash(&signed_intent.hash()),
-                )
-            },
-        )
+        // SignedIntent::test_with_sbor_depth(depth, network_id).and_then(
+        //     |signed_intent| {
+        //         Self::new(
+        //             signed_intent.clone(),
+        //             Ed25519PrivateKey::sample_alice()
+        //                 .notarize_hash(&signed_intent.hash()),
+        //         )
+        //     },
+        // )
+        todo!()
     }
 
-    pub(crate) const MAX_SBOR_DEPTH: usize = SignedIntent::MAX_SBOR_DEPTH - 1;
+    pub const MAX_SBOR_DEPTH: usize = SignedIntent::MAX_SBOR_DEPTH - 1;
 }
 
 impl HasSampleValues for NotarizedTransaction {
@@ -101,11 +102,13 @@ impl HasSampleValues for NotarizedTransaction {
 
         let signed_intent_hash = signed_intent.hash();
 
-        Self::new(
-            signed_intent,
-            private_key.notarize_hash(&signed_intent_hash),
-        )
-        .unwrap()
+        // Self::new(
+        //     signed_intent,
+        //     private_key.notarize_hash(&signed_intent_hash),
+        // )
+        // .unwrap()
+
+        todo!()
     }
 
     // Identical to: https://github.com/radixdlt/radixdlt-scrypto/blob/ff21f24952318387803ae720105eec079afe33f3/transaction/src/model/hash/encoder.rs#L115
@@ -124,11 +127,12 @@ impl HasSampleValues for NotarizedTransaction {
 
         let signed_intent_hash = signed_intent.hash();
 
-        Self::new(
-            signed_intent,
-            private_key.notarize_hash(&signed_intent_hash),
-        )
-        .unwrap()
+        // Self::new(
+        //     signed_intent,
+        //     private_key.notarize_hash(&signed_intent_hash),
+        // )
+        // .unwrap()
+        todo!()
     }
 }
 

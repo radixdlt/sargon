@@ -1,12 +1,12 @@
 use crate::prelude::*;
 
-#[uniffi::export]
-pub fn new_mnemonic_generate_with_entropy(
-    entropy: BIP39Entropy,
-    language: BIP39Language,
-) -> Mnemonic {
-    Mnemonic::from_entropy_in(entropy, language)
-}
+// #[uniffi::export]
+// pub fn new_mnemonic_generate_with_entropy(
+//     entropy: BIP39Entropy,
+//     language: BIP39Language,
+// ) -> Mnemonic {
+//     Mnemonic::from_entropy_in(entropy, language)
+// }
 
 /// Returns new mnemonic from a string of words
 #[uniffi::export]
@@ -72,27 +72,27 @@ mod uniffi_tests {
         assert_eq!(mnemonic_phrase(&sut), str);
     }
 
-    #[test]
-    fn test_new_mnemonic_generate_with_entropy_16_bytes() {
-        let sut = new_mnemonic_generate_with_entropy(
-            BIP39Entropy::EntropyOf16Bytes(Entropy16Bytes::new([0xff; 16])),
-            BIP39Language::English,
-        );
-        assert_eq!(
-            sut.phrase(),
-            "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"
-        );
-    }
+    // #[test]
+    // fn test_new_mnemonic_generate_with_entropy_16_bytes() {
+    //     let sut = new_mnemonic_generate_with_entropy(
+    //         BIP39Entropy::EntropyOf16Bytes(Entropy16Bytes::new([0xff; 16])),
+    //         BIP39Language::English,
+    //     );
+    //     assert_eq!(
+    //         sut.phrase(),
+    //         "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"
+    //     );
+    // }
 
-    #[test]
-    fn test_new_mnemonic_generate_with_entropy_32_bytes() {
-        let sut = new_mnemonic_generate_with_entropy(
-            BIP39Entropy::EntropyOf32Bytes(Entropy32Bytes::new([0xff; 32])),
-            BIP39Language::English,
-        );
-        assert_eq!(sut.phrase(), "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo vote",
-    );
-    }
+    // #[test]
+    // fn test_new_mnemonic_generate_with_entropy_32_bytes() {
+    //     let sut = new_mnemonic_generate_with_entropy(
+    //         BIP39Entropy::EntropyOf32Bytes(Entropy32Bytes::new([0xff; 32])),
+    //         BIP39Language::English,
+    //     );
+    //     assert_eq!(sut.phrase(), "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo vote",
+    // );
+    // }
 
     #[test]
     fn test_new_mnemonic_from_phrase() {

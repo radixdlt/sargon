@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 #[derive(Clone, Debug)]
 pub struct TransactionReceipt {
-    pub(crate) decoded: ScryptoTransactionReceipt,
+    pub decoded: ScryptoTransactionReceipt,
 }
 
 impl TryFrom<BagOfBytes> for TransactionReceipt {

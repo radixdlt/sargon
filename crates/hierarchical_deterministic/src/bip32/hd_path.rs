@@ -67,7 +67,7 @@ impl HasSampleValues for HDPath {
 }
 
 impl HDPath {
-    pub(crate) fn from_components<I>(components: I) -> Self
+    pub fn from_components<I>(components: I) -> Self
     where
         I: IntoIterator<Item = HDPathComponent>,
     {
@@ -76,11 +76,11 @@ impl HDPath {
         }
     }
 
-    pub(crate) fn depth(&self) -> usize {
+    pub fn depth(&self) -> usize {
         self.components.len()
     }
 
-    pub(crate) fn parse_try_map<T, F>(
+    pub fn parse_try_map<T, F>(
         path: &[HDPathComponent],
         index: usize,
         try_map: F,
@@ -92,7 +92,7 @@ impl HDPath {
         try_map(got.index())
     }
 
-    pub(crate) fn parse<F>(
+    pub fn parse<F>(
         path: &[HDPathComponent],
         index: usize,
         expected: HDPathComponent,
@@ -109,7 +109,7 @@ impl HDPath {
     }
 
     #[cfg(not(tarpaulin_include))] // false negative
-    pub(crate) fn try_parse_base_hdpath<F>(
+    pub fn try_parse_base_hdpath<F>(
         path: &HDPath,
         depth_error: F,
     ) -> Result<(HDPath, Vec<HDPathComponent>)>
@@ -138,7 +138,7 @@ impl HDPath {
         Ok((path.clone(), components.clone()))
     }
 
-    pub(crate) fn try_parse_base<F>(
+    pub fn try_parse_base<F>(
         s: &str,
         depth_error: F,
     ) -> Result<(HDPath, Vec<HDPathComponent>)>

@@ -19,7 +19,7 @@ impl TransactionManifestSecretMagic {
         }
     }
 
-    pub(crate) fn instructions(&self) -> &Vec<ScryptoInstruction> {
+    pub fn instructions(&self) -> &Vec<ScryptoInstruction> {
         self.instructions.instructions()
     }
 }
@@ -36,7 +36,7 @@ impl HasSampleValues for TransactionManifestSecretMagic {
 
 #[allow(unused)]
 impl TransactionManifestSecretMagic {
-    pub(crate) fn sample_mainnet_without_lock_fee() -> Self {
+    pub fn sample_mainnet_without_lock_fee() -> Self {
         Self::new(
             Instructions::sample_mainnet_without_lock_fee(),
             Blobs::default(),

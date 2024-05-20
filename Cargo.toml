@@ -7,6 +7,7 @@ members = [
     "crates/hierarchical_deterministic",
     "crates/profile",
     "crates/radix_connect",
+    "crates/transaction",
     "crates/ret",
     "crates/sargon",
 ]
@@ -100,7 +101,7 @@ itertools = { git = "https://github.com/rust-itertools/itertools/", rev = "98eca
 enum-as-inner = { git = "https://github.com/bluejekyll/enum-as-inner/", rev = "c15f6e5c4f98ec865e181ae1fff9fc13a1a2e4e2" }
 
 # uniffi = "0.27.1"
-uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "6f33088e8100a2ea9586c8c3ecf98ab51d5aba62", features = [
+uniffi = { git = "https://github.com/bendk/uniffi-rs/", rev = "4b65c3796bc3743404e1ee2a7b4ab51e24589aa6", features = [
     "cli",
 ] }
 

@@ -85,32 +85,6 @@ impl IsNetworkAware for Account {
     }
 }
 
-impl Account {
-    pub fn new(
-        account_creating_factor_instance: HDFactorInstanceAccountCreation,
-        display_name: DisplayName,
-        appearance_id: AppearanceID,
-    ) -> Self {
-        let address =
-            AccountAddress::from_hd_factor_instance_virtual_entity_creation(
-                account_creating_factor_instance.clone(),
-            );
-        Self {
-            network_id: account_creating_factor_instance.network_id(),
-            address,
-            display_name,
-            security_state:
-                UnsecuredEntityControl::with_entity_creating_factor_instance(
-                    account_creating_factor_instance,
-                )
-                .into(),
-            appearance_id,
-            flags: EntityFlags::default(),
-            on_ledger_settings: OnLedgerSettings::default(),
-        }
-    }
-}
-
 impl Identifiable for Account {
     type ID = AccountAddress;
 

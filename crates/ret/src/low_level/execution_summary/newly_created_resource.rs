@@ -103,7 +103,7 @@ impl NewlyCreatedResource {
 
 #[allow(unused)]
 impl NewlyCreatedResource {
-    pub(crate) fn sample_mainnet_xrd() -> Self {
+    pub fn sample_mainnet_xrd() -> Self {
         Self::with(
             "Rad",
             "XRD",
@@ -113,7 +113,7 @@ impl NewlyCreatedResource {
         )
     }
 
-    pub(crate) fn sample_mainnet_candy() -> Self {
+    pub fn sample_mainnet_candy() -> Self {
         Self::with(
             "Candy",
             "CANDY",
@@ -123,7 +123,7 @@ impl NewlyCreatedResource {
         )
     }
 
-    pub(crate) fn sample_stokenet_gc() -> Self {
+    pub fn sample_stokenet_gc() -> Self {
         Self::with(
             "GC Tokens (GC)",
             "GC",
@@ -133,7 +133,7 @@ impl NewlyCreatedResource {
         )
     }
 
-    pub(crate) fn sample_stokenet_gum() -> Self {
+    pub fn sample_stokenet_gum() -> Self {
         Self::with(
             "GC Gumballs (GUM)",
             "GUM",

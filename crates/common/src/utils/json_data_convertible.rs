@@ -51,6 +51,7 @@ pub trait JsonDataSerializing: Sized + Serialize {
     }
 }
 
+#[macro_export]
 macro_rules! json_data_convertible {
     ($type: ty) => {
         paste! {
@@ -117,8 +118,9 @@ macro_rules! json_data_convertible {
     };
 }
 
-pub(crate) use json_data_convertible;
+pub use json_data_convertible;
 
+#[macro_export]
 macro_rules! json_string_convertible {
     ($type: ty) => {
         paste! {
@@ -198,4 +200,4 @@ macro_rules! json_string_convertible {
     };
 }
 
-pub(crate) use json_string_convertible;
+pub use json_string_convertible;

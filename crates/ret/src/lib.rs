@@ -1,11 +1,11 @@
-mod high_level;
+mod address;
 mod low_level;
 
 pub mod prelude {
-    pub use crate::high_level::*;
+    pub use crate::address::*;
     pub use crate::low_level::*;
 
-    pub(crate) use common::prelude::*;
+    pub use common::prelude::*;
 }
 
 pub use prelude::*;

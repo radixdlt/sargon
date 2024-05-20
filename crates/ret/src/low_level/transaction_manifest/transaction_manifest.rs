@@ -36,7 +36,7 @@ impl TransactionManifest {
 }
 
 impl TransactionManifest {
-    pub(crate) fn empty(network_id: NetworkID) -> Self {
+    pub fn empty(network_id: NetworkID) -> Self {
         Self {
             secret_magic: TransactionManifestSecretMagic {
                 instructions: Instructions::empty(network_id),
@@ -55,7 +55,7 @@ impl From<TransactionManifestSecretMagic> for TransactionManifest {
 }
 
 impl TransactionManifest {
-    pub(crate) fn scrypto_manifest(&self) -> ScryptoTransactionManifest {
+    pub fn scrypto_manifest(&self) -> ScryptoTransactionManifest {
         ScryptoTransactionManifest {
             instructions: self.instructions().clone(),
             blobs: self.secret_magic.blobs.clone().into(),
@@ -104,11 +104,11 @@ impl TransactionManifest {
 }
 
 impl TransactionManifest {
-    pub(crate) fn instructions(&self) -> &Vec<ScryptoInstruction> {
+    pub fn instructions(&self) -> &Vec<ScryptoInstruction> {
         self.secret_magic.instructions()
     }
 
-    pub(crate) fn blobs(&self) -> &Blobs {
+    pub fn blobs(&self) -> &Blobs {
         &self.secret_magic.blobs
     }
 
@@ -160,7 +160,7 @@ impl HasSampleValues for TransactionManifest {
 
 #[allow(unused)]
 impl TransactionManifest {
-    pub(crate) fn sample_mainnet_without_lock_fee() -> Self {
+    pub fn sample_mainnet_without_lock_fee() -> Self {
         TransactionManifestSecretMagic::sample_mainnet_without_lock_fee().into()
     }
 }
@@ -262,8 +262,9 @@ mod tests {
         assert_eq!(
             SUT::new(instructions_str, NetworkID::Mainnet, Blobs::default()),
             Err(CommonError::InvalidInstructionsWrongNetwork {
-                found_in_instructions: NetworkID::Simulator,
+                found_in_instructions: NetworkID::Simulator.discriminant(),
                 specified_to_instructions_ctor: NetworkID::Mainnet
+                    .discriminant()
             })
         );
     }
@@ -279,8 +280,9 @@ mod tests {
         assert_eq!(
             SUT::new(instructions_str, NetworkID::Stokenet, Blobs::default()),
             Err(CommonError::InvalidInstructionsWrongNetwork {
-                found_in_instructions: NetworkID::Mainnet,
+                found_in_instructions: NetworkID::Mainnet.discriminant(),
                 specified_to_instructions_ctor: NetworkID::Stokenet
+                    .discriminant()
             })
         );
     }

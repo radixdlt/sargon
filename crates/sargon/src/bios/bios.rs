@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 #[derive(Debug, uniffi::Object)]
 pub struct Bios {
-    pub(crate) drivers: Arc<Drivers>,
+    pub drivers: Arc<Drivers>,
 }
 
 #[uniffi::export]

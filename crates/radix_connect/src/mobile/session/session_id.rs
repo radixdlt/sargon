@@ -14,7 +14,7 @@ uniffi::custom_newtype!(SessionID, Uuid);
     Hash,
     derive_more::Display,
 )]
-pub struct SessionID(pub(crate) Uuid);
+pub struct SessionID(pub Uuid);
 
 impl FromStr for SessionID {
     type Err = CommonError;

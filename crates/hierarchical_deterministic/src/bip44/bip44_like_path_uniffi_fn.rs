@@ -18,11 +18,6 @@ pub fn bip44_like_path_to_string(path: &BIP44LikePath) -> String {
 }
 
 #[uniffi::export]
-pub fn bip44_like_path_get_address_index(path: &BIP44LikePath) -> HDPathValue {
-    path.last_component().index()
-}
-
-#[uniffi::export]
 pub fn new_bip44_like_path_sample() -> BIP44LikePath {
     BIP44LikePath::sample()
 }
@@ -76,10 +71,5 @@ mod tests {
                 .unwrap()
                 .to_string()
         );
-    }
-
-    #[test]
-    fn test_bip44_like_path_get_address_index() {
-        assert_eq!(bip44_like_path_get_address_index(&SUT::sample_other()), 1)
     }
 }

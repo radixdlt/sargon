@@ -6,7 +6,7 @@ pub struct EntropyClient {
 }
 
 impl EntropyClient {
-    pub(crate) fn new(driver: Arc<dyn EntropyProviderDriver>) -> Self {
+    pub fn new(driver: Arc<dyn EntropyProviderDriver>) -> Self {
         Self { driver }
     }
 

@@ -15,6 +15,11 @@ impl Derivation for BIP44LikePath {
     }
 }
 
+#[uniffi::export]
+pub fn bip44_like_path_get_address_index(path: &BIP44LikePath) -> HDPathValue {
+    path.last_component().index()
+}
+
 impl BIP44LikePath {
     fn scheme(&self) -> DerivationPathScheme {
         DerivationPathScheme::Bip44Olympia
@@ -55,5 +60,16 @@ impl HDPrivateKeyDeriving for BIP39Seed {
                 )
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    #[test]
+    fn test_bip44_like_path_get_address_index() {
+        assert_eq!(bip44_like_path_get_address_index(&SUT::sample_other()), 1)
     }
 }

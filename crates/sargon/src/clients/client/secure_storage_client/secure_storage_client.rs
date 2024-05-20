@@ -19,7 +19,7 @@ pub struct SecureStorageClient {
 impl SecureStorageClient {
     /// Creates a new SecureStorageClient using an implementation of
     /// `SecureStorageDriver`.
-    pub(crate) fn new(driver: Arc<dyn SecureStorageDriver>) -> Self {
+    pub fn new(driver: Arc<dyn SecureStorageDriver>) -> Self {
         Self { driver }
     }
 }
@@ -283,13 +283,13 @@ impl SecureStorageClient {
 
 #[cfg(test)]
 impl SecureStorageClient {
-    pub(crate) fn ephemeral(
+    pub fn ephemeral(
     ) -> (SecureStorageClient, Arc<EphemeralSecureStorage>) {
         let storage = EphemeralSecureStorage::new();
         (SecureStorageClient::new(storage.clone()), storage)
     }
 
-    pub(crate) fn always_fail() -> Self {
+    pub fn always_fail() -> Self {
         SecureStorageClient::new(Arc::new(AlwaysFailSecureStorage {}))
     }
 }

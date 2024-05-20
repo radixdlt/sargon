@@ -13,7 +13,7 @@ impl RadixConnectMobileLinkRequest {
         Self { origin, session_id }
     }
 
-    pub(crate) fn try_with_origin_and_session_id(
+    pub fn try_with_origin_and_session_id(
         origin: impl AsRef<str>,
         session_id: impl AsRef<str>,
     ) -> Result<Self> {

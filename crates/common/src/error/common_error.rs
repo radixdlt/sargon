@@ -304,7 +304,7 @@ pub enum CommonError {
     #[error("Failed to create Address (via RetAddress) from node_id (hex): {node_id_as_hex}, network_id: {network_id}")]
     FailedToCreateAddressViaRetAddressFromNodeIdAndNetworkID {
         node_id_as_hex: String,
-        network_id: String,
+        network_id: u8,
     } = 10088,
 
     #[error("Invalid Olympia address string: {bad_value}")]
