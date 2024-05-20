@@ -55,29 +55,20 @@ impl<'de> Deserialize<'de> for DeviceInfoDescription {
                 model: new_format.model,
             }),
             Wrapper::OldFormat(description) => {
+                // Swift used: "\(model) (\(name))"
+                let swift_name_suffix = " (iPhone)";
+                if description.ends_with(swift_name_suffix) {
+                    let model =
+                        description.split(swift_name_suffix).next().unwrap();
+                    return Ok(Self {
+                        name: "iPhone".to_owned(),
+                        model: model.to_owned(),
+                    });
+                }
+                // FIXME: Android
                 let name = description.clone();
                 let model = description.clone();
 
-                // let re = Regex::new(r"(?<name>[alphanum]+)((?<model>\d{4})\)").unwrap();
-
-                // let parts = description.split("(").collect_vec();
-                // if parts.len() >= 2 {
-                //     name = parts[0].to_owned();
-                //     if let Some(model_to_be_parsed) =
-                //         description.strip_prefix(&name)
-                //     {
-                //         if model_to_be_parsed.starts_with("(")
-                //             && model_to_be_parsed.ends_with(")")
-                //         {
-                //             // iOS styled
-                //             model = model_to_be_parsed
-                //                 [1..model_to_be_parsed.len() - 1]
-                //                 .to_owned();
-                //         } else {
-                //             model = model_to_be_parsed.to_owned();
-                //         }
-                //     }
-                // }
                 Ok(Self { name, model })
             }
         }
@@ -113,6 +104,40 @@ mod test_device_info_description {
             }
             "#,
         )
+    }
+
+    #[test]
+    fn json_old_format_iphone_iphone() {
+        let json = json!("iPhone (iPhone)");
+        let sut = serde_json::from_value::<SUT>(json).unwrap();
+        assert_eq!(sut.clone(), SUT::new("iPhone", "iPhone"));
+
+        assert_eq_after_json_roundtrip(
+            &sut,
+            r#"
+            {
+                "name": "iPhone",
+                "model": "iPhone"
+            }
+            "#,
+        );
+    }
+
+    #[test]
+    fn json_old_format_iphone15_pro_max_iphone() {
+        let json = json!("iPhone 15 Pro Max (iPhone)");
+        let sut = serde_json::from_value::<SUT>(json).unwrap();
+        assert_eq!(sut.clone(), SUT::new("iPhone", "iPhone 15 Pro Max"));
+
+        assert_eq_after_json_roundtrip(
+            &sut,
+            r#"
+            {
+                "name": "iPhone",
+                "model": "iPhone 15 Pro Max"
+            }
+            "#,
+        );
     }
 
     #[test]
