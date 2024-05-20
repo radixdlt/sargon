@@ -1,16 +1,12 @@
-#![feature(async_closure)]
-#![feature(let_chains)]
-#![feature(core_intrinsics)]
-#![allow(unused_imports)]
-#![allow(internal_features)]
-
-mod core;
-mod gateway_api;
-mod hierarchical_deterministic;
-mod profile;
-mod radix_connect;
-mod system;
-mod wrapped_radix_engine_toolkit;
+mod assert_json;
+mod error;
+mod has_sample_values;
+mod hash;
+mod hash_uniffi_fn;
+mod secure_random_bytes;
+mod types;
+mod unsafe_id_stepper;
+mod utils;
 
 pub mod prelude {
 
@@ -22,41 +18,41 @@ pub mod prelude {
     pub use crate::system::*;
     pub use crate::wrapped_radix_engine_toolkit::*;
 
-    pub(crate) use radix_rust::prelude::{
+    pub use radix_rust::prelude::{
         BTreeSet, HashMap, HashSet, IndexMap, IndexSet,
     };
 
-    pub(crate) use ::hex::decode as hex_decode;
-    pub(crate) use ::hex::encode as hex_encode;
-    pub(crate) use iso8601_timestamp::Timestamp;
-    pub(crate) use itertools::Itertools;
-    pub(crate) use log::{debug, error, info, trace, warn};
-    pub(crate) use serde::{
+    pub use ::hex::decode as hex_decode;
+    pub use ::hex::encode as hex_encode;
+    pub use iso8601_timestamp::Timestamp;
+    pub use itertools::Itertools;
+    pub use log::{debug, error, info, trace, warn};
+    pub use serde::{
         de, ser::SerializeStruct, Deserialize, Deserializer, Serialize,
         Serializer,
     };
-    pub(crate) use serde_json::json;
-    pub(crate) use serde_repr::{Deserialize_repr, Serialize_repr};
-    pub(crate) use serde_with::*;
-    pub(crate) use zeroize::{Zeroize, ZeroizeOnDrop};
+    pub use serde_json::json;
+    pub use serde_repr::{Deserialize_repr, Serialize_repr};
+    pub use serde_with::*;
+    pub use zeroize::{Zeroize, ZeroizeOnDrop};
 
     pub use radix_common::math::traits::CheckedMul as ScryptoCheckedMul;
-    pub(crate) use std::cmp::Ordering;
-    pub(crate) use std::collections::BTreeMap;
-    pub(crate) use std::fmt::{Debug, Display, Formatter};
-    pub(crate) use std::fs;
-    pub(crate) use std::hash::Hash as StdHash;
+    pub use std::cmp::Ordering;
+    pub use std::collections::BTreeMap;
+    pub use std::fmt::{Debug, Display, Formatter};
+    pub use std::fs;
+    pub use std::hash::Hash as StdHash;
     pub use std::ops::{Add, AddAssign, Deref, Div, Mul, Neg, Sub};
-    pub(crate) use std::str::FromStr;
-    pub(crate) use std::sync::{Arc, RwLock};
+    pub use std::str::FromStr;
+    pub use std::sync::{Arc, RwLock};
 
-    pub(crate) use strum::FromRepr;
-    pub(crate) use url::Url;
-    pub(crate) use uuid::Uuid;
+    pub use strum::FromRepr;
+    pub use url::Url;
+    pub use uuid::Uuid;
 
-    pub(crate) use enum_as_inner::EnumAsInner;
-    pub(crate) use paste::*;
-    pub(crate) use radix_engine::{
+    pub use enum_as_inner::EnumAsInner;
+    pub use paste::*;
+    pub use radix_engine::{
         blueprints::consensus_manager::UnstakeData as ScryptoUnstakeData,
         system::system_modules::execution_trace::ResourceSpecifier as ScryptoResourceSpecifier,
         transaction::{
@@ -65,9 +61,9 @@ pub mod prelude {
             VersionedTransactionReceipt as ScryptoVersionedTransactionReceipt,
         },
     };
-    pub(crate) use sbor::Versioned;
+    pub use sbor::Versioned;
 
-    pub(crate) use radix_common::{
+    pub use radix_common::{
         address::AddressBech32Encoder as ScryptoAddressBech32Encoder,
         crypto::{
             blake2b_256_hash, verify_ed25519 as scrypto_verify_ed25519,
@@ -118,14 +114,14 @@ pub mod prelude {
         },
         ManifestSbor as ScryptoManifestSbor, ScryptoSbor,
     };
-    pub(crate) use radix_engine_interface::blueprints::{
+    pub use radix_engine_interface::blueprints::{
         account::{
             DefaultDepositRule as ScryptoDefaultDepositRule,
             ResourcePreference as ScryptoResourcePreference,
         },
         resource::ResourceOrNonFungible as ScryptoResourceOrNonFungible,
     };
-    pub(crate) use radix_engine_interface::prelude::{
+    pub use radix_engine_interface::prelude::{
         AccessRule as ScryptoAccessRule, Epoch as ScryptoEpoch,
         FungibleResourceRoles as ScryptoFungibleResourceRoles,
         MetadataInit as ScryptoMetadataInit,
@@ -138,9 +134,9 @@ pub mod prelude {
         UncheckedUrl as ScryptoUncheckedUrl,
     };
 
-    pub(crate) use enum_iterator::all;
+    pub use enum_iterator::all;
 
-    pub(crate) use radix_transactions::{
+    pub use radix_transactions::{
         builder::{
             ExistingManifestBucket as ScryptoExistingManifestBucket,
             ManifestNameRegistrar as ScryptoManifestNameRegistrar,
@@ -187,7 +183,7 @@ pub mod prelude {
         },
     };
 
-    pub(crate) use radix_engine_toolkit_json::models::{
+    pub use radix_engine_toolkit_json::models::{
         common::SerializableNonFungibleLocalId as RetNonFungibleLocalId,
         scrypto::non_fungible_global_id::{
             SerializableNonFungibleGlobalId as RetNonFungibleGlobalId,
@@ -244,7 +240,6 @@ pub mod prelude {
         },
     };
 }
-
 pub use prelude::*;
 
 // Use `Url` as a custom type, with `String` as the Builtin
@@ -296,4 +291,4 @@ impl UniffiCustomTypeConverter for Uuid {
     }
 }
 
-uniffi::include_scaffolding!("sargon");
+uniffi::include_scaffolding!("core");

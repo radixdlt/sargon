@@ -1,6 +1,4 @@
-extern crate sargon;
 use regex::Regex;
-use sargon::prelude::*;
 
 use crate::bindgen_error::BindgenError;
 

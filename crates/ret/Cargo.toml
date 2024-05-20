@@ -1,0 +1,22 @@
+[package]
+name = "ret"
+version = "1.1.0"
+edition = "2021"
+build = "build.rs"
+
+[dependencies]
+uniffi = { workspace = true, features = ["cli"] }
+core = { path = "../core" }
+
+[build-dependencies]
+uniffi = { workspace = true, features = ["build"] }
+
+# cargo_toml = "0.15.3"
+cargo_toml = { git = "https://gitlab.com/lib.rs/cargo_toml", rev = "e498c94fc42a660c1ca1a28999ce1d757cfe77fe" }
+
+
+[dev-dependencies]
+uniffi = { workspace = true, features = ["bindgen-tests"] }
+
+[lib]
+crate-type = ["staticlib", "cdylib", "lib"]

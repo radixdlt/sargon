@@ -1,0 +1,28 @@
+[package]
+name = "bindgen"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+uniffi = { workspace = true, features = ["cli"] }
+
+# clap = "4.5.1"
+clap = { git = "https://github.com/clap-rs/clap/", rev = "8a7a13a5618cfdc4ff328624a5266e7b4d88649a", default-features = false, features = [
+    "std",
+    "derive",
+] }
+
+# regex = "1.9.3"
+regex = { git = "https://github.com/rust-lang/regex/", rev = "72f889ef3cca59ebac6a026f3646e8d92f056d88" }
+
+
+# camino = "1.0.8"
+camino = { git = "https://github.com/camino-rs/camino/", rev = "afa51b1b4c684b7e6698a6717ccda3affd0abd42" }
+
+thiserror = { workspace = true }
+
+[build-dependencies]
+uniffi = { workspace = true, features = ["build"] }
+
+[dev-dependencies]
+uniffi = { workspace = true, features = ["bindgen-tests"] }

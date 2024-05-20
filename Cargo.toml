@@ -1,27 +1,17 @@
-[package]
-name = "sargon"
-version = "0.7.18"
-edition = "2021"
-build = "build.rs"
+[workspace]
+resolver = "2"
+members = [
+    "crates/bindgen",
+    "crates/core",
+    "crates/gateway_api",
+    "crates/hierarchical_deterministic",
+    "crates/profile",
+    "crates/radix_connect",
+    "crates/ret",
+    "crates/sargon",
+]
 
-[profile.release]
-incremental = false
-panic = 'unwind'
-codegen-units = 1
-
-[[test]]
-name = "vectors"
-
-[lib]
-crate-type = ["staticlib", "cdylib", "lib"]
-
-[[bin]]
-name = "sargon-bindgen"
-path = "src/bindgen/bin.rs"
-required-features = ["build-binary"]
-
-[dependencies]
-
+[workspace.dependencies]
 # zeroize = "1.7.0"
 zeroize = { git = "https://github.com/RustCrypto/utils", rev = "df6d2f48a5e8afe8eef04ba32e2af55bacb41375", features = [
     "zeroize_derive",
@@ -80,7 +70,8 @@ radix-rust = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "397a
 ] }
 radix-engine = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "397a1bc0bb67429f1c82fbe0a62b3ac2f89a6fad" }
 radix-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "397a1bc0bb67429f1c82fbe0a62b3ac2f89a6fad", features = [
-    "serde", "secp256k1_sign_and_validate"
+    "serde",
+    "secp256k1_sign_and_validate",
 ] }
 radix-common-derive = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "397a1bc0bb67429f1c82fbe0a62b3ac2f89a6fad" }
 radix-engine-interface = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "397a1bc0bb67429f1c82fbe0a62b3ac2f89a6fad" }
@@ -141,18 +132,6 @@ url = { version = "2.5.0", features = ["serde"] }
 # paste = "1.0.14"
 paste = { git = "https://github.com/dtolnay/paste", rev = "1e0cc1025af5388397c67fa4389ad7ad24814df8" }
 
-# regex = "1.9.3"
-regex = { git = "https://github.com/rust-lang/regex/", rev = "72f889ef3cca59ebac6a026f3646e8d92f056d88", optional = true }
-
-# clap = "4.5.1"
-clap = { git = "https://github.com/clap-rs/clap/", rev = "8a7a13a5618cfdc4ff328624a5266e7b4d88649a", default-features = false, features = [
-    "std",
-    "derive",
-], optional = true }
-
-# camino = "1.0.8"
-camino = { git = "https://github.com/camino-rs/camino/", rev = "afa51b1b4c684b7e6698a6717ccda3affd0abd42", optional = true }
-
 # async-trait = "0.1.79"
 async-trait = { git = "https://github.com/dtolnay/async-trait", rev = "1eb21ed8bd87029bf4dcbea41ff309f2b2220c43" }
 
@@ -176,24 +155,5 @@ reqwest = { git = "https://github.com/seanmonstar/reqwest", rev = "0720159f6369f
     "native-tls-vendored",
 ] }
 
-
-[dev-dependencies]
-# uniffi = "0.27.1"
-uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "6f33088e8100a2ea9586c8c3ecf98ab51d5aba62", features = [
-    "bindgen-tests",
-] }
-
 # actix-rt = "3.3.0"
 actix-rt = { git = "https://github.com/actix/actix-net", rev = "57fd6ea8098d1f2d281c305fc331216c4fe1992e" }
-
-[build-dependencies]
-# uniffi = "0.27.1"
-uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "6f33088e8100a2ea9586c8c3ecf98ab51d5aba62", features = [
-    "build",
-] }
-
-# cargo_toml = "0.15.3"
-cargo_toml = { git = "https://gitlab.com/lib.rs/cargo_toml", rev = "e498c94fc42a660c1ca1a28999ce1d757cfe77fe" }
-
-[features]
-build-binary = ["camino", "clap", "regex"]

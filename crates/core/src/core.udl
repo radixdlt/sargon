@@ -1,5 +1,4 @@
-
-namespace sargon {};
+namespace core {};
 
 // HERE BE DRAGONS
 // Due to Kotlin equals being broken for ByteArray
