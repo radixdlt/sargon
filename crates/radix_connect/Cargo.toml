@@ -6,7 +6,8 @@ build = "build.rs"
 
 [dependencies]
 uniffi = { workspace = true, features = ["cli"] }
-core = { path = "../core" }
+common = { path = "../common" }
+profile = { path = "../profile" }
 
 [build-dependencies]
 uniffi = { workspace = true, features = ["build"] }

@@ -6,8 +6,16 @@ build = "build.rs"
 
 [dependencies]
 uniffi = { workspace = true, features = ["cli"] }
-core = { path = "../core" }
-
+common = { path = "../common" }
+iota-crypto = { workspace = true }
+k256 = { workspace = true }
+bip39 = { workspace = true }
+derive_more = { workspace = true }
+serde = { workspace = true }
+serde_with = { workspace = true }
+serde_json = { workspace = true }
+zeroize = { workspace = true }
+enum-iterator = { workspace = true }
 
 [build-dependencies]
 uniffi = { workspace = true, features = ["build"] }

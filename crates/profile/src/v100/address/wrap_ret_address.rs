@@ -19,26 +19,18 @@ pub trait IsAddress:
 /// Helps with unit testing, so that we do not need to explicitly specify each
 /// (Sargon) Address types corresponding RET address type, but can use, e.g.
 /// `AccountAddress::RetAddress` instead of `radix_engine_toolkit::models::canonical_address_types::CanonicalAccountAddress`
-pub(crate) trait FromRetAddress {
+pub trait FromRetAddress {
     type RetAddress;
 }
 
-pub(crate) fn format_string(
-    s: impl AsRef<str>,
-    start: usize,
-    end: usize,
-) -> String {
+pub fn format_string(s: impl AsRef<str>, start: usize, end: usize) -> String {
     let s = s.as_ref();
     let prefix = &s[0..start];
     let suffix = suffix_str(end, s);
     format!("{}...{}", prefix, suffix)
 }
 
-pub(crate) fn trim_string(
-    s: impl AsRef<str>,
-    prefix: usize,
-    suffix: usize,
-) -> String {
+pub fn trim_string(s: impl AsRef<str>, prefix: usize, suffix: usize) -> String {
     let s = s.as_ref();
     let start = prefix;
     let end = s.len() - suffix;

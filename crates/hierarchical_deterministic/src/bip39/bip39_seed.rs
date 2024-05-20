@@ -61,32 +61,6 @@ impl BIP39Seed {
             .expect("Valid Secp256k1PrivateKey bytes")
         // `IotaSlip10Ed25519::SecretKey` implements `ZeroizeOnDrop` so should now be zeroized.
     }
-
-    pub fn derive_private_key<D>(
-        &self,
-        derivation: &D,
-    ) -> HierarchicalDeterministicPrivateKey
-    where
-        D: Derivation,
-    {
-        match derivation.curve() {
-            SLIP10Curve::Curve25519 => {
-                let key = self.derive_ed25519_private_key(derivation.hd_path());
-                HierarchicalDeterministicPrivateKey::new(
-                    key.into(),
-                    derivation.derivation_path(),
-                )
-            }
-            SLIP10Curve::Secp256k1 => {
-                let key =
-                    self.derive_secp256k1_private_key(derivation.hd_path());
-                HierarchicalDeterministicPrivateKey::new(
-                    key.into(),
-                    derivation.derivation_path(),
-                )
-            }
-        }
-    }
 }
 
 #[cfg(test)]
@@ -95,14 +69,6 @@ mod tests {
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = BIP39Seed;
-
-    #[test]
-    fn zeroize() {
-        let mut sut: SUT = MnemonicWithPassphrase::sample().to_seed();
-        assert!(!sut.is_zeroized());
-        sut.zeroize();
-        assert!(sut.is_zeroized());
-    }
 
     #[test]
     fn manual_uniffi_conversion() {

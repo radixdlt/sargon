@@ -6,7 +6,11 @@ build = "build.rs"
 
 [dependencies]
 uniffi = { workspace = true, features = ["cli"] }
-core = { path = "../core" }
+common = { path = "../common" }
+pretty_assertions = { workspace = true }
+serde = { workspace = true }
+strum = { workspace = true }
+rand = { workspace = true }
 
 sbor = { workspace = true }
 radix-rust = { workspace = true }
@@ -14,12 +18,9 @@ radix-engine = { workspace = true }
 radix-common = { workspace = true }
 radix-common-derive = { workspace = true }
 radix-engine-interface = { workspace = true }
-
 radix-transactions = { workspace = true }
-
 radix-engine-toolkit-json = { workspace = true }
 radix-engine-toolkit = { workspace = true }
-
 
 [build-dependencies]
 uniffi = { workspace = true, features = ["build"] }

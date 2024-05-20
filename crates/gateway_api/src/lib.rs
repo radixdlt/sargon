@@ -3,7 +3,7 @@ mod modules;
 pub mod prelude {
     pub use crate::modules::*;
 
-    pub(crate) use core::prelude::*;
+    pub(crate) use common::prelude::*;
 }
 
 pub use prelude::*;

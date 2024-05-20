@@ -1,1 +1,4 @@
 namespace hd {};
+
+[ExternalExport="common"]
+typedef extern BagOfBytes;

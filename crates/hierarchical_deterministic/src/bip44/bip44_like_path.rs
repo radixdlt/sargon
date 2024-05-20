@@ -115,27 +115,6 @@ impl BIP44LikePath {
     }
 }
 
-impl Derivation for BIP44LikePath {
-    fn curve(&self) -> SLIP10Curve {
-        self.scheme().curve()
-    }
-
-    fn derivation_path(&self) -> DerivationPath {
-        DerivationPath::BIP44Like {
-            value: self.clone(),
-        }
-    }
-    fn hd_path(&self) -> &HDPath {
-        &self.path
-    }
-}
-
-impl BIP44LikePath {
-    fn scheme(&self) -> DerivationPathScheme {
-        DerivationPathScheme::Bip44Olympia
-    }
-}
-
 impl FromStr for BIP44LikePath {
     type Err = CommonError;
 
