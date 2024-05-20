@@ -23,7 +23,7 @@ macro_rules! decl_exactly_n_bytes {
                 Ord,
                 PartialOrd,
             )]
-            struct [<Exactly $byte_count Bytes SecretMagic>]([u8; $byte_count]);
+            pub struct [<Exactly $byte_count Bytes SecretMagic>]([u8; $byte_count]);
 
             impl From<&[u8; $byte_count]> for BagOfBytes {
                 fn from(value: &[u8; $byte_count]) -> BagOfBytes {
@@ -90,7 +90,7 @@ macro_rules! decl_exactly_n_bytes {
             #[display("{}", self.to_hex())]
             #[debug("{}", self.to_hex())]
             pub struct [<Exactly $byte_count Bytes>] {
-                secret_magic: [<Exactly $byte_count Bytes SecretMagic>],
+                pub secret_magic: [<Exactly $byte_count Bytes SecretMagic>],
             }
 
             // Make it JSON String convertible in Swift/Kotlin

@@ -173,4 +173,4 @@ macro_rules! declare_shared_with_dapp {
     };
 }
 
-pub use declare_shared_with_dapp;
+pub(crate) use declare_shared_with_dapp;

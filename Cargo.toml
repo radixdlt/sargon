@@ -3,6 +3,7 @@ resolver = "2"
 members = [
     "crates/bindgen",
     "crates/common",
+    "crates/drivers",
     "crates/gateway_api",
     "crates/hierarchical_deterministic",
     "crates/profile",

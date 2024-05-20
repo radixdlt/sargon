@@ -32,7 +32,7 @@ pub fn main() {
     );
 
     let manifest = Manifest::from_path(manifest_path).expect("Can't panic");
-    println!("🐭🐹 {:?}", &manifest);
+
     let dependencies = manifest.dependencies;
     let set_dep_env = |key: &str| {
         let dependency = dependencies.get(key).expect("Can't panic");

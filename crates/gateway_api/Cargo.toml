@@ -6,6 +6,8 @@ build = "build.rs"
 
 [dependencies]
 uniffi = { workspace = true, features = ["cli"] }
+serde = { workspace = true }
+drivers = { path = "../drivers" }
 common = { path = "../common" }
 ret = { path = "../ret" }
 

@@ -234,4 +234,4 @@ macro_rules! declare_collection_of_identified_entry {
     };
 }
 
-pub use declare_collection_of_identified_entry;
+pub(crate) use declare_collection_of_identified_entry;

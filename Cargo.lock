@@ -930,6 +930,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "75b325c5dbd37f80359721ad39aca5a29fb04c89279657cffdda8736d0c0b9d2"
 
 [[package]]
+name = "drivers"
+version = "1.1.0"
+dependencies = [
+ "async-trait",
+ "common",
+ "profile",
+ "ret",
+ "serde",
+ "strum 0.26.1",
+ "uniffi",
+]
+
+[[package]]
 name = "dyn-clone"
 version = "1.0.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1204,7 +1217,9 @@ name = "gateway_api"
 version = "1.1.0"
 dependencies = [
  "common",
+ "drivers",
  "ret",
+ "serde",
  "uniffi",
 ]
 
@@ -2112,12 +2127,24 @@ dependencies = [
 name = "profile"
 version = "1.1.0"
 dependencies = [
+ "actix-rt",
+ "aes-gcm",
  "common",
+ "derive_more",
+ "enum-as-inner",
+ "enum-iterator",
  "hd",
+ "hkdf",
+ "k256 0.13.3 (git+https://github.com/RustCrypto/elliptic-curves?rev=e158ce5cf0e9acee2fd76aff2a628334f5c771e5)",
+ "pretty_assertions",
+ "radix-common",
+ "radix-rust",
  "ret",
  "serde",
  "serde_json 1.0.108",
+ "serde_repr",
  "serde_with 3.4.0",
+ "strum 0.26.1",
  "uniffi",
 ]
 
@@ -2725,6 +2752,7 @@ name = "sargon"
 version = "1.1.0"
 dependencies = [
  "common",
+ "drivers",
  "profile",
  "uniffi",
 ]

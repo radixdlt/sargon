@@ -33,6 +33,7 @@ pub mod prelude {
     pub use iso8601_timestamp::Timestamp;
     pub use itertools::Itertools;
     pub use log::{debug, error, info, trace, warn};
+    pub use paste::paste;
     pub use serde::{
         de, ser::SerializeStruct, Deserialize, Deserializer, Serialize,
         Serializer,

@@ -10,7 +10,7 @@ use radix_common::crypto::{blake2b_256_hash, Hash};
     Deserialize,
     PartialEq,
     Eq,
-    Hash,
+    std::hash::Hash,
     derive_more::Display,
     derive_more::Debug,
     uniffi::Record,
