@@ -8,6 +8,19 @@ build = "build.rs"
 uniffi = { workspace = true, features = ["cli"] }
 core = { path = "../core" }
 
+sbor = { workspace = true }
+radix-rust = { workspace = true }
+radix-engine = { workspace = true }
+radix-common = { workspace = true }
+radix-common-derive = { workspace = true }
+radix-engine-interface = { workspace = true }
+
+radix-transactions = { workspace = true }
+
+radix-engine-toolkit-json = { workspace = true }
+radix-engine-toolkit = { workspace = true }
+
+
 [build-dependencies]
 uniffi = { workspace = true, features = ["build"] }
 

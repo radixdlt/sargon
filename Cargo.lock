@@ -607,6 +607,7 @@ dependencies = [
  "iso8601-timestamp",
  "itertools 0.12.0",
  "log",
+ "paste 1.0.14",
  "pretty_assertions",
  "pretty_env_logger",
  "radix-common",
@@ -1701,6 +1702,11 @@ dependencies = [
 
 [[package]]
 name = "paste"
+version = "1.0.14"
+source = "git+https://github.com/dtolnay/paste?rev=1e0cc1025af5388397c67fa4389ad7ad24814df8#1e0cc1025af5388397c67fa4389ad7ad24814df8"
+
+[[package]]
+name = "paste"
 version = "1.0.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a"
@@ -1860,7 +1866,7 @@ dependencies = [
  "num-bigint",
  "num-integer",
  "num-traits",
- "paste",
+ "paste 1.0.15",
  "radix-rust",
  "radix-sbor-derive",
  "sbor",
@@ -1876,7 +1882,7 @@ name = "radix-common-derive"
 version = "1.2.0-dev"
 source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=397a1bc0bb67429f1c82fbe0a62b3ac2f89a6fad#397a1bc0bb67429f1c82fbe0a62b3ac2f89a6fad"
 dependencies = [
- "paste",
+ "paste 1.0.15",
  "proc-macro2",
  "quote",
  "radix-common",
@@ -1895,7 +1901,7 @@ dependencies = [
  "lazy_static",
  "moka",
  "num-traits",
- "paste",
+ "paste 1.0.15",
  "radix-blueprint-schema-init",
  "radix-common",
  "radix-common-derive",
@@ -1923,7 +1929,7 @@ dependencies = [
  "const-sha1",
  "hex 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "lazy_static",
- "paste",
+ "paste 1.0.15",
  "radix-blueprint-schema-init",
  "radix-common",
  "radix-common-derive",
@@ -1963,7 +1969,7 @@ dependencies = [
  "cargo_toml 0.15.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "extend",
  "lazy_static",
- "paste",
+ "paste 1.0.15",
  "radix-common",
  "radix-engine",
  "radix-engine-interface",
@@ -1987,7 +1993,7 @@ dependencies = [
  "bech32",
  "indexmap 1.9.3",
  "jni",
- "paste",
+ "paste 1.0.15",
  "radix-common",
  "radix-engine",
  "radix-engine-interface",
@@ -2067,7 +2073,7 @@ source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=397a1bc0bb67429f1
 dependencies = [
  "hex 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "itertools 0.10.5",
- "paste",
+ "paste 1.0.15",
  "radix-common",
  "radix-engine",
  "radix-engine-interface",
@@ -2100,7 +2106,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9b5e1305200330d3dd5c9b16ca43eba268993036ba19a2b2cadadee1b9166ab4"
 dependencies = [
  "anyhow",
- "paste",
+ "paste 1.0.15",
  "wasm-encoder",
  "wasmparser 0.107.0",
  "wasmprinter",
@@ -2317,6 +2323,15 @@ version = "1.1.0"
 dependencies = [
  "cargo_toml 0.15.3 (git+https://gitlab.com/lib.rs/cargo_toml?rev=e498c94fc42a660c1ca1a28999ce1d757cfe77fe)",
  "core",
+ "radix-common",
+ "radix-common-derive",
+ "radix-engine",
+ "radix-engine-interface",
+ "radix-engine-toolkit",
+ "radix-engine-toolkit-json",
+ "radix-rust",
+ "radix-transactions",
+ "sbor",
  "uniffi",
 ]
 
@@ -2401,7 +2416,7 @@ dependencies = [
  "const-sha1",
  "hex 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "lazy_static",
- "paste",
+ "paste 1.0.15",
  "radix-rust",
  "sbor-derive",
  "serde",
@@ -2523,7 +2538,7 @@ dependencies = [
  "hex 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "num-bigint",
  "num-traits",
- "paste",
+ "paste 1.0.15",
  "radix-blueprint-schema-init",
  "radix-common",
  "radix-engine-interface",
@@ -3275,7 +3290,7 @@ dependencies = [
  "goblin",
  "heck 0.5.0",
  "once_cell",
- "paste",
+ "paste 1.0.15",
  "serde",
  "textwrap",
  "toml 0.5.11",
@@ -3313,7 +3328,7 @@ dependencies = [
  "camino 1.1.7",
  "log",
  "once_cell",
- "paste",
+ "paste 1.0.15",
  "static_assertions",
 ]
 
@@ -3542,7 +3557,7 @@ dependencies = [
  "downcast-rs",
  "libm",
  "num-traits",
- "paste",
+ "paste 1.0.15",
 ]
 
 [[package]]

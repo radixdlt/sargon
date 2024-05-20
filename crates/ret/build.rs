@@ -7,7 +7,8 @@ pub fn main() {
         Path::new(env!("CARGO_MANIFEST_DIR")).join("Cargo.toml");
 
     // Paths for reading fixtures used by tests
-    let fixtures_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("fixtures");
+    let fixtures_path =
+        Path::new(env!("CARGO_MANIFEST_DIR")).join("../../fixtures");
     println!("cargo:rustc-env=FIXTURES={}/", fixtures_path.display());
     let fixtures_transaction_path = fixtures_path.join("transaction");
     println!(
@@ -31,6 +32,7 @@ pub fn main() {
     );
 
     let manifest = Manifest::from_path(manifest_path).expect("Can't panic");
+    println!("🐭🐹 {:?}", &manifest);
     let dependencies = manifest.dependencies;
     let set_dep_env = |key: &str| {
         let dependency = dependencies.get(key).expect("Can't panic");
