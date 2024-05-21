@@ -11,7 +11,8 @@ impl EntropyClient {
     }
 
     pub fn bip39_entropy(&self) -> NonEmptyMax32Bytes {
-        // NonEmptyMax32Bytes::from(self.driver.generate_secure_random_bytes())
-        todo!()
+        let entropy = self.driver.generate_secure_random_bytes();
+        NonEmptyMax32Bytes::try_from(entropy.as_ref())
+            .expect("Entropy is not empty")
     }
 }

@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-use radix_common::prelude::MANIFEST_SBOR_V1_MAX_DEPTH;
-
 use radix_engine_toolkit::functions::address::decode as RET_decode_address;
 
 #[derive(Clone, Debug, PartialEq, Eq, derive_more::Display, uniffi::Record)]
@@ -121,7 +119,8 @@ impl Instructions {
             .and_then(|x: String| Self::new(x, network_id))
     }
 
-    pub const MAX_SBOR_DEPTH: usize = MANIFEST_SBOR_V1_MAX_DEPTH - 3;
+    pub const MAX_SBOR_DEPTH: usize =
+        radix_common::prelude::MANIFEST_SBOR_V1_MAX_DEPTH - 3;
 }
 
 fn extract_error_from_addr(
@@ -155,7 +154,7 @@ fn extract_error_from_error(
 ) -> CommonError {
     use radix_transactions::manifest::parser::ParserError;
     use radix_transactions::manifest::parser::ParserErrorKind::*;
-    use GeneratorError;
+
     use GeneratorErrorKind::*;
     let n = expected_network;
     match err {

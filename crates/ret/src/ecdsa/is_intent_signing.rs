@@ -1,6 +1,8 @@
 use crate::prelude::*;
 
-pub trait IsIntentSigning: IsPrivateKey {
+pub trait IsIntentSigning<P: IsPublicKey<Self::Signature>>:
+    IsPrivateKey<P>
+{
     fn sign_intent_hash(&self, intent_hash: &IntentHash) -> IntentSignature
     where
         (P, Self::Signature): Into<SignatureWithPublicKey>,
@@ -22,11 +24,13 @@ pub trait IsIntentSigning: IsPrivateKey {
     }
 }
 
-pub trait HashSigning {
-    pub fn sign_intent_hash(&self, intent_hash: &IntentHash)
-        -> IntentSignature;
+impl IsIntentSigning<Ed25519PublicKey> for Ed25519PrivateKey {}
+impl IsIntentSigning<Secp256k1PublicKey> for Secp256k1PrivateKey {}
 
-    pub fn notarize_hash(
+pub trait HashSigning {
+    fn sign_intent_hash(&self, intent_hash: &IntentHash) -> IntentSignature;
+
+    fn notarize_hash(
         &self,
         signed_intent_hash: &SignedIntentHash,
     ) -> NotarySignature;

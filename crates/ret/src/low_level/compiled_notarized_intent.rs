@@ -1,5 +1,8 @@
 use crate::prelude::*;
 
+#[allow(unused)]
+use sbor::ValueKind as ScryptoValueKind;
+
 #[derive(
     Serialize,
     Deserialize,
@@ -73,7 +76,6 @@ impl HasSampleValues for CompiledNotarizedIntent {
     }
 }
 
-use sbor::ValueKind as ScryptoValueKind;
 #[cfg(test)]
 pub fn invalid_signed_intent() -> ScryptoSignedIntent {
     let invalid_value = ScryptoManifestValue::Tuple {
@@ -168,7 +170,7 @@ mod tests {
         });
         assert_eq!(
             res,
-            Err(CommonError::InvalidNotarizedIntentFailedToEncode { underlying: "MismatchingArrayElementValueKind { element_value_kind: 7, actual_value_kind: 8 }".to_owned() }) 
+            Err(CommonError::InvalidNotarizedIntentFailedToEncode { underlying: "MismatchingArrayElementValueKind { element_value_kind: 7, actual_value_kind: 8 }".to_owned() })
         );
     }
 }

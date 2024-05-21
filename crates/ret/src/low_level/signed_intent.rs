@@ -110,22 +110,21 @@ impl TryFrom<ScryptoSignedIntent> for SignedIntent {
 
 impl HasSampleValues for SignedIntent {
     fn sample() -> Self {
-        let _intent = TransactionIntent::sample_other();
+        let intent = TransactionIntent::sample_other();
 
-        let _signatures = Vec::<IntentSignature>::new();
-        // for n in 1..4 {
-        //     let private_key: Secp256k1PrivateKey =
-        //         ScryptoSecp256k1PrivateKey::from_u64(n).unwrap().into();
+        let mut signatures = Vec::<IntentSignature>::new();
+        for n in 1..4 {
+            let private_key: Secp256k1PrivateKey =
+                ScryptoSecp256k1PrivateKey::from_u64(n).unwrap().into();
 
-        //     let intent_signature =
-        //         private_key.sign_intent_hash(&intent.intent_hash());
-        //     signatures.push(intent_signature)
-        // }
+            let intent_signature =
+                private_key.sign_intent_hash(&intent.intent_hash());
+            signatures.push(intent_signature)
+        }
 
-        // let intent_signatures = IntentSignatures::new(signatures);
+        let intent_signatures = IntentSignatures::new(signatures);
 
-        // Self::new(intent, intent_signatures).unwrap()
-        todo!()
+        Self::new(intent, intent_signatures).unwrap()
     }
 
     fn sample_other() -> Self {
@@ -140,27 +139,26 @@ impl SignedIntent {
     /// and SHOULD return `Err` if `depth > SignedIntent::MAX_SBOR_DEPTH`, which
     /// we can assert in unit tests.
     pub fn test_with_sbor_depth(
-        _depth: usize,
-        _network_id: NetworkID,
+        depth: usize,
+        network_id: NetworkID,
     ) -> Result<Self> {
-        // TransactionIntent::test_with_sbor_depth(depth, network_id).and_then(
-        //     |intent| {
-        //         let mut signatures = Vec::<IntentSignature>::new();
-        //         for n in 1..4 {
-        //             let private_key: Secp256k1PrivateKey =
-        //                 ScryptoSecp256k1PrivateKey::from_u64(n).unwrap().into();
+        TransactionIntent::test_with_sbor_depth(depth, network_id).and_then(
+            |intent| {
+                let mut signatures = Vec::<IntentSignature>::new();
+                for n in 1..4 {
+                    let private_key: Secp256k1PrivateKey =
+                        ScryptoSecp256k1PrivateKey::from_u64(n).unwrap().into();
 
-        //             let intent_signature =
-        //                 private_key.sign_intent_hash(&intent.intent_hash());
-        //             signatures.push(intent_signature)
-        //         }
+                    let intent_signature =
+                        private_key.sign_intent_hash(&intent.intent_hash());
+                    signatures.push(intent_signature)
+                }
 
-        //         let intent_signatures = IntentSignatures::new(signatures);
+                let intent_signatures = IntentSignatures::new(signatures);
 
-        //         Self::new(intent, intent_signatures)
-        //     },
-        // )
-        todo!()
+                Self::new(intent, intent_signatures)
+            },
+        )
     }
 
     pub const MAX_SBOR_DEPTH: usize = TransactionIntent::MAX_SBOR_DEPTH - 1;
@@ -196,74 +194,71 @@ mod tests {
 
     #[test]
     fn many_intent_signatures_all_valid() {
-        let _intent = TransactionIntent::sample_other();
+        let intent = TransactionIntent::sample_other();
 
-        let _signatures = Vec::<IntentSignature>::new();
-        // for n in 1..4 {
-        //     let private_key: Secp256k1PrivateKey =
-        //         ScryptoSecp256k1PrivateKey::from_u64(n).unwrap().into();
+        let mut signatures = Vec::<IntentSignature>::new();
+        for n in 1..4 {
+            let private_key: Secp256k1PrivateKey =
+                ScryptoSecp256k1PrivateKey::from_u64(n).unwrap().into();
 
-        //     let intent_signature =
-        //         private_key.sign_intent_hash(&intent.intent_hash());
-        //     signatures.push(intent_signature)
-        // }
+            let intent_signature =
+                private_key.sign_intent_hash(&intent.intent_hash());
+            signatures.push(intent_signature)
+        }
 
-        // let intent_signatures = IntentSignatures::new(signatures);
-        // assert_eq!(intent_signatures.clone().signatures.into_iter().map(|s| s.signature().to_string()).collect_vec(), ["01da59c65684d07f1997bf9615c1e9330a54d8f3b13d8caaef1a8b32f64259be05544dc9290b64294a174c2857dd1043b3a5c0ca50bfc4ff35a95dd4338edee80b", "01427f6b48420da77ecb31c62b693d1970fb6cd3bcf68ea4ae21ae6c4e4521eff80100fed2410cba034a46cc5c546c9470cce1b44ff1c2d2e31c7ded420aa84024", "00570e538b1f84b323ea21b87930debed81d46a1a1abec5007c72106c4985ab515501af9a4ebbbfb75570416e0cc52dc93e064478c254fafb5065159e40b606612"]);
+        let intent_signatures = IntentSignatures::new(signatures);
+        assert_eq!(intent_signatures.clone().signatures.into_iter().map(|s| s.signature().to_string()).collect_vec(), ["01da59c65684d07f1997bf9615c1e9330a54d8f3b13d8caaef1a8b32f64259be05544dc9290b64294a174c2857dd1043b3a5c0ca50bfc4ff35a95dd4338edee80b", "01427f6b48420da77ecb31c62b693d1970fb6cd3bcf68ea4ae21ae6c4e4521eff80100fed2410cba034a46cc5c546c9470cce1b44ff1c2d2e31c7ded420aa84024", "00570e538b1f84b323ea21b87930debed81d46a1a1abec5007c72106c4985ab515501af9a4ebbbfb75570416e0cc52dc93e064478c254fafb5065159e40b606612"]);
 
-        // assert_eq!(
-        //     SUT::new(intent, intent_signatures.clone())
-        //         .unwrap()
-        //         .intent_signatures,
-        //     intent_signatures
-        // );
-        todo!()
+        assert_eq!(
+            SUT::new(intent, intent_signatures.clone())
+                .unwrap()
+                .intent_signatures,
+            intent_signatures
+        );
     }
 
     #[test]
     fn many_intent_signatures_one_invalid() {
-        let _intent = TransactionIntent::sample_other();
+        let intent = TransactionIntent::sample_other();
 
-        // let mut signatures = Vec::<IntentSignature>::new();
-        // for n in 1..4 {
-        //     let private_key: Secp256k1PrivateKey =
-        //         ScryptoSecp256k1PrivateKey::from_u64(n).unwrap().into();
+        let mut signatures = Vec::<IntentSignature>::new();
+        for n in 1..4 {
+            let private_key: Secp256k1PrivateKey =
+                ScryptoSecp256k1PrivateKey::from_u64(n).unwrap().into();
 
-        //     let intent_signature =
-        //         private_key.sign_intent_hash(&intent.intent_hash());
-        //     signatures.push(intent_signature)
-        // }
+            let intent_signature =
+                private_key.sign_intent_hash(&intent.intent_hash());
+            signatures.push(intent_signature)
+        }
 
-        // signatures.push(IntentSignature::sample());
+        signatures.push(IntentSignature::sample());
 
-        // assert_eq!(
-        //     SUT::with_signatures(intent, signatures),
-        //     Err(CommonError::InvalidSignaturesForIntentSomeDidNotValidateIntentHash)
-        // );
-        todo!()
+        assert_eq!(
+            SUT::with_signatures(intent, signatures),
+            Err(CommonError::InvalidSignaturesForIntentSomeDidNotValidateIntentHash)
+        );
     }
 
     #[test]
     fn many_intent_signatures_invalid_because_mismatching_intent() {
-        let _intent = TransactionIntent::sample_other();
+        let intent = TransactionIntent::sample_other();
 
-        let _signatures = Vec::<IntentSignature>::new();
-        // for n in 1..4 {
-        //     let private_key: Secp256k1PrivateKey =
-        //         ScryptoSecp256k1PrivateKey::from_u64(n).unwrap().into();
-        //     let hash = intent.intent_hash();
-        //     let intent_signature = private_key.sign_intent_hash(&hash);
-        //     signatures.push(intent_signature)
-        // }
+        let mut signatures = Vec::<IntentSignature>::new();
+        for n in 1..4 {
+            let private_key: Secp256k1PrivateKey =
+                ScryptoSecp256k1PrivateKey::from_u64(n).unwrap().into();
+            let hash = intent.intent_hash();
+            let intent_signature = private_key.sign_intent_hash(&hash);
+            signatures.push(intent_signature)
+        }
 
-        // assert_eq!(
-        //     SUT::with_signatures(
-        //         TransactionIntent::sample(), // <-- WRONG Intent, not was signed.
-        //         signatures
-        //     ),
-        //     Err(CommonError::InvalidSignaturesForIntentSomeDidNotValidateIntentHash)
-        // );
-        todo!()
+        assert_eq!(
+            SUT::with_signatures(
+                TransactionIntent::sample(), // <-- WRONG Intent, not was signed.
+                signatures
+            ),
+            Err(CommonError::InvalidSignaturesForIntentSomeDidNotValidateIntentHash)
+        );
     }
 
     #[test]
@@ -293,7 +288,7 @@ mod tests {
         let res = compile_signed_intent(invalid_signed_intent());
         assert_eq!(
             res,
-            Err(CommonError::InvalidSignedIntentFailedToEncode { underlying: "MismatchingArrayElementValueKind { element_value_kind: 7, actual_value_kind: 8 }".to_owned() }) 
+            Err(CommonError::InvalidSignedIntentFailedToEncode { underlying: "MismatchingArrayElementValueKind { element_value_kind: 7, actual_value_kind: 8 }".to_owned() })
         );
     }
 }

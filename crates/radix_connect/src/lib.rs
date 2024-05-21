@@ -20,8 +20,6 @@ pub mod prelude {
     pub use crate::wallet_persona::*;
 
     pub use clients::prelude::*;
-    pub use common::prelude::*;
-    pub use profile::prelude::*;
 }
 
 pub use prelude::*;

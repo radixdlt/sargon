@@ -43,7 +43,7 @@ pub use account_address_uniffi_fn::*;
 pub use address::*;
 pub use address_format::*;
 pub use address_of_account_or_persona::*;
-pub use address_union::*;
+pub(crate) use address_union::*;
 pub use component_address::*;
 pub use component_address_uniffi_fn::*;
 pub use entity_address::*;

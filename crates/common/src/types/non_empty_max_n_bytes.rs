@@ -151,6 +151,37 @@ decl_non_empty_max_n_bytes!(
     32
 );
 
+impl From<[u8; 32]> for NonEmptyMax32Bytes {
+    fn from(value: [u8; 32]) -> Self {
+        Self::try_from(value.as_slice())
+            .expect("32 bytes is less than or equal to 32 bytes")
+    }
+}
+impl From<[u8; 28]> for NonEmptyMax32Bytes {
+    fn from(value: [u8; 28]) -> Self {
+        Self::try_from(value.as_slice())
+            .expect("28 bytes is less than or equal to 32 bytes")
+    }
+}
+impl From<[u8; 24]> for NonEmptyMax32Bytes {
+    fn from(value: [u8; 24]) -> Self {
+        Self::try_from(value.as_slice())
+            .expect("24 bytes is less than or equal to 32 bytes")
+    }
+}
+impl From<[u8; 20]> for NonEmptyMax32Bytes {
+    fn from(value: [u8; 20]) -> Self {
+        Self::try_from(value.as_slice())
+            .expect("20 bytes is less than or equal to 32 bytes")
+    }
+}
+impl From<[u8; 16]> for NonEmptyMax32Bytes {
+    fn from(value: [u8; 16]) -> Self {
+        Self::try_from(value.as_slice())
+            .expect("16 bytes is less than or equal to 32 bytes")
+    }
+}
+
 /// This macro exists since UniFFI does not support generics currently, when/if
 /// UniFFI does, we SHOULD remove this macro and use generics.
 macro_rules! decl_samples_for_max_n_bytes {

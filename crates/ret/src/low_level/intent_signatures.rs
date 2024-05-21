@@ -55,31 +55,29 @@ impl TryFrom<(ScryptoIntentSignatures, Hash)> for IntentSignatures {
 
 impl HasSampleValues for IntentSignatures {
     fn sample() -> Self {
-        // let intent = TransactionIntent::sample();
-        // let mut signatures = Vec::<IntentSignature>::new();
-        // for n in 1..4 {
-        //     let private_key: Secp256k1PrivateKey =
-        //         ScryptoSecp256k1PrivateKey::from_u64(n).unwrap().into();
+        let intent = TransactionIntent::sample();
+        let mut signatures = Vec::<IntentSignature>::new();
+        for n in 1..4 {
+            let private_key: Secp256k1PrivateKey =
+                ScryptoSecp256k1PrivateKey::from_u64(n).unwrap().into();
 
-        //     signatures.push(private_key.sign_intent_hash(&intent.intent_hash()))
-        // }
+            signatures.push(private_key.sign_intent_hash(&intent.intent_hash()))
+        }
 
-        // IntentSignatures::new(signatures)
-        todo!()
+        IntentSignatures::new(signatures)
     }
 
     fn sample_other() -> Self {
-        // let intent = TransactionIntent::sample_other();
-        // let mut signatures = Vec::<IntentSignature>::new();
-        // for n in 1..4 {
-        //     let private_key: Secp256k1PrivateKey =
-        //         ScryptoSecp256k1PrivateKey::from_u64(n).unwrap().into();
+        let intent = TransactionIntent::sample_other();
+        let mut signatures = Vec::<IntentSignature>::new();
+        for n in 1..4 {
+            let private_key: Secp256k1PrivateKey =
+                ScryptoSecp256k1PrivateKey::from_u64(n).unwrap().into();
 
-        //     signatures.push(private_key.sign_intent_hash(&intent.intent_hash()))
-        // }
+            signatures.push(private_key.sign_intent_hash(&intent.intent_hash()))
+        }
 
-        // IntentSignatures::new(signatures)
-        todo!()
+        IntentSignatures::new(signatures)
     }
 }
 

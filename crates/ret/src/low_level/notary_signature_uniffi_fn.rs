@@ -24,17 +24,16 @@ pub fn notary_signature_get_signature(
 
 #[uniffi::export]
 pub fn android_notarize_hash_with_private_key_bytes(
-    _private_key_bytes: Exactly32Bytes,
-    _signed_intent_hash: &SignedIntentHash,
+    private_key_bytes: Exactly32Bytes,
+    signed_intent_hash: &SignedIntentHash,
 ) -> Result<NotarySignature> {
-    // let ed25519_private_key =
-    //     Ed25519PrivateKey::try_from(private_key_bytes.as_ref())?;
+    let ed25519_private_key =
+        Ed25519PrivateKey::try_from(private_key_bytes.as_ref())?;
 
-    // let private_key = PrivateKey::from(ed25519_private_key);
-    // let signature = private_key.notarize_hash(signed_intent_hash);
+    let private_key = PrivateKey::from(ed25519_private_key);
+    let signature = private_key.notarize_hash(signed_intent_hash);
 
-    // Ok(signature)
-    todo!()
+    Ok(signature)
 }
 
 #[uniffi::export]

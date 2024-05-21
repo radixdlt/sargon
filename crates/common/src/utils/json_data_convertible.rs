@@ -55,8 +55,8 @@ pub trait JsonDataSerializing: Sized + Serialize {
 macro_rules! json_data_convertible {
     ($type: ty) => {
         paste::paste! {
-            use crate::prelude::*;
-            impl crate::prelude::JsonDataDeserializing for $type {}
+            use $crate::prelude::*;
+            impl $crate::prelude::JsonDataDeserializing for $type {}
             impl crate::prelude::JsonDataSerializing for $type {}
 
             #[uniffi::export]

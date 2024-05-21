@@ -21,6 +21,7 @@ pub struct MnemonicWithPassphrase {
     pub mnemonic: Mnemonic,
     pub passphrase: BIP39Passphrase,
 }
+json_data_convertible!(MnemonicWithPassphrase);
 
 impl MnemonicWithPassphrase {
     #[cfg(not(tarpaulin_include))] // false negative
@@ -207,11 +208,10 @@ mod tests {
 
     #[test]
     fn zeroize() {
-        // let mut sut: SUT = MnemonicWithPassphrase::sample().to_seed();
-        // assert!(!sut.is_zeroized());
-        // sut.zeroize();
-        // assert!(sut.is_zeroized());
-        todo!()
+        let mut sut = MnemonicWithPassphrase::sample().to_seed();
+        assert!(!sut.is_zeroized());
+        sut.zeroize();
+        assert!(sut.is_zeroized());
     }
 
     #[test]

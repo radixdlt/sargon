@@ -74,19 +74,18 @@ impl NotarizedTransaction {
     /// and SHOULD return `Err` if `depth > NotarizedTransaction::MAX_SBOR_DEPTH`, which
     /// we can assert in unit tests.
     pub fn test_with_sbor_depth(
-        _depth: usize,
-        _network_id: NetworkID,
+        depth: usize,
+        network_id: NetworkID,
     ) -> Result<Self> {
-        // SignedIntent::test_with_sbor_depth(depth, network_id).and_then(
-        //     |signed_intent| {
-        //         Self::new(
-        //             signed_intent.clone(),
-        //             Ed25519PrivateKey::sample_alice()
-        //                 .notarize_hash(&signed_intent.hash()),
-        //         )
-        //     },
-        // )
-        todo!()
+        SignedIntent::test_with_sbor_depth(depth, network_id).and_then(
+            |signed_intent| {
+                Self::new(
+                    signed_intent.clone(),
+                    Ed25519PrivateKey::sample_alice()
+                        .notarize_hash(&signed_intent.hash()),
+                )
+            },
+        )
     }
 
     pub const MAX_SBOR_DEPTH: usize = SignedIntent::MAX_SBOR_DEPTH - 1;
@@ -94,21 +93,19 @@ impl NotarizedTransaction {
 
 impl HasSampleValues for NotarizedTransaction {
     fn sample() -> Self {
-        let _private_key = Ed25519PrivateKey::sample_alice();
+        let private_key = Ed25519PrivateKey::sample_alice();
         let intent = TransactionIntent::sample();
 
         let signed_intent =
             SignedIntent::new(intent, IntentSignatures::default()).unwrap();
 
-        let _signed_intent_hash = signed_intent.hash();
+        let signed_intent_hash = signed_intent.hash();
 
-        // Self::new(
-        //     signed_intent,
-        //     private_key.notarize_hash(&signed_intent_hash),
-        // )
-        // .unwrap()
-
-        todo!()
+        Self::new(
+            signed_intent,
+            private_key.notarize_hash(&signed_intent_hash),
+        )
+        .unwrap()
     }
 
     // Identical to: https://github.com/radixdlt/radixdlt-scrypto/blob/ff21f24952318387803ae720105eec079afe33f3/transaction/src/model/hash/encoder.rs#L115
@@ -116,7 +113,7 @@ impl HasSampleValues for NotarizedTransaction {
     // bech32 encoded   (mainnet): `"txid_rdx1vrjkzlt8pekg5s46tum5na8lzpulvc3p72p92nkdm2dd8p0vkx2syss63y"`
     // bech32 encoded (simulator): `"txid_sim1vrjkzlt8pekg5s46tum5na8lzpulvc3p72p92nkdm2dd8p0vkx2svr7ejr"`
     fn sample_other() -> Self {
-        let _private_key: Secp256k1PrivateKey =
+        let private_key: Secp256k1PrivateKey =
             ScryptoSecp256k1PrivateKey::from_u64(1).unwrap().into();
 
         let intent = TransactionIntent::sample_other();
@@ -125,14 +122,13 @@ impl HasSampleValues for NotarizedTransaction {
             SignedIntent::new(intent, IntentSignatures::new(Vec::new()))
                 .unwrap();
 
-        let _signed_intent_hash = signed_intent.hash();
+        let signed_intent_hash = signed_intent.hash();
 
-        // Self::new(
-        //     signed_intent,
-        //     private_key.notarize_hash(&signed_intent_hash),
-        // )
-        // .unwrap()
-        todo!()
+        Self::new(
+            signed_intent,
+            private_key.notarize_hash(&signed_intent_hash),
+        )
+        .unwrap()
     }
 }
 

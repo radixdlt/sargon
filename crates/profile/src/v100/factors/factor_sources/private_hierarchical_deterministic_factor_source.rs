@@ -53,16 +53,15 @@ impl PrivateHierarchicalDeterministicFactorSource {
         entropy: NonEmptyMax32Bytes,
         passphrase: BIP39Passphrase,
         device_info: &DeviceInfo,
-    ) -> Self {
-        // let mnemonic = Mnemonic::from_entropy(entropy);
-        // let mnemonic_with_passphrase =
-        //     MnemonicWithPassphrase::with_passphrase(mnemonic, passphrase);
-        // Self::new_babylon_with_mnemonic_with_passphrase(
-        //     is_main,
-        //     mnemonic_with_passphrase,
-        //     device_info,
-        // )
-        todo!()
+    ) -> Result<Self> {
+        let mnemonic = Mnemonic::from_entropy(entropy)?;
+        let mnemonic_with_passphrase =
+            MnemonicWithPassphrase::with_passphrase(mnemonic, passphrase);
+        Ok(Self::new_babylon_with_mnemonic_with_passphrase(
+            is_main,
+            mnemonic_with_passphrase,
+            device_info,
+        ))
     }
 
     pub fn generate_new_babylon(

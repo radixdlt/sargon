@@ -1,18 +1,18 @@
 use crate::prelude::*;
 
-// decl_secret_bytes!(
-//     /// A BIP39 seed for hierarchal deterministic wallets, as per the [BIP39 standard][doc].
-//     ///
-//     /// We typically obtain this by calling [`to_seed` on `MnemonicWithPassphrase`][MnemonicWithPassphrase::to_seed].
-//     ///
-//     /// [doc]: https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki#user-content-From_mnemonic_to_seed
-//     BIP39Seed,
-//     64
-// );
+use crypto::{
+    keys::slip10::{self as IotaSlip10, Hardened as IotaSlip10PathComponent},
+    signatures::ed25519 as IotaSlip10Ed25519,
+    signatures::secp256k1_ecdsa as IotaSlip10Secp256k1,
+};
 
 uniffi::custom_newtype!(BIP39Seed, Exactly64Bytes);
 
-/// A BIP39 Seed
+/// A BIP39 seed for hierarchal deterministic wallets, as per the [BIP39 standard][doc].
+///
+/// We typically obtain this by calling [`to_seed` on `MnemonicWithPassphrase`][MnemonicWithPassphrase::to_seed].
+///
+/// [doc]: https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki#user-content-From_mnemonic_to_seed
 #[derive(
     Zeroize,
     Serialize,
@@ -28,6 +28,12 @@ uniffi::custom_newtype!(BIP39Seed, Exactly64Bytes);
 #[display("<OBFUSCATED>")]
 pub struct BIP39Seed(pub Exactly64Bytes);
 
+impl BIP39Seed {
+    pub fn is_zeroized(&self) -> bool {
+        self.0.as_ref() == [0; 64]
+    }
+}
+
 impl HDPath {
     fn hardened_chain(&self) -> Vec<IotaSlip10PathComponent> {
         self.components
@@ -37,12 +43,6 @@ impl HDPath {
             .collect_vec()
     }
 }
-
-use crypto::{
-    keys::slip10::{self as IotaSlip10, Hardened as IotaSlip10PathComponent},
-    signatures::ed25519 as IotaSlip10Ed25519,
-    signatures::secp256k1_ecdsa as IotaSlip10Secp256k1,
-};
 
 impl BIP39Seed {
     fn derive_slip10_private_key<K, I>(&self, chain: I) -> IotaSlip10::Slip10<K>

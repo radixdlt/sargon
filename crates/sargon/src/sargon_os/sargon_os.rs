@@ -135,7 +135,7 @@ impl SargonOS {
                     entropy,
                     BIP39Passphrase::default(),
                     &device_info
-                )
+                )?
             }
         };
         debug!("Created BDFS (unsaved)");
