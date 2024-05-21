@@ -17,7 +17,7 @@ impl AuthorizedPersonaSimple {
                         // This is a sign that Profile is in a bad state somehow...
                         warn!("Discrepancy! AuthorizedDapp references account which does not exist {}", account_address);
                         return Err(CommonError::DiscrepancyAuthorizedDappReferencedAccountWhichDoesNotExist {
-                            address: account_address.to_owned()
+                            address: account_address.to_string()
                         })
                 };
                 Ok(AccountForDisplay::new(
@@ -101,7 +101,7 @@ impl AuthorizedPersonaSimple {
             // This is a sign that Profile is in a bad state somehow...
             warn!("Discrepancy! AuthorizedDapp references persona which does not exist {}", self.identity_address);
             return Err(CommonError::DiscrepancyAuthorizedDappReferencedPersonaWhichDoesNotExist {
-                address: self.identity_address
+                address: self.identity_address.to_string()
             });
         };
         Ok(persona.clone())
@@ -176,8 +176,8 @@ mod tests {
         assert_eq!(
             sut.details_for_authorized_dapp(&AuthorizedDapp::sample_stokenet()),
             Err(CommonError::NetworkDiscrepancy {
-                expected: sut.network_id(),
-                actual: NetworkID::Stokenet
+                expected: sut.network_id().discriminant(),
+                actual: NetworkID::Stokenet.discriminant()
             })
         )
     }
@@ -193,7 +193,7 @@ mod tests {
 
         assert_eq!(
 			sut.details_for_authorized_dapp(&dapp),
-			Err(CommonError::DiscrepancyAuthorizedDappReferencedPersonaWhichDoesNotExist { address: persona_simple.identity_address })
+			Err(CommonError::DiscrepancyAuthorizedDappReferencedPersonaWhichDoesNotExist { address: persona_simple.identity_address.to_string() })
 		);
     }
 
@@ -219,7 +219,7 @@ mod tests {
 
         assert_eq!(
 			sut.details_for_authorized_dapp(&dapp),
-			Err(CommonError::DiscrepancyAuthorizedDappReferencedAccountWhichDoesNotExist { address: address_of_non_existing_account })
+			Err(CommonError::DiscrepancyAuthorizedDappReferencedAccountWhichDoesNotExist { address: address_of_non_existing_account.to_string() })
 		);
     }
 

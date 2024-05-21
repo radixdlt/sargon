@@ -933,8 +933,10 @@ checksum = "75b325c5dbd37f80359721ad39aca5a29fb04c89279657cffdda8736d0c0b9d2"
 name = "drivers"
 version = "1.1.0"
 dependencies = [
+ "actix-rt",
  "async-trait",
  "common",
+ "pretty_assertions",
  "profile",
  "ret",
  "serde",

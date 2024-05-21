@@ -56,8 +56,8 @@ pub trait EntityCAP26Path: Derivation + FromStr {
 
         if entity_kind != Self::entity_kind() {
             return Err(CommonError::WrongEntityKind {
-                expected: Self::entity_kind().to_string(),
-                found: entity_kind.to_string(),
+                expected: Self::entity_kind().discriminant(),
+                found: entity_kind.discriminant(),
             });
         }
 

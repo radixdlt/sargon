@@ -4,7 +4,15 @@ use crate::prelude::*;
 // a field `structure_configuration_references` but no client can populate it yet, so the list will always
 // be empty, thus save to used a serializable trivial type such as `bool` as a sample for now.
 #[derive(
-    Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, uniffi::Record,
+    Serialize,
+    Deserialize,
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    uniffi::Record,
 )]
 pub struct SecurityStructureConfigurationReference;
 impl Identifiable for SecurityStructureConfigurationReference {

@@ -24,8 +24,8 @@ pub trait OnSameNetworkValidating:
                 Ok(())
             } else {
                 Err(CommonError::NetworkDiscrepancy {
-                    expected: network_id,
-                    actual: e.network_id(),
+                    expected: network_id.discriminant(),
+                    actual: e.network_id().discriminant(),
                 })
             }
         })?;

@@ -8,7 +8,9 @@ build = "build.rs"
 uniffi = { workspace = true, features = ["cli"] }
 serde = { workspace = true }
 strum = { workspace = true }
+pretty_assertions = { workspace = true }
 async-trait = { workspace = true }
+actix-rt = { workspace = true }
 profile = { path = "../profile" }
 common = { path = "../common" }
 ret = { path = "../ret" }
