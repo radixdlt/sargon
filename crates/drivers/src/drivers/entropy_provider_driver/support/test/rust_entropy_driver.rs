@@ -11,7 +11,7 @@ impl RustEntropyDriver {
 }
 
 impl EntropyProviderDriver for RustEntropyDriver {
-    fn generate_secure_random_bytes(&self) -> Entropy32Bytes {
-        Entropy32Bytes::new(generate_byte_array::<32>())
+    fn generate_secure_random_bytes(&self) -> Exactly32Bytes {
+        Exactly32Bytes::generate()
     }
 }

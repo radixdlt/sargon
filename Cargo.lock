@@ -3589,7 +3589,12 @@ name = "transaction"
 version = "1.1.0"
 dependencies = [
  "common",
+ "derive_more",
+ "log",
+ "pretty_assertions",
  "profile",
+ "radix-engine-interface",
+ "radix-rust",
  "ret",
  "serde",
  "uniffi",

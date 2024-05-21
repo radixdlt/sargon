@@ -7,8 +7,13 @@ use radix_engine_interface::blueprints::account::{
     ACCOUNT_SET_RESOURCE_PREFERENCE_IDENT,
 };
 
-impl TransactionManifest {
-    pub fn third_party_deposit_update(
+pub trait IsThirdPartyDepositsUpdating {
+    fn third_party_deposit_update_by_delta(
+        owner: &AccountAddress,
+        delta: ThirdPartyDepositsDelta,
+    ) -> Self;
+
+    fn third_party_deposit_update(
         owner: &AccountAddress,
         from: ThirdPartyDeposits,
         to: ThirdPartyDeposits,
@@ -16,8 +21,10 @@ impl TransactionManifest {
         let delta = ThirdPartyDepositsDelta::new(from, to);
         Self::third_party_deposit_update_by_delta(owner, delta)
     }
+}
 
-    pub fn third_party_deposit_update_by_delta(
+impl IsThirdPartyDepositsUpdating for TransactionManifest {
+    fn third_party_deposit_update_by_delta(
         owner: &AccountAddress,
         delta: ThirdPartyDepositsDelta,
     ) -> Self {
