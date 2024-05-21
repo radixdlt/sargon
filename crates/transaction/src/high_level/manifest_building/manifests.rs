@@ -1,7 +1,14 @@
 use crate::prelude::*;
 
-impl TransactionManifest {
-    pub fn faucet(
+pub trait FaucetManifestBuilding {
+    fn faucet(
+        include_lock_fee_instruction: bool,
+        address_of_receiving_account: &AccountAddress,
+    ) -> Self;
+}
+
+impl FaucetManifestBuilding for TransactionManifest {
+    fn faucet(
         include_lock_fee_instruction: bool,
         address_of_receiving_account: &AccountAddress,
     ) -> Self {
@@ -23,8 +30,18 @@ impl TransactionManifest {
             address_of_receiving_account.network_id(),
         )
     }
+}
 
-    pub fn marking_account_as_dapp_definition_type(
+pub trait MetadataManifestBuilding: Sized {
+    fn set_metadata<A>(
+        address: &A,
+        key: MetadataKey,
+        value: impl ScryptoToMetadataEntry,
+    ) -> Self
+    where
+        A: IntoScryptoAddress;
+
+    fn marking_account_as_dapp_definition_type(
         account_address: &AccountAddress,
     ) -> Self {
         Self::set_metadata(
@@ -34,7 +51,7 @@ impl TransactionManifest {
         )
     }
 
-    pub fn set_owner_keys_hashes(
+    fn set_owner_keys_hashes(
         address_of_account_or_persona: &AddressOfAccountOrPersona,
         owner_key_hashes: Vec<PublicKeyHash>,
     ) -> Self {
@@ -46,7 +63,37 @@ impl TransactionManifest {
             ),
         )
     }
+}
 
+impl MetadataManifestBuilding for TransactionManifest {
+    fn set_metadata<A>(
+        address: &A,
+        key: MetadataKey,
+        value: impl ScryptoToMetadataEntry,
+    ) -> Self
+    where
+        A: IntoScryptoAddress,
+    {
+        let builder = ScryptoManifestBuilder::new().set_metadata(
+            address.scrypto(),
+            key,
+            value,
+        );
+
+        TransactionManifest::sargon_built(builder, address.network_id())
+    }
+}
+
+pub trait AccountWithdrawalManifestBuilding {
+    fn account_withdraw_non_fungibles(
+        builder: ScryptoManifestBuilder,
+        owner: &AccountAddress,
+        resource_address: &ResourceAddress,
+        non_fungible_local_ids: &[NonFungibleLocalId],
+    ) -> ScryptoManifestBuilder;
+}
+
+impl AccountWithdrawalManifestBuilding for TransactionManifest {
     fn account_withdraw_non_fungibles(
         builder: ScryptoManifestBuilder,
         owner: &AccountAddress,
@@ -62,8 +109,17 @@ impl TransactionManifest {
                 .map(ScryptoNonFungibleLocalId::from),
         )
     }
+}
 
-    pub fn stake_claims(
+pub trait StakeClaimManifestBuilding {
+    fn stake_claims(
+        owner: &AccountAddress,
+        stake_claims: Vec<StakeClaim>,
+    ) -> Self;
+}
+
+impl StakeClaimManifestBuilding for TransactionManifest {
+    fn stake_claims(
         owner: &AccountAddress,
         stake_claims: Vec<StakeClaim>,
     ) -> Self {
@@ -114,25 +170,6 @@ impl TransactionManifest {
         }
 
         TransactionManifest::sargon_built(builder, network_id)
-    }
-}
-
-impl TransactionManifest {
-    fn set_metadata<A>(
-        address: &A,
-        key: MetadataKey,
-        value: impl ScryptoToMetadataEntry,
-    ) -> Self
-    where
-        A: IntoScryptoAddress,
-    {
-        let builder = ScryptoManifestBuilder::new().set_metadata(
-            address.scrypto(),
-            key,
-            value,
-        );
-
-        TransactionManifest::sargon_built(builder, address.network_id())
     }
 }
 

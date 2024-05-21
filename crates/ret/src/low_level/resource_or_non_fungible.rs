@@ -1,5 +1,10 @@
 use crate::prelude::*;
 
+use radix_engine_interface::blueprints::account::{
+    AccountAddAuthorizedDepositorInput as ScryptoAccountAddAuthorizedDepositorInput,
+    AccountRemoveResourcePreferenceInput as ScryptoAccountRemoveResourcePreferenceInput,
+};
+
 /// The addresses that can be added as exception to the `DepositRule`
 #[derive(
     Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum,
@@ -11,6 +16,28 @@ pub enum ResourceOrNonFungible {
 
     #[serde(rename = "nonFungibleGlobalID")]
     NonFungible { value: NonFungibleGlobalId },
+}
+
+impl From<ResourceOrNonFungible> for ScryptoAccountAddAuthorizedDepositorInput {
+    fn from(value: ResourceOrNonFungible) -> Self {
+        ScryptoAccountAddAuthorizedDepositorInput {
+            badge: value.into(),
+        }
+    }
+}
+impl From<ResourceOrNonFungible>
+    for ScryptoAccountRemoveResourcePreferenceInput
+{
+    fn from(value: ResourceOrNonFungible) -> Self {
+        match value {
+            ResourceOrNonFungible::Resource { value } => Self {
+                resource_address: value.into(),
+            },
+            ResourceOrNonFungible::NonFungible { value } => Self {
+                resource_address: value.resource_address.into(),
+            },
+        }
+    }
 }
 
 impl std::fmt::Display for ResourceOrNonFungible {

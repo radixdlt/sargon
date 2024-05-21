@@ -1,6 +1,6 @@
 use super::request_method::Method;
+use crate::mobile::session::session_id::SessionID;
 use crate::prelude::*;
-use crate::radix_connect::mobile::session::session_id::SessionID;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]

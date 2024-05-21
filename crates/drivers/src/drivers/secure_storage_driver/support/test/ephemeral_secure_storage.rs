@@ -1,4 +1,5 @@
-#![cfg(test)]
+//  #![cfg(test)] // FIXME
+
 use crate::prelude::*;
 
 use std::sync::RwLock;

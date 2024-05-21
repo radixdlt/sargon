@@ -5,6 +5,12 @@ pub struct Bios {
     pub drivers: Arc<Drivers>,
 }
 
+impl Bios {
+    pub fn into_clients(bios: Ar<Self>) -> Clients {
+        Clients::with_drivers(bios.drivers.clone())
+    }
+}
+
 #[uniffi::export]
 impl Bios {
     #[uniffi::constructor]

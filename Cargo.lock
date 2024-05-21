@@ -608,6 +608,28 @@ version = "0.7.0"
 source = "git+https://github.com/clap-rs/clap/?rev=8a7a13a5618cfdc4ff328624a5266e7b4d88649a#8a7a13a5618cfdc4ff328624a5266e7b4d88649a"
 
 [[package]]
+name = "clients"
+version = "1.1.0"
+dependencies = [
+ "actix-rt",
+ "async-trait",
+ "common",
+ "drivers",
+ "enum-iterator",
+ "gateway_models",
+ "log",
+ "pretty_assertions",
+ "pretty_env_logger",
+ "profile",
+ "reqwest",
+ "ret",
+ "serde",
+ "serde_json 1.0.108",
+ "strum 0.26.1",
+ "uniffi",
+]
+
+[[package]]
 name = "colorchoice"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1220,11 +1242,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "gateway_api"
+name = "gateway_models"
 version = "1.1.0"
 dependencies = [
  "common",
- "drivers",
+ "derive_more",
  "ret",
  "serde",
  "uniffi",
@@ -2147,6 +2169,7 @@ dependencies = [
  "paste 1.0.14",
  "pretty_assertions",
  "radix-common",
+ "radix-engine-interface",
  "radix-rust",
  "ret",
  "serde",
@@ -2472,6 +2495,7 @@ checksum = "1a03d7e7816ade40c6ecedff7515198906d644527771bd8fb5a335094353a15a"
 name = "radix_connect"
 version = "1.1.0"
 dependencies = [
+ "clients",
  "common",
  "derive_more",
  "paste 1.0.14",
@@ -2479,6 +2503,7 @@ dependencies = [
  "serde",
  "serde_with 3.4.0",
  "uniffi",
+ "url",
 ]
 
 [[package]]
@@ -2765,6 +2790,7 @@ name = "sargon"
 version = "1.1.0"
 dependencies = [
  "actix-rt",
+ "clients",
  "common",
  "drivers",
  "log",
@@ -3601,8 +3627,12 @@ dependencies = [
  "pretty_assertions",
  "pretty_env_logger",
  "profile",
+ "radix-common",
+ "radix-engine",
  "radix-engine-interface",
+ "radix-engine-toolkit",
  "radix-rust",
+ "rand 0.8.5",
  "ret",
  "sbor",
  "serde",

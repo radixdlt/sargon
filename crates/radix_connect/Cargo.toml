@@ -7,11 +7,13 @@ build = "build.rs"
 [dependencies]
 uniffi = { workspace = true, features = ["cli"] }
 paste = { workspace = true }
+url = { workspace = true }
 serde = { workspace = true }
 serde_with = { workspace = true }
 derive_more = { workspace = true }
 common = { path = "../common" }
 profile = { path = "../profile" }
+clients = { path = "../clients" }
 
 [build-dependencies]
 uniffi = { workspace = true, features = ["build"] }

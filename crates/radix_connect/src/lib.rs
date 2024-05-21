@@ -16,6 +16,7 @@ pub mod prelude {
     pub use crate::wallet_interaction::*;
     pub use crate::wallet_persona::*;
 
+    pub use clients::prelude::*;
     pub use common::prelude::*;
     pub use profile::prelude::*;
 }

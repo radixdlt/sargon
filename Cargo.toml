@@ -4,7 +4,7 @@ members = [
     "crates/bindgen",
     "crates/common",
     "crates/drivers",
-    "crates/gateway_api",
+    "crates/gateway_models",
     "crates/hierarchical_deterministic",
     "crates/profile",
     "crates/radix_connect",

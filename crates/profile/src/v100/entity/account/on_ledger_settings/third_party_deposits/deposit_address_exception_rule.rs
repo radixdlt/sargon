@@ -25,6 +25,19 @@ pub enum DepositAddressExceptionRule {
     Deny,
 }
 
+impl From<DepositAddressExceptionRule> for ScryptoResourcePreference {
+    fn from(value: DepositAddressExceptionRule) -> Self {
+        match value {
+            DepositAddressExceptionRule::Allow => {
+                ScryptoResourcePreference::Allowed
+            }
+            DepositAddressExceptionRule::Deny => {
+                ScryptoResourcePreference::Disallowed
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;

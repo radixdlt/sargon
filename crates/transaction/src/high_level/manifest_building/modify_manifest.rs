@@ -56,7 +56,14 @@ where
     instruction[0].clone()
 }
 
-impl TransactionManifest {
+pub trait InstructionInserting: Sized {
+    fn instructions(&self) -> &Vec<ScryptoInstruction>;
+    fn insert_instruction(
+        self,
+        position: InstructionPosition,
+        instruction: ScryptoInstruction,
+    ) -> Self;
+
     /// Modifies `manifest` by inserting transaction "guarantees", which is the wallet
     /// term for `assert_worktop_contains`.
     ///
@@ -66,7 +73,7 @@ impl TransactionManifest {
     ///
     /// Also panics if the number of TransactionGuarantee's is larger than the number
     /// of instructions of `manifest` (does not make any sense).
-    pub fn modify_add_guarantees<I>(self, guarantees: I) -> Self
+    fn modify_add_guarantees<I>(self, guarantees: I) -> Self
     where
         I: IntoIterator<Item = TransactionGuarantee>,
     {
@@ -121,7 +128,7 @@ impl TransactionManifest {
         manifest
     }
 
-    pub fn modify_add_lock_fee(
+    fn modify_add_lock_fee(
         self,
         address_of_fee_payer: &AccountAddress,
         fee: Option<Decimal192>,
@@ -134,7 +141,12 @@ impl TransactionManifest {
     fn prepend_instruction(self, instruction: ScryptoInstruction) -> Self {
         self.insert_instruction(InstructionPosition::First, instruction)
     }
+}
 
+impl InstructionInserting for TransactionManifest {
+    fn instructions(&self) -> &Vec<ScryptoInstruction> {
+        self.instructions()
+    }
     fn insert_instruction(
         self,
         position: InstructionPosition,

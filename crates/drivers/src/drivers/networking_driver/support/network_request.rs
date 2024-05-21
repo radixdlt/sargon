@@ -10,6 +10,20 @@ pub struct NetworkRequest {
 }
 
 impl NetworkRequest {
+    pub fn with_gateway_api_headers(self) -> Self {
+        let headers = HashMap::<String, String>::from_iter([
+            ("content-Type".to_owned(), "application/json".to_owned()),
+            ("accept".to_owned(), "application/json".to_owned()),
+            ("user-agent".to_owned(), "Sargon".to_owned()), // https://stackoverflow.com/a/77866494/1311272
+            ("RDX-Client-Name".to_owned(), "Sargon".to_owned()),
+            ("RDX-Client-Version".to_owned(), "1.5.1".to_owned()),
+        ]);
+
+        self.with_headers(headers)
+    }
+}
+
+impl NetworkRequest {
     pub fn new_post(url: Url) -> Self {
         Self {
             url,

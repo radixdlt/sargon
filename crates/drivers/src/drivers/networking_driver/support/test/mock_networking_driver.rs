@@ -1,4 +1,4 @@
-#![cfg(test)]
+// FIXME: we want: #![cfg(test)] but does not work across crates
 
 use crate::prelude::*;
 

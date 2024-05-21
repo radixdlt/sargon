@@ -9,6 +9,7 @@ uniffi = { workspace = true, features = ["cli"] }
 serde = { workspace = true }
 serde_json = { workspace = true }
 log = { workspace = true }
+rand = { workspace = true }
 pretty_env_logger = { workspace = true }
 derive_more = { workspace = true }
 pretty_assertions = { workspace = true }
@@ -18,13 +19,10 @@ profile = { path = "../profile" }
 
 sbor = { workspace = true }
 radix-rust = { workspace = true }
-# radix-engine = { workspace = true }
-# radix-common = { workspace = true }
-# radix-common-derive = { workspace = true }
+radix-engine = { workspace = true }
+radix-common = { workspace = true }
 radix-engine-interface = { workspace = true }
-# radix-transactions = { workspace = true }
-# radix-engine-toolkit-json = { workspace = true }
-# radix-engine-toolkit = { workspace = true }
+radix-engine-toolkit = { workspace = true }
 
 [build-dependencies]
 uniffi = { workspace = true, features = ["build"] }

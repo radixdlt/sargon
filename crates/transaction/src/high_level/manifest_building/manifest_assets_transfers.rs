@@ -1,17 +1,19 @@
 use crate::prelude::*;
 
-impl TransactionManifest {
+pub trait TransfersBuilding {
+    fn per_asset_transfers(transfers: PerAssetTransfers) -> Self;
+
     /// Uses `per_asset_transfers` after having transposed the `PerRecipientAssetTransfers`
     /// into `PerAssetTransfers`. We always use `PerAssetTransfers` when building the manifest
     /// since it is more efficient (allows a single withdraw per resource) => fewer instruction =>
     /// cheaper TX fee for user.
-    pub fn per_recipient_transfers(
-        transfers: PerRecipientAssetTransfers,
-    ) -> Self {
+    fn per_recipient_transfers(transfers: PerRecipientAssetTransfers) -> Self {
         Self::per_asset_transfers(transfers.transpose())
     }
+}
 
-    pub fn per_asset_transfers(transfers: PerAssetTransfers) -> Self {
+impl TransfersBuilding for TransactionManifest {
+    fn per_asset_transfers(transfers: PerAssetTransfers) -> Self {
         let mut builder = ScryptoManifestBuilder::new();
         let bucket_factory = BucketFactory::default();
         let from_account = &transfers.from_account;
