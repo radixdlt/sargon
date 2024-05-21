@@ -2134,6 +2134,7 @@ dependencies = [
  "enum-as-inner",
  "enum-iterator",
  "hd",
+ "hex 0.4.3 (git+https://github.com/KokaKiwi/rust-hex/?rev=b2b4370b5bf021b98ee7adc92233e8de3f2de792)",
  "hkdf",
  "k256 0.13.3 (git+https://github.com/RustCrypto/elliptic-curves?rev=e158ce5cf0e9acee2fd76aff2a628334f5c771e5)",
  "paste 1.0.14",

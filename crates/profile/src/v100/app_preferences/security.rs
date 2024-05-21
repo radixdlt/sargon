@@ -3,7 +3,10 @@ use crate::prelude::*;
 // FIXME: MFA this is in fact not used, so ok to be a `bool` for now. The AppPreferences Security type has
 // a field `structure_configuration_references` but no client can populate it yet, so the list will always
 // be empty, thus save to used a serializable trivial type such as `bool` as a sample for now.
-pub type SecurityStructureConfigurationReference = bool;
+#[derive(
+    Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, uniffi::Record,
+)]
+pub struct SecurityStructureConfigurationReference;
 impl Identifiable for SecurityStructureConfigurationReference {
     type ID = Self;
 

@@ -94,12 +94,6 @@ impl VersionedEncryption for AesGcm256 {
     }
 }
 
-impl From<Exactly32Bytes> for Key<aes_gcm::Aes256Gcm> {
-    fn from(value: Exactly32Bytes) -> Self {
-        Self::from(*value.bytes())
-    }
-}
-
 #[cfg(test)]
 mod tests {
 

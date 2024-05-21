@@ -6,3 +6,51 @@ experimental_sendable_value_types = true
 
 [bindings.kotlin]
 package_name = "com.radixdlt.sargon.common"
+
+[bindings.swift.custom_types.BagOfBytes]
+type_name = "Data"
+imports = ["Foundation"]
+into_custom = "{ Data({}.map({ i8 in UInt8(bitPattern: i8) })) }()"
+from_custom = "{ {}.map({ u8 in Int8(bitPattern: u8) }) }()"
+
+[bindings.kotlin.custom_types.BagOfBytes]
+type_name = "List<UByte>"
+imports = []
+into_custom = "{}.map({ it.toUByte() })"
+from_custom = "{}.map({ it.toByte() })"
+
+[bindings.swift.custom_types.Uuid]
+type_name = "UUID"
+imports = ["Foundation"]
+into_custom = "UUID(uuidString: {})!"
+from_custom = "{}.uuidString"
+
+[bindings.kotlin.custom_types.Uuid]
+type_name = "UUID"
+imports = ["java.util.UUID"]
+into_custom = "UUID.fromString({})"
+from_custom = "{}.toString()"
+
+[bindings.swift.custom_types.Url]
+type_name = "URL"
+imports = ["Foundation"]
+into_custom = "URL(string: {})!"
+from_custom = "String(describing: {})"
+
+[bindings.kotlin.custom_types.Url]
+type_name = "HttpUrl"
+imports = ["okhttp3.HttpUrl", "okhttp3.HttpUrl.Companion.toHttpUrl"]
+into_custom = "{}.toHttpUrl()"
+from_custom = "{}.toString()"
+
+[bindings.swift.custom_types.Timestamp]
+type_name = "Date"
+imports = ["Foundation"]
+into_custom = "{let df = DateFormatter();df.dateFormat = \"yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ\";return df.date(from: {})!}()"
+from_custom = "{let df = DateFormatter();df.dateFormat = \"yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ\";return df.string(from: {})}()"
+
+[bindings.kotlin.custom_types.Timestamp]
+type_name = "OffsetDateTime"
+imports = ["java.time.OffsetDateTime", "java.time.format.DateTimeFormatter"]
+into_custom = "OffsetDateTime.parse({}, DateTimeFormatter.ISO_DATE_TIME)"
+from_custom = "{}.format(DateTimeFormatter.ISO_DATE_TIME)"

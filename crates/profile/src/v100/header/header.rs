@@ -61,7 +61,7 @@ impl Header {
     /// "Unknown device" as description, and empty content hint
     pub fn new(creating_device: DeviceInfo) -> Self {
         Self::with_values(
-            profile_id(),
+            ProfileID(id()),
             creating_device,
             ContentHint::new(),
             now(),

@@ -152,9 +152,7 @@ impl SargonOS {
         Self::get_device_info(&self.clients).await
     }
 
-    pub async fn get_device_info(
-        clients: &Clients,
-    ) -> Result<DeviceInfo> {
+    pub async fn get_device_info(clients: &Clients) -> Result<DeviceInfo> {
         debug!("Get device info");
         let secure_storage = &clients.secure_storage;
 

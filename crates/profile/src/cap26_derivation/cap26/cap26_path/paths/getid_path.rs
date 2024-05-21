@@ -35,10 +35,8 @@ impl Derivation for GetIDPath {
     fn curve(&self) -> SLIP10Curve {
         self.scheme().curve()
     }
-}
 
-impl GetIDPath {
-    pub fn scheme(&self) -> DerivationPathScheme {
+    fn scheme(&self) -> DerivationPathScheme {
         DerivationPathScheme::Cap26
     }
 }

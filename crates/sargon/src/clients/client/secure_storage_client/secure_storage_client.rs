@@ -283,8 +283,7 @@ impl SecureStorageClient {
 
 #[cfg(test)]
 impl SecureStorageClient {
-    pub fn ephemeral(
-    ) -> (SecureStorageClient, Arc<EphemeralSecureStorage>) {
+    pub fn ephemeral() -> (SecureStorageClient, Arc<EphemeralSecureStorage>) {
         let storage = EphemeralSecureStorage::new();
         (SecureStorageClient::new(storage.clone()), storage)
     }

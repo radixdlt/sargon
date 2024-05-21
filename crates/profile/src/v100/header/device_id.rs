@@ -15,6 +15,7 @@ use crate::prelude::*;
 )]
 #[serde(transparent)]
 pub struct DeviceID(pub Uuid);
+
 uniffi::custom_newtype!(DeviceID, Uuid);
 
 impl DeviceID {

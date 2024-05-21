@@ -26,6 +26,14 @@ decl_ret_wrapped_address!(
     account
 );
 
+impl Identifiable for AccountAddress {
+    type ID = Self;
+
+    fn id(&self) -> Self::ID {
+        *self
+    }
+}
+
 impl AccountAddress {
     pub fn new(
         public_key: impl Into<PublicKey>,

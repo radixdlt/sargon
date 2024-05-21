@@ -6,14 +6,15 @@ pub fn new_private_hd_factor_source_babylon(
     entropy: NonEmptyMax32Bytes,
     device_info: &DeviceInfo,
 ) -> Result<PrivateHierarchicalDeterministicFactorSource> {
-    BIP39Entropy::try_from(entropy).map(|entropy| {
-        PrivateHierarchicalDeterministicFactorSource::new_babylon_with_entropy(
-            is_main,
-            entropy,
-            BIP39Passphrase::default(),
-            device_info,
-        )
-    })
+    // BIP39Entropy::try_from(entropy).map(|entropy| {
+    //     PrivateHierarchicalDeterministicFactorSource::new_babylon_with_entropy(
+    //         is_main,
+    //         entropy,
+    //         BIP39Passphrase::default(),
+    //         device_info,
+    //     )
+    // })
+    todo!()
 }
 
 #[uniffi::export]
@@ -69,13 +70,14 @@ mod tests {
 
     #[test]
     fn new_uses_empty_bip39_passphrase() {
-        let private: SUT = new_private_hd_factor_source_babylon(
-            true,
-            Entropy32Bytes::new([0xff; 32]).into(),
-            &DeviceInfo::sample(),
-        )
-        .unwrap();
-        assert_eq!(private.mnemonic_with_passphrase.passphrase.0, "");
+        // let private: SUT = new_private_hd_factor_source_babylon(
+        //     true,
+        //     Entropy32Bytes::new([0xff; 32]).into(),
+        //     &DeviceInfo::sample(),
+        // )
+        // .unwrap();
+        // assert_eq!(private.mnemonic_with_passphrase.passphrase.0, "");
+        todo!()
     }
 
     #[test]

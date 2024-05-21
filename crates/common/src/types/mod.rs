@@ -51,3 +51,9 @@ pub use rounding_mode::*;
 pub use safe_to_log::*;
 pub use secret_bytes::*;
 pub use signatures::*;
+
+impl From<Exactly32Bytes> for aes_gcm::Key<aes_gcm::Aes256Gcm> {
+    fn from(value: Exactly32Bytes) -> Self {
+        Self::from(*value.bytes())
+    }
+}
