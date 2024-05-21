@@ -10,7 +10,7 @@ impl EntropyClient {
         Self { driver }
     }
 
-    pub fn bip39_entropy(&self) -> BIP39Entropy {
-        BIP39Entropy::from(self.driver.generate_secure_random_bytes())
+    pub fn bip39_entropy(&self) -> NonEmptyMax32Bytes {
+        NonEmptyMax32Bytes::from(self.driver.generate_secure_random_bytes())
     }
 }

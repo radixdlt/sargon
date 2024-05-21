@@ -1,9 +1,23 @@
-mod modules;
+mod interaction_id;
+mod interaction_version;
+mod p2p_links;
+mod wallet_account;
+mod wallet_interaction;
+mod wallet_persona;
+
+#[allow(dead_code)]
+mod mobile;
 
 pub mod prelude {
-    pub use crate::modules::*;
+    pub use crate::interaction_id::*;
+    pub use crate::interaction_version::*;
+    pub use crate::p2p_links::*;
+    pub use crate::wallet_account::*;
+    pub use crate::wallet_interaction::*;
+    pub use crate::wallet_persona::*;
 
     pub use common::prelude::*;
+    pub use profile::prelude::*;
 }
 
 pub use prelude::*;

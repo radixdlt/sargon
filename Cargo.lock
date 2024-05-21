@@ -2473,8 +2473,11 @@ name = "radix_connect"
 version = "1.1.0"
 dependencies = [
  "common",
+ "derive_more",
  "paste 1.0.14",
  "profile",
+ "serde",
+ "serde_with 3.4.0",
  "uniffi",
 ]
 
@@ -2661,7 +2664,6 @@ dependencies = [
 name = "ret"
 version = "1.1.0"
 dependencies = [
- "cargo_toml 0.15.3 (git+https://gitlab.com/lib.rs/cargo_toml?rev=e498c94fc42a660c1ca1a28999ce1d757cfe77fe)",
  "common",
  "derive_more",
  "enum-iterator",
@@ -2762,9 +2764,13 @@ dependencies = [
 name = "sargon"
 version = "1.1.0"
 dependencies = [
+ "actix-rt",
  "common",
  "drivers",
+ "log",
+ "pretty_assertions",
  "profile",
+ "transaction",
  "uniffi",
 ]
 
@@ -3588,15 +3594,19 @@ dependencies = [
 name = "transaction"
 version = "1.1.0"
 dependencies = [
+ "cargo_toml 0.15.3 (git+https://gitlab.com/lib.rs/cargo_toml?rev=e498c94fc42a660c1ca1a28999ce1d757cfe77fe)",
  "common",
  "derive_more",
  "log",
  "pretty_assertions",
+ "pretty_env_logger",
  "profile",
  "radix-engine-interface",
  "radix-rust",
  "ret",
+ "sbor",
  "serde",
+ "serde_json 1.0.108",
  "uniffi",
 ]
 

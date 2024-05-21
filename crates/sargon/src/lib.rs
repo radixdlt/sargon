@@ -14,6 +14,9 @@ pub mod prelude {
 
     pub(crate) use common::prelude::*;
     pub(crate) use drivers::prelude::*;
+    pub(crate) use hd::prelude::*;
+    pub(crate) use profile::prelude::*;
+    pub(crate) use transaction::prelude::*;
 }
 
 pub use prelude::*;

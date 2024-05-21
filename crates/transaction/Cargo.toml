@@ -7,14 +7,16 @@ build = "build.rs"
 [dependencies]
 uniffi = { workspace = true, features = ["cli"] }
 serde = { workspace = true }
+serde_json = { workspace = true }
 log = { workspace = true }
+pretty_env_logger = { workspace = true }
 derive_more = { workspace = true }
 pretty_assertions = { workspace = true }
 common = { path = "../common" }
 ret = { path = "../ret" }
 profile = { path = "../profile" }
 
-# sbor = { workspace = true }
+sbor = { workspace = true }
 radix-rust = { workspace = true }
 # radix-engine = { workspace = true }
 # radix-common = { workspace = true }
@@ -26,6 +28,10 @@ radix-engine-interface = { workspace = true }
 
 [build-dependencies]
 uniffi = { workspace = true, features = ["build"] }
+
+# cargo_toml = "0.15.3"
+cargo_toml = { git = "https://gitlab.com/lib.rs/cargo_toml", rev = "e498c94fc42a660c1ca1a28999ce1d757cfe77fe" }
+
 
 [dev-dependencies]
 uniffi = { workspace = true, features = ["bindgen-tests"] }

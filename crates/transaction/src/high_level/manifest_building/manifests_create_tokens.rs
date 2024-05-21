@@ -1,7 +1,33 @@
 use crate::prelude::*;
 
-impl TransactionManifest {
-    pub fn create_fungible_token(address_of_owner: &AccountAddress) -> Self {
+pub trait IsTokenCreating {
+    fn create_multiple_fungible_tokens(
+        address_of_owner: &AccountAddress,
+        count: impl Into<Option<u8>>,
+    ) -> TransactionManifest;
+
+    fn create_non_fungible_tokens<T, V>(
+        address_of_owner: &AccountAddress,
+        collection_count: u16,
+        initial_supply: T,
+    ) -> Self
+    where
+        T: Clone + IntoIterator<Item = (NonFungibleLocalId, V)>,
+        V: ScryptoManifestEncode + ScryptoNonFungibleData;
+
+    fn create_fungible_token_with_metadata_without_deposit(
+        builder: ScryptoManifestBuilder,
+        initial_supply: Decimal192,
+        metadata: TokenDefinitionMetadata,
+    ) -> ScryptoManifestBuilder;
+
+    fn create_fungible_token_with_metadata(
+        address_of_owner: &AccountAddress,
+        initial_supply: Decimal192,
+        metadata: TokenDefinitionMetadata,
+    ) -> Self;
+
+    fn create_fungible_token(address_of_owner: &AccountAddress) -> Self {
         Self::create_fungible_token_with_metadata(
             address_of_owner,
             21_000_000.into(),
@@ -9,29 +35,7 @@ impl TransactionManifest {
         )
     }
 
-    pub fn create_fungible_token_with_metadata(
-        address_of_owner: &AccountAddress,
-        initial_supply: Decimal192,
-        metadata: TokenDefinitionMetadata,
-    ) -> Self {
-        let mut builder = ScryptoManifestBuilder::new();
-        builder = Self::create_fungible_token_with_metadata_without_deposit(
-            builder,
-            initial_supply,
-            metadata,
-        );
-        builder = builder.try_deposit_entire_worktop_or_abort(
-            address_of_owner.scrypto(),
-            None,
-        );
-
-        TransactionManifest::sargon_built(
-            builder,
-            address_of_owner.network_id(),
-        )
-    }
-
-    pub fn create_single_nft_collection(
+    fn create_single_nft_collection(
         address_of_owner: &AccountAddress,
         nfts_per_collection: u64,
     ) -> Self {
@@ -42,7 +46,7 @@ impl TransactionManifest {
         )
     }
 
-    pub fn create_multiple_nft_collections(
+    fn create_multiple_nft_collections(
         address_of_owner: &AccountAddress,
         collection_count: u16,
         nfts_per_collection: u64,
@@ -67,7 +71,6 @@ impl TransactionManifest {
         )
     }
 
-    #[cfg(not(tarpaulin_include))] // false negative, tested
     fn create_non_fungible_tokens_collections_with_local_id_fn<F>(
         address_of_owner: &AccountAddress,
         collection_count: u16,
@@ -84,8 +87,31 @@ impl TransactionManifest {
                 .map(|i| (local_id(i), NonFungibleTokenData::new(i))),
         )
     }
+}
 
-    #[cfg(not(tarpaulin_include))] // false negative, tested
+impl IsTokenCreating for TransactionManifest {
+    fn create_fungible_token_with_metadata(
+        address_of_owner: &AccountAddress,
+        initial_supply: Decimal192,
+        metadata: TokenDefinitionMetadata,
+    ) -> Self {
+        let mut builder = ScryptoManifestBuilder::new();
+        builder = Self::create_fungible_token_with_metadata_without_deposit(
+            builder,
+            initial_supply,
+            metadata,
+        );
+        builder = builder.try_deposit_entire_worktop_or_abort(
+            address_of_owner.scrypto(),
+            None,
+        );
+
+        TransactionManifest::sargon_built(
+            builder,
+            address_of_owner.network_id(),
+        )
+    }
+
     fn create_non_fungible_tokens<T, V>(
         address_of_owner: &AccountAddress,
         collection_count: u16,
@@ -138,7 +164,7 @@ impl TransactionManifest {
         )
     }
 
-    pub fn create_fungible_token_with_metadata_without_deposit(
+    fn create_fungible_token_with_metadata_without_deposit(
         builder: ScryptoManifestBuilder,
         initial_supply: Decimal192,
         metadata: TokenDefinitionMetadata,
@@ -161,7 +187,7 @@ impl TransactionManifest {
     /// # Panics
     /// Panics if `address_of_owner` is on `Mainnet`, use a testnet instead.
     /// Panics if `count` is zero or is greater than the number of token metadata defined in `sample_resource_definition_metadata` (25)
-    pub fn create_multiple_fungible_tokens(
+    fn create_multiple_fungible_tokens(
         address_of_owner: &AccountAddress,
         count: impl Into<Option<u8>>,
     ) -> TransactionManifest {

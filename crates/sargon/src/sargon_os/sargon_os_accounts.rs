@@ -589,7 +589,10 @@ mod tests {
         assert!(os.profile().networks[0].accounts.is_empty())
     }
 
-    impl DisplayName {
+    trait RandomValue {
+        fn random() -> Self;
+    }
+    impl RandomValue for DisplayName {
         fn random() -> Self {
             Self::new(format!(
                 "random-{}",

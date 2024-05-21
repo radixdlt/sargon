@@ -6,9 +6,13 @@ build = "build.rs"
 
 [dependencies]
 uniffi = { workspace = true, features = ["cli"] }
+actix-rt = { workspace = true }
+log = { workspace = true }
+pretty_assertions = { workspace = true }
 common = { path = "../common" }
 drivers = { path = "../drivers" }
 profile = { path = "../profile" }
+transaction = { path = "../transaction" }
 
 [build-dependencies]
 uniffi = { workspace = true, features = ["build"] }

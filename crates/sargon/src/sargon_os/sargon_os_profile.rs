@@ -185,8 +185,8 @@ impl SargonOS {
                 .await;
             if err_on_lack_of_ownership {
                 Err(CommonError::ProfileLastUsedOnOtherDevice {
-                    other_device_id: last_used.id,
-                    this_device_id: device_info.id,
+                    other_device_id: last_used.id.to_string(),
+                    this_device_id: device_info.id.to_string(),
                 })
             } else {
                 // used by SargonOS::boot
