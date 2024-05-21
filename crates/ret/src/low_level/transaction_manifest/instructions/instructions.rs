@@ -1,6 +1,7 @@
 use crate::prelude::*;
 
 use radix_common::prelude::MANIFEST_SBOR_V1_MAX_DEPTH;
+
 use radix_engine_toolkit::functions::address::decode as RET_decode_address;
 
 #[derive(Clone, Debug, PartialEq, Eq, derive_more::Display, uniffi::Record)]
@@ -103,6 +104,7 @@ impl Instructions {
         depth: usize,
         network_id: NetworkID,
     ) -> Result<Self> {
+        use crate::low_level::sbor_depth_validation::manifest_value_with_sbor_depth;
         let nested_value = manifest_value_with_sbor_depth(depth);
         let dummy_address =
             ComponentAddress::with_node_id_bytes(&[0xffu8; 29], network_id);

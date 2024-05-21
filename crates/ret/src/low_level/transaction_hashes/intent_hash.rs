@@ -15,7 +15,7 @@ impl HasSampleValues for IntentHash {
 mod tests {
 
     use super::*;
-    use crate::prelude::*;
+    
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = IntentHash;

@@ -55,7 +55,7 @@ impl Mnemonic {
     }
 
     pub fn from_internal(internal: bip39::Mnemonic) -> Self {
-        use k256::elliptic_curve::zeroize::Zeroize;
+        
 
         let language = internal.language();
 

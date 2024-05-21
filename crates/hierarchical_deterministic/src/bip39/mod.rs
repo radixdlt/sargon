@@ -7,7 +7,7 @@ mod bip39_word_count_uniffi_fn;
 mod mnemonic;
 mod mnemonic_uniffi_fn;
 
-pub use bip39_entropy::*;
+
 pub use bip39_passphrase::*;
 pub use bip39_seed::*;
 pub use bip39_word::*;

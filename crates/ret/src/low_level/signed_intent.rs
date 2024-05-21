@@ -110,9 +110,9 @@ impl TryFrom<ScryptoSignedIntent> for SignedIntent {
 
 impl HasSampleValues for SignedIntent {
     fn sample() -> Self {
-        let intent = TransactionIntent::sample_other();
+        let _intent = TransactionIntent::sample_other();
 
-        let mut signatures = Vec::<IntentSignature>::new();
+        let _signatures = Vec::<IntentSignature>::new();
         // for n in 1..4 {
         //     let private_key: Secp256k1PrivateKey =
         //         ScryptoSecp256k1PrivateKey::from_u64(n).unwrap().into();
@@ -140,8 +140,8 @@ impl SignedIntent {
     /// and SHOULD return `Err` if `depth > SignedIntent::MAX_SBOR_DEPTH`, which
     /// we can assert in unit tests.
     pub fn test_with_sbor_depth(
-        depth: usize,
-        network_id: NetworkID,
+        _depth: usize,
+        _network_id: NetworkID,
     ) -> Result<Self> {
         // TransactionIntent::test_with_sbor_depth(depth, network_id).and_then(
         //     |intent| {
@@ -196,9 +196,9 @@ mod tests {
 
     #[test]
     fn many_intent_signatures_all_valid() {
-        let intent = TransactionIntent::sample_other();
+        let _intent = TransactionIntent::sample_other();
 
-        let mut signatures = Vec::<IntentSignature>::new();
+        let _signatures = Vec::<IntentSignature>::new();
         // for n in 1..4 {
         //     let private_key: Secp256k1PrivateKey =
         //         ScryptoSecp256k1PrivateKey::from_u64(n).unwrap().into();
@@ -222,7 +222,7 @@ mod tests {
 
     #[test]
     fn many_intent_signatures_one_invalid() {
-        let intent = TransactionIntent::sample_other();
+        let _intent = TransactionIntent::sample_other();
 
         // let mut signatures = Vec::<IntentSignature>::new();
         // for n in 1..4 {
@@ -245,9 +245,9 @@ mod tests {
 
     #[test]
     fn many_intent_signatures_invalid_because_mismatching_intent() {
-        let intent = TransactionIntent::sample_other();
+        let _intent = TransactionIntent::sample_other();
 
-        let mut signatures = Vec::<IntentSignature>::new();
+        let _signatures = Vec::<IntentSignature>::new();
         // for n in 1..4 {
         //     let private_key: Secp256k1PrivateKey =
         //         ScryptoSecp256k1PrivateKey::from_u64(n).unwrap().into();

@@ -31,7 +31,7 @@ mod transaction_intent_uniffi_fn;
 mod transaction_manifest;
 mod transaction_receipt;
 
-pub use address_conversion::*;
+
 pub use addresses_manifest_builder_support::*;
 pub use assert_manifest::*;
 pub use compiled_notarized_intent::*;
@@ -52,7 +52,7 @@ pub use public_key_hash::*;
 pub use public_key_hash_uniffi_fn::*;
 pub use resource_or_non_fungible::*;
 pub use resource_or_non_fungible_uniffi_fn::*;
-pub use sbor_depth_validation::*;
+
 pub use signed_intent::*;
 pub use signed_intent_uniffi_fn::*;
 pub use transaction_classes::*;

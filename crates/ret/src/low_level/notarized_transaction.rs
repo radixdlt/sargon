@@ -74,8 +74,8 @@ impl NotarizedTransaction {
     /// and SHOULD return `Err` if `depth > NotarizedTransaction::MAX_SBOR_DEPTH`, which
     /// we can assert in unit tests.
     pub fn test_with_sbor_depth(
-        depth: usize,
-        network_id: NetworkID,
+        _depth: usize,
+        _network_id: NetworkID,
     ) -> Result<Self> {
         // SignedIntent::test_with_sbor_depth(depth, network_id).and_then(
         //     |signed_intent| {
@@ -94,13 +94,13 @@ impl NotarizedTransaction {
 
 impl HasSampleValues for NotarizedTransaction {
     fn sample() -> Self {
-        let private_key = Ed25519PrivateKey::sample_alice();
+        let _private_key = Ed25519PrivateKey::sample_alice();
         let intent = TransactionIntent::sample();
 
         let signed_intent =
             SignedIntent::new(intent, IntentSignatures::default()).unwrap();
 
-        let signed_intent_hash = signed_intent.hash();
+        let _signed_intent_hash = signed_intent.hash();
 
         // Self::new(
         //     signed_intent,
@@ -116,7 +116,7 @@ impl HasSampleValues for NotarizedTransaction {
     // bech32 encoded   (mainnet): `"txid_rdx1vrjkzlt8pekg5s46tum5na8lzpulvc3p72p92nkdm2dd8p0vkx2syss63y"`
     // bech32 encoded (simulator): `"txid_sim1vrjkzlt8pekg5s46tum5na8lzpulvc3p72p92nkdm2dd8p0vkx2svr7ejr"`
     fn sample_other() -> Self {
-        let private_key: Secp256k1PrivateKey =
+        let _private_key: Secp256k1PrivateKey =
             ScryptoSecp256k1PrivateKey::from_u64(1).unwrap().into();
 
         let intent = TransactionIntent::sample_other();
@@ -125,7 +125,7 @@ impl HasSampleValues for NotarizedTransaction {
             SignedIntent::new(intent, IntentSignatures::new(Vec::new()))
                 .unwrap();
 
-        let signed_intent_hash = signed_intent.hash();
+        let _signed_intent_hash = signed_intent.hash();
 
         // Self::new(
         //     signed_intent,

@@ -1,4 +1,5 @@
-use crate::prelude::*;
+#[allow(unused)]
+pub use crate::prelude::*;
 
 #[cfg(test)]
 mod tests {
