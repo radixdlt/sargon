@@ -17,7 +17,8 @@ use crate::prelude::*;
 /// string without this test method since every space need to be correct.
 /// This function also allows for prettier formatting of the manifest string
 /// we assert against, since we can use any number of tabs.
-#[cfg(test)]
+///
+/// FIXME: We want this to be `#[uniffi(test)]` but that hides it across crates..
 pub fn manifest_eq(manifest: TransactionManifest, expected: impl AsRef<str>) {
     let trim =
         |s: &str| s.replace(' ', "").replace('\t', " ").trim().to_owned();
@@ -44,7 +45,8 @@ pub fn manifest_eq(manifest: TransactionManifest, expected: impl AsRef<str>) {
 /// string without this test method since every space need to be correct.
 /// This function also allows for prettier formatting of the Instructions set string
 /// we assert against, since we can use any number of tabs.
-#[cfg(test)]
+///
+/// FIXME: We want this to be `#[uniffi(test)]` but that hides it across crates..
 pub fn instructions_eq(instructions: Instructions, expected: impl AsRef<str>) {
     let trim =
         |s: &str| s.replace(' ', "").replace('\t', " ").trim().to_owned();
