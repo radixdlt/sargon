@@ -44,7 +44,8 @@ impl SargonOS {
         bios: Arc<Bios>,
         bdfs_mnemonic: Option<MnemonicWithPassphrase>,
     ) -> Result<Arc<Self>> {
-        let clients = Clients::new(bios);
+        // let clients = Clients::new(bios);
+        let clients = Bios::into_clients(bios);
 
         let sargon_info = SargonBuildInformation::get();
         let version = sargon_info.sargon_version;
@@ -127,7 +128,7 @@ impl SargonOS {
             None => {
                 debug!("Generating mnemonic (using Host provided entropy) for a new 'Babylon' `DeviceFactorSource` ('BDFS')");
 
-                let entropy: BIP39Entropy = clients.entropy.bip39_entropy();
+                let entropy = clients.entropy.bip39_entropy();
 
                 PrivateHierarchicalDeterministicFactorSource::new_babylon_with_entropy(
                     is_main,
@@ -300,8 +301,12 @@ mod tests {
         assert_eq!(
             add_res,
             Err(CommonError::ProfileLastUsedOnOtherDevice {
-                other_device_id: profile.header.last_used_on_device.id,
-                this_device_id: device_info.id
+                other_device_id: profile
+                    .header
+                    .last_used_on_device
+                    .id
+                    .to_string(),
+                this_device_id: device_info.id.to_string()
             })
         );
     }

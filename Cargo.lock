@@ -2796,6 +2796,7 @@ dependencies = [
  "clients",
  "common",
  "drivers",
+ "hd",
  "log",
  "pretty_assertions",
  "profile",

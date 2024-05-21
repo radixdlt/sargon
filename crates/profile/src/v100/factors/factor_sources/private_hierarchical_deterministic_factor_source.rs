@@ -50,7 +50,7 @@ impl PrivateHierarchicalDeterministicFactorSource {
 
     pub fn new_babylon_with_entropy(
         is_main: bool,
-        entropy: Exactly32Bytes,
+        entropy: NonEmptyMax32Bytes,
         passphrase: BIP39Passphrase,
         device_info: &DeviceInfo,
     ) -> Self {

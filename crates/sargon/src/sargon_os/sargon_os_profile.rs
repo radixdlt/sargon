@@ -624,7 +624,7 @@ mod tests {
         assert_eq!(
             load_profile_res,
             Err(CommonError::UnableToLoadProfileFromSecureStorage {
-                profile_id: second
+                profile_id: second.to_string()
             })
         );
     }

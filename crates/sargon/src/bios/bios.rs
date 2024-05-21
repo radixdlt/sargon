@@ -6,7 +6,7 @@ pub struct Bios {
 }
 
 impl Bios {
-    pub fn into_clients(bios: Ar<Self>) -> Clients {
+    pub fn into_clients(bios: Arc<Self>) -> Clients {
         Clients::with_drivers(bios.drivers.clone())
     }
 }

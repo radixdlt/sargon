@@ -1,4 +1,4 @@
-#![cfg(test)]
+// #![cfg(test)] // FIXME: multi crate cf test
 
 use crate::prelude::*;
 

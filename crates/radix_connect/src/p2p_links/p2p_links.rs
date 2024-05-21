@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+use profile::decl_identified_vec_of;
+
 decl_identified_vec_of!(
     /// Collection of clients user have connected P2P with, typically these
     /// are WebRTC connections with the dApp or Connector Extension

@@ -28,7 +28,8 @@ impl Profile {
             .await?;
 
         let account = accounts
-            .into_iter()
+            .iter()
+            .clone()
             .last()
             .expect("Should have created one account");
 
@@ -76,7 +77,8 @@ impl Profile {
             })?;
 
         let accounts = factor_instances
-            .into_iter()
+            .iter()
+            .clone()
             .map(|f| {
                 let idx = f.index();
                 let name = get_name(idx);
@@ -85,7 +87,7 @@ impl Profile {
                         (idx as usize) + number_of_accounts_on_network,
                     );
 
-                Account::new(f, name, appearance_id)
+                Account::new(f.clone(), name, appearance_id)
             })
             .collect::<Accounts>();
 

@@ -311,7 +311,7 @@ mod tests {
     fn not_allowed_to_create_profile_with_empty_factor_source() {
         let _ = SUT::with(
             Header::sample(),
-            IdentifiedVecOf::new(),
+            FactorSources::new(),
             AppPreferences::sample(),
             ProfileNetworks::sample(),
         );

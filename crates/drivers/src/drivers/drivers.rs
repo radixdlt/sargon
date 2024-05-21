@@ -67,7 +67,7 @@ impl Drivers {
     }
 }
 
-#[cfg(test)]
+// #[cfg(test)] // FIXME: multi-crate test
 impl Drivers {
     pub fn test() -> Arc<Self> {
         Drivers::new(

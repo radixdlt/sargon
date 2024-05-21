@@ -12,6 +12,7 @@ pretty_assertions = { workspace = true }
 common = { path = "../common" }
 drivers = { path = "../drivers" }
 clients = { path = "../clients" }
+hd = { path = "../hierarchical_deterministic" }
 profile = { path = "../profile" }
 transaction = { path = "../transaction" }
 

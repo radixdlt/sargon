@@ -1,4 +1,5 @@
-#![cfg(test)]
+// #![cfg(test)] // FIXME: cfg(test) multicrate
+
 use crate::prelude::*;
 
 use std::sync::RwLock;
