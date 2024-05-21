@@ -7,7 +7,7 @@ use radix_engine_interface::blueprints::account::{
     ACCOUNT_SET_RESOURCE_PREFERENCE_IDENT,
 };
 
-pub trait IsThirdPartyDepositsUpdating {
+pub trait IsThirdPartyDepositsUpdating: Sized {
     fn third_party_deposit_update_by_delta(
         owner: &AccountAddress,
         delta: ThirdPartyDepositsDelta,

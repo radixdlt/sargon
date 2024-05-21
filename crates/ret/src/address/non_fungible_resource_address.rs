@@ -109,7 +109,7 @@ macro_rules! decl_specialized_address {
                 }
             }
 
-            #[cfg(test)]
+            // #[cfg(test)] // FIXME
             impl From<&str> for $specialized_address_type {
                 /// TEST ONLY
                 fn from(value: &str) -> Self {

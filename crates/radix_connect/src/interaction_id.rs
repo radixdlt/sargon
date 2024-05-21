@@ -1,6 +1,10 @@
 use crate::prelude::*;
 
-uniffi::custom_newtype!(WalletInteractionId, Uuid);
+uniffi::custom_type!(WalletInteractionId, Uuid, {
+    remote,
+    from_custom: |id| id.0,
+    try_into_custom: |val| Ok(WalletInteractionId(val))
+});
 
 #[derive(
     Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Ord, PartialOrd, Hash,

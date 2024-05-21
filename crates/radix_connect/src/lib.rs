@@ -8,6 +8,9 @@ mod wallet_persona;
 #[allow(dead_code)]
 mod mobile;
 
+uniffi::remote_type!(Url, common);
+uniffi::remote_type!(Uuid, common);
+
 pub mod prelude {
     pub use crate::interaction_id::*;
     pub use crate::interaction_version::*;

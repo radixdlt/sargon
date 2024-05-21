@@ -27,7 +27,11 @@ impl Service {
 const SERVICE_PATH: &str =
     "https://radix-connect-relay-dev.rdx-works-main.extratools.works/api/v1";
 
-impl NetworkRequest {
+pub trait FromRadixConnectRelayRequest {
+    fn radix_connect_relay_request(request: Request) -> Result<NetworkRequest>;
+}
+
+impl FromRadixConnectRelayRequest for NetworkRequest {
     fn radix_connect_relay_request(request: Request) -> Result<Self> {
         NetworkRequest::new_post(Url::from_str(SERVICE_PATH).unwrap())
             .with_serializing_body(request)

@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-pub trait IsTokenCreating {
+pub trait IsTokenCreating: Sized {
     fn create_multiple_fungible_tokens(
         address_of_owner: &AccountAddress,
         count: impl Into<Option<u8>>,

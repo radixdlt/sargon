@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-pub trait TransfersBuilding {
+pub trait TransfersBuilding: Sized {
     fn per_asset_transfers(transfers: PerAssetTransfers) -> Self;
 
     /// Uses `per_asset_transfers` after having transposed the `PerRecipientAssetTransfers`

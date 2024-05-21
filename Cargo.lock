@@ -2495,12 +2495,15 @@ checksum = "1a03d7e7816ade40c6ecedff7515198906d644527771bd8fb5a335094353a15a"
 name = "radix_connect"
 version = "1.1.0"
 dependencies = [
+ "actix-rt",
  "clients",
  "common",
  "derive_more",
  "paste 1.0.14",
+ "pretty_assertions",
  "profile",
  "serde",
+ "serde_json 1.0.108",
  "serde_with 3.4.0",
  "uniffi",
  "url",
