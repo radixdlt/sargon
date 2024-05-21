@@ -64,7 +64,6 @@ impl HasSampleValues for MessageContents {
 mod tests {
 
     use super::*;
-    
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = MessageContents;

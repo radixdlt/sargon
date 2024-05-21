@@ -1,5 +1,3 @@
-use crate::prelude::*;
-
 /// A version of an algorithm so that we can change the implementation between
 /// app releases and remain backwards compatible.
 pub trait VersionOfAlgorithm {

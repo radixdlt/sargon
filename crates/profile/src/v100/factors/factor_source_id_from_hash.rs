@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use radix_common::crypto::{blake2b_256_hash, Hash};
 
 /// FactorSourceID from the blake2b hash of the special HD public key derived at `CAP26::GetID`,
 /// for a certain `FactorSourceKind`

@@ -23,7 +23,7 @@ pub use authorized_dapp_detailed::*;
 pub use authorized_dapp_detailed_uniffi_fn::*;
 pub use authorized_persona_detailed::*;
 pub use authorized_persona_detailed_uniffi_fn::*;
-pub use decl_identified_vec_of_with_samples::*;
+pub(crate) use decl_identified_vec_of_with_samples::*;
 pub use detailed_authorized_personas::*;
 pub use identified_vec_of::*;
 pub use on_same_network_validating::*;

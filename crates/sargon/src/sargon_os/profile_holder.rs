@@ -1,8 +1,5 @@
 use crate::prelude::*;
-use std::{
-    borrow::Borrow,
-    sync::{RwLock, RwLockReadGuard, RwLockWriteGuard},
-};
+use std::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 
 #[derive(Debug, uniffi::Object)]
 #[allow(dead_code)]

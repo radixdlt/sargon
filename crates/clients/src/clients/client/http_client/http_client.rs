@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use serde_json::Value;
 
 /// A `HttpClient` needs a "network antenna" to be able to execute the
 /// network requests - which is a trait that clients implement on the FFI side (iOS/Android).
@@ -78,7 +77,7 @@ mod tests {
     use super::*;
     use actix_rt::time::timeout;
     use drivers::*;
-    use reqwest::Response;
+
     use std::time::Duration;
 
     const MAX: Duration = Duration::from_millis(10);

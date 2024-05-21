@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use crate::prelude::*;
 
@@ -57,6 +57,7 @@ impl FileSystemDriver for RustFileSystemDriver {
 mod tests {
 
     use super::*;
+    use std::path::Path;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = RustFileSystemDriver;

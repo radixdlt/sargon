@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use std::ops::Deref;
 
 /// A gateway to some Radix Network, which is a high level REST API which clients (wallets) can
 /// consume in order to query asset balances and submit transactions.

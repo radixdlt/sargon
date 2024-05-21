@@ -1,5 +1,3 @@
-use std::sync::Once;
-
 use crate::prelude::*;
 
 /// The Sargon "Operating System" is the root "manager" of the Sargon library
@@ -225,7 +223,6 @@ impl SargonOS {
 mod tests {
     use super::*;
     use actix_rt::time::timeout;
-    use std::time::Duration;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SargonOS;

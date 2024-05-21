@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use std::hash::{DefaultHasher, Hash, Hasher};
 
 #[uniffi::export]
 pub fn new_profile_file_contents_sample() -> ProfileFileContents {

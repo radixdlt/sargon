@@ -18,4 +18,4 @@ pub use shared_persona_data::*;
 pub use shared_persona_data_uniffi_fn::*;
 pub use shared_to_dapp_with_persona_account_addresses::*;
 pub use shared_to_dapp_with_persona_ids_of_persona_data_entries::*;
-pub use shared_with_dapp::*;
+pub(crate) use shared_with_dapp::*;

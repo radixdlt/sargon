@@ -168,8 +168,6 @@ impl TransactionManifest {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
-    
 
     impl FromStr for TransactionManifest {
         type Err = crate::CommonError;

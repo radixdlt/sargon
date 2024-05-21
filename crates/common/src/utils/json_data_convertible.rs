@@ -57,7 +57,7 @@ macro_rules! json_data_convertible {
         paste::paste! {
             use $crate::prelude::*;
             impl $crate::prelude::JsonDataDeserializing for $type {}
-            impl crate::prelude::JsonDataSerializing for $type {}
+            impl $crate::prelude::JsonDataSerializing for $type {}
 
             #[uniffi::export]
             pub fn [< new_ $type:snake _from_json_bytes >](

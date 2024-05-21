@@ -1,5 +1,3 @@
-use std::any::TypeId;
-
 use crate::prelude::*;
 
 use super::{export_identified_vec_of, import_identified_vec_of_from};

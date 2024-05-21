@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
 use aes_gcm::{
-    aead::{generic_array::sequence::Concat, Aead, AeadCore, KeyInit, OsRng},
-    Aes256Gcm, Key, Nonce,
+    aead::{Aead, AeadCore, KeyInit, OsRng},
+    Key,
 };
 
 /// AES GCM 256 encryption

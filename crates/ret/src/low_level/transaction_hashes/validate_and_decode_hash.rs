@@ -3,10 +3,10 @@ use crate::prelude::*;
 pub fn validate_and_decode_hash_try_network<T: ScryptoHashHasHrp>(
     bech32_encoded_hash: &str,
     network_id: NetworkID,
-) -> Result<T, ()> {
+) -> Result<T, CommonError> {
     ScryptoTransactionHashBech32Decoder::new(&network_id.network_definition())
         .validate_and_decode::<T>(bech32_encoded_hash)
-        .map_err(|_| ())
+        .map_err(|_| CommonError::Unknown)
 }
 
 pub fn validate_and_decode_hash<T: ScryptoHashHasHrp>(

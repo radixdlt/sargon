@@ -55,8 +55,6 @@ impl Mnemonic {
     }
 
     pub fn from_internal(internal: bip39::Mnemonic) -> Self {
-        
-
         let language = internal.language();
 
         let words = internal

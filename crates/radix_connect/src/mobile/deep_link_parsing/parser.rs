@@ -1,6 +1,4 @@
 use crate::prelude::*;
-use url::form_urlencoded;
-use url::Url;
 
 use super::*;
 

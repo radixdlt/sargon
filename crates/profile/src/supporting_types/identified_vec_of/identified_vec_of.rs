@@ -1,14 +1,9 @@
-use radix_rust::prelude::{IndexMap, IndexSet};
+use radix_rust::prelude::IndexMap;
 
 use crate::prelude::*;
 
-use std::{
-    any::TypeId,
-    fmt::{Debug, Display, Formatter},
-    hash::Hasher,
-    ops::Index,
-};
-use std::{hash::Hash, ops::DerefMut};
+use std::hash::Hash;
+use std::{fmt::Debug, hash::Hasher, ops::Index};
 
 /// A collection which **retains the insertion order** of its **unique** [`Identifiable`]
 /// items, with **constant time** look up of an item by its `id` - a stable key

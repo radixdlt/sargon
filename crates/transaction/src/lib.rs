@@ -6,7 +6,6 @@ pub mod prelude {
 
     pub use common::prelude::*;
     pub use profile::prelude::*;
-    pub use ret::prelude::*;
 }
 
 pub use prelude::*;

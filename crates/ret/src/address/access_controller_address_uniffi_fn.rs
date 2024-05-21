@@ -26,7 +26,6 @@ pub fn new_access_controller_address_sample_stokenet_other(
 
 #[cfg(test)]
 mod uniffi_tests {
-    
 
     use super::*;
 

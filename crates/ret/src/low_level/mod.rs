@@ -31,7 +31,6 @@ mod transaction_intent_uniffi_fn;
 mod transaction_manifest;
 mod transaction_receipt;
 
-
 pub use addresses_manifest_builder_support::*;
 pub use assert_manifest::*;
 pub use compiled_notarized_intent::*;

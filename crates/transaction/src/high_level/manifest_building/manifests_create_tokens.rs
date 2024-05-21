@@ -309,9 +309,7 @@ impl ScryptoNonFungibleData for NonFungibleTokenData {
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
-    use pretty_assertions::{assert_eq, assert_ne};
-    use rand::Rng;
-
+    use pretty_assertions::assert_eq;
     #[allow(clippy::upper_case_acronyms)]
     type SUT = TransactionManifest;
 

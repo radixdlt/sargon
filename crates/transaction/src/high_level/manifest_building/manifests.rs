@@ -177,7 +177,6 @@ impl StakeClaimManifestBuilding for TransactionManifest {
 mod tests {
     use super::*;
     use pretty_assertions::{assert_eq, assert_ne};
-    use rand::Rng;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = TransactionManifest;

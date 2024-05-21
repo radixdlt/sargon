@@ -1,4 +1,4 @@
-use std::{ffi::OsStr, sync::Once};
+use std::sync::Once;
 
 use crate::prelude::*;
 
