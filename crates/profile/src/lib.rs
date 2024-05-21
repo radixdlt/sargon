@@ -8,6 +8,10 @@ mod profilesnapshot_version;
 mod supporting_types;
 mod v100;
 
+uniffi::remote_type!(Uuid, common);
+uniffi::remote_type!(Timestamp, common);
+uniffi::remote_type!(Url, common);
+
 pub mod prelude {
 
     pub use crate::cap26_derivation::*;

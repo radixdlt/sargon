@@ -1,6 +1,1 @@
 namespace ret {};
-
-[ExternalExport="common"]
-typedef extern BagOfBytes;
-[ExternalExport="common"]
-typedef extern Epoch;

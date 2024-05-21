@@ -1,3 +1,5 @@
+use crate::prelude::*;
+
 // use crate::{decl_secret_bytes, prelude::*, UniffiCustomTypeConverter};
 
 // macro_rules! entropy_with_byte_counts {
@@ -102,29 +104,30 @@
 //     BIP39Entropy: 16, 20, 24, 28, 32,
 // );
 
-// impl Mnemonic {
-//     pub fn from_entropy_in(
-//         entropy: BIP39Entropy,
-//         language: BIP39Language,
-//     ) -> Self {
-//         let internal = bip39::Mnemonic::from_entropy_in(
-//             language.into(),
-//             NonEmptyMax32Bytes::from(entropy).as_ref(),
-//         )
-//         .unwrap();
-//         Self::from_internal(internal)
-//     }
+impl Mnemonic {
+    // pub fn from_entropy_in(
+    //     entropy: BIP39Entropy,
+    //     language: BIP39Language,
+    // ) -> Self {
+    //     let internal = bip39::Mnemonic::from_entropy_in(
+    //         language.into(),
+    //         NonEmptyMax32Bytes::from(entropy).as_ref(),
+    //     )
+    //     .unwrap();
+    //     Self::from_internal(internal)
+    // }
 
-//     pub fn from_entropy(entropy: BIP39Entropy) -> Self {
-//         Self::from_entropy_in(entropy, BIP39Language::English)
-//     }
+    // pub fn from_entropy(entropy: BIP39Entropy) -> Self {
+    //     Self::from_entropy_in(entropy, BIP39Language::English)
+    // }
 
-//     pub fn generate_new() -> Self {
-//         Self::from_entropy(BIP39Entropy::from(Entropy32Bytes::new(
-//             generate_byte_array::<32>(),
-//         )))
-//     }
-// }
+    pub fn generate_new() -> Self {
+        // Self::from_entropy(BIP39Entropy::from(Entropy32Bytes::new(
+        //     generate_byte_array::<32>(),
+        // )))
+        todo!()
+    }
+}
 
 // #[cfg(test)]
 // mod tests {

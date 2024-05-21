@@ -109,8 +109,8 @@ mod tests {
             ])
             .assert_elements_not_empty_and_on_same_network(),
             Err(CommonError::NetworkDiscrepancy {
-                expected: NetworkID::Mainnet,
-                actual: NetworkID::Stokenet
+                expected: NetworkID::Mainnet.discriminant(),
+                actual: NetworkID::Stokenet.discriminant()
             })
         )
     }
@@ -124,8 +124,8 @@ mod tests {
             ])
             .assert_elements_not_empty_and_on_same_network(),
             Err(CommonError::NetworkDiscrepancy {
-                expected: NetworkID::Stokenet,
-                actual: NetworkID::Mainnet
+                expected: NetworkID::Stokenet.discriminant(),
+                actual: NetworkID::Mainnet.discriminant()
             })
         )
     }

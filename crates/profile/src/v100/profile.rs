@@ -215,8 +215,8 @@ impl Profile {
             .maybe_update_with(factor_source_id, |f| {
                 S::try_from(f.clone())
                     .map_err(|_| CommonError::CastFactorSourceWrongKind {
-                        expected: S::kind(),
-                        found: f.factor_source_kind(),
+                        expected: S::kind().to_string(),
+                        found: f.factor_source_kind().to_string(),
                     })
                     .and_then(|element| {
                         mutate(element).map(|modified| modified.into())
@@ -457,8 +457,8 @@ mod tests {
                 }
             ),
             Err(CommonError::CastFactorSourceWrongKind {
-                expected: FactorSourceKind::LedgerHQHardwareWallet,
-                found: FactorSourceKind::Device
+                expected: FactorSourceKind::LedgerHQHardwareWallet.to_string(),
+                found: FactorSourceKind::Device.to_string()
             })
         );
 

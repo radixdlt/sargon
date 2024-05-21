@@ -143,7 +143,8 @@ macro_rules! decl_ret_wrapped_address {
                 }
             }
 
-            #[cfg(test)]
+            // Actually we want `#[cfg(test)]` but does not work across
+            // crates - FIXME!
             impl From<&str> for [< $address_type:camel Address >] {
                 /// TEST ONLY
                 fn from(value: &str) -> Self {

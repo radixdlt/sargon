@@ -1,10 +1,1 @@
 namespace profile {};
-
-[ExternalExport="common"]
-typedef extern Url;
-
-[ExternalExport="common"]
-typedef extern Uuid;
-
-[ExternalExport="common"]
-typedef extern Timestamp;

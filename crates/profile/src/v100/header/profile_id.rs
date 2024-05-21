@@ -14,6 +14,7 @@ use crate::prelude::*;
 )]
 #[serde(transparent)]
 pub struct ProfileID(pub Uuid);
+
 uniffi::custom_newtype!(ProfileID, Uuid);
 
 impl FromStr for ProfileID {

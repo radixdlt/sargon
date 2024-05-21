@@ -207,10 +207,11 @@ mod tests {
 
     #[test]
     fn zeroize() {
-        let mut sut: SUT = MnemonicWithPassphrase::sample().to_seed();
-        assert!(!sut.is_zeroized());
-        sut.zeroize();
-        assert!(sut.is_zeroized());
+        // let mut sut: SUT = MnemonicWithPassphrase::sample().to_seed();
+        // assert!(!sut.is_zeroized());
+        // sut.zeroize();
+        // assert!(sut.is_zeroized());
+        todo!()
     }
 
     #[test]
