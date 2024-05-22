@@ -103,7 +103,7 @@ itertools = { git = "https://github.com/rust-itertools/itertools/", rev = "98eca
 enum-as-inner = { git = "https://github.com/bluejekyll/enum-as-inner/", rev = "c15f6e5c4f98ec865e181ae1fff9fc13a1a2e4e2" }
 
 # uniffi = "0.27.1"
-uniffi = { git = "https://github.com/bendk/uniffi-rs/", rev = "4b65c3796bc3743404e1ee2a7b4ab51e24589aa6", features = [
+uniffi = { git = "https://github.com/sajjon/uniffi-rs/", rev = "d2886a5c836307e6b3f6f1a78e4b18b84eab3893", features = [
     "cli",
 ] }
 
