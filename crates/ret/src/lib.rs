@@ -9,7 +9,7 @@ pub mod prelude {
     pub use crate::is_intent_signing::*;
     pub use crate::low_level::*;
 
-    pub use common::prelude::*;
+    pub use sargoncommon::prelude::*;
 }
 
 pub use prelude::*;

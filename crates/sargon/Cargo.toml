@@ -8,7 +8,7 @@ uniffi = { workspace = true, features = ["cli"] }
 actix-rt = { workspace = true }
 log = { workspace = true }
 pretty_assertions = { workspace = true }
-common = { path = "../common" }
+sargoncommon = { path = "../common" }
 drivers = { path = "../drivers" }
 clients = { path = "../clients" }
 hd = { path = "../hierarchical_deterministic" }

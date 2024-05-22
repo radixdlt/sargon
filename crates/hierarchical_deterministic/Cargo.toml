@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 uniffi = { workspace = true, features = ["cli"] }
-common = { path = "../common" }
+sargoncommon = { path = "../common" }
 iota-crypto = { workspace = true }
 k256 = { workspace = true }
 bip39 = { workspace = true }

@@ -309,17 +309,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bindgen"
-version = "0.1.0"
-dependencies = [
- "camino 1.0.8",
- "clap 4.5.1",
- "regex 1.9.3 (git+https://github.com/rust-lang/regex/?rev=72f889ef3cca59ebac6a026f3646e8d92f056d88)",
- "thiserror 1.0.50",
- "uniffi",
-]
-
-[[package]]
 name = "bip39"
 version = "2.0.0"
 source = "git+https://github.com/rust-bitcoin/rust-bip39?rev=a30760beac21d595b2bda376df4f4e6bf029bcc5#a30760beac21d595b2bda376df4f4e6bf029bcc5"
@@ -613,7 +602,6 @@ version = "1.1.0"
 dependencies = [
  "actix-rt",
  "async-trait",
- "common",
  "drivers",
  "enum-iterator",
  "gateway_models",
@@ -623,6 +611,7 @@ dependencies = [
  "profile",
  "reqwest",
  "ret",
+ "sargoncommon",
  "serde",
  "serde_json 1.0.108",
  "strum 0.26.1",
@@ -653,51 +642,6 @@ checksum = "ba5a308b75df32fe02788e748662718f03fde005016435c444eea572398219fd"
 dependencies = [
  "bytes",
  "memchr",
-]
-
-[[package]]
-name = "common"
-version = "1.1.0"
-dependencies = [
- "actix-rt",
- "aes-gcm",
- "assert-json-diff",
- "async-trait",
- "delegate",
- "derive_more",
- "enum-as-inner",
- "enum-iterator",
- "hex 0.4.3 (git+https://github.com/KokaKiwi/rust-hex/?rev=b2b4370b5bf021b98ee7adc92233e8de3f2de792)",
- "hkdf",
- "iota-crypto",
- "iso8601-timestamp",
- "itertools 0.12.0",
- "k256 0.13.3 (git+https://github.com/RustCrypto/elliptic-curves?rev=e158ce5cf0e9acee2fd76aff2a628334f5c771e5)",
- "log",
- "paste 1.0.14",
- "pretty_assertions",
- "pretty_env_logger",
- "radix-common",
- "radix-common-derive",
- "radix-engine",
- "radix-engine-interface",
- "radix-engine-toolkit",
- "radix-engine-toolkit-json",
- "radix-rust",
- "radix-transactions",
- "rand 0.8.5",
- "reqwest",
- "sbor",
- "serde",
- "serde_json 1.0.108",
- "serde_repr",
- "serde_with 3.4.0",
- "strum 0.26.1",
- "thiserror 1.0.50",
- "uniffi",
- "url",
- "uuid 1.6.1",
- "zeroize 1.7.0 (git+https://github.com/RustCrypto/utils?rev=df6d2f48a5e8afe8eef04ba32e2af55bacb41375)",
 ]
 
 [[package]]
@@ -957,7 +901,6 @@ version = "1.1.0"
 dependencies = [
  "actix-rt",
  "async-trait",
- "common",
  "enum-iterator",
  "log",
  "pretty_assertions",
@@ -965,6 +908,7 @@ dependencies = [
  "profile",
  "reqwest",
  "ret",
+ "sargoncommon",
  "serde",
  "serde_json 1.0.108",
  "strum 0.26.1",
@@ -1245,9 +1189,9 @@ dependencies = [
 name = "gateway_models"
 version = "1.1.0"
 dependencies = [
- "common",
  "derive_more",
  "ret",
+ "sargoncommon",
  "serde",
  "uniffi",
 ]
@@ -1359,11 +1303,11 @@ name = "hd"
 version = "1.1.0"
 dependencies = [
  "bip39",
- "common",
  "derive_more",
  "enum-iterator",
  "iota-crypto",
  "k256 0.13.3 (git+https://github.com/RustCrypto/elliptic-curves?rev=e158ce5cf0e9acee2fd76aff2a628334f5c771e5)",
+ "sargoncommon",
  "serde",
  "serde_json 1.0.108",
  "serde_with 3.4.0",
@@ -2158,7 +2102,6 @@ version = "1.1.0"
 dependencies = [
  "actix-rt",
  "aes-gcm",
- "common",
  "derive_more",
  "enum-as-inner",
  "enum-iterator",
@@ -2172,6 +2115,7 @@ dependencies = [
  "radix-engine-interface",
  "radix-rust",
  "ret",
+ "sargoncommon",
  "serde",
  "serde_json 1.0.108",
  "serde_repr",
@@ -2497,11 +2441,11 @@ version = "1.1.0"
 dependencies = [
  "actix-rt",
  "clients",
- "common",
  "derive_more",
  "paste 1.0.14",
  "pretty_assertions",
  "profile",
+ "sargoncommon",
  "serde",
  "serde_json 1.0.108",
  "serde_with 3.4.0",
@@ -2692,7 +2636,6 @@ dependencies = [
 name = "ret"
 version = "1.1.0"
 dependencies = [
- "common",
  "derive_more",
  "enum-iterator",
  "pretty_assertions",
@@ -2705,6 +2648,7 @@ dependencies = [
  "radix-rust",
  "radix-transactions",
  "rand 0.8.5",
+ "sargoncommon",
  "sbor",
  "serde",
  "serde_json 1.0.108",
@@ -2794,14 +2738,59 @@ version = "1.1.0"
 dependencies = [
  "actix-rt",
  "clients",
- "common",
  "drivers",
  "hd",
  "log",
  "pretty_assertions",
  "profile",
+ "sargoncommon",
  "transaction",
  "uniffi",
+]
+
+[[package]]
+name = "sargoncommon"
+version = "1.1.0"
+dependencies = [
+ "actix-rt",
+ "aes-gcm",
+ "assert-json-diff",
+ "async-trait",
+ "delegate",
+ "derive_more",
+ "enum-as-inner",
+ "enum-iterator",
+ "hex 0.4.3 (git+https://github.com/KokaKiwi/rust-hex/?rev=b2b4370b5bf021b98ee7adc92233e8de3f2de792)",
+ "hkdf",
+ "iota-crypto",
+ "iso8601-timestamp",
+ "itertools 0.12.0",
+ "k256 0.13.3 (git+https://github.com/RustCrypto/elliptic-curves?rev=e158ce5cf0e9acee2fd76aff2a628334f5c771e5)",
+ "log",
+ "paste 1.0.14",
+ "pretty_assertions",
+ "pretty_env_logger",
+ "radix-common",
+ "radix-common-derive",
+ "radix-engine",
+ "radix-engine-interface",
+ "radix-engine-toolkit",
+ "radix-engine-toolkit-json",
+ "radix-rust",
+ "radix-transactions",
+ "rand 0.8.5",
+ "reqwest",
+ "sbor",
+ "serde",
+ "serde_json 1.0.108",
+ "serde_repr",
+ "serde_with 3.4.0",
+ "strum 0.26.1",
+ "thiserror 1.0.50",
+ "uniffi",
+ "url",
+ "uuid 1.6.1",
+ "zeroize 1.7.0 (git+https://github.com/RustCrypto/utils?rev=df6d2f48a5e8afe8eef04ba32e2af55bacb41375)",
 ]
 
 [[package]]
@@ -3625,7 +3614,6 @@ name = "transaction"
 version = "1.1.0"
 dependencies = [
  "cargo_toml 0.15.3 (git+https://gitlab.com/lib.rs/cargo_toml?rev=e498c94fc42a660c1ca1a28999ce1d757cfe77fe)",
- "common",
  "derive_more",
  "log",
  "pretty_assertions",
@@ -3638,6 +3626,7 @@ dependencies = [
  "radix-rust",
  "rand 0.8.5",
  "ret",
+ "sargoncommon",
  "sbor",
  "serde",
  "serde_json 1.0.108",
@@ -3738,6 +3727,17 @@ dependencies = [
  "uniffi_build",
  "uniffi_core",
  "uniffi_macros",
+]
+
+[[package]]
+name = "uniffi-bindgen"
+version = "0.1.0"
+dependencies = [
+ "camino 1.0.8",
+ "clap 4.5.1",
+ "regex 1.9.3 (git+https://github.com/rust-lang/regex/?rev=72f889ef3cca59ebac6a026f3646e8d92f056d88)",
+ "thiserror 1.0.50",
+ "uniffi",
 ]
 
 [[package]]

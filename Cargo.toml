@@ -1,7 +1,6 @@
 [workspace]
 resolver = "2"
 members = [
-    "crates/bindgen",
     "crates/common",
     "crates/drivers",
     "crates/gateway_models",
@@ -11,7 +10,9 @@ members = [
     "crates/transaction",
     "crates/ret",
     "crates/sargon",
+    "crates/uniffi-bindgen",
 ]
+default-members = ["crates/sargon"]
 
 [workspace.dependencies]
 # zeroize = "1.7.0"

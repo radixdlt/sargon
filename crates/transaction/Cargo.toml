@@ -13,7 +13,7 @@ rand = { workspace = true }
 pretty_env_logger = { workspace = true }
 derive_more = { workspace = true }
 pretty_assertions = { workspace = true }
-common = { path = "../common" }
+sargoncommon = { path = "../common" }
 ret = { path = "../ret" }
 profile = { path = "../profile" }
 

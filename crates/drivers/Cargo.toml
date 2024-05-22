@@ -16,7 +16,7 @@ async-trait = { workspace = true }
 enum-iterator = { workspace = true }
 actix-rt = { workspace = true }
 profile = { path = "../profile" }
-common = { path = "../common" }
+sargoncommon = { path = "../common" }
 ret = { path = "../ret" }
 
 [build-dependencies]

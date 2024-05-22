@@ -13,7 +13,7 @@ pretty_assertions = { workspace = true }
 actix-rt = { workspace = true }
 serde_with = { workspace = true }
 derive_more = { workspace = true }
-common = { path = "../common" }
+sargoncommon = { path = "../common" }
 profile = { path = "../profile" }
 clients = { path = "../clients" }
 

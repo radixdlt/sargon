@@ -8,7 +8,7 @@ build = "build.rs"
 uniffi = { workspace = true, features = ["cli"] }
 serde = { workspace = true }
 derive_more = { workspace = true }
-common = { path = "../common" }
+sargoncommon = { path = "../common" }
 ret = { path = "../ret" }
 
 [build-dependencies]

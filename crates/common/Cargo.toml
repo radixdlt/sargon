@@ -1,5 +1,5 @@
 [package]
-name = "common"
+name = "sargoncommon"
 version = "1.1.0"
 edition = "2021"
 
