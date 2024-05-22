@@ -1,4 +1,4 @@
-
+namespace = "transaction"
 
 [bindings.swift]
 module_name = "SargonTransaction"

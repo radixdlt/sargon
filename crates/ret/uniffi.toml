@@ -1,4 +1,4 @@
-
+namespace = "ret"
 
 [bindings.swift]
 module_name = "SargonRET"

@@ -1,5 +1,3 @@
-uniffi::setup_scaffolding!();
-
 mod interaction_id;
 mod interaction_version;
 mod p2p_links;
@@ -25,3 +23,5 @@ pub mod prelude {
 }
 
 pub use prelude::*;
+
+uniffi::include_scaffolding!("radix_connect");

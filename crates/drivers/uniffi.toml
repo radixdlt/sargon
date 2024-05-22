@@ -1,4 +1,4 @@
-
+namespace = "drivers"
 
 [bindings.swift]
 module_name = "SargonDrivers"

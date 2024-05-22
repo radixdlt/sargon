@@ -1,5 +1,3 @@
-uniffi::setup_scaffolding!();
-
 mod models;
 
 pub mod prelude {
@@ -10,3 +8,5 @@ pub mod prelude {
 }
 
 pub use prelude::*;
+
+uniffi::include_scaffolding!("gateway_models");

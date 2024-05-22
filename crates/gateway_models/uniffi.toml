@@ -1,4 +1,4 @@
-
+namespace = "gateway_models"
 
 [bindings.swift]
 module_name = "SargonGatewayModels"

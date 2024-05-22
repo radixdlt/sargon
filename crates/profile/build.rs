@@ -23,4 +23,7 @@ pub fn main() {
         "cargo:rustc-env=FIXTURES_MODELS={}/",
         fixtures_models_path.display()
     );
+
+    uniffi::generate_scaffolding("src/profile.udl")
+        .expect("Should be able to build.");
 }

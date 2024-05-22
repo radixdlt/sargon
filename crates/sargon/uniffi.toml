@@ -1,4 +1,4 @@
-
+namespace = "sargon"
 
 [bindings.swift]
 module_name = "SargonOS"

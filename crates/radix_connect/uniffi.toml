@@ -1,4 +1,4 @@
-
+namespace = "radix_connect"
 
 [bindings.swift]
 module_name = "SargonRadixConnect"

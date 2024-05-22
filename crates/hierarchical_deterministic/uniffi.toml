@@ -1,4 +1,4 @@
-
+namespace = "hd"
 
 [bindings.swift]
 module_name = "SargonHD"

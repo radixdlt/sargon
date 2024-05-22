@@ -1,5 +1,3 @@
-uniffi::setup_scaffolding!();
-
 mod clients;
 
 uniffi::remote_type!(Uuid, sargoncommon);
@@ -16,3 +14,5 @@ pub mod prelude {
 }
 
 pub use prelude::*;
+
+uniffi::include_scaffolding!("clients");

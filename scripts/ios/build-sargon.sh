@@ -47,7 +47,6 @@ generate_ffi() {
   cargo run -p uniffi-bindgen --bin sargon-bindgen generate --library target/$TARGET_FOR_DYLIB_PATH/release/lib$1.dylib --language swift --out-dir target/uniffi-xcframework-staging
   mkdir -p apple/Sources/UniFFI/
   mv target/uniffi-xcframework-staging/*.swift apple/Sources/UniFFI/
-  mv target/uniffi-xcframework-staging/*.modulemap target/uniffi-xcframework-staging/
 }
 
 
