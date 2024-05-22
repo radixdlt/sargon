@@ -2,6 +2,8 @@
 #![allow(unused_imports)]
 #![allow(internal_features)]
 
+uniffi::setup_scaffolding!();
+
 mod assert_json;
 mod error;
 mod has_sample_values;
@@ -309,5 +311,3 @@ uniffi::custom_type!(Uuid, String, {
 //         obj.to_string()
 //     }
 // }
-
-uniffi::include_scaffolding!("common");

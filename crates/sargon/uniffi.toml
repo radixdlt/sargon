@@ -1,8 +1,6 @@
-namespace = "radix_connect"
-
 [bindings.swift]
-module_name = "SargonRadixConnect"
+module_name = "SargonOS"
 experimental_sendable_value_types = true
 
 [bindings.kotlin]
-package_name = "com.radixdlt.sargon.radixconnect"
+package_name = "com.radixdlt.sargon.os"

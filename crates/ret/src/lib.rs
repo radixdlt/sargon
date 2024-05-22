@@ -1,3 +1,5 @@
+uniffi::setup_scaffolding!();
+
 mod address;
 mod ecdsa;
 mod low_level;
@@ -11,5 +13,3 @@ pub mod prelude {
 }
 
 pub use prelude::*;
-
-uniffi::include_scaffolding!("ret");

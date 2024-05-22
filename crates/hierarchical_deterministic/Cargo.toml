@@ -2,7 +2,6 @@
 name = "hd"
 version = "1.1.0"
 edition = "2021"
-build = "build.rs"
 
 [dependencies]
 uniffi = { workspace = true, features = ["cli"] }

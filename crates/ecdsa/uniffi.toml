@@ -1,8 +1,0 @@
-namespace = "ecdsa"
-
-[bindings.swift]
-module_name = "SargonECDSA"
-experimental_sendable_value_types = true
-
-[bindings.kotlin]
-package_name = "com.radixdlt.sargon.ecdsa"

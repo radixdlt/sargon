@@ -1,3 +1,5 @@
+uniffi::setup_scaffolding!();
+
 mod bip32;
 mod bip39;
 mod bip44;
@@ -12,5 +14,3 @@ pub mod prelude {
 }
 
 pub use prelude::*;
-
-uniffi::include_scaffolding!("hd");

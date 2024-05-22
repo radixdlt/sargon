@@ -1,5 +1,3 @@
-namespace = "drivers"
-
 [bindings.swift]
 module_name = "SargonDrivers"
 experimental_sendable_value_types = true

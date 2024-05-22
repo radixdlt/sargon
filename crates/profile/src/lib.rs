@@ -1,6 +1,8 @@
 #![feature(async_closure)]
 #![feature(let_chains)]
 
+uniffi::setup_scaffolding!();
+
 mod cap26_derivation;
 mod encrypted;
 mod logic;
@@ -27,5 +29,3 @@ pub mod prelude {
 }
 
 pub use prelude::*;
-
-uniffi::include_scaffolding!("profile");
