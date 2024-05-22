@@ -1,0 +1,28 @@
+[package]
+name = "radix_connect"
+version = "1.1.0"
+edition = "2021"
+build = "build.rs"
+
+[dependencies]
+uniffi = { workspace = true, features = ["cli"] }
+paste = { workspace = true }
+url = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+pretty_assertions = { workspace = true }
+actix-rt = { workspace = true }
+serde_with = { workspace = true }
+derive_more = { workspace = true }
+sargoncommon = { path = "../common" }
+profile = { path = "../profile" }
+clients = { path = "../clients" }
+
+[build-dependencies]
+uniffi = { workspace = true, features = ["build"] }
+
+[dev-dependencies]
+uniffi = { workspace = true, features = ["bindgen-tests"] }
+
+[lib]
+crate-type = ["staticlib", "cdylib", "lib"]

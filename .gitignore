@@ -6,7 +6,7 @@
 # And locally, when we run `./scripts/ios/build-sargon.sh` the file gets
 # updated to something runnable and we can run locally... So we never need
 # this file part of git history.
-apple/Sources/UniFFI/Sargon.swift 
+apple/Sources/UniFFI/*.swift 
 
 /target
 tarpaulin-report.html

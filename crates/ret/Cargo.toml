@@ -1,0 +1,36 @@
+[package]
+name = "ret"
+version = "1.1.0"
+edition = "2021"
+build = "build.rs"
+
+[dependencies]
+uniffi = { workspace = true, features = ["cli"] }
+sargoncommon = { path = "../common" }
+pretty_assertions = { workspace = true }
+serde = { workspace = true }
+serde_with = { workspace = true }
+serde_json = { workspace = true }
+strum = { workspace = true }
+derive_more = { workspace = true }
+enum-iterator = { workspace = true }
+rand = { workspace = true }
+
+sbor = { workspace = true }
+radix-rust = { workspace = true }
+radix-engine = { workspace = true }
+radix-common = { workspace = true }
+radix-common-derive = { workspace = true }
+radix-engine-interface = { workspace = true }
+radix-transactions = { workspace = true }
+radix-engine-toolkit-json = { workspace = true }
+radix-engine-toolkit = { workspace = true }
+
+[build-dependencies]
+uniffi = { workspace = true, features = ["build"] }
+
+[dev-dependencies]
+uniffi = { workspace = true, features = ["bindgen-tests"] }
+
+[lib]
+crate-type = ["staticlib", "cdylib", "lib"]

@@ -1,0 +1,27 @@
+[package]
+name = "hd"
+version = "1.1.0"
+edition = "2021"
+build = "build.rs"
+
+[dependencies]
+uniffi = { workspace = true, features = ["cli"] }
+sargoncommon = { path = "../common" }
+iota-crypto = { workspace = true }
+k256 = { workspace = true }
+bip39 = { workspace = true }
+derive_more = { workspace = true }
+serde = { workspace = true }
+serde_with = { workspace = true }
+serde_json = { workspace = true }
+zeroize = { workspace = true }
+enum-iterator = { workspace = true }
+
+[build-dependencies]
+uniffi = { workspace = true, features = ["build"] }
+
+[dev-dependencies]
+uniffi = { workspace = true, features = ["bindgen-tests"] }
+
+[lib]
+crate-type = ["staticlib", "cdylib", "lib"]
