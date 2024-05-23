@@ -7,10 +7,10 @@ import com.radixdlt.sargon.checkIfEncryptedProfileJsonContainsLegacyP2pLinks
 import com.radixdlt.sargon.checkIfProfileJsonContainsLegacyP2pLinks
 import com.radixdlt.sargon.newProfile
 import com.radixdlt.sargon.newProfileFromEncryptionBytes
-import com.radixdlt.sargon.newProfileFromJsonBytes
+import com.radixdlt.sargon.newProfileFromJsonString
 import com.radixdlt.sargon.profileAnalyzeContentsOfFile
 import com.radixdlt.sargon.profileEncryptWithPassword
-import com.radixdlt.sargon.profileToJsonBytes
+import com.radixdlt.sargon.profileToJsonString
 
 fun Profile.Companion.init(
     deviceFactorSource: FactorSource.Device,
