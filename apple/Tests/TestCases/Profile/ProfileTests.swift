@@ -1,6 +1,6 @@
 import CustomDump
 import Foundation
-import Sargon
+@testable import Sargon
 import SargonUniFFI
 import XCTest
 
@@ -92,16 +92,51 @@ final class ProfileTests: Test<Profile> {
 	}
 	
 	func test_json_roundtrip() throws {
-		func doTest(_ sut: SUT, _ json: Data) throws {
-			let encoded = sut.profileSnapshot()
+		func doTest(_ sut: SUT, _ json: String) throws {
+			let encoded = sut.jsonString(prettyPrint: false)
 			XCTAssertEqual(encoded, json)
-			let decoded = try SUT(jsonData: json)
+			let decoded = try SUT(jsonString: json)
 			XCTAssertEqual(decoded, sut)
 		}
-		var vectors = Array(zip(SUT.sampleValues, SUT.sampleValues.map { $0.jsonData() }))
-		vectors.append(vector)
+		var vectors = Array(zip(SUT.sampleValues, SUT.sampleValues.map { $0.jsonString(prettyPrint: false) }))
+		vectors.append((vector.model, String(data: vector.json, encoding: .utf8)!))
 		try vectors.forEach(doTest)
 	}
+	
+	// Macbook Pro M2: 0.64 seconds
+	func test_performance_json_encoding_data() throws {
+		let (sut, _) = vector
+		measure {
+			let _ = sut.jsonData()
+		}
+	}
+	
+	// Macbook Pro M2: 0.06 (10x speedup vs BagOfBytes)
+	func test_performance_json_encoding_string() throws {
+		let (sut, _) = vector
+		measure {
+			let _ = sut.jsonString(prettyPrint: false)
+		}
+	}
+	
+	// Macbook Pro M2: 0.26 seconds
+	func test_performance_json_decoding_data() throws {
+		let (_, jsonData) = vector
+		measure {
+			let _ = try! SUT(jsonData: jsonData)
+		}
+	}
+	
+	// Macbook Pro M2: 0.1 (2.5x speedup vs BagOfBytes)
+	func test_performance_json_decoding_string() throws {
+		let (_, _jsonData) = vector
+		let jsonString = String(data: _jsonData, encoding: .utf8)!
+		measure {
+			let _ = try! SUT(jsonString: jsonString)
+		}
+	}
+	
+
 	
 	lazy var vector: (model: Profile, json: Data) = {
 		try! jsonFixture(

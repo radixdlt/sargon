@@ -7,9 +7,28 @@ extension Profile {
 		profileAnalyzeContentsOfFile(bytes: Data(contents))
 	}
 	
-	public init(jsonData bytes: some DataProtocol) throws {
+#if DEBUG
+	///
+	internal init(jsonData bytes: some DataProtocol) throws {
 		self = try newProfileFromJsonBytes(jsonBytes: Data(bytes))
 	}
+	internal func profileSnapshot() -> Data {
+		profileToJsonBytes(profile: self)
+	}
+	internal func jsonData() -> Data {
+		profileSnapshot()
+	}
+	
+	#endif
+	
+	internal init(jsonString: String) throws {
+		self = try newProfileFromJsonString(json: jsonString)
+	}
+
+	internal func jsonString(prettyPrint: Bool) -> String {
+		profileToJsonString(profile: self, prettyPrinted: prettyPrint)
+	}
+
 	
 	public init(encrypted bytes: some DataProtocol, decryptionPassword: String) throws {
 		self = try newProfileFromEncryptionBytes(
@@ -26,15 +45,7 @@ extension Profile {
 	public func toDebugString() -> String {
 		profileToDebugString(profile: self)
 	}
-	
-	public func profileSnapshot() -> Data {
-		profileToJsonBytes(profile: self)
-	}
-	
-	public func jsonData() -> Data {
-		profileSnapshot()
-	}
-	
+
 	public func encrypt(password: String) -> Data {
 		profileEncryptWithPassword(profile: self, encryptionPassword: password)
 	}
