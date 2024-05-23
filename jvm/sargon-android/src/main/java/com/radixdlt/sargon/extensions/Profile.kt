@@ -21,27 +21,27 @@ fun Profile.Companion.init(
 )
 
 fun Profile.Companion.analyzeContentsOfFile(contents: String): ProfileFileContents =
-    profileAnalyzeContentsOfFile(bytes = bagOfBytes(fromString = contents))
+    profileAnalyzeContentsOfFile(contents = contents)
 
 @Throws(SargonException::class)
 fun Profile.Companion.fromJson(jsonString: String) =
-    newProfileFromJsonBytes(jsonBytes = bagOfBytes(fromString = jsonString))
+    newProfileFromJsonString(jsonStr = jsonString)
 
 @Throws(SargonException::class)
 fun Profile.Companion.fromEncryptedJson(
     jsonString: String,
     decryptionPassword: String
 ) = newProfileFromEncryptionBytes(
-    json = bagOfBytes(fromString = jsonString),
+    jsonString = jsonString,
     decryptionPassword = decryptionPassword
 )
 
-fun Profile.toJson() = profileToJsonBytes(profile = this).string
+fun Profile.toJson(prettyPrinted: Boolean = true) = profileToJsonString(profile = this, prettyPrinted = prettyPrinted)
 fun Profile.toEncryptedJson(encryptionPassword: String) =
-    profileEncryptWithPassword(profile = this, encryptionPassword = encryptionPassword).string
+    profileEncryptWithPassword(profile = this, encryptionPassword = encryptionPassword)
 
 fun Profile.Companion.checkIfProfileJsonContainsLegacyP2PLinks(jsonString: String) =
-    checkIfProfileJsonContainsLegacyP2pLinks(json = bagOfBytes(fromString = jsonString))
+    checkIfProfileJsonContainsLegacyP2pLinks(jsonStr = jsonString)
 
 fun Profile.Companion.checkIfEncryptedProfileJsonContainsLegacyP2PLinks(jsonString: String, password: String) =
-    checkIfEncryptedProfileJsonContainsLegacyP2pLinks(json = bagOfBytes(fromString = jsonString), password)
+    checkIfEncryptedProfileJsonContainsLegacyP2pLinks(jsonStr = jsonString, password)
