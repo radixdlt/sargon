@@ -113,7 +113,7 @@ impl SecureStorageClient {
             trace!("Found no active profile id");
             return Ok(None);
         };
-        self.load_profile_with_id(id).await
+        self.load_profile_with_id(id).await.map(Some)
     }
 
     /// Loads the active Profile if any, by first loading the active
@@ -121,7 +121,7 @@ impl SecureStorageClient {
     pub async fn load_profile_with_id(
         &self,
         profile_id: ProfileID,
-    ) -> Result<Option<Profile>> {
+    ) -> Result<Profile> {
         debug!("Loading profile profile with id: {}", profile_id);
         self.load_or(
             SecureStorageKey::ProfileSnapshot { profile_id },
