@@ -71,7 +71,7 @@ macro_rules! json_data_convertible {
             }
 
             #[cfg(test)]
-            mod [< uniffi_test_ $type:snake >] {
+            mod [< uniffi_test_json_as_data_ $type:snake >] {
                 use super::*;
 
                 #[allow(clippy::upper_case_acronyms)]
@@ -86,7 +86,7 @@ macro_rules! json_data_convertible {
             }
 
             #[cfg(test)]
-            mod [< test_ $type:snake >] {
+            mod [< test_json_as_data_ $type:snake >] {
                 use super::*;
 
                 #[allow(clippy::upper_case_acronyms)]
@@ -139,7 +139,7 @@ macro_rules! json_string_convertible {
             }
 
             #[cfg(test)]
-            mod [< uniffi_test_ $type:snake >] {
+            mod [< uniffi_test_json_as_string_ $type:snake >] {
                 use super::*;
 
                 #[allow(clippy::upper_case_acronyms)]
@@ -154,7 +154,7 @@ macro_rules! json_string_convertible {
             }
 
             #[cfg(test)]
-            mod [< test_ $type:snake >] {
+            mod [< test_json_as_string_ $type:snake >] {
                 use super::*;
 
                 #[allow(clippy::upper_case_acronyms)]

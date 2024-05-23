@@ -3,6 +3,29 @@ use crate::prelude::*;
 json_data_convertible!(Profile);
 
 #[uniffi::export]
+pub fn new_profile_from_json_string(json: String) -> Result<Profile> {
+    serde_json::from_str(&json).map_err(|_| {
+        CommonError::FailedToDeserializeJSONToValue {
+            json_byte_count: json.len() as u64,
+            type_name: type_name::<Profile>(),
+        }
+    })
+}
+
+#[uniffi::export]
+pub fn profile_to_json_string(
+    profile: &Profile,
+    pretty_printed: bool,
+) -> String {
+    if pretty_printed {
+        serde_json::to_string_pretty(profile)
+    } else {
+        serde_json::to_string(profile)
+    }
+    .expect("Should always be able to JSON encode Profile.")
+}
+
+#[uniffi::export]
 pub fn new_profile(
     device_factor_source: DeviceFactorSource,
     creating_device_name: String,
@@ -214,5 +237,19 @@ mod uniffi_tests {
             BagOfBytes::new(),
             password.to_owned()
         ));
+    }
+
+    #[test]
+    fn profile_json_string_roundtrip() {
+        let sut = SUT::sample();
+        let pretty_string = profile_to_json_string(&sut, false);
+        let from_str =
+            new_profile_from_json_string(pretty_string.clone()).unwrap();
+        assert_eq!(from_str, sut);
+        let ugly_string = profile_to_json_string(&sut, true);
+        let from_str =
+            new_profile_from_json_string(ugly_string.clone()).unwrap();
+        assert_eq!(from_str, sut);
+        assert_ne!(pretty_string, ugly_string);
     }
 }
