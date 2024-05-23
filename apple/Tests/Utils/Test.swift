@@ -42,6 +42,17 @@ class TestCase: XCTestCase {
 		return (model, json)
 	}
 	
+	func jsonString<T>(
+		as: T.Type = T.self,
+		file fileName: String,
+		decode: (String) throws -> T
+	) throws -> (model: T, jsonString: String) {
+		let jsonData = try openFile(subPath: "vector", fileName, extension: "json")
+		let jsonString = try XCTUnwrap(String(data: jsonData, encoding: .utf8))
+		let model: T = try decode(jsonString)
+		return (model, jsonString)
+	}
+	
 }
 
 class Test<SUT_: SargonModel>: TestCase {

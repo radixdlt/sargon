@@ -1,6 +1,6 @@
 import CustomDump
 import Foundation
-import Sargon
+@testable import Sargon
 import SargonUniFFI
 import XCTest
 
@@ -36,6 +36,19 @@ final class ProfileTests: Test<Profile> {
 		)
 		XCTAssertNoDifference(decrypted, sut)
 	}
+	
+	func test_encryption_roundtrip_string() throws {
+		let password = "ultra secret"
+		let sut = SUT.sample
+		let encryptedString = sut.encryptedJsonString(
+			password: password
+		)
+		let decrypted = try Profile(
+			encryptedProfileJSONString: encryptedString,
+			decryptionPassword: password
+		)
+		XCTAssertNoDifference(decrypted, sut)
+	}
 
 	func test_init_with_header_and_dfs() {
 		let header = Header.sampleOther
@@ -48,17 +61,17 @@ final class ProfileTests: Test<Profile> {
 	}
 
 	func test_analyze_file_not_profile() {
-		XCTAssertEqual(SUT.analyzeFile(contents: Data()), .notProfile)
+		XCTAssertEqual(SUT.analyzeContents(data: Data()), .notProfile)
 	}
 
 	func test_analyze_file_profile() {
-		func doTest(_ sut: SUT, _ json: Data) {
+		func doTest(_ sut: SUT, _ jsonString: String) {
 			XCTAssertEqual(
-				SUT.analyzeFile(contents: json),
+				SUT.analyzeContents(of: jsonString),
 				.plaintextProfile(sut)
 			)
 		}
-		var vectors = Array(zip(SUT.sampleValues, SUT.sampleValues.map { $0.jsonData() }))
+		var vectors = Array(zip(SUT.sampleValues, SUT.sampleValues.map { $0.toJSONString() }))
 		vectors.append(vector)
 		
 		vectors.forEach(doTest)
@@ -72,9 +85,9 @@ final class ProfileTests: Test<Profile> {
 		let passwords = ["Mellon", "open sesame", "REINDEER FLOTILLA", "swordfish"]
 		func doTest(_ index: Int, _ sut: SUT) {
 			let password = passwords[index % passwords.count]
-			let encrypted = sut.encrypt(password: password)
+			let encrypted = sut.encryptedJsonString(password: password)
 			XCTAssertEqual(
-				SUT.analyzeFile(contents: encrypted),
+				SUT.analyzeContents(of: encrypted),
 				.encryptedProfile
 			)
 		}
@@ -83,8 +96,7 @@ final class ProfileTests: Test<Profile> {
 	}
 
 	func test_encrypted_profile_contents() throws {
-		let encrypted = SUT.sample.encrypt(password: "open sesame")
-		let jsonString = try XCTUnwrap(String(data: encrypted, encoding: .utf8))
+		let jsonString = SUT.sample.encryptedJsonString(password: "open sesame")
 		XCTAssertTrue(jsonString.contains("encryptionScheme"))
 		XCTAssertTrue(jsonString.contains("keyDerivationScheme"))
 		XCTAssertTrue(jsonString.contains("encryptedSnapshot"))
@@ -92,29 +104,48 @@ final class ProfileTests: Test<Profile> {
 	}
 	
 	func test_json_roundtrip() throws {
-		func doTest(_ sut: SUT, _ json: Data) throws {
-			let encoded = sut.profileSnapshot()
+		func doTest(_ sut: SUT, _ json: String) throws {
+			let encoded = sut.toJSONString(prettyPrinted: false)
 			XCTAssertEqual(encoded, json)
-			let decoded = try SUT(jsonData: json)
+			let decoded = try SUT(jsonString: json)
 			XCTAssertEqual(decoded, sut)
+			let decodedFromData = try SUT(jsonData: sut.jsonData())
+			XCTAssertEqual(decodedFromData, sut)
 		}
-		var vectors = Array(zip(SUT.sampleValues, SUT.sampleValues.map { $0.jsonData() }))
+		var vectors = Array(zip(SUT.sampleValues, SUT.sampleValues.map { $0.toJSONString(prettyPrinted: false) }))
 		vectors.append(vector)
 		try vectors.forEach(doTest)
 	}
 	
-	lazy var vector: (model: Profile, json: Data) = {
-		try! jsonFixture(
+	
+	// Macbook Pro M2: 0.06 (10x speedup vs BagOfBytes)
+	func test_performance_json_encoding_string() throws {
+		let (sut, _) = vector
+		measure {
+			let _ = sut.toJSONString()
+		}
+	}
+	
+	// Macbook Pro M2: 0.1 (2.5x speedup vs BagOfBytes)
+	func test_performance_json_decoding_string() throws {
+		let (_, jsonString) = vector
+		measure {
+			let _ = try! SUT(jsonString: jsonString)
+		}
+	}
+	
+	lazy var vector: (model: Profile, jsonString: String) = {
+		try! jsonString(
 			as: SUT.self,
 			file: "huge_profile_1000_accounts",
-			decode: { try Profile(jsonData: $0) }
+			decode: { try Profile(jsonString: $0) }
 		)
 	}()
 
     func test_check_if_profile_json_contains_legacy_p2p_links_when_p2p_links_are_not_present() {
 		eachSample { sut in
 			XCTAssertFalse(
-				SUT.checkIfProfileJsonContainsLegacyP2PLinks(contents: sut.jsonData())
+				SUT.checkIfProfileJsonStringContainsLegacyP2PLinks(jsonString: sut.toJSONString())
 			)
 		}
     }
@@ -128,7 +159,7 @@ final class ProfileTests: Test<Profile> {
 
 	func test_check_if_encrypted_profile_json_contains_legacy_p2p_links_when_empty_json() {
 		XCTAssertFalse(
-			SUT.checkIfEncryptedProfileJsonContainsLegacyP2PLinks(contents: Data(), password: "babylon")
+			SUT.checkIfEncryptedProfileJsonStringContainsLegacyP2PLinks(jsonString: "", password: "babylon")
 		)
 	}
 
@@ -136,6 +167,14 @@ final class ProfileTests: Test<Profile> {
 		let json = try openFile(subPath: "vector", "profile_encrypted_by_password_of_babylon", extension: "json")
 		XCTAssert(
 			SUT.checkIfEncryptedProfileJsonContainsLegacyP2PLinks(contents: json, password: "babylon")
+		)
+	}
+	
+	func test_check_if_encrypted_profile_json_string_contains_legacy_p2p_links_when_p2p_links_are_present() throws {
+		let json = try openFile(subPath: "vector", "profile_encrypted_by_password_of_babylon", extension: "json")
+		let jsonString = try XCTUnwrap(String(data: json, encoding: .utf8))
+		XCTAssert(
+			SUT.checkIfEncryptedProfileJsonStringContainsLegacyP2PLinks(jsonString: jsonString, password: "babylon")
 		)
 	}
 }

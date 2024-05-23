@@ -7,7 +7,6 @@ var swiftSettings: [SwiftSetting] = [
 	.enableExperimentalFeature("StrictConcurrency")
 ]
 
-var strictSwiftSettings: [SwiftSetting] = swiftSettings
 
 let sargonBinaryTargetName = "SargonCoreRS"
 let binaryTarget: Target
@@ -19,12 +18,6 @@ if useLocalFramework {
 		// IMPORTANT: Swift packages importing this locally will not be able to
 		// import SargonCore unless you specify this as a relative path!
 		path: "./target/swift/libsargon-rs.xcframework"
-	)
-	
-	// MUST NOT be part of release, since results in compilation error:
-	// The package product 'Sargon' cannot be used as a dependency of this target because it uses unsafe build flags.
-	strictSwiftSettings.append(
-		.unsafeFlags(["-warnings-as-errors"])
 	)
 } else {
 	let releaseTag = "0.1.0"
@@ -75,7 +68,7 @@ let package = Package(
 				.product(name: "CustomDump", package: "swift-custom-dump"),
 			],
 			path: "apple/Tests",
-			swiftSettings: strictSwiftSettings
+			swiftSettings: swiftSettings
 		),
 	]
 )
