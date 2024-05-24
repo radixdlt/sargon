@@ -672,7 +672,7 @@ mod tests {
         assert!(event_bus_driver
             .recorded()
             .iter()
-            .any(|e| e.event.kind() == EventKind::UpdatedAccount));
+            .any(|e| e.event.kind() == EventKind::AccountUpdated));
     }
 
     #[actix_rt::test]

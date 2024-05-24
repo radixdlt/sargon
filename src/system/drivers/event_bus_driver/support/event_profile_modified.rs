@@ -16,9 +16,9 @@ pub enum EventProfileModified {
 impl HasEventKind for EventProfileModified {
     fn kind(&self) -> EventKind {
         match self {
-            Self::UpdatedAccount { address: _ } => EventKind::UpdatedAccount,
-            Self::AddedAccount { address: _ } => EventKind::AddedAccount,
-            Self::AddedAccounts { addresses: _ } => EventKind::AddedAccounts,
+            Self::UpdatedAccount { address: _ } => EventKind::AccountUpdated,
+            Self::AddedAccount { address: _ } => EventKind::AccountAdded,
+            Self::AddedAccounts { addresses: _ } => EventKind::AccountsAdded,
         }
     }
 }
@@ -67,19 +67,19 @@ mod tests {
             SUT::AddedAccount {
                 address: AccountAddress::sample(),
             },
-            EventKind::AddedAccount,
+            EventKind::AccountAdded,
         );
         test(
             SUT::UpdatedAccount {
                 address: AccountAddress::sample(),
             },
-            EventKind::UpdatedAccount,
+            EventKind::AccountUpdated,
         );
         test(
             SUT::AddedAccounts {
                 addresses: vec![AccountAddress::sample()],
             },
-            EventKind::AddedAccounts,
+            EventKind::AccountsAdded,
         );
     }
 }

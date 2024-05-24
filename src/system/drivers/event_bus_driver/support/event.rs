@@ -1,4 +1,7 @@
 use crate::prelude::*;
+use crate::EventKind::{
+    AccountUpdated, AccountsAdded, Booted, ProfileImported, ProfileSaved,
+};
 
 /// SargonOS event contain information about something of interest that has
 /// happened to the SargonOS, most prominently to the Profile, host device
@@ -17,10 +20,10 @@ pub enum Event {
 
     /// A profile has been imported and has been set to active profile,
     /// and saved into secure storage.
-    ImportedProfile { id: ProfileID },
+    ProfileImported { id: ProfileID },
 
     /// The active profile has been modified (might not have been saved yet).
-    ModifiedProfile { change: EventProfileModified },
+    ProfileModified { change: EventProfileModified },
 
     /// The Profile was last used on another device, user ought to claim it.
     ProfileLastUsedOnOtherDevice(DeviceInfo),
@@ -28,7 +31,7 @@ pub enum Event {
 
 impl Event {
     pub fn profile_modified(change: EventProfileModified) -> Self {
-        Self::ModifiedProfile { change }
+        Self::ProfileModified { change }
     }
 
     pub fn profile_last_used_on_other_device(device: DeviceInfo) -> Self {
@@ -43,11 +46,11 @@ impl HasEventKind for Event {
             Self::GatewayChangedCurrent { to: _, is_new: _ } => {
                 EventKind::GatewayChangedCurrent
             }
-            Self::ModifiedProfile { change } => change.kind(),
+            Self::ProfileModified { change } => change.kind(),
             Self::ProfileLastUsedOnOtherDevice(_) => {
                 EventKind::ProfileLastUsedOnOtherDevice
             }
-            Self::ImportedProfile { id: _ } => EventKind::ImportedProfile,
+            Self::ProfileImported { id: _ } => EventKind::ProfileImported,
             Self::ProfileSaved => EventKind::ProfileSaved,
         }
     }
@@ -59,10 +62,21 @@ impl HasSampleValues for Event {
     }
 
     fn sample_other() -> Self {
-        Self::ModifiedProfile {
+        Self::ProfileModified {
             change: EventProfileModified::sample_other(),
         }
     }
+}
+
+impl Event {
+    pub fn affect_current_accounts(&self) -> bool {
+        self.kind().affect_current_accounts()
+    }
+}
+
+#[uniffi::export]
+pub fn event_affect_current_accounts(event: Event) -> bool {
+    event.affect_current_accounts()
 }
 
 #[cfg(test)]
@@ -96,10 +110,10 @@ mod tests {
             assert_eq!(s.kind(), exp);
         };
         test(
-            SUT::ImportedProfile {
+            SUT::ProfileImported {
                 id: ProfileID::sample(),
             },
-            EventKind::ImportedProfile,
+            EventKind::ProfileImported,
         );
         test(SUT::ProfileSaved, EventKind::ProfileSaved);
         test(
@@ -113,7 +127,7 @@ mod tests {
             address: AccountAddress::sample(),
         };
         test(
-            SUT::ModifiedProfile {
+            SUT::ProfileModified {
                 change: change.clone(),
             },
             change.kind(),

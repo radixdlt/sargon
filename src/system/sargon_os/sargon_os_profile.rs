@@ -89,7 +89,7 @@ impl SargonOS {
         );
 
         self.event_bus
-            .emit(EventNotification::new(Event::ImportedProfile {
+            .emit(EventNotification::new(Event::ProfileImported {
                 id: imported_id,
             }))
             .await;
@@ -383,7 +383,7 @@ mod tests {
         assert!(event_bus_driver
             .recorded()
             .iter()
-            .any(|e| e.event.kind() == EventKind::ImportedProfile));
+            .any(|e| e.event.kind() == EventKind::ProfileImported));
     }
 
     #[actix_rt::test]
