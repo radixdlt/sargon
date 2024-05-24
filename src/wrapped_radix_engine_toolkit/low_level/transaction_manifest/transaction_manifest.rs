@@ -235,6 +235,40 @@ mod tests {
     }
 
     #[test]
+    fn non_sensical_manifest_does_not_crash() {
+        // We are passing in an account address instead of resource address as argument
+        // to "withdraw", which does not make any sense. In an earlier version of RET
+        // this caused `summary` call to crash. But the PR adding this test bumps RET to
+        // a version which does not crash. Does not hurt to keep this unit test around.
+        let non_sensical = r#"
+CALL_METHOD
+  Address("account_tdx_2_1c90qdw5e3t3tjyd8axt3zg9zezhhhymt2mr8y4l0k2285mfwhczhdt")
+  "withdraw"
+  Address("account_tdx_2_12y0errvzu4caktegxc5v0ug93u5yat9d90k4zdqkcy6n55pt7wlgmq")
+  Decimal("0.01")
+;
+TAKE_FROM_WORKTOP
+  Address("resource_tdx_2_1thqru9whuem5sjltshg4q7vj3e22xfh27u6s9xvwecz4fallqjny90")
+  Decimal("0.01")
+  Bucket("burn")
+;
+
+BURN_RESOURCE
+  Bucket("burn")
+;
+        "#;
+
+        let manifest = TransactionManifest::new(
+            non_sensical,
+            NetworkID::Stokenet,
+            Blobs::default(),
+        )
+        .unwrap();
+        let summary = manifest.summary();
+        assert_eq!(summary.addresses_of_accounts_deposited_into, []);
+    }
+
+    #[test]
     fn new_from_instructions_string() {
         let instructions_str = r#"CALL_METHOD
         Address("account_sim1cyvgx33089ukm2pl97pv4max0x40ruvfy4lt60yvya744cve475w0q")
