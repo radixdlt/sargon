@@ -134,11 +134,44 @@ final class ProfileTests: Test<Profile> {
 		}
 	}
 	
+	// Macbook Pro M2: 0.045
+	func test_performance__OBJECT___json_decoding_string() throws {
+		let (_, jsonString) = vectorObj
+		measure {
+			let _ = try! ProfileObject.newProfileFromJsonString(jsonString: jsonString)
+		}
+	}
+	
+	// Macbook Pro M2: 0.000
+	func test_performance_json__OBJECT__encoding_string() throws {
+		let (sut, _) = vectorObj
+		measure {
+			let _ = sut.toJsonString()
+		}
+	}
+	
+	
+	// Macbook Pro M2: 0.000
+	func test_performance__OBJECT___trivial_quer() throws {
+		let (sut, _) = vectorObj
+		measure {
+			let _ = sut.getNumberOfNetworks()
+		}
+	}
+	
 	lazy var vector: (model: Profile, jsonString: String) = {
 		try! jsonString(
 			as: SUT.self,
 			file: "huge_profile_1000_accounts",
 			decode: { try Profile(jsonString: $0) }
+		)
+	}()
+	
+	lazy var vectorObj: (model: ProfileObject, jsonString: String) = {
+		try! jsonString(
+			as: ProfileObject.self,
+			file: "huge_profile_1000_accounts",
+			decode: { try ProfileObject.newProfileFromJsonString(jsonString: $0) }
 		)
 	}()
 
