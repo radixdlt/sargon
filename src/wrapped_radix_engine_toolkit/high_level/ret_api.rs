@@ -401,6 +401,7 @@ mod tests {
                 vec![TransactionGuarantee::new(
                     0,
                     0,
+                    0,
                     ResourceAddress::sample(),
                     None,
                 )],
