@@ -48,14 +48,15 @@ pub struct Profile {
 
 impl Profile {
     pub fn analyze_contents_of_file(
-        bytes: impl AsRef<[u8]>,
+        json_string: impl AsRef<str>,
     ) -> ProfileFileContents {
-        let json = bytes.as_ref();
-        if let Ok(profile) = Profile::new_from_json_bytes(json) {
+        let json_string = json_string.as_ref();
+        if let Ok(profile) = Profile::new_from_json_string(json_string) {
             return ProfileFileContents::PlaintextProfile(profile);
         };
 
-        if serde_json::from_slice::<EncryptedProfileSnapshot>(json).is_ok() {
+        if serde_json::from_str::<EncryptedProfileSnapshot>(json_string).is_ok()
+        {
             return ProfileFileContents::EncryptedProfile;
         };
 
@@ -160,25 +161,29 @@ impl Profile {
         }
     }
 
-    pub fn new_from_encryption_bytes(
-        json: impl AsRef<[u8]>,
+    pub fn new_from_encrypted_profile_json_string(
+        json_string: impl AsRef<str>,
         password: impl AsRef<str>,
     ) -> Result<Self> {
-        let json = json.as_ref();
-        serde_json::from_slice::<EncryptedProfileSnapshot>(json)
+        let json_string = json_string.as_ref();
+        let json_byte_count = json_string.len() as u64;
+        serde_json::from_str::<EncryptedProfileSnapshot>(json_string)
 		.map_err(|e| {
 			error!("Failed to deserialize JSON as EncryptedProfileSnapshot, error: {:?}", e);
             CommonError::FailedToDeserializeJSONToValue {
-                json_byte_count: json.len() as u64,
+                json_byte_count,
                 type_name: type_name::<EncryptedProfileSnapshot>(),
             }})
 		    .and_then(|encrypted| encrypted.decrypt(password))
     }
 
-    pub fn to_encryption_bytes(&self, password: impl AsRef<str>) -> Vec<u8> {
+    pub fn to_encrypted_profile_json_str(
+        &self,
+        password: impl AsRef<str>,
+    ) -> String {
         let encrypted =
             EncryptedProfileSnapshot::encrypting(self, password, None, None);
-        serde_json::to_vec(&encrypted).expect(
+        serde_json::to_string(&encrypted).expect(
             "JSON serialization of EncryptedProfileSnapshot should never fail.",
         )
     }
@@ -225,31 +230,49 @@ impl Profile {
     }
 }
 
+impl ProtoProfileMaybeWithLegacyP2PLinks {
+    pub fn contains_legacy_links(&self) -> bool {
+        !self.app_preferences.p2p_links.is_empty()
+    }
+}
+
 impl Profile {
     pub fn check_if_profile_json_contains_legacy_p2p_links(
+        json_str: impl AsRef<str>,
+    ) -> bool {
+        let json_str = json_str.as_ref();
+        serde_json::from_str::<ProtoProfileMaybeWithLegacyP2PLinks>(json_str)
+            .map_or_else(|_| false, |s| s.contains_legacy_links())
+    }
+
+    pub fn check_if_profile_json_bytes_contains_legacy_p2p_links(
         json: impl AsRef<[u8]>,
     ) -> bool {
         let json = json.as_ref();
         serde_json::from_slice::<ProtoProfileMaybeWithLegacyP2PLinks>(json)
-            .map_or_else(|_| false, |s| !s.app_preferences.p2p_links.is_empty())
+            .map_or_else(|_| false, |s| s.contains_legacy_links())
     }
 
     pub fn check_if_encrypted_profile_json_contains_legacy_p2p_links(
-        json: impl AsRef<[u8]>,
+        json_string: impl AsRef<str>,
         password: impl AsRef<str>,
     ) -> bool {
-        let json = json.as_ref();
-        serde_json::from_slice::<EncryptedProfileSnapshot>(json)
+        let json_string = json_string.as_ref();
+        let json_byte_count = json_string.len() as u64;
+        serde_json::from_str::<EncryptedProfileSnapshot>(json_string)
 		.map_err(|e| {
 			error!("Failed to deserialize JSON as EncryptedProfileSnapshot, error: {:?}", e);
             CommonError::FailedToDeserializeJSONToValue {
-                json_byte_count: json.len() as u64,
+                json_byte_count,
                 type_name: type_name::<EncryptedProfileSnapshot>(),
             }})
 		    .and_then(|encrypted| encrypted.decrypt_to_bytes(password))
-			.map_or_else(|_| false, Profile::check_if_profile_json_contains_legacy_p2p_links)
+			.map_or_else(|_| false, Profile::check_if_profile_json_bytes_contains_legacy_p2p_links)
     }
 }
+
+impl JsonDataDeserializing for Profile {}
+impl JsonDataSerializing for Profile {}
 
 impl HasSampleValues for Profile {
     fn sample() -> Self {
@@ -480,22 +503,22 @@ mod tests {
     #[test]
     fn test_analyze_contents_of_file_plaintext_profile() {
         let sut = SUT::sample();
-        let bytes = sut.to_json_bytes();
-        let contents = SUT::analyze_contents_of_file(bytes);
+        let json_str = sut.to_json_string(false);
+        let contents = SUT::analyze_contents_of_file(json_str);
         assert_eq!(contents, ProfileFileContents::PlaintextProfile(sut));
     }
 
     #[test]
     fn test_analyze_contents_of_file_encrypted_profile() {
         let sut = SUT::sample();
-        let bytes = sut.to_encryption_bytes("super secret");
-        let contents = SUT::analyze_contents_of_file(bytes);
+        let json_str = sut.to_encrypted_profile_json_str("super secret");
+        let contents = SUT::analyze_contents_of_file(json_str);
         assert_eq!(contents, ProfileFileContents::EncryptedProfile);
     }
 
     #[test]
     fn test_analyze_contents_of_file_not_profile() {
-        let contents = SUT::analyze_contents_of_file(Exactly32Bytes::sample());
+        let contents = SUT::analyze_contents_of_file("bello");
         assert_eq!(contents, ProfileFileContents::NotProfile);
     }
 
@@ -561,10 +584,12 @@ mod tests {
     }
 
     #[test]
-    fn from_encryption_bytes_valid() {
-        let json =
-            serde_json::to_vec(&EncryptedProfileSnapshot::sample()).unwrap();
-        let sut = SUT::new_from_encryption_bytes(json, "babylon").unwrap();
+    fn from_encrypted_profile_json_str_valid() {
+        let json_str =
+            serde_json::to_string(&EncryptedProfileSnapshot::sample()).unwrap();
+        let sut =
+            SUT::new_from_encrypted_profile_json_string(json_str, "babylon")
+                .unwrap();
         assert_eq!(
             sut.header.id,
             ProfileID::from_str("e5e4477b-e47b-4b64-bbc8-f8f40e8beb74")
@@ -573,14 +598,14 @@ mod tests {
     }
 
     #[test]
-    fn from_encryption_bytes_invalid_is_err() {
+    fn from_encrypted_profile_json_str_invalid_is_err() {
         assert_eq!(
-            SUT::new_from_encryption_bytes(
-                Vec::from_iter([0xde, 0xad, 0xbe, 0xef]),
-                "invalid"
+            SUT::new_from_encrypted_profile_json_string(
+                "We came we saw we kicked its ass!",
+                "Mellon"
             ),
             Err(CommonError::FailedToDeserializeJSONToValue {
-                json_byte_count: 4,
+                json_byte_count: 33,
                 type_name: type_name::<EncryptedProfileSnapshot>()
             })
         );
@@ -590,9 +615,10 @@ mod tests {
     fn encryption_roundtrip() {
         let sut = SUT::sample();
         let password = "super secret";
-        let encryption_bytes = sut.to_encryption_bytes(password);
+        let encrypted = sut.to_encrypted_profile_json_str(password);
         assert_eq!(
-            SUT::new_from_encryption_bytes(encryption_bytes, password).unwrap(),
+            SUT::new_from_encrypted_profile_json_string(encrypted, password)
+                .unwrap(),
             sut
         );
     }
@@ -612,16 +638,12 @@ mod tests {
             }
           }
         "#;
-        assert!(SUT::check_if_profile_json_contains_legacy_p2p_links(
-            json.as_bytes()
-        ));
+        assert!(SUT::check_if_profile_json_contains_legacy_p2p_links(json));
     }
 
     #[test]
-    fn check_if_profile_json_contains_legacy_p2p_links_when_empty_json() {
-        assert!(!SUT::check_if_profile_json_contains_legacy_p2p_links(
-            BagOfBytes::new()
-        ));
+    fn check_if_profile_json_contains_legacy_p2p_links_when_empty_json_str() {
+        assert!(!SUT::check_if_profile_json_contains_legacy_p2p_links(""));
     }
 
     #[test]
@@ -634,9 +656,7 @@ mod tests {
             }
           }
         "#;
-        assert!(!SUT::check_if_profile_json_contains_legacy_p2p_links(
-            json.as_bytes()
-        ));
+        assert!(!SUT::check_if_profile_json_contains_legacy_p2p_links(json));
     }
 
     #[test]
@@ -646,16 +666,14 @@ mod tests {
             env!("FIXTURES_VECTOR"),
             "only_plaintext_profile_snapshot_version_100.json"
         ));
-        assert!(SUT::check_if_profile_json_contains_legacy_p2p_links(
-            json.as_bytes()
-        ));
+        assert!(SUT::check_if_profile_json_contains_legacy_p2p_links(json));
     }
 
     #[test]
     fn check_if_encrypted_profile_json_contains_legacy_p2p_links_when_p2p_links_are_present(
     ) {
         let json =
-            serde_json::to_vec(&EncryptedProfileSnapshot::sample()).unwrap();
+            serde_json::to_string(&EncryptedProfileSnapshot::sample()).unwrap();
         let password = "babylon";
         assert!(
             SUT::check_if_encrypted_profile_json_contains_legacy_p2p_links(
@@ -670,8 +688,7 @@ mod tests {
         let password = "babylon";
         assert!(
             !SUT::check_if_encrypted_profile_json_contains_legacy_p2p_links(
-                BagOfBytes::new(),
-                password
+                "", password
             )
         );
     }

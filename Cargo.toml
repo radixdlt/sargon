@@ -1,6 +1,6 @@
 [package]
 name = "sargon"
-version = "0.7.18"
+version = "1.0.1"
 edition = "2021"
 build = "build.rs"
 
@@ -80,7 +80,8 @@ radix-rust = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "397a
 ] }
 radix-engine = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "397a1bc0bb67429f1c82fbe0a62b3ac2f89a6fad" }
 radix-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "397a1bc0bb67429f1c82fbe0a62b3ac2f89a6fad", features = [
-    "serde", "secp256k1_sign_and_validate"
+    "serde",
+    "secp256k1_sign_and_validate",
 ] }
 radix-common-derive = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "397a1bc0bb67429f1c82fbe0a62b3ac2f89a6fad" }
 radix-engine-interface = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "397a1bc0bb67429f1c82fbe0a62b3ac2f89a6fad" }

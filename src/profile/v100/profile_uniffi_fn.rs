@@ -1,6 +1,41 @@
 use crate::prelude::*;
 
-json_data_convertible!(Profile);
+#[uniffi::export]
+pub fn new_profile_from_json_string(json_str: String) -> Result<Profile> {
+    Profile::new_from_json_string(json_str)
+}
+
+impl Profile {
+    pub fn new_from_json_string(json_str: impl AsRef<str>) -> Result<Profile> {
+        let json_str = json_str.as_ref();
+        let json_byte_count = json_str.len() as u64;
+        serde_json::from_str(json_str).map_err(|_| {
+            CommonError::FailedToDeserializeJSONToValue {
+                json_byte_count,
+                type_name: type_name::<Profile>(),
+            }
+        })
+    }
+}
+
+#[uniffi::export]
+pub fn profile_to_json_string(
+    profile: &Profile,
+    pretty_printed: bool,
+) -> String {
+    profile.to_json_string(pretty_printed)
+}
+
+impl Profile {
+    pub fn to_json_string(&self, pretty_printed: bool) -> String {
+        if pretty_printed {
+            serde_json::to_string_pretty(self)
+        } else {
+            serde_json::to_string(self)
+        }
+        .expect("Should always be able to JSON encode Profile.")
+    }
+}
 
 #[uniffi::export]
 pub fn new_profile_with_mnemonic(
@@ -46,18 +81,21 @@ pub fn profile_to_debug_string(profile: &Profile) -> String {
 
 #[uniffi::export]
 pub fn new_profile_from_encryption_bytes(
-    json: BagOfBytes,
+    json_string: String,
     decryption_password: String,
 ) -> Result<Profile> {
-    Profile::new_from_encryption_bytes(json.to_vec(), decryption_password)
+    Profile::new_from_encrypted_profile_json_string(
+        json_string,
+        decryption_password,
+    )
 }
 
 #[uniffi::export]
 pub fn profile_encrypt_with_password(
     profile: &Profile,
     encryption_password: String,
-) -> BagOfBytes {
-    profile.to_encryption_bytes(encryption_password).into()
+) -> String {
+    profile.to_encrypted_profile_json_str(encryption_password)
 }
 
 // ################
@@ -65,26 +103,25 @@ pub fn profile_encrypt_with_password(
 // ################
 #[uniffi::export]
 pub fn profile_analyze_contents_of_file(
-    bytes: BagOfBytes,
+    contents: String,
 ) -> ProfileFileContents {
-    Profile::analyze_contents_of_file(bytes)
+    Profile::analyze_contents_of_file(contents)
 }
 
 #[uniffi::export]
 pub fn check_if_profile_json_contains_legacy_p2p_links(
-    json: BagOfBytes,
+    json_str: String,
 ) -> bool {
-    Profile::check_if_profile_json_contains_legacy_p2p_links(json.to_vec())
+    Profile::check_if_profile_json_contains_legacy_p2p_links(json_str)
 }
 
 #[uniffi::export]
 pub fn check_if_encrypted_profile_json_contains_legacy_p2p_links(
-    json: BagOfBytes,
+    json_str: String,
     password: String,
 ) -> bool {
     Profile::check_if_encrypted_profile_json_contains_legacy_p2p_links(
-        json.to_vec(),
-        password,
+        json_str, password,
     )
 }
 
@@ -105,7 +142,9 @@ mod uniffi_tests {
     #[test]
     fn test_profile_analyze_contents_of_file() {
         assert_eq!(
-            profile_analyze_contents_of_file(BagOfBytes::sample()),
+            profile_analyze_contents_of_file(
+                "ring ring ring ring ring ring, banana phone!".to_owned()
+            ),
             ProfileFileContents::NotProfile
         )
     }
@@ -144,45 +183,12 @@ mod uniffi_tests {
     }
 
     #[test]
-    fn serialize_deserialize() {
-        let sut = SUT::sample();
-
-        assert_eq!(
-            new_profile_from_json_bytes(&profile_to_json_bytes(&sut)).unwrap(),
-            sut
-        )
-    }
-
-    #[test]
-    fn deserialize_malformed() {
-        let malformed_profile_snapshot = BagOfBytes::from("{}".as_bytes());
-        assert_eq!(
-            new_profile_from_json_bytes(&malformed_profile_snapshot),
-            Result::Err(CommonError::FailedToDeserializeJSONToValue {
-                json_byte_count: malformed_profile_snapshot.len() as u64,
-                type_name: String::from("Profile")
-            })
-        );
-    }
-
-    #[test]
-    fn test_new_profile_from_encryption_bytes() {
-        assert!(new_profile_from_encryption_bytes(
-            BagOfBytes::sample(),
-            "invalid".to_string()
-        )
-        .is_err());
-    }
-
-    #[test]
     fn encryption_roundtrip() {
         let sut = SUT::sample();
         let password = "super secret".to_owned();
-        let encryption_bytes =
-            profile_encrypt_with_password(&sut, password.clone());
+        let encrypted = profile_encrypt_with_password(&sut, password.clone());
         assert_eq!(
-            new_profile_from_encryption_bytes(encryption_bytes, password)
-                .unwrap(),
+            new_profile_from_encryption_bytes(encrypted, password).unwrap(),
             sut
         );
     }
@@ -203,14 +209,14 @@ mod uniffi_tests {
           }
         "#;
         assert!(check_if_profile_json_contains_legacy_p2p_links(
-            BagOfBytes::from(json.as_bytes())
+            json.to_owned()
         ));
     }
 
     #[test]
     fn check_if_profile_json_contains_legacy_p2p_links_when_empty_json() {
         assert!(!check_if_profile_json_contains_legacy_p2p_links(
-            BagOfBytes::new()
+            "".to_owned()
         ));
     }
 
@@ -218,10 +224,10 @@ mod uniffi_tests {
     fn check_if_encrypted_profile_json_contains_legacy_p2p_links_when_p2p_links_are_present(
     ) {
         let json =
-            serde_json::to_vec(&EncryptedProfileSnapshot::sample()).unwrap();
+            serde_json::to_string(&EncryptedProfileSnapshot::sample()).unwrap();
         let password = "babylon";
         assert!(check_if_encrypted_profile_json_contains_legacy_p2p_links(
-            BagOfBytes::from(json),
+            json,
             password.to_owned()
         ));
     }
@@ -231,8 +237,33 @@ mod uniffi_tests {
     ) {
         let password = "babylon";
         assert!(!check_if_encrypted_profile_json_contains_legacy_p2p_links(
-            BagOfBytes::new(),
+            "".to_owned(),
             password.to_owned()
         ));
+    }
+
+    #[test]
+    fn profile_json_string_roundtrip() {
+        let sut = SUT::sample();
+        let pretty_string = profile_to_json_string(&sut, false);
+        let from_str =
+            new_profile_from_json_string(pretty_string.clone()).unwrap();
+        assert_eq!(from_str, sut);
+        let ugly_string = profile_to_json_string(&sut, true);
+        let from_str =
+            new_profile_from_json_string(ugly_string.clone()).unwrap();
+        assert_eq!(from_str, sut);
+        assert_ne!(pretty_string, ugly_string);
+    }
+
+    #[test]
+    fn profile_from_invalid_json_string_throws() {
+        assert_eq!(
+            new_profile_from_json_string("".to_owned()),
+            Err(CommonError::FailedToDeserializeJSONToValue {
+                json_byte_count: 0,
+                type_name: "Profile".to_owned()
+            })
+        )
     }
 }

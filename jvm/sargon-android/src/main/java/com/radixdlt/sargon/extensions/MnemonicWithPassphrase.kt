@@ -77,7 +77,7 @@ fun MnemonicWithPassphrase.sign(
 private data class AndroidMnemonicWithPassphrase(
     @SerialName("mnemonic")
     val phrase: String,
-    @SerialName("Bip39Passphrase")
+    @SerialName("bip39Passphrase")
     val passphrase: String
 ) {
 
