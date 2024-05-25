@@ -17,17 +17,16 @@ extension Array where Element: Identifiable {
 	}
 }
 
+/// The purpose of this client is to provide WRITE / UPDATE methods of Profile
+/// relating to Account(s). READING should be done with `@SharedReader(.accountsForDisplay)`
+/// Shared state!
 @DependencyClient
 public struct AccountsClient: Sendable {
-	public typealias GetAccounts = @Sendable () -> Accounts
-	public typealias AccountsStream = @Sendable () -> AsyncStream<Accounts>
 	public typealias AccountByAddress = @Sendable (AccountAddress) throws -> Account
 	public typealias CreateAndSaveAccount = @Sendable (DisplayName) async throws -> Account
 	public typealias UpdateAccount = @Sendable (Account) async throws -> Void
 	public typealias BatchCreateManySavedAccounts = @Sendable (_ count: UInt16) async throws -> Void
 	
-	public var getAccounts: GetAccounts
-	public var accountsStream: AccountsStream
 	public var accountByAddress: AccountByAddress
 	public var createAndSaveAccount: CreateAndSaveAccount
 	public var updateAccount: UpdateAccount
@@ -37,22 +36,8 @@ public struct AccountsClient: Sendable {
 extension AccountsClient: DependencyKey {
 	public static let liveValue = Self.live(os: SargonOS.shared)
 	public static func live(os: SargonOS) -> Self {
-		
-		let getAccounts: GetAccounts = {
-			os.accountsOnCurrentNetwork().asIdentified()
-		}
-		
+
 		return Self(
-			getAccounts: getAccounts,
-			accountsStream: {
-				AsyncStream<Accounts> { continuation in
-					Task {
-						for await _ in await EventBus.shared.notifications() {
-							continuation.yield(getAccounts())
-						}
-					}
-				}
-			},
 			accountByAddress: { address in
 				try os.accountByAddress(address: address)
 			},

@@ -15,7 +15,9 @@ class FileSystemDriverTests: DriverTest<FileSystem> {
 		try await sut.saveToFile(path: path, data: data)
 		let loaded = try await sut.loadFromFile(path: path)
 		XCTAssertEqual(loaded, data)
-		try await sut.deleteFile(path: path)
 		
+		XCTAssertTrue(FileManager.default.fileExists(atPath: path))
+		try await sut.deleteFile(path: path)
+		XCTAssertFalse(FileManager.default.fileExists(atPath: path))
 	}
 }

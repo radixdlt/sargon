@@ -69,11 +69,12 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_submit_notarized_transaction_mock_duplicate() {
-        let mock_antenna =
-            MockAntenna::with_response(TransactionSubmitResponse {
+        let mock_networking_driver =
+            MockNetworkingDriver::with_response(TransactionSubmitResponse {
                 duplicate: true,
             });
-        let sut = SUT::new(Arc::new(mock_antenna), NetworkID::Stokenet);
+        let sut =
+            SUT::new(Arc::new(mock_networking_driver), NetworkID::Stokenet);
         let req =
             sut.submit_notarized_transaction(NotarizedTransaction::sample());
         let result = timeout(MAX, req).await.unwrap();

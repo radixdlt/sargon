@@ -1,9 +1,11 @@
 use crate::prelude::*;
 
-/// A factor source representing the device that the Radix Wallet is running on
-/// typically an iPhone or Android device. This is the initial factor source of
-/// all new Accounts and Personas an users authenticate signing by authorizing
-/// the client (Wallet App) to access a mnemonic stored in secure storage on
+/// A factor source representing the host device which SargonOS runs on, typically
+/// an iPhone or Android device.
+///
+/// This is the initial factor source of
+/// all new Accounts and Personas. Users authenticate signing by authorizing
+/// the host to access a mnemonic stored in secure storage on
 /// the device.
 #[derive(
     Serialize,

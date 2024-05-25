@@ -14,7 +14,7 @@ use crate::prelude::*;
 //     // The internal components, such as RadixConnectRelayService will be created by the RadixConnectMobile.
 //     #[uniffi::constructor]
 //     pub fn new(
-//         _network_antenna: Arc<dyn NetworkingDriver>,
+//         _networking_driver: Arc<dyn NetworkingDriver>,
 //         _secure_storage: Arc<dyn SecureStorageDriver>,
 //     ) -> Self {
 //         todo!()

@@ -4,14 +4,14 @@ use crate::prelude::*;
 
 /// A mocked network antenna, useful for testing.
 #[derive(Debug)]
-pub struct MockAntenna {
+pub struct MockNetworkingDriver {
     hard_coded_status: u16,
     hard_coded_body: BagOfBytes,
     spy: fn(NetworkRequest) -> (),
 }
 
 #[allow(unused)]
-impl MockAntenna {
+impl MockNetworkingDriver {
     pub fn with_spy(
         status: u16,
         body: impl Into<BagOfBytes>,
@@ -42,7 +42,7 @@ impl MockAntenna {
 }
 
 #[async_trait::async_trait]
-impl NetworkingDriver for MockAntenna {
+impl NetworkingDriver for MockNetworkingDriver {
     async fn execute_network_request(
         &self,
         request: NetworkRequest,

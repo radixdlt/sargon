@@ -2,7 +2,7 @@ use crate::prelude::*;
 use std::future::Future;
 
 impl Profile {
-    /// Creates a new non securified account **WITHOUT** add it to Profile, using the *main* "Babylon"
+    /// Creates a new non securified account **WITHOUT** adding it to Profile, using the *main* "Babylon"
     /// `DeviceFactorSource` and the "next" index for this FactorSource as derivation path.
     ///
     /// If you want to add it to Profile, call `add_account(account)`
@@ -35,8 +35,8 @@ impl Profile {
         Ok(account)
     }
 
-    /// Creates many new non securified accounts **WITHOUT** add them to Profile, using the *main* "Babylon"
-    /// `DeviceFactorSource` and the "next" index for this FactorSource as derivation paths.
+    /// Creates many new non securified accounts **WITHOUT** adding them to Profile, using the *main* "Babylon"
+    /// `DeviceFactorSource` and the "next" indices for this FactorSource as derivation paths.
     ///
     /// If you want to add the accounts to Profile, call `add_accounts(accounts)`
     pub async fn create_unsaved_accounts<F, Fut>(

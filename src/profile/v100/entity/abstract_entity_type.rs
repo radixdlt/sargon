@@ -18,7 +18,7 @@ use crate::prelude::*;
 )]
 #[repr(u32)] // it is u32 since used in Derivation Paths (CAP26) where each component is a u32.
 pub enum AbstractEntityType {
-    /// The entity type used by Accounts created by the Radix Wallet.
+    /// The entity type used by Accounts.
     Account,
     /// The entity type used by Personas.
     Identity,

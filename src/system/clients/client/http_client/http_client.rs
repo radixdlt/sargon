@@ -87,10 +87,10 @@ mod tests {
 
     #[actix_rt::test]
     async fn execute_network_request_invalid_url() {
-        let mock_antenna = MockAntenna::new(200, ());
+        let mock_networking_driver = MockNetworkingDriver::new(200, ());
         let base = "http://example.com";
         let sut = SUT::with_gateway(
-            Arc::new(mock_antenna),
+            Arc::new(mock_networking_driver),
             Gateway::declare(base, NetworkID::Stokenet),
         );
         let bad_path = "https://exa%23mple.org";
@@ -105,11 +105,12 @@ mod tests {
 
     #[actix_rt::test]
     async fn execute_network_request_bad_status_code() {
-        let mock_antenna = MockAntenna::new(
+        let mock_networking_driver = MockNetworkingDriver::new(
             404, // bad code
             (),
         );
-        let sut = SUT::new(Arc::new(mock_antenna), NetworkID::Stokenet);
+        let sut =
+            SUT::new(Arc::new(mock_networking_driver), NetworkID::Stokenet);
         let req = sut.current_epoch();
         let result = timeout(MAX, req).await.unwrap();
         assert_eq!(result, Err(CommonError::NetworkResponseBadCode))
@@ -117,11 +118,12 @@ mod tests {
 
     #[actix_rt::test]
     async fn execute_network_request_invalid_json() {
-        let mock_antenna = MockAntenna::new(
+        let mock_networking_driver = MockNetworkingDriver::new(
             200,
             BagOfBytes::sample_aced(), // wrong JSON
         );
-        let sut = SUT::new(Arc::new(mock_antenna), NetworkID::Stokenet);
+        let sut =
+            SUT::new(Arc::new(mock_networking_driver), NetworkID::Stokenet);
         let req = sut.current_epoch();
         let result = timeout(MAX, req).await.unwrap();
         assert_eq!(
@@ -134,26 +136,28 @@ mod tests {
 
     #[actix_rt::test]
     async fn spy_headers() {
-        let mock_antenna = MockAntenna::with_spy(200, (), |request| {
-            assert_eq!(
-                request
-                    .headers
-                    .keys()
-                    .map(|v| v.to_string())
-                    .collect::<BTreeSet<String>>(),
-                [
-                    "RDX-Client-Version",
-                    "RDX-Client-Name",
-                    "accept",
-                    "content-Type",
-                    "user-agent"
-                ]
-                .into_iter()
-                .map(|s| s.to_owned())
-                .collect::<BTreeSet<String>>()
-            )
-        });
-        let sut = SUT::new(Arc::new(mock_antenna), NetworkID::Stokenet);
+        let mock_networking_driver =
+            MockNetworkingDriver::with_spy(200, (), |request| {
+                assert_eq!(
+                    request
+                        .headers
+                        .keys()
+                        .map(|v| v.to_string())
+                        .collect::<BTreeSet<String>>(),
+                    [
+                        "RDX-Client-Version",
+                        "RDX-Client-Name",
+                        "accept",
+                        "content-Type",
+                        "user-agent"
+                    ]
+                    .into_iter()
+                    .map(|s| s.to_owned())
+                    .collect::<BTreeSet<String>>()
+                )
+            });
+        let sut =
+            SUT::new(Arc::new(mock_networking_driver), NetworkID::Stokenet);
         let req = sut.current_epoch();
         drop(timeout(MAX, req).await.unwrap());
     }

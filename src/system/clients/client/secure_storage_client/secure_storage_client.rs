@@ -1,18 +1,14 @@
 use crate::prelude::*;
 
-/// An abstraction of an implementing WalletClients's secure storage, used by `Wallet` to
+/// An abstraction of an implementing host's secure storage, used to
 /// save and load models, most prominently `Profile` and `MnemonicWithPassphrase`.
 ///
 /// It uses the lower level CRUD trait `SecureStorageDriver` which works on bytes (Vec<u8>),
 /// by instead working with JSON.
-///
-/// The typical usage is that `Wallet` uses this to build even higher level API's that work
-/// with application level types such as `PrivateHierarchicalDeterministicFactorSource`, which
-/// apart from `MnemonicWithPassphrase` read from SecureStorageDriver using this `SecureStorageClient`,
-/// also has to load the DeviceFactorSource from Profile, given a FactorSourceID only.
 #[derive(Debug)]
 pub struct SecureStorageClient {
-    /// Low level CRUD traits injected from implementing Wallet Client, that works on bytes.
+    /// Low level CRUD traits that works on bytes, passed from host via BIOS when
+    /// booting the SargonOS
     driver: Arc<dyn SecureStorageDriver>,
 }
 
@@ -71,7 +67,7 @@ impl SecureStorageClient {
     /// Loads bytes from SecureStorageDriver and deserializes them into `T`.
     ///
     /// Returns Err if failed to load bytes or failed to deserialize the JSON into a `T`,
-    /// unlike `load` this method returns an error if `None` bytes were found.
+    /// unlike `load` this method returns given `err` if `None` bytes were found.
     pub async fn load_or<T>(
         &self,
         key: SecureStorageKey,
@@ -116,8 +112,7 @@ impl SecureStorageClient {
         self.load_profile_with_id(id).await.map(Some)
     }
 
-    /// Loads the active Profile if any, by first loading the active
-    /// profile id.
+    /// Loads the Profile with the given `profile_id`.
     pub async fn load_profile_with_id(
         &self,
         profile_id: ProfileID,

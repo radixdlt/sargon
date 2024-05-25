@@ -30,7 +30,7 @@ impl Profile {
 /// we just added it.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
 pub enum ChangeGatewayOutcome {
-    /// If the we did in fact change the gateway, and if the gateway was unknown
+    /// If we did in fact change the gateway, and if the gateway was unknown
     /// or known before it was added, i.e. `is_new` will be true iff the gateway
     /// was unknown before changing to it.
     DidChange {

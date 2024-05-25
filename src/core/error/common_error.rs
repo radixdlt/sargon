@@ -276,7 +276,7 @@ pub enum CommonError {
     #[error("Account Already Present {bad_value}")]
     AccountAlreadyPresent { bad_value: AccountAddress } = 10076,
 
-    #[error("Unable to acquire write lock for Profile inside Wallet")]
+    #[error("Unable to acquire write lock for Profile.")]
     UnableToAcquireWriteLockForProfile = 10077,
 
     #[error("Failed save Mnemonic to SecureStorageDriver with FactorSourceID: {bad_value}")]

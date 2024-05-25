@@ -1,9 +1,11 @@
 use crate::prelude::*;
 
-/// Representation of the Radix Wallet, contains a list of
-/// users Accounts, Personas, Authorized Dapps per network
-/// the user has used. It also contains all FactorSources,
-/// FactorInstances and wallet App preferences.
+/// The canonical representation of a users accounts, personas,
+/// authorized dapps, security factors, settings and more.
+///
+/// This large structure of values is called 'wallet backup data'
+/// in user facing tests in host applications, but internally at
+/// RDX Works known as "the Profile".
 ///
 /// ```
 /// extern crate sargon;

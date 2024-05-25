@@ -4,7 +4,6 @@ import ComposableArchitecture
 
 @Reducer
 public struct AccountsFeature {
-	@Dependency(AccountsClient.self) var accountsClient
 	
 	public init() {}
 	

@@ -142,10 +142,7 @@ impl From<(RetExecutionSummary, NetworkID)> for ExecutionSummary {
             ret.reserved_instructions
                 .into_iter()
                 .map(ReservedInstruction::from),
-            ret
-                // iOS Wallet only use `Vec<ResourceAddress>` for `presented_proofs` today,
-                // have to assert Android does the same.
-                .presented_proofs
+            ret.presented_proofs
                 .values()
                 .cloned()
                 .flat_map(|vec| filter_try_to_vec_network_aware(vec, n)),

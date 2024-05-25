@@ -31,7 +31,7 @@ pub fn new_account_address_sample_stokenet_other() -> AccountAddress {
 /// Returns `false` for all addresses created with `Ed25519PublicKey`s, i.e.
 /// for all accounts created by the Babylon Radix Wallets.
 /// Returns `true` for all addresses created with `Secp256k1PublicKey`s, i.e.
-/// imported from the Olympia Wallet.
+/// imported from the legacy Olympia desktop application.
 #[uniffi::export]
 pub fn account_address_is_legacy(address: &AccountAddress) -> bool {
     address.is_legacy_address()

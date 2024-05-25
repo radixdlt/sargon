@@ -49,7 +49,7 @@ impl SargonOS {
     #[allow(non_snake_case)]
     #[deprecated(
         since = "0.0.1",
-        note = "Wallet Clients SHOULD migrate to use more specialized methods on SargonOS instead, e.g. `createAndSaveNewAccount`. And SargonOS should be the SOLE object to perform the mutation and persisting."
+        note = "Hosts SHOULD migrate to use more specialized methods on SargonOS instead, e.g. `createAndSaveNewAccount`. And SargonOS should be the SOLE object to perform the mutation and persisting."
     )]
     pub async fn DEPRECATED_save_ffi_changed_profile(
         &self,

@@ -71,7 +71,7 @@ extension Drivers {
 		)
 	}
 	
-	static func withSecureStorage(_ entropyProvider: some EntropyProviderDriver) -> Drivers {
+	static func withEntropyProvider(_ entropyProvider: some EntropyProviderDriver) -> Drivers {
 		Drivers(
 			networking: .shared,
 			secureStorage: .shared,
@@ -123,7 +123,7 @@ extension Drivers {
 		)
 	}
 	
-	static func withEventBus(_ fileSystem: some FileSystemDriver) -> Drivers {
+	static func withFileSystem(_ fileSystem: some FileSystemDriver) -> Drivers {
 		Drivers(
 			networking: .shared,
 			secureStorage: .shared,
@@ -136,7 +136,7 @@ extension Drivers {
 		)
 	}
 	
-	static func withEventBus(_ unsafeStorage: some UnsafeStorageDriver) -> Drivers {
+	static func withUnsafeStorage(_ unsafeStorage: some UnsafeStorageDriver) -> Drivers {
 		Drivers(
 			networking: .shared,
 			secureStorage: .shared,

@@ -13,4 +13,8 @@ final class NetworkMethodTests: Test<NetworkMethod> {
 	func test_post_description() {
 		XCTAssertEqual(SUT.post.description, "POST")
 	}
+	
+	func test_head_description() {
+		XCTAssertEqual(SUT.head.description, "HEAD")
+	}
 }
