@@ -41,28 +41,66 @@ pub enum EventKind {
 }
 
 impl EventKind {
-    pub fn affect_current_accounts(&self) -> bool {
+    /// Returns collection of all different EventKinds
+    pub fn all() -> Vec<Self> {
+        all::<Self>().collect()
+    }
+
+    /// If hosts should fetch account list due to an action which triggered the
+    /// event of this kind to be emitted.
+    ///
+    /// E.g. if an account was saved into Profile, an event with the kind
+    /// `EventKind::AccountAdded` will be emitted, which hosts SHOULD react to
+    /// and thus fetch the account list and possibly update UI.
+    pub fn affects_current_accounts(&self) -> bool {
         use EventKind::*;
         matches!(
             *self,
             Booted
                 | ProfileImported
-                | ProfileSaved
                 | AccountAdded
                 | AccountsAdded
                 | AccountUpdated
+                | GatewayChangedCurrent
         )
     }
 
-    /// Returns collection of all different EventKinds
-    pub fn all() -> Vec<Self> {
-        all::<Self>().collect()
+    /// If hosts should check the current network due to an action which triggered the
+    /// event of this kind to be emitted.
+    ///
+    /// E.g. if the current gateway was changed by the user, an event with the kind
+    /// `EventKind::GatewayChangedCurrent` will be emitted, which hosts SHOULD react to
+    /// and check the network of the new gateway and possibly update UI.
+    pub fn affects_current_network(&self) -> bool {
+        use EventKind::*;
+        matches!(*self, Booted | ProfileImported | GatewayChangedCurrent)
+    }
+
+    /// If hosts should check saved gateways due to an action which triggered the
+    /// event of this kind to be emitted.
+    ///
+    /// E.g. if the current gateway was changed by the user, an event with the kind
+    /// `EventKind::GatewayChangedCurrent` will be emitted, which hosts SHOULD
+    /// react to and fetch saved gateways and possibly update UI.
+    pub fn affects_saved_gateways(&self) -> bool {
+        use EventKind::*;
+        matches!(*self, Booted | ProfileImported | GatewayChangedCurrent)
     }
 }
 
 #[uniffi::export]
-pub fn event_kind_affect_current_accounts(event_kind: EventKind) -> bool {
-    event_kind.affect_current_accounts()
+pub fn event_kind_affects_current_accounts(event_kind: EventKind) -> bool {
+    event_kind.affects_current_accounts()
+}
+
+#[uniffi::export]
+pub fn event_kind_affects_current_network(event_kind: EventKind) -> bool {
+    event_kind.affects_current_network()
+}
+
+#[uniffi::export]
+pub fn event_kind_affects_saved_gateways(event_kind: EventKind) -> bool {
+    event_kind.affects_saved_gateways()
 }
 
 #[uniffi::export]
@@ -103,15 +141,57 @@ mod tests {
     }
 
     #[test]
-    fn test_event_kind_affect_current_accounts() {
+    fn test_event_kind_affects_current_accounts() {
         use EventKind::*;
         SUT::all()
             .into_iter()
-            .map(|sut| (sut, sut.affect_current_accounts()))
+            .map(|sut| (sut, sut.affects_current_accounts()))
             .for_each(|(sut, affects)| match sut {
-                Booted | ProfileImported | ProfileSaved | AccountAdded
-                | AccountsAdded | AccountUpdated => assert!(affects),
-                _ => assert!(!affects),
+                Booted
+                | ProfileImported
+                | AccountAdded
+                | AccountsAdded
+                | AccountUpdated
+                | GatewayChangedCurrent => assert!(affects),
+                ProfileLastUsedOnOtherDevice | ProfileSaved => {
+                    assert!(!affects)
+                }
+            })
+    }
+
+    #[test]
+    fn event_kind_affects_current_network() {
+        use EventKind::*;
+        SUT::all()
+            .into_iter()
+            .map(|sut| (sut, sut.affects_current_network()))
+            .for_each(|(sut, affects)| match sut {
+                Booted | ProfileImported | GatewayChangedCurrent => {
+                    assert!(affects)
+                }
+                ProfileLastUsedOnOtherDevice
+                | ProfileSaved
+                | AccountAdded
+                | AccountsAdded
+                | AccountUpdated => assert!(!affects),
+            })
+    }
+
+    #[test]
+    fn event_kind_affects_saved_gateways() {
+        use EventKind::*;
+        SUT::all()
+            .into_iter()
+            .map(|sut| (sut, sut.affects_saved_gateways()))
+            .for_each(|(sut, affects)| match sut {
+                Booted | ProfileImported | GatewayChangedCurrent => {
+                    assert!(affects)
+                }
+                ProfileLastUsedOnOtherDevice
+                | ProfileSaved
+                | AccountAdded
+                | AccountsAdded
+                | AccountUpdated => assert!(!affects),
             })
     }
 }

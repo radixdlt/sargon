@@ -81,8 +81,7 @@ let package = Package(
 				.target(name: "Sargon"),
 				.product(name: "CustomDump", package: "swift-custom-dump"),
 			],
-			path: "apple/Tests",
-			swiftSettings: swiftSettings
+			path: "apple/Tests"
 		),
 	]
 )

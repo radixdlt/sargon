@@ -68,17 +68,6 @@ impl HasSampleValues for Event {
     }
 }
 
-impl Event {
-    pub fn affect_current_accounts(&self) -> bool {
-        self.kind().affect_current_accounts()
-    }
-}
-
-#[uniffi::export]
-pub fn event_affect_current_accounts(event: Event) -> bool {
-    event.affect_current_accounts()
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;

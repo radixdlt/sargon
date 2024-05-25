@@ -8,7 +8,6 @@ class EventBusDriverTests: DriverTest<EventBus> {
 	
 	func test() async throws {
 		let sut = SUT()
-
 		
 		let task = Task {
 			var notifications = Set<EventNotification>()
@@ -22,7 +21,7 @@ class EventBusDriverTests: DriverTest<EventBus> {
 		let os = try await TestOS(bios: bios)
 		try await os.createAccount()
 		let notifications = await task.value
-		XCTAssertEqual(Set(notifications.map(\.event.kind)), Set([.booted, .profileSaved, .addedAccount]))
+		XCTAssertEqual(Set(notifications.map(\.event.kind)), Set([.booted, .profileSaved, .accountAdded]))
 	}
 	
 }

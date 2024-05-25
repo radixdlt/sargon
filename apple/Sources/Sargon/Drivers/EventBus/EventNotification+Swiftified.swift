@@ -18,7 +18,7 @@ extension EventProfileModified {
 extension Event {
 	public var profileModified: EventProfileModified? {
 		switch self {
-		case let .modifiedProfile(change): return change
+		case let .profileModified(change): return change
 		default: return nil
 		}
 	}
