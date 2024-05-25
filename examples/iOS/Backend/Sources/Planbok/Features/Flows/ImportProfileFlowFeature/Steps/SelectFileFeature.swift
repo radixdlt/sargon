@@ -62,7 +62,7 @@ public struct SelectFileFeature {
 					defer { profileURL.stopAccessingSecurityScopedResource() }
 					let data = try Data(contentsOf: profileURL)
 					
-					let analyzed = Profile.analyzeFile(contents: data)
+					let analyzed = Profile.analyzeContents(data: data)
 					return .send(.delegate(.analyzedContentsOfFile(contents: data, analysis: analyzed)))
 					
 				} catch {

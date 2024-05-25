@@ -26,9 +26,15 @@ public final actor EventBus {
 	/// A stream we multicast on.
 	private let stream = AsyncThrowingPassthroughSubject<Element, any Error>()
 	private let subject: Subject
+#if DEBUG
 	public init() {
 		subject = .init()
 	}
+#else
+	private init() {
+		subject = .init()
+	}
+#endif
 }
 
 extension EventBus {

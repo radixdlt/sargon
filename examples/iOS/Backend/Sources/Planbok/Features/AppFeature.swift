@@ -12,29 +12,24 @@ public struct AppFeature {
 		
 		public init(isEmulatingFreshInstall: Bool = false) {
 			
-			let bios = BIOS.init(
-				drivers: .init(
-					networking: URLSession.shared,
-					secureStorage: Keychain(service: "rdx.works.planbok"),
-					entropyProvider: EntropyProvider.shared,
-					hostInfo: HostInfo(
-						appVersion: "0.0.1"
-					),
-					logging: Log.shared,
-					eventBus: EventBus.shared,
-					fileSystem: FileSystem.shared,
-					unsafeStorage: UnsafeStorage.init(
-						userDefaults: .init(
-							suiteName: "rdx.works"
-						)!
-					)
-				)
-			)
+			let drivers = Drivers(
+				networking: URLSession.shared,
+				   secureStorage: Keychain(service: "rdx.works.planbok"),
+				   entropyProvider: EntropyProvider.shared,
+				   hostInfo: HostInfo(
+					   appVersion: "0.0.1"
+				   ),
+				   logging: Log.shared,
+				   eventBus: EventBus.shared,
+				   fileSystem: FileSystem.shared,
+				   unsafeStorage: UnsafeStorage.init(
+					   userDefaults: .init(
+						   suiteName: "rdx.works"
+					   )!
+				   )
+			   )
 			
-			BIOS.settingShared(
-				shared: bios,
-				isEmulatingFreshInstall: isEmulatingFreshInstall
-			)
+			BIOS.creatingShared(drivers: drivers)
 			
 			self = .splash(.init(isEmulatingFreshInstall: true))
 		}

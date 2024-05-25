@@ -15,20 +15,34 @@ struct SargonOSAlreadyBooted: LocalizedError {
 }
 
 extension SargonOS {
-	internal nonisolated(unsafe) static var _shared: SargonOS!
 	
 	public nonisolated(unsafe) static var shared: SargonOS {
 		guard let shared = Self._shared else {
-			fatalError("OS not created, create it with `SargonOS.createdSharedBootingWith:bios`")
+			fatalError("`SargonOS.shared` not created, create it with `SargonOS.creatingShared:bootingWith` and pass it a `BIOS`.")
 		}
 		return shared
 	}
 	
 	/// Can be access later with `OS.shared`
 	@discardableResult
-	public static func createdSharedBootingWith(
-		bios: BIOS,
-		isEmulatingFreshInstall: Bool = false
+	public static func creatingShared(
+		bootingWith bios: BIOS
+	) async throws -> SargonOS {
+		try await _creatingShared(
+			bootingWith: bios,
+			isEmulatingFreshInstall: false
+		)
+	}
+	
+}
+
+extension SargonOS {
+	
+	/// Can be access later with `OS.shared`
+	@discardableResult
+	internal static func _creatingShared(
+		bootingWith bios: BIOS,
+		isEmulatingFreshInstall: Bool
 	) async throws -> SargonOS {
 		if !isEmulatingFreshInstall, _shared != nil {
 			throw SargonOSAlreadyBooted()
@@ -37,4 +51,8 @@ extension SargonOS {
 		Self._shared = shared
 		return shared
 	}
+	
+	internal nonisolated(unsafe) static var _shared: SargonOS!
+	
 }
+

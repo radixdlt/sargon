@@ -28,8 +28,8 @@ extension PersistenceReaderKey where Self == PersistenceKeyDefault<SargonKey<Acc
 extension PersistenceKeyDefault<SargonKey<AccountsForDisplay>> {
 	public static let sharedAccountsForDisplay = Self(
 		SargonKey(
-			on: .currentAccounts,
-			accessing: \.accountsForDisplayOnCurrentNetworkIdentified
+			accessing: \.accountsForDisplayOnCurrentNetworkIdentified,
+			fetchIf: \.affectsCurrentAccounts
 		),
 		.default
 	)
@@ -45,8 +45,8 @@ extension PersistenceKeyDefault: @unchecked Sendable {}
 extension PersistenceKeyDefault<SargonKey<NetworkID>> {
 	public static let sharedNetwork = Self(
 		SargonKey(
-			on: .currentGateway,
-			accessing: \.currentNetworkID
+			accessing: \.currentNetworkID,
+			fetchIf: \.affectsCurrentNetwork
 		),
 		.default
 	)
@@ -61,44 +61,44 @@ extension PersistenceReaderKey where Self == PersistenceKeyDefault<SargonKey<Sav
 extension PersistenceKeyDefault<SargonKey<SavedGateways>> {
 	public static let sharedSavedGateways = Self(
 		SargonKey(
-			on: .currentGateway,
-			accessing: \.gateways
+			accessing: \.gateways,
+			fetchIf: \.affectsSavedGateways
 		),
 			.default
 	)
 	
 }
 
-extension Set<EventKind> {
-	public static let currentGateway: Self = [.booted, .importedProfile, .gatewayChangedCurrent]
-	public static let currentAccounts: Self = [.booted, .importedProfile, .addedAccount, .addedAccounts, .updatedAccount, .gatewayChangedCurrent]
-}
 
 public struct SargonKey<Value>: Hashable, PersistenceReaderKey, Sendable {
 	public typealias LastValue = @Sendable () -> Value?
+	public typealias ShouldFetch = @Sendable (EventKind) -> Bool
 
 	private let lastValue: LastValue
-	private let fetchOnEvents: Set<EventKind>
+	private let shouldFetch: ShouldFetch
 	
 	public init(
-		on fetchOnEvents: Set<EventKind>,
-		lastValueWithOS: @escaping @Sendable (SargonOS) -> Value?
+		lastValueWithOS: @escaping @Sendable (SargonOS) -> Value?,
+		shouldFetch: @escaping ShouldFetch
 	) {
-		self.fetchOnEvents = fetchOnEvents
 		self.lastValue = {
 			lastValueWithOS(SargonOS.shared)
 		}
+		self.shouldFetch = shouldFetch
+		log.warning("SharedState for \(String(describing: Value.self)), hopefully just one per value kind")
 	}
 }
 
 extension SargonKey {
 	public init(
-		on fetchOnEvents: Set<EventKind>,
-		accessing keyPath: KeyPath<SargonOS, Value>
+		accessing lastValueWithOSKeyPath: KeyPath<SargonOS, Value>,
+		fetchIf fetchIfKeyPath: KeyPath<EventKind, Bool>
 	) {
-		self.init(on: fetchOnEvents, lastValueWithOS: { $0[keyPath: keyPath] })
+		self.init(
+			lastValueWithOS: { $0[keyPath: lastValueWithOSKeyPath] },
+			shouldFetch: { $0[keyPath: fetchIfKeyPath] }
+		)
 
-		log.warning("SharedState for \(String(describing: Value.self)), hopefully just one per value kind")
 	}
 }
 
@@ -115,9 +115,9 @@ extension SargonKey {
 	  initialValue: Value?,
 	  didSet: @Sendable @escaping (_ newValue: Value?) -> Void
 	) -> Shared<Value>.Subscription {
-		let task = Task { [fetchOnEvents = self.fetchOnEvents] in
+		let task = Task { [shouldFetch = self.shouldFetch] in
 			for await _ in await EventBus.shared.notifications().map(\.event.kind).filter({
-				fetchOnEvents.contains($0)
+				shouldFetch($0)
 			}) {
 				guard !Task.isCancelled else { return }
 				didSet(lastValue())
@@ -138,7 +138,7 @@ extension SargonKey {
 // MARK: Equatable
 extension SargonKey {
 	public static func == (lhs: SargonKey<Value>, rhs: SargonKey<Value>) -> Bool {
-		lhs.valueKind == rhs.valueKind && lhs.fetchOnEvents == rhs.fetchOnEvents
+		lhs.valueKind == rhs.valueKind && EventKind.allCases.map(lhs.shouldFetch) == EventKind.allCases.map(rhs.shouldFetch)
 	}
 }
 
@@ -146,6 +146,6 @@ extension SargonKey {
 extension SargonKey {
 	public func hash(into hasher: inout Hasher) {
 		hasher.combine(valueKind)
-		hasher.combine(fetchOnEvents)
+		hasher.combine(EventKind.allCases.map(shouldFetch))
 	}
 }

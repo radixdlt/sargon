@@ -10,6 +10,36 @@ import SargonUniFFI
 
 
 extension Drivers: @unchecked Sendable {}
+
+
+extension Drivers {
+	public convenience init(
+		bundle: Bundle,
+		userDefaultsSuite: String,
+		secureStorageDriver: SecureStorageDriver
+	) {
+		self.init(
+			appVersion: (bundle.infoDictionary?["CFBundleShortVersionString"] as? String) ?? "Unknown",
+			userDefaultsSuite: userDefaultsSuite,
+			secureStorageDriver: secureStorageDriver
+		)
+	}
+	
+	public convenience init(
+		appVersion: String,
+		userDefaultsSuite: String,
+		secureStorageDriver: SecureStorageDriver
+	) {
+		self.init(
+			secureStorage: secureStorageDriver,
+			hostInfo: HostInfo(appVersion: appVersion),
+			unsafeStorage: UnsafeStorage(
+				userDefaults: .init(suiteName: userDefaultsSuite)!
+			)
+		)
+	}
+}
+
 extension Drivers {
 	
 	public convenience init(

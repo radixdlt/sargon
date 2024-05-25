@@ -1,4 +1,4 @@
-import Sargon
+@testable import Sargon
 import ComposableArchitecture
 
 @Reducer
@@ -54,8 +54,8 @@ public struct SplashFeature {
 				struct SplashID: Hashable { }
 				return .run { [isEmulatingFreshInstall = state.isEmulatingFreshInstall] send in
 					
-					let os = try await SargonOS.createdSharedBootingWith(
-						bios: BIOS.shared,
+					let os = try await SargonOS._creatingShared(
+						bootingWith: BIOS.shared,
 						isEmulatingFreshInstall: isEmulatingFreshInstall
 					)
 					await send(

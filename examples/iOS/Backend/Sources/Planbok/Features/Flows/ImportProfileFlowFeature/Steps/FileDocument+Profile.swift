@@ -33,7 +33,7 @@ extension ExportableProfileFile {
 	}
 
 	public init(data: Data) throws {
-		switch Profile.analyzeFile(contents: data) {
+		switch Profile.analyzeContents(data: data) {
 		case .encryptedProfile:
 			self = .encrypted(data)
 		case .notProfile:
@@ -48,7 +48,7 @@ extension ExportableProfileFile {
 
 		switch self {
 		case let .plaintext(plaintext):
-			let jsonData = plaintext.profileSnapshot()
+			let jsonData = plaintext.jsonData()
 			return FileWrapper(regularFileWithContents: jsonData)
 		case let .encrypted(encryptedSnapshot):
 			return FileWrapper(regularFileWithContents: encryptedSnapshot)
