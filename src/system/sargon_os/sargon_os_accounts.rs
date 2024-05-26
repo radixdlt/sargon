@@ -10,7 +10,7 @@ impl SargonOS {
     /// Returns the non-hidden accounts on the current network, empty if no accounts
     /// on the network
     pub fn accounts_on_current_network(&self) -> Accounts {
-        self.profile_holder.accounts_on_current_network().clone()
+        self.profile_holder.accounts_on_current_network()
     }
 
     /// Returns the non-hidden accounts on the current network as `AccountForDisplay`
@@ -35,15 +35,11 @@ impl SargonOS {
     pub async fn create_unsaved_unnamed_mainnet_account(
         &self,
     ) -> Result<Account> {
-        let accounts = self
-            .batch_create_unsaved_accounts(
-                NetworkID::Mainnet,
-                1,
-                "Unnamed".to_owned(),
-            )
-            .await?;
-
-        Ok(accounts.first().unwrap().clone())
+        self.create_unsaved_account(
+            NetworkID::Mainnet,
+            DisplayName::new("Unnamed").unwrap(),
+        )
+        .await
     }
 
     /// Uses `create_unsaved_account` specifying `NetworkID::Mainnet`.
