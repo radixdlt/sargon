@@ -9,8 +9,6 @@ import SwiftUI
 import Planbok
 import ComposableArchitecture
 
-extension BIOS: ObservableObject {}
-
 @main
 struct PlanbokApp: App {
 

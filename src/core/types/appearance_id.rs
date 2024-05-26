@@ -23,16 +23,16 @@ pub struct AppearanceID {
 
 impl AppearanceID {
     /// The number of different appearances
-    pub const MAX: u8 = 11;
+    pub const COUNT: u8 = 12;
     pub fn new(value: u8) -> Result<Self> {
-        if value > Self::MAX {
+        if value >= Self::COUNT {
             return Err(CommonError::InvalidAppearanceID { bad_value: value });
         }
         Ok(Self { value })
     }
 
     pub fn from_number_of_accounts_on_network(n: usize) -> Self {
-        Self::new((n % ((Self::MAX + 1) as usize)) as u8).unwrap()
+        Self::new((n % (Self::COUNT as usize)) as u8).unwrap()
     }
 
     // Probably want this as a macro... but it is just not worth it, why I boilerplate it.
@@ -41,7 +41,7 @@ impl AppearanceID {
     }
 
     pub fn all() -> Vec<Self> {
-        (0..=Self::MAX).map(Self::declare).collect_vec()
+        (0..Self::COUNT).map(Self::declare).collect_vec()
     }
 }
 
@@ -93,8 +93,8 @@ mod tests {
     }
 
     #[test]
-    fn len_of_all_is_max_plus_one() {
-        assert_eq!(SUT::all().len(), SUT::MAX as usize + 1);
+    fn len_is_count() {
+        assert_eq!(SUT::all().len(), SUT::COUNT as usize);
     }
 
     #[test]
@@ -151,6 +151,6 @@ mod tests {
             .into_iter()
             .map(|a| a.value)
             .collect::<HashSet<_>>();
-        assert_eq!(set.len(), (SUT::MAX as usize) + 1);
+        assert_eq!(set.len(), SUT::COUNT as usize);
     }
 }
