@@ -15,7 +15,6 @@ extension EventKind {
 		eventKindAffectsCurrentAccounts(eventKind: self)
 	}
 	
-	
 	public var affectsCurrentNetwork: Bool {
 		eventKindAffectsCurrentNetwork(eventKind: self)
 	}

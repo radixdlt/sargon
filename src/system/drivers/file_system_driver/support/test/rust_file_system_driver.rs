@@ -23,29 +23,30 @@ pub(crate) fn path_from_str(str: String, require: bool) -> Result<PathBuf> {
 #[async_trait::async_trait]
 impl FileSystemDriver for RustFileSystemDriver {
     async fn load_from_file(&self, path: String) -> Result<Option<BagOfBytes>> {
-        let path = path_from_str(path, true)?;
-        match fs::read(path) {
+        let path_buf = path_from_str(path.clone(), true)?;
+        match fs::read(path_buf) {
             Err(e) => match e.kind() {
                 std::io::ErrorKind::NotFound => Ok(None),
-                _ => Err(CommonError::Unknown),
+                _ => Err(CommonError::FailedToLoadFile { path }),
             },
             Ok(contents) => Ok(Some(BagOfBytes::from(contents))),
         }
     }
 
     async fn save_to_file(&self, path: String, data: BagOfBytes) -> Result<()> {
-        let path = path_from_str(path, false)?;
-        fs::write(path, data.as_ref()).map_err(|_| CommonError::Unknown)?;
+        let path_buf = path_from_str(path.clone(), false)?;
+        fs::write(path_buf, data.as_ref())
+            .map_err(|_| CommonError::FailedToSaveFile { path })?;
         Ok(())
     }
 
     async fn delete_file(&self, path: String) -> Result<()> {
-        let path = path_from_str(path, false)?;
-        match fs::remove_file(path) {
+        let path_buf = path_from_str(path.clone(), false)?;
+        match fs::remove_file(path_buf) {
             Ok(_) => Ok(()),
             Err(e) => match e.kind() {
                 std::io::ErrorKind::NotFound => Ok(()),
-                _ => Err(CommonError::Unknown),
+                _ => Err(CommonError::FailedToDeleteFile { path }),
             },
         }
     }
@@ -101,7 +102,12 @@ mod tests {
     async fn test_load_fail() {
         let sut = SUT::new();
         let res = sut.load_from_file("/".to_owned()).await;
-        assert_eq!(res, Err(CommonError::Unknown));
+        assert_eq!(
+            res,
+            Err(CommonError::FailedToLoadFile {
+                path: "/".to_owned()
+            })
+        );
     }
 
     #[actix_rt::test]
@@ -114,21 +120,20 @@ mod tests {
     #[actix_rt::test]
     async fn test_save_to_root_is_err() {
         let sut = SUT::new();
-        let file = file_in_dir(Path::new("/"));
-        let res = sut.save_to_file(file, contents()).await;
-        assert_eq!(res, Err(CommonError::Unknown));
+        let path = file_in_dir(Path::new("/"));
+        let res = sut.save_to_file(path.clone(), contents()).await;
+        assert_eq!(res, Err(CommonError::FailedToSaveFile { path }));
     }
 
     #[actix_rt::test]
     async fn test_delete_dir_does_not_work() {
         let sut = SUT::new();
-        let res = sut
-            .delete_file(String::from(
-                Path::new(env!("CARGO_MANIFEST_DIR"))
-                    .join("target/")
-                    .to_string_lossy(),
-            ))
-            .await;
-        assert_eq!(res, Err(CommonError::Unknown));
+        let path = String::from(
+            Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join("target/")
+                .to_string_lossy(),
+        );
+        let res = sut.delete_file(path.clone()).await;
+        assert_eq!(res, Err(CommonError::FailedToDeleteFile { path }));
     }
 }

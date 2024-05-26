@@ -9,11 +9,6 @@ import Foundation
 import SargonUniFFI
 
 #if DEBUG
-extension SecureStorageDriver where Self == Insecure︕！TestOnly︕！Ephemeral︕！SecureStorage {
-	public init(keychainService: String) {
-		self.init(keychainService: keychainService)
-	}
-}
 
 /// ‼️ NEVER USE IN PRODUCTION ‼️
 /// An INSECURE ephemeral storage conforming to `SecureStorageDriver` meant

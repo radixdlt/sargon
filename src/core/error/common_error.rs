@@ -529,6 +529,21 @@ pub enum CommonError {
 
     #[error("Tried to replace profile with one with a different ProfileID than the current one. Use `import_profile` instead.")]
     TriedToUpdateProfileWithOneWithDifferentID = 10148,
+
+    #[error("Invalid path, bad value: '{bad_value}'")]
+    InvalidPath { bad_value: String } = 10149,
+
+    #[error("Failed to save file: '{path}'")]
+    FailedToSaveFile { path: String } = 10150,
+
+    #[error("Failed to load file: '{path}'")]
+    FailedToLoadFile { path: String } = 10151,
+
+    #[error("Failed to delete file: '{path}'")]
+    FailedToDeleteFile { path: String } = 10152,
+
+    #[error("Not permission enough to access file: '{path}'")]
+    NotPermissionToAccessFile { path: String } = 10153,
 }
 
 #[uniffi::export]

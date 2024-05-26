@@ -17,7 +17,9 @@ impl FileSystemClient {
 pub(crate) fn path_to_string(path: impl AsRef<Path>) -> Result<String> {
     path.as_ref()
         .to_str()
-        .ok_or(CommonError::Unknown)
+        .ok_or(CommonError::InvalidPath {
+            bad_value: format!("{:?}", path.as_ref()),
+        })
         .map(|s| s.to_owned())
 }
 
@@ -129,7 +131,12 @@ mod tests {
     async fn test_load_fail() {
         let sut = SUT::test();
         let res = sut.load_from_file("/".to_owned()).await;
-        assert_eq!(res, Err(CommonError::Unknown));
+        assert_eq!(
+            res,
+            Err(CommonError::FailedToLoadFile {
+                path: "/".to_owned()
+            })
+        );
     }
 
     #[actix_rt::test]
@@ -142,21 +149,25 @@ mod tests {
     #[actix_rt::test]
     async fn test_save_to_root_is_err() {
         let sut = SUT::test();
-        let file = file_in_dir(Path::new("/"));
-        let res = sut.save_to_file(file, contents()).await;
-        assert_eq!(res, Err(CommonError::Unknown));
+        let path = file_in_dir(Path::new("/"));
+        let res = sut.save_to_file(path.clone(), contents()).await;
+        assert_eq!(
+            res,
+            Err(CommonError::FailedToSaveFile {
+                path: path.to_str().unwrap().to_owned()
+            })
+        );
     }
 
     #[actix_rt::test]
     async fn test_delete_dir_does_not_work() {
+        let path = String::from(
+            Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join("target/")
+                .to_string_lossy(),
+        );
         let sut = SUT::test();
-        let res = sut
-            .delete_file(String::from(
-                Path::new(env!("CARGO_MANIFEST_DIR"))
-                    .join("target/")
-                    .to_string_lossy(),
-            ))
-            .await;
-        assert_eq!(res, Err(CommonError::Unknown));
+        let res = sut.delete_file(path.clone()).await;
+        assert_eq!(res, Err(CommonError::FailedToDeleteFile { path }));
     }
 }

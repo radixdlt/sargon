@@ -45,8 +45,7 @@ extension FileSystem {
 	) throws -> T {
 		let url = URL(file: path)
 		guard url.startAccessingSecurityScopedResource() else {
-			// FIXME CYON change to specific error
-			throw CommonError.Unknown
+			throw CommonError.NotPermissionToAccessFile(path: path)
 		}
 		defer { url.stopAccessingSecurityScopedResource() }
 		return try io(url)

@@ -195,3 +195,32 @@ mod tests {
             })
     }
 }
+
+mod uniffi_tests {
+
+    use super::*;
+    use crate::EventKind::{
+        AccountAdded, AccountUpdated, AccountsAdded, Booted, ProfileImported,
+        ProfileSaved,
+    };
+
+    #[test]
+    fn test_event_kind_all() {
+        assert!(event_kind_all().into_iter().contains(&Booted));
+    }
+
+    #[test]
+    fn test_event_kind_affects_current_accounts() {
+        assert!(event_kind_affects_current_accounts(Booted));
+    }
+
+    #[test]
+    fn test_event_kind_affects_current_network() {
+        assert!(event_kind_affects_current_network(Booted));
+    }
+
+    #[test]
+    fn test_event_kind_affects_saved_gateways() {
+        assert!(event_kind_affects_saved_gateways(Booted));
+    }
+}
