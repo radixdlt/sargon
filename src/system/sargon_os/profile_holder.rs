@@ -72,7 +72,7 @@ impl ProfileHolder {
         self.profile
             .try_read()
             .map(access)
-            .expect("Implementing Wallet clients should not read and write Profile from Wallet from multiple threads.")
+            .expect("Implementing hosts should not read and write Profile from multiple threads.")
     }
 
     /// Sets the profile held by this ProfileHolder to `profile`.

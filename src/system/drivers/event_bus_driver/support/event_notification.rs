@@ -18,12 +18,12 @@ impl EventNotification {
         }
     }
 
-    pub fn profile_changed(change: EventProfileModified) -> Self {
+    pub fn profile_modified(change: EventProfileModified) -> Self {
         Self::new(Event::profile_modified(change))
     }
 
     pub fn profile_used_on_other_device(other_device: DeviceInfo) -> Self {
-        Self::new(Event::profile_last_used_on_other_device(other_device))
+        Self::new(Event::profile_used_on_other_device(other_device))
     }
 }
 

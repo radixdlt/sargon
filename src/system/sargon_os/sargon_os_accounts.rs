@@ -186,7 +186,7 @@ impl SargonOS {
         });
 
         self.event_bus
-            .emit(EventNotification::profile_changed(
+            .emit(EventNotification::profile_modified(
                 EventProfileModified::AddedAccount { address },
             ))
             .await;
@@ -210,7 +210,7 @@ impl SargonOS {
         self.add_accounts_without_emitting_event(accounts).await?;
 
         self.event_bus
-            .emit(EventNotification::profile_changed(
+            .emit(EventNotification::profile_modified(
                 EventProfileModified::AddedAccounts { addresses },
             ))
             .await;
@@ -237,7 +237,7 @@ impl SargonOS {
         .await?;
 
         self.event_bus
-            .emit(EventNotification::profile_changed(
+            .emit(EventNotification::profile_modified(
                 EventProfileModified::UpdatedAccount {
                     address: updated.address,
                 },

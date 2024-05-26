@@ -4,7 +4,7 @@ use crate::EventKind::{
 };
 
 /// SargonOS event contain information about something of interest that has
-/// happened to the SargonOS, most prominently to the Profile, host device
+/// happened to the SargonOS, most prominently to the Profile. Host device
 /// can subscribe to these events by use of `EventBusDriver`.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Enum)]
 pub enum Event {
@@ -26,7 +26,7 @@ pub enum Event {
     ProfileModified { change: EventProfileModified },
 
     /// The Profile was last used on another device, user ought to claim it.
-    ProfileLastUsedOnOtherDevice(DeviceInfo),
+    ProfileUsedOnOtherDevice(DeviceInfo),
 }
 
 impl Event {
@@ -34,8 +34,8 @@ impl Event {
         Self::ProfileModified { change }
     }
 
-    pub fn profile_last_used_on_other_device(device: DeviceInfo) -> Self {
-        Self::ProfileLastUsedOnOtherDevice(device)
+    pub fn profile_used_on_other_device(device: DeviceInfo) -> Self {
+        Self::ProfileUsedOnOtherDevice(device)
     }
 }
 
@@ -47,8 +47,8 @@ impl HasEventKind for Event {
                 EventKind::GatewayChangedCurrent
             }
             Self::ProfileModified { change } => change.kind(),
-            Self::ProfileLastUsedOnOtherDevice(_) => {
-                EventKind::ProfileLastUsedOnOtherDevice
+            Self::ProfileUsedOnOtherDevice(_) => {
+                EventKind::ProfileUsedOnOtherDevice
             }
             Self::ProfileImported { id: _ } => EventKind::ProfileImported,
             Self::ProfileSaved => EventKind::ProfileSaved,
@@ -89,8 +89,8 @@ mod tests {
     #[test]
     fn last_used_on_other_device() {
         let device = DeviceInfo::sample();
-        let sut = SUT::profile_last_used_on_other_device(device.clone());
-        assert_eq!(sut, SUT::ProfileLastUsedOnOtherDevice(device))
+        let sut = SUT::profile_used_on_other_device(device.clone());
+        assert_eq!(sut, SUT::ProfileUsedOnOtherDevice(device))
     }
 
     #[test]

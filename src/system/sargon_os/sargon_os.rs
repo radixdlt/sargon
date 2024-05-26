@@ -294,7 +294,7 @@ mod tests {
         // ASSERT
         assert_eq!(
             add_res,
-            Err(CommonError::ProfileLastUsedOnOtherDevice {
+            Err(CommonError::ProfileUsedOnOtherDevice {
                 other_device_id: profile.header.last_used_on_device.id,
                 this_device_id: device_info.id
             })
@@ -429,13 +429,10 @@ mod tests {
             .unwrap();
 
         // ASSERT
-        assert!(
-            event_bus_driver
-                .recorded()
-                .iter()
-                .any(|e| e.event.kind()
-                    == EventKind::ProfileLastUsedOnOtherDevice)
-        );
+        assert!(event_bus_driver
+            .recorded()
+            .iter()
+            .any(|e| e.event.kind() == EventKind::ProfileUsedOnOtherDevice));
     }
 
     #[actix_rt::test]

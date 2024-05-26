@@ -519,7 +519,7 @@ pub enum CommonError {
     UnableToAddAllAccountsDuplicatesFound = 10145,
 
     #[error("Profile last used on other device {other_device_id} (this device: {this_device_id})")]
-    ProfileLastUsedOnOtherDevice {
+    ProfileUsedOnOtherDevice {
         other_device_id: DeviceID,
         this_device_id: DeviceID,
     } = 10146,

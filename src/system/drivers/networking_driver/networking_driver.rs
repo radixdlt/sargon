@@ -1,8 +1,7 @@
 use crate::prelude::*;
 
-/// Trait for executing network requests, to be  implemented on the FFI side
-/// (iOS/Android), so that Sargon can with some HTTP client perform make network
-/// requests.
+/// Trait for executing network requests, to be implemented by hosts, so that
+/// Sargon can make network requests with some HTTP client.
 #[uniffi::export(with_foreign)]
 #[async_trait::async_trait]
 pub trait NetworkingDriver: Send + Sync + std::fmt::Debug {

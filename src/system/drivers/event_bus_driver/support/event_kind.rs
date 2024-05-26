@@ -37,7 +37,7 @@ pub enum EventKind {
     ProfileImported,
 
     /// Profile was last used on another device.
-    ProfileLastUsedOnOtherDevice,
+    ProfileUsedOnOtherDevice,
 }
 
 impl EventKind {
@@ -153,7 +153,7 @@ mod tests {
                 | AccountsAdded
                 | AccountUpdated
                 | GatewayChangedCurrent => assert!(affects),
-                ProfileLastUsedOnOtherDevice | ProfileSaved => {
+                ProfileUsedOnOtherDevice | ProfileSaved => {
                     assert!(!affects)
                 }
             })
@@ -169,7 +169,7 @@ mod tests {
                 Booted | ProfileImported | GatewayChangedCurrent => {
                     assert!(affects)
                 }
-                ProfileLastUsedOnOtherDevice
+                ProfileUsedOnOtherDevice
                 | ProfileSaved
                 | AccountAdded
                 | AccountsAdded
@@ -187,7 +187,7 @@ mod tests {
                 Booted | ProfileImported | GatewayChangedCurrent => {
                     assert!(affects)
                 }
-                ProfileLastUsedOnOtherDevice
+                ProfileUsedOnOtherDevice
                 | ProfileSaved
                 | AccountAdded
                 | AccountsAdded
