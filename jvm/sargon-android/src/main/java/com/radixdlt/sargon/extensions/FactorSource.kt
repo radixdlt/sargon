@@ -7,7 +7,6 @@ import com.radixdlt.sargon.FactorSourceId
 import com.radixdlt.sargon.FactorSourceKind
 import com.radixdlt.sargon.LedgerHardwareWalletFactorSource
 import com.radixdlt.sargon.MnemonicWithPassphrase
-import com.radixdlt.sargon.WalletClientModel
 import com.radixdlt.sargon.deviceFactorSourceIsMainBdfs
 import com.radixdlt.sargon.factorSourceSupportsBabylon
 import com.radixdlt.sargon.factorSourceSupportsOlympia

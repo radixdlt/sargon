@@ -38,7 +38,6 @@ import com.radixdlt.sargon.Profile
 import com.radixdlt.sargon.ProfileNetwork
 import com.radixdlt.sargon.SecureStorageDriver
 import com.radixdlt.sargon.Wallet
-import com.radixdlt.sargon.WalletClientModel
 import com.radixdlt.sargon.android.ui.theme.SargonAndroidTheme
 import com.radixdlt.sargon.annotation.UsesSampleValues
 import com.radixdlt.sargon.extensions.toBagOfBytes

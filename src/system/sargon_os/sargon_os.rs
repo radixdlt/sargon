@@ -93,13 +93,7 @@ impl SargonOS {
     pub(crate) async fn new_profile_and_bdfs(
         &self,
     ) -> Result<(Profile, PrivateHierarchicalDeterministicFactorSource)> {
-        Self::create_new_profile_and_bdfs(&self.clients).await
-    }
-
-    async fn create_new_profile_and_bdfs(
-        clients: &Clients,
-    ) -> Result<(Profile, PrivateHierarchicalDeterministicFactorSource)> {
-        Self::create_new_profile_with_bdfs(clients, None).await
+        Self::create_new_profile_with_bdfs(&self.clients, None).await
     }
 
     async fn create_new_profile_with_bdfs(

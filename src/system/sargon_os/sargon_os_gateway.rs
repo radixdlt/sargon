@@ -25,7 +25,7 @@ impl SargonOS {
         self.profile_holder.gateways().clone()
     }
 
-    /// Returns the ProfileNetwork corresponding to the network ID set by the
+    /// Returns the `ProfileNetwork` corresponding to the network ID set by the
     /// current gateway.
     pub fn current_network(&self) -> ProfileNetwork {
         self.profile_holder.current_network().clone()
@@ -39,7 +39,7 @@ impl SargonOS {
 impl SargonOS {
     /// Changes the current Gateway to `to`, if it is not already the current.
     /// Returns the outcome of the change, if we did in fact switch (current != to),
-    /// and if we switched then if `to` as new.
+    /// and if we switched then if `to` is new.
     ///
     /// If we did in fact change current, an `EventNotification` is emitted.
     ///

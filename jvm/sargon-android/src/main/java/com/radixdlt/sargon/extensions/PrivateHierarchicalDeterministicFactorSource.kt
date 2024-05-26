@@ -4,7 +4,6 @@ import com.radixdlt.sargon.DeviceInfo
 import com.radixdlt.sargon.MnemonicWithPassphrase
 import com.radixdlt.sargon.NonEmptyMax32Bytes
 import com.radixdlt.sargon.PrivateHierarchicalDeterministicFactorSource
-import com.radixdlt.sargon.WalletClientModel
 import com.radixdlt.sargon.newPrivateHdFactorSourceBabylon
 import com.radixdlt.sargon.newPrivateHdFactorSourceBabylonFromMnemonicWithPassphrase
 import com.radixdlt.sargon.newPrivateHdFactorSourceOlympiaFromMnemonicWithPassphrase
