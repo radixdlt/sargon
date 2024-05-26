@@ -16,6 +16,8 @@ impl SargonOS {
         was_needed
     }
 
+    /// "Claims" the `profile`, meaning the last_used_on_device is updated in the
+    /// header
     pub async fn claim_profile(&self, profile: &mut Profile) -> Result<()> {
         debug!("Claiming profile, id: {}", &profile.id());
         let device_info = self.device_info().await?;
@@ -31,6 +33,7 @@ impl SargonOS {
 
 #[uniffi::export]
 impl SargonOS {
+    /// Checks if current Profile contains any `ProfileNetwork`s.
     pub fn has_any_network(&self) -> bool {
         self.profile_holder
             .access_profile_with(|p| !p.networks.is_empty())
@@ -42,6 +45,12 @@ impl SargonOS {
             .access_profile_with(|p| p.has_any_account_on_any_network())
     }
 
+    /// Returns the current profile in full. This is a COSTLY operation
+    /// and hosts SHOULD NOT do it lightheartedly, prefer using more specific
+    /// reading operations such as `os.current_network_id` or `os.accounts_for_display_on_current_network` etc, which are cheap operations compared
+    /// to using this.
+    ///
+    /// In the future will will most likely deprecate this method.
     pub fn profile(&self) -> Profile {
         self.profile_holder.profile()
     }
@@ -67,6 +76,11 @@ impl SargonOS {
         .await
     }
 
+    /// Imports the `profile`, claims it, set it as active (current) one and
+    /// saves it into secure storage (with the claim modification).
+    ///
+    /// # Emits Event
+    /// Emits `EventNotification::new(Event::ProfileImported))` event if successful.
     pub async fn import_profile(&self, profile: Profile) -> Result<()> {
         let imported_id = profile.id();
         debug!("Importing profile, id: {}", imported_id);
@@ -99,13 +113,20 @@ impl SargonOS {
         Ok(())
     }
 
+    /// Claims the active profile, meaning the `last_used_on_device` in `header`
+    /// is updated.
+    ///
     /// Returns `true` if the profile was changed (i.e. if claim was indeed needed),
     /// `false`` otherwise.
     pub async fn claim_active_profile(&self) -> Result<bool> {
         let device_info = self.device_info().await?;
-        self.maybe_validate_ownership_update_profile_with(false, |mut p| {
-            Ok(Self::claim_provided_profile(&mut p, device_info.clone()))
-        })
+
+        self.maybe_validate_ownership_update_profile_with(
+            false, // we do NOT validate ownership, since this method is claiming
+            |mut p| {
+                Ok(Self::claim_provided_profile(&mut p, device_info.clone()))
+            },
+        )
         .await
     }
 
@@ -143,6 +164,12 @@ impl SargonOS {
 }
 
 impl SargonOS {
+    /// Returns `Err`` if the **active** profile is not 'owned by host',
+    /// meaning `profile.header.last_used_on_device.id != device_info.id`.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileUsedOnOtherDevice` if `profile` is not 'owned by
+    /// host'.
     pub(crate) async fn validate_is_allowed_to_mutate_active_profile(
         &self,
     ) -> Result<()> {
@@ -153,6 +180,12 @@ impl SargonOS {
         .await
     }
 
+    /// Returns `Err` if the **provided** `profile` is not 'owned by host',
+    /// meaning `profile.header.last_used_on_device.id != device_info.id`.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileUsedOnOtherDevice` if `profile` is not 'owned by
+    /// host'.
     pub(crate) async fn validate_is_allowed_to_update_provided_profile(
         clients: &Clients,
         profile: &Profile,
@@ -164,6 +197,14 @@ impl SargonOS {
         Ok(())
     }
 
+    /// Checks if the **provided** `profile` is not 'owned by host',
+    /// meaning `profile.header.last_used_on_device.id != device_info.id`,
+    /// and if `err_on_lack_of_ownership` an Err is returns, otherwise `Ok(false)`
+    /// is returned.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileUsedOnOtherDevice` if `profile` is not 'owned by
+    /// host'.
     pub(crate) async fn check_is_allowed_to_update_provided_profile(
         clients: &Clients,
         profile: &Profile,
@@ -197,6 +238,10 @@ impl SargonOS {
 
     /// Validates ownership of Profile, then updates and **saves** it to
     /// secure storage, after mutating it with `mutate`.
+    ///
+    /// # Emits
+    /// Emits `Event::ProfileSaved` after having successfully written the JSON
+    /// of the active profile to secure storage.
     pub(crate) async fn update_profile_with<F, R>(&self, mutate: F) -> Result<R>
     where
         F: Fn(RwLockWriteGuard<'_, Profile>) -> Result<R>,
@@ -211,6 +256,10 @@ impl SargonOS {
     ///
     /// The only function to pass `false` to the `validate_ownership` parameter
     /// is the `SargonOS::claim_active_profile` method.
+    ///
+    /// # Emits
+    /// Emits `Event::ProfileSaved` after having successfully written the JSON
+    /// of the active profile to secure storage.
     pub(crate) async fn maybe_validate_ownership_update_profile_with<F, R>(
         &self,
         validate_ownership: bool, // should only ever pass `false` from `claim`
@@ -233,10 +282,20 @@ impl SargonOS {
         Ok(res)
     }
 
+    ///  Saves the **active** profile into secure storage, if profile is 'owned by host'.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileSaved` after having successfully written the JSON
+    /// of the active profile to secure storage.
     pub(crate) async fn save_existing_profile(&self) -> Result<()> {
         self.save_profile(&self.profile()).await
     }
 
+    ///  Saves **provided** `profile`` into secure storage, if it's 'owned by host'.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileSaved` after having successfully written the JSON
+    /// of the active profile to secure storage.
     pub(crate) async fn save_profile(&self, profile: &Profile) -> Result<()> {
         self.validate_is_allowed_to_mutate_active_profile().await?;
 

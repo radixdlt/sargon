@@ -22,6 +22,8 @@ impl SargonOS {
             .await
     }
 
+    /// Returns the "main Babylon" `DeviceFactorSource` of the current account as
+    /// a `DeviceFactorSource`.
     pub fn bdfs(&self) -> DeviceFactorSource {
         self.profile_holder.access_profile_with(|p| p.bdfs())
     }

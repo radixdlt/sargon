@@ -50,10 +50,11 @@ impl SargonOS {
         self.create_unsaved_account(NetworkID::Mainnet, name).await
     }
 
-    /// Creates a new non securified account **WITHOUT** add it to Profile, using the *main* "Babylon"
-    /// `DeviceFactorSource` and the "next" index for this FactorSource as derivation path.
+    /// Creates a new non securified account **WITHOUT** adding it to Profile,
+    /// using the *main* "Babylon" `DeviceFactorSource` and the "next" index for
+    /// this FactorSource as derivation path.
     ///
-    /// If you want to add it to Profile, call `wallet.add_account(account)`
+    /// If you want to add it to Profile, call `os.add_account(account)`.
     pub async fn create_unsaved_account(
         &self,
         network_id: NetworkID,
@@ -68,6 +69,9 @@ impl SargonOS {
     }
 
     /// Create a new mainnet Account named "Unnamed" and adds it to the active Profile.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileModified { change: EventProfileModified::AddedAccount }`
     pub async fn create_and_save_new_unnamed_mainnet_account(
         &self,
     ) -> Result<Account> {
@@ -78,6 +82,9 @@ impl SargonOS {
     }
 
     /// Create a new mainnet Account and adds it to the active Profile.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileModified { change: EventProfileModified::AddedAccount }`
     pub async fn create_and_save_new_mainnet_account(
         &self,
         name: DisplayName,
@@ -87,6 +94,9 @@ impl SargonOS {
     }
 
     /// Create a new Account and adds it to the active Profile.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileModified { change: EventProfileModified::AddedAccount }`
     pub async fn create_and_save_new_account(
         &self,
         network_id: NetworkID,
@@ -104,6 +114,11 @@ impl SargonOS {
     }
 
     /// The account names will be `<name_prefix> <index>`
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileModified { change: EventProfileModified::AddedAccount }`
+    ///
+    /// And also emits
     pub async fn batch_create_many_accounts_then_save_once(
         &self,
         count: u16,
@@ -161,12 +176,20 @@ impl SargonOS {
     /// Returns `Ok(())` if the `account` was new and successfully added. If
     /// saving failed or if the account was already present in Profile, an
     /// error is returned.
+    ///
+    /// # Emits Events
+    /// Emits `Event::ProfileSaved` after having successfully written the JSON
+    /// of the active profile to secure storage.
+    ///
+    /// And also emits `Event::ProfileModified { change: EventProfileModified::AddedAccounts { addresses } }`
     pub async fn add_account(&self, account: Account) -> Result<()> {
         let address = account.address;
 
         debug!("Adding account address: {} to profile", address);
-        self.add_accounts_without_emitting_event(Accounts::just(account))
-            .await?;
+        self.add_accounts_without_emitting_account_added_event(Accounts::just(
+            account,
+        ))
+        .await?;
 
         self.profile_holder.access_profile_with(|p| {
             let accounts_on_network = p
@@ -196,6 +219,12 @@ impl SargonOS {
     /// Returns `Ok(())` if the `accounts` were new and successfully added. If
     /// saving failed or if the accounts were already present in Profile, an
     /// error is returned.
+    ///
+    /// # Emits Events
+    /// Emits `Event::ProfileSaved` after having successfully written the JSON
+    /// of the active profile to secure storage.
+    ///
+    /// And also emits `Event::ProfileModified { change: EventProfileModified::AddedAccounts { addresses } }`
     pub async fn add_accounts(&self, accounts: Accounts) -> Result<()> {
         let addresses = accounts
             .clone()
@@ -203,7 +232,8 @@ impl SargonOS {
             .map(|a| a.address)
             .collect_vec();
 
-        self.add_accounts_without_emitting_event(accounts).await?;
+        self.add_accounts_without_emitting_account_added_event(accounts)
+            .await?;
 
         self.event_bus
             .emit(EventNotification::profile_modified(
@@ -220,6 +250,12 @@ impl SargonOS {
 // ==================
 #[uniffi::export]
 impl SargonOS {
+    /// Updates the account `updated` by mutating current profile and persisting
+    /// the change to secure storage. Throws `UnknownAccount` error if the account
+    /// is not found.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileModified { change: EventProfileModified::UpdatedAccount { address } }`
     pub async fn update_account(&self, updated: Account) -> Result<()> {
         self.update_profile_with(|mut p| {
             if p.update_account(&updated.address, |old| *old = updated.clone())
@@ -246,12 +282,17 @@ impl SargonOS {
 
 impl SargonOS {
     /// Adds the `accounts` to active profile and **saves** the updated profile to
-    /// secure storage.
+    /// secure storage, without emitting `Event::AccountAdded`, but we DO emit
+    /// `Event::ProfileSaved`.`
     ///
     /// Returns `Ok(())` if the `accounts` were new and successfully added. If
     /// saving failed or if the accounts were already present in Profile, an
     /// error is returned.
-    async fn add_accounts_without_emitting_event(
+    ///
+    /// # Emits
+    /// Emits `Event::ProfileSaved` after having successfully written the JSON
+    /// of the active profile to secure storage.
+    async fn add_accounts_without_emitting_account_added_event(
         &self,
         accounts: Accounts,
     ) -> Result<()> {

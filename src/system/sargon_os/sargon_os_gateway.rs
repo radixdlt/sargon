@@ -5,18 +5,28 @@ use crate::prelude::*;
 // ==================
 #[uniffi::export]
 impl SargonOS {
+    /// Returns the id of the Network of the current Gateway set in AppPreferences
+    /// of the active Profile. This is the canonical value of "current network",
+    /// which affects which accounts host clients display to end user and to
+    /// which network transactions are submitted, amongst other behaviors.
     pub fn current_network_id(&self) -> NetworkID {
         self.profile_holder.current_network_id()
     }
 
+    /// The current gateway host client is using, which affects `current_network_id`.
+    /// All Network Requests reading from Radix ledger and submission of new
+    /// transactions will go the the Radix Network of the current Gateway.
     pub fn current_gateway(&self) -> Gateway {
         self.profile_holder.current_gateway().clone()
     }
 
+    /// Returns the `gateways` values of the current Profile.
     pub fn gateways(&self) -> SavedGateways {
         self.profile_holder.gateways().clone()
     }
 
+    /// Returns the ProfileNetwork corresponding to the network ID set by the
+    /// current gateway.
     pub fn current_network(&self) -> ProfileNetwork {
         self.profile_holder.current_network().clone()
     }
@@ -32,6 +42,9 @@ impl SargonOS {
     /// and if we switched then if `to` as new.
     ///
     /// If we did in fact change current, an `EventNotification` is emitted.
+    ///
+    /// # Emits Event
+    /// Emits `Event::GatewayChangedCurrent` if we changed the gateway.
     pub async fn change_current_gateway(
         &self,
         to: Gateway,
