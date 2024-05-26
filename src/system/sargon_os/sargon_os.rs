@@ -14,13 +14,6 @@ pub struct SargonOS {
     pub(crate) clients: Clients,
 }
 
-#[uniffi::export]
-impl SargonOS {
-    pub fn drivers(&self) -> Arc<Drivers> {
-        self.clients.drivers.clone()
-    }
-}
-
 /// So that we do not have to go through `self.clients`,
 /// but can use e.g. `self.secure_storage` directly.
 impl Deref for SargonOS {
@@ -442,27 +435,6 @@ mod tests {
                 .iter()
                 .any(|e| e.event.kind()
                     == EventKind::ProfileLastUsedOnOtherDevice)
-        );
-    }
-
-    #[actix_rt::test]
-    async fn can_read_out_driver_after_os_is_created() {
-        // ARRANGE (and ACT)
-        let event_bus = RustEventBusDriver::new();
-
-        let drivers = Drivers::with_event_bus(event_bus.clone());
-        let bios = Bios::new(drivers);
-
-        // ACT
-        let sut = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
-            .await
-            .unwrap()
-            .unwrap();
-
-        // ASSERT
-        assert_eq!(
-            Arc::as_ptr(&sut.drivers().event_bus()),
-            Arc::as_ptr(&event_bus)
         );
     }
 

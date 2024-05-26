@@ -2,7 +2,6 @@ use crate::prelude::*;
 
 #[derive(Debug)]
 pub struct Clients {
-    pub drivers: Arc<Drivers>,
     pub host: HostInfoClient,
     pub secure_storage: SecureStorageClient,
     pub entropy: EntropyClient,
@@ -24,7 +23,6 @@ impl Clients {
         let file_system = FileSystemClient::new(drivers.file_system.clone());
         let event_bus = EventBusClient::new(drivers.event_bus.clone());
         Self {
-            drivers,
             host,
             secure_storage,
             entropy,
