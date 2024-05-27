@@ -190,7 +190,8 @@ final class ManifestBuildingTests: Test<TransactionManifest> {
 		var manifest = try rtm("transfer_1to2_multiple_nf_and_f_tokens")
 		
 		let guarantee = TransactionGuarantee(
-			amount: 642,
+			amount: 642, 
+			percentage: 0.9,
 			instructionIndex: 12,
 			resourceAddress: .sampleStokenetXRD,
 			resourceDivisibility: nil
