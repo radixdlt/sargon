@@ -30,7 +30,7 @@ public struct SargonKey<Value: Sendable>: Hashable, PersistenceReaderKey, Sendab
 	public typealias FetchValueFromSargonOS = @Sendable () -> Value?
 	public typealias ShouldFetch = @Sendable (EventKind) -> Bool
 
-	/// A closure which we invoke of `shouldFetch` returns `true` for a received `EventNotification`,
+	/// A closure which we invoke if `shouldFetch` returns `true` for a received `EventNotification`,
 	/// which fetches a new value from SargonOS. The closure has already been translated from a `(SargonOS) -> Value?`
 	/// closure in the initializer of `SargonKey` into a `() -> Value?`.
 	private let fetchValueFromSargonOS: FetchValueFromSargonOS

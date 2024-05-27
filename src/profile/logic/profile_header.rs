@@ -39,6 +39,12 @@ mod tests {
     #[test]
     fn test_update_header() {
         let mut sut = SUT::sample();
+        let new_hint = ContentHint::sample_other();
+        let new_device = DeviceInfo::sample_other();
+        assert_ne!(sut.content_hint, new_hint.clone());
+        assert_ne!(sut.last_used_on_device, new_device.clone());
         sut.update(ContentHint::sample_other(), DeviceInfo::sample_other());
+        assert_eq!(sut.content_hint, new_hint);
+        assert_eq!(sut.last_used_on_device, new_device);
     }
 }
