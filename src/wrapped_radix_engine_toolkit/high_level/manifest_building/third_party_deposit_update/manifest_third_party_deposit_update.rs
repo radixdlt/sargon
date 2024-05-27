@@ -97,7 +97,9 @@ CALL_METHOD
 CALL_METHOD
     Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
     "remove_authorized_depositor"
-    Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+    Enum<1u8>(
+        Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+    )
 ;"#,
         );
     }
