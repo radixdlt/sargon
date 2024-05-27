@@ -27,3 +27,18 @@ impl Profile {
         self.header.update(content_hint, maybe_device_info)
     }
 }
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = Header;
+
+    #[test]
+    fn test_update_header() {
+        let mut sut = SUT::sample();
+        sut.update(ContentHint::sample_other(), DeviceInfo::sample_other());
+    }
+}

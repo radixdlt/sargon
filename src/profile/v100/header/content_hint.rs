@@ -72,27 +72,45 @@ impl ContentHint {
     }
 }
 
+impl HasSampleValues for ContentHint {
+    fn sample() -> Self {
+        Self::with_counters(3, 1, 1)
+    }
+    fn sample_other() -> Self {
+        Self::with_counters(1, 0, 0)
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = ContentHint;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
 
     #[test]
     fn new_counters_all_start_at_zero() {
-        let sut = ContentHint::new();
+        let sut = SUT::new();
         assert_eq!(sut.number_of_accounts_on_all_networks_in_total, 0);
         assert_eq!(sut.number_of_personas_on_all_networks_in_total, 0);
         assert_eq!(sut.number_of_networks, 0);
     }
 
     #[test]
-    fn eq() {
-        assert_eq!(ContentHint::new(), ContentHint::new());
-    }
-
-    #[test]
     fn display() {
-        let sut = ContentHint::default();
+        let sut = SUT::default();
         assert_eq!(
             format!("{}", sut),
             "#networks: 0, #accounts: 0, #personas: 0"
@@ -105,7 +123,7 @@ mod tests {
             let x = i + 1;
             let y = i + 2;
             let z = i + 3;
-            let sut = ContentHint::with_counters(x, y, z);
+            let sut = SUT::with_counters(x, y, z);
             assert_eq!(
                 sut.number_of_accounts_on_all_networks_in_total as usize,
                 x
@@ -120,7 +138,7 @@ mod tests {
 
     #[test]
     fn json_roundtrip() {
-        let model = ContentHint::with_counters(3, 2, 1);
+        let model = SUT::with_counters(3, 2, 1);
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -146,7 +164,7 @@ mod tests {
 
     #[test]
     fn invalid_json() {
-        assert_json_fails::<ContentHint>(
+        assert_json_fails::<SUT>(
             r#"
             {
                 "numberOfAccountsOnAllNetworksInTotal": "oh a string",
@@ -156,7 +174,7 @@ mod tests {
             "#,
         );
 
-        assert_json_fails::<ContentHint>(
+        assert_json_fails::<SUT>(
             r#"
             {
                 "missing_key": "numberOfAccountsOnAllNetworksInTotal",
@@ -166,7 +184,7 @@ mod tests {
             "#,
         );
 
-        assert_json_fails::<ContentHint>(
+        assert_json_fails::<SUT>(
             r#"
             {
                 "numberOfAccountsOnAllNetworksInTotal": 1337,
@@ -176,7 +194,7 @@ mod tests {
             "#,
         );
 
-        assert_json_fails::<ContentHint>(
+        assert_json_fails::<SUT>(
             r#"
             {
                 "numberOfAccountsOnAllNetworksInTotal": 1337,
@@ -187,7 +205,7 @@ mod tests {
         );
 
         // We are NOT doing snake case
-        assert_json_fails::<ContentHint>(
+        assert_json_fails::<SUT>(
             r#"
             {
                 "number_of_accounts_on_all_networks_in_total": 1337,
