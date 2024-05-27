@@ -517,6 +517,8 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                                                                                 TransactionGuarantee(
                                                                                                 amount =
                                                                                                                 642.toDecimal192(),
+                                                                                                percentage =
+                                                                                                                1.toDecimal192(),
                                                                                                 instructionIndex =
                                                                                                                 12.toULong(),
                                                                                                 resourceAddress =
