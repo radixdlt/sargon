@@ -71,7 +71,7 @@ impl SargonOS {
     /// Create a new mainnet Account named "Unnamed" and adds it to the active Profile.
     ///
     /// # Emits Event
-    /// Emits `Event::ProfileModified { change: EventProfileModified::AddedAccount }`
+    /// Emits `Event::ProfileModified { change: EventProfileModified::AccountAdded }`
     pub async fn create_and_save_new_unnamed_mainnet_account(
         &self,
     ) -> Result<Account> {
@@ -84,7 +84,7 @@ impl SargonOS {
     /// Create a new mainnet Account and adds it to the active Profile.
     ///
     /// # Emits Event
-    /// Emits `Event::ProfileModified { change: EventProfileModified::AddedAccount }`
+    /// Emits `Event::ProfileModified { change: EventProfileModified::AccountAdded }`
     pub async fn create_and_save_new_mainnet_account(
         &self,
         name: DisplayName,
@@ -96,7 +96,7 @@ impl SargonOS {
     /// Create a new Account and adds it to the active Profile.
     ///
     /// # Emits Event
-    /// Emits `Event::ProfileModified { change: EventProfileModified::AddedAccount }`
+    /// Emits `Event::ProfileModified { change: EventProfileModified::AccountAdded }`
     pub async fn create_and_save_new_account(
         &self,
         network_id: NetworkID,
@@ -116,7 +116,7 @@ impl SargonOS {
     /// The account names will be `<name_prefix> <index>`
     ///
     /// # Emits Event
-    /// Emits `Event::ProfileModified { change: EventProfileModified::AddedAccount }`
+    /// Emits `Event::ProfileModified { change: EventProfileModified::AccountAdded }`
     ///
     /// And also emits `Event::ProfileSaved` after having successfully written the JSON
     /// of the active profile to secure storage.
@@ -182,7 +182,7 @@ impl SargonOS {
     /// Emits `Event::ProfileSaved` after having successfully written the JSON
     /// of the active profile to secure storage.
     ///
-    /// And also emits `Event::ProfileModified { change: EventProfileModified::AddedAccounts { addresses } }`
+    /// And also emits `Event::ProfileModified { change: EventProfileModified::AccountsAdded { addresses } }`
     pub async fn add_account(&self, account: Account) -> Result<()> {
         let address = account.address;
 
@@ -207,7 +207,7 @@ impl SargonOS {
 
         self.event_bus
             .emit(EventNotification::profile_modified(
-                EventProfileModified::AddedAccount { address },
+                EventProfileModified::AccountAdded { address },
             ))
             .await;
 
@@ -225,7 +225,7 @@ impl SargonOS {
     /// Emits `Event::ProfileSaved` after having successfully written the JSON
     /// of the active profile to secure storage.
     ///
-    /// And also emits `Event::ProfileModified { change: EventProfileModified::AddedAccounts { addresses } }`
+    /// And also emits `Event::ProfileModified { change: EventProfileModified::AccountsAdded { addresses } }`
     pub async fn add_accounts(&self, accounts: Accounts) -> Result<()> {
         let addresses = accounts
             .clone()
@@ -238,7 +238,7 @@ impl SargonOS {
 
         self.event_bus
             .emit(EventNotification::profile_modified(
-                EventProfileModified::AddedAccounts { addresses },
+                EventProfileModified::AccountsAdded { addresses },
             ))
             .await;
 
@@ -256,7 +256,7 @@ impl SargonOS {
     /// is not found.
     ///
     /// # Emits Event
-    /// Emits `Event::ProfileModified { change: EventProfileModified::UpdatedAccount { address } }`
+    /// Emits `Event::ProfileModified { change: EventProfileModified::AccountUpdated { address } }`
     pub async fn update_account(&self, updated: Account) -> Result<()> {
         self.update_profile_with(|mut p| {
             if p.update_account(&updated.address, |old| *old = updated.clone())
@@ -271,7 +271,7 @@ impl SargonOS {
 
         self.event_bus
             .emit(EventNotification::profile_modified(
-                EventProfileModified::UpdatedAccount {
+                EventProfileModified::AccountUpdated {
                     address: updated.address,
                 },
             ))

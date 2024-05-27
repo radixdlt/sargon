@@ -4,34 +4,34 @@ use crate::prelude::*;
 #[derive(Debug, Clone, PartialEq, Eq, Hash, uniffi::Enum)]
 pub enum EventProfileModified {
     /// A new account with `address` was inserted into the active profile
-    AddedAccount { address: AccountAddress },
+    AccountAdded { address: AccountAddress },
 
     /// New accounts with `addresses` were inserted into the active profile
-    AddedAccounts { addresses: Vec<AccountAddress> },
+    AccountsAdded { addresses: Vec<AccountAddress> },
 
     /// An existing account has been updated
-    UpdatedAccount { address: AccountAddress },
+    AccountUpdated { address: AccountAddress },
 }
 
 impl HasEventKind for EventProfileModified {
     fn kind(&self) -> EventKind {
         match self {
-            Self::UpdatedAccount { address: _ } => EventKind::AccountUpdated,
-            Self::AddedAccount { address: _ } => EventKind::AccountAdded,
-            Self::AddedAccounts { addresses: _ } => EventKind::AccountsAdded,
+            Self::AccountUpdated { address: _ } => EventKind::AccountUpdated,
+            Self::AccountAdded { address: _ } => EventKind::AccountAdded,
+            Self::AccountsAdded { addresses: _ } => EventKind::AccountsAdded,
         }
     }
 }
 
 impl HasSampleValues for EventProfileModified {
     fn sample() -> Self {
-        Self::AddedAccount {
+        Self::AccountAdded {
             address: AccountAddress::sample(),
         }
     }
 
     fn sample_other() -> Self {
-        Self::AddedAccounts {
+        Self::AccountsAdded {
             addresses: vec![
                 AccountAddress::sample_mainnet_other(),
                 AccountAddress::sample_mainnet(),
@@ -64,19 +64,19 @@ mod tests {
             assert_eq!(s.kind(), exp);
         };
         test(
-            SUT::AddedAccount {
+            SUT::AccountAdded {
                 address: AccountAddress::sample(),
             },
             EventKind::AccountAdded,
         );
         test(
-            SUT::UpdatedAccount {
+            SUT::AccountUpdated {
                 address: AccountAddress::sample(),
             },
             EventKind::AccountUpdated,
         );
         test(
-            SUT::AddedAccounts {
+            SUT::AccountsAdded {
                 addresses: vec![AccountAddress::sample()],
             },
             EventKind::AccountsAdded,

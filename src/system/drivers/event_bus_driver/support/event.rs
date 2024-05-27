@@ -112,7 +112,7 @@ mod tests {
             },
             EventKind::GatewayChangedCurrent,
         );
-        let change = EventProfileModified::AddedAccount {
+        let change = EventProfileModified::AccountAdded {
             address: AccountAddress::sample(),
         };
         test(
