@@ -13,8 +13,6 @@ import ComposableArchitecture
 extension Keychain: @unchecked Sendable {}
 extension Keychain: SecureStorageDriver {
 
-	public static let shared = Keychain(service: "works.rdx.planbok")
-
 	@Sendable
 	public func loadData(key: SecureStorageKey) throws -> Data? {
 		try getData(key.identifier)

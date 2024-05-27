@@ -118,7 +118,8 @@ impl SargonOS {
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::AddedAccount }`
     ///
-    /// And also emits
+    /// And also emits `Event::ProfileSaved` after having successfully written the JSON
+    /// of the active profile to secure storage.
     pub async fn batch_create_many_accounts_then_save_once(
         &self,
         count: u16,
