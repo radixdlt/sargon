@@ -10,7 +10,7 @@ import SargonUniFFI
 
 extension EventProfileModified {
 	public var addedAccount: AccountAddress? {
-		guard case let .addedAccount(address) = self else { return nil }
+		guard case let .accountAdded(address) = self else { return nil }
 		return address
 	}
 }
