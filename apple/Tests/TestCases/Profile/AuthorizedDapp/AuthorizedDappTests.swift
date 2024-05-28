@@ -28,7 +28,7 @@ final class AuthorizedDappTests: Test<AuthorizedDapp> {
 					  "displayName": "Gumball Club",
 					  "referencesToAuthorizedPersonas": [
 						  {
-							  "identityAddress": "identity_rdx12gcd4r799jpvztlffgw483pqcen98pjnay988n8rmscdswd872xy62",
+							  "identityAddress": "identity_rdx12tw6rt9c4l56rz6p866e35tmzp556nymxmpj8hagfewq82kspctdyw",
 							  "lastLogin": "2024-01-31T14:23:45.000Z",
 							  "sharedAccounts": {
 								  "request": {
@@ -67,7 +67,7 @@ final class AuthorizedDappTests: Test<AuthorizedDapp> {
 
 		// test decoding
 		let sut = try JSONDecoder().decode(SUT.self, from: raw)
-		XCTAssertEqual(sut, SUT.sampleMainnetOther)
+		XCTAssertNoDifference(sut, SUT.sampleMainnetOther)
 
 		// test encoding
 		let encoded = try JSONEncoder().encode(sut)

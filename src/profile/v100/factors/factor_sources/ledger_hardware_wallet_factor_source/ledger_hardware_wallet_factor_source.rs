@@ -33,13 +33,10 @@ pub struct LedgerHardwareWalletFactorSource {
 fn new_ledger_with_mwp(
     mwp: MnemonicWithPassphrase,
     hint: LedgerHardwareWalletHint,
+    common: FactorSourceCommon,
 ) -> LedgerHardwareWalletFactorSource {
     let id = FactorSourceIDFromHash::new_for_ledger(&mwp);
-    let mut source = LedgerHardwareWalletFactorSource::new(
-        id,
-        FactorSourceCommon::new_bdfs(false),
-        hint,
-    );
+    let mut source = LedgerHardwareWalletFactorSource::new(id, common, hint);
     source.common.last_used_on = Timestamp::sample();
     source.common.added_on = Timestamp::sample();
     source
@@ -61,6 +58,7 @@ impl HasSampleValues for LedgerHardwareWalletFactorSource {
         new_ledger_with_mwp(
             MnemonicWithPassphrase::sample_ledger(),
             LedgerHardwareWalletHint::sample(),
+            FactorSourceCommon::new_bdfs(false),
         )
     }
 
@@ -68,6 +66,7 @@ impl HasSampleValues for LedgerHardwareWalletFactorSource {
         new_ledger_with_mwp(
             MnemonicWithPassphrase::sample_ledger_other(),
             LedgerHardwareWalletHint::sample_other(),
+            FactorSourceCommon::new_olympia(),
         )
     }
 }

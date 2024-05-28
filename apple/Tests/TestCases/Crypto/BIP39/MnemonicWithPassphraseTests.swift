@@ -18,14 +18,14 @@ final class MnemonicWithPassphraseTests: Test<MnemonicWithPassphrase> {
 	func test_codable() throws {
 		let raw = """
 		{
-			"mnemonic": "bright club bacon dinner achieve pull grid save ramp cereal blush woman humble limb repeat video sudden possible story mask neutral prize goose mandate",
-			"passphrase": "radix"
+			"mnemonic": "device phone sign source sample device sample device sample device sample device sample device sample device sample device phone sign source sample device swim",
+			"passphrase": ""
 		}
 		""".data(using: .utf8)!
 		
 		// test decoding
 		let sut = try JSONDecoder().decode(SUT.self, from: raw)
-		XCTAssertEqual(sut, SUT.sample)
+		XCTAssertNoDifference(sut, SUT.sample)
 		
 		// test encoding
 		let encoded = try JSONEncoder().encode(sut)
