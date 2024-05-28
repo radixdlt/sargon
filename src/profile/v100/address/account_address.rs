@@ -88,7 +88,7 @@ impl AccountAddress {
     /// A sample used to facilitate unit tests.
     pub fn sample_stokenet() -> Self {
         let address = AccountAddress::try_from_bech32(
-                "account_tdx_2_1289zm062j788dwrjefqkfgfeea5tkkdnh8htqhdrzdvjkql4kxceql",
+                "account_tdx_2_128jx5fmru80v38a7hun8tdhajf2exef756c92tfg4atwl3y4pqn48m",
             )
             .unwrap();
         assert_eq!(address.network_id(), NetworkID::Stokenet);
@@ -98,7 +98,7 @@ impl AccountAddress {
     /// A sample used to facilitate unit tests.
     pub fn sample_stokenet_other() -> Self {
         let address = AccountAddress::try_from_bech32(
-                "account_tdx_2_129663ef7fj8azge3y6sl73lf9vyqt53ewzlf7ul2l76mg5wyqlqlpr",
+                "account_tdx_2_12xvlee7xtg7dx599yv69tzkpeqzn4wr2nlnn3gpsm0zu0v9luqdpnp",
             )
             .unwrap();
         assert_eq!(address.network_id(), NetworkID::Stokenet);

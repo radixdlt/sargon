@@ -119,14 +119,100 @@ impl MnemonicWithPassphrase {
     }
 }
 
+impl MnemonicWithPassphrase {
+    pub(crate) fn sample_device() -> Self {
+        Self::with_passphrase(
+            Mnemonic::sample_device(),
+            BIP39Passphrase::default(),
+        )
+    }
+
+    pub(crate) fn sample_device_other() -> Self {
+        Self::with_passphrase(
+            Mnemonic::sample_device_other(),
+            BIP39Passphrase::default(),
+        )
+    }
+
+    pub(crate) fn sample_device_12_words() -> Self {
+        Self::with_passphrase(
+            Mnemonic::sample_device_12_words(),
+            BIP39Passphrase::default(),
+        )
+    }
+
+    pub(crate) fn sample_device_12_words_other() -> Self {
+        Self::with_passphrase(
+            Mnemonic::sample_device_12_words_other(),
+            BIP39Passphrase::new("Olympia rules!"),
+        )
+    }
+
+    pub(crate) fn sample_ledger() -> Self {
+        Self::with_passphrase(
+            Mnemonic::sample_ledger(),
+            BIP39Passphrase::default(),
+        )
+    }
+
+    pub(crate) fn sample_ledger_other() -> Self {
+        Self::with_passphrase(
+            Mnemonic::sample_ledger_other(),
+            BIP39Passphrase::new("Mellon"),
+        )
+    }
+
+    pub(crate) fn sample_off_device() -> Self {
+        Self::with_passphrase(
+            Mnemonic::sample_off_device(),
+            BIP39Passphrase::default(),
+        )
+    }
+
+    pub(crate) fn sample_off_device_other() -> Self {
+        Self::with_passphrase(
+            Mnemonic::sample_off_device_other(),
+            BIP39Passphrase::new("open sesame"),
+        )
+    }
+
+    pub(crate) fn sample_security_questions() -> Self {
+        Self::with_passphrase(
+            Mnemonic::sample_security_questions(),
+            BIP39Passphrase::default(),
+        )
+    }
+
+    pub(crate) fn sample_security_questions_other() -> Self {
+        Self::with_passphrase(
+            Mnemonic::sample_security_questions_other(),
+            BIP39Passphrase::default(),
+        )
+    }
+
+    pub(crate) fn sample_arculus() -> Self {
+        Self::with_passphrase(
+            Mnemonic::sample_arculus(),
+            BIP39Passphrase::default(),
+        )
+    }
+
+    pub(crate) fn sample_arculus_other() -> Self {
+        Self::with_passphrase(
+            Mnemonic::sample_arculus_other(),
+            BIP39Passphrase::new("Leonidas"),
+        )
+    }
+}
+
 impl HasSampleValues for MnemonicWithPassphrase {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {
-        Self::with_passphrase(Mnemonic::sample(), BIP39Passphrase::sample())
+        Self::sample_device()
     }
 
     fn sample_other() -> Self {
-        Self::new(Mnemonic::sample_other())
+        Self::sample_ledger()
     }
 }
 
@@ -155,26 +241,34 @@ mod tests {
     }
 
     #[test]
-    fn debug() {
+    fn debug_sample() {
         assert_eq!(
             format!("{:?}", SUT::sample()),
-            format!("{:?}", "24 words (bright...mandate) + <NOT EMPTY>")
-        );
-        assert_eq!(
-            format!("{:?}", SUT::sample_other()),
-            format!("{:?}", "12 words (zoo...wrong) + <EMPTY>")
+            format!("{:?}", "24 words (device...swim) + <EMPTY>")
         );
     }
 
     #[test]
-    fn non_sensitive() {
+    fn debug_sample_other() {
+        assert_eq!(
+            format!("{:?}", SUT::sample_other()),
+            format!("{:?}", "24 words (pledge...cactus) + <EMPTY>")
+        );
+    }
+
+    #[test]
+    fn non_sensitive_sample() {
         assert_eq!(
             format!("{:?}", SUT::sample().non_sensitive()),
-            format!("{:?}", "24 words (bright...mandate) + <NOT EMPTY>")
+            format!("{:?}", "24 words (device...swim) + <EMPTY>")
         );
+    }
+
+    #[test]
+    fn non_sensitive_sample_other() {
         assert_eq!(
             format!("{:?}", SUT::sample_other().non_sensitive()),
-            format!("{:?}", "12 words (zoo...wrong) + <EMPTY>")
+            format!("{:?}", "24 words (pledge...cactus) + <EMPTY>")
         );
     }
 
@@ -326,8 +420,23 @@ mod tests {
             &model,
             r#"
             {
-                "mnemonic": "bright club bacon dinner achieve pull grid save ramp cereal blush woman humble limb repeat video sudden possible story mask neutral prize goose mandate",
-                "passphrase": "radix"
+                "mnemonic": "device phone sign source sample device sample device sample device sample device sample device sample device sample device phone sign source sample device swim",
+                "passphrase": ""
+            }
+            "#,
+        );
+    }
+
+    #[test]
+    fn json_roundtrip_sample_ledger_other() {
+        let model = SUT::sample_ledger_other();
+
+        assert_eq_after_json_roundtrip(
+            &model,
+            r#"
+            {
+                "mnemonic": "pledge rely stick hard snow ice sign source sample other pledge rely sample other pledge rely sample other pledge rely stick sample other shaft",
+                "passphrase": "Mellon"
             }
             "#,
         );
@@ -347,11 +456,11 @@ mod tests {
         assert_eq!(path.to_string(), "m/44H/1022H/1H/525H/1460H/0H");
 
         assert_eq!(
-            "cf52dbc7bb2663223e99fb31799281b813b939440a372d0aa92eb5f5b8516003",
+            "88ec4649da764965f862510dbe53d551a3fc2da49e1ef1f383d9d17006773bee",
             private_key.to_hex()
         );
         assert_eq!(
-            "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b",
+            "c05f9fa53f203a01cbe43e89086cae29f6c7cdd5a435daa9e52b69e656739b36",
             private_key.public_key().to_hex()
         );
     }

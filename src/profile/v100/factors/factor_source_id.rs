@@ -127,7 +127,7 @@ mod tests {
             {
                 "fromHash": {
                     "kind": "device",
-                    "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+                    "body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
                 },
                 "discriminator" : "fromHash"
             }

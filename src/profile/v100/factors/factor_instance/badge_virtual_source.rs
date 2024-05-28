@@ -117,7 +117,7 @@ mod tests {
 				"hierarchicalDeterministicPublicKey": {
 					"publicKey": {
 						"curve": "curve25519",
-						"compressedData": "d24cc6af91c3f103d7f46e5691ce2af9fea7d90cfb89a89d5bba4b513b34be3b"
+						"compressedData": "c05f9fa53f203a01cbe43e89086cae29f6c7cdd5a435daa9e52b69e656739b36"
 					},
 					"derivationPath": {
 						"scheme": "cap26",

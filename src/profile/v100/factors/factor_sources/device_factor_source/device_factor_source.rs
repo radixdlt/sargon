@@ -27,9 +27,6 @@ pub struct DeviceFactorSource {
 
     /// Common properties shared between FactorSources of different kinds,
     /// describing its state, when added, and supported cryptographic parameters.
-    ///
-    /// Has interior mutability since we must be able to update the
-    /// last used date.
     pub common: FactorSourceCommon,
 
     /// Properties describing a DeviceFactorSource to help user disambiguate between it and another one.
@@ -126,47 +123,72 @@ impl HasSampleValues for DeviceFactorSource {
 impl DeviceFactorSource {
     /// A sample used to facilitate unit tests.
     pub fn sample_babylon() -> Self {
-        Self::new(
-            FactorSourceIDFromHash::sample(),
-            FactorSourceCommon::sample_main_babylon(),
-            DeviceFactorSourceHint::sample(),
-        )
+        let mut source = Self::babylon(
+            true,
+            &MnemonicWithPassphrase::sample_device(),
+            &DeviceInfo::sample(),
+        );
+        source.common.last_used_on = Timestamp::sample();
+        source.common.added_on = Timestamp::sample();
+        source
+    }
+
+    /// A sample used to facilitate unit tests.
+    pub fn sample_babylon_other() -> Self {
+        let mut source = Self::babylon(
+            true,
+            &MnemonicWithPassphrase::sample_device_other(),
+            &DeviceInfo::sample_other(),
+        );
+        source.common.last_used_on = Timestamp::sample_other();
+        source.common.added_on = Timestamp::sample_other();
+        source
     }
 
     /// A sample used to facilitate unit tests.
     pub fn sample_olympia() -> Self {
-        Self::new(
-            FactorSourceIDFromHash::sample_other(),
-            FactorSourceCommon::sample_olympia(),
-            DeviceFactorSourceHint::sample(),
-        )
+        let mut source = Self::olympia(
+            &MnemonicWithPassphrase::sample_device_12_words(),
+            &DeviceInfo::sample_other(),
+        );
+        source.common.last_used_on = Timestamp::sample();
+        source.common.added_on = Timestamp::sample();
+        source
+    }
+
+    /// A sample used to facilitate unit tests.
+    pub fn sample_olympia_other() -> Self {
+        let mut source = Self::olympia(
+            &MnemonicWithPassphrase::sample_device_12_words_other(),
+            &DeviceInfo::sample(),
+        );
+        source.common.last_used_on = Timestamp::sample_other();
+        source.common.added_on = Timestamp::sample_other();
+        source
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = DeviceFactorSource;
 
     #[test]
     fn equality() {
-        assert_eq!(DeviceFactorSource::sample(), DeviceFactorSource::sample());
-        assert_eq!(
-            DeviceFactorSource::sample_other(),
-            DeviceFactorSource::sample_other()
-        );
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(
-            DeviceFactorSource::sample(),
-            DeviceFactorSource::sample_other()
-        );
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
     fn main_babylon() {
-        assert!(DeviceFactorSource::babylon(
+        assert!(SUT::babylon(
             true,
             &MnemonicWithPassphrase::sample(),
             &DeviceInfo::sample()
@@ -176,7 +198,7 @@ mod tests {
 
     #[test]
     fn json() {
-        let model = DeviceFactorSource::sample();
+        let model = SUT::sample();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -193,10 +215,10 @@ mod tests {
                 "hint": {
                     "mnemonicWordCount": 24,
                     "model": "iPhone",
-                    "name": "Unknown Name"
+                    "name": "iPhone"
                 },
                 "id": {
-                    "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240",
+                    "body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a",
                     "kind": "device"
                 }
             }
@@ -206,21 +228,21 @@ mod tests {
 
     #[test]
     fn factor_source_id() {
-        let sut = DeviceFactorSource::sample();
+        let sut = SUT::sample();
         let factor_source_id: FactorSourceID = sut.clone().id.into();
         assert_eq!(factor_source_id, sut.factor_source_id());
     }
 
     #[test]
     fn from_factor_source() {
-        let sut = DeviceFactorSource::sample();
+        let sut = SUT::sample();
         let factor_source: FactorSource = sut.clone().into();
-        assert_eq!(DeviceFactorSource::try_from(factor_source), Ok(sut));
+        assert_eq!(SUT::try_from(factor_source), Ok(sut));
     }
 
     #[test]
     fn static_kind() {
-        assert_eq!(DeviceFactorSource::kind(), FactorSourceKind::Device);
+        assert_eq!(SUT::kind(), FactorSourceKind::Device);
     }
 
     #[test]
@@ -228,7 +250,7 @@ mod tests {
         let ledger = LedgerHardwareWalletFactorSource::sample();
         let factor_source: FactorSource = ledger.clone().into();
         assert_eq!(
-            DeviceFactorSource::try_from(factor_source),
+            SUT::try_from(factor_source),
             Err(CommonError::ExpectedDeviceFactorSourceGotSomethingElse)
         );
     }
@@ -236,9 +258,7 @@ mod tests {
     #[test]
     fn sample_olympia_has_crypto_parameters_olympia() {
         assert_eq!(
-            DeviceFactorSource::sample_olympia()
-                .common
-                .crypto_parameters,
+            SUT::sample_olympia().common.crypto_parameters,
             FactorSourceCryptoParameters::olympia()
         );
     }
@@ -246,7 +266,7 @@ mod tests {
     #[test]
     fn hint() {
         assert_eq!(
-            DeviceFactorSource::sample().hint.mnemonic_word_count,
+            SUT::sample().hint.mnemonic_word_count,
             BIP39WordCount::TwentyFour
         );
     }

@@ -155,24 +155,24 @@ mod tests {
     #[test]
     fn ed25519_from_str() {
         assert_eq!(
-            "2150c2f6b6c496d197ae03afb23f6adf23b275c675394f23786250abd006d5a2c7543566403cb414f70d0e229b0a9b55b4c74f42fc38cdf1aba2307f97686f0b".parse::<SUT>().unwrap(), SUT::sample());
+            "fc6a4a15516b886b10f26777094cb1abdccb213c9ebdea7a4bceb83b6fcba50fea181b0136ee5659c3dfae5f771e5b6e6f9abbaa3f0435df0be1f732be965103".parse::<SUT>().unwrap(), SUT::sample());
     }
 
     #[test]
     fn ed25519_from_bag_of_bytes() {
-        let bytes: BagOfBytes = "2150c2f6b6c496d197ae03afb23f6adf23b275c675394f23786250abd006d5a2c7543566403cb414f70d0e229b0a9b55b4c74f42fc38cdf1aba2307f97686f0b".parse().unwrap();
+        let bytes: BagOfBytes = "fc6a4a15516b886b10f26777094cb1abdccb213c9ebdea7a4bceb83b6fcba50fea181b0136ee5659c3dfae5f771e5b6e6f9abbaa3f0435df0be1f732be965103".parse().unwrap();
         assert_eq!(SUT::try_from(bytes).unwrap(), SUT::sample());
     }
 
     #[test]
     fn secp256k1_from_str() {
         assert_eq!(
-            "018ad795353658a0cd1b513c4414cbafd0f990d329522977f8885a27876976a7d41ed8a81c1ac34551819627689cf940c4e27cacab217f00a0a899123c021ff6ef".parse::<SUT>().unwrap(), SUT::sample_other());
+            "0001598e989470d125dafac276b95bb1ba21e2ee8e0beb0547599335f83b48a0a830cd6a956a54421039cef5fb7e492ebaa315f751a2dd5b74bd9cebbda997ec12".parse::<SUT>().unwrap(), SUT::sample_other());
     }
 
     #[test]
     fn secp256k1_from_bag_of_bytes() {
-        let bytes: BagOfBytes = "018ad795353658a0cd1b513c4414cbafd0f990d329522977f8885a27876976a7d41ed8a81c1ac34551819627689cf940c4e27cacab217f00a0a899123c021ff6ef".parse().unwrap();
+        let bytes: BagOfBytes = "0001598e989470d125dafac276b95bb1ba21e2ee8e0beb0547599335f83b48a0a830cd6a956a54421039cef5fb7e492ebaa315f751a2dd5b74bd9cebbda997ec12".parse().unwrap();
         assert_eq!(SUT::try_from(bytes).unwrap(), SUT::sample_other());
     }
 

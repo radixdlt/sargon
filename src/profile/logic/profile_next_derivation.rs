@@ -223,7 +223,10 @@ mod tests {
     fn device_factor_source_by_id_success_device() {
         let profile = Profile::sample();
         let dfs = DeviceFactorSource::sample_babylon();
-        assert_eq!(profile.device_factor_source_by_id(&dfs.id), Ok(dfs));
+        pretty_assertions::assert_eq!(
+            profile.device_factor_source_by_id(&dfs.id),
+            Ok(dfs)
+        );
     }
 
     #[test]

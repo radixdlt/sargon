@@ -56,7 +56,7 @@ impl PerAssetNonFungibleTransfer {
     pub(crate) fn sample_mainnet_other() -> Self {
         Self::new(
             AccountOrAddressOf::AddressOfExternalAccount {
-                value: AccountAddress::from_str("account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69").unwrap() 
+                value: AccountAddress::from_str("account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7").unwrap() 
             },
         true,
         [NonFungibleLocalId::sample_other()]

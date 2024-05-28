@@ -55,7 +55,7 @@ mod tests {
     fn test_to_string() {
         assert_eq!(
             ed25519_signature_to_string(&SUT::sample()),
-            "2150c2f6b6c496d197ae03afb23f6adf23b275c675394f23786250abd006d5a2c7543566403cb414f70d0e229b0a9b55b4c74f42fc38cdf1aba2307f97686f0b"
+            "fc6a4a15516b886b10f26777094cb1abdccb213c9ebdea7a4bceb83b6fcba50fea181b0136ee5659c3dfae5f771e5b6e6f9abbaa3f0435df0be1f732be965103"
         )
     }
 

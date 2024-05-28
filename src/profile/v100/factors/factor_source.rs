@@ -25,6 +25,12 @@ pub enum FactorSource {
         #[display("LedgerHWFS({value})")]
         value: LedgerHardwareWalletFactorSource,
     },
+
+    OffDeviceMnemonic {
+        #[serde(rename = "offDeviceMnemonic")]
+        #[display("OffDevice({value})")]
+        value: OffDeviceMnemonicFactorSource,
+    },
 }
 
 impl BaseIsFactorSource for FactorSource {
@@ -32,6 +38,9 @@ impl BaseIsFactorSource for FactorSource {
         match self {
             FactorSource::Device { value } => value.common_properties(),
             FactorSource::Ledger { value } => value.common_properties(),
+            FactorSource::OffDeviceMnemonic { value } => {
+                value.common_properties()
+            }
         }
     }
 
@@ -39,6 +48,9 @@ impl BaseIsFactorSource for FactorSource {
         match self {
             FactorSource::Device { value } => value.factor_source_kind(),
             FactorSource::Ledger { value } => value.factor_source_kind(),
+            FactorSource::OffDeviceMnemonic { value } => {
+                value.factor_source_kind()
+            }
         }
     }
 
@@ -46,6 +58,9 @@ impl BaseIsFactorSource for FactorSource {
         match self {
             FactorSource::Device { value } => value.factor_source_id(),
             FactorSource::Ledger { value } => value.factor_source_id(),
+            FactorSource::OffDeviceMnemonic { value } => {
+                value.factor_source_id()
+            }
         }
     }
 }
@@ -67,6 +82,12 @@ impl From<DeviceFactorSource> for FactorSource {
 impl From<LedgerHardwareWalletFactorSource> for FactorSource {
     fn from(value: LedgerHardwareWalletFactorSource) -> Self {
         FactorSource::Ledger { value }
+    }
+}
+
+impl From<OffDeviceMnemonicFactorSource> for FactorSource {
+    fn from(value: OffDeviceMnemonicFactorSource) -> Self {
+        FactorSource::OffDeviceMnemonic { value }
     }
 }
 
@@ -104,6 +125,11 @@ impl Serialize for FactorSource {
                 let discriminant = "ledgerHQHardwareWallet";
                 state.serialize_field(discriminator_key, discriminant)?;
                 state.serialize_field(discriminant, ledger)?;
+            }
+            FactorSource::OffDeviceMnemonic { value: off_device } => {
+                let discriminant = "offDeviceMnemonic";
+                state.serialize_field(discriminator_key, discriminant)?;
+                state.serialize_field(discriminant, off_device)?;
             }
         }
         state.end()
@@ -241,7 +267,7 @@ mod tests {
                 "device": {
                     "id": {
                         "kind": "device",
-                        "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+                        "body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
                     },
                     "common": {
                         "flags": ["main"],
@@ -253,7 +279,7 @@ mod tests {
                         "lastUsedOn": "2023-09-11T16:05:56.000Z"
                     },
                     "hint": {
-                        "name": "Unknown Name",
+                        "name": "iPhone",
                         "model": "iPhone",
                         "mnemonicWordCount": 24
                     }
@@ -274,7 +300,7 @@ mod tests {
                 "ledgerHQHardwareWallet": {
                     "id": {
                         "kind": "ledgerHQHardwareWallet",
-                        "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+                        "body": "ab59987eedd181fe98e512c1ba0f5ff059f11b5c7c56f15614dcc9fe03fec58b"
                     },
                     "common": {
                         "addedOn": "2023-09-11T16:05:56.000Z",
@@ -282,7 +308,7 @@ mod tests {
                             "supportedCurves": ["curve25519"],
                             "supportedDerivationPathSchemes": ["cap26"]
                         },
-                        "flags": ["main"],
+                        "flags": [],
                         "lastUsedOn": "2023-09-11T16:05:56.000Z"
                     },
                     "hint": {

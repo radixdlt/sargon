@@ -30,6 +30,21 @@ pub struct LedgerHardwareWalletFactorSource {
     pub hint: LedgerHardwareWalletHint,
 }
 
+fn new_ledger_with_mwp(
+    mwp: MnemonicWithPassphrase,
+    hint: LedgerHardwareWalletHint,
+) -> LedgerHardwareWalletFactorSource {
+    let id = FactorSourceIDFromHash::new_for_ledger(&mwp);
+    let mut source = LedgerHardwareWalletFactorSource::new(
+        id,
+        FactorSourceCommon::new_bdfs(false),
+        hint,
+    );
+    source.common.last_used_on = Timestamp::sample();
+    source.common.added_on = Timestamp::sample();
+    source
+}
+
 impl LedgerHardwareWalletFactorSource {
     /// Instantiates a new `LedgerHardwareWalletFactorSource`
     pub fn new(
@@ -43,17 +58,15 @@ impl LedgerHardwareWalletFactorSource {
 
 impl HasSampleValues for LedgerHardwareWalletFactorSource {
     fn sample() -> Self {
-        Self::new(
-            FactorSourceIDFromHash::sample_ledger(),
-            FactorSourceCommon::sample(),
+        new_ledger_with_mwp(
+            MnemonicWithPassphrase::sample_ledger(),
             LedgerHardwareWalletHint::sample(),
         )
     }
 
     fn sample_other() -> Self {
-        Self::new(
-            FactorSourceIDFromHash::sample_ledger_other(),
-            FactorSourceCommon::sample_other(),
+        new_ledger_with_mwp(
+            MnemonicWithPassphrase::sample_ledger_other(),
             LedgerHardwareWalletHint::sample_other(),
         )
     }
@@ -65,9 +78,7 @@ impl TryFrom<FactorSource> for LedgerHardwareWalletFactorSource {
     fn try_from(value: FactorSource) -> Result<Self> {
         match value {
             FactorSource::Ledger { value: factor } => Ok(factor),
-            FactorSource::Device { value: _ } => {
-                Err(Self::Error::ExpectedLedgerHardwareWalletFactorSourceGotSomethingElse)
-            }
+            _ =>  Err(Self::Error::ExpectedLedgerHardwareWalletFactorSourceGotSomethingElse)
         }
     }
 }
@@ -123,7 +134,7 @@ mod tests {
             {
                 "id": {
                     "kind": "ledgerHQHardwareWallet",
-                    "body": "3c986ebf9dcd9167a97036d3b2c997433e85e6cc4e4422ad89269dac7bfea240"
+                    "body": "ab59987eedd181fe98e512c1ba0f5ff059f11b5c7c56f15614dcc9fe03fec58b"
                 },
                 "common": {
                     "addedOn": "2023-09-11T16:05:56.000Z",
@@ -131,7 +142,7 @@ mod tests {
                         "supportedCurves": ["curve25519"],
                         "supportedDerivationPathSchemes": ["cap26"]
                     },
-                    "flags": ["main"],
+                    "flags": [],
                     "lastUsedOn": "2023-09-11T16:05:56.000Z"
                 },
                 "hint": {

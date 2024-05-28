@@ -127,9 +127,14 @@ impl PrivateHierarchicalDeterministicFactorSource {
 
 impl HasSampleValues for PrivateHierarchicalDeterministicFactorSource {
     fn sample() -> Self {
+        let mwp = MnemonicWithPassphrase::sample();
         Self::new(
-            MnemonicWithPassphrase::sample(),
-            DeviceFactorSource::sample_babylon(),
+            mwp.clone(),
+            DeviceFactorSource::new(
+                FactorSourceIDFromHash::new_for_device(&mwp),
+                FactorSourceCommon::sample_main_babylon(),
+                DeviceFactorSourceHint::sample_other(),
+            ),
         )
     }
 

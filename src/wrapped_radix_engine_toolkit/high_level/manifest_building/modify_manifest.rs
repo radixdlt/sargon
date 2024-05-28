@@ -252,7 +252,7 @@ CALL_METHOD
     fn test_modify_manifest_lock_fee() {
         let instructions_string = r#"
 CALL_METHOD
-    Address("account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8")
+    Address("account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87")
     "withdraw"
     Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
     Decimal("1337")
@@ -263,7 +263,7 @@ TAKE_FROM_WORKTOP
     Bucket("bucket1")
 ;
 CALL_METHOD
-    Address("account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69")
+    Address("account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7")
     "try_deposit_or_abort"
     Bucket("bucket1")
     Enum<0u8>()
@@ -289,7 +289,7 @@ CALL_METHOD
             Decimal("42")
         ;
         CALL_METHOD
-            Address("account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8")
+            Address("account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87")
             "withdraw"
             Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
             Decimal("1337")
@@ -300,7 +300,7 @@ CALL_METHOD
             Bucket("bucket1")
         ;
         CALL_METHOD
-            Address("account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69")
+            Address("account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7")
             "try_deposit_or_abort"
             Bucket("bucket1")
             Enum<0u8>()
@@ -325,7 +325,7 @@ CALL_METHOD
             Decimal("25")
         ;
         CALL_METHOD
-            Address("account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8")
+            Address("account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87")
             "withdraw"
             Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
             Decimal("1337")
@@ -336,7 +336,7 @@ CALL_METHOD
             Bucket("bucket1")
         ;
         CALL_METHOD
-            Address("account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69")
+            Address("account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7")
             "try_deposit_or_abort"
             Bucket("bucket1")
             Enum<0u8>()
@@ -358,7 +358,7 @@ CALL_METHOD
             )]),
             r#"
             CALL_METHOD
-                Address("account_rdx12yy8n09a0w907vrjyj4hws2yptrm3rdjv84l9sr24e3w7pk7nuxst8")
+                Address("account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87")
                 "withdraw"
                 Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
                 Decimal("1337")
@@ -373,7 +373,7 @@ CALL_METHOD
                 Bucket("bucket1")
             ;
             CALL_METHOD
-                Address("account_rdx129a9wuey40lducsf6yu232zmzk5kscpvnl6fv472r0ja39f3hced69")
+                Address("account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7")
                 "try_deposit_or_abort"
                 Bucket("bucket1")
                 Enum<0u8>()
