@@ -14,6 +14,7 @@ extension FactorSource: Identifiable {
 	public var id: ID {
 		switch self {
 		case let .device(value): value.id.asGeneral
+		case let .arculusCard(value): value.id.asGeneral
 		case let .ledger(value): value.id.asGeneral
 		case let .offDeviceMnemonic(value): value.id.asGeneral
 		}
@@ -29,6 +30,7 @@ extension FactorSource: BaseFactorSourceProtocol {
 		switch self {
 		case let .device(value): value.factorSourceKind
 		case let .ledger(value): value.factorSourceKind
+		case let .arculusCard(value): value.factorSourceKind
 		case let .offDeviceMnemonic(value): value.factorSourceKind
 		}
 	}
@@ -38,6 +40,7 @@ extension FactorSource: BaseFactorSourceProtocol {
 			switch self {
 			case let .device(value): value.common
 			case let .ledger(value): value.common
+			case let .arculusCard(value): value.common
 			case let .offDeviceMnemonic(value): value.common
 			}
 		}
@@ -52,6 +55,9 @@ extension FactorSource: BaseFactorSourceProtocol {
 			case var .offDeviceMnemonic(source):
 				source.common = newValue
 				self = .offDeviceMnemonic(value: source)
+			case var .arculusCard(source):
+				source.common = newValue
+				self = .arculusCard(value: source)
 			}
 		}
 	}
