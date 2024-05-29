@@ -64,7 +64,7 @@ mod tests {
             assert_eq!(SUT::from_str(s).unwrap(), f);
         };
 
-        eq(ArculusColdStorageWallet, "arculusColdStorageWallet+");
+        eq(ArculusColdStorageWallet, "arculusColdStorageWallet");
     }
 
     #[test]
