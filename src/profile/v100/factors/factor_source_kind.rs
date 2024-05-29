@@ -81,8 +81,8 @@ pub enum FactorSourceKind {
     ///  * Hardware (communicates with host using NFC)
     ///
     /// [link]: https://www.getarculus.com/
-    #[serde(rename = "arculus")]
-    Arculus,
+    #[serde(rename = "arculusCard")]
+    ArculusCard,
 }
 
 impl FactorSourceKind {

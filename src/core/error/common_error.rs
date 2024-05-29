@@ -544,6 +544,12 @@ pub enum CommonError {
 
     #[error("Not permission enough to access file: '{path}'")]
     NotPermissionToAccessFile { path: String } = 10153,
+
+    #[error("Invalid Arculus Card Model")]
+    InvalidArculusCardModel { bad_value: String } = 10154,
+
+    #[error("Expected ArculusCard factor source got something else")]
+    ExpectedArculusCardFactorSourceGotSomethingElse = 10155,
 }
 
 #[uniffi::export]

@@ -76,7 +76,7 @@ impl FactorSourceIDFromHash {
         mnemonic_with_passphrase: &MnemonicWithPassphrase,
     ) -> Self {
         Self::from_mnemonic_with_passphrase(
-            FactorSourceKind::Arculus,
+            FactorSourceKind::ArculusCard,
             mnemonic_with_passphrase,
         )
     }

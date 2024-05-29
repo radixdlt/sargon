@@ -23,14 +23,17 @@ pub struct OffDeviceMnemonicFactorSource {
 
     /// Common properties shared between FactorSources of different kinds,
     /// describing its state, when added, and supported cryptographic parameters.
-    ///
-    /// Has interior mutability since we must be able to update the
-    /// last used date.
     pub common: FactorSourceCommon,
 
     /// Properties describing a OffDeviceMnemonicFactorSource to help user
     /// disambiguate between it and another one.
     pub hint: OffDeviceFactorSourceHint,
+}
+
+impl From<OffDeviceMnemonicFactorSource> for FactorSource {
+    fn from(value: OffDeviceMnemonicFactorSource) -> Self {
+        FactorSource::OffDeviceMnemonic { value }
+    }
 }
 
 fn new_off_device_with_mwp(

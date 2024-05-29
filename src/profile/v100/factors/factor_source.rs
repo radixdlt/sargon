@@ -31,6 +31,12 @@ pub enum FactorSource {
         #[display("OffDevice({value})")]
         value: OffDeviceMnemonicFactorSource,
     },
+
+    ArculusCard {
+        #[serde(rename = "arculusCard")]
+        #[display("ArculusCard({value})")]
+        value: ArculusCardFactorSource,
+    },
 }
 
 impl BaseIsFactorSource for FactorSource {
@@ -38,6 +44,7 @@ impl BaseIsFactorSource for FactorSource {
         match self {
             FactorSource::Device { value } => value.common_properties(),
             FactorSource::Ledger { value } => value.common_properties(),
+            FactorSource::ArculusCard { value } => value.common_properties(),
             FactorSource::OffDeviceMnemonic { value } => {
                 value.common_properties()
             }
@@ -48,6 +55,7 @@ impl BaseIsFactorSource for FactorSource {
         match self {
             FactorSource::Device { value } => value.factor_source_kind(),
             FactorSource::Ledger { value } => value.factor_source_kind(),
+            FactorSource::ArculusCard { value } => value.factor_source_kind(),
             FactorSource::OffDeviceMnemonic { value } => {
                 value.factor_source_kind()
             }
@@ -58,6 +66,7 @@ impl BaseIsFactorSource for FactorSource {
         match self {
             FactorSource::Device { value } => value.factor_source_id(),
             FactorSource::Ledger { value } => value.factor_source_id(),
+            FactorSource::ArculusCard { value } => value.factor_source_id(),
             FactorSource::OffDeviceMnemonic { value } => {
                 value.factor_source_id()
             }
@@ -82,12 +91,6 @@ impl From<DeviceFactorSource> for FactorSource {
 impl From<LedgerHardwareWalletFactorSource> for FactorSource {
     fn from(value: LedgerHardwareWalletFactorSource) -> Self {
         FactorSource::Ledger { value }
-    }
-}
-
-impl From<OffDeviceMnemonicFactorSource> for FactorSource {
-    fn from(value: OffDeviceMnemonicFactorSource) -> Self {
-        FactorSource::OffDeviceMnemonic { value }
     }
 }
 
@@ -125,6 +128,11 @@ impl Serialize for FactorSource {
                 let discriminant = "ledgerHQHardwareWallet";
                 state.serialize_field(discriminator_key, discriminant)?;
                 state.serialize_field(discriminant, ledger)?;
+            }
+            FactorSource::ArculusCard { value } => {
+                let discriminant = "arculusCard";
+                state.serialize_field(discriminator_key, discriminant)?;
+                state.serialize_field(discriminant, value)?;
             }
             FactorSource::OffDeviceMnemonic { value: off_device } => {
                 let discriminant = "offDeviceMnemonic";

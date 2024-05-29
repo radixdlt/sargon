@@ -1,5 +1,9 @@
 use crate::prelude::*;
+use crate::prelude::*;
 
+/// An Arculus card, a hierarchal deterministic wallet capable of CAP26 derivation
+/// which users interact with by placing it near their host device, which
+/// communicates with the card over NFC.
 #[derive(
     Serialize,
     Deserialize,
@@ -13,77 +17,86 @@ use crate::prelude::*;
 )]
 #[serde(rename_all = "camelCase")]
 #[display("{hint} : {id}")]
-pub struct LedgerHardwareWalletFactorSource {
+pub struct ArculusCardFactorSource {
     /// Unique and stable identifier of this factor source, stemming from the
     /// hash of a special child key of the HD root of the mnemonic,
-    /// that is secured by the Ledger Hardware Wallet device.
+    /// that is secured by the Arculus Card.
     pub id: FactorSourceIDFromHash,
 
     /// Common properties shared between FactorSources of different kinds,
     /// describing its state, when added, and supported cryptographic parameters.
     pub common: FactorSourceCommon,
 
-    /// Properties describing a LedgerHardwareWalletFactorSource to help user disambiguate between it and another one.
-    pub hint: LedgerHardwareWalletHint,
+    /// Properties describing a ArculusCardFactorSource to help user disambiguate
+    /// between it and another one.
+    pub hint: ArculusCardHint,
 }
 
-fn new_ledger_with_mwp(
+impl From<ArculusCardFactorSource> for FactorSource {
+    fn from(value: ArculusCardFactorSource) -> Self {
+        FactorSource::ArculusCard { value }
+    }
+}
+
+fn new_arculus_with_mwp(
     mwp: MnemonicWithPassphrase,
-    hint: LedgerHardwareWalletHint,
+    hint: ArculusCardHint,
     common: FactorSourceCommon,
-) -> LedgerHardwareWalletFactorSource {
-    let id = FactorSourceIDFromHash::new_for_ledger(&mwp);
-    let mut source = LedgerHardwareWalletFactorSource::new(id, common, hint);
+) -> ArculusCardFactorSource {
+    let id = FactorSourceIDFromHash::new_for_arculus(&mwp);
+    let mut source = ArculusCardFactorSource::new(id, common, hint);
     source.common.last_used_on = Timestamp::sample();
     source.common.added_on = Timestamp::sample();
     source
 }
 
-impl LedgerHardwareWalletFactorSource {
-    /// Instantiates a new `LedgerHardwareWalletFactorSource`
+impl ArculusCardFactorSource {
+    /// Instantiates a new `ArculusCardFactorSource`
     pub fn new(
         id: FactorSourceIDFromHash,
         common: FactorSourceCommon,
-        hint: LedgerHardwareWalletHint,
+        hint: ArculusCardHint,
     ) -> Self {
         Self { id, common, hint }
     }
 }
 
-impl HasSampleValues for LedgerHardwareWalletFactorSource {
+impl HasSampleValues for ArculusCardFactorSource {
     fn sample() -> Self {
-        new_ledger_with_mwp(
-            MnemonicWithPassphrase::sample_ledger(),
-            LedgerHardwareWalletHint::sample(),
+        new_arculus_with_mwp(
+            MnemonicWithPassphrase::sample_arculus(),
+            ArculusCardHint::sample(),
             FactorSourceCommon::new_bdfs(false),
         )
     }
 
     fn sample_other() -> Self {
-        new_ledger_with_mwp(
-            MnemonicWithPassphrase::sample_ledger_other(),
-            LedgerHardwareWalletHint::sample_other(),
-            FactorSourceCommon::new_olympia(),
+        new_arculus_with_mwp(
+            MnemonicWithPassphrase::sample_arculus_other(),
+            ArculusCardHint::sample_other(),
+            FactorSourceCommon::new_bdfs(false),
         )
     }
 }
 
-impl TryFrom<FactorSource> for LedgerHardwareWalletFactorSource {
+impl TryFrom<FactorSource> for ArculusCardFactorSource {
     type Error = CommonError;
 
     fn try_from(value: FactorSource) -> Result<Self> {
         match value {
-            FactorSource::Ledger { value: factor } => Ok(factor),
-            _ =>  Err(Self::Error::ExpectedLedgerHardwareWalletFactorSourceGotSomethingElse)
+            FactorSource::ArculusCard { value } => Ok(value),
+            _ => Err(
+                Self::Error::ExpectedArculusCardFactorSourceGotSomethingElse,
+            ),
         }
     }
 }
-impl IsFactorSource for LedgerHardwareWalletFactorSource {
+impl IsFactorSource for ArculusCardFactorSource {
     fn kind() -> FactorSourceKind {
-        FactorSourceKind::LedgerHQHardwareWallet
+        FactorSourceKind::ArculusCard
     }
 }
-impl BaseIsFactorSource for LedgerHardwareWalletFactorSource {
+impl BaseIsFactorSource for ArculusCardFactorSource {
     fn common_properties(&self) -> FactorSourceCommon {
         self.common.clone()
     }
@@ -104,32 +117,32 @@ mod tests {
     #[test]
     fn equality() {
         assert_eq!(
-            LedgerHardwareWalletFactorSource::sample(),
-            LedgerHardwareWalletFactorSource::sample()
+            ArculusCardFactorSource::sample(),
+            ArculusCardFactorSource::sample()
         );
         assert_eq!(
-            LedgerHardwareWalletFactorSource::sample_other(),
-            LedgerHardwareWalletFactorSource::sample_other()
+            ArculusCardFactorSource::sample_other(),
+            ArculusCardFactorSource::sample_other()
         );
     }
 
     #[test]
     fn inequality() {
         assert_ne!(
-            LedgerHardwareWalletFactorSource::sample(),
-            LedgerHardwareWalletFactorSource::sample_other()
+            ArculusCardFactorSource::sample(),
+            ArculusCardFactorSource::sample_other()
         );
     }
 
     #[test]
     fn json_roundtrip() {
-        let model = LedgerHardwareWalletFactorSource::sample();
+        let model = ArculusCardFactorSource::sample();
         assert_eq_after_json_roundtrip(
             &model,
             r#"            
             {
                 "id": {
-                    "kind": "ledgerHQHardwareWallet",
+                    "kind": "arculus",
                     "body": "ab59987eedd181fe98e512c1ba0f5ff059f11b5c7c56f15614dcc9fe03fec58b"
                 },
                 "common": {
@@ -142,8 +155,8 @@ mod tests {
                     "lastUsedOn": "2023-09-11T16:05:56.000Z"
                 },
                 "hint": {
-                    "name": "Orange, scratched",
-                    "model": "nanoS+"
+                    "name": "Silver",
+                    "model": "ArculusColdStorageWallet"
                 }
             }
             "#,
@@ -152,12 +165,9 @@ mod tests {
 
     #[test]
     fn from_factor_source() {
-        let sut = LedgerHardwareWalletFactorSource::sample();
+        let sut = ArculusCardFactorSource::sample();
         let factor_source: FactorSource = sut.clone().into();
-        assert_eq!(
-            LedgerHardwareWalletFactorSource::try_from(factor_source),
-            Ok(sut)
-        );
+        assert_eq!(ArculusCardFactorSource::try_from(factor_source), Ok(sut));
     }
 
     #[test]
@@ -165,24 +175,24 @@ mod tests {
         let wrong = DeviceFactorSource::sample();
         let factor_source: FactorSource = wrong.clone().into();
         assert_eq!(
-            LedgerHardwareWalletFactorSource::try_from(factor_source),
-            Err(CommonError::ExpectedLedgerHardwareWalletFactorSourceGotSomethingElse)
+            ArculusCardFactorSource::try_from(factor_source),
+            Err(CommonError::ExpectedArculusCardFactorSourceGotSomethingElse)
         );
     }
 
     #[test]
     fn factor_source_id() {
         assert_eq!(
-            LedgerHardwareWalletFactorSource::sample().factor_source_id(),
-            LedgerHardwareWalletFactorSource::sample().id.into()
+            ArculusCardFactorSource::sample().factor_source_id(),
+            ArculusCardFactorSource::sample().id.into()
         );
     }
 
     #[test]
     fn factor_source_kind() {
         assert_eq!(
-            LedgerHardwareWalletFactorSource::sample().factor_source_kind(),
-            LedgerHardwareWalletFactorSource::sample().id.kind
+            ArculusCardFactorSource::sample().factor_source_kind(),
+            ArculusCardFactorSource::sample().id.kind
         );
     }
 }

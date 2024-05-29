@@ -1,5 +1,5 @@
-mod off_device_mnemonic;
-mod off_device_mnemonic_uniffi;
+mod arculus_card_factor_source;
+mod off_device_mnemonic_factor_source;
 
-pub use off_device_mnemonic::*;
-pub use off_device_mnemonic_uniffi::*;
+pub use arculus_card_factor_source::*;
+pub use off_device_mnemonic_factor_source::*;
