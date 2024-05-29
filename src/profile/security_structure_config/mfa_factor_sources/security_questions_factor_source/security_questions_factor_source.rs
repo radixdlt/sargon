@@ -45,7 +45,7 @@ use crate::prelude::*;
 /// We form ["6 choose 4" ("P choose P-1")][choose] = 15 many combinations
 /// (e.g. using [`combinations method from itertools`](itertools))
 ///
-/// ```
+/// ```no_run
 /// let k = 4;
 /// assert_eq!(ec_keys.len(), 6);
 /// let key_combinations = Vec<Vec<X25519PrivateKey>> = ec_keys.combinations(k);
@@ -55,7 +55,7 @@ use crate::prelude::*;
 ///
 /// We map the 15 `Vec<X25519PrivateKey>` into `X25519PublicKeys` using `multi_party_ecdh`:
 ///
-/// ```
+/// ```no_run
 /// let ecdh_keys: Vec<X25519PublicKey> = key_combinations.iter().map(multi_party_ecdh).collect();
 /// assert_eq!(sec_keys.len(), 15);
 /// ```
@@ -63,7 +63,7 @@ use crate::prelude::*;
 /// Where `multi_party_ecdh` is a function taking `Vec<X25519PrivateKey>` as input and
 /// returning a `Key<Aes256Gcm>` by doing key exchange between all keys, like so:
 ///
-/// ```
+/// ```no_run
 /// fn multi_party_ecdh(
 ///     private_keys: Vec<X25519PrivateKey>
 /// ) -> Result<Key<X25519PublicKey>> {
@@ -85,14 +85,14 @@ use crate::prelude::*;
 /// We form 15 Symmetric Encryption keys from the 15 `X25519PublicKey` by simply
 /// mapping the data of the public keys into AesGCM keys:
 ///
-/// ```
+/// ```no_run
 /// let sec_keys: Vec<Key<AesGcm>> = ecdh_keys.iter().map(ec2sec).collect()
 /// assert_eq!(sec_keys.len(), 15);
 /// ```
 ///
 /// We encrypt the mnemonic 15 times, using each symmetric key in `sec_keys`:
 ///
-/// ```
+/// ```no_run
 /// let encryptions: Vec<AesGcmSealedBox> = sec_keys.iter().map(|x| x.enc)
 /// assert_eq!(encryptions.len(), 15);
 /// ```
