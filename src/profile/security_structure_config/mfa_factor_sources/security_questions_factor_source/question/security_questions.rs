@@ -12,20 +12,25 @@ decl_identified_vec_of!(
 
 impl HasSampleValues for Security_NOT_PRODUCTION_READY_Questions {
     fn sample() -> Self {
+        type Q = Security_NOT_PRODUCTION_READY_Question;
         Self::from_iter([
-            Security_NOT_PRODUCTION_READY_Question::sample(),
-            Security_NOT_PRODUCTION_READY_Question::sample_other(),
+            Q::q00(),
+            Q::q01(),
+            Q::q02(),
+            Q::q03(),
+            Q::q04(),
+            Q::q05(),
         ])
     }
     fn sample_other() -> Self {
+        type Q = Security_NOT_PRODUCTION_READY_Question;
         Self::from_iter([
-            Security_NOT_PRODUCTION_READY_Question::with_details(
-                Uuid::from_bytes([0x5e; 16]),
-                1,
-                SecurityQuestionKind::Freeform,
-                "In what city did your parents meet?",
-            ),
-            Security_NOT_PRODUCTION_READY_Question::sample(),
+            Q::q06(),
+            Q::q07(),
+            Q::q08(),
+            Q::q09(),
+            Q::q10(),
+            Q::q11(),
         ])
     }
 }
