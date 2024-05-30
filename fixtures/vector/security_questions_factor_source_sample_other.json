@@ -1,0 +1,124 @@
+{
+	"id": {
+		"kind": "securityQuestions",
+		"body": "bb0ac72196f748bba4ddf9c6d87c4e3ea939750e3a207f312653aa25f3f9c060"
+	},
+	"common": {
+		"cryptoParameters": {
+			"supportedCurves": [
+				"curve25519"
+			],
+			"supportedDerivationPathSchemes": [
+				"cap26"
+			]
+		},
+		"addedOn": "2024-05-30T14:48:53.585Z",
+		"lastUsedOn": "2024-05-30T14:48:53.585Z",
+		"flags": []
+	},
+	"sealedMnemonic": {
+		"securityQuestions": [
+			{
+				"id": 6,
+				"version": 1,
+				"kind": "freeform",
+				"question": "What is the middle name of your youngest child?",
+				"expectedAnswerFormat": {
+					"answerStructure": "<NAME>",
+					"exampleAnswer": "Maria",
+					"unsafeAnswers": []
+				}
+			},
+			{
+				"id": 7,
+				"version": 1,
+				"kind": "freeform",
+				"question": "What was the name of your first stuffed animal?",
+				"expectedAnswerFormat": {
+					"answerStructure": "<NAME>",
+					"exampleAnswer": "Oinky piggy pig",
+					"unsafeAnswers": [
+						"Teddy",
+						"Cat",
+						"Dog",
+						"Winnie (the Poh)",
+						"(Peter) Rabbit"
+					]
+				}
+			},
+			{
+				"id": 8,
+				"version": 1,
+				"kind": "freeform",
+				"question": "What is your oldest cousin's middle name?",
+				"expectedAnswerFormat": {
+					"answerStructure": "<NAME>",
+					"exampleAnswer": "Maria",
+					"unsafeAnswers": [
+						"Don't use this one if you and your cousin are very close and have plenty of mutual friends."
+					]
+				}
+			},
+			{
+				"id": 9,
+				"version": 1,
+				"kind": "freeform",
+				"question": "What was the last name of your third grade teacher?",
+				"expectedAnswerFormat": {
+					"answerStructure": "<NAME>",
+					"exampleAnswer": "Maria",
+					"unsafeAnswers": []
+				}
+			},
+			{
+				"id": 10,
+				"version": 1,
+				"kind": "freeform",
+				"question": "What is the name of a college you applied to but didn't attend?",
+				"expectedAnswerFormat": {
+					"answerStructure": "<UNIVERSITY NAME>",
+					"exampleAnswer": "Oxford",
+					"unsafeAnswers": []
+				}
+			},
+			{
+				"id": 11,
+				"version": 1,
+				"kind": "freeform",
+				"question": "What was the name of the first school you remember attending?",
+				"expectedAnswerFormat": {
+					"answerStructure": "<SCHOOL NAME>",
+					"exampleAnswer": "Hogwartz",
+					"unsafeAnswers": []
+				}
+			}
+		],
+		"kdfScheme": {
+			"version1": {
+				"kdfKeyExchangesKeysFromQuestionsAndAnswers": null,
+				"kdfEncryptionKeysFromKeyExchangeKeys": null
+			}
+		},
+		"encryptionScheme": {
+			"description": "AESGCM-256",
+			"version": 1
+		},
+		"encryptions": [
+			"60224f3f5493d0b1bbb2259a45873d816e587caacb1bf64fec6e2e70faefe51b017fc480e53a9c787e04ef2a1f36b8b92b0fc7d486025702cfc68f32",
+			"c926adb9e1da7acfd0dfaed0db2ae6fe9ef85d2af602cf8b069dce38f68ca2f811f52ea95a1a15694e0f36772bb1f3d67e1d8e987a25931bd61da41a",
+			"f51a850da61d0c1238a662417b6ceca98a031e5778233593795279f109fad62228e2d8786b31dfed48c97dc5f36dd779c1ab881d8f9682c85b20cf2e",
+			"80bf3a2c6632fffceab9bed7ca627c33a7f941e6b7aa65d16cb511f386e2749dc56c141562873da8f592ce3e3f606dfd1a9e73b29d0fec77aafa69aa",
+			"b43b5eb0503fbbff85d4822b31b0491acfcaccd4a764f0a659ca49c6f613c0c1550b8ace9f04149c8ab78a433db16559a5f0950994071053889b7d15",
+			"ddfa0b726a3a7d230156f5a3e03331bda10a623ec1fd7e9ad5ef72b285091daa6af9e253606ca0a88d67315fdcc5c8607187c2553dc2e2d91da993db",
+			"4a99f2952557870f68f4e6d57c5d05b463652dca9fd5f7900a3cb2f60dc9725ae57748cafa055b66e8000a1e7bc0afb289a853bc098ba7442a8f2371",
+			"e2e9e7610b20df0b1d01f015ba42550d7515187507d2678998d36cabee5128f50ee38a49b0348fa2c6cbbf90ffc191b616c4d011ab8409de01c02c3d",
+			"bc092355bce8abcd6186e6e1c38b8dffae4fdfe1841b5e2e81e958fef03a2bd391dd0e2517677f6eded063425fd0200f7eff226dba191ad841aaf130",
+			"597a33a7397e3474ad3cf35fb7a6106e726ce9adaf5a5c37e49995410e2029e15cb36af25f2ad403e190a0490e9bd5b1121a51deb4f77857b559d128",
+			"b8dfea3ea46f2059286e9396feb6306e836c1653fa3238fd3642fabb21705bea9f6847d69e12891cfccf9c26a4afdcb6a3e13f615641b54fd4548c38",
+			"5b5e55d9225dee6e065798951270f50a189362f0410046a0ae4cb01e003530877423750a398723e6e0a36b45024c3d11122d4a126e770156f89dffd6",
+			"5222b267fc2ee2b1d61e1547301adc21b7234ee480388b14d8de0a9c14b680a0e0981163aed8afac188e1c14d98b2008292ec3ac4ad2a2d7d764240a",
+			"f9bf684be323f0f8bddc10e373445fdd57b9c346a350eeff96b91d1a0c998e7a463d17542df572558f9d592f10a29148b85f566cfde069bf079cf6df",
+			"257e427f7b4d04ed13bd2692994a641dcb4b4012b388e5fcdd3fd0983830ff8399641ab595c9f32abca6c7de2c7f303b5bcc9b22ed00f4549c5c598c"
+		]
+	}
+}

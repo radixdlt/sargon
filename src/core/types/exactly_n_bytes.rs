@@ -559,8 +559,8 @@ decl_exactly_n_bytes!(
 );
 
 decl_exactly_n_bytes!(
-    /// 182 bytes, used as encrypted mnemonic for security questions factor
-    /// source. 32 bytes mnemonic when encrypted results in exactly 185 bytes.
-    185,
-    "185deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddea", // expected sample value for tests
+    /// 60 bytes, used as encrypted mnemonic for security questions factor
+    /// source. 32 bytes mnemonic when encrypted results in exactly this length.
+    60,
+    "deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead", // expected sample value for tests
 );

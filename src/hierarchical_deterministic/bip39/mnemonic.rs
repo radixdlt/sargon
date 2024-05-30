@@ -93,6 +93,14 @@ impl Mnemonic {
             .map(Self::from_internal)
     }
 
+    pub fn from_32bytes_entropy(entropy: Exactly32Bytes) -> Self {
+        let internal: bip39::Mnemonic = bip39::Mnemonic::from_entropy(
+            entropy.as_ref(),
+        )
+        .expect("Should always be able to create Mnemonic from 32 bytes");
+        Self::from_internal(internal)
+    }
+
     pub fn from_words(words: Vec<BIP39Word>) -> Result<Self> {
         if words.is_empty() {
             return Err(CommonError::InvalidMnemonicPhrase);
@@ -112,6 +120,12 @@ impl Mnemonic {
         bip39::Mnemonic::from_str(phrase)
             .map_err(|_| CommonError::InvalidMnemonicPhrase)
             .map(Self::from_internal)
+    }
+
+    pub fn to_entropy(&self) -> NonEmptyMax32Bytes {
+        let entropy = self.internal().to_entropy();
+        NonEmptyMax32Bytes::try_from(entropy)
+            .expect("Entropy should never be empty and always max 32 bytes")
     }
 
     pub fn to_seed(&self, passphrase: &str) -> BIP39Seed {
@@ -159,7 +173,7 @@ pub(super) fn calculate_last_mnemonic_word_from_words(
             Err(_) => continue,
         };
     }
-    assert!(mnemonics.len() > 0, "should find at least one!");
+    assert!(!mnemonics.is_empty(), "should find at least one!");
     mnemonics
 }
 
@@ -168,7 +182,7 @@ pub(super) fn calculate_last_mnemonic_word_from_phrase(
     phrase: impl AsRef<str>,
 ) -> Vec<Mnemonic> {
     calculate_last_mnemonic_word_from_words(
-        phrase.as_ref().split(" ").into_iter().map(|x| x.to_owned()),
+        phrase.as_ref().split(' ').map(|x| x.to_owned()),
     )
 }
 

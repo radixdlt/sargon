@@ -21,7 +21,7 @@ pub struct SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic {
 
     /// The N many encryptions of the mnemonic, where N corresponds to the number of derived keys
     /// from the `keyDerivationScheme`
-    pub encryptions: Vec<Exactly185Bytes>, // FIXME: Set?
+    pub encryptions: Vec<Exactly60Bytes>, // FIXME: Set?
 }
 
 impl SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic {
@@ -37,19 +37,18 @@ impl SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic {
             .map(|qa| qa.question.clone())
             .collect::<Security_NOT_PRODUCTION_READY_Questions>();
 
-        let plaintext = serde_json::to_vec(&mnemonic)
-            .expect("JSON encoding of Mnemonic should never fail.");
+        let mnemonic_entropy = Exactly32Bytes::try_from(mnemonic.to_entropy().as_ref()).expect("SecurityQuestionsFactorSource mnemonics SHOULD ALWAYS be 32 bytes of entropy.");
 
         let encryption_keys = kdf_scheme.derive_encryption_keys_from_questions_and_answers(questions_and_answers).expect("TODO validate that answer is non-empty BEFORE passing it here.");
 
         let encryptions = encryption_keys
             .into_iter()
             .map(|k| {
-                encryption_scheme.encrypt(plaintext.clone(), &mut k.clone())
+                encryption_scheme.encrypt(mnemonic_entropy, &mut k.clone())
             })
             .map(|vec| {
-                Exactly185Bytes::try_from(vec)
-                    .expect("Should have been 185 bytes")
+                Exactly60Bytes::try_from(vec)
+                    .expect("Should have been 60 bytes")
             })
             .collect_vec();
 
@@ -75,15 +74,16 @@ impl SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic {
 
         for decryption_key in decryption_keys {
             for encrypted_mnemonic in self.encryptions.iter() {
-                match self.encryption_scheme.decrypt(
-                    encrypted_mnemonic.bytes(),
-                    &mut decryption_key.clone(),
-                ) {
+                match self
+                    .encryption_scheme
+                    .decrypt(
+                        encrypted_mnemonic.bytes(),
+                        &mut decryption_key.clone(),
+                    )
+                    .and_then(Exactly32Bytes::try_from)
+                {
                     Ok(decrypted) => {
-                        return serde_json::from_slice::<Mnemonic>(&decrypted)
-                            .map_err(|_| {
-                                CommonError::FailedToDecryptSealedMnemonic
-                            })
+                        return Ok(Mnemonic::from_32bytes_entropy(decrypted))
                     }
                     _ => continue,
                 }

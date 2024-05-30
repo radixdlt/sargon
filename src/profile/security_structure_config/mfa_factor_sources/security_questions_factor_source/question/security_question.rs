@@ -45,12 +45,12 @@ impl Security_NOT_PRODUCTION_READY_ExpectedAnswerFormat {
     }
 
     pub fn name() -> Self {
-        Self::new("<Name>", "Maria")
+        Self::new("<NAME>", "Maria")
     }
 
     pub fn location() -> Self {
         Self::with_details(
-            "<Location>",
+            "<LOCATION>",
             "At bus stop outside of Dallas",
             ["Specifying only a country as location would be unsafe"],
         )
@@ -99,7 +99,7 @@ impl Identifiable for Security_NOT_PRODUCTION_READY_Question {
     /// Return `Element`'s globally unique and stable ID, used to uniquely identify
     /// the `Element` in the `IdentifiedVecOf` collection of elements.
     fn id(&self) -> Self::ID {
-        self.id.clone()
+        self.id
     }
 }
 
@@ -150,13 +150,15 @@ impl Security_NOT_PRODUCTION_READY_Question {
             "What was the first exam you failed",
             Security_NOT_PRODUCTION_READY_ExpectedAnswerFormat::new(
                 "<SCHOOL>, <SCHOOL_GRADE>, <SUBJECT>",
-                "MIT, year 2, Physics",
+                "MIT, year 4, Python",
             ),
         )
     }
 
     /// ❗️ NOT PRODUCTION READY YET ❗️
-    pub fn q00() -> Self { Self::failed_exam() }
+    pub fn q00() -> Self {
+        Self::failed_exam()
+    }
 
     /// ❗️ NOT PRODUCTION READY YET ❗️
     /// An NON-entropy-analyzed security question
@@ -175,7 +177,9 @@ impl Security_NOT_PRODUCTION_READY_Question {
     }
 
     /// ❗️ NOT PRODUCTION READY YET ❗️
-    pub fn q01() -> Self { Self::parents_met() }
+    pub fn q01() -> Self {
+        Self::parents_met()
+    }
 
     /// ❗️ NOT PRODUCTION READY YET ❗️
     /// An NON-entropy-analyzed security question
@@ -192,7 +196,9 @@ impl Security_NOT_PRODUCTION_READY_Question {
         )
     }
     /// ❗️ NOT PRODUCTION READY YET ❗️
-    pub fn q02() -> Self { Self::first_concert() }
+    pub fn q02() -> Self {
+        Self::first_concert()
+    }
 
     /// ❗️ NOT PRODUCTION READY YET ❗️
     /// An NON-entropy-analyzed security question
@@ -210,7 +216,9 @@ impl Security_NOT_PRODUCTION_READY_Question {
         )
     }
     /// ❗️ NOT PRODUCTION READY YET ❗️
-    pub fn q03() -> Self { Self::first_kiss_whom() }
+    pub fn q03() -> Self {
+        Self::first_kiss_whom()
+    }
 
     /// ❗️ NOT PRODUCTION READY YET ❗️
     /// An NON-entropy-analyzed security question
@@ -228,7 +236,9 @@ impl Security_NOT_PRODUCTION_READY_Question {
         )
     }
     /// ❗️ NOT PRODUCTION READY YET ❗️
-    pub fn q04() -> Self { Self::first_kiss_location() }
+    pub fn q04() -> Self {
+        Self::first_kiss_location()
+    }
 
     /// ❗️ NOT PRODUCTION READY YET ❗️
     /// An NON-entropy-analyzed security question
@@ -246,7 +256,9 @@ impl Security_NOT_PRODUCTION_READY_Question {
         )
     }
     /// ❗️ NOT PRODUCTION READY YET ❗️
-    pub fn q05() -> Self { Self::spouse_met() }
+    pub fn q05() -> Self {
+        Self::spouse_met()
+    }
 
     /// ❗️ NOT PRODUCTION READY YET ❗️
     /// An NON-entropy-analyzed security question
@@ -264,7 +276,9 @@ impl Security_NOT_PRODUCTION_READY_Question {
         )
     }
     /// ❗️ NOT PRODUCTION READY YET ❗️
-    pub fn q06() -> Self { Self::child_middle_name() }
+    pub fn q06() -> Self {
+        Self::child_middle_name()
+    }
 
     /// ❗️ NOT PRODUCTION READY YET ❗️
     /// An NON-entropy-analyzed security question
@@ -286,7 +300,9 @@ impl Security_NOT_PRODUCTION_READY_Question {
         )
     }
     /// ❗️ NOT PRODUCTION READY YET ❗️
-    pub fn q07() -> Self { Self::stuffed_animal() }
+    pub fn q07() -> Self {
+        Self::stuffed_animal()
+    }
 
     /// ❗️ NOT PRODUCTION READY YET ❗️
     /// An NON-entropy-analyzed security question
@@ -298,12 +314,15 @@ impl Security_NOT_PRODUCTION_READY_Question {
     /// ❗️ NOT PRODUCTION READY YET ❗️
     pub fn oldest_cousin() -> Self {
         Self::freeform_with_id(
-            8, 
-            "What is your oldest cousin’s middle name?", 
-            Security_NOT_PRODUCTION_READY_ExpectedAnswerFormat::with_details("<NAME>", "Maria", ["Don’t use this one if you and your cousin are very close and have plenty of mutual friends."]))
+            8,
+            "What is your oldest cousin's middle name?", 
+            Security_NOT_PRODUCTION_READY_ExpectedAnswerFormat::with_details("<NAME>", "Maria", ["Don't use this one if you and your cousin are very close and have plenty of mutual friends."]))
     }
+
     /// ❗️ NOT PRODUCTION READY YET ❗️
-    pub fn q08() -> Self { Self::oldest_cousin() }
+    pub fn q08() -> Self {
+        Self::oldest_cousin()
+    }
 
     /// ❗️ NOT PRODUCTION READY YET ❗️
     /// An NON-entropy-analyzed security question
@@ -321,7 +340,9 @@ impl Security_NOT_PRODUCTION_READY_Question {
         )
     }
     /// ❗️ NOT PRODUCTION READY YET ❗️
-    pub fn q09() -> Self { Self::teacher_grade3() }
+    pub fn q09() -> Self {
+        Self::teacher_grade3()
+    }
 
     /// ❗️ NOT PRODUCTION READY YET ❗️
     /// An NON-entropy-analyzed security question
@@ -334,7 +355,7 @@ impl Security_NOT_PRODUCTION_READY_Question {
     pub fn applied_uni_no_attend() -> Self {
         Self::freeform_with_id(
             10,
-            "What is the name of a college you applied to but didn’t attend?",
+            "What is the name of a college you applied to but didn't attend?",
             Security_NOT_PRODUCTION_READY_ExpectedAnswerFormat::new(
                 "<UNIVERSITY NAME>",
                 "Oxford",
@@ -342,7 +363,9 @@ impl Security_NOT_PRODUCTION_READY_Question {
         )
     }
     /// ❗️ NOT PRODUCTION READY YET ❗️
-    pub fn q10() -> Self { Self::applied_uni_no_attend() }
+    pub fn q10() -> Self {
+        Self::applied_uni_no_attend()
+    }
 
     /// ❗️ NOT PRODUCTION READY YET ❗️
     /// An NON-entropy-analyzed security question
@@ -355,7 +378,7 @@ impl Security_NOT_PRODUCTION_READY_Question {
     pub fn first_school() -> Self {
         Self::freeform_with_id(
             11,
-            " What was the name of the first school you remember attending?",
+            "What was the name of the first school you remember attending?",
             Security_NOT_PRODUCTION_READY_ExpectedAnswerFormat::new(
                 "<SCHOOL NAME>",
                 "Hogwartz",
@@ -363,7 +386,9 @@ impl Security_NOT_PRODUCTION_READY_Question {
         )
     }
     /// ❗️ NOT PRODUCTION READY YET ❗️
-    pub fn q11() -> Self { Self::first_school() }
+    pub fn q11() -> Self {
+        Self::first_school()
+    }
 
     /// ❗️ NOT PRODUCTION READY YET ❗️
     /// An NON-entropy-analyzed security question
@@ -376,12 +401,14 @@ impl Security_NOT_PRODUCTION_READY_Question {
     pub fn math_teacher_highschool() -> Self {
         Self::freeform_with_id(
             12,
-            "What was your maths teacher's surname in your 8th year of school?",
+            "What was your maths teacher's surname in 7th grade?",
             Security_NOT_PRODUCTION_READY_ExpectedAnswerFormat::name(),
         )
     }
     /// ❗️ NOT PRODUCTION READY YET ❗️
-    pub fn q12() -> Self { Self::math_teacher_highschool() }
+    pub fn q12() -> Self {
+        Self::math_teacher_highschool()
+    }
 
     /// ❗️ NOT PRODUCTION READY YET ❗️
     /// An NON-entropy-analyzed security question
@@ -399,7 +426,9 @@ impl Security_NOT_PRODUCTION_READY_Question {
         )
     }
     /// ❗️ NOT PRODUCTION READY YET ❗️
-    pub fn q13() -> Self { Self::drivings_instructor() }
+    pub fn q13() -> Self {
+        Self::drivings_instructor()
+    }
 
     /// ❗️ NOT PRODUCTION READY YET ❗️
     /// An NON-entropy-analyzed security question
@@ -413,12 +442,14 @@ impl Security_NOT_PRODUCTION_READY_Question {
     pub fn street_friend_highschool() -> Self {
         Self::freeform_with_id(
             14,
-            "What was the street name where your best friend in high school lived (street name only)?",
-            Security_NOT_PRODUCTION_READY_ExpectedAnswerFormat::name(),
+            "What was the street name where your best friend in high school lived?",
+            Security_NOT_PRODUCTION_READY_ExpectedAnswerFormat::with_details("<STREET NAME WITHOUT NUMBER>", "Baker Street", ["Bad if had several different best friends during high school."]),
         )
     }
     /// ❗️ NOT PRODUCTION READY YET ❗️
-    pub fn q14() -> Self { Self::street_friend_highschool() }
+    pub fn q14() -> Self {
+        Self::street_friend_highschool()
+    }
 
     /// ❗️ NOT PRODUCTION READY YET ❗️
     /// An NON-entropy-analyzed security question
@@ -437,7 +468,9 @@ impl Security_NOT_PRODUCTION_READY_Question {
         )
     }
     /// ❗️ NOT PRODUCTION READY YET ❗️
-    pub fn q15() -> Self { Self::friend_kindergarten() }
+    pub fn q15() -> Self {
+        Self::friend_kindergarten()
+    }
 
     /// ❗️ NOT PRODUCTION READY YET ❗️
     /// An NON-entropy-analyzed security question
@@ -455,8 +488,10 @@ impl Security_NOT_PRODUCTION_READY_Question {
             Security_NOT_PRODUCTION_READY_ExpectedAnswerFormat::with_details("<STREET NAME WITHOUT NUMBER>", "Abbey Road", ["Bad if you lived in many places during that year."]),
         )
     }
-        /// ❗️ NOT PRODUCTION READY YET ❗️
-        pub fn q16() -> Self { Self::street_age8() }
+    /// ❗️ NOT PRODUCTION READY YET ❗️
+    pub fn q16() -> Self {
+        Self::street_age8()
+    }
 }
 
 impl Security_NOT_PRODUCTION_READY_Question {
@@ -494,7 +529,6 @@ impl HasSampleValues for Security_NOT_PRODUCTION_READY_Question {
         Self::first_kiss_location()
     }
 }
-
 
 #[cfg(test)]
 mod tests {

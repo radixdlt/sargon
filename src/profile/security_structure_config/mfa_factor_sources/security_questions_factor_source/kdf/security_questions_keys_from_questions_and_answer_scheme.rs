@@ -18,6 +18,14 @@ pub enum SecurityQuestions_NOT_PRODUCTION_READY_KDFScheme {
     Version1(SecurityQuestions_NOT_PRODUCTION_READY_KDFSchemeVersion1),
 }
 
+impl Default for SecurityQuestions_NOT_PRODUCTION_READY_KDFScheme {
+    fn default() -> Self {
+        Self::Version1(
+            SecurityQuestions_NOT_PRODUCTION_READY_KDFSchemeVersion1::default(),
+        )
+    }
+}
+
 impl IsSecurityQuestionsKDFScheme
     for SecurityQuestions_NOT_PRODUCTION_READY_KDFScheme
 {
@@ -46,6 +54,15 @@ impl IsSecurityQuestionsKDFScheme
 pub struct SecurityQuestions_NOT_PRODUCTION_READY_KDFSchemeVersion1 {
     pub kdf_key_exchanges_keys_from_questions_and_answers: SecurityQuestions_NOT_PRODUCTION_READY_KeyExchangeKeysFromQandAsLowerTrimUtf8,
     pub kdf_encryption_keys_from_key_exchange_keys: SecurityQuestions_NOT_PRODUCTION_READY_EncryptionKeysByDiffieHellmanFold,
+}
+
+impl Default for SecurityQuestions_NOT_PRODUCTION_READY_KDFSchemeVersion1 {
+    fn default() -> Self {
+        Self {
+            kdf_key_exchanges_keys_from_questions_and_answers: SecurityQuestions_NOT_PRODUCTION_READY_KeyExchangeKeysFromQandAsLowerTrimUtf8,
+            kdf_encryption_keys_from_key_exchange_keys: SecurityQuestions_NOT_PRODUCTION_READY_EncryptionKeysByDiffieHellmanFold
+        }
+    }
 }
 
 impl IsSecurityQuestionsKDFScheme

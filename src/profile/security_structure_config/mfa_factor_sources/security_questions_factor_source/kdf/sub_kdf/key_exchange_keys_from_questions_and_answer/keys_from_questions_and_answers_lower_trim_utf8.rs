@@ -25,6 +25,14 @@ impl From<Exactly32Bytes> for X25519PrivateKey {
 #[allow(non_camel_case_types)]
 pub struct SecurityQuestions_NOT_PRODUCTION_READY_KeyExchangeKeysFromQandAsLowerTrimUtf8;
 
+impl Default
+    for SecurityQuestions_NOT_PRODUCTION_READY_KeyExchangeKeysFromQandAsLowerTrimUtf8
+{
+    fn default() -> Self {
+        Self
+    }
+}
+
 const FORBIDDEN_CHARACTERS: &[char] = &[
     ' ',  // whitespace
     '\t', // whitespace

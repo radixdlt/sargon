@@ -25,6 +25,14 @@ impl From<X25519PublicKey> for EncryptionKey {
 #[allow(non_camel_case_types)]
 pub struct SecurityQuestions_NOT_PRODUCTION_READY_EncryptionKeysByDiffieHellmanFold;
 
+impl Default
+    for SecurityQuestions_NOT_PRODUCTION_READY_EncryptionKeysByDiffieHellmanFold
+{
+    fn default() -> Self {
+        Self
+    }
+}
+
 impl SecurityQuestions_NOT_PRODUCTION_READY_EncryptionKeysByDiffieHellmanFold {
     // TODO version me!!
     fn multi_party_ecdh(

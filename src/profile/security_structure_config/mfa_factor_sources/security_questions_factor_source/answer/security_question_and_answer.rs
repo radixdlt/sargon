@@ -13,6 +13,34 @@ pub struct Security_NOT_PRODUCTION_READY_QuestionAndAnswer {
     pub answer: String,
 }
 
+impl Security_NOT_PRODUCTION_READY_QuestionAndAnswer {
+    pub fn new(
+        question: Security_NOT_PRODUCTION_READY_Question,
+        answer: impl AsRef<str>,
+    ) -> Self {
+        Self {
+            question,
+            answer: answer.as_ref().to_owned(),
+        }
+    }
+}
+
+impl HasSampleValues for Security_NOT_PRODUCTION_READY_QuestionAndAnswer {
+    fn sample() -> Self {
+        Self::new(
+            Security_NOT_PRODUCTION_READY_Question::first_concert(),
+            "Jean-Michel Jarre, Paris La Défense, 1990",
+        )
+    }
+
+    fn sample_other() -> Self {
+        Self::new(
+            Security_NOT_PRODUCTION_READY_Question::stuffed_animal(),
+            "Oinky piggy pig",
+        )
+    }
+}
+
 impl Identifiable for Security_NOT_PRODUCTION_READY_QuestionAndAnswer {
     type ID = <Security_NOT_PRODUCTION_READY_Question as Identifiable>::ID;
 
