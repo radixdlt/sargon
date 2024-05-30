@@ -164,8 +164,21 @@ impl SecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
     pub fn new_by_encrypting(
         mnemonic: Mnemonic,
         with: Security_NOT_PRODUCTION_READY_QuestionsAndAnswers,
+        kdf_scheme: SecurityQuestions_NOT_PRODUCTION_READY_KDFScheme,
+        encryption_scheme: EncryptionScheme,
     ) -> Self {
-        todo!()
+        let questions_and_answers = with;
+        let id = FactorSourceIDFromHash::new_for_security_questions(
+            &MnemonicWithPassphrase::new(mnemonic.clone()),
+        );
+        let sealed_mnemonic = SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic::new_by_encrypting(mnemonic, questions_and_answers, kdf_scheme, encryption_scheme);
+        let common = FactorSourceCommon::new_babylon();
+
+        Self {
+            id,
+            sealed_mnemonic,
+            common,
+        }
     }
 
     pub fn decrypt(

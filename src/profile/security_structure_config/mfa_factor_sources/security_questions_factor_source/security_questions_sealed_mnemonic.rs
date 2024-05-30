@@ -25,6 +25,42 @@ pub struct SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic {
 }
 
 impl SecurityQuestionsSealed_NOT_PRODUCTION_READY_Mnemonic {
+    pub fn new_by_encrypting(
+        mnemonic: Mnemonic,
+        with: Security_NOT_PRODUCTION_READY_QuestionsAndAnswers,
+        kdf_scheme: SecurityQuestions_NOT_PRODUCTION_READY_KDFScheme,
+        encryption_scheme: EncryptionScheme,
+    ) -> Self {
+        let questions_and_answers = with;
+        let security_questions = questions_and_answers
+            .iter()
+            .map(|qa| qa.question.clone())
+            .collect::<Security_NOT_PRODUCTION_READY_Questions>();
+
+        let plaintext = serde_json::to_vec(&mnemonic)
+            .expect("JSON encoding of Mnemonic should never fail.");
+
+        let encryption_keys = kdf_scheme.derive_encryption_keys_from_questions_and_answers(questions_and_answers).expect("TODO validate that answer is non-empty BEFORE passing it here.");
+
+        let encryptions = encryption_keys
+            .into_iter()
+            .map(|k| {
+                encryption_scheme.encrypt(plaintext.clone(), &mut k.clone())
+            })
+            .map(|vec| {
+                Exactly185Bytes::try_from(vec)
+                    .expect("Should have been 185 bytes")
+            })
+            .collect_vec();
+
+        Self {
+            security_questions,
+            encryptions,
+            kdf_scheme,
+            encryption_scheme,
+        }
+    }
+
     pub fn decrypt(
         &self,
         with: Security_NOT_PRODUCTION_READY_QuestionsAndAnswers,

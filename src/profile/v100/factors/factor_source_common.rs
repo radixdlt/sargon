@@ -73,6 +73,10 @@ impl FactorSourceCommon {
         Self::new(FactorSourceCryptoParameters::olympia(), Vec::new())
     }
 
+    pub fn new_babylon() -> Self {
+        Self::new(FactorSourceCryptoParameters::babylon(), Vec::new())
+    }
+
     pub fn new_bdfs(is_main: bool) -> Self {
         Self::new(
             FactorSourceCryptoParameters::babylon(),
