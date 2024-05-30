@@ -550,6 +550,15 @@ pub enum CommonError {
 
     #[error("Expected ArculusCard factor source got something else")]
     ExpectedArculusCardFactorSourceGotSomethingElse = 10155,
+
+    #[error("Failed to Derive Key after max attempts")]
+    FailedToDeriveKeyAfterMaxAttempts = 10156,
+
+    #[error("Failed to decrypt sealed mnemonic")]
+    FailedToDecryptSealedMnemonic = 10157,
+
+    #[error("Answers to Security Questions cannot be empty")]
+    AnswersToSecurityQuestionsCannotBeEmpty = 10158,
 }
 
 #[uniffi::export]

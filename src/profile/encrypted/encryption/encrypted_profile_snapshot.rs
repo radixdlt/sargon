@@ -45,7 +45,8 @@ impl EncryptedProfileSnapshot {
         password: impl AsRef<str>,
     ) -> Result<Vec<u8>> {
         // Derive encryption key based on password
-        let mut decryption_key = self.key_derivation_scheme.kdf(password);
+        let mut decryption_key =
+            EncryptionKey::from(self.key_derivation_scheme.kdf(password));
 
         // decrypt Profile JSON bytes
         self.encryption_scheme
@@ -65,7 +66,8 @@ impl EncryptedProfileSnapshot {
         let json = profile.to_json_bytes();
 
         // derive symmetric encryption key
-        let mut encryption_key = key_derivation_scheme.kdf(password);
+        let mut encryption_key =
+            EncryptionKey::from(key_derivation_scheme.kdf(password));
 
         // encrypt profile with encryption key
         let encrypted_payload =

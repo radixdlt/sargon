@@ -48,7 +48,7 @@ impl Service {
             .execute_request_with_decoding(request)
             .await?;
 
-        let mut encryption_key = session.encryption_key;
+        let mut encryption_key = EncryptionKey::from(session.encryption_key);
         let decrypted_wallet_interactions = encrypted_wallet_interactions
             .iter()
             .map(|bytes| {
@@ -70,7 +70,7 @@ impl Service {
         let serialized_response =
             wallet_to_dapp_interaction_response_to_json_bytes(&response);
 
-        let mut encryption_key = session.encryption_key;
+        let mut encryption_key = EncryptionKey::from(session.encryption_key);
         let encrypted_response = self
             .encryption_scheme
             .encrypt(serialized_response.to_vec(), &mut encryption_key);
@@ -187,7 +187,7 @@ mod tests {
     async fn test_get_wallet_interaction_requests() {
         let session = Session::sample();
         // Prepare encryption keys
-        let mut encryption_key = session.encryption_key;
+        let mut encryption_key = EncryptionKey::from(session.encryption_key);
 
         // Serialize the request
         let dapp_to_wallet_interaction_unvalidated =
@@ -235,7 +235,8 @@ mod tests {
         let mock_networking_driver =
             MockNetworkingDriver::with_spy(200, (), |request| {
                 // Prepare encryption keys
-                let mut encryption_key = Session::sample().encryption_key;
+                let mut encryption_key =
+                    EncryptionKey::from(Session::sample().encryption_key);
                 let mut decryption_key = encryption_key;
 
                 // Serialize the response
