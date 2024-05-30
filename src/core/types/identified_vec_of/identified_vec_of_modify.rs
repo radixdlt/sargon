@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+use std::borrow::Borrow;
+
 impl<V: Debug + PartialEq + Eq + Clone + Identifiable> IdentifiedVecOf<V> {
     /// Insert an item in the map **unconditionally**, using `id()` on item as key.
     ///
@@ -82,11 +84,15 @@ impl<V: Debug + PartialEq + Eq + Clone + Identifiable> IdentifiedVecOf<V> {
     /// `true`.
     #[cfg(not(tarpaulin_include))] // false negative
     #[inline]
-    pub fn update_with<F>(&mut self, id: &V::ID, mut mutate: F) -> bool
+    pub fn update_with<F>(
+        &mut self,
+        id: impl Borrow<V::ID>,
+        mut mutate: F,
+    ) -> bool
     where
         F: FnMut(&mut V),
     {
-        let Some(existing) = self.0.get_mut(id) else {
+        let Some(existing) = self.0.get_mut(id.borrow()) else {
             return false;
         };
         mutate(existing);
@@ -252,14 +258,14 @@ mod tests {
         let foobar = User::new(0, "Foobar");
         let mut sut = SUT::sample();
         assert_eq!(sut.get_id(0), Some(&User::alice()));
-        assert!(sut.update_with(&0, |u| { *u = foobar.clone() }));
+        assert!(sut.update_with(0, |u| { *u = foobar.clone() }));
         assert_eq!(sut.get_id(0), Some(&foobar));
     }
 
     #[test]
     fn update_with_not_exists() {
         let mut sut = SUT::sample();
-        assert!(!sut.update_with(&1, |u| { *u = User::bob() }));
+        assert!(!sut.update_with(1, |u| { *u = User::bob() }));
     }
 
     #[test]

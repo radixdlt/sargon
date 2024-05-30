@@ -23,7 +23,7 @@ impl ProfileNetworks {
     where
         F: FnMut(&mut Account),
     {
-        self.update_with(&address.network_id(), |n| {
+        self.update_with(address.network_id(), |n| {
             _ = n.update_account(address, |a| mutate(a))
         });
         self.get_account(address)

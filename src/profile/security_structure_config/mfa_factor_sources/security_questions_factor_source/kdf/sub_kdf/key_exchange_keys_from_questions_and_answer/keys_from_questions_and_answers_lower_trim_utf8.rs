@@ -33,7 +33,7 @@ impl Default
     }
 }
 
-const FORBIDDEN_CHARACTERS: &[char] = &[
+pub(crate) const SECURITY_QUESTIONS_TRIMMED_CHARS: &[char] = &[
     ' ',  // whitespace
     '\t', // whitespace
     '\n', // whitespace
@@ -56,7 +56,7 @@ impl SecurityQuestions_NOT_PRODUCTION_READY_KeyExchangeKeysFromQandAsLowerTrimUt
 
         non_trimmed
             .to_lowercase()
-            .retain(|c| !FORBIDDEN_CHARACTERS.contains(&c));
+            .retain(|c| !SECURITY_QUESTIONS_TRIMMED_CHARS.contains(&c));
 
         let trimmed = non_trimmed;
 

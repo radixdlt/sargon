@@ -218,6 +218,7 @@ impl HasSampleValues for SecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
         assert_eq!(decrypted, Mnemonic::sample_security_questions());
         sut
     }
+
     fn sample_other() -> Self {
         let json = include_str!(concat!(
             env!("FIXTURES_VECTOR"),
@@ -237,6 +238,8 @@ impl HasSampleValues for SecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
 
 #[cfg(test)]
 mod tests {
+    use std::borrow::BorrowMut;
+
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
@@ -254,7 +257,7 @@ mod tests {
     }
 
     #[test]
-    fn cryption_roundtrip_questions_and_answers_sample() {
+    fn roundtrip_sample_all_answers_correct() {
         let m = Mnemonic::sample_security_questions();
         let qas = Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample();
         let sut = SUT::new_by_encrypting(m.clone(), qas.clone());
@@ -262,12 +265,113 @@ mod tests {
         assert_eq!(m, decrypted);
     }
 
+    impl Security_NOT_PRODUCTION_READY_QuestionAndAnswer {
+        fn insert_bad_chars_to_answer(&mut self) {
+            let bad: String =
+                String::from_iter(SECURITY_QUESTIONS_TRIMMED_CHARS);
+            self.answer = format!("{}{}{}", bad, self.answer, bad);
+        }
+    }
+
     #[test]
-    fn cryption_roundtrip_questions_and_answers_sample_other() {
+    fn roundtrip_sample_one_incorrect_answer_is_ok() {
+        let m = Mnemonic::sample_security_questions();
+        let mut qas =
+            Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample();
+        let sut = SUT::new_by_encrypting(m.clone(), qas.clone());
+
+        // Change to one wrong answer when decrypting
+        qas.update_with(0, |qa| qa.answer = "wrong".to_owned());
+        let decrypted = sut.decrypt(qas).unwrap();
+        assert_eq!(m, decrypted);
+    }
+
+    #[test]
+    fn roundtrip_sample_two_incorrect_answer_is_ok() {
+        let m = Mnemonic::sample_security_questions();
+        let mut qas =
+            Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample();
+        let sut = SUT::new_by_encrypting(m.clone(), qas.clone());
+
+        // Change to two wrong answers when decrypting
+        qas.update_with(0, |qa| qa.answer = "wrong".to_owned());
+        qas.update_with(3, |qa| qa.answer = "also wrong".to_owned());
+        let decrypted = sut.decrypt(qas).unwrap();
+        assert_eq!(m, decrypted);
+    }
+
+    #[test]
+    fn roundtrip_sample_case_does_not_matter() {
+        let m = Mnemonic::sample_security_questions();
+        let mut qas =
+            Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample();
+        let sut = SUT::new_by_encrypting(m.clone(), qas.clone());
+
+        // Change all answers to uppercase before decrypting is ok
+        qas.update_with(0, |qa| qa.answer = qa.answer.to_uppercase());
+        let decrypted = sut.decrypt(qas).unwrap();
+        assert_eq!(m, decrypted);
+    }
+
+    #[test]
+    fn roundtrip_sample_bad_chars_are_trimmed() {
+        let m = Mnemonic::sample_security_questions();
+        let mut qas =
+            Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample();
+        let sut = SUT::new_by_encrypting(m.clone(), qas.clone());
+
+        // Inserting bad chars into answer before decrypting.
+        qas.update_with(0, |qa| qa.insert_bad_chars_to_answer());
+        let decrypted = sut.decrypt(qas).unwrap();
+        assert_eq!(m, decrypted);
+    }
+
+    #[test]
+    fn roundtrip_sample_other_all_answers_correct() {
         let m = Mnemonic::sample_security_questions_other();
         let qas =
             Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample_other();
         let sut = SUT::new_by_encrypting(m.clone(), qas.clone());
+        let decrypted = sut.decrypt(qas).unwrap();
+        assert_eq!(m, decrypted);
+    }
+
+    #[test]
+    fn roundtrip_sample_other_case_does_not_matter() {
+        let m = Mnemonic::sample_security_questions_other();
+        let mut qas =
+            Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample_other();
+        let sut = SUT::new_by_encrypting(m.clone(), qas.clone());
+
+        // Change all answers to uppercase before decrypting is ok
+        qas.update_with(0, |qa| qa.answer = qa.answer.to_uppercase());
+        let decrypted = sut.decrypt(qas).unwrap();
+        assert_eq!(m, decrypted);
+    }
+
+    #[test]
+    fn roundtrip_sample_other_one_incorrect_answer_is_ok() {
+        let m = Mnemonic::sample_security_questions_other();
+        let mut qas =
+            Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample_other();
+        let sut = SUT::new_by_encrypting(m.clone(), qas.clone());
+
+        // Change to two wrong answers when decrypting
+        qas.update_with(0, |qa| qa.answer = "wrong".to_owned());
+        let decrypted = sut.decrypt(qas).unwrap();
+        assert_eq!(m, decrypted);
+    }
+
+    #[test]
+    fn roundtrip_sample_other_two_incorrect_answer_is_ok() {
+        let m = Mnemonic::sample_security_questions_other();
+        let mut qas =
+            Security_NOT_PRODUCTION_READY_QuestionsAndAnswers::sample_other();
+        let sut = SUT::new_by_encrypting(m.clone(), qas.clone());
+
+        // Change to two wrong answers when decrypting
+        qas.update_with(0, |qa| qa.answer = "wrong".to_owned());
+        qas.update_with(3, |qa| qa.answer = "also wrong".to_owned());
         let decrypted = sut.decrypt(qas).unwrap();
         assert_eq!(m, decrypted);
     }
