@@ -236,6 +236,50 @@ impl HasSampleValues for SecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
     }
 }
 
+impl From<SecurityQuestions_NOT_PRODUCTION_READY_FactorSource>
+    for FactorSource
+{
+    fn from(
+        value: SecurityQuestions_NOT_PRODUCTION_READY_FactorSource,
+    ) -> Self {
+        FactorSource::SecurityQuestions { value }
+    }
+}
+
+impl TryFrom<FactorSource>
+    for SecurityQuestions_NOT_PRODUCTION_READY_FactorSource
+{
+    type Error = CommonError;
+
+    fn try_from(value: FactorSource) -> Result<Self> {
+        value.clone().into_security_questions().map_err(|_| {
+            CommonError::InvalidFactorSourceKind {
+                bad_value: value.factor_source_kind().to_string(),
+            }
+        })
+    }
+}
+impl IsFactorSource for SecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
+    fn kind() -> FactorSourceKind {
+        FactorSourceKind::SecurityQuestions
+    }
+}
+impl BaseIsFactorSource
+    for SecurityQuestions_NOT_PRODUCTION_READY_FactorSource
+{
+    fn common_properties(&self) -> FactorSourceCommon {
+        self.common.clone()
+    }
+
+    fn factor_source_kind(&self) -> FactorSourceKind {
+        self.id.kind
+    }
+
+    fn factor_source_id(&self) -> FactorSourceID {
+        self.clone().id.into()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::borrow::BorrowMut;

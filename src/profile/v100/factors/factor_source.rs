@@ -37,6 +37,12 @@ pub enum FactorSource {
         #[display("ArculusCard({value})")]
         value: ArculusCardFactorSource,
     },
+
+    SecurityQuestions {
+        #[serde(rename = "securityQuestions")]
+        #[display("SecurityQuestions({value})")]
+        value: SecurityQuestions_NOT_PRODUCTION_READY_FactorSource,
+    },
 }
 
 impl BaseIsFactorSource for FactorSource {
@@ -44,6 +50,9 @@ impl BaseIsFactorSource for FactorSource {
         match self {
             FactorSource::Device { value } => value.common_properties(),
             FactorSource::Ledger { value } => value.common_properties(),
+            FactorSource::SecurityQuestions { value } => {
+                value.common_properties()
+            }
             FactorSource::ArculusCard { value } => value.common_properties(),
             FactorSource::OffDeviceMnemonic { value } => {
                 value.common_properties()
@@ -55,6 +64,9 @@ impl BaseIsFactorSource for FactorSource {
         match self {
             FactorSource::Device { value } => value.factor_source_kind(),
             FactorSource::Ledger { value } => value.factor_source_kind(),
+            FactorSource::SecurityQuestions { value } => {
+                value.factor_source_kind()
+            }
             FactorSource::ArculusCard { value } => value.factor_source_kind(),
             FactorSource::OffDeviceMnemonic { value } => {
                 value.factor_source_kind()
@@ -66,6 +78,9 @@ impl BaseIsFactorSource for FactorSource {
         match self {
             FactorSource::Device { value } => value.factor_source_id(),
             FactorSource::Ledger { value } => value.factor_source_id(),
+            FactorSource::SecurityQuestions { value } => {
+                value.factor_source_id()
+            }
             FactorSource::ArculusCard { value } => value.factor_source_id(),
             FactorSource::OffDeviceMnemonic { value } => {
                 value.factor_source_id()
@@ -119,25 +134,30 @@ impl Serialize for FactorSource {
         let mut state = serializer.serialize_struct("FactorSource", 2)?;
         let discriminator_key = "discriminator";
         match self {
-            FactorSource::Device { value: device } => {
+            FactorSource::Device { value } => {
                 let discriminant = "device";
                 state.serialize_field(discriminator_key, discriminant)?;
-                state.serialize_field(discriminant, device)?;
+                state.serialize_field(discriminant, value)?;
             }
-            FactorSource::Ledger { value: ledger } => {
+            FactorSource::Ledger { value } => {
                 let discriminant = "ledgerHQHardwareWallet";
                 state.serialize_field(discriminator_key, discriminant)?;
-                state.serialize_field(discriminant, ledger)?;
+                state.serialize_field(discriminant, value)?;
             }
             FactorSource::ArculusCard { value } => {
                 let discriminant = "arculusCard";
                 state.serialize_field(discriminator_key, discriminant)?;
                 state.serialize_field(discriminant, value)?;
             }
-            FactorSource::OffDeviceMnemonic { value: off_device } => {
+            FactorSource::OffDeviceMnemonic { value } => {
                 let discriminant = "offDeviceMnemonic";
                 state.serialize_field(discriminator_key, discriminant)?;
-                state.serialize_field(discriminant, off_device)?;
+                state.serialize_field(discriminant, value)?;
+            }
+            FactorSource::SecurityQuestions { value } => {
+                let discriminant = "securityQuestions";
+                state.serialize_field(discriminator_key, discriminant)?;
+                state.serialize_field(discriminant, value)?;
             }
         }
         state.end()
