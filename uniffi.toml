@@ -44,8 +44,34 @@ from_custom = "{}.toString()"
 [bindings.swift.custom_types.Timestamp]
 type_name = "Date"
 imports = ["Foundation"]
-into_custom = "{let df = DateFormatter();df.dateFormat = \"yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ\";return df.date(from: {})!}()"
-from_custom = "{let df = DateFormatter();df.dateFormat = \"yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ\";return df.string(from: {})}()"
+into_custom = """
+{
+    let stringToDeserialize = {} // this is UniFFIs counterpart to `$0`
+    let formatter = ISO8601DateFormatter()
+    let formatOptionMS = ISO8601DateFormatter.Options.withFractionalSeconds
+    formatter.formatOptions.insert(formatOptionMS)
+    
+    func format() -> Date? {
+        formatter.date(from: stringToDeserialize)
+    }
+    
+    if let date = format() {
+        return date
+    }
+    
+    // try without fractional seconds
+    formatter.formatOptions.remove(formatOptionMS)
+    return format()!
+}()
+"""
+from_custom = """
+{ 
+    let dateToSerialize = {} // this is UniFFIs counterpart to `$0`
+    let formatter = ISO8601DateFormatter()
+    formatter.formatOptions.insert(.withFractionalSeconds)
+    return formatter.string(from: dateToSerialize)
+}()
+"""
 
 [bindings.kotlin.custom_types.Timestamp]
 type_name = "OffsetDateTime"
