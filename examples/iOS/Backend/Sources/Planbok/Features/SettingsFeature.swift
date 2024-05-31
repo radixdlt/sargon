@@ -40,10 +40,24 @@ public struct SettingsFeature {
 		@CasePathable
 		public enum ViewAction {
 			case createManyAccountsButtonTapped
+            case factorSourcesButtonTapped
 		}
 		
 		case view(ViewAction)
 		case destination(PresentationAction<Destination.Action>)
+        
+        
+        @CasePathable
+        public enum DelegateAction {
+            case navigate(Navigate)
+            
+            @CasePathable
+            public enum Navigate {
+                case toFactorSources
+            }
+        }
+        
+        case delegate(DelegateAction)
 	}
 	
 	public init() {}
@@ -65,6 +79,9 @@ public struct SettingsFeature {
 					}
 				))
 				return .none
+                
+            case .view(.factorSourcesButtonTapped):
+                return .send(.delegate(.navigate(.toFactorSources)))
 				
 			case let .destination(.presented(.createManyAccountsAlert(action))):
 				state.destination = nil
@@ -88,18 +105,27 @@ extension SettingsFeature {
 	public struct View: SwiftUI.View {
 		
 		@Bindable public var store: StoreOf<SettingsFeature>
-		public var body: some SwiftUI.View {
+		
+        public var body: some SwiftUI.View {
 			VStack {
 				Text("Settings").font(.largeTitle)
-				Spacer()
-				GatewaysFeature.View(
+		
+                Spacer()
+				
+                GatewaysFeature.View(
 					store: Store(
 						initialState: GatewaysFeature.State()
 					) {
 						GatewaysFeature()
 					}
 				)
-				Spacer()
+				
+                Spacer()
+                
+                Button("Handle Factor Sources") {
+                    send(.factorSourcesButtonTapped)
+                }
+                
 				Button("Create Many Accounts") {
 					send(.createManyAccountsButtonTapped)
 				}

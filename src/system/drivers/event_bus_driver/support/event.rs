@@ -27,6 +27,12 @@ pub enum Event {
 
     /// The Profile was last used on another device, user ought to claim it.
     ProfileUsedOnOtherDevice(DeviceInfo),
+
+    /// Profile updated with a new factor source.
+    FactorSourceAdded { id: FactorSourceID },
+
+    /// An existing factor source has been updated
+    FactorSourceUpdated { id: FactorSourceID },
 }
 
 impl Event {
@@ -51,6 +57,10 @@ impl HasEventKind for Event {
                 EventKind::ProfileUsedOnOtherDevice
             }
             Self::ProfileImported { id: _ } => EventKind::ProfileImported,
+            Self::FactorSourceAdded { id: _ } => EventKind::FactorSourceAdded,
+            Self::FactorSourceUpdated { id: _ } => {
+                EventKind::FactorSourceUpdated
+            }
             Self::ProfileSaved => EventKind::ProfileSaved,
         }
     }
@@ -105,6 +115,18 @@ mod tests {
             EventKind::ProfileImported,
         );
         test(SUT::ProfileSaved, EventKind::ProfileSaved);
+        test(
+            SUT::FactorSourceAdded {
+                id: FactorSourceID::sample(),
+            },
+            EventKind::FactorSourceAdded,
+        );
+        test(
+            SUT::FactorSourceUpdated {
+                id: FactorSourceID::sample(),
+            },
+            EventKind::FactorSourceUpdated,
+        );
         test(
             SUT::GatewayChangedCurrent {
                 to: Gateway::sample(),

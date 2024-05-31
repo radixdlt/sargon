@@ -38,6 +38,12 @@ pub enum EventKind {
 
     /// Profile was last used on another device.
     ProfileUsedOnOtherDevice,
+
+    /// Profile updated with a new factor source.
+    FactorSourceAdded,
+
+    /// An existing factor source has been updated
+    FactorSourceUpdated,
 }
 
 impl EventKind {
@@ -86,6 +92,20 @@ impl EventKind {
         use EventKind::*;
         matches!(*self, Booted | ProfileImported | GatewayChangedCurrent)
     }
+
+    /// If hosts UI displaying factor sources (of any kind) should re-fetch
+    /// the list from SargonOS.
+    ///
+    /// E.g. if a new account is created using factor source `X` then `x.common.last_used`,
+    /// is updated and an event if kind `FactorSourceUpdated` is emitted, which does
+    /// affect factor sources shown by host.
+    pub fn affects_factor_sources(&self) -> bool {
+        use EventKind::*;
+        matches!(
+            *self,
+            Booted | ProfileImported | FactorSourceAdded | FactorSourceUpdated
+        )
+    }
 }
 
 #[uniffi::export]
@@ -101,6 +121,11 @@ pub fn event_kind_affects_current_network(event_kind: EventKind) -> bool {
 #[uniffi::export]
 pub fn event_kind_affects_saved_gateways(event_kind: EventKind) -> bool {
     event_kind.affects_saved_gateways()
+}
+
+#[uniffi::export]
+pub fn event_kind_affects_factor_sources(event_kind: EventKind) -> bool {
+    event_kind.affects_factor_sources()
 }
 
 #[uniffi::export]
@@ -149,6 +174,8 @@ mod tests {
             .for_each(|(sut, affects)| match sut {
                 Booted
                 | ProfileImported
+                | FactorSourceAdded
+                | FactorSourceUpdated
                 | AccountAdded
                 | AccountsAdded
                 | AccountUpdated
@@ -170,6 +197,8 @@ mod tests {
                     assert!(affects)
                 }
                 ProfileUsedOnOtherDevice
+                | FactorSourceAdded
+                | FactorSourceUpdated
                 | ProfileSaved
                 | AccountAdded
                 | AccountsAdded
@@ -188,6 +217,28 @@ mod tests {
                     assert!(affects)
                 }
                 ProfileUsedOnOtherDevice
+                | FactorSourceAdded
+                | FactorSourceUpdated
+                | ProfileSaved
+                | AccountAdded
+                | AccountsAdded
+                | AccountUpdated => assert!(!affects),
+            })
+    }
+
+    #[test]
+    fn event_kind_affects_factor_source() {
+        use EventKind::*;
+        SUT::all()
+            .into_iter()
+            .map(|sut| (sut, sut.affects_saved_gateways()))
+            .for_each(|(sut, affects)| match sut {
+                Booted | ProfileImported | FactorSourceAdded
+                | FactorSourceUpdated => {
+                    assert!(affects)
+                }
+                ProfileUsedOnOtherDevice
+                | GatewayChangedCurrent
                 | ProfileSaved
                 | AccountAdded
                 | AccountsAdded

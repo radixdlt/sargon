@@ -143,6 +143,10 @@ impl SargonOS {
     /// `DeviceFactorSource` and the "next" indices for this FactorSource as derivation paths.
     ///
     /// If you want to add them to Profile, call `add_accounts(accounts)`
+    ///
+    /// # Emits Event
+    /// Emits `Event::FactorSourceUpdated { id: FactorSourceID }` since the date in
+    /// `factor_source.common.last_used` is updated.
     pub async fn batch_create_unsaved_accounts(
         &self,
         network_id: NetworkID,

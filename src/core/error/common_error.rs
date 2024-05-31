@@ -559,6 +559,9 @@ pub enum CommonError {
 
     #[error("Answers to Security Questions cannot be empty")]
     AnswersToSecurityQuestionsCannotBeEmpty = 10158,
+
+    #[error("Integrity Violation, mutation of FactorSource is not allowed to mutate its ID")]
+    IntegrityViolationMutationOfFactorSourceIsNotAllowedToMutateItsID = 10159,
 }
 
 #[uniffi::export]

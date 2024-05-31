@@ -10,6 +10,7 @@ public struct MainFeature {
 	@Reducer(state: .equatable)
 	public enum Path {
 		case settings(SettingsFeature)
+        case factorSources(FactorSourcesFeature)
 		case accountDetails(AccountDetailsFeature)
 	}
 	
@@ -80,6 +81,9 @@ public struct MainFeature {
 					switch action {
 					case .accountDetails(_):
 						return .none
+                    case .settings(.delegate(.navigate(.toFactorSources))):
+                        log.debug("Display Factor Sources!")
+                        return .none
 					case .settings(_):
 						return .none
 					}
