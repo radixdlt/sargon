@@ -34,23 +34,22 @@ impl Default
 }
 
 impl SecurityQuestions_NOT_PRODUCTION_READY_EncryptionKeysByDiffieHellmanFold {
-    // TODO version me!!
-    fn multi_party_ecdh(
+    fn key_exchange_between_more_than_two_keys(
         &self,
         between: Vec<&X25519PrivateKey>,
     ) -> X25519PublicKey {
         let mut private_keys = between.clone();
-        assert!(private_keys.len() >= 2);
+        assert!(private_keys.len() > 2);
         let tail = private_keys.split_off(1);
         let head = private_keys.into_iter().last().unwrap();
 
-        tail.into_iter().fold(head.public_key(), |acc_res, x_priv| {
-            let shared_secret = x_priv.diffie_hellman(&acc_res);
+        tail.into_iter().fold(head.public_key(), |acc_pub, x_priv| {
+            let shared_secret = x_priv.diffie_hellman(&acc_pub);
             X25519PublicKey::from_bytes(shared_secret.to_bytes())
         })
     }
 
-    fn multi_party_key_exchange_between_all_combinations(
+    fn key_exchange_between_all_combinations(
         &self,
         of: Vec<X25519PrivateKey>,
         minus: usize,
@@ -61,20 +60,18 @@ impl SecurityQuestions_NOT_PRODUCTION_READY_EncryptionKeysByDiffieHellmanFold {
             private_keys.iter().combinations(private_keys.len() - minus);
 
         private_key_combinations
-            .map(|xs| self.multi_party_ecdh(xs))
+            .map(|xs| self.key_exchange_between_more_than_two_keys(xs))
             .collect_vec()
     }
 
-    fn encryption_keys_from_multi_party_key_exchange_between_all_combinations(
+    fn encryption_keys_from_key_exchange_between_all_combinations(
         &self,
         of: Vec<X25519PrivateKey>,
         minus: usize,
     ) -> Vec<EncryptionKey> {
         let private_keys = of;
-        let keys = self.multi_party_key_exchange_between_all_combinations(
-            private_keys,
-            minus,
-        );
+        let keys =
+            self.key_exchange_between_all_combinations(private_keys, minus);
         keys.into_iter().map(EncryptionKey::from).collect_vec()
     }
 }
@@ -87,9 +84,9 @@ impl SecurityQuestions_NOT_PRODUCTION_READY_EncryptionKeysByDiffieHellmanFold {
         let minus = 2;
         assert!((key_exchange_keys.len() - minus) > 1);
 
-        self.encryption_keys_from_multi_party_key_exchange_between_all_combinations(
+        self.encryption_keys_from_key_exchange_between_all_combinations(
             key_exchange_keys,
-            minus
+            minus,
         )
     }
 }

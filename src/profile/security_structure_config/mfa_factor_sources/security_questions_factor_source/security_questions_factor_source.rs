@@ -55,7 +55,7 @@ use crypto::keys::x25519::SecretKey as X25519PrivateKey;
 /// We form ["6 choose 4" ("P choose P-1")][choose] = 15 many combinations
 /// (e.g. using [`combinations method from itertools`](itertools))
 ///
-/// ```no_run
+/// ```ignore
 /// let k = 4;
 /// assert_eq!(ec_keys.len(), 6);
 /// let key_combinations = Vec<Vec<X25519PrivateKey>> = ec_keys.combinations(k);
@@ -65,7 +65,7 @@ use crypto::keys::x25519::SecretKey as X25519PrivateKey;
 ///
 /// We map the 15 `Vec<X25519PrivateKey>` into `X25519PublicKeys` using `multi_party_ecdh`:
 ///
-/// ```no_run
+/// ```ignore
 /// let ecdh_keys: Vec<X25519PublicKey> = key_combinations.iter().map(multi_party_ecdh).collect();
 /// assert_eq!(sec_keys.len(), 15);
 /// ```
@@ -74,35 +74,33 @@ use crypto::keys::x25519::SecretKey as X25519PrivateKey;
 /// returning a `Key<Aes256Gcm>` by doing key exchange between all keys, like so:
 ///
 /// ```no_run
-/// fn multi_party_ecdh(
-///     private_keys: Vec<X25519PrivateKey>
-/// ) -> Result<Key<X25519PublicKey>> {
-///     assert!(private_keys.len() >= 2);
-///     let (head, tail) = private_keys.split_off(1);
-///     tail.fold(head.public_key(), |acc_pub, x_priv| {
-///         let raw = x_priv.hkdf_key_agreement(acc_pub);
-///         
-///     })
+/// fn key_exchange_between_more_than_two_keys(
+///     &self,
+///     between: Vec<&X25519PrivateKey>,
+/// ) -> X25519PublicKey {
+///     let mut private_keys = between.clone();
+///     assert!(private_keys.len() > 2);
+///     let tail = private_keys.split_off(1);
+///     let head = private_keys.into_iter().last().unwrap();
 ///
-///     return try rest.reduce(first.publicKey) { publicKey, privateKey in
-///         try Curve25519.KeyAgreement.PublicKey(
-///             rawRepresentation: privateKey.sharedSecretFromKeyAgreement(with: publicKey)
-///         )
-///     }
+///     tail.into_iter().fold(head.public_key(), |acc_pub, x_priv| {
+///         let shared_secret = x_priv.diffie_hellman(&acc_pub);
+///         X25519PublicKey::from_bytes(shared_secret.to_bytes())
+///     })
 /// }
 /// ```
 ///
 /// We form 15 Symmetric Encryption keys from the 15 `X25519PublicKey` by simply
 /// mapping the data of the public keys into AesGCM keys:
 ///
-/// ```no_run
+/// ```ignore
 /// let sec_keys: Vec<Key<AesGcm>> = ecdh_keys.iter().map(ec2sec).collect()
 /// assert_eq!(sec_keys.len(), 15);
 /// ```
 ///
 /// We encrypt the mnemonic 15 times, using each symmetric key in `sec_keys`:
 ///
-/// ```no_run
+/// ```ignore
 /// let encryptions: Vec<AesGcmSealedBox> = sec_keys.iter().map(|x| x.enc)
 /// assert_eq!(encryptions.len(), 15);
 /// ```
