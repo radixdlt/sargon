@@ -82,8 +82,14 @@ public struct MainFeature {
 					case .accountDetails(_):
 						return .none
                     case .settings(.delegate(.navigate(.toFactorSources))):
-                        log.debug("Display Factor Sources!")
+						log.debug("Display Factor Sources!")
                         return .none
+					case .factorSources(.delegate(.navigate(.toDeviceFactorSources))):
+						log.debug("Display Device!")
+						return .none
+						
+					case .factorSources(_):
+						return .none
 					case .settings(_):
 						return .none
 					}
@@ -212,6 +218,7 @@ extension MainFeature {
 				switch store.case {
 				case let .settings(store):
 					SettingsFeature.View(store: store)
+				case let .fact
 				case let .accountDetails(store):
 					AccountDetailsFeature.View(store: store)
 				}

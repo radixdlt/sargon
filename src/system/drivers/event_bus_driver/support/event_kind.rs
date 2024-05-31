@@ -232,7 +232,7 @@ mod tests {
         use EventKind::*;
         SUT::all()
             .into_iter()
-            .map(|sut| (sut, sut.affects_saved_gateways()))
+            .map(|sut| (sut, sut.affects_factor_sources()))
             .for_each(|(sut, affects)| match sut {
                 Booted | ProfileImported | FactorSourceAdded
                 | FactorSourceUpdated => {

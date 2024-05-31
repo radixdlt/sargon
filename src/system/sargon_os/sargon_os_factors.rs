@@ -27,6 +27,12 @@ impl SargonOS {
     pub fn bdfs(&self) -> DeviceFactorSource {
         self.profile_holder.access_profile_with(|p| p.bdfs())
     }
+
+    /// Returns all the factor sources
+    pub fn factor_sources(&self) -> FactorSources {
+        self.profile_holder
+            .access_profile_with(|p| p.factor_sources.clone())
+    }
 }
 
 impl SargonOS {
