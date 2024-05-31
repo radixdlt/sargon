@@ -63,17 +63,17 @@ impl SargonOS {
         network_id: NetworkID,
         name: DisplayName,
     ) -> Result<Account> {
-        // mutable since we must update `last_used_on` date on FactorSource
-        let mut profile = self.profile();
+        let profile = self.profile();
 
-        let account = profile
+        let (factor_source_id, account) = profile
             .create_unsaved_account(network_id, name, async move |fs| {
                 self.load_private_device_factor_source(&fs).await
             })
             .await?;
 
-        // Persist change of `last_used_on` of FactorSource
-        self.save_profile(&profile).await?;
+        // Change of `last_used_on` of FactorSource
+        self.update_last_used_of_factor_source(factor_source_id)
+            .await?;
 
         Ok(account)
     }
@@ -163,7 +163,6 @@ impl SargonOS {
         count: u16,
         name_prefix: String,
     ) -> Result<Accounts> {
-        // mutable since we must update `last_used_on` date on FactorSource
         let profile = self.profile();
 
         let (factor_source_id, accounts) = profile
@@ -180,8 +179,8 @@ impl SargonOS {
             )
             .await?;
 
-        // Cchange of `last_used_on` of FactorSource
-        self.update_last_used_of_factor_source(&factor_source_id)
+        // Change of `last_used_on` of FactorSource
+        self.update_last_used_of_factor_source(factor_source_id)
             .await?;
 
         Ok(accounts)
@@ -201,8 +200,9 @@ impl SargonOS {
         );
 
         self.update_profile_with(|mut p| {
-            p.update_last_used_of_factor_source(id)
-        });
+            p.update_last_used_of_factor_source(&id)
+        })
+        .await?;
 
         self.event_bus
             .emit(EventNotification::profile_modified(

@@ -174,13 +174,14 @@ mod tests {
             .for_each(|(sut, affects)| match sut {
                 Booted
                 | ProfileImported
-                | FactorSourceAdded
-                | FactorSourceUpdated
                 | AccountAdded
                 | AccountsAdded
                 | AccountUpdated
                 | GatewayChangedCurrent => assert!(affects),
-                ProfileUsedOnOtherDevice | ProfileSaved => {
+                ProfileUsedOnOtherDevice
+                | ProfileSaved
+                | FactorSourceAdded
+                | FactorSourceUpdated => {
                     assert!(!affects)
                 }
             })

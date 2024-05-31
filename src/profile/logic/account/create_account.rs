@@ -105,7 +105,7 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_create_unsaved_accounts() {
-        let mut sut = Profile::from_device_factor_source(
+        let sut = Profile::from_device_factor_source(
             PrivateHierarchicalDeterministicFactorSource::sample()
                 .factor_source,
             DeviceInfo::sample(),
