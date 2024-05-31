@@ -32,6 +32,9 @@ impl SargonOS {
 
     /// Creates a new unsaved mainnet account named "Unnamed {N}", where `N` is the
     /// index of the next account for the BDFS.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileModified { change: EventProfileModified::FactorSourceUpdated }`
     pub async fn create_unsaved_unnamed_mainnet_account(
         &self,
     ) -> Result<Account> {
@@ -60,12 +63,19 @@ impl SargonOS {
         network_id: NetworkID,
         name: DisplayName,
     ) -> Result<Account> {
-        let profile = self.profile();
-        profile
+        // mutable since we must update `last_used_on` date on FactorSource
+        let mut profile = self.profile();
+
+        let account = profile
             .create_unsaved_account(network_id, name, async move |fs| {
                 self.load_private_device_factor_source(&fs).await
             })
-            .await
+            .await?;
+
+        // Persist change of `last_used_on` of FactorSource
+        self.save_profile(&profile).await?;
+
+        Ok(account)
     }
 
     /// Create a new mainnet Account named "Unnamed" and adds it to the active Profile.
@@ -153,8 +163,10 @@ impl SargonOS {
         count: u16,
         name_prefix: String,
     ) -> Result<Accounts> {
+        // mutable since we must update `last_used_on` date on FactorSource
         let profile = self.profile();
-        profile
+
+        let (factor_source_id, accounts) = profile
             .create_unsaved_accounts(
                 network_id,
                 count,
@@ -166,7 +178,39 @@ impl SargonOS {
                     self.load_private_device_factor_source(&fs).await
                 },
             )
-            .await
+            .await?;
+
+        // Cchange of `last_used_on` of FactorSource
+        self.update_last_used_of_factor_source(&factor_source_id)
+            .await?;
+
+        Ok(accounts)
+    }
+}
+
+impl SargonOS {
+    pub async fn update_last_used_of_factor_source(
+        &self,
+        factor_source_id: impl Into<FactorSourceID>,
+    ) -> Result<()> {
+        let id = factor_source_id.into();
+
+        debug!(
+            "Updating 'last_used_on' date for FactorSource with ID: {}",
+            &id
+        );
+
+        self.update_profile_with(|mut p| {
+            p.update_last_used_of_factor_source(id)
+        });
+
+        self.event_bus
+            .emit(EventNotification::profile_modified(
+                EventProfileModified::FactorSourceUpdated { id: id },
+            ))
+            .await;
+
+        Ok(())
     }
 }
 
@@ -191,23 +235,11 @@ impl SargonOS {
         let address = account.address;
 
         debug!("Adding account address: {} to profile", address);
+
         self.add_accounts_without_emitting_account_added_event(Accounts::just(
             account,
         ))
         .await?;
-
-        self.profile_holder.access_profile_with(|p| {
-            let accounts_on_network = p
-                .networks
-                .get_id(address.network_id())
-                .unwrap()
-                .accounts
-                .len();
-            debug!(
-                "Added account address: {} to profile, contains: #{}",
-                address, accounts_on_network
-            );
-        });
 
         self.event_bus
             .emit(EventNotification::profile_modified(

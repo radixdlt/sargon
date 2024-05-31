@@ -6,19 +6,22 @@ impl Profile {
     /// `DeviceFactorSource` and the "next" index for this FactorSource as derivation path.
     ///
     /// If you want to add it to Profile, call `add_account(account)`
+    ///
+    /// Returns a tuple `(FactorSourceID, Account)` where FactorSourceID is the ID
+    /// of the FactorSource used to create the account.
     pub async fn create_unsaved_account<F, Fut>(
         &self,
         network_id: NetworkID,
         name: DisplayName,
         load_private_device_factor_source: F,
-    ) -> Result<Account>
+    ) -> Result<(FactorSourceID, Account)>
     where
         F: FnOnce(DeviceFactorSource) -> Fut,
         Fut: Future<
             Output = Result<PrivateHierarchicalDeterministicFactorSource>,
         >,
     {
-        let accounts = self
+        let (factor_source_id, accounts) = self
             .create_unsaved_accounts(
                 network_id,
                 1,
@@ -32,20 +35,23 @@ impl Profile {
             .last()
             .expect("Should have created one account");
 
-        Ok(account)
+        Ok((factor_source_id, account))
     }
 
     /// Creates many new non securified accounts **WITHOUT** adding them to Profile, using the *main* "Babylon"
     /// `DeviceFactorSource` and the "next" indices for this FactorSource as derivation paths.
     ///
     /// If you want to add the accounts to Profile, call `add_accounts(accounts)`
+    ///
+    /// Returns a tuple `(FactorSourceID, Accounts)` where FactorSourceID is the ID
+    /// of the FactorSource used to create the accounts.
     pub async fn create_unsaved_accounts<F, Fut>(
         &self,
         network_id: NetworkID,
         count: u16,
         get_name: impl Fn(u32) -> DisplayName, // name of account at index
         load_private_device_factor_source: F,
-    ) -> Result<Accounts>
+    ) -> Result<(FactorSourceID, Accounts)>
     where
         F: FnOnce(DeviceFactorSource) -> Fut,
         Fut: Future<
@@ -89,7 +95,7 @@ impl Profile {
             })
             .collect::<Accounts>();
 
-        Ok(accounts)
+        Ok((bdfs.factor_source_id().clone(), accounts))
     }
 }
 
@@ -99,13 +105,13 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_create_unsaved_accounts() {
-        let sut = Profile::from_device_factor_source(
+        let mut sut = Profile::from_device_factor_source(
             PrivateHierarchicalDeterministicFactorSource::sample()
                 .factor_source,
             DeviceInfo::sample(),
         );
 
-        let accounts = sut
+        let (_, accounts) = sut
             .create_unsaved_accounts(
                 NetworkID::Mainnet,
                 3,

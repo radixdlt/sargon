@@ -96,30 +96,6 @@ impl SargonOS {
             // tarpaulin will incorrectly flag next line is missed
             .await
     }
-
-    pub fn update_factor_source<F, S>(
-        &self,
-        id: FactorSourceID,
-        mutate: F,
-    ) -> Result<()>
-    where
-        S: IsFactorSource,
-        F: FnOnce(&mut S) -> (),
-    {
-        self.profile_holder.update_profile_with(|p| {
-
-            p.factor_sources.try_try_update_with(id, |&mut f| {
-                let mut s: S = <S as TryInto<S>>::try_into(f).map_err(|_| CommonError::Unknown)?;
-                mutate(&mut s);
-                if s.id() != id {
-                    return Err(CommonError::IntegrityViolationMutationOfFactorSourceIsNotAllowedToMutateItsID)
-                }
-                f = FactorSource::from(s);
-                Ok(())
-            })
-
-        })
-    }
 }
 
 #[cfg(test)]

@@ -46,6 +46,26 @@ pub enum FactorSource {
 }
 
 impl BaseIsFactorSource for FactorSource {
+    fn set_common_properties(&mut self, updated: FactorSourceCommon) {
+        match self {
+            FactorSource::Device { value } => {
+                value.set_common_properties(updated)
+            }
+            FactorSource::Ledger { value } => {
+                value.set_common_properties(updated)
+            }
+            FactorSource::SecurityQuestions { value } => {
+                value.set_common_properties(updated)
+            }
+            FactorSource::ArculusCard { value } => {
+                value.set_common_properties(updated)
+            }
+            FactorSource::OffDeviceMnemonic { value } => {
+                value.set_common_properties(updated)
+            }
+        }
+    }
+
     fn common_properties(&self) -> FactorSourceCommon {
         match self {
             FactorSource::Device { value } => value.common_properties(),

@@ -11,6 +11,12 @@ pub enum EventProfileModified {
 
     /// An existing account has been updated
     AccountUpdated { address: AccountAddress },
+
+    /// Profile updated with a new factor source.
+    FactorSourceAdded { id: FactorSourceID },
+
+    /// An existing factor source has been updated
+    FactorSourceUpdated { id: FactorSourceID },
 }
 
 impl HasEventKind for EventProfileModified {
@@ -19,6 +25,10 @@ impl HasEventKind for EventProfileModified {
             Self::AccountUpdated { address: _ } => EventKind::AccountUpdated,
             Self::AccountAdded { address: _ } => EventKind::AccountAdded,
             Self::AccountsAdded { addresses: _ } => EventKind::AccountsAdded,
+            Self::FactorSourceAdded { id: _ } => EventKind::FactorSourceAdded,
+            Self::FactorSourceUpdated { id: _ } => {
+                EventKind::FactorSourceUpdated
+            }
         }
     }
 }
@@ -69,6 +79,7 @@ mod tests {
             },
             EventKind::AccountAdded,
         );
+
         test(
             SUT::AccountUpdated {
                 address: AccountAddress::sample(),
@@ -80,6 +91,20 @@ mod tests {
                 addresses: vec![AccountAddress::sample()],
             },
             EventKind::AccountsAdded,
+        );
+
+        test(
+            SUT::FactorSourceAdded {
+                id: FactorSourceID::sample(),
+            },
+            EventKind::FactorSourceAdded,
+        );
+
+        test(
+            SUT::FactorSourceUpdated {
+                id: FactorSourceID::sample(),
+            },
+            EventKind::FactorSourceUpdated,
         );
     }
 }

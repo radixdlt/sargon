@@ -59,6 +59,10 @@ impl BaseIsFactorSource for DeviceFactorSource {
     fn factor_source_id(&self) -> FactorSourceID {
         self.clone().id.into()
     }
+
+    fn set_common_properties(&mut self, updated: FactorSourceCommon) {
+        self.common = updated
+    }
 }
 
 impl DeviceFactorSource {

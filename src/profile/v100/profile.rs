@@ -209,6 +209,17 @@ impl Profile {
         self.networks.update_account(address, mutate)
     }
 
+    pub fn update_last_used_of_factor_source(
+        &mut self,
+        id: &FactorSourceID,
+    ) -> Result<()> {
+        self.update_any_factor_source(id, |fs| {
+            let mut common = fs.common_properties();
+            common.last_used_on = now();
+            fs.set_common_properties(common);
+        })
+    }
+
     pub fn update_factor_source<S, M>(
         &mut self,
         factor_source_id: &FactorSourceID,
@@ -229,6 +240,18 @@ impl Profile {
                         mutate(element).map(|modified| modified.into())
                     })
             })
+    }
+
+    pub fn update_any_factor_source<F>(
+        &mut self,
+        factor_source_id: &FactorSourceID,
+        mutate: F,
+    ) -> Result<()>
+    where
+        F: FnMut(&mut FactorSource),
+    {
+        self.factor_sources
+            .try_update_with(factor_source_id, mutate)
     }
 }
 
