@@ -46,22 +46,30 @@ type_name = "Date"
 imports = ["Foundation"]
 into_custom = """
 {
-    let s = {}
-    let df = ISO8601DateFormatter()
-    let fo = ISO8601DateFormatter.Options.withFractionalSeconds
-    df.formatOptions.insert(fo)
-    func t() -> Date? {df.date(from: s)}
-    if let d = t() {return d}
-    df.formatOptions.remove(fo)
-    return t()!
+    let stringToDeserialize = {} // this is UniFFIs counterpart to `$0`
+    let formatter = ISO8601DateFormatter()
+    let formatOptionMS = ISO8601DateFormatter.Options.withFractionalSeconds
+    formatter.formatOptions.insert(formatOptionMS)
+    
+    func format() -> Date? {
+        formatter.date(from: stringToDeserialize)
+    }
+    
+    if let date = format() {
+        return date
+    }
+    
+    // try without fractional seconds
+    formatter.formatOptions.remove(formatOptionMS)
+    return format()!
 }()
 """
 from_custom = """
 { 
-    let d = {}
-    let df = ISO8601DateFormatter()
-    df.formatOptions.insert(.withFractionalSeconds)
-    return df.string(from: d)
+    let dateToSerialize = {} // this is UniFFIs counterpart to `$0`
+    let formatter = ISO8601DateFormatter()
+    formatter.formatOptions.insert(.withFractionalSeconds)
+    return formatter.string(from: dateToSerialize)
 }()
 """
 
