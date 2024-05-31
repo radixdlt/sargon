@@ -79,18 +79,13 @@ final class DeviceInfoTests: Test<DeviceInfo> {
 	
 	func test_date() {
 		
-		let into_custom: (String) -> Date = { date in
-			let df = ISO8601DateFormatter()
-			let t: () -> Date? = {
-				return df.date(from: date)
-			}
-			if let d = t() {
-				return d
-			}
-			df.formatOptions.insert(.withFractionalSeconds)
-			return t()!
-		}
+		/// This matches `[bindings.swift.custom_types.Timestamp]`
+		/// inside `uniffi.toml` with the only difference that we use `$0` here but
+		/// the toml uses `{}`;
+		let into_custom: (String) -> Date = {let s = $0;let df = ISO8601DateFormatter();let fo = ISO8601DateFormatter.Options.withFractionalSeconds;df.formatOptions.insert(fo);func t() -> Date? {df.date(from: s)};if let d = t() {return d};df.formatOptions.remove(fo);return t()!}
 		
+		/// This matches `[bindings.swift.custom_types.Timestamp]`
+		/// inside `uniffi.toml`
 		let from_custom: (Date) -> String = { let df = ISO8601DateFormatter();df.formatOptions.insert(.withFractionalSeconds);return df.string(from: $0) }
 		
 		func testIntoThenFrom(_ vector: (String, String?)) {

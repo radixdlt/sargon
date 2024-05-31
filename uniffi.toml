@@ -44,8 +44,8 @@ from_custom = "{}.toString()"
 [bindings.swift.custom_types.Timestamp]
 type_name = "Date"
 imports = ["Foundation"]
-into_custom = "{let df = DateFormatter();df.dateFormat = \"yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ\";return df.date(from: {})!}()"
-from_custom = "{let df = DateFormatter();df.dateFormat = \"yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ\";return df.string(from: {})}()"
+into_custom = "{let s = {};let df = ISO8601DateFormatter();let fo = ISO8601DateFormatter.Options.withFractionalSeconds;df.formatOptions.insert(fo);func t() -> Date? {df.date(from: s)};if let d = t() {return d};df.formatOptions.remove(fo);return t()!}()"
+from_custom = "{ let d = {};let df = ISO8601DateFormatter();df.formatOptions.insert(.withFractionalSeconds);return df.string(from: d) }()"
 
 [bindings.kotlin.custom_types.Timestamp]
 type_name = "OffsetDateTime"
