@@ -76,6 +76,55 @@ final class DeviceInfoTests: Test<DeviceInfo> {
         }
         """, expected: nil)
 	}
+	
+	func test_date() {
+		
+		let into_custom: (String) -> Date = { date in
+			let df = ISO8601DateFormatter()
+			let t: () -> Date? = {
+				return df.date(from: date)
+			}
+			if let d = t() {
+				return d
+			}
+			df.formatOptions.insert(.withFractionalSeconds)
+			return t()!
+		}
+		
+		let from_custom: (Date) -> String = { let df = ISO8601DateFormatter();df.formatOptions.insert(.withFractionalSeconds);return df.string(from: $0) }
+		
+		func testIntoThenFrom(_ vector: (String, String?)) {
+			let sut = vector.0
+			let expected = vector.1 ?? sut
+
+			let string = from_custom(into_custom(sut))
+			
+			XCTAssertEqual(string, expected)
+		}
+		
+		func testFromThenInto(_ vector: (String, String?)) {
+			let lhs = vector.0
+			let rhs = vector.1 ?? lhs
+			
+			let lhsString = from_custom(into_custom(lhs))
+			let rhsString = from_custom(into_custom(rhs))
+		
+			XCTAssertEqual(rhsString, rhs)
+			
+			XCTAssertEqual(
+				into_custom(lhsString),
+				into_custom(rhsString)
+			)
+		}
+		
+		let vectors = [
+			("2023-12-24T17:13:56.123456Z", "2023-12-24T17:13:56.123Z"), // precision lost (which is OK)
+			("2023-12-24T17:13:56.123Z", nil), // unchanged
+			("2023-12-24T17:13:56Z", "2023-12-24T17:13:56.000Z") // (000 added, which is OK)
+		]
+		vectors.forEach(testIntoThenFrom)
+		vectors.forEach(testFromThenInto)
+	}
     
 }
 
