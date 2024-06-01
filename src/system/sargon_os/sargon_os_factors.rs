@@ -2,6 +2,59 @@ use crate::prelude::*;
 
 #[uniffi::export]
 impl SargonOS {
+    /// Returns the "main Babylon" `DeviceFactorSource` of the current account as
+    /// a `DeviceFactorSource`.
+    pub fn bdfs(&self) -> DeviceFactorSource {
+        self.profile_holder.access_profile_with(|p| p.bdfs())
+    }
+
+    /// Returns all the factor sources
+    pub fn factor_sources(&self) -> FactorSources {
+        self.profile_holder
+            .access_profile_with(|p| p.factor_sources.clone())
+    }
+
+    /// Returns `Ok(false)` if the Profile already contained a factor source with the
+    /// same id (Profile unchanged occurred).
+    ///    
+    /// # Emits Event
+    /// Emits `Event::ProfileModified { change: EventProfileModified::FactorSourceAdded }`
+    ///
+    /// And also emits `Event::ProfileSaved` after having successfully written the JSON
+    /// of the active profile to secure storage.
+    pub async fn add_factor_source(
+        &self,
+        factor_source: FactorSource,
+    ) -> Result<bool> {
+        let id = factor_source.factor_source_id();
+        let inserted = self
+            .update_profile_with(|mut p| {
+                Ok(p.factor_sources.append(factor_source.clone()).0)
+            })
+            .await?;
+
+        if inserted {
+            self.event_bus
+                .emit(EventNotification::profile_modified(
+                    EventProfileModified::FactorSourceAdded { id },
+                ))
+                .await;
+        }
+
+        Ok(inserted)
+    }
+}
+
+impl SargonOS {
+    /// Tries to load a `MnemonicWithPassphrase` from secure storage
+    /// by `id` of type `FactorSourceIDFromHash`.
+    pub async fn mnemonic_with_passphrase_of_device_factor_source_by_id(
+        &self,
+        id: &FactorSourceIDFromHash,
+    ) -> Result<MnemonicWithPassphrase> {
+        self.secure_storage.load_mnemonic_with_passphrase(id).await
+    }
+
     /// Loads a `MnemonicWithPassphrase` with the `id` of `device_factor_source`,
     /// from SecureStorage, and returns a `PrivateHierarchicalDeterministicFactorSource`
     /// built from both.
@@ -20,29 +73,6 @@ impl SargonOS {
             .access_profile_with(|p| p.device_factor_source_by_id(id))?;
         self.load_private_device_factor_source(&device_factor_source)
             .await
-    }
-
-    /// Returns the "main Babylon" `DeviceFactorSource` of the current account as
-    /// a `DeviceFactorSource`.
-    pub fn bdfs(&self) -> DeviceFactorSource {
-        self.profile_holder.access_profile_with(|p| p.bdfs())
-    }
-
-    /// Returns all the factor sources
-    pub fn factor_sources(&self) -> FactorSources {
-        self.profile_holder
-            .access_profile_with(|p| p.factor_sources.clone())
-    }
-}
-
-impl SargonOS {
-    /// Tries to load a `MnemonicWithPassphrase` from secure storage
-    /// by `id` of type `FactorSourceIDFromHash`.
-    pub async fn mnemonic_with_passphrase_of_device_factor_source_by_id(
-        &self,
-        id: &FactorSourceIDFromHash,
-    ) -> Result<MnemonicWithPassphrase> {
-        self.secure_storage.load_mnemonic_with_passphrase(id).await
     }
 
     /// Loads a `MnemonicWithPassphrase` with the `id` of `device_factor_source`,
@@ -168,5 +198,55 @@ mod tests {
 
         // ASSERT
         assert_eq!(loaded, mwp);
+    }
+
+    #[actix_rt::test]
+    async fn test_add_ledger_factor_source() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        let inserted = os
+            .with_timeout(|x| x.add_factor_source(FactorSource::sample_other()))
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert!(inserted);
+        assert!(os
+            .profile()
+            .factor_sources
+            .contains_by_id(&FactorSource::sample_other()));
+    }
+
+    #[actix_rt::test]
+    async fn test_add_existing_factor_source_is_noop() {
+        // ARRANGE
+        let mwp = MnemonicWithPassphrase::sample();
+        let os = SUT::fast_boot_bdfs(mwp.clone()).await;
+
+        let bdfs = os.bdfs();
+
+        // ACT
+        let inserted = os
+            .with_timeout(|x| {
+                x.add_factor_source(
+                    DeviceFactorSource::babylon(
+                        false,
+                        &mwp,
+                        &DeviceInfo::sample_other(),
+                    )
+                    .into(),
+                )
+            })
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert!(!inserted); // already exists
+        assert_eq!(
+            os.profile().factor_sources,
+            FactorSources::just(bdfs.into())
+        );
     }
 }

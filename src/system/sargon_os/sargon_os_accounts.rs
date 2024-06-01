@@ -663,6 +663,30 @@ mod tests {
         assert!(os.profile().networks[0].accounts.is_empty())
     }
 
+    #[actix_rt::test]
+    async fn test_create_unsaved_account_emits_factor_source_updated() {
+        // ARRANGE (and ACT)
+        let event_bus_driver = RustEventBusDriver::new();
+        let drivers = Drivers::with_event_bus(event_bus_driver.clone());
+        let bios = Bios::new(drivers);
+
+        let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
+            .await
+            .unwrap()
+            .unwrap();
+
+        // ACT
+        os.with_timeout(|x| x.create_unsaved_unnamed_mainnet_account())
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert!(event_bus_driver
+            .recorded()
+            .iter()
+            .any(|e| e.event.kind() == EventKind::FactorSourceUpdated));
+    }
+
     impl DisplayName {
         fn random() -> Self {
             Self::new(format!(
