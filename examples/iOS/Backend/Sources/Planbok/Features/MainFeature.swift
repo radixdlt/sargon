@@ -12,6 +12,7 @@ public struct MainFeature {
 		case settings(SettingsFeature)
         case factorSources(FactorSourcesFeature)
         case deviceFactorSources(DeviceFactorSourcesFeature)
+        case ledgerFactorSources(LedgerFactorSourcesFeature)
 		case accountDetails(AccountDetailsFeature)
 	}
 	
@@ -82,18 +83,38 @@ public struct MainFeature {
 					switch action {
 					case .accountDetails(_):
 						return .none
-                    case .settings(.delegate(.navigate(.toFactorSources))):
+						
+					case .settings(.delegate(.navigate(.toFactorSources))):
 						state.path.append(.factorSources(FactorSourcesFeature.State()))
+						return .none
+						
+                    case let .factorSources(.delegate(.navigate(.toFactor(kind)))):
+						switch kind {
+						case .device:
+							state.path.append(.deviceFactorSources(DeviceFactorSourcesFeature.State()))
+						case .ledgerHqHardwareWallet:
+							state.path.append(.ledgerFactorSources(LedgerFactorSourcesFeature.State()))
+						default: fatalError("unsupported")
+						}
                         return .none
-					
-					case .factorSources(.delegate(.navigate(.toDeviceFactorSources))):
-						state.path.append(.deviceFactorSources(DeviceFactorSourcesFeature.State()))
+						
+					case let .deviceFactorSources(.delegate(.addNew(kind))):
+						log.debug("Add new \(kind) button tapped")
+						return .none
+						
+					case let .ledgerFactorSources(.delegate(.addNew(kind))):
+						log.debug("Add new \(kind) button tapped")
 						return .none
 						
 					case .factorSources(_):
 						return .none
+						
 					case .deviceFactorSources(_):
 						return .none
+					
+					case .ledgerFactorSources(_):
+						return .none
+						
 					case .settings(_):
 						return .none
 					}
@@ -220,14 +241,22 @@ extension MainFeature {
 				}
 			} destination: { store in
 				switch store.case {
+				
 				case let .settings(store):
 					SettingsFeature.View(store: store)
+				
 				case let .factorSources(store):
 					FactorSourcesFeature.View(store: store)
+				
 				case let .deviceFactorSources(store):
 					DeviceFactorSourcesFeature.View(store: store)
+					
+				case let .ledgerFactorSources(store):
+					LedgerFactorSourcesFeature.View(store: store)
+				
 				case let .accountDetails(store):
 					AccountDetailsFeature.View(store: store)
+					
 				}
 			}
 			.sheet(

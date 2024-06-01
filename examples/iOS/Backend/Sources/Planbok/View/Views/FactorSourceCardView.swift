@@ -12,7 +12,7 @@ public protocol FactorSourceHint {
 	func display() -> any SwiftUI.View
 }
 
-public protocol DisplayableFactorSource: FactorSourceProtocol {
+public protocol DisplayableFactorSource: FactorSourceProtocol & Identifiable where ID: Sendable {
 	associatedtype Hint: FactorSourceHint
 	var hint: Hint { get }
 }

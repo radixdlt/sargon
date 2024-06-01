@@ -24,6 +24,7 @@ public struct FactorSourcesFeature {
         @CasePathable
         public enum ViewAction {
             case deviceFactorSourcesButtonTapped
+            case ledgerFactorSourcesButtonTapped
         }
         
         case view(ViewAction)
@@ -34,7 +35,7 @@ public struct FactorSourcesFeature {
             
             @CasePathable
             public enum Navigate {
-                case toDeviceFactorSources
+				case toFactor(kind: FactorSourceKind)
             }
         }
         
@@ -47,8 +48,11 @@ public struct FactorSourcesFeature {
         Reduce { state, action in
             switch action {
             case .view(.deviceFactorSourcesButtonTapped):
-                return .send(.delegate(.navigate(.toDeviceFactorSources)))
-                
+				return .send(.delegate(.navigate(.toFactor(kind: .device))))
+			
+			case .view(.ledgerFactorSourcesButtonTapped):
+				return .send(.delegate(.navigate(.toFactor(kind: .ledgerHqHardwareWallet))))
+		  
         
             default:
                 return .none
@@ -73,6 +77,10 @@ extension FactorSourcesFeature {
 				
 				Button("Device Factor Sources") {
 					send(.deviceFactorSourcesButtonTapped)
+				}
+				
+				Button("Ledger Factor Sources") {
+					send(.ledgerFactorSourcesButtonTapped)
 				}
 				
            
