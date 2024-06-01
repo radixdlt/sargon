@@ -16,7 +16,7 @@ public struct DeviceFactorSourcesFeature {
 		
 		@CasePathable
 		public enum ViewAction {
-			case deviceFactorSourcesButtonTapped
+			case addNewButtonTapped
 		}
 		
 		case view(ViewAction)
@@ -27,7 +27,7 @@ public struct DeviceFactorSourcesFeature {
 			
 			@CasePathable
 			public enum Navigate {
-				case toDeviceFactorSources
+				case toNewDeviceFactorSource
 			}
 		}
 		
@@ -39,9 +39,8 @@ public struct DeviceFactorSourcesFeature {
 	public var body: some ReducerOf<Self> {
 		Reduce { state, action in
 			switch action {
-			case .view(.deviceFactorSourcesButtonTapped):
-				return .send(.delegate(.navigate(.toDeviceFactorSources)))
-				
+			case .view(.addNewButtonTapped):
+				return .send(.delegate(.navigate(.toNewDeviceFactorSource)))
 		
 			default:
 				return .none
@@ -74,37 +73,14 @@ extension DeviceFactorSourcesFeature {
 					}
 				}
 		   
-				
+				Button("Add New") {
+					send(.addNewButtonTapped)
+				}
 			}
 			.padding(.bottom, 100)
 		}
 	}
 	
-}
-
-public struct FactorSourceCardView<F: DisplayableFactorSource>: SwiftUI.View {
-	public let factorSource: F
-	public var body: some SwiftUI.View {
-		VStack(alignment: .leading) {
-			Labeled("Kind", factorSource.kind)
-			Labeled("Added", factorSource.addedOn.formatted(.dateTime))
-			Labeled("Last Used", factorSource.lastUsedOn.formatted(.dateTime))
-			
-			AnyView(factorSource.hint.display())
-		}
-		.multilineTextAlignment(.leading)
-		.frame(maxWidth: .infinity)
-		.background(Color.orange)
-		.padding()
-	}
-}
-
-public protocol FactorSourceHint {
-	func display() -> any SwiftUI.View
-}
-public protocol DisplayableFactorSource: FactorSourceProtocol {
-	associatedtype Hint: FactorSourceHint
-	var hint: Hint { get }
 }
 
 extension DeviceFactorSourceHint: FactorSourceHint {
@@ -125,19 +101,3 @@ extension DeviceFactorSourceHint: FactorSourceHint {
 	}
 }
 extension DeviceFactorSource: DisplayableFactorSource {}
-
-public struct Labeled: SwiftUI.View {
-	public let title: String
-	public let value: String
-	public init<V>(_ title: String, _ value: V) where V: CustomStringConvertible {
-		self.title = title
-		self.value = value.description
-	}
-	public var body: some SwiftUI.View {
-		HStack {
-			Text("**\(title)**")
-			Text("`\(value)`")
-		}
-		.multilineTextAlignment(.leading)
-	}
-}
