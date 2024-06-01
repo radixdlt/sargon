@@ -88,36 +88,19 @@ public struct MainFeature {
 						return .none
 						
                     case let .factorSources(.delegate(.navigate(.toFactor(kind)))):
-						let factorState: any EditFactorStateProtocol = switch kind {
-						case .device:
-								DeviceFS()
-						case .ledgerHqHardwareWallet:
-							LedgerFS()
-						default: fatalError("Not yet implemented: \(kind)")
-						}
-						
 						state.path.append(.manageFactorSourcesOfKind(
-							SpecificFactorSourcesFeature.State(factorState)
+							SpecificFactorSourcesFeature.State(kind: kind)
 						))
                         return .none
 						
-//					case let .deviceFactorSources(.delegate(.addNew(kind))):
-//						log.debug("Add new \(kind) button tapped")
-//						return .none
-//						
-//					case let .ledgerFactorSources(.delegate(.addNew(kind))):
-//						log.debug("Add new \(kind) button tapped")
-//						return .none
+					case let .manageFactorSourcesOfKind(.delegate(.addNew(kind))):
+						log.notice("Main: Add new FactorSource of kind: '\(kind)' button tapped")
+						return .none
+
 						
 					case .factorSources(_):
 						return .none
-						
-//					case .deviceFactorSources(_):
-//						return .none
-//					
-//					case .ledgerFactorSources(_):
-//						return .none
-						
+			
 					case .settings(_):
 						return .none
 					case .manageFactorSourcesOfKind(_):

@@ -30,11 +30,21 @@ public struct AnyEditFactorState: BaseEditFactorStateProtocol {
 	private let getFactors: () -> IdentifiedArrayOf<AnyDisplayableFactorSource>
 	public var baseCurrentFactors: IdentifiedArrayOf<AnyDisplayableFactorSource> { getFactors() }
 	
-	public init<S>(_ state: S) where S: EditFactorStateProtocol {
-		self.getFactors = { state.currentFactors.map({
-			AnyDisplayableFactorSource.init(factor: $0)
-		}).asIdentified() }
+	private init<S>(_ state: S) where S: EditFactorStateProtocol {
+		self.getFactors = {
+			state.currentFactors.map(AnyDisplayableFactorSource.init).asIdentified()
+		}
 		self.factorKind = S.factorKind
+	}
+	
+	public init(kind: FactorSourceKind) {
+		switch kind {
+		case .device:
+			self.init(DeviceFS())
+		case .ledgerHqHardwareWallet:
+			self.init(LedgerFS())
+		default: fatalError("Unsupported kind")
+		}
 	}
 }
 
@@ -89,17 +99,8 @@ extension LedgerHardwareWalletHint: FactorSourceHint {
 extension LedgerHardwareWalletFactorSource: DisplayableFactorSource {}
 
 
-//public typealias DeviceFactorSourcesFeature = SpecificFactorSourcesFeature<DeviceFS>
-//public typealias LedgerFactorSourcesFeature = SpecificFactorSourcesFeature<LedgerFS>
-
 public struct SpecificFactorSourcesFeature: Reducer & Equatable {
 	public typealias State = AnyEditFactorState
-//	public let stateKind: any EditFactorStateProtocol.Type
-//	
-//	public init<S>(stateKind: S.Type) where S: EditFactorStateProtocol {
-////		self.factorKind =
-//		self.stateKind = stateKind
-//	}
 	
 	@CasePathable
 	public enum Action: ViewAction {
@@ -138,7 +139,7 @@ public struct SpecificFactorSourcesFeature: Reducer & Equatable {
 extension SpecificFactorSourcesFeature {
 	public typealias HostingFeature = Self
 	
-//	@ViewAction(for: HostingFeature.self)
+	@ViewAction(for: HostingFeature.self)
 	public struct View: SwiftUI.View {
 		
 		@Bindable public var store: StoreOf<HostingFeature>
@@ -165,9 +166,9 @@ extension SpecificFactorSourcesFeature {
 				
 				Spacer()
 		   
-//				Button("Add New") {
-//					send(.addNewButtonTapped)
-//				}
+				Button("Add New") {
+					send(.addNewButtonTapped)
+				}
 			}
 			.padding(.bottom, 100)
 		}
