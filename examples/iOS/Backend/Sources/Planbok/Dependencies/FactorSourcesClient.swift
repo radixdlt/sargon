@@ -21,7 +21,7 @@ extension FactorSourcesClient: DependencyKey {
 		Self(
 			addFactorSource: { factorSource in
 				log.notice("Adding New factorSource: \(factorSource)")
-				let _ = try await os.fac
+				let _ = try await os.addFactorSource(factorSource: factorSource)
 				log.info("Finished adding new factorSource.")
 			}
 		)

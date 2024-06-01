@@ -43,17 +43,6 @@ impl SargonOS {
 
         Ok(inserted)
     }
-}
-
-impl SargonOS {
-    /// Tries to load a `MnemonicWithPassphrase` from secure storage
-    /// by `id` of type `FactorSourceIDFromHash`.
-    pub async fn mnemonic_with_passphrase_of_device_factor_source_by_id(
-        &self,
-        id: &FactorSourceIDFromHash,
-    ) -> Result<MnemonicWithPassphrase> {
-        self.secure_storage.load_mnemonic_with_passphrase(id).await
-    }
 
     /// Loads a `MnemonicWithPassphrase` with the `id` of `device_factor_source`,
     /// from SecureStorage, and returns a `PrivateHierarchicalDeterministicFactorSource`
@@ -73,6 +62,17 @@ impl SargonOS {
             .access_profile_with(|p| p.device_factor_source_by_id(id))?;
         self.load_private_device_factor_source(&device_factor_source)
             .await
+    }
+}
+
+impl SargonOS {
+    /// Tries to load a `MnemonicWithPassphrase` from secure storage
+    /// by `id` of type `FactorSourceIDFromHash`.
+    pub async fn mnemonic_with_passphrase_of_device_factor_source_by_id(
+        &self,
+        id: &FactorSourceIDFromHash,
+    ) -> Result<MnemonicWithPassphrase> {
+        self.secure_storage.load_mnemonic_with_passphrase(id).await
     }
 
     /// Loads a `MnemonicWithPassphrase` with the `id` of `device_factor_source`,
