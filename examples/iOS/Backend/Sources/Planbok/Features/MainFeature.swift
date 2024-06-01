@@ -7,12 +7,11 @@ public struct MainFeature {
 	@Dependency(ProfileClient.self) var profileClient
 	@Dependency(AccountsClient.self) var accountsClient
 	
-	@Reducer(state: .equatable)
+	@Reducer //(state: .equatable)
 	public enum Path {
 		case settings(SettingsFeature)
         case factorSources(FactorSourcesFeature)
-        case deviceFactorSources(DeviceFactorSourcesFeature)
-        case ledgerFactorSources(LedgerFactorSourcesFeature)
+        case manageFactorSourcesOfKind(SpecificFactorSourcesFeature)
 		case accountDetails(AccountDetailsFeature)
 	}
 	
@@ -29,7 +28,7 @@ public struct MainFeature {
 	}
 	
 	@ObservableState
-	public struct State: Equatable {
+	public struct State {
 		@SharedReader(.network) var network
 		@Presents var destination: Destination.State?
 		public var path = StackState<Path.State>()
@@ -89,33 +88,39 @@ public struct MainFeature {
 						return .none
 						
                     case let .factorSources(.delegate(.navigate(.toFactor(kind)))):
-						switch kind {
+						let factorState: any EditFactorStateProtocol = switch kind {
 						case .device:
-							state.path.append(.deviceFactorSources(DeviceFactorSourcesFeature.State()))
+								DeviceFS()
 						case .ledgerHqHardwareWallet:
-							state.path.append(.ledgerFactorSources(LedgerFactorSourcesFeature.State()))
-						default: log.fault("Not yet implemented: \(kind)")
+							LedgerFS()
+						default: fatalError("Not yet implemented: \(kind)")
 						}
+						
+						state.path.append(.manageFactorSourcesOfKind(
+							SpecificFactorSourcesFeature.State(factorState)
+						))
                         return .none
 						
-					case let .deviceFactorSources(.delegate(.addNew(kind))):
-						log.debug("Add new \(kind) button tapped")
-						return .none
-						
-					case let .ledgerFactorSources(.delegate(.addNew(kind))):
-						log.debug("Add new \(kind) button tapped")
-						return .none
+//					case let .deviceFactorSources(.delegate(.addNew(kind))):
+//						log.debug("Add new \(kind) button tapped")
+//						return .none
+//						
+//					case let .ledgerFactorSources(.delegate(.addNew(kind))):
+//						log.debug("Add new \(kind) button tapped")
+//						return .none
 						
 					case .factorSources(_):
 						return .none
 						
-					case .deviceFactorSources(_):
-						return .none
-					
-					case .ledgerFactorSources(_):
-						return .none
+//					case .deviceFactorSources(_):
+//						return .none
+//					
+//					case .ledgerFactorSources(_):
+//						return .none
 						
 					case .settings(_):
+						return .none
+					case .manageFactorSourcesOfKind(_):
 						return .none
 					}
 					
@@ -248,11 +253,9 @@ extension MainFeature {
 				case let .factorSources(store):
 					FactorSourcesFeature.View(store: store)
 				
-				case let .deviceFactorSources(store):
-					DeviceFactorSourcesFeature.View(store: store)
+				case let .manageFactorSourcesOfKind(store):
+					SpecificFactorSourcesFeature.View(store: store)
 					
-				case let .ledgerFactorSources(store):
-					LedgerFactorSourcesFeature.View(store: store)
 				
 				case let .accountDetails(store):
 					AccountDetailsFeature.View(store: store)

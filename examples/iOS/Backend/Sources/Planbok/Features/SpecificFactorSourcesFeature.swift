@@ -3,20 +3,43 @@ import Sargon
 import ComposableArchitecture
 import SwiftUI
 
-public protocol Foo: ObservableState & Equatable where Key == PersistenceKeyDefault<SargonKey<IdentifiedArrayOf<F>>> {
+public protocol BaseEditFactorStateProtocol {
+	var baseCurrentFactors: IdentifiedArrayOf<AnyDisplayableFactorSource> { get }
+}
+
+public protocol EditFactorStateProtocol: ObservableState & Equatable where Key == PersistenceKeyDefault<SargonKey<IdentifiedArrayOf<F>>> {
 	associatedtype Key
 	associatedtype F: DisplayableFactorSource
 	static var key: Key { get }
 	var currentFactors: IdentifiedArrayOf<F> { get }
 }
-extension Foo {
+extension EditFactorStateProtocol {
 	public static var factorKind: FactorSourceKind {
 		F.kind
 	}
 }
+extension AnyDisplayableFactorSource {
+	init(factor: some DisplayableFactorSource) {
+		self.init(hint: factor.hint, factorSource: factor.asGeneral)
+	}
+}
 
 @ObservableState
-public struct DeviceFS: Foo {
+public struct AnyEditFactorState: BaseEditFactorStateProtocol {
+	public let factorKind: FactorSourceKind
+	private let getFactors: () -> IdentifiedArrayOf<AnyDisplayableFactorSource>
+	public var baseCurrentFactors: IdentifiedArrayOf<AnyDisplayableFactorSource> { getFactors() }
+	
+	public init<S>(_ state: S) where S: EditFactorStateProtocol {
+		self.getFactors = { state.currentFactors.map({
+			AnyDisplayableFactorSource.init(factor: $0)
+		}).asIdentified() }
+		self.factorKind = S.factorKind
+	}
+}
+
+@ObservableState
+public struct DeviceFS: EditFactorStateProtocol {
 	public typealias F = DeviceFactorSource
 	public static let key: Key = .sharedDeviceFactorSources
 	@SharedReader(key) public var factors
@@ -45,7 +68,7 @@ extension DeviceFactorSource: DisplayableFactorSource {}
 
 
 @ObservableState
-public struct LedgerFS: Foo {
+public struct LedgerFS: EditFactorStateProtocol {
 	public typealias F = LedgerHardwareWalletFactorSource
 	public static let key: Key = .sharedLedgerFactorSources
 	@SharedReader(key) public var factors
@@ -66,13 +89,17 @@ extension LedgerHardwareWalletHint: FactorSourceHint {
 extension LedgerHardwareWalletFactorSource: DisplayableFactorSource {}
 
 
-public typealias DeviceFactorSourcesFeature = SpecificFactorSourcesFeature<DeviceFS>
-public typealias LedgerFactorSourcesFeature = SpecificFactorSourcesFeature<LedgerFS>
+//public typealias DeviceFactorSourcesFeature = SpecificFactorSourcesFeature<DeviceFS>
+//public typealias LedgerFactorSourcesFeature = SpecificFactorSourcesFeature<LedgerFS>
 
-public struct SpecificFactorSourcesFeature<_State: Foo>: Reducer {
-	public typealias State = _State
-	
-	public static var factorKind: FactorSourceKind { State.factorKind }
+public struct SpecificFactorSourcesFeature: Reducer & Equatable {
+	public typealias State = AnyEditFactorState
+//	public let stateKind: any EditFactorStateProtocol.Type
+//	
+//	public init<S>(stateKind: S.Type) where S: EditFactorStateProtocol {
+////		self.factorKind =
+//		self.stateKind = stateKind
+//	}
 	
 	@CasePathable
 	public enum Action: ViewAction {
@@ -98,7 +125,7 @@ public struct SpecificFactorSourcesFeature<_State: Foo>: Reducer {
 		Reduce { state, action in
 			switch action {
 			case .view(.addNewButtonTapped):
-				return .send(.delegate(.addNew(Self.factorKind)))
+				return .send(.delegate(.addNew(state.factorKind)))
 		
 			default:
 				return .none
@@ -111,25 +138,24 @@ public struct SpecificFactorSourcesFeature<_State: Foo>: Reducer {
 extension SpecificFactorSourcesFeature {
 	public typealias HostingFeature = Self
 	
-	@ViewAction(for: HostingFeature.self)
+//	@ViewAction(for: HostingFeature.self)
 	public struct View: SwiftUI.View {
 		
 		@Bindable public var store: StoreOf<HostingFeature>
 		
-		typealias F = HostingFeature.State.F
-		var factors: IdentifiedArrayOf<F> {
-			store.state.currentFactors
+		var factors: IdentifiedArrayOf<AnyDisplayableFactorSource> {
+			store.state.baseCurrentFactors
 		}
 		
 		public var body: some SwiftUI.View {
 			VStack {
-				Text("\(HostingFeature.factorKind) Factors").font(.largeTitle)
+				Text("\(store.factorKind) Factors").font(.largeTitle)
 		
 				if factors.isEmpty {
 					Text("You have no factors")
 				} else {
 					ScrollView {
-						ForEach(factors) { factorSource in
+						ForEach(factors, id: \.id) { factorSource in
 							VStack {
 								FactorSourceCardView(factorSource: factorSource)
 							}
@@ -139,9 +165,9 @@ extension SpecificFactorSourcesFeature {
 				
 				Spacer()
 		   
-				Button("Add New") {
-					send(.addNewButtonTapped)
-				}
+//				Button("Add New") {
+//					send(.addNewButtonTapped)
+//				}
 			}
 			.padding(.bottom, 100)
 		}

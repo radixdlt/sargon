@@ -12,18 +12,33 @@ public protocol FactorSourceHint {
 	func display() -> any SwiftUI.View
 }
 
+public struct AnyDisplayableFactorSource: Hashable & Identifiable {
+	public typealias ID = FactorSourceID
+	public var id: ID {
+		factorSource.id
+	}
+	public static func == (lhs: Self, rhs: Self) -> Bool {
+		lhs.factorSource == rhs.factorSource
+	}
+	public func hash(into hasher: inout Hasher) {
+		hasher.combine(factorSource)
+	}
+	public let hint: any FactorSourceHint
+	public let factorSource: FactorSource
+}
+
 public protocol DisplayableFactorSource: FactorSourceProtocol & Identifiable where ID: Sendable {
 	associatedtype Hint: FactorSourceHint
 	var hint: Hint { get }
 }
 
-public struct FactorSourceCardView<F: DisplayableFactorSource>: SwiftUI.View {
-	public let factorSource: F
+public struct FactorSourceCardView: SwiftUI.View {
+	public let factorSource: AnyDisplayableFactorSource
 	public var body: some SwiftUI.View {
 		VStack(alignment: .leading) {
-			Labeled("Kind", factorSource.kind)
-			Labeled("Added", factorSource.addedOn.formatted(.dateTime))
-			Labeled("Last Used", factorSource.lastUsedOn.formatted(.dateTime))
+			Labeled("Kind", factorSource.factorSource.kind)
+			Labeled("Added", factorSource.factorSource.addedOn.formatted(.dateTime))
+			Labeled("Last Used", factorSource.factorSource.lastUsedOn.formatted(.dateTime))
 			
 			AnyView(factorSource.hint.display())
 		}
