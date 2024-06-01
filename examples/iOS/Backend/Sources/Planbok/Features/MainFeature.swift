@@ -94,7 +94,7 @@ public struct MainFeature {
 							state.path.append(.deviceFactorSources(DeviceFactorSourcesFeature.State()))
 						case .ledgerHqHardwareWallet:
 							state.path.append(.ledgerFactorSources(LedgerFactorSourcesFeature.State()))
-						default: fatalError("unsupported")
+						default: log.fault("Not yet implemented: \(kind)")
 						}
                         return .none
 						

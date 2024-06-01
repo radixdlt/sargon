@@ -23,8 +23,12 @@ public struct FactorSourcesFeature {
         
         @CasePathable
         public enum ViewAction {
-            case deviceFactorSourcesButtonTapped
-            case ledgerFactorSourcesButtonTapped
+            case deviceButtonTapped
+            case ledgerButtonTapped
+            case arculusButtonTapped
+            case offDeviceButtonTapped
+            case securityQuestionsButtonTapped
+            case trustedContactButtonTapped
         }
         
         case view(ViewAction)
@@ -47,12 +51,23 @@ public struct FactorSourcesFeature {
     public var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
-            case .view(.deviceFactorSourcesButtonTapped):
+            case .view(.deviceButtonTapped):
 				return .send(.delegate(.navigate(.toFactor(kind: .device))))
 			
-			case .view(.ledgerFactorSourcesButtonTapped):
+			case .view(.ledgerButtonTapped):
 				return .send(.delegate(.navigate(.toFactor(kind: .ledgerHqHardwareWallet))))
 		  
+			case .view(.arculusButtonTapped):
+				return .send(.delegate(.navigate(.toFactor(kind: .arculusCard))))
+		  
+			case .view(.offDeviceButtonTapped):
+				return .send(.delegate(.navigate(.toFactor(kind: .offDeviceMnemonic))))
+		  
+			case .view(.securityQuestionsButtonTapped):
+				return .send(.delegate(.navigate(.toFactor(kind: .securityQuestions))))
+		  
+			case .view(.trustedContactButtonTapped):
+				return .send(.delegate(.navigate(.toFactor(kind: .trustedContact))))
         
             default:
                 return .none
@@ -75,14 +90,29 @@ extension FactorSourcesFeature {
         
 				Spacer()
 				
-				Button("Device Factor Sources") {
-					send(.deviceFactorSourcesButtonTapped)
+				Button("Device") {
+					send(.deviceButtonTapped)
 				}
 				
-				Button("Ledger Factor Sources") {
-					send(.ledgerFactorSourcesButtonTapped)
+				Button("Ledger") {
+					send(.ledgerButtonTapped)
 				}
 				
+				Button("Arculus") {
+					send(.arculusButtonTapped)
+				}
+				
+				Button("Security Questions") {
+					send(.securityQuestionsButtonTapped)
+				}
+				
+				Button("Trusted Contact") {
+					send(.trustedContactButtonTapped)
+				}
+				
+				Button("Off Device Mnemonic") {
+					send(.offDeviceButtonTapped)
+				}
            
                 
             }
