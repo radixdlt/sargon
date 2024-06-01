@@ -82,17 +82,62 @@ extension DeviceFactorSourcesFeature {
 	
 }
 
-public struct FactorSourceCardView<F: FactorSourceProtocol>: SwiftUI.View {
+public struct FactorSourceCardView<F: DisplayableFactorSource>: SwiftUI.View {
 	public let factorSource: F
 	public var body: some SwiftUI.View {
 		VStack(alignment: .leading) {
-			Text("Kind: \(factorSource.kind)")
-			Text("Added: \(factorSource.addedOn.formatted(.dateTime))")
-			Text("Last Used: \(factorSource.lastUsedOn.formatted(.dateTime))")
+			Labeled("Kind", factorSource.kind)
+			Labeled("Added", factorSource.addedOn.formatted(.dateTime))
+			Labeled("Last Used", factorSource.lastUsedOn.formatted(.dateTime))
+			
+			AnyView(factorSource.hint.display())
 		}
 		.multilineTextAlignment(.leading)
 		.frame(maxWidth: .infinity)
 		.background(Color.orange)
 		.padding()
+	}
+}
+
+public protocol FactorSourceHint {
+	func display() -> any SwiftUI.View
+}
+public protocol DisplayableFactorSource: FactorSourceProtocol {
+	associatedtype Hint: FactorSourceHint
+	var hint: Hint { get }
+}
+
+extension DeviceFactorSourceHint: FactorSourceHint {
+	public func display() -> any SwiftUI.View {
+		VStack(alignment: .leading) {
+			Labeled("Device Name", name)
+			Labeled("Device Model", model)
+			Labeled("#Mnemonic Words", mnemonicWordCount.rawValue)
+			if let systemVersion {
+				Labeled("iOS", systemVersion)
+			}
+			if let hostAppVersion {
+				Labeled("App Version", hostAppVersion)
+			}
+		}
+		.multilineTextAlignment(.leading)
+		.frame(maxWidth: .infinity)
+	}
+}
+extension DeviceFactorSource: DisplayableFactorSource {}
+
+public struct Labeled: SwiftUI.View {
+	public let title: String
+	public let value: String
+	public init<V>(_ title: String, _ value: V) where V: CustomStringConvertible {
+		self.title = title
+		self.value = value.description
+	}
+	public var body: some SwiftUI.View {
+		HStack {
+			Text("**\(title)**")
+			Text("`\(value)`")
+		}
+		.multilineTextAlignment(.leading)
 	}
 }
