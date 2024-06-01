@@ -11,6 +11,7 @@ public struct MainFeature {
 	public enum Path {
 		case settings(SettingsFeature)
         case factorSources(FactorSourcesFeature)
+        case deviceFactorSources(DeviceFactorSourcesFeature)
 		case accountDetails(AccountDetailsFeature)
 	}
 	
@@ -82,13 +83,16 @@ public struct MainFeature {
 					case .accountDetails(_):
 						return .none
                     case .settings(.delegate(.navigate(.toFactorSources))):
-						log.debug("Display Factor Sources!")
+						state.path.append(.factorSources(FactorSourcesFeature.State()))
                         return .none
+					
 					case .factorSources(.delegate(.navigate(.toDeviceFactorSources))):
-						log.debug("Display Device!")
+						state.path.append(.deviceFactorSources(DeviceFactorSourcesFeature.State()))
 						return .none
 						
 					case .factorSources(_):
+						return .none
+					case .deviceFactorSources(_):
 						return .none
 					case .settings(_):
 						return .none
@@ -218,7 +222,10 @@ extension MainFeature {
 				switch store.case {
 				case let .settings(store):
 					SettingsFeature.View(store: store)
-				case let .fact
+				case let .factorSources(store):
+					FactorSourcesFeature.View(store: store)
+				case let .deviceFactorSources(store):
+					DeviceFactorSourcesFeature.View(store: store)
 				case let .accountDetails(store):
 					AccountDetailsFeature.View(store: store)
 				}

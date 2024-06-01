@@ -15,7 +15,7 @@ public struct FactorSourcesFeature {
 
     @ObservableState
     public struct State: Equatable {
-        
+		@SharedReader(.factorSources) var factorSources
     }
     
     @CasePathable
@@ -69,9 +69,13 @@ extension FactorSourcesFeature {
             VStack {
                 Text("FactorSources").font(.largeTitle)
         
-                Button("Device Factor Sources") {
-                    send(.deviceFactorSourcesButtonTapped)
-                }
+				Spacer()
+				
+				Button("Device Factor Sources") {
+					send(.deviceFactorSourcesButtonTapped)
+				}
+				
+           
                 
             }
             .padding(.bottom, 100)
