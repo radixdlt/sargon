@@ -11,7 +11,7 @@ import ComposableArchitecture
 import SwiftUI
 
 @Reducer
-public struct FactorSourcesFeature {
+public struct ManageFactorSourcesFeature {
 
     @ObservableState
     public struct State: Equatable {
@@ -77,12 +77,12 @@ public struct FactorSourcesFeature {
     }
 }
 
-extension FactorSourcesFeature {
+extension ManageFactorSourcesFeature {
     
-    @ViewAction(for: FactorSourcesFeature.self)
+    @ViewAction(for: ManageFactorSourcesFeature.self)
     public struct View: SwiftUI.View {
         
-        @Bindable public var store: StoreOf<FactorSourcesFeature>
+        @Bindable public var store: StoreOf<ManageFactorSourcesFeature>
         
         public var body: some SwiftUI.View {
             VStack {

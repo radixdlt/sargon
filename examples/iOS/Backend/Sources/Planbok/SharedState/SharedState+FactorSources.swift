@@ -5,110 +5,22 @@ import ComposableArchitecture
 import IdentifiedCollections
 
 public typealias FactorSources = IdentifiedArrayOf<FactorSource>
+
+extension FactorSources {
+	public func compactMap<F>(as kind: F.Type = F.self) -> IdentifiedArrayOf<F> where F: FactorSourceProtocol {
+		self.elements.compactMap({ $0.extract(F.self) }).asIdentified()
+	}
+	public func filter(kind: FactorSourceKind) -> Self {
+		self.elements.filter({ $0.kind == kind }).asIdentified()
+	}
+}
+
+
 public typealias DeviceFactorSources = IdentifiedArrayOf<DeviceFactorSource>
 public typealias LedgerHWWalletFactorSources = IdentifiedArrayOf<LedgerHardwareWalletFactorSource>
 public typealias ArculusCardFactorSources = IdentifiedArrayOf<ArculusCardFactorSource>
 public typealias OffDeviceMnemonicFactorSources = IdentifiedArrayOf<OffDeviceMnemonicFactorSource>
 public typealias SecurityQuestionsFactorSources = IdentifiedArrayOf<SecurityQuestionsNotProductionReadyFactorSource>
-
-
-
-
-
-
-
-
-
-extension PersistenceReaderKey where Self == PersistenceKeyDefault<SargonKey<OffDeviceMnemonicFactorSources>> {
-	public static var offDeviceMnemonicFactorSources: Self {
-		Self.sharedOffDeviceMnemonicFactorSources
-	}
-}
-
-extension PersistenceKeyDefault<SargonKey<OffDeviceMnemonicFactorSources>> {
-	public static let sharedOffDeviceMnemonicFactorSources = Self(
-		SargonKey(
-			accessing: \.offDeviceMnemonicFactorSources,
-			fetchIf: \.affectsFactorSources
-		),
-		[]
-	)
-}
-
-
-extension PersistenceReaderKey where Self == PersistenceKeyDefault<SargonKey<SecurityQuestionsFactorSources>> {
-	public static var securityQuestionsFactorSources: Self {
-		Self.sharedSecurityQuestions
-	}
-}
-
-extension PersistenceKeyDefault<SargonKey<SecurityQuestionsFactorSources>> {
-	public static let sharedSecurityQuestions = Self(
-		SargonKey(
-			accessing: \.securityQuestionsFactorSources,
-			fetchIf: \.affectsFactorSources
-		),
-		[]
-	)
-}
-
-
-
-
-
-
-extension PersistenceReaderKey where Self == PersistenceKeyDefault<SargonKey<DeviceFactorSources>> {
-	public static var deviceFactorSources: Self {
-		Self.sharedDeviceFactorSources
-	}
-}
-
-extension PersistenceKeyDefault<SargonKey<DeviceFactorSources>> {
-	public static let sharedDeviceFactorSources = Self(
-		SargonKey(
-			accessing: \.deviceFactorSources,
-			fetchIf: \.affectsFactorSources
-		),
-		[]
-	)
-}
-
-
-
-
-extension PersistenceReaderKey where Self == PersistenceKeyDefault<SargonKey<ArculusCardFactorSources>> {
-	public static var arculusFactorSources: Self {
-		Self.sharedArculusFactorSources
-	}
-}
-
-extension PersistenceKeyDefault<SargonKey<ArculusCardFactorSources>> {
-	public static let sharedArculusFactorSources = Self(
-		SargonKey(
-			accessing: \.arculusCardFactorSources,
-			fetchIf: \.affectsFactorSources
-		),
-		[]
-	)
-}
-
-
-extension PersistenceReaderKey where Self == PersistenceKeyDefault<SargonKey<LedgerHWWalletFactorSources>> {
-	public static var ledgerFactorSources: Self {
-		Self.sharedLedgerFactorSources
-	}
-}
-
-extension PersistenceKeyDefault<SargonKey<LedgerHWWalletFactorSources>> {
-	public static let sharedLedgerFactorSources = Self(
-		SargonKey(
-			accessing: \.ledgerFactorSources,
-			fetchIf: \.affectsFactorSources
-		),
-		[]
-	)
-}
-
 
 extension PersistenceReaderKey where Self == PersistenceKeyDefault<SargonKey<FactorSources>> {
     public static var factorSources: Self {

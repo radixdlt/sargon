@@ -3,62 +3,71 @@ import Sargon
 import ComposableArchitecture
 import SwiftUI
 
-public protocol BaseEditFactorStateProtocol {
-	var baseCurrentFactors: IdentifiedArrayOf<AnyDisplayableFactorSource> { get }
-}
-
-public protocol EditFactorStateProtocol: ObservableState & Equatable where Key == PersistenceKeyDefault<SargonKey<IdentifiedArrayOf<F>>> {
-	associatedtype Key
-	associatedtype F: DisplayableFactorSource
-	static var key: Key { get }
-	var currentFactors: IdentifiedArrayOf<F> { get }
-}
-extension EditFactorStateProtocol {
-	public static var factorKind: FactorSourceKind {
-		F.kind
+extension FactorSource {
+	public var asDevice: DeviceFactorSource? {
+		extract()
 	}
-}
-extension AnyDisplayableFactorSource {
-	init(factor: some DisplayableFactorSource) {
-		self.init(hint: factor.hint, factorSource: factor.asGeneral)
+	public var asLedger: LedgerHardwareWalletFactorSource? {
+		extract()
 	}
-}
-
-@ObservableState
-public struct AnyEditFactorState: BaseEditFactorStateProtocol {
-	public let factorKind: FactorSourceKind
-	private let getFactors: () -> IdentifiedArrayOf<AnyDisplayableFactorSource>
-	public var baseCurrentFactors: IdentifiedArrayOf<AnyDisplayableFactorSource> { getFactors() }
-	
-	private init<S>(_ state: S) where S: EditFactorStateProtocol {
-		self.getFactors = {
-			state.currentFactors.map(AnyDisplayableFactorSource.init).asIdentified()
-		}
-		self.factorKind = S.factorKind
+	public var asArculus: ArculusCardFactorSource? {
+		extract()
+	}
+	public var asOffDeviceMnemonic: OffDeviceMnemonicFactorSource? {
+		extract()
+	}
+	public var asSecurityQuestions: SecurityQuestionsNotProductionReadyFactorSource? {
+		extract()
 	}
 	
-	public init(kind: FactorSourceKind) {
-		switch kind {
-		case .device:
-			self.init(DeviceFS())
-		case .ledgerHqHardwareWallet:
-			self.init(LedgerFS())
-		default: fatalError("Unsupported kind")
+	public func hintView() -> some SwiftUI.View {
+		Group {
+			if let device = asDevice {
+				device.hint.display()
+			} else if let ledger = asLedger {
+				ledger.hint.display()
+			} else if let arculus = asArculus {
+				arculus.hint.display()
+			} else if let offDevice = asOffDeviceMnemonic {
+				offDevice.hint.display()
+			} else if let securityQuestions = asSecurityQuestions {
+				securityQuestions.sealedMnemonic.display()
+			} else {
+				Text("No hint")
+			}
 		}
 	}
 }
-
-@ObservableState
-public struct DeviceFS: EditFactorStateProtocol {
-	public typealias F = DeviceFactorSource
-	public static let key: Key = .sharedDeviceFactorSources
-	@SharedReader(key) public var factors
-	public var currentFactors: IdentifiedArrayOf<F> {
-		factors
+extension SecurityQuestionsSealedNotProductionReadyMnemonic {
+	public func display() -> some SwiftUI.View {
+		VStack(alignment: .leading) {
+			Labeled("#Questions", self.securityQuestions.count)
+		}
+		.multilineTextAlignment(.leading)
+		.frame(maxWidth: .infinity)
 	}
 }
-extension DeviceFactorSourceHint: FactorSourceHint {
-	public func display() -> any SwiftUI.View {
+extension OffDeviceFactorSourceHint {
+	public func display() -> some SwiftUI.View {
+		VStack(alignment: .leading) {
+			Labeled("Label", displayName)
+		}
+		.multilineTextAlignment(.leading)
+		.frame(maxWidth: .infinity)
+	}
+}
+extension ArculusCardHint {
+	public func display() -> some SwiftUI.View {
+		VStack(alignment: .leading) {
+			Labeled("Arculus Name", name)
+			Labeled("Arculus Model", String(describing: model))
+		}
+		.multilineTextAlignment(.leading)
+		.frame(maxWidth: .infinity)
+	}
+}
+extension DeviceFactorSourceHint {
+	public func display() -> some SwiftUI.View {
 		VStack(alignment: .leading) {
 			Labeled("Device Name", name)
 			Labeled("Device Model", model)
@@ -74,20 +83,9 @@ extension DeviceFactorSourceHint: FactorSourceHint {
 		.frame(maxWidth: .infinity)
 	}
 }
-extension DeviceFactorSource: DisplayableFactorSource {}
 
-
-@ObservableState
-public struct LedgerFS: EditFactorStateProtocol {
-	public typealias F = LedgerHardwareWalletFactorSource
-	public static let key: Key = .sharedLedgerFactorSources
-	@SharedReader(key) public var factors
-	public var currentFactors: IdentifiedArrayOf<F> {
-		factors
-	}
-}
-extension LedgerHardwareWalletHint: FactorSourceHint {
-	public func display() -> any SwiftUI.View {
+extension LedgerHardwareWalletHint {
+	public func display() -> some SwiftUI.View {
 		VStack(alignment: .leading) {
 			Labeled("Ledger Name", name)
 			Labeled("Ledger Model", model)
@@ -96,11 +94,16 @@ extension LedgerHardwareWalletHint: FactorSourceHint {
 		.frame(maxWidth: .infinity)
 	}
 }
-extension LedgerHardwareWalletFactorSource: DisplayableFactorSource {}
 
 
-public struct SpecificFactorSourcesFeature: Reducer & Equatable {
-	public typealias State = AnyEditFactorState
+@Reducer
+public struct SpecificFactorSourcesFeature {
+	
+	@ObservableState
+	public struct State {
+		@SharedReader(.factorSources) var factorSources
+		public let kind: FactorSourceKind
+	}
 	
 	@CasePathable
 	public enum Action: ViewAction {
@@ -126,7 +129,7 @@ public struct SpecificFactorSourcesFeature: Reducer & Equatable {
 		Reduce { state, action in
 			switch action {
 			case .view(.addNewButtonTapped):
-				return .send(.delegate(.addNew(state.factorKind)))
+				return .send(.delegate(.addNew(state.kind)))
 		
 			default:
 				return .none
@@ -144,13 +147,16 @@ extension SpecificFactorSourcesFeature {
 		
 		@Bindable public var store: StoreOf<HostingFeature>
 		
-		var factors: IdentifiedArrayOf<AnyDisplayableFactorSource> {
-			store.state.baseCurrentFactors
+		public var kind: FactorSourceKind {
+			store.state.kind
+		}
+		public var factors: IdentifiedArrayOf<FactorSource> {
+			store.state.factorSources.filter(kind: kind)
 		}
 		
 		public var body: some SwiftUI.View {
 			VStack {
-				Text("\(store.factorKind) Factors").font(.largeTitle)
+				Text("\(kind) Factors").font(.largeTitle)
 		
 				if factors.isEmpty {
 					Text("You have no factors")
