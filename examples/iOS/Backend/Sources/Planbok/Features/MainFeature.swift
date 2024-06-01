@@ -10,8 +10,8 @@ public struct MainFeature {
 	@Reducer //(state: .equatable)
 	public enum Path {
 		case settings(SettingsFeature)
-        case factorSources(ManageFactorSourcesFeature)
-        case manageFactorSourcesOfKind(SpecificFactorSourcesFeature)
+        case manageFactorSources(ManageFactorSourcesFeature)
+        case manageSpecificFactorSources(ManageSpecificFactorSourcesFeature)
 		case accountDetails(AccountDetailsFeature)
 	}
 	
@@ -84,26 +84,26 @@ public struct MainFeature {
 						return .none
 						
 					case .settings(.delegate(.navigate(.toFactorSources))):
-						state.path.append(.factorSources(ManageFactorSourcesFeature.State()))
+						state.path.append(.manageFactorSources(ManageFactorSourcesFeature.State()))
 						return .none
 						
-                    case let .factorSources(.delegate(.navigate(.toFactor(kind)))):
-						state.path.append(.manageFactorSourcesOfKind(
-							SpecificFactorSourcesFeature.State(kind: kind)
+                    case let .manageFactorSources(.delegate(.navigate(.toFactor(kind)))):
+						state.path.append(.manageSpecificFactorSources(
+							ManageSpecificFactorSourcesFeature.State(kind: kind)
 						))
                         return .none
 						
-					case let .manageFactorSourcesOfKind(.delegate(.addNew(kind))):
+					case let .manageSpecificFactorSources(.delegate(.addNew(kind))):
 						log.notice("Main: Add new FactorSource of kind: '\(kind)' button tapped")
 						return .none
-
 						
-					case .factorSources(_):
-						return .none
-			
 					case .settings(_):
 						return .none
-					case .manageFactorSourcesOfKind(_):
+						
+					case .manageFactorSources(_):
+						return .none
+			
+					case .manageSpecificFactorSources(_):
 						return .none
 					}
 					
@@ -233,11 +233,11 @@ extension MainFeature {
 				case let .settings(store):
 					SettingsFeature.View(store: store)
 				
-				case let .factorSources(store):
+				case let .manageFactorSources(store):
 					ManageFactorSourcesFeature.View(store: store)
 				
-				case let .manageFactorSourcesOfKind(store):
-					SpecificFactorSourcesFeature.View(store: store)
+				case let .manageSpecificFactorSources(store):
+					ManageSpecificFactorSourcesFeature.View(store: store)
 					
 				
 				case let .accountDetails(store):

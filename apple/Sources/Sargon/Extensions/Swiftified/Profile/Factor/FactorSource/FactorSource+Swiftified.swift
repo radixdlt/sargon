@@ -89,4 +89,20 @@ extension FactorSource: BaseFactorSourceProtocol {
 		public let actualKind: FactorSourceKind
 	}
 	
+	public var asDevice: DeviceFactorSource? {
+		extract()
+	}
+	public var asLedger: LedgerHardwareWalletFactorSource? {
+		extract()
+	}
+	public var asArculus: ArculusCardFactorSource? {
+		extract()
+	}
+	public var asOffDeviceMnemonic: OffDeviceMnemonicFactorSource? {
+		extract()
+	}
+	public var asSecurityQuestions: SecurityQuestionsNotProductionReadyFactorSource? {
+		extract()
+	}
+	
 }
