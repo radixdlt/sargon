@@ -5,6 +5,9 @@ import ComposableArchitecture
 extension SecurityNotProductionReadyQuestion: Identifiable {
 	public typealias ID = UInt16
 }
+extension SecurityNotProductionReadyQuestion {
+	public static let all: [SecurityNotProductionReadyQuestion] = securityQuestionsAll()
+}
 public struct AnswersToQuestions: Hashable, Sendable {
 	public let questions: IdentifiedArrayOf<SecurityNotProductionReadyQuestion>
 	public var answers: [SecurityNotProductionReadyQuestion.ID: String] = [:]
@@ -16,34 +19,109 @@ extension PersistenceKey where Self == InMemoryKey<AnswersToQuestions> {
 	}
 }
 
+extension PersistenceReaderKey
+where Self == PersistenceKeyDefault<InMemoryKey<IdentifiedArrayOf<SecurityNotProductionReadyQuestion>>> {
+	static var selectedQuestions: Self {
+		PersistenceKeyDefault(
+			.inMemory("selectedQuestions"),
+			[]
+		)
+	}
+}
+
 @Reducer
 public struct SelectQuestionsFeature {
-	public struct State: Equatable {}
-	public enum Action {
+
+	@ObservableState
+	public struct State: Equatable {
+		@Shared(.selectedQuestions) var selectedQuestions
+	}
+	
+	@CasePathable
+	public enum Action: ViewAction {
 		case delegate(DelegateAction)
+		case view(ViewAction)
 		public enum DelegateAction {
 			case done
 		}
+		
+		@CasePathable
+		public enum ViewAction {
+			case confirmedQuestions
+		}
 	}
 }
+
+public struct SelectQuestionCard: View {
+	@Shared(.selectedQuestions) var selectedQuestions
+	public let question: SecurityNotProductionReadyQuestion
+	public var id: SecurityNotProductionReadyQuestion.ID {
+		question.id
+	}
+	public var isSelected: Bool {
+		selectedQuestions[id: id] != nil
+	}
+	public var body: some SwiftUI.View {
+		Button(action: {
+			if isSelected { 
+				selectedQuestions.remove(id: id)
+			} else {
+				selectedQuestions.append(question)
+			}
+		}, label: {
+			HStack {
+				Text(isSelected ? "✅" : "☑️").font(.title)
+				VStack {
+					Text("\(question.question)")
+				}
+			}
+		})
+		.buttonStyle(.plain)
+		.frame(maxWidth: .infinity, alignment: .leading)
+		.cornerRadius(.small1)
+	}
+}
+
 extension SelectQuestionsFeature {
 	public typealias HostingFeature = Self
+	
+	
+	@ViewAction(for: HostingFeature.self)
 	public struct View: SwiftUI.View {
+		let amount = 4
 		public let store: StoreOf<HostingFeature>
 		public init(store: StoreOf<HostingFeature>) {
 			self.store = store
 		}
 		public var body: some SwiftUI.View {
 			VStack {
-				Text("SelectQuestionsFeature").font(.largeTitle)
+				Text("Pick #\(amount) questions").font(.title)
+				Text("Picked: \(store.state.selectedQuestions.count)")
+				ScrollView {
+					ForEach(SecurityNotProductionReadyQuestion.all) { question in
+						SelectQuestionCard(question: question)
+							.padding()
+					}
+				}
+				.padding()
+				
+				Button("Confirm Questions") {
+					send(.confirmedQuestions)
+				}
+				.buttonStyle(.borderedProminent)
+				.disabled(store.state.selectedQuestions.count != amount)
 			}
+			.padding()
 		}
 	}
 }
 
 @Reducer
 public struct AnswerSecurityQuestionFeature {
+
+	@ObservableState
 	public struct State: Equatable {}
+
 	public enum Action {
 		case delegate(DelegateAction)
 		public enum DelegateAction {
@@ -68,7 +146,10 @@ extension AnswerSecurityQuestionFeature {
 
 @Reducer
 public struct SecurityQuestionsCreationCompleted {
+
+	@ObservableState
 	public struct State: Equatable {}
+
 	public enum Action {
 		case delegate(DelegateAction)
 		public enum DelegateAction {
