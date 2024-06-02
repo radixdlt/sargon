@@ -41,10 +41,9 @@ impl From<ArculusCardFactorSource> for FactorSource {
 fn new_arculus_with_mwp(
     mwp: MnemonicWithPassphrase,
     hint: ArculusCardHint,
-    common: FactorSourceCommon,
 ) -> ArculusCardFactorSource {
     let id = FactorSourceIDFromHash::new_for_arculus(&mwp);
-    let mut source = ArculusCardFactorSource::new(id, common, hint);
+    let mut source = ArculusCardFactorSource::new(id, hint);
     source.common.last_used_on = Timestamp::sample();
     source.common.added_on = Timestamp::sample();
     source
@@ -52,12 +51,12 @@ fn new_arculus_with_mwp(
 
 impl ArculusCardFactorSource {
     /// Instantiates a new `ArculusCardFactorSource`
-    pub fn new(
-        id: FactorSourceIDFromHash,
-        common: FactorSourceCommon,
-        hint: ArculusCardHint,
-    ) -> Self {
-        Self { id, common, hint }
+    pub fn new(id: FactorSourceIDFromHash, hint: ArculusCardHint) -> Self {
+        Self {
+            id,
+            common: FactorSourceCommon::new_bdfs(false),
+            hint,
+        }
     }
 }
 
@@ -66,7 +65,6 @@ impl HasSampleValues for ArculusCardFactorSource {
         new_arculus_with_mwp(
             MnemonicWithPassphrase::sample_arculus(),
             ArculusCardHint::sample(),
-            FactorSourceCommon::new_bdfs(false),
         )
     }
 
@@ -74,7 +72,6 @@ impl HasSampleValues for ArculusCardFactorSource {
         new_arculus_with_mwp(
             MnemonicWithPassphrase::sample_arculus_other(),
             ArculusCardHint::sample_other(),
-            FactorSourceCommon::new_bdfs(false),
         )
     }
 }

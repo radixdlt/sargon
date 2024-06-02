@@ -12,6 +12,15 @@ pub fn new_off_device_mnemonic_factor_source_sample_other(
     OffDeviceMnemonicFactorSource::sample_other()
 }
 
+#[uniffi::export]
+fn new_off_device_mnemonic_factor_source_from_mnemonic_with_passphrase(
+    mwp: MnemonicWithPassphrase,
+    hint: OffDeviceFactorSourceHint,
+) -> OffDeviceMnemonicFactorSource {
+    let id = FactorSourceIDFromHash::new_for_off_device(&mwp);
+    OffDeviceMnemonicFactorSource::new(id, hint)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -31,6 +40,19 @@ mod tests {
             ])
             .len(),
             2
+        );
+    }
+
+    #[test]
+    fn test_new_off_device_mnemonic_factor_source_from_mnemonic_with_passphrase(
+    ) {
+        assert_eq!(
+            new_off_device_mnemonic_factor_source_from_mnemonic_with_passphrase(
+                MnemonicWithPassphrase::sample_off_device(),
+                OffDeviceFactorSourceHint::sample()
+            )
+            .factor_source_id(),
+            SUT::sample().factor_source_id()
         );
     }
 }

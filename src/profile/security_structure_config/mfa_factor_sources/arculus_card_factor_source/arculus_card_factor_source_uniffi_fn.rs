@@ -11,6 +11,15 @@ pub fn new_arculus_card_factor_source_sample_other() -> ArculusCardFactorSource
     ArculusCardFactorSource::sample_other()
 }
 
+#[uniffi::export]
+fn new_arculus_card_factor_source_from_mnemonic_with_passphrase(
+    mwp: MnemonicWithPassphrase,
+    hint: ArculusCardHint,
+) -> ArculusCardFactorSource {
+    let id = FactorSourceIDFromHash::new_for_arculus(&mwp);
+    ArculusCardFactorSource::new(id, hint)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -30,6 +39,18 @@ mod tests {
             ])
             .len(),
             2
+        );
+    }
+
+    #[test]
+    fn test_new_arculus_card_factor_source_from_mnemonic_with_passphrase() {
+        assert_eq!(
+            new_arculus_card_factor_source_from_mnemonic_with_passphrase(
+                MnemonicWithPassphrase::sample_arculus(),
+                ArculusCardHint::sample()
+            )
+            .factor_source_id(),
+            SUT::sample().factor_source_id()
         );
     }
 }

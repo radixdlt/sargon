@@ -41,11 +41,7 @@ fn new_off_device_with_mwp(
     hint: OffDeviceFactorSourceHint,
 ) -> OffDeviceMnemonicFactorSource {
     let id = FactorSourceIDFromHash::new_for_off_device(&mwp);
-    let mut source = OffDeviceMnemonicFactorSource::new(
-        id,
-        FactorSourceCommon::new_bdfs(false),
-        hint,
-    );
+    let mut source = OffDeviceMnemonicFactorSource::new(id, hint);
     source.common.last_used_on = Timestamp::sample();
     source.common.added_on = Timestamp::sample();
     source
@@ -55,10 +51,13 @@ impl OffDeviceMnemonicFactorSource {
     /// Instantiates a new `OffDeviceMnemonicFactorSource`
     pub fn new(
         id: FactorSourceIDFromHash,
-        common: FactorSourceCommon,
         hint: OffDeviceFactorSourceHint,
     ) -> Self {
-        Self { id, common, hint }
+        Self {
+            id,
+            common: FactorSourceCommon::new_bdfs(false),
+            hint,
+        }
     }
 }
 

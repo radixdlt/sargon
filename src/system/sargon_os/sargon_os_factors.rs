@@ -1,5 +1,13 @@
 use crate::prelude::*;
 
+/// If we wanna create an Olympia DeviceFactorSource or
+/// a Babylon one, either main or not.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, uniffi::Enum)]
+pub enum DeviceFactorSourceType {
+    Babylon { is_main: bool },
+    Olympia,
+}
+
 #[uniffi::export]
 impl SargonOS {
     /// Returns the "main Babylon" `DeviceFactorSource` of the current account as
@@ -20,6 +28,10 @@ impl SargonOS {
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::FactorSourceAdded }`
     ///
+    /// And also emits `Event::ProfileModified { change: EventProfileModified::FactorSourceUpdated }`,
+    /// if the newly added FactorSource is a new **main** flag, then we remove the
+    /// main flag from the old BDFS.
+    ///
     /// And also emits `Event::ProfileSaved` after having successfully written the JSON
     /// of the active profile to secure storage.
     pub async fn add_factor_source(
@@ -27,6 +39,10 @@ impl SargonOS {
         factor_source: FactorSource,
     ) -> Result<bool> {
         let id = factor_source.factor_source_id();
+
+        let is_new_main_bdfs = factor_source.is_main_bdfs();
+        let id_of_old_bdfs = self.bdfs().factor_source_id();
+
         let inserted = self
             .update_profile_with(|mut p| {
                 Ok(p.factor_sources.append(factor_source.clone()).0)
@@ -34,6 +50,12 @@ impl SargonOS {
             .await?;
 
         if inserted {
+            if is_new_main_bdfs {
+                self.update_factor_source_remove_flag_main(id_of_old_bdfs)
+                    .await?;
+                assert_eq!(self.bdfs().factor_source_id(), id);
+            }
+
             self.event_bus
                 .emit(EventNotification::profile_modified(
                     EventProfileModified::FactorSourceAdded { id },
@@ -42,6 +64,28 @@ impl SargonOS {
         }
 
         Ok(inserted)
+    }
+
+    pub async fn create_device_factor_source(
+        &self,
+        mnemonic_with_passphrase: MnemonicWithPassphrase,
+        factor_type: DeviceFactorSourceType,
+    ) -> Result<DeviceFactorSource> {
+        let device_info = self.device_info().await?;
+        let factor_source = match factor_type {
+            DeviceFactorSourceType::Olympia => DeviceFactorSource::olympia(
+                &mnemonic_with_passphrase,
+                &device_info,
+            ),
+            DeviceFactorSourceType::Babylon { is_main } => {
+                DeviceFactorSource::babylon(
+                    is_main,
+                    &mnemonic_with_passphrase,
+                    &device_info,
+                )
+            }
+        };
+        Ok(factor_source)
     }
 
     /// Loads a `MnemonicWithPassphrase` with the `id` of `device_factor_source`,
@@ -62,6 +106,58 @@ impl SargonOS {
             .access_profile_with(|p| p.device_factor_source_by_id(id))?;
         self.load_private_device_factor_source(&device_factor_source)
             .await
+    }
+}
+
+impl SargonOS {
+    pub async fn update_last_used_of_factor_source(
+        &self,
+        factor_source_id: impl Into<FactorSourceID>,
+    ) -> Result<()> {
+        let id = factor_source_id.into();
+
+        debug!(
+            "Updating 'last_used_on' date for FactorSource with ID: {}",
+            &id
+        );
+
+        self.update_profile_with(|mut p| {
+            p.update_last_used_of_factor_source(&id)
+        })
+        .await?;
+
+        self.event_bus
+            .emit(EventNotification::profile_modified(
+                EventProfileModified::FactorSourceUpdated { id },
+            ))
+            .await;
+
+        Ok(())
+    }
+
+    pub async fn update_factor_source_remove_flag_main(
+        &self,
+        factor_source_id: impl Into<FactorSourceID>,
+    ) -> Result<()> {
+        let id = factor_source_id.into();
+
+        debug!(
+            "Updating 'flags', removing main, for FactorSource with ID: {}",
+            &id
+        );
+
+        self.update_profile_with(|mut p| {
+            p.update_factor_source_remove_flag_main(&id)
+        })
+        .await?;
+
+        self.event_bus
+            .emit(EventNotification::profile_modified(
+                EventProfileModified::FactorSourceUpdated { id },
+            ))
+            .await;
+
+        Ok(())
     }
 }
 
@@ -220,6 +316,42 @@ mod tests {
     }
 
     #[actix_rt::test]
+    async fn test_add_ledger_factor_source_new_bdfs_removes_main_from_existing_bdfs(
+    ) {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        let old_bdfs_id = os.bdfs().factor_source_id();
+        let new_bdfs = DeviceFactorSource::babylon(
+            true,
+            &MnemonicWithPassphrase::sample(),
+            &DeviceInfo::sample(),
+        );
+        assert_ne!(old_bdfs_id, new_bdfs.factor_source_id());
+
+        // ACT
+        let inserted = os
+            .with_timeout(|x| {
+                x.add_factor_source(FactorSource::from(new_bdfs.clone()))
+            })
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert!(inserted);
+        assert_eq!(os.bdfs(), new_bdfs);
+        let old_bdfs = os
+            .profile()
+            .factor_sources
+            .get_id(old_bdfs_id)
+            .unwrap()
+            .clone()
+            .into_device()
+            .unwrap();
+        assert!(!old_bdfs.is_main_bdfs());
+    }
+
+    #[actix_rt::test]
     async fn test_add_existing_factor_source_is_noop() {
         // ARRANGE
         let mwp = MnemonicWithPassphrase::sample();
@@ -247,6 +379,73 @@ mod tests {
         assert_eq!(
             os.profile().factor_sources,
             FactorSources::just(bdfs.into())
+        );
+    }
+
+    #[actix_rt::test]
+    async fn test_create_device_factor_source_babylon_main() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        let bdfs = os
+            .with_timeout(|x| {
+                x.create_device_factor_source(
+                    MnemonicWithPassphrase::sample(),
+                    DeviceFactorSourceType::Babylon { is_main: true },
+                )
+            })
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert!(bdfs.is_main_bdfs());
+    }
+
+    #[actix_rt::test]
+    async fn test_create_device_factor_source_babylon_not_main() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        let bdfs = os
+            .with_timeout(|x| {
+                x.create_device_factor_source(
+                    MnemonicWithPassphrase::sample(),
+                    DeviceFactorSourceType::Babylon { is_main: false },
+                )
+            })
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert!(!bdfs.common.is_main_bdfs());
+        assert!(bdfs.common.supports_babylon());
+    }
+
+    #[actix_rt::test]
+    async fn test_create_device_factor_source_olympia() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        let dfs = os
+            .with_timeout(|x| {
+                x.create_device_factor_source(
+                    MnemonicWithPassphrase::sample_device_12_words(),
+                    DeviceFactorSourceType::Olympia,
+                )
+            })
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert!(!dfs.common.is_main_bdfs());
+        assert!(!dfs.common.supports_babylon());
+        assert!(dfs.common.supports_olympia());
+        assert_eq!(
+            dfs.factor_source_id(),
+            DeviceFactorSource::sample_other().factor_source_id()
         );
     }
 }

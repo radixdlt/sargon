@@ -12,7 +12,6 @@ import Sargon
 @Reducer
 public struct InputMnemonicFeature {
 	
-	
 	@Reducer(state: .equatable)
 	public enum Destination {
 		case prefillMnemonic(AlertState<PrefillMnemonicAlert>)
@@ -36,9 +35,14 @@ public struct InputMnemonicFeature {
 	@ObservableState
 	public struct State {
 		@Presents var destination: Destination.State?
+		public var bip39Passphrase = ""
 		public var phrase = ""
 		public var mnemonic: Mnemonic? {
 			try? Mnemonic(phrase: phrase)
+		}
+		public var mnemonicWithPassphrase: MnemonicWithPassphrase? {
+			guard let mnemonic else { return nil }
+			return MnemonicWithPassphrase(mnemonic: mnemonic, passphrase: bip39Passphrase)
 		}
 	}
 	
@@ -51,7 +55,7 @@ public struct InputMnemonicFeature {
 			case confirmMnemonicButtonTapped
 		}
 		public enum DelegateAction {
-			case confirmed(Mnemonic)
+			case confirmed(MnemonicWithPassphrase)
 		}
 		case view(ViewAction)
 		case delegate(DelegateAction)
@@ -83,8 +87,8 @@ public struct InputMnemonicFeature {
 				return .none
 			
 			case .view(.confirmMnemonicButtonTapped):
-				guard let mnemonic = state.mnemonic else { return .none }
-				return .send(.delegate(.confirmed(mnemonic)))
+				guard let mnemonicWithPassphrase = state.mnemonicWithPassphrase else { return .none }
+				return .send(.delegate(.confirmed(mnemonicWithPassphrase)))
 				
 			case .delegate(_):
 				return .none

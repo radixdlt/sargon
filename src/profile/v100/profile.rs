@@ -213,9 +213,31 @@ impl Profile {
         &mut self,
         id: &FactorSourceID,
     ) -> Result<()> {
-        self.update_any_factor_source(id, |fs| {
-            let mut common = fs.common_properties();
+        self.update_any_factor_source_common(id, |common| {
             common.last_used_on = now();
+        })
+    }
+
+    pub fn update_factor_source_remove_flag_main(
+        &mut self,
+        id: &FactorSourceID,
+    ) -> Result<()> {
+        self.update_any_factor_source_common(id, |common| {
+            common.flags.remove_id(&FactorSourceFlag::Main);
+        })
+    }
+
+    pub fn update_any_factor_source_common<F>(
+        &mut self,
+        factor_source_id: &FactorSourceID,
+        mut mutate: F,
+    ) -> Result<()>
+    where
+        F: FnMut(&mut FactorSourceCommon),
+    {
+        self.update_any_factor_source(factor_source_id, |fs| {
+            let mut common = fs.common_properties();
+            mutate(&mut common);
             fs.set_common_properties(common);
         })
     }

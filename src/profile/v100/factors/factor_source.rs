@@ -129,6 +129,16 @@ impl From<LedgerHardwareWalletFactorSource> for FactorSource {
     }
 }
 
+impl FactorSource {
+    pub fn is_main_bdfs(&self) -> bool {
+        if let Some(dfs) = self.as_device() {
+            dfs.is_main_bdfs()
+        } else {
+            false
+        }
+    }
+}
+
 impl<'de> Deserialize<'de> for FactorSource {
     #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(

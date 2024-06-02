@@ -187,33 +187,6 @@ impl SargonOS {
     }
 }
 
-impl SargonOS {
-    pub async fn update_last_used_of_factor_source(
-        &self,
-        factor_source_id: impl Into<FactorSourceID>,
-    ) -> Result<()> {
-        let id = factor_source_id.into();
-
-        debug!(
-            "Updating 'last_used_on' date for FactorSource with ID: {}",
-            &id
-        );
-
-        self.update_profile_with(|mut p| {
-            p.update_last_used_of_factor_source(&id)
-        })
-        .await?;
-
-        self.event_bus
-            .emit(EventNotification::profile_modified(
-                EventProfileModified::FactorSourceUpdated { id: id },
-            ))
-            .await;
-
-        Ok(())
-    }
-}
-
 // ==================
 // Add (Save) Account(s)
 // ==================
