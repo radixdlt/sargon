@@ -79,7 +79,7 @@ public struct InputMnemonicFeature {
 					buttons: [
 						.cancel(TextState("Cancel"))
 					] + Destination.PrefillMnemonicAlert.allCases.map { action in
-						ButtonState<Destination.PrefillMnemonicAlert>.init(action: action, label: {
+						ButtonState<Destination.PrefillMnemonicAlert>(action: action, label: {
 							TextState("Prefill \(action.rawValue)")
 						})
 					}
@@ -95,8 +95,18 @@ public struct InputMnemonicFeature {
 				
 			case let .destination(.presented(.prefillMnemonic(prefillAction))):
 				let mnemonic = switch prefillAction {
-				case .arculus: Mnemonic.sample
-				default:  Mnemonic.sampleOther
+				case .device24: Mnemonic.sampleDevice
+				case .device24Other: Mnemonic.sampleDeviceOther
+				case .arculus: Mnemonic.sampleArculus
+				case .arculusOther: Mnemonic.sampleArculusOther
+				case .device12: Mnemonic.sampleDevice12Words
+				case .device12Other: Mnemonic.sampleDevice12WordsOther
+				case .ledger: Mnemonic.sampleLedger
+				case .ledgerOther: Mnemonic.sampleLedgerOther
+				case .securityQuestions: Mnemonic.sampleSecurityQuestions
+				case .securityQuestionsOther: Mnemonic.sampleSecurityQuestionsOther
+				case .offDevice: Mnemonic.sampleOffDeviceMnemonic
+				case .offDeviceOther: Mnemonic.sampleOffDeviceMnemonicOther
 				}
 				return .send(.view(.phraseChanged(mnemonic.phrase)))
 				

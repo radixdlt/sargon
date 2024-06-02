@@ -87,6 +87,8 @@ extension ManageFactorSourcesFeature {
         public var body: some SwiftUI.View {
             VStack {
                 Text("FactorSources").font(.largeTitle)
+				Text("You have #\(store.state.factorSources.count) factor sources")
+				Text("of #\(Set(store.state.factorSources.map(\.kind)).count) different kinds.")
         
 				Spacer()
 				
@@ -102,6 +104,10 @@ extension ManageFactorSourcesFeature {
 					send(.arculusButtonTapped)
 				}
 				
+				Button("Off Device Mnemonic") {
+					send(.offDeviceButtonTapped)
+				}
+				
 				Button("Security Questions") {
 					send(.securityQuestionsButtonTapped)
 				}
@@ -109,11 +115,6 @@ extension ManageFactorSourcesFeature {
 				Button("Trusted Contact") {
 					send(.trustedContactButtonTapped)
 				}
-				
-				Button("Off Device Mnemonic") {
-					send(.offDeviceButtonTapped)
-				}
-           
                 
             }
             .padding(.bottom, 100)
