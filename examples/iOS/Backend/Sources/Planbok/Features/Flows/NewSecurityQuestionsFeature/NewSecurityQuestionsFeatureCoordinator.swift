@@ -8,16 +8,20 @@ extension SecurityNotProductionReadyQuestion: Identifiable {
 extension SecurityNotProductionReadyQuestion {
 	public static let all: [SecurityNotProductionReadyQuestion] = securityQuestionsAll()
 }
-public struct AnswersToQuestions: Hashable, Sendable {
-	public let questions: IdentifiedArrayOf<SecurityNotProductionReadyQuestion>
-	public var answers: [SecurityNotProductionReadyQuestion.ID: String] = [:]
-}
 
-extension PersistenceKey where Self == InMemoryKey<AnswersToQuestions> {
-	static var answersToSecurityQuestions: Self {
-		.inMemory("answersToSecurityQuestions")
+
+
+extension PersistenceReaderKey
+where Self == PersistenceKeyDefault<InMemoryKey<AnswersToQuestions>> {
+	static var answers: Self {
+		PersistenceKeyDefault(
+			.inMemory("answers"),
+			[:]
+		)
 	}
 }
+
+public typealias AnswersToQuestions = [SecurityNotProductionReadyQuestion.ID: String?]
 
 extension PersistenceReaderKey
 where Self == PersistenceKeyDefault<InMemoryKey<IdentifiedArrayOf<SecurityNotProductionReadyQuestion>>> {
@@ -50,6 +54,17 @@ public struct SelectQuestionsFeature {
 			case confirmedQuestions
 		}
 	}
+	
+	public var body: some ReducerOf<Self> {
+		Reduce { state, action in
+			switch action {
+			case .view(.confirmedQuestions):
+				return .send(.delegate(.done))
+			case .delegate(_):
+				return .none
+			}
+		}
+	}
 }
 
 public struct SelectQuestionCard: View {
@@ -72,7 +87,12 @@ public struct SelectQuestionCard: View {
 			HStack {
 				Text(isSelected ? "✅" : "☑️").font(.title)
 				VStack {
-					Text("\(question.question)")
+					Text("\(question.question)").font(.headline).fontWeight(.bold)
+					if case let unsafeAnswers = question.expectedAnswerFormat.unsafeAnswers, !unsafeAnswers.isEmpty {
+						Text("Dont select if: \(unsafeAnswers.joined(separator: ","))")
+							.font(.footnote)
+							.foregroundStyle(Color.red)
+					}
 				}
 			}
 		})
@@ -100,10 +120,10 @@ extension SelectQuestionsFeature {
 				ScrollView {
 					ForEach(SecurityNotProductionReadyQuestion.all) { question in
 						SelectQuestionCard(question: question)
-							.padding()
+							.padding(.bottom, 10)
 					}
 				}
-				.padding()
+				.padding(.vertical, 10)
 				
 				Button("Confirm Questions") {
 					send(.confirmedQuestions)
@@ -120,26 +140,86 @@ extension SelectQuestionsFeature {
 public struct AnswerSecurityQuestionFeature {
 
 	@ObservableState
-	public struct State: Equatable {}
+	public struct State: Equatable {
+		
+		@Shared(.answers) var answers
+		@Shared(.selectedQuestions) var selectedQuestions
+		
+		public let index: Int
+		public var answer: String = ""
+		public var question: SecurityNotProductionReadyQuestion {
+			selectedQuestions[index]
+		}
+		
+	}
 
-	public enum Action {
+	@CasePathable
+	public enum Action: ViewAction {
 		case delegate(DelegateAction)
+		case view(ViewAction)
 		public enum DelegateAction {
 			case done
+		}
+
+		@CasePathable
+		public enum ViewAction {
+			case answerChanged(String)
+			case confirmButtonTapped
+		}
+	}
+	
+	public var body: some ReducerOf<Self> {
+		Reduce { state, action in
+			switch action {
+			case let .view(.answerChanged(answer)):
+				state.answer = answer
+				return .none
+			case .view(.confirmButtonTapped):
+				guard !state.answer.isEmpty else { return .none }
+				state.answers[state.question.id] = state.answer
+				return .send(.delegate(.done))
+			case .delegate(_):
+				return .none
+			}
 		}
 	}
 }
 extension AnswerSecurityQuestionFeature {
 	public typealias HostingFeature = Self
+	
+	@ViewAction(for: HostingFeature.self)
 	public struct View: SwiftUI.View {
-		public let store: StoreOf<HostingFeature>
+		@Bindable public var store: StoreOf<HostingFeature>
 		public init(store: StoreOf<HostingFeature>) {
 			self.store = store
 		}
 		public var body: some SwiftUI.View {
 			VStack {
-				Text("AnswerSecurityQuestionFeature").font(.largeTitle)
+				Text("Question #\(store.state.index)")
+					.font(.largeTitle)
+				
+				Spacer()
+
+				Text("\(store.state.question.question)")
+					.font(.title).font(.body)
+				
+				Labeled("Structure", store.state.question.expectedAnswerFormat.answerStructure)
+				
+				LabeledTextField(label: "Answer", text: $store.answer.sending(\.view.answerChanged))
+					.padding(.vertical, 20)
+				
+				Labeled("Example", store.state.question.expectedAnswerFormat.exampleAnswer)
+				
+				Spacer()
+				
+				Button("Confirm") {
+					send(.confirmButtonTapped)
+				}
+				.buttonStyle(.borderedProminent)
+				.disabled(store.state.answer.isEmpty)
 			}
+			.multilineTextAlignment(.leading)
+			.padding()
 		}
 	}
 }
@@ -190,6 +270,9 @@ public struct NewSecurityQuestionsFeatureCoordinator {
 	
 	@ObservableState
 	public struct State: Equatable {
+		@Shared(.selectedQuestions) var selectedQuestions
+		@Shared(.answers) var answers
+		
 		public var selectQuestions: SelectQuestionsFeature.State
 		public var path = StackState<Path.State>()
 		
@@ -220,21 +303,26 @@ public struct NewSecurityQuestionsFeatureCoordinator {
 			switch action {
 				
 			case .path(let pathAction):
-//				switch pathAction {
-//
-//				case .element(id: _, action: .answerQuestion0(.delegate(.done))):
-//					return .send(.delegate(.done))
-//					
-//				case .popFrom(id: _):
-//					return .none
-//				case .push(id: _, state: _):
-//					return .none
-//				default:
-//					return .none
-//				}
-				return .none
+				switch pathAction {
+
+				case .element(id: _, action: .answerQuestion0(.delegate(.done))):
+					return .send(.delegate(.done))
+					
+				case .popFrom(id: _):
+					return .none
+				case .push(id: _, state: _):
+					return .none
+				default:
+					return .none
+				}
 				
 			case .selectQuestions(.delegate(.done)):
+				state.answers = Dictionary(uniqueKeysWithValues: state.selectedQuestions.map({ ($0.id, String?.none) }))
+				state.path.append(.answerQuestion0(
+					AnswerSecurityQuestionFeature.State(
+						index: 0
+					)
+				))
 				return .none
 				
 			
