@@ -19,6 +19,7 @@ public struct MainFeature {
 	public enum Destination {
 		case createAccount(CreateAccountFlowFeature)
 		
+		case newHWFactorSource(NewHWFactorSourceFeature)
 		case deleteProfileAlert(AlertState<DeleteProfileAlert>)
 		
 		public enum DeleteProfileAlert {
@@ -94,7 +95,7 @@ public struct MainFeature {
                         return .none
 						
 					case let .manageSpecificFactorSources(.delegate(.addNew(kind))):
-						log.notice("Main: Add new FactorSource of kind: '\(kind)' button tapped")
+						state.destination = .newHWFactorSource(NewHWFactorSourceFeature.State(kind: kind))
 						return .none
 						
 					case .settings(_):
@@ -145,6 +146,10 @@ public struct MainFeature {
 				state.destination = .createAccount(
 					CreateAccountFlowFeature.State(index: index)
 				)
+				return .none
+				
+			case .destination(.presented(.newHWFactorSource(.delegate(.createdAndSavedNewFactorSource)))):
+				state.destination = nil
 				return .none
 				
 			case .destination(.presented(.deleteProfileAlert(.confirmedEmulateFreshInstallThenTerminate))):
@@ -252,6 +257,14 @@ extension MainFeature {
 				)
 			) { store in
 				CreateAccountFlowFeature.View(store: store)
+			}
+			.sheet(
+				item: $store.scope(
+					state: \.destination?.newHWFactorSource,
+					action: \.destination.newHWFactorSource
+				)
+			) { store in
+				NewHWFactorSourceFeature.View(store: store)
 			}
 			.alert($store.scope(state: \.destination?.deleteProfileAlert, action: \.destination.deleteProfileAlert))
 			

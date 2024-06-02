@@ -33,7 +33,7 @@ public struct InputMnemonicFeature {
 	}
 	
 	@ObservableState
-	public struct State {
+	public struct State: Equatable {
 		@Presents var destination: Destination.State?
 		public var bip39Passphrase = ""
 		public var phrase = ""

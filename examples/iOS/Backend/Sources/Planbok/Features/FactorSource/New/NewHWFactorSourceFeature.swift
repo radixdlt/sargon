@@ -11,42 +11,50 @@ import Sargon
 
 @Reducer
 public struct NewHWFactorSourceFeature {
+	
+	@Dependency(FactorSourcesClient.self) var factorSourcesClient
+	
 	@ObservableState
-	public struct State {
+	public struct State: Equatable {
 		public let kind: FactorSourceKind
 		public var inputMnemonic: InputMnemonicFeature.State
+		public init(kind: FactorSourceKind) {
+			self.kind = kind
+			self.inputMnemonic = .init()
+		}
 	}
 	
+	@CasePathable
 	public enum Action {
-		case inputMnemonic(InputMnemonicFeature.Action)
+		case `internal`(InternalAction)
+		case delegate(DelegateAction)
+		@CasePathable
+		public enum InternalAction {
+			case inputMnemonic(InputMnemonicFeature.Action)
+		}
+		@CasePathable
+		public enum DelegateAction {
+			case createdAndSavedNewFactorSource
+		}
 	}
 	
 	public var body: some ReducerOf<Self> {
-		Scope(state: \.inputMnemonic, action: \.inputMnemonic) {
+		Scope(state: \.inputMnemonic, action: \.internal.inputMnemonic) {
 			InputMnemonicFeature()
 		}
 		
-		Reduce {
-			state,
-			action in
+		Reduce { state, action in
 			switch action {
-			case let .inputMnemonic(.delegate(.confirmed(mnemonicWithPassphrase))):
-				let factorSource: FactorSource = switch state.kind {
-				case .device:
-					let deviceInfo = DeviceInfo.sample
-					let deviceFS: DeviceFactorSource = mnemonicWithPassphrase.mnemonic.wordCount == .twentyFour ? DeviceFactorSource.babylon(
-						mnemonicWithPassphrase: mnemonicWithPassphrase,
-						isMain: false,
-						deviceInfo: deviceInfo
-					) : DeviceFactorSource.olympia(
-						mnemonicWithPassphrase: mnemonicWithPassphrase,
-						deviceInfo: deviceInfo
-					)
-					FactorSource.device(value: deviceFS)
-				case .ledger:
-					LedgerHardwareWalletFactorSource.
+			case let .internal(.inputMnemonic(.delegate(.confirmed(mnemonicWithPassphrase)))):
+				return .run { [kind = state.kind] send in
+					let factorSource = try await factorSourcesClient.createHWFactorSource(mnemonicWithPassphrase, kind)
+					try await factorSourcesClient.addFactorSource(factorSource)
+					await send(.delegate(.createdAndSavedNewFactorSource))
 				}
-			case .inputMnemonic(_):
+			case .delegate(_):
+				return .none
+				
+			case .internal(_):
 				return .none
 			}
 		}
@@ -64,7 +72,7 @@ extension NewHWFactorSourceFeature {
 		public var body: some SwiftUI.View {
 			VStack {
 				Text("New \(store.state.kind) Factor")
-				InputMnemonicFeature.View(store: store.scope(state: \.inputMnemonic, action: \.inputMnemonic))
+				InputMnemonicFeature.View(store: store.scope(state: \.inputMnemonic, action: \.internal.inputMnemonic))
 			}
 		}
 	}

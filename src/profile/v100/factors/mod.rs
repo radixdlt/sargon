@@ -1,6 +1,7 @@
 mod factor_instance;
 mod factor_source;
 mod factor_source_common;
+mod factor_source_common_uniffi_fn;
 mod factor_source_crypto_parameters;
 mod factor_source_crypto_parameters_uniffi_fn;
 mod factor_source_flag;
@@ -22,6 +23,7 @@ mod is_factor_source;
 pub use factor_instance::*;
 pub use factor_source::*;
 pub use factor_source_common::*;
+pub use factor_source_common_uniffi_fn::*;
 pub use factor_source_crypto_parameters::*;
 pub use factor_source_crypto_parameters_uniffi_fn::*;
 pub use factor_source_flag::*;
