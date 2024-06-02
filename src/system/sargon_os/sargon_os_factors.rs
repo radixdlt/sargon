@@ -110,6 +110,13 @@ impl SargonOS {
 }
 
 impl SargonOS {
+    /// Updates the `last_used_on` for the factor source and emits events.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileSaved` after having successfully written the JSON
+    /// of the active profile to secure storage.
+    ///
+    /// Also emits `EventNotification::ProfileModified { change: EventProfileModified::FactorSourceUpdated { id } }`
     pub async fn update_last_used_of_factor_source(
         &self,
         factor_source_id: impl Into<FactorSourceID>,

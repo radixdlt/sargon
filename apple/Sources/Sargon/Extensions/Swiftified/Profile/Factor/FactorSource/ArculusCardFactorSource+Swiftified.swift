@@ -8,6 +8,12 @@
 import Foundation
 import SargonUniFFI
 
+extension ArculusCardModel: CustomStringConvertible {
+	public var description: String {
+		toString()
+	}
+}
+
 extension ArculusCardFactorSource: SargonModel {}
 extension ArculusCardFactorSource: Identifiable {
 	public typealias ID = FactorSourceIDFromHash

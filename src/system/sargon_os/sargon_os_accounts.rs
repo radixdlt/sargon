@@ -58,6 +58,13 @@ impl SargonOS {
     /// this FactorSource as derivation path.
     ///
     /// If you want to add it to Profile, call `os.add_account(account)`.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileSaved` after having successfully written the JSON
+    /// of the active profile to secure storage, since the `last_used_on` date
+    /// of the factor source has been updated.
+    ///
+    /// Also emits `EventNotification::ProfileModified { change: EventProfileModified::FactorSourceUpdated { id } }`
     pub async fn create_unsaved_account(
         &self,
         network_id: NetworkID,
@@ -658,6 +665,48 @@ mod tests {
             .recorded()
             .iter()
             .any(|e| e.event.kind() == EventKind::FactorSourceUpdated));
+    }
+
+    #[actix_rt::test]
+    async fn test_create_and_save_new_account_emits_events() {
+        // ARRANGE (and ACT)
+        let event_bus_driver = RustEventBusDriver::new();
+        let drivers = Drivers::with_event_bus(event_bus_driver.clone());
+        let bios = Bios::new(drivers);
+
+        let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
+            .await
+            .unwrap()
+            .unwrap();
+
+        // ACT
+        os.with_timeout(|x| {
+            x.create_and_save_new_account(
+                NetworkID::Mainnet,
+                DisplayName::sample(),
+            )
+        })
+        .await
+        .unwrap();
+
+        // ASSERT
+        let events = event_bus_driver
+            .recorded()
+            .iter()
+            .map(|e| e.event.kind())
+            .collect_vec();
+
+        use EventKind::*;
+        assert_eq!(
+            events,
+            vec![
+                Booted,
+                ProfileSaved,
+                FactorSourceUpdated,
+                ProfileSaved,
+                AccountAdded
+            ]
+        );
     }
 
     impl DisplayName {
