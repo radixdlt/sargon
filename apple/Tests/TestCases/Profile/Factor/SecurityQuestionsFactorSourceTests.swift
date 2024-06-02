@@ -5,24 +5,70 @@ import SargonUniFFI
 import XCTest
 
 final class SecurityQuestionsFactorSourceTests: SpecificFactorSourceTest<SecurityQuestionsNotProductionReadyFactorSource> {
-	func test_id_of_ledger() {
-		XCTAssertEqual(SUT.sample.id.description, FactorSourceID.hash(value: SUT.sample.id).description)
+	
+	func test_id_of_security_questions() {
+		eachSample { sut in
+			XCTAssertEqual(sut.id.description, FactorSourceID.hash(value: sut.id).description)
+		}
 	}
 	
+	func test_roundtrip() throws {
+		let mnemonic = Mnemonic.sampleSecurityQuestions
+		let qas = newSecurityNOTPRODUCTIONREADYQuestionsAndAnswersSample()
+		let sut = SUT(
+			mnemonic: mnemonic,
+			questionsAndAnswers: qas
+		)
+		let decrypted = try sut.decrypt(questionsAndAnswers: qas)
+		XCTAssertEqual(decrypted, mnemonic)
+	}
+	
+	
+	func test_new() {
+		XCTAssertEqual(
+			SUT(
+				mnemonic: .sampleSecurityQuestions,
+				questionsAndAnswers: newSecurityNOTPRODUCTIONREADYQuestionsAndAnswersSample()
+			).id,
+			SUT.sample.id
+		)
+	}
+	
+	func test_as() {
+		eachSample { sut in
+			XCTAssertEqual(sut.asGeneral.asSecurityQuestions, sut)
+		}
+	}
+	
+	func test_as_wrong() {
+		eachSample { sut in
+			XCTAssertNil(sut.asGeneral.asDevice)
+		}
+	}
+	
+	
 	func test_factor_source_id_is_id() {
-		XCTAssertEqual(SUT.sample.id.asGeneral, SUT.sample.factorSourceID)
+		eachSample { sut in
+			XCTAssertEqual(sut.id.asGeneral, sut.factorSourceID)
+		}
 	}
 	
 	func test_kind() {
-		XCTAssertEqual(SUT.sample.factorSourceKind, .securityQuestions)
+		eachSample { sut in
+			XCTAssertEqual(sut.factorSourceKind, .securityQuestions)
+		}
 	}
 	
 	func test_as_factor_source_to_string() {
-		XCTAssertEqual(SUT.sample.asGeneral.id.description, SUT.sample.id.description)
+		eachSample { sut in
+			XCTAssertEqual(sut.asGeneral.id.description, sut.id.description)
+		}
 	}
 	
 	func test_as_general() {
-		XCTAssertEqual(SUT.sample.asGeneral, FactorSource.securityQuestions(value: SUT.sample))
+		eachSample { sut in
+			XCTAssertEqual(sut.asGeneral, FactorSource.securityQuestions(value: sut))
+		}
 	}
 	
 	func test_source_that_supports_babylon() {
