@@ -63,7 +63,7 @@ public struct SelectQuestionCard: View {
 		}, label: {
 			HStack {
 				Text(isSelected ? "✅" : "☑️").font(.title)
-				VStack {
+                VStack(alignment: .leading) {
 					Text("\(question.question)").font(.headline).fontWeight(.bold)
 					if case let unsafeAnswers = question.expectedAnswerFormat.unsafeAnswers, !unsafeAnswers.isEmpty {
 						Text("Unsuitable if: \(unsafeAnswers.joined(separator: ","))")
@@ -72,6 +72,7 @@ public struct SelectQuestionCard: View {
 					}
 				}
 			}
+            .multilineTextAlignment(.leading)
 		})
 		.buttonStyle(.plain)
 		.frame(maxWidth: .infinity, alignment: .leading)

@@ -79,10 +79,13 @@ extension AnswerSecurityQuestionFeature {
 				Text("Question #\(store.state.index)")
 					.font(.largeTitle)
 				
-				Spacer()
+                Spacer()
 
-				Text("\(store.state.question.question)")
-					.font(.title).font(.body)
+                Text("\(store.state.question.question)")
+                    .font(.title)
+                    .fontWeight(.bold)
+
+                Spacer()
                 
                 if
                     case let unsafeAnswers = store.state.question.expectedAnswerFormat.unsafeAnswers,
@@ -95,8 +98,8 @@ extension AnswerSecurityQuestionFeature {
 				LabeledTextField(
 					label: "Answer",
 					text: $store.answer.sending(\.view.answerChanged),
-					placeholder: "\(store.state.question.expectedAnswerFormat.answerStructure)",
-					hint: "\(store.state.question.expectedAnswerFormat.exampleAnswer)"
+					placeholder: "Suggested format: `\(store.state.question.expectedAnswerFormat.answerStructure)`",
+					hint: "Example: *\"\(store.state.question.expectedAnswerFormat.exampleAnswer)\"*"
 				)
 				.padding(.vertical, 20)
 				

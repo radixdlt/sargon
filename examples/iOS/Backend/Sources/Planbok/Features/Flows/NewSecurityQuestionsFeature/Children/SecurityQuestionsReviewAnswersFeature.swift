@@ -75,13 +75,8 @@ extension SecurityQuestionsReviewAnswersFeature {
 				ScrollView {
                     ForEach(store.state.answersToQuestions) { answerToQuestion in
                         let index = store.state.answersToQuestions.firstIndex(of: answerToQuestion)!
-						VStack(alignment: .leading) {
-                            Labeled("Question \(index)", answerToQuestion.question.question, axis: .vertical)
-                            Labeled("Answer \(index)", answerToQuestion.answer, axis: .vertical)
-						}
-                        .multilineTextAlignment(.leading)
-                        .padding(.vertical, 10)
-					}
+                        AnsweredQuestionCard(answerToQuestion, index)
+                    }
                     .multilineTextAlignment(.leading)
                 }
                 
@@ -93,4 +88,28 @@ extension SecurityQuestionsReviewAnswersFeature {
             .padding()
         }
 	}
+}
+
+public struct AnsweredQuestionCard: SwiftUI.View {
+    public let answerToQuestion: AnswersToQuestions.Element
+    public let index: Int
+    public init(
+        _ answerToQuestion: AnswersToQuestions.Element,
+        _ index: Int
+    ) {
+        self.answerToQuestion = answerToQuestion
+        self.index = index
+    }
+    public var body: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            Labeled("Question \(index)", answerToQuestion.question.question, axis: .vertical)
+            Labeled("Answer \(index)", answerToQuestion.answer, axis: .vertical)
+        }
+        .fontWeight(.bold)
+        .foregroundStyle(Color.white)
+        .frame(maxWidth:. infinity)
+        .padding()
+        .background(Color.green)
+        .clipShape(.rect(cornerRadius: 20))
+    }
 }
