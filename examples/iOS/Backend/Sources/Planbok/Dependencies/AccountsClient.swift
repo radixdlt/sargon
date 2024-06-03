@@ -13,7 +13,7 @@ import IdentifiedCollections
 public typealias Accounts = IdentifiedArrayOf<Account>
 extension Array where Element: Identifiable {
 	func asIdentified() -> IdentifiedArrayOf<Element> {
-		IdentifiedArrayOf.init(uncheckedUniqueElements: self)
+		IdentifiedArrayOf(uncheckedUniqueElements: self)
 	}
 }
 

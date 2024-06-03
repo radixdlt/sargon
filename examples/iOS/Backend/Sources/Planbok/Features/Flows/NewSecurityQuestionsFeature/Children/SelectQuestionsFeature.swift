@@ -13,34 +13,84 @@ import ComposableArchitecture
 @Reducer
 public struct SelectQuestionsFeature {
 
+	
+	@Reducer(state: .equatable)
+	public enum Destination {
+		case prefillQuestionsAndAnswersAlert(AlertState<PrefillQuestionsAndAnswersAlert>)
+		
+		public enum PrefillQuestionsAndAnswersAlert: Int, CaseIterable {
+			case sample
+			case sampleOther
+		}
+	}
+	
+
 	@ObservableState
 	public struct State: Equatable {
 		@Shared(.selectedQuestions) var selectedQuestions
+		@Presents var destination: Destination.State?
+		
 	}
 	
 	@CasePathable
 	public enum Action: ViewAction {
 		case delegate(DelegateAction)
 		case view(ViewAction)
+		case destination(PresentationAction<Destination.Action>)
+		
 		public enum DelegateAction {
-			case done
+			case done(prefillWith: [SecurityNotProductionReadyQuestionAndAnswer]?)
 		}
 		
 		@CasePathable
 		public enum ViewAction {
 			case confirmedQuestions
+			case prefillButtonTapped
 		}
 	}
 	
 	public var body: some ReducerOf<Self> {
 		Reduce { state, action in
 			switch action {
+				
+			case .view(.prefillButtonTapped):
+				state.destination = .prefillQuestionsAndAnswersAlert(.init(
+					title: TextState("Prefill?"),
+					message: TextState("Will take you to review screen."),
+					buttons: [
+						.cancel(TextState("Cancel"))
+					] + Destination.PrefillQuestionsAndAnswersAlert.allCases.map { action in
+						ButtonState<Destination.PrefillQuestionsAndAnswersAlert>(
+							action: action,
+							label: {
+							TextState("Prefill \(action.rawValue)")
+						})
+					}
+				))
+				return .none
+				
 			case .view(.confirmedQuestions):
-				return .send(.delegate(.done))
+				return .send(.delegate(.done(prefillWith: nil)))
+				
+			case let .destination(.presented(.prefillQuestionsAndAnswersAlert(prefillAction))):
+				let qas = switch prefillAction {
+				case .sample:
+					newSecurityNOTPRODUCTIONREADYQuestionsAndAnswersSample()
+				case .sampleOther:
+					newSecurityNOTPRODUCTIONREADYQuestionsAndAnswersSampleOther()
+				}
+				
+				state.destination = nil
+				return .send(.delegate(.done(prefillWith: qas)))
+				
+			case .destination(_):
+				return .none
+				
 			case .delegate(_):
 				return .none
 			}
 		}
+		.ifLet(\.$destination, action: \.destination)
 	}
 }
 
@@ -87,7 +137,7 @@ extension SelectQuestionsFeature {
 	@ViewAction(for: HostingFeature.self)
 	public struct View: SwiftUI.View {
 		let amount = 4
-		public let store: StoreOf<HostingFeature>
+		@Bindable public var store: StoreOf<HostingFeature>
 		public init(store: StoreOf<HostingFeature>) {
 			self.store = store
 		}
@@ -95,6 +145,12 @@ extension SelectQuestionsFeature {
 			VStack {
 				Text("Pick #\(amount) questions").font(.title)
 				Text("Picked: \(store.state.selectedQuestions.count)")
+				
+				Button("Prefill Q + As") {
+					send(.prefillButtonTapped)
+				}
+				.buttonStyle(.borderedProminent)
+				
 				ScrollView {
 					ForEach(SecurityNotProductionReadyQuestion.all) { question in
 						SelectQuestionCard(question: question)
@@ -110,6 +166,7 @@ extension SelectQuestionsFeature {
 				.disabled(store.state.selectedQuestions.count != amount)
 			}
 			.padding()
+			.alert($store.scope(state: \.destination?.prefillQuestionsAndAnswersAlert, action: \.destination.prefillQuestionsAndAnswersAlert))
 		}
 	}
 }

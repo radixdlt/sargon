@@ -52,7 +52,7 @@ public struct NewSecurityQuestionsFeatureCoordinator {
 				let question = state.selectedQuestions[id: $0.key]!
 				return SecurityNotProductionReadyQuestionAndAnswer(question: question, answer: $0.value)
 			})
-			let answersToQuestions = IdentifiedArrayOf(uniqueElements: answersToQuestionsArray)
+			let answersToQuestions = answersToQuestionsArray.asIdentified()
 			state.path.append(.reviewAnswers(SecurityQuestionsReviewAnswersFeature.State(
 				answersToQuestions: answersToQuestions
 			)))
@@ -86,8 +86,28 @@ public struct NewSecurityQuestionsFeatureCoordinator {
 					return .none
 				}
 				
-			case .selectQuestions(.delegate(.done)):
-				return nextStep(&state, nextIndex: 0)
+			case let .selectQuestions(.delegate(.done(prefillWith))):
+				if let qas = prefillWith {
+					state.selectedQuestions = qas.map(\.question).asIdentified()
+					state.pendingAnswers = Dictionary(
+						uniqueKeysWithValues: qas.map({ ($0.question.id, $0.answer) })
+					)
+
+					state.path = StackState(
+						(0..<qas.count)
+							.map(AnswerSecurityQuestionFeature.State.init(index:))
+							.map(Path.State.answerQuestion)
+					)
+					
+					state.path.append(.reviewAnswers(
+						SecurityQuestionsReviewAnswersFeature.State(
+							answersToQuestions: qas.asIdentified())
+					))
+					
+					return .none
+				} else {
+					return nextStep(&state, nextIndex: 0)
+				}
 			
 			case .selectQuestions(_):
 				return .none
