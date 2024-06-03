@@ -13,9 +13,11 @@ public struct FactorSourceCardView: SwiftUI.View {
 	public let factorSource: FactorSource
 	public var body: some SwiftUI.View {
 		VStack(alignment: .leading) {
-			Labeled("Kind", factorSource.kind)
+			Labeled("Kind",  factorSource.kind)
+			Labeled("ID", factorSource.id.description.suffix(8))
 			Labeled("Added", factorSource.addedOn.formatted(.dateTime))
 			Labeled("Last Used", factorSource.lastUsedOn.formatted(.dateTime))
+			Labeled("Main?", factorSource.common.flags.contains(.main) ? "TRUE" : "FALSE")
 			
 			factorSource.hintView()
 		}

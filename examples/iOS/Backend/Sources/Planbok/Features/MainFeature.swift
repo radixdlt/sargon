@@ -153,6 +153,10 @@ public struct MainFeature {
 				)
 				return .none
 				
+			case .destination(.presented(.newSecurityQuestions(.delegate(.done)))):
+				state.destination = nil
+				return .none
+				
 			case .destination(.presented(.newHWFactorSource(.delegate(.createdAndSavedNewFactorSource)))):
 				state.destination = nil
 				return .none

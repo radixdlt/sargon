@@ -18,7 +18,7 @@ public struct SelectQuestionsFeature {
 	public enum Destination {
 		case prefillQuestionsAndAnswersAlert(AlertState<PrefillQuestionsAndAnswersAlert>)
 		
-		public enum PrefillQuestionsAndAnswersAlert: Int, CaseIterable {
+		public enum PrefillQuestionsAndAnswersAlert: String, CaseIterable {
 			case sample
 			case sampleOther
 		}
@@ -63,7 +63,7 @@ public struct SelectQuestionsFeature {
 						ButtonState<Destination.PrefillQuestionsAndAnswersAlert>(
 							action: action,
 							label: {
-							TextState("Prefill \(action.rawValue)")
+							TextState("Prefill with '\(action.rawValue)'")
 						})
 					}
 				))

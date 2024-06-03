@@ -27,6 +27,7 @@ public struct SecurityQuestionsReviewAnswersFeature {
 	@ObservableState
 	public struct State: Equatable {
 		public let answersToQuestions: AnswersToQuestions
+		public var isAdding = false
 	}
 
 	@CasePathable
@@ -48,6 +49,8 @@ public struct SecurityQuestionsReviewAnswersFeature {
 		Reduce { state, action in
 			switch action {
 			case .view(.addFactorButtonTapped):
+				guard !state.isAdding else { return .none }
+				state.isAdding = true
 				return .run { [qas = state.answersToQuestions] send in
 					let factor = factorSourcesClient.createSecurityQuestionsFactor(qas)
                     try await factorSourcesClient.addFactorSource(factor.asGeneral)
@@ -83,6 +86,7 @@ extension SecurityQuestionsReviewAnswersFeature {
                 Button("Add Factor") {
                     send(.addFactorButtonTapped)
                 }
+				.disabled(store.state.isAdding)
                 .buttonStyle(.borderedProminent)
             }
             .padding()
