@@ -75,6 +75,28 @@
     }
   },
   {
+    "interactionId" : "4b32866e-b2cd-40aa-ac54-2e7e7aaf0263",
+    "items" : {
+       "discriminator" : "authorizedRequest",
+       "auth" : {
+         "discriminator" : "usePersona",
+         "identityAddress" : "identity_rdx122kttqch0eehzj6f9nkkxcw7msfeg9udurq5u0ysa0e92c59w0mg6x"
+       },
+       "ongoingAccounts" : {
+          "numberOfAccounts" : {
+             "quantifier" : "exactly",
+             "quantity" : 1
+          }
+       }               
+    },
+    "metadata" : {
+       "version" : 1,
+       "networkId" : 1,
+       "origin" : "https://dashboard-hammunet.rdx-works-main.extratools.works/",
+       "dAppDefinitionAddress" : "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
+    }
+ },
+  {
     "interactionId" : "4051ff20-03b0-4a48-8205-0e8e8c673289",
     "items" : {
       "discriminator" : "transaction",

@@ -138,6 +138,7 @@ impl Profile {
             CommonError::FailedToDeserializeJSONToValue {
                 json_byte_count,
                 type_name: type_name::<EncryptedProfileSnapshot>(),
+				reason: e.to_string(),
             }})
 		    .and_then(|encrypted| encrypted.decrypt(password))
     }
@@ -230,6 +231,7 @@ impl Profile {
             CommonError::FailedToDeserializeJSONToValue {
                 json_byte_count,
                 type_name: type_name::<EncryptedProfileSnapshot>(),
+				reason: e.to_string(),
             }})
 		    .and_then(|encrypted| encrypted.decrypt_to_bytes(password))
 			.map_or_else(|_| false, Profile::check_if_profile_json_bytes_contains_legacy_p2p_links)
@@ -532,7 +534,8 @@ mod tests {
             SUT::new_from_json_bytes(malformed_profile_snapshot.clone()),
             Result::Err(CommonError::FailedToDeserializeJSONToValue {
                 json_byte_count: malformed_profile_snapshot.len() as u64,
-                type_name: String::from("Profile")
+                type_name: String::from("Profile"),
+                reason: "missing field `header` at line 1 column 2".to_string(),
             })
         );
     }
@@ -560,7 +563,8 @@ mod tests {
             ),
             Err(CommonError::FailedToDeserializeJSONToValue {
                 json_byte_count: 33,
-                type_name: type_name::<EncryptedProfileSnapshot>()
+                type_name: type_name::<EncryptedProfileSnapshot>(),
+                reason: "expected value at line 1 column 1".to_string(),
             })
         );
     }

@@ -4,6 +4,7 @@ use crate::prelude::*;
 #[serde(rename_all = "camelCase")]
 pub struct DappToWalletInteractionAuthorizedRequestItems {
     pub auth: DappToWalletInteractionAuthRequestItem,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub reset: Option<DappToWalletInteractionResetRequestItem>,
 
     #[serde(skip_serializing_if = "Option::is_none")]

@@ -4,10 +4,11 @@ pub trait JsonStringDeserializing: for<'a> Deserialize<'a> {
     fn new_from_json_string(json: impl AsRef<str>) -> Result<Self> {
         let json_string = json.as_ref().to_owned();
         let json_value = serde_json::Value::String(json_string.clone());
-        serde_json::from_value(json_value).map_err(|_| {
+        serde_json::from_value(json_value).map_err(|err| {
             CommonError::FailedToDeserializeJSONToValue {
                 json_byte_count: json_string.len() as u64,
                 type_name: type_name::<Self>(),
+                reason: err.to_string(),
             }
         })
     }
@@ -31,10 +32,11 @@ pub trait JsonStringSerializing: Sized + Serialize {
 pub trait JsonDataDeserializing: for<'a> Deserialize<'a> {
     fn new_from_json_bytes(json: impl AsRef<[u8]>) -> Result<Self> {
         let json = json.as_ref();
-        serde_json::from_slice::<Self>(json).map_err(|_| {
+        serde_json::from_slice::<Self>(json).map_err(|err| {
             CommonError::FailedToDeserializeJSONToValue {
                 json_byte_count: json.len() as u64,
                 type_name: type_name::<Self>(),
+                reason: err.to_string(),
             }
         })
     }
@@ -108,7 +110,8 @@ macro_rules! json_data_convertible {
                             type_name: {{
                                 const STRINGIFIED: &'static str = stringify!($type);
                                 STRINGIFIED
-                            }}.to_owned()
+                            }}.to_owned(),
+                            reason: "expected value at line 1 column 1".to_string(),
                         })
                     );
                 }
@@ -181,16 +184,32 @@ macro_rules! json_string_convertible {
 
                 #[test]
                 fn from_json_string_fail() {
-                    assert_eq!(
-                        SUT::new_from_json_string($invalid_json_string),
+
+                    let expected_json_byte_count = 25;
+                    let expected_type_name = {{
+                            const STRINGIFIED: &'static str = stringify!($type);
+                            STRINGIFIED
+                        }}.to_owned();
+
+                    let result = SUT::new_from_json_string($invalid_json_string);
+
+                    match result {
                         Err(CommonError::FailedToDeserializeJSONToValue {
-                            json_byte_count: 25,
-                            type_name: {{
-                                const STRINGIFIED: &'static str = stringify!($type);
-                                STRINGIFIED
-                            }}.to_owned()
-                        })
-                    );
+                            json_byte_count,
+                            type_name,
+                            reason
+                        }) => {
+                            assert_eq!(
+                                expected_json_byte_count,
+                                json_byte_count,
+                            );
+                            assert_eq!(
+                                expected_type_name,
+                                type_name,
+                            );
+                        },
+                        _ => panic!("Expected FailedToDeserializeJSONToValue error variant")
+                    }
                 }
             }
         }

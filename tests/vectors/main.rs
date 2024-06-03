@@ -590,6 +590,40 @@ mod dapp_to_wallet_interaction_tests {
             metadata.clone(),
         );
 
+        let authorized_request_use_persona_items = DappToWalletInteractionItems::AuthorizedRequest(
+            DappToWalletInteractionAuthorizedRequestItems::new(
+                DappToWalletInteractionAuthRequestItem::UsePersona(
+                    DappToWalletInteractionAuthUsePersonaRequestItem::new(
+                        IdentityAddress::from_str("identity_rdx122kttqch0eehzj6f9nkkxcw7msfeg9udurq5u0ysa0e92c59w0mg6x").unwrap()
+                    )
+                ),
+                None,
+                DappToWalletInteractionAccountsRequestItem::new(
+                    RequestedQuantity::exactly(1),
+                    None
+                ),
+                None,
+                None,
+                None,
+            )
+        );
+
+        let authorized_request_use_persona = DappToWalletInteraction::new(
+            WalletInteractionId::from_str(
+                "4b32866e-b2cd-40aa-ac54-2e7e7aaf0263",
+            ).unwrap(),
+            authorized_request_use_persona_items,
+            DappToWalletInteractionMetadata::new(
+                1,
+                NetworkID::Mainnet,
+                Url::from_str("https://dashboard-hammunet.rdx-works-main.extratools.works").unwrap(),
+                DappDefinitionAddress::from_str(
+                    "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr",
+                )
+                .unwrap(),
+            )
+        );
+
         let transaction = DappToWalletInteraction::new(
         WalletInteractionId::from_str("4051ff20-03b0-4a48-8205-0e8e8c673289").unwrap(),
         DappToWalletInteractionItems::Transaction(
@@ -654,6 +688,7 @@ mod dapp_to_wallet_interaction_tests {
         let interactions = vec![
             authorized_request_with_challenge,
             authorized_request_without_challenge,
+            authorized_request_use_persona,
             transaction,
             unauthorized_request_1,
             unauthorized_request_2,
