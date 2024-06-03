@@ -24,6 +24,8 @@ extension FactorSource {
 				offDevice.hint.display()
 			} else if let securityQuestions = asSecurityQuestions {
 				securityQuestions.sealedMnemonic.display(action: action)
+			} else if let trustedContact = asTrustedContact {
+				trustedContact.contact.display()
 			} else {
 				Text("No hint")
 			}
@@ -31,6 +33,18 @@ extension FactorSource {
 	}
 }
 
+extension TrustedContactFactorSourceContact {
+	public func display(
+		action: @escaping @Sendable () -> Void = {}
+	) -> some SwiftUI.View {
+		VStack(alignment: .leading) {
+			Labeled("Contact Name", name)
+			Labeled("Contact Email", emailAddress)
+		}
+		.multilineTextAlignment(.leading)
+		.frame(maxWidth: .infinity)
+	}
+}
 extension SecurityQuestionsSealedNotProductionReadyMnemonic {
 	public func display(
 		action: @escaping @Sendable () -> Void = {}

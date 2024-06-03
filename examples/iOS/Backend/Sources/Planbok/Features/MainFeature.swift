@@ -20,6 +20,7 @@ public struct MainFeature {
 		case createAccount(CreateAccountFlowFeature)
 		
 		case newHWFactorSource(NewHWFactorSourceFeature)
+		case newTrustedContact(NewTrustedContactFactorSourceFeature)
 		case newSecurityQuestions(NewSecurityQuestionsFeatureCoordinator)
 		case deleteProfileAlert(AlertState<DeleteProfileAlert>)
 		
@@ -56,7 +57,6 @@ public struct MainFeature {
 			case deletedWallet
 			case emulateFreshInstall
 		}
-		
 		
 		case view(ViewAction)
 		case destination(PresentationAction<Destination.Action>)
@@ -98,6 +98,8 @@ public struct MainFeature {
 					case let .manageSpecificFactorSources(.delegate(.addNew(kind))):
 						if kind == .securityQuestions {
 							state.destination = .newSecurityQuestions(NewSecurityQuestionsFeatureCoordinator.State())
+						} else if kind == .trustedContact {
+							state.destination = .newTrustedContact(NewTrustedContactFactorSourceFeature.State())
 						} else {
 							state.destination = .newHWFactorSource(NewHWFactorSourceFeature.State(kind: kind))
 						}
@@ -154,6 +156,10 @@ public struct MainFeature {
 				return .none
 				
 			case .destination(.presented(.newSecurityQuestions(.delegate(.done)))):
+				state.destination = nil
+				return .none
+				
+			case .destination(.presented(.newTrustedContact(.delegate(.done)))):
 				state.destination = nil
 				return .none
 				
@@ -273,6 +279,14 @@ extension MainFeature {
 				)
 			) { store in
 				NewHWFactorSourceFeature.View(store: store)
+			}
+			.sheet(
+				item: $store.scope(
+					state: \.destination?.newTrustedContact,
+					action: \.destination.newTrustedContact
+				)
+			) { store in
+				NewTrustedContactFactorSourceFeature.View(store: store)
 			}
 			.sheet(
 				item: $store.scope(
