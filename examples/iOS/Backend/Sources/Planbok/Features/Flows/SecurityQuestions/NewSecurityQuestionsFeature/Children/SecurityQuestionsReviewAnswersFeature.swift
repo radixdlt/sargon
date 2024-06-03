@@ -26,6 +26,7 @@ public struct SecurityQuestionsReviewAnswersFeature {
 	
 	@ObservableState
 	public struct State: Equatable {
+		@Shared(.pendingAnswers) var toWipeAnswers
 		public let answersToQuestions: AnswersToQuestions
 		public var isAdding = false
 	}
@@ -34,9 +35,15 @@ public struct SecurityQuestionsReviewAnswersFeature {
 	public enum Action: ViewAction {
 		case delegate(DelegateAction)
 		case view(ViewAction)
+		case `internal`(InternalAction)
 		public enum DelegateAction {
 			case factorCreatedAndAdded
 		}
+		
+		public enum InternalAction {
+			case factorCreatedAndAdded
+		}
+		
 		
 		@CasePathable
 		public enum ViewAction {
@@ -54,8 +61,12 @@ public struct SecurityQuestionsReviewAnswersFeature {
 				return .run { [qas = state.answersToQuestions] send in
 					let factor = factorSourcesClient.createSecurityQuestionsFactor(qas)
                     try await factorSourcesClient.addFactorSource(factor.asGeneral)
-                    await send(.delegate(.factorCreatedAndAdded))
+                    await send(.internal(.factorCreatedAndAdded))
 				}
+			case .internal(.factorCreatedAndAdded):
+				state.toWipeAnswers = [:] // IMPORTANT! Since this is shared state (in memory) we SHOULD wipe secrets
+				return .send(.delegate(.factorCreatedAndAdded))
+				
             case .delegate(_):
                 return .none
 			}

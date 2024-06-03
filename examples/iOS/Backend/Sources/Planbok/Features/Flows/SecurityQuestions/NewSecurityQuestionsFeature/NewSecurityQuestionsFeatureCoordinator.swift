@@ -11,10 +11,9 @@ public struct NewSecurityQuestionsFeatureCoordinator {
 		case reviewAnswers(SecurityQuestionsReviewAnswersFeature)
 	}
 	
-	
 	@ObservableState
 	public struct State: Equatable {
-		@Shared(.selectedQuestions) var selectedQuestions
+		@Shared(.questions) var questions
 		@Shared(.pendingAnswers) var pendingAnswers
 		
 		public var selectQuestions: SelectQuestionsFeature.State
@@ -40,16 +39,16 @@ public struct NewSecurityQuestionsFeatureCoordinator {
 	public init() {}
 	
 	func nextStep(_ state: inout State, nextIndex indexOfNextQuestionToAnswer: Int) -> EffectOf<Self> {
-		if indexOfNextQuestionToAnswer < state.selectedQuestions.count {
+		if indexOfNextQuestionToAnswer < state.questions.count {
 			state.path.append(.answerQuestion(
 				AnswerSecurityQuestionFeature.State(
 					index: indexOfNextQuestionToAnswer
 				)
 			))
 		} else {
-			precondition(state.pendingAnswers.count == state.selectedQuestions.count)
+			precondition(state.pendingAnswers.count == state.questions.count)
 			let answersToQuestionsArray = state.pendingAnswers.map({
-				let question = state.selectedQuestions[id: $0.key]!
+				let question = state.questions[id: $0.key]!
 				return SecurityNotProductionReadyQuestionAndAnswer(question: question, answer: $0.value)
 			})
 			let answersToQuestions = answersToQuestionsArray.asIdentified()
@@ -88,7 +87,7 @@ public struct NewSecurityQuestionsFeatureCoordinator {
 				
 			case let .selectQuestions(.delegate(.done(prefillWith))):
 				if let qas = prefillWith {
-					state.selectedQuestions = qas.map(\.question).asIdentified()
+					state.questions = qas.map(\.question).asIdentified()
 					state.pendingAnswers = Dictionary(
 						uniqueKeysWithValues: qas.map({ ($0.question.id, $0.answer) })
 					)

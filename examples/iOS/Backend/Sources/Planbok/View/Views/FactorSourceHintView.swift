@@ -10,7 +10,9 @@ import Sargon
 import SwiftUI
 
 extension FactorSource {
-	public func hintView() -> some SwiftUI.View {
+	public func hintView(
+		action: @escaping @Sendable () -> Void = {}
+	) -> some SwiftUI.View {
 		Group {
 			if let device = asDevice {
 				device.hint.display()
@@ -21,7 +23,7 @@ extension FactorSource {
 			} else if let offDevice = asOffDeviceMnemonic {
 				offDevice.hint.display()
 			} else if let securityQuestions = asSecurityQuestions {
-				securityQuestions.sealedMnemonic.display()
+				securityQuestions.sealedMnemonic.display(action: action)
 			} else {
 				Text("No hint")
 			}
@@ -30,9 +32,12 @@ extension FactorSource {
 }
 
 extension SecurityQuestionsSealedNotProductionReadyMnemonic {
-	public func display() -> some SwiftUI.View {
+	public func display(
+		action: @escaping @Sendable () -> Void = {}
+	) -> some SwiftUI.View {
 		VStack(alignment: .leading) {
 			Labeled("#Questions", self.securityQuestions.count)
+			Button("Test", action: action)
 		}
 		.multilineTextAlignment(.leading)
 		.frame(maxWidth: .infinity)

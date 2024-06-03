@@ -15,8 +15,10 @@ public struct FactorSourcesClient: Sendable {
     public typealias AddFactorSource = @Sendable (FactorSource) async throws -> Void
     public typealias CreateHWFactorSource = @Sendable (MnemonicWithPassphrase, FactorSourceKind) async throws -> FactorSource
     public typealias CreateSecurityQuestionsFactor = @Sendable (AnswersToQuestions) -> SecurityQuestionsNotProductionReadyFactorSource
+    public typealias DecryptSecurityQuestionsFactor = @Sendable (AnswersToQuestions, SecurityQuestionsNotProductionReadyFactorSource) throws -> Mnemonic
     public var createHWFactorSource: CreateHWFactorSource
     public var createSecurityQuestionsFactor: CreateSecurityQuestionsFactor
+    public var decryptSecurityQuestionsFactor: DecryptSecurityQuestionsFactor
     public var addFactorSource: AddFactorSource
 }
 
@@ -76,6 +78,9 @@ extension FactorSourcesClient: DependencyKey {
                     mnemonic: mnemonic,
                     questionsAndAnswers: questionsAndAnswers.elements
                 )
+			},
+			decryptSecurityQuestionsFactor: { questionsAndAnswers, factor in
+				try factor.decrypt(questionsAndAnswers: questionsAndAnswers.elements)
 			},
 			addFactorSource: { factorSource in
 				log.notice("Adding New factorSource: \(factorSource)")

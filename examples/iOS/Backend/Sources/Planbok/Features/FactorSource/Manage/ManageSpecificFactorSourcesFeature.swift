@@ -6,9 +6,16 @@ import SwiftUI
 @Reducer
 public struct ManageSpecificFactorSourcesFeature {
 	
+	@Reducer(state: .equatable)
+	public enum Destination {
+		case decryptSecurityQuestions(DecryptSecurityQuestionsFeatureCoordinator)
+	}
+	
 	@ObservableState
 	public struct State {
 		@SharedReader(.factorSources) var factorSources
+
+		@Presents var destination: Destination.State?
 		public let kind: FactorSourceKind
 	}
 	
@@ -18,9 +25,11 @@ public struct ManageSpecificFactorSourcesFeature {
 		@CasePathable
 		public enum ViewAction {
 			case addNewButtonTapped
+			case factorSourceActionButtonTapped(FactorSource)
 		}
 		
 		case view(ViewAction)
+		case destination(PresentationAction<Destination.Action>)
 		
 		@CasePathable
 		public enum DelegateAction {
@@ -38,11 +47,28 @@ public struct ManageSpecificFactorSourcesFeature {
 			case .view(.addNewButtonTapped):
 				return .send(.delegate(.addNew(state.kind)))
 		
+			case let .view(.factorSourceActionButtonTapped(factorSource)):
+				if let securityQuestions = factorSource.asSecurityQuestions {
+					state.destination = .decryptSecurityQuestions(
+						DecryptSecurityQuestionsFeatureCoordinator.State(
+							securityQuestionsFactorSource: securityQuestions
+						)
+					)
+				} else {
+					log.warning("FactorSource tapped but no action performed: \(factorSource)")
+				}
+				return .none
+
+			case .destination(.presented(.decryptSecurityQuestions(.delegate(.done)))):
+				state.destination = nil
+				return .none
+
 			default:
 				return .none
 				
 			}
 		}
+		.ifLet(\.$destination, action: \.destination)
 	}
 }
 
@@ -71,7 +97,9 @@ extension ManageSpecificFactorSourcesFeature {
 					ScrollView {
 						ForEach(factors, id: \.id) { factorSource in
 							VStack {
-								FactorSourceCardView(factorSource: factorSource)
+								FactorSourceCardView(factorSource: factorSource) {
+									send(.factorSourceActionButtonTapped(factorSource))
+								}
 							}
 						}
 					}
@@ -84,6 +112,14 @@ extension ManageSpecificFactorSourcesFeature {
 				}
 			}
 			.padding(.bottom, 100)
+			.sheet(
+				item: $store.scope(
+					state: \.destination?.decryptSecurityQuestions,
+					action: \.destination.decryptSecurityQuestions
+				)
+			) { store in
+				DecryptSecurityQuestionsFeatureCoordinator.View(store: store)
+			}
 		}
 	}
 	

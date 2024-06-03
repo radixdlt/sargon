@@ -31,9 +31,9 @@ public typealias PendingAnswersToQuestions = [SecurityNotProductionReadyQuestion
 
 extension PersistenceReaderKey
 where Self == PersistenceKeyDefault<InMemoryKey<IdentifiedArrayOf<SecurityNotProductionReadyQuestion>>> {
-	static var selectedQuestions: Self {
+	static var questions: Self {
 		PersistenceKeyDefault(
-			.inMemory("selectedQuestions"),
+			.inMemory("questions"),
 			[]
 		)
 	}

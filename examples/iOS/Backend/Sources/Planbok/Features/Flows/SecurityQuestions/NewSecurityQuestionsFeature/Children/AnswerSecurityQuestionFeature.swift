@@ -16,7 +16,7 @@ public struct AnswerSecurityQuestionFeature {
 	public struct State: Equatable {
 		
 		@Shared(.pendingAnswers) var pendingAnswers
-		@Shared(.selectedQuestions) var selectedQuestions
+		@Shared(.questions) var questions
 		
 		public let index: Int
 		public var answer: String = ""
@@ -24,13 +24,17 @@ public struct AnswerSecurityQuestionFeature {
 			trimSecurityQuestionsAnswer(answer: answer)
 		}
 		public var question: SecurityNotProductionReadyQuestion {
-			selectedQuestions[index]
+			questions[index]
 		}
 		
+		public init(index: Int, answer: String) {
+			self.index = index
+			self.answer = answer
+		}
 		
 		public init(index: Int) {
-			self.index = index
-			self.answer = pendingAnswers[selectedQuestions[index].id] ?? ""
+			self.init(index: index, answer: "")
+			self.answer = pendingAnswers[questions[index].id] ?? ""
 		}
 	}
 

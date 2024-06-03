@@ -27,7 +27,7 @@ public struct SelectQuestionsFeature {
 
 	@ObservableState
 	public struct State: Equatable {
-		@Shared(.selectedQuestions) var selectedQuestions
+		@Shared(.questions) var questions
 		@Presents var destination: Destination.State?
 		
 	}
@@ -95,20 +95,20 @@ public struct SelectQuestionsFeature {
 }
 
 public struct SelectQuestionCard: View {
-	@Shared(.selectedQuestions) var selectedQuestions
+	@Shared(.questions) var questions
 	public let question: SecurityNotProductionReadyQuestion
 	public var id: SecurityNotProductionReadyQuestion.ID {
 		question.id
 	}
 	public var isSelected: Bool {
-		selectedQuestions[id: id] != nil
+		questions[id: id] != nil
 	}
 	public var body: some SwiftUI.View {
 		Button(action: {
 			if isSelected {
-				selectedQuestions.remove(id: id)
+				questions.remove(id: id)
 			} else {
-				selectedQuestions.append(question)
+				questions.append(question)
 			}
 		}, label: {
 			HStack {
@@ -144,7 +144,7 @@ extension SelectQuestionsFeature {
 		public var body: some SwiftUI.View {
 			VStack {
 				Text("Pick #\(amount) questions").font(.title)
-				Text("Picked: \(store.state.selectedQuestions.count)")
+				Text("Picked: \(store.state.questions.count)")
 				
 				Button("Prefill Q + As") {
 					send(.prefillButtonTapped)
@@ -163,7 +163,7 @@ extension SelectQuestionsFeature {
 					send(.confirmedQuestions)
 				}
 				.buttonStyle(.borderedProminent)
-				.disabled(store.state.selectedQuestions.count != amount)
+				.disabled(store.state.questions.count != amount)
 			}
 			.padding()
 			.alert($store.scope(state: \.destination?.prefillQuestionsAndAnswersAlert, action: \.destination.prefillQuestionsAndAnswersAlert))
