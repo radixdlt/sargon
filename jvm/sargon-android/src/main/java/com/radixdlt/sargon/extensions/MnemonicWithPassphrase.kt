@@ -31,10 +31,11 @@ fun MnemonicWithPassphrase.Companion.fromJson(
     Json.decodeFromString<AndroidMnemonicWithPassphrase>(fromJson)
 }.map {
     it.toMnemonicWithPassphrase()
-}.onFailure {
+}.onFailure { exception ->
     throw CommonException.FailedToDeserializeJsonToValue(
         jsonByteCount = fromJson.toByteArray(charset = Charsets.UTF_8).size.toULong(),
-        typeName = "MnemonicWithPassphrase"
+        typeName = "MnemonicWithPassphrase",
+        reason = exception.message ?: "Unknown"
     )
 }.getOrThrow()
 
