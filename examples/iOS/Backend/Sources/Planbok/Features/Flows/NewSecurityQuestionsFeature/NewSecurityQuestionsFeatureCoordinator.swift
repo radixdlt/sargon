@@ -21,7 +21,7 @@ where Self == PersistenceKeyDefault<InMemoryKey<AnswersToQuestions>> {
 	}
 }
 
-public typealias AnswersToQuestions = [SecurityNotProductionReadyQuestion.ID: String?]
+public typealias AnswersToQuestions = [SecurityNotProductionReadyQuestion.ID: String]
 
 extension PersistenceReaderKey
 where Self == PersistenceKeyDefault<InMemoryKey<IdentifiedArrayOf<SecurityNotProductionReadyQuestion>>> {
@@ -147,10 +147,18 @@ public struct AnswerSecurityQuestionFeature {
 		
 		public let index: Int
 		public var answer: String = ""
+		public var trimmed: String {
+			trimSecurityQuestionsAnswer(answer: answer)
+		}
 		public var question: SecurityNotProductionReadyQuestion {
 			selectedQuestions[index]
 		}
 		
+		
+		public init(index: Int) {
+			self.index = index
+			self.answer = answers[selectedQuestions[index].id] ?? ""
+		}
 	}
 
 	@CasePathable
@@ -158,7 +166,7 @@ public struct AnswerSecurityQuestionFeature {
 		case delegate(DelegateAction)
 		case view(ViewAction)
 		public enum DelegateAction {
-			case done
+			case done(Int)
 		}
 
 		@CasePathable
@@ -175,9 +183,9 @@ public struct AnswerSecurityQuestionFeature {
 				state.answer = answer
 				return .none
 			case .view(.confirmButtonTapped):
-				guard !state.answer.isEmpty else { return .none }
-				state.answers[state.question.id] = state.answer
-				return .send(.delegate(.done))
+				guard !state.trimmed.isEmpty else { return .none }
+				state.answers[state.question.id] = state.trimmed
+				return .send(.delegate(.done(state.index)))
 			case .delegate(_):
 				return .none
 			}
@@ -203,12 +211,15 @@ extension AnswerSecurityQuestionFeature {
 				Text("\(store.state.question.question)")
 					.font(.title).font(.body)
 				
-				Labeled("Structure", store.state.question.expectedAnswerFormat.answerStructure)
+				LabeledTextField(
+					label: "Answer",
+					text: $store.answer.sending(\.view.answerChanged),
+					placeholder: "\(store.state.question.expectedAnswerFormat.answerStructure)",
+					hint: "\(store.state.question.expectedAnswerFormat.exampleAnswer)"
+				)
+				.padding(.vertical, 20)
 				
-				LabeledTextField(label: "Answer", text: $store.answer.sending(\.view.answerChanged))
-					.padding(.vertical, 20)
-				
-				Labeled("Example", store.state.question.expectedAnswerFormat.exampleAnswer)
+				Labeled("Used", "'\(store.state.trimmed)'")
 				
 				Spacer()
 				
@@ -259,11 +270,7 @@ public struct NewSecurityQuestionsFeatureCoordinator {
 	
 	@Reducer(state: .equatable)
 	public enum Path {
-		case answerQuestion0(AnswerSecurityQuestionFeature)
-		case answerQuestion1(AnswerSecurityQuestionFeature)
-		case answerQuestion2(AnswerSecurityQuestionFeature)
-		case answerQuestion3(AnswerSecurityQuestionFeature)
-
+		case answerQuestion(AnswerSecurityQuestionFeature)
 		case creationCompleted(SecurityQuestionsCreationCompleted)
 	}
 	
@@ -295,6 +302,21 @@ public struct NewSecurityQuestionsFeatureCoordinator {
 	
 	public init() {}
 	
+	func nextStep(_ state: inout State, nextIndex indexOfNextQuestionToAnswer: Int) -> EffectOf<Self> {
+		if indexOfNextQuestionToAnswer < state.selectedQuestions.count {
+			state.path.append(.answerQuestion(
+				AnswerSecurityQuestionFeature.State(
+					index: indexOfNextQuestionToAnswer
+				)
+			))
+		} else {
+			state.path.append(.creationCompleted(SecurityQuestionsCreationCompleted.State()))
+		}
+			
+	
+		return .none
+	}
+	
 	public var body: some ReducerOf<Self> {
 		Scope(state: \.selectQuestions, action: \.selectQuestions) {
 			SelectQuestionsFeature()
@@ -305,7 +327,10 @@ public struct NewSecurityQuestionsFeatureCoordinator {
 			case .path(let pathAction):
 				switch pathAction {
 
-				case .element(id: _, action: .answerQuestion0(.delegate(.done))):
+				case let .element(id: _, action: .answerQuestion(.delegate(.done(index)))):
+					return nextStep(&state, nextIndex: index + 1)
+					
+				case .element(id: _, action: .creationCompleted(.delegate(.done))):
 					return .send(.delegate(.done))
 					
 				case .popFrom(id: _):
@@ -317,14 +342,8 @@ public struct NewSecurityQuestionsFeatureCoordinator {
 				}
 				
 			case .selectQuestions(.delegate(.done)):
-				state.answers = Dictionary(uniqueKeysWithValues: state.selectedQuestions.map({ ($0.id, String?.none) }))
-				state.path.append(.answerQuestion0(
-					AnswerSecurityQuestionFeature.State(
-						index: 0
-					)
-				))
-				return .none
-				
+				state.answers = [:]
+				return nextStep(&state, nextIndex: 0)
 			
 			case .selectQuestions(_):
 				return .none
@@ -332,8 +351,6 @@ public struct NewSecurityQuestionsFeatureCoordinator {
 			case .delegate:
 				return .none
 				
-			default:
-				return .none
 			}
 		}
 		.forEach(\.path, action: \.path)
@@ -355,15 +372,9 @@ extension NewSecurityQuestionsFeatureCoordinator {
 				)
 			} destination: { store in
 				switch store.case {
-				case let .answerQuestion0(store):
+				case let .answerQuestion(store):
 					AnswerSecurityQuestionFeature.View(store: store)
-				case let .answerQuestion1(store):
-					AnswerSecurityQuestionFeature.View(store: store)
-				case let .answerQuestion2(store):
-					AnswerSecurityQuestionFeature.View(store: store)
-				case let .answerQuestion3(store):
-					AnswerSecurityQuestionFeature.View(store: store)
-					
+			
 				case let .creationCompleted(store):
 					SecurityQuestionsCreationCompleted.View(store: store)
 				}

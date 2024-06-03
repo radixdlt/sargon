@@ -48,17 +48,19 @@ pub(crate) const SECURITY_QUESTIONS_TRIMMED_CHARS: &[char] = &[
 ];
 
 impl SecurityQuestions_NOT_PRODUCTION_READY_KeyExchangeKeysFromQandAsLowerTrimUtf8 {
+    pub(crate) fn trim_answer(&self, answer: impl AsRef<str>) -> String {
+        let mut answer = answer.as_ref().to_lowercase();
+        answer.retain(|c| !SECURITY_QUESTIONS_TRIMMED_CHARS.contains(&c));
+        answer
+    }
+
     fn bytes_from_answer(&self, answer: impl AsRef<str>) -> Result<Vec<u8>> {
-        let non_trimmed = answer.as_ref();
-        if non_trimmed.is_empty() {
+        let answer = answer.as_ref();
+        if answer.is_empty() {
             return Err(CommonError::AnswersToSecurityQuestionsCannotBeEmpty);
         }
 
-        non_trimmed
-            .to_lowercase()
-            .retain(|c| !SECURITY_QUESTIONS_TRIMMED_CHARS.contains(&c));
-
-        let trimmed = non_trimmed;
+        let trimmed = self.trim_answer(answer);
 
         Ok(trimmed.as_bytes().to_owned())
     }
@@ -100,4 +102,21 @@ impl SecurityQuestions_NOT_PRODUCTION_READY_KeyExchangeKeysFromQandAsLowerTrimUt
     }
 
 
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = SecurityQuestions_NOT_PRODUCTION_READY_KeyExchangeKeysFromQandAsLowerTrimUtf8;
+
+    #[test]
+    fn apa() {
+        let sut = SUT::default();
+        let non_trimmed = "FoO\nB.a\tR ' ! FiZz ? ‘ B ’ u＇ZZ";
+        let trimmed = sut.trim_answer(non_trimmed);
+        assert_eq!(trimmed, "foobarfizzbuzz".to_owned())
+    }
 }
