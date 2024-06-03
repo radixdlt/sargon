@@ -51,10 +51,10 @@ public struct NewHWFactorSourceFeature {
 					try await factorSourcesClient.addFactorSource(factorSource)
 					await send(.delegate(.createdAndSavedNewFactorSource))
 				}
-			case .delegate(_):
+			case .delegate:
 				return .none
 				
-			case .internal(_):
+			case .internal:
 				return .none
 			}
 		}

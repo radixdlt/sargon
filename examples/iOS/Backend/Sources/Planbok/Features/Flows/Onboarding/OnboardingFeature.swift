@@ -79,7 +79,7 @@ public struct OnboardingFeature {
 				return .none
 				
 			
-			case .welcome(_):
+			case .welcome:
 				return .none
 		
 			case .delegate:

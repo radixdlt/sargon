@@ -83,10 +83,10 @@ public struct SelectQuestionsFeature {
 				state.destination = nil
 				return .send(.delegate(.done(prefillWith: qas)))
 				
-			case .destination(_):
+			case .destination:
 				return .none
 				
-			case .delegate(_):
+			case .delegate:
 				return .none
 			}
 		}

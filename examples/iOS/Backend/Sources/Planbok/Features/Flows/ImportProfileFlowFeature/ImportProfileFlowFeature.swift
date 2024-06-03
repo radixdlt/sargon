@@ -83,7 +83,7 @@ public struct ImportProfileFlowFeature {
 				}
 				return .none
 
-			case .selectFile(_):
+			case .selectFile:
 				return .none
 				
 			case .delegate:

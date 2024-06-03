@@ -75,7 +75,7 @@ public struct SelectFileFeature {
 				state.isPresentingFileImporter = isPresentingFileImporter
 				return .none
 				
-			case .delegate(_):
+			case .delegate:
 				return .none
 			}
 		}

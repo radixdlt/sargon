@@ -90,7 +90,7 @@ public struct InputMnemonicFeature {
 				guard let mnemonicWithPassphrase = state.mnemonicWithPassphrase else { return .none }
 				return .send(.delegate(.confirmed(mnemonicWithPassphrase)))
 				
-			case .delegate(_):
+			case .delegate:
 				return .none
 				
 			case let .destination(.presented(.prefillMnemonic(prefillAction))):
@@ -113,7 +113,7 @@ public struct InputMnemonicFeature {
 			case .destination(.dismiss):
 				state.destination = nil
 				return .none
-			case .destination(_):
+			case .destination:
 				return .none
 			}
 		}

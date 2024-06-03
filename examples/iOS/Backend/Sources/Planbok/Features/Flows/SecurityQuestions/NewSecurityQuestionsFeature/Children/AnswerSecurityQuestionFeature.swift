@@ -63,7 +63,7 @@ public struct AnswerSecurityQuestionFeature {
 				guard !state.trimmed.isEmpty else { return .none }
 				state.pendingAnswers[state.question.id] = state.trimmed
 				return .send(.delegate(.done(state.index)))
-			case .delegate(_):
+			case .delegate:
 				return .none
 			}
 		}

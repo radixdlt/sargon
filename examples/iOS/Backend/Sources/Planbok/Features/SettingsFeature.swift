@@ -126,11 +126,16 @@ extension SettingsFeature {
                     send(.factorSourcesButtonTapped)
                 }
                 
-				Button("Create Many Accounts") {
-					send(.createManyAccountsButtonTapped)
+				VStack {
+					Button("Create Many Accounts") {
+						send(.createManyAccountsButtonTapped)
+					}
+					Label("This button is here, in Settings, and not on Home screen since we wanna test that the accounts on Home screen is updated when we dismiss Settings.", systemImage: "info.circle")
+						.font(.footnote)
 				}
 			}
 			.padding(.bottom, 100)
+			.padding(.horizontal, 10)
 			.alert($store.scope(state: \.destination?.createManyAccountsAlert, action: \.destination.createManyAccountsAlert))
 		}
 	}

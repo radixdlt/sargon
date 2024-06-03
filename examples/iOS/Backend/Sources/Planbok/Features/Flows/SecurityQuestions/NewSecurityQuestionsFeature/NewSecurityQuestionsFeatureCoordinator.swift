@@ -108,7 +108,7 @@ public struct NewSecurityQuestionsFeatureCoordinator {
 					return nextStep(&state, nextIndex: 0)
 				}
 			
-			case .selectQuestions(_):
+			case .selectQuestions:
 				return .none
 		
 			case .delegate:

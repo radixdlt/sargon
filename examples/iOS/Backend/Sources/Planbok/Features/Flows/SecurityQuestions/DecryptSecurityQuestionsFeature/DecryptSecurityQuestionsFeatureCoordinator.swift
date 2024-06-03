@@ -99,7 +99,7 @@ public struct DecryptSecurityQuestionsFeatureCoordinator {
 			case let .firstQuestion(.delegate(.done(index))):
 				return nextStep(&state, nextIndex: index + 1)
 			
-			case .firstQuestion(_):
+			case .firstQuestion:
 				return .none
 		
 			case .delegate:

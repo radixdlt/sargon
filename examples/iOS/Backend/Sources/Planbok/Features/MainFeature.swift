@@ -82,7 +82,7 @@ public struct MainFeature {
 					
 				case let .element(id: _, action: action):
 					switch action {
-					case .accountDetails(_):
+					case .accountDetails:
 						return .none
 						
 					case .settings(.delegate(.navigate(.toFactorSources))):
@@ -103,13 +103,13 @@ public struct MainFeature {
 						}
 						return .none
 						
-					case .settings(_):
+					case .settings:
 						return .none
 						
-					case .manageFactorSources(_):
+					case .manageFactorSources:
 						return .none
 			
-					case .manageSpecificFactorSources(_):
+					case .manageSpecificFactorSources:
 						return .none
 					}
 					

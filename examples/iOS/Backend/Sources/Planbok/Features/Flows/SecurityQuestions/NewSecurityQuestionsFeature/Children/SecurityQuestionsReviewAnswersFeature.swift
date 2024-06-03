@@ -67,7 +67,7 @@ public struct SecurityQuestionsReviewAnswersFeature {
 				state.toWipeAnswers = [:] // IMPORTANT! Since this is shared state (in memory) we SHOULD wipe secrets
 				return .send(.delegate(.factorCreatedAndAdded))
 				
-            case .delegate(_):
+            case .delegate:
                 return .none
 			}
 		}
