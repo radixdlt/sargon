@@ -39,13 +39,10 @@ final class SecurityQuestionsFactorSourceTests: SpecificFactorSourceTest<Securit
 			XCTAssertEqual(sut.asGeneral.asSecurityQuestions, sut)
 		}
 	}
-	
-	func test_as_wrong() {
-		eachSample { sut in
-			XCTAssertNil(sut.asGeneral.asDevice)
-		}
+
+	func test_other_wrong() {
+		XCTAssertNil(SUT.extract(from: DeviceFactorSource.sample))
 	}
-	
 	
 	func test_factor_source_id_is_id() {
 		eachSample { sut in

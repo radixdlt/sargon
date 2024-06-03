@@ -13,7 +13,7 @@ extension TrustedContactFactorSource {
 		accountAddress: AccountAddress,
 		contact: TrustedContactFactorSourceContact
 	) {
-		self = newTrustedContactFrom(
+		self = newTrustedContactFactorSourceFromAddressAndContact(
 			accountAddress: accountAddress,
 			contact: contact
 		)

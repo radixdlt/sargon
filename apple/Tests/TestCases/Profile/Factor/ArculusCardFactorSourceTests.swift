@@ -49,12 +49,10 @@ final class ArculusCardFactorSourceTests: SpecificFactorSourceTest<ArculusCardFa
 		}
 	}
 	
-	func test_as_wrong() {
-		eachSample { sut in
-			XCTAssertNil(sut.asGeneral.asDevice)
-		}
+
+	func test_other_wrong() {
+		XCTAssertNil(SUT.extract(from: DeviceFactorSource.sample))
 	}
-	
 	
 	func test_as_factor_source_to_string() {
 		eachSample { sut in

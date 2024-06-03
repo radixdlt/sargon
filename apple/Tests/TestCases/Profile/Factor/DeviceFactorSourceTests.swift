@@ -63,13 +63,10 @@ final class DeviceFactorSourceTests: SpecificFactorSourceTest<DeviceFactorSource
 			XCTAssertEqual(sut.asGeneral.asDevice, sut)
 		}
 	}
-	
-	func test_as_wrong() {
-		eachSample { sut in
-			XCTAssertNil(sut.asGeneral.asLedger)
-		}
+
+	func test_other_wrong() {
+		XCTAssertNil(SUT.extract(from: TrustedContactFactorSource.sample))
 	}
-	
 	
 	func test_extract_wrong_throws() throws {
 		try eachSample { sut in

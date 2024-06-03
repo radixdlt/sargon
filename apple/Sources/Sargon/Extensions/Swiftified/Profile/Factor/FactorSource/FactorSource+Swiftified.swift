@@ -6,7 +6,6 @@ extension FactorSource: CustomStringConvertible {
 	public var description: String {
 		toString()
 	}
-	
 }
 
 extension FactorSource: Identifiable {
@@ -18,6 +17,7 @@ extension FactorSource: Identifiable {
 		case let .securityQuestions(value): value.id.asGeneral
 		case let .ledger(value): value.id.asGeneral
 		case let .offDeviceMnemonic(value): value.id.asGeneral
+		case let .trustedContact(value): value.id.asGeneral
 		}
 	}
 }
@@ -34,6 +34,7 @@ extension FactorSource: BaseFactorSourceProtocol {
 		case let .securityQuestions(value): value.factorSourceKind
 		case let .arculusCard(value): value.factorSourceKind
 		case let .offDeviceMnemonic(value): value.factorSourceKind
+		case let .trustedContact(value): value.factorSourceKind
 		}
 	}
 	
@@ -45,6 +46,7 @@ extension FactorSource: BaseFactorSourceProtocol {
 			case let .securityQuestions(value): value.common
 			case let .arculusCard(value): value.common
 			case let .offDeviceMnemonic(value): value.common
+			case let .trustedContact(value): value.common
 			}
 		}
 		set {
@@ -64,6 +66,9 @@ extension FactorSource: BaseFactorSourceProtocol {
 			case var .securityQuestions(source):
 				source.common = newValue
 				self = .securityQuestions(value: source)
+			case var .trustedContact(source):
+				source.common = newValue
+				self = .trustedContact(value: source)
 			}
 		}
 	}
@@ -104,5 +109,7 @@ extension FactorSource: BaseFactorSourceProtocol {
 	public var asSecurityQuestions: SecurityQuestionsNotProductionReadyFactorSource? {
 		extract()
 	}
-	
+	public var asTrustedContact: TrustedContactFactorSource? {
+		extract()
+	}
 }

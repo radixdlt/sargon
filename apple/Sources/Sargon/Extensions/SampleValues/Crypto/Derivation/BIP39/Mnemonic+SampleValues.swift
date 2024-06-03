@@ -20,7 +20,7 @@ extension Mnemonic {
 	
     public static let sample24ZooVote: Self = try! Self(phrase: "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo vote")
 	
-	public static var sampleValues: [Self] = [
+	public static let sampleValues: [Self] = [
 		.sampleDevice,
 		.sampleDeviceOther,
 		.sampleDevice12Words,

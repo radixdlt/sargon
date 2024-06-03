@@ -10,7 +10,7 @@ import SargonUniFFI
 
 #if DEBUG
 extension TrustedContactFactorSource {
-	public static let sample: Self = newTrustedContactSample()
-	public static let sampleOther: Self = newTrustedContactSampleOther()
+	public static let sample: Self = newTrustedContactFactorSourceSample()
+	public static let sampleOther: Self = newTrustedContactFactorSourceSampleOther()
 }
 #endif // DEBUG
