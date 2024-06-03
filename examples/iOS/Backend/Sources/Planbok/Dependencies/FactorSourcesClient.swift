@@ -13,7 +13,9 @@ import DependenciesMacros
 public struct FactorSourcesClient: Sendable {
 	public typealias AddFactorSource = @Sendable (FactorSource) async throws -> Void
 	public typealias CreateHWFactorSource = @Sendable (MnemonicWithPassphrase, FactorSourceKind) async throws -> FactorSource
+	public typealias CreateSecurityQuestionsFactor = @Sendable (AnswersToQuestions) async throws -> SecurityQuestionsNotProductionReadyFactorSource
 	public var createHWFactorSource: CreateHWFactorSource
+	public var createSecurityQuestionsFactor: CreateSecurityQuestionsFactor
 	public var addFactorSource: AddFactorSource
 }
 
@@ -64,6 +66,9 @@ extension FactorSourcesClient: DependencyKey {
 					)
 				}
 				
+			},
+			createSecurityQuestionsFactor: { qas in
+				let mnemonic = mnemonic
 			},
 			addFactorSource: { factorSource in
 				log.notice("Adding New factorSource: \(factorSource)")
