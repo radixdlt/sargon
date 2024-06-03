@@ -20,7 +20,7 @@ extension SecurityNotProductionReadyQuestionAndAnswer: Identifiable {
 public typealias AnswersToQuestions = IdentifiedArrayOf<SecurityNotProductionReadyQuestionAndAnswer>
 
 @Reducer
-public struct SecurityQuestionsCreationCompleted {
+public struct SecurityQuestionsReviewAnswersFeature {
 
 	@Dependency(FactorSourcesClient.self) var factorSourcesClient
 	
@@ -49,14 +49,18 @@ public struct SecurityQuestionsCreationCompleted {
 			switch action {
 			case .view(.addFactorButtonTapped):
 				return .run { [qas = state.answersToQuestions] send in
-					factorSourcesClient.createSecurityQuestionsFactor(qas) 
+					let factor = factorSourcesClient.createSecurityQuestionsFactor(qas)
+                    try await factorSourcesClient.addFactorSource(factor.asGeneral)
+                    await send(.delegate(.factorCreatedAndAdded))
 				}
+            case .delegate(_):
+                return .none
 			}
 		}
 	}
 }
 
-extension SecurityQuestionsCreationCompleted {
+extension SecurityQuestionsReviewAnswersFeature {
 	public typealias HostingFeature = Self
 	
 	@ViewAction(for: HostingFeature.self)
@@ -67,7 +71,7 @@ extension SecurityQuestionsCreationCompleted {
 		}
 		public var body: some SwiftUI.View {
 			VStack {
-				Text("SecurityQuestionsCreationCompleted").font(.largeTitle)
+				Text("SecurityQuestionsReviewAnswersFeature").font(.largeTitle)
 				ScrollView {
 					ForEach(store.state.answersToQuestions) { answerToQuestion in
 						VStack {

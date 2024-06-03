@@ -66,7 +66,7 @@ public struct SelectQuestionCard: View {
 				VStack {
 					Text("\(question.question)").font(.headline).fontWeight(.bold)
 					if case let unsafeAnswers = question.expectedAnswerFormat.unsafeAnswers, !unsafeAnswers.isEmpty {
-						Text("Dont select if: \(unsafeAnswers.joined(separator: ","))")
+						Text("Unsuitable if: \(unsafeAnswers.joined(separator: ","))")
 							.font(.footnote)
 							.foregroundStyle(Color.red)
 					}

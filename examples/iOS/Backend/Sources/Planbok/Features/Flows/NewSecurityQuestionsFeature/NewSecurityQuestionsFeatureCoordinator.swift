@@ -8,7 +8,7 @@ public struct NewSecurityQuestionsFeatureCoordinator {
 	@Reducer(state: .equatable)
 	public enum Path {
 		case answerQuestion(AnswerSecurityQuestionFeature)
-		case creationCompleted(SecurityQuestionsCreationCompleted)
+		case reviewAnswers(SecurityQuestionsReviewAnswersFeature)
 	}
 	
 	
@@ -53,7 +53,7 @@ public struct NewSecurityQuestionsFeatureCoordinator {
 				return SecurityNotProductionReadyQuestionAndAnswer(question: question, answer: $0.value)
 			})
 			let answersToQuestions = IdentifiedArrayOf(uniqueElements: answersToQuestionsArray)
-			state.path.append(.creationCompleted(SecurityQuestionsCreationCompleted.State(
+			state.path.append(.reviewAnswers(SecurityQuestionsReviewAnswersFeature.State(
 				answersToQuestions: answersToQuestions
 			)))
 		}
@@ -75,7 +75,7 @@ public struct NewSecurityQuestionsFeatureCoordinator {
 				case let .element(id: _, action: .answerQuestion(.delegate(.done(index)))):
 					return nextStep(&state, nextIndex: index + 1)
 					
-				case .element(id: _, action: .creationCompleted(.delegate(.factorCreatedAndAdded))):
+				case .element(id: _, action: .reviewAnswers(.delegate(.factorCreatedAndAdded))):
 					return .send(.delegate(.done))
 					
 				case .popFrom(id: _):
@@ -119,8 +119,8 @@ extension NewSecurityQuestionsFeatureCoordinator {
 				case let .answerQuestion(store):
 					AnswerSecurityQuestionFeature.View(store: store)
 			
-				case let .creationCompleted(store):
-					SecurityQuestionsCreationCompleted.View(store: store)
+				case let .reviewAnswers(store):
+					SecurityQuestionsReviewAnswersFeature.View(store: store)
 				}
 			}
 		}
