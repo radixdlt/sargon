@@ -598,10 +598,7 @@ mod dapp_to_wallet_interaction_tests {
                     )
                 ),
                 None,
-                DappToWalletInteractionAccountsRequestItem::new(
-                    RequestedQuantity::exactly(1),
-                    None
-                ),
+                None,
                 None,
                 None,
                 None,
@@ -611,17 +608,10 @@ mod dapp_to_wallet_interaction_tests {
         let authorized_request_use_persona = DappToWalletInteraction::new(
             WalletInteractionId::from_str(
                 "4b32866e-b2cd-40aa-ac54-2e7e7aaf0263",
-            ).unwrap(),
-            authorized_request_use_persona_items,
-            DappToWalletInteractionMetadata::new(
-                1,
-                NetworkID::Mainnet,
-                Url::from_str("https://dashboard-hammunet.rdx-works-main.extratools.works").unwrap(),
-                DappDefinitionAddress::from_str(
-                    "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr",
-                )
-                .unwrap(),
             )
+            .unwrap(),
+            authorized_request_use_persona_items,
+            metadata.clone(),
         );
 
         let transaction = DappToWalletInteraction::new(
