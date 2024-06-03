@@ -71,21 +71,26 @@ extension SecurityQuestionsReviewAnswersFeature {
 		}
 		public var body: some SwiftUI.View {
 			VStack {
-				Text("SecurityQuestionsReviewAnswersFeature").font(.largeTitle)
+				Text("Review Answers").font(.largeTitle)
 				ScrollView {
-					ForEach(store.state.answersToQuestions) { answerToQuestion in
-						VStack {
-							Text("\(answerToQuestion.question.question)")
-							Text("\(answerToQuestion.answer)").fontWeight(.bold)
+                    ForEach(store.state.answersToQuestions) { answerToQuestion in
+                        let index = store.state.answersToQuestions.firstIndex(of: answerToQuestion)!
+						VStack(alignment: .leading) {
+                            Labeled("Question \(index)", answerToQuestion.question.question, axis: .vertical)
+                            Labeled("Answer \(index)", answerToQuestion.answer, axis: .vertical)
 						}
+                        .multilineTextAlignment(.leading)
+                        .padding(.vertical, 10)
 					}
-				}
-				
-				Button("Add Factor") {
-					send(.addFactorButtonTapped)
-				}
-			}
-			.multilineTextAlignment(.leading)
-		}
+                    .multilineTextAlignment(.leading)
+                }
+                
+                Button("Add Factor") {
+                    send(.addFactorButtonTapped)
+                }
+                .buttonStyle(.borderedProminent)
+            }
+            .padding()
+        }
 	}
 }

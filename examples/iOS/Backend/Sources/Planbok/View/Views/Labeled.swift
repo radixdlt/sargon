@@ -12,15 +12,34 @@ import SwiftUI
 public struct Labeled: SwiftUI.View {
 	public let title: String
 	public let value: String
-	public init<V>(_ title: String, _ value: V) where V: CustomStringConvertible {
-		self.title = title
+    public let axis: Axis
+ 
+    public init<V>(
+        _ title: String,
+        _ value: V,
+        axis: Axis = .horizontal
+    ) where V: CustomStringConvertible {
+        self.axis = axis
+        self.title = title
 		self.value = value.description
 	}
+    
 	public var body: some SwiftUI.View {
-		HStack {
-			Text("**\(title)**")
-			Text("`\(value)`")
-		}
-		.multilineTextAlignment(.leading)
-	}
+        if axis == .horizontal {
+            HStack {
+                content()
+            }
+        } else {
+            VStack(alignment: .leading) {
+                content()
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private func content() -> some SwiftUI.View {
+        Text("**\(title)**")
+        Text("`\(value)`")
+            .multilineTextAlignment(.leading)
+    }
 }

@@ -83,9 +83,15 @@ extension AnswerSecurityQuestionFeature {
 
 				Text("\(store.state.question.question)")
 					.font(.title).font(.body)
-                Text("Unsuitable if your answer would be: \(store.state.question.expectedAnswerFormat.unsafeAnswers.map({ "\"\($0)\"" }).joined(separator: ", "))")
-                    .foregroundStyle(Color.red)
-				
+                
+                if
+                    case let unsafeAnswers = store.state.question.expectedAnswerFormat.unsafeAnswers,
+                    !unsafeAnswers.isEmpty
+                {
+                    Text("Unsuitable if your answer would be: \(unsafeAnswers.map({ "\"\($0)\"" }).joined(separator: ", "))")
+                        .foregroundStyle(Color.red)
+                }
+                
 				LabeledTextField(
 					label: "Answer",
 					text: $store.answer.sending(\.view.answerChanged),
