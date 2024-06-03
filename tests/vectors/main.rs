@@ -594,7 +594,7 @@ mod dapp_to_wallet_interaction_tests {
             DappToWalletInteractionAuthorizedRequestItems::new(
                 DappToWalletInteractionAuthRequestItem::UsePersona(
                     DappToWalletInteractionAuthUsePersonaRequestItem::new(
-                        IdentityAddress::from_str("identity_rdx122kttqch0eehzj6f9nkkxcw7msfeg9udurq5u0ysa0e92c59w0mg6x").unwrap()
+                        IdentityAddress::from_str("identity_tdx_2_1224clayjwq45swgd0xj2uc4s3gq4l6g7q77f9d290su4flufq2lt9j").unwrap()
                     )
                 ),
                 None,
