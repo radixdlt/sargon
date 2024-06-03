@@ -30,6 +30,12 @@ impl FactorSourceIDFromAddress {
 }
 
 impl FactorSourceIDFromAddress {
+    pub fn new_for_trusted_contact(address: AccountAddress) -> Self {
+        Self::new(FactorSourceKind::TrustedContact, address)
+    }
+}
+
+impl FactorSourceIDFromAddress {
     pub fn to_canonical_string(&self) -> String {
         format!("{}:{}", self.kind.discriminant(), self.body)
     }

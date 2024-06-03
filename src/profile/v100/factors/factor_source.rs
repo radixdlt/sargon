@@ -43,6 +43,12 @@ pub enum FactorSource {
         #[display("SecurityQuestions({value})")]
         value: SecurityQuestions_NOT_PRODUCTION_READY_FactorSource,
     },
+
+    TrustedContact {
+        #[serde(rename = "trustedContact")]
+        #[display("TrustedContact({value})")]
+        value: TrustedContactFactorSource,
+    },
 }
 
 impl BaseIsFactorSource for FactorSource {
@@ -63,6 +69,9 @@ impl BaseIsFactorSource for FactorSource {
             FactorSource::OffDeviceMnemonic { value } => {
                 value.set_common_properties(updated)
             }
+            FactorSource::TrustedContact { value } => {
+                value.set_common_properties(updated)
+            }
         }
     }
 
@@ -77,6 +86,7 @@ impl BaseIsFactorSource for FactorSource {
             FactorSource::OffDeviceMnemonic { value } => {
                 value.common_properties()
             }
+            FactorSource::TrustedContact { value } => value.common_properties(),
         }
     }
 
@@ -89,6 +99,9 @@ impl BaseIsFactorSource for FactorSource {
             }
             FactorSource::ArculusCard { value } => value.factor_source_kind(),
             FactorSource::OffDeviceMnemonic { value } => {
+                value.factor_source_kind()
+            }
+            FactorSource::TrustedContact { value } => {
                 value.factor_source_kind()
             }
         }
@@ -105,6 +118,7 @@ impl BaseIsFactorSource for FactorSource {
             FactorSource::OffDeviceMnemonic { value } => {
                 value.factor_source_id()
             }
+            FactorSource::TrustedContact { value } => value.factor_source_id(),
         }
     }
 }
@@ -186,6 +200,11 @@ impl Serialize for FactorSource {
             }
             FactorSource::SecurityQuestions { value } => {
                 let discriminant = "securityQuestions";
+                state.serialize_field(discriminator_key, discriminant)?;
+                state.serialize_field(discriminant, value)?;
+            }
+            FactorSource::TrustedContact { value } => {
+                let discriminant = "trustedContact";
                 state.serialize_field(discriminator_key, discriminant)?;
                 state.serialize_field(discriminant, value)?;
             }
