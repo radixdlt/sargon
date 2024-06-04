@@ -105,6 +105,10 @@ impl AccountAddress {
         address
     }
 
+    pub fn sample_grace() -> Self {
+        Self::from_str("account_rdx128c4f8dnuvd73d2r3fl95ryfuavw5zjf8zr57hjw0qjagz7s7grace").unwrap()
+    }
+
     pub fn sample_frank() -> Self {
         Self::from_str("account_rdx1298d59ae3k94htjzpy2z6mx4436h98e5u4qpnwhek8lukv7lkfrank").unwrap()
     }
@@ -119,6 +123,9 @@ impl AccountAddress {
         Self::from_str("account_rdx129uc6rf5vmkj2gau7fgxlsqdg8008nca8yd57sxx4v67dyw7u0scar").unwrap()
     }
 
+    pub fn sample_trudy() -> Self {
+        Self::from_str("account_rdx1284z0gpg9vnhevn7sytdncszc7ukcrycntg7zjktqvggmwe6ctrudy").unwrap()
+    }
     pub fn sample_radix() -> Self {
         // Or alternatively: `"account_rdx12yql52whel8xjttrw84tau270asj92ssu9pgqzgrftd4m8ptm8zrdx"`
         // Or alternatively: `"account_rdx129sctf9rusf0ceq6ap2ca8r030f2mf8z0a2fx90jg5yxtladqrprdx"`

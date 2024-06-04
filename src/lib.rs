@@ -3,7 +3,6 @@
 #![feature(core_intrinsics)]
 #![allow(unused_imports)]
 #![allow(internal_features)]
-#![feature(macro_metavar_expr)]
 
 mod core;
 mod gateway_api;
