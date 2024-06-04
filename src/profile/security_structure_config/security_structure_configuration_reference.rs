@@ -7,18 +7,35 @@ decl_security_structure_config!(
     [
         // primary_role_threshold_factors_sample
         FactorSourceID::from(FactorSourceIDFromHash::sample_device()),
-        FactorSourceID::from(FactorSourceIDFromHash::sample_ledger()),
+        FactorSourceID::from(FactorSourceIDFromHash::sample_arculus()),
+        FactorSourceID::from(FactorSourceIDFromHash::sample_off_device()),
     ],
     [
         // primary_role_threshold_factors_sample_other
-        FactorSourceID::from(FactorSourceIDFromHash::sample_ledger())
+        FactorSourceID::from(FactorSourceIDFromHash::sample_device_other()),
+        FactorSourceID::from(FactorSourceIDFromHash::sample_arculus_other()),
+        FactorSourceID::from(FactorSourceIDFromHash::sample_off_device_other()),
     ],
     [
-        // primary_role_super_admin_factors_sample
+        // primary_role_override_factors_sample
         FactorSourceID::from(FactorSourceIDFromHash::sample_ledger()),
     ],
     [
-        // primary_role_super_admin_factors_sample_other
+        // primary_role_override_factors_sample_other
+        FactorSourceID::from(FactorSourceIDFromHash::sample_ledger_other()),
+    ],
+    [
+        // recovery_role_threshold_factors_sample
+        FactorSourceID::from(FactorSourceIDFromAddress::sample())
+    ],
+    [
+        // recovery_role_threshold_factors_sample_other
+    ],
+    [
+        // recovery_role_override_factors_sample
+    ],
+    [
+        // recovery_role_override_factors_sample_other
     ],
     [
         // confirmation_role_threshold_factors_sample
@@ -27,24 +44,32 @@ decl_security_structure_config!(
         // confirmation_role_threshold_factors_sample_other   
     ],
     [
-        // confirmation_role_super_admin_factors_sample
+        // confirmation_role_override_factors_sample
     ],
     [
-        // confirmation_role_super_admin_factors_sample_other
+        // confirmation_role_override_factors_sample_other
     ],
-    [
-        // recovery_role_threshold_factors_sample
-    ],
-    [
-        // recovery_role_threshold_factors_sample_other
-    ],
-    [
-        // recovery_role_super_admin_factors_sample
-    ],
-    [
-        // recovery_role_super_admin_factors_sample_other
-    ]
 );
+
+pub type SecurityShield = SecurityStructureConfigurationReference;
+
+impl Identifiable for SecurityStructureConfigurationReference {
+    type ID = <SecurityStructureMetadata as Identifiable>::ID;
+
+    fn id(&self) -> Self::ID {
+        self.metadata.id()
+    }
+}
+
+// What to call FactorInstance level for SecurityShield? I.e. the collection
+// of FactorInstances which is derived from having "used" a SecurityShield for
+// a certain account?
+// Maybe:
+// Shield Ward
+// Shield Wield
+// Shield Bash
+// Raise Shield
+// Shield Wielding -> WieldingOfShield
 
 // #[cfg(test)]
 // mod test_security_structure_configuration_reference {

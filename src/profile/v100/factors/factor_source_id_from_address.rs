@@ -41,18 +41,33 @@ impl FactorSourceIDFromAddress {
     }
 }
 
+impl FactorSourceIDFromAddress {
+    /// A sample used to facilitate unit tests.
+    fn sample_trusted_contact_friend_alice() -> Self {
+        Self::new(
+            FactorSourceKind::TrustedContact,
+            Account::sample_alice().address,
+        )
+    }
+
+    /// A sample used to facilitate unit tests.
+    fn sample_trusted_contact_friend_bob() -> Self {
+        Self::new(
+            FactorSourceKind::TrustedContact,
+            Account::sample_bob().address,
+        )
+    }
+}
+
 impl HasSampleValues for FactorSourceIDFromAddress {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {
-        Self::new(FactorSourceKind::TrustedContact, AccountAddress::sample())
+        Self::sample_trusted_contact_friend_alice()
     }
 
     /// A sample used to facilitate unit tests.
     fn sample_other() -> Self {
-        Self::new(
-            FactorSourceKind::TrustedContact,
-            AccountAddress::sample_other(),
-        )
+        Self::sample_trusted_contact_friend_bob()
     }
 }
 

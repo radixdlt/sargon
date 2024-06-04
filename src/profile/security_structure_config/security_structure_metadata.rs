@@ -11,6 +11,14 @@ pub struct SecurityStructureMetadata {
     pub last_updated_on: Timestamp,
 }
 
+impl Identifiable for SecurityStructureMetadata {
+    type ID = Uuid;
+
+    fn id(&self) -> Self::ID {
+        self.id.clone()
+    }
+}
+
 impl SecurityStructureMetadata {
     pub fn with_details(
         id: Uuid,

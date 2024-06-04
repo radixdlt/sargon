@@ -131,6 +131,16 @@ impl FactorSourceIDFromHash {
     }
 
     /// A sample used to facilitate unit tests.
+    pub fn sample_arculus() -> Self {
+        ArculusCardFactorSource::sample().id
+    }
+
+    /// A sample used to facilitate unit tests.
+    pub fn sample_arculus_other() -> Self {
+        ArculusCardFactorSource::sample_other().id
+    }
+
+    /// A sample used to facilitate unit tests.
     pub fn sample_off_device() -> Self {
         OffDeviceMnemonicFactorSource::sample().id
     }

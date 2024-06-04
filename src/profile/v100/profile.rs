@@ -853,7 +853,7 @@ mod tests {
 					"security": {
 						"isCloudProfileSyncEnabled": true,
 						"isDeveloperModeEnabled": true,
-						"structureConfigurationReferences": []
+						"shields": []
 					},
 					"transaction": {
 						"defaultDepositGuarantee": "0.975"

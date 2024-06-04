@@ -157,7 +157,7 @@ mod tests {
                 },
                 "security": {
                     "isCloudProfileSyncEnabled": true,
-                    "structureConfigurationReferences": [],
+                    "shields": [],
                     "isDeveloperModeEnabled": true
                 },
                 "transaction": {
