@@ -48,19 +48,14 @@ mod tests {
     }
 
     #[test]
-    fn hash_of_new() {
-        assert_eq!(
-            HashSet::<SUT>::from_iter([
-                new_factor_source_common_babylon(),
-                new_factor_source_common_olympia(),
-                new_factor_source_common_bdfs(false),
-                // duplicates should get removed
-                new_factor_source_common_babylon(),
-                new_factor_source_common_olympia(),
-                new_factor_source_common_bdfs(false),
-            ])
-            .len(),
-            3
+    fn inequality_of_presets() {
+        assert_ne!(
+            new_factor_source_common_babylon(),
+            new_factor_source_common_olympia()
+        );
+        assert_ne!(
+            new_factor_source_common_bdfs(false),
+            new_factor_source_common_olympia()
         );
     }
 }

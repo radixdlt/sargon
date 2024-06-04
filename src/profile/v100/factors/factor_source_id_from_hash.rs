@@ -152,12 +152,12 @@ impl FactorSourceIDFromHash {
 
     /// A sample used to facilitate unit tests.
     pub fn sample_security_questions() -> Self {
-        SecurityQuestionsNotProductionReadyFactorSource::sample().id
+        SecurityQuestions_NOT_PRODUCTION_READY_FactorSource::sample().id
     }
 
     /// A sample used to facilitate unit tests.
     pub fn sample_security_questions_other() -> Self {
-        SecurityQuestionsNotProductionReadyFactorSource::sample_other().id
+        SecurityQuestions_NOT_PRODUCTION_READY_FactorSource::sample_other().id
     }
 }
 
