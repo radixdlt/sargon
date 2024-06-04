@@ -90,10 +90,18 @@ macro_rules! decl_security_structure_config {
                     _self
                 }
 
+                fn theshold_of(factors_count: usize) -> u16 {
+                    if factors_count > 2 {
+                        (factors_count - 1) as u16
+                    } else {
+                        1
+                    }
+                }
+
                 pub fn sample_primary() -> Self {
                     let override_factors: Vec<$factor_level_type> = $primary_role_override_factors_sample.into_iter().collect_vec();
                     let threshold_factors: Vec<$factor_level_type> = $primary_role_threshold_factors_sample.into_iter().collect_vec();
-                    let threshold = threshold_factors.len() - 1;
+                    let threshold = Self::theshold_of(threshold_factors.len());
                     Self::new(
                         threshold_factors,
                         threshold as u16,
@@ -104,7 +112,7 @@ macro_rules! decl_security_structure_config {
                 pub fn sample_primary_other() -> Self {
                     let override_factors: Vec<$factor_level_type> = $primary_role_override_factors_sample_other.into_iter().collect_vec();
                     let threshold_factors: Vec<$factor_level_type> = $primary_role_threshold_factors_sample_other.into_iter().collect_vec();
-                    let threshold = threshold_factors.len() - 1;
+                    let threshold = Self::theshold_of(threshold_factors.len());
                     Self::new(
                         threshold_factors,
                         threshold as u16,
@@ -115,7 +123,7 @@ macro_rules! decl_security_structure_config {
                 pub fn sample_recovery() -> Self {
                     let override_factors: Vec<$factor_level_type> = $recovery_role_override_factors_sample.into_iter().collect_vec();
                     let threshold_factors: Vec<$factor_level_type> = $recovery_role_threshold_factors_sample.into_iter().collect_vec();
-                    let threshold = threshold_factors.len() - 1;
+                    let threshold = Self::theshold_of(threshold_factors.len());
                     Self::new(
                         threshold_factors,
                         threshold as u16,
@@ -126,7 +134,7 @@ macro_rules! decl_security_structure_config {
                 pub fn sample_recovery_other() -> Self {
                     let override_factors: Vec<$factor_level_type> = $recovery_role_override_factors_sample_other.into_iter().collect_vec();
                     let threshold_factors: Vec<$factor_level_type> = $recovery_role_threshold_factors_sample_other.into_iter().collect_vec();
-                    let threshold = threshold_factors.len() - 1;
+                    let threshold = Self::theshold_of(threshold_factors.len());
                     Self::new(
                         threshold_factors,
                         threshold as u16,
@@ -137,7 +145,7 @@ macro_rules! decl_security_structure_config {
                 pub fn sample_confirmation() -> Self {
                     let override_factors: Vec<$factor_level_type> = $confirmation_role_override_factors_sample.into_iter().collect_vec();
                     let threshold_factors: Vec<$factor_level_type> = $confirmation_role_threshold_factors_sample.into_iter().collect_vec();
-                    let threshold = threshold_factors.len() - 1;
+                    let threshold = Self::theshold_of(threshold_factors.len());
                     Self::new(
                         threshold_factors,
                         threshold as u16,
@@ -148,7 +156,7 @@ macro_rules! decl_security_structure_config {
                 pub fn sample_confirmation_other() -> Self {
                     let override_factors: Vec<$factor_level_type> = $confirmation_role_override_factors_sample_other.into_iter().collect_vec();
                     let threshold_factors: Vec<$factor_level_type> = $confirmation_role_threshold_factors_sample_other.into_iter().collect_vec();
-                    let threshold = threshold_factors.len() - 1;
+                    let threshold = Self::theshold_of(threshold_factors.len());
                     Self::new(
                         threshold_factors,
                         threshold as u16,

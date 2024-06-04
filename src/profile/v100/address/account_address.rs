@@ -104,6 +104,31 @@ impl AccountAddress {
         assert_eq!(address.network_id(), NetworkID::Stokenet);
         address
     }
+
+    pub fn sample_frank() -> Self {
+        Self::from_str("account_rdx1298d59ae3k94htjzpy2z6mx4436h98e5u4qpnwhek8lukv7lkfrank").unwrap()
+    }
+
+    pub fn sample_judy() -> Self {
+        // Or alternatively: `"account_rdx12xc095hk3g8klf8gvz5q6qy9pl9e7v5m5eju0xctzvesnyhnfdjudy"`
+        // Or alternatively: `"account_rdx12x82w84l6n55m78h8eldedeca52tp8tpuu3342g5lw4f9v85znjudy"`
+        Self::from_str("account_rdx12y0389ew2xn7w02d059hhye6t0mjzqxqyavsetyg2j3p3xqyepjudy").unwrap()
+    }
+
+    pub fn sample_oscar() -> Self {
+        Self::from_str("account_rdx129uc6rf5vmkj2gau7fgxlsqdg8008nca8yd57sxx4v67dyw7u0scar").unwrap()
+    }
+
+    pub fn sample_radix() -> Self {
+        // Or alternatively: `"account_rdx12yql52whel8xjttrw84tau270asj92ssu9pgqzgrftd4m8ptm8zrdx"`
+        // Or alternatively: `"account_rdx129sctf9rusf0ceq6ap2ca8r030f2mf8z0a2fx90jg5yxtladqrprdx"`
+        // Or alternatively: `"account_rdx1287mp2d20wfmc8tyluryehz3j53jn0f9jmkdxp9808vrjxetu9prdx"`
+        // Or alternatively: `"account_rdx1282v25pw9y59ny74rv7aht6q0qgqs4g85q20zmustkyu6mxphp5rdx"`
+        // Or alternatively: `"account_rdx128avae2px32e8t7vcax0axvt0afa5lrw4rwjlksev48wamgs472rdx"`
+        // Or alternatively: `"account_rdx128g9urn56vyu2axptn9r4rctggn9f0phlu3mzd6mz6lsdkxkd7hrdx"`
+        // Or alternatively: `"account_rdx129mvy35wx370ey2sxqces5ddq5sqj4q7xxhwl3ejpvu8gd8ta3erdx"`
+        Self::from_str("account_rdx12y7uww27s250g9d3d72ey9wdp5z78zpmq5la0r0wgw4fkf6y8eerdx").unwrap()
+    }
 }
 
 #[cfg(test)]

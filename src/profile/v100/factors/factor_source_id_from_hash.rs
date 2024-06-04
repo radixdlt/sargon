@@ -149,6 +149,16 @@ impl FactorSourceIDFromHash {
     pub fn sample_off_device_other() -> Self {
         OffDeviceMnemonicFactorSource::sample_other().id
     }
+
+    /// A sample used to facilitate unit tests.
+    pub fn sample_security_questions() -> Self {
+        SecurityQuestionsNotProductionReadyFactorSource::sample().id
+    }
+
+    /// A sample used to facilitate unit tests.
+    pub fn sample_security_questions_other() -> Self {
+        SecurityQuestionsNotProductionReadyFactorSource::sample_other().id
+    }
 }
 
 #[cfg(test)]
