@@ -53,11 +53,14 @@ mod tests {
             HashSet::<SUT>::from_iter([
                 new_factor_source_common_babylon(),
                 new_factor_source_common_olympia(),
-                new_factor_source_common_bdfs(true),
+                new_factor_source_common_bdfs(false),
+                // duplicates should get removed
+                new_factor_source_common_babylon(),
+                new_factor_source_common_olympia(),
                 new_factor_source_common_bdfs(false),
             ])
             .len(),
-            4
+            3
         );
     }
 }

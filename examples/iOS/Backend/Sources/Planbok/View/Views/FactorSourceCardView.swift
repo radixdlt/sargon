@@ -22,7 +22,7 @@ public struct FactorSourceCardView: SwiftUI.View {
 			Labeled("Added", factorSource.addedOn.formatted(.dateTime))
 			Labeled("Last Used", factorSource.lastUsedOn.formatted(.dateTime))
 			Labeled("Main?", factorSource.common.flags.contains(.main) ? "TRUE" : "FALSE")
-			
+			Divider()
 			factorSource.hintView(action: action)
 		}
 		.multilineTextAlignment(.leading)

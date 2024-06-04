@@ -6,6 +6,9 @@ import IdentifiedCollections
 
 public typealias FactorSources = IdentifiedArrayOf<FactorSource>
 
+public typealias Shield = SecurityStructureConfigurationReference
+public typealias Shields = IdentifiedArrayOf<Shield>
+
 extension FactorSources {
 	public func compactMap<F>(as kind: F.Type = F.self) -> IdentifiedArrayOf<F> where F: FactorSourceProtocol {
 		self.elements.compactMap({ $0.extract(F.self) }).asIdentified()
@@ -38,11 +41,31 @@ extension PersistenceKeyDefault<SargonKey<FactorSources>> {
     )
 }
 
+extension PersistenceReaderKey where Self == PersistenceKeyDefault<SargonKey<Shields>> {
+	public static var shields: Self {
+		Self.sharedShields
+	}
+}
+extension PersistenceKeyDefault<SargonKey<Shields>> {
+	public static let sharedShields = Self(
+		SargonKey(
+			accessing: \.shields,
+			fetchIf: \.affectsShields
+		),
+		[]
+	)
+}
+
 extension SargonOS {
     
     public var factorSources: FactorSources {
         factorSources().asIdentified()
     }
+	
+	
+	public var shields: Shields {
+		securityStructureConfigurationReferences().asIdentified()
+	}
     
 	public var deviceFactorSources: DeviceFactorSources {
 		factorSources.compactMap({ $0.extract(DeviceFactorSource.self)}).asIdentified()
