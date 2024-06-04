@@ -78,15 +78,15 @@ decl_security_shield_at_level!(
     ],
 );
 
-pub type SchematicOfSecurityShield = SecurityStructureConfigurationReference;
+// pub type SchematicOfSecurityShield = SecurityStructureConfigurationReference;
 
-impl Identifiable for SecurityStructureConfigurationReference {
-    type ID = <SecurityStructureMetadata as Identifiable>::ID;
+// impl Identifiable for SecurityStructureConfigurationReference {
+//     type ID = <SecurityStructureMetadata as Identifiable>::ID;
 
-    fn id(&self) -> Self::ID {
-        self.metadata.id()
-    }
-}
+//     fn id(&self) -> Self::ID {
+//         self.metadata.id()
+//     }
+// }
 
 // What to call FactorInstance level for SchematicOfSecurityShield? I.e. the collection
 // of FactorInstances which is derived from having "used" a SchematicOfSecurityShield for
