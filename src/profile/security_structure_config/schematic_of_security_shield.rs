@@ -1,7 +1,10 @@
 use crate::prelude::*;
 
-decl_security_structure_config!(
-    /// Apa
+decl_security_shield_at_level!(
+    /// A "Schematic Of SecurityShield", is at `FactorSourceID` level.
+    /// This is what is saved into Profile, being just references to FactorSources.
+    /// The user views, creates and manages SecurityShields, which is at `FactorSource`
+    /// level.
     Reference,
     FactorSourceID,
     [
@@ -75,7 +78,7 @@ decl_security_structure_config!(
     ],
 );
 
-pub type SecurityShield = SecurityStructureConfigurationReference;
+pub type SchematicOfSecurityShield = SecurityStructureConfigurationReference;
 
 impl Identifiable for SecurityStructureConfigurationReference {
     type ID = <SecurityStructureMetadata as Identifiable>::ID;
@@ -85,8 +88,8 @@ impl Identifiable for SecurityStructureConfigurationReference {
     }
 }
 
-// What to call FactorInstance level for SecurityShield? I.e. the collection
-// of FactorInstances which is derived from having "used" a SecurityShield for
+// What to call FactorInstance level for SchematicOfSecurityShield? I.e. the collection
+// of FactorInstances which is derived from having "used" a SchematicOfSecurityShield for
 // a certain account?
 // Maybe:
 // Shield Ward
