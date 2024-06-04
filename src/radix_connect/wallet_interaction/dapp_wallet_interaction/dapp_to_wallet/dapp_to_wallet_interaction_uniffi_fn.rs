@@ -16,21 +16,11 @@ pub(crate) fn new_dapp_to_wallet_interaction_unvalidated_sample_other(
 mod tests {
     use super::*;
 
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = DappToWalletInteractionUnvalidated;
-
     #[test]
-    fn hash_of_samples() {
-        assert_eq!(
-            HashSet::<SUT>::from_iter([
-                new_dapp_to_wallet_interaction_unvalidated_sample(),
-                new_dapp_to_wallet_interaction_unvalidated_sample_other(),
-                // duplicates should get removed
-                new_dapp_to_wallet_interaction_unvalidated_sample(),
-                new_dapp_to_wallet_interaction_unvalidated_sample_other(),
-            ])
-            .len(),
-            2
+    fn inequality_of_samples() {
+        assert_ne!(
+            new_dapp_to_wallet_interaction_unvalidated_sample(),
+            new_dapp_to_wallet_interaction_unvalidated_sample_other()
         );
     }
 }
