@@ -8,7 +8,6 @@ import com.radixdlt.sargon.newDappToWalletInteractionUnvalidatedFromJsonBytes
 fun DappToWalletInteractionUnvalidated.Companion.fromJson(json: String) =
     newDappToWalletInteractionUnvalidatedFromJsonBytes(json.toByteArray().toBagOfBytes())
 
-@Throws(SargonException::class)
 fun DappToWalletInteractionUnvalidated.toJson() =
     dappToWalletInteractionUnvalidatedToJsonBytes(this).string
 

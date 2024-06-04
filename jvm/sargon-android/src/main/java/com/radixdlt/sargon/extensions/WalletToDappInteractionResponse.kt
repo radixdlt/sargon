@@ -8,6 +8,5 @@ import com.radixdlt.sargon.walletToDappInteractionResponseToJsonBytes
 fun WalletToDappInteractionResponse.Companion.fromJson(json: String) =
     newWalletToDappInteractionResponseFromJsonBytes(json.toByteArray().toBagOfBytes())
 
-@Throws(SargonException::class)
 fun WalletToDappInteractionResponse.toJson() =
     walletToDappInteractionResponseToJsonBytes(this).string
