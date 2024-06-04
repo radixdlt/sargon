@@ -10,7 +10,7 @@ class WalletToDappInteractionResponseTest {
     @Test
     fun testRoundtrip() {
         val sample = newWalletToDappInteractionResponseSample()
-        assertEquals(sample, WalletToDappInteractionResponse.Companion.fromJson(sample.toJson().getOrThrow()).getOrThrow())
+        assertEquals(sample, WalletToDappInteractionResponse.Companion.fromJson(sample.toJson()))
     }
 
 }

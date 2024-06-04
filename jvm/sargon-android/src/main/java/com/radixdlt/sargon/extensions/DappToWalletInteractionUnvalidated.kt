@@ -4,10 +4,11 @@ import com.radixdlt.sargon.DappToWalletInteractionUnvalidated
 import com.radixdlt.sargon.dappToWalletInteractionUnvalidatedToJsonBytes
 import com.radixdlt.sargon.newDappToWalletInteractionUnvalidatedFromJsonBytes
 
-fun DappToWalletInteractionUnvalidated.Companion.fromJson(json: String) = runCatching {
+@Throws(SargonException::class)
+fun DappToWalletInteractionUnvalidated.Companion.fromJson(json: String) =
     newDappToWalletInteractionUnvalidatedFromJsonBytes(json.toByteArray().toBagOfBytes())
-}
-fun DappToWalletInteractionUnvalidated.toJson() = runCatching {
+
+@Throws(SargonException::class)
+fun DappToWalletInteractionUnvalidated.toJson() =
     dappToWalletInteractionUnvalidatedToJsonBytes(this).string
-}
 

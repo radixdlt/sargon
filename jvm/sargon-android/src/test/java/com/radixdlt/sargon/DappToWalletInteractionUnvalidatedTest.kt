@@ -10,7 +10,7 @@ class DappToWalletInteractionUnvalidatedTest {
     @Test
     fun testRoundtrip() {
         val sample = newDappToWalletInteractionUnvalidatedSample()
-        assertEquals(sample, DappToWalletInteractionUnvalidated.Companion.fromJson(sample.toJson().getOrThrow()).getOrThrow())
+        assertEquals(sample, DappToWalletInteractionUnvalidated.Companion.fromJson(sample.toJson()))
     }
 
 }
