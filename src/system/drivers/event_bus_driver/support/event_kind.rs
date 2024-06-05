@@ -44,6 +44,9 @@ pub enum EventKind {
 
     /// An existing factor source has been updated
     FactorSourceUpdated,
+
+    /// Profile updated with a new Security Structure.
+    SecurityStructureAdded,
 }
 
 impl EventKind {
@@ -93,6 +96,12 @@ impl EventKind {
         matches!(*self, Booted | ProfileImported | GatewayChangedCurrent)
     }
 
+    /// If security structures have changed
+    pub fn affects_security_structures(&self) -> bool {
+        use EventKind::*;
+        matches!(*self, Booted | ProfileImported | SecurityStructureAdded)
+    }
+
     /// If hosts UI displaying factor sources (of any kind) should re-fetch
     /// the list from SargonOS.
     ///
@@ -126,6 +135,11 @@ pub fn event_kind_affects_saved_gateways(event_kind: EventKind) -> bool {
 #[uniffi::export]
 pub fn event_kind_affects_factor_sources(event_kind: EventKind) -> bool {
     event_kind.affects_factor_sources()
+}
+
+#[uniffi::export]
+pub fn event_kind_affects_security_structures(event_kind: EventKind) -> bool {
+    event_kind.affects_security_structures()
 }
 
 #[uniffi::export]
@@ -180,6 +194,7 @@ mod tests {
                 | GatewayChangedCurrent => assert!(affects),
                 ProfileUsedOnOtherDevice
                 | ProfileSaved
+                | SecurityStructureAdded
                 | FactorSourceAdded
                 | FactorSourceUpdated => {
                     assert!(!affects)
@@ -202,6 +217,28 @@ mod tests {
                 | FactorSourceUpdated
                 | ProfileSaved
                 | AccountAdded
+                | SecurityStructureAdded
+                | AccountsAdded
+                | AccountUpdated => assert!(!affects),
+            })
+    }
+
+    #[test]
+    fn event_kind_affects_security_structures() {
+        use EventKind::*;
+        SUT::all()
+            .into_iter()
+            .map(|sut| (sut, sut.affects_security_structures()))
+            .for_each(|(sut, affects)| match sut {
+                Booted | ProfileImported | SecurityStructureAdded => {
+                    assert!(affects)
+                }
+                ProfileUsedOnOtherDevice
+                | FactorSourceAdded
+                | FactorSourceUpdated
+                | ProfileSaved
+                | AccountAdded
+                | GatewayChangedCurrent
                 | AccountsAdded
                 | AccountUpdated => assert!(!affects),
             })
@@ -222,6 +259,7 @@ mod tests {
                 | FactorSourceUpdated
                 | ProfileSaved
                 | AccountAdded
+                | SecurityStructureAdded
                 | AccountsAdded
                 | AccountUpdated => assert!(!affects),
             })
@@ -241,6 +279,7 @@ mod tests {
                 ProfileUsedOnOtherDevice
                 | GatewayChangedCurrent
                 | ProfileSaved
+                | SecurityStructureAdded
                 | AccountAdded
                 | AccountsAdded
                 | AccountUpdated => assert!(!affects),
@@ -274,5 +313,10 @@ mod uniffi_tests {
     #[test]
     fn test_event_kind_affects_saved_gateways() {
         assert!(event_kind_affects_saved_gateways(Booted));
+    }
+
+    #[test]
+    fn test_event_kind_affects_security_structures() {
+        assert!(event_kind_affects_security_structures(Booted));
     }
 }

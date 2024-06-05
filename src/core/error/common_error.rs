@@ -565,6 +565,11 @@ pub enum CommonError {
 
     #[error("Invalid SecurityStructureID, bad value: '{bad_value}'")]
     InvalidSecurityStructureID { bad_value: String } = 10160,
+
+    #[error(
+        "Invalid SecurityStructure, it references Factors not in profile (by FactorSourceID)."
+    )]
+    StructureReferencesUnknownFactorSource = 10161,
 }
 
 #[uniffi::export]

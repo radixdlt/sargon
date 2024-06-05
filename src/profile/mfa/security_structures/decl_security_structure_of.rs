@@ -53,6 +53,12 @@ macro_rules! decl_role_with_factors {
                     assert!(_self.threshold_factors.len() >= _self.threshold as usize);
                     _self
                 }
+
+                pub fn all_factors(&self) -> HashSet<&$factor> {
+                    let mut factors = HashSet::from_iter(self.threshold_factors.iter());
+                    factors.extend(self.override_factors.iter());
+                    factors
+                }
             }
         }
     };
@@ -118,6 +124,14 @@ macro_rules! decl_matrix_of_factors {
                         confirmation_role,
                     }
                 }
+
+                pub fn all_factors(&self) -> HashSet<&$factor> {
+                    let mut factors = HashSet::new();
+                    factors.extend(self.primary_role.all_factors());
+                    factors.extend(self.recovery_role.all_factors());
+                    factors.extend(self.confirmation_role.all_factors());
+                    factors
+                }
             }
         }
     };
@@ -166,6 +180,10 @@ macro_rules! decl_security_structure_of {
                         number_of_epochs_until_auto_confirmation,
                         matrix_of_factors
                     }
+                }
+
+                pub fn all_factors(&self) -> HashSet<&$factor> {
+                    self.matrix_of_factors.all_factors()
                 }
             }
         }

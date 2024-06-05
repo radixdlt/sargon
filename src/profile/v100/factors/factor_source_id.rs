@@ -9,6 +9,7 @@ use crate::prelude::*;
     Deserialize,
     EnumAsInner,
     Clone,
+    Copy,
     Debug,
     PartialEq,
     Eq,

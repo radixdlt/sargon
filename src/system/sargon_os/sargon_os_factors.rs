@@ -110,6 +110,13 @@ impl SargonOS {
 }
 
 impl SargonOS {
+    /// Returns IDs of all the factor sources.
+    pub fn factor_source_ids(&self) -> HashSet<FactorSourceID> {
+        self.profile_holder.access_profile_with(|p| {
+            HashSet::from_iter(p.factor_sources.iter().map(|s| s.id()))
+        })
+    }
+
     /// Updates the `last_used_on` for the factor source and emits events.
     ///
     /// # Emits Event
