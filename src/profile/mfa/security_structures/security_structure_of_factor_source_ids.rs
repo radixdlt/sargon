@@ -63,7 +63,7 @@ impl From<SecurityStructureOfFactorSources>
         Self::new(
             value.metadata,
             value.number_of_epochs_until_auto_confirmation,
-            value.configuration.into(),
+            value.matrix_of_factors.into(),
         )
     }
 }

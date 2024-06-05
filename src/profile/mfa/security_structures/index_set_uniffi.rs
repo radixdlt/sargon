@@ -67,6 +67,17 @@ impl<V: Debug + std::hash::Hash + PartialEq + Eq + Clone> FromIterator<V>
     }
 }
 
+impl<V: Debug + std::hash::Hash + PartialEq + Eq + Clone> IntoIterator
+    for OrderedSet<V>
+{
+    type Item = V;
+    type IntoIter = <IndexSet<V> as IntoIterator>::IntoIter;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
+    }
+}
+
 unsafe impl<UT, V: Debug + Clone + std::hash::Hash + PartialEq + Eq + Lower<UT>>
     Lower<UT> for OrderedSet<V>
 {

@@ -562,6 +562,9 @@ pub enum CommonError {
 
     #[error("Integrity Violation, mutation of FactorSource is not allowed to mutate its ID")]
     IntegrityViolationMutationOfFactorSourceIsNotAllowedToMutateItsID = 10159,
+    
+    #[error("Invalid SecurityStructureID")]
+    InvalidSecurityStructureID = 10160,
 }
 
 #[uniffi::export]

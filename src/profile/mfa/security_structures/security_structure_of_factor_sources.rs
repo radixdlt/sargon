@@ -18,10 +18,10 @@ impl Identifiable for SecurityStructureOfFactorSources {
 }
 
 fn factors_from(
-    ids: &[FactorSourceID],
+    ids: impl IntoIterator<Item = FactorSourceID>,
     from: &FactorSources,
 ) -> Result<FactorSources> {
-    ids.iter()
+    ids.into_iter()
         .map(|id| {
             from.get_id(id.clone())
                 .ok_or(CommonError::ProfileDoesNotContainFactorSourceWithID {
@@ -42,10 +42,10 @@ impl TryFrom<(&PrimaryRoleWithFactorSourceIDs, &FactorSources)>
         let (id_level, factor_sources) = value;
 
         let threshold_factors =
-            factors_from(&id_level.threshold_factors, factor_sources)?;
+            factors_from(id_level.threshold_factors, factor_sources)?;
 
         let override_factors =
-            factors_from(&id_level.override_factors, factor_sources)?;
+            factors_from(id_level.override_factors, factor_sources)?;
         Ok(Self::new(
             threshold_factors,
             id_level.threshold,
@@ -63,10 +63,10 @@ impl TryFrom<(&RecoveryRoleWithFactorSourceIDs, &FactorSources)>
         let (id_level, factor_sources) = value;
 
         let threshold_factors =
-            factors_from(&id_level.threshold_factors, factor_sources)?;
+            factors_from(id_level.threshold_factors, factor_sources)?;
 
         let override_factors =
-            factors_from(&id_level.override_factors, factor_sources)?;
+            factors_from(id_level.override_factors, factor_sources)?;
         Ok(Self::new(
             threshold_factors,
             id_level.threshold,
@@ -84,10 +84,10 @@ impl TryFrom<(&ConfirmationRoleWithFactorSourceIDs, &FactorSources)>
         let (id_level, factor_sources) = value;
 
         let threshold_factors =
-            factors_from(&id_level.threshold_factors, factor_sources)?;
+            factors_from(id_level.threshold_factors, factor_sources)?;
 
         let override_factors =
-            factors_from(&id_level.override_factors, factor_sources)?;
+            factors_from(id_level.override_factors, factor_sources)?;
         Ok(Self::new(
             threshold_factors,
             id_level.threshold,
@@ -132,7 +132,7 @@ impl TryFrom<(&SecurityStructureOfFactorSourceIDs, &FactorSources)>
     ) -> Result<Self> {
         let (id_level, factor_sources) = value;
         let matrix = MatrixOfFactorSources::try_from((
-            &id_level.configuration,
+            &id_level.matrix_of_factors,
             factor_sources,
         ))?;
         Ok(Self::new(
