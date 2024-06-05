@@ -223,7 +223,7 @@ impl HasSampleValues for FactorSource {
     }
 }
 impl FactorSources {
-    pub fn sample_values_all() -> FactorSources {
+    pub fn sample_values_all() -> Self {
         Self::from_iter(FactorSource::sample_values_all())
     }
 }

@@ -17,31 +17,40 @@ impl Identifiable for SchematicOfSecurityShield {
     }
 }
 
-impl TryFrom<&(SchematicOfSecurityShieldPrimaryRole, FactorSources)>
+fn factors_from(
+    ids: &[FactorSourceID],
+    from: &FactorSources,
+) -> Result<FactorSources> {
+    ids.iter()
+        .map(|id| {
+            from.get_id(id.clone())
+                .ok_or(CommonError::ProfileDoesNotContainFactorSourceWithID {
+                    bad_value: id.clone(),
+                })
+                .map(|x| x.clone())
+        })
+        .collect::<Result<FactorSources>>()
+}
+
+impl TryFrom<(&SchematicOfSecurityShieldPrimaryRole, &FactorSources)>
     for SecurityShieldPrimaryRole
 {
     type Error = CommonError;
     fn try_from(
-        value: &(SchematicOfSecurityShieldPrimaryRole, FactorSources),
+        value: (&SchematicOfSecurityShieldPrimaryRole, &FactorSources),
     ) -> Result<Self> {
         let (schematics, factor_sources) = value;
-        // Self::new(
-        //     value.threshold_factors.iter().map(|x| x.factor_source_id()),
-        //     value.threshold,
-        //     value.override_factors.iter().map(|x| x.factor_source_id()),
-        // )
-        let threshold_factors = schematics
-            .threshold_factors
-            .iter()
-            .map(|id| {
-                factor_sources
-                    .get_id(id)
-                    .ok_or(CommonError::Unknown)
-                    .map(|x| x.clone())
-            })
-            .collect::<Result<Vec<FactorSource>>>()?;
-        todo!()
-        // Self::new(threshold_factors, threshold, override_factors)
+
+        let threshold_factors =
+            factors_from(&schematics.threshold_factors, factor_sources)?;
+
+        let override_factors =
+            factors_from(&schematics.override_factors, factor_sources)?;
+        Ok(Self::new(
+            threshold_factors,
+            schematics.threshold,
+            override_factors,
+        ))
     }
 }
 impl From<SecurityShieldPrimaryRole> for SchematicOfSecurityShieldPrimaryRole {
@@ -51,6 +60,28 @@ impl From<SecurityShieldPrimaryRole> for SchematicOfSecurityShieldPrimaryRole {
             value.threshold,
             value.override_factors.iter().map(|x| x.factor_source_id()),
         )
+    }
+}
+
+impl TryFrom<(&SchematicOfSecurityShieldRecoveryRole, &FactorSources)>
+    for SecurityShieldRecoveryRole
+{
+    type Error = CommonError;
+    fn try_from(
+        value: (&SchematicOfSecurityShieldRecoveryRole, &FactorSources),
+    ) -> Result<Self> {
+        let (schematics, factor_sources) = value;
+
+        let threshold_factors =
+            factors_from(&schematics.threshold_factors, factor_sources)?;
+
+        let override_factors =
+            factors_from(&schematics.override_factors, factor_sources)?;
+        Ok(Self::new(
+            threshold_factors,
+            schematics.threshold,
+            override_factors,
+        ))
     }
 }
 impl From<SecurityShieldRecoveryRole>
@@ -64,6 +95,28 @@ impl From<SecurityShieldRecoveryRole>
         )
     }
 }
+
+impl TryFrom<(&SchematicOfSecurityShieldConfirmationRole, &FactorSources)>
+    for SecurityShieldConfirmationRole
+{
+    type Error = CommonError;
+    fn try_from(
+        value: (&SchematicOfSecurityShieldConfirmationRole, &FactorSources),
+    ) -> Result<Self> {
+        let (schematics, factor_sources) = value;
+
+        let threshold_factors =
+            factors_from(&schematics.threshold_factors, factor_sources)?;
+
+        let override_factors =
+            factors_from(&schematics.override_factors, factor_sources)?;
+        Ok(Self::new(
+            threshold_factors,
+            schematics.threshold,
+            override_factors,
+        ))
+    }
+}
 impl From<SecurityShieldConfirmationRole>
     for SchematicOfSecurityShieldConfirmationRole
 {
@@ -73,6 +126,38 @@ impl From<SecurityShieldConfirmationRole>
             value.threshold,
             value.override_factors.iter().map(|x| x.factor_source_id()),
         )
+    }
+}
+
+impl TryFrom<(&SchematicOfSecurityShieldConfiguration, &FactorSources)>
+    for SecurityShieldConfiguration
+{
+    type Error = CommonError;
+    fn try_from(
+        value: (&SchematicOfSecurityShieldConfiguration, &FactorSources),
+    ) -> Result<Self> {
+        let (schematics, factor_sources) = value;
+        let primary_role = SecurityShieldPrimaryRole::try_from((
+            &schematics.primary_role,
+            factor_sources,
+        ))?;
+
+        let recovery_role = SecurityShieldRecoveryRole::try_from((
+            &schematics.recovery_role,
+            factor_sources,
+        ))?;
+
+        let confirmation_role = SecurityShieldConfirmationRole::try_from((
+            &schematics.confirmation_role,
+            factor_sources,
+        ))?;
+
+        Ok(Self::new(
+            primary_role,
+            recovery_role,
+            confirmation_role,
+            schematics.number_of_epochs_until_auto_confirmation,
+        ))
     }
 }
 impl From<SecurityShieldConfiguration>
@@ -90,6 +175,20 @@ impl From<SecurityShieldConfiguration>
 impl From<SecurityShield> for SchematicOfSecurityShield {
     fn from(value: SecurityShield) -> Self {
         Self::new(value.metadata, value.configuration.into())
+    }
+}
+
+impl TryFrom<(&SchematicOfSecurityShield, &FactorSources)> for SecurityShield {
+    type Error = CommonError;
+    fn try_from(
+        value: (&SchematicOfSecurityShield, &FactorSources),
+    ) -> Result<Self> {
+        let (schematics, factor_sources) = value;
+        let config = SecurityShieldConfiguration::try_from((
+            &schematics.configuration,
+            factor_sources,
+        ))?;
+        Ok(Self::new(schematics.metadata.clone(), config))
     }
 }
 

@@ -132,4 +132,13 @@ mod tests {
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
     }
+
+    #[test]
+    fn test_into_schematics_and_back() {
+        let factor_sources = FactorSources::sample_values_all();
+        let sut = SUT::sample();
+        let schematics = SchematicOfSecurityShield::from(sut.clone());
+        let detailed = SUT::try_from((&schematics, &factor_sources)).unwrap();
+        assert_eq!(detailed, sut);
+    }
 }
