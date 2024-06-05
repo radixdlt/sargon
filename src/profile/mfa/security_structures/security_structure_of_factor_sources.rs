@@ -42,10 +42,10 @@ impl TryFrom<(&PrimaryRoleWithFactorSourceIDs, &FactorSources)>
         let (id_level, factor_sources) = value;
 
         let threshold_factors =
-            factors_from(id_level.threshold_factors, factor_sources)?;
+            factors_from(&id_level.threshold_factors, factor_sources)?;
 
         let override_factors =
-            factors_from(id_level.override_factors, factor_sources)?;
+            factors_from(&id_level.override_factors, factor_sources)?;
         Ok(Self::new(
             threshold_factors,
             id_level.threshold,
@@ -63,10 +63,10 @@ impl TryFrom<(&RecoveryRoleWithFactorSourceIDs, &FactorSources)>
         let (id_level, factor_sources) = value;
 
         let threshold_factors =
-            factors_from(id_level.threshold_factors, factor_sources)?;
+            factors_from(&id_level.threshold_factors, factor_sources)?;
 
         let override_factors =
-            factors_from(id_level.override_factors, factor_sources)?;
+            factors_from(&id_level.override_factors, factor_sources)?;
         Ok(Self::new(
             threshold_factors,
             id_level.threshold,
@@ -84,10 +84,10 @@ impl TryFrom<(&ConfirmationRoleWithFactorSourceIDs, &FactorSources)>
         let (id_level, factor_sources) = value;
 
         let threshold_factors =
-            factors_from(id_level.threshold_factors, factor_sources)?;
+            factors_from(&id_level.threshold_factors, factor_sources)?;
 
         let override_factors =
-            factors_from(id_level.override_factors, factor_sources)?;
+            factors_from(&id_level.override_factors, factor_sources)?;
         Ok(Self::new(
             threshold_factors,
             id_level.threshold,

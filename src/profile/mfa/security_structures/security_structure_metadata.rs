@@ -36,7 +36,7 @@ impl SecurityStructureMetadata {
 
     pub fn new(display_name: DisplayName) -> Self {
         Self::with_details(
-            SecurityStructureID::from(id()),
+            SecurityStructureID::from(Uuid::new_v4()),
             display_name,
             now(),
             now(),

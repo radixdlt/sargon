@@ -18,6 +18,12 @@ use crate::prelude::*;
 pub struct SecurityStructureID(pub(crate) Uuid);
 uniffi::custom_newtype!(SecurityStructureID, Uuid);
 
+impl From<Uuid> for SecurityStructureID {
+    fn from(value: Uuid) -> Self {
+        Self(value)
+    }
+}
+
 impl FromStr for SecurityStructureID {
     type Err = CommonError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {

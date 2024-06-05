@@ -37,6 +37,6 @@ impl Identifiable for SecurityStructureOfFactorInstances {
     type ID = <SecurityStructureMetadata as Identifiable>::ID;
 
     fn id(&self) -> Self::ID {
-        self.security_structure_id.clone()
+        self.security_structure_id
     }
 }

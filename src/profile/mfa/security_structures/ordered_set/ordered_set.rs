@@ -7,18 +7,23 @@ use uniffi::{
     metadata, Lift, Lower, LowerReturn, MetadataBuffer, RustBuffer,
 };
 
-#[derive(Debug, PartialEq, Eq, Clone)]
-pub struct OrderedSet<V: Debug + std::hash::Hash + PartialEq + Eq + Clone>(
-    IndexSet<V>,
-);
-impl<V: Debug + std::hash::Hash + PartialEq + Eq + Clone> From<IndexSet<V>>
+#[derive(PartialEq, Eq, Clone)]
+pub struct OrderedSet<V: std::hash::Hash + PartialEq + Eq + Clone>(IndexSet<V>);
+
+impl<V: std::hash::Hash + PartialEq + Eq + Clone> OrderedSet<V> {
+    pub fn new() -> Self {
+        Self::from(IndexSet::new())
+    }
+}
+
+impl<V: std::hash::Hash + PartialEq + Eq + Clone> From<IndexSet<V>>
     for OrderedSet<V>
 {
     fn from(value: IndexSet<V>) -> Self {
         Self(value)
     }
 }
-impl<V: Debug + std::hash::Hash + PartialEq + Eq + Clone> std::ops::Deref
+impl<V: std::hash::Hash + PartialEq + Eq + Clone> std::ops::Deref
     for OrderedSet<V>
 {
     type Target = IndexSet<V>;
@@ -27,7 +32,22 @@ impl<V: Debug + std::hash::Hash + PartialEq + Eq + Clone> std::ops::Deref
     }
 }
 
-impl<V: Debug + PartialEq + Eq + Clone + std::hash::Hash + 'static> Serialize
+impl<V: std::hash::Hash + PartialEq + Eq + Clone> Default for OrderedSet<V> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl<V: std::hash::Hash + PartialEq + Eq + Clone> std::hash::Hash
+    for OrderedSet<V>
+{
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        let vec = self.0.clone().into_iter().collect_vec();
+        vec.hash(state)
+    }
+}
+
+impl<V: PartialEq + Eq + Clone + std::hash::Hash + 'static> Serialize
     for OrderedSet<V>
 where
     V: Serialize,
@@ -41,7 +61,7 @@ where
     }
 }
 
-impl<'de, V: Debug + PartialEq + Eq + Clone + std::hash::Hash + 'static>
+impl<'de, V: PartialEq + Eq + Clone + std::hash::Hash + 'static>
     Deserialize<'de> for OrderedSet<V>
 where
     V: Deserialize<'de>,
@@ -55,7 +75,7 @@ where
     }
 }
 
-impl<V: Debug + std::hash::Hash + PartialEq + Eq + Clone> FromIterator<V>
+impl<V: std::hash::Hash + PartialEq + Eq + Clone> FromIterator<V>
     for OrderedSet<V>
 {
     fn from_iter<T: IntoIterator<Item = V>>(iter: T) -> Self {
@@ -67,7 +87,7 @@ impl<V: Debug + std::hash::Hash + PartialEq + Eq + Clone> FromIterator<V>
     }
 }
 
-impl<V: Debug + std::hash::Hash + PartialEq + Eq + Clone> IntoIterator
+impl<V: std::hash::Hash + PartialEq + Eq + Clone> IntoIterator
     for OrderedSet<V>
 {
     type Item = V;
@@ -78,7 +98,18 @@ impl<V: Debug + std::hash::Hash + PartialEq + Eq + Clone> IntoIterator
     }
 }
 
-unsafe impl<UT, V: Debug + Clone + std::hash::Hash + PartialEq + Eq + Lower<UT>>
+impl<V: std::hash::Hash + PartialEq + Eq + Clone> IntoIterator
+    for &OrderedSet<V>
+{
+    type Item = V;
+    type IntoIter = <IndexSet<V> as IntoIterator>::IntoIter;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.clone().into_iter()
+    }
+}
+
+unsafe impl<UT, V: Clone + std::hash::Hash + PartialEq + Eq + Lower<UT>>
     Lower<UT> for OrderedSet<V>
 {
     type FfiType = RustBuffer;
@@ -96,7 +127,7 @@ unsafe impl<UT, V: Debug + Clone + std::hash::Hash + PartialEq + Eq + Lower<UT>>
     }
 }
 
-unsafe impl<UT, V: Debug + Clone + std::hash::Hash + PartialEq + Eq + Lower<UT>>
+unsafe impl<UT, V: Clone + std::hash::Hash + PartialEq + Eq + Lower<UT>>
     LowerReturn<UT> for OrderedSet<V>
 {
     type ReturnType = <Self as Lower<UT>>::FfiType;
@@ -106,8 +137,8 @@ unsafe impl<UT, V: Debug + Clone + std::hash::Hash + PartialEq + Eq + Lower<UT>>
     }
 }
 
-unsafe impl<UT, V: Debug + Clone + std::hash::Hash + PartialEq + Eq + Lift<UT>>
-    Lift<UT> for OrderedSet<V>
+unsafe impl<UT, V: Clone + std::hash::Hash + PartialEq + Eq + Lift<UT>> Lift<UT>
+    for OrderedSet<V>
 {
     type FfiType = RustBuffer;
 
@@ -126,10 +157,8 @@ unsafe impl<UT, V: Debug + Clone + std::hash::Hash + PartialEq + Eq + Lift<UT>>
     }
 }
 
-impl<
-        UT,
-        V: Debug + Clone + std::hash::Hash + PartialEq + Eq + UFTypeId<UT>,
-    > UFTypeId<UT> for OrderedSet<V>
+impl<UT, V: Clone + std::hash::Hash + PartialEq + Eq + UFTypeId<UT>>
+    UFTypeId<UT> for OrderedSet<V>
 {
     const TYPE_ID_META: MetadataBuffer =
         MetadataBuffer::from_code(metadata::codes::TYPE_VEC)
