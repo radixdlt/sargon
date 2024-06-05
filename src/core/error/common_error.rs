@@ -565,9 +565,6 @@ pub enum CommonError {
 
     #[error("Invalid SecurityStructureID, bad value: '{bad_value}'")]
     InvalidSecurityStructureID { bad_value: String } = 10160,
-
-    #[error("Item already exists at index '{index_of_existing}'")]
-    ItemAlreadyExist { index_of_existing: u64 } = 10161,
 }
 
 #[uniffi::export]

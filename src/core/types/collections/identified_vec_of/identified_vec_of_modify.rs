@@ -249,7 +249,9 @@ mod tests {
         let mut sut = SUT::sample();
         assert_eq!(
             sut.try_insert_unique(User::grace()),
-            Err(CommonError::IdentifiableItemAlreadyExist { id: "6".to_owned() })
+            Err(CommonError::IdentifiableItemAlreadyExist {
+                id: "6".to_owned()
+            })
         );
     }
 

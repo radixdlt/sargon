@@ -18,10 +18,10 @@ impl Identifiable for SecurityStructureOfFactorSources {
 }
 
 fn factors_from(
-    ids: impl IntoIterator<Item = FactorSourceID>,
+    ids: &[FactorSourceID],
     from: &FactorSources,
 ) -> Result<FactorSources> {
-    ids.into_iter()
+    ids.iter()
         .map(|id| {
             from.get_id(id.clone())
                 .ok_or(CommonError::ProfileDoesNotContainFactorSourceWithID {

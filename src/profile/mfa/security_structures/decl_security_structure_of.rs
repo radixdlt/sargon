@@ -20,7 +20,15 @@ macro_rules! decl_role_with_factors {
 
                 /// Factors which are used in combination with other instances, amounting to at
                 /// least `threshold` many instances to perform some function with this role.
-                pub threshold_factors: OrderedSet<$factor>,
+                ///
+                /// # Implementation
+                /// Must allow duplicates, thus using `Vec` since at FactorSourceKind level
+                /// we might wanna use duplicates, allowing us to build a "template"
+                /// structure where a role might contain two `FactorSourceKind::TrustedContact`,
+                /// meaning an instance of this template at FactorSource level
+                /// (`SecurityStructureOfFactorSources`) will contain two different
+                /// `TrustedContactFactorSource`s.
+                pub threshold_factors: Vec<$factor>,
 
                 /// How many threshold factors that must be used to perform some function with this role.
                 pub threshold: u16,
@@ -28,7 +36,7 @@ macro_rules! decl_role_with_factors {
                 /// Overriding / Super admin / "sudo" / God / factors, **ANY**
                 /// single of these factor which can perform the function of this role,
                 /// disregarding of `threshold`.
-                pub override_factors: OrderedSet<$factor>,
+                pub override_factors: Vec<$factor>,
             }
 
             impl [< $role RoleWith $factor s >] {
@@ -142,7 +150,7 @@ macro_rules! decl_security_structure_of {
                 pub metadata: SecurityStructureMetadata,
 
                 /// The amount of time until Confirmation Role is automatically
-                /// excercised, inputted by user in Days in UI, but translate it into
+                /// exercised, inputted by user in Days in UI, but translate it into
                 /// epochs ("block time").
                 pub number_of_epochs_until_auto_confirmation: u64,
 

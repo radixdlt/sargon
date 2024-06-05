@@ -99,16 +99,3 @@ impl crate::HasSampleValues for IdentifiedVecOf<User> {
         Self::from_iter(sample_vec_other().into_iter())
     }
 }
-
-#[cfg(test)]
-impl crate::HasSampleValues for OrderedSet<User> {
-    /// Alice(0), Carol(2), Erin(4), Grace(6)
-    fn sample() -> Self {
-        Self::from_iter(sample_vec().into_iter())
-    }
-
-    /// Bob(1), David(3), Frank(5)
-    fn sample_other() -> Self {
-        Self::from_iter(sample_vec_other().into_iter())
-    }
-}

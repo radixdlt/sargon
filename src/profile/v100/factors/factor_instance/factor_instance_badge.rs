@@ -45,6 +45,7 @@ impl FactorInstanceBadge {
         }
     }
 
+    #[allow(unused)]
     /// A sample used to facilitate unit tests.
     fn sample_virtual_other() -> Self {
         Self::Virtual {
