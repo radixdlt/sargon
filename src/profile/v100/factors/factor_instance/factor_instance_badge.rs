@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-/// Either a "physical" badge (NFT) or some source for recreation of a producer
+/// Either a "physical" badge (resource) or some source for recreation of a producer
 /// of a virtual badge (signature), e.g. a HD derivation path, from which a private key
 /// is derived which produces virtual badges (signatures).
 #[derive(
@@ -20,20 +20,42 @@ pub enum FactorInstanceBadge {
         #[serde(rename = "virtualSource")]
         value: FactorInstanceBadgeVirtualSource,
     },
+    Physical {
+        value: ResourceAddress,
+    },
 }
 
 impl HasSampleValues for FactorInstanceBadge {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {
-        FactorInstanceBadge::Virtual {
+        Self::sample_virtual()
+    }
+
+    /// A sample used to facilitate unit tests.
+    fn sample_other() -> Self {
+        Self::sample_physical()
+    }
+}
+
+impl FactorInstanceBadge {
+    /// A sample used to facilitate unit tests.
+    fn sample_virtual() -> Self {
+        Self::Virtual {
             value: FactorInstanceBadgeVirtualSource::sample(),
         }
     }
 
     /// A sample used to facilitate unit tests.
-    fn sample_other() -> Self {
-        FactorInstanceBadge::Virtual {
+    fn sample_virtual_other() -> Self {
+        Self::Virtual {
             value: FactorInstanceBadgeVirtualSource::sample_other(),
+        }
+    }
+
+    /// A sample used to facilitate unit tests.
+    fn sample_physical() -> Self {
+        Self::Physical {
+            value: ResourceAddress::sample(),
         }
     }
 }
@@ -49,6 +71,12 @@ impl From<HierarchicalDeterministicPublicKey> for FactorInstanceBadge {
         Self::Virtual {
             value: value.into(),
         }
+    }
+}
+
+impl From<ResourceAddress> for FactorInstanceBadge {
+    fn from(value: ResourceAddress) -> Self {
+        Self::Physical { value }
     }
 }
 
@@ -76,8 +104,13 @@ impl Serialize for FactorInstanceBadge {
         let mut state =
             serializer.serialize_struct("FactorInstanceBadge", 2)?;
         match self {
-            FactorInstanceBadge::Virtual { value } => {
+            Self::Virtual { value } => {
                 let discriminant = "virtualSource";
+                state.serialize_field("discriminator", discriminant)?;
+                state.serialize_field(discriminant, value)?;
+            }
+            Self::Physical { value } => {
+                let discriminant = "physical";
                 state.serialize_field("discriminator", discriminant)?;
                 state.serialize_field(discriminant, value)?;
             }

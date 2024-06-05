@@ -5,14 +5,14 @@ use crate::prelude::*;
 )]
 #[serde(rename_all = "camelCase")]
 pub struct SecurityStructureMetadata {
-    pub id: Uuid,
+    pub id: SecurityStructureID,
     pub display_name: DisplayName,
     pub created_on: Timestamp,
     pub last_updated_on: Timestamp,
 }
 
 impl Identifiable for SecurityStructureMetadata {
-    type ID = Uuid;
+    type ID = SecurityStructureID;
 
     fn id(&self) -> Self::ID {
         self.id
@@ -21,7 +21,7 @@ impl Identifiable for SecurityStructureMetadata {
 
 impl SecurityStructureMetadata {
     pub fn with_details(
-        id: Uuid,
+        id: SecurityStructureID,
         display_name: DisplayName,
         created_on: Timestamp,
         last_updated_on: Timestamp,
@@ -35,13 +35,18 @@ impl SecurityStructureMetadata {
     }
 
     pub fn new(display_name: DisplayName) -> Self {
-        Self::with_details(id(), display_name, now(), now())
+        Self::with_details(
+            SecurityStructureID::from(Uuid::new_v4()),
+            display_name,
+            now(),
+            now(),
+        )
     }
 }
 impl HasSampleValues for SecurityStructureMetadata {
     fn sample() -> Self {
         Self::with_details(
-            Uuid::sample(),
+            SecurityStructureID::sample(),
             DisplayName::sample(),
             Timestamp::sample(),
             Timestamp::sample(),
@@ -49,7 +54,7 @@ impl HasSampleValues for SecurityStructureMetadata {
     }
     fn sample_other() -> Self {
         Self::with_details(
-            Uuid::sample_other(),
+            SecurityStructureID::sample_other(),
             DisplayName::sample_other(),
             Timestamp::sample_other(),
             Timestamp::sample_other(),
