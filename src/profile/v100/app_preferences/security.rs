@@ -24,7 +24,8 @@ pub struct Security {
     pub is_cloud_profile_sync_enabled: bool,
     pub is_developer_mode_enabled: bool,
     #[serde(default)]
-    pub shields: SchematicsOfSecurityShields,
+    pub security_structures_of_factor_source_ids:
+        SecurityStructuresOfFactorSourceIDs,
 }
 
 impl Security {
@@ -32,12 +33,12 @@ impl Security {
     pub fn new(
         is_cloud_profile_sync_enabled: bool,
         is_developer_mode_enabled: bool,
-        shields: SchematicsOfSecurityShields,
+        security_structures_of_factor_source_ids: SecurityStructuresOfFactorSourceIDs,
     ) -> Self {
         Self {
             is_cloud_profile_sync_enabled,
             is_developer_mode_enabled,
-            shields,
+            security_structures_of_factor_source_ids,
         }
     }
 }
@@ -45,19 +46,19 @@ impl Security {
 impl Default for Security {
     /// By default we cloud profile sync is enabled and developer mode is disabled, with an empty `structure_configuration_references` list.
     fn default() -> Self {
-        Self::new(true, false, SchematicsOfSecurityShields::new())
+        Self::new(true, false, SecurityStructuresOfFactorSourceIDs::new())
     }
 }
 
 impl HasSampleValues for Security {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {
-        Self::new(true, true, SchematicsOfSecurityShields::new())
+        Self::new(true, true, SecurityStructuresOfFactorSourceIDs::new())
     }
 
     /// A sample used to facilitate unit tests.
     fn sample_other() -> Self {
-        Self::new(false, false, SchematicsOfSecurityShields::new())
+        Self::new(false, false, SecurityStructuresOfFactorSourceIDs::new())
     }
 }
 
@@ -87,8 +88,10 @@ mod tests {
     }
 
     #[test]
-    fn default_structure_configuration_references_is_empty() {
-        assert!(Security::default().shields.is_empty());
+    fn default_security_structures_of_factor_source_ids_is_empty() {
+        assert!(Security::default()
+            .security_structures_of_factor_source_ids
+            .is_empty());
     }
 
     #[test]
@@ -99,7 +102,7 @@ mod tests {
             r#"
             {
                 "isCloudProfileSyncEnabled": true,
-                "shields": [],
+                "securityStructuresOfFactorSourceIDs": [],
                 "isDeveloperModeEnabled": true
             }
             "#,
