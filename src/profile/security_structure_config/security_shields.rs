@@ -1,18 +1,19 @@
 use crate::prelude::*;
 
 decl_identified_vec_of!(
-    /// A collection of [`SecurityShield`](`SecurityStructureConfigurationReference`s)
-    SecurityShield
+    /// A collection of [`SchematicOfSecurityShield`](`SecurityStructureConfigurationReference`s)
+    SchematicsOfSecurityShields,
+    SchematicOfSecurityShield
 );
 
-impl HasSampleValues for SecurityShields {
+impl HasSampleValues for SchematicsOfSecurityShields {
     fn sample() -> Self {
         Self::from_iter([
-            SecurityShield::sample(),
-            SecurityShield::sample_other(),
+            SchematicOfSecurityShield::sample(),
+            SchematicOfSecurityShield::sample_other(),
         ])
     }
     fn sample_other() -> Self {
-        Self::from_iter([SecurityShield::sample_other()])
+        Self::from_iter([SchematicOfSecurityShield::sample_other()])
     }
 }

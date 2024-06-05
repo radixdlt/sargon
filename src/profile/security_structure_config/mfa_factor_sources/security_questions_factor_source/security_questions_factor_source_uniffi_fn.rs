@@ -26,7 +26,7 @@ pub fn new_security_questions_factor_source_by_encrypting_mnemonic(
 
 #[uniffi::export]
 pub fn trim_security_questions_answer(answer: String) -> String {
-    let kdf = SecurityQuestions_NOT_PRODUCTION_READY_KeyExchangeKeysFromQandAsLowerTrimUtf8::default();
+    let kdf = SecurityQuestions_NOT_PRODUCTION_READY_KeyExchangeKeysFromQandAsLowerTrimUtf8;
     kdf.trim_answer(answer)
 }
 

@@ -89,7 +89,63 @@ impl BaseIsFactorSource for TrustedContactFactorSource {
         self.common = updated
     }
 }
+impl TrustedContactFactorSource {
+    fn new_sample(name: &str, email: &str, address: AccountAddress) -> Self {
+        let mut source = Self::new(
+            address,
+            TrustedContactFactorSourceContact::new(
+                EmailAddress::new(email).unwrap(),
+                DisplayName::new(name).unwrap(),
+            ),
+        );
+        source.common.last_used_on = Timestamp::sample();
+        source.common.added_on = Timestamp::sample();
+        source
+    }
 
+    pub fn sample_frank() -> Self {
+        Self::new_sample(
+            "Frank Sample",
+            "frank.sample@gmail.com",
+            AccountAddress::sample_frank(),
+        )
+    }
+    pub fn sample_grace() -> Self {
+        Self::new_sample(
+            "Grace Sample",
+            "grace.sample@gmail.com",
+            AccountAddress::sample_grace(),
+        )
+    }
+    pub fn sample_judy() -> Self {
+        Self::new_sample(
+            "Judy Sample",
+            "judy.sample@gmail.com",
+            AccountAddress::sample_judy(),
+        )
+    }
+    pub fn sample_oscar() -> Self {
+        Self::new_sample(
+            "Oscar Sample",
+            "oscar.sample@gmail.com",
+            AccountAddress::sample_oscar(),
+        )
+    }
+    pub fn sample_trudy() -> Self {
+        Self::new_sample(
+            "Trudy Sample",
+            "trudy.sample@gmail.com",
+            AccountAddress::sample_trudy(),
+        )
+    }
+    pub fn sample_radix() -> Self {
+        Self::new_sample(
+            "Radix InstaBridge",
+            "hello@instabridge.com",
+            AccountAddress::sample_radix(),
+        )
+    }
+}
 impl HasSampleValues for TrustedContactFactorSource {
     fn sample() -> Self {
         let mut source = Self::new(
@@ -100,6 +156,7 @@ impl HasSampleValues for TrustedContactFactorSource {
         source.common.added_on = Timestamp::sample();
         source
     }
+
     fn sample_other() -> Self {
         let mut source = Self::new(
             AccountAddress::sample_mainnet_other(),

@@ -15,7 +15,7 @@ impl Identifiable for SecurityStructureMetadata {
     type ID = Uuid;
 
     fn id(&self) -> Self::ID {
-        self.id.clone()
+        self.id
     }
 }
 

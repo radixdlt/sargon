@@ -222,28 +222,95 @@ impl HasSampleValues for FactorSource {
         Self::sample_ledger()
     }
 }
-
+impl FactorSources {
+    pub fn sample_values_all() -> Self {
+        Self::from_iter(FactorSource::sample_values_all())
+    }
+}
 impl FactorSource {
+    pub fn sample_values_all() -> Vec<Self> {
+        vec![
+            Self::sample_device_babylon(),
+            Self::sample_device_babylon_other(),
+            Self::sample_device_olympia(),
+            Self::sample_ledger(),
+            Self::sample_ledger_other(),
+            Self::sample_arculus(),
+            Self::sample_arculus_other(),
+            Self::sample_off_device(),
+            Self::sample_off_device_other(),
+            Self::sample_trusted_contact_frank(),
+            Self::sample_trusted_contact_grace(),
+            Self::sample_trusted_contact_judy(),
+            Self::sample_trusted_contact_oscar(),
+            Self::sample_trusted_contact_trudy(),
+            Self::sample_trusted_contact_radix(),
+            Self::sample_security_questions(),
+            Self::sample_security_questions_other(),
+        ]
+    }
     pub fn sample_device() -> Self {
         Self::sample_device_babylon()
     }
 
     pub fn sample_device_babylon() -> Self {
-        Self::Device {
-            value: DeviceFactorSource::sample_babylon(),
-        }
+        Self::from(DeviceFactorSource::sample_babylon())
     }
 
+    pub fn sample_device_babylon_other() -> Self {
+        Self::from(DeviceFactorSource::sample_babylon_other())
+    }
     pub fn sample_device_olympia() -> Self {
-        Self::Device {
-            value: DeviceFactorSource::sample_olympia(),
-        }
+        Self::from(DeviceFactorSource::sample_olympia())
     }
 
     pub fn sample_ledger() -> Self {
-        Self::Ledger {
-            value: LedgerHardwareWalletFactorSource::sample(),
-        }
+        Self::from(LedgerHardwareWalletFactorSource::sample())
+    }
+    pub fn sample_ledger_other() -> Self {
+        Self::from(LedgerHardwareWalletFactorSource::sample_other())
+    }
+
+    pub fn sample_arculus() -> Self {
+        Self::from(ArculusCardFactorSource::sample())
+    }
+    pub fn sample_arculus_other() -> Self {
+        Self::from(ArculusCardFactorSource::sample_other())
+    }
+
+    pub fn sample_off_device() -> Self {
+        Self::from(OffDeviceMnemonicFactorSource::sample())
+    }
+    pub fn sample_off_device_other() -> Self {
+        Self::from(OffDeviceMnemonicFactorSource::sample_other())
+    }
+
+    pub fn sample_trusted_contact_frank() -> Self {
+        Self::from(TrustedContactFactorSource::sample_frank())
+    }
+    pub fn sample_trusted_contact_grace() -> Self {
+        Self::from(TrustedContactFactorSource::sample_grace())
+    }
+    pub fn sample_trusted_contact_judy() -> Self {
+        Self::from(TrustedContactFactorSource::sample_judy())
+    }
+    pub fn sample_trusted_contact_oscar() -> Self {
+        Self::from(TrustedContactFactorSource::sample_oscar())
+    }
+    pub fn sample_trusted_contact_trudy() -> Self {
+        Self::from(TrustedContactFactorSource::sample_trudy())
+    }
+    pub fn sample_trusted_contact_radix() -> Self {
+        Self::from(TrustedContactFactorSource::sample_radix())
+    }
+
+    pub fn sample_security_questions() -> Self {
+        Self::from(SecurityQuestions_NOT_PRODUCTION_READY_FactorSource::sample())
+    }
+    pub fn sample_security_questions_other() -> Self {
+        Self::from(
+            SecurityQuestions_NOT_PRODUCTION_READY_FactorSource::sample_other(),
+        )
     }
 }
 
