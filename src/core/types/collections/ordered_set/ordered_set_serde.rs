@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+use super::{export_ordered_set, import_ordered_set_from};
+
 impl<V: PartialEq + Eq + Clone + std::hash::Hash + 'static> Serialize
     for OrderedSet<V>
 where
@@ -10,7 +12,9 @@ where
     where
         S: Serializer,
     {
-        self.0.serialize(serializer)
+        export_ordered_set(self)
+            .map_err(serde::ser::Error::custom)
+            .and_then(|v| serializer.collect_seq(v))
     }
 }
 
@@ -23,8 +27,8 @@ where
     fn deserialize<D: Deserializer<'de>>(
         deserializer: D,
     ) -> Result<Self, D::Error> {
-        let set = IndexSet::<V>::deserialize(deserializer)?;
-        Ok(Self::from(set))
+        let items = Vec::<V>::deserialize(deserializer)?;
+        import_ordered_set_from(items).map_err(de::Error::custom)
     }
 }
 

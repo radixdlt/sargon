@@ -18,4 +18,8 @@ impl<V: std::hash::Hash + PartialEq + Eq + Clone> OrderedSet<V> {
     pub fn new() -> Self {
         Self::from(IndexSet::new())
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
 }

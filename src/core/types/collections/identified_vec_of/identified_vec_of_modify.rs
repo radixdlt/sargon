@@ -24,7 +24,7 @@ impl<V: Debug + PartialEq + Eq + Clone + Identifiable> IdentifiedVecOf<V> {
     /// exists, if exists, an error is thrown.
     pub fn try_insert_unique(&mut self, item: V) -> Result<()> {
         if self.contains_by_id(&item) {
-            return Err(CommonError::ElementAlreadyExist {
+            return Err(CommonError::IdentifiableItemAlreadyExist {
                 id: format!("{:?}", item.id()),
             });
         }
@@ -249,7 +249,7 @@ mod tests {
         let mut sut = SUT::sample();
         assert_eq!(
             sut.try_insert_unique(User::grace()),
-            Err(CommonError::ElementAlreadyExist { id: "6".to_owned() })
+            Err(CommonError::IdentifiableItemAlreadyExist { id: "6".to_owned() })
         );
     }
 

@@ -487,7 +487,7 @@ pub enum CommonError {
     ElementDoesNotExist { id: String } = 10135,
 
     #[error("Item identified by ID {id} already exist")]
-    ElementAlreadyExist { id: String } = 10136,
+    IdentifiableItemAlreadyExist { id: String } = 10136,
 
     #[error("Invalid RadixConnectPurpose, bad value: {bad_value}")]
     InvalidRadixConnectPurpose { bad_value: String } = 10137,
@@ -565,6 +565,9 @@ pub enum CommonError {
 
     #[error("Invalid SecurityStructureID, bad value: '{bad_value}'")]
     InvalidSecurityStructureID { bad_value: String } = 10160,
+
+    #[error("Item already exists at index '{index_of_existing}'")]
+    ItemAlreadyExist { index_of_existing: u64 } = 10161,
 }
 
 #[uniffi::export]
