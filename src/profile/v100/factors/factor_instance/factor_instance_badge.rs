@@ -21,19 +21,19 @@ pub enum FactorInstanceBadge {
         value: FactorInstanceBadgeVirtualSource,
     },
     Physical {
-        value: ResourceAddress
-    }
+        value: ResourceAddress,
+    },
 }
 
 impl HasSampleValues for FactorInstanceBadge {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {
-       Self::sample_virtual()
+        Self::sample_virtual()
     }
 
     /// A sample used to facilitate unit tests.
     fn sample_other() -> Self {
-       Self::sample_physical()
+        Self::sample_physical()
     }
 }
 
@@ -55,7 +55,7 @@ impl FactorInstanceBadge {
     /// A sample used to facilitate unit tests.
     fn sample_physical() -> Self {
         Self::Physical {
-            value: ResourceAddress:sample()
+            value: ResourceAddress::sample(),
         }
     }
 }
@@ -79,7 +79,6 @@ impl From<ResourceAddress> for FactorInstanceBadge {
         Self::Physical { value }
     }
 }
-
 
 impl<'de> Deserialize<'de> for FactorInstanceBadge {
     #[cfg(not(tarpaulin_include))] // false negative
@@ -109,7 +108,7 @@ impl Serialize for FactorInstanceBadge {
                 let discriminant = "virtualSource";
                 state.serialize_field("discriminator", discriminant)?;
                 state.serialize_field(discriminant, value)?;
-            },
+            }
             Self::Physical { value } => {
                 let discriminant = "physical";
                 state.serialize_field("discriminator", discriminant)?;

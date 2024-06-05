@@ -7,28 +7,75 @@ use uniffi::{
     metadata, Lift, Lower, LowerReturn, MetadataBuffer, RustBuffer,
 };
 
-// We turn an `[Rust] IndexMap -> Array/List [FFI]``
-#[derive(Clone)]
-pub struct OrderedSet<V>(IndexSet<V>);
-impl<V> From<IndexSet<V>> for IndexSet<V> {
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub struct OrderedSet<V: Debug + std::hash::Hash + PartialEq + Eq + Clone>(
+    IndexSet<V>,
+);
+impl<V: Debug + std::hash::Hash + PartialEq + Eq + Clone> From<IndexSet<V>>
+    for OrderedSet<V>
+{
     fn from(value: IndexSet<V>) -> Self {
         Self(value)
     }
 }
-impl<V> std::ops::Deref for OrderedSet<V> {
+impl<V: Debug + std::hash::Hash + PartialEq + Eq + Clone> std::ops::Deref
+    for OrderedSet<V>
+{
     type Target = IndexSet<V>;
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-unsafe impl<UT, V: Lower<UT>> Lower<UT> for OrderedSet<V> {
+impl<V: Debug + PartialEq + Eq + Clone + std::hash::Hash + 'static> Serialize
+    for OrderedSet<V>
+where
+    V: Serialize,
+{
+    #[inline]
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.0.serialize(serializer)
+    }
+}
+
+impl<'de, V: Debug + PartialEq + Eq + Clone + std::hash::Hash + 'static>
+    Deserialize<'de> for OrderedSet<V>
+where
+    V: Deserialize<'de>,
+{
+    #[inline]
+    fn deserialize<D: Deserializer<'de>>(
+        deserializer: D,
+    ) -> Result<Self, D::Error> {
+        let set = IndexSet::<V>::deserialize(deserializer)?;
+        Ok(Self::from(set))
+    }
+}
+
+impl<V: Debug + std::hash::Hash + PartialEq + Eq + Clone> FromIterator<V>
+    for OrderedSet<V>
+{
+    fn from_iter<T: IntoIterator<Item = V>>(iter: T) -> Self {
+        let mut set = IndexSet::<V>::new();
+        for item in iter {
+            let _ = set.insert(item);
+        }
+        Self::from(set)
+    }
+}
+
+unsafe impl<UT, V: Debug + Clone + std::hash::Hash + PartialEq + Eq + Lower<UT>>
+    Lower<UT> for OrderedSet<V>
+{
     type FfiType = RustBuffer;
 
     fn write(obj: Self, buf: &mut Vec<u8>) {
         let len = i32::try_from(obj.len()).unwrap();
         buf.put_i32(len); // We limit arrays to i32::MAX items
-        for value in &obj {
+        for value in obj.0.clone().into_iter() {
             <V as Lower<UT>>::write(value, buf);
         }
     }
@@ -38,15 +85,19 @@ unsafe impl<UT, V: Lower<UT>> Lower<UT> for OrderedSet<V> {
     }
 }
 
-unsafe impl<UT, V: LowerReturn<UT>> LowerReturn<UT> for OrderedSet<V> {
-    type ReturnType = <Self as LowerReturn<UT>>::FfiType;
+unsafe impl<UT, V: Debug + Clone + std::hash::Hash + PartialEq + Eq + Lower<UT>>
+    LowerReturn<UT> for OrderedSet<V>
+{
+    type ReturnType = <Self as Lower<UT>>::FfiType;
 
     fn lower_return(obj: Self) -> uniffi::Result<Self::ReturnType, RustBuffer> {
         Ok(<Self as Lower<UT>>::lower(obj))
     }
 }
 
-unsafe impl<UT, V: Lift<UT>> Lift<UT> for OrderedSet<V> {
+unsafe impl<UT, V: Debug + Clone + std::hash::Hash + PartialEq + Eq + Lift<UT>>
+    Lift<UT> for OrderedSet<V>
+{
     type FfiType = RustBuffer;
 
     fn try_read(buf: &mut &[u8]) -> uniffi::Result<Self> {
@@ -56,8 +107,7 @@ unsafe impl<UT, V: Lift<UT>> Lift<UT> for OrderedSet<V> {
         for _ in 0..len {
             vec.push(<V as Lift<UT>>::try_read(buf)?)
         }
-        // import_identified_vec_of_from(vec).map_err(|e| e.into())
-        uniffi::Result::Ok(Self::from(IndexSet::from_iter(vec)))
+        uniffi::Result::Ok(Self::from(IndexSet::<V>::from_iter(vec)))
     }
 
     fn try_lift(buf: RustBuffer) -> uniffi::Result<Self> {
@@ -65,7 +115,11 @@ unsafe impl<UT, V: Lift<UT>> Lift<UT> for OrderedSet<V> {
     }
 }
 
-impl<UT, V: UFTypeId<UT>> UFTypeId<UT> for IndexSet<V> {
+impl<
+        UT,
+        V: Debug + Clone + std::hash::Hash + PartialEq + Eq + UFTypeId<UT>,
+    > UFTypeId<UT> for OrderedSet<V>
+{
     const TYPE_ID_META: MetadataBuffer =
         MetadataBuffer::from_code(metadata::codes::TYPE_VEC)
             .concat(V::TYPE_ID_META);
