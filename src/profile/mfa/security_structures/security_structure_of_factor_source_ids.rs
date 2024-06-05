@@ -25,9 +25,7 @@ impl From<PrimaryRoleWithFactorSources> for PrimaryRoleWithFactorSourceIDs {
     }
 }
 
-impl From<RecoveryRoleWithFactorSources>
-    for SchematicOfSecurityShieldRecoveryRole
-{
+impl From<RecoveryRoleWithFactorSources> for RecoveryRoleWithFactorSourceIDs {
     fn from(value: RecoveryRoleWithFactorSources) -> Self {
         Self::new(
             value.threshold_factors.iter().map(|x| x.factor_source_id()),
@@ -70,12 +68,12 @@ impl From<SecurityStructureOfFactorSources>
     }
 }
 
-impl HasSampleValues for SchematicOfSecurityShield {
+impl HasSampleValues for SecurityStructureOfFactorSourceIDs {
     fn sample() -> Self {
-        SecurityShield::sample().into()
+        SecurityStructureOfFactorSources::sample().into()
     }
     fn sample_other() -> Self {
-        SecurityShield::sample_other().into()
+        SecurityStructureOfFactorSources::sample_other().into()
     }
 }
 
@@ -84,7 +82,7 @@ mod test_schematic_of_security_shield {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = SchematicOfSecurityShield;
+    type SUT = SecurityStructureOfFactorSourceIDs;
 
     #[test]
     fn equality() {

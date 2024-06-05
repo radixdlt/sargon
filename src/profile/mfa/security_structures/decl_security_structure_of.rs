@@ -20,7 +20,7 @@ macro_rules! decl_role_with_factors {
 
                 /// Factors which are used in combination with other instances, amounting to at
                 /// least `threshold` many instances to perform some function with this role.
-                pub threshold_factors: IdentifiedVecOf<$factor>,
+                pub threshold_factors: IndexSet<$factor>,
 
                 /// How many threshold factors that must be used to perform some function with this role.
                 pub threshold: u16,
@@ -28,7 +28,7 @@ macro_rules! decl_role_with_factors {
                 /// Overriding / Super admin / "sudo" / God / factors, **ANY**
                 /// single of these factor which can perform the function of this role,
                 /// disregarding of `threshold`.
-                pub override_factors: IdentifiedVecOf<$factor>,
+                pub override_factors: IndexSet<$factor>,
             }
 
             impl [< $role RoleWith $factor s >] {
@@ -64,13 +64,13 @@ macro_rules! decl_matrix_of_factors {
             decl_role_with_factors!(
                 /// PrimaryRole is used for Signing Transactions.
                 Primary,
-                $factor,
+                $factor
             );
 
             decl_role_with_factors!(
                 /// RecoveryRole is used to recover lost access to an entity.
                 Recovery,
-                $factor,
+                $factor
             );
 
             decl_role_with_factors!(
