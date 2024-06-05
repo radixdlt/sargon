@@ -19,6 +19,15 @@ impl NetworkRequest {
         }
     }
 
+    pub fn new_get(url: Url) -> Self {
+        Self {
+            url,
+            method: NetworkMethod::Get,
+            headers: HashMap::new(),
+            body: BagOfBytes::new(),
+        }
+    }
+
     pub fn with_headers(mut self, headers: HashMap<String, String>) -> Self {
         self.headers.extend(headers);
         self
