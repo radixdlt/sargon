@@ -73,7 +73,7 @@ use crypto::keys::x25519::SecretKey as X25519PrivateKey;
 /// Where `multi_party_ecdh` is a function taking `Vec<X25519PrivateKey>` as input and
 /// returning a `Key<Aes256Gcm>` by doing key exchange between all keys, like so:
 ///
-/// ```no_run
+/// ```ignore
 /// fn key_exchange_between_more_than_two_keys(
 ///     &self,
 ///     between: Vec<&X25519PrivateKey>,

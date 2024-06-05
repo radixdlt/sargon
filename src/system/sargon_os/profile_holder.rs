@@ -47,6 +47,16 @@ impl ProfileHolder {
         self.access_profile_with(|p| p.accounts_on_current_network())
     }
 
+    /// Returns all the SecurityStructuresOfFactorSources,
+    /// by trying to map FactorSourceID level -> FactorSource Level
+    pub fn security_structures_of_factor_source_ids(
+        &self,
+    ) -> Result<SecurityStructuresOfFactorSources> {
+        self.access_profile_with(|p| {
+            p.security_structures_of_factor_source_ids()
+        })
+    }
+
     /// Returns the non-hidden accounts on the current network as `AccountForDisplay`
     pub fn accounts_for_display_on_current_network(
         &self,

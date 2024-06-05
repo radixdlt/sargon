@@ -72,7 +72,7 @@ impl SecurityQuestions_NOT_PRODUCTION_READY_KeyExchangeKeysFromQandAsLowerTrimUt
 
 impl SecurityQuestions_NOT_PRODUCTION_READY_KeyExchangeKeysFromQandAsLowerTrimUtf8 {
 
-    /// ```no_run
+    /// ```ignore
     /// let mut attempt 0;
     /// let FORBIDDEN = whitespace.union(delimiters);
     /// let ikm = answer.remove(FORBIDDEN).lowercase();
