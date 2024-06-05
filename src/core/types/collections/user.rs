@@ -75,20 +75,40 @@ impl User {
     }
 }
 
+/// Alice(0), Carol(2), Erin(4), Grace(6)
+#[cfg(test)]
+fn sample_vec() -> Vec<User> {
+    vec![User::alice(), User::carol(), User::erin(), User::grace()]
+}
+
+/// Bob(1), David(3), Frank(5)
+#[cfg(test)]
+fn sample_vec_other() -> Vec<User> {
+    vec![User::bob(), User::david(), User::frank()]
+}
+
 #[cfg(test)]
 impl crate::HasSampleValues for IdentifiedVecOf<User> {
     /// Alice(0), Carol(2), Erin(4), Grace(6)
     fn sample() -> Self {
-        Self::from_iter([
-            User::alice(),
-            User::carol(),
-            User::erin(),
-            User::grace(),
-        ])
+        Self::from_iter(sample_vec().into_iter())
     }
 
     /// Bob(1), David(3), Frank(5)
     fn sample_other() -> Self {
-        Self::from_iter([User::bob(), User::david(), User::frank()])
+        Self::from_iter(sample_vec_other().into_iter())
+    }
+}
+
+#[cfg(test)]
+impl crate::HasSampleValues for OrderedSet<User> {
+    /// Alice(0), Carol(2), Erin(4), Grace(6)
+    fn sample() -> Self {
+        Self::from_iter(sample_vec().into_iter())
+    }
+
+    /// Bob(1), David(3), Frank(5)
+    fn sample_other() -> Self {
+        Self::from_iter(sample_vec_other().into_iter())
     }
 }

@@ -8,12 +8,6 @@ mod identified_vec_of_serde;
 mod identified_vec_of_uniffi_converter;
 mod identified_vec_of_validation_import_export;
 
-#[cfg(test)]
-mod user;
-
-#[cfg(test)]
-use user::*;
-
 pub use identifiable::*;
 pub use identified_vec_of::*;
 pub use identified_vec_of_display_debug::*;

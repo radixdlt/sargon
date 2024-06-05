@@ -1,11 +1,7 @@
-use std::any::TypeId;
-
 use crate::prelude::*;
 
-use super::{export_identified_vec_of, import_identified_vec_of_from};
-
-impl<V: Debug + PartialEq + Eq + Clone + Identifiable + 'static> Serialize
-    for IdentifiedVecOf<V>
+impl<V: PartialEq + Eq + Clone + std::hash::Hash + 'static> Serialize
+    for OrderedSet<V>
 where
     V: Serialize,
 {
@@ -14,14 +10,12 @@ where
     where
         S: Serializer,
     {
-        export_identified_vec_of(self)
-            .map_err(serde::ser::Error::custom)
-            .and_then(|v| serializer.collect_seq(v))
+        self.0.serialize(serializer)
     }
 }
 
-impl<'de, V: Debug + PartialEq + Eq + Clone + Identifiable + 'static>
-    Deserialize<'de> for IdentifiedVecOf<V>
+impl<'de, V: PartialEq + Eq + Clone + std::hash::Hash + 'static>
+    Deserialize<'de> for OrderedSet<V>
 where
     V: Deserialize<'de>,
 {
@@ -29,19 +23,19 @@ where
     fn deserialize<D: Deserializer<'de>>(
         deserializer: D,
     ) -> Result<Self, D::Error> {
-        let items = Vec::<V>::deserialize(deserializer)?;
-        import_identified_vec_of_from(items).map_err(de::Error::custom)
+        let set = IndexSet::<V>::deserialize(deserializer)?;
+        Ok(Self::from(set))
     }
 }
 
 #[cfg(test)]
 mod tests {
 
-    use super::super::User;
+    use super::super::super::User;
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = IdentifiedVecOf<User>;
+    type SUT = OrderedSet<User>;
 
     #[test]
     fn json_roundtrip_sample() {

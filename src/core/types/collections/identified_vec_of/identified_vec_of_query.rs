@@ -65,7 +65,7 @@ impl<V: Debug + PartialEq + Eq + Clone + Identifiable> IdentifiedVecOf<V> {
 #[cfg(test)]
 mod tests {
 
-    use super::super::User;
+    use super::super::super::User;
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]

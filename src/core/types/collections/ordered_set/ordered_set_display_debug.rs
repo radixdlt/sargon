@@ -3,9 +3,9 @@ use crate::prelude::*;
 // ===============
 // where V: Display
 // ===============
-impl<V> Display for IdentifiedVecOf<V>
+impl<V> Display for OrderedSet<V>
 where
-    V: Debug + PartialEq + Eq + Clone + Identifiable + Display,
+    V: PartialEq + Eq + Clone + std::hash::Hash + Display,
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.description())?;
@@ -13,9 +13,9 @@ where
     }
 }
 
-impl<V> IdentifiedVecOf<V>
+impl<V> OrderedSet<V>
 where
-    V: Debug + PartialEq + Eq + Clone + Identifiable + Display,
+    V: PartialEq + Eq + Clone + std::hash::Hash + Display,
 {
     fn description(&self) -> String {
         [
@@ -33,9 +33,9 @@ where
 // ===============
 // where V: Debug
 // ===============
-impl<V> Debug for IdentifiedVecOf<V>
+impl<V> Debug for OrderedSet<V>
 where
-    V: Debug + PartialEq + Eq + Clone + Identifiable,
+    V: PartialEq + Eq + Clone + std::hash::Hash + Debug,
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.debug_description())?;
@@ -43,9 +43,9 @@ where
     }
 }
 
-impl<V> IdentifiedVecOf<V>
+impl<V> OrderedSet<V>
 where
-    V: Debug + PartialEq + Eq + Clone + Identifiable,
+    V: PartialEq + Eq + Clone + std::hash::Hash + Debug,
 {
     fn debug_description(&self) -> String {
         [
@@ -63,11 +63,11 @@ where
 #[cfg(test)]
 mod tests {
 
-    use super::super::User;
+    use super::super::super::User;
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = IdentifiedVecOf<User>;
+    type SUT = OrderedSet<User>;
 
     #[test]
     fn display() {

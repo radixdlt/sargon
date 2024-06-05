@@ -1,5 +1,4 @@
 mod decl_security_structure_of;
-mod ordered_set;
 mod security_structure_id;
 mod security_structure_metadata;
 mod security_structure_of_factor_instances;
@@ -9,7 +8,6 @@ mod security_structures_of_factor_source_ids;
 mod security_structures_of_factor_sources;
 
 pub use decl_security_structure_of::*;
-pub use ordered_set::*;
 pub use security_structure_id::*;
 pub use security_structure_metadata::*;
 pub use security_structure_of_factor_instances::*;
