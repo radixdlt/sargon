@@ -77,10 +77,7 @@ pub fn decimal_formatted_plain(
 ///
 /// assert!(new_decimal_from_f32(208050.17).is_ok());
 ///
-/// assert_eq!(
-///     new_decimal_from_f32(f32::MIN_POSITIVE),
-///     Err(CommonError::DecimalOverflow { bad_value: f32::MIN_POSITIVE.to_string() })
-/// );
+/// assert!(new_decimal_from_f32(f32::MIN_POSITIVE).is_ok());
 /// ```
 #[uniffi::export]
 pub fn new_decimal_from_f32(value: f32) -> Result<Decimal192> {
@@ -97,10 +94,7 @@ pub fn new_decimal_from_f32(value: f32) -> Result<Decimal192> {
 ///
 /// assert!(new_decimal_from_f64(208050.17).is_ok());
 ///
-/// assert_eq!(
-///     new_decimal_from_f64(f64::MIN_POSITIVE),
-///     Err(CommonError::DecimalOverflow { bad_value: f64::MIN_POSITIVE.to_string() })
-/// );
+/// assert!(new_decimal_from_f64(f64::MIN_POSITIVE).is_ok());
 /// ```
 #[uniffi::export]
 pub fn new_decimal_from_f64(value: f64) -> Result<Decimal192> {

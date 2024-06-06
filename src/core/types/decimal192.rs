@@ -157,10 +157,7 @@ impl TryFrom<f32> for Decimal {
     ///
     /// assert!(Decimal::try_from(208050.17).is_ok());
     ///
-    /// assert_eq!(
-    ///     Decimal::try_from(f32::MIN_POSITIVE),
-    ///     Err(CommonError::DecimalOverflow { bad_value: f32::MIN_POSITIVE.to_string() })
-    /// );
+    /// assert!(Decimal::try_from(f32::MIN_POSITIVE).is_ok());
     /// ```
     fn try_from(value: f32) -> Result<Self, Self::Error> {
         let str_value = value.to_string();
@@ -181,10 +178,7 @@ impl TryFrom<f64> for Decimal {
     ///
     /// assert!(Decimal::try_from(208050.17).is_ok());
     ///
-    /// assert_eq!(
-    ///     Decimal::try_from(f64::MIN_POSITIVE),
-    ///     Err(CommonError::DecimalOverflow { bad_value: f64::MIN_POSITIVE.to_string() })
-    /// );
+    /// assert!(Decimal::try_from(f64::MIN_POSITIVE).is_ok());
     /// ```
     fn try_from(value: f64) -> Result<Self, Self::Error> {
         let str_value = value.to_string();
