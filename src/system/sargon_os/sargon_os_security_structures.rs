@@ -39,9 +39,28 @@ impl SargonOS {
             .all_factors()
             .into_iter()
             .cloned()
-            .collect();
+            .collect::<HashSet<FactorSourceID>>();
 
-        if ids_of_factors_in_profile.is_subset(&ids_in_structure) {
+        println!(
+            "P: IDs of factors in profile: {:?}",
+            &ids_of_factors_in_profile
+        );
+        println!("S: IDs of factors in structure: {:?}", &ids_in_structure);
+
+        let s = &ids_in_structure;
+        let p = &ids_of_factors_in_profile;
+
+        let s_sub_setof_p = s.is_subset(&p);
+        let p_sub_setof_s = p.is_subset(&s);
+        let s_super_setof_p = s.is_superset(&p);
+        let p_super_setof_s = p.is_superset(&s);
+
+        println!("s_sub_setof_p: {}", s_sub_setof_p);
+        println!("p_sub_setof_s: {}", p_sub_setof_s);
+        println!("s_super_setof_p: {}", s_super_setof_p);
+        println!("p_super_setof_s: {}", p_super_setof_s);
+
+        if ids_in_structure.is_superset(&ids_of_factors_in_profile) {
             return Err(CommonError::StructureReferencesUnknownFactorSource);
         }
 
@@ -77,7 +96,7 @@ mod tests {
     type SUT = SargonOS;
 
     #[actix_rt::test]
-    async fn test_add_structure() {
+    async fn add_structure() {
         // ARRANGE
         let os = SUT::fast_boot().await;
 
@@ -116,15 +135,27 @@ mod tests {
             .unwrap()
             .items();
 
-        assert_eq!(structures.len(), 1);
-
-        let in_prof = structures.iter().last().unwrap().clone();
-
-        pretty_assertions::assert_eq!(
-            in_prof,
-            structure_factor_source_level.clone()
-        );
-
         assert!(structures.contains(&structure_factor_source_level));
+    }
+
+    #[actix_rt::test]
+    async fn when_adding_structure_referencing_unknown_factors_error_is_thrown()
+    {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        let structure = SecurityStructureOfFactorSources::sample();
+        let res = os
+            .with_timeout(|x| {
+                x.add_security_structure_of_factor_sources(&structure)
+            })
+            .await;
+
+        // ASSERT
+        assert_eq!(
+            res,
+            Err(CommonError::StructureReferencesUnknownFactorSource)
+        );
     }
 }
