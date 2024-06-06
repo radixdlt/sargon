@@ -6,7 +6,7 @@ use crate::prelude::*;
 pub struct DappDefinition {
     /// Address of the dapp.
     #[serde(rename = "dAppDefinitionAddress")]
-    pub dapp_definition_address: AccountAddress,
+    pub dapp_definition_address: DappDefinitionAddress,
 }
 
 impl DappDefinition {

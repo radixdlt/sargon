@@ -85,9 +85,9 @@ impl RadixConnectMobile {
         // 4. Create a new session
         let session = Session::new(
             request.session_id,
-            SessionOrigin::WebDapp(request.origin),
+            SessionOrigin::WebDapp(request.origin.clone()),
             encryption_key,
-            callback_path,
+            callback_path.clone(),
         );
 
         {
@@ -99,8 +99,7 @@ impl RadixConnectMobile {
                 .unwrap();
         }
 
-        // 5. TODO: use the actual dapp callback path
-        Ok(Url::from_str("https://example.com").unwrap())
+        Ok(request.origin.join(&callback_path.0).unwrap())
     }
 
     #[uniffi::method]

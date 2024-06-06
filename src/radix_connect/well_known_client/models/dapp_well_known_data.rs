@@ -3,7 +3,7 @@ use crate::prelude::*;
 /// Struct that represents content of well known file
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Eq)]
 #[serde(rename_all = "camelCase")]
-pub struct DappDefinitions {
+pub struct DappWellKnownData {
     /// List of dapp definitions
     #[serde(rename = "dApps")]
     pub dapp_definitions: Vec<DappDefinition>,
@@ -12,7 +12,7 @@ pub struct DappDefinitions {
     pub callback_path: Option<RCMCallbackPath>,
 }
 
-impl DappDefinitions {
+impl DappWellKnownData {
     pub fn new(
         dapp_definitions: impl IntoIterator<Item = DappDefinition>,
         callback_path: impl Into<Option<RCMCallbackPath>>,
@@ -24,7 +24,7 @@ impl DappDefinitions {
     }
 }
 
-impl HasSampleValues for DappDefinitions {
+impl HasSampleValues for DappWellKnownData {
     fn sample() -> Self {
         Self::new(
             vec![DappDefinition::sample()],
@@ -42,7 +42,7 @@ mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = DappDefinitions;
+    type SUT = DappWellKnownData;
 
     #[test]
     fn equality() {

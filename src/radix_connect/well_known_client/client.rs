@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-const SUFFIX_WELL_KNOWN_FILE: &str = ".well-known/dapp.json";
+const SUFFIX_WELL_KNOWN_FILE: &str = ".well-known/radix.json";
 
 /// The Well Known Client .
 /// It will be used to fetch the well-known file for a given origin.
@@ -33,7 +33,7 @@ impl WellKnownClient {
     pub async fn get_well_known_file(
         &self,
         origin: Url,
-    ) -> Result<DappDefinitions> {
+    ) -> Result<DappWellKnownData> {
         let network_request = NetworkRequest::get_well_known(origin);
         self.http_client
             .execute_request_with_decoding(network_request)
@@ -61,7 +61,7 @@ mod tests {
 
     #[test]
     fn test_suffix_is_correct() {
-        assert_eq!(SUFFIX_WELL_KNOWN_FILE, ".well-known/dapp.json")
+        assert_eq!(SUFFIX_WELL_KNOWN_FILE, ".well-known/radix.json")
     }
 
     #[test]

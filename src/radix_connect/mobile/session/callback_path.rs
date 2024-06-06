@@ -8,9 +8,10 @@ use crate::prelude::*;
     Debug,
     derive_more::FromStr,
     derive_more::Display,
-    DeserializeFromStr,
-    SerializeDisplay,
+    Serialize,
+    Deserialize,
 )]
+#[serde(transparent)]
 pub struct RCMCallbackPath(pub(crate) String);
 
 impl RCMCallbackPath {
@@ -19,15 +20,15 @@ impl RCMCallbackPath {
     }
 }
 
-impl From<String> for RCMCallbackPath {
-    fn from(value: String) -> Self {
-        Self(value)
+impl From<&str> for RCMCallbackPath {
+    fn from(value: &str) -> Self {
+        Self::new(value)
     }
 }
 
 impl Default for RCMCallbackPath {
     fn default() -> Self {
-        Self::new("default_callback_path")
+        Self::new("connect")
     }
 }
 
@@ -61,16 +62,24 @@ mod tests {
 
     #[test]
     fn from_string() {
-        let value = "from_string".to_owned();
-        let callback_path = RCMCallbackPath::from(value.clone());
-        assert_eq!(callback_path, RCMCallbackPath(value));
+        let value = "from_string";
+        let callback_path = RCMCallbackPath::from(value);
+        assert_eq!(callback_path, RCMCallbackPath(value.to_owned()));
     }
 
     #[test]
     fn test_default() {
         assert_eq!(
             RCMCallbackPath::default(),
-            RCMCallbackPath("default_callback_path".to_owned())
+            RCMCallbackPath("connect".to_owned())
         );
+    }
+
+    #[test]
+    fn json_roundtrip() {
+        let sut: SUT = "/connect".into();
+        assert_json_value_eq_after_roundtrip(&sut, json!("/connect"));
+        assert_json_roundtrip(&sut);
+        assert_json_value_ne_after_roundtrip(&sut, json!("foobar"));
     }
 }
