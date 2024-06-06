@@ -239,27 +239,55 @@ impl HasSampleValues for ConfirmationRoleWithFactorSources {
     }
 }
 
-impl HasSampleValues for SecurityStructureOfFactorSources {
+impl HasSampleValues for MatrixOfFactorSources {
     fn sample() -> Self {
         Self::new(
-            SecurityStructureMetadata::sample(),
-            4096, // 14.2 days
-            MatrixOfFactorSources::new(
-                PrimaryRoleWithFactorSources::sample(),
-                RecoveryRoleWithFactorSources::sample(),
-                ConfirmationRoleWithFactorSources::sample(),
-            ),
+            PrimaryRoleWithFactorSources::sample(),
+            RecoveryRoleWithFactorSources::sample(),
+            ConfirmationRoleWithFactorSources::sample(),
         )
     }
     fn sample_other() -> Self {
         Self::new(
+            PrimaryRoleWithFactorSources::sample_other(),
+            RecoveryRoleWithFactorSources::sample_other(),
+            ConfirmationRoleWithFactorSources::sample_other(),
+        )
+    }
+}
+
+#[cfg(test)]
+mod matrix_tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = MatrixOfFactorSources;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+}
+
+impl HasSampleValues for SecurityStructureOfFactorSources {
+    fn sample() -> Self {
+        Self::new_with_days(
+            SecurityStructureMetadata::sample(),
+            14,
+            MatrixOfFactorSources::sample(),
+        )
+    }
+    fn sample_other() -> Self {
+        Self::new_with_days(
             SecurityStructureMetadata::sample_other(),
-            8192, // 28.4 days
-            MatrixOfFactorSources::new(
-                PrimaryRoleWithFactorSources::sample_other(),
-                RecoveryRoleWithFactorSources::sample_other(),
-                ConfirmationRoleWithFactorSources::sample_other(),
-            ),
+            28,
+            MatrixOfFactorSources::sample_other(),
         )
     }
 }

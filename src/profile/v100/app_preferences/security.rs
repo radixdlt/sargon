@@ -134,7 +134,7 @@ mod tests {
                             "createdOn": "2023-09-11T16:05:56.000Z",
                             "lastUpdatedOn": "2023-09-11T16:05:56.000Z"
                         },
-                        "numberOfEpochsUntilAutoConfirmation": 4096,
+                        "numberOfEpochsUntilAutoConfirmation": 4032,
                         "matrixOfFactors": {
                             "primaryRole": {
                                 "thresholdFactors": [
@@ -235,7 +235,7 @@ mod tests {
                             "createdOn": "2023-12-24T17:13:56.123Z",
                             "lastUpdatedOn": "2023-12-24T17:13:56.123Z"
                         },
-                        "numberOfEpochsUntilAutoConfirmation": 8192,
+                        "numberOfEpochsUntilAutoConfirmation": 8064,
                         "matrixOfFactors": {
                             "primaryRole": {
                                 "thresholdFactors": [
