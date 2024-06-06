@@ -41,26 +41,13 @@ impl SargonOS {
             .cloned()
             .collect::<HashSet<FactorSourceID>>();
 
-        println!(
-            "P: IDs of factors in profile: {:?}",
-            &ids_of_factors_in_profile
-        );
-        println!("S: IDs of factors in structure: {:?}", &ids_in_structure);
+        let factors_only_in_structure =
+            ids_in_structure.difference(&ids_of_factors_in_profile);
+        // If `structure` references factors by ID which are not present in Profile
+        let has_unknown_factors =
+            !factors_only_in_structure.collect_vec().is_empty();
 
-        let s = &ids_in_structure;
-        let p = &ids_of_factors_in_profile;
-
-        let s_sub_setof_p = s.is_subset(&p);
-        let p_sub_setof_s = p.is_subset(&s);
-        let s_super_setof_p = s.is_superset(&p);
-        let p_super_setof_s = p.is_superset(&s);
-
-        println!("s_sub_setof_p: {}", s_sub_setof_p);
-        println!("p_sub_setof_s: {}", p_sub_setof_s);
-        println!("s_super_setof_p: {}", s_super_setof_p);
-        println!("p_super_setof_s: {}", p_super_setof_s);
-
-        if ids_in_structure.is_superset(&ids_of_factors_in_profile) {
+        if has_unknown_factors {
             return Err(CommonError::StructureReferencesUnknownFactorSource);
         }
 
