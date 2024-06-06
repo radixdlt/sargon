@@ -1,4 +1,5 @@
 mod decl_security_structure_of;
+mod matrix_of_factor_sources_uniffi_fn;
 mod security_structure_id;
 mod security_structure_metadata;
 mod security_structure_metadata_uniffi_fn;
@@ -11,6 +12,7 @@ mod security_structures_of_factor_source_ids_uniffi_fn;
 mod security_structures_of_factor_sources;
 
 pub use decl_security_structure_of::*;
+pub use matrix_of_factor_sources_uniffi_fn::*;
 pub use security_structure_id::*;
 pub use security_structure_metadata::*;
 pub use security_structure_metadata_uniffi_fn::*;

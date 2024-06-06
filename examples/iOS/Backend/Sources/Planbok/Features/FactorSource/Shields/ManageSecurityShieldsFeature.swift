@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by Alexander Cyon on 2024-06-03.
 //
@@ -11,57 +11,64 @@ import ComposableArchitecture
 
 @Reducer
 public struct ManageSecurityShieldsFeature {
-	
-	@ObservableState
-	public struct State {
-		@SharedReader(.shields) var shields
-	}
-	
-	public enum Action: ViewAction {
-		public enum ViewAction {
-			case addSampleShieldButtonTapped
-			case addSampleOtherShieldButtonTapped
-		}
-		case view(ViewAction)
-	}
-	
-	public var body: some ReducerOf<Self> {
-		Reduce { state, action in
-			switch action {
-			case .view(.addSampleShieldButtonTapped):
-				return .none
-			case .view(.addSampleOtherShieldButtonTapped):
-				return .none
-			}
-		}
-	}
+    
+    @ObservableState
+    public struct State {
+        @SharedReader(.shields) var shields
+    }
+    
+    public enum Action: ViewAction {
+        public enum InternalAction {
+            case saveShield(Shield)
+        }
+        public enum ViewAction {
+            case addSampleShieldButtonTapped
+            case addSampleOtherShieldButtonTapped
+        }
+        case view(ViewAction)
+        case `internal`(InternalAction)
+    }
+    
+    public var body: some ReducerOf<Self> {
+        Reduce { state, action in
+            switch action {
+            case .view(.addSampleShieldButtonTapped):
+                return .none
+            case .view(.addSampleOtherShieldButtonTapped):
+                return .none
+                
+            case let .internal(.saveShield(shield)):
+                return .none
+            }
+        }
+    }
 }
 
 
 extension ManageSecurityShieldsFeature {
-	
-	public typealias HostingFeature = ManageSecurityShieldsFeature
-	
-	@ViewAction(for: HostingFeature.self)
-	public struct View: SwiftUI.View {
-		public let store: StoreOf<HostingFeature>
-		
-		public init(store: StoreOf<HostingFeature>) {
-			self.store = store
-		}
-		
-		public var body: some SwiftUI.View {
-			VStack {
-				ForEach(store.shields) { shield in
-					Text("Shield id: \(shield.id)")
-				}
-				Button("Add Sample Shield") {
-					send(.addSampleShieldButtonTapped)
-				}
-				Button("Add Sample Other Shield") {
-					send(.addSampleShieldButtonTapped)
-				}
-			}
-		}
-	}
+    
+    public typealias HostingFeature = ManageSecurityShieldsFeature
+    
+    @ViewAction(for: HostingFeature.self)
+    public struct View: SwiftUI.View {
+        public let store: StoreOf<HostingFeature>
+        
+        public init(store: StoreOf<HostingFeature>) {
+            self.store = store
+        }
+        
+        public var body: some SwiftUI.View {
+            VStack {
+                ForEach(store.shields) { shield in
+                    Text("Shield id: \(shield.id)")
+                }
+                Button("Add Sample Shield") {
+                    send(.addSampleShieldButtonTapped)
+                }
+                Button("Add Sample Other Shield") {
+                    send(.addSampleShieldButtonTapped)
+                }
+            }
+        }
+    }
 }

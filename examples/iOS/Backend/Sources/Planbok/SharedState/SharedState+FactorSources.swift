@@ -49,19 +49,18 @@ extension PersistenceKeyDefault<SargonKey<FactorSources>> {
 
 extension PersistenceReaderKey where Self == PersistenceKeyDefault<SargonKey<Shields>> {
 	public static var shields: Self {
-//		Self.sharedShields
-		fatalError()
+		Self.sharedShields
 	}
 }
-//extension PersistenceKeyDefault<SargonKey<Shields>> {
-//	public static let sharedShields = Self(
-////		SargonKey(
-////			accessing: \.shields,
-////			fetchIf: \.affectsShields
-////		),
-////		[]
-//	)
-//}
+extension PersistenceKeyDefault<SargonKey<Shields>> {
+	public static let sharedShields = Self(
+		SargonKey(
+			accessing: \.shields,
+			fetchIf: \.affectsShields
+		),
+		[]
+	)
+}
 
 extension SargonOS {
     
