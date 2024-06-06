@@ -145,4 +145,67 @@ mod tests {
             Err(CommonError::StructureReferencesUnknownFactorSource)
         );
     }
+
+    #[actix_rt::test]
+    async fn add_when_failed_to_add_structure_no_security_structure_related_event_is_emitted(
+    ) {
+        // ARRANGE (and ACT)
+        let event_bus_driver = RustEventBusDriver::new();
+        let drivers = Drivers::with_event_bus(event_bus_driver.clone());
+        let bios = Bios::new(drivers);
+
+        let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
+            .await
+            .unwrap()
+            .unwrap();
+
+        // ACT
+        let structure = SecurityStructureOfFactorSources::sample();
+        let res = os
+            .with_timeout(|x| {
+                x.add_security_structure_of_factor_sources(&structure)
+            })
+            .await;
+
+        // ASSERT
+        assert!(res.is_err());
+        assert!(!event_bus_driver
+            .recorded()
+            .iter()
+            .any(|e| e.event.kind() == EventKind::SecurityStructureAdded));
+    }
+
+    #[actix_rt::test]
+    async fn add_structure_emits_event() {
+        // ARRANGE
+        let event_bus_driver = RustEventBusDriver::new();
+        let drivers = Drivers::with_event_bus(event_bus_driver.clone());
+        let bios = Bios::new(drivers);
+
+        let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
+            .await
+            .unwrap()
+            .unwrap();
+
+        for fs in FactorSources::sample_values_all().into_iter() {
+            os.add_factor_source(fs).await.unwrap();
+        }
+
+        // ACT
+        let structure = SecurityStructureOfFactorSources::sample();
+        let id = structure.metadata.id;
+        let inserted = os
+            .with_timeout(|x| {
+                x.add_security_structure_of_factor_sources(&structure)
+            })
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert!(inserted);
+        assert!(event_bus_driver.recorded().iter().any(|e| e.event
+            == Event::ProfileModified {
+                change: EventProfileModified::SecurityStructureAdded { id }
+            }));
+    }
 }
