@@ -93,16 +93,8 @@ impl Decimal192 {
     fn from_str_by_truncating(s: impl AsRef<str>) -> Result<Self> {
         let str_value = s.as_ref();
         let parts: Vec<&str> = str_value.split('.').collect();
-        let processed_s = if parts.len() == 2 {
-            let fractional_part = parts[1];
-            if fractional_part.len() > 18 {
-                format!("{}.{}", parts[0], &fractional_part[..18])
-            } else {
-                str_value.to_string()
-            }
-        } else {
-            str_value.to_string()
-        };
+        let fractional_part = parts[1];
+        let processed_s = format!("{}.{}", parts[0], &fractional_part[..18]);
 
         processed_s
             .parse::<ScryptoDecimal192>()
@@ -1253,6 +1245,14 @@ mod test_decimal {
         test(123456789.87654321, "123456790");
         test(4.012_346, "4.012346"); // precision lost
         test(4.012_346, "4.012346"); // Over 18 decimals is OK (precision lost)
+    }
+
+    #[test]
+    fn from_more_than_one_decimal_point_with_more_than_18_decimals_string() {
+        assert_eq!(
+            "4.0123456789012345678.123".parse::<Decimal192>(),
+            Err(CommonError::DecimalError)
+        );
     }
 
     #[test]
