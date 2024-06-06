@@ -485,12 +485,7 @@ mod uniffi_tests {
             SUT::try_from(f32::MAX).unwrap().to_string(),
             "340282350000000000000000000000000000000"
         );
-        assert_eq!(
-            SUT::try_from(f32::MIN_POSITIVE),
-            Err(CommonError::DecimalOverflow {
-                bad_value: f32::MIN_POSITIVE.to_string()
-            })
-        );
+        assert_eq!(SUT::try_from(f32::MIN_POSITIVE).unwrap().to_string(), "0");
     }
 
     #[test]
@@ -504,10 +499,8 @@ mod uniffi_tests {
             "340282346638528860000000000000000000000"
         );
         assert_eq!(
-            SUT::try_from(f32::MIN_POSITIVE as f64),
-            Err(CommonError::DecimalOverflow {
-                bad_value: (f32::MIN_POSITIVE as f64).to_string()
-            })
+            SUT::try_from(f32::MIN_POSITIVE as f64).unwrap().to_string(),
+            "0"
         );
     }
 

@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use delegate::delegate;
 use enum_iterator::reverse_all;
+use radix_common::math::ParseDecimalError;
 
 uniffi::custom_type!(ScryptoDecimal192, String);
 
@@ -87,13 +88,45 @@ impl Decimal {
     }
 }
 
+impl Decimal192 {
+    /// Will lose precision if the fractional part has more than 18 digits!
+    fn from_str_by_truncating(s: impl AsRef<str>) -> Result<Self> {
+        let str_value = s.as_ref();
+        let parts: Vec<&str> = str_value.split('.').collect();
+        let processed_s = if parts.len() == 2 {
+            let fractional_part = parts[1];
+            if fractional_part.len() > 18 {
+                format!("{}.{}", parts[0], &fractional_part[..18])
+            } else {
+                str_value.to_string()
+            }
+        } else {
+            str_value.to_string()
+        };
+
+        processed_s
+            .parse::<ScryptoDecimal192>()
+            .map(Self::from_native)
+            .map_err(|_| CommonError::DecimalError)
+    }
+
+    pub fn from_str_value(s: impl AsRef<str>) -> Result<Self> {
+        let str_value = s.as_ref();
+        match str_value.parse::<ScryptoDecimal192>() {
+            Ok(decimal) => Ok(Self::from_native(decimal)),
+            Err(ParseDecimalError::MoreThanEighteenDecimalPlaces) => {
+                Self::from_str_by_truncating(str_value)
+            }
+            Err(_) => Err(CommonError::DecimalError),
+        }
+    }
+}
+
 impl FromStr for Decimal192 {
     type Err = crate::CommonError;
 
     fn from_str(s: &str) -> Result<Self> {
-        s.parse::<ScryptoDecimal192>()
-            .map(Self::from_native)
-            .map_err(|_| CommonError::DecimalError)
+        Self::from_str_value(s)
     }
 }
 
@@ -131,12 +164,7 @@ impl TryFrom<f32> for Decimal {
     /// ```
     fn try_from(value: f32) -> Result<Self, Self::Error> {
         let str_value = value.to_string();
-
-        str_value
-            .parse::<Self>()
-            .map_err(|_| CommonError::DecimalOverflow {
-                bad_value: str_value,
-            })
+        Self::from_str_value(str_value)
     }
 }
 
@@ -160,12 +188,7 @@ impl TryFrom<f64> for Decimal {
     /// ```
     fn try_from(value: f64) -> Result<Self, Self::Error> {
         let str_value = value.to_string();
-
-        str_value
-            .parse::<Self>()
-            .map_err(|_| CommonError::DecimalOverflow {
-                bad_value: str_value,
-            })
+        Self::from_str_value(str_value)
     }
 }
 
@@ -1221,7 +1244,7 @@ mod test_decimal {
         test(f32::MAX as f64, "340282346638528860000000000000000000000");
         test(123456789.87654321, "123456789.87654321");
         test(4.012_345_678_901_235, "4.012345678901235"); // precision lost
-        test(4.012_345_678_901_235, "4.012345678901235"); // Over 18 decimals is OK (precision lost)
+        test(4.012_345_678_901_234_567_890, "4.012345678901235"); // Over 18 decimals is OK (precision lost)
     }
 
     #[test]
@@ -1308,6 +1331,11 @@ mod test_decimal {
 
         fail("1,000,000.23", &swedish);
         test("1,000,000.23", &us, "1000000.23");
+        test(
+            "4.012 345 678 901 234 567 890",
+            &us,
+            "4.012345678901234567890",
+        );
     }
 
     #[test]
