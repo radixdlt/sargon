@@ -19,18 +19,21 @@ impl WellKnownClient {
 }
 
 impl NetworkRequest {
-    fn get_well_known_request(url: Url) -> Self {
+    fn get_well_known(url: Url) -> Self {
         let well_known_url = url.join(SUFFIX_WELL_KNOWN_FILE).unwrap();
         NetworkRequest::new_get(well_known_url)
     }
 }
 
+/// The Well Known Client .
+/// It will be used to fetch the well-known file for a given origin.
 impl WellKnownClient {
+    /// Fetches the well-known file, internally it appends the suffix to the origin URL.
     pub async fn get_well_known_file(
         &self,
-        url: Url,
+        origin: Url,
     ) -> Result<DappDefinitions> {
-        let network_request = NetworkRequest::get_well_known_request(url);
+        let network_request = NetworkRequest::get_well_known(origin);
         self.http_client
             .execute_request_with_decoding(network_request)
             .await
@@ -44,12 +47,6 @@ impl WellKnownClient {
             MockAntenna::new_always_failing(),
         ))
     }
-
-    fn new_succeeding_http_client(response: &DappDefinitions) -> Self {
-        Self::new_with_network_antenna(Arc::new(MockAntenna::with_response(
-            response,
-        )))
-    }
 }
 
 #[cfg(test)]
@@ -62,49 +59,44 @@ mod tests {
     const TEST_ORIGIN: &str = "https://d2xmq49o1iddud.cloudfront.net";
 
     #[test]
+    fn test_suffix_is_correct() {
+        assert_eq!(SUFFIX_WELL_KNOWN_FILE, ".well-known/dapp.json")
+    }
+
+    #[test]
     fn test_get_well_known_request_error() {
+        // ARRANGE
         let url = Url::parse(TEST_ORIGIN).unwrap();
-        let request = NetworkRequest::get_well_known_request(url.clone());
+        // ACT
+        let request = NetworkRequest::get_well_known(url.clone());
+        // ASSERT
         assert_eq!(request.url, url.join(SUFFIX_WELL_KNOWN_FILE).unwrap());
         assert_eq!(request.method, NetworkMethod::Get);
     }
 
     #[actix_rt::test]
     async fn test_get_well_known_file_correct_request_made() {
-        let mock_antenna_with_spy =
-            MockAntenna::with_spy(200, vec![], |request| {
-                let request = NetworkRequest::get_well_known_request(
-                    Url::from_str(TEST_ORIGIN).unwrap(),
-                );
+        // ARRANGE
+        let mock_antenna_with_spy = MockAntenna::with_spy(200, vec![], |_| {
+            let request = NetworkRequest::get_well_known(
+                Url::from_str(TEST_ORIGIN).unwrap(),
+            );
 
-                let expected_request = NetworkRequest {
-                    url: Url::from_str(TEST_ORIGIN)
-                        .unwrap()
-                        .join(SUFFIX_WELL_KNOWN_FILE)
-                        .unwrap(),
-                    method: NetworkMethod::Get,
-                    body: BagOfBytes::new(),
-                    headers: HashMap::new(),
-                };
+            let expected_request = NetworkRequest::new_get(
+                Url::from_str(TEST_ORIGIN)
+                    .unwrap()
+                    .join(SUFFIX_WELL_KNOWN_FILE)
+                    .unwrap(),
+            );
 
-                pretty_assertions::assert_eq!(
-                    request.url,
-                    expected_request.url
-                );
-                pretty_assertions::assert_eq!(
-                    request.method,
-                    expected_request.method
-                );
-                pretty_assertions::assert_eq!(
-                    request.body,
-                    expected_request.body
-                );
-            });
+            // ASSERT
+            pretty_assertions::assert_eq!(request, expected_request);
+        });
 
         let client = WellKnownClient::new_with_network_antenna(Arc::new(
             mock_antenna_with_spy,
         ));
-
+        // ACT
         let req =
             client.get_well_known_file(Url::from_str(TEST_ORIGIN).unwrap());
         let _ = timeout(MAX, req).await.unwrap();
@@ -112,30 +104,13 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_get_well_known_file_failure_response() {
+        // ARRANGE
         let client = WellKnownClient::new_always_failing();
-
+        // ACT
         let req =
             client.get_well_known_file(Url::from_str(TEST_ORIGIN).unwrap());
         let result = timeout(MAX, req).await.unwrap();
+        // ASSERT
         assert!(result.is_err());
     }
-
-    // #[actix_rt::test]
-    // async fn test_1() {
-    //     let (sut, json) = fixture_and_json::<DappDefinitions>(include_str!(concat!(
-    //         env!("FIXTURES_MODELS"),
-    //         "well_known.json"
-    //     )))
-    //     .unwrap();
-    //     let js = serde_json::to_value(&sut).unwrap();
-    //     let mock_antenna = MockAntenna::new(200, json.into());
-    //     let client = WellKnownClient::new_with_network_antenna(Arc::new(
-    //         mock_antenna
-    //     ));
-
-    //     let req =
-    //         client.get_well_known_file(Url::from_str(TEST_ORIGIN).unwrap());
-    //     let result = timeout(MAX, req).await.unwrap().unwrap();
-    //     assert_eq!(result, sut);
-    // }
 }

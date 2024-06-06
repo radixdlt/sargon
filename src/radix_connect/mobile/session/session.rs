@@ -7,7 +7,7 @@ pub struct Session {
     pub id: SessionID,
     pub origin: SessionOrigin,
     pub encryption_key: Exactly32Bytes,
-    pub callback_path: String, // TBA: possibly will contain also the callback path
+    pub callback_path: RCMCallbackPath,
 }
 
 impl Session {
@@ -15,7 +15,7 @@ impl Session {
         id: impl Into<SessionID>,
         origin: SessionOrigin,
         encryption_key: impl Into<Exactly32Bytes>,
-        callback_path: String,
+        callback_path: RCMCallbackPath,
     ) -> Self {
         Self {
             id: id.into(),
@@ -32,7 +32,7 @@ impl HasSampleValues for Session {
             SessionID::sample(),
             SessionOrigin::sample(),
             Exactly32Bytes::sample(),
-            String::from("callback_path"),
+            RCMCallbackPath::sample(),
         )
     }
 
@@ -41,7 +41,7 @@ impl HasSampleValues for Session {
             SessionID::sample_other(),
             SessionOrigin::sample_other(),
             Exactly32Bytes::sample_other(),
-            String::from("callback_path_other"),
+            RCMCallbackPath::sample_other(),
         )
     }
 }
