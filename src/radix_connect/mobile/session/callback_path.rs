@@ -27,17 +27,17 @@ impl From<String> for RCMCallbackPath {
 
 impl Default for RCMCallbackPath {
     fn default() -> Self {
-        Self("default_callback_path".to_owned())
+        Self::new("default_callback_path")
     }
 }
 
 impl HasSampleValues for RCMCallbackPath {
     fn sample() -> Self {
-        Self("sample_callback_path".to_owned())
+        Self::new("sample_callback_path")
     }
 
     fn sample_other() -> Self {
-        Self("sample_callback_path_other".to_owned())
+        Self::new("sample_other_callback_path")
     }
 }
 
