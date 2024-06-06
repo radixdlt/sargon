@@ -7,8 +7,13 @@ import IdentifiedCollections
 public typealias FactorSources = IdentifiedArrayOf<FactorSource>
 
 public typealias Shield = SecurityStructureOfFactorSources
-
 public typealias Shields = IdentifiedArrayOf<Shield>
+
+
+
+public typealias ShieldReference = SecurityStructureOfFactorSourceIDs
+public typealias ShieldReferences = IdentifiedArrayOf<ShieldReference>
+
 
 extension FactorSources {
 	public func compactMap<F>(as kind: F.Type = F.self) -> IdentifiedArrayOf<F> where F: FactorSourceProtocol {
@@ -64,10 +69,12 @@ extension SargonOS {
         factorSources().asIdentified()
     }
 	
+	public var shieldReferences: ShieldReferences {
+		securityStructuresOfFactorSourceIds().asIdentified()
+	}
 	
 	public var shields: Shields {
-		// FIXME: Change to `securityStructuresOfFactorSources()` to get it to compile!
-		securityStructuresOfFactorSourceIds().asIdentified()
+		shieldReferences.compactMap({ try? self.securityStructureOfFactorSourcesFromSecurityStructureOfFactorSourceIds(structureOfIds: $0) }).asIdentified()
 	}
     
 	public var deviceFactorSources: DeviceFactorSources {

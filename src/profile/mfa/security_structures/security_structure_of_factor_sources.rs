@@ -9,6 +9,29 @@ decl_security_structure_of!(
     FactorSource,
 );
 
+pub const MINUTES_PER_DAY: u64 = 24 * 60;
+pub const MINUTES_PER_EPOCH: u64 = 5;
+pub const EPOCHS_PER_DAY: u64 = MINUTES_PER_DAY / MINUTES_PER_EPOCH;
+
+pub fn days_to_epochs(days: u16) -> u64 {
+    let days = days as u64;
+    days * EPOCHS_PER_DAY
+}
+
+impl SecurityStructureOfFactorSources {
+    pub fn new_with_days(
+        metadata: SecurityStructureMetadata,
+        number_of_days_until_auto_confirmation: u16,
+        matrix_of_factors: MatrixOfFactorSources,
+    ) -> Self {
+        Self::new(
+            metadata,
+            days_to_epochs(number_of_days_until_auto_confirmation),
+            matrix_of_factors,
+        )
+    }
+}
+
 impl Identifiable for SecurityStructureOfFactorSources {
     type ID = <SecurityStructureMetadata as Identifiable>::ID;
 
@@ -257,6 +280,17 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn test_epochs_per_day() {
+        assert_eq!(EPOCHS_PER_DAY, 288);
+    }
+
+    #[test]
+    fn test_days_to_epochs() {
+        assert_eq!(days_to_epochs(0), 0);
+        assert_eq!(days_to_epochs(10), 2880);
     }
 
     #[test]
