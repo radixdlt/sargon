@@ -91,11 +91,11 @@ fn sample_vec_other() -> Vec<User> {
 impl crate::HasSampleValues for IdentifiedVecOf<User> {
     /// Alice(0), Carol(2), Erin(4), Grace(6)
     fn sample() -> Self {
-        Self::from_iter(sample_vec().into_iter())
+        Self::from_iter(sample_vec())
     }
 
     /// Bob(1), David(3), Frank(5)
     fn sample_other() -> Self {
-        Self::from_iter(sample_vec_other().into_iter())
+        Self::from_iter(sample_vec_other())
     }
 }

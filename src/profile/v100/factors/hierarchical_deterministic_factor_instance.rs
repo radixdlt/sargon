@@ -61,7 +61,7 @@ impl HierarchicalDeterministicFactorInstance {
         let badge = virtual_source.as_hierarchical_deterministic();
 
         Self::try_from(
-            factor_instance.factor_source_id.clone(),
+            factor_instance.factor_source_id,
             badge.public_key,
             badge.derivation_path.clone(),
         )

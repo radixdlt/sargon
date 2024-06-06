@@ -95,7 +95,7 @@ impl Profile {
             })
             .collect::<Accounts>();
 
-        Ok((bdfs.factor_source_id().clone(), accounts))
+        Ok((bdfs.factor_source_id(), accounts))
     }
 }
 

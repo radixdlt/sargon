@@ -223,8 +223,7 @@ impl SargonOS {
         &self,
         factor_source_id: &FactorSourceID,
     ) -> Result<MnemonicWithPassphrase> {
-        let id = factor_source_id
-            .clone()
+        let id = (*factor_source_id)
             .into_hash()
             .map_err(|_| CommonError::FactorSourceIDNotFromHash)?;
         self.mnemonic_with_passphrase_of_device_factor_source_by_id(&id)

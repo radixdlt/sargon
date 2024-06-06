@@ -11,9 +11,9 @@ impl Profile {
     {
         let id = id.into();
         self.factor_sources
-            .get_id(&id)
+            .get_id(id)
             .ok_or(CommonError::ProfileDoesNotContainFactorSourceWithID {
-                bad_value: id.clone(),
+                bad_value: id,
             })
             .and_then(|f| {
                 f.clone().try_into().map_err(|_| {

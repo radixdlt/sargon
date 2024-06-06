@@ -23,9 +23,9 @@ fn factors_from(
 ) -> Result<FactorSources> {
     ids.iter()
         .map(|id| {
-            from.get_id(id.clone())
+            from.get_id(*id)
                 .ok_or(CommonError::ProfileDoesNotContainFactorSourceWithID {
-                    bad_value: id.clone(),
+                    bad_value: *id,
                 })
                 .map(|x| x.clone())
         })

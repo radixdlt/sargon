@@ -172,7 +172,7 @@ mod tests {
     #[test]
     fn address_into_as_roundtrip() {
         let from_address = FactorSourceIDFromAddress::sample();
-        let id: FactorSourceID = from_address.clone().into(); // test `into()`
+        let id: FactorSourceID = from_address.into(); // test `into()`
         assert_eq!(id.as_address().unwrap(), &from_address);
     }
 

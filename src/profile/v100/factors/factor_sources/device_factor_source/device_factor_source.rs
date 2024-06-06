@@ -140,7 +140,7 @@ impl DeviceFactorSource {
     /// A sample used to facilitate unit tests.
     pub fn sample_babylon_other() -> Self {
         let mut source = Self::babylon(
-            true,
+            false,
             &MnemonicWithPassphrase::sample_device_other(),
             &DeviceInfo::sample_other(),
         );
