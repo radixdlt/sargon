@@ -1,5 +1,6 @@
 use crate::prelude::*;
 
+/// Path used to respond to dapp requests in Mobile Connect flow. Read from well known file.
 #[derive(
     Clone,
     PartialEq,
