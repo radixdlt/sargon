@@ -41,6 +41,7 @@ public struct SettingsFeature {
 		public enum ViewAction {
 			case createManyAccountsButtonTapped
             case factorSourcesButtonTapped
+			case shieldsButtonTapped
 		}
 		
 		case view(ViewAction)
@@ -54,6 +55,7 @@ public struct SettingsFeature {
             @CasePathable
             public enum Navigate {
                 case toFactorSources
+				case toShields
             }
         }
         
@@ -82,6 +84,9 @@ public struct SettingsFeature {
                 
             case .view(.factorSourcesButtonTapped):
                 return .send(.delegate(.navigate(.toFactorSources)))
+				
+			case .view(.shieldsButtonTapped):
+				return .send(.delegate(.navigate(.toShields)))
 				
 			case let .destination(.presented(.createManyAccountsAlert(action))):
 				state.destination = nil
@@ -125,6 +130,10 @@ extension SettingsFeature {
                 Button("Handle Factor Sources") {
                     send(.factorSourcesButtonTapped)
                 }
+				
+				Button("Handle Security Shields") {
+					send(.shieldsButtonTapped)
+				}
                 
 				VStack {
 					Button("Create Many Accounts") {

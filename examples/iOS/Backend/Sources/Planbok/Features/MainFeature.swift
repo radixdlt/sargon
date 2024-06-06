@@ -10,6 +10,7 @@ public struct MainFeature {
 	@Reducer //(state: .equatable)
 	public enum Path {
 		case settings(SettingsFeature)
+		case manageSecurityShields(ManageSecurityShieldsFeature)
         case manageFactorSources(ManageFactorSourcesFeature)
         case manageSpecificFactorSources(ManageSpecificFactorSourcesFeature)
 		case accountDetails(AccountDetailsFeature)
@@ -85,6 +86,10 @@ public struct MainFeature {
 					case .accountDetails:
 						return .none
 						
+					case .settings(.delegate(.navigate(.toShields))):
+						state.path.append(.manageSecurityShields(ManageSecurityShieldsFeature.State()))
+						return .none
+						
 					case .settings(.delegate(.navigate(.toFactorSources))):
 						state.path.append(.manageFactorSources(ManageFactorSourcesFeature.State()))
 						return .none
@@ -108,6 +113,9 @@ public struct MainFeature {
 					case .settings:
 						return .none
 						
+					case .manageSecurityShields:
+						return .none
+
 					case .manageFactorSources:
 						return .none
 			
@@ -253,6 +261,9 @@ extension MainFeature {
 				case let .settings(store):
 					SettingsFeature.View(store: store)
 				
+				case let .manageSecurityShields(store):
+					ManageSecurityShieldsFeature.View(store: store)
+					
 				case let .manageFactorSources(store):
 					ManageFactorSourcesFeature.View(store: store)
 				

@@ -4,8 +4,8 @@ import DependenciesMacros
 
 @DependencyClient
 public struct ShieldClient: Sendable {
-	public typealias CreateNewSecurityShield = @Sendable (MatrixOfFactorSources, _ name: DisplayName, _ numberOfDaysToAutoConfirm: UInt16) -> Shield
-	public var createNewSecurityShield: CreateNewSecurityShield
+	public typealias SaveSecurityShield = @Sendable (Shield) async throws -> Bool
+	public var saveSecurityShield: SaveSecurityShield
 }
 
 
@@ -13,19 +13,9 @@ extension ShieldClient: DependencyKey {
 	public static let liveValue = Self.live(os: SargonOS.shared)
 	public static func live(os: SargonOS) -> Self {
 		Self(
-			createNewSecurityShield: { matrixOfFactors, name, numberOfDaysToAutoConfirm in
-		
+			saveSecurityShield: { shield in
+				try await os.addSecurityStructureOfFactorSources(structure: shield)
 			}
 		)
 	}
 }
-extension ShieldClient {
-    public func createNewShield(
-        matrix: MatrixOfFactorSources,
-        name: DisplayName,
-        numberOfDaysToAutoConfirm: UInt16 = 14
-    ) -> Shield {
-        self.createNewSecurityShield(matrix, name, numberOfDaysToAutoConfirm)
-    }
-}
-
