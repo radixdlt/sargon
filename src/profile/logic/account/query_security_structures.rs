@@ -3,7 +3,7 @@ use crate::prelude::*;
 impl Profile {
     /// Returns all the SecurityStructuresOfFactorSources,
     /// by trying to map FactorSourceID level -> FactorSource Level
-    pub fn security_structures_of_factor_source_ids(
+    pub fn security_structures_of_factor_sources(
         &self,
     ) -> Result<SecurityStructuresOfFactorSources> {
         self.app_preferences

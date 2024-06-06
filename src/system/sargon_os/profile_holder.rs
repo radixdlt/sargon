@@ -49,12 +49,10 @@ impl ProfileHolder {
 
     /// Returns all the SecurityStructuresOfFactorSources,
     /// by trying to map FactorSourceID level -> FactorSource Level
-    pub fn security_structures_of_factor_source_ids(
+    pub fn security_structures_of_factor_sources(
         &self,
     ) -> Result<SecurityStructuresOfFactorSources> {
-        self.access_profile_with(|p| {
-            p.security_structures_of_factor_source_ids()
-        })
+        self.access_profile_with(|p| p.security_structures_of_factor_sources())
     }
 
     /// Returns the non-hidden accounts on the current network as `AccountForDisplay`
@@ -83,6 +81,14 @@ impl ProfileHolder {
             .try_read()
             .map(access)
             .expect("Implementing hosts should not read and write Profile from multiple threads.")
+    }
+
+    pub(super) fn try_access_profile_with<T, F>(&self, access: F) -> Result<T>
+    where
+        F: Fn(RwLockReadGuard<'_, Profile>) -> Result<T>,
+    {
+        let guard = self.profile.try_read().expect("Implementing hosts should not read and write Profile from multiple threads.");
+        access(guard)
     }
 
     /// Sets the profile held by this ProfileHolder to `profile`.

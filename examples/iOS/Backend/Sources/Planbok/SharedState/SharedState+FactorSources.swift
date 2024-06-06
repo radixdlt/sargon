@@ -6,7 +6,8 @@ import IdentifiedCollections
 
 public typealias FactorSources = IdentifiedArrayOf<FactorSource>
 
-public typealias Shield = SecurityStructureConfigurationReference
+public typealias Shield = SecurityStructureOfFactorSources
+
 public typealias Shields = IdentifiedArrayOf<Shield>
 
 extension FactorSources {
@@ -43,18 +44,19 @@ extension PersistenceKeyDefault<SargonKey<FactorSources>> {
 
 extension PersistenceReaderKey where Self == PersistenceKeyDefault<SargonKey<Shields>> {
 	public static var shields: Self {
-		Self.sharedShields
+//		Self.sharedShields
+		fatalError()
 	}
 }
-extension PersistenceKeyDefault<SargonKey<Shields>> {
-	public static let sharedShields = Self(
-		SargonKey(
-			accessing: \.shields,
-			fetchIf: \.affectsShields
-		),
-		[]
-	)
-}
+//extension PersistenceKeyDefault<SargonKey<Shields>> {
+//	public static let sharedShields = Self(
+////		SargonKey(
+////			accessing: \.shields,
+////			fetchIf: \.affectsShields
+////		),
+////		[]
+//	)
+//}
 
 extension SargonOS {
     
@@ -64,7 +66,8 @@ extension SargonOS {
 	
 	
 	public var shields: Shields {
-		securityStructureConfigurationReferences().asIdentified()
+		// FIXME: Change to `securityStructuresOfFactorSources()` to get it to compile!
+		securityStructuresOfFactorSourceIds().asIdentified()
 	}
     
 	public var deviceFactorSources: DeviceFactorSources {
@@ -93,4 +96,8 @@ extension EventKind {
     public var affectsFactorSources: Bool {
         eventKindAffectsFactorSources(eventKind: self)
     }
+	
+	public var affectsShields: Bool {
+		eventKindAffectsSecurityStructures(eventKind: self)
+	}
 }

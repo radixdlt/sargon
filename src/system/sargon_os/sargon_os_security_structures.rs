@@ -4,11 +4,37 @@ use crate::prelude::*;
 impl SargonOS {
     /// Returns all the SecurityStructuresOfFactorSources,
     /// by trying to map FactorSourceID level -> FactorSource Level
-    pub fn security_structures_of_factor_source_ids(
+    pub fn security_structures_of_factor_sources(
         &self,
     ) -> Result<SecurityStructuresOfFactorSources> {
+        self.profile_holder
+            .access_profile_with(|p| p.security_structures_of_factor_sources())
+    }
+
+    /// Returns all the `SecurityStructuresOfFactorSourceIDs` which are stored
+    /// in profile.
+    pub fn security_structures_of_factor_source_ids(
+        &self,
+    ) -> SecurityStructuresOfFactorSourceIDs {
         self.profile_holder.access_profile_with(|p| {
-            p.security_structures_of_factor_source_ids()
+            p.app_preferences
+                .security
+                .security_structures_of_factor_source_ids
+                .clone()
+        })
+    }
+
+    /// Returns all the `SecurityStructuresOfFactorSourceIDs` which are stored
+    /// in profile.
+    pub fn security_structure_of_factor_sources_from_security_structure_of_factor_source_ids(
+        &self,
+        structure_of_ids: &SecurityStructureOfFactorSourceIDs,
+    ) -> Result<SecurityStructureOfFactorSources> {
+        self.profile_holder.try_access_profile_with(|p| {
+            SecurityStructureOfFactorSources::try_from((
+                structure_of_ids,
+                &p.factor_sources,
+            ))
         })
     }
 
@@ -117,10 +143,8 @@ mod tests {
             .security_structures_of_factor_source_ids
             .contains_by_id(&structure_factor_id_level));
 
-        let structures = os
-            .security_structures_of_factor_source_ids()
-            .unwrap()
-            .items();
+        let structures =
+            os.security_structures_of_factor_sources().unwrap().items();
 
         assert!(structures.contains(&structure_factor_source_level));
     }
@@ -207,5 +231,76 @@ mod tests {
             == Event::ProfileModified {
                 change: EventProfileModified::SecurityStructureAdded { id }
             }));
+    }
+
+    #[actix_rt::test]
+    async fn get_structure_from_id() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        for fs in FactorSources::sample_values_all().into_iter() {
+            os.add_factor_source(fs).await.unwrap();
+        }
+
+        // ACT
+        let structure_source_sample =
+            SecurityStructureOfFactorSources::sample();
+        let structure_source_sample_other =
+            SecurityStructureOfFactorSources::sample_other();
+        let inserted = os
+            .with_timeout(|x| {
+                x.add_security_structure_of_factor_sources(
+                    &structure_source_sample,
+                )
+            })
+            .await
+            .unwrap();
+        assert!(inserted);
+
+        let inserted = os
+            .with_timeout(|x| {
+                x.add_security_structure_of_factor_sources(
+                    &structure_source_sample_other,
+                )
+            })
+            .await
+            .unwrap();
+        assert!(inserted);
+
+        let structure_id_sample = SecurityStructureOfFactorSourceIDs::from(
+            structure_source_sample.clone(),
+        );
+        let structure_id_sample_other =
+            SecurityStructureOfFactorSourceIDs::from(
+                structure_source_sample_other.clone(),
+            );
+
+        // ASSERT
+        assert_eq!(
+            os.security_structures_of_factor_source_ids(),
+            SecurityStructuresOfFactorSourceIDs::from_iter([
+                structure_id_sample.clone(),
+                structure_id_sample_other.clone(),
+            ])
+        );
+
+        let structures = os.security_structures_of_factor_sources().unwrap();
+
+        let sample_by_lookup = os.security_structure_of_factor_sources_from_security_structure_of_factor_source_ids(
+                &structure_id_sample,
+            ).unwrap();
+
+        let sample_by_lookup_other =
+        os.security_structure_of_factor_sources_from_security_structure_of_factor_source_ids(
+            &structure_id_sample_other,
+        ).unwrap();
+
+        let sources_by_id_lookup =
+            SecurityStructuresOfFactorSources::from_iter([
+                sample_by_lookup,
+                sample_by_lookup_other,
+            ]);
+
+        assert_eq!(sources_by_id_lookup, structures);
     }
 }
