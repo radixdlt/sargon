@@ -18,6 +18,12 @@ impl RCMCallbackPath {
     }
 }
 
+impl From<String> for RCMCallbackPath {
+    fn from(value: String) -> Self {
+        Self(value)
+    }
+}
+
 impl Default for RCMCallbackPath {
     fn default() -> Self {
         Self("default_callback_path".to_owned())
@@ -50,5 +56,20 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn from_string() {
+        let value = "from_string".to_owned();
+        let callback_path = RCMCallbackPath::from(value.clone());
+        assert_eq!(callback_path, RCMCallbackPath(value));
+    }
+
+    #[test]
+    fn test_default() {
+        assert_eq!(
+            RCMCallbackPath::default(),
+            RCMCallbackPath("default_callback_path".to_owned())
+        );
     }
 }

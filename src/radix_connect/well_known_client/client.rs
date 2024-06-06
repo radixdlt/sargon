@@ -2,7 +2,10 @@ use crate::prelude::*;
 
 const SUFFIX_WELL_KNOWN_FILE: &str = ".well-known/dapp.json";
 
+/// The Well Known Client .
+/// It will be used to fetch the well-known file for a given origin.
 pub struct WellKnownClient {
+    /// The HTTP client to be used to make the requests.
     pub http_client: HttpClient,
 }
 
@@ -25,8 +28,6 @@ impl NetworkRequest {
     }
 }
 
-/// The Well Known Client .
-/// It will be used to fetch the well-known file for a given origin.
 impl WellKnownClient {
     /// Fetches the well-known file, internally it appends the suffix to the origin URL.
     pub async fn get_well_known_file(

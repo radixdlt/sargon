@@ -1,23 +1,29 @@
 use crate::prelude::*;
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+/// Wrapper around the address of a dapp.
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct DappDefinition {
+    /// Address of the dapp.
     #[serde(rename = "dAppDefinitionAddress")]
     pub dapp_definition_address: AccountAddress,
 }
 
+impl DappDefinition {
+    pub fn new(dapp_definition_address: AccountAddress) -> Self {
+        Self {
+            dapp_definition_address,
+        }
+    }
+}
+
 impl HasSampleValues for DappDefinition {
     fn sample() -> Self {
-        Self {
-            dapp_definition_address: AccountAddress::sample(),
-        }
+        Self::new(AccountAddress::sample())
     }
 
     fn sample_other() -> Self {
-        Self {
-            dapp_definition_address: AccountAddress::sample_other(),
-        }
+        Self::new(AccountAddress::sample_other())
     }
 }
 

@@ -70,9 +70,7 @@ impl RadixConnectMobile {
                 },
             );
         }
-        let callback_path = dapp_definitions
-            .callback_path
-            .map_or(RCMCallbackPath::default(), RCMCallbackPath::new);
+        let callback_path = dapp_definitions.callback_path.unwrap_or_default();
 
         // 3. Compute the shared secret
         // random salt
