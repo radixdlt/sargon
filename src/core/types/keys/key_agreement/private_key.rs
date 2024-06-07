@@ -5,20 +5,20 @@ use k256::sha2::Sha256;
 
 #[derive(derive_more::Debug)]
 #[debug("{}", self.to_hex())]
-pub struct DiffieHellmanPrivateKey(X25519PrivateKey);
+pub struct KeyAgreementPrivateKey(X25519PrivateKey);
 
-impl DiffieHellmanPrivateKey {
+impl KeyAgreementPrivateKey {
     pub fn generate() -> Result<Self> {
         Exactly32Bytes::generate().to_vec().try_into()
     }
 
-    pub fn public_key(&self) -> DiffieHellmanPublicKey {
+    pub fn public_key(&self) -> KeyAgreementPublicKey {
         self.0.public_key().into()
     }
 
     pub fn hkdf_key_agreement(
         &self,
-        other: &DiffieHellmanPublicKey,
+        other: &KeyAgreementPublicKey,
         salt: &[u8],
         info: &[u8],
     ) -> Result<Exactly32Bytes> {
@@ -36,31 +36,31 @@ impl DiffieHellmanPrivateKey {
     }
 }
 
-impl PartialEq for DiffieHellmanPrivateKey {
+impl PartialEq for KeyAgreementPrivateKey {
     fn eq(&self, other: &Self) -> bool {
         self.to_bytes() == other.to_bytes()
     }
 }
 
-impl From<X25519PrivateKey> for DiffieHellmanPrivateKey {
+impl From<X25519PrivateKey> for KeyAgreementPrivateKey {
     fn from(value: X25519PrivateKey) -> Self {
         Self(value)
     }
 }
 
-impl TryFrom<&[u8]> for DiffieHellmanPrivateKey {
+impl TryFrom<&[u8]> for KeyAgreementPrivateKey {
     type Error = crate::CommonError;
 
     fn try_from(slice: &[u8]) -> Result<Self, Self::Error> {
         X25519PrivateKey::try_from_slice(slice)
-            .map_err(|_| CommonError::InvalidDiffieHellmanPrivateKeyFromBytes {
+            .map_err(|_| CommonError::InvalidKeyAgreementPrivateKeyFromBytes {
                 bad_value: slice.into(),
             })
             .map(Self::from)
     }
 }
 
-impl TryFrom<Vec<u8>> for DiffieHellmanPrivateKey {
+impl TryFrom<Vec<u8>> for KeyAgreementPrivateKey {
     type Error = CommonError;
 
     fn try_from(value: Vec<u8>) -> Result<Self, Self::Error> {
@@ -68,7 +68,7 @@ impl TryFrom<Vec<u8>> for DiffieHellmanPrivateKey {
     }
 }
 
-impl TryFrom<Exactly32Bytes> for DiffieHellmanPrivateKey {
+impl TryFrom<Exactly32Bytes> for KeyAgreementPrivateKey {
     type Error = CommonError;
 
     fn try_from(value: Exactly32Bytes) -> Result<Self, Self::Error> {
@@ -76,7 +76,7 @@ impl TryFrom<Exactly32Bytes> for DiffieHellmanPrivateKey {
     }
 }
 
-impl DiffieHellmanPrivateKey {
+impl KeyAgreementPrivateKey {
     pub fn to_hex(&self) -> String {
         hex_encode(self.to_bytes())
     }
@@ -86,7 +86,7 @@ impl DiffieHellmanPrivateKey {
     }
 }
 
-impl HasSampleValues for DiffieHellmanPrivateKey {
+impl HasSampleValues for KeyAgreementPrivateKey {
     /// A sample used to facilitate unit tests.
     /// `98df1ecbf042f5dc986f79c332ef64efed6240f407a664b2e9261c1af78e1063`
     ///
@@ -122,7 +122,7 @@ mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = DiffieHellmanPrivateKey;
+    type SUT = KeyAgreementPrivateKey;
 
     #[test]
     fn equality() {
@@ -149,7 +149,7 @@ mod tests {
         println!("{:?}", public_key);
         assert_eq!(
             public_key,
-             DiffieHellmanPublicKey::from_hex("8679bc1fe3210b2ce84793668b05218fdc4c220bc05387b7d2ac0d4c7b7c5d10".to_owned())
+             KeyAgreementPublicKey::from_hex("8679bc1fe3210b2ce84793668b05218fdc4c220bc05387b7d2ac0d4c7b7c5d10".to_owned())
              .unwrap()
         );
     }
@@ -168,13 +168,13 @@ mod tests {
 
         let decoded: serde_json::Value =
             serde_json::from_str(json_test_vector).unwrap();
-        let private_key = DiffieHellmanPrivateKey::try_from(
+        let private_key = KeyAgreementPrivateKey::try_from(
             hex_decode(decoded["wallet_private_key"].as_str().unwrap())
                 .unwrap(),
         )
         .unwrap();
 
-        let public_key = DiffieHellmanPublicKey::from_hex(
+        let public_key = KeyAgreementPublicKey::from_hex(
             decoded["dapp_public_key"].as_str().unwrap().to_owned(),
         )
         .unwrap();

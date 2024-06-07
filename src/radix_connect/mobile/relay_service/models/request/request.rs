@@ -60,7 +60,7 @@ impl Request {
 
     pub fn new_send_handshake_response_with_public_key(
         session_id: impl Into<SessionID>,
-        public_key: impl Into<DiffieHellmanPublicKey>,
+        public_key: impl Into<KeyAgreementPublicKey>,
     ) -> Self {
         Self::new_send_handshake_response(
             session_id.into(),
@@ -158,7 +158,7 @@ mod tests {
     #[test]
     fn send_handshake_response_with_public_key() {
         let session_id = SessionID::sample();
-        let public_key = DiffieHellmanPublicKey::sample();
+        let public_key = KeyAgreementPublicKey::sample();
         let request = SUT::new_send_handshake_response_with_public_key(
             session_id.clone(),
             public_key,
@@ -266,7 +266,7 @@ mod tests {
     #[test]
     fn send_handshake_response_with_public_key_json_roundtrip() {
         let session_id = SessionID::sample();
-        let public_key = DiffieHellmanPublicKey::sample();
+        let public_key = KeyAgreementPublicKey::sample();
         let request = SUT::new_send_handshake_response_with_public_key(
             session_id.clone(),
             public_key,

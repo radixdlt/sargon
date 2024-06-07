@@ -50,7 +50,7 @@ impl RadixConnectMobile {
             .await?;
 
         // 2. Generate a new Diffie-Hellman key pair
-        let wallet_private_key = DiffieHellmanPrivateKey::generate()?;
+        let wallet_private_key = KeyAgreementPrivateKey::generate()?;
 
         // 3. Compute the shared secret
         // random salt

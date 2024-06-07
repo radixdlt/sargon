@@ -17,21 +17,21 @@ use crypto::keys::x25519::PublicKey as X25519PublicKey;
 )]
 #[display("{}", self.to_hex())]
 #[debug("{}", self.to_hex())]
-pub struct DiffieHellmanPublicKey(pub X25519PublicKey);
+pub struct KeyAgreementPublicKey(pub X25519PublicKey);
 
-impl From<DiffieHellmanPrivateKey> for DiffieHellmanPublicKey {
-    fn from(value: DiffieHellmanPrivateKey) -> Self {
+impl From<KeyAgreementPrivateKey> for KeyAgreementPublicKey {
+    fn from(value: KeyAgreementPrivateKey) -> Self {
         value.public_key()
     }
 }
 
-impl From<X25519PublicKey> for DiffieHellmanPublicKey {
+impl From<X25519PublicKey> for KeyAgreementPublicKey {
     fn from(value: X25519PublicKey) -> Self {
         Self(value)
     }
 }
 
-impl FromStr for DiffieHellmanPublicKey {
+impl FromStr for KeyAgreementPublicKey {
     type Err = crate::CommonError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -39,7 +39,7 @@ impl FromStr for DiffieHellmanPublicKey {
     }
 }
 
-impl TryFrom<Vec<u8>> for DiffieHellmanPublicKey {
+impl TryFrom<Vec<u8>> for KeyAgreementPublicKey {
     type Error = CommonError;
 
     fn try_from(value: Vec<u8>) -> Result<Self, Self::Error> {
@@ -47,22 +47,22 @@ impl TryFrom<Vec<u8>> for DiffieHellmanPublicKey {
     }
 }
 
-impl TryFrom<&[u8]> for DiffieHellmanPublicKey {
+impl TryFrom<&[u8]> for KeyAgreementPublicKey {
     type Error = crate::CommonError;
 
     fn try_from(slice: &[u8]) -> Result<Self> {
         X25519PublicKey::try_from_slice(slice)
-            .map_err(|_| CommonError::InvalidDiffieHellmanPublicKeyFromBytes {
+            .map_err(|_| CommonError::InvalidKeyAgreementPublicKeyFromBytes {
                 bad_value: slice.to_vec().into(),
             })
             .map(|k| k.into())
     }
 }
 
-impl DiffieHellmanPublicKey {
+impl KeyAgreementPublicKey {
     pub fn from_hex(hex: String) -> Result<Self> {
         Exactly32Bytes::from_str(hex.as_str())
-            .map_err(|_| CommonError::InvalidDiffieHellmanPublicKeyFromHex {
+            .map_err(|_| CommonError::InvalidKeyAgreementPublicKeyFromHex {
                 bad_value: hex,
             })
             .and_then(|b| b.to_vec().try_into())
@@ -77,7 +77,7 @@ impl DiffieHellmanPublicKey {
     }
 }
 
-impl HasSampleValues for DiffieHellmanPublicKey {
+impl HasSampleValues for KeyAgreementPublicKey {
     fn sample() -> Self {
         Self::sample_alice()
     }
@@ -87,7 +87,7 @@ impl HasSampleValues for DiffieHellmanPublicKey {
     }
 }
 
-impl DiffieHellmanPublicKey {
+impl KeyAgreementPublicKey {
     /// A sample used to facilitate unit tests.
     ///
     /// `833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42`
@@ -116,7 +116,7 @@ mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = DiffieHellmanPublicKey;
+    type SUT = KeyAgreementPublicKey;
 
     #[test]
     fn equality() {
@@ -197,7 +197,7 @@ mod tests {
     fn from_invalid_hex() {
         assert_eq!(
             SUT::from_hex("bad".to_owned()),
-            Err(CommonError::InvalidDiffieHellmanPublicKeyFromHex {
+            Err(CommonError::InvalidKeyAgreementPublicKeyFromHex {
                 bad_value: "bad".to_owned()
             })
         );
@@ -207,7 +207,7 @@ mod tests {
     fn from_invalid_bytes() {
         assert_eq!(
             SUT::try_from(vec![0]),
-            Err(CommonError::InvalidDiffieHellmanPublicKeyFromBytes {
+            Err(CommonError::InvalidKeyAgreementPublicKeyFromBytes {
                 bad_value: vec![0].into()
             })
         );
@@ -217,7 +217,7 @@ mod tests {
     fn from_invalid_str() {
         assert_eq!(
             "bad".parse::<SUT>(),
-            Err(CommonError::InvalidDiffieHellmanPublicKeyFromHex {
+            Err(CommonError::InvalidKeyAgreementPublicKeyFromHex {
                 bad_value: "bad".to_owned()
             })
         );

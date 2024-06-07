@@ -492,18 +492,18 @@ pub enum CommonError {
     #[error("Invalid RadixConnectPurpose, bad value: {bad_value}")]
     InvalidRadixConnectPurpose { bad_value: String } = 10137,
 
-    #[error("Failed to create DiffieHellmanPublicKey from hex: {bad_value}")]
-    InvalidDiffieHellmanPublicKeyFromHex { bad_value: String } = 10138,
+    #[error("Failed to create KeyAgreementPublicKey from hex: {bad_value}")]
+    InvalidKeyAgreementPublicKeyFromHex { bad_value: String } = 10138,
 
     #[error(
-        "Failed to create DiffieHellmanPublicKey from bytes: {bad_value:?}"
+        "Failed to create KeyAgreementPublicKey from bytes: {bad_value:?}"
     )]
-    InvalidDiffieHellmanPublicKeyFromBytes { bad_value: BagOfBytes } = 10139,
+    InvalidKeyAgreementPublicKeyFromBytes { bad_value: BagOfBytes } = 10139,
 
     #[error(
-        "Failed to create DiffieHellmanPrivateKey from bytes: {bad_value:?}"
+        "Failed to create KeyAgreementPrivateKey from bytes: {bad_value:?}"
     )]
-    InvalidDiffieHellmanPrivateKeyFromBytes { bad_value: BagOfBytes } = 10140,
+    InvalidKeyAgreementPrivateKeyFromBytes { bad_value: BagOfBytes } = 10140,
 
     #[error("Failed to expand HKDF, reason: '{underlying}'")]
     HkdfExpandFailed { underlying: String } = 10141,
