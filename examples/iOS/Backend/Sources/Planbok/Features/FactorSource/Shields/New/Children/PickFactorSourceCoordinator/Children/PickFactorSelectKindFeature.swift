@@ -11,6 +11,9 @@ import ComposableArchitecture
 
 @Reducer
 public struct PickFactorSelectKindFeature {
+	
+	@Dependency(\.dismiss) var dismiss
+	
 	@ObservableState
 	public struct State: Equatable {
 		public let role: Role
@@ -23,6 +26,7 @@ public struct PickFactorSelectKindFeature {
 	public enum Action: ViewAction {
 		public enum ViewAction {
 			case kindButtonTapped(FactorSourceKind)
+			case dismissButtonTapped
 		}
         public enum DelegateAction {
             case selectedKind(FactorSourceKind)
@@ -36,6 +40,10 @@ public struct PickFactorSelectKindFeature {
 			switch action {
 			case let .view(.kindButtonTapped(kind)):
                 return .send(.delegate(.selectedKind(kind)))
+			case .view(.dismissButtonTapped):
+				return .run { _ in
+					await dismiss()
+				}
             case .delegate:
                 return .none
 			}
@@ -72,10 +80,18 @@ extension PickFactorSelectKindFeature {
 						.disabled(!canBeUsedForRole)
 					}
 				}
-                
+				.navigationTitle("Pick Factor Kind")
+				.toolbar {
+					ToolbarItem(placement: .cancellationAction) {
+						Button("Close") {
+							send(.dismissButtonTapped)
+						}
+						.foregroundStyle(.blue)
+						.buttonStyle(.plain)
+					}
+				}
 			}
             .padding()
-            .navigationTitle("Pick Factor Kind")
 		}
 	}
 }
