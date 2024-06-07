@@ -38,16 +38,12 @@ public enum Factor: Hashable, Sendable, Identifiable {
 
 @Reducer
 public struct PrimaryRoleFactorsFeature {
+	public typealias Factors = IdentifiedArrayOf<Factor>
+
 	@ObservableState
 	public struct State: Equatable {
-		
-	
-		
 		@SharedReader(.factorSources) var allInProfile
-		
-		public typealias Factors = IdentifiedArrayOf<Factor>
-		
-		
+
 		var allPicked: FactorSources {
 			var picked = FactorSources()
 			func addFrom(_ factors: Factors) {
@@ -68,10 +64,13 @@ public struct PrimaryRoleFactorsFeature {
 		public var overrideFactors: Factors = []
 	}
 	
+	@CasePathable
 	public enum Action: ViewAction {
+		@CasePathable
 		public enum ViewAction {
 			case confirmButtonTapped
-			case pickButtonTapped
+			case pickButtonTapped(Factor.ID)
+			case thresholdFactorsChanged(Factors)
 		}
 		public enum DelegateAction {
 			case `continue`
@@ -85,7 +84,11 @@ public struct PrimaryRoleFactorsFeature {
 			switch action {
 			case .view(.confirmButtonTapped):
 				return .send(.delegate(.continue))
-			case .view(.pickButtonTapped):
+			case let .view(.pickButtonTapped(factorID)):
+				print("pick: \(String(describing: factorID))")
+				return .none
+			case let .view(.thresholdFactorsChanged(new)):
+				state.thresholdFactors = new
 				return .none
 			case .delegate:
 				return .none
@@ -109,9 +112,16 @@ extension PrimaryRoleFactorsFeature {
 				
 				Text("These factors are required to withdraw your assets and log in to dApps.")
 				
-				FactorsBuilderView(factors: store.thresholdFactors, title: "Security", titleAction: { log.info("very important!") }, pickAction: {
-					send(.pickButtonTapped)
-				})
+				FactorsBuilderView(
+					factors: $store.thresholdFactors.sending(\.view.thresholdFactorsChanged),
+					title: "Security",
+					titleAction: {
+						log.info("very important!")
+					},
+					pickAction: { id in
+						send(.pickButtonTapped(id))
+					}
+				)
 				
 				Button("Confirm") {
 					send(.confirmButtonTapped)
@@ -124,11 +134,11 @@ extension PrimaryRoleFactorsFeature {
 
 public struct FactorsBuilderView: SwiftUI.View {
 
-	public var factors: IdentifiedArrayOf<Factor>
+	@Binding var factors: IdentifiedArrayOf<Factor>
 
 	public let title: LocalizedStringKey
 	public let titleAction: () -> Void
-	public let pickAction: () -> Void
+	public let pickAction: (Factor.ID) -> Void
 	
 
 	public var body: some SwiftUI.View {
@@ -156,15 +166,18 @@ public struct FactorsBuilderView: SwiftUI.View {
 			}
 		}
 	}
+	
 	public struct FactorView: SwiftUI.View {
 		public let factor: Factor
-		public let pickAction: () -> Void
+		public let pickAction: (Factor.ID) -> Void
 		public let removeAction: () -> Void
 		public var body: some SwiftUI.View {
 			HStack {
 				switch factor {
 					case .placeholder:
-					Button("<PICK>", action: pickAction)
+					Button("<PICK>") {
+						pickAction(factor.id)
+					}
 				case let .factor(factorSource):
 					Text("\(factorSource.kind)")
 				}
