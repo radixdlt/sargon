@@ -113,9 +113,9 @@ mod tests {
         // ARRANGE
         let os = SUT::fast_boot().await;
 
-        for fs in FactorSources::sample_values_all().into_iter() {
-            os.add_factor_source(fs).await.unwrap();
-        }
+        os.with_timeout(|x| x.debug_add_all_sample_factors())
+            .await
+            .unwrap();
 
         // ACT
         let structure_factor_source_level =
@@ -211,9 +211,9 @@ mod tests {
             .unwrap()
             .unwrap();
 
-        for fs in FactorSources::sample_values_all().into_iter() {
-            os.add_factor_source(fs).await.unwrap();
-        }
+        os.with_timeout(|x| x.debug_add_all_sample_factors())
+            .await
+            .unwrap();
 
         // ACT
         let structure = SecurityStructureOfFactorSources::sample();

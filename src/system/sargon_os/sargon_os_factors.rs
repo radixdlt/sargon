@@ -40,30 +40,71 @@ impl SargonOS {
     ) -> Result<bool> {
         let id = factor_source.factor_source_id();
 
-        let is_new_main_bdfs = factor_source.is_main_bdfs();
-        let id_of_old_bdfs = self.bdfs().factor_source_id();
+        let contains = self.factor_source_ids().contains(&id);
 
-        let inserted = self
-            .update_profile_with(|mut p| {
-                Ok(p.factor_sources.append(factor_source.clone()).0)
-            })
-            .await?;
-
-        if inserted {
-            if is_new_main_bdfs {
-                self.update_factor_source_remove_flag_main(id_of_old_bdfs)
-                    .await?;
-                assert_eq!(self.bdfs().factor_source_id(), id);
-            }
-
-            self.event_bus
-                .emit(EventNotification::profile_modified(
-                    EventProfileModified::FactorSourceAdded { id },
-                ))
-                .await;
+        if contains {
+            return Ok(false);
         }
 
-        Ok(inserted)
+        self.add_factor_sources_without_emitting_factor_sources_added(
+            FactorSources::just(factor_source),
+        )
+        .await?;
+
+        self.event_bus
+            .emit(EventNotification::profile_modified(
+                EventProfileModified::FactorSourceAdded { id },
+            ))
+            .await;
+
+        Ok(true)
+    }
+
+    pub async fn add_factor_sources(
+        &self,
+        factor_sources: FactorSources,
+    ) -> Result<Vec<FactorSourceID>> {
+        let ids = self
+            .add_factor_sources_without_emitting_factor_sources_added(
+                factor_sources,
+            )
+            .await?;
+
+        self.event_bus
+            .emit(EventNotification::profile_modified(
+                EventProfileModified::FactorSourcesAdded { ids: ids.clone() },
+            ))
+            .await;
+
+        Ok(ids)
+    }
+
+    pub async fn debug_add_all_sample_factors(
+        &self,
+    ) -> Result<Vec<FactorSourceID>> {
+        let mwp = MnemonicWithPassphrase::sample_device();
+        let id = FactorSourceIDFromHash::new_for_device(&mwp);
+        self.clients
+            .secure_storage
+            .save_mnemonic_with_passphrase(&mwp, &id)
+            .await?;
+
+        let mwp = MnemonicWithPassphrase::sample_device_other();
+        let id = FactorSourceIDFromHash::new_for_device(&mwp);
+        self.clients
+            .secure_storage
+            .save_mnemonic_with_passphrase(&mwp, &id)
+            .await?;
+
+        let mwp = MnemonicWithPassphrase::sample_device_12_words();
+        let id = FactorSourceIDFromHash::new_for_device(&mwp);
+        self.clients
+            .secure_storage
+            .save_mnemonic_with_passphrase(&mwp, &id)
+            .await?;
+
+        self.add_factor_sources(FactorSources::sample_values_all())
+            .await
     }
 
     pub async fn create_device_factor_source(
@@ -110,6 +151,61 @@ impl SargonOS {
 }
 
 impl SargonOS {
+    /// Adds all factor sources to Profile.
+    ///    
+    /// # Emits Event
+    /// Emits `Event::ProfileModified { change: EventProfileModified::FactorSourceUpdated }`,
+    /// if any of the newly added FactorSources has **main** flag, then we remove the
+    /// main flag from the old BDFS.
+    ///
+    /// And also emits `Event::ProfileSaved` after having successfully written the JSON
+    /// of the active profile to secure storage.
+    async fn add_factor_sources_without_emitting_factor_sources_added(
+        &self,
+        factor_sources: FactorSources,
+    ) -> Result<Vec<FactorSourceID>> {
+        let ids_of_factors_to_add = factor_sources
+            .iter()
+            .map(|x| x.id())
+            .collect::<IndexSet<_>>();
+        let existing_ids = self
+            .factor_source_ids()
+            .into_iter()
+            .collect::<IndexSet<_>>();
+
+        let ids_of_new_factor_sources = ids_of_factors_to_add
+            .difference(&existing_ids)
+            .cloned()
+            .collect::<IndexSet<_>>();
+
+        let new_factors_only = factor_sources
+            .iter()
+            .filter(|x| {
+                ids_of_new_factor_sources.contains(&x.factor_source_id())
+            })
+            .collect::<FactorSources>();
+
+        let is_any_of_new_factors_main_bdfs =
+            new_factors_only.iter().any(|x| x.is_main_bdfs());
+        let id_of_old_bdfs = self.bdfs().factor_source_id();
+
+        self.update_profile_with(|mut p| {
+            p.factor_sources.extend(new_factors_only.clone());
+            Ok(())
+        })
+        .await?;
+
+        if is_any_of_new_factors_main_bdfs {
+            self.update_factor_source_remove_flag_main(id_of_old_bdfs)
+                .await?;
+            assert!(
+                ids_of_factors_to_add.contains(&self.bdfs().factor_source_id())
+            )
+        }
+
+        Ok(ids_of_new_factor_sources.into_iter().collect_vec())
+    }
+
     /// Returns IDs of all the factor sources.
     pub fn factor_source_ids(&self) -> HashSet<FactorSourceID> {
         self.profile_holder.access_profile_with(|p| {
@@ -460,5 +556,88 @@ mod tests {
             dfs.factor_source_id(),
             DeviceFactorSource::sample_other().factor_source_id()
         );
+    }
+
+    #[actix_rt::test]
+    async fn when_adding_many_factor_sources_event_factor_sources_added_is_emitted(
+    ) {
+        // ARRANGE (and ACT)
+        let event_bus_driver = RustEventBusDriver::new();
+        let drivers = Drivers::with_event_bus(event_bus_driver.clone());
+        let bios = Bios::new(drivers);
+
+        let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
+            .await
+            .unwrap()
+            .unwrap();
+
+        // ACT
+        let ids = os
+            .with_timeout(|x| {
+                x.add_factor_sources(FactorSources::sample_values_all())
+            })
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert_eq!(
+            ids.clone(),
+            FactorSources::sample_values_all()
+                .into_iter()
+                .map(|x| x.id())
+                .collect_vec(),
+        );
+        assert!(event_bus_driver.recorded().iter().any(|e| e.event
+            == Event::ProfileModified {
+                change: EventProfileModified::FactorSourcesAdded {
+                    ids: ids.clone()
+                }
+            }));
+    }
+
+    #[actix_rt::test]
+    async fn test_debug_add_all_sample_factors_saves_mnemonics_to_secure_storage(
+    ) {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        os.with_timeout(|x| x.debug_add_all_sample_factors())
+            .await
+            .unwrap();
+
+        // ASSERT
+        // First
+        let expected = MnemonicWithPassphrase::sample_device();
+        let id = FactorSourceIDFromHash::new_for_device(&expected);
+        let loaded = os
+            .with_timeout(|x| {
+                x.secure_storage.load_mnemonic_with_passphrase(&id)
+            })
+            .await
+            .unwrap();
+        assert_eq!(loaded, expected);
+
+        // Second
+        let expected = MnemonicWithPassphrase::sample_device_other();
+        let id = FactorSourceIDFromHash::new_for_device(&expected);
+        let loaded = os
+            .with_timeout(|x| {
+                x.secure_storage.load_mnemonic_with_passphrase(&id)
+            })
+            .await
+            .unwrap();
+        assert_eq!(loaded, expected);
+
+        // Third
+        let expected = MnemonicWithPassphrase::sample_device_12_words();
+        let id = FactorSourceIDFromHash::new_for_device(&expected);
+        let loaded = os
+            .with_timeout(|x| {
+                x.secure_storage.load_mnemonic_with_passphrase(&id)
+            })
+            .await
+            .unwrap();
+        assert_eq!(loaded, expected);
     }
 }

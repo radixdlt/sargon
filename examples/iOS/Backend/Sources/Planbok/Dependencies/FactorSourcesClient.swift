@@ -16,10 +16,12 @@ public struct FactorSourcesClient: Sendable {
     public typealias CreateHWFactorSource = @Sendable (MnemonicWithPassphrase, FactorSourceKind) async throws -> FactorSource
     public typealias CreateSecurityQuestionsFactor = @Sendable (AnswersToQuestions) -> SecurityQuestionsNotProductionReadyFactorSource
     public typealias DecryptSecurityQuestionsFactor = @Sendable (AnswersToQuestions, SecurityQuestionsNotProductionReadyFactorSource) throws -> Mnemonic
+	public typealias AddAllSampleFactors = @Sendable () async throws -> Void
     public var createHWFactorSource: CreateHWFactorSource
     public var createSecurityQuestionsFactor: CreateSecurityQuestionsFactor
     public var decryptSecurityQuestionsFactor: DecryptSecurityQuestionsFactor
     public var addFactorSource: AddFactorSource
+    public var addAllSampleFactors: AddAllSampleFactors
 }
 
 extension FactorSourcesClient: DependencyKey {
@@ -86,6 +88,11 @@ extension FactorSourcesClient: DependencyKey {
 				log.notice("Adding New factorSource: \(factorSource)")
 				let _ = try await os.addFactorSource(factorSource: factorSource)
 				log.info("Finished adding new factorSource.")
+			},
+			addAllSampleFactors: {
+				log.notice("Adding Many Sample factorSources")
+				let _ = try await os.debugAddAllSampleFactors()
+				log.notice("Finished adding Many Sample factorSources")
 			}
 		)
 	}

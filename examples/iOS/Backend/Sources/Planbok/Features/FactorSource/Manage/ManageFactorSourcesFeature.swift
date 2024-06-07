@@ -13,6 +13,8 @@ import SwiftUI
 @Reducer
 public struct ManageFactorSourcesFeature {
 
+	@Dependency(FactorSourcesClient.self) var factorsClient
+	
     @ObservableState
     public struct State: Equatable {
 		@SharedReader(.factorSources) var factorSources
@@ -23,6 +25,8 @@ public struct ManageFactorSourcesFeature {
         
         @CasePathable
         public enum ViewAction {
+			case addAllSampleValuesTapped
+			
             case deviceButtonTapped
             case ledgerButtonTapped
             case arculusButtonTapped
@@ -51,6 +55,11 @@ public struct ManageFactorSourcesFeature {
     public var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
+			case .view(.addAllSampleValuesTapped):
+				return .run { send in
+					try await factorsClient.addAllSampleFactors()
+				}
+				
             case .view(.deviceButtonTapped):
 				return .send(.delegate(.navigate(.toFactor(kind: .device))))
 			
@@ -90,6 +99,10 @@ extension ManageFactorSourcesFeature {
 				Text("You have #\(store.state.factorSources.count) factor sources")
 				Text("of #\(Set(store.state.factorSources.map(\.kind)).count) different kinds.")
         
+				Button("ADD ALL SAMPLE FACTORS") {
+					send(.addAllSampleValuesTapped)
+				}
+				
 				Spacer()
 				
 				Button("Device") {

@@ -42,6 +42,9 @@ pub enum EventKind {
     /// Profile updated with a new factor source.
     FactorSourceAdded,
 
+    /// Profile updated with multiple new factor sources.
+    FactorSourcesAdded,
+
     /// An existing factor source has been updated
     FactorSourceUpdated,
 
@@ -112,7 +115,11 @@ impl EventKind {
         use EventKind::*;
         matches!(
             *self,
-            Booted | ProfileImported | FactorSourceAdded | FactorSourceUpdated
+            Booted
+                | ProfileImported
+                | FactorSourceAdded
+                | FactorSourceUpdated
+                | FactorSourcesAdded
         )
     }
 }
@@ -196,6 +203,7 @@ mod tests {
                 | ProfileSaved
                 | SecurityStructureAdded
                 | FactorSourceAdded
+                | FactorSourcesAdded
                 | FactorSourceUpdated => {
                     assert!(!affects)
                 }
@@ -218,6 +226,7 @@ mod tests {
                 | ProfileSaved
                 | AccountAdded
                 | SecurityStructureAdded
+                | FactorSourcesAdded
                 | AccountsAdded
                 | AccountUpdated => assert!(!affects),
             })
@@ -239,6 +248,7 @@ mod tests {
                 | ProfileSaved
                 | AccountAdded
                 | GatewayChangedCurrent
+                | FactorSourcesAdded
                 | AccountsAdded
                 | AccountUpdated => assert!(!affects),
             })
@@ -259,6 +269,7 @@ mod tests {
                 | FactorSourceUpdated
                 | ProfileSaved
                 | AccountAdded
+                | FactorSourcesAdded
                 | SecurityStructureAdded
                 | AccountsAdded
                 | AccountUpdated => assert!(!affects),
@@ -273,7 +284,7 @@ mod tests {
             .map(|sut| (sut, sut.affects_factor_sources()))
             .for_each(|(sut, affects)| match sut {
                 Booted | ProfileImported | FactorSourceAdded
-                | FactorSourceUpdated => {
+                | FactorSourcesAdded | FactorSourceUpdated => {
                     assert!(affects)
                 }
                 ProfileUsedOnOtherDevice
@@ -318,5 +329,10 @@ mod uniffi_tests {
     #[test]
     fn test_event_kind_affects_security_structures() {
         assert!(event_kind_affects_security_structures(Booted));
+    }
+
+    #[test]
+    fn test_event_kind_affects_factor_sources() {
+        assert!(event_kind_affects_factor_sources(Booted));
     }
 }

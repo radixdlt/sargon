@@ -14,7 +14,7 @@ public struct ManageSecurityShieldsFeature {
 	
 	@Reducer(state: .equatable)
 	public enum Destination {
-		case newSecurityShield(NewSecurityShieldFeature)
+		case newSecurityShield(NewSecurityShieldCoordinator)
 	}
 	
 	@ObservableState
@@ -50,13 +50,14 @@ public struct ManageSecurityShieldsFeature {
 				return .send(.internal(.newShield(preset: nil)))
 				
 			case let .internal(.newShield(preset)):
-				state.destination = .newSecurityShield(NewSecurityShieldFeature.State(preset: preset))
+				state.destination = .newSecurityShield(NewSecurityShieldCoordinator.State(preset: preset))
 				return .none
 				
 			case .destination:
 				return .none
 			}
 		}
+		.ifLet(\.$destination, action: \.destination)
 	}
 }
 
@@ -75,6 +76,10 @@ extension ManageSecurityShieldsFeature {
 		public var body: some SwiftUI.View {
 			VStack {
 				Text("Shields").font(.largeTitle)
+				
+				Text("Security shields are a combination of factors you can use to protect your accounts and personas.")
+				
+				Text("Here are your current security shields.")
 				
 				if store.shields.isEmpty {
 					Text("You have no shields")
@@ -107,7 +112,7 @@ extension ManageSecurityShieldsFeature {
 					action: \.destination.newSecurityShield
 				)
 			) { store in
-				NewSecurityShieldFeature.View(store: store)
+				NewSecurityShieldCoordinator.View(store: store)
 			}
 		}
 	}
@@ -116,6 +121,11 @@ extension ManageSecurityShieldsFeature {
 public struct ShieldCardView: SwiftUI.View {
 	public let shield: Shield
 	public var body: some SwiftUI.View {
-		Text("Shield: \(shield.id)")
+		HStack {
+			Image(systemName: "lock.shield").resizable()
+				.imageScale(.large)
+				.frame(idealHeight: 100)
+			Text("\(shield.metadata.displayName)")
+		}
 	}
 }
