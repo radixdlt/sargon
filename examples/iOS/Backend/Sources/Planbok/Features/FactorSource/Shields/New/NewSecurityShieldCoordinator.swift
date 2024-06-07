@@ -13,6 +13,11 @@ import ComposableArchitecture
 public struct NewSecurityShieldCoordinator {
 	
 	@Reducer(state: .equatable)
+	public enum Destination {
+		case pickFactorSourceCoordinator(PickFactorSourceCoordinator)
+	}
+	
+	@Reducer(state: .equatable)
 	public enum Path {
 		case primaryRoleFactors(PrimaryRoleFactorsFeature)
 	}
@@ -20,9 +25,15 @@ public struct NewSecurityShieldCoordinator {
 	
 	@ObservableState
 	public struct State: Equatable {
+		
+		@Shared(.currentRole) var currentRole
+		
 		public var intro: IntroWhatIsShieldFeature.State
 		public var path = StackState<Path.State>()
 	
+		@Presents var destination: Destination.State?
+	
+		
 		public let preset: Shield?
 		public init(preset: Shield?) {
 			self.preset = preset
@@ -34,8 +45,19 @@ public struct NewSecurityShieldCoordinator {
 	public enum Action {
 		case path(StackAction<Path.State, Path.Action>)
 		case intro(IntroWhatIsShieldFeature.Action)
-	}
 	
+		case destination(PresentationAction<Destination.Action>)
+		
+	}
+	func updateCurrentRole(_ state: inout State) -> EffectOf<Self> {
+		if let last = state.path.last {
+			switch last {
+			case .primaryRoleFactors:
+				state.currentRole = .primary
+			}
+		}
+		return .none
+	}
 	public var body: some ReducerOf<Self> {
 		Scope(state: \.intro, action: \.intro) {
 			IntroWhatIsShieldFeature()
@@ -44,13 +66,20 @@ public struct NewSecurityShieldCoordinator {
 			switch action {
 			case .intro(.delegate(.continue)):
 				state.path.append(.primaryRoleFactors(PrimaryRoleFactorsFeature.State()))
+				return updateCurrentRole(&state)
+				
+			case .path(.element(id: _, action: .primaryRoleFactors(.delegate(.pickFactor)))):
+				state.destination = . pickFactorSourceCoordinator(PickFactorSourceCoordinator.State())
 				return .none
 				
 			case .path(.element(id: _, action: .primaryRoleFactors(.delegate(.continue)))):
 				log.fault("IGNORED should have navigated to next screen")
-				return .none
-
+				return updateCurrentRole(&state)
+				
 			case .path:
+				return updateCurrentRole(&state)
+
+			case .destination:
 				return .none
 				
 			case .intro:
@@ -58,6 +87,7 @@ public struct NewSecurityShieldCoordinator {
 			}
 		}
 		.forEach(\.path, action: \.path)
+		.ifLet(\.$destination, action: \.destination)
 	}
 }
 
@@ -82,7 +112,11 @@ extension NewSecurityShieldCoordinator {
 				}
 			}
 			.buttonStyle(.plain)
-
+			.sheet(
+				item: $store.scope(state: \.destination?.pickFactorSourceCoordinator, action: \.destination.pickFactorSourceCoordinator)
+			) { store in
+				PickFactorSourceCoordinator.View(store: store)
+			}
 		}
 	}
 }
