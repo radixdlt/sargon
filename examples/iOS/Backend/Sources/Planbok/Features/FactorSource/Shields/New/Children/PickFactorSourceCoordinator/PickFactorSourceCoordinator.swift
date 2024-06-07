@@ -11,39 +11,6 @@ import ComposableArchitecture
 import SwiftUI
 
 @Reducer
-public struct PickFactorSourceFeature {
-    
-    @ObservableState
-    public struct State: Equatable {
-        public let kind: FactorSourceKind
-    }
-    
-    @CasePathable
-    public enum Action: ViewAction {
-        @CasePathable
-        public enum ViewAction {}
-        case view(ViewAction)
-    }
-}
-
-extension PickFactorSourceFeature {
-    public typealias HostingFeature = Self
-    
-    @ViewAction(for: HostingFeature.self)
-    public struct View: SwiftUI.View {
-        
-        public let store: StoreOf<HostingFeature>
-        public init(store: StoreOf<HostingFeature>) {
-            self.store = store
-        }
-        
-        public var body: some SwiftUI.View {
-            Text("PickFactorSourceFeature")
-        }
-    }
-}
-
-@Reducer
 public struct PickFactorSourceCoordinator {
 	
     @Reducer(state: .equatable)
@@ -86,7 +53,11 @@ public struct PickFactorSourceCoordinator {
             case let .pickKind(.delegate(.selectedKind(kind))):
                 state.path.append(.pickFactorSource(PickFactorSourceFeature.State(kind: kind)))
                 return .none
-
+                
+            case .path(.element(id: _, action: .pickFactorSource(.delegate(.done)))):
+                log.fault("PickFactorSourceCoordinator delegate done")
+                return .send(.delegate(.done))
+                
             case .pickKind:
                 return .none
 

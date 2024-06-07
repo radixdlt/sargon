@@ -81,10 +81,10 @@ extension ManageSpecificFactorSourcesFeature {
 		@Bindable public var store: StoreOf<HostingFeature>
 		
 		public var kind: FactorSourceKind {
-			store.state.kind
+			store.kind
 		}
 		public var factors: IdentifiedArrayOf<FactorSource> {
-			store.state.factorSources.filter(kind: kind)
+			store.factorSources.filter(kind: kind)
 		}
 		
 		public var body: some SwiftUI.View {

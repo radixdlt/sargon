@@ -11,10 +11,8 @@ import Sargon
 import ComposableArchitecture
 
 public struct FactorsBuilderView: SwiftUI.View {
-	
+    @Shared(.pickedFactor) var pickedFactor
 	@Binding var factors: IdentifiedArrayOf<Factor>
-	
-	@Shared(.pickedFactor) var pickedFactor
 	
 	public let factorThreshold: FactorThreshold
 	
@@ -22,7 +20,6 @@ public struct FactorsBuilderView: SwiftUI.View {
 	public let titleAction: () -> Void
 	public let changeThresholdAction: (() -> Void)?
 	public let pickAction: () -> Void
-	
 	
 	public var body: some SwiftUI.View {
 		VStack(spacing: 0) {
@@ -45,21 +42,14 @@ public struct FactorsBuilderView: SwiftUI.View {
 				ForEach(factors) { factor in
 					FactorView(
 						factor: factor,
-						pickAction: pickAction
+                        pickAction: {
+                            self.pickedFactor = factor
+                            pickAction()
+                        }
 					) {
 						self.factors.remove(
 							id: factor.id
 						)
-					}
-					.onChange(of: pickedFactor) { (oldState: Factor?, newState: Factor?) in
-						
-						switch (oldState, newState) {
-						case let (_, .some(picked)) where picked.id == factor.id:
-							self.factors[id: factor.id] = picked
-							// dont forget to nil it!
-							self.pickedFactor = nil
-						default: break
-						}
 					}
 				}
 				.padding(.horizontal)
@@ -68,7 +58,7 @@ public struct FactorsBuilderView: SwiftUI.View {
 				Spacer()
 				
 				Button("Add factors") {
-					self.factors.append(Factor.placeholder(.init()))
+					self.factors.append(Factor(factorSource: nil))
 				}
 				.foregroundStyle(Color.app.gray4)
 				.padding()
@@ -114,7 +104,7 @@ public struct FactorsBuilderView: SwiftUI.View {
 	VStack {
 		
 		FactorsBuilderView(
-			factors: .init(get: { [FactorSource.sample].map({ .factor($0) }).asIdentified() }, set: {
+            factors: .init(get: { [FactorSource.sample].map({ Factor(factorSource: $0) }).asIdentified() }, set: {
 				print("Preview NOOP set factors sources to: \($0)")
 			}),
 			factorThreshold: .threshold(3),

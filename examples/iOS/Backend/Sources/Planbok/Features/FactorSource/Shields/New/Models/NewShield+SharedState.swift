@@ -53,7 +53,7 @@ extension Observable {
 	
 	/// Uh, this is hacky!
 	public func pickedPendingFactors() -> FactorSources {
-		@Shared(.thresholdFactors) var thresholdFactors = [.factor(.sample)]
+        @Shared(.thresholdFactors) var thresholdFactors = [Factor(factorSource: .sample)]
 		@Shared(.overrideFactors) var overrideFactors = []
 		
 		var picked = FactorSources()

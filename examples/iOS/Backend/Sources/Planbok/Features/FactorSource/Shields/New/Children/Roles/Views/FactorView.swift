@@ -18,26 +18,25 @@ public struct FactorView: SwiftUI.View {
 	public var body: some SwiftUI.View {
 		HStack {
 			Button(action: pickAction, label: {
-				switch factor {
-				case .placeholder:
-					Text("Select a factor")
-						.fontWeight(.bold)
-				case let .factor(factorSource):
-					HStack {
-						if let factorImageName = factorSource.kind.image {
-							Image(systemName: factorImageName)
-								.imageScale(.large)
-							
-						}
-						VStack(alignment: .leading) {
-							Text("\(factorSource.kind.title)")
-							if let subtitle = factorSource.kind.subtitle {
-								Text("\(subtitle)")
-									.foregroundStyle(Color.app.gray3)
-							}
-						}
-					}
-				}
+                if let factorSource = factor.factorSource {
+                    HStack {
+                        if let factorImageName = factorSource.kind.image {
+                            Image(systemName: factorImageName)
+                                .imageScale(.large)
+                            
+                        }
+                        VStack(alignment: .leading) {
+                            Text("\(factorSource.kind.title)")
+                            if let subtitle = factorSource.kind.subtitle {
+                                Text("\(subtitle)")
+                                    .foregroundStyle(Color.app.gray3)
+                            }
+                        }
+                    }
+                } else {
+                    Text("Select a factor")
+                        .fontWeight(.bold)
+                }
 			})
 			.frame(maxWidth: .infinity, alignment: .leading)
 			.padding()

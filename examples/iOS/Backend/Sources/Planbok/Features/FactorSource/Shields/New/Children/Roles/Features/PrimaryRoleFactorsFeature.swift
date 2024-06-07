@@ -15,13 +15,14 @@ public struct PrimaryRoleFactorsFeature {
 	@ObservableState
 	public struct State: Equatable {
 		@SharedReader(.factorSources) var allInProfile
+        @Shared(.pickedFactor) var pickedFactor
 		
 		var available: FactorSources {
 			let idsOfAllPicked = idsOfAllPicked()
 			return allInProfile.filter({ !idsOfAllPicked.contains($0.id) }).asIdentified()
 		}
 		
-		@Shared(.thresholdFactors) var thresholdFactors = [.factor(.sample)]
+        @Shared(.thresholdFactors) var thresholdFactors = [Factor(factorSource: .sample)]
 		@Shared(.overrideFactors) var overrideFactors = []
 
 		public var threshold: FactorThreshold = .any
@@ -36,14 +37,15 @@ public struct PrimaryRoleFactorsFeature {
 			case pickButtonTapped
 			case thresholdFactorsChanged(Factors)
 			case overrideFactorsChanged(Factors)
-		}
-		
-		public enum DelegateAction {
-			case `continue`
-			case pickFactor
-		}
-		
-		case view(ViewAction)
+            case onPickedFactorChanged(old: Factor?, new: Factor?)
+        }
+        
+        public enum DelegateAction {
+            case `continue`
+            case pickFactor
+        }
+        
+        case view(ViewAction)
 		case delegate(DelegateAction)
 	}
 	
@@ -64,9 +66,20 @@ public struct PrimaryRoleFactorsFeature {
 			case let .view(.overrideFactorsChanged(new)):
 				state.overrideFactors = new
 				return .none
-				
-			case .delegate:
-				return .none
+                
+            case let .view(.onPickedFactorChanged(old, new)):
+                guard let old, let new else { return .none }
+                if state.thresholdFactors.contains(old) {
+                    state.thresholdFactors[id: new.id] = new
+                } else if state.overrideFactors.contains(old) {
+                    state.overrideFactors[id: new.id] = new
+                }
+                // dont forget to nil it!
+                state.pickedFactor = nil
+                return .none
+                
+            case .delegate:
+                return .none
 			}
 		}
 	}
@@ -125,6 +138,9 @@ extension PrimaryRoleFactorsFeature {
 					}
 					.buttonStyle(.borderedProminent)
 				}
+                .onChange(of: store.pickedFactor) { (oldState: Factor?, newState: Factor?) in
+                    send(.onPickedFactorChanged(old: oldState, new: newState))
+                }
 				.padding()
 			}
 		}

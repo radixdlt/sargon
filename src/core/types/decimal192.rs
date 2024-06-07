@@ -93,7 +93,10 @@ impl FromStr for Decimal192 {
     fn from_str(s: &str) -> Result<Self> {
         s.parse::<ScryptoDecimal192>()
             .map(Self::from_native)
-            .map_err(|_| CommonError::DecimalError)
+            .map_err(|e| {
+                println!("error: {:?}", e);
+                CommonError::DecimalError
+            })
     }
 }
 
@@ -1124,6 +1127,15 @@ mod test_decimal {
             .parse()
             .unwrap();
         assert_eq!(a + b, c);
+    }
+
+    #[test]
+    fn from_scientific_works() {
+        assert_eq!("1e5".parse::<SUT>().unwrap(), SUT::from(10000));
+        assert_eq!(
+            "1e-4".parse::<SUT>().unwrap(),
+            SUT::try_from(0.0001).unwrap()
+        );
     }
 
     #[test]

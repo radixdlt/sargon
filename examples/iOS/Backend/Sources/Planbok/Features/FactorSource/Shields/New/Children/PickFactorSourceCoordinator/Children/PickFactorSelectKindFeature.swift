@@ -13,7 +13,6 @@ import ComposableArchitecture
 public struct PickFactorSelectKindFeature {
 	@ObservableState
 	public struct State: Equatable {
-		@Shared(.pickedFactor) var pickedFactor
 	}
 	
 	@CasePathable

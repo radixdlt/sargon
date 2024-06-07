@@ -78,9 +78,13 @@ public struct NewSecurityShieldCoordinator {
 				
 			case .path:
 				return updateCurrentRole(&state)
+                
+            case .destination(.presented(.pickFactorSourceCoordinator(.delegate(.done)))):
+                state.destination = nil
+                return .none
 
-			case .destination:
-				return .none
+            case .destination:
+                return .none
 				
 			case .intro:
 				return .none

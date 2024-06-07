@@ -9,13 +9,19 @@ import Foundation
 import SwiftUI
 
 public struct FactorSourceCardView: SwiftUI.View {
+  
 	public let factorSource: FactorSource
 	public let action: @Sendable () -> Void
-	public init(factorSource: FactorSource, action: @escaping @Sendable () -> Void = {}) {
+
+    public init(
+        factorSource: FactorSource,
+        action: @escaping @Sendable () -> Void = {}
+    ) {
 		self.factorSource = factorSource
 		self.action = action
 	}
-	public var body: some SwiftUI.View {
+
+    public var body: some SwiftUI.View {
 		VStack(alignment: .leading) {
 			Labeled("Kind",  factorSource.kind)
 			Labeled("ID", "...\(factorSource.id.description.suffix(6))")
