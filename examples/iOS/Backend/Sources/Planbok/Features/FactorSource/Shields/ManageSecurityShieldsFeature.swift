@@ -113,6 +113,7 @@ extension ManageSecurityShieldsFeature {
 				)
 			) { store in
 				NewSecurityShieldCoordinator.View(store: store)
+				
 			}
 		}
 	}

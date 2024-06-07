@@ -74,12 +74,14 @@ extension NewSecurityShieldCoordinator {
 				IntroWhatIsShieldFeature.View(
 					store: store.scope(state: \.intro, action: \.intro)
 				)
+				.buttonStyle(.borderedProminent)
 			} destination: { store in
 				switch store.case {
 				case let .primaryRoleFactors(store):
 					PrimaryRoleFactorsFeature.View(store: store)
 				}
 			}
+			.buttonStyle(.plain)
 
 		}
 	}
