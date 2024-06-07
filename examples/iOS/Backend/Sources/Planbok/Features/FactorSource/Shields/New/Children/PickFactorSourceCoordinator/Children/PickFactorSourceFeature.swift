@@ -101,9 +101,13 @@ extension PickFactorSourceFeature {
         }
         
         public struct SelectableFactorView: SwiftUI.View {
-            public let factorSource: FactorSource
+           
+			public let factorSource: FactorSource
+            public let isAvailable: Bool
             public let isSelected: Bool
-            public let action: () -> Void
+            
+			public let action: () -> Void
+			
             public var body: some SwiftUI.View {
                 Button(action: action, label: {
                     HStack {
@@ -112,13 +116,19 @@ extension PickFactorSourceFeature {
                             Labeled("Last Used", factorSource.lastUsedOn.formatted(.dateTime))
                             Labeled("Added", factorSource.addedOn.formatted(.dateTime))
                             Labeled("ID", "...\(factorSource.id.description.suffix(6))").font(.footnote)
+							
+							if !isAvailable {
+								Text("ALREADY USED IN SHIELD").fontWeight(.bold)
+							}
                         }
                         .multilineTextAlignment(.leading)
 
-                        Circle()
-                            .stroke(Color.app.gray2, lineWidth: 3)
-                            .fill(isSelected ? Color.app.gray2 : Color.app.gray5)
-                            .frame(width: 20, height: 20)
+						if isAvailable {
+							Circle()
+								.stroke(Color.app.gray2, lineWidth: 3)
+								.fill(isSelected ? Color.app.gray2 : Color.app.gray5)
+								.frame(width: 20, height: 20)
+						}
                     }
                     .padding()
                     .background(Color.app.white)
@@ -130,6 +140,7 @@ extension PickFactorSourceFeature {
                     )
                     .padding()
                 })
+				.disabled(!isAvailable)
                 .buttonStyle(.plain)
          
             }
@@ -149,6 +160,7 @@ extension PickFactorSourceFeature {
                         ForEach(factors) { factorSource in
                             SelectableFactorView(
                                 factorSource: factorSource,
+								isAvailable: !store.idsOfAllPicked().contains(factorSource.id),
                                 isSelected: factorSource.id == store.idOfSelected
                             ) {
                                 send(.tappedFactorSource(id: factorSource.id))
