@@ -105,7 +105,7 @@ public struct OnboardingFeature {
 
 extension OnboardingFeature {
 	public struct View: SwiftUI.View {
-		@Bindable var store: StoreOf<OnboardingFeature>
+		@Bindable public var store: StoreOf<OnboardingFeature>
 		
 		public init(store: StoreOf<OnboardingFeature>) {
 			self.store = store

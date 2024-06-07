@@ -21,14 +21,20 @@ public struct PickFactorSelectKindFeature {
 		public enum ViewAction {
 			case kindButtonTapped(FactorSourceKind)
 		}
-		case view(ViewAction)
+        public enum DelegateAction {
+            case selectedKind(FactorSourceKind)
+        }
+        case view(ViewAction)
+        case delegate(DelegateAction)
 	}
 	
 	public var body: some ReducerOf<Self> {
 		Reduce { state, action in
 			switch action {
 			case let .view(.kindButtonTapped(kind)):
-				return .none
+                return .send(.delegate(.selectedKind(kind)))
+            case .delegate:
+                return .none
 			}
 		}
 	}
