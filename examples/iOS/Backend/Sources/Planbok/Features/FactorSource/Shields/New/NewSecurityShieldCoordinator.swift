@@ -15,6 +15,7 @@ public struct NewSecurityShieldCoordinator {
 	@Reducer(state: .equatable)
 	public enum Destination {
 		case pickFactorSourceCoordinator(PickFactorSourceCoordinator)
+		case setFactorThreshold(SetFactorThresholdFeature)
 	}
 	
 	@Reducer(state: .equatable)
@@ -61,8 +62,16 @@ public struct NewSecurityShieldCoordinator {
 				return .none
 				
 			case .path(.element(id: _, action: .primaryRoleFactors(.delegate(.pickFactor)))):
-				state.destination = . pickFactorSourceCoordinator(PickFactorSourceCoordinator.State(
+				state.destination = .pickFactorSourceCoordinator(PickFactorSourceCoordinator.State(
 					role: .primary
+				))
+				return .none
+				
+			case let .path(.element(id: _, action: .primaryRoleFactors(.delegate(.setThreshold(currentThreshold, numberOfFactors))))):
+				state.destination = .setFactorThreshold(SetFactorThresholdFeature.State(
+					role: .primary,
+					numberOfFactors: numberOfFactors,
+					threshold: currentThreshold
 				))
 				return .none
 				
@@ -121,6 +130,12 @@ extension NewSecurityShieldCoordinator {
 				item: $store.scope(state: \.destination?.pickFactorSourceCoordinator, action: \.destination.pickFactorSourceCoordinator)
 			) { store in
 				PickFactorSourceCoordinator.View(store: store)
+			}
+			.sheet(
+				item: $store.scope(state: \.destination?.setFactorThreshold, action: \.destination.setFactorThreshold)
+			) { store in
+				SetFactorThresholdFeature.View(store: store)
+					.presentationDetents([.medium])
 			}
 		}
 	}

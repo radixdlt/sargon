@@ -35,6 +35,7 @@ public struct PrimaryRoleFactorsFeature {
 		public enum ViewAction {
 			case confirmButtonTapped
 			case pickButtonTapped
+			case changeThresholdButtonTapped
 			case thresholdFactorsChanged(Factors)
 			case overrideFactorsChanged(Factors)
             case onPickedFactorChanged(old: Factor?, new: Factor?)
@@ -43,6 +44,7 @@ public struct PrimaryRoleFactorsFeature {
         public enum DelegateAction {
             case `continue`
             case pickFactor
+			case setThreshold(current: FactorThreshold, numberOfFactors: Int)
         }
         
         case view(ViewAction)
@@ -58,6 +60,12 @@ public struct PrimaryRoleFactorsFeature {
 				
 			case .view(.pickButtonTapped):
 				return .send(.delegate(.pickFactor))
+				
+			case .view(.changeThresholdButtonTapped):
+				return .send(.delegate(.setThreshold(
+					current: state.threshold,
+					numberOfFactors: state.thresholdFactors.count
+				)))
 				
 			case let .view(.thresholdFactorsChanged(new)):
 				state.thresholdFactors = new
@@ -113,7 +121,7 @@ extension PrimaryRoleFactorsFeature {
 							log.info("Threshold factors rule!")
 						},
 						changeThresholdAction: {
-							log.info("TODO change threshold")
+							send(.changeThresholdButtonTapped)
 						},
 						pickAction: {
 							send(.pickButtonTapped)
