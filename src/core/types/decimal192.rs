@@ -1248,6 +1248,17 @@ mod test_decimal {
     }
 
     #[test]
+    fn from_str_more_than_18_decimals_is_ok() {
+        assert_eq!(
+            "4.012345678901234567890"
+                .parse::<Decimal192>()
+                .unwrap()
+                .to_string(),
+            "4.012345678901234567"
+        ); // Over 18 decimals is OK (precision lost)
+    }
+
+    #[test]
     fn from_more_than_one_decimal_point_with_more_than_18_decimals_string() {
         assert_eq!(
             "4.0123456789012345678.123".parse::<Decimal192>(),
