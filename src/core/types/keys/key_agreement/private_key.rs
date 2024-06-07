@@ -19,20 +19,19 @@ impl KeyAgreementPrivateKey {
     pub fn hkdf_key_agreement(
         &self,
         other: &KeyAgreementPublicKey,
-        salt: &[u8],
-        info: &[u8],
-    ) -> Result<Exactly32Bytes> {
+        salt: impl AsRef<[u8]>,
+        info: impl AsRef<[u8]>,
+    ) -> Result<SymmetricKey> {
         let shared_secret = self.0.diffie_hellman(&other.0).to_bytes();
         let mut symmetric_key = [0u8; 32]; // 32-byte buffer for the symmetric key
 
-        let hkdf = Hkdf::<Sha256>::new(Some(salt), &shared_secret);
-        hkdf.expand(info, &mut symmetric_key).map_err(|err| {
-            CommonError::HkdfExpandFailed {
+        let hkdf = Hkdf::<Sha256>::new(Some(salt.as_ref()), &shared_secret);
+        hkdf.expand(info.as_ref(), &mut symmetric_key)
+            .map_err(|err| CommonError::HkdfExpandFailed {
                 underlying: err.to_string(),
-            }
-        })?;
+            })?;
 
-        Ok(Exactly32Bytes::from(&symmetric_key))
+        Ok(SymmetricKey::from(&symmetric_key))
     }
 }
 
