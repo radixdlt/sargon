@@ -42,6 +42,22 @@ impl VersionedPasswordBasedKeyDerivation for PbHkdfSha256 {
 }
 
 impl PbHkdfSha256 {
+    pub fn hkdf_key_agreement(
+        &self,
+        ikm: impl AsRef<[u8]>,
+        salt: Option<&[u8]>,
+        info: Option<&[u8]>,
+    ) -> Exactly32Bytes {
+        let mut okm = [0u8; 32]; // 32-byte buffer for the symmetric key
+
+        let hkdf = Hkdf::<Sha256>::new(salt, ikm.as_ref());
+        hkdf.expand(info.unwrap_or(&[]), &mut okm).unwrap();
+
+        Exactly32Bytes::from(&okm)
+    }
+}
+
+impl PbHkdfSha256 {
     pub const DESCRIPTION: &'static str =
         "HKDFSHA256-with-UTF8-encoding-of-password-no-salt-no-info";
 }
