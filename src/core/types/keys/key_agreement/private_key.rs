@@ -37,7 +37,7 @@ impl KeyAgreementPrivateKey {
 
 impl PartialEq for KeyAgreementPrivateKey {
     fn eq(&self, other: &Self) -> bool {
-        self.to_bytes() == other.to_bytes()
+        self.public_key() == other.public_key()
     }
 }
 
